@@ -98,14 +98,26 @@ private:
     };
 
     struct TerminalBinder {
-        bool firstLayerInit;
         int32_t pid;
         int32_t tid;
     };
 
+    struct ParseBinderParam {
+        int32_t eventPid;
+        int32_t eventTid;
+        int32_t pid;
+        int layer;
+    };
+
+    struct HitraceInfo {
+        std::string hiTraceChainId;
+        std::string spanId;
+        std::string pspanId;
+        std::string traceFlag;
+    };
+
     AppfreezeManager& operator=(const AppfreezeManager&) = delete;
     AppfreezeManager(const AppfreezeManager&) = delete;
-    uint64_t GetMilliseconds();
     std::map<int, std::list<AppfreezeManager::PeerBinderInfo>> BinderParser(std::ifstream& fin, std::string& stack,
         std::set<int>& asyncPids) const;
     std::map<int, std::list<AppfreezeManager::PeerBinderInfo>> BinderLineParser(std::ifstream& fin, std::string& stack,
@@ -113,9 +125,10 @@ private:
         std::vector<std::pair<uint32_t, uint64_t>>& freeAsyncSpacePairs) const;
     std::vector<std::string> GetFileToList(std::string line) const;
     void ParseBinderPids(const std::map<int, std::list<AppfreezeManager::PeerBinderInfo>>& binderInfos,
-        std::set<int>& pids, int pid, int layer, AppfreezeManager::TerminalBinder& terminalBinder) const;
-    std::set<int> GetBinderPeerPids(std::string& stack, int pid, std::set<int>& asyncPids,
+        std::set<int>& pids, AppfreezeManager::ParseBinderParam params, bool getTerminal,
         AppfreezeManager::TerminalBinder& terminalBinder) const;
+    std::set<int> GetBinderPeerPids(std::string& stack, AppfreezeManager::ParseBinderParam params,
+        std::set<int>& asyncPids, AppfreezeManager::TerminalBinder& terminalBinder) const;
     void FindStackByPid(std::string& msg, int pid) const;
     std::string CatchJsonStacktrace(int pid, const std::string& faultType, const std::string& stack) const;
     std::string CatcherStacktrace(int pid, const std::string& stack) const;
@@ -129,6 +142,8 @@ private:
     void ClearOldInfo();
     void CollectFreezeSysMemory(std::string& memoryContent);
     int MergeNotifyInfo(FaultData& faultNotifyData, const AppfreezeManager::AppInfo& appInfo);
+    std::string ParseDecToHex(uint64_t id);
+    bool GetHitraceId(HitraceInfo& info);
 
     static const inline std::string LOGGER_DEBUG_PROC_PATH = "/proc/transaction_proc";
     std::string name_;

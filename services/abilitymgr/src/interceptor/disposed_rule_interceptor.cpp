@@ -45,14 +45,15 @@ ErrCode DisposedRuleInterceptor::DoProcess(AbilityInterceptorParam param)
             "componentType: %{public}d", disposedRule.disposedType, disposedRule.controlType,
             disposedRule.componentType);
 #ifdef SUPPORT_GRAPHICS
+        std::string bundleName = param.abilityInfo ? param.abilityInfo->bundleName : "";
         if (!param.isWithUI || disposedRule.want == nullptr
             || disposedRule.disposedType == AppExecFwk::DisposedType::NON_BLOCK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "no dispose want");
-            return AbilityUtil::EdmErrorType(disposedRule.isEdm);
+            return AbilityUtil::EdmErrorType(disposedRule.isEdm, bundleName);
         }
         if (disposedRule.want->GetBundle() == param.want.GetBundle()) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "no dispose want, with same bundleName");
-            return AbilityUtil::EdmErrorType(disposedRule.isEdm);
+            return AbilityUtil::EdmErrorType(disposedRule.isEdm, bundleName);
         }
         SetInterceptInfo(param.want, disposedRule);
         if (disposedRule.componentType == AppExecFwk::ComponentType::UI_ABILITY) {
@@ -71,7 +72,7 @@ ErrCode DisposedRuleInterceptor::DoProcess(AbilityInterceptorParam param)
             }
         }
 #endif
-        return AbilityUtil::EdmErrorType(disposedRule.isEdm);
+        return AbilityUtil::EdmErrorType(disposedRule.isEdm, bundleName);
     }
     if (disposedRule.disposedType != AppExecFwk::DisposedType::NON_BLOCK) {
         return ERR_OK;

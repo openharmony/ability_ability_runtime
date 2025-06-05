@@ -24,6 +24,9 @@
 
 #include "main_thread.h"
 #include "mock_app_thread.h"
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+#include "hitrace/hitracechain.h"
+#endif
 
 using namespace testing::ext;
 using namespace OHOS;
@@ -516,5 +519,20 @@ HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_010, TestSize.Level1)
     watchdog_->ReportEvent();
     EXPECT_TRUE(watchdog_->backgroundReportCount_ > 0 && watchdog_->backgroundReportCount_.load() < 5);
 }
+
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+/**
+ * @tc.number: WatchdogTest_SetHiTraceChainId_001
+ * @tc.name: SetHiTraceChainId
+ * @tc.desc: Verify that function SetHiTraceChainId.
+ */
+HWTEST_F(WatchdogTest, WatchdogTest_SetHiTraceChainId_001, TestSize.Level1)
+{
+    watchdog_->SetHiTraceChainId();
+    OHOS::HiviewDFX::HiTraceChain::Begin("WatchdogTest_SetHiTraceChainId_001", 0);
+    watchdog_->SetHiTraceChainId();
+    EXPECT_TRUE(watchdog_->hitraceId_ != nullptr);
+}
+#endif
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -521,15 +521,15 @@ int32_t InsightIntentExecuteManager::GenerateWant(
         TAG_LOGD(AAFwkTag::INTENT, "Generate want with displayId: %{public}d", param->displayId_);
     }
 
-    ret = AddWantUirsAndFlagsFromParam(param, want);
-    if (ret != ERR_OK) {
-        return ret;
+    auto intRet = AddWantUirsAndFlagsFromParam(param, want);
+    if (intRet != ERR_OK) {
+        return intRet;
     }
 
-    ret = CheckAndUpdateDecoratorParams(param, decoratorInfo, want);
-    if (ret != ERR_OK) {
+    intRet = CheckAndUpdateDecoratorParams(param, decoratorInfo, want);
+    if (intRet != ERR_OK) {
         // log has print in sub method
-        return ret;
+        return intRet;
     }
 
     return ERR_OK;

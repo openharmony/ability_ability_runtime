@@ -40,6 +40,7 @@ constexpr const char* START_SPECIFIED_PROCESS = "persist.sys.abilityms.start_spe
 constexpr const char* USE_MULTI_RENDER_PROCESS = "persist.sys.abilityms.use_multi_render_process";
 constexpr const char* LIMIT_MAXIMUM_OF_RENDER_PROCESS = "persist.sys.abilityms.limit_maximum_of_render_process";
 constexpr const char* GRANT_PERSIST_URI_PERMISSION = "persist.sys.abilityms.grant_persist_uri_permission";
+constexpr const char* GRANT_TEMPORARY_URI_PERMISSION = "persist.sys.abilityms.grant_temporary_uri_permission";
 constexpr const char* START_OPTIONS_WITH_ANIMATION = "persist.sys.abilityms.start_options_with_animation";
 constexpr const char* MULTI_PROCESS_MODEL = "persist.sys.abilityms.multi_process_model";
 constexpr const char* PARAM_ANCO_APP_IDENTIFIER = "persist.hmos_fusion_mgr.anco_identifier";
@@ -202,6 +203,16 @@ bool AppUtils::IsGrantPersistUriPermission()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isGrantPersistUriPermission_.value);
     return isGrantPersistUriPermission_.value;
+}
+
+bool AppUtils::IsSupportGrantUriPermission()
+{
+    if (!isGrantTempUriPermission_.isLoaded) {
+        isGrantTempUriPermission_.value = system::GetBoolParameter(GRANT_TEMPORARY_URI_PERMISSION, true);
+        isGrantTempUriPermission_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isGrantTempUriPermission_.value);
+    return isGrantTempUriPermission_.value;
 }
 
 bool AppUtils::IsStartOptionsWithAnimation()
@@ -472,7 +483,7 @@ std::string AppUtils::GetCacheExtensionTypeList()
 
 std::string AppUtils::GetAncoAppIdentifiers()
 {
-    std::string identifiers = system::GetParameter(PARAM_ANCO_APP_IDENTIFIER, "");\
+    std::string identifiers = system::GetParameter(PARAM_ANCO_APP_IDENTIFIER, "");
     return identifiers;
 }
 

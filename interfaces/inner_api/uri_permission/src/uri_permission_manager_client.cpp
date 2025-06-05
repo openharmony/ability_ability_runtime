@@ -165,6 +165,40 @@ int32_t UriPermissionManagerClient::GrantUriPermissionPrivileged(const std::vect
     return funcResult;
 }
 
+int32_t UriPermissionManagerClient::GrantUriPermissionByKey(const std::string &key, uint32_t flag,
+    uint32_t targetTokenId)
+{
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "GrantUriPermissionByKey call");
+    auto uriPermMgr = ConnectUriPermService();
+    if (uriPermMgr) {
+        int32_t funcResult = INNER_ERR;
+        auto ret = uriPermMgr->GrantUriPermissionByKey(key, flag, targetTokenId, funcResult);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", ret);
+            return INNER_ERR;
+        }
+        return funcResult;
+    }
+    return INNER_ERR;
+}
+
+int32_t UriPermissionManagerClient::GrantUriPermissionByKeyAsCaller(const std::string &key, uint32_t flag,
+    uint32_t callerTokenId, uint32_t targetTokenId)
+{
+    TAG_LOGD(AAFwkTag::URIPERMMGR, "GrantUriPermissionByKeyAsCaller call");
+    auto uriPermMgr = ConnectUriPermService();
+    if (uriPermMgr) {
+        int32_t funcResult = INNER_ERR;
+        auto ret = uriPermMgr->GrantUriPermissionByKeyAsCaller(key, flag, callerTokenId, targetTokenId, funcResult);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", ret);
+            return INNER_ERR;
+        }
+        return funcResult;
+    }
+    return INNER_ERR;
+}
+
 int UriPermissionManagerClient::RevokeAllUriPermissions(const uint32_t tokenId)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");

@@ -110,9 +110,9 @@ void NapiCommonWantFuzztest1(bool boolParam, std::string &stringParam, int32_t i
     }
     WrapWantParams(env, wantParams1); // branch failed
     UnwrapWantParams(env, param, wantParams1); // branch failed
-    BlackListFilter(Want::PARAM_RESV_WINDOW_MODE); // branch
-    BlackListFilter(Want::PARAM_RESV_DISPLAY_ID); // branch
-    BlackListFilter(stringParam); // branch
+    BlackListFilter(Want::PARAM_RESV_WINDOW_MODE, ""); // branch
+    BlackListFilter(Want::PARAM_RESV_DISPLAY_ID, ""); // branch
+    BlackListFilter(stringParam, ""); // branch
     Want want;
     WrapWant(env, want); // branch
     UnwrapWant(env, param, want); // branch

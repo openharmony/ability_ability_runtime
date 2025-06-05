@@ -36,9 +36,10 @@ ErrCode ControlInterceptor::DoProcess(AbilityInterceptorParam param)
         TAG_LOGI(AAFwkTag::ABILITYMGR,
             "app is intercepted %{public}s", controlRule.controlMessage.c_str());
 #ifdef SUPPORT_GRAPHICS
+        std::string bundleName = param.abilityInfo ? param.abilityInfo->bundleName : "";
         if (!param.isWithUI || controlRule.controlWant == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "no control want");
-            return AbilityUtil::EdmErrorType(controlRule.isEdm);
+            return AbilityUtil::EdmErrorType(controlRule.isEdm, bundleName);
         }
         if (controlRule.controlWant->GetBoolParam(IS_FROM_PARENTCONTROL, false)) {
             auto controlWant = controlRule.controlWant;
@@ -60,7 +61,7 @@ ErrCode ControlInterceptor::DoProcess(AbilityInterceptorParam param)
             return ret;
         }
 #endif
-        return AbilityUtil::EdmErrorType(controlRule.isEdm);
+        return AbilityUtil::EdmErrorType(controlRule.isEdm, bundleName);
     }
     return ERR_OK;
 }

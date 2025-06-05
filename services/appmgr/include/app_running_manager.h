@@ -24,6 +24,7 @@
 #include "ability_info.h"
 #include "app_debug_listener_interface.h"
 #include "app_jsheap_mem_info.h"
+#include "app_cjheap_mem_info.h"
 #include "app_malloc_info.h"
 #include "app_mem_info.h"
 #include "app_running_record.h"
@@ -108,6 +109,16 @@ public:
      * @return, Return true if exist.
      */
     bool IsAppExist(uint32_t accessTokenId);
+
+    /**
+     * Check whether the running appRunningRecord matches the input process name.
+     *
+     * @param appRecord, the ptr of the AppRunningRecord.
+     * @param processName, the input process name.
+     * @return, Return true if matches.
+     */
+    static bool CheckAppProcessNameIsSame(const std::shared_ptr<AppRunningRecord> &appRecord,
+        const std::string &processName);
 
     /**
      * CheckAppRunningRecordIsExistByUid, check app exist when concurrent.
@@ -266,6 +277,15 @@ public:
     int32_t DumpJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info);
 
     /**
+     * DumpCjHeapMemory, call DumpCjHeapMemory() through proxy project.
+     * triggerGC and dump the application's cjheap memory info.
+     *
+     * @param info, pid, needGc, needSnapshot
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info);
+
+    /**
      * Set AbilityForegroundingFlag of an app-record to true.
      *
      * @param pid, pid.
@@ -403,6 +423,9 @@ public:
     
     int32_t AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;
+
+    void HandleChildRelation(
+        std::shared_ptr<ChildProcessRecord> childRecord, std::shared_ptr<AppRunningRecord> appRecord);
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);

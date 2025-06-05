@@ -2116,7 +2116,7 @@ sptr<IWantSender> AbilityManagerProxy::GetWantSender(
     return wantSender;
 }
 
-int AbilityManagerProxy::SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo)
+int AbilityManagerProxy::SendWantSender(sptr<IWantSender> target, SenderInfo &senderInfo)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2137,6 +2137,12 @@ int AbilityManagerProxy::SendWantSender(sptr<IWantSender> target, const SenderIn
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
     }
+    std::unique_ptr<SenderInfo> completedDataReply(reply.ReadParcelable<SenderInfo>());
+    if (!completedDataReply) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "readParcelableInfo fail");
+        return INNER_ERR;
+    }
+    senderInfo = *completedDataReply;
     return reply.ReadInt32();
 }
 
@@ -4699,7 +4705,12 @@ sptr<IAbilityManagerCollaborator> AbilityManagerProxy::GetAbilityManagerCollabor
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", ret);
         return nullptr;
     }
-    sptr<IAbilityManagerCollaborator> collaborator = iface_cast<IAbilityManagerCollaborator>(reply.ReadRemoteObject());
+    auto remoteObj = reply.ReadRemoteObject();
+    if (!remoteObj) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "remote object null");
+        return nullptr;
+    }
+    sptr<IAbilityManagerCollaborator> collaborator = iface_cast<IAbilityManagerCollaborator>(remoteObj);
     return collaborator;
 }
 

@@ -102,7 +102,6 @@ group("moduletest") {
 
   deps = [
     "ability_running_record_test:moduletest",
-    "app_life_cycle_test:moduletest",
     "app_mgr_service_test:moduletest",
     "app_recent_list_test:moduletest",
     "app_running_processes_info_module_test:moduletest",

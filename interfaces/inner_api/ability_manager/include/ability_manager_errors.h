@@ -804,24 +804,48 @@ enum {
     ERR_APP_SELECTOR_NOT_EXISTS = 2097334,
 
     /**
-     * Result (2097335) target not in whitelist.
+     * Result (2097335) for canceled wantagent.
      */
-    ERR_KIOSK_MODE_NOT_IN_WHITELIST = 2097335,
+    ERR_WANTAGENT_CANCELED = 2097335,
 
     /**
-     * Result (2097336) already in kiosk mode.
+     * Result (2097340-2097350) for uri permission error result.
      */
-    ERR_ALREADY_IN_KIOSK_MODE = 2097336,
+    ERR_UPMS_GET_FILE_URIS_BY_KEY_FAILED = 2097340,
+
+    ERR_UPMS_NO_PERMISSION_GRANT_URI = 2097341,
+
+    ERR_UPMS_INVALID_CALLER_TOKENID = 2097342,
+
+    ERR_UPMS_INVALID_TARGET_TOKENID = 2097343,
+
+    ERR_UPMS_ADD_PRIVILEGED_FAILED = 2097344,
+
+    ERR_UPMS_GET_ORI_URI_FAILED = 2097345,
+
+    ERR_UPMS_NOT_FILE_URI = 2097346,
+
+    ERR_UPMS_GRANT_URI_PERMISSION_FAILED = 2097347,
 
     /**
-     * Result (2097337) system not in kiosk mode when required.
+     * Result (2097351) target not in whitelist.
      */
-    ERR_NOT_IN_KIOSK_MODE = 2097337,
+    ERR_KIOSK_MODE_NOT_IN_WHITELIST = 2097351,
 
     /**
-     * Result (2097338) for application not in focus.
+     * Result (2097352) already in kiosk mode.
      */
-    ERR_APP_NOT_IN_FOCUS = 2097338,
+    ERR_ALREADY_IN_KIOSK_MODE = 2097352,
+
+    /**
+     * Result (2097353) system not in kiosk mode when required.
+     */
+    ERR_NOT_IN_KIOSK_MODE = 2097353,
+
+    /**
+     * Result (2097354) for application not in focus.
+     */
+    ERR_APP_NOT_IN_FOCUS = 2097354,
 
     /**
      * Native error(3000000) for target bundle not exist.

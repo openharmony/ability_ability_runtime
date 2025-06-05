@@ -30,6 +30,9 @@ namespace AppExecFwk {
 namespace {
 constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
 constexpr int RESET_RATIO = 2;
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+constexpr int32_t CHARACTER_WIDTH = 2;
+#endif
 
 constexpr int32_t BACKGROUND_REPORT_COUNT_MAX = 5;
 constexpr int32_t WATCHDOG_REPORT_COUNT_MAX = 5;
@@ -44,6 +47,10 @@ constexpr uint32_t WEARABLE_CHECK_INTERVAL_TIME = 5000;
 #endif
 }
 std::shared_ptr<EventHandler> Watchdog::appMainHandler_ = nullptr;
+
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+OHOS::HiviewDFX::HiTraceId* Watchdog::hitraceId_ = nullptr;
+#endif
 
 Watchdog::Watchdog()
 {}
@@ -65,6 +72,9 @@ void Watchdog::Init(const std::shared_ptr<EventHandler> mainHandler)
         appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE, 0, EventQueue::Priority::VIP);
     }
     lastWatchTime_ = 0;
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+    hitraceId_ = OHOS::HiviewDFX::HiTraceChain::GetIdAddress();
+#endif
     auto watchdogTask = [this] { this->Timer(); };
 #ifdef APP_NO_RESPONSE_DIALOG_WEARABLE
     OHOS::HiviewDFX::Watchdog::GetInstance().RunPeriodicalTask("AppkitWatchdog", watchdogTask,
@@ -98,6 +108,21 @@ void Watchdog::SetAppMainThreadState(const bool appMainThreadState)
     std::unique_lock<std::mutex> lock(cvMutex_);
     appMainThreadIsAlive_.store(appMainThreadState);
 }
+
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+void Watchdog::SetHiTraceChainId()
+{
+    OHOS::HiviewDFX::HiTraceId hitraceId = *hitraceId_;
+    if (hitraceId.IsValid() == 0) {
+        TAG_LOGW(AAFwkTag::APPDFR, "get hitrace id is invalid.");
+        return;
+    }
+    OHOS::HiviewDFX::HiTraceChain::SetId(hitraceId);
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0') << std::setw(CHARACTER_WIDTH) << hitraceId.GetChainId();
+    TAG_LOGI(AAFwkTag::APPDFR, "Main thread blocked, %{public}s", ss.str().c_str());
+}
+#endif
 
 #ifdef APP_NO_RESPONSE_DIALOG
 bool isDeviceType2in1()
@@ -183,6 +208,9 @@ void Watchdog::Timer()
         watchdogReportCount_++;
         TAG_LOGE(AAFwkTag::APPDFR, "wait count: %{public}d", watchdogReportCount_.load());
         if (watchdogReportCount_.load() >= WATCHDOG_REPORT_COUNT_MAX) {
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+            SetHiTraceChainId();
+#endif
 #ifndef APP_NO_RESPONSE_DIALOG
             AppExecFwk::AppfreezeInner::GetInstance()->AppfreezeHandleOverReportCount(true);
 #endif
@@ -255,6 +283,12 @@ void Watchdog::ReportEvent()
 #ifndef APP_NO_RESPONSE_DIALOG
     if (isSixSecondEvent_) {
         needReport_.store(false);
+    }
+#endif
+
+#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+    if (isSixSecondEvent_) {
+        SetHiTraceChainId();
     }
 #endif
     AppExecFwk::AppfreezeInner::GetInstance()->ThreadBlock(isSixSecondEvent_);

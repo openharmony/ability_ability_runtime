@@ -307,7 +307,7 @@ HWTEST_F(PendingWantRecordTest, PendingWantRecordTest_0700, TestSize.Level1)
     EXPECT_NE(pendingWantRecord, nullptr);
     SenderInfo info;
     pendingWantRecord->canceled_ = true;
-    EXPECT_EQ(pendingWantRecord->SenderInner(info), -96);
+    EXPECT_EQ(pendingWantRecord->SenderInner(info), 2097335);
 }
 
 /*

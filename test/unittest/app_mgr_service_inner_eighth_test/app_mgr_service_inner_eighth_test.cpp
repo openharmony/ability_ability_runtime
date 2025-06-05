@@ -42,6 +42,9 @@ static int g_scheduleLoadChildCall = 0;
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+constexpr const char* DEBUG_APP = "debugApp";
+}
 class AppMgrServiceInnerEighthTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -2648,6 +2651,36 @@ HWTEST_F(AppMgrServiceInnerEighthTest, LaunchAbility_002, TestSize.Level1)
     auto ret = appMgrServiceInner->LaunchAbility(token);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "LaunchAbility_002 end");
+}
+
+/**
+ * @tc.name: SetPreloadDebugApp_0100
+ * @tc.desc: test SetPreloadDebugApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, SetPreloadDebugApp_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetPreloadDebugApp_0100 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    auto want = std::make_shared<AAFwk::Want>();
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(want, nullptr);
+    ASSERT_NE(appInfo, nullptr);
+    appInfo->debug = true;
+    appInfo->appProvisionType = AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG;
+    std::string bundleName = "com.example.test";
+    appInfo->bundleName = bundleName;
+    
+    OHOS::AAFwk::MyStatus::GetInstance().getBoolParameter_ = true;
+    appMgrServiceInner->isInitAppWaitingDebugListExecuted_ = true;
+    appMgrServiceInner->waitingDebugBundleList_.try_emplace(bundleName, true);
+
+    appMgrServiceInner->SetPreloadDebugApp(want, appInfo);
+    bool debugApp = want->GetBoolParam(DEBUG_APP, false);
+    EXPECT_EQ(debugApp, true);
+    TAG_LOGI(AAFwkTag::TEST, "SetPreloadDebugApp_0100 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS
