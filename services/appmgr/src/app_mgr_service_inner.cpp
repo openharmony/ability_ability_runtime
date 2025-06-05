@@ -1120,14 +1120,6 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
         TAG_LOGI(AAFwkTag::APPMGR, "%{public}s will not alive", hapModuleInfo.process.c_str());
     }
 
-    ffrt::submit([appRecord, abilityInfo, innerServiceWeak = weak_from_this()]() {
-        auto innerService = innerServiceWeak.lock();
-        CHECK_POINTER_AND_RETURN_LOG(innerService, "get appMgrServiceInner fail");
-        innerService->OnAppStateChanged(appRecord, ApplicationState::APP_STATE_SET_COLD_START, false, false);
-        innerService->SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::COLD, AppStartReason::NONE);
-        }, ffrt::task_attr().name("AppStateChangedNotify")
-        .timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
-
     uint32_t startFlags = (want == nullptr) ? 0 : AppspawnUtil::BuildStartFlags(*want, *abilityInfo);
     int32_t bundleIndex = 0;
     if (want != nullptr) {
@@ -1138,6 +1130,15 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
         abilityInfo->moduleName, abilityInfo->name, token, want, abilityInfo->extensionAbilityType) != ERR_OK) {
         NotifyStartProcessFailed(token);
     }
+
+    ffrt::submit([appRecord, abilityInfo, innerServiceWeak = weak_from_this()]() {
+        auto innerService = innerServiceWeak.lock();
+        CHECK_POINTER_AND_RETURN_LOG(innerService, "get appMgrServiceInner fail");
+        innerService->OnAppStateChanged(appRecord, ApplicationState::APP_STATE_SET_COLD_START, false, false);
+        innerService->SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::COLD, AppStartReason::NONE);
+        }, ffrt::task_attr().name("AppStateChangedNotify")
+        .timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
+
     if (isShellCall) {
         std::string perfCmd = (want == nullptr) ? "" : want->GetStringParam(PERF_CMD);
         bool isSandboxApp = (want == nullptr) ? false : want->GetBoolParam(ENTER_SANDBOX, false);
