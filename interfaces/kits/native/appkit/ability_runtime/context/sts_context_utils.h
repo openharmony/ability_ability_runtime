@@ -18,7 +18,6 @@
 
 #include "sts_runtime.h"
 #include "context.h"
-#include "ets_enviroment_callback.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
