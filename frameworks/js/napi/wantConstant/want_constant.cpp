@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,6 +130,7 @@ napi_value WantConstantInit(napi_env env, napi_value exports)
     SetNamedProperty(env, params, "ohos.param.callerAppCloneIndex", "CALLER_APP_CLONE_INDEX");
     SetNamedProperty(env, params, "ohos.media.params.hideSensitiveType", "HIDE_SENSITIVE_TYPE");
     SetNamedProperty(env, params, "ohos.params.pluginAbility", "DESTINATION_PLUGIN_ABILITY");
+    SetNamedProperty(env, params, "ohos.params.atomicservice.shareRouter", "ATOMIC_SERVICE_SHARE_ROUTER");
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("Action", action),
         DECLARE_NAPI_PROPERTY("Entity", entity),
