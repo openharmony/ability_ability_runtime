@@ -212,7 +212,7 @@ enum class AbilityErrorCode {
     // The context is not UIAbilityContext.
     ERROR_CODE_NOT_UI_ABILITY_CONTEXT = 16000086,
 
-    // The Caller is not an atomic service.
+    // The caller is not an atomic service.
     ERROR_CODE_CALLER_NOT_ATOMIC_SERVICE = 16000090,
 
     // invalid caller.
