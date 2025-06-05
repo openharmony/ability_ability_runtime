@@ -561,6 +561,14 @@ int32_t AppMgrService::DumpJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info)
     return appMgrServiceInner_->DumpJsHeapMemory(info);
 }
 
+int32_t AppMgrService::DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
+{
+    if (!IsReady() || !HasDumpPermission()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->DumpCjHeapMemory(info);
+}
+
 void AppMgrService::AddAbilityStageDone(const int32_t recordId)
 {
     if (!IsReady()) {
@@ -1604,12 +1612,6 @@ int32_t AppMgrService::GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRun
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
-    }
-    bool isCallingPermission = AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
-        AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
-    if (!isCallingPermission) {
-        TAG_LOGE(AAFwkTag::APPMGR, "GetAppRunningUniqueIdByPid not SA call or verification failed");
-        return ERR_PERMISSION_DENIED;
     }
     return appMgrServiceInner_->GetAppRunningUniqueIdByPid(pid, appRunningUniqueId);
 }

@@ -85,6 +85,12 @@ ohos_unittest("watchdog_test") {
     "jsoncpp:jsoncpp",
     "napi:ace_napi",
   ]
+
+  defines = []
+  if (ability_runtime_hitrace_enable) {
+    external_deps += [ "hitrace:libhitracechain" ]
+    defines += [ "ABILITY_RUNTIME_HITRACE_ENABLE" ]
+  }
 }
 
 ###############################################################################

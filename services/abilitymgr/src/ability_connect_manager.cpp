@@ -220,6 +220,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
         return ret;
     }
 
+    ReportEventToRSS(abilityRequest.abilityInfo, targetService, abilityRequest.callerToken);
     if (!isLoadedAbility) {
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "targetService has not been loaded");
         SetLastExitReason(abilityRequest, targetService);
@@ -650,9 +651,8 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     if (ret != ERR_OK) {
         return ret;
     }
-    if (ResSchedUtil::GetInstance().NeedReportByPidWhenConnect(abilityRequest.abilityInfo)) {
-        ReportEventToRSS(abilityRequest.abilityInfo, targetService, callerToken);
-    }
+
+    ReportEventToRSS(abilityRequest.abilityInfo, targetService, callerToken);
     // 2. get target connectRecordList, and check whether this callback has been connected.
     ConnectListType connectRecordList;
     GetConnectRecordListFromMap(connect, connectRecordList);

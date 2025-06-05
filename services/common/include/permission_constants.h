@@ -43,6 +43,7 @@ constexpr const char* PERMISSION_READ_IMAGEVIDEO = "ohos.permission.READ_IMAGEVI
 constexpr const char* PERMISSION_WRITE_AUDIO = "ohos.permission.WRITE_AUDIO";
 constexpr const char* PERMISSION_READ_AUDIO = "ohos.permission.READ_AUDIO";
 constexpr const char* PERMISSION_GRANT_URI_PERMISSION_PRIVILEGED = "ohos.permission.GRANT_URI_PERMISSION_PRIVILEGED";
+constexpr const char* PERMISSION_GRANT_URI_PERMISSION_AS_CALLER = "ohos.permission.GRANT_URI_PERMISSION_AS_CALLER";
 constexpr const char* PERMISSION_READ_WRITE_DOWNLOAD = "ohos.permission.READ_WRITE_DOWNLOAD_DIRECTORY";
 constexpr const char* PERMISSION_READ_WRITE_DESKTON = "ohos.permission.READ_WRITE_DESKTOP_DIRECTORY";
 constexpr const char* PERMISSION_READ_WRITE_DOCUMENTS = "ohos.permission.READ_WRITE_DOCUMENTS_DIRECTORY";

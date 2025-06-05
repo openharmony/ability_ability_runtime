@@ -171,7 +171,7 @@ bool BundleMgrService::CheckWantEntity(const AAFwk::Want& want, AbilityInfo& abi
 }
 
 bool BundleMgrService::ImplicitQueryInfos(const Want& want, int32_t flags, int32_t userId, bool withDefault,
-    std::vector<AbilityInfo>& abilityInfos, std::vector<ExtensionAbilityInfo>& extensionInfos)
+    std::vector<AbilityInfo>& abilityInfos, std::vector<ExtensionAbilityInfo>& extensionInfos, bool &findDefaultApp)
 {
     if (want.GetAction() == "ohos.want.action.viewData") {
         auto num = want.GetIntParam("numMock", 0);

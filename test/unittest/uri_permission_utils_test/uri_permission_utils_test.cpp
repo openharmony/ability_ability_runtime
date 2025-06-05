@@ -52,7 +52,7 @@ void UriPermissionUtilsTest::TearDown() {}
  */
 HWTEST_F(UriPermissionUtilsTest, Upms_SendSystemAppGrantUriPermissionEvent_001, TestSize.Level1)
 {
-    std::vector<Uri> uriVec = { Uri("file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt") };
+    std::vector<std::string> uriVec = { "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt" };
     const std::vector<bool> resVec = { true };
     auto ret = UPMSUtils::SendSystemAppGrantUriPermissionEvent(1001, 1002, uriVec, resVec);
     ASSERT_EQ(ret, false);

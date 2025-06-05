@@ -185,10 +185,6 @@ static void ProcessSignalData(void *token, uint32_t event)
     signal = jsonObject["signal"];
     uid = jsonObject["uid"];
     bundleName = jsonObject["bundleName"];
-    if (signal == 0) {
-        TAG_LOGD(AAFwkTag::APPMGR, "ignore signal 0, pid: %{public}d", pid);
-        return;
-    }
     TAG_LOGI(AAFwkTag::APPMGR, "pid:%{public}d, signal:%{public}d, uid:%{public}d, bundleName:%{public}s",
         pid, signal, uid, bundleName.c_str());
     AppNativeSpawnManager::GetInstance().NotifyChildProcessExitTask(pid, signal, bundleName);

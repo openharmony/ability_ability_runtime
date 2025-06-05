@@ -170,6 +170,16 @@ const std::string &AppRunningRecord::GetProcessName() const
     return processName_;
 }
 
+bool AppRunningRecord::GetExtensionSandBoxFlag() const
+{
+    return isExtensionSandBox_;
+}
+
+void AppRunningRecord::SetExtensionSandBoxFlag(bool extensionSandBoxFlag)
+{
+    isExtensionSandBox_ = extensionSandBoxFlag;
+}
+
 void AppRunningRecord::SetSpecifiedProcessFlag(const std::string &flag)
 {
     specifiedProcessFlag_ = flag;
@@ -612,6 +622,13 @@ void AppRunningRecord::ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &in
 {
     if (appLifeCycleDeal_) {
         appLifeCycleDeal_->ScheduleJsHeapMemory(info);
+    }
+}
+
+void AppRunningRecord::ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
+{
+    if (appLifeCycleDeal_) {
+        appLifeCycleDeal_->ScheduleCjHeapMemory(info);
     }
 }
 

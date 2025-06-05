@@ -82,7 +82,7 @@ napi_value JsInsightIntentUtils::ResolveCbCpp(napi_env env, napi_callback_info i
 
 napi_value JsInsightIntentUtils::RejectCbCpp(napi_env env, napi_callback_info info)
 {
-    TAG_LOGI(AAFwkTag::INTENT, "reject function");
+    TAG_LOGW(AAFwkTag::INTENT, "reject function");
     constexpr size_t argc = 1;
     napi_value argv[argc] = { nullptr };
     size_t actualArgc = argc;
@@ -106,7 +106,7 @@ napi_value JsInsightIntentUtils::RejectCbCpp(napi_env env, napi_callback_info in
 void JsInsightIntentUtils::ReplyFailed(InsightIntentExecutorAsyncCallback* callback,
     InsightIntentInnerErr innerErr)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "reply failed");
+    TAG_LOGE(AAFwkTag::INTENT, "reply failed");
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "callback null");
         return;

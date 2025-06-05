@@ -57,6 +57,7 @@ struct CArrProcessInformation {
 };
 
 CConfiguration CreateCConfiguration(const OHOS::AppExecFwk::Configuration &configuration);
+void FreeCConfiguration(CConfiguration configuration);
 }
 }
 

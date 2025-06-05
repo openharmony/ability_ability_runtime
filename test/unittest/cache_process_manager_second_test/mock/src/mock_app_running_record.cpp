@@ -103,6 +103,16 @@ const std::string &AppRunningRecord::GetProcessName() const
     return processName_;
 }
 
+bool AppRunningRecord::GetExtensionSandBoxFlag() const
+{
+    return isExtensionSandBox_;
+}
+
+void AppRunningRecord::SetExtensionSandBoxFlag(bool extensionSandBoxFlag)
+{
+    isExtensionSandBox_ = extensionSandBoxFlag;
+}
+
 void AppRunningRecord::SetSpecifiedProcessFlag(const std::string &flag)
 {
 }
@@ -258,6 +268,10 @@ void AppRunningRecord::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::M
 }
 
 void AppRunningRecord::ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info)
+{
+}
+
+void AppRunningRecord::ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
 {
 }
 

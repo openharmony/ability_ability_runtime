@@ -48,6 +48,7 @@
 #include "app_spawn_client.h"
 #include "app_malloc_info.h"
 #include "app_jsheap_mem_info.h"
+#include "app_cjheap_mem_info.h"
 #include "simple_process_info.h"
 
 namespace OHOS {
@@ -150,6 +151,20 @@ public:
      * @return Returns the process name.
      */
     const std::string &GetProcessName() const;
+
+    /**
+     * @brief Obtains the flag of sandbox extension process.
+     *
+     * @return Returns true or false.
+     */
+    bool GetExtensionSandBoxFlag() const;
+
+    /**
+     * @brief Setting the flag of sandbox extension process.
+     *
+     * @param extensionSandBoxFlag, the flag of sandbox process.
+     */
+    void SetExtensionSandBoxFlag(bool extensionSandBoxFlag);
 
     /**
      * @brief Obtains the the flag of specified process.
@@ -430,6 +445,15 @@ public:
      * @return
      */
     void ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info);
+
+    /**
+     * ScheduleCjHeapMemory, triggerGC and dump the application's cjheap memory info.
+     *
+     * @param info, pid, needGc, needSnapshot
+     *
+     * @return
+     */
+    void ScheduleCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info);
 
     /**
      * GetAbilityRunningRecordByToken, Obtaining the ability record through token.
@@ -1161,6 +1185,7 @@ private:
     bool isNeedLimitPrio_ = false;
     bool isAllowedNWebPreload_ = false;
     bool isUnSetPermission_ = false;
+    bool isExtensionSandBox_ = false;
     std::atomic<bool> isKilling_ = false;
     std::atomic_bool isSpawned_ = false;
 
