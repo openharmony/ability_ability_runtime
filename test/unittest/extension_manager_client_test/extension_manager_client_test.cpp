@@ -174,36 +174,6 @@ HWTEST_F(ExtensionManagerClientTest, ExtensionManagerClientTest_010, TestSize.Le
 
 /*
  * Feature: ExtensionManagerClient
- * Function: StartExtensionAbility
- */
-HWTEST_F(ExtensionManagerClientTest, StartExtensionAbility_0100, TestSize.Level1)
-{
-    auto client = std::make_shared<ExtensionManagerClient>();
-    Want want;
-    sptr<IRemoteObject> callerToken = nullptr;
-    int32_t userId = DEFAULT_INVAL_VALUE;
-    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
-    auto result = client->StartExtensionAbility(want, callerToken, userId, extensionType);
-    EXPECT_NE(ERR_OK, result);
-}
-
-/*
- * Feature: ExtensionManagerClient
- * Function: StopExtensionAbility
- */
-HWTEST_F(ExtensionManagerClientTest, StopExtensionAbility_0100, TestSize.Level1)
-{
-    auto client = std::make_shared<ExtensionManagerClient>();
-    Want want;
-    sptr<IRemoteObject> callerToken = nullptr;
-    int32_t userId = DEFAULT_INVAL_VALUE;
-    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
-    auto result = client->StopExtensionAbility(want, callerToken, userId, extensionType);
-    EXPECT_NE(ERR_OK, result);
-}
-
-/*
- * Feature: ExtensionManagerClient
  * Function: GetExtensionRunningInfos
  */
 HWTEST_F(ExtensionManagerClientTest, GetExtensionRunningInfos_0100, TestSize.Level1)

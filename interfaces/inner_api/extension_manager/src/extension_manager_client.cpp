@@ -211,27 +211,6 @@ ErrCode ExtensionManagerClient::RemoveDeathRecipient()
     return ERR_OK;
 }
 
-ErrCode ExtensionManagerClient::StartExtensionAbility(const Want &want, sptr<IRemoteObject> callerToken,
-    int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    auto abms = GetExtensionManager();
-    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::EXTMGR, "name:%{public}s %{public}s, userId=%{public}d.",
-        want.GetElement().GetAbilityName().c_str(), want.GetElement().GetBundleName().c_str(), userId);
-    return abms->StartExtensionAbility(want, callerToken, userId, extensionType);
-}
-
-ErrCode ExtensionManagerClient::StopExtensionAbility(const Want &want, sptr<IRemoteObject> callerToken,
-    int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
-{
-    auto abms = GetExtensionManager();
-    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::EXTMGR, "name:%{public}s %{public}s, userId=%{public}d.",
-        want.GetElement().GetAbilityName().c_str(), want.GetElement().GetBundleName().c_str(), userId);
-    return abms->StopExtensionAbility(want, callerToken, userId, extensionType);
-}
-
 ErrCode ExtensionManagerClient::GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);

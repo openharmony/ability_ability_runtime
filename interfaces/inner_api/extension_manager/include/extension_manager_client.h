@@ -63,36 +63,6 @@ public:
     ErrCode Release();
 
     /**
-     * Start extension ability with want, send want to ability manager service.
-     *
-     * @param want, the want of the ability to start.
-     * @param callerToken, caller ability token.
-     * @param userId, Designation User ID.
-     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode StartExtensionAbility(
-        const Want &want,
-        sptr<IRemoteObject> callerToken,
-        int32_t userId = DEFAULT_INVALID_USER_ID,
-        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED);
-
-    /**
-     * Stop extension ability with want, send want to ability manager service.
-     *
-     * @param want, the want of the ability to stop.
-     * @param callerToken, caller ability token.
-     * @param userId, Designation User ID.
-     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be stopped.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode StopExtensionAbility(
-        const Want &want,
-        sptr<IRemoteObject> callerToken,
-        int32_t userId = DEFAULT_INVALID_USER_ID,
-        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED);
-
-    /**
      * @brief Get the extension running information.
      *
      * @param upperLimit The maximum limit of information wish to get.
