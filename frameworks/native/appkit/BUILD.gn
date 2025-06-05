@@ -341,6 +341,7 @@ ohos_shared_library("app_context") {
     "${ability_runtime_native_path}/appkit/ability_runtime/context/application_state_change_callback.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/context_impl.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/environment_callback.cpp",
+    "${ability_runtime_native_path}/appkit/ability_runtime/context/ets_application_state_change_callback.cpp",
     "${ability_runtime_native_path}/appkit/app/overlay_event_subscriber.cpp",
     "${ability_runtime_native_path}/appkit/app/sys_mgr_client.cpp",
   ]

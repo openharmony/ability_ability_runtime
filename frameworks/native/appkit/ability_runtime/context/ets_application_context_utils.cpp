@@ -27,6 +27,7 @@ namespace {
 }
 std::weak_ptr<ApplicationContext> applicationContext_;
 std::shared_ptr<EtsEnviromentCallback> etsEnviromentCallback_ = nullptr;
+std::shared_ptr<EtsApplicationStateChangeCallback> applicationStateCallback_ = nullptr;
 
 void EtsApplicationContextUtils::RestartApp([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
     ani_object wantObj)
@@ -207,6 +208,49 @@ void EtsApplicationContextUtils::GetRunningProcessInformation([[maybe_unused]]an
     } else {
         AppExecFwk::AsyncCallback(env, callback, CreateStsError(env,
             (ani_int)AbilityErrorCode::ERROR_CODE_INNER, "Get process infos failed."), emptyArray);
+    }
+}
+
+void EtsApplicationContextUtils::NativeOnApplicationStateChangeSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+    ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "NativeOnApplicationStateChangeSync Call");
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "nativeContext is null");
+        ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return;
+    }
+    if (applicationStateCallback_ != nullptr) {
+        applicationStateCallback_->Register(callback);
+        return;
+    }
+    applicationStateCallback_ = std::make_shared<EtsApplicationStateChangeCallback>(env);
+    applicationStateCallback_->Register(callback);
+    applicationContext->RegisterApplicationStateChangeCallback(applicationStateCallback_);
+}
+
+void EtsApplicationContextUtils::NativeOffApplicationStateChangeSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+    ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "NativeOffApplicationStateChangeSync Call");
+    if (applicationStateCallback_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationStateCallback_");
+        ThrowStsInvalidParamError(
+            env, "Parse applicationStateCallback failed, applicationStateCallback must be function.");
+        return;
+    }
+    ani_boolean isUndefined = true;
+    env->Reference_IsUndefined(callback, &isUndefined);
+    if (isUndefined) {
+        applicationStateCallback_->UnRegister();
+    } else if (!applicationStateCallback_->UnRegister(callback)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed");
+        ThrowStsInvalidParamError(env, "Parse param call UnRegister failed, call UnRegister must be function.");
+        return;
+    }
+    if (applicationStateCallback_->IsEmpty()) {
+        applicationStateCallback_.reset();
     }
 }
 
@@ -392,6 +436,13 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env* aniEnv, ani
             reinterpret_cast<void *>(EtsApplicationContextUtils::SetFont)},
         ani_native_function {"nativerestartApp", "L@ohos/app/ability/Want/Want;:V",
             reinterpret_cast<void *>(EtsApplicationContextUtils::RestartApp)},
+        ani_native_function {"nativeOnApplicationStateChangeSync",
+            "L@ohos/app/ability/ApplicationStateChangeCallback/ApplicationStateChangeCallback",
+            reinterpret_cast<void*>(EtsApplicationContextUtils::NativeOnApplicationStateChangeSync)},
+        ani_native_function {"nativeOffApplicationStateChangeSync",
+            "L@ohos/app/ability/ApplicationStateChangeCallback/ApplicationStateChangeCallback",
+            reinterpret_cast<void*>(EtsApplicationContextUtils::NativeOffApplicationStateChangeSync)},
+
     };
     ani_status status = aniEnv->Class_BindNativeMethods(contextClass, applicationContextFunctions.data(),
     applicationContextFunctions.size());

@@ -17,6 +17,7 @@ import Context from 'application.Context'
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { BusinessError, AsyncCallback } from '@ohos.base'
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
+import type ApplicationStateChangeCallback from '@ohos.app.ability.ApplicationStateChangeCallback';
 import Want from '@ohos.app.ability.Want';
 import { ProcessInformation } from 'application.ProcessInformation';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
@@ -34,11 +35,21 @@ export default class ApplicationContext extends Context {
   public native nativesetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
   public native nativesetFont(font: string): void; 
   public native nativerestartApp(want: Want): void;
+  public native nativeOnApplicationStateChangeSync(callback: ApplicationStateChangeCallback): void;
+  public native nativeOffApplicationStateChangeSync(callback?: ApplicationStateChangeCallback): void;
 
   setSupportedProcessCache(isSupported: boolean): void {
     taskpool.execute((): void => {
       this.setSupportedProcessCacheSync(isSupported);
     });
+  }
+
+  on(type: 'applicationStateChange', callback: ApplicationStateChangeCallback): void {
+    this.nativeOnApplicationStateChangeSync(callback);
+  }
+
+  off(type: 'applicationStateChange', callback?: ApplicationStateChangeCallback): void {
+    this.nativeOffApplicationStateChangeSync(callback);
   }
 
   on(type: 'environment', callback: EnvironmentCallback): number {
