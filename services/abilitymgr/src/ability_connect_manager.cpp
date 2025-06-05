@@ -1209,8 +1209,6 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
     }
 
     std::string element = abilityRecord->GetURI();
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "schedule disconnect %{public}s",
-        element.c_str());
 
     // complete disconnect and remove record from conn map
     connect->ScheduleDisconnectAbilityDone();
@@ -1222,7 +1220,7 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
             AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "don't terminate uiservice");
         } else {
-            TAG_LOGI(AAFwkTag::SERVICE_EXT, "need terminate or cache");
+            TAG_LOGD(AAFwkTag::SERVICE_EXT, "need terminate or cache");
             TerminateOrCacheAbility(abilityRecord);
         }
     }
