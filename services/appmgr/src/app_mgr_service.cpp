@@ -561,6 +561,14 @@ int32_t AppMgrService::DumpJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info)
     return appMgrServiceInner_->DumpJsHeapMemory(info);
 }
 
+int32_t AppMgrService::DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
+{
+    if (!IsReady() || !HasDumpPermission()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->DumpCjHeapMemory(info);
+}
+
 void AppMgrService::AddAbilityStageDone(const int32_t recordId)
 {
     if (!IsReady()) {

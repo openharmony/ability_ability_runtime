@@ -24,6 +24,7 @@
 #include "hilog_tag_wrapper.h"
 #include "app_malloc_info.h"
 #include "app_jsheap_mem_info.h"
+#include "app_cjheap_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -360,6 +361,11 @@ public:
     }
 
     int32_t DumpJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info)
+    {
+        return 0;
+    }
+
+    int32_t DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
     {
         return 0;
     }
