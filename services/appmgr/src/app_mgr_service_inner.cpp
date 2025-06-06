@@ -1102,7 +1102,7 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
     sptr<IRemoteObject> token, const std::string &customProcessFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPMGR, "processName:%{public}s, isPreload:%{public}d",
+    TAG_LOGI(AAFwkTag::APPMGR, "processName:%{public}s, isPreload:%{public}d",
         processName.c_str(), isPreload);
     if (!appRecord || !abilityInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord or abilityInfo");
@@ -1257,7 +1257,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
 
 void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppScheduler> &appScheduler)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called", __func__);
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     if (pid <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid pid:%{public}d", pid);
         return;
@@ -1283,7 +1283,7 @@ void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppSched
         NotifyAppAttachFailed(appRecord);
         return;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "attach pid:%{public}d, bundle:%{public}s", pid, eventInfo.bundleName.c_str());
+    TAG_LOGI(AAFwkTag::APPMGR, "attach pid:%{public}d, bundle:%{public}s", pid, eventInfo.bundleName.c_str());
     sptr<AppDeathRecipient> appDeathRecipient = sptr<AppDeathRecipient>::MakeSptr();
     CHECK_POINTER_AND_RETURN_LOG(appDeathRecipient, "Failed to create death recipient.");
     appDeathRecipient->SetTaskHandler(taskHandler_);
@@ -1962,7 +1962,7 @@ void AppMgrServiceInner::SendProcessExitEvent(std::shared_ptr<AppRunningRecord> 
 
 int32_t AppMgrServiceInner::KillApplicationSelf(const bool clearPageStack, const std::string& reason)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "start");
+    TAG_LOGI(AAFwkTag::APPMGR, "start");
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
         return ERR_NO_INIT;
@@ -1977,7 +1977,7 @@ int32_t AppMgrServiceInner::KillApplicationSelf(const bool clearPageStack, const
     int64_t startTime = SystemTimeMillisecond();
     auto bundleName = appRecord->GetBundleName();
     auto callingUid = IPCSkeleton::GetCallingUid();
-    TAG_LOGD(AAFwkTag::APPMGR, "uid value: %{public}d", callingUid);
+    TAG_LOGI(AAFwkTag::APPMGR, "uid value: %{public}d", callingUid);
     std::list<pid_t> pids;
     KillProcessConfig config{clearPageStack, false, reason};
     if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, callingUid, pids, config)) {
@@ -2081,7 +2081,7 @@ int32_t AppMgrServiceInner::ClearUpApplicationData(const std::string &bundleName
             newUserId = currentUserId_;
         }
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "bundleName: %{public}s, uId: %{public}d, appIndex: %{public}d", bundleName.c_str(),
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName: %{public}s, uId: %{public}d, appIndex: %{public}d", bundleName.c_str(),
         newUserId, appCloneIndex);
     return ClearUpApplicationDataByUserId(bundleName, callerUid, callerPid, appCloneIndex, newUserId,
         false, "ClearUpApplicationData");
@@ -2164,7 +2164,7 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(const std::string &bu
     int targetUid = IN_PROCESS_CALL(bundleMgrHelper->GetUidByBundleName(bundleName, userId, appCloneIndex));
     NotifyAppStatusByCallerUid(bundleName, tokenId, userId, callerUid, targetUid,
         EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
-    TAG_LOGD(AAFwkTag::APPMGR, "clear");
+    TAG_LOGI(AAFwkTag::APPMGR, "clear");
     return ERR_OK;
 }
 
@@ -2801,7 +2801,7 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PID, std::to_string(eventInfo.pid),
         EVENT_KEY_PROCESS_NAME, eventInfo.processName, EVENT_KEY_MESSAGE, newReason,
         EVENT_KEY_FOREGROUND, foreground);
-    TAG_LOGD(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
+    TAG_LOGW(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
         "%{public}d, processName=%{public}s, msg=%{public}s, FOREGROUND=%{public}d, ret=%{public}d",
         result, pid, eventInfo.processName.c_str(), newReason.c_str(), foreground, ret);
     return ret;
@@ -4552,7 +4552,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     auto appInfo = appRecord->GetApplicationInfo();
     if (appInfo != nullptr && !appRunningManager_->IsAppExist(appInfo->accessTokenId)) {
         appRecord->UnSetPolicy();
-        TAG_LOGD(AAFwkTag::APPMGR, "before OnAppStopped");
+        TAG_LOGw(AAFwkTag::APPMGR, "before OnAppStopped");
         OnAppStopped(appRecord);
     }
 
@@ -4564,7 +4564,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     ClearAppRunningDataForKeepAlive(appRecord);
 
     auto uid = appRecord->GetUid();
-    TAG_LOGD(AAFwkTag::APPMGR, "before NotifyAppRunningStatusEvent");
+    TAG_LOGW(AAFwkTag::APPMGR, "before NotifyAppRunningStatusEvent");
     NotifyAppRunningStatusEvent(appRecord->GetBundleName(), uid, AbilityRuntime::RunningStatus::APP_RUNNING_STOP);
 }
 
@@ -4812,7 +4812,7 @@ void AppMgrServiceInner::StartResidentProcess(const std::vector<BundleInfo> &inf
             TAG_LOGI(AAFwkTag::APPMGR, "processName [%{public}s] already exists", processName.c_str());
             continue;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "processName: [%{public}s]", processName.c_str());
+        TAG_LOGI(AAFwkTag::APPMGR, "processName: [%{public}s]", processName.c_str());
         StartEmptyResidentProcess(bundle, processName, restartCount, isEmptyKeepAliveApp);
     }
 }
@@ -4820,7 +4820,7 @@ void AppMgrServiceInner::StartResidentProcess(const std::vector<BundleInfo> &inf
 void AppMgrServiceInner::StartEmptyResidentProcess(
     const BundleInfo &info, const std::string &processName, int restartCount, bool isEmptyKeepAliveApp)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "start bundle [%{public}s | processName [%{public}s]]", info.name.c_str(),
+    TAG_LOGI(AAFwkTag::APPMGR, "start bundle [%{public}s | processName [%{public}s]]", info.name.c_str(),
         processName.c_str());
     if (!CheckRemoteClient() || !appRunningManager_) {
         TAG_LOGI(AAFwkTag::APPMGR, "startResidentProcess fail");
