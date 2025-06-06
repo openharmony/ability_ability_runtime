@@ -151,6 +151,13 @@ public:
      */
     virtual void OnProcessBindingRelationChanged(const ProcessBindData &processBindData) {};
 
+    /**
+     * Will be called when the process keepalive state change.
+     *
+     * @param processData Process data.
+     */
+    virtual void OnKeepAliveStateChanged(const ProcessData &processData) {};
+
     enum class Message {
         TRANSACT_ON_FOREGROUND_APPLICATION_CHANGED = 0,
         TRANSACT_ON_ABILITY_STATE_CHANGED,
@@ -169,6 +176,7 @@ public:
         TRANSACT_ON_WINDOW_SHOW,
         TRANSACT_ON_WINDOW_HIDDEN,
         TRANSACT_ON_PROCESS_BINDINGRELATION_CHANGED,
+        TRANSACT_ON_KEEP_ALIVE_STATE_CHANGED,
     };
 };
 }  // namespace AppExecFwk
