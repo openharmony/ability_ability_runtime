@@ -18,6 +18,7 @@
 #include <sys/epoll.h>
 
 #include "ability_background_connection.h"
+#include "ability_business_error.h"
 #include "ability_connect_manager.h"
 #include "ability_manager_radar.h"
 #include "ability_start_by_call_helper.h"
@@ -125,6 +126,7 @@
 #endif
 #include "hidden_start_observer_manager.h"
 #include "insight_intent_db_cache.h"
+#include "sa_interceptor_manager.h"
 
 using OHOS::AppExecFwk::ElementName;
 using OHOS::Security::AccessToken::AccessTokenKit;
@@ -1332,6 +1334,9 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
             TAG_LOGE(AAFwkTag::ABILITYMGR, "checkCallPermission error, result:%{public}d", result);
             return result;
         }
+        if (!HandleExecuteSAInterceptor(want, callerToken, abilityRequest, result)) {
+            return result;
+        }
     }
     Want newWant = abilityRequest.want;
     AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(newWant, requestCode, GetUserId(),
@@ -2004,6 +2009,10 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return result;
     }
 
+    if (!HandleExecuteSAInterceptor(want, callerToken, abilityRequest, result)) {
+        return result;
+    }
+
     if (!isStartAsCaller) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "do not start as caller, UpdateCallerInfo");
         UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(abilityRequest.want, callerToken);
@@ -2443,6 +2452,13 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     StartAbilityInfoWrap threadLocalInfo(sessionInfo->want, currentUserId, appIndex, sessionInfo->callerToken);
+    AbilityRequest abilityRequest;
+    auto result = GenerateAbilityRequest(sessionInfo->want, requestCode, abilityRequest,
+        sessionInfo->callerToken, currentUserId);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "generate ability request local error");
+        return result;
+    }
     if (sessionInfo->want.GetBoolParam(ServerConstant::IS_CALL_BY_SCB, true)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "interceptorExecuter_ called");
         (sessionInfo->want).RemoveParam(IS_CALLING_FROM_DMS);
@@ -2458,14 +2474,9 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
             SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
             return result;
         }
-    }
-
-    AbilityRequest abilityRequest;
-    auto result = GenerateAbilityRequest(sessionInfo->want, requestCode, abilityRequest,
-        sessionInfo->callerToken, currentUserId);
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "generate ability request local error");
-        return result;
+        if (!HandleExecuteSAInterceptor(sessionInfo->want, sessionInfo->callerToken, abilityRequest, result)) {
+            return result;
+        }
     }
 
     if (sessionInfo->want.GetBoolParam(ServerConstant::IS_CALL_BY_SCB, true)) {
@@ -3299,6 +3310,10 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
             eventInfo.errCode = result;
             EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
         }
+        return result;
+    }
+
+    if (!HandleExecuteSAInterceptor(want, callerToken, abilityRequest, result)) {
         return result;
     }
 
@@ -4545,6 +4560,15 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
 
     Want abilityWant = want;
     AbilityRequest abilityRequest;
+    if (isQueryExtensionOnly || AAFwk::UIExtensionUtils::IsUIExtension(extensionType)) {
+        result = GenerateExtensionAbilityRequest(abilityWant, abilityRequest, callerToken, validUserId);
+    } else {
+        result = GenerateAbilityRequest(abilityWant, DEFAULT_INVAL_VALUE, abilityRequest, callerToken, validUserId);
+    }
+    if (!HandleExecuteSAInterceptor(abilityWant, callerToken, abilityRequest, result)) {
+        return result;
+    }
+
     std::string uri = abilityWant.GetUri().ToString();
     bool isFileUri = (abilityWant.GetUri().GetScheme() == "file");
     if (!uri.empty() && !isFileUri) {
@@ -8148,6 +8172,10 @@ int AbilityManagerService::StartAbilityByCallWithErrMsg(const Want &want, const 
         return result;
     }
 
+    if (!HandleExecuteSAInterceptor(want, callerToken, abilityRequest, result)) {
+        return result;
+    }
+
     if (!abilityRequest.abilityInfo.isStageBasedModel) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "target ability not stage base model");
         return RESOLVE_CALL_ABILITY_VERSION_ERR;
@@ -11262,6 +11290,18 @@ void AbilityManagerService::StartSpecifiedAbilityBySCB(const Want &want)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no sceneboard called, no allowed");
         return;
     }
+
+    AbilityRequest abilityRequest;
+    auto result = GenerateAbilityRequest(want, -1, abilityRequest, want.GetRemoteObject(TOKEN_KEY), GetUserId());
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "generate ability request error");
+        return;
+    }
+
+    if (!HandleExecuteSAInterceptor(want, want.GetRemoteObject(TOKEN_KEY), abilityRequest, result)) {
+        return;
+    }
+
     int32_t appIndex = 0;
     if (!StartAbilityUtils::GetAppIndex(want, nullptr, appIndex)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid app clone index");
@@ -11270,7 +11310,7 @@ void AbilityManagerService::StartSpecifiedAbilityBySCB(const Want &want)
         GetUserId(), appIndex, nullptr);
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER(uiAbilityManager);
-    uiAbilityManager->StartSpecifiedAbilityBySCB(want);
+    uiAbilityManager->StartSpecifiedAbilityBySCB(want, abilityRequest);
 }
 
 int32_t AbilityManagerService::RegisterIAbilityManagerCollaborator(
@@ -13373,6 +13413,10 @@ int AbilityManagerService::StartUIAbilityByPreInstallInner(sptr<SessionInfo> ses
         return result;
     }
 
+    if (!HandleExecuteSAInterceptor(want, callerToken, abilityRequest, result)) {
+        return result;
+    }
+
     if (specifyTokenId > 0 && callerToken != nullptr) { // for sa specify tokenId and caller token
         UpdateCallerInfoUtil::GetInstance().UpdateCallerInfoFromToken(abilityRequest.want, callerToken);
     } else if (!isStartAsCaller) {
@@ -14320,6 +14364,46 @@ int32_t AbilityManagerService::GetKioskStatus(KioskStatus &kioskStatus)
 std::shared_ptr<AbilityInterceptorExecuter> AbilityManagerService::GetAbilityInterceptorExecuter()
 {
     return interceptorExecuter_;
+}
+
+int32_t AbilityManagerService::RegisterSAInterceptor(sptr<AbilityRuntime::ISAInterceptor> interceptor)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call RegisterSaInterceptor");
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not sa call");
+        return CHECK_PERMISSION_FAILED;
+    }
+    
+    return SAInterceptorManager::GetInstance().AddSAInterceptor(interceptor);
+}
+
+bool AbilityManagerService::HandleExecuteSAInterceptor(const Want &want, sptr<IRemoteObject> callerToken,
+    AbilityRequest &abilityRequest, int32_t &result)
+{
+    if (SAInterceptorManager::GetInstance().SAInterceptorListIsEmpty()) {
+        return true;
+    }
+    Rule rule;
+    auto dialogSessionId = DialogSessionManager::GetInstance().GenerateDialogSessionId();
+    auto params = SAInterceptorManager::GetInstance().GenerateSAInterceptorParams(want, callerToken,
+        abilityRequest.abilityInfo, dialogSessionId);
+    auto ret = SAInterceptorManager::GetInstance().ExecuteSAInterceptor(params, rule);
+
+    if (ret != ERR_OK || rule.type == RuleType::NOT_ALLOW) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "sa interceptor OnCheckStarting failed");
+        result = static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_CONTROLLED);
+        return false;
+    }
+
+    if (rule.type == RuleType::USER_SELECTION) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "sa interceptor OnCheckStarting failed, set dialog caller info");
+        DialogSessionManager::GetInstance().OnlySetDialogCallerInfo(abilityRequest, GetUserId(),
+            SelectorType::INTERCEPTOR_SELECTOR, dialogSessionId, false);
+        result = ERR_OK;
+        return false;
+    }
+
+    return true;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

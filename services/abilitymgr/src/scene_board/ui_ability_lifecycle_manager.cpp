@@ -2270,17 +2270,10 @@ int32_t UIAbilityLifecycleManager::StartSpecifiedProcessRequest(const AbilityReq
     return ERR_OK;
 }
 
-void UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(const Want &want)
+void UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(const Want &want, AbilityRequest &abilityRequest)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
-    AbilityRequest abilityRequest;
-    int result = DelayedSingleton<AbilityManagerService>::GetInstance()->GenerateAbilityRequest(
-        want, DEFAULT_INVAL_VALUE, abilityRequest, nullptr, userId_);
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "no find request");
-        return;
-    }
     abilityRequest.isFromIcon = true;
     std::lock_guard guard(sessionLock_);
     // support specified process mode
