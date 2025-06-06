@@ -45,6 +45,9 @@ export function callback(cleaner: Cleaner): void {
 let destroyRegister = new FinalizationRegistry<Cleaner>(callback);
 let unregisterToken = new object();
 
+// remove local declaration after Any type is supported
+type Any = Object | null | undefined
+
 export default class UIAbilityContext extends Context {
   static {
     loadLibrary("context_ani");
@@ -81,6 +84,15 @@ export default class UIAbilityContext extends Context {
 
   unregisterCleaner(): void {
     destroyRegister.unregister(unregisterToken);
+  }
+
+  private static native nativeTransferStatic(input: ESValue): Object;
+  private static native nativeTransferDynamic(input: Object): ESValue;
+  static transferStatic(input: Any): Object {
+    return UIAbilityContext.nativeTransferStatic(ESValue.wrap(input));
+  }
+  static transferDynamic(input: Object): Any {
+    return UIAbilityContext.nativeTransferDynamic(input).unwrap();
   }
 
   private native nativeStartAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
