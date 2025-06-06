@@ -31,6 +31,10 @@ EtsApplicationStateChangeCallback::EtsApplicationStateChangeCallback(ani_env *en
 void EtsApplicationStateChangeCallback::CallEtsMethod(const std::string &methodName)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "MethodName = %{public}s", methodName.c_str());
+    if (env_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return;
+    }
     ani_class cls {};
     ani_status status = env_->FindClass(APPLICATION_STATE_CHANGE_CALLBACK, &cls);
     if (status != ANI_OK) {
@@ -42,7 +46,7 @@ void EtsApplicationStateChangeCallback::CallEtsMethod(const std::string &methodN
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod status: %{public}d", status);
         return;
     }
-    std::lock_guard lock(Mutex_);
+    std::lock_guard lock(mutex_);
     for (auto &callback : callbacks_) {
         if ((status = env_->Object_CallMethod_Void(reinterpret_cast<ani_object>(callback), method)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPKIT, "Object_CallMethod_Void status: %{public}d", status);
@@ -72,19 +76,24 @@ void EtsApplicationStateChangeCallback::Register(ani_object aniCallback)
         TAG_LOGE(AAFwkTag::APPKIT, "GlobalReference_Create status : %{public}d", status);
         return;
     }
-    std::lock_guard lock(Mutex_);
+    std::lock_guard lock(mutex_);
     callbacks_.emplace(aniCallbackRef);
 }
 
 bool EtsApplicationStateChangeCallback::UnRegister(ani_object aniCallback)
 {
     ani_status status = ANI_ERROR;
-    std::lock_guard lock(Mutex_);
+    std::lock_guard lock(mutex_);
+    if (env_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return false;
+    }
     if (aniCallback == nullptr) {
         TAG_LOGI(AAFwkTag::APPKIT, "null aniCallback");
         for (auto &callback : callbacks_) {
             if (!callback) {
                 TAG_LOGE(AAFwkTag::APPKIT, "Invalid aniCallback");
+                continue;
             }
             if ((status = env_->GlobalReference_Delete(callback)) != ANI_OK) {
                 TAG_LOGE(AAFwkTag::APPKIT, "GlobalReference_Delete status: %{public}d", status);
@@ -96,6 +105,7 @@ bool EtsApplicationStateChangeCallback::UnRegister(ani_object aniCallback)
     for (auto &callback : callbacks_) {
         if (!callback) {
             TAG_LOGE(AAFwkTag::APPKIT, "Invalid aniCallback");
+            continue;
         }
         ani_boolean isEqual = false;
         env_->Reference_StrictEquals(aniCallback, callback, &isEqual);
@@ -112,7 +122,7 @@ bool EtsApplicationStateChangeCallback::UnRegister(ani_object aniCallback)
 
 bool EtsApplicationStateChangeCallback::IsEmpty() const
 {
-    std::lock_guard lock(Mutex_);
+    std::lock_guard lock(mutex_);
     return callbacks_.empty();
 }
 } // namespace AbilityRuntime

@@ -37,8 +37,8 @@ public:
 
     /**
      * @brief Unregister application state change callback.
-     * @param aniCallback, if jscallback is nullptr, delete all register jscallback.
-     *                    or if jscallback is specified, delete prescribed jscallback.
+     * @param aniCallback, if anicallback is nullptr, delete all register anicallback.
+     * or if anicallback is specified, delete prescribed anicallback.
      * @return Returns true on unregister success, others return false.
      */
     bool UnRegister(ani_object aniCallback = nullptr);
@@ -47,7 +47,7 @@ private:
     void CallEtsMethod(const std::string &methodName);
     ani_env *env_ = nullptr;
     std::set<ani_ref> callbacks_;
-    mutable std::mutex Mutex_;
+    mutable std::mutex mutex_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
