@@ -71,6 +71,10 @@ napi_value JsKioskManager::CreateJsKioskStatus(napi_env env,
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null ObjValue");
         return nullptr;
     }
+    if (kioskStatus == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null kioskStatus");
+        return nullptr;
+    }
     napi_set_named_property(env, objValue, "isKioskMode",
                             CreateJsValue(env, kioskStatus->isKioskMode_));
     napi_set_named_property(env, objValue, "kioskBundleName",
@@ -243,13 +247,7 @@ napi_value JsKioskManager::GetKioskStatus(napi_env env, napi_callback_info info)
 napi_value JsKioskManager::OnGetKioskStatus(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Get KioskStatus");
-    if (info.argc != ARGC_ZERO) {
-        TAG_LOGE(AAFwkTag::APPKIT, "OnGetKioskStatus invalid argc");
-        ThrowTooFewParametersError(env);
-        return CreateJsUndefined(env);
-    }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-
     std::shared_ptr<AAFwk::KioskStatus> kioskStatus = std::make_shared<AAFwk::KioskStatus>();
 
     NapiAsyncTask::ExecuteCallback execute = [innerErrCode, kioskStatus]() {

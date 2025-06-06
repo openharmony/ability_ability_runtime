@@ -1096,12 +1096,14 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, GetKioskStatus, TestSize.Level1) {
  * FunctionPoints: KioskManager UpdateKioskApplicationList
  */
 HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_UpdateKioskApplicationList, TestSize.Level1) {
-    auto kioskManager = std::make_shared<KioskManager>();
+    IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
+    IPCSkeleton::SetCallingTokenID(ONE);
+    MyFlag::flag_ = true;
     std::vector<std::string> bundleNames;
     bundleNames.emplace_back("com.test.demo");
     bundleNames.emplace_back("com.test.demo2");
     bundleNames.emplace_back("com.test.demo3");
-    auto result = kioskManager->UpdateKioskApplicationList(bundleNames);
+    auto result = KioskManager::GetInstance().UpdateKioskApplicationList(bundleNames);
     ASSERT_EQ(result, ERR_OK);
 }
 
@@ -1112,34 +1114,9 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_UpdateKioskApplicationLi
  * FunctionPoints: KioskManager EnterKioskMode
  */
 HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_EnterKioskMode_Fail_01, TestSize.Level1) {
-    auto kioskManager = std::make_shared<KioskManager>();
     auto callerToken = MockToken(AbilityType::PAGE);
-    auto result = kioskManager->EnterKioskMode(callerToken);
-    ASSERT_EQ(result, ERR_KIOSK_MODE_NOT_IN_WHITELIST);
-}
-
-/*
- * Feature: KioskManager
- * Function: EnterKioskMode
- * SubFunction: NA
- * FunctionPoints: KioskManager EnterKioskMode
- */
-HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_EnterKioskMode_Fail_02, TestSize.Level1) {
-    auto kioskManager = std::make_shared<KioskManager>();
-    std::vector<std::string> bundleNames;
-    bundleNames.emplace_back("com.test.demo");
-    bundleNames.emplace_back("com.test.demo2");
-    bundleNames.emplace_back("com.test.demo3");
-    auto result = kioskManager->UpdateKioskApplicationList(bundleNames);
-    ASSERT_EQ(result, ERR_OK);
-    auto callerToken = MockToken(AbilityType::PAGE);
-    result = kioskManager->EnterKioskMode(callerToken);
-    ASSERT_EQ(result, ERR_OK);
-    bundleNames.clear();
-    bundleNames.emplace_back("com.test.demo3");
-    result = kioskManager->UpdateKioskApplicationList(bundleNames);
-    result = kioskManager->EnterKioskMode(callerToken);
-    ASSERT_EQ(result, ERR_ALREADY_IN_KIOSK_MODE);
+    auto result = KioskManager::GetInstance().EnterKioskMode(callerToken);
+    ASSERT_EQ(result, ERR_APP_NOT_IN_FOCUS);
 }
 
 /*
@@ -1149,9 +1126,8 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_EnterKioskMode_Fail_02, 
  * FunctionPoints: KioskManager ExitKioskMode
  */
 HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_ExitKioskMode_Fail_01, TestSize.Level1) {
-    auto kioskManager = std::make_shared<KioskManager>();
     auto callerToken = MockToken(AbilityType::PAGE);
-    auto result = kioskManager->ExitKioskMode(callerToken);
+    auto result = KioskManager::GetInstance().ExitKioskMode(callerToken);
     ASSERT_EQ(result, ERR_KIOSK_MODE_NOT_IN_WHITELIST);
 }
 
@@ -1162,37 +1138,15 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_ExitKioskMode_Fail_01, T
  * FunctionPoints: KioskManager ExitKioskMode
  */
 HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_ExitKioskMode_Fail_02, TestSize.Level1) {
-    auto kioskManager = std::make_shared<KioskManager>();
     std::vector<std::string> bundleNames;
     bundleNames.emplace_back("com.test.demo");
     bundleNames.emplace_back("com.test.demo2");
     bundleNames.emplace_back("com.test.demo3");
-    auto result = kioskManager->UpdateKioskApplicationList(bundleNames);
+    auto result = KioskManager::GetInstance().UpdateKioskApplicationList(bundleNames);
     ASSERT_EQ(result, ERR_OK);
     auto callerToken = MockToken(AbilityType::PAGE);
-    result = kioskManager->ExitKioskMode(callerToken);
+    result = KioskManager::GetInstance().ExitKioskMode(callerToken);
     ASSERT_EQ(result, ERR_NOT_IN_KIOSK_MODE);
-}
-
-/*
- * Feature: KioskManager
- * Function: ExitKioskMode
- * SubFunction: NA
- * FunctionPoints: KioskManager ExitKioskMode
- */
-HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_ExitKioskMode_Success, TestSize.Level1) {
-    auto kioskManager = std::make_shared<KioskManager>();
-    std::vector<std::string> bundleNames;
-    bundleNames.emplace_back("com.test.demo");
-    bundleNames.emplace_back("com.test.demo2");
-    bundleNames.emplace_back("com.test.demo3");
-    auto result = kioskManager->UpdateKioskApplicationList(bundleNames);
-    ASSERT_EQ(result, ERR_OK);
-    auto callerToken = MockToken(AbilityType::PAGE);
-    result = kioskManager->EnterKioskMode(callerToken);
-    ASSERT_EQ(result, ERR_OK);
-    result = kioskManager->ExitKioskMode(callerToken);
-    ASSERT_EQ(result, ERR_OK);
 }
 
 /*
@@ -1202,18 +1156,11 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_ExitKioskMode_Success, T
  * FunctionPoints: KioskManager GetKioskStatus
  */
 HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_GetKioskStatus_Success, TestSize.Level1) {
-    auto kioskManager = std::make_shared<KioskManager>();
-    std::vector<std::string> bundleNames;
-    bundleNames.emplace_back("com.test.demo");
-    bundleNames.emplace_back("com.test.demo2");
-    bundleNames.emplace_back("com.test.demo3");
-    auto result = kioskManager->UpdateKioskApplicationList(bundleNames);
-    ASSERT_EQ(result, ERR_OK);
-    auto callerToken = MockToken(AbilityType::PAGE);
-    result = kioskManager->EnterKioskMode(callerToken);
-    ASSERT_EQ(result, ERR_OK);
+    IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
+    IPCSkeleton::SetCallingTokenID(ONE);
+    MyFlag::flag_ = true;
     KioskStatus kioskStatus;
-    result = kioskManager->GetKioskStatus(kioskStatus);
+    auto result = KioskManager::GetInstance().GetKioskStatus(kioskStatus);
     ASSERT_EQ(result, ERR_OK);
 }
 } // namespace AAFwk

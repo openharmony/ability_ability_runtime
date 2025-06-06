@@ -21,11 +21,10 @@ namespace AAFwk {
 int KioskInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     auto bundleName = param.want.GetElement().GetBundleName();
-    auto kioskManager = KioskManager::GetInstance();
-    if (!kioskManager || !kioskManager->IsInKioskMode()) {
+    if (!KioskManager::GetInstance().IsInKioskMode()) {
         return ERR_OK;
     }
-    if (!kioskManager->IsInWhiteList(bundleName)) {
+    if (!KioskManager::GetInstance().IsInWhiteList(bundleName)) {
         return ERR_KIOSK_MODE_NOT_IN_WHITELIST;
     }
     return ERR_OK;
