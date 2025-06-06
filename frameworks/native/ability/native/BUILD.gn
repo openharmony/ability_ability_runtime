@@ -1590,6 +1590,7 @@ ohos_shared_library("ui_extension") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
     "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/include",
+    "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
   ]
   sources = [
     "${ability_runtime_native_path}/ability/native/ui_extension_ability/js_embeddable_ui_ability_context.cpp",
