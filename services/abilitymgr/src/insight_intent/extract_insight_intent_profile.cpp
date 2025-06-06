@@ -58,7 +58,7 @@ const std::string INSIGHT_INTENT_PARAM_MAPPING_NAME = "paramMappingName";
 const std::string INSIGHT_INTENT_PARAM_CATEGORY = "paramCategory";
 const std::string INSIGHT_INTENT_RESULT = "result";
 const std::string INSIGHT_INTENT_EXAMPLE = "example";
-
+const std::string INSIGHT_INTENT_FORM_NAME = "formName";
 const std::string INSIGHT_INTENT_ENTITES = "entities";
 const std::string INSIGHT_INTENT_ENTITY_DECORETOR_FILE = "decoratorFile";
 const std::string INSIGHT_INTENT_ENTITY_CLASS_NAME = "className";
@@ -130,7 +130,7 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentEntityInfo &entity
         jsonObjectEnd,
         INSIGHT_INTENT_ENTITY_DECORETOR_FILE,
         entityInfo.decoratorFile,
-        false,
+        true,
         g_extraParseResult);
     AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
         jsonObjectEnd,
@@ -165,7 +165,7 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentEntityInfo &entity
 
     if (jsonObject.find(INSIGHT_INTENT_ENTITY_PARAMETERS) != jsonObjectEnd) {
         if (jsonObject.at(INSIGHT_INTENT_ENTITY_PARAMETERS).is_object()) {
-            entityInfo.parameters =  jsonObject[INSIGHT_INTENT_ENTITY_PARAMETERS].dump();
+            entityInfo.parameters = jsonObject[INSIGHT_INTENT_ENTITY_PARAMETERS].dump();
         } else {
             TAG_LOGE(AAFwkTag::INTENT, "type error: entity parameters not object");
             g_extraParseResult = ERR_INVALID_VALUE;
@@ -343,6 +343,12 @@ void from_json(const nlohmann::json &jsonObject, ExtractInsightIntentProfileInfo
         false,
         g_extraParseResult,
         ArrayType::OBJECT);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_FORM_NAME,
+        insightIntentInfo.formName,
+        false,
+        g_extraParseResult);
 
     if (jsonObject.find(INSIGHT_INTENT_PARAMETERS) != jsonObjectEnd) {
         if (jsonObject.at(INSIGHT_INTENT_PARAMETERS).is_object()) {
@@ -439,6 +445,7 @@ void to_json(nlohmann::json& jsonObject, const ExtractInsightIntentProfileInfo& 
         {INSIGHT_INTENT_EXECUTE_MODE, info.executeMode},
         {INSIGHT_INTENT_FUNCTION_NAME, info.functionName},
         {INSIGHT_INTENT_FUNCTION_PARAMS, info.functionParams},
+        {INSIGHT_INTENT_FORM_NAME, info.formName},
         {INSIGHT_INTENT_ENTITES, info.entities}
     };
 
@@ -501,6 +508,11 @@ bool CheckProfileSubIntentInfo(const ExtractInsightIntentProfileInfo &insightInt
             }
             break;
         case DecoratorType::DECORATOR_FORM:
+            if (insightIntent.formName.empty() || insightIntent.abilityName.empty()) {
+                TAG_LOGE(AAFwkTag::INTENT, "empty formName or abilityName, intentName: %{public}s, "
+                    "abilityName: %{public}s", insightIntent.intentName.c_str(), insightIntent.abilityName.c_str());
+                return false;
+            }
             break;
         default:
             TAG_LOGE(AAFwkTag::INTENT, "invalid decoratorType: %{public}s", insightIntent.decoratorType.c_str());
@@ -609,6 +621,8 @@ bool TransformToFunctionInfo(const ExtractInsightIntentProfileInfo &insightInten
 
 bool TransformToFormInfo(const ExtractInsightIntentProfileInfo &insightIntent, InsightIntentFormInfo &info)
 {
+    info.abilityName = insightIntent.abilityName;
+    info.formName = insightIntent.formName;
     info.parameters = insightIntent.parameters;
     TAG_LOGD(AAFwkTag::INTENT, "form parameters: %{public}s", info.parameters.c_str());
     return true;
@@ -679,8 +693,7 @@ bool ExtractInsightIntentProfile::ProfileInfoFormat(const ExtractInsightIntentPr
     info.keywords.assign(insightIntent.keywords.begin(), insightIntent.keywords.end());
     info.entities = insightIntent.entities;
     TAG_LOGD(AAFwkTag::INTENT, "entities size: %{public}zu", info.entities.size());
-    for (std::vector<InsightIntentEntityInfo>::const_iterator iter = info.entities.begin();
-        iter != info.entities.end(); iter++) {
+    for (auto iter = info.entities.begin(); iter != info.entities.end(); iter++) {
         TAG_LOGD(AAFwkTag::INTENT, "entity decoratorFile: %{public}s, className: %{public}s, "
             "decoratorType: %{public}s, entityId: %{public}s, entityCategory: %{public}s, "
             "parentClassName: %{public}s, parameters: %{public}s",

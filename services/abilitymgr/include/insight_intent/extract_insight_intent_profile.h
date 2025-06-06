@@ -50,7 +50,6 @@ struct LinkIntentParamMapping {
 struct InsightIntentLinkInfo {
     std::string uri;
     std::vector<LinkIntentParamMapping> paramMapping {};
-    // std::vector<InsightIntentParam> params {};
     std::string parameters;
 
     InsightIntentLinkInfo() = default;
@@ -61,7 +60,6 @@ struct InsightIntentPageInfo {
     std::string pagePath;
     std::string navigationId;
     std::string navDestinationName;
-    // std::vector<InsightIntentParam> params {};
     std::string parameters;
 
     InsightIntentPageInfo() = default;
@@ -70,7 +68,6 @@ struct InsightIntentPageInfo {
 struct InsightIntentEntryInfo {
     std::string abilityName;
     std::vector<ExecuteMode> executeMode {};
-    // std::vector<InsightIntentParam> params {};
     std::string parameters;
 
     InsightIntentEntryInfo() = default;
@@ -79,14 +76,14 @@ struct InsightIntentEntryInfo {
 struct InsightIntentFunctionInfo {
     std::string functionName;
     std::vector<std::string> functionParams;
-    // std::vector<InsightIntentParam> params {};
     std::string parameters;
 
     InsightIntentFunctionInfo() = default;
 };
 
 struct InsightIntentFormInfo {
-    // std::vector<InsightIntentParam> params {};
+    std::string abilityName;
+    std::string formName;
     std::string parameters;
 
     InsightIntentFormInfo() = default;
@@ -216,6 +213,7 @@ struct ExtractInsightIntentProfileInfo {
     std::vector<std::string> executeMode {};
     std::string functionName;
     std::vector<std::string> functionParams;
+    std::string formName;
     std::vector<InsightIntentEntityInfo> entities {};
 };
 
