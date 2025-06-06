@@ -150,6 +150,14 @@ public:
      * @param processBindData Process bind data.
      */
     virtual void OnProcessBindingRelationChanged(const ProcessBindData &processBindData) override;
+
+    /**
+     * Will be called when the process keepalive state change.
+     *
+     * @param processData Process data.
+     */
+    virtual void OnKeepAliveStateChanged(const ProcessData &processData) override;
+
 private:
     int32_t HandleOnForegroundApplicationChanged(MessageParcel &data, MessageParcel &reply);
 
@@ -184,6 +192,8 @@ private:
     int32_t HandleOnAppCacheStateChanged(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleOnProcessBindingRelationChanged(MessageParcel &data, MessageParcel &reply);
+
+    int32_t HandleOnKeepAliveStateChanged(MessageParcel &data, MessageParcel &reply);
 
     static std::mutex callbackMutex_;
 
