@@ -416,7 +416,7 @@ void UIAbilityLifecycleManager::OnStartSpecifiedProcessTimeoutResponse(int32_t r
 {
 }
 
-void UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(const Want &want)
+void UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(const Want &want, AbilityRequest &abilityRequest)
 {
 }
 

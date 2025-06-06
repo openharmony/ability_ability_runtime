@@ -2103,6 +2103,13 @@ public:
 
     std::shared_ptr<AbilityInterceptorExecuter> GetAbilityInterceptorExecuter();
 
+    /**
+     * Register sa interceptor.
+     * @param interceptor, The sa interceptor.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterSAInterceptor(sptr<AbilityRuntime::ISAInterceptor> interceptor) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -2676,6 +2683,9 @@ private:
         bool hasStartOptions = false;
     };
     int StartSelfUIAbilityInner(StartSelfUIAbilityParam param);
+
+    bool HandleExecuteSAInterceptor(const Want &want, sptr<IRemoteObject> callerToken,
+        AbilityRequest &abilityRequest, int32_t &result);
 
     bool controllerIsAStabilityTest_ = false;
     bool isParamStartAbilityEnable_ = false;

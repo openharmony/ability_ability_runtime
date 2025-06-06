@@ -641,6 +641,9 @@ enum class AbilityManagerInterfaceCode {
 
     // get current kiosk mode information
     GET_KIOSK_INFO = 6148,
+
+    // register sa interceptor
+    REGISTER_SA_INTERCEPTOR = 6149,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

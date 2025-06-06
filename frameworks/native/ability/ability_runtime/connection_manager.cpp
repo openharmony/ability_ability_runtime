@@ -321,7 +321,7 @@ void ConnectionManager::ReportConnectionLeakEvent(const int pid, const int tid)
 {
     TAG_LOGD(AAFwkTag::CONNECTION, "pid:%{public}d, tid:%{public}d", pid, tid);
 #ifdef SUPPORT_HICHECKER
-    if (HiChecker::Contains(Rule::RULE_CHECK_ABILITY_CONNECTION_LEAK)) {
+    if (HiChecker::Contains(HiviewDFX::Rule::RULE_CHECK_ABILITY_CONNECTION_LEAK)) {
         DfxDumpCatcher dumpLog;
         std::string stackTrace;
         bool ret = dumpLog.DumpCatch(pid, tid, stackTrace);
@@ -330,7 +330,7 @@ void ConnectionManager::ReportConnectionLeakEvent(const int pid, const int tid)
                 std::to_string(pid) + "-tid=" + std::to_string(tid) + ", has leaked connection" +
                 ", Are you missing a call to DisconnectAbility()";
             TAG_LOGD(AAFwkTag::CONNECTION, "cautionMsg:%{public}s", cautionMsg.c_str());
-            Caution caution(Rule::RULE_CHECK_ABILITY_CONNECTION_LEAK, cautionMsg, stackTrace);
+            Caution caution(HiviewDFX::Rule::RULE_CHECK_ABILITY_CONNECTION_LEAK, cautionMsg, stackTrace);
             HiChecker::NotifyAbilityConnectionLeak(caution);
         } else {
             TAG_LOGE(AAFwkTag::CONNECTION, "dumpCatch stackTrace failed");
