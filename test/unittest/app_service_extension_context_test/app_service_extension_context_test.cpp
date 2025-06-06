@@ -86,6 +86,23 @@ HWTEST_F(AppServiceExtensionContextTest, service_extension_context_DisconnectAbi
 
 /*
  * Feature: AppServiceExtensionContext
+ * Function: StartAbility
+ * SubFunction: NA
+ * FunctionPoints: AppServiceExtensionContextTest StartAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify StartAbility
+ */
+HWTEST_F(AppServiceExtensionContextTest, service_extension_context_StartAbility_002, TestSize.Level1)
+{
+    AppServiceExtensionContext appServiceExtensionContextTest;
+    Want want;
+    StartOptions startOptions;
+    ErrCode result = appServiceExtensionContextTest.StartAbility(want, startOptions);
+    EXPECT_NE(ERR_OK, result);
+}
+
+/*
+ * Feature: AppServiceExtensionContext
  * Function: TerminateSelf
  * SubFunction: NA
  * FunctionPoints: AppServiceExtensionContextTest TerminateSelf
