@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_JS_APP_MANAGER_H
-#define OHOS_ABILITY_RUNTIME_JS_APP_MANAGER_H
-
-#include "native_engine/native_engine.h"
+#ifndef OHOS_ABILITY_RUNTIME_RUNNING_PROCESS_INFO_H
+#define OHOS_ABILITY_RUNTIME_RUNNING_PROCESS_INFO_H
 
 namespace OHOS {
-namespace AbilityRuntime {
-napi_value JsAppManagerInit(napi_env env, napi_value exportObj);
-void JsAppManagerInitProperty(napi_env env, napi_value exportObj);
-}  // namespace AbilityRuntime
+namespace AppExecFwk {
+
+struct RunningProcessInfo {
+    int32_t uid_ = -1;
+    bool isKeepAliveAppService = false;
+};
+}  // namespace AppExecFwk
 }  // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_JS_APP_MANAGER_H
+
+#endif  // OHOS_ABILITY_RUNTIME_RUNNING_PROCESS_INFO_H

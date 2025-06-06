@@ -3891,5 +3891,43 @@ HWTEST_F(AbilityManagerStubTest, RegisterSAInterceptorInner_0100, TestSize.Level
     EXPECT_EQ(ret, NO_ERROR);
     TAG_LOGI(AAFwkTag::TEST, "end");
 }
+
+/**
+ * @tc.name: SetAppServiceExtensionKeepAlive_0100
+ * @tc.desc: SetAppServiceExtensionKeepAlive
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, SetAppServiceExtensionKeepAlive_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    std::string bundleName = "bundleName";
+    bool flag = true;
+    data.WriteString(bundleName);
+    data.WriteUint32(static_cast<uint32_t>(flag));
+    auto ret = stub_->SetAppServiceExtensionKeepAliveInner(data, reply);
+    EXPECT_EQ(ret, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: QueryKeepAliveAppServiceExtensions_0100
+ * @tc.desc: QueryKeepAliveAppServiceExtensions
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, QueryKeepAliveAppServiceExtensions_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    auto ret = stub_->QueryKeepAliveAppServiceExtensionsInner(data, reply);
+    EXPECT_EQ(ret, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
 } // namespace AAFwk
 } // namespace OHOS

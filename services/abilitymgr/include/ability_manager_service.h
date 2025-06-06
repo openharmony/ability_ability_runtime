@@ -1920,7 +1920,8 @@ public:
      * @param flag Keep-alive flag.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId, bool flag) override;
+    virtual int32_t SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId,
+        bool flag, bool isAllowUserToCancel = false) override;
 
     /**
      * Get keep-alive applications by EDM.
@@ -2109,6 +2110,21 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t RegisterSAInterceptor(sptr<AbilityRuntime::ISAInterceptor> interceptor) override;
+
+     /**
+     * Set keep-alive flag for app service extension under u1 user.
+     * @param bundleName Bundle name.
+     * @param flag Keep-alive flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetAppServiceExtensionKeepAlive(const std::string &bundleName, bool flag) override;
+
+    /**
+     * Get keep-alive app service extensions.
+     * @param list List of Keep-alive information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryKeepAliveAppServiceExtensions(std::vector<KeepAliveInfo> &list) override;
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;

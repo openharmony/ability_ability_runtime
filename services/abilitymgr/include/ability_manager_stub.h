@@ -317,6 +317,8 @@ private:
     int32_t QueryKeepAliveApplicationsInner(MessageParcel &data, MessageParcel &reply);
     int32_t SetApplicationKeepAliveByEDMInner(MessageParcel &data, MessageParcel &reply);
     int32_t QueryKeepAliveApplicationsByEDMInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SetAppServiceExtensionKeepAliveInner(MessageParcel &data, MessageParcel &reply);
+    int32_t QueryKeepAliveAppServiceExtensionsInner(MessageParcel &data, MessageParcel &reply);
     int32_t AddQueryERMSObserverInner(MessageParcel &data, MessageParcel &reply);
     int32_t QueryAtomicServiceStartupRuleInner(MessageParcel &data, MessageParcel &reply);
     int32_t PrepareTerminateAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
@@ -380,6 +382,8 @@ private:
     int HandleOnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int HandleOnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int HandleOnRemoteRequestInnerThird(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int32_t OpenLinkInner(MessageParcel &data, MessageParcel &reply);
     int32_t TerminateMissionInner(MessageParcel &data, MessageParcel &reply);

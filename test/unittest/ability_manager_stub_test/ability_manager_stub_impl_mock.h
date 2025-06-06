@@ -441,6 +441,16 @@ public:
         return ERR_OK;
     }
 
+    int32_t SetAppServiceExtensionKeepAlive(const std::string &bundleName, bool flag) override
+    {
+        return ERR_OK;
+    }
+
+    int32_t QueryKeepAliveAppServiceExtensions(std::vector<KeepAliveInfo> &list) override
+    {
+        return ERR_OK;
+    }
+
 #ifdef ABILITY_COMMAND_FOR_TEST
     int ForceTimeoutForTest(const std::string& abilityName, const std::string& state) override
     {
