@@ -27,6 +27,7 @@
 #include "ets_interface.h"
 #include "file_path_utils.h"
 #include "hilog_tag_wrapper.h"
+#include "hybrid_js_module_reader.h"
 
 #ifdef SUPPORT_SCREEN
 #include "ace_forward_compatibility.h"
@@ -228,7 +229,6 @@ std::unique_ptr<ETSRuntime> ETSRuntime::Create(const Options &options, std::uniq
         return std::unique_ptr<ETSRuntime>();
     }
     EntryPathManager::GetInstance().Init();
-
     return instance;
 }
 
@@ -270,6 +270,12 @@ bool ETSRuntime::Initialize(const Options &options, std::unique_ptr<JsRuntime> &
     if (!CreateEtsEnv(options, jsRuntime_.get())) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "CreateEtsEnv failed");
         return false;
+    }
+
+    if (jsRuntime_ != nullptr) {
+        auto vm = static_cast<JsRuntime *>(jsRuntime_.get())->GetEcmaVm();
+        panda::JSNApi::SetHostResolveBufferTrackerForHybridApp(
+            vm, HybridJsModuleReader(options.bundleName, options.hapPath, options.isUnique));
     }
 
     apiTargetVersion_ = options.apiTargetVersion;
