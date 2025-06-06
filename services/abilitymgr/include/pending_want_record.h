@@ -31,7 +31,6 @@ namespace AAFwk {
 class PendingWantManager;
 class PendingWantRecord : public WantSenderStub {
 public:
-    static const int START_CANCELED = -96;
 
     PendingWantRecord();
     PendingWantRecord(const std::shared_ptr<PendingWantManager> &pendingWantManager, int32_t uid,

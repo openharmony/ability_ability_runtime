@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,6 +95,7 @@ enum class AAFwkLogTag : uint32_t {
     QUERY_ERMS,
 
     LOCAL_CALL = DEFAULT + 0x60, // 0xD001360
+    SA_INTERCEPTOR,
 
     APP_SERVICE_EXT = DEFAULT + 0x70, // 0xD001370
 

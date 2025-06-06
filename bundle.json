@@ -108,6 +108,7 @@
             "selinux_adapter",
             "storage_service",
             "toolchain",
+            "udmf",
             "webview",
             "window_manager",
             "zlib"
@@ -537,6 +538,15 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/interfaces/inner_api/extension_manager:extension_manager"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/mission_manager/include",
+              "header_files": [
+                "mission_manager_client.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/mission_manager:mission_manager"
           },
           {
             "header": {

@@ -20,6 +20,7 @@
 #include "interceptor/ability_jump_interceptor.h"
 #include "interceptor/ecological_rule_interceptor.h"
 #include "interceptor/disposed_rule_interceptor.h"
+#include "interceptor/kiosk_interceptor.h"
 #undef private
 #undef protected
 

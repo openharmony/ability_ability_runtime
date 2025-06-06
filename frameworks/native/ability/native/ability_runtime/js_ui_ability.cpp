@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1024,6 +1024,11 @@ void JsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
         abilityContext_->SetWeakSessionToken(sessionToken);
         ret = scene_->Init(displayId, abilityContext_, sceneListener_, option, sessionToken, identityToken,
             reusingWindow_);
+        std::string navDestinationInfo = want.GetStringParam(Want::ATOMIC_SERVICE_SHARE_ROUTER);
+        if (!navDestinationInfo.empty()) {
+            TAG_LOGI(AAFwkTag::UIABILITY, "SetNavDestinationInfo :%{public}s", navDestinationInfo.c_str());
+            scene_->SetNavDestinationInfo(navDestinationInfo);
+        }
         if (abilityContext_->IsHook()) {
             TAG_LOGI(AAFwkTag::UIABILITY, "to set element");
             Rosen::WMError result = scene_->SetHookedWindowElementInfo(want.GetElement());

@@ -28,6 +28,9 @@ interface OHOS.AAFwk.IUriPermissionManager {
     int GrantUriPermissionPrivileged([in] UriPermissionRawData rawData, [in] unsigned int flag,
         [in] String targetBundleName, [in] int appIndex, [in] unsigned int initiatorTokenId,
         [in] int hideSensitiveType);
+    int GrantUriPermissionByKey([in] String key, [in] unsigned int flag, [in] unsigned int targetTokenId);
+    int GrantUriPermissionByKeyAsCaller([in] String key, [in] unsigned int flag,
+        [in] unsigned int callerTokenId, [in] unsigned int targetTokenId);
     int RevokeAllUriPermissions([in] unsigned int tokenId);
     int RevokeUriPermissionManually([in] Uri uri, [in] String bundleName, [in] int appIndex);
     boolean VerifyUriPermission([in] Uri uri, [in] unsigned int flag, [in] unsigned int tokenId);

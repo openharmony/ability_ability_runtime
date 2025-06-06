@@ -293,8 +293,8 @@ HWTEST_F(AppMgrServiceInnerTest, IsIsolateExtensionSandBox_001, TestSize.Level2)
 
     AppExecFwk::ExtensionAbilityInfo extensionAbilityInfo2;
     abilityInfo->name = "extensionAbilityInfo2";
-    extensionAbilityInfo1.name = "extensionAbilityInfo2";
-    extensionAbilityInfo1.needCreateSandbox = true;
+    extensionAbilityInfo2.name = "extensionAbilityInfo2";
+    extensionAbilityInfo2.needCreateSandbox = true;
     hapModuleInfo.extensionInfos.push_back(extensionAbilityInfo2);
     ret = appMgrServiceInner->IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
     EXPECT_TRUE(ret);

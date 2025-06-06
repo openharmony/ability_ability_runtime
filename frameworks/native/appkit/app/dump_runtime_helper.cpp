@@ -210,8 +210,11 @@ void DumpRuntimeHelper::DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
     }
-    if (info.needLeakobj &&
-        runtime->GetLanguage() == OHOS::AbilityRuntime::Runtime::Language::JS) {
+    if (runtime->GetLanguage() != OHOS::AbilityRuntime::Runtime::Language::JS) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null JSRuntime");
+        return;
+    }
+    if (info.needLeakobj) {
         std::string checkList = "";
         GetCheckList(runtime, checkList);
         WriteCheckList(checkList);
@@ -222,6 +225,30 @@ void DumpRuntimeHelper::DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
     } else {
         if (info.needGc == true) {
             runtime->ForceFullGC(info.tid);
+        }
+    }
+}
+
+void DumpRuntimeHelper::DumpCjHeap(const OHOS::AppExecFwk::CjHeapDumpInfo &info)
+{
+    if (application_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null application");
+        return;
+    }
+    auto& runtime = application_->GetRuntime();
+    if (runtime == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+        return;
+    }
+    if (runtime->GetLanguage() != OHOS::AbilityRuntime::Runtime::Language::CJ) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null CJRuntime");
+        return;
+    }
+    if (info.needSnapshot == true) {
+        runtime->DumpHeapSnapshot(info.pid, info.needGc);
+    } else {
+        if (info.needGc == true) {
+            runtime->ForceFullGC(info.pid);
         }
     }
 }

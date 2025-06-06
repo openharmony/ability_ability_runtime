@@ -148,6 +148,14 @@ public:
      * @param processBindData Process bind data.
      */
     virtual void OnProcessBindingRelationChanged(const ProcessBindData &processBindData) override;
+
+    /**
+     * Will be called when the process keepalive state change.
+     *
+     * @param processData Process data.
+     */
+    virtual void OnKeepAliveStateChanged(const ProcessData &processData) override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     static inline BrokerDelegator<ApplicationStateObserverProxy> delegator_;

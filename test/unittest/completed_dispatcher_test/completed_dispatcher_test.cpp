@@ -169,11 +169,11 @@ HWTEST_F(CompletedDispatcherTest, CompletedDispatcher_0400, Function | MediumTes
     WantParams wParams;
     wParams.SetParam(key, Boolean::Box(value));
     completedDispatcher.PerformReceive(want, 10, "test", wParams, 0, 0, 1);
-    EXPECT_EQ(completedDispatcher.want_.GetElement().GetBundleName(), "bundleName");
+    EXPECT_EQ(completedDispatcher.GetWant().GetElement().GetBundleName(), "bundleName");
     EXPECT_EQ(completedDispatcher.want_.GetElement().GetAbilityName(), "ability");
-    EXPECT_EQ(completedDispatcher.resultCode_, 10);
-    EXPECT_EQ(completedDispatcher.resultData_, "test");
-    EXPECT_EQ(Boolean::Unbox(IBoolean::Query(completedDispatcher.resultExtras_.GetParam(key))), value);
+    EXPECT_EQ(completedDispatcher.GetResultCode(), 10);
+    EXPECT_EQ(completedDispatcher.GetResultData(), "test");
+    EXPECT_EQ(Boolean::Unbox(IBoolean::Query(completedDispatcher.GetResultExtras().GetParam(key))), value);
     EXPECT_EQ(CompletedCallbackSon::code, 0);
     CompletedCallbackSon::code = 0;
 }
@@ -208,5 +208,17 @@ HWTEST_F(CompletedDispatcherTest, CompletedDispatcher_0600, Function | MediumTes
     completedDispatcher.Run();
     EXPECT_EQ(CompletedCallbackSon::code, 0);
     CompletedCallbackSon::code = 0;
+}
+
+/*
+ * @tc.number    : CompletedDispatcher_0700
+ * @tc.name      : CompletedDispatcher Run
+ */
+HWTEST_F(CompletedDispatcherTest, CompletedDispatcher_0700, Function | MediumTest | Level1)
+{
+    CompletedDispatcher completedDispatcher;
+    CompletedDispatcher completedDispatcher2(nullptr, nullptr, nullptr);
+    completedDispatcher = std::move(completedDispatcher2);
+    EXPECT_EQ(completedDispatcher.GetPendingWant(), nullptr);
 }
 }  // namespace OHOS::AbilityRuntime::WantAgent

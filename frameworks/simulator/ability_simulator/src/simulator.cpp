@@ -1065,13 +1065,13 @@ void SimulatorImpl::ReportJsError(napi_value obj)
     std::string errorName = GetNativeStrFromJsTaggedObj(obj, "name");
     std::string errorStack = GetNativeStrFromJsTaggedObj(obj, "stack");
     std::string topStack = GetNativeStrFromJsTaggedObj(obj, "topstack");
-    std::string summary = "name:" + errorName + "\n";
-    summary += "message:" + errorMsg + "\n";
+    std::string summary = "Error name:" + errorName + "\n";
+    summary += "Error message:" + errorMsg + "\n";
     bool hasProperty = false;
     napi_has_named_property(nativeEngine_, obj, "code", &hasProperty);
     if (hasProperty) {
         std::string errorCode = GetNativeStrFromJsTaggedObj(obj, "code");
-        summary += "code:" + errorCode + "\n";
+        summary += "Error code:" + errorCode + "\n";
     }
     if (errorStack.empty()) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "errorStack empty");
@@ -1087,7 +1087,7 @@ void SimulatorImpl::ReportJsError(napi_value obj)
         formattedSummary += "[Simulator Log]" + line + "\n";
     }
 
-    TAG_LOGW(AAFwkTag::ABILITY_SIM, "summary:\n%{public}s", formattedSummary.c_str());
+    TAG_LOGE(AAFwkTag::ABILITY_SIM, "summary:\n%{public}s", formattedSummary.c_str());
 }
 
 void SimulatorImpl::CreateStageContext()

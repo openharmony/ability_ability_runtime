@@ -61,7 +61,7 @@ HWTEST_F(JsModuleReaderTest, JsModuleReaderTest_0100, TestSize.Level2)
     uint8_t *buff = nullptr;
     size_t buffSize = 0;
     std::string errorMsg = "";
-    auto result = jsModuleReader("", &buff, &buffSize, errorMsg);
+    auto result = jsModuleReader("", false, &buff, &buffSize, errorMsg);
     EXPECT_EQ(result, false);
 }
 
@@ -77,7 +77,7 @@ HWTEST_F(JsModuleReaderTest, JsModuleReaderTest_0200, TestSize.Level2)
     uint8_t *buff = nullptr;
     size_t buffSize = 0;
     std::string errorMsg = "";
-    auto result = jsModuleReader("bundleName/moduleName", &buff, &buffSize, errorMsg);
+    auto result = jsModuleReader("bundleName/moduleName", false, &buff, &buffSize, errorMsg);
     EXPECT_EQ(result, false);
 }
 
@@ -113,7 +113,7 @@ EXPECT_TRUE(hapPath.empty());
 HWTEST_F(JsModuleReaderTest, GetFormAppHspPathTest_0100, TestSize.Level2)
 {
     JsModuleReader jsModuleReader("JsModuleReader", "");
-    auto realHapPath = jsModuleReader.GetFormAppHspPath("inputPath");
+    auto realHapPath = jsModuleReader.GetFormAppPath("inputPath", ".hsp");
     EXPECT_EQ(realHapPath, "/data/bundles/JsModuleReader/inputPath.hsp");
 }
 

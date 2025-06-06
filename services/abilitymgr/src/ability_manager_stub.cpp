@@ -286,6 +286,9 @@ int AbilityManagerStub::OnRemoteRequestInnerSixth(uint32_t code, MessageParcel &
     if (interfaceCode == AbilityManagerInterfaceCode::GET_INSIGHT_INTENT_INFO_BY_INTENT_NAME) {
         return GetInsightIntentInfoByIntentNameInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::REGISTER_SA_INTERCEPTOR) {
+        return RegisterSAInterceptorInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -849,6 +852,25 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentieth(uint32_t code, MessageParc
     return ERR_CODE_NOT_EXIST;
 }
 
+int AbilityManagerStub::OnRemoteRequestInnerTwentyFirst(uint32_t code, MessageParcel &data,
+    MessageParcel &reply, MessageOption &option)
+{
+    AbilityManagerInterfaceCode interfaceCode = static_cast<AbilityManagerInterfaceCode>(code);
+    if (interfaceCode == AbilityManagerInterfaceCode::UPDATE_KIOSK_APP_LIST) {
+        return UpdateKioskApplicationListInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::ENTER_KIOSK_MODE) {
+        return EnterKioskModeInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::EXIT_KIOSK_MODE) {
+        return ExitKioskModeInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::GET_KIOSK_INFO) {
+        return GetKioskStatusInner(data, reply);
+    }
+    return ERR_CODE_NOT_EXIST;
+}
+
 int AbilityManagerStub::OnRemoteRequestInner(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {
@@ -953,6 +975,10 @@ int AbilityManagerStub::HandleOnRemoteRequestInnerSecond(uint32_t code, MessageP
         return retCode;
     }
     retCode = OnRemoteRequestInnerTwentieth(code, data, reply, option);
+    if (retCode != ERR_CODE_NOT_EXIST) {
+        return retCode;
+    }
+    retCode = OnRemoteRequestInnerTwentyFirst(code, data, reply, option);
     if (retCode != ERR_CODE_NOT_EXIST) {
         return retCode;
     }
@@ -1879,6 +1905,9 @@ int AbilityManagerStub::SendWantSenderInner(MessageParcel &data, MessageParcel &
         return ERR_INVALID_VALUE;
     }
     int32_t result = SendWantSender(wantSender, *senderInfo);
+    if (!reply.WriteParcelable(senderInfo.get())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "completedData write fail");
+    }
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -4619,6 +4648,73 @@ int32_t AbilityManagerStub::RestartSelfAtomicServiceInner(MessageParcel &data, M
     int32_t result = RestartSelfAtomicService(callerToken);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
+        return ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::UpdateKioskApplicationListInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<std::string> appList;
+    data.ReadStringVector(&appList);
+
+    auto result = UpdateKioskApplicationList(appList);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::EnterKioskModeInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    auto result = EnterKioskMode(token);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::ExitKioskModeInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    auto result = ExitKioskMode(token);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::GetKioskStatusInner(MessageParcel &data, MessageParcel &reply)
+{
+    KioskStatus kioskStatus;
+    int result = GetKioskStatus(kioskStatus);
+    if (!reply.WriteParcelable(&kioskStatus)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write kiosk info fail");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::RegisterSAInterceptorInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call RegisterSaInterceptorInner");
+    auto interceptor = iface_cast<AbilityRuntime::ISAInterceptor>(data.ReadRemoteObject());
+    if (interceptor == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptor is null.");
+        return ERR_NULL_SA_INTERCEPTOR_EXECUTER;
+    }
+    int32_t result = RegisterSAInterceptor(interceptor);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to write result.");
         return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;

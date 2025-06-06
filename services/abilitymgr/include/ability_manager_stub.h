@@ -331,6 +331,7 @@ private:
     int32_t GetInsightIntentInfoByBundleNameInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetInsightIntentInfoByIntentNameInner(MessageParcel &data, MessageParcel &reply);
     int32_t RestartSelfAtomicServiceInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RegisterSAInterceptorInner(MessageParcel &data, MessageParcel &reply);
 
     int OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
@@ -374,6 +375,8 @@ private:
         MessageParcel &reply, MessageOption &option);
     int OnRemoteRequestInnerTwentieth(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
+    int OnRemoteRequestInnerTwentyFirst(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
     int HandleOnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int HandleOnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
@@ -382,6 +385,10 @@ private:
     int32_t TerminateMissionInner(MessageParcel &data, MessageParcel &reply);
     int32_t BlockAllAppStartInner(MessageParcel &data, MessageParcel &reply);
     int32_t UpdateAssociateConfigListInner(MessageParcel &data, MessageParcel &reply);
+    int32_t UpdateKioskApplicationListInner(MessageParcel &data, MessageParcel &reply);
+    int32_t EnterKioskModeInner(MessageParcel &data, MessageParcel &reply);
+    int32_t ExitKioskModeInner(MessageParcel &data, MessageParcel &reply);
+    int32_t GetKioskStatusInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

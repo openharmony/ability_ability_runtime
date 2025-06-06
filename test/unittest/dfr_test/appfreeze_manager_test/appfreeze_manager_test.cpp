@@ -318,5 +318,47 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetHitraceId_001, TestSize.L
     EXPECT_EQ(result, 0);
 }
 #endif
+
+/**
+ * @tc.number: AppfreezeManagerTest_GetFreezeInfoFile_001
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFreezeInfoFile_001, TestSize.Level1)
+{
+    FaultData faultData;
+    std::string bundleName = "AppfreezeManagerTest";
+    std::string freezeInfoFile = appfreezeManager->GetFreezeInfoFile(faultData, bundleName);
+    EXPECT_EQ(freezeInfoFile, "");
+    faultData.appfreezeInfo = "stackPath:test.txt;";
+    faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
+    AppfreezeManager::AppInfo appInfo = {
+        .pid = getpid(),
+        .uid = getuid(),
+        .bundleName = bundleName,
+        .processName = bundleName,
+    };
+    freezeInfoFile = appfreezeManager->GetFreezeInfoFile(faultData, bundleName);
+    EXPECT_EQ(freezeInfoFile, "");
+    faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
+    freezeInfoFile = appfreezeManager->GetFreezeInfoFile(faultData, bundleName);
+    EXPECT_TRUE(!freezeInfoFile.empty());
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest_GetFaultNotifyData_001
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFaultNotifyData_001, TestSize.Level1)
+{
+    FaultData faultData;
+    int pid = getpid();
+    FaultData faultNotifyData = appfreezeManager->GetFaultNotifyData(faultData, pid);
+    EXPECT_EQ(faultNotifyData.eventId, -1);
+    faultData.eventId = 10;
+    faultNotifyData = appfreezeManager->GetFaultNotifyData(faultData, pid);
+    EXPECT_EQ(faultNotifyData.eventId, 10);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

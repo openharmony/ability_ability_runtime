@@ -46,6 +46,18 @@ ErrCode AppServiceExtensionContext::DisconnectAbility(const AAFwk::Want &want,
     return ret;
 }
 
+ErrCode AppServiceExtensionContext::StartAbility(const AAFwk::Want &want,
+    const AAFwk::StartOptions &startOptions) const
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "ability:%{public}s", want.GetElement().GetAbilityName().c_str());
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, startOptions, token_, -1);
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "failed %{public}d", err);
+    }
+    return err;
+}
+
 ErrCode AppServiceExtensionContext::TerminateSelf()
 {
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, -1, nullptr);
