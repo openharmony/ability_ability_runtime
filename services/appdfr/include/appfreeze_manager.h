@@ -134,6 +134,7 @@ private:
     std::string CatcherStacktrace(int pid, const std::string& stack) const;
     FaultData GetFaultNotifyData(const FaultData& faultData, int pid);
     int AcquireStack(const FaultData& faultData, const AppInfo& appInfo, const std::string& memoryContent);
+    std::string ReportAppfreezeCpuInfo(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
     int NotifyANR(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo,
         const std::string& binderInfo, const std::string& memoryContent);
     int64_t GetFreezeCurrentTime();
