@@ -4661,7 +4661,7 @@ int32_t AbilityManagerStub::UpdateKioskApplicationListInner(MessageParcel &data,
     auto result = UpdateKioskApplicationList(appList);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
-        return ERR_INVALID_VALUE;
+        return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }
@@ -4672,7 +4672,7 @@ int32_t AbilityManagerStub::EnterKioskModeInner(MessageParcel &data, MessageParc
     auto result = EnterKioskMode(token);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
-        return ERR_INVALID_VALUE;
+        return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }
@@ -4683,7 +4683,7 @@ int32_t AbilityManagerStub::ExitKioskModeInner(MessageParcel &data, MessageParce
     auto result = ExitKioskMode(token);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
-        return ERR_INVALID_VALUE;
+        return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }
@@ -4693,13 +4693,13 @@ int32_t AbilityManagerStub::GetKioskStatusInner(MessageParcel &data, MessageParc
     KioskStatus kioskStatus;
     int result = GetKioskStatus(kioskStatus);
     if (!reply.WriteParcelable(&kioskStatus)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write kiosk info fail");
-        return ERR_INVALID_VALUE;
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write kiosk status fail");
+        return ERR_WRITE_KIOSK_STATUS_FAILED;
     }
 
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
-        return ERR_INVALID_VALUE;
+        return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }

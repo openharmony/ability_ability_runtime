@@ -6612,7 +6612,7 @@ int32_t AbilityManagerProxy::UpdateKioskApplicationList(const std::vector<std::s
 
     if (!data.WriteStringVector(appList)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appList write fail");
-        return ERR_IPC_PROXY_WRITE_FAILED;
+        return ERR_WRITE_KIOSK_UPDATE_APP_LIST_FAILED;
     }
 
     auto error =
@@ -6705,7 +6705,7 @@ int32_t AbilityManagerProxy::GetKioskStatus(KioskStatus &kioskStatus)
     std::unique_ptr<KioskStatus> info(reply.ReadParcelable<KioskStatus>());
     if (!info) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "read KioskStatus fail");
-        return ERR_UNKNOWN_OBJECT;
+        return ERR_READ_RESULT_PARCEL_FAILED;
     }
     kioskStatus = *info;
     return reply.ReadInt32();

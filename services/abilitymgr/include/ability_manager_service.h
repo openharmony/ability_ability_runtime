@@ -2075,30 +2075,12 @@ public:
         const std::string &intentName,
         InsightIntentInfoForQuery &info) override;
 
-    /**
-     * Update the list of applications allowed in kiosk mode.
-     * @param appList, the list of application bundle names that are allowed in kiosk mode.
-     * @return Returns ERR_OK on success, others on failure.
-     */
     int32_t UpdateKioskApplicationList(const std::vector<std::string> &appList) override;
 
-    /**
-     * Enter kiosk mode
-     * @return Returns ERR_OK on success, others on failure.
-     */
     int32_t EnterKioskMode(sptr<IRemoteObject> callerToken) override;
 
-    /**
-     * Exit kiosk mode
-     * @return Returns ERR_OK on success, others on failure.
-     */
     int32_t ExitKioskMode(sptr<IRemoteObject> callerToken) override;
 
-    /**
-     * Retrieve the current kiosk mode configuration and status.
-     * @param kioskStatus, the structure to store kiosk configuration and status information.
-     * @return Returns ERR_OK on success, others on failure.
-     */
     int32_t GetKioskStatus(AAFwk::KioskStatus &kioskStatus) override;
 
     std::shared_ptr<AbilityInterceptorExecuter> GetAbilityInterceptorExecuter();
