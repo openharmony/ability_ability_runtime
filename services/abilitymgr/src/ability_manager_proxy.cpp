@@ -6710,5 +6710,34 @@ int32_t AbilityManagerProxy::GetKioskStatus(KioskStatus &kioskStatus)
     kioskStatus = *info;
     return reply.ReadInt32();
 }
+
+ErrCode AbilityManagerProxy::RegisterSAInterceptor(sptr<AbilityRuntime::ISAInterceptor> interceptor)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call RegisterSAInterceptor");
+    if (!interceptor) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptor null");
+        return ERR_NULL_SA_INTERCEPTOR_EXECUTER;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken failed");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteRemoteObject(interceptor->AsObject())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptor write failed.");
+        return ERR_WRITE_SA_INTERCEPTOR_FAILED;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::REGISTER_SA_INTERCEPTOR, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
 } // namespace AAFwk
 } // namespace OHOS

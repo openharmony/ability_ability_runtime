@@ -286,6 +286,9 @@ int AbilityManagerStub::OnRemoteRequestInnerSixth(uint32_t code, MessageParcel &
     if (interfaceCode == AbilityManagerInterfaceCode::GET_INSIGHT_INTENT_INFO_BY_INTENT_NAME) {
         return GetInsightIntentInfoByIntentNameInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::REGISTER_SA_INTERCEPTOR) {
+        return RegisterSAInterceptorInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -4697,6 +4700,22 @@ int32_t AbilityManagerStub::GetKioskStatusInner(MessageParcel &data, MessageParc
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
         return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::RegisterSAInterceptorInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call RegisterSaInterceptorInner");
+    auto interceptor = iface_cast<AbilityRuntime::ISAInterceptor>(data.ReadRemoteObject());
+    if (interceptor == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptor is null.");
+        return ERR_NULL_SA_INTERCEPTOR_EXECUTER;
+    }
+    int32_t result = RegisterSAInterceptor(interceptor);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to write result.");
+        return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }

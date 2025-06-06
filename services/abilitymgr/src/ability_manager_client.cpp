@@ -2308,5 +2308,13 @@ ErrCode AbilityManagerClient::GetKioskStatus(AAFwk::KioskStatus &kioskStatus)
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->GetKioskStatus(kioskStatus);
 }
+
+ErrCode AbilityManagerClient::RegisterSAInterceptor(sptr<AbilityRuntime::ISAInterceptor> interceptor)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call RegisterSAInterceptor");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RegisterSAInterceptor(interceptor);
+}
 } // namespace AAFwk
 } // namespace OHOS

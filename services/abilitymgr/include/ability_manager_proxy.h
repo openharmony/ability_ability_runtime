@@ -1761,6 +1761,13 @@ public:
      */
     int32_t GetKioskStatus(AAFwk::KioskStatus &kioskStatus) override;
 
+    /**
+     * Register sa interceptor.
+     * @param interceptor, The sa interceptor.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode RegisterSAInterceptor(sptr<AbilityRuntime::ISAInterceptor> interceptor) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
