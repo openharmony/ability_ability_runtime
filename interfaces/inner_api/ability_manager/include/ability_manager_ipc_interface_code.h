@@ -585,6 +585,12 @@ enum class AbilityManagerInterfaceCode {
 
     GET_INTENT_EXEMPTION_INFO = 6125,
 
+    // set app service extension keep alive
+    SET_APP_SERVICE_EXTENSION_KEEP_ALIVE = 6126,
+
+    // get keep-alive app service extensions
+    GET_APP_SERVICE_EXTENSIONS_KEEP_ALIVE = 6127,
+
     // add query ERMS observer
     ADD_QUERY_ERMS_OBSERVER = 6130,
 

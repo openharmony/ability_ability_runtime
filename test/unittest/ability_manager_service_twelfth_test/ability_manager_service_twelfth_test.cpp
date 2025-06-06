@@ -1164,5 +1164,39 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_GetKioskStatus_Success, 
     auto result = KioskManager::GetInstance().GetKioskStatus(kioskStatus);
     ASSERT_EQ(result, ERR_OK);
 }
+
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, SetAppServiceExtensionKeepAlive_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SetAppServiceExtensionKeepAlive_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    std::string bundleName = "bundleName";
+    bool flag = true;
+    int32_t result = abilityMs->SetAppServiceExtensionKeepAlive(bundleName, flag);
+    ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SetAppServiceExtensionKeepAlive_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: QueryKeepAliveAppServiceExtensions
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService QueryKeepAliveAppServiceExtensions
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, QueryKeepAliveAppServiceExtensions_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest QueryKeepAliveAppServiceExtensions_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    std::vector<AbilityRuntime::KeepAliveInfo> list;
+    int32_t result = abilityMs->QueryKeepAliveAppServiceExtensions(list);
+    ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest QueryKeepAliveAppServiceExtensions_001 end");
+}
 } // namespace AAFwk
 } // namespace OHOS

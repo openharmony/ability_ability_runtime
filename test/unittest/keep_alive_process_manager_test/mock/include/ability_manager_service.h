@@ -31,7 +31,9 @@ using KeepAliveInfo = AbilityRuntime::KeepAliveInfo;
 using KeepAliveSetter = AbilityRuntime::KeepAliveSetter;
 using KeepAliveAppType = AbilityRuntime::KeepAliveAppType;
 using KeepAliveStatus = AbilityRuntime::KeepAliveStatus;
+using KeepAlivePolicy = AbilityRuntime::KeepAlivePolicy;
 
+constexpr int32_t BASE_USER_RANGE = 200000;
 const int DEFAULT_INVAL_VALUE = -1;
 
 /**
@@ -69,12 +71,28 @@ public:
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = -1,
         int requestCode = -1);
+    
+    /**
+     * Start extension ability with want, send want to ability manager service.
+     *
+     * @param want, the want of the ability to start.
+     * @param callerToken, caller ability token.
+     * @param userId, Designation User ID.
+     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t StartExtensionAbility(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED);
 
 public:
     static bool isInStatusBarResult;
     static bool isSupportStatusBarResult;
     static int32_t userId_;
     static int32_t startAbilityResult;
+    static int32_t startExtensionAbilityResult;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

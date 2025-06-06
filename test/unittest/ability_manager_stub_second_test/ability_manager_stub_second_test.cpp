@@ -767,6 +767,35 @@ HWTEST_F(AbilityManagerStubSecondTest, OnRemoteRequestInnerNineteenth_0100, Test
 }
 
 /**
+ * @tc.name: OnRemoteRequestInnerTwentyFirst_0100
+ * @tc.desc: Test OnRemoteRequestInnerTwentyFirst
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubSecondTest, OnRemoteRequestInnerTwentyFirst_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnRemoteRequestInnerTwentyFirst_0100 begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code[] = {
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_APP_SERVICE_EXTENSION_KEEP_ALIVE),
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_APP_SERVICE_EXTENSIONS_KEEP_ALIVE)
+    };
+
+    int i = 0;
+    while (i < sizeof(code) / sizeof(uint32_t)) {
+        stub_->OnRemoteRequestInnerTwentyFirst(code[i++], data, reply, option);
+    }
+    
+    uint32_t code_ = 0;
+    auto ret = stub_->OnRemoteRequestInnerTwentyFirst(code_, data, reply, option);
+    EXPECT_EQ(ret, ERR_CODE_NOT_EXIST);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnRemoteRequestInnerTwentyFirst_0100 end");
+}
+
+/**
  * @tc.name: OnRemoteRequestInner_0100
  * @tc.desc: Test OnRemoteRequestInner
  * @tc.type: FUNC
@@ -862,6 +891,35 @@ HWTEST_F(AbilityManagerStubSecondTest, HandleOnRemoteRequestInnerSecond_0100, Te
     EXPECT_EQ(ret, ERR_CODE_NOT_EXIST);
 
     TAG_LOGI(AAFwkTag::TEST, "HandleOnRemoteRequestInnerSecond_0100 end");
+}
+
+/**
+ * @tc.name: HandleOnRemoteRequestInnerThird_0100
+ * @tc.desc: Test HandleOnRemoteRequestInnerThird
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubSecondTest, HandleOnRemoteRequestInnerThird_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleOnRemoteRequestInnerThird_0100 begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code[] = {
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_APP_SERVICE_EXTENSION_KEEP_ALIVE),
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_APP_SERVICE_EXTENSIONS_KEEP_ALIVE)
+    };
+
+    int i = 0;
+    while (i < sizeof(code) / sizeof(uint32_t)) {
+        stub_->HandleOnRemoteRequestInnerThird(code[i++], data, reply, option);
+    }
+    
+    uint32_t code_ = 0;
+    auto ret = stub_->HandleOnRemoteRequestInnerThird(code_, data, reply, option);
+    EXPECT_EQ(ret, ERR_CODE_NOT_EXIST);
+
+    TAG_LOGI(AAFwkTag::TEST, "HandleOnRemoteRequestInnerThird_0100 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

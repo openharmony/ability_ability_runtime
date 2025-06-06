@@ -380,6 +380,13 @@ napi_value CreateJsKeepAliveBundleInfo(napi_env env, const KeepAliveInfo &info)
     napi_set_named_property(env, object, "bundleName", CreateJsValue(env, info.bundleName));
     napi_set_named_property(env, object, "type", CreateJsValue(env, static_cast<int32_t>(info.appType)));
     napi_set_named_property(env, object, "setter", CreateJsValue(env, static_cast<int32_t>(info.setter)));
+    if (info.setterId >= 0) {
+        napi_set_named_property(env, object, "setterUserId", CreateJsValue(env, info.setterId));
+    }
+    if (info.policy != KeepAlivePolicy::UNSPECIFIED) {
+        napi_set_named_property(env, object, "allowUserToCancel",
+            CreateJsValue(env, info.policy == KeepAlivePolicy::ALLOW_CANCEL));
+    }
     return object;
 }
 
