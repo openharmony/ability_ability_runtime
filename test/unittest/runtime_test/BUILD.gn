@@ -65,6 +65,31 @@ ohos_unittest("runtime_test") {
   ]
 }
 
+ohos_unittest("hybrid_js_module_reader_test") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "${ability_runtime_native_path}/runtime",
+    "${ability_runtime_native_path}/runtime/utils/include",
+  ]
+
+  sources = [
+  # add mock file
+    "hybrid_js_module_reader_test.cpp",
+  ]
+
+  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
+  deps = []
+
+  external_deps = [
+    "ability_base:extractortool",
+    "ability_runtime:runtime",
+    "c_utils:utils",
+    "zlib:libz",
+    "zlib:shared_libz",
+  ]
+}
+
 ohos_unittest("js_runtime_test") {
   module_out_path = module_output_path
   sanitize = {
@@ -262,6 +287,7 @@ group("unittest") {
 
   deps = [
     ":hdc_register_test",
+    ":hybrid_js_module_reader_test",
     ":js_runtime_first_test",
     ":js_runtime_test",
     ":js_worker_test",
@@ -273,5 +299,7 @@ group("unittest") {
 group("stsunittest") {
   testonly = true
 
-  deps = []
+  deps = [
+    ":hybrid_js_module_reader_test",
+  ]
 }
