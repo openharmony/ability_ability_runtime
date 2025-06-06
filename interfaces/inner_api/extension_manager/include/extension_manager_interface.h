@@ -19,15 +19,12 @@
 #include <iremote_broker.h>
 #include <vector>
 
-#include "extension_ability_info.h"
-#include "extension_running_info.h"
-
-
 namespace OHOS {
 namespace AppExecFwk {
 enum class ExtensionAbilityType;
 }
 namespace AAFwk {
+struct ExtensionRunningInfo;
 namespace {
 constexpr int DEFAULT_INVALID_USER_ID = -1;
 }
@@ -64,42 +61,6 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int DisconnectAbility(const sptr<IRemoteObject> &connect) = 0;
-
-    /**
-     * Start extension ability with want, send want to ability manager service.
-     *
-     * @param want, the want of the ability to start.
-     * @param callerToken, caller ability token.
-     * @param userId, Designation User ID.
-     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int32_t StartExtensionAbility(
-        const Want &want,
-        const sptr<IRemoteObject> &callerToken,
-        int32_t userId = DEFAULT_INVALID_USER_ID,
-        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED)
-    {
-        return 0;
-    }
-
-    /**
-     * Stop extension ability with want, send want to ability manager service.
-     *
-     * @param want, the want of the ability to stop.
-     * @param callerToken, caller ability token.
-     * @param userId, Designation User ID.
-     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be stopped.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int StopExtensionAbility(
-        const Want &want,
-        const sptr<IRemoteObject> &callerToken,
-        int32_t userId = DEFAULT_INVALID_USER_ID,
-        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED)
-    {
-        return 0;
-    }
 
     /**
      * @brief Get the extension running information.

@@ -58,6 +58,22 @@ public:
     static int onAbilityDisconnectDoneCount;
 };
 
+class MockIRemoteMissionListener : public IRemoteMissionListener {
+public:
+    MockIRemoteMissionListener() {};
+    virtual ~MockIRemoteMissionListener() {};
+    void NotifyMissionsChanged(const std::string& deviceId) override
+    {}
+
+    void NotifySnapshot(const std::string& deviceId, int32_t missionId) override
+    {}
+
+    void NotifyNetDisconnect(const std::string& deviceId, int32_t state) override
+    {}
+    sptr<IRemoteObject> AsObject() override
+    { return nullptr; }
+};
+
 void MissionManagerClientTest::SetUpTestCase(void)
 {}
 void MissionManagerClientTest::TearDownTestCase(void)
@@ -202,6 +218,131 @@ HWTEST_F(MissionManagerClientTest, ContinueMission_0700, TestSize.Level1)
     GTEST_LOG_(INFO) << "ContinueMission_0700 end";
 }
 
+/**
+ * @tc.name: MissionManagerClient_ContinueMission_0800
+ * @tc.desc: ContinueMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionManagerClientTest, ContinueMission_0800, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ContinueMission_0800 start";
+    AAFwk::ContinueMissionInfo continueMissionInfo;
+    continueMissionInfo.srcDeviceId = "123";
+    continueMissionInfo.dstDeviceId = "ABC";
+    sptr<IRemoteObject> callback = nullptr;
+    auto result = client_->ContinueMission(continueMissionInfo, callback);
+
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "ContinueMission_0800 end";
+}
+
+/**
+ * @tc.name: MissionManagerClient_ContinueMission_0900
+ * @tc.desc: ContinueMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionManagerClientTest, ContinueMission_0900, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ContinueMission_0900 start";
+    AAFwk::ContinueMissionInfo continueMissionInfo;
+    continueMissionInfo.srcDeviceId = "";
+    continueMissionInfo.dstDeviceId = "ABC";
+    sptr<IRemoteObject> callback = nullptr;
+    auto result = client_->ContinueMission(continueMissionInfo, callback);
+
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "ContinueMission_0900 end";
+}
+
+/**
+ * @tc.name: MissionManagerClient_ContinueMission_1000
+ * @tc.desc: ContinueMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionManagerClientTest, ContinueMission_1000, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ContinueMission_1000 start";
+    AAFwk::ContinueMissionInfo continueMissionInfo;
+    continueMissionInfo.srcDeviceId = "123";
+    continueMissionInfo.dstDeviceId = "";
+    sptr<IRemoteObject> callback = new (std::nothrow) OHOS::AAFwk::AbilityConnectCallback();
+    auto result = client_->ContinueMission(continueMissionInfo, callback);
+
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "ContinueMission_1000 end";
+}
+
+/**
+ * @tc.name: MissionManagerClient_ContinueMission_1100
+ * @tc.desc: ContinueMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionManagerClientTest, ContinueMission_1100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ContinueMission_1100 start";
+    AAFwk::ContinueMissionInfo continueMissionInfo;
+    continueMissionInfo.srcDeviceId = "";
+    continueMissionInfo.dstDeviceId = "ABC";
+    sptr<IRemoteObject> callback = new (std::nothrow) OHOS::AAFwk::AbilityConnectCallback();
+    auto result = client_->ContinueMission(continueMissionInfo, callback);
+
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "ContinueMission_1100 end";
+}
+
+/**
+ * @tc.name: MissionManagerClient_ContinueMission_1200
+ * @tc.desc: ContinueMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionManagerClientTest, ContinueMission_1200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ContinueMission_1200 start";
+    AAFwk::ContinueMissionInfo continueMissionInfo;
+    continueMissionInfo.srcDeviceId = "";
+    continueMissionInfo.dstDeviceId = "";
+    sptr<IRemoteObject> callback = new (std::nothrow) OHOS::AAFwk::AbilityConnectCallback();
+    auto result = client_->ContinueMission(continueMissionInfo, callback);
+
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "ContinueMission_1200 end";
+}
+
+/**
+ * @tc.name: MissionManagerClient_ContinueMission_1300
+ * @tc.desc: ContinueMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionManagerClientTest, ContinueMission_1300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ContinueMission_1300 start";
+    AAFwk::ContinueMissionInfo continueMissionInfo;
+    continueMissionInfo.srcDeviceId = "123";
+    continueMissionInfo.dstDeviceId = "";
+    sptr<IRemoteObject> callback = nullptr;
+    auto result = client_->ContinueMission(continueMissionInfo, callback);
+
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "ContinueMission_1300 end";
+}
+
+/**
+ * @tc.name: MissionManagerClient_ContinueMission_1400
+ * @tc.desc: ContinueMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionManagerClientTest, ContinueMission_1400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ContinueMission_1400 start";
+    AAFwk::ContinueMissionInfo continueMissionInfo;
+    continueMissionInfo.srcDeviceId = "123";
+    continueMissionInfo.dstDeviceId = "ABC";
+    sptr<IRemoteObject> callback = new (std::nothrow) OHOS::AAFwk::AbilityConnectCallback();
+    auto result = client_->ContinueMission(continueMissionInfo, callback);
+
+    EXPECT_EQ(result, ERR_INVALID_STATE);
+    GTEST_LOG_(INFO) << "ContinueMission_1400 end";
+}
 
 /**
  * @tc.name: MissionManagerClient_LockMissionForCleanup_0100
@@ -321,6 +462,40 @@ HWTEST_F(MissionManagerClientTest, UnRegisterMissionListener_0100, TestSize.Leve
     EXPECT_TRUE(client_ != nullptr);
     sptr<IMissionListener> listener = nullptr;
     auto result = client_->UnRegisterMissionListener(listener);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    }
+}
+
+/**
+ * @tc.name: MissionManagerClient_RegisterMissionListener_0200
+ * @tc.desc: RegisterMissionListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MissionManagerClientTest, RegisterMissionListener_0200, TestSize.Level1)
+{
+    EXPECT_TRUE(client_ != nullptr);
+    std::string deviceId = "123";
+    sptr<MockIRemoteMissionListener> listener = new (std::nothrow) MockIRemoteMissionListener();
+    auto result = client_->RegisterMissionListener(deviceId, listener);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    }
+}
+
+/**
+ * @tc.name: MissionManagerClient_UnRegisterMissionListener_0200
+ * @tc.desc: UnRegisterMissionListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MissionManagerClientTest, UnRegisterMissionListener_0200, TestSize.Level1)
+{
+    EXPECT_TRUE(client_ != nullptr);
+    std::string deviceId = "123";
+    sptr<MockIRemoteMissionListener> listener = new (std::nothrow) MockIRemoteMissionListener();
+    auto result = client_->UnRegisterMissionListener(deviceId, listener);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     }
@@ -465,6 +640,38 @@ HWTEST_F(MissionManagerClientTest, MoveMissionsToForeground_0200, TestSize.Level
 }
 
 /**
+ * @tc.name: MissionManagerClient_MoveMissionsToBackground_0100
+ * @tc.desc: MoveMissionsToBackground
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MissionManagerClientTest, MoveMissionsToBackground_0100, TestSize.Level1)
+{
+    EXPECT_TRUE(client_ != nullptr);
+    std::vector<int32_t> result;
+    auto ret = client_->MoveMissionsToBackground({1, 2, 3}, result);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, ERR_INVALID_STATE);
+    }
+}
+
+/**
+ * @tc.name: MissionManagerClient_MoveMissionsToBackground_0200
+ * @tc.desc: MoveMissionsToBackground
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MissionManagerClientTest, MoveMissionsToBackground_0200, TestSize.Level1)
+{
+    EXPECT_TRUE(client_ != nullptr);
+    std::vector<int32_t> result;
+    auto ret = client_->MoveMissionsToBackground({1, 2, 3}, result);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(ret, ERR_INVALID_STATE);
+    }
+}
+
+/**
  * @tc.name: MissionManagerClient_GetMissionIdByToken_0100
  * @tc.desc: GetMissionIdByToken
  * @tc.type: FUNC
@@ -600,6 +807,22 @@ HWTEST_F(MissionManagerClientTest, UpdateMissionSnapShot_0100, TestSize.Level1)
     EXPECT_TRUE(client_ != nullptr);
 }
 #endif // WITH_DLP
+
+/**
+ * @tc.name: MissionManagerClient_IsValidMissionIds_0100
+ * @tc.desc: IsValidMissionIds
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MissionManagerClientTest, IsValidMissionIds_0100, TestSize.Level1)
+{
+    EXPECT_TRUE(client_ != nullptr);
+    std::vector<MissionValidResult> results;
+    auto result = client_->IsValidMissionIds({1, 2, 3}, results);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, ERR_INVALID_STATE);
+    }
+}
 
 /**
  * @tc.name: MissionManagerClient_PreStartMission_0100
