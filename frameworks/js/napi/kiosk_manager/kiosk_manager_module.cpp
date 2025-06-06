@@ -48,7 +48,7 @@ static napi_module _module = {
 /*
  * The module registration.
  */
-extern "C" __attribute__((constructor)) void NAPI_application_KioskManager_AutoRegister(void)
+extern "C" __attribute__((constructor)) void NapiApplicationKioskManagerAutoRegister(void)
 {
     napi_module_register(&_module);
 }

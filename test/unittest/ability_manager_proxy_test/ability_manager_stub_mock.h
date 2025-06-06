@@ -36,9 +36,15 @@ public:
     int InvokeSendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
     {
         code_ = code;
+
+        return 0;
+    }
+
+    int InvokeKioskModeSendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
+    {
+        code_ = code;
         KioskStatus kioskStatus;
         reply.WriteParcelable(&kioskStatus);
-        reply.WriteInt32(0);
         return 0;
     }
 

@@ -6793,13 +6793,7 @@ void AbilityManagerService::OnAppStateChanged(const AppInfo &info)
     if (system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
         KeepAliveProcessManager::GetInstance().OnAppStateChanged(info);
     }
-
-    auto kioskManager = KioskManager::GetInstance();
-    if (kioskManager == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null kioskManager");
-        return;
-    }
-    kioskManager->OnAppStop(info);
+    KioskManager::GetInstance().OnAppStop(info);
 }
 
 std::shared_ptr<AbilityEventHandler> AbilityManagerService::GetEventHandler()
@@ -14309,33 +14303,25 @@ int32_t AbilityManagerService::RestartSelfAtomicService(sptr<IRemoteObject> call
 int32_t AbilityManagerService::UpdateKioskApplicationList(const std::vector<std::string> &appList)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "request UpdateKioskApplicationList");
-    auto kioskManager = KioskManager::GetInstance();
-    CHECK_POINTER_AND_RETURN(kioskManager, INNER_ERR);
-    return kioskManager->UpdateKioskApplicationList(appList);
+    return KioskManager::GetInstance().UpdateKioskApplicationList(appList);
 }
 
 int32_t AbilityManagerService::EnterKioskMode(sptr<IRemoteObject> callerToken)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "request EnterKioskMode");
-    auto kioskManager = KioskManager::GetInstance();
-    CHECK_POINTER_AND_RETURN(kioskManager, INNER_ERR);
-    return kioskManager->EnterKioskMode(callerToken);
+    return KioskManager::GetInstance().EnterKioskMode(callerToken);
 }
 
 int32_t AbilityManagerService::ExitKioskMode(sptr<IRemoteObject> callerToken)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "request ExitKioskMode");
-    auto kioskManager = KioskManager::GetInstance();
-    CHECK_POINTER_AND_RETURN(kioskManager, INNER_ERR);
-    return kioskManager->ExitKioskMode(callerToken);
+    return KioskManager::GetInstance().ExitKioskMode(callerToken);
 }
 
 int32_t AbilityManagerService::GetKioskStatus(KioskStatus &kioskStatus)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "request GetKioskStatus");
-    auto kioskManager = KioskManager::GetInstance();
-    CHECK_POINTER_AND_RETURN(kioskManager, INNER_ERR);
-    return kioskManager->GetKioskStatus(kioskStatus);
+    return KioskManager::GetInstance().GetKioskStatus(kioskStatus);
 }
 
 std::shared_ptr<AbilityInterceptorExecuter> AbilityManagerService::GetAbilityInterceptorExecuter()

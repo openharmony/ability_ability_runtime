@@ -30,7 +30,7 @@ namespace OHOS {
 namespace AAFwk {
 class KioskManager {
 public:
-    static std::shared_ptr<KioskManager> GetInstance();
+    static KioskManager &GetInstance();
     int32_t UpdateKioskApplicationList(const std::vector<std::string> &appList);
     int32_t EnterKioskMode(sptr<IRemoteObject> callerToken);
     int32_t ExitKioskMode(sptr<IRemoteObject> callerToken);
@@ -51,12 +51,9 @@ private:
     void AddKioskInterceptor();
     void RemoveKioskInterceptor();
     bool CheckCallerIsForeground(sptr<IRemoteObject> callerToken);
-    bool CheckKioskPermission();
 
     std::unordered_set<std::string> whitelist_;
     KioskStatus kioskStatus_;
-    static std::once_flag singletonFlag_;
-    static std::shared_ptr<KioskManager> instance_;
     std::mutex kioskManagermutex_;
 };
 } // namespace AAFwk

@@ -32,14 +32,10 @@
 
 namespace OHOS {
 namespace AAFwk {
-std::shared_ptr<KioskManager> KioskManager::instance_ = nullptr;
-std::once_flag KioskManager::singletonFlag_;
-std::shared_ptr<KioskManager> KioskManager::GetInstance()
+KioskManager &KioskManager::GetInstance()
 {
-    std::call_once(singletonFlag_, [] () {
-        instance_ = std::shared_ptr<KioskManager>(new KioskManager());
-    });
-    return instance_;
+    static KioskManager manager;
+    return manager;
 }
 
 void KioskManager::OnAppStop(const AppInfo &info)
@@ -55,7 +51,14 @@ void KioskManager::OnAppStop(const AppInfo &info)
 
 int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> &appList)
 {
-    if (!CheckKioskPermission()) {
+    if (!PermissionVerification::GetInstance()->IsSystemAppCall() &&
+        !PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
+        return ERR_NOT_SYSTEM_APP;
+    }
+    if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_MANAGE_EDM_POLICY)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not MANAGE_EDM_POLICY permission");
         return CHECK_PERMISSION_FAILED;
     }
     std::lock_guard<std::mutex> lock(kioskManagermutex_);
@@ -134,8 +137,9 @@ int32_t KioskManager::ExitKioskModeInner(const std::string & bundleName)
 
 int32_t KioskManager::GetKioskStatus(KioskStatus &kioskStatus)
 {
-    if (!CheckKioskPermission()) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "without Kiosk mode permission");
+    if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_MANAGE_EDM_POLICY)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not MANAGE_EDM_POLICY permission");
         return CHECK_PERMISSION_FAILED;
     }
     std::lock_guard<std::mutex> lock(kioskManagermutex_);
@@ -183,12 +187,7 @@ std::function<void()> KioskManager::GetEnterKioskModeCallback()
 {
     auto enterKioskModeCallback = []() {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "EnterKioskMode");
-        auto kioskManager = KioskManager::GetInstance();
-        if (!kioskManager) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid abilityMgr pointer");
-            return;
-        }
-        kioskManager->AddKioskInterceptor();
+        KioskManager::GetInstance().AddKioskInterceptor();
     };
     return enterKioskModeCallback;
 }
@@ -197,12 +196,7 @@ std::function<void()> KioskManager::GetExitKioskModeCallback()
 {
     auto exitKioskModeCallback = []() {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "EnterKioskMode");
-        auto kioskManager = KioskManager::GetInstance();
-        if (!kioskManager) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid abilityMgr pointer");
-            return;
-        }
-        kioskManager->RemoveKioskInterceptor();
+        KioskManager::GetInstance().RemoveKioskInterceptor();
     };
     return exitKioskModeCallback;
 }
@@ -245,19 +239,6 @@ bool KioskManager::CheckCallerIsForeground(sptr<IRemoteObject> callerToken)
 
     return processInfo.state_ ==
            AppExecFwk::AppProcessState::APP_STATE_FOREGROUND;
-}
-
-bool KioskManager::CheckKioskPermission()
-{
-    if ((PermissionVerification::GetInstance()->IsSystemAppCall() ||
-         PermissionVerification::GetInstance()->IsSACall()) &&
-        PermissionVerification::GetInstance()->VerifyCallingPermission(
-            PermissionConstants::PERMISSION_MANAGE_EDM_POLICY)) {
-        return true;
-    }
-
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "without KIOSK mode permission");
-    return false;
 }
 } // namespace AAFwk
 } // namespace OHOS

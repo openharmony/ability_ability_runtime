@@ -16,7 +16,6 @@
 #ifndef OHOS_KIOSK_INTERCEPTOR_INTERCEPTOR
 #define OHOS_KIOSK_INTERCEPTOR_INTERCEPTOR
 #include "ability_interceptor_interface.h"
-#include "kiosk_manager.h"
 
 namespace OHOS {
 namespace AAFwk {

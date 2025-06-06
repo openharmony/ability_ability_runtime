@@ -6612,7 +6612,7 @@ int32_t AbilityManagerProxy::UpdateKioskApplicationList(const std::vector<std::s
 
     if (!data.WriteStringVector(appList)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appList write fail");
-        return INNER_ERR;
+        return ERR_IPC_PROXY_WRITE_FAILED;
     }
 
     auto error =

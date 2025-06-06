@@ -2933,7 +2933,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetKioskStatus, TestSize.L
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
-        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeKioskModeSendRequest));
     KioskStatus kioskStatus;
     auto res = proxy_->GetKioskStatus(kioskStatus);
     EXPECT_EQ(res, NO_ERROR);
