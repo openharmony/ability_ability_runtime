@@ -13,25 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_H
-#define OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_H
+#ifndef OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_UTILS_H
+#define OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_UTILS_H
 
-#include "sts_runtime.h"
 #include "ability_running_info.h"
+#include "sts_runtime.h"
 
 namespace OHOS {
 namespace AbilityManagerSts {
-void StsAbilityManagerRegistryInit(ani_env *env);
-
-class StsAbilityManager final {
-public:
-    static StsAbilityManager &GetInstance()
-    {
-        static StsAbilityManager instance;
-        return instance;
-    }
-    static void GetAbilityRunningInfos(ani_env *env, ani_object callback);
-};
+bool WrapAbilityRunningInfo(ani_env *env, ani_object &infoObj, const AAFwk::AbilityRunningInfo &info);
+bool WrapAbilityRunningInfoArray(
+    ani_env *env, ani_object &arrayObj, const std::vector<AAFwk::AbilityRunningInfo> &infos);
+bool WrapAbilityRunningInfoInner(
+    ani_env *env, ani_object &infoObj, const AAFwk::AbilityRunningInfo &info, ani_class cls);
 } // namespace AbilityManagerSts
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_H
+#endif // OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_UTILS_H

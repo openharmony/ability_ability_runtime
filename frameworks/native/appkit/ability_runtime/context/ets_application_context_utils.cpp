@@ -211,8 +211,8 @@ void EtsApplicationContextUtils::GetRunningProcessInformation([[maybe_unused]]an
     }
 }
 
-void EtsApplicationContextUtils::NativeOnApplicationStateChangeSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
-    ani_object callback)
+void EtsApplicationContextUtils::NativeOnApplicationStateChangeSync([[maybe_unused]]ani_env *env,
+    [[maybe_unused]]ani_object aniObj, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "NativeOnApplicationStateChangeSync Call");
     auto applicationContext = applicationContext_.lock();
@@ -230,8 +230,8 @@ void EtsApplicationContextUtils::NativeOnApplicationStateChangeSync([[maybe_unus
     applicationContext->RegisterApplicationStateChangeCallback(applicationStateCallback_);
 }
 
-void EtsApplicationContextUtils::NativeOffApplicationStateChangeSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
-    ani_object callback)
+void EtsApplicationContextUtils::NativeOffApplicationStateChangeSync([[maybe_unused]]ani_env *env,
+    [[maybe_unused]]ani_object aniObj, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "NativeOffApplicationStateChangeSync Call");
     if (applicationStateCallback_ == nullptr) {
@@ -437,10 +437,10 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env* aniEnv, ani
         ani_native_function {"nativerestartApp", "L@ohos/app/ability/Want/Want;:V",
             reinterpret_cast<void *>(EtsApplicationContextUtils::RestartApp)},
         ani_native_function {"nativeOnApplicationStateChangeSync",
-            "L@ohos/app/ability/ApplicationStateChangeCallback/ApplicationStateChangeCallback",
+            "L@ohos/app/ability/ApplicationStateChangeCallback/ApplicationStateChangeCallback;:V",
             reinterpret_cast<void*>(EtsApplicationContextUtils::NativeOnApplicationStateChangeSync)},
         ani_native_function {"nativeOffApplicationStateChangeSync",
-            "L@ohos/app/ability/ApplicationStateChangeCallback/ApplicationStateChangeCallback",
+            "L@ohos/app/ability/ApplicationStateChangeCallback/ApplicationStateChangeCallback;:V",
             reinterpret_cast<void*>(EtsApplicationContextUtils::NativeOffApplicationStateChangeSync)},
 
     };

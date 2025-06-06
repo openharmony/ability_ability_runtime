@@ -206,5 +206,22 @@ HWTEST_F(StsEnvironmentTest, GetAniEnv_0100, TestSize.Level0)
     stsEnv->vmEntry_ = vMEntryOld;
 }
 
+/**
+ * @tc.name: LoadSymbolANIGetCreatedVMs_0100
+ * @tc.desc: Test LoadSymbolANIGetCreatedVMs when symbol is not found.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StsEnvironmentTest, LoadSymbolANIGetCreatedVMs_0100, TestSize.Level1)
+{
+    auto stsEnv = std::make_shared<STSEnvironment>();
+    ASSERT_NE(stsEnv, nullptr);
+    void* handle = dlopen(nullptr, RTLD_LAZY);
+    ASSERT_NE(handle, nullptr);
+    STSRuntimeAPI apis = {};
+    bool result = stsEnv->LoadSymbolANIGetCreatedVMs(handle, apis);
+    dlclose(handle);
+    EXPECT_TRUE(result);
+    EXPECT_NE(apis.ANI_GetCreatedVMs, nullptr);
+}
 } // namespace StsEnv
 } // namespace OHOS

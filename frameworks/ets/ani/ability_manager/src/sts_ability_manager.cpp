@@ -25,6 +25,7 @@
 #include "ability_manager_interface.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
+#include "sts_ability_manager_utils.h"
 #include "sts_error_utils.h"
 #include "system_ability_definition.h"
 
@@ -134,6 +135,8 @@ void StsAbilityManagerRegistryInit(ani_env *env)
             reinterpret_cast<void *>(GetForegroundUIAbilities)
         },
         ani_native_function {"nativeGetTopAbility", nullptr, reinterpret_cast<void *>(GetTopAbility)},
+        ani_native_function { "nativeGetAbilityRunningInfos", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(StsAbilityManager::GetAbilityRunningInfos) },
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
     if (status != ANI_OK) {
@@ -165,6 +168,20 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerSts.ANI_Constructor finished");
     return ANI_OK;
 }
+}
+
+void StsAbilityManager::GetAbilityRunningInfos(ani_env *env, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "GetAbilityRunningInfos");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return;
+    }
+    std::vector<AAFwk::AbilityRunningInfo> infos;
+    auto errcode = AAFwk::AbilityManagerClient::GetInstance()->GetAbilityRunningInfos(infos);
+    ani_object retObject = nullptr;
+    WrapAbilityRunningInfoArray(env, retObject, infos);
+    AppExecFwk::AsyncCallback(env, callback, OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, errcode), retObject);
 }
 } // namespace AbilityManagerSts
 } // namespace OHOS
