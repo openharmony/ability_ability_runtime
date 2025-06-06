@@ -6598,5 +6598,117 @@ int32_t AbilityManagerProxy::RestartSelfAtomicService(sptr<IRemoteObject> caller
     }
     return reply.ReadInt32();
 }
+
+int32_t AbilityManagerProxy::UpdateKioskApplicationList(const std::vector<std::string> &appList)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken failed");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    if (!data.WriteStringVector(appList)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appList write fail");
+        return ERR_IPC_PROXY_WRITE_FAILED;
+    }
+
+    auto error =
+        SendRequest(AbilityManagerInterfaceCode::UPDATE_KIOSK_APP_LIST, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::EnterKioskMode(sptr<IRemoteObject> callerToken)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null token");
+        return ERR_INVALID_CONTEXT;
+    }
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken failed");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    if (!data.WriteRemoteObject(callerToken)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken fail");
+        return ERR_WRITE_CALLER_TOKEN_FAILED;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::ENTER_KIOSK_MODE, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::ExitKioskMode(sptr<IRemoteObject> callerToken)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null token");
+        return ERR_INVALID_CONTEXT;
+    }
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken failed");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    if (!data.WriteRemoteObject(callerToken)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken fail");
+        return ERR_WRITE_CALLER_TOKEN_FAILED;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::EXIT_KIOSK_MODE, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::GetKioskStatus(KioskStatus &kioskStatus)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken failed");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::GET_KIOSK_INFO, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+
+    std::unique_ptr<KioskStatus> info(reply.ReadParcelable<KioskStatus>());
+    if (!info) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "read KioskStatus fail");
+        return ERR_UNKNOWN_OBJECT;
+    }
+    kioskStatus = *info;
+    return reply.ReadInt32();
+}
 } // namespace AAFwk
 } // namespace OHOS

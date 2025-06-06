@@ -72,6 +72,7 @@
 #include "system_dialog_scheduler.h"
 #endif
 #include "insight_intent_event_mgr.h"
+#include "kiosk_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -2073,6 +2074,34 @@ public:
         const std::string &moduleName,
         const std::string &intentName,
         InsightIntentInfoForQuery &info) override;
+
+    /**
+     * Update the list of applications allowed in kiosk mode.
+     * @param appList, the list of application bundle names that are allowed in kiosk mode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UpdateKioskApplicationList(const std::vector<std::string> &appList) override;
+
+    /**
+     * Enter kiosk mode
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t EnterKioskMode(sptr<IRemoteObject> callerToken) override;
+
+    /**
+     * Exit kiosk mode
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t ExitKioskMode(sptr<IRemoteObject> callerToken) override;
+
+    /**
+     * Retrieve the current kiosk mode configuration and status.
+     * @param kioskStatus, the structure to store kiosk configuration and status information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetKioskStatus(AAFwk::KioskStatus &kioskStatus) override;
+
+    std::shared_ptr<AbilityInterceptorExecuter> GetAbilityInterceptorExecuter();
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
