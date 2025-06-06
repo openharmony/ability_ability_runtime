@@ -251,6 +251,8 @@ void DialogSessionManager::NotifyAbilityRequestFailure(const std::string &dialog
         message = "User closed the implicit startup picker";
     } else if (callerInfo->type == SelectorType::APP_CLONE_SELECTOR) {
         message = "User closed the app clone picker";
+    } else if (callerInfo->type == SelectorType::INTERCEPTOR_SELECTOR) {
+        message = "User closed the interceptor picker";
     }
     abilityRecord->NotifyAbilityRequestFailure(requestId, want.GetElement(), message);
 }
@@ -279,7 +281,9 @@ int DialogSessionManager::SendDialogResult(const Want &want, const std::string &
         return ERR_INVALID_VALUE;
     }
     auto targetWant = dialogCallerInfo->targetWant;
-    targetWant.SetElement(want.GetElement());
+    if (dialogCallerInfo->type != SelectorType::INTERCEPTOR_SELECTOR) {
+        targetWant.SetElement(want.GetElement());
+    }
     targetWant.SetParam("isSelector", dialogCallerInfo->type != SelectorType::WITHOUT_SELECTOR);
     targetWant.SetParam(DIALOG_SESSION_ID, dialogSessionId);
     if (want.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY)) {
@@ -570,6 +574,15 @@ bool DialogSessionManager::UpdateExtensionWantWithDialogCallerInfo(AbilityReques
         return true;
     }
     return false;
+}
+
+void DialogSessionManager::OnlySetDialogCallerInfo(AbilityRequest &abilityRequest, int32_t userId,
+    SelectorType type, const std::string &dialogSessionId, bool needGrantUriPermission)
+{
+    std::lock_guard<ffrt::mutex> guard(dialogSessionRecordLock_);
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    GenerateDialogCallerInfo(abilityRequest, userId, dialogCallerInfo, type, needGrantUriPermission);
+    dialogCallerInfoMap_[dialogSessionId] = dialogCallerInfo;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

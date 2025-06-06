@@ -2357,7 +2357,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartSpecifiedAbilityBySCB_001, TestSize
     auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     Want want;
-    uiAbilityLifecycleManager->StartSpecifiedAbilityBySCB(want);
+    AbilityRequest abilityRequest;
+    uiAbilityLifecycleManager->StartSpecifiedAbilityBySCB(want, abilityRequest);
     uiAbilityLifecycleManager.reset();
 }
 

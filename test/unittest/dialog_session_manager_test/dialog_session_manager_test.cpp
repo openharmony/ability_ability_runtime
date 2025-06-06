@@ -380,6 +380,24 @@ HWTEST_F(DialogSessionManagerTest, UpdateExtensionWantWithDialogCallerInfo_0700,
 }
 
 /**
+ * @tc.name: OnlySetDialogCallerInfo_0100
+ * @tc.desc: OnlySetDialogCallerInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, OnlySetDialogCallerInfo_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "OnlySetDialogCallerInfo_0100 start";
+    SelectorType type = SelectorType::INTERCEPTOR_SELECTOR;
+    AbilityRequest abilityRequest;
+    abilityRequest.want.SetParam(TEST_DIALOG_SESSION_ID, TEST_DIALOG_SESSION_ID);
+
+    DialogSessionManager dialogSessionManager;
+    dialogSessionManager.OnlySetDialogCallerInfo(abilityRequest, TEST_USER_ID, type, TEST_DIALOG_SESSION_ID, false);
+    EXPECT_NE(dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID), nullptr);
+    GTEST_LOG_(INFO) << "OnlySetDialogCallerInfo_0100 end";
+}
+
+/**
  * @tc.name: CreateImplicitSelectorModalDialog_0001
  * @tc.desc: No APP_LAUNCH_TRUSTLIST
  * @tc.type: FUNC

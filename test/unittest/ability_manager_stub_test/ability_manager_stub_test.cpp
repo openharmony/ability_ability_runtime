@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "iremote_proxy.h"
 #include "mock_ability_connect_callback.h"
 #include "mock_ability_token.h"
+#include "mock_sa_interceptor_stub.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -3868,6 +3869,25 @@ HWTEST_F(AbilityManagerStubTest, GetKioskStatusInner, TestSize.Level1)
     MessageOption option;
     auto ret = stub_->OnRemoteRequest(
         static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_KIOSK_INFO), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: RegisterSAInterceptorInner_0100
+ * @tc.desc: RegisterSAInterceptorInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, RegisterSAInterceptorInner_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    MessageParcel data;
+    MessageParcel reply;
+    auto ret = stub_->RegisterSAInterceptorInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_SA_INTERCEPTOR_EXECUTER);
+    sptr<AbilityRuntime::ISAInterceptor> interceptor = new AbilityRuntime::MockSAInterceptorStub(0);
+    EXPECT_EQ(data.WriteRemoteObject(interceptor->AsObject()), true);
+    ret = stub_->RegisterSAInterceptorInner(data, reply);
     EXPECT_EQ(ret, NO_ERROR);
     TAG_LOGI(AAFwkTag::TEST, "end");
 }
