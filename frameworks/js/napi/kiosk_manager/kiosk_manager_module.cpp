@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,33 +16,13 @@
 #include "native_engine/native_engine.h"
 #include "js_kiosk_manager.h"
 
-#ifdef ENABLE_ERRCODE
 /*
  * The module definition.
  */
 static napi_module _module = {
     .nm_version = 0,
-    .nm_filename = "app/ability/kioskmanager_napi.so/kiosk_manager.js",
     .nm_register_func = OHOS::AbilityRuntime::JsKioskManagerInit,
     .nm_modname = "app.ability.kioskManager",
-};
-
-/*
- * The module registration.
- */
-extern "C" __attribute__((constructor)) void NAPI_application_KioskManager_AutoRegister(void)
-{
-    napi_module_register(&_module);
-}
-#else
-/*
- * The module definition.
- */
-static napi_module _module = {
-    .nm_version = 0,
-    .nm_filename = "application/kioskmanager_napi.so/kiosk_manager.js",
-    .nm_register_func = OHOS::AbilityRuntime::JsKioskManagerInit,
-    .nm_modname = "application.kioskManager",
 };
 
 /*
@@ -52,4 +32,3 @@ extern "C" __attribute__((constructor)) void NapiApplicationKioskManagerAutoRegi
 {
     napi_module_register(&_module);
 }
-#endif

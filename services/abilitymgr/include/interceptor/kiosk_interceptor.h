@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_KIOSK_INTERCEPTOR_INTERCEPTOR
-#define OHOS_KIOSK_INTERCEPTOR_INTERCEPTOR
+#ifndef OHOS_KIOSK_INTERCEPTOR_H
+#define OHOS_KIOSK_INTERCEPTOR_H
 #include "ability_interceptor_interface.h"
 
 namespace OHOS {
@@ -26,4 +26,4 @@ public:
 } // namespace AAFwk
 } // namespace OHOS
 
-#endif // OHOS_KIOSK_INTERCEPTOR_INTERCEPTOR
+#endif // OHOS_KIOSK_INTERCEPTOR_H

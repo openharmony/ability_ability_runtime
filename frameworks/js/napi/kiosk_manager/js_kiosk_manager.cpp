@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,11 +68,11 @@ napi_value JsKioskManager::CreateJsKioskStatus(napi_env env,
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null ObjValue");
+        TAG_LOGE(AAFwkTag::APPKIT, "null ObjValue");
         return nullptr;
     }
     if (kioskStatus == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null kioskStatus");
+        TAG_LOGE(AAFwkTag::APPKIT, "null kioskStatus");
         return nullptr;
     }
     napi_set_named_property(env, objValue, "isKioskMode",
@@ -100,8 +100,8 @@ napi_value JsKioskManager::OnUpdateKioskApplicationList(napi_env env, NapiCallba
 
     std::vector<std::string> appList;
     if (!OHOS::AppExecFwk::UnwrapArrayStringFromJS(env, info.argv[ARGC_ZERO], appList)) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "app list is invalid");
-        ThrowInvalidParamError(env, "Parameter error: app list is invalid, must be a Array<string>.");
+        TAG_LOGE(AAFwkTag::APPKIT, "app list is invalid");
+        ThrowInvalidParamError(env, "Failed to parse application list. Application list must be an Array<string>.");
         return CreateJsUndefined(env);
     }
     NapiAsyncTask::ExecuteCallback execute = [innerErrCode, appList]() {
@@ -146,13 +146,13 @@ napi_value JsKioskManager::OnEnterKioskMode(napi_env env, NapiCallbackInfo &info
     auto context = OHOS::AbilityRuntime::GetStageModeContext(env, info.argv[INDEX_ZERO]);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null context");
-        ThrowInvalidParamError(env, "Parse param context failed, must not be nullptr.");
+        ThrowInvalidParamError(env, "Failed to get context. Context must not be nullptr.");
         return CreateJsUndefined(env);
     }
     auto uiAbilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
     if (uiAbilityContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null UIAbilityContext");
-        ThrowInvalidParamError(env, "Parse param context failed, must be UIAbilityContext.");
+        ThrowInvalidParamError(env, "Failed to get uiAbilityContext, uiAbilityContext must not be nullptr.");
         return CreateJsUndefined(env);
     }
     auto token = uiAbilityContext->GetToken();
@@ -202,13 +202,13 @@ napi_value JsKioskManager::OnExitKioskMode(napi_env env, NapiCallbackInfo &info)
     auto context = OHOS::AbilityRuntime::GetStageModeContext(env, info.argv[INDEX_ZERO]);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null context");
-        ThrowInvalidParamError(env, "Parse param context failed, must not be nullptr.");
+        ThrowInvalidParamError(env, "Failed to get context. Context must not be nullptr.");
         return CreateJsUndefined(env);
     }
     auto uiAbilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
     if (uiAbilityContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null UIAbilityContext");
-        ThrowInvalidParamError(env, "Parse param context failed, must be UIAbilityContext.");
+        ThrowInvalidParamError(env, "Failed to get uIAbilityContext. Context must be uIAbilityContext.");
         return CreateJsUndefined(env);
     }
     auto token = uiAbilityContext->GetToken();
@@ -277,15 +277,13 @@ napi_value JsKioskManager::OnGetKioskStatus(napi_env env, NapiCallbackInfo &info
 
 napi_value JsKioskManagerInit(napi_env env, napi_value exportObj)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-
     std::unique_ptr<JsKioskManager> jsKioskManager = std::make_unique<JsKioskManager>();
     napi_wrap(env, exportObj, jsKioskManager.release(), JsKioskManager::Finalizer, nullptr,
               nullptr);
 
     const char *moduleName = "JsKioskManager";
 
-    BindNativeFunction(env, exportObj, "updateKioskApplicationList", moduleName,
+    BindNativeFunction(env, exportObj, "updateKioskAppList", moduleName,
                        JsKioskManager::UpdateKioskApplicationList);
     BindNativeFunction(env, exportObj, "enterKioskMode", moduleName, JsKioskManager::EnterKioskMode);
     BindNativeFunction(env, exportObj, "exitKioskMode", moduleName, JsKioskManager::ExitKioskMode);
