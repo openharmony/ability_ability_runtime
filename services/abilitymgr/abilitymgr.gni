@@ -66,6 +66,7 @@ abilityms_files = [
   "src/interceptor/extension_control_interceptor.cpp",
   "src/interceptor/screen_unlock_interceptor.cpp",
   "src/interceptor/start_other_app_interceptor.cpp",
+  "src/interceptor/kiosk_interceptor.cpp",
   "src/window_focus_changed_listener.cpp",
   "src/window_visibility_changed_listener.cpp",
 
@@ -168,6 +169,8 @@ abilityms_files = [
   "src/utils/want_utils.cpp",
   "src/utils/window_options_utils.cpp",
   "src/utils/timeout_state_utils.cpp",
+  "src/kiosk_status.cpp",
+  "src/kiosk_manager.cpp"
 ]
 
 if (ability_runtime_graphics) {

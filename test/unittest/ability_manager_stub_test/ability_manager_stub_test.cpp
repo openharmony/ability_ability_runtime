@@ -3785,5 +3785,91 @@ HWTEST_F(AbilityManagerStubTest, GetInsightIntentInfoByIntentName_0100, TestSize
 
     TAG_LOGI(AAFwkTag::TEST, "end");
 }
+
+/**
+ * @tc.name: UpdateKioskApplicationListInner
+ * @tc.desc: UpdateKioskApplicationListInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, UpdateKioskApplicationListInner, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    MessageParcel data;
+    bool writeRet = data.WriteInterfaceToken(AbilityManagerStubImplMock::GetDescriptor());
+    std::vector<std::string> appList = {"com.ohos.test1"};
+    writeRet &= data.WriteStringVector(appList);
+    EXPECT_EQ(writeRet, true);
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::UPDATE_KIOSK_APP_LIST), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: EnterKioskModeInner
+ * @tc.desc: EnterKioskModeInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, EnterKioskModeInner, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    MessageParcel data;
+    bool writeRet = data.WriteInterfaceToken(AbilityManagerStubImplMock::GetDescriptor());
+    auto token = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    writeRet &= data.WriteRemoteObject(token);
+    EXPECT_EQ(writeRet, true);
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::ENTER_KIOSK_MODE), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: ExitKioskModeInner
+ * @tc.desc: ExitKioskModeInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, ExitKioskModeInner, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    MessageParcel data;
+    bool writeRet = data.WriteInterfaceToken(AbilityManagerStubImplMock::GetDescriptor());
+    auto token = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    writeRet &= data.WriteRemoteObject(token);
+    EXPECT_EQ(writeRet, true);
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::EXIT_KIOSK_MODE), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: GetKioskStatusInner
+ * @tc.desc: GetKioskStatusInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, GetKioskStatusInner, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    MessageParcel data;
+    bool writeRet = data.WriteInterfaceToken(AbilityManagerStubImplMock::GetDescriptor());
+    EXPECT_EQ(writeRet, true);
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_KIOSK_INFO), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
 } // namespace AAFwk
 } // namespace OHOS

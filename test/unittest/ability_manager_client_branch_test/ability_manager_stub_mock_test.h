@@ -32,6 +32,25 @@ public:
     {}
 
     MOCK_METHOD4(SendRequest, int(uint32_t, MessageParcel&, MessageParcel&, MessageOption&));
+    int32_t UpdateKioskApplicationList(const std::vector<std::string> &appList) override
+    {
+        return 0;
+    }
+
+    int32_t EnterKioskMode(sptr<IRemoteObject> callerToken) override
+    {
+        return 0;
+    }
+
+    int32_t ExitKioskMode(sptr<IRemoteObject> callerToken) override
+    {
+        return 0;
+    }
+
+    int32_t GetKioskStatus(AAFwk::KioskStatus &kioskStatus) override
+    {
+        return 0;
+    }
 
     int InvokeSendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
     {

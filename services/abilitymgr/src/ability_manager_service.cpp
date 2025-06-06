@@ -59,6 +59,7 @@
 #include "interceptor/extension_control_interceptor.h"
 #include "interceptor/screen_unlock_interceptor.h"
 #include "interceptor/start_other_app_interceptor.h"
+#include "interceptor/kiosk_interceptor.h"
 #include "int_wrapper.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -6795,6 +6796,7 @@ void AbilityManagerService::OnAppStateChanged(const AppInfo &info)
     if (system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
         KeepAliveProcessManager::GetInstance().OnAppStateChanged(info);
     }
+    KioskManager::GetInstance().OnAppStop(info);
 }
 
 std::shared_ptr<AbilityEventHandler> AbilityManagerService::GetEventHandler()
@@ -14299,6 +14301,35 @@ int32_t AbilityManagerService::RestartSelfAtomicService(sptr<IRemoteObject> call
     }
     RestartAppManager::GetInstance().AddRestartAppHistory(key, now);
     return result;
+}
+
+int32_t AbilityManagerService::UpdateKioskApplicationList(const std::vector<std::string> &appList)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "request UpdateKioskApplicationList");
+    return KioskManager::GetInstance().UpdateKioskApplicationList(appList);
+}
+
+int32_t AbilityManagerService::EnterKioskMode(sptr<IRemoteObject> callerToken)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "request EnterKioskMode");
+    return KioskManager::GetInstance().EnterKioskMode(callerToken);
+}
+
+int32_t AbilityManagerService::ExitKioskMode(sptr<IRemoteObject> callerToken)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "request ExitKioskMode");
+    return KioskManager::GetInstance().ExitKioskMode(callerToken);
+}
+
+int32_t AbilityManagerService::GetKioskStatus(KioskStatus &kioskStatus)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "request GetKioskStatus");
+    return KioskManager::GetInstance().GetKioskStatus(kioskStatus);
+}
+
+std::shared_ptr<AbilityInterceptorExecuter> AbilityManagerService::GetAbilityInterceptorExecuter()
+{
+    return interceptorExecuter_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

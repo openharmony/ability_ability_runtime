@@ -1825,6 +1825,14 @@ public:
         const std::string &moduleName,
         const std::string &intentName,
         InsightIntentInfoForQuery &info);
+
+    ErrCode UpdateKioskApplicationList(const std::vector<std::string> &appList);
+
+    ErrCode EnterKioskMode(sptr<IRemoteObject> callerToken);
+
+    ErrCode ExitKioskMode(sptr<IRemoteObject> callerToken);
+
+    ErrCode GetKioskStatus(AAFwk::KioskStatus &kioskStatus);
                                     
 private:
     AbilityManagerClient();

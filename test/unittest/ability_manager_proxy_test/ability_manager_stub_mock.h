@@ -40,6 +40,14 @@ public:
         return 0;
     }
 
+    int InvokeKioskModeSendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
+    {
+        code_ = code;
+        KioskStatus kioskStatus;
+        reply.WriteParcelable(&kioskStatus);
+        return 0;
+    }
+
     int InvokeErrorSendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
     {
         code_ = code;
@@ -362,7 +370,10 @@ public:
     MOCK_METHOD4(ShareDataDone, int32_t(const sptr<IRemoteObject> &token,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam));
     MOCK_METHOD1(MoveUIAbilityToBackground, int(const sptr<IRemoteObject> token));
-
+    MOCK_METHOD1(UpdateKioskApplicationList, int(const std::vector<std::string> &appList));
+    MOCK_METHOD1(EnterKioskMode, int(sptr<IRemoteObject>));
+    MOCK_METHOD1(ExitKioskMode, int(sptr<IRemoteObject>));
+    MOCK_METHOD1(GetKioskStatus, int(AAFwk::KioskStatus &kioskInf));
     int StartUserTest(const Want& want, const sptr<IRemoteObject>& observer) override
     {
         return 0;

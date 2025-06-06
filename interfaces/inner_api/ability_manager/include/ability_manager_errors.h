@@ -826,7 +826,27 @@ enum {
     ERR_UPMS_NOT_FILE_URI = 2097346,
 
     ERR_UPMS_GRANT_URI_PERMISSION_FAILED = 2097347,
-    
+
+    /**
+     * Result (2097351) target not in whitelist.
+     */
+    ERR_KIOSK_MODE_NOT_IN_WHITELIST = 2097351,
+
+    /**
+     * Result (2097352) already in kiosk mode.
+     */
+    ERR_ALREADY_IN_KIOSK_MODE = 2097352,
+
+    /**
+     * Result (2097353) system not in kiosk mode when required.
+     */
+    ERR_NOT_IN_KIOSK_MODE = 2097353,
+
+    /**
+     * Result (2097354) for application not in focus.
+     */
+    ERR_APP_NOT_IN_FOCUS = 2097354,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */
