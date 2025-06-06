@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,10 @@
 
 #include <algorithm>
 
+#include "ability_manager_errors.h"
 #include "ability_manager_service.h"
 #include "ability_record.h"
-#include "ability_manager_errors.h"
+#include "ability_util.h"
 #include "common_event.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -27,6 +28,7 @@
 #include "ipc_skeleton.h"
 #include "kiosk_manager.h"
 #include "permission_constants.h"
+#include "session_manager_lite.h"
 #include "singleton.h"
 #include "utils/want_utils.h"
 
@@ -75,7 +77,9 @@ int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> 
     for (const auto &app : appList) {
         whitelist_.insert(app);
     }
-
+    auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    CHECK_POINTER_AND_RETURN_LOG(sceneSessionManager, ERR_INVALID_VALUE, "sceneSessionManager is nullptr");
+    sceneSessionManager->UpdateKioskAppList(appList);
     return ERR_OK;
 }
 
@@ -105,7 +109,9 @@ int32_t KioskManager::EnterKioskMode(sptr<IRemoteObject> callerToken)
     kioskStatus_.kioskBundleUid_ = IPCSkeleton::GetCallingUid();
     GetEnterKioskModeCallback()();
     notifyKioskModeChanged(true);
-
+    auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    CHECK_POINTER_AND_RETURN_LOG(sceneSessionManager, ERR_INVALID_VALUE, "sceneSessionManager is nullptr");
+    sceneSessionManager->EnterKioskMode(callerToken);
     return ERR_OK;
 }
 
@@ -117,10 +123,10 @@ int32_t KioskManager::ExitKioskMode(sptr<IRemoteObject> callerToken)
         return INVALID_PARAMETERS_ERR;
     }
     std::lock_guard<std::mutex> lock(kioskManagermutex_);
-    return ExitKioskModeInner(record->GetAbilityInfo().bundleName);
+    return ExitKioskModeInner(record->GetAbilityInfo().bundleName, callerToken);
 }
 
-int32_t KioskManager::ExitKioskModeInner(const std::string & bundleName)
+int32_t ExitKioskModeInner(const std::string &bundleName, sptr<IRemoteObject> callerToken = nullptr);
 {
     if (!IsInWhiteListInner(bundleName)) {
         return ERR_KIOSK_MODE_NOT_IN_WHITELIST;
@@ -132,6 +138,9 @@ int32_t KioskManager::ExitKioskModeInner(const std::string & bundleName)
     GetExitKioskModeCallback()();
     notifyKioskModeChanged(false);
     kioskStatus_.Clear();
+    auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    CHECK_POINTER_AND_RETURN_LOG(sceneSessionManager, ERR_INVALID_VALUE, "sceneSessionManager is nullptr");
+    sceneSessionManager->ExitKioskMode(callerToken);
     return ERR_OK;
 }
 
