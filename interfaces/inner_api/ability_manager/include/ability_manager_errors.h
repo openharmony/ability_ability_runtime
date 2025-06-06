@@ -847,6 +847,10 @@ enum {
      */
     ERR_APP_NOT_IN_FOCUS = 2097354,
 
+    ERR_WRITE_KIOSK_UPDATE_APP_LIST_FAILED = 2097355,
+
+    ERR_WRITE_KIOSK_STATUS_FAILED = 2097356,
+
     /**
      * Result (2097355) for sa interceptor executer is nullptr.
      */

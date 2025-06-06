@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,7 +104,7 @@ int32_t KioskManager::EnterKioskMode(sptr<IRemoteObject> callerToken)
     kioskStatus_.kioskBundleName_ = bundleName;
     kioskStatus_.kioskBundleUid_ = IPCSkeleton::GetCallingUid();
     GetEnterKioskModeCallback()();
-    notifyKioskModeChanged(true);
+    NotifyKioskModeChanged(true);
 
     return ERR_OK;
 }
@@ -130,7 +130,7 @@ int32_t KioskManager::ExitKioskModeInner(const std::string & bundleName)
         return ERR_NOT_IN_KIOSK_MODE;
     }
     GetExitKioskModeCallback()();
-    notifyKioskModeChanged(false);
+    NotifyKioskModeChanged(false);
     kioskStatus_.Clear();
     return ERR_OK;
 }
@@ -164,7 +164,7 @@ bool KioskManager::IsInKioskModeInner()
     return kioskStatus_.isKioskMode_;
 }
 
-void KioskManager::notifyKioskModeChanged(bool isInKioskMode)
+void KioskManager::NotifyKioskModeChanged(bool isInKioskMode)
 {
     std::string eventData = isInKioskMode
                                 ? EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_ON
@@ -195,7 +195,7 @@ std::function<void()> KioskManager::GetEnterKioskModeCallback()
 std::function<void()> KioskManager::GetExitKioskModeCallback()
 {
     auto exitKioskModeCallback = []() {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "EnterKioskMode");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "ExitKioskMode");
         KioskManager::GetInstance().RemoveKioskInterceptor();
     };
     return exitKioskModeCallback;

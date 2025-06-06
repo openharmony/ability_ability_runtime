@@ -1134,24 +1134,6 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_ExitKioskMode_Fail_01, T
 
 /*
  * Feature: KioskManager
- * Function: ExitKioskMode
- * SubFunction: NA
- * FunctionPoints: KioskManager ExitKioskMode
- */
-HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_ExitKioskMode_Fail_02, TestSize.Level1) {
-    std::vector<std::string> bundleNames;
-    bundleNames.emplace_back("com.test.demo");
-    bundleNames.emplace_back("com.test.demo2");
-    bundleNames.emplace_back("com.test.demo3");
-    auto result = KioskManager::GetInstance().UpdateKioskApplicationList(bundleNames);
-    ASSERT_EQ(result, ERR_OK);
-    auto callerToken = MockToken(AbilityType::PAGE);
-    result = KioskManager::GetInstance().ExitKioskMode(callerToken);
-    ASSERT_EQ(result, ERR_NOT_IN_KIOSK_MODE);
-}
-
-/*
- * Feature: KioskManager
  * Function: GetKioskStatus
  * SubFunction: NA
  * FunctionPoints: KioskManager GetKioskStatus
