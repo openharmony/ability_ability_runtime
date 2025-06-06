@@ -132,6 +132,7 @@ private:
     void FindStackByPid(std::string& msg, int pid) const;
     std::string CatchJsonStacktrace(int pid, const std::string& faultType, const std::string& stack) const;
     std::string CatcherStacktrace(int pid, const std::string& stack) const;
+    FaultData GetFaultNotifyData(const FaultData& faultData, int pid);
     int AcquireStack(const FaultData& faultData, const AppInfo& appInfo, const std::string& memoryContent);
     int NotifyANR(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo,
         const std::string& binderInfo, const std::string& memoryContent);
@@ -144,6 +145,9 @@ private:
     int MergeNotifyInfo(FaultData& faultNotifyData, const AppfreezeManager::AppInfo& appInfo);
     std::string ParseDecToHex(uint64_t id);
     bool GetHitraceId(HitraceInfo& info);
+    void PerfStart(std::string eventName);
+    std::string GetFirstLine(const std::string &path);
+    std::string GetFreezeInfoFile(const FaultData& faultData, const std::string& bundleName);
 
     static const inline std::string LOGGER_DEBUG_PROC_PATH = "/proc/transaction_proc";
     std::string name_;
@@ -156,8 +160,8 @@ private:
     static ffrt::mutex freezeFilterMutex_;
     std::map<std::string, AppFreezeInfo> appfreezeFilterMap_;
     int64_t perfTime = 0;
-    void PerfStart(std::string eventName);
-    std::string GetFirstLine(const std::string &path);
+    static ffrt::mutex freezeInfoMutex_;
+    static std::string appfreezeInfoPath_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
