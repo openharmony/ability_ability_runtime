@@ -33,6 +33,11 @@ class AppServiceExtensionContext extends ExtensionContext {
     return this.__context_impl__.disconnectServiceExtensionAbility(connection);
   }
 
+  startAbility(want, options) {
+    hilog.sLogI(domainID, TAG, 'startAbility');
+    return this.__context_impl__.startAbility(want, options);
+  }
+
   terminateSelf() {
     hilog.sLogI(domainID, TAG, 'terminateSelf');
     return this.__context_impl__.terminateSelf();
