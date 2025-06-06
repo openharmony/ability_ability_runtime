@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,8 @@ enum CollaborateResult {
     REJECT,
 };
 
+const std::string REASON_MESSAGE_DESKTOP_SHORTCUT = "ReasonMessage_DesktopShortcut";
+
 static napi_status SetEnumItem(napi_env env, napi_value object, const char* name, int32_t value)
 {
     TAG_LOGD(AAFwkTag::JSNAPI, "called");
@@ -49,6 +51,16 @@ static napi_status SetEnumItem(napi_env env, napi_value object, const char* name
     NAPI_CALL_BASE(env, status = napi_set_property(env, object, itemValue, itemName), status);
 
     return napi_ok;
+}
+
+static napi_value InitReasonMessageDesktopShortcut(napi_env env)
+{
+    napi_value reasonMessage = nullptr;
+    if (napi_create_string_utf8(env, REASON_MESSAGE_DESKTOP_SHORTCUT.c_str(), REASON_MESSAGE_DESKTOP_SHORTCUT.length(),
+        &reasonMessage) != napi_ok) {
+        return nullptr;
+    }
+    return reasonMessage;
 }
 
 static napi_value InitLaunchReasonObject(napi_env env)
@@ -203,6 +215,12 @@ static napi_value InitAbilityStagePrepareTerminationObject(napi_env env)
  */
 static napi_value AbilityConstantInit(napi_env env, napi_value exports)
 {
+    napi_value reasonMessageDesktopShortcut = InitReasonMessageDesktopShortcut(env);
+    if (reasonMessageDesktopShortcut == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null reasonMessageDesktopShortcut");
+        return nullptr;
+    }
+
     napi_value launchReason = InitLaunchReasonObject(env);
     if (launchReason == nullptr) {
         TAG_LOGE(AAFwkTag::JSNAPI, "null launchReason");
@@ -274,6 +292,7 @@ static napi_value AbilityConstantInit(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("StateType", stateType),
         DECLARE_NAPI_PROPERTY("CollaborateResult", collaborateResult),
         DECLARE_NAPI_PROPERTY("PrepareTermination", prepareTermination),
+        DECLARE_NAPI_PROPERTY("REASON_MESSAGE_DESKTOP_SHORTCUT", reasonMessageDesktopShortcut),
     };
     napi_status status = napi_define_properties(env, exports, sizeof(exportObjs) / sizeof(exportObjs[0]), exportObjs);
     if (status != napi_ok) {

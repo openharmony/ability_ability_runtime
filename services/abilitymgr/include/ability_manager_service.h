@@ -2349,7 +2349,7 @@ private:
     void RetrySubscribeScreenUnlockedEvent(int32_t retryCount);
     void RemoveScreenUnlockInterceptor();
     void RemoveUnauthorizedLaunchReasonMessage(const Want &want, AbilityRequest &abilityRequest,
-        const sptr<IRemoteObject> &callerToken);
+        uint32_t callerTokenId);
 
     int VerifyAccountPermission(int32_t userId);
 
