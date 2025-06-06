@@ -123,6 +123,9 @@ public:
     }
     MOCK_METHOD(WMError, CreateNewInstanceKey, (const std::string& bundleName, std::string& instanceKey), (override));
     MOCK_METHOD(WMError, RemoveInstanceKey, (const std::string& bundleName, const std::string& instanceKey), (override));
+    MOCK_METHOD(WSError, PendingSessionToBackground,
+        (const sptr<IRemoteObject>& token, const BackgroundParams& params), (override));
+    MOCK_METHOD(WMError, TransferSessionToTargetScreen, (const TransferSessionInfo& info), (override));
 };
 } // namespace OHOS::Rosen
 #endif // MOCK_SCENE_SESSION_MANAGER_LITE_H
