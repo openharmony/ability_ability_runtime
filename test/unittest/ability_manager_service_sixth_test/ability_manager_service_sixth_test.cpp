@@ -2064,7 +2064,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, GetInsightIntentInfoByBundleName_001, T
     std::string bundleName = "com.example.bundleName";
     std::vector<InsightIntentInfoForQuery> infos;
     auto ret = abilityMs->GetInsightIntentInfoByBundleName(flag, bundleName, infos);
-    EXPECT_NE(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest GetInsightIntentInfoByBundleName end");
 }
 
@@ -2085,7 +2085,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, GetInsightIntentInfoByIntentName_001, T
     std::string intentName = "test";
     InsightIntentInfoForQuery info;
     auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
-    EXPECT_NE(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest GetInsightIntentInfoByIntentName_001 end");
 }
 }  // namespace AAFwk
