@@ -67,6 +67,8 @@ public:
     static void NativeMoveAbilityToBackground(ani_env *env, ani_object aniObj, ani_object callBack);
     static void NativeRequestModalUIExtension(ani_env *env, ani_object aniObj, ani_string pickerWantObj,
         ani_object callBackObj);
+    static ani_object NativeTransferStatic(ani_env *env, ani_object aniObj, ani_object input);
+    static ani_object NativeTransferDynamic(ani_env *env, ani_object aniObj, ani_object input);
 
 private:
     static void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
