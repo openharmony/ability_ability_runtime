@@ -14148,7 +14148,7 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
     std::vector<InsightIntentInfoForQuery> &infos)
 {
     TAG_LOGI(AAFwkTag::INTENT, "GetAllInsightIntentInfo");
-    int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckCallerPermission();
+    int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckGetInsightIntenInfoPermission();
     if (ret != ERR_OK) {
         TAG_LOGD(AAFwkTag::INTENT, "not system app or permission denied");
         return ret;
@@ -14189,7 +14189,7 @@ int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
     std::vector<InsightIntentInfoForQuery> &infos)
 {
     TAG_LOGI(AAFwkTag::INTENT, "GetInsightIntentInfoByBundleName");
-    int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckCallerPermission();
+    int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckGetInsightIntenInfoPermission();
     if (ret != ERR_OK) {
         TAG_LOGD(AAFwkTag::INTENT, "not system app or permission denied");
         return ret;
@@ -14234,7 +14234,7 @@ int32_t AbilityManagerService::GetInsightIntentInfoByIntentName(
     InsightIntentInfoForQuery &info)
 {
     TAG_LOGI(AAFwkTag::INTENT, "GetInsightIntentInfoByIntentName");
-    int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckCallerPermission();
+    int32_t ret = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckGetInsightIntenInfoPermission();
     if (ret != ERR_OK) {
         TAG_LOGD(AAFwkTag::INTENT, "not system app or permission denied");
         return ret;
