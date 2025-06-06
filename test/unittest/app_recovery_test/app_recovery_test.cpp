@@ -130,7 +130,7 @@ HWTEST_F(AppRecoveryUnitTest, InitApplicationInfo_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, EnableAppRecovery_001, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, EnableAppRecovery_001, TestSize.Level0)
 {
     EXPECT_FALSE(AppRecovery::GetInstance().IsEnabled());
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
@@ -144,7 +144,7 @@ HWTEST_F(AppRecoveryUnitTest, EnableAppRecovery_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, EnableAppRecovery_002, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, EnableAppRecovery_002, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -159,7 +159,7 @@ HWTEST_F(AppRecoveryUnitTest, EnableAppRecovery_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, EnableAppRecovery_003, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, EnableAppRecovery_003, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::NO_RESTART, SaveOccasionFlag::SAVE_ALL,
         SaveModeFlag::SAVE_WITH_SHARED_MEMORY);
@@ -278,7 +278,7 @@ HWTEST_F(AppRecoveryUnitTest, DoRecoverApp_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ShouldSaveAppState_001, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ShouldSaveAppState_001, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -292,7 +292,7 @@ HWTEST_F(AppRecoveryUnitTest, ShouldSaveAppState_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ShouldSaveAppState_002, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ShouldSaveAppState_002, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -306,7 +306,7 @@ HWTEST_F(AppRecoveryUnitTest, ShouldSaveAppState_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ShouldSaveAppState_003, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ShouldSaveAppState_003, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_BACKGROUND,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -336,7 +336,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_002, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_002, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -350,7 +350,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_003, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_003, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -378,7 +378,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_004, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_004, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -393,7 +393,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_005, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_005, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -409,7 +409,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_006, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_006, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -426,7 +426,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_006, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_007, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_007, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -442,7 +442,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_007, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ShouldRecoverApp_001, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ShouldRecoverApp_001, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::NO_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -456,7 +456,7 @@ HWTEST_F(AppRecoveryUnitTest, ShouldRecoverApp_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ShouldRecoverApp_002, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ShouldRecoverApp_002, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -474,7 +474,7 @@ HWTEST_F(AppRecoveryUnitTest, ShouldRecoverApp_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ShouldRecoverApp_003, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ShouldRecoverApp_003, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -524,7 +524,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_003, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_003, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -538,7 +538,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_003, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_004, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_004, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -556,7 +556,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_004, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_005, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_005, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -575,7 +575,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_005, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_006, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_006, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -605,7 +605,7 @@ HWTEST_F(AppRecoveryUnitTest, TryRecoverApp_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
-HWTEST_F(AppRecoveryUnitTest, TryRecoverApp_002, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, TryRecoverApp_002, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -623,7 +623,7 @@ HWTEST_F(AppRecoveryUnitTest, TryRecoverApp_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5Z7LE
  */
-HWTEST_F(AppRecoveryUnitTest, PersistAppState_001, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, PersistAppState_001, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_FILE);
@@ -636,7 +636,7 @@ HWTEST_F(AppRecoveryUnitTest, PersistAppState_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5Z7LE
  */
-HWTEST_F(AppRecoveryUnitTest, PersistAppState_002, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, PersistAppState_002, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_SHARED_MEMORY);
@@ -649,7 +649,7 @@ HWTEST_F(AppRecoveryUnitTest, PersistAppState_002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5Z7LE
  */
-HWTEST_F(AppRecoveryUnitTest, PersistAppState_003, TestSize.Level1)
+HWTEST_F(AppRecoveryUnitTest, PersistAppState_003, TestSize.Level0)
 {
     AppRecovery::GetInstance().EnableAppRecovery(RestartFlag::ALWAYS_RESTART, SaveOccasionFlag::SAVE_WHEN_ERROR,
         SaveModeFlag::SAVE_WITH_SHARED_MEMORY);
