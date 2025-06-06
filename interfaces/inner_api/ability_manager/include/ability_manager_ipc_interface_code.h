@@ -629,6 +629,21 @@ enum class AbilityManagerInterfaceCode {
 
     // restart atomic service
     RESTART_SELF_ATOMIC_SERVICE = 6144,
+
+    // update the list of applications allowed in kiosk mode
+    UPDATE_KIOSK_APP_LIST = 6145,
+
+    // enter kiosk mode
+    ENTER_KIOSK_MODE = 6146,
+
+    // exit kiosk mode
+    EXIT_KIOSK_MODE = 6147,
+
+    // get current kiosk mode information
+    GET_KIOSK_INFO = 6148,
+
+    // register sa interceptor
+    REGISTER_SA_INTERCEPTOR = 6149,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

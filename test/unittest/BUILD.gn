@@ -414,8 +414,12 @@ group("unittest") {
       "res_sched_util_test:unittest",
       "resident_process_manager_test:unittest",
       "restart_app_manager_test:unittest",
+      "rule_test:unittest",
       "running_infos_test:unittest",
       "runtime_test:unittest",
+      "sa_interceptor_manager_test:unittest",
+      "sa_interceptor_proxy_test:unittest",
+      "sa_interceptor_stub_test:unittest",
       "screen_unlock_interceptor_test:unittest",
       "sender_info_test:unittest",
       "service_extension_context_test:unittest",
@@ -462,6 +466,7 @@ group("unittest") {
       "window_focus_changed_listener_test:unittest",
       "window_options_utils_test:unittest",
       "window_visibility_changed_listener_test:unittest",
+      "../new_test/unit_test:unittest",
     ]
 
     if (ability_runtime_auto_fill) {

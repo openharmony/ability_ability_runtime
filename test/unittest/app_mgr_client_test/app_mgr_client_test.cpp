@@ -715,6 +715,22 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_DumpJsHeapMemory_001, TestSize.Level2)
 }
 
 /**
+ * @tc.name: AppMgrClient_DumpCjHeapMemory_001
+ * @tc.desc: DumpCjHeapMemory.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_DumpCjHeapMemory_001, TestSize.Level2)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+
+    OHOS::AppExecFwk::CjHeapDumpInfo info;
+    appMgrClient->DumpCjHeapMemory(info);
+    EXPECT_NE(appMgrClient, nullptr);
+}
+
+/**
  * @tc.name: AppMgrClient_NotifyMemoryLevel_001
  * @tc.desc: NotifyMemoryLevel.
  * @tc.type: FUNC

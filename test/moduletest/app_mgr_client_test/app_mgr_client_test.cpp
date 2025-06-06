@@ -64,7 +64,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetProcessRunningInfosByUserId_0100, Tes
 {
     TAG_LOGI(AAFwkTag::TEST, "AppMgrClient_GetProcessRunningInfosByUserId_0100 start");
 
-    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
 

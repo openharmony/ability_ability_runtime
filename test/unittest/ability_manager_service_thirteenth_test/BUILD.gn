@@ -165,6 +165,7 @@ ohos_unittest("ability_manager_service_thirteenth_test") {
     "${ability_runtime_services_path}/abilitymgr/src/remote_mission_listener_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/resident_process/resident_process_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/restart_app_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/sa_interceptor_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/status_bar_delegate_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/screen_lock/unlock_screen_callback.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/screen_lock/unlock_screen_manager.cpp",
@@ -225,6 +226,9 @@ ohos_unittest("ability_manager_service_thirteenth_test") {
     "mock/src/mock_scene_board_judgement.cpp",
     "mock/src/mock_sub_managers_helper.cpp",
     "mock/src/mock_ui_ability_lifecycle_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/kiosk_status.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/kiosk_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/interceptor/kiosk_interceptor.cpp",
   ]
 
   deps = [

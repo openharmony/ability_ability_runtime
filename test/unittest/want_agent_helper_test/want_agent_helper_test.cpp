@@ -1012,7 +1012,8 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_4900, Function | MediumTest | Leve
 
     std::shared_ptr<CompletedCallback> callback;
     TriggerInfo paramsInfo;
-    WantAgentHelper::TriggerWantAgent(nullptr, callback, paramsInfo);
+    sptr<CompletedDispatcher> completedData;
+    WantAgentHelper::TriggerWantAgent(nullptr, callback, paramsInfo, completedData, nullptr);
 
     GTEST_LOG_(INFO) << "WantAgentHelper::TriggerWantAgent end";
 }
@@ -1028,7 +1029,8 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_5000, Function | MediumTest | Leve
 
     std::shared_ptr<WantAgent> wantAgent(nullptr);
     TriggerInfo paramsInfo;
-    WantAgentHelper::TriggerWantAgent(wantAgent, nullptr, paramsInfo);
+    sptr<CompletedDispatcher> completedData;
+    WantAgentHelper::TriggerWantAgent(wantAgent, nullptr, paramsInfo, completedData, nullptr);
 
     GTEST_LOG_(INFO) << "WantAgentHelper::TriggerWantAgent end";
 }
@@ -1045,7 +1047,8 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_5100, Function | MediumTest | Leve
     std::shared_ptr<WantAgent> wantAgent(nullptr);
     std::shared_ptr<CompletedCallback> callback;
     TriggerInfo paramsInfo;
-    WantAgentHelper::TriggerWantAgent(wantAgent, callback, paramsInfo);
+    sptr<CompletedDispatcher> completedData;
+    WantAgentHelper::TriggerWantAgent(wantAgent, callback, paramsInfo, completedData, nullptr);
 
     GTEST_LOG_(INFO) << "WantAgentHelper::TriggerWantAgent end";
 }

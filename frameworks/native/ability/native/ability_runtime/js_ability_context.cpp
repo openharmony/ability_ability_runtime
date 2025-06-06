@@ -1706,10 +1706,17 @@ napi_value JsAbilityContext::ConnectExtensionAbilityCommon(napi_env env, NapiCal
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
-
+    
+    std::string proNameNotFilter = "";
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken) &&
+        extensionType == AppExecFwk::ExtensionAbilityType::SERVICE) {
+        proNameNotFilter = Want::PARAM_RESV_DISPLAY_ID;
+        TAG_LOGI(AAFwkTag::CONTEXT, "don't filter displayId");
+    }
     // unwrap want
     AAFwk::Want want;
-    OHOS::AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want);
+    OHOS::AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want, proNameNotFilter);
     TAG_LOGD(AAFwkTag::CONTEXT, "callee:%{public}s.%{public}s",
         want.GetBundle().c_str(),
         want.GetElement().GetAbilityName().c_str());

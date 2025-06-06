@@ -674,7 +674,7 @@ public:
     virtual sptr<IWantSender> GetWantSender(
         const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t uid = -1) override;
 
-    virtual int SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo) override;
+    virtual int SendWantSender(sptr<IWantSender> target, SenderInfo &senderInfo) override;
 
     virtual void CancelWantSender(const sptr<IWantSender> &sender) override;
 
@@ -1734,6 +1734,39 @@ public:
         const std::string &moduleName,
         const std::string &intentName,
         InsightIntentInfoForQuery &info) override;
+
+    /**
+     * Update the list of applications allowed in Kiosk mode.
+     * @param appList, the vector of bundle names for applications allowed in Kiosk mode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UpdateKioskApplicationList(const std::vector<std::string> &appList) override;
+
+    /**
+     * Enter Kiosk mode
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t EnterKioskMode(sptr<IRemoteObject> callerToken) override;
+
+    /**
+     * Exit Kiosk mode
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t ExitKioskMode(sptr<IRemoteObject> callerToken) override;
+
+    /**
+     * Get current Kiosk mode information.
+     * @param kioskStatus, the structure to store Kiosk mode details.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetKioskStatus(AAFwk::KioskStatus &kioskStatus) override;
+
+    /**
+     * Register sa interceptor.
+     * @param interceptor, The sa interceptor.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode RegisterSAInterceptor(sptr<AbilityRuntime::ISAInterceptor> interceptor) override;
 
 private:
     template <typename T>
