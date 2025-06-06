@@ -28,6 +28,9 @@
 #include "event_handler.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "interop_js/arkts_esvalue.h"
+#include "interop_js/hybridgref_ani.h"
+#include "interop_js/hybridgref_napi.h"
 #include "ipc_skeleton.h"
 #include "sts_data_struct_converter.h"
 #include "mission_info.h"
@@ -683,6 +686,56 @@ void StsAbilityContext::NativeRequestModalUIExtension(ani_env *env, ani_object a
     AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
 }
 
+ani_object StsAbilityContext::NativeTransferStatic(ani_env *env, ani_object, ani_object input)
+{
+    void *unwrapResult = nullptr;
+    bool success = arkts_esvalue_unwrap(env, input, &unwrapResult);
+    if (!success) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "failed to unwrap");
+        return nullptr;
+    }
+    if (unwrapResult == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null unwrapResult");
+        return nullptr;
+    }
+    auto context = reinterpret_cast<std::weak_ptr<AbilityContext> *>(unwrapResult)->lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null context");
+        return nullptr;
+    }
+    auto &bindingObj = context->GetBindingObject();
+    if (bindingObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObj");
+        return nullptr;
+    }
+    auto staticContext = bindingObj->Get<ani_ref>();
+    if (staticContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null staticContext");
+        return nullptr;
+    }
+    return reinterpret_cast<ani_object>(*staticContext);
+}
+
+ani_object StsAbilityContext::NativeTransferDynamic(ani_env *env, ani_object, ani_object input)
+{
+    auto context = GetAbilityContext(env, input);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null context");
+        return nullptr;
+    }
+    auto &bindingObj = context->GetBindingObject();
+    if (bindingObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObj");
+        return nullptr;
+    }
+    auto dynamicContext = bindingObj->Get<NativeReference>();
+    if (dynamicContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null dynamicContext");
+        return nullptr;
+    }
+    return nullptr;
+}
+
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
     ani_status status = env->FindClass(UI_ABILITY_CONTEXT_CLASS_NAME, &cls);
@@ -730,6 +783,10 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void*>(StsAbilityContext::NativeMoveAbilityToBackground) },
             ani_native_function { "nativeRequestModalUIExtension", nullptr,
                 reinterpret_cast<void*>(StsAbilityContext::NativeRequestModalUIExtension) },
+            ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
+                reinterpret_cast<void*>(StsAbilityContext::NativeTransferStatic) },
+            ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",
+                reinterpret_cast<void*>(StsAbilityContext::NativeTransferDynamic) },
         };
         status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
     });
