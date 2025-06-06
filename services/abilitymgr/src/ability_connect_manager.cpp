@@ -164,7 +164,7 @@ int AbilityConnectManager::StopServiceAbility(const AbilityRequest &abilityReque
 int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityRequest)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "ability_name:%{public}s", abilityRequest.want.GetElement().GetURI().c_str());
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "ability_name:%{public}s", abilityRequest.want.GetElement().GetURI().c_str());
 
     int32_t ret = AbilityPermissionUtil::GetInstance().CheckMultiInstanceKeyForExtension(abilityRequest);
     if (ret != ERR_OK) {
@@ -191,7 +191,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
         GetOrCreateServiceRecord(abilityRequest, false, targetService, isLoadedAbility);
     }
     CHECK_POINTER_AND_RETURN(targetService, ERR_INVALID_VALUE);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "startAbility:%{public}s", targetService->GetURI().c_str());
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "startAbility:%{public}s", targetService->GetURI().c_str());
 
     std::string value = abilityRequest.want.GetStringParam(Want::PARM_LAUNCH_REASON_MESSAGE);
     if (UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType) && !value.empty()) {
@@ -379,7 +379,7 @@ int AbilityConnectManager::TerminateAbilityLocked(const sptr<IRemoteObject> &tok
 int AbilityConnectManager::StopServiceAbilityLocked(const AbilityRequest &abilityRequest)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "call");
     AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, GenerateBundleName(abilityRequest),
         abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
     std::string serviceKey = element.GetURI();
@@ -1640,7 +1640,7 @@ void AbilityConnectManager::PostRestartResidentTask(const AbilityRequest &abilit
 
 void AbilityConnectManager::HandleRestartResidentTask(const AbilityRequest &abilityRequest)
 {
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "start");
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "start");
     std::lock_guard guard(serialMutex_);
     auto findRestartResidentTask = [abilityRequest](const AbilityRequest &requestInfo) {
         return (requestInfo.want.GetElement().GetBundleName() == abilityRequest.want.GetElement().GetBundleName() &&
@@ -3255,7 +3255,7 @@ bool AbilityConnectManager::IsWindowExtensionFocused(uint32_t extensionTokenId, 
 
 void AbilityConnectManager::HandleProcessFrozen(const std::vector<int32_t> &pidList, int32_t uid)
 {
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "uid:%{public}d", uid);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "uid:%{public}d", uid);
     std::unordered_set<int32_t> pidSet(pidList.begin(), pidList.end());
     std::lock_guard lock(serviceMapMutex_);
     auto weakThis = weak_from_this();
@@ -3439,7 +3439,7 @@ bool AbilityConnectManager::AddToServiceMap(const std::string &key, std::shared_
         return false;
     }
     auto insert = serviceMap_.emplace(key, abilityRecord);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "ServiceMap add, size:%{public}zu", serviceMap_.size());
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "ServiceMap add, size:%{public}zu", serviceMap_.size());
     if (!insert.second) {
         TAG_LOGW(AAFwkTag::SERVICE_EXT, "record exist: %{public}s", key.c_str());
     }
