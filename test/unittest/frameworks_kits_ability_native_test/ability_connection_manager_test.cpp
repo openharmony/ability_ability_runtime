@@ -79,117 +79,117 @@ HWTEST_F(ConnectionManagerTest, ConnectAbilityWithAccount_0100, TestSize.Level0)
  * @tc.name: ConnectAbilityWithAccount
  * @tc.desc: ConnectAbilityWithAccount Test, connectCaller is nullptr, return ERR_INVALID_CALLER.
  */
- HWTEST_F(ConnectionManagerTest, ConnectAbilityWithAccount_0200, TestSize.Level1)
- {
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0200 start";
-     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
-         std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
-     AAFwk::Want want;
-     int32_t accountId = -1;
-     sptr<AbilityConnectCallback> connectCallback = new (std::nothrow) MockAbilityConnectCallback();
-     auto result = mgr->ConnectAbilityWithAccount(nullptr, want, accountId, connectCallback);
-     EXPECT_EQ(result, AAFwk::ERR_INVALID_CALLER);
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0200 end";
- }
+HWTEST_F(ConnectionManagerTest, ConnectAbilityWithAccount_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0200 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    AAFwk::Want want;
+    int32_t accountId = -1;
+    sptr<AbilityConnectCallback> connectCallback = new (std::nothrow) MockAbilityConnectCallback();
+    auto result = mgr->ConnectAbilityWithAccount(nullptr, want, accountId, connectCallback);
+    EXPECT_EQ(result, AAFwk::ERR_INVALID_CALLER);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0200 end";
+}
 
  /**
   * @tc.number: ConnectAbilityWithAccount_0300
   * @tc.name: ConnectAbilityWithAccount
   * @tc.desc: ConnectAbilityWithAccount Test, connectCallback is nullptr, return ERR_INVALID_CALLER.
   */
- HWTEST_F(ConnectionManagerTest, ConnectAbilityWithAccount_0300, TestSize.Level1)
- {
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0300 start";
-     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
-         std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
-     sptr<IRemoteObject> connectCaller = new (std::nothrow) AbilityConnection();
-     AAFwk::Want want;
-     int32_t accountId = -1;
-     auto result = mgr->ConnectAbilityWithAccount(connectCaller, want, accountId, nullptr);
-     EXPECT_EQ(result, AAFwk::ERR_INVALID_CALLER);
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0300 end";
- }
+HWTEST_F(ConnectionManagerTest, ConnectAbilityWithAccount_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0300 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    sptr<IRemoteObject> connectCaller = new (std::nothrow) AbilityConnection();
+    AAFwk::Want want;
+    int32_t accountId = -1;
+    auto result = mgr->ConnectAbilityWithAccount(connectCaller, want, accountId, nullptr);
+    EXPECT_EQ(result, AAFwk::ERR_INVALID_CALLER);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0300 end";
+}
 
  /**
   * @tc.number: ConnectAbilityWithAccount_0400
   * @tc.name: ConnectAbilityWithAccount
-  * @tc.desc: ConnectAbilityWithAccount Test, connectCallback is nullptr, connectCaller is nullptr, return ERR_INVALID_CALLER.
+  * @tc.desc: ConnectAbilityWithAccount Test, connectCallback is nullptr, return ERR_INVALID_CALLER.
   */
- HWTEST_F(ConnectionManagerTest, ConnectAbilityWithAccount_0400, TestSize.Level1)
- {
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0400 start";
-     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
-         std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
-     AAFwk::Want want;
-     int32_t accountId = -1;
-     auto result = mgr->ConnectAbilityWithAccount(nullptr, want, accountId, nullptr);
-     EXPECT_EQ(result, AAFwk::ERR_INVALID_CALLER);
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0400 end";
- }
+HWTEST_F(ConnectionManagerTest, ConnectAbilityWithAccount_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0400 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    AAFwk::Want want;
+    int32_t accountId = -1;
+    auto result = mgr->ConnectAbilityWithAccount(nullptr, want, accountId, nullptr);
+    EXPECT_EQ(result, AAFwk::ERR_INVALID_CALLER);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0400 end";
+}
 
  /**
   * @tc.number: ConnectAbilityWithAccount_0500
   * @tc.name: ConnectAbilityWithAccount
   * @tc.desc: ConnectAbilityWithAccount Test, return INVALID_CONNECTION_STATE.
   */
- HWTEST_F(ConnectionManagerTest, ConnectAbilityWithAccount_0500, TestSize.Level1)
- {
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0500 start";
-     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
-         std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
-     sptr<IRemoteObject> connectCaller = new (std::nothrow) AbilityConnection();
-     sptr<AbilityConnectCallback> connectCallback = new (std::nothrow) MockAbilityConnectCallback();
-     AAFwk::Operation connectReceiver;
-     AAFwk::Want want;
-     want.SetElementName("abc", "edf");
-     int32_t accountId = -1;
-     connectReceiver.SetBundleName("abc");
-     connectReceiver.SetAbilityName("edf");
-     std::vector<sptr<AbilityConnectCallback>> callbacks;
-     callbacks.push_back(connectCallback);
-     sptr<AbilityConnection> abilityConnection = new (std::nothrow) AbilityConnection();
-     ConnectionInfo connectionInfo(connectCaller, connectReceiver, abilityConnection);
-     connectionInfo.connectReceiver.SetBundleName("abc");
-     connectionInfo.connectReceiver.SetAbilityName("edf");
-     connectionInfo.connectCaller = connectCaller;
-     mgr->abilityConnections_.emplace(connectionInfo, callbacks);
-     auto result = mgr->ConnectAbilityWithAccount(connectCaller, want, accountId, connectCallback);
-     EXPECT_EQ(result, AAFwk::RESOLVE_ABILITY_ERR);
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0500 end";
- }
+HWTEST_F(ConnectionManagerTest, ConnectAbilityWithAccount_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0500 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    sptr<IRemoteObject> connectCaller = new (std::nothrow) AbilityConnection();
+    sptr<AbilityConnectCallback> connectCallback = new (std::nothrow) MockAbilityConnectCallback();
+    AAFwk::Operation connectReceiver;
+    AAFwk::Want want;
+    want.SetElementName("abc", "edf");
+    int32_t accountId = -1;
+    connectReceiver.SetBundleName("abc");
+    connectReceiver.SetAbilityName("edf");
+    std::vector<sptr<AbilityConnectCallback>> callbacks;
+    callbacks.push_back(connectCallback);
+    sptr<AbilityConnection> abilityConnection = new (std::nothrow) AbilityConnection();
+    ConnectionInfo connectionInfo(connectCaller, connectReceiver, abilityConnection);
+    connectionInfo.connectReceiver.SetBundleName("abc");
+    connectionInfo.connectReceiver.SetAbilityName("edf");
+    connectionInfo.connectCaller = connectCaller;
+    mgr->abilityConnections_.emplace(connectionInfo, callbacks);
+    auto result = mgr->ConnectAbilityWithAccount(connectCaller, want, accountId, connectCallback);
+    EXPECT_EQ(result, AAFwk::RESOLVE_ABILITY_ERR);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0500 end";
+}
 
  /**
   * @tc.number: ConnectAbilityWithAccount_0600
   * @tc.name: ConnectAbilityWithAccount
   * @tc.desc: ConnectAbilityWithAccount Test, return ERR_OK.
   */
- HWTEST_F(ConnectionManagerTest, ConnectAbilityWithAccount_0600, TestSize.Level1)
- {
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0600 start";
-     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
-         std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
-     sptr<IRemoteObject> connectCaller = new (std::nothrow) AbilityConnection();
-     sptr<AbilityConnectCallback> connectCallback = new (std::nothrow) MockAbilityConnectCallback();
-     AAFwk::Operation connectReceiver;
-     AAFwk::Want want;
-     want.SetElementName("abc", "edf");
-     int32_t accountId = -1;
-     int32_t connectionState = 1;
-     connectReceiver.SetBundleName("abc");
-     connectReceiver.SetAbilityName("edf");
-     std::vector<sptr<AbilityConnectCallback>> callbacks;
-     callbacks.push_back(connectCallback);
-     sptr<AbilityConnection> abilityConnection = new (std::nothrow) AbilityConnection();
-     ConnectionInfo connectionInfo(connectCaller, connectReceiver, abilityConnection);
-     connectionInfo.connectReceiver.SetBundleName("abc");
-     connectionInfo.connectReceiver.SetAbilityName("edf");
-     connectionInfo.connectCaller = connectCaller;
-     mgr->abilityConnections_.emplace(connectionInfo, callbacks);
-     abilityConnection->SetConnectionState(connectionState);
-     auto result = mgr->ConnectAbilityWithAccount(connectCaller, want, accountId, connectCallback);
-     EXPECT_EQ(result, ERR_OK);
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0600 end";
- }
+HWTEST_F(ConnectionManagerTest, ConnectAbilityWithAccount_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0600 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    sptr<IRemoteObject> connectCaller = new (std::nothrow) AbilityConnection();
+    sptr<AbilityConnectCallback> connectCallback = new (std::nothrow) MockAbilityConnectCallback();
+    AAFwk::Operation connectReceiver;
+    AAFwk::Want want;
+    want.SetElementName("abc", "edf");
+    int32_t accountId = -1;
+    int32_t connectionState = 1;
+    connectReceiver.SetBundleName("abc");
+    connectReceiver.SetAbilityName("edf");
+    std::vector<sptr<AbilityConnectCallback>> callbacks;
+    callbacks.push_back(connectCallback);
+    sptr<AbilityConnection> abilityConnection = new (std::nothrow) AbilityConnection();
+    ConnectionInfo connectionInfo(connectCaller, connectReceiver, abilityConnection);
+    connectionInfo.connectReceiver.SetBundleName("abc");
+    connectionInfo.connectReceiver.SetAbilityName("edf");
+    connectionInfo.connectCaller = connectCaller;
+    mgr->abilityConnections_.emplace(connectionInfo, callbacks);
+    abilityConnection->SetConnectionState(connectionState);
+    auto result = mgr->ConnectAbilityWithAccount(connectCaller, want, accountId, connectCallback);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbilityWithAccount_0600 end";
+}
 
 /**
  * @tc.number: ConnectAbility_0100
@@ -214,117 +214,112 @@ HWTEST_F(ConnectionManagerTest, ConnectAbility_0100, TestSize.Level0)
  * @tc.name: ConnectAbility
  * @tc.desc: ConnectAbility Test, connectCaller is nullptr, return ERR_INVALID_CALLER.
  */
- HWTEST_F(ConnectionManagerTest, ConnectAbility_0200, TestSize.Level1)
- {
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0200 start";
-     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
-         std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
-     AAFwk::Want want;
-     int32_t accountId = -1;
-     sptr<AbilityConnectCallback> connectCallback = new (std::nothrow) MockAbilityConnectCallback();
-     auto result = mgr->ConnectAbility(nullptr, want, connectCallback);
-     EXPECT_EQ(result, AAFwk::ERR_INVALID_CALLER);
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0200 end";
- }
+HWTEST_F(ConnectionManagerTest, ConnectAbility_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0200 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    AAFwk::Want want;
+    sptr<AbilityConnectCallback> connectCallback = new (std::nothrow) MockAbilityConnectCallback();
+    auto result = mgr->ConnectAbility(nullptr, want, connectCallback);
+    EXPECT_EQ(result, AAFwk::ERR_INVALID_CALLER);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0200 end";
+}
 
- /**
+/**
   * @tc.number: ConnectAbility_0300
   * @tc.name: ConnectAbility
   * @tc.desc: ConnectAbility Test, connectCallback is nullptr, return ERR_INVALID_CALLER.
   */
- HWTEST_F(ConnectionManagerTest, ConnectAbility_0300, TestSize.Level1)
- {
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0300 start";
-     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
-         std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
-     sptr<IRemoteObject> connectCaller = new (std::nothrow) AbilityConnection();
-     AAFwk::Want want;
-     int32_t accountId = -1;
-     auto result = mgr->ConnectAbility(connectCaller, want, nullptr);
-     EXPECT_EQ(result, AAFwk::ERR_INVALID_CALLER);
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0300 end";
- }
+HWTEST_F(ConnectionManagerTest, ConnectAbility_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0300 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    sptr<IRemoteObject> connectCaller = new (std::nothrow) AbilityConnection();
+    AAFwk::Want want;
+    auto result = mgr->ConnectAbility(connectCaller, want, nullptr);
+    EXPECT_EQ(result, AAFwk::ERR_INVALID_CALLER);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0300 end";
+}
 
- /**
+/**
   * @tc.number: ConnectAbility_0400
   * @tc.name: ConnectAbility
-  * @tc.desc: ConnectAbility Test, connectCallback is nullptr, connectCaller is nullptr, return ERR_INVALID_CALLER.
+  * @tc.desc: ConnectAbility Test, connectCallback is nullptr, return ERR_INVALID_CALLER.
   */
  HWTEST_F(ConnectionManagerTest, ConnectAbility_0400, TestSize.Level1)
  {
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0400 start";
-     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
-         std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
-     AAFwk::Want want;
-     int32_t accountId = -1;
-     auto result = mgr->ConnectAbility(nullptr, want, accountId, nullptr);
-     EXPECT_EQ(result, AAFwk::ERR_INVALID_CALLER);
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0400 end";
- }
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0400 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    AAFwk::Want want;
+    auto result = mgr->ConnectAbility(nullptr, want, nullptr);
+    EXPECT_EQ(result, AAFwk::ERR_INVALID_CALLER);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0400 end";
+}
 
- /**
-  * @tc.number: ConnectAbility_0500
-  * @tc.name: ConnectAbility
-  * @tc.desc: ConnectAbility Test, return INVALID_CONNECTION_STATE.
-  */
- HWTEST_F(ConnectionManagerTest, ConnectAbility_0500, TestSize.Level1)
- {
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0500 start";
-     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
-         std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
-     sptr<IRemoteObject> connectCaller = new (std::nothrow) AbilityConnection();
-     sptr<AbilityConnectCallback> connectCallback = new (std::nothrow) MockAbilityConnectCallback();
-     AAFwk::Operation connectReceiver;
-     AAFwk::Want want;
-     want.SetElementName("abc", "edf");
-     int32_t accountId = -1;
-     connectReceiver.SetBundleName("abc");
-     connectReceiver.SetAbilityName("edf");
-     std::vector<sptr<AbilityConnectCallback>> callbacks;
-     callbacks.push_back(connectCallback);
-     sptr<AbilityConnection> abilityConnection = new (std::nothrow) AbilityConnection();
-     ConnectionInfo connectionInfo(connectCaller, connectReceiver, abilityConnection);
-     connectionInfo.connectReceiver.SetBundleName("abc");
-     connectionInfo.connectReceiver.SetAbilityName("edf");
-     connectionInfo.connectCaller = connectCaller;
-     mgr->abilityConnections_.emplace(connectionInfo, callbacks);
-     auto result = mgr->ConnectAbility(connectCaller, want, connectCallback);
-     EXPECT_EQ(result, AAFwk::RESOLVE_ABILITY_ERR);
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0500 end";
- }
+/**
+ * @tc.number: ConnectAbility_0500
+ * @tc.name: ConnectAbility
+ * @tc.desc: ConnectAbility Test, return INVALID_CONNECTION_STATE.
+ */
+HWTEST_F(ConnectionManagerTest, ConnectAbility_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0500 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    sptr<IRemoteObject> connectCaller = new (std::nothrow) AbilityConnection();
+    sptr<AbilityConnectCallback> connectCallback = new (std::nothrow) MockAbilityConnectCallback();
+    AAFwk::Operation connectReceiver;
+    AAFwk::Want want;
+    want.SetElementName("abc", "edf");
+    connectReceiver.SetBundleName("abc");
+    connectReceiver.SetAbilityName("edf");
+    std::vector<sptr<AbilityConnectCallback>> callbacks;
+    callbacks.push_back(connectCallback);
+    sptr<AbilityConnection> abilityConnection = new (std::nothrow) AbilityConnection();
+    ConnectionInfo connectionInfo(connectCaller, connectReceiver, abilityConnection);
+    connectionInfo.connectReceiver.SetBundleName("abc");
+    connectionInfo.connectReceiver.SetAbilityName("edf");
+    connectionInfo.connectCaller = connectCaller;
+    mgr->abilityConnections_.emplace(connectionInfo, callbacks);
+    auto result = mgr->ConnectAbility(connectCaller, want, connectCallback);
+    EXPECT_EQ(result, AAFwk::RESOLVE_ABILITY_ERR);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0500 end";
+}
 
  /**
   * @tc.number: ConnectAbility_0600
   * @tc.name: ConnectAbility
   * @tc.desc: ConnectAbility Test, return ERR_OK.
   */
- HWTEST_F(ConnectionManagerTest, ConnectAbility_0600, TestSize.Level1)
- {
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0600 start";
-     std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
-         std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
-     sptr<IRemoteObject> connectCaller = new (std::nothrow) AbilityConnection();
-     sptr<AbilityConnectCallback> connectCallback = new (std::nothrow) MockAbilityConnectCallback();
-     AAFwk::Operation connectReceiver;
-     AAFwk::Want want;
-     want.SetElementName("abc", "edf");
-     int32_t accountId = -1;
-     int32_t connectionState = 1;
-     connectReceiver.SetBundleName("abc");
-     connectReceiver.SetAbilityName("edf");
-     std::vector<sptr<AbilityConnectCallback>> callbacks;
-     callbacks.push_back(connectCallback);
-     sptr<AbilityConnection> abilityConnection = new (std::nothrow) AbilityConnection();
-     ConnectionInfo connectionInfo(connectCaller, connectReceiver, abilityConnection);
-     connectionInfo.connectReceiver.SetBundleName("abc");
-     connectionInfo.connectReceiver.SetAbilityName("edf");
-     connectionInfo.connectCaller = connectCaller;
-     mgr->abilityConnections_.emplace(connectionInfo, callbacks);
-     abilityConnection->SetConnectionState(connectionState);
-     auto result = mgr->ConnectAbility(connectCaller, want, connectCallback);
-     EXPECT_EQ(result, ERR_OK);
-     GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0600 end";
- }
+HWTEST_F(ConnectionManagerTest, ConnectAbility_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0600 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    sptr<IRemoteObject> connectCaller = new (std::nothrow) AbilityConnection();
+    sptr<AbilityConnectCallback> connectCallback = new (std::nothrow) MockAbilityConnectCallback();
+    AAFwk::Operation connectReceiver;
+    AAFwk::Want want;
+    want.SetElementName("abc", "edf");
+    int32_t connectionState = 1;
+    connectReceiver.SetBundleName("abc");
+    connectReceiver.SetAbilityName("edf");
+    std::vector<sptr<AbilityConnectCallback>> callbacks;
+    callbacks.push_back(connectCallback);
+    sptr<AbilityConnection> abilityConnection = new (std::nothrow) AbilityConnection();
+    ConnectionInfo connectionInfo(connectCaller, connectReceiver, abilityConnection);
+    connectionInfo.connectReceiver.SetBundleName("abc");
+    connectionInfo.connectReceiver.SetAbilityName("edf");
+    connectionInfo.connectCaller = connectCaller;
+    mgr->abilityConnections_.emplace(connectionInfo, callbacks);
+    abilityConnection->SetConnectionState(connectionState);
+    auto result = mgr->ConnectAbility(connectCaller, want, connectCallback);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest ConnectAbility_0600 end";
+}
 
 /**
  * @tc.number: ConnectAbilityInner_0100
@@ -481,6 +476,22 @@ HWTEST_F(ConnectionManagerTest, IsConnectCallerEqual_0100, TestSize.Level2)
 }
 
 /**
+ * @tc.number: IsConnectCallerEqual_0200
+ * @tc.name: IsConnectCallerEqual
+ * @tc.desc: IsConnectCallerEqual Test, return true.
+ */
+HWTEST_F(ConnectionManagerTest, IsConnectCallerEqual_0200, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "ConnectionManagerTest IsConnectCallerEqual_0200 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    sptr<IRemoteObject> connectCaller = new (std::nothrow) AbilityConnection();
+    auto result = mgr->IsConnectCallerEqual(connectCaller, connectCaller);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest IsConnectCallerEqual_0200 end";
+}
+
+/**
  * @tc.number: IsConnectReceiverEqual_0100
  * @tc.name: IsConnectReceiverEqual
  * @tc.desc: IsConnectReceiverEqual Test, return true.
@@ -497,6 +508,63 @@ HWTEST_F(ConnectionManagerTest, IsConnectReceiverEqual_0100, TestSize.Level2)
     auto result = mgr->IsConnectReceiverEqual(connectReceiver, connectReceiverOther);
     EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "ConnectionManagerTest IsConnectReceiverEqual_0100 end";
+}
+
+/**
+ * @tc.number: IsConnectReceiverEqual_0200
+ * @tc.name: IsConnectReceiverEqual
+ * @tc.desc: IsConnectReceiverEqual Test, return false.
+ */
+HWTEST_F(ConnectionManagerTest, IsConnectReceiverEqual_0200, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "ConnectionManagerTest IsConnectReceiverEqual_0200 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    AAFwk::Operation connectReceiver;
+    connectReceiver.SetBundleName("bundleName");
+    connectReceiver.SetAbilityName("abilityName");
+    AppExecFwk::ElementName connectReceiverOther("deviceId", "bundleName", "", "");
+    auto result = mgr->IsConnectReceiverEqual(connectReceiver, connectReceiverOther);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest IsConnectReceiverEqual_0200 end";
+}
+
+/**
+ * @tc.number: IsConnectReceiverEqual_0300
+ * @tc.name: IsConnectReceiverEqual
+ * @tc.desc: IsConnectReceiverEqual Test, return false.
+ */
+HWTEST_F(ConnectionManagerTest, IsConnectReceiverEqual_0300, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "ConnectionManagerTest IsConnectReceiverEqual_0300 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    AAFwk::Operation connectReceiver;
+    connectReceiver.SetBundleName("bundleName");
+    connectReceiver.SetAbilityName("abilityName");
+    AppExecFwk::ElementName connectReceiverOther("deviceId", "", "abilityName", "");
+    auto result = mgr->IsConnectReceiverEqual(connectReceiver, connectReceiverOther);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest IsConnectReceiverEqual_0300 end";
+}
+
+/**
+ * @tc.number: IsConnectReceiverEqual_0400
+ * @tc.name: IsConnectReceiverEqual
+ * @tc.desc: IsConnectReceiverEqual Test, return false.
+ */
+HWTEST_F(ConnectionManagerTest, IsConnectReceiverEqual_0400, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "ConnectionManagerTest IsConnectReceiverEqual_0400 start";
+    std::shared_ptr<OHOS::AbilityRuntime::ConnectionManager> mgr =
+        std::make_shared<OHOS::AbilityRuntime::ConnectionManager>();
+    AAFwk::Operation connectReceiver;
+    connectReceiver.SetBundleName("bundleName");
+    connectReceiver.SetAbilityName("abilityName");
+    AppExecFwk::ElementName connectReceiverOther("deviceId", "", "", "");
+    auto result = mgr->IsConnectReceiverEqual(connectReceiver, connectReceiverOther);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "ConnectionManagerTest IsConnectReceiverEqual_0400 end";
 }
 
 /**
