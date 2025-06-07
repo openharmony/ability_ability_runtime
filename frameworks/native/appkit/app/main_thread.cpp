@@ -990,8 +990,28 @@ void MainThread::HandleCjHeapMemory(const OHOS::AppExecFwk::CjHeapDumpInfo &info
         TAG_LOGE(AAFwkTag::APPKIT, "null app");
         return;
     }
-    auto helper = std::make_shared<DumpRuntimeHelper>(app);
-    helper->DumpCjHeap(info);
+    std::shared_ptr<DumpRuntimeHelper> helper;
+    try {
+        helper = std::make_shared<DumpRuntimeHelper>(app);
+    } catch (const std::bad_alloc& e) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to create DumpRuntimeHelper: %s", e.what());
+        return;
+    } catch (const std::exception& e) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to create DumpRuntimeHelper: %s", e.what());
+        return;
+    } catch (...) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to create DumpRuntimeHelper: unknown exception");
+        return;
+    }
+    try {
+        helper->DumpCjHeap(info);
+    } catch (const std::exception& e) {
+        TAG_LOGE(AAFwkTag::APPKIT, "DumpCjHeap failed: %s", e.what());
+        return;
+    } catch (...) {
+        TAG_LOGE(AAFwkTag::APPKIT, "DumpCjHeap failed: unknown exception");
+        return;
+    }
 }
 
 /**

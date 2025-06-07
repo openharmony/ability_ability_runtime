@@ -577,7 +577,21 @@ AppMgrResultCode AppMgrClient::DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo
         TAG_LOGE(AAFwkTag::APPMGR, "DumpCjHeapMemory: service is nullptr");
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    return AppMgrResultCode(service->DumpCjHeapMemory(info));
+    int32_t result = service->DumpCjHeapMemory(info);
+    switch (result) {
+        case static_cast<int32_t>(AppMgrResultCode::RESULT_OK):
+            return AppMgrResultCode::RESULT_OK;
+        case static_cast<int32_t>(AppMgrResultCode::ERROR_SERVICE_NOT_READY):
+            return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+        case static_cast<int32_t>(AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED):
+            return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+        case static_cast<int32_t>(AppMgrResultCode::ERROR_KILL_APPLICATION):
+            return AppMgrResultCode::ERROR_KILL_APPLICATION;
+        case static_cast<int32_t>(AppMgrResultCode::ERROR_KILL_PROCESSES_BY_PIDS):
+            return AppMgrResultCode::ERROR_KILL_PROCESSES_BY_PIDS;
+        default:
+            return static_cast<AppMgrResultCode>(result);
+    }
 }
 
 AppMgrResultCode AppMgrClient::GetConfiguration(Configuration& config)

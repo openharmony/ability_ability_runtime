@@ -211,7 +211,7 @@ void DumpRuntimeHelper::DumpJsHeap(const OHOS::AppExecFwk::JsHeapDumpInfo &info)
         return;
     }
     if (runtime->GetLanguage() != OHOS::AbilityRuntime::Runtime::Language::JS) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null JSRuntime");
+        TAG_LOGE(AAFwkTag::APPKIT, "runtime language is not JS");
         return;
     }
     if (info.needLeakobj) {
@@ -241,7 +241,7 @@ void DumpRuntimeHelper::DumpCjHeap(const OHOS::AppExecFwk::CjHeapDumpInfo &info)
         return;
     }
     if (runtime->GetLanguage() != OHOS::AbilityRuntime::Runtime::Language::CJ) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null CJRuntime");
+        TAG_LOGE(AAFwkTag::APPKIT, "runtime language is not CJ");
         return;
     }
     if (info.needSnapshot == true) {
