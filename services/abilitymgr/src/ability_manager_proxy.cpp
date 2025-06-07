@@ -801,6 +801,8 @@ int AbilityManagerProxy::StartUIExtensionAbility(const sptr<SessionInfo> &extens
         error = SendRequest(AbilityManagerInterfaceCode::START_UI_EXTENSION_ABILITY_EMBEDDED, data, reply, option);
     } else if (extensionSessionInfo->uiExtensionUsage == UIExtensionUsage::MODAL) {
         error = SendRequest(AbilityManagerInterfaceCode::START_UI_EXTENSION_ABILITY, data, reply, option);
+    } else if (extensionSessionInfo->uiExtensionUsage == UIExtensionUsage::PRE_VIEW_EMBEDDED) {
+        error = SendRequest(AbilityManagerInterfaceCode::START_UI_EXTENSION_PRE_VIEW_EMBEDDED, data, reply, option);
     } else {
         error = SendRequest(AbilityManagerInterfaceCode::START_UI_EXTENSION_CONSTRAINED_EMBEDDED, data, reply, option);
     }

@@ -3495,6 +3495,12 @@ int AbilityManagerService::CheckUIExtensionUsage(AppExecFwk::UIExtensionUsage ui
         return ERR_INVALID_VALUE;
     }
 
+    if (uiExtensionUsage == UIExtensionUsage::PRE_VIEW_EMBEDDED &&
+        !AAFwk::UIExtensionUtils::IsSystemUIExtension(extensionType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "target not system app");
+        return ERR_INVALID_VALUE;
+    }
+
     return ERR_OK;
 }
 
