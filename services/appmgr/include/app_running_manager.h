@@ -280,7 +280,7 @@ public:
      * DumpCjHeapMemory, call DumpCjHeapMemory() through proxy project.
      * triggerGC and dump the application's cjheap memory info.
      *
-     * @param info, pid, needGc, needSnapshot
+     * @param info The information to be dumped
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info);

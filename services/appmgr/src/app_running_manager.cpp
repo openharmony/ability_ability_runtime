@@ -1267,8 +1267,7 @@ int32_t AppRunningManager::DumpJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &in
 
 int32_t AppRunningManager::DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
 {
-    int32_t pid = static_cast<int32_t>(info.pid);
-    auto appRecord = GetAppRunningRecordByPid(pid);
+    auto appRecord = GetAppRunningRecordByPid(info.pid);
     if (appRecord == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return ERR_INVALID_VALUE;
