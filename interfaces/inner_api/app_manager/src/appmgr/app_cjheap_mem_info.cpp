@@ -31,6 +31,10 @@ CjHeapDumpInfo *CjHeapDumpInfo::Unmarshalling(Parcel &parcel)
         return nullptr;
     }
     info->pid = parcel.ReadUint32();
+    if (info->pid == 0) {
+        delete info;
+        return nullptr;
+    }
     info->needGc = parcel.ReadBool();
     info->needSnapshot = parcel.ReadBool();
     return info;
