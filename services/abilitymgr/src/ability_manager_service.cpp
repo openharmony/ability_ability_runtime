@@ -2881,7 +2881,7 @@ void AbilityManagerService::UnSubscribeBackgroundTask()
 
 void AbilityManagerService::SubscribeBundleEventCallback()
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "SubscribeBundleEventCallback begin");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "subscribeBundleEventCallback begin");
     if (taskHandler_) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "submit startResidentApps task");
         auto startResidentAppsTask = [aams = shared_from_this()]() { aams->StartResidentApps(U0_USER_ID); };
@@ -2908,7 +2908,7 @@ void AbilityManagerService::SubscribeBundleEventCallback()
     } else {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get bundleManager failed");
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "SubscribeBundleEventCallback success.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "SubscribeBundleEventCallback success.");
 }
 
 void AbilityManagerService::UnsubscribeBundleEventCallback()
@@ -4929,7 +4929,7 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
 int AbilityManagerService::ConnectRemoteAbility(Want &want, const sptr<IRemoteObject> &callerToken,
     const sptr<IRemoteObject> &connect)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call" );
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s begin", __func__);
     UpdateCallerInfoUtil::GetInstance().UpdateDmsCallerInfo(want, callerToken);
     if (AddStartControlParam(want, callerToken) != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s addStartControlParam failed", __func__);
@@ -5048,7 +5048,7 @@ int AbilityManagerService::ContinueAbility(const std::string &deviceId, int32_t 
 int AbilityManagerService::StartContinuation(const Want &want, const sptr<IRemoteObject> &abilityToken, int32_t status)
 {
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "start continuation");
     if (!CheckIfOperateRemote(want)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "deviceId or bundleName or abilityName empty");
         return ERR_INVALID_VALUE;
@@ -5057,8 +5057,7 @@ int AbilityManagerService::StartContinuation(const Want &want, const sptr<IRemot
 
     int32_t appUid = IPCSkeleton::GetCallingUid();
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
-        TAG_LOGI(AAFwkTag::ABILITYMGR,
-            "AbilityManagerService::try startContinuation");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "try startContinuation");
     int32_t missionId = -1;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         missionId = GetMissionIdByAbilityTokenInner(abilityToken);

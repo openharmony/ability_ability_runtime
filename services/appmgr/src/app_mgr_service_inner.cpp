@@ -4284,7 +4284,7 @@ bool AppMgrServiceInner::SendCreateAtomicServiceProcessEvent(const std::shared_p
         TAG_LOGI(AAFwkTag::APPMGR, "null appRecord");
         return false;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "report createAtomicServiceProcessEvent");
+    TAG_LOGI(AAFwkTag::APPMGR, "report createAtomicServiceProcessEvent");
     auto callerPid = appRecord->GetCallerPid() == -1 ? IPCSkeleton::GetCallingPid() : appRecord->GetCallerPid();
     auto callerAppRecord = GetAppRunningRecordByPid(callerPid);
     return AppMgrEventUtil::SendCreateAtomicServiceProcessEvent(callerAppRecord, appRecord, moduleName, abilityName);
@@ -4779,7 +4779,7 @@ bool AppMgrServiceInner::CheckGetRunningInfoPermission() const
 
 void AppMgrServiceInner::LoadResidentProcess(const std::vector<AppExecFwk::BundleInfo> &infos)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s call", __func__);
 
     TAG_LOGI(AAFwkTag::APPMGR, "info size: [%{public}zu]", infos.size());
     StartResidentProcess(infos, -1, true);
@@ -8039,7 +8039,7 @@ void AppMgrServiceInner::ClearNonResidentKeepAliveAppRunningData(const std::shar
             TAG_LOGE(AAFwkTag::APPMGR, "taskHandler_ null");
             return;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "submit restart keep-alive process task.");
+        TAG_LOGI(AAFwkTag::APPMGR, "submit restart keep-alive process task.");
         taskHandler_->SubmitTask(restartProcess, "RestartKeepAliveProcess");
     }
 }

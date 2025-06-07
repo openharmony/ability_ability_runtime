@@ -971,7 +971,7 @@ void UIAbilityLifecycleManager::PreCreateProcessName(AbilityRequest &abilityRequ
         TAG_LOGD(AAFwkTag::ABILITYMGR, "No need to pre create process name.");
         return;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "create process name in advance");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "create process name in advance");
     std::string processName = GenerateProcessNameForNewProcessMode(abilityRequest.abilityInfo);
     abilityRequest.processOptions->processName = processName;
     abilityRequest.abilityInfo.process = processName;
@@ -2965,7 +2965,7 @@ int UIAbilityLifecycleManager::MoveMissionToFront(int32_t sessionId, std::shared
     }
     sessionInfo->processOptions = nullptr;
     sessionInfo->startWindowOption = nullptr;
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call PendingSessionActivation by rootSceneSession"
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call PendingSessionActivation by rootSceneSession"
         "windowLeft=%{public}d,windowTop=%{public}d,"
         "windowHeight=%{public}d,windowWidth=%{public}d",
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
