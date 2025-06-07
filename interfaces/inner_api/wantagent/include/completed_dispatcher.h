@@ -28,9 +28,12 @@ namespace OHOS::AbilityRuntime::WantAgent {
 class PendingWant;
 class CompletedDispatcher : public AAFwk::WantReceiverStub {
 public:
+    CompletedDispatcher();
     CompletedDispatcher(const std::shared_ptr<PendingWant> &pendingWant,
         const std::shared_ptr<CompletedCallback> &callback, const std::shared_ptr<AppExecFwk::EventHandler> &handler);
     virtual ~CompletedDispatcher() = default;
+    
+    CompletedDispatcher &operator=(const CompletedDispatcher &other);
 
     void Send(const int32_t resultCode) override;
 
@@ -38,9 +41,15 @@ public:
         const AAFwk::WantParams &extras, bool serialized, bool sticky, int sendingUser) override;
 
     void Run();
+    
+    int GetResultCode() const;
+    std::string GetResultData() const;
+    AAFwk::Want GetWant() const;
+    AAFwk::WantParams GetResultExtras() const;
+    std::shared_ptr<PendingWant> GetPendingWant() const;
 
 private:
-    const std::shared_ptr<PendingWant> pendingWant_;
+    std::shared_ptr<PendingWant> pendingWant_;
     const std::shared_ptr<CompletedCallback> callback_;
     const std::shared_ptr<AppExecFwk::EventHandler> handler_;
     AAFwk::Want want_;

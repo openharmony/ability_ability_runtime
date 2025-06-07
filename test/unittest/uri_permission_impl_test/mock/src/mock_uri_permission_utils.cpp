@@ -16,15 +16,6 @@
 #include "uri_permission_utils.h"
 
 #include "ability_manager_errors.h"
-#include "accesstoken_kit.h"
-#include "bundle_mgr_client.h"
-#include "global_constant.h"
-#include "hilog_tag_wrapper.h"
-#include "in_process_call_wrapper.h"
-#include "ipc_skeleton.h"
-#include "os_account_manager_wrapper.h"
-#include "permission_verification.h"
-#include "tokenid_kit.h"
 #include "mock_my_flag.h"
 
 namespace OHOS {
@@ -42,7 +33,7 @@ bool UPMSUtils::SendShareUnPrivilegeUriEvent(uint32_t callerTokenId, uint32_t ta
 }
 
 bool UPMSUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint32_t targetTokenId,
-    const std::vector<Uri> &uriVec, const std::vector<bool> &resVec)
+    const std::vector<std::string> &uriVec, const std::vector<bool> &resVec)
 {
     return true;
 }
@@ -60,12 +51,12 @@ int32_t UPMSUtils::GetCurrentAccountId()
 
 bool UPMSUtils::IsFoundationCall()
 {
-    return true;
+    return MyFlag::upmsUtilsIsFoundationCallRet_;
 }
 
 bool UPMSUtils::IsSAOrSystemAppCall()
 {
-    return MyFlag::isSAOrSystemAppCall_;
+    return MyFlag::isSAOrSystemAppCall_ || (MyFlag::IS_SA_CALL & MyFlag::flag_) != 0;
 }
 
 bool UPMSUtils::IsSystemAppCall()
@@ -75,7 +66,7 @@ bool UPMSUtils::IsSystemAppCall()
 
 bool UPMSUtils::CheckIsSystemAppByBundleName(std::string &bundleName)
 {
-    return true;
+    return MyFlag::upmsUtilsCheckIsSystemAppByBundleNameRet_;
 }
 
 bool UPMSUtils::GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion)
@@ -85,32 +76,36 @@ bool UPMSUtils::GetBundleApiTargetVersion(const std::string &bundleName, int32_t
 
 bool UPMSUtils::CheckIsSystemAppByTokenId(uint32_t tokenId)
 {
-    return false;
+    return MyFlag::upmsUtilsCheckIsSystemAppByTokenIdRet_;
 }
 
 bool UPMSUtils::GetDirByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex, std::string &dirName)
 {
-    return true;
+    dirName = MyFlag::upmsUtilsAlterBundleName_;
+    return MyFlag::upmsUtilsGetDirByBundleNameAndAppIndexRet_;
 }
 
 bool UPMSUtils::GetAlterableBundleNameByTokenId(uint32_t tokenId, std::string &bundleName)
 {
-    bundleName = MyFlag::bundleName_;
-    return true;
+    bundleName = MyFlag::upmsUtilsAlterBundleName_;
+    return MyFlag::upmsUtilsGetAlterBundleNameByTokenIdRet_;
 }
 
 bool UPMSUtils::GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName)
 {
-    return false;
+    bundleName = MyFlag::upmsUtilsBundleName_;
+    return MyFlag::upmsUtilsGetBundleNameByTokenIdRet_;
 }
 
 int32_t UPMSUtils::GetAppIdByBundleName(const std::string &bundleName, std::string &appId)
 {
-    return ERR_OK;
+    appId = MyFlag::upmsUtilsAppId_;
+    return MyFlag::upmsUtilsGetAppIdByBundleNameRet_;
 }
 
 int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t appIndex, uint32_t &tokenId)
 {
+    tokenId = MyFlag::upmsUtilsTokenId_;
     return MyFlag::getTokenIdByBundleNameStatus_;
 }
 

@@ -300,7 +300,8 @@ HWTEST_F(PandingWantManagerTest, pending_want_mgr_test_005, TestSize.Level1)
     TriggerInfo paramsInfo("", nullptr, abilityWant, 11);
 
     EXPECT_CALL(*call, OnSendFinished(_, _, _, _)).Times(1);
-    WantAgentHelper::TriggerWantAgent(wantAgent, callback, paramsInfo);
+    sptr<CompletedDispatcher> completedData;
+    WantAgentHelper::TriggerWantAgent(wantAgent, callback, paramsInfo, completedData, nullptr);
 }
 
 /*

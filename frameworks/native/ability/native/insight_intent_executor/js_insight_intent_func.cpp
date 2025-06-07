@@ -234,7 +234,7 @@ bool JsInsightIntentFunc::ExecuteInsightIntent(std::shared_ptr<InsightIntentExec
     std::string className = executeParam->className_;
     std::string methodName = executeParam->methodName_;
     std::vector<std::string> methodParams = executeParam->methodParams_;
-    std::unordered_map<std::string, int> paramMap;
+    std::unordered_map<std::string, size_t> paramMap;
     for (size_t i = 0; i < methodParams.size(); i++) {
         paramMap[methodParams[i]] = i;
     }
@@ -272,7 +272,7 @@ bool JsInsightIntentFunc::ExecuteInsightIntent(std::shared_ptr<InsightIntentExec
 }
 
 bool JsInsightIntentFunc::ParseParams(napi_env env, const AAFwk::WantParams& param,
-    const std::unordered_map<std::string, int> &paramMap, size_t &argc, std::vector<napi_value> &argv)
+    const std::unordered_map<std::string, size_t> &paramMap, size_t &argc, std::vector<napi_value> &argv)
 {
     AAFwk::WantParamWrapper wrapper(param);
     std::string parametersString = wrapper.ToString();

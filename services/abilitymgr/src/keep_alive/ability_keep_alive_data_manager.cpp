@@ -30,6 +30,8 @@ const std::string JSON_KEY_BUNDLE_NAME = "bundleName";
 const std::string JSON_KEY_USERID = "userId";
 const std::string JSON_KEY_APP_TYPE = "appType";
 const std::string JSON_KEY_SETTER = "setter";
+const std::string JSON_KEY_SETTERID = "setterId";
+const std::string JSON_KEY_POLICY = "policy";
 } // namespace
 const DistributedKv::AppId AbilityKeepAliveDataManager::APP_ID = { "keep_alive_storage" };
 const DistributedKv::StoreId AbilityKeepAliveDataManager::STORE_ID = { "keep_alive_infos" };
@@ -135,7 +137,7 @@ int32_t AbilityKeepAliveDataManager::InsertKeepAliveData(const KeepAliveInfo &in
     }
 
     DistributedKv::Key key = ConvertKeepAliveDataToKey(info);
-    DistributedKv::Value value = ConvertKeepAliveStatusToValue(info.setter);
+    DistributedKv::Value value = ConvertKeepAliveStatusToValue(info);
     DistributedKv::Status status;
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
@@ -245,7 +247,7 @@ KeepAliveStatus AbilityKeepAliveDataManager::QueryKeepAliveData(const KeepAliveI
     kaStatus.code = ERR_NAME_NOT_FOUND;
     for (const auto &item : allEntries) {
         if (IsEqual(item.key, info)) {
-            ConvertKeepAliveStatusFromValue(item.value, kaStatus.setter);
+            ConvertKeepAliveStatusFromValue(item.value, kaStatus);
             kaStatus.code = ERR_OK;
             break;
         }
@@ -298,10 +300,12 @@ int32_t AbilityKeepAliveDataManager::QueryKeepAliveApplications(
     return ERR_OK;
 }
 
-DistributedKv::Value AbilityKeepAliveDataManager::ConvertKeepAliveStatusToValue(KeepAliveSetter setter)
+DistributedKv::Value AbilityKeepAliveDataManager::ConvertKeepAliveStatusToValue(const KeepAliveInfo &info)
 {
     nlohmann::json jsonObject = nlohmann::json {
-        { JSON_KEY_SETTER, setter },
+        { JSON_KEY_SETTER, info.setter },
+        { JSON_KEY_SETTERID, info.setterId },
+        { JSON_KEY_POLICY, info.policy },
     };
     DistributedKv::Value value(jsonObject.dump());
     TAG_LOGD(AAFwkTag::KEEP_ALIVE, "value: %{public}s", value.ToString().c_str());
@@ -309,7 +313,7 @@ DistributedKv::Value AbilityKeepAliveDataManager::ConvertKeepAliveStatusToValue(
 }
 
 void AbilityKeepAliveDataManager::ConvertKeepAliveStatusFromValue(const DistributedKv::Value &value,
-    KeepAliveSetter &setter)
+    KeepAliveStatus &status)
 {
     nlohmann::json jsonObject = nlohmann::json::parse(value.ToString(), nullptr, false);
     if (jsonObject.is_discarded()) {
@@ -317,7 +321,13 @@ void AbilityKeepAliveDataManager::ConvertKeepAliveStatusFromValue(const Distribu
         return;
     }
     if (jsonObject.contains(JSON_KEY_SETTER) && jsonObject[JSON_KEY_SETTER].is_number()) {
-        setter = KeepAliveSetter(jsonObject.at(JSON_KEY_SETTER).get<int32_t>());
+        status.setter = KeepAliveSetter(jsonObject.at(JSON_KEY_SETTER).get<int32_t>());
+    }
+    if (jsonObject.contains(JSON_KEY_SETTERID) && jsonObject[JSON_KEY_SETTERID].is_number()) {
+        status.setterId = jsonObject.at(JSON_KEY_SETTERID).get<int32_t>();
+    }
+    if (jsonObject.contains(JSON_KEY_POLICY) && jsonObject[JSON_KEY_POLICY].is_number()) {
+        status.policy = KeepAlivePolicy(jsonObject.at(JSON_KEY_POLICY).get<int32_t>());
     }
 }
 
@@ -328,6 +338,8 @@ DistributedKv::Key AbilityKeepAliveDataManager::ConvertKeepAliveDataToKey(const 
         { JSON_KEY_USERID, info.userId },
         { JSON_KEY_APP_TYPE, info.appType },
         { JSON_KEY_SETTER, info.setter },
+        { JSON_KEY_SETTERID, info.setterId },
+        { JSON_KEY_POLICY, info.policy },
     };
     DistributedKv::Key key(jsonObject.dump());
     TAG_LOGD(AAFwkTag::KEEP_ALIVE, "key: %{public}s", key.ToString().c_str());
@@ -359,6 +371,14 @@ KeepAliveInfo AbilityKeepAliveDataManager::ConvertKeepAliveInfoFromKey(const Dis
         info.setter = KeepAliveSetter(jsonObject.at(JSON_KEY_SETTER).get<int32_t>());
     }
 
+    if (jsonObject.contains(JSON_KEY_SETTERID) && jsonObject[JSON_KEY_SETTERID].is_number()) {
+        info.setterId = jsonObject.at(JSON_KEY_SETTERID).get<int32_t>();
+    }
+
+    if (jsonObject.contains(JSON_KEY_POLICY) && jsonObject[JSON_KEY_POLICY].is_number()) {
+        info.policy = KeepAlivePolicy(jsonObject.at(JSON_KEY_POLICY).get<int32_t>());
+    }
+
     return info;
 }
 
@@ -381,6 +401,11 @@ bool AbilityKeepAliveDataManager::IsEqual(const DistributedKv::Key &key, const K
 
     if (info.appType != KeepAliveAppType::UNSPECIFIED &&
         !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_APP_TYPE, static_cast<int32_t>(info.appType))) {
+        return false;
+    }
+
+    if (info.setterId != -1 &&
+        !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_SETTERID, info.setterId)) {
         return false;
     }
 

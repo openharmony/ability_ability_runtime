@@ -23,6 +23,7 @@
 #include "ability_manager_stub_mock.h"
 #include "mock_ability_connect_callback.h"
 #include "mock_ability_token.h"
+#include "mock_sa_interceptor_stub.h"
 #include "ability_scheduler_mock.h"
 #include "ability_record.h"
 #include "app_debug_listener_stub_mock.h"
@@ -2860,6 +2861,103 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetInsightIntentInfoByInte
     std::string intentName = "test";
     InsightIntentInfoForQuery info;
     auto res = proxy_->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: UpdateKioskApplicationList
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService UpdateKioskApplicationList
+ * EnvConditions: NA
+ * CaseDescription: UpdateKioskApplicationList
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_UpdateKioskApplicationList, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    std::vector<std::string> appList = {"com.ohos.test1", "com.ohos.test2"};
+    auto res = proxy_->UpdateKioskApplicationList(appList);
+    EXPECT_EQ(res, NO_ERROR);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::UPDATE_KIOSK_APP_LIST), mock_->code_);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: EnterKioskMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService EnterKioskMode
+ * EnvConditions: NA
+ * CaseDescription: EnterKioskMode
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_EnterKioskMode, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+
+    OHOS::sptr<IRemoteObject> callback = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto res = proxy_->EnterKioskMode(callback);
+    EXPECT_EQ(res, NO_ERROR);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::ENTER_KIOSK_MODE), mock_->code_);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ExitKioskMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ExitKioskMode
+ * EnvConditions: NA
+ * CaseDescription: ExitKioskMode
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_ExitKioskMode, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    OHOS::sptr<IRemoteObject> callback = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto res = proxy_->ExitKioskMode(callback);
+    EXPECT_EQ(res, NO_ERROR);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::EXIT_KIOSK_MODE), mock_->code_);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: GetKioskStatus
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetKioskStatus
+ * EnvConditions: NA
+ * CaseDescription: GetKioskStatus
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetKioskStatus, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeKioskModeSendRequest));
+    KioskStatus kioskStatus;
+    auto res = proxy_->GetKioskStatus(kioskStatus);
+    EXPECT_EQ(res, NO_ERROR);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_KIOSK_INFO), mock_->code_);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RegisterSAInterceptor
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterSAInterceptor
+ * EnvConditions: NA
+ * CaseDescription: RegisterSAInterceptor
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RegisterSAInterceptor_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    auto res = proxy_->RegisterSAInterceptor(nullptr);
+    EXPECT_EQ(res, ERR_NULL_SA_INTERCEPTOR_EXECUTER);
+    sptr<AbilityRuntime::ISAInterceptor> interceptor = new AbilityRuntime::MockSAInterceptorStub(0);
+    res = proxy_->RegisterSAInterceptor(interceptor);
     EXPECT_EQ(res, NO_ERROR);
 }
 } // namespace AAFwk

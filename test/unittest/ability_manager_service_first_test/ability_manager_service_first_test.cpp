@@ -1832,6 +1832,25 @@ HWTEST_F(AbilityManagerServiceFirstTest, UninstallAppInner_0300, TestSize.Level1
 }
 
 /**
+ * @tc.name: AbilityManagerServiceFirstTest_UninstallAppInner_0400
+ * @tc.desc: Test the state of UninstallAppInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, UninstallAppInner_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest UninstallAppInner_0400 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    std::string bundleName = "";
+    int32_t uid = 20000;
+    std::string exitMsg = "App upgrade.";
+    int32_t appIndex = 0;
+    auto result = abilityMs->UninstallAppInner(bundleName, uid, appIndex, false, exitMsg);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest UninstallAppInner_0400 end");
+}
+
+/**
  * @tc.name: AbilityManagerServiceFirstTest_PreLoadAppDataAbilities_0100
  * @tc.desc: Test the state of PreLoadAppDataAbilities
  * @tc.type: FUNC
@@ -1841,8 +1860,6 @@ HWTEST_F(AbilityManagerServiceFirstTest, PreLoadAppDataAbilities_0100, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest PreLoadAppDataAbilities_0100 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_EQ(abilityMs->PreLoadAppDataAbilities("", USER_ID_U100), ERR_INVALID_VALUE);
-    EXPECT_EQ(abilityMs->PreLoadAppDataAbilities("test", USER_ID_U100), ERR_INVALID_STATE);
-    abilityMs->taskHandler_ = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
     EXPECT_EQ(abilityMs->PreLoadAppDataAbilities("test", USER_ID_U100), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest PreLoadAppDataAbilities_0100 end");
 }

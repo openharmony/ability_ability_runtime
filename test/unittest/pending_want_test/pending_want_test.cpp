@@ -489,8 +489,9 @@ HWTEST_F(PendingWantTest, PendingWant_2100, Function | MediumTest | Level1)
     unsigned int flags = 1;
     flags |= FLAG_NO_CREATE;
     AbilityManagerClient::GetInstance()->Connect();
-    EXPECT_EQ(ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT,
-        pendingWant.SendAndReturnResult(requestCode, want, nullptr, "Permission", nullptr, nullptr, nullptr));
+    sptr<CompletedDispatcher> onCompleted;
+    EXPECT_EQ(ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT, pendingWant.SendAndReturnResult(requestCode,
+        want, onCompleted, "Permission", nullptr, nullptr, nullptr, nullptr));
 }
 
 /*
@@ -763,56 +764,6 @@ HWTEST_F(PendingWantTest, PendingWant_4300, Function | MediumTest | Level1)
 }
 
 /*
- * @tc.number    : PendingWant_4400
- * @tc.name      : PendingWant Send
- * @tc.desc      : Send
- */
-HWTEST_F(PendingWantTest, PendingWant_4400, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "PendingWant_4400 start";
-    auto pendingWant = std::make_shared<PendingWant>(nullptr);
-    sptr<AAFwk::IWantSender> target;
-    pendingWant->Send(target);
-    EXPECT_TRUE(pendingWant != nullptr);
-    GTEST_LOG_(INFO) << "PendingWant_4400 end";
-}
-
-/*
- * @tc.number    : PendingWant_4500
- * @tc.name      : PendingWant Send
- * @tc.desc      : Send
- */
-HWTEST_F(PendingWantTest, PendingWant_4500, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "PendingWant_4500 start";
-    auto pendingWant = std::make_shared<PendingWant>(nullptr);
-    int requestCode = 10;
-    sptr<AAFwk::IWantSender> target;
-    pendingWant->Send(requestCode, target);
-    EXPECT_TRUE(pendingWant != nullptr);
-    GTEST_LOG_(INFO) << "PendingWant_4500 end";
-}
-
-/*
- * @tc.number    : PendingWant_4600
- * @tc.name      : PendingWant Send
- * @tc.desc      : Send
- */
-HWTEST_F(PendingWantTest, PendingWant_4600, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "PendingWant_4600 start";
-    auto pendingWant = std::make_shared<PendingWant>(nullptr);
-    int requestCode = 10;
-    std::shared_ptr<Want> want = std::make_shared<Want>();
-    ElementName element("device", "bundleName", "abilityName");
-    want->SetElement(element);
-    sptr<AAFwk::IWantSender> target;
-    pendingWant->Send(requestCode, want, target);
-    EXPECT_TRUE(pendingWant != nullptr);
-    GTEST_LOG_(INFO) << "PendingWant_4600 end";
-}
-
-/*
  * @tc.number    : PendingWant_4700
  * @tc.name      : PendingWant Send
  * @tc.desc      : Send
@@ -888,8 +839,9 @@ HWTEST_F(PendingWantTest, PendingWant_5000, Function | MediumTest | Level1)
     std::shared_ptr<WantParams> options;
     std::shared_ptr<StartOptions> startOptions = nullptr;
     sptr<AAFwk::IWantSender> target;
-    auto result = pendingWant.Send(requestCode, want, onCompleted, requiredPermission, options, startOptions, target);
-    EXPECT_EQ(result, ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY);
+    auto result = pendingWant.Send(requestCode, want, onCompleted,
+        requiredPermission, options, startOptions, target, nullptr);
+    EXPECT_EQ(result, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT);
     GTEST_LOG_(INFO) << "PendingWant_5000 end";
 }
 

@@ -32,10 +32,10 @@ public:
     ~MockAbilitySchedulerTools() = default;
 
     // return Copy AbilityThread class Smart pointer
-    std::shared_ptr<MockAbilitySchedulerStub> GetMockAbilityScheduler()
+    sptr<MockAbilitySchedulerStub> GetMockAbilityScheduler()
     {
         if (mockAbilitySchedulerStubInstance == nullptr) {
-            mockAbilitySchedulerStubInstance = std::make_shared<MockAbilitySchedulerStub>();
+            mockAbilitySchedulerStubInstance = sptr<MockAbilitySchedulerStub>::MakeSptr();
         }
         return mockAbilitySchedulerStubInstance;
     };
@@ -46,7 +46,7 @@ public:
         if (mockStatus) {
             if (abilitySchedulerProxyInstance1 == nullptr) {
                 if (mockAbilitySchedulerStubInstance == nullptr) {
-                    mockAbilitySchedulerStubInstance = std::make_shared<MockAbilitySchedulerStub>();
+                    mockAbilitySchedulerStubInstance = sptr<MockAbilitySchedulerStub>::MakeSptr();
                 }
                 abilitySchedulerProxyInstance1 = sptr<AAFwk::AbilitySchedulerProxy>(
                     new (std::nothrow) AAFwk::AbilitySchedulerProxy(mockAbilitySchedulerStubInstance->AsObject()));
@@ -55,7 +55,7 @@ public:
         } else {
             if (abilitySchedulerProxyInstance2 == nullptr) {
                 if (abilityThreadInstance == nullptr) {
-                    abilityThreadInstance = std::make_shared<AbilityRuntime::FAAbilityThread>();
+                    abilityThreadInstance = sptr<AbilityRuntime::FAAbilityThread>::MakeSptr();
                 }
                 abilitySchedulerProxyInstance2 = sptr<AAFwk::AbilitySchedulerProxy>(
                     new (std::nothrow) AAFwk::AbilitySchedulerProxy(abilityThreadInstance->AsObject()));
@@ -85,9 +85,9 @@ public:
 private:
     static std::shared_ptr<MockAbilitySchedulerTools> instance_;
     sptr<AAFwk::AbilitySchedulerProxy> abilitySchedulerProxyInstance1;
-    std::shared_ptr<AppExecFwk::MockAbilitySchedulerStub> mockAbilitySchedulerStubInstance;
+    sptr<AppExecFwk::MockAbilitySchedulerStub> mockAbilitySchedulerStubInstance;
     sptr<AAFwk::AbilitySchedulerProxy> abilitySchedulerProxyInstance2;
-    std::shared_ptr<AppExecFwk::AbilityThread> abilityThreadInstance;
+    sptr<AppExecFwk::AbilityThread> abilityThreadInstance;
     bool mockStatus;
 };
 

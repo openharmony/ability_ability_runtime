@@ -25,6 +25,8 @@ bool KeepAliveInfo::ReadFromParcel(Parcel &parcel)
     userId = parcel.ReadInt32();
     appType = KeepAliveAppType(parcel.ReadInt32());
     setter = KeepAliveSetter(parcel.ReadInt32());
+    setterId = parcel.ReadInt32();
+    policy = KeepAlivePolicy(parcel.ReadInt32());
     return true;
 }
 
@@ -59,6 +61,14 @@ bool KeepAliveInfo::Marshalling(Parcel &parcel) const
     }
     if (!parcel.WriteInt32(static_cast<int32_t>(setter))) {
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "failed to write setter");
+        return false;
+    }
+    if (!parcel.WriteInt32(setterId)) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "failed to write setterId");
+        return false;
+    }
+    if (!parcel.WriteInt32(static_cast<int32_t>(policy))) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "failed to write policy");
         return false;
     }
     return true;

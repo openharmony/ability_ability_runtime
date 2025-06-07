@@ -145,5 +145,30 @@ bool MainElementUtils::CheckStatusBarAbility(const AppExecFwk::BundleInfo &bundl
     }
     return false;
 }
+
+bool MainElementUtils::CheckAppServiceExtension(const AppExecFwk::BundleInfo &bundleInfo, std::string& mainElementName)
+{
+    for (const auto& hapModuleInfo : bundleInfo.hapModuleInfos) {
+        if (hapModuleInfo.moduleType != AppExecFwk::ModuleType::ENTRY) {
+            continue;
+        }
+
+        mainElementName = hapModuleInfo.mainElementName;
+        if (mainElementName.empty()) {
+            return false;
+        }
+
+        for (const auto &extensionInfo: hapModuleInfo.extensionInfos) {
+            if (extensionInfo.type != AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
+                continue;
+            }
+
+            if (extensionInfo.name == mainElementName) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

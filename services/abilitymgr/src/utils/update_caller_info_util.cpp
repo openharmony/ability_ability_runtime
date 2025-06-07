@@ -47,7 +47,6 @@ constexpr const char* COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules"
 void ClearProtectedWantParam(Want &want)
 {
     want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
-    want.RemoveParam(Want::PARAM_ABILITY_RECOVERY_RESTART);
     want.RemoveParam(COMPONENT_STARTUP_NEW_RULES);
 }
 }

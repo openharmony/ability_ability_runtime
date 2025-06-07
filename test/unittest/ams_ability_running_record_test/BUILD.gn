@@ -93,6 +93,7 @@ ohos_unittest("AmsAbilityRunningRecordTest") {
     "resource_schedule_service:ressched_client",
     "samgr:samgr_proxy",
     "json:nlohmann_json_static",
+    "window_manager:session_manager_lite",
   ]
 
   defines = []

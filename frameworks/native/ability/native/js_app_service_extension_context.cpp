@@ -93,6 +93,11 @@ public:
         GET_NAPI_INFO_AND_CALL(env, info, JsAppServiceExtensionContext, OnDisconnectAbility);
     }
 
+    static napi_value StartAbility(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsAppServiceExtensionContext, OnStartAbility);
+    }
+
     static napi_value TerminateSelf(napi_env env, napi_callback_info info)
     {
         GET_NAPI_INFO_AND_CALL(env, info, JsAppServiceExtensionContext, OnTerminateSelf);
@@ -100,6 +105,7 @@ public:
 
 private:
     std::weak_ptr<AppServiceExtensionContext> context_;
+    sptr<JsFreeInstallObserver> freeInstallObserver_ = nullptr;
 
     napi_value OnTerminateSelf(napi_env env, NapiCallbackInfo& info)
     {
@@ -289,6 +295,71 @@ private:
             env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
         return result;
     }
+
+    bool CheckStartAbilityInputParam(napi_env env, NapiCallbackInfo& info,
+        AAFwk::Want& want, AAFwk::StartOptions& startOptions, size_t& unwrapArgc) const
+    {
+        if (info.argc < ARGC_ONE) {
+            return false;
+        }
+        unwrapArgc = ARGC_ZERO;
+        if (!AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want)) {
+            return false;
+        }
+        ++unwrapArgc;
+        if (info.argc > ARGC_ONE && CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
+            AppExecFwk::UnwrapStartOptions(env, info.argv[INDEX_ONE], startOptions);
+            unwrapArgc++;
+        }
+        return true;
+    }
+
+    napi_value OnStartAbility(napi_env env, NapiCallbackInfo& info)
+    {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+        TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "StartAbility");
+
+        size_t unwrapArgc = 0;
+        AAFwk::Want want;
+        AAFwk::StartOptions startOptions;
+        if (info.argc == ARGC_ZERO) {
+            TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "invalid arg");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        if (!CheckStartAbilityInputParam(env, info, want, startOptions, unwrapArgc)) {
+            TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "Failed, input param type invalid");
+            ThrowInvalidParamError(env, "Parse param want failed, want must be Want");
+            return CreateJsUndefined(env);
+        }
+        auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+        NapiAsyncTask::ExecuteCallback execute =
+            [weak = context_, want, startOptions, unwrapArgc, innerErrCode]() {
+            auto context = weak.lock();
+            if (!context) {
+                TAG_LOGI(AAFwkTag::APP_SERVICE_EXT, "null context");
+                *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+                return;
+            }
+            *innerErrCode = context->StartAbility(want, startOptions);
+        };
+        NapiAsyncTask::CompleteCallback complete =
+            [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (*innerErrCode == ERR_OK) {
+                task.ResolveWithNoError(env, CreateJsUndefined(env));
+            } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+            } else {
+                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+            }
+        };
+
+        napi_value lastParam = nullptr;
+        napi_value result = nullptr;
+        NapiAsyncTask::ScheduleHighQos("JSAppServiceExtensionContext::OnStartAbility",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+        return result;
+    }
 };
 } // namespace
 
@@ -309,6 +380,7 @@ napi_value CreateJsAppServiceExtensionContext(napi_env env, std::shared_ptr<AppS
         env, object, "connectServiceExtensionAbility", moduleName, JsAppServiceExtensionContext::ConnectAbility);
     BindNativeFunction(
         env, object, "disconnectServiceExtensionAbility", moduleName, JsAppServiceExtensionContext::DisconnectAbility);
+    BindNativeFunction(env, object, "startAbility", moduleName, JsAppServiceExtensionContext::StartAbility);
     BindNativeFunction(
         env, object, "terminateSelf", moduleName, JsAppServiceExtensionContext::TerminateSelf);
     return object;

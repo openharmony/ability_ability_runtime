@@ -109,6 +109,12 @@ public:
         const std::string& targetBundleName, int32_t appIndex, uint32_t initiatorTokenId,
         int32_t hideSensitiveType, int32_t& funcResult) override;
 
+    ErrCode GrantUriPermissionByKeyAsCaller(const std::string &key, uint32_t flag, uint32_t callerTokenId,
+        uint32_t targetTokenId, int32_t &funcResult) override;
+
+    ErrCode GrantUriPermissionByKey(const std::string &key, uint32_t flag,
+        uint32_t targetTokenId, int32_t &funcResult) override;
+
     /*
     * only support local file uri, not support distribute docs and content uri.
     */
@@ -136,7 +142,7 @@ private:
 
     int32_t AddTempUriPermission(const std::string &uri, uint32_t flag, TokenId fromTokenId, TokenId targetTokenId);
 
-    int32_t GrantUriPermissionInner(const std::vector<Uri> &uriVec, uint32_t flag,
+    int32_t GrantUriPermissionInner(const std::vector<std::string> &uriVec, uint32_t flag,
         uint32_t callerTokenId, uint32_t targetTokenId, const std::string &targetBundleName);
 
     int32_t GrantUriPermissionPrivilegedInner(const std::vector<Uri> &uriVec, uint32_t flag, uint32_t callerTokenId,
@@ -162,11 +168,11 @@ private:
     int32_t GrantBatchUriPermissionImpl(const std::vector<std::string> &uriVec,
         uint32_t flag, TokenId callerTokenId, TokenId targetTokenId);
 
-    std::vector<bool> CheckUriPermission(TokenIdPermission &tokenIdPermission, const std::vector<Uri> &uriVec,
+    std::vector<bool> CheckUriPermission(TokenIdPermission &tokenIdPermission, const std::vector<std::string> &uriVec,
         uint32_t flag);
 
-    void CheckProxyUriPermission(TokenIdPermission &tokenIdPermission, const std::vector<Uri> &uriVec, uint32_t flag,
-        std::vector<bool> &result);
+    void CheckProxyUriPermission(TokenIdPermission &tokenIdPermission, const std::vector<std::string> &uriVec,
+        uint32_t flag, std::vector<bool> &result);
 
     void RevokeMapUriPermission(uint32_t tokenId);
 
@@ -196,6 +202,18 @@ private:
     ErrCode RawDataToStringVec(const UriPermissionRawData& rawData, std::vector<std::string>& stringVec);
 
     ErrCode CheckGrantUriPermissionPrivileged(uint32_t callerTokenId, uint32_t flag, int32_t& funcResult);
+
+    int32_t GrantUriPermissionByKeyInner(const std::string &key, uint32_t flag,
+        uint32_t callerTokenId, uint32_t targetTokenId);
+
+    int32_t CheckGrantUriPermissionByKeyAsCaller();
+
+    int32_t CheckGrantUriPermissionByKey();
+
+    int32_t CheckGrantUriPermissionByKeyParams(const std::string &key, uint32_t flag,
+        UPMSAppInfo &callerAppInfo, UPMSAppInfo &targetAppInfo, std::vector<std::string> &uris);
+
+    inline int32_t WrapErrorCode(int32_t errorCode, int32_t &funcRet);
 
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     ErrCode Active(const UriPermissionRawData& policyRawData, std::vector<uint32_t>& res, int32_t& funcResult) override;

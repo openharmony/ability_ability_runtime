@@ -56,6 +56,7 @@ ohos_unittest("dlp_state_item_test") {
     "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",

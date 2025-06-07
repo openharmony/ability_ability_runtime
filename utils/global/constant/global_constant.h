@@ -23,7 +23,7 @@ constexpr int32_t MAX_APP_CLONE_INDEX = 1000;
 constexpr int32_t TIMEOUT_UNIT_TIME = 1000;
 
 constexpr int32_t PREPARE_TERMINATE_TIMEOUT_TIME = 10000;
-
+constexpr int32_t DEFAULT_FFRT_TASK_TIMEOUT = 60 * 1000 * 1000; // 60s = 60 000 000us
 constexpr const char* LOW_MEMORY_KILL = "LowMemoryKill";
 
 #ifdef SUPPORT_ASAN

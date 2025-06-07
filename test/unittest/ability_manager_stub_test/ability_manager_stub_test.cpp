@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "iremote_proxy.h"
 #include "mock_ability_connect_callback.h"
 #include "mock_ability_token.h"
+#include "mock_sa_interceptor_stub.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -3797,6 +3798,149 @@ HWTEST_F(AbilityManagerStubTest, GetInsightIntentInfoByIntentName_0100, TestSize
     data.WriteString(moduleName);
     data.WriteString(intentName);
     auto ret = stub_->GetInsightIntentInfoByIntentNameInner(data, reply);
+    EXPECT_EQ(ret, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: UpdateKioskApplicationListInner
+ * @tc.desc: UpdateKioskApplicationListInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, UpdateKioskApplicationListInner, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    MessageParcel data;
+    bool writeRet = data.WriteInterfaceToken(AbilityManagerStubImplMock::GetDescriptor());
+    std::vector<std::string> appList = {"com.ohos.test1"};
+    writeRet &= data.WriteStringVector(appList);
+    EXPECT_EQ(writeRet, true);
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::UPDATE_KIOSK_APP_LIST), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: EnterKioskModeInner
+ * @tc.desc: EnterKioskModeInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, EnterKioskModeInner, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    MessageParcel data;
+    bool writeRet = data.WriteInterfaceToken(AbilityManagerStubImplMock::GetDescriptor());
+    auto token = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    writeRet &= data.WriteRemoteObject(token);
+    EXPECT_EQ(writeRet, true);
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::ENTER_KIOSK_MODE), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: ExitKioskModeInner
+ * @tc.desc: ExitKioskModeInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, ExitKioskModeInner, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    MessageParcel data;
+    bool writeRet = data.WriteInterfaceToken(AbilityManagerStubImplMock::GetDescriptor());
+    auto token = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    writeRet &= data.WriteRemoteObject(token);
+    EXPECT_EQ(writeRet, true);
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::EXIT_KIOSK_MODE), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: GetKioskStatusInner
+ * @tc.desc: GetKioskStatusInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, GetKioskStatusInner, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    MessageParcel data;
+    bool writeRet = data.WriteInterfaceToken(AbilityManagerStubImplMock::GetDescriptor());
+    EXPECT_EQ(writeRet, true);
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_KIOSK_INFO), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: RegisterSAInterceptorInner_0100
+ * @tc.desc: RegisterSAInterceptorInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, RegisterSAInterceptorInner_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+    MessageParcel data;
+    MessageParcel reply;
+    auto ret = stub_->RegisterSAInterceptorInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_SA_INTERCEPTOR_EXECUTER);
+    sptr<AbilityRuntime::ISAInterceptor> interceptor = new AbilityRuntime::MockSAInterceptorStub(0);
+    EXPECT_EQ(data.WriteRemoteObject(interceptor->AsObject()), true);
+    ret = stub_->RegisterSAInterceptorInner(data, reply);
+    EXPECT_EQ(ret, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: SetAppServiceExtensionKeepAlive_0100
+ * @tc.desc: SetAppServiceExtensionKeepAlive
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, SetAppServiceExtensionKeepAlive_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    std::string bundleName = "bundleName";
+    bool flag = true;
+    data.WriteString(bundleName);
+    data.WriteUint32(static_cast<uint32_t>(flag));
+    auto ret = stub_->SetAppServiceExtensionKeepAliveInner(data, reply);
+    EXPECT_EQ(ret, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: QueryKeepAliveAppServiceExtensions_0100
+ * @tc.desc: QueryKeepAliveAppServiceExtensions
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, QueryKeepAliveAppServiceExtensions_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    MessageParcel data;
+    MessageParcel reply;
+    auto ret = stub_->QueryKeepAliveAppServiceExtensionsInner(data, reply);
     EXPECT_EQ(ret, NO_ERROR);
 
     TAG_LOGI(AAFwkTag::TEST, "end");

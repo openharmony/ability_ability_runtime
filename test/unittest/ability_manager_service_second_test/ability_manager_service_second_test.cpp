@@ -1739,7 +1739,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, PreLoadAppDataAbilities_001, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest PreLoadAppDataAbilities_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_EQ(abilityMs_->PreLoadAppDataAbilities("", 100), ERR_INVALID_VALUE);
-    EXPECT_EQ(abilityMs_->PreLoadAppDataAbilities("test", -1), ERR_INVALID_STATE);
+    EXPECT_EQ(abilityMs_->PreLoadAppDataAbilities("test", -1), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest PreLoadAppDataAbilities_001 end");
 }
 

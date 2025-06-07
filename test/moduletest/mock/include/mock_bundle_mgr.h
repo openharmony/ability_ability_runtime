@@ -331,7 +331,8 @@ public:
         const std::string& appName, const ApplicationFlag flag, const int userId, ApplicationInfo& appInfo) override;
 
     bool ImplicitQueryInfos(const Want& want, int32_t flags, int32_t userId, bool withDefault,
-        std::vector<AbilityInfo>& abilityInfos, std::vector<ExtensionAbilityInfo>& extensionInfos) override;
+        std::vector<AbilityInfo>& abilityInfos, std::vector<ExtensionAbilityInfo>& extensionInfos,
+        bool &findDefaultApp) override;
 
     BundleMgrService()
     {

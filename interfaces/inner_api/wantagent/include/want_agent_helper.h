@@ -102,7 +102,7 @@ public:
      */
     static ErrCode TriggerWantAgent(std::shared_ptr<WantAgent> agent,
         const std::shared_ptr<CompletedCallback> &callback,
-        const TriggerInfo &paramsInfo);
+        const TriggerInfo &paramsInfo, sptr<CompletedDispatcher> &data, sptr<IRemoteObject> callerToken);
 
     /**
      * Cancels an WantAgent.
@@ -191,8 +191,9 @@ private:
 private:
     static ErrCode Send(const std::shared_ptr<PendingWant> &pendingWant,
         WantAgentConstant::OperationType type,
-        const sptr<CompletedDispatcher> &callBack,
-        const TriggerInfo &paramsInfo);
+        sptr<CompletedDispatcher> &callBack,
+        const TriggerInfo &paramsInfo,
+        sptr<IRemoteObject> callerToken);
 
     static unsigned int FlagsTransformer(const std::vector<WantAgentConstant::Flags> &flags);
 

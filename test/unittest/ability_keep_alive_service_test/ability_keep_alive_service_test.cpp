@@ -591,5 +591,438 @@ HWTEST_F(AbilityKeepAliveServiceTest, GetKeepAliveApplications_004, TestSize.Lev
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest GetKeepAliveApplications_004 end";
 }
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_001 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::USER;
+    info.setterId = -1;
+    info.policy = KeepAlivePolicy::UNSPECIFIED;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_INVALID_VALUE;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, true);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_001 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_002 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::USER;
+    info.setterId = -1;
+    info.policy = KeepAlivePolicy::UNSPECIFIED;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_NAME_NOT_FOUND;
+    AbilityKeepAliveDataManager::callInsertResult = ERR_OK;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, true);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_002 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_003 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::USER;
+    info.setterId = -1;
+    info.policy = KeepAlivePolicy::UNSPECIFIED;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_NAME_NOT_FOUND;
+    AbilityKeepAliveDataManager::callInsertResult = ERR_INVALID_VALUE;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, true);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_003 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_004 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::USER;
+    info.setterId = -1;
+    info.policy = KeepAlivePolicy::UNSPECIFIED;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_NAME_NOT_FOUND;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, false);
+    EXPECT_EQ(result, ERR_GET_TARGET_BUNDLE_INFO_FAILED);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_004 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_005 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::USER;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::UNSPECIFIED;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
+    AbilityKeepAliveDataManager::queryDataSetterId = -1;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, false);
+    EXPECT_EQ(result, ERR_CHANGE_KEEP_ALIVE);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_005 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_006, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_006 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::USER;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::UNSPECIFIED;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
+    AbilityKeepAliveDataManager::queryDataSetterId = 100;
+    AbilityKeepAliveDataManager::queryDataPolicy = KeepAlivePolicy::NOT_ALLOW_CANCEL;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, false);
+    EXPECT_EQ(result, ERR_CHANGE_KEEP_ALIVE);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_006 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_007, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_007 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::USER;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::UNSPECIFIED;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
+    AbilityKeepAliveDataManager::queryDataSetterId = 100;
+    AbilityKeepAliveDataManager::queryDataPolicy = KeepAlivePolicy::ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callDeleteResult = ERR_OK;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, false);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_007 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_008, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_008 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::USER;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::UNSPECIFIED;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
+    AbilityKeepAliveDataManager::queryDataSetterId = 100;
+    AbilityKeepAliveDataManager::queryDataPolicy = KeepAlivePolicy::ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callDeleteResult = ERR_INVALID_VALUE;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, false);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_008 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_009, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_009 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::SYSTEM;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::UNSPECIFIED;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
+    AbilityKeepAliveDataManager::queryDataSetterId = 100;
+    AbilityKeepAliveDataManager::queryDataPolicy = KeepAlivePolicy::ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callDeleteResult = ERR_OK;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, false);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_009 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_010, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_010 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::SYSTEM;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::UNSPECIFIED;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
+    AbilityKeepAliveDataManager::queryDataSetterId = 100;
+    AbilityKeepAliveDataManager::queryDataPolicy = KeepAlivePolicy::ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callDeleteResult = ERR_INVALID_VALUE;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, false);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_010 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_011, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_011 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::USER;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::UNSPECIFIED;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
+    AbilityKeepAliveDataManager::queryDataPolicy = KeepAlivePolicy::ALLOW_CANCEL;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, true);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_011 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_012, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_012 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::SYSTEM;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
+    AbilityKeepAliveDataManager::queryDataPolicy = KeepAlivePolicy::ALLOW_CANCEL;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, true);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_012 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_013, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_013 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::SYSTEM;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::NOT_ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
+    AbilityKeepAliveDataManager::queryDataPolicy = KeepAlivePolicy::NOT_ALLOW_CANCEL;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, true);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_013 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_014, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_014 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::SYSTEM;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::NOT_ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
+    AbilityKeepAliveDataManager::queryDataPolicy = KeepAlivePolicy::ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callInsertResult = ERR_OK;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, true);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_014 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_015, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_015 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::SYSTEM;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::NOT_ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
+    AbilityKeepAliveDataManager::queryDataPolicy = KeepAlivePolicy::ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callInsertResult = ERR_INVALID_VALUE;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, true);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_015 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_016, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_016 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::USER;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::NOT_ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
+    AbilityKeepAliveDataManager::queryDataPolicy = KeepAlivePolicy::ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callInsertResult = ERR_OK;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, true);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_016 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, SetAppServiceExtensionKeepAlive_017, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_017 start";
+    KeepAliveInfo info;
+    info.bundleName = "bundleName";
+    info.userId = 1;
+    info.setter = KeepAliveSetter::SYSTEM;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::NOT_ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
+    AbilityKeepAliveDataManager::queryDataPolicy = KeepAlivePolicy::ALLOW_CANCEL;
+    AbilityKeepAliveDataManager::callInsertResult = ERR_INVALID_VALUE;
+    auto result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, true);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest SetAppServiceExtensionKeepAlive_017 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: QueryKeepAliveAppServiceExtensions
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService QueryKeepAliveAppServiceExtensions
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, QueryKeepAliveAppServiceExtensions_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest QueryKeepAliveAppServiceExtensions_001 start";
+    std::vector<KeepAliveInfo> infoList;
+    AbilityKeepAliveDataManager::callQueryApplicationResult = ERR_INVALID_VALUE;
+    auto result = AbilityKeepAliveService::GetInstance().QueryKeepAliveAppServiceExtensions(infoList);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest QueryKeepAliveAppServiceExtensions_001 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: QueryKeepAliveAppServiceExtensions
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService QueryKeepAliveAppServiceExtensions
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, QueryKeepAliveAppServiceExtensions_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest QueryKeepAliveAppServiceExtensions_002 start";
+    std::vector<KeepAliveInfo> infoList;
+    AbilityKeepAliveDataManager::callQueryApplicationResult = ERR_OK;
+    auto result = AbilityKeepAliveService::GetInstance().QueryKeepAliveAppServiceExtensions(infoList);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest QueryKeepAliveAppServiceExtensions_002 end";
+}
+
+/*
+ * Feature: AbilityKeepAliveService
+ * Function: ClearKeepAliveAppServiceExtension
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveService ClearKeepAliveAppServiceExtension
+ */
+HWTEST_F(AbilityKeepAliveServiceTest, ClearKeepAliveAppServiceExtension_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest ClearKeepAliveAppServiceExtension_001 start";
+    KeepAliveInfo info;
+    AbilityKeepAliveDataManager::callDeleteResult = ERR_OK;
+    auto result = AbilityKeepAliveService::GetInstance().ClearKeepAliveAppServiceExtension(info);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest ClearKeepAliveAppServiceExtension_001 end";
+}
 } // namespace AAFwk
 } // namespace OHOS

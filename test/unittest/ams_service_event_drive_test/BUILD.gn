@@ -99,6 +99,7 @@ ohos_unittest("AmsServiceEventDriveTest") {
     "os_account:os_account_innerkits",
     "resource_schedule_service:ressched_client",
     "json:nlohmann_json_static",
+    "window_manager:session_manager_lite",
   ]
 
   if (ability_runtime_child_process) {

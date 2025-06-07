@@ -278,6 +278,10 @@ ohos_shared_library("abilityms") {
     external_deps += [ "image_framework:image_native" ]
   }
 
+  if (ability_runtime_no_screen) {
+    defines += ["DISABLE_LAUNCHER"]
+  }
+
   version_script = "libabilityms.map"
   subsystem_name = "ability"
   innerapi_tags = [ "platformsdk_indirect" ]

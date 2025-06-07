@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,7 @@ public:
     MOCK_METHOD3(
         GetWantSender, sptr<IWantSender>(const WantSenderInfo& wantSenderInfo, const sptr<IRemoteObject>& callerToken,
         int32_t uid));
-    MOCK_METHOD2(SendWantSender, int(sptr<IWantSender> target, const SenderInfo& senderInfo));
+    MOCK_METHOD2(SendWantSender, int(sptr<IWantSender> target, SenderInfo& senderInfo));
     MOCK_METHOD1(CancelWantSender, void(const sptr<IWantSender>& sender));
     MOCK_METHOD1(GetPendingWantUid, int(const sptr<IWantSender>& target));
     MOCK_METHOD1(GetPendingWantUserId, int(const sptr<IWantSender>& target));
@@ -418,6 +418,36 @@ public:
         abilityStateDataOne.appCloneIndex = 0;
         abilityStateDataTwo.abilityType = static_cast<int32_t>(AppExecFwk::AbilityType::PAGE);
         list.emplace_back(abilityStateDataTwo);
+        return ERR_OK;
+    }
+
+    int32_t UpdateKioskApplicationList(const std::vector<std::string> &appList) override
+    {
+        return ERR_OK;
+    }
+
+    int32_t EnterKioskMode(sptr<IRemoteObject> callerToken) override
+    {
+        return ERR_OK;
+    }
+
+    int32_t ExitKioskMode(sptr<IRemoteObject> callerToken) override
+    {
+        return ERR_OK;
+    }
+
+    int32_t GetKioskStatus(AAFwk::KioskStatus &kioskStatus) override
+    {
+        return ERR_OK;
+    }
+
+    int32_t SetAppServiceExtensionKeepAlive(const std::string &bundleName, bool flag) override
+    {
+        return ERR_OK;
+    }
+
+    int32_t QueryKeepAliveAppServiceExtensions(std::vector<KeepAliveInfo> &list) override
+    {
         return ERR_OK;
     }
 

@@ -70,11 +70,12 @@ void DoSomethingInterestingWithMyAPI1(const char *data, size_t size)
     std::string strParam(data, size);
     int32_t int32Param = static_cast<int32_t>(GetU32Data(data));
     uint32_t requestId = static_cast<uint32_t>(GetU32Data(data));
+    AbilityRequest abilityRequest;
     uIAbilityLifecycleManager->OnAcceptWantResponse(want1, strParam, requestId);
     uIAbilityLifecycleManager->OnStartSpecifiedProcessResponse(strParam, requestId);
     uIAbilityLifecycleManager->OnStartSpecifiedAbilityTimeoutResponse(requestId);
     uIAbilityLifecycleManager->OnStartSpecifiedProcessTimeoutResponse(requestId);
-    uIAbilityLifecycleManager->StartSpecifiedAbilityBySCB(want1);
+    uIAbilityLifecycleManager->StartSpecifiedAbilityBySCB(want1, abilityRequest);
     sptr<IRemoteObject> callStub;
     std::shared_ptr<AbilityRecord> abilityRecord4;
     uIAbilityLifecycleManager->CallRequestDone(abilityRecord4, callStub);

@@ -109,6 +109,7 @@ ohos_unittest("AmsServiceLoadAbilityProcessTest") {
     "samgr:samgr_proxy",
     "json:nlohmann_json_static",
     "jsoncpp:jsoncpp",
+    "window_manager:session_manager_lite",
   ]
 
   defines = []

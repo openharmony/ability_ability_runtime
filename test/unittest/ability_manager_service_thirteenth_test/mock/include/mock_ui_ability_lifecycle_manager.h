@@ -243,8 +243,9 @@ public:
      * Start specified ability by SCB.
      *
      * @param want Want information.
+     * @param abilityRequest AbilityRequest information.
      */
-    void StartSpecifiedAbilityBySCB(const Want &want);
+    void StartSpecifiedAbilityBySCB(const Want &want, AbilityRequest &abilityRequest);
 
     /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.

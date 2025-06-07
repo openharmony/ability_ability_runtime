@@ -61,7 +61,7 @@ public:
 protected:
     bool isExcludeFromAutoStart_ = false;
     std::string moduleName_;
-    AppExecFwk::ModuleType moduleType_;
+    AppExecFwk::ModuleType moduleType_ = AppExecFwk::ModuleType::UNKNOWN;
     StartupTaskMatchRules matchRules_;
 };
 } // namespace AbilityRuntime
