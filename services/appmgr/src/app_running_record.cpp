@@ -525,7 +525,7 @@ void AppRunningRecord::ScheduleTerminate()
 
 void AppRunningRecord::LaunchPendingAbilities()
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Launch pending abilities.");
+    TAG_LOGI(AAFwkTag::APPMGR, "Launch pending abilities.");
     AddAppLifecycleEvent("AppRunningRecord::LaunchPendingAbilities");
     auto moduleRecordList = GetAllModuleRecord();
     if (moduleRecordList.empty()) {
@@ -1068,7 +1068,7 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
 
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
     if (abilityRecord) {
-        TAG_LOGD(AAFwkTag::APPMGR, "TerminateAbility:%{public}s", abilityRecord->GetName().c_str());
+        TAG_LOGI(AAFwkTag::APPMGR, "TerminateAbility:%{public}s", abilityRecord->GetName().c_str());
     }
     if (!isTimeout) {
         StateChangedNotifyObserver(

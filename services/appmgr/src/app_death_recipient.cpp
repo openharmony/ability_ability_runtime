@@ -45,7 +45,7 @@ void AppDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
             return;
         }
         serviceInner->OnRemoteDied(remote, isRenderProcess, isChildProcess);
-        TAG_LOGD(AAFwkTag::APPMGR, "OnRemoteDiedTask end");
+        TAG_LOGW(AAFwkTag::APPMGR, "OnRemoteDiedTask end");
     };
     handler->SubmitTask(onRemoteDiedFunc, TASK_ON_REMOTE_DIED);
 }
