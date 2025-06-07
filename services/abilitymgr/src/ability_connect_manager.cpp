@@ -1620,7 +1620,7 @@ bool AbilityConnectManager::NeedExtensionControl(std::shared_ptr<AbilityRecord> 
 
 void AbilityConnectManager::PostRestartResidentTask(const AbilityRequest &abilityRequest)
 {
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "start");
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "PostRestartResidentTask start");
     CHECK_POINTER(taskHandler_);
     std::string taskName = std::string("RestartResident_") + std::string(abilityRequest.abilityInfo.name);
     auto task = [abilityRequest, connectManagerWeak = weak_from_this()]() {
@@ -1640,7 +1640,7 @@ void AbilityConnectManager::PostRestartResidentTask(const AbilityRequest &abilit
 
 void AbilityConnectManager::HandleRestartResidentTask(const AbilityRequest &abilityRequest)
 {
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "start");
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "HandleRestartResidentTask start");
     std::lock_guard guard(serialMutex_);
     auto findRestartResidentTask = [abilityRequest](const AbilityRequest &requestInfo) {
         return (requestInfo.want.GetElement().GetBundleName() == abilityRequest.want.GetElement().GetBundleName() &&
@@ -1745,7 +1745,7 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
 
 void AbilityConnectManager::HandleCommandTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "start");
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "HandleCommandTimeoutTask start");
     CHECK_POINTER(abilityRecord);
     if (abilityRecord->GetAbilityInfo().name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "Handle root launcher command timeout.");
@@ -1754,7 +1754,7 @@ void AbilityConnectManager::HandleCommandTimeoutTask(const std::shared_ptr<Abili
         return;
     }
     CleanActivatingTimeoutAbility(abilityRecord);
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "end");
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "HandleCommandTimeoutTask end");
 }
 
 void AbilityConnectManager::HandleConnectTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord)

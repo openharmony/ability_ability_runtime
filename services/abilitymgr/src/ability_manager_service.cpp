@@ -2881,7 +2881,7 @@ void AbilityManagerService::UnSubscribeBackgroundTask()
 
 void AbilityManagerService::SubscribeBundleEventCallback()
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "begin");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SubscribeBundleEventCallback begin");
     if (taskHandler_) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "submit startResidentApps task");
         auto startResidentAppsTask = [aams = shared_from_this()]() { aams->StartResidentApps(U0_USER_ID); };
@@ -2908,7 +2908,7 @@ void AbilityManagerService::SubscribeBundleEventCallback()
     } else {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get bundleManager failed");
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "success.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SubscribeBundleEventCallback success.");
 }
 
 void AbilityManagerService::UnsubscribeBundleEventCallback()
