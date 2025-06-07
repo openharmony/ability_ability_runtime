@@ -1765,6 +1765,23 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t QueryKeepAliveAppServiceExtensions(std::vector<KeepAliveInfo> &list) override;
+
+    /**
+     * SuspendExtensionAbility, suspend session with service ability.
+     *
+     * @param connect, Callback used to notify caller the result of suspend or resume.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SuspendExtensionAbility(sptr<IAbilityConnection> connect) override;
+
+    /**
+     * ResumeExtensionAbility, resume session with service ability.
+     *
+     * @param connect, Callback used to notify caller the result of suspend or resume.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t ResumeExtensionAbility(sptr<IAbilityConnection> connect) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);

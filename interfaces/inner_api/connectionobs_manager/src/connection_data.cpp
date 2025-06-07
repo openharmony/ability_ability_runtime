@@ -59,6 +59,10 @@ bool ConnectionData::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteBool(isSuspended)) {
+        return false;
+    }
+
     return true;
 }
 
@@ -109,6 +113,11 @@ bool ConnectionData::ReadFromParcel(Parcel &parcel)
         return false;
     }
     callerName = Str16ToStr8(strValue);
+
+    if (!parcel.ReadBool(isSuspended)) {
+        TAG_LOGW(AAFwkTag::CONNECTION, "read isSuspended failed");
+        return false;
+    }
 
     return true;
 }

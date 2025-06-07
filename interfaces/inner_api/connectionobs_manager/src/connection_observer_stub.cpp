@@ -38,6 +38,10 @@ int ConnectionObserverStub::OnRemoteRequest(
                 return OnExtensionConnectedInner(data, reply);
             case ON_EXTENSION_DISCONNECTED:
                 return OnExtensionDisconnectedInner(data, reply);
+            case ON_EXTENSION_SUSPENDED:
+                return OnExtensionSuspendedInner(data, reply);
+            case ON_EXTENSION_RESUMED:
+                return OnExtensionResumedInner(data, reply);
 #ifdef WITH_DLP
             case ON_DLP_ABILITY_OPENED:
                 return OnDlpAbilityOpenedInner(data, reply);
@@ -70,6 +74,30 @@ int ConnectionObserverStub::OnExtensionDisconnectedInner(MessageParcel &data, Me
     }
 
     OnExtensionDisconnected(*connectionData);
+    return NO_ERROR;
+}
+
+int ConnectionObserverStub::OnExtensionSuspendedInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<ConnectionData> connectionData(data.ReadParcelable<ConnectionData>());
+    if (!connectionData) {
+        TAG_LOGE(AAFwkTag::CONNECTION, "error connectionData");
+        return ERR_INVALID_VALUE;
+    }
+
+    OnExtensionSuspended(*connectionData);
+    return NO_ERROR;
+}
+
+int ConnectionObserverStub::OnExtensionResumedInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<ConnectionData> connectionData(data.ReadParcelable<ConnectionData>());
+    if (!connectionData) {
+        TAG_LOGE(AAFwkTag::CONNECTION, "error connectionData");
+        return ERR_INVALID_VALUE;
+    }
+
+    OnExtensionResumed(*connectionData);
     return NO_ERROR;
 }
 

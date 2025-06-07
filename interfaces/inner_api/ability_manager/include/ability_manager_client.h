@@ -1841,6 +1841,22 @@ public:
      */
     ErrCode RegisterSAInterceptor(sptr<AbilityRuntime::ISAInterceptor> interceptor);
 
+    /**
+     * SuspendExtensionAbility, suspend session with service ability.
+     *
+     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SuspendExtensionAbility(sptr<IAbilityConnection> connect);
+
+    /**
+     * ResumeExtensionAbility, resume session with service ability.
+     *
+     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ResumeExtensionAbility(sptr<IAbilityConnection> connect);
+
 private:
     AbilityManagerClient();
     DISALLOW_COPY_AND_MOVE(AbilityManagerClient);

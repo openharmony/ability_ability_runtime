@@ -907,7 +907,9 @@ HWTEST_F(AbilityManagerStubSecondTest, HandleOnRemoteRequestInnerThird_0100, Tes
     MessageOption option;
     uint32_t code[] = {
         static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_APP_SERVICE_EXTENSION_KEEP_ALIVE),
-        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_APP_SERVICE_EXTENSIONS_KEEP_ALIVE)
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_APP_SERVICE_EXTENSIONS_KEEP_ALIVE),
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::SUSPEND_EXTENSION_ABILITY),
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::RESUME_EXTENSION_ABILITY)
     };
 
     int i = 0;
@@ -920,6 +922,38 @@ HWTEST_F(AbilityManagerStubSecondTest, HandleOnRemoteRequestInnerThird_0100, Tes
     EXPECT_EQ(ret, ERR_CODE_NOT_EXIST);
 
     TAG_LOGI(AAFwkTag::TEST, "HandleOnRemoteRequestInnerThird_0100 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SuspendExtensionAbilityInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SuspendExtensionAbilityInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function SuspendExtensionAbilityInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubSecondTest, SuspendExtensionAbilityInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    stub_->SuspendExtensionAbilityInner(data, reply);
+    EXPECT_TRUE(stub_ != nullptr);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ResumeExtensionAbilityInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ResumeExtensionAbilityInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function ResumeExtensionAbilityInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubSecondTest, ResumeExtensionAbilityInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    stub_->ResumeExtensionAbilityInner(data, reply);
+    EXPECT_TRUE(stub_ != nullptr);
 }
 } // namespace AAFwk
 } // namespace OHOS

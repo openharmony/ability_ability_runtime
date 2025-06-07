@@ -82,6 +82,18 @@ void ConnectionObserverController::NotifyExtensionDisconnected(const AbilityRunt
     CallObservers(&AbilityRuntime::IConnectionObserver::OnExtensionDisconnected, data);
 }
 
+
+void ConnectionObserverController::NotifyExtensionSuspended(const AbilityRuntime::ConnectionData& data)
+{
+    CallObservers(&AbilityRuntime::IConnectionObserver::OnExtensionSuspended, data);
+}
+
+
+void ConnectionObserverController::NotifyExtensionResumed(const AbilityRuntime::ConnectionData& data)
+{
+    CallObservers(&AbilityRuntime::IConnectionObserver::OnExtensionResumed, data);
+}
+
 #ifdef WITH_DLP
 void ConnectionObserverController::NotifyDlpAbilityOpened(const AbilityRuntime::DlpStateData& data)
 {

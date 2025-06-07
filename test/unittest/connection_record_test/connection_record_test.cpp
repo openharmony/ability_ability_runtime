@@ -319,5 +319,47 @@ HWTEST_F(ConnectionRecordTest, AaFwk_ConnectionRecord_013, TestSize.Level1)
 
     EXPECT_NE(info.end(), std::find_if(info.begin(), info.end(), IsExist));
 }
+
+/*
+ * Feature: ConnectionRecord
+ * Function: SuspendExtensionAbility
+ * SubFunction: NA
+ * FunctionPoints: SuspendExtensionAbility
+ * EnvConditions:NA
+ * CaseDescription: 1.Connection state is not connected, SuspendExtensionAbility failed
+ * 2.Verify the correct process of suspendextensionability
+ */
+HWTEST_F(ConnectionRecordTest, AaFwk_ConnectionRecord_014, TestSize.Level1)
+{
+    auto result = connectionRecord_->SuspendExtensionAbility();
+    EXPECT_EQ(result, INVALID_CONNECTION_STATE);
+
+    connectionRecord_->SetConnectState(ConnectionState::CONNECTED);
+
+    result = connectionRecord_->SuspendExtensionAbility();
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(connectionRecord_->GetConnectState(), ConnectionState::CONNECTED);
+}
+
+/*
+ * Feature: ConnectionRecord
+ * Function: SuspendExtensionAbility
+ * SubFunction: NA
+ * FunctionPoints: SuspendExtensionAbility
+ * EnvConditions:NA
+ * CaseDescription: 1.Connection state is not connected, SuspendExtensionAbility failed
+ * 2.Verify the correct process of suspendextensionability
+ */
+HWTEST_F(ConnectionRecordTest, AaFwk_ConnectionRecord_015, TestSize.Level1)
+{
+    auto result = connectionRecord_->ResumeExtensionAbility();
+    EXPECT_EQ(result, INVALID_CONNECTION_STATE);
+
+    connectionRecord_->SetConnectState(ConnectionState::CONNECTED);
+
+    result = connectionRecord_->ResumeExtensionAbility();
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(connectionRecord_->GetConnectState(), ConnectionState::CONNECTED);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -877,6 +877,12 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentyFirst(uint32_t code, MessagePa
     if (interfaceCode == AbilityManagerInterfaceCode::GET_APP_SERVICE_EXTENSIONS_KEEP_ALIVE) {
         return QueryKeepAliveAppServiceExtensionsInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::SUSPEND_EXTENSION_ABILITY) {
+        return SuspendExtensionAbilityInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::RESUME_EXTENSION_ABILITY) {
+        return ResumeExtensionAbilityInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -896,6 +902,7 @@ int AbilityManagerStub::OnRemoteRequestInner(uint32_t code, MessageParcel &data,
     if (retCode != ERR_CODE_NOT_EXIST) {
         return retCode;
     }
+
     TAG_LOGW(AAFwkTag::ABILITYMGR, "default case");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
@@ -4676,6 +4683,32 @@ int32_t AbilityManagerStub::GetInsightIntentInfoByIntentNameInner(MessageParcel 
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
         return INNER_ERR;
     }
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::SuspendExtensionAbilityInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IAbilityConnection> callback = iface_cast<IAbilityConnection>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "callback null");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = SuspendExtensionAbility(callback);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "suspend extension ability ret = %d", result);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::ResumeExtensionAbilityInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IAbilityConnection> callback = iface_cast<IAbilityConnection>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "callback null");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = ResumeExtensionAbility(callback);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "resume extension ability ret = %d", result);
+    reply.WriteInt32(result);
     return NO_ERROR;
 }
 

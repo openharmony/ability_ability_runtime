@@ -37,6 +37,24 @@ void ConnectionObserverStubImpl::OnExtensionDisconnected(const ConnectionData &d
     owner->HandleExtensionDisconnected(data);
 }
 
+void ConnectionObserverStubImpl::OnExtensionSuspended(const ConnectionData &data)
+{
+    auto owner = owner_.lock();
+    if (!owner) {
+        return;
+    }
+    owner->HandleExtensionSuspended(data);
+}
+
+void ConnectionObserverStubImpl::OnExtensionResumed(const ConnectionData &data)
+{
+    auto owner = owner_.lock();
+    if (!owner) {
+        return;
+    }
+    owner->HandleExtensionResumed(data);
+}
+
 #ifdef WITH_DLP
 void ConnectionObserverStubImpl::OnDlpAbilityOpened(const DlpStateData &data)
 {
