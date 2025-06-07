@@ -650,6 +650,9 @@ enum class AbilityManagerInterfaceCode {
 
     // register sa interceptor
     REGISTER_SA_INTERCEPTOR = 6149,
+
+    // ipc id for start UIExtension ability pre view embedded
+    START_UI_EXTENSION_PRE_VIEW_EMBEDDED = 6150,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

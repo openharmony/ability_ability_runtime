@@ -640,6 +640,9 @@ int AbilityManagerStub::OnRemoteRequestInnerSixteenth(uint32_t code, MessageParc
     if (interfaceCode == AbilityManagerInterfaceCode::START_UI_EXTENSION_CONSTRAINED_EMBEDDED) {
         return StartUIExtensionConstrainedEmbeddedInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::START_UI_EXTENSION_PRE_VIEW_EMBEDDED) {
+        return StartUIExtensionPreViewEmbeddedInner(data, reply);
+    }
 #endif
     if (interfaceCode == AbilityManagerInterfaceCode::REQUEST_DIALOG_SERVICE) {
         return HandleRequestDialogService(data, reply);
@@ -1584,6 +1587,26 @@ int AbilityManagerStub::StartUIExtensionConstrainedEmbeddedInner(MessageParcel &
         }
         // To ensure security, this attribute must be rewritten.
         extensionSessionInfo->uiExtensionUsage = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    }
+
+    int32_t userId = data.ReadInt32();
+
+    int32_t result = StartUIExtensionAbility(extensionSessionInfo, userId);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::StartUIExtensionPreViewEmbeddedInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<SessionInfo> extensionSessionInfo = nullptr;
+    if (data.ReadBool()) {
+        extensionSessionInfo = data.ReadParcelable<SessionInfo>();
+        if (extensionSessionInfo == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null extensionSessionInfo");
+            return ERR_NULL_OBJECT;
+        }
+        // To ensure security, this attribute must be rewritten.
+        extensionSessionInfo->uiExtensionUsage = UIExtensionUsage::PRE_VIEW_EMBEDDED;
     }
 
     int32_t userId = data.ReadInt32();
