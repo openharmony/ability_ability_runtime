@@ -160,6 +160,22 @@ public:
     int DisconnectAbilityLocked(const sptr<IAbilityConnection> &connect);
 
     /**
+     * SuspendExtensionAbilityLocked, suspend session with callback.
+     *
+     * @param connect, Callback used to notify caller the result of suspend.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t SuspendExtensionAbilityLocked(const sptr<IAbilityConnection> &connect);
+
+    /**
+     * ResumeExtensionAbilityLocked, resume session with callback.
+     *
+     * @param connect, Callback used to notify caller the result of resume.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t ResumeExtensionAbilityLocked(const sptr<IAbilityConnection> &connect);
+
+    /**
      * AttachAbilityThreadLocked, ability call this interface after loaded.
      *
      * @param scheduler, the interface handler of kit ability.

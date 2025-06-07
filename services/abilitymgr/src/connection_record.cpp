@@ -447,5 +447,29 @@ Want ConnectionRecord::GetConnectWant() const
 {
     return connectWant_;
 }
+
+int32_t ConnectionRecord::SuspendExtensionAbility()
+{
+    if (state_ != ConnectionState::CONNECTED) {
+        TAG_LOGE(AAFwkTag::CONNECTION, "connection not established, state: %{public}d",
+            static_cast<int32_t>(state_));
+        return INVALID_CONNECTION_STATE;
+    }
+
+    DelayedSingleton<ConnectionStateManager>::GetInstance()->SuspendConnection(shared_from_this());
+    return ERR_OK;
+}
+
+int32_t ConnectionRecord::ResumeExtensionAbility()
+{
+    if (state_ != ConnectionState::CONNECTED) {
+        TAG_LOGE(AAFwkTag::CONNECTION, "connection not established, state: %{public}d",
+            static_cast<int32_t>(state_));
+        return INVALID_CONNECTION_STATE;
+    }
+
+    DelayedSingleton<ConnectionStateManager>::GetInstance()->ResumeConnection(shared_from_this());
+    return ERR_OK;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

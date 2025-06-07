@@ -14446,6 +14446,76 @@ bool AbilityManagerService::HandleExecuteSAInterceptor(const Want &want, sptr<IR
     return true;
 }
 
+int32_t AbilityManagerService::HandleExtensionAbility(sptr<IAbilityConnection> connect,
+        std::function<int32_t(std::shared_ptr<AbilityConnectManager>, sptr<IAbilityConnection>)> func)
+{
+    CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
+    auto currentConnectManager = GetCurrentConnectManager();
+    CHECK_POINTER_AND_RETURN(currentConnectManager, ERR_NO_INIT);
+    if (func(currentConnectManager, connect) == ERR_OK) {
+        return ERR_OK;
+    }
+    // If current connectManager does not exist connect, then try connectManagerU0
+    auto connectManager = GetConnectManagerByUserId(U0_USER_ID);
+    CHECK_POINTER_AND_RETURN(connectManager, ERR_NO_INIT);
+    if (func(connectManager, connect) == ERR_OK) {
+        return ERR_OK;
+    }
+    
+    connectManager = GetConnectManagerByUserId(U1_USER_ID);
+    CHECK_POINTER_AND_RETURN(connectManager, ERR_NO_INIT);
+    if (func(connectManager, connect) == ERR_OK) {
+        return ERR_OK;
+    }
+
+    auto userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    if (userId == U0_USER_ID || userId == U1_USER_ID) {
+        auto connectManagers = GetConnectManagers();
+        for (auto& item : connectManagers) {
+            if (item.second && func(item.second, connect) == ERR_OK) {
+                return ERR_OK;
+            }
+        }
+    }
+    connectManager = GetConnectManagerByUserId(userId);
+    CHECK_POINTER_AND_RETURN(connectManager, ERR_NO_INIT);
+    return func(connectManager, connect); 
+}
+
+int AbilityManagerService::SuspendExtensionAbility(sptr<IAbilityConnection> connect)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Suspend extension ability begin.");
+    CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
+    auto err = HandleExtensionAbility(connect,
+        [](std::shared_ptr<AbilityConnectManager> connectManager, sptr<IAbilityConnection> connect) {
+            return connectManager->SuspendExtensionAbilityLocked(connect);
+        });
+    if (err == ERR_OK) {
+        return ERR_OK;
+    }
+
+    TAG_LOGE(AAFwkTag::SERVICE_EXT, "Suspend extension ability error %{public}d", err);
+    return err;
+}
+
+int AbilityManagerService::ResumeExtensionAbility(sptr<IAbilityConnection> connect)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Resume extension ability begin.");
+    CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
+    auto err = HandleExtensionAbility(connect,
+        [](std::shared_ptr<AbilityConnectManager> connectManager, sptr<IAbilityConnection> connect) {
+            return connectManager->ResumeExtensionAbilityLocked(connect);
+        });
+    if (err == ERR_OK) {
+        return ERR_OK;
+    }
+
+    TAG_LOGE(AAFwkTag::SERVICE_EXT, "Resume extension ability error %{public}d", err);
+    return err;
+}
+
 int32_t AbilityManagerService::SetAppServiceExtensionKeepAlive(const std::string &bundleName, bool flag)
 {
     return KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(
