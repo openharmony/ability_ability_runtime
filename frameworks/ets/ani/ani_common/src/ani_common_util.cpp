@@ -1,0 +1,455 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "ani_common_util.h"
+
+#include <cstring>
+#include "hilog_tag_wrapper.h"
+#include "securec.h"
+
+namespace OHOS {
+namespace AppExecFwk {
+constexpr const char* CLASSNAME_DOUBLE = "Lstd/core/Double;";
+constexpr const char* CLASSNAME_BOOL = "Lstd/core/Boolean;";
+constexpr const char* CLASSNAME_ARRAY = "Lescompat/Array;";
+
+bool GetFieldDoubleByName(ani_env *env, ani_object object, const char *name, double &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_ref field = nullptr;
+    if ((status = env->Object_GetFieldByName_Ref(object, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isUndefined = true;
+    if ((status = env->Reference_IsUndefined(field, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::ANI, "%{public}s: undefined", name);
+        return false;
+    }
+    ani_double aniValue = 0.0;
+    if ((status = env->Object_CallMethodByName_Double(
+        reinterpret_cast<ani_object>(field), "doubleValue", nullptr, &aniValue)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    value = static_cast<double>(aniValue);
+    return true;
+}
+
+bool SetFieldDoubleByName(ani_env *env, ani_class cls, ani_object object, const char *name, double value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_field field = nullptr;
+    if ((status = env->Class_FindField(cls, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_object obj = CreateDouble(env, value);
+    if (obj == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "CreateDouble failed");
+        return false;
+    }
+    if ((status = env->Object_SetField_Ref(object, field, reinterpret_cast<ani_ref>(obj))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool GetFieldBoolByName(ani_env *env, ani_object object, const char *name, bool &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_ref field = nullptr;
+    if ((status = env->Object_GetFieldByName_Ref(object, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isUndefined = true;
+    if ((status = env->Reference_IsUndefined(object, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::ANI, "%{public}s: undefined", name);
+        return false;
+    }
+    ani_boolean aniValue = false;
+    if ((status = env->Object_CallMethodByName_Boolean(
+        reinterpret_cast<ani_object>(object), "booleanValue", nullptr, &aniValue)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    value = static_cast<bool>(aniValue);
+    return true;
+}
+
+bool SetFieldBoolByName(ani_env *env, ani_class cls, ani_object object, const char *name, bool value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_field field = nullptr;
+    if ((status = env->Class_FindField(cls, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if ((status = env->Object_SetField_Boolean(object, field, value)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool GetFieldStringByName(ani_env *env, ani_object object, const char *name, std::string &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_ref field = nullptr;
+    if ((status = env->Object_GetFieldByName_Ref(object, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isUndefined = true;
+    if ((status = env->Reference_IsUndefined(object, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::ANI, "%{public}s: undefined", name);
+        return false;
+    }
+    if (!GetStdString(env, reinterpret_cast<ani_string>(field), value)) {
+        TAG_LOGE(AAFwkTag::ANI, "GetStdString failed");
+        return false;
+    }
+    return true;
+}
+
+bool SetFieldStringByName(ani_env *env, ani_class cls, ani_object object, const char *name,
+    const std::string &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_field field = nullptr;
+    if ((status = env->Class_FindField(cls, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+
+    if (value.empty()) {
+        ani_ref nullRef = nullptr;
+        if ((status = env->GetNull(&nullRef)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+            return false;
+        }
+        if ((status = env->Object_SetField_Ref(object, field, nullRef)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+            return false;
+        }
+        return true;
+    }
+    ani_string aniStr = nullptr;
+    if ((status = env->String_NewUTF8(value.c_str(), value.size(), &aniStr)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if ((status = env->Object_SetField_Ref(object, field, aniStr)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool GetFieldIntByName(ani_env *env, ani_object object, const char *name, int &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_int aniInt = 0;
+    if ((status = env->Object_GetFieldByName_Int(object, name, &aniInt)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    value = static_cast<int>(aniInt);
+    return true;
+}
+
+bool SetFieldIntByName(ani_env *env, ani_class cls, ani_object object, const char *name, int value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_field field = nullptr;
+    if ((status = env->Class_FindField(cls, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if ((status = env->Object_SetField_Int(object, field, value)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool GetFieldStringArrayByName(ani_env *env, ani_object object, const char *name, std::vector<std::string> &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_ref arrayObj = nullptr;
+    if ((status = env->Object_GetFieldByName_Ref(object, name, &arrayObj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isUndefined = true;
+    if ((status = env->Reference_IsUndefined(arrayObj, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::ANI, "%{public}s: undefined", name);
+        return false;
+    }
+    ani_double length = 0;
+    if ((status = env->Object_GetPropertyByName_Double(reinterpret_cast<ani_object>(arrayObj),
+        "length", &length)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    for (int i = 0; i < static_cast<int>(length); i++) {
+        ani_ref stringEntryRef;
+        status = env->Object_CallMethodByName_Ref(reinterpret_cast<ani_object>(arrayObj),
+            "$_get", "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "status: %{public}d, index: %{public}d", status, i);
+            return false;
+        }
+        std::string str = "";
+        if (!GetStdString(env, reinterpret_cast<ani_string>(stringEntryRef), str)) {
+            TAG_LOGE(AAFwkTag::ANI, "GetStdString failed, index: %{public}d", i);
+            return false;
+        }
+        value.emplace_back(str);
+        TAG_LOGD(AAFwkTag::ANI, "GetStdString index: %{public}d %{public}s", i, str.c_str());
+    }
+    return true;
+}
+
+bool SetFieldArrayStringByName(ani_env *env, ani_class cls, ani_object object, const char *name,
+    const std::vector<std::string> &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_field field = nullptr;
+    if ((status = env->Class_FindField(cls, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_class arrayCls = nullptr;
+    if ((status = env->FindClass(CLASSNAME_ARRAY, &arrayCls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_method arrayCtor = nullptr;
+    if ((status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_object arrayObj = nullptr;
+    if ((status = env->Object_New(arrayCls, arrayCtor, &arrayObj, value.size())) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    for (size_t i = 0; i < value.size(); i++) {
+        ani_string str = nullptr;
+        if ((status = env->String_NewUTF8(value[i].c_str(), value[i].size(), &str)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+            return false;
+        }
+        if ((status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V",
+            i, str)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+            return false;
+        }
+    }
+    if ((status = env->Object_SetField_Ref(object, field, arrayObj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool GetFieldRefByName(ani_env *env, ani_object object, const char *name, ani_ref &ref)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_GetFieldByName_Ref(object, name, &ref)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isUndefined = true;
+    if ((status = env->Reference_IsUndefined(ref, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::ANI, "%{public}s is undefined", name);
+        return false;
+    }
+    return true;
+}
+
+bool SetFieldRefByName(ani_env *env, ani_class cls, ani_object object, const char *name, ani_ref value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_field field = nullptr;
+    if ((status = env->Class_FindField(cls, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if ((status = env->Object_SetField_Ref(object, field, value)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool GetStdString(ani_env *env, ani_string str, std::string &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_size sz = 0;
+    if ((status = env->String_GetUTF8Size(str, &sz)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    value.resize(sz + 1);
+    if ((status = env->String_GetUTF8SubString(str, 0, sz, value.data(), value.size(), &sz)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    value.resize(sz);
+    return true;
+}
+
+ani_string GetAniString(ani_env *env, const std::string &str)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return nullptr;
+    }
+    ani_string aniStr = nullptr;
+    ani_status status = env->String_NewUTF8(str.c_str(), str.size(), &aniStr);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status : %{public}d", status);
+        return nullptr;
+    }
+    return aniStr;
+}
+
+ani_object CreateDouble(ani_env *env, ani_double value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return nullptr;
+    }
+    ani_status status = ANI_ERROR;
+    ani_class cls = nullptr;
+    if ((status = env->FindClass(CLASSNAME_DOUBLE, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return nullptr;
+    }
+    ani_method ctor = nullptr;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "D:V", &ctor)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return nullptr;
+    }
+    ani_object obj = nullptr;
+    if ((status = env->Object_New(cls, ctor, &obj, value)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return nullptr;
+    }
+    return obj;
+}
+
+ani_object CreateBoolean(ani_env *env, ani_boolean value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return nullptr;
+    }
+    ani_status status = ANI_ERROR;
+    ani_class cls;
+    if ((status = env->FindClass(CLASSNAME_BOOL, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return nullptr;
+    }
+    ani_method ctor;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "Z:V", &ctor)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return nullptr;
+    }
+    ani_object obj;
+    if ((status = env->Object_New(cls, ctor, &obj, value)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return nullptr;
+    }
+    return obj;
+}
+}  // namespace AppExecFwk
+}  // namespace OHOS
