@@ -69,6 +69,14 @@ public:
      * @return Whether or not the bundle has a status bar ability.
      */
     static bool CheckStatusBarAbility(const AppExecFwk::BundleInfo &bundleInfo);
+
+    /**
+     * CheckAppServiceExtension, check if bundle has app service extension.
+     *
+     * @param bundleInfo The bundle info.
+     * @return Whether or not the bundle has app service extension.
+     */
+    static bool CheckAppServiceExtension(const AppExecFwk::BundleInfo &bundleInfo, std::string& mainElementName);
 };
 }  // namespace AAFwk
 }  // namespace OHOS
