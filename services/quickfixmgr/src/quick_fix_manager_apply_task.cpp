@@ -310,7 +310,7 @@ QuickFixManagerApplyTask::~QuickFixManagerApplyTask()
 void QuickFixManagerApplyTask::Run(const std::vector<std::string> &quickFixFiles, bool isDebug, bool isReplace)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::QUICKFIX, "Run apply task");
+    TAG_LOGI(AAFwkTag::QUICKFIX, "Run apply task");
     taskType_ = TaskType::QUICK_FIX_APPLY;
     PostDeployQuickFixTask(quickFixFiles, isDebug, isReplace);
 }
@@ -318,7 +318,7 @@ void QuickFixManagerApplyTask::Run(const std::vector<std::string> &quickFixFiles
 void QuickFixManagerApplyTask::RunRevoke()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::QUICKFIX, "Run apply revoke task");
+    TAG_LOGI(AAFwkTag::QUICKFIX, "Run apply revoke task");
     taskType_ = TaskType::QUICK_FIX_REVOKE;
     PostRevokeQuickFixTask();
 }
