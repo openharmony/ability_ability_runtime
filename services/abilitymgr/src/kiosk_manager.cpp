@@ -137,10 +137,9 @@ int32_t KioskManager::ExitKioskModeInner(const std::string & bundleName)
 
 int32_t KioskManager::GetKioskStatus(KioskStatus &kioskStatus)
 {
-    if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
-        PermissionConstants::PERMISSION_MANAGE_EDM_POLICY)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not MANAGE_EDM_POLICY permission");
-        return CHECK_PERMISSION_FAILED;
+    if (!PermissionVerification::GetInstance()->IsSystemAppCall()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
+        return ERR_NOT_SYSTEM_APP;
     }
     std::lock_guard<std::mutex> lock(kioskManagermutex_);
     kioskStatus = kioskStatus_;
