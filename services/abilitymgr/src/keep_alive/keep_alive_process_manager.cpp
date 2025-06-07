@@ -19,6 +19,7 @@
 
 #include "ability_util.h"
 #include "ffrt.h"
+#include "ipc_skeleton.h"
 #include "keep_alive_utils.h"
 #include "main_element_utils.h"
 #include "parameters.h"
@@ -33,6 +34,7 @@ constexpr char FOUNDATION_PROCESS_NAME[] = "foundation";
 constexpr int MAX_RETRY_TIMES = 3;
 constexpr int RETRY_INTERVAL_MICRO_SECONDS = 200000; // 200ms
 constexpr int CREATE_STATUS_BAR_TIMEOUT_MICRO_SECONDS = 5000000; // 5s
+constexpr int32_t U1_USER_ID = 1;
 } // namespace
 
 void CheckStatusBarTask::Cancel()
@@ -303,7 +305,7 @@ void KeepAliveProcessManager::OnAppStateChanged(const AppInfo &info)
         return;
     }
 
-    bool localEnable = IsKeepAliveBundle(bundleName, -1);
+    bool localEnable = IsKeepAliveBundle(bundleName, -1) || IsKeepAliveBundle(bundleName, U1_USER_ID);
     if (!localEnable) {
         return;
     }
@@ -362,6 +364,123 @@ int32_t KeepAliveProcessManager::QueryKeepAliveApplications(int32_t appType, int
     return AbilityKeepAliveService::GetInstance().QueryKeepAliveApplications(userId, appType, infoList);
 }
 
+int32_t KeepAliveProcessManager::SetAppServiceExtensionKeepAlive(const std::string &bundleName, bool updateEnable,
+    bool isByEDM, bool isallowUserToCancel)
+{
+    auto result = isByEDM ? CheckPermissionForEDM() : CheckPermission();
+    CHECK_RET_RETURN_RET(result, "permission denied");
+
+    CHECK_TRUE_RETURN_RET(bundleName.empty(), INVALID_PARAMETERS_ERR, "input parameter error");
+   
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bms, INNER_ERR);
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!IN_PROCESS_CALL(bms->GetBundleInfo(
+        bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, U1_USER_ID))) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "The target bundle is not in u1");
+        return ERR_NO_U1;
+    }
+
+    std::string mainElementName;
+    CHECK_TRUE_RETURN_RET(!MainElementUtils::CheckAppServiceExtension(bundleInfo, mainElementName),
+        ERR_INVALID_MAIN_ELEMENT_TYPE, "Invalid main element type");
+    
+    auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
+    CHECK_POINTER_AND_RETURN(appMgrClient, INNER_ERR);
+
+    KeepAliveInfo info;
+    info.bundleName = bundleName;
+    info.userId = U1_USER_ID;
+    info.setterId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    info.appType = bundleInfo.applicationInfo.isSystemApp ? KeepAliveAppType::SYSTEM : KeepAliveAppType::THIRD_PARTY;
+    info.setter = isByEDM ? KeepAliveSetter::SYSTEM : KeepAliveSetter::USER;
+    info.policy = isByEDM ? (isallowUserToCancel ? KeepAlivePolicy::ALLOW_CANCEL : KeepAlivePolicy::NOT_ALLOW_CANCEL) :
+        KeepAlivePolicy::UNSPECIFIED;
+    result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, updateEnable);
+    CHECK_RET_RETURN_RET(result, "set keep-alive failed");
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveDkv(bundleName, updateEnable, bundleInfo.uid));
+    return ERR_OK;
+}
+
+int32_t KeepAliveProcessManager::QueryKeepAliveAppServiceExtensions(std::vector<KeepAliveInfo> &infoList, bool isByEDM)
+{
+    auto result = isByEDM ? CheckPermissionForEDM() : CheckPermission();
+    CHECK_RET_RETURN_RET(result, "permission denied");
+    return AbilityKeepAliveService::GetInstance().QueryKeepAliveAppServiceExtensions(infoList);
+}
+
+void KeepAliveProcessManager::StartKeepAliveAppServiceExtension(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+{
+    for (const auto &bundleInfo : bundleInfos) {
+        StartKeepAliveAppServiceExtensionPerBundle(bundleInfo);
+    }
+}
+
+void KeepAliveProcessManager::StartKeepAliveAppServiceExtensionPerBundle(const AppExecFwk::BundleInfo &bundleInfo)
+{
+    auto userId = U1_USER_ID;
+    if (!IsKeepAliveBundle(bundleInfo.name, userId)) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "bundle is not set keep-alive");
+        return;
+    }
+
+    std::string mainElementName;
+    if (!MainElementUtils::CheckAppServiceExtension(bundleInfo, mainElementName)) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "Invalid main element type");
+        return;
+    }
+
+    KeepAliveAbilityInfo info = {
+        .userId = userId,
+        .appCloneIndex = bundleInfo.appIndex,
+        .uid = bundleInfo.uid,
+        .bundleName = bundleInfo.name,
+        .moduleName = bundleInfo.entryModuleName,
+        .abilityName = mainElementName,
+    };
+    auto ret = StartKeepAliveAppServiceExtensionInner(info);
+    if (ret == ERR_OK) {
+        TAG_LOGI(AAFwkTag::KEEP_ALIVE, "start ok");
+        return;
+    }
+
+    TAG_LOGE(AAFwkTag::KEEP_ALIVE, "StartKeepAliveAppServiceExtension failed:%{public}d, retry", ret);
+    ffrt::submit([bundleName = bundleInfo.name, userId, info, ret]() mutable {
+        for (int tried = 0; tried < MAX_RETRY_TIMES && ret != ERR_OK; tried++) {
+            usleep(RETRY_INTERVAL_MICRO_SECONDS);
+            TAG_LOGI(AAFwkTag::KEEP_ALIVE, "retry attempt:%{public}d", tried + 1);
+            ret = KeepAliveProcessManager::GetInstance().StartKeepAliveAppServiceExtensionInner(info);
+            TAG_LOGI(AAFwkTag::KEEP_ALIVE, "retry result:%{public}d", ret);
+        }
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::KEEP_ALIVE, "reach max retry, failed:%{public}d, unsetting keep-alive", ret);
+            KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName, false, true, false);
+            return;
+        }
+    });
+}
+
+int32_t KeepAliveProcessManager::StartKeepAliveAppServiceExtensionInner(const KeepAliveAbilityInfo &info)
+{
+    Want want;
+    want.SetElementName(info.bundleName, info.abilityName);
+    want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, info.appCloneIndex);
+    TAG_LOGI(AAFwkTag::KEEP_ALIVE, "call, bundleName: %{public}s, moduleName: %{public}s, mainElement: %{public}s"
+        " appCloneIndex: %{public}d", info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(),
+        info.appCloneIndex);
+    auto ret = IN_PROCESS_CALL(DelayedSingleton<AbilityManagerService>::GetInstance()->StartExtensionAbility(want,
+        nullptr, info.userId, AppExecFwk::ExtensionAbilityType::APP_SERVICE));
+    return ret;
+}
+
+int32_t KeepAliveProcessManager::ClearKeepAliveAppServiceExtension(int32_t userId)
+{
+    KeepAliveInfo info;
+    info.userId = U1_USER_ID;
+    info.setterId = userId;
+    return AbilityKeepAliveService::GetInstance().ClearKeepAliveAppServiceExtension(info);
+}
+
 int32_t KeepAliveProcessManager::CheckPermission()
 {
     if (!system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
@@ -397,6 +516,47 @@ int32_t KeepAliveProcessManager::CheckPermissionForEDM()
     }
     TAG_LOGE(AAFwkTag::KEEP_ALIVE, "verify PERMISSION_MANAGE_APP_KEEP_ALIVE_INTERNAL fail");
     return CHECK_PERMISSION_FAILED;
+}
+
+void KeepAliveProcessManager::SaveAppSeriviceRestartAfterUpgrade(const std::string &bundleName, int32_t uid)
+{
+    if (!IsKeepAliveBundle(bundleName, U1_USER_ID)) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "bundle is not set keep-alive");
+        return;
+    }
+
+    auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
+    if (!appMgrClient) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "appMgrClient is null");
+        return;
+    }
+    
+    std::vector<AppExecFwk::RunningProcessInfo> infos;
+    auto ret = IN_PROCESS_CALL(appMgrClient->GetProcessRunningInfosByUserId(infos, uid / BASE_USER_RANGE));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "get ProcessRunningInfos by userId fail");
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(restartAfterUpgradeMutex_);
+    for (const auto& info : infos) {
+        if (info.uid_ == uid && info.isKeepAliveAppService) {
+            restartAfterUpgradeList_.insert(uid);
+            IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveDkv(bundleName, false, uid));
+        }
+    }
+}
+
+    
+bool KeepAliveProcessManager::CheckNeedRestartAfterUpgrade(int32_t uid)
+{
+    std::lock_guard<std::mutex> lock(restartAfterUpgradeMutex_);
+    auto iter = restartAfterUpgradeList_.find(uid);
+    if (iter == restartAfterUpgradeList_.end()) {
+        return false;
+    }
+    restartAfterUpgradeList_.erase(iter);
+    return true;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

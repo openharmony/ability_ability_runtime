@@ -66,6 +66,7 @@
 #include "iservice_registry.h"
 #include "keep_alive_process_manager.h"
 #include "keep_alive_utils.h"
+#include "main_element_utils.h"
 #ifdef MEMMGR_OVERRIDE_ENABLE
 #include "mem_mgr_client.h"
 #include "mem_mgr_process_state_info.h"
@@ -2649,6 +2650,10 @@ void AbilityManagerService::AppUpgradeCompleted(int32_t uid)
     std::vector<AppExecFwk::BundleInfo> bundleInfos = { bundleInfo };
     if (type == KeepAliveType::THIRD_PARTY) {
         KeepAliveProcessManager::GetInstance().StartKeepAliveProcessWithMainElement(bundleInfos, userId);
+        if (IN_PROCESS_CALL(KeepAliveProcessManager::GetInstance().CheckNeedRestartAfterUpgrade(uid))) {
+            IN_PROCESS_CALL_WITHOUT_RET(
+                KeepAliveProcessManager::GetInstance().StartKeepAliveAppServiceExtension(bundleInfos));
+        }
     } else if (type == KeepAliveType::RESIDENT_PROCESS) {
         auto residentProcessManager = DelayedSingleton<ResidentProcessManager>::GetInstance();
         CHECK_POINTER(residentProcessManager);
@@ -7285,9 +7290,15 @@ int32_t AbilityManagerService::UninstallAppInner(const std::string &bundleName, 
         CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
         AAFwk::ExitReason exitReason = { REASON_UPGRADE, exitMsg };
         appExitReasonHelper_->RecordAppExitReason(bundleName, uid, appIndex, exitReason);
+        IN_PROCESS_CALL_WITHOUT_RET(
+            KeepAliveProcessManager::GetInstance().SaveAppSeriviceRestartAfterUpgrade(bundleName, uid));
     } else {
         IN_PROCESS_CALL_WITHOUT_RET(
             KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, false, true, false));
+        if (userId == U1_USER_ID) {
+            IN_PROCESS_CALL_WITHOUT_RET(KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(
+                bundleName, false, true, false));
+        }
     }
     IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppExecFwk::AppMgrClient>::
         GetInstance()->SetKeepAliveEnableState(bundleName, false, uid));
@@ -8339,6 +8350,7 @@ int AbilityManagerService::StopUser(int userId, const sptr<IUserCallback> &callb
     if (!system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false)) {
         return 0;
     }
+    IN_PROCESS_CALL_WITHOUT_RET(KeepAliveProcessManager::GetInstance().ClearKeepAliveAppServiceExtension(userId));
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     if (!KeepAliveProcessManager::GetInstance().GetKeepAliveBundleInfosForUser(bundleInfos, userId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get keep-alive bundle info failed");
@@ -8347,6 +8359,10 @@ int AbilityManagerService::StopUser(int userId, const sptr<IUserCallback> &callb
     for (const auto &bundleInfo : bundleInfos) {
         IN_PROCESS_CALL_WITHOUT_RET(KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(
             bundleInfo.name, userId, false, true, false));
+        if (userId == U1_USER_ID) {
+            IN_PROCESS_CALL_WITHOUT_RET(KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(
+                bundleInfo.name, false, true, false));
+        }
     }
     return 0;
 }
@@ -10329,6 +10345,9 @@ AAFwk::PermissionVerification::VerificationInfo AbilityManagerService::CreateVer
 int32_t AbilityManagerService::CheckCallAppServiceExtensionPermission(const AbilityRequest &abilityRequest,
     std::shared_ptr<AbilityRecord> targetService, bool isFromConnect)
 {
+    if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        return ERR_OK;
+    }
     bool isVerifyAppIdentifierAllowList = true;
     if (targetService != nullptr && targetService->IsAbilityState(AbilityState::ACTIVE)) {
         isVerifyAppIdentifierAllowList = false;
@@ -12104,18 +12123,22 @@ void AbilityManagerService::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::
 
     auto userId = GetUserId();
     std::vector<AppExecFwk::BundleInfo> bundleInfosForCurrentUser;
+    std::vector<AppExecFwk::BundleInfo> bundleInfosForU1;
     for (const auto &item: bundleInfos) {
-        if (item.uid / BASE_USER_RANGE == userId) {
+        if (item.uid / BASE_USER_RANGE == U1_USER_ID) {
+            bundleInfosForU1.push_back(item);
+        } else if (item.uid / BASE_USER_RANGE == userId) {
             bundleInfosForCurrentUser.push_back(item);
         }
     }
 
-    if (bundleInfosForCurrentUser.size() == 0) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "no app to restart");
-        return;
+    if (bundleInfosForCurrentUser.size() != 0) {
+        KeepAliveProcessManager::GetInstance().StartKeepAliveProcessWithMainElement(bundleInfosForCurrentUser, userId);
     }
 
-    KeepAliveProcessManager::GetInstance().StartKeepAliveProcessWithMainElement(bundleInfosForCurrentUser, userId);
+    if (bundleInfosForU1.size() != 0) {
+        KeepAliveProcessManager::GetInstance().StartKeepAliveAppServiceExtension(bundleInfosForU1);
+    }
 }
 
 void AbilityManagerService::NotifyAppPreCache(int32_t pid, int32_t userId)
@@ -13931,8 +13954,22 @@ int32_t AbilityManagerService::QueryKeepAliveApplications(int32_t appType, int32
         appType, userId, list, false);
 }
 
-int32_t AbilityManagerService::SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId, bool flag)
+int32_t AbilityManagerService::SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId,
+    bool flag, bool isAllowUserToCancel)
 {
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    AppExecFwk::BundleInfo bundleInfo;
+    if (bms && userId == U1_USER_ID) {
+        if (IN_PROCESS_CALL(bms->GetBundleInfo(
+            bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId))) {
+            std::string mainElementName;
+            if (MainElementUtils::CheckAppServiceExtension(bundleInfo, mainElementName)) {
+                return KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(
+                    bundleName, flag, true, isAllowUserToCancel);
+            }
+        }
+    }
+
     return KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(
         bundleName, userId, flag, true, false);
 }
@@ -14404,6 +14441,17 @@ bool AbilityManagerService::HandleExecuteSAInterceptor(const Want &want, sptr<IR
     }
 
     return true;
+}
+
+int32_t AbilityManagerService::SetAppServiceExtensionKeepAlive(const std::string &bundleName, bool flag)
+{
+    return KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(
+        bundleName, flag, false, false);
+}
+
+int32_t AbilityManagerService::QueryKeepAliveAppServiceExtensions(std::vector<KeepAliveInfo> &list)
+{
+    return KeepAliveProcessManager::GetInstance().QueryKeepAliveAppServiceExtensions(list, false);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

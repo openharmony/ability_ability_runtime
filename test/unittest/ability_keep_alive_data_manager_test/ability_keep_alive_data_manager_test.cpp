@@ -533,11 +533,19 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, QueryKeepAliveApplications_200, TestSi
 HWTEST_F(AbilityKeepAliveDataManagerTest, ConvertKeepAliveStatusFromValue_100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConvertKeepAliveStatusFromValue_100 start";
-    DistributedKv::Value value = AbilityKeepAliveDataManager::GetInstance().ConvertKeepAliveStatusToValue(
-        KeepAliveSetter::USER);
-    KeepAliveSetter setter = KeepAliveSetter::UNSPECIFIED;
-    AbilityKeepAliveDataManager::GetInstance().ConvertKeepAliveStatusFromValue(value, setter);
-    EXPECT_EQ(setter, KeepAliveSetter::USER);
+    KeepAliveInfo info;
+    info.setter = KeepAliveSetter::USER;
+    info.setterId = 100;
+    info.policy = KeepAlivePolicy::ALLOW_CANCEL;
+    DistributedKv::Value value = AbilityKeepAliveDataManager::GetInstance().ConvertKeepAliveStatusToValue(info);
+    KeepAliveStatus kStatus;
+    kStatus.setterId = -1;
+    kStatus.setter = KeepAliveSetter::UNSPECIFIED;
+    kStatus.policy = KeepAlivePolicy::UNSPECIFIED;
+    AbilityKeepAliveDataManager::GetInstance().ConvertKeepAliveStatusFromValue(value, kStatus);
+    EXPECT_EQ(kStatus.setterId, 100);
+    EXPECT_EQ(kStatus.setter, KeepAliveSetter::USER);
+    EXPECT_EQ(kStatus.policy, KeepAlivePolicy::ALLOW_CANCEL);
     GTEST_LOG_(INFO) << "ConvertKeepAliveStatusFromValue_100 end";
 }
 

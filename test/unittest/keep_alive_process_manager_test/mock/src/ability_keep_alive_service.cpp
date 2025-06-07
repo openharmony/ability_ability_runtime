@@ -22,6 +22,9 @@ int32_t AbilityKeepAliveService::callSetResult = ERR_OK;
 int32_t AbilityKeepAliveService::callQueryResult = ERR_OK;
 bool AbilityKeepAliveService::callIsKeepAliveResult = false;
 int32_t AbilityKeepAliveService::callGetResult = ERR_OK;
+int32_t AbilityKeepAliveService::callSetAppServiceExtensionResult = ERR_OK;
+int32_t AbilityKeepAliveService::callQueryAppServiceExtensionResult = ERR_OK;
+int32_t AbilityKeepAliveService::callClearKeepAliveAppServiceExtensionResult = ERR_OK;
 
 AbilityKeepAliveService &AbilityKeepAliveService::GetInstance()
 {
@@ -52,6 +55,21 @@ bool AbilityKeepAliveService::IsKeepAliveApp(const std::string &bundleName, int3
 int32_t AbilityKeepAliveService::GetKeepAliveApplications(int32_t userId, std::vector<KeepAliveInfo> &infoList)
 {
     return callGetResult;
+}
+
+int32_t AbilityKeepAliveService::SetAppServiceExtensionKeepAlive(KeepAliveInfo &info, bool flag)
+{
+    return callSetAppServiceExtensionResult;
+}
+
+int32_t AbilityKeepAliveService::QueryKeepAliveAppServiceExtensions(std::vector<KeepAliveInfo> &infoList)
+{
+    return callQueryAppServiceExtensionResult;
+}
+
+int32_t AbilityKeepAliveService::ClearKeepAliveAppServiceExtension(const KeepAliveInfo &info)
+{
+    return callClearKeepAliveAppServiceExtensionResult;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

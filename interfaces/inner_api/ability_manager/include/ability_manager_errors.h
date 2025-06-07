@@ -809,6 +809,21 @@ enum {
     ERR_WANTAGENT_CANCELED = 2097335,
 
     /**
+     * Result (2097336) for invalid main element type.
+     */
+    ERR_INVALID_MAIN_ELEMENT_TYPE = 2097336,
+    
+    /**
+     * Result (2097337) for can not change keep alive status.
+     */
+    ERR_CHANGE_KEEP_ALIVE = 2097337,
+
+    /**
+     * Result (2097338) for target bundle is not in u1.
+     */
+    ERR_NO_U1 = 2097338,
+
+    /**
      * Result (2097340-2097350) for uri permission error result.
      */
     ERR_UPMS_GET_FILE_URIS_BY_KEY_FAILED = 2097340,
