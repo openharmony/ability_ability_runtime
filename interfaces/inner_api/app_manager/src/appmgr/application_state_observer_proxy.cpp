@@ -416,5 +416,28 @@ void ApplicationStateObserverProxy::OnProcessBindingRelationChanged(const Proces
             ret, processBindData.bundleName.c_str());
     }
 }
+
+void ApplicationStateObserverProxy::OnKeepAliveStateChanged(const ProcessData &processData)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "OnKeepAliveStateChanged, WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteParcelable(&processData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "OnKeepAliveStateChanged write processData failed");
+        return;
+    }
+    int32_t ret = SendTransactCmd(
+        static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_KEEP_ALIVE_STATE_CHANGED),
+        data, reply, option);
+    if (ret != NO_ERROR && ret != ERR_INVALID_STUB) {
+        TAG_LOGW(AAFwkTag::APPMGR,
+            "OnKeepAliveStateChanged ssendRequest is wrong, error code: %{public}d, bundleName:%{public}s.", ret,
+            processData.bundleName.c_str());
+    }
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

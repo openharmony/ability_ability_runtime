@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_KEEP_ALIVE_PROCESS_MANAGER_H
 
 #include <functional>
+#include <mutex>
 
 #include "ability_manager_service.h"
 #include "app_scheduler.h"
@@ -130,6 +131,35 @@ public:
 
     void RemoveCheckStatusBarTask(int32_t uid, bool shouldCancel);
 
+    /**
+     * Set the enable flag for keep-alive app service extension.
+     *
+     * @param bundleName, The bundle name of the keep-alive app service extension.
+     * @param updateEnable, Set value.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t SetAppServiceExtensionKeepAlive(const std::string &bundleName, bool updateEnable,
+        bool isByEDM, bool isAllowUserToCancel);
+
+     /**
+     * @brief Query keep-alive app service extensions.
+     * @param infoList Output parameters, return keep-alive info list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t QueryKeepAliveAppServiceExtensions(std::vector<KeepAliveInfo> &infoList, bool isByEDM);
+
+    /**
+     * Start keep-alive app service extension.
+     *
+     * @param bundleInfos bundles of keep-alive app service extension.
+     */
+    void StartKeepAliveAppServiceExtension(std::vector<AppExecFwk::BundleInfo> &bundleInfos);
+
+    int32_t ClearKeepAliveAppServiceExtension(int32_t userId);
+
+    void SaveAppSeriviceRestartAfterUpgrade(const std::string &bundleName, int32_t uid);
+
+    bool CheckNeedRestartAfterUpgrade(int32_t uid);
 private:
     KeepAliveProcessManager();
     ~KeepAliveProcessManager();
@@ -141,9 +171,13 @@ private:
     void AfterStartKeepAliveApp(const std::string &bundleName, uint32_t accessTokenId, int32_t uid, int32_t userId,
         bool isMultiInstance);
     bool IsRunningAppInStatusBar(const AppExecFwk::BundleInfo &bundleInfo);
+    void StartKeepAliveAppServiceExtensionPerBundle(const AppExecFwk::BundleInfo &bundleInfo);
+    int32_t StartKeepAliveAppServiceExtensionInner(const KeepAliveAbilityInfo &info);
 
     ffrt::mutex checkStatusBarTasksMutex_;
     std::vector<std::shared_ptr<CheckStatusBarTask>> checkStatusBarTasks_;
+    std::mutex restartAfterUpgradeMutex_;
+    std::set<int32_t> restartAfterUpgradeList_;
 
     DISALLOW_COPY_AND_MOVE(KeepAliveProcessManager);
 };

@@ -126,6 +126,13 @@ public:
     bool IsGrantPersistUriPermission();
 
     /**
+     * IsSupportGrantUriPermission, check whether to grant temp uri permission, default true.
+     *
+     * @return Whether to grant temp uri permission.
+     */
+    bool IsSupportGrantUriPermission();
+
+    /**
      * IsStartOptionsWithAnimation, check whether the start options have animation.
      *
      * @return Whether the start options have animation.
@@ -408,6 +415,7 @@ private:
     std::mutex isConnectSupportCrossUserMutex_;
     volatile DeviceConfiguration<bool> isConnectSupportCrossUser_ = {false, false};
     volatile DeviceConfiguration<bool> isSupportAppServiceExtension_ = {false, false};
+    volatile DeviceConfiguration<bool> isGrantTempUriPermission_ = {false, true};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         residentProcessInExtremeMemory_ = {false, {}};
     std::mutex residentProcessInExtremeMemoryMutex_;

@@ -46,6 +46,7 @@ ohos_moduletest("PandingWantMgrTest") {
     "${ability_runtime_innerkits_path}/wantagent:wantagent_innerkits",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/common:perm_verification",
   ]
 

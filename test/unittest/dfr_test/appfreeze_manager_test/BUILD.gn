@@ -87,6 +87,12 @@ ohos_unittest("appfreeze_manager_test") {
     "ipc:ipc_core",
     "json:nlohmann_json_static",
   ]
+
+  defines = []
+  if (ability_runtime_hitrace_enable) {
+    external_deps += [ "hitrace:libhitracechain" ]
+    defines += [ "ABILITY_RUNTIME_HITRACE_ENABLE" ]
+  }
 }
 
 ###############################################################################

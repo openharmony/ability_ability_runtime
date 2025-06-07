@@ -33,6 +33,7 @@ namespace AAFwk {
 namespace {
 constexpr size_t INSIGHT_INTENT_EXECUTE_RECORDS_MAX_SIZE = 256;
 constexpr char EXECUTE_INSIGHT_INTENT_PERMISSION[] = "ohos.permission.EXECUTE_INSIGHT_INTENT";
+constexpr char PERMISSION_GET_BUNDLE_INFO_PRIVILEGED[] = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
 constexpr int32_t OPERATION_DURATION = 10000;
 }
 using namespace AppExecFwk;
@@ -521,15 +522,15 @@ int32_t InsightIntentExecuteManager::GenerateWant(
         TAG_LOGD(AAFwkTag::INTENT, "Generate want with displayId: %{public}d", param->displayId_);
     }
 
-    ret = AddWantUirsAndFlagsFromParam(param, want);
-    if (ret != ERR_OK) {
-        return ret;
+    auto intRet = AddWantUirsAndFlagsFromParam(param, want);
+    if (intRet != ERR_OK) {
+        return intRet;
     }
 
-    ret = CheckAndUpdateDecoratorParams(param, decoratorInfo, want);
-    if (ret != ERR_OK) {
+    intRet = CheckAndUpdateDecoratorParams(param, decoratorInfo, want);
+    if (intRet != ERR_OK) {
         // log has print in sub method
-        return ret;
+        return intRet;
     }
 
     return ERR_OK;
@@ -563,6 +564,22 @@ int32_t InsightIntentExecuteManager::CheckCallerPermission()
         EXECUTE_INSIGHT_INTENT_PERMISSION);
     if (!isCallingPerm) {
         TAG_LOGE(AAFwkTag::INTENT, "permission %{public}s verification failed", EXECUTE_INSIGHT_INTENT_PERMISSION);
+        return ERR_PERMISSION_DENIED;
+    }
+    return ERR_OK;
+}
+
+int32_t InsightIntentExecuteManager::CheckGetInsightIntenInfoPermission()
+{
+    bool isSystemAppCall = PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI();
+    if (!isSystemAppCall) {
+        TAG_LOGE(AAFwkTag::INTENT, "system-api cannot use");
+        return ERR_NOT_SYSTEM_APP;
+    }
+
+    bool isCallingPerm = PermissionVerification::GetInstance()->VerifyGetBundleInfoPrivilegedPermission();
+    if (!isCallingPerm) {
+        TAG_LOGE(AAFwkTag::INTENT, "permission %{public}s verification failed", PERMISSION_GET_BUNDLE_INFO_PRIVILEGED);
         return ERR_PERMISSION_DENIED;
     }
     return ERR_OK;

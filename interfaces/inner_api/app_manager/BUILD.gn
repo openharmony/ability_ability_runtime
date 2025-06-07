@@ -52,7 +52,9 @@ ohos_shared_library("app_manager") {
   ]
 
   sources = [
+    "${ability_runtime_services_path}/appdfr/src/appfreeze_cpu_freq_manager.cpp",
     "${ability_runtime_services_path}/appdfr/src/appfreeze_manager.cpp",
+    "${ability_runtime_services_path}/appdfr/src/appfreeze_util.cpp",
     "src/appmgr/ability_controller_proxy.cpp",
     "src/appmgr/ability_controller_stub.cpp",
     "src/appmgr/ability_debug_response_proxy.cpp",
@@ -70,6 +72,7 @@ ohos_shared_library("app_manager") {
     "src/appmgr/app_foreground_state_observer_proxy.cpp",
     "src/appmgr/app_foreground_state_observer_stub.cpp",
     "src/appmgr/app_jsheap_mem_info.cpp",
+    "src/appmgr/app_cjheap_mem_info.cpp",
     "src/appmgr/app_launch_data.cpp",
     "src/appmgr/app_malloc_info.cpp",
     "src/appmgr/app_mgr_client.cpp",
@@ -174,6 +177,11 @@ ohos_shared_library("app_manager") {
 
   if (background_task_mgr_continuous_task_enable) {
     defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
+  }
+
+  if (ability_runtime_hitrace_enable) {
+    external_deps += [ "hitrace:libhitracechain" ]
+    defines += [ "ABILITY_RUNTIME_HITRACE_ENABLE" ]
   }
 
   innerapi_tags = [ "platformsdk" ]

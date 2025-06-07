@@ -157,7 +157,7 @@ public:
         return nullptr;
     }
 
-    virtual int SendWantSender(const sptr<AAFwk::IWantSender>& target, const SenderInfo& senderInfo) override
+    virtual int SendWantSender(sptr<AAFwk::IWantSender>& target, SenderInfo& senderInfo) override
     {
         return 0;
     }

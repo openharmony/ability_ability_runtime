@@ -17,6 +17,8 @@
 
 #include "ability_util.h"
 #include "ability_manager_service.h"
+#include "ffrt.h"
+#include "global_constant.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -130,10 +132,10 @@ bool CallRecord::SchedulerConnectDone()
         abilityInfo.name, abilityInfo.moduleName);
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     CHECK_POINTER_AND_RETURN(handler, false);
-    handler->SubmitTask([callback, remoteObject, launchMode = abilityInfo.launchMode, element]() {
+    ffrt::submit([callback, remoteObject, launchMode = abilityInfo.launchMode, element]() {
         callback->OnAbilityConnectDone(element,
             remoteObject, static_cast<int32_t>(launchMode));
-        });
+        }, ffrt::task_attr().timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
     state_ = CallState::REQUESTED;
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "element: %{public}s, mode: %{public}d. connectstate:%{public}d.",
@@ -156,9 +158,9 @@ bool CallRecord::SchedulerDisconnectDone()
         abilityInfo.name, abilityInfo.moduleName);
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     CHECK_POINTER_AND_RETURN(handler, false);
-    handler->SubmitTask([callback, element]() {
+    ffrt::submit([callback, element]() {
         callback->OnAbilityDisconnectDone(element,  ERR_OK);
-        });
+        }, ffrt::task_attr().timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 
     return true;
 }

@@ -491,7 +491,15 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
             lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
             std::string bundleName = GetAbilityInfo().bundleName;
             int32_t uid = GetUid();
-            ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, "THAW_BY_FOREGROUND_ABILITY");
+            auto pid = GetPid();
+            if (pid > 0) {
+                auto callerPid = GetCallerRecord() ? GetCallerRecord()->GetPid() : -1;
+                TAG_LOGD(AAFwkTag::ABILITYMGR,
+                    "ReportEventToRSS---%{public}d_%{public}s_%{public}d callerPid=%{public}d",
+                    uid, bundleName.c_str(), pid, callerPid);
+                ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, "THAW_BY_FOREGROUND_ABILITY", pid,
+                    callerPid);
+            }
             SetAbilityStateInner(AbilityState::FOREGROUNDING);
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
         }

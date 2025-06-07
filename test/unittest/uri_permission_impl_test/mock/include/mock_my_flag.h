@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,6 +69,25 @@ public:
         permissionReadWriteDesktop_ = false;
         permissionReadWriteDocuments_ = false;
         IsSystempAppCall_ = false;
+        getTokenIdByBundleNameStatus_ = 0;
+        isSAOrSystemAppCall_ = false;
+        isSystemAppCall_ = false;
+        isUriTypeValid_ = false;
+        isDocsCloudUri_ = false;
+        permissionGrantUriPermissionAsCaller_ = false;
+        processUdmfKeyRet_ = 0;
+        udmfUtilsUris_ = {};
+        upmsUtilsCheckIsSystemAppByBundleNameRet_ = true;
+        upmsUtilsCheckIsSystemAppByTokenIdRet_ = false;
+        upmsUtilsGetDirByBundleNameAndAppIndexRet_ = true;
+        upmsUtilsAlterBundleName_ = "";
+        upmsUtilsGetAlterBundleNameByTokenIdRet_ = true;
+        upmsUtilsBundleName_ = "";
+        upmsUtilsGetBundleNameByTokenIdRet_ = false;
+        upmsUtilsAppId_ = "";
+        upmsUtilsGetAppIdByBundleNameRet_ = 0;
+        upmsUtilsTokenId_ = 0;
+        upmsUtilsIsFoundationCallRet_ = false;
         tokenInfos = {};
     }
 
@@ -87,13 +106,25 @@ public:
     static bool permissionReadWriteDocuments_;
     static bool IsSystempAppCall_;
     static bool permissionFileAccessPersist_;
+    static bool permissionGrantUriPermissionAsCaller_;
     static bool isSAOrSystemAppCall_;
     static bool isUriTypeValid_;
     static bool isSystemAppCall_;
     static bool isDocsCloudUri_;
-    static std::string bundleName_;
     static int32_t getTokenIdByBundleNameStatus_;
-
+    static int32_t processUdmfKeyRet_;
+    static std::vector<std::string> udmfUtilsUris_;
+    static bool upmsUtilsCheckIsSystemAppByBundleNameRet_;
+    static bool upmsUtilsCheckIsSystemAppByTokenIdRet_;
+    static bool upmsUtilsGetDirByBundleNameAndAppIndexRet_;
+    static std::string upmsUtilsAlterBundleName_ ;
+    static bool upmsUtilsGetAlterBundleNameByTokenIdRet_;
+    static std::string upmsUtilsBundleName_;
+    static bool upmsUtilsGetBundleNameByTokenIdRet_;
+    static std::string upmsUtilsAppId_;
+    static int32_t upmsUtilsGetAppIdByBundleNameRet_;
+    static uint32_t upmsUtilsTokenId_;
+    static bool upmsUtilsIsFoundationCallRet_;
     static TokenInfoMap tokenInfos;
 };
 }  // namespace AAFwk

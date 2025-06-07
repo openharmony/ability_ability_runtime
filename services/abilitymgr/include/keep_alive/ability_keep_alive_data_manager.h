@@ -44,8 +44,8 @@ private:
     DistributedKv::Status RestoreKvStore(DistributedKv::Status status);
     DistributedKv::Status GetKvStore();
     bool CheckKvStore();
-    DistributedKv::Value ConvertKeepAliveStatusToValue(KeepAliveSetter setter);
-    void ConvertKeepAliveStatusFromValue(const DistributedKv::Value &value, KeepAliveSetter &setter);
+    DistributedKv::Value ConvertKeepAliveStatusToValue(const KeepAliveInfo &info);
+    void ConvertKeepAliveStatusFromValue(const DistributedKv::Value &value, KeepAliveStatus &status);
     DistributedKv::Key ConvertKeepAliveDataToKey(const KeepAliveInfo &info);
     KeepAliveInfo ConvertKeepAliveInfoFromKey(const DistributedKv::Key &key);
     bool IsEqual(const DistributedKv::Key &key, const KeepAliveInfo &info);

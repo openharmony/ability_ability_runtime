@@ -55,9 +55,17 @@ public:
      */
     static bool CheckStatusBarAbility(const AppExecFwk::BundleInfo &bundleInfo);
 
+    /**
+     * CheckAppServiceExtension, check if bundle has app service extension.
+     *
+     * @param bundleInfo The bundle info.
+     * @return Whether or not the bundle has app service extension.
+     */
+    static bool CheckAppServiceExtension(const AppExecFwk::BundleInfo &bundleInfo, std::string& mainElementName);
 public:
     static bool checkMainUIAbilityResult;
     static bool checkStatusBarAbilityResult;
+    static bool checkAppServiceExtensionResult;
     static uint32_t accessTokenId_;
 };
 }  // namespace AAFwk

@@ -33,7 +33,8 @@ namespace AAFwk {
 enum class SelectorType {
     WITHOUT_SELECTOR = -1,
     IMPLICIT_START_SELECTOR = 0,
-    APP_CLONE_SELECTOR = 1
+    APP_CLONE_SELECTOR = 1,
+    INTERCEPTOR_SELECTOR = 2
 };
 
 struct DialogCallerInfo {
@@ -86,9 +87,13 @@ public:
 
     bool UpdateExtensionWantWithDialogCallerInfo(AbilityRequest &abilityRequest,
         const sptr<IRemoteObject> &callerToken, bool isSCBCall);
+
+    std::string GenerateDialogSessionId();
+
+    void OnlySetDialogCallerInfo(AbilityRequest &abilityRequest, int32_t userId, SelectorType type,
+        const std::string &dialogSessionId, bool needGrantUriPermission);
 private:
     DialogSessionManager() = default;
-    std::string GenerateDialogSessionId();
 
     void SetDialogSessionInfo(const std::string &dialogSessionId, sptr<DialogSessionInfo> &dilogSessionInfo,
         std::shared_ptr<DialogCallerInfo> &dialogCallerInfo);

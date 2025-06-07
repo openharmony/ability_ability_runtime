@@ -802,7 +802,105 @@ enum {
      * Result (2097334) for app selector not exists.
      */
     ERR_APP_SELECTOR_NOT_EXISTS = 2097334,
+
+    /**
+     * Result (2097335) for canceled wantagent.
+     */
+    ERR_WANTAGENT_CANCELED = 2097335,
+
+    /**
+     * Result (2097336) for invalid main element type.
+     */
+    ERR_INVALID_MAIN_ELEMENT_TYPE = 2097336,
     
+    /**
+     * Result (2097337) for can not change keep alive status.
+     */
+    ERR_CHANGE_KEEP_ALIVE = 2097337,
+
+    /**
+     * Result (2097338) for target bundle is not in u1.
+     */
+    ERR_NO_U1 = 2097338,
+
+    /**
+     * Result (2097340-2097350) for uri permission error result.
+     */
+    ERR_UPMS_GET_FILE_URIS_BY_KEY_FAILED = 2097340,
+
+    ERR_UPMS_NO_PERMISSION_GRANT_URI = 2097341,
+
+    ERR_UPMS_INVALID_CALLER_TOKENID = 2097342,
+
+    ERR_UPMS_INVALID_TARGET_TOKENID = 2097343,
+
+    ERR_UPMS_ADD_PRIVILEGED_FAILED = 2097344,
+
+    ERR_UPMS_GET_ORI_URI_FAILED = 2097345,
+
+    ERR_UPMS_NOT_FILE_URI = 2097346,
+
+    ERR_UPMS_GRANT_URI_PERMISSION_FAILED = 2097347,
+
+    /**
+     * Result (2097351) target not in whitelist.
+     */
+    ERR_KIOSK_MODE_NOT_IN_WHITELIST = 2097351,
+
+    /**
+     * Result (2097352) already in kiosk mode.
+     */
+    ERR_ALREADY_IN_KIOSK_MODE = 2097352,
+
+    /**
+     * Result (2097353) system not in kiosk mode when required.
+     */
+    ERR_NOT_IN_KIOSK_MODE = 2097353,
+
+    /**
+     * Result (2097354) for application not in focus.
+     */
+    ERR_APP_NOT_IN_FOCUS = 2097354,
+
+    ERR_WRITE_KIOSK_UPDATE_APP_LIST_FAILED = 2097355,
+
+    ERR_WRITE_KIOSK_STATUS_FAILED = 2097356,
+
+    /**
+     * Result (2097355) for sa interceptor executer is nullptr.
+     */
+    ERR_NULL_SA_INTERCEPTOR_EXECUTER = 2097355,
+
+    /**
+     * Result (2097356) for sa interceptor write rule falied.
+     */
+    ERR_SA_INTERCEPTOR_WRITE_RULE_FAILED = 2097356,
+
+    /**
+     * Result (2097357) for sa interceptor descriptor mismatch.
+     */
+    ERR_SA_INTERCEPTOR_DESCRIPTOR_MISMATCH = 2097357,
+
+    /**
+     * Result (2097358) for sa interceptor write ipc params failed.
+     */
+    ERR_SA_INTERCEPTOR_WRITE_PARAMS_FAILED = 2097358,
+
+    /*
+     * Result(2097359) for ipc remote null.
+     */
+    ERR_NULL_IPC_REMOTE = 2097359,
+
+    /*
+     * Result(2097360) for ipc send request failed.
+     */
+    ERR_NULL_IPC_SEND_REQUST_FAILED = 2097360,
+
+    /*
+     * Result(2097361) for sa interceptor read ipc params failed.
+     */
+    ERR_SA_INTERCEPTOR_READ_PARAMS_FAILED = 2097361,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */
@@ -1029,6 +1127,11 @@ enum NativeFreeInstallError {
      * Result(29360218) for failed to create instance key from SCB.
      */
     ERR_CREATE_INSTANCE_KEY_FAILED = 29360218,
+
+    /*
+     * Result(29360219) for write sa interceptor failed.
+     */
+    ERR_WRITE_SA_INTERCEPTOR_FAILED = 29360219,
 
     /**
      * Undefine error code.

@@ -41,6 +41,8 @@ constexpr char EVENT_MESSAGE[] = "MSG";
 constexpr char EVENT_PACKAGE_NAME[] = "PACKAGE_NAME";
 constexpr char EVENT_PROCESS_NAME[] = "PROCESS_NAME";
 constexpr char EVENT_STACK[] = "STACK";
+constexpr int32_t HALF_DURATION = 3000;
+constexpr int32_t HALF_INTERVAL = 300;
 }
 std::weak_ptr<EventHandler> AppfreezeInner::appMainHandler_;
 std::shared_ptr<AppfreezeInner> AppfreezeInner::instance_ = nullptr;
@@ -221,6 +223,7 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
         faultData.timeoutMarkers = it->timeoutMarkers;
         faultData.eventId = it->eventId;
         faultData.needKillProcess = it->needKillProcess;
+        faultData.appfreezeInfo = it->appfreezeInfo;
         ChangeFaultDateInfo(faultData, msgContent);
     }
     return 0;
@@ -249,6 +252,9 @@ void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent)
     } else {
         faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
         isSixSecondEvent.store(true);
+        std::string outFile;
+        OHOS::HiviewDFX::Watchdog::GetInstance().StartSample(HALF_DURATION, HALF_INTERVAL, outFile);
+        faultData.appfreezeInfo = outFile;
     }
     faultData.timeoutMarkers = "";
 

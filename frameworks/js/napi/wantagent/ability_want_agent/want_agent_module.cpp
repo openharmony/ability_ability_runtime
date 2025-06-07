@@ -59,6 +59,7 @@ napi_value JsNapiWantAgentInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getUid", moduleName, JsWantAgent::GetUid);
     BindNativeFunction(env, exportObj, "cancel", moduleName, JsWantAgent::Cancel);
     BindNativeFunction(env, exportObj, "trigger", moduleName, JsWantAgent::NapiTrigger);
+    BindNativeFunction(env, exportObj, "triggerAsync", moduleName, JsWantAgent::NapiTriggerAsync);
     BindNativeFunction(env, exportObj, "getWant", moduleName, JsWantAgent::NapiGetWant);
     BindNativeFunction(env, exportObj, "getWantAgent", moduleName, JsWantAgent::NapiGetWantAgent);
     BindNativeFunction(env, exportObj, "getOperationType", moduleName, JsWantAgent::NapiGetOperationType);

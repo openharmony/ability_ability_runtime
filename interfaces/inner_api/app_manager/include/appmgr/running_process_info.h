@@ -52,6 +52,7 @@ enum class WeightReasonCode {
 struct RunningProcessInfo : public Parcelable {
     bool isContinuousTask = false;
     bool isKeepAlive = false;
+    bool isKeepAliveAppService = false;
     bool isFocused = false;
     bool isTestProcess = false;
     bool isAbilityForegrounding = false;
