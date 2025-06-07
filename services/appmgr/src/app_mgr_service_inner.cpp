@@ -558,7 +558,7 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
         TAG_LOGE(AAFwkTag::APPMGR, "null taskHandler_");
         return ERR_INVALID_VALUE;
     }
-    TAG_LOGI(AAFwkTag::APPMGR, "submit task, bundleName:%{public}s, userId:%{public}d",
+    TAG_LOGD(AAFwkTag::APPMGR, "submit task, bundleName:%{public}s, userId:%{public}d",
         bundleName.c_str(), userId);
     taskHandler_->SubmitTask(task, PRELOAD_APPLIATION_TASK);
     return ERR_OK;
@@ -802,8 +802,8 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         MakeProcessName(abilityInfo, appInfo, hapModuleInfo, appIndex, specifiedProcessFlag,
             processName, loadParam->isCallerSetProcess);
         isExtensionSandBox = IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
-        TAG_LOGI(AAFwkTag::APPMGR, "%{public}s name:%{public}s-%{public}s processName = %{public}s",
-            __func__, abilityInfo->bundleName.c_str(), abilityInfo->name.c_str(), processName.c_str());
+        TAG_LOGI(AAFwkTag::APPMGR, "name:%{public}s-%{public}s processName = %{public}s",
+            abilityInfo->bundleName.c_str(), abilityInfo->name.c_str(), processName.c_str());
         if (MakeKiaProcess(want, isKia, watermarkBusinessName, isWatermarkEnabled, isFileUri, processName) != ERR_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "MakeKiaProcess failed");
             return;
@@ -1257,7 +1257,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
 
 void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppScheduler> &appScheduler)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s called", __func__);
+    TAG_LOGI(AAFwkTag::APPMGR, "called");
     if (pid <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid pid:%{public}d", pid);
         return;
@@ -3991,7 +3991,7 @@ int32_t AppMgrServiceInner::CreateStartMsg(const CreateStartMsgParam &param, App
 void AppMgrServiceInner::SetStartMsgCustomSandboxFlag(AppSpawnStartMsg &startMsg, uint32_t accessTokenId)
 {
     if (!AAFwk::AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "not supported device");
+        TAG_LOGD(AAFwkTag::APPMGR, "not supported device");
         return;
     }
 
@@ -9890,7 +9890,7 @@ void AppMgrServiceInner::RemoveUIExtensionBindItem(
     }
 
     if (!AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "abilityType not match");
+        TAG_LOGE(AAFwkTag::APPMGR, "not uiextension");
         return;
     }
 

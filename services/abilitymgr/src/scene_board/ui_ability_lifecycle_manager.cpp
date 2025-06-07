@@ -1061,8 +1061,7 @@ int32_t UIAbilityLifecycleManager::NotifySCBToMinimizeUIAbility(const sptr<IRemo
     CHECK_POINTER_AND_RETURN(sceneSessionManager, ERR_NULL_OBJECT);
     Rosen::WSError ret = sceneSessionManager->PendingSessionToBackgroundForDelegator(token);
     if (ret != Rosen::WSError::WS_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR,
-            "call error:%{public}d", ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "call error:%{public}d", ret);
     }
     return static_cast<int32_t>(ret);
 }
