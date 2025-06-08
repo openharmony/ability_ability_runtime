@@ -82,6 +82,8 @@ napi_value CreateFormInfoForQuery(napi_env env, const FormInfoForQuery &info)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
+    napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info.abilityName));
+    napi_set_named_property(env, objValue, "formName", CreateJsValue(env, info.formName));
     return objValue;
 }
 
