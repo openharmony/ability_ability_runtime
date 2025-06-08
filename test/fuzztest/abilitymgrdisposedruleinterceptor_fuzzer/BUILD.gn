@@ -66,7 +66,6 @@ ohos_fuzztest("AbilitymgrDisposedRuleInterceptorFuzzTest") {
     "dsoftbus:softbus_client",
     "ffrt:libffrt",
     "hilog:libhilog",
-    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "jsoncpp:jsoncpp",
