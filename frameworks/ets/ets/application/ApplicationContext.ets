@@ -34,6 +34,7 @@ export default class ApplicationContext extends Context {
   public native nativesetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
   public native nativesetFont(font: string): void; 
   public native nativerestartApp(want: Want): void;
+  public native nativegetAllRunningInstanceKeys(callback: AsyncCallbackWrapper<Array<string>>): void;
 
   setSupportedProcessCache(isSupported: boolean): void {
     taskpool.execute((): void => {
@@ -147,6 +148,24 @@ export default class ApplicationContext extends Context {
       });
       taskpool.execute((): void => {
         this.nativegetRunningProcessInformation(myCall);
+      });
+    });
+    return p;
+  }
+  
+  getAllRunningInstanceKeys(): Promise<Array<string>> {
+    let p = new Promise<Array<string>>((resolve: (data: Array<string>) => void,
+      reject: (err: BusinessError<void>) => void): void => {
+      let myCall = new AsyncCallbackWrapper<Array<string>>((err: BusinessError<void>,
+        data: Array<string>) => {
+        if (err.code == 0) {
+          resolve(data);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativegetAllRunningInstanceKeys(myCall);
       });
     });
     return p;
