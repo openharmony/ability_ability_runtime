@@ -210,6 +210,40 @@ void EtsApplicationContextUtils::GetRunningProcessInformation([[maybe_unused]]an
     }
 }
 
+void EtsApplicationContextUtils::GetAllRunningInstanceKeys([[maybe_unused]]ani_env *env,
+    [[maybe_unused]]ani_object aniObj, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "GetAllRunningInstanceKeys Call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return;
+    }
+    ani_object emptyArray = AppManagerSts::CreateEmptyAniArray(env);
+    std::shared_ptr<std::vector<std::string>> instanceKeys = std::make_shared<std::vector<std::string>>();
+    auto applicationContext = applicationContext_.lock();
+    if (!applicationContext) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
+        AppExecFwk::AsyncCallback(env, callback, CreateStsError(env,
+            AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT), emptyArray);
+        return;
+    }
+    if (applicationContext->GetCurrentAppMode() != static_cast<int32_t>(AppExecFwk::MultiAppModeType::MULTI_INSTANCE)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "not supported");
+        AppExecFwk::AsyncCallback(env, callback, CreateStsErrorByNativeErr(env,
+            AAFwk::ERR_MULTI_INSTANCE_NOT_SUPPORTED), emptyArray);
+        return;
+    }
+    ErrCode innerErrCode = applicationContext->GetAllRunningInstanceKeys(*instanceKeys);
+    if (innerErrCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "innerErrCode=%{public}d", innerErrCode);
+        AppExecFwk::AsyncCallback(env, callback, CreateStsErrorByNativeErr(env, (int32_t)innerErrCode), emptyArray);
+        return;
+    }
+    ani_object stringArray;
+    AppExecFwk::WrapArrayString(env, stringArray, *instanceKeys);
+    AppExecFwk::AsyncCallback(env, callback, CreateStsError(env, AbilityErrorCode::ERROR_OK), stringArray);
+}
+
 ani_double EtsApplicationContextUtils::NativeOnSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
     ani_string type, ani_object envCallback)
 {
@@ -392,6 +426,8 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env* aniEnv, ani
             reinterpret_cast<void *>(EtsApplicationContextUtils::SetFont)},
         ani_native_function {"nativerestartApp", "L@ohos/app/ability/Want/Want;:V",
             reinterpret_cast<void *>(EtsApplicationContextUtils::RestartApp)},
+        ani_native_function {"nativegetAllRunningInstanceKeys", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsApplicationContextUtils::GetAllRunningInstanceKeys)},
     };
     ani_status status = aniEnv->Class_BindNativeMethods(contextClass, applicationContextFunctions.data(),
     applicationContextFunctions.size());
