@@ -67,6 +67,7 @@ public:
     static void NativeMoveAbilityToBackground(ani_env *env, ani_object aniObj, ani_object callBack);
     static void NativeRequestModalUIExtension(ani_env *env, ani_object aniObj, ani_string pickerWantObj,
         ani_object callBackObj);
+    static void SetColorMode(ani_env *env, ani_object aniObj, ani_enum_item colorMode);
 
 private:
     static void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
