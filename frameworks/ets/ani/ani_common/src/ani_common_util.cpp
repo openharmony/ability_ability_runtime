@@ -93,7 +93,7 @@ bool GetFieldBoolByName(ani_env *env, ani_object object, const char *name, bool 
         return false;
     }
     ani_boolean isUndefined = true;
-    if ((status = env->Reference_IsUndefined(object, &isUndefined)) != ANI_OK) {
+    if ((status = env->Reference_IsUndefined(field, &isUndefined)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
@@ -103,7 +103,7 @@ bool GetFieldBoolByName(ani_env *env, ani_object object, const char *name, bool 
     }
     ani_boolean aniValue = false;
     if ((status = env->Object_CallMethodByName_Boolean(
-        reinterpret_cast<ani_object>(object), "booleanValue", nullptr, &aniValue)) != ANI_OK) {
+        reinterpret_cast<ani_object>(field), "booleanValue", nullptr, &aniValue)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
@@ -143,7 +143,7 @@ bool GetFieldStringByName(ani_env *env, ani_object object, const char *name, std
         return false;
     }
     ani_boolean isUndefined = true;
-    if ((status = env->Reference_IsUndefined(object, &isUndefined)) != ANI_OK) {
+    if ((status = env->Reference_IsUndefined(field, &isUndefined)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
