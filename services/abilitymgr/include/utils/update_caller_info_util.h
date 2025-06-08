@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@ private:
     void UpdateCallerBundleName(Want& want, const std::string &bundleName);
     void UpdateCallerAbilityName(Want& want, const std::string &abilityName);
     void UpdateCallerAppCloneIndex(Want& want, int32_t appIndex);
+    void ClearProtectedWantParam(Want &want);
 
     DISALLOW_COPY_AND_MOVE(UpdateCallerInfoUtil);
 };

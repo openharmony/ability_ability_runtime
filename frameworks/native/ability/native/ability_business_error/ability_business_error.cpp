@@ -111,10 +111,10 @@ constexpr const char* ERROR_MSG_CALLER_NOT_ATOMIC_SERVICE =
     "The caller is not an atomic service.";
 constexpr const char* ERROR_MSG_NOT_UI_ABILITY_CONTEXT =
     "The context is not UIAbilityContext.";
-constexpr const char* ERR_MSG_GET_FILE_URIS_BY_KEY_FAILED = "Failed to get file uri from key.";
-constexpr const char* ERR_MSG_NO_PERMISSION_GRANT_URI = "No permission to grant uri permission.";
-constexpr const char* ERR_MSG_INVALID_CALLER_TOKENID = "Caller token id is invalid.";
-constexpr const char* ERR_MSG_INVALID_TARGET_TOKENID = "Target token id is invalid.";
+constexpr const char* ERR_MSG_GET_FILE_URIS_BY_KEY_FAILED = "Failed to get the file URI from the key.";
+constexpr const char* ERR_MSG_NO_PERMISSION_GRANT_URI = "No permission to authorize the URI.";
+constexpr const char* ERR_MSG_INVALID_CALLER_TOKENID = "The caller token ID is invalid.";
+constexpr const char* ERR_MSG_INVALID_TARGET_TOKENID = "The target token ID is invalid.";
 constexpr const char* ERROR_MSG_INVALID_MAIN_ELEMENT_TYPE = "Invalid main element type";
 constexpr const char* ERROR_MSG_CHANGE_KEEP_ALIVE = "Can not change keep alive status";
 constexpr const char* ERROR_MSG_NO_U1 = "The target bundle is not in u1";
