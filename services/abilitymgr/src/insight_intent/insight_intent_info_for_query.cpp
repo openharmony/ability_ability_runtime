@@ -143,6 +143,33 @@ void to_json(nlohmann::json& jsonObject, const EntryInfoForQuery &info)
     };
 }
 
+void from_json(const nlohmann::json &jsonObject, FormInfoForQuery &formInfo)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "FormInfoForQuery from json");
+    const auto &jsonObjectEnd = jsonObject.end();
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_ABILITY_NAME,
+        formInfo.abilityName,
+        true,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_FORM_NAME,
+        formInfo.formName,
+        true,
+        g_parseResult);
+}
+
+void to_json(nlohmann::json& jsonObject, const FormInfoForQuery &info)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "FormInfoForQuery to json");
+    jsonObject = nlohmann::json {
+        {INSIGHT_INTENT_ABILITY_NAME, info.abilityName},
+        {INSIGHT_INTENT_FORM_NAME, info.formName}
+    };
+}
+
 void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insightIntentInfo)
 {
     TAG_LOGD(AAFwkTag::INTENT, "InsightIntentInfoForQuery from json");
@@ -261,6 +288,15 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insi
             false,
             g_parseResult,
             ArrayType::NOT_ARRAY);
+    } else if (insightIntentInfo.intentType == INSIGHT_INTENT_FORM_INFO) {
+        AppExecFwk::GetValueIfFindKey<FormInfoForQuery>(jsonObject,
+            jsonObjectEnd,
+            INSIGHT_INTENT_FORM_INFO,
+            insightIntentInfo.formInfo,
+            JsonType::OBJECT,
+            false,
+            g_parseResult,
+            ArrayType::NOT_ARRAY);
     }
 }
 
@@ -284,7 +320,8 @@ void to_json(nlohmann::json& jsonObject, const InsightIntentInfoForQuery &info)
         {INSIGHT_INTENT_KEYWORDS, info.keywords},
         {INSIGHT_INTENT_LINK_INFO, info.linkInfo},
         {INSIGHT_INTENT_PAGE_INFO, info.pageInfo},
-        {INSIGHT_INTENT_ENTRY_INFO, info.entryInfo}
+        {INSIGHT_INTENT_ENTRY_INFO, info.entryInfo},
+        {INSIGHT_INTENT_FORM_INFO, info.formInfo}
     };
 }
 

@@ -102,6 +102,17 @@ InsightIntentLinkInfo TEST_INSIGHT_INTENT_LINK_INFO = [] {
     return tmp;
 }();
 
+InsightIntentFormInfo TEST_INSIGHT_INTENT_FORM_INFO = [] {
+    InsightIntentFormInfo tmp;
+    tmp.abilityName = "abilityName";
+    tmp.formName = "formName";
+    tmp.parameters = R"({"oneOf":[{"requied":["palybackSpeed"]},{"requied": ["playbackProgress"]}],"properties":
+        {"playbackProgress":{"type":"number","description":"播放进度，单位秒"},"palybackSpeed":
+        {"description":"播放速率","enum":[0.5,0.75,1,1.25,1.5,2],"type":"number"}},"propertiesNames":
+        {"enum":["playbackProgress","palybackSpeed"]},"type":"object"})";
+    return tmp;
+}();
+
 ExtractInsightIntentGenericInfo TEST_INSIGHT_INTENT_GENERIC_INFO = [] {
     ExtractInsightIntentGenericInfo tmp;
     tmp.bundleName = "com.tdd.test";
@@ -333,6 +344,28 @@ HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentInfo_0100, TestSize.
     Mock::VerifyAndClear(mockBundleMgr);
     testing::Mock::AllowLeak(mockBundleMgr);
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest ConvertExtractInsightIntentInfo_0100 end.");
+}
+
+/**
+ * @tc.name: ConvertExtractInsightIntentInfo_0200
+ * @tc.desc: basic function test of convert info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentInfo_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest ConvertExtractInsightIntentInfo_0200 start");
+    EXPECT_CALL(*mockBundleMgr, GetJsonProfile(testing::_, testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<3>(TEST_JSON_STR_ARRAY), Return(ERR_OK)));
+    AbilityRuntime::InsightIntentUtils utils;
+    InsightIntentInfoForQuery insightIntentInfoForQuery;
+    TEST_INSIGHT_INTENT_INFO.genericInfo.data = TEST_INSIGHT_INTENT_FORM_INFO;
+    auto result = utils.ConvertExtractInsightIntentInfo(TEST_INSIGHT_INTENT_INFO, insightIntentInfoForQuery);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(TEST_INSIGHT_INTENT_FORM_INFO.abilityName, insightIntentInfoForQuery.formInfo.abilityName);
+    EXPECT_EQ(TEST_INSIGHT_INTENT_FORM_INFO.formName, insightIntentInfoForQuery.formInfo.formName);
+    Mock::VerifyAndClear(mockBundleMgr);
+    testing::Mock::AllowLeak(mockBundleMgr);
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest ConvertExtractInsightIntentInfo_0200 end");
 }
 } // namespace AAFwk
 } // namespace OHOS
