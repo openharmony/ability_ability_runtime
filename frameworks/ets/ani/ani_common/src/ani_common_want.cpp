@@ -61,6 +61,10 @@ bool InnerUnwrapWantParams(ani_env* env, ani_object wantObject, AAFwk::WantParam
 ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
 {
     TAG_LOGD(AAFwkTag::ANI, "WrapWant called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return nullptr;
+    }
     ani_class cls = nullptr;
     ani_status status = ANI_ERROR;
     ani_method method = nullptr;
