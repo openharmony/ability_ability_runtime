@@ -35,6 +35,7 @@ config("cj_want_agent_public_config") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
   ]
+  configs = [ "${ability_runtime_innerkits_path}/app_manager:appmgr_innerkits_config", ]
 }
 
 ohos_shared_library("cj_want_agent_ffi") {

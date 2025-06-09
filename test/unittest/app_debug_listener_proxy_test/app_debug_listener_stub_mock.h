@@ -19,7 +19,7 @@
 #include <gmock/gmock.h>
 #include <iremote_stub.h>
 #define private public
-#include "app_debug_listener_interface.h"
+#include "iapp_debug_listener.h"
 #undef private
 
 namespace OHOS {
@@ -45,8 +45,8 @@ public:
 
     uint32_t code_ = 0;
     MOCK_METHOD4(SendRequest, int(uint32_t, MessageParcel &, MessageParcel &, MessageOption &));
-    MOCK_METHOD1(OnAppDebugStarted, void(const std::vector<AppDebugInfo> &));
-    MOCK_METHOD1(OnAppDebugStoped, void(const std::vector<AppDebugInfo> &));
+    MOCK_METHOD1(OnAppDebugStarted, ErrCode(const std::vector<AppDebugInfo> &));
+    MOCK_METHOD1(OnAppDebugStoped, ErrCode(const std::vector<AppDebugInfo> &));
 };
 } // namespace AppExecFwk
 } // namespace OHOS

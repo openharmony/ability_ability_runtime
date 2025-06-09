@@ -74,50 +74,53 @@ void AbilityDebugDeal::OnAbilitysAssertDebugChange(const std::vector<sptr<IRemot
     }
 }
 
-void AbilityDebugResponse::OnAbilitysDebugStarted(const std::vector<sptr<IRemoteObject>> &tokens)
+ErrCode AbilityDebugResponse::OnAbilitysDebugStarted(const std::vector<sptr<IRemoteObject>> &tokens)
 {
     if (tokens.empty()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "tokens empty");
-        return;
+        return ERR_INVALID_DATA;
     }
 
     auto deal = abilityDebugDeal_.lock();
     if (deal == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "deal null");
-        return;
+        return ERR_INVALID_DATA;
     }
     deal->OnAbilitysDebugStarted(tokens);
+    return ERR_OK;
 }
 
-void AbilityDebugResponse::OnAbilitysDebugStoped(const std::vector<sptr<IRemoteObject>> &tokens)
+ErrCode AbilityDebugResponse::OnAbilitysDebugStoped(const std::vector<sptr<IRemoteObject>> &tokens)
 {
     if (tokens.empty()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "tokens empty");
-        return;
+        return ERR_INVALID_DATA;
     }
 
     auto deal = abilityDebugDeal_.lock();
     if (deal == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "deal null");
-        return;
+        return ERR_INVALID_DATA;
     }
     deal->OnAbilitysDebugStoped(tokens);
+    return ERR_OK;
 }
 
-void AbilityDebugResponse::OnAbilitysAssertDebugChange(
+ErrCode AbilityDebugResponse::OnAbilitysAssertDebugChange(
     const std::vector<sptr<IRemoteObject>> &tokens, bool isAssertDebug)
 {
     if (tokens.empty()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "tokens empty");
-        return;
+        return ERR_INVALID_DATA;
     }
 
     auto deal = abilityDebugDeal_.lock();
     if (deal == nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "deal null");
-        return;
+        return ERR_INVALID_DATA;
     }
     deal->OnAbilitysAssertDebugChange(tokens, isAssertDebug);
+    return ERR_OK;
 }
 } // namespace AAFwk
 } // namespace OHOS

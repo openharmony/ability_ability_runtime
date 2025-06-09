@@ -19,7 +19,7 @@
 #include <mutex>
 #include <set>
 
-#include "app_debug_listener_interface.h"
+#include "iapp_debug_listener.h"
 
 namespace OHOS {
 namespace AppExecFwk {

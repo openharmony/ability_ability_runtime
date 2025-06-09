@@ -16,7 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_ABILITY_DEBUG_DEAL_H
 #define OHOS_ABILITY_RUNTIME_ABILITY_DEBUG_DEAL_H
 
-#include "ability_debug_response_interface.h"
+#include "iability_debug_response.h"
 #include "ability_debug_response_stub.h"
 
 namespace OHOS {
@@ -60,9 +60,9 @@ public:
     virtual ~AbilityDebugResponse() = default;
 
 private:
-    void OnAbilitysDebugStarted(const std::vector<sptr<IRemoteObject>> &tokens) override;
-    void OnAbilitysDebugStoped(const std::vector<sptr<IRemoteObject>> &tokens) override;
-    void OnAbilitysAssertDebugChange(const std::vector<sptr<IRemoteObject>> &tokens, bool isAssertDebug) override;
+    ErrCode OnAbilitysDebugStarted(const std::vector<sptr<IRemoteObject>> &tokens) override;
+    ErrCode OnAbilitysDebugStoped(const std::vector<sptr<IRemoteObject>> &tokens) override;
+    ErrCode OnAbilitysAssertDebugChange(const std::vector<sptr<IRemoteObject>> &tokens, bool isAssertDebug) override;
 
     std::weak_ptr<AbilityDebugDeal> abilityDebugDeal_;
 };

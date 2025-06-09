@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/idl_tool/idl.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
@@ -40,9 +41,116 @@ config("appmgr_core_config") {
   }
 }
 
-ohos_shared_library("app_manager") {
-  branch_protector_ret = "pac_ret"
+idl_gen_interface("appmgr_innerkits") {
+  sources = [
+    "idl/IAbilityDebugResponse.idl",
+    "idl/IAppDebugListener.idl",
+    "idl/IStartSpecifiedAbilityResponse.idl",
+  ]
+  log_domainid = "0xD001311"
+  log_tag = "AppMgr"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
 
+config("appmgr_innerkits_config") {
+  include_dirs = [ "${target_gen_dir}" ]
+}
+
+ohos_source_set("appmgr_innerkits_include") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  public_configs = [
+    ":appmgr_innerkits_config",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_idl_config",
+    "${ability_runtime_path}/utils/server/startup:startup_util_config",
+  ]
+
+  deps = [
+    ":appmgr_innerkits",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_interface",
+    "${ability_runtime_path}/utils/server/startup:startup_util",
+  ]
+  external_deps = [
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+    "ability_base:configuration",
+  ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_source_set("appmgr_innerkits_source") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  configs = [
+    ":appmgr_core_config",
+    ":appmgr_sdk_config",
+  ]
+
+  public_configs = [
+    ":appmgr_innerkits_config",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_idl_config",
+    "${ability_runtime_path}/utils/server/startup:startup_util_config",
+  ]
+
+  output_values = get_target_outputs(":appmgr_innerkits")
+  sources = filter_include(output_values, [ "*.cpp" ])
+
+  deps = [
+    ":appmgr_innerkits",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_interface",
+    "${ability_runtime_path}/utils/server/startup:startup_util",
+  ]
+  external_deps = [
+    "c_utils:utils",
+    "faultloggerd:libfaultloggerd",
+    "ffrt:libffrt",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+  ]
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_shared_library("app_manager") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/dfr",
     "${ability_runtime_path}/utils/global/time/include",
@@ -57,8 +165,6 @@ ohos_shared_library("app_manager") {
     "${ability_runtime_services_path}/appdfr/src/appfreeze_util.cpp",
     "src/appmgr/ability_controller_proxy.cpp",
     "src/appmgr/ability_controller_stub.cpp",
-    "src/appmgr/ability_debug_response_proxy.cpp",
-    "src/appmgr/ability_debug_response_stub.cpp",
     "src/appmgr/ability_foreground_state_observer_proxy.cpp",
     "src/appmgr/ability_foreground_state_observer_stub.cpp",
     "src/appmgr/ability_info_callback_proxy.cpp",
@@ -67,8 +173,6 @@ ohos_shared_library("app_manager") {
     "src/appmgr/ams_mgr_proxy.cpp",
     "src/appmgr/ams_mgr_stub.cpp",
     "src/appmgr/app_debug_info.cpp",
-    "src/appmgr/app_debug_listener_proxy.cpp",
-    "src/appmgr/app_debug_listener_stub.cpp",
     "src/appmgr/app_foreground_state_observer_proxy.cpp",
     "src/appmgr/app_foreground_state_observer_stub.cpp",
     "src/appmgr/app_jsheap_mem_info.cpp",
@@ -120,8 +224,6 @@ ohos_shared_library("app_manager") {
     "src/appmgr/render_state_observer_stub.cpp",
     "src/appmgr/running_multi_info.cpp",
     "src/appmgr/running_process_info.cpp",
-    "src/appmgr/start_specified_ability_response_proxy.cpp",
-    "src/appmgr/start_specified_ability_response_stub.cpp",
     "src/appmgr/system_memory_attr.cpp",
     "src/appmgr/process_bind_data.cpp",
   ]
@@ -129,6 +231,9 @@ ohos_shared_library("app_manager") {
   public_configs = [
     ":appmgr_core_config",
     ":appmgr_sdk_config",
+    ":appmgr_innerkits_config",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_idl_config",
+    "${ability_runtime_path}/utils/server/startup:startup_util_config",
   ]
 
   defines = [ "AMS_LOG_TAG = \"AppexecfwkCore\"" ]
@@ -138,6 +243,7 @@ ohos_shared_library("app_manager") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
+    ":appmgr_innerkits_source",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/common:app_util",

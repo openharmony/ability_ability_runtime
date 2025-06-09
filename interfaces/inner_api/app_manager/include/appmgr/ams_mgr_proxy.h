@@ -17,7 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_AMS_MGR_PROXY_H
 
 #include "ams_mgr_interface.h"
-#include "app_debug_listener_interface.h"
+#include "iapp_debug_listener.h"
 #include "iremote_proxy.h"
 
 namespace OHOS {

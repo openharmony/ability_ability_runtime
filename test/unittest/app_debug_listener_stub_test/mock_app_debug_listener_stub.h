@@ -26,8 +26,8 @@ class MockAppDebugListenerStub : public AppDebugListenerStub {
 public:
     MockAppDebugListenerStub() {}
     virtual ~ MockAppDebugListenerStub() {}
-    MOCK_METHOD1(OnAppDebugStarted, void(const std::vector<AppDebugInfo> &debugInfos));
-    MOCK_METHOD1(OnAppDebugStoped, void(const std::vector<AppDebugInfo> &debugInfos));
+    MOCK_METHOD1(OnAppDebugStarted, ErrCode(const std::vector<AppDebugInfo> &debugInfos));
+    MOCK_METHOD1(OnAppDebugStoped, ErrCode(const std::vector<AppDebugInfo> &debugInfos));
 };
 } // namespace AAFwk
 } // namespace OHOS

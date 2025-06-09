@@ -16,9 +16,9 @@
 #ifndef OHOS_ABILITY_RUNTIME_APP_MGR_CLIENT_H
 #define OHOS_ABILITY_RUNTIME_APP_MGR_CLIENT_H
 
-#include "ability_debug_response_interface.h"
+#include "iability_debug_response.h"
 #include "ability_info.h"
-#include "app_debug_listener_interface.h"
+#include "iapp_debug_listener.h"
 #include "app_malloc_info.h"
 #include "app_mem_info.h"
 #include "app_mgr_constants.h"

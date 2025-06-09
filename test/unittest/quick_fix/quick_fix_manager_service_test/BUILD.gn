@@ -68,7 +68,11 @@ ohos_unittest("quick_fix_manager_service_test") {
 
 ohos_unittest("quick_fix_manager_apply_task_test") {
   module_out_path = "ability_runtime/ability_runtime/quick_fix"
-
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_test_path}/unittest/quick_fix/mock/include",

@@ -19,7 +19,7 @@
 #include "ability_info.h"
 #include "ability_running_record.h"
 #include "ams_mgr_stub.h"
-#include "app_debug_listener_interface.h"
+#include "iapp_debug_listener.h"
 #include "app_mgr_constants.h"
 #include "app_mgr_service_inner.h"
 #include "app_record_id.h"

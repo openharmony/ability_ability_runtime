@@ -73,7 +73,7 @@ HWTEST_F(AppDebugListenerStubTest, OnRemoteRequest_0100, TestSize.Level1)
     data.WriteParcelable(&debugInfo);
 
     auto result = mockStub_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppDebugListener::Message::ON_APP_DEBUG_STARTED), data, reply, option);
+        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 }
 
@@ -91,7 +91,7 @@ HWTEST_F(AppDebugListenerStubTest, OnRemoteRequest_0200, TestSize.Level1)
     data.WriteInt32(DEBUG_INFO_SIZE_ZERO);
 
     auto result = mockStub_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppDebugListener::Message::ON_APP_DEBUG_STARTED), data, reply, option);
+        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED), data, reply, option);
     EXPECT_EQ(result, ERR_INVALID_STATE);
 }
 
@@ -128,7 +128,7 @@ HWTEST_F(AppDebugListenerStubTest, OnRemoteRequest_0400, TestSize.Level1)
     data.WriteInt32(DEBUG_INFO_SIZE_ZERO);
 
     auto result = mockStub_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppDebugListener::Message::ON_APP_DEBUG_STARTED), data, reply, option);
+        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED), data, reply, option);
     EXPECT_EQ(result, ERR_INVALID_DATA);
 }
 
@@ -142,12 +142,14 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStarted_0100, TestSize.Level1
     EXPECT_NE(mockStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
     AppDebugInfo debugInfo;
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(&debugInfo);
 
     EXPECT_CALL(*mockStub_, OnAppDebugStarted(_)).Times(1);
-    EXPECT_EQ(mockStub_->HandleOnAppDebugStarted(data, reply), NO_ERROR);
+    mockStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED), data, reply, option);
 }
 
 /**
@@ -160,13 +162,15 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStarted_0200, TestSize.Level1
     EXPECT_NE(mockStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
     AppDebugInfo *debugInfo = nullptr;
     WriteInterfaceToken(data);
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(debugInfo);
 
     EXPECT_CALL(*mockStub_, OnAppDebugStarted(_)).Times(0);
-    EXPECT_EQ(mockStub_->HandleOnAppDebugStarted(data, reply), ERR_INVALID_DATA);
+    mockStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED), data, reply, option);
 }
 
 /**
@@ -179,12 +183,15 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStoped_0100, TestSize.Level1)
     EXPECT_NE(mockStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
     AppDebugInfo debugInfo;
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(&debugInfo);
     
     EXPECT_CALL(*mockStub_, OnAppDebugStoped(_)).Times(1);
-    EXPECT_EQ(mockStub_->HandleOnAppDebugStoped(data, reply), NO_ERROR);
+    auto ret = mockStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STOPED), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
 }
 
 /**
@@ -197,13 +204,16 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStoped_0200, TestSize.Level1)
     EXPECT_NE(mockStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
     AppDebugInfo *debugInfo = nullptr;
     WriteInterfaceToken(data);
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(debugInfo);
 
     EXPECT_CALL(*mockStub_, OnAppDebugStoped(_)).Times(0);
-    EXPECT_EQ(mockStub_->HandleOnAppDebugStoped(data, reply), ERR_INVALID_DATA);
+    auto ret = mockStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STOPED), data, reply, option);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -64,7 +64,7 @@ HWTEST_F(StopUserCallbackProxyTest, OnStopUserDone_001, TestSize.Level1)
     int userId = 0;
     int errcode = 0;
     proxy_->OnStopUserDone(userId, errcode);
-    EXPECT_EQ(IUserCallback::UserCallbackCmd::ON_STOP_USER_DONE, mock_->code_);
+    EXPECT_EQ(static_cast<int32_t>(IUserCallbackIpcCode::COMMAND_ON_STOP_USER_DONE), mock_->code_);
 }
 
 /*
@@ -83,7 +83,7 @@ HWTEST_F(StopUserCallbackProxyTest, OnStopUserDone_002, TestSize.Level1)
     int userId = 0;
     int errcode = 0;
     proxy_->OnStopUserDone(userId, errcode);
-    EXPECT_EQ(IUserCallback::UserCallbackCmd::ON_STOP_USER_DONE, mock_->code_);
+    EXPECT_EQ(static_cast<int32_t>(IUserCallbackIpcCode::COMMAND_ON_STOP_USER_DONE), mock_->code_);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

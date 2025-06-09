@@ -43,6 +43,7 @@ config("wantagent_innerkits_public_config") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
   ]
+  configs = [ "${ability_runtime_innerkits_path}/app_manager:appmgr_innerkits_config", ]
 }
 
 ohos_shared_library("wantagent_innerkits") {
@@ -64,7 +65,10 @@ ohos_shared_library("wantagent_innerkits") {
     "src/want_agent_info.cpp",
   ]
 
-  public_configs = [ ":wantagent_innerkits_public_config" ]
+  public_configs = [ 
+    ":wantagent_innerkits_public_config",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_idl_config",
+  ]
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",

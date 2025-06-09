@@ -55,17 +55,6 @@ void AppDebugListenerProxyTest::TearDown()
 {}
 
 /**
- * @tc.name: WriteInterfaceToken_0100
- * @tc.desc: write token into parcel data
- * @tc.type: FUNC
- */
-HWTEST_F(AppDebugListenerProxyTest, WriteInterfaceToken_0100, TestSize.Level1)
-{
-    MessageParcel data;
-    EXPECT_TRUE(proxy_->WriteInterfaceToken(data));
-}
-
-/**
  * @tc.name: OnAppDebugStarted_0100
  * @tc.desc: Callback of app debug started, verify that AppDebugListener interface calls normally.
  * @tc.type: FUNC
@@ -83,7 +72,7 @@ HWTEST_F(AppDebugListenerProxyTest, OnAppDebugStarted_0100, TestSize.Level1)
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AppDebugListenerStubMock::InvokeSendRequest));
     proxy_->OnAppDebugStarted(appDebugInfos);
-    auto code = static_cast<uint32_t>(IAppDebugListener::Message::ON_APP_DEBUG_STARTED);
+    auto code = static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED);
     EXPECT_EQ(code, static_cast<uint32_t>(mock_->code_));
 }
 
@@ -105,7 +94,7 @@ HWTEST_F(AppDebugListenerProxyTest, OnAppDebugStoped_0100, TestSize.Level1)
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AppDebugListenerStubMock::InvokeSendRequest));
     proxy_->OnAppDebugStoped(appDebugInfos);
-    auto code = static_cast<uint32_t>(IAppDebugListener::Message::ON_APP_DEBUG_STOPED);
+    auto code = static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STOPED);
     EXPECT_EQ(code, static_cast<uint32_t>(mock_->code_));
 }
 } // namespace AppExecFwk

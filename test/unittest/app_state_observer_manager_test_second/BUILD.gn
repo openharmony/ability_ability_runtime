@@ -18,6 +18,12 @@ module_output_path = "ability_runtime/ability_runtime/appmgr"
 
 ohos_unittest("app_state_observer_manager_test_second") {
   module_out_path = module_output_path
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../../cfi_blocklist.txt"
+  }
   cflags_cc = []
   include_dirs = [
     "${ability_runtime_services_path}/appmgr/include",

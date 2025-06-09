@@ -19,14 +19,14 @@
 #include <memory>
 #include <unordered_set>
 
-#include "ability_debug_response_interface.h"
+#include "iability_debug_response.h"
 #include "ability_info.h"
 #include "ability_manager_client.h"
-#include "app_debug_listener_interface.h"
+#include "iapp_debug_listener.h"
 #include "application_info.h"
 #include "appmgr/app_mgr_client.h"
 #include "appmgr/app_state_callback_host.h"
-#include "appmgr/start_specified_ability_response_stub.h"
+#include "start_specified_ability_response_stub.h"
 #include "bundle_info.h"
 #include "fault_data.h"
 #include "iremote_object.h"
@@ -114,7 +114,7 @@ public:
      * @param abilityTokens abilities in died process.
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
-    
+
     virtual void OnStartProcessFailed(sptr<IRemoteObject> token) {}
 
     virtual void OnCacheExitInfo(uint32_t accessTokenId, const AppExecFwk::RunningProcessInfo &exitInfo,
@@ -127,14 +127,14 @@ public:
     StartSpecifiedAbilityResponse() = default;
     virtual ~StartSpecifiedAbilityResponse() = default;
 
-    virtual void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag,
+    virtual ErrCode OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag,
         int32_t requestId) override;
-    virtual void OnTimeoutResponse(int32_t requestId) override;
+    virtual ErrCode OnTimeoutResponse(int32_t requestId) override;
 
-    virtual void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId) override;
-    virtual void OnNewProcessRequestTimeoutResponse(int32_t requestId) override;
+    virtual ErrCode OnNewProcessRequestResponse(const std::string &flag, int32_t requestId) override;
+    virtual ErrCode OnNewProcessRequestTimeoutResponse(int32_t requestId) override;
 
-    virtual void OnStartSpecifiedFailed(int32_t requestId) override;
+    virtual ErrCode OnStartSpecifiedFailed(int32_t requestId) override;
 };
 
 /**
