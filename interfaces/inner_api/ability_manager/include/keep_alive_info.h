@@ -43,14 +43,26 @@ enum class KeepAliveAppType : int32_t {
 };
 
 /**
+ * @class KeepAlivePolicy
+ * defines the keep-alive policy.
+ */
+enum class KeepAlivePolicy : int32_t {
+    UNSPECIFIED = 0,
+    NOT_ALLOW_CANCEL = 1,
+    ALLOW_CANCEL = 2,
+};
+
+/**
  * @struct KeepAliveInfo
  * Defines keep-alive info.
  */
 struct KeepAliveInfo : public Parcelable {
 public:
     int32_t userId = -1;
+    int32_t setterId = -1;
     KeepAliveAppType appType = KeepAliveAppType::UNSPECIFIED;
     KeepAliveSetter setter = KeepAliveSetter::UNSPECIFIED;
+    KeepAlivePolicy policy = KeepAlivePolicy::UNSPECIFIED;
     std::string bundleName;
 
     bool ReadFromParcel(Parcel &parcel);
@@ -60,7 +72,9 @@ public:
 
 struct KeepAliveStatus {
     int32_t code;
+    int32_t setterId;
     KeepAliveSetter setter;
+    KeepAlivePolicy policy = KeepAlivePolicy::UNSPECIFIED;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -21,6 +21,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 napi_value JsAppManagerInit(napi_env env, napi_value exportObj);
+void JsAppManagerInitProperty(napi_env env, napi_value exportObj);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_JS_APP_MANAGER_H

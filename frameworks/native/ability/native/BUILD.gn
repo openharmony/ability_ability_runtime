@@ -837,6 +837,14 @@ ohos_shared_library("uiabilitykit_native") {
     cflags_cc += [ "-DWITH_DLP" ]
   }
 
+  defines = []
+
+  if (hiappevent_part_enabled) {
+    defines += [ "NO_RUNTIME_EMULATOR" ]
+
+    external_deps += [ "hiappevent:hiappevent_innerapi" ]
+  }
+
   if (cj_frontend) {
     sources += [
       "${ability_runtime_native_path}/ability/native/ability_runtime/cj_ability_ffi.cpp",
@@ -849,7 +857,7 @@ ohos_shared_library("uiabilitykit_native") {
       "${ability_runtime_path}/frameworks/cj/ffi",
       "${ability_runtime_path}/frameworks/cj/ffi/application_context/include",
     ]
-    defines = [ "CJ_FRONTEND" ]
+    defines += [ "CJ_FRONTEND" ]
     external_deps += [
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",

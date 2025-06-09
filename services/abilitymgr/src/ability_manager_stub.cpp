@@ -286,6 +286,9 @@ int AbilityManagerStub::OnRemoteRequestInnerSixth(uint32_t code, MessageParcel &
     if (interfaceCode == AbilityManagerInterfaceCode::GET_INSIGHT_INTENT_INFO_BY_INTENT_NAME) {
         return GetInsightIntentInfoByIntentNameInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::REGISTER_SA_INTERCEPTOR) {
+        return RegisterSAInterceptorInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -637,6 +640,9 @@ int AbilityManagerStub::OnRemoteRequestInnerSixteenth(uint32_t code, MessageParc
     if (interfaceCode == AbilityManagerInterfaceCode::START_UI_EXTENSION_CONSTRAINED_EMBEDDED) {
         return StartUIExtensionConstrainedEmbeddedInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::START_UI_EXTENSION_PRE_VIEW_EMBEDDED) {
+        return StartUIExtensionPreViewEmbeddedInner(data, reply);
+    }
 #endif
     if (interfaceCode == AbilityManagerInterfaceCode::REQUEST_DIALOG_SERVICE) {
         return HandleRequestDialogService(data, reply);
@@ -865,6 +871,12 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentyFirst(uint32_t code, MessagePa
     if (interfaceCode == AbilityManagerInterfaceCode::GET_KIOSK_INFO) {
         return GetKioskStatusInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::SET_APP_SERVICE_EXTENSION_KEEP_ALIVE) {
+        return SetAppServiceExtensionKeepAliveInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::GET_APP_SERVICE_EXTENSIONS_KEEP_ALIVE) {
+        return QueryKeepAliveAppServiceExtensionsInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -877,6 +889,10 @@ int AbilityManagerStub::OnRemoteRequestInner(uint32_t code, MessageParcel &data,
         return retCode;
     }
     retCode = HandleOnRemoteRequestInnerSecond(code, data, reply, option);
+    if (retCode != ERR_CODE_NOT_EXIST) {
+        return retCode;
+    }
+    retCode = HandleOnRemoteRequestInnerThird(code, data, reply, option);
     if (retCode != ERR_CODE_NOT_EXIST) {
         return retCode;
     }
@@ -975,6 +991,13 @@ int AbilityManagerStub::HandleOnRemoteRequestInnerSecond(uint32_t code, MessageP
     if (retCode != ERR_CODE_NOT_EXIST) {
         return retCode;
     }
+    return ERR_CODE_NOT_EXIST;
+}
+
+int AbilityManagerStub::HandleOnRemoteRequestInnerThird(uint32_t code, MessageParcel &data,
+    MessageParcel &reply, MessageOption &option)
+{
+    int retCode = ERR_OK;
     retCode = OnRemoteRequestInnerTwentyFirst(code, data, reply, option);
     if (retCode != ERR_CODE_NOT_EXIST) {
         return retCode;
@@ -1564,6 +1587,26 @@ int AbilityManagerStub::StartUIExtensionConstrainedEmbeddedInner(MessageParcel &
         }
         // To ensure security, this attribute must be rewritten.
         extensionSessionInfo->uiExtensionUsage = UIExtensionUsage::CONSTRAINED_EMBEDDED;
+    }
+
+    int32_t userId = data.ReadInt32();
+
+    int32_t result = StartUIExtensionAbility(extensionSessionInfo, userId);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::StartUIExtensionPreViewEmbeddedInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<SessionInfo> extensionSessionInfo = nullptr;
+    if (data.ReadBool()) {
+        extensionSessionInfo = data.ReadParcelable<SessionInfo>();
+        if (extensionSessionInfo == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null extensionSessionInfo");
+            return ERR_NULL_OBJECT;
+        }
+        // To ensure security, this attribute must be rewritten.
+        extensionSessionInfo->uiExtensionUsage = UIExtensionUsage::PRE_VIEW_EMBEDDED;
     }
 
     int32_t userId = data.ReadInt32();
@@ -4342,7 +4385,8 @@ int AbilityManagerStub::SetApplicationKeepAliveByEDMInner(MessageParcel &data, M
     std::string bundleName = data.ReadString();
     int32_t userId = data.ReadInt32();
     bool flag = data.ReadBool();
-    int32_t result = SetApplicationKeepAliveByEDM(bundleName, userId, flag);
+    bool isAllowUserToCancel = data.ReadBool();
+    int32_t result = SetApplicationKeepAliveByEDM(bundleName, userId, flag, isAllowUserToCancel);
     if (!reply.WriteInt32(result)) {
         return ERR_INVALID_VALUE;
     }
@@ -4658,7 +4702,7 @@ int32_t AbilityManagerStub::UpdateKioskApplicationListInner(MessageParcel &data,
     auto result = UpdateKioskApplicationList(appList);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
-        return ERR_INVALID_VALUE;
+        return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }
@@ -4669,7 +4713,7 @@ int32_t AbilityManagerStub::EnterKioskModeInner(MessageParcel &data, MessageParc
     auto result = EnterKioskMode(token);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
-        return ERR_INVALID_VALUE;
+        return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }
@@ -4680,7 +4724,7 @@ int32_t AbilityManagerStub::ExitKioskModeInner(MessageParcel &data, MessageParce
     auto result = ExitKioskMode(token);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
-        return ERR_INVALID_VALUE;
+        return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }
@@ -4690,15 +4734,60 @@ int32_t AbilityManagerStub::GetKioskStatusInner(MessageParcel &data, MessageParc
     KioskStatus kioskStatus;
     int result = GetKioskStatus(kioskStatus);
     if (!reply.WriteParcelable(&kioskStatus)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write kiosk info fail");
-        return ERR_INVALID_VALUE;
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write kiosk status fail");
+        return ERR_WRITE_KIOSK_STATUS_FAILED;
     }
 
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write result fail");
-        return ERR_INVALID_VALUE;
+        return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::RegisterSAInterceptorInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call RegisterSaInterceptorInner");
+    auto interceptor = iface_cast<AbilityRuntime::ISAInterceptor>(data.ReadRemoteObject());
+    if (interceptor == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptor is null.");
+        return ERR_NULL_SA_INTERCEPTOR_EXECUTER;
+    }
+    int32_t result = RegisterSAInterceptor(interceptor);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to write result.");
+        return ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::SetAppServiceExtensionKeepAliveInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::string bundleName = data.ReadString();
+    bool flag = data.ReadBool();
+    int32_t result = SetAppServiceExtensionKeepAlive(bundleName, flag);
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return result;
+}
+
+int AbilityManagerStub::QueryKeepAliveAppServiceExtensionsInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::vector<KeepAliveInfo> list;
+    int32_t result = QueryKeepAliveAppServiceExtensions(list);
+    reply.WriteInt32(list.size());
+    for (auto &it : list) {
+        if (!reply.WriteParcelable(&it)) {
+            return ERR_INVALID_VALUE;
+        }
+    }
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return result;
 }
 } // namespace AAFwk
 } // namespace OHOS

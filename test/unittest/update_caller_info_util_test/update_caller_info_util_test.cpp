@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "mock_permission_verification.h"
 #define private public
 #define protected public
 #include "update_caller_info_util.h"
@@ -120,6 +121,38 @@ HWTEST_F(UpdateCallerInfoUtilTest, UpdateCallerInfoFromToken_0001, TestSize.Leve
     abilityRecord = nullptr;
     updateCallerUtil->UpdateCallerInfoFromToken(want, callerToken);
     EXPECT_EQ(abilityRecord, nullptr);
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_ClearProtectedWantParam_001
+ * @tc.desc: The caller is not system app, remove udKey.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, ClearProtectedWantParam_001, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    Want want;
+    std::string key = "udmf://temp/key/aaa";
+    want.SetParam(Want::PARAM_ABILITY_UNIFIED_DATA_KEY, key);
+    updateCallerUtil->ClearProtectedWantParam(want);
+    EXPECT_EQ(want.GetStringParam(Want::PARAM_ABILITY_UNIFIED_DATA_KEY), key);
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_ClearProtectedWantParam_002
+ * @tc.desc: The caller is system app, do not remove udKey.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, ClearProtectedWantParam_002, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    Want want;
+    std::string key = "udmf://temp/key/aaa";
+    want.SetParam(Want::PARAM_ABILITY_UNIFIED_DATA_KEY, key);
+    MyFlag::isSystemAppCallRet = false;
+    updateCallerUtil->ClearProtectedWantParam(want);
+    MyFlag::isSystemAppCallRet = true;
+    EXPECT_EQ(want.GetStringParam(Want::PARAM_ABILITY_UNIFIED_DATA_KEY), "");
 }
 } // namespace AAFwk
 } // namespace OHOS

@@ -801,6 +801,8 @@ int AbilityManagerProxy::StartUIExtensionAbility(const sptr<SessionInfo> &extens
         error = SendRequest(AbilityManagerInterfaceCode::START_UI_EXTENSION_ABILITY_EMBEDDED, data, reply, option);
     } else if (extensionSessionInfo->uiExtensionUsage == UIExtensionUsage::MODAL) {
         error = SendRequest(AbilityManagerInterfaceCode::START_UI_EXTENSION_ABILITY, data, reply, option);
+    } else if (extensionSessionInfo->uiExtensionUsage == UIExtensionUsage::PRE_VIEW_EMBEDDED) {
+        error = SendRequest(AbilityManagerInterfaceCode::START_UI_EXTENSION_PRE_VIEW_EMBEDDED, data, reply, option);
     } else {
         error = SendRequest(AbilityManagerInterfaceCode::START_UI_EXTENSION_CONSTRAINED_EMBEDDED, data, reply, option);
     }
@@ -6000,7 +6002,8 @@ int32_t AbilityManagerProxy::QueryKeepAliveApplications(int32_t appType, int32_t
     return reply.ReadInt32();
 }
 
-int32_t AbilityManagerProxy::SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId, bool flag)
+int32_t AbilityManagerProxy::SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId,
+    bool flag, bool isAllowUserToCancel)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -6020,6 +6023,11 @@ int32_t AbilityManagerProxy::SetApplicationKeepAliveByEDM(const std::string &bun
 
     if (!data.WriteBool(flag)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write flag");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteBool(isAllowUserToCancel)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write isAllowUserToCancel");
         return ERR_INVALID_VALUE;
     }
 
@@ -6612,7 +6620,7 @@ int32_t AbilityManagerProxy::UpdateKioskApplicationList(const std::vector<std::s
 
     if (!data.WriteStringVector(appList)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appList write fail");
-        return ERR_IPC_PROXY_WRITE_FAILED;
+        return ERR_WRITE_KIOSK_UPDATE_APP_LIST_FAILED;
     }
 
     auto error =
@@ -6705,9 +6713,93 @@ int32_t AbilityManagerProxy::GetKioskStatus(KioskStatus &kioskStatus)
     std::unique_ptr<KioskStatus> info(reply.ReadParcelable<KioskStatus>());
     if (!info) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "read KioskStatus fail");
-        return ERR_UNKNOWN_OBJECT;
+        return ERR_READ_RESULT_PARCEL_FAILED;
     }
     kioskStatus = *info;
+    return reply.ReadInt32();
+}
+
+ErrCode AbilityManagerProxy::RegisterSAInterceptor(sptr<AbilityRuntime::ISAInterceptor> interceptor)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call RegisterSAInterceptor");
+    if (!interceptor) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptor null");
+        return ERR_NULL_SA_INTERCEPTOR_EXECUTER;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken failed");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteRemoteObject(interceptor->AsObject())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptor write failed.");
+        return ERR_WRITE_SA_INTERCEPTOR_FAILED;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::REGISTER_SA_INTERCEPTOR, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::SetAppServiceExtensionKeepAlive(const std::string &bundleName, bool flag)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken fail");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write bundleName");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteBool(flag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write flag");
+        return ERR_INVALID_VALUE;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = SendRequest(AbilityManagerInterfaceCode::SET_APP_SERVICE_EXTENSION_KEEP_ALIVE,
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::QueryKeepAliveAppServiceExtensions(std::vector<KeepAliveInfo> &list)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken fail");
+        return INNER_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = SendRequest(AbilityManagerInterfaceCode::GET_APP_SERVICE_EXTENSIONS_KEEP_ALIVE,
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error: %{public}d", ret);
+        return ret;
+    }
+
+    ret = GetParcelableInfos<KeepAliveInfo>(reply, list);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetParcelableInfos error: %{public}d", ret);
+        return ret;
+    }
+
     return reply.ReadInt32();
 }
 } // namespace AAFwk

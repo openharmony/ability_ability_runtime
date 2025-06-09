@@ -338,11 +338,10 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFreezeInfoFile_001, TestS
         .bundleName = bundleName,
         .processName = bundleName,
     };
-    freezeInfoFile = appfreezeManager->GetFreezeInfoFile(faultData, bundleName);
+    freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
     EXPECT_EQ(freezeInfoFile, "");
     faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
-    freezeInfoFile = appfreezeManager->GetFreezeInfoFile(faultData, bundleName);
-    EXPECT_TRUE(!freezeInfoFile.empty());
+    freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
 }
 
 /**

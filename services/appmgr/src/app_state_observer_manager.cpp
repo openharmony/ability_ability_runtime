@@ -863,7 +863,7 @@ ProcessData AppStateObserverManager::WrapProcessData(const std::shared_ptr<AppRu
     }
     processData.state = static_cast<AppProcessState>(appRecord->GetState());
     processData.isContinuousTask = appRecord->IsContinuousTask();
-    processData.isKeepAlive = appRecord->IsKeepAliveApp();
+    processData.isKeepAlive = appRecord->IsKeepAliveApp() || appRecord->IsKeepAliveDkv();
     processData.isFocused = appRecord->GetFocusFlag();
     processData.requestProcCode = appRecord->GetRequestProcCode();
     processData.processChangeReason = static_cast<int32_t>(appRecord->GetProcessChangeReason());
@@ -1316,6 +1316,50 @@ void AppStateObserverManager::HandleOnProcessBindingRelationChanged(
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
         if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
             it->first->OnProcessBindingRelationChanged(data);
+        }
+    }
+}
+
+void AppStateObserverManager::OnKeepAliveStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (handler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null handler");
+        return;
+    }
+
+    auto task = [weak = weak_from_this(), appRecord]() {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "null self");
+            return;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "HandleOnKeepAliveStateChanged come.");
+        self->HandleOnKeepAliveStateChanged(appRecord);
+    };
+    handler_->SubmitTask(task);
+}
+
+void AppStateObserverManager::HandleOnKeepAliveStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
+        return;
+    }
+    ProcessData data = WrapProcessData(appRecord);
+    TAG_LOGI(AAFwkTag::APPMGR,
+        "bundle:%{public}s, pid:%{public}d, uid:%{public}d, processType:%{public}d, "
+        "extensionType:%{public}d, processName:%{public}s, renderUid:%{public}d, isTestMode:%{public}d, "
+        "callerPid:%{public}d, callerUid:%{public}d, isKeepAlive:%{public}d",
+        data.bundleName.c_str(), data.pid, data.uid, data.processType, data.extensionType, data.processName.c_str(),
+        data.renderUid, data.isTestMode, data.callerPid, data.callerUid, data.isKeepAlive);
+
+    auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
+    for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
+        const auto &bundleNames = it->second.bundleNames;
+        auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+            it->first->OnKeepAliveStateChanged(data);
         }
     }
 }

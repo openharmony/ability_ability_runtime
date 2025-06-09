@@ -357,5 +357,108 @@ HWTEST_F(MainElementUtilsTest, CheckStatusBarAbility_002, TestSize.Level1)
     bool res = MainElementUtils::CheckStatusBarAbility(bundleInfo);
     EXPECT_TRUE(res);
 }
+
+/*
+ * Feature: MainElementUtils
+ * Function: CheckAppServiceExtension
+ * SubFunction: NA
+ * FunctionPoints:MainElementUtils CheckAppServiceExtension
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckAppServiceExtension
+ */
+HWTEST_F(MainElementUtilsTest, CheckAppServiceExtension_001, TestSize.Level1)
+{
+    AppExecFwk::BundleInfo bundleInfo;
+    std::vector<HapModuleInfo> hapModuleInfos;
+    HapModuleInfo moduleInfo;
+    moduleInfo.name = "entry";
+    moduleInfo.moduleName = "entry";
+    moduleInfo.moduleType = ModuleType::UNKNOWN;
+    hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos = hapModuleInfos;
+    std::string mainElementName = "";
+    bool res = MainElementUtils::CheckAppServiceExtension(bundleInfo, mainElementName);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * Feature: MainElementUtils
+ * Function: CheckAppServiceExtension
+ * SubFunction: NA
+ * FunctionPoints:MainElementUtils CheckAppServiceExtension
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckAppServiceExtension
+ */
+HWTEST_F(MainElementUtilsTest, CheckAppServiceExtension_002, TestSize.Level1)
+{
+    AppExecFwk::BundleInfo bundleInfo;
+    std::vector<HapModuleInfo> hapModuleInfos;
+    HapModuleInfo moduleInfo;
+    moduleInfo.name = "entry";
+    moduleInfo.moduleName = "entry";
+    moduleInfo.moduleType = ModuleType::ENTRY;
+    moduleInfo.mainElementName = "";
+    hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos = hapModuleInfos;
+    std::string mainElementName = "";
+    bool res = MainElementUtils::CheckAppServiceExtension(bundleInfo, mainElementName);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * Feature: MainElementUtils
+ * Function: CheckAppServiceExtension
+ * SubFunction: NA
+ * FunctionPoints:MainElementUtils CheckAppServiceExtension
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckAppServiceExtension
+ */
+HWTEST_F(MainElementUtilsTest, CheckAppServiceExtension_003, TestSize.Level1)
+{
+    AppExecFwk::BundleInfo bundleInfo;
+    std::vector<HapModuleInfo> hapModuleInfos;
+    HapModuleInfo moduleInfo;
+    moduleInfo.name = "entry";
+    moduleInfo.moduleName = "entry";
+    moduleInfo.moduleType = ModuleType::ENTRY;
+    moduleInfo.mainElementName = "mainElementName";
+    ExtensionAbilityInfo extensionAbilityInfo;
+    extensionAbilityInfo.name = "nameTest";
+    extensionAbilityInfo.type = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    moduleInfo.extensionInfos.push_back(extensionAbilityInfo);
+    hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos = hapModuleInfos;
+    std::string mainElementName = "";
+    bool res = MainElementUtils::CheckAppServiceExtension(bundleInfo, mainElementName);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * Feature: MainElementUtils
+ * Function: CheckAppServiceExtension
+ * SubFunction: NA
+ * FunctionPoints:MainElementUtils CheckAppServiceExtension
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckAppServiceExtension
+ */
+HWTEST_F(MainElementUtilsTest, CheckAppServiceExtension_004, TestSize.Level1)
+{
+    AppExecFwk::BundleInfo bundleInfo;
+    std::vector<HapModuleInfo> hapModuleInfos;
+    HapModuleInfo moduleInfo;
+    moduleInfo.name = "entry";
+    moduleInfo.moduleName = "entry";
+    moduleInfo.moduleType = ModuleType::ENTRY;
+    moduleInfo.mainElementName = "mainElementName";
+    ExtensionAbilityInfo extensionAbilityInfo;
+    extensionAbilityInfo.name = "mainElementName";
+    extensionAbilityInfo.type = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    moduleInfo.extensionInfos.push_back(extensionAbilityInfo);
+    hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos = hapModuleInfos;
+    std::string mainElementName = "";
+    bool res = MainElementUtils::CheckAppServiceExtension(bundleInfo, mainElementName);
+    EXPECT_TRUE(res);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

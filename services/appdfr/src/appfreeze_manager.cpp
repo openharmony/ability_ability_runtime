@@ -40,6 +40,7 @@
 #ifdef ABILITY_RUNTIME_HITRACE_ENABLE
 #include "hitrace/hitracechain.h"
 #endif
+#include "appfreeze_cpu_freq_manager.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -396,14 +397,33 @@ std::string AppfreezeManager::GetFreezeInfoFile(const FaultData& faultData,
     const std::string& bundleName)
 {
     std::lock_guard<ffrt::mutex> lock(freezeInfoMutex_);
-    std::string filePath = "";
+    std::string filePath;
     if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_3S) {
-        appfreezeInfoPath_ = !faultData.appfreezeInfo.empty() ? (APPFREEZE_LOG_PREFIX + bundleName +
+        filePath = !faultData.appfreezeInfo.empty() ? (APPFREEZE_LOG_PREFIX + bundleName +
             APPFREEZE_LOG_SUFFIX + faultData.appfreezeInfo) : "";
-    } else if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S) {
-        filePath = appfreezeInfoPath_;
-        TAG_LOGI(AAFwkTag::APPDFR, "filePath:%{public}s", filePath.c_str());
     }
+    TAG_LOGI(AAFwkTag::APPDFR, "appfreezeInfo:%{public}s, filePath:%{public}s",
+        faultData.appfreezeInfo.c_str(), filePath.c_str());
+    return filePath;
+}
+
+std::string AppfreezeManager::ReportAppfreezeCpuInfo(const FaultData& faultData,
+    const AppfreezeManager::AppInfo& appInfo)
+{
+    std::string filePath;
+    if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_3S) {
+        AppExecFwk::AppfreezeCpuFreqManager::GetInstance()->SetHalfStackPath(GetFreezeInfoFile(faultData,
+            appInfo.bundleName));
+        AppExecFwk::AppfreezeCpuFreqManager::GetInstance()->InitHalfCpuInfo(appInfo.pid);
+    } else if (faultData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
+        AppExecFwk::AppfreezeCpuFreqManager::GetInstance()->InitHalfCpuInfo(appInfo.pid);
+    } else if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S ||
+        faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT) {
+        filePath = AppExecFwk::AppfreezeCpuFreqManager::GetInstance()->WriteCpuInfoToFile(appInfo.bundleName,
+            appInfo.uid, appInfo.pid);
+    }
+    TAG_LOGI(AAFwkTag::APPDFR, "appfreezeInfo:%{public}s, filePath:%{public}s",
+        faultData.appfreezeInfo.c_str(), filePath.c_str());
     return filePath;
 }
 
@@ -436,14 +456,15 @@ int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManag
             EVENT_SPAN_ID, hitraceIsValid ? info.spanId : "",
             EVENT_PARENT_SPAN_ID, hitraceIsValid ? info.pspanId : "",
             EVENT_TRACE_FLAG, hitraceIsValid ? info.traceFlag : "",
-            FREEZE_INFO_PATH, GetFreezeInfoFile(faultData, appInfo.bundleName));
+            FREEZE_INFO_PATH, ReportAppfreezeCpuInfo(faultData, appInfo));
     } else {
         ret = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, faultData.errorObject.name,
             OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_UID, appInfo.uid, EVENT_PID, appInfo.pid,
             EVENT_TID, faultData.tid > 0 ? faultData.tid : appInfo.pid,
             EVENT_PACKAGE_NAME, appInfo.bundleName, EVENT_PROCESS_NAME, appInfo.processName, EVENT_MESSAGE,
             faultData.errorObject.message, EVENT_STACK, faultData.errorObject.stack, BINDER_INFO, binderInfo,
-            APP_RUNNING_UNIQUE_ID, appRunningUniqueId, FREEZE_MEMORY, memoryContent);
+            APP_RUNNING_UNIQUE_ID, appRunningUniqueId, FREEZE_MEMORY, memoryContent,
+            FREEZE_INFO_PATH, ReportAppfreezeCpuInfo(faultData, appInfo));
     }
     TAG_LOGW(AAFwkTag::APPDFR,
         "reportEvent:%{public}s, pid:%{public}d, tid:%{public}d, bundleName:%{public}s, appRunningUniqueId:%{public}s"

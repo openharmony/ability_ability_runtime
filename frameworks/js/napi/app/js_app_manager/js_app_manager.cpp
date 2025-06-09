@@ -199,6 +199,16 @@ public:
     {
         GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnGetKeepAliveBundles);
     }
+
+    static napi_value SetKeepAliveForAppServiceExtension(napi_env env, napi_callback_info info)
+    {
+        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnSetKeepAliveForAppServiceExtension);
+    }
+
+    static napi_value GetKeepAliveAppServiceExtensions(napi_env env, napi_callback_info info)
+    {
+        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnGetKeepAliveAppServiceExtensions);
+    }
 #ifdef SUPPORT_SCREEN
     static bool CheckCallerIsSystemApp()
     {
@@ -1646,6 +1656,113 @@ private:
         return OnGetKeepAliveBundlesInner(env, appType, userId);
     }
 
+    napi_value OnSetKeepAliveForAppServiceExtensionInner(napi_env env, const std::string &bundleName, bool flag)
+    {
+        auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+        NapiAsyncTask::ExecuteCallback execute = [bundleName, flag, abilityManager = abilityManager_,
+            innerErrCode]() {
+            if (innerErrCode == nullptr) {
+                TAG_LOGE(AAFwkTag::APPMGR, "inner code null");
+                return;
+            }
+            if (abilityManager == nullptr) {
+                TAG_LOGE(AAFwkTag::APPMGR, "abilityManager nullptr");
+                *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INNER);
+                return;
+            }
+            *innerErrCode = abilityManager->SetAppServiceExtensionKeepAlive(bundleName, flag);
+        };
+
+        NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (innerErrCode == nullptr) {
+                TAG_LOGE(AAFwkTag::APPMGR, "inner code null");
+                task.Reject(env, CreateJsErrorByNativeErr(env,
+                    static_cast<int>(AbilityErrorCode::ERROR_CODE_INNER)));
+                return;
+            }
+            if (*innerErrCode == ERR_OK) {
+                TAG_LOGI(AAFwkTag::APPMGR, "SetAppServiceExtensionKeepAlive succeeded.");
+                task.ResolveWithNoError(env, CreateJsUndefined(env));
+                return;
+            }
+            TAG_LOGE(AAFwkTag::APPMGR, "SetAppServiceExtensionKeepAlive failed:%{public}d", *innerErrCode);
+            task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+        };
+
+        napi_value result = nullptr;
+        NapiAsyncTask::ScheduleHighQos("OnSetKeepAliveForAppServiceExtension", env,
+            CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+        return result;
+    }
+
+    napi_value OnSetKeepAliveForAppServiceExtension(napi_env env, size_t argc, napi_value *argv)
+    {
+        if (argc < ARGC_TWO) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Params not enough.");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        std::string bundleName;
+        if (!ConvertFromJsValue(env, argv[INDEX_ZERO], bundleName)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "get bundleName wrong.");
+            ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
+            return CreateJsUndefined(env);
+        }
+        bool flag = false;
+        if (!ConvertFromJsValue(env, argv[INDEX_ONE], flag)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "get flag wrong.");
+            ThrowInvalidParamError(env, "Parse param flag failed, must be a boolean.");
+            return CreateJsUndefined(env);
+        }
+        return OnSetKeepAliveForAppServiceExtensionInner(env, bundleName, flag);
+    }
+
+    napi_value OnGetKeepAliveAppServiceExtensionsInner(napi_env env)
+    {
+        auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+        auto infoList = std::make_shared<std::vector<KeepAliveInfo>>();
+        NapiAsyncTask::ExecuteCallback execute = [abilityManager = abilityManager_, infoList, innerErrCode]() {
+            if (infoList == nullptr || innerErrCode == nullptr) {
+                TAG_LOGE(AAFwkTag::APPMGR, "infoList or inner code null");
+                return;
+            }
+            if (abilityManager == nullptr) {
+                TAG_LOGE(AAFwkTag::APPMGR, "abilityManager nullptr");
+                *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INNER);
+                return;
+            }
+            *innerErrCode = abilityManager->QueryKeepAliveAppServiceExtensions(*infoList);
+        };
+
+        NapiAsyncTask::CompleteCallback complete = [infoList, innerErrCode](
+            napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (infoList == nullptr || innerErrCode == nullptr) {
+                TAG_LOGE(AAFwkTag::APPMGR, "infoList or inner code null");
+                task.Reject(env, CreateJsErrorByNativeErr(env,
+                    static_cast<int>(AbilityErrorCode::ERROR_CODE_INNER)));
+                return;
+            }
+            if (*innerErrCode == ERR_OK) {
+                TAG_LOGI(AAFwkTag::APPMGR, "QueryKeepAliveAppServiceExtensions succeeded.");
+                task.ResolveWithNoError(env, CreateJsKeepAliveBundleInfoArray(env, *infoList));
+                return;
+            }
+            TAG_LOGE(AAFwkTag::APPMGR, "QueryKeepAliveAppServiceExtensions failed:%{public}d", *innerErrCode);
+            task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+        };
+
+        napi_value result = nullptr;
+        NapiAsyncTask::ScheduleHighQos("OnGetKeepAliveAppServiceExtensions", env,
+            CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+        return result;
+    }
+
+    napi_value OnGetKeepAliveAppServiceExtensions(napi_env env, size_t argc, napi_value *argv)
+    {
+        TAG_LOGD(AAFwkTag::APPMGR, "called");
+        return OnGetKeepAliveAppServiceExtensionsInner(env);
+    }
+
     bool CheckOnOffType(napi_env env, size_t argc, napi_value* argv)
     {
         if (argc < ARGC_ONE) {
@@ -1709,13 +1826,7 @@ napi_value JsAppManagerInit(napi_env env, napi_value exportObj)
     std::unique_ptr<JsAppManager> jsAppManager = std::make_unique<JsAppManager>(
         GetAppManagerInstance(), GetAbilityManagerInstance());
     napi_wrap(env, exportObj, jsAppManager.release(), JsAppManager::Finalizer, nullptr, nullptr);
-
-    napi_set_named_property(env, exportObj, "ApplicationState", ApplicationStateInit(env));
-    napi_set_named_property(env, exportObj, "ProcessState", ProcessStateInit(env));
-    napi_set_named_property(env, exportObj, "PreloadMode", PreloadModeInit(env));
-    napi_set_named_property(env, exportObj, "KeepAliveAppType", KeepAliveAppTypeInit(env));
-    napi_set_named_property(env, exportObj, "KeepAliveSetter", KeepAliveSetterInit(env));
-
+    JsAppManagerInitProperty(env, exportObj);
     const char *moduleName = "AppManager";
     BindNativeFunction(env, exportObj, "on", moduleName, JsAppManager::On);
     BindNativeFunction(env, exportObj, "off", moduleName, JsAppManager::Off);
@@ -1749,8 +1860,21 @@ napi_value JsAppManagerInit(napi_env env, napi_value exportObj)
         JsAppManager::GetSupportedProcessCachePids);
     BindNativeFunction(env, exportObj, "setKeepAliveForBundle", moduleName, JsAppManager::SetKeepAliveForBundle);
     BindNativeFunction(env, exportObj, "getKeepAliveBundles", moduleName, JsAppManager::GetKeepAliveBundles);
+    BindNativeFunction(env, exportObj, "setKeepAliveForAppServiceExtension", moduleName,
+        JsAppManager::SetKeepAliveForAppServiceExtension);
+    BindNativeFunction(env, exportObj, "getKeepAliveAppServiceExtensions", moduleName,
+        JsAppManager::GetKeepAliveAppServiceExtensions);
     TAG_LOGD(AAFwkTag::APPMGR, "end");
     return CreateJsUndefined(env);
+}
+
+void JsAppManagerInitProperty(napi_env env, napi_value exportObj)
+{
+    napi_set_named_property(env, exportObj, "ApplicationState", ApplicationStateInit(env));
+    napi_set_named_property(env, exportObj, "ProcessState", ProcessStateInit(env));
+    napi_set_named_property(env, exportObj, "PreloadMode", PreloadModeInit(env));
+    napi_set_named_property(env, exportObj, "KeepAliveAppType", KeepAliveAppTypeInit(env));
+    napi_set_named_property(env, exportObj, "KeepAliveSetter", KeepAliveSetterInit(env));
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

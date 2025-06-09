@@ -65,9 +65,17 @@ void BundleContainer::LoadDependencyHspInfo(
         innerBundleInfo->SetIsNewVersion(true);
         ModuleProfile moduleProfile;
         moduleProfile.TransformTo(info.moduleJsonBuffer, *innerBundleInfo);
-        auto key = bundleName + std::string(FILE_SEPARATOR) + info.moduleName;
-        bundleInfos_.emplace(key, innerBundleInfo);
-        resourcePaths_.emplace(key, info.resourcePath);
+        BundleInfo bundleInfo;
+        innerBundleInfo->GetBundleInfoV9(
+            (static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
+                static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)),
+            bundleInfo);
+        if (!bundleInfo.moduleNames.empty()) {
+            auto key = bundleName + std::string(FILE_SEPARATOR) + bundleInfo.moduleNames[0];
+            TAG_LOGD(AAFwkTag::ABILITY_SIM, "key: %{public}s", key.c_str());
+            bundleInfos_.emplace(key, innerBundleInfo);
+            resourcePaths_.emplace(key, info.resourcePath);
+        }
     }
 }
 
