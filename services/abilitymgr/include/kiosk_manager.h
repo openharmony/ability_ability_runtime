@@ -42,7 +42,7 @@ public:
 private:
     KioskManager() = default;
     DISALLOW_COPY_AND_MOVE(KioskManager);
-    int32_t ExitKioskModeInner(const std::string &bundleName, sptr<IRemoteObject> callerToken = nullptr);
+    int32_t ExitKioskModeInner(const std::string &bundleName, sptr<IRemoteObject> callerToken);
     bool IsInKioskModeInner();
     void NotifyKioskModeChanged(bool isInKioskMode);
     bool IsInWhiteListInner(const std::string &bundleName);
