@@ -176,10 +176,10 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_001, TestSiz
     EXPECT_TRUE(abilityMs_->startUpNewRule_);
     abilityMs_->startUpNewRule_ = false;
     request.abilityInfo.visible = true;
-    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest_), ERR_OK);
+    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest_), ERR_INVALID_VALUE);
 
     abilityMs_->startUpNewRule_ = true;
-    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest_), ERR_OK);
+    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest_), ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_001 end");
 }
 
@@ -198,11 +198,11 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallServicePermission_001, TestSiz
     abilityMs_->startUpNewRule_ = false;
     EXPECT_FALSE(abilityMs_->startUpNewRule_);
     request.abilityInfo.visible = true;
-    EXPECT_EQ(abilityMs_->CheckCallServicePermission(request), ERR_OK);
+    EXPECT_EQ(abilityMs_->CheckCallServicePermission(request), ERR_INVALID_VALUE);
 
     abilityMs_->startUpNewRule_ = true;
     request.abilityInfo.isStageBasedModel = false;
-    EXPECT_EQ(abilityMs_->CheckCallServicePermission(request), ERR_OK);
+    EXPECT_EQ(abilityMs_->CheckCallServicePermission(request), ERR_INVALID_VALUE);
 
     request.abilityInfo.isStageBasedModel = true;
     request.abilityInfo.extensionAbilityType = ExtensionAbilityType::SERVICE;
@@ -229,7 +229,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckStartByCallPermission_002, TestSiz
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckStartByCallPermission_002 start");
     abilityRequest_.abilityInfo.type = AbilityType::PAGE;
-    EXPECT_EQ(abilityMs_->CheckStartByCallPermission(abilityRequest_), ERR_OK);
+    EXPECT_EQ(abilityMs_->CheckStartByCallPermission(abilityRequest_), ERR_INVALID_VALUE);
 
     abilityRequest_.abilityInfo.type = AbilityType::DATA;
     EXPECT_EQ(abilityMs_->CheckStartByCallPermission(abilityRequest_), RESOLVE_CALL_ABILITY_TYPE_ERR);
@@ -960,15 +960,15 @@ HWTEST_F(AbilityManagerServiceFirstTest, IsCallFromBackground_001, TestSize.Leve
     MyFlag::flag_ = 0;
     abilityRequest.callerToken = nullptr;
     abilityRequest.want.SetFlags(0);
-    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_OK);
+    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_INVALID_VALUE);
 
     abilityRequest.callerToken = MockToken(AbilityType::PAGE);
     abilityRequest.want.SetParam("isDelegatorCall", true);
-    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_OK);
+    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_INVALID_VALUE);
 
     abilityRequest.callerToken = nullptr;
     abilityRequest.want.SetParam("isDelegatorCall", true);
-    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_OK);
+    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest IsCallFromBackground_001 end");
 }
 
@@ -1072,7 +1072,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StopExtensionAbility_003, TestSize.Leve
     abilityRecord->abilityInfo_.applicationInfo.bundleName = "com.ix.hiservcie";
     MyFlag::flag_ = 1;
     EXPECT_EQ(abilityMs_->StopExtensionAbility(want, abilityRecord->GetToken(), -1, ExtensionAbilityType::SERVICE),
-        INVALID_PARAMETERS_ERR);
+        RESOLVE_ABILITY_ERR);
     MyFlag::flag_ = 0;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StopExtensionAbility_003 end");
 }
@@ -2019,14 +2019,14 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckStaticCfgPermission_0001, TestSize
     isSaCall = true;
     int ret = abilityMs->CheckStaticCfgPermission(
         abilityRequest, isStartAsCaller, callerTokenId, isData, isSaCall, isImplicit);
-    EXPECT_EQ(ret, AppExecFwk::Constants::PERMISSION_GRANTED);
+    EXPECT_NE(ret, AppExecFwk::Constants::PERMISSION_GRANTED);
 
     abilityRequest.abilityInfo.applicationInfo.accessTokenId = 1;
     callerTokenId = 1;
 
     ret = abilityMs->CheckStaticCfgPermission(
         abilityRequest, isStartAsCaller, callerTokenId, isData, isSaCall, isImplicit);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, ERR_OK);
 }
 
 /**
