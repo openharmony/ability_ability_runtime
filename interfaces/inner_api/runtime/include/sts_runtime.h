@@ -111,6 +111,7 @@ public:
         const std::string& hapPath, const std::string& srcEntrance);
     void HandleUncaughtError();
     static std::unique_ptr<STSRuntime> PreFork(const Options& options);
+    void PreloadClass(const char *className) override;
 
 private:
     bool LoadSTSAppLibrary(const AppLibPathVec& appLibPaths);
