@@ -254,6 +254,14 @@ enum class AbilityErrorCode {
     // can not change keep alive status
     ERROR_CODE_CHANGE_KEEP_ALIVE = 16000203,
 
+    ERROR_CODE_KIOSK_MODE_NOT_IN_WHITELIST = 16000110,
+
+    ERROR_CODE_ALREADY_IN_KIOSK_MODE = 16000111,
+
+    ERROR_CODE_NOT_IN_KIOSK_MODE = 16000112,
+
+    ERROR_CODE_APP_NOT_IN_FOCUS = 16000113,
+
     // target bundle is not in u1
     ERROR_CODE_NO_U1 = 16000204,
 
