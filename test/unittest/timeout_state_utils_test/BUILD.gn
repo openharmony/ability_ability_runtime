@@ -19,7 +19,10 @@ module_output_path = "ability_runtime/ability_runtime/state_utils_test"
 ohos_unittest("timeout_state_utils_test") {
   module_out_path = module_output_path
 
-  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
+  configs = [
+    "${ability_runtime_services_path}/abilitymgr:abilityms_config",
+    "${ability_runtime_path}/utils/server/startup:startup_util_config",
+  ]
 
   if (target_cpu == "arm") {
     cflags = [ "-DBINDER_IPC_32BIT" ]

@@ -18,7 +18,7 @@
 #include <gmock/gmock.h>
 #include <iremote_object.h>
 #include <iremote_stub.h>
-#include "user_callback.h"
+#include "iuser_callback.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -45,9 +45,9 @@ public:
 
     int code_ = 0;
 
-    virtual void OnStopUserDone(int userId, int errcode) {};
-    virtual void OnStartUserDone(int userId, int errcode) {}
-    virtual void OnLogoutUserDone(int userId, int errcode) {}
+    virtual ErrCode OnStopUserDone(int userId, int errcode) { return ERR_OK; };
+    virtual ErrCode OnStartUserDone(int userId, int errcode) { return ERR_OK; }
+    virtual ErrCode OnLogoutUserDone(int userId, int errcode) { return ERR_OK; }
 };
 }  // namespace AAFwk
 }  // namespace OHOS

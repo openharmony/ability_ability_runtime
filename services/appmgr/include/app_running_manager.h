@@ -22,7 +22,7 @@
 #include <set>
 
 #include "ability_info.h"
-#include "app_debug_listener_interface.h"
+#include "iapp_debug_listener.h"
 #include "app_jsheap_mem_info.h"
 #include "app_cjheap_mem_info.h"
 #include "app_malloc_info.h"
@@ -420,7 +420,7 @@ public:
     int32_t RemoveUIExtensionBindItemById(int32_t uiExtensionBindAbilityId);
 
     std::shared_ptr<AppRunningRecord> GetAppRunningRecordByChildRecordPid(const pid_t pid);
-    
+
     int32_t AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;
 

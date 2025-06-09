@@ -43,6 +43,7 @@ config("ability_config") {
     "${ability_runtime_napi_path}/featureAbility",
   ]
 
+  configs = [ "${ability_runtime_innerkits_path}/app_manager:appmgr_innerkits_config", ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -142,7 +143,7 @@ config("abilitykit_utils_public_config") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
   ]
-
+  configs = [ "${ability_runtime_innerkits_path}/app_manager:appmgr_innerkits_config", ]
   if (ability_runtime_graphics) {
     defines = [ "SUPPORT_GRAPHICS" ]
   }
@@ -332,6 +333,7 @@ ohos_shared_library("abilitykit_native") {
   public_configs = [
     ":ability_public_config",
     "${ability_runtime_native_path}/ability:ability_context_public_config",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_idl_config",
     "${ability_runtime_innerkits_path}/wantagent:wantagent_innerkits_public_config",
   ]
 
@@ -545,7 +547,7 @@ config("extensionkit_public_config") {
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
     "${ability_runtime_services_path}/common/include",
   ]
-
+  configs = [ "${ability_runtime_innerkits_path}/app_manager:appmgr_innerkits_config", ]
   if (ability_runtime_graphics) {
     defines = [ "SUPPORT_GRAPHICS" ]
   }
@@ -753,7 +755,7 @@ config("uiability_config") {
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
   ]
-
+  configs = [ "${ability_runtime_innerkits_path}/app_manager:appmgr_innerkits_config", ]
   if (ability_runtime_graphics) {
     defines = [
       "SUPPORT_GRAPHICS",
@@ -2190,7 +2192,7 @@ config("embedded_ui_extension_module_config") {
     "${ability_runtime_napi_path}/inner/napi_common",
     "${ability_runtime_napi_path}/featureAbility",
   ]
-
+  configs = [ "${ability_runtime_innerkits_path}/app_manager:appmgr_innerkits_config", ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]

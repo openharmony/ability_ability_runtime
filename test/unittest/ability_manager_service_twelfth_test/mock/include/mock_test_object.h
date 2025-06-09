@@ -16,16 +16,17 @@
 #ifndef ABILITY_MANAGER_SERVICE_TWELFTH_TEST_MOCK_TEST_OBJECT_H
 #define ABILITY_MANAGER_SERVICE_TWELFTH_TEST_MOCK_TEST_OBJECT_H
 
-#include "user_callback.h"
+#include "iuser_callback.h"
 #include "ability_connect_callback_interface.h"
 
+namespace OHOS {
 class MockIUserCallback : public OHOS::AAFwk::IUserCallback {
 public:
     MockIUserCallback() = default;
     virtual ~MockIUserCallback() = default;
-    virtual void OnStopUserDone(int userId, int errcode) override {}
-    virtual void OnStartUserDone(int userId, int errcode) override {}
-    virtual void OnLogoutUserDone(int userId, int errcode) override {}
+    virtual ErrCode OnStopUserDone(int userId, int errcode) override { return ERR_OK; }
+    virtual ErrCode OnStartUserDone(int userId, int errcode) override { return ERR_OK; }
+    virtual ErrCode OnLogoutUserDone(int userId, int errcode) override { return ERR_OK; }
     virtual OHOS::sptr<IRemoteObject> AsObject()
     {
         return nullptr;
@@ -44,4 +45,5 @@ public:
         return nullptr;
     }
 };
+}
 #endif // ABILITY_MANAGER_SERVICE_TWELFTH_TEST_MOCK_TEST_OBJECT_H

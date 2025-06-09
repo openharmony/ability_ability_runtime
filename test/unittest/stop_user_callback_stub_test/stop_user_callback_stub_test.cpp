@@ -27,11 +27,13 @@ public:
     MockStopUserCallbackStub() = default;
     virtual ~MockStopUserCallbackStub()
     {}
-    void OnStopUserDone(int userId, int errcode) override
-    {}
-    void OnStartUserDone(int userId, int errcode) override {}
+    ErrCode OnStopUserDone(int userId, int errcode) override
+    {
+        return ERR_OK;
+    }
+    ErrCode OnStartUserDone(int userId, int errcode) override { return ERR_OK; }
 
-    void OnLogoutUserDone(int userId, int errcode) override {}
+    ErrCode OnLogoutUserDone(int userId, int errcode) override { return ERR_OK; }
 };
 
 class StopUserCallbackStubTest : public testing::Test {

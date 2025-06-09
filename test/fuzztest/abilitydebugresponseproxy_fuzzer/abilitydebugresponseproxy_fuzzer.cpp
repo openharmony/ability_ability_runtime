@@ -68,16 +68,10 @@ void AbilityDebugResponseProxyFuzztest1(bool boolParam, std::string &stringParam
     std::shared_ptr<AbilityDebugResponseProxy> proxy =
         std::make_shared<AbilityDebugResponseProxy>(nullptr); // branch constructor
     MessageParcel data;
-    proxy->WriteInterfaceToken(data); // branch
     std::vector<sptr<IRemoteObject>> tokens;
     proxy->OnAbilitysDebugStarted(tokens); // branch
     proxy->OnAbilitysDebugStoped(tokens); // branch
     proxy->OnAbilitysAssertDebugChange(tokens, boolParam); // branch
-    sptr<Token> token = GetFuzzAbilityToken();
-    tokens.emplace_back(token);
-    proxy->SendRequest(static_cast<IAbilityDebugResponse::Message>(int32Param), tokens); // branch tokens no empty.
-    tokens.clear();
-    proxy->SendRequest(static_cast<IAbilityDebugResponse::Message>(int32Param), tokens); // branch tokens empty.
 }
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)

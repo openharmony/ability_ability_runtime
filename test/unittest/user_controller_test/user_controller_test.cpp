@@ -51,21 +51,22 @@ void UserControllerTest::TearDown()
 
 class TestUserCallback : public UserCallbackStub {
 public:
-    void OnStopUserDone(int userId, int errcode) override;
-    void OnStartUserDone(int userId, int errcode) override;
-    void OnLogoutUserDone(int userId, int errcode) override;
+    ErrCode OnStopUserDone(int userId, int errcode) override;
+    ErrCode OnStartUserDone(int userId, int errcode) override;
+    ErrCode OnLogoutUserDone(int userId, int errcode) override;
 
     int errCode_ = -1;
 };
 
-void TestUserCallback::OnStartUserDone(int userId, int errcode)
+ErrCode TestUserCallback::OnStartUserDone(int userId, int errcode)
 {
     errCode_ = errcode;
+    return ERR_OK;
 }
 
-void TestUserCallback::OnStopUserDone(int userId, int errcode) {}
+ErrCode TestUserCallback::OnStopUserDone(int userId, int errcode) { return ERR_OK; }
 
-void TestUserCallback::OnLogoutUserDone(int userId, int errcode) {}
+ErrCode TestUserCallback::OnLogoutUserDone(int userId, int errcode) { return ERR_OK; }
 
 /**
  * @tc.name: UserItemSetState_0100

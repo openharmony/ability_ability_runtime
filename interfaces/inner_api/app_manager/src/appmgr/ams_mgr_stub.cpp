@@ -16,7 +16,7 @@
 #include "ams_mgr_stub.h"
 #include "ability_manager_errors.h"
 #include "ability_info.h"
-#include "app_debug_listener_interface.h"
+#include "iapp_debug_listener.h"
 #include "app_mgr_proxy.h"
 #include "app_scheduler_interface.h"
 #include "appexecfwk_errors.h"

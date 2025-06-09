@@ -27,9 +27,9 @@ class MockAbilityDebugResponseStub : public AbilityDebugResponseStub {
 public:
     MockAbilityDebugResponseStub() {}
     virtual ~ MockAbilityDebugResponseStub() {}
-    MOCK_METHOD1(OnAbilitysDebugStarted, void(const std::vector<sptr<IRemoteObject>> &tokens));
-    MOCK_METHOD1(OnAbilitysDebugStoped, void(const std::vector<sptr<IRemoteObject>> &tokens));
-    MOCK_METHOD2(OnAbilitysAssertDebugChange, void(const std::vector<sptr<IRemoteObject>> &, bool));
+    MOCK_METHOD1(OnAbilitysDebugStarted, ErrCode(const std::vector<sptr<IRemoteObject>> &tokens));
+    MOCK_METHOD1(OnAbilitysDebugStoped, ErrCode(const std::vector<sptr<IRemoteObject>> &tokens));
+    MOCK_METHOD2(OnAbilitysAssertDebugChange, ErrCode(const std::vector<sptr<IRemoteObject>> &, bool));
 };
 } // namespace AppExecFwk
 } // namespace OHOS
