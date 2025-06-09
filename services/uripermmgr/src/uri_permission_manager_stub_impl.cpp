@@ -49,6 +49,7 @@ constexpr uint32_t FLAG_WRITE_URI = Want::FLAG_AUTH_WRITE_URI_PERMISSION;
 constexpr uint32_t FLAG_READ_URI = Want::FLAG_AUTH_READ_URI_PERMISSION;
 constexpr const char* CLOUND_DOCS_URI_MARK = "?networkid=";
 constexpr const char* FOUNDATION_PROCESS = "foundation";
+constexpr const char* AUTHORITY_MEDIA = "media";
 constexpr size_t MAX_IPC_RAW_DATA_SIZE = 128 * 1024 * 1024; // 128M
 const int MAX_URI_COUNT = 200000;
 #ifndef ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
@@ -661,7 +662,7 @@ int32_t UriPermissionManagerStubImpl::GrantUriPermissionByKeyInner(const std::st
             return ERR_UPMS_NO_PERMISSION_GRANT_URI;
         }
         auto uriInner = Uri(uris[i]);
-        if (uriInner.GetScheme() == "media") {
+        if (uriInner.GetAuthority() == AUTHORITY_MEDIA) {
             permissionedMediaUris.emplace_back(uris[i]);
         } else {
             permissionedOtherUris.emplace_back(uris[i]);

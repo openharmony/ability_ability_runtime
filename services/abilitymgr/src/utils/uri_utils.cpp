@@ -42,7 +42,6 @@ const std::string PARAMS_URI = "ability.verify.uri";
 const std::string DISTRIBUTED_FILES_PATH = "/data/storage/el2/distributedfiles/";
 const std::string HIDE_SENSITIVE_TYPE = "ohos.media.params.hideSensitiveType";
 const std::string DMS_PROCESS_NAME = "distributedsched";
-const std::string UDMF_DATA_KEY = "ohos.param.ability.udmfKey";
 const int32_t MAX_URI_COUNT = 500;
 constexpr int32_t API14 = 14;
 constexpr int32_t API_VERSION_MOD = 100;
@@ -457,7 +456,7 @@ void UriUtils::ProcessUDMFKey(Want &want)
 {
     // PARAMS_STREAM and UDMF_DATA_KEY is conflict
     if (!want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM).empty()) {
-        want.RemoveParam(UDMF_DATA_KEY);
+        want.RemoveParam(Want::PARAM_ABILITY_UNIFIED_DATA_KEY);
     }
 }
 
