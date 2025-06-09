@@ -44,7 +44,7 @@ class RecordWriter {
     } else {
       const objType = Type.of(obj);
       if (objType instanceof ArrayType) {
-        this.writeBuildArray(obj, Value.of(obj) as ArrayValue);
+        this.writeBuildArray(obj as Object, reflect.Value.of(obj) as ArrayValue);
       } else {
         this.buffer.append('null');
       }
