@@ -25,6 +25,7 @@ public:
     static constexpr const char* const LOG_FILE_PATH = "/data/log/eventlog/freeze";
     static constexpr const char* const EVENTLOG_PATH = "/data/log/eventlog";
     static constexpr int64_t SEC_TO_MILLISEC = 1000;
+    static constexpr int32_t CPU_COUNT_SUBTRACT = 1;
     AppfreezeUtil();
     ~AppfreezeUtil();
 
@@ -32,6 +33,7 @@ public:
     static std::string TimestampFormatToDate(time_t timeStamp, const std::string& format);
     static uint64_t GetMilliseconds();
     static std::string RoundToTwoDecimals(float value);
+    static int GetCpuCount();
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
