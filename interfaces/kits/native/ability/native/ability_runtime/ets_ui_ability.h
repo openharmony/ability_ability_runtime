@@ -156,6 +156,7 @@ private:
     void DoOnForegroundForSceneIsNull(const Want &want);
     void UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &moduleName, const std::string &srcPath);
+    void CreateEtsContext(int32_t screenMode, const std::shared_ptr<OHOSApplication> &application);
     bool BindNativeMethods();
 
     ETSRuntime &etsRuntime_;
