@@ -92,11 +92,13 @@ class UdmfClient {
 
         int32_t GetBatchData(const QueryOption &query, std::vector<UnifiedData> &unifiedDataset);
         int32_t AddPrivilege(const QueryOption &query, const Privilege &privilege);
+        std::string GetBundleNameByUdKey(const std::string &key);
         static void Init();
         static std::vector<UnifiedData> unifiedData_;
         static int32_t getBatchDataRet_;
         static int32_t addPrivilegeRet_;
         static int32_t privilegeTokenId_;
+        static std::string keyAuthority;
     
     private:
         UdmfClient() {};

@@ -842,6 +842,8 @@ enum {
 
     ERR_UPMS_GRANT_URI_PERMISSION_FAILED = 2097347,
 
+    ERR_UPMS_KEY_IS_NOT_CREATE_BY_CALLER = 2097348,
+
     /**
      * Result (2097351) target not in whitelist.
      */

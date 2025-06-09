@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,6 @@ namespace OHOS {
 namespace AAFwk {
 using MyFlag = OHOS::AAFwk::MyFlag;
 
-std::shared_ptr<AppExecFwk::BundleMgrHelper> UPMSUtils::ConnectManagerHelper()
-{
-    return bundleMgrHelper_;
-}
-
 bool UPMSUtils::SendShareUnPrivilegeUriEvent(uint32_t callerTokenId, uint32_t targetTokenId)
 {
     return true;
@@ -34,12 +29,6 @@ bool UPMSUtils::SendShareUnPrivilegeUriEvent(uint32_t callerTokenId, uint32_t ta
 
 bool UPMSUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint32_t targetTokenId,
     const std::vector<std::string> &uriVec, const std::vector<bool> &resVec)
-{
-    return true;
-}
-
-bool UPMSUtils::CheckAndCreateEventInfo(uint32_t callerTokenId, uint32_t targetTokenId,
-    EventInfo &eventInfo)
 {
     return true;
 }
@@ -62,11 +51,6 @@ bool UPMSUtils::IsSAOrSystemAppCall()
 bool UPMSUtils::IsSystemAppCall()
 {
     return MyFlag::isSystemAppCall_;
-}
-
-bool UPMSUtils::CheckIsSystemAppByBundleName(std::string &bundleName)
-{
-    return MyFlag::upmsUtilsCheckIsSystemAppByBundleNameRet_;
 }
 
 bool UPMSUtils::GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion)
@@ -118,7 +102,5 @@ bool UPMSUtils::IsDocsCloudUri(Uri &uri)
 {
     return MyFlag::isDocsCloudUri_;
 }
-
-std::shared_ptr<AppExecFwk::BundleMgrHelper> UPMSUtils::bundleMgrHelper_ = nullptr;
 }  // namespace AAFwk
 }  // namespace OHOS
