@@ -54,6 +54,7 @@ config("appkit_config") {
 config("appkit_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
+    "${ability_runtime_path}/ets_environment/interfaces/inner_api",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_delegator",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
@@ -75,6 +76,7 @@ config("appkit_public_config") {
 ohos_shared_library("appkit_native") {
   include_dirs = [
     "native",
+    "${ability_runtime_path}/ets_environment/interfaces/inner_api",
     "${ability_runtime_path}/interfaces/inner_api/error_utils/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
@@ -166,6 +168,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
+    "${ability_runtime_path}/ets_environment/frameworks/ets_environment:ets_environment",
     "${ability_runtime_path}/js_environment/frameworks/js_environment:js_environment",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:app_util",
@@ -208,6 +211,7 @@ ohos_shared_library("appkit_native") {
     "napi:ace_napi",
     "preferences:native_preferences",
     "resource_management:global_resmgr",
+    "runtime_core:ani",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "storage_service:storage_manager_acl",

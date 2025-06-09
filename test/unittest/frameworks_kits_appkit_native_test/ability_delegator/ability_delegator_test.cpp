@@ -202,7 +202,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_0100, Function | MediumTes
     std::shared_ptr<AbilityDelegatorArgs> abilityArgs = std::make_shared<AbilityDelegatorArgs>(want);
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         abilityArgs,
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -241,7 +242,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_0200, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -276,7 +278,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_0300, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -306,7 +309,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_0400, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -338,7 +342,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_0500, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -376,7 +381,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_0600, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -409,7 +415,8 @@ HWTEST_F(AbilityDelegatorTest2, Ability_Delegator_Test_070, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub2());
@@ -460,7 +467,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_0800, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -495,7 +503,8 @@ HWTEST_F(AbilityDelegatorTest2, Ability_Delegator_Test_0900, Function | MediumTe
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub2());
@@ -527,7 +536,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_1000, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -557,7 +567,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_1100, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -592,7 +603,8 @@ HWTEST_F(AbilityDelegatorTest2, Ability_Delegator_Test_1200, Function | MediumTe
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub2());
@@ -624,7 +636,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_1300, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -654,7 +667,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_1400, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -684,7 +698,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_1500, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -715,7 +730,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_1600, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -747,7 +763,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_1700, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -780,7 +797,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_1800, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -813,7 +831,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_1900, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -852,7 +871,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_2000, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -890,7 +910,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_2100, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -923,7 +944,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_2200, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -963,7 +985,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_23400, Function | MediumTe
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -996,7 +1019,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_2400, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -1036,7 +1060,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_2500, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -1069,7 +1094,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_2600, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -1109,7 +1135,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_2700, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -1142,7 +1169,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_2800, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -1182,7 +1210,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_2900, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -1215,7 +1244,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_3000, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -1255,7 +1285,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_3100, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -1294,7 +1325,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_3200, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -1334,7 +1366,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_3300, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -1373,7 +1406,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_3400, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub());
@@ -1416,13 +1450,15 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_3500, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         abilityArgs,
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub);
     std::shared_ptr<AbilityDelegator> abilityDelegator =
         std::make_shared<AbilityDelegator>(context, std::move(testRunner), iRemoteObj);
-    AbilityDelegatorRegistry::RegisterInstance(abilityDelegator, abilityArgs);
+    AbilityDelegatorRegistry::RegisterInstance(abilityDelegator, abilityArgs,
+        OHOS::AbilityRuntime::Runtime::Language::JS);
 
     abilityDelegator->abilityMonitors_.clear();
     std::shared_ptr<MockIabilityMonitor> mockMonitor = std::make_shared<MockIabilityMonitor>(ABILITY_NAME);
@@ -1461,13 +1497,15 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_3600, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         abilityArgs,
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub2);
     std::shared_ptr<AbilityDelegator> abilityDelegator =
         std::make_shared<AbilityDelegator>(context, std::move(testRunner), iRemoteObj);
-    AbilityDelegatorRegistry::RegisterInstance(abilityDelegator, abilityArgs);
+    AbilityDelegatorRegistry::RegisterInstance(abilityDelegator, abilityArgs,
+        OHOS::AbilityRuntime::Runtime::Language::JS);
 
     abilityDelegator->abilityMonitors_.clear();
     std::shared_ptr<MockIabilityMonitor> mockMonitor = std::make_shared<MockIabilityMonitor>(ABILITY_NAME);
@@ -1504,7 +1542,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_3700, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new AAFwk::MockTestObserverStub);
@@ -1535,7 +1574,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_3800, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new AAFwk::MockTestObserverStub);
@@ -1566,7 +1606,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_3900, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new AAFwk::MockTestObserverStub);
@@ -1597,7 +1638,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_4000, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new AAFwk::MockTestObserverStub);
@@ -1628,7 +1670,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_4100, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new AAFwk::MockTestObserverStub);
@@ -1660,7 +1703,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_4200, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new AAFwk::MockTestObserverStub);
@@ -1693,7 +1737,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_4300, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new AAFwk::MockTestObserverStub);
@@ -1727,7 +1772,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_4400, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new AAFwk::MockTestObserverStub);
@@ -1760,7 +1806,8 @@ HWTEST_F(AbilityDelegatorTest, Ability_Delegator_Test_4500, Function | MediumTes
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
+            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
         std::make_shared<AbilityDelegatorArgs>(want),
         true);
     sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new AAFwk::MockTestObserverStub);
@@ -1903,7 +1950,8 @@ HWTEST_F(AbilityDelegatorTest, StartAbilityTest_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "test start.");
     ASSERT_NE(commonDelegator_, nullptr);
-    AbilityDelegatorRegistry::RegisterInstance(commonDelegator_, delegatorArgs_);
+    AbilityDelegatorRegistry::RegisterInstance(commonDelegator_, delegatorArgs_,
+        OHOS::AbilityRuntime::Runtime::Language::JS);
 
     AAFwk::Want want;
     want.SetElementName(VALUE_TEST_BUNDLE_NAME, ABILITY_NAME);
