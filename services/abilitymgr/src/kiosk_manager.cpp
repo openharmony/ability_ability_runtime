@@ -16,9 +16,10 @@
 
 #include <algorithm>
 
+#include "ability_manager_errors.h"
 #include "ability_manager_service.h"
 #include "ability_record.h"
-#include "ability_manager_errors.h"
+#include "ability_util.h"
 #include "common_event.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -27,6 +28,7 @@
 #include "ipc_skeleton.h"
 #include "kiosk_manager.h"
 #include "permission_constants.h"
+#include "session_manager_lite.h"
 #include "singleton.h"
 #include "utils/want_utils.h"
 
@@ -45,7 +47,7 @@ void KioskManager::OnAppStop(const AppInfo &info)
     }
     std::lock_guard<std::mutex> lock(kioskManagermutex_);
     if (IsInKioskModeInner() && IsInWhiteListInner(info.bundleName)) {
-        ExitKioskModeInner(info.bundleName);
+        ExitKioskModeInner(info.bundleName, nullptr);
     }
 }
 
@@ -65,7 +67,7 @@ int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> 
     if (IsInKioskModeInner()) {
         auto it = std::find(appList.begin(), appList.end(), kioskStatus_.kioskBundleName_);
         if (it == appList.end()) {
-            auto ret = ExitKioskModeInner(kioskStatus_.kioskBundleName_);
+            auto ret = ExitKioskModeInner(kioskStatus_.kioskBundleName_, nullptr);
             if (ret != ERR_OK) {
                 return ret;
             }
@@ -75,7 +77,9 @@ int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> 
     for (const auto &app : appList) {
         whitelist_.insert(app);
     }
-
+    auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    CHECK_POINTER_AND_RETURN_LOG(sceneSessionManager, INNER_ERR, "sceneSessionManager is nullptr");
+    sceneSessionManager->UpdateKioskAppList(appList);
     return ERR_OK;
 }
 
@@ -105,7 +109,9 @@ int32_t KioskManager::EnterKioskMode(sptr<IRemoteObject> callerToken)
     kioskStatus_.kioskBundleUid_ = IPCSkeleton::GetCallingUid();
     GetEnterKioskModeCallback()();
     NotifyKioskModeChanged(true);
-
+    auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    CHECK_POINTER_AND_RETURN_LOG(sceneSessionManager, INNER_ERR, "sceneSessionManager is nullptr");
+    sceneSessionManager->EnterKioskMode(callerToken);
     return ERR_OK;
 }
 
@@ -117,10 +123,10 @@ int32_t KioskManager::ExitKioskMode(sptr<IRemoteObject> callerToken)
         return INVALID_PARAMETERS_ERR;
     }
     std::lock_guard<std::mutex> lock(kioskManagermutex_);
-    return ExitKioskModeInner(record->GetAbilityInfo().bundleName);
+    return ExitKioskModeInner(record->GetAbilityInfo().bundleName, callerToken);
 }
 
-int32_t KioskManager::ExitKioskModeInner(const std::string & bundleName)
+int32_t KioskManager::ExitKioskModeInner(const std::string &bundleName, sptr<IRemoteObject> callerToken)
 {
     if (!IsInWhiteListInner(bundleName)) {
         return ERR_KIOSK_MODE_NOT_IN_WHITELIST;
@@ -132,6 +138,9 @@ int32_t KioskManager::ExitKioskModeInner(const std::string & bundleName)
     GetExitKioskModeCallback()();
     NotifyKioskModeChanged(false);
     kioskStatus_.Clear();
+    auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    CHECK_POINTER_AND_RETURN_LOG(sceneSessionManager, INNER_ERR, "sceneSessionManager is nullptr");
+    sceneSessionManager->ExitKioskMode(callerToken);
     return ERR_OK;
 }
 
