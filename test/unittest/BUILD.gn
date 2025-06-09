@@ -390,6 +390,7 @@ group("unittest") {
       "multi_user_config_mgr_test:unittest",
       "napi_base_context_test:unittest",
       "napi_common_want_agent_test:unittest",
+      "native_child_process_test:unittest",
       "native_runtime_test:unittest",
       "os_account_manager_wrapper_test:unittest",
       "page_state_data_test:unittest",
