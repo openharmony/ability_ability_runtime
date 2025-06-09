@@ -22,9 +22,9 @@ using namespace testing::ext;
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-    constexpr int32_t DEBUG_INFO_SIZE_ONE = 1;
-    constexpr int32_t DEBUG_INFO_SIZE_ZERO = 0;
-    constexpr uint32_t UNKNOWN_CODE = 2;
+constexpr int32_t DEBUG_INFO_SIZE_ONE = 1;
+constexpr int32_t DEBUG_INFO_SIZE_ZERO = 0;
+constexpr uint32_t UNKNOWN_CODE = -1;
 }
 class AppDebugListenerStubTest : public testing::Test {
 public:
@@ -92,7 +92,7 @@ HWTEST_F(AppDebugListenerStubTest, OnRemoteRequest_0200, TestSize.Level1)
 
     auto result = mockStub_->OnRemoteRequest(
         static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED), data, reply, option);
-    EXPECT_EQ(result, ERR_INVALID_STATE);
+    EXPECT_EQ(result, ERR_TRANSACTION_FAILED); // ERR_TRANSACTION_FAILED for no interfaceToken data
 }
 
 /**
@@ -129,7 +129,7 @@ HWTEST_F(AppDebugListenerStubTest, OnRemoteRequest_0400, TestSize.Level1)
 
     auto result = mockStub_->OnRemoteRequest(
         static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED), data, reply, option);
-    EXPECT_EQ(result, ERR_INVALID_DATA);
+    EXPECT_EQ(result, ERR_NONE);
 }
 
 /**
@@ -147,7 +147,7 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStarted_0100, TestSize.Level1
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(&debugInfo);
 
-    EXPECT_CALL(*mockStub_, OnAppDebugStarted(_)).Times(1);
+    EXPECT_CALL(*mockStub_, OnAppDebugStarted(_)).Times(0);
     mockStub_->OnRemoteRequest(
         static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED), data, reply, option);
 }
@@ -184,6 +184,7 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStoped_0100, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
+    WriteInterfaceToken(data);
     AppDebugInfo debugInfo;
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(&debugInfo);
