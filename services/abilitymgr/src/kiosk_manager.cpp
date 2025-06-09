@@ -34,6 +34,8 @@
 
 namespace OHOS {
 namespace AAFwk {
+constexpr char PRODUCT_APPBOOT_SETTING_ENABLED[] = "const.product.appboot.setting.enabled";
+
 KioskManager &KioskManager::GetInstance()
 {
     static KioskManager manager;
@@ -53,6 +55,11 @@ void KioskManager::OnAppStop(const AppInfo &info)
 
 int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> &appList)
 {
+    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+    }
+
     if (!PermissionVerification::GetInstance()->IsSystemAppCall() &&
         !PermissionVerification::GetInstance()->IsSACall()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
@@ -85,6 +92,10 @@ int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> 
 
 int32_t KioskManager::EnterKioskMode(sptr<IRemoteObject> callerToken)
 {
+    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+    }
     auto record = Token::GetAbilityRecordByToken(callerToken);
     if (!record) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "record null");
@@ -117,6 +128,10 @@ int32_t KioskManager::EnterKioskMode(sptr<IRemoteObject> callerToken)
 
 int32_t KioskManager::ExitKioskMode(sptr<IRemoteObject> callerToken)
 {
+    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+    }
     auto record = Token::GetAbilityRecordByToken(callerToken);
     if (!record) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "record null");
@@ -146,6 +161,10 @@ int32_t KioskManager::ExitKioskModeInner(const std::string &bundleName, sptr<IRe
 
 int32_t KioskManager::GetKioskStatus(KioskStatus &kioskStatus)
 {
+    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+    }
     if (!PermissionVerification::GetInstance()->IsSystemAppCall()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
         return ERR_NOT_SYSTEM_APP;
