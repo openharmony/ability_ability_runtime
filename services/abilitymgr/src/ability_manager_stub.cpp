@@ -1130,7 +1130,9 @@ int AbilityManagerStub::TerminateUIExtensionAbilityInner(MessageParcel &data, Me
     int resultCode = data.ReadInt32();
     Want *resultWant = data.ReadParcelable<Want>();
     int32_t result = TerminateUIExtensionAbility(extensionSessionInfo, resultCode, resultWant);
-    extensionSessionInfo->want.CloseAllFd();
+    if(extensionSessionInfo != nullptr){
+        extensionSessionInfo->want.CloseAllFd();
+    }
     reply.WriteInt32(result);
     if (resultWant != nullptr) {
         delete resultWant;
@@ -1184,7 +1186,9 @@ int AbilityManagerStub::MinimizeUIExtensionAbilityInner(MessageParcel &data, Mes
     }
     auto fromUser = data.ReadBool();
     int32_t result = MinimizeUIExtensionAbility(extensionSessionInfo, fromUser);
-    extensionSessionInfo->want.CloseAllFd();
+    if(extensionSessionInfo != nullptr){
+        extensionSessionInfo->want.CloseAllFd();
+    }
     reply.WriteInt32(result);
     return NO_ERROR;
 }
