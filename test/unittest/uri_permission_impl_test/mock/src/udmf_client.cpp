@@ -45,9 +45,15 @@ int32_t UdmfClient::AddPrivilege(const QueryOption &query, const Privilege &priv
     return addPrivilegeRet_;
 }
 
+std::string UdmfClient::GetBundleNameByUdKey(const std::string &key)
+{
+    return keyAuthority;
+}
+
 int32_t UdmfClient::getBatchDataRet_ = 0;
 int32_t UdmfClient::addPrivilegeRet_ = 0;
 int32_t UdmfClient::privilegeTokenId_ = 10000;
 std::vector<UnifiedData> UdmfClient::unifiedData_ = {};
+std::string UdmfClient::keyAuthority = "";
 } // OHOS
 } // UDMF
