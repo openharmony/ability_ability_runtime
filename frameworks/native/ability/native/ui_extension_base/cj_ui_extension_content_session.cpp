@@ -62,7 +62,7 @@ int32_t CJUIExtensionContentSession::LoadContent(const std::string& path)
         uiWindow_->TriggerBindModalUIExtension();
         isFirstTriggerBindModal_ = false;
     }
-    Rosen::WMError ret = uiWindow_->NapiSetUIContent(path, nullptr, nullptr,
+    Rosen::WMError ret = uiWindow_->NapiSetUIContent(path, (napi_env)nullptr, nullptr,
         Rosen::BackupAndRestoreType::NONE, sessionInfo_->parentToken);
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "NapiSetUIContent failed, ret=%{public}d", ret);
