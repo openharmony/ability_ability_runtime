@@ -2276,6 +2276,24 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLink_001, TestSize.Level1)
 }
 
 /*
+* Feature: AbilityManagerService
+* Function: OpenLink
+* FunctionPoints: AbilityManagerService OpenLink
+*/
+HWTEST_F(AbilityManagerServiceThirdTest, OpenLink_002, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    AAFwk::Want want;
+    Uri uri("");
+    want.GetOperation().SetUri(uri);
+
+    auto result = abilityMs_->OpenLinkInner(want, token, USER_ID_U100, REQUESTCODE, true);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest OpenLink_002 call result %{public}d", result);
+}
+
+/*
  * Feature: AbilityManagerService
  * Function: NotifySCBToHandleAtomicServiceException
  * FunctionPoints: AbilityManagerService NotifySCBToHandleAtomicServiceException
@@ -2664,6 +2682,21 @@ HWTEST_F(AbilityManagerServiceThirdTest, AbilityManagerServiceTest_OpenLink_001,
     int res = abilityMs->OpenLink(want, callerToken, 0, -1);
     EXPECT_NE(res, ERR_OK);
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OpenLink
+ * FunctionPoints: AbilityManagerService OpenLink
+ */
+ HWTEST_F(AbilityManagerServiceThirdTest, AbilityManagerServiceTest_OpenLink_002, TestSize.Level1)
+ {
+     auto abilityMs = std::make_shared<AbilityManagerService>();
+     EXPECT_NE(abilityMs, nullptr);
+     Want want;
+     sptr<IRemoteObject> callerToken = nullptr;
+     int res = abilityMs->OpenLinkInner(want, callerToken, 0, -1, true);
+     EXPECT_NE(res, ERR_OK);
+ }
 
 /*
 * Feature: AbilityManagerService
