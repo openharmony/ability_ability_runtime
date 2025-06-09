@@ -27,8 +27,8 @@ using namespace OHOS::AppExecFwk;
 using namespace testing;
 using namespace testing::ext;
 using CreateAblity = std::function<Ability *(void)>;
-using CreateExtension = std::function<AbilityRuntime::Extension *(void)>;
-using CreateUIAblity = std::function<AbilityRuntime::UIAbility *(void)>;
+using CreateExtension = std::function<AbilityRuntime::Extension *(const std::string &language)>;
+using CreateUIAblity = std::function<AbilityRuntime::UIAbility *(const std::string &language)>;
 
 class AbilityLoaderTest : public testing::Test {
 public:
@@ -136,13 +136,14 @@ HWTEST_F(AbilityLoaderTest, GetExtensionByName_0100, TestSize.Level2)
     GTEST_LOG_(INFO) << "AbilityLoaderTest GetExtensionByName_0100 start";
     std::string abilityName = "AbilityRuntime::Extension";
     CreateExtension createFunc;
-    auto createExtension = []() -> AbilityRuntime::Extension *{
+    auto createExtension = [](const std::string &) -> AbilityRuntime::Extension *{
         AbilityRuntime::Extension *callBack = new (std::nothrow) AbilityRuntime::Extension;
         return callBack;
     };
     AbilityLoader::GetInstance().extensions_.clear();
     AbilityLoader::GetInstance().RegisterExtension(abilityName, createExtension);
-    EXPECT_TRUE(AbilityLoader::GetInstance().GetExtensionByName(abilityName) != nullptr);
+    EXPECT_TRUE(AbilityLoader::GetInstance().GetExtensionByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) != nullptr);
     GTEST_LOG_(INFO) << "AbilityLoaderTest GetExtensionByName_0100 end";
 }
 
@@ -156,7 +157,8 @@ HWTEST_F(AbilityLoaderTest, GetExtensionByName_0200, TestSize.Level1)
     GTEST_LOG_(INFO) << "AbilityLoaderTest GetExtensionByName_0200 start";
     std::string abilityName = "AbilityRuntime";
     AbilityLoader::GetInstance().extensions_.clear();
-    EXPECT_FALSE(AbilityLoader::GetInstance().GetExtensionByName(abilityName) != nullptr);
+    EXPECT_FALSE(AbilityLoader::GetInstance().GetExtensionByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) != nullptr);
     GTEST_LOG_(INFO) << "AbilityLoaderTest GetExtensionByName_0200 end";
 }
 
@@ -191,13 +193,14 @@ HWTEST_F(AbilityLoaderTest, GetUIAbilityByName_0100, TestSize.Level1)
     GTEST_LOG_(INFO) << "AbilityLoaderTest GetUIAbilityByName_0100 start";
     std::string abilityName = "UIAbility";
     CreateAblity createFunc;
-    auto createAblity = []() -> AbilityRuntime::UIAbility *{
+    auto createAblity = [](const std::string &) -> AbilityRuntime::UIAbility *{
         AbilityRuntime::UIAbility *callBack = new (std::nothrow) AbilityRuntime::UIAbility;
         return callBack;
     };
     AbilityLoader::GetInstance().uiAbilities_.clear();
     AbilityLoader::GetInstance().RegisterUIAbility(abilityName, createAblity);
-    EXPECT_TRUE(AbilityLoader::GetInstance().GetUIAbilityByName(abilityName) != nullptr);
+    EXPECT_TRUE(AbilityLoader::GetInstance().GetUIAbilityByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) != nullptr);
     GTEST_LOG_(INFO) << "AbilityLoaderTest GetUIAbilityByName_0100 end";
 }
 
@@ -211,6 +214,7 @@ HWTEST_F(AbilityLoaderTest, GetUIAbilityByName_0200, TestSize.Level1)
     GTEST_LOG_(INFO) << "AbilityLoaderTest GetAbilityByName_0200 start";
     std::string abilityName = "UIAbilityName";
     AbilityLoader::GetInstance().abilities_.clear();
-    EXPECT_FALSE(AbilityLoader::GetInstance().GetUIAbilityByName(abilityName) != nullptr);
+    EXPECT_FALSE(AbilityLoader::GetInstance().GetUIAbilityByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) != nullptr);
     GTEST_LOG_(INFO) << "AbilityLoaderTest GetUIAbilityByName_0200 start";
 }

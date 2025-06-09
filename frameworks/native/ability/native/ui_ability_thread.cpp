@@ -131,7 +131,8 @@ void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
     }
 
     // 2.new ability
-    auto ability = AppExecFwk::AbilityLoader::GetInstance().GetUIAbilityByName(abilityName);
+    auto ability = AppExecFwk::AbilityLoader::GetInstance().GetUIAbilityByName(
+        abilityName, abilityRecord->GetAbilityInfo()->codeLanguage);
     if (ability == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
         return;
@@ -203,7 +204,8 @@ void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
     }
 
     // 2.new ability
-    auto ability = AppExecFwk::AbilityLoader::GetInstance().GetUIAbilityByName(abilityName);
+    auto ability = AppExecFwk::AbilityLoader::GetInstance().GetUIAbilityByName(
+        abilityName, abilityRecord->GetAbilityInfo()->codeLanguage);
     if (ability == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
         return;

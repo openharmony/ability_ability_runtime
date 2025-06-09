@@ -55,6 +55,8 @@ public:
         const std::string& hapPath,  bool isEsMode, const std::string& srcEntrance) override {}
     void PreloadModule(const std::string& moduleName, const std::string& srcPath,
         const std::string& hapPath, bool isEsMode, bool useCommonTrunk) override {}
+    void PreloadModule(const std::string& moduleName, const std::string& hapPath,
+        bool isEsMode, bool useCommonTrunk) override {}
     void FinishPreload() override {}
     bool LoadRepairPatch(const std::string& patchFile, const std::string& baseFile) override { return false; }
     bool NotifyHotReloadPage() override { return false; }
@@ -72,8 +74,8 @@ public:
     void DumpCpuProfile() override {};
     void AllowCrossThreadExecution() override {};
     void GetHeapPrepare() override {};
-    void RegisterUncaughtExceptionHandler(const CJUncaughtExceptionInfo& uncaughtExceptionInfo);
     static bool RegisterCangjieCallback();
+    void RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo) override;
 
 private:
     bool StartDebugger();
