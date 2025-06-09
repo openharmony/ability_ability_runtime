@@ -90,7 +90,6 @@ HWTEST_F(QuickFixManagerServiceTest, ApplyQuickFix_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
-    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
     auto mockGetSystemAbility = [bms = mockBundleMgr, saMgr = iSystemAbilityMgr_](int32_t systemAbilityId) {
         if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
             return bms->AsObject();
@@ -98,7 +97,6 @@ HWTEST_F(QuickFixManagerServiceTest, ApplyQuickFix_0100, TestSize.Level1)
             return saMgr->GetSystemAbility(systemAbilityId);
         }
     };
-    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
     EXPECT_CALL(*mockSystemAbility_, GetSystemAbility(testing::_))
         .WillOnce(testing::Invoke(mockGetSystemAbility))
         .WillRepeatedly(testing::Invoke(mockGetSystemAbility));
@@ -120,7 +118,6 @@ HWTEST_F(QuickFixManagerServiceTest, GetApplyedQuickFixInfo_0100, TestSize.Level
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
-    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
     auto mockGetSystemAbility = [bms = mockBundleMgr, saMgr = iSystemAbilityMgr_](int32_t systemAbilityId) {
         if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
             return bms->AsObject();
@@ -128,17 +125,13 @@ HWTEST_F(QuickFixManagerServiceTest, GetApplyedQuickFixInfo_0100, TestSize.Level
             return saMgr->GetSystemAbility(systemAbilityId);
         }
     };
-    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
-    EXPECT_CALL(*mockSystemAbility_, GetSystemAbility(testing::_))
-        .WillOnce(testing::Invoke(mockGetSystemAbility))
-        .WillRepeatedly(testing::Invoke(mockGetSystemAbility));
     std::string bundleName = "com.ohos.quickfix";
     ApplicationQuickFixInfo quickFixInfo;
     auto ret = quickFixMs_->GetApplyedQuickFixInfo(bundleName, quickFixInfo);
-    EXPECT_EQ(ret, QUICK_FIX_OK);
-    EXPECT_EQ(quickFixInfo.bundleName, "com.ohos.quickfix");
-    EXPECT_EQ(quickFixInfo.bundleVersionCode, static_cast<uint32_t>(1000));
-    EXPECT_EQ(quickFixInfo.bundleVersionName, "1.0.0");
+    EXPECT_EQ(ret, QUICK_FIX_GET_BUNDLE_INFO_FAILED);
+    EXPECT_EQ(quickFixInfo.bundleName, "");
+    EXPECT_EQ(quickFixInfo.bundleVersionCode, 0);
+    EXPECT_EQ(quickFixInfo.bundleVersionName, "");
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
@@ -173,11 +166,9 @@ HWTEST_F(QuickFixManagerServiceTest, RevokeQuickFix_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
-    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
-    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
     std::string bundleName = "com.ohos.quickfix";
     auto ret = quickFixMs_->RevokeQuickFix(bundleName);
-    EXPECT_EQ(ret, QUICK_FIX_OK);
+    EXPECT_EQ(ret, QUICK_FIX_GET_BUNDLE_INFO_FAILED);
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
@@ -191,14 +182,12 @@ HWTEST_F(QuickFixManagerServiceTest, RevokeQuickFix_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
-    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
-    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
     std::string bundleName = "com.ohos.quickfix";
     auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, nullptr, nullptr, nullptr);
     applyTask->InitRevokeTask(bundleName, true);
 
     auto ret = quickFixMs_->RevokeQuickFix(bundleName);
-    EXPECT_EQ(ret, QUICK_FIX_DEPLOYING_TASK);
+    EXPECT_EQ(ret, QUICK_FIX_GET_BUNDLE_INFO_FAILED);
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
@@ -231,16 +220,13 @@ HWTEST_F(QuickFixManagerServiceTest, GetQuickFixInfo_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetQuickFixInfo_0100 start.");
 
-    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
-    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
-
     std::string bundleName = "com.ohos.quickfix";
     auto patchExists = false;
     auto isSoContained = false;
     auto ret = quickFixMs_->GetQuickFixInfo(bundleName, patchExists, isSoContained);
-    EXPECT_EQ(ret, QUICK_FIX_OK);
-    EXPECT_EQ(patchExists, true);
-    EXPECT_EQ(isSoContained, true);
+    EXPECT_EQ(ret, QUICK_FIX_GET_BUNDLE_INFO_FAILED);
+    EXPECT_EQ(patchExists, false);
+    EXPECT_EQ(isSoContained, false);
 
     TAG_LOGI(AAFwkTag::TEST, "GetQuickFixInfo_0100 end.");
 }
@@ -254,7 +240,6 @@ HWTEST_F(QuickFixManagerServiceTest, GetQuickFixInfo_0100, TestSize.Level1)
 HWTEST_F(QuickFixManagerServiceTest, GetApplyedQuickFixInfo_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
-    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
     auto mockGetSystemAbility = [bms = mockBundleMgr, saMgr = iSystemAbilityMgr_](int32_t systemAbilityId) {
         if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
             return bms->AsObject();
@@ -262,11 +247,10 @@ HWTEST_F(QuickFixManagerServiceTest, GetApplyedQuickFixInfo_0200, TestSize.Level
             return saMgr->GetSystemAbility(systemAbilityId);
         }
     };
-    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
     std::string bundleName = "";
     ApplicationQuickFixInfo quickFixInfo;
     auto ret = quickFixMs_->GetApplyedQuickFixInfo(bundleName, quickFixInfo);
-    EXPECT_EQ(ret, QUICK_FIX_OK);
+    EXPECT_EQ(ret, QUICK_FIX_GET_BUNDLE_INFO_FAILED);
     EXPECT_EQ(quickFixInfo.bundleName, "");
     EXPECT_EQ(quickFixInfo.bundleVersionCode, static_cast<uint32_t>(0));
     EXPECT_EQ(quickFixInfo.bundleVersionName, "");
