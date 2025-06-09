@@ -21,6 +21,7 @@
 #include "app_recovery.h"
 #include "connection_manager.h"
 #include "display_util.h"
+#include "ets_ability_context.h"
 #include "ets_data_struct_converter.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -187,6 +188,35 @@ void EtsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, s
         TAG_LOGE(AAFwkTag::UIABILITY, "null etsAbilityObj_ or abilityContext_ or want");
         return;
     }
+    int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::ScreenMode::IDLE_SCREEN_MODE);
+    CreateEtsContext(screenMode, application);
+}
+
+void EtsUIAbility::CreateEtsContext(int32_t screenMode, const std::shared_ptr<OHOSApplication> &application)
+{
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
+        ani_object contextObj = CreateEtsAbilityContext(env, abilityContext_, application);
+        if (contextObj == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null contextObj");
+            return;
+        }
+        ani_ref contextGlobalRef = nullptr;
+        env->GlobalReference_Create(contextObj, &contextGlobalRef);
+        ani_status status = env->Object_SetFieldByName_Ref(etsAbilityObj_->aniObj, "context", contextGlobalRef);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "Object_SetFieldByName_Ref status: %{public}d", status);
+            return;
+        }
+        shellContextRef_ = std::make_shared<ETSNativeReference>();
+        shellContextRef_->aniObj = contextObj;
+        shellContextRef_->aniRef = contextGlobalRef;
+    }
+    // to be done: CreateAniEmbeddableUIAbilityContext
 }
 
 void EtsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
