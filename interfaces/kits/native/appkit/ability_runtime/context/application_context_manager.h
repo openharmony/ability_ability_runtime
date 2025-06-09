@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_APPLICATION_CONTEXT_MANAGER_H
 
 #include "native_engine/native_engine.h"
+#include "ets_runtime.h"
 
 #include <mutex>
 #include <unordered_map>
@@ -42,13 +43,21 @@ public:
 
     void RemoveGlobalObject(napi_env env);
 
+    void AddEtsGlobalObject(ani_env* env, std::shared_ptr<AbilityRuntime::ETSNativeReference> applicationContextObj);
+
+    std::shared_ptr<AbilityRuntime::ETSNativeReference> GetEtsGlobalObject(ani_env* env);
+
+    void RemoveEtsGlobalObject(ani_env* env);
+
 private:
     ApplicationContextManager();
 
     ~ApplicationContextManager();
 
     std::unordered_map<napi_env, std::shared_ptr<NativeReference>> applicationContextMap_;
+    std::unordered_map<ani_env*, std::shared_ptr<AbilityRuntime::ETSNativeReference>> etsApplicationContextMap_;
     std::mutex applicationContextMutex_;
+    std::mutex etsApplicationContextMutex_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
