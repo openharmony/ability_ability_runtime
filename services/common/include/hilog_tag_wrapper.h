@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,8 @@ enum class AAFwkLogTag : uint32_t {
     INTENT,
     JSNAPI,
     CJRUNTIME,
+    ETSRUNTIME,
+    ANI,
 
     DELEGATOR = DEFAULT + 0x30, // 0xD001330
     CONTEXT,
@@ -95,6 +97,7 @@ enum class AAFwkLogTag : uint32_t {
     QUERY_ERMS,
 
     LOCAL_CALL = DEFAULT + 0x60, // 0xD001360
+    SA_INTERCEPTOR,
 
     APP_SERVICE_EXT = DEFAULT + 0x70, // 0xD001370
 
@@ -129,7 +132,8 @@ inline const char* GetDomainName1(AAFwkLogTag tag)
 
 inline const char* GetDomainName2(AAFwkLogTag tag)
 {
-    const char* tagNames[] = { "JsEnv", "JsRuntime", "FA", "Intent", "JsNapi" };
+    const char* tagNames[] = { "JsEnv", "JsRuntime", "FA", "Intent", "JsNapi",
+        "CjRuntime", "EtsRuntime", "Ani"};
     uint32_t offset = GetOffset(tag, AAFwkLogTag::JSENV);
     if (offset >= sizeof(tagNames) / sizeof(const char*)) {
         return "UN";

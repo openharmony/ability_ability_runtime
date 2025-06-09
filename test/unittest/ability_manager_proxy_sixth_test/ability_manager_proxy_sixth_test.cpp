@@ -475,16 +475,17 @@ HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_SetApplicationKeepAli
     std::string bundleName;
     int32_t userId = 100;
     bool flag = false;
+    bool allowUserToCancel = false;
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Return(-1));
-    auto res = proxy_->SetApplicationKeepAliveByEDM(bundleName, userId, flag);
+    auto res = proxy_->SetApplicationKeepAliveByEDM(bundleName, userId, flag, allowUserToCancel);
     EXPECT_EQ(res, -1);
 
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
-    res = proxy_->SetApplicationKeepAliveByEDM(bundleName, userId, flag);
+    res = proxy_->SetApplicationKeepAliveByEDM(bundleName, userId, flag, allowUserToCancel);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_APPLICATION_KEEP_ALLIVE_BY_EDM), mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
 }
@@ -914,5 +915,49 @@ HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_TerminateMission_001,
     EXPECT_EQ(res, -1);
 }
 
+/*
+ * @tc.name: AbilityManagerProxy_SetAppServiceExtensionKeepAlive_001
+ * Function: SetAppServiceExtensionKeepAlive
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_SetAppServiceExtensionKeepAlive_001, TestSize.Level1)
+{
+    std::string bundleName = "bundleName";
+    bool flag = true;
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(-1));
+    auto res = proxy_->SetAppServiceExtensionKeepAlive(bundleName, flag);
+    EXPECT_EQ(res, -1);
+
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    res = proxy_->SetAppServiceExtensionKeepAlive(bundleName, flag);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_APP_SERVICE_EXTENSION_KEEP_ALIVE), mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * @tc.name: AbilityManagerProxy_QueryKeepAliveAppServiceExtensions_001
+ * Function: QueryKeepAliveAppServiceExtensions
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_QueryKeepAliveAppServiceExtensions_001, TestSize.Level1)
+{
+    std::vector<KeepAliveInfo> list;
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(-1));
+    auto res = proxy_->QueryKeepAliveAppServiceExtensions(list);
+    EXPECT_EQ(res, -1);
+
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    res = proxy_->QueryKeepAliveAppServiceExtensions(list);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_APP_SERVICE_EXTENSIONS_KEEP_ALIVE), mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
 } // namespace AAFwk
 } // namespace OHOS

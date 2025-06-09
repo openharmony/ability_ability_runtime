@@ -26,6 +26,8 @@ int32_t AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
 int32_t AbilityKeepAliveDataManager::callQueryApplicationResult = ERR_OK;
 KeepAliveSetter AbilityKeepAliveDataManager::queryDataSetter = KeepAliveSetter::UNSPECIFIED;
 std::vector<KeepAliveInfo> AbilityKeepAliveDataManager::returnInfoList;
+int32_t AbilityKeepAliveDataManager::queryDataSetterId = -1;
+KeepAlivePolicy AbilityKeepAliveDataManager::queryDataPolicy = KeepAlivePolicy::UNSPECIFIED;
 
 AbilityKeepAliveDataManager &AbilityKeepAliveDataManager::GetInstance()
 {
@@ -52,6 +54,8 @@ KeepAliveStatus AbilityKeepAliveDataManager::QueryKeepAliveData(const KeepAliveI
     KeepAliveStatus kaStatus;
     kaStatus.code = callQueryDataResult;
     kaStatus.setter = queryDataSetter;
+    kaStatus.setterId = queryDataSetterId;
+    kaStatus.policy = queryDataPolicy;
     return kaStatus;
 }
 

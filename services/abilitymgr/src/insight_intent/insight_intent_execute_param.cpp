@@ -177,6 +177,33 @@ bool InsightIntentExecuteParam::RemoveInsightIntent(AAFwk::Want &want)
     if (want.HasParameter(INSIGHT_INTENT_EXECUTE_PARAM_FLAGS)) {
         want.RemoveParam(INSIGHT_INTENT_EXECUTE_PARAM_FLAGS);
     }
+    if (want.HasParameter(INSIGHT_INTENT_EXECUTE_OPENLINK_FLAG)) {
+        want.RemoveParam(INSIGHT_INTENT_EXECUTE_OPENLINK_FLAG);
+    }
+    if (want.HasParameter(INSIGHT_INTENT_DECORATOR_TYPE)) {
+	    want.RemoveParam(INSIGHT_INTENT_DECORATOR_TYPE);
+    }
+    if (want.HasParameter(INSIGHT_INTENT_SRC_ENTRANCE)) {
+        want.RemoveParam(INSIGHT_INTENT_SRC_ENTRANCE);
+    }
+    if (want.HasParameter(INSIGHT_INTENT_FUNC_PARAM_CLASSNAME)) {
+        want.RemoveParam(INSIGHT_INTENT_FUNC_PARAM_CLASSNAME);
+    }
+    if (want.HasParameter(INSIGHT_INTENT_FUNC_PARAM_METHODNAME)) {
+        want.RemoveParam(INSIGHT_INTENT_FUNC_PARAM_METHODNAME);
+    }
+    if (want.HasParameter(INSIGHT_INTENT_FUNC_PARAM_METHODPARAMS)) {
+        want.RemoveParam(INSIGHT_INTENT_FUNC_PARAM_METHODPARAMS);
+    }
+    if (want.HasParameter(INSIGHT_INTENT_PAGE_PARAM_PAGEPATH)) {
+        want.RemoveParam(INSIGHT_INTENT_PAGE_PARAM_PAGEPATH);
+    }
+    if (want.HasParameter(INSIGHT_INTENT_PAGE_PARAM_NAVIGATIONID)) {
+        want.RemoveParam(INSIGHT_INTENT_PAGE_PARAM_NAVIGATIONID);
+    }
+    if (want.HasParameter(INSIGHT_INTENT_PAGE_PARAM_NAVDESTINATIONNAME)) {
+        want.RemoveParam(INSIGHT_INTENT_PAGE_PARAM_NAVDESTINATIONNAME);
+    }
     return true;
 }
 

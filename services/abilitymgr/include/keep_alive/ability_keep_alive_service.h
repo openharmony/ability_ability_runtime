@@ -72,6 +72,22 @@ public:
      */
     bool CanSetKeepAlive(const std::string &bundleName, int32_t userId, bool isByEDM, bool &isKeepAlive);
 
+    /**
+     * @brief Set app service extension keep alive state.
+     * @param info The keep-alive info,include bundle name, module name, ability name.
+     * @param flag Indicates whether to keep alive for app service extension.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t SetAppServiceExtensionKeepAlive(KeepAliveInfo &info, bool flag);
+
+    /**
+     * @brief Query keep-alive app service extensions.
+     * @param infoList Output parameters, return keep-alive info list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t QueryKeepAliveAppServiceExtensions(std::vector<KeepAliveInfo> &infoList);
+
+    int32_t ClearKeepAliveAppServiceExtension(const KeepAliveInfo &info);
 private:
     AbilityKeepAliveService();
     ~AbilityKeepAliveService();

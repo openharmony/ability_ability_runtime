@@ -136,7 +136,7 @@ int32_t ExitKioskModeInner(const std::string &bundleName, sptr<IRemoteObject> ca
         return ERR_NOT_IN_KIOSK_MODE;
     }
     GetExitKioskModeCallback()();
-    notifyKioskModeChanged(false);
+    NotifyKioskModeChanged(false);
     kioskStatus_.Clear();
     auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
     CHECK_POINTER_AND_RETURN_LOG(sceneSessionManager, ERR_INVALID_VALUE, "sceneSessionManager is nullptr");
@@ -146,10 +146,9 @@ int32_t ExitKioskModeInner(const std::string &bundleName, sptr<IRemoteObject> ca
 
 int32_t KioskManager::GetKioskStatus(KioskStatus &kioskStatus)
 {
-    if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
-        PermissionConstants::PERMISSION_MANAGE_EDM_POLICY)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not MANAGE_EDM_POLICY permission");
-        return CHECK_PERMISSION_FAILED;
+    if (!PermissionVerification::GetInstance()->IsSystemAppCall()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
+        return ERR_NOT_SYSTEM_APP;
     }
     std::lock_guard<std::mutex> lock(kioskManagermutex_);
     kioskStatus = kioskStatus_;
@@ -173,7 +172,7 @@ bool KioskManager::IsInKioskModeInner()
     return kioskStatus_.isKioskMode_;
 }
 
-void KioskManager::notifyKioskModeChanged(bool isInKioskMode)
+void KioskManager::NotifyKioskModeChanged(bool isInKioskMode)
 {
     std::string eventData = isInKioskMode
                                 ? EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_ON
@@ -204,7 +203,7 @@ std::function<void()> KioskManager::GetEnterKioskModeCallback()
 std::function<void()> KioskManager::GetExitKioskModeCallback()
 {
     auto exitKioskModeCallback = []() {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "EnterKioskMode");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "ExitKioskMode");
         KioskManager::GetInstance().RemoveKioskInterceptor();
     };
     return exitKioskModeCallback;

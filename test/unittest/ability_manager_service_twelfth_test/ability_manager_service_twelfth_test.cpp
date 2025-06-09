@@ -482,10 +482,11 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, GetUserScreenUnlockCallback_001, Test
     abilityMs_->RetrySubscribeScreenUnlockedEvent(retryCount);
     Want want;
     AbilityRequest abilityRequest;
-    abilityMs_->RemoveUnauthorizedLaunchReasonMessage(want, abilityRequest, nullptr);
+    auto callerTokenId = IPCSkeleton::GetCallingTokenID();
+    abilityMs_->RemoveUnauthorizedLaunchReasonMessage(want, abilityRequest, callerTokenId);
     std::string testText = "AbilityManagerServiceTwelfthTest";
     want.SetParam(Want::PARM_LAUNCH_REASON_MESSAGE, testText);
-    abilityMs_->RemoveUnauthorizedLaunchReasonMessage(want, abilityRequest, nullptr);
+    abilityMs_->RemoveUnauthorizedLaunchReasonMessage(want, abilityRequest, callerTokenId);
     auto ret = abilityMs_->GetUserScreenUnlockCallback();
     if (ret) {
         ret();
@@ -1133,24 +1134,6 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_ExitKioskMode_Fail_01, T
 
 /*
  * Feature: KioskManager
- * Function: ExitKioskMode
- * SubFunction: NA
- * FunctionPoints: KioskManager ExitKioskMode
- */
-HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_ExitKioskMode_Fail_02, TestSize.Level1) {
-    std::vector<std::string> bundleNames;
-    bundleNames.emplace_back("com.test.demo");
-    bundleNames.emplace_back("com.test.demo2");
-    bundleNames.emplace_back("com.test.demo3");
-    auto result = KioskManager::GetInstance().UpdateKioskApplicationList(bundleNames);
-    ASSERT_EQ(result, ERR_OK);
-    auto callerToken = MockToken(AbilityType::PAGE);
-    result = KioskManager::GetInstance().ExitKioskMode(callerToken);
-    ASSERT_EQ(result, ERR_NOT_IN_KIOSK_MODE);
-}
-
-/*
- * Feature: KioskManager
  * Function: GetKioskStatus
  * SubFunction: NA
  * FunctionPoints: KioskManager GetKioskStatus
@@ -1162,6 +1145,40 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_GetKioskStatus_Success, 
     KioskStatus kioskStatus;
     auto result = KioskManager::GetInstance().GetKioskStatus(kioskStatus);
     ASSERT_EQ(result, ERR_OK);
+}
+
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, SetAppServiceExtensionKeepAlive_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SetAppServiceExtensionKeepAlive_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    std::string bundleName = "bundleName";
+    bool flag = true;
+    int32_t result = abilityMs->SetAppServiceExtensionKeepAlive(bundleName, flag);
+    ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SetAppServiceExtensionKeepAlive_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: QueryKeepAliveAppServiceExtensions
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService QueryKeepAliveAppServiceExtensions
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, QueryKeepAliveAppServiceExtensions_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest QueryKeepAliveAppServiceExtensions_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    std::vector<AbilityRuntime::KeepAliveInfo> list;
+    int32_t result = abilityMs->QueryKeepAliveAppServiceExtensions(list);
+    ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest QueryKeepAliveAppServiceExtensions_001 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

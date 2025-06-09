@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,11 @@ namespace AAFwk {
 int KioskInterceptor::DoProcess(AbilityInterceptorParam param)
 {
     auto bundleName = param.want.GetElement().GetBundleName();
-    if (!KioskManager::GetInstance().IsInKioskMode()) {
+    auto& kioskManager = KioskManager::GetInstance();
+    if (!kioskManager.IsInKioskMode()) {
         return ERR_OK;
     }
-    if (!KioskManager::GetInstance().IsInWhiteList(bundleName)) {
+    if (!kioskManager.IsInWhiteList(bundleName)) {
         return ERR_KIOSK_MODE_NOT_IN_WHITELIST;
     }
     return ERR_OK;

@@ -105,6 +105,7 @@ private:
     int StartUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);
     int StartUIExtensionAbilityEmbeddedInner(MessageParcel &data, MessageParcel &reply);
     int StartUIExtensionConstrainedEmbeddedInner(MessageParcel &data, MessageParcel &reply);
+    int StartUIExtensionPreViewEmbeddedInner(MessageParcel &data, MessageParcel &reply);
     int StartUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int StopExtensionAbilityInner(MessageParcel& data, MessageParcel& reply);
     int StartAbilityAddCallerInner(MessageParcel &data, MessageParcel &reply);
@@ -317,6 +318,8 @@ private:
     int32_t QueryKeepAliveApplicationsInner(MessageParcel &data, MessageParcel &reply);
     int32_t SetApplicationKeepAliveByEDMInner(MessageParcel &data, MessageParcel &reply);
     int32_t QueryKeepAliveApplicationsByEDMInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SetAppServiceExtensionKeepAliveInner(MessageParcel &data, MessageParcel &reply);
+    int32_t QueryKeepAliveAppServiceExtensionsInner(MessageParcel &data, MessageParcel &reply);
     int32_t AddQueryERMSObserverInner(MessageParcel &data, MessageParcel &reply);
     int32_t QueryAtomicServiceStartupRuleInner(MessageParcel &data, MessageParcel &reply);
     int32_t PrepareTerminateAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
@@ -331,6 +334,7 @@ private:
     int32_t GetInsightIntentInfoByBundleNameInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetInsightIntentInfoByIntentNameInner(MessageParcel &data, MessageParcel &reply);
     int32_t RestartSelfAtomicServiceInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RegisterSAInterceptorInner(MessageParcel &data, MessageParcel &reply);
 
     int OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
@@ -379,6 +383,8 @@ private:
     int HandleOnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int HandleOnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int HandleOnRemoteRequestInnerThird(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int32_t OpenLinkInner(MessageParcel &data, MessageParcel &reply);
     int32_t TerminateMissionInner(MessageParcel &data, MessageParcel &reply);

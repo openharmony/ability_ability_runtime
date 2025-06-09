@@ -50,8 +50,7 @@ void ResourceManagerHelper::GetResConfig(Global::Resource::ResConfig &resConfig,
     if (!isCreateModuleContext) {
         auto direction = ConvertDirection(options_.deviceConfig.orientation);
         resConfig.SetDirection(direction);
-        auto density = ConvertDensity(options_.deviceConfig.density);
-        resConfig.SetScreenDensity(density);
+        resConfig.SetScreenDensity(options_.deviceConfig.density);
         auto colorMode = ConvertColorMode(options_.deviceConfig.colorMode);
         resConfig.SetColorMode(colorMode);
         resConfig.SetThemeId(options_.themeId);

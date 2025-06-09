@@ -111,10 +111,13 @@ constexpr const char* ERROR_MSG_CALLER_NOT_ATOMIC_SERVICE =
     "The caller is not an atomic service.";
 constexpr const char* ERROR_MSG_NOT_UI_ABILITY_CONTEXT =
     "The context is not UIAbilityContext.";
-constexpr const char* ERR_MSG_GET_FILE_URIS_BY_KEY_FAILED = "Failed to get file uri from key.";
-constexpr const char* ERR_MSG_NO_PERMISSION_GRANT_URI = "No permission to grant uri permission.";
-constexpr const char* ERR_MSG_INVALID_CALLER_TOKENID = "Caller token id is invalid.";
-constexpr const char* ERR_MSG_INVALID_TARGET_TOKENID = "Target token id is invalid.";
+constexpr const char* ERR_MSG_GET_FILE_URIS_BY_KEY_FAILED = "Failed to get the file URI from the key.";
+constexpr const char* ERR_MSG_NO_PERMISSION_GRANT_URI = "No permission to authorize the URI.";
+constexpr const char* ERR_MSG_INVALID_CALLER_TOKENID = "The caller token ID is invalid.";
+constexpr const char* ERR_MSG_INVALID_TARGET_TOKENID = "The target token ID is invalid.";
+constexpr const char* ERROR_MSG_INVALID_MAIN_ELEMENT_TYPE = "Invalid main element type";
+constexpr const char* ERROR_MSG_CHANGE_KEEP_ALIVE = "Can not change keep alive status";
+constexpr const char* ERROR_MSG_NO_U1 = "The target bundle is not in u1";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
@@ -199,6 +202,9 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERR_CODE_NO_PERMISSION_GRANT_URI, ERR_MSG_NO_PERMISSION_GRANT_URI},
     { AbilityErrorCode::ERR_CODE_INVALID_CALLER_TOKENID, ERR_MSG_INVALID_CALLER_TOKENID},
     { AbilityErrorCode::ERR_CODE_INVALID_TARGET_TOKENID, ERR_MSG_INVALID_TARGET_TOKENID},
+    { AbilityErrorCode::ERROR_CODE_INVALID_MAIN_ELEMENT_TYPE, ERROR_MSG_INVALID_MAIN_ELEMENT_TYPE},
+    { AbilityErrorCode::ERROR_CODE_CHANGE_KEEP_ALIVE, ERROR_MSG_CHANGE_KEEP_ALIVE},
+    { AbilityErrorCode::ERROR_CODE_NO_U1, ERROR_MSG_NO_U1},
 };
 
 static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP {
@@ -285,6 +291,9 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_UPMS_NO_PERMISSION_GRANT_URI, AbilityErrorCode::ERR_CODE_NO_PERMISSION_GRANT_URI},
     {ERR_UPMS_INVALID_CALLER_TOKENID, AbilityErrorCode::ERR_CODE_INVALID_CALLER_TOKENID},
     {ERR_UPMS_INVALID_TARGET_TOKENID, AbilityErrorCode::ERR_CODE_INVALID_TARGET_TOKENID},
+    {ERR_INVALID_MAIN_ELEMENT_TYPE, AbilityErrorCode::ERROR_CODE_INVALID_MAIN_ELEMENT_TYPE},
+    {ERR_CHANGE_KEEP_ALIVE, AbilityErrorCode::ERROR_CODE_CHANGE_KEEP_ALIVE},
+    {ERR_NO_U1, AbilityErrorCode::ERROR_CODE_NO_U1},
 };
 }
 

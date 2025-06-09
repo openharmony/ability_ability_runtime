@@ -59,6 +59,17 @@ public:
         int32_t accountId = -1) const;
 
     /**
+     * @brief Starts an ability.
+     *
+     * @param want Indicates the want containing information about the ability to start.
+     *
+     * @param startOptions Indicates the start options for the ability to start.
+     *
+     * @return Returns zero on success, others on failure.
+     */
+    ErrCode StartAbility(const AAFwk::Want &want, const AAFwk::StartOptions &startOptions) const;
+
+    /**
      * @brief Destroys the current ability.
      *
      * @return errCode ERR_OK on success, others on failure.

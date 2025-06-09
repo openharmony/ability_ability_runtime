@@ -41,6 +41,8 @@ public:
     static int32_t callQueryDataResult;
     static int32_t callQueryApplicationResult;
     static KeepAliveSetter queryDataSetter;
+    static int32_t queryDataSetterId;
+    static KeepAlivePolicy queryDataPolicy;
     static std::vector<KeepAliveInfo> returnInfoList;
 
 private:

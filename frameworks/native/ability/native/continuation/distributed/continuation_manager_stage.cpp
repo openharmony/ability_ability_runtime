@@ -17,6 +17,10 @@
 
 #include "ability_continuation_interface.h"
 #include "ability_manager_client.h"
+#ifdef NO_RUNTIME_EMULATOR
+#include "app_event.h"
+#include "app_event_processor_mgr.h"
+#endif
 #include "bool_wrapper.h"
 #include "continuation_handler.h"
 #include "distributed_client.h"
@@ -29,6 +33,9 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+#ifdef NO_RUNTIME_EMULATOR
+using namespace OHOS::HiviewDFX;
+#endif
 namespace {
 constexpr int TIMEOUT_MS_WAIT_DMS_NOTIFY_CONTINUATION_COMPLETE = 25000;
 constexpr int TIMEOUT_MS_WAIT_REMOTE_NOTIFY_BACK = 6000;
@@ -39,6 +46,12 @@ const int32_t CONTINUE_SAVE_DATA_FAILED = 29360198;
 const int32_t CONTINUE_ON_CONTINUE_FAILED = 29360199;
 const int32_t CONTINUE_ON_CONTINUE_HANDLE_FAILED = 29360300;
 const int32_t CONTINUE_ON_CONTINUE_MISMATCH = 29360204;
+#ifdef NO_RUNTIME_EMULATOR
+constexpr int32_t TRIGGER_COND_TIMEOUT = 90;
+constexpr int32_t TRIGGER_COND_ROW = 30;
+constexpr int32_t EVENT_RESULT_SUCCESS = 0;
+constexpr int32_t EVENT_RESULT_FAIL = 1;
+#endif
 #ifdef SUPPORT_GRAPHICS
 const int32_t CONTINUE_GET_CONTENT_FAILED = 29360200;
 #endif
@@ -195,22 +208,92 @@ int32_t ContinuationManagerStage::OnContinueAndGetContent(WantParams &wantParams
     }
 }
 
+#ifdef NO_RUNTIME_EMULATOR
+static int64_t AddProcessor()
+{
+    HiAppEvent::ReportConfig config;
+    config.name = "ha_app_event";
+    config.appId = "com_hmos_sdk_ocg";
+    config.routeInfo = "AUTO";
+    config.triggerCond.timeout = TRIGGER_COND_TIMEOUT;
+    config.triggerCond.row = TRIGGER_COND_ROW;
+    config.eventConfigs.clear();
+    {
+        HiAppEvent::EventConfig event1;
+        event1.domain = "api_diagnostic";
+        event1.name = "api_exec_end";
+        event1.isRealTime = false;
+        config.eventConfigs.push_back(event1);
+    }
+    {
+        HiAppEvent::EventConfig event2;
+        event2.domain = "api_diagnostic";
+        event2.name = "api_called_stat";
+        event2.isRealTime = true;
+        config.eventConfigs.push_back(event2);
+    }
+    {
+        HiAppEvent::EventConfig event3;
+        event3.domain = "api_diagnostic";
+        event3.name = "api_called_stat_cnt";
+        event3.isRealTime = true;
+        config.eventConfigs.push_back(event3);
+    }
+    return HiAppEvent::AppEventProcessorMgr::AddProcessor(config);
+}
+
+static void WriteEndEvent(const std::string& transId, const int result, const int errCode, const time_t beginTime)
+{
+    HiAppEvent::Event event("api_diagnostic", "api_exec_end", HiAppEvent::BEHAVIOR);
+    event.AddParam("transId", transId);
+    event.AddParam("result", result);
+    event.AddParam("error_code", errCode);
+    event.AddParam("api_name", std::string("onContinue"));
+    event.AddParam("sdk_name", std::string("AbilityKit"));
+    event.AddParam("begin_time", beginTime);
+    event.AddParam("end_time", time(nullptr));
+    Write(event);
+}
+#endif
+
 int32_t ContinuationManagerStage::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
     const AbilityInfo &tmpAbilityInfo)
 {
     TAG_LOGD(AAFwkTag::CONTINUATION, "Begin");
+#ifdef NO_RUNTIME_EMULATOR
+    int64_t processorId = -1;
+    processorId = AddProcessor();
+    if (processorId <= 0) {
+        TAG_LOGE(AAFwkTag::CONTINUATION, "Add processor fail.Error code is %{public}lld", processorId);
+        return ERR_INVALID_VALUE;
+    }
+    time_t beginTime = time(nullptr);
+    std::string transId = std::string("transId_") + std::to_string(std::rand());
+#endif
+    int32_t ret = 0;
     auto ability = ability_.lock();
     auto abilityInfo = abilityInfo_.lock();
     if (ability == nullptr || abilityInfo == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION, "null ability or abilityInfo");
+#ifdef NO_RUNTIME_EMULATOR
+        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_INVALID_VALUE, beginTime);
+#endif
         return ERR_INVALID_VALUE;
     }
 
     bool stageBased = abilityInfo->isStageBasedModel;
     if (!stageBased) {
-        return OnStartAndSaveData(wantParams);
+        ret = OnStartAndSaveData(wantParams);
+#ifdef NO_RUNTIME_EMULATOR
+        WriteEndEvent(transId, EVENT_RESULT_FAIL, ret, beginTime);
+#endif
+        return ret;
     }
-    return OnContinueAndGetContent(wantParams, isAsyncOnContinue, tmpAbilityInfo);
+    ret = OnContinueAndGetContent(wantParams, isAsyncOnContinue, tmpAbilityInfo);
+#ifdef NO_RUNTIME_EMULATOR
+    WriteEndEvent(transId, EVENT_RESULT_SUCCESS, ret, beginTime);
+#endif
+    return ret;
 }
 
 #ifdef SUPPORT_SCREEN

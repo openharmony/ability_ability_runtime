@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,12 +43,6 @@ constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
 constexpr const char* CALLER_REQUEST_CODE = "ohos.extra.param.key.callerRequestCode";
 constexpr const char* IS_SHELL_CALL = "isShellCall";
 constexpr const char* COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
-
-void ClearProtectedWantParam(Want &want)
-{
-    want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
-    want.RemoveParam(COMPONENT_STARTUP_NEW_RULES);
-}
 }
 
 UpdateCallerInfoUtil &UpdateCallerInfoUtil::GetInstance()
@@ -286,6 +280,7 @@ void UpdateCallerInfoUtil::UpdateDmsCallerInfo(Want& want, const sptr<IRemoteObj
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     int32_t tokenId = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
     int32_t callerUid = IPCSkeleton::GetCallingUid();
+    ClearProtectedWantParam(want);
 
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (!abilityRecord) {
@@ -335,6 +330,16 @@ void UpdateCallerInfoUtil::UpdateCallerAppCloneIndex(Want& want, int32_t appInde
 {
     want.RemoveParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX);
     want.SetParam(Want::PARAM_RESV_CALLER_APP_CLONE_INDEX, appIndex);
+}
+
+void UpdateCallerInfoUtil::ClearProtectedWantParam(Want &want)
+{
+    want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
+    want.RemoveParam(COMPONENT_STARTUP_NEW_RULES);
+    if (!PermissionVerification::GetInstance()->IsSystemAppCall()) {
+        // only system app can set unifiedDataKey
+        want.RemoveParam(Want::PARAM_ABILITY_UNIFIED_DATA_KEY);
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS
