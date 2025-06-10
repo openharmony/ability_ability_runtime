@@ -36,8 +36,6 @@ using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::AAFwk;
 
-
-
 class ModalSystemAppFreezeUiextensionTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
