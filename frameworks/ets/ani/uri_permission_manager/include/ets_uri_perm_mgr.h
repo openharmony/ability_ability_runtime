@@ -29,7 +29,6 @@ bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object r
 ani_object WrapBusinessError(ani_env *env, ani_int code);
 ani_object WrapError(ani_env *env, const std::string &msg);
 ani_string GetAniString(ani_env *env, const std::string &str);
-ani_object createDouble(ani_env *env, int32_t res);
 std::string GetErrMsg(int32_t err, const std::string &permission = "");
 }  // namespace AbilityRuntime
 }  // namespace OHOS
