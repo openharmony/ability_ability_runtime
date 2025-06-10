@@ -341,7 +341,8 @@ private:
                 *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
-            *innerErrCode = context->StartAbility(want, startOptions);
+            *innerErrCode = (unwrapArgc == ARGC_ONE) ? context->StartAbility(want) :
+                context->StartAbility(want, startOptions);
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
