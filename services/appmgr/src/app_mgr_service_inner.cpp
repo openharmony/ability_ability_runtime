@@ -622,7 +622,7 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     if (appRecord != nullptr) {
         appRecord->SetPreloadState(PreloadState::PRELOADING);
         appRecord->SetPreloadMode(request.preloadMode);
-        appRecord->SetNeedPreloadModule(request.preloadMode != PreloadMode::PRESS_DOWN);
+        appRecord->SetNeedPreloadModule(request.preloadMode == AppExecFwk::PreloadMode::PRELOAD_MODULE);
         appRecord->SetNeedLimitPrio(request.preloadMode != PreloadMode::PRESS_DOWN);
         appRecord->SetExtensionSandBoxFlag(isExtensionSandBox);
         LoadAbilityNoAppRecord(appRecord, false, appInfo, abilityInfo, processName, specifiedProcessFlag, bundleInfo,
