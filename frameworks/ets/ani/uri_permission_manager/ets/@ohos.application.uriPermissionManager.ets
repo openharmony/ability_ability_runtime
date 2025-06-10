@@ -38,7 +38,7 @@ export default namespace uriPermissionManager {
 
     export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string): Promise<number> {
         let p:Promise<number> = new Promise<number>((resolve: (data: number)=>void, reject:(err: BusinessError<void>)=>void):void => {
-            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
+            let callbackWrapper = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
                 if (err.code == 0) {
                     resolve(data);
                 } else {
@@ -46,7 +46,7 @@ export default namespace uriPermissionManager {
                 }
             });
             taskpool.execute((): void => {
-                uriPermissionManager.grantUriPermissionCallbackSync(uri, flag, targetBundleName, 0, myCall);
+                uriPermissionManager.grantUriPermissionCallbackSync(uri, flag, targetBundleName, 0, callbackWrapper);
             });
         });
         return p;
@@ -55,7 +55,7 @@ export default namespace uriPermissionManager {
     export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string,
         appCloneIndex: number): Promise<void> {
         let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
-            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
+            let callbackWrapper = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
                 if (err.code == 0) {
                     resolve(undefined);
                 } else {
@@ -64,7 +64,7 @@ export default namespace uriPermissionManager {
             });
             taskpool.execute((): void => {
                 uriPermissionManager.grantUriPermissionCallbackSync(uri,
-                    flag, targetBundleName, appCloneIndex, myCall);
+                    flag, targetBundleName, appCloneIndex, callbackWrapper);
             });
         });
         return p;
@@ -72,15 +72,15 @@ export default namespace uriPermissionManager {
 
     export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string,
         callback: AsyncCallback<number, void>): void {
-        let myCall = new AsyncCallbackWrapper<number>(callback);
+        let callbackWrapper = new AsyncCallbackWrapper<number>(callback);
         taskpool.execute((): void => {
-            uriPermissionManager.grantUriPermissionCallbackSync(uri, flag, targetBundleName, 0, myCall);
+            uriPermissionManager.grantUriPermissionCallbackSync(uri, flag, targetBundleName, 0, callbackWrapper);
         })
     }
 
     export function revokeUriPermission(uri: string, targetBundleName: string): Promise<number> {
         let p:Promise<number> = new Promise<number>((resolve: (data: number)=>void, reject:(err: BusinessError<void>)=>void):void => {
-            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
+            let callbackWrapper = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
                 if (err.code == 0) {
                     resolve(data);
                 } else {
@@ -88,7 +88,7 @@ export default namespace uriPermissionManager {
                 }
             });
             taskpool.execute((): void => {
-                uriPermissionManager.revokeUriPermissionCallbackSync(uri, targetBundleName, 0, myCall);
+                uriPermissionManager.revokeUriPermissionCallbackSync(uri, targetBundleName, 0, callbackWrapper);
             });
         });
         return p;
@@ -96,7 +96,7 @@ export default namespace uriPermissionManager {
 
     export function revokeUriPermission(uri: string, targetBundleName: string, appCloneIndex: number): Promise<void> {
         let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
-            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
+            let callbackWrapper = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
                 if (err.code == 0) {
                     resolve(undefined);
                 } else {
@@ -104,16 +104,16 @@ export default namespace uriPermissionManager {
                 }
             });
             taskpool.execute((): void => {
-                uriPermissionManager.revokeUriPermissionCallbackSync(uri, targetBundleName, appCloneIndex, myCall);
+                uriPermissionManager.revokeUriPermissionCallbackSync(uri, targetBundleName, appCloneIndex, callbackWrapper);
             });
         });
         return p;
     }
 
     export function revokeUriPermission(uri: string, targetBundleName: string, callback: AsyncCallback<number, void>): void {
-        let myCall = new AsyncCallbackWrapper<number>(callback);
+        let callbackWrapper = new AsyncCallbackWrapper<number>(callback);
         taskpool.execute((): void => {
-            uriPermissionManager.revokeUriPermissionCallbackSync(uri, targetBundleName, 0, myCall);
+            uriPermissionManager.revokeUriPermissionCallbackSync(uri, targetBundleName, 0, callbackWrapper);
         })
     }
 }

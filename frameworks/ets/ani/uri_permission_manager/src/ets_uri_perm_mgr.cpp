@@ -36,14 +36,43 @@ namespace {
 constexpr const char* WRAPPER_CLASS_NAME = "Lutils/AbilityUtils/AsyncCallbackWrapper;";
 constexpr const char* ERROR_CLASS_NAME = "Lescompat/Error;";
 constexpr const char* BUSINESS_ERROR_CLASS_NAME = "L@ohos/base/BusinessError;";
-}
-const char *INVOKE_METHOD_NAME = "invoke";
-const int32_t ERR_OK = 0;
-const int32_t ERR_FAILURE = -1;
+constexpr const char *INVOKE_METHOD_NAME = "invoke";
+constexpr const int32_t ERR_OK = 0;
+constexpr const int32_t ERR_FAILURE = -1;
 constexpr const char* NOT_SYSTEM_APP = "The application is not system-app, can not use system-api.";
+
+ani_object createDouble(ani_env *env, int32_t res)
+{
+    if (env == nullptr) {
+        return nullptr;
+    }
+    static const char *className = "Lstd/core/Double;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "create double error");
+        return nullptr;
+    }
+
+    if (cls == nullptr) {
+        return nullptr;
+    }
+    ani_method ctor;
+    env->Class_FindMethod(cls, "<ctor>", "D:V", &ctor);
+    if (ctor == nullptr) {
+        return nullptr;
+    }
+    ani_object obj;
+    env->Object_New(cls, ctor, &obj, ani_double(res));
+    return obj;
+}
+
+}
 
 static std::string GetStdString(ani_env* env, ani_string str)
 {
+    if (env == nullptr) {
+        return std::string();
+    }
     std::string result;
     ani_size sz {};
     env->String_GetUTF8Size(str, &sz);
@@ -62,12 +91,12 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         return;
     }
     auto selfToken = IPCSkeleton::GetSelfTokenID();
-    ani_object EtsErrCode = CreateEtsError(env, AbilityErrorCode::ERROR_OK);
+    ani_object etsErrCode = CreateEtsError(env, AbilityErrorCode::ERROR_OK);
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
-        EtsErrCode = CreateEtsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
+        etsErrCode = CreateEtsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
             NOT_SYSTEM_APP);
-        AsyncCallback(env, callback, EtsErrCode, createDouble(env, ERR_FAILURE));
+        AsyncCallback(env, callback, etsErrCode, createDouble(env, ERR_FAILURE));
         return;
     }
     std::string uriStr = GetStdString(env, uri);
@@ -77,16 +106,15 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     int32_t flagId = static_cast<int32_t>(flag);
     std::string targetBundleName = GetStdString(env, targetName);
     int32_t appCloneIndexId = static_cast<int32_t>(appCloneIndex);
-    int32_t errCode = ERR_OK;
     int32_t result = ERR_OK;
-    errCode = AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uriVec, flagId,
+    int32_t errCode = AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uriVec, flagId,
         targetBundleName, appCloneIndexId);
     if (errCode != ERR_OK) {
         result = ERR_FAILURE;
-        EtsErrCode = CreateEtsErrorByNativeErr(env, errCode);
+        etsErrCode = CreateEtsErrorByNativeErr(env, errCode);
     }
     
-    AsyncCallback(env, callback, EtsErrCode, createDouble(env, result));
+    AsyncCallback(env, callback, etsErrCode, createDouble(env, result));
 }
 
 static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
@@ -98,41 +126,25 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         return;
     }
     auto selfToken = IPCSkeleton::GetSelfTokenID();
-    ani_object EtsErrCode = CreateEtsError(env, AbilityErrorCode::ERROR_OK);
+    ani_object etsErrCode = CreateEtsError(env, AbilityErrorCode::ERROR_OK);
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
-        EtsErrCode = CreateEtsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
+        etsErrCode = CreateEtsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
             NOT_SYSTEM_APP);
-        AsyncCallback(env, callback, EtsErrCode, createDouble(env, ERR_FAILURE));
+        AsyncCallback(env, callback, etsErrCode, createDouble(env, ERR_FAILURE));
         return;
     }
     std::string uriStr = GetStdString(env, uri);
     Uri uriVec(uriStr);
     std::string targetBundleName = GetStdString(env, targetName);
-    int32_t errCode = ERR_OK;
     int32_t result = ERR_OK;
-    errCode = AAFwk::UriPermissionManagerClient::GetInstance().RevokeUriPermissionManually(uriVec,
+    int32_t errCode = AAFwk::UriPermissionManagerClient::GetInstance().RevokeUriPermissionManually(uriVec,
         targetBundleName, appCloneIndex);
     if (errCode != ERR_OK) {
         result = ERR_FAILURE;
-        EtsErrCode = CreateEtsErrorByNativeErr(env, errCode);
+        etsErrCode = CreateEtsErrorByNativeErr(env, errCode);
     }
-    AsyncCallback(env, callback, EtsErrCode, createDouble(env, result));
-}
-
-ani_object createDouble(ani_env *env, int32_t res)
-{
-static const char *className = "Lstd/core/Double;";
-ani_class persion_cls;
-if (ANI_OK != env->FindClass(className, &persion_cls)) {
-    TAG_LOGE(AAFwkTag::URIPERMMGR, "create double error");
-    return nullptr;
-}
-ani_method persionInfoCtor;
-env->Class_FindMethod(persion_cls, "<ctor>", "D:V", &persionInfoCtor);
-ani_object persionInfoObj;
-env->Object_New(persion_cls, persionInfoCtor, &persionInfoObj, ani_double(res));
-return persionInfoObj;
+    AsyncCallback(env, callback, etsErrCode, createDouble(env, result));
 }
 
 void EtsUriPermissionManagerInit(ani_env *env)
@@ -140,11 +152,16 @@ void EtsUriPermissionManagerInit(ani_env *env)
     TAG_LOGI(AAFwkTag::URIPERMMGR, "EtsUriPermissionManagerInit call");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Invalid param");
+        return;
     }
     ani_namespace ns;
     const char* targetNamespace = "L@ohos/application/uriPermissionManager/uriPermissionManager;";
     if (env->FindNamespace(targetNamespace, &ns) != ANI_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "FindNamespace failed");
+    }
+    if (ns == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "ns null");
+        return;
     }
     std::array functions = {
         ani_native_function {
@@ -164,13 +181,21 @@ void EtsUriPermissionManagerInit(ani_env *env)
     if (env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()) != ANI_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Namespace_BindNativeFunctions failed");
     };
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "EtsUriPermissionManagerInit success");
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "EtsUriPermissionManagerInit end");
 }
 
 extern "C"{
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ANI_Constructor");
+    if (vm == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "vm null");
+        return ANI_ERROR;
+    }
+    if (result == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "result null");
+        return ANI_ERROR;
+    }
     ani_env *env = nullptr;
     ani_status status = ANI_ERROR;
     status = vm->GetEnv(ANI_VERSION_1, &env);
@@ -191,6 +216,11 @@ bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object r
     ani_status status = ANI_ERROR;
     ani_class clsCall {};
 
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "env null");
+        return false;
+    }
+
     if ((status = env->FindClass(WRAPPER_CLASS_NAME, &clsCall)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "status: %{public}d", status);
         return false;
@@ -199,6 +229,10 @@ bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object r
     if ((status = env->Class_FindMethod(
         clsCall, INVOKE_METHOD_NAME, "L@ohos/base/BusinessError;Lstd/core/Object;:V", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "status: %{public}d", status);
+        return false;
+    }
+    if (method == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "method null");
         return false;
     }
     if (result == nullptr) {
