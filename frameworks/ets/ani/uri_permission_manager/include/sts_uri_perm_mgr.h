@@ -16,7 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_STS_URI_PERM_MGR_H
 #define OHOS_ABILITY_RUNTIME_STS_URI_PERM_MGR_H
 
-#include "sts_runtime.h"
+#include "ets_runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
