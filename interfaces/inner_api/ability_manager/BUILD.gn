@@ -15,24 +15,6 @@ import("//build/config/components/idl_tool/idl.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-idl_gen_interface("ability_manager_interface") {
-  sources = [
-    "idl/IUserCallback.idl",
-  ]
-  sources_callback = [
-  ]
-  sources_common =[
-  ]
-  log_domainid = "0xD001336"
-  log_tag = "AbilityMgr"
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-}
-
-config("ability_manager_idl_config") {
-    include_dirs = [ "${target_gen_dir}" ]
-}
-
 config("ability_manager_public_config") {
   visibility = [ ":*" ]
   visibility += [
@@ -82,7 +64,25 @@ config("ability_manager_public_config") {
   }
 }
 
-ohos_source_set("ability_manager_idl_proxy") {
+idl_gen_interface("ability_manager_innerkits") {
+  sources = [
+    "idl/IUserCallback.idl",
+  ]
+  sources_callback = [
+  ]
+  sources_common =[
+  ]
+  log_domainid = "0xD001336"
+  log_tag = "AbilityMgr"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+config("ability_manager_innerkits_config") {
+    include_dirs = [ "${target_gen_dir}" ]
+}
+
+ohos_source_set("ability_manager_innerkits_include") {
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -92,19 +92,13 @@ ohos_source_set("ability_manager_idl_proxy") {
     cfi_vcall_icall_only = true
     debug = false
   }
-  output_values = get_target_outputs(":ability_manager_interface")
-  source_values = [
-    "*user_callback_proxy.cpp",
-  ]
-  sources = filter_include(output_values, source_values)
 
   public_configs = [
-    ":ability_manager_idl_config",
+    ":ability_manager_innerkits_config",
     "${ability_runtime_services_path}/abilitymgr:abilityms_config",
   ]
 
-  deps = [ ":ability_manager_interface" ]
-
+  deps = [ ":ability_manager_innerkits" ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
@@ -116,7 +110,7 @@ ohos_source_set("ability_manager_idl_proxy") {
   part_name = "ability_runtime"
 }
 
-ohos_source_set("ability_manager_idl_stub") {
+ohos_source_set("ability_manager_innerkits_source") {
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -126,18 +120,16 @@ ohos_source_set("ability_manager_idl_stub") {
     cfi_vcall_icall_only = true
     debug = false
   }
-  output_values = get_target_outputs(":ability_manager_interface")
-  source_values = [
-    "*user_callback_stub.cpp",
-  ]
+  output_values = get_target_outputs(":ability_manager_innerkits")
+  source_values = [ "*.cpp", ]
   sources = filter_include(output_values, source_values)
 
   public_configs = [
-    ":ability_manager_idl_config",
+    ":ability_manager_innerkits_config",
     "${ability_runtime_services_path}/abilitymgr:abilityms_config",
   ]
 
-  deps = [ ":ability_manager_interface" ]
+  deps = [ ":ability_manager_innerkits" ]
 
   external_deps = [
     "c_utils:utils",
@@ -234,8 +226,8 @@ ohos_shared_library("ability_manager") {
   public_deps = [ ":ability_connect_callback_stub" ]
 
   deps = [
-    ":ability_manager_idl_stub",
-    ":ability_manager_idl_proxy",
+    ":ability_manager_innerkits_include",
+    ":ability_manager_innerkits_source",
     ":ability_start_options",
     ":ability_start_setting",
     ":mission_info",
