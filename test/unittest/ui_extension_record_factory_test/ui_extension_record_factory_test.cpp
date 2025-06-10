@@ -145,6 +145,27 @@ HWTEST_F(UIExtensionRecordFactoryTest, NeedReuse_0200, TestSize.Level1)
 }
 
 /**
+ * @tc.number: NeedReuse_0300
+ * @tc.name: UIExtensionRecordFactoryTest
+ * @tc.desc: Set UIEXTENSION_ABILITY_ID equal INVALID_EXTENSION_RECORD_ID
+ */
+HWTEST_F(UIExtensionRecordFactoryTest, NeedReuse_0300, TestSize.Level1)
+{
+    AbilityRuntime::UIExtensionRecordFactory info;
+    AAFwk::AbilityRequest abilityRequest;
+    std::string deviceName = "device";
+    std::string abilityName = "ServiceAbility";
+    std::string appName = "hiservcie";
+    std::string bundleName = "com.ix.hiservcie";
+    std::string moduleName = "entry";
+    abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
+    abilityRequest.sessionInfo = nullptr;
+    int32_t extensionRecordId = 1;
+    bool result = info.NeedReuse(abilityRequest, extensionRecordId);
+    EXPECT_EQ(result, false);
+}
+
+/**
  * @tc.number: CreateRecord_0100
  * @tc.name: UIExtensionRecordFactoryTest
  * @tc.desc: Call function CreateRecord

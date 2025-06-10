@@ -29,6 +29,7 @@ public:
 private:
     static int32_t GetBatchData(const std::string &key, std::vector<std::string> &uris);
     static int32_t AddPrivilege(const std::string &key, uint32_t tokenId, const std::string &readPermission);
+    static bool IsUdKeyCreateByCaller(uint32_t callerTokenId, const std::string &key);
 };
 } // OHOS
 } // AAFwk

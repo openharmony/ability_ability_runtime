@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_URI_PERMISSION_EVENT_H
-#define OHOS_ABILITY_RUNTIME_URI_PERMISSION_EVENT_H
+#ifndef OHOS_ABILITY_RUNTIME_URI_PERMISSION_UTILS_H
+#define OHOS_ABILITY_RUNTIME_URI_PERMISSION_UTILS_H
 
 #include "bundle_mgr_helper.h"
 #include "event_report.h"
@@ -52,4 +52,4 @@ private:
 };
 } // OHOS
 } // AAFwk
-#endif  // OHOS_ABILITY_RUNTIME_URI_PERMISSION_EVENT_H
+#endif  // OHOS_ABILITY_RUNTIME_URI_PERMISSION_UTILS_H
