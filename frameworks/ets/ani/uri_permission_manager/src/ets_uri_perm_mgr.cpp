@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "sts_uri_perm_mgr.h"
+#include "ets_uri_perm_mgr.h"
 
 #include "ability_business_error.h"
 #include "ability_manager_errors.h"
@@ -28,7 +28,7 @@
 #include "tokenid_kit.h"
 #include "uri.h"
 #include "uri_permission_manager_client.h"
-#include "sts_error_utils.h"
+#include "ets_error_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -62,18 +62,18 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         return;
     }
     auto selfToken = IPCSkeleton::GetSelfTokenID();
-    ani_object stsErrCode = CreateStsError(env, AbilityErrorCode::ERROR_OK);
+    ani_object EtsErrCode = CreateEtsError(env, AbilityErrorCode::ERROR_OK);
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
-        stsErrCode = CreateStsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
+        EtsErrCode = CreateEtsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
             NOT_SYSTEM_APP);
-        AsyncCallback(env, callback, stsErrCode, createDouble(env, ERR_FAILURE));
+        AsyncCallback(env, callback, EtsErrCode, createDouble(env, ERR_FAILURE));
         return;
     }
     std::string uriStr = GetStdString(env, uri);
     Uri uriVec(uriStr);
     ani_int flag = 0;
-    AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(env, flagEnum, flag);
+    AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, flagEnum, flag);
     int32_t flagId = static_cast<int32_t>(flag);
     std::string targetBundleName = GetStdString(env, targetName);
     int32_t appCloneIndexId = static_cast<int32_t>(appCloneIndex);
@@ -83,10 +83,10 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         targetBundleName, appCloneIndexId);
     if (errCode != ERR_OK) {
         result = ERR_FAILURE;
-        stsErrCode = CreateStsErrorByNativeErr(env, errCode);
+        EtsErrCode = CreateEtsErrorByNativeErr(env, errCode);
     }
     
-    AsyncCallback(env, callback, stsErrCode, createDouble(env, result));
+    AsyncCallback(env, callback, EtsErrCode, createDouble(env, result));
 }
 
 static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
@@ -98,12 +98,12 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         return;
     }
     auto selfToken = IPCSkeleton::GetSelfTokenID();
-    ani_object stsErrCode = CreateStsError(env, AbilityErrorCode::ERROR_OK);
+    ani_object EtsErrCode = CreateEtsError(env, AbilityErrorCode::ERROR_OK);
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
-        stsErrCode = CreateStsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
+        EtsErrCode = CreateEtsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
             NOT_SYSTEM_APP);
-        AsyncCallback(env, callback, stsErrCode, createDouble(env, ERR_FAILURE));
+        AsyncCallback(env, callback, EtsErrCode, createDouble(env, ERR_FAILURE));
         return;
     }
     std::string uriStr = GetStdString(env, uri);
@@ -115,9 +115,9 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         targetBundleName, appCloneIndex);
     if (errCode != ERR_OK) {
         result = ERR_FAILURE;
-        stsErrCode = CreateStsErrorByNativeErr(env, errCode);
+        EtsErrCode = CreateEtsErrorByNativeErr(env, errCode);
     }
-    AsyncCallback(env, callback, stsErrCode, createDouble(env, result));
+    AsyncCallback(env, callback, EtsErrCode, createDouble(env, result));
 }
 
 ani_object createDouble(ani_env *env, int32_t res)
@@ -135,9 +135,9 @@ env->Object_New(persion_cls, persionInfoCtor, &persionInfoObj, ani_double(res));
 return persionInfoObj;
 }
 
-void StsUriPermissionManagerInit(ani_env *env)
+void EtsUriPermissionManagerInit(ani_env *env)
 {
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "StsUriPermissionManagerInit call");
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "EtsUriPermissionManagerInit call");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Invalid param");
     }
@@ -160,11 +160,11 @@ void StsUriPermissionManagerInit(ani_env *env)
             reinterpret_cast<void*>(revokeUriPermissionCallbackSync)
         },
     };
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "StsUriPermissionManagerInit bind functions");
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "EtsUriPermissionManagerInit bind functions");
     if (env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()) != ANI_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Namespace_BindNativeFunctions failed");
     };
-    TAG_LOGI(AAFwkTag::URIPERMMGR, "StsUriPermissionManagerInit success");
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "EtsUriPermissionManagerInit success");
 }
 
 extern "C"{
@@ -179,7 +179,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_NOT_FOUND;
     }
 
-    StsUriPermissionManagerInit(env);
+    EtsUriPermissionManagerInit(env);
     *result = ANI_VERSION_1;
     TAG_LOGI(AAFwkTag::URIPERMMGR, "ANI_Constructor finish");
     return ANI_OK;

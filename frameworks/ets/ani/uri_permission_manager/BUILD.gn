@@ -38,7 +38,7 @@ ohos_shared_library("uri_permission_manager_ani_kit") {
 
   public_configs = []
 
-  sources = [ "./src/sts_uri_perm_mgr.cpp" ]
+  sources = [ "./src/ets_uri_perm_mgr.cpp" ]
 
   cflags = []
   if (target_cpu == "arm") {
