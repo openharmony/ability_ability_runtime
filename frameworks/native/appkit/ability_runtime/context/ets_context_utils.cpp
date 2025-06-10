@@ -20,9 +20,10 @@
 #include "application_context.h"
 #include "application_context_manager.h"
 #include "common_fun_ani.h"
+#include "ets_application_context_utils.h"
+#include "ets_error_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "resourceManager.h"
-#include "ets_error_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -154,22 +155,22 @@ std::shared_ptr<Context> GetBaseContext(ani_env *env, ani_object aniObj)
 {
     ani_status status = ANI_ERROR;
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
         return nullptr;
     }
     ani_class cls {};
     if ((status = env->FindClass(CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
         return nullptr;
     }
     ani_field contextField = nullptr;
     if ((status = env->Class_FindField(cls, "nativeContext", &contextField)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
         return nullptr;
     }
     ani_long nativeContextLong;
     if ((status = env->Object_GetField_Long(aniObj, contextField, &nativeContextLong)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
         return nullptr;
     }
     auto weakContext = reinterpret_cast<std::weak_ptr<Context>*>(nativeContextLong);
@@ -180,40 +181,14 @@ ani_object GetApplicationContext(ani_env* env, const std::shared_ptr<Application
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null env");
-    }
-    ani_class applicationContextCls = nullptr;
-    if (env->FindClass("Lapplication/ApplicationContext/ApplicationContext;", &applicationContextCls) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed");
         return {};
     }
-    ani_method contextCtorMethod = nullptr;
-    if (env->Class_FindMethod(applicationContextCls, "<ctor>", ":V", &contextCtorMethod) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod ctor failed");
+    ani_object applicationContextObject =
+        EtsApplicationContextUtils::CreateEtsApplicationContext(env, applicationContext);
+    if (applicationContextObject == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationContextObject");
         return {};
     }
-    ani_object applicationContextObject = nullptr;
-    if (env->Object_New(applicationContextCls, contextCtorMethod, &applicationContextObject) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_New failed");
-        return {};
-    }
-    ani_field contextField;
-    if (env->Class_FindField(applicationContextCls, "nativeContext", &contextField) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed");
-        return {};
-    }
-    auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(applicationContext);
-    if (workContext == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "workContext nullptr");
-        return {};
-    }
-    ani_long nativeContextLong = (ani_long)workContext;
-    if (env->Object_SetField_Long(applicationContextObject, contextField, nativeContextLong) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Long failed");
-        return {};
-    }
-    auto etsReference = std::make_shared<AbilityRuntime::ETSNativeReference>();
-    etsReference->aniObj = applicationContextObject;
-    AbilityRuntime::ApplicationContextManager::GetApplicationContextManager().AddEtsGlobalObject(env, etsReference);
     applicationContext->SetApplicationInfoUpdateFlag(false);
     return applicationContextObject;
 }
