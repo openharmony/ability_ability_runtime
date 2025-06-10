@@ -84,6 +84,7 @@ ohos_unittest("watchdog_test") {
     "json:nlohmann_json_static",
     "jsoncpp:jsoncpp",
     "napi:ace_napi",
+    "runtime_core:ani",
   ]
 
   defines = []

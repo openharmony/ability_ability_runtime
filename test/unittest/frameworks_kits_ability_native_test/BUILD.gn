@@ -123,6 +123,7 @@ ohos_unittest("ability_test") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -696,6 +697,7 @@ ohos_unittest("ability_impl_test") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -764,6 +766,7 @@ ohos_unittest("ui_ability_impl_test") {
       "i18n:intl_util",
       "input:libmmi-client",
       "window_manager:libwm",
+      "runtime_core:ani",
     ]
   }
 }
@@ -839,6 +842,7 @@ ohos_unittest("ability_thread_test") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -923,6 +927,7 @@ ohos_unittest("fa_ability_thread_test") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -1041,6 +1046,7 @@ ohos_unittest("ui_ability_thread_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -1475,6 +1481,7 @@ ohos_unittest("data_ability_impl_test") {
     "relational_store:rdb_data_share_adapter",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -1541,6 +1548,7 @@ ohos_unittest("data_ability_impl_file_secondpart_test") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -1607,6 +1615,7 @@ ohos_unittest("data_ability_impl_file_test") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -1675,6 +1684,7 @@ ohos_unittest("ability_thread_dataability_test") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -1967,6 +1977,7 @@ ohos_unittest("ui_ability_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -2095,6 +2106,7 @@ ohos_unittest("form_host_client_test") {
       "resource_management:global_resmgr",
       "samgr:samgr_proxy",
       "window_manager:libwm",
+      "runtime_core:ani",
     ]
   }
 }
@@ -2149,6 +2161,7 @@ ohos_unittest("continuation_test") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -2415,6 +2428,7 @@ ohos_unittest("ability_window_test") {
     "window_manager:libwm_lite",
     "window_manager:libwsutils",
     "window_manager:scene_session",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -2473,6 +2487,7 @@ ohos_unittest("ability_handler_test") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -2542,6 +2557,7 @@ ohos_unittest("ability_impl_factory_test") {
     "relational_store:native_rdb",
     "relational_store:rdb_data_share_adapter",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -3425,6 +3441,7 @@ ohos_unittest("ability_second_test") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {

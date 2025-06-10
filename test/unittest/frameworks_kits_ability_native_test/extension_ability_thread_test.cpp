@@ -1000,7 +1000,8 @@ HWTEST_F(
     auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
     std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
     std::string abilityName = extensionabilitythread->CreateAbilityName(abilityRecord, application);
-    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName);
+    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
     EXPECT_EQ(extension, nullptr);
     GTEST_LOG_(INFO) << "ExtensionAbilityThread_CreateAbilityName_0100 end";
 }
