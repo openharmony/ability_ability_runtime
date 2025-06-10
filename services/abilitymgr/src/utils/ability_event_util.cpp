@@ -19,7 +19,7 @@
 
 namespace OHOS {
 namespace AAFwk {
-
+constexpr int32_t FFRT_TASK_TIMEOUT = 5 * 1000 * 1000;  // 5s
 void AbilityEventUtil::HandleModuleInfoUpdated(const std::string &bundleName, const int uid,
     const std::string& moduleName, bool isPlugin)
 {
@@ -31,16 +31,12 @@ void AbilityEventUtil::HandleModuleInfoUpdated(const std::string &bundleName, co
 void AbilityEventUtil::SendStartAbilityErrorEvent(EventInfo &eventInfo, int32_t errCode, const std::string errMsg,
     bool isSystemError)
 {
-    if (taskHandler_ == nullptr) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "task handler null");
-        return;
-    }
     EventName name = isSystemError ? EventName::START_ABILITY_SYSTEM_ERROR : EventName::START_ABILITY_ERROR;
     eventInfo.errCode = errCode;
     eventInfo.errMsg = errMsg;
-    taskHandler_->SubmitTask([eventInfo, name]() {
+    ffrt::submit([name, eventInfo]() {
         EventReport::SendAbilityEvent(name, HiSysEventType::FAULT, eventInfo);
-        });
+        }, ffrt::task_attr().timeout(FFRT_TASK_TIMEOUT));
 }
 } // namespace AAFwk
 } // namespace OHOS
