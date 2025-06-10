@@ -438,6 +438,7 @@ ohos_shared_library("app_context_utils") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:bms_ani_common",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
