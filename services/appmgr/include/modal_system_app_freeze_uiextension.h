@@ -34,7 +34,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 
-constexpr const char* APP_NO_RESPONSE_ABILITY = "AppAbnormalAbility";
+constexpr const char *APP_NO_RESPONSE_ABILITY = "AppAbnormalAbility";
 
 class ModalSystemAppFreezeUIExtension {
 public:
@@ -47,35 +47,15 @@ public:
 
 private:
     bool CreateModalUIExtension(std::string pid, std::string bundleName);
-    AAFwk::Want CreateSystemDialogWant(std::string pid, std::string bundleName);
+    bool CreateSystemDialogWant(std::string pid, std::string bundleName, sptr<IRemoteObject> &token, AAFwk::Want &want);
 
 private:
-    class AppFreezeDialogConnection : public AAFwk::AbilityConnectionStub {
-    public:
-        AppFreezeDialogConnection() = default;
-        virtual ~AppFreezeDialogConnection() = default;
-
-        void SetReqeustAppFreezeDialogWant(const AAFwk::Want &want);
-        void OnAbilityConnectDone(const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject,
-            int resultCode) override;
-        void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;
-
-    private:
-        bool WriteWantElement(MessageParcel &data);
-        AAFwk::Want want_;
-    };
-
-private:
-    sptr<AppFreezeDialogConnection> GetConnection();
-
     bool lastFocusStatus = false;
     uint64_t lastFreezeTime = 0;
-    sptr<AppFreezeDialogConnection> dialogConnectionCallback_;
     std::mutex appFreezeResultMutex_;
-    std::mutex dialogConnectionMutex_;
     std::string lastFreezePid;
 };
-} // namespace AppExecFwk
-} // namespace OHOS
-#endif // APP_NO_RESPONSE_DIALOG
-#endif // OHOS_ABILITY_RUNTIME_MODAL_SYSTEM_APP_FREEZE_UIEXTENSION_H
+}  // namespace AppExecFwk
+}  // namespace OHOS
+#endif  // APP_NO_RESPONSE_DIALOG
+#endif  // OHOS_ABILITY_RUNTIME_MODAL_SYSTEM_APP_FREEZE_UIEXTENSION_H
