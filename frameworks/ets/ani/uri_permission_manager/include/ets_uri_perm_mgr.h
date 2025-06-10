@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_STS_URI_PERM_MGR_H
-#define OHOS_ABILITY_RUNTIME_STS_URI_PERM_MGR_H
+#ifndef OHOS_ABILITY_RUNTIME_ETS_URI_PERM_MGR_H
+#define OHOS_ABILITY_RUNTIME_ETS_URI_PERM_MGR_H
 
 #include "ets_runtime.h"
 
@@ -33,4 +33,4 @@ ani_object createDouble(ani_env *env, int32_t res);
 std::string GetErrMsg(int32_t err, const std::string &permission = "");
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_STS_URI_PERM_MGR_H
+#endif  // OHOS_ABILITY_RUNTIME_ETS_URI_PERM_MGR_H
