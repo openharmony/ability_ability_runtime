@@ -905,5 +905,571 @@ HWTEST_F(KeepAliveProcessManagerTest, OnAppStateChanged_001, TestSize.Level1)
     EXPECT_NE(keepAliveProcessManager, nullptr);
     GTEST_LOG_(INFO) << "OnAppStateChanged_001 end";
 }
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager SetAppServiceExtensionKeepAlive
+ * EnvConditions: NA
+ * CaseDescription: Verify SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SetAppServiceExtensionKeepAlive_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_001 start";
+    std::string bundleName = "bundleName";
+    bool updataEnable = true;
+    bool isByEDM = false;
+    bool isAllowUserToCancel = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), false);
+    auto result = KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName,
+        updataEnable, isByEDM, isAllowUserToCancel);
+    EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_001 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager SetAppServiceExtensionKeepAlive
+ * EnvConditions: NA
+ * CaseDescription: Verify SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SetAppServiceExtensionKeepAlive_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_002 start";
+    std::string bundleName = "bundleName";
+    bool updataEnable = true;
+    bool isByEDM = false;
+    bool isAllowUserToCancel = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::isAllowedToUseSystemAPIFlag_ = false;
+    auto result = KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName,
+        updataEnable, isByEDM, isAllowUserToCancel);
+    EXPECT_EQ(result, ERR_NOT_SYSTEM_APP);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_002 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager SetAppServiceExtensionKeepAlive
+ * EnvConditions: NA
+ * CaseDescription: Verify SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SetAppServiceExtensionKeepAlive_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_003 start";
+    std::string bundleName = "bundleName";
+    bool updataEnable = true;
+    bool isByEDM = false;
+    bool isAllowUserToCancel = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::isAllowedToUseSystemAPIFlag_ = true;
+    MyFlag::verifyCallingPermissionFlag_ = false;
+    auto result = KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName,
+        updataEnable, isByEDM, isAllowUserToCancel);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_003 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager SetAppServiceExtensionKeepAlive
+ * EnvConditions: NA
+ * CaseDescription: Verify SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SetAppServiceExtensionKeepAlive_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_004 start";
+    std::string bundleName = "bundleName";
+    bool updataEnable = true;
+    bool isByEDM = true;
+    bool isAllowUserToCancel = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), false);
+    auto result = KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName,
+        updataEnable, isByEDM, isAllowUserToCancel);
+    EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_004 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager SetAppServiceExtensionKeepAlive
+ * EnvConditions: NA
+ * CaseDescription: Verify SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SetAppServiceExtensionKeepAlive_005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_005 start";
+    std::string bundleName = "bundleName";
+    bool updataEnable = true;
+    bool isByEDM = true;
+    bool isAllowUserToCancel = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::checkSpecificFlag_ = false;
+    MyFlag::flag_ = MyFlag::FLAG::IS_SA_CALL;
+    MyFlag::verifyCallingPermissionFlag_ = false;
+    auto result = KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName,
+        updataEnable, isByEDM, isAllowUserToCancel);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_005 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager SetAppServiceExtensionKeepAlive
+ * EnvConditions: NA
+ * CaseDescription: Verify SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SetAppServiceExtensionKeepAlive_006, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_006 start";
+    std::string bundleName = "bundleName";
+    bool updataEnable = true;
+    bool isByEDM = false;
+    bool isAllowUserToCancel = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::isAllowedToUseSystemAPIFlag_ = true;
+    MyFlag::verifyCallingPermissionFlag_ = true;
+    BundleMgrHelper::getBundleInfoResult = false;
+    auto result = KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName,
+        updataEnable, isByEDM, isAllowUserToCancel);
+    EXPECT_EQ(result, ERR_NO_U1);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_006 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager SetAppServiceExtensionKeepAlive
+ * EnvConditions: NA
+ * CaseDescription: Verify SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SetAppServiceExtensionKeepAlive_007, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_007 start";
+    std::string bundleName = "bundleName";
+    bool updataEnable = true;
+    bool isByEDM = true;
+    bool isAllowUserToCancel = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::checkSpecificFlag_ = true;
+    BundleMgrHelper::getBundleInfoResult = false;
+    auto result = KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName,
+        updataEnable, isByEDM, isAllowUserToCancel);
+    EXPECT_EQ(result, ERR_NO_U1);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_007 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager SetAppServiceExtensionKeepAlive
+ * EnvConditions: NA
+ * CaseDescription: Verify SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SetAppServiceExtensionKeepAlive_008, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_008 start";
+    std::string bundleName = "bundleName";
+    bool updataEnable = true;
+    bool isByEDM = false;
+    bool isAllowUserToCancel = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::isAllowedToUseSystemAPIFlag_ = true;
+    MyFlag::verifyCallingPermissionFlag_ = true;
+    BundleMgrHelper::getBundleInfoResult = true;
+    MainElementUtils::checkAppServiceExtensionResult = false;
+    auto result = KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName,
+        updataEnable, isByEDM, isAllowUserToCancel);
+    EXPECT_EQ(result, ERR_INVALID_MAIN_ELEMENT_TYPE);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_008 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager SetAppServiceExtensionKeepAlive
+ * EnvConditions: NA
+ * CaseDescription: Verify SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SetAppServiceExtensionKeepAlive_009, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_009 start";
+    std::string bundleName = "bundleName";
+    bool updataEnable = true;
+    bool isByEDM = true;
+    bool isAllowUserToCancel = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::checkSpecificFlag_ = true;
+    BundleMgrHelper::getBundleInfoResult = true;
+    MainElementUtils::checkAppServiceExtensionResult = false;
+    auto result = KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName,
+        updataEnable, isByEDM, isAllowUserToCancel);
+    EXPECT_EQ(result, ERR_INVALID_MAIN_ELEMENT_TYPE);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_009 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager SetAppServiceExtensionKeepAlive
+ * EnvConditions: NA
+ * CaseDescription: Verify SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SetAppServiceExtensionKeepAlive_010, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_010 start";
+    std::string bundleName = "bundleName";
+    bool updataEnable = true;
+    bool isByEDM = false;
+    bool isAllowUserToCancel = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::isAllowedToUseSystemAPIFlag_ = true;
+    MyFlag::verifyCallingPermissionFlag_ = true;
+    BundleMgrHelper::getBundleInfoResult = true;
+    MainElementUtils::checkAppServiceExtensionResult = true;
+    AbilityKeepAliveService::callIsKeepAliveResult = false;
+    AbilityKeepAliveService::callSetAppServiceExtensionResult = INNER_ERR;
+    auto result = KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName,
+        updataEnable, isByEDM, isAllowUserToCancel);
+    EXPECT_EQ(result, INNER_ERR);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_010 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager SetAppServiceExtensionKeepAlive
+ * EnvConditions: NA
+ * CaseDescription: Verify SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SetAppServiceExtensionKeepAlive_011, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_011 start";
+    std::string bundleName = "bundleName";
+    bool updataEnable = true;
+    bool isByEDM = true;
+    bool isAllowUserToCancel = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::checkSpecificFlag_ = true;
+    BundleMgrHelper::getBundleInfoResult = true;
+    MainElementUtils::checkAppServiceExtensionResult = true;
+    AbilityKeepAliveService::callIsKeepAliveResult = false;
+    AbilityKeepAliveService::callSetAppServiceExtensionResult = INNER_ERR;
+    auto result = KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName,
+        updataEnable, isByEDM, isAllowUserToCancel);
+    EXPECT_EQ(result, INNER_ERR);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_011 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager SetAppServiceExtensionKeepAlive
+ * EnvConditions: NA
+ * CaseDescription: Verify SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SetAppServiceExtensionKeepAlive_012, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_012 start";
+    std::string bundleName = "bundleName";
+    bool updataEnable = true;
+    bool isByEDM = false;
+    bool isAllowUserToCancel = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::isAllowedToUseSystemAPIFlag_ = true;
+    MyFlag::verifyCallingPermissionFlag_ = true;
+    BundleMgrHelper::getBundleInfoResult = true;
+    MainElementUtils::checkAppServiceExtensionResult = true;
+    AbilityKeepAliveService::callIsKeepAliveResult = false;
+    AbilityKeepAliveService::callSetAppServiceExtensionResult = ERR_OK;
+    auto result = KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName,
+        updataEnable, isByEDM, isAllowUserToCancel);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_012 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: SetAppServiceExtensionKeepAlive
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager SetAppServiceExtensionKeepAlive
+ * EnvConditions: NA
+ * CaseDescription: Verify SetAppServiceExtensionKeepAlive
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SetAppServiceExtensionKeepAlive_013, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_013 start";
+    std::string bundleName = "bundleName";
+    bool updataEnable = true;
+    bool isByEDM = true;
+    bool isAllowUserToCancel = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::checkSpecificFlag_ = true;
+    BundleMgrHelper::getBundleInfoResult = true;
+    MainElementUtils::checkAppServiceExtensionResult = true;
+    AbilityKeepAliveService::callIsKeepAliveResult = false;
+    AbilityKeepAliveService::callSetAppServiceExtensionResult = ERR_OK;
+    auto result = KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName,
+        updataEnable, isByEDM, isAllowUserToCancel);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest SetAppServiceExtensionKeepAlive_013 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: QueryKeepAliveAppServiceExtensions
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager QueryKeepAliveAppServiceExtensions
+ * EnvConditions: NA
+ * CaseDescription: Verify QueryKeepAliveAppServiceExtensions
+ */
+HWTEST_F(KeepAliveProcessManagerTest, QueryKeepAliveAppServiceExtensions_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_001 start";
+    std::vector<KeepAliveInfo> infoList;
+    bool isByEDM = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), false);
+    auto result = KeepAliveProcessManager::GetInstance().QueryKeepAliveAppServiceExtensions(infoList,
+        isByEDM);
+    EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_001 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: QueryKeepAliveAppServiceExtensions
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager QueryKeepAliveAppServiceExtensions
+ * EnvConditions: NA
+ * CaseDescription: Verify QueryKeepAliveAppServiceExtensions
+ */
+HWTEST_F(KeepAliveProcessManagerTest, QueryKeepAliveAppServiceExtensions_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_002 start";
+    std::vector<KeepAliveInfo> infoList;
+    bool isByEDM = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::isAllowedToUseSystemAPIFlag_ = false;
+    auto result = KeepAliveProcessManager::GetInstance().QueryKeepAliveAppServiceExtensions(infoList,
+        isByEDM);
+    EXPECT_EQ(result, ERR_NOT_SYSTEM_APP);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_002 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: QueryKeepAliveAppServiceExtensions
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager QueryKeepAliveAppServiceExtensions
+ * EnvConditions: NA
+ * CaseDescription: Verify QueryKeepAliveAppServiceExtensions
+ */
+HWTEST_F(KeepAliveProcessManagerTest, QueryKeepAliveAppServiceExtensions_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_003 start";
+    std::vector<KeepAliveInfo> infoList;
+    bool isByEDM = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::isAllowedToUseSystemAPIFlag_ = true;
+    MyFlag::verifyCallingPermissionFlag_ = false;
+    auto result = KeepAliveProcessManager::GetInstance().QueryKeepAliveAppServiceExtensions(infoList,
+        isByEDM);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_003 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: QueryKeepAliveAppServiceExtensions
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager QueryKeepAliveAppServiceExtensions
+ * EnvConditions: NA
+ * CaseDescription: Verify QueryKeepAliveAppServiceExtensions
+ */
+HWTEST_F(KeepAliveProcessManagerTest, QueryKeepAliveAppServiceExtensions_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_004 start";
+    std::vector<KeepAliveInfo> infoList;
+    bool isByEDM = true;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), false);
+    auto result = KeepAliveProcessManager::GetInstance().QueryKeepAliveAppServiceExtensions(infoList,
+        isByEDM);
+    EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_004 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: QueryKeepAliveAppServiceExtensions
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager QueryKeepAliveAppServiceExtensions
+ * EnvConditions: NA
+ * CaseDescription: Verify QueryKeepAliveAppServiceExtensions
+ */
+HWTEST_F(KeepAliveProcessManagerTest, QueryKeepAliveAppServiceExtensions_005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_005 start";
+    std::vector<KeepAliveInfo> infoList;
+    bool isByEDM = true;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::checkSpecificFlag_ = false;
+    MyFlag::flag_ = MyFlag::FLAG::IS_SA_CALL;
+    MyFlag::verifyCallingPermissionFlag_ = false;
+    auto result = KeepAliveProcessManager::GetInstance().QueryKeepAliveAppServiceExtensions(infoList,
+        isByEDM);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_005 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: QueryKeepAliveAppServiceExtensions
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager QueryKeepAliveAppServiceExtensions
+ * EnvConditions: NA
+ * CaseDescription: Verify QueryKeepAliveAppServiceExtensions
+ */
+HWTEST_F(KeepAliveProcessManagerTest, QueryKeepAliveAppServiceExtensions_006, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_006 start";
+    std::vector<KeepAliveInfo> infoList;
+    bool isByEDM = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::isAllowedToUseSystemAPIFlag_ = true;
+    MyFlag::verifyCallingPermissionFlag_ = true;
+    AbilityKeepAliveService::callQueryAppServiceExtensionResult = INNER_ERR;
+    auto result = KeepAliveProcessManager::GetInstance().QueryKeepAliveAppServiceExtensions(infoList,
+        isByEDM);
+    EXPECT_EQ(result, INNER_ERR);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_006 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: QueryKeepAliveAppServiceExtensions
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager QueryKeepAliveAppServiceExtensions
+ * EnvConditions: NA
+ * CaseDescription: Verify QueryKeepAliveAppServiceExtensions
+ */
+HWTEST_F(KeepAliveProcessManagerTest, QueryKeepAliveAppServiceExtensions_007, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_007 start";
+    std::vector<KeepAliveInfo> infoList;
+    bool isByEDM = true;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::checkSpecificFlag_ = true;
+    MyFlag::flag_ = MyFlag::FLAG::IS_SA_CALL;
+    MyFlag::verifyCallingPermissionFlag_ = false;
+    AbilityKeepAliveService::callQueryAppServiceExtensionResult = INNER_ERR;
+    auto result = KeepAliveProcessManager::GetInstance().QueryKeepAliveAppServiceExtensions(infoList,
+        isByEDM);
+    EXPECT_EQ(result, INNER_ERR);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_007 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: QueryKeepAliveAppServiceExtensions
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager QueryKeepAliveAppServiceExtensions
+ * EnvConditions: NA
+ * CaseDescription: Verify QueryKeepAliveAppServiceExtensions
+ */
+HWTEST_F(KeepAliveProcessManagerTest, QueryKeepAliveAppServiceExtensions_008, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_008 start";
+    std::vector<KeepAliveInfo> infoList;
+    bool isByEDM = false;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::isAllowedToUseSystemAPIFlag_ = true;
+    MyFlag::verifyCallingPermissionFlag_ = true;
+    AbilityKeepAliveService::callQueryAppServiceExtensionResult = ERR_OK;
+    auto result = KeepAliveProcessManager::GetInstance().QueryKeepAliveAppServiceExtensions(infoList,
+        isByEDM);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_008 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: QueryKeepAliveAppServiceExtensions
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager QueryKeepAliveAppServiceExtensions
+ * EnvConditions: NA
+ * CaseDescription: Verify QueryKeepAliveAppServiceExtensions
+ */
+HWTEST_F(KeepAliveProcessManagerTest, QueryKeepAliveAppServiceExtensions_009, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_009 start";
+    std::vector<KeepAliveInfo> infoList;
+    bool isByEDM = true;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    MyFlag::checkSpecificFlag_ = true;
+    MyFlag::flag_ = MyFlag::FLAG::IS_SA_CALL;
+    MyFlag::verifyCallingPermissionFlag_ = false;
+    AbilityKeepAliveService::callQueryAppServiceExtensionResult = ERR_OK;
+    auto result = KeepAliveProcessManager::GetInstance().QueryKeepAliveAppServiceExtensions(infoList,
+        isByEDM);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest QueryKeepAliveAppServiceExtensions_009 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: ClearKeepAliveAppServiceExtension
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager ClearKeepAliveAppServiceExtension
+ * EnvConditions: NA
+ * CaseDescription: Verify ClearKeepAliveAppServiceExtension
+ */
+HWTEST_F(KeepAliveProcessManagerTest, ClearKeepAliveAppServiceExtension_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest ClearKeepAliveAppServiceExtension_001 start";
+    int32_t userId = 100;
+    AbilityKeepAliveService::callClearKeepAliveAppServiceExtensionResult = ERR_OK;
+    auto result = KeepAliveProcessManager::GetInstance().ClearKeepAliveAppServiceExtension(userId);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest ClearKeepAliveAppServiceExtension_001 end";
+}
 }  // namespace AAFwk
 }  // namespace OHOS

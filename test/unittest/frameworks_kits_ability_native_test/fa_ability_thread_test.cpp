@@ -321,7 +321,8 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_AttachExtension_0300, Function
     std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
 
     std::string abilityName = abilitythread->CreateAbilityName(abilityRecord, nullptr);
-    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName);
+    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
     EXPECT_EQ(extension, nullptr);
 
     abilitythread->AttachExtension(nullptr, abilityRecord, mainRunner);
@@ -346,7 +347,8 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_AttachExtension_0400, Function
     std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
 
     std::string abilityName = abilitythread->CreateAbilityName(nullptr, application);
-    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName);
+    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
     EXPECT_EQ(extension, nullptr);
 
     abilitythread->AttachExtension(application, nullptr, mainRunner);
@@ -373,7 +375,8 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_AttachExtension_0500, Function
     auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::string abilityName = abilitythread->CreateAbilityName(abilityRecord, application);
-    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName);
+    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
     EXPECT_EQ(extension, nullptr);
 
     abilitythread->AttachExtension(application, abilityRecord, nullptr);
@@ -401,7 +404,8 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_CreateAndInitContextDeal_0500,
     auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::string abilityName = abilitythread->CreateAbilityName(abilityRecord, application);
-    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName);
+    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
     EXPECT_EQ(extension, nullptr);
 
     auto ret = abilitythread->CreateAndInitContextDeal(application, abilityRecord, nullptr);
@@ -428,7 +432,8 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_CreateAndInitContextDeal_0600,
 
     std::shared_ptr<AppExecFwk::AbilityContext> abilityObject = std::make_shared<AppExecFwk::AbilityContext>();
     std::string abilityName = abilitythread->CreateAbilityName(abilityRecord, nullptr);
-    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName);
+    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
     EXPECT_EQ(extension, nullptr);
 
     auto ret = abilitythread->CreateAndInitContextDeal(nullptr, abilityRecord, abilityObject);
@@ -456,7 +461,8 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_InitExtensionFlag_0200, Functi
     auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::string abilityName = abilitythread->CreateAbilityName(abilityRecord, application);
-    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName);
+    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
     EXPECT_EQ(extension, nullptr);
     abilitythread->InitExtensionFlag(abilityRecord);
 
@@ -488,7 +494,8 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_InitExtensionFlag_0300, Functi
     auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
 
     std::string abilityName = abilitythread->CreateAbilityName(abilityRecord, application);
-    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName);
+    auto extension = AbilityLoader::GetInstance().GetExtensionByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
     EXPECT_EQ(extension, nullptr);
     abilitythread->InitExtensionFlag(abilityRecord);
 

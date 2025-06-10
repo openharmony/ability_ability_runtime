@@ -125,7 +125,8 @@ void CjAbilityDelegatorTest::TearDown()
 HWTEST_F(CjAbilityDelegatorTest, CjAbilityDelegatorTestStartAbility_001, TestSize.Level1)
 {
     EXPECT_NE(commonDelegator_, nullptr);
-    AbilityDelegatorRegistry::RegisterInstance(commonDelegator_, delegatorArgs_);
+    AbilityDelegatorRegistry::RegisterInstance(commonDelegator_, delegatorArgs_,
+        OHOS::AbilityRuntime::Runtime::Language::CJ);
 
     AAFwk::Want want;
     want.SetElementName(VALUE_TEST_BUNDLE_NAME, ABILITY_NAME);

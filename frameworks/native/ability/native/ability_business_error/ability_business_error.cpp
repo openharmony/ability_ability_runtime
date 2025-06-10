@@ -118,6 +118,11 @@ constexpr const char* ERR_MSG_INVALID_TARGET_TOKENID = "The target token ID is i
 constexpr const char* ERROR_MSG_INVALID_MAIN_ELEMENT_TYPE = "Invalid main element type";
 constexpr const char* ERROR_MSG_CHANGE_KEEP_ALIVE = "Can not change keep alive status";
 constexpr const char* ERROR_MSG_NO_U1 = "The target bundle is not in u1";
+constexpr const char* ERROR_MSG_KIOSK_MODE_NOT_IN_WHITELIST = "The current application is not in the kiosk whitelist.";
+constexpr const char* ERROR_MSG_ALREADY_IN_KIOSK_MODE = "The system is already in the kiosk mode.";
+constexpr const char* ERROR_MSG_NOT_IN_KIOSK_MODE =
+    "The current application is not in the kiosk mode. Exit is not allowed.";
+constexpr const char* ERROR_MSG_APP_NOT_IN_FOCUS = "The current ability is not foreground.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
@@ -205,6 +210,10 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_INVALID_MAIN_ELEMENT_TYPE, ERROR_MSG_INVALID_MAIN_ELEMENT_TYPE},
     { AbilityErrorCode::ERROR_CODE_CHANGE_KEEP_ALIVE, ERROR_MSG_CHANGE_KEEP_ALIVE},
     { AbilityErrorCode::ERROR_CODE_NO_U1, ERROR_MSG_NO_U1},
+    { AbilityErrorCode::ERROR_CODE_KIOSK_MODE_NOT_IN_WHITELIST, ERROR_MSG_KIOSK_MODE_NOT_IN_WHITELIST},
+    { AbilityErrorCode::ERROR_CODE_ALREADY_IN_KIOSK_MODE, ERROR_MSG_ALREADY_IN_KIOSK_MODE},
+    { AbilityErrorCode::ERROR_CODE_NOT_IN_KIOSK_MODE, ERROR_MSG_NOT_IN_KIOSK_MODE},
+    { AbilityErrorCode::ERROR_CODE_APP_NOT_IN_FOCUS, ERROR_MSG_APP_NOT_IN_FOCUS},
 };
 
 static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP {
@@ -294,6 +303,10 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_INVALID_MAIN_ELEMENT_TYPE, AbilityErrorCode::ERROR_CODE_INVALID_MAIN_ELEMENT_TYPE},
     {ERR_CHANGE_KEEP_ALIVE, AbilityErrorCode::ERROR_CODE_CHANGE_KEEP_ALIVE},
     {ERR_NO_U1, AbilityErrorCode::ERROR_CODE_NO_U1},
+    {ERR_KIOSK_MODE_NOT_IN_WHITELIST, AbilityErrorCode::ERROR_CODE_KIOSK_MODE_NOT_IN_WHITELIST},
+    {ERR_ALREADY_IN_KIOSK_MODE, AbilityErrorCode::ERROR_CODE_ALREADY_IN_KIOSK_MODE},
+    {ERR_NOT_IN_KIOSK_MODE, AbilityErrorCode::ERROR_CODE_NOT_IN_KIOSK_MODE},
+    {ERR_APP_NOT_IN_FOCUS, AbilityErrorCode::ERROR_CODE_APP_NOT_IN_FOCUS},
 };
 }
 

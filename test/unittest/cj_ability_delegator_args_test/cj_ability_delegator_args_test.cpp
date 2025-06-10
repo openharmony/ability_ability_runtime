@@ -101,7 +101,8 @@ void CjAbilityDelegatorArgsTest::TearDown()
 HWTEST_F(CjAbilityDelegatorArgsTest,
     CjAbilityDelegatorArgsTestFfiAbilityDelegatorRegistryGetArguments_001, TestSize.Level1)
 {
-    OHOS::AppExecFwk::AbilityDelegatorRegistry::RegisterInstance(nullptr, nullptr);
+    OHOS::AppExecFwk::AbilityDelegatorRegistry::RegisterInstance(nullptr, nullptr,
+        OHOS::AbilityRuntime::Runtime::Language::CJ);
     auto result = FfiAbilityDelegatorRegistryGetArguments();
     EXPECT_TRUE(result == INVALID_ARG);
 }
@@ -114,7 +115,8 @@ HWTEST_F(CjAbilityDelegatorArgsTest,
 HWTEST_F(CjAbilityDelegatorArgsTest,
     CjAbilityDelegatorArgsTestFfiAbilityDelegatorRegistryGetArguments_002, TestSize.Level1)
 {
-    OHOS::AppExecFwk::AbilityDelegatorRegistry::RegisterInstance(abilityDelegator_, abilityDelegatorArgs_);
+    OHOS::AppExecFwk::AbilityDelegatorRegistry::RegisterInstance(abilityDelegator_, abilityDelegatorArgs_,
+        OHOS::AbilityRuntime::Runtime::Language::CJ);
     auto result = FfiAbilityDelegatorRegistryGetArguments();
     EXPECT_TRUE(result != INVALID_ARG);
 }

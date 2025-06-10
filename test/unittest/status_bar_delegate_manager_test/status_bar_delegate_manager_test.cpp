@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -355,6 +355,36 @@ HWTEST_F(StatusBarDelegateManagerTest, DoCallerProcessDetachment_0400, TestSize.
     EXPECT_NE(abilityRecord, nullptr);
     int32_t ret = statusBarDelegate->DoCallerProcessDetachment(abilityRecord);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: StatusBarDelegateManager_IsSupportStatusBar_0100
+ * @tc.desc: Test IsSupportStatusBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, IsSupportStatusBar_0100, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    sptr<MockIStatusBarDelegate> mockDelegate = new MockIStatusBarDelegate();
+    statusBarDelegate->RegisterStatusBarDelegate(nullptr);
+    auto ret = statusBarDelegate->IsSupportStatusBar();
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: StatusBarDelegateManager_IsSupportStatusBar_0200
+ * @tc.desc: Test IsSupportStatusBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, IsSupportStatusBar_0200, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    sptr<MockIStatusBarDelegate> mockDelegate = new MockIStatusBarDelegate();
+    statusBarDelegate->RegisterStatusBarDelegate(mockDelegate);
+    auto ret = statusBarDelegate->IsSupportStatusBar();
+    EXPECT_EQ(ret, true);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

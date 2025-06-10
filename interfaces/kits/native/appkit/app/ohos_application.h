@@ -27,6 +27,7 @@
 #include "ability_stage_context.h"
 #include "application_configuration_manager.h"
 #include "app_launch_data.h"
+#include "runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -49,11 +50,11 @@ public:
     void DumpApplication();
 
     /**
-     * @brief Set Runtime
+     * @brief Add Runtime
      *
      * @param runtime Runtime instance.
      */
-    void SetRuntime(std::unique_ptr<AbilityRuntime::Runtime>&& runtime);
+    void AddRuntime(std::unique_ptr<AbilityRuntime::Runtime> &&runtime);
 
     /**
      * @brief Set ApplicationContext
@@ -169,11 +170,18 @@ public:
     std::shared_ptr<AbilityRuntime::Context> GetAppContext() const;
 
     /**
+     * @brief return the application runtimes
+     *
+     * @param runtime
+     */
+    const std::vector<std::unique_ptr<AbilityRuntime::Runtime>> &GetRuntime() const;
+
+    /**
      * @brief return the application runtime
      *
      * @param runtime
      */
-    const std::unique_ptr<AbilityRuntime::Runtime>& GetRuntime() const;
+    const std::unique_ptr<AbilityRuntime::Runtime> &GetRuntime(const std::string &language) const;
 
     /*
      *
@@ -236,6 +244,8 @@ public:
     void PreloadAppStartup(const BundleInfo &bundleInfo, const std::string &preloadModuleName,
         std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData);
 
+    void SetCJApplication(bool isCJApplication = false);
+
 private:
     void UpdateAppContextResMgr(const Configuration &config);
     bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);
@@ -251,14 +261,17 @@ private:
         const AppExecFwk::HapModuleInfo &hapModuleInfo,
         const std::function<void()>& callback);
     bool IsMainProcess(const std::string &bundleName, const std::string &process);
+    AbilityRuntime::Runtime::Language ConvertLangToCode(const std::string &language) const;
+    void PreloadHybridModule(const HapModuleInfo &hapModuleInfo) const;
 
 private:
     std::shared_ptr<AbilityRecordMgr> abilityRecordMgr_ = nullptr;
     std::shared_ptr<AbilityRuntime::ApplicationContext> abilityRuntimeContext_ = nullptr;
     std::unordered_map<std::string, std::shared_ptr<AbilityRuntime::AbilityStage>> abilityStages_;
-    std::unique_ptr<AbilityRuntime::Runtime> runtime_;
+    std::vector<std::unique_ptr<AbilityRuntime::Runtime>> runtimes_;
     std::shared_ptr<Configuration> configuration_ = nullptr;
     std::map<int32_t, std::string> extensionTypeMap_;
+    bool isCJApplication_ = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

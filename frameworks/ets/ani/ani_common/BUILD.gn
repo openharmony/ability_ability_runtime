@@ -68,6 +68,7 @@ ohos_shared_library("ani_common") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "runtime_core:ani",
