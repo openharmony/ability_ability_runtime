@@ -40,6 +40,7 @@
 #include "resource_manager.h"
 #include "runtime.h"
 #include "watchdog.h"
+#include "ets_exception_callback.h"
 
 #ifdef CJ_FRONTEND
 #include "cj_envsetup.h"
@@ -323,6 +324,8 @@ public:
     CJUncaughtExceptionInfo CreateCjExceptionInfo(const std::string &bundleName, uint32_t versionCode,
         const std::string &hapPath);
 #endif
+    EtsEnv::ETSUncaughtExceptionInfo CreateEtsExceptionInfo(const std::string &bundleName, uint32_t versionCode,
+        const std::string &hapPath, std::string &appRunningId, int32_t pid, std::string &processName);
     /**
      * @brief Notify NativeEngine GC of status change.
      *
@@ -622,7 +625,8 @@ private:
      *
      */
     bool PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
-        const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion);
+        const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion,
+		const std::string &applicationCodeLanguage);
 
     /**
      * @brief Set current process extension type
@@ -797,6 +801,12 @@ private:
     void SetAppDebug(uint32_t modeFlag, bool isDebug);
     void GetPluginNativeLibPath(std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos,
         AppLibPathMap &appLibPaths);
+    void AddRuntimeLang(ApplicationInfo &appInfo, AbilityRuntime::Runtime::Options &options);
+    bool IsNeedEtsInit(const ApplicationInfo &appInfo);
+    const std::unique_ptr<AbilityRuntime::Runtime> &GetVerOneRuntime(
+        const ApplicationInfo &appInfo, const std::vector<std::unique_ptr<Runtime>> &runtimes);
+    void SetJsIdleCallback(const std::weak_ptr<OHOSApplication> &wpApplication,
+        const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;

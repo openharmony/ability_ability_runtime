@@ -142,6 +142,7 @@ ohos_unittest("application_test") {
     "resource_management:global_resmgr",
     "resource_management:librawfile",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -207,6 +208,7 @@ ohos_unittest("context_impl_test") {
     "resource_management:global_resmgr",
     "resource_management:librawfile",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -265,6 +267,7 @@ ohos_unittest("context_impl_second_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -325,6 +328,7 @@ ohos_unittest("context_impl_third_test") {
     "resource_management:global_resmgr",
     "resource_management:librawfile",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -375,6 +379,7 @@ ohos_unittest("context_container_test") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -576,6 +581,7 @@ ohos_unittest("context_deal_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -631,6 +637,7 @@ ohos_unittest("application_impl_test") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -776,6 +783,7 @@ ohos_unittest("form_extension_context_test") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -908,6 +916,7 @@ ohos_unittest("assert_fault_test") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -1023,6 +1032,7 @@ ohos_unittest("idle_time_test") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "runtime_core:ani",
   ]
 }
 
@@ -1061,6 +1071,7 @@ ohos_unittest("dump_runtime_helper_second_test") {
     "napi:ace_napi",
     "ffrt:libffrt",
     "storage_service:storage_manager_acl",
+    "runtime_core:ani",
   ]
 }
 
