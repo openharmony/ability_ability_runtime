@@ -230,6 +230,7 @@ ohos_shared_library("app_manager") {
 
   public_configs = [
     ":appmgr_core_config",
+    ":appmgr_innerkits_config",
     ":appmgr_sdk_config",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager_innerkits_config",
     "${ability_runtime_path}/utils/server/startup:startup_util_config",
