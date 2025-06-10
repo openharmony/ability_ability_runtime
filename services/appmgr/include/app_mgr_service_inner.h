@@ -24,7 +24,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include "iability_debug_response.h"
 #include "ability_foreground_state_observer_interface.h"
 #include "ability_info.h"
 #include "advanced_security_mode_manager.h"
@@ -58,6 +57,7 @@
 #include "fault_data.h"
 #include "fd_guard.h"
 #include "hisysevent.h"
+#include "iability_debug_response.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
