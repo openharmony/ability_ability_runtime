@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-import Context from 'application.Context'
-import {ExtensionAbilityInfo}  from 'bundleManager.ExtensionAbilityInfo'
+import { AbilityDelegator as _AbilityDelegator } from 'application.AbilityDelegator';
+import { AbilityDelegatorArgs as _AbilityDelegatorArgs } from 'application.abilityDelegatorArgs';
 
-export default class ExtensionContext extends Context {
-    static {
-        loadLibrary("context_ani");
-    }
-    extensionAbilityInfo: ExtensionAbilityInfo;
-    native constructor();
-    constructor(extensionAbilityInfo: ExtensionAbilityInfo) {
-        super();
-        this.extensionAbilityInfo = extensionAbilityInfo;
-    }
+export default namespace abilityDelegatorRegistry {
+  loadLibrary("ability_delegator_registry_ani_kit.z")
+
+  export native function getAbilityDelegator(): AbilityDelegator;
+
+  export native function getArguments(): AbilityDelegatorArgs;
+
+  export type AbilityDelegator = _AbilityDelegator;
+  export type AbilityDelegatorArgs = _AbilityDelegatorArgs;
 }

@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-import Context from 'application.Context'
-import {ExtensionAbilityInfo}  from 'bundleManager.ExtensionAbilityInfo'
+export interface AbilityDelegatorArgs {
+    bundleName: string;
+    parameters: Record<string, string>;
+    testCaseNames: string;
+    testRunnerClassName: string;
+  }
 
-export default class ExtensionContext extends Context {
-    static {
-        loadLibrary("context_ani");
-    }
-    extensionAbilityInfo: ExtensionAbilityInfo;
-    native constructor();
-    constructor(extensionAbilityInfo: ExtensionAbilityInfo) {
-        super();
-        this.extensionAbilityInfo = extensionAbilityInfo;
-    }
-}
+  class AbilityDelegatorArgsInner implements AbilityDelegatorArgs {
+    public bundleName: string = '';
+    public parameters: Record<string, string> = {};
+    public testCaseNames: string = '';
+    public testRunnerClassName: string = '';
+  }

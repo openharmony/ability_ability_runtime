@@ -210,6 +210,65 @@ ohos_prebuilt_etc("ability_runtime_ability_result_abc_etc") {
   deps = [ ":ability_runtime_ability_result_abc" ]
 }
 
+generate_static_abc("service_extension_ability") {
+  base_url = "./"
+  files = [
+    "./@ohos.app.ability.ServiceExtensionAbility.ets",
+    "./application/ServiceExtensionContext.ets",
+  ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/service_extension_ability.abc"
+}
+
+ohos_prebuilt_etc("service_extension_ability_abc_etc") {
+  source = "$target_out_dir/service_extension_ability.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":service_extension_ability" ]
+}
+
+generate_static_abc("ui_extension_ability_ani_abc") {
+  base_url = "./"
+
+  files = [
+    "./application/UIExtensionContext.ets",
+    "./@ohos.app.ability.UIExtensionAbility.ets",
+    "./@ohos.app.ability.UIExtensionContentSession.ets",
+  ]
+
+  dst_file = "$target_out_dir/ui_extension_ability_ani.abc"
+  out_puts = [ "$target_out_dir/ui_extension_ability_ani.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ui_extension_ability_ani.abc"
+}
+
+ohos_prebuilt_etc("ui_extension_ability_ani_etc") {
+  source = "$target_out_dir/ui_extension_ability_ani.abc"
+  deps = [ ":ui_extension_ability_ani_abc" ]
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+generate_static_abc("ability_runtime_ability_stage_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.AbilityStage.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_runtime_ability_stage_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_ability_stage_abc_etc") {
+  source = "$target_out_dir/ability_runtime_ability_stage_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_ability_stage_abc" ]
+}
+
 generate_static_abc("ability_runtime_ui_ability_abc") {
   base_url = "./"
   files = [ "./@ohos.app.ability.UIAbility.ets" ]
@@ -243,21 +302,129 @@ ohos_prebuilt_etc("ability_runtime_ui_ability_context_abc_etc") {
   deps = [ ":ability_runtime_ui_ability_context_abc" ]
 }
 
+generate_static_abc("ability_delegator_application_testRunner_abc") {
+  base_url = "./"
+  files = [ "./@ohos.application.testRunner.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_delegator_application_testRunner_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_delegator_application_testRunner_abc_etc") {
+  source = "$target_out_dir/ability_delegator_application_testRunner_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_delegator_application_testRunner_abc" ]
+}
+
+generate_static_abc("ability_delegator_registry_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.abilityDelegatorRegistry.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_delegator_registry_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_delegator_registry_abc_etc") {
+  source = "$target_out_dir/ability_delegator_registry_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_delegator_registry_abc" ]
+}
+
+generate_static_abc("ability_delegator_abc") {
+  base_url = "./"
+  files = [ "./application/AbilityDelegator.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_delegator_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_delegator_abc_etc") {
+  source = "$target_out_dir/ability_delegator_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_delegator_abc" ]
+}
+
+generate_static_abc("ability_delegator_args_abc") {
+  base_url = "./"
+  files = [ "./application/abilityDelegatorArgs.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_delegator_args_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_delegator_args_abc_etc") {
+  source = "$target_out_dir/ability_delegator_args_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_delegator_args_abc" ]
+}
+
+generate_static_abc("ability_delegator_ability_monitor_abc") {
+  base_url = "."
+  files = [ "./application/AbilityMonitor.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_delegator_ability_monitor_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_delegator_ability_monitor_abc_etc") {
+  source = "$target_out_dir/ability_delegator_ability_monitor_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_delegator_ability_monitor_abc" ]
+}
+
+generate_static_abc("ability_runtime_shell_cmd_result_abc") {
+  base_url = "./"
+  files = [ "./application/shellCmdResult.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_runtime_shell_cmd_result_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_shell_cmd_result_abc_etc") {
+  source = "$target_out_dir/ability_runtime_shell_cmd_result_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_shell_cmd_result_abc" ]
+}
+
 group("ets_packages") {
   deps = [
-    ":ability_runtime_ability_result_abc_etc",
+    ":ability_delegator_abc_etc",
+    ":ability_delegator_ability_monitor_abc_etc",
+    ":ability_delegator_application_testRunner_abc_etc",
+    ":ability_delegator_args_abc_etc",
+    ":ability_delegator_registry_abc_etc",
+    ":ability_runtime_shell_cmd_result_abc_etc",
     ":ability_runtime_ability_constant_abc_etc",
+    ":ability_runtime_ability_result_abc_etc",
+    ":ability_runtime_ability_stage_abc_etc",
     ":ability_runtime_ability_utils_abc_etc",
-    ":ability_runtime_base_context_abc_etc",
     ":ability_runtime_application_context_abc_etc",
+    ":ability_runtime_base_context_abc_etc",
     ":ability_runtime_configuration_abc_etc",
     ":ability_runtime_configuration_constant_abc_etc",
     ":ability_runtime_context_abc_etc",
+    ":ability_runtime_extension_context_abc_etc",
     ":ability_runtime_start_options_abc_etc",
     ":ability_runtime_want_abc_etc",
     ":ability_runtime_want_constant_abc_etc",
-    ":ability_runtime_extension_context_abc_etc",
     ":ability_runtime_ui_ability_abc_etc",
     ":ability_runtime_ui_ability_context_abc_etc",
+    ":service_extension_ability_abc_etc",
+    ":ui_extension_ability_ani_etc",
   ]
 }

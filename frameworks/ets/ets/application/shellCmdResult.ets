@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
-import Context from 'application.Context'
-import {ExtensionAbilityInfo}  from 'bundleManager.ExtensionAbilityInfo'
+interface ShellCmdResult {
+    stdResult: string;
+    exitCode: number;
+  }
 
-export default class ExtensionContext extends Context {
-    static {
-        loadLibrary("context_ani");
-    }
-    extensionAbilityInfo: ExtensionAbilityInfo;
-    native constructor();
-    constructor(extensionAbilityInfo: ExtensionAbilityInfo) {
-        super();
-        this.extensionAbilityInfo = extensionAbilityInfo;
-    }
-}
+  class ShellCmdResultImpl implements ShellCmdResult {
+    public stdResult: string = '';
+    public exitCode: number = 0;
+  }
+
+  export default ShellCmdResult;

@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
-import Context from 'application.Context'
-import {ExtensionAbilityInfo}  from 'bundleManager.ExtensionAbilityInfo'
+#ifndef OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_REGISTRY_H
+#define OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_REGISTRY_H
 
-export default class ExtensionContext extends Context {
-    static {
-        loadLibrary("context_ani");
-    }
-    extensionAbilityInfo: ExtensionAbilityInfo;
-    native constructor();
-    constructor(extensionAbilityInfo: ExtensionAbilityInfo) {
-        super();
-        this.extensionAbilityInfo = extensionAbilityInfo;
-    }
-}
+#include "ets_runtime.h"
+
+namespace OHOS {
+namespace AbilityDelegatorEts {
+void EtsAbilityDelegatorRegistryInit(ani_env *env);
+} // namespace AbilityDelegatorEts
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_REGISTRY_H
