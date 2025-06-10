@@ -26,8 +26,8 @@
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "istart_specified_ability_response.h"
-#include "running_process_info.h"
 #include "iuser_callback.h"
+#include "running_process_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {

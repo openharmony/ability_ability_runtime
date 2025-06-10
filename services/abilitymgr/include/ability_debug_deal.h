@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_ABILITY_DEBUG_DEAL_H
 #define OHOS_ABILITY_RUNTIME_ABILITY_DEBUG_DEAL_H
 
-#include "iability_debug_response.h"
 #include "ability_debug_response_stub.h"
+#include "iability_debug_response.h"
 
 namespace OHOS {
 namespace AAFwk {
