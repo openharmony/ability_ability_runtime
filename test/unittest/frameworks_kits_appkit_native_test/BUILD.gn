@@ -38,7 +38,7 @@ config("module_private_config") {
 config("module_context_config") {
   visibility = [ ":*" ]
   configs = [
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_idl_config",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_innerkits_config",
     "${ability_runtime_innerkits_path}/app_manager:appmgr_innerkits_config",
   ]
   include_dirs = [

@@ -70,13 +70,13 @@ ohos_source_set("appmgr_innerkits_include") {
 
   public_configs = [
     ":appmgr_innerkits_config",
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_idl_config",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_innerkits_config",
     "${ability_runtime_path}/utils/server/startup:startup_util_config",
   ]
 
   deps = [
     ":appmgr_innerkits",
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_interface",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_innerkits",
     "${ability_runtime_path}/utils/server/startup:startup_util",
   ]
   external_deps = [
@@ -109,7 +109,7 @@ ohos_source_set("appmgr_innerkits_source") {
 
   public_configs = [
     ":appmgr_innerkits_config",
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_idl_config",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_innerkits_config",
     "${ability_runtime_path}/utils/server/startup:startup_util_config",
   ]
 
@@ -118,7 +118,7 @@ ohos_source_set("appmgr_innerkits_source") {
 
   deps = [
     ":appmgr_innerkits",
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_interface",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_innerkits",
     "${ability_runtime_path}/utils/server/startup:startup_util",
   ]
   external_deps = [
@@ -232,7 +232,7 @@ ohos_shared_library("app_manager") {
     ":appmgr_core_config",
     ":appmgr_sdk_config",
     ":appmgr_innerkits_config",
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_idl_config",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_innerkits_config",
     "${ability_runtime_path}/utils/server/startup:startup_util_config",
   ]
 
