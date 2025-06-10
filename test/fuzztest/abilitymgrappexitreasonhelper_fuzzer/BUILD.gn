@@ -102,6 +102,7 @@ ohos_fuzztest("AbilityMgrAppExitReasonHelperFuzzTest") {
     "napi:ace_napi",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:libdm",
     "window_manager:libmodal_system_ui_extension_client",
     "window_manager:libwsutils",
     "window_manager:scene_session",
