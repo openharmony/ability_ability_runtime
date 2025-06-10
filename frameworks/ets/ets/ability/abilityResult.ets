@@ -13,16 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_ANI_COMMON_CONFIGURATION_H
-#define OHOS_ABILITY_RUNTIME_ANI_COMMON_CONFIGURATION_H
+import Want from '@ohos.app.ability.Want';
 
-#include "ani_common_util.h"
-#include "configuration.h"
+export interface AbilityResult {
+  resultCode: number;
+  want?: Want;
+}
 
-namespace OHOS {
-namespace AppExecFwk {
-ani_object WrapConfiguration(ani_env *env, const AppExecFwk::Configuration &configuration);
-bool UnwrapConfiguration(ani_env *env, ani_object param, Configuration &config);
-}  // namespace AppExecFwk
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_ANI_COMMON_CONFIGURATION_H
+class AbilityResultInner implements AbilityResult {
+  resultCode: number;
+  want?: Want | undefined = {};
+}
