@@ -19,7 +19,7 @@
 #include "session_info.h"
 #include "start_options.h"
 #include "window.h"
-#include "sts_runtime.h"
+#include "ets_runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -66,7 +66,7 @@ public:
         sptr<Rosen::Window> uiWindow);
     virtual ~EtsUIExtensionContentSession() = default;
     static EtsUIExtensionContentSession* GetEtsContentSession(ani_env* env, ani_object obj);
-    static ani_object CreateStsUIExtensionContentSession(ani_env* env,
+    static ani_object CreateEtsUIExtensionContentSession(ani_env* env,
         sptr<AAFwk::SessionInfo> sessionInfo, sptr<Rosen::Window> uiWindow,
         std::weak_ptr<AbilityRuntime::Context> context,
         std::shared_ptr<EtsAbilityResultListeners>& abilityResultListeners,

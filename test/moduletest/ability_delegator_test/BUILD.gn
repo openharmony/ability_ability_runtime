@@ -134,6 +134,7 @@ ohos_moduletest("ability_delegator_registry_moduletest") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "runtime_core:ani",
     "napi:ace_napi",
   ]
 }
@@ -164,6 +165,7 @@ ohos_moduletest("iability_monitor_moduletest") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "runtime_core:ani",
     "napi:ace_napi",
   ]
 }
@@ -198,6 +200,8 @@ ohos_moduletest("ability_delegator_moduletest") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "runtime_core:ani",
+    "napi:ace_napi",
   ]
 
   if (ability_runtime_graphics) {
@@ -243,6 +247,7 @@ ohos_moduletest("js_test_runner_moduletest") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "runtime_core:ani",
     "napi:ace_napi",
   ]
 }

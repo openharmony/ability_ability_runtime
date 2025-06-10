@@ -13,17 +13,18 @@
  * limitations under the License.
  */
 
-import Context from 'application.Context'
-import {ExtensionAbilityInfo}  from 'bundleManager.ExtensionAbilityInfo'
+#ifndef OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_UTILS_H
+#define OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_UTILS_H
 
-export default class ExtensionContext extends Context {
-    static {
-        loadLibrary("context_ani");
-    }
-    extensionAbilityInfo: ExtensionAbilityInfo;
-    native constructor();
-    constructor(extensionAbilityInfo: ExtensionAbilityInfo) {
-        super();
-        this.extensionAbilityInfo = extensionAbilityInfo;
-    }
-}
+#include "ability_delegator.h"
+#include "ability_delegator_args.h"
+#include "ets_runtime.h"
+
+namespace OHOS {
+namespace AbilityDelegatorEts {
+ani_object CreateEtsAbilityDelegator(ani_env *env);
+ani_object CreateEtsAbilityDelegatorArguments(ani_env *env,
+    const std::shared_ptr<AppExecFwk::AbilityDelegatorArgs> abilityDelegatorArgs);
+} // namespace AbilityDelegatorEts
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_UTILS_H
