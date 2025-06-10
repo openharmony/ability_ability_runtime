@@ -28,7 +28,6 @@
 #include "tokenid_kit.h"
 #include "uri.h"
 #include "uri_permission_manager_client.h"
-#include "sts_runtime.h"
 #include "sts_error_utils.h"
 
 namespace OHOS {
