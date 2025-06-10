@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -232,6 +232,209 @@ HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateHspResourceManager_0
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
     GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateHspResourceManager_003 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AppContext_IsModuleExist_001
+ * @tc.name: IsModuleExist
+ * @tc.desc: Test IsModuleExist.
+ * @tc.type: FUNC
+ * @tc.require: issueI5HQEM
+ */
+HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_IsModuleExist_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_IsModuleExist_001 start";
+
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+
+    contextImpl->applicationInfo_ = std::make_shared<AppExecFwk::ApplicationInfo>();
+    contextImpl->applicationInfo_->moduleInfos.clear();
+
+    auto ret = contextImpl->IsModuleExist("");
+    EXPECT_EQ(ret, false);
+
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_IsModuleExist_001 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AppContext_IsModuleExist_002
+ * @tc.name: IsModuleExist
+ * @tc.desc: Test IsModuleExist.
+ * @tc.type: FUNC
+ * @tc.require: issueI5HQEM
+ */
+HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_IsModuleExist_002, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_IsModuleExist_002 start";
+
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    
+    contextImpl->applicationInfo_ = std::make_shared<AppExecFwk::ApplicationInfo>();
+    std::string moduleName = "HeavenlyMeModule";
+    std::string moduleSourceDir = "HeavenlyMeModuleSource";
+    std::vector<std::string> preloads = {"Dummy1", "Dummy2"};
+    ModuleInfo moduleInfo;
+    moduleInfo.moduleName = moduleName;
+    moduleInfo.moduleSourceDir = moduleSourceDir;
+    moduleInfo.preloads = preloads;
+    contextImpl->applicationInfo_->moduleInfos = {
+        moduleInfo
+    };
+
+    auto ret = contextImpl->IsModuleExist(moduleName);
+    EXPECT_EQ(ret, true);
+
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_IsModuleExist_002 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AppContext_IsModuleExist_003
+ * @tc.name: IsModuleExist
+ * @tc.desc: Test IsModuleExist.
+ * @tc.type: FUNC
+ * @tc.require: issueI5HQEM
+ */
+HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_IsModuleExist_003, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_IsModuleExist_003 start";
+
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+
+    contextImpl->applicationInfo_ = std::make_shared<AppExecFwk::ApplicationInfo>();
+    std::string moduleName = "HeavenlyMeModule";
+    std::string moduleSourceDir = "HeavenlyMeModuleSource";
+    std::vector<std::string> preloads = {"Dummy1", "Dummy2"};
+    ModuleInfo moduleInfo;
+    moduleInfo.moduleName = moduleName;
+    moduleInfo.moduleSourceDir = moduleSourceDir;
+    moduleInfo.preloads = preloads;
+    contextImpl->applicationInfo_->moduleInfos = {
+        moduleInfo
+    };
+
+    auto ret = contextImpl->IsModuleExist("DummyModuleName");
+    EXPECT_EQ(ret, false);
+
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_IsModuleExist_003 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AppContext_GetPluginInfo_001
+ * @tc.name: GetPluginInfo
+ * @tc.desc: Test GetPluginInfo.
+ * @tc.type: FUNC
+ * @tc.require: issueI5HQEM
+ */
+HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_GetPluginInfo_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_GetPluginInfo_001 start";
+
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+
+    std::string hostBundleName = "";
+    std::string pluginBundleName = "HeavenlyMePluginBundle";
+    std::string pluginModuleName = "HeavenlyMePluginModule";
+    AppExecFwk::PluginBundleInfo pluginBundleInfo;
+
+    auto ret = contextImpl->GetPluginInfo(hostBundleName,
+        pluginBundleName, pluginModuleName, pluginBundleInfo);
+    EXPECT_EQ(ret, false);
+
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_GetPluginInfo_001 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AppContext_CreatePluginContext_001
+ * @tc.name: CreatePluginContext
+ * @tc.desc: Test CreatePluginContext.
+ * @tc.type: FUNC
+ * @tc.require: issueI5HQEM
+ */
+HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreatePluginContext_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreatePluginContext_001 start";
+
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+
+    std::string pluginBundleName = "";
+    std::string moduleName = "";
+    std::shared_ptr<AbilityRuntime::Context> inputContext = nullptr;
+
+    auto ret = contextImpl->CreatePluginContext(pluginBundleName,
+        moduleName, inputContext);
+    EXPECT_EQ(ret, nullptr);
+
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreatePluginContext_001 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AppContext_CreateSystemHspModuleResourceManager_001
+ * @tc.name: CreateSystemHspModuleResourceManager
+ * @tc.desc: Test CreateSystemHspModuleResourceManager.
+ * @tc.type: FUNC
+ * @tc.require: issueI5HQEM
+ */
+HWTEST_F(ContextImplSecondTest, CreateSystemHspModuleResourceManager_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateSystemHspModuleResourceManager_001 start";
+
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+
+    std::string bundleName = "";
+    std::string moduleName = "";
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager = nullptr;
+
+    auto ret = contextImpl->CreateSystemHspModuleResourceManager(bundleName,
+        moduleName, resourceManager);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreateSystemHspModuleResourceManager_001 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AppContext_GetHapModuleInfoWithContext_001
+ * @tc.name: GetHapModuleInfoWithContext
+ * @tc.desc: Test GetHapModuleInfoWithContext.
+ * @tc.type: FUNC
+ * @tc.require: issueI5HQEM
+ */
+HWTEST_F(ContextImplSecondTest, GetHapModuleInfoWithContext_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_GetHapModuleInfoWithContext_001 start";
+
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+
+    contextImpl->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
+    auto inputContext = std::make_shared<AbilityRuntime::ContextImpl>();
+    inputContext->hapModuleInfo_ = nullptr;
+
+    auto ret = contextImpl->GetHapModuleInfoWithContext(inputContext);
+    EXPECT_EQ(ret, nullptr);
+
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_GetHapModuleInfoWithContext_001 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AppContext_GetHapModuleInfoWithContext_002
+ * @tc.name: GetHapModuleInfoWithContext
+ * @tc.desc: Test GetHapModuleInfoWithContext.
+ * @tc.type: FUNC
+ * @tc.require: issueI5HQEM
+ */
+HWTEST_F(ContextImplSecondTest, GetHapModuleInfoWithContext_002, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_GetHapModuleInfoWithContext_002 start";
+
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+
+    contextImpl->hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>();
+    auto inputContext = std::make_shared<AbilityRuntime::ContextImpl>();
+    inputContext->hapModuleInfo_ = nullptr;
+
+    auto ret = contextImpl->GetHapModuleInfoWithContext(nullptr);
+    EXPECT_EQ(ret, contextImpl->hapModuleInfo_);
+
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_GetHapModuleInfoWithContext_002 end";
 }
 }  // namespace AppExecFwk
 }

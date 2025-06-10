@@ -210,6 +210,7 @@ ohos_unittest("ability_delegator_registry_unittest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "runtime_core:ani",
   ]
 }
 
