@@ -231,8 +231,6 @@ HWTEST_F(AbilityManagerServiceMockTest, ExecuteIntent_0200, TestSize.Level1)
 {
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
-    abilityMs->abilityEventHelper_ = std::make_shared<AbilityEventUtil>();
-    ASSERT_NE(abilityMs->abilityEventHelper_, nullptr);
     AppExecFwk::InsightIntentExecuteParam param;
     param.bundleName_ = "test.bundleName";
     param.moduleName_ = "test.entry";
@@ -256,8 +254,6 @@ HWTEST_F(AbilityManagerServiceMockTest, ExecuteIntent_0300, TestSize.Level1)
 {
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
-    abilityMs->abilityEventHelper_ = std::make_shared<AbilityEventUtil>();
-    ASSERT_NE(abilityMs->abilityEventHelper_, nullptr);
     AppExecFwk::InsightIntentExecuteParam param;
     param.bundleName_ = "test.bundleName";
     param.moduleName_ = "test.entry";

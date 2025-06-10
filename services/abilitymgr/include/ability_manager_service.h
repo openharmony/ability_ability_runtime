@@ -2829,7 +2829,7 @@ private:
 
     std::mutex prepareTermiationCallbackMutex_;
     std::map<std::string, sptr<IPrepareTerminateCallback>> prepareTermiationCallbacks_;
-    std::shared_ptr<AbilityEventUtil> abilityEventHelper_;
+    AbilityEventUtil abilityEventHelper_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
