@@ -15,9 +15,9 @@
 
 #include "ani_common_configuration.h"
 
+#include "ani_enum_convert.h"
 #include "configuration_convertor.h"
 #include "hilog_tag_wrapper.h"
-#include "ani_enum_convert.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -26,17 +26,22 @@ constexpr double FONT_SIZE_MIN_SCALE = 0.0;
 constexpr double FONT_SIZE_MAX_SCALE = 3.2;
 constexpr double FONT_WEIGHT_MIN_SCALE = 0.0;
 constexpr double FONT_WEIGHT_MAX_SCALE = 1.25;
-}
+constexpr const char* COLOR_MODE_ENUM_NAME =
+    "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ColorMode;";
+constexpr const char* DIRECTION_ENUM_NAME =
+    "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/Direction;";
+constexpr const char* DENSITY_ENUM_NAME =
+    "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ScreenDensity;";
+constexpr const char* CONFIGURATION_IMPL_CLASS_NAME = "L@ohos/app/ability/Configuration/ConfigurationImpl;";
 
-void SetBasicConfiguration(
-    ani_env *env, ani_class cls, ani_object object, const AppExecFwk::Configuration &configuration)
+void SetBasicConfiguration(ani_env *env, ani_object object, const AppExecFwk::Configuration &configuration)
 {
     std::string str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
     env->Object_SetPropertyByName_Ref(object, "language", GetAniString(env, str));
 
-    ani_enum_item colorModeItem {};
+    ani_enum_item colorModeItem = nullptr;
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(env,
-        "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ColorMode;",
+        COLOR_MODE_ENUM_NAME,
         ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE)), colorModeItem);
     env->Object_SetPropertyByName_Ref(object, "colorMode", colorModeItem);
 
@@ -44,28 +49,26 @@ void SetBasicConfiguration(
     env->Object_SetPropertyByName_Ref(object, "displayId", CreateDouble(env, static_cast<ani_double>(displayId)));
 
     std::string direction = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
-    ani_enum_item directionItem {};
+    ani_enum_item directionItem = nullptr;
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(env,
-        "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/Direction;", ConvertDirection(direction),
+        DIRECTION_ENUM_NAME, ConvertDirection(direction),
         directionItem);
     env->Object_SetPropertyByName_Ref(object, "direction", directionItem);
 
     std::string density = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI);
-    ani_enum_item densityItem {};
+    ani_enum_item densityItem = nullptr;
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(env,
-        "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ScreenDensity;", ConvertDensity(density),
-        densityItem);
+        DENSITY_ENUM_NAME, ConvertDensity(density), densityItem);
     env->Object_SetPropertyByName_Ref(object, "screenDensity", densityItem);
 }
 
-void SetAdditionalConfiguration(
-    ani_env *env, ani_class cls, ani_object object, const AppExecFwk::Configuration &configuration)
+void SetAdditionalConfiguration(ani_env *env, ani_object object, const AppExecFwk::Configuration &configuration)
 {
     std::string hasPointerDevice = configuration.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     env->Object_SetPropertyByName_Ref(
         object, "hasPointerDevice", CreateBoolean(env, hasPointerDevice == "true" ? true : false));
 
-    std::string str = configuration.GetItem(AAFwk::GlobalConfigurationKey::APPLICATION_FONT);
+    std::string str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_ID);
     env->Object_SetPropertyByName_Ref(object, "fontId", GetAniString(env, str));
 
     std::string fontSizeScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
@@ -82,57 +85,62 @@ void SetAdditionalConfiguration(
     str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
     env->Object_SetPropertyByName_Ref(object, "mnc", GetAniString(env, str));
 }
+} // namespace
 
 ani_object WrapConfiguration(ani_env *env, const AppExecFwk::Configuration &configuration)
 {
-    ani_class cls {};
-    ani_status status = ANI_ERROR;
-    ani_method method {};
-    ani_object object = nullptr;
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null env");
+        TAG_LOGE(AAFwkTag::ANI, "null env");
         return nullptr;
     }
-    if ((status = env->FindClass("L@ohos/app/ability/Configuration/ConfigurationImpl;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    ani_class cls = nullptr;
+    ani_status status = env->FindClass(CONFIGURATION_IMPL_CLASS_NAME, &cls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "FindClass status: %{public}d", status);
         return nullptr;
     }
     if (cls == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null Configuration");
+        TAG_LOGE(AAFwkTag::ANI, "null Configuration");
         return nullptr;
     }
+    ani_method method = nullptr;
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod status: %{public}d", status);
         return nullptr;
     }
+    ani_object object = nullptr;
     if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::ANI, "Object_New status: %{public}d", status);
         return nullptr;
     }
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "null object");
+        TAG_LOGE(AAFwkTag::ANI, "null object");
         return nullptr;
     }
-    SetBasicConfiguration(env, cls, object, configuration);
-    SetAdditionalConfiguration(env, cls, object, configuration);
+    SetBasicConfiguration(env, object, configuration);
+    SetAdditionalConfiguration(env, object, configuration);
     return object;
 }
 
 bool UnwrapConfiguration(ani_env *env, ani_object param, Configuration &config)
 {
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
     std::string language { "" };
-    if (GetStringOrUndefined(env, param, "language", language)) {
-        TAG_LOGD(AAFwkTag::JSNAPI, "The parsed language part %{public}s", language.c_str());
+    if (GetFieldStringByName(env, param, "language", language)) {
+        TAG_LOGD(AAFwkTag::ANI, "The parsed language part %{public}s", language.c_str());
         if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "language Parsing failed");
+            TAG_LOGE(AAFwkTag::ANI, "language Parsing failed");
             return false;
         }
     }
 
     ani_double fontSizeScale = 0.0;
-    if (GetDoubleOrUndefined(env, param, "fontSizeScale", fontSizeScale)) {
+    if (GetFieldDoubleByName(env, param, "fontSizeScale", fontSizeScale)) {
         if (fontSizeScale < FONT_SIZE_MIN_SCALE || fontSizeScale > FONT_SIZE_MAX_SCALE) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "invalid fontSizeScale");
+            TAG_LOGE(AAFwkTag::ANI, "invalid fontSizeScale");
             return false;
         }
         if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, std::to_string(fontSizeScale))) {
@@ -141,9 +149,9 @@ bool UnwrapConfiguration(ani_env *env, ani_object param, Configuration &config)
     }
 
     ani_double fontWeightScale = 0.0;
-    if (GetDoubleOrUndefined(env, param, "fontWeightScale", fontWeightScale)) {
+    if (GetFieldDoubleByName(env, param, "fontWeightScale", fontWeightScale)) {
         if (fontWeightScale < FONT_WEIGHT_MIN_SCALE || fontWeightScale > FONT_WEIGHT_MAX_SCALE) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "invalid fontWeightScale");
+            TAG_LOGE(AAFwkTag::ANI, "invalid fontWeightScale");
             return false;
         }
         if (!config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE, std::to_string(fontWeightScale))) {
@@ -152,5 +160,5 @@ bool UnwrapConfiguration(ani_env *env, ani_object param, Configuration &config)
     }
     return true;
 }
-}  // namespace AppExecFwk
-}  // namespace OHOS
+} // namespace AppExecFwk
+} // namespace OHOS

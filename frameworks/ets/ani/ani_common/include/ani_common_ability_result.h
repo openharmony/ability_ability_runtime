@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_ANI_COMMON_CONFIGURATION_H
-#define OHOS_ABILITY_RUNTIME_ANI_COMMON_CONFIGURATION_H
+#ifndef OHOS_ABILITY_RUNTIME_ANI_COMMON_ABILITY_RESULT_H
+#define OHOS_ABILITY_RUNTIME_ANI_COMMON_ABILITY_RESULT_H
 
-#include "ani_common_util.h"
-#include "configuration.h"
+#include "ani.h"
+#include "want.h"
 
 namespace OHOS {
 namespace AppExecFwk {
-ani_object WrapConfiguration(ani_env *env, const AppExecFwk::Configuration &configuration);
-bool UnwrapConfiguration(ani_env *env, ani_object param, Configuration &config);
-}  // namespace AppExecFwk
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_ANI_COMMON_CONFIGURATION_H
+ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want &want);
+} // namespace AppExecFwk
+} // namespace OHOS
+
+#endif // OHOS_ABILITY_RUNTIME_ANI_COMMON_ABILITY_RESULT_H
