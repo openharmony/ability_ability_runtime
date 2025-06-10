@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #undef protected
 #include "ability_manager_service.h"
 #include "user_controller.h"
+#include "ability_resident_process_rdb.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -162,6 +163,41 @@ HWTEST_F(ResidentProcessManagerTest, AddFailedResidentAbility_001, TestSize.Leve
     manager->StartFailedResidentAbilities();
     EXPECT_TRUE(manager->unlockedAfterBoot_);
     EXPECT_TRUE(manager->failedResidentAbilityInfos_.empty());
+}
+
+/*
+ * Feature: ResidentProcessManager
+ * Function: StartResidentProcessWithMainElementPerBundle
+ * SubFunction: NA
+ * FunctionPoints:ResidentProcessManager StartResidentProcessWithMainElementPerBundle
+ * EnvConditions: NA
+ * CaseDescription: Verify StartResidentProcessWithMainElementPerBundle
+ */
+HWTEST_F(ResidentProcessManagerTest, StartResidentProcessWithMainElementPerBundle_001, TestSize.Level1)
+{
+    std::shared_ptr<ResidentProcessManager> manager = std::make_shared<ResidentProcessManager>();
+    AppExecFwk::BundleInfo bundleInfo;
+    size_t index = 1;
+    std::set<uint32_t> needEraseIndexSet;
+    int32_t userId = 1;
+    EXPECT_EQ((int)needEraseIndexSet.size(), 0);
+    manager->StartResidentProcessWithMainElementPerBundle(bundleInfo, index, needEraseIndexSet, userId);
+    EXPECT_EQ((int)needEraseIndexSet.size(), 1);
+}
+
+/*
+ * Feature: ResidentProcessManager
+ * Function: PutResidentAbility
+ * SubFunction: NA
+ * FunctionPoints:ResidentProcessManager PutResidentAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify PutResidentAbility
+ */
+HWTEST_F(ResidentProcessManagerTest, PutResidentAbility_002, TestSize.Level1)
+{
+    auto manager = std::make_shared<ResidentProcessManager>();
+    bool ret = manager->IsResidentAbility("", "", 0);
+    EXPECT_FALSE(ret);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
