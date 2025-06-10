@@ -16,7 +16,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 group("ani_packages") {
   deps = [
-    "${ability_runtime_path}/frameworks/ets/ani/native_constructor:context_ani",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_path}/frameworks/ets/ani/native_constructor:context_ani",
   ]
 }

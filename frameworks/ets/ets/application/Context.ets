@@ -21,7 +21,7 @@ import resmgr from '@ohos.resourceManager'
 
 export class Context extends BaseContext {
   static {
-      loadLibrary("context_ani");
+    loadLibrary("context_ani");
   }
   area: contextConstant.AreaMode = contextConstant.AreaMode.EL1;
   filesDir: string = "";
