@@ -47,7 +47,7 @@ static bool EnumConvert_EtsToNative(ani_env *env, ani_enum_item enumItem, T &res
         ani_int intValue{};
         status = env->EnumItem_GetValue_Int(enumItem, &intValue);
         if (ANI_OK != status) {
-            TAG_LOGE(AAFwkTag::EtsRUNTIME, "EnumConvert_EtsToNative failed, status : %{public}d", status);
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "EnumConvert_EtsToNative failed, status : %{public}d", status);
             return false;
         }
         result = static_cast<T>(intValue);
@@ -56,12 +56,12 @@ static bool EnumConvert_EtsToNative(ani_env *env, ani_enum_item enumItem, T &res
         ani_string strValue{};
         status = env->EnumItem_GetValue_String(enumItem, &strValue);
         if (ANI_OK != status) {
-            TAG_LOGE(AAFwkTag::EtsRUNTIME, "EnumItem_GetValue_String failed, status : %{public}d", status);
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "EnumItem_GetValue_String failed, status : %{public}d", status);
             return false;
         }
         return GetStdString(env, strValue, result);
     } else {
-        TAG_LOGE(AAFwkTag::EtsRUNTIME, "Enum convert failed: type not supported");
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Enum convert failed: type not supported");
         return false;
     }
 }
@@ -78,7 +78,7 @@ static bool EnumConvert_NativeToEts(ani_env *env, const char *enumName, const T 
     ani_enum aniEnum{};
     ani_status status = env->FindEnum(enumName, &aniEnum);
     if (ANI_OK != status) {
-        TAG_LOGE(AAFwkTag::EtsRUNTIME, "Enum convert FindEnum failed: %{public}s status: %{public}d", enumName, status);
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Enum convert FindEnum failed: %{public}s status: %{public}d", enumName, status);
         return false;
     }
     constexpr int32_t loopMaxNum = 1000;
@@ -86,7 +86,7 @@ static bool EnumConvert_NativeToEts(ani_env *env, const char *enumName, const T 
         ani_enum_item enumItem{};
         status = env->Enum_GetEnumItemByIndex(aniEnum, index, &enumItem);
         if (ANI_OK != status) {
-            TAG_LOGE(AAFwkTag::EtsRUNTIME,
+            TAG_LOGE(AAFwkTag::ETSRUNTIME,
                 "Enum convert Enum_GetEnumItemByIndex failed: enumName:%{public}s index:%{public}d status:%{public}d",
                 enumName, index, status);
             return false;
@@ -98,7 +98,7 @@ static bool EnumConvert_NativeToEts(ani_env *env, const char *enumName, const T 
             return true;
         }
     }
-    TAG_LOGE(AAFwkTag::EtsRUNTIME, "EnumConvert_NativeToEts failed enumName: %{public}s", enumName);
+    TAG_LOGE(AAFwkTag::ETSRUNTIME, "EnumConvert_NativeToEts failed enumName: %{public}s", enumName);
     return false;
 }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -292,5 +292,61 @@ HWTEST_F(AbilityStageContextTest, AbilityStageContextTest_CreatePluginContext_01
     TAG_LOGI(AAFwkTag::TEST, "end");
 }
 #endif
+
+/**
+ * @tc.name: AbilityStageContextTest_SetIsPlugin_0100
+ * @tc.desc: Ability stage SetIsPlugin test.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AbilityStageContextTest, AbilityStageContextTest_SetIsPlugin_0100, TestSize.Level1)
+{
+    auto abilityStageContext = std::make_shared<AbilityStageContext>();
+    ASSERT_NE(abilityStageContext, nullptr);
+
+    abilityStageContext->contextImpl_ = std::make_shared<ContextImpl>();
+    abilityStageContext->contextImpl_->isPlugin_ = true;
+
+    abilityStageContext->SetIsPlugin(false);
+
+    EXPECT_EQ(abilityStageContext->contextImpl_->isPlugin_, false);
+}
+
+/**
+ * @tc.name: AbilityStageContextTest_CreateBundleContext_0100
+ * @tc.desc: Ability stage CreateBundleContext test.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AbilityStageContextTest, AbilityStageContextTest_CreateBundleContext_0100, TestSize.Level1)
+{
+    auto abilityStageContext = std::make_shared<AbilityStageContext>();
+    ASSERT_NE(abilityStageContext, nullptr);
+
+    abilityStageContext->contextImpl_ = nullptr;
+
+    auto ret = abilityStageContext->CreateBundleContext("HeavenlyMe");
+
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: AbilityStageContextTest_GetSystemPreferencesDir_0100
+ * @tc.desc: Ability stage GetSystemPreferencesDir test.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AbilityStageContextTest, AbilityStageContextTest_GetSystemPreferencesDir_0100, TestSize.Level1)
+{
+    auto abilityStageContext = std::make_shared<AbilityStageContext>();
+    ASSERT_NE(abilityStageContext, nullptr);
+
+    std::string preferencesDir = "";
+    abilityStageContext->contextImpl_ = nullptr;
+
+    auto ret = abilityStageContext->GetSystemPreferencesDir("HeavenlyMe", false, preferencesDir);
+
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

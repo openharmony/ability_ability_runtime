@@ -20,6 +20,7 @@
 #include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "udmf_client.h"
+#include "uri_permission_utils.h"
 #include "uri.h"
 
 namespace OHOS {
@@ -85,10 +86,28 @@ int32_t UDMFUtils::AddPrivilege(const std::string &key, uint32_t tokenId, const 
     return ret;
 }
 
+bool UDMFUtils::IsUdKeyCreateByCaller(uint32_t callerTokenId, const std::string &key)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto keyAuthority =  IN_PROCESS_CALL(UDMF::UdmfClient::GetInstance().GetBundleNameByUdKey(key));
+    std::string callerAuthority;
+    UPMSUtils::GetAlterableBundleNameByTokenId(callerTokenId, callerAuthority);
+    if (callerAuthority != keyAuthority) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Authority: %{public}s-%{public}s",
+            keyAuthority.c_str(), callerAuthority.c_str());
+        return false;
+    }
+    return true;
+}
+
 int32_t UDMFUtils::ProcessUdmfKey(const std::string &key, uint32_t callerTokenId, uint32_t targetTokenId,
     std::vector<std::string> &uris)
 {
     // To check if the key belong to callerTokenId
+    if (!IsUdKeyCreateByCaller(callerTokenId, key)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Key is not create by caller");
+        return ERR_UPMS_KEY_IS_NOT_CREATE_BY_CALLER;
+    }
     auto ret = AddPrivilege(key, targetTokenId, "");
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "AddPrivilege failed:%{public}d", ret);

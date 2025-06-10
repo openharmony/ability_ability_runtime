@@ -1,0 +1,106 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "ets_data_struct_converter.h"
+
+#include "ani_enum_convert.h"
+#include "hilog_tag_wrapper.h"
+
+namespace OHOS {
+namespace AbilityRuntime {
+namespace {
+constexpr const char *CLASSNAME_LAUNCHPARAM = "L@ohos/app/ability/AbilityConstant/LaunchParamImpl";
+constexpr const char *CLASSNAME_LAUNCHREASON = "L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchReason;";
+constexpr const char *CLASSNAME_LAST_EXITREASION = "L@ohos/app/ability/AbilityConstant/AbilityConstant/LastExitReason";
+
+ani_string GetAniString(ani_env *env, const std::string &str)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null env");
+        return nullptr;
+    }
+    ani_string aniStr = nullptr;
+    ani_status status = env->String_NewUTF8(str.c_str(), str.size(), &aniStr);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to getAniString, status : %{public}d", status);
+        return nullptr;
+    }
+    return aniStr;
+}
+
+bool WrapLaunchParamInner(ani_env *env, const AAFwk::LaunchParam &launchParam, ani_object &object)
+{
+    ani_status status = ANI_ERROR;
+    ani_enum_item launchReasonItem {};
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(
+        env, CLASSNAME_LAUNCHREASON, launchParam.launchReason, launchReasonItem);
+    if ((status = env->Object_SetPropertyByName_Ref(object, "launchReason", launchReasonItem)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to set launchReason");
+        return false;
+    }
+
+    ani_enum_item lastExitReasonItem {};
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(
+        env, CLASSNAME_LAST_EXITREASION, launchParam.lastExitReason, lastExitReasonItem);
+    if ((status = env->Object_SetPropertyByName_Ref(object, "lastExitReason", lastExitReasonItem)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to set lastExitReason");
+        return false;
+    }
+    return true;
+}
+} // namespace
+
+bool WrapLaunchParam(ani_env *env, const AAFwk::LaunchParam &launchParam, ani_object &object)
+{
+    ani_method method = nullptr;
+    ani_status status = ANI_ERROR;
+    ani_class cls = nullptr;
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null env");
+        return false;
+    }
+    if ((status = env->FindClass(CLASSNAME_LAUNCHPARAM, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to find lanchParam Class, status : %{public}d", status);
+        return false;
+    }
+    if (cls == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null cls");
+        return false;
+    }
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to find method, status : %{public}d", status);
+        return false;
+    }
+    if (method == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null method");
+        return false;
+    }
+    if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to create object, status : %{public}d", status);
+        return false;
+    }
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null object");
+        return false;
+    }
+    if ((status = env->Object_SetPropertyByName_Ref(
+            object, "lastExitMessage", GetAniString(env, launchParam.lastExitMessage))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to set lastExitMessage");
+        return false;
+    }
+    return WrapLaunchParamInner(env, launchParam, object);
+}
+} // namespace AbilityRuntime
+} // namespace OHOS
