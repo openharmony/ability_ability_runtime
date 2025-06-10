@@ -23,6 +23,7 @@
 #undef private
 #undef protected
 #include "js_runtime_utils.h"
+#include "ability_stage_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -172,6 +173,12 @@ HWTEST_F(JsUiAbilityTest, JSUIAbility_DoOnForegroundForSceneIsNull_0100, TestSiz
     wptr<IRemoteObject> token(new IPCObjectStub());
     ability->sessionToken_ = token;
     auto abilityContextImpl = std::make_shared<AbilityContextImpl>();
+
+    auto stageContext = std::make_shared<AbilityRuntime::AbilityStageContext>();
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+    stageContext->InitHapModuleInfo(hapModuleInfo);
+    abilityContextImpl->SetStageContext(stageContext);
+
     ability->abilityContext_ = abilityContextImpl;
     Rosen::SceneBoardJudgement::flag_ = true;
     Want want;
@@ -182,6 +189,7 @@ HWTEST_F(JsUiAbilityTest, JSUIAbility_DoOnForegroundForSceneIsNull_0100, TestSiz
 
     navDestinationInfo = "";
     want.SetParam(Want::ATOMIC_SERVICE_SHARE_ROUTER, navDestinationInfo);
+    ability->sceneListener_ = new Rosen::IWindowLifeCycle();
     ability->DoOnForegroundForSceneIsNull(want);
     EXPECT_NE(abilityContextImpl->GetSessionToken(), nullptr);
     GTEST_LOG_(INFO) << "JSUIAbility_DoOnForegroundForSceneIsNull_0100 end";
