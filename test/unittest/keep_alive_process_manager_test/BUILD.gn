@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -28,6 +28,7 @@ ohos_unittest("keep_alive_process_manager_test") {
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/keep_alive/keep_alive_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/keep_alive/keep_alive_process_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/process_options.cpp",
     "keep_alive_process_manager_test.cpp",
     "mock/src/ability_keep_alive_service.cpp",
     "mock/src/ability_manager_service.cpp",
@@ -48,6 +49,8 @@ ohos_unittest("keep_alive_process_manager_test") {
   deps = [ "${ability_runtime_services_path}/abilitymgr:abilityms" ]
 
   external_deps = [
+    "ability_base:base",
+    "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
