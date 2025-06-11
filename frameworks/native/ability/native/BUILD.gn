@@ -743,6 +743,59 @@ ohos_shared_library("insight_intent_executor") {
   part_name = "ability_runtime"
 }
 
+ohos_shared_library("cj_insight_intent_executor") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  sources = [
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/cj_insight_intent_executor.cpp",
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/cj_insight_intent_executor_impl.cpp",
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/cj_insight_intent_executor_impl_object.cpp",
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/cj_insight_intent_executor_mgr.cpp",
+  ]
+
+  public_configs = [ ":insight_intent_executor_public_config" ]
+
+  deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
+    "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
+    "${ability_runtime_services_path}/common:event_report",
+  ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "napi:ace_napi",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
+    "window_manager:libwm",
+  ]
+  innerapi_tags = [ "platformsdk" ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
 config("uiability_config") {
   visibility = [ ":*" ]
   include_dirs = [
@@ -1794,6 +1847,7 @@ ohos_shared_library("cj_ui_extension") {
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability:cj_ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/ability/native:cj_insight_intent_executor",
     "${ability_runtime_native_path}/ability/native:insight_intent_executor",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
