@@ -590,6 +590,25 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbility_002, TestSize.Level1)
 }
 
 /*
+* Feature: AbilityManagerService
+* Function: StartAbilityWithRemoveIntentFlag
+* SubFunction: NA
+* FunctionPoints: AbilityManagerService StartAbilityWithRemoveIntentFlag
+*/
+HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityWithRemoveIntentFlag_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartAbilityWithRemoveIntentFlag_003 start");
+    Want want;
+    auto callerToken = MockToken(AbilityType::PAGE);
+    int32_t userId{0};
+    int requestCode{0};
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    auto ret = abilityMs_->StartAbilityWithRemoveIntentFlag(want, callerToken, userId, requestCode, true);
+    EXPECT_EQ(ret, ERR_INVALID_CALLER);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartAbilityWithRemoveIntentFlag_003 end");
+}
+
+/*
  * Feature: AbilityManagerService
  * Function: StartAbilityByFreeInstall
  * SubFunction: NA

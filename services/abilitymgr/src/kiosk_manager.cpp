@@ -16,9 +16,10 @@
 
 #include <algorithm>
 
+#include "ability_manager_errors.h"
 #include "ability_manager_service.h"
 #include "ability_record.h"
-#include "ability_manager_errors.h"
+#include "ability_util.h"
 #include "common_event.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -27,11 +28,14 @@
 #include "ipc_skeleton.h"
 #include "kiosk_manager.h"
 #include "permission_constants.h"
+#include "session_manager_lite.h"
 #include "singleton.h"
 #include "utils/want_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
+constexpr char PRODUCT_APPBOOT_SETTING_ENABLED[] = "const.product.appboot.setting.enabled";
+
 KioskManager &KioskManager::GetInstance()
 {
     static KioskManager manager;
@@ -45,12 +49,17 @@ void KioskManager::OnAppStop(const AppInfo &info)
     }
     std::lock_guard<std::mutex> lock(kioskManagermutex_);
     if (IsInKioskModeInner() && IsInWhiteListInner(info.bundleName)) {
-        ExitKioskModeInner(info.bundleName);
+        ExitKioskModeInner(info.bundleName, nullptr);
     }
 }
 
 int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> &appList)
 {
+    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+    }
+
     if (!PermissionVerification::GetInstance()->IsSystemAppCall() &&
         !PermissionVerification::GetInstance()->IsSACall()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
@@ -65,7 +74,7 @@ int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> 
     if (IsInKioskModeInner()) {
         auto it = std::find(appList.begin(), appList.end(), kioskStatus_.kioskBundleName_);
         if (it == appList.end()) {
-            auto ret = ExitKioskModeInner(kioskStatus_.kioskBundleName_);
+            auto ret = ExitKioskModeInner(kioskStatus_.kioskBundleName_, nullptr);
             if (ret != ERR_OK) {
                 return ret;
             }
@@ -75,12 +84,18 @@ int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> 
     for (const auto &app : appList) {
         whitelist_.insert(app);
     }
-
+    auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    CHECK_POINTER_AND_RETURN_LOG(sceneSessionManager, INNER_ERR, "sceneSessionManager is nullptr");
+    sceneSessionManager->UpdateKioskAppList(appList);
     return ERR_OK;
 }
 
 int32_t KioskManager::EnterKioskMode(sptr<IRemoteObject> callerToken)
 {
+    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+    }
     auto record = Token::GetAbilityRecordByToken(callerToken);
     if (!record) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "record null");
@@ -105,22 +120,28 @@ int32_t KioskManager::EnterKioskMode(sptr<IRemoteObject> callerToken)
     kioskStatus_.kioskBundleUid_ = IPCSkeleton::GetCallingUid();
     GetEnterKioskModeCallback()();
     NotifyKioskModeChanged(true);
-
+    auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    CHECK_POINTER_AND_RETURN_LOG(sceneSessionManager, INNER_ERR, "sceneSessionManager is nullptr");
+    sceneSessionManager->EnterKioskMode(callerToken);
     return ERR_OK;
 }
 
 int32_t KioskManager::ExitKioskMode(sptr<IRemoteObject> callerToken)
 {
+    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+    }
     auto record = Token::GetAbilityRecordByToken(callerToken);
     if (!record) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "record null");
         return INVALID_PARAMETERS_ERR;
     }
     std::lock_guard<std::mutex> lock(kioskManagermutex_);
-    return ExitKioskModeInner(record->GetAbilityInfo().bundleName);
+    return ExitKioskModeInner(record->GetAbilityInfo().bundleName, callerToken);
 }
 
-int32_t KioskManager::ExitKioskModeInner(const std::string & bundleName)
+int32_t KioskManager::ExitKioskModeInner(const std::string &bundleName, sptr<IRemoteObject> callerToken)
 {
     if (!IsInWhiteListInner(bundleName)) {
         return ERR_KIOSK_MODE_NOT_IN_WHITELIST;
@@ -132,11 +153,18 @@ int32_t KioskManager::ExitKioskModeInner(const std::string & bundleName)
     GetExitKioskModeCallback()();
     NotifyKioskModeChanged(false);
     kioskStatus_.Clear();
+    auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    CHECK_POINTER_AND_RETURN_LOG(sceneSessionManager, INNER_ERR, "sceneSessionManager is nullptr");
+    sceneSessionManager->ExitKioskMode(callerToken);
     return ERR_OK;
 }
 
 int32_t KioskManager::GetKioskStatus(KioskStatus &kioskStatus)
 {
+    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+    }
     if (!PermissionVerification::GetInstance()->IsSystemAppCall()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
         return ERR_NOT_SYSTEM_APP;

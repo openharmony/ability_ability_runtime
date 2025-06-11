@@ -31,6 +31,7 @@ namespace OHOS::AbilityRuntime {
     constexpr char INSIGHT_INTENT_NAVIGATION_ID[] = "navigationId";
     constexpr char INSIGHT_INTENT_NAV_DESTINATION_NAME[] = "navDestinationName";
     constexpr char INSIGHT_INTENT_ABILITY_NAME[] = "abilityName";
+    constexpr char INSIGHT_INTENT_FORM_NAME[] = "formName";
     constexpr char INSIGHT_INTENT_EXECUTE_MODE[] = "executeMode";
     constexpr char INSIGHT_INTENT_BUNDLE_NAME[] = "bundleName";
     constexpr char INSIGHT_INTENT_MODULE_NAME[] = "moduleName";

@@ -226,7 +226,7 @@ HWTEST_F(IabilityMonitorTest, FuncTest_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "test start.");
     auto iabilityMonitor = new IAbilityMonitor(ABILITY_NAME);
     ASSERT_NE(iabilityMonitor, nullptr);
-    auto nativeRef = std::shared_ptr<NativeReference>();
+    auto nativeRef = std::shared_ptr<BaseDelegatorAbilityProperty>();
     iabilityMonitor->OnAbilityStart(nativeRef);
     iabilityMonitor->OnAbilityForeground(nativeRef);
     iabilityMonitor->OnAbilityBackground(nativeRef);

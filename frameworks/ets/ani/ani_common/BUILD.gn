@@ -40,6 +40,8 @@ ohos_shared_library("ani_common") {
   public_configs = [ ":ani_common_public_config" ]
 
   sources = [
+    "src/ani_common_ability_result.cpp",
+    "src/ani_common_configuration.cpp",
     "src/ani_common_start_options.cpp",
     "src/ani_common_util.cpp",
     "src/ani_common_want.cpp",
@@ -68,6 +70,7 @@ ohos_shared_library("ani_common") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "runtime_core:ani",

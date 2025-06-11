@@ -127,7 +127,8 @@ JSAbilityDelegator::JSAbilityDelegator()
 {
     auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
     if (delegator) {
-        auto clearFunc = [](const std::shared_ptr<ADelegatorAbilityProperty> &property) {
+        auto clearFunc = [](const std::shared_ptr<BaseDelegatorAbilityProperty> &baseProperty) {
+            auto property = std::static_pointer_cast<AppExecFwk::ADelegatorAbilityProperty>(baseProperty);
             TAG_LOGI(AAFwkTag::DELEGATOR, "clearFunc called");
             if (!property) {
                 TAG_LOGE(AAFwkTag::DELEGATOR, "null property");
@@ -524,16 +525,17 @@ napi_value JSAbilityDelegator::OnWaitAbilityMonitor(napi_env env, NapiCallbackIn
             return;
         }
 
-        std::shared_ptr<ADelegatorAbilityProperty> property = opt.hasTimeoutPara ?
+        std::shared_ptr<BaseDelegatorAbilityProperty> property = opt.hasTimeoutPara ?
             delegator->WaitAbilityMonitor(monitor, timeout) : delegator->WaitAbilityMonitor(monitor);
-        if (!property || property->object_.expired()) {
+        auto jsProperty = std::static_pointer_cast<AppExecFwk::ADelegatorAbilityProperty>(property);
+        if (!jsProperty || jsProperty->object_.expired()) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "invalid property");
             return;
         }
 
-        abilityObjectBox->object_ = property->object_;
+        abilityObjectBox->object_ = jsProperty->object_;
         std::unique_lock<std::mutex> lck(g_mutexAbilityRecord);
-        g_abilityRecord.emplace(property->object_, property->token_);
+        g_abilityRecord.emplace(jsProperty->object_, jsProperty->token_);
     };
 
     NapiAsyncTask::CompleteCallback complete = [abilityObjectBox](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -795,15 +797,16 @@ napi_value JSAbilityDelegator::OnGetCurrentTopAbility(napi_env env, NapiCallback
         }
 
         auto property = delegator->GetCurrentTopAbility();
-        if (!property || property->object_.expired()) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "invalid property");
+        auto jsProperty = std::static_pointer_cast<AppExecFwk::ADelegatorAbilityProperty>(property);
+        if (!jsProperty || jsProperty->object_.expired()) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "invalid jsProperty");
             task.Reject(env, CreateJsError(env, COMMON_FAILED, "Calling GetCurrentTopAbility failed."));
         } else {
             {
                 std::unique_lock<std::mutex> lck(g_mutexAbilityRecord);
-                g_abilityRecord.emplace(property->object_, property->token_);
+                g_abilityRecord.emplace(jsProperty->object_, jsProperty->token_);
             }
-            ResolveWithNoError(env, task, property->object_.lock()->GetNapiValue());
+            ResolveWithNoError(env, task, jsProperty->object_.lock()->GetNapiValue());
         }
     };
 

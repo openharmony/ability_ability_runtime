@@ -127,6 +127,8 @@ uint32_t InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(
         queryInfo.parameters = functionInfo.parameters;
     } else if (genericInfo.decoratorType == INSIGHT_INTENTS_DECORATOR_TYPE_FORM) {
         auto formInfo = genericInfo.get<InsightIntentFormInfo>();
+        queryInfo.formInfo.abilityName = formInfo.abilityName;
+        queryInfo.formInfo.formName = formInfo.formName;
         queryInfo.parameters = formInfo.parameters;
     } else {
         TAG_LOGE(AAFwkTag::INTENT, "invalid decoratorType:%{public}s", genericInfo.decoratorType.c_str());

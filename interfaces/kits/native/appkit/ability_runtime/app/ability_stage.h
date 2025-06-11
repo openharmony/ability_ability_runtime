@@ -74,6 +74,7 @@ public:
 
 private:
     friend class JsAbilityStage;
+    friend class ETSAbilityStage;
     std::shared_ptr<Context> context_;
     std::map<sptr<IRemoteObject>, std::shared_ptr<AppExecFwk::AbilityLocalRecord>> abilityRecords_;
     std::weak_ptr<AppExecFwk::OHOSApplication> application_;

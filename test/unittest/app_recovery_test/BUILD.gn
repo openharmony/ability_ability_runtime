@@ -72,6 +72,7 @@ ohos_unittest("AppRecoveryUnitTest") {
     "image_framework:image_native",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "runtime_core:ani",
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:windowstage_kit",

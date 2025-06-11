@@ -19,6 +19,7 @@
 #include "cj_runtime.h"
 #endif
 #include "js_runtime.h"
+#include "ets_runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -26,8 +27,45 @@ namespace {
 std::unique_ptr<Runtime> g_preloadedInstance;
 }
 
-std::unique_ptr<Runtime> Runtime::Create(const Runtime::Options& options)
+std::vector<std::unique_ptr<Runtime>> Runtime::CreateRuntimes(Runtime::Options &options)
 {
+    std::vector<std::unique_ptr<Runtime>> runtimes;
+    for (auto lang : options.langs) {
+        switch (lang.first) {
+            case Runtime::Language::JS:
+                options.lang = Runtime::Language::JS;
+                runtimes.emplace_back(JsRuntime::Create(options));
+                break;
+#ifdef CJ_FRONTEND
+            case Runtime::Language::CJ:
+                options.lang = Runtime::Language::CJ;
+                runtimes.emplace_back(CJRuntime::Create(options));
+                break;
+#endif
+            case Runtime::Language::ETS: {
+                options.lang = Runtime::Language::JS;
+                auto &jsRuntime = runtimes.emplace_back(JsRuntime::Create(options));
+                options.lang = Runtime::Language::ETS;
+                runtimes.emplace_back(ETSRuntime::Create(options,
+                    static_cast<AbilityRuntime::JsRuntime*>(jsRuntime.get())));
+                break;
+            }
+            default:
+                runtimes.emplace_back(std::unique_ptr<Runtime>());
+                break;
+        }
+    }
+    return runtimes;
+}
+
+std::unique_ptr<Runtime> Runtime::Create(Runtime::Options &options)
+{
+    std::unique_ptr<JsRuntime> jsRuntime;
+    if (options.lang == Runtime::Language::ETS) {
+        options.lang = Runtime::Language::JS;
+        jsRuntime = JsRuntime::Create(options);
+        options.lang = Runtime::Language::ETS;
+    }
     switch (options.lang) {
         case Runtime::Language::JS:
             return JsRuntime::Create(options);
@@ -35,6 +73,8 @@ std::unique_ptr<Runtime> Runtime::Create(const Runtime::Options& options)
         case Runtime::Language::CJ:
             return CJRuntime::Create(options);
 #endif
+        case Runtime::Language::ETS:
+            return ETSRuntime::Create(options, jsRuntime.get());
         default:
             return std::unique_ptr<Runtime>();
     }

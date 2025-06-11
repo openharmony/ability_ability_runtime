@@ -33,49 +33,49 @@ MockIabilityMonitor::MockIabilityMonitor(const std::string& abilityName) : IAbil
     windowStageDestroy_ = false;
 }
 
-void MockIabilityMonitor::OnAbilityStart(const std::weak_ptr<NativeReference>& abilityObj)
+void MockIabilityMonitor::OnAbilityStart(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::TEST, "MockIabilityMonitor::OnAbilityStart is called");
     start_ = true;
 }
 
-void MockIabilityMonitor::OnAbilityForeground(const std::weak_ptr<NativeReference>& abilityObj)
+void MockIabilityMonitor::OnAbilityForeground(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::TEST, "MockIabilityMonitor::OnAbilityForeground is called");
     foreground_ = true;
 }
 
-void MockIabilityMonitor::OnAbilityBackground(const std::weak_ptr<NativeReference>& abilityObj)
+void MockIabilityMonitor::OnAbilityBackground(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::TEST, "MockIabilityMonitor::OnAbilityBackground is called");
     background_ = true;
 }
 
-void MockIabilityMonitor::OnAbilityStop(const std::weak_ptr<NativeReference>& abilityObj)
+void MockIabilityMonitor::OnAbilityStop(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::TEST, "MockIabilityMonitor::OnAbilityStop is called");
     stop_ = true;
 }
 
-void MockIabilityMonitor::OnWindowStageCreate(const std::weak_ptr<NativeReference>& abilityObj)
+void MockIabilityMonitor::OnWindowStageCreate(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::TEST, "MockIabilityMonitor::OnWindowStageCreate is called");
     windowStageCreate_ = true;
 }
 
-void MockIabilityMonitor::OnWindowStageRestore(const std::weak_ptr<NativeReference>& abilityObj)
+void MockIabilityMonitor::OnWindowStageRestore(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::TEST, "MockIabilityMonitor::OnWindowStageRestore is called");
     windowStageRestore_ = true;
 }
 
-void MockIabilityMonitor::OnWindowStageDestroy(const std::weak_ptr<NativeReference>& abilityObj)
+void MockIabilityMonitor::OnWindowStageDestroy(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::TEST, "MockIabilityMonitor::OnWindowStageDestroy is called");
     windowStageDestroy_ = true;
 }
 
-bool MockIabilityMonitor::Match(const std::shared_ptr<ADelegatorAbilityProperty>& ability, bool isNotify)
+bool MockIabilityMonitor::Match(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability, bool isNotify)
 {
     TAG_LOGI(AAFwkTag::TEST, "MockIabilityMonitor::Match is called");
 

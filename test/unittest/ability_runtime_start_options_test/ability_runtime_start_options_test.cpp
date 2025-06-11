@@ -895,7 +895,7 @@ HWTEST_F(AbilityRuntimeStartOptionsTest, OH_AbilityRuntime_SetStartOptionsStartV
 {
     AbilityRuntime_StartOptions* startOptions = nullptr;
     AbilityRuntime_StartVisibility startVisibility = AbilityRuntime_StartVisibility::ABILITY_RUNTIME_HIDE_UPON_START;
-    EXPECT_EQ(OH_AbilityRuntime_SetStartOptionsWindowWidth(startOptions, startVisibility),
+    EXPECT_EQ(OH_AbilityRuntime_SetStartOptionsStartVisibility(startOptions, startVisibility),
         ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 }
 
