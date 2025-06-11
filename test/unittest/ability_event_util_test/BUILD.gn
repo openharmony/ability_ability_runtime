@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,40 +11,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#####################hydra-fuzz###################
-import("//build/config/features.gni")
-import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-module_output_path = "ability_runtime/abilitymgr"
 
-##############################fuzztest##########################################
-ohos_fuzztest("AbilityEventUtilFuzzTest") {
+module_output_path = "ability_runtime/ability_runtime/abilitymgr"
+
+ohos_unittest("ability_event_util_test") {
   module_out_path = module_output_path
 
-  fuzz_config_file =
-      "${ability_runtime_test_path}/fuzztest/abilityeventutil_fuzzer"
   include_dirs = [
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
   ]
+
   cflags = [
     "-g",
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
+
+  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
+
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/utils/ability_event_util.cpp",
-    "abilityeventutil_fuzzer.cpp",
+    "ability_event_util_test.cpp",
   ]
 
-  configs = [ "${ability_runtime_innerkits_path}/ability_manager:ability_manager_public_config" ]
-  cflags = []
-  if (target_cpu == "arm") {
-    cflags += [ "-DBINDER_IPC_32BIT" ]
-  }
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
@@ -68,19 +62,10 @@ ohos_fuzztest("AbilityEventUtilFuzzTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
-
-  if (ability_runtime_graphics) {
-    external_deps += [ "input:libmmi-client" ]
-  }
 }
 
-###############################################################################
-group("fuzztest") {
+group("unittest") {
   testonly = true
-  deps = []
-  deps += [
-    # deps file
-    ":AbilityEventUtilFuzzTest",
-  ]
+
+  deps = [ ":ability_event_util_test" ]
 }
-###############################################################################
