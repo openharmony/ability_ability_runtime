@@ -19,12 +19,12 @@
 #include <chrono>
 #include <mutex>
 
+#include "ability_record.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "scene_board_judgement.h"
 #include "session_manager_lite.h"
-#include "ability_record.h"
 #include "window_visibility_info.h"
 
 using namespace OHOS::AAFwk;
@@ -113,9 +113,8 @@ bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string pid, st
     }
     lastFreezePid = pid;
     lastFocusStatus = true;
-    lastFreezeTime =
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
-            .count();
+    lastFreezeTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "success, result = %{public}d", result);
     return true;
 }
@@ -132,12 +131,11 @@ bool ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(
     if (!sceneSessionManager) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sceneSessionManager is null proxy!");
         return false;
-    } else {
-        auto ret = static_cast<int>(sceneSessionManager->GetFocusSessionToken(token));
-        if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Get focus session token err: %{public}d", ret);
-            return false;
-        }
+    }
+    auto ret = static_cast<int>(sceneSessionManager->GetFocusSessionToken(token));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get focus session token err: %{public}d", ret);
+        return false;
     }
     want.SetParam(APP_FREEZE_TOKEN, token);
 
@@ -146,26 +144,25 @@ bool ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(
     int32_t width = 10;
     int32_t height  = 10;
     std::vector<sptr<Rosen::WindowVisibilityInfo>> infos;
-    auto ret = sceneSessionManager->GetVisibilityWindowInfo(infos);
-    if (ret != Rosen::WMError::WM_OK) {
+    ret = static_cast<int>(sceneSessionManager->GetVisibilityWindowInfo(infos));
+    if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Get visibility window info err: %{public}d", ret);
         return false;
-    } else {
-        bool infoReady = false;
-        for (const auto &info : infos) {
-            if (info->IsFocused()) {
-                posX = info->rect_.posX_;
-                posY = info->rect_.posY_;
-                width = info->rect_.width_;
-                height = info->rect_.height_;
-                infoReady = true;
-                break;
-            }
+    }
+    bool infoReady = false;
+    for (const auto &info : infos) {
+        if (info->IsFocused()) {
+            posX = info->rect_.posX_;
+            posY = info->rect_.posY_;
+            width = info->rect_.width_;
+            height = info->rect_.height_;
+            infoReady = true;
+            break;
         }
-        if (!infoReady) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "No fucused window!");
-            return false;
-        }
+    }
+    if (!infoReady) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "No fucused window!");
+        return false;
     }
     want.SetParam(FREEZE_WINDOW_POSX, std::to_string(posX));
     want.SetParam(FREEZE_WINDOW_POSY, std::to_string(posY));
