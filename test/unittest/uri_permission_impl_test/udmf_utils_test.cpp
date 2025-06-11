@@ -15,9 +15,9 @@
 
 #include <gtest/gtest.h>
 
-#include "udmf_client.h"
-
 #include "ability_manager_errors.h"
+#include "mock_my_flag.h"
+#include "udmf_client.h"
 #define private public
 #include "upms_udmf_utils.h"
 #undef private
@@ -44,6 +44,7 @@ void UriPermissionImplUdmfUtilsTest::TearDownTestCase(void)
 void UriPermissionImplUdmfUtilsTest::SetUp()
 {
     UDMF::UdmfClient::Init();
+    MyFlag::Init();
 }
 
 void UriPermissionImplUdmfUtilsTest::TearDown()
@@ -287,6 +288,64 @@ HWTEST_F(UriPermissionImplUdmfUtilsTest, ProcessUdmfKey_0400, TestSize.Level1)
     // processUdmfKey
     auto ret = UDMFUtils::ProcessUdmfKey(key, callerTokenId, targetTokenId, uris);
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.number: ProcessUdmfKey_0500
+ * @tc.desc: Test ProcessUdmfKey works, ProcessUdmfKey failed, key is not create by caller.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UriPermissionImplUdmfUtilsTest, ProcessUdmfKey_0500, TestSize.Level1)
+{
+    std::string uri = "file://com.example.test/temp.txt";
+    std::string key = "udmfKey";
+    uint32_t callerTokenId = 100001;
+    uint32_t targetTokenId = 100002;
+    std::vector<std::string> uris;
+    // callerAuthority
+    MyFlag::upmsUtilsGetAlterBundleNameByTokenIdRet_ = 0;
+    MyFlag::upmsUtilsAlterBundleName_ = "com.example.test";
+    // keyAuthority
+    UDMF::UdmfClient::keyAuthority = "com.example.test1";
+    // processUdmfKey
+    auto ret = UDMFUtils::ProcessUdmfKey(key, callerTokenId, targetTokenId, uris);
+    EXPECT_EQ(ret, ERR_UPMS_KEY_IS_NOT_CREATE_BY_CALLER);
+}
+
+/**
+ * @tc.number: UriPermissionImplUdmfUtilsTest_IsUdKeyCreateByCaller_001
+ * @tc.desc: callerAuthority equal to keyAuthority.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UriPermissionImplUdmfUtilsTest, IsUdKeyCreateByCaller_001, TestSize.Level1)
+{
+    std::string key = "udmf://Picker/com.example.test/aaa";
+    uint32_t callerTokenId = 100001;
+    // callerAuthority
+    MyFlag::upmsUtilsGetAlterBundleNameByTokenIdRet_ = 0;
+    MyFlag::upmsUtilsAlterBundleName_ = "com.example.test";
+    // keyAuthority
+    UDMF::UdmfClient::keyAuthority = "com.example.test";
+    bool ret = UDMFUtils::IsUdKeyCreateByCaller(callerTokenId, key);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.number: UriPermissionImplUdmfUtilsTest_IsUdKeyCreateByCaller_002
+ * @tc.desc: callerAuthority do not equal to keyAuthority.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UriPermissionImplUdmfUtilsTest, IsUdKeyCreateByCaller_002, TestSize.Level1)
+{
+    std::string key = "udmf://Picker/com.example.test/aaa";
+    uint32_t callerTokenId = 100001;
+    // callerAuthority
+    MyFlag::upmsUtilsGetAlterBundleNameByTokenIdRet_ = 0;
+    MyFlag::upmsUtilsAlterBundleName_ = "com.example.test";
+    // keyAuthority
+    UDMF::UdmfClient::keyAuthority = "com.example.test1";
+    bool ret = UDMFUtils::IsUdKeyCreateByCaller(callerTokenId, key);
+    EXPECT_EQ(ret, false);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

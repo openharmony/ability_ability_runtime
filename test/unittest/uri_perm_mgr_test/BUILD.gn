@@ -62,6 +62,7 @@ ohos_unittest("uri_perm_mgr_test") {
     "bundle_framework:appexecfwk_core",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "safwk:api_cache_manager",
     "storage_service:storage_manager_sa_proxy",
   ]

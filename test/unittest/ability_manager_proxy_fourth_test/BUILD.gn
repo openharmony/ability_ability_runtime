@@ -82,6 +82,7 @@ ohos_unittest("ability_manager_proxy_fourth_test") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
     "hisysevent:libhisysevent",
+    "window_manager:session_manager_lite",
   ]
 
   if (background_task_mgr_continuous_task_enable) {
