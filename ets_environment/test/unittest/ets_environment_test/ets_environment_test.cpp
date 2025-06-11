@@ -14,6 +14,7 @@
  */
 #include <cstdarg>
 #include <gtest/gtest.h>
+#include <dlfcn.h>
 #include <gtest/hwext/gtest-multithread.h>
 #include <string>
 
@@ -100,5 +101,72 @@ HWTEST_F(EtsEnvironmentTest, GetAniEnv_0100, TestSize.Level0)
     etsEnv->vmEntry_ = vMEntryOld;
 }
 
+/**
+ * @tc.name: LoadSymbolCreateVM_0100
+ * @tc.desc: Test LoadSymbolCreateVM when dlsym returns nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, LoadSymbolCreateVM_0100, TestSize.Level1)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    void* handle = dlopen(nullptr, RTLD_LAZY);
+    ASSERT_NE(handle, nullptr);
+    ETSRuntimeAPI apis = {};
+    bool result = etsEnv->LoadSymbolCreateVM(handle, apis);
+    dlclose(handle);
+    EXPECT_TRUE(result);
+    EXPECT_NE(apis.ANI_CreateVM, nullptr);
+}
+
+/**
+ * @tc.name: LoadSymbolCreateVM_0200
+ * @tc.desc: Test LoadSymbolCreateVM returns false when symbol is not found.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, LoadSymbolCreateVM_0200, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    void* invalidHandle = reinterpret_cast<void*>(0x1);
+    ETSRuntimeAPI apis = {};
+    bool result = etsEnv->LoadSymbolCreateVM(invalidHandle, apis);
+    EXPECT_FALSE(result);
+    EXPECT_EQ(apis.ANI_CreateVM, nullptr);
+}
+
+/**
+ * @tc.name: LoadSymbolANIGetCreatedVMs_0100
+ * @tc.desc: Test LoadSymbolANIGetCreatedVMs when symbol is not found.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, LoadSymbolANIGetCreatedVMs_0100, TestSize.Level1)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    void* handle = dlopen(nullptr, RTLD_LAZY);
+    ASSERT_NE(handle, nullptr);
+    ETSRuntimeAPI apis = {};
+    bool result = etsEnv->LoadSymbolANIGetCreatedVMs(handle, apis);
+    dlclose(handle);
+    EXPECT_TRUE(result);
+    EXPECT_NE(apis.ANI_GetCreatedVMs, nullptr);
+}
+
+/**
+ * @tc.name: LoadSymbolANIGetCreatedVMs_0200
+ * @tc.desc: Test LoadSymbolANIGetCreatedVMs returns false when symbol is not found.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, LoadSymbolANIGetCreatedVMs_0200, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    void* invalidHandle = reinterpret_cast<void*>(0x1);
+    ETSRuntimeAPI apis = {};
+    bool result = etsEnv->LoadSymbolANIGetCreatedVMs(invalidHandle, apis);
+    EXPECT_FALSE(result);
+    EXPECT_EQ(apis.ANI_GetCreatedVMs, nullptr);
+}
 } // namespace StsEnv
 } // namespace OHOS
