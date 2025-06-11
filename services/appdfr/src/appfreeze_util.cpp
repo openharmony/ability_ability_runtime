@@ -20,8 +20,9 @@
 #include <iomanip>
 #include <sstream>
 
-#include "file_ex.h"
 #include "directory_ex.h"
+#include "file_ex.h"
+#include "string_ex.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -31,6 +32,7 @@ namespace {
     constexpr mode_t DEFAULT_LOG_DIR_MODE = 0770;
     constexpr mode_t DEFAULT_LOG_FILE_MODE = 0644;
     constexpr uint32_t TWO_DECIMALS = 2;
+    constexpr size_t CPU_INFO_SIZE = 11;
 }
 
 AppfreezeUtil::AppfreezeUtil()
@@ -82,6 +84,38 @@ std::string AppfreezeUtil::RoundToTwoDecimals(float value)
     std::stringstream ss;
     ss<< std::fixed << std::setprecision(TWO_DECIMALS) << value;
     return ss.str();
+}
+
+int AppfreezeUtil::GetCpuCount()
+{
+    std::string procStatPath = "/proc/stat";
+    std::string content;
+    if (!LoadStringFromFile(procStatPath, content) || content.empty()) {
+        TAG_LOGW(AAFwkTag::APPDFR, "failed to read path:%{public}s, errno:%{public}d",
+            procStatPath.c_str(), errno);
+        return 0;
+    }
+    int cpuCount = 0;
+    std::istringstream iss(content);
+    std::string line;
+    while (std::getline(iss, line)) {
+        if (line.empty()) {
+            continue;
+        }
+        std::vector<std::string> splitStrs;
+        SplitStr(line, " ", splitStrs);
+        if (splitStrs.size() != CPU_INFO_SIZE) {
+            break;
+        }
+        if (splitStrs[0].find("cpu") != 0) {
+            TAG_LOGW(AAFwkTag::APPDFR, "not find cpu prefix, head: %{public}s.", splitStrs[0].c_str());
+            break;
+        }
+        cpuCount++;
+    }
+    cpuCount -= CPU_COUNT_SUBTRACT;
+    TAG_LOGD(AAFwkTag::APPDFR, "read: %{public}s to get cpu count:%{public}d.", procStatPath.c_str(), cpuCount);
+    return cpuCount;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
