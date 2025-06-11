@@ -62,6 +62,20 @@ public:
      */
     void NotifyExtensionDisconnected(const AbilityRuntime::ConnectionData& data);
 
+    /**
+     * notify observers that extension was suspended.
+     *
+     * @param data connection data.
+     */
+    void NotifyExtensionSuspended(const AbilityRuntime::ConnectionData& data);
+
+    /**
+     * notify observers that extension was suspended.
+     *
+     * @param data connection data.
+     */
+    void NotifyExtensionResumed(const AbilityRuntime::ConnectionData& data);
+
 #ifdef WITH_DLP
     /**
      * notify observers that dlp ability was opened.

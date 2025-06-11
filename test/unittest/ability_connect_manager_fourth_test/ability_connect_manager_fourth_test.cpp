@@ -977,5 +977,78 @@ HWTEST_F(AbilityConnectManagerFourthTest, QueryPreLoadUIExtensionRecordInner_002
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     TAG_LOGI(AAFwkTag::TEST, "QueryPreLoadUIExtensionRecordInner_002 end");
 }
+/*
+ * Feature: AbilityConnectManager
+ * Function: SuspendExtensionAbilityLocked
+ * SubFunction:
+ * FunctionPoints: SuspendExtensionAbilityLocked and ConnectAbilityLocked
+ * EnvConditions:NA
+ * CaseDescription:Verify the following:
+ * 1. Disconnect ability a nonexistent connect, disconnect failed
+ * 2. If the current connect ability state is not connected, disconnect fails
+ * 3. Verify the success of disconnect ability
+ */
+HWTEST_F(AbilityConnectManagerFourthTest, AAFWK_Kit_SuspendExtensionAbilityLocked_001, TestSize.Level1)
+{
+    ConnectManager()->SetTaskHandler(TaskHandler());
+    ConnectManager()->SetEventHandler(EventHandler());
+
+    auto callback = new AbilityConnectCallback();
+    auto result = ConnectManager()->SuspendExtensionAbilityLocked(callback);
+    EXPECT_EQ(result, OHOS::AAFwk::CONNECTION_NOT_EXIST);
+
+    auto result1 = ConnectManager()->ConnectAbilityLocked(abilityRequest_, callbackA_, nullptr);
+    EXPECT_EQ(0, result1);
+
+    auto result2 = ConnectManager()->SuspendExtensionAbilityLocked(callbackA_);
+    EXPECT_EQ(result2, OHOS::AAFwk::INVALID_CONNECTION_STATE);
+
+    auto list = ConnectManager()->GetConnectRecordListByCallback(callbackA_);
+    EXPECT_EQ(static_cast<int>(list.size()), 1);
+
+    for (auto& it : list) {
+        it->SetConnectState(ConnectionState::CONNECTED);
+    }
+
+    auto result3 = ConnectManager()->SuspendExtensionAbilityLocked(callbackA_);
+    EXPECT_EQ(result3, OHOS::ERR_OK);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: ResumeExtensionAbilityLocked
+ * SubFunction:
+ * FunctionPoints: ResumeExtensionAbilityLocked
+ * EnvConditions:NA
+ * CaseDescription:Verify the following:
+ * 1. If the current connect ability state is not connected, disconnect fails
+ * 2. Verify the success of ResumeExtensionAbilityLocked ability
+ */
+HWTEST_F(AbilityConnectManagerFourthTest, AAFWK_Kit_ResumeExtensionAbilityLocked_001, TestSize.Level1)
+{
+    ConnectManager()->SetTaskHandler(TaskHandler());
+    ConnectManager()->SetEventHandler(EventHandler());
+
+    auto callback = new AbilityConnectCallback();
+
+    auto result1 = ConnectManager()->ConnectAbilityLocked(abilityRequest_, callbackA_, nullptr);
+    EXPECT_EQ(0, result1);
+
+    auto result2 = ConnectManager()->ResumeExtensionAbilityLocked(callbackA_);
+    EXPECT_EQ(result2, OHOS::AAFwk::INVALID_CONNECTION_STATE);
+
+    auto list = ConnectManager()->GetConnectRecordListByCallback(callbackA_);
+    EXPECT_EQ(static_cast<int>(list.size()), 1);
+
+
+    for (auto& it : list) {
+        it->SetConnectState(ConnectionState::CONNECTED);
+    }
+
+    ConnectManager()->SuspendExtensionAbilityLocked(callbackA_);
+
+    auto result3 = ConnectManager()->ResumeExtensionAbilityLocked(callbackA_);
+    EXPECT_EQ(result3, OHOS::ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

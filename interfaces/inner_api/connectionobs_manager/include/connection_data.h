@@ -44,6 +44,7 @@ struct ConnectionData : public Parcelable {
      */
     static ConnectionData *Unmarshalling(Parcel &parcel);
 
+    bool isSuspended = false;
     int32_t extensionPid = -1;
     int32_t extensionUid = 0;
     int32_t callerUid;

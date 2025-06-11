@@ -60,6 +60,10 @@ public:
     {}
     void OnExtensionDisconnected(const ConnectionData& data) override
     {}
+    void OnExtensionSuspended(const ConnectionData &data) override
+    {}
+    void OnExtensionResumed(const ConnectionData &data) override
+    {}
 #ifdef WITH_DLP
     void OnDlpAbilityOpened(const DlpStateData& data) override
     {}

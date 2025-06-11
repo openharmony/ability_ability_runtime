@@ -48,6 +48,20 @@ public:
      */
     virtual void OnExtensionDisconnected(const ConnectionData &data) = 0;
 
+    /**
+     * called when extension was suspended.
+     *
+     * @param data connection relationship data.
+     */
+    virtual void OnExtensionSuspended(const ConnectionData &data) = 0;
+
+    /**
+     * called when extension was resumed.
+     *
+     * @param data connection relationship data.
+     */
+    virtual void OnExtensionResumed(const ConnectionData &data) = 0;
+
 #ifdef WITH_DLP
     /**
      * called when dlp ability was started.
@@ -79,6 +93,12 @@ public:
         ON_DLP_ABILITY_CLOSED,
 #endif // WITH_DLP
 
+        // ipc id for OnExtensionSuspended
+        ON_EXTENSION_SUSPENDED,
+
+        // ipc id for OnExtensionResumed
+        ON_EXTENSION_RESUMED,
+        
         // maximum of enum
         CMD_MAX
     };

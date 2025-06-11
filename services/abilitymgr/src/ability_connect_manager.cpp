@@ -821,6 +821,74 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
     return result;
 }
 
+int32_t AbilityConnectManager::SuspendExtensionAbilityLocked(const sptr<IAbilityConnection> &connect)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::lock_guard guard(serialMutex_);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
+
+    // 1. check whether callback was connected.
+    ConnectListType connectRecordList;
+    GetConnectRecordListFromMap(connect, connectRecordList);
+    if (connectRecordList.empty()) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "recordList empty");
+        return CONNECTION_NOT_EXIST;
+    }
+
+    // 2. schedule suspend to target service
+    int result = ERR_OK;
+    for (auto &connectRecord : connectRecordList) {
+        if (connectRecord) {
+            if (connectRecord->GetCallerTokenId() != IPCSkeleton::GetCallingTokenID() &&
+                static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID() != IPCSkeleton::GetCallingTokenID())) {
+                TAG_LOGW(AAFwkTag::SERVICE_EXT, "inconsistent caller");
+                continue;
+            }
+
+            result = connectRecord->SuspendExtensionAbility();
+            if (result != ERR_OK) {
+                TAG_LOGE(AAFwkTag::SERVICE_EXT, "fail , ret = %{public}d", result);
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+int32_t AbilityConnectManager::ResumeExtensionAbilityLocked(const sptr<IAbilityConnection> &connect)
+{
+    std::lock_guard guard(serialMutex_);
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
+
+    // 1. check whether callback was connected.
+    ConnectListType connectRecordList;
+    GetConnectRecordListFromMap(connect, connectRecordList);
+    if (connectRecordList.empty()) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "recordList empty");
+        return CONNECTION_NOT_EXIST;
+    }
+
+    // 2. schedule suspend to target service
+    int result = ERR_OK;
+    for (auto &connectRecord : connectRecordList) {
+        if (connectRecord) {
+            if (connectRecord->GetCallerTokenId() != IPCSkeleton::GetCallingTokenID() &&
+                static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID() != IPCSkeleton::GetCallingTokenID())) {
+                TAG_LOGW(AAFwkTag::SERVICE_EXT, "inconsistent caller");
+                continue;
+            }
+
+            result = connectRecord->ResumeExtensionAbility();
+            if (result != ERR_OK) {
+                TAG_LOGE(AAFwkTag::SERVICE_EXT, "fail , ret = %{public}d", result);
+                break;
+            }
+        }
+    }
+    return result;
+}
+
 void AbilityConnectManager::TerminateRecord(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "call");
