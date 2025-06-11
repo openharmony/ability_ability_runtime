@@ -73,7 +73,7 @@ void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const Fau
             .count();
     bool timeout = now - lastFreezeTime > TIMEOUT_INTERVAL_MS;
     TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "%{public}s is %{public}s.pid:%{public}s lastFreezePid:%{public}s,timeout %{public}llu", bundleName.c_str(),
+        "%{public}s is %{public}s.pid:%{public}s lastFreezePid:%{public}s,timeout %{public}lu", bundleName.c_str(),
         focusFlag ? "focus" : "not focus", pid.c_str(), lastFreezePid.c_str(), now - lastFreezeTime);
     bool isPullUpBox =
         isAppFreezeDialog && (pid != lastFreezePid || (pid == lastFreezePid && timeout && !isDialogExist));
