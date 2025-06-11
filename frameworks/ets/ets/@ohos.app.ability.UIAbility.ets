@@ -14,6 +14,7 @@
  */
 
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
+import UIAbilityContext from 'application.UIAbilityContext';
 import Want from '@ohos.app.ability.Want';
 import window from '@ohos.window';
 import { AbilityUtils } from './utils/AbilityUtils';
@@ -43,6 +44,7 @@ export default class UIAbility {
     return false;
   }
 
+  context: UIAbilityContext = new UIAbilityContext();
   launchWant: Want = new Want();
   lastRequestWant: Want = new Want();
 

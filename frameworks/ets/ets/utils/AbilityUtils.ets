@@ -12,12 +12,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import { BusinessError, AsyncCallback } from '@ohos.base';
 import hilog from '@ohos.hilog'
 
 const DOMAIN_ID = 0xD001300;
 const TAG = 'AbilityUtils';
 const LEVEL = 100;
+
+export default class AsyncCallbackWrapper<T> {
+  private myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
+
+  constructor(myFun:AsyncCallback<T, void>){
+    this.myFun_ = myFun;
+  }
+
+  invoke(err: BusinessError<void>, data: T) : void {
+    this.myFun_(err, data);
+  }
+}
 
 export class AbilityUtils {
   public static getClassType(obj: Object): ClassType | undefined {

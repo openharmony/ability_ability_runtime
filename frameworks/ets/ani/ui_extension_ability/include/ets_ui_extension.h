@@ -177,10 +177,8 @@ public:
     void ConfigurationUpdated();
 
 private:
-    virtual void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want,
-        const std::shared_ptr<OHOSApplication> &application);
-    ani_object CreateETSContext(ani_env *env, std::shared_ptr<UIExtensionContext> context,
-        int32_t screenMode, const std::shared_ptr<OHOSApplication> &application);
+    virtual void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want);
+    ani_object CreateETSContext(ani_env *env, std::shared_ptr<UIExtensionContext> context, int32_t screenMode);
 
     bool CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
 
