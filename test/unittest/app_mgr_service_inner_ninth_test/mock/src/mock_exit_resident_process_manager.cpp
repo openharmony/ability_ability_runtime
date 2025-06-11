@@ -88,6 +88,7 @@ int32_t ExitResidentProcessManager::HandleNoRequireBigMemoryOptimization (
 void ExitResidentProcessManager::QueryExitBundleInfos(const std::vector<ExitResidentProcessInfo> &exitProcessInfos,
     std::vector<AppExecFwk::BundleInfo>& exitBundleInfos)
 {
+    AAFwk::MyStatus::GetInstance().queryExitBundleInfos_called_ = true;
 }
 
 bool ExitResidentProcessManager::IsKilledForUpgradeWeb(const std::string &bundleName) const
