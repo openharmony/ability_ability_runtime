@@ -3608,10 +3608,11 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
             std::string errMsg;
             NotifySCBPendingActivation(sessionInfo, request, errMsg);
             sessionInfo->want.RemoveAllFd();
-            return;
         }
-        DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(request.want,
-            request.abilityInfo, specifiedRequest.requestId);
+        if (!specifiedRequest.isCold) {
+            DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(request.want,
+                request.abilityInfo, specifiedRequest.requestId);
+        }
     }
 
     auto timeoutTask = [requestId = specifiedRequest.requestId, wThis = weak_from_this()]() {

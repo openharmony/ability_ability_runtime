@@ -46,6 +46,7 @@
 #include "hilog_tag_wrapper.h"
 #include "mock_my_flag.h"
 #include "mock_permission_verification.h"
+#include "mock_app_mgr_service.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -57,6 +58,7 @@ namespace {
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 #endif // WITH_DLP
 constexpr int32_t TEST_UID = 20010001;
+constexpr int32_t TIMEOUT_VALUE = 11 * 1000 * 1000;
 };
 class UIAbilityLifecycleManagerThirdTest : public testing::Test {
 public:
@@ -227,6 +229,35 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, FindRecordFromTmpMap_001, TestSize.
 }
 
 /**
+ * @tc.name: FindRecordFromTmpMap_002
+ * @tc.desc: FindRecordFromTmpMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, FindRecordFromTmpMap_002, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    
+    AbilityRequest abilityRequest;
+    auto ret = mgr->FindRecordFromTmpMap(abilityRequest);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: FindRecordFromTmpMap_003
+ * @tc.desc: FindRecordFromTmpMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, FindRecordFromTmpMap_003, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    
+    AbilityRequest abilityRequest;
+    mgr->tmpAbilityMap_.emplace(0, nullptr);
+    auto ret = mgr->FindRecordFromTmpMap(abilityRequest);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
  * @tc.name: CheckSessionInfo_001
  * @tc.desc: CheckSessionInfo
  * @tc.type: FUNC
@@ -298,6 +329,143 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifySCBToStartUIAbility_003, Test
     auto ret = mgr->NotifySCBToStartUIAbility(abilityRequest);
 
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_NotifySCBToStartUIAbility_004
+ * @tc.desc: NotifySCBToStartUIAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifySCBToStartUIAbility_004, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
+
+    auto ret = mgr->NotifySCBToStartUIAbility(abilityRequest);
+
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_PostCallTimeoutTask_001
+ * @tc.desc: PostCallTimeoutTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, PostCallTimeoutTask_001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    mgr->PostCallTimeoutTask(nullptr);
+    EXPECT_NE(mgr, nullptr);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_PostCallTimeoutTask_002
+ * @tc.desc: PostCallTimeoutTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, PostCallTimeoutTask_002, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    mgr->PostCallTimeoutTask(abilityRecord);
+    abilityRecord.reset();
+    usleep(TIMEOUT_VALUE);
+    EXPECT_NE(mgr, nullptr);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_PostCallTimeoutTask_003
+ * @tc.desc: PostCallTimeoutTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, PostCallTimeoutTask_003, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    mgr->tmpAbilityMap_.emplace(0, abilityRecord);
+    mgr->PostCallTimeoutTask(abilityRecord);
+    usleep(TIMEOUT_VALUE);
+    EXPECT_TRUE(mgr->tmpAbilityMap_.empty());
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedRequest_001
+ * @tc.desc: StartSpecifiedRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    SpecifiedRequest specifiedRequest(0, AbilityRequest());
+    mgr->StartSpecifiedRequest(specifiedRequest);
+    EXPECT_TRUE(specifiedRequest.isCold);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedRequest_002
+ * @tc.desc: StartSpecifiedRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_002, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    SpecifiedRequest specifiedRequest(0, AbilityRequest());
+    specifiedRequest.specifiedProcessState = SpecifiedProcessState::STATE_PROCESS;
+    mgr->StartSpecifiedRequest(specifiedRequest);
+    EXPECT_FALSE(specifiedRequest.isCold);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedRequest_003
+ * @tc.desc: StartSpecifiedRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_003, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    SpecifiedRequest specifiedRequest(0, AbilityRequest());
+    specifiedRequest.specifiedProcessState = SpecifiedProcessState::STATE_ABILITY;
+    mgr->StartSpecifiedRequest(specifiedRequest);
+    EXPECT_FALSE(specifiedRequest.isCold);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedRequest_004
+ * @tc.desc: StartSpecifiedRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_004, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    SpecifiedRequest specifiedRequest(0, AbilityRequest());
+    specifiedRequest.preCreateProcessName = true;
+    mgr->StartSpecifiedRequest(specifiedRequest);
+    EXPECT_TRUE(specifiedRequest.isCold);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedRequest_005
+ * @tc.desc: StartSpecifiedRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_005, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    SpecifiedRequest specifiedRequest(0, AbilityRequest());
+    auto originAppMgr = AppMgrUtil::appMgr_;
+    auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
+    AppMgrUtil::appMgr_ = appmgr;
+    EXPECT_CALL(*appmgr, IsSpecifiedModuleLoaded)
+        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result) {
+            result = true;
+            return 0;
+        });
+    mgr->StartSpecifiedRequest(specifiedRequest);
+    EXPECT_FALSE(specifiedRequest.isCold);
+    AppMgrUtil::appMgr_ = originAppMgr;
 }
 
 /**
