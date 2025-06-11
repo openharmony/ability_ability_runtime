@@ -946,6 +946,18 @@ public:
      */
     void NotifyAppStatus(const std::string &bundleName, int32_t appIndex, const std::string &eventData);
 
+    /**
+     * Notify application status by event name.
+     *
+     * @param bundleName Indicates the name of the bundle.
+     * @param eventName Indicates the event defined by CommonEventSupport
+     * @param want Want contains information of the event wish to notify.
+     *
+     * @return Returns 0 if the event is normal, 1 if the event needs to be managed.
+     */
+    int32_t NotifyAppStatusByCommonEventName(const std::string &bundleName, const std::string &eventName,
+        const Want &want);
+
     int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation");
 
     int32_t KillSubProcessBypidInner(const pid_t pid, const std::string &reason,

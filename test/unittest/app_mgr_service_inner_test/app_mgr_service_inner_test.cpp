@@ -2291,6 +2291,33 @@ HWTEST_F(AppMgrServiceInnerTest, NotifyAppStatusByCallerUid_001, TestSize.Level2
 }
 
 /**
+ * @tc.name: NotifyAppStatusByCommonEventName_001
+ * @tc.desc: notify app status by special common event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, NotifyAppStatusByCommonEventName_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "NotifyAppStatusByCommonEventName_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "test_bundle_name";
+    std::string eventData = "usual.event.PACKAGE_DATA_CLEARED";
+    AAFwk::Want want;
+    int32_t ret = appMgrServiceInner->NotifyAppStatusByCommonEventName(bundleName, eventData, want);
+    EXPECT_EQ(ret, 1);
+
+    eventData = "test_event_name";
+    ret = appMgrServiceInner->NotifyAppStatusByCommonEventName(bundleName, eventData, want);
+    EXPECT_EQ(ret, 0);
+
+    eventData = "usual.event.PACKAGE_RESTARTED";
+    ret = appMgrServiceInner->NotifyAppStatusByCommonEventName(bundleName, eventData, want);
+    EXPECT_EQ(ret, 1);
+    TAG_LOGI(AAFwkTag::TEST, "NotifyAppStatusByCommonEventName_001 end");
+}
+
+/**
  * @tc.name: RegisterApplicationStateObserver_001
  * @tc.desc: register application state observer.
  * @tc.type: FUNC
