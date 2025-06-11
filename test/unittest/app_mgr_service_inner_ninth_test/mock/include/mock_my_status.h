@@ -203,7 +203,51 @@ public:
     int debugAppCalledTimes_ = 0;
     int addModuleCalledTimes_ = 0;
     bool getStateCalled_ = false;
-    void resetRunningRecordFunctionFlag()
+    bool getBundleNamesCalled_ = false;
+    bool isStartSpecifiedAbility_ = false;
+    bool isNewProcessRequest_ = false;
+    int getSpecifiedRequestIdCall_ = 0;
+    bool setStateCalled_ = false;
+    int resetSpecifiedRequestCall_ = 0;
+    bool getBundleNameCalled_ = false;
+    int removeChildProcessRecordCall_ = 0;
+    int getParentAppRecordCall_ = 0;
+    bool getAbilityRunningRecordByTokenCalled_ = false;
+    bool setApplicationClientCalled_ = false;
+    bool getRecordIdCalled_ = false;
+    bool isGetAppRunningByBundleName_ = false;
+    bool getDialogEnabled_ = false;
+    int getCallingPid_ = 0;
+    bool setAssertionPauseFlagCalled_ = false;
+    bool getAbilitiesCalled_ = false;
+    bool notifyAppPreCacheCalled_ = false;
+    bool notifyStartResidentProcessCalled_ = false;
+    bool notifyStartKeepAliveProcessCalled_ = false;
+    int getCallingUidCalledTimes_ = 0;
+    int getAppRunningRecordMapCall_ = 0;
+    bool setKeepAliveEnableStateCalled_ = false;
+    bool setKeepAliveDkvCalled_ = false;
+    bool isKeepAliveApp_ = false;
+    bool getUidCalled_ = false;
+    bool queryExitBundleInfos_called_ = false;
+    bool updateInstanceKeyBySpecifiedIdCalled_ = false;
+    bool addUIExtensionBindItemCalled_ = false;
+    bool killProcessByPidCalled_ = false;
+    pid_t killProcessByPid_pid_ = 0;
+    bool setUserRequestCleaningCalled_ = false;
+    bool isAllAbilityReadyToCleanedByUserRequestCalled_ = false;
+    bool isAllAbilityReadyToCleanedByUserRequest_ = false;
+    bool queryUIExtensionBindItemByIdCalled_ = false;
+    bool removeUIExtensionBindItemByIdCalled_ = false;
+    int32_t queryUIExtensionBindItemByIdResult_ = ERR_OK;
+    int32_t notifyProcessBind_ = 0;
+
+    bool getAbilityInfoCalled_ = false;
+    bool isKeepAliveAppCalled_ = false;
+    bool getUIExtensionBindAbilityIdCalled_ = false;
+    int32_t queryUIExtensionBindItemById_ = static_cast<int32_t>(ERR_INVALID_VALUE);
+    bool getAbilityRunningRecordByTokenCalledAppRecord_ = false;
+    void resetRunningRecordFunctionFlagExtend()
     {
         appRunningRecordSetAppDeathRecipientCalled_ = false;
         getPidCall_ = false;
@@ -217,6 +261,57 @@ public:
         debugAppCalledTimes_ = 0;
         addModuleCalledTimes_ = 0;
         getStateCalled_ = false;
+        getBundleNamesCalled_ = false;
+        isStartSpecifiedAbility_ = false;
+        isNewProcessRequest_ = false;
+        getSpecifiedRequestIdCall_ = 0;
+        getNewProcessRequestIdCall_ = 0;
+        setStateCalled_ = false;
+        resetNewProcessRequestCall_ = 0;
+        resetSpecifiedRequestCall_ = 0;
+        getBundleNameCalled_ = false;
+        getChildProcessRecordByPidCall_ = 0;
+        getAppRunningProcessPidCall_ = 0;
+        removeChildProcessRecordCall_ = 0;
+        getParentAppRecordCall_ = 0;
+        getAbilityRunningRecordByTokenCalled_ = false;
+        getAbilityRunningRecordByTokenCalledAppRecord_ = false;
+        setApplicationClientCalled_ = false;
+        getRecordIdCalled_ = false;
+        isGetAppRunningByBundleName_ = false;
+        getDialogEnabled_ = false;
+        getCallingPid_ = 0;
+    }
+    void resetRunningRecordFunctionFlag()
+    {
+        resetRunningRecordFunctionFlagExtend();
+        setAssertionPauseFlagCalled_ = false;
+        getAbilitiesCalled_ = false;
+        notifyAppPreCacheCalled_ = false;
+        notifyStartResidentProcessCalled_ = false;
+        notifyStartKeepAliveProcessCalled_ = false;
+        getCallingUidCalledTimes_ = 0;
+        getAppRunningRecordMapCall_ = 0;
+        setKeepAliveEnableStateCalled_ = false;
+        setKeepAliveDkvCalled_ = false;
+        isKeepAliveApp_ = false;
+        getUidCalled_ = false;
+        queryExitBundleInfos_called_ = false;
+        updateInstanceKeyBySpecifiedIdCalled_ = false;
+        addUIExtensionBindItemCalled_ = false;
+        killProcessByPidCalled_ = false;
+        killProcessByPid_pid_ = 0;
+        setUserRequestCleaningCalled_ = false;
+        isAllAbilityReadyToCleanedByUserRequestCalled_ = false;
+        isAllAbilityReadyToCleanedByUserRequest_ = false;
+        queryUIExtensionBindItemByIdCalled_ = false;
+        removeUIExtensionBindItemByIdCalled_ = false;
+        queryUIExtensionBindItemByIdResult_ = ERR_OK;
+        notifyProcessBind_ = 0;
+        getAbilityInfoCalled_ = false;
+        isKeepAliveAppCalled_ = false;
+        getUIExtensionBindAbilityIdCalled_ = false;
+        queryUIExtensionBindItemById_ = static_cast<int32_t>(ERR_INVALID_VALUE);
     }
 
     // StartAbility tracking variables
@@ -258,11 +353,11 @@ public:
         addModuleCalled_ = false;
         getModuleRecordByModuleNameCalled_ = false;
     }
-
-    bool getAbilityRunningRecordByTokenCalled_ = false;
+    std::shared_ptr<AppExecFwk::AppRunningRecord> runningRecord_ = nullptr;
     void resetModuleRunningFlags()
     {
         getAbilityRunningRecordByTokenCalled_ = false;
+        runningRecord_ = nullptr;
     }
 private:
     MyStatus() = default;

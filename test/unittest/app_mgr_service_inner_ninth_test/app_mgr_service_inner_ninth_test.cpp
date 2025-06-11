@@ -48,7 +48,13 @@ constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state
 constexpr const char* DEBUG_APP = "debugApp";
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 static int g_scheduleLoadChildCall = 0;
-
+constexpr const char* UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbilityId";
+constexpr const char* UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
+constexpr const char* UIEXTENSION_HOST_PID = "ability.want.params.uiExtensionHostPid";
+constexpr const char* UIEXTENSION_HOST_UID = "ability.want.params.uiExtensionHostUid";
+constexpr const char* UIEXTENSION_HOST_BUNDLENAME = "ability.want.params.uiExtensionHostBundleName";
+constexpr const char* UIEXTENSION_BIND_ABILITY_ID = "ability.want.params.uiExtensionBindAbilityId";
+constexpr const char* UIEXTENSION_NOTIFY_BIND = "ohos.uiextension.params.notifyProcessBind";
 namespace OHOS {
 namespace AppExecFwk {
 class AppMgrServiceInnerNinthTest : public testing::Test {
@@ -57,55 +63,6 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
-};
-class MyKiaInterceptor : public IKiaInterceptor {
-public:
-    int OnIntercept(AAFwk::Want &want) override
-    {
-        return 0;
-    }
-
-    sptr<IRemoteObject> AsObject() override
-    {
-        return nullptr;
-    }
-};
-class MyRenderStateObserver : public IRenderStateObserver {
-public:
-    void OnRenderStateChanged(const RenderStateData &renderStateData) override {}
-    sptr<IRemoteObject> AsObject() override
-    {
-        return nullptr;
-    }
-};
-class MyChildScheduler : public IChildScheduler {
-public:
-    bool ScheduleLoadChild() override
-    {
-        g_scheduleLoadChildCall++;
-        return false;
-    }
-    bool ScheduleExitProcessSafely() override
-    {
-        return false;
-    }
-    bool ScheduleRunNativeProc(const sptr<IRemoteObject> &mainProcessCb) override
-    {
-        return false;
-    }
-    sptr<IRemoteObject> AsObject() override
-    {
-        return nullptr;
-    }
-};
-class MyRenderScheduler : public IRenderScheduler {
-public:
-    void NotifyBrowserFd(int32_t ipcFd, int32_t sharedFd,
-        int32_t crashFd, sptr<IRemoteObject> browser) override {}
-    sptr<IRemoteObject> AsObject() override
-    {
-        return nullptr;
-    }
 };
 
 class MyAbilityDebugResponse : public IAbilityDebugResponse {
@@ -143,28 +100,29 @@ public:
     }
 };
 
-class MyRemoteObject : public IRemoteStub<IAbilityConnection> {
+class MockIAppStateCallback : public IAppStateCallback {
 public:
-    static sptr<MyRemoteObject> GetInstance()
+    MockIAppStateCallback() = default;
+    virtual ~MockIAppStateCallback() = default;
+    MOCK_METHOD1(OnAppStateChanged, void(const AppProcessData &appProcessData));
+    MOCK_METHOD2(OnAbilityRequestDone, void(const sptr<IRemoteObject> &token, const AbilityState state));
+    void NotifyAppPreCache(int32_t pid, int32_t userId) override
     {
-        static sptr<MyRemoteObject> instance = new MyRemoteObject();
-        return instance;
+        AAFwk::MyStatus::GetInstance().notifyAppPreCacheCalled_ = true;
     }
-
-    void OnAbilityConnectDone(const AppExecFwk::ElementName& element,
-        const sptr<IRemoteObject>& remoteObject, int resultCode) override
-    {}
-
-    void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) override
-    {}
-
-private:
-    MyRemoteObject() = default;
-    ~MyRemoteObject() override = default;
-    MyRemoteObject(const MyRemoteObject&) = delete;
-    MyRemoteObject& operator=(const MyRemoteObject&) = delete;
+    void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override
+    {
+        AAFwk::MyStatus::GetInstance().notifyStartResidentProcessCalled_ = true;
+    }
+    void NotifyStartKeepAliveProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override
+    {
+        AAFwk::MyStatus::GetInstance().notifyStartKeepAliveProcessCalled_ = true;
+    }
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
 };
-    
 void AppMgrServiceInnerNinthTest::SetUpTestCase() {}
 
 void AppMgrServiceInnerNinthTest::TearDownTestCase() {}
@@ -299,6 +257,34 @@ HWTEST_F(AppMgrServiceInnerNinthTest, PreloadApplication_005, TestSize.Level1)
     int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
     EXPECT_EQ(ret, AAFwk::ERR_NOT_ALLOW_PRELOAD_BY_RSS);
     TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_005 end");
+}
+
+/**
+ * @tc.name: PreloadApplication_006
+ * @tc.desc: test PreloadApplication
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, PreloadApplication_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_006 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    
+    AAFwk::MyStatus::GetInstance().judgeCallerIsAllowed_ = false;
+    AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = true;
+    AAFwk::MyStatus::GetInstance().isSACall_ = false;
+    AAFwk::MyStatus::GetInstance().isLogoutUser_ = false;
+    AAFwk::MyStatus::GetInstance().allowPreload_ = true;
+    AAFwk::MyStatus::GetInstance().generatePreloadRequestRet_ = ERR_INVALID_VALUE;
+    appMgrServiceInner->appPreloader_ = std::make_shared<AppPreloader>(nullptr);
+
+    std::string bundleName = "com.test.preload";
+    int32_t userId = 100;
+    PreloadMode preloadMode = PreloadMode::PRE_MAKE;
+    int32_t appIndex = 0;
+    
+    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+    EXPECT_EQ(ret, AAFwk::ERR_NOT_SYSTEM_APP);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplication_006 end");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
