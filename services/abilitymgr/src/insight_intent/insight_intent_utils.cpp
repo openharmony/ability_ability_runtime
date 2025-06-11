@@ -138,7 +138,7 @@ uint32_t InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(
 }
 
 uint32_t InsightIntentUtils::ConvertExtractInsightIntentInfo(
-    ExtractInsightIntentInfo &intentInfo, InsightIntentInfoForQuery &queryInfo)
+    ExtractInsightIntentInfo &intentInfo, InsightIntentInfoForQuery &queryInfo, bool getEntity)
 {
     ConvertExtractInsightIntentGenericInfo(intentInfo.genericInfo, queryInfo);
     queryInfo.domain = intentInfo.domain;
@@ -152,6 +152,37 @@ uint32_t InsightIntentUtils::ConvertExtractInsightIntentInfo(
     for (auto &keyword : intentInfo.keywords) {
         queryInfo.keywords.emplace_back(keyword);
     }
+
+    if (getEntity) {
+        for (auto &entityInfo : intentInfo.entities) {
+            EntityInfoForQuery insightInfo;
+            insightInfo.className = entityInfo.className;
+            insightInfo.entityCategory = entityInfo.entityCategory;
+            insightInfo.entityId = entityInfo.entityId;
+            insightInfo.parameters = entityInfo.parameters;
+            insightInfo.parentClassName = entityInfo.parentClassName;
+            queryInfo.entities.emplace_back(insightInfo);
+        }
+    }
+
+    return ERR_OK;
+}
+
+uint32_t InsightIntentUtils::ConvertExtractInsightIntentEntityInfo(
+    ExtractInsightIntentInfo &intentInfo, InsightIntentInfoForQuery &queryInfo)
+{
+    ConvertExtractInsightIntentGenericInfo(intentInfo.genericInfo, queryInfo);
+
+    for (auto &entityInfo : intentInfo.entities) {
+        EntityInfoForQuery insightInfo;
+        insightInfo.className = entityInfo.className;
+        insightInfo.entityCategory = entityInfo.entityCategory;
+        insightInfo.entityId = entityInfo.entityId;
+        insightInfo.parameters = entityInfo.parameters;
+        insightInfo.parentClassName = entityInfo.parentClassName;
+        queryInfo.entities.emplace_back(insightInfo);
+    }
+
     return ERR_OK;
 }
 } // namespace AbilityRuntime

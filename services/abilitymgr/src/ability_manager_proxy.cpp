@@ -6468,7 +6468,7 @@ int32_t AbilityManagerProxy::GetAllInsightIntentInfo(
         TAG_LOGE(AAFwkTag::INTENT, "write flag fail");
         return ERR_INVALID_VALUE;
     }
-    
+
     int error = SendRequest(
         AbilityManagerInterfaceCode::GET_ALL_INSIGHT_INTENT_INFO, data, reply, option);
     if (error != NO_ERROR) {
@@ -6510,7 +6510,7 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByBundleName(
         TAG_LOGE(AAFwkTag::INTENT, "write bundleName fail");
         return ERR_INVALID_VALUE;
     }
-    
+
     int error = SendRequest(
         AbilityManagerInterfaceCode::GET_INSIGHT_INTENT_INFO_BY_BUNDLE_NAME, data, reply, option);
     if (error != NO_ERROR) {
@@ -6564,7 +6564,7 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByIntentName(
         TAG_LOGE(AAFwkTag::INTENT, "write intentName fail");
         return ERR_INVALID_VALUE;
     }
-    
+
     int error = SendRequest(
         AbilityManagerInterfaceCode::GET_INSIGHT_INTENT_INFO_BY_INTENT_NAME, data, reply, option);
     if (error != NO_ERROR) {

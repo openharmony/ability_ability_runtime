@@ -171,7 +171,9 @@ private:
         GetInsightIntentFlag flag;
         if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], flag) ||
             (flag != GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT &&
-            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT)) {
+            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT &&
+            flag != (GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO) &&
+            flag != (GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO))) {
             TAG_LOGE(AAFwkTag::INTENT, "Parse flag failed");
             ThrowInvalidParamError(env, "Parse param flag failed, flag must be GetInsightIntentFlag.");
             return CreateJsUndefined(env);
@@ -212,7 +214,9 @@ private:
         GetInsightIntentFlag flag;
         if (!ConvertFromJsValue(env, info.argv[INDEX_ONE], flag) ||
             (flag != GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT &&
-            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT)) {
+            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT &&
+            flag != (GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO) &&
+            flag != (GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO))) {
             TAG_LOGE(AAFwkTag::INTENT, "Parse flag failed");
             ThrowInvalidParamError(env, "Parse param flag failed, flag must be GetInsightIntentFlag.");
             return CreateJsUndefined(env);
@@ -266,7 +270,9 @@ private:
         GetInsightIntentFlag flag;
         if (!ConvertFromJsValue(env, info.argv[INDEX_THREE], flag) ||
             (flag != GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT &&
-            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT)) {
+            flag != GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT &&
+            flag != (GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO) &&
+            flag != (GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT | GetInsightIntentFlag::GET_ENTITY_INFO))) {
             TAG_LOGE(AAFwkTag::INTENT, "Parse flag failed");
             ThrowInvalidParamError(env, "Parse param flag failed, flag must be GetInsightIntentFlag.");
             return CreateJsUndefined(env);
@@ -332,6 +338,8 @@ static napi_value InitGetInsightIntentFlagObject(napi_env env)
         env, napiObject, "GET_FULL_INSIGHT_INTENT", GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT));
     NAPI_CALL(env, SetEnumItem(
         env, napiObject, "GET_SUMMARY_INSIGHT_INTENT", GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT));
+    NAPI_CALL(env, SetEnumItem(
+        env, napiObject, "GET_ENTITY_INFO", GetInsightIntentFlag::GET_ENTITY_INFO));
 
     return napiObject;
 }
