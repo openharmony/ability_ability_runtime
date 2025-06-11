@@ -30,8 +30,6 @@ class UriUtils {
 public:
     static UriUtils &GetInstance();
 
-    int32_t CheckNonImplicitShareFileUri(const Want &want, int32_t userId, uint32_t specifyTokenId);
-
     std::vector<Uri> GetPermissionedUriList(const std::vector<std::string> &uriVec,
         const std::vector<bool> &checkResults, Want &want);
 
@@ -75,11 +73,6 @@ private:
     bool IsSandboxApp(uint32_t tokenId);
 
     std::vector<Uri> GetUriListFromWantDms(Want &want);
-
-    int32_t CheckNonImplicitShareFileUriInner(uint32_t callerTokenId, const std::string &targetBundleName,
-        int32_t userId);
-
-    bool IsSystemApplication(const std::string &bundleName, int32_t userId);
 
     void PublishFileOpenEvent(const Want &want);
 
