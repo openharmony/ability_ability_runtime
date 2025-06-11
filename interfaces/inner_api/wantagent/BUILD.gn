@@ -56,6 +56,8 @@ ohos_shared_library("wantagent_innerkits") {
 
   sources = [
     "src/completed_dispatcher.cpp",
+    "src/local_pending_want.cpp",
+    "src/local_want_agent_info.cpp",
     "src/pending_want.cpp",
     "src/trigger_info.cpp",
     "src/want_agent.cpp",

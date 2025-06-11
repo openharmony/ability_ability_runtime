@@ -238,6 +238,32 @@ int32_t PendingWantManager::SendWantSender(sptr<IWantSender> target,  SenderInfo
     return record->SenderInner(senderInfo);
 }
 
+int32_t PendingWantManager::SendLocalWantSender(const SenderInfo &senderInfo)
+{
+    int32_t result = NO_ERROR;
+    switch (senderInfo.operType) {
+        case static_cast<int32_t>(OperationType::START_ABILITY): {
+            result = PendingWantStartAbility(senderInfo.want, senderInfo.startOptions,
+                senderInfo.callerToken, -1, senderInfo.uid, senderInfo.tokenId);
+            break;
+        }
+        case static_cast<int32_t>(OperationType::START_SERVICE): {
+            result = PendingWantStartAbility(senderInfo.want, nullptr,
+                senderInfo.callerToken, -1, senderInfo.uid, senderInfo.tokenId);
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+    bool sendFinish = (senderInfo.finishedReceiver != nullptr);
+    if (sendFinish && result != ERR_WANTAGENT_CANCELED) {
+        WantParams wantParams = {};
+        senderInfo.finishedReceiver->PerformReceive(senderInfo.want, senderInfo.code, "", wantParams, false, false, 0);
+    }
+    return result;
+}
+
 void PendingWantManager::CancelWantSender(const bool isSystemAppCall, const sptr<IWantSender> &sender)
 {
     TAG_LOGD(AAFwkTag::WANTAGENT, "begin");

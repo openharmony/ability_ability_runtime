@@ -5328,6 +5328,14 @@ int AbilityManagerService::SendWantSender(sptr<IWantSender> target, SenderInfo &
     return pendingWantManager->SendWantSender(target, senderInfo);
 }
 
+int AbilityManagerService::SendLocalWantSender(const SenderInfo &senderInfo)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    auto pendingWantManager = GetCurrentPendingWantManager();
+    CHECK_POINTER_AND_RETURN(pendingWantManager, ERR_INVALID_VALUE);
+    return pendingWantManager->SendLocalWantSender(senderInfo);
+}
+
 void AbilityManagerService::CancelWantSender(const sptr<IWantSender> &sender)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");

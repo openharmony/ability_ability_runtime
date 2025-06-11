@@ -103,7 +103,8 @@ void CompletedDispatcherTest::TearDown(void)
  */
 HWTEST_F(CompletedDispatcherTest, CompletedDispatcher_0100, Function | MediumTest | Level1)
 {
-    CompletedDispatcher completedDispatcher(nullptr, nullptr, nullptr);
+    std::shared_ptr<PendingWant> pendingWant = nullptr;
+    CompletedDispatcher completedDispatcher(pendingWant, nullptr, nullptr);
     EXPECT_EQ(completedDispatcher.pendingWant_, nullptr);
     EXPECT_EQ(completedDispatcher.callback_, nullptr);
     EXPECT_EQ(completedDispatcher.handler_, nullptr);
@@ -118,7 +119,8 @@ HWTEST_F(CompletedDispatcherTest, CompletedDispatcher_0200, Function | MediumTes
 {
     std::shared_ptr<CompletedDispatcherTest::CompletedCallbackSon> callBack =
         std::make_shared<CompletedDispatcherTest::CompletedCallbackSon>();
-    CompletedDispatcher completedDispatcher(nullptr, callBack, nullptr);
+    std::shared_ptr<PendingWant> pendingWant = nullptr;
+    CompletedDispatcher completedDispatcher(pendingWant, callBack, nullptr);
     EXPECT_EQ(completedDispatcher.pendingWant_, nullptr);
     EXPECT_EQ(completedDispatcher.callback_, callBack);
     EXPECT_EQ(completedDispatcher.handler_, nullptr);
@@ -133,7 +135,8 @@ HWTEST_F(CompletedDispatcherTest, CompletedDispatcher_0300, Function | MediumTes
 {
     std::shared_ptr<CompletedDispatcherTest::CompletedCallbackSon> callBack =
         std::make_shared<CompletedDispatcherTest::CompletedCallbackSon>();
-    CompletedDispatcher completedDispatcher(nullptr, callBack, nullptr);
+    std::shared_ptr<PendingWant> pendingWant = nullptr;
+    CompletedDispatcher completedDispatcher(pendingWant, callBack, nullptr);
 
     Want want = MakeWant("device", "ability", "bundleName");
     std::string key = "key";
@@ -161,7 +164,8 @@ HWTEST_F(CompletedDispatcherTest, CompletedDispatcher_0400, Function | MediumTes
     std::shared_ptr<CompletedDispatcherTest::CompletedCallbackSon> callBack =
         std::make_shared<CompletedDispatcherTest::CompletedCallbackSon>();
     std::shared_ptr<EventHandler> handler = std::make_shared<EventHandler>();
-    CompletedDispatcher completedDispatcher(nullptr, callBack, handler);
+    std::shared_ptr<PendingWant> pendingWant = nullptr;
+    CompletedDispatcher completedDispatcher(pendingWant, callBack, handler);
 
     Want want = MakeWant("device", "ability", "bundleName");
     std::string key = "key";
@@ -188,7 +192,8 @@ HWTEST_F(CompletedDispatcherTest, CompletedDispatcher_0500, Function | MediumTes
 {
     std::shared_ptr<CompletedDispatcherTest::CompletedCallbackSon> callBack =
         std::make_shared<CompletedDispatcherTest::CompletedCallbackSon>();
-    CompletedDispatcher completedDispatcher(nullptr, callBack, nullptr);
+    std::shared_ptr<PendingWant> pendingWant = nullptr;
+    CompletedDispatcher completedDispatcher(pendingWant, callBack, nullptr);
     EXPECT_EQ(completedDispatcher.callback_, callBack);
     completedDispatcher.Run();
     EXPECT_EQ(CompletedCallbackSon::code, 100);
@@ -203,7 +208,8 @@ HWTEST_F(CompletedDispatcherTest, CompletedDispatcher_0500, Function | MediumTes
  */
 HWTEST_F(CompletedDispatcherTest, CompletedDispatcher_0600, Function | MediumTest | Level1)
 {
-    CompletedDispatcher completedDispatcher(nullptr, nullptr, nullptr);
+    std::shared_ptr<PendingWant> pendingWant = nullptr;
+    CompletedDispatcher completedDispatcher(pendingWant, nullptr, nullptr);
     EXPECT_EQ(completedDispatcher.callback_, nullptr);
     completedDispatcher.Run();
     EXPECT_EQ(CompletedCallbackSon::code, 0);
@@ -217,7 +223,8 @@ HWTEST_F(CompletedDispatcherTest, CompletedDispatcher_0600, Function | MediumTes
 HWTEST_F(CompletedDispatcherTest, CompletedDispatcher_0700, Function | MediumTest | Level1)
 {
     CompletedDispatcher completedDispatcher;
-    CompletedDispatcher completedDispatcher2(nullptr, nullptr, nullptr);
+    std::shared_ptr<PendingWant> pendingWant = nullptr;
+    CompletedDispatcher completedDispatcher2(pendingWant, nullptr, nullptr);
     completedDispatcher = std::move(completedDispatcher2);
     EXPECT_EQ(completedDispatcher.GetPendingWant(), nullptr);
 }

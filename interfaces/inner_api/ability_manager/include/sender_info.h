@@ -36,9 +36,13 @@ struct SenderInfo : public Parcelable {
     std::string requiredPermission;
     Want want;
     sptr<IRemoteObject> callerToken = nullptr;
+    int32_t operType = 0;
+    int32_t uid = 0;
+    uint32_t tokenId = 0;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
+    bool MarshallingInner(Parcel &parcel) const;
     static SenderInfo *Unmarshalling(Parcel &parcel);
 };
 }  // namespace AAFwk
