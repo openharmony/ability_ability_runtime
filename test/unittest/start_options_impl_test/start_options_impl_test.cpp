@@ -601,6 +601,56 @@ HWTEST_F(StartOptionsImplTest, SetStartOptionsStartVisibility_001, testing::ext:
 }
 
 // Test cases
+// Test SetStartOptionsStartVisibility function - Failure case
+/**
+ * @tc.name: SetStartOptionsStartVisibility_002
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, SetStartOptionsStartVisibility_002, testing::ext::TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetStartOptionsStartVisibility_002 begin");
+    // Arrange
+    AbilityRuntime_ErrorCode expectedErrorCode = ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+
+    // Act
+    AbilityRuntime_StartVisibility startVisibility = AbilityRuntime_StartVisibility(100);
+    AbilityRuntime_ErrorCode resultErrorCode = startOptions->SetStartOptionsStartVisibility(startVisibility);
+    TAG_LOGI(AAFwkTag::TEST,
+        "SetStartOptionsStartVisibility_002 resultErrorCode=%{public}d,expectedErrorCode=%{public}d",
+        resultErrorCode, expectedErrorCode);
+
+    // Assert
+    EXPECT_EQ(expectedErrorCode, resultErrorCode);
+    TAG_LOGI(AAFwkTag::TEST, "SetStartOptionsStartVisibility_002 end");
+}
+
+// Test cases
+// Test SetStartOptionsStartVisibility function - Failure case
+/**
+ * @tc.name: SetStartOptionsStartVisibility_003
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, SetStartOptionsStartVisibility_003, testing::ext::TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetStartOptionsStartVisibility_003 begin");
+    // Arrange
+    AbilityRuntime_ErrorCode expectedErrorCode = ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+
+    // Act
+    AbilityRuntime_StartVisibility startVisibility = AbilityRuntime_StartVisibility(-1);
+    AbilityRuntime_ErrorCode resultErrorCode = startOptions->SetStartOptionsStartVisibility(startVisibility);
+    TAG_LOGI(AAFwkTag::TEST,
+        "SetStartOptionsStartVisibility_003 resultErrorCode=%{public}d,expectedErrorCode=%{public}d",
+        resultErrorCode, expectedErrorCode);
+
+    // Assert
+    EXPECT_EQ(expectedErrorCode, resultErrorCode);
+    TAG_LOGI(AAFwkTag::TEST, "SetStartOptionsStartVisibility_003 end");
+}
+
+// Test cases
 // Test GetStartOptionsStartVisibility function - Normal case
 /**
  * @tc.name: GetStartOptionsStartVisibility_001
@@ -725,6 +775,25 @@ HWTEST_F(StartOptionsImplTest, SetStartOptionsStartWindowIcon_004, testing::ext:
 }
 
 // Test cases
+// Test SetStartOptionsStartWindowIcon function - Normal case
+/**
+ * @tc.name: SetStartOptionsStartWindowIcon_005
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, SetStartOptionsStartWindowIcon_005, testing::ext::TestSize.Level1)
+{
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
+    OH_PixelmapNative *startWindowIcon = new OH_PixelmapNative(nullptr);
+    startOptions->options.startWindowOption = nullptr;
+    EXPECT_EQ(startOptions->SetStartOptionsStartWindowIcon(startWindowIcon),
+        ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(startOptions->options.startWindowOption, nullptr);
+    delete startWindowIcon;
+#endif
+}
+
+// Test cases
 // Test GetStartOptionsStartWindowIcon function - Normal case
 /**
  * @tc.name: GetStartOptionsStartWindowIcon_001
@@ -818,6 +887,57 @@ HWTEST_F(StartOptionsImplTest, GetStartOptionsStartWindowIcon_004, testing::ext:
     // Assert
     EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_NO_ERROR, result);
     EXPECT_EQ(nullptr, startWindowIcon);
+#endif
+}
+
+// Test cases
+// Test SetStartOptionsStartWindowIcon function - Normal case
+/**
+ * @tc.name: GetStartOptionsStartWindowIcon_005
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, GetStartOptionsStartWindowIcon_005, testing::ext::TestSize.Level1)
+{
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
+    // Arrange
+    startOptions->options.startWindowOption = std::make_shared<OHOS::AAFwk::StartWindowOption>();
+    startOptions->options.startWindowOption->hasStartWindow = true;
+    startOptions->options.startWindowOption->startWindowIcon = std::make_shared<OHOS::Media::PixelMap>();
+    OH_PixelmapNative* startWindowIcon = new OH_PixelmapNative(nullptr);
+
+    // Act
+    AbilityRuntime_ErrorCode result = startOptions->GetStartOptionsStartWindowIcon(&startWindowIcon);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+    delete startWindowIcon;
+#endif
+}
+
+// Test cases
+// Test SetStartOptionsStartWindowIcon function - Normal case
+/**
+ * @tc.name: GetStartOptionsStartWindowIcon_006
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, GetStartOptionsStartWindowIcon_006, testing::ext::TestSize.Level1)
+{
+#ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
+    // Arrange
+    startOptions->options.startWindowOption = std::make_shared<OHOS::AAFwk::StartWindowOption>();
+    startOptions->options.startWindowOption->hasStartWindow = true;
+    startOptions->options.startWindowOption->startWindowIcon = std::make_shared<OHOS::Media::PixelMap>();
+    OH_PixelmapNative* startWindowIcon = nullptr;
+
+    // Act
+    AbilityRuntime_ErrorCode result = startOptions->GetStartOptionsStartWindowIcon(&startWindowIcon);
+
+    // Assert
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_NO_ERROR, result);
+    EXPECT_NE(nullptr, startWindowIcon);
+    delete startWindowIcon;
 #endif
 }
 
@@ -1116,6 +1236,20 @@ HWTEST_F(StartOptionsImplTest, GetStartOptionsSupportedWindowModes_004, testing:
     EXPECT_NE(nullptr, supportedWindowModes);
     EXPECT_EQ(ABILITY_RUNTIME_SUPPORTED_WINDOW_MODE_FULL_SCREEN, supportedWindowModes[0]);
     free(supportedWindowModes);
+}
+
+// Test cases
+// Test GetStartOptionsSupportedWindowModes function
+/**
+ * @tc.name: GetStartOptionsSupportedWindowModes_005
+ * @tc.desc: test class StartOptions number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsImplTest, GetStartOptionsSupportedWindowModes_005, testing::ext::TestSize.Level1)
+{
+    size_t size = 0;
+    EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID,
+        startOptions->GetStartOptionsSupportedWindowModes(nullptr, size));
 }
 
 // Test cases
