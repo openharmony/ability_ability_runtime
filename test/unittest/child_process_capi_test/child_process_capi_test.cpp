@@ -18,6 +18,9 @@
 #include "app_utils.h"
 #include "child_process_args_manager.h"
 #include "child_process_configs.h"
+#include "native_child_callback.h"
+
+extern void SetGlobalNativeChildCallbackStub(OHOS::sptr<OHOS::AbilityRuntime::NativeChildCallback> local);
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -32,6 +35,7 @@ public:
 
     static void OnNativeChildProcessStarted(int errCode, OHIPCRemoteProxy *remoteProxy);
     static void OnNativeChildProcessExit(int32_t pid, int32_t signal);
+    static void OnNativeChildProcessExit1(int32_t pid, int32_t signal);
 
     void SetUp();
     void TearDown();
@@ -55,6 +59,12 @@ void ChildProcessCapiTest::OnNativeChildProcessStarted(int errCode, OHIPCRemoteP
 
 void ChildProcessCapiTest::OnNativeChildProcessExit(int32_t pid, int32_t signal)
 {
+    GTEST_LOG_(INFO) << "OnNativeChildProcessExit call";
+}
+
+void ChildProcessCapiTest::OnNativeChildProcessExit1(int32_t pid, int32_t signal)
+{
+    GTEST_LOG_(INFO) << "OnNativeChildProcessExit1 call";
 }
 
 /**
@@ -217,6 +227,30 @@ HWTEST_F(ChildProcessCapiTest, OH_Ability_RegisterNativeChildProcessExitCallback
 }
 
 /**
+ * @tc.number: OH_Ability_RegisterNativeChildProcessExitCallback_002
+ * @tc.desc: Test API OH_Ability_RegisterNativeChildProcessExitCallback_002 works
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessCapiTest, OH_Ability_RegisterNativeChildProcessExitCallback_002, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "OH_Ability_RegisterNativeChildProcessExitCallback_002 begin";
+    auto localCallbackStub = sptr<NativeChildCallback>::MakeSptr(nullptr);
+    ::SetGlobalNativeChildCallbackStub(localCallbackStub);
+    auto ret = OH_Ability_RegisterNativeChildProcessExitCallback(ChildProcessCapiTest::OnNativeChildProcessExit);
+    EXPECT_EQ(ret, NCP_NO_ERROR);
+    ret = OH_Ability_RegisterNativeChildProcessExitCallback(ChildProcessCapiTest::OnNativeChildProcessExit);
+    EXPECT_EQ(ret, NCP_NO_ERROR);
+    int32_t pid = 111;
+    int32_t signal = 9;
+    localCallbackStub->OnNativeChildExit(pid, signal);
+    EXPECT_EQ(ret, NCP_NO_ERROR);
+    ret = OH_Ability_UnregisterNativeChildProcessExitCallback(ChildProcessCapiTest::OnNativeChildProcessExit);
+    EXPECT_EQ(ret, NCP_ERR_INTERNAL);
+    ::SetGlobalNativeChildCallbackStub(nullptr);
+    GTEST_LOG_(INFO) << "OH_Ability_RegisterNativeChildProcessExitCallback_002 end";
+}
+
+/**
  * @tc.number: OH_Ability_UnregisterNativeChildProcessExitCallback_001
  * @tc.desc: Test API OH_Ability_UnregisterNativeChildProcessExitCallback_001 works
  * @tc.type: FUNC
@@ -229,6 +263,24 @@ HWTEST_F(ChildProcessCapiTest, OH_Ability_UnregisterNativeChildProcessExitCallba
     ret = OH_Ability_UnregisterNativeChildProcessExitCallback(ChildProcessCapiTest::OnNativeChildProcessExit);
     EXPECT_EQ(ret, NCP_ERR_CALLBACK_NOT_EXIST);
     GTEST_LOG_(INFO) << "OH_Ability_UnregisterNativeChildProcessExitCallback_001 end";
+}
+
+/**
+ * @tc.number: OH_Ability_UnregisterNativeChildProcessExitCallback_002
+ * @tc.desc: Test API OH_Ability_UnregisterNativeChildProcessExitCallback_002 works
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessCapiTest, OH_Ability_UnregisterNativeChildProcessExitCallback_002, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "OH_Ability_UnregisterNativeChildProcessExitCallback_002 begin";
+    auto localCallbackStub = sptr<NativeChildCallback>::MakeSptr(nullptr);
+    ::SetGlobalNativeChildCallbackStub(localCallbackStub);
+    auto ret = OH_Ability_RegisterNativeChildProcessExitCallback(ChildProcessCapiTest::OnNativeChildProcessExit);
+    EXPECT_EQ(ret, NCP_NO_ERROR);
+    ret = OH_Ability_UnregisterNativeChildProcessExitCallback(ChildProcessCapiTest::OnNativeChildProcessExit1);
+    EXPECT_EQ(ret, NCP_ERR_CALLBACK_NOT_EXIST);
+    ::SetGlobalNativeChildCallbackStub(nullptr);
+    GTEST_LOG_(INFO) << "OH_Ability_UnregisterNativeChildProcessExitCallback_002 end";
 }
 
 /**
