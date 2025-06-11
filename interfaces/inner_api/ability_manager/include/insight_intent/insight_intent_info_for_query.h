@@ -43,7 +43,10 @@ struct EntryInfoForQuery {
 
 struct FunctionInfoForQuery {};
 
-struct FormInfoForQuery {};
+struct FormInfoForQuery {
+    std::string abilityName;
+    std::string formName;
+};
 
 struct InsightIntentInfoForQuery : public Parcelable {
     std::string bundleName;
