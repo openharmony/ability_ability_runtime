@@ -40,6 +40,8 @@ private:
 
     int OnExtensionConnectedInner(MessageParcel &data, MessageParcel &reply);
     int OnExtensionDisconnectedInner(MessageParcel &data, MessageParcel &reply);
+    int OnExtensionSuspendedInner(MessageParcel &data, MessageParcel &reply);
+    int OnExtensionResumedInner(MessageParcel &data, MessageParcel &reply);
 #ifdef WITH_DLP
     int OnDlpAbilityOpenedInner(MessageParcel &data, MessageParcel &reply);
     int OnDlpAbilityClosedInner(MessageParcel &data, MessageParcel &reply);
