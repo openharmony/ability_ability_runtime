@@ -48,6 +48,14 @@ struct FormInfoForQuery {
     std::string formName;
 };
 
+struct EntityInfoForQuery {
+    std::string className;
+    std::string entityId;
+    std::string entityCategory;
+    std::string parameters;
+    std::string parentClassName;
+};
+
 struct InsightIntentInfoForQuery : public Parcelable {
     std::string bundleName;
     std::string moduleName;
@@ -68,6 +76,7 @@ struct InsightIntentInfoForQuery : public Parcelable {
     EntryInfoForQuery entryInfo;
     FunctionInfoForQuery functionInfo;
     FormInfoForQuery formInfo;
+    std::vector<EntityInfoForQuery> entities {};
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
