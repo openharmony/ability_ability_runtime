@@ -2461,23 +2461,23 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
         TAG_LOGD(AAFwkTag::APPKIT, "Stage model");
         if (applicationCodeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) {
             TAG_LOGI(AAFwkTag::DELEGATOR, "create 1.0 testrunner");
-            auto &runtime = application_->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
+            auto& runtime = application_->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
             auto testRunner = TestRunner::Create(runtime, args, false);
             auto delegator = IAbilityDelegator::Create(runtime, application_->GetAppContext(),
                 std::move(testRunner), record->observer);
-            AbilityDelegatorRegistry::RegisterInstance(delegator, args, runtime->GetLanguage());
-            delegator->SetApiTargetVersion(targetVersion);
+            AbilityDelegatorRegistry::RegisterInstance(delegator, args, AbilityRuntime::Runtime::Language::JS);
+			delegator->SetApiTargetVersion(targetVersion);
             delegator->Prepare();
         }
 
         if (applicationCodeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
             TAG_LOGI(AAFwkTag::DELEGATOR, "create 1.2 testrunner");
-            auto &runtime = application_->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2);
+            auto& runtime = application_->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2);
             auto testRunner = TestRunner::Create(runtime, args, false);
             auto delegator = IAbilityDelegator::Create(runtime, application_->GetAppContext(),
                 std::move(testRunner), record->observer);
-            AbilityDelegatorRegistry::RegisterInstance(delegator, args, runtime->GetLanguage());
-            delegator->SetApiTargetVersion(targetVersion);
+            AbilityDelegatorRegistry::RegisterInstance(delegator, args, AbilityRuntime::Runtime::Language::ETS);
+			delegator->SetApiTargetVersion(targetVersion);
             delegator->Prepare();
         }
     } else { // FA model
@@ -2497,8 +2497,10 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
             return false;
         }
         bool isFaJsModel = entryHapModuleInfo.abilityInfos.front().srcLanguage == "js" ? true : false;
-        static auto runtime = AbilityRuntime::Runtime::Create(options);
-        auto testRunner = TestRunner::Create(runtime, args, isFaJsModel);
+        options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true); // default
+        static auto runtimes = AbilityRuntime::Runtime::CreateRuntimes(options);
+        for (const auto& runtime : runtimes) {
+            auto testRunner = TestRunner::Create(runtime, args, isFaJsModel);
         if (testRunner == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null testRunner");
             return false;
@@ -2509,9 +2511,10 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
         }
         auto delegator = std::make_shared<AbilityDelegator>(
             application_->GetAppContext(), std::move(testRunner), record->observer);
-        AbilityDelegatorRegistry::RegisterInstance(delegator, args, AbilityRuntime::Runtime::Language::JS);
+        AbilityDelegatorRegistry::RegisterInstance(delegator, args, runtime->GetLanguage());
         delegator->SetApiTargetVersion(targetVersion);
         delegator->Prepare();
+        }
     }
     return true;
 }

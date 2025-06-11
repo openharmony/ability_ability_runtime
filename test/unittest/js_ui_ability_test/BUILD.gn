@@ -69,6 +69,7 @@ ohos_unittest("js_ui_ability_test") {
     "ipc:ipc_napi",
     "libuv:uv",
     "napi:ace_napi",
+    "runtime_core:ani",
     "window_manager:libwsutils",
   ]
 }

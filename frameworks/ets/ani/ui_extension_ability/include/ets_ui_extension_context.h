@@ -15,7 +15,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_UI_EXTENSION_CONTEXT_H
 #define OHOS_ABILITY_RUNTIME_ETS_UI_EXTENSION_CONTEXT_H
 
-#include "sts_runtime.h"
+#include "ets_runtime.h"
 #include <array>
 #include <iostream>
 #include <unistd.h>
@@ -24,9 +24,7 @@
 #include "hitrace_meter.h"
 #include "ohos_application.h"
 
-ani_object CreateEtsUIExtensionContext(ani_env *env,
-    std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context,
-    const std::shared_ptr<OHOS::AppExecFwk::OHOSApplication> &application);
+ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context);
 
 class EtsUIExtensionContext final {
 public:
@@ -38,7 +36,7 @@ public:
     static void TerminateSelfWithResultSync(ani_env *env, ani_object obj, ani_object abilityResult, ani_object callback);
 
     static void EtsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-        void* applicationCtxRef, std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context);
+        std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context);
 private:
     static void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
         std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo);

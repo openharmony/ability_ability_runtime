@@ -19,7 +19,6 @@
 #include "ability_manager_client.h"
 #include "ets_context_utils.h"
 #include "ets_error_utils.h"
-#include "ets_ui_extension_common.h"
 
 const char *INVOKE_METHOD_NAME = "invoke";
 const char *UI_EXTENSION_CONTEXT_CLASS_NAME = "Lapplication/UIExtensionContext/UIExtensionContext;";
@@ -45,8 +44,8 @@ void EtsUIExtensionContext::TerminateSelfSync(ani_env *env, ani_object obj, ani_
         return;
     }
     ret = ((OHOS::AbilityRuntime::UIExtensionContext*)nativeContextLong)->TerminateSelf();
-    AppExecFwk::AsyncCallback(env, callback,
-        CreateEtsErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
+    OHOS::AppExecFwk::AsyncCallback(env, callback,
+        OHOS::AbilityRuntime::CreateEtsErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
 }
 
 void EtsUIExtensionContext::TerminateSelfWithResultSync(ani_env *env,  ani_object obj,
@@ -86,8 +85,8 @@ void EtsUIExtensionContext::TerminateSelfWithResultSync(ani_env *env,  ani_objec
         TAG_LOGE(AAFwkTag::UI_EXT, "TerminateSelf failed, errorCode is %{public}d", ret);
         return;
     }
-    AppExecFwk::AsyncCallback(env, callback,
-        CreateEtsErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
+    OHOS::AppExecFwk::AsyncCallback(env, callback,
+        OHOS::AbilityRuntime::CreateEtsErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
 }
 
 void EtsUIExtensionContext::BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
@@ -124,15 +123,13 @@ void EtsUIExtensionContext::BindExtensionInfo(ani_env* aniEnv, ani_class context
 }
 
 void EtsUIExtensionContext::EtsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context)
+    std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context)
 {
-    OHOS::AbilityRuntime::ContextUtil::EtsCreatContext(aniEnv, contextClass, contextObj, applicationCtxRef, context);
+    OHOS::AbilityRuntime::ContextUtil::CreateEtsBaseContext(aniEnv, contextClass, contextObj, context);
     BindExtensionInfo(aniEnv, contextClass, contextObj, context, context->GetAbilityInfo());
 }
 
-ani_object CreateEtsUIExtensionContext(ani_env *env,
-    std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context,
-    const std::shared_ptr<OHOS::AppExecFwk::OHOSApplication> &application)
+ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
     ani_class cls = nullptr;
@@ -171,13 +168,6 @@ ani_object CreateEtsUIExtensionContext(ani_env *env,
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return nullptr;
     }
-
-    // bind parent context
-    if (application == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "application null");
-        return nullptr;
-    }
-    EtsUIExtensionContext::EtsCreatExtensionContext(env, cls, contextObj,
-        application->GetApplicationCtxObjRef(), context);
+    EtsUIExtensionContext::EtsCreatExtensionContext(env, cls, contextObj, context);
     return contextObj;
 }
