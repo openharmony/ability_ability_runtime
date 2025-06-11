@@ -18,9 +18,13 @@
 
 namespace OHOS {
 namespace system {
+constexpr const char* PRODUCT_ASSERT_FAULT_DIALOG_ENABLED = "persisit.sys.abilityms.support_assert_fault_dialog";
 
 bool GetBoolParameter(const std::string& key, bool def)
 {
+    if (key == PRODUCT_ASSERT_FAULT_DIALOG_ENABLED) {
+        return OHOS::AAFwk::MyStatus::GetInstance().getDialogEnabled_;
+    }
     return OHOS::AAFwk::MyStatus::GetInstance().getBoolParameter_;
 }
 } // namespace system
