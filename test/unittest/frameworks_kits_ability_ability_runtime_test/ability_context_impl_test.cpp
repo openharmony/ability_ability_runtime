@@ -31,6 +31,7 @@
 #include "mock_lifecycle_observer.h"
 #include "mock_serviceability_manager_service.h"
 #include "scene_board_judgement.h"
+#include "session/host/include/session.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 
@@ -2202,6 +2203,52 @@ HWTEST_F(AbilityContextImplTest, RevokeDelegator_0600, Function | MediumTest | L
         EXPECT_EQ(result, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
     } else {
         EXPECT_EQ(result, ERR_INVALID_VALUE);
+    }
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_RevokeDelegator_0700
+ * @tc.name: RevokeDelegator
+ * @tc.desc: Verify that function RevokeDelegator.
+ */
+HWTEST_F(AbilityContextImplTest, RevokeDelegator_0700, Function | MediumTest | Level1)
+{
+    auto context = std::make_unique<AbilityContextImpl>();
+    context->isHook_ = true;
+    context->hookOff_ = false;
+    AAFwk::AbilityManagerClient::GetInstance()->proxy_ = g_mockAbilityMs;
+    Rosen::SessionInfo info;
+    sptr<Rosen::ISession> session = new Rosen::Session(info);
+    context->SetWeakSessionToken(session->AsObject());
+    auto result = context->RevokeDelegator();
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        EXPECT_EQ(result, ERR_INVALID_VALUE);
+    }
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_RevokeDelegator_0800
+ * @tc.name: RevokeDelegator
+ * @tc.desc: Verify that function RevokeDelegator.
+ */
+HWTEST_F(AbilityContextImplTest, RevokeDelegator_0800, Function | MediumTest | Level1)
+{
+    auto context = std::make_unique<AbilityContextImpl>();
+    context->isHook_ = true;
+    context->hookOff_ = false;
+    AAFwk::AbilityManagerClient::GetInstance()->proxy_ = g_mockAbilityMs;
+    Rosen::SessionInfo info;
+    sptr<Rosen::ISession> session = new Rosen::Session(info);
+    context->SetWeakSessionToken(session->AsObject());
+    std::shared_ptr<MyAbilityCallback> abilityCallback = std::make_shared<MyAbilityCallback>();
+    context->RegisterAbilityCallback(abilityCallback);
+    auto result = context->RevokeDelegator();
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        EXPECT_EQ(result, ERR_OK);
     }
 }
 
