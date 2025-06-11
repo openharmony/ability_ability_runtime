@@ -62,6 +62,8 @@ napi_value JsNapiWantAgentInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "triggerAsync", moduleName, JsWantAgent::NapiTriggerAsync);
     BindNativeFunction(env, exportObj, "getWant", moduleName, JsWantAgent::NapiGetWant);
     BindNativeFunction(env, exportObj, "getWantAgent", moduleName, JsWantAgent::NapiGetWantAgent);
+    BindNativeFunction(env, exportObj, "createLocalWantAgent", moduleName, JsWantAgent::NapiCreateLocalWantAgent);
+    BindNativeFunction(env, exportObj, "isLocalWantAgent", moduleName, JsWantAgent::NapiIsLocalWantAgent);
     BindNativeFunction(env, exportObj, "getOperationType", moduleName, JsWantAgent::NapiGetOperationType);
     BindNativeFunction(env, exportObj, "setWantAgentMultithreading", moduleName,
                        JsWantAgent::NapiSetWantAgentMultithreading);

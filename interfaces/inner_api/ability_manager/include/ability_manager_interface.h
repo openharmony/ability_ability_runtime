@@ -888,6 +888,11 @@ public:
 
     virtual int SendWantSender(sptr<IWantSender> target, SenderInfo &senderInfo) = 0;
 
+    virtual int SendLocalWantSender(const SenderInfo &senderInfo)
+    {
+        return 0;
+    }
+
     virtual void CancelWantSender(const sptr<IWantSender> &sender) = 0;
 
     virtual int GetPendingWantUid(const sptr<IWantSender> &target) = 0;

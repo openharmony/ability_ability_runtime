@@ -326,6 +326,9 @@ int AbilityManagerStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel
     if (interfaceCode == AbilityManagerInterfaceCode::UNREGISTER_CANCEL_LISTENER) {
         return UnregisterCancelListenerInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::SEND_LOCAL_PENDING_WANT_SENDER) {
+        return SendLocalWantSenderInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -1961,6 +1964,18 @@ int AbilityManagerStub::SendWantSenderInner(MessageParcel &data, MessageParcel &
     if (!reply.WriteParcelable(senderInfo.get())) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "completedData write fail");
     }
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::SendLocalWantSenderInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<SenderInfo> senderInfo(data.ReadParcelable<SenderInfo>());
+    if (senderInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "senderInfo null");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = SendLocalWantSender(*senderInfo);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
