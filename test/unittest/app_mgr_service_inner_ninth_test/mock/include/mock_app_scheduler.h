@@ -71,6 +71,7 @@ public:
     MOCK_METHOD0(ScheduleClearPageStack, void());
     MOCK_METHOD0(IsMemorySizeSufficent, bool());
     MOCK_METHOD0(ScheduleCacheProcess, void());
+    MOCK_METHOD1(ScheduleCjHeapMemory, void(OHOS::AppExecFwk::CjHeapDumpInfo &info));
     bool AddDeathRecipient(const sptr<DeathRecipient> &recipient) override
     {
         return AAFwk::MyStatus::GetInstance().addDeathRecipientReturn_;
