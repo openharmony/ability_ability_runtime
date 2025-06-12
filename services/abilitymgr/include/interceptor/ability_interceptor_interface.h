@@ -37,7 +37,7 @@ struct AbilityInterceptorParam {
     int32_t requestCode;
     int32_t userId;
     bool isWithUI = false;
-    const sptr<IRemoteObject> &callerToken;
+    sptr<IRemoteObject> callerToken = nullptr;
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo;  // target abilityInfo get in afterCheckExecuter_
     bool isStartAsCaller = false;
     int32_t appIndex = 0;
