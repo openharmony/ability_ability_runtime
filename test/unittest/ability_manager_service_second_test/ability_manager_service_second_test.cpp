@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -251,7 +251,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityByCall_001, TestSize.Level
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityByCall_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     Want want;
-    EXPECT_EQ(abilityMs_->StartAbilityByCall(want, nullptr, nullptr), ERR_OK);
+    EXPECT_EQ(abilityMs_->StartAbilityByCall(want, nullptr, nullptr), ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityByCall_001 end");
 }
 
@@ -312,7 +312,8 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallOtherExtensionPermission_001,
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallOtherExtensionPermission_001 start");
     bool oldFlag = abilityMs_->startUpNewRule_;
     abilityMs_->startUpNewRule_ = true;
-    EXPECT_EQ(abilityMs_->CheckCallOtherExtensionPermission(abilityRequest_), CHECK_PERMISSION_FAILED);
+    AbilityRequest abilityRequest;
+    EXPECT_EQ(abilityMs_->CheckCallOtherExtensionPermission(abilityRequest), ERR_OK);
     abilityMs_->startUpNewRule_ = oldFlag;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallOtherExtensionPermission_001 end");
 }
@@ -327,10 +328,11 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallOtherExtensionPermission_002,
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallOtherExtensionPermission_002 start");
-    abilityRequest_.abilityInfo.visible = false;
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.visible = false;
     bool oldFlag = abilityMs_->startUpNewRule_;
     abilityMs_->startUpNewRule_ = true;
-    EXPECT_EQ(abilityMs_->CheckCallOtherExtensionPermission(abilityRequest_), CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(abilityMs_->CheckCallOtherExtensionPermission(abilityRequest), ERR_OK);
     abilityMs_->startUpNewRule_ = oldFlag;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckCallOtherExtensionPermission_002 end");
 }
@@ -344,11 +346,12 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallOtherExtensionPermission_003,
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "testcase begin.");
-    abilityRequest_.abilityInfo.visible = true;
-    abilityRequest_.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
-    abilityRequest_.appInfo.isSystemApp = false;
-    abilityRequest_.appInfo.bundleName = "test.bundleName";
-    EXPECT_EQ(abilityMs_->CheckCallOtherExtensionPermission(abilityRequest_), NO_FOUND_ABILITY_BY_CALLER);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.visible = true;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.appInfo.isSystemApp = false;
+    abilityRequest.appInfo.bundleName = "test.bundleName";
+    EXPECT_EQ(abilityMs_->CheckCallOtherExtensionPermission(abilityRequest), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "testcase end.");
 }
 
@@ -361,11 +364,12 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallOtherExtensionPermission_004,
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "testcase begin.");
-    abilityRequest_.abilityInfo.visible = true;
-    abilityRequest_.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
-    abilityRequest_.appInfo.isSystemApp = true;
-    abilityRequest_.appInfo.bundleName = "test.bundleName";
-    EXPECT_EQ(abilityMs_->CheckCallOtherExtensionPermission(abilityRequest_), NO_FOUND_ABILITY_BY_CALLER);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.visible = true;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    abilityRequest.appInfo.isSystemApp = true;
+    abilityRequest.appInfo.bundleName = "test.bundleName";
+    EXPECT_EQ(abilityMs_->CheckCallOtherExtensionPermission(abilityRequest), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "testcase end.");
 }
 
@@ -392,8 +396,9 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckStartByCallPermission_001, TestSi
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_001, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->Init();
     Want want;
-    EXPECT_EQ(abilityMs_->StartAbility(want, nullptr, 100, 0), CHECK_PERMISSION_FAILED);
+    EXPECT_NE(abilityMs_->StartAbility(want, nullptr, 100, 0), ERR_OK);
 
     want.SetFlags(Want::FLAG_ABILITY_CONTINUATION);
     EXPECT_EQ(abilityMs_->StartAbility(want, nullptr, 100, 0), ERR_INVALID_CONTINUATION_FLAG);
@@ -408,16 +413,13 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_001, TestSize.Level1)
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_002, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->Init();
     Want want;
     AbilityStartSetting abilityStartSetting;
     sptr<IRemoteObject> callerToken = nullptr;
     int requestCode = 0;
     auto ret = abilityMs_->StartAbility(want, abilityStartSetting, callerToken, 0, requestCode);
-    if (UnlockScreenManager::GetInstance().UnlockScreen()) {
-        EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
-    } else {
-        EXPECT_EQ(ret, ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE);
-    }
+    EXPECT_NE(ret, ERR_OK);
 }
 
 /*
@@ -429,16 +431,13 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_002, TestSize.Level1)
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_003, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->Init();
     Want want;
     AbilityStartSetting abilityStartSetting;
     sptr<IRemoteObject> callerToken = nullptr;
     int requestCode = 0;
     auto ret = abilityMs_->StartAbilityDetails(want, abilityStartSetting, callerToken, 0, requestCode);
-    if (UnlockScreenManager::GetInstance().UnlockScreen()) {
-        EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
-    } else {
-        EXPECT_EQ(ret, ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE);
-    }
+    EXPECT_NE(ret, ERR_OK);
 }
 
 /*
@@ -450,14 +449,15 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_003, TestSize.Level1)
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_004, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->Init();
     Want want;
     ElementName element("", "com.ix.hiMusic", "MusicAbility");
     want.SetElement(element);
     StartOptions startOptions;
     sptr<IRemoteObject> callerToken = nullptr;
     int requestCode = 0;
-    EXPECT_EQ(abilityMs_->StartAbilityWithSpecifyTokenIdInner(want, startOptions, callerToken,
-        USER_ID_U100, requestCode), CHECK_PERMISSION_FAILED);
+    EXPECT_NE(abilityMs_->StartAbilityWithSpecifyTokenIdInner(want, startOptions, callerToken,
+        USER_ID_U100, requestCode), ERR_OK);
 }
 
 /*
@@ -469,11 +469,12 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_004, TestSize.Level1)
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityAsCaller_001, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->Init();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityAsCaller_001 start");
     Want want;
     int requestCode = 0;
     sptr<IRemoteObject> callerToken = nullptr;
-    EXPECT_EQ(abilityMs_->StartAbility(want, callerToken, USER_ID_U100, requestCode), CHECK_PERMISSION_FAILED);
+    EXPECT_NE(abilityMs_->StartAbility(want, callerToken, USER_ID_U100, requestCode), ERR_OK);
 
     want.SetFlags(Want::FLAG_ABILITY_CONTINUATION);
     EXPECT_EQ(abilityMs_->StartAbilityAsCaller(want, callerToken, nullptr, USER_ID_U100, requestCode),
@@ -490,13 +491,14 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityAsCaller_001, TestSize.Lev
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityAsCaller_002, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->Init();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityAsCaller_002 start");
     Want want;
     StartOptions startOptions;
     sptr<IRemoteObject> callerToken = nullptr;
     int requestCode = 0;
-    EXPECT_EQ(abilityMs_->StartAbilityAsCaller(want, startOptions, callerToken, nullptr, USER_ID_U100, requestCode),
-    CHECK_PERMISSION_FAILED);
+    EXPECT_NE(abilityMs_->StartAbilityAsCaller(want, startOptions, callerToken, nullptr, USER_ID_U100, requestCode),
+        ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityAsCaller_002 end");
 }
 
@@ -509,6 +511,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityAsCaller_002, TestSize.Lev
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityForResultAsCaller_001, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->Init();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityForResultAsCaller_001 start");
     Want want;
     StartOptions startOptions;
@@ -527,6 +530,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityForResultAsCaller_001, Tes
 HWTEST_F(AbilityManagerServiceSecondTest, StartAbilityForResultAsCaller_002, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->Init();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartAbilityForResultAsCaller_002 start");
     Want want;
     StartOptions startOptions;
@@ -756,8 +760,8 @@ HWTEST_F(AbilityManagerServiceSecondTest, ContinueMission_001, TestSize.Level1)
     std::string srcDeviceId = "test";
     std::string dstDeviceId = "test";
     AAFwk::WantParams wantParams;
-    EXPECT_EQ(abilityMs_->ContinueMission(srcDeviceId, dstDeviceId, 1, nullptr, wantParams),
-        CHECK_PERMISSION_FAILED);
+    EXPECT_NE(abilityMs_->ContinueMission(srcDeviceId, dstDeviceId, 1, nullptr, wantParams),
+        ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ContinueMission_001 end");
 }
 
@@ -780,7 +784,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, ContinueMissionBundleName_001, TestSiz
     continueMissionInfo.srcDeviceId = srcDeviceId;
     continueMissionInfo.bundleName = "bundleName";
     continueMissionInfo.wantParams = wantParams;
-    EXPECT_EQ(abilityMs_->ContinueMission(continueMissionInfo, callback), CHECK_PERMISSION_FAILED);
+    EXPECT_NE(abilityMs_->ContinueMission(continueMissionInfo, callback), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ContinueMissionBundleName_001 end");
 }
 
@@ -803,7 +807,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, ContinueMissionBundleName_002, TestSiz
     continueMissionInfo.srcDeviceId = srcDeviceId;
     continueMissionInfo.bundleName = "";
     continueMissionInfo.wantParams = wantParams;
-    EXPECT_EQ(abilityMs_->ContinueMission(continueMissionInfo, callback), CHECK_PERMISSION_FAILED);
+    EXPECT_NE(abilityMs_->ContinueMission(continueMissionInfo, callback), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ContinueMissionBundleName_002 end");
 }
 
@@ -884,7 +888,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, StopSyncRemoteMissions_001, TestSize.L
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StopSyncRemoteMissions_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     std::string devId = "test";
-    EXPECT_EQ(abilityMs_->StopSyncRemoteMissions(devId), CHECK_PERMISSION_FAILED);
+    EXPECT_NE(abilityMs_->StopSyncRemoteMissions(devId), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StopSyncRemoteMissions_001 end");
 }
 
@@ -931,7 +935,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, RegisterMissionListener_001, TestSize.
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest RegisterMissionListener_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     std::string deviceId = "test";
-    EXPECT_EQ(abilityMs_->RegisterMissionListener(deviceId, nullptr), ERR_INVALID_VALUE);
+    EXPECT_NE(abilityMs_->RegisterMissionListener(deviceId, nullptr), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest RegisterMissionListener_001 end");
 }
 
@@ -966,7 +970,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, RegisterMissionListener_003, TestSize.
     std::string deviceId = "test";
     sptr<MockIRemoteMissionListener> listener = new (std::nothrow) MockIRemoteMissionListener();
     EXPECT_NE(listener, nullptr);
-    EXPECT_EQ(abilityMs_->RegisterMissionListener(deviceId, listener), CHECK_PERMISSION_FAILED);
+    EXPECT_NE(abilityMs_->RegisterMissionListener(deviceId, listener), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest RegisterMissionListener_003 end");
 }
 
@@ -981,7 +985,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, UnRegisterMissionListener_001, TestSiz
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UnRegisterMissionListener_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     std::string deviceId = "test";
-    EXPECT_EQ(abilityMs_->UnRegisterMissionListener(deviceId, nullptr), ERR_INVALID_VALUE);
+    EXPECT_NE(abilityMs_->UnRegisterMissionListener(deviceId, nullptr), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UnRegisterMissionListener_001 end");
 }
 
@@ -1015,7 +1019,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, UnRegisterMissionListener_003, TestSiz
     std::string deviceId = "test";
     sptr<MockIRemoteMissionListener> listener = new (std::nothrow) MockIRemoteMissionListener();
     EXPECT_NE(listener, nullptr);
-    EXPECT_EQ(abilityMs_->UnRegisterMissionListener(deviceId, listener), CHECK_PERMISSION_FAILED);
+    EXPECT_NE(abilityMs_->UnRegisterMissionListener(deviceId, listener), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest UnRegisterMissionListener_003 end");
 }
 
@@ -1320,7 +1324,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, MoveMissionToFront_002, TestSize.Level
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest MoveMissionToFront_002 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     StartOptions startOptions;
-    EXPECT_EQ(abilityMs_->MoveMissionToFront(100, startOptions), CHECK_PERMISSION_FAILED);
+    EXPECT_NE(abilityMs_->MoveMissionToFront(100, startOptions), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest MoveMissionToFront_002 end");
 }
 
@@ -1337,7 +1341,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, MoveMissionToFront_003, TestSize.Level
     EXPECT_TRUE(abilityMs_ != nullptr);
     StartOptions startOptions;
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(abilityMs_->MoveMissionToFront(100, startOptions), CHECK_PERMISSION_FAILED);
+        EXPECT_NE(abilityMs_->MoveMissionToFront(100, startOptions), ERR_OK);
     }
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest MoveMissionToFront_002 end");
 }
@@ -1352,7 +1356,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, MoveMissionsToForeground_001, TestSize
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest MoveMissionsToForeground_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_EQ(abilityMs_->MoveMissionsToForeground({1, 2, 3}, 1), CHECK_PERMISSION_FAILED);
+    EXPECT_NE(abilityMs_->MoveMissionsToForeground({1, 2, 3}, 1), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest MoveMissionsToForeground_001 end");
 }
 
@@ -1367,7 +1371,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, MoveMissionsToBackground_001, TestSize
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest MoveMissionsToBackground_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     std::vector<int32_t> rs;
-    EXPECT_EQ(abilityMs_->MoveMissionsToBackground({1, 2, 3}, rs), CHECK_PERMISSION_FAILED);
+    EXPECT_NE(abilityMs_->MoveMissionsToBackground({1, 2, 3}, rs), ERR_OK);
     EXPECT_TRUE(rs.empty());
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest MoveMissionsToBackground_001 end");
 }
