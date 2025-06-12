@@ -44,12 +44,12 @@ void AgConvertCallbackImplTest::SetUp() {}
  */
 HWTEST_F(AgConvertCallbackImplTest, OnConvert_0001, TestSize.Level1)
 {
-    ConvertCallbackTask task = [](int x, AAFwk::Want &y) {};
+    ConvertCallbackTask task = [](int x, AppDomainVerify::TargetInfo &y) {};
     auto callbackImpl = std::make_shared<ConvertCallbackImpl>(std::move(task));
     int resultCode = 1;
-    AAFwk::Want want;
+    AppDomainVerify::TargetInfo targetInfo;
     callbackImpl->task_ = nullptr;
-    callbackImpl->OnConvert(resultCode, want);
+    callbackImpl->OnConvert(resultCode, targetInfo);
     EXPECT_EQ(callbackImpl->task_, nullptr);
 }
 } // namespace AAFwk
