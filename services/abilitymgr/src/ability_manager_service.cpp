@@ -2495,7 +2495,10 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
         bool isColdStart = true;
         int32_t pid = 0;
         for (auto const &info : runningProcessInfos) {
-            if (info.uid_ == abilityInfo.applicationInfo.uid) {
+            if (info.uid_ == abilityInfo.applicationInfo.uid &&
+                info.processType_ == AppExecFwk::ProcessType::NORMAL &&
+                std::find(info.bundleNames.begin(), info.bundleNames.end(),
+                abilityInfo.applicationInfo.bundleName) != info.bundleNames.end()){
                 isColdStart = false;
                 pid = info.pid_;
                 break;
