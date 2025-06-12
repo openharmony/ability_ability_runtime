@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,8 @@ namespace OHOS {
 namespace AAFwk {
 std::mutex QuickFixUtil::saMutex_;
 std::unordered_map<int32_t, sptr<IRemoteObject>> QuickFixUtil::servicesMap_;
+bool QuickFixUtil::setAppManagerProxyNull_ = false;
+bool QuickFixUtil::setBundleMgrProxyNull_ = false;
 
 sptr<IRemoteObject> QuickFixUtil::GetRemoteObjectOfSystemAbility(const int32_t systemAbilityId)
 {
@@ -44,11 +46,17 @@ sptr<IRemoteObject> QuickFixUtil::GetRemoteObjectOfSystemAbility(const int32_t s
 
 sptr<AppExecFwk::IAppMgr> QuickFixUtil::GetAppManagerProxy()
 {
+    if (setAppManagerProxyNull_) {
+        return nullptr;
+    }
     return iface_cast<AppExecFwk::IAppMgr>(GetRemoteObjectOfSystemAbility(APP_MGR_SERVICE_ID));
 }
 
 sptr<AppExecFwk::IBundleMgr> QuickFixUtil::GetBundleManagerProxy()
 {
+    if (setBundleMgrProxyNull_) {
+        return nullptr;
+    }
     return iface_cast<AppExecFwk::IBundleMgr>(GetRemoteObjectOfSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID));
 }
 
