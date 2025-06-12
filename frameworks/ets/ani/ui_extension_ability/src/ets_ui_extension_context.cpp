@@ -97,7 +97,7 @@ void EtsUIExtensionContext::BindExtensionInfo(ani_env* aniEnv, ani_class context
     ani_status status = ANI_OK;
     if (abilityInfo && hapModuleInfo) {
         auto isExist = [&abilityInfo](const OHOS::AppExecFwk::ExtensionAbilityInfo& info) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
+            TAG_LOGD(AAFwkTag::UI_EXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
             return info.bundleName == abilityInfo->bundleName && info.name == abilityInfo->name;
         };
         auto infoIter = std::find_if(

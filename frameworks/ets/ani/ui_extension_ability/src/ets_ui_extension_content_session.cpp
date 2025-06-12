@@ -199,7 +199,7 @@ ani_object EtsUIExtensionContentSession::CreateEtsUIExtensionContentSession(ani_
             reinterpret_cast<void *>(EtsUIExtensionContentSession::NativeSetWindowBackgroundColor)},
         ani_native_function {"getUIExtensionHostWindowProxy", nullptr,
             reinterpret_cast<void *>(EtsUIExtensionContentSession::NativeGetUIExtensionHostWindowProxy)},
-        ani_native_function {"setReceiveDataCallbackASync", nullptr,
+        ani_native_function {"nativeSetReceiveDataCallback", nullptr,
             reinterpret_cast<void *>(EtsUIExtensionContentSession::NativeSetReceiveDataCallback)}
     };
     status = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
