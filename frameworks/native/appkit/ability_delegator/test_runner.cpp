@@ -19,6 +19,7 @@
 #ifdef CJ_FRONTEND
 #include "runner_runtime/cj_test_runner.h"
 #endif
+#include "runner_runtime/ets_test_runner.h"
 #include "runner_runtime/js_test_runner.h"
 #include "runtime.h"
 #include "sys_mgr_client.h"
@@ -64,6 +65,8 @@ std::unique_ptr<TestRunner> TestRunner::Create(const std::unique_ptr<AbilityRunt
         case AbilityRuntime::Runtime::Language::CJ:
             return RunnerRuntime::CJTestRunner::Create(runtime, args, bundleInfo);
 #endif
+        case AbilityRuntime::Runtime::Language::ETS:
+            return RunnerRuntime::ETSTestRunner::Create(runtime, args, bundleInfo);
         default:
             return std::make_unique<TestRunner>();
     }
