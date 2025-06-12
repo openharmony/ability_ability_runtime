@@ -26,6 +26,10 @@ void ExtensionContextConstructor()
 {
 }
 
+void UIAbilityContextConstructor()
+{
+}
+
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -65,6 +69,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     if (ANI_OK != env->Class_BindNativeMethods(extensionContextClass, classMethods_extensionContext.data(),
         classMethods_extensionContext.size())) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Cannot bind native ctor to class %{public}s.", extensionContextClassName);
+        return ANI_ERROR;
+    };
+
+    ani_class uiAbilityClass;
+    static const char *uiAbilityClassName = "Lapplication/UIAbilityContext/UIAbilityContext;";
+    if (ANI_OK != env->FindClass(uiAbilityClassName, &uiAbilityClass)) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Not found class %{public}s.", uiAbilityClassName);
+        return ANI_NOT_FOUND;
+    }
+    std::array classMethods_uiAbility = {
+        ani_native_function {"<ctor>", ":V", reinterpret_cast<void *>(UIAbilityContextConstructor)},
+    };
+    if (ANI_OK != env->Class_BindNativeMethods(uiAbilityClass, classMethods_uiAbility.data(),
+        classMethods_uiAbility.size())) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Cannot bind native ctor to class %{public}s.", uiAbilityClassName);
         return ANI_ERROR;
     };
     *result = ANI_VERSION_1;
