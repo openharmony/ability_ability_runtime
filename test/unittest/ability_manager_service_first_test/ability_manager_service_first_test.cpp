@@ -172,14 +172,21 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_001, TestSiz
     AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_001 start");
-    AbilityRequest request;
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    AbilityRequest abilityRequest;
+    abilityRequest.callerToken = abilityRecord->GetToken();
     EXPECT_TRUE(abilityMs_->startUpNewRule_);
     abilityMs_->startUpNewRule_ = false;
-    request.abilityInfo.visible = true;
-    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest_), ERR_OK);
+    abilityRequest.abilityInfo.visible = true;
+    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest), ERR_OK);
 
     abilityMs_->startUpNewRule_ = true;
-    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest_), ERR_OK);
+    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_001 end");
 }
 
@@ -2428,6 +2435,72 @@ HWTEST_F(AbilityManagerServiceFirstTest, RevokeDelegator_001, TestSize.Level1)
         EXPECT_EQ(retCode, AAFwk::ERR_NO_PERMISSION_CALLER);
     }
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest RevokeDelegator_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckCallAbilityPermission
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckCallAbilityPermission
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    AbilityRequest abilityRequest;
+    abilityRequest.callerToken = abilityRecord->GetToken();
+    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest), ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckCallAbilityPermission
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckCallAbilityPermission
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    AbilityRequest abilityRequest;
+    abilityRequest.callerToken = nullptr;
+    EXPECT_NE(abilityMs_->CheckCallAbilityPermission(abilityRequest), ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckCallAbilityPermission
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckCallAbilityPermission
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_004 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI_SERVICE;
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    AbilityRequest abilityRequest;
+    abilityRequest.callerToken = abilityRecord->GetToken();
+    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest), ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_004 end");
 }
 } // namespace AAFwk
 } // namespace OHOS
