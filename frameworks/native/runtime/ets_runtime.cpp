@@ -433,7 +433,7 @@ std::unique_ptr<ETSNativeReference> ETSRuntime::LoadEtsModule(const std::string 
         return std::make_unique<ETSNativeReference>();
     }
     ani_method loadClassMethod = nullptr;
-    if (aniEnv->Class_FindMethod(cls, "loadClass", "Lstd/core/String;Z:Lstd/core/Class;", &loadClassMethod) != ANI_OK) {
+    if (aniEnv->Class_FindMethod(cls, "loadClass", nullptr, &loadClassMethod) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod loadClass failed");
         return std::make_unique<ETSNativeReference>();
     }
