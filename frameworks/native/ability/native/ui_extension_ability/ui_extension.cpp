@@ -15,6 +15,7 @@
 
 #include "ui_extension.h"
 
+#include "ets_ui_extension.h"
 #include "hilog_tag_wrapper.h"
 #include "js_ui_extension.h"
 #include "runtime.h"
@@ -32,6 +33,8 @@ UIExtension* UIExtension::Create(const std::unique_ptr<Runtime>& runtime)
     switch (runtime->GetLanguage()) {
         case Runtime::Language::JS:
             return JsUIExtension::Create(runtime);
+        case Runtime::Language::ETS:
+            return EtsUIExtension::Create(runtime);
 
         default:
             return new UIExtension();
