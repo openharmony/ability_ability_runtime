@@ -49,6 +49,157 @@ void AbilityManagerServiceMockTest::SetUp() {}
 void AbilityManagerServiceMockTest::TearDown() {}
 
 /**
+* @tc.name: ExecuteIntent_0400
+* @tc.desc: Test  StartExtensionAbilityWithInsightIntent error
+* @tc.type: FUNC
+*/
+HWTEST_F(AbilityManagerServiceMockTest, InsightIntentExecuteParam_0100, TestSize.Level1)
+{
+    Want want;
+    auto ret = AppExecFwk::InsightIntentExecuteParam::IsInsightIntentExecute(want);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+* @tc.name: InsightIntentExecuteParam_0200
+* @tc.desc: Test  StartExtensionAbilityWithInsightIntent error
+* @tc.type: FUNC
+*/
+HWTEST_F(AbilityManagerServiceMockTest, InsightIntentExecuteParam_0200, TestSize.Level1)
+{
+    Want want;
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, 1);
+    auto ret = AppExecFwk::InsightIntentExecuteParam::IsInsightIntentExecute(want);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+* @tc.name: InsightIntentExecuteParam_0300
+* @tc.desc: Test  StartExtensionAbilityWithInsightIntent error
+* @tc.type: FUNC
+*/
+HWTEST_F(AbilityManagerServiceMockTest, InsightIntentExecuteParam_0300, TestSize.Level1)
+{
+    Want want;
+    auto ret = AppExecFwk::InsightIntentExecuteParam::IsInsightIntentPage(want);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+* @tc.name: InsightIntentExecuteParam_0400
+* @tc.desc: Test  StartExtensionAbilityWithInsightIntent error
+* @tc.type: FUNC
+*/
+HWTEST_F(AbilityManagerServiceMockTest, InsightIntentExecuteParam_0400, TestSize.Level1)
+{
+    Want want;
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_DECORATOR_TYPE, 1);
+    auto ret = AppExecFwk::InsightIntentExecuteParam::IsInsightIntentPage(want);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+* @tc.name: InsightIntentExecuteParam_0500
+* @tc.desc: Test  StartExtensionAbilityWithInsightIntent error
+* @tc.type: FUNC
+*/
+HWTEST_F(AbilityManagerServiceMockTest, InsightIntentExecuteParam_0500, TestSize.Level1)
+{
+    Want want;
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_DECORATOR_TYPE, 2);
+    auto ret = AppExecFwk::InsightIntentExecuteParam::IsInsightIntentPage(want);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+* @tc.name: InsightIntentExecuteParam_0600
+* @tc.desc: Test  StartExtensionAbilityWithInsightIntent error
+* @tc.type: FUNC
+*/
+HWTEST_F(AbilityManagerServiceMockTest, InsightIntentExecuteParam_0600, TestSize.Level1)
+{
+    Want want;
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_DECORATOR_TYPE, 2);
+    auto ret = AppExecFwk::InsightIntentExecuteParam::IsInsightIntentPage(want);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+* @tc.name: InsightIntentExecuteParam_0700
+* @tc.desc: Test  StartExtensionAbilityWithInsightIntent error
+* @tc.type: FUNC
+*/
+HWTEST_F(AbilityManagerServiceMockTest, InsightIntentExecuteParam_0700, TestSize.Level1)
+{
+    Want want;
+    AppExecFwk::InsightIntentExecuteParam param;
+    auto ret = AppExecFwk::InsightIntentExecuteParam::GenerateFromWant(want, param);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+* @tc.name: InsightIntentExecuteParam_0800
+* @tc.desc: Test  StartExtensionAbilityWithInsightIntent error
+* @tc.type: FUNC
+*/
+HWTEST_F(AbilityManagerServiceMockTest, InsightIntentExecuteParam_0800, TestSize.Level1)
+{
+    Want want;
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_ID, std::string("error"));
+    AppExecFwk::InsightIntentExecuteParam param;
+    auto ret = AppExecFwk::InsightIntentExecuteParam::GenerateFromWant(want, param);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+* @tc.name: InsightIntentExecuteParam_0900
+* @tc.desc: Test  StartExtensionAbilityWithInsightIntent error
+* @tc.type: FUNC
+*/
+HWTEST_F(AbilityManagerServiceMockTest, InsightIntentExecuteParam_0900, TestSize.Level1)
+{
+    Want want;
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_ID, std::string("error"));
+    AppExecFwk::InsightIntentExecuteParam param;
+    auto ret = AppExecFwk::InsightIntentExecuteParam::GenerateFromWant(want, param);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+* @tc.name: InsightIntentExecuteParam_1000
+* @tc.desc: Test  StartExtensionAbilityWithInsightIntent error
+* @tc.type: FUNC
+*/
+HWTEST_F(AbilityManagerServiceMockTest, InsightIntentExecuteParam_1000, TestSize.Level1)
+{
+    Want want;
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_ID, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_MODE, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_PARAM, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_SRC_ENTRY, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_URI, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_FLAGS, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_OPENLINK_FLAG, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_DECORATOR_TYPE, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_SRC_ENTRANCE, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_FUNC_PARAM_CLASSNAME, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_FUNC_PARAM_METHODNAME, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_FUNC_PARAM_METHODPARAMS, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_PAGE_PARAM_PAGEPATH, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_PAGE_PARAM_NAVIGATIONID, 1);
+    want.SetParam(AppExecFwk::INSIGHT_INTENT_PAGE_PARAM_NAVDESTINATIONNAME, 1);
+
+    auto ret = AppExecFwk::InsightIntentExecuteParam::RemoveInsightIntent(want);
+    EXPECT_EQ(ret, true);
+}
+
+/**
  * @tc.name: ExecuteIntent_0100
  * @tc.desc: Test  StartAbilityByCallWithInsightIntent error
  * @tc.type: FUNC
@@ -80,6 +231,8 @@ HWTEST_F(AbilityManagerServiceMockTest, ExecuteIntent_0200, TestSize.Level1)
 {
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
+    abilityMs->abilityEventHelper_ = std::make_shared<AbilityEventUtil>();
+    ASSERT_NE(abilityMs->abilityEventHelper_, nullptr);
     AppExecFwk::InsightIntentExecuteParam param;
     param.bundleName_ = "test.bundleName";
     param.moduleName_ = "test.entry";
@@ -103,6 +256,8 @@ HWTEST_F(AbilityManagerServiceMockTest, ExecuteIntent_0300, TestSize.Level1)
 {
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
+    abilityMs->abilityEventHelper_ = std::make_shared<AbilityEventUtil>();
+    ASSERT_NE(abilityMs->abilityEventHelper_, nullptr);
     AppExecFwk::InsightIntentExecuteParam param;
     param.bundleName_ = "test.bundleName";
     param.moduleName_ = "test.entry";
