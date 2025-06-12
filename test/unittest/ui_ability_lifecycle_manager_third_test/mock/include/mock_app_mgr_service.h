@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,10 @@
 #ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_APP_MGR_SERVICE_H
 #define MOCK_OHOS_ABILITY_RUNTIME_MOCK_APP_MGR_SERVICE_H
 
+#include "app_malloc_info.h"
+#include "app_mgr_stub.h"
 #include "gmock/gmock.h"
 #include "semaphore_ex.h"
-#include "app_mgr_stub.h"
-#include "app_malloc_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {

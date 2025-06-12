@@ -44,9 +44,9 @@
 #undef private
 #include "ability_scheduler_mock.h"
 #include "hilog_tag_wrapper.h"
+#include "mock_app_mgr_service.h"
 #include "mock_my_flag.h"
 #include "mock_permission_verification.h"
-#include "mock_app_mgr_service.h"
 
 using namespace testing;
 using namespace testing::ext;
