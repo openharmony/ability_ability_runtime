@@ -72,6 +72,7 @@ ohos_unittest("quick_fix_manager_apply_task_test") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "../../../cfi_blocklist.txt"
   }
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",

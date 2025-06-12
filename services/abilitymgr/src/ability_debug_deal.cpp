@@ -78,13 +78,13 @@ ErrCode AbilityDebugResponse::OnAbilitysDebugStarted(const std::vector<sptr<IRem
 {
     if (tokens.empty()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "tokens empty");
-        return ERR_INVALID_DATA;
+        return ERR_ABILITY_DEBUG_EMPTY_TOKENS;
     }
 
     auto deal = abilityDebugDeal_.lock();
     if (deal == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "deal null");
-        return ERR_INVALID_DATA;
+        return INNER_ERR;
     }
     deal->OnAbilitysDebugStarted(tokens);
     return ERR_OK;
@@ -94,13 +94,13 @@ ErrCode AbilityDebugResponse::OnAbilitysDebugStoped(const std::vector<sptr<IRemo
 {
     if (tokens.empty()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "tokens empty");
-        return ERR_INVALID_DATA;
+        return ERR_ABILITY_DEBUG_EMPTY_TOKENS;
     }
 
     auto deal = abilityDebugDeal_.lock();
     if (deal == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "deal null");
-        return ERR_INVALID_DATA;
+        return INNER_ERR;
     }
     deal->OnAbilitysDebugStoped(tokens);
     return ERR_OK;
@@ -111,13 +111,13 @@ ErrCode AbilityDebugResponse::OnAbilitysAssertDebugChange(
 {
     if (tokens.empty()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "tokens empty");
-        return ERR_INVALID_DATA;
+        return ERR_ABILITY_DEBUG_EMPTY_TOKENS;
     }
 
     auto deal = abilityDebugDeal_.lock();
     if (deal == nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "deal null");
-        return ERR_INVALID_DATA;
+        return INNER_ERR;
     }
     deal->OnAbilitysAssertDebugChange(tokens, isAssertDebug);
     return ERR_OK;
