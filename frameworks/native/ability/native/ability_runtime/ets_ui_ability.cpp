@@ -18,6 +18,9 @@
 #include <regex>
 
 #include "ani_common_want.h"
+#ifdef SUPPORT_SCREEN
+#include "ani_window_stage.h"
+#endif
 #include "app_recovery.h"
 #include "connection_manager.h"
 #include "display_util.h"
@@ -26,9 +29,6 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "string_wrapper.h"
-#ifdef SUPPORT_SCREEN
-#include "ani_window_stage.h"
-#endif
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -84,17 +84,16 @@ EtsUIAbility::EtsUIAbility(ETSRuntime &etsRuntime) : etsRuntime_(etsRuntime)
 EtsUIAbility::~EtsUIAbility()
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "~EtsUIAbility called");
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
     if (shellContextRef_ && shellContextRef_->aniRef) {
-        auto env = etsRuntime_.GetAniEnv();
-        if (env != nullptr) {
-            env->GlobalReference_Delete(shellContextRef_->aniRef);
-        }
+        env->GlobalReference_Delete(shellContextRef_->aniRef);
     }
     if (etsWindowStageObj_ && etsWindowStageObj_->aniRef) {
-        auto env = etsRuntime_.GetAniEnv();
-        if (env != nullptr) {
-            env->GlobalReference_Delete(etsWindowStageObj_->aniRef);
-        }
+        env->GlobalReference_Delete(etsWindowStageObj_->aniRef);
     }
 }
 
@@ -472,24 +471,17 @@ void EtsUIAbility::AbilityContinuationOrRecover(const Want &want)
     if (IsRestoredInContinuation()) {
         RestorePageStack(want);
         NotifyContinuationResult(want, true);
-    } else if (ShouldRecoverState(want)) {
-        std::string pageStack = abilityRecovery_->GetSavedPageStack(AppExecFwk::StateReason::DEVELOPER_REQUEST);
-
-        auto mainWindow = scene_->GetMainWindow();
-        if (mainWindow == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null mainWindow");
-        }
-    } else {
-        if (ShouldDefaultRecoverState(want) && abilityRecovery_ != nullptr && scene_ != nullptr) {
-            TAG_LOGD(AAFwkTag::UIABILITY, "need restore");
-            std::string pageStack = abilityRecovery_->GetSavedPageStack(AppExecFwk::StateReason::DEVELOPER_REQUEST);
-            auto mainWindow = scene_->GetMainWindow();
-            if (!pageStack.empty() && mainWindow != nullptr) {
-                mainWindow->SetRestoredRouterStack(pageStack);
-            }
-        }
-        OnSceneCreated();
+        return;
     }
+    if (ShouldDefaultRecoverState(want) && abilityRecovery_ != nullptr && scene_ != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "need restore");
+        std::string pageStack = abilityRecovery_->GetSavedPageStack(AppExecFwk::StateReason::DEVELOPER_REQUEST);
+        auto mainWindow = scene_->GetMainWindow();
+        if (!pageStack.empty() && mainWindow != nullptr) {
+            mainWindow->SetRestoredRouterStack(pageStack);
+        }
+    }
+    OnSceneCreated();
 }
 
 void EtsUIAbility::DoOnForeground(const Want &want)
