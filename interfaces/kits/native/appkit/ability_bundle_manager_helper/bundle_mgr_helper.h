@@ -125,6 +125,9 @@ public:
         int32_t userId, BundleInfo &bundleInfo);
     ErrCode GetLauncherAbilityInfoSync(const std::string &bundleName, int32_t userId,
         std::vector<AbilityInfo> &abilityInfo);
+    ErrCode GetPluginInfoForTarget(const std::string &hostBundleName, const std::string &pluginBundleName,
+        int32_t userId, PluginBundleInfo &pluginBundleInfo);
+
 private:
     sptr<IBundleMgr> Connect();
     sptr<IBundleMgr> Connect(bool checkBmsReady);
