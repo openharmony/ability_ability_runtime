@@ -29,7 +29,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace ContextUtil {
 namespace {
-    constexpr const char* CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
+constexpr const char* CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
 }
 void BindApplicationInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<Context> context)
@@ -99,9 +99,9 @@ void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object cont
         return;
     }
     auto filesDir = context->GetFilesDir();
-    ani_string filesDir_string{};
-    aniEnv->String_NewUTF8(filesDir.c_str(), filesDir.size(), &filesDir_string);
-    if (aniEnv->Object_SetField_Ref(contextObj, filesDirField, reinterpret_cast<ani_ref>(filesDir_string)) != ANI_OK) {
+    ani_string filesDirString{};
+    aniEnv->String_NewUTF8(filesDir.c_str(), filesDir.size(), &filesDirString);
+    if (aniEnv->Object_SetField_Ref(contextObj, filesDirField, reinterpret_cast<ani_ref>(filesDirString)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
         return;
     }
@@ -111,9 +111,9 @@ void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object cont
         return;
     }
     auto tempDir = context->GetTempDir();
-    ani_string tempDir_string{};
-    aniEnv->String_NewUTF8(tempDir.c_str(), tempDir.size(), &tempDir_string);
-    if (aniEnv->Object_SetField_Ref(contextObj, tempDirField, reinterpret_cast<ani_ref>(tempDir_string)) != ANI_OK) {
+    ani_string tempDirString{};
+    aniEnv->String_NewUTF8(tempDir.c_str(), tempDir.size(), &tempDirString);
+    if (aniEnv->Object_SetField_Ref(contextObj, tempDirField, reinterpret_cast<ani_ref>(tempDirString)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
         return;
     }
@@ -211,7 +211,7 @@ ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unuse
         return {};
     }
     if (!applicationContext->GetApplicationInfoUpdateFlag()) {
-        auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetEtsGlobalObject(env);
+        auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetEtsGlobalObject();
         if (appContextObj != nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "appContextObj is not nullptr");
             return appContextObj->aniObj;

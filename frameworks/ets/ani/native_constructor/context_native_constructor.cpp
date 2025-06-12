@@ -13,27 +13,20 @@
  * limitations under the License.
  */
 #include <ani.h>
-#include <iostream>
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-void ContextConstructor()
-{
-}
+void ContextConstructor() {}
 
-void ExtensionContextConstructor()
-{
-}
+void ExtensionContextConstructor() {}
 
-void UIAbilityContextConstructor()
-{
-}
+void UIAbilityContextConstructor() {}
 
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
-    ani_env *env;
+    ani_env *env = nullptr;
     if (vm == nullptr || result == nullptr) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Illegal VM or result");
         return ANI_ERROR;
@@ -42,47 +35,47 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Unsupported ANI_VERSION_1");
         return ANI_ERROR;
     }
-    ani_class contextClass;
+    ani_class contextClass = nullptr;
     static const char *contextClassName = "Lapplication/Context/Context;";
     if (ANI_OK != env->FindClass(contextClassName, &contextClass)) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Not found class %{public}s.", contextClassName);
         return ANI_NOT_FOUND;
     }
-    std::array classMethods_context = {
+    std::array classMethodsContext = {
         ani_native_function {"<ctor>", ":V", reinterpret_cast<void *>(ContextConstructor)},
     };
-    if (ANI_OK != env->Class_BindNativeMethods(contextClass, classMethods_context.data(),
-        classMethods_context.size())) {
+    if (ANI_OK != env->Class_BindNativeMethods(contextClass, classMethodsContext.data(),
+        classMethodsContext.size())) {
             TAG_LOGE(AAFwkTag::ETSRUNTIME, "Cannot bind native ctor to class %{public}s.", contextClassName);
         return ANI_ERROR;
     };
 
-    ani_class extensionContextClass;
+    ani_class extensionContextClass = nullptr;
     static const char *extensionContextClassName = "Lapplication/ExtensionContext/ExtensionContext;";
     if (ANI_OK != env->FindClass(extensionContextClassName, &extensionContextClass)) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Not found class %{public}s.", extensionContextClassName);
         return ANI_NOT_FOUND;
     }
-    std::array classMethods_extensionContext = {
+    std::array classMethodsExtensionContext = {
         ani_native_function {"<ctor>", ":V", reinterpret_cast<void *>(ExtensionContextConstructor)},
     };
-    if (ANI_OK != env->Class_BindNativeMethods(extensionContextClass, classMethods_extensionContext.data(),
-        classMethods_extensionContext.size())) {
+    if (ANI_OK != env->Class_BindNativeMethods(extensionContextClass, classMethodsExtensionContext.data(),
+        classMethodsExtensionContext.size())) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Cannot bind native ctor to class %{public}s.", extensionContextClassName);
         return ANI_ERROR;
     };
 
-    ani_class uiAbilityClass;
+    ani_class uiAbilityClass = nullptr;
     static const char *uiAbilityClassName = "Lapplication/UIAbilityContext/UIAbilityContext;";
     if (ANI_OK != env->FindClass(uiAbilityClassName, &uiAbilityClass)) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Not found class %{public}s.", uiAbilityClassName);
         return ANI_NOT_FOUND;
     }
-    std::array classMethods_uiAbility = {
+    std::array classMethodsUiAbility = {
         ani_native_function {"<ctor>", ":V", reinterpret_cast<void *>(UIAbilityContextConstructor)},
     };
-    if (ANI_OK != env->Class_BindNativeMethods(uiAbilityClass, classMethods_uiAbility.data(),
-        classMethods_uiAbility.size())) {
+    if (ANI_OK != env->Class_BindNativeMethods(uiAbilityClass, classMethodsUiAbility.data(),
+        classMethodsUiAbility.size())) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Cannot bind native ctor to class %{public}s.", uiAbilityClassName);
         return ANI_ERROR;
     };
