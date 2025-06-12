@@ -1831,7 +1831,7 @@ HWTEST_F(AbilityDelegatorTest, RegisterClearFuncTest_0100, TestSize.Level1)
     ASSERT_NE(commonDelegator_, nullptr);
 
     // Register clear function.
-    auto clearFunc = [](const std::shared_ptr<ADelegatorAbilityProperty> &property) {
+    auto clearFunc = [](const std::shared_ptr<BaseDelegatorAbilityProperty> &property) {
         TAG_LOGI(AAFwkTag::TEST, "Clear function is called");
     };
     commonDelegator_->RegisterClearFunc(clearFunc);

@@ -24,8 +24,6 @@
 #include "context.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
-#include "insight_intent_executor_info.h"
-#include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
 #include "ets_runtime.h"
 #include "ani_common_want.h"
@@ -132,19 +130,18 @@ void EtsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     if ((status = env->Class_BindNativeMethods(etsObj_->aniCls, functions.data(), functions.size())) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
     }
-    BindContext(env, record->GetWant(), application);
+    BindContext(env, record->GetWant());
     RegisterDisplayInfoChangedListener();
 }
 
-ani_object EtsUIExtension::CreateETSContext(ani_env* env, std::shared_ptr<UIExtensionContext> context,
-    int32_t screenMode, const std::shared_ptr<OHOSApplication> &application)
+ani_object EtsUIExtension::CreateETSContext(ani_env* env,
+    std::shared_ptr<UIExtensionContext> context, int32_t screenMode)
 {
-    ani_object obj = CreateEtsUIExtensionContext(env, context, application);
+    ani_object obj = CreateEtsUIExtensionContext(env, context);
     return obj;
 }
 
-void EtsUIExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want,
-    const std::shared_ptr<OHOSApplication> &application)
+void EtsUIExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want)
 {
     if (env == nullptr || want == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Want info is null or env is null");
@@ -158,7 +155,7 @@ void EtsUIExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want,
     }
 
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
-    ani_object contextObj = CreateETSContext(env, context, screenMode, application);
+    ani_object contextObj = CreateETSContext(env, context, screenMode);
     if (contextObj == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null contextObj");
         return;

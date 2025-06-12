@@ -23,6 +23,7 @@
 #include "connection_record.h"
 #include "extension_ability_info.h"
 #include "connection_data.h"
+#include "connection_event.h"
 #include "data_ability_record.h"
 
 namespace OHOS {
@@ -61,18 +62,42 @@ public:
      *
      * @param record the connection record which mark an connection.
      * @param data output relationship data.
+     * @param event output relationship event.
      * @return Returns true if need report relationship.
      */
-    bool AddConnection(std::shared_ptr<ConnectionRecord> record, AbilityRuntime::ConnectionData &data);
+    bool AddConnection(std::shared_ptr<ConnectionRecord> record,
+        AbilityRuntime::ConnectionData &data, ConnectionEvent &event);
 
     /**
      * remove a connection to target extension.
      *
      * @param record the connection record which mark an connection.
      * @param data output relationship data.
+     * @param event output relationship event.
      * @return Returns true if need report relationship.
      */
-    bool RemoveConnection(std::shared_ptr<ConnectionRecord> record, AbilityRuntime::ConnectionData &data);
+    bool RemoveConnection(std::shared_ptr<ConnectionRecord> record,
+        AbilityRuntime::ConnectionData &data, ConnectionEvent &event);
+
+    /**
+     * suspend a connection to target extension.
+     *
+     * @param record the connection record which mark an connection.
+     * @param data output relationship data.
+     * @return Returns true if need report relationship.
+     */
+    bool SuspendConnection(std::shared_ptr<ConnectionRecord> record,
+        AbilityRuntime::ConnectionData &data);
+
+    /**
+     * resume a connection to target extension.
+     *
+     * @param record the connection record which mark an connection.
+     * @param data output relationship data.
+     * @return Returns true if need report relationship.
+     */
+    bool ResumeConnection(std::shared_ptr<ConnectionRecord> record,
+        AbilityRuntime::ConnectionData &data);
 
     /**
      * add a connection to target data ability.

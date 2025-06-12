@@ -28,7 +28,7 @@ public:
     explicit MockIabilityMonitor(const std::string& abilityName);
     virtual ~MockIabilityMonitor() = default;
 
-    virtual bool Match(const std::shared_ptr<ADelegatorAbilityProperty>& ability, bool isNotify = false);
+    virtual bool Match(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability, bool isNotify = false);
 
     std::shared_ptr<ADelegatorAbilityProperty> waitForAbility()
     {
@@ -39,14 +39,14 @@ public:
         return std::make_shared<ADelegatorAbilityProperty>();
     };
 
-    void OnAbilityStart(const std::weak_ptr<NativeReference>& abilityObj) override;
-    void OnAbilityForeground(const std::weak_ptr<NativeReference>& abilityObj) override;
-    void OnAbilityBackground(const std::weak_ptr<NativeReference>& abilityObj) override;
-    void OnAbilityStop(const std::weak_ptr<NativeReference>& abilityObj) override;
+    void OnAbilityStart(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj) override;
+    void OnAbilityForeground(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj) override;
+    void OnAbilityBackground(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj) override;
+    void OnAbilityStop(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj) override;
 
-    void OnWindowStageCreate(const std::weak_ptr<NativeReference>& abilityObj) override;
-    void OnWindowStageRestore(const std::weak_ptr<NativeReference>& abilityObj) override;
-    void OnWindowStageDestroy(const std::weak_ptr<NativeReference>& abilityObj) override;
+    void OnWindowStageCreate(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj) override;
+    void OnWindowStageRestore(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj) override;
+    void OnWindowStageDestroy(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj) override;
 
     bool start_;
     bool foreground_;

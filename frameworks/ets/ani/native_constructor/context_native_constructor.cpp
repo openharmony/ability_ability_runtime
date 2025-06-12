@@ -22,6 +22,10 @@ void ContextConstructor()
 {
 }
 
+void ExtensionContextConstructor()
+{
+}
+
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -46,6 +50,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     if (ANI_OK != env->Class_BindNativeMethods(contextClass, classMethods_context.data(),
         classMethods_context.size())) {
             TAG_LOGE(AAFwkTag::ETSRUNTIME, "Cannot bind native ctor to class %{public}s.", contextClassName);
+        return ANI_ERROR;
+    };
+
+    ani_class extensionContextClass;
+    static const char *extensionContextClassName = "Lapplication/ExtensionContext/ExtensionContext;";
+    if (ANI_OK != env->FindClass(extensionContextClassName, &extensionContextClass)) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Not found class %{public}s.", extensionContextClassName);
+        return ANI_NOT_FOUND;
+    }
+    std::array classMethods_extensionContext = {
+        ani_native_function {"<ctor>", ":V", reinterpret_cast<void *>(ExtensionContextConstructor)},
+    };
+    if (ANI_OK != env->Class_BindNativeMethods(extensionContextClass, classMethods_extensionContext.data(),
+        classMethods_extensionContext.size())) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Cannot bind native ctor to class %{public}s.", extensionContextClassName);
         return ANI_ERROR;
     };
     *result = ANI_VERSION_1;

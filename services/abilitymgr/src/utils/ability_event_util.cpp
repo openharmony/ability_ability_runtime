@@ -28,5 +28,19 @@ void AbilityEventUtil::HandleModuleInfoUpdated(const std::string &bundleName, co
         isPlugin);
 }
 
+void AbilityEventUtil::SendStartAbilityErrorEvent(EventInfo &eventInfo, int32_t errCode, const std::string errMsg,
+    bool isSystemError)
+{
+    if (taskHandler_ == nullptr) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "task handler null");
+        return;
+    }
+    EventName name = isSystemError ? EventName::START_ABILITY_SYSTEM_ERROR : EventName::START_ABILITY_ERROR;
+    eventInfo.errCode = errCode;
+    eventInfo.errMsg = errMsg;
+    taskHandler_->SubmitTask([eventInfo, name]() {
+        EventReport::SendAbilityEvent(name, HiSysEventType::FAULT, eventInfo);
+        });
+}
 } // namespace AAFwk
 } // namespace OHOS

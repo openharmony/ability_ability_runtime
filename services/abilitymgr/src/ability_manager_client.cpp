@@ -2316,5 +2316,24 @@ ErrCode AbilityManagerClient::RegisterSAInterceptor(sptr<AbilityRuntime::ISAInte
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->RegisterSAInterceptor(interceptor);
 }
+
+ErrCode AbilityManagerClient::SuspendExtensionAbility(sptr<IAbilityConnection> connect)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "SuspendExtensionAbility call");
+    return abms->SuspendExtensionAbility(connect);
+}
+
+ErrCode AbilityManagerClient::ResumeExtensionAbility(sptr<IAbilityConnection> connect)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "ResumeExtensionAbility call");
+    return abms->ResumeExtensionAbility(connect);
+}
+
 } // namespace AAFwk
 } // namespace OHOS

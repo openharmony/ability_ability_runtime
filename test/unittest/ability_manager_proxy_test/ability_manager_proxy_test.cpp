@@ -621,6 +621,111 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_033, TestSize.Level2)
 
 /*
  * Feature: AbilityManagerService
+ * Function: SuspendExtensionAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SuspendExtensionAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify the abnormal conditions of SuspendExtensionAbility
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_034, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
+    sptr<IAbilityConnection> connect = new AbilityConnectCallback();
+    int res = proxy_->SuspendExtensionAbility(connect);
+
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::SUSPEND_EXTENSION_ABILITY), mock_->code_);
+    EXPECT_NE(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ResumeExtensionAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ResumeExtensionAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify the abnormal conditions of ResumeExtensionAbility
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_035, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
+    sptr<IAbilityConnection> connect = new AbilityConnectCallback();
+    int res = proxy_->ResumeExtensionAbility(connect);
+
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::RESUME_EXTENSION_ABILITY), mock_->code_);
+    EXPECT_NE(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SuspendExtensionAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SuspendExtensionAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify the abnormal conditions of SuspendExtensionAbility
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_036, TestSize.Level1)
+{
+    sptr<IAbilityConnection> connect = nullptr;
+    int res = proxy_->SuspendExtensionAbility(connect);
+    EXPECT_NE(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ResumeExtensionAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ResumeExtensionAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify the abnormal conditions of ResumeExtensionAbility
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_037, TestSize.Level1)
+{
+    sptr<IAbilityConnection> connect = nullptr;
+    int res = proxy_->ResumeExtensionAbility(connect);
+
+    EXPECT_NE(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_033
+ * @tc.desc: test ResumeExtensionAbility send async request succeeded
+ * @tc.type: FUNC
+ * @tc.require: AR000GI8IL
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_038, TestSize.Level2)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    sptr<IAbilityConnection> connect = new AbilityConnectCallback();
+    int res = proxy_->ResumeExtensionAbility(connect);
+    EXPECT_EQ(res, NO_ERROR);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::RESUME_EXTENSION_ABILITY), mock_->code_);
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_033
+ * @tc.desc: test SuspendExtensionAbility send async request succeeded
+ * @tc.type: FUNC
+ * @tc.require: AR000GI8IL
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_039, TestSize.Level2)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    sptr<IAbilityConnection> connect = new AbilityConnectCallback();
+    int res = proxy_->SuspendExtensionAbility(connect);
+    EXPECT_EQ(res, NO_ERROR);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::SUSPEND_EXTENSION_ABILITY), mock_->code_);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: AcquireDataAbility
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService AcquireDataAbility

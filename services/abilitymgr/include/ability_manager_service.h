@@ -747,6 +747,10 @@ public:
 
     virtual int DisconnectAbility(sptr<IAbilityConnection> connect) override;
 
+    virtual int32_t SuspendExtensionAbility(sptr<IAbilityConnection> connect) override;
+
+    virtual int32_t ResumeExtensionAbility(sptr<IAbilityConnection> connect) override;
+
     /**
      * AcquireDataAbility, acquire a data ability by its authority, if it not existed,
      * AMS loads it synchronously.
@@ -2319,6 +2323,8 @@ private:
     std::shared_ptr<DataAbilityManager> GetDataAbilityManager(const sptr<IAbilityScheduler> &scheduler);
     std::shared_ptr<DataAbilityManager> GetDataAbilityManagerByUserId(int32_t userId);
     std::shared_ptr<DataAbilityManager> GetDataAbilityManagerByToken(const sptr<IRemoteObject> &token);
+    int32_t HandleExtensionAbility(sptr<IAbilityConnection> connect,
+        std::function<int32_t(std::shared_ptr<AbilityConnectManager>, sptr<IAbilityConnection>)>);
     std::unordered_map<int, std::shared_ptr<AbilityConnectManager>> GetConnectManagers();
     std::shared_ptr<AbilityConnectManager> GetCurrentConnectManager();
     std::shared_ptr<AbilityConnectManager> GetConnectManagerByUserId(int32_t userId);
@@ -2821,6 +2827,7 @@ private:
 
     std::mutex prepareTermiationCallbackMutex_;
     std::map<std::string, sptr<IPrepareTerminateCallback>> prepareTermiationCallbacks_;
+    std::shared_ptr<AbilityEventUtil> abilityEventHelper_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

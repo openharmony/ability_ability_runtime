@@ -420,7 +420,7 @@ std::string AppfreezeManager::ReportAppfreezeCpuInfo(const FaultData& faultData,
     } else if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S ||
         faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT) {
         filePath = AppExecFwk::AppfreezeCpuFreqManager::GetInstance()->WriteCpuInfoToFile(appInfo.bundleName,
-            appInfo.uid, appInfo.pid);
+            appInfo.uid, appInfo.pid, faultData.errorObject.name);
     }
     TAG_LOGI(AAFwkTag::APPDFR, "appfreezeInfo:%{public}s, filePath:%{public}s",
         faultData.appfreezeInfo.c_str(), filePath.c_str());

@@ -103,11 +103,18 @@ void ConnectionStateManager::AddConnection(std::shared_ptr<ConnectionRecord> con
     }
 
     ConnectionData connectionData;
-    if (!AddConnectionInner(connectionRecord, connectionData)) {
+    ConnectionEvent connectionEvent;
+    if (!AddConnectionInner(connectionRecord, connectionData, connectionEvent)) {
         TAG_LOGD(AAFwkTag::CONNECTION, "no need notify observers");
         return;
     }
-    controller->NotifyExtensionConnected(connectionData);
+    if (connectionEvent.connectedEvent) {
+        controller->NotifyExtensionConnected(connectionData);
+    }
+
+    if (connectionEvent.resumedEvent) {
+        controller->NotifyExtensionResumed(connectionData);
+    }
 }
 
 void ConnectionStateManager::RemoveConnection(std::shared_ptr<ConnectionRecord> connectionRecord,
@@ -130,11 +137,18 @@ void ConnectionStateManager::RemoveConnection(std::shared_ptr<ConnectionRecord> 
     }
 
     ConnectionData connectionData;
-    if (!RemoveConnectionInner(connectionRecord, connectionData)) {
+    ConnectionEvent connectionEvent;
+    if (!RemoveConnectionInner(connectionRecord, connectionData, connectionEvent)) {
         TAG_LOGD(AAFwkTag::CONNECTION, "no need notify observers");
         return;
     }
-    controller->NotifyExtensionDisconnected(connectionData);
+    if (connectionEvent.disconnectedEvent) {
+        controller->NotifyExtensionDisconnected(connectionData);
+    }
+
+    if (connectionEvent.suspendedEvent) {
+        controller->NotifyExtensionSuspended(connectionData);
+    }
 }
 
 void ConnectionStateManager::AddDataAbilityConnection(const DataAbilityCaller &caller,
@@ -323,7 +337,9 @@ void ConnectionStateManager::GetConnectionData(std::vector<AbilityRuntime::Conne
 }
 
 bool ConnectionStateManager::AddConnectionInner(std::shared_ptr<ConnectionRecord> connectionRecord,
-    AbilityRuntime::ConnectionData &data)
+    AbilityRuntime::ConnectionData &data, ConnectionEvent &connectionEvent
+
+)
 {
     std::shared_ptr<ConnectionStateItem> targetItem = nullptr;
     auto callerPid = connectionRecord->GetCallerPid();
@@ -343,11 +359,11 @@ bool ConnectionStateManager::AddConnectionInner(std::shared_ptr<ConnectionRecord
         return false;
     }
 
-    return targetItem->AddConnection(connectionRecord, data);
+    return targetItem->AddConnection(connectionRecord, data, connectionEvent);
 }
 
 bool ConnectionStateManager::RemoveConnectionInner(std::shared_ptr<ConnectionRecord> connectionRecord,
-    AbilityRuntime::ConnectionData &data)
+    AbilityRuntime::ConnectionData &data, ConnectionEvent &connectionEvent)
 {
     auto callerPid = connectionRecord->GetCallerPid();
     std::lock_guard<ffrt::mutex> guard(stateLock_);
@@ -363,7 +379,7 @@ bool ConnectionStateManager::RemoveConnectionInner(std::shared_ptr<ConnectionRec
         return false;
     }
 
-    bool result = targetItem->RemoveConnection(connectionRecord, data);
+    bool result = targetItem->RemoveConnection(connectionRecord, data, connectionEvent);
     if (result && targetItem->IsEmpty()) {
         connectionStates_.erase(it);
     }
@@ -553,6 +569,86 @@ void ConnectionStateManager::InitAppStateObserver()
         appStateObserver_ = nullptr;
         return;
     }
+}
+
+void ConnectionStateManager::SuspendConnection(std::shared_ptr<ConnectionRecord> connectionRecord)
+{
+    std::shared_ptr<ConnectionObserverController> controller = observerController_;
+    if (!controller) {
+        return;
+    }
+
+    if (!connectionRecord) {
+        TAG_LOGE(AAFwkTag::CONNECTION, "invalid connection record");
+        return;
+    }
+
+    ConnectionData connectionData;
+    if (!SuspendConnectionInner(connectionRecord, connectionData)) {
+        TAG_LOGD(AAFwkTag::CONNECTION, "no need notify observers");
+        return;
+    }
+    controller->NotifyExtensionSuspended(connectionData);
+}
+
+bool ConnectionStateManager::SuspendConnectionInner(std::shared_ptr<ConnectionRecord> connectionRecord,
+    AbilityRuntime::ConnectionData &data)
+{
+    auto callerPid = connectionRecord->GetCallerPid();
+    std::lock_guard<ffrt::mutex> guard(stateLock_);
+    auto it = connectionStates_.find(callerPid);
+    if (it == connectionStates_.end()) {
+        TAG_LOGW(AAFwkTag::CONNECTION, "find target failed, callerPid:%{public}d", callerPid);
+        return false;
+    }
+
+    auto targetItem = it->second;
+    if (!targetItem) {
+        TAG_LOGE(AAFwkTag::CONNECTION, "find targetItem failed");
+        return false;
+    }
+
+    return targetItem->SuspendConnection(connectionRecord, data);
+}
+
+void ConnectionStateManager::ResumeConnection(std::shared_ptr<ConnectionRecord> connectionRecord)
+{
+    std::shared_ptr<ConnectionObserverController> controller = observerController_;
+    if (!controller) {
+        return;
+    }
+
+    if (!connectionRecord) {
+        TAG_LOGE(AAFwkTag::CONNECTION, "invalid connection record");
+        return;
+    }
+
+    ConnectionData connectionData;
+    if (!ResumeConnectionInner(connectionRecord, connectionData)) {
+        TAG_LOGD(AAFwkTag::CONNECTION, "no need notify observers");
+        return;
+    }
+    controller->NotifyExtensionResumed(connectionData);
+}
+
+bool ConnectionStateManager::ResumeConnectionInner(std::shared_ptr<ConnectionRecord> connectionRecord,
+    AbilityRuntime::ConnectionData &data)
+{
+    auto callerPid = connectionRecord->GetCallerPid();
+    std::lock_guard<ffrt::mutex> guard(stateLock_);
+    auto it = connectionStates_.find(callerPid);
+    if (it == connectionStates_.end()) {
+        TAG_LOGW(AAFwkTag::CONNECTION, "find target failed, callerPid:%{public}d", callerPid);
+        return false;
+    }
+
+    auto targetItem = it->second;
+    if (!targetItem) {
+        TAG_LOGE(AAFwkTag::CONNECTION, "find targetItem failed");
+        return false;
+    }
+
+    return targetItem->ResumeConnection(connectionRecord, data);
 }
 } // namespace AAFwk
 } // namespace OHOS

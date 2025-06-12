@@ -36,6 +36,10 @@ public:
 
     virtual void OnExtensionDisconnected(const ConnectionData &connectionData) override;
 
+    virtual void OnExtensionSuspended(const ConnectionData &connectionData) override;
+
+    virtual void OnExtensionResumed(const ConnectionData &connectionData) override;
+
 #ifdef WITH_DLP
     virtual void OnDlpAbilityOpened(const DlpStateData &dlpData) override;
 
