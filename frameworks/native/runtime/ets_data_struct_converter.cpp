@@ -21,9 +21,9 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char *CLASSNAME_LAUNCHPARAM = "L@ohos/app/ability/AbilityConstant/LaunchParamImpl";
+constexpr const char *CLASSNAME_LAUNCHPARAM = "L@ohos/app/ability/AbilityConstant/LaunchParamImpl;";
 constexpr const char *CLASSNAME_LAUNCHREASON = "L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchReason;";
-constexpr const char *CLASSNAME_LAST_EXITREASION = "L@ohos/app/ability/AbilityConstant/AbilityConstant/LastExitReason";
+constexpr const char *CLASSNAME_LAST_EXITREASION = "L@ohos/app/ability/AbilityConstant/AbilityConstant/LastExitReason;";
 
 ani_string GetAniString(ani_env *env, const std::string &str)
 {
