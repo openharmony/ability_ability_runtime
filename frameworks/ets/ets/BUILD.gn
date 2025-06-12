@@ -418,6 +418,25 @@ ohos_prebuilt_etc("ability_runtime_ability_context_constant_abc_etc") {
   deps = [ ":ability_runtime_ability_context_constant_abc" ]
 }
 
+generate_static_abc("form_extension_ability_ani") {
+  base_url = "./"
+  files = [
+    "./@ohos.app.form.FormExtensionAbility.ets",
+    "./application/FormExtensionContext.ets",
+  ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/form_extension_ability_ani.abc"
+}
+
+ohos_prebuilt_etc("form_extension_ability_etc") {
+  source = "$target_out_dir/form_extension_ability_ani.abc"
+  deps = [ ":form_extension_ability_ani" ]
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
 group("ets_packages") {
   deps = [
     ":ability_delegator_abc_etc",
@@ -444,5 +463,6 @@ group("ets_packages") {
     ":ability_runtime_ui_ability_context_abc_etc",
     ":service_extension_ability_abc_etc",
     ":ui_extension_ability_ani_etc",
+    ":form_extension_ability_etc",
   ]
 }

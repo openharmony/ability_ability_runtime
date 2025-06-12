@@ -38,15 +38,15 @@ constexpr const char* RECORD_CLASS_NAME = "Lescompat/Record;";
 STSFormExtension *STSFormExtension::Create(const std::unique_ptr<Runtime> &runtime)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "call___%{public}d", runtime->GetLanguage());
-    return new STSFormExtension(static_cast<STSRuntime &>(*runtime));
+    return new STSFormExtension(static_cast<ETSRuntime &>(*runtime));
 }
 
-const STSRuntime &STSFormExtension::GetSTSRuntime()
+const ETSRuntime &STSFormExtension::GetSTSRuntime()
 {
     return stsRuntime_;
 }
 
-STSFormExtension::STSFormExtension(STSRuntime &stsRuntime) : stsRuntime_(stsRuntime) {}
+STSFormExtension::STSFormExtension(ETSRuntime &stsRuntime) : stsRuntime_(stsRuntime) {}
 
 STSFormExtension::~STSFormExtension()
 {
@@ -656,25 +656,6 @@ void STSFormExtension::OnStop()
     TAG_LOGI(AAFwkTag::FORM_EXT, "OnStop End");
 }
 
-void STSFormExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
-{
-    TAG_LOGI(AAFwkTag::FORM_EXT, "OnConfigurationUpdated call");
-    FormExtension::OnConfigurationUpdated(configuration);
-
-    HandleScope handleScope(jsRuntime_);
-    napi_env env = jsRuntime_.GetNapiEnv();
-
-    // Notify extension context
-    auto fullConfig = GetContext()->GetConfiguration();
-    if (!fullConfig) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "null fullConfig");
-        return;
-    }
-    JsExtensionContext::ConfigurationUpdated(env, shellContextRef_, fullConfig);
-
-    napi_value napiConfiguration = OHOS::AppExecFwk::WrapConfiguration(env, *fullConfig);
-    CallObjectMethod("onConfigurationUpdate", "onConfigurationUpdated", &napiConfiguration, 1);
-}
 
 } // namespace AbilityRuntime
 } // namespace OHOS
