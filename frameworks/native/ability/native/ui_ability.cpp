@@ -20,6 +20,7 @@
 #include "configuration_convertor.h"
 #include "display_util.h"
 #include "display_info.h"
+#include "ets_ui_ability.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -71,6 +72,8 @@ UIAbility *UIAbility::Create(const std::unique_ptr<Runtime> &runtime)
         case Runtime::Language::CJ:
             return CJUIAbility::Create(runtime);
 #endif
+        case Runtime::Language::ETS:
+            return EtsUIAbility::Create(runtime);
         default:
             return new (std::nothrow) UIAbility();
     }
