@@ -65,6 +65,7 @@ struct EventInfo {
     std::string errReason;
     std::string lifeCycle;
     std::string intentName;
+    std::string errMsg;
 };
 
 enum class EventName {
@@ -79,6 +80,7 @@ enum class EventName {
     UI_SERVICE_EXTENSION_ERROR,
     EXECUTE_INSIGHT_INTENT_ERROR,
     STARTUP_TASK_ERROR,
+    START_ABILITY_SYSTEM_ERROR,
 
     // ability behavior event
     START_ABILITY,
@@ -160,6 +162,7 @@ private:
     static void LogStartAbilityByAppLinking(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogUIExtensionErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogUIServiceExtErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
+    static void LogSystemErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
 };
 }  // namespace AAFWK
 }  // namespace OHOS

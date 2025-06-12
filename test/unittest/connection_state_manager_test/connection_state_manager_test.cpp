@@ -173,6 +173,109 @@ HWTEST_F(ConnectionStateManagerTest, AddConnection_002, TestSize.Level1)
 
 /*
  * Feature: ConnectionStateManager
+ * Function: AddConnection
+ * SubFunction: NA
+ * FunctionPoints: ConnectionStateManager AddConnection
+ * EnvConditions: NA
+ * CaseDescription: Verify AddConnection
+ */
+HWTEST_F(ConnectionStateManagerTest, AddConnection_003, TestSize.Level1)
+{
+    auto connectionRecord =
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
+    manager_->Init();
+    connectionRecord->callerPid_ = 0;
+    int32_t callerUid = 0;
+    int32_t callerPid = 0;
+    std::string callerName = "callerName";
+    manager_->connectionStates_[0] = std::make_shared<ConnectionStateItem>(callerUid, callerPid, callerName);
+    manager_->AddConnection(connectionRecord);
+    EXPECT_TRUE(manager_ != nullptr);
+}
+
+/*
+ * Feature: ConnectionStateManager
+ * Function: SuspendConnection
+ * SubFunction: NA
+ * FunctionPoints: ConnectionStateManager SuspendConnection
+ * EnvConditions: NA
+ * CaseDescription: Verify SuspendConnection
+ */
+HWTEST_F(ConnectionStateManagerTest, SuspendConnection_001, TestSize.Level1)
+{
+    std::shared_ptr<ConnectionRecord> connectionRecord = nullptr;
+    manager_->Init();
+    manager_->SuspendConnection(connectionRecord);
+    EXPECT_TRUE(manager_ != nullptr);
+}
+
+/*
+ * Feature: ConnectionStateManager
+ * Function: SuspendConnection
+ * SubFunction: NA
+ * FunctionPoints: ConnectionStateManager SuspendConnection
+ * EnvConditions: NA
+ * CaseDescription: Verify SuspendConnection
+ */
+HWTEST_F(ConnectionStateManagerTest, SuspendConnection_002, TestSize.Level1)
+{
+    auto connectionRecord =
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
+    manager_->Init();
+    connectionRecord->callerPid_ = 0;
+    int32_t callerUid = 0;
+    int32_t callerPid = 0;
+    std::string callerName = "callerName";
+    manager_->connectionStates_[0] = std::make_shared<ConnectionStateItem>(callerUid, callerPid, callerName);
+    manager_->AddConnection(connectionRecord);
+    manager_->SuspendConnection(connectionRecord);
+    EXPECT_TRUE(manager_ != nullptr);
+}
+
+/*
+ * Feature: ConnectionStateManager
+ * Function: ResumeConnection
+ * SubFunction: NA
+ * FunctionPoints: ConnectionStateManager ResumeConnection
+ * EnvConditions: NA
+ * CaseDescription: Verify ResumeConnection
+ */
+HWTEST_F(ConnectionStateManagerTest, ResumeConnection_001, TestSize.Level1)
+{
+    std::shared_ptr<ConnectionRecord> connectionRecord = nullptr;
+    manager_->Init();
+    manager_->ResumeConnection(connectionRecord);
+    EXPECT_TRUE(manager_ != nullptr);
+}
+
+/*
+ * Feature: ConnectionStateManager
+ * Function: ResumeConnection
+ * SubFunction: NA
+ * FunctionPoints: ConnectionStateManager ResumeConnection
+ * EnvConditions: NA
+ * CaseDescription: Verify ResumeConnection
+ */
+HWTEST_F(ConnectionStateManagerTest, ResumeConnection_002, TestSize.Level1)
+{
+    auto connectionRecord =
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
+    manager_->Init();
+    connectionRecord->callerPid_ = 0;
+    int32_t callerUid = 0;
+    int32_t callerPid = 0;
+    std::string callerName = "callerName";
+    manager_->connectionStates_[0] = std::make_shared<ConnectionStateItem>(callerUid, callerPid, callerName);
+    manager_->ResumeConnection(connectionRecord);
+    manager_->AddConnection(connectionRecord);
+    manager_->ResumeConnection(connectionRecord);
+    manager_->SuspendConnection(connectionRecord);
+    manager_->ResumeConnection(connectionRecord);
+    EXPECT_TRUE(manager_ != nullptr);
+}
+
+/*
+ * Feature: ConnectionStateManager
  * Function: RemoveConnection
  * SubFunction: NA
  * FunctionPoints: ConnectionStateManager RemoveConnection
@@ -625,9 +728,33 @@ HWTEST_F(ConnectionStateManagerTest, AddConnectionInner_001, TestSize.Level1)
     std::shared_ptr<ConnectionRecord> connectionRecord =
         ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
     ConnectionData data;
+    ConnectionEvent event;
     connectionRecord->callerPid_ = 0;
     manager_->connectionStates_[0] = nullptr;
-    bool res = manager_->AddConnectionInner(connectionRecord, data);
+    bool res = manager_->AddConnectionInner(connectionRecord, data, event);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * Feature: ConnectionStateManager
+ * Function: AddConnectionInner
+ * SubFunction: NA
+ * FunctionPoints: ConnectionStateManager AddConnectionInner
+ * EnvConditions: NA
+ * CaseDescription: Verify AddConnectionInner
+ */
+HWTEST_F(ConnectionStateManagerTest, AddConnectionInner_002, TestSize.Level1)
+{
+    std::shared_ptr<ConnectionRecord> connectionRecord =
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
+    ConnectionData data;
+    ConnectionEvent event;
+    connectionRecord->callerPid_ = 0;
+    int32_t callerUid = 0;
+    int32_t callerPid = 0;
+    std::string callerName = "callerName";
+    manager_->connectionStates_[0] = std::make_shared<ConnectionStateItem>(callerUid, callerPid, callerName);;
+    bool res = manager_->AddConnectionInner(connectionRecord, data, event);
     EXPECT_FALSE(res);
 }
 
@@ -644,9 +771,10 @@ HWTEST_F(ConnectionStateManagerTest, RemoveConnectionInner_001, TestSize.Level1)
     std::shared_ptr<ConnectionRecord> connectionRecord =
         ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
     ConnectionData data;
+    ConnectionEvent event;
     connectionRecord->callerPid_ = 0;
     manager_->connectionStates_[0] = nullptr;
-    bool res = manager_->RemoveConnectionInner(connectionRecord, data);
+    bool res = manager_->RemoveConnectionInner(connectionRecord, data, event);
     EXPECT_FALSE(res);
 }
 

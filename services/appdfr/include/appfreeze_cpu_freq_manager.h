@@ -34,16 +34,17 @@ public:
     static std::shared_ptr<AppfreezeCpuFreqManager> GetInstance();
     void SetHalfStackPath(const std::string& stackpath);
     void InitHalfCpuInfo(int32_t pid);
-    std::string WriteCpuInfoToFile(const std::string& bundleName, int32_t uid, int32_t pid);
+    std::string WriteCpuInfoToFile(const std::string &bundleName, int32_t uid, int32_t pid,
+        const std::string &eventName);
 
 private:
     bool ReadCpuDataByNum(int32_t num, std::vector<CpuFreqData>& parseDatas, TotalTime& totalTime);
     void ParseCpuData(std::vector<std::vector<CpuFreqData>>& datas, std::vector<TotalTime>& totalTimeLists);
     std::string GetCpuStr(int code, std::vector<FrequencyPair>& freqPairs, float percentage);
-    bool GetCpuTotalValue(size_t i, std::vector<TotalTime> totalTimeList_,
+    bool GetCpuTotalValue(size_t i, std::vector<TotalTime> totalTimeList,
         std::vector<TotalTime> blockTotalTimeList, TotalTime& totalTime);
-    uint32_t GetProcessCpuTime(int32_t pid);
-    uint32_t GetDeviceRuntime();
+    uint64_t GetProcessCpuTime(int32_t pid);
+    uint64_t GetDeviceRuntime();
     std::string GetCpuInfoContent();
     std::string GetStartTime(uint64_t start);
     uint64_t GetAppCpuTime(int32_t pid);
@@ -58,9 +59,10 @@ private:
     static ffrt::mutex freezeInfoMutex_;
     static std::vector<std::vector<CpuFreqData>> handlingHalfCpuData_;
     static std::vector<TotalTime> totalTimeList_;
-    static int64_t halfTime_;
+    static uint64_t halfTime_;
     static uint64_t optimalCpuTime_;
     static std::string stackPath_;
+    static int cpuCount_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

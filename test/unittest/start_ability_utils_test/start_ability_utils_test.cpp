@@ -135,5 +135,36 @@ HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_003, TestSize.Level1)
     int32_t ret = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
+
+/**
+ * @tc.name: CheckAppProvisionMode_004
+ * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_004, TestSize.Level1)
+{
+    Want want;
+    int32_t userId = 1001;
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    int32_t ret = StartAbilityUtils::CheckAppProvisionMode(want, userId);
+    EXPECT_EQ(ret, ERR_NOT_IN_APP_PROVISION_MODE);
+}
+
+/**
+ * @tc.name: CheckAppProvisionMode_005
+ * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_005, TestSize.Level1)
+{
+    Want want;
+    int32_t userId = 1001;
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityUtils::startAbilityInfo->abilityInfo.bundleName = "bundleName";
+    StartAbilityUtils::startAbilityInfo->abilityInfo.name = "name";
+    StartAbilityUtils::startAbilityInfo->status = 1;
+    int32_t ret = StartAbilityUtils::CheckAppProvisionMode(want, userId);
+    EXPECT_EQ(ret, StartAbilityUtils::startAbilityInfo->status);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

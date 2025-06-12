@@ -51,6 +51,8 @@ bool GetStringOrUndefined(ani_env *env, ani_object param, const char *name, std:
 
 ani_object CreateDouble(ani_env *env, ani_double value);
 ani_object CreateBoolean(ani_env *env, ani_boolean value);
+
+bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
 } // namespace AppExecFwk
 } // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_ANI_COMMON_UTIL_H

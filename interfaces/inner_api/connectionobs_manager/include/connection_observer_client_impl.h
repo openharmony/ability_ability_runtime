@@ -41,6 +41,8 @@ public:
     int32_t GetConnectionData(std::vector<ConnectionData> &infos);
     void HandleExtensionConnected(const ConnectionData &data);
     void HandleExtensionDisconnected(const ConnectionData &data);
+    void HandleExtensionSuspended(const ConnectionData &data);
+    void HandleExtensionResumed(const ConnectionData &data);
     void HandleRemoteDied(const wptr<IRemoteObject> &remote);
     
 #ifdef WITH_DLP

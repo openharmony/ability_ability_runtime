@@ -468,6 +468,11 @@ enum class AbilityManagerInterfaceCode {
     // ipc for open link
     OPEN_LINK = 1140,
 
+    //ipc for suspend extionsion ability
+    SUSPEND_EXTENSION_ABILITY = 1141,
+    // ipc for resume extionsion ability
+    RESUME_EXTENSION_ABILITY = 1142,
+
     // ipc id 2001-3000 for tools
     // ipc id for dumping state (2001)
     DUMP_STATE = 2001,

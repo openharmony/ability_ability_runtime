@@ -63,7 +63,7 @@ public:
      * @param isNotify Indicates whether to notify the matched ability to the object who waited.
      * @return true if match is successful; returns false otherwise.
      */
-    virtual bool Match(const std::shared_ptr<ADelegatorAbilityProperty> &ability, bool isNotify = false);
+    virtual bool Match(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability, bool isNotify = false);
 
     /**
      * Waits for and returns the started Ability object that matches the conditions specified in this monitor
@@ -72,7 +72,7 @@ public:
      *
      * @return the Ability object if any object has started is matched within 5 seconds; returns null otherwise.
      */
-    virtual std::shared_ptr<ADelegatorAbilityProperty> WaitForAbility();
+    virtual std::shared_ptr<BaseDelegatorAbilityProperty> WaitForAbility();
 
     /**
      * Waits for and returns the started Ability object that matches the conditions specified in this monitor
@@ -84,61 +84,61 @@ public:
      * @return the Ability object if any object has started is matched within the specified time;
      * returns null otherwise.
      */
-    virtual std::shared_ptr<ADelegatorAbilityProperty> WaitForAbility(const int64_t timeoutMs);
+    virtual std::shared_ptr<BaseDelegatorAbilityProperty> WaitForAbility(const int64_t timeoutMs);
 
     /**
      * Called when ability is started.
      *
      * @param abilityObj Indicates the ability object.
      */
-    virtual void OnAbilityStart(const std::weak_ptr<NativeReference> &abilityObj);
+    virtual void OnAbilityStart(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj);
 
     /**
      * Called when ability is in foreground.
      *
      * @param abilityObj Indicates the ability object.
      */
-    virtual void OnAbilityForeground(const std::weak_ptr<NativeReference> &abilityObj);
+    virtual void OnAbilityForeground(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj);
 
     /**
      * Called when ability is in background.
      *
      * @param abilityObj Indicates the ability object.
      */
-    virtual void OnAbilityBackground(const std::weak_ptr<NativeReference> &abilityObj);
+    virtual void OnAbilityBackground(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj);
 
     /**
      * Called when ability is stopped.
      *
      * @param abilityObj Indicates the ability object.
      */
-    virtual void OnAbilityStop(const std::weak_ptr<NativeReference> &abilityObj);
+    virtual void OnAbilityStop(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj);
 
     /**
      * Called when window stage is created.
      *
      * @param abilityObj Indicates the ability object.
      */
-    virtual void OnWindowStageCreate(const std::weak_ptr<NativeReference> &abilityObj);
+    virtual void OnWindowStageCreate(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj);
 
     /**
      * Called when window stage is restored.
      *
      * @param abilityObj Indicates the ability object.
      */
-    virtual void OnWindowStageRestore(const std::weak_ptr<NativeReference> &abilityObj);
+    virtual void OnWindowStageRestore(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj);
 
     /**
      * Called when window stage is destroyed.
      *
      * @param abilityObj Indicates the ability object.
      */
-    virtual void OnWindowStageDestroy(const std::weak_ptr<NativeReference> &abilityObj);
+    virtual void OnWindowStageDestroy(const std::weak_ptr<BaseDelegatorAbilityProperty> &abilityObj);
 
 private:
     std::string abilityName_;
     std::string moduleName_;
-    std::shared_ptr<ADelegatorAbilityProperty> matchedAbility_;
+    std::shared_ptr<BaseDelegatorAbilityProperty> matchedAbility_;
 
     std::condition_variable cvMatch_;
     std::mutex mMatch_;

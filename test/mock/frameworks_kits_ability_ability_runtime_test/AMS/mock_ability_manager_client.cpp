@@ -195,6 +195,26 @@ ErrCode AbilityManagerClient::DisconnectAbility(sptr<IAbilityConnection> connect
     return abms->DisconnectAbility(connect);
 }
 
+ErrCode AbilityManagerClient::SuspendExtensionAbility(sptr<IAbilityConnection> connect)
+{
+    if (g_remoteObject == nullptr) {
+        g_remoteObject =
+            OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
+    }
+    sptr<IAbilityManager> abms = iface_cast<IAbilityManager>(g_remoteObject);
+    return abms->SuspendExtensionAbility(connect);
+}
+
+ErrCode AbilityManagerClient::ResumeExtensionAbility(sptr<IAbilityConnection> connect)
+{
+    if (g_remoteObject == nullptr) {
+        g_remoteObject =
+            OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
+    }
+    sptr<IAbilityManager> abms = iface_cast<IAbilityManager>(g_remoteObject);
+    return abms->ResumeExtensionAbility(connect);
+}
+
 ErrCode AbilityManagerClient::DumpState(const std::string& args, std::vector<std::string>& state)
 {
     if (g_remoteObject == nullptr) {

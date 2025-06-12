@@ -20,6 +20,7 @@
 #define protected public
 #include "update_caller_info_util.h"
 #include "ability_manager_service.h"
+#include "dialog_session_manager.h"
 #undef private
 #undef protected
 #include "ability_manager_errors.h"
@@ -153,6 +154,62 @@ HWTEST_F(UpdateCallerInfoUtilTest, ClearProtectedWantParam_002, TestSize.Level1)
     updateCallerUtil->ClearProtectedWantParam(want);
     MyFlag::isSystemAppCallRet = true;
     EXPECT_EQ(want.GetStringParam(Want::PARAM_ABILITY_UNIFIED_DATA_KEY), "");
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_UpdateAsCallerInfoFromCallerRecord_0002
+ * @tc.desc: Test the state of QueryAllAutoStartupApplications
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromCallerRecord_0002, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
+    callerToken = abilityRecord->GetToken();
+
+    updateCallerUtil->UpdateAsCallerInfoFromCallerRecord(want, callerToken);
+    EXPECT_NE(callerToken, nullptr);
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_UpdateAsCallerInfoFromDialog_0001
+ * @tc.desc: Test the state of QueryAllAutoStartupApplications
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromDialog_0001, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    const std::string TEST_DIALOG_SESSION_ID = "dialogSessionId";
+    want.SetParam(KEY_REQUEST_ID, std::string("1234567890"));
+    sptr<DialogSessionInfo> dilogSessionInfo = nullptr;
+    std::shared_ptr<DialogCallerInfo> dialogCallerInfo = std::make_shared<DialogCallerInfo>();
+    EXPECT_NE(dialogCallerInfo, nullptr);
+    dialogCallerInfo->targetWant = want;
+
+    dialogSessionManager.SetDialogSessionInfo(TEST_DIALOG_SESSION_ID, dilogSessionInfo, dialogCallerInfo);
+    auto callerInfo = dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID);
+    EXPECT_NE(dialogSessionManager.GetDialogCallerInfo(TEST_DIALOG_SESSION_ID), nullptr);
+
+    bool ret = updateCallerUtil->UpdateAsCallerInfoFromDialog(want);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_UpdateAsCallerInfoFromDialog_0002
+ * @tc.desc: Test the state of QueryAllAutoStartupApplications
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromDialog_0002, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    bool ret = updateCallerUtil->UpdateAsCallerInfoFromDialog(want);
+    EXPECT_FALSE(ret);
 }
 } // namespace AAFwk
 } // namespace OHOS

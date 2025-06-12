@@ -1180,5 +1180,45 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, QueryKeepAliveAppServiceExtensions_00
     ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest QueryKeepAliveAppServiceExtensions_001 end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SuspendExtensionAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SuspendExtensionAbility
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, SuspendExtensionAbility_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SuspendExtensionAbility_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    sptr<IAbilityConnection> connect = nullptr;
+
+    EXPECT_EQ(abilityMs_->SuspendExtensionAbility(connect), ERR_INVALID_VALUE);
+
+    connect = new AbilityConnectCallback();
+    EXPECT_EQ(abilityMs_->SuspendExtensionAbility(connect), ERR_NO_INIT);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SuspendExtensionAbility_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ResumeExtensionAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ResumeExtensionAbility
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, ResumeExtensionAbility_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest ResumeExtensionAbility_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    sptr<IAbilityConnection> connect = nullptr;
+
+    EXPECT_EQ(abilityMs_->ResumeExtensionAbility(connect), ERR_INVALID_VALUE);
+
+    connect = new AbilityConnectCallback();
+    EXPECT_EQ(abilityMs_->ResumeExtensionAbility(connect), ERR_NO_INIT);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest ResumeExtensionAbility_001 end");
+}
 } // namespace AAFwk
 } // namespace OHOS

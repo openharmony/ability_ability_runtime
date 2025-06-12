@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -262,6 +262,54 @@ HWTEST_F(DumpUtilsTest, DumpsysMap_001, TestSize.Level1)
     EXPECT_TRUE(result.first);
     EXPECT_EQ(result.second, DumpUtils::KEY_DUMP_SYS_DATA);
     TAG_LOGI(AAFwkTag::TEST, "DumpUtilsTest DumpsysMap_001 end");
+}
+
+/*
+ * Feature: DumpUtils
+ * Function: DumpMap
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService DumpMap
+ */
+HWTEST_F(DumpUtilsTest, DumpMap_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DumpUtilsTest DumpMap_001 start");
+    DumpUtils info;
+    std::string argString ="-a";
+    auto result = info.DumpMap(argString);
+    EXPECT_TRUE(result.first);
+    TAG_LOGI(AAFwkTag::TEST, "DumpUtilsTest DumpMap_001 end");
+}
+
+/*
+ * Feature: DumpUtils
+ * Function: DumpMap
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService DumpMap
+ */
+HWTEST_F(DumpUtilsTest, DumpMap_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DumpUtilsTest DumpMap_002 start");
+    DumpUtils info;
+    std::string argString ="-z";
+    auto result = info.DumpMap(argString);
+    EXPECT_TRUE(result.first);
+    TAG_LOGI(AAFwkTag::TEST, "DumpUtilsTest DumpMap_002 end");
+}
+
+/*
+ * Feature: DumpUtils
+ * Function: DumpMap
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService DumpMap
+ */
+HWTEST_F(DumpUtilsTest, DumpMap_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DumpUtilsTest DumpMap_003 start");
+    DumpUtils info;
+    std::string argString ="-b";
+    auto result = info.DumpMap(argString);
+    EXPECT_FALSE(result.first);
+    TAG_LOGI(AAFwkTag::TEST, "DumpUtilsTest DumpMap_003 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

@@ -65,6 +65,7 @@ constexpr const char *EVENT_KEY_ERR_REASON = "ERR_REASON";
 constexpr const char *EVENT_KEY_LIFE_CYCLE = "LIFE_CYCLE";
 constexpr const char *EVENT_KEY_PERSISTENT_ID = "PERSISTENT_ID";
 constexpr const char *EVENT_KEY_INTENT_NAME = "INTENT_NAME";
+constexpr const char *EVENT_KEY_ERROR_MESSAGE = "ERROR_MESSAGE";
 
 constexpr const int32_t DEFAULT_EXTENSION_TYPE = -1;
 }
@@ -136,7 +137,22 @@ void EventReport::LogErrorEvent(const std::string &name, HiSysEventType type, co
         EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
         EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
         EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-        EVENT_KEY_ERROR_CODE, eventInfo.errCode);
+        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
+        EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
+}
+
+void EventReport::LogSystemErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+{
+    HiSysEventWrite(
+        HiSysEvent::Domain::AAFWK,
+        name,
+        type,
+        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
+        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
+        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
+        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
+        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
+        EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
 }
 
 void EventReport::LogStartAbilityEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
@@ -299,6 +315,9 @@ void EventReport::SendAbilityEvent(const EventName &eventName, HiSysEventType ty
         case EventName::START_ABILITY_ERROR:
         case EventName::TERMINATE_ABILITY_ERROR:
             LogErrorEvent(name, type, eventInfo);
+            break;
+        case EventName::START_ABILITY_SYSTEM_ERROR:
+            LogSystemErrorEvent(name, type, eventInfo);
             break;
         case EventName::START_ABILITY:
             LogStartAbilityEvent(name, type, eventInfo);
