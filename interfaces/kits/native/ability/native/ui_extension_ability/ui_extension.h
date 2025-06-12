@@ -16,6 +16,9 @@
 #ifndef OHOS_ABILITY_RUNTIME_UI_EXTENSION_H
 #define OHOS_ABILITY_RUNTIME_UI_EXTENSION_H
 
+#include <mutex>
+#include <unordered_set>
+
 #include "extension_base.h"
 
 namespace OHOS {
@@ -65,6 +68,30 @@ public:
      * @return The ui extension instance.
      */
     static UIExtension* Create(const std::unique_ptr<Runtime>& runtime);
+
+    virtual void OnStopCallBack() override;
+
+    virtual void OnCommand(const AAFwk::Want &want, bool restart, int startId) override;
+
+    virtual void OnCommandWindow(
+        const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd) override;
+
+    virtual void OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd) override;
+
+    virtual void OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &sessionInfo,
+        const AppExecFwk::InsightIntentExecuteResult &result) override;
+
+protected:
+    virtual void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
+    virtual void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
+    virtual void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
+    virtual bool ForegroundWindowWithInsightIntent(
+        const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo, bool needForeground);
+    virtual bool HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
+protected:
+    std::mutex uiWindowMutex_;
+    std::map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
+    std::set<uint64_t> foregroundWindows_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
