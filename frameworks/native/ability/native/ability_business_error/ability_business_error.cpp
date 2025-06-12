@@ -74,7 +74,7 @@ constexpr const char* ERROR_MSG_WUKONG_MODE_CANT_MOVE_STATE =
 constexpr const char* ERROR_MSG_START_OPTIONS_CHECK_FAILED = "The StartOptions check failed.";
 constexpr const char* ERROR_MSG_ABILITY_ALREADY_RUNNING = "The ability is already running.";
 constexpr const char* ERROR_MSG_NOT_SUPPORT_CROSS_APP_START =
-    "Redirection to a third-party application is not allowed in API version 11 or later.";
+    "Redirection to a third-party application is not allowed in API version greater than 11.";
 constexpr const char* ERROR_MSG_CANNOT_MATCH_ANY_COMPONENT = "No matching ability is found.";
 constexpr const char* ERROR_MSG_TARGET_BUNDLE_NOT_EXIST = "The bundle does not exist or no patch has been applied.";
 constexpr const char* ERROR_MSG_NO_MAIN_ABILITY = "The target bundle has no main ability.";

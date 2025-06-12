@@ -131,7 +131,7 @@ const std::map<int32_t, std::string> ERROR_MSG_MAP = {
     { ERR_ABILITY_RUNTIME_EXTERNAL_START_ABILITY_WAITTING,
         "Another ability is being started. Wait until it finishes starting." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_NOT_SUPPORT_CROSS_APP_START,
-        "Redirection to a third-party application is not allowed in API version 11 or later." },
+        "Redirection to a third-party application is not allowed in API version greater than 11." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_CANNOT_MATCH_ANY_COMPONENT,
         "No matching ability is found." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_URI_FLAG,
