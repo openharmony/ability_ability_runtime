@@ -619,7 +619,6 @@ ohos_shared_library("application_context_manager") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/inner_api/runtime/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_path}/ets_environment/interfaces/inner_api",
   ]
 
   sources = [ "${ability_runtime_native_path}/appkit/ability_runtime/context/application_context_manager.cpp" ]
@@ -630,10 +629,8 @@ ohos_shared_library("application_context_manager") {
   }
 
   external_deps = [
-    "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
     "napi:ace_napi",
-    "runtime_core:ani",
   ]
 
   public_configs = [ ":application_context_manager_config" ]
