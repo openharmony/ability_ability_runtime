@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -316,6 +316,82 @@ HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentGenericInfo_0100, Te
     Mock::VerifyAndClear(mockBundleMgr);
     testing::Mock::AllowLeak(mockBundleMgr);
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0100 end.");
+}
+
+/**
+ * @tc.name: ConvertExtractInsightIntentGenericInfo_0110
+ * @tc.desc: basic function test of convert info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentGenericInfo_0110, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST,  "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0110 start");
+    AbilityRuntime::InsightIntentUtils utils;
+    InsightIntentInfoForQuery insightIntentInfoForQuery;
+    TEST_INSIGHT_INTENT_GENERIC_INFO.decoratorType = "@InsightIntentPage";
+    auto result = utils.ConvertExtractInsightIntentGenericInfo(TEST_INSIGHT_INTENT_GENERIC_INFO,
+        insightIntentInfoForQuery);
+    EXPECT_EQ(result, ERR_OK);
+    Mock::VerifyAndClear(mockBundleMgr);
+    testing::Mock::AllowLeak(mockBundleMgr);
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0110 end.");
+}
+/**
+ * @tc.name: ConvertExtractInsightIntentGenericInfo_0120
+ * @tc.desc: basic function test of convert info.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentGenericInfo_0120, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST,  "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0120 start");
+    AbilityRuntime::InsightIntentUtils utils;
+    InsightIntentInfoForQuery insightIntentInfoForQuery;
+    TEST_INSIGHT_INTENT_GENERIC_INFO.decoratorType = "@InsightIntentEntry";
+    auto result = utils.ConvertExtractInsightIntentGenericInfo(TEST_INSIGHT_INTENT_GENERIC_INFO,
+        insightIntentInfoForQuery);
+    EXPECT_EQ(result, ERR_OK);
+    Mock::VerifyAndClear(mockBundleMgr);
+    testing::Mock::AllowLeak(mockBundleMgr);
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0120 end.");
+}
+
+/**
+ * @tc.name: ConvertExtractInsightIntentGenericInfo_0130
+ * @tc.desc: basic function test of convert info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentGenericInfo_0130, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST,  "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0130 start");
+    AbilityRuntime::InsightIntentUtils utils;
+    InsightIntentInfoForQuery insightIntentInfoForQuery;
+    TEST_INSIGHT_INTENT_GENERIC_INFO.decoratorType = "@InsightIntentFunctionMethod";
+    auto result = utils.ConvertExtractInsightIntentGenericInfo(TEST_INSIGHT_INTENT_GENERIC_INFO,
+        insightIntentInfoForQuery);
+    EXPECT_EQ(result, ERR_OK);
+    Mock::VerifyAndClear(mockBundleMgr);
+    testing::Mock::AllowLeak(mockBundleMgr);
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0130 end.");
+}
+
+/**
+ * @tc.name: ConvertExtractInsightIntentGenericInfo_0140
+ * @tc.desc: basic function test of convert info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentGenericInfo_0140, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST,  "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0140 start");
+    AbilityRuntime::InsightIntentUtils utils;
+    InsightIntentInfoForQuery insightIntentInfoForQuery;
+    TEST_INSIGHT_INTENT_GENERIC_INFO.decoratorType = "@InsightIntentForm";
+    auto result = utils.ConvertExtractInsightIntentGenericInfo(TEST_INSIGHT_INTENT_GENERIC_INFO,
+        insightIntentInfoForQuery);
+    EXPECT_EQ(result, ERR_OK);
+    Mock::VerifyAndClear(mockBundleMgr);
+    testing::Mock::AllowLeak(mockBundleMgr);
+    TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0140 end.");
 }
 
 /**
