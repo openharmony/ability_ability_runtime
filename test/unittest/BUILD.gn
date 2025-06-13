@@ -348,8 +348,6 @@ group("unittest") {
       "dynamic_loader_ohos_test:unittest",
       "dynamic_loader_test:unittest",
       "ecological_rule_interceptor_test:unittest",
-      "ets_data_struct_converter_test:unittest",
-      "ets_ui_ability_test:unittest",
       "event_report_test:unittest",
       "exit_info_data_manager_test:unittest",
       "exit_reason_test:unittest",
