@@ -1846,5 +1846,79 @@ HWTEST_F(AppMgrServiceInnerNinthTest, StartAbility_009, TestSize.Level1)
 
     TAG_LOGI(AAFwkTag::TEST, "StartAbility_009 end");
 }
+/**
+ * @tc.name: StartAbility_010
+ * @tc.desc: Test StartAbility with DLP security flag processing
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, StartAbility_010, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbility_010 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    
+    sptr<IRemoteObject> token = new MockAppScheduler();
+    sptr<IRemoteObject> preToken = nullptr;
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->bundleName = "com.test.bundle";
+    abilityInfo->name = "TestAbility";
+    abilityInfo->launchMode = LaunchMode::STANDARD;
+    abilityInfo->applicationInfo.bundleName = "com.test.bundle";
+    auto appRecord = std::make_shared<AppRunningRecord>(nullptr, 1, "test_process");
+    appRecord->SetState(ApplicationState::APP_STATE_CREATE);
+    HapModuleInfo hapModuleInfo;
+    hapModuleInfo.moduleName = "entry";
+    auto want = std::make_shared<AAFwk::Want>();
+    // Set debug app parameter
+    want->SetParam(DEBUG_APP, true);
+    int32_t abilityRecordId = 1;
+    AAFwk::MyStatus::GetInstance().getAbilityRunningRecordByTokenModule_ =
+        std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    // Set up mock to return valid module record
+    auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo->applicationInfo);
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    AAFwk::MyStatus::GetInstance().getModuleRecord_ = moduleRecord;
+    appMgrServiceInner->StartAbility(token, preToken, abilityInfo, appRecord, hapModuleInfo, want, abilityRecordId);
+    EXPECT_TRUE(AAFwk::MyStatus::GetInstance().getStateCalled_);
+    EXPECT_FALSE(AAFwk::MyStatus::GetInstance().startAbility_launchAbility_called_);
+    TAG_LOGI(AAFwkTag::TEST, "StartAbility_010 end");
+}
+
+/**
+ * @tc.name: StartAbility_011
+ * @tc.desc: Test StartAbility with DLP security flag processing
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, StartAbility_011, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbility_011 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    
+    sptr<IRemoteObject> token = new MockAppScheduler();
+    sptr<IRemoteObject> preToken = nullptr;
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->bundleName = "com.test.bundle";
+    abilityInfo->name = "TestAbility";
+    abilityInfo->launchMode = LaunchMode::STANDARD;
+    abilityInfo->applicationInfo.bundleName = "com.test.bundle";
+    auto appRecord = std::make_shared<AppRunningRecord>(nullptr, 1, "test_process");
+    appRecord->SetState(ApplicationState::APP_STATE_READY);
+    HapModuleInfo hapModuleInfo;
+    hapModuleInfo.moduleName = "entry";
+    auto want = std::make_shared<AAFwk::Want>();
+    // Set debug app parameter
+    want->SetParam(DEBUG_APP, true);
+    int32_t abilityRecordId = 1;
+
+    AAFwk::MyStatus::GetInstance().getAbilityRunningRecordByTokenModule_ =
+        std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo->applicationInfo);
+    auto moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    AAFwk::MyStatus::GetInstance().getModuleRecord_ = moduleRecord;
+
+    appMgrServiceInner->StartAbility(token, preToken, abilityInfo, appRecord, hapModuleInfo, want, abilityRecordId);
+    EXPECT_TRUE(AAFwk::MyStatus::GetInstance().getStateCalled_);
+    EXPECT_TRUE(AAFwk::MyStatus::GetInstance().startAbility_launchAbility_called_);
+    TAG_LOGI(AAFwkTag::TEST, "StartAbility_011 end");
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
