@@ -346,6 +346,7 @@ group("unittest") {
       "dummy_values_bucket_test:unittest",
       "dump_utils_test:unittest",
       "dynamic_loader_ohos_test:unittest",
+      "dynamic_loader_test:unittest",
       "ecological_rule_interceptor_test:unittest",
       "ets_data_struct_converter_test:unittest",
       "ets_ui_ability_test:unittest",
