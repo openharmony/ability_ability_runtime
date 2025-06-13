@@ -43,8 +43,11 @@ ohos_shared_library("application_ani") {
 
   external_deps = [
     "ability_base:configuration",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_core",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "napi:ace_napi",
     "runtime_core:ani",
   ]
