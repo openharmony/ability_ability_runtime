@@ -24,7 +24,7 @@
 
 namespace OHOS {
 namespace AAFwk {
-using ConvertCallbackTask = std::function<void(int, AAFwk::Want&)>;
+using ConvertCallbackTask = std::function<void(int, AppDomainVerify::TargetInfo&)>;
 
 /**
  * @class ConvertCallbackImpl the implementation of the IConvertCallback
@@ -34,7 +34,7 @@ public:
     explicit ConvertCallbackImpl(ConvertCallbackTask&& task) : task_(task) {}
     virtual ~ConvertCallbackImpl() = default;
 
-    void OnConvert(int resultCode, AAFwk::Want& want) override;
+    void OnConvert(int resultCode, AppDomainVerify::TargetInfo &targetInfo) override;
 
     void Cancel();
 
