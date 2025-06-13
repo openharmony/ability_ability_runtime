@@ -2379,7 +2379,9 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
         return;
     }
 
-    if (abilityRecord->IsSceneBoard() && AmsConfigurationParameter::GetInstance().IsSupportSCBCrashReboot()) {
+    int32_t restart = OHOS::system::GetIntParameter<int32_t>("persist.sceneboard.restart", 0);
+    if (restart <= 0 && abilityRecord->IsSceneBoard() &&
+        AmsConfigurationParameter::GetInstance().IsSupportSCBCrashReboot()) {
         static int sceneBoardCrashCount = 0;
         static int64_t tickCount = GetTickCount();
         int64_t tickNow = GetTickCount();
