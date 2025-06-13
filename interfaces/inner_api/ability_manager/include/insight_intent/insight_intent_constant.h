@@ -50,8 +50,14 @@ namespace OHOS::AbilityRuntime {
     constexpr char INSIGHT_INTENT_LINK_INFO[] = "linkInfo";
     constexpr char INSIGHT_INTENT_PAGE_INFO[] = "pageInfo";
     constexpr char INSIGHT_INTENT_ENTRY_INFO[] = "entryInfo";
+    constexpr char INSIGHT_INTENT_ENTITY_INFO[] = "entities";
     constexpr char INSIGHT_INTENT_FUNCTION_INFO[] = "functionInfo";
     constexpr char INSIGHT_INTENT_FORM_INFO[] = "formInfo";
+    constexpr char INSIGHT_INTENT_ENTITY_CLASS_NAME[] = "className";
+    constexpr char INSIGHT_INTENT_ENTITY_CATEGORY[] = "entityCategory";
+    constexpr char INSIGHT_INTENT_ENTITY_ID[] = "entityId";
+    constexpr char INSIGHT_INTENT_ENTITY_PARENT_CLASS_NAME[] = "parentClassName";
+    constexpr char INSIGHT_INTENT_ENTITY_PARAMETERS[] = "parameters";
 
     enum class InsightIntentExecuteMode {
         UIABILITY_FOREGROUND,
@@ -70,7 +76,10 @@ namespace OHOS::AbilityRuntime {
 
     enum GetInsightIntentFlag {
         GET_FULL_INSIGHT_INTENT = 1,
-        GET_SUMMARY_INSIGHT_INTENT
+        GET_SUMMARY_INSIGHT_INTENT,
+        GET_ENTITY_INFO = 4,
+        GET_FULL_INSIGHT_INTENT_ENTITY = 5,
+        GET_SUMMARY_INSIGHT_INTENT_ENTITY = 6,
     };
 
     enum class InsightIntentType : uint8_t {
