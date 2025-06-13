@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -423,6 +423,215 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_2100, TestSize.Level2)
     appUtils.isGrantTempUriPermission_.isLoaded = true;
     auto isSupport = appUtils.IsSupportGrantUriPermission();
     EXPECT_TRUE(isSupport);
+}
+
+/**
+ * @tc.number: IsLauncher_0100
+ * @tc.desc: Test IsLauncher works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsLauncher_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsLauncher_0100 called.");
+    std::string bundleName = "com.ohos.launcher";
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    bool result = appUtils.IsLauncher(bundleName);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number: IsLauncher_0200
+ * @tc.desc: Test IsLauncher works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsLauncher_0200, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsLauncher_0200 called.");
+    std::string bundleName = "com.ohos.launcher.test";
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    bool result = appUtils.IsLauncher(bundleName);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number: IsLauncher_0300
+ * @tc.desc: Test IsLauncher works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsLauncher_0300, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsLauncher_0200 called.");
+    std::string bundleName = "com.ohos.sceneboard";
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSceneBoard_ = true;
+    bool result = appUtils.IsLauncher(bundleName);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number: IsSupportNativeChildProcess_0100
+ * @tc.desc: Test IsSupportNativeChildProcess works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsSupportNativeChildProcess_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsSupportNativeChildProcess_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    bool result = appUtils.IsSupportNativeChildProcess();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number: IsSupportNativeChildProcess_0200
+ * @tc.desc: Test IsSupportNativeChildProcess works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsSupportNativeChildProcess_0200, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsSupportNativeChildProcess_0200 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportNativeChildProcess_.isLoaded = true;
+    appUtils.isSupportNativeChildProcess_.value = true;
+    bool result = appUtils.IsSupportNativeChildProcess();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number: GetAncoAppIdentifiers_0100
+ * @tc.desc: Test GetAncoAppIdentifiers works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, GetAncoAppIdentifiers_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetAncoAppIdentifiers_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    std::string result = appUtils.GetAncoAppIdentifiers();
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.number: IsCacheAbilityEnabled_0100
+ * @tc.desc: Test IsCacheAbilityEnabled works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsCacheAbilityEnabled_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsCacheAbilityEnabled_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    bool result = appUtils.IsCacheAbilityEnabled();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number: IsSupportAppServiceExtension_0100
+ * @tc.desc: Test IsSupportAppServiceExtension works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsSupportAppServiceExtension_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsSupportAppServiceExtension_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    bool result = appUtils.IsSupportAppServiceExtension();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number: IsSupportAppServiceExtension_0200
+ * @tc.desc: Test IsSupportAppServiceExtension works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsSupportAppServiceExtension_0200, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsSupportAppServiceExtension_0200 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportAppServiceExtension_.isLoaded = true;
+    appUtils.isSupportAppServiceExtension_.value = true;
+    bool result = appUtils.IsSupportAppServiceExtension();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number: MaxMultiProcessFeatureChildProcess_0100
+ * @tc.desc: Test MaxMultiProcessFeatureChildProcess works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, MaxMultiProcessFeatureChildProcess_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "MaxMultiProcessFeatureChildProcess_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.maxMultiProcessFeatureChildProcess_.isLoaded = false;
+    bool result = appUtils.MaxMultiProcessFeatureChildProcess();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number: IsSystemReasonMessage_0100
+ * @tc.desc: Test IsSystemReasonMessage works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsSystemReasonMessage_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsSystemReasonMessage_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    std::string reasonMessage = "";
+    bool result = appUtils.IsSystemReasonMessage(reasonMessage);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number: IsGrantPersistUriPermission_0100
+ * @tc.desc: Test IsGrantPersistUriPermission works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsGrantPersistUriPermission_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsGrantPersistUriPermission_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isGrantPersistUriPermission_.isLoaded = false;
+    bool result = appUtils.IsGrantPersistUriPermission();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.number: GetMigrateClientBundleName_0100
+ * @tc.desc: Test GetMigrateClientBundleName works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, GetMigrateClientBundleName_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetMigrateClientBundleName_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.migrateClientBundleName_.isLoaded = false;
+    std::string result = appUtils.GetMigrateClientBundleName();
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.number: IsUseMultiRenderProcess_0100
+ * @tc.desc: Test IsUseMultiRenderProcess works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsUseMultiRenderProcess_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsUseMultiRenderProcess_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isUseMultiRenderProcess_.isLoaded = false;
+    bool result = appUtils.IsUseMultiRenderProcess();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.number: IsLaunchEmbededUIAbility_0100
+ * @tc.desc: Test IsLaunchEmbededUIAbility works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsLaunchEmbededUIAbility_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsLaunchEmbededUIAbility_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isLaunchEmbededUIAbility_.isLoaded = false;
+    bool result = appUtils.IsLaunchEmbededUIAbility();
+    EXPECT_FALSE(result);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
