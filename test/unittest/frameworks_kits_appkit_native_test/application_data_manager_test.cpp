@@ -110,6 +110,23 @@ HWTEST_F(ApplicationDataManagerTest, ApplicationDataManager_RemoveErrorObserver_
 }
 
 /**
+ * @tc.number: ApplicationDataManager_RemoveErrorObserver_002
+ * @tc.name: ApplicationDataManager RemoveErrorObserver
+ * @tc.desc: Test whether remove Registerabilitylifecyclecallbacks and are called normally.
+ */
+HWTEST_F(ApplicationDataManagerTest, ApplicationDataManager_RemoveErrorObserver_002, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ApplicationDataManager_RemoveErrorObserver_002 start";
+    std::shared_ptr<MyObserver> observer = std::make_shared<MyObserver>();
+    ApplicationDataManager::GetInstance().AddErrorObserver(observer);
+    ApplicationDataManager::GetInstance().NotifyETSUnhandledException("test");
+    EXPECT_EQ(true, ApplicationDataManagerTest::Flag);
+    ApplicationDataManager::GetInstance().RemoveErrorObserver();
+    EXPECT_EQ(nullptr, ApplicationDataManager::GetInstance().errorObserver_);
+    GTEST_LOG_(INFO) << "ApplicationDataManager_RemoveErrorObserver_002 end";
+}
+
+/**
  * @tc.number: ApplicationDataManager_NotifyExceptionObject_001
  * @tc.name: ApplicationDataManager NotifyExceptionObject
  * @tc.desc: Test whether NotifyExceptionObject are called normally.
@@ -146,6 +163,25 @@ HWTEST_F(ApplicationDataManagerTest, ApplicationDataManager_NotifyExceptionObjec
     EXPECT_EQ(nullptr, ApplicationDataManager::GetInstance().errorObserver_);
     EXPECT_FALSE(ApplicationDataManager::GetInstance().NotifyExceptionObject(errorObj));
     GTEST_LOG_(INFO) << "ApplicationDataManager_NotifyExceptionObject_002 end";
+}
+
+/**
+ * @tc.number: ApplicationDataManager_NotifyETSExceptionObject_001
+ * @tc.name: ApplicationDataManager NotifyExceptionObject
+ * @tc.desc: Test whether NotifyETSExceptionObject are called normally.
+ */
+HWTEST_F(ApplicationDataManagerTest,
+    ApplicationDataManager_NotifyETSExceptionObject_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ApplicationDataManager_NotifyETSExceptionObject_001 start";
+    AppExecFwk::ErrorObject errorObj;
+    errorObj.name = "errorName";
+    errorObj.message = "errorMessage";
+    errorObj.stack = "errorStack";
+    ApplicationDataManager::GetInstance().RemoveErrorObserver();
+    EXPECT_EQ(nullptr, ApplicationDataManager::GetInstance().errorObserver_);
+    EXPECT_FALSE(ApplicationDataManager::GetInstance().NotifyETSExceptionObject(errorObj));
+    GTEST_LOG_(INFO) << "ApplicationDataManager_NotifyETSExceptionObject_001 end";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
