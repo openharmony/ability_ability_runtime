@@ -127,12 +127,65 @@ HWTEST_F(EtsRuntimeTest, Initialize_100, TestSize.Level1)
  */
 HWTEST_F(EtsRuntimeTest, Initialize_200, TestSize.Level1)
 {
-    options_.lang = Runtime::Language::JS;
-    Runtime *jsRuntime = nullptr;
+    Runtime::Options options;
+    options.lang = Runtime::Language::ETS;
+    options.arkNativeFilePath = "test_app/";
+    options.moduleName = "TestModule";
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    ASSERT_NE(jsRuntime, nullptr);
     std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
-    bool result = etsRuntime->Initialize(options_, jsRuntime);
+    ASSERT_NE(etsRuntime, nullptr);
+    bool result = etsRuntime->Initialize(options, jsRuntime.get());
     EXPECT_EQ(result, false);
-    options_.lang = Runtime::Language::ETS;
+}
+
+/**
+ * @tc.name: LoadModule_0100
+ * @tc.desc: LoadModule with non-empty hapPath should construct file path directly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, LoadModule_0100, TestSize.Level1)
+{
+    auto etsRuntime = std::make_unique<ETSRuntime>();
+    etsRuntime->codePath_ = "/test/code/path";
+    std::string moduleName = "abc";
+    std::string modulePath = "dir.test.module";
+    std::string hapPath = "/some/hap";
+    std::string srcEntrance = "main.ets";
+    auto result = etsRuntime->LoadModule(moduleName, modulePath, hapPath, false, false, srcEntrance);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: LoadModule_0200
+ * @tc.desc: LoadModule trims moduleName containing "::" correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, LoadModule_0200, TestSize.Level1)
+{
+    auto etsRuntime = std::make_unique<ETSRuntime>();
+    etsRuntime->codePath_ = "/code";
+    std::string moduleName = "lib::submod";
+    std::string modulePath = "m.js";
+    std::string hapPath = "/hap";
+    std::string srcEntrance = "main";
+    etsRuntime->LoadModule(moduleName, modulePath, hapPath, false, false, srcEntrance);
+    EXPECT_EQ(etsRuntime->moduleName_, "lib");
+}
+
+
+/**
+ * @tc.name: LoadAbcLinker_0100
+ * @tc.desc: LoadAbcLinker returns false when env is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, LoadAbcLinker_0100, TestSize.Level0)
+{
+    ETSRuntime etsRuntime;
+    ani_class cls = nullptr;
+    ani_object obj = nullptr;
+    bool result = etsRuntime.LoadAbcLinker(nullptr, "testModule", cls, obj);
+    EXPECT_FALSE(result);
 }
 
 /**
