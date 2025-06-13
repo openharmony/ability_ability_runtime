@@ -796,7 +796,7 @@ std::shared_ptr<AppExecFwk::Configuration> ApplicationContext::GetConfiguration(
 
 std::string ApplicationContext::GetBaseDir() const
 {
-    return (contextImpl_ != nullptr) ? contextImpl_->GetBaseDir() : nullptr;
+    return (contextImpl_ != nullptr) ? contextImpl_->GetBaseDir() : "";
 }
 
 Global::Resource::DeviceType ApplicationContext::GetDeviceType() const
