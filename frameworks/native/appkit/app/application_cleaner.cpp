@@ -97,10 +97,10 @@ void ApplicationCleaner::RenameTempData()
 
 void ApplicationCleaner::ClearTempData()
 {
-    if (hasCleaned) {
+    if (hasCleaned_) {
         return;
     }
-    hasCleaned = true;
+    hasCleaned_ = true;
     TAG_LOGI(AAFwkTag::APPKIT, "ClearTempData");
     std::vector<std::string> rootDir;
     if (GetRootPath(rootDir) != RESULT_OK) {
@@ -160,7 +160,7 @@ int ApplicationCleaner::GetRootPath(std::vector<std::string> &rootPath)
         return RESULT_ERR;
     }
 
-    auto instance = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance();
+    auto instance = AppExecFwk::OsAccountManagerWrapper::GetInstance();
     if (instance == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null instance");
         return RESULT_ERR;
