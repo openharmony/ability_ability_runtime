@@ -1665,6 +1665,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.apiTargetVersion = appInfo.apiTargetVersion;
         options.pkgContextInfoJsonStringMap = pkgContextInfoJsonStringMap;
         options.allowArkTsLargeHeap = appInfo.allowArkTsLargeHeap;
+        options.versionCode = appInfo.versionCode;
 #ifdef CJ_FRONTEND
         if (isCJApp) {
             options.langs.emplace(AbilityRuntime::Runtime::Language::CJ, true);
