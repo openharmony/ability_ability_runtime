@@ -767,6 +767,7 @@ HWTEST_F(JsRuntimeTest, JsRuntimeInitialize_0100, TestSize.Level2)
     options.isStageModel = false;
     options.isTestFramework = false;
     options.preload = true;
+    options.versionCode = 1000;
     bool result = jsRuntime->Initialize(options);
     EXPECT_EQ(result, true);
 
