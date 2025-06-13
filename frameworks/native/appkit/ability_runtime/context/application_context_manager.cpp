@@ -89,37 +89,17 @@ void ApplicationContextManager::RemoveGlobalObject(napi_env env)
     }
 }
 
-void ApplicationContextManager::AddEtsGlobalObject(ani_env* env,
+void ApplicationContextManager::SetEtsGlobalObject(
     std::shared_ptr<AbilityRuntime::ETSNativeReference> applicationContextObj)
 {
-    std::lock_guard<std::mutex> lock(etsApplicationContextMutex_);
-    auto iter = etsApplicationContextMap_.find(env);
-    if (iter == etsApplicationContextMap_.end()) {
-        etsApplicationContextMap_[env] = applicationContextObj;
-        return;
-    }
-    if (iter->second != nullptr) {
-        iter->second.reset();
-        iter->second = nullptr;
-    }
-    iter->second = applicationContextObj;
+    std::lock_guard<std::mutex> lock(applicationContextMutex_);
+    etsApplicationContextRef_ = applicationContextObj;
 }
 
-std::shared_ptr<AbilityRuntime::ETSNativeReference> ApplicationContextManager::GetEtsGlobalObject(ani_env* env)
+std::shared_ptr<AbilityRuntime::ETSNativeReference> ApplicationContextManager::GetEtsGlobalObject()
 {
-    std::lock_guard<std::mutex> lock(etsApplicationContextMutex_);
-    return etsApplicationContextMap_[env];
-}
-
-void ApplicationContextManager::RemoveEtsGlobalObject(ani_env* env)
-{
-    std::lock_guard<std::mutex> lock(etsApplicationContextMutex_);
-    auto iter = etsApplicationContextMap_.find(env);
-    if (iter != etsApplicationContextMap_.end() && iter->second != nullptr) {
-        iter->second.reset();
-        iter->second = nullptr;
-        etsApplicationContextMap_.erase(env);
-    }
+    std::lock_guard<std::mutex> lock(applicationContextMutex_);
+    return etsApplicationContextRef_;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
