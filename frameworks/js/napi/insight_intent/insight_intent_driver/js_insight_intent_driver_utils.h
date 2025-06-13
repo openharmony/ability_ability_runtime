@@ -34,6 +34,8 @@ napi_value CreateInsightIntentInfoParam(napi_env env, const std::string &paramSt
 napi_value CreateInsightIntentInfoResult(napi_env env, const std::string &resultStr);
 napi_value CreateInsightIntentInfoForQuery(napi_env env, const InsightIntentInfoForQuery &info);
 napi_value CreateInsightIntentInfoForQueryArray(napi_env env, const std::vector<InsightIntentInfoForQuery> &infos);
+napi_value CreateJsEntityInfo(napi_env env, const EntityInfoForQuery &info);
+napi_value CreateEntityInfoForArray(napi_env env, const std::vector<EntityInfoForQuery> &infos);
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_JS_INSIGHT_INTENT_DRIVER_UTILS_H
