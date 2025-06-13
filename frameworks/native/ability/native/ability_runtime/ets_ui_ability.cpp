@@ -17,6 +17,7 @@
 
 #include <regex>
 
+#include "ability_delegator_infos.h"
 #include "ability_delegator_registry.h"
 #include "ani_common_want.h"
 #ifdef SUPPORT_SCREEN
@@ -260,9 +261,11 @@ void EtsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
     CallObjectMethod(false, "onCreate", nullptr, wantObj, launchParamObj);
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
         AbilityRuntime::Runtime::Language::ETS);
-    if (delegator) {
+    auto property = std::make_shared<AppExecFwk::EtsDelegatorAbilityProperty>();
+    if (delegator && CreateProperty(abilityContext_, property)) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStart");
-        delegator->PostPerformStart(CreateADelegatorAbilityProperty());
+        property->object_ = etsAbilityObj_;
+        delegator->PostPerformStart(property);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnStart end");
 }
@@ -334,11 +337,12 @@ void EtsUIAbility::OnStopCallback()
 {
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
         AbilityRuntime::Runtime::Language::ETS);
-    if (delegator) {
+    auto property = std::make_shared<AppExecFwk::EtsDelegatorAbilityProperty>();
+    if (delegator && CreateProperty(abilityContext_, property)) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStop");
-        delegator->PostPerformStop(CreateADelegatorAbilityProperty());
+        property->object_ = etsAbilityObj_;
+        delegator->PostPerformStop(property);
     }
-
     bool ret = ConnectionManager::GetInstance().DisconnectCaller(AbilityContext::token_);
     if (ret) {
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
@@ -371,9 +375,11 @@ void EtsUIAbility::OnSceneCreated()
     CallObjectMethod(false, "onWindowStageCreate", nullptr, etsAppWindowStage);
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
         AbilityRuntime::Runtime::Language::ETS);
-    if (delegator) {
+    auto property = std::make_shared<AppExecFwk::EtsDelegatorAbilityProperty>();
+    if (delegator && CreateProperty(abilityContext_, property)) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceCreated");
-        delegator->PostPerformScenceCreated(CreateADelegatorAbilityProperty());
+        property->object_ = etsAbilityObj_;
+        delegator->PostPerformScenceCreated(property);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnSceneCreated end");
 }
@@ -393,9 +399,11 @@ void EtsUIAbility::onSceneDestroyed()
     }
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
         AbilityRuntime::Runtime::Language::ETS);
-    if (delegator) {
+    auto property = std::make_shared<AppExecFwk::EtsDelegatorAbilityProperty>();
+    if (delegator && CreateProperty(abilityContext_, property)) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceDestroyed");
-        delegator->PostPerformScenceDestroyed(CreateADelegatorAbilityProperty());
+        property->object_ = etsAbilityObj_;
+        delegator->PostPerformScenceDestroyed(property);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "onSceneDestroyed end");
 }
@@ -436,9 +444,11 @@ void EtsUIAbility::CallOnForegroundFunc(const Want &want)
     CallObjectMethod(false, "onForeground", nullptr, wantRef);
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
         AbilityRuntime::Runtime::Language::ETS);
-    if (delegator) {
+    auto property = std::make_shared<AppExecFwk::EtsDelegatorAbilityProperty>();
+    if (delegator && CreateProperty(abilityContext_, property)) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformForeground");
-        delegator->PostPerformForeground(CreateADelegatorAbilityProperty());
+        property->object_ = etsAbilityObj_;
+        delegator->PostPerformForeground(property);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "CallOnForegroundFunc end");
 }
@@ -451,9 +461,11 @@ void EtsUIAbility::OnBackground()
     UIAbility::OnBackground();
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
         AbilityRuntime::Runtime::Language::ETS);
-    if (delegator) {
+    auto property = std::make_shared<AppExecFwk::EtsDelegatorAbilityProperty>();
+    if (delegator && CreateProperty(abilityContext_, property)) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformBackground");
-        delegator->PostPerformBackground(CreateADelegatorAbilityProperty());
+        property->object_ = etsAbilityObj_;
+        delegator->PostPerformBackground(property);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnBackground end");
 }
@@ -748,31 +760,6 @@ bool EtsUIAbility::CallObjectMethod(bool withResult, const char *name, const cha
     va_end(args);
     TAG_LOGI(AAFwkTag::UIABILITY, "CallObjectMethod end, name: %{public}s", name);
     return false;
-}
-
-std::shared_ptr<AppExecFwk::ETSDelegatorAbilityProperty> EtsUIAbility::CreateADelegatorAbilityProperty()
-{
-    if (abilityContext_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
-        return nullptr;
-    }
-    auto property = std::make_shared<AppExecFwk::ETSDelegatorAbilityProperty>();
-    property->token_ = abilityContext_->GetToken();
-    property->name_ = GetAbilityName();
-    property->moduleName_ = GetModuleName();
-    if (GetApplicationInfo() == nullptr || GetApplicationInfo()->bundleName.empty()) {
-        property->fullName_ = GetAbilityName();
-    } else {
-        std::string::size_type pos = GetAbilityName().find(GetApplicationInfo()->bundleName);
-        if (pos == std::string::npos || pos != 0) {
-            property->fullName_ = GetApplicationInfo()->bundleName + "." + GetAbilityName();
-        } else {
-            property->fullName_ = GetAbilityName();
-        }
-    }
-    property->lifecycleState_ = GetState();
-    property->object_ = etsAbilityObj_;
-    return property;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
