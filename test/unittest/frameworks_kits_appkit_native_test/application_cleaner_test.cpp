@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
 #include <gtest/gtest.h>
 
 #define private public
@@ -22,6 +24,8 @@
 #include "context_impl.h"
 #undef private
 #undef protected
+#include "hilog_tag_wrapper.h"
+#include "mock_my_status.h"
 
 using namespace testing::ext;
 using namespace OHOS;
@@ -30,6 +34,9 @@ using namespace OHOS::AbilityRuntime;
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+constexpr int32_t RESULT_ERR = -1;
+}
 class ApplicationCleanerTest : public testing::Test {
 public:
     ApplicationCleanerTest()
@@ -61,12 +68,29 @@ void ApplicationCleanerTest::TearDown(void)
  */
 HWTEST_F(ApplicationCleanerTest, ClearTempData_0100, Function | MediumTest | Level1)
 {
-    GTEST_LOG_(INFO) << "ClearTempData_0100 start";
-    auto cleaner = ApplicationCleaner::GetInstance();
-    EXPECT_NE(cleaner, nullptr);
-    cleaner->ClearTempData();
+    TAG_LOGI(AAFwkTag::APPKIT, "ClearTempData_0100 start");
+    ApplicationCleaner cleaner;
+    cleaner.hasCleaned_ = false;
+    cleaner.ClearTempData();
+    EXPECT_TRUE(cleaner.hasCleaned_);
 
-    GTEST_LOG_(INFO) << "ClearTempData_0100 end";
+    TAG_LOGI(AAFwkTag::APPKIT, "ClearTempData_0100 end");
+}
+
+/**
+ * @tc.number: ClearTempData_0200
+ * @tc.name: ClearTempData
+ * @tc.desc: Test repeat call fail.
+ */
+HWTEST_F(ApplicationCleanerTest, ClearTempData_0200, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "ClearTempData_0200 start");
+    ApplicationCleaner cleaner;
+    cleaner.hasCleaned_ = true;
+    cleaner.ClearTempData();
+    EXPECT_TRUE(cleaner.hasCleaned_);
+
+    TAG_LOGI(AAFwkTag::APPKIT, "ClearTempData_0200 end");
 }
 
 /**
@@ -121,6 +145,127 @@ HWTEST_F(ApplicationCleanerTest, RemoveDir_0100, Function | MediumTest | Level1)
     bool res = cleaner->RemoveDir(currentPath);
     EXPECT_EQ(res, false);
     GTEST_LOG_(INFO) << "RemoveDir_0100 end";
+}
+
+/**
+ * @tc.number: RemoveDir_0200
+ * @tc.name: RemoveDir
+ * @tc.desc: Test RemoveDir with empty fileName.
+ */
+HWTEST_F(ApplicationCleanerTest, RemoveDir_0200, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "RemoveDir_0200 start");
+
+    std::string emptyPath;
+    ApplicationCleaner cleaner;
+    EXPECT_FALSE(cleaner.RemoveDir(emptyPath));
+
+    TAG_LOGI(AAFwkTag::APPKIT, "RemoveDir_0200 end");
+}
+
+/**
+ * @tc.number: RemoveDir_0300
+ * @tc.name: RemoveDir
+ * @tc.desc: Test RemoveDir with device fileName.
+ */
+HWTEST_F(ApplicationCleanerTest, RemoveDir_0300, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "RemoveDir_0300 start");
+
+    std::string deviceFile("/dev/null");
+    ApplicationCleaner cleaner;
+    EXPECT_FALSE(cleaner.RemoveDir(deviceFile));
+
+    TAG_LOGI(AAFwkTag::APPKIT, "RemoveDir_0300 end");
+}
+
+/**
+ * @tc.number: RemoveDir_0400
+ * @tc.name: RemoveDir
+ * @tc.desc: Test RemoveDir with regular file.
+ */
+HWTEST_F(ApplicationCleanerTest, RemoveDir_0400, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "RemoveDir_0400 start");
+
+    std::string fileName("testfile.txt");
+    std::ofstream testFile(fileName);
+    ApplicationCleaner cleaner;
+    EXPECT_TRUE(cleaner.RemoveDir(fileName));
+
+    TAG_LOGI(AAFwkTag::APPKIT, "RemoveDir_0400 end");
+}
+
+/**
+ * @tc.number: RemoveDir_0500
+ * @tc.name: RemoveDir
+ * @tc.desc: Test RemoveDir with dir.
+ */
+HWTEST_F(ApplicationCleanerTest, RemoveDir_0500, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "RemoveDir_0500 start");
+
+    std::string fileName("testdir");
+    std::filesystem::create_directory(fileName);
+    ApplicationCleaner cleaner;
+    EXPECT_TRUE(cleaner.RemoveDir(fileName));
+
+    TAG_LOGI(AAFwkTag::APPKIT, "RemoveDir_0500 end");
+}
+
+/**
+ * @tc.number: GetRootPath_0100
+ * @tc.name: GetRootPath
+ * @tc.desc: Test GetRootPath with null context_.
+ */
+HWTEST_F(ApplicationCleanerTest, GetRootPath_0100, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0100 start");
+
+    ApplicationCleaner cleaner;
+    cleaner.context_ = nullptr;
+    std::vector<std::string> rootPath;
+    EXPECT_EQ(cleaner.GetRootPath(rootPath), RESULT_ERR);
+
+    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0100 end");
+}
+
+/**
+ * @tc.number: GetRootPath_0200
+ * @tc.name: GetRootPath
+ * @tc.desc: Test GetRootPath with null OsAccountManagerWrapper.
+ */
+HWTEST_F(ApplicationCleanerTest, GetRootPath_0200, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0200 start");
+
+    ApplicationCleaner cleaner;
+    cleaner.context_ = AbilityRuntime::ApplicationContext::GetInstance();
+    std::vector<std::string> rootPath;
+    MyStatus::GetInstance().instanceStatus_ = false;
+    EXPECT_EQ(cleaner.GetRootPath(rootPath), RESULT_ERR);
+    MyStatus::GetInstance().instanceStatus_ = true;
+
+    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0200 end");
+}
+
+/**
+ * @tc.number: GetRootPath_0300
+ * @tc.name: GetRootPath
+ * @tc.desc: Test GetRootPath with GetOsAccountLocalIdFromProcess failing.
+ */
+HWTEST_F(ApplicationCleanerTest, GetRootPath_0300, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0300 start");
+
+    ApplicationCleaner cleaner;
+    cleaner.context_ = AbilityRuntime::ApplicationContext::GetInstance();
+    std::vector<std::string> rootPath;
+    MyStatus::GetInstance().statusValue_ = RESULT_ERR;
+    EXPECT_EQ(cleaner.GetRootPath(rootPath), RESULT_ERR);
+    MyStatus::GetInstance().statusValue_ = 0;
+
+    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0300 end");
 }
 }
 }

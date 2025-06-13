@@ -1113,6 +1113,42 @@ ohos_unittest("native_lib_util_test") {
   ]
 }
 
+ohos_unittest("application_cleaner_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../../cfi_blocklist.txt"
+  }
+  include_dirs = [
+    "mock/include",
+  ]
+  module_out_path = module_output_path
+
+  sources = [
+    "${ability_runtime_native_path}/appkit/app/application_cleaner.cpp",
+    "application_cleaner_test.cpp",
+    "mock/src/os_account_manager_wrapper.cpp",
+  ]
+
+  configs = [ ":module_context_config" ]
+
+  deps = [
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:appkit_native",
+  ]
+
+  external_deps = [
+    "ability_runtime:runtime",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "ffrt:libffrt",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("startup_manager_test") {
   sanitize = {
     cfi = true
@@ -1236,6 +1272,7 @@ group("unittest") {
   deps += [
     ":ability_stage_test",
     ":ability_start_setting_test",
+    ":application_cleaner_test",
     ":application_impl_test",
     ":application_test",
     ":assert_fault_test",
