@@ -32,19 +32,21 @@ int32_t WantUtils::GetCallerBundleName(std::string &callerBundleName)
     return IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callerUid, callerBundleName));
 }
 
-int32_t WantUtils::ConvertToExplicitWant(Want& want)
+int32_t WantUtils::ConvertToExplicitWant(Want& want, uint32_t &targetType)
 {
     int32_t retCode = ERR_OK;
 #ifdef APP_DOMAIN_VERIFY_ENABLED
     bool isUsed = false;
     ffrt::condition_variable callbackDoneCv;
     ffrt::mutex callbackDoneMutex;
-    ConvertCallbackTask task = [&retCode, &isUsed, &callbackDoneCv, &callbackDoneMutex,
-        &convertedWant = want](int resultCode, AAFwk::Want& want) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "in convert callback task, resultCode=%{public}d,want=%{private}s",
-            resultCode, want.ToString().c_str());
+    ConvertCallbackTask task = [&retCode, &isUsed, &callbackDoneCv, &callbackDoneMutex, &convertedWant = want,
+        &convertedType = targetType](int resultCode, AppDomainVerify::TargetInfo &targetInfo) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR,
+            "in convert callback task, resultCode=%{public}d, targetType=%{public}u",
+            resultCode, targetInfo.targetType);
         retCode = resultCode;
-        convertedWant = want;
+        convertedWant = targetInfo.targetWant;
+        convertedType = targetInfo.targetType;
         {
             std::lock_guard<ffrt::mutex> lock(callbackDoneMutex);
             isUsed = true;
@@ -69,17 +71,39 @@ int32_t WantUtils::ConvertToExplicitWant(Want& want)
     return retCode;
 }
 
-bool WantUtils::IsAtomicServiceUrl(const Want& want)
+bool WantUtils::IsShortUrl(const Want &want)
 {
     std::string url = want.GetUriString();
-    bool isAtomicServiceShortUrl = false;
+    bool isShortUrl = false;
 #ifdef APP_DOMAIN_VERIFY_ENABLED
-    isAtomicServiceShortUrl = AppDomainVerify::AppDomainVerifyMgrClient::GetInstance()->IsAtomicServiceUrl(url);
+    isShortUrl = AppDomainVerify::AppDomainVerifyMgrClient::GetInstance()->IsShortUrl(url);
 #endif
-    if (!isAtomicServiceShortUrl) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "not atomic service short url");
+    if (!isShortUrl) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "not short url");
     }
-    return isAtomicServiceShortUrl;
+    return isShortUrl;
+}
+
+bool WantUtils::IsAtomicService(uint32_t targetType)
+{
+#ifdef APP_DOMAIN_VERIFY_ENABLED
+    if (targetType == AppDomainVerify::TargetType::ATOMIC_SERVICE) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "targetType is ATOMIC_SERVICE");
+        return true;
+    }
+#endif
+    return false;
+}
+
+bool WantUtils::IsNormalApp(uint32_t targetType)
+{
+#ifdef APP_DOMAIN_VERIFY_ENABLED
+    if (targetType == AppDomainVerify::TargetType::APP) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "targetType is APP");
+        return true;
+    }
+#endif
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

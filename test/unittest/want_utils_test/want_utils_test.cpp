@@ -23,6 +23,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace AAFwk {
+constexpr uint32_t InitTargetType = 100;
 class WantUtilsTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -53,13 +54,17 @@ HWTEST_F(WantUtilsTest, ConvertToExplicitWant_001, TestSize.Level1)
     auto client = AppDomainVerify::AppDomainVerifyMgrClient::GetInstance();
     EXPECT_NE(client, nullptr);
     AppDomainVerify::AppDomainVerifyMgrClient::convertResultCode_ = 0;
-    AppDomainVerify::AppDomainVerifyMgrClient::explicitWant_.SetElementName("short_bundle", "short_ability");
-    auto errCode = WantUtils::ConvertToExplicitWant(want);
+    AppDomainVerify::AppDomainVerifyMgrClient::
+        convertTargetInfo_.targetWant.SetElementName("short_bundle", "short_ability");
+    AppDomainVerify::AppDomainVerifyMgrClient::convertTargetInfo_.targetType = AppDomainVerify::TargetType::APP;
+    uint32_t targetType = InitTargetType;
+    auto errCode = WantUtils::ConvertToExplicitWant(want, targetType);
     auto bundle = want.GetElement().GetBundleName();
     auto ability = want.GetElement().GetAbilityName();
     EXPECT_EQ(errCode, 0);
     EXPECT_EQ(bundle, "short_bundle");
     EXPECT_EQ(ability, "short_ability");
+    EXPECT_EQ(targetType, AppDomainVerify::TargetType::APP);
     TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest ConvertToExplicitWant_001 end");
 }
 
@@ -76,8 +81,9 @@ HWTEST_F(WantUtilsTest, ConvertToExplicitWant_002, TestSize.Level1)
     want.SetUri("a_short_atomic_service_uri");
     auto client = AppDomainVerify::AppDomainVerifyMgrClient::GetInstance();
     EXPECT_NE(client, nullptr);
+    uint32_t targetType = InitTargetType;
     AppDomainVerify::AppDomainVerifyMgrClient::convertResultCode_ = -1;
-    auto errCode = WantUtils::ConvertToExplicitWant(want);
+    auto errCode = WantUtils::ConvertToExplicitWant(want, targetType);
     EXPECT_EQ(errCode, -1);
     TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest ConvertToExplicitWant_002 end");
 }
@@ -95,48 +101,49 @@ HWTEST_F(WantUtilsTest, ConvertToExplicitWant_003, TestSize.Level1)
     want.SetUri("a_short_atomic_service_uri");
     auto client = AppDomainVerify::AppDomainVerifyMgrClient::GetInstance();
     EXPECT_NE(client, nullptr);
+    uint32_t targetType = InitTargetType;
     AppDomainVerify::AppDomainVerifyMgrClient::convertResultCode_ = ERR_TIMED_OUT;
-    auto errCode = WantUtils::ConvertToExplicitWant(want);
+    auto errCode = WantUtils::ConvertToExplicitWant(want, targetType);
     EXPECT_EQ(errCode, ERR_TIMED_OUT);
     TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest ConvertToExplicitWant_003 end");
 }
 
 /*
  * Feature: WantUtilsTest
- * Function: IsAtomicServiceUrl
+ * Function: IsShortUrl
  * SubFunction: NA
- * FunctionPoints: AbilityManagerService IsAtomicServiceUrl
+ * FunctionPoints: AbilityManagerService IsShortUrl
  */
-HWTEST_F(WantUtilsTest, IsAtomicServiceUrl_001, TestSize.Level1)
+HWTEST_F(WantUtilsTest, IsShortUrl_001, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsAtomicServiceUrl_001 start");
+    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsShortUrl_001 start");
     Want want;
     want.SetUri("not_a_short_atomic_service_uri");
     auto client = AppDomainVerify::AppDomainVerifyMgrClient::GetInstance();
     EXPECT_NE(client, nullptr);
-    AppDomainVerify::AppDomainVerifyMgrClient::isAtomicServiceUrlFlag_ = false;
-    auto result = WantUtils::IsAtomicServiceUrl(want);
+    AppDomainVerify::AppDomainVerifyMgrClient::isShortUrlFlag_ = false;
+    auto result = WantUtils::IsShortUrl(want);
     EXPECT_EQ(result, false);
-    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsAtomicServiceUrl_001 end");
+    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsShortUrl_001 end");
 }
 
 /*
  * Feature: WantUtilsTest
- * Function: IsAtomicServiceUrl
+ * Function: IsShortUrl
  * SubFunction: NA
- * FunctionPoints: AbilityManagerService IsAtomicServiceUrl
+ * FunctionPoints: AbilityManagerService IsShortUrl
  */
-HWTEST_F(WantUtilsTest, IsAtomicServiceUrl_002, TestSize.Level1)
+HWTEST_F(WantUtilsTest, IsShortUrl_002, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsAtomicServiceUrl_002 start");
+    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsShortUrl_002 start");
     Want want;
     want.SetUri("a_short_atomic_service_uri");
     auto client = AppDomainVerify::AppDomainVerifyMgrClient::GetInstance();
     EXPECT_NE(client, nullptr);
-    AppDomainVerify::AppDomainVerifyMgrClient::isAtomicServiceUrlFlag_ = true;
-    auto result = WantUtils::IsAtomicServiceUrl(want);
+    AppDomainVerify::AppDomainVerifyMgrClient::isShortUrlFlag_ = true;
+    auto result = WantUtils::IsShortUrl(want);
     EXPECT_EQ(result, true);
-    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsAtomicServiceUrl_002 end");
+    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsShortUrl_002 end");
 }
 
 /*
@@ -152,6 +159,70 @@ HWTEST_F(WantUtilsTest, GetCallerBundleName_001, TestSize.Level1)
     auto errCode = WantUtils::GetCallerBundleName(callerBundleName);
     EXPECT_NE(errCode, 0);
     TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest GetCallerBundleName_001 end");
+}
+
+/*
+ * Feature: WantUtilsTest
+ * Function: IsAtomicService
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService IsAtomicService true
+ */
+HWTEST_F(WantUtilsTest, IsAtomicService_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsAtomicService_001 start");
+    std::string callerBundleName;
+    uint32_t targetType = 0;
+    auto result = WantUtils::IsAtomicService(targetType);
+    EXPECT_EQ(result, true);
+    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsAtomicService_001 end");
+}
+
+/*
+ * Feature: WantUtilsTest
+ * Function: IsAtomicService
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService IsAtomicService false
+ */
+HWTEST_F(WantUtilsTest, IsAtomicService_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsAtomicService_002 start");
+    std::string callerBundleName;
+    uint32_t targetType = 1;
+    auto result = WantUtils::IsAtomicService(targetType);
+    EXPECT_EQ(result, false);
+    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsAtomicService_002 end");
+}
+
+/*
+ * Feature: WantUtilsTest
+ * Function: IsNormalApp
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService IsNormalApp true
+ */
+HWTEST_F(WantUtilsTest, IsNormalApp_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsNormalApp_001 start");
+    std::string callerBundleName;
+    uint32_t targetType = 1;
+    auto result = WantUtils::IsNormalApp(targetType);
+    EXPECT_EQ(result, true);
+    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsNormalApp_001 end");
+}
+
+/*
+ * Feature: WantUtilsTest
+ * Function: IsNormalApp
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService IsNormalApp false
+ */
+HWTEST_F(WantUtilsTest, IsNormalApp_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsNormalApp_002 start");
+    std::string callerBundleName;
+    uint32_t targetType = 0;
+    auto result = WantUtils::IsNormalApp(targetType);
+    EXPECT_EQ(result, false);
+    TAG_LOGI(AAFwkTag::TEST, "WantUtilsTest IsNormalApp_002 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

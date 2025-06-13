@@ -18,11 +18,6 @@
 
 #include "want.h"
 
-#ifdef APP_DOMAIN_VERIFY_ENABLED
-#include "ag_convert_callback_impl.h"
-#include "app_domain_verify_mgr_client.h"
-#endif
-
 namespace OHOS {
 namespace AAFwk {
 /**
@@ -32,10 +27,10 @@ namespace AAFwk {
 class WantUtils final {
 public:
     /**
-     * ConvertToExplicitWant, convert implicit want and targetType to explicit.
+     * ConvertToExplicitWant, convert implicit want to explicit want.
      *
-     * @param want The implicit want will be updated by AG.
-     * @param targetType The targetType will be updated to specific type by AG.
+     * @param want The implicit want.
+     * @param targetType AG find specific targetType.
      * @return Error code of calling the function.
      */
     static int32_t ConvertToExplicitWant(Want &want, uint32_t &targetType);
