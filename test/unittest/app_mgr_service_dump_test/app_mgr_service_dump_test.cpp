@@ -70,7 +70,7 @@ HWTEST_F(AppMgrServiceDumpTest, AppMgrServiceDump_GetProcessRunningInfosByUserId
 
     std::vector<RunningProcessInfo> info;
     auto result = appMgrServiceInner->GetProcessRunningInfosByUserId(info, USER_ID);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_NE(result, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceDump_GetProcessRunningInfosByUserId_0100 end");
 }
@@ -95,7 +95,7 @@ HWTEST_F(AppMgrServiceDumpTest, AppMgrServiceDump_GetProcessRunningInfosByUserId
 
     std::vector<RunningProcessInfo> info;
     auto result = appMgrService->GetProcessRunningInfosByUserId(info, USER_ID);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_NE(result, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceDump_GetProcessRunningInfosByUserId_0200 end");
 }

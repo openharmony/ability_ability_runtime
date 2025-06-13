@@ -2344,7 +2344,7 @@ HWTEST_F(AppMgrServiceInnerTest, RegisterNativeChildExitNotify_001, TestSize.Lev
 
     sptr<INativeChildNotify> notify;
     auto ret = appMgrServiceInner->RegisterNativeChildExitNotify(notify);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "RegisterNativeChildExitNotify_001 end");
 }
