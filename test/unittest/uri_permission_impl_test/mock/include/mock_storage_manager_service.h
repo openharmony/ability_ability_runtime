@@ -381,16 +381,6 @@ public:
     {
         return E_OK;
     }
-
-    virtual int32_t MountDisShareFile(int32_t userId, const std::map<std::string, std::string> &shareFiles)
-    {
-        return E_OK;
-    }
-
-    virtual int32_t UMountDisShareFile(int32_t userId, const std::string &networkId)
-    {
-        return E_OK;
-    }
 };
 
 bool StorageManagerServiceMock::isZero = true;
