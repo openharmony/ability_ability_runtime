@@ -38,10 +38,6 @@ std::map<std::weak_ptr<AppExecFwk::ETSNativeReference>, sptr<IRemoteObject>, std
 std::mutex g_mtxMonitorRecord;
 std::mutex g_mutexAbilityRecord;
 
-enum ERROR_CODE {
-    INCORRECT_PARAMETERS    = 401,
-};
-
 #ifdef ENABLE_ERRCODE
 constexpr int COMMON_FAILED = 16000100;
 #else
@@ -60,7 +56,7 @@ EtsAbilityDelegator::EtsAbilityDelegator()
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::ETS);
     if (delegator) {
         auto clearFunc = [](const std::shared_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &baseProperty) {
-            auto property = std::static_pointer_cast<AppExecFwk::ETSDelegatorAbilityProperty>(baseProperty);
+            auto property = std::static_pointer_cast<AppExecFwk::EtsDelegatorAbilityProperty>(baseProperty);
             if (!property) {
                 TAG_LOGE(AAFwkTag::DELEGATOR, "invalid property type");
                 return;
@@ -118,9 +114,9 @@ ani_object EtsAbilityDelegator::CreateEtsBaseContext(ani_env* aniEnv, ani_class 
         return {};
     }
     auto filesDir = context->GetFilesDir();
-    ani_string filesDir_string{};
-    aniEnv->String_NewUTF8(filesDir.c_str(), filesDir.size(), &filesDir_string);
-    if (aniEnv->Object_SetField_Ref(contextObj, filesDirField, reinterpret_cast<ani_ref>(filesDir_string)) != ANI_OK) {
+    ani_string filesDirstring = nullptr;
+    aniEnv->String_NewUTF8(filesDir.c_str(), filesDir.size(), &filesDirstring);
+    if (aniEnv->Object_SetField_Ref(contextObj, filesDirField, reinterpret_cast<ani_ref>(filesDirstring)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Ref failed");
         return {};
     }
@@ -130,7 +126,7 @@ ani_object EtsAbilityDelegator::CreateEtsBaseContext(ani_env* aniEnv, ani_class 
         return {};
     }
     auto tempDir = context->GetTempDir();
-    ani_string tempDirString{};
+    ani_string tempDirString = nullptr;
     aniEnv->String_NewUTF8(tempDir.c_str(), tempDir.size(), &tempDirString);
     if (aniEnv->Object_SetField_Ref(contextObj, tempDirField, reinterpret_cast<ani_ref>(tempDirString)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Ref failed");
@@ -172,7 +168,7 @@ ani_object EtsAbilityDelegator::WrapShellCmdResult(ani_env* env, std::unique_ptr
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindField failed status: %{public}d", status);
     }
-    ani_string aniStringVal {};
+    ani_string aniStringVal = nullptr;
     std::string strResult = result->GetStdResult();
     status = env->String_NewUTF8(strResult.c_str(), strResult.size(), &aniStringVal);
     if (status != ANI_OK) {
@@ -197,7 +193,7 @@ ani_object EtsAbilityDelegator::GetAppContext(ani_env* env, [[maybe_unused]]ani_
         TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
         return {};
     }
-    ani_class cls;
+    ani_class cls = nullptr;
     ani_object nullobj = nullptr;
     if (ANI_OK != env->FindClass(CONTEXT_CLASS_NAME, &cls)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass Context Failed");
@@ -314,7 +310,7 @@ void EtsAbilityDelegator::PrintSync(ani_env *env, [[maybe_unused]]ani_class aniC
         TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
         return;
     }
-    std::string msgStr;
+    std::string msgStr = "";
     ani_size sz {};
     env->String_GetUTF8Size(msg, &sz);
     msgStr.resize(sz + 1);
@@ -361,8 +357,7 @@ void EtsAbilityDelegator::AddAbilityMonitor(ani_env *env, [[maybe_unused]]ani_cl
     std::shared_ptr<EtsAbilityMonitor> monitorImpl = nullptr;
     if (!GetInstance().ParseMonitorPara(env, monitorObj, monitorImpl)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "ParseMonitorPara failed");
-        AbilityRuntime::EtsErrorUtil::ThrowError(env, INCORRECT_PARAMETERS,
-            "Parse param monitor failed, monitor must be Monitor.");
+        AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return;
     }
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::ETS);
@@ -463,41 +458,40 @@ bool EtsAbilityDelegator::ParseMonitorParaInner(ani_env *env, ani_object monitor
         TAG_LOGE(AAFwkTag::DELEGATOR, "env or monitorObj is nullptr");
         return false;
     }
-    ani_class monitorCls;
+    ani_class monitorCls = nullptr;
     ani_status status = env->FindClass(ABILITY_MONITOR_INNER_CLASS_NAME, &monitorCls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status: %{public}d", status);
         return false;
     }
-    ani_ref moduleNameRef;
+    ani_ref moduleNameRef = nullptr;
     status = env->Object_GetPropertyByName_Ref(monitorObj, "moduleName", &moduleNameRef);
     if (ANI_OK != status) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
         AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
         return false;
     }
-    std::string strModuleName;
+    std::string strModuleName = "";
     ani_string aniModuleString = static_cast<ani_string>(moduleNameRef);
     GetInstance().RetrieveStringFromAni(env, aniModuleString, strModuleName);
-    ani_ref abilityNameRef;
+    ani_ref abilityNameRef = nullptr;
     status = env->Object_GetPropertyByName_Ref(monitorObj, "abilityName", &abilityNameRef);
     if (ANI_OK != status) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref ");
         AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
         return false;
     }
-    std::string strAbilityName;
+    std::string strAbilityName = "";
     ani_string aniAbilityName = static_cast<ani_string>(abilityNameRef);
     GetInstance().RetrieveStringFromAni(env, aniAbilityName, strAbilityName);
 
     std::shared_ptr<EtsAbilityMonitor> abilityMonitor = nullptr;
     if (strModuleName.empty()) {
         abilityMonitor = std::make_shared<EtsAbilityMonitor>(strAbilityName);
-        abilityMonitor->SetEtsAbilityMonitor(env, monitorObj);
     } else {
         abilityMonitor = std::make_shared<EtsAbilityMonitor>(strAbilityName, strModuleName);
-        abilityMonitor->SetEtsAbilityMonitor(env, monitorObj);
     }
+    abilityMonitor->SetEtsAbilityMonitor(env, monitorObj);
     monitorImpl = abilityMonitor;
     std::shared_ptr<AppExecFwk::ETSNativeReference> reference = std::make_shared<AppExecFwk::ETSNativeReference>();
     if (reference != nullptr) {

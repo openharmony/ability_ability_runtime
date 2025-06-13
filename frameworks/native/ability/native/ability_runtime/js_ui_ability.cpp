@@ -405,18 +405,23 @@ void JsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     CallObjectMethod("onCreate", argv, ArraySize(argv));
     AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
-
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
-    if (delegator) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStart");
-        delegator->PostPerformStart(CreateADelegatorAbilityProperty());
-    }
-
+    HandleAbilityDelegatorStart();
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
         applicationContext->DispatchOnAbilityCreate(jsAbilityObj_);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
+}
+
+void JsUIAbility::HandleAbilityDelegatorStart()
+{
+    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
+    auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
+    if (delegator && CreateProperty(abilityContext_, property)) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStart");
+        property->object_ = jsAbilityObj_;
+        delegator->PostPerformStart(property);
+    }
 }
 
 void JsUIAbility::AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
@@ -525,9 +530,11 @@ void JsUIAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackI
 void JsUIAbility::OnStopCallback()
 {
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
-    if (delegator) {
+    auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
+    if (delegator && CreateProperty(abilityContext_, property)) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStop");
-        delegator->PostPerformStop(CreateADelegatorAbilityProperty());
+        property->object_ = jsAbilityObj_;
+        delegator->PostPerformStop(property);
     }
 
     bool ret = ConnectionManager::GetInstance().DisconnectCaller(AbilityContext::token_);
@@ -571,9 +578,11 @@ void JsUIAbility::OnSceneCreated()
     }
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
-    if (delegator) {
+    auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
+    if (delegator && CreateProperty(abilityContext_, property)) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceCreated");
-        delegator->PostPerformScenceCreated(CreateADelegatorAbilityProperty());
+        property->object_ = jsAbilityObj_;
+        delegator->PostPerformScenceCreated(property);
     }
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
@@ -608,9 +617,11 @@ void JsUIAbility::OnSceneRestored()
     }
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
-    if (delegator) {
+    auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
+    if (delegator && CreateProperty(abilityContext_, property)) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceRestored");
-        delegator->PostPerformScenceRestored(CreateADelegatorAbilityProperty());
+        property->object_ = jsAbilityObj_;
+        delegator->PostPerformScenceRestored(property);
     }
 }
 
@@ -652,9 +663,11 @@ void JsUIAbility::onSceneDestroyed()
     }
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
-    if (delegator) {
+    auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
+    if (delegator && CreateProperty(abilityContext_, property)) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceDestroyed");
-        delegator->PostPerformScenceDestroyed(CreateADelegatorAbilityProperty());
+        property->object_ = jsAbilityObj_;
+        delegator->PostPerformScenceDestroyed(property);
     }
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
@@ -714,9 +727,11 @@ void JsUIAbility::CallOnForegroundFunc(const Want &want)
     AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
-    if (delegator) {
+    auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
+    if (delegator && CreateProperty(abilityContext_, property)) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformForeground");
-        delegator->PostPerformForeground(CreateADelegatorAbilityProperty());
+        property->object_ = jsAbilityObj_;
+        delegator->PostPerformForeground(property);
     }
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
@@ -743,9 +758,11 @@ void JsUIAbility::OnBackground()
     UIAbility::OnBackground();
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
-    if (delegator) {
+    auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
+    if (delegator && CreateProperty(abilityContext_, property)) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformBackground");
-        delegator->PostPerformBackground(CreateADelegatorAbilityProperty());
+        property->object_ = jsAbilityObj_;
+        delegator->PostPerformBackground(property);
     }
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
@@ -2015,31 +2032,6 @@ int32_t JsUIAbility::CallSaveStatePromise(napi_value result, CallOnSaveStateInfo
     napi_value argv[1] = { promiseCallback };
     napi_call_function(env, result, then, 1, argv, nullptr);
     return ERR_OK;
-}
-
-std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> JsUIAbility::CreateADelegatorAbilityProperty()
-{
-    if (abilityContext_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
-        return nullptr;
-    }
-    auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
-    property->token_ = abilityContext_->GetToken();
-    property->name_ = GetAbilityName();
-    property->moduleName_ = GetModuleName();
-    if (GetApplicationInfo() == nullptr || GetApplicationInfo()->bundleName.empty()) {
-        property->fullName_ = GetAbilityName();
-    } else {
-        std::string::size_type pos = GetAbilityName().find(GetApplicationInfo()->bundleName);
-        if (pos == std::string::npos || pos != 0) {
-            property->fullName_ = GetApplicationInfo()->bundleName + "." + GetAbilityName();
-        } else {
-            property->fullName_ = GetAbilityName();
-        }
-    }
-    property->lifecycleState_ = GetState();
-    property->object_ = jsAbilityObj_;
-    return property;
 }
 
 void JsUIAbility::Dump(const std::vector<std::string> &params, std::vector<std::string> &info)

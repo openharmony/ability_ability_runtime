@@ -410,7 +410,6 @@ private:
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo);
     int32_t CallSaveStatePromise(napi_value result, CallOnSaveStateInfo info);
     std::unique_ptr<NativeReference> CreateAppWindowStage();
-    std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
     sptr<IRemoteObject> SetNewRuleFlagToCallee(napi_env env, napi_value remoteJsObj);
     void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
         std::shared_ptr<AAFwk::Want> want, const std::string &moduleName, const std::string &srcPath);
@@ -427,6 +426,7 @@ private:
     void ReleaseOnContinueAsset(const napi_env env, napi_value &promise,
         napi_ref &jsWantParamsRef, AppExecFwk::AbilityTransactionCallbackInfo<int32_t> *callbackInfo);
     void RemoveShareRouterByBundleType(const Want &want);
+    void HandleAbilityDelegatorStart();
 
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;
