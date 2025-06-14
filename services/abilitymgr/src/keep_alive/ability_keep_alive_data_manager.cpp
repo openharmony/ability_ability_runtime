@@ -25,6 +25,7 @@ namespace AbilityRuntime {
 namespace {
 constexpr int32_t CHECK_INTERVAL = 100000; // 100ms
 constexpr int32_t MAX_TIMES = 5;           // 5 * 100ms = 500ms
+constexpr int32_t U1_USER_ID = 1;
 constexpr const char *KEEP_ALIVE_STORAGE_DIR = "/data/service/el1/public/database/keep_alive_service";
 const std::string JSON_KEY_BUNDLE_NAME = "bundleName";
 const std::string JSON_KEY_USERID = "userId";
@@ -300,6 +301,53 @@ int32_t AbilityKeepAliveDataManager::QueryKeepAliveApplications(
     return ERR_OK;
 }
 
+int32_t AbilityKeepAliveDataManager::DeleteKeepAliveDataWithSetterId(const KeepAliveInfo &info)
+{
+    TAG_LOGD(AAFwkTag::KEEP_ALIVE, "setterId: %{public}d", info.setterId);
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        if (!CheckKvStore()) {
+            TAG_LOGE(AAFwkTag::KEEP_ALIVE, "null kvStore");
+            return ERR_NO_INIT;
+        }
+    }
+
+    std::vector<DistributedKv::Entry> allEntries;
+    DistributedKv::Status status = DistributedKv::Status::SUCCESS;
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        status = kvStorePtr_->GetEntries(nullptr, allEntries);
+    }
+    if (status != DistributedKv::Status::SUCCESS) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "GetEntries error: %{public}d", status);
+        {
+            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+            status = RestoreKvStore(status);
+        }
+        return ERR_INVALID_OPERATION;
+    }
+
+    for (const auto &item : allEntries) {
+        if (IsEqualSetterId(item.key, info)) {
+            {
+                std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+                status = kvStorePtr_->Delete(item.key);
+            }
+            if (status != DistributedKv::Status::SUCCESS) {
+                TAG_LOGE(AAFwkTag::KEEP_ALIVE, "kvStore delete error: %{public}d", status);
+                {
+                    std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+                    status = RestoreKvStore(status);
+                }
+                return ERR_INVALID_OPERATION;
+            }
+        }
+    }
+
+    return ERR_OK;
+}
+
+
 DistributedKv::Value AbilityKeepAliveDataManager::ConvertKeepAliveStatusToValue(const KeepAliveInfo &info)
 {
     nlohmann::json jsonObject = nlohmann::json {
@@ -382,6 +430,26 @@ KeepAliveInfo AbilityKeepAliveDataManager::ConvertKeepAliveInfoFromKey(const Dis
     return info;
 }
 
+bool AbilityKeepAliveDataManager::IsEqualSetterId(const DistributedKv::Key &key, const KeepAliveInfo &info)
+{
+    nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
+    if (jsonObject.is_discarded()) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "parse jsonObject fail");
+        return false;
+    }
+
+    if (!AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_USERID, U1_USER_ID)) {
+        return false;
+    }
+
+    if (info.setterId != -1 &&
+        !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_SETTERID, info.setterId)) {
+        return false;
+    }
+
+    return true;
+}
+
 bool AbilityKeepAliveDataManager::IsEqual(const DistributedKv::Key &key, const KeepAliveInfo &info)
 {
     nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
@@ -401,11 +469,6 @@ bool AbilityKeepAliveDataManager::IsEqual(const DistributedKv::Key &key, const K
 
     if (info.appType != KeepAliveAppType::UNSPECIFIED &&
         !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_APP_TYPE, static_cast<int32_t>(info.appType))) {
-        return false;
-    }
-
-    if (info.setterId != -1 &&
-        !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_SETTERID, info.setterId)) {
         return false;
     }
 
