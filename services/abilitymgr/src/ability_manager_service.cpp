@@ -78,8 +78,9 @@
 #include "os_account_manager_wrapper.h"
 #include "permission_constants.h"
 #include "process_options.h"
-#include "recovery_param.h"
 #include "rate_limiter.h"
+#include "recovery_param.h"
+#include "report_data_partition_usage_manager.h"
 #include "res_sched_util.h"
 #include "restart_app_manager.h"
 #include "scene_board_judgement.h"
@@ -433,6 +434,7 @@ bool AbilityManagerService::Init()
     insightIntentEventMgr_ = std::make_shared<AbilityRuntime::InsightIntentEventMgr>();
     insightIntentEventMgr_->SubscribeSysEventReceiver();
     abilityEventHelper_ = std::make_shared<AbilityEventUtil>(taskHandler_);
+    ReportDataPartitionUsageManager::SendReportDataPartitionUsageEvent();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "init success");
     return true;
 }
