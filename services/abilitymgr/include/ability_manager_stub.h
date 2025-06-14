@@ -335,6 +335,8 @@ private:
     int32_t GetInsightIntentInfoByIntentNameInner(MessageParcel &data, MessageParcel &reply);
     int32_t RestartSelfAtomicServiceInner(MessageParcel &data, MessageParcel &reply);
     int32_t RegisterSAInterceptorInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SuspendExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);
+    int32_t ResumeExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);
 
     int OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);

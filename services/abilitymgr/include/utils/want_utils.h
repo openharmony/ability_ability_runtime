@@ -32,12 +32,13 @@ namespace AAFwk {
 class WantUtils final {
 public:
     /**
-     * ConvertToExplicitWant, convert implicit want to explicit want.
+     * ConvertToExplicitWant, convert implicit want and targetType to explicit.
      *
-     * @param want The implicit want.
+     * @param want The implicit want will be updated by AG.
+     * @param targetType The targetType will be updated to specific type by AG.
      * @return Error code of calling the function.
      */
-    static int32_t ConvertToExplicitWant(Want& want);
+    static int32_t ConvertToExplicitWant(Want &want, uint32_t &targetType);
 
     /**
      * GetCallerBundleName, get caller bundle name.
@@ -48,12 +49,28 @@ public:
     static int32_t GetCallerBundleName(std::string &callerBundleName);
 
     /**
-     * IsAtomicServiceUrl, check if the want contains atomic service url.
+     * IsShortUrl, check if the want url is short url.
      *
      * @param want The implicit want.
-     * @return Flag if the want contains atomic service url.
+     * @return Flag if the want url is short url.
      */
-    static bool IsAtomicServiceUrl(const Want& want);
+    static bool IsShortUrl(const Want &want);
+
+    /**
+     * IsAtomicService, check if the targetType is AtomicService.
+     *
+     * @param targetType targetType to be judged.
+     * @return Flag if the targetType is AtomicService.
+     */
+    static bool IsAtomicService(uint32_t targetType);
+
+    /**
+     * IsNormalApp, check if the targetType is App.
+     *
+     * @param targetType targetType to be judged.
+     * @return Flag if the targetType is App.
+     */
+    static bool IsNormalApp(uint32_t targetType);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

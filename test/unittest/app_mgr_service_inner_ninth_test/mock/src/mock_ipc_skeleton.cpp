@@ -23,11 +23,13 @@ using namespace IPC_SINGLE;
 
 pid_t IPCSkeleton::GetCallingUid()
 {
+    AAFwk::MyStatus::GetInstance().getCallingUidCalledTimes_++;
     return AAFwk::MyStatus::GetInstance().getCallingUid_;
 }
 
 pid_t IPCSkeleton::GetCallingPid()
 {
+    AAFwk::MyStatus::GetInstance().getCallingPid_++;
     return 0;
 }
 

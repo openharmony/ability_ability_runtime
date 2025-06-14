@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 int32_t AppMgrClient::isAppRunningReturnCode = ERR_OK;
+int32_t AppMgrClient::usedKillAppTimes = 0;
 bool AppMgrClient::isAppRunningReturnValue = false;
 
 AppMgrClient::AppMgrClient() {}
@@ -26,6 +27,7 @@ AppMgrClient::~AppMgrClient() {}
 
 int32_t AppMgrClient::KillApplication(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
 {
+    usedKillAppTimes++;
     return ERR_OK;
 }
 

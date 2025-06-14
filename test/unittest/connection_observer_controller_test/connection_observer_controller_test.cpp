@@ -189,5 +189,37 @@ HWTEST_F(ConnectionObserverControllerTest, OnRemoteDied_001, TestSize.Level1)
     wptr<IRemoteObject> remote;
     observerDeathRecipient->OnRemoteDied(remote);
 }
+
+/*
+ * Feature: ConnectionObserverController
+ * Function: NotifyExtensionSuspened
+ * SubFunction: NA
+ * FunctionPoints: ConnectionObserverController NotifyExtensionSuspened
+ * EnvConditions: NA
+ * CaseDescription: Verify NotifyExtensionSuspened
+ */
+HWTEST_F(ConnectionObserverControllerTest, NotifyExtensionSuspended_001, TestSize.Level1)
+{
+    auto connectionObserverController = std::make_shared<ConnectionObserverController>();
+    ASSERT_NE(connectionObserverController, nullptr);
+    ConnectionData data;
+    connectionObserverController->NotifyExtensionSuspended(data);
+}
+
+/*
+ * Feature: ConnectionObserverController
+ * Function: NotifyExtensionResumed
+ * SubFunction: NA
+ * FunctionPoints: ConnectionObserverController NotifyExtensionResumed
+ * EnvConditions: NA
+ * CaseDescription: Verify NotifyExtensionResumed
+ */
+HWTEST_F(ConnectionObserverControllerTest, NotifyExtensionResumed_001, TestSize.Level1)
+{
+    auto connectionObserverController = std::make_shared<ConnectionObserverController>();
+    ASSERT_NE(connectionObserverController, nullptr);
+    ConnectionData data;
+    connectionObserverController->NotifyExtensionResumed(data);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

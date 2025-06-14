@@ -36,7 +36,10 @@ WantAgentClient &WantAgentClient::GetInstance()
 
 WantAgentClient::WantAgentClient() {}
 
-WantAgentClient::~WantAgentClient() {}
+WantAgentClient::~WantAgentClient()
+{
+    RemoveDeathRecipient();
+}
 
 ErrCode WantAgentClient::GetWantSender(
     const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, sptr<IWantSender> &wantSender,
@@ -400,6 +403,27 @@ sptr<IRemoteObject> WantAgentClient::GetAbilityManager()
     }
 
     return proxy_;
+}
+
+void WantAgentClient::RemoveDeathRecipient()
+{
+    TAG_LOGI(AAFwkTag::WANTAGENT, "remove death recipient");
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (proxy_ == nullptr) {
+        TAG_LOGI(AAFwkTag::WANTAGENT, "null proxy_");
+        return;
+    }
+
+    if (deathRecipient_ == nullptr) {
+        TAG_LOGI(AAFwkTag::WANTAGENT, "null deathRecipient_");
+        return;
+    }
+
+    if (proxy_->RemoveDeathRecipient(deathRecipient_)) {
+        proxy_ = nullptr;
+        deathRecipient_ = nullptr;
+        TAG_LOGI(AAFwkTag::WANTAGENT, "remove success");
+    }
 }
 
 void WantAgentClient::WantAgentDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)

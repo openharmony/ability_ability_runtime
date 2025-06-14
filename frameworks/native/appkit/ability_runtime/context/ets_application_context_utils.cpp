@@ -160,7 +160,7 @@ ani_object EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniE
     }
     auto etsReference = std::make_shared<AbilityRuntime::ETSNativeReference>();
     etsReference->aniObj = applicationContextObject;
-    AbilityRuntime::ApplicationContextManager::GetApplicationContextManager().AddEtsGlobalObject(aniEnv, etsReference);
+    AbilityRuntime::ApplicationContextManager::GetApplicationContextManager().SetEtsGlobalObject(etsReference);
     BindApplicationContextFunc(aniEnv);
     return applicationContextObject;
 }

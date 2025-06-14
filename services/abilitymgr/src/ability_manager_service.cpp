@@ -324,6 +324,7 @@ constexpr const char* LIFE_CYCLE_CONNECT = "connect";
 constexpr const char* LIFE_CYCLE_MINIMIZE = "minimize";
 constexpr const char* LIFE_CYCLE_TERMINATE = "terminate";
 constexpr const char* LIFE_CYCLE_PRELOAD = "preload";
+constexpr uint32_t TARGET_TYPE_INIT = 100;
 
 const bool REGISTER_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<AbilityManagerService>::GetInstance().get());
@@ -3623,6 +3624,9 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     }
     abilityRequest.extensionType = abilityRequest.abilityInfo.extensionAbilityType;
 
+    if (!HandleExecuteSAInterceptor(extensionSessionInfo->want, callerToken, abilityRequest, result)) {
+        return result;
+    }
     auto abilityInfo = abilityRequest.abilityInfo;
     threadLocalInfo.SetStartAbilityInfo(abilityInfo);
     validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
@@ -13622,20 +13626,21 @@ ErrCode AbilityManagerService::IntentOpenLinkInner(const std::shared_ptr<AppExec
 }
 
 ErrCode AbilityManagerService::OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
-    int32_t userId, int requestCode)
+    int32_t userId, int32_t requestCode)
 {
     return OpenLinkInner(want, callerToken, userId, requestCode, true);
 }
 
 ErrCode AbilityManagerService::OpenLinkInner(const Want& want, sptr<IRemoteObject> callerToken,
-    int32_t userId, int requestCode, bool removeInsightIntentFlag)
+    int32_t userId, int32_t requestCode, bool removeInsightIntentFlag)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call OpenLink");
     AbilityUtil::RemoveInstanceKey(const_cast<Want &>(want));
     std::string callerBundleName;
     Want convertedWant = want;
-    if (!WantUtils::IsAtomicServiceUrl(want) ||
+    if (!WantUtils::IsShortUrl(want) ||
         WantUtils::GetCallerBundleName(callerBundleName) != ERR_OK) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "start ability by default");
         int retCode = StartAbilityWithRemoveIntentFlag(want, callerToken, userId, requestCode, removeInsightIntentFlag);
@@ -13645,20 +13650,52 @@ ErrCode AbilityManagerService::OpenLinkInner(const Want& want, sptr<IRemoteObjec
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "callerBundleName=%{public}s", callerBundleName.c_str());
     convertedWant.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
-    if (WantUtils::ConvertToExplicitWant(convertedWant) != ERR_OK ||
-        freeInstallManager_ == nullptr) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "start ability by default");
+    uint32_t targetType = TARGET_TYPE_INIT;
+    if (WantUtils::ConvertToExplicitWant(convertedWant, targetType) != ERR_OK) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "ConvertToExplicitWant fail. start ability by default");
         int retCode = StartAbilityWithRemoveIntentFlag(want, callerToken, userId, requestCode, removeInsightIntentFlag);
         CHECK_RET_RETURN_RET(retCode, "startAbility failed");
         return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
     }
 
+    if (WantUtils::IsNormalApp(targetType)) {
+        int retCode = StartAbilityWithRemoveIntentFlag(convertedWant, callerToken, userId, requestCode,
+            removeInsightIntentFlag);
+        CHECK_RET_RETURN_RET(retCode, "startAbility failed");
+        return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
+    }
+    if (WantUtils::IsAtomicService(targetType)) {
+        return OpenLinkFreeInstallAtomicService(convertedWant, want, callerToken, userId, requestCode,
+            removeInsightIntentFlag);
+    }
+    bool curAppLinkingOnlyFlag = convertedWant.GetBoolParam(APP_LINKING_ONLY, false);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "openLink not specific app or atomicService. AppLinkingOnly: %{public}d",
+        curAppLinkingOnlyFlag);
+    if (curAppLinkingOnlyFlag) {
+        return RESOLVE_ABILITY_ERR;
+    }
+    int retCode = StartAbilityWithRemoveIntentFlag(convertedWant, callerToken, userId, requestCode,
+        removeInsightIntentFlag);
+    CHECK_RET_RETURN_RET(retCode, "startAbility failed");
+    return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
+}
+
+int32_t AbilityManagerService::OpenLinkFreeInstallAtomicService(Want &convertedWant,
+    const Want &originalWant, sptr<IRemoteObject> callerToken, int32_t userId, int32_t requestCode,
+    bool removeInsightIntentFlag)
+{
+    if (freeInstallManager_ == nullptr) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "freeInstallManager_ nullptr. start ability by default");
+        auto retCode = StartAbilityWithRemoveIntentFlag(originalWant, callerToken, userId, requestCode,
+            removeInsightIntentFlag);
+        CHECK_RET_RETURN_RET(retCode, "startAbility failed");
+        return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
+    }
     convertedWant.AddFlags(Want::FLAG_INSTALL_ON_DEMAND);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "convertedWant=%{private}s", convertedWant.ToString().c_str());
     auto param = std::make_shared<FreeInstallParams>();
     param->isAsync = true;
     param->isOpenAtomicServiceShortUrl = true;
-    param->originalWant = std::make_shared<Want>(want);
+    param->originalWant = std::make_shared<Want>(originalWant);
     ErrCode retCode = freeInstallManager_->StartFreeInstall(convertedWant, GetValidUserId(userId),
         requestCode, callerToken, param);
     if (retCode != ERR_OK) {
@@ -13668,7 +13705,8 @@ ErrCode AbilityManagerService::OpenLinkInner(const Want& want, sptr<IRemoteObjec
             return retCode;
         }
         TAG_LOGI(AAFwkTag::ABILITYMGR, "start ability by default");
-        retCode = StartAbilityWithRemoveIntentFlag(want, callerToken, userId, requestCode, removeInsightIntentFlag);
+        retCode = StartAbilityWithRemoveIntentFlag(originalWant, callerToken, userId, requestCode,
+            removeInsightIntentFlag);
         CHECK_RET_RETURN_RET(retCode, "StartAbility failed");
         return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
     }
@@ -14201,7 +14239,7 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
         TAG_LOGD(AAFwkTag::INTENT, "not system app or permission denied");
         return ret;
     }
-    if (flag == AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
+    if (flag & AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
         std::vector<ExtractInsightIntentInfo> intentInfos;
         const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentInfo(userId, intentInfos);
@@ -14210,24 +14248,45 @@ int32_t AbilityManagerService::GetAllInsightIntentInfo(
             return ERR_OK;
         }
         TAG_LOGD(AAFwkTag::INTENT, "intentInfos size: %{public}zu", intentInfos.size());
+        bool getEntity = (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
         for (auto &info : intentInfos) {
             InsightIntentInfoForQuery intentInfoQuery;
-            InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoQuery);
+            InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoQuery, getEntity);
             infos.emplace_back(intentInfoQuery);
         }
-    } else {
+    } else if (flag & AbilityRuntime::GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT) {
         std::vector<ExtractInsightIntentGenericInfo> genericInfos;
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentGenericInfo(genericInfos);
         if (genericInfos.empty()) {
             return ERR_OK;
         }
         TAG_LOGD(AAFwkTag::INTENT, "genericInfos size: %{public}zu", genericInfos.size());
+
+        if (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO) {
+            std::vector<ExtractInsightIntentInfo> intentInfos;
+            const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+            DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetAllInsightIntentInfo(userId, intentInfos);
+            if (intentInfos.empty()) {
+                TAG_LOGI(AAFwkTag::INTENT, "extractInsightIntentInfos empty");
+                return ERR_OK;
+            }
+            for (auto &info : intentInfos) {
+                InsightIntentInfoForQuery intentInfoQuery;
+                InsightIntentUtils::ConvertExtractInsightIntentEntityInfo(info, intentInfoQuery);
+                infos.emplace_back(intentInfoQuery);
+            }
+            return ERR_OK;
+        }
+
         for (auto &info : genericInfos) {
             InsightIntentInfoForQuery intentInfoQuery;
             InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(info, intentInfoQuery);
             infos.emplace_back(intentInfoQuery);
         }
+    } else {
+        TAG_LOGW(AAFwkTag::INTENT, "invalid flag: %{public}d", flag);
     }
+
     return ERR_OK;
 }
 
@@ -14242,7 +14301,7 @@ int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
         TAG_LOGD(AAFwkTag::INTENT, "not system app or permission denied");
         return ret;
     }
-    if (flag == AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
+    if (flag & AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
         std::vector<ExtractInsightIntentInfo> intentInfos;
         const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfoByName(
@@ -14252,12 +14311,13 @@ int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
             return ERR_OK;
         }
         TAG_LOGD(AAFwkTag::INTENT, "intentInfos size: %{public}zu", intentInfos.size());
+        bool getEntity = (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
         for (auto &info : intentInfos) {
             InsightIntentInfoForQuery intentInfoQuery;
-            InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoQuery);
+            InsightIntentUtils::ConvertExtractInsightIntentInfo(info, intentInfoQuery, getEntity);
             infos.emplace_back(intentInfoQuery);
         }
-    } else {
+    } else if (flag & AbilityRuntime::GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT) {
         std::vector<ExtractInsightIntentGenericInfo> genericInfos;
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfoByName(
             bundleName, genericInfos);
@@ -14265,11 +14325,30 @@ int32_t AbilityManagerService::GetInsightIntentInfoByBundleName(
             return ERR_OK;
         }
         TAG_LOGD(AAFwkTag::INTENT, "genericInfos size: %{public}zu", genericInfos.size());
+
+        if (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO) {
+            std::vector<ExtractInsightIntentInfo> intentInfos;
+            const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+            DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfoByName(
+                bundleName, userId, intentInfos);
+            if (intentInfos.empty()) {
+                TAG_LOGI(AAFwkTag::INTENT, "extractInsightIntentInfos empty");
+                return ERR_OK;
+            }
+            for (auto &info : intentInfos) {
+                InsightIntentInfoForQuery intentInfoQuery;
+                InsightIntentUtils::ConvertExtractInsightIntentEntityInfo(info, intentInfoQuery);
+                infos.emplace_back(intentInfoQuery);
+            }
+            return ERR_OK;
+        }
         for (auto &info : genericInfos) {
             InsightIntentInfoForQuery intentInfoQuery;
             InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(info, intentInfoQuery);
             infos.emplace_back(intentInfoQuery);
         }
+    } else {
+        TAG_LOGW(AAFwkTag::INTENT, "invalid flag: %{public}d", flag);
     }
     return ERR_OK;
 }
@@ -14287,17 +14366,31 @@ int32_t AbilityManagerService::GetInsightIntentInfoByIntentName(
         TAG_LOGD(AAFwkTag::INTENT, "not system app or permission denied");
         return ret;
     }
-    if (flag == AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
+    if (flag & AbilityRuntime::GetInsightIntentFlag::GET_FULL_INSIGHT_INTENT) {
         ExtractInsightIntentInfo intentInfo;
         const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
             bundleName, moduleName, intentName, userId, intentInfo);
-        InsightIntentUtils::ConvertExtractInsightIntentInfo(intentInfo, info);
-    } else {
+        bool getEntity = (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO);
+        InsightIntentUtils::ConvertExtractInsightIntentInfo(intentInfo, info, getEntity);
+    } else if (flag & AbilityRuntime::GetInsightIntentFlag::GET_SUMMARY_INSIGHT_INTENT) {
+        if (flag & AbilityRuntime::GetInsightIntentFlag::GET_ENTITY_INFO) {
+            ExtractInsightIntentInfo intentInfo;
+            const int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+            DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentInfo(
+                bundleName, moduleName, intentName, userId, intentInfo);
+            InsightIntentUtils::ConvertExtractInsightIntentEntityInfo(intentInfo, info);
+
+            return ERR_OK;
+        }
+
         ExtractInsightIntentGenericInfo genericInfo;
         DelayedSingleton<InsightIntentDbCache>::GetInstance()->GetInsightIntentGenericInfo(
             bundleName, moduleName, intentName, genericInfo);
         InsightIntentUtils::ConvertExtractInsightIntentGenericInfo(genericInfo, info);
+
+    } else {
+        TAG_LOGW(AAFwkTag::INTENT, "invalid flag: %{public}d", flag);
     }
     return ERR_OK;
 }
@@ -14422,6 +14515,76 @@ bool AbilityManagerService::HandleExecuteSAInterceptor(const Want &want, sptr<IR
     }
 
     return true;
+}
+
+int32_t AbilityManagerService::HandleExtensionAbility(sptr<IAbilityConnection> connect,
+        std::function<int32_t(std::shared_ptr<AbilityConnectManager>, sptr<IAbilityConnection>)> func)
+{
+    CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
+    auto currentConnectManager = GetCurrentConnectManager();
+    CHECK_POINTER_AND_RETURN(currentConnectManager, ERR_NO_INIT);
+    if (func(currentConnectManager, connect) == ERR_OK) {
+        return ERR_OK;
+    }
+    // If current connectManager does not exist connect, then try connectManagerU0
+    auto connectManager = GetConnectManagerByUserId(U0_USER_ID);
+    CHECK_POINTER_AND_RETURN(connectManager, ERR_NO_INIT);
+    if (func(connectManager, connect) == ERR_OK) {
+        return ERR_OK;
+    }
+    
+    connectManager = GetConnectManagerByUserId(U1_USER_ID);
+    CHECK_POINTER_AND_RETURN(connectManager, ERR_NO_INIT);
+    if (func(connectManager, connect) == ERR_OK) {
+        return ERR_OK;
+    }
+
+    auto userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    if (userId == U0_USER_ID || userId == U1_USER_ID) {
+        auto connectManagers = GetConnectManagers();
+        for (auto& item : connectManagers) {
+            if (item.second && func(item.second, connect) == ERR_OK) {
+                return ERR_OK;
+            }
+        }
+    }
+    connectManager = GetConnectManagerByUserId(userId);
+    CHECK_POINTER_AND_RETURN(connectManager, ERR_NO_INIT);
+    return func(connectManager, connect); 
+}
+
+int AbilityManagerService::SuspendExtensionAbility(sptr<IAbilityConnection> connect)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Suspend extension ability begin.");
+    CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
+    auto err = HandleExtensionAbility(connect,
+        [](std::shared_ptr<AbilityConnectManager> connectManager, sptr<IAbilityConnection> connect) {
+            return connectManager->SuspendExtensionAbilityLocked(connect);
+        });
+    if (err == ERR_OK) {
+        return ERR_OK;
+    }
+
+    TAG_LOGE(AAFwkTag::SERVICE_EXT, "Suspend extension ability error %{public}d", err);
+    return err;
+}
+
+int AbilityManagerService::ResumeExtensionAbility(sptr<IAbilityConnection> connect)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Resume extension ability begin.");
+    CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
+    auto err = HandleExtensionAbility(connect,
+        [](std::shared_ptr<AbilityConnectManager> connectManager, sptr<IAbilityConnection> connect) {
+            return connectManager->ResumeExtensionAbilityLocked(connect);
+        });
+    if (err == ERR_OK) {
+        return ERR_OK;
+    }
+
+    TAG_LOGE(AAFwkTag::SERVICE_EXT, "Resume extension ability error %{public}d", err);
+    return err;
 }
 
 int32_t AbilityManagerService::SetAppServiceExtensionKeepAlive(const std::string &bundleName, bool flag)

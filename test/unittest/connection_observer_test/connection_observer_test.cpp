@@ -60,6 +60,16 @@ public:
         isExtensionDisconnected_ = true;
     }
 
+    void OnExtensionSuspended(const ConnectionData& data)
+    {
+        isExtensionSuspended_ = true;
+    }
+
+    void OnExtensionResumed(const ConnectionData& data)
+    {
+        isExtensionResumed_ = true;
+    }
+
     void OnDlpAbilityOpened(const DlpStateData& data)
     {
         isDlpAbilityOpened_ = true;
@@ -100,12 +110,24 @@ public:
         return isServiceDied_;
     }
 
+    bool IsExtensionSuspended() const
+    {
+        return isExtensionSuspended_;
+    }
+
+    bool IsExtensionResumed() const
+    {
+        return isExtensionResumed_;
+    }
+
 private:
     bool isExtensionConnected_ = false;
     bool isExtensionDisconnected_ = false;
     bool isDlpAbilityOpened_ = false;
     bool isDlpAbilityClosed_ = false;
     bool isServiceDied_ = false;
+    bool isExtensionSuspended_ = false;
+    bool isExtensionResumed_ = false;
 };
 }
 
@@ -260,6 +282,12 @@ HWTEST_F(ConnectionObserverTest, ConnectionObserver_Observer_0100, TestSize.Leve
 
     clientImpl->HandleExtensionDisconnected(connectionData);
     EXPECT_TRUE(myObserver->IsExtensionDisconnected());
+
+    clientImpl->HandleExtensionSuspended(connectionData);
+    EXPECT_TRUE(myObserver->IsExtensionSuspended());
+
+    clientImpl->HandleExtensionResumed(connectionData);
+    EXPECT_TRUE(myObserver->IsExtensionResumed());
 
     DlpStateData dlpData;
     clientImpl->HandleDlpAbilityOpened(dlpData);
