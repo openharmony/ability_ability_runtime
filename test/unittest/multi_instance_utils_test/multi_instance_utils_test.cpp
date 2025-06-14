@@ -34,12 +34,22 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    std::shared_ptr<AbilityRecord> MockAbilityRecord(AppExecFwk::AbilityType abilityType);
 };
 
 void MultiInstanceUtilsTest::SetUpTestCase(void) {}
 void MultiInstanceUtilsTest::TearDownTestCase(void) {}
 void MultiInstanceUtilsTest::SetUp() {}
 void MultiInstanceUtilsTest::TearDown() {}
+
+std::shared_ptr<AbilityRecord> MultiInstanceUtilsTest::MockAbilityRecord(AppExecFwk::AbilityType abilityType)
+{
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test.demo";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = abilityType;
+    return AbilityRecord::CreateAbilityRecord(abilityRequest);
+}
 
 /**
  * @tc.name: MultiInstanceUtils_GetInstanceKey_0100
@@ -93,6 +103,49 @@ HWTEST_F(MultiInstanceUtilsTest, MultiInstanceUtils_GetValidExtensionInstanceKey
 }
 
 /**
+ * @tc.name: MultiInstanceUtils_GetValidExtensionInstanceKey_0300
+ * @tc.desc: GetValidExtensionInstanceKey
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(MultiInstanceUtilsTest, MultiInstanceUtils_GetValidExtensionInstanceKey_0300, TestSize.Level1)
+{
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::WORK_SCHEDULER;
+    sptr<IRemoteObject> callerToken = nullptr;
+    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AppExecFwk::AbilityType::PAGE);
+    ASSERT_NE(abilityRecord, nullptr);
+    callerToken = abilityRecord->GetToken();
+    abilityRequest.callerToken = callerToken;
+    auto key = MultiInstanceUtils::GetValidExtensionInstanceKey(abilityRequest);
+    EXPECT_EQ(key, "app_instance_0");
+}
+
+/**
+ * @tc.name: MultiInstanceUtils_GetValidExtensionInstanceKey_0400
+ * @tc.desc: GetValidExtensionInstanceKey
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(MultiInstanceUtilsTest, MultiInstanceUtils_GetValidExtensionInstanceKey_0400, TestSize.Level1)
+{
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::WORK_SCHEDULER;
+    std::string bundleName = "";
+    Want want;
+    want.SetBundle(bundleName);
+    sptr<IRemoteObject> callerToken = nullptr;
+    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AppExecFwk::AbilityType::PAGE);
+    ASSERT_NE(abilityRecord, nullptr);
+    std::string instanceKey = "instanceKey";
+    abilityRecord->SetInstanceKey(instanceKey);
+    callerToken = abilityRecord->GetToken();
+    abilityRequest.callerToken = callerToken;
+    auto key = MultiInstanceUtils::GetValidExtensionInstanceKey(abilityRequest);
+    EXPECT_EQ(key, instanceKey);
+}
+
+/**
  * @tc.name: MultiInstanceUtils_GetSelfCallerInstanceKey_0100
  * @tc.desc: GetSelfCallerInstanceKey
  * @tc.type: FUNC
@@ -137,6 +190,20 @@ HWTEST_F(MultiInstanceUtilsTest, MultiInstanceUtils_IsMultiInstanceApp_0100, Tes
     EXPECT_EQ(ret, false);
 
     TAG_LOGI(AAFwkTag::TEST, "MultiInstanceUtils_IsMultiInstanceApp_0100 end");
+}
+
+/**
+ * @tc.name: MultiInstanceUtils_IsMultiInstanceApp_0200
+ * @tc.desc: IsMultiInstanceApp
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(MultiInstanceUtilsTest, MultiInstanceUtils_IsMultiInstanceApp_0200, TestSize.Level1)
+{
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.multiAppMode.multiAppModeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+    auto ret = MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo);
+    EXPECT_EQ(ret, false);
 }
 
 /**

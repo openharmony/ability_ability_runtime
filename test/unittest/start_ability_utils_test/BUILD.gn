@@ -27,6 +27,7 @@ ohos_unittest("start_ability_utils_test") {
   ]
 
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/utils/start_ability_utils.cpp",
     "mock/src/mock_bundle_mgr_helper.cpp",
     "mock/src/mock_my_status.cpp",
     "start_ability_utils_test.cpp",
@@ -37,15 +38,25 @@ ohos_unittest("start_ability_utils_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [ "${ability_runtime_services_path}/abilitymgr:abilityms" ]
+  deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
+    "${ability_runtime_path}/utils/server/startup:startup_util",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/common:app_util",
+  ]
 
   external_deps = [
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "ffrt:libffrt",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
   ]
 }
