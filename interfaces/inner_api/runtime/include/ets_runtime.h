@@ -87,7 +87,7 @@ public:
         const std::string &hapPath, bool esmodule, bool useCommonChunk, const std::string &srcEntrance);
     std::unique_ptr<ETSNativeReference> LoadEtsModule(const std::string &moduleName, const std::string &fileName,
         const std::string &hapPath, const std::string &srcEntrance);
-    void HandleUncaughtError();
+    bool HandleUncaughtError();
 
 private:
     bool Initialize(const Options &options, Runtime *jsRuntime);

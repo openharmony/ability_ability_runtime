@@ -248,14 +248,14 @@ ani_env *ETSEnvironment::GetAniEnv()
     return vmEntry_.aniEnv_;
 }
 
-void ETSEnvironment::HandleUncaughtError()
+bool ETSEnvironment::HandleUncaughtError()
 {
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "HandleUncaughtError called");
     const EtsEnv::ETSErrorObject errorObj = GetETSErrorObject();
     std::string errorStack = errorObj.stack;
     if (errorStack.empty()) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "errorStack is empty");
-        return;
+        return false;
     }
     TAG_LOGE(AAFwkTag::ETSRUNTIME, "errorObj.name:%{public}s, errorObj.message:%{public}s,errorObj.stack:%{public}s",
         errorObj.name.c_str(), errorObj.message.c_str(), errorObj.stack.c_str());
@@ -275,7 +275,9 @@ void ETSEnvironment::HandleUncaughtError()
     if (uncaughtExceptionInfo_.uncaughtTask) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "uncaughtTask called");
         uncaughtExceptionInfo_.uncaughtTask(summary, errorObj);
+        return true;
     }
+    return false;
 }
 
 EtsEnv::ETSErrorObject ETSEnvironment::GetETSErrorObject()
