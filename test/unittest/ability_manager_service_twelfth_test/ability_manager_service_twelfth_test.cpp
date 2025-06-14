@@ -1012,7 +1012,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, UpdateKioskApplicationList_Success, T
     MyFlag::flag_ = true;
     auto result = abilityManagerService->UpdateKioskApplicationList(bundleNames);
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        ASSERT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     } else {
         ASSERT_EQ(result, ERR_OK);
     }
@@ -1035,7 +1035,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, UpdateKioskApplicationList_Fail, Test
     MyFlag::flag_ = false;
     auto result = abilityManagerService->UpdateKioskApplicationList(bundleNames);
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        ASSERT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     } else {
         ASSERT_EQ(result, CHECK_PERMISSION_FAILED);
     }
@@ -1058,7 +1058,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, EnterKioskMode_Fail, TestSize.Level1)
     auto callerToken = MockToken(AbilityType::PAGE);
     result = abilityManagerService->EnterKioskMode(callerToken);
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        ASSERT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     } else {
         ASSERT_EQ(result, ERR_APP_NOT_IN_FOCUS);
     }
@@ -1077,7 +1077,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, ExitKioskMode_Fail, TestSize.Level1) 
     auto callerToken = MockToken(AbilityType::PAGE);
     auto result = abilityManagerService->ExitKioskMode(callerToken);
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        ASSERT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     } else {
         ASSERT_EQ(result, ERR_KIOSK_MODE_NOT_IN_WHITELIST);
     }
@@ -1097,7 +1097,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, GetKioskStatus, TestSize.Level1) {
     MyFlag::flag_ = true;
     auto result = abilityManagerService->GetKioskStatus(kioskStatus);
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        ASSERT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     } else {
         ASSERT_EQ(result, ERR_OK);
     }
@@ -1119,7 +1119,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_UpdateKioskApplicationLi
     bundleNames.emplace_back("com.test.demo3");
     auto result = KioskManager::GetInstance().UpdateKioskApplicationList(bundleNames);
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        ASSERT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     } else {
         ASSERT_EQ(result, ERR_OK);
     }
@@ -1135,7 +1135,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_EnterKioskMode_Fail_01, 
     auto callerToken = MockToken(AbilityType::PAGE);
     auto result = KioskManager::GetInstance().EnterKioskMode(callerToken);
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        ASSERT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     } else {
         ASSERT_EQ(result, ERR_APP_NOT_IN_FOCUS);
     }
@@ -1151,7 +1151,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_ExitKioskMode_Fail_01, T
     auto callerToken = MockToken(AbilityType::PAGE);
     auto result = KioskManager::GetInstance().ExitKioskMode(callerToken);
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        ASSERT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     } else {
         ASSERT_EQ(result, ERR_KIOSK_MODE_NOT_IN_WHITELIST);
     }
@@ -1170,7 +1170,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_GetKioskStatus_Success, 
     KioskStatus kioskStatus;
     auto result = KioskManager::GetInstance().GetKioskStatus(kioskStatus);
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        ASSERT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     } else {
         ASSERT_EQ(result, ERR_OK);
     }
