@@ -13,24 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_MY_STATUS_H
-#define MOCK_MY_STATUS_H
+#ifndef MOCK_FFRT_H
+#define MOCK_FFRT_H
 
 #include <cinttypes>
+#include <errno.h>
+#include <functional>
 #include <string>
-namespace OHOS {
-namespace AppExecFwk {
-class MyStatus {
-public:
-    static MyStatus& GetInstance();
-    ~MyStatus() = default;
-    int32_t statusValue_ = 0;
-    bool instanceStatus_ = true;
-    std::string tmpDir_;
-    bool applicationContextStatus_ = true;
-private:
-    MyStatus() = default;
+
+constexpr int32_t ffrt_qos_background = 0;
+namespace ffrt {
+struct task_attr {
+    inline void qos(int32_t) {}
+    inline void name(const std::string &) {}
+    inline void delay(int64_t) {}
 };
-}  // namespace AppExecFwk
-}  // namespace OHOS
-#endif // MOCK_MY_STATUS_H
+void submit(std::function<void()> &&task, task_attr)
+{
+    if (task) {
+        task();
+    }
+}
+}  // namespace ffrt
+#endif // MOCK_FFRT_H
