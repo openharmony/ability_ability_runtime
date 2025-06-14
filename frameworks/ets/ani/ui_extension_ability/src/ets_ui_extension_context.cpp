@@ -45,7 +45,7 @@ void EtsUIExtensionContext::TerminateSelfSync(ani_env *env, ani_object obj, ani_
     }
     ret = ((OHOS::AbilityRuntime::UIExtensionContext*)nativeContextLong)->TerminateSelf();
     OHOS::AppExecFwk::AsyncCallback(env, callback,
-        OHOS::AbilityRuntime::CreateEtsErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
+        OHOS::AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
 }
 
 void EtsUIExtensionContext::TerminateSelfWithResultSync(ani_env *env,  ani_object obj,
@@ -86,7 +86,7 @@ void EtsUIExtensionContext::TerminateSelfWithResultSync(ani_env *env,  ani_objec
         return;
     }
     OHOS::AppExecFwk::AsyncCallback(env, callback,
-        OHOS::AbilityRuntime::CreateEtsErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
+        OHOS::AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
 }
 
 void EtsUIExtensionContext::BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
