@@ -1035,6 +1035,8 @@ ohos_unittest("application_cleaner_test") {
     blocklist = "../../cfi_blocklist.txt"
   }
   include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/appkit/app",
+    "${ability_runtime_services_path}/common/include",
     "mock/include",
   ]
   module_out_path = module_output_path
@@ -1042,22 +1044,16 @@ ohos_unittest("application_cleaner_test") {
   sources = [
     "${ability_runtime_native_path}/appkit/app/application_cleaner.cpp",
     "application_cleaner_test.cpp",
+    "mock/src/application_context.cpp",
     "mock/src/os_account_manager_wrapper.cpp",
   ]
 
   configs = [ ":module_context_config" ]
 
-  deps = [
-    "${ability_runtime_native_path}/appkit:app_context",
-    "${ability_runtime_native_path}/appkit:appkit_native",
-  ]
-
   external_deps = [
-    "ability_runtime:runtime",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
   ]

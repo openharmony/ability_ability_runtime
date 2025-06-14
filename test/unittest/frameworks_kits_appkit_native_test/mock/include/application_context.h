@@ -13,24 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_MY_STATUS_H
-#define MOCK_MY_STATUS_H
+#ifndef MOCK_APPLICATION_CONTEXT_H
+#define MOCK_APPLICATION_CONTEXT_H
 
-#include <cinttypes>
+#include <memory>
 #include <string>
+#include <vector>
+
+#include "application_info.h"
+
 namespace OHOS {
-namespace AppExecFwk {
-class MyStatus {
+namespace AbilityRuntime {
+class ApplicationContext {
 public:
-    static MyStatus& GetInstance();
-    ~MyStatus() = default;
-    int32_t statusValue_ = 0;
-    bool instanceStatus_ = true;
-    std::string tmpDir_;
-    bool applicationContextStatus_ = true;
-private:
-    MyStatus() = default;
+    static std::shared_ptr<ApplicationContext> GetInstance();
+    std::string GetBaseDir();
+    std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo();
+    void GetAllTempDir(std::vector<std::string> &tempPaths);
 };
-}  // namespace AppExecFwk
+}  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif // MOCK_MY_STATUS_H
+#endif // MOCK_APPLICATION_CONTEXT_H
