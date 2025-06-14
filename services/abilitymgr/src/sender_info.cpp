@@ -55,6 +55,9 @@ bool SenderInfo::ReadFromParcel(Parcel &parcel)
             return false;
         }
     }
+    operType = parcel.ReadInt32();
+    uid = parcel.ReadInt32();
+    tokenId = parcel.ReadUint32();
     return true;
 }
 
@@ -104,6 +107,11 @@ bool SenderInfo::Marshalling(Parcel &parcel) const
             return false;
         }
     }
+    return MarshallingInner(parcel);
+}
+
+bool SenderInfo::MarshallingInner(Parcel &parcel) const
+{
     if (!parcel.WriteString16(Str8ToStr16(requiredPermission))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write requiredPermission failed");
         return false;
@@ -118,12 +126,27 @@ bool SenderInfo::Marshalling(Parcel &parcel) const
             return false;
         }
     }
+    if (!parcel.WriteBool(callerToken != nullptr)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag failed");
+        return false;
+    }
     if (callerToken) {
-        if (!parcel.WriteBool(true) ||
-            !(static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(callerToken)) {
+        if (!(static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(callerToken)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken failed");
             return false;
         }
+    }
+    if (!parcel.WriteInt32(operType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write operType failed");
+        return false;
+    }
+    if (!parcel.WriteInt32(uid)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write uid failed");
+        return false;
+    }
+    if (!parcel.WriteUint32(tokenId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write tokenId failed");
+        return false;
     }
     return true;
 }

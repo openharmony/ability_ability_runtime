@@ -39,6 +39,8 @@ public:
 
     ErrCode SendWantSender(sptr<IWantSender> target, SenderInfo &senderInfo);
 
+    ErrCode SendLocalWantSender(const SenderInfo &senderInfo);
+
     ErrCode CancelWantSender(const sptr<IWantSender> &sender, uint32_t flags = 0);
 
     ErrCode GetPendingWantUid(const sptr<IWantSender> &target, int32_t &uid);

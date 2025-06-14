@@ -1269,4 +1269,139 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_5800, Function | MediumTest | Leve
     type = WantAgentHelper::GetType(wantAgent);
     EXPECT_EQ(type, WantAgentConstant::OperationType::UNKNOWN_TYPE);
 }
+
+/*
+ * @tc.number    : WantAgentHelper_5900
+ * @tc.name      : WantAgentHelper GetWant for local wantagent
+ * @tc.desc      : wantAgent is local and not null
+ */
+HWTEST_F(WantAgentHelperTest, WantAgentHelper_5900, Function | MediumTest | Level1)
+{
+    std::shared_ptr<AAFwk::Want> expectedWant = std::make_shared<AAFwk::Want>();
+    expectedWant->SetElement(ElementName("deviceId", "bundleName", "abilityName"));
+    std::shared_ptr<LocalPendingWant> localPendingWant = std::make_shared<LocalPendingWant>(
+        "TestBundleName", expectedWant, 0);
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(localPendingWant);
+    std::shared_ptr<AAFwk::Want> actualWant;
+
+    WantAgentHelper::GetWant(wantAgent, actualWant);
+    ASSERT_EQ(actualWant->GetElement().GetBundleName(), expectedWant->GetElement().GetBundleName());
+    ASSERT_EQ(WantAgentHelper::GetWant(wantAgent)->GetElement().GetBundleName(),
+        expectedWant->GetElement().GetBundleName());
+}
+
+/*
+ * @tc.number    : WantAgentHelper_6000
+ * @tc.name      : WantAgentHelper GetWant for local wantagent
+ * @tc.desc      : wantAgent is local and null
+ */
+HWTEST_F(WantAgentHelperTest, WantAgentHelper_6000, Function | MediumTest | Level1)
+{
+    std::shared_ptr<LocalPendingWant> localPendingWant = nullptr;
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(localPendingWant);
+    std::shared_ptr<AAFwk::Want> actualWant;
+    const auto retCode = WantAgentHelper::GetWant(wantAgent, actualWant);
+    ASSERT_TRUE(actualWant == nullptr);
+    ASSERT_TRUE(retCode == ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+    ASSERT_TRUE(WantAgentHelper::GetWant(wantAgent) == nullptr);
+}
+
+/*
+ * @tc.number    : WantAgentHelper_6100
+ * @tc.name      : WantAgentHelper GetType for local wantagent
+ * @tc.desc      : wantAgent is local and not null
+ */
+HWTEST_F(WantAgentHelperTest, WantAgentHelper_6100, Function | MediumTest | Level1)
+{
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    want->SetElement(ElementName("deviceId", "bundleName", "abilityName"));
+    const int32_t expectedType = 100;
+    std::shared_ptr<LocalPendingWant> localPendingWant = std::make_shared<LocalPendingWant>(
+        "TestBundleName", want, expectedType);
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(localPendingWant);
+    int32_t actualType = 0;
+    WantAgentHelper::GetType(wantAgent, actualType);
+    ASSERT_EQ(actualType, expectedType);
+    ASSERT_EQ(static_cast<int32_t>(WantAgentHelper::GetType(wantAgent)), expectedType);
+}
+
+/*
+ * @tc.number    : WantAgentHelper_6200
+ * @tc.name      : WantAgentHelper GetType for local wantagent
+ * @tc.desc      : wantAgent is local and null
+ */
+HWTEST_F(WantAgentHelperTest, WantAgentHelper_6200, Function | MediumTest | Level1)
+{
+    std::shared_ptr<LocalPendingWant> localPendingWant = nullptr;
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(localPendingWant);
+    int32_t actualType = 0;
+    const auto retCode = WantAgentHelper::GetType(wantAgent, actualType);
+    ASSERT_TRUE(retCode == ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+    ASSERT_TRUE(WantAgentHelper::GetType(wantAgent) == WantAgentConstant::OperationType::UNKNOWN_TYPE);
+}
+
+/*
+ * @tc.number    : WantAgentHelper_6300
+ * @tc.name      : WantAgentHelper GetUid for local wantagent
+ * @tc.desc      : wantAgent is local and not null
+ */
+HWTEST_F(WantAgentHelperTest, WantAgentHelper_6300, Function | MediumTest | Level1)
+{
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    want->SetElement(ElementName("deviceId", "bundleName", "abilityName"));
+    const int32_t expectedUid = 6200;
+    std::shared_ptr<LocalPendingWant> localPendingWant = std::make_shared<LocalPendingWant>(
+        "TestBundleName", want, 0);
+    localPendingWant->SetUid(expectedUid);
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(localPendingWant);
+    int32_t actualUid = 0;
+    WantAgentHelper::GetUid(wantAgent, actualUid);
+    ASSERT_EQ(actualUid, expectedUid);
+}
+
+/*
+ * @tc.number    : WantAgentHelper_6400
+ * @tc.name      : WantAgentHelper GetUid for local wantagent
+ * @tc.desc      : wantAgent is local and null
+ */
+HWTEST_F(WantAgentHelperTest, WantAgentHelper_6400, Function | MediumTest | Level1)
+{
+    std::shared_ptr<LocalPendingWant> localPendingWant = nullptr;
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(localPendingWant);
+    int32_t actualUid = 0;
+    const auto retCode = WantAgentHelper::GetType(wantAgent, actualUid);
+    ASSERT_TRUE(retCode == ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+}
+
+/*
+ * @tc.number    : WantAgentHelper_6500
+ * @tc.name      : WantAgentHelper GetBundleName for local wantagent
+ * @tc.desc      : wantAgent is local and not null
+ */
+HWTEST_F(WantAgentHelperTest, WantAgentHelper_6500, Function | MediumTest | Level1)
+{
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    want->SetElement(ElementName("deviceId", "bundleName", "abilityName"));
+    const std::string expectedBundleName = "TestBundleName";
+    std::shared_ptr<LocalPendingWant> localPendingWant = std::make_shared<LocalPendingWant>(
+        expectedBundleName, want, 0);
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(localPendingWant);
+    std::string actualBundleName;
+    WantAgentHelper::GetBundleName(wantAgent, actualBundleName);
+    ASSERT_EQ(actualBundleName, expectedBundleName);
+}
+
+/*
+ * @tc.number    : WantAgentHelper_6600
+ * @tc.name      : WantAgentHelper GetBundleName for local wantagent
+ * @tc.desc      : wantAgent is local and null
+ */
+HWTEST_F(WantAgentHelperTest, WantAgentHelper_6600, Function | MediumTest | Level1)
+{
+    std::shared_ptr<LocalPendingWant> localPendingWant = nullptr;
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(localPendingWant);
+    std::string actualBundleName;
+    const auto retCode = WantAgentHelper::GetBundleName(wantAgent, actualBundleName);
+    ASSERT_TRUE(retCode == ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+}
 }  // namespace OHOS::AbilityRuntime::WantAgent

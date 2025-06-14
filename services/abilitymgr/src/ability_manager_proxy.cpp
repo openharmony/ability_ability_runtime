@@ -2148,6 +2148,26 @@ int AbilityManagerProxy::SendWantSender(sptr<IWantSender> target, SenderInfo &se
     return reply.ReadInt32();
 }
 
+int AbilityManagerProxy::SendLocalWantSender(const SenderInfo &senderInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return INNER_ERR;
+    }
+    if (!data.WriteParcelable(&senderInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "senderInfo write fail");
+        return INNER_ERR;
+    }
+    auto error = SendRequest(AbilityManagerInterfaceCode::SEND_LOCAL_PENDING_WANT_SENDER, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
 void AbilityManagerProxy::CancelWantSender(const sptr<IWantSender> &sender)
 {
     MessageParcel data;

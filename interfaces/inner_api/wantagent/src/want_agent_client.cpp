@@ -124,6 +124,29 @@ ErrCode WantAgentClient::SendWantSender(sptr<IWantSender> target, SenderInfo &se
     return ERR_OK;
 }
 
+ErrCode WantAgentClient::SendLocalWantSender(const SenderInfo &senderInfo)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_AND_RETURN(abms, ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
+    if (!data.WriteParcelable(&senderInfo)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "senderInfo write failed");
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
+    auto error = abms->SendRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::SEND_LOCAL_PENDING_WANT_SENDER),
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "send request error: %{public}d", error);
+        return ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_TIMEOUT;
+    }
+    return reply.ReadInt32();
+}
+
 ErrCode WantAgentClient::CancelWantSender(const sptr<IWantSender> &sender, uint32_t flags)
 {
     CHECK_POINTER_AND_RETURN(sender, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
