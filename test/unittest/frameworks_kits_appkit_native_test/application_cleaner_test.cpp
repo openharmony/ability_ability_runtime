@@ -21,7 +21,6 @@
 #define private public
 #define protected public
 #include "application_cleaner.h"
-#include "context_impl.h"
 #undef private
 #undef protected
 #include "hilog_tag_wrapper.h"
@@ -91,6 +90,47 @@ HWTEST_F(ApplicationCleanerTest, ClearTempData_0200, Function | MediumTest | Lev
     EXPECT_TRUE(cleaner.hasCleaned_);
 
     TAG_LOGI(AAFwkTag::APPKIT, "ClearTempData_0200 end");
+}
+
+/**
+ * @tc.number: ClearTempData_0300
+ * @tc.name: ClearTempData
+ * @tc.desc: Test ClearTempData empty dir.
+ */
+HWTEST_F(ApplicationCleanerTest, ClearTempData_0300, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "ClearTempData_0300 start");
+    auto cleaner = std::make_shared<ApplicationCleaner>();
+    cleaner->context_ = AbilityRuntime::ApplicationContext::GetInstance();
+    cleaner->ClearTempData();
+    EXPECT_TRUE(cleaner->hasCleaned_);
+
+    TAG_LOGI(AAFwkTag::APPKIT, "ClearTempData_0300 end");
+}
+
+/**
+ * @tc.number: ClearTempData_0400
+ * @tc.name: ClearTempData
+ * @tc.desc: Test ClearTempData success.
+ */
+HWTEST_F(ApplicationCleanerTest, ClearTempData_0400, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "ClearTempData_0400 start");
+    auto cleaner = std::make_shared<ApplicationCleaner>();
+    cleaner->context_ = AbilityRuntime::ApplicationContext::GetInstance();
+    std::string fileName("testdir");
+    MyStatus::GetInstance().tmpDir_ = fileName;
+    std::filesystem::create_directory(fileName);
+    auto uselessDir = fileName + "/temp_useless_1";
+    std::filesystem::create_directory(uselessDir);
+    EXPECT_TRUE(std::filesystem::exists(uselessDir));
+    cleaner->ClearTempData();
+    EXPECT_TRUE(cleaner->hasCleaned_);
+    EXPECT_FALSE(std::filesystem::exists(uselessDir));
+    std::filesystem::remove(fileName);
+    MyStatus::GetInstance().tmpDir_.clear();
+
+    TAG_LOGI(AAFwkTag::APPKIT, "ClearTempData_0400 end");
 }
 
 /**
@@ -266,6 +306,23 @@ HWTEST_F(ApplicationCleanerTest, GetRootPath_0300, Function | MediumTest | Level
     MyStatus::GetInstance().statusValue_ = 0;
 
     TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0300 end");
+}
+
+/**
+ * @tc.number: GetRootPath_0400
+ * @tc.name: GetRootPath
+ * @tc.desc: Test GetRootPath ok.
+ */
+HWTEST_F(ApplicationCleanerTest, GetRootPath_0400, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0400 start");
+
+    ApplicationCleaner cleaner;
+    cleaner.context_ = AbilityRuntime::ApplicationContext::GetInstance();
+    std::vector<std::string> rootPath;
+    EXPECT_EQ(cleaner.GetRootPath(rootPath), 0);
+
+    TAG_LOGI(AAFwkTag::APPKIT, "GetRootPath_0400 end");
 }
 }
 }

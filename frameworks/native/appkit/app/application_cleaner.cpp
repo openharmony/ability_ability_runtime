@@ -39,7 +39,6 @@ static const std::string CONTEXT_HAPS{ "/haps" };
 static const size_t MARK_TEMP_LEN = 12;
 static const int PATH_MAX_SIZE = 256;
 
-const mode_t MODE = 0777;
 static const int RESULT_OK = 0;
 static const int RESULT_ERR = -1;
 
@@ -57,16 +56,7 @@ void SetCurrentThreadAffinity()
     }
 
     if (pthread_setaffinity_np(pthread_self(), sizeof(cpuSet), &cpuSet) != 0) {
-        TAG_LOGW(AAFwkTag::APPKIT, "reset ThreadAffinity failed errno %{public}d", errno);
-    }
-}
-
-void ResetCurrentThreadAffinity()
-{
-    cpu_set_t cpuSet;
-    CPU_ZERO(&cpuSet);
-    if (pthread_setaffinity_np(pthread_self(), sizeof(cpuSet), &cpuSet) != 0) {
-        TAG_LOGW(AAFwkTag::APPKIT, "reset ThreadAffinity failed errno %{public}d", errno);
+        TAG_LOGW(AAFwkTag::APPKIT, "set ThreadAffinity failed errno %{public}d", errno);
     }
 }
 } // namespace
@@ -118,7 +108,6 @@ void ApplicationCleaner::ClearTempData()
         std::vector<std::string> temps;
         if (sharedThis->GetObsoleteBundleTempPath(rootDir, temps) != RESULT_OK) {
             TAG_LOGE(AAFwkTag::APPKIT, "get bundle temp file list false");
-            ResetCurrentThreadAffinity();
             return;
         }
 
@@ -127,7 +116,6 @@ void ApplicationCleaner::ClearTempData()
                 TAG_LOGE(AAFwkTag::APPKIT, "path: %{private}s", temp.c_str());
             }
         }
-        ResetCurrentThreadAffinity();
     };
 
     ffrt::task_attr attr;
