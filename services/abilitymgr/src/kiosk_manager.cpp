@@ -47,8 +47,10 @@ void KioskManager::OnAppStop(const AppInfo &info)
     if (info.state != AppState::TERMINATED && info.state != AppState::END) {
         return;
     }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "App stop, bundleName: %{public}s, state: %{public}d",
+        info.bundleName.c_str(), static_cast<int32_t>(info.state));
     std::lock_guard<std::mutex> lock(kioskManagermutex_);
-    if (IsInKioskModeInner() && IsInWhiteListInner(info.bundleName)) {
+    if (IsInKioskModeInner() && (info.bundleName == kioskStatus_.kioskBundleName_)) {
         ExitKioskModeInner(info.bundleName, nullptr);
     }
 }
@@ -57,7 +59,7 @@ int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> 
 {
     if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
-        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+        return ERR_CAPABILITY_NOT_SUPPORT;
     }
 
     if (!PermissionVerification::GetInstance()->IsSystemAppCall() &&
@@ -94,7 +96,7 @@ int32_t KioskManager::EnterKioskMode(sptr<IRemoteObject> callerToken)
 {
     if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
-        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+        return ERR_CAPABILITY_NOT_SUPPORT;
     }
     auto record = Token::GetAbilityRecordByToken(callerToken);
     if (!record) {
@@ -130,7 +132,7 @@ int32_t KioskManager::ExitKioskMode(sptr<IRemoteObject> callerToken)
 {
     if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
-        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+        return ERR_CAPABILITY_NOT_SUPPORT;
     }
     auto record = Token::GetAbilityRecordByToken(callerToken);
     if (!record) {
@@ -163,7 +165,7 @@ int32_t KioskManager::GetKioskStatus(KioskStatus &kioskStatus)
 {
     if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
-        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+        return ERR_CAPABILITY_NOT_SUPPORT;
     }
     if (!PermissionVerification::GetInstance()->IsSystemAppCall()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
@@ -202,7 +204,9 @@ void KioskManager::NotifyKioskModeChanged(bool isInKioskMode)
     want.SetParam("uid", kioskStatus_.kioskBundleUid_);
     want.SetParam("userId", kioskStatus_.kioskBundleUid_ / BASE_USER_RANGE);
     EventFwk::CommonEventData commonData {want};
-    EventFwk::CommonEventManager::PublishCommonEvent(commonData);
+    if (!IN_PROCESS_CALL(EventFwk::CommonEventManager::PublishCommonEvent(commonData))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "PublishCommonEvent failed, eventData: %{public}s", eventData.c_str());
+    }
 }
 
 bool KioskManager::IsInWhiteListInner(const std::string &bundleName)
