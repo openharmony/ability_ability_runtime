@@ -166,5 +166,163 @@ HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_005, TestSize.Level1)
     int32_t ret = StartAbilityUtils::CheckAppProvisionMode(want, userId);
     EXPECT_EQ(ret, StartAbilityUtils::startAbilityInfo->status);
 }
+
+/**
+ * @tc.name: CheckAppProvisionMode_006
+ * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_006, TestSize.Level1)
+{
+    std::string bundleName = "testName";
+    Want want;
+    want.SetBundle(bundleName);
+    int32_t userId = 0;
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.bundleName = bundleName;
+    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo = applicationInfo;
+    auto ret = StartAbilityUtils::CheckAppProvisionMode(want, userId);
+    EXPECT_EQ(ret, ERR_NOT_IN_APP_PROVISION_MODE);
+}
+
+/**
+ * @tc.name: CheckAppProvisionMode_007
+ * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_007, TestSize.Level1)
+{
+    std::string bundleName = "testName";
+    Want want;
+    want.SetParam("ohos.dlp.params.index", 5);
+    int32_t userId = 0;
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.bundleName = bundleName;
+    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo = applicationInfo;
+    auto ret = StartAbilityUtils::CheckAppProvisionMode(want, userId);
+    EXPECT_EQ(ret, ERR_APP_CLONE_INDEX_INVALID);
+}
+
+/**
+ * @tc.name: CheckAppProvisionMode_008
+ * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_008, TestSize.Level1)
+{
+    std::string bundleName = "testName";
+    Want want;
+    want.SetBundle(bundleName);
+    int32_t userId = 0;
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.bundleName = bundleName;
+    applicationInfo.appProvisionType = AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG;
+    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo = applicationInfo;
+    auto ret = StartAbilityUtils::CheckAppProvisionMode(want, userId);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: CheckAppProvisionMode_009
+ * @tc.desc: test class StartAbilityUtil CheckAppProvisionMode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, CheckAppProvisionMode_009, TestSize.Level1)
+{
+    std::string bundleName = "testName";
+    Want want;
+    want.SetParam("ohos.dlp.params.index", 0);
+    want.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
+    want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
+    int32_t userId = 0;
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.bundleName = bundleName;
+    StartAbilityUtils::startAbilityInfo->abilityInfo.applicationInfo = applicationInfo;
+    auto ret = StartAbilityUtils::CheckAppProvisionMode(want, userId);
+    EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
+}
+
+/**
+ * @tc.name: CreateStartExtensionInfo_001
+ * @tc.desc: test class StartAbilityUtil CreateStartExtensionInfo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_001, TestSize.Level1)
+{
+    Want want;
+    int32_t userId = 0;
+    int32_t appIndex = 1;
+    auto ret = StartAbilityInfo::CreateStartExtensionInfo(want, userId, appIndex);
+    ASSERT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: CreateStartExtensionInfo_002
+ * @tc.desc: test class StartAbilityUtil CreateStartExtensionInfo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_002, TestSize.Level1)
+{
+    Want want;
+    int32_t userId = 0;
+    int32_t appIndex = 10000;
+    auto ret = StartAbilityInfo::CreateStartExtensionInfo(want, userId, appIndex);
+    ASSERT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: CreateStartExtensionInfo_003
+ * @tc.desc: test class StartAbilityUtil CreateStartExtensionInfo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, CreateStartExtensionInfo_003, TestSize.Level1)
+{
+    Want want;
+    int32_t userId = 0;
+    int32_t appIndex = 0;
+    int32_t validUserId = 0;
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityInfoWrap threadLocalInfo(want, validUserId, appIndex, nullptr);
+    auto ret = StartAbilityInfo::CreateStartExtensionInfo(want, userId, appIndex);
+    ASSERT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: SetStartAbilityInfo_001
+ * @tc.desc: test class StartAbilityUtil SetStartAbilityInfo_ function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, SetStartAbilityInfo_001, TestSize.Level1)
+{
+    StartAbilityUtils::startAbilityInfo = nullptr;
+    AppExecFwk::AbilityInfo abilityInfo;
+    StartAbilityInfoWrap startAbilityInfoWrap;
+    startAbilityInfoWrap.SetStartAbilityInfo(abilityInfo);
+    ASSERT_NE(StartAbilityUtils::startAbilityInfo, nullptr);
+
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    abilityInfo.name = "abilityName";
+    startAbilityInfoWrap.SetStartAbilityInfo(abilityInfo);
+    auto abilityName = StartAbilityUtils::startAbilityInfo->abilityInfo.name;
+    EXPECT_NE(abilityName, abilityInfo.name);
+}
+
+/**
+ * @tc.name: CreateStartAbilityInfo_001
+ * @tc.desc: test class StartAbilityUtil CreateStartAbilityInfo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, CreateStartAbilityInfo_001, TestSize.Level1)
+{
+    Want want;
+    int32_t userId = 0;
+    int32_t appIndex = 0;
+    auto ret = StartAbilityInfo::CreateStartAbilityInfo(want, userId, appIndex, nullptr);
+    ASSERT_NE(ret, nullptr);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -872,5 +872,419 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_GetUserId_0100, TestSize.Level1)
     EXPECT_EQ(result, 1);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningRecord_GetUserId_0100 end.");
 }
+
+/**
+ * @tc.name: AppRunningRecord_UpdateApplicationInfoInstalled_0100
+ * @tc.desc: Test UpdateApplicationInfoInstalled works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_UpdateApplicationInfoInstalled_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    appRecord->isStageBasedModel_ = true;
+    appRecord->appLifeCycleDeal_ == nullptr;
+    std::string moduleName = "moduleName";
+    ApplicationInfo applicationInfo;
+    appRecord->UpdateApplicationInfoInstalled(applicationInfo, moduleName);
+    EXPECT_TRUE(applicationInfo.name.empty());
+}
+
+/**
+ * @tc.name: AppRunningRecord_UpdateApplicationInfoInstalled_0200
+ * @tc.desc: Test UpdateApplicationInfoInstalled works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_UpdateApplicationInfoInstalled_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    appRecord->isStageBasedModel_ = true;
+    appRecord->appLifeCycleDeal_ = std::make_shared<AppLifeCycleDeal>();
+    std::string moduleName = "moduleName";
+    ApplicationInfo applicationInfo;
+    appRecord->UpdateApplicationInfoInstalled(applicationInfo, moduleName);
+    EXPECT_TRUE(applicationInfo.name.empty());
+}
+
+/**
+ * @tc.name: AppRunningRecord_SetModuleLoaded_0100
+ * @tc.desc: Test SetModuleLoaded works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_SetModuleLoaded_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    std::string moduleName = "moduleName";
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecords;
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    moduleRunningRecord->moduleName_ = moduleName;
+    moduleRecords.emplace_back(moduleRunningRecord);
+    appRecord->hapModules_.emplace("key", moduleRecords);
+    appRecord->SetModuleLoaded(moduleName);
+    EXPECT_TRUE(moduleRunningRecord->IsLoaded());
+}
+
+/**
+ * @tc.name: AppRunningRecord_ScheduleForegroundRunning_0100
+ * @tc.desc: Test ScheduleForegroundRunning works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_ScheduleForegroundRunning_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    appRecord->appLifeCycleDeal_ = std::make_shared<AppLifeCycleDeal>();
+    appRecord->appLifeCycleDeal_->SetApplicationClient(nullptr);
+    appRecord->ScheduleTerminate();
+    appRecord->ScheduleClearPageStack();
+    EXPECT_FALSE(appRecord->ScheduleForegroundRunning());
+}
+
+/**
+ * @tc.name: AppRunningRecord_StateChangedNotifyObserver_0100
+ * @tc.desc: Test StateChangedNotifyObserver works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_StateChangedNotifyObserver_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->multiAppMode.multiAppModeType = MultiAppModeType::APP_CLONE;
+    ASSERT_NE(appInfo, nullptr);
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    ASSERT_NE(abilityInfo, nullptr);
+    sptr<IRemoteObject> token = nullptr;
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    ASSERT_NE(abilityRecord, nullptr);
+    appRecord->StateChangedNotifyObserver(abilityRecord, 1, true, true);
+    auto applicationInfo = appRecord->GetApplicationInfo();
+    EXPECT_EQ(applicationInfo->multiAppMode.multiAppModeType, MultiAppModeType::APP_CLONE);
+}
+
+/**
+ * @tc.name: AppRunningRecord_StateChangedNotifyObserver_0200
+ * @tc.desc: Test StateChangedNotifyObserver works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_StateChangedNotifyObserver_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->multiAppMode.multiAppModeType = MultiAppModeType::APP_CLONE;
+    ASSERT_NE(appInfo, nullptr);
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    ASSERT_NE(abilityInfo, nullptr);
+    sptr<IRemoteObject> token = nullptr;
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    abilityRecord->SetWant(want);
+    ASSERT_NE(abilityRecord, nullptr);
+    appRecord->StateChangedNotifyObserver(abilityRecord, 1, true, true);
+    auto applicationInfo = appRecord->GetApplicationInfo();
+    EXPECT_EQ(applicationInfo->multiAppMode.multiAppModeType, MultiAppModeType::APP_CLONE);
+}
+
+/**
+ * @tc.name: AppRunningRecord_StateChangedNotifyObserver_0300
+ * @tc.desc: Test StateChangedNotifyObserver works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_StateChangedNotifyObserver_0300, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->multiAppMode.multiAppModeType = MultiAppModeType::APP_CLONE;
+    appInfo->bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
+    ASSERT_NE(appInfo, nullptr);
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    ASSERT_NE(abilityInfo, nullptr);
+    sptr<IRemoteObject> token = nullptr;
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    abilityRecord->SetWant(want);
+    ASSERT_NE(abilityRecord, nullptr);
+    appRecord->StateChangedNotifyObserver(abilityRecord, 1, true, true);
+    auto applicationInfo = appRecord->GetApplicationInfo();
+    EXPECT_EQ(applicationInfo->multiAppMode.multiAppModeType, MultiAppModeType::APP_CLONE);
+    EXPECT_EQ(applicationInfo->bundleType, AppExecFwk::BundleType::ATOMIC_SERVICE);
+}
+
+/**
+ * @tc.name: AppRunningRecord_StateChangedNotifyObserver_0400
+ * @tc.desc: Test StateChangedNotifyObserver works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_StateChangedNotifyObserver_0400, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->multiAppMode.multiAppModeType = MultiAppModeType::APP_CLONE;
+    appInfo->bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
+    ASSERT_NE(appInfo, nullptr);
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    ASSERT_NE(abilityInfo, nullptr);
+    abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::SHARE;
+    sptr<IRemoteObject> token = nullptr;
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    abilityRecord->SetWant(want);
+    ASSERT_NE(abilityRecord, nullptr);
+    appRecord->StateChangedNotifyObserver(abilityRecord, 1, true, true);
+    auto applicationInfo = appRecord->GetApplicationInfo();
+    EXPECT_EQ(applicationInfo->multiAppMode.multiAppModeType, MultiAppModeType::APP_CLONE);
+    EXPECT_EQ(applicationInfo->bundleType, AppExecFwk::BundleType::ATOMIC_SERVICE);
+}
+
+/**
+ * @tc.name: AppRunningRecord_StateChangedNotifyObserver_0500
+ * @tc.desc: Test StateChangedNotifyObserver works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_StateChangedNotifyObserver_0500, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->multiAppMode.multiAppModeType = MultiAppModeType::APP_CLONE;
+    appInfo->bundleType = AppExecFwk::BundleType::ATOMIC_SERVICE;
+    ASSERT_NE(appInfo, nullptr);
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    ASSERT_NE(abilityInfo, nullptr);
+    abilityInfo->extensionAbilityType = AppExecFwk::ExtensionAbilityType::SHARE;
+    sptr<IRemoteObject> token = nullptr;
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token, 0);
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    abilityRecord->SetWant(want);
+    ASSERT_NE(abilityRecord, nullptr);
+    appRecord->StateChangedNotifyObserver(abilityRecord, 1, false, true);
+    auto applicationInfo = appRecord->GetApplicationInfo();
+    EXPECT_EQ(applicationInfo->multiAppMode.multiAppModeType, MultiAppModeType::APP_CLONE);
+    EXPECT_EQ(applicationInfo->bundleType, AppExecFwk::BundleType::ATOMIC_SERVICE);
+}
+
+/**
+ * @tc.name: AppRunningRecord_PopForegroundingAbilityTokens_0100
+ * @tc.desc: Test PopForegroundingAbilityTokens works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_PopForegroundingAbilityTokens_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
+    ASSERT_NE(appRecord, nullptr);
+    appRecord->foregroundingAbilityTokens_.insert(nullptr);
+    appRecord->PopForegroundingAbilityTokens();
+    EXPECT_EQ(appRecord->foregroundingAbilityTokens_.size(), 0);
+}
+
+/**
+ * @tc.name: AppRunningRecord_SendEvent_0300
+ * @tc.desc: Test SendEvent works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_SendEvent_0300, TestSize.Level1)
+{
+    uint32_t msg = AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG;
+    int64_t timeOut = TIMEOUT;
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    int32_t recordId = RECORD_ID;
+    std::string processName;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    ASSERT_NE(appRunningRecord, nullptr);
+    appRunningRecord->taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler(Constants::APP_MGR_SERVICE_NAME);
+    appRunningRecord->eventHandler_ =
+        std::make_shared<AMSEventHandler>(appRunningRecord->taskHandler_, appRunningRecord->appMgrServiceInner_);
+    appRunningRecord->isDebugApp_ = true;
+    appRunningRecord->isNativeDebug_ = false;
+    appRunningRecord->isAttachDebug_ = false;
+    appRunningRecord->SendEvent(msg, timeOut);
+    EXPECT_EQ(appRunningRecord->appEventId_, 2);
+}
+
+/**
+ * @tc.name: AppRunningRecord_SendEvent_0400
+ * @tc.desc: Test SendEvent works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_SendEvent_0400, TestSize.Level1)
+{
+    uint32_t msg = AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG;
+    int64_t timeOut = TIMEOUT;
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    int32_t recordId = RECORD_ID;
+    std::string processName;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    ASSERT_NE(appRunningRecord, nullptr);
+    appRunningRecord->appEventId_ = 0;
+    appRunningRecord->taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler(Constants::APP_MGR_SERVICE_NAME);
+    appRunningRecord->eventHandler_ =
+        std::make_shared<AMSEventHandler>(appRunningRecord->taskHandler_, appRunningRecord->appMgrServiceInner_);
+    appRunningRecord->isDebugApp_ = false;
+    appRunningRecord->isNativeDebug_ = true;
+    appRunningRecord->isAttachDebug_ = false;
+    appRunningRecord->SendEvent(msg, timeOut);
+    EXPECT_EQ(appRunningRecord->appEventId_, 0);
+}
+
+/**
+ * @tc.name: AppRunningRecord_SendEvent_0500
+ * @tc.desc: Test SendEvent works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_SendEvent_0500, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    int32_t recordId = RECORD_ID;
+    std::string processName;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    ASSERT_NE(appRunningRecord, nullptr);
+    appRunningRecord->appEventId_ = 0;
+    appRunningRecord->taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler(Constants::APP_MGR_SERVICE_NAME);
+    appRunningRecord->eventHandler_ =
+        std::make_shared<AMSEventHandler>(appRunningRecord->taskHandler_, appRunningRecord->appMgrServiceInner_);
+    appRunningRecord->isDebugApp_ = false;
+    appRunningRecord->isNativeDebug_ = false;
+    appRunningRecord->isAttachDebug_ = true;
+    uint32_t msg = AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG;
+    int64_t timeOut = TIMEOUT;
+    appRunningRecord->SendEvent(msg, timeOut);
+    EXPECT_EQ(appRunningRecord->appEventId_, 0);
+}
+
+/**
+ * @tc.name: AppRunningRecord_OnWindowVisibilityChangedWithPendingState_0100
+ * @tc.desc: Test OnWindowVisibilityChangedWithPendingState works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_OnWindowVisibilityChangedWithPendingState_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    int32_t recordId = RECORD_ID;
+    std::string processName;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    ASSERT_NE(appRunningRecord, nullptr);
+    appRunningRecord->pendingState_ == ApplicationPendingState::FOREGROUNDING;
+    appRunningRecord->hapModules_.clear();
+    appRunningRecord->windowIds_.clear();
+    appRunningRecord->foregroundingAbilityTokens_.clear();
+    appRunningRecord->OnWindowVisibilityChangedWithPendingState();
+    EXPECT_EQ(appRunningRecord->pendingState_, ApplicationPendingState::READY);
+}
+
+/**
+ * @tc.name: AppRunningRecord_OnWindowVisibilityChangedWithPendingState_0200
+ * @tc.desc: Test OnWindowVisibilityChangedWithPendingState works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_OnWindowVisibilityChangedWithPendingState_0200, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    int32_t recordId = RECORD_ID;
+    std::string processName;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    ASSERT_NE(appRunningRecord, nullptr);
+    appRunningRecord->pendingState_ == ApplicationPendingState::BACKGROUNDING;
+    appRunningRecord->windowIds_.emplace(100);
+    appRunningRecord->OnWindowVisibilityChangedWithPendingState();
+    EXPECT_EQ(appRunningRecord->pendingState_, ApplicationPendingState::FOREGROUNDING);
+}
+
+/**
+ * @tc.name: AppRunningRecord_OnWindowVisibilityChangedWithPendingState_0300
+ * @tc.desc: Test OnWindowVisibilityChangedWithPendingState works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_OnWindowVisibilityChangedWithPendingState_0300, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    int32_t recordId = RECORD_ID;
+    std::string processName;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    ASSERT_NE(appRunningRecord, nullptr);
+    appRunningRecord->pendingState_ == ApplicationPendingState::READY;
+    appRunningRecord->curState_ == ApplicationState::APP_STATE_FOREGROUND;
+    appRunningRecord->hapModules_.clear();
+    appRunningRecord->OnWindowVisibilityChangedWithPendingState();
+    EXPECT_EQ(appRunningRecord->pendingState_, ApplicationPendingState::READY);
+}
+
+/**
+ * @tc.name: AppRunningRecord_OnWindowVisibilityChangedWithPendingState_0400
+ * @tc.desc: Test OnWindowVisibilityChangedWithPendingState works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_OnWindowVisibilityChangedWithPendingState_0400, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    int32_t recordId = RECORD_ID;
+    std::string processName;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    ASSERT_NE(appRunningRecord, nullptr);
+    appRunningRecord->pendingState_ == ApplicationPendingState::READY;
+    appRunningRecord->OnWindowVisibilityChangedWithPendingState();
+    EXPECT_EQ(appRunningRecord->pendingState_, ApplicationPendingState::READY);
+}
+
+/**
+ * @tc.name: AppRunningRecord_OnWindowVisibilityChangedWithPendingState_0500
+ * @tc.desc: Test OnWindowVisibilityChangedWithPendingState works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_OnWindowVisibilityChangedWithPendingState_0500, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    int32_t recordId = RECORD_ID;
+    std::string processName;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    ASSERT_NE(appRunningRecord, nullptr);
+    appRunningRecord->pendingState_ == ApplicationPendingState::READY;
+    appRunningRecord->watchdogVisibilityState_ = WatchdogVisibilityState::WATCHDOG_STATE_UNVISIBILITY;
+    appRunningRecord->OnWindowVisibilityChangedWithPendingState();
+    EXPECT_EQ(appRunningRecord->pendingState_, ApplicationPendingState::READY);
+    EXPECT_EQ(appRunningRecord->watchdogVisibilityState_, WatchdogVisibilityState::WATCHDOG_STATE_UNVISIBILITY);
+}
+
+/**
+ * @tc.name: AppRunningRecord_OnWindowVisibilityChangedWithPendingState_0600
+ * @tc.desc: Test OnWindowVisibilityChangedWithPendingState works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_OnWindowVisibilityChangedWithPendingState_0600, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    int32_t recordId = RECORD_ID;
+    std::string processName;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    ASSERT_NE(appRunningRecord, nullptr);
+    appRunningRecord->pendingState_ == ApplicationPendingState::READY;
+    appRunningRecord->watchdogVisibilityState_ = WatchdogVisibilityState::WATCHDOG_STATE_VISIBILITY;
+    appRunningRecord->OnWindowVisibilityChangedWithPendingState();
+    EXPECT_EQ(appRunningRecord->pendingState_, ApplicationPendingState::READY);
+    EXPECT_EQ(appRunningRecord->watchdogVisibilityState_, WatchdogVisibilityState::WATCHDOG_STATE_UNVISIBILITY);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

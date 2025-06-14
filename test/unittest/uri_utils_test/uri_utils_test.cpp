@@ -760,5 +760,39 @@ HWTEST_F(UriUtilsTest, ProcessUDMFKey_002, TestSize.Level1)
     uriUtils.ProcessUDMFKey(want);
     EXPECT_EQ(want.GetStringParam(Want::PARAM_ABILITY_UNIFIED_DATA_KEY).empty(), true);
 }
+
+/*
+ * Feature: UriUtils
+ * Function: IsInAncoAppIdentifier
+ * SubFunction: NA
+ * FunctionPoints: UriUtils IsInAncoAppIdentifier
+ */
+HWTEST_F(UriUtilsTest, IsInAncoAppIdentifier_001, TestSize.Level1)
+{
+    auto &uriUtils = UriUtils::GetInstance();
+    std::string uri = "";
+    Want want;
+    want.SetUri(uri);
+    uriUtils.PublishFileOpenEvent(want);
+    auto result = uriUtils.IsInAncoAppIdentifier("com.example.test");
+    EXPECT_FALSE(result);
+}
+
+/*
+ * Feature: UriUtils
+ * Function: IsInAncoAppIdentifier
+ * SubFunction: NA
+ * FunctionPoints: UriUtils IsInAncoAppIdentifier
+ */
+HWTEST_F(UriUtilsTest, IsInAncoAppIdentifier_002, TestSize.Level1)
+{
+    auto &uriUtils = UriUtils::GetInstance();
+    std::string uri = "file://com.example.test/test.txt";
+    Want want;
+    want.SetUri(uri);
+    uriUtils.PublishFileOpenEvent(want);
+    auto result = uriUtils.IsInAncoAppIdentifier("com.example.test");
+    EXPECT_FALSE(result);
+}
 }
 }
