@@ -469,13 +469,14 @@ std::unique_ptr<ETSNativeReference> ETSRuntime::LoadEtsModule(const std::string 
     return etsNativeReference;
 }
 
-void ETSRuntime::HandleUncaughtError()
+bool ETSRuntime::HandleUncaughtError()
 {
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "HandleUncaughtError called");
     if (etsEnv_ == nullptr) {
-        return;
+        return false;
     }
     etsEnv_->HandleUncaughtError();
+    return true;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
