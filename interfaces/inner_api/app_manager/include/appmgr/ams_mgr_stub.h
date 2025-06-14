@@ -89,6 +89,7 @@ private:
     int32_t HandleIsNoRequireBigMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetKeepAliveEnableState(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetKeepAliveDkv(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetKeepAliveAppService(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAttachedToStatusBar(MessageParcel &data, MessageParcel &reply);
     int32_t OnRemoteRequestInner(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);

@@ -54,6 +54,9 @@ bool LoadParam::Marshalling(Parcel &parcel) const
     if (!parcel.WriteBool(isKeepAlive)) {
         return false;
     }
+    if (!parcel.WriteBool(isKeepAliveAppService)) {
+        return false;
+    }
     if (!parcel.WriteUint32(extensionProcessMode)) {
         return false;
     }
@@ -81,6 +84,7 @@ bool LoadParam::ReadFromParcel(Parcel &parcel)
         }
     }
     isKeepAlive = parcel.ReadBool();
+    isKeepAliveAppService = parcel.ReadBool();
     extensionProcessMode = parcel.ReadUint32();
     std::unique_ptr<ExtensionLoadParam> extensionParamRead(parcel.ReadParcelable<ExtensionLoadParam>());
     if (!extensionParamRead) {

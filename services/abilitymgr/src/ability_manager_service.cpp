@@ -13976,6 +13976,10 @@ int32_t AbilityManagerService::QueryKeepAliveApplications(int32_t appType, int32
 int32_t AbilityManagerService::SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId,
     bool flag, bool isAllowUserToCancel)
 {
+    if (userId != U1_USER_ID && isAllowUserToCancel) {
+        return ERR_CAPABILITY_NOT_SUPPORT;
+    }
+
     auto bms = AbilityUtil::GetBundleManagerHelper();
     AppExecFwk::BundleInfo bundleInfo;
     if (bms && userId == U1_USER_ID) {

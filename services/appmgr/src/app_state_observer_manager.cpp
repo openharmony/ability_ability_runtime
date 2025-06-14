@@ -863,7 +863,7 @@ ProcessData AppStateObserverManager::WrapProcessData(const std::shared_ptr<AppRu
     }
     processData.state = static_cast<AppProcessState>(appRecord->GetState());
     processData.isContinuousTask = appRecord->IsContinuousTask();
-    processData.isKeepAlive = appRecord->IsKeepAliveApp() || appRecord->IsKeepAliveDkv();
+    processData.isKeepAlive = appRecord->IsKeepAliveApp() || appRecord->IsKeepAliveAppService();
     processData.isFocused = appRecord->GetFocusFlag();
     processData.requestProcCode = appRecord->GetRequestProcCode();
     processData.processChangeReason = static_cast<int32_t>(appRecord->GetProcessChangeReason());
