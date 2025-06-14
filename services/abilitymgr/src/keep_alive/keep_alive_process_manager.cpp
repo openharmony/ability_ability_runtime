@@ -305,17 +305,20 @@ void KeepAliveProcessManager::OnAppStateChanged(const AppInfo &info)
         return;
     }
 
-    bool localEnable = IsKeepAliveBundle(bundleName, -1) || IsKeepAliveBundle(bundleName, U1_USER_ID);
-    if (!localEnable) {
-        return;
-    }
-
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (appMgrClient == nullptr) {
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "appMgrClient is null");
         return;
     }
-    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveDkv(bundleName, localEnable, uid));
+
+    bool localEnable = IsKeepAliveBundle(bundleName, -1);
+    bool localEnableForAppservice = IsKeepAliveBundle(bundleName, U1_USER_ID);
+    if (localEnable) {
+        IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveDkv(bundleName, localEnable, uid));
+    }
+    if (localEnableForAppservice) {
+        IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveAppService(bundleName, localEnable, uid));
+    }
 }
 
 bool KeepAliveProcessManager::IsKeepAliveBundle(const std::string &bundleName, int32_t userId)
@@ -398,7 +401,7 @@ int32_t KeepAliveProcessManager::SetAppServiceExtensionKeepAlive(const std::stri
         KeepAlivePolicy::UNSPECIFIED;
     result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, updateEnable);
     CHECK_RET_RETURN_RET(result, "set keep-alive failed");
-    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveDkv(bundleName, updateEnable, bundleInfo.uid));
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveAppService(bundleName, updateEnable, bundleInfo.uid));
     return ERR_OK;
 }
 
@@ -542,7 +545,7 @@ void KeepAliveProcessManager::SaveAppSeriviceRestartAfterUpgrade(const std::stri
     for (const auto& info : infos) {
         if (info.uid_ == uid && info.isKeepAliveAppService) {
             restartAfterUpgradeList_.insert(uid);
-            IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveDkv(bundleName, false, uid));
+            IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveAppService(bundleName, false, uid));
         }
     }
 }
