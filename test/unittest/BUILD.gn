@@ -422,6 +422,7 @@ group("unittest") {
       "query_erms_manager_test:unittest",
       "query_erms_observer_manager_test:unittest",
       "quick_fix:unittest",
+      "rate_limiter_test:rate_limiter_test",
       "recovery_info_timer_test:unittest",
       "remote_mission_listener_proxy_test:unittest",
       "remote_mission_listener_stub_test:unittest",
