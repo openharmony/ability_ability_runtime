@@ -34,7 +34,7 @@
 
 namespace OHOS {
 namespace AAFwk {
-constexpr char PRODUCT_APPBOOT_SETTING_ENABLED[] = "const.product.appboot.setting.enabled";
+constexpr char KIOSK_MODE_ENABLED[] = "const.product.kioskmode.enabled";
 
 KioskManager &KioskManager::GetInstance()
 {
@@ -55,7 +55,7 @@ void KioskManager::OnAppStop(const AppInfo &info)
 
 int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> &appList)
 {
-    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+    if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
         return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
@@ -92,7 +92,7 @@ int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> 
 
 int32_t KioskManager::EnterKioskMode(sptr<IRemoteObject> callerToken)
 {
-    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+    if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
         return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
@@ -128,7 +128,7 @@ int32_t KioskManager::EnterKioskMode(sptr<IRemoteObject> callerToken)
 
 int32_t KioskManager::ExitKioskMode(sptr<IRemoteObject> callerToken)
 {
-    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+    if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
         return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
@@ -161,7 +161,7 @@ int32_t KioskManager::ExitKioskModeInner(const std::string &bundleName, sptr<IRe
 
 int32_t KioskManager::GetKioskStatus(KioskStatus &kioskStatus)
 {
-    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+    if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
         return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
