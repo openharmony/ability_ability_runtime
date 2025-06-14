@@ -24,6 +24,7 @@
 #undef private
 #include "mock_my_flag.h"
 #include "accesstoken_kit.h"
+#include "uri.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -129,6 +130,80 @@ HWTEST_F(UriPermissionUtilsNewTest, Upms_GetTokenIdByBundleName_001, TestSize.Le
     uint32_t tokenId = 1;
     auto result = UPMSUtils::GetTokenIdByBundleName(bundleName, appIndex, tokenId);
     EXPECT_EQ(result, ERR_GET_TARGET_BUNDLE_INFO_FAILED);
+}
+
+/*
+ * Feature: UPMSUtils
+ * Function: ConnectManagerHelper
+ * SubFunction: NA
+ * FunctionPoints: UPMSUtils ConnectManagerHelper
+ */
+HWTEST_F(UriPermissionUtilsNewTest, Upms_ConnectManagerHelper_001, TestSize.Level1)
+{
+    auto manager = UPMSUtils::ConnectManagerHelper();
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/*
+ * Feature: UPMSUtils
+ * Function: IsDocsCloudUri
+ * SubFunction: NA
+ * FunctionPoints: UPMSUtils IsDocsCloudUri
+ */
+HWTEST_F(UriPermissionUtilsNewTest, Upms_IsDocsCloudUri_001, TestSize.Level1)
+{
+    Uri uri("ccc");
+    EXPECT_FALSE(UPMSUtils::IsDocsCloudUri(uri));
+}
+
+/*
+ * Feature: UPMSUtils
+ * Function: CheckUriTypeIsValid
+ * SubFunction: NA
+ * FunctionPoints: UPMSUtils CheckUriTypeIsValid
+ */
+HWTEST_F(UriPermissionUtilsNewTest, Upms_CheckUriTypeIsValid_001, TestSize.Level1)
+{
+    Uri uri("ccc");
+    EXPECT_FALSE(UPMSUtils::CheckUriTypeIsValid(uri));
+}
+
+/*
+ * Feature: UPMSUtils
+ * Function: CheckUriTypeIsValid
+ * SubFunction: NA
+ * FunctionPoints: UPMSUtils CheckUriTypeIsValid
+ */
+HWTEST_F(UriPermissionUtilsNewTest, Upms_CheckUriTypeIsValid_002, TestSize.Level1)
+{
+    Uri uri("file:///path/to/file");
+    EXPECT_TRUE(UPMSUtils::CheckUriTypeIsValid(uri));
+}
+
+/*
+ * Feature: UPMSUtils
+ * Function: GetBundleApiTargetVersion
+ * SubFunction: NA
+ * FunctionPoints: UPMSUtils GetBundleApiTargetVersion
+ */
+HWTEST_F(UriPermissionUtilsNewTest, Upms_GetBundleApiTargetVersion_001, TestSize.Level1)
+{
+    std::string bundleName = "ohos.bundle.test";
+    int32_t targetApiVersion = 0;
+    EXPECT_FALSE(UPMSUtils::GetBundleApiTargetVersion(bundleName, targetApiVersion));
+}
+
+/*
+ * Feature: UPMSUtils
+ * Function: GetDirByBundleNameAndAppIndex
+ * SubFunction: NA
+ * FunctionPoints: UPMSUtils GetDirByBundleNameAndAppIndex
+ */
+HWTEST_F(UriPermissionUtilsNewTest, Upms_GetDirByBundleNameAndAppIndex_001, TestSize.Level1)
+{
+    std::string bundleName = "ohos.bundle.test";
+    std::string dirName = "/Data";
+    EXPECT_TRUE(UPMSUtils::GetDirByBundleNameAndAppIndex(bundleName, 0, dirName));
 }
 }  // namespace AAFwk
 }  // namespace OHOS
