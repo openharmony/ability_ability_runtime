@@ -48,6 +48,21 @@ void AbilityKeepAliveDataManagerTest::TearDown() {}
 
 /**
  * Feature: AbilityKeepAliveDataManager
+ * Function: GetInstance
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager GetInstance
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, GetInstance_0100, TestSize.Level1)
+{
+    AbilityKeepAliveDataManager& instance1 = AbilityKeepAliveDataManager::GetInstance();
+    AbilityKeepAliveDataManager& instance2 = AbilityKeepAliveDataManager::GetInstance();
+    
+    // Verify we're getting the same instance
+    EXPECT_EQ(&instance1, &instance2);
+}
+
+/**
+ * Feature: AbilityKeepAliveDataManager
  * Function: GetKvStore
  * SubFunction: NA
  * FunctionPoints: AbilityKeepAliveDataManager GetKvStore
@@ -621,6 +636,29 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, IsEqual_info_400, TestSize.Level1)
     auto result = abilityKeepAliveDataManager.IsEqual(key, info);
     EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "IsEqual_info_400 end";
+}
+
+/**
+ * Feature: AbilityKeepAliveDataManager
+ * Function: ConvertKeepAliveInfoFromKey
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager ConvertKeepAliveInfoFromKey
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, ConvertKeepAliveInfoFromKey_100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_100 start";
+    AbilityKeepAliveDataManager abilityKeepAliveDataManager;
+    DistributedKv::Key key;
+    auto retInfo_1 = abilityKeepAliveDataManager.ConvertKeepAliveInfoFromKey(key);
+    EXPECT_TRUE(retInfo_1.bundleName.empty());
+    KeepAliveInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.appType = KeepAliveAppType::THIRD_PARTY;
+    info.userId = 100;
+    key = abilityKeepAliveDataManager.ConvertKeepAliveDataToKey(info);
+    auto ret_Info_2 = abilityKeepAliveDataManager.ConvertKeepAliveInfoFromKey(key);
+    EXPECT_TRUE(!ret_Info_2.bundleName.empty());
+    GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_100 end";
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

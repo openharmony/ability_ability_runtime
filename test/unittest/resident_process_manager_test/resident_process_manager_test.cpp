@@ -199,5 +199,62 @@ HWTEST_F(ResidentProcessManagerTest, PutResidentAbility_002, TestSize.Level1)
     bool ret = manager->IsResidentAbility("", "", 0);
     EXPECT_FALSE(ret);
 }
+
+/*
+ * Feature: ResidentProcessManager
+ * Function: IsResidentAbility
+ * SubFunction: NA
+ * FunctionPoints:ResidentProcessManager IsResidentAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify IsResidentAbility
+ */
+HWTEST_F(ResidentProcessManagerTest, IsResidentAbility_001, TestSize.Level1)
+{
+    auto manager = std::make_shared<ResidentProcessManager>();
+    ASSERT_NE(manager, nullptr);
+    std::string bundleName = "com.example.resident.process";
+    std::string callerName = "resident.process.manager.test";
+    EXPECT_FALSE(manager->IsResidentAbility(bundleName, callerName, 0));
+}
+
+/*
+ * Feature: ResidentProcessManager
+ * Function: GetResidentBundleInfosForUser
+ * SubFunction: NA
+ * FunctionPoints:ResidentProcessManager GetResidentBundleInfosForUser
+ * EnvConditions: NA
+ * CaseDescription: Verify GetResidentBundleInfosForUser
+ */
+HWTEST_F(ResidentProcessManagerTest, GetResidentBundleInfosForUser_001, TestSize.Level1)
+{
+    auto manager = std::make_shared<ResidentProcessManager>();
+    ASSERT_NE(manager, nullptr);
+    BundleInfo bundleInfo;
+    HapModuleInfo hapModuleInfo;
+    hapModuleInfo.isModuleJson = false;
+    hapModuleInfo.mainAbility = "";
+    bundleInfo.isKeepAlive = true;
+    bundleInfo.applicationInfo.process = "";
+    std::vector<BundleInfo> bundleInfos;
+    bundleInfos.push_back(bundleInfo);
+    EXPECT_TRUE(manager->GetResidentBundleInfosForUser(bundleInfos, 0));
+}
+
+/*
+ * Feature: ResidentProcessManager
+ * Function: StartFailedResidentAbilities
+ * SubFunction: NA
+ * FunctionPoints:ResidentProcessManager StartFailedResidentAbilities
+ * EnvConditions: NA
+ * CaseDescription: Verify StartFailedResidentAbilities
+ */
+HWTEST_F(ResidentProcessManagerTest, StartFailedResidentAbilities_001, TestSize.Level1)
+{
+    auto manager = std::make_shared<ResidentProcessManager>();
+    ASSERT_NE(manager, nullptr);
+    manager->unlockedAfterBoot_ = false;
+    manager->StartFailedResidentAbilities();
+    EXPECT_TRUE(manager->unlockedAfterBoot_);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
