@@ -476,7 +476,6 @@ int32_t KeepAliveProcessManager::StartKeepAliveAppServiceExtensionInner(const Ke
 int32_t KeepAliveProcessManager::ClearKeepAliveAppServiceExtension(int32_t userId)
 {
     KeepAliveInfo info;
-    info.userId = U1_USER_ID;
     info.setterId = userId;
     return AbilityKeepAliveService::GetInstance().ClearKeepAliveAppServiceExtension(info);
 }

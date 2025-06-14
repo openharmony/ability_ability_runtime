@@ -1019,7 +1019,7 @@ HWTEST_F(AbilityKeepAliveServiceTest, ClearKeepAliveAppServiceExtension_001, Tes
 {
     GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest ClearKeepAliveAppServiceExtension_001 start";
     KeepAliveInfo info;
-    AbilityKeepAliveDataManager::callDeleteResult = ERR_OK;
+    AbilityKeepAliveDataManager::callDeleteBySetterIdResult = ERR_OK;
     auto result = AbilityKeepAliveService::GetInstance().ClearKeepAliveAppServiceExtension(info);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "AbilityKeepAliveServiceTest ClearKeepAliveAppServiceExtension_001 end";

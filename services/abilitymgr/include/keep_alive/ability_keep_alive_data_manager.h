@@ -38,6 +38,8 @@ public:
 
     int32_t QueryKeepAliveApplications(const KeepAliveInfo &queryParam, std::vector<KeepAliveInfo> &infoList);
 
+    int32_t DeleteKeepAliveDataWithSetterId(const KeepAliveInfo &info);
+
 private:
     AbilityKeepAliveDataManager();
     ~AbilityKeepAliveDataManager();
@@ -49,6 +51,7 @@ private:
     DistributedKv::Key ConvertKeepAliveDataToKey(const KeepAliveInfo &info);
     KeepAliveInfo ConvertKeepAliveInfoFromKey(const DistributedKv::Key &key);
     bool IsEqual(const DistributedKv::Key &key, const KeepAliveInfo &info);
+    bool IsEqualSetterId(const DistributedKv::Key &key, const KeepAliveInfo &info);
 
     static const DistributedKv::AppId APP_ID;
     static const DistributedKv::StoreId STORE_ID;
