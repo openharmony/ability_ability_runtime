@@ -6468,7 +6468,7 @@ int32_t AbilityManagerProxy::GetAllInsightIntentInfo(
         TAG_LOGE(AAFwkTag::INTENT, "write flag fail");
         return ERR_INVALID_VALUE;
     }
-    
+
     int error = SendRequest(
         AbilityManagerInterfaceCode::GET_ALL_INSIGHT_INTENT_INFO, data, reply, option);
     if (error != NO_ERROR) {
@@ -6510,7 +6510,7 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByBundleName(
         TAG_LOGE(AAFwkTag::INTENT, "write bundleName fail");
         return ERR_INVALID_VALUE;
     }
-    
+
     int error = SendRequest(
         AbilityManagerInterfaceCode::GET_INSIGHT_INTENT_INFO_BY_BUNDLE_NAME, data, reply, option);
     if (error != NO_ERROR) {
@@ -6564,7 +6564,7 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByIntentName(
         TAG_LOGE(AAFwkTag::INTENT, "write intentName fail");
         return ERR_INVALID_VALUE;
     }
-    
+
     int error = SendRequest(
         AbilityManagerInterfaceCode::GET_INSIGHT_INTENT_INFO_BY_INTENT_NAME, data, reply, option);
     if (error != NO_ERROR) {
@@ -6576,6 +6576,57 @@ int32_t AbilityManagerProxy::GetInsightIntentInfoByIntentName(
         return false;
     }
     info = *intentInfo;
+    return reply.ReadInt32();
+}
+
+
+int32_t AbilityManagerProxy::SuspendExtensionAbility(sptr<IAbilityConnection> connect)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (connect == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "fail, connect null");
+        return ERR_INVALID_VALUE;
+    }
+    if (!WriteInterfaceToken(data)) {
+        return INNER_ERR;
+    }
+    if (!data.WriteRemoteObject(connect->AsObject())) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "connect write failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    int32_t error = SendRequest(AbilityManagerInterfaceCode::SUSPEND_EXTENSION_ABILITY, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "request error:%{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::ResumeExtensionAbility(sptr<IAbilityConnection> connect)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (connect == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "fail, connect null");
+        return ERR_INVALID_VALUE;
+    }
+    if (!WriteInterfaceToken(data)) {
+        return INNER_ERR;
+    }
+    if (!data.WriteRemoteObject(connect->AsObject())) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "connect write failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    int32_t error = SendRequest(AbilityManagerInterfaceCode::RESUME_EXTENSION_ABILITY, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "request error:%{public}d", error);
+        return error;
+    }
     return reply.ReadInt32();
 }
 

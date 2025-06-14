@@ -30,16 +30,18 @@ class AppDomainVerifyMgrClient : public DelayedSingleton<AppDomainVerifyMgrClien
 
 public:
     DISALLOW_COPY_AND_MOVE(AppDomainVerifyMgrClient);
-    static bool isAtomicServiceUrlFlag_;
+    static bool isShortUrlFlag_;
     static AAFwk::Want explicitWant_;
     static int convertResultCode_;
+    static uint32_t targetType_;
+    static AppDomainVerify::TargetInfo convertTargetInfo_;
     /**
-     * IsAtomicServiceUrl
-     * @descrition check input url is atomic service or not.
+     * IsShortUrl
+     * @descrition check input url is short url or not.
      * @param url input url to check.
-     * @return bool is atomic service or not.
+     * @return bool is short url or not.
      */
-    bool IsAtomicServiceUrl(const std::string& url);
+    bool IsShortUrl(const std::string& url);
 
     /**
      * ConvertToExplicitWant

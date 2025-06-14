@@ -88,5 +88,26 @@ HWTEST_F(StateUtilsTest, StateUtilsTest_ConvertStateMap_0100, TestSize.Level2)
     EXPECT_EQ(StateUtils::ConvertStateMap(ABILITY_STATE_BACKGROUND_FAILED), BACKGROUND_FAILED);
 }
 
+/**
+ * @tc.number: StateUtilsTest_ConvertStateMap_0200
+ * @tc.desc: ConvertStateMap
+ * @tc.type: FUNC
+ * @tc.require: No
+ */
+HWTEST_F(StateUtilsTest, StateUtilsTest_ConvertStateMap_0200, TestSize.Level2)
+{
+    EXPECT_EQ(StateUtils::ConvertStateMap(ABILITY_STATE_INVALID_WINDOW_MODE), FOREGROUND_INVALID_MODE);
+}
+
+/**
+ * @tc.number: StateUtilsTest_StateToStrMap_0200
+ * @tc.desc: StateToStrMap
+ * @tc.type: FUNC
+ * @tc.require: No
+ */
+HWTEST_F(StateUtilsTest, StateUtilsTest_StateToStrMap_0200, TestSize.Level2)
+{
+    EXPECT_EQ(StateUtils::StateToStrMap(FOREGROUND_INVALID_MODE), std::string("FOREGROUND_INVALID_MODE"));
+}
 }  // namespace AAFwk
 }  // namespace OHOS

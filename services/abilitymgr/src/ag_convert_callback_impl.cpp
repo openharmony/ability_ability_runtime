@@ -19,13 +19,13 @@
 
 namespace OHOS {
 namespace AAFwk {
-void ConvertCallbackImpl::OnConvert(int resultCode, AAFwk::Want& want)
+void ConvertCallbackImpl::OnConvert(int resultCode, AppDomainVerify::TargetInfo &targetInfo)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     std::unique_lock<ffrt::mutex> lock(taskMutex_);
     if (task_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "resultCode:%{public}d", resultCode);
-        task_(resultCode, want);
+        task_(resultCode, targetInfo);
     }
 }
 

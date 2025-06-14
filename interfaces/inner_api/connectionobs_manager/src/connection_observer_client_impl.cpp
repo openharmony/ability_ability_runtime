@@ -105,6 +105,28 @@ void ConnectionObserverClientImpl::HandleExtensionDisconnected(const ConnectionD
     }
 }
 
+void ConnectionObserverClientImpl::HandleExtensionSuspended(const ConnectionData &data)
+{
+    auto observers = GetObservers();
+    for (auto it = observers.begin(); it != observers.end(); ++it) {
+        auto observer = *it;
+        if (observer) {
+            observer->OnExtensionSuspended(data);
+        }
+    }
+}
+
+void ConnectionObserverClientImpl::HandleExtensionResumed(const ConnectionData &data)
+{
+    auto observers = GetObservers();
+    for (auto it = observers.begin(); it != observers.end(); ++it) {
+        auto observer = *it;
+        if (observer) {
+            observer->OnExtensionResumed(data);
+        }
+    }
+}
+
 #ifdef WITH_DLP
 void ConnectionObserverClientImpl::HandleDlpAbilityOpened(const DlpStateData &data)
 {

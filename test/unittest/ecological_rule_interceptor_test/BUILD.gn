@@ -20,25 +20,21 @@ ohos_unittest("ecological_rule_interceptor_test") {
   module_out_path = module_output_path
   cflags_cc = []
   include_dirs = [
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
-    "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/system_ability_mock",
-    "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
-    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
-    "${ability_runtime_services_path}/abilitymgr/include/utils",
-    "${ability_runtime_services_path}/abilitymgr/include",
-    "${ability_runtime_services_path}/abilitymgr/include/interceptor",
+    "./mock",
+    "${ability_runtime_services_path}/abilitymgr/include/ecological_rule",
   ]
 
   sources = [
-    # add mock file
     "${ability_runtime_services_path}/abilitymgr/src/ecological_rule/ability_ecological_rule_mgr_service_param.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/interceptor/ability_interceptor_executer.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/utils/start_ability_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/interceptor/ecological_rule_interceptor.cpp",
+    "./mock/ecological_rule/ability_ecological_rule_mgr_service.cpp",
+    "./mock/ability_record.cpp",
+    "./mock/bundle_mgr_helper.cpp",
+    "./mock/start_ability_utils.cpp",
     "ecological_rule_interceptor_test.cpp",
   ]
 
   configs = [
-    "${ability_runtime_services_path}/abilitymgr:abilityms_config",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test:aafwk_mock_config",
   ]
   cflags = [
@@ -52,7 +48,6 @@ ohos_unittest("ecological_rule_interceptor_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
-    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:app_util",
@@ -67,6 +62,7 @@ ohos_unittest("ecological_rule_interceptor_test") {
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_deps_wrapper",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "dsoftbus:softbus_client",

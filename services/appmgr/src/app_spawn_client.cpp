@@ -380,6 +380,13 @@ int32_t AppSpawnClient::AppspawnSetExtMsg(const AppSpawnStartMsg &startMsg, AppS
         }
     }
 
+    std::string apiTargetVersionStr = std::to_string(startMsg.apiTargetVersion);
+    ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_API_TARGET_VERSION, apiTargetVersionStr.c_str());
+    if (ret) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send apiTargetVersion fail, ret: %{public}d", ret);
+        return ret;
+    }
+
     return AppspawnSetExtMsgMore(startMsg, reqHandle);
 }
 

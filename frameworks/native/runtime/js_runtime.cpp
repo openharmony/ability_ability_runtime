@@ -753,6 +753,7 @@ bool JsRuntime::Initialize(const Options& options)
             panda::JSNApi::SetpkgContextInfoList(vm, pkgContextInfoMap);
             panda::JSNApi::SetPkgAliasList(vm, pkgAliasMap);
             panda::JSNApi::SetPkgNameList(vm, options.packageNameList);
+            panda::JSNApi::ModuleDeserialize(vm, options.versionCode);
         }
     }
 

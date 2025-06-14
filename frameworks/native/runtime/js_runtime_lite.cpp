@@ -443,6 +443,7 @@ void JsRuntimeLite::SetChildOptions(const Options& options)
     childOptions_->jitEnabled = options.jitEnabled;
     childOptions_->pkgContextInfoJsonStringMap = options.pkgContextInfoJsonStringMap;
     childOptions_->packageNameList = options.packageNameList;
+    childOptions_->versionCode = options.versionCode;
 }
 
 std::shared_ptr<Options> JsRuntimeLite::GetChildOptions()
