@@ -67,14 +67,14 @@ public:
 
 class MyAbilityDebugResponse : public IAbilityDebugResponse {
 public:
-    void OnAbilitysDebugStarted(const std::vector<sptr<IRemoteObject>> &tokens) override
-    {}
+    ErrCode OnAbilitysDebugStarted(const std::vector<sptr<IRemoteObject>> &tokens) override
+    { return ERR_OK; }
 
-    void OnAbilitysDebugStoped(const std::vector<sptr<IRemoteObject>> &tokens) override
-    {}
+    ErrCode OnAbilitysDebugStoped(const std::vector<sptr<IRemoteObject>> &tokens) override
+    { return ERR_OK; }
 
-    void OnAbilitysAssertDebugChange(const std::vector<sptr<IRemoteObject>> &tokens,
-        bool isAssertDebug) override {}
+    ErrCode OnAbilitysAssertDebugChange(const std::vector<sptr<IRemoteObject>> &tokens,
+        bool isAssertDebug) override { return ERR_OK; }
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
@@ -83,16 +83,16 @@ public:
 
 class MyStartSpecifiedAbilityResponse : public IStartSpecifiedAbilityResponse {
 public:
-    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId) override
-    {}
-    void OnTimeoutResponse(int32_t requestId) override
-    {}
-    void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId) override
-    {}
-    void OnNewProcessRequestTimeoutResponse(int32_t requestId) override
-    {}
-    void OnStartSpecifiedFailed(int32_t requestId) override
-    {}
+    ErrCode OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId) override
+    { return ERR_OK; }
+    ErrCode OnTimeoutResponse(int32_t requestId) override
+    { return ERR_OK; }
+    ErrCode OnNewProcessRequestResponse(const std::string &flag, int32_t requestId) override
+    { return ERR_OK; }
+    ErrCode OnNewProcessRequestTimeoutResponse(int32_t requestId) override
+    { return ERR_OK; }
+    ErrCode OnStartSpecifiedFailed(int32_t requestId) override
+    { return ERR_OK; }
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
