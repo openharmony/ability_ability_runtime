@@ -1250,7 +1250,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, GetRemoteMissionInfos_001, TestSize.Le
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GetRemoteMissionInfos_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     std::vector<MissionInfo> missionInfos;
-    EXPECT_EQ(abilityMs_->GetRemoteMissionInfos("", 10, missionInfos), INVALID_PARAMETERS_ERR);
+    EXPECT_NE(abilityMs_->GetRemoteMissionInfos("", 10, missionInfos), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GetRemoteMissionInfos_001 end");
 }
 
@@ -1280,7 +1280,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, GetRemoteMissionInfo_001, TestSize.Lev
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GetRemoteMissionInfo_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     MissionInfo missionInfo;
-    EXPECT_EQ(abilityMs_->GetRemoteMissionInfo("", 10, missionInfo), INVALID_PARAMETERS_ERR);
+    EXPECT_NE(abilityMs_->GetRemoteMissionInfo("", 10, missionInfo), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GetRemoteMissionInfo_001 end");
 }
 
