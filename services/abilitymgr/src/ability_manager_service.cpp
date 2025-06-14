@@ -79,6 +79,7 @@
 #include "permission_constants.h"
 #include "process_options.h"
 #include "recovery_param.h"
+#include "rate_limiter.h"
 #include "res_sched_util.h"
 #include "restart_app_manager.h"
 #include "scene_board_judgement.h"
@@ -1095,6 +1096,33 @@ int AbilityManagerService::CheckCallPermission(const Want& want, const AppExecFw
         return CheckAbilityCallPermission(abilityRequest, abilityInfo, specifyTokenId);
     }
     return ERR_OK;
+}
+
+void AbilityManagerService::CheckExtensionRateLimit()
+{
+    if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        return;
+    }
+    auto uid = IPCSkeleton::GetCallingUid();
+    if (!RateLimiter::GetInstance().CheckExtensionLimit(uid)) {
+        return;
+    }
+    TAG_LOGE(AAFwkTag::SERVICE_EXT, "Reach max request limit, uid:%{public}d", uid);
+    if (RateLimiter::GetInstance().CheckReportLimit(uid)) {
+        return;
+    }
+    std::string callerBundleName;
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER(bms)
+    IN_PROCESS_CALL(bms->GetNameForUid(uid, callerBundleName));
+    if (callerBundleName.empty()) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "callerBundleName empty, uid:%{public}d", uid);
+        return;
+    }
+    EventInfo eventInfo;
+    eventInfo.abilityName = "ReachLimit";
+    eventInfo.callerBundleName = callerBundleName;
+    EventReport::SendStartAbilityOtherExtensionEvent(EventName::START_ABILITY_OTHER_EXTENSION, eventInfo);
 }
 
 int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemoteObject> &callerToken,
@@ -3190,6 +3218,7 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
     TAG_LOGI(AAFwkTag::SERVICE_EXT,
         "Start extension ability come, bundlename: %{public}s, ability is %{public}s, userId is %{public}d",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
+    CheckExtensionRateLimit();
     if (checkSystemCaller) {
         CHECK_CALLER_IS_SYSTEM_APP;
     }
@@ -3484,6 +3513,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UI_EXT, "StartUIExtensionAbility begin");
+    CheckExtensionRateLimit();
     CHECK_POINTER_AND_RETURN(extensionSessionInfo, ERR_INVALID_VALUE);
     SetPickerElementName(extensionSessionInfo, userId);
     SetAutoFillElementName(extensionSessionInfo);
@@ -4479,6 +4509,7 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::SERVICE_EXT,
         "elementUri:%{public}s", want.GetElement().GetURI().c_str());
+    CheckExtensionRateLimit();
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
     if (extensionType != AppExecFwk::ExtensionAbilityType::UI_SERVICE && want.HasParameter(UISERVICEHOSTPROXY_KEY)) {
@@ -4631,6 +4662,7 @@ int AbilityManagerService::ConnectUIExtensionAbility(const Want &want, const spt
     TAG_LOGI(AAFwkTag::UI_EXT,
         "ConnectUIExtensionAbility bundlename: %{public}s, ability is %{public}s, userId is %{private}d",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
+    CheckExtensionRateLimit();
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
