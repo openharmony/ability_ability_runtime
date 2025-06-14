@@ -17,6 +17,7 @@
 
 #include "ability_manager_service.h"
 #include "hilog_tag_wrapper.h"
+#include "rate_limiter.h"
 #include "sub_managers_helper.h"
 #include "mission_list_manager.h"
 
@@ -27,6 +28,9 @@ using OHOS::AppExecFwk::AbilityType;
 using OHOS::AppExecFwk::ExtensionAbilityType;
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr int32_t EXTENSION_MAX_LIMIT = 20;
+}
 class AbilityManagerServiceFourteenthTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -1235,6 +1239,87 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, CheckUIExtensionIsFocused_001, Tes
     int retCode = abilityMs_->CheckUIExtensionIsFocused(0, isFocused);
     EXPECT_EQ(retCode, CHECK_PERMISSION_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckUIExtensionIsFocused_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckExtensionRateLimit_001
+ * Function: CheckExtensionRateLimit
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckExtensionRateLimit
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckExtensionRateLimit_001 start");
+    
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    auto uid = 20010001;
+    MyStatus::GetInstance().permPermission_ = 1;
+    MyStatus::GetInstance().ipcGetCallingUid_ = uid;
+    for (int i = 0; i < EXTENSION_MAX_LIMIT + 1; i++) {
+        abilityMs_->CheckExtensionRateLimit();
+    }
+
+    auto &rateLimiter = RateLimiter::GetInstance();
+    auto isLimit = rateLimiter.CheckExtensionLimit(uid);
+    EXPECT_EQ(isLimit, false);
+    
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckExtensionRateLimit_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckExtensionRateLimit_002
+ * Function: CheckExtensionRateLimit
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckExtensionRateLimit
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckExtensionRateLimit_002 start");
+    
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    auto uid = 20010001;
+    MyStatus::GetInstance().permPermission_ = 0;
+    MyStatus::GetInstance().ipcGetCallingUid_ = uid;
+    for (int i = 0; i < EXTENSION_MAX_LIMIT + 1; i++) {
+        abilityMs_->CheckExtensionRateLimit();
+    }
+
+    auto &rateLimiter = RateLimiter::GetInstance();
+    auto isLimit = rateLimiter.CheckExtensionLimit(uid);
+    EXPECT_EQ(isLimit, true);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckExtensionRateLimit_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckExtensionRateLimit_003
+ * Function: CheckExtensionRateLimit
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckExtensionRateLimit
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckExtensionRateLimit_003 start");
+    
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    auto uid = 20010001;
+    MyStatus::GetInstance().permPermission_ = 0;
+    MyStatus::GetInstance().ipcGetCallingUid_ = uid;
+    for (int i = 0; i < EXTENSION_MAX_LIMIT + 1; i++) {
+        abilityMs_->CheckExtensionRateLimit();
+    }
+
+    auto &rateLimiter = RateLimiter::GetInstance();
+    auto isLimit = rateLimiter.CheckReportLimit(uid);
+    EXPECT_EQ(isLimit, true);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest CheckExtensionRateLimit_003 end");
 }
 } // namespace AAFwk
 } // namespace OHOS
