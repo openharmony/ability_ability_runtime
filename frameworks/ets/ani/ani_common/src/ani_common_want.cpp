@@ -71,6 +71,7 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
     ani_object object = nullptr;
     if ((status = env->FindClass("L@ohos/app/ability/Want/Want;", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status : %{public}d", status);
+        return nullptr;
     }
     if (cls == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null wantCls");
@@ -78,9 +79,11 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
     }
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status : %{public}d", status);
+        return nullptr;
     }
     if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status : %{public}d", status);
+        return nullptr;
     }
     if (object == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null object");
@@ -112,6 +115,7 @@ ani_ref WrapWantParams(ani_env *env, const AAFwk::WantParams &wantParams)
     ani_class cls = nullptr;
     if ((status = env->FindClass("L@ohos/app/ability/Want/RecordSerializeTool;", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "FindClass RecordSerializeTool failed, status : %{public}d", status);
+        return nullptr;
     }
     if (cls == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "RecordSerializeTool class null");
@@ -145,6 +149,10 @@ ani_ref WrapWantParams(ani_env *env, const AAFwk::WantParams &wantParams)
 bool InnerWrapWantParamsString(
     ani_env *env, ani_object object, const std::string &key, const AAFwk::WantParams &wantParams)
 {
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
     auto value = wantParams.GetParam(key);
     AAFwk::IString *ao = AAFwk::IString::Query(value);
     return ao != nullptr;
@@ -152,6 +160,10 @@ bool InnerWrapWantParamsString(
 
 bool UnwrapElementName(ani_env *env, ani_object param, ElementName &elementName)
 {
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
     std::string deviceId;
     if (GetFieldStringByName(env, param, "deviceId", deviceId)) {
         elementName.SetDeviceID(deviceId);
@@ -238,6 +250,7 @@ bool UnwrapWantParams(ani_env *env, ani_ref param, AAFwk::WantParams &wantParams
     ani_class cls = nullptr;
     if ((status = env->FindClass("L@ohos/app/ability/Want/RecordSerializeTool;", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "FindClass RecordSerializeTool failed, status : %{public}d", status);
+        return false;
     }
     if (cls == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "RecordSerializeTool class null");

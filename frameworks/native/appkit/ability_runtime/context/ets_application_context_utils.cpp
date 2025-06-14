@@ -35,14 +35,15 @@ void EtsApplicationContextUtils::SetSupportedProcessCacheSync([[maybe_unused]]an
     auto applicationContext = GeApplicationContext(env, aniObj);
     if (applicationContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
-        AbilityRuntime::ThrowEtsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
         return;
     }
     int32_t errCode = applicationContext->SetSupportedProcessCacheSelf(value);
     if (errCode == AAFwk::ERR_CAPABILITY_NOT_SUPPORT) {
-        AbilityRuntime::ThrowEtsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_CAPABILITY_NOT_SUPPORT);
+        AbilityRuntime::EtsErrorUtil::ThrowError(env,
+            AbilityRuntime::AbilityErrorCode::ERROR_CODE_CAPABILITY_NOT_SUPPORT);
     } else if (errCode != ERR_OK) {
-        AbilityRuntime::ThrowEtsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+        AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
     }
 }
 
