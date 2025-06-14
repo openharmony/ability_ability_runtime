@@ -58,6 +58,137 @@ void InsightIntentExecuteParamTest::TearDown()
 {}
 
 /**
+ * @tc.name: ReadFromParcel_0100
+ * @tc.desc: basic function test of get caller info.
+ * @tc.type: FUNC
+ * @tc.require: issueI91RLM
+ */
+HWTEST_F(InsightIntentExecuteParamTest, ReadFromParcel_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    Parcel parcel;
+    auto param = std::make_shared<InsightIntentExecuteParam>();
+    auto ret = param->ReadFromParcel(parcel);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: Unmarshalling_0100
+ * @tc.desc: basic function test of get caller info.
+ * @tc.type: FUNC
+ * @tc.require: issueI91RLM
+ */
+HWTEST_F(InsightIntentExecuteParamTest, Unmarshalling_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    Parcel parcel;
+    auto ret = InsightIntentExecuteParam::Unmarshalling(parcel);
+    EXPECT_EQ(ret, nullptr);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: Marshalling_0100
+ * @tc.desc: basic function test of get caller info.
+ * @tc.type: FUNC
+ * @tc.require: issueI91RLM
+ */
+HWTEST_F(InsightIntentExecuteParamTest, Marshalling_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    Parcel parcel;
+    auto param = std::make_shared<InsightIntentExecuteParam>();
+    auto ret = param->Marshalling(parcel);
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: IsInsightIntentExecute_0100
+ * @tc.desc: basic function test of get caller info.
+ * @tc.type: FUNC
+ * @tc.require: issueI91RLM
+ */
+HWTEST_F(InsightIntentExecuteParamTest, IsInsightIntentExecute_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    Want want;
+    auto ret = InsightIntentExecuteParam::IsInsightIntentExecute(want);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: IsInsightIntentExecute_0200
+ * @tc.desc: basic function test of get caller info.
+ * @tc.type: FUNC
+ * @tc.require: issueI91RLM
+ */
+HWTEST_F(InsightIntentExecuteParamTest, IsInsightIntentExecute_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    Want want;
+    WantParams wantParams;
+    wantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, AAFwk::String::Box(TEST_INSIGHT_INTENT_NANE));
+    wantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_ID, AAFwk::String::Box("1"));
+    wantParams.SetParam(Want::PARAM_RESV_CALLER_TOKEN, Integer::Box(1000));
+    wantParams.SetParam(Want::PARAM_RESV_CALLER_UID, Integer::Box(1001));
+    wantParams.SetParam(Want::PARAM_RESV_CALLER_PID, Integer::Box(1002));
+    wantParams.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, AAFwk::String::Box(TEST_CALLER_BUNDLE_NANE));
+    WantParams insightIntentParam;
+    insightIntentParam.SetParam("dummy", Integer::Box(-1));
+    wantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_PARAM, WantParamWrapper::Box(insightIntentParam));
+    want.SetElementName("", TEST_BUNDLE_NANE, TEST_ABILITY_NANE, TEST_MODULE_NANE);
+    want.SetParams(wantParams);
+    auto ret = InsightIntentExecuteParam::IsInsightIntentExecute(want);
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: IsInsightIntentPage_0100
+ * @tc.desc: basic function test of get caller info.
+ * @tc.type: FUNC
+ * @tc.require: issueI91RLM
+ */
+HWTEST_F(InsightIntentExecuteParamTest, IsInsightIntentPage_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    Want want;
+    auto ret = InsightIntentExecuteParam::IsInsightIntentPage(want);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: IsInsightIntentPage_0200
+ * @tc.desc: basic function test of get caller info.
+ * @tc.type: FUNC
+ * @tc.require: issueI91RLM
+ */
+HWTEST_F(InsightIntentExecuteParamTest, IsInsightIntentPage_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    Want want;
+    WantParams wantParams;
+    wantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, AAFwk::String::Box(TEST_INSIGHT_INTENT_NANE));
+    wantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_ID, AAFwk::String::Box("1"));
+    wantParams.SetParam(Want::PARAM_RESV_CALLER_TOKEN, Integer::Box(1000));
+    wantParams.SetParam(Want::PARAM_RESV_CALLER_UID, Integer::Box(1001));
+    wantParams.SetParam(Want::PARAM_RESV_CALLER_PID, Integer::Box(1002));
+    wantParams.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, AAFwk::String::Box(TEST_CALLER_BUNDLE_NANE));
+    WantParams insightIntentParam;
+    insightIntentParam.SetParam("dummy", Integer::Box(-1));
+    wantParams.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_PARAM, WantParamWrapper::Box(insightIntentParam));
+    want.SetElementName("", TEST_BUNDLE_NANE, TEST_ABILITY_NANE, TEST_MODULE_NANE);
+    want.SetParams(wantParams);
+    auto ret = InsightIntentExecuteParam::IsInsightIntentPage(want);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
  * @tc.name: GenerateFromWant_0100
  * @tc.desc: basic function test of get caller info.
  * @tc.type: FUNC
