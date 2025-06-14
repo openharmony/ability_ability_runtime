@@ -63,6 +63,23 @@ void KeepAliveProcessManagerTest::TearDown()
 
 /*
  * Feature: KeepAliveProcessManager
+ * Function: GetInstance
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager GetInstance
+ * EnvConditions: NA
+ * CaseDescription: Verify GetInstance
+ */
+HWTEST_F(KeepAliveProcessManagerTest, GetInstance_0100, TestSize.Level1)
+{
+    KeepAliveProcessManager& instance1 = KeepAliveProcessManager::GetInstance();
+    KeepAliveProcessManager& instance2 = KeepAliveProcessManager::GetInstance();
+    
+    // Verify we're getting the same instance
+    EXPECT_EQ(&instance1, &instance2);
+}
+
+/*
+ * Feature: KeepAliveProcessManager
  * Function: SetApplicationKeepAlive
  * SubFunction: NA
  * FunctionPoints:KeepAliveProcessManager SetApplicationKeepAlive
