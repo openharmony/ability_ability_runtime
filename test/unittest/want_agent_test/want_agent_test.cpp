@@ -76,7 +76,8 @@ void WantAgentTest::TearDown(void)
  */
 HWTEST_F(WantAgentTest, WantAgent_0100, Function | MediumTest | Level1)
 {
-    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(nullptr);
+    std::shared_ptr<PendingWant> pendingWant = nullptr;
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(pendingWant);
     EXPECT_EQ(wantAgent->GetPendingWant(), nullptr);
 }
 
@@ -114,7 +115,8 @@ HWTEST_F(WantAgentTest, WantAgent_0300, Function | MediumTest | Level1)
  */
 HWTEST_F(WantAgentTest, WantAgent_0400, Function | MediumTest | Level1)
 {
-    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(nullptr);
+    std::shared_ptr<PendingWant> pendingWant = nullptr;
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(pendingWant);
     Parcel parcel;
     bool ret = wantAgent->Marshalling(parcel);
     EXPECT_EQ(ret, true);
@@ -127,7 +129,8 @@ HWTEST_F(WantAgentTest, WantAgent_0400, Function | MediumTest | Level1)
  */
 HWTEST_F(WantAgentTest, WantAgent_0500, Function | MediumTest | Level1)
 {
-    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(nullptr);
+    std::shared_ptr<PendingWant> pendingWant = nullptr;
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(pendingWant);
     Parcel parcel;
     bool ret = wantAgent->Unmarshalling(parcel);
     EXPECT_EQ(ret, true);
@@ -156,6 +159,21 @@ HWTEST_F(WantAgentTest, WantAgent_0700, Function | MediumTest | Level1)
     wantAgent->isMultithreadingSupported_ = true;
     bool test = wantAgent->GetIsMultithreadingSupported();
     EXPECT_EQ(test, true);
+}
+
+/*
+ * @tc.number    : WantAgent_0800
+ * @tc.name      : LocalWantAgent Constructor
+ * @tc.desc      : LocalWantAgent Constructor
+ */
+HWTEST_F(WantAgentTest, WantAgent_0800, Function | MediumTest | Level1)
+{
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    std::shared_ptr<LocalPendingWant> localPendingWant = std::make_shared<LocalPendingWant>(
+        "TestBundleName", want, 0);
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(localPendingWant);
+    ASSERT_EQ(wantAgent->IsLocal(), 1);
+    ASSERT_EQ(wantAgent->GetLocalPendingWant()->GetBundleName(), "TestBundleName");
 }
 
 /*
@@ -287,4 +305,6 @@ HWTEST_F(WantAgentTest, ProcessOptionsTest_1000, TestSize.Level1)
     ProcessMode value = ProcessMode::NEW_HIDDEN_PROCESS;
     EXPECT_EQ(ProcessOptions::IsNewHiddenProcessMode(value), true);
 }
+
+
 }  // namespace OHOS::AbilityRuntime::WantAgent
