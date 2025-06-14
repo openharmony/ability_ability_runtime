@@ -16,12 +16,10 @@
 #include "keep_alive_utils.h"
 #include <gtest/gtest.h>
 
-#include "ability_manager_service.h"
-#include "ability_info.h"
+#include "ability_resident_process_rdb.h"
 #include "bundle_info.h"
-#include "hap_module_info.h"
+#include "keep_alive_process_manager.h"
 #include "main_element_utils.h"
-#include "mock_parameters.h"
 
 #include <vector>
 #include <memory>
@@ -30,7 +28,13 @@ using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::AppExecFwk;
 namespace OHOS {
+namespace AbilityRuntime {
+bool AmsResidentProcessRdb::residentProcessEnable = false;
+}
 namespace AAFwk {
+bool MainElementUtils::retCheckMainElement = false;
+bool MainElementUtils::isUpdateMainElementCalled = false;
+bool KeepAliveProcessManager::isKeepAliveBundle = false;
 
 namespace {
     const std::string PROCESS_NAME = "com.ohos.example.process";
@@ -61,10 +65,12 @@ KeepAliveUtilsTest::~KeepAliveUtilsTest()
 
 void KeepAliveUtilsTest::SetUpTestCase()
 {
+    MainElementUtils::isUpdateMainElementCalled = false;
 }
 
 void KeepAliveUtilsTest::TearDownTestCase()
 {
+    MainElementUtils::isUpdateMainElementCalled = false;
 }
 
 void KeepAliveUtilsTest::SetUp()
@@ -92,15 +98,15 @@ HWTEST_F(KeepAliveUtilsTest, NotifyDisableKeepAliveProcesses_0100, TestSize.Leve
 
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     bundleInfos.push_back(bundleInfo);
+    MainElementUtils::retCheckMainElement = false;
     int32_t userId = 0;
     std::string mainElement;
     std::string uriStr;
     bool isDataAbility = false;
-    std::shared_ptr<AAFwk::KeepAliveUtils> keepAliveUtils =
-        std::make_shared<AAFwk::KeepAliveUtils>();
-    keepAliveUtils->NotifyDisableKeepAliveProcesses(bundleInfos, userId);
+    KeepAliveUtils::NotifyDisableKeepAliveProcesses(bundleInfos, userId);
     EXPECT_FALSE(MainElementUtils::CheckMainElement(hapModuleInfo, bundleInfo.applicationInfo.process,
         mainElement, isDataAbility, uriStr, userId));
+    EXPECT_FALSE(MainElementUtils::isUpdateMainElementCalled);
 
     GTEST_LOG_(INFO) << "NotifyDisableKeepAliveProcesses_0100 end";
 }
@@ -133,6 +139,7 @@ HWTEST_F(KeepAliveUtilsTest, NotifyDisableKeepAliveProcesses_0200, TestSize.Leve
     hapModuleInfo.abilityInfos.push_back(abilityInfo);
     bundleInfo.hapModuleInfos.push_back(hapModuleInfo);
 
+    MainElementUtils::retCheckMainElement = true;
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     bundleInfos.push_back(bundleInfo);
     int32_t userId = 0;
@@ -140,11 +147,10 @@ HWTEST_F(KeepAliveUtilsTest, NotifyDisableKeepAliveProcesses_0200, TestSize.Leve
     std::string uriStr;
     bool isDataAbility = false;
 
-    std::shared_ptr<AAFwk::KeepAliveUtils> keepAliveUtils =
-        std::make_shared<AAFwk::KeepAliveUtils>();
-    keepAliveUtils->NotifyDisableKeepAliveProcesses(bundleInfos, userId);
+    KeepAliveUtils::NotifyDisableKeepAliveProcesses(bundleInfos, userId);
     EXPECT_TRUE(MainElementUtils::CheckMainElement(hapModuleInfo, bundleInfo.applicationInfo.process,
         mainElement, isDataAbility, uriStr, userId));
+    EXPECT_TRUE(MainElementUtils::isUpdateMainElementCalled);
 
     GTEST_LOG_(INFO) << "NotifyDisableKeepAliveProcesses_0200 end";
 }
@@ -158,17 +164,16 @@ HWTEST_F(KeepAliveUtilsTest, IsKeepAliveBundle_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "IsKeepAliveBundle_0100 start";
 
+    KeepAliveProcessManager::isKeepAliveBundle = true;
     AppExecFwk::BundleInfo bundleInfo;
     bundleInfo.name = BUNDLE_NAME;
     bundleInfo.isKeepAlive = false;
     int32_t userId = 0;
     AAFwk::KeepAliveType type = AAFwk::KeepAliveType::UNSPECIFIED;
 
-    std::shared_ptr<AAFwk::KeepAliveUtils> keepAliveUtils =
-        std::make_shared<AAFwk::KeepAliveUtils>();
-    auto test = keepAliveUtils->IsKeepAliveBundle(bundleInfo, userId, type);
-    EXPECT_EQ(test, false);
-    EXPECT_EQ(system::GetBoolParameter("const.product.enterprisefeature.setting.enabled", false), false);
+    auto result = KeepAliveUtils::IsKeepAliveBundle(bundleInfo, userId, type);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(type, KeepAliveType::THIRD_PARTY);
 
     GTEST_LOG_(INFO) << "IsKeepAliveBundle_0100 end";
 }
@@ -182,14 +187,14 @@ HWTEST_F(KeepAliveUtilsTest, IsKeepAliveBundle_0200, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "IsKeepAliveBundle_0200 start";
 
+    KeepAliveProcessManager::isKeepAliveBundle = false;
+    AbilityRuntime::AmsResidentProcessRdb::residentProcessEnable = true;
     AppExecFwk::BundleInfo bundleInfo;
     bundleInfo.isKeepAlive = true;
     int32_t userId = 0;
     AAFwk::KeepAliveType type = AAFwk::KeepAliveType::UNSPECIFIED;
-    std::shared_ptr<AAFwk::KeepAliveUtils> keepAliveUtils =
-        std::make_shared<AAFwk::KeepAliveUtils>();
-    auto test = keepAliveUtils->IsKeepAliveBundle(bundleInfo, userId, type);
-    EXPECT_EQ(test, true);
+    auto result = KeepAliveUtils::IsKeepAliveBundle(bundleInfo, userId, type);
+    EXPECT_EQ(result, true);
     EXPECT_EQ(type, AAFwk::KeepAliveType::RESIDENT_PROCESS);
 
     GTEST_LOG_(INFO) << "IsKeepAliveBundle_0200 end";
