@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,6 +66,11 @@ constexpr const char *EVENT_KEY_LIFE_CYCLE = "LIFE_CYCLE";
 constexpr const char *EVENT_KEY_PERSISTENT_ID = "PERSISTENT_ID";
 constexpr const char *EVENT_KEY_INTENT_NAME = "INTENT_NAME";
 constexpr const char *EVENT_KEY_ERROR_MESSAGE = "ERROR_MESSAGE";
+constexpr const char *EVENT_FILE_OR_FOLDER_PATH = "FILE_OR_FOLDER_PATH";
+constexpr const char *EVENT_FILE_OR_FOLDER_SIZE = "FILE_OR_FOLDER_SIZE";
+constexpr const char *EVENT_COMPONENT_NAME_KEY = "COMPONENT_NAME";
+constexpr const char *EVENT_PARTITION_NAME_KEY = "PARTITION_NAME";
+constexpr const char *EVENT_REMAIN_PARTITION_SIZE_KEY = "REMAIN_PARTITION_SIZE";
 
 constexpr const int32_t DEFAULT_EXTENSION_TYPE = -1;
 }
@@ -803,6 +808,30 @@ void EventReport::SendLaunchFrameworkEvent(const EventName &eventName, HiSysEven
         EVENT_KEY_ERR_REASON, eventInfo.errReason);
 }
 
+void EventReport::SendReportDataPartitionUsageEvent(const EventName &eventName, HiSysEventType type,
+    const EventInfo &eventInfo)
+{
+    std::string name = ConvertEventName(eventName);
+    if (name == INVALID_EVENT_NAME) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");
+        return;
+    }
+
+    HiSysEventWrite(
+#ifdef USE_EXTENSION_DATA
+        OHOS::HiviewDFX::HiSysEvent::Domain::FILEMANAGEMENT,
+#else
+        OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK,
+#endif
+        name,
+        type,
+        EVENT_COMPONENT_NAME_KEY, eventInfo.componentName,
+        EVENT_PARTITION_NAME_KEY, eventInfo.partitionName,
+        EVENT_REMAIN_PARTITION_SIZE_KEY, eventInfo.remainPartitionSize,
+        EVENT_FILE_OR_FOLDER_PATH, eventInfo.fileOfFolderPath,
+        EVENT_FILE_OR_FOLDER_SIZE, eventInfo.fileOfFolderSize);
+}
+
 std::string EventReport::ConvertEventName(const EventName &eventName)
 {
     const char* eventNames[] = {
@@ -833,7 +862,10 @@ std::string EventReport::ConvertEventName(const EventName &eventName)
         "CREATE_ATOMIC_SERVICE_PROCESS", "ATOMIC_SERVICE_DRAWN_COMPLETE",
         
         // uri permission
-        "SHARE_UNPRIVILEGED_FILE_URI"
+        "SHARE_UNPRIVILEGED_FILE_URI",
+
+        // report data
+        "USER_DATA_SIZE"
     };
     uint32_t eventIndex = static_cast<uint32_t> (eventName);
     if (eventIndex >= sizeof(eventNames) / sizeof(const char*)) {

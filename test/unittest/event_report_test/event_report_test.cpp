@@ -97,6 +97,7 @@ HWTEST_F(EventReportTest, ConvertEventName_0100, TestSize.Level2)
         "ATOMIC_SERVICE_DRAWN_COMPLETE");
     EXPECT_EQ(EventReport::ConvertEventName(EventName::SHARE_UNPRIVILEGED_FILE_URI),
         "SHARE_UNPRIVILEGED_FILE_URI");
+    EXPECT_EQ(EventReport::ConvertEventName(EventName::USER_DATA_SIZE), "USER_DATA_SIZE");
 }
 
 /**
@@ -731,6 +732,22 @@ HWTEST_F(EventReportTest, SendAtomicServiceEvent_0100, TestSize.Level2)
     eventName = EventName::ATOMIC_SERVICE_DRAWN_COMPLETE;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "ATOMIC_SERVICE_DRAWN_COMPLETE");
     EventReport::SendAtomicServiceEvent(eventName, type, eventInfo);
+}
+
+/**
+ * @tc.name: SendReportDataPartitionUsageEvent_0100
+ * @tc.desc: Check SendReportDataPartitionUsageEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventReportTest, SendReportDataPartitionUsageEvent_0100, TestSize.Level1)
+{
+    EventName eventName = static_cast<EventName>(-1);
+    EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
+    EventInfo eventInfo;
+    EventReport::SendReportDataPartitionUsageEvent(eventName, HiSysEventType::STATISTIC, eventInfo);
+    eventName = EventName::USER_DATA_SIZE;
+    EXPECT_EQ(EventReport::ConvertEventName(eventName), "USER_DATA_SIZE");
+    EventReport::SendReportDataPartitionUsageEvent(eventName, HiSysEventType::STATISTIC, eventInfo);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
