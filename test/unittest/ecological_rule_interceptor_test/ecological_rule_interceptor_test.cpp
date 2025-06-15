@@ -1339,5 +1339,159 @@ HWTEST_F(EcologicalRuleInterceptorTest, DoProcess_018, TestSize.Level1)
     bool result = interceptor->DoProcess(want, userId);
     EXPECT_TRUE(result);
 }
+
+/**
+ * @tc.name: GetEcologicalTargetInfo_004
+ * @tc.desc: Tests GetEcologicalTargetInfo
+ * @tc.type: FUNC
+ * @tc.require: No
+ */
+HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_004, TestSize.Level1)
+{
+    std::shared_ptr<EcologicalRuleInterceptor> interceptor = std::make_shared<EcologicalRuleInterceptor>();
+    ASSERT_NE(interceptor, nullptr);
+    StartAbilityUtils::callerAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityUtils::callerAbilityInfo->abilityInfo.applicationInfo.bundleType =
+        AppExecFwk::BundleType::ATOMIC_SERVICE;
+    Want want;
+    ErmsCallerInfo callerInfo;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int userId = 100;
+    interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
+    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_ATOM_SERVICE);
+}
+
+/**
+ * @tc.name: GetEcologicalTargetInfo_005
+ * @tc.desc: Tests GetEcologicalTargetInfo
+ * @tc.type: FUNC
+ * @tc.require: No
+ */
+HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_005, TestSize.Level1)
+{
+    std::shared_ptr<EcologicalRuleInterceptor> interceptor = std::make_shared<EcologicalRuleInterceptor>();
+    ASSERT_NE(interceptor, nullptr);
+    StartAbilityUtils::callerAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityUtils::callerAbilityInfo->abilityInfo.applicationInfo.bundleType = AppExecFwk::BundleType::APP;
+    Want want;
+    ErmsCallerInfo callerInfo;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int userId = 100;
+    interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
+    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_HARMONY_APP);
+}
+
+/**
+ * @tc.name: GetEcologicalTargetInfo_006
+ * @tc.desc: Tests GetEcologicalTargetInfo
+ * @tc.type: FUNC
+ * @tc.require: No
+ */
+HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_006, TestSize.Level1)
+{
+    std::shared_ptr<EcologicalRuleInterceptor> interceptor = std::make_shared<EcologicalRuleInterceptor>();
+    ASSERT_NE(interceptor, nullptr);
+    StartAbilityUtils::callerAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityUtils::callerAbilityInfo->abilityInfo.applicationInfo.bundleType =
+        AppExecFwk::BundleType::APP_SERVICE_FWK;
+    Want want;
+    ErmsCallerInfo callerInfo;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int userId = 100;
+    interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
+    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_APP_SERVICE);
+}
+
+/**
+ * @tc.name: GetEcologicalTargetInfo_007
+ * @tc.desc: Tests GetEcologicalTargetInfo
+ * @tc.type: FUNC
+ * @tc.require: No
+ */
+HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_007, TestSize.Level1)
+{
+    std::shared_ptr<EcologicalRuleInterceptor> interceptor = std::make_shared<EcologicalRuleInterceptor>();
+    ASSERT_NE(interceptor, nullptr);
+    StartAbilityUtils::callerAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityUtils::callerAbilityInfo->abilityInfo.applicationInfo.bundleType = AppExecFwk::BundleType::APP;
+    StartAbilityUtils::callerAbilityInfo->abilityInfo.applicationInfo.name = "test";
+    Want want;
+    ErmsCallerInfo callerInfo;
+    callerInfo.packageName = "";
+    sptr<IRemoteObject> callerToken = nullptr;
+    int userId = 100;
+    interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
+    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_HARMONY_APP);
+    EXPECT_NE(callerInfo.packageName, BUNDLE_NAME_SCENEBOARD);
+}
+
+/**
+ * @tc.name: GetEcologicalTargetInfo_008
+ * @tc.desc: Tests GetEcologicalTargetInfo
+ * @tc.type: FUNC
+ * @tc.require: No
+ */
+HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_008, TestSize.Level1)
+{
+    std::shared_ptr<EcologicalRuleInterceptor> interceptor = std::make_shared<EcologicalRuleInterceptor>();
+    ASSERT_NE(interceptor, nullptr);
+    StartAbilityUtils::callerAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityUtils::callerAbilityInfo->abilityInfo.applicationInfo.bundleType = AppExecFwk::BundleType::APP;
+    StartAbilityUtils::callerAbilityInfo->abilityInfo.applicationInfo.name = BUNDLE_NAME_SCENEBOARD;
+    Want want;
+    ErmsCallerInfo callerInfo;
+    callerInfo.packageName = "";
+    sptr<IRemoteObject> callerToken = nullptr;
+    int userId = 100;
+    interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
+    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_HARMONY_APP);
+    EXPECT_EQ(callerInfo.packageName, BUNDLE_NAME_SCENEBOARD);
+}
+
+/**
+ * @tc.name: GetEcologicalTargetInfo_009
+ * @tc.desc: Tests GetEcologicalTargetInfo
+ * @tc.type: FUNC
+ * @tc.require: No
+ */
+HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_009, TestSize.Level1)
+{
+    std::shared_ptr<EcologicalRuleInterceptor> interceptor = std::make_shared<EcologicalRuleInterceptor>();
+    ASSERT_NE(interceptor, nullptr);
+    StartAbilityUtils::callerAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityUtils::callerAbilityInfo->abilityInfo.applicationInfo.bundleType = AppExecFwk::BundleType::APP;
+    StartAbilityUtils::callerAbilityInfo->abilityInfo.applicationInfo.name = BUNDLE_NAME_SCENEBOARD;
+    Want want;
+    ErmsCallerInfo callerInfo;
+    callerInfo.packageName = "test";
+    sptr<IRemoteObject> callerToken = nullptr;
+    int userId = 100;
+    interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
+    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_HARMONY_APP);
+    EXPECT_NE(callerInfo.packageName, BUNDLE_NAME_SCENEBOARD);
+}
+
+/**
+ * @tc.name: GetEcologicalTargetInfo_010
+ * @tc.desc: Tests GetEcologicalTargetInfo
+ * @tc.type: FUNC
+ * @tc.require: No
+ */
+HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_010, TestSize.Level1)
+{
+    std::shared_ptr<EcologicalRuleInterceptor> interceptor = std::make_shared<EcologicalRuleInterceptor>();
+    ASSERT_NE(interceptor, nullptr);
+    StartAbilityUtils::callerAbilityInfo = std::make_shared<StartAbilityInfo>();
+    StartAbilityUtils::callerAbilityInfo->abilityInfo.applicationInfo.bundleType = AppExecFwk::BundleType::APP;
+    StartAbilityUtils::callerAbilityInfo->abilityInfo.applicationInfo.name = "test";
+    Want want;
+    ErmsCallerInfo callerInfo;
+    callerInfo.packageName = "test";
+    sptr<IRemoteObject> callerToken = nullptr;
+    int userId = 100;
+    interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
+    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_HARMONY_APP);
+    EXPECT_NE(callerInfo.packageName, BUNDLE_NAME_SCENEBOARD);
+}
 } // namespace AAFwk
 } // namespace OHOS
