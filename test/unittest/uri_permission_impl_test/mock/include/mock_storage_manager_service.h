@@ -129,6 +129,13 @@ public:
         return E_OK;
     }
 
+    virtual int32_t NotifyVolumeDamaged(const std::string &volumeId,
+        const std::string &fsTypeStr, const std::string &fsUuid,
+        const std::string &path, const std::string &description) override
+    {
+        return E_OK;
+    }
+
     virtual int32_t NotifyVolumeStateChanged(const std::string &volumeId, uint32_t state) override
     {
         return E_OK;
@@ -140,6 +147,11 @@ public:
     }
 
     virtual int32_t Unmount(const std::string &volumeId) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t TryToFix(const std::string &volumeId) override
     {
         return E_OK;
     }
