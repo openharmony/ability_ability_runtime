@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_UI_ABILITY_H
 #define OHOS_ABILITY_RUNTIME_ETS_UI_ABILITY_H
 
+#include "ability_delegator_infos.h"
 #include "ets_runtime.h"
 #include "ui_ability.h"
 
@@ -151,6 +152,7 @@ private:
 private:
     bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...);
     ani_object CreateAppWindowStage();
+    std::shared_ptr<AppExecFwk::ETSDelegatorAbilityProperty> CreateADelegatorAbilityProperty();
     void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<Want> want,
         const std::string &moduleName, const std::string &srcPath, const std::shared_ptr<OHOSApplication> &application);
     void DoOnForegroundForSceneIsNull(const Want &want);
