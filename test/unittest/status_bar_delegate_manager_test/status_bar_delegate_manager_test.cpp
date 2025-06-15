@@ -159,6 +159,40 @@ HWTEST_F(StatusBarDelegateManagerTest, IsCallerInStatusBar_0300, TestSize.Level1
 }
 
 /**
+ * @tc.name: StatusBarDelegateManager_IsCallerInStatusBar_0400
+ * @tc.desc: Test IsCallerInStatusBar when CheckIfStatusBarItemExists returns error
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, IsCallerInStatusBar_0400, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    sptr<MockIStatusBarDelegate> mockDelegate = new MockIStatusBarDelegate();
+    mockDelegate->SetReturnValue(ERR_OK);
+    mockDelegate->SetItemExists(false);
+    statusBarDelegate->RegisterStatusBarDelegate(mockDelegate);
+    bool result = statusBarDelegate->IsCallerInStatusBar("test_instance_key");
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: StatusBarDelegateManager_IsCallerInStatusBar_0500
+ * @tc.desc: Test IsCallerInStatusBar when CheckIfStatusBarItemExists returns error
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, IsCallerInStatusBar_0500, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    sptr<MockIStatusBarDelegate> mockDelegate = new MockIStatusBarDelegate();
+    mockDelegate->SetReturnValue(ERR_INVALID_VALUE);
+    mockDelegate->SetItemExists(true);
+    statusBarDelegate->RegisterStatusBarDelegate(mockDelegate);
+    bool result = statusBarDelegate->IsCallerInStatusBar("test_instance_key");
+    EXPECT_EQ(result, false);
+}
+
+/**
  * @tc.name: StatusBarDelegateManager_DoProcessAttachment_0100
  * @tc.desc: DoProcessAttachment
  * @tc.type: FUNC
@@ -174,6 +208,65 @@ HWTEST_F(StatusBarDelegateManagerTest, DoProcessAttachment_0100, TestSize.Level1
     std::shared_ptr<AbilityRecord> abilityRecord;
     int32_t attach_ret = statusBarDelegate->DoProcessAttachment(abilityRecord);
     EXPECT_NE(attach_ret, ERR_OK);
+}
+
+/**
+ * @tc.name: StatusBarDelegateManager_DoProcessAttachment_0200
+ * @tc.desc: DoProcessAttachment
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, DoProcessAttachment_0200, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    std::shared_ptr<AbilityRecord> abilityRecord = CreateMockAbilityRecord();
+    sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
+    EXPECT_NE(sessionInfo, nullptr);
+    abilityRecord->SetSessionInfo(sessionInfo);
+    int32_t attach_ret = statusBarDelegate->DoProcessAttachment(abilityRecord);
+    EXPECT_EQ(attach_ret, ERR_OK);
+}
+
+/**
+ * @tc.name: StatusBarDelegateManager_DoProcessAttachment_0300
+ * @tc.desc: DoProcessAttachment
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, DoProcessAttachment_0300, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    std::shared_ptr<AbilityRecord> abilityRecord = CreateMockAbilityRecord();
+    sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
+    EXPECT_NE(sessionInfo, nullptr);
+    std::shared_ptr<ProcessOptions> processOptions = std::make_shared<ProcessOptions>();
+    EXPECT_NE(processOptions, nullptr);
+    processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT;
+    sessionInfo->processOptions = processOptions;
+    abilityRecord->SetSessionInfo(sessionInfo);
+    int32_t attach_ret = statusBarDelegate->DoProcessAttachment(abilityRecord);
+    EXPECT_EQ(attach_ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: StatusBarDelegateManager_DoProcessAttachment_0400
+ * @tc.desc: DoProcessAttachment
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, DoProcessAttachment_0400, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    std::shared_ptr<AbilityRecord> abilityRecord = CreateMockAbilityRecord();
+    sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
+    EXPECT_NE(sessionInfo, nullptr);
+    std::shared_ptr<ProcessOptions> processOptions = std::make_shared<ProcessOptions>();
+    EXPECT_NE(processOptions, nullptr);
+    processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM;
+    sessionInfo->processOptions = processOptions;
+    abilityRecord->SetSessionInfo(sessionInfo);
+    int32_t attach_ret = statusBarDelegate->DoProcessAttachment(abilityRecord);
+    EXPECT_EQ(attach_ret, ERR_INVALID_VALUE);
 }
 
 /**
@@ -242,6 +335,40 @@ HWTEST_F(StatusBarDelegateManagerTest, IsInStatusBar_0300, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StatusBarDelegateManager_IsInStatusBar_0400
+ * @tc.desc: Test IsInStatusBar when CheckIfStatusBarItemExists returns error
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, IsInStatusBar_0400, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    sptr<MockIStatusBarDelegate> mockDelegate = new MockIStatusBarDelegate();
+    mockDelegate->SetReturnValue(ERR_OK);
+    mockDelegate->SetItemExists(false);
+    statusBarDelegate->RegisterStatusBarDelegate(mockDelegate);
+    bool ret = statusBarDelegate->IsInStatusBar(1000, false);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: StatusBarDelegateManager_IsInStatusBar_0500
+ * @tc.desc: Test IsInStatusBar when CheckIfStatusBarItemExists returns error
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, IsInStatusBar_0500, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    sptr<MockIStatusBarDelegate> mockDelegate = new MockIStatusBarDelegate();
+    mockDelegate->SetReturnValue(ERR_INVALID_DATA);
+    mockDelegate->SetItemExists(false);
+    statusBarDelegate->RegisterStatusBarDelegate(mockDelegate);
+    bool ret = statusBarDelegate->IsInStatusBar(1000, false);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: StatusBarDelegateManager_DoCallerProcessAttachment_0200
  * @tc.desc: Test DoCallerProcessAttachment when abilityRecord is null
  * @tc.type: FUNC
@@ -287,6 +414,48 @@ HWTEST_F(StatusBarDelegateManagerTest, DoCallerProcessAttachment_0400, TestSize.
     statusBarDelegate->RegisterStatusBarDelegate(mockDelegate);
     std::shared_ptr<AbilityRecord> abilityRecord = CreateMockAbilityRecord();
     EXPECT_NE(abilityRecord, nullptr);
+    int32_t ret = statusBarDelegate->DoCallerProcessAttachment(abilityRecord);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: StatusBarDelegateManager_DoCallerProcessAttachment_0500
+ * @tc.desc: Test DoCallerProcessAttachment when AttachPidToStatusBarItem returns error
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, DoCallerProcessAttachment_0500, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    sptr<MockIStatusBarDelegate> mockDelegate = new MockIStatusBarDelegate();
+    mockDelegate->SetReturnValue(ERR_OK);
+    statusBarDelegate->RegisterStatusBarDelegate(mockDelegate);
+    std::shared_ptr<AbilityRecord> abilityRecord = CreateMockAbilityRecord();
+    EXPECT_NE(abilityRecord, nullptr);
+    uint32_t accessTokenId = 12;
+    abilityRecord->SetPid(10);
+    abilityRecord->SetInstanceKey("123");
+    int32_t ret = statusBarDelegate->DoCallerProcessAttachment(abilityRecord);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: StatusBarDelegateManager_DoCallerProcessAttachment_0600
+ * @tc.desc: Test DoCallerProcessAttachment when AttachPidToStatusBarItem returns error
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, DoCallerProcessAttachment_0600, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    sptr<MockIStatusBarDelegate> mockDelegate = new MockIStatusBarDelegate();
+    mockDelegate->SetReturnValue(ERR_INVALID_VALUE);
+    statusBarDelegate->RegisterStatusBarDelegate(mockDelegate);
+    std::shared_ptr<AbilityRecord> abilityRecord = CreateMockAbilityRecord();
+    EXPECT_NE(abilityRecord, nullptr);
+    uint32_t accessTokenId = 12;
+    abilityRecord->SetPid(10);
+    abilityRecord->SetInstanceKey("123");
     int32_t ret = statusBarDelegate->DoCallerProcessAttachment(abilityRecord);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
@@ -385,6 +554,77 @@ HWTEST_F(StatusBarDelegateManagerTest, IsSupportStatusBar_0200, TestSize.Level1)
     statusBarDelegate->RegisterStatusBarDelegate(mockDelegate);
     auto ret = statusBarDelegate->IsSupportStatusBar();
     EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: StatusBarDelegateManager_IsSupportStatusBar_0300
+ * @tc.desc: Test IsSupportStatusBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, IsSupportStatusBar_0300, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    sptr<MockIStatusBarDelegate> mockDelegate = new MockIStatusBarDelegate();
+    mockDelegate->SetReturnValue(ERR_OK);
+    statusBarDelegate->RegisterStatusBarDelegate(mockDelegate);
+    bool ret = statusBarDelegate->IsSupportStatusBar();
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: StatusBarDelegateManager_IsSupportStatusBar_0400
+ * @tc.desc: Test IsSupportStatusBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, IsSupportStatusBar_0500, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    bool ret = statusBarDelegate->IsSupportStatusBar();
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: StatusBarDelegateManager_DoCallerProcessDetachment_0500
+ * @tc.desc: Test DoCallerProcessDetachment when DetachPidToStatusBarItem returns error
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, DoCallerProcessDetachment_0500, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    sptr<MockIStatusBarDelegate> mockDelegate = new MockIStatusBarDelegate();
+    mockDelegate->SetReturnValue(ERR_OK);
+    statusBarDelegate->RegisterStatusBarDelegate(mockDelegate);
+    std::shared_ptr<AbilityRecord> abilityRecord = CreateMockAbilityRecord();
+    EXPECT_NE(abilityRecord, nullptr);
+    uint32_t accessTokenId = 12;
+    abilityRecord->SetPid(10);
+    abilityRecord->SetInstanceKey("123");
+    int32_t ret = statusBarDelegate->DoCallerProcessDetachment(abilityRecord);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: StatusBarDelegateManager_DoCallerProcessDetachment_0600
+ * @tc.desc: Test DoCallerProcessDetachment when DetachPidToStatusBarItem returns error
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatusBarDelegateManagerTest, DoCallerProcessDetachment_0600, TestSize.Level1)
+{
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegate = std::make_shared<StatusBarDelegateManager>();
+    EXPECT_NE(statusBarDelegate, nullptr);
+    sptr<MockIStatusBarDelegate> mockDelegate = new MockIStatusBarDelegate();
+    mockDelegate->SetReturnValue(ERR_INVALID_VALUE);
+    statusBarDelegate->RegisterStatusBarDelegate(mockDelegate);
+    std::shared_ptr<AbilityRecord> abilityRecord = CreateMockAbilityRecord();
+    EXPECT_NE(abilityRecord, nullptr);
+    uint32_t accessTokenId = 12;
+    abilityRecord->SetPid(10);
+    abilityRecord->SetInstanceKey("123");
+    int32_t ret = statusBarDelegate->DoCallerProcessDetachment(abilityRecord);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
