@@ -315,7 +315,7 @@ public:
     virtual int32_t CreateShareFile(const StorageFileRawData &rawData,
         uint32_t tokenId, uint32_t flag, std::vector<int32_t> &funcResult) override
     {
-        int32_t size = rawData.size();
+        int32_t size = static_cast<int32_t>(rawData.size);
         if (size <= 0) {
             return -1;
         }
