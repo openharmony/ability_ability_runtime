@@ -75,6 +75,7 @@ std::shared_ptr<AbilityStage> ETSAbilityStage::Create(
     }
     std::unique_ptr<ETSNativeReference> moduleObj;
     if (!hapModuleInfo.srcEntrance.empty()) {
+        TAG_LOGD(AAFwkTag::APPKIT, "entry path: %{public}s", hapModuleInfo.srcEntrance.c_str());
         moduleObj = etsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
             hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag,
             hapModuleInfo.srcEntrance);
@@ -159,6 +160,7 @@ void ETSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& co
 bool ETSAbilityStage::CallObjectMethod(bool withResult, const char *name, const char *signature, ...) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
+    TAG_LOGD(AAFwkTag::ABILITY, "CallObjectMethod: name:%{public}s", name);
     if (etsAbilityStageObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "etsAbilityStageObj_ nullptr");
         return false;
