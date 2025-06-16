@@ -26,7 +26,7 @@ std::shared_ptr<AbilityManagerClient> AbilityManagerClient::GetInstance()
     if (instance_) {
         return instance_;
     }
-    instance_ = std::shared_ptr<AbilityManagerClient>(new AbilityManagerClient());
+    instance_ = std::shared_ptr<AbilityManagerClient>();
     return instance_;
 }
 
