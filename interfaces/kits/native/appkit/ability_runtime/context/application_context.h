@@ -163,6 +163,8 @@ public:
     static const size_t CONTEXT_TYPE_ID;
     std::string GetDataDir();
 
+    int32_t PromoteToStandbyMasterProcess(bool isInsertToHead);
+    int32_t DemoteFromStandbyMasterProcess();
 protected:
     bool IsContext(size_t contextTypeId) override
     {

@@ -297,6 +297,14 @@ class ApplicationContext {
     return this.__context_impl__.createDisplayContext(displayId);
   }
 
+  promoteToStandbyMasterProcess(isInsertToHead) {
+    return this.__context_impl__.promoteToStandbyMasterProcess(isInsertToHead);
+  }
+  
+  demoteFromStandbyMasterProcess() {
+    return this.__context_impl__.demoteFromStandbyMasterProcess();
+  }
+
   set area(mode) {
     return this.__context_impl__.switchArea(mode);
   }

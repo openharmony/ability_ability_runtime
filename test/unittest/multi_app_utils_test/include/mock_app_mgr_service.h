@@ -271,6 +271,15 @@ public:
         return 0;
     }
 
+    int32_t PromoteToStandbyMasterProcess(bool isInsertToHead)
+    {
+        return 0;
+    }
+
+    int32_t DemoteFromStandbyMasterProcess(){
+        return ;
+    }
+
     int32_t GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
         RunningMultiAppInfo &info) override;
 

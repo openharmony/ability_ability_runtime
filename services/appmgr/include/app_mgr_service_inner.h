@@ -1298,6 +1298,21 @@ public:
     virtual int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback);
 
     /**
+     * Elevate the current process to be a standby master process.
+     *
+     * @param isInsertToHead Whether inset current process to the head of standby master process list.
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t PromoteToStandbyMasterProcess(bool isInsertToHead);
+    
+    /**
+     * Revoke current process as a standby master process.
+     *
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t DemoteFromStandbyMasterProcess();
+
+    /**
      * To clear the process by ability token.
      *
      * @param token the unique identification to the ability.
