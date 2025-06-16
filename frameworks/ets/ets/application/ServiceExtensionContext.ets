@@ -12,8 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AbilityResult } from 'ability.abilityResult';
-import { ConnectOptions } from 'ability.connectOptions';
+
 import StartOptions from '@ohos.app.ability.StartOptions';
 import Want from '@ohos.app.ability.Want';
 import { AsyncCallback } from '@ohos.base';
@@ -24,13 +23,18 @@ import AsyncCallbackWrapper from '../utils/AbilityUtils';
 
 export default class ServiceExtensionContext extends ExtensionContext {
   nativeServiceExtensionContext: long = 0;
-  native nativeTerminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
+
+  native nativeTerminateSelfSync(callback: AsyncCallbackWrapper<void>): void;
+
   native nativeStartAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
-  native nativeStartAbilitySync(want: Want, options: StartOptions, callback:AsyncCallbackWrapper<void>): void;
+
+  native nativeStartAbilitySync(want: Want, options: StartOptions, callback: AsyncCallbackWrapper<void>): void;
+
   native nativeStartServiceExtensionAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
+
   native nativeStopServiceExtensionAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
 
-  terminateSelf(callback:AsyncCallback<void>): void {
+  terminateSelf(callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeTerminateSelfSync(myCall);
@@ -38,7 +42,7 @@ export default class ServiceExtensionContext extends ExtensionContext {
   }
 
   terminateSelf(): Promise<void> {
-    let p = new Promise<void>((resolve: (data: undefined) => void, reject:(err: BusinessError) => void): void => {
+    let p = new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
         if (err == null || err.code == 0) {
           resolve(undefined);
@@ -68,8 +72,8 @@ export default class ServiceExtensionContext extends ExtensionContext {
   }
 
   startAbility(want: Want, options: StartOptions): Promise<void> {
-    let p = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
+    let p = new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
         if (err == null || err.code == 0) {
           resolve(undefined);
         } else {
@@ -89,9 +93,9 @@ export default class ServiceExtensionContext extends ExtensionContext {
       this.nativeStartServiceExtensionAbilitySync(want, myCall);
     });
   }
-  
+
   startServiceExtensionAbility(want: Want): Promise<void> {
-    let p = new Promise<void>((resolve: (data: undefined)=>void, reject:(err: BusinessError) => void): void => {
+    let p = new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
         if (err == null || err.code == 0) {
           resolve(undefined);
@@ -114,9 +118,9 @@ export default class ServiceExtensionContext extends ExtensionContext {
   }
 
   stopServiceExtensionAbility(want: Want): Promise<void> {
-    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-        if (err.code == 0) {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
           resolve(undefined);
         } else {
           reject(err);

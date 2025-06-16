@@ -26,8 +26,8 @@ export default namespace uriPermissionManager {
         callback: AsyncCallbackWrapper<number>): void;
 
     export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string): Promise<number> {
-        let p:Promise<number> = new Promise<number>((resolve: (data: number)=>void, reject:(err: BusinessError<void>)=>void):void => {
-            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void> | null, data: number | undefined)=>{
+        let p:Promise<number> = new Promise<number>((resolve: (data: number)=>void, reject:(err: BusinessError)=>void):void => {
+            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError | null, data: number | undefined)=>{
                 if (err === null || err.code === 0) {
                     if (data === undefined) {
                         resolve(-1);
@@ -47,8 +47,8 @@ export default namespace uriPermissionManager {
 
     export function grantUriPermission(uri: string, flag: wantConstant.Flags, targetBundleName: string,
         appCloneIndex: number): Promise<void> {
-        let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
-            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void> | null, data: number | undefined)=>{
+        let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError)=>void):void => {
+            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError | null, data: number | undefined)=>{
                 if (err === null || err.code === 0) {
                     resolve(undefined);
                 } else {
@@ -72,8 +72,8 @@ export default namespace uriPermissionManager {
     }
 
     export function revokeUriPermission(uri: string, targetBundleName: string): Promise<number> {
-        let p:Promise<number> = new Promise<number>((resolve: (data: number)=>void, reject:(err: BusinessError<void>)=>void):void => {
-            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void> | null, data: number | undefined)=>{
+        let p:Promise<number> = new Promise<number>((resolve: (data: number)=>void, reject:(err: BusinessError)=>void):void => {
+            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError | null, data: number | undefined)=>{
                 if (err === null || err.code === 0) {
                     if (data === undefined) {
                         resolve(-1);
@@ -92,8 +92,8 @@ export default namespace uriPermissionManager {
     }
 
     export function revokeUriPermission(uri: string, targetBundleName: string, appCloneIndex: number): Promise<void> {
-        let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
-            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void> | null, data: number | undefined)=>{
+        let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError)=>void):void => {
+            let myCall = new AsyncCallbackWrapper<number>((err: BusinessError | null, data: number | undefined)=>{
                 if (err === null || err.code === 0) {
                     resolve(undefined);
                 } else {
