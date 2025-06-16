@@ -1227,6 +1227,9 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, SuspendExtensionAbility_001, TestSize
     connect = new AbilityConnectCallback();
     EXPECT_EQ(abilityMs_->SuspendExtensionAbility(connect), ERR_NO_INIT);
 
+    MyFlag::flag_ = false;
+    EXPECT_EQ(abilityMs_->SuspendExtensionAbility(connect), CHECK_PERMISSION_FAILED);
+
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SuspendExtensionAbility_001 end");
 }
 
@@ -1246,6 +1249,9 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, ResumeExtensionAbility_001, TestSize.
 
     connect = new AbilityConnectCallback();
     EXPECT_EQ(abilityMs_->ResumeExtensionAbility(connect), ERR_NO_INIT);
+
+    MyFlag::flag_ = false;
+    EXPECT_EQ(abilityMs_->ResumeExtensionAbility(connect), CHECK_PERMISSION_FAILED);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest ResumeExtensionAbility_001 end");
 }
@@ -1275,6 +1281,29 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, OnAbilityDied_001, TestSize.Level1)
     }
     EXPECT_FALSE(abilityMs->VerificationToken(token));
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest OnAbilityDied_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: HandleExtensionAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService HandleExtensionAbility
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, HandleExtensionAbility_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest HandleExtensionAbility_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    sptr<IAbilityConnection> connect = nullptr;
+
+    EXPECT_EQ(abilityMs_->HandleExtensionAbility(connect,
+        [](std::shared_ptr<AbilityConnectManager> connectManager, sptr<IAbilityConnection> connect) {
+            return connectManager->ResumeExtensionAbilityLocked(connect);}), ERR_INVALID_VALUE);
+
+    connect = new AbilityConnectCallback();
+    EXPECT_EQ(abilityMs_->HandleExtensionAbility(connect,
+        [](std::shared_ptr<AbilityConnectManager> connectManager, sptr<IAbilityConnection> connect) {
+            return connectManager->ResumeExtensionAbilityLocked(connect);}), ERR_NO_INIT);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest HandleExtensionAbility_001 end");
 }
 } // namespace AAFwk
 } // namespace OHOS
