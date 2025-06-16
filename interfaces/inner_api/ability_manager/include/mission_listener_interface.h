@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,8 @@ public:
      * @param missionId, mission Id.
      */
     virtual void OnMissionMovedToFront(int32_t missionId) = 0;
+
+    virtual void OnMissionMovedToBackground(int32_t missionId) {};
 
     /**
      * @brief When the ability focused, AbilityMs notifies the listener of the mission id
@@ -124,6 +126,9 @@ public:
 
         // ipc id for OnMissionUnfocused
         ON_MISSION_UNFOCUSED,
+
+        // ipc id for OnMissionMovedToBackground
+        ON_MISSION_MOVED_TO_BACKGROUND,
 
         // maximum of enum
         MISSION_LINSTENER_CMD_MAX
