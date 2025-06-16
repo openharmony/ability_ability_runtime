@@ -792,6 +792,21 @@ public:
     int32_t SetProcessCacheEnable(int32_t pid, bool enable) override;
 
     /**
+     * Elevate the current process to be a standby master process.
+     *
+     * @param isInsertToHead Whether inset current process to the head of standby master process list.
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t PromoteToStandbyMasterProcess(bool isInsertToHead) override;
+    
+    /**
+     * Revoke current process as a standby master process.
+     *
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t DemoteFromStandbyMasterProcess() override;
+
+    /**
      * set browser channel for caller
      */
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) override;

@@ -847,6 +847,21 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t LaunchAbility(sptr<IRemoteObject> token) override;
+    
+    /**
+     * Elevate the current process to be a standby master process.
+     *
+     * @param isInsertToHead Whether inset current process to the head of standby master process list.
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t PromoteToStandbyMasterProcess(bool isInsertToHead) override;
+    
+    /**
+     * Revoke current process as a standby master process.
+     *
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t DemoteFromStandbyMasterProcess() override;
 
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);

@@ -420,6 +420,21 @@ public:
      */
     std::shared_ptr<Context> CreateAreaModeContext(int areaMode) override;
 
+    /**
+     * Elevate the current process to be a standby master process.
+     *
+     * @param isInsertToHead Whether inset current process to the head of standby master process list.
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t PromoteToStandbyMasterProcess(bool isInsertToHead);
+    
+    /**
+     * Revoke current process as a standby master process.
+     *
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t DemoteFromStandbyMasterProcess();
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * @brief Create a context by displayId. This Context updates the density and direction properties
@@ -527,6 +542,7 @@ private:
     void ShallowCopySelf(std::shared_ptr<ContextImpl> &contextImpl);
     bool UpdateDisplayConfiguration(std::shared_ptr<ContextImpl> &contextImpl, uint64_t displayId,
         float density, std::string direction);
+
 #ifdef SUPPORT_GRAPHICS
     bool GetDisplayConfig(uint64_t displayId, float &density, std::string &directionStr);
 #endif

@@ -103,6 +103,18 @@ public:
 #endif
 
     /**
+     * CheckMasterProcessAppRunningRecordIsExist, Get master process record by application name and ability information.
+     *
+     * @param appName, the application name.
+     * @param abilityInfo, the ability information.
+     * @param uid, the process uid.
+     *
+     * @return process record.
+     */
+    std::shared_ptr<AppRunningRecord> CheckMasterProcessAppRunningRecordIsExist(const std::string &appName,
+        const AppExecFwk::AbilityInfo &abilityInfo, const int uid);
+
+    /**
      * Check whether the process of the application exists.
      *
      * @param accessTokenId, the accessTokenId.

@@ -2424,5 +2424,38 @@ int32_t AppMgrProxy::LaunchAbility(sptr<IRemoteObject> token)
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::LAUNCH_ABILITY, data, reply, option);
     return reply.ReadInt32();
 }
+
+int32_t AppMgrProxy::PromoteToStandbyMasterProcess(bool isInsertToHead)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_INVALID_DATA;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Bool, isInsertToHead);
+
+    MessageParcel reply;
+    MessageOption option;  
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::PROMOTE_TO_STANDBY_MASTER_PROCESS, data, reply, option);
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::DemoteFromStandbyMasterProcess()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::DEMOTE_FROM_STANDBY_MASTER_PROCESS, data, reply, option);
+    return reply.ReadInt32();
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS

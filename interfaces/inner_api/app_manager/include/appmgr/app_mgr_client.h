@@ -987,6 +987,21 @@ public:
     virtual AppMgrResultCode IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
         bool &isRunning);
 
+    /**
+     * Elevate the current process to be a standby master process.
+     *
+     * @param isInsertToHead Whether inset current process to the head of standby master process list.
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t PromoteToStandbyMasterProcess(bool isInsertToHead);
+    
+    /**
+     * Revoke current process as a standby master process.
+     *
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t DemoteFromStandbyMasterProcess();
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

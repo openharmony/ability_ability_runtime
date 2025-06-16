@@ -1804,6 +1804,74 @@ napi_value JsApplicationContextUtils::OnSetSupportedProcessCacheSelf(napi_env en
     return CreateJsUndefined(env);
 }
 
+napi_value JsApplicationContextUtils::PromoteToStandbyMasterProcess(napi_env env, napi_callback_info info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils, OnPromoteToStandbyMasterProcess, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnPromoteToStandbyMasterProcess(napi_env env, NapiCallbackInfo& info)
+{
+    // only support one params
+    if (info.argc == ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
+        ThrowInvalidParamError(env, "Not enough params");
+        return CreateJsUndefined(env);
+    }
+    auto applicationContext = applicationContext_.lock();
+    if (!applicationContext) {
+        TAG_LOGW(AAFwkTag::APPKIT, "null applicationContext");
+        return CreateJsUndefined(env);
+    }
+    
+    bool isInsertToHead = false;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], isInsertToHead)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Parse isInsertToHead failed");
+        ThrowInvalidParamError(env,
+            "Parse param isSupport failed, isInsertToHead must be boolean.");
+        return CreateJsUndefined(env);
+    }
+
+    auto errCode = applicationContext->PromoteToStandbyMasterProcess(isInsertToHead);
+
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "promote to standby master process failed");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
+    }
+    TAG_LOGE(AAFwkTag::APPKIT, "errCode:%{public}d.", errCode);
+    return CreateJsUndefined(env);
+}
+
+napi_value JsApplicationContextUtils::DemoteFromStandbyMasterProcess(napi_env env, napi_callback_info info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils, OnDemoteFromStandbyMasterProcess, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnDemoteFromStandbyMasterProcess(napi_env env, NapiCallbackInfo& info)
+{
+    // only support 0 params
+    if (info.argc != ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
+        ThrowInvalidParamError(env, "Not enough params");
+        return CreateJsUndefined(env);
+    }
+    auto applicationContext = applicationContext_.lock();
+    if (!applicationContext) {
+        TAG_LOGW(AAFwkTag::APPKIT, "null applicationContext");
+        return CreateJsUndefined(env);
+    }
+    
+    auto errCode = applicationContext->DemoteFromStandbyMasterProcess();
+
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Demote from standby master process failed");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
+    }
+    TAG_LOGE(AAFwkTag::APPKIT, "errCode:%{public}d.", errCode);
+    return CreateJsUndefined(env);
+}
+
 void JsApplicationContextUtils::BindNativeApplicationContextOne(napi_env env, napi_value object)
 {
     BindNativeProperty(env, object, "cacheDir", JsApplicationContextUtils::GetCacheDir);
@@ -1867,6 +1935,10 @@ void JsApplicationContextUtils::BindNativeApplicationContextTwo(napi_env env, na
         JsApplicationContextUtils::SetSupportedProcessCacheSelf);
     BindNativeFunction(env, object, "setFontSizeScale", MD_NAME,
         JsApplicationContextUtils::SetFontSizeScale);
+    BindNativeFunction(env, object, "promoteToStandbyMasterProcess", MD_NAME,
+        JsApplicationContextUtils::PromoteToStandbyMasterProcess);
+    BindNativeFunction(env, object, "demoteFromStandbyMasterProcess", MD_NAME,
+        JsApplicationContextUtils::DemoteFromStandbyMasterProcess);        
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

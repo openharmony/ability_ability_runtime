@@ -255,6 +255,45 @@ bool AppRunningManager::CheckAppRunningRecordIsExist(const std::string &bundleNa
 }
 #endif
 
+std::shared_ptr<AppRunningRecord> AppRunningManager::CheckMasterProcessAppRunningRecordIsExist(const std::string &appName,
+        const AppExecFwk::AbilityInfo &abilityInfo, const int uid)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::APPMGR, "uid: %{public}d: appName: %{public}s", uid, appName.c_str());
+    auto appRunningMap = GetAppRunningRecordMap();
+    int64_t maxTimeStamp = INT64_MIN;
+    std::shared_ptr<AppRunningRecord> maxAppRecord = nullptr;
+    bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE);
+    bool isUIExtension = (abilityInfo.type == AppExecFwk::AbilityType::EXTENSION &&
+                        abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI);
+    for(const auto &item : appRunningMap){
+        const auto &appRecord = item.second;
+        if(appRecord && appRecord->GetUid() == uid && appRecord->GetIsMasterProcess() &&
+           ((appRecord->GetProcessType() == ProcessType::NORMAL && isUIAbility) ||
+           (appRecord->GetExtensionType() == AppExecFwk::ExtensionAbilityType::UI && isUIExtension))
+        ){
+            return appRecord;
+        }
+
+        if(appRecord && appRecord->GetUid() == uid &&
+            appRecord->GetTimeStamp() !=0 && maxTimeStamp < appRecord->GetTimeStamp() && 
+           ((appRecord->GetProcessType() == ProcessType::NORMAL && isUIAbility) ||
+            (appRecord->GetExtensionType() == AppExecFwk::ExtensionAbilityType::UI && isUIExtension))
+        ){
+            maxTimeStamp = appRecord->GetTimeStamp();
+            maxAppRecord = appRecord;
+        }
+    }
+
+    if(maxAppRecord != nullptr){
+        maxAppRecord->SetMasterProcess(true);
+        maxAppRecord->SetTimeStamp(0);
+        return maxAppRecord;
+    }
+
+    return nullptr;
+}
+
 bool AppRunningManager::IsAppExist(uint32_t accessTokenId)
 {
     std::lock_guard guard(runningRecordMapMutex_);
