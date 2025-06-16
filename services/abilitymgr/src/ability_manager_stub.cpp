@@ -3537,7 +3537,8 @@ int32_t AbilityManagerStub::StartSpecifiedAbilityBySCBInner(MessageParcel &data,
         TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
         return ERR_INVALID_VALUE;
     }
-    StartSpecifiedAbilityBySCB(*want);
+    auto resultCode = StartSpecifiedAbilityBySCB(*want);
+    reply.WriteInt32(resultCode);
     return NO_ERROR;
 }
 

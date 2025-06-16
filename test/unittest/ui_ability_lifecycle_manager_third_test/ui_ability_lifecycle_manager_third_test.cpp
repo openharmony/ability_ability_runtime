@@ -653,9 +653,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, GetPersistentIdByAbilityRequest_003
  */
 HWTEST_F(UIAbilityLifecycleManagerThirdTest, OnStartSpecifiedFailed_002, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     int32_t requestId = 1;
     AbilityRequest abilityRequest;
     auto abilityRecord = std::make_shared<AbilityRecord>(
@@ -676,20 +674,23 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, OnStartSpecifiedFailed_002, TestSiz
  */
 HWTEST_F(UIAbilityLifecycleManagerThirdTest, OnStartSpecifiedFailed_003, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     int32_t requestId = 1;
     AbilityRequest abilityRequest;
+    auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
+    specifiedRequest->persistentId = 1;
+    auto &list = uiAbilityLifecycleManager->specifiedRequestList_[std::string()];
+    list.push_back(specifiedRequest);
+
+    int32_t requestId_2 = 2;
+    list.push_back(std::make_shared<SpecifiedRequest>(requestId_2, abilityRequest));
+
     auto abilityRecord = std::make_shared<AbilityRecord>(
         abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
-
-    uiAbilityLifecycleManager->hookSpecifiedMap_ = {
-        {2, abilityRecord}
-    };
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(specifiedRequest->persistentId, abilityRecord);
 
     uiAbilityLifecycleManager->OnStartSpecifiedFailed(requestId);
-    EXPECT_NE(uiAbilityLifecycleManager->hookSpecifiedMap_.size(), 0);
+    EXPECT_FALSE(list.empty());
 }
 
 /**

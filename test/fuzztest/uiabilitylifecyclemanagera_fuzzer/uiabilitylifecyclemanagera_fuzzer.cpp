@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,7 @@ void DoSomethingInterestingWithMyAPI1(const char *data, size_t size)
     uIAbilityLifecycleManager->OnStartSpecifiedProcessResponse(strParam, requestId);
     uIAbilityLifecycleManager->OnStartSpecifiedAbilityTimeoutResponse(requestId);
     uIAbilityLifecycleManager->OnStartSpecifiedProcessTimeoutResponse(requestId);
-    uIAbilityLifecycleManager->StartSpecifiedAbilityBySCB(want1, abilityRequest);
+    uIAbilityLifecycleManager->StartSpecifiedAbilityBySCB(abilityRequest);
     sptr<IRemoteObject> callStub;
     std::shared_ptr<AbilityRecord> abilityRecord4;
     uIAbilityLifecycleManager->CallRequestDone(abilityRecord4, callStub);

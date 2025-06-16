@@ -4577,25 +4577,27 @@ void AbilityManagerProxy::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInf
     isColdStart = reply.ReadBool();
 }
 
-void AbilityManagerProxy::StartSpecifiedAbilityBySCB(const Want &want)
+int32_t AbilityManagerProxy::StartSpecifiedAbilityBySCB(const Want &want)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
-        return;
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
     }
 
     if (!data.WriteParcelable(&want)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "want write fail");
-        return;
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
     }
 
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     auto error = SendRequest(AbilityManagerInterfaceCode::START_SPECIFIED_ABILITY_BY_SCB, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
     }
+    return reply.ReadInt32();
 }
 
 int32_t AbilityManagerProxy::NotifySaveAsResult(const Want &want, int resultCode, int requestCode)
