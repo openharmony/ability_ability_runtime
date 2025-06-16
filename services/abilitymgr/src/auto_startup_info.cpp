@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,9 @@ bool AutoStartupInfo::ReadFromParcel(Parcel &parcel)
     moduleName = Str16ToStr8(parcel.ReadString16());
     abilityTypeName = Str16ToStr8(parcel.ReadString16());
     appCloneIndex = parcel.ReadInt32();
+    userId = parcel.ReadInt32();
+    setterUserId = parcel.ReadInt32();
+    canUserModify = parcel.ReadBool();
     return true;
 }
 
@@ -57,6 +60,15 @@ bool AutoStartupInfo::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteInt32(appCloneIndex)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(userId)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(setterUserId)) {
+        return false;
+    }
+    if (!parcel.WriteBool(canUserModify)) {
         return false;
     }
     return true;

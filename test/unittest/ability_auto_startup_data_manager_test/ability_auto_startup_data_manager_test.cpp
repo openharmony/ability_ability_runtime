@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,6 +131,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, InsertAutoStartupData_300, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
+    info.currentUserId = 100;
     info.userId = 100;
     struct AutoStartupStatus AutoStartupStatus;
     AutoStartupStatus.isAutoStartup = false;
@@ -160,6 +161,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, InsertAutoStartupData_400, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
+    info.currentUserId = 100;
     info.userId = 100;
     struct AutoStartupStatus AutoStartupStatus;
     AutoStartupStatus.isAutoStartup = false;
@@ -203,6 +205,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_200, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
+    info.currentUserId = 100;
     info.userId = 100;
     bool isAutoStartup = false;
     bool isEdmForce = false;
@@ -248,6 +251,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_400, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
+    info.currentUserId = 100;
     info.userId = 100;
     bool isAutoStartup = false;
     bool isEdmForce = false;
@@ -304,6 +308,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, DeleteAutoStartupData_300, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
+    info.currentUserId = 100;
     info.userId = 100;
     auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info);
     EXPECT_EQ(result, ERR_OK);
@@ -328,6 +333,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, DeleteAutoStartupData_400, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
+    info.currentUserId = 100;
     info.userId = 100;
     auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info);
     EXPECT_EQ(result, ERR_OK);
@@ -437,6 +443,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAutoStartupData_300, TestSize.L
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
+    info.currentUserId = 100;
     info.userId = 100;
     auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info);
     EXPECT_EQ(result.code, ERR_NAME_NOT_FOUND);
@@ -461,6 +468,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAutoStartupData_400, TestSize.L
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
+    info.currentUserId = 100;
     info.userId = 100;
     auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info);
     EXPECT_EQ(result.code, ERR_NAME_NOT_FOUND);
@@ -633,6 +641,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_500, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
+    info.currentUserId = 100;
     info.userId = 100;
     bool isAutoStartup = true;
     bool isEdmForce = false;
@@ -660,6 +669,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, DeleteAutoStartupData_500, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
+    info.currentUserId = 100;
     info.userId = 100;
     kvStorePtr->Delete_ = DistributedKv::Status::INVALID_FORMAT;
 
@@ -709,6 +719,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAutoStartupData_500, TestSize.L
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
+    info.currentUserId = 100;
     info.userId = 100;
     kvStorePtr->GetEntries_ = DistributedKv::Status::INVALID_FORMAT;
 
@@ -796,6 +807,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, InsertAutoStartupData_500, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
+    info.currentUserId = 100;
     info.userId = 100;
     struct AutoStartupStatus AutoStartupStatus;
     AutoStartupStatus.isAutoStartup = false;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,9 @@ struct AutoStartupInfo : public Parcelable {
 public:
     int32_t appCloneIndex = 0;
     int32_t userId = -1;
+    int32_t setterUserId = -1;
+    int32_t currentUserId = -1;
+    bool canUserModify = false;
     // Only use in count, don't mashall and unmashall
     int32_t retryCount = 0;
     std::string bundleName;
@@ -47,6 +50,15 @@ struct AutoStartupStatus {
     bool isAutoStartup = false;
     bool isEdmForce = false;
     int32_t code = -1;
+};
+
+struct AutoStartupAbilityData {
+    std::string abilityTypeName;
+    std::string accessTokenId;
+    int32_t userId = -1;
+    int32_t setterUserId = -1;
+    int32_t currentUserId = -1;
+    bool isVisible = false;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
