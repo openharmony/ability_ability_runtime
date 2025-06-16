@@ -314,7 +314,7 @@ bool GetWantReference(ani_env *env, ani_object param, ani_class cls, ani_ref &wa
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
-    ani_boolean isUndefined = true;
+    ani_boolean isUndefined = ANI_TRUE;
     status = env->Reference_IsUndefined(wantRef, &isUndefined);
     if (status != ANI_OK || isUndefined) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
