@@ -790,5 +790,17 @@ HWTEST_F(UIExtensionContextTest, StartAbilityByType_0400, TestSize.Level1)
 
     TAG_LOGI(AAFwkTag::TEST, "StartAbilityByType_0400 end");
 }
+
+ /**
+  * @tc.number: IsTerminating_0100
+  * @tc.name: UIExtensionContext IsTerminating
+  * @tc.desc: UIExtensionContext IsTerminating.
+  */
+HWTEST_F(UIExtensionContextTest, IsTerminating_0100, TestSize.Level1)
+{
+    auto context = std::make_shared<UIExtensionContext>();
+    context->SetTerminating(true);
+    EXPECT_TRUE(context->IsTerminating());
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
