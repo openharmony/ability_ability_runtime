@@ -111,7 +111,7 @@ public:
 
     bool IsStartSelfUIAbility();
 
-    int32_t CheckPrepareTerminateEnable(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    int32_t CheckPrepareTerminateEnable(std::shared_ptr<AbilityRecord> abilityRecord);
 
 private:
     /**

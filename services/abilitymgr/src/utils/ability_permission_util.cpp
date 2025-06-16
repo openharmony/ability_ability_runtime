@@ -15,8 +15,8 @@
 
 #include "utils/ability_permission_util.h"
 
-#include "ability_connect_manager.h"
 #include "ability_info.h"
+#include "ability_manager_errors.h"
 #include "ability_util.h"
 #include "app_utils.h"
 #include "accesstoken_kit.h"
@@ -85,7 +85,7 @@ bool AbilityPermissionUtil::IsDominateScreen(const Want &want, bool isPendingWan
         AppExecFwk::RunningProcessInfo processInfo;
         DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
         bool isDelegatorCall = processInfo.isTestProcess && want.GetBoolParam(IS_DELEGATOR_CALL, false);
-        if (isDelegatorCall || InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
+        if (isDelegatorCall || AppExecFwk::InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "not dominate screen.");
             return false;
         }
@@ -171,14 +171,14 @@ int32_t AbilityPermissionUtil::CheckMultiInstance(Want &want, sptr<IRemoteObject
 {
     auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "null appMgr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgr");
         return ERR_INVALID_VALUE;
     }
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
     std::vector<std::string> instanceKeyArray;
     auto result = IN_PROCESS_CALL(appMgr->GetAllRunningInstanceKeysByBundleName(want.GetBundle(), instanceKeyArray));
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::FREE_INSTALL, "Failed to get instance key");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get instance key");
         return ERR_INVALID_VALUE;
     }
     // in-app launch
@@ -363,7 +363,7 @@ bool AbilityPermissionUtil::IsStartSelfUIAbility()
     return PermissionVerification::GetInstance()->VerifyStartSelfUIAbility(tokenId);
 }
 
-int32_t AbilityPermissionUtil::CheckPrepareTerminateEnable(const std::shared_ptr<AbilityRecord> &abilityRecord)
+int32_t AbilityPermissionUtil::CheckPrepareTerminateEnable(std::shared_ptr<AbilityRecord> abilityRecord)
 {
     if (!AppUtils::GetInstance().IsPrepareTerminateEnabled()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "prepare terminate not supported");
