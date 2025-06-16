@@ -338,7 +338,6 @@ sptr<IAmsMgr> AppMgrService::GetAmsMgr()
 
 int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex, int32_t userId)
 {
-    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
         TAG_LOGE(AAFwkTag::APPMGR, "caller is not SA");
         return AAFwk::ERR_NOT_SYSTEM_APP;
@@ -375,7 +374,6 @@ int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, int
 
 int32_t AppMgrService::ClearUpApplicationDataBySelf(int32_t userId)
 {
-    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
