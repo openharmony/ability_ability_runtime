@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import AbilityStateData from 'application.AbilityStateData';
 import { ElementName } from 'bundleManager.ElementName'
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
@@ -78,11 +77,11 @@ export function getTopAbility(callback: AsyncCallback<ElementName, void>): void 
 
   function getAbilityRunningInfos(): Promise<Array<AbilityRunningInfo>> {
     return new Promise<Array<AbilityRunningInfo>>((resolve: (data: Array<AbilityRunningInfo>) => void,
-      reject: (err: BusinessError<void>) => void): void => {
-      let syncCall = new AsyncCallbackWrapper<Array<AbilityRunningInfo>>((err: BusinessError<void>,
-        data: Array<AbilityRunningInfo>) => {
-        if (err.code == 0) {
-          resolve(data);
+      reject: (err: BusinessError) => void): void => {
+      let syncCall = new AsyncCallbackWrapper<Array<AbilityRunningInfo>>((err: BusinessError | null,
+        data: Array<AbilityRunningInfo> | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as Array<AbilityRunningInfo>);
         } else {
           reject(err);
         }
