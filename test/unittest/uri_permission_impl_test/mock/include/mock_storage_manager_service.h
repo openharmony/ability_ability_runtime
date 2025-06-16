@@ -355,13 +355,6 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GetBundleStatsForIncrease(uint32_t userId, const std::vector<std::string> &bundleNames,
-        const std::vector<int64_t> &incrementalBackTimes, std::vector<int64_t> &pkgFileSizes,
-        std::vector<int64_t> &incPkgFileSizes) override
-    {
-        return E_OK;
-    }
-
     virtual int32_t MountMediaFuse(int32_t userId, int32_t &devFd) override
     {
         return E_OK;
