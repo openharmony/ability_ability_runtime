@@ -16,5 +16,9 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 group("unittest") {
   testonly = true
-  deps = [ "ability_auto_startup_client_unit_test:unittest" ]
+  deps = [
+    "ability_auto_startup_client_unit_test:unittest",
+    "ability_connection_unit_test:unittest",
+    "user_controller_unit_test:unittest",
+  ]
 }
