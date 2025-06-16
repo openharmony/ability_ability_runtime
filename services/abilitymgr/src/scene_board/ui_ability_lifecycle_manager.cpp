@@ -225,10 +225,20 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     if (uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped");
         uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
+        uiAbilityRecord->SetLastWant(std::make_shared<Want>(abilityRequest.want));
         return ERR_OK;
     } else {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "pending state is not FOREGROUND or BACKGROUND.");
         uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
+    }
+    if (!isColdStart) {
+        uiAbilityRecord->SetIsNewWant(sessionInfo->isNewWant);
+        if (sessionInfo->isNewWant) {
+            uiAbilityRecord->SetWant(abilityRequest.want);
+            uiAbilityRecord->GetSessionInfo()->want.RemoveAllFd();
+        } else {
+            sessionInfo->want.CloseAllFd();
+        }
     }
 
     if (!uiAbilityRecord->IsReady() || sessionInfo->isNewWant) {
@@ -321,13 +331,6 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
                 return uiAbilityRecord;
             }
             return nullptr;
-        }
-        uiAbilityRecord->SetIsNewWant(sessionInfo->isNewWant);
-        if (sessionInfo->isNewWant) {
-            uiAbilityRecord->SetWant(abilityRequest.want);
-            uiAbilityRecord->GetSessionInfo()->want.RemoveAllFd();
-        } else {
-            sessionInfo->want.CloseAllFd();
         }
     }
     return uiAbilityRecord;
@@ -825,9 +828,9 @@ void UIAbilityLifecycleManager::CompleteForegroundSuccess(const std::shared_ptr<
         abilityRecord->SetStartToForeground(false);
     }
 
-    if (abilityRecord->IsNewWant()) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "has new want");
-        abilityRecord->ForegroundAbility();
+    if (abilityRecord->HasLastWant()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "has last want");
+        abilityRecord->ForegroundAbility(0, true);
     } else if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
         abilityRecord->SetMinimizeReason(true);
         MoveToBackground(abilityRecord);
@@ -2116,8 +2119,6 @@ void UIAbilityLifecycleManager::HandleLegacyAcceptWantDone(AbilityRequest &abili
             TAG_LOGI(AAFwkTag::ABILITYMGR, "find specified ability, session:%{public}d", persistentId);
             abilityRecord = iter->second;
             CHECK_POINTER_LOG(abilityRecord, "OnAcceptWantResponse abilityRecord null");
-            abilityRecord->SetWant(abilityRequest.want);
-            abilityRecord->SetIsNewWant(true);
             UpdateAbilityRecordLaunchReason(abilityRequest, abilityRecord);
             MoveAbilityToFront(abilityRequest, abilityRecord, callerAbility, nullptr, requestId);
             NotifyRestartSpecifiedAbility(abilityRequest, abilityRecord->GetToken());
