@@ -118,5 +118,23 @@ HWTEST_F(PreloadUIextStateObserverTest, OnProcessDied_003, Function | MediumTest
     EXPECT_TRUE(record == nullptr);
     GTEST_LOG_(INFO) << "OnProcessDied_003 end";
 }
+
+/**
+ * @tc.number: OnAppCacheStateChanged_001
+ * @tc.name: OnAppCacheStateChanged
+ * @tc.desc: Test whether OnAppCacheStateChanged is called normally.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreloadUIextStateObserverTest, OnAppCacheStateChanged_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "OnAppCacheStateChanged_001 start";
+    std::weak_ptr<AbilityRuntime::ExtensionRecord> extensionRecord;
+    PreLoadUIExtStateObserver preLoadUIExtStateObserver(extensionRecord);
+    AppExecFwk::AppStateData appStateData;
+    preLoadUIExtStateObserver.OnAppCacheStateChanged(appStateData);
+    auto record = preLoadUIExtStateObserver.extensionRecord_.lock();
+    EXPECT_TRUE(record == nullptr);
+    GTEST_LOG_(INFO) << "OnAppCacheStateChanged_001 end";
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
