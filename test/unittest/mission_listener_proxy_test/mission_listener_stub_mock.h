@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,7 @@ public:
     virtual void OnMissionDestroyed(int32_t missionId) {}
     virtual void OnMissionSnapshotChanged(int32_t missionId) {}
     virtual void OnMissionMovedToFront(int32_t missionId) {}
+    virtual void OnMissionMovedToBackground(int32_t missionId) {}
 #ifdef SUPPORT_GRAPHICS
     virtual void OnMissionIconUpdated(int32_t missionId, const std::shared_ptr<OHOS::Media::PixelMap> &icon) {}
 #endif
