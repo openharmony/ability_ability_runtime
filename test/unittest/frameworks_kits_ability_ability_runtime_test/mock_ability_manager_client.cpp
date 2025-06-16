@@ -792,8 +792,10 @@ void AbilityManagerClient::SetRootSceneSession(sptr<IRemoteObject> rootSceneSess
 void AbilityManagerClient::CallUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart)
 {}
 
-void AbilityManagerClient::StartSpecifiedAbilityBySCB(const Want &want)
-{}
+int32_t AbilityManagerClient::StartSpecifiedAbilityBySCB(const Want &want)
+{
+    return 0;
+}
 
 ErrCode AbilityManagerClient::NotifySaveAsResult(const Want &want, int resultCode, int requestCode)
 {

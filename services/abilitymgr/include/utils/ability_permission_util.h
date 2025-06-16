@@ -87,10 +87,11 @@ public:
      * @param userId The user id.
      * @param appIndex The app index.
      * @param callerToken The caller token.
+     * @param isScbCall The scb call.
      * @return Whether the app is either multi-instance or app-clone.
      */
     int32_t CheckMultiInstanceAndAppClone(Want &want, int32_t userId, int32_t appIndex,
-        sptr<IRemoteObject> callerToken);
+        sptr<IRemoteObject> callerToken, bool isScbCall);
 
     /**
      * CheckMultiInstanceKeyForExtension, check multi-instance key for extension.
@@ -131,13 +132,11 @@ private:
      *
      * @param want The want.
      * @param callerToken The caller token.
-     * @param isCreating Whether the app is being created.
-     * @param instanceKey The instance key.
      * @param maxCount The max number of instances.
+     * @param isScbCall The scb call.
      * @return Whether it is a valid multi-instance instance.
      */
-    int32_t CheckMultiInstance(Want &want, sptr<IRemoteObject> callerToken, bool isCreating,
-        const std::string &instanceKey, int32_t maxCount);
+    int32_t CheckMultiInstance(Want &want, sptr<IRemoteObject> callerToken, int32_t maxCount, bool isScbCall);
 
     /**
      * UpdateInstanceKey, update instance key.
