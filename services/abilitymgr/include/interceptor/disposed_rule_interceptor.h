@@ -38,17 +38,17 @@ public:
     {
         taskHandler_ = taskHandler;
     };
-    void UnregisterObserver(const std::string &bundleName);
+    void UnregisterObserver(int32_t uid);
 private:
     bool CheckControl(const Want &want, int32_t userId, AppExecFwk::DisposedRule &disposedRule, int32_t appIndex);
     bool CheckDisposedRule(const Want &want, AppExecFwk::DisposedRule &disposedRule);
-    ErrCode StartNonBlockRule(const Want &want, AppExecFwk::DisposedRule &disposedRule);
+    ErrCode StartNonBlockRule(const Want &want, AppExecFwk::DisposedRule &disposedRule, int32_t uid);
     sptr<AppExecFwk::IAppMgr> GetAppMgr();
     ErrCode CreateModalUIExtension(const Want &want, const sptr<IRemoteObject> &callerToken);
     void SetInterceptInfo(const Want &want, AppExecFwk::DisposedRule &disposedRule);
 private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
-    std::map<std::string, sptr<DisposedObserver>> disposedObserverMap_;
+    std::map<int32_t, sptr<DisposedObserver>> disposedObserverMap_;
     ffrt::mutex observerLock_;
 };
 } // namespace AAFwk

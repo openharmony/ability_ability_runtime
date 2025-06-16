@@ -27,8 +27,8 @@ constexpr const char* INTERCEPT_MISSION_ID = "intercept_missionId";
 }
 
 DisposedObserver::DisposedObserver(const AppExecFwk::DisposedRule &disposedRule,
-    const std::shared_ptr<DisposedRuleInterceptor> &interceptor)
-    : interceptor_(interceptor), disposedRule_(disposedRule)
+    const std::shared_ptr<DisposedRuleInterceptor> &interceptor, int32_t uid)
+    : interceptor_(interceptor), disposedRule_(disposedRule), uid_(uid)
 {}
 
 void DisposedObserver::OnAbilityStateChanged(const AppExecFwk::AbilityStateData &abilityStateData)
@@ -55,17 +55,21 @@ void DisposedObserver::OnAbilityStateChanged(const AppExecFwk::AbilityStateData 
         if (!ret) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "call failed");
         }
-        interceptor_->UnregisterObserver(abilityStateData.bundleName);
+        interceptor_->UnregisterObserver(abilityStateData.uid);
     }
 }
 
 void DisposedObserver::OnPageShow(const AppExecFwk::PageStateData &pageStateData)
 {
+    if (pageStateData.uid != uid_) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "currentUid:%{public}d, paramUid:%{public}d", uid_, pageStateData.uid);
+        return;
+    }
     if (disposedRule_.componentType == AppExecFwk::ComponentType::UI_ABILITY) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Call");
         int ret = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartAbility(*disposedRule_.want));
         if (ret != ERR_OK) {
-            interceptor_->UnregisterObserver(pageStateData.bundleName);
+            interceptor_->UnregisterObserver(pageStateData.uid);
             TAG_LOGE(AAFwkTag::ABILITYMGR, "call failed");
             return;
         }
@@ -79,7 +83,7 @@ void DisposedObserver::OnPageShow(const AppExecFwk::PageStateData &pageStateData
             TAG_LOGD(AAFwkTag::ABILITYMGR, "modal system");
             bool ret = IN_PROCESS_CALL(systemUIExtension->CreateModalUIExtension(want));
             if (!ret) {
-                interceptor_->UnregisterObserver(pageStateData.bundleName);
+                interceptor_->UnregisterObserver(pageStateData.uid);
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "call failed");
                 return;
             }
@@ -94,13 +98,13 @@ void DisposedObserver::OnPageShow(const AppExecFwk::PageStateData &pageStateData
             TAG_LOGD(AAFwkTag::ABILITYMGR, "modal app");
             int ret = abilityRecord->CreateModalUIExtension(want);
             if (ret != ERR_OK) {
-                interceptor_->UnregisterObserver(pageStateData.bundleName);
+                interceptor_->UnregisterObserver(pageStateData.uid);
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "call failed");
                 return;
             }
         }
     }
-    interceptor_->UnregisterObserver(pageStateData.bundleName);
+    interceptor_->UnregisterObserver(pageStateData.uid);
 }
 } // namespace AAFwk
 } // namespace OHOS
