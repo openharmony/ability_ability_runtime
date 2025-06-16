@@ -838,16 +838,6 @@ public:
     virtual int32_t UpdateProcessMemoryState(const std::vector<ProcessMemoryState> &procMemState) override;
 
     /**
-     * Get killed process info by process id and uid.
-     *
-     * @param pid Process id.
-     * @param uid Process uid.
-     * @param info result KilledProcessInfo.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int32_t GetKilledProcessInfo(int pid, int uid, KilledProcessInfo &info) override;
-
-    /**
      * Launch ability when reuseDelegatorWindow is true.
      *
      * @param token Ability identify.

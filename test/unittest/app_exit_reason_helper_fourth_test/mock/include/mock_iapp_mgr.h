@@ -536,15 +536,6 @@ public:
     {
         return 0;
     }
-
-    virtual int32_t GetKilledProcessInfo(int pid, int uid, KilledProcessInfo& info)
-    {
-        if (pid == 0 || uid == 0) {
-            return -1;
-        } else {
-            return 0;
-        }
-    }
 };
 } // namespace AppExecFwk
 } // namespace OHOS

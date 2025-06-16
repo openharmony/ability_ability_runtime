@@ -2556,65 +2556,6 @@ HWTEST_F(AppMgrServiceInnerEighthTest, IsSpecifiedModuleLoaded_001, TestSize.Lev
 }
 
 /**
- * @tc.name: GetKilledProcessInfo_001
- * @tc.desc: test GetKilledProcessInfo_001
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerEighthTest, GetKilledProcessInfo_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "GetKilledProcessInfo_001 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    appMgrServiceInner->appRunningManager_ = nullptr;
-
-    int pid = 0;
-    int uid = 0;
-    KilledProcessInfo info;
-    auto ret = appMgrServiceInner->GetKilledProcessInfo(pid, uid, info);
-    EXPECT_EQ(ret, AAFwk::ERR_NULL_APP_RUNNING_MANAGER);
-    TAG_LOGI(AAFwkTag::TEST, "GetKilledProcessInfo_001 end");
-}
-
-/**
- * @tc.name: GetKilledProcessInfo_002
- * @tc.desc: test GetKilledProcessInfo_002
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerEighthTest, GetKilledProcessInfo_002, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "GetKilledProcessInfo_002 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    std::shared_ptr<ApplicationInfo> info1 = std::make_shared<ApplicationInfo>();
-    AAFwk::MyStatus::GetInstance().queryAppRecordPlus_ = std::make_shared<AppRunningRecord>(info1, 0, "");
-
-    int pid = 0;
-    int uid = 0;
-    KilledProcessInfo info;
-    auto ret = appMgrServiceInner->GetKilledProcessInfo(pid, uid, info);
-    EXPECT_EQ(ret, ERR_OK);
-    TAG_LOGI(AAFwkTag::TEST, "GetKilledProcessInfo_002 end");
-}
-
-/**
- * @tc.name: GetKilledProcessInfo_003
- * @tc.desc: test GetKilledProcessInfo_003
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerEighthTest, GetKilledProcessInfo_003, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "GetKilledProcessInfo_003 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    std::shared_ptr<ApplicationInfo> info1 = nullptr;
-    AAFwk::MyStatus::GetInstance().queryAppRecordPlus_ = std::make_shared<AppRunningRecord>(info1, 0, "");
-
-    int pid = 0;
-    int uid = 0;
-    KilledProcessInfo info;
-    auto ret = appMgrServiceInner->GetKilledProcessInfo(pid, uid, info);
-    EXPECT_EQ(ret, ERR_OK);
-    TAG_LOGI(AAFwkTag::TEST, "GetKilledProcessInfo_003 end");
-}
-
-/**
  * @tc.name: LaunchAbility_001
  * @tc.desc: test LaunchAbility_001
  * @tc.type: FUNC

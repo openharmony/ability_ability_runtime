@@ -497,18 +497,6 @@ void AppRunningManager::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std:
     AAFwk::MyStatus::GetInstance().updateInstanceKeyBySpecifiedIdCalled_ = true;
 }
 
-std::shared_ptr<AppRunningRecord> AppRunningManager::QueryAppRecordPlus(int32_t pid, int32_t uid)
-{
-    return AAFwk::MyStatus::GetInstance().queryAppRecordPlus_;
-}
-
-void AppRunningManager::AddRecordToDeadList(std::shared_ptr<AppRunningRecord> appRecord)
-{
-}
-
-void AppRunningManager::RemoveTimeoutDeadAppRecord()
-{
-}
 int32_t AppRunningManager::RemoveUIExtensionBindItemById(int32_t uiExtensionBindAbilityId)
 {
     AAFwk::MyStatus::GetInstance().removeUIExtensionBindItemByIdCalled_ = true;
