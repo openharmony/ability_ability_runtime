@@ -2399,29 +2399,6 @@ int32_t AppMgrProxy::UpdateProcessMemoryState(const std::vector<ProcessMemorySta
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::GetKilledProcessInfo(int pid, int uid, KilledProcessInfo &info)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write token failed");
-        return AAFwk::ERR_WRITE_INTERFACE_TOKEN_FAILED;
-    }
-    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
-    PARCEL_UTIL_WRITE_RET_INT(data, Int32, uid);
-    
-    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::GET_KILLED_PROCESS_INFO, data, reply, option);
-    std::unique_ptr<KilledProcessInfo> infoReply(reply.ReadParcelable<KilledProcessInfo>());
-    if (infoReply == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "KilledProcessInfo ReadParcelable nullptr");
-        return AAFwk::ERR_READ_RESULT_PARCEL_FAILED;
-    }
-
-    info = *infoReply;
-    return ERR_OK;
-}
-
 int32_t AppMgrProxy::LaunchAbility(sptr<IRemoteObject> token)
 {
     MessageParcel data;

@@ -43,7 +43,7 @@ public:
 private:
     int32_t RecordProcessExitReason(const int32_t pid, const std::string bundleName, const int32_t uid,
         const uint32_t accessTokenId, const ExitReason &exitReason,
-        const AppExecFwk::RunningProcessInfo &processInfo, bool fromKillWithReason, bool searchDead);
+        const AppExecFwk::RunningProcessInfo &processInfo, bool fromKillWithReason);
     void GetActiveAbilityList(int32_t uid, std::vector<std::string> &abilityLists, const int32_t pid);
     void GetActiveAbilityListFromUIAbilityManager(int32_t uid, std::vector<std::string> &abilityLists,
         const int32_t pid);

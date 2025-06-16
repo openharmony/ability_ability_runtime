@@ -179,10 +179,9 @@ HWTEST_F(AppExitReasonHelperTest, RecordProcessExitReason_0400, TestSize.Level1)
     ExitReason exitReason;
     AppExecFwk::RunningProcessInfo processInfo;
     bool fromKillWithReason = false;
-    bool searchDead = true;
     appExitReasonHelper->subManagersHelper_ = nullptr;
     int32_t result = appExitReasonHelper->RecordProcessExitReason(
-        pid, bundleName, uid, accessTokenId, exitReason, processInfo, fromKillWithReason, searchDead);
+        pid, bundleName, uid, accessTokenId, exitReason, processInfo, fromKillWithReason);
     EXPECT_NE(result, 0);
 
     EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
@@ -196,7 +195,7 @@ HWTEST_F(AppExitReasonHelperTest, RecordProcessExitReason_0400, TestSize.Level1)
     EXPECT_NE(missionListManager, nullptr);
     appExitReasonHelper->subManagersHelper_->missionListManagers_.emplace(0, missionListManager);
     result = appExitReasonHelper->RecordProcessExitReason(
-        pid, bundleName, uid, accessTokenId, exitReason, processInfo, fromKillWithReason, searchDead);
+        pid, bundleName, uid, accessTokenId, exitReason, processInfo, fromKillWithReason);
     EXPECT_NE(result, 0);
 
     GTEST_LOG_(INFO) << "RecordProcessExitReason_0400 end";

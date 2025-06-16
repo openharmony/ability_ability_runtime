@@ -396,8 +396,6 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleUpdateInstanceKeyBySpecifiedId(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_PROCESS_MEMORY_STATE):
             return HandleUpdateProcessMemoryState(data, reply);
-        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_KILLED_PROCESS_INFO):
-            return HandleGetKilledProcessInfo(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::LAUNCH_ABILITY):
             return HandleLaunchAbility(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_CONFIGURATION_POLICY):
@@ -2000,18 +1998,6 @@ ErrCode AppMgrStub::HandleUpdateProcessMemoryState(MessageParcel &data, MessageP
     auto ret = UpdateProcessMemoryState(states);
     reply.WriteInt32(ret);
     return NO_ERROR;
-}
-
-int32_t AppMgrStub::HandleGetKilledProcessInfo(MessageParcel &data, MessageParcel &reply)
-{
-    int pid = data.ReadInt32();
-    int uid = data.ReadInt32();
-    KilledProcessInfo info;
-    auto ret = GetKilledProcessInfo(pid, uid, info);
-    if (ret == ERR_OK && !reply.WriteParcelable(&info)) {
-        ret = IPC_STUB_ERR;
-    }
-    return ret;
 }
 
 int32_t AppMgrStub::HandleLaunchAbility(MessageParcel &data, MessageParcel &reply)
