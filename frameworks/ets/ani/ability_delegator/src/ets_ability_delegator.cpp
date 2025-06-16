@@ -435,7 +435,7 @@ bool EtsAbilityDelegator::ParseMonitorPara(ani_env *env, ani_object monitorObj,
         std::unique_lock<std::mutex> lck(g_mtxMonitorRecord);
         for (auto iter = g_monitorRecord.begin(); iter != g_monitorRecord.end(); ++iter) {
             std::shared_ptr<ETSNativeReference> etsMonitor = iter->first;
-            ani_boolean result = false;
+            ani_boolean result = ANI_FALSE;
             ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(monitorObj),
                 reinterpret_cast<ani_ref>(etsMonitor->aniObj), &result);
             if (status != ANI_OK) {
