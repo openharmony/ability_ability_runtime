@@ -31,18 +31,27 @@ int DataObsMgrInnerPref::HandleRegisterObserver(const Uri &uri, struct ObserverN
     std::lock_guard<std::mutex> lock(preferenceMutex_);
 
     auto [obsPair, flag] = observers_.try_emplace(uri.ToString(), std::list<struct ObserverNode>());
-    if (!flag && obsPair->second.size() > OBS_NUM_MAX) {
+    if (!flag && obsPair->second.size() >= OBS_ALL_NUM_MAX) {
         TAG_LOGE(AAFwkTag::DBOBSMGR,
-            "subscribers num:%{public}s num maxed",
+            "subscribers num:%{public}s maxed",
             CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_OBS_LIMMIT;
     }
 
+    uint32_t tokenCount = 0;
     for (auto obs = obsPair->second.begin(); obs != obsPair->second.end(); obs++) {
         if ((*obs).observer_->AsObject() == observerNode.observer_->AsObject()) {
             TAG_LOGE(AAFwkTag::DBOBSMGR, "registered obs:%{public}s",
                 CommonUtils::Anonymous(uri.ToString()).c_str());
             return OBS_EXIST;
+        }
+        if ((*obs).tokenId_ == observerNode.tokenId_) {
+            tokenCount++;
+            if (tokenCount > OBS_NUM_MAX) {
+                TAG_LOGE(AAFwkTag::DBOBSMGR, "subscribers num:%{public}s maxed, token:%{public}d",
+                    CommonUtils::Anonymous(uri.ToString()).c_str(), observerNode.tokenId_);
+                return DATAOBS_SERVICE_OBS_LIMMIT;
+            }
         }
     }
 
