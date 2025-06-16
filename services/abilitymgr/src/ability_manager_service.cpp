@@ -14610,6 +14610,10 @@ int32_t AbilityManagerService::HandleExtensionAbility(sptr<IAbilityConnection> c
 int AbilityManagerService::SuspendExtensionAbility(sptr<IAbilityConnection> connect)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not sa call");
+        return CHECK_PERMISSION_FAILED;
+    }
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "Suspend extension ability begin.");
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     auto err = HandleExtensionAbility(connect,
@@ -14627,6 +14631,10 @@ int AbilityManagerService::SuspendExtensionAbility(sptr<IAbilityConnection> conn
 int AbilityManagerService::ResumeExtensionAbility(sptr<IAbilityConnection> connect)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not sa call");
+        return CHECK_PERMISSION_FAILED;
+    }
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "Resume extension ability begin.");
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     auto err = HandleExtensionAbility(connect,
