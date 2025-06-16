@@ -391,8 +391,8 @@ void UriPermissionManagerStubImpl::RemoveContentTokenIdRecord(uint32_t tokenId)
     contentTokenIdSet_.erase(tokenId);
 }
 
-void UriPermissionManagerStubImpl::StringVecToRawData(const std::vector<std::string>& stringVec,
-    StorageFileRawData& rawData)
+void UriPermissionManagerStubImpl::StringVecToRawData(const std::vector<std::string> &stringVec,
+    StorageFileRawData &rawData)
 {
     std::stringstream ss;
     uint32_t stringCount = stringVec.size();
