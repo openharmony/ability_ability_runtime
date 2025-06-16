@@ -134,7 +134,7 @@ HWTEST_F(AbilityInterceptorSecondTest, DisposedRuleInterceptor_003, TestSize.Lev
     DisposedRule disposedRule;
     disposedRule.want = std::make_shared<Want>();
     disposedRule.want->SetBundle(bundleName);
-    ErrCode result = executer->StartNonBlockRule(want, disposedRule);
+    ErrCode result = executer->StartNonBlockRule(want, disposedRule, 0);
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
@@ -156,7 +156,7 @@ HWTEST_F(AbilityInterceptorSecondTest, DisposedRuleInterceptor_004, TestSize.Lev
     DisposedRule disposedRule;
     disposedRule.want = std::make_shared<Want>();
     disposedRule.want->SetBundle(bundleName2);
-    ErrCode result = executer->StartNonBlockRule(want, disposedRule);
+    ErrCode result = executer->StartNonBlockRule(want, disposedRule, 0);
     EXPECT_NE(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
