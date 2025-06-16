@@ -68,7 +68,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::shared_ptr<DisposedRuleInterceptor> executer = std::make_shared<DisposedRuleInterceptor>();
     Want want;
     AppExecFwk::DisposedRule disposedRule;
-    std::string stringParam(data, size);
     int requestCode = static_cast<int>(GetU32Data(data));
     int32_t userId = static_cast<int32_t>(GetU32Data(data));
     bool isWithUI = *data % ENABLE;
@@ -82,9 +81,10 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     executer-> DoProcess(param);
     executer-> CheckControl(want, userId, disposedRule, 0);
     executer-> CheckDisposedRule(want, disposedRule);
-    executer-> StartNonBlockRule(want, disposedRule);
+    int32_t uid = static_cast<int32_t>(GetU32Data(data));
+    executer-> StartNonBlockRule(want, disposedRule, uid);
     executer-> GetAppMgr();
-    executer-> UnregisterObserver(stringParam);
+    executer-> UnregisterObserver(uid);
     executer-> CreateModalUIExtension(want, token);
     executer-> SetInterceptInfo(want, disposedRule);
 

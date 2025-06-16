@@ -28,7 +28,7 @@ class DisposedRuleInterceptor;
 class DisposedObserver : public AppExecFwk::ApplicationStateObserverStub {
 public:
     DisposedObserver(const AppExecFwk::DisposedRule &disposedRule,
-        const std::shared_ptr<DisposedRuleInterceptor> &interceptor);
+        const std::shared_ptr<DisposedRuleInterceptor> &interceptor, int32_t uid);
     ~DisposedObserver() = default;
 
 private:
@@ -38,6 +38,7 @@ private:
     sptr<IRemoteObject> token_ = nullptr;
     std::shared_ptr<DisposedRuleInterceptor> interceptor_ = nullptr;
     AppExecFwk::DisposedRule disposedRule_;
+    int32_t uid_ = 0;
     ffrt::mutex observerLock_;
 };
 } // namespace AAFwk
