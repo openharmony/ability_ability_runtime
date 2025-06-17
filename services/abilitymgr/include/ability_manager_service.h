@@ -37,7 +37,6 @@
 #include "ability_keep_alive_service.h"
 #include "ability_start_with_wait_observer_utils.h"
 #include "ams_configuration_parameter.h"
-#include "app_debug_listener_interface.h"
 #include "app_exit_reason_helper.h"
 #include "app_mgr_interface.h"
 #include "app_scheduler.h"
@@ -52,6 +51,7 @@
 #include "event_report.h"
 #include "free_install_manager.h"
 #include "iacquire_share_data_callback_interface.h"
+#include "iapp_debug_listener.h"
 #include "interceptor/ability_interceptor_executer.h"
 #include "iremote_object.h"
 #include "mission_list_manager_interface.h"
@@ -2172,7 +2172,7 @@ protected:
 
     int32_t GetCollaboratorType(const std::string &codePath) const;
     int32_t KillProcessForCollaborator(int32_t collaboratorType, const std::string &bundleName, int32_t userId);
-    
+
     /**
      * Check if Caller is allowed to start AppServiceExtension(Stage).
      *
@@ -2784,9 +2784,9 @@ private:
 
     ErrCode IntentOpenLinkInner(const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &param,
         AbilityRuntime::ExtractInsightIntentGenericInfo &linkInfo, const int32_t userId);
- 
+
     AbilityRuntime::ExtractInsightIntentGenericInfo GetInsightIntentGenericInfo(const InsightIntentExecuteParam &param);
- 
+
     void CombinLinkInfo(
         const std::vector<AbilityRuntime::LinkIntentParamMapping> &paramMappings, std::string &uri, AAFwk::Want &want);
 

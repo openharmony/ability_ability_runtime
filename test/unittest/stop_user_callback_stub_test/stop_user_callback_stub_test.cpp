@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,11 +27,13 @@ public:
     MockStopUserCallbackStub() = default;
     virtual ~MockStopUserCallbackStub()
     {}
-    void OnStopUserDone(int userId, int errcode) override
-    {}
-    void OnStartUserDone(int userId, int errcode) override {}
+    ErrCode OnStopUserDone(int userId, int errcode) override
+    {
+        return ERR_OK;
+    }
+    ErrCode OnStartUserDone(int userId, int errcode) override { return ERR_OK; }
 
-    void OnLogoutUserDone(int userId, int errcode) override {}
+    ErrCode OnLogoutUserDone(int userId, int errcode) override { return ERR_OK; }
 };
 
 class StopUserCallbackStubTest : public testing::Test {
@@ -68,7 +70,7 @@ HWTEST_F(StopUserCallbackStubTest, StopUserCallbackStubTest_001, TestSize.Level1
     data.WriteString16(value);
     auto result = backStub->OnRemoteRequest(code, data, reply, option);
 
-    EXPECT_EQ(result, ERR_INVALID_STATE);
+    EXPECT_EQ(result, ERR_TRANSACTION_FAILED);
     GTEST_LOG_(INFO) << "StopUserCallbackStubTest_001 end";
 }
 
@@ -85,11 +87,11 @@ HWTEST_F(StopUserCallbackStubTest, StopUserCallbackStubTest_002, TestSize.Level1
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    std::u16string metaDescriptor_ = u"ohos.aafwk.UserCallback";
+    std::u16string metaDescriptor_ = u"OHOS.AAFwk.IUserCallback";
     data.WriteInterfaceToken(metaDescriptor_);
     auto result = backStub->OnRemoteRequest(code, data, reply, option);
 
-    EXPECT_EQ(result, IPC_STUB_UNKNOW_TRANS_ERR);
+    EXPECT_EQ(result, ERR_NONE);
     GTEST_LOG_(INFO) << "StopUserCallbackStubTest_002 end";
 }
 
@@ -106,10 +108,10 @@ HWTEST_F(StopUserCallbackStubTest, StopUserCallbackStubTest_003, TestSize.Level1
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    std::u16string metaDescriptor_ = u"ohos.aafwk.UserCallback";
+    std::u16string metaDescriptor_ = u"OHOS.AAFwk.IUserCallback";
     data.WriteInterfaceToken(metaDescriptor_);
     auto result = backStub->OnRemoteRequest(code, data, reply, option);
 
-    EXPECT_EQ(result, ERR_NONE);
+    EXPECT_EQ(result, IPC_STUB_UNKNOW_TRANS_ERR);
     GTEST_LOG_(INFO) << "StopUserCallbackStubTest_003 end";
 }
