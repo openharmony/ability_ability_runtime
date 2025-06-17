@@ -18,11 +18,14 @@
 #include <native_engine/native_engine.h>
 
 #include "ability_manager_client.h"
-#include "hitrace_meter.h"
+#include "application_configuration_manager.h"
+#include "configuration_convertor.h"
+#include "bindable_sub_thread.h"
 #include "connection_manager.h"
 #include "dialog_request_callback_impl.h"
 #include "dialog_ui_extension_callback.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "json_utils.h"
 #include "remote_object_wrapper.h"
 #include "request_constants.h"
@@ -34,8 +37,6 @@
 #include "ui_content.h"
 #endif // SUPPORT_SCREEN
 #include "want_params_wrapper.h"
-#include "configuration_convertor.h"
-#include "application_configuration_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -54,6 +55,11 @@ struct RequestResult {
     AAFwk::Want resultWant;
     RequestDialogResultTask task;
 };
+
+AbilityContextImpl::AbilityContextImpl()
+{
+    subThreadObject_ = std::make_unique<BindableSubThread>();
+}
 
 Global::Resource::DeviceType AbilityContextImpl::GetDeviceType() const
 {
