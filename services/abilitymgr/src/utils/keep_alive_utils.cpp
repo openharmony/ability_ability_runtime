@@ -48,7 +48,9 @@ bool KeepAliveUtils::IsKeepAliveBundle(const AppExecFwk::BundleInfo &bundleInfo,
     }
 
     bool keepAliveEnable = bundleInfo.isKeepAlive;
-    AbilityRuntime::AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfo.name, keepAliveEnable);
+    if (keepAliveEnable) {
+        AbilityRuntime::AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfo.name, keepAliveEnable);
+    }
     if (keepAliveEnable) {
         type = KeepAliveType::RESIDENT_PROCESS;
     }
