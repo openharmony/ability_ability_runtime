@@ -14,7 +14,8 @@
 import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-import("//foundation/ability/ability_runtime/services/abilitymgr/abilitymgr.gni")
+import(
+    "//foundation/ability/ability_runtime/services/abilitymgr/abilitymgr.gni")
 
 config("appmgr_test_config") {
   configs = [
@@ -42,6 +43,8 @@ ohos_source_set("appmgr_test_source") {
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_record_id.cpp",
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_scheduler_host.cpp",
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_scheduler_proxy.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_state_callback_host.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_state_callback_proxy.cpp",
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/fault_data.cpp",
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/native_child_notify_proxy.cpp",
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/native_child_notify_stub.cpp",

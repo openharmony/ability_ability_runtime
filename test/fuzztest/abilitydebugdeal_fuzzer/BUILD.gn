@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -37,6 +37,7 @@ ohos_fuzztest("AbilityDebugDealFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/ability_debug_response_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_debug_deal.cpp",
     "abilitydebugdeal_fuzzer.cpp",
   ]
@@ -49,7 +50,6 @@ ohos_fuzztest("AbilityDebugDealFuzzTest") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
-    "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
   ]

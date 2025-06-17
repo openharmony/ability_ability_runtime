@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,12 +19,6 @@ module_output_path = "ability_runtime/ability_runtime/wantagent"
 
 ohos_unittest("pending_want_test") {
   module_out_path = module_output_path
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-    blocklist = "../../cfi_blocklist.txt"
-  }
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context/",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",

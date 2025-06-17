@@ -37,10 +37,6 @@ config("module_private_config") {
 
 config("module_context_config") {
   visibility = [ ":*" ]
-  configs = [
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_innerkits_config",
-    "${ability_runtime_innerkits_path}/app_manager:appmgr_innerkits_config",
-  ]
   include_dirs = [
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/include",
@@ -1023,10 +1019,7 @@ ohos_unittest("idle_time_test") {
 
   configs = [ ":module_context_config" ]
 
-  deps = [
-    "${ability_runtime_innerkits_path}/app_manager:app_manager",
-    "${ability_runtime_native_path}/appkit:appkit_native",
-  ]
+  deps = [ "${ability_runtime_native_path}/appkit:appkit_native" ]
 
   external_deps = [
     "ability_runtime:runtime",
