@@ -144,13 +144,17 @@ ohos_unittest("context_impl_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
+    "${ability_runtime_innerkits_path}/error_utils:ability_runtime_error_util",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_path}/js_environment/frameworks/js_environment:js_environment",
   ]
 
   external_deps = [
@@ -173,6 +177,7 @@ ohos_unittest("context_impl_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "resource_management:librawfile",
+    "runtime_core:ani",
     "samgr:samgr_proxy",
     "runtime_core:ani",
   ]
