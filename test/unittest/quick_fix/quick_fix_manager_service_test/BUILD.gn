@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -68,12 +68,7 @@ ohos_unittest("quick_fix_manager_service_test") {
 
 ohos_unittest("quick_fix_manager_apply_task_test") {
   module_out_path = "ability_runtime/ability_runtime/quick_fix"
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-    blocklist = "../../../cfi_blocklist.txt"
-  }
+
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_test_path}/unittest/quick_fix/mock/include",

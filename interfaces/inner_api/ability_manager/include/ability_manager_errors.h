@@ -903,11 +903,6 @@ enum {
      */
     ERR_SA_INTERCEPTOR_READ_PARAMS_FAILED = 2097361,
 
-    /*
-     * Result(2097362) for abilitys debug empty tokens.
-     */
-    ERR_ABILITY_DEBUG_EMPTY_TOKENS = 2097362,
-
     /**
      * Native error(3000000) for target bundle not exist.
      */

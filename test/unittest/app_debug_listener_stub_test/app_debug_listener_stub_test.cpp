@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,9 +22,9 @@ using namespace testing::ext;
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-constexpr int32_t DEBUG_INFO_SIZE_ONE = 1;
-constexpr int32_t DEBUG_INFO_SIZE_ZERO = 0;
-constexpr uint32_t UNKNOWN_CODE = -1;
+    constexpr int32_t DEBUG_INFO_SIZE_ONE = 1;
+    constexpr int32_t DEBUG_INFO_SIZE_ZERO = 0;
+    constexpr uint32_t UNKNOWN_CODE = 2;
 }
 class AppDebugListenerStubTest : public testing::Test {
 public:
@@ -73,7 +73,7 @@ HWTEST_F(AppDebugListenerStubTest, OnRemoteRequest_0100, TestSize.Level1)
     data.WriteParcelable(&debugInfo);
 
     auto result = mockStub_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED), data, reply, option);
+        static_cast<uint32_t>(IAppDebugListener::Message::ON_APP_DEBUG_STARTED), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 }
 
@@ -91,8 +91,8 @@ HWTEST_F(AppDebugListenerStubTest, OnRemoteRequest_0200, TestSize.Level1)
     data.WriteInt32(DEBUG_INFO_SIZE_ZERO);
 
     auto result = mockStub_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED), data, reply, option);
-    EXPECT_EQ(result, ERR_TRANSACTION_FAILED); // ERR_TRANSACTION_FAILED for no interfaceToken data
+        static_cast<uint32_t>(IAppDebugListener::Message::ON_APP_DEBUG_STARTED), data, reply, option);
+    EXPECT_EQ(result, ERR_INVALID_STATE);
 }
 
 /**
@@ -128,8 +128,8 @@ HWTEST_F(AppDebugListenerStubTest, OnRemoteRequest_0400, TestSize.Level1)
     data.WriteInt32(DEBUG_INFO_SIZE_ZERO);
 
     auto result = mockStub_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED), data, reply, option);
-    EXPECT_EQ(result, ERR_NONE);
+        static_cast<uint32_t>(IAppDebugListener::Message::ON_APP_DEBUG_STARTED), data, reply, option);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
 }
 
 /**
@@ -142,14 +142,12 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStarted_0100, TestSize.Level1
     EXPECT_NE(mockStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
     AppDebugInfo debugInfo;
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(&debugInfo);
 
-    EXPECT_CALL(*mockStub_, OnAppDebugStarted(_)).Times(0);
-    mockStub_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED), data, reply, option);
+    EXPECT_CALL(*mockStub_, OnAppDebugStarted(_)).Times(1);
+    EXPECT_EQ(mockStub_->HandleOnAppDebugStarted(data, reply), NO_ERROR);
 }
 
 /**
@@ -162,15 +160,13 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStarted_0200, TestSize.Level1
     EXPECT_NE(mockStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
     AppDebugInfo *debugInfo = nullptr;
     WriteInterfaceToken(data);
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(debugInfo);
 
     EXPECT_CALL(*mockStub_, OnAppDebugStarted(_)).Times(0);
-    mockStub_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED), data, reply, option);
+    EXPECT_EQ(mockStub_->HandleOnAppDebugStarted(data, reply), ERR_INVALID_DATA);
 }
 
 /**
@@ -183,16 +179,12 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStoped_0100, TestSize.Level1)
     EXPECT_NE(mockStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    WriteInterfaceToken(data);
     AppDebugInfo debugInfo;
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(&debugInfo);
     
     EXPECT_CALL(*mockStub_, OnAppDebugStoped(_)).Times(1);
-    auto ret = mockStub_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STOPED), data, reply, option);
-    EXPECT_EQ(ret, NO_ERROR);
+    EXPECT_EQ(mockStub_->HandleOnAppDebugStoped(data, reply), NO_ERROR);
 }
 
 /**
@@ -205,16 +197,13 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStoped_0200, TestSize.Level1)
     EXPECT_NE(mockStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
     AppDebugInfo *debugInfo = nullptr;
     WriteInterfaceToken(data);
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(debugInfo);
 
     EXPECT_CALL(*mockStub_, OnAppDebugStoped(_)).Times(0);
-    auto ret = mockStub_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STOPED), data, reply, option);
-    EXPECT_EQ(ret, ERR_INVALID_DATA);
+    EXPECT_EQ(mockStub_->HandleOnAppDebugStoped(data, reply), ERR_INVALID_DATA);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

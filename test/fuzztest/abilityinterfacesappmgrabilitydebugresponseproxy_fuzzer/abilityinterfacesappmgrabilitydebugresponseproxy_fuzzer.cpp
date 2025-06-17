@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #define private public
 #include "ability_debug_response_proxy.h"
+#include "ability_debug_response_interface.h"
 #undef private
 
 #include "securec.h"
@@ -72,6 +73,17 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     infosProxy->OnAbilitysDebugStoped(tokens);
     bool isAssertDebug = *data % ENABLE;
     infosProxy->OnAbilitysAssertDebugChange(tokens, isAssertDebug);
+    MessageParcel parcels;
+    parcels.WriteInterfaceToken(AMSMGR_INTERFACE_TOKEN);
+    parcels.WriteBuffer(data, size);
+    parcels.RewindRead(0);
+    infosProxy->WriteInterfaceToken(parcels);
+    IAbilityDebugResponse::Message message = IAbilityDebugResponse::Message::ON_ABILITYS_DEBUG_STARTED;
+    infosProxy->SendRequest(message, tokens);
+    message = IAbilityDebugResponse::Message::ON_ABILITYS_DEBUG_STOPED;
+    infosProxy->SendRequest(message, tokens);
+    message = IAbilityDebugResponse::Message::ON_ABILITYS_ASSERT_DEBUG;
+    infosProxy->SendRequest(message, tokens);
     return true;
 }
 }

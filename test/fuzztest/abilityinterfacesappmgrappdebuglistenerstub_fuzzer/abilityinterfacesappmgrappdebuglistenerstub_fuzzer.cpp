@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #define private public
 #include "app_debug_listener_stub.h"
+#include "app_debug_listener_interface.h"
 #undef private
 
 #include "securec.h"
@@ -54,8 +55,8 @@ public:
     virtual ~ AppDebugListenerStubFUZZ() {};
     int OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override{ return 0; };
-    ErrCode OnAppDebugStarted(const std::vector<AppDebugInfo> &debugInfos) override { return ERR_OK; };
-    ErrCode OnAppDebugStoped(const std::vector<AppDebugInfo> &debugInfos) override { return ERR_OK; };
+    void OnAppDebugStarted(const std::vector<AppDebugInfo> &debugInfos) override{};
+    void OnAppDebugStoped(const std::vector<AppDebugInfo> &debugInfos) override{};
 };
 
 sptr<Token> GetFuzzAbilityToken()
@@ -74,7 +75,7 @@ sptr<Token> GetFuzzAbilityToken()
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
-    uint32_t codeOne = static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STARTED);
+    uint32_t codeOne = static_cast<uint32_t>(IAppDebugListener::Message::ON_APP_DEBUG_STARTED);
     MessageParcel parcel;
     parcel.WriteInterfaceToken(AMSMGR_INTERFACE_TOKEN);
     parcel.WriteBuffer(data, size);
@@ -83,7 +84,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     MessageOption option;
     std::shared_ptr<AppDebugListenerStub> abmsOne = std::make_shared<AppDebugListenerStubFUZZ>();
     abmsOne->OnRemoteRequest(codeOne, parcel, reply, option);
-    uint32_t codeTwo = static_cast<uint32_t>(IAppDebugListenerIpcCode::COMMAND_ON_APP_DEBUG_STOPED);
+    uint32_t codeTwo = static_cast<uint32_t>(IAppDebugListener::Message::ON_APP_DEBUG_STOPED);
     abmsOne->OnRemoteRequest(codeTwo, parcel, reply, option);
     return true;
 }

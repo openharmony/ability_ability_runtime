@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
 #include <gmock/gmock.h>
 #include <iremote_object.h>
 #include <iremote_stub.h>
-#include "iuser_callback.h"
+#include "user_callback.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -45,9 +45,9 @@ public:
 
     int code_ = 0;
 
-    virtual ErrCode OnStopUserDone(int userId, int errcode) { return ERR_OK; };
-    virtual ErrCode OnStartUserDone(int userId, int errcode) { return ERR_OK; }
-    virtual ErrCode OnLogoutUserDone(int userId, int errcode) { return ERR_OK; }
+    virtual void OnStopUserDone(int userId, int errcode) {};
+    virtual void OnStartUserDone(int userId, int errcode) {}
+    virtual void OnLogoutUserDone(int userId, int errcode) {}
 };
 }  // namespace AAFwk
 }  // namespace OHOS
