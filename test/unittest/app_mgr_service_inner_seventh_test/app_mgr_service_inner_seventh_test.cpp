@@ -55,26 +55,16 @@ public:
 
 class MyStartSpecifiedAbilityResponse : public IStartSpecifiedAbilityResponse {
 public:
-    ErrCode OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId) override
-    {
-        return ERR_OK;
-    }
-    ErrCode OnTimeoutResponse(int32_t requestId) override
-    {
-        return ERR_OK;
-    }
-    ErrCode OnNewProcessRequestResponse(const std::string &flag, int32_t requestId) override
-    {
-        return ERR_OK;
-    }
-    ErrCode OnNewProcessRequestTimeoutResponse(int32_t requestId) override
-    {
-        return ERR_OK;
-    }
-    ErrCode OnStartSpecifiedFailed(int32_t requestId) override
-    {
-        return ERR_OK;
-    }
+    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId) override
+    {}
+    void OnTimeoutResponse(int32_t requestId) override
+    {}
+    void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId) override
+    {}
+    void OnNewProcessRequestTimeoutResponse(int32_t requestId) override
+    {}
+    void OnStartSpecifiedFailed(int32_t requestId) override
+    {}
     sptr<IRemoteObject> AsObject() override
     {
         return nullptr;
