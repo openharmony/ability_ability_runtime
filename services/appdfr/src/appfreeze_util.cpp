@@ -43,7 +43,7 @@ AppfreezeUtil::~AppfreezeUtil()
 {
 }
 
-std::string AppfreezeUtil::CreateFile(const std::string& dirPath, const std::string& fileName)
+std::string AppfreezeUtil::CreateFile(const std::string &dirPath, const std::string &fileName)
 {
     if (!OHOS::FileExists(dirPath)) {
         OHOS::ForceCreateDirectory(dirPath);
@@ -62,7 +62,7 @@ std::string AppfreezeUtil::CreateFile(const std::string& dirPath, const std::str
     return filePath;
 }
 
-std::string AppfreezeUtil::TimestampFormatToDate(time_t timeStamp, const std::string& format)
+std::string AppfreezeUtil::TimestampFormatToDate(time_t timeStamp, const std::string &format)
 {
     char date[MAX_TIME_BUFF] = {0};
     struct tm result {};
@@ -88,7 +88,7 @@ std::string AppfreezeUtil::RoundToTwoDecimals(float value)
 
 int AppfreezeUtil::GetCpuCount()
 {
-    std::string procStatPath = "/proc/stat";
+    std::string procStatPath = PROC_STAT_PATH;
     std::string content;
     if (!LoadStringFromFile(procStatPath, content) || content.empty()) {
         TAG_LOGW(AAFwkTag::APPDFR, "failed to read path:%{public}s, errno:%{public}d",
