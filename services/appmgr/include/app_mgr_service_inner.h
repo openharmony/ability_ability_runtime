@@ -24,12 +24,11 @@
 #include <unordered_set>
 #include <vector>
 
-#include "ability_debug_response_interface.h"
 #include "ability_foreground_state_observer_interface.h"
 #include "ability_info.h"
 #include "advanced_security_mode_manager.h"
 #include "app_death_recipient.h"
-#include "app_debug_listener_interface.h"
+#include "iapp_debug_listener.h"
 #include "app_debug_manager.h"
 #include "app_foreground_state_observer_interface.h"
 #include "app_malloc_info.h"
@@ -58,6 +57,7 @@
 #include "fault_data.h"
 #include "fd_guard.h"
 #include "hisysevent.h"
+#include "iability_debug_response.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
@@ -81,7 +81,7 @@
 #include "app_cjheap_mem_info.h"
 #include "running_multi_info.h"
 #include "multi_user_config_mgr.h"
-#include "user_callback.h"
+#include "iuser_callback.h"
 #include "native_child_notify_interface.h"
 
 namespace OHOS {

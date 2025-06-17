@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,7 @@ HWTEST_F(AbilityDebugResponseStubTest, HandleOnAbilitysDebugStarted_0100, TestSi
     data.WriteRemoteObject(token);
 
     auto result = stub->OnRemoteRequest(
-        static_cast<uint32_t>(IAbilityDebugResponse::Message::ON_ABILITYS_DEBUG_STARTED), data, reply, option);
+        static_cast<uint32_t>(IAbilityDebugResponseIpcCode::COMMAND_ON_ABILITYS_DEBUG_STARTED), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
     testing::Mock::AllowLeak(stub);
     GTEST_LOG_(INFO) << "AbilityDebugResponseProxyTest_HandleOnAbilitysDebugStarted_0100 end";
@@ -103,7 +103,7 @@ HWTEST_F(AbilityDebugResponseStubTest, HandleOnAbilitysDebugStoped_0100, TestSiz
     data.WriteRemoteObject(token);
 
     auto result = stub->OnRemoteRequest(
-        static_cast<uint32_t>(IAbilityDebugResponse::Message::ON_ABILITYS_DEBUG_STOPED), data, reply, option);
+        static_cast<uint32_t>(IAbilityDebugResponseIpcCode::COMMAND_ON_ABILITYS_DEBUG_STOPED), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
     testing::Mock::AllowLeak(stub);
     GTEST_LOG_(INFO) << "AbilityDebugResponseProxyTest_HandleOnAbilitysDebugStoped_0100 end";

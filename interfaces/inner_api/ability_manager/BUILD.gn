@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/idl_tool/idl.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
@@ -40,8 +41,9 @@ config("ability_manager_public_config") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/dfr",
     "${ability_runtime_path}/interfaces/kits/native/appkit",
     "${ability_runtime_innerkits_path}/dataobs_manager/include",
+    "${target_gen_dir}",
   ]
-
+  configs = [ "${ability_runtime_innerkits_path}/app_manager:appmgr_innerkits_config", ]
   defines = []
 
   if (ability_command_for_test) {
@@ -62,7 +64,94 @@ config("ability_manager_public_config") {
   }
 }
 
+idl_gen_interface("ability_manager_innerkits") {
+  sources = [
+    "idl/IUserCallback.idl",
+  ]
+  sources_callback = [
+  ]
+  sources_common =[
+  ]
+  log_domainid = "0xD001336"
+  log_tag = "AbilityMgr"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+config("ability_manager_innerkits_config") {
+    include_dirs = [ "${target_gen_dir}" ]
+}
+
+ohos_source_set("ability_manager_innerkits_include") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  public_configs = [
+    ":ability_manager_innerkits_config",
+    "${ability_runtime_services_path}/abilitymgr:abilityms_config",
+  ]
+
+  deps = [ ":ability_manager_innerkits" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_source_set("ability_manager_innerkits_source") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  output_values = get_target_outputs(":ability_manager_innerkits")
+  source_values = [ "*.cpp", ]
+  sources = filter_include(output_values, source_values)
+
+  public_configs = [
+    ":ability_manager_innerkits_config",
+    "${ability_runtime_services_path}/abilitymgr:abilityms_config",
+  ]
+
+  deps = [ ":ability_manager_innerkits" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+  ]
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
 ohos_shared_library("ability_manager") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
   use_exceptions = true
   branch_protector_ret = "pac_ret"
 
@@ -108,8 +197,6 @@ ohos_shared_library("ability_manager") {
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension/ui_extension_ability_connect_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension/ui_extension_host_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ui_extension/ui_extension_session_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/user_callback_proxy.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/user_callback_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/window_config.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/kiosk_status.cpp",
     "src/aa_tools/ability_start_with_wait_data.cpp",
@@ -139,6 +226,8 @@ ohos_shared_library("ability_manager") {
   public_deps = [ ":ability_connect_callback_stub" ]
 
   deps = [
+    ":ability_manager_innerkits_include",
+    ":ability_manager_innerkits_source",
     ":ability_start_options",
     ":ability_start_setting",
     ":mission_info",

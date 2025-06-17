@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,6 @@
 
 #define private public
 #include "app_debug_listener_proxy.h"
-#include "app_debug_listener_interface.h"
 #undef private
 
 #include "securec.h"
@@ -71,15 +70,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::vector<AppDebugInfo> debugInfos;
     infosProxy->OnAppDebugStarted(debugInfos);
     infosProxy->OnAppDebugStoped(debugInfos);
-    MessageParcel parcels;
-    parcels.WriteInterfaceToken(AMSMGR_INTERFACE_TOKEN);
-    parcels.WriteBuffer(data, size);
-    parcels.RewindRead(0);
-    infosProxy->WriteInterfaceToken(parcels);
-    IAppDebugListener::Message message = IAppDebugListener::Message::ON_APP_DEBUG_STARTED;
-    infosProxy->SendRequest(message, debugInfos);
-    message = IAppDebugListener::Message::ON_APP_DEBUG_STOPED;
-    infosProxy->SendRequest(message, debugInfos);
     return true;
 }
 }

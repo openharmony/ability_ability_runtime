@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,50 +74,53 @@ void AbilityDebugDeal::OnAbilitysAssertDebugChange(const std::vector<sptr<IRemot
     }
 }
 
-void AbilityDebugResponse::OnAbilitysDebugStarted(const std::vector<sptr<IRemoteObject>> &tokens)
+ErrCode AbilityDebugResponse::OnAbilitysDebugStarted(const std::vector<sptr<IRemoteObject>> &tokens)
 {
     if (tokens.empty()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "tokens empty");
-        return;
+        return ERR_ABILITY_DEBUG_EMPTY_TOKENS;
     }
 
     auto deal = abilityDebugDeal_.lock();
     if (deal == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "deal null");
-        return;
+        return INNER_ERR;
     }
     deal->OnAbilitysDebugStarted(tokens);
+    return ERR_OK;
 }
 
-void AbilityDebugResponse::OnAbilitysDebugStoped(const std::vector<sptr<IRemoteObject>> &tokens)
+ErrCode AbilityDebugResponse::OnAbilitysDebugStoped(const std::vector<sptr<IRemoteObject>> &tokens)
 {
     if (tokens.empty()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "tokens empty");
-        return;
+        return ERR_ABILITY_DEBUG_EMPTY_TOKENS;
     }
 
     auto deal = abilityDebugDeal_.lock();
     if (deal == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "deal null");
-        return;
+        return INNER_ERR;
     }
     deal->OnAbilitysDebugStoped(tokens);
+    return ERR_OK;
 }
 
-void AbilityDebugResponse::OnAbilitysAssertDebugChange(
+ErrCode AbilityDebugResponse::OnAbilitysAssertDebugChange(
     const std::vector<sptr<IRemoteObject>> &tokens, bool isAssertDebug)
 {
     if (tokens.empty()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "tokens empty");
-        return;
+        return ERR_ABILITY_DEBUG_EMPTY_TOKENS;
     }
 
     auto deal = abilityDebugDeal_.lock();
     if (deal == nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "deal null");
-        return;
+        return INNER_ERR;
     }
     deal->OnAbilitysAssertDebugChange(tokens, isAssertDebug);
+    return ERR_OK;
 }
 } // namespace AAFwk
 } // namespace OHOS

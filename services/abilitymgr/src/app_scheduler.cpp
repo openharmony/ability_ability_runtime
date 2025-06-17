@@ -386,10 +386,11 @@ void AppScheduler::StartSpecifiedAbility(const AAFwk::Want &want, const AppExecF
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->StartSpecifiedAbility(want, abilityInfo, requestId));
 }
 
-void StartSpecifiedAbilityResponse::OnAcceptWantResponse(
+ErrCode StartSpecifiedAbilityResponse::OnAcceptWantResponse(
     const AAFwk::Want &want, const std::string &flag, int32_t requestId)
 {
     DelayedSingleton<AbilityManagerService>::GetInstance()->OnAcceptWantResponse(want, flag, requestId);
+    return ERR_OK;
 }
 
 void AppScheduler::PrepareTerminateApp(const pid_t pid, const std::string &moduleName)
@@ -398,9 +399,10 @@ void AppScheduler::PrepareTerminateApp(const pid_t pid, const std::string &modul
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->PrepareTerminateApp(pid, moduleName));
 }
 
-void StartSpecifiedAbilityResponse::OnTimeoutResponse(int32_t requestId)
+ErrCode StartSpecifiedAbilityResponse::OnTimeoutResponse(int32_t requestId)
 {
     DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedAbilityTimeoutResponse(requestId);
+    return ERR_OK;
 }
 
 void AppScheduler::StartSpecifiedProcess(
@@ -410,19 +412,22 @@ void AppScheduler::StartSpecifiedProcess(
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->StartSpecifiedProcess(want, abilityInfo, requestId));
 }
 
-void StartSpecifiedAbilityResponse::OnNewProcessRequestResponse(const std::string &flag, int32_t requestId)
+ErrCode StartSpecifiedAbilityResponse::OnNewProcessRequestResponse(const std::string &flag, int32_t requestId)
 {
     DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedProcessResponse(flag, requestId);
+    return ERR_OK;
 }
 
-void StartSpecifiedAbilityResponse::OnNewProcessRequestTimeoutResponse(int32_t requestId)
+ErrCode StartSpecifiedAbilityResponse::OnNewProcessRequestTimeoutResponse(int32_t requestId)
 {
     DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedProcessTimeoutResponse(requestId);
+    return ERR_OK;
 }
 
-void StartSpecifiedAbilityResponse::OnStartSpecifiedFailed(int32_t requestId)
+ErrCode StartSpecifiedAbilityResponse::OnStartSpecifiedFailed(int32_t requestId)
 {
     DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedFailed(requestId);
+    return ERR_OK;
 }
 
 int AppScheduler::GetProcessRunningInfos(std::vector<AppExecFwk::RunningProcessInfo> &info)

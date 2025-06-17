@@ -16,9 +16,9 @@
 #ifndef OHOS_ABILITY_RUNTIME_AMS_MGR_INTERFACE_H
 #define OHOS_ABILITY_RUNTIME_AMS_MGR_INTERFACE_H
 
-#include "ability_debug_response_interface.h"
+#include "iability_debug_response.h"
 #include "ability_info.h"
-#include "app_debug_listener_interface.h"
+#include "iapp_debug_listener.h"
 #include "app_record_id.h"
 #include "application_info.h"
 #include "configuration.h"
@@ -26,8 +26,8 @@
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "istart_specified_ability_response.h"
+#include "iuser_callback.h"
 #include "running_process_info.h"
-#include "user_callback.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
