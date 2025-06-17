@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,6 +106,13 @@ HWTEST_F(MissionListenerProxyTest, OnMissionMovedToFront_001, TestSize.Level1)
 {
     int32_t missionId = 0;
     proxy_->OnMissionMovedToFront(missionId);
+    EXPECT_TRUE(proxy_ != nullptr);
+}
+
+HWTEST_F(MissionListenerProxyTest, OnMissionMovedToBackground_001, TestSize.Level1)
+{
+    int32_t missionId = 0;
+    proxy_->OnMissionMovedToBackground(missionId);
     EXPECT_TRUE(proxy_ != nullptr);
 }
 

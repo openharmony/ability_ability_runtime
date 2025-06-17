@@ -166,5 +166,20 @@ HWTEST_F(MissionListenerStubSecondTest, OnRemoteRequest_008, TestSize.Level1)
     int res = stub_->OnRemoteRequest(IMissionListener::ON_MISSION_UNFOCUSED, data, reply, option);
     EXPECT_EQ(res, NO_ERROR);
 }
+
+/*
+ * Feature: OnRemoteRequest_009
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ */
+HWTEST_F(MissionListenerStubSecondTest, OnRemoteRequest_009, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+    int res = stub_->OnRemoteRequest(IMissionListener::ON_MISSION_MOVED_TO_BACKGROUND, data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

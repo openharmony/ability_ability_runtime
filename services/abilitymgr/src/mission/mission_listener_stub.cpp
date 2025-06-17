@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,13 @@ int MissionListenerStub::OnMissionMovedToFrontInner(MessageParcel &data, Message
 {
     auto missionId = data.ReadInt32();
     OnMissionMovedToFront(missionId);
+    return NO_ERROR;
+}
+
+int MissionListenerStub::OnMissionMovedToBackgroundInner(MessageParcel &data, MessageParcel &reply)
+{
+    auto missionId = data.ReadInt32();
+    OnMissionMovedToBackground(missionId);
     return NO_ERROR;
 }
 
@@ -126,6 +133,8 @@ int MissionListenerStub::OnRemoteRequest(
             case ON_MISSION_UNFOCUSED:
                 return OnMissionUnfocusedInner(data, reply);
                 break;
+            case ON_MISSION_MOVED_TO_BACKGROUND:
+                return OnMissionMovedToBackgroundInner(data, reply);
         }
     }
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
