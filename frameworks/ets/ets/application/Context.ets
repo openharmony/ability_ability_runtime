@@ -38,7 +38,9 @@ let unregisterToken = new object();
 export class Context extends BaseContext {
   static {
     loadLibraryWithPermissionCheck("context_ani", "application.Context");
+    loadLibraryWithPermissionCheck("context_ani_kit.z", "application.Context");
   }
+
   etsContextPtr: long = 0;
   private cleaner: Cleaner | null = null;
   filesDir: string = "";
@@ -72,6 +74,7 @@ export class Context extends BaseContext {
   unregisterCleaner(): void {
     destroyRegister.unregister(unregisterToken);
   }
+
   public native getApplicationContextSync(): ApplicationContext;
   public native createModuleResourceManagerSync(bundleName: string, moduleName: string): resmgr.ResourceManager;
   private native switchArea(mode: contextConstant.AreaMode): void;
@@ -80,6 +83,9 @@ export class Context extends BaseContext {
   public native nativeCreateDisplayContext(displayId: long): Context;
   public native nativeCreateAreaModeContext(areaMode: contextConstant.AreaMode): Context;
   public native nativeCreateSystemHspModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager;
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
+  private static native nativeTransferDynamic(input: Object): ESValue;
+  private static contextType: string = 'Context';
 
   getApplicationContext(): ApplicationContext {
     return this.getApplicationContextSync();
@@ -129,5 +135,20 @@ export class Context extends BaseContext {
 
   createSystemHspModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager {
     return this.nativeCreateSystemHspModuleResourceManager(bundleName, moduleName);
+  }
+
+  static transferStatic(input: Any): Object {
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    console.log('transferStatic type: ' + type);
+    return Context.nativeTransferStatic(ESValue.wrap(input), type);
+  }
+
+  static transferDynamic(input: Object): Any {
+    return Context.nativeTransferDynamic(input).unwrap();
   }
 }
