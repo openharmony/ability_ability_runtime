@@ -93,6 +93,12 @@ void ResidentProcessManager::StartResidentProcessWithMainElementPerBundle(const 
     bool keepAliveEnable = bundleInfo.isKeepAlive;
     // Check startup permissions
     AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfo.name, keepAliveEnable);
+    if (!bundleInfo.isKeepAlive && keepAliveEnable) {
+        auto &bundleName = bundleInfo.name;
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "keepAliveBundle changed, bundle:%{public}s", bundleName.c_str());
+        AmsResidentProcessRdb::GetInstance().RemoveData(bundleName);
+        keepAliveEnable = false;
+    }
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "Precheck,bundle:%{public}s, process:%{public}s, keepAlive:%{public}d, enable:%{public}d",
         bundleInfo.name.c_str(), processName.c_str(), bundleInfo.isKeepAlive, keepAliveEnable);
