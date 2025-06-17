@@ -23,6 +23,20 @@
 #include "parcel.h"
 
 namespace OHOS {
+namespace AbilityRuntime {
+using OnRequestResult = std::function<void(const AppExecFwk::ElementName&, const std::string&)>;
+struct OnRequestResultElement {
+    std::string requestId_;
+    OnRequestResult onRequestSuccess_;
+    OnRequestResult onRequestFailure_;
+
+    OnRequestResultElement(const std::string &requestId, OnRequestResult onRequestSucc,
+        OnRequestResult onRequestFail) : requestId_(requestId), onRequestSuccess_(onRequestSucc),
+        onRequestFailure_(onRequestFail)
+    {}
+};
+}
+
 namespace AAFwk {
 class ProcessOptions;
 class StartWindowOption;
