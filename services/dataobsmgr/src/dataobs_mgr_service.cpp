@@ -107,9 +107,11 @@ std::pair<bool, struct ObserverNode> DataObsMgrService::ConstructObserverNode(sp
         userId = GetCallingUserId();
     }
     if (userId == -1) {
-        return std::make_pair(false, ObserverNode(dataObserver, userId));
+        // return false, tokenId default 0
+        return std::make_pair(false, ObserverNode(dataObserver, userId, 0));
     }
-    return std::make_pair(true, ObserverNode(dataObserver, userId));
+    uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
+    return std::make_pair(true, ObserverNode(dataObserver, userId, tokenId));
 }
 
 int32_t DataObsMgrService::GetCallingUserId()
@@ -308,7 +310,8 @@ Status DataObsMgrService::RegisterObserverExt(const Uri &uri, sptr<IDataAbilityO
     }
 
     auto innerUri = uri;
-    return dataObsMgrInnerExt_->HandleRegisterObserver(innerUri, dataObserver, userId, isDescendants);
+    uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
+    return dataObsMgrInnerExt_->HandleRegisterObserver(innerUri, dataObserver, userId, tokenId, isDescendants);
 }
 
 Status DataObsMgrService::UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
