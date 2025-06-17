@@ -31,8 +31,7 @@ namespace AbilityRuntime {
     [[maybe_unused]] ani_object callback);
 [[maybe_unused]] static void TerminateSelfWithResultSync([[maybe_unused]] ani_env *env,
     [[maybe_unused]] ani_object obj, [[maybe_unused]] ani_object abilityResult, [[maybe_unused]] ani_object callback);
-ani_object CreateStsUIExtensionContext(ani_env *env, std::shared_ptr<UIExtensionContext> context,
-    const std::shared_ptr<AppExecFwk::OHOSApplication> &application);
+ani_object CreateStsUIExtensionContext(ani_env *env, std::shared_ptr<UIExtensionContext> context);
 
 bool BindNativeMethods(ani_env *env, ani_class &cls);
 

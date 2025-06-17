@@ -17,15 +17,30 @@ import Context from 'application.Context'
 import { Configuration } from '@ohos.app.ability.Configuration'
 import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 
+// remove local declaration after Any type is supported
+type Any = Object | null | undefined
+
 export default class AbilityStageContext extends Context {
     static {
-        loadLibrary("context_ani");
+      loadLibrary("context_ani");
+      loadLibrary("ability_stage_context_ani_kit.z");
     }
     config?: Configuration;
     currentHapModuleInfo: HapModuleInfo;
     native constructor();
     constructor(currentHapModuleInfo: HapModuleInfo) {
-        super();
-        this.currentHapModuleInfo = currentHapModuleInfo;
+      super();
+      this.currentHapModuleInfo = currentHapModuleInfo;
+    }
+
+    private static native nativeTransferStatic(input: ESValue): Object;
+    private static native nativeTransferDynamic(input: Object): ESValue;
+
+    static transferStatic(input: Any): Object {
+      return AbilityStageContext.nativeTransferStatic(ESValue.wrap(input));
+    }
+
+    static transferDynamic(input: Object): Any {
+      return AbilityStageContext.nativeTransferDynamic(input).unwrap();
     }
 }
