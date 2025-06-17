@@ -66,7 +66,6 @@
 #include "istart_specified_ability_response.h"
 #include "kia_interceptor_interface.h"
 #include "kill_process_config.h"
-#include "killed_process_info.h"
 #include "process_memory_state.h"
 #include "process_util.h"
 #include "record_query_result.h"
