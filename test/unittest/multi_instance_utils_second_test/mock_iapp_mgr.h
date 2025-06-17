@@ -38,7 +38,6 @@
 #include "iremote_object.h"
 #include "irender_state_observer.h"
 #include "kia_interceptor_interface.h"
-#include "killed_process_info.h"
 #include "memory_level_info.h"
 #include "page_state_data.h"
 #include "process_memory_state.h"

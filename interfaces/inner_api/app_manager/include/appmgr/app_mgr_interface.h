@@ -40,7 +40,6 @@
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "irender_state_observer.h"
-#include "killed_process_info.h"
 #include "memory_level_info.h"
 #include "page_state_data.h"
 #include "process_memory_state.h"

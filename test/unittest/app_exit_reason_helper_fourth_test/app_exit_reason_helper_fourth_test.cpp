@@ -20,13 +20,12 @@
 #include "ability_manager_service.h"
 #include "app_exit_reason_helper.h"
 #include "bundle_mgr_helper.h"
-#include "mock_iapp_mgr.h"
+#include "exit_info_data_manager.h"
 #include "mock_mission_list_manager_interface.h"
 #include "mock_os_account_manager_wrapper.h"
 #include "mock_scene_board_judgement.h"
 
 #include "utils/ability_util.h"
-#include "utils/app_mgr_util.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -147,14 +146,18 @@ HWTEST_F(AppExitReasonHelperTest, RecordProcessExitReason_0300, TestSize.Level1)
     auto appExitReasonHelper = std::make_shared<AppExitReasonHelper>(nullptr);
     EXPECT_NE(appExitReasonHelper, nullptr);
 
-    AAFwk::AppMgrUtil::appMgr_ = new AppExecFwk::MockIAppMgr();
-    EXPECT_NE(AAFwk::AppMgrUtil::appMgr_, nullptr);
     ExitReason exitReason;
     int32_t result = appExitReasonHelper->RecordProcessExitReason(0, 0, exitReason);
-    EXPECT_EQ(result, -1);
+    EXPECT_EQ(result, AAFwk::ERR_NO_APP_RECORD);
 
+    ExitCacheInfo cacheInfo;
+    cacheInfo.exitInfo.pid_ = 1;
+    cacheInfo.exitInfo.uid_ = 1;
+    uint32_t accessTokenId = 0;
+    ExitInfoDataManager::GetInstance().AddExitInfo(accessTokenId, cacheInfo);
     result = appExitReasonHelper->RecordProcessExitReason(1, 1, exitReason);
-    EXPECT_NE(result, 0);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    ExitInfoDataManager::GetInstance().DeleteExitInfo(accessTokenId);
 
     GTEST_LOG_(INFO) << "RecordProcessExitReason_0300 end";
 }
