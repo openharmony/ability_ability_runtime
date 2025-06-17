@@ -57,7 +57,7 @@ void* DetachNewJsAbilityContext(napi_env, void* nativeObject, void*)
         return nullptr;
     }
     TAG_LOGD(AAFwkTag::APPKIT, "New detached base context");
-    auto* detachNewContext = new(std::nothrow) std::weak_ptr<AbilityContext>(*origContext);
+    auto* detachNewContext = new (std::nothrow) std::weak_ptr<AbilityContext>(*origContext);
     return detachNewContext;
 }
 
