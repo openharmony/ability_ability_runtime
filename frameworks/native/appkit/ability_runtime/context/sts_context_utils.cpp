@@ -27,6 +27,10 @@
 #include "ability_runtime_error_util.h"
 #include "tokenid_kit.h"
 #include "ipc_skeleton.h"
+#include "js_runtime.h"
+#include "js_runtime_utils.h"
+#include "js_context_utils.h"
+#include "native_engine/native_engine.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -35,8 +39,7 @@ namespace {
 constexpr const char* AREA_MODE_ENUM_NAME = "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;";
 }
 static std::weak_ptr<Context> context_;
-void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef)
+void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object contextObj)
 {
     // bind parent context field:applicationContext
     ani_field applicationContextField;
@@ -44,8 +47,13 @@ void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object cont
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed");
         return;
     }
-    ani_ref applicationContextRef = reinterpret_cast<ani_ref>(applicationCtxRef);
-    if (aniEnv->Object_SetField_Ref(contextObj, applicationContextField, applicationContextRef) != ANI_OK) {
+    auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetEtsGlobalObject();
+    if (appContextObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appContextObj is nullptr");
+        return;
+    }
+
+    if (aniEnv->Object_SetField_Ref(contextObj, applicationContextField, appContextObj->aniRef) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed");
         return;
     }
@@ -232,14 +240,13 @@ bool SetHapModuleInfo(
     return true;
 }
 
-void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<Context> context)
+void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj, std::shared_ptr<Context> context)
 {
     if (aniEnv == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "aniEnv is nullptr");
         return;
     }
-    BindApplicationCtx(aniEnv, contextClass, contextObj, applicationCtxRef);
+    BindApplicationCtx(aniEnv, contextClass, contextObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "context is nullptr");
         return;
