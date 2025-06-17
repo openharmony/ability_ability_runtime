@@ -79,6 +79,15 @@ ETSAbilityStage::ETSAbilityStage(
     : etsRuntime_(etsRuntime), etsAbilityStageObj_(std::move(etsAbilityStageObj))
 {}
 
+ETSAbilityStage::~ETSAbilityStage()
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "destructor");
+    auto context = GetContext();
+    if (context != nullptr) {
+        context->Unbind();
+    }
+}
+
 void ETSAbilityStage::Init(const std::shared_ptr<Context> &context,
     const std::weak_ptr<AppExecFwk::OHOSApplication> application)
 {
