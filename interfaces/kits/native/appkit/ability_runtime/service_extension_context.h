@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -172,6 +172,15 @@ public:
     ErrCode OpenLink(const AAFwk::Want& want, int reuqestCode);
     ErrCode OpenAtomicService(const AAFwk::Want &want, const AAFwk::StartOptions &options);
 
+    ErrCode AddCompletionHandler(const std::string &requestId, OnRequestResult onRequestSucc,
+        OnRequestResult onRequestFail) override;
+    
+    void OnRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) override;
+
+    void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message) override;
+
 protected:
     bool IsContext(size_t contextTypeId) override
     {
@@ -188,6 +197,9 @@ private:
      * @return Current Ability Type
      */
     OHOS::AppExecFwk::AbilityType GetAbilityInfoType() const;
+
+    std::mutex onRequestResultMutex_;
+    std::vector<std::shared_ptr<OnRequestResultElement>> onRequestResults_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

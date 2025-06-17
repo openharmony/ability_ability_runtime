@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -551,6 +551,124 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_OpenAtomicServic
 
     auto result = serviceExtensionContextTest.OpenAtomicService(want, options);
     EXPECT_NE(result, ERR_OK);
+}
+
+/**
+ * @tc.number: AddCompletionHandler_0100
+ * @tc.name: AddCompletionHandler
+ * @tc.desc: Verify that function AddCompletionHandler.
+ */
+HWTEST_F(ServiceExtensionContextTest, AddCompletionHandler_100, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    OnRequestResult onRequestSucc = nullptr;
+    OnRequestResult onRequestFail = nullptr;
+    ServiceExtensionContext serviceExtensionContextTest;
+    auto result = serviceExtensionContextTest.AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(serviceExtensionContextTest.onRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: AddCompletionHandler_0200
+ * @tc.name: AddCompletionHandler
+ * @tc.desc: Verify that function AddCompletionHandler.
+ */
+HWTEST_F(ServiceExtensionContextTest, AddCompletionHandler_0200, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = nullptr;
+    ServiceExtensionContext serviceExtensionContextTest;
+    auto result = serviceExtensionContextTest.AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(serviceExtensionContextTest.onRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: AddCompletionHandler_0300
+ * @tc.name: AddCompletionHandler
+ * @tc.desc: Verify that function AddCompletionHandler.
+ */
+HWTEST_F(ServiceExtensionContextTest, AddCompletionHandler_0300, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    ServiceExtensionContext serviceExtensionContextTest;
+    auto result = serviceExtensionContextTest.AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(serviceExtensionContextTest.onRequestResults_.empty(), false);
+    serviceExtensionContextTest.onRequestResults_.clear();
+}
+
+/**
+ * @tc.number: OnRequestSuccess_0100
+ * @tc.name: OnRequestSuccess
+ * @tc.desc: Verify that function OnRequestSuccess.
+ */
+HWTEST_F(ServiceExtensionContextTest, OnRequestSuccess_0100, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    ServiceExtensionContext serviceExtensionContextTest;
+    auto result = serviceExtensionContextTest.AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(serviceExtensionContextTest.onRequestResults_.empty(), false);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    serviceExtensionContextTest.OnRequestSuccess(requestId, element, "success");
+    EXPECT_EQ(serviceExtensionContextTest.onRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: OnRequestSuccess_0200
+ * @tc.name: OnRequestSuccess
+ * @tc.desc: Verify that function OnRequestSuccess.
+ */
+HWTEST_F(ServiceExtensionContextTest, OnRequestSuccess_0200, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    ServiceExtensionContext serviceExtensionContextTest;
+    EXPECT_EQ(serviceExtensionContextTest.onRequestResults_.empty(), true);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    serviceExtensionContextTest.OnRequestSuccess(requestId, element, "success");
+    EXPECT_EQ(serviceExtensionContextTest.onRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: OnRequestFailure_0100
+ * @tc.name: OnRequestFailure
+ * @tc.desc: Verify that function OnRequestFailure.
+ */
+HWTEST_F(ServiceExtensionContextTest, OnRequestFailure_0100, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    ServiceExtensionContext serviceExtensionContextTest;
+    auto result = serviceExtensionContextTest.AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(serviceExtensionContextTest.onRequestResults_.empty(), false);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    serviceExtensionContextTest.OnRequestFailure(requestId, element, "failure");
+    EXPECT_EQ(serviceExtensionContextTest.onRequestResults_.empty(), true);
+    serviceExtensionContextTest.onRequestResults_.clear();
+}
+
+/**
+ * @tc.number: OnRequestFailure_0200
+ * @tc.name: OnRequestFailure
+ * @tc.desc: Verify that function OnRequestFailure.
+ */
+HWTEST_F(ServiceExtensionContextTest, OnRequestFailure_0200, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    ServiceExtensionContext serviceExtensionContextTest;
+    EXPECT_EQ(serviceExtensionContextTest.onRequestResults_.empty(), true);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    serviceExtensionContextTest.OnRequestFailure(requestId, element, "failure");
+    EXPECT_EQ(serviceExtensionContextTest.onRequestResults_.empty(), true);
 }
 }
 }
