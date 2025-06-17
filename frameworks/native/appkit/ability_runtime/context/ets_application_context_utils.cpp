@@ -442,7 +442,7 @@ void EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniEnv, vo
     }
     auto stsReference = std::make_shared<AbilityRuntime::STSNativeReference>();
     stsReference->aniObj = applicationContextObject;
-    AbilityRuntime::ApplicationContextManager::GetApplicationContextManager().AddStsGlobalObject(aniEnv, stsReference);
+    AbilityRuntime::ApplicationContextManager::GetApplicationContextManager().SetEtsGlobalObject(stsReference);
     applicationContextObjRef = reinterpret_cast<void*>(applicationContextObjectRef);
     applicationContext->SetApplicationCtxObjRef(applicationContextObjectRef);
 }
