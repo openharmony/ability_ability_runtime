@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,9 +45,11 @@ public:
     UserCallbackStubFuzzTest() = default;
     virtual ~UserCallbackStubFuzzTest()
     {}
-    ErrCode OnStopUserDone(int userId, int errcode) override { return ERR_OK; }
-    ErrCode OnStartUserDone(int userId, int errcode) override { return ERR_OK; }
-    ErrCode OnLogoutUserDone(int userId, int errcode) override { return ERR_OK; }
+    void OnStopUserDone(int userId, int errcode) override
+    {}
+    void OnStartUserDone(int userId, int errcode) override {}
+
+    void OnLogoutUserDone(int userId, int errcode) override {}
 };
 const std::u16string APPMGR_INTERFACE_TOKEN = u"ohos.aafwk.AppManager";
 uint32_t GetU32Data(const char* ptr)
@@ -68,6 +70,8 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     MessageParcel reply;
     MessageOption option;
     backStub->OnRemoteRequest(code, dataParcel, reply, option);
+    backStub->OnStopUserDoneInner(dataParcel, reply);
+    backStub->OnStartUserDoneInner(dataParcel, reply);
 
     return true;
 }
