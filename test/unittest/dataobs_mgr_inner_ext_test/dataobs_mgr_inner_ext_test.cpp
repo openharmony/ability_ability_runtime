@@ -21,6 +21,7 @@
 #include "data_ability_observer_proxy.h"
 #include "dataobs_mgr_inner_ext.h"
 #include "dataobs_mgr_errors.h"
+#include "hilog_tag_wrapper.h"
 #include "mock.h"
 
 using namespace OHOS;
@@ -58,7 +59,7 @@ void DataObsMgrInnerExtTest::RegisterObserverUtil(std::shared_ptr<DataObsMgrInne
     const sptr<IDataAbilityObserver> &callback, uint32_t times, bool isFuzzy)
 {
     while (times-- > 0) {
-        EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri, callback, USER_TEST, isFuzzy), SUCCESS);
+        EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri, callback, USER_TEST, 0, isFuzzy), SUCCESS);
     }
 }
 
@@ -116,7 +117,7 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0100,
     Uri uri2(uriBase + "/Person/2");
     sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
 
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer, USER_TEST), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer, USER_TEST, 0), SUCCESS);
 
     ChangeInfo changeInfo = { ChangeInfo::ChangeType::OTHER, {uri1} };
     dataObsMgrInnerExt->HandleNotifyChange(changeInfo, USER_TEST);
@@ -186,14 +187,14 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0300,
     sptr<MockDataAbilityObserverStub> observer2(new (std::nothrow) MockDataAbilityObserverStub());
     sptr<MockDataAbilityObserverStub> observer3(new (std::nothrow) MockDataAbilityObserverStub());
 
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST), SUCCESS);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer2, USER_TEST), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST, 0), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer2, USER_TEST, 0), SUCCESS);
 
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2, observer2, USER_TEST), SUCCESS);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2, observer3, USER_TEST), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2, observer2, USER_TEST, 0), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2, observer3, USER_TEST, 0), SUCCESS);
 
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri3, observer3, USER_TEST), SUCCESS);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri3, observer1, USER_TEST), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri3, observer3, USER_TEST, 0), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri3, observer1, USER_TEST, 0), SUCCESS);
 
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer1->changeInfo_.uris_, { uri1 }));
@@ -232,7 +233,7 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0400,
     Uri uri2(uriBase + "/Person2");
 
     sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer, USER_TEST, true), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer, USER_TEST, 0, true), SUCCESS);
 
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer->changeInfo_.uris_, { uri1 }));
@@ -302,11 +303,11 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0600,
     Uri uri145(uriBase + "/Person1/4/5");
 
     sptr<MockDataAbilityObserverStub> observer1(new (std::nothrow) MockDataAbilityObserverStub());
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST, true), SUCCESS);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri123, observer1, USER_TEST, true), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST, 0, true), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri123, observer1, USER_TEST, 0, true), SUCCESS);
 
     sptr<MockDataAbilityObserverStub> observer2(new (std::nothrow) MockDataAbilityObserverStub());
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri14, observer2, USER_TEST, true), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri14, observer2, USER_TEST, 0, true), SUCCESS);
 
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer1->changeInfo_.uris_, { uri1 }));
@@ -343,11 +344,11 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0700,
     Uri uri145(uriBase + "/Person1/4/5");
 
     sptr<MockDataAbilityObserverStub> observer1(new (std::nothrow) MockDataAbilityObserverStub());
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST, true), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST, 0, true), SUCCESS);
 
     sptr<MockDataAbilityObserverStub> observer2(new (std::nothrow) MockDataAbilityObserverStub());
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri14, observer2, USER_TEST, true), SUCCESS);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri14, observer2, USER_TEST, false), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri14, observer2, USER_TEST, 0, true), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri14, observer2, USER_TEST, 0, false), SUCCESS);
 
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer1->changeInfo_.uris_, { uri1 }));
@@ -359,6 +360,75 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0700,
             { uri14, uri145, uri12, uri123 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer1->changeInfo_.uris_, { uri14, uri145, uri12, uri123 }));
     EXPECT_TRUE(UrisEqual(observer2->changeInfo_.uris_, { uri14, uri14, uri145 }));
+}
+
+/*
+ * Feature: DataObsMgrInnerExt
+ * Function: HandleRegisterObserver test
+ * SubFunction: 0900
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription:Register max observer
+ */
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0900, TestSize.Level1)
+{
+    std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
+    std::string uriBase = "datashare://Authority/com.domainname.dataability.persondata";
+
+    Uri uri1(uriBase + "/Person1");
+    int res = 0;
+
+    int times = DataObsMgrInnerExt::OBS_NUM_MAX;
+    for (int i = 0; i <= times; i++) {
+        sptr<MockDataAbilityObserverStub> observer1(new (std::nothrow) MockDataAbilityObserverStub());
+        res = dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST, 0, true);
+        EXPECT_EQ(res, SUCCESS);
+    }
+    sptr<MockDataAbilityObserverStub> observer1(new (std::nothrow) MockDataAbilityObserverStub());
+    res = dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST, 0, true);
+    EXPECT_EQ(res, DATAOBS_SERVICE_OBS_LIMMIT);
+
+    TAG_LOGE(AAFwkTag::DBOBSMGR, "DataObsMgrInnerExt_HandleRegisterObserver_0900");
+    // other token success
+    sptr<MockDataAbilityObserverStub> observer2(new (std::nothrow) MockDataAbilityObserverStub());
+    res = dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer2, USER_TEST, 1, true);
+    EXPECT_EQ(res, SUCCESS);
+
+    // other uri success
+    Uri uri12(uriBase + "/Person1/2");
+    sptr<MockDataAbilityObserverStub> observer3(new (std::nothrow) MockDataAbilityObserverStub());
+    res = dataObsMgrInnerExt->HandleRegisterObserver(uri12, observer3, USER_TEST, 0, true);
+    EXPECT_EQ(res, SUCCESS);
+}
+
+/*
+ * Feature: DataObsMgrInnerExt
+ * Function: HandleRegisterObserver test
+ * SubFunction: 01000
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription:Register max observer
+ */
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_01000, TestSize.Level1)
+{
+    TAG_LOGE(AAFwkTag::DBOBSMGR, "DataObsMgrInnerExt_HandleRegisterObserver_01000::Start");
+    std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
+    std::string uriBase = "datashare://Authority/com.domainname.dataability.persondata";
+
+    Uri uri1(uriBase + "/Person1");
+    int res = 0;
+
+    for (int token = 0; token < DataObsMgrInnerExt::OBS_NUM_MAX; token++) {
+        for (int i = 0; i < DataObsMgrInnerExt::OBS_NUM_MAX; i++) {
+            sptr<MockDataAbilityObserverStub> observer1(new (std::nothrow) MockDataAbilityObserverStub());
+            res = dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST, token, true);
+            EXPECT_EQ(res, SUCCESS);
+        }
+    }
+    sptr<MockDataAbilityObserverStub> observer1(new (std::nothrow) MockDataAbilityObserverStub());
+    res = dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST, 0, true);
+    EXPECT_EQ(res, DATAOBS_SERVICE_OBS_LIMMIT);
+    TAG_LOGE(AAFwkTag::DBOBSMGR, "DataObsMgrInnerExt_HandleRegisterObserver_01000::Start");
 }
 
 /*
@@ -380,7 +450,7 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleUnregisterObserver_010
     Uri uri2(uriBase2 + "/Person2");
 
     sptr<MockDataAbilityObserverStub> observer1(new (std::nothrow) MockDataAbilityObserverStub());
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST, true), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST, 0, true), SUCCESS);
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer1->changeInfo_.uris_, { uri1 }));
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 1);
@@ -408,11 +478,11 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleUnregisterObserver_020
     sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 0);
 
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer, USER_TEST, true), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer, USER_TEST, 0, true), SUCCESS);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 1);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.find(observer)->second->ref, 2);
 
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer, USER_TEST, false), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer, USER_TEST, 0, false), SUCCESS);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 1);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.find(observer)->second->ref, 3);
 
@@ -448,13 +518,13 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleUnregisterObserver_030
     Uri uri135(uriBase + "/Person1/3/5");
 
     sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri13, observer, USER_TEST, true), SUCCESS);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri13, observer, USER_TEST, false), SUCCESS);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri134, observer, USER_TEST, false), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri13, observer, USER_TEST, 0, true), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri13, observer, USER_TEST, 0, false), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri134, observer, USER_TEST, 0, false), SUCCESS);
 
     sptr<MockDataAbilityObserverStub> observer2(new (std::nothrow) MockDataAbilityObserverStub());
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri13, observer2, USER_TEST, true), SUCCESS);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri135, observer2, USER_TEST, true), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri13, observer2, USER_TEST, 0, true), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri135, observer2, USER_TEST, 0, true), SUCCESS);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 2);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.find(observer2)->second->ref, 3);
 
@@ -497,15 +567,15 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_RegisterAndUnRegister_0100, 
     sptr<MockDataAbilityObserverStub> observer1(new (std::nothrow) MockDataAbilityObserverStub());
     sptr<MockDataAbilityObserverStub> observer2(new (std::nothrow) MockDataAbilityObserverStub());
 
-    RegisterObserverUtil(dataObsMgrInnerExt, uri1, observer1, 50, false);
+    RegisterObserverUtil(dataObsMgrInnerExt, uri1, observer1, AAFwk::DataObsMgrInnerExt::OBS_NUM_MAX + 1, false);
     auto obsRecipientRef1 = dataObsMgrInnerExt->obsRecipientRefs.find(observer1);
-    EXPECT_TRUE(obsRecipientRef1 != dataObsMgrInnerExt->obsRecipientRefs.end() && obsRecipientRef1->second->ref == 51);
+    EXPECT_TRUE(obsRecipientRef1 != dataObsMgrInnerExt->obsRecipientRefs.end() && obsRecipientRef1->second->ref == 52);
     EXPECT_TRUE(dataObsMgrInnerExt->obsRecipientRefs.find(observer2) == dataObsMgrInnerExt->obsRecipientRefs.end());
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST, false),
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, USER_TEST, 0, false),
         DATAOBS_SERVICE_OBS_LIMMIT);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer2, USER_TEST, true),
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer2, USER_TEST, 0, true),
         DATAOBS_SERVICE_OBS_LIMMIT);
-    EXPECT_EQ(obsRecipientRef1->second->ref, 51);
+    EXPECT_EQ(obsRecipientRef1->second->ref, 52);
     EXPECT_TRUE(dataObsMgrInnerExt->obsRecipientRefs.find(observer2) == dataObsMgrInnerExt->obsRecipientRefs.end());
 
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST);
@@ -517,7 +587,7 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_RegisterAndUnRegister_0100, 
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST);
     EXPECT_TRUE(dataObsMgrInnerExt->obsRecipientRefs.find(observer1) == dataObsMgrInnerExt->obsRecipientRefs.end());
     EXPECT_TRUE(dataObsMgrInnerExt->obsRecipientRefs.find(observer2) == dataObsMgrInnerExt->obsRecipientRefs.end());
-    EXPECT_EQ(observer1->onChangeCall_, 50);
+    EXPECT_EQ(observer1->onChangeCall_, 51);
     EXPECT_EQ(observer2->onChangeCall_, 0);
 }
 
@@ -540,17 +610,17 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_RegisterAndUnRegister_0200, 
     sptr<MockDataAbilityObserverStub> observer2(new (std::nothrow) MockDataAbilityObserverStub());
 
     RegisterObserverUtil(dataObsMgrInnerExt, uri2, observer1, 20, true);
-    RegisterObserverUtil(dataObsMgrInnerExt, uri2, observer2, 30, false);
+    RegisterObserverUtil(dataObsMgrInnerExt, uri2, observer2, 31, false);
     auto obsRecipientRef1 = dataObsMgrInnerExt->obsRecipientRefs.find(observer1);
     auto obsRecipientRef2 = dataObsMgrInnerExt->obsRecipientRefs.find(observer2);
     EXPECT_TRUE(obsRecipientRef1 != dataObsMgrInnerExt->obsRecipientRefs.end() && obsRecipientRef1->second->ref == 21);
-    EXPECT_TRUE(obsRecipientRef2 != dataObsMgrInnerExt->obsRecipientRefs.end() && obsRecipientRef2->second->ref == 31);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2, observer1, USER_TEST, false),
+    EXPECT_TRUE(obsRecipientRef2 != dataObsMgrInnerExt->obsRecipientRefs.end() && obsRecipientRef2->second->ref == 32);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2, observer1, USER_TEST, 0, false),
         DATAOBS_SERVICE_OBS_LIMMIT);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2, observer2, USER_TEST, false),
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2, observer2, USER_TEST, 0, false),
         DATAOBS_SERVICE_OBS_LIMMIT);
     EXPECT_EQ(obsRecipientRef1->second->ref, 21);
-    EXPECT_EQ(obsRecipientRef2->second->ref, 31);
+    EXPECT_EQ(obsRecipientRef2->second->ref, 32);
 
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST);
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri1, observer1), SUCCESS);
@@ -562,7 +632,7 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_RegisterAndUnRegister_0200, 
     EXPECT_TRUE(dataObsMgrInnerExt->obsRecipientRefs.find(observer1) == dataObsMgrInnerExt->obsRecipientRefs.end());
     EXPECT_TRUE(dataObsMgrInnerExt->obsRecipientRefs.find(observer2) == dataObsMgrInnerExt->obsRecipientRefs.end());
     EXPECT_EQ(observer1->onChangeCall_, 40);
-    EXPECT_EQ(observer2->onChangeCall_, 90);
+    EXPECT_EQ(observer2->onChangeCall_, 93);
 }
 
 /*
@@ -688,7 +758,7 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_DeathRecipient_0200, TestSiz
     sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
     {
         std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
-        EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri, observer, USER_TEST, false), SUCCESS);
+        EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri, observer, USER_TEST, 0, false), SUCCESS);
 
         auto it = dataObsMgrInnerExt->obsRecipientRefs.find(observer->AsObject());
         EXPECT_TRUE(it != dataObsMgrInnerExt->obsRecipientRefs.end() && it->second->deathRecipient != nullptr);
@@ -721,7 +791,7 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_AddObsDeathRecipientOverMax_
     EXPECT_TRUE(dataObsMgrInnerExt->AddObsDeathRecipient(observer));
     deathRecipientRef->ref++;
     EXPECT_FALSE(dataObsMgrInnerExt->AddObsDeathRecipient(observer));
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri, observer, USER_TEST), DATAOBS_SERVICE_OBS_LIMMIT);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri, observer, USER_TEST, 0), DATAOBS_SERVICE_OBS_LIMMIT);
 }
 
 /*
@@ -745,7 +815,7 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0800,
     auto func = [](std::vector<Uri> &uris, std::shared_ptr<DataObsMgrInnerExt> obsMgr,
                     sptr<MockDataAbilityObserverStub> &obs) {
         for (uint32_t i = 0; i < uris.size() * 5; ++i) {
-            EXPECT_EQ(obsMgr->HandleRegisterObserver(uris[i % uris.size()], obs, USER_TEST, false), SUCCESS);
+            EXPECT_EQ(obsMgr->HandleRegisterObserver(uris[i % uris.size()], obs, USER_TEST, 0, false), SUCCESS);
         }
         obs->Notify();
     };
@@ -792,10 +862,10 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleNotifyChange_0100, Tes
 
     sptr<MockDataAbilityObserverStub> observer1 = (new (std::nothrow) MockDataAbilityObserverStub());
     sptr<MockDataAbilityObserverStub> observer2 = (new (std::nothrow) MockDataAbilityObserverStub());
-    dataObsMgrInnerExt->HandleRegisterObserver(uri, observer1, USER_TEST);
+    dataObsMgrInnerExt->HandleRegisterObserver(uri, observer1, USER_TEST, 0);
 
     observer1->func = [&dataObsMgrInnerExt, &observer2, &uri]() {
-        EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri, observer2, USER_TEST), SUCCESS);
+        EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri, observer2, USER_TEST, 0), SUCCESS);
     };
     EXPECT_EQ(dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri } }, USER_TEST), SUCCESS);
     EXPECT_EQ(observer1->onChangeCall_, 1);
