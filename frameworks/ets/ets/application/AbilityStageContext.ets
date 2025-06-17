@@ -20,12 +20,32 @@ import { HapModuleInfo } from 'bundleManager.HapModuleInfo'
 export default class AbilityStageContext extends Context {
   static {
     loadLibraryWithPermissionCheck("context_ani", "application.AbilityStageContext");
+    loadLibraryWithPermissionCheck("ability_stage_context_ani_kit.z", "application.AbilityStageContext");
   }
   config?: Configuration;
   currentHapModuleInfo: HapModuleInfo;
   native constructor();
   constructor(currentHapModuleInfo: HapModuleInfo) {
-      super();
-      this.currentHapModuleInfo = currentHapModuleInfo;
+    super();
+    this.currentHapModuleInfo = currentHapModuleInfo;
+  }
+
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
+  private static native nativeTransferDynamic(input: Object): ESValue;
+  private static contextType: string = 'AbilityStageContext';
+
+  static transferStatic(input: Any): Object {
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    console.log('transferStatic type: ' + type);
+    return AbilityStageContext.nativeTransferStatic(ESValue.wrap(input), type);
+  }
+
+  static transferDynamic(input: Object): Any {
+    return AbilityStageContext.nativeTransferDynamic(input).unwrap();
   }
 }
