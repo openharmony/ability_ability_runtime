@@ -20,6 +20,7 @@
 #include <gtest/gtest.h>
 
 #include "ability.h"
+#include "ui_ability.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -38,6 +39,25 @@ public:
     MOCK_METHOD1(OnRestoreData, bool(WantParams &restoreData));
     MOCK_METHOD1(OnCompleteContinuation, void(int result));
     MOCK_METHOD1(OnContinue, int32_t(WantParams &wantParams));
+
+    const std::shared_ptr<AbilityInfo> GetAbilityInfo()
+    {
+        return abilityInfo_;
+    }
+};
+
+class MockContinuationUIAbility : public AbilityRuntime::UIAbility {
+public:
+    MockContinuationUIAbility() = default;
+    virtual ~MockContinuationUIAbility() = default;
+
+    MOCK_METHOD0(OnStartContinuation, bool());
+    MOCK_METHOD0(TerminateAbility, int());
+    MOCK_METHOD0(OnRemoteTerminated, void());
+    MOCK_METHOD0(GetContentInfo, std::string());
+    MOCK_METHOD1(OnSaveData, bool(WantParams &saveData));
+    MOCK_METHOD3(OnContinue, int32_t(AAFwk::WantParams &wantParams, bool &isAsyncOnContinue,
+        const AppExecFwk::AbilityInfo &abilityInfo));
 
     const std::shared_ptr<AbilityInfo> GetAbilityInfo()
     {
