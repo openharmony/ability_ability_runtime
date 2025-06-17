@@ -49,16 +49,17 @@ namespace {
     constexpr const char* const LOG_FILE_SEP = "===============================================================";
     constexpr int START_PATH_LEN = 128;
     constexpr const char* const LIB_THREAD_CPU_LOAD_PATH = "libucollection_utility.z.so";
+    constexpr int TIME_LIMIT = 6000; // 6s
+    constexpr size_t MAX_CPU_MAP_SIZE = 10;
+    constexpr uint32_t DEFAULT_CPU_SIZE = 1;
+    constexpr const char* const CPU_INFO_PREFIX = "cpu-info-";
+
 }
 std::shared_ptr<AppfreezeCpuFreqManager> AppfreezeCpuFreqManager::instance_ = nullptr;
-ffrt::mutex AppfreezeCpuFreqManager::singletonMutex_;
 ffrt::mutex AppfreezeCpuFreqManager::freezeInfoMutex_;
-std::vector<std::vector<CpuFreqData>> AppfreezeCpuFreqManager::handlingHalfCpuData_;
-uint64_t AppfreezeCpuFreqManager::halfTime_ = 0;
-uint64_t AppfreezeCpuFreqManager::optimalCpuTime_ = 0;
-std::string AppfreezeCpuFreqManager::stackPath_ = "";
-std::vector<TotalTime> AppfreezeCpuFreqManager::totalTimeList_;
 int AppfreezeCpuFreqManager::cpuCount_ = 0;
+std::map<std::string, CpuDataProcessor> AppfreezeCpuFreqManager::cpuInfoMap_;
+
 typedef double (*GetThreadCpuload)(int);
 
 AppfreezeCpuFreqManager::AppfreezeCpuFreqManager()
@@ -70,36 +71,76 @@ AppfreezeCpuFreqManager::~AppfreezeCpuFreqManager()
 {
 }
 
-
-std::shared_ptr<AppfreezeCpuFreqManager> AppfreezeCpuFreqManager::GetInstance()
+AppfreezeCpuFreqManager &AppfreezeCpuFreqManager::GetInstance()
 {
-    if (instance_ == nullptr) {
-        std::lock_guard<ffrt::mutex> lock(singletonMutex_);
-        if (instance_ == nullptr) {
-            instance_ = std::make_shared<AppfreezeCpuFreqManager>();
+    static AppfreezeCpuFreqManager instance;
+    return instance;
+}
+
+void AppfreezeCpuFreqManager::ClearOldCpuData(uint64_t curTime)
+{
+    std::lock_guard<ffrt::mutex> lock(freezeInfoMutex_);
+    if (cpuInfoMap_.size() < MAX_CPU_MAP_SIZE) {
+        return ;
+    }
+    for (auto it = cpuInfoMap_.begin(); it != cpuInfoMap_.end();) {
+        auto diff = curTime - it->second.GetCpuStartTime().halfStartTime;
+        if (diff > TIME_LIMIT || diff < 0) {
+            it = cpuInfoMap_.erase(it);
+        } else {
+            ++it;
         }
     }
-    return instance_;
 }
 
-void AppfreezeCpuFreqManager::SetHalfStackPath(const std::string& stackpath)
+bool AppfreezeCpuFreqManager::IsSkipTask(uint64_t curTime, const std::string &key, int32_t pid)
 {
     std::lock_guard<ffrt::mutex> lock(freezeInfoMutex_);
-    if (!stackPath_.empty()) {
-        return;
+    auto it = cpuInfoMap_.find(key);
+    if (it != cpuInfoMap_.end()) {
+        auto diff = curTime - it->second.GetCpuStartTime().halfStartTime;
+        if (diff > TIME_LIMIT || diff < 0) {
+            it = cpuInfoMap_.erase(it);
+        } else {
+            TAG_LOGW(AAFwkTag::APPDFR, "Skip this task. "
+                "The task of the current process is already being executed, pid:%{public}d", pid);
+            return true;
+        }
     }
-    stackPath_ = stackpath;
+    if (cpuInfoMap_.size() >= MAX_CPU_MAP_SIZE) {
+        TAG_LOGW(AAFwkTag::APPDFR, "Skip this task. "
+            "The current queue can only execute up to %{public}zu tasks", MAX_CPU_MAP_SIZE);
+        return true;
+    }
+    return false;
 }
 
-void AppfreezeCpuFreqManager::InitHalfCpuInfo(int32_t pid)
+bool AppfreezeCpuFreqManager::InitCpuDataProcessor(const std::string &eventType,
+    int32_t pid, int32_t uid, const std::string &stackPath)
 {
-    std::lock_guard<ffrt::mutex> lock(freezeInfoMutex_);
-    if (handlingHalfCpuData_.size() != 0) {
-        return;
+    uint64_t curTime = AppfreezeUtil::GetMilliseconds();
+    ClearOldCpuData(curTime);
+    std::string key = eventType + std::to_string(uid);
+    if (IsSkipTask(curTime, key, pid)) {
+        return false;
     }
-    halfTime_ = AppfreezeUtil::GetMilliseconds();
-    optimalCpuTime_ = GetOptimalCpuTime(pid);
-    ParseCpuData(handlingHalfCpuData_, totalTimeList_);
+    CpuStartTime cpuStartTime = {
+        .halfStartTime = curTime,
+        .optimalCpuStartTime = GetOptimalCpuTime(pid),
+    };
+    std::vector<std::vector<CpuFreqData>> cpuData;
+    std::vector<TotalTime> totalTimeList;
+    ParseCpuData(cpuData, totalTimeList);
+    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath);
+    {
+        std::lock_guard<ffrt::mutex> lock(freezeInfoMutex_);
+        cpuInfoMap_[key] = data;
+    }
+    TAG_LOGD(AAFwkTag::APPDFR, "init success. eventType: %{public}s path: %{public}s "
+        "halfStartTime: %{public}" PRIu64", optimalCpuStartTime: %{public}" PRIu64".",
+        eventType.c_str(), stackPath.c_str(), cpuStartTime.halfStartTime,
+        cpuStartTime.optimalCpuStartTime);
+    return true;
 }
 
 void AppfreezeCpuFreqManager::ParseCpuData(std::vector<std::vector<CpuFreqData>>& datas,
@@ -109,7 +150,7 @@ void AppfreezeCpuFreqManager::ParseCpuData(std::vector<std::vector<CpuFreqData>>
         AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str());
     std::string tmp = "start time: " + AbilityRuntime::TimeUtil::DefaultCurrentTimeStr();
     TAG_LOGW(AAFwkTag::APPDFR, "ParseCpuData called, %{public}s", tmp.c_str());
-    for (int32_t i = 0; i <= cpuCount_; ++i) {
+    for (int32_t i = 0; i < cpuCount_; ++i) {
         std::vector<CpuFreqData> parseDatas;
         TotalTime totalTime;
         if (ReadCpuDataByNum(i, parseDatas, totalTime)) {
@@ -127,7 +168,8 @@ bool AppfreezeCpuFreqManager::ReadCpuDataByNum(int32_t num, std::vector<CpuFreqD
     TAG_LOGD(AAFwkTag::APPDFR, "ReadCpuDataByNum start time: %{public}s",
         AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str());
     if (num > cpuCount_) {
-        TAG_LOGE(AAFwkTag::APPDFR, "Read cpu info failed, num:%{public}d", num);
+        TAG_LOGE(AAFwkTag::APPDFR, "Read cpu info failed, num:%{public}d, cpuCount:%{public}d",
+            num, cpuCount_);
         return false;
     }
     std::string cpuFreqPath = "/sys/devices/system/cpu/cpu" + std::to_string(num) + "/power/time_in_state";
@@ -186,6 +228,8 @@ bool AppfreezeCpuFreqManager::GetCpuTotalValue(size_t i, std::vector<TotalTime> 
     std::vector<TotalTime> blockTotalTimeList, TotalTime& totalTime)
 {
     if (totalTimeList.size() <= i || totalTimeList.size() != blockTotalTimeList.size()) {
+        TAG_LOGE(AAFwkTag::APPDFR, "index:%{public}zu, halfTotal size:%{public}zu, "
+            "blockTotal size:%{public}zu.", i, totalTimeList.size(), blockTotalTimeList.size());
         return false;
     }
     totalTime.totalCpuTime = totalTimeList[i].totalCpuTime > blockTotalTimeList[i].totalCpuTime ?
@@ -201,9 +245,10 @@ bool AppfreezeCpuFreqManager::GetCpuTotalValue(size_t i, std::vector<TotalTime> 
     return true;
 }
 
-std::string AppfreezeCpuFreqManager::GetCpuInfoContent()
+std::string AppfreezeCpuFreqManager::GetCpuInfoContent(
+    const std::vector<std::vector<CpuFreqData>> &handlingHalfCpuData, const std::vector<TotalTime> &totalTimeList)
 {
-    if (handlingHalfCpuData_.size() == 0) {
+    if (handlingHalfCpuData.size() == 0 || totalTimeList.size() == 0) {
         return "";
     }
     std::stringstream ss;
@@ -211,20 +256,22 @@ std::string AppfreezeCpuFreqManager::GetCpuInfoContent()
     std::vector<std::vector<CpuFreqData>> blockCpuData;
     std::vector<TotalTime> blockTotalTimeList;
     ParseCpuData(blockCpuData, blockTotalTimeList);
-    if (handlingHalfCpuData_.size() != blockCpuData.size()) {
-        return "Error: Half and block datas have different sizes.";
+    if (handlingHalfCpuData.size() != blockCpuData.size()) {
+        TAG_LOGE(AAFwkTag::APPDFR, "Half and block have different sizes, halfData:%{public}zu, "
+            "blockData:%{public}zu", handlingHalfCpuData.size(), blockCpuData.size());
+        return "";
     }
-    for (size_t i = 0; i < handlingHalfCpuData_.size(); ++i) {
-        auto halfData = handlingHalfCpuData_[i];
+    for (size_t i = 0; i < handlingHalfCpuData.size(); ++i) {
+        auto halfData = handlingHalfCpuData[i];
         auto blockData = blockCpuData[i];
         if (halfData.size() != blockData.size()) {
             TAG_LOGE(AAFwkTag::APPDFR, "Half and block have different sizes, halfData:%{public}zu, "
                 "blockData:%{public}zu", halfData.size(), blockData.size());
-            return "Error: Half and block have different sizes.";
+            return "";
         }
         TotalTime totalTime;
-        if (!GetCpuTotalValue(i, totalTimeList_, blockTotalTimeList, totalTime)) {
-            return "Error: totalCpuTime less than zero.";
+        if (!GetCpuTotalValue(i, totalTimeList, blockTotalTimeList, totalTime)) {
+            return "";
         }
         float percentage = (static_cast<float>(totalTime.totalRunningTime) /
             static_cast<float>(totalTime.totalCpuTime)) * CPU_PERCENTAGE;;
@@ -252,10 +299,10 @@ std::string AppfreezeCpuFreqManager::GetCpuInfoContent()
 
 uint64_t AppfreezeCpuFreqManager::GetAppCpuTime(int32_t pid)
 {
-    int32_t cpuTime = 0;
     if (pid < 0) {
-        return cpuTime;
+        return 0;
     }
+    uint64_t cpuTime = 0;
     std::string filePath = "/proc/" + std::to_string(pid) + "/task/" + std::to_string(pid) + "/stat";
     std::string content;
     if (!LoadStringFromFile(filePath, content)) {
@@ -306,7 +353,7 @@ uint64_t AppfreezeCpuFreqManager::GetProcessCpuTime(int32_t pid)
 
 uint64_t AppfreezeCpuFreqManager::GetDeviceRuntime()
 {
-    std::string statPath = "/proc/stat";
+    std::string statPath = AppfreezeUtil::PROC_STAT_PATH;
     std::string content;
     if (!LoadStringFromFile(statPath, content)) {
         TAG_LOGE(AAFwkTag::APPDFR, "Read device run time failed, path:%{public}s", statPath.c_str());
@@ -318,7 +365,7 @@ uint64_t AppfreezeCpuFreqManager::GetDeviceRuntime()
     if (std::getline(iss, line) && !line.empty()) {
         std::vector<std::string> strings;
         SplitStr(line, " ", strings);
-        if (strings.size() <= 1) {
+        if (strings.size() <= DEFAULT_CPU_SIZE) {
             TAG_LOGE(AAFwkTag::APPDFR, "GetDeviceRuntime failed, string size: %{public}zu.", strings.size());
             return deviceRuntime;
         }
@@ -332,12 +379,12 @@ uint64_t AppfreezeCpuFreqManager::GetDeviceRuntime()
 
 double AppfreezeCpuFreqManager::GetOptimalCpuTime(int32_t pid)
 {
-    int maxCount = cpuCount_ - AppfreezeUtil::CPU_COUNT_SUBTRACT;
-    if (maxCount <= 0) {
-        TAG_LOGE(AAFwkTag::APPDFR, "GetOptimalCpuTime failed, maxCount:%{public}d", maxCount);
+    int maxCpuCount = cpuCount_ - AppfreezeUtil::CPU_COUNT_SUBTRACT;
+    if (maxCpuCount <= 0) {
+        TAG_LOGE(AAFwkTag::APPDFR, "GetOptimalCpuTime failed, maxCpuCount:%{public}d", maxCpuCount);
         return -1;
     }
-    std::string statPath = "/sys/devices/system/cpu/cpu11/cpu_capacity";
+    std::string statPath = "/sys/devices/system/cpu/cpu" + std::to_string(maxCpuCount) + "/cpu_capacity";
     std::string content;
     int ret = -1;
     if (!LoadStringFromFile(statPath, content)) {
@@ -367,7 +414,7 @@ double AppfreezeCpuFreqManager::GetOptimalCpuTime(int32_t pid)
     threadFuncHandler = nullptr;
     getThreadCpuload = nullptr;
     dlclose(threadFuncHandler);
-    if (dmips <= 0 || optimalCpuTime <= 0) {
+    if (dmips <= 0 || optimalCpuTime < 0) {
         return ret;
     }
     TAG_LOGW(AAFwkTag::APPDFR, "dmips %{public}d optimalCpuTime %{public}lf", dmips, optimalCpuTime);
@@ -401,11 +448,10 @@ std::string AppfreezeCpuFreqManager::GetStaticInfoHead()
         "|-------------------------CpuTime----------------------|--------SyncWaitTime----------|." << std::endl;
     staticInfoStr <<
         "|----OptimalCpuTime----|------SupplyAvailableTime------|--------SyncWaitTime----------|." << std::endl;
-    staticInfoStr << "See the link for more information: XXXXXX." << std::endl;
     return staticInfoStr.str();
 }
 
-std::string AppfreezeCpuFreqManager::GetStaticInfo(int32_t pid)
+std::string AppfreezeCpuFreqManager::GetStaticInfo(int32_t pid, CpuStartTime cpuStartTime)
 {
     std::ostringstream staticInfoStr;
     staticInfoStr << GetStaticInfoHead() << std::endl;
@@ -413,13 +459,13 @@ std::string AppfreezeCpuFreqManager::GetStaticInfo(int32_t pid)
     staticInfoStr << "ProcessCpuTime: " << GetProcessCpuTime(pid) << " ms" << std::endl;
     staticInfoStr << "DeviceRuntime: " << GetDeviceRuntime() << " ms" << std::endl;
     staticInfoStr << "Tid: " << pid << std::endl;
-    staticInfoStr << "StartTime: " << GetStartTime(halfTime_) << std::endl;
+    staticInfoStr << "StartTime: " << GetStartTime(cpuStartTime.halfStartTime) << std::endl;
     staticInfoStr << "EndTime: " << AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() << std::endl;
-    uint64_t duration = AppfreezeUtil::GetMilliseconds() - halfTime_;
+    uint64_t duration = AppfreezeUtil::GetMilliseconds() - cpuStartTime.halfStartTime;
     staticInfoStr << "StaticsDuration: " << duration << " ms" << std::endl;
     uint64_t cpuTime = GetAppCpuTime(pid);
     uint64_t syncWaitTime = duration - cpuTime;
-    uint64_t optimalCpuTime = GetOptimalCpuTime(pid) - optimalCpuTime_;
+    uint64_t optimalCpuTime = GetOptimalCpuTime(pid) - cpuStartTime.optimalCpuStartTime;
     uint64_t supplyAvailableTime = duration - optimalCpuTime - syncWaitTime;
     staticInfoStr << "CpuTime: " << cpuTime << " ms" << std::endl;
     staticInfoStr << "SyncWaitTime: " << syncWaitTime << " ms" << std::endl;
@@ -428,7 +474,7 @@ std::string AppfreezeCpuFreqManager::GetStaticInfo(int32_t pid)
     return staticInfoStr.str();
 }
 
-void AppfreezeCpuFreqManager::WriteDfxLogToFile(const std::string& filePath, const std::string& bundleName)
+void AppfreezeCpuFreqManager::WriteDfxLogToFile(const std::string &filePath, const std::string &bundleName)
 {
     std::stringstream ss;
     ss << LOG_FILE_HEAD << std::endl;
@@ -438,31 +484,45 @@ void AppfreezeCpuFreqManager::WriteDfxLogToFile(const std::string& filePath, con
     OHOS::SaveStringToFile(filePath, ss.str());
 }
 
-void AppfreezeCpuFreqManager::Clear()
+bool AppfreezeCpuFreqManager::IsContainHalfData(const std::string &key, CpuDataProcessor &cpuData)
 {
-    stackPath_ = "";
-    optimalCpuTime_ = 0;
-    halfTime_ = 0;
-    totalTimeList_.clear();
-    handlingHalfCpuData_.clear();
+    std::lock_guard<ffrt::mutex> lock(freezeInfoMutex_);
+    auto it = cpuInfoMap_.find(key);
+    if (it != cpuInfoMap_.end()) {
+        cpuData = it->second;
+        return true;
+    }
+    return false;
 }
 
-std::string AppfreezeCpuFreqManager::WriteCpuInfoToFile(const std::string &bundleName,
-    int32_t uid, int32_t pid, const std::string &eventName)
+std::string AppfreezeCpuFreqManager::WriteCpuInfoToFile(const std::string &eventType,
+    const std::string &bundleName, int32_t uid, int32_t pid, const std::string &eventName)
 {
-    std::string fileName = "cpu-info-" + AbilityRuntime::TimeUtil::FormatTime("%Y%m%d%H%M%S");
+    std::string key = eventType + std::to_string(uid);
+    CpuDataProcessor cpuData;
+    if (!IsContainHalfData(key, cpuData)) {
+        TAG_LOGI(AAFwkTag::APPDFR, "Not find half cpuInfo, pid: %{public}d", pid);
+        return "";
+    }
+
+    std::string cpuInfo = GetCpuInfoContent(cpuData.GetHandlingHalfCpuData(), cpuData.GetTotalTimeList());
+    if (cpuInfo.empty()) {
+        return "";
+    }
+    std::string fileName = CPU_INFO_PREFIX + std::to_string(uid) +
+        AbilityRuntime::TimeUtil::FormatTime("%Y%m%d%H%M%S");
     std::string filePath = AppfreezeUtil::CreateFile(AppfreezeUtil::EVENTLOG_PATH, fileName);
     WriteDfxLogToFile(filePath, bundleName);
+
     std::ostringstream str;
-    std::string path;
+    str << std::endl << GetStaticInfo(pid, cpuData.GetCpuStartTime());
+    str << std::endl << "#CpuFreq Usage (usage >=1%)" << std::endl << cpuInfo << std::endl;
+    std::string path = filePath + "," + cpuData.GetStackPath();
+    OHOS::SaveStringToFile(filePath, str.str(), false);
     {
         std::lock_guard<ffrt::mutex> lock(freezeInfoMutex_);
-        str << std::endl << GetStaticInfo(pid);
-        str << std::endl << "#CpuFreq Usage (usage >=1%)" << std::endl << GetCpuInfoContent() << std::endl;
-        path = (eventName == AppFreezeType::LIFECYCLE_TIMEOUT) ? filePath : (filePath + "," + stackPath_);
-        Clear();
+        cpuInfoMap_.erase(key);
     }
-    OHOS::SaveStringToFile(filePath, str.str(), false);
     TAG_LOGW(AAFwkTag::APPDFR, "Write CpuInfo to file: %{public}s", path.c_str());
     return path;
 }
