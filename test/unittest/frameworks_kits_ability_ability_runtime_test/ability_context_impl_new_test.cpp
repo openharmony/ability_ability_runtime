@@ -379,18 +379,5 @@ HWTEST_F(AbilityContextImplNewTest, AbilityContextImpl_SetRestoreEnabled_002, Te
     context->SetRestoreEnabled(enabled);
     EXPECT_EQ(context->restoreEnabled_.load(), true);
 }
-
-/*
- * Feature: AbilityContextImpl
- * Function: RevokeDelegator
- * SubFunction: NA
- * FunctionPoints: AbilityContextImpl RevokeDelegator
- */
-HWTEST_F(AbilityContextImplNewTest, AbilityContextImpl_RevokeDelegator_001, TestSize.Level1)
-{
-    auto context = std::make_shared<AbilityContextImpl>();
-    auto result = context->RevokeDelegator();
-    EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
-}
 } // namespace AppExecFwk
 } // namespace OHOS
