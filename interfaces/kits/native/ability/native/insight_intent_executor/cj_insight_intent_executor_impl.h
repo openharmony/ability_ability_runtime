@@ -35,14 +35,12 @@ public:
     static std::shared_ptr<CJInsightIntentExecutorImpl> Create();
     enum class State { INVALID, CREATED, INITIALIZED, EXECUTING, EXECUTATION_DONE, DESTROYED };
 
-private:
-    explicit CJInsightIntentExecutorImpl();
-
 public:
+    CJInsightIntentExecutorImpl();
     CJInsightIntentExecutorImpl(const CJInsightIntentExecutorImpl&) = delete;
-    CJInsightIntentExecutorImpl(const CJInsightIntentExecutorImpl&&) = delete;
+    CJInsightIntentExecutorImpl(CJInsightIntentExecutorImpl&&) = delete;
     CJInsightIntentExecutorImpl& operator=(const CJInsightIntentExecutorImpl&) = delete;
-    CJInsightIntentExecutorImpl& operator=(const CJInsightIntentExecutorImpl&&) = delete;
+    CJInsightIntentExecutorImpl& operator=(CJInsightIntentExecutorImpl&&) = delete;
     ~CJInsightIntentExecutorImpl() override;
 
     /**
@@ -73,9 +71,9 @@ public:
 
 private:
     static std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> GetResultFromCj(CJExecuteResult resultCj);
-    static void ReplyFailed(InsightIntentExecutorAsyncCallback* callback,
+    static void ReplyFailed(std::unique_ptr<InsightIntentExecutorAsyncCallback> callback,
         InsightIntentInnerErr innerErr = InsightIntentInnerErr::INSIGHT_INTENT_EXECUTE_REPLY_FAILED);
-    static void ReplySucceeded(InsightIntentExecutorAsyncCallback* callback,
+    static void ReplySucceeded(std::unique_ptr<InsightIntentExecutorAsyncCallback> callback,
         std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> resultCpp);
     void ReplyFailedInner(InsightIntentInnerErr innerErr = InsightIntentInnerErr::INSIGHT_INTENT_EXECUTE_REPLY_FAILED);
     void ReplySucceededInner(std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> resultCpp);

@@ -712,7 +712,6 @@ void CJUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
     if (executeParam == nullptr) {
         TAG_LOGW(AAFwkTag::UIABILITY, "invalid param");
         RequestFocus(want);
-        // CJInsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback), ERR_OK);
         CallTriggerCallbackInner(std::move(callback), ERR_OK);
         return;
     }
@@ -735,8 +734,6 @@ void CJUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
         CallTriggerCallbackInner(std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return;
     }
-    // ret = DelayedSingleton<CJInsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
-    //     cjRuntime_, executeInfo, std::move(callback));
     ret = CallExecuteInsightIntent(cjRuntime_, executeInfo, std::move(callback));
     if (!ret) {
         // callback has removed, release in insight intent executor.
@@ -752,7 +749,6 @@ void CJUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
     if (executeParam == nullptr) {
         TAG_LOGW(AAFwkTag::UIABILITY, "param invalid");
         OnForeground(want);
-        // CJInsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback), ERR_OK);
         CallTriggerCallbackInner(std::move(callback), ERR_OK);
         return;
     }
@@ -777,8 +773,6 @@ void CJUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
         CallTriggerCallbackInner(std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return;
     }
-    // ret = DelayedSingleton<CJInsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
-    //     cjRuntime_, executeInfo, std::move(callback));
     ret = CallExecuteInsightIntent(cjRuntime_, executeInfo, std::move(callback));
     if (!ret) {
         // callback has removed, release in insight intent executor.
@@ -793,7 +787,6 @@ void CJUIAbility::ExecuteInsightIntentBackground(const Want &want,
     TAG_LOGI(AAFwkTag::UIABILITY, "executeInsightIntentBackground");
     if (executeParam == nullptr) {
         TAG_LOGW(AAFwkTag::UIABILITY, "null executePara");
-        // CJInsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback), ERR_OK);
         CallTriggerCallbackInner(std::move(callback), ERR_OK);
         return;
     }
@@ -802,14 +795,10 @@ void CJUIAbility::ExecuteInsightIntentBackground(const Want &want,
     auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
     if (!ret) {
         TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
-        // CJInsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
-        //    static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         CallTriggerCallbackInner(std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return;
     }
 
-    // auto ret = DelayedSingleton<CJInsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
-    //     cjRuntime_, executeInfo, std::move(callback));
     ret = CallExecuteInsightIntent(cjRuntime_, executeInfo, std::move(callback));
     if (!ret) {
         // callback has removed, release in insight intent executor.

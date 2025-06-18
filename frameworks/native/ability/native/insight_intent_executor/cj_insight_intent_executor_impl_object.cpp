@@ -157,7 +157,7 @@ void CJInsightIntentExecutorImplObj::FreeCJExecuteResult(CJExecuteResult result)
 }
 
 extern "C" {
-CJ_EXPORT void FFIRegisterCJInsightIntentExecutorFuncs(void (*registerFunc)(CJInsightIntentExecutorFuncs*))
+CJ_EXPORT void FfiRegisterCJInsightIntentExecutorFuncs(void (*registerFunc)(CJInsightIntentExecutorFuncs*))
 {
     TAG_LOGD(AAFwkTag::INTENT, "FFIRegisterCJExtAbilityFuncs start");
     if (g_cjFuncs.createCjInsightIntentExecutor != nullptr) {

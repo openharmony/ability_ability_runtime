@@ -220,6 +220,7 @@ bool CJUIExtensionBase::ForegroundWindowWithInsightIntent(const AAFwk::Want &wan
         cjRuntime_, executorInfo, std::move(executorCallback));
     if (!ret) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed");
+        return false;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
     return true;
