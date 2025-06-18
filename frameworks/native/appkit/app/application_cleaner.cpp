@@ -17,6 +17,7 @@
 
 #include <cstring>
 #include <dirent.h>
+#include <pthread.h>
 #include <sstream>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -38,13 +39,26 @@ static const std::string CONTEXT_HAPS{ "/haps" };
 static const size_t MARK_TEMP_LEN = 12;
 static const int PATH_MAX_SIZE = 256;
 
-const mode_t MODE = 0777;
 static const int RESULT_OK = 0;
 static const int RESULT_ERR = -1;
 
 static const char TASK_NAME[] = "ApplicationCleaner::ClearTempData";
 static constexpr uint64_t DELAY = 5000000; //5s
 constexpr int64_t MAX_FILE_SIZE = 50 * 1024;
+constexpr int32_t MAX_CPU_INDEX = 4;
+
+void SetCurrentThreadAffinity()
+{
+    cpu_set_t cpuSet;
+    CPU_ZERO(&cpuSet);
+    for (int32_t i = 0; i < MAX_CPU_INDEX; i++) {
+        CPU_SET(i, &cpuSet);
+    }
+
+    if (pthread_setaffinity_np(pthread_self(), sizeof(cpuSet), &cpuSet) != 0) {
+        TAG_LOGW(AAFwkTag::APPKIT, "set ThreadAffinity failed errno %{public}d", errno);
+    }
+}
 } // namespace
 void ApplicationCleaner::RenameTempData()
 {
@@ -73,7 +87,11 @@ void ApplicationCleaner::RenameTempData()
 
 void ApplicationCleaner::ClearTempData()
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "Called");
+    if (hasCleaned_) {
+        return;
+    }
+    hasCleaned_ = true;
+    TAG_LOGI(AAFwkTag::APPKIT, "ClearTempData");
     std::vector<std::string> rootDir;
     if (GetRootPath(rootDir) != RESULT_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Get root dir error");
@@ -86,6 +104,7 @@ void ApplicationCleaner::ClearTempData()
             TAG_LOGE(AAFwkTag::APPKIT, "Invalid shared pointer");
             return;
         }
+        SetCurrentThreadAffinity();
         std::vector<std::string> temps;
         if (sharedThis->GetObsoleteBundleTempPath(rootDir, temps) != RESULT_OK) {
             TAG_LOGE(AAFwkTag::APPKIT, "get bundle temp file list false");
@@ -99,14 +118,13 @@ void ApplicationCleaner::ClearTempData()
         }
     };
 
-    if (CheckFileSize(rootDir)) {
-        ffrt::submit(cleanTemp);
-    } else {
-        ffrt::task_attr attr;
-        attr.name(TASK_NAME);
+    ffrt::task_attr attr;
+    attr.name(TASK_NAME);
+    attr.qos(ffrt_qos_background);
+    if (!CheckFileSize(rootDir)) {
         attr.delay(DELAY);
-        ffrt::submit(std::move(cleanTemp), attr);
     }
+    ffrt::submit(std::move(cleanTemp), attr);
 }
 
 bool ApplicationCleaner::CheckFileSize(const std::vector<std::string> &bundlePath)
@@ -130,7 +148,7 @@ int ApplicationCleaner::GetRootPath(std::vector<std::string> &rootPath)
         return RESULT_ERR;
     }
 
-    auto instance = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance();
+    auto instance = AppExecFwk::OsAccountManagerWrapper::GetInstance();
     if (instance == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null instance");
         return RESULT_ERR;
