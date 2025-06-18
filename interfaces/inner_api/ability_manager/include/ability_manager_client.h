@@ -1390,8 +1390,9 @@ public:
      * Start specified ability by SCB.
      *
      * @param want Want information.
+     * @return Returns ERR_OK on success, others on failure.
      */
-    void StartSpecifiedAbilityBySCB(const Want &want);
+    int32_t StartSpecifiedAbilityBySCB(const Want &want);
 
     /**
      * Notify sandbox app the result of saving file.

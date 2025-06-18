@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -239,13 +239,7 @@ public:
      */
     void OnStartSpecifiedFailed(int32_t requestId);
 
-    /**
-     * Start specified ability by SCB.
-     *
-     * @param want Want information.
-     * @param abilityRequest AbilityRequest information.
-     */
-    void StartSpecifiedAbilityBySCB(const Want &want, AbilityRequest &abilityRequest);
+    int32_t StartSpecifiedAbilityBySCB(AbilityRequest &abilityRequest);
 
     /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
@@ -527,6 +521,7 @@ private:
     bool TryProcessHookModule(SpecifiedRequest &specifiedRequest, bool isHookModule);
     bool IsStartSpecifiedProcessRequest(const AbilityRequest &abilityRequest);
     int32_t StartSpecifiedProcessRequest(const AbilityRequest &abilityRequest);
+    void RemoveInstanceKey(const AbilityRequest &abilityRequest) const;
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
