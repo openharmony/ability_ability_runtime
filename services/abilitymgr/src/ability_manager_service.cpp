@@ -2148,6 +2148,11 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             abilityRequest.startWindowOption = startOptions.startWindowOption;
         }
         abilityRequest.supportWindowModes = startOptions.supportWindowModes_;
+        auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+        CHECK_POINTER_AND_RETURN_LOG(abilityRecord, ERR_INVALID_VALUE, "ability record is nullptr.");
+        if (JudgeSelfCalled(abilityRecord)) {
+            abilityRequest.hideStartWindow = startOptions.GetHideStartWindow();
+        }
         auto uiAbilityManager = GetUIAbilityManagerByUserId(oriValidUserId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_NULL_UI_ABILITY_MANAGER);
         return uiAbilityManager->NotifySCBToStartUIAbility(abilityRequest);

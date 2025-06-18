@@ -217,6 +217,11 @@ bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &sta
     if (UnwrapBooleanByPropertyName(env, param, "windowFocused", windowFocused)) {
         startOptions.SetWindowFocused(windowFocused);
     }
+    
+    bool hideStartWindow = false;
+    if (UnwrapBooleanByPropertyName(env, param, "hideStartWindow", hideStartWindow)) {
+        startOptions.SetHideStartWindow(hideStartWindow);
+    }
 
     std::vector<int32_t> supportWindowModes;
     if (UnwrapInt32ArrayByPropertyName(env, param, "supportWindowModes", supportWindowModes)) {
