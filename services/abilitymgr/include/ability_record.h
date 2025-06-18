@@ -253,6 +253,7 @@ struct AbilityRequest {
     bool isQueryERMS = false;
     bool isEmbeddedAllowed = false;
     bool callSpecifiedFlagTimeout = false;
+    bool hideStartWindow = false;
     int32_t restartCount = -1;
     int32_t uid = 0;
     int32_t collaboratorType = CollaboratorType::DEFAULT_TYPE;

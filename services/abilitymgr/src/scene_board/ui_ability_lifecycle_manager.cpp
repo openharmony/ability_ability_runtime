@@ -1354,9 +1354,8 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         errMsg = "sessionInfo is nullptr";
         return ERR_INVALID_VALUE;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "windowLeft=%{public}d,windowTop=%{public}d,windowHeight=%{public}d,"
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "windowTop=%{public}d,windowHeight=%{public}d,"
         "windowWidth=%{public}d,windowMode=%{public}d,supportWindowModes.size=%{public}zu,specifiedFlag=%{public}s",
-        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0),
@@ -1366,10 +1365,11 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
     bool hasStartWindow = hasStartWindowOption ? sessionInfo->startWindowOption->hasStartWindow : false;
     std::string backgroundColor =
         hasStartWindowOption ? sessionInfo->startWindowOption->startWindowBackgroundColor : "";
+    sessionInfo->hideStartWindow = abilityRequest.hideStartWindow;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "appCloneIndex:%{public}d, instanceKey:%{public}s, "
-        "hasStartWindow:%{public}d, backgroundColor:%{public}s",
+        "hasStartWindow:%{public}d, backgroundColor:%{public}s, hideStartWindow: %{public}d",
         (sessionInfo->want).GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0), sessionInfo->instanceKey.c_str(),
-        hasStartWindow, backgroundColor.c_str());
+        hasStartWindow, backgroundColor.c_str(), sessionInfo->hideStartWindow);
     auto abilityRecord = GetAbilityRecordByToken(abilityRequest.callerToken);
     if (abilityRecord != nullptr && !abilityRecord->GetRestartAppFlag()) {
         auto callerSessionInfo = abilityRecord->GetSessionInfo();

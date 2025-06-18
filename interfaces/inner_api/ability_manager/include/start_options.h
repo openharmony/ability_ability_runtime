@@ -64,6 +64,9 @@ public:
     void SetWindowFocused(bool windowFocused);
     int32_t GetWindowFocused() const;
 
+    void SetHideStartWindow(bool hideStartWindow);
+    bool GetHideStartWindow() const;
+
     void SetWindowLeft(int32_t windowLeft);
     int32_t GetWindowLeft() const;
 
@@ -90,6 +93,7 @@ public:
 private:
     bool withAnimation_ = true;
     bool windowFocused_ = true;
+    bool hideStartWindow_ = false;
     int32_t windowMode_ = AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED;
     int32_t displayId_ = -1;
     int32_t windowLeft_ = 0;
