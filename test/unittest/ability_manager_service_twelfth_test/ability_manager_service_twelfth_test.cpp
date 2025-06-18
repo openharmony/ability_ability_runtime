@@ -1249,5 +1249,32 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, ResumeExtensionAbility_001, TestSize.
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest ResumeExtensionAbility_001 end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnAbilityDied
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnAbilityDied
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, OnAbilityDied_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest OnAbilityDied_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
+    EXPECT_NE(abilityRecord, nullptr);
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = false;
+    abilityMs->OnAbilityDied(abilityRecord);
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = true;
+    abilityMs->OnAbilityDied(abilityRecord);
+    EXPECT_NE(abilityRecord->GetToken(), nullptr);
+    KioskManager::GetInstance().whitelist_.emplace(abilityRecord->GetAbilityInfo().bundleName);
+    abilityMs->OnAbilityDied(abilityRecord);
+    if (system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
+        EXPECT_EQ(KioskManager::GetInstance().kioskStatus_.kioskBundleName_, "");
+    }
+    EXPECT_FALSE(abilityMs->VerificationToken(token));
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest OnAbilityDied_001 end");
+}
 } // namespace AAFwk
 } // namespace OHOS
