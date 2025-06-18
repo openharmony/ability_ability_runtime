@@ -56,6 +56,7 @@
 #include "syscap_ts.h"
 #include "system_ability_definition.h"
 #include "ets_ani_expo.h"
+#include "static_core/plugins/ets/runtime/ets_namespace_manager.h"
 
 #ifdef SUPPORT_SCREEN
 #include "ace_forward_compatibility.h"
@@ -274,7 +275,7 @@ std::unique_ptr<STSRuntime> STSRuntime::Create(const Options& options, JsRuntime
     return instance;
 }
 
-void STSRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths)
+void STSRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths, const AppLibPathMap& appAbcLibPaths)
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "called");
     std::string appPath = "";
@@ -290,6 +291,8 @@ void STSRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths)
     StsEnv::STSEnvironment::InitSTSAppNS(appPath);
     StsEnv::STSEnvironment::InitSTSSDKNS(STS_RT_PATH);
     StsEnv::STSEnvironment::InitSTSSysNS(STS_SYSLIB_PATH);
+
+    ark::ets::EtsNamespaceManager::SetAppLibPaths(appAbcLibPaths);
 }
 
 bool STSRuntime::Initialize(const Options& options)
