@@ -147,6 +147,7 @@ ohos_shared_library("ability_manager") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/abilitymgr:wantagent_manager",
+    "${ability_runtime_services_path}/common:hitrace_chain_util",
   ]
 
   external_deps = [
@@ -157,6 +158,7 @@ ohos_shared_library("ability_manager") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "jsoncpp:jsoncpp",
