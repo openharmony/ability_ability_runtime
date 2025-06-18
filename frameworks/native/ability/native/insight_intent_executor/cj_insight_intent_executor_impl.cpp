@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,8 +35,7 @@ namespace OHOS::AbilityRuntime {
 
 std::shared_ptr<CJInsightIntentExecutorImpl> CJInsightIntentExecutorImpl::Create()
 {
-    std::shared_ptr<CJInsightIntentExecutorImpl> ptr(new (std::nothrow) CJInsightIntentExecutorImpl());
-    return ptr;
+    return std::make_shared<CJInsightIntentExecutorImpl>();
 }
 
 using State = CJInsightIntentExecutorImpl::State;
@@ -46,7 +45,7 @@ CJInsightIntentExecutorImpl::CJInsightIntentExecutorImpl() {}
 CJInsightIntentExecutorImpl::~CJInsightIntentExecutorImpl()
 {
     state_ = State::DESTROYED;
-    TAG_LOGI(AAFwkTag::INTENT, "called");
+    TAG_LOGD(AAFwkTag::INTENT, "called");
     cjObj_.Destroy();
 }
 
@@ -155,7 +154,7 @@ std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> CJInsightIntentExecutorI
 }
 
 void CJInsightIntentExecutorImpl::ReplyFailed(
-    InsightIntentExecutorAsyncCallback* callback, InsightIntentInnerErr innerErr)
+    std::unique_ptr<InsightIntentExecutorAsyncCallback> callback, InsightIntentInnerErr innerErr)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
     if (callback == nullptr) {
@@ -169,53 +168,48 @@ void CJInsightIntentExecutorImpl::ReplyFailed(
     AAFwk::EventReport::SendExecuteIntentEvent(
         AAFwk::EventName::EXECUTE_INSIGHT_INTENT_ERROR, HiSysEventType::FAULT, eventInfo);
     callback->Call(errorResult);
-    delete callback;
 }
 
 void CJInsightIntentExecutorImpl::ReplySucceeded(
-    InsightIntentExecutorAsyncCallback* callback, std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> resultCpp)
+    std::unique_ptr<InsightIntentExecutorAsyncCallback> callback,
+    std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> resultCpp)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
     if (callback == nullptr) {
         return;
     }
     if (resultCpp == nullptr) {
-        ReplyFailed(callback);
+        ReplyFailed(std::move(callback));
         return;
     }
     resultCpp->innerErr = InsightIntentInnerErr::INSIGHT_INTENT_ERR_OK;
     callback->Call(*resultCpp);
-    delete callback;
 }
 
 void CJInsightIntentExecutorImpl::ReplyFailedInner(InsightIntentInnerErr innerErr)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
     state_ = CJInsightIntentExecutorImpl::State::INVALID;
-    auto* callback = callback_.release();
-    CJInsightIntentExecutorImpl::ReplyFailed(callback, innerErr);
+    CJInsightIntentExecutorImpl::ReplyFailed(std::move(callback_), innerErr);
 }
 
 void CJInsightIntentExecutorImpl::ReplySucceededInner(std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> resultCpp)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
     state_ = CJInsightIntentExecutorImpl::State::EXECUTATION_DONE;
-    auto* callback = callback_.release();
-    CJInsightIntentExecutorImpl::ReplySucceeded(callback, resultCpp);
+    CJInsightIntentExecutorImpl::ReplySucceeded(std::move(callback_), resultCpp);
 }
 
 bool CJInsightIntentExecutorImpl::HandleResultReturnedFromCjFunc(CJExecuteResult resultJs)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
-
-    // TAG_LOGI(AAFwkTag::INTENT, "Not promise");
     auto resultCpp = CJInsightIntentExecutorImpl::GetResultFromCj(resultJs);
     if (resultCpp == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "null resultCpp");
         ReplyFailedInner();
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
-    // TAG_LOGD(AAFwkTag::INTENT, "Call succeed");
+    TAG_LOGD(AAFwkTag::INTENT, "Call succeed");
     ReplySucceededInner(resultCpp);
     cjObj_.FreeCJExecuteResult(resultJs);
     return true;

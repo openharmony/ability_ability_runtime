@@ -57,7 +57,7 @@ int32_t CjInsightIntentContext::OnStartAbility(AAFwk::Want& want)
 }
 
 extern "C" {
-CJ_EXPORT int32_t FFIInsightIntentGetContext(CJInsightIntentExecutorHandle executorHandle, int64_t* id)
+CJ_EXPORT int32_t FfiInsightIntentGetContext(CJInsightIntentExecutorHandle executorHandle, int64_t* id)
 {
     auto executor = static_cast<CJInsightIntentExecutorImpl*>(executorHandle);
     if (executor == nullptr) {
@@ -83,11 +83,15 @@ CJ_EXPORT int32_t FFIInsightIntentGetContext(CJInsightIntentExecutorHandle execu
     return SUCCESS_CODE;
 }
 
-CJ_EXPORT int32_t FFIInsightIntentContextStartAbility(int64_t id, WantHandle want)
+CJ_EXPORT int32_t FfiInsightIntentContextStartAbility(int64_t id, WantHandle want)
 {
     auto context = OHOS::FFI::FFIData::GetData<CjInsightIntentContext>(id);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "null context");
+        return ERR_INVALID_INSTANCE_CODE;
+    }
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null want");
         return ERR_INVALID_INSTANCE_CODE;
     }
     auto actualWant = reinterpret_cast<AAFwk::Want*>(want);
