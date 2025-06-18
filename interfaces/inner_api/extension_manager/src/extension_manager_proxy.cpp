@@ -18,6 +18,7 @@
 #include "extension_manager_proxy.h"
 #include "extension_running_info.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_chain_utils.h"
 #include "hitrace_meter.h"
 #include "message_parcel.h"
 #include "want.h"
@@ -37,6 +38,7 @@ int ExtensionManagerProxy::ConnectAbilityCommon(const Want &want, sptr<IRemoteOb
     const sptr<IRemoteObject> &callerToken, AppExecFwk::ExtensionAbilityType extensionType, int32_t userId,
     bool isQueryExtensionOnly)
 {
+    Ability_MANAGER_HITRACE_CHAIN_NAME("ConnectAbilityCommon", HITRACE_FLAG_INCLUDE_ASYNC);
     if (connect == nullptr) {
         TAG_LOGE(AAFwkTag::EXTMGR, "null connect");
         return CONNECTION_NOT_EXIST;
@@ -90,6 +92,7 @@ int ExtensionManagerProxy::ConnectAbilityCommon(const Want &want, sptr<IRemoteOb
 
 int ExtensionManagerProxy::DisconnectAbility(const sptr<IRemoteObject> &connect)
 {
+    Ability_MANAGER_HITRACE_CHAIN_NAME("DisconnectAbility", HITRACE_FLAG_INCLUDE_ASYNC);
     if (connect == nullptr) {
         TAG_LOGE(AAFwkTag::EXTMGR, "disconnect ability failed");
         return INVALID_PARAMETERS_ERR;

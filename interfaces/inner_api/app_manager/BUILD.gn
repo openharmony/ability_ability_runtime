@@ -141,6 +141,7 @@ ohos_shared_library("app_manager") {
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/common:app_util",
+    "${ability_runtime_services_path}/common:hitrace_chain_util",
     "${ability_runtime_services_path}/common:res_sched_util",
   ]
 
@@ -153,6 +154,7 @@ ohos_shared_library("app_manager") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "init:libbegetutil",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
