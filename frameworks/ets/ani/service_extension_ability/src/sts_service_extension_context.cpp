@@ -306,9 +306,9 @@ void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object conte
 }
 
 void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<ExtensionContext> context)
+    std::shared_ptr<ExtensionContext> context)
 {
-    ContextUtil::StsCreatContext(aniEnv, contextClass, contextObj, applicationCtxRef, context);
+    ContextUtil::StsCreatContext(aniEnv, contextClass, contextObj, context);
     BindExtensionInfo(aniEnv, contextClass, contextObj, context, context->GetAbilityInfo());
 }
 
@@ -336,9 +336,7 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
     return true;
 }
 
-ani_object CreateStsServiceExtensionContext(ani_env *env,
-    std::shared_ptr<ServiceExtensionContext> context,
-    const std::shared_ptr<AppExecFwk::OHOSApplication> &application)
+ani_object CreateStsServiceExtensionContext(ani_env *env, std::shared_ptr<ServiceExtensionContext> context)
 {
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
     if (env == nullptr) {
@@ -374,11 +372,7 @@ ani_object CreateStsServiceExtensionContext(ani_env *env,
         TAG_LOGE(AAFwkTag::UI_EXT, "set filed status : %{public}d", status);
         return nullptr;
     }
-    if (application == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "application is null");
-        return nullptr;
-    }
-    StsCreatExtensionContext(env, cls, contextObj, application->GetApplicationCtxObjRef(), context);
+    StsCreatExtensionContext(env, cls, contextObj, context);
     return contextObj;
 }
 } // namespace AbilityRuntime

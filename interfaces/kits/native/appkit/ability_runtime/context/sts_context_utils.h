@@ -23,8 +23,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace ContextUtil {
-void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef);
+void BindApplicationCtx(ani_env* aniEnv, ani_class contextClass, ani_object contextObj);
 
 void SetArea([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj, ani_int value);
 
@@ -45,8 +44,7 @@ void BindParentPropertyInner(ani_env* aniEnv, ani_class contextClass, ani_object
 void BindContextDir(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<Context> context);
 
-void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<Context> context);
+void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj, std::shared_ptr<Context> context);
 
 ani_object CreateModuleResourceManagerSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
     ani_string bundleName, ani_string moduleName);
