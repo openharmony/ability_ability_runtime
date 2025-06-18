@@ -534,5 +534,16 @@ bool PermissionVerification::VerifyKillProcessDependedOnWebPermission() const
     TAG_LOGW(AAFwkTag::APPMGR, "Permission verification failed");
     return false;
 }
+
+bool PermissionVerification::VerifyFusionAccessPermission() const
+{
+    auto callerToken = GetCallingTokenID();
+    if (VerifyPermissionByTokenId(callerToken, PermissionConstants::PERMISSION_FUSION_ACCESS)) {
+        TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
+        return true;
+    }
+    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
+    return false;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
