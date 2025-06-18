@@ -165,17 +165,19 @@ std::string STSAbilityStage::OnNewProcessRequest(const AAFwk::Want &want)
 
 void STSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "OnConfigurationUpdated called");
     AbilityStage::OnConfigurationUpdated(configuration);
     auto env = stsRuntime_.GetAniEnv();
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "env nullptr");
         return;
     }
-
     ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env, configuration);
-
-    CallObjectMethod(false, "onConfigurationUpdate", "L@ohos/app/ability/Configuration/Configuration;:V",
-        &configuration);
+    if (configObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null configObj");
+        return;
+    }
+    CallObjectMethod(false, "onConfigurationUpdate", "L@ohos/app/ability/Configuration/Configuration;:V", configObj);
 }
 
 void STSAbilityStage::OnMemoryLevel(int32_t level)
