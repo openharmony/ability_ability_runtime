@@ -2356,12 +2356,10 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnAcceptWantResponse_002, TestSize.Level
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, StartSpecifiedAbilityBySCB_001, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    Want want;
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     AbilityRequest abilityRequest;
-    uiAbilityLifecycleManager->StartSpecifiedAbilityBySCB(want, abilityRequest);
-    uiAbilityLifecycleManager.reset();
+    auto result = uiAbilityLifecycleManager->StartSpecifiedAbilityBySCB(abilityRequest);
+    EXPECT_EQ(result, ERR_OK);
 }
 
 /**
@@ -2937,10 +2935,17 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnStartSpecifiedFailed_001, TestSize.Lev
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, OnStartSpecifiedProcessTimeoutResponse_001, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    int32_t requestId = 1;
+    AbilityRequest abilityRequest;
+    auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
+    auto &list = uiAbilityLifecycleManager->specifiedRequestList_[std::string()];
+    list.push_back(specifiedRequest);
+    int32_t requestId_2 = 2;
+    list.push_back(std::make_shared<SpecifiedRequest>(requestId_2, abilityRequest));
+
     uiAbilityLifecycleManager->OnStartSpecifiedProcessTimeoutResponse(0);
-    uiAbilityLifecycleManager.reset();
+    EXPECT_FALSE(list.empty());
 }
 
 /**
@@ -2950,11 +2955,19 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnStartSpecifiedProcessTimeoutResponse_0
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, OnStartSpecifiedProcessTimeoutResponse_002, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    int32_t requestId = 100;
-    uiAbilityLifecycleManager->OnStartSpecifiedProcessTimeoutResponse(requestId);
-    uiAbilityLifecycleManager.reset();
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    int32_t requestId = 1;
+    AbilityRequest abilityRequest;
+    std::string instanceKey = "instance_0";
+    abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
+    auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
+    auto &list = uiAbilityLifecycleManager->specifiedRequestList_[std::string()];
+    list.push_back(specifiedRequest);
+    int32_t requestId_2 = 2;
+    list.push_back(std::make_shared<SpecifiedRequest>(requestId_2, abilityRequest));
+
+    uiAbilityLifecycleManager->OnStartSpecifiedProcessTimeoutResponse(0);
+    EXPECT_FALSE(list.empty());
 }
 
 /**

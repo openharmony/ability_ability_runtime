@@ -131,7 +131,7 @@ bool AbilityPermissionUtil::IsDominateScreen(const Want &want, bool isPendingWan
 }
 
 int32_t AbilityPermissionUtil::CheckMultiInstanceAndAppClone(Want &want, int32_t userId, int32_t appIndex,
-    sptr<IRemoteObject> callerToken)
+    sptr<IRemoteObject> callerToken, bool isScbCall)
 {
     auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
     auto isCreating = want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
@@ -154,7 +154,7 @@ int32_t AbilityPermissionUtil::CheckMultiInstanceAndAppClone(Want &want, int32_t
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "Not support appClone");
                 return ERR_NOT_SUPPORT_APP_CLONE;
             }
-            return CheckMultiInstance(want, callerToken, isCreating, instanceKey, appInfo.multiAppMode.maxCount);
+            return CheckMultiInstance(want, callerToken, appInfo.multiAppMode.maxCount, isScbCall);
         }
     }
     if (!isSupportMultiInstance || appInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::APP_CLONE) {
@@ -167,7 +167,7 @@ int32_t AbilityPermissionUtil::CheckMultiInstanceAndAppClone(Want &want, int32_t
 }
 
 int32_t AbilityPermissionUtil::CheckMultiInstance(Want &want, sptr<IRemoteObject> callerToken,
-    bool isCreating, const std::string &instanceKey, int32_t maxCount)
+    int32_t maxCount, bool isScbCall)
 {
     auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
@@ -181,6 +181,8 @@ int32_t AbilityPermissionUtil::CheckMultiInstance(Want &want, sptr<IRemoteObject
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get instance key");
         return ERR_INVALID_VALUE;
     }
+    auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
+    auto isCreating = want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
     // in-app launch
     if ((callerRecord != nullptr && callerRecord->GetAbilityInfo().bundleName == want.GetBundle()) ||
         IsStartSelfUIAbility()) {
@@ -206,8 +208,11 @@ int32_t AbilityPermissionUtil::CheckMultiInstance(Want &want, sptr<IRemoteObject
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not support to create a new instance");
         return ERR_CREATE_NEW_INSTANCE_NOT_SUPPORT;
     }
-    std::string defaultInstanceKey = "app_instance_0";
-    return UpdateInstanceKey(want, instanceKey, instanceKeyArray, defaultInstanceKey);
+    if (!isScbCall) {
+        std::string defaultInstanceKey = "app_instance_0";
+        return UpdateInstanceKey(want, instanceKey, instanceKeyArray, defaultInstanceKey);
+    }
+    return ERR_OK;
 }
 
 int32_t AbilityPermissionUtil::UpdateInstanceKey(Want &want, const std::string &originInstanceKey,
