@@ -103,13 +103,7 @@ void SetCreateCompleteCallback(ani_env *env, std::shared_ptr<std::shared_ptr<Con
         TAG_LOGE(AAFwkTag::APPKIT, "set nativeContextLong failed");
         return;
     }
-    auto application = context->GetApplicationContext();
-    if (application == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application is null");
-        ThrowStsInvalidParamError(env, "application is nullptr.");
-        return;
-    }
-    ContextUtil::StsCreatContext(env, cls, contextObj, application->GetApplicationCtxObjRef(), context);
+    ContextUtil::StsCreatContext(env, cls, contextObj, context);
     AppExecFwk::AsyncCallback(env, callback, CreateStsError(env, AbilityErrorCode::ERROR_OK), contextObj);
 }
 
