@@ -43,7 +43,7 @@ public:
     bool Initialize(napi_env napiEnv, std::vector<ani_option> &options);
     void RegisterUncaughtExceptionHandler(const ETSUncaughtExceptionInfo &handle);
     ani_env *GetAniEnv();
-    void HandleUncaughtError();
+    bool HandleUncaughtError();
 
     struct VMEntry {
         ani_vm *aniVm_;
