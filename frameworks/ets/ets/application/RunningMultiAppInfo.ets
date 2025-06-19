@@ -14,6 +14,8 @@
  */
 
 import { MultiAppMode } from 'application.MultiAppMode';
+import { RunningAppClone } from 'application.RunningAppClone';
+import { RunningMultiInstanceInfo } from 'application.RunningMultiInstanceInfo';
 
 export interface RunningMultiAppInfo {
     bundleName: string;
@@ -27,24 +29,4 @@ export default class RunningMultiAppInfoInner implements RunningMultiAppInfo {
   mode: MultiAppMode = MultiAppMode.NOT_SUPPORTED;
   runningMultiInstances?: Array<RunningMultiInstanceInfo>;
   runningAppClones?: Array<RunningAppClone>;
-}
-
-export interface RunningMultiInstanceInfo {
-    instanceKey: string;
-}
-
-class RunningMultiInstanceInfoInner implements RunningMultiInstanceInfo {
-  instanceKey: string = '';
-}
-
-export interface RunningAppClone {
-    appCloneIndex: number;
-    uid: number;
-    pids: Array<number>;
-}
-
-class RunningAppCloneInner implements RunningAppClone {
-  appCloneIndex: number;
-  uid: number;
-  pids: Array<number> = [];
 }

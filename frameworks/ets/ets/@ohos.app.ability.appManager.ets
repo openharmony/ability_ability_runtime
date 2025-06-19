@@ -21,8 +21,11 @@ import { BusinessError, AsyncCallback } from '@ohos.base';
 import _ProcessData from 'application.ProcessData';
 import _ApplicationStateObserver from 'application.ApplicationStateObserver';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
+import bundleManager from '@ohos.bundle.bundleManager';
 
 export default namespace appManager {
+loadLibrary("ability_app_manager_ani_kit.z")
+
 export type ProcessInformation = _ProcessInformation;
 export type AbilityStateData = _AbilityStateData;
 export type AppStateData = _AppStateData;
@@ -312,7 +315,7 @@ export function isRunningInStabilityTest(): Promise<boolean> {
 
 export native function nativeKillProcessesByBundleNameSync(bundleName: string, callback: AsyncCallbackWrapper<void>) : void;
 export native function nativeKillProcessesByBundleName(callback: AsyncCallbackWrapper<void>, bundleName: string, clearPageStack: boolean, appIndex?: number) : void;
-export function killProcessesByBundleName(bundleName: string, callback: AsyncCallback<void>) {
+export function killProcessesByBundleName(bundleName: string, callback: AsyncCallback<void>) : void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       appManager.nativeKillProcessesByBundleNameSync(bundleName, myCall);
@@ -347,6 +350,200 @@ export function killProcessesByBundleName(bundleName: string, clearPageStack: bo
       });
     });
     return p;
+}
+
+export native function nativeKillProcessWithAccountSync(bundleName: string, accountId: number, callback: AsyncCallbackWrapper<void>) : void;
+export function killProcessWithAccount(bundleName: string, accountId: number, callback: AsyncCallback<void>): void {
+  let myCall = new AsyncCallbackWrapper<void>(callback);
+  taskpool.execute((): void => {
+    appManager.nativeKillProcessWithAccountSync(bundleName, accountId, myCall);
+  });
+}
+export function killProcessWithAccount(bundleName: string, accountId: number): Promise<void> {
+  let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
+    let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+      if (err.code == 0) {
+        resolve(undefined);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeKillProcessWithAccountSync(bundleName, accountId, myCall);
+    });
+  });
+  return p;
+}
+export native function nativeKillProcessWithAccount(callback: AsyncCallbackWrapper<void>,
+  bundleName: string, accountId: number, clearPageStack: boolean, appIndex?: number) : void;
+export function killProcessWithAccount(bundleName: string, accountId: number,
+  clearPageStack: boolean, appIndex?: number): Promise<void>
+{
+  let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
+    let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+      if (err.code == 0) {
+        resolve(undefined);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeKillProcessWithAccount(myCall, bundleName, accountId, clearPageStack, appIndex);
+    });
+  });
+  return p;
+}
+
+export native function nativeGetProcessMemoryByPid(pid: number, callback: AsyncCallbackWrapper<number>) : void;
+export function getProcessMemoryByPid(pid: number, callback: AsyncCallback<number>): void {
+  let myCall = new AsyncCallbackWrapper<number>(callback);
+  taskpool.execute((): void => {
+    appManager.nativeGetProcessMemoryByPid(pid, myCall);
+  });
+}
+export function getProcessMemoryByPid(pid: number): Promise<number> {
+  let p = new Promise<number>((resolve:(data:number)=>void, reject:(err: BusinessError<void>)=>void):void => {
+    let myCall = new AsyncCallbackWrapper<number>((err: BusinessError<void>, data: number)=>{
+      if (err.code == 0) {
+        resolve(data);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeGetProcessMemoryByPid(pid, myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeGetRunningProcessInformationByBundleType(bundleType: bundleManager.BundleType,
+  callback: AsyncCallbackWrapper<Array<ProcessInformation>>) : void;
+export function getRunningProcessInformationByBundleType(bundleType: bundleManager.BundleType): Promise<Array<ProcessInformation>>
+{
+  let p = new Promise<Array<ProcessInformation>>((resolve:(data:Array<ProcessInformation>)=>void, reject:(err: BusinessError<void>)=>void):void => {
+    let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>((err: BusinessError<void>, data: Array<ProcessInformation>)=>{
+      if (err.code == 0) {
+        resolve(data);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeGetRunningProcessInformationByBundleType(bundleType, myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeIsSharedBundleRunning(bundleName: string, versionCode: number, callback: AsyncCallbackWrapper<boolean>) : void;
+export function isSharedBundleRunning(bundleName: string, versionCode: number, callback: AsyncCallback<boolean>): void {
+  let myCall = new AsyncCallbackWrapper<boolean>(callback);
+  taskpool.execute((): void => {
+    appManager.nativeIsSharedBundleRunning(bundleName, versionCode, myCall);
+  });
+}
+export function isSharedBundleRunning(bundleName: string, versionCode: number): Promise<boolean> {
+  let p = new Promise<boolean>((resolve:(data:boolean)=>void, reject:(err: BusinessError<void>)=>void):void => {
+    let myCall = new AsyncCallbackWrapper<boolean>((err: BusinessError<void>, data: boolean)=>{
+      if (err.code == 0) {
+        resolve(data);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeIsSharedBundleRunning(bundleName, versionCode, myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeGetSupportedProcessCachePids(bundleName: string, callback: AsyncCallbackWrapper<Array<number>>) : void;
+export function getSupportedProcessCachePids(bundleName: string): Promise<Array<number>> {
+  let p = new Promise<Array<number>>((resolve:(data:Array<number>)=>void, reject:(err: BusinessError<void>)=>void):void => {
+    let myCall = new AsyncCallbackWrapper<Array<number>>((err: BusinessError<void>, data: Array<number>)=>{
+      if (err.code == 0) {
+        resolve(data);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeGetSupportedProcessCachePids(bundleName, myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeKillProcessesInBatch(pids: Array<number>, callback: AsyncCallbackWrapper<void>) : void;
+export function killProcessesInBatch(pids: Array<number>) : Promise<void> {
+  let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
+    let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+      if (err.code == 0) {
+        resolve(undefined);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeKillProcessesInBatch(pids, myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeIsAppRunning(callback: AsyncCallbackWrapper<boolean>, bundleName: string, appCloneIndex?: number) : void;
+export function isAppRunning(bundleName: string, appCloneIndex?: number): Promise<boolean> {
+  let p = new Promise<boolean>((resolve:(data:boolean)=>void, reject:(err: BusinessError<void>)=>void):void => {
+    let myCall = new AsyncCallbackWrapper<boolean>((err: BusinessError<void>, data: boolean)=>{
+      if (err.code == 0) {
+        resolve(data);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeIsAppRunning(myCall, bundleName, appCloneIndex);
+    });
+  });
+  return p;
+}
+
+export native function nativeSetKeepAliveForBundle(bundleName: string,
+  userId: number, enable: boolean, callback: AsyncCallbackWrapper<void>) : void;
+export function setKeepAliveForBundle(bundleName: string, userId: number, enable: boolean): Promise<void> {
+  let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError<void>)=>void):void => {
+    let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>)=>{
+      if (err.code == 0) {
+        resolve(undefined);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeSetKeepAliveForBundle(bundleName, userId, enable, myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeGetKeepAliveBundles(callback: AsyncCallbackWrapper<Array<KeepAliveBundleInfo>>,
+  type: KeepAliveAppType, userId?: number) : void;
+export function getKeepAliveBundles(type: KeepAliveAppType, userId?: number): Promise<Array<KeepAliveBundleInfo>> {
+  let p = new Promise<Array<KeepAliveBundleInfo>>((resolve:(data:Array<KeepAliveBundleInfo>)=>void, reject:(err: BusinessError<void>)=>void):void => {
+    let myCall = new AsyncCallbackWrapper<Array<KeepAliveBundleInfo>>((err: BusinessError<void>, data: Array<KeepAliveBundleInfo>)=>{
+      if (err.code == 0) {
+        resolve(data);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeGetKeepAliveBundles(myCall, type, userId);
+    });
+  });
+  return p;
 }
 
 } // namespace appManager

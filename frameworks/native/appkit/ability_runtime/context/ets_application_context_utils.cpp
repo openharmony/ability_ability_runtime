@@ -397,7 +397,7 @@ ani_string EtsApplicationContextUtils::GetCurrentInstanceKey([[maybe_unused]]ani
         return nullptr;
     }
     std::string instanceKey = context->GetCurrentInstanceKey();
-    aniStr = OHOS::AppExecFwk::GetAniString(env, instanceKey);
+    aniStr = AppExecFwk::GetAniString(env, instanceKey);
     return aniStr;
 }
 
@@ -450,7 +450,7 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env* aniEnv, ani
     }
 }
 
-void EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniEnv, void* applicationContextObjRef)
+void EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniEnv)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "CreateEtsApplicationContext Call");
     auto applicationContext = applicationContext_.lock();
@@ -480,11 +480,24 @@ void EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniEnv, vo
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed status: %{public}d", status);
         return;
     }
-    if ((status = aniEnv->Object_SetField_Long(applicationContextObject, contextField,
-        (ani_long)applicationContext.get())) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Long failed status: %{public}d", status);
+    auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(applicationContext);
+    if (workContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "workContext nullptr");
         return;
     }
+    ani_long nativeContextLong = (ani_long)workContext;
+    if ((status = aniEnv->Object_SetField_Long(applicationContextObject, contextField, nativeContextLong)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Long failed status: %{public}d", status);
+        delete workContext;
+        return;
+    }
+    SetAndBindApplicationObject(aniEnv, applicationContextObject, applicationContext);
+}
+
+void EtsApplicationContextUtils::SetAndBindApplicationObject(ani_env* aniEnv, ani_object applicationContextObject,
+    std::shared_ptr<ApplicationContext> applicationContext)
+{
+    ani_status status = ANI_ERROR;
     ani_ref applicationContextObjectRef = nullptr;
     if ((status = aniEnv->GlobalReference_Create(applicationContextObject, &applicationContextObjectRef)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "GlobalReference_Create failed status: %{public}d", status);
@@ -492,9 +505,15 @@ void EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniEnv, vo
     }
     auto stsReference = std::make_shared<AbilityRuntime::STSNativeReference>();
     stsReference->aniObj = applicationContextObject;
-    AbilityRuntime::ApplicationContextManager::GetApplicationContextManager().AddStsGlobalObject(aniEnv, stsReference);
-    applicationContextObjRef = reinterpret_cast<void*>(applicationContextObjectRef);
+    AbilityRuntime::ApplicationContextManager::GetApplicationContextManager().SetEtsGlobalObject(stsReference);
     applicationContext->SetApplicationCtxObjRef(applicationContextObjectRef);
+    ani_ref* contextGlobalRef = new (std::nothrow) ani_ref;
+    if ((status = aniEnv->GlobalReference_Create(applicationContextObject, contextGlobalRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
+        delete contextGlobalRef;
+        return;
+    }
+    applicationContext->Bind(contextGlobalRef);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

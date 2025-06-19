@@ -167,7 +167,7 @@ void StsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     std::string moduleName(abilityInfo->moduleName);
     moduleName.append("::").append(abilityInfo->name);
 
-    SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath, application);
+    SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath);
 }
 
 bool StsUIAbility::BindNativeMethods()
@@ -250,7 +250,7 @@ void StsUIAbility::CreateAndBindContext(const std::shared_ptr<AppExecFwk::OHOSAp
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::ScreenMode::IDLE_SCREEN_MODE);
     abilityContext->SetScreenMode(screenMode);
     if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
-        ani_ref contextObj = CreateStsAbilityContext(env, abilityContext, application);
+        ani_ref contextObj = CreateStsAbilityContext(env, abilityContext);
         ani_ref* contextGlobalRef = new ani_ref;
         ani_status status = ANI_ERROR;
         if ((status = env->GlobalReference_Create(contextObj, contextGlobalRef)) != ANI_OK) {
@@ -263,7 +263,7 @@ void StsUIAbility::CreateAndBindContext(const std::shared_ptr<AppExecFwk::OHOSAp
 }
 
 void StsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want,
-    const std::string &moduleName, const std::string &srcPath, const std::shared_ptr<OHOSApplication> &application)
+    const std::string &moduleName, const std::string &srcPath)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     auto env = stsRuntime_.GetAniEnv();
@@ -278,18 +278,17 @@ void StsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, s
     }
     ani_ref contextObj = nullptr;
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::ScreenMode::IDLE_SCREEN_MODE);
-    CreateAniContext(env, contextObj, screenMode, application);
+    CreateAniContext(env, contextObj, screenMode);
 }
 
-void StsUIAbility::CreateAniContext(
-    ani_env *env, ani_ref contextGlobalRef, int32_t screenMode, const std::shared_ptr<OHOSApplication> &application)
+void StsUIAbility::CreateAniContext(ani_env *env, ani_ref contextGlobalRef, int32_t screenMode)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return;
     }
     if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
-        ani_ref contextObj = CreateStsAbilityContext(env, abilityContext_, application);
+        ani_ref contextObj = CreateStsAbilityContext(env, abilityContext_);
         if (contextObj == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null contextObj");
             return;
@@ -1347,7 +1346,47 @@ std::shared_ptr<AppExecFwk::ETSDelegatorAbilityProperty> StsUIAbility::CreateADe
 void StsUIAbility::Dump(const std::vector<std::string> &params, std::vector<std::string> &info)
 {
     UIAbility::Dump(params, info);
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    auto env = stsRuntime_.GetAniEnv();
+    if (env == nullptr || stsAbilityObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env or stsAbilityObj");
+        return;
+    }
+    ani_object arrayObj = nullptr;
+    if (!AppExecFwk::WrapArrayString(env, arrayObj, params)) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "WrapArrayString failed");
+        return;
+    }
+    if (!stsAbilityObj_->aniObj || !stsAbilityObj_->aniCls) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null aniObj or aniCls");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_method method = nullptr;
+    if ((status = env->Class_FindMethod(stsAbilityObj_->aniCls, "onDump", nullptr, &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Class_FindMethod FAILED: %{public}d", status);
+        return;
+    }
+    if (!method) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "find method onDump failed");
+        return;
+    }
+    ani_ref strArrayRef;
+    if ((status = env->Object_CallMethod_Ref(stsAbilityObj_->aniObj, method, &strArrayRef, arrayObj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Object_CallMethod_Ref FAILED: %{public}d", status);
+        return;
+    }
+    if (!strArrayRef) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null strArrayRef");
+        return;
+    }
+    std::vector<std::string> dumpInfoStrArray;
+    if (!AppExecFwk::UnwrapArrayString(env, reinterpret_cast<ani_object>(strArrayRef), dumpInfoStrArray)) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "UnwrapArrayString failed");
+        return;
+    }
+    for (auto dumpInfoStr:dumpInfoStrArray) {
+        info.push_back(dumpInfoStr);
+    }
     TAG_LOGD(AAFwkTag::UIABILITY, "dump info size: %{public}zu", info.size());
 }
 

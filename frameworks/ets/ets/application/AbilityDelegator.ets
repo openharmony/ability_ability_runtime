@@ -20,7 +20,7 @@ import { BusinessError, AsyncCallback } from '@ohos.base';
 import { ShellCmdResult } from 'application.shellCmdResult';
 import UIAbility from '@ohos.app.ability.UIAbility';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
-import AbilityStageMonitor from './AbilityStageMonitor';
+import { AbilityStageMonitor } from 'application.AbilityStageMonitor';
 import AbilityStage from '@ohos.app.ability.AbilityStage';
 
 export interface AbilityDelegator {
@@ -448,9 +448,9 @@ class AbilityDelegatorInner implements AbilityDelegator {
       let error: BusinessError = { code: resultCode, data: undefined };
       callback(error, ability);
       console.log("getCurrentTopAbility callback2_06");
-    }).catch((err: BusinessError): void => {
+    }).catch((err: Error): void => {
       console.log("getCurrentTopAbility callback2_0606 err end");
-      callback(err, {});
+      callback(err as BusinessError, {});
     });
   }
   getCurrentTopAbility(): Promise<UIAbility> {
@@ -463,7 +463,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
         console.log("getCurrentTopAbility promise1_04");
         let r: UIAbility = e as UIAbility;
         resolve(r);
-      }).catch((err: BusinessError): void => {
+      }).catch((err: Error): void => {
         reject(err);
         console.log("getCurrentTopAbility promise1 end");
       });

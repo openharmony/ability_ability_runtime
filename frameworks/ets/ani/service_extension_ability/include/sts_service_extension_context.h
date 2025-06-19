@@ -39,11 +39,10 @@ bool BindNativeMethods(ani_env *env, ani_class &cls);
     [[maybe_unused]] ani_object obj, [[maybe_unused]] ani_object wantObj, [[maybe_unused]] ani_object callbackobj);
 [[maybe_unused]] static void StopServiceExtensionAbilitySync(ani_env *env, ani_object aniObj, ani_object wantObj,
     ani_object callbackobj);
-ani_object CreateStsServiceExtensionContext(ani_env *env, std::shared_ptr<ServiceExtensionContext> context,
-    const std::shared_ptr<AppExecFwk::OHOSApplication> &application);
+ani_object CreateStsServiceExtensionContext(ani_env *env, std::shared_ptr<ServiceExtensionContext> context);
 
 void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    void* applicationCtxRef, std::shared_ptr<ExtensionContext> context);
+    std::shared_ptr<ExtensionContext> context);
 
 void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<Context> context, std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
