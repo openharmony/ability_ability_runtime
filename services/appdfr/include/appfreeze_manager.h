@@ -148,7 +148,6 @@ private:
     bool GetHitraceId(HitraceInfo& info);
     void PerfStart(std::string eventName);
     std::string GetFirstLine(const std::string &path);
-    std::string GetFreezeInfoFile(const FaultData& faultData, const std::string& bundleName);
 
     static const inline std::string LOGGER_DEBUG_PROC_PATH = "/proc/transaction_proc";
     std::string name_;
