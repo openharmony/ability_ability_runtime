@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,13 +24,13 @@
 #undef private
 
 #include "securec.h"
+#include "../ability_fuzz_util.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-constexpr size_t U32_AT_SIZE = 4;
 constexpr size_t STRING_MAX_LENGTH = 128;
 }
 
@@ -40,14 +40,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     abilityAutoStartupClient->Connect();
     AutoStartupInfo info;
     FuzzedDataProvider fdp(data, size);
-    info.appCloneIndex = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
-    info.userId = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
-    info.retryCount = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
-    info.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    info.abilityName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    info.moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    info.abilityTypeName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    info.accessTokenId = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    AbilityFuzzUtil::GetRandomAutoStartupInfo(fdp, info);
     bool boolParam = fdp.ConsumeBool();
     abilityAutoStartupClient->SetApplicationAutoStartupByEDM(info, boolParam);
     return true;

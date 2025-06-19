@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,6 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-constexpr size_t U32_AT_SIZE = 4;
 constexpr size_t STRING_MAX_LENGTH = 128;
 }
 
@@ -50,8 +49,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     PreloadRequest request;
     FuzzedDataProvider fdp(data, size);
     bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    userId = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
-    appIndex = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
+    userId = fdp.ConsumeIntegral<int32_t>();
+    appIndex = fdp.ConsumeIntegral<int32_t>();
     appPreloader->GeneratePreloadRequest(bundleName, userId, appIndex, request);
     return true;
 }
