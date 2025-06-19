@@ -67,7 +67,7 @@ export class CallerImpl implements Caller {
   }
 
   call(method: string, data: rpc.Parcelable): Promise<void> {
-    return new Promise<void>((resolve: (data: undefined)=>void, reject: (error: Object) => void): void => {
+    return new Promise<void>((resolve: (data: undefined)=>void, reject: (error: Error) => void): void => {
       hilog.info(domainID, TAG, 'Caller call');
       resolve(undefined);
       return;

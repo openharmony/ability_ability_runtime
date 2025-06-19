@@ -167,7 +167,7 @@ void StsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     std::string moduleName(abilityInfo->moduleName);
     moduleName.append("::").append(abilityInfo->name);
 
-    SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath, application);
+    SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath);
 }
 
 bool StsUIAbility::BindNativeMethods()
@@ -250,7 +250,7 @@ void StsUIAbility::CreateAndBindContext(const std::shared_ptr<AppExecFwk::OHOSAp
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::ScreenMode::IDLE_SCREEN_MODE);
     abilityContext->SetScreenMode(screenMode);
     if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
-        ani_ref contextObj = CreateStsAbilityContext(env, abilityContext, application);
+        ani_ref contextObj = CreateStsAbilityContext(env, abilityContext);
         ani_ref* contextGlobalRef = new ani_ref;
         ani_status status = ANI_ERROR;
         if ((status = env->GlobalReference_Create(contextObj, contextGlobalRef)) != ANI_OK) {
@@ -263,7 +263,7 @@ void StsUIAbility::CreateAndBindContext(const std::shared_ptr<AppExecFwk::OHOSAp
 }
 
 void StsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want,
-    const std::string &moduleName, const std::string &srcPath, const std::shared_ptr<OHOSApplication> &application)
+    const std::string &moduleName, const std::string &srcPath)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     auto env = stsRuntime_.GetAniEnv();
@@ -278,18 +278,17 @@ void StsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, s
     }
     ani_ref contextObj = nullptr;
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::ScreenMode::IDLE_SCREEN_MODE);
-    CreateAniContext(env, contextObj, screenMode, application);
+    CreateAniContext(env, contextObj, screenMode);
 }
 
-void StsUIAbility::CreateAniContext(
-    ani_env *env, ani_ref contextGlobalRef, int32_t screenMode, const std::shared_ptr<OHOSApplication> &application)
+void StsUIAbility::CreateAniContext(ani_env *env, ani_ref contextGlobalRef, int32_t screenMode)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return;
     }
     if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
-        ani_ref contextObj = CreateStsAbilityContext(env, abilityContext_, application);
+        ani_ref contextObj = CreateStsAbilityContext(env, abilityContext_);
         if (contextObj == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null contextObj");
             return;
