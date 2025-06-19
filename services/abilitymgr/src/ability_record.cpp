@@ -433,12 +433,11 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag, bool hasLastWant)
     lifeCycleStateInfo_.sceneFlag = sceneFlag;
     Want want;
     if (hasLastWant && lastWant_ != nullptr) {
-        want = *lastWant_;
+        SetWant(*lastWant_);
         lifeCycleStateInfo_.isNewWant = true;
         lastWant_ = nullptr;
-    } else {
-        want = GetWant();
     }
+    want = GetWant();
     UpdateDmsCallerInfo(want);
     AbilityRuntime::ErrorMsgGuard errorMsgGuard(token_ ? token_->AsObject() : nullptr,
         reinterpret_cast<uintptr_t>(GetScheduler().GetRefPtr()), "ScheduleAbilityTransaction");

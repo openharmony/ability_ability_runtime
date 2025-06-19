@@ -225,7 +225,9 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     if (uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped");
         uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
-        uiAbilityRecord->SetLastWant(std::make_shared<Want>(abilityRequest.want));
+        if (sessionInfo->isNewWant) {
+            uiAbilityRecord->SetLastWant(std::make_shared<Want>(abilityRequest.want));
+        }
         return ERR_OK;
     } else {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "pending state is not FOREGROUND or BACKGROUND.");
