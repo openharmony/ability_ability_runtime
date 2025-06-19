@@ -21,7 +21,14 @@ import Want from '@ohos.app.ability.Want';
 import { ProcessInformation } from 'application.ProcessInformation';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 
+// remove local declaration after Any type is supported
+type Any = Object | null | undefined
+
 export default class ApplicationContext extends Context {
+  static {
+    loadLibrary("application_context_ani_kit.z");
+  }
+
   public native nativekillAllProcessesSync(clearPageStack: boolean, callback: AsyncCallbackWrapper<void>): void;
   public native nativeOnSync(type: 'environment', callback: EnvironmentCallback): number;
   public native nativeOffSync(type: 'environment', callbackId: number, callback: AsyncCallbackWrapper<void>): void;
@@ -32,10 +39,12 @@ export default class ApplicationContext extends Context {
   public native nativesetLanguage(language: string): void;
   public native nativesetFontSizeScale(fontSizeScale: number): void;
   public native nativesetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
-  public native nativesetFont(font: string): void; 
+  public native nativesetFont(font: string): void;
   public native nativerestartApp(want: Want): void;
   public native nativegetCurrentAppCloneIndex(): number;
   public native nativegetCurrentInstanceKey(): string;
+  private static native nativeTransferStatic(input: ESValue): Object;
+  private static native nativeTransferDynamic(input: Object): ESValue;
 
   setSupportedProcessCache(isSupported: boolean): void {
     taskpool.execute((): void => {
@@ -194,7 +203,7 @@ export default class ApplicationContext extends Context {
     return this.nativegetCurrentInstanceKey();
   }
 
-  getCurrentAppCloneIndex():number{
+  getCurrentAppCloneIndex(): number {
     return this.nativegetCurrentAppCloneIndex();
   }
 
@@ -206,5 +215,13 @@ export default class ApplicationContext extends Context {
     taskpool.execute((): void => {
       this.nativerestartApp(want);
     });
+  }
+
+  static transferStatic(input: Any): Object {
+    return ApplicationContext.nativeTransferStatic(ESValue.wrap(input));
+  }
+
+  static transferDynamic(input: Object): Any {
+    return ApplicationContext.nativeTransferDynamic(input).unwrap();
   }
 }

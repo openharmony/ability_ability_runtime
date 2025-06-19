@@ -30,6 +30,11 @@ namespace AbilityDelegatorEts {
 using namespace OHOS::AbilityRuntime;
 class EtsAbilityDelegator {
 public:
+    static EtsAbilityDelegator& GetInstance()
+    {
+        static EtsAbilityDelegator instance;
+        return instance;
+    }
     EtsAbilityDelegator();
     ~EtsAbilityDelegator();
     static void ExecuteShellCommand(ani_env* env, [[maybe_unused]]ani_object object,
@@ -48,20 +53,77 @@ public:
     static void AddAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
         ani_object monitorObj, ani_object callback);
 
+    static void AddAbilityMonitorSync(ani_env* env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj);
+
+    static void RemoveAbilityMonitor(ani_env* env, [[maybe_unused]]ani_class aniClass,
+        ani_object monitorObj, ani_object callback);
+
+    static void RemoveAbilityMonitorSync(ani_env* env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj);
+
+    static void WaitAbilityMonitor(ani_env* env, [[maybe_unused]]ani_class aniClass,
+        ani_object monitorOb0, ani_double timeout, ani_object callback);
+
+    static void AddAbilityStageMonitor(ani_env* env, [[maybe_unused]]ani_class aniClass,
+        ani_object stageMonitorObj, ani_object callback);
+
+    static void AddAbilityStageMonitorSync(ani_env* env, [[maybe_unused]]ani_class aniClass,
+        ani_object stageMonitorObj);
+
+    static void RemoveAbilityStageMonitor(ani_env* env, [[maybe_unused]]ani_class aniClass,
+        ani_object stageMonitorObj, ani_object callback);
+
+    static void RemoveAbilityStageMonitorSync(ani_env* env, [[maybe_unused]]ani_class aniClass,
+        ani_object stageMonitorObj);
+
+    static void WaitAbilityStageMonitor(ani_env* env, [[maybe_unused]]ani_class aniClass,
+        ani_object stageMonitorObj, ani_double timeout, ani_object callback);
+
+    static void DoAbilityForeground(ani_env* env, [[maybe_unused]]ani_object object,
+        ani_object abilityObj, ani_object callback);
+
+    static void DoAbilityBackground(ani_env* env, [[maybe_unused]]ani_object object,
+        ani_object abilityObj, ani_object callback);
+
+    static void Print(ani_env* env, [[maybe_unused]]ani_object object, ani_string msg, ani_object callback);
+
+    static ani_double  GetAbilityState(ani_env* env, [[maybe_unused]]ani_object object, ani_object abilityObj);
+
     static void StartAbility(ani_env* env, [[maybe_unused]]ani_object object, ani_object wantObj, ani_object callback);
 
     static ani_ref GetCurrentTopAbility(ani_env* env);
 
 private:
-    [[maybe_unused]]static void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resString);
+    [[maybe_unused]] void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resString);
 
-    static ani_object WrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmdResult> result);
+    ani_object WrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmdResult> result);
 
-    static bool ParseMonitorPara(ani_env *env, ani_object monitorObj,
+    bool ParseMonitorPara(ani_env *env, ani_object monitorObj,
         std::shared_ptr<EtsAbilityMonitor> &monitorImpl);
 
-    static bool ParseMonitorParaInner(ani_env *env, ani_object monitorObj,
+    bool ParseMonitorParaInner(ani_env *env, ani_object monitorObj,
         std::shared_ptr<EtsAbilityMonitor> &monitorImpl);
+
+    bool ParseStageMonitorPara(ani_env *env, ani_object stageMonitorObj,
+        std::shared_ptr<EtsAbilityStageMonitor> &stageMonitor, bool &isExisted);
+
+    bool ParseStageMonitorParaInner(ani_env *env, ani_object stageMonitorObj,
+        std::shared_ptr<EtsAbilityStageMonitor> &stageMonitor);
+
+    void AddStageMonitorRecord(ani_env *env, ani_object stageMonitorObj,
+        const std::shared_ptr<EtsAbilityStageMonitor> &stageMonitor);
+
+    void RemoveStageMonitorRecord(ani_env *env, ani_object stageMonitorObj);
+
+    bool ParseWaitAbilityStageMonitorPara(ani_env *env, ani_object stageMonitorObj,
+        std::shared_ptr<EtsAbilityStageMonitor> &stageMonitor);
+
+    bool ParseAbilityCommonPara(ani_env *env, ani_object abilityObj, sptr<OHOS::IRemoteObject> &remoteObject);
+
+    void AbilityLifecycleStateToEts(const AbilityDelegator::AbilityState &lifeState,
+        AbilityLifecycleState &abilityLifeState);
+
+    bool CheckPropertyValue(ani_env *env, int &resultCode, ani_object &resultAniOj,
+        std::shared_ptr<AppExecFwk::ETSDelegatorAbilityStageProperty> etsProperty);
 };
 } // namespace AbilityDelegatorEts
 } // namespace OHOS

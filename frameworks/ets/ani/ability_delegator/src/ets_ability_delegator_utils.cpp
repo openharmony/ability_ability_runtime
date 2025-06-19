@@ -29,10 +29,62 @@ constexpr const char* ARGS_ABILITY_DELEGATOR_CLASS_NAME =
     "Lapplication/abilityDelegatorArgs/AbilityDelegatorArgsInner;";
 }
 
+bool BindFunctions(ani_env *aniEnv, ani_class abilityDelegator)
+{
+    if (aniEnv == nullptr) {
+        return false;
+    }
+    std::array functions = {
+        ani_native_function {"getAppContext", nullptr, reinterpret_cast<void *>(EtsAbilityDelegator::GetAppContext)},
+        ani_native_function {"nativeExecuteShellCommand", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::ExecuteShellCommand)},
+        ani_native_function {"nativeFinishTest", nullptr, reinterpret_cast<void *>(EtsAbilityDelegator::FinishTest)},
+        ani_native_function {"printSync", nullptr, reinterpret_cast<void *>(EtsAbilityDelegator::PrintSync)},
+        ani_native_function {"nativeAddAbilityMonitor", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityMonitor)},
+        ani_native_function {"addAbilityMonitorSync", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityMonitorSync)},
+        ani_native_function {"removeAbilityMonitorAsync", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityMonitor)},
+        ani_native_function {"removeAbilityMonitorSync", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityMonitorSync)},
+        ani_native_function {"waitAbilityMonitorAsync", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::WaitAbilityMonitor)},
+        ani_native_function {"addAbilityStageMonitorAsync", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityStageMonitor)},
+        ani_native_function {"addAbilityStageMonitorSync", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityStageMonitorSync)},
+        ani_native_function {"removeAbilityStageMonitorAsync", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityStageMonitor)},
+        ani_native_function {"removeAbilityStageMonitorSync", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityStageMonitorSync)},
+        ani_native_function {"waitAbilityStageMonitorAsync", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::WaitAbilityStageMonitor)},
+        ani_native_function {"doAbilityForegroundAsync", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::DoAbilityForeground)},
+        ani_native_function {"doAbilityBackgroundAsync", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::DoAbilityBackground)},
+        ani_native_function {"printAsync", nullptr, reinterpret_cast<void *>(EtsAbilityDelegator::Print)},
+        ani_native_function {"getAbilityState", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::GetAbilityState)},
+        ani_native_function {"nativeStartAbility",
+            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsAbilityDelegator::StartAbility)},
+        ani_native_function {"nativeGetCurrentTopAbility", nullptr,
+            reinterpret_cast<void *>(EtsAbilityDelegator::GetCurrentTopAbility)}
+    };
+    ani_status status = aniEnv->Class_BindNativeMethods(abilityDelegator, functions.data(), functions.size());
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_BindNativeMethods failed status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 ani_object CreateEtsAbilityDelegator(ani_env *aniEnv)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "CreateEtsAbilityDelegator");
-    if (aniEnv ==nullptr) {
+    if (aniEnv == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null aniEnv");
         return {};
     }
@@ -45,24 +97,8 @@ ani_object CreateEtsAbilityDelegator(ani_env *aniEnv)
     }
     TAG_LOGD(AAFwkTag::DELEGATOR, "find AbilityDelegator success");
 
-    std::array delegatorFunctions = {
-        ani_native_function {"getAppContext", nullptr, reinterpret_cast<void *>(EtsAbilityDelegator::GetAppContext)},
-        ani_native_function {"nativeExecuteShellCommand", nullptr,
-            reinterpret_cast<void *>(EtsAbilityDelegator::ExecuteShellCommand)},
-        ani_native_function {"nativeFinishTest", nullptr,
-            reinterpret_cast<void *>(EtsAbilityDelegator::FinishTest)},
-        ani_native_function {"printSync", nullptr, reinterpret_cast<void *>(EtsAbilityDelegator::PrintSync)},
-        ani_native_function {"nativeAddAbilityMonitor", nullptr,
-            reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityMonitor)},
-        ani_native_function {"nativeStartAbility",
-            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
-            reinterpret_cast<void *>(EtsAbilityDelegator::StartAbility)},
-        ani_native_function {"nativeGetCurrentTopAbility", nullptr,
-            reinterpret_cast<void *>(EtsAbilityDelegator::GetCurrentTopAbility)}
-    };
-    status = aniEnv->Class_BindNativeMethods(abilityDelegator, delegatorFunctions.data(), delegatorFunctions.size());
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_BindNativeMethods failed status: %{public}d", status);
+    if (!BindFunctions(aniEnv, abilityDelegator)) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "BindFunctions failed");
         return {};
     }
 

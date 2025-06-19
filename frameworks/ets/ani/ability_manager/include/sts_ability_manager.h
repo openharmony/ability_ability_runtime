@@ -17,10 +17,21 @@
 #define OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_H
 
 #include "sts_runtime.h"
+#include "ability_running_info.h"
 
 namespace OHOS {
 namespace AbilityManagerSts {
 void StsAbilityManagerRegistryInit(ani_env *env);
+
+class StsAbilityManager final {
+public:
+    static StsAbilityManager &GetInstance()
+    {
+        static StsAbilityManager instance;
+        return instance;
+    }
+    static void GetAbilityRunningInfos(ani_env *env, ani_object callback);
+};
 } // namespace AbilityManagerSts
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_H
