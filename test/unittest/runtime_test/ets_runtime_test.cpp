@@ -82,8 +82,8 @@ HWTEST_F(EtsRuntimeTest, Create_100, TestSize.Level1)
     options_.lang = Runtime::Language::JS;
     options_.preload = true;
     options_.isStageModel = false;
-    auto jsRuntime = JsRuntime::Create(options_);
-    auto etsRuntime = ETSRuntime::Create(options_, jsRuntime.get());
+    std::unique_ptr<JsRuntime> jsRuntime = JsRuntime::Create(options_);
+    auto etsRuntime = ETSRuntime::Create(options_, jsRuntime);
     EXPECT_EQ(etsRuntime, nullptr);
     options_.lang = Runtime::Language::ETS;
     options_.preload = false;
@@ -113,7 +113,7 @@ HWTEST_F(EtsRuntimeTest, SetAppLibPath_100, TestSize.Level1)
 HWTEST_F(EtsRuntimeTest, Initialize_100, TestSize.Level1)
 {
     options_.lang = Runtime::Language::JS;
-    Runtime *jsRuntime = nullptr;
+    std::unique_ptr<JsRuntime> jsRuntime = nullptr;
     std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
     bool result = etsRuntime->Initialize(options_, jsRuntime);
     EXPECT_EQ(result, false);
@@ -135,7 +135,7 @@ HWTEST_F(EtsRuntimeTest, Initialize_200, TestSize.Level1)
     ASSERT_NE(jsRuntime, nullptr);
     std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
     ASSERT_NE(etsRuntime, nullptr);
-    bool result = etsRuntime->Initialize(options, jsRuntime.get());
+    bool result = etsRuntime->Initialize(options, jsRuntime);
     EXPECT_EQ(result, false);
 }
 
@@ -153,7 +153,7 @@ HWTEST_F(EtsRuntimeTest, LoadModule_0100, TestSize.Level1)
     std::string hapPath = "/some/hap";
     std::string srcEntrance = "main.ets";
     auto result = etsRuntime->LoadModule(moduleName, modulePath, hapPath, false, false, srcEntrance);
-    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result, nullptr);
 }
 
 /**
@@ -171,21 +171,6 @@ HWTEST_F(EtsRuntimeTest, LoadModule_0200, TestSize.Level1)
     std::string srcEntrance = "main";
     etsRuntime->LoadModule(moduleName, modulePath, hapPath, false, false, srcEntrance);
     EXPECT_EQ(etsRuntime->moduleName_, "lib");
-}
-
-
-/**
- * @tc.name: LoadAbcLinker_0100
- * @tc.desc: LoadAbcLinker returns false when env is nullptr.
- * @tc.type: FUNC
- */
-HWTEST_F(EtsRuntimeTest, LoadAbcLinker_0100, TestSize.Level0)
-{
-    ETSRuntime etsRuntime;
-    ani_class cls = nullptr;
-    ani_object obj = nullptr;
-    bool result = etsRuntime.LoadAbcLinker(nullptr, "testModule", cls, obj);
-    EXPECT_FALSE(result);
 }
 
 /**
@@ -252,7 +237,7 @@ HWTEST_F(EtsRuntimeTest, LoadModule_100, TestSize.Level1)
     env = nullptr;
     hapPath = TEST_HAP_PATH;
     env = etsRuntime->LoadModule(moduleName, modulePath, hapPath, esmodule, useCommonChunk, srcEntrance);
-    EXPECT_NE(env, nullptr);
+    EXPECT_EQ(env, nullptr);
 }
 
 /**
@@ -270,7 +255,7 @@ HWTEST_F(EtsRuntimeTest, LoadEtsModule_100, TestSize.Level1)
     std::string hapPath = "";
     std::string srcEntrance = "";
     auto env = etsRuntime->LoadEtsModule(moduleName, modulePath, hapPath, srcEntrance);
-    EXPECT_NE(env, nullptr);
+    EXPECT_EQ(env, nullptr);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

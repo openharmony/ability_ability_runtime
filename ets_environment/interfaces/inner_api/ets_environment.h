@@ -44,6 +44,9 @@ public:
     void RegisterUncaughtExceptionHandler(const ETSUncaughtExceptionInfo &handle);
     ani_env *GetAniEnv();
     bool HandleUncaughtError();
+    bool PreloadModule(const std::string &modulePath);
+    bool LoadModule(const std::string &modulePath, const std::string &srcEntrance, ani_class &cls,
+        ani_object &obj, ani_ref &ref);
 
     struct VMEntry {
         ani_vm *aniVm_;
@@ -63,6 +66,7 @@ private:
     std::string GetBuildId(std::string stack);
     EtsEnv::ETSErrorObject GetETSErrorObject();
     std::string GetErrorProperty(ani_error aniError, const char *property);
+    bool LoadAbcLinker(ani_env *env, const std::string &modulePath, ani_class &abcCls, ani_object &abcObj);
     static ETSRuntimeAPI lazyApis_;
     VMEntry vmEntry_;
     ETSUncaughtExceptionInfo uncaughtExceptionInfo_;
