@@ -118,6 +118,16 @@ bool CJRuntime::Initialize(const Options& options)
     return true;
 }
 
+void CJRuntime::RegisterUncaughtExceptionHandler(const CJUncaughtExceptionInfo& uncaughtExceptionInfo)
+{
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "null cjEnv");
+        return;
+    }
+    cjEnv->registerCJUncaughtExceptionHandler(uncaughtExceptionInfo);
+}
+
 bool CJRuntime::IsCJAbility(const std::string& info)
 {
     // in cj application, the srcEntry format should be packageName.AbilityClassName.
@@ -358,14 +368,4 @@ void CJRuntime::ForceFullGC(uint32_t tid)
         return;
     }
     cjEnv->forceFullGC();
-}
-
-void CJRuntime::RegisterUncaughtExceptionHandler(void* uncaughtExceptionInfo)
-{
-    auto cjEnv = OHOS::CJEnv::LoadInstance();
-    if (cjEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::CJRUNTIME, "null cjEnv");
-        return;
-    }
-    cjEnv->registerCJUncaughtExceptionHandler(*static_cast<CJUncaughtExceptionInfo *>(uncaughtExceptionInfo));
 }
