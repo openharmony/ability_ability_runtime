@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,8 @@ constexpr char EVENT_TRACE_ID[] = "HITRACE_ID";
 constexpr char EVENT_SPAN_ID[] = "SPAN_ID";
 constexpr char EVENT_PARENT_SPAN_ID[] = "PARENT_SPAN_ID";
 constexpr char EVENT_TRACE_FLAG[] = "TRACE_FLAG";
+constexpr char EVENT_APPFREEZE_TYPE[] = "appfreeze";
+constexpr char EVENT_SYSFREEZE_TYPE[] = "sysfreeze";
 constexpr int32_t CHARACTER_WIDTH = 2;
 #endif
 
@@ -82,8 +84,6 @@ const std::string LOG_FILE_PATH = "data/log/eventlog";
 static bool g_betaVersion = OHOS::system::GetParameter("const.logsystem.versiontype", "unknown") == "beta";
 static bool g_developMode = (OHOS::system::GetParameter("persist.hiview.leak_detector", "unknown") == "enable") ||
                             (OHOS::system::GetParameter("persist.hiview.leak_detector", "unknown") == "true");
-static constexpr const char *const APPFREEZE_LOG_PREFIX = "/data/app/el2/100/log/";
-static constexpr const char *const APPFREEZE_LOG_SUFFIX = "/watchdog/freeze/";
 }
 static constexpr const char *const TWELVE_BIG_CPU_CUR_FREQ = "/sys/devices/system/cpu/cpufreq/policy2/scaling_cur_freq";
 static constexpr const char *const TWELVE_BIG_CPU_MAX_FREQ = "/sys/devices/system/cpu/cpufreq/policy2/scaling_max_freq";
@@ -393,37 +393,25 @@ bool AppfreezeManager::GetHitraceId(HitraceInfo& info)
     return false;
 }
 
-std::string AppfreezeManager::GetFreezeInfoFile(const FaultData& faultData,
-    const std::string& bundleName)
-{
-    std::lock_guard<ffrt::mutex> lock(freezeInfoMutex_);
-    std::string filePath;
-    if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_3S) {
-        filePath = !faultData.appfreezeInfo.empty() ? (APPFREEZE_LOG_PREFIX + bundleName +
-            APPFREEZE_LOG_SUFFIX + faultData.appfreezeInfo) : "";
-    }
-    TAG_LOGI(AAFwkTag::APPDFR, "appfreezeInfo:%{public}s, filePath:%{public}s",
-        faultData.appfreezeInfo.c_str(), filePath.c_str());
-    return filePath;
-}
-
 std::string AppfreezeManager::ReportAppfreezeCpuInfo(const FaultData& faultData,
     const AppfreezeManager::AppInfo& appInfo)
 {
     std::string filePath;
     if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_3S) {
-        AppExecFwk::AppfreezeCpuFreqManager::GetInstance()->SetHalfStackPath(GetFreezeInfoFile(faultData,
-            appInfo.bundleName));
-        AppExecFwk::AppfreezeCpuFreqManager::GetInstance()->InitHalfCpuInfo(appInfo.pid);
+        AppExecFwk::AppfreezeCpuFreqManager::GetInstance().InitCpuDataProcessor(
+            EVENT_APPFREEZE_TYPE, appInfo.pid, appInfo.uid, faultData.appfreezeInfo);
     } else if (faultData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
-        AppExecFwk::AppfreezeCpuFreqManager::GetInstance()->InitHalfCpuInfo(appInfo.pid);
-    } else if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S ||
-        faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT) {
-        filePath = AppExecFwk::AppfreezeCpuFreqManager::GetInstance()->WriteCpuInfoToFile(appInfo.bundleName,
-            appInfo.uid, appInfo.pid, faultData.errorObject.name);
+        AppExecFwk::AppfreezeCpuFreqManager::GetInstance().InitCpuDataProcessor(
+            EVENT_SYSFREEZE_TYPE, appInfo.pid, appInfo.uid, faultData.appfreezeInfo);
+    } else if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S) {
+        filePath = AppExecFwk::AppfreezeCpuFreqManager::GetInstance().WriteCpuInfoToFile(
+            EVENT_APPFREEZE_TYPE, appInfo.bundleName, appInfo.uid, appInfo.pid, faultData.errorObject.name);
+    } else if (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT) {
+        filePath = AppExecFwk::AppfreezeCpuFreqManager::GetInstance().WriteCpuInfoToFile(
+            EVENT_SYSFREEZE_TYPE, appInfo.bundleName, appInfo.uid, appInfo.pid, faultData.errorObject.name);
     }
-    TAG_LOGI(AAFwkTag::APPDFR, "appfreezeInfo:%{public}s, filePath:%{public}s",
-        faultData.appfreezeInfo.c_str(), filePath.c_str());
+    TAG_LOGI(AAFwkTag::APPDFR, "report appfreeze name:%{public}s, appfreezeInfo:%{public}s, path:%{public}s",
+        faultData.errorObject.name.c_str(), faultData.appfreezeInfo.c_str(), filePath.c_str());
     return filePath;
 }
 
