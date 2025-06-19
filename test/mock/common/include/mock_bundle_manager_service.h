@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 #include "iremote_object.h"
 #include "iremote_stub.h"
 #include "module_info.h"
-#include "mock_overlay_manager.h"
 
 namespace OHOS {
 namespace {
@@ -56,13 +55,6 @@ public:
     MOCK_METHOD3(QueryAbilityInfoByUri, bool(const std::string&, int32_t, AppExecFwk::AbilityInfo&));
     MOCK_METHOD5(ImplicitQueryInfoByPriority, bool(const Want&, int32_t, int32_t, AppExecFwk::AbilityInfo&,
         AppExecFwk::ExtensionAbilityInfo&));
-
-    sptr<AppExecFwk::IOverlayManager> GetOverlayManagerProxy()
-    {
-        sptr<AppExecFwk::IOverlayManager> overlayModuleProxy =
-            new (std::nothrow) AppExecFwk::OverlayManagerProxy(nullptr);
-        return overlayModuleProxy;
-    }
 
     bool GetBundleInfo(const std::string &bundleName, const AppExecFwk::BundleFlag flag,
         AppExecFwk::BundleInfo &bundleInfo, int32_t userId) override
