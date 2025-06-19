@@ -269,5 +269,49 @@ HWTEST_F(EtsEnvironmentTest, HandleUncaughtError_0100, TestSize.Level1)
     bool result = etsEnv->HandleUncaughtError();
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: LoadAbcLinker_0100
+ * @tc.desc: LoadAbcLinker returns false when env is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, LoadAbcLinker_0100, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    ani_class cls = nullptr;
+    ani_object obj = nullptr;
+    bool result = etsEnv->LoadAbcLinker(nullptr, "testModule", cls, obj);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PreloadModule_0100
+ * @tc.desc: PreloadModule returns false when env is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, PreloadModule_0100, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    bool result = etsEnv->PreloadModule("testModule");
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: LoadModule_0100
+ * @tc.desc: LoadModule returns false when env is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, LoadModule_0100, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    ani_class cls = nullptr;
+    ani_object obj = nullptr;
+    ani_ref ref = nullptr;
+    bool result = etsEnv->LoadModule("testModule", "testModule", cls, obj, ref);
+    EXPECT_FALSE(result);
+}
 } // namespace StsEnv
 } // namespace OHOS

@@ -1766,12 +1766,5 @@ void JsRuntime::StartLocalDebugMode(bool isDebugFromLocal)
     debugOption_.isDebugFromLocal = isDebugFromLocal;
     StartDebugMode(debugOption_);
 }
-
-void JsRuntime::RegisterUncaughtExceptionHandler(void *uncaughtExceptionInfo)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    CHECK_POINTER(jsEnv_);
-    jsEnv_->RegisterUncaughtExceptionHandler(*static_cast<JsEnv::UncaughtExceptionInfo *>(uncaughtExceptionInfo));
-}
 } // namespace AbilityRuntime
 } // namespace OHOS
