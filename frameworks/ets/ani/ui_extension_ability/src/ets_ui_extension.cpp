@@ -667,7 +667,7 @@ bool EtsUIExtension::CallObjectMethod(bool withResult, const char *name, const c
     }
     env->ResetError();
     if (withResult) {
-        ani_boolean res = 0;
+        ani_boolean res = ANI_FALSE;
         va_list args;
         va_start(args, signature);
         if ((status = env->Object_CallMethod_Boolean(etsObj_->aniObj, method, &res, args)) != ANI_OK) {
