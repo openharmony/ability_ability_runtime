@@ -79,6 +79,7 @@ private:
     sptr<AppExecFwk::IAppMgr> GetAppMgr();
     void MakeProcessName(const std::string &srcEntry);
     bool IsMultiProcessFeatureApp(const AppExecFwk::BundleInfo &bundleInfo);
+    ChildProcessManagerErrorCode GetErrorCodeCompat(int32_t ret, int32_t childProcessType);
 
     static bool signalRegistered_;
     bool isChildProcessBySelfFork_ = false;
