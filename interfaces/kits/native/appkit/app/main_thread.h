@@ -761,7 +761,8 @@ private:
 
     bool GetHqfFileAndHapPath(const std::string &bundleName,
         std::vector<std::pair<std::string, std::string>> &fileMap);
-    void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths);
+    void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths,
+        AppLibPathMap &appAbcLibPaths);
     void SetAppDebug(uint32_t modeFlag, bool isDebug);
 
     void AddRuntimeLang(ApplicationInfo& appInfo, AbilityRuntime::Runtime::Options& options);
