@@ -1741,36 +1741,6 @@ bool ContextImpl::UpdateDisplayConfiguration(std::shared_ptr<ContextImpl> &conte
     return true;
 }
 
-
-int64_t GetSteadyNanoSeconds() {
-    auto now = std::chrono::steady_clock::now().time_since_epoch();
-    return std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
-}
-
-int32_t ContextImpl::PromoteToStandbyMasterProcess(bool isInsertToHead)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "Called");
-    auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
-    if (appMgrClient == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null appMgrClient");
-        return ERR_INVALID_VALUE;
-    }
-    return appMgrClient->PromoteToStandbyMasterProcess(isInsertToHead);
-
-}
-
-int32_t ContextImpl::DemoteFromStandbyMasterProcess()
-{
-
-    TAG_LOGD(AAFwkTag::APPKIT, "Called");
-    auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
-    if (appMgrClient == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null appMgrClient");
-        return ERR_INVALID_VALUE;
-    }
-    return appMgrClient->DemoteFromStandbyMasterProcess();
-}
-
 #ifdef SUPPORT_GRAPHICS
 std::shared_ptr<Context> ContextImpl::CreateDisplayContext(uint64_t displayId)
 {

@@ -255,43 +255,88 @@ bool AppRunningManager::CheckAppRunningRecordIsExist(const std::string &bundleNa
 }
 #endif
 
-std::shared_ptr<AppRunningRecord> AppRunningManager::CheckMasterProcessAppRunningRecordIsExist(const std::string &appName,
-        const AppExecFwk::AbilityInfo &abilityInfo, const int uid)
+bool AppRunningManager::IsSameAbilityType(const std::shared_ptr<AppRunningRecord> &appRecord,
+    const AppExecFwk::AbilityInfo &abilityInfo)
+{
+    if (appRecord == nullptr) {
+        return false;
+    }
+    bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE);
+    bool isUIExtension = (abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI);
+    if (((appRecord->GetProcessType() == ProcessType::NORMAL ||
+        appRecord->GetExtensionType() == AppExecFwk::ExtensionAbilityType::SERVICE ||
+        appRecord->GetExtensionType() == AppExecFwk::ExtensionAbilityType::DATASHARE) && isUIAbility)||
+        (appRecord->GetExtensionType() == AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI && isUIExtension)) {
+            return true;
+    }
+    return false;
+}
+
+std::shared_ptr<AppRunningRecord> AppRunningManager::FindMasterProcessAppRunningRecord(
+    const std::string &appName, const AppExecFwk::AbilityInfo &abilityInfo, const int uid)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "uid: %{public}d: appName: %{public}s", uid, appName.c_str());
     auto appRunningMap = GetAppRunningRecordMap();
     int64_t maxTimeStamp = INT64_MIN;
-    std::shared_ptr<AppRunningRecord> maxAppRecord = nullptr;
+    int64_t minAppRecordId = INT32_MAX;
+    std::shared_ptr<AppRunningRecord> maxAppRecord;
+    std::shared_ptr<AppRunningRecord> minAppRecord;
     bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE);
-    bool isUIExtension = (abilityInfo.type == AppExecFwk::AbilityType::EXTENSION &&
-                        abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI);
-    for(const auto &item : appRunningMap){
+    bool isUIExtension = (abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI);
+    for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
-        if(appRecord && appRecord->GetUid() == uid && appRecord->GetIsMasterProcess() &&
-           ((appRecord->GetProcessType() == ProcessType::NORMAL && isUIAbility) ||
-           (appRecord->GetExtensionType() == AppExecFwk::ExtensionAbilityType::UI && isUIExtension))
-        ){
+        if (!(appRecord && appRecord->GetUid() == uid)) {
+            continue;
+        }
+        
+        if (appRecord->GetIsMasterProcess() && IsSameAbilityType(appRecord, abilityInfo)) {
             return appRecord;
         }
 
-        if(appRecord && appRecord->GetUid() == uid &&
-            appRecord->GetTimeStamp() !=0 && maxTimeStamp < appRecord->GetTimeStamp() && 
-           ((appRecord->GetProcessType() == ProcessType::NORMAL && isUIAbility) ||
-            (appRecord->GetExtensionType() == AppExecFwk::ExtensionAbilityType::UI && isUIExtension))
-        ){
+        if (appRecord->GetTimeStamp() != 0 && maxTimeStamp < appRecord->GetTimeStamp() &&
+            IsSameAbilityType(appRecord, abilityInfo)) {
             maxTimeStamp = appRecord->GetTimeStamp();
             maxAppRecord = appRecord;
         }
+
+        if ((appRecord->GetExtensionType() == AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI && isUIExtension) &&
+            appRecord->GetRecordId() < minAppRecordId) {
+            minAppRecordId = appRecord->GetRecordId();
+            minAppRecord = appRecord;
+        }
     }
 
-    if(maxAppRecord != nullptr){
+    if (maxAppRecord != nullptr) {
         maxAppRecord->SetMasterProcess(true);
         maxAppRecord->SetTimeStamp(0);
         return maxAppRecord;
     }
 
+    if (minAppRecord != nullptr) {
+        minAppRecord->SetMasterProcess(true);
+        return minAppRecord;
+    }
+
     return nullptr;
+}
+
+bool AppRunningManager::CheckMasterProcessAppRunningRecordIsExist(
+    const std::string &appName, const AppExecFwk::AbilityInfo &abilityInfo, const int uid)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::APPMGR, "uid: %{public}d: appName: %{public}s", uid, appName.c_str());
+    auto appRunningMap = GetAppRunningRecordMap();
+    bool isUIAbility = (abilityInfo.type == AppExecFwk::AbilityType::PAGE);
+    bool isUIExtension = (abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI);
+    for (const auto &item : appRunningMap) {
+        const auto &appRecord = item.second;
+        if (appRecord && appRecord->GetUid() == uid && appRecord->GetIsMasterProcess() &&
+            IsSameAbilityType(appRecord, abilityInfo)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool AppRunningManager::IsAppExist(uint32_t accessTokenId)

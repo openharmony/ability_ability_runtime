@@ -35,6 +35,8 @@ public:
     static napi_value CreateBundleContext(napi_env env, napi_callback_info info);
     static napi_value GetApplicationContext(napi_env env, napi_callback_info info);
     static napi_value CreatePluginModuleContext(napi_env env, napi_callback_info info);
+    static napi_value PromoteCurrentToCandidateMasterProcess(napi_env env, napi_callback_info info);
+    static napi_value DemoteCurrentFromCandidateMasterProcess(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnCreateModuleContext(napi_env env, NapiCallbackInfo &info);
@@ -46,6 +48,8 @@ private:
     bool CheckCallerIsSystemApp();
     bool CheckCallerPermission(const std::string &permission);
     napi_value OnGetApplicationContext(napi_env env, NapiCallbackInfo &info);
+    napi_value OnPromoteCurrentToCandidateMasterProcess(napi_env env, NapiCallbackInfo& info);
+    napi_value OnDemoteCurrentFromCandidateMasterProcess(napi_env env, NapiCallbackInfo& info);
 };
 
 napi_value ApplicationInit(napi_env env, napi_value exportObj);

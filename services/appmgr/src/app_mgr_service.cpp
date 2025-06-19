@@ -1905,24 +1905,24 @@ int32_t AppMgrService::LaunchAbility(sptr<IRemoteObject> token)
     return appMgrServiceInner_->LaunchAbility(token);
 }
 
-int32_t AppMgrService::PromoteToStandbyMasterProcess(bool isInsertToHead)
+int32_t AppMgrService::PromoteCurrentToCandidateMasterProcess(bool isInsertToHead)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
-        return ERR_INVALID_OPERATION;
+        return AAFwk::ERR_NULL_APP_MGR_SERVICE_INNER;
     }
-    return appMgrServiceInner_->PromoteToStandbyMasterProcess(isInsertToHead);
+    return appMgrServiceInner_->PromoteCurrentToCandidateMasterProcess(isInsertToHead);
 }
 
-int32_t AppMgrService::DemoteFromStandbyMasterProcess()
+int32_t AppMgrService::DemoteCurrentFromCandidateMasterProcess()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
-    if (!appMgrServiceInner_) {
+    if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
-        return ERR_INVALID_VALUE;
+        return AAFwk::ERR_NULL_APP_MGR_SERVICE_INNER;
     }
-    return appMgrServiceInner_->DemoteFromStandbyMasterProcess();
+    return appMgrServiceInner_->DemoteCurrentFromCandidateMasterProcess();
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

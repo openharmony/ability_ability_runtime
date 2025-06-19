@@ -53,11 +53,6 @@ public:
     static napi_value CancelAutoStartup(napi_env env, napi_callback_info info);
     static napi_value IsAutoStartup(napi_env env, napi_callback_info info);
 
-    static napi_value PromoteToStandbyMasterProcess(napi_env env, napi_callback_info info);
-    napi_value OnPromoteToStandbyMasterProcess(napi_env env, NapiCallbackInfo& info);
-    static napi_value DemoteFromStandbyMasterProcess(napi_env env, napi_callback_info info);
-    napi_value OnDemoteFromStandbyMasterProcess(napi_env env, NapiCallbackInfo& info);
-
     napi_value OnRegisterAbilityLifecycleCallback(napi_env env, NapiCallbackInfo& info);
     napi_value OnUnregisterAbilityLifecycleCallback(napi_env env, NapiCallbackInfo& info);
 
@@ -100,8 +95,6 @@ public:
     napi_value OnGetCurrentInstanceKey(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetAllRunningInstanceKeys(napi_env env, NapiCallbackInfo& info);
     napi_value OnSetFontSizeScale(napi_env env, NapiCallbackInfo& info);
-
-
 
     static napi_value GetCacheDir(napi_env env, napi_callback_info info);
     static napi_value GetTempDir(napi_env env, napi_callback_info info);

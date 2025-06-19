@@ -988,19 +988,19 @@ public:
         bool &isRunning);
 
     /**
-     * Elevate the current process to be a standby master process.
+     * Elevate the current process to be a candidate master process.
      *
-     * @param isInsertToHead Whether inset current process to the head of standby master process list.
+     * @param isInsertToHead Whether inset current process to the head of candidate master process list.
      * @return Return ERR_OK if success, others fail.
      */
-    int32_t PromoteToStandbyMasterProcess(bool isInsertToHead);
+    int32_t PromoteCurrentToCandidateMasterProcess(bool isInsertToHead);
     
     /**
-     * Revoke current process as a standby master process.
+     * Revoke current process as a candidate master process.
      *
      * @return Return ERR_OK if success, others fail.
      */
-    int32_t DemoteFromStandbyMasterProcess();
+    int32_t DemoteCurrentFromCandidateMasterProcess();
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

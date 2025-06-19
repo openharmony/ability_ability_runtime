@@ -2425,7 +2425,7 @@ int32_t AppMgrProxy::LaunchAbility(sptr<IRemoteObject> token)
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::PromoteToStandbyMasterProcess(bool isInsertToHead)
+int32_t AppMgrProxy::PromoteCurrentToCandidateMasterProcess(bool isInsertToHead)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
@@ -2436,13 +2436,13 @@ int32_t AppMgrProxy::PromoteToStandbyMasterProcess(bool isInsertToHead)
     PARCEL_UTIL_WRITE_RET_INT(data, Bool, isInsertToHead);
 
     MessageParcel reply;
-    MessageOption option;  
+    MessageOption option;
 
-    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::PROMOTE_TO_STANDBY_MASTER_PROCESS, data, reply, option);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::PROMOTE_CURRENT_TO_CANDIDATE_MASTER_PROCESS, data, reply, option);
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::DemoteFromStandbyMasterProcess()
+int32_t AppMgrProxy::DemoteCurrentFromCandidateMasterProcess()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     MessageParcel data;
@@ -2453,7 +2453,7 @@ int32_t AppMgrProxy::DemoteFromStandbyMasterProcess()
         return ERR_INVALID_DATA;
     }
 
-    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::DEMOTE_FROM_STANDBY_MASTER_PROCESS, data, reply, option);
+    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::DEMOTE_CURRENT_FROM_CANDIDATE_MASTER_PROCESS, data, reply, option);
     return reply.ReadInt32();
 }
 
