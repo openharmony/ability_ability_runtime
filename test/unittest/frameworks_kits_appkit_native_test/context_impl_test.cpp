@@ -27,8 +27,13 @@
 #include "hap_module_info.h"
 #include "hilog_tag_wrapper.h"
 #include "iremote_object.h"
+#include "js_context_utils.h"
+#include "js_runtime_utils.h"
+#include "js_runtime_lite.h"
 #include "mock_ability_token.h"
 #include "mock_bundle_manager.h"
+#include "napi/native_api.h"
+#include "native_engine/native_engine.h"
 #include "system_ability_definition.h"
 #include "sys_mgr_client.h"
 
@@ -1636,6 +1641,41 @@ HWTEST_F(ContextImplTest, AppExecFwk_ContextImpl_UpdateDisplayConfiguration_004,
         DEFAULT_DISPLAY_ID, DENSITY, DIRECTION_HORIZONTAL);
     EXPECT_EQ(result, true);
     GTEST_LOG_(INFO) << "AppExecFwk_ContextImpl_UpdateDisplayConfiguration_004 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_ContextImpl_Bind_001
+ * @tc.name: AppExecFwk_ContextImpl_Bind_001
+ * @tc.desc: test Bind and UnBind function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContextImplTest, AppExecFwk_ContextImpl_Bind_001, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ContextImpl_Bind_001 start");
+    auto context = std::make_shared<AbilityRuntime::ContextImpl>();
+    ASSERT_NE(context, nullptr);
+
+    std::shared_ptr<JsEnv::JsEnvironment> jsEnv = nullptr;
+    Options options;
+    auto errCode = AbilityRuntime::JsRuntimeLite::GetInstance().CreateJsEnv(options, jsEnv);
+    EXPECT_NE(jsEnv, nullptr);
+    napi_env napiEnv = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
+    EXPECT_NE(napiEnv, nullptr);
+
+    auto value = AbilityRuntime::CreateJsBaseContext(napiEnv, context);
+    auto systemModule = AbilityRuntime::JsRuntime::LoadSystemModuleByEngine(napiEnv, "application.Context", &value, 1);
+    EXPECT_NE(systemModule, nullptr);
+    context->Bind(systemModule.get());
+
+    auto &bindingObj = context->GetBindingObject();
+    ASSERT_NE(bindingObj, nullptr);
+
+    auto dynamicContext = bindingObj->Get<NativeReference>();
+    EXPECT_NE(dynamicContext, nullptr);
+    EXPECT_EQ(dynamicContext, systemModule.get());
+    context->Unbind();
+
+    TAG_LOGI(AAFwkTag::TEST, "ContextImpl_Bind_001 end");
 }
 }  // namespace AppExecFwk
 }

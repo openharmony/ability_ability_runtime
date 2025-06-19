@@ -32,6 +32,7 @@ void ThrowStsNoPermissionError(ani_env *env, const std::string &permission);
 void ThrowStsInvalidParamError(ani_env *env, const std::string &message);
 void ThrowStsErrorByNativeErr(ani_env *env, int32_t err);
 void ThrowStsNotSystemAppError(ani_env *env);
+void ThrowStsTransferClassError(ani_env *env);
 
 ani_object CreateStsError(ani_env *env, const AbilityErrorCode &err);
 ani_object CreateStsError(ani_env *env, ani_int code, const std::string &msg);

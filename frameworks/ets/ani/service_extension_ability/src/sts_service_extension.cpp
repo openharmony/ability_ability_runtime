@@ -148,7 +148,7 @@ void StsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record
     if (ANI_OK != status) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Class_BindNativeMethods is fail %{public}d", status);
     };
-    BindContext(env, record->GetWant(), application);
+    BindContext(env, record->GetWant());
     return;
 }
 #ifdef SUPPORT_GRAPHICS
@@ -159,15 +159,14 @@ void StsServiceExtension::SystemAbilityStatusChangeListener::OnAddSystemAbility(
 #endif //SUPPORT_GRAPHICS
 
 ani_object StsServiceExtension::CreateSTSContext(ani_env* env, std::shared_ptr<ServiceExtensionContext> context,
-    int32_t screenMode, const std::shared_ptr<OHOSApplication> &application)
+    int32_t screenMode)
 {
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "CreateSTSContext");
-    ani_object obj = CreateStsServiceExtensionContext(env, context, application);
+    ani_object obj = CreateStsServiceExtensionContext(env, context);
     return obj;
 }
 
-void StsServiceExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want,
-    const std::shared_ptr<OHOSApplication> &application)
+void StsServiceExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want)
 {
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "StsServiceExtension BindContext Call");
     if (env == nullptr || want == nullptr) {
@@ -180,7 +179,7 @@ void StsServiceExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> 
         return;
     }
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
-    ani_object contextObj = CreateSTSContext(env, context, screenMode, application);
+    ani_object contextObj = CreateSTSContext(env, context, screenMode);
     if (contextObj == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null contextObj");
         return;

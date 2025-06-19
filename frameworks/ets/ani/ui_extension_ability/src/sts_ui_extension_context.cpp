@@ -243,8 +243,7 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
     return true;
 }
 
-ani_object CreateStsUIExtensionContext(ani_env *env, std::shared_ptr<UIExtensionContext> context,
-    const std::shared_ptr<AppExecFwk::OHOSApplication> &application)
+ani_object CreateStsUIExtensionContext(ani_env *env, std::shared_ptr<UIExtensionContext> context)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "CreateStsUIExtensionContext");
     if (env == nullptr) {
@@ -280,12 +279,7 @@ ani_object CreateStsUIExtensionContext(ani_env *env, std::shared_ptr<UIExtension
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return nullptr;
     }
-    if (application == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "application null");
-        return nullptr;
-    }
-    OHOS::AbilityRuntime::ContextUtil::StsCreatContext(env, cls, contextObj,
-        application->GetApplicationCtxObjRef(), context);
+    OHOS::AbilityRuntime::ContextUtil::StsCreatContext(env, cls, contextObj, context);
     OHOS::AbilityRuntime::CreatEtsExtensionContext(env, cls, contextObj, context, context->GetAbilityInfo());
     return contextObj;
 }

@@ -177,10 +177,8 @@ public:
     void ResetEnv(ani_env* env);
 
 private:
-    virtual void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want,
-        const std::shared_ptr<OHOSApplication> &application);
-    ani_object CreateSTSContext(ani_env *env, std::shared_ptr<UIExtensionContext> context,
-        int32_t screenMode, const std::shared_ptr<OHOSApplication> &application);
+    virtual void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want);
+    ani_object CreateSTSContext(ani_env *env, std::shared_ptr<UIExtensionContext> context, int32_t screenMode);
     bool CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
     ani_status CallOnDisconnect(const AAFwk::Want &want, bool withResult = false);
     ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& param);
