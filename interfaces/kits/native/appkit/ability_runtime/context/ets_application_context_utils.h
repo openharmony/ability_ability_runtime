@@ -56,8 +56,10 @@ public:
     static void SetSupportedProcessCacheSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         ani_boolean value);
     static void SetApplicationContextToEts(const std::shared_ptr<ApplicationContext> &abilityRuntimeContext);
-    static void CreateEtsApplicationContext(ani_env* aniEnv, void* applicationContextObjRef);
+    static void CreateEtsApplicationContext(ani_env* aniEnv);
     static void BindApplicationContextFunc(ani_env* aniEnv, ani_class& contextClass);
+    static void SetAndBindApplicationObject(ani_env* aniEnv, ani_object applicationContextObject,
+        std::shared_ptr<ApplicationContext> applicationContext);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

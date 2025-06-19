@@ -40,7 +40,7 @@ class StsServiceExtension : public ServiceExtension {
 public:
     explicit StsServiceExtension(STSRuntime& stsRuntime);
     virtual ~StsServiceExtension() override;
- 
+
     /**
      * @brief Create StsServiceExtension.
      *
@@ -60,7 +60,7 @@ public:
         const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
         std::shared_ptr<AppExecFwk::AbilityHandler> &handler,
         const sptr<IRemoteObject> &token) override;
- 
+
     /**
      * @brief Called when this extension is started. You must override this function if you want to perform some
      *        initialization operations during extension startup.
@@ -69,7 +69,7 @@ public:
      * @param Want Indicates the {@link Want} structure containing startup information about the extension.
      */
     virtual void OnStart(const AAFwk::Want &want) override;
- 
+
     /**
      * @brief Called when this Service extension is connected for the first time.
      *
@@ -79,7 +79,7 @@ public:
      * @return Returns a pointer to the <b>sid</b> of the connected Service extension.
      */
     virtual sptr<IRemoteObject> OnConnect(const AAFwk::Want &want) override;
- 
+
     /**
      * @brief Called when this Service extension is connected for the first time.
      *
@@ -100,7 +100,7 @@ public:
      *
      */
     virtual void OnDisconnect(const AAFwk::Want &want) override;
- 
+
     /**
      * @brief Called when all abilities connected to this Service extension are disconnected.
      *
@@ -110,7 +110,7 @@ public:
      */
     void OnDisconnect(const AAFwk::Want &want, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo,
         bool &isAsyncCallback) override;
- 
+
     /**
      * @brief Called back when Service is started.
      * This method can be called only by Service. You can use the StartAbility(ohos.aafwk.content.Want) method to start
@@ -125,9 +125,9 @@ public:
      * value of startId is 6.
      */
     virtual void OnCommand(const AAFwk::Want &want, bool restart, int startId) override;
- 
+
     bool HandleInsightIntent(const AAFwk::Want &want) override;
- 
+
     /**
      * @brief Called when this extension enters the <b>STATE_STOP</b> state.
      *
@@ -141,13 +141,13 @@ public:
      * @param configuration Indicates the updated configuration information.
      */
     void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration) override;
- 
+
     /**
      * @brief Called when configuration changed, including system configuration and window configuration.
      *
      */
     void ConfigurationUpdated();
- 
+
     /**
      * @brief Called when extension need dump info.
      *
@@ -157,25 +157,23 @@ public:
     virtual void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
 
     void ResetEnv(ani_env* env);
- 
+
 private:
     ani_ref CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
- 
-    void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want,
-        const std::shared_ptr<OHOSApplication> &application);
-    ani_object CreateSTSContext(ani_env *env, std::shared_ptr<ServiceExtensionContext> context,
-        int32_t screenMode, const std::shared_ptr<OHOSApplication> &application);
- 
+
+    void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want);
+    ani_object CreateSTSContext(ani_env *env, std::shared_ptr<ServiceExtensionContext> context, int32_t screenMode);
+
     void GetSrcPath(std::string &srcPath);
- 
+
     napi_value CallOnConnect(const AAFwk::Want &want);
- 
+
     napi_value CallOnDisconnect(const AAFwk::Want &want, bool withResult = false);
- 
+
     bool CheckPromise(napi_value result);
- 
+
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
- 
+
     void ListenWMS();
 
     STSRuntime& stsRuntime_;
@@ -190,7 +188,7 @@ protected:
         {
             stsServiceExtension_ = stsServiceExtension;
         }
- 
+
         void OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::DisplayId displayId, float density,
             Rosen::DisplayOrientation orientation) override
             {
@@ -199,17 +197,17 @@ protected:
                     sptr->OnDisplayInfoChange(token, displayId, density, orientation);
                 }
             }
- 
+
     private:
         std::weak_ptr<StsServiceExtension> stsServiceExtension_;
     };
- 
+
     void OnCreate(Rosen::DisplayId displayId);
     void OnDestroy(Rosen::DisplayId displayId);
     void OnChange(Rosen::DisplayId displayId);
     void OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::DisplayId displayId, float density,
         Rosen::DisplayOrientation orientation);
- 
+
 private:
     class SystemAbilityStatusChangeListener : public OHOS::SystemAbilityStatusChangeStub {
     public:
@@ -217,12 +215,12 @@ private:
             const sptr<IRemoteObject> & token): tmpDisplayListener_(displayListener), token_(token) {};
         virtual void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
         virtual void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override {}
- 
+
     private:
         sptr<StsServiceExtensionDisplayListener> tmpDisplayListener_ = nullptr;
         sptr<IRemoteObject> token_ = nullptr;
     };
- 
+
     sptr<StsServiceExtensionDisplayListener> displayListener_ = nullptr;
     sptr<SystemAbilityStatusChangeListener> saStatusChangeListener_ = nullptr;
 #endif

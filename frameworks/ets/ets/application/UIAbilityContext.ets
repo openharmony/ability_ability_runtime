@@ -28,6 +28,9 @@ import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import OpenLinkOptions from '@ohos.app.ability.OpenLinkOptions';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 
+// remove local declaration after Any type is supported
+type Any = Object | null | undefined
+
 export default class UIAbilityContext extends Context {
   static {
     loadLibrary("context_ani");
@@ -45,6 +48,15 @@ export default class UIAbilityContext extends Context {
     this.abilityInfo = abilityInfo;
     this.windowStage = windowStage;
     this.currentHapModuleInfo = currentHapModuleInfo;
+  }
+
+  private static native nativeTransferStatic(input: ESValue): Object;
+  private static native nativeTransferDynamic(input: Object): ESValue;
+  static transferStatic(input: Any): Object {
+    return UIAbilityContext.nativeTransferStatic(ESValue.wrap(input));
+  }
+  static transferDynamic(input: Object): Any {
+    return UIAbilityContext.nativeTransferDynamic(input).unwrap();
   }
 
   private native nativeStartAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;

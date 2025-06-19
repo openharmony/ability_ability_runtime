@@ -221,7 +221,7 @@ void OHOSApplication::InitAniApplicationContext()
 {
     auto& runtime = GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2);
     auto aniEnv = static_cast<AbilityRuntime::STSRuntime &>(*runtime).GetAniEnv();
-    AbilityRuntime::EtsApplicationContextUtils::CreateEtsApplicationContext(aniEnv, applicationContextObjRef_);
+    AbilityRuntime::EtsApplicationContextUtils::CreateEtsApplicationContext(aniEnv);
 }
 
 void OHOSApplication::InitAniContext()

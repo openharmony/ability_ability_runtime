@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <cstdarg>
+#include <dlfcn.h>
 #include <gtest/gtest.h>
 #include <gtest/hwext/gtest-multithread.h>
 #include <string>
@@ -23,6 +24,7 @@
 #include "sts_environment.h"
 #undef private
 #include "sts_environment_impl.h"
+#include "sts_invoker.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -206,5 +208,24 @@ HWTEST_F(StsEnvironmentTest, GetAniEnv_0100, TestSize.Level0)
     stsEnv->vmEntry_ = vMEntryOld;
 }
 
+/**
+ * @tc.name: LoadSymbolANIGetCreatedVMs_0100
+ * @tc.desc: Test LoadSymbolANIGetCreatedVMs when symbol is not found.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StsEnvironmentTest, LoadSymbolANIGetCreatedVMs_0100, TestSize.Level0)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> eventRunner = AppExecFwk::EventRunner::Create(TEST_ABILITY_NAME);
+    auto stsEnv =
+        std::make_shared<STSEnvironment>(std::make_unique<AbilityRuntime::OHOSStsEnvironmentImpl>(eventRunner));
+    ASSERT_NE(stsEnv, nullptr);
+    void* handle = dlopen(nullptr, RTLD_LAZY);
+    ASSERT_NE(handle, nullptr);
+    STSRuntimeAPI apis;
+    bool result = stsEnv->LoadSymbolANIGetCreatedVMs(handle, apis);
+    dlclose(handle);
+    EXPECT_TRUE(result);
+    EXPECT_NE(apis.ANI_GetCreatedVMs, nullptr);
+}
 } // namespace StsEnv
 } // namespace OHOS

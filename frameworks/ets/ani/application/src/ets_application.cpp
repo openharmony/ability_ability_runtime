@@ -12,14 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ets_application.h"
+
 #include "accesstoken_kit.h"
 #include "ani_base_context.h"
 #include "ani_common_util.h"
 #include "application_context.h"
 #include "context_impl.h"
-#include "ets_application.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
+#include "permission_verification.h"
 #include "sts_context_utils.h"
 #include "sts_error_utils.h"
 #include "tokenid_kit.h"
@@ -30,57 +32,40 @@ namespace {
 constexpr const char* PERMISSION_GET_BUNDLE_INFO = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
 }
 
-ani_object GetNullObject(ani_env *env)
+ani_object CreateEmptyObject(ani_env *env)
 {
     ani_class cls = nullptr;
     ani_status status = env->FindClass("Lapplication/Context/Context;", &cls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "find Context failed status: %{public}d", status);
+        return nullptr;
     }
     ani_method method = nullptr;
     status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod ctor failed status: %{public}d", status);
+        return nullptr;
     }
     ani_object objValue = nullptr;
     if (env->Object_New(cls, method, &objValue) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_New failed status: %{public}d", status);
+        return nullptr;
     }
     return objValue;
 }
 
-bool CheckCallerIsSystemApp()
+bool CheckIsSystemAppOrPermisson(ani_env *env, ani_object callback)
 {
-    auto selfToken = IPCSkeleton::GetSelfTokenID();
-    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
-        return false;
-    }
-    return true;
-}
-
-bool CheckCallerPermission(const std::string &permission)
-{
-    auto selfToken = IPCSkeleton::GetSelfTokenID();
-    int ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(selfToken, permission);
-    if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
-        return false;
-    }
-    return true;
-}
-
-bool CheckCaller(ani_env *env, ani_object callback)
-{
-    if (!CheckCallerIsSystemApp()) {
+    auto emptyObject = CreateEmptyObject(env);
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall()) {
         TAG_LOGE(AAFwkTag::APPKIT, "no system app");
-        auto emptyObject = GetNullObject(env);
         AppExecFwk::AsyncCallback(env, callback, CreateStsError(env,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
                 "The application is not system-app, can not use system-api."), emptyObject);
         return false;
     }
-    if (!CheckCallerPermission(PERMISSION_GET_BUNDLE_INFO)) {
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyGetBundleInfoPrivilegedPermission()) {
         TAG_LOGE(AAFwkTag::APPKIT, "no permission");
-        auto emptyObject = GetNullObject(env);
         AppExecFwk::AsyncCallback(env, callback,
             CreateStsNoPermissionError(env, PERMISSION_GET_BUNDLE_INFO), emptyObject);
         return false;
@@ -133,7 +118,7 @@ void SetCreateCompleteCallback(ani_env *env, std::shared_ptr<std::shared_ptr<Con
     auto context = *contextPtr;
     if (!context) {
         TAG_LOGE(AAFwkTag::APPKIT, "failed to create context");
-        auto emptyObject = GetNullObject(env);
+        auto emptyObject = CreateEmptyObject(env);
         AppExecFwk::AsyncCallback(env, callback, CreateStsError(env,
             AbilityErrorCode::ERROR_CODE_INVALID_PARAM), emptyObject);
         return;
@@ -149,13 +134,29 @@ void SetCreateCompleteCallback(ani_env *env, std::shared_ptr<std::shared_ptr<Con
         TAG_LOGE(AAFwkTag::APPKIT, "set nativeContextLong failed");
         return;
     }
-    auto application = context->GetApplicationContext();
-    if (application == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "application is null");
-        return;
-    }
-    ContextUtil::StsCreatContext(env, cls, contextObj, application->GetApplicationCtxObjRef(), context);
+    ContextUtil::StsCreatContext(env, cls, contextObj, context);
     AppExecFwk::AsyncCallback(env, callback, CreateStsError(env, AbilityErrorCode::ERROR_OK), contextObj);
+}
+
+std::shared_ptr<Context> GetStageModeContext(ani_env *env, ani_object &contextObj,
+    ani_object callback, ani_object emptyObject)
+{
+    ani_boolean stageMode = false;
+    ani_status status = IsStageContext(env, contextObj, stageMode);
+    if (status != ANI_OK || !stageMode) {
+        TAG_LOGE(AAFwkTag::APPKIT, "not stageMode");
+        AppExecFwk::AsyncCallback(env, callback, CreateStsInvalidParamError(env,
+            "Parse param context failed, must be a context of stageMode."), emptyObject);
+        return nullptr;
+    }
+    auto context = GetStageModeContext(env, contextObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
+        AppExecFwk::AsyncCallback(env, callback, CreateStsInvalidParamError(env,
+            "Parse param context failed, must not be nullptr."), emptyObject);
+        return nullptr;
+    }
+    return context;
 }
 
 static void CreateModuleContext([[maybe_unused]] ani_env *env,
@@ -166,24 +167,13 @@ static void CreateModuleContext([[maybe_unused]] ani_env *env,
         TAG_LOGE(AAFwkTag::APPKIT, "null env");
         return;
     }
-    ani_object emptyObject = GetNullObject(env);
+    ani_object emptyObject = CreateEmptyObject(env);
     std::string stdBundleName = "";
     std::string stdModuleName = "";
     AppExecFwk::GetStdString(env, bundleName, stdBundleName);
     AppExecFwk::GetStdString(env, moduleName, stdModuleName);
-    ani_boolean stageMode = false;
-    ani_status status = OHOS::AbilityRuntime::IsStageContext(env, contextObj, stageMode);
-    if (status != ANI_OK || !stageMode) {
-        TAG_LOGE(AAFwkTag::APPKIT, "not stageMode");
-        AppExecFwk::AsyncCallback(env, callback, CreateStsInvalidParamError(env,
-            "Parse param context failed, must be a context of stageMode."), emptyObject);
-        return;
-    }
-    auto context = OHOS::AbilityRuntime::GetStageModeContext(env, contextObj);
+    auto context = GetStageModeContext(env, contextObj, callback, emptyObject);
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null context");
-        AppExecFwk::AsyncCallback(env, callback, CreateStsInvalidParamError(env,
-            "Parse param context failed, must not be nullptr."), emptyObject);
         return;
     }
     auto inputContextPtr = Context::ConvertTo<Context>(context);
@@ -205,7 +195,7 @@ static void CreateModuleContext([[maybe_unused]] ani_env *env,
     if (stdBundleName.empty()) {
         *moduleContext = contextImpl->CreateModuleContext(stdModuleName, inputContextPtr);
     } else {
-        if (!CheckCaller(env, callback)) {
+        if (!CheckIsSystemAppOrPermisson(env, callback)) {
             TAG_LOGE(AAFwkTag::APPKIT, "CheckCaller failed");
         }
         *moduleContext = contextImpl->CreateModuleContext(stdBundleName, stdModuleName, inputContextPtr);
@@ -221,7 +211,8 @@ static void CreateBundleContext([[maybe_unused]] ani_env *env,
         TAG_LOGE(AAFwkTag::APPKIT, "null env");
         return;
     }
-    if (!CheckCaller(env, callback)) {
+    ani_object emptyObject = CreateEmptyObject(env);
+    if (!CheckIsSystemAppOrPermisson(env, callback)) {
         TAG_LOGE(AAFwkTag::APPKIT, "CheckCaller failed");
         return;
     }
