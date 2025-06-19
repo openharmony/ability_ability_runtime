@@ -27,6 +27,8 @@ constexpr const char* NOT_SYSTEM_APP = "The application is not system-app, can n
 
 constexpr const char* BUSINESS_ERROR_CLASS = "L@ohos/base/BusinessError;";
 constexpr const char* ERROR_CLASS_NAME = "Lescompat/Error;";
+constexpr const char* ERROR_MSG_TRANSFER_CLASS_NOT_FOUND = "Unable to find the class for transferring.";
+constexpr int32_t ERROR_CODE_TRANSFER_CLASS_NOT_FOUND = 10200067;
 } // namespace
 
 void ThrowStsError(ani_env *env, ani_object err)
@@ -90,6 +92,11 @@ void ThrowStsInvalidParamError(ani_env *env, const std::string &message)
 void ThrowStsErrorByNativeErr(ani_env *env, int32_t err)
 {
     ThrowStsError(env, CreateStsErrorByNativeErr(env, err));
+}
+
+void ThrowStsTransferClassError(ani_env *env)
+{
+    ThrowStsError(env, CreateStsError(env, ERROR_CODE_TRANSFER_CLASS_NOT_FOUND, ERROR_MSG_TRANSFER_CLASS_NOT_FOUND));
 }
 
 ani_object CreateStsError(ani_env *env, const AbilityErrorCode &err)

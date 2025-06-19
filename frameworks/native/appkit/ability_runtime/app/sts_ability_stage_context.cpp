@@ -34,8 +34,7 @@ void STSAbilityStageContext::ResetEnv(ani_env* env)
     }
 }
 
-ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, std::shared_ptr<Context> context,
-    std::weak_ptr<AppExecFwk::OHOSApplication> application)
+ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, std::shared_ptr<Context> context)
 {
     if (env == nullptr || context == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "env nullptr or context nullptr");
@@ -84,13 +83,7 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
     }
 
     // bind parent context
-    auto app = application.lock();
-    if (app == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "application is null");
-        delete workContext;
-        return nullptr;
-    }
-    ContextUtil::StsCreatContext(env, abilityStageCtxCls, obj, app->GetApplicationCtxObjRef(), context);
+    ContextUtil::StsCreatContext(env, abilityStageCtxCls, obj, context);
 
     //set Config class
     auto configuration = context->GetConfiguration();
@@ -125,6 +118,13 @@ ani_object STSAbilityStageContext::CreateStsAbilityStageContext(ani_env* env, st
             TAG_LOGE(AAFwkTag::ABILITY, "Object_SetField_Ref moduleInfoField failed");
         }
     }
+    ani_ref* contextGlobalRef = new (std::nothrow) ani_ref;
+    if ((status = env->GlobalReference_Create(obj, contextGlobalRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "status: %{public}d", status);
+        delete contextGlobalRef;
+        return obj;
+    }
+    context->Bind(contextGlobalRef);
     return obj;
 }
 
