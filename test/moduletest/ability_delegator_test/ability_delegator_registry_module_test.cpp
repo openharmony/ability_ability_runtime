@@ -81,8 +81,7 @@ HWTEST_F(AbilityDelegatorRegistryModuleTest,
     }
     std::shared_ptr<AbilityDelegatorArgs> abilityArgs = std::make_shared<AbilityDelegatorArgs>(want);
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
-            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
         abilityArgs,
         true);
     std::shared_ptr<AbilityDelegator> abilityDelegator =
@@ -117,8 +116,7 @@ HWTEST_F(AbilityDelegatorRegistryModuleTest,
     }
     std::shared_ptr<AbilityDelegatorArgs> abilityArgs = std::make_shared<AbilityDelegatorArgs>(want);
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
-            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
         abilityArgs,
         true);
     std::shared_ptr<AbilityDelegator> abilityDelegator =

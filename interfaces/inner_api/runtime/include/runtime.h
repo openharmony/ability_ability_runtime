@@ -43,7 +43,6 @@ public:
     };
 
     struct Options {
-        std::map<Language, bool> langs;
         Language lang = Language::JS;
         std::string bundleName;
         std::string moduleName;
@@ -90,7 +89,6 @@ public:
         bool isDeveloperMode;
     };
 
-    static std::vector<std::unique_ptr<Runtime>> CreateRuntimes(Options &options);
     static std::unique_ptr<Runtime> Create(Options &options);
     static void SavePreloaded(std::unique_ptr<Runtime>&& instance);
     static std::unique_ptr<Runtime> GetPreloaded();
@@ -135,7 +133,6 @@ public:
     Runtime(Runtime&&) = delete;
     Runtime& operator=(const Runtime&) = delete;
     Runtime& operator=(Runtime&&) = delete;
-    virtual void RegisterUncaughtExceptionHandler(void *uncaughtExceptionInfo) {}
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

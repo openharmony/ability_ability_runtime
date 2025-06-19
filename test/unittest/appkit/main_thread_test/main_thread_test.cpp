@@ -1915,7 +1915,7 @@ HWTEST_F(MainThreadTest, HandleLaunchAbility_0200, TestSize.Level1)
     abilityRecord3->abilityInfo_ = nullptr;
     AbilityRuntime::Runtime::Options options;
     auto runtime = AbilityRuntime::Runtime::Create(options);
-    mainThread_->application_->AddRuntime(std::move(runtime));
+    mainThread_->application_->SetRuntime(std::move(runtime));
     auto contextDeal = std::make_shared<ContextDeal>();
     auto appInfo = std::make_shared<ApplicationInfo>();
     appInfo->debug = true;
@@ -2552,6 +2552,33 @@ HWTEST_F(MainThreadTest, HandleUpdatePluginInfoInstalled_0100, TestSize.Level1)
     ASSERT_EQ(appLibPaths.size(), size_t(1));
     EXPECT_EQ(appLibPaths["pluginBundleName/moduleName"][0],
         "/data/storage/el1/bundle/+plugins/test");
+}
+
+/**
+ * @tc.name: SetRuntimeLang_0100
+ * @tc.desc: SetRuntimeLang codeLanguage 1.2, options.lang get ETS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainThreadTest, SetRuntimeLang_0100, TestSize.Level1)
+{
+    ApplicationInfo appInfo;
+    appInfo.codeLanguage = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2;
+    AbilityRuntime::Runtime::Options options;
+    mainThread_->SetRuntimeLang(appInfo, options);
+    EXPECT_EQ(options.lang, AbilityRuntime::Runtime::Language::ETS);
+}
+
+/**
+ * @tc.name: IsEtsAPP_0100
+ * @tc.desc: IsEtsAPP return true if codeLanguage is CODE_LANGUAGE_ARKTS_1_2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainThreadTest, IsEtsAPP_0100, TestSize.Level1)
+{
+    ApplicationInfo appInfo;
+    appInfo.codeLanguage = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2;
+    auto result = mainThread_->IsEtsAPP(appInfo);
+    EXPECT_EQ(result, true);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

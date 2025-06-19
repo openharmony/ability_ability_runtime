@@ -196,7 +196,7 @@ void ETSEnvironment::InitETSSysNS(const std::string &path)
 
 bool ETSEnvironment::Initialize(napi_env napiEnv, std::vector<ani_option> &options)
 {
-    TAG_LOGD(AAFwkTag::ETSRUNTIME, "StartRuntime called");
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "Initialize called");
     if (!LoadRuntimeApis()) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "LoadRuntimeApis failed");
         return false;
@@ -206,30 +206,15 @@ bool ETSEnvironment::Initialize(napi_env napiEnv, std::vector<ani_option> &optio
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "LoadBootPathFile failed");
         return false;
     }
-    const std::string optionPrefix = "--ext:";
     // Create boot-panda-files options
-    std::string bootString = optionPrefix + "--boot-panda-files=" + bootfiles;
-    TAG_LOGI(AAFwkTag::ETSRUNTIME, "bootString %{public}s", bootString.c_str());
-    options.push_back(ani_option { bootString.c_str(), nullptr });
-    std::string schedulingExternal = optionPrefix + "--coroutine-enable-external-scheduling=true";
-    ani_option schedulingExternalOption = { schedulingExternal.data(), nullptr };
-    options.push_back(schedulingExternalOption);
-
-    std::string forbiddenJIT = optionPrefix + "--compiler-enable-jit=false";
-    ani_option forbiddenJITOption = { forbiddenJIT.data(), nullptr };
-    options.push_back(forbiddenJITOption);
+    std::string bootString = "--ext:--boot-panda-files=" + bootfiles;
+    options.push_back(ani_option { bootString.data(), nullptr });
+    options.push_back(ani_option { "--ext:--coroutine-enable-external-scheduling=true", nullptr });
+    options.push_back(ani_option { "--ext:--compiler-enable-jit=false", nullptr });
     options.push_back(ani_option { "--ext:--log-level=info", nullptr });
-    std::string enableVerfication = optionPrefix + "--verification-enabled=true";
-    ani_option enableVerficationOption = { enableVerfication.data(), nullptr };
-    options.push_back(enableVerficationOption);
-
-    std::string verificationMode = optionPrefix + "--verification-mode=on-the-fly";
-    ani_option verificationModeOption = { verificationMode.data(), nullptr };
-    options.push_back(verificationModeOption);
-
-    std::string interop = optionPrefix + "interop";
-    ani_option interopOption = { interop.data(), (void *)napiEnv };
-    options.push_back(interopOption);
+    options.push_back(ani_option { "--ext:--verification-enabled=true", nullptr });
+    options.push_back(ani_option { "--ext:--verification-mode=on-the-fly", nullptr });
+    options.push_back(ani_option { "--ext:interop", (void *)napiEnv });
     ani_options optionsPtr = { options.size(), options.data() };
     ani_status status = ANI_ERROR;
     if ((status = lazyApis_.ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vmEntry_.aniVm_)) != ANI_OK) {
@@ -353,6 +338,122 @@ std::string ETSEnvironment::GetErrorProperty(ani_error aniError, const char *pro
     }
     propertyValue.resize(sz);
     return propertyValue;
+}
+
+bool ETSEnvironment::PreloadModule(const std::string &modulePath)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "modulePath: %{public}s", modulePath.c_str());
+    ani_env *env = GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null env");
+        return false;
+    }
+
+    ani_class abcCls = nullptr;
+    ani_object abcObj = nullptr;
+    if (!LoadAbcLinker(env, modulePath, abcCls, abcObj)) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "LoadAbcLinker failed");
+        return false;
+    }
+    return true;
+}
+
+bool ETSEnvironment::LoadAbcLinker(ani_env *env, const std::string &modulePath, ani_class &abcCls, ani_object &abcObj)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_class stringCls = nullptr;
+    if ((status = env->FindClass("Lstd/core/String;", &stringCls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "FindClass failed, status: %{public}d", status);
+        return false;
+    }
+    ani_string modulePathAni = nullptr;
+    if ((status = env->String_NewUTF8(modulePath.c_str(), modulePath.size(), &modulePathAni)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "String_NewUTF8 failed, status: %{public}d", status);
+        return false;
+    }
+    ani_ref undefinedRef = nullptr;
+    if ((status = env->GetUndefined(&undefinedRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "GetUndefined failed, status: %{public}d", status);
+        return false;
+    }
+    ani_array_ref refArray = nullptr;
+    if ((status = env->Array_New_Ref(stringCls, 1, undefinedRef, &refArray)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_New_Ref failed, status: %{public}d", status);
+        return false;
+    }
+    if ((status = env->Array_Set_Ref(refArray, 0, modulePathAni)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_Set_Ref failed, status: %{public}d", status);
+        return false;
+    }
+    if ((status = env->FindClass("Lstd/core/AbcRuntimeLinker;", &abcCls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "FindClass failed, status: %{public}d", status);
+        return false;
+    }
+    ani_method method = nullptr;
+    if ((status = env->Class_FindMethod(abcCls, "<ctor>", "Lstd/core/RuntimeLinker;[Lstd/core/String;:V",
+        &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod failed, status: %{public}d", status);
+        return false;
+    }
+    env->ResetError();
+    if ((status = env->Object_New(abcCls, method, &abcObj, undefinedRef, refArray)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_New failed, status: %{public}d", status);
+        HandleUncaughtError();
+        return false;
+    }
+    return true;
+}
+
+bool ETSEnvironment::LoadModule(const std::string &modulePath, const std::string &srcEntrance, ani_class &cls,
+    ani_object &obj, ani_ref &ref)
+{
+    ani_env *env = GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_class abcCls = nullptr;
+    ani_object abcObj = nullptr;
+    if (!LoadAbcLinker(env, modulePath, abcCls, abcObj)) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "LoadAbcLinker failed");
+        return false;
+    }
+    ani_method loadClassMethod = nullptr;
+    if ((status = env->Class_FindMethod(abcCls, "loadClass", nullptr, &loadClassMethod)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod failed, status: %{public}d", status);
+        return false;
+    }
+    ani_string clsStr = nullptr;
+    if ((status = env->String_NewUTF8(srcEntrance.c_str(), srcEntrance.length(), &clsStr)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "String_NewUTF8 failed, status: %{public}d", status);
+        return false;
+    }
+    ani_ref clsRef = nullptr;
+    if ((status = env->Object_CallMethod_Ref(abcObj, loadClassMethod, &clsRef, clsStr, false)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_CallMethod_Ref failed, status: %{public}d", status);
+        return false;
+    } else {
+        cls = static_cast<ani_class>(clsRef);
+    }
+    ani_method method = nullptr;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod failed, status: %{public}d", status);
+        return false;
+    }
+    if ((status = env->Object_New(cls, method, &obj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_New failed, status: %{public}d", status);
+        return false;
+    }
+    if ((status = env->GlobalReference_Create(obj, &ref)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "GlobalReference_Create failed, status: %{public}d", status);
+        return false;
+    }
+    return true;
 }
 } // namespace EtsEnv
 } // namespace OHOS
