@@ -85,6 +85,7 @@ ohos_unittest("app_mgr_service_inner_eighth_test") {
     "mock/src/mock_permission_verification.cpp",
     "mock/src/mock_remote_client_manager.cpp",
     "mock/src/mock_user_record_manager.cpp",
+    "mock/src/mock_app_utils.cpp",
   ]
 
   configs = []

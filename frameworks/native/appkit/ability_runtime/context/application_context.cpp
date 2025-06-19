@@ -923,24 +923,6 @@ std::shared_ptr<Context> ApplicationContext::CreateAreaModeContext(int areaMode)
     return contextImpl_ ? contextImpl_->CreateAreaModeContext(areaMode) : nullptr;
 }
 
-int32_t ApplicationContext::PromoteToStandbyMasterProcess(bool isInsertToHead)
-{
-    if (contextImpl_ != nullptr) {
-        return contextImpl_->PromoteToStandbyMasterProcess(isInsertToHead);
-    }
-    TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl_");
-    return ERR_INVALID_VALUE;
-}
-
-int32_t ApplicationContext::DemoteFromStandbyMasterProcess()
-{
-    if (contextImpl_ != nullptr) {
-        return contextImpl_->DemoteFromStandbyMasterProcess();
-    }
-    TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl_");
-    return ERR_INVALID_VALUE;
-}
-
 #ifdef SUPPORT_GRAPHICS
 std::shared_ptr<Context> ApplicationContext::CreateDisplayContext(uint64_t displayId)
 {

@@ -848,20 +848,20 @@ public:
      */
     int32_t LaunchAbility(sptr<IRemoteObject> token) override;
     
-    /**
-     * Elevate the current process to be a standby master process.
+/**
+     * Elevate the current process to be a candidate master process.
      *
-     * @param isInsertToHead Whether inset current process to the head of standby master process list.
+     * @param isInsertToHead Whether inset current process to the head of candidate master process list.
      * @return Return ERR_OK if success, others fail.
      */
-    int32_t PromoteToStandbyMasterProcess(bool isInsertToHead) override;
+    int32_t PromoteCurrentToCandidateMasterProcess(bool isInsertToHead) override;
     
     /**
-     * Revoke current process as a standby master process.
+     * Revoke current process as a candidate master process.
      *
      * @return Return ERR_OK if success, others fail.
      */
-    int32_t DemoteFromStandbyMasterProcess() override;
+    int32_t DemoteCurrentFromCandidateMasterProcess() override;
 
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);

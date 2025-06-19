@@ -1002,9 +1002,15 @@ public:
         return 0;
     }
 
-    virtual int32_t PromoteToStandbyMasterProcess(bool isInsertToHead) = 0;
+    virtual int32_t PromoteCurrentToCandidateMasterProcess(bool isInsertToHead)
+    {
+        return 0;
+    }
     
-    virtual int32_t DemoteFromStandbyMasterProcess() = 0;
+    virtual int32_t DemoteCurrentFromCandidateMasterProcess()
+    {
+        return 0;
+    }
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

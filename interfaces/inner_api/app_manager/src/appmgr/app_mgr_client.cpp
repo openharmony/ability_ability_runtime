@@ -1593,7 +1593,7 @@ AppMgrResultCode AppMgrClient::IsAppRunningByBundleNameAndUserId(const std::stri
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-int32_t AppMgrClient::PromoteToStandbyMasterProcess(bool isInsertToHead)
+int32_t AppMgrClient::PromoteCurrentToCandidateMasterProcess(bool isInsertToHead)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called");
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -1601,10 +1601,10 @@ int32_t AppMgrClient::PromoteToStandbyMasterProcess(bool isInsertToHead)
         TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    return service->PromoteToStandbyMasterProcess(isInsertToHead);
+    return service->PromoteCurrentToCandidateMasterProcess(isInsertToHead);
 }
 
-int32_t AppMgrClient::DemoteFromStandbyMasterProcess()
+int32_t AppMgrClient::DemoteCurrentFromCandidateMasterProcess()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called");
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -1612,7 +1612,7 @@ int32_t AppMgrClient::DemoteFromStandbyMasterProcess()
         TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    return service->DemoteFromStandbyMasterProcess();
+    return service->DemoteCurrentFromCandidateMasterProcess();
 }
 
 

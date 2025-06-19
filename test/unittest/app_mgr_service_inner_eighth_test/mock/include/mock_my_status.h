@@ -137,6 +137,7 @@ public:
     ErrCode handleMemorySizeInSufficent_ = ERR_OK;
     ErrCode handleRequireBigMemoryOptimization_ = ERR_OK;
     ErrCode handleNoRequireBigMemoryOptimization_ = ERR_OK;
+    bool isStartSpecifiedProcess_ = true;
 private:
     MyStatus() = default;
 };
