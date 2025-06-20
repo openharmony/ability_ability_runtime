@@ -648,6 +648,10 @@ int FormExtensionProviderClient::NotifySizeChanged(const int64_t formId, const s
     const Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "called");
+    if (!FormProviderClient::CheckIsSystemApp()) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Permission denied");
+        return ERR_APPEXECFWK_FORM_PERMISSION_DENY;
+    }
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
     std::function<void()> notifyExtensionSizeChangedFunc = [client = sptr<FormExtensionProviderClient>(this),
         formId, newDimesnion, newRect, want, callerToken]() {
