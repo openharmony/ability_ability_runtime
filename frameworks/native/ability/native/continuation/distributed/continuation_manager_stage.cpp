@@ -242,7 +242,8 @@ static int64_t AddProcessor()
     return HiAppEvent::AppEventProcessorMgr::AddProcessor(config);
 }
 
-static void WriteEndEvent(const std::string& transId, const int result, const int errCode, const time_t beginTime)
+static void WriteEndEvent(const std::string& transId, const int result, const int errCode, const time_t beginTime,
+    int64_t processorId)
 {
     HiAppEvent::Event event("api_diagnostic", "api_exec_end", HiAppEvent::BEHAVIOR);
     event.AddParam("transId", transId);
@@ -252,7 +253,9 @@ static void WriteEndEvent(const std::string& transId, const int result, const in
     event.AddParam("sdk_name", std::string("AbilityKit"));
     event.AddParam("begin_time", beginTime);
     event.AddParam("end_time", time(nullptr));
-    Write(event);
+    if (processorId > 0) {
+        Write(event);
+    }
 }
 #endif
 
@@ -263,10 +266,7 @@ int32_t ContinuationManagerStage::OnContinue(WantParams &wantParams, bool &isAsy
 #ifdef NO_RUNTIME_EMULATOR
     int64_t processorId = -1;
     processorId = AddProcessor();
-    if (processorId <= 0) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "Add processor fail.Error code is %{public}lld", processorId);
-        return ERR_INVALID_VALUE;
-    }
+    TAG_LOGI(AAFwkTag::CONTINUATION, "Add processor start.Processor id is %{public}lld", processorId);
     time_t beginTime = time(nullptr);
     std::string transId = std::string("transId_") + std::to_string(std::rand());
 #endif
@@ -276,7 +276,7 @@ int32_t ContinuationManagerStage::OnContinue(WantParams &wantParams, bool &isAsy
     if (ability == nullptr || abilityInfo == nullptr) {
         TAG_LOGE(AAFwkTag::CONTINUATION, "null ability or abilityInfo");
 #ifdef NO_RUNTIME_EMULATOR
-        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_INVALID_VALUE, beginTime);
+        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_INVALID_VALUE, beginTime, processorId);
 #endif
         return ERR_INVALID_VALUE;
     }
@@ -285,13 +285,15 @@ int32_t ContinuationManagerStage::OnContinue(WantParams &wantParams, bool &isAsy
     if (!stageBased) {
         ret = OnStartAndSaveData(wantParams);
 #ifdef NO_RUNTIME_EMULATOR
-        WriteEndEvent(transId, EVENT_RESULT_FAIL, ret, beginTime);
+        int32_t result = (ret == ERR_OK) ? EVENT_RESULT_SUCCESS : EVENT_RESULT_FAIL;
+        WriteEndEvent(transId, result, ret, beginTime, processorId);
 #endif
         return ret;
     }
     ret = OnContinueAndGetContent(wantParams, isAsyncOnContinue, tmpAbilityInfo);
 #ifdef NO_RUNTIME_EMULATOR
-    WriteEndEvent(transId, EVENT_RESULT_SUCCESS, ret, beginTime);
+    int32_t result = (ret == ERR_OK) ? EVENT_RESULT_SUCCESS : EVENT_RESULT_FAIL;
+    WriteEndEvent(transId, result, ret, beginTime, processorId);
 #endif
     return ret;
 }
