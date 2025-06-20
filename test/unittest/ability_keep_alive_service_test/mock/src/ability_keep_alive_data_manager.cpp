@@ -22,6 +22,7 @@ namespace AbilityRuntime {
 int32_t AbilityKeepAliveDataManager::callSetResult = ERR_OK;
 int32_t AbilityKeepAliveDataManager::callInsertResult = ERR_OK;
 int32_t AbilityKeepAliveDataManager::callDeleteResult = ERR_OK;
+int32_t AbilityKeepAliveDataManager::callDeleteBySetterIdResult = ERR_OK;
 int32_t AbilityKeepAliveDataManager::callQueryDataResult = ERR_OK;
 int32_t AbilityKeepAliveDataManager::callQueryApplicationResult = ERR_OK;
 KeepAliveSetter AbilityKeepAliveDataManager::queryDataSetter = KeepAliveSetter::UNSPECIFIED;
@@ -64,6 +65,11 @@ int32_t AbilityKeepAliveDataManager::QueryKeepAliveApplications(
 {
     infoList = returnInfoList;
     return callQueryApplicationResult;
+}
+
+int32_t AbilityKeepAliveDataManager::DeleteKeepAliveDataWithSetterId(const KeepAliveInfo &info)
+{
+    return callDeleteBySetterIdResult;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
