@@ -1774,7 +1774,6 @@ ohos_unittest("pac_map_test") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "samgr:samgr_proxy",
   ]
 
@@ -1802,7 +1801,6 @@ ohos_unittest("pac_map_second_test") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "samgr:samgr_proxy",
   ]
 

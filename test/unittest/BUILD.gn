@@ -81,7 +81,6 @@ ohos_source_set("appmgr_test_source") {
     "hitrace:libhitracechain",
     "i18n:intl_util",
     "ipc:ipc_core",
-    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "kv_store:distributeddata_mgr",
     "samgr:samgr_proxy",

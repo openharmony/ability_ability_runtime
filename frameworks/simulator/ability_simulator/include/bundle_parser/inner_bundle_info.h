@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -112,13 +112,13 @@ public:
      * @param jsonObject Indicates the obtained json object.
      * @return
      */
-    void ToJson(nlohmann::json &jsonObject) const;
+    bool ToJson(cJSON *&jsonObject) const;
     /**
      * @brief Transform the json object to InnerBundleInfo object.
      * @param jsonObject Indicates the obtained json object.
      * @return Returns 0 if the json object parsed successfully; returns error code otherwise.
      */
-    int32_t FromJson(const nlohmann::json &jsonObject);
+    int32_t FromJson(const cJSON *jsonObject);
     /**
      * @brief Find hap module info by module package.
      * @param modulePackage Indicates the module package.
@@ -268,8 +268,11 @@ private:
     int32_t overlayType_ = NON_OVERLAY_TYPE;
 };
 
-void from_json(const nlohmann::json &jsonObject, InnerModuleInfo &info);
-void from_json(const nlohmann::json &jsonObject, Distro &distro);
+bool to_json(cJSON *&jsonObject, const Distro &distro);
+bool to_json(cJSON *&jsonObject, const InnerModuleInfo &info);
+
+void from_json(const cJSON *jsonObject, InnerModuleInfo &info);
+void from_json(const cJSON *jsonObject, Distro &distro);
 } // namespace AppExecFwk
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_SIMULATOR_INNER_BUNDLE_INFO_H

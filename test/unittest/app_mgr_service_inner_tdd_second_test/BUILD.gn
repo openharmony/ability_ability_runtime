@@ -65,7 +65,6 @@ ohos_unittest("app_mgr_service_inner_tdd_second_test") {
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "kv_store:distributeddata_mgr",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",

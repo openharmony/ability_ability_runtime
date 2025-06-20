@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "config_policy_utils.h"
 #include "hilog_tag_wrapper.h"
+#include "json_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -55,33 +56,34 @@ void ParserUtil::GetResidentProcessRawData(std::vector<std::tuple<std::string, s
 void ParserUtil::ParsePreInstallAbilityConfig(
     const std::string &filePath, std::vector<std::tuple<std::string, std::string, std::string>> &list)
 {
-    nlohmann::json jsonBuf;
+    cJSON *jsonBuf = nullptr;
     if (!ReadFileIntoJson(filePath, jsonBuf)) {
         return;
     }
 
-    if (jsonBuf.is_discarded()) {
+    if (jsonBuf == nullptr) {
         return;
     }
 
     FilterInfoFromJson(jsonBuf, list);
+
+    cJSON_Delete(jsonBuf);
 }
 
 bool ParserUtil::FilterInfoFromJson(
-    nlohmann::json &jsonBuf, std::vector<std::tuple<std::string, std::string, std::string>> &list)
+    cJSON *jsonBuf, std::vector<std::tuple<std::string, std::string, std::string>> &list)
 {
-    if (jsonBuf.is_discarded()) {
+    if (jsonBuf == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "format error");
         return false;
     }
 
-    if (jsonBuf.find(INSTALL_LIST) == jsonBuf.end()) {
+    cJSON *arrays = cJSON_GetObjectItem(jsonBuf, INSTALL_LIST);
+    if (arrays == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "installList absent");
         return false;
     }
-
-    auto arrays = jsonBuf.at(INSTALL_LIST);
-    if (!arrays.is_array() || arrays.empty()) {
+    if (!cJSON_IsArray(arrays)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not found");
         return false;
     }
@@ -89,31 +91,36 @@ bool ParserUtil::FilterInfoFromJson(
     std::string bundleName;
     std::string KeepAliveEnable = "1";
     std::string KeepAliveConfiguredList;
-    for (const auto &array : arrays) {
-        if (!array.is_object()) {
+    int size = cJSON_GetArraySize(arrays);
+    for (int i = 0; i < size; i++) {
+        cJSON *array = cJSON_GetArrayItem(arrays, i);
+        if (array == nullptr || !cJSON_IsObject(array)) {
             continue;
         }
 
         // Judgment logic exists, not found, not bool, not resident process
-        if (!(array.find(KEEP_ALIVE) != array.end() && array.at(KEEP_ALIVE).is_boolean() &&
-                array.at(KEEP_ALIVE).get<bool>())) {
+        cJSON *keepAliveItem = cJSON_GetObjectItem(array, KEEP_ALIVE);
+        if (keepAliveItem == nullptr || !cJSON_IsBool(keepAliveItem) || keepAliveItem->type != cJSON_True) {
             continue;
         }
 
-        if (!(array.find(BUNDLE_NAME) != array.end() && array.at(BUNDLE_NAME).is_string())) {
+        cJSON *bundleNameItem = cJSON_GetObjectItem(array, BUNDLE_NAME);
+        if (bundleNameItem == nullptr || !cJSON_IsString(bundleNameItem)) {
             continue;
         }
 
-        bundleName = array.at(BUNDLE_NAME).get<std::string>();
+        bundleName = bundleNameItem->valuestring;
 
-        if (array.find(KEEP_ALIVE_ENABLE) != array.end() && array.at(KEEP_ALIVE_ENABLE).is_boolean()) {
-            auto val = array.at(KEEP_ALIVE_ENABLE).get<bool>();
+        cJSON *keepAliveEnableItem = cJSON_GetObjectItem(array, KEEP_ALIVE_ENABLE);
+        if (keepAliveEnableItem != nullptr || cJSON_IsBool(keepAliveEnableItem)) {
+            bool val = keepAliveEnableItem->type == cJSON_True;
             KeepAliveEnable = std::to_string(val);
         }
 
-        if (array.find(KEEP_ALIVE_CONFIGURED_LIST) != array.end() && array.at(KEEP_ALIVE_CONFIGURED_LIST).is_array()) {
+        cJSON *keepAliveConfiguredListItem = cJSON_GetObjectItem(array, KEEP_ALIVE_CONFIGURED_LIST);
+        if (keepAliveConfiguredListItem != nullptr || cJSON_IsArray(keepAliveConfiguredListItem)) {
             // Save directly in the form of an array and parse it when in use
-            KeepAliveConfiguredList = array.at(KEEP_ALIVE_CONFIGURED_LIST).dump();
+            KeepAliveConfiguredList = AAFwk::JsonUtils::GetInstance().ToString(keepAliveConfiguredListItem);
         }
 
         list.emplace_back(std::make_tuple(bundleName, KeepAliveEnable, KeepAliveConfiguredList));
@@ -144,7 +151,7 @@ void ParserUtil::GetPreInstallRootDirList(std::vector<std::string> &rootDirList)
     }
 }
 
-bool ParserUtil::ReadFileIntoJson(const std::string &filePath, nlohmann::json &jsonBuf)
+bool ParserUtil::ReadFileIntoJson(const std::string &filePath, cJSON *&jsonBuf)
 {
     if (access(filePath.c_str(), F_OK) != 0) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "path not exist");
@@ -177,9 +184,11 @@ bool ParserUtil::ReadFileIntoJson(const std::string &filePath, nlohmann::json &j
     }
 
     fin.seekg(0, std::ios::beg);
-    jsonBuf = nlohmann::json::parse(fin, nullptr, false);
+    std::string fileContent((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
     fin.close();
-    if (jsonBuf.is_discarded()) {
+
+    jsonBuf = cJSON_Parse(fileContent.c_str());
+    if (jsonBuf == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "bad profile");
         return false;
     }
