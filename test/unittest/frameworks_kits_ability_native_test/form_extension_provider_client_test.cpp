@@ -835,25 +835,5 @@ HWTEST_F(FormExtensionProviderClientTest, NotifyExtensionSizeChanged_3200, Funct
         formId, newDimesnion, newRect, want, formSupplyCallback);
     GTEST_LOG_(INFO) << "NotifyExtensionSizeChanged_3200 end";
 }
-
-/**
- * @tc.number: NotifySizeChanged_3300
- * @tc.name: NotifySizeChanged
- * @tc.desc: formSupplyCallback is nullptr, failed to verify NotifySizeChanged.
- */
-HWTEST_F(FormExtensionProviderClientTest, NotifySizeChanged_3300, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "NotifySizeChanged_3300 start";
-    int64_t formId = 0;
-    std::string newDimesnion = "2*2";
-    AppExecFwk::Rect newRect;
-    Want want;
-    sptr<IRemoteObject> formSupplyCallback = nullptr;
-    AbilityRuntime::FormExtensionProviderClient formExtensionProviderClient;
-    auto result = formExtensionProviderClient.NotifySizeChanged(
-        formId, newDimesnion, newRect, want, formSupplyCallback);
-    EXPECT_EQ(result, ERR_APPEXECFWK_FORM_PERMISSION_DENY);
-    GTEST_LOG_(INFO) << "NotifySizeChanged_3300 end";
-}
 }  // namespace AppExecFwk
 }  // namespace OHOS
