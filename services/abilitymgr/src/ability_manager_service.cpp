@@ -7832,7 +7832,14 @@ void AbilityManagerService::StartAutoStartupApps(std::queue<AutoStartupInfo> inf
     if (info.appCloneIndex >= 0 && info.appCloneIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
         want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, info.appCloneIndex);
     }
-    if (StartAbility(want) != ERR_OK && info.retryCount > 0) {
+    int32_t result = ERR_OK;
+    if (info.abilityTypeName == AbilityRuntime::EXTENSION_TYPE_APP_SERVICE) {
+        result = StartExtensionAbility(
+            want, nullptr, DEFAULT_INVAL_VALUE, AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+    } else {
+        result = StartAbility(want);
+    }
+    if ((result != ERR_OK) && (info.retryCount > 0)) {
         info.retryCount--;
         infoQueue.push(info);
     }

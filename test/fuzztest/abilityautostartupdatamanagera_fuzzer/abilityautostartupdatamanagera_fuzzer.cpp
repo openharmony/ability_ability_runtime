@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,7 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     std::shared_ptr<AbilityAutoStartupDataManager> dataMgr = std::make_shared<AbilityAutoStartupDataManager>();
     dataMgr->CheckKvStore();
     AutoStartupInfo info1;
+    info1.currentUserId = int32Param;
     info1.userId = int32Param;
     dataMgr->InsertAutoStartupData(info1, boolParam, boolParam); // branch info1.bundleName empty
     info1.bundleName = "com.example.fuzzTest";
@@ -82,6 +83,7 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     dataMgr->InsertAutoStartupData(info1, boolParam, boolParam); // branch info1.accestoken empty
 
     AutoStartupInfo info2;
+    info2.currentUserId = int32Param;
     info2.userId = int32Param;
     dataMgr->UpdateAutoStartupData(info2, boolParam, boolParam); // branch info2.bundleName empty
     info2.bundleName = "com.example.fuzzTest";
@@ -92,6 +94,7 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     dataMgr->UpdateAutoStartupData(info2, boolParam, boolParam); // branch info2.accestoken empty
 
     AutoStartupInfo info3;
+    info3.currentUserId = int32Param;
     info3.userId = int32Param;
     dataMgr->UpdateAutoStartupData(info3, boolParam, boolParam); // branch info3.bundleName empty
     info3.bundleName = "com.example.fuzzTest";
@@ -104,6 +107,7 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     dataMgr->DeleteAutoStartupData(stringParam, int32Param); // called
 
     AutoStartupInfo info4;
+    info4.currentUserId = int32Param;
     info4.userId = int32Param;
     dataMgr->QueryAutoStartupData(info4); // branch info3.bundleName empty
     info4.bundleName = "com.example.fuzzTest";
@@ -123,8 +127,9 @@ void AbilityAutoStartupDataManagerFuzztest2(bool boolParam, std::string &stringP
 {
     std::shared_ptr<AbilityAutoStartupDataManager> dataMgr = std::make_shared<AbilityAutoStartupDataManager>();
     AutoStartupInfo info1;
+    info1.currentUserId = int32Param;
     info1.userId = int32Param;
-    dataMgr->ConvertAutoStartupStatusToValue(boolParam, boolParam, info1.abilityName);
+    dataMgr->ConvertAutoStartupStatusToValue(info1, boolParam, boolParam);
 
     DistributedKv::Value value1(jsonStr1);
     dataMgr->ConvertAutoStartupStatusFromValue(value1, boolParam, boolParam); // branch json
