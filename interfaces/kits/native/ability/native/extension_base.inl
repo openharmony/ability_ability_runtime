@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,6 +119,30 @@ template<class C>
 void ExtensionBase<C>::SetExtensionCommon(const std::shared_ptr<ExtensionCommon> &common)
 {
     extensionCommon_ = common;
+}
+
+template<class C>
+void ExtensionBase<C>::OnExtensionAbilityRequestFailure(
+    const std::string &requestId, const AppExecFwk::ElementName &element, const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::EXT, "OnAbilityRequestFailure called");
+    if (context_ == nullptr) {
+        TAG_LOGE(AAFwkTag::EXT, "null context_");
+        return;
+    }
+    context_->OnRequestFailure(requestId, element, message);
+}
+
+template<class C>
+void ExtensionBase<C>::OnExtensionAbilityRequestSuccess(
+    const std::string &requestId, const AppExecFwk::ElementName &element, const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::EXT, "OnAbilityRequestSuccess called");
+    if (context_ == nullptr) {
+        TAG_LOGE(AAFwkTag::EXT, "null context_");
+        return;
+    }
+    context_->OnRequestSuccess(requestId, element, message);
 }
 }
 }
