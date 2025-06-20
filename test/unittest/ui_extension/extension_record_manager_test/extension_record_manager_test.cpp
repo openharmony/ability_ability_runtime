@@ -549,5 +549,198 @@ HWTEST_F(ExtensionRecordManagerTest, GetOrCreateExtensionRecord_0200, TestSize.L
         hostBundleName, abilityRecord, isLoaded);
     EXPECT_NE(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: GetUIExtensionSessionInfo_0100
+ * @tc.desc: GetUIExtensionSessionInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, GetUIExtensionSessionInfo_0100, TestSize.Level1)
+{
+    sptr<IRemoteObject> token;
+    UIExtensionSessionInfo uiExtensionSessionInfo;
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    auto ret = extRecordMgr->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: GetUIExtensionSessionInfo_0200
+ * @tc.desc: GetUIExtensionSessionInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, GetUIExtensionSessionInfo_0200, TestSize.Level1)
+{
+    sptr<IRemoteObject> token = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    ASSERT_NE(token, nullptr);
+    UIExtensionSessionInfo uiExtensionSessionInfo;
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    auto ret = extRecordMgr->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: GetUIExtensionSessionInfo_0300
+ * @tc.desc: GetUIExtensionSessionInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, GetUIExtensionSessionInfo_0300, TestSize.Level1)
+{
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    ASSERT_NE(extRecordMgr, nullptr);
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    abilityRequest.abilityInfo.extensionAbilityType =  AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    ASSERT_NE(abilityRecord, nullptr);
+    auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+    int32_t extensionRecordId = 1;
+    extRecordMgr->AddExtensionRecord(extensionRecordId, extRecord);
+
+    auto token = abilityRecord->GetToken();
+    ASSERT_NE(token, nullptr);
+
+    UIExtensionSessionInfo uiExtensionSessionInfo;
+    auto ret = extRecordMgr->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetUIExtensionSessionInfo_0400
+ * @tc.desc: GetUIExtensionSessionInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, GetUIExtensionSessionInfo_0400, TestSize.Level1)
+{
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    ASSERT_NE(extRecordMgr, nullptr);
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    abilityRequest.abilityInfo.extensionAbilityType =  AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    ASSERT_NE(abilityRecord, nullptr);
+    auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+    int32_t extensionRecordId = 1;
+    extRecordMgr->AddExtensionRecord(extensionRecordId, extRecord);
+
+    auto token = abilityRecord->GetToken();
+    ASSERT_NE(token, nullptr);
+
+    UIExtensionSessionInfo uiExtensionSessionInfo;
+    auto ret = extRecordMgr->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: GetUIExtensionSessionInfo_0500
+ * @tc.desc: GetUIExtensionSessionInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, GetUIExtensionSessionInfo_0500, TestSize.Level1)
+{
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    ASSERT_NE(extRecordMgr, nullptr);
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    abilityRequest.abilityInfo.extensionAbilityType =  AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    std::string deviceId = "testDeviceId";
+    std::string bundleName = "testBundleName";
+    std::string abilityName = "testAbilityName";
+    std::string moduleName = "testModuleName";
+    abilityRequest.want.SetElementName(deviceId, bundleName, abilityName, moduleName);
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    ASSERT_NE(abilityRecord, nullptr);
+    auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+    int32_t extensionRecordId = 1;
+    extRecordMgr->AddExtensionRecord(extensionRecordId, extRecord);
+
+    auto token = abilityRecord->GetToken();
+    ASSERT_NE(token, nullptr);
+
+    sptr<AAFwk::SessionInfo> sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    sessionInfo->persistentId  = 1;
+    sessionInfo->hostWindowId  = 1;
+    sessionInfo->uiExtensionUsage  = AAFwk::UIExtensionUsage::MODAL;
+    ASSERT_NE(sessionInfo, nullptr);
+    extRecord->abilityRecord_->SetSessionInfo(sessionInfo);
+
+    UIExtensionSessionInfo uiExtensionSessionInfo;
+    auto ret = extRecordMgr->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: GetUIExtensionSessionInfo_0600
+ * @tc.desc: GetUIExtensionSessionInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerTest, GetUIExtensionSessionInfo_0600, TestSize.Level1)
+{
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    ASSERT_NE(extRecordMgr, nullptr);
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    abilityRequest.abilityInfo.extensionAbilityType =  AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    std::string deviceId = "testDeviceId";
+    std::string bundleName = "testBundleName";
+    std::string abilityName = "testAbilityName";
+    std::string moduleName = "testModuleName";
+    abilityRequest.want.SetElementName(deviceId, bundleName, abilityName, moduleName);
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    ASSERT_NE(abilityRecord, nullptr);
+    auto extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+    int32_t extensionRecordId = 1;
+    extRecordMgr->AddExtensionRecord(extensionRecordId, extRecord);
+
+    auto token = abilityRecord->GetToken();
+
+    AAFwk::AbilityRequest callerAbilityRequest;
+    callerAbilityRequest.appInfo.bundleName = "com.example.unittest";
+    callerAbilityRequest.abilityInfo.name = "MainAbility";
+    callerAbilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    callerAbilityRequest.abilityInfo.extensionAbilityType =  AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    std::string callerDeviceId = "testDeviceId";
+    std::string callerBundleName = "testBundleName";
+    std::string callerAbilityName = "testAbilityName";
+    std::string callerModuleName = "testModuleName";
+    callerAbilityRequest.want.SetElementName(callerDeviceId, callerBundleName, callerAbilityName, callerModuleName);
+    auto callerAbilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(callerAbilityRequest);
+    ASSERT_NE(callerAbilityRecord, nullptr);
+    auto callerExtRecord = std::make_shared<ExtensionRecord>(callerAbilityRecord);
+    int32_t callerExtensionRecordId = 2;
+    extRecordMgr->AddExtensionRecord(callerExtensionRecordId, callerExtRecord);
+    sptr<IRemoteObject> callerToken = callerAbilityRecord->GetToken();
+    ASSERT_NE(callerToken, nullptr);
+
+    sptr<AAFwk::SessionInfo> sessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    sessionInfo->persistentId  = 1;
+    sessionInfo->hostWindowId  = 1;
+    sessionInfo->uiExtensionUsage  = AAFwk::UIExtensionUsage::MODAL;
+    sessionInfo->callerToken = callerToken;
+    ASSERT_NE(sessionInfo, nullptr);
+    extRecord->abilityRecord_->SetSessionInfo(sessionInfo);
+
+    UIExtensionSessionInfo uiExtensionSessionInfo;
+    auto ret = extRecordMgr->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo);
+    EXPECT_EQ(ret, ERR_OK);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
