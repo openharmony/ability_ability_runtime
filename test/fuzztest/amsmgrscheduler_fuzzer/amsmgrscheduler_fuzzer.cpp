@@ -128,6 +128,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
         delete want;
         want = nullptr;
     }
+    bool enable = *data % ENABLE;
+    amsMgrScheduler->SetKeepAliveAppService(bundleName, enable, uid);
     return amsMgrScheduler->IsReady();
 }
 }
