@@ -1030,7 +1030,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_001, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetTerminatingState();
     abilityRecord->currentState_ = AbilityState::BACKGROUND;
-    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, nullptr, false), ERR_OK);
+    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, nullptr, false, false), ERR_OK);
     uiAbilityLifecycleManager.reset();
 }
 
@@ -1043,7 +1043,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_002, TestSize.Level1)
 {
     auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
-    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, nullptr, false), ERR_INVALID_VALUE);
+    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, nullptr, false, false), ERR_INVALID_VALUE);
     uiAbilityLifecycleManager.reset();
 }
 
@@ -1057,7 +1057,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_003, TestSize.Level1)
     auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     Want want;
-    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, &want, false), ERR_INVALID_VALUE);
+    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, &want, false, false), ERR_INVALID_VALUE);
     uiAbilityLifecycleManager.reset();
 }
 
@@ -1072,7 +1072,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_004, TestSize.Level1)
     auto abilityRecord = InitAbilityRecord();
     abilityRecord->currentState_ = AbilityState::FOREGROUND;
     Want want;
-    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, &want, false), ERR_OK);
+    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, &want, false, false), ERR_OK);
     uiAbilityLifecycleManager.reset();
 }
 
@@ -1087,7 +1087,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_005, TestSize.Level1)
     auto abilityRecord = InitAbilityRecord();
     abilityRecord->currentState_ = AbilityState::FOREGROUNDING;
     Want want;
-    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, &want, false), ERR_OK);
+    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, &want, false, false), ERR_OK);
     uiAbilityLifecycleManager.reset();
 }
 
@@ -1102,8 +1102,38 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_006, TestSize.Level1)
     auto abilityRecord = InitAbilityRecord();
     abilityRecord->currentState_ = AbilityState::BACKGROUND;
     Want want;
-    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, &want, false), ERR_OK);
+    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, &want, false, false), ERR_OK);
     uiAbilityLifecycleManager.reset();
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CloseUIAbility_0700
+ * @tc.desc: CloseUIAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_007, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto abilityRecord = InitAbilityRecord();
+    abilityRecord->currentState_ = AbilityState::BACKGROUND;
+    abilityRecord->SetPendingState(FOREGROUND);
+    Want want;
+    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, &want, false, false), ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_CloseUIAbility_0800
+ * @tc.desc: CloseUIAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_008, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto abilityRecord = InitAbilityRecord();
+    abilityRecord->currentState_ = AbilityState::FOREGROUND;
+    abilityRecord->SetPendingState(FOREGROUND);
+    Want want;
+    EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord, -1, &want, false, true), ERR_OK);
 }
 
 /**
@@ -5836,7 +5866,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_0001, TestSize.Level1)
     request.abilityInfo.name = "AbilityA";
     auto record = AbilityRecord::CreateAbilityRecord(request);
     record->SetAbilityState(AbilityState::INITIAL);
-    int ret = mgr->CloseUIAbility(record, 0, nullptr, false);
+    int ret = mgr->CloseUIAbility(record, 0, nullptr, false, false);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
@@ -5852,7 +5882,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_DebugAndClearSession, Tes
     request.abilityInfo.applicationInfo.debug = true;
     auto record = AbilityRecord::CreateAbilityRecord(request);
     record->SetAbilityState(AbilityState::FOREGROUND);
-    int ret = mgr->CloseUIAbility(record, 0, nullptr, true);
+    int ret = mgr->CloseUIAbility(record, 0, nullptr, true, false);
     EXPECT_EQ(ret, 0);
 }
 
@@ -5868,7 +5898,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_0003, TestSize.Level1)
     auto record = AbilityRecord::CreateAbilityRecord(request);
     record->SetAbilityState(AbilityState::FOREGROUND);
     record->SetPendingState(AbilityState::FOREGROUND);
-    int ret = mgr->CloseUIAbility(record, 0, nullptr, false);
+    int ret = mgr->CloseUIAbility(record, 0, nullptr, false, false);
     EXPECT_EQ(record->GetPendingState(), AbilityState::BACKGROUND);
     EXPECT_EQ(ret, ERR_OK);
 }

@@ -154,7 +154,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int CloseUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
-        int resultCode, const Want *resultWant, bool isClearSession);
+        int resultCode, const Want *resultWant, bool isClearSession, bool isIndependentRecovery);
 
     /**
      * Set rootSceneSession by SCB.
