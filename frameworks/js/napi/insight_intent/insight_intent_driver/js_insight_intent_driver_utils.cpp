@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,11 +18,11 @@
 #include <cstdint>
 
 #include "ability_state.h"
-#include "napi_common_want.h"
-#include "napi_remote_object.h"
+#include "hilog_tag_wrapper.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
-#include "hilog_tag_wrapper.h"
+#include "napi_common_want.h"
+#include "napi_remote_object.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -121,40 +121,49 @@ napi_value CreateJsEntityInfo(napi_env env, const EntityInfoForQuery &info)
     return objValue;
 }
 
-napi_value CreateInsightIntentInfoWithJson(napi_env env, const nlohmann::json &jsonObject)
+napi_value CreateInsightIntentInfoWithJson(napi_env env, const cJSON *jsonObject)
 {
-    if (jsonObject.is_object()) {
+    if (cJSON_IsObject(jsonObject)) {
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
-        for (const auto &it: jsonObject.items()) {
-            if (it.value().is_object() || it.value().is_array()) {
+        cJSON *childItem = jsonObject->child;
+        while (childItem != nullptr) {
+            std::string key = childItem->string == nullptr ? "" : childItem->string;
+            if (cJSON_IsObject(childItem) || cJSON_IsArray(childItem)) {
                 napi_set_named_property(
-                    env, objValue, it.key().c_str(), CreateInsightIntentInfoWithJson(env, it.value()));
-            } else if (it.value().is_string()) {
-                napi_set_named_property(
-                    env, objValue, it.key().c_str(), CreateJsValue(env, it.value().get<std::string>()));
-            } else if (it.value().is_boolean()) {
-                napi_set_named_property(
-                    env, objValue, it.key().c_str(), CreateJsValue(env, it.value().get<bool>()));
-            } else if (it.value().is_number()) {
-                napi_set_named_property(
-                    env, objValue, it.key().c_str(), CreateJsValue(env, it.value().get<double>()));
+                    env, objValue, key.c_str(), CreateInsightIntentInfoWithJson(env, childItem));
+            } else if (cJSON_IsString(childItem)) {
+                std::string value = childItem->valuestring;
+                napi_set_named_property(env, objValue, key.c_str(), CreateJsValue(env, value));
+            } else if (cJSON_IsBool(childItem)) {
+                bool value = childItem->type == cJSON_True;
+                napi_set_named_property(env, objValue, key.c_str(), CreateJsValue(env, value));
+            } else if (cJSON_IsNumber(childItem)) {
+                napi_set_named_property(env, objValue, key.c_str(), CreateJsValue(env, childItem->valuedouble));
             }
+            childItem = childItem->next;
         }
         return objValue;
-    } else if (jsonObject.is_array()) {
+    } else if (cJSON_IsArray(jsonObject)) {
         napi_value arrayValue = nullptr;
-        napi_create_array_with_length(env, jsonObject.size(), &arrayValue);
+        int size = cJSON_GetArraySize(jsonObject);
+        napi_create_array_with_length(env, size, &arrayValue);
         uint32_t index = 0;
-        for (const auto &it: jsonObject) {
-            if (it.is_object() || it.is_array()) {
-                napi_set_element(env, arrayValue, index++, CreateInsightIntentInfoWithJson(env, it));
-            } else if (it.is_string()) {
-                napi_set_element(env, arrayValue, index++, CreateJsValue(env, it.get<std::string>()));
-            } else if (it.is_boolean()) {
-                napi_set_element(env, arrayValue, index++, CreateJsValue(env, it.get<bool>()));
-            } else if (it.is_number()) {
-                napi_set_element(env, arrayValue, index++, CreateJsValue(env, it.get<double>()));
+        for (int i = 0; i < size; i++) {
+            cJSON *item = cJSON_GetArrayItem(jsonObject, i);
+            if (item == nullptr) {
+                continue;
+            }
+            if (cJSON_IsObject(item) || cJSON_IsArray(item)) {
+                napi_set_element(env, arrayValue, index++, CreateInsightIntentInfoWithJson(env, item));
+            } else if (cJSON_IsString(item)) {
+                std::string value = item->valuestring;
+                napi_set_element(env, arrayValue, index++, CreateJsValue(env, value));
+            } else if (cJSON_IsBool(item)) {
+                bool value = item->type == cJSON_True;
+                napi_set_element(env, arrayValue, index++, CreateJsValue(env, value));
+            } else if (cJSON_IsNumber(item)) {
+                napi_set_element(env, arrayValue, index++, CreateJsValue(env, item->valuedouble));
             }
         }
         return arrayValue;
@@ -169,12 +178,14 @@ napi_value CreateInsightIntentInfoParam(napi_env env, const std::string &paramSt
         TAG_LOGD(AAFwkTag::INTENT, "paramStr empty");
         return nullptr;
     }
-    nlohmann::json jsonObject = nlohmann::json::parse(paramStr, nullptr, false);
-    if (jsonObject.is_discarded()) {
+    cJSON *jsonObject = cJSON_Parse(paramStr.c_str());
+    if (jsonObject == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "Parse param str fail");
         return nullptr;
     }
-    return CreateInsightIntentInfoWithJson(env, jsonObject);
+    napi_value result = CreateInsightIntentInfoWithJson(env, jsonObject);
+    cJSON_Delete(jsonObject);
+    return result;
 }
 
 napi_value CreateInsightIntentInfoResult(napi_env env, const std::string &resultStr)
@@ -183,12 +194,14 @@ napi_value CreateInsightIntentInfoResult(napi_env env, const std::string &result
         TAG_LOGD(AAFwkTag::INTENT, "resultStr empty");
         return nullptr;
     }
-    nlohmann::json jsonObject = nlohmann::json::parse(resultStr, nullptr, false);
-    if (jsonObject.is_discarded()) {
+    cJSON *jsonObject = cJSON_Parse(resultStr.c_str());
+    if (jsonObject == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "Parse result str fail");
         return nullptr;
     }
-    return CreateInsightIntentInfoWithJson(env, jsonObject);
+    napi_value result = CreateInsightIntentInfoWithJson(env, jsonObject);
+    cJSON_Delete(jsonObject);
+    return result;
 }
 
 napi_value CreateInsightIntentInfoForQuery(napi_env env, const InsightIntentInfoForQuery &info)

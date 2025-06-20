@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -37,6 +37,7 @@ ohos_unittest("ability_bundle_event_callback_test") {
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_rdb_data_mgr.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_rdb_storage_mgr.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_db_cache.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_json_util.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/extract_insight_intent_profile.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_event_mgr.cpp",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",

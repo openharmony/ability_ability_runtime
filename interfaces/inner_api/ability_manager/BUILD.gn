@@ -89,6 +89,7 @@ ohos_shared_library("ability_manager") {
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_execute_param.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_execute_result.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_info_for_query.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_json_util.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/intent_exemption_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/keep_alive/keep_alive_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/last_exit_detail_info.cpp",
@@ -148,6 +149,7 @@ ohos_shared_library("ability_manager") {
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/abilitymgr:wantagent_manager",
     "${ability_runtime_services_path}/common:hitrace_chain_util",
+    "${ability_runtime_services_path}/common:app_util",
   ]
 
   external_deps = [
@@ -161,7 +163,6 @@ ohos_shared_library("ability_manager") {
     "hitrace:libhitracechain",
     "ipc:ipc_core",
     "ipc:ipc_napi",
-    "jsoncpp:jsoncpp",
     "relational_store:native_dataability",
     "samgr:samgr_proxy",
   ]
@@ -180,7 +181,6 @@ ohos_shared_library("ability_manager") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "init:libbegetutil",
-    "jsoncpp:jsoncpp",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
   ]
@@ -272,7 +272,6 @@ ohos_shared_library("mission_info") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
-    "jsoncpp:jsoncpp",
   ]
   if (ability_runtime_graphics) {
     external_deps += [ "image_framework:image_native" ]
@@ -319,7 +318,6 @@ ohos_shared_library("ability_start_setting") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
-    "jsoncpp:jsoncpp",
     "napi:ace_napi",
   ]
   if (ability_runtime_graphics) {
@@ -428,7 +426,6 @@ ohos_shared_library("ability_connect_callback_stub") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
-    "jsoncpp:jsoncpp",
   ]
   if (ability_runtime_graphics) {
     external_deps += [ "graphic_2d:color_manager" ]

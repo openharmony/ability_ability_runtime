@@ -158,7 +158,6 @@ ohos_shared_library("app_manager") {
     "hitrace:libhitracechain",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "json:nlohmann_json_static",
     "samgr:samgr_proxy",
   ]
   public_external_deps = [

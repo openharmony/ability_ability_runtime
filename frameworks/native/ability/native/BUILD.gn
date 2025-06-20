@@ -186,7 +186,6 @@ ohos_shared_library("abilitykit_utils") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "ipc:ipc_napi",
-    "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",
   ]
@@ -194,7 +193,6 @@ ohos_shared_library("abilitykit_utils") {
   public_external_deps = [
     "bundle_framework:appexecfwk_core",
     "icu:shared_icuuc",
-    "jsoncpp:jsoncpp",
     "window_manager:libwm",
   ]
 
@@ -258,8 +256,6 @@ ohos_shared_library("configuration_helper") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "ipc:ipc_napi",
-    "json:nlohmann_json_static",
-    "jsoncpp:jsoncpp",
     "napi:ace_napi",
     "resource_management:global_resmgr",
   ]
@@ -387,7 +383,6 @@ ohos_shared_library("abilitykit_native") {
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "ipc:rpc",
-    "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "runtime_core:ani",
@@ -407,7 +402,6 @@ ohos_shared_library("abilitykit_native") {
     "ability_base:session_info",
     "accessibility:accessibility_common",
     "bundle_framework:appexecfwk_core",
-    "jsoncpp:jsoncpp",
     "libuv:uv",
     "napi:ace_napi",
   ]
@@ -602,7 +596,6 @@ ohos_shared_library("extensionkit_native") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "ipc:ipc_napi",
-    "json:nlohmann_json_static",
     "napi:ace_napi",
   ]
 
@@ -611,7 +604,6 @@ ohos_shared_library("extensionkit_native") {
   public_external_deps = [
     "ability_base:session_info",
     "bundle_framework:appexecfwk_core",
-    "jsoncpp:jsoncpp",
   ]
 
   if (ability_runtime_graphics) {
@@ -774,6 +766,7 @@ ohos_shared_library("uiabilitykit_native") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
     "${ability_runtime_path}/utils/global/time/include",
+    "${ability_runtime_services_path}/common/include",
   ]
 
   sources = [
@@ -811,6 +804,7 @@ ohos_shared_library("uiabilitykit_native") {
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
+    "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:event_report",
   ]
 
@@ -828,7 +822,6 @@ ohos_shared_library("uiabilitykit_native") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "ipc:ipc_napi",
-    "json:nlohmann_json_static",
     "resource_management:global_resmgr",
     "runtime_core:ani",
     "samgr:samgr_proxy",
@@ -1106,7 +1099,6 @@ ohos_shared_library("form_extension_module") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
-    "json:nlohmann_json_static",
     "napi:ace_napi",
     "window_manager:libwm",
   ]
@@ -1452,7 +1444,6 @@ ohos_shared_library("continuation_ipc") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_core",
-    "json:nlohmann_json_static",
     "resource_management:global_resmgr",
   ]
   public_external_deps = []
@@ -1499,7 +1490,6 @@ ohos_shared_library("data_ability_helper") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_single",
-    "json:nlohmann_json_static",
     "relational_store:native_dataability",
     "relational_store:rdb_data_ability_adapter",
     "window_manager:libwm",
@@ -1547,7 +1537,6 @@ ohos_shared_library("service_extension_module") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
-    "json:nlohmann_json_static",
     "napi:ace_napi",
   ]
 
@@ -2785,7 +2774,6 @@ ohos_shared_library("app_service_extension_module") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
-    "json:nlohmann_json_static",
     "napi:ace_napi",
   ]
 
