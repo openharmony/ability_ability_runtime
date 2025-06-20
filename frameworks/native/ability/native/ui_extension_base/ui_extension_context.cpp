@@ -460,6 +460,56 @@ void UIExtensionContext::RequestComponentTerminate()
     }
 }
 
+ErrCode UIExtensionContext::AddCompletionHandler(const std::string &requestId, OnRequestResult onRequestSucc,
+    OnRequestResult onRequestFail)
+{
+    if (onRequestSucc == nullptr || onRequestFail == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "either func is null");
+        return ERR_INVALID_VALUE;
+    }
+    std::lock_guard lock(onRequestResultMutex_);
+    for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
+        if (iter->requestId_ == requestId) {
+            TAG_LOGI(AAFwkTag::UI_EXT, "requestId=%{public}s already exists", requestId.c_str());
+            return ERR_OK;
+        }
+    }
+    onRequestResults_.emplace_back(requestId, onRequestSucc, onRequestFail);
+    return ERR_OK;
+}
+
+void UIExtensionContext::OnRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    std::lock_guard<std::mutex> lock(onRequestResultMutex_);
+    for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
+        if (iter->requestId_ == requestId) {
+            TAG_LOGI(AAFwkTag::UI_EXT, "requestId=%{public}s, call onRequestSuccess", requestId.c_str());
+            iter->onRequestSuccess_(element, message);
+            onRequestResults_.erase(iter);
+            return;
+        }
+    }
+
+    TAG_LOGE(AAFwkTag::UI_EXT, "requestId=%{public}s not exist", requestId.c_str());
+}
+
+void UIExtensionContext::OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    std::lock_guard<std::mutex> lock(onRequestResultMutex_);
+    for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
+        if (iter->requestId_ == requestId) {
+            TAG_LOGI(AAFwkTag::UI_EXT, "requestId=%{public}s, call onRequestFailure", requestId.c_str());
+            iter->onRequestFailure_(element, message);
+            onRequestResults_.erase(iter);
+            return;
+        }
+    }
+
+    TAG_LOGE(AAFwkTag::UI_EXT, "requestId=%{public}s not exist", requestId.c_str());
+}
+
 int32_t UIExtensionContext::curRequestCode_ = 0;
 std::mutex UIExtensionContext::requestCodeMutex_;
 }  // namespace AbilityRuntime

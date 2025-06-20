@@ -182,6 +182,10 @@ FreeInstallInfo FreeInstallManager::BuildFreeInstallInfo(const Want &want, int32
         .startOptions = param->startOptions,
         .want = want
     };
+    if (param->startOptions != nullptr && !param->startOptions->requestId_.empty()) {
+        TAG_LOGD(AAFwkTag::FREE_INSTALL, "set requestId:%{public}s", param->startOptions->requestId_.c_str());
+        info.want.SetParam(KEY_REQUEST_ID, param->startOptions->requestId_);
+    }
     if (!param->isAsync) {
         auto promise = std::make_shared<std::promise<int32_t>>();
         info.promise = promise;

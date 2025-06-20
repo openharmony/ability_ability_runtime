@@ -1025,5 +1025,91 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_HandleDisconnectExte
     extensionabilitythread->HandleDisconnectExtension(want);
     GTEST_LOG_(INFO) << "ExtensionAbilityThread_HandleDisconnectExtension_0100 end";
 }
+
+/**
+ * @tc.number: ExtensionAbilityThread_ScheduleAbilityRequestFailure_0100
+ * @tc.name: ScheduleAbilityRequestFailure
+ * @tc.desc: Test ScheduleAbilityRequestFailure function
+ */
+HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleAbilityRequestFailure_0100,
+    Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ExtensionAbilityThread_ScheduleAbilityRequestFailure_0100 start";
+    AbilityRuntime::ExtensionAbilityThread *extensionabilitythread =
+        new (std::nothrow) AbilityRuntime::ExtensionAbilityThread();
+    EXPECT_NE(extensionabilitythread, nullptr);
+    extensionabilitythread->extensionImpl_ = std::make_shared<AbilityRuntime::ExtensionImpl>();
+    EXPECT_NE(extensionabilitythread->extensionImpl_, nullptr);
+    extensionabilitythread->abilityHandler_ = std::make_shared<AbilityHandler>(nullptr);
+    EXPECT_NE(extensionabilitythread->abilityHandler_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "failure";
+    extensionabilitythread->ScheduleAbilityRequestFailure(requestId, element, message);
+    GTEST_LOG_(INFO) << "ExtensionAbilityThread_ScheduleAbilityRequestFailure_0100 end";
+}
+
+/**
+ * @tc.number: ExtensionAbilityThread_ScheduleAbilityRequestFailure_0200
+ * @tc.name: ScheduleAbilityRequestFailure
+ * @tc.desc: Test ScheduleAbilityRequestFailure function
+ */
+HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleAbilityRequestFailure_0200,
+    Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ExtensionAbilityThread_ScheduleAbilityRequestFailure_0200 start";
+    AbilityRuntime::ExtensionAbilityThread *extensionabilitythread =
+        new (std::nothrow) AbilityRuntime::ExtensionAbilityThread();
+    EXPECT_NE(extensionabilitythread, nullptr);
+    EXPECT_EQ(extensionabilitythread->extensionImpl_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "failure";
+    extensionabilitythread->ScheduleAbilityRequestFailure(requestId, element, message);
+    GTEST_LOG_(INFO) << "ExtensionAbilityThread_ScheduleAbilityRequestFailure_0200 end";
+}
+
+/**
+ * @tc.number: ExtensionAbilityThread_ScheduleAbilityRequestSuccess_0100
+ * @tc.name: ScheduleAbilityRequestSuccess
+ * @tc.desc: Test ScheduleAbilityRequestSuccess function
+ */
+HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleAbilityRequestSuccess_0100,
+    Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0100 start";
+    AbilityRuntime::ExtensionAbilityThread *extensionabilitythread =
+        new (std::nothrow) AbilityRuntime::ExtensionAbilityThread();
+    EXPECT_NE(extensionabilitythread, nullptr);
+    extensionabilitythread->extensionImpl_ = std::make_shared<AbilityRuntime::ExtensionImpl>();
+    EXPECT_NE(extensionabilitythread->extensionImpl_, nullptr);
+    extensionabilitythread->abilityHandler_ = std::make_shared<AbilityHandler>(nullptr);
+    EXPECT_NE(extensionabilitythread->abilityHandler_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "success";
+    extensionabilitythread->ScheduleAbilityRequestSuccess(requestId, element);
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0100 end";
+}
+
+/**
+ * @tc.number: ExtensionAbilityThread_ScheduleAbilityRequestSuccess_0200
+ * @tc.name: ScheduleAbilityRequestSuccess
+ * @tc.desc: Test ScheduleAbilityRequestSuccess function
+ */
+HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleAbilityRequestSuccess_0200,
+    Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0200 start";
+    AbilityRuntime::ExtensionAbilityThread *extensionabilitythread =
+        new (std::nothrow) AbilityRuntime::ExtensionAbilityThread();
+    EXPECT_NE(extensionabilitythread, nullptr);
+    EXPECT_EQ(extensionabilitythread->extensionImpl_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "success";
+    extensionabilitythread->ScheduleAbilityRequestSuccess(requestId, element);
+    GTEST_LOG_(INFO) << "AbilityRuntime_ScheduleAbilityRequestSuccess_0200 end";
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,7 @@ constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr size_t ARGC_FOUR = 4;
 constexpr const char* ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
+const std::string JSON_KEY_ERR_MSG = "errMsg";
 
 class StartAbilityByCallParameters {
 public:
@@ -388,6 +389,58 @@ private:
         
         return result;
     }
+
+    void UnwrapCompletionHandlerInStartOptions(napi_env env, napi_value param,
+        AAFwk::StartOptions &options)
+    {
+        napi_value completionHandler = AppExecFwk::GetPropertyValueByPropertyName(env, param,
+            "completionHandler", napi_object);
+        if (completionHandler == nullptr) {
+            TAG_LOGD(AAFwkTag::SERVICE_EXT, "null completionHandler");
+            return;
+        }
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "completionHandler exists");
+        napi_value onRequestSuccObj = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandler,
+            "onRequestSuccess", napi_function);
+        napi_value onRequestFailObj = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandler,
+            "onRequestFailure", napi_function);
+        if (onRequestSuccObj == nullptr || onRequestFailObj == nullptr) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "null onRequestSuccObj or onRequestFailObj");
+            return;
+        }
+        OnRequestResult onRequestSucc = [env, completionHandler, onRequestSuccObj](
+            const AppExecFwk::ElementName &element, const std::string &message) {
+            size_t argc = ARGC_TWO;
+            napi_value argv[ARGC_TWO] = { AppExecFwk::WrapElementName(env, element), CreateJsValue(env, message) };
+            napi_status status = napi_call_function(env, completionHandler, onRequestSuccObj, argc, argv, nullptr);
+            if (status != napi_ok) {
+                TAG_LOGE(AAFwkTag::SERVICE_EXT, "call onRequestSuccess, failed: %{public}d", status);
+            }
+        };
+        OnRequestResult onRequestFail = [env, completionHandler, onRequestFailObj](
+            const AppExecFwk::ElementName &element, const std::string &message) {
+            size_t argc = ARGC_TWO;
+            napi_value argv[ARGC_TWO] = { AppExecFwk::WrapElementName(env, element), CreateJsValue(env, message) };
+            napi_status status = napi_call_function(env, completionHandler, onRequestFailObj, argc, argv, nullptr);
+            if (status != napi_ok) {
+                TAG_LOGE(AAFwkTag::SERVICE_EXT, "call onRequestFailure, failed: %{public}d", status);
+            }
+        };
+        auto context = context_.lock();
+        if (!context) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
+            return;
+        }
+        auto time = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+        std::string requestId = std::to_string(time);
+        if (context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail) != ERR_OK) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "add completionHandler failed");
+            return;
+        }
+        options.requestId_ = requestId;
+    }
+
     napi_value OnOpenAtomicService(napi_env env, NapiCallbackInfo &info)
     {
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "OpenAtomicService");
@@ -412,6 +465,7 @@ private:
                 ThrowInvalidParamError(env, "Parse param startOptions failed, startOptions must be StartOption.");
                 return CreateJsUndefined(env);
             }
+            UnwrapCompletionHandlerInStartOptions(env, info.argv[INDEX_ONE], startOptions);
         }
 
         std::string bundleName = ATOMIC_SERVICE_PREFIX + appId;
@@ -437,7 +491,8 @@ private:
             }
             *innerErrorCode = context->OpenAtomicService(want, options);
         };
-        NapiAsyncTask::CompleteCallback complete = [innerErrorCode, startTime, want, observer = freeInstallObserver_](
+        NapiAsyncTask::CompleteCallback complete = [innerErrorCode, startTime, want, observer = freeInstallObserver_,
+            weak = context_, options](
             napi_env env, NapiAsyncTask &task, int32_t status) {
             if (*innerErrorCode == 0) {
                 TAG_LOGI(AAFwkTag::SERVICE_EXT, "OpenAtomicService success");
@@ -448,6 +503,17 @@ private:
                 std::string bundleName = want.GetElement().GetBundleName();
                 std::string abilityName = want.GetElement().GetAbilityName();
                 observer->OnInstallFinished(bundleName, abilityName, startTime, *innerErrorCode);
+            }
+            auto context = weak.lock();
+            if (context == nullptr) {
+                TAG_LOGW(AAFwkTag::SERVICE_EXT, "null context");
+                return;
+            }
+            if (!options.requestId_.empty()) {
+                nlohmann::json jsonObject = nlohmann::json {
+                    { JSON_KEY_ERR_MSG, "failed to call openAtomicService" }
+                };
+                context->OnRequestFailure(options.requestId_, want.GetElement(), jsonObject.dump());
             }
         };
         napi_value result = nullptr;

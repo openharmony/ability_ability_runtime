@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2942,6 +2942,7 @@ napi_value JsAbilityContext::OnOpenAtomicService(napi_env env, NapiCallbackInfo&
             ThrowInvalidParamError(env, "Parse param startOptions failed, startOptions must be StartOption.");
             return CreateJsUndefined(env);
         }
+        UnwrapCompletionHandlerInStartOptions(env, info.argv[INDEX_ONE], startOptions);
     }
 
     std::string bundleName = ATOMIC_SERVICE_PREFIX + appId;
