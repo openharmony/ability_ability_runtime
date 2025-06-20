@@ -13,16 +13,66 @@
  * limitations under the License.
  */
 #include "ets_application.h"
-#include "sts_error_utils.h"
+
+#include "accesstoken_kit.h"
 #include "ani_base_context.h"
 #include "ani_common_util.h"
-#include "sts_context_utils.h"
 #include "application_context.h"
 #include "context_impl.h"
 #include "hilog_tag_wrapper.h"
+#include "ipc_skeleton.h"
+#include "permission_verification.h"
+#include "sts_context_utils.h"
+#include "sts_error_utils.h"
+#include "tokenid_kit.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+constexpr const char* PERMISSION_GET_BUNDLE_INFO = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
+}
+
+ani_object CreateEmptyObject(ani_env *env)
+{
+    ani_class cls = nullptr;
+    ani_status status = env->FindClass("Lapplication/Context/Context;", &cls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find Context failed status: %{public}d", status);
+        return nullptr;
+    }
+    ani_method method = nullptr;
+    status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod ctor failed status: %{public}d", status);
+        return nullptr;
+    }
+    ani_object objValue = nullptr;
+    if (env->Object_New(cls, method, &objValue) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_New failed status: %{public}d", status);
+        return nullptr;
+    }
+    return objValue;
+}
+
+bool CheckIsSystemAppOrPermisson(ani_env *env, ani_object callback)
+{
+    auto emptyObject = CreateEmptyObject(env);
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "no system app");
+        AppExecFwk::AsyncCallback(env, callback, CreateStsError(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
+                "The application is not system-app, can not use system-api."), emptyObject);
+        return false;
+    }
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyGetBundleInfoPrivilegedPermission()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "no permission");
+        AppExecFwk::AsyncCallback(env, callback,
+            CreateStsNoPermissionError(env, PERMISSION_GET_BUNDLE_INFO), emptyObject);
+        return false;
+    }
+    return true;
+}
+
 bool SetNativeContextLong(ani_env *env, std::shared_ptr<Context> context, ani_class& cls, ani_object& contextObj)
 {
     if (env == nullptr || context == nullptr) {
@@ -33,30 +83,25 @@ bool SetNativeContextLong(ani_env *env, std::shared_ptr<Context> context, ani_cl
     ani_method method {};
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
-        ThrowStsInvalidParamError(env, "find method failed.");
         return false;
     }
     if ((status = env->Object_New(cls, method, &contextObj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
-        ThrowStsInvalidParamError(env, "new object failed.");
         return false;
     }
     ani_field field = nullptr;
     if ((status = env->Class_FindField(cls, "nativeContext", &field)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
-        ThrowStsInvalidParamError(env, "find nativeContext failed.");
         return false;
     }
     auto workContext = new (std::nothrow) std::weak_ptr<Context>(context);
     if (workContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "workContext nullptr");
-        ThrowStsInvalidParamError(env, "workContext is null.");
         return false;
     }
     ani_long nativeContextLong = (ani_long)workContext;
     if ((status = env->Object_SetField_Long(contextObj, field, nativeContextLong)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
-        ThrowStsInvalidParamError(env, "set field failed.");
         delete workContext;
         workContext = nullptr;
         return false;
@@ -73,29 +118,15 @@ void SetCreateCompleteCallback(ani_env *env, std::shared_ptr<std::shared_ptr<Con
     auto context = *contextPtr;
     if (!context) {
         TAG_LOGE(AAFwkTag::APPKIT, "failed to create context");
-        ani_class cls = nullptr;
-        ani_status status = env->FindClass("Lapplication/Context/Context;", &cls);
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "find Context failed status: %{public}d", status);
-        }
-        ani_method method = nullptr;
-        status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod ctor failed status: %{public}d", status);
-        }
-        ani_object objValue = nullptr;
-        if (env->Object_New(cls, method, &objValue) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "Object_New failed status: %{public}d", status);
-        }
+        auto emptyObject = CreateEmptyObject(env);
         AppExecFwk::AsyncCallback(env, callback, CreateStsError(env,
-            AbilityErrorCode::ERROR_CODE_INVALID_PARAM), objValue);
+            AbilityErrorCode::ERROR_CODE_INVALID_PARAM), emptyObject);
         return;
     }
     ani_class cls {};
     ani_status status = ANI_ERROR;
     if ((status = env->FindClass("Lapplication/Context/Context;", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
-        ThrowStsInvalidParamError(env, "find class failed.");
         return;
     }
     ani_object contextObj = nullptr;
@@ -107,6 +138,27 @@ void SetCreateCompleteCallback(ani_env *env, std::shared_ptr<std::shared_ptr<Con
     AppExecFwk::AsyncCallback(env, callback, CreateStsError(env, AbilityErrorCode::ERROR_OK), contextObj);
 }
 
+std::shared_ptr<Context> GetStageModeContext(ani_env *env, ani_object &contextObj,
+    ani_object callback, ani_object emptyObject)
+{
+    ani_boolean stageMode = false;
+    ani_status status = IsStageContext(env, contextObj, stageMode);
+    if (status != ANI_OK || !stageMode) {
+        TAG_LOGE(AAFwkTag::APPKIT, "not stageMode");
+        AppExecFwk::AsyncCallback(env, callback, CreateStsInvalidParamError(env,
+            "Parse param context failed, must be a context of stageMode."), emptyObject);
+        return nullptr;
+    }
+    auto context = GetStageModeContext(env, contextObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null context");
+        AppExecFwk::AsyncCallback(env, callback, CreateStsInvalidParamError(env,
+            "Parse param context failed, must not be nullptr."), emptyObject);
+        return nullptr;
+    }
+    return context;
+}
+
 static void CreateModuleContext([[maybe_unused]] ani_env *env,
     ani_object contextObj, ani_string bundleName, ani_string moduleName, ani_object callback)
 {
@@ -115,40 +167,37 @@ static void CreateModuleContext([[maybe_unused]] ani_env *env,
         TAG_LOGE(AAFwkTag::APPKIT, "null env");
         return;
     }
+    ani_object emptyObject = CreateEmptyObject(env);
     std::string stdBundleName = "";
     std::string stdModuleName = "";
     AppExecFwk::GetStdString(env, bundleName, stdBundleName);
     AppExecFwk::GetStdString(env, moduleName, stdModuleName);
-    ani_boolean stageMode = false;
-    ani_status status = OHOS::AbilityRuntime::IsStageContext(env, contextObj, stageMode);
-    if (status != ANI_OK || !stageMode) {
-        TAG_LOGE(AAFwkTag::APPKIT, "not stageMode");
-        ThrowStsInvalidParamError(env, "Parse param context failed, must be a context of stageMode.");
-        return;
-    }
-    auto context = OHOS::AbilityRuntime::GetStageModeContext(env, contextObj);
+    auto context = GetStageModeContext(env, contextObj, callback, emptyObject);
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null context");
-        ThrowStsInvalidParamError(env, "Parse param context failed, must not be nullptr.");
         return;
     }
     auto inputContextPtr = Context::ConvertTo<Context>(context);
     if (inputContextPtr == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Convert to context failed");
-        ThrowStsInvalidParamError(env, "Parse param context failed, must be a context.");
+        AppExecFwk::AsyncCallback(env, callback, CreateStsInvalidParamError(env,
+            "Parse param context failed, must be a context."), emptyObject);
         return;
     }
     std::shared_ptr<std::shared_ptr<Context>> moduleContext = std::make_shared<std::shared_ptr<Context>>();
     std::shared_ptr<ContextImpl> contextImpl = std::make_shared<ContextImpl>();
     if (contextImpl == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
-        ThrowStsInvalidParamError(env, "create context failed.");
+        AppExecFwk::AsyncCallback(env, callback, CreateStsInvalidParamError(env,
+            "create context failed."), emptyObject);
         return;
     }
     contextImpl->SetProcessName(context->GetProcessName());
     if (stdBundleName.empty()) {
         *moduleContext = contextImpl->CreateModuleContext(stdModuleName, inputContextPtr);
     } else {
+        if (!CheckIsSystemAppOrPermisson(env, callback)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "CheckCaller failed");
+        }
         *moduleContext = contextImpl->CreateModuleContext(stdBundleName, stdModuleName, inputContextPtr);
     }
     SetCreateCompleteCallback(env, moduleContext, callback);
@@ -162,32 +211,41 @@ static void CreateBundleContext([[maybe_unused]] ani_env *env,
         TAG_LOGE(AAFwkTag::APPKIT, "null env");
         return;
     }
+    ani_object emptyObject = CreateEmptyObject(env);
+    if (!CheckIsSystemAppOrPermisson(env, callback)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "CheckCaller failed");
+        return;
+    }
     std::string stdBundleName = "";
     AppExecFwk::GetStdString(env, bundleName, stdBundleName);
     ani_boolean stageMode = false;
     ani_status status = OHOS::AbilityRuntime::IsStageContext(env, contextObj, stageMode);
     if (status != ANI_OK || !stageMode) {
         TAG_LOGE(AAFwkTag::APPKIT, "not stageMode");
-        ThrowStsInvalidParamError(env, "Parse param context failed, must be a context of stageMode.");
+        AppExecFwk::AsyncCallback(env, callback, CreateStsInvalidParamError(env,
+            "Parse param context failed, must be a context of stageMode."), emptyObject);
         return;
     }
     auto context = OHOS::AbilityRuntime::GetStageModeContext(env, contextObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null context");
-        ThrowStsInvalidParamError(env, "Parse param context failed, must not be nullptr.");
+        AppExecFwk::AsyncCallback(env, callback, CreateStsInvalidParamError(env,
+            "Parse param context failed, must not be nullptr."), emptyObject);
         return;
     }
     auto inputContextPtr = Context::ConvertTo<Context>(context);
     if (inputContextPtr == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Convert to context failed");
-        ThrowStsInvalidParamError(env, "Parse param context failed, must be a context.");
+        AppExecFwk::AsyncCallback(env, callback, CreateStsInvalidParamError(env,
+            "Parse param context failed, must be a context."), emptyObject);
         return;
     }
     auto bundleContext = std::make_shared<std::shared_ptr<Context>>();
     std::shared_ptr<ContextImpl> contextImpl = std::make_shared<ContextImpl>();
     if (contextImpl == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
-        ThrowStsInvalidParamError(env, "create context failed.");
+        AppExecFwk::AsyncCallback(env, callback, CreateStsInvalidParamError(env,
+            "create context failed."), emptyObject);
         return;
     }
     contextImpl->SetProcessName(context->GetProcessName());
