@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,6 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 const std::string HELP_MSG_NO_OPTION = "error: you must specify an option at least.";
-const std::string AA_TOOL_URL = "https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/tools/aa-tool.md";
 
 const int OFFSET_REQUIRED_ARGUMENT = 2;
 }  // namespace
@@ -83,8 +82,6 @@ struct AaToolErrorInfo {
         for (const auto& solution : solutions) {
             oss << "  > " << solution << "\n";
         }
-        oss << "  > MoreInfo: " << AA_TOOL_URL;
-
         return oss.str();
     }
 };
