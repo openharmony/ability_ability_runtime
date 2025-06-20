@@ -36,6 +36,7 @@
 #define private public
 #define protected public
 #include "want_agent_helper.h"
+#include "want_agent_client.h"
 #include "want_agent_info.h"
 #undef private
 #undef protected
@@ -1229,6 +1230,39 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_5700, Function | MediumTest | Leve
     EXPECT_EQ(type, WantAgentConstant::OperationType::START_ABILITY);
 
     WantAgentHelper::Cancel(wantAgent, FLAG_ONE_SHOT|FLAG_ALLOW_CANCEL);
+    type = WantAgentHelper::GetType(wantAgent);
+    EXPECT_EQ(type, WantAgentConstant::OperationType::UNKNOWN_TYPE);
+}
+
+/*
+ * @tc.number    : WantAgentHelper_5800
+ * @tc.name      : WantAgentHelper Cancel success after remove death recipient
+ * @tc.desc      : RemoveDeathRecipient normal test
+ */
+HWTEST_F(WantAgentHelperTest, WantAgentHelper_5800, Function | MediumTest | Level1)
+{
+    std::shared_ptr<WantAgentHelper> wantAgentHelper = std::make_shared<WantAgentHelper>();
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    ElementName element("device", "bundleName", "abilityName");
+    want->SetElement(element);
+    WantAgentInfo wantAgentInfo;
+    wantAgentInfo.wants_.emplace_back(want);
+    wantAgentInfo.operationType_ = WantAgentConstant::OperationType::START_ABILITY;
+    wantAgentInfo.requestCode_ = 10;
+    bool value = true;
+    std::string key = "key";
+    std::shared_ptr<WantParams> wParams = std::make_shared<WantParams>();
+    wParams->SetParam(key, Boolean::Box(value));
+    wantAgentInfo.extraInfo_ = wParams;
+    auto wantAgent = wantAgentHelper->GetWantAgent(wantAgentInfo);
+    EXPECT_NE(wantAgent, nullptr);
+    auto type = wantAgentHelper->GetType(wantAgent);
+    EXPECT_EQ(type, WantAgentConstant::OperationType::START_ABILITY);
+
+    // remove death recipient
+    WantAgentClient::GetInstance().RemoveDeathRecipient();
+
+    WantAgentHelper::Cancel(wantAgent);
     type = WantAgentHelper::GetType(wantAgent);
     EXPECT_EQ(type, WantAgentConstant::OperationType::UNKNOWN_TYPE);
 }
