@@ -209,6 +209,24 @@ HWTEST_F(StsEnvironmentTest, GetAniEnv_0100, TestSize.Level0)
 }
 
 /**
+ * @tc.name: LoadSymbolCreateVM_0100
+ * @tc.desc: LoadSymbolCreateVM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StsEnvironmentTest, LoadSymbolCreateVM_0100, TestSize.Level0)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> eventRunner = AppExecFwk::EventRunner::Create(TEST_ABILITY_NAME);
+    auto stsEnv =
+        std::make_shared<STSEnvironment>(std::make_unique<AbilityRuntime::OHOSStsEnvironmentImpl>(eventRunner));
+    ASSERT_NE(stsEnv, nullptr);
+    void* handle = reinterpret_cast<void*>(0x1);
+    STSRuntimeAPI apis = {};
+    bool result = stsEnv->LoadSymbolCreateVM(handle, apis);
+    EXPECT_FALSE(result);
+    EXPECT_EQ(apis.ANI_CreateVM, nullptr);
+}
+
+/**
  * @tc.name: LoadSymbolANIGetCreatedVMs_0100
  * @tc.desc: Test LoadSymbolANIGetCreatedVMs when symbol is not found.
  * @tc.type: FUNC
