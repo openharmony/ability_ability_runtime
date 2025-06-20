@@ -58,7 +58,7 @@ namespace {
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 #endif // WITH_DLP
 constexpr int32_t TEST_UID = 20010001;
-constexpr int32_t TIMEOUT_VALUE = 11 * 1000 * 1000;
+constexpr int32_t TIMEOUT_VALUE = 4000;
 };
 class UIAbilityLifecycleManagerThirdTest : public testing::Test {
 public:
