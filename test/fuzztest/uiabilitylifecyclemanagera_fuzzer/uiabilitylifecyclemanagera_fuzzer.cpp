@@ -128,7 +128,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     uIAbilityLifecycleManager->GetUIAbilityRecordBySessionInfo(sessionInfo1);
     Want *want;
     std::shared_ptr<AbilityRecord> abilityRecord2;
-    uIAbilityLifecycleManager->CloseUIAbility(abilityRecord2, intParam, want, boolParam);
+    uIAbilityLifecycleManager->CloseUIAbility(abilityRecord2, intParam, want, boolParam, boolParam);
     sptr<IRemoteObject> rootSceneSession;
     uIAbilityLifecycleManager->SetRootSceneSession(rootSceneSession);
     AbilityRequest abilityRequest1;
