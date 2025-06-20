@@ -26,6 +26,22 @@ AbilityConnectManager::AbilityConnectManager(int userId) : userId_(userId)
 AbilityConnectManager::~AbilityConnectManager()
 {}
 
+bool AbilityConnectManager::HasRequestIdInLoadAbilityQueue(int32_t requestId)
+{
+    return false;
+}
+
+void AbilityConnectManager::OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId)
+{}
+
+void AbilityConnectManager::OnStartSpecifiedProcessTimeoutResponse(int32_t requestId)
+{}
+
+void AbilityConnectManager::StartSpecifiedProcess(
+    const LoadAbilityContext &context, const std::shared_ptr<AbilityRecord> &abilityRecord)
+{}
+
+
 int AbilityConnectManager::StartAbility(const AbilityRequest &abilityRequest)
 {
     return 0;
