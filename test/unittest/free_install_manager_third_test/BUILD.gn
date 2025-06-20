@@ -63,7 +63,6 @@ ohos_unittest("free_install_manager_third_test") {
     "hisysevent:libhisysevent",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "safwk:api_cache_manager",
   ]
 

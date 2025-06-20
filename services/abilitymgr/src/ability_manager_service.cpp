@@ -13111,31 +13111,47 @@ bool AbilityManagerService::IsInWhiteList(const std::string &callerBundleName, c
 
 bool AbilityManagerService::ParseJsonFromBoot(const std::string &relativePath)
 {
-    nlohmann::json jsonObj;
+    cJSON *jsonObj = nullptr;
     std::string absolutePath = GetConfigFileAbsolutePath(relativePath);
     if (ParseJsonValueFromFile(jsonObj, absolutePath) != ERR_OK) {
         return false;
     }
     std::lock_guard<std::mutex> locker(whiteListMutex_);
-    nlohmann::json whiteListJsonList = jsonObj[WHITE_LIST];
-    for (const auto& [key, value] : whiteListJsonList.items()) {
-        if (!value.is_array()) {
+    cJSON *whiteListJsonList = cJSON_GetObjectItem(jsonObj, WHITE_LIST);
+    if (whiteListJsonList == nullptr) {
+        cJSON_Delete(jsonObj);
+        return false;
+    }
+    cJSON *childItem = whiteListJsonList->child;
+    while (childItem != nullptr) {
+        std::string key = childItem->string == nullptr ? "" : childItem->string;
+        if (!cJSON_IsArray(childItem)) {
             continue;
         }
         whiteListMap_.emplace(key, std::list<std::string>());
-        for (const auto& it : value) {
-            if (it.is_string()) {
-                whiteListMap_[key].push_back(it);
+        int size = cJSON_GetArraySize(childItem);
+        for (int i = 0; i < size; i++) {
+            cJSON *valueItem = cJSON_GetArrayItem(childItem, i);
+            if (valueItem != nullptr && cJSON_IsString(valueItem)) {
+                std::string value = valueItem->valuestring;
+                whiteListMap_[key].push_back(value);
             }
         }
+        
+        childItem = childItem->next;
     }
-    if (!jsonObj.contains("exposed_white_list")) {
+
+    cJSON *exposedWhiteListItem = cJSON_GetObjectItem(jsonObj, "exposed_white_list");
+    if (exposedWhiteListItem == nullptr || !cJSON_IsArray(exposedWhiteListItem)) {
+        cJSON_Delete(jsonObj);
         return false;
     }
-    nlohmann::json exportWhiteJsonList = jsonObj["exposed_white_list"];
-    for (const auto& it : exportWhiteJsonList) {
-        if (it.is_string()) {
-            exportWhiteList_.push_back(it);
+    int size = cJSON_GetArraySize(exposedWhiteListItem);
+    for (int i = 0; i < size; i++) {
+        cJSON *exposedWhiteItem = cJSON_GetArrayItem(exposedWhiteListItem, i);
+        if (exposedWhiteItem != nullptr && cJSON_IsString(exposedWhiteItem)) {
+            std::string exportWhiteStr = exposedWhiteItem->valuestring;
+            exportWhiteList_.push_back(exportWhiteStr);
         }
     }
     return true;
@@ -13157,7 +13173,7 @@ std::string AbilityManagerService::GetConfigFileAbsolutePath(const std::string &
     return std::string(absolutePath);
 }
 
-int32_t AbilityManagerService::ParseJsonValueFromFile(nlohmann::json &value, const std::string &filePath)
+int32_t AbilityManagerService::ParseJsonValueFromFile(cJSON *&value, const std::string &filePath)
 {
     std::ifstream fin;
     std::string realPath;
@@ -13176,8 +13192,10 @@ int32_t AbilityManagerService::ParseJsonValueFromFile(nlohmann::json &value, con
         os << buffer;
     }
     const std::string data = os.str();
-    value = nlohmann::json::parse(data, nullptr, false);
-    if (value.is_discarded()) {
+    fin.close();
+
+    value = cJSON_Parse(data.c_str());
+    if (value == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed due data discarded");
         return ERR_INVALID_VALUE;
     }

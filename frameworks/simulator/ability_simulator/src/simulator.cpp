@@ -160,7 +160,7 @@ private:
     void GetPkgContextInfoListMap(const std::map<std::string, std::string> &contextInfoMap,
         std::map<std::string, std::vector<std::vector<std::string>>> &pkgContextInfoMap,
         std::map<std::string, std::string> &pkgAliasMap);
-    void GetPkgContextInfoListInner(nlohmann::json &itemObject, std::vector<std::string> &items,
+    void GetPkgContextInfoListInner(cJSON *itemObject, std::vector<std::string> &items,
         std::map<std::string, std::string> &pkgAliasMap, std::string &pkgName);
 };
 
@@ -288,9 +288,14 @@ bool SimulatorImpl::ParseBundleAndModuleInfo()
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "appinfo parse failed");
         return false;
     }
-    nlohmann::json appInfoJson;
-    to_json(appInfoJson, *appInfo_);
-    std::cout << "appinfo : " << appInfoJson.dump() << std::endl;
+    cJSON *appInfoJson = nullptr;
+    if (!to_json(appInfoJson, *appInfo_)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json appInfo failed");
+        return false;
+    }
+    std::string appInfoJsonStr = AppExecFwk::JsonToString(appInfoJson);
+    cJSON_Delete(appInfoJson);
+    std::cout << "appinfo : " << appInfoJsonStr << std::endl;
 
     AppExecFwk::BundleContainer::GetInstance().LoadDependencyHspInfo(appInfo_->bundleName, options_.dependencyHspInfos);
     AppExecFwk::BundleContainer::GetInstance().SetBundleCodeDir(options_.previewPath);
@@ -314,9 +319,14 @@ bool SimulatorImpl::ParseBundleAndModuleInfo()
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "module info parse failed");
         return false;
     }
-    nlohmann::json moduleInfoJson;
-    to_json(moduleInfoJson, *moduleInfo_);
-    std::cout << "moduleInfo : " << moduleInfoJson.dump() << std::endl;
+    cJSON *moduleInfoJson = nullptr;
+    if (!to_json(moduleInfoJson, *moduleInfo_)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json moduleInfo failed");
+        return false;
+    }
+    std::string moduleInfoJsonStr = AppExecFwk::JsonToString(moduleInfoJson);
+    cJSON_Delete(moduleInfoJson);
+    std::cout << "moduleInfo : " << moduleInfoJsonStr << std::endl;
 
     options_.pageProfile = moduleInfo_->pages;
     options_.enablePartialUpdate = true;
@@ -345,9 +355,13 @@ bool SimulatorImpl::ParseAbilityInfo(const std::string &abilitySrcPath, const st
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "ability info parse failed");
         return false;
     }
-    nlohmann::json json;
-    to_json(json, *abilityInfo_);
-    std::cout << "abilityInfo : " << json.dump() << std::endl;
+    cJSON *jsonObject = nullptr;
+    if (!to_json(jsonObject, *abilityInfo_)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json abilityInfo failed");
+        return false;
+    }
+    std::string jsonStr = AppExecFwk::JsonToString(jsonObject);
+    std::cout << "abilityInfo : " << jsonStr << std::endl;
 
     options_.labelId = abilityInfo_->labelId;
     return true;
@@ -957,76 +971,85 @@ void SimulatorImpl::GetPkgContextInfoListMap(const std::map<std::string, std::st
 {
     for (auto it = contextInfoMap.begin(); it != contextInfoMap.end(); it++) {
         std::vector<std::vector<std::string>> pkgContextInfoList;
-        auto jsonObject = nlohmann::json::parse(it->second);
-        if (jsonObject.is_discarded()) {
+        cJSON *jsonObject = cJSON_Parse(it->second.c_str());
+        if (jsonObject == nullptr) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s parse json error", it->first.c_str());
             continue;
         }
-        for (nlohmann::json::iterator jsonIt = jsonObject.begin(); jsonIt != jsonObject.end(); jsonIt++) {
+        cJSON *childItem = jsonObject->child;
+        while (childItem != nullptr) {
             std::vector<std::string> items;
-            items.emplace_back(jsonIt.key());
-            nlohmann::json itemObject = jsonIt.value();
+            std::string key = childItem->string == nullptr ? "" : childItem->string;
+            items.emplace_back(key);
+
             std::string pkgName = "";
             items.emplace_back(PACKAGE_NAME);
-            if (itemObject[PACKAGE_NAME].is_null() || !itemObject[PACKAGE_NAME].is_string()) {
-                items.emplace_back(pkgName);
-            } else {
-                pkgName = itemObject[PACKAGE_NAME].get<std::string>();
-                items.emplace_back(pkgName);
+            cJSON *packageNameItem = cJSON_GetObjectItem(childItem, PACKAGE_NAME.c_str());
+            if (packageNameItem != nullptr && cJSON_IsString(packageNameItem)) {
+                pkgName = packageNameItem->valuestring;
             }
+            items.emplace_back(pkgName);
 
+            std::string bundleName = "";
             items.emplace_back(BUNDLE_NAME);
-            if (itemObject[BUNDLE_NAME].is_null() || !itemObject[BUNDLE_NAME].is_string()) {
-                items.emplace_back("");
-            } else {
-                items.emplace_back(itemObject[BUNDLE_NAME].get<std::string>());
+            cJSON *bundleNameItem = cJSON_GetObjectItem(childItem, BUNDLE_NAME.c_str());
+            if (bundleNameItem != nullptr && cJSON_IsString(bundleNameItem)) {
+                bundleName = bundleNameItem->valuestring;
             }
+            items.emplace_back(bundleName);
 
+            std::string moduleName = "";
             items.emplace_back(MODULE_NAME);
-            if (itemObject[MODULE_NAME].is_null() || !itemObject[MODULE_NAME].is_string()) {
-                items.emplace_back("");
-            } else {
-                items.emplace_back(itemObject[MODULE_NAME].get<std::string>());
+            cJSON *moduleNameItem = cJSON_GetObjectItem(childItem, MODULE_NAME.c_str());
+            if (moduleNameItem != nullptr && cJSON_IsString(moduleNameItem)) {
+                moduleName = moduleNameItem->valuestring;
             }
+            items.emplace_back(moduleName);
 
-            GetPkgContextInfoListInner(itemObject, items, pkgAliasMap, pkgName);
+            GetPkgContextInfoListInner(childItem, items, pkgAliasMap, pkgName);
             pkgContextInfoList.emplace_back(items);
+
+            childItem = childItem->next;
         }
+        cJSON_Delete(jsonObject);
         TAG_LOGI(AAFwkTag::JSRUNTIME, "moduleName: %{public}s parse json success", it->first.c_str());
         pkgContextInfoMap[it->first] = pkgContextInfoList;
     }
 }
 
-void SimulatorImpl::GetPkgContextInfoListInner(nlohmann::json &itemObject, std::vector<std::string> &items,
+void SimulatorImpl::GetPkgContextInfoListInner(cJSON *itemObject, std::vector<std::string> &items,
     std::map<std::string, std::string> &pkgAliasMap, std::string &pkgName)
 {
     items.emplace_back(VERSION);
-    if (itemObject[VERSION].is_null() || !itemObject[VERSION].is_string()) {
+    cJSON *versionItem = cJSON_GetObjectItem(itemObject, VERSION.c_str());
+    if (versionItem == nullptr || !cJSON_IsString(versionItem)) {
         items.emplace_back("");
     } else {
-        items.emplace_back(itemObject[VERSION].get<std::string>());
+        std::string version = versionItem->valuestring;
+        items.emplace_back(version);
     }
 
     items.emplace_back(ENTRY_PATH);
-    if (itemObject[ENTRY_PATH].is_null() || !itemObject[ENTRY_PATH].is_string()) {
+    cJSON *entryPathItem = cJSON_GetObjectItem(itemObject, ENTRY_PATH.c_str());
+    if (entryPathItem == nullptr || !cJSON_IsString(entryPathItem)) {
         items.emplace_back("");
     } else {
-        items.emplace_back(itemObject[ENTRY_PATH].get<std::string>());
+        std::string entryPath = entryPathItem->valuestring;
+        items.emplace_back(entryPath);
     }
 
     items.emplace_back(IS_SO);
-    if (itemObject[IS_SO].is_null() || !itemObject[IS_SO].is_boolean()) {
+    cJSON *isSoItem = cJSON_GetObjectItem(itemObject, IS_SO.c_str());
+    if (isSoItem == nullptr || !cJSON_IsBool(isSoItem)) {
         items.emplace_back("false");
     } else {
-        bool isSo = itemObject[IS_SO].get<bool>();
-        if (isSo) {
-            items.emplace_back("true");
-        } else {
-            items.emplace_back("false");
-        }
+        std::string isSo = isSoItem->type == cJSON_True ? "true" : "false";
+        items.emplace_back(isSo);
     }
-    if (!itemObject[DEPENDENCY_ALIAS].is_null() && itemObject[DEPENDENCY_ALIAS].is_string()) {
-        std::string pkgAlias = itemObject[DEPENDENCY_ALIAS].get<std::string>();
+    
+    cJSON *dependencyAliasItem = cJSON_GetObjectItem(itemObject, DEPENDENCY_ALIAS.c_str());
+    if (dependencyAliasItem != nullptr && cJSON_IsString(dependencyAliasItem)) {
+        std::string pkgAlias = dependencyAliasItem->valuestring;
         if (!pkgAlias.empty()) {
             pkgAliasMap[pkgAlias] = pkgName;
         }

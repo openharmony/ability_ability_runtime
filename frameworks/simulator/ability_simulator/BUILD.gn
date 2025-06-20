@@ -71,6 +71,7 @@ ohos_shared_library("ability_simulator_inner") {
       "src/bundle_parser/extension_ability_info.cpp",
       "src/bundle_parser/hap_module_info.cpp",
       "src/bundle_parser/inner_bundle_info.cpp",
+      "src/bundle_parser/json_util.cpp",
       "src/bundle_parser/module_info.cpp",
       "src/bundle_parser/module_profile.cpp",
       "src/bundle_parser/overlay_bundle_info.cpp",
@@ -100,12 +101,11 @@ ohos_shared_library("ability_simulator_inner") {
 
     external_deps = [
       "ability_base:string_utils",
+      "cJSON:cjson",
       "ets_runtime:libark_jsruntime",
       "ets_utils:console",
       "ets_utils:timer",
       "hilog:libhilog",
-      "json:nlohmann_json_static",
-      "jsoncpp:jsoncpp_static",
       "napi:ace_napi",
       "previewer:ide_extension",
       "resource_management:resmgr_napi_core_preview",

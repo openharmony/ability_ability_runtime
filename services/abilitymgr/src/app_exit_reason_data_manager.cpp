@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,8 @@
 #include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "exit_info_data_manager.h"
+#include "insight_intent_json_util.h"
+#include "json_utils.h"
 #include "os_account_manager_wrapper.h"
 
 namespace OHOS {
@@ -327,21 +329,33 @@ DistributedKv::Value AppExitReasonDataManager::ConvertAppExitReasonInfoToValue(
     if (withKillMsg) {
         killMsg = exitReason.exitMsg;
     }
-    nlohmann::json jsonObject = nlohmann::json {
-        { JSON_KEY_PID, processInfo.pid_ },
-        { JSON_KEY_UID, processInfo.uid_ },
-        { JSON_KEY_REASON, exitReason.reason },
-        { JSON_KEY_SUB_KILL_REASON, exitReason.subReason },
-        { JSON_KEY_EXIT_MSG, exitMsg },
-        { JSON_KEY_KILL_MSG, killMsg },
-        { JSON_KEY_RSS_VALUE, processInfo.rssValue },
-        { JSON_KEY_PSS_VALUE, processInfo.pssValue },
-        { JSON_KEY_PROCESS_NAME, processInfo.processName_ },
-        { JSON_KEY_TIME_STAMP, nowMs.count() },
-        { JSON_KEY_ABILITY_LIST, abilityList },
-        { JSON_KEY_PROSESS_STATE, processInfo.state_ },
-    };
-    DistributedKv::Value value(jsonObject.dump());
+    cJSON *jsonObject = cJSON_CreateObject();
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "create json object failed");
+        return DistributedKv::Value();
+    }
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_PID.c_str(), static_cast<double>(processInfo.pid_));
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_UID.c_str(), static_cast<double>(processInfo.uid_));
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_REASON.c_str(), static_cast<double>(exitReason.reason));
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_SUB_KILL_REASON.c_str(), static_cast<double>(exitReason.subReason));
+    cJSON_AddStringToObject(jsonObject, JSON_KEY_EXIT_MSG.c_str(), exitMsg.c_str());
+    cJSON_AddStringToObject(jsonObject, JSON_KEY_KILL_MSG.c_str(), killMsg.c_str());
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_RSS_VALUE.c_str(), static_cast<double>(processInfo.rssValue));
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_PSS_VALUE.c_str(), static_cast<double>(processInfo.pssValue));
+    cJSON_AddStringToObject(jsonObject, JSON_KEY_PROCESS_NAME.c_str(), processInfo.processName_.c_str());
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_TIME_STAMP.c_str(), static_cast<double>(nowMs.count()));
+    cJSON *abilityListItem = nullptr;
+    if (!to_json(abilityListItem, abilityList)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "to_json abilityList failed");
+        cJSON_Delete(jsonObject);
+        return DistributedKv::Value();
+    }
+    cJSON_AddItemToObject(jsonObject, JSON_KEY_ABILITY_LIST.c_str(), abilityListItem);
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_PROSESS_STATE.c_str(), static_cast<double>(processInfo.state_));
+
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
+    cJSON_Delete(jsonObject);
+    DistributedKv::Value value(jsonStr);
     return value;
 }
 
@@ -349,59 +363,80 @@ void AppExitReasonDataManager::ConvertAppExitReasonInfoFromValue(const Distribut
     AAFwk::ExitReason &exitReason, int64_t &time_stamp, std::vector<std::string> &abilityList,
     AppExecFwk::RunningProcessInfo &processInfo, bool &withKillMsg)
 {
-    nlohmann::json jsonObject = nlohmann::json::parse(value.ToString(), nullptr, false);
-    if (jsonObject.is_discarded()) {
+    cJSON *jsonObject = cJSON_Parse(value.ToString().c_str());
+    if (jsonObject == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "parse json sting failed");
         return;
     }
-    if (jsonObject.contains(JSON_KEY_PID) && jsonObject[JSON_KEY_PID].is_number_integer()) {
-        processInfo.pid_ = jsonObject.at(JSON_KEY_PID).get<int32_t>();
+    cJSON *pidItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_PID.c_str());
+    if (pidItem != nullptr && cJSON_IsNumber(pidItem)) {
+        processInfo.pid_ = static_cast<int32_t>(pidItem->valuedouble);
     }
-    if (jsonObject.contains(JSON_KEY_UID) && jsonObject[JSON_KEY_UID].is_number_integer()) {
-        processInfo.uid_ = jsonObject.at(JSON_KEY_UID).get<int32_t>();
+    cJSON *uidItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_UID.c_str());
+    if (uidItem != nullptr && cJSON_IsNumber(uidItem)) {
+        processInfo.uid_ = static_cast<int32_t>(uidItem->valuedouble);
     }
     ConvertReasonFromValue(jsonObject, exitReason, withKillMsg);
-    if (jsonObject.contains(JSON_KEY_RSS_VALUE) && jsonObject[JSON_KEY_RSS_VALUE].is_number_integer()) {
-        processInfo.rssValue = jsonObject.at(JSON_KEY_RSS_VALUE).get<int32_t>();
+    cJSON *rssValueItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_RSS_VALUE.c_str());
+    if (rssValueItem != nullptr && cJSON_IsNumber(rssValueItem)) {
+        processInfo.rssValue = static_cast<int32_t>(rssValueItem->valuedouble);
     }
-    if (jsonObject.contains(JSON_KEY_PSS_VALUE) && jsonObject[JSON_KEY_PSS_VALUE].is_number_integer()) {
-        processInfo.pssValue = jsonObject.at(JSON_KEY_PSS_VALUE).get<int32_t>();
+    cJSON *pssValueItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_PSS_VALUE.c_str());
+    if (pssValueItem != nullptr && cJSON_IsNumber(pssValueItem)) {
+        processInfo.pssValue = static_cast<int32_t>(pssValueItem->valuedouble);
     }
-    if (jsonObject.contains(JSON_KEY_PROCESS_NAME) && jsonObject[JSON_KEY_PROCESS_NAME].is_string()) {
-        processInfo.processName_ = jsonObject.at(JSON_KEY_PROCESS_NAME).get<std::string>();
+    cJSON *processNameItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_PROCESS_NAME.c_str());
+    if (processNameItem != nullptr && cJSON_IsString(processNameItem)) {
+        processInfo.processName_ = processNameItem->valuestring;
     }
-    if (jsonObject.contains(JSON_KEY_TIME_STAMP) && jsonObject[JSON_KEY_TIME_STAMP].is_number_integer()) {
-        time_stamp = jsonObject.at(JSON_KEY_TIME_STAMP).get<int64_t>();
+    cJSON *timeStampItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_TIME_STAMP.c_str());
+    if (timeStampItem != nullptr && cJSON_IsNumber(timeStampItem)) {
+        time_stamp = static_cast<int64_t>(timeStampItem->valuedouble);
     }
-    if (jsonObject.contains(JSON_KEY_PROSESS_STATE) && jsonObject[JSON_KEY_PROSESS_STATE].is_number_integer()) {
-        processInfo.state_ = static_cast<OHOS::AppExecFwk::AppProcessState>(
-            jsonObject.at(JSON_KEY_PROSESS_STATE).get<int32_t>());
+    cJSON *processStateItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_PROSESS_STATE.c_str());
+    if (processStateItem != nullptr && cJSON_IsNumber(processStateItem)) {
+        processInfo.state_ = static_cast<OHOS::AppExecFwk::AppProcessState>(processStateItem->valuedouble);
     }
-    if (jsonObject.contains(JSON_KEY_ABILITY_LIST) && jsonObject[JSON_KEY_ABILITY_LIST].is_array()) {
-        abilityList.clear();
-        auto size = jsonObject[JSON_KEY_ABILITY_LIST].size();
-        for (size_t i = 0; i < size; i++) {
-            if (jsonObject[JSON_KEY_ABILITY_LIST][i].is_string()) {
-                abilityList.emplace_back(jsonObject[JSON_KEY_ABILITY_LIST][i]);
-            }
+    ConvertAbilityListFromValue(jsonObject, abilityList);
+    cJSON_Delete(jsonObject);
+}
+
+void AppExitReasonDataManager::ConvertAbilityListFromValue(const cJSON *jsonObject,
+    std::vector<std::string> &abilityList)
+{
+    cJSON *abilityListItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_ABILITY_LIST.c_str());
+    if (abilityListItem == nullptr || !cJSON_IsArray(abilityListItem)) {
+        return;
+    }
+    abilityList.clear();
+    int size = cJSON_GetArraySize(abilityListItem);
+    for (int i = 0; i < size; i++) {
+        cJSON *abilityItem = cJSON_GetArrayItem(abilityListItem, i);
+        if (abilityItem != nullptr && cJSON_IsString(abilityItem)) {
+            std::string ability = abilityItem->valuestring;
+            abilityList.emplace_back(ability);
         }
     }
 }
 
-void AppExitReasonDataManager::ConvertReasonFromValue(const nlohmann::json &jsonObject, AAFwk::ExitReason &exitReason,
+void AppExitReasonDataManager::ConvertReasonFromValue(const cJSON *jsonObject, AAFwk::ExitReason &exitReason,
     bool &withKillMsg)
 {
-    if (jsonObject.contains(JSON_KEY_REASON) && jsonObject[JSON_KEY_REASON].is_number_integer()) {
-        exitReason.reason = jsonObject.at(JSON_KEY_REASON).get<AAFwk::Reason>();
+    cJSON *reasonItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_REASON.c_str());
+    if (reasonItem != nullptr && cJSON_IsNumber(reasonItem)) {
+        exitReason.reason = static_cast<AAFwk::Reason>(reasonItem->valuedouble);
     }
-    if (jsonObject.contains(JSON_KEY_SUB_KILL_REASON) && jsonObject[JSON_KEY_SUB_KILL_REASON].is_number_integer()) {
-        exitReason.subReason = jsonObject.at(JSON_KEY_SUB_KILL_REASON).get<int32_t>();
+    cJSON *subReasonItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_SUB_KILL_REASON.c_str());
+    if (subReasonItem != nullptr && cJSON_IsNumber(subReasonItem)) {
+        exitReason.subReason = static_cast<int32_t>(subReasonItem->valuedouble);
     }
-    if (jsonObject.contains(JSON_KEY_EXIT_MSG) && jsonObject[JSON_KEY_EXIT_MSG].is_string()) {
-        exitReason.exitMsg = jsonObject.at(JSON_KEY_EXIT_MSG).get<std::string>();
+    cJSON *exitMsgItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_EXIT_MSG.c_str());
+    if (exitMsgItem != nullptr && cJSON_IsString(exitMsgItem)) {
+        exitReason.exitMsg = exitMsgItem->valuestring;
     }
-    if (jsonObject.contains(JSON_KEY_KILL_MSG) && jsonObject[JSON_KEY_KILL_MSG].is_string()) {
-        auto killMsg = jsonObject.at(JSON_KEY_KILL_MSG).get<std::string>();
+    cJSON *killMsgItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_KILL_MSG.c_str());
+    if (killMsgItem != nullptr && cJSON_IsString(killMsgItem)) {
+        std::string killMsg = killMsgItem->valuestring;
         if (!killMsg.empty()) {
             exitReason.exitMsg = killMsg;
             withKillMsg = true;
@@ -783,11 +818,30 @@ void AppExitReasonDataManager::UpdateAbilityRecoverInfo(uint32_t accessTokenId,
 DistributedKv::Value AppExitReasonDataManager::ConvertAbilityRecoverInfoToValue(
     const std::vector<std::string> &recoverInfoList, const std::vector<int> &sessionIdList)
 {
-    nlohmann::json jsonObject = nlohmann::json {
-        { JSON_KEY_RECOVER_INFO_LIST, recoverInfoList },
-        { JSON_KEY_SESSION_ID_LIST, sessionIdList },
-    };
-    DistributedKv::Value value(jsonObject.dump());
+    cJSON *jsonObject = cJSON_CreateObject();
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "create json object failed");
+        return DistributedKv::Value();
+    }
+    cJSON *recoverInfoListItem = nullptr;
+    if (!to_json(recoverInfoListItem, recoverInfoList)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "to json recoverInfoList failed");
+        cJSON_Delete(jsonObject);
+        return DistributedKv::Value();
+    }
+    cJSON_AddItemToObject(jsonObject, JSON_KEY_RECOVER_INFO_LIST.c_str(), recoverInfoListItem);
+
+    cJSON *sessionIdListItem = nullptr;
+    if (!to_json(sessionIdListItem, sessionIdList)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "to json sessionIdList failed");
+        cJSON_Delete(jsonObject);
+        return DistributedKv::Value();
+    }
+    cJSON_AddItemToObject(jsonObject, JSON_KEY_SESSION_ID_LIST.c_str(), sessionIdListItem);
+
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
+    cJSON_Delete(jsonObject);
+    DistributedKv::Value value(jsonStr);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ConvertAbilityRecoverInfoToValue value: %{public}s", value.ToString().c_str());
     return value;
 }
@@ -795,44 +849,33 @@ DistributedKv::Value AppExitReasonDataManager::ConvertAbilityRecoverInfoToValue(
 void AppExitReasonDataManager::ConvertAbilityRecoverInfoFromValue(const DistributedKv::Value &value,
     std::vector<std::string> &recoverInfoList, std::vector<int> &sessionIdList)
 {
-    nlohmann::json jsonObject = nlohmann::json::parse(value.ToString(), nullptr, false);
-    if (jsonObject.is_discarded()) {
+    cJSON *jsonObject = cJSON_Parse(value.ToString().c_str());
+    if (jsonObject == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "parse json sting failed");
         return;
     }
-    if (jsonObject.contains(JSON_KEY_RECOVER_INFO_LIST)
-        && jsonObject[JSON_KEY_RECOVER_INFO_LIST].is_array()) {
-        recoverInfoList.clear();
-        auto size = jsonObject[JSON_KEY_RECOVER_INFO_LIST].size();
-        for (size_t i = 0; i < size; i++) {
-            if (jsonObject[JSON_KEY_RECOVER_INFO_LIST][i].is_string()) {
-                recoverInfoList.emplace_back(jsonObject[JSON_KEY_RECOVER_INFO_LIST][i]);
-            }
-        }
-    }
-    if (jsonObject.contains(JSON_KEY_SESSION_ID_LIST)
-        && jsonObject[JSON_KEY_SESSION_ID_LIST].is_array()) {
-        sessionIdList.clear();
-        auto size = jsonObject[JSON_KEY_SESSION_ID_LIST].size();
-        for (size_t i = 0; i < size; i++) {
-            if (jsonObject[JSON_KEY_SESSION_ID_LIST][i].is_number_integer()) {
-                sessionIdList.emplace_back(jsonObject[JSON_KEY_SESSION_ID_LIST][i]);
-            }
-        }
-    }
+    cJSON *recoverInfoListItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_RECOVER_INFO_LIST.c_str());
+    from_json(recoverInfoListItem, recoverInfoList);
+
+    cJSON *sessionIdListItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_SESSION_ID_LIST.c_str());
+    from_json(sessionIdListItem, sessionIdList);
+
+    cJSON_Delete(jsonObject);
 }
 
 void AppExitReasonDataManager::ConvertAccessTokenIdFromValue(const DistributedKv::Value &value,
     uint32_t &accessTokenId)
 {
-    nlohmann::json jsonObject = nlohmann::json::parse(value.ToString(), nullptr, false);
-    if (jsonObject.is_discarded()) {
+    cJSON *jsonObject = cJSON_Parse(value.ToString().c_str());
+    if (jsonObject == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "parse json sting failed");
         return;
     }
-    if (jsonObject.contains(JSON_KEY_ACCESSTOKENId)) {
-        accessTokenId=jsonObject[JSON_KEY_ACCESSTOKENId];
+    cJSON *accessTokenIdItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_ACCESSTOKENId.c_str());
+    if (accessTokenIdItem != nullptr && cJSON_IsNumber(accessTokenIdItem)) {
+        accessTokenId = static_cast<uint32_t>(accessTokenIdItem->valuedouble);
     }
+    cJSON_Delete(jsonObject);
 }
 
 void AppExitReasonDataManager::InnerDeleteAbilityRecoverInfo(uint32_t accessTokenId)
@@ -902,13 +945,19 @@ DistributedKv::Key AppExitReasonDataManager::GetSessionIdKey(const int sessionId
 {
     return DistributedKv::Key(KEY_RECOVER_INFO_PREFIX + std::to_string(sessionId));
 }
- 
+
 DistributedKv::Value AppExitReasonDataManager::ConvertAccessTokenIdToValue(uint32_t accessTokenId)
 {
-    nlohmann::json jsonObject = nlohmann::json {
-            { JSON_KEY_ACCESSTOKENId, accessTokenId },
-        };
-    DistributedKv::Value value(jsonObject.dump());
+    cJSON *jsonObject = cJSON_CreateObject();
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "create json object failed");
+        return DistributedKv::Value();
+    }
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_ACCESSTOKENId.c_str(), static_cast<double>(accessTokenId));
+
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
+    cJSON_Delete(jsonObject);
+    DistributedKv::Value value(jsonStr);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ConvertAccessTokenIdToValue value: %{public}s", value.ToString().c_str());
     return value;
 }
@@ -925,21 +974,26 @@ DistributedKv::Value AppExitReasonDataManager::ConvertAppExitReasonInfoToValueOf
     if (withKillMsg) {
         killMsg = exitReason.exitMsg;
     }
-    nlohmann::json jsonObject = nlohmann::json {
-        { JSON_KEY_PID, processInfo.pid_ },
-        { JSON_KEY_UID, processInfo.uid_ },
-        { JSON_KEY_REASON, exitReason.reason },
-        { JSON_KEY_SUB_KILL_REASON, exitReason.subReason },
-        { JSON_KEY_EXIT_MSG, exitMsg },
-        { JSON_KEY_KILL_MSG, killMsg },
-        { JSON_KEY_RSS_VALUE, processInfo.rssValue },
-        { JSON_KEY_PSS_VALUE, processInfo.pssValue },
-        { JSON_KEY_PROCESS_NAME, processInfo.processName_ },
-        { JSON_KEY_TIME_STAMP, nowMs.count() },
-        { JSON_KEY_EXTENSION_NAME, extensionListName },
-    };
+    cJSON *jsonObject = cJSON_CreateObject();
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "create json object failed");
+        return DistributedKv::Value();
+    }
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_PID.c_str(), static_cast<double>(processInfo.pid_));
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_UID.c_str(), static_cast<double>(processInfo.uid_));
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_REASON.c_str(), static_cast<double>(exitReason.reason));
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_SUB_KILL_REASON.c_str(), static_cast<double>(exitReason.subReason));
+    cJSON_AddStringToObject(jsonObject, JSON_KEY_EXIT_MSG.c_str(), exitMsg.c_str());
+    cJSON_AddStringToObject(jsonObject, JSON_KEY_KILL_MSG.c_str(), killMsg.c_str());
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_RSS_VALUE.c_str(), static_cast<double>(processInfo.rssValue));
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_PSS_VALUE.c_str(), static_cast<double>(processInfo.pssValue));
+    cJSON_AddStringToObject(jsonObject, JSON_KEY_PROCESS_NAME.c_str(), processInfo.processName_.c_str());
+    cJSON_AddNumberToObject(jsonObject, JSON_KEY_TIME_STAMP.c_str(), static_cast<double>(nowMs.count()));
+    cJSON_AddStringToObject(jsonObject, JSON_KEY_EXTENSION_NAME.c_str(), extensionListName.c_str());
 
-    DistributedKv::Value value(jsonObject.dump());
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
+    cJSON_Delete(jsonObject);
+    DistributedKv::Value value(jsonStr);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "value: %{public}s", value.ToString().c_str());
     return value;
 }

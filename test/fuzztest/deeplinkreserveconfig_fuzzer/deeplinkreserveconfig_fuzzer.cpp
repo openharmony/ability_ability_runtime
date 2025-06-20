@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,6 @@
 #include "deeplink_reserve_config.h"
 #undef private
 
-using json = nlohmann::json;
 using namespace OHOS::AAFwk;
 namespace OHOS {
 namespace {
@@ -86,23 +85,24 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     reservedUri.pathRegex = strParam;
     deepLinkReserveConfig.IsUriMatched(reservedUri, link);
     std::vector<ReserveUri> uriList;
-    json jsonUriObject;
-    jsonUriObject["SCHEME_NAME"] = SCHEME_NAME;
+    cJSON *jsonUriObject = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonUriObject, "SCHEME_NAME", SCHEME_NAME.c_str());
     deepLinkReserveConfig.LoadReservedUrilItem(jsonUriObject, uriList);
-    jsonUriObject["HOST_NAME"] = HOST_NAME;
+    cJSON_AddStringToObject(jsonUriObject, "HOST_NAME", HOST_NAME.c_str());
     deepLinkReserveConfig.LoadReservedUrilItem(jsonUriObject, uriList);
-    jsonUriObject["PORT_NAME"] = PORT_NAME;
+    cJSON_AddStringToObject(jsonUriObject, "PORT_NAME", PORT_NAME.c_str());
     deepLinkReserveConfig.LoadReservedUrilItem(jsonUriObject, uriList);
-    jsonUriObject["PATH_NAME"] = PATH_NAME;
+    cJSON_AddStringToObject(jsonUriObject, "PATH_NAME", PATH_NAME.c_str());
     deepLinkReserveConfig.LoadReservedUrilItem(jsonUriObject, uriList);
-    jsonUriObject["PATH_START_WITH_NAME"] = PATH_START_WITH_NAME;
+    cJSON_AddStringToObject(jsonUriObject, "PATH_START_WITH_NAME", PATH_START_WITH_NAME.c_str());
     deepLinkReserveConfig.LoadReservedUrilItem(jsonUriObject, uriList);
-    jsonUriObject["PATH_REGEX_NAME"] = PATH_REGEX_NAME;
+    cJSON_AddStringToObject(jsonUriObject, "PATH_REGEX_NAME", PATH_REGEX_NAME.c_str());
     deepLinkReserveConfig.LoadReservedUrilItem(jsonUriObject, uriList);
-    jsonUriObject["TYPE_NAME"] = TYPE_NAME;
+    cJSON_AddStringToObject(jsonUriObject, "TYPE_NAME", TYPE_NAME.c_str());
     deepLinkReserveConfig.LoadReservedUrilItem(jsonUriObject, uriList);
-    jsonUriObject["UTD_NAME"] = UTD_NAME;
+    cJSON_AddStringToObject(jsonUriObject, "UTD_NAME", UTD_NAME.c_str());
     deepLinkReserveConfig.LoadReservedUrilItem(jsonUriObject, uriList);
+    cJSON_Delete(jsonUriObject);
     return true;
 }
 
@@ -110,22 +110,44 @@ bool DoSomethingInterestingWithMyAPIOne(const char* data, size_t size)
 {
     auto &deepLinkReserveConfig1 = DeepLinkReserveConfig::GetInstance();
     std::string filePath(data, size);
-    json jsonBuf;
+    cJSON *jsonBuf = nullptr;
     deepLinkReserveConfig1.ReadFileInfoJson(filePath, jsonBuf);
-    json object;
+    cJSON_Delete(jsonBuf);
+
+    cJSON *object = cJSON_CreateObject();
     deepLinkReserveConfig1.LoadReservedUriList(object);
-    object["DEEPLINK_RESERVED_URI_NAME"] = DEEPLINK_RESERVED_URI_NAME;
+
+    cJSON_AddStringToObject(object, "DEEPLINK_RESERVED_URI_NAME", DEEPLINK_RESERVED_URI_NAME.c_str());
     deepLinkReserveConfig1.LoadReservedUriList(object);
+
     int32_t userId = static_cast<int32_t>(GetU32Data(data));
-    object["BUNDLE_NAME"] = userId;
+    cJSON_AddNumberToObject(object, "BUNDLE_NAME", userId);
     deepLinkReserveConfig1.LoadReservedUriList(object);
-    object["BUNDLE_NAME"] = BUNDLE_NAME;
+
+    cJSON *oldBundleNameItem = cJSON_GetObjectItem(object, "BUNDLE_NAME");
+    if (oldBundleNameItem != nullptr) {
+        cJSON_DetachItemViaPointer(object, oldBundleNameItem);
+        cJSON_Delete(oldBundleNameItem);
+    }
+    cJSON_AddStringToObject(object, "BUNDLE_NAME", BUNDLE_NAME.c_str());
     deepLinkReserveConfig1.LoadReservedUriList(object);
-    json uriArray = { "uri1", "uri2", "uri3" };
-    object["URIS_NAME"] = uriArray;
+
+    cJSON *uriArray = cJSON_CreateArray();
+    cJSON_AddItemToArray(uriArray, cJSON_CreateString("uri1"));
+    cJSON_AddItemToArray(uriArray, cJSON_CreateString("uri2"));
+    cJSON_AddItemToArray(uriArray, cJSON_CreateString("uri3"));
+    cJSON_AddItemToObject(object, "URIS_NAME", uriArray);
     deepLinkReserveConfig1.LoadReservedUriList(object);
-    object["URIS_NAME"] = URIS_NAME;
+
+    cJSON *oldUriNameItem = cJSON_GetObjectItem(object, "URIS_NAME");
+    if (oldUriNameItem != nullptr) {
+        cJSON_DetachItemViaPointer(object, oldUriNameItem);
+        cJSON_Delete(oldUriNameItem);
+    }
+    cJSON_AddStringToObject(object, "URIS_NAME", URIS_NAME.c_str());
     deepLinkReserveConfig1.LoadReservedUriList(object);
+
+    cJSON_Delete(object);
     return true;
 }
 }

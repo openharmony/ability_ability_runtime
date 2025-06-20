@@ -21,10 +21,10 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "cJSON.h"
 #include "js_environment.h"
 #include "native_engine/native_engine.h"
 #include "runtime.h"
-#include <nlohmann/json.hpp>
 
 using Options = OHOS::AbilityRuntime::Runtime::Options;
 namespace OHOS {
@@ -57,11 +57,10 @@ private:
     void SetRequestAotCallback(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
     bool InitLoop(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
     void InitWorkerModule(const Options& options, const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
-    void ParsePkgContextInfoJson(
-        nlohmann::json &pkgJson, std::vector<std::vector<std::string>> &pkgContextInfoList,
+    void ParsePkgContextInfoJson(cJSON *pkgJson, std::vector<std::vector<std::string>> &pkgContextInfoList,
         std::map<std::string, std::string> &pkgAliasMap);
-    void ParsePkgContextInfoJsonString(
-        const nlohmann::json &itemObject, const std::string &key, std::vector<std::string> &items);
+    void ParsePkgContextInfoJsonString(const cJSON *itemObject, const std::string &key,
+        std::vector<std::string> &items);
     void SetChildOptions(const Options& options);
     std::unordered_map<napi_env, std::shared_ptr<JsEnv::JsEnvironment>> envMap_;
     std::unordered_set<pid_t> threadIds_;
