@@ -441,8 +441,10 @@ AppMgrServiceInner::~AppMgrServiceInner()
 {}
 
 void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-    int32_t requestId)
+    int32_t requestId, std::string customProcess)
 {
+    TAG_LOGI(AAFwkTag::APPMGR, "StartSpecifiedProcess, requestId = %{public}d, customProcess = %{public}s", requestId,
+        customProcess.c_str());
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "call.");
     BundleInfo bundleInfo;
@@ -464,7 +466,12 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
     MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, "", processName, false);
     TAG_LOGD(AAFwkTag::APPMGR, "processName = %{public}s", processName.c_str());
     auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
-    auto customProcessFlag = abilityInfo.process;
+    std::string customProcessFlag = "";
+    if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo.extensionAbilityType)) {
+        customProcessFlag = customProcess;
+    } else {
+        customProcessFlag = abilityInfo.process;
+    }
     auto mainAppRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid,
         bundleInfo, "", nullptr, instanceKey, customProcessFlag);
     if (mainAppRecord != nullptr) {
@@ -484,9 +491,15 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
         mainAppRecord->ScheduleNewProcessRequest(want, hapModuleInfo.moduleName);
         return;
     }
+    std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     TAG_LOGI(AAFwkTag::APPMGR, "main process do not exists.");
-    auto appRecord = appRunningManager_->CheckAppRunningRecordForSpecifiedProcess(
-        appInfo->uid, instanceKey, customProcessFlag);
+    if (abilityInfo.type == AppExecFwk::AbilityType::PAGE) {
+        appRecord =
+            appRunningManager_->CheckAppRunningRecordForSpecifiedProcess(appInfo->uid, instanceKey, customProcessFlag);
+    } else {
+        appRecord =
+            appRunningManager_->CheckAppRunningRecordForUIExtension(appInfo->uid, instanceKey, customProcessFlag);
+    }
     if (appRecord != nullptr) {
         TAG_LOGI(AAFwkTag::APPMGR, "starting process [%{public}s]", processName.c_str());
         AbilityRuntime::LoadParam loadParam;
@@ -1169,6 +1182,12 @@ std::string AppMgrServiceInner::GetSpecifiedProcessFlag(const AbilityInfo &abili
     if (isSpecifiedProcess) {
         specifiedProcessFlag = want.GetStringParam(PARAM_SPECIFIED_PROCESS_FLAG);
         TAG_LOGI(AAFwkTag::APPMGR, "specifiedProcessFlag: %{public}s", specifiedProcessFlag.c_str());
+    }
+    if (abilityInfo.isolationProcess &&
+        AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo.extensionAbilityType)) {
+        specifiedProcessFlag = want.GetStringParam(PARAM_SPECIFIED_PROCESS_FLAG);
+        TAG_LOGI(AAFwkTag::APPMGR, "UIExtension process, specifiedProcessFlag: %{public}s",
+            specifiedProcessFlag.c_str());
     }
     return specifiedProcessFlag;
 }
@@ -2886,8 +2905,15 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager or loadParam null");
         return nullptr;
     }
-    auto appRecord = appRunningManager_->CreateAppRunningRecord(appInfo, processName, bundleInfo,
-        loadParam->instanceKey, abilityInfo ? abilityInfo->process : "");
+    std::shared_ptr<AppRunningRecord> appRecord = nullptr;
+    if (abilityInfo && AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+        appRecord = appRunningManager_->CreateAppRunningRecord(
+            appInfo, processName, bundleInfo, loadParam->instanceKey, loadParam->customProcessFlag);
+    } else {
+        appRecord = appRunningManager_->CreateAppRunningRecord(
+            appInfo, processName, bundleInfo, loadParam->instanceKey, abilityInfo ? abilityInfo->process : "");
+    }
+
     CHECK_POINTER_AND_RETURN_VALUE(appRecord, nullptr);
     appRecord->SetProcessAndExtensionType(abilityInfo, loadParam->extensionProcessMode);
     appRecord->SetKeepAliveEnableState(bundleInfo.isKeepAlive);

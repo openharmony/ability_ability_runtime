@@ -494,7 +494,7 @@ public:
      * @param requestId for callback
      */
     virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t requestId = 0);
+        int32_t requestId = 0, std::string customProcess = "");
 
     /**
      * Schedule accept want done.

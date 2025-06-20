@@ -5804,5 +5804,68 @@ HWTEST_F(AppMgrServiceInnerTest, ReportEventToRSS_001, TestSize.Level1)
     EXPECT_EQ(appRecord->GetPid(), FUN_TEST_PID);
     TAG_LOGI(AAFwkTag::TEST, "ReportEventToRSS_001 end");
 }
+
+/**
+ * @tc.name: CreateAppRunningRecord_0001
+ * @tc.desc: launch application.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, CreateAppRunningRecord_0001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CreateAppRunningRecord_0001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    appMgrServiceInner->LaunchApplication(nullptr);
+
+    BundleInfo info;
+    std::string processName = "test_processName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, info, "");
+
+    ASSERT_NE(appRecord, nullptr);
+}
+
+/**
+ * @tc.name: GetSpecifiedProcessFlag_0001
+ * @tc.desc: Verify that GetSpecifiedProcessFlag returns the correct flag when AbilityInfo is a UIExtension and
+ * isolationProcess is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0001, TestSize.Level1)
+{
+    AbilityInfo abilityInfo;
+    abilityInfo.type = AbilityType::PAGE;
+    abilityInfo.isStageBasedModel = false;
+    abilityInfo.isolationProcess = true;
+    abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+
+    AAFwk::Want want;
+    std::string flag = "uiext_flag";
+    want.SetParam("ohoSpecifiedProcessFlag", flag);
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
+    EXPECT_EQ(result, flag);
+}
+
+/**
+ * @tc.name: GetSpecifiedProcessFlag_0002
+ * @tc.desc: Verify that GetSpecifiedProcessFlag returns an empty string when AbilityInfo does not meet the conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0002, TestSize.Level1)
+{
+    AbilityInfo abilityInfo;
+    abilityInfo.type = AbilityType::PAGE;
+    abilityInfo.isStageBasedModel = false;
+    abilityInfo.isolationProcess = false;
+    abilityInfo.extensionAbilityType = ExtensionAbilityType::UNSPECIFIED;
+
+    AAFwk::Want want;
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
+    EXPECT_EQ(result, "");
+}
 } // namespace AppExecFwk
 } // namespace OHOS

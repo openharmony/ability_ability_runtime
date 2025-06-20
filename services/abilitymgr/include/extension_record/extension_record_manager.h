@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,7 +164,8 @@ private:
         std::shared_ptr<ExtensionRecord> &extensionRecord, bool &isLoaded);
 
     int32_t UpdateProcessName(const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<ExtensionRecord> &record);
-
+    int32_t SetAbilityProcessName(const AAFwk::AbilityRequest &abilityRequest,
+        const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::shared_ptr<ExtensionRecord> &extensionRecord);
     bool IsHostSpecifiedProcessValid(const AAFwk::AbilityRequest &abilityRequest,
         std::shared_ptr<ExtensionRecord> &record, const std::string &process);
 };

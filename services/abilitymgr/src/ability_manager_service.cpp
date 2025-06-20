@@ -8461,6 +8461,14 @@ void AbilityManagerService::OnStartSpecifiedAbilityTimeoutResponse(int32_t reque
 void AbilityManagerService::OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "flag = %{public}s", flag.c_str());
+    auto connectManager = GetCurrentConnectManager();
+    CHECK_POINTER(connectManager);
+    if (connectManager->HasRequestIdInLoadAbilityQueue(requestId)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "uiextension StartSpecifiedProcessResponse, requestId = %{public}d", requestId);
+        connectManager->OnStartSpecifiedProcessResponse(flag, requestId);
+        return;
+    }
+
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = GetCurrentUIAbilityManager();
         CHECK_POINTER(uiAbilityManager);
@@ -8472,6 +8480,13 @@ void AbilityManagerService::OnStartSpecifiedProcessResponse(const std::string &f
 void AbilityManagerService::OnStartSpecifiedProcessTimeoutResponse(int32_t requestId)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessTimeoutResponse %{public}d", requestId);
+    auto connectManager = GetCurrentConnectManager();
+    CHECK_POINTER(connectManager);
+    if (connectManager->HasRequestIdInLoadAbilityQueue(requestId)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "uiextension StartSpecifiedProcessTimeoutResponse");
+        connectManager->OnStartSpecifiedProcessTimeoutResponse(requestId);
+        return;
+    }
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = GetCurrentUIAbilityManager();
         CHECK_POINTER(uiAbilityManager);
