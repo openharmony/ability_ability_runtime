@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -153,8 +153,11 @@ HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialog_0500, TestSize.Lev
     };
     std::vector<DialogAppInfo> dialogAppInfos = { dialogAppInfo };
     auto params = systemDialogScheduler_->GetSelectorParams(dialogAppInfos);
-    nlohmann::json jsonObj = nlohmann::json::parse(params);
-    EXPECT_EQ(jsonObj["hapList"].size(), 1);
+    cJSON *jsonObj = cJSON_Parse(params.c_str());
+    cJSON *hapListItem = cJSON_GetObjectItem(jsonObj, "hapList");
+    EXPECT_TRUE(hapListItem != nullptr && cJSON_IsArray(hapListItem));
+    EXPECT_EQ(cJSON_GetArraySize(hapListItem), 1);
+    cJSON_Delete(jsonObj);
     TAG_LOGI(AAFwkTag::TEST, "AbilityMgrServiceDialog_0500 end");
 }
 

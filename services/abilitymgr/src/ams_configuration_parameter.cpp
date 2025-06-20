@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,9 @@
  */
 
 #include "ams_configuration_parameter.h"
+
 #include <unistd.h>
+
 #include "app_utils.h"
 #include "config_policy_utils.h"
 #include "hilog_tag_wrapper.h"
@@ -33,8 +35,6 @@ AmsConfigurationParameter &AmsConfigurationParameter::GetInstance()
     static AmsConfigurationParameter amsConfiguration;
     return amsConfiguration;
 }
-
-using json = nlohmann::json;
 
 void AmsConfigurationParameter::Parse()
 {
@@ -98,14 +98,15 @@ int AmsConfigurationParameter::GetAppStartTimeoutTime() const
     return timeoutUnitTime_ * AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
 }
 
-void AmsConfigurationParameter::SetPickerJsonObject(nlohmann::json Object)
+void AmsConfigurationParameter::SetPickerJsonObject(cJSON *jsonObject)
 {
-    if (Object.contains(AmsConfig::PICKER_CONFIGURATION)) {
-        pickerJsonObject_ = Object.at(AmsConfig::PICKER_CONFIGURATION);
+    cJSON *pickerConfigurationItem = cJSON_GetObjectItem(jsonObject, AmsConfig::PICKER_CONFIGURATION);
+    if (jsonObject != nullptr) {
+        pickerJsonObject_ = cJSON_Duplicate(pickerConfigurationItem, true);
     }
 }
 
-nlohmann::json AmsConfigurationParameter::GetPickerJsonObject() const
+cJSON *AmsConfigurationParameter::GetPickerJsonObject() const
 {
     return pickerJsonObject_;
 }
@@ -133,44 +134,52 @@ void AmsConfigurationParameter::LoadUIExtensionPickerConfig(const std::string &f
         TAG_LOGE(AAFwkTag::ABILITYMGR, "read picker config error");
         return;
     }
-
-    json pickerJson;
-    inFile >> pickerJson;
+    std::string fileContent((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
     inFile.close();
-    if (pickerJson.is_discarded()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "json discarded error");
+
+    cJSON *pickerJson = cJSON_Parse(fileContent.c_str());
+    if (pickerJson == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "json parse error");
         return;
     }
 
-    if (pickerJson.is_null() || pickerJson.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid jsonObj");
-        return;
-    }
-
-    if (!pickerJson.contains(AmsConfig::UIEATENSION)) {
+    cJSON *uieatensionItem = cJSON_GetObjectItem(pickerJson, AmsConfig::UIEATENSION);
+    if (uieatensionItem == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "json config not contains the key");
+        cJSON_Delete(pickerJson);
         return;
     }
-
-    if (pickerJson[AmsConfig::UIEATENSION].is_null() || !pickerJson[AmsConfig::UIEATENSION].is_array()
-        || pickerJson[AmsConfig::UIEATENSION].empty()) {
+    if (!cJSON_IsArray(uieatensionItem)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid obj");
+        cJSON_Delete(pickerJson);
+        return;
+    }
+    int size = cJSON_GetArraySize(uieatensionItem);
+    if (size == 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid obj");
+        cJSON_Delete(pickerJson);
         return;
     }
 
-    for (auto extension : pickerJson[AmsConfig::UIEATENSION]) {
-        if (extension[AmsConfig::UIEATENSION_TYPE].is_null() || !extension[AmsConfig::UIEATENSION_TYPE].is_string()
-            || extension[AmsConfig::UIEATENSION_TYPE_PICKER].is_null()
-            || !extension[AmsConfig::UIEATENSION_TYPE_PICKER].is_string()) {
+    for (int i = 0; i < size; i++) {
+        cJSON *extensionItem = cJSON_GetArrayItem(uieatensionItem, i);
+        if (extensionItem == nullptr || !cJSON_IsObject(extensionItem)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid obj");
+            continue;
+        }
+        cJSON *uieatensionTypeItem = cJSON_GetObjectItem(extensionItem, AmsConfig::UIEATENSION_TYPE);
+        cJSON *uieatensionTypePickerItem = cJSON_GetObjectItem(extensionItem, AmsConfig::UIEATENSION_TYPE_PICKER);
+        if (uieatensionTypeItem == nullptr || !cJSON_IsString(uieatensionTypeItem) ||
+            uieatensionTypePickerItem == nullptr || !cJSON_IsString(uieatensionTypePickerItem)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid key or value");
             continue;
         }
-        std::string type = extension[AmsConfig::UIEATENSION_TYPE].get<std::string>();
-        std::string typePicker = extension[AmsConfig::UIEATENSION_TYPE_PICKER].get<std::string>();
+        std::string type = uieatensionTypeItem->valuestring;
+        std::string typePicker = uieatensionTypePickerItem->valuestring;
         TAG_LOGI(AAFwkTag::ABILITYMGR, "type: %{public}s, typePicker: %{public}s", type.c_str(), typePicker.c_str());
         picker_[type] = typePicker;
     }
-    pickerJson.clear();
+    cJSON_Delete(pickerJson);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "read config success");
 }
 
@@ -194,12 +203,13 @@ int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
         return READ_FAIL;
     }
 
-    json amsJson;
-    inFile >> amsJson;
-    if (amsJson.is_discarded()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "json discarded error ...");
+    std::string fileContent((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
+    inFile.close();
+    
+    cJSON *amsJson = cJSON_Parse(fileContent.c_str());
+    if (amsJson == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "json parse error");
         nonConfigFile_ = true;
-        inFile.close();
         return READ_JSON_FAIL;
     }
 
@@ -218,8 +228,7 @@ int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
     LoadSupportSCBCrashRebootConfig(amsJson);
     LoadSupportAAKillWithReasonConfig(amsJson);
     SetPickerJsonObject(amsJson);
-    amsJson.clear();
-    inFile.close();
+    cJSON_Delete(amsJson);
 
     for (const auto& i : ret) {
         if (i != 0) {
@@ -232,27 +241,29 @@ int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
     return READ_OK;
 }
 
-int AmsConfigurationParameter::LoadAppConfigurationForStartUpService(nlohmann::json& Object)
+int AmsConfigurationParameter::LoadAppConfigurationForStartUpService(cJSON *jsonObject)
 {
-    if (!Object.contains(AmsConfig::SERVICE_ITEM_AMS)) {
+    cJSON *amsItem = cJSON_GetObjectItem(jsonObject, AmsConfig::SERVICE_ITEM_AMS);
+    if (amsItem == nullptr) {
         return LOAD_CONFIGURATION_FAILED;
     }
-    UpdateStartUpServiceConfigInteger(Object, AmsConfig::MISSION_SAVE_TIME, missionSaveTime_);
-    UpdateStartUpServiceConfigInteger(Object, AmsConfig::APP_NOT_RESPONSE_PROCESS_TIMEOUT_TIME, anrTime_);
-    UpdateStartUpServiceConfigInteger(Object, AmsConfig::AMS_TIMEOUT_TIME, amsTime_);
-    UpdateStartUpServiceConfigInteger(Object, AmsConfig::ROOT_LAUNCHER_RESTART_MAX, maxRootLauncherRestartNum_);
-    UpdateStartUpServiceConfigInteger(Object, AmsConfig::RESIDENT_RESTART_MAX, maxResidentRestartNum_);
-    UpdateStartUpServiceConfigInteger(Object, AmsConfig::RESTART_INTERVAL_TIME, restartIntervalTime_);
-    UpdateStartUpServiceConfigInteger(Object, AmsConfig::BOOT_ANIMATION_TIMEOUT_TIME, bootAnimationTime_);
-    UpdateStartUpServiceConfigInteger(Object, AmsConfig::TIMEOUT_UNIT_TIME, timeoutUnitTime_);
-    UpdateStartUpServiceConfigInteger(Object, AmsConfig::MULTI_USER_TYPE, multiUserType_);
+    UpdateStartUpServiceConfigInteger(jsonObject, AmsConfig::MISSION_SAVE_TIME, missionSaveTime_);
+    UpdateStartUpServiceConfigInteger(jsonObject, AmsConfig::APP_NOT_RESPONSE_PROCESS_TIMEOUT_TIME, anrTime_);
+    UpdateStartUpServiceConfigInteger(jsonObject, AmsConfig::AMS_TIMEOUT_TIME, amsTime_);
+    UpdateStartUpServiceConfigInteger(jsonObject, AmsConfig::ROOT_LAUNCHER_RESTART_MAX, maxRootLauncherRestartNum_);
+    UpdateStartUpServiceConfigInteger(jsonObject, AmsConfig::RESIDENT_RESTART_MAX, maxResidentRestartNum_);
+    UpdateStartUpServiceConfigInteger(jsonObject, AmsConfig::RESTART_INTERVAL_TIME, restartIntervalTime_);
+    UpdateStartUpServiceConfigInteger(jsonObject, AmsConfig::BOOT_ANIMATION_TIMEOUT_TIME, bootAnimationTime_);
+    UpdateStartUpServiceConfigInteger(jsonObject, AmsConfig::TIMEOUT_UNIT_TIME, timeoutUnitTime_);
+    UpdateStartUpServiceConfigInteger(jsonObject, AmsConfig::MULTI_USER_TYPE, multiUserType_);
     return LOAD_CONFIGURATION_SUCCESS;
 }
 
-int AmsConfigurationParameter::LoadAppConfigurationForMemoryThreshold(nlohmann::json &Object)
+int AmsConfigurationParameter::LoadAppConfigurationForMemoryThreshold(cJSON *jsonObject)
 {
     int ret = 0;
-    if (!Object.contains("memorythreshold")) {
+    cJSON *memoryThresholdItem = cJSON_GetObjectItem(jsonObject, "memorythreshold");
+    if (memoryThresholdItem == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "LoadAppConfigurationForMemoryThreshold return error");
         ret = -1;
     }
@@ -260,36 +271,37 @@ int AmsConfigurationParameter::LoadAppConfigurationForMemoryThreshold(nlohmann::
     return ret;
 }
 
-int AmsConfigurationParameter::LoadSystemConfiguration(nlohmann::json& Object)
+int AmsConfigurationParameter::LoadSystemConfiguration(cJSON *jsonObject)
 {
-    if (Object.contains(AmsConfig::SYSTEM_CONFIGURATION) &&
-        Object.at(AmsConfig::SYSTEM_CONFIGURATION).contains(AmsConfig::SYSTEM_ORIENTATION) &&
-        Object.at(AmsConfig::SYSTEM_CONFIGURATION).at(AmsConfig::SYSTEM_ORIENTATION).is_string()) {
-        orientation_ = Object.at(AmsConfig::SYSTEM_CONFIGURATION).at(AmsConfig::SYSTEM_ORIENTATION).get<std::string>();
-        return READ_OK;
+    cJSON *systemConfigurationItem = cJSON_GetObjectItem(jsonObject, AmsConfig::SYSTEM_CONFIGURATION);
+    if (systemConfigurationItem != nullptr) {
+        cJSON *systemOrientationItem = cJSON_GetObjectItem(systemConfigurationItem, AmsConfig::SYSTEM_ORIENTATION);
+        if (systemOrientationItem != nullptr && cJSON_IsString(systemOrientationItem)) {
+            orientation_ = systemOrientationItem->valuestring;
+            return READ_OK;
+        }
     }
-
     return READ_FAIL;
 }
 
-int32_t AmsConfigurationParameter::LoadBackToCallerConfig(nlohmann::json& Object)
+int32_t AmsConfigurationParameter::LoadBackToCallerConfig(cJSON *jsonObject)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "load backTocaller config");
-    if (Object.contains(AmsConfig::SUPPORT_BACK_TO_CALLER) &&
-        Object.at(AmsConfig::SUPPORT_BACK_TO_CALLER).is_boolean()) {
-        supportBackToCaller_ = Object.at(AmsConfig::SUPPORT_BACK_TO_CALLER).get<bool>();
+    cJSON *supportBackToCallerItem = cJSON_GetObjectItem(jsonObject, AmsConfig::SUPPORT_BACK_TO_CALLER);
+    if (supportBackToCallerItem != nullptr && cJSON_IsBool(supportBackToCallerItem)) {
+        supportBackToCaller_ = supportBackToCallerItem->type == cJSON_True;
         return READ_OK;
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "load backTocaller failed");
     return READ_FAIL;
 }
 
-int32_t AmsConfigurationParameter::LoadSupportAAKillWithReasonConfig(nlohmann::json& Object)
+int32_t AmsConfigurationParameter::LoadSupportAAKillWithReasonConfig(cJSON *jsonObject)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "load SupportAAKillWithReason config");
-    if (Object.contains(AmsConfig::SUPPORT_AA_KILL_WITH_REASON) &&
-        Object.at(AmsConfig::SUPPORT_AA_KILL_WITH_REASON).is_boolean()) {
-        supportAAKillWithReason_ = Object.at(AmsConfig::SUPPORT_AA_KILL_WITH_REASON).get<bool>();
+    cJSON *supportAAKillWithReasonItem = cJSON_GetObjectItem(jsonObject, AmsConfig::SUPPORT_AA_KILL_WITH_REASON);
+    if (supportAAKillWithReasonItem != nullptr && cJSON_IsBool(supportAAKillWithReasonItem)) {
+        supportAAKillWithReason_ = supportAAKillWithReasonItem->type == cJSON_True;
         return READ_OK;
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "load SupportAAKillWithReason failed");
@@ -306,12 +318,12 @@ bool AmsConfigurationParameter::IsSupportAAKillWithReason() const
     return supportAAKillWithReason_;
 }
 
-int32_t AmsConfigurationParameter::LoadSupportSCBCrashRebootConfig(nlohmann::json& Object)
+int32_t AmsConfigurationParameter::LoadSupportSCBCrashRebootConfig(cJSON *jsonObject)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "load scb_crash_reboot_config config");
-    if (Object.contains(AmsConfig::SUPPORT_SCB_CRASH_REBOOT) &&
-        Object.at(AmsConfig::SUPPORT_SCB_CRASH_REBOOT).is_boolean()) {
-        supportSceneboardCrashReboot_ = Object.at(AmsConfig::SUPPORT_SCB_CRASH_REBOOT).get<bool>();
+    cJSON *suportScbCrashRebootItem = cJSON_GetObjectItem(jsonObject, AmsConfig::SUPPORT_SCB_CRASH_REBOOT);
+    if (suportScbCrashRebootItem != nullptr && cJSON_IsBool(suportScbCrashRebootItem)) {
+        supportSceneboardCrashReboot_ = suportScbCrashRebootItem->type == cJSON_True;
         return READ_OK;
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "load scb_crash_reboot_config failed");
@@ -323,20 +335,24 @@ bool AmsConfigurationParameter::IsSupportSCBCrashReboot() const
     return supportSceneboardCrashReboot_;
 }
 
-bool AmsConfigurationParameter::CheckServiceConfigEnable(nlohmann::json& Object, const std::string &configName,
+bool AmsConfigurationParameter::CheckServiceConfigEnable(cJSON *jsonObject, const std::string &configName,
     JsonValueType type)
 {
-    if (Object.contains(AmsConfig::SERVICE_ITEM_AMS) &&
-        Object.at(AmsConfig::SERVICE_ITEM_AMS).contains(configName)) {
+    cJSON *amsItem = cJSON_GetObjectItem(jsonObject, AmsConfig::SERVICE_ITEM_AMS);
+    if (amsItem != nullptr) {
+        cJSON *configItem = cJSON_GetObjectItem(amsItem, configName.c_str());
+        if (configItem == nullptr) {
+            return false;
+        }
         switch (type) {
             case JsonValueType::NUMBER: {
-                return Object.at(AmsConfig::SERVICE_ITEM_AMS).at(configName).is_number();
+                return cJSON_IsNumber(configItem);
             }
             case JsonValueType::STRING: {
-                return Object.at(AmsConfig::SERVICE_ITEM_AMS).at(configName).is_string();
+                return cJSON_IsString(configItem);
             }
             case JsonValueType::BOOLEAN: {
-                return Object.at(AmsConfig::SERVICE_ITEM_AMS).at(configName).is_boolean();
+                return cJSON_IsBool(configItem);
             }
             default: {
                 return false;
@@ -346,19 +362,27 @@ bool AmsConfigurationParameter::CheckServiceConfigEnable(nlohmann::json& Object,
     return false;
 }
 
-void AmsConfigurationParameter::UpdateStartUpServiceConfigInteger(nlohmann::json& Object,
+void AmsConfigurationParameter::UpdateStartUpServiceConfigInteger(cJSON *jsonObject,
     const std::string &configName, int32_t &value)
 {
-    if (CheckServiceConfigEnable(Object, configName, JsonValueType::NUMBER)) {
-        value = Object.at(AmsConfig::SERVICE_ITEM_AMS).at(configName).get<int>();
+    cJSON *amsItem = cJSON_GetObjectItem(jsonObject, AmsConfig::SERVICE_ITEM_AMS);
+    if (amsItem != nullptr) {
+        cJSON *configItem = cJSON_GetObjectItem(amsItem, configName.c_str());
+        if (configItem != nullptr && cJSON_IsNumber(configItem)) {
+            value = static_cast<int32_t>(configItem->valuedouble);
+        }
     }
 }
 
-void AmsConfigurationParameter::UpdateStartUpServiceConfigString(nlohmann::json& Object,
+void AmsConfigurationParameter::UpdateStartUpServiceConfigString(cJSON *jsonObject,
     const std::string &configName, std::string &value)
 {
-    if (CheckServiceConfigEnable(Object, configName, JsonValueType::STRING)) {
-        value = Object.at(AmsConfig::SERVICE_ITEM_AMS).at(configName).get<std::string>();
+    cJSON *amsItem = cJSON_GetObjectItem(jsonObject, AmsConfig::SERVICE_ITEM_AMS);
+    if (amsItem != nullptr && cJSON_IsObject(amsItem)) {
+        cJSON *configItem = cJSON_GetObjectItem(amsItem, configName.c_str());
+        if (configItem != nullptr && cJSON_IsString(configItem)) {
+            value = configItem->valuestring;
+        }
     }
 }
 

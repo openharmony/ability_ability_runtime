@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     extensionConfig->IsExtensionStartServiceEnableNew(strParam, strParam);
     extensionConfig->IsExtensionStartThirdPartyAppEnableNew(strParam, strParam);
     extensionConfig->IsExtensionStartDefaultEnable(strParam, strParam);
-    nlohmann::json object;
+    cJSON *object = cJSON_CreateObject();
     extensionConfig->LoadExtensionConfig(object);
     extensionConfig->ReadFileInfoJson(strParam, object);
     extensionConfig->GetExtensionConfigPath();
@@ -70,6 +70,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     extensionConfig->LoadExtensionServiceBlockedList(object, strParam);
     extensionConfig->LoadExtensionAbilityAccess(object, strParam);
     extensionConfig->CheckExtensionUriValid(strParam);
+    cJSON_Delete(object);
     return true;
 }
 } // namespace OHOS
