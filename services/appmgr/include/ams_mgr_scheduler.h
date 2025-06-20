@@ -397,6 +397,8 @@ public:
      */
     void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid) override;
 
+    void SetKeepAliveAppService(const std::string &bundleName, bool enable, int32_t uid) override;
+
     /**
      * To clear the process by ability token.
      *

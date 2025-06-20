@@ -2253,6 +2253,45 @@ HWTEST_F(AmsMgrSchedulerSecondTest, IsNoRequireBigMemory_003, TestSize.Level1)
     bool ret = amsMgrScheduler->IsNoRequireBigMemory();
     EXPECT_TRUE(ret);
 }
+
+/*
+ * @tc.name: AmsMgrSchedulerSecondTest_SetKeepAliveAppService_001
+ * @tc.desc: Test SetKeepAliveAppService
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_SetKeepAliveAppService_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_SetKeepAliveAppService_001 start");
+    auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
+    ASSERT_NE(amsMgrScheduler, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    appInfo->bundleName = SCENE_BOARD_BUNDLE_NAME;
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, 0, "foundation");
+    ASSERT_NE(appRecord, nullptr);
+    appMgrServiceInner->appRunningManager_->appRunningRecordMap_.emplace(1, appRecord);
+    /**
+     * @tc.steps: step1. amsMgrScheduler isReady false
+     * @tc.expected: step1. expect isKeepAliveAppService_ is false
+     */
+    amsMgrScheduler->amsHandler_ = nullptr;
+    amsMgrScheduler->SetKeepAliveAppService(SCENE_BOARD_BUNDLE_NAME, true, 0);
+    EXPECT_FALSE(appRecord->isKeepAliveAppService_);
+
+    /**
+     * @tc.steps: step2. set appService keepAlive success
+     * @tc.expected: step2. expect isKeepAliveAppService_ is true
+     */
+    amsMgrScheduler->amsHandler_ = taskHandler_;
+    IPCSkeleton::SetCallingUid(Constants::FOUNDATION_UID);
+    amsMgrScheduler->SetKeepAliveAppService(SCENE_BOARD_BUNDLE_NAME, true, 0);
+    EXPECT_TRUE(appRecord->isKeepAliveAppService_);
+
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_SetKeepAliveAppService_001 end");
+}
 } // AppExecFwk
 } // OHOS
 
