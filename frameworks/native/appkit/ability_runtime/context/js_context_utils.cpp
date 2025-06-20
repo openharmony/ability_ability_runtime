@@ -778,7 +778,7 @@ napi_value JsBaseContext::CreateJsContext(napi_env env, const std::shared_ptr<Co
     auto workContext = new (std::nothrow) std::weak_ptr<Context>(context);
     auto status = napi_coerce_to_native_binding_object(
         env, object, DetachNewBaseContext, AttachBaseContext, workContext, nullptr);
-    napi_add_detached_finalizer(env, object, DetachFinalizeBaseContext, nullptr);        
+    napi_add_detached_finalizer(env, object, DetachFinalizeBaseContext, nullptr);
     if (status != napi_ok) {
         TAG_LOGE(AAFwkTag::APPKIT, "coerce context failed: %{public}d", status);
         delete workContext;
@@ -816,7 +816,7 @@ napi_value JsBaseContext::CreateJSApplicationContext(napi_env env,
     }
     auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(applicationContext);
     napi_coerce_to_native_binding_object(
-	    env, object, DetachNewApplicationContext, AttachApplicationContext, workContext, nullptr);
+        env, object, DetachNewApplicationContext, AttachApplicationContext, workContext, nullptr);
     napi_add_detached_finalizer(env, object, DetachFinalizeApplicationContext, nullptr);
     auto res = napi_wrap(env, object, workContext,
         [](napi_env, void *data, void *) {
