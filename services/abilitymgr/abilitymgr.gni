@@ -141,6 +141,9 @@ abilityms_files = [
   #sa interceptor
   "src/sa_interceptor_manager.cpp",
 
+  #report data
+  "src/report_data_partition_usage_manager.cpp",
+
   # keep alive
   "src/keep_alive/ability_keep_alive_data_manager.cpp",
   "src/keep_alive/ability_keep_alive_service.cpp",

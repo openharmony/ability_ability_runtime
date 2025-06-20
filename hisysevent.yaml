@@ -1,4 +1,4 @@
-#  Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+#  Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -493,3 +493,11 @@ SHARE_UNPRIVILEGED_FILE_URI:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: share unprivileged file uri}
   CALLER_BUNDLE_NAME: {type: STRING, desc: caller bundle name}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
+
+USER_DATA_SIZE:
+   __BASE: {type: STATISTIC, level: CRITICAL , desc: data partition management}
+   COMPONENT_NAME: {type: STRING, desc: name of component}
+   PARTITION_NAME: {type: STRING, desc: name of partition}
+   REMAIN_PARTITION_SIZE: {type: UINT64, desc: Remaining size of the partition}
+   FILE_OR_FOLDER_PATH: {type: STRING, arrsize: 100, desc: File or folder path}
+   FILE_OR_FOLDER_SIZE: {type: UINT64, arrsize: 100, desc: File or folder size}
