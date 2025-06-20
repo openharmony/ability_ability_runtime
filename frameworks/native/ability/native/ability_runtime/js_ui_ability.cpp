@@ -796,6 +796,9 @@ void JsUIAbility::OnWillBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
+    if (scene_ != nullptr) {
+        scene_->GoPause();
+    }
     UIAbility::OnWillBackground();
 
     std::string methodName = "OnWillBackground";
