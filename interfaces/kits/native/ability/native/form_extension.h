@@ -19,6 +19,7 @@
 #include "extension_base.h"
 #include "form_provider_info.h"
 #include "form_state_info.h"
+#include "form_instance.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -166,6 +167,16 @@ public:
     void OnConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
 
     virtual void OnFormLocationChanged(const int64_t formId, const int32_t formLocation);
+
+    /**
+     * @brief Called to notify the form provider to size changed.
+     *
+     * @param formId The Id of the form to update.
+     * @param newDimesnion The dimesnion value to be updated.
+     * @param newRect The rect value to be updated.
+     * @return none.
+     */
+    virtual void OnSizeChanged(const int64_t formId, const std::string &newDimesnion, const AppExecFwk::Rect &newRect);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

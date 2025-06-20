@@ -643,5 +643,36 @@ void FormExtensionProviderClient::NotifyFormExtensionUpdateLocation(const int64_
         HandleResultCode(errorCode, want, callerToken);
     }
 }
+
+int FormExtensionProviderClient::NotifySizeChanged(const int64_t formId, const std::string &newDimesnion,
+    const Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken)
+{
+    TAG_LOGI(AAFwkTag::FORM_EXT, "called");
+    std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    std::function<void()> notifyExtensionSizeChangedFunc = [client = sptr<FormExtensionProviderClient>(this),
+        formId, newDimesnion, newRect, want, callerToken]() {
+        client->NotifyExtensionSizeChanged(formId, newDimesnion, newRect, want, callerToken);
+    };
+    mainHandler->PostSyncTask(notifyExtensionSizeChangedFunc,
+        "FormExtensionProviderClient::NotifySizeChanged");
+    return ERR_OK;
+}
+
+void FormExtensionProviderClient::NotifyExtensionSizeChanged(const int64_t formId, const std::string &newDimesnion,
+    const Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken)
+{
+    TAG_LOGD(AAFwkTag::FORM_EXT, "called");
+    int errorCode = ERR_OK;
+    std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
+    if (ownerFormExtension == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
+        errorCode = ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
+    } else {
+        ownerFormExtension->OnSizeChanged(formId, newDimesnion, newRect);
+    }
+    if (want.HasParameter(Constants::FORM_CONNECT_ID)) {
+        HandleResultCode(errorCode, want, callerToken);
+    }
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
