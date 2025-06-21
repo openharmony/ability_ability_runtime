@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -426,6 +426,9 @@ public:
 
     void HandleChildRelation(
         std::shared_ptr<ChildProcessRecord> childRecord, std::shared_ptr<AppRunningRecord> appRecord);
+    std::shared_ptr<AppRunningRecord> CheckAppRunningRecordForUIExtension(
+        int32_t uid, const std::string &instanceKey, const std::string &customProcessFlag);
+
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);

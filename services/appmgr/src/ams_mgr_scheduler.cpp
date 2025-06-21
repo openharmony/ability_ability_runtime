@@ -454,7 +454,7 @@ void AmsMgrScheduler::PrepareTerminateApp(const pid_t pid, const std::string &mo
 }
 
 void AmsMgrScheduler::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-    int32_t requestId)
+    int32_t requestId, std::string customProcess)
 {
     if (!IsReady()) {
         TAG_LOGW(AAFwkTag::APPMGR, "not ready");
@@ -465,7 +465,7 @@ void AmsMgrScheduler::StartSpecifiedProcess(const AAFwk::Want &want, const AppEx
         TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
         return;
     }
-    auto task = [=]() { amsMgrServiceInner_->StartSpecifiedProcess(want, abilityInfo, requestId); };
+    auto task = [=]() { amsMgrServiceInner_->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess); };
     amsHandler_->SubmitTask(task, {
         .taskName_ = "StartSpecifiedProcess",
         .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE
