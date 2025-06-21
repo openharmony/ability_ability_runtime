@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "uv.h"
+
 #include <gtest/gtest.h>
 
 #include "uncaught_exception_callback.h"
@@ -329,6 +331,48 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, GetFuncNameAndBuildIdTest_0100, Test
     std::string stackinfo = NapiUncaughtExceptionCallback::GetFuncNameAndBuildId(stack.str());
     ASSERT_EQ(stackinfo.find("GetFuncNameAndBuildIdTest") != std::string::npos, true);
     GTEST_LOG_(INFO) << "GetFuncNameAndBuildIdTest_0100 end" << stackinfo.c_str();
+}
+
+std::string submitterStack;
+int g_result = -1;
+static bool g_done = false;
+ 
+static void WorkCallback(uv_work_t* req)
+{
+    submitterStack = NapiUncaughtExceptionCallback::GetSubmitterStackLocal();
+}
+ 
+static void AfterWorkCallback(uv_work_t* req, int status)
+{
+    if (!g_done) {
+        uv_queue_work(req->loop, req, WorkCallback, AfterWorkCallback);
+    }
+}
+ 
+static void TimerCallback(uv_timer_t* handle)
+{
+    g_done = true;
+}
+
+/**
+ * @tc.name: GetSubmitterStackLocal_0100
+ * @tc.desc: NapiUncaughtExceptionCallbackTest GetSubmitterStackLocal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NapiUncaughtExceptionCallbackTest, GetSubmitterStackLocal_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetSubmitterStackLocal_0100 start";
+    setenv("HAP_DEBUGGABLE", "true", 1);
+    uv_timer_t timerHandle;
+    uv_work_t work;
+    uv_loop_t* loop = uv_default_loop();
+    int timeout = 1000;
+    uv_timer_init(loop, &timerHandle);
+    uv_timer_start(&timerHandle, TimerCallback, timeout, 0);
+    uv_queue_work(loop, &work, WorkCallback, AfterWorkCallback);
+    uv_run(loop, UV_RUN_DEFAULT);
+    EXPECT_TRUE(!submitterStack.empty());
+    GTEST_LOG_(INFO) << "GetSubmitterStackLocal_0100 end";
 }
 } // namespace AppExecFwk
 } // namespace OHOS

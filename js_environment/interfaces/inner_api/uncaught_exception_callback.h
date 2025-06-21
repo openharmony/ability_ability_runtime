@@ -56,6 +56,8 @@ public:
 
     static std::string GetFuncNameAndBuildId(std::string nativeStack);
 
+    static std::string GetSubmitterStackLocal();
+
 private:
     std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask_;
     std::shared_ptr<SourceMapOperator> sourceMapOperator_ = nullptr;
