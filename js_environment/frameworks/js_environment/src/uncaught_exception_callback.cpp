@@ -15,6 +15,7 @@
 #include "uncaught_exception_callback.h"
 
 #include <charconv>
+#include <dlfcn.h>
 #include <string>
 #include <sstream>
 
@@ -33,6 +34,9 @@ namespace JsEnv {
 constexpr char BACKTRACE[] = "=====================Backtrace========================";
 constexpr size_t FLAG_SPLIT_POS = 16;
 constexpr size_t FLAG_PC_POS = 4;
+constexpr char LIB_AYNC_STACK_SO_NAME[] = "libasync_stack.z.so";
+
+typedef int (*SubmitterStackFunc)(char*, size_t);
 
 std::string NapiUncaughtExceptionCallback::GetNativeStrFromJsTaggedObj(napi_value obj, const char* key)
 {
@@ -80,7 +84,6 @@ void NapiUncaughtExceptionCallback::CallbackTask(napi_value& obj)
     std::string errorMsg = GetNativeStrFromJsTaggedObj(obj, "message");
     std::string errorName = GetNativeStrFromJsTaggedObj(obj, "name");
     std::string errorStack = GetNativeStrFromJsTaggedObj(obj, "stack");
-    std::string topStack = GetNativeStrFromJsTaggedObj(obj, "topstack");
     std::string summary = "Error name:" + errorName + "\n";
     summary += "Error message:" + errorMsg + "\n";
     const JsEnv::ErrorObject errorObj = {
@@ -98,21 +101,10 @@ void NapiUncaughtExceptionCallback::CallbackTask(napi_value& obj)
         TAG_LOGE(AAFwkTag::JSENV, "errorStack is empty");
         return;
     }
-    auto errorPos = SourceMap::GetErrorPos(topStack);
-    std::string error;
-    if (obj != nullptr) {
-        napi_value fuc = nullptr;
-        napi_get_named_property(env_, obj, "errorfunc", &fuc);
-        napi_valuetype valueType = napi_undefined;
-        napi_typeof(env_, fuc, &valueType);
-        if (valueType == napi_function) {
-            error = reinterpret_cast<NativeEngine*>(env_)->GetSourceCodeInfo(fuc, errorPos);
-        }
-    }
     if (errorStack.find(BACKTRACE) != std::string::npos) {
-        summary += error + "Stacktrace:\n" + GetFuncNameAndBuildId(errorStack);
+        summary += "Stacktrace:\n" + GetFuncNameAndBuildId(errorStack);
     } else {
-        summary += error + "Stacktrace:\n" + errorStack;
+        summary += "Stacktrace:\n" + errorStack;
     }
 #ifdef SUPPORT_GRAPHICS
     std::string str = Ace::UIContent::GetCurrentUIStackInfo();
@@ -120,6 +112,11 @@ void NapiUncaughtExceptionCallback::CallbackTask(napi_value& obj)
         summary.append(str);
     }
 #endif // SUPPORT_GRAPHICS
+    std::string submitterStack = GetSubmitterStackLocal();
+    if (!submitterStack.empty()) {
+        summary.append("========SubmitterStacktrace========\n");
+        summary.append(submitterStack);
+    }
     if (uncaughtTask_) {
         uncaughtTask_(summary, errorObj);
     }
@@ -174,6 +171,30 @@ std::string NapiUncaughtExceptionCallback::GetFuncNameAndBuildId(std::string nat
         }
     }
     return appendInfo;
+}
+
+std::string NapiUncaughtExceptionCallback::GetSubmitterStackLocal()
+{
+    static SubmitterStackFunc sbmitterStack = nullptr;
+    void *handle = dlopen(LIB_AYNC_STACK_SO_NAME, RTLD_NOW);
+    if (!handle) {
+        TAG_LOGE(AAFwkTag::JSENV, "Failed to dlopen libasync_stack, %{public}s", dlerror());
+        return "";
+    }
+    sbmitterStack = reinterpret_cast<SubmitterStackFunc>(dlsym(handle, "DfxGetSubmitterStackLocal"));
+    if (sbmitterStack == nullptr) {
+        TAG_LOGE(AAFwkTag::JSENV, "dlsym libasync_stack failed");
+        return "";
+    }
+    const size_t bufferSize = 64 * 1024;
+    char stackTrace[bufferSize] = {0};
+    int result = sbmitterStack(stackTrace, bufferSize);
+    if (result == 0) {
+        return stackTrace;
+    } else {
+        TAG_LOGE(AAFwkTag::JSENV, "submitterStack interface failed");
+        return "";
+    }
 }
 } // namespace JsEnv
 } // namespace OHOS
