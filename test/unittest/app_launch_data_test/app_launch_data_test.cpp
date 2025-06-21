@@ -147,5 +147,21 @@ HWTEST_F(AppLaunchDataTest, ReadFromParcel_0100, TestSize.Level1)
     EXPECT_EQ(launchData_->appIndex_, appIndex);
     EXPECT_EQ(launchData_->debugApp_, isDebug);
 }
+
+/**
+ * @tc.name: GetAppPreloadMode_0100
+ * @tc.desc: AppLaunchData SetAppPreloadMode, verify if AppLaunchData startup successfully.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLaunchDataTest, GetAppPreloadMode_0100, TestSize.Level1)
+{
+    EXPECT_NE(launchData_, nullptr);
+    PreloadMode premakeMode = PreloadMode::PRE_MAKE;
+    launchData_->SetAppPreloadMode(premakeMode);
+    EXPECT_EQ(premakeMode, launchData_->GetAppPreloadMode());
+
+    launchData_->SetAppPreloadMode(PreloadMode::PRELOAD_MODULE);
+    EXPECT_NE(premakeMode, launchData_->GetAppPreloadMode());
+}
 } // namespace AppExecFwk
 } // namespace OHOS
