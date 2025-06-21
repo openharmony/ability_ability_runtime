@@ -199,6 +199,7 @@ ohos_unittest("ability_manager_service_fourteenth_test") {
     "${ability_runtime_services_path}/abilitymgr/src/utils/uri_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/want_utils.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/window_options_utils.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/request_id_util.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/want_receiver_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/want_receiver_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/want_sender_info.cpp",

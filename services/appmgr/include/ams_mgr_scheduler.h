@@ -286,7 +286,7 @@ public:
      * @param requestId for callback
      */
     virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t requestId = 0) override;
+        int32_t requestId = 0, std::string customProcess = "") override;
 
     /**
      * SetCurrentUserId, set the userid to app mgr by ability mgr when switching to another user.

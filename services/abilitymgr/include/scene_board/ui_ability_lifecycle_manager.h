@@ -481,14 +481,6 @@ private:
     bool HasAbilityRequest(const AbilityRequest &abilityRequest);
     void AddAbilityRequest(const AbilityRequest &abilityRequest, int32_t requestId);
     void RemoveAbilityRequest(int32_t requestId);
-    inline int32_t GetRequestId()
-    {
-        if (requestId_ == 0 || requestId_ == INT32_MAX) {
-            requestId_ = 1;
-        }
-        return requestId_++;
-    }
-
     void AddSpecifiedRequest(std::shared_ptr<SpecifiedRequest> request);
     void StartSpecifiedRequest(SpecifiedRequest &specifiedRequest);
     std::shared_ptr<SpecifiedRequest> PopAndGetNextSpecified(int32_t requestId);
@@ -522,7 +514,6 @@ private:
     std::unordered_map<std::shared_ptr<AbilityRecord>, std::list<AbilityRequest>> callRequestCache_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
     sptr<IRemoteObject> rootSceneSession_;
-    int32_t requestId_ = 0;
     sptr<ISessionHandler> handler_;
     ffrt::mutex statusBarDelegateManagerLock_;
     std::shared_ptr<StatusBarDelegateManager> statusBarDelegateManager_;

@@ -803,7 +803,7 @@ void AppMgrClient::SetKeepAliveAppService(const std::string &bundleName, bool en
 }
 
 void AppMgrClient::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-    int32_t requestId)
+    int32_t requestId, std::string customProcess)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call.");
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -814,7 +814,7 @@ void AppMgrClient::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecF
     if (amsService == nullptr) {
         return;
     }
-    amsService->StartSpecifiedProcess(want, abilityInfo, requestId);
+    amsService->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess);
 }
 
 void AppMgrClient::RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response)
