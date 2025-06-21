@@ -645,7 +645,7 @@ void FormExtensionProviderClient::NotifyFormExtensionUpdateLocation(const int64_
 }
 
 int FormExtensionProviderClient::NotifySizeChanged(int64_t formId, const std::string &newDimension,
-    const Rect &newRect, const Want &want, sptr<IRemoteObject> &callerToken)
+    const Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "called");
     if (!FormProviderClient::CheckIsSystemApp()) {
