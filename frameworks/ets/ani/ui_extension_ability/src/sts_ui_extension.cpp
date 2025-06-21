@@ -141,7 +141,7 @@ void StsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     if ((status = env->Class_BindNativeMethods(stsObj_->aniCls, functions.data(), functions.size())) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
     }
-    BindContext(env, record->GetWant(), application);
+    BindContext(env, record->GetWant());
     RegisterDisplayInfoChangedListener();
 }
 
@@ -175,14 +175,13 @@ std::shared_ptr<STSNativeReference> StsUIExtension::LoadModule(ani_env *env)
 }
 
 ani_object StsUIExtension::CreateSTSContext(ani_env* env, std::shared_ptr<UIExtensionContext> context,
-    int32_t screenMode, const std::shared_ptr<OHOSApplication> &application)
+    int32_t screenMode)
 {
-    ani_object obj = CreateStsUIExtensionContext(env, context, application);
+    ani_object obj = CreateStsUIExtensionContext(env, context);
     return obj;
 }
 
-void StsUIExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want,
-    const std::shared_ptr<OHOSApplication> &application)
+void StsUIExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want)
 {
     if (env == nullptr || want == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Want info is null or env is null");
@@ -196,7 +195,7 @@ void StsUIExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want,
     }
 
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
-    ani_object contextObj = CreateSTSContext(env, context, screenMode, application);
+    ani_object contextObj = CreateSTSContext(env, context, screenMode);
     if (contextObj == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null contextObj");
         return;

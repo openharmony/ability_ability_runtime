@@ -1,0 +1,284 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "ets_ability_stage_context_module.h"
+
+#include <cstdio>
+#include <sys/syscall.h>
+#include <unistd.h>
+#include "ability_stage_context.h"
+#include "ani_base_context.h"
+#include "hilog_tag_wrapper.h"
+#include "interop_js/arkts_esvalue.h"
+#include "interop_js/hybridgref_ani.h"
+#include "interop_js/hybridgref_napi.h"
+#include "js_ability_stage_context.h"
+#include "js_runtime_utils.h"
+#include "native_engine/native_engine.h"
+#include "sts_ability_stage_context.h"
+#include "sts_error_utils.h"
+
+namespace OHOS {
+namespace AbilityRuntime {
+namespace {
+constexpr const char *ETS_ABILITY_STAGE_CONTEXT_CLASS_NAME = "Lapplication/AbilityStageContext/AbilityStageContext;";
+} // namespace
+
+ani_object EtsAbilityStageContextModule::NativeTransferStatic(ani_env *aniEnv, ani_object, ani_object input)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "transfer static AbilityStageContext");
+    if (aniEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null aniEnv");
+        return nullptr;
+    }
+
+    void *unwrapResult = nullptr;
+    bool success = arkts_esvalue_unwrap(aniEnv, input, &unwrapResult);
+    if (!success) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "failed to unwrap");
+        ThrowStsTransferClassError(aniEnv);
+        return nullptr;
+    }
+    if (unwrapResult == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null unwrapResult");
+        ThrowStsTransferClassError(aniEnv);
+        return nullptr;
+    }
+
+    auto context = reinterpret_cast<std::weak_ptr<AbilityStageContext> *>(unwrapResult)->lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null AbilityStageContext");
+        ThrowStsTransferClassError(aniEnv);
+        return nullptr;
+    }
+
+    auto abilityStageContext = Context::ConvertTo<AbilityStageContext>(context);
+    if (abilityStageContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid abilityStageContext");
+        ThrowStsTransferClassError(aniEnv);
+        return nullptr;
+    }
+
+    auto &bindingObj = abilityStageContext->GetBindingObject();
+    if (bindingObj == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null bindingObj");
+        ThrowStsTransferClassError(aniEnv);
+        return nullptr;
+    }
+
+    auto staticContext = bindingObj->Get<ani_ref>();
+    if (staticContext != nullptr) {
+        TAG_LOGI(AAFwkTag::CONTEXT, "there exist a staticContext");
+        return reinterpret_cast<ani_object>(*staticContext);
+    }
+
+    // if not exist, create a new one
+    auto newContext = STSAbilityStageContext::CreateStsAbilityStageContext(aniEnv, abilityStageContext);
+    if (newContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "create abilityStageContext failed");
+        ThrowStsTransferClassError(aniEnv);
+        return nullptr;
+    }
+
+    return newContext;
+}
+
+std::unique_ptr<NativeReference> EtsAbilityStageContextModule::CreateNativeReference(napi_env napiEnv,
+    std::shared_ptr<AbilityStageContext> abilityStageContext)
+{
+    if (napiEnv == nullptr || abilityStageContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null param");
+        return nullptr;
+    }
+
+    auto value = CreateJsAbilityStageContext(napiEnv, abilityStageContext);
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(napiEnv, "application.AbilityStageContext", &value, 1);
+    if (systemModule == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null systemModule");
+        return nullptr;
+    }
+
+    napi_value object = systemModule->GetNapiValue();
+    if (!CheckTypeForNapiValue(napiEnv, object, napi_object)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "check type failed");
+        return nullptr;
+    }
+
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityStageContext>(abilityStageContext);
+    if (workContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null workContext");
+        return nullptr;
+    }
+    auto status = napi_coerce_to_native_binding_object(napiEnv, object, DetachCallbackFunc, AttachAbilityStageContext,
+        workContext, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "coerce AbilityStageContext failed: %{public}d", status);
+        delete workContext;
+        return nullptr;
+    }
+
+    status = napi_wrap(napiEnv, object, workContext,
+        [](napi_env, void *data, void *) {
+            TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr AbilityStageContext");
+            delete static_cast<std::weak_ptr<AbilityStageContext> *>(data);
+        }, nullptr, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "wrap failed: %{public}d", status);
+        delete workContext;
+        return nullptr;
+    }
+
+    return systemModule;
+}
+
+std::unique_ptr<NativeReference> EtsAbilityStageContextModule::GetOrCreateNativeReference(napi_env napiEnv,
+    std::shared_ptr<AbilityStageContext> abilityStageContext)
+{
+    if (napiEnv == nullptr || abilityStageContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null param");
+        return nullptr;
+    }
+
+    // if sub-thread, create a new abilityStageContext and return
+    if (getpid() != syscall(SYS_gettid)) {
+        return CreateNativeReference(napiEnv, abilityStageContext);
+    }
+
+    // if main-thread, get bindingObj firstly
+    auto &bindingObj = abilityStageContext->GetBindingObject();
+    if (bindingObj == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null bindingObj");
+        return nullptr;
+    }
+
+    // if main-thread bindingObj exist, return it directly
+    auto dynamicContext = bindingObj->Get<NativeReference>();
+    if (dynamicContext != nullptr) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "there exist a dynamicContext");
+        return std::unique_ptr<NativeReference>(dynamicContext);
+    }
+
+    // if main-thread bindingObj didn't exist, create and bind
+    auto nativeRef = CreateNativeReference(napiEnv, abilityStageContext);
+    if (nativeRef == nullptr) {
+        return nullptr;
+    }
+
+    abilityStageContext->Bind(nativeRef.get());
+    return nativeRef;
+}
+
+ani_object EtsAbilityStageContextModule::NativeTransferDynamic(ani_env *aniEnv, ani_object, ani_object input)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "transfer dynamic AbilityStageContext");
+    if (!IsInstanceOf(aniEnv, input)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "not AbilityStageContext");
+        ThrowStsTransferClassError(aniEnv);
+        return nullptr;
+    }
+
+    auto context = AbilityRuntime::GetStageModeContext(aniEnv, input);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        ThrowStsTransferClassError(aniEnv);
+        return nullptr;
+    }
+
+    auto abilityStageContext = Context::ConvertTo<AbilityStageContext>(context);
+    if (abilityStageContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid abilityStageContext");
+        ThrowStsTransferClassError(aniEnv);
+        return nullptr;
+    }
+
+    // Not support yet
+    ThrowStsTransferClassError(aniEnv);
+    return nullptr;
+}
+
+bool EtsAbilityStageContextModule::IsInstanceOf(ani_env *aniEnv, ani_object aniObj)
+{
+    ani_class cls {};
+    ani_status status = ANI_ERROR;
+    if (aniEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null aniEnv");
+        return false;
+    }
+    if ((status = aniEnv->FindClass(ETS_ABILITY_STAGE_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "FindClass status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isInstanceOf = false;
+    if ((status = aniEnv->Object_InstanceOf(aniObj, cls, &isInstanceOf)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Object_InstanceOf status: %{public}d", status);
+        return false;
+    }
+    return isInstanceOf;
+}
+
+void EtsAbilityStageContextModuleInit(ani_env *aniEnv)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "Init AbilityStageContext kit");
+    if (aniEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null ani env");
+        return;
+    }
+
+    ani_class abilityStageContextCls = nullptr;
+    auto status = aniEnv->FindClass(ETS_ABILITY_STAGE_CONTEXT_CLASS_NAME, &abilityStageContextCls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass AbilityStageContext failed status: %{public}d", status);
+        return;
+    }
+
+    std::array nativeFuncs = {
+        ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
+            reinterpret_cast<void*>(EtsAbilityStageContextModule::NativeTransferStatic) },
+        ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",
+            reinterpret_cast<void*>(EtsAbilityStageContextModule::NativeTransferDynamic) },
+    };
+    status = aniEnv->Class_BindNativeMethods(abilityStageContextCls, nativeFuncs.data(), nativeFuncs.size());
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_BindNativeMethods failed status: %{public}d", status);
+        return;
+    }
+
+    TAG_LOGD(AAFwkTag::CONTEXT, "Init AbilityStageContext kit end");
+}
+
+extern "C" {
+ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "ANI_Constructor");
+    if (vm == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null vm");
+        return ANI_ERROR;
+    }
+
+    ani_env *aniEnv = nullptr;
+    ani_status status = vm->GetEnv(ANI_VERSION_1, &aniEnv);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "GetEnv failed status: %{public}d", status);
+        return ANI_NOT_FOUND;
+    }
+
+    EtsAbilityStageContextModuleInit(aniEnv);
+    *result = ANI_VERSION_1;
+    TAG_LOGD(AAFwkTag::CONTEXT, "ANI_Constructor finish");
+    return ANI_OK;
+}
+}
+} // namespace AbilityRuntime
+} // namespace OHOS

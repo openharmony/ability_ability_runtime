@@ -28,6 +28,9 @@
 #include "event_handler.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "interop_js/arkts_esvalue.h"
+#include "interop_js/hybridgref_ani.h"
+#include "interop_js/hybridgref_napi.h"
 #include "ipc_skeleton.h"
 #include "sts_data_struct_converter.h"
 #include "mission_info.h"
@@ -683,6 +686,87 @@ void StsAbilityContext::NativeRequestModalUIExtension(ani_env *env, ani_object a
     AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
 }
 
+ani_object StsAbilityContext::NativeTransferStatic(ani_env *env, ani_object, ani_object input)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "transfer static UIAbilityContext");
+    void *unwrapResult = nullptr;
+    bool success = arkts_esvalue_unwrap(env, input, &unwrapResult);
+    if (!success) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "failed to unwrap");
+        ThrowStsTransferClassError(env);
+        return nullptr;
+    }
+    if (unwrapResult == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null unwrapResult");
+        ThrowStsTransferClassError(env);
+        return nullptr;
+    }
+    auto context = reinterpret_cast<std::weak_ptr<AbilityContext> *>(unwrapResult)->lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null context");
+        ThrowStsTransferClassError(env);
+        return nullptr;
+    }
+
+    auto abilityContext = Context::ConvertTo<AbilityContext>(context);
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+        ThrowStsTransferClassError(env);
+        return nullptr;
+    }
+    auto &bindingObj = abilityContext->GetBindingObject();
+    if (bindingObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObj");
+        ThrowStsTransferClassError(env);
+        return nullptr;
+    }
+    auto staticContext = bindingObj->Get<ani_ref>();
+    if (staticContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null staticContext");
+        ThrowStsTransferClassError(env);
+        return nullptr;
+    }
+    return reinterpret_cast<ani_object>(*staticContext);
+}
+
+ani_object StsAbilityContext::NativeTransferDynamic(ani_env *env, ani_object, ani_object input)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "transfer dynamic UIAbilityContext");
+    if (!IsInstanceOf(env, input)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "not UIAbilityContext");
+        ThrowStsTransferClassError(env);
+        return nullptr;
+    }
+
+    auto context = GetAbilityContext(env, input);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null context");
+        ThrowStsTransferClassError(env);
+        return nullptr;
+    }
+    auto abilityContext = Context::ConvertTo<AbilityContext>(context);
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+        ThrowStsTransferClassError(env);
+        return nullptr;
+    }
+    auto &bindingObj = abilityContext->GetBindingObject();
+    if (bindingObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObj");
+        ThrowStsTransferClassError(env);
+        return nullptr;
+    }
+    auto dynamicContext = bindingObj->Get<NativeReference>();
+    if (dynamicContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null dynamicContext");
+        ThrowStsTransferClassError(env);
+        return nullptr;
+    }
+    // Not support yet
+    ThrowStsTransferClassError(env);
+    return nullptr;
+}
+
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
     ani_status status = env->FindClass(UI_ABILITY_CONTEXT_CLASS_NAME, &cls);
@@ -730,6 +814,10 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void*>(StsAbilityContext::NativeMoveAbilityToBackground) },
             ani_native_function { "nativeRequestModalUIExtension", nullptr,
                 reinterpret_cast<void*>(StsAbilityContext::NativeRequestModalUIExtension) },
+            ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
+                reinterpret_cast<void*>(StsAbilityContext::NativeTransferStatic) },
+            ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",
+                reinterpret_cast<void*>(StsAbilityContext::NativeTransferDynamic) },
         };
         status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
     });
@@ -848,6 +936,26 @@ void StsAbilityContext::CreateOpenLinkTask(ani_env *env, const ani_object callba
     context->InsertResultCallbackTask(requestCode, std::move(task));
 }
 
+bool StsAbilityContext::IsInstanceOf(ani_env *env, ani_object aniObj)
+{
+    ani_class cls {};
+    ani_status status = ANI_ERROR;
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return false;
+    }
+    if ((status = env->FindClass(UI_ABILITY_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isInstanceOf = false;
+    if ((status = env->Object_InstanceOf(aniObj, cls, &isInstanceOf)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        return false;
+    }
+    return isInstanceOf;
+}
+
 bool SetAbilityInfo(ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<AbilityContext> &context)
 {
     if (env == nullptr || context == nullptr) {
@@ -922,8 +1030,7 @@ bool SetHapModuleInfo(
 }
 
 
-ani_ref CreateStsAbilityContext(
-    ani_env *env, const std::shared_ptr<AbilityContext> &context, const std::shared_ptr<OHOSApplication> &application)
+ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (env == nullptr || context == nullptr) {
@@ -940,11 +1047,7 @@ ani_ref CreateStsAbilityContext(
         TAG_LOGE(AAFwkTag::UIABILITY, "null contextObj");
         return nullptr;
     }
-    if (application == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null application");
-        return nullptr;
-    }
-    ContextUtil::StsCreatContext(env, cls, contextObj, application->GetApplicationCtxObjRef(), context);
+    ContextUtil::StsCreatContext(env, cls, contextObj, context);
     if (!SetAbilityInfo(env, cls, contextObj, context)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "SetAbilityInfo failed");
         return nullptr;

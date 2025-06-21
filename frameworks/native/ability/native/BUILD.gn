@@ -367,6 +367,7 @@ ohos_shared_library("abilitykit_native") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
     "samgr:samgr_proxy",
     "window_manager:windowstage_kit",
   ]
@@ -2359,6 +2360,42 @@ ohos_shared_library("auto_fill_extension") {
   part_name = "ability_runtime"
 }
 
+ohos_shared_library("auto_fill_extension_util") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  public_configs = [ ":auto_fill_extension_config" ]
+
+  sources = []
+
+  deps = [
+    ":abilitykit_native",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+  ]
+
+  external_deps = [
+    "ability_base:view_data",
+    "ace_engine:ace_uicontent",
+  ]
+
+  if (ability_runtime_auto_fill) {
+    sources += [
+      "${ability_runtime_native_path}/ability/native/auto_fill_extension_ability/ets_auto_fill_extension_util.cpp",
+    ]
+  }
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
 ohos_shared_library("auto_fill_extension_module") {
   sources = [ "${ability_runtime_native_path}/ability/native/auto_fill_extension_ability/auto_fill_extension_module_loader.cpp" ]
 
@@ -2388,6 +2425,7 @@ ohos_shared_library("auto_fill_extension_module") {
   ]
   if (ability_runtime_auto_fill) {
     deps += [ ":auto_fill_extension" ]
+    deps += [ ":auto_fill_extension_util" ]
   }
   if (ability_runtime_graphics) {
     external_deps += []
