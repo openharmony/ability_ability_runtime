@@ -220,7 +220,7 @@ private:
         const sptr<IRemoteObject> &callerToken);
 
     void NotifyExtensionSizeChanged(int64_t formId, const std::string &newDimension,
-        const AppExecFwk::Rect &newRect, const Want &want, sptr<IRemoteObject> &callerToken);
+        const AppExecFwk::Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken);
 
 private:
     mutable std::mutex formExtensionMutex_;
