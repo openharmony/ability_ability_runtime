@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -221,7 +221,7 @@ void OHOSApplication::InitAniApplicationContext()
 {
     auto& runtime = GetRuntime(AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_1_2);
     auto aniEnv = static_cast<AbilityRuntime::STSRuntime &>(*runtime).GetAniEnv();
-    AbilityRuntime::EtsApplicationContextUtils::CreateEtsApplicationContext(aniEnv, applicationContextObjRef_);
+    AbilityRuntime::EtsApplicationContextUtils::CreateEtsApplicationContext(aniEnv);
 }
 
 void OHOSApplication::InitAniContext()
@@ -246,6 +246,10 @@ void OHOSApplication::InitAniContext()
             reinterpret_cast<void *>(AbilityRuntime::ContextUtil::CreateModuleResourceManagerSync)},
         ani_native_function {"nativeGetGroupDir", nullptr,
             reinterpret_cast<void *>(AbilityRuntime::ContextUtil::NativeGetGroupDir)},
+        ani_native_function {"switchArea", nullptr,
+            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::SwitchArea)},
+        ani_native_function {"getArea", nullptr,
+            reinterpret_cast<void *>(AbilityRuntime::ContextUtil::GetArea)},
     };
     aniEnv->Class_BindNativeMethods(contextCls, contextFunctions.data(),
         contextFunctions.size());

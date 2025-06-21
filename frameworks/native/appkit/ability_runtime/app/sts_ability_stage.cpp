@@ -114,6 +114,11 @@ STSAbilityStage::STSAbilityStage(STSRuntime & stsRuntime, std::unique_ptr<STSNat
 
 STSAbilityStage::~STSAbilityStage()
 {
+    TAG_LOGI(AAFwkTag::APPKIT, "destructor");
+    auto context = GetContext();
+    if (context != nullptr) {
+        context->Unbind();
+    }
 }
 
 void STSAbilityStage::Init(const std::shared_ptr<Context> &context,
@@ -131,7 +136,7 @@ void STSAbilityStage::Init(const std::shared_ptr<Context> &context,
         return;
     }
 
-    SetJsAbilityStage(context, application);
+    SetJsAbilityStage(context);
 }
 
 void STSAbilityStage::OnCreate(const AAFwk::Want &want) const
@@ -165,17 +170,19 @@ std::string STSAbilityStage::OnNewProcessRequest(const AAFwk::Want &want)
 
 void STSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
 {
+    TAG_LOGD(AAFwkTag::APPKIT, "OnConfigurationUpdated called");
     AbilityStage::OnConfigurationUpdated(configuration);
     auto env = stsRuntime_.GetAniEnv();
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "env nullptr");
         return;
     }
-
     ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env, configuration);
-
-    CallObjectMethod(false, "onConfigurationUpdate", "L@ohos/app/ability/Configuration/Configuration;:V",
-        &configuration);
+    if (configObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null configObj");
+        return;
+    }
+    CallObjectMethod(false, "onConfigurationUpdate", "L@ohos/app/ability/Configuration/Configuration;:V", configObj);
 }
 
 void STSAbilityStage::OnMemoryLevel(int32_t level)
@@ -266,8 +273,7 @@ std::string STSAbilityStage::GetHapModuleProp(const std::string &propName) const
 }
 
 
-void STSAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context,
-    const std::weak_ptr<AppExecFwk::OHOSApplication> application)
+void STSAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context)
 {
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "context nullptr");
@@ -287,7 +293,7 @@ void STSAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context,
 
     STSAbilityStageContext::ResetEnv(env);
 
-    ani_object stageCtxObj = STSAbilityStageContext::CreateStsAbilityStageContext(env, context, application);
+    ani_object stageCtxObj = STSAbilityStageContext::CreateStsAbilityStageContext(env, context);
     if (stageCtxObj == nullptr) {
         STSAbilityStageContext::ResetEnv(env);
         TAG_LOGE(AAFwkTag::ABILITY, "CreateStsAbilityStageContext failed");
