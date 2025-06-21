@@ -22,5 +22,6 @@ group("unittest") {
     "appfreeze_state_test:unittest",
     "dump_proc_helper_test:unittest",
     "watchdog_test:unittest",
+    "appcapture_perf_test:unittest",
   ]
 }
