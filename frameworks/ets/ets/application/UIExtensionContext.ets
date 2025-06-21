@@ -20,6 +20,7 @@ import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import ExtensionContext from 'application.ExtensionContext';
+import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 
 export default class UIExtensionContext extends ExtensionContext {
   native terminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
@@ -102,5 +103,15 @@ export default class UIExtensionContext extends ExtensionContext {
         });
       });
     return p;
+  }
+
+  native setColorMode(colorMode: ConfigurationConstant.ColorMode): void;
+
+  native nativeReportDrawnCompleted(callback:AsyncCallbackWrapper<void>): void;
+  reportDrawnCompleted(callback: AsyncCallback<void>): void {
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeReportDrawnCompleted(myCall);
+    });
   }
 }
