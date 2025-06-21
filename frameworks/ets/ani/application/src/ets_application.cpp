@@ -18,7 +18,9 @@
 #include "ani_base_context.h"
 #include "ani_common_util.h"
 #include "application_context.h"
+#include "application_context_manager.h"
 #include "context_impl.h"
+#include "ets_application_context_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
 #include "permission_verification.h"
@@ -159,7 +161,7 @@ std::shared_ptr<Context> GetStageModeContext(ani_env *env, ani_object &contextOb
     return context;
 }
 
-static void CreateModuleContext([[maybe_unused]] ani_env *env,
+void EtsApplication::CreateModuleContext([[maybe_unused]] ani_env *env,
     ani_object contextObj, ani_string bundleName, ani_string moduleName, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "CreateModuleContext Call");
@@ -203,7 +205,7 @@ static void CreateModuleContext([[maybe_unused]] ani_env *env,
     SetCreateCompleteCallback(env, moduleContext, callback);
 }
 
-static void CreateBundleContext([[maybe_unused]] ani_env *env,
+void EtsApplication::CreateBundleContext([[maybe_unused]] ani_env *env,
     ani_object contextObj, ani_string bundleName, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "CreateBundleContext Call");
@@ -253,6 +255,25 @@ static void CreateBundleContext([[maybe_unused]] ani_env *env,
     SetCreateCompleteCallback(env, bundleContext, callback);
 }
 
+ani_object EtsApplication::GetApplicationContext(ani_env *env)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "GetApplicationContext Call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return {};
+    }
+    auto stsReference =
+        AbilityRuntime::ApplicationContextManager::GetApplicationContextManager().GetEtsGlobalObject();
+    if (stsReference == nullptr || stsReference->aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null applicationContextObject");
+        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+        ani_ref result = nullptr;
+        env->GetNull(&result);
+        return static_cast<ani_object>(result);
+    }
+    return stsReference->aniObj;
+}
+
 void ApplicationInit(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "ApplicationInit Call");
@@ -269,10 +290,21 @@ void ApplicationInit(ani_env *env)
     }
     std::array methods = {
         ani_native_function {
-            "nativeCreateModuleContext", nullptr, reinterpret_cast<void *>(CreateModuleContext)
+            "nativeCreateModuleContext",
+            "Lapplication/Context/Context;Lstd/core/String;Lstd/core/String;"
+            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsApplication::CreateModuleContext)
         },
         ani_native_function {
-            "nativeCreateBundleContext", nullptr, reinterpret_cast<void *>(CreateBundleContext)
+            "nativeCreateBundleContext",
+            "Lapplication/Context/Context;Lstd/core/String;"
+            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsApplication::CreateBundleContext)
+        },
+        ani_native_function {
+            "nativeGetApplicationContext",
+            ":Lapplication/ApplicationContext/ApplicationContext;",
+            reinterpret_cast<void *>(EtsApplication::GetApplicationContext)
         },
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
