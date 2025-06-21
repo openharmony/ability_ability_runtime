@@ -34,6 +34,78 @@ namespace {
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 
+void* DetachNewApplicationContext(napi_env, void* nativeObject, void*)
+{
+    auto* origContext = static_cast<std::weak_ptr<ApplicationContext> *>(nativeObject);
+    if (origContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "origContext is null");
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "New detached application context");
+    auto* detachNewContext = new(std::nothrow) std::weak_ptr<ApplicationContext>(*origContext);
+    return detachNewContext;
+}
+
+void* DetachNewBaseContext(napi_env, void* nativeObject, void*)
+{
+    auto* origContext = static_cast<std::weak_ptr<Context> *>(nativeObject);
+    if (origContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "origContext is null");
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "New detached base context");
+    auto* detachNewContext = new(std::nothrow) std::weak_ptr<Context>(*origContext);
+    return detachNewContext;
+}
+
+void* DetachNewAbilityStageContext(napi_env, void* nativeObject, void*)
+{
+    auto* origContext = static_cast<std::weak_ptr<AbilityStageContext> *>(nativeObject);
+    if (origContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "origContext is null");
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "New detached abilityStage context");
+    auto* detachNewContext = new(std::nothrow) std::weak_ptr<AbilityStageContext>(*origContext);
+    return detachNewContext;
+}
+
+void* DetachNewAbilityContext(napi_env, void* nativeObject, void*)
+{
+    auto* origContext = static_cast<std::weak_ptr<AbilityContext> *>(nativeObject);
+    if (origContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "origContext is null");
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "New detached ability context");
+    auto* detachNewContext = new(std::nothrow) std::weak_ptr<AbilityContext>(*origContext);
+    return detachNewContext;
+}
+
+void DetachFinalizeApplicationContext(void* detachedObject, void*)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Finalizer detached application context");
+    delete static_cast<std::weak_ptr<ApplicationContext> *>(detachedObject);
+}
+
+void DetachFinalizeBaseContext(void* detachedObject, void*)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Finalizer detached base context");
+    delete static_cast<std::weak_ptr<Context> *>(detachedObject);
+}
+
+void DetachFinalizeAbilityStageContext(void* detachedObject, void*)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Finalizer detached abilityStage context");
+    delete static_cast<std::weak_ptr<AbilityStageContext> *>(detachedObject);
+}
+
+void DetachFinalizeAbilityStageContext(void* detachedObject, void*)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Finalizer detached ability context");
+    delete static_cast<std::weak_ptr<AbilityContext> *>(detachedObject);
+}
+
 class JsContext {
 public:
     explicit JsContext(std::weak_ptr<Context>&& context) : context_(std::move(context)) {}
@@ -111,8 +183,9 @@ napi_value CreateJsBaseContextFromSendable(napi_env env, void* wrapped)
     }
 
     auto workContext = new (std::nothrow) std::weak_ptr<Context>(contextPtr);
-    auto status = napi_coerce_to_native_binding_object(env, object, DetachCallbackFunc, AttachBaseContext,
+    auto status = napi_coerce_to_native_binding_object(env, object, DetachNewBaseContext, AttachBaseContext,
         workContext, nullptr);
+    napi_add_detached_finalizer(env, object, DetachFinalizeBaseContext, nullptr);
     if (status != napi_ok) {
         TAG_LOGE(AAFwkTag::CONTEXT, "coerce context failed: %{public}d", status);
         delete workContext;
@@ -169,8 +242,9 @@ napi_value CreateJsApplicationContextFromSendable(napi_env env, void* wrapped)
     }
 
     auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(applicationContext);
-    auto status = napi_coerce_to_native_binding_object(env, object, DetachCallbackFunc, AttachApplicationContext,
+    auto status = napi_coerce_to_native_binding_object(env, object, DetachNewApplicationContext, AttachApplicationContext,
         workContext, nullptr);
+    napi_add_detached_finalizer(env, object, DetachFinalizeApplicationContext, nullptr);
     if (status != napi_ok) {
         TAG_LOGE(AAFwkTag::CONTEXT, "coerce application context failed: %{public}d", status);
         delete workContext;
@@ -227,8 +301,9 @@ napi_value CreateJsAbilityStageContextFromSendable(napi_env env, void* wrapped)
     }
 
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityStageContext>(abilitystageContext);
-    auto status = napi_coerce_to_native_binding_object(env, object, DetachCallbackFunc, AttachAbilityStageContext,
+    auto status = napi_coerce_to_native_binding_object(env, object, DetachNewAbilityStageContext, AttachAbilityStageContext,
         workContext, nullptr);
+    napi_add_detached_finalizer(env, object, DetachFinalizeAbilityStageContext, nullptr);
     if (status != napi_ok) {
         TAG_LOGE(AAFwkTag::CONTEXT, "coerce ability stage context failed: %{public}d", status);
         delete workContext;
@@ -285,8 +360,9 @@ napi_value CreateJsUIAbilityContextFromSendable(napi_env env, void* wrapped)
     }
 
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityContext>(uiAbilityContext);
-    auto status = napi_coerce_to_native_binding_object(env, object, DetachCallbackFunc, AttachJsUIAbilityContext,
+    auto status = napi_coerce_to_native_binding_object(env, object, DetachNewAbilityContext, AttachJsUIAbilityContext,
         workContext, nullptr);
+    napi_add_detached_finalizer(env, object, DetachFinalizeAbilityContext, nullptr);
     if (status != napi_ok) {
         TAG_LOGE(AAFwkTag::CONTEXT, "coerce ui ability context failed: %{public}d", status);
         delete workContext;
