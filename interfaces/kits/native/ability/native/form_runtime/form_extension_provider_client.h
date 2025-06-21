@@ -186,8 +186,8 @@ public:
      * @param callerToken Caller ability token.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int NotifySizeChanged(const int64_t formId, const std::string &newDimension, const AppExecFwk::Rect &newRect,
-        const Want &want, const sptr<IRemoteObject> &callerToken) override;
+    int NotifySizeChanged(int64_t formId, const std::string &newDimension, const AppExecFwk::Rect &newRect,
+        const Want &want, sptr<IRemoteObject> &callerToken) override;
 
 private:
     std::shared_ptr<FormExtension> GetOwner();
@@ -219,8 +219,8 @@ private:
     void NotifyFormExtensionUpdateLocation(const int64_t formId, const Want &want,
         const sptr<IRemoteObject> &callerToken);
 
-    void NotifyExtensionSizeChanged(const int64_t formId, const std::string &newDimension,
-        const AppExecFwk::Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken);
+    void NotifyExtensionSizeChanged(int64_t formId, const std::string &newDimension,
+        const AppExecFwk::Rect &newRect, const Want &want, sptr<IRemoteObject> &callerToken);
 
 private:
     mutable std::mutex formExtensionMutex_;

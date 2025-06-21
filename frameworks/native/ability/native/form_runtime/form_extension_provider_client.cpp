@@ -644,8 +644,8 @@ void FormExtensionProviderClient::NotifyFormExtensionUpdateLocation(const int64_
     }
 }
 
-int FormExtensionProviderClient::NotifySizeChanged(const int64_t formId, const std::string &newDimension,
-    const Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken)
+int FormExtensionProviderClient::NotifySizeChanged(int64_t formId, const std::string &newDimension,
+    const Rect &newRect, const Want &want, sptr<IRemoteObject> &callerToken)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "called");
     if (!FormProviderClient::CheckIsSystemApp()) {
@@ -662,8 +662,8 @@ int FormExtensionProviderClient::NotifySizeChanged(const int64_t formId, const s
     return ERR_OK;
 }
 
-void FormExtensionProviderClient::NotifyExtensionSizeChanged(const int64_t formId, const std::string &newDimension,
-    const Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken)
+void FormExtensionProviderClient::NotifyExtensionSizeChanged(int64_t formId, const std::string &newDimension,
+    const Rect &newRect, const Want &want, sptr<IRemoteObject> &callerToken)
 {
     TAG_LOGD(AAFwkTag::FORM_EXT, "called");
     int errorCode = ERR_OK;

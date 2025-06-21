@@ -550,7 +550,7 @@ void JsFormExtension::OnFormLocationChanged(const int64_t formId, const int32_t 
     CallObjectMethod("onFormLocationChanged", "OnFormLocationChanged", argv, ARGC_TWO);
 }
 
-void JsFormExtension::OnSizeChanged(const int64_t formId, const std::string &newDimension, const Rect &newRect)
+void JsFormExtension::OnSizeChanged(int64_t formId, const std::string &newDimension, const Rect &newRect)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "Form size changed, formId: %{public}" PRId64, formId);
     FormExtension::OnSizeChanged(formId, newDimension, newRect);
