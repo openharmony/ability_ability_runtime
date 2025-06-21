@@ -175,6 +175,19 @@ HWTEST_F(StsEnvironmentTest, DeInitLoop_0100, TestSize.Level0)
 }
 
 /**
+ * @tc.name: DeInitLoop_0200
+ * @tc.desc: DeInitLoop
+ * @tc.type: FUNC
+ */
+HWTEST_F(StsEnvironmentTest, DeInitLoop_WithNullImpl_0200, TestSize.Level0)
+{
+    auto stsEnv = std::make_shared<STSEnvironment>(nullptr); // Nullptr is passed in explicitly
+    ASSERT_NE(stsEnv, nullptr);
+    stsEnv->DeInitLoop(); // The case where impl is nullptr
+    EXPECT_NO_THROW(stsEnv->DeInitLoop());
+}
+
+/**
  * @tc.name: ReInitUVLoop_0100
  * @tc.desc: ReInitUVLoop.
  * @tc.type: FUNC
