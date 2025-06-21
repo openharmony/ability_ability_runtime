@@ -242,8 +242,8 @@ napi_value CreateJsApplicationContextFromSendable(napi_env env, void* wrapped)
     }
 
     auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(applicationContext);
-    auto status = napi_coerce_to_native_binding_object(env, object, DetachNewApplicationContext, AttachApplicationContext,
-        workContext, nullptr);
+    auto status = napi_coerce_to_native_binding_object(
+        env, object, DetachNewApplicationContext, AttachApplicationContext, workContext, nullptr);
     napi_add_detached_finalizer(env, object, DetachFinalizeApplicationContext, nullptr);
     if (status != napi_ok) {
         TAG_LOGE(AAFwkTag::CONTEXT, "coerce application context failed: %{public}d", status);
@@ -301,8 +301,8 @@ napi_value CreateJsAbilityStageContextFromSendable(napi_env env, void* wrapped)
     }
 
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityStageContext>(abilitystageContext);
-    auto status = napi_coerce_to_native_binding_object(env, object, DetachNewAbilityStageContext, AttachAbilityStageContext,
-        workContext, nullptr);
+    auto status = napi_coerce_to_native_binding_object(
+        env, object, DetachNewAbilityStageContext, AttachAbilityStageContext, workContext, nullptr);
     napi_add_detached_finalizer(env, object, DetachFinalizeAbilityStageContext, nullptr);
     if (status != napi_ok) {
         TAG_LOGE(AAFwkTag::CONTEXT, "coerce ability stage context failed: %{public}d", status);
