@@ -61,6 +61,7 @@ ohos_unittest("app_running_manager_test") {
     "samgr:samgr_proxy",
     "window_manager:libwmutil",
     "window_manager:libwmutil_static",
+    "window_manager:libwmutil_base",
   ]
 
   defines = []

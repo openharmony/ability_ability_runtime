@@ -55,6 +55,8 @@ public:
      * @param uid indicates user, 0 for all users
      */
     void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid);
+
+    void SetKeepAliveAppService(const std::string &bundleName, bool enable, int32_t uid);
     
     int32_t GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId);
 public:

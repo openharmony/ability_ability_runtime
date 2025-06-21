@@ -374,7 +374,7 @@ bool STSFormExtension::ExtractFormData(ani_env *env, ani_ref nativeResult, AppEx
         return true;
     }
 
-    ani_boolean isUndefined = true;
+    ani_boolean isUndefined = ANI_TRUE;
     if ((status = env->Reference_IsUndefined(proxiesRef, &isUndefined)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Reference_IsUndefined status: %{public}d", status);
     }
@@ -634,8 +634,7 @@ void STSFormExtension::OnStop()
     ani_status status = env->Object_GetFieldByName_Ref(
         static_cast<ani_object>(stsAbilityObj_->aniRef), "onStop", &nameRef);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d, %{public}p, %{public}p",
-            status, stsAbilityObj_->aniRef, stsAbilityObj_->aniObj);
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d", status);
         return;
     }
     

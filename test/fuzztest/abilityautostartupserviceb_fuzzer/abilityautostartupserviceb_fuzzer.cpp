@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,23 +88,48 @@ void AbilityStartupServiceFuzztest1(bool boolParam, std::string &stringParam, in
     AppExecFwk::BundleInfo bundleInfo;
     service->GetBundleInfo(stringParam, bundleInfo, int32Param, int32Param, int32Param); // branch
     AutoStartupInfo info;
-    service->GetAbilityData(info, boolParam, stringParam, stringParam, int32Param); // branch
     AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.bundleName = stringParam;
+    abilityInfo.name = stringParam;
+    abilityInfo.moduleName = stringParam;
     service->GetAbilityTypeName(abilityInfo); // branch
     abilityInfo.type == AppExecFwk::AbilityType::PAGE;
     service->GetAbilityTypeName(abilityInfo); // branch
-    AppExecFwk::ExtensionAbilityInfo extensionInfo;
-    service->GetExtensionTypeName(extensionInfo);
-    extensionInfo.type == AppExecFwk::ExtensionAbilityType::SERVICE;
-    service->GetExtensionTypeName(extensionInfo);
     service->GetBundleMgrClient();
     service->CheckPermissionForSystem();
     service->CheckPermissionForSelf(stringParam);
-    service->GetAbilityInfo(info, stringParam, stringParam, int32Param);
     service->SetApplicationAutoStartupByEDM(info, boolParam);
     service->CancelApplicationAutoStartupByEDM(info, boolParam);
     service->InnerApplicationAutoStartupByEDM(info, boolParam, boolParam);
     service->CheckPermissionForEDM();
+}
+
+void AbilityStartupServiceFuzztest2(bool boolParam, std::string &stringParam, int32_t int32Param)
+{
+    std::shared_ptr<AbilityAutoStartupService> service = std::make_shared<AbilityAutoStartupService>();
+    AutoStartupAbilityData abilityData;
+    abilityData.isVisible = boolParam;
+    abilityData.abilityTypeName = stringParam;
+    abilityData.accessTokenId = stringParam;
+    abilityData.currentUserId = int32Param;
+    AutoStartupInfo info;
+    service->GetAbilityData(info, abilityData); // branch
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.bundleName = stringParam;
+    abilityInfo.name = stringParam;
+    abilityInfo.moduleName = stringParam;
+    service->IsTargetAbility(info, abilityInfo);
+    AppExecFwk::ExtensionAbilityInfo extensionInfo;
+    extensionInfo.bundleName = stringParam;
+    extensionInfo.name = stringParam;
+    extensionInfo.moduleName = stringParam;
+    service->IsTargetExtension(info, extensionInfo);
+    service->GetExtensionTypeName(extensionInfo);
+    extensionInfo.type == AppExecFwk::ExtensionAbilityType::SERVICE;
+    service->GetExtensionTypeName(extensionInfo);
+    extensionInfo.type == AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    service->GetExtensionTypeName(extensionInfo);
+    service->GetAbilityInfo(info, abilityData);
 }
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
@@ -113,6 +138,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string stringParam(data, size);
     int32_t int32Param = static_cast<int32_t>(GetU32Data(data));
     AbilityStartupServiceFuzztest1(boolParam, stringParam, int32Param);
+    AbilityStartupServiceFuzztest2(boolParam, stringParam, int32Param);
     return true;
 }
 }

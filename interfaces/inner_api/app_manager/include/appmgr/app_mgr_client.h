@@ -727,6 +727,14 @@ public:
     void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid);
 
     /**
+     * @brief Set non-resident keep-alive app service extension status.
+     * @param bundleName The application bundle name.
+     * @param enable The current updated enable status.
+     * @param uid indicates user.
+     */
+    void SetKeepAliveAppService(const std::string &bundleName, bool enable, int32_t uid);
+
+    /**
      * Register application or process state observer.
      * @param observer, ability token.
      * @param bundleNameList, the list of bundle names.

@@ -1,3 +1,7 @@
 [Docs Uri Permission]
 services/uripermmgr/include/file_permission_manager.h @hobbycao
 services/uripermmgr/src/file_permission_manager.cpp @hobbycao
+
+[UPMS]
+services/uripermmgr @duan-sizhao
+interfaces/inner_api/uri_permission @duan-sizhao

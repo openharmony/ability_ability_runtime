@@ -1267,5 +1267,15 @@ void AppRunningRecord::SetSupportMultiProcessDeviceFeature(bool support)
 {
     supportMultiProcessDeviceFeature_ = support;
 }
+
+bool AppRunningRecord::IsKeepAliveAppService() const
+{
+    return isKeepAliveAppService_;
+}
+
+void AppRunningRecord::SetKeepAliveAppService(bool isKeepAliveAppService)
+{
+    isKeepAliveAppService_ = isKeepAliveAppService;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

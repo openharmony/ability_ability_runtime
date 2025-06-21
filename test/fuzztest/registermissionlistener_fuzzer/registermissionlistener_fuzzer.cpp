@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@ public:
     void OnMissionDestroyed(int32_t missionId) override {};
     void OnMissionSnapshotChanged(int32_t missionId) override {};
     void OnMissionMovedToFront(int32_t missionId) override {};
+    void OnMissionMovedToBackground(int32_t missionId) override {};
     void OnMissionClosed(int32_t missionId) override {};
     void OnMissionLabelUpdated(int32_t missionId) override {};
 #ifdef SUPPORT_GRAPHICS

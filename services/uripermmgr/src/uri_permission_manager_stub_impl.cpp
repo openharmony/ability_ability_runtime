@@ -391,6 +391,24 @@ void UriPermissionManagerStubImpl::RemoveContentTokenIdRecord(uint32_t tokenId)
     contentTokenIdSet_.erase(tokenId);
 }
 
+void UriPermissionManagerStubImpl::StringVecToRawData(const std::vector<std::string> &stringVec,
+    StorageFileRawData &rawData)
+{
+    std::stringstream ss;
+    uint32_t stringCount = stringVec.size();
+    ss.write(reinterpret_cast<const char*>(&stringCount), sizeof(stringCount));
+
+    for (uint32_t i = 0; i < stringCount; ++i) {
+        uint32_t strLen = stringVec[i].length();
+        ss.write(reinterpret_cast<const char*>(&strLen), sizeof(strLen));
+        ss.write(stringVec[i].c_str(), strLen);
+    }
+    std::string result = ss.str();
+    rawData.ownedData = std::move(result);
+    rawData.data = rawData.ownedData.data();
+    rawData.size = rawData.ownedData.size();
+}
+
 int32_t UriPermissionManagerStubImpl::GrantBatchUriPermissionImpl(const std::vector<std::string> &uriVec,
     uint32_t flag, TokenId callerTokenId, TokenId targetTokenId)
 {
@@ -407,7 +425,9 @@ int32_t UriPermissionManagerStubImpl::GrantBatchUriPermissionImpl(const std::vec
         return INNER_ERR;
     }
     std::vector<int32_t> resVec;
-    storageManager_->CreateShareFile(uriVec, targetTokenId, flag, resVec);
+    StorageFileRawData uriRawData;
+    StringVecToRawData(uriVec, uriRawData);
+    storageManager_->CreateShareFile(uriRawData, targetTokenId, flag, resVec);
     if (resVec.size() == 0) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "CreateShareFile failed, storageManager resVec empty");
         return INNER_ERR;
@@ -1000,7 +1020,7 @@ int32_t UriPermissionManagerStubImpl::RevokeUriPermissionManuallyInner(Uri &uri,
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
     TAG_LOGI(AAFwkTag::URIPERMMGR, "callerTokenId: %{public}u, targetTokenId:%{public}u",
         callerTokenId, targetTokenId);
-    
+
     if (UPMSUtils::IsDocsCloudUri(uri)) {
         return RevokeMapUriPermissionManually(callerTokenId, targetTokenId, uri);
     }
@@ -1052,7 +1072,9 @@ int32_t UriPermissionManagerStubImpl::DeleteShareFile(uint32_t targetTokenId, co
         TAG_LOGE(AAFwkTag::URIPERMMGR, "null StorageManager");
         return INNER_ERR;
     }
-    auto ret = storageManager_->DeleteShareFile(targetTokenId, uriVec);
+    StorageFileRawData uriRawData;
+    StringVecToRawData(uriVec, uriRawData);
+    auto ret = storageManager_->DeleteShareFile(targetTokenId, uriRawData);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "DeleteShareFile failed:%{public}d", ret);
     }

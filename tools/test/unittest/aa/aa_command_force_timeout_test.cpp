@@ -128,6 +128,7 @@ HWTEST_F(AaCommandForceTimeOut, Aa_Command_Force_Timeout_0300, Function | Medium
     EXPECT_EQ(cmd.ExecCommand(), STRING_FORCE_TIMEOUT_OK + "\n");
 }
 
+#ifdef ABILITY_COMMAND_FOR_TEST
 /**
  * @tc.number: Aa_Command_Force_Timeout_0400
  * @tc.name: ExecCommand
@@ -183,3 +184,4 @@ HWTEST_F(AaCommandForceTimeOut, Aa_Command_Force_Timeout_0500, Function | Medium
     EXPECT_EQ(cmd.ExecCommand(), STRING_FORCE_TIMEOUT_OK + "\n");
     testing::Mock::AllowLeak(mockAbilityManagerStub);
 }
+#endif

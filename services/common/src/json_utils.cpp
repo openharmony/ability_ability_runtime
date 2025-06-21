@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,7 @@
 
 namespace OHOS {
 namespace AAFwk {
-bool JsonUtils::LoadConfiguration(const std::string& path, nlohmann::json& jsonBuf,
-    const std::string& defaultPath)
+bool JsonUtils::LoadConfiguration(const std::string& path, cJSON *&jsonBuf, const std::string& defaultPath)
 {
     std::string configPath = GetConfigPath(path, defaultPath);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "config path is: %{public}s", configPath.c_str());
@@ -45,7 +44,7 @@ std::string JsonUtils::GetConfigPath(const std::string& path, const std::string&
     return configPath;
 }
 
-bool JsonUtils::ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf)
+bool JsonUtils::ReadFileInfoJson(const std::string &filePath, cJSON *&jsonBuf)
 {
     if (access(filePath.c_str(), F_OK) != 0) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "deepLink config not exist");
@@ -82,9 +81,10 @@ bool JsonUtils::ReadFileInfoJson(const std::string &filePath, nlohmann::json &js
     }
 
     in.seekg(0, std::ios::beg);
-    jsonBuf = nlohmann::json::parse(in, nullptr, false);
+    std::string fileContent((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
     in.close();
-    if (jsonBuf.is_discarded()) {
+    jsonBuf = cJSON_Parse(fileContent.c_str());
+    if (jsonBuf == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "bad profile file");
         return false;
     }
@@ -92,10 +92,11 @@ bool JsonUtils::ReadFileInfoJson(const std::string &filePath, nlohmann::json &js
     return true;
 }
 
-bool JsonUtils::IsEqual(nlohmann::json &jsonObject, const std::string &key, const std::string &value, bool checkEmpty)
+bool JsonUtils::IsEqual(cJSON *jsonObject, const std::string &key, const std::string &value, bool checkEmpty)
 {
-    if (jsonObject.contains(key) && jsonObject[key].is_string()) {
-        std::string  jsonValue = jsonObject.at(key).get<std::string>();
+    cJSON *item = cJSON_GetObjectItem(jsonObject, key.c_str());
+    if (item != nullptr && cJSON_IsString(item)) {
+        std::string jsonValue = item->valuestring;
         if (checkEmpty && !jsonValue.empty() && jsonValue != value) {
             return false;
         } else if (value != jsonValue) {
@@ -105,22 +106,40 @@ bool JsonUtils::IsEqual(nlohmann::json &jsonObject, const std::string &key, cons
     return true;
 }
 
-bool JsonUtils::IsEqual(nlohmann::json &jsonObject, const std::string &key, int32_t value)
+bool JsonUtils::IsEqual(cJSON *jsonObject, const std::string &key, int32_t value)
 {
-    if (jsonObject.contains(key) && jsonObject[key].is_number()) {
-        if (value != jsonObject.at(key).get<int32_t>()) {
+    cJSON *item = cJSON_GetObjectItem(jsonObject, key.c_str());
+    if (item != nullptr && cJSON_IsNumber(item)) {
+        int32_t jsonValue = static_cast<int32_t>(item->valuedouble);
+        if (value != jsonValue) {
             return false;
         }
     }
     return true;
 }
 
-std::optional<bool> JsonUtils::JsonToOptionalBool(const nlohmann::json &jsonObject, const std::string &key)
+std::optional<bool> JsonUtils::JsonToOptionalBool(const cJSON *jsonObject, const std::string &key)
 {
-    if (jsonObject.contains(key) && jsonObject[key].is_boolean()) {
-        return jsonObject[key].get<bool>();
+    cJSON *item = cJSON_GetObjectItem(jsonObject, key.c_str());
+    if (item != nullptr && cJSON_IsBool(item)) {
+        return item->type == cJSON_True;
     }
     return std::nullopt;
+}
+
+std::string JsonUtils::ToString(const cJSON *jsonObject)
+{
+    if (jsonObject == nullptr) {
+        return {};
+    }
+    char *str = cJSON_PrintUnformatted(jsonObject);
+    if (str == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json string failed");
+        return {};
+    }
+    std::string jsonStr(str);
+    cJSON_free(str);
+    return jsonStr;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,7 @@
 #include "application_data_manager.h"
 #include "application_env_impl.h"
 #include "bundle_mgr_proxy.h"
+#include "cJSON.h"
 #include "hitrace_meter.h"
 #ifdef SUPPORT_CHILD_PROCESS
 #include "child_main_thread.h"
@@ -80,7 +81,6 @@
 #include "cj_runtime.h"
 #endif
 #include "native_lib_util.h"
-#include "nlohmann/json.hpp"
 #include "ohos_application.h"
 #include "overlay_module_info.h"
 #include "parameters.h"
@@ -184,7 +184,6 @@ const char* PC_LIBRARY_PATH = "/system/lib64/liblayered_parameters_manager.z.so"
 const char* PC_FUNC_INFO = "DetermineResourceType";
 const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
-std::unique_ptr<AbilityRuntime::Runtime> RUNTIME_NULL = nullptr;
 
 #if defined(NWEB)
 constexpr int32_t PRELOAD_DELAY_TIME = 2000;  //millisecond
@@ -1636,9 +1635,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         }
     } else {
 #endif
-        AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, isSystemApp);
-        if (IsNeedEtsInit(appInfo)) {
+        if (IsEtsAPP(appInfo)) {
             AbilityRuntime::ETSRuntime::SetAppLibPath(appLibPaths);
+        } else {
+            AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, isSystemApp);
         }
 #ifdef CJ_FRONTEND
     }
@@ -1668,13 +1668,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.versionCode = appInfo.versionCode;
 #ifdef CJ_FRONTEND
         if (isCJApp) {
-            options.langs.emplace(AbilityRuntime::Runtime::Language::CJ, true);
-            application_->SetCJApplication(true);
+            options.lang = AbilityRuntime::Runtime::Language::CJ;
         } else {
-            AddRuntimeLang(appInfo, options);
+            SetRuntimeLang(appInfo, options);
         }
 #else
-        AddRuntimeLang(appInfo, options);
+        SetRuntimeLang(appInfo, options);
 #endif
         if (applicationInfo_->appProvisionType == Constants::APP_PROVISION_TYPE_DEBUG) {
             TAG_LOGD(AAFwkTag::APPKIT, "multi-thread mode: %{public}d", appLaunchData.GetMultiThread());
@@ -1708,12 +1707,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     static_cast<int32_t>(hapModuleInfo.aotCompileStatus);
             }
         }
-        std::vector<std::unique_ptr<Runtime>> runtimes = AbilityRuntime::Runtime::CreateRuntimes(options);
-        if (runtimes.empty()) {
-            TAG_LOGE(AAFwkTag::APPKIT, "runtimes empty");
+        auto runtime = AbilityRuntime::Runtime::Create(options);
+        if (!runtime) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
             return;
         }
-        auto &runtimeVerOne = GetVerOneRuntime(appInfo, runtimes);
+
         if (appInfo.debug && appLaunchData.GetDebugApp()) {
             wptr<MainThread> weak = this;
             auto cb = [weak]() {
@@ -1724,9 +1723,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 }
                 return appThread->NotifyDeviceDisConnect();
             };
-            if (runtimeVerOne != nullptr) {
-                runtimeVerOne->SetDeviceDisconnectCallback(cb);
-            }
+            runtime->SetDeviceDisconnectCallback(cb);
         }
         auto perfCmd = appLaunchData.GetPerfCmd();
 
@@ -1737,13 +1734,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             processName = processInfo_->GetProcessName();
             TAG_LOGD(AAFwkTag::APPKIT, "pid is %{public}d, processName is %{public}s", pid, processName.c_str());
         }
-        if (runtimeVerOne != nullptr) {
-            runtimeVerOne->SetStopPreloadSoCallback([uid = bundleInfo.applicationInfo.uid, currentPid = pid,
-                bundleName = appInfo.bundleName]()-> void {
-                    TAG_LOGD(AAFwkTag::APPKIT, "runtime callback and report load abc completed info to rss.");
-                    ResHelper::ReportLoadAbcCompletedInfoToRss(uid, currentPid, bundleName);
-                });
-        }
+        runtime->SetStopPreloadSoCallback([uid = bundleInfo.applicationInfo.uid, currentPid = pid,
+            bundleName = appInfo.bundleName]()-> void {
+                TAG_LOGD(AAFwkTag::APPKIT, "runtime callback and report load abc completed info to rss.");
+                ResHelper::ReportLoadAbcCompletedInfoToRss(uid, currentPid, bundleName);
+            });
         AbilityRuntime::Runtime::DebugOption debugOption;
         debugOption.isStartWithDebug = appLaunchData.GetDebugApp();
         debugOption.processName = processName;
@@ -1753,19 +1748,13 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         debugOption.isDebugFromLocal = appLaunchData.GetDebugFromLocal();
         debugOption.perfCmd = perfCmd;
         debugOption.isDeveloperMode = isDeveloperMode_;
-        if (runtimeVerOne != nullptr) {
-            runtimeVerOne->SetDebugOption(debugOption);
-        }
+        runtime->SetDebugOption(debugOption);
         if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
             perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos) {
             TAG_LOGD(AAFwkTag::APPKIT, "perfCmd is %{public}s", perfCmd.c_str());
-            if (runtimeVerOne != nullptr) {
-                runtimeVerOne->StartProfiler(debugOption);
-            }
+            runtime->StartProfiler(debugOption);
         } else {
-            if (runtimeVerOne != nullptr) {
-                runtimeVerOne->StartDebugMode(debugOption);
-            }
+            runtime->StartDebugMode(debugOption);
         }
 
         std::vector<HqfInfo> hqfInfos = appInfo.appQuickFix.deployedAppqfInfo.hqfInfos;
@@ -1776,9 +1765,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     it->moduleName.c_str(), it->hqfFilePath.c_str());
                 modulePaths.insert(std::make_pair(it->moduleName, it->hqfFilePath));
             }
-            if (runtimeVerOne != nullptr) {
-                runtimeVerOne->RegisterQuickFixQueryFunc(modulePaths);
-            }
+            runtime->RegisterQuickFixQueryFunc(modulePaths);
         }
 
         auto bundleName = appInfo.bundleName;
@@ -1786,37 +1773,26 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 #ifdef CJ_FRONTEND
         if (!isCJApp) {
 #endif
-            for (const auto &runtime : runtimes) {
-                if (appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0 &&
-                    runtime->GetLanguage() == AbilityRuntime::Runtime::Language::JS) {
-                    JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
-                    uncaughtExceptionInfo.hapPath = hapPath;
-                    UncatchableTaskInfo uncatchableTaskInfo = {bundleName, versionCode, appRunningId, pid, processName};
-                    InitUncatchableTask(uncaughtExceptionInfo.uncaughtTask, uncatchableTaskInfo);
-                    (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(
-                        uncaughtExceptionInfo);
-                    JsEnv::UncatchableTask uncatchableTask;
-                    InitUncatchableTask(uncatchableTask, uncatchableTaskInfo, true);
-                    (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncatchableExceptionHandler(
-                        uncatchableTask);
-                }
-                if ((appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
-                    appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) &&
-                    runtime->GetLanguage() == AbilityRuntime::Runtime::Language::ETS) {
-                    auto expectionInfo =
-                        CreateEtsExceptionInfo(bundleName, versionCode, hapPath, appRunningId, pid, processName);
-                    runtime->RegisterUncaughtExceptionHandler((void*)&expectionInfo);
-                }
+            if (IsEtsAPP(appInfo)) {
+                auto expectionInfo =
+                    CreateEtsExceptionInfo(bundleName, versionCode, hapPath, appRunningId, pid, processName);
+                (static_cast<AbilityRuntime::ETSRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(expectionInfo);
+            } else {
+                JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
+                uncaughtExceptionInfo.hapPath = hapPath;
+                UncatchableTaskInfo uncatchableTaskInfo = {bundleName, versionCode, appRunningId, pid, processName};
+                InitUncatchableTask(uncaughtExceptionInfo.uncaughtTask, uncatchableTaskInfo);
+                (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(
+                    uncaughtExceptionInfo);
+                JsEnv::UncatchableTask uncatchableTask;
+                InitUncatchableTask(uncatchableTask, uncatchableTaskInfo, true);
+                (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncatchableExceptionHandler(
+                    uncatchableTask);
             }
 #ifdef CJ_FRONTEND
         } else {
-            for (const auto &runtime : runtimes) {
-                if (appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0 &&
-                    runtime->GetLanguage() == AbilityRuntime::Runtime::Language::CJ) {
-                    auto expectionInfo = CreateCjExceptionInfo(bundleName, versionCode, hapPath);
-                        runtime->RegisterUncaughtExceptionHandler((void*)&expectionInfo);
-                }
-            }
+            auto expectionInfo = CreateCjExceptionInfo(bundleName, versionCode, hapPath);
+            (static_cast<AbilityRuntime::CJRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(expectionInfo);
         }
 #endif
         wptr<MainThread> weak = this;
@@ -1830,21 +1806,14 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         };
         applicationContext->RegisterProcessSecurityExit(callback);
 
-        for (auto &runtime : runtimes) {
-            application_->AddRuntime(std::move(runtime));
-        }
+        application_->SetRuntime(std::move(runtime));
+
         std::weak_ptr<OHOSApplication> wpApplication = application_;
         AbilityLoader::GetInstance().RegisterUIAbility("UIAbility",
-            [wpApplication](const std::string &language) -> AbilityRuntime::UIAbility* {
+            [wpApplication](const std::string &codeLanguage) -> AbilityRuntime::UIAbility* {
             auto app = wpApplication.lock();
             if (app != nullptr) {
-                if (language ==  AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
-                    return AbilityRuntime::UIAbility::Create(app->GetRuntime(
-                        AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2));
-                } else {
-                    return AbilityRuntime::UIAbility::Create(app->GetRuntime(
-                        AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0));
-                }
+                return AbilityRuntime::UIAbility::Create(app->GetSpecifiedRuntime(codeLanguage));
             }
             TAG_LOGE(AAFwkTag::APPKIT, "failed");
             return nullptr;
@@ -1856,8 +1825,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 TAG_LOGD(AAFwkTag::APPKIT, "LoadAllExtensions lan:%{public}s", appInfo.codeLanguage.c_str());
                 LoadAllExtensions();
             }
-            if (appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) {
-                auto &runtime = application_->GetRuntime(appInfo.codeLanguage);
+            if (!IsEtsAPP(appInfo)) {
+                auto &runtime = application_->GetRuntime();
                 if (runtime == nullptr) {
                     TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
                     return;
@@ -1966,9 +1935,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 #endif
     if (appLaunchData.IsNeedPreloadModule()) {
-        for (auto &runtime : application_->GetRuntime()) {
-            PreloadModule(entryHapModuleInfo, runtime);
-        }
+        PreloadModule(entryHapModuleInfo, application_->GetRuntime());
     }
 }
 
@@ -2003,8 +1970,7 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
             EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
 
         ErrorObject appExecErrorObj = { errorObject.name, errorObject.message, errorObject.stack};
-        auto napiEnv = (static_cast<AbilityRuntime::JsRuntime&>(
-            *appThread->application_->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0))).GetNapiEnv();
+        auto napiEnv = (static_cast<AbilityRuntime::JsRuntime&>(*appThread->application_->GetRuntime())).GetNapiEnv();
         AAFwk::ExitReason exitReason = { REASON_JS_ERROR, errorObject.name };
         AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
         if (!isUncatchable && NapiErrorManager::GetInstance()->NotifyUncaughtException(napiEnv, summary,
@@ -2297,7 +2263,7 @@ void MainThread::HandleUpdatePluginInfoInstalled(const ApplicationInfo &pluginAp
         TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return;
     }
-    auto &runtime = application_->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
+    auto &runtime = application_->GetRuntime();
     if (runtime == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
@@ -2347,7 +2313,7 @@ void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo& app
     }
     application_->UpdateApplicationInfoInstalled(appInfo);
 
-    auto &runtime = application_->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
+    auto &runtime = application_->GetRuntime();
     if (runtime == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
@@ -2435,11 +2401,11 @@ void MainThread::LoadAllExtensions()
         std::string file = item.extensionLibFile;
         std::weak_ptr<OHOSApplication> wApp = application_;
         AbilityLoader::GetInstance().RegisterExtension(item.extensionName,
-            [wApp, file](const std::string &language) -> AbilityRuntime::Extension* {
+            [wApp, file](const std::string &codeLanguage) -> AbilityRuntime::Extension* {
             auto app = wApp.lock();
             if (app != nullptr) {
                 return AbilityRuntime::ExtensionModuleLoader::GetLoader(file.c_str())
-                    .Create(app->GetRuntime(language));
+                    .Create(app->GetSpecifiedRuntime(codeLanguage));
             }
             TAG_LOGE(AAFwkTag::APPKIT, "failed");
             return nullptr;
@@ -2460,27 +2426,12 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
     auto args = std::make_shared<AbilityDelegatorArgs>(record->want);
     if (isStageBased) { // Stage model
         TAG_LOGD(AAFwkTag::APPKIT, "Stage model");
-        if (applicationCodeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) {
-            TAG_LOGI(AAFwkTag::DELEGATOR, "create 1.0 testrunner");
-            auto& runtime = application_->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
-            auto testRunner = TestRunner::Create(runtime, args, false);
-            auto delegator = IAbilityDelegator::Create(runtime, application_->GetAppContext(),
-                std::move(testRunner), record->observer);
-            AbilityDelegatorRegistry::RegisterInstance(delegator, args, AbilityRuntime::Runtime::Language::JS);
-			delegator->SetApiTargetVersion(targetVersion);
-            delegator->Prepare();
-        }
-
-        if (applicationCodeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
-            TAG_LOGI(AAFwkTag::DELEGATOR, "create 1.2 testrunner");
-            auto& runtime = application_->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2);
-            auto testRunner = TestRunner::Create(runtime, args, false);
-            auto delegator = IAbilityDelegator::Create(runtime, application_->GetAppContext(),
-                std::move(testRunner), record->observer);
-            AbilityDelegatorRegistry::RegisterInstance(delegator, args, AbilityRuntime::Runtime::Language::ETS);
-			delegator->SetApiTargetVersion(targetVersion);
-            delegator->Prepare();
-        }
+        auto testRunner = TestRunner::Create(application_->GetRuntime(), args, false);
+        auto delegator = IAbilityDelegator::Create(application_->GetRuntime(), application_->GetAppContext(),
+            std::move(testRunner), record->observer);
+        AbilityDelegatorRegistry::RegisterInstance(delegator, args, application_->GetRuntime()->GetLanguage());
+        delegator->SetApiTargetVersion(targetVersion);
+        delegator->Prepare();
     } else { // FA model
         TAG_LOGD(AAFwkTag::APPKIT, "FA model");
         AbilityRuntime::Runtime::Options options;
@@ -2498,10 +2449,8 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
             return false;
         }
         bool isFaJsModel = entryHapModuleInfo.abilityInfos.front().srcLanguage == "js" ? true : false;
-        options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true); // default
-        static auto runtimes = AbilityRuntime::Runtime::CreateRuntimes(options);
-        for (const auto& runtime : runtimes) {
-            auto testRunner = TestRunner::Create(runtime, args, isFaJsModel);
+        static auto runtime = AbilityRuntime::Runtime::Create(options);
+        auto testRunner = TestRunner::Create(runtime, args, isFaJsModel);
         if (testRunner == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null testRunner");
             return false;
@@ -2515,7 +2464,6 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
         AbilityDelegatorRegistry::RegisterInstance(delegator, args, runtime->GetLanguage());
         delegator->SetApiTargetVersion(targetVersion);
         delegator->Prepare();
-        }
     }
     return true;
 }
@@ -2574,7 +2522,7 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
             TAG_LOGE(AAFwkTag::APPKIT, "null application");
             return;
         }
-        auto &runtime = application->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
+        auto &runtime = application->GetRuntime();
         appThread->UpdateRuntimeModuleChecker(runtime);
 #ifdef APP_ABILITY_USE_TWO_RUNNER
         AbilityThread::AbilityThreadMain(application, abilityRecord, stageContext);
@@ -2601,7 +2549,7 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
         return;
     }
     SetProcessExtensionType(abilityRecord);
-    auto &runtime = application_->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
+    auto &runtime = application_->GetRuntime();
     UpdateRuntimeModuleChecker(runtime);
 #ifdef APP_ABILITY_USE_TWO_RUNNER
     AbilityThread::AbilityThreadMain(application_, abilityRecord, stageContext);
@@ -2964,7 +2912,7 @@ void MainThread::HandleDumpHeapPrepare()
         TAG_LOGE(AAFwkTag::APPKIT, "null app");
         return;
     }
-    auto &runtime = app->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
+    auto &runtime = app->GetRuntime();
     if (runtime == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
@@ -2984,7 +2932,7 @@ void MainThread::HandleDumpHeap(bool isPrivate)
         TAG_LOGE(AAFwkTag::APPKIT, "null app");
         return;
     }
-    auto &runtime = app->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
+    auto &runtime = app->GetRuntime();
     if (runtime == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
@@ -3037,11 +2985,11 @@ void MainThread::DestroyHeapProfiler()
 
     auto task = [] {
         auto app = applicationForDump_.lock();
-        if (app == nullptr || app->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) == nullptr) {
+        if (app == nullptr || app->GetRuntime() == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
             return;
         }
-        app->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0)->DestroyHeapProfiler();
+        app->GetRuntime()->DestroyHeapProfiler();
     };
     mainHandler_->PostTask(task, "MainThread:DestroyHeapProfiler");
 }
@@ -3056,11 +3004,11 @@ void MainThread::ForceFullGC()
 
     auto task = [] {
         auto app = applicationForDump_.lock();
-        if (app == nullptr || app->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) == nullptr) {
+        if (app == nullptr || app->GetRuntime() == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
             return;
         }
-        app->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0)->ForceFullGC();
+        app->GetRuntime()->ForceFullGC();
     };
     mainHandler_->PostTask(task, "MainThread:ForceFullGC");
 }
@@ -3788,7 +3736,7 @@ int32_t MainThread::ChangeAppGcState(int32_t state, uint64_t tid)
         TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return ERR_INVALID_VALUE;
     }
-    auto &runtime = application_->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
+    auto &runtime = application_->GetRuntime();
     if (runtime == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return ERR_INVALID_VALUE;
@@ -3840,7 +3788,7 @@ int32_t MainThread::OnAttachLocalDebug(bool isDebugFromLocal)
         TAG_LOGE(AAFwkTag::APPKIT, "null application_");
         return ERR_INVALID_VALUE;
     }
-    auto &runtime = application_->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
+    auto &runtime = application_->GetRuntime();
     if (runtime == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return ERR_INVALID_VALUE;
@@ -4019,34 +3967,31 @@ void MainThread::ParseAppConfigurationParams(const std::string configuration, Co
         return;
     }
     TAG_LOGI(AAFwkTag::APPKIT, "ParseAppConfigurationParams config:%{public}s", appConfig.GetName().c_str());
-    nlohmann::json configurationJson = nlohmann::json::parse(configuration, nullptr, false);
-    if (configurationJson.is_discarded()) {
+    cJSON *configurationJson = cJSON_Parse(configuration.c_str());
+    if (configurationJson == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "discarded error");
         return;
     }
-    if (!configurationJson.contains(JSON_KEY_APP_CONFIGURATION)) {
+    cJSON *jsonObject = cJSON_GetObjectItem(configurationJson, JSON_KEY_APP_CONFIGURATION.c_str());
+    if (jsonObject == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "app config not exist");
+        cJSON_Delete(configurationJson);
         return;
     }
-    nlohmann::json jsonObject = configurationJson.at(JSON_KEY_APP_CONFIGURATION).get<nlohmann::json>();
-    if (jsonObject.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null app config");
-        return;
+    cJSON *fontSizeScaleItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_APP_FONT_SIZE_SCALE.c_str());
+    if (fontSizeScaleItem != nullptr && cJSON_IsString(fontSizeScaleItem)) {
+        std::string configFontSizeScal = fontSizeScaleItem->valuestring;
+        appConfig.AddItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE, configFontSizeScal);
     }
-    if (jsonObject.contains(JSON_KEY_APP_FONT_SIZE_SCALE)
-        && jsonObject[JSON_KEY_APP_FONT_SIZE_SCALE].is_string()) {
-        std::string configFontSizeScal = jsonObject.at(JSON_KEY_APP_FONT_SIZE_SCALE).get<std::string>();
-        appConfig.AddItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE,
-            jsonObject.at(JSON_KEY_APP_FONT_SIZE_SCALE).get<std::string>());
-    }
-    if (jsonObject.contains(JSON_KEY_APP_FONT_MAX_SCALE)
-        && jsonObject[JSON_KEY_APP_FONT_MAX_SCALE].is_string()) {
-        std::string appFontMaxScale = jsonObject.at(JSON_KEY_APP_FONT_MAX_SCALE).get<std::string>();
+    cJSON *fontMaxScaleItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_APP_FONT_MAX_SCALE.c_str());
+    if (fontMaxScaleItem != nullptr && cJSON_IsString(fontMaxScaleItem)) {
+        std::string appFontMaxScale = fontMaxScaleItem->valuestring;
         const std::regex INTEGER_REGEX("^[-+]?([0-9]+)([.]([0-9]+))?$");
         if (std::regex_match(appFontMaxScale, INTEGER_REGEX)) {
             appConfig.AddItem(AAFwk::GlobalConfigurationKey::APP_FONT_MAX_SCALE, appFontMaxScale);
         }
     }
+    cJSON_Delete(configurationJson);
     TAG_LOGD(AAFwkTag::APPKIT, "configuration_: %{public}s", appConfig.GetName().c_str());
 }
 
@@ -4062,7 +4007,7 @@ void MainThread::HandleCacheProcess()
 
     // force gc
     if (application_ != nullptr) {
-        auto &runtime = application_->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
+        auto &runtime = application_->GetRuntime();
         if (runtime == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
             return;
@@ -4071,36 +4016,20 @@ void MainThread::HandleCacheProcess()
     }
 }
 
-void MainThread::AddRuntimeLang(ApplicationInfo &appInfo, AbilityRuntime::Runtime::Options &options)
+void MainThread::SetRuntimeLang(ApplicationInfo &appInfo, AbilityRuntime::Runtime::Options &options)
 {
-    if (appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
-        options.langs.emplace(AbilityRuntime::Runtime::Language::ETS, true);
-    } else if (appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
-        options.langs.emplace(AbilityRuntime::Runtime::Language::ETS, true);
+    if (appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
+        appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
+        options.lang = AbilityRuntime::Runtime::Language::ETS;
     } else {
-        options.langs.emplace(AbilityRuntime::Runtime::Language::JS, true);
+        options.lang = AbilityRuntime::Runtime::Language::JS;
     }
 }
 
-bool MainThread::IsNeedEtsInit(const ApplicationInfo &appInfo)
+bool MainThread::IsEtsAPP(const ApplicationInfo &appInfo)
 {
     return appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
         appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID;
-}
-
-const std::unique_ptr<AbilityRuntime::Runtime> &MainThread::GetVerOneRuntime(
-    const ApplicationInfo &appInfo, const std::vector<std::unique_ptr<Runtime>> &runtimes)
-{
-    if (appInfo.codeLanguage != AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) {
-        return RUNTIME_NULL;
-    }
-    for (auto &runtime : runtimes) {
-        if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::JS ||
-            runtime->GetLanguage() == AbilityRuntime::Runtime::Language::CJ) {
-            return runtime;
-        }
-    }
-    return RUNTIME_NULL;
 }
 
 void MainThread::HandleConfigByPlugin(Configuration &config, BundleInfo &bundleInfo)
@@ -4136,7 +4065,7 @@ void MainThread::SetJsIdleCallback(const std::weak_ptr<OHOSApplication> &wpAppli
             TAG_LOGE(AAFwkTag::APPKIT, "null app");
             return;
         }
-        auto &runtime = app->GetRuntime(AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0);
+        auto &runtime = app->GetRuntime();
         if (runtime == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
             return;

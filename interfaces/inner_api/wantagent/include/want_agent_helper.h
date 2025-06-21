@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,8 @@
 
 #include <string>
 #include <memory>
+
+#include "cJSON.h"
 #include "context/application_context.h"
 #include "completed_callback.h"
 #include "completed_dispatcher.h"
@@ -215,7 +217,7 @@ private:
 
     static unsigned int FlagsTransformer(const std::vector<WantAgentConstant::Flags> &flags);
 
-    static std::vector<WantAgentConstant::Flags> ParseFlags(nlohmann::json jsonObject);
+    static std::vector<WantAgentConstant::Flags> ParseFlags(cJSON *jsonObject);
 };
 }  // namespace OHOS::AbilityRuntime::WantAgent
 #endif  // OHOS_ABILITY_RUNTIME_WANT_AGENT_HELPER_H

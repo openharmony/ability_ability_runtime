@@ -603,18 +603,19 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, ConvertKeepAliveInfoFromKey_200, TestS
 HWTEST_F(AbilityKeepAliveDataManagerTest, ConvertKeepAliveInfoFromKey_300, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_300 start";
-    nlohmann::json jsonData = {
-        {JSON_KEY_USERID, 100},
-        {JSON_KEY_APP_TYPE, 2},
-        {JSON_KEY_SETTER, 1}
-    };
-    DistributedKv::Key key(jsonData.dump());
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_USERID.c_str(), static_cast<double>(100));
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_APP_TYPE.c_str(), static_cast<double>(2));
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_SETTER.c_str(), static_cast<double>(1));
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonData);
+    DistributedKv::Key key(jsonStr);
     AbilityKeepAliveDataManager abilityKeepAliveDataManager;
     KeepAliveInfo retInfo = abilityKeepAliveDataManager.ConvertKeepAliveInfoFromKey(key);
     EXPECT_TRUE(retInfo.bundleName.empty());
     EXPECT_EQ(retInfo.userId, 100);
     EXPECT_EQ(retInfo.appType, KeepAliveAppType::SYSTEM);
     EXPECT_EQ(retInfo.setter, KeepAliveSetter::USER);
+    cJSON_Delete(jsonData);
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_300 end";
 }
 
@@ -628,19 +629,20 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, ConvertKeepAliveInfoFromKey_400, TestS
 {
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_400 start";
     KeepAliveInfo info;
-    nlohmann::json jsonData = {
-        {JSON_KEY_BUNDLE_NAME, "com.example.app"},
-        {JSON_KEY_USERID, "invalid"},
-        {JSON_KEY_APP_TYPE, 2},
-        {JSON_KEY_SETTER, 1}
-    };
-    DistributedKv::Key key(jsonData.dump());
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, JSON_KEY_BUNDLE_NAME.c_str(), "com.example.app");
+    cJSON_AddStringToObject(jsonData, JSON_KEY_USERID.c_str(), "invalid");
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_APP_TYPE.c_str(), static_cast<double>(2));
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_SETTER.c_str(), static_cast<double>(1));
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonData);
+    DistributedKv::Key key(jsonStr);
     AbilityKeepAliveDataManager abilityKeepAliveDataManager;
     KeepAliveInfo retInfo = abilityKeepAliveDataManager.ConvertKeepAliveInfoFromKey(key);
     EXPECT_EQ(retInfo.bundleName, "com.example.app");
     EXPECT_EQ(retInfo.userId, info.userId);
     EXPECT_EQ(retInfo.appType, KeepAliveAppType::SYSTEM);
     EXPECT_EQ(retInfo.setter, KeepAliveSetter::USER);
+    cJSON_Delete(jsonData);
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_400 end";
 }
 
@@ -654,19 +656,20 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, ConvertKeepAliveInfoFromKey_500, TestS
 {
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_500 start";
     KeepAliveInfo info;
-    nlohmann::json jsonData = {
-        {JSON_KEY_BUNDLE_NAME, "com.example.app"},
-        {JSON_KEY_USERID, 100},
-        {JSON_KEY_APP_TYPE, "invalid"},
-        {JSON_KEY_SETTER, 1}
-    };
-    DistributedKv::Key key(jsonData.dump());
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, JSON_KEY_BUNDLE_NAME.c_str(), "com.example.app");
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_USERID.c_str(), static_cast<double>(100));
+    cJSON_AddStringToObject(jsonData, JSON_KEY_APP_TYPE.c_str(), "invalid");
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_SETTER.c_str(), static_cast<double>(1));
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonData);
+    DistributedKv::Key key(jsonStr);
     AbilityKeepAliveDataManager abilityKeepAliveDataManager;
     KeepAliveInfo retInfo = abilityKeepAliveDataManager.ConvertKeepAliveInfoFromKey(key);
     EXPECT_EQ(retInfo.bundleName, "com.example.app");
     EXPECT_EQ(retInfo.userId, 100);
     EXPECT_EQ(retInfo.appType, info.appType);
     EXPECT_EQ(retInfo.setter, KeepAliveSetter::USER);
+    cJSON_Delete(jsonData);
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_500 end";
 }
 
@@ -680,19 +683,20 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, ConvertKeepAliveInfoFromKey_600, TestS
 {
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_600 start";
     KeepAliveInfo info;
-    nlohmann::json jsonData = {
-        {JSON_KEY_BUNDLE_NAME, "com.example.app"},
-        {JSON_KEY_USERID, 100},
-        {JSON_KEY_APP_TYPE, 2},
-        {JSON_KEY_SETTER, "invalid"}
-    };
-    DistributedKv::Key key(jsonData.dump());
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, JSON_KEY_BUNDLE_NAME.c_str(), "com.example.app");
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_USERID.c_str(), static_cast<double>(100));
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_APP_TYPE.c_str(), static_cast<double>(2));
+    cJSON_AddStringToObject(jsonData, JSON_KEY_SETTER.c_str(), "invalid");
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonData);
+    DistributedKv::Key key(jsonStr);
     AbilityKeepAliveDataManager abilityKeepAliveDataManager;
     KeepAliveInfo retInfo = abilityKeepAliveDataManager.ConvertKeepAliveInfoFromKey(key);
     EXPECT_EQ(retInfo.bundleName, "com.example.app");
     EXPECT_EQ(retInfo.userId, 100);
     EXPECT_EQ(retInfo.appType, KeepAliveAppType::SYSTEM);
     EXPECT_EQ(retInfo.setter, info.setter);
+    cJSON_Delete(jsonData);
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_600 end";
 }
 
@@ -733,8 +737,11 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, ConvertKeepAliveStatusToValue_100, Tes
     KeepAliveSetter testSetter = KeepAliveSetter::SYSTEM;
     info.setter = testSetter;
     DistributedKv::Value value = abilityKeepAliveDataManager.ConvertKeepAliveStatusToValue(info);
-    nlohmann::json jsonObject = nlohmann::json::parse(value.ToString(), nullptr, false);
-    KeepAliveSetter retSetter = KeepAliveSetter(jsonObject.at(JSON_KEY_SETTER).get<int32_t>());
+    cJSON *jsonObject = cJSON_Parse(value.ToString().c_str());
+    EXPECT_NE(jsonObject, nullptr);
+    cJSON *setterItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_SETTER.c_str());
+    EXPECT_NE(setterItem, nullptr);
+    KeepAliveSetter retSetter = static_cast<KeepAliveSetter>(setterItem->valuedouble);
     EXPECT_EQ(retSetter, testSetter);
     GTEST_LOG_(INFO) << "ConvertKeepAliveStatusToValue_100 end";
 }
@@ -749,19 +756,20 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, ConvertKeepAliveInfoFromKey_700, TestS
 {
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_700 start";
     KeepAliveInfo info;
-    nlohmann::json jsonData = {
-        {JSON_KEY_BUNDLE_NAME, 123},
-        {JSON_KEY_USERID, 100},
-        {JSON_KEY_APP_TYPE, 2},
-        {JSON_KEY_SETTER, 1}
-    };
-    DistributedKv::Key key(jsonData.dump());
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_BUNDLE_NAME.c_str(), 123);
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_USERID.c_str(), static_cast<double>(100));
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_APP_TYPE.c_str(), static_cast<double>(2));
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_SETTER.c_str(), static_cast<double>(1));
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonData);
+    DistributedKv::Key key(jsonStr);
     AbilityKeepAliveDataManager abilityKeepAliveDataManager;
     KeepAliveInfo retInfo = abilityKeepAliveDataManager.ConvertKeepAliveInfoFromKey(key);
     EXPECT_TRUE(retInfo.bundleName.empty());
     EXPECT_EQ(retInfo.userId, 100);
     EXPECT_EQ(retInfo.appType, KeepAliveAppType::SYSTEM);
     EXPECT_EQ(retInfo.setter, KeepAliveSetter::USER);
+    cJSON_Delete(jsonData);
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_700 end";
 }
 
@@ -775,18 +783,19 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, ConvertKeepAliveInfoFromKey_800, TestS
 {
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_800 start";
     KeepAliveInfo info;
-    nlohmann::json jsonData = {
-        {JSON_KEY_BUNDLE_NAME, "com.example.app"},
-        {JSON_KEY_APP_TYPE, 2},
-        {JSON_KEY_SETTER, 1}
-    };
-    DistributedKv::Key key(jsonData.dump());
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, JSON_KEY_BUNDLE_NAME.c_str(), "com.example.app");
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_APP_TYPE.c_str(), static_cast<double>(2));
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_SETTER.c_str(), static_cast<double>(1));
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonData);
+    DistributedKv::Key key(jsonStr);
     AbilityKeepAliveDataManager abilityKeepAliveDataManager;
     KeepAliveInfo retInfo = abilityKeepAliveDataManager.ConvertKeepAliveInfoFromKey(key);
     EXPECT_EQ(retInfo.bundleName, "com.example.app");
     EXPECT_EQ(retInfo.userId, info.userId);
     EXPECT_EQ(retInfo.appType, KeepAliveAppType::SYSTEM);
     EXPECT_EQ(retInfo.setter, KeepAliveSetter::USER);
+    cJSON_Delete(jsonData);
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_800 end";
 }
 
@@ -800,18 +809,19 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, ConvertKeepAliveInfoFromKey_900, TestS
 {
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_900 start";
     KeepAliveInfo info;
-    nlohmann::json jsonData = {
-        {JSON_KEY_BUNDLE_NAME, "com.example.app"},
-        {JSON_KEY_USERID, 100},
-        {JSON_KEY_SETTER, 1}
-    };
-    DistributedKv::Key key(jsonData.dump());
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, JSON_KEY_BUNDLE_NAME.c_str(), "com.example.app");
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_USERID.c_str(), static_cast<double>(100));
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_SETTER.c_str(), static_cast<double>(1));
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonData);
+    DistributedKv::Key key(jsonStr);
     AbilityKeepAliveDataManager abilityKeepAliveDataManager;
     KeepAliveInfo retInfo = abilityKeepAliveDataManager.ConvertKeepAliveInfoFromKey(key);
     EXPECT_EQ(retInfo.bundleName, "com.example.app");
     EXPECT_EQ(retInfo.userId, 100);
     EXPECT_EQ(retInfo.appType, info.appType);
     EXPECT_EQ(retInfo.setter, KeepAliveSetter::USER);
+    cJSON_Delete(jsonData);
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_900 end";
 }
 
@@ -825,18 +835,19 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, ConvertKeepAliveInfoFromKey_1000, Test
 {
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_1000 start";
     KeepAliveInfo info;
-    nlohmann::json jsonData = {
-        {JSON_KEY_BUNDLE_NAME, "com.example.app"},
-        {JSON_KEY_USERID, 100},
-        {JSON_KEY_APP_TYPE, 2}
-    };
-    DistributedKv::Key key(jsonData.dump());
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, JSON_KEY_BUNDLE_NAME.c_str(), "com.example.app");
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_USERID.c_str(), static_cast<double>(100));
+    cJSON_AddNumberToObject(jsonData, JSON_KEY_APP_TYPE.c_str(), static_cast<double>(2));
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonData);
+    DistributedKv::Key key(jsonStr);
     AbilityKeepAliveDataManager abilityKeepAliveDataManager;
     KeepAliveInfo retInfo = abilityKeepAliveDataManager.ConvertKeepAliveInfoFromKey(key);
     EXPECT_EQ(retInfo.bundleName, "com.example.app");
     EXPECT_EQ(retInfo.userId, 100);
     EXPECT_EQ(retInfo.appType, KeepAliveAppType::SYSTEM);
     EXPECT_EQ(retInfo.setter, info.setter);
+    cJSON_Delete(jsonData);
     GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_1000 end";
 }
 

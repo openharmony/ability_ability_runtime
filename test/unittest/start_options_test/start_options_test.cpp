@@ -122,5 +122,43 @@ HWTEST_F(StartOptionsTest, start_options_test_003, TestSize.Level1)
     StartOptions secondStartOptions = firstStartOptions;
     EXPECT_EQ(secondStartOptions.GetWindowMode(), firstStartOptions.windowMode_);
 }
+
+/**
+ * @tc.name: start_options_test_004
+ * @tc.desc: test class StartOptions HideStartWindow = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsTest, start_options_test_004, TestSize.Level1)
+{
+    StartOptions startOptions;
+    bool hideStartWindow = false;
+    startOptions.SetHideStartWindow(hideStartWindow);
+    EXPECT_EQ(startOptions.GetHideStartWindow(), hideStartWindow);
+
+    Parcel parcel;
+    bool marshallResult = startOptions.Marshalling(parcel);
+    EXPECT_EQ(marshallResult, true);
+    auto unmarshallResult = startOptions.Unmarshalling(parcel);
+    EXPECT_EQ(unmarshallResult->GetHideStartWindow(), hideStartWindow);
+}
+
+/**
+ * @tc.name: start_options_test_005
+ * @tc.desc: test class StartOptions HideStartWindow = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartOptionsTest, start_options_test_005, TestSize.Level1)
+{
+    StartOptions startOptions;
+    bool hideStartWindow = true;
+    startOptions.SetHideStartWindow(hideStartWindow);
+    EXPECT_EQ(startOptions.GetHideStartWindow(), hideStartWindow);
+
+    Parcel parcel;
+    bool marshallResult = startOptions.Marshalling(parcel);
+    EXPECT_EQ(marshallResult, true);
+    auto unmarshallResult = startOptions.Unmarshalling(parcel);
+    EXPECT_EQ(unmarshallResult->GetHideStartWindow(), hideStartWindow);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

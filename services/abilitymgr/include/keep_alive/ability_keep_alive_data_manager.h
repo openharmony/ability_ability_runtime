@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,6 @@
 
 #include "distributed_kv_data_manager.h"
 #include "keep_alive_info.h"
-#include "nlohmann/json.hpp"
 #include "singleton.h"
 
 namespace OHOS {
@@ -38,6 +37,8 @@ public:
 
     int32_t QueryKeepAliveApplications(const KeepAliveInfo &queryParam, std::vector<KeepAliveInfo> &infoList);
 
+    int32_t DeleteKeepAliveDataWithSetterId(const KeepAliveInfo &info);
+
 private:
     AbilityKeepAliveDataManager();
     ~AbilityKeepAliveDataManager();
@@ -49,6 +50,7 @@ private:
     DistributedKv::Key ConvertKeepAliveDataToKey(const KeepAliveInfo &info);
     KeepAliveInfo ConvertKeepAliveInfoFromKey(const DistributedKv::Key &key);
     bool IsEqual(const DistributedKv::Key &key, const KeepAliveInfo &info);
+    bool IsEqualSetterId(const DistributedKv::Key &key, const KeepAliveInfo &info);
 
     static const DistributedKv::AppId APP_ID;
     static const DistributedKv::StoreId STORE_ID;

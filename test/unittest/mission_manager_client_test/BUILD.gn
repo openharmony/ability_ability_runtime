@@ -51,7 +51,6 @@ ohos_unittest("mission_manager_client_test") {
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "window_manager:libwsutils",
     "window_manager:session_manager_lite",
   ]

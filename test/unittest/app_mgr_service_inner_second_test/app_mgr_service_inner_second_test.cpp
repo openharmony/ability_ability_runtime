@@ -2467,11 +2467,60 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_GetKeepAlive
     EXPECT_FALSE(resultState);
 
     // case 2, get success.
-    appRecord->isKeepAliveDkv_ = true;
+    appRecord->isKeepAliveAppService_ = true;
     resultState = appMgrServiceInner->GetKeepAliveState(appRecord);
     EXPECT_TRUE(resultState);
 
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetKeepAliveState_0100 end");
+}
+
+/**
+ * @tc.name: AppMgrServiceInnerSecondTest_SetKeepAliveAppService_0100
+ * @tc.desc: Test SetKeepAliveAppService
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_SetKeepAliveAppService_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_SetKeepAliveAppService_0100 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    const BundleInfo bundleInfo;
+    HapModuleInfo hapModuleInfo;
+    hapModuleInfo.isStageBasedModel = true;
+    hapModuleInfo.process = TEST_PROCESS_NAME;
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = token_;
+    loadParam->preToken = preToken_;
+    auto appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam, applicationInfo_, abilityInfo_,
+        TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
+    ASSERT_NE(appRecord, nullptr);
+
+    // case 1, bundleName is empty.
+    appMgrServiceInner->SetKeepAliveAppService("", true, 0);
+    EXPECT_FALSE(appRecord->isKeepAliveAppService_);
+
+    // case 2, appRunningManager_ is nullptr.
+    std::shared_ptr<AppRunningManager> appRunningManagerBack = appMgrServiceInner->appRunningManager_;
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    appMgrServiceInner->SetKeepAliveAppService(TEST_BUNDLE_NAME, true, 0);
+    EXPECT_FALSE(appRecord->isKeepAliveAppService_);
+    appMgrServiceInner->appRunningManager_ = appRunningManagerBack;
+
+    // case 3, not foundation call.
+    appMgrServiceInner->SetKeepAliveAppService(TEST_BUNDLE_NAME, true, 0);
+    EXPECT_FALSE(appRecord->isKeepAliveAppService_);
+
+    // case 4, caller bundleName and appRecord bundleName are not equal.
+    IPCSkeleton::SetCallingUid(FOUNDATION_UID);
+    appMgrServiceInner->SetKeepAliveAppService("InvalidBundleName", true, 0);
+    EXPECT_FALSE(appRecord->isKeepAliveAppService_);
+
+    // case 5, set success.
+    appRecord->extensionType_ = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    appMgrServiceInner->SetKeepAliveAppService(TEST_BUNDLE_NAME, true, 0);
+    EXPECT_TRUE(appRecord->isKeepAliveAppService_);
+
+    IPCSkeleton::SetCallingUid(0);
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_SetKeepAliveAppService_0100 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

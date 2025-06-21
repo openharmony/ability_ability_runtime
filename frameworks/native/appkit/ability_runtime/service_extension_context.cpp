@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -276,6 +276,71 @@ ErrCode ServiceExtensionContext::OpenAtomicService(const AAFwk::Want &want, cons
         TAG_LOGE(AAFwkTag::APPKIT, "OpenAtomicService ret=%{public}d", err);
     }
     return err;
+}
+
+ErrCode ServiceExtensionContext::AddCompletionHandler(const std::string &requestId, OnRequestResult onRequestSucc,
+    OnRequestResult onRequestFail)
+{
+    if (onRequestSucc == nullptr || onRequestFail == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "either func is null");
+        return ERR_INVALID_VALUE;
+    }
+    std::lock_guard lock(onRequestResultMutex_);
+    for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
+        if ((*iter)->requestId_ == requestId) {
+            TAG_LOGI(AAFwkTag::APPKIT, "requestId=%{public}s already exists", requestId.c_str());
+            return ERR_OK;
+        }
+    }
+    onRequestResults_.emplace_back(std::make_shared<OnRequestResultElement>(requestId, onRequestSucc, onRequestFail));
+    return ERR_OK;
+}
+
+void ServiceExtensionContext::OnRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    std::shared_ptr<OnRequestResultElement> result = nullptr;
+    {
+        std::lock_guard lock(onRequestResultMutex_);
+        for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
+            if ((*iter)->requestId_ == requestId) {
+                result = *iter;
+                onRequestResults_.erase(iter);
+                break;
+            }
+        }
+    }
+
+    if (result != nullptr) {
+        TAG_LOGI(AAFwkTag::APPKIT, "requestId=%{public}s, call onRequestSuccess", requestId.c_str());
+        result->onRequestSuccess_(element, message);
+        return;
+    }
+    TAG_LOGE(AAFwkTag::APPKIT, "requestId=%{public}s not exist", requestId.c_str());
+}
+
+void ServiceExtensionContext::OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    std::shared_ptr<OnRequestResultElement> result = nullptr;
+    {
+        std::lock_guard lock(onRequestResultMutex_);
+        for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
+            if ((*iter)->requestId_ == requestId) {
+                result = *iter;
+                onRequestResults_.erase(iter);
+                break;
+            }
+        }
+    }
+
+    if (result != nullptr) {
+        TAG_LOGI(AAFwkTag::APPKIT, "requestId=%{public}s, call onRequestFailure", requestId.c_str());
+        result->onRequestFailure_(element, message);
+        return;
+    }
+
+    TAG_LOGE(AAFwkTag::APPKIT, "requestId=%{public}s not exist", requestId.c_str());
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

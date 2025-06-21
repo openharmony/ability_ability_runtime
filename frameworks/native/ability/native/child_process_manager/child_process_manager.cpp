@@ -157,9 +157,17 @@ ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessWithArgs(
     TAG_LOGD(AAFwkTag::PROCESSMGR, "AppMgr StartChildProcess ret:%{public}d", ret);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "StartChildProcess error:%{public}d", ret);
-        return ChildProcessManagerErrorUtil::GetChildProcessManagerErrorCode(ret);
+        return GetErrorCodeCompat(ret, childProcessType);
     }
     return ChildProcessManagerErrorCode::ERR_OK;
+}
+
+ChildProcessManagerErrorCode ChildProcessManager::GetErrorCodeCompat(int32_t ret, int32_t childProcessType)
+{
+    if (ret == AAFwk::ERR_NOT_SUPPORT_CHILD_PROCESS && childProcessType == AppExecFwk::CHILD_PROCESS_TYPE_JS) {
+        return ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED;
+    }
+    return ChildProcessManagerErrorUtil::GetChildProcessManagerErrorCode(ret);
 }
 
 ChildProcessManagerErrorCode ChildProcessManager::StartNativeChildProcessByAppSpawnFork(

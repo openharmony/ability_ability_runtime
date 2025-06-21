@@ -529,5 +529,39 @@ HWTEST_F(ChildProcessManagerTest, IsMultiProcessFeatureApp_0400, TestSize.Level2
     bool ret = ChildProcessManager::GetInstance().IsMultiProcessFeatureApp(bundleInfo);
     EXPECT_TRUE(ret);
 }
+
+/**
+ * @tc.number: GetErrorCodeCompat
+ * @tc.desc: Test GetErrorCodeCompat works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessManagerTest, GetErrorCodeCompat_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetErrorCodeCompat_0100 start.");
+
+    auto &childProcessManager = ChildProcessManager::GetInstance();
+    
+    auto ret = AAFwk::ERR_NOT_SUPPORT_CHILD_PROCESS;
+    auto childProcessType = AppExecFwk::CHILD_PROCESS_TYPE_JS;
+    auto errCode = childProcessManager.GetErrorCodeCompat(ret, childProcessType);
+    EXPECT_EQ(errCode, ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED);
+
+    ret = AAFwk::ERR_NOT_SUPPORT_CHILD_PROCESS;
+    childProcessType = AppExecFwk::CHILD_PROCESS_TYPE_ARK;
+    errCode = childProcessManager.GetErrorCodeCompat(ret, childProcessType);
+    EXPECT_NE(errCode, ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED);
+    
+    ret = AAFwk::INNER_ERR;
+    childProcessType = AppExecFwk::CHILD_PROCESS_TYPE_JS;
+    errCode = childProcessManager.GetErrorCodeCompat(ret, childProcessType);
+    EXPECT_NE(errCode, ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED);
+
+    ret = AAFwk::INNER_ERR;
+    childProcessType = AppExecFwk::CHILD_PROCESS_TYPE_ARK;
+    errCode = childProcessManager.GetErrorCodeCompat(ret, childProcessType);
+    EXPECT_NE(errCode, ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetErrorCodeCompat_0100 end.");
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

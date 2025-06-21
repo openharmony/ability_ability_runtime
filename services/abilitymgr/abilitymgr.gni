@@ -130,6 +130,7 @@ abilityms_files = [
   "src/insight_intent/insight_intent_db_cache.cpp",
   "src/insight_intent/insight_intent_execute_manager.cpp",
   "src/insight_intent/insight_intent_execute_result.cpp",
+  "src/insight_intent/insight_intent_json_util.cpp",
   "src/insight_intent/insight_intent_profile.cpp",
   "src/insight_intent/insight_intent_rdb_data_mgr.cpp",
   "src/insight_intent/insight_intent_rdb_storage_mgr.cpp",
@@ -140,6 +141,9 @@ abilityms_files = [
 
   #sa interceptor
   "src/sa_interceptor_manager.cpp",
+
+  #report data
+  "src/report_data_partition_usage_manager.cpp",
 
   # keep alive
   "src/keep_alive/ability_keep_alive_data_manager.cpp",

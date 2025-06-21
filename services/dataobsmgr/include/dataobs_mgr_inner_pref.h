@@ -48,6 +48,7 @@ private:
     bool HaveRegistered(sptr<IDataAbilityObserver> dataObserver);
 
     static constexpr uint32_t OBS_NUM_MAX = 50;
+    static constexpr uint32_t OBS_ALL_NUM_MAX = OBS_NUM_MAX * OBS_NUM_MAX;
     std::mutex preferenceMutex_;
     ObsMapType observers_;
     ObsRecipientMapType obsRecipient_;

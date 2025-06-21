@@ -157,7 +157,7 @@ int32_t AbilityKeepAliveService::SetAppServiceExtensionKeepAlive(KeepAliveInfo &
     }
 
     if (!flag) {
-        if (info.setterId != status.setterId) {
+        if (info.setterId != status.setterId && info.setter == status.setter) {
             TAG_LOGE(AAFwkTag::KEEP_ALIVE, "setter id is different, cannot unset");
             return ERR_CHANGE_KEEP_ALIVE;
         } else if (info.setter == KeepAliveSetter::USER && status.policy == KeepAlivePolicy::NOT_ALLOW_CANCEL) {
@@ -188,9 +188,8 @@ int32_t AbilityKeepAliveService::QueryKeepAliveAppServiceExtensions(std::vector<
 int32_t AbilityKeepAliveService::ClearKeepAliveAppServiceExtension(const KeepAliveInfo &info)
 {
     TAG_LOGD(AAFwkTag::KEEP_ALIVE, "ClearKeepAliveAppServiceExtension is called,"
-        " bundleName: %{public}s, userId: %{public}d, setterId: %{public}d",
-        info.bundleName.c_str(), info.userId, info.setterId);
-    return AbilityKeepAliveDataManager::GetInstance().DeleteKeepAliveData(info);
+        "setterId: %{public}d", info.setterId);
+    return AbilityKeepAliveDataManager::GetInstance().DeleteKeepAliveDataWithSetterId(info);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

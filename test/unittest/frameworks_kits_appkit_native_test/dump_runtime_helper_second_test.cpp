@@ -79,7 +79,7 @@ HWTEST_F(DumpRuntimeHelperTestSecond, SetAppFreezeFilterCallback_0200, TestSize.
 
     AbilityRuntime::Runtime::Options options;
     auto runtime = AbilityRuntime::Runtime::Create(options);
-    application->AddRuntime(std::move(runtime));
+    application->SetRuntime(std::move(runtime));
     helper = std::make_shared<DumpRuntimeHelper>(application);
     helper->SetAppFreezeFilterCallback();
     EXPECT_NE(application, nullptr);
@@ -117,7 +117,7 @@ HWTEST_F(DumpRuntimeHelperTestSecond, DumpJsHeap_0400, TestSize.Level1)
 
     AbilityRuntime::Runtime::Options options;
     auto runtime = AbilityRuntime::Runtime::Create(options);
-    application->AddRuntime(std::move(runtime));
+    application->SetRuntime(std::move(runtime));
     helper = std::make_shared<DumpRuntimeHelper>(application);
     helper->DumpJsHeap(info);
     EXPECT_NE(application, nullptr);
@@ -146,10 +146,9 @@ HWTEST_F(DumpRuntimeHelperTestSecond, GetCheckList_0500, TestSize.Level1)
     AbilityRuntime::Runtime::Options options;
     options.lang = AbilityRuntime::Runtime::Language::JS;
     auto runtime = AbilityRuntime::Runtime::Create(options);
-    application->AddRuntime(std::move(runtime));
+    application->SetRuntime(std::move(runtime));
     auto helper = std::make_shared<DumpRuntimeHelper>(application);
-    helper->GetCheckList(helper->application_->GetRuntime(OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
-        checkList);
+    helper->GetCheckList(helper->application_->GetRuntime(), checkList);
     EXPECT_NE(checkList, "");
 }
 
@@ -165,7 +164,7 @@ HWTEST_F(DumpRuntimeHelperTestSecond, GetJsLeakModule_0600, TestSize.Level1)
     AbilityRuntime::Runtime::Options options;
     options.lang = AbilityRuntime::Runtime::Language::JS;
     auto runtime = AbilityRuntime::Runtime::Create(options);
-    application->AddRuntime(std::move(runtime));
+    application->SetRuntime(std::move(runtime));
     auto helper = std::make_shared<DumpRuntimeHelper>(application);
     napi_env env = nullptr;
     napi_value global = nullptr;
@@ -186,10 +185,10 @@ HWTEST_F(DumpRuntimeHelperTestSecond, GetJsLeakModule_0700, TestSize.Level1)
     AbilityRuntime::Runtime::Options options;
     options.lang = AbilityRuntime::Runtime::Language::JS;
     auto runtime = AbilityRuntime::Runtime::Create(options);
-    application->AddRuntime(std::move(runtime));
+    application->SetRuntime(std::move(runtime));
     auto helper = std::make_shared<DumpRuntimeHelper>(application);
     AbilityRuntime::JsRuntime &jsruntime = static_cast<AbilityRuntime::JsRuntime&>(
-        *helper->application_->GetRuntime(OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0));
+        *helper->application_->GetRuntime());
     AbilityRuntime::HandleScope handleScope(jsruntime);
     auto env = jsruntime.GetNapiEnv();
     napi_value global = nullptr;
@@ -210,7 +209,7 @@ HWTEST_F(DumpRuntimeHelperTestSecond, GetMethodCheck_0800, TestSize.Level1)
     AbilityRuntime::Runtime::Options options;
     options.lang = AbilityRuntime::Runtime::Language::JS;
     auto runtime = AbilityRuntime::Runtime::Create(options);
-    application->AddRuntime(std::move(runtime));
+    application->SetRuntime(std::move(runtime));
     auto helper = std::make_shared<DumpRuntimeHelper>(application);
     napi_env env = nullptr;
     napi_value global = nullptr;
@@ -232,7 +231,7 @@ HWTEST_F(DumpRuntimeHelperTestSecond, WriteCheckList_0900, TestSize.Level1)
     AbilityRuntime::Runtime::Options options;
     options.lang = AbilityRuntime::Runtime::Language::JS;
     auto runtime = AbilityRuntime::Runtime::Create(options);
-    application->AddRuntime(std::move(runtime));
+    application->SetRuntime(std::move(runtime));
     auto helper = std::make_shared<DumpRuntimeHelper>(application);
     std::string checkList = "test";
     helper->WriteCheckList(checkList);
