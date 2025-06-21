@@ -58,7 +58,7 @@ bool GetDoubleOrUndefined(ani_env *env, ani_object param, const char *name, ani_
         return false;
     }
     if ((status = env->Object_CallMethodByName_Double(
-        reinterpret_cast<ani_object>(obj), "doubleValue", nullptr, &value)) != ANI_OK) {
+        reinterpret_cast<ani_object>(obj), "unboxed", nullptr, &value)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         return false;
     }
@@ -791,7 +791,7 @@ bool GetDoublePropertyObject(ani_env *env, ani_object param, const char *name, d
         return false;
     }
     if ((status = env->Object_CallMethodByName_Double(
-        reinterpret_cast<ani_object>(obj), "doubleValue", nullptr, &value)) != ANI_OK) {
+        reinterpret_cast<ani_object>(obj), "unboxed", nullptr, &value)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
         return false;
     }
