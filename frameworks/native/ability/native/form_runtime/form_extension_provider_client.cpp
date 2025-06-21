@@ -644,7 +644,7 @@ void FormExtensionProviderClient::NotifyFormExtensionUpdateLocation(const int64_
     }
 }
 
-int FormExtensionProviderClient::NotifySizeChanged(const int64_t formId, const std::string &newDimesnion,
+int FormExtensionProviderClient::NotifySizeChanged(const int64_t formId, const std::string &newDimension,
     const Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "called");
@@ -654,15 +654,15 @@ int FormExtensionProviderClient::NotifySizeChanged(const int64_t formId, const s
     }
     std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
     std::function<void()> notifyExtensionSizeChangedFunc = [client = sptr<FormExtensionProviderClient>(this),
-        formId, newDimesnion, newRect, want, callerToken]() {
-        client->NotifyExtensionSizeChanged(formId, newDimesnion, newRect, want, callerToken);
+        formId, newDimension, newRect, want, callerToken]() {
+        client->NotifyExtensionSizeChanged(formId, newDimension, newRect, want, callerToken);
     };
     mainHandler->PostSyncTask(notifyExtensionSizeChangedFunc,
         "FormExtensionProviderClient::NotifySizeChanged");
     return ERR_OK;
 }
 
-void FormExtensionProviderClient::NotifyExtensionSizeChanged(const int64_t formId, const std::string &newDimesnion,
+void FormExtensionProviderClient::NotifyExtensionSizeChanged(const int64_t formId, const std::string &newDimension,
     const Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken)
 {
     TAG_LOGD(AAFwkTag::FORM_EXT, "called");
@@ -672,7 +672,7 @@ void FormExtensionProviderClient::NotifyExtensionSizeChanged(const int64_t formI
         TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
         errorCode = ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
     } else {
-        ownerFormExtension->OnSizeChanged(formId, newDimesnion, newRect);
+        ownerFormExtension->OnSizeChanged(formId, newDimension, newRect);
     }
     if (want.HasParameter(Constants::FORM_CONNECT_ID)) {
         HandleResultCode(errorCode, want, callerToken);
