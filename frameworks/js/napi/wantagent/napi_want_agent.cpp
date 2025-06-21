@@ -1185,6 +1185,14 @@ napi_value JsWantAgent::OnNapiTrigger(napi_env env, napi_callback_info info)
         ThrowInvalidParamError(env, "Parameter error!");
         return CreateJsUndefined(env);
     }
+
+    // Public api trigger does not support localWantAgent, switch to triggerAsync.
+    if (wantAgent->IsLocal()) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Tigger does not support localWantAgent");
+        ThrowInvalidParamError(env, "Agent can not be local.");
+        return CreateJsUndefined(env);
+    }
+
     auto execute = [wantAgent, triggerObj, triggerInfo] () {
         TAG_LOGD(AAFwkTag::WANTAGENT, "called");
         sptr<CompletedDispatcher> completedData;
