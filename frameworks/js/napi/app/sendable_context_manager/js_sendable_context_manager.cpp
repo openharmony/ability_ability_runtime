@@ -42,7 +42,7 @@ void* DetachNewApplicationContext(napi_env, void* nativeObject, void*)
         return nullptr;
     }
     TAG_LOGD(AAFwkTag::APPKIT, "New detached application context");
-    auto* detachNewContext = new(std::nothrow) std::weak_ptr<ApplicationContext>(*origContext);
+    auto* detachNewContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(*origContext);
     return detachNewContext;
 }
 
@@ -54,7 +54,7 @@ void* DetachNewBaseContext(napi_env, void* nativeObject, void*)
         return nullptr;
     }
     TAG_LOGD(AAFwkTag::APPKIT, "New detached base context");
-    auto* detachNewContext = new(std::nothrow) std::weak_ptr<Context>(*origContext);
+    auto* detachNewContext = new (std::nothrow) std::weak_ptr<Context>(*origContext);
     return detachNewContext;
 }
 
@@ -66,7 +66,7 @@ void* DetachNewAbilityStageContext(napi_env, void* nativeObject, void*)
         return nullptr;
     }
     TAG_LOGD(AAFwkTag::APPKIT, "New detached abilityStage context");
-    auto* detachNewContext = new(std::nothrow) std::weak_ptr<AbilityStageContext>(*origContext);
+    auto* detachNewContext = new (std::nothrow) std::weak_ptr<AbilityStageContext>(*origContext);
     return detachNewContext;
 }
 
@@ -78,7 +78,7 @@ void* DetachNewAbilityContext(napi_env, void* nativeObject, void*)
         return nullptr;
     }
     TAG_LOGD(AAFwkTag::APPKIT, "New detached ability context");
-    auto* detachNewContext = new(std::nothrow) std::weak_ptr<AbilityContext>(*origContext);
+    auto* detachNewContext = new (std::nothrow) std::weak_ptr<AbilityContext>(*origContext);
     return detachNewContext;
 }
 
