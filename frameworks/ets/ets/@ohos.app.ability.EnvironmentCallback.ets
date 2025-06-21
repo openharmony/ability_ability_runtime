@@ -16,9 +16,16 @@
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import { Configuration } from '@ohos.app.ability.Configuration';
 
-export default class EnvironmentCallback {
-
-  public onConfigurationUpdated: (config: Configuration) => void = (config: Configuration) => {}
-  public onMemoryLevel: (level: AbilityConstant.MemoryLevel) => void = (level: AbilityConstant.MemoryLevel) => {}
-
+interface EnvironmentCallback {
+  onConfigurationUpdated(config: Configuration): void;
+  onMemoryLevel(level: AbilityConstant.MemoryLevel): void;
 }
+
+class EnvironmentCallbackInner implements EnvironmentCallback {
+  onConfigurationUpdated(config: Configuration): void {
+  }
+
+  onMemoryLevel(level: AbilityConstant.MemoryLevel): void {
+  }
+}
+export default EnvironmentCallback;
