@@ -187,7 +187,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int NotifySizeChanged(int64_t formId, const std::string &newDimension, const AppExecFwk::Rect &newRect,
-        const Want &want, sptr<IRemoteObject> &callerToken) override;
+        const Want &want, const sptr<IRemoteObject> &callerToken) override;
 
 private:
     std::shared_ptr<FormExtension> GetOwner();
