@@ -13,18 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_STS_APPLICATION_H
-#define OHOS_ABILITY_RUNTIME_STS_APPLICATION_H
+#ifndef OHOS_ABILITY_RUNTIME_ETS_APPLICATION_H
+#define OHOS_ABILITY_RUNTIME_ETS_APPLICATION_H
 
 #include "ani.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-static void CreateModuleContext([[maybe_unused]] ani_env *env,
-    ani_object contextObj, ani_string bundleName, ani_string moduleName, ani_object callback);
-static void CreateBundleContext([[maybe_unused]] ani_env *env,
-    ani_object contextObj, ani_string bundleName, ani_object callback);
+class EtsApplication {
+public:
+    static void CreateModuleContext([[maybe_unused]] ani_env *env,
+        ani_object contextObj, ani_string bundleName, ani_string moduleName, ani_object callback);
+    static void CreateBundleContext([[maybe_unused]] ani_env *env,
+        ani_object contextObj, ani_string bundleName, ani_object callback);
+    static ani_object GetApplicationContext(ani_env *env);
+};
 void ApplicationInit(ani_env *env);
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif //OHOS_ABILITY_RUNTIME_STS_APPLICATION_H
+#endif //OHOS_ABILITY_RUNTIME_ETS_APPLICATION_H
