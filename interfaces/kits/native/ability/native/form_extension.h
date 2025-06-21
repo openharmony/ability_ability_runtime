@@ -172,11 +172,11 @@ public:
      * @brief Called to notify the form provider to size changed.
      *
      * @param formId The Id of the form to update.
-     * @param newDimesnion The dimesnion value to be updated.
+     * @param newDimension The dimesnion value to be updated.
      * @param newRect The rect value to be updated.
      * @return none.
      */
-    virtual void OnSizeChanged(const int64_t formId, const std::string &newDimesnion, const AppExecFwk::Rect &newRect);
+    virtual void OnSizeChanged(const int64_t formId, const std::string &newDimension, const AppExecFwk::Rect &newRect);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
