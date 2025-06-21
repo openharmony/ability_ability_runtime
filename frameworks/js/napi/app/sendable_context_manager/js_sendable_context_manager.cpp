@@ -100,7 +100,7 @@ void DetachFinalizeAbilityStageContext(void* detachedObject, void*)
     delete static_cast<std::weak_ptr<AbilityStageContext> *>(detachedObject);
 }
 
-void DetachFinalizeAbilityStageContext(void* detachedObject, void*)
+void DetachFinalizeAbilityContext(void* detachedObject, void*)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Finalizer detached ability context");
     delete static_cast<std::weak_ptr<AbilityContext> *>(detachedObject);
