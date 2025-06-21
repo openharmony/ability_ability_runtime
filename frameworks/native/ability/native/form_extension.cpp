@@ -140,7 +140,7 @@ void FormExtension::OnConfigurationUpdated(const AppExecFwk::Configuration &conf
     }
 }
 
-void FormExtension::OnSizeChanged(const int64_t formId, const std::string &newDimension, const Rect &newRect)
+void FormExtension::OnSizeChanged(int64_t formId, const std::string &newDimension, const Rect &newRect)
 {
     TAG_LOGD(AAFwkTag::FORM_EXT, "call");
 }
