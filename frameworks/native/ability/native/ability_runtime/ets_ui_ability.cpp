@@ -735,7 +735,7 @@ bool EtsUIAbility::CallObjectMethod(bool withResult, const char *name, const cha
         return false;
     }
     if (withResult) {
-        ani_boolean res = false;
+        ani_boolean res = ANI_FALSE;
         va_list args;
         va_start(args, signature);
         if ((status = env->Object_CallMethod_Boolean_V(obj, method, &res, args)) != ANI_OK) {

@@ -1372,6 +1372,8 @@ public:
      */
     void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid);
 
+    void SetKeepAliveAppService(const std::string &bundleName, bool enable, int32_t uid);
+
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 
     int32_t GetAllUIExtensionRootHostPid(pid_t pid, std::vector<pid_t> &hostPids);
@@ -2042,7 +2044,7 @@ private:
     void ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo,
         const std::shared_ptr<AppRunningRecord> &appRecord);
     void SetKeepAliveEnableStateAndNotify(const std::shared_ptr<AppRunningRecord>& appRecord, bool enable);
-    void SetKeepAliveDkvAndNotify(const std::shared_ptr<AppRunningRecord>& appRecord, bool enable);
+    void SetKeepAliveAppServiceAndNotify(const std::shared_ptr<AppRunningRecord>& appRecord, bool enable);
     bool GetKeepAliveState(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;

@@ -14,10 +14,12 @@
  */
 
 #include "app_utils.h"
+
 #include <unordered_set>
-#include "json_utils.h"
+
+#include "cJSON.h"
 #include "hilog_tag_wrapper.h"
-#include "nlohmann/json.hpp"
+#include "json_utils.h"
 #include "parameter.h"
 #include "parameters.h"
 #ifdef SUPPORT_GRAPHICS
@@ -341,79 +343,123 @@ bool AppUtils::IsRequireBigMemoryProcess(const std::string &bundleName)
 
 void AppUtils::LoadProcessProhibitedFromRestarting()
 {
-    nlohmann::json object;
+    cJSON *object = nullptr;
     if (!JsonUtils::GetInstance().LoadConfiguration(CONFIG_PATH, object)) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "process prohibited invalid");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "process prohibited invalid");
         return;
     }
-    if (!object.contains(PROCESS_PROHIBITED_FROM_RESTARTING) ||
-        !object.at(PROCESS_PROHIBITED_FROM_RESTARTING).is_array()) {
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "object is null");
+        return;
+    }
+    cJSON *processItem = cJSON_GetObjectItem(object, PROCESS_PROHIBITED_FROM_RESTARTING);
+    if (processItem == nullptr || !cJSON_IsArray(processItem)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "process prohibited invalid.");
+        cJSON_Delete(object);
         return;
     }
 
-    for (auto &item : object.at(PROCESS_PROHIBITED_FROM_RESTARTING).items()) {
-        const nlohmann::json& jsonObject = item.value();
-        if (!jsonObject.contains(BUNDLE_NAME) || !jsonObject.at(BUNDLE_NAME).is_string()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "load bundleName failed");
+    int size = cJSON_GetArraySize(processItem);
+    for (int i = 0; i < size; i++) {
+        cJSON *childItem = cJSON_GetArrayItem(processItem, i);
+        if (childItem == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "item is null");
+            cJSON_Delete(object);
             return;
         }
-        std::string bundleName = jsonObject.at(BUNDLE_NAME).get<std::string>();
+        cJSON *bundleNameItem = cJSON_GetObjectItem(childItem, BUNDLE_NAME);
+        if (bundleNameItem == nullptr || !cJSON_IsString(bundleNameItem)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "load bundleName failed");
+            cJSON_Delete(object);
+            return;
+        }
+        std::string bundleName = bundleNameItem->valuestring;
         processProhibitedFromRestarting_.value.emplace_back(bundleName);
     }
+    cJSON_Delete(object);
 }
 
 void AppUtils::LoadRequireBigMemoryApp()
 {
-    nlohmann::json object;
+    cJSON *object = nullptr;
     if (!JsonUtils::GetInstance().LoadConfiguration(CONFIG_PATH, object)) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "process prohibited invalid");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "process prohibited invalid");
         return;
     }
-    if (!object.contains(REQUIRE_BIGMEMORY_APP) ||
-        !object.at(REQUIRE_BIGMEMORY_APP).is_array()) {
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "object is null");
+        return;
+    }
+    cJSON *processItem = cJSON_GetObjectItem(object, REQUIRE_BIGMEMORY_APP);
+    if (processItem == nullptr || !cJSON_IsArray(processItem)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "process prohibited invalid.");
+        cJSON_Delete(object);
         return;
     }
 
-    for (auto &item : object.at(REQUIRE_BIGMEMORY_APP).items()) {
-        const nlohmann::json& jsonObject = item.value();
-        if (!jsonObject.contains(BUNDLE_NAME) || !jsonObject.at(BUNDLE_NAME).is_string()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "load bundleName failed");
+    int size = cJSON_GetArraySize(processItem);
+    for (int i = 0; i < size; i++) {
+        cJSON *childItem = cJSON_GetArrayItem(processItem, i);
+        if (childItem == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "item is null");
+            cJSON_Delete(object);
             return;
         }
-        std::string bundleName = jsonObject.at(BUNDLE_NAME).get<std::string>();
+        cJSON *bundleNameItem = cJSON_GetObjectItem(childItem, BUNDLE_NAME);
+        if (bundleNameItem == nullptr || !cJSON_IsString(bundleNameItem)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "load bundleName failed");
+            cJSON_Delete(object);
+            return;
+        }
+        std::string bundleName = bundleNameItem->valuestring;
         requireBigMemoryApp_.value.emplace_back(bundleName);
     }
+    cJSON_Delete(object);
 }
 
 void AppUtils::LoadResidentProcessInExtremeMemory()
 {
-    nlohmann::json object;
+    cJSON *object = nullptr;
     if (!JsonUtils::GetInstance().LoadConfiguration(CONFIG_PATH, object)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "resident process failed");
         return;
     }
-    if (!object.contains(RESIDENT_PROCESS_IN_EXTREME_MEMORY) ||
-        !object.at(RESIDENT_PROCESS_IN_EXTREME_MEMORY).is_array()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "resident process invalid");
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "object is null");
+        return;
+    }
+    cJSON *processItem = cJSON_GetObjectItem(object, RESIDENT_PROCESS_IN_EXTREME_MEMORY);
+    if (processItem == nullptr || !cJSON_IsArray(processItem)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "resident process invalid.");
+        cJSON_Delete(object);
         return;
     }
 
-    for (auto &item : object.at(RESIDENT_PROCESS_IN_EXTREME_MEMORY).items()) {
-        const nlohmann::json& jsonObject = item.value();
-        if (!jsonObject.contains(BUNDLE_NAME) || !jsonObject.at(BUNDLE_NAME).is_string()) {
+    int size = cJSON_GetArraySize(processItem);
+    for (int i = 0; i < size; i++) {
+        cJSON *childItem = cJSON_GetArrayItem(processItem, i);
+        if (childItem == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "item is null");
+            cJSON_Delete(object);
+            return;
+        }
+        cJSON *bundleNameItem = cJSON_GetObjectItem(childItem, BUNDLE_NAME);
+        if (bundleNameItem ==  nullptr || !cJSON_IsString(bundleNameItem)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "load bundleName failed");
+            cJSON_Delete(object);
             return;
         }
-        if (!jsonObject.contains(ABILITY_NAME) || !jsonObject.at(ABILITY_NAME).is_string()) {
+        cJSON *abilityNameItem = cJSON_GetObjectItem(childItem, ABILITY_NAME);
+        if (abilityNameItem ==  nullptr || !cJSON_IsString(abilityNameItem)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "load abilityName failed");
+            cJSON_Delete(object);
             return;
         }
-        std::string bundleName = jsonObject.at(BUNDLE_NAME).get<std::string>();
-        std::string abilityName = jsonObject.at(ABILITY_NAME).get<std::string>();
+        std::string bundleName = bundleNameItem->valuestring;
+        std::string abilityName = abilityNameItem->valuestring;
         residentProcessInExtremeMemory_.value.emplace_back(std::make_pair(bundleName, abilityName));
     }
+    cJSON_Delete(object);
 }
 
 bool AppUtils::IsAllowNativeChildProcess(const std::string &appIdentifier)
@@ -430,26 +476,39 @@ bool AppUtils::IsAllowNativeChildProcess(const std::string &appIdentifier)
 
 void AppUtils::LoadAllowNativeChildProcessApps()
 {
-    nlohmann::json object;
+    cJSON *object = nullptr;
     if (!JsonUtils::GetInstance().LoadConfiguration(ALLOW_NATIVE_CHILD_PROCESS_APPS_CONFIG_PATH, object)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "load child process config failed");
         return;
     }
-    if (!object.contains(KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS) ||
-        !object.at(KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS).is_array()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "get key invalid");
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "object is null");
         return;
     }
-
-    for (auto &item : object.at(KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS).items()) {
-        const nlohmann::json& jsonObject = item.value();
-        if (!jsonObject.contains(KEY_IDENTIFIER) || !jsonObject.at(KEY_IDENTIFIER).is_string()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "load identifier failed");
+    cJSON *processItem = cJSON_GetObjectItem(object, KEY_ALLOW_NATIVE_CHILD_PROCESS_APPS);
+    if (processItem == nullptr || !cJSON_IsArray(processItem)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get key invalid.");
+        cJSON_Delete(object);
+        return;
+    }
+    int size = cJSON_GetArraySize(processItem);
+    for (int i = 0; i < size; i++) {
+        cJSON *childItem = cJSON_GetArrayItem(processItem, i);
+        if (childItem == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "item is null");
+            cJSON_Delete(object);
             return;
         }
-        std::string identifier = jsonObject.at(KEY_IDENTIFIER).get<std::string>();
+        cJSON *identifierItem = cJSON_GetObjectItem(childItem, KEY_IDENTIFIER);
+        if (identifierItem == nullptr || !cJSON_IsString(identifierItem)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "load identifier failed");
+            cJSON_Delete(object);
+            return;
+        }
+        std::string identifier = identifierItem->valuestring;
         allowStartNativeProcessApps_.value.emplace_back(identifier);
     }
+    cJSON_Delete(object);
 }
 
 int32_t AppUtils::GetLimitMaximumExtensionsPerProc()
@@ -506,32 +565,48 @@ bool AppUtils::IsAllowStartAbilityWithoutCallerToken(const std::string& bundleNa
 
 void AppUtils::LoadStartAbilityWithoutCallerToken()
 {
-    nlohmann::json object;
+    cJSON *object = nullptr;
     if (!JsonUtils::GetInstance().LoadConfiguration(
         START_ABILITY_WITHOUT_CALLERTOKEN_PATH, object, START_ABILITY_WITHOUT_CALLERTOKEN)) {
         TAG_LOGE(AAFwkTag::DEFAULT, "token list failed");
         return;
     }
-    if (!object.contains(START_ABILITY_WITHOUT_CALLERTOKEN_TITLE) ||
-        !object.at(START_ABILITY_WITHOUT_CALLERTOKEN_TITLE).is_array()) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "token config invalid");
+    if (object == nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "object is null");
+        return;
+    }
+    cJSON *processItem = cJSON_GetObjectItem(object, START_ABILITY_WITHOUT_CALLERTOKEN_TITLE);
+    if (processItem == nullptr || !cJSON_IsArray(processItem)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "token config invalid.");
+        cJSON_Delete(object);
         return;
     }
 
-    for (auto &item : object.at(START_ABILITY_WITHOUT_CALLERTOKEN_TITLE).items()) {
-        const nlohmann::json& jsonObject = item.value();
-        if (!jsonObject.contains(BUNDLE_NAME) || !jsonObject.at(BUNDLE_NAME).is_string()) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "load bundleName failed");
+    int size = cJSON_GetArraySize(processItem);
+    for (int i = 0; i < size; i++) {
+        cJSON *childItem = cJSON_GetArrayItem(processItem, i);
+        if (childItem == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "item is null");
+            cJSON_Delete(object);
             return;
         }
-        if (!jsonObject.contains(ABILITY_NAME) || !jsonObject.at(ABILITY_NAME).is_string()) {
-            TAG_LOGE(AAFwkTag::DEFAULT, "load abilityName failed");
+        cJSON *bundleNameItem = cJSON_GetObjectItem(childItem, BUNDLE_NAME);
+        if (bundleNameItem ==  nullptr || !cJSON_IsString(bundleNameItem)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "load bundleName failed");
+            cJSON_Delete(object);
             return;
         }
-        std::string bundleName = jsonObject.at(BUNDLE_NAME).get<std::string>();
-        std::string abilityName = jsonObject.at(ABILITY_NAME).get<std::string>();
+        cJSON *abilityNameItem = cJSON_GetObjectItem(childItem, ABILITY_NAME);
+        if (abilityNameItem ==  nullptr || !cJSON_IsString(abilityNameItem)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "load abilityName failed");
+            cJSON_Delete(object);
+            return;
+        }
+        std::string bundleName = bundleNameItem->valuestring;
+        std::string abilityName = abilityNameItem->valuestring;
         startAbilityWithoutCallerToken_.value.emplace_back(std::make_pair(bundleName, abilityName));
     }
+    cJSON_Delete(object);
 }
 
 std::string AppUtils::GetBrokerDelegateBundleName()
@@ -647,31 +722,47 @@ bool AppUtils::IsCacheAbilityEnabled()
 
 void AppUtils::LoadCacheAbilityList()
 {
-    nlohmann::json object;
+    cJSON *object = nullptr;
     if (!JsonUtils::GetInstance().LoadConfiguration(CACHE_ABILITY_LIST_PATH, object)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "load cache_ability file failed");
         return;
     }
-    if (!object.contains(CACHE_PROCESS_NAME) ||
-        !object.at(CACHE_PROCESS_NAME).is_array()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "cache_ability file invalid");
+    if (object == nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "object is null");
+        return;
+    }
+    cJSON *processItem = cJSON_GetObjectItem(object, CACHE_PROCESS_NAME);
+    if (processItem == nullptr || !cJSON_IsArray(processItem)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "cache_ability file invalid.");
+        cJSON_Delete(object);
         return;
     }
 
-    for (auto &item : object.at(CACHE_PROCESS_NAME).items()) {
-        const nlohmann::json& jsonObject = item.value();
-        if (!jsonObject.contains(BUNDLE_NAME) || !jsonObject.at(BUNDLE_NAME).is_string()) {
+    int size = cJSON_GetArraySize(processItem);
+    for (int i = 0; i < size; i++) {
+        cJSON *childItem = cJSON_GetArrayItem(processItem, i);
+        if (childItem == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "item is null");
+            cJSON_Delete(object);
+            return;
+        }
+        cJSON *bundleNameItem = cJSON_GetObjectItem(childItem, BUNDLE_NAME);
+        if (bundleNameItem ==  nullptr || !cJSON_IsString(bundleNameItem)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "load cache_ability bundleName failed");
+            cJSON_Delete(object);
             return;
         }
-        if (!jsonObject.contains(ABILITY_NAME) || !jsonObject.at(ABILITY_NAME).is_string()) {
+        cJSON *abilityNameItem = cJSON_GetObjectItem(childItem, ABILITY_NAME);
+        if (abilityNameItem ==  nullptr || !cJSON_IsString(abilityNameItem)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "load cache_ability abilityName failed");
+            cJSON_Delete(object);
             return;
         }
-        std::string bundleName = jsonObject.at(BUNDLE_NAME).get<std::string>();
-        std::string abilityName = jsonObject.at(ABILITY_NAME).get<std::string>();
+        std::string bundleName = bundleNameItem->valuestring;
+        std::string abilityName = abilityNameItem->valuestring;
         cacheAbilityList_.value.emplace_back(std::make_pair(bundleName, abilityName));
     }
+    cJSON_Delete(object);
 }
 
 bool AppUtils::IsCacheExtensionAbilityByList(const std::string& bundleName, const std::string& abilityName)
@@ -700,24 +791,25 @@ bool AppUtils::IsCacheExtensionAbilityByList(const std::string& bundleName, cons
 
 void AppUtils::LoadResidentWhiteList()
 {
-    nlohmann::json object;
+    cJSON *object = nullptr;
     if (!JsonUtils::GetInstance().LoadConfiguration(RESIDENT_WHITE_LIST_PATH, object)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "load resident white list file failed");
         return;
     }
-    if (!object.contains(NORMAL_RESIDENT_APPS) ||
-        !object.at(NORMAL_RESIDENT_APPS).is_array()) {
+    cJSON *normalResidentAppsItem = cJSON_GetObjectItem(object, NORMAL_RESIDENT_APPS);
+    if (normalResidentAppsItem == nullptr || !cJSON_IsArray(normalResidentAppsItem)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "resident white list file invalid");
         return;
     }
-
-    for (auto &item : object.at(NORMAL_RESIDENT_APPS).items()) {
-        const nlohmann::json& jsonObject = item.value();
-        if (!jsonObject.is_string()) {
+    int size = cJSON_GetArraySize(normalResidentAppsItem);
+    for (int i = 0; i < size; i++) {
+        cJSON *jsonObject = cJSON_GetArrayItem(normalResidentAppsItem, i);
+        if (jsonObject == nullptr || !cJSON_IsString(jsonObject)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "load resident white bundleName failed");
             return;
         }
-        residentWhiteList_.value.emplace_back(jsonObject.get<std::string>());
+        std::string jsonStr = jsonObject->valuestring;
+        residentWhiteList_.value.emplace_back(jsonStr);
     }
 }
 

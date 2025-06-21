@@ -140,46 +140,47 @@ HWTEST_F(AbilityAutoStartupServiceSecondTest, GetAbilityData_003, TestSize.Level
     autoStartupInfo.accessTokenId = 1;
     autoStartupInfo.appCloneIndex = 0;
 
-    bool isVisible = true;
-    std::string abilityTypeName = "";
-    std::string accessTokenId = "";
-    int32_t userId = 0;
+    AutoStartupAbilityData abilityData;
+    abilityData.isVisible = true;
+    abilityData.abilityTypeName = "";
+    abilityData.accessTokenId = "";
+    abilityData.currentUserId = 0;
 
     bool result =
-        abilityAutoStartupService->GetAbilityData(autoStartupInfo, isVisible, abilityTypeName, accessTokenId, userId);
+        abilityAutoStartupService->GetAbilityData(autoStartupInfo, abilityData);
     EXPECT_FALSE(result);
-    EXPECT_TRUE(isVisible);
+    EXPECT_TRUE(abilityData.isVisible);
 
-    isVisible = true;
+    abilityData.isVisible = true;
     autoStartupInfo.bundleName = "hapModuleInfosModuleNameIsempty";
     autoStartupInfo.moduleName = "";
     result =
-        abilityAutoStartupService->GetAbilityData(autoStartupInfo, isVisible, abilityTypeName, accessTokenId, userId);
+        abilityAutoStartupService->GetAbilityData(autoStartupInfo, abilityData);
     EXPECT_TRUE(result);
-    EXPECT_FALSE(isVisible);
+    EXPECT_FALSE(abilityData.isVisible);
 
-    isVisible = true;
+    abilityData.isVisible = true;
     autoStartupInfo.bundleName = "hapModuleInfosModuleNameNotempty";
     autoStartupInfo.moduleName = "moduleNameTest";
     result =
-        abilityAutoStartupService->GetAbilityData(autoStartupInfo, isVisible, abilityTypeName, accessTokenId, userId);
-    EXPECT_FALSE(isVisible);
+        abilityAutoStartupService->GetAbilityData(autoStartupInfo, abilityData);
+    EXPECT_FALSE(abilityData.isVisible);
 
-    isVisible = true;
+    abilityData.isVisible = true;
     autoStartupInfo.bundleName = "extensionInfosModuleNameIsempty";
     autoStartupInfo.moduleName = "";
     result =
-        abilityAutoStartupService->GetAbilityData(autoStartupInfo, isVisible, abilityTypeName, accessTokenId, userId);
+        abilityAutoStartupService->GetAbilityData(autoStartupInfo, abilityData);
     EXPECT_TRUE(result);
-    EXPECT_FALSE(isVisible);
+    EXPECT_FALSE(abilityData.isVisible);
 
-    isVisible = true;
+    abilityData.isVisible = true;
     autoStartupInfo.bundleName = "extensionInfosModuleNameNotempty";
     autoStartupInfo.moduleName = "moduleNameTest";
     result =
-        abilityAutoStartupService->GetAbilityData(autoStartupInfo, isVisible, abilityTypeName, accessTokenId, userId);
+        abilityAutoStartupService->GetAbilityData(autoStartupInfo, abilityData);
     EXPECT_TRUE(result);
-    EXPECT_FALSE(isVisible);
+    EXPECT_FALSE(abilityData.isVisible);
 
     GTEST_LOG_(INFO) << "GetAbilityData_003 end";
 }
@@ -206,6 +207,7 @@ HWTEST_F(AbilityAutoStartupServiceSecondTest, InnerApplicationAutoStartupByEDM_0
     autoStartupInfo.moduleName = "moduleNameTest";
     autoStartupInfo.accessTokenId = 1;
     autoStartupInfo.appCloneIndex = 1;
+    autoStartupInfo.currentUserId = 1;
     autoStartupInfo.userId = 1;
 
     int32_t result = abilityAutoStartupService->InnerApplicationAutoStartupByEDM(autoStartupInfo, true, true);
@@ -287,6 +289,7 @@ HWTEST_F(AbilityAutoStartupServiceSecondTest, SetApplicationAutoStartup_001, Tes
     info.moduleName = "testModule";
     info.abilityName = "testAbility";
     info.accessTokenId = "12345";
+    info.currentUserId = 100;
     info.userId = 100;
     int32_t result = abilityAutoStartupService->SetApplicationAutoStartup(info);
     ASSERT_EQ(result, INNER_ERR);
@@ -311,10 +314,14 @@ HWTEST_F(AbilityAutoStartupServiceSecondTest, SetApplicationAutoStartup_002, Tes
     info.moduleName = "testModule";
     info.abilityName = "testAbility";
     info.accessTokenId = "12345";
+    info.currentUserId = 100;
     info.userId = 100;
-    bool isVisible = true;
-    abilityAutoStartupService->GetAbilityData(info, isVisible, info.abilityName,
-        info.accessTokenId, info.userId);
+    AutoStartupAbilityData abilityData;
+    abilityData.isVisible = true;
+    abilityData.abilityTypeName = info.abilityName;
+    abilityData.accessTokenId = info.accessTokenId;
+    abilityData.currentUserId = info.currentUserId;
+    abilityAutoStartupService->GetAbilityData(info, abilityData);
     int32_t result = abilityAutoStartupService->SetApplicationAutoStartup(info);
     ASSERT_EQ(result, ERR_NOT_SYSTEM_APP);
     GTEST_LOG_(INFO) << "SetApplicationAutoStartup_002 end";
@@ -338,10 +345,14 @@ HWTEST_F(AbilityAutoStartupServiceSecondTest, CancelApplicationAutoStartup_001, 
     info.moduleName = "testModule";
     info.abilityName = "testAbility";
     info.accessTokenId = "12345";
+    info.currentUserId = 100;
     info.userId = 100;
-    bool isVisible = true;
-    abilityAutoStartupService->GetAbilityData(info, isVisible, info.abilityName,
-        info.accessTokenId, info.userId);
+    AutoStartupAbilityData abilityData;
+    abilityData.isVisible = true;
+    abilityData.abilityTypeName = info.abilityName;
+    abilityData.accessTokenId = info.accessTokenId;
+    abilityData.currentUserId = info.currentUserId;
+    abilityAutoStartupService->GetAbilityData(info, abilityData);
     int32_t result = abilityAutoStartupService->CancelApplicationAutoStartup(info);
     ASSERT_EQ(result, ERR_NOT_SYSTEM_APP);
     GTEST_LOG_(INFO) << "CancelApplicationAutoStartup_001 end";
@@ -379,6 +390,66 @@ HWTEST_F(AbilityAutoStartupServiceSecondTest, CheckPermissionForSelf_002, TestSi
     int32_t result = abilityAutoStartupService->CheckPermissionForSelf(bundleName);
     ASSERT_EQ(result, ERR_NOT_SELF_APPLICATION);
     GTEST_LOG_(INFO) << "CheckPermissionForSelf_002 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: GetBundleInfo
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService GetBundleInfo
+ */
+HWTEST_F(AbilityAutoStartupServiceSecondTest, GetBundleInfo_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceSecondTest GetBundleInfo_001 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    std::string bundleName = "infoListIs0";
+    int32_t userId = -1;
+    int32_t uid = 2000000;
+    int32_t appIndex = 0;
+    AppExecFwk::BundleInfo bundleInfo;
+    auto result = abilityAutoStartupService->GetBundleInfo(bundleName, bundleInfo, uid, userId, appIndex);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceSecondTest GetBundleInfo_001 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: GetBundleInfo
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService GetBundleInfo
+ */
+HWTEST_F(AbilityAutoStartupServiceSecondTest, GetBundleInfo_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceSecondTest GetBundleInfo_002 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    std::string bundleName = "bundleName12345";
+    int32_t userId = -1;
+    int32_t uid = 2000000;
+    int32_t appIndex = 1;
+    AppExecFwk::BundleInfo bundleInfo;
+    auto result = abilityAutoStartupService->GetBundleInfo(bundleName, bundleInfo, uid, userId, appIndex);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceSecondTest GetBundleInfo_002 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: GetBundleInfo
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService GetBundleInfo
+ */
+HWTEST_F(AbilityAutoStartupServiceSecondTest, GetBundleInfo_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceSecondTest GetBundleInfo_003 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    std::string bundleName = "bundleName12345";
+    int32_t userId = -1;
+    int32_t uid = 2000000;
+    int32_t appIndex = 6;
+    AppExecFwk::BundleInfo bundleInfo;
+    auto result = abilityAutoStartupService->GetBundleInfo(bundleName, bundleInfo, uid, userId, appIndex);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceSecondTest GetBundleInfo_003 end";
 }
 } // namespace AAFwk
 } // namespace OHOS

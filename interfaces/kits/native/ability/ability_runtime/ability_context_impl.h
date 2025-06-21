@@ -397,16 +397,6 @@ private:
     sptr<IRemoteObject> GetSessionToken();
     void SetWindowRectangleParams(AAFwk::Want &want);
 
-    struct OnRequestResultElement {
-        std::string requestId_;
-        OnRequestResult onRequestSuccess_;
-        OnRequestResult onRequestFailure_;
-
-        OnRequestResultElement(const std::string &requestId, OnRequestResult onRequestSucc,
-            OnRequestResult onRequestFail) : requestId_(requestId), onRequestSuccess_(onRequestSucc),
-            onRequestFailure_(onRequestFail)
-        {}
-    };
     std::mutex onRequestResultMutex_;
     std::vector<std::shared_ptr<OnRequestResultElement>> onRequestResults_;
 };

@@ -158,8 +158,5 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(
     napi_create_reference(env, instanceValue, 1, &result);
     return std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference *>(result));
 }
-
-void JsRuntime::RegisterUncaughtExceptionHandler(void *uncaughtExceptionInfo)
-{}
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -34,10 +34,13 @@ public:
 
     int32_t QueryKeepAliveApplications(const KeepAliveInfo &queryParam, std::vector<KeepAliveInfo> &infoList);
 
+    int32_t DeleteKeepAliveDataWithSetterId(const KeepAliveInfo &info);
+
 public:
     static int32_t callSetResult;
     static int32_t callInsertResult;
     static int32_t callDeleteResult;
+    static int32_t callDeleteBySetterIdResult;
     static int32_t callQueryDataResult;
     static int32_t callQueryApplicationResult;
     static KeepAliveSetter queryDataSetter;

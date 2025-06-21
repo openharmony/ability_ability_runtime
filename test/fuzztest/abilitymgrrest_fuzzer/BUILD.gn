@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,6 +41,7 @@ ohos_fuzztest("AbilityMgrRestFuzzTest") {
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/appmgr:libappms",
+    "${ability_runtime_services_path}/common:app_util",
   ]
 
   external_deps = [
@@ -52,6 +53,7 @@ ohos_fuzztest("AbilityMgrRestFuzzTest") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "cJSON:cjson",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
     "hilog:libhilog",

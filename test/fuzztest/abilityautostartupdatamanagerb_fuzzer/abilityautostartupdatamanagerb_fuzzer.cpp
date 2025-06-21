@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,6 +82,7 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     info.abilityName = "MainAbility";
     info.appCloneIndex = int32Param;
     info.accessTokenId = "accessTokenId";
+    info.currentUserId = int32Param;
     info.userId = int32Param;
     dataMgr->ConvertAutoStartupDataToKey(info);
 
@@ -99,7 +100,8 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     dataMgr->ConvertAutoStartupInfoFromKeyAndValue(key2, value2Illegal);
     dataMgr->ConvertAutoStartupInfoFromKeyAndValue(key2, value3);
 
-    nlohmann::json jsonObject = nlohmann::json::parse(key1.ToString(), nullptr, false);
+    cJSON *jsonObject = cJSON_Parse(key1.ToString().c_str());
+    cJSON_Delete(jsonObject);
     dataMgr->IsEqual(key1, info);
     dataMgr->IsEqual(key2, info);
     dataMgr->IsEqual(key1Illegal, info);

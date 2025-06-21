@@ -1114,6 +1114,31 @@ void AmsMgrProxy::SetKeepAliveDkv(const std::string &bundleName, bool enable, in
     }
 }
 
+void AmsMgrProxy::SetKeepAliveAppService(const std::string &bundleName, bool enable, int32_t uid)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "SetKeepAliveAppService called");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write token failed");
+        return;
+    }
+    if (bundleName.empty() || !data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write bundleName fail");
+        return;
+    }
+    if (!data.WriteBool(enable) || !data.WriteInt32(uid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write flag or uid fail");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::SET_KEEP_ALIVE_APP_SERVICE),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request err: %{public}d", ret);
+    }
+}
+
 int32_t AmsMgrProxy::SetAppWaitingDebug(const std::string &bundleName, bool isPersist)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");

@@ -83,7 +83,6 @@
             "input",
             "ipc",
             "json",
-            "jsoncpp",
             "kv_store",
             "libuv",
             "libxml2",

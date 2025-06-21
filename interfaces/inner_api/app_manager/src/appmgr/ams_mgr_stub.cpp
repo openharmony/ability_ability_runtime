@@ -221,6 +221,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleIsCallerKilling(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::SET_KEEP_ALIVE_DKV):
             return HandleSetKeepAliveDkv(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::SET_KEEP_ALIVE_APP_SERVICE):
+            return HandleSetKeepAliveAppService(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESSES_IN_BATCH):
             return HandleKillProcessesInBatch(data, reply);
     }
@@ -772,6 +774,16 @@ int32_t AmsMgrStub::HandleSetKeepAliveDkv(MessageParcel &data, MessageParcel &re
     auto enable = data.ReadBool();
     auto uid = data.ReadInt32();
     SetKeepAliveDkv(bundleName, enable, uid);
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleSetKeepAliveAppService(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleSetKeepAliveAppService called");
+    auto bundleName = data.ReadString();
+    auto enable = data.ReadBool();
+    auto uid = data.ReadInt32();
+    SetKeepAliveAppService(bundleName, enable, uid);
     return NO_ERROR;
 }
 

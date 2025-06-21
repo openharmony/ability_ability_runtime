@@ -57,7 +57,6 @@ ohos_unittest("uri_utils_test") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
   ]
 }
 

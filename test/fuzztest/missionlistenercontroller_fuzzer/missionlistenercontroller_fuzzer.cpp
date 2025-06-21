@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,6 +67,11 @@ public:
         isMissionMovedToFront_ = true;
     }
 
+    void OnMissionMovedToBackground(int32_t missionId) override
+    {
+        isMissionMovedToBackground_ = true;
+    }
+
     void OnMissionIconUpdated(int32_t missionId, const std::shared_ptr<OHOS::Media::PixelMap>& icon) override
     {
         isMissionIconUpdated_ = true;
@@ -122,6 +127,7 @@ private:
     bool isMissionDestroyed_ = false;
     bool isMissionSnapshotChanged_ = false;
     bool isMissionMovedToFront_ = false;
+    bool isMissionMovedToBackground_ = false;
     bool isMissionIconUpdated_ = false;
     bool isMissionClosed_ = false;
     bool isMissionLabelUpdated_ = false;

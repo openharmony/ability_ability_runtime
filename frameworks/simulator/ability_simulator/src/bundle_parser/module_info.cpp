@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 
 #include "hilog_tag_wrapper.h"
 #include "json_util.h"
-#include "nlohmann/json.hpp"
 #include "string_ex.h"
 
 namespace OHOS {
@@ -26,46 +25,35 @@ namespace {
 const std::string MODULE_INFO_MODULE_SOURCE_DIR = "moduleSourceDir";
 const std::string MODULE_INFO_PRELOADS = "preloads";
 }
-void to_json(nlohmann::json &jsonObject, const ModuleInfo &moduleInfo)
+
+bool to_json(cJSON *&jsonObject, const ModuleInfo &moduleInfo)
 {
-    jsonObject = nlohmann::json {
-        {Constants::MODULE_NAME, moduleInfo.moduleName},
-        {MODULE_INFO_MODULE_SOURCE_DIR, moduleInfo.moduleSourceDir},
-        {MODULE_INFO_PRELOADS, moduleInfo.preloads}
-    };
+    jsonObject = cJSON_CreateObject();
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
+        return false;
+    }
+    cJSON_AddStringToObject(jsonObject, Constants::MODULE_NAME, moduleInfo.moduleName.c_str());
+    cJSON_AddStringToObject(jsonObject, MODULE_INFO_MODULE_SOURCE_DIR.c_str(), moduleInfo.moduleSourceDir.c_str());
+
+    cJSON *preloadsItem = nullptr;
+    if (!to_json(preloadsItem, moduleInfo.preloads)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json preloads failed");
+        cJSON_Delete(jsonObject);
+        return false;
+    }
+    cJSON_AddItemToObject(jsonObject, MODULE_INFO_PRELOADS.c_str(), preloadsItem);
+    return true;
 }
 
-void from_json(const nlohmann::json &jsonObject, ModuleInfo &moduleInfo)
+void from_json(const cJSON *jsonObject, ModuleInfo &moduleInfo)
 {
-    const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        Constants::MODULE_NAME,
-        moduleInfo.moduleName,
-        JsonType::STRING,
-        false,
-        parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        MODULE_INFO_MODULE_SOURCE_DIR,
-        moduleInfo.moduleSourceDir,
-        JsonType::STRING,
-        false,
-        parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
-        jsonObjectEnd,
-        MODULE_INFO_PRELOADS,
-        moduleInfo.preloads,
-        JsonType::ARRAY,
-        false,
-        parseResult,
-        ArrayType::STRING);
+    GetStringValueIfFindKey(jsonObject, Constants::MODULE_NAME, moduleInfo.moduleName, false, parseResult);
+    GetStringValueIfFindKey(jsonObject, MODULE_INFO_MODULE_SOURCE_DIR, moduleInfo.moduleSourceDir, false, parseResult);
+    GetStringValuesIfFindKey(jsonObject, MODULE_INFO_PRELOADS, moduleInfo.preloads, false, parseResult);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM,
-            "read module moduleInfo error:%{public}d", parseResult);
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "read module moduleInfo error:%{public}d", parseResult);
     }
 }
 } // namespace AppExecFwk

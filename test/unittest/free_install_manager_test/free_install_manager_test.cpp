@@ -32,6 +32,7 @@ namespace {
 const int BUNDLE_MGR_SERVICE_SYS_ABILITY_ID = 401;
 const int VALID_RECORD_ID = 1;
 const int INVALID_RECORD_ID = -1;
+constexpr const char* KEY_REQUEST_ID = "com.ohos.param.requestId";
 }
 class FreeInstallTest : public testing::Test {
 public:
@@ -602,6 +603,30 @@ HWTEST_F(FreeInstallTest, FreeInstall_GetRecordIdByToken_002, TestSize.Level1)
     sptr<IRemoteObject> callerToken = nullptr;
     int32_t result = freeInstallManager_->GetRecordIdByToken(callerToken);
     EXPECT_EQ(result, INVALID_RECORD_ID);
+}
+
+/**
+ * @tc.number: FreeInstall_BuildFreeInstallInfo_002
+ * @tc.name: BuildFreeInstallInfo
+ * @tc.desc: Test BuildFreeInstallInfo.
+ */
+HWTEST_F(FreeInstallTest, FreeInstall_BuildFreeInstallInfo_002, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    Want want;
+    ElementName element("", "com.test.demo", "MainAbility");
+    want.SetElement(element);
+    const int32_t userId = 1;
+    const int requestCode = 0;
+    want.SetParam(Want::PARAM_RESV_START_TIME, std::string("0"));
+    auto param = std::make_shared<FreeInstallParams>();
+    AAFwk::StartOptions startOptions;
+    startOptions.requestId_ = "test";
+    param->startOptions = std::make_shared<AAFwk::StartOptions>(startOptions);
+
+    FreeInstallInfo info = freeInstallManager_->BuildFreeInstallInfo(want, userId, requestCode, nullptr, param);
+    EXPECT_EQ(info.want.GetStringParam(KEY_REQUEST_ID), "test");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

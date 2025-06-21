@@ -48,6 +48,25 @@ namespace {
 #ifdef SUPPORT_SCREEN
 const std::string METHOD_NAME = "WindowScene::GoForeground";
 #endif
+
+void* DetachNewJsAbilityContext(napi_env, void* nativeObject, void*)
+{
+    auto* origContext = static_cast<std::weak_ptr<AbilityContext> *>(nativeObject);
+    if (origContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "origContext is null");
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "New detached base context");
+    auto* detachNewContext = new (std::nothrow) std::weak_ptr<AbilityContext>(*origContext);
+    return detachNewContext;
+}
+
+void DetachFinalizeJsAbilityContext(void* detachedObject, void*)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Finalizer detached base context");
+    delete static_cast<std::weak_ptr<AbilityContext> *>(detachedObject);
+}
+
 napi_value PromiseCallback(napi_env env, napi_callback_info info)
 {
     void *data = nullptr;
@@ -79,8 +98,10 @@ napi_value AttachJsAbilityContext(napi_env env, void *value, void *)
         return nullptr;
     }
     auto contextObj = systemModule->GetNapiValue();
-    napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, value, nullptr);
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(ptr);
+    napi_coerce_to_native_binding_object(
+        env, contextObj, DetachNewJsAbilityContext, AttachJsAbilityContext, workContext, nullptr);
+    napi_add_detached_finalizer(env, contextObj, DetachFinalizeJsAbilityContext, nullptr);
     napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void* data, void*) {
             TAG_LOGD(AAFwkTag::ABILITY, "finalizer for weak_ptr ability context is called");

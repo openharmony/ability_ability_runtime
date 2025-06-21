@@ -78,8 +78,9 @@
 #include "os_account_manager_wrapper.h"
 #include "permission_constants.h"
 #include "process_options.h"
-#include "recovery_param.h"
 #include "rate_limiter.h"
+#include "recovery_param.h"
+#include "report_data_partition_usage_manager.h"
 #include "res_sched_util.h"
 #include "restart_app_manager.h"
 #include "scene_board_judgement.h"
@@ -433,6 +434,7 @@ bool AbilityManagerService::Init()
     insightIntentEventMgr_ = std::make_shared<AbilityRuntime::InsightIntentEventMgr>();
     insightIntentEventMgr_->SubscribeSysEventReceiver();
     abilityEventHelper_ = std::make_shared<AbilityEventUtil>(taskHandler_);
+    ReportDataPartitionUsageManager::SendReportDataPartitionUsageEvent();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "init success");
     return true;
 }
@@ -1195,7 +1197,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     }
     if (!isForegroundToRestartApp) {
         auto checkRet = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
-            validUserId, appIndex, callerToken);
+            validUserId, appIndex, callerToken, false);
         if (checkRet != ERR_OK) {
             return checkRet;
         }
@@ -1592,7 +1594,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     auto checkRet = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
-        validUserId, appIndex, callerToken);
+        validUserId, appIndex, callerToken, false);
     if (checkRet != ERR_OK) {
         return checkRet;
     }
@@ -1915,7 +1917,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     auto checkRet = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
-        validUserId, appIndex, callerToken);
+        validUserId, appIndex, callerToken, false);
     if (checkRet != ERR_OK) {
         return checkRet;
     }
@@ -2148,6 +2150,11 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             abilityRequest.startWindowOption = startOptions.startWindowOption;
         }
         abilityRequest.supportWindowModes = startOptions.supportWindowModes_;
+        auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+        CHECK_POINTER_AND_RETURN_LOG(abilityRecord, ERR_INVALID_VALUE, "ability record is nullptr.");
+        if (JudgeSelfCalled(abilityRecord)) {
+            abilityRequest.hideStartWindow = startOptions.GetHideStartWindow();
+        }
         auto uiAbilityManager = GetUIAbilityManagerByUserId(oriValidUserId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_NULL_UI_ABILITY_MANAGER);
         return uiAbilityManager->NotifySCBToStartUIAbility(abilityRequest);
@@ -4061,7 +4068,7 @@ int AbilityManagerService::TerminateAbilityWithFlag(const sptr<IRemoteObject> &t
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = GetUIAbilityManagerByUserId(ownerUserId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-        return uiAbilityManager->CloseUIAbility(abilityRecord, resultCode, resultWant, false);
+        return uiAbilityManager->CloseUIAbility(abilityRecord, resultCode, resultWant, false, false);
     }
     return ERR_INVALID_VALUE;
 }
@@ -4201,7 +4208,7 @@ int AbilityManagerService::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionI
             exitReason);
     }
     eventInfo.errCode = uiAbilityManager->CloseUIAbility(abilityRecord, sessionInfo->resultCode,
-        &(sessionInfo->want), sessionInfo->isClearSession);
+        &(sessionInfo->want), sessionInfo->isClearSession, false);
     if (eventInfo.errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "close UIAbility by SCB failed: %{public}d", eventInfo.errCode);
         SendAbilityEvent(EventName::TERMINATE_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
@@ -7164,6 +7171,10 @@ void AbilityManagerService::OnAbilityDied(std::shared_ptr<AbilityRecord> ability
         abilityRecord->GetAbilityRecordId());
     if (abilityRecord->GetToken()) {
         FreezeUtil::GetInstance().DeleteLifecycleEvent(abilityRecord->GetToken()->AsObject());
+        if (KioskManager::GetInstance().IsInKioskMode() &&
+            KioskManager::GetInstance().IsInWhiteList(abilityRecord->GetAbilityInfo().bundleName)) {
+            KioskManager::GetInstance().ExitKioskMode(abilityRecord->GetToken()->AsObject());
+        }
     }
     FreezeUtil::GetInstance().DeleteAppLifecycleEvent(abilityRecord->GetPid());
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -7821,7 +7832,14 @@ void AbilityManagerService::StartAutoStartupApps(std::queue<AutoStartupInfo> inf
     if (info.appCloneIndex >= 0 && info.appCloneIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
         want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, info.appCloneIndex);
     }
-    if (StartAbility(want) != ERR_OK && info.retryCount > 0) {
+    int32_t result = ERR_OK;
+    if (info.abilityTypeName == AbilityRuntime::EXTENSION_TYPE_APP_SERVICE) {
+        result = StartExtensionAbility(
+            want, nullptr, DEFAULT_INVAL_VALUE, AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+    } else {
+        result = StartAbility(want);
+    }
+    if ((result != ERR_OK) && (info.retryCount > 0)) {
         info.retryCount--;
         infoQueue.push(info);
     }
@@ -8157,7 +8175,7 @@ int AbilityManagerService::StartAbilityByCallWithErrMsg(const Want &want, const 
         return ERR_APP_CLONE_INDEX_INVALID;
     }
     auto checkRet = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
-        GetUserId(), appIndex, callerToken);
+        GetUserId(), appIndex, callerToken, false);
     if (checkRet != ERR_OK) {
         return checkRet;
     }
@@ -11323,34 +11341,39 @@ int32_t AbilityManagerService::SetSessionManagerService(const sptr<IRemoteObject
     return SET_SMS_FAILED;
 }
 
-void AbilityManagerService::StartSpecifiedAbilityBySCB(const Want &want)
+int32_t AbilityManagerService::StartSpecifiedAbilityBySCB(const Want &want)
 {
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no sceneboard called, no allowed");
-        return;
-    }
-
-    AbilityRequest abilityRequest;
-    auto result = GenerateAbilityRequest(want, -1, abilityRequest, want.GetRemoteObject(TOKEN_KEY), GetUserId());
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "generate ability request error");
-        return;
-    }
-
-    if (!HandleExecuteSAInterceptor(want, want.GetRemoteObject(TOKEN_KEY), abilityRequest, result)) {
-        return;
+        return ERR_PERMISSION_DENIED;
     }
 
     int32_t appIndex = 0;
     if (!StartAbilityUtils::GetAppIndex(want, nullptr, appIndex)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid app clone index");
+        return ERR_APP_CLONE_INDEX_INVALID;
     }
-    (void)AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
-        GetUserId(), appIndex, nullptr);
+    auto result = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
+        GetUserId(), appIndex, nullptr, true);
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    AbilityRequest abilityRequest;
+    result = GenerateAbilityRequest(want, -1, abilityRequest, want.GetRemoteObject(TOKEN_KEY), GetUserId());
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "generate ability request error");
+        return result;
+    }
+    if (!HandleExecuteSAInterceptor(want, want.GetRemoteObject(TOKEN_KEY), abilityRequest, result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptor prevented");
+        return result;
+    }
+
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
-    CHECK_POINTER(uiAbilityManager);
-    uiAbilityManager->StartSpecifiedAbilityBySCB(want, abilityRequest);
+    CHECK_POINTER_AND_RETURN_LOG(uiAbilityManager, INNER_ERR, "uiAbilityManager is nullptr.");
+    return uiAbilityManager->StartSpecifiedAbilityBySCB(abilityRequest);
 }
 
 int32_t AbilityManagerService::RegisterIAbilityManagerCollaborator(
@@ -13088,31 +13111,47 @@ bool AbilityManagerService::IsInWhiteList(const std::string &callerBundleName, c
 
 bool AbilityManagerService::ParseJsonFromBoot(const std::string &relativePath)
 {
-    nlohmann::json jsonObj;
+    cJSON *jsonObj = nullptr;
     std::string absolutePath = GetConfigFileAbsolutePath(relativePath);
     if (ParseJsonValueFromFile(jsonObj, absolutePath) != ERR_OK) {
         return false;
     }
     std::lock_guard<std::mutex> locker(whiteListMutex_);
-    nlohmann::json whiteListJsonList = jsonObj[WHITE_LIST];
-    for (const auto& [key, value] : whiteListJsonList.items()) {
-        if (!value.is_array()) {
+    cJSON *whiteListJsonList = cJSON_GetObjectItem(jsonObj, WHITE_LIST);
+    if (whiteListJsonList == nullptr) {
+        cJSON_Delete(jsonObj);
+        return false;
+    }
+    cJSON *childItem = whiteListJsonList->child;
+    while (childItem != nullptr) {
+        std::string key = childItem->string == nullptr ? "" : childItem->string;
+        if (!cJSON_IsArray(childItem)) {
             continue;
         }
         whiteListMap_.emplace(key, std::list<std::string>());
-        for (const auto& it : value) {
-            if (it.is_string()) {
-                whiteListMap_[key].push_back(it);
+        int size = cJSON_GetArraySize(childItem);
+        for (int i = 0; i < size; i++) {
+            cJSON *valueItem = cJSON_GetArrayItem(childItem, i);
+            if (valueItem != nullptr && cJSON_IsString(valueItem)) {
+                std::string value = valueItem->valuestring;
+                whiteListMap_[key].push_back(value);
             }
         }
+        
+        childItem = childItem->next;
     }
-    if (!jsonObj.contains("exposed_white_list")) {
+
+    cJSON *exposedWhiteListItem = cJSON_GetObjectItem(jsonObj, "exposed_white_list");
+    if (exposedWhiteListItem == nullptr || !cJSON_IsArray(exposedWhiteListItem)) {
+        cJSON_Delete(jsonObj);
         return false;
     }
-    nlohmann::json exportWhiteJsonList = jsonObj["exposed_white_list"];
-    for (const auto& it : exportWhiteJsonList) {
-        if (it.is_string()) {
-            exportWhiteList_.push_back(it);
+    int size = cJSON_GetArraySize(exposedWhiteListItem);
+    for (int i = 0; i < size; i++) {
+        cJSON *exposedWhiteItem = cJSON_GetArrayItem(exposedWhiteListItem, i);
+        if (exposedWhiteItem != nullptr && cJSON_IsString(exposedWhiteItem)) {
+            std::string exportWhiteStr = exposedWhiteItem->valuestring;
+            exportWhiteList_.push_back(exportWhiteStr);
         }
     }
     return true;
@@ -13134,7 +13173,7 @@ std::string AbilityManagerService::GetConfigFileAbsolutePath(const std::string &
     return std::string(absolutePath);
 }
 
-int32_t AbilityManagerService::ParseJsonValueFromFile(nlohmann::json &value, const std::string &filePath)
+int32_t AbilityManagerService::ParseJsonValueFromFile(cJSON *&value, const std::string &filePath)
 {
     std::ifstream fin;
     std::string realPath;
@@ -13153,8 +13192,10 @@ int32_t AbilityManagerService::ParseJsonValueFromFile(nlohmann::json &value, con
         os << buffer;
     }
     const std::string data = os.str();
-    value = nlohmann::json::parse(data, nullptr, false);
-    if (value.is_discarded()) {
+    fin.close();
+
+    value = cJSON_Parse(data.c_str());
+    if (value == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed due data discarded");
         return ERR_INVALID_VALUE;
     }
@@ -14016,6 +14057,10 @@ int32_t AbilityManagerService::QueryKeepAliveApplications(int32_t appType, int32
 int32_t AbilityManagerService::SetApplicationKeepAliveByEDM(const std::string &bundleName, int32_t userId,
     bool flag, bool isAllowUserToCancel)
 {
+    if (userId != U1_USER_ID && isAllowUserToCancel) {
+        return ERR_CAPABILITY_NOT_SUPPORT;
+    }
+
     auto bms = AbilityUtil::GetBundleManagerHelper();
     AppExecFwk::BundleInfo bundleInfo;
     if (bms && userId == U1_USER_ID) {

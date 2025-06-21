@@ -2671,7 +2671,7 @@ void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecor
     info.state_ = static_cast<AppProcessState>(appRecord->GetState());
     info.isContinuousTask = appRecord->IsContinuousTask();
     info.isKeepAlive = appRecord->IsKeepAliveApp();
-    info.isKeepAliveAppService = appRecord->IsKeepAliveDkv();
+    info.isKeepAliveAppService = appRecord->IsKeepAliveAppService();
     info.isFocused = appRecord->GetFocusFlag();
     info.startTimeMillis_ = appRecord->GetAppStartTime();
     appRecord->GetBundleNames(info.bundleNames);
@@ -2892,6 +2892,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
     appRecord->SetProcessAndExtensionType(abilityInfo, loadParam->extensionProcessMode);
     appRecord->SetKeepAliveEnableState(bundleInfo.isKeepAlive);
     appRecord->SetKeepAliveDkv(loadParam->isKeepAlive);
+    appRecord->SetKeepAliveAppService(loadParam->isKeepAliveAppService);
     appRecord->SetEmptyKeepAliveAppState(false);
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
@@ -8023,7 +8024,7 @@ void AppMgrServiceInner::ClearNonResidentKeepAliveAppRunningData(const std::shar
 
     auto userId = GetUserIdByUid(appRecord->GetUid());
     bool isDefaultInstance = appRecord->GetInstanceKey().empty() || appRecord->GetInstanceKey() == APP_INSTANCE_KEY_0;
-    if (!appRecord->GetRestartAppFlag() && appRecord->IsKeepAliveDkv() &&
+    if (!appRecord->GetRestartAppFlag() && (appRecord->IsKeepAliveDkv() || appRecord->IsKeepAliveAppService()) &&
         isDefaultInstance && (userId == 0 || userId == 1 ||userId == currentUserId_) &&
         appRecord->GetBundleName() != SCENE_BOARD_BUNDLE_NAME) {
         if (ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(appRecord->GetBundleName())) {
@@ -9048,19 +9049,50 @@ void AppMgrServiceInner::SetKeepAliveDkv(const std::string &bundleName, bool ena
             (uid == 0 || appRecord->GetUid() == uid)) {
             TAG_LOGD(AAFwkTag::APPMGR, "%{public}s update state: %{public}d",
                 bundleName.c_str(), static_cast<int32_t>(enable));
-            SetKeepAliveDkvAndNotify(appRecord, enable);
+                appRecord->SetKeepAliveDkv(enable);
         }
     }
 }
 
-void AppMgrServiceInner::SetKeepAliveDkvAndNotify(const std::shared_ptr<AppRunningRecord>& appRecord, bool enable)
+void AppMgrServiceInner::SetKeepAliveAppService(const std::string& bundleName, bool enable, int32_t uid)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "SetKeepAliveAppService called");
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SetKeepAliveAppService bundle name empty");
+        return;
+    }
+
+    if (appRunningManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SetKeepAliveAppService running manager error");
+        return;
+    }
+
+    auto callerUid = IPCSkeleton::GetCallingUid();
+    if (callerUid != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SetKeepAliveAppService not foundation call");
+        return;
+    }
+
+    for (const auto& item : appRunningManager_->GetAppRunningRecordMap()) {
+        const auto& appRecord = item.second;
+        if (appRecord != nullptr && appRecord->GetBundleName() == bundleName &&
+            appRecord->GetUid() == uid) {
+            TAG_LOGD(AAFwkTag::APPMGR, "%{public}s update app service keep alive state: %{public}d", bundleName.c_str(),
+                static_cast<int32_t>(enable));
+            SetKeepAliveAppServiceAndNotify(appRecord, enable);
+        }
+    }
+}
+
+void AppMgrServiceInner::SetKeepAliveAppServiceAndNotify(
+    const std::shared_ptr<AppRunningRecord>& appRecord, bool enable)
 {
     if (appRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "SetKeepAliveDkvAndNotify appRecord is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "SetKeepAliveAppServiceAndNotify appRecord is nullptr");
         return;
     }
     auto beforState = GetKeepAliveState(appRecord);
-    appRecord->SetKeepAliveDkv(enable);
+    appRecord->SetKeepAliveAppService(enable);
     auto afterState = GetKeepAliveState(appRecord);
     if (beforState != afterState) {
         DelayedSingleton<AppStateObserverManager>::GetInstance()->OnKeepAliveStateChanged(appRecord);
@@ -9073,7 +9105,7 @@ bool AppMgrServiceInner::GetKeepAliveState(const std::shared_ptr<AppRunningRecor
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr");
         return false;
     }
-    return appRecord->IsKeepAliveApp() || appRecord->IsKeepAliveDkv();
+    return appRecord->IsKeepAliveApp() || appRecord->IsKeepAliveAppService();
 }
 
 int32_t AppMgrServiceInner::SetSupportedProcessCacheSelf(bool isSupport)

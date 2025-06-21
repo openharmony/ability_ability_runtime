@@ -324,10 +324,10 @@ public:
         return E_OK;
     }
 
-    virtual int32_t CreateShareFile(const std::vector<std::string> &uriList,
+    virtual int32_t CreateShareFile(const StorageFileRawData &rawData,
         uint32_t tokenId, uint32_t flag, std::vector<int32_t> &funcResult) override
     {
-        int size = uriList.size();
+        int32_t size = static_cast<int32_t>(rawData.size);
         if (size <= 0) {
             return -1;
         }
@@ -339,7 +339,7 @@ public:
         return E_OK;
     }
 
-    virtual int32_t DeleteShareFile(uint32_t tokenId, const std::vector<std::string> &sharePathList) override
+    virtual int32_t DeleteShareFile(uint32_t tokenId, const StorageFileRawData &rawData) override
     {
         return E_OK;
     }
@@ -351,13 +351,6 @@ public:
     }
 
     virtual int32_t UpdateMemoryPara(int32_t size, int32_t &oldSize) override
-    {
-        return E_OK;
-    }
-
-    virtual int32_t GetBundleStatsForIncrease(uint32_t userId, const std::vector<std::string> &bundleNames,
-        const std::vector<int64_t> &incrementalBackTimes, std::vector<int64_t> &pkgFileSizes,
-        std::vector<int64_t> &incPkgFileSizes) override
     {
         return E_OK;
     }

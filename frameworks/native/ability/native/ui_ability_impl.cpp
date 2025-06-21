@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -955,10 +955,15 @@ void UIAbilityImpl::ScheduleAbilityRequestSuccess(const std::string &requestId, 
         TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
         return;
     }
-    nlohmann::json jsonObject = nlohmann::json {
-        { JSON_KEY_ERR_MSG, "Succeeded" },
-    };
-    ability_->OnAbilityRequestSuccess(requestId, element, jsonObject.dump());
+    cJSON *jsonObject = cJSON_CreateObject();
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "create json object failed");
+        return;
+    }
+    cJSON_AddStringToObject(jsonObject, JSON_KEY_ERR_MSG.c_str(), "Succeeded");
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
+    cJSON_Delete(jsonObject);
+    ability_->OnAbilityRequestSuccess(requestId, element, jsonStr);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

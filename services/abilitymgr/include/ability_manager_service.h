@@ -1533,12 +1533,7 @@ public:
      */
     virtual void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart) override;
 
-    /**
-     * Start specified ability by SCB.
-     *
-     * @param want Want information.
-     */
-    virtual void StartSpecifiedAbilityBySCB(const Want &want) override;
+    virtual int32_t StartSpecifiedAbilityBySCB(const Want &want) override;
 
     /**
      * Notify sandbox app the result of saving file.
@@ -2759,11 +2754,11 @@ private:
 
     std::string GetConfigFileAbsolutePath(const std::string &relativePath);
 
-    int32_t ParseJsonValueFromFile(nlohmann::json &value, const std::string& fullPath);
+    int32_t ParseJsonValueFromFile(cJSON *&value, const std::string& fullPath);
 
     bool ConvertFullPath(const std::string& partialPath, std::string& fullPath);
 
-    bool GetJsonFromFile(const char *filePath, Json::Value &root);
+    bool GetJsonFromFile(const char *filePath, cJSON *root);
 
     bool ParseJsonFromBoot(const std::string &relativePath);
 

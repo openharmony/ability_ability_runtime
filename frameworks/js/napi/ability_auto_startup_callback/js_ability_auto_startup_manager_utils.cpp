@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,7 +70,6 @@ bool IsNormalObject(napi_env env, napi_value value)
 
 napi_value CreateJsAutoStartupInfoArray(napi_env env, const std::vector<AutoStartupInfo> &infoList)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
     napi_value arrayObj = nullptr;
     napi_create_array(env, &arrayObj);
     for (size_t i = 0; i < infoList.size(); ++i) {
@@ -89,56 +88,98 @@ napi_value CreateJsAutoStartupInfoArray(napi_env env, const std::vector<AutoStar
     return arrayObj;
 }
 
-napi_value CreateJsAutoStartupInfo(napi_env env, const AutoStartupInfo &info)
+bool AddBasicProperties(napi_env env, napi_value object, const AutoStartupInfo &info)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
-    napi_value object = AppExecFwk::CreateJSObject(env);
-    if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null object");
-        return nullptr;
-    }
-
     napi_value bundleName = AppExecFwk::WrapStringToJS(env, info.bundleName);
     if (bundleName == nullptr) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null bundleName");
-        return nullptr;
+        return false;
     }
 
     napi_value abilityName = AppExecFwk::WrapStringToJS(env, info.abilityName);
     if (abilityName == nullptr) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null abilityName");
-        return nullptr;
+        return false;
     }
 
     napi_value moduleName = AppExecFwk::WrapStringToJS(env, info.moduleName);
     if (moduleName == nullptr) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null moduleName");
-        return nullptr;
+        return false;
     }
 
     napi_value abilityTypeName = AppExecFwk::WrapStringToJS(env, info.abilityTypeName);
     if (abilityTypeName == nullptr) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null abilityTypeName");
-        return nullptr;
+        return false;
     }
 
     if (!(AppExecFwk::SetPropertyValueByPropertyName(env, object, "bundleName", bundleName) &&
         AppExecFwk::SetPropertyValueByPropertyName(env, object, "abilityName", abilityName) &&
         AppExecFwk::SetPropertyValueByPropertyName(env, object, "moduleName", moduleName) &&
         AppExecFwk::SetPropertyValueByPropertyName(env, object, "abilityTypeName", abilityTypeName))) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "create js AutoStartupInfo failed");
-        return nullptr;
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "failed to set basic properties for js AutoStartupInfo");
+        return false;
     }
     if (info.appCloneIndex >= 0 && info.appCloneIndex < GlobalConstant::MAX_APP_CLONE_INDEX) {
         napi_value appCloneIndex = AppExecFwk::WrapInt32ToJS(env, info.appCloneIndex);
         if (appCloneIndex == nullptr) {
             TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null appCloneIndex");
-            return nullptr;
+            return false;
         }
         if (!AppExecFwk::SetPropertyValueByPropertyName(env, object, "appCloneIndex", appCloneIndex)) {
-            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "create js AutoStartupInfo failed");
-            return nullptr;
+            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "failed to set basic properties for js AutoStartupInfo");
+            return false;
         }
+    }
+    return true;
+}
+
+bool AddReadOnlyProperties(napi_env env, napi_value object, const AutoStartupInfo &info)
+{
+    napi_value userId = AppExecFwk::WrapInt32ToJS(env, info.userId);
+    if (userId == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null userId");
+        return false;
+    }
+
+    napi_value setterUserId = AppExecFwk::WrapInt32ToJS(env, info.setterUserId);
+    if (setterUserId == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null setterUserId");
+        return false;
+    }
+
+    napi_value canUserModify = AppExecFwk::WrapBoolToJS(env, info.canUserModify);
+    if (canUserModify == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null canUserModify");
+        return false;
+    }
+
+    if (!(AppExecFwk::SetPropertyValueByPropertyName(env, object, "userId", userId) &&
+        AppExecFwk::SetPropertyValueByPropertyName(env, object, "setterUserId", setterUserId) &&
+        AppExecFwk::SetPropertyValueByPropertyName(env, object, "canUserModify", canUserModify))) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "failed to set readonly properties for js AutoStartupInfo");
+        return false;
+    }
+    return true;
+}
+
+napi_value CreateJsAutoStartupInfo(napi_env env, const AutoStartupInfo &info)
+{
+    napi_value object = AppExecFwk::CreateJSObject(env);
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null object");
+        return nullptr;
+    }
+
+    if (!AddBasicProperties(env, object, info)) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "failed to add basic properties");
+        return nullptr;
+    }
+
+    if (!AddReadOnlyProperties(env, object, info)) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "failed to add readonly properties");
+        return nullptr;
     }
     return object;
 }

@@ -1352,6 +1352,11 @@ bool AppRunningRecord::IsKeepAliveDkv() const
     return isKeepAliveDkv_;
 }
 
+bool AppRunningRecord::IsKeepAliveAppService() const
+{
+    return isKeepAliveAppService_;
+}
+
 void AppRunningRecord::SetKeepAliveEnableState(bool isKeepAliveEnable)
 {
     isKeepAliveRdb_ = isKeepAliveEnable;
@@ -1360,6 +1365,11 @@ void AppRunningRecord::SetKeepAliveEnableState(bool isKeepAliveEnable)
 void AppRunningRecord::SetKeepAliveDkv(bool isKeepAliveDkv)
 {
     isKeepAliveDkv_ = isKeepAliveDkv;
+}
+
+void AppRunningRecord::SetKeepAliveAppService(bool isKeepAliveAppService)
+{
+    isKeepAliveAppService_ = isKeepAliveAppService;
 }
 
 void AppRunningRecord::SetKeepAliveBundle(bool isKeepAliveBundle)

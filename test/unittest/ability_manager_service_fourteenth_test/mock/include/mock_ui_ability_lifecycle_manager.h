@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,7 +154,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int CloseUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
-        int resultCode, const Want *resultWant, bool isClearSession);
+        int resultCode, const Want *resultWant, bool isClearSession, bool isIndependentRecovery);
 
     /**
      * Set rootSceneSession by SCB.
@@ -239,13 +239,7 @@ public:
      */
     void OnStartSpecifiedFailed(int32_t requestId);
 
-    /**
-     * Start specified ability by SCB.
-     *
-     * @param want Want information.
-     * @param abilityRequest AbilityRequest information.
-     */
-    void StartSpecifiedAbilityBySCB(const Want &want, AbilityRequest &abilityRequest);
+    int32_t StartSpecifiedAbilityBySCB(AbilityRequest &abilityRequest);
 
     /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
