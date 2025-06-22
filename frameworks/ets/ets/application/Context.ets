@@ -31,7 +31,6 @@ export class Context extends BaseContext {
     loadLibrary("context_ani");
     loadLibrary("context_ani_kit.z");
   }
-  area: contextConstant.AreaMode = contextConstant.AreaMode.EL1;
   filesDir: string = "";
   tempDir: string = "";
   preferencesDir: string = "";
@@ -53,6 +52,8 @@ export class Context extends BaseContext {
   public native nativeGetGroupDir(dataGroupID: string, callback: AsyncCallbackWrapper<string>): void;
   private static native nativeTransferStatic(input: ESValue): Object;
   private static native nativeTransferDynamic(input: Object): ESValue;
+  private native switchArea(mode: contextConstant.AreaMode): void;
+  private native getArea(): contextConstant.AreaMode;
 
   getApplicationContext(): ApplicationContext {
     return this.getApplicationContextSync();
@@ -90,5 +91,13 @@ export class Context extends BaseContext {
 
   static transferDynamic(input: Object): Any {
     return Context.nativeTransferDynamic(input).unwrap();
+  }
+
+  set area(mode: contextConstant.AreaMode) {
+    this.switchArea(mode);
+  }
+
+  get area(): contextConstant.AreaMode {
+    return this.getArea();
   }
 }

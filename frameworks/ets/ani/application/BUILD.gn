@@ -29,22 +29,31 @@ ohos_shared_library("application_ani") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_path}/interfaces/inner_api/runtime/include",
+    "${ability_runtime_path}/interfaces/inner_api/error_utils/include",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native",
   ]
 
   sources = [ "./src/ets_application.cpp" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ani_base_context:ani_base_context",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_native_path}/appkit:application_context_manager",
+    "${ability_runtime_services_path}/common:perm_verification",
   ]
 
   external_deps = [
     "ability_base:configuration",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_core",
     "hilog:libhilog",
+    "jsoncpp:jsoncpp",
+    "ipc:ipc_core",
     "napi:ace_napi",
     "runtime_core:ani",
   ]
