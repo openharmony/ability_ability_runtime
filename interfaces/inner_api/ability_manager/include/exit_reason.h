@@ -31,6 +31,7 @@ struct ExitReason : public Parcelable {
     Reason reason = Reason::REASON_UNKNOWN;
     int32_t subReason = -1;
     std::string exitMsg = "";
+    bool shouldKillForeground = true;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
