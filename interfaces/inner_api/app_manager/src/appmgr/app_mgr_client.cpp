@@ -1592,5 +1592,30 @@ AppMgrResultCode AppMgrClient::IsAppRunningByBundleNameAndUserId(const std::stri
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
+
+int32_t AppMgrClient::PromoteCurrentToCandidateMasterProcess(bool isInsertToHead)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->PromoteCurrentToCandidateMasterProcess(isInsertToHead);
+}
+
+int32_t AppMgrClient::DemoteCurrentFromCandidateMasterProcess()
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->DemoteCurrentFromCandidateMasterProcess();
+}
+
+
+
 }  // namespace AppExecFwk
 }  // namespace OHOS

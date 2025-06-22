@@ -903,6 +903,21 @@ enum {
      */
     ERR_SA_INTERCEPTOR_READ_PARAMS_FAILED = 2097361,
 
+    /*
+     * Result(2097364) Current process is not running a component configured with "isolationProcess".
+     */
+    ERR_NOT_ISOLATION_PROCESS = 2097364,
+
+    /*
+     * Result(2097365) Current process is already a master process, revocation is not supported.
+     */
+    ERR_ALREADY_MASTER_PROCESS = 2097365,
+
+     /*
+     * Result(2097366) Current process is not a candidate master process, no need to revocation.
+     */
+    ERR_NOT_CANDIDATE_MASTER_PROCESS = 2097366,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */

@@ -1298,6 +1298,21 @@ public:
     virtual int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback);
 
     /**
+     * Elevate the current process to be a candidate master process.
+     *
+     * @param isInsertToHead Whether inset current process to the head of candidate master process list.
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t PromoteCurrentToCandidateMasterProcess(bool isInsertToHead);
+    
+    /**
+     * Revoke current process as a candidate master process.
+     *
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t DemoteCurrentFromCandidateMasterProcess();
+
+    /**
      * To clear the process by ability token.
      *
      * @param token the unique identification to the ability.

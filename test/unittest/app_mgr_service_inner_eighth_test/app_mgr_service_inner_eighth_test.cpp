@@ -2682,5 +2682,146 @@ HWTEST_F(AppMgrServiceInnerEighthTest, SetPreloadDebugApp_0100, TestSize.Level1)
     EXPECT_EQ(debugApp, true);
     TAG_LOGI(AAFwkTag::TEST, "SetPreloadDebugApp_0100 end");
 }
+
+/**
+ * @tc.name: PromoteCurrentToCandidateMasterProcess_0100
+ * @tc.desc: test SetPreloadDebugApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, PromoteCurrentToCandidateMasterProcess_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PromoteCurrentToCandidateMasterProcess_0100 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    AAFwk::MyStatus::GetInstance().isStartSpecifiedProcess_ = true;
+    std::shared_ptr<ApplicationInfo> info1 = nullptr;
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetMasterProcess(true);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetTimeStamp(0);
+    int32_t res = appMgrServiceInner->PromoteCurrentToCandidateMasterProcess(true);
+    EXPECT_EQ(res, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "PromoteCurrentToCandidateMasterProcess_0100 end");
+}
+
+/**
+ * @tc.name: PromoteCurrentToCandidateMasterProcess_0200
+ * @tc.desc: test SetPreloadDebugApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, PromoteCurrentToCandidateMasterProcess_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PromoteCurrentToCandidateMasterProcess_0200 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    AAFwk::MyStatus::GetInstance().isStartSpecifiedProcess_ = true;
+    std::shared_ptr<ApplicationInfo> info1 = nullptr;
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetMasterProcess(false);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetTimeStamp(1);
+    int32_t res = appMgrServiceInner->PromoteCurrentToCandidateMasterProcess(true);
+    EXPECT_EQ(res, AAFwk::ERR_NOT_ISOLATION_PROCESS);
+    TAG_LOGI(AAFwkTag::TEST, "PromoteCurrentToCandidateMasterProcess_0200 end");
+}
+
+/**
+ * @tc.name: PromoteCurrentToCandidateMasterProcess_0300
+ * @tc.desc: test SetPreloadDebugApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, PromoteCurrentToCandidateMasterProcess_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PromoteCurrentToCandidateMasterProcess_0300 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    AAFwk::MyStatus::GetInstance().isStartSpecifiedProcess_ = false;
+    std::shared_ptr<ApplicationInfo> info1 = nullptr;
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetMasterProcess(false);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetTimeStamp(0);
+    int32_t res = appMgrServiceInner->PromoteCurrentToCandidateMasterProcess(true);
+    EXPECT_EQ(res, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
+    TAG_LOGI(AAFwkTag::TEST, "PromoteCurrentToCandidateMasterProcess_0300 end");
+}
+
+/**
+ * @tc.name: DemoteCurrentFromCandidateMasterProcess_0100
+ * @tc.desc: test SetPreloadDebugApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, DemoteCurrentFromCandidateMasterProcess_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DemoteCurrentFromCandidateMasterProcess_0100 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    AAFwk::MyStatus::GetInstance().isStartSpecifiedProcess_ = true;
+    std::shared_ptr<ApplicationInfo> info1 = nullptr;
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetMasterProcess(false);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetTimeStamp(1);
+    int32_t res = appMgrServiceInner->DemoteCurrentFromCandidateMasterProcess();
+    EXPECT_EQ(res, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "DemoteCurrentFromCandidateMasterProcess_0100 end");
+}
+
+
+/**
+ * @tc.name: DemoteCurrentFromCandidateMasterProcess_0200
+ * @tc.desc: test SetPreloadDebugApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, DemoteCurrentFromCandidateMasterProcess_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DemoteCurrentFromCandidateMasterProcess_0200 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    AAFwk::MyStatus::GetInstance().isStartSpecifiedProcess_ = true;
+    std::shared_ptr<ApplicationInfo> info1 = nullptr;
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetMasterProcess(true);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetTimeStamp(0);
+    int32_t res = appMgrServiceInner->DemoteCurrentFromCandidateMasterProcess();
+    EXPECT_EQ(res, AAFwk::ERR_ALREADY_MASTER_PROCESS);
+    TAG_LOGI(AAFwkTag::TEST, "DemoteCurrentFromCandidateMasterProcess_0200 end");
+}
+
+/**
+ * @tc.name: DemoteCurrentFromCandidateMasterProcess_0300
+ * @tc.desc: test SetPreloadDebugApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, DemoteCurrentFromCandidateMasterProcess_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DemoteCurrentFromCandidateMasterProcess_0300 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    AAFwk::MyStatus::GetInstance().isStartSpecifiedProcess_ = false;
+    std::shared_ptr<ApplicationInfo> info1 = nullptr;
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetMasterProcess(false);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetTimeStamp(0);
+    int32_t res = appMgrServiceInner->DemoteCurrentFromCandidateMasterProcess();
+    EXPECT_EQ(res, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
+    TAG_LOGI(AAFwkTag::TEST, "DemoteCurrentFromCandidateMasterProcess_0300 end");
+}
+
+/**
+ * @tc.name: DemoteCurrentFromCandidateMasterProcess_0400
+ * @tc.desc: test SetPreloadDebugApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, DemoteCurrentFromCandidateMasterProcess_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DemoteCurrentFromCandidateMasterProcess_0400 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    AAFwk::MyStatus::GetInstance().isStartSpecifiedProcess_ = true;
+    std::shared_ptr<ApplicationInfo> info1 = nullptr;
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetMasterProcess(false);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetTimeStamp(0);
+    int32_t res = appMgrServiceInner->DemoteCurrentFromCandidateMasterProcess();
+    EXPECT_EQ(res, AAFwk::ERR_NOT_CANDIDATE_MASTER_PROCESS);
+    TAG_LOGI(AAFwkTag::TEST, "DemoteCurrentFromCandidateMasterProcess_0400 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS
