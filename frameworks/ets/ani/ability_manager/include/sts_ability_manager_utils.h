@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_UTILS_H
 
 #include "ability_running_info.h"
+#include "extension_running_info.h"
 #include "sts_runtime.h"
 
 namespace OHOS {
@@ -26,6 +27,10 @@ bool WrapAbilityRunningInfoArray(
     ani_env *env, ani_object &arrayObj, const std::vector<AAFwk::AbilityRunningInfo> &infos);
 bool WrapAbilityRunningInfoInner(
     ani_env *env, ani_object &infoObj, const AAFwk::AbilityRunningInfo &info, ani_class cls);
+bool WrapExtensionRunningInfo(ani_env *env, ani_object &infoObj, const AAFwk::ExtensionRunningInfo &info);
+bool WrapExtensionRunningInfoInner(
+    ani_env *env, ani_object &infoObj, const AAFwk::ExtensionRunningInfo &info, ani_class cls);
+bool WrapArrayString(ani_env *env, ani_object &arrayObj, const std::vector<std::string> &values);
 } // namespace AbilityManagerSts
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_STS_ABILITY_MANAGER_UTILS_H

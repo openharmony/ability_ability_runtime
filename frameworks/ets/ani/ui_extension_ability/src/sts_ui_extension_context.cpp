@@ -21,6 +21,8 @@
 #include "sts_error_utils.h"
 #include "ets_extension_context.h"
 #include "ani_common_start_options.h"
+#include "ani_common_util.h"
+#include "ani_enum_convert.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -221,6 +223,50 @@ void StsUIExtensionContext::StartAbilityInner([[maybe_unused]] ani_env *env, [[m
     }
 }
 
+void StsUIExtensionContext::NativeSetColorMode(ani_env *env, ani_object aniContext, ani_enum_item aniColorMode)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "NativeSetColorMode called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    ani_int colorMode = 0;
+    if (!AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(env, aniColorMode, colorMode)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "param aniColorMode err");
+        ThrowStsInvalidParamError(env, "Parse param colorMode failed, colorMode must be number.");
+        return;
+    }
+    auto context = StsUIExtensionContext::GetAbilityContext(env, aniContext);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "GetAbilityContext is nullptr");
+        ThrowStsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        return;
+    }
+    context->SetAbilityColorMode(colorMode);
+    TAG_LOGD(AAFwkTag::UI_EXT, "NativeSetColorMode end");
+}
+
+void StsUIExtensionContext::NativeReportDrawnCompleted(ani_env* env, ani_object aniCls, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "NativeReportDrawnCompleted called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    auto context = StsUIExtensionContext::GetAbilityContext(env, aniCls);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "GetAbilityContext is nullptr");
+        AppExecFwk::AsyncCallback(env, callback,
+            CreateStsErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)),
+            nullptr);
+        return;
+    }
+    int32_t innerErrorCode = context->ReportDrawnCompleted();
+    AppExecFwk::AsyncCallback(env, callback, CreateStsErrorByNativeErr(env,
+        static_cast<int32_t>(innerErrorCode)), nullptr);
+    TAG_LOGD(AAFwkTag::UI_EXT, "NativeReportDrawnCompleted end");
+}
+
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
     ani_status status = ANI_ERROR;
@@ -235,6 +281,10 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/"
             "AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(StartAbilityWithOption) },
+        ani_native_function { "setColorMode", nullptr,
+            reinterpret_cast<void*>(StsUIExtensionContext::NativeSetColorMode)},
+        ani_native_function { "nativeReportDrawnCompleted", nullptr,
+            reinterpret_cast<void*>(StsUIExtensionContext::NativeReportDrawnCompleted)}
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);

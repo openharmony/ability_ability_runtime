@@ -863,7 +863,7 @@ bool UnWrapArrayDouble(ani_env *env, ani_object arrayObj, std::vector<int32_t> &
         }
         ani_double dval = 0.0;
         if ((status = env->Object_CallMethodByName_Double(static_cast<ani_object>(ref),
-            "doubleValue", nullptr, &dval)) != ANI_OK) {
+            "unboxed", nullptr, &dval)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Double status : %{public}d", status);
             return false;
         }

@@ -56,7 +56,8 @@ private:
     void InitNativeLib(const BundleInfo &bundleInfo);
     void HandleExitProcessSafely();
     void ExitProcessSafely();
-    void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths);
+    void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths,
+        AppLibPathMap &appAbcLibPaths);
     void HandleRunNativeProc(const sptr<IRemoteObject> &mainProcessCb);
     void UpdateNativeChildLibModuleName(const AppLibPathMap &appLibPaths, bool isSystemApp);
 
