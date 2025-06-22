@@ -396,6 +396,11 @@ public:
     {
         return E_OK;
     }
+
+    virtual int32_t InactiveUserPublicDirKey(uint32_t userId) override
+    {
+        return E_OK;
+    }
 };
 
 bool StorageManagerServiceMock::isZero = true;
