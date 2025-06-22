@@ -347,7 +347,7 @@ void from_json(const cJSON *jsonObject, Extension &extension)
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "read extension tag from module.json");
     if (jsonObject == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "jsonObject is null");
-        return false;
+        return;
     }
     GetStringValueIfFindKey(jsonObject, EXTENSION_ABILITY_NAME, extension.name, true, g_parseResult);
     // both srcEntry and srcEntrance can be configured, but srcEntry has higher priority
@@ -377,9 +377,8 @@ void from_json(const cJSON *jsonObject, Extension &extension)
     GetObjectValuesIfFindKey(jsonObject, META_DATA, extension.metadata, false, g_parseResult);
     if (g_parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "g_parseResult:%{public}d", g_parseResult);
-        return false;
     }
-    return true;
+    return;
 }
 
 void from_json(const cJSON *jsonObject, DeviceConfig &deviceConfig)
