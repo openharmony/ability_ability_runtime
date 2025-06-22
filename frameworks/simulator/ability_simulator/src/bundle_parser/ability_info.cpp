@@ -430,6 +430,7 @@ bool to_json(cJSON *&jsonObject, const AbilityInfo &abilityInfo)
         static_cast<double>(abilityInfo.maxWindowRatio == 0 ? 0 : abilityInfo.maxWindowRatio));
     cJSON_AddNumberToObject(jsonObject, JOSN_KEY_MIN_WINDOW_RATIO.c_str(),
         static_cast<double>(abilityInfo.minWindowRatio == 0 ? 0 : abilityInfo.minWindowRatio));
+    return true;
 }
 
 void from_json(const cJSON *jsonObject, CustomizeData &customizeData)
