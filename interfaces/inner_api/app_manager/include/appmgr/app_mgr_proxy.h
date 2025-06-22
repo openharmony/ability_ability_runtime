@@ -847,6 +847,21 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t LaunchAbility(sptr<IRemoteObject> token) override;
+    
+/**
+     * Elevate the current process to be a candidate master process.
+     *
+     * @param isInsertToHead Whether inset current process to the head of candidate master process list.
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t PromoteCurrentToCandidateMasterProcess(bool isInsertToHead) override;
+    
+    /**
+     * Revoke current process as a candidate master process.
+     *
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t DemoteCurrentFromCandidateMasterProcess() override;
 
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);

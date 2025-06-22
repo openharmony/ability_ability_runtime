@@ -1098,6 +1098,26 @@ public:
     std::optional<bool> IsSupportMultiProcessDeviceFeature() const;
     void SetSupportMultiProcessDeviceFeature(bool support);
 
+    inline void SetMasterProcess(bool isMasterProcess)
+    {
+        isMasterProcess_ = isMasterProcess;
+    }
+
+    inline bool GetIsMasterProcess() const
+    {
+        return isMasterProcess_;
+    }
+
+    inline void SetTimeStamp(int64_t timeStamp)
+    {
+        timeStamp_ = timeStamp;
+    }
+
+    inline int64_t GetTimeStamp() const
+    {
+        return timeStamp_;
+    }
+
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1278,6 +1298,9 @@ private:
     std::shared_ptr<StartupTaskData> startupTaskData_ = nullptr;
     ffrt::mutex startupTaskDataLock_;
     mutable ffrt::mutex killReasonLock_;
+
+    bool isMasterProcess_ = false; // Only MasterProcess can be keepalive
+    int64_t timeStamp_ = 0; // the flag of BackUpMainControlProcess
 };
 
 }  // namespace AppExecFwk

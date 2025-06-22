@@ -103,6 +103,21 @@ public:
 #endif
 
     /**
+     * CheckMasterProcessAppRunningRecordIsExist, Get master process record by application name and ability information.
+     *
+     * @param appName, the application name.
+     * @param abilityInfo, the ability information.
+     * @param uid, the process uid.
+     *
+     * @return process record.
+     */
+    std::shared_ptr<AppRunningRecord> FindMasterProcessAppRunningRecord(const std::string &appName,
+        const AppExecFwk::AbilityInfo &abilityInfo, const int uid);
+
+    bool CheckMasterProcessAppRunningRecordIsExist(const std::string &appName,
+        const AppExecFwk::AbilityInfo &abilityInfo, const int uid);
+
+    /**
      * Check whether the process of the application exists.
      *
      * @param accessTokenId, the accessTokenId.
@@ -438,6 +453,8 @@ private:
     void RemoveTimeoutDeadAppRecord();
     void ExecuteConfigurationTask(const BackgroundAppInfo& info, const int32_t userId);
     bool UpdateConfiguration(std::shared_ptr<AppRunningRecord> &appRecord, Rosen::ConfigMode configMode);
+    bool IsSameAbilityType(
+        const std::shared_ptr<AppRunningRecord> &appRecord, const AppExecFwk::AbilityInfo &abilityInfo);
 private:
     std::mutex runningRecordMapMutex_;
     std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> appRunningRecordMap_;

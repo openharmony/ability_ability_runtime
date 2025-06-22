@@ -792,6 +792,21 @@ public:
     int32_t SetProcessCacheEnable(int32_t pid, bool enable) override;
 
     /**
+     * Elevate the current process to be a candidate master process.
+     *
+     * @param isInsertToHead Whether inset current process to the head of candidate master process list.
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t PromoteCurrentToCandidateMasterProcess(bool isInsertToHead) override;
+    
+    /**
+     * Revoke current process as a candidate master process.
+     *
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t DemoteCurrentFromCandidateMasterProcess() override;
+
+    /**
      * set browser channel for caller
      */
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) override;
