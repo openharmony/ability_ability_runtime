@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,6 +89,18 @@ HWTEST_F(UIExtensionUtilsTest, IsWindowExtension_0100, TestSize.Level0)
 
     extensionAbilityType = AppExecFwk::ExtensionAbilityType::SHARE;
     result = UIExtensionUtils::IsUIExtension(extensionAbilityType);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsSystemUIExtension_0100
+ * @tc.desc: IsWindowExtension Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionUtilsTest, IsSystemUIExtension_0100, TestSize.Level0)
+{
+    AppExecFwk::ExtensionAbilityType extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    bool result = UIExtensionUtils::IsUIExtension(extensionAbilityType);
     EXPECT_TRUE(result);
 }
 }  // namespace AAFwk
