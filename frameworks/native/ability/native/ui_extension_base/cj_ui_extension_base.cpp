@@ -20,19 +20,19 @@
 
 #include "ability_info.h"
 #include "ability_manager_client.h"
+#include "cj_application_context.h"
+#include "cj_common_ffi.h"
+#include "cj_extension_common.h"
+#include "cj_insight_intent_executor_info.h"
+#include "cj_insight_intent_executor_mgr.h"
+#include "cj_runtime.h"
 #include "configuration_utils.h"
 #include "connection_manager.h"
 #include "context.h"
 #include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
-#include "insight_intent_executor_info.h"
-#include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
-#include "cj_runtime.h"
-#include "cj_common_ffi.h"
-#include "cj_extension_common.h"
-#include "cj_application_context.h"
 #include "ui_extension_window_command.h"
 #include "want_params_wrapper.h"
 
@@ -202,23 +202,25 @@ bool CJUIExtensionBase::ForegroundWindowWithInsightIntent(const AAFwk::Want &wan
             extension->PostInsightIntentExecuted(sessionInfo, result, needForeground);
         });
 
-    InsightIntentExecutorInfo executorInfo;
+    CJInsightIntentExecutorInfo executorInfo;
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = context_->GetAbilityInfo();
     if (abilityInfo != nullptr) {
         executorInfo.hapPath = abilityInfo->hapPath;
         executorInfo.windowMode = abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE;
     }
     executorInfo.token = context_->GetToken();
+    executorInfo.pageLoader.sessionPageLoader = contentSessions_[sessionInfo->uiExtensionComponentId]->GetID();
     executorInfo.executeParam = std::make_shared<InsightIntentExecuteParam>();
     InsightIntentExecuteParam::GenerateFromWant(want, *executorInfo.executeParam);
     executorInfo.executeParam->executeMode_ = UI_EXTENSION_ABILITY;
     executorInfo.srcEntry = want.GetStringParam(INSIGHT_INTENT_SRC_ENTRY);
     TAG_LOGD(AAFwkTag::UI_EXT, "executorInfo, insightIntentId: %{public}" PRIu64,
         executorInfo.executeParam->insightIntentId_);
-    int32_t ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+    int32_t ret = DelayedSingleton<CJInsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
         cjRuntime_, executorInfo, std::move(executorCallback));
     if (!ret) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed");
+        return false;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "end");
     return true;

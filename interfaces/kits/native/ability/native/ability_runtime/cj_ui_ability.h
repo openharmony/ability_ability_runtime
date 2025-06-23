@@ -30,7 +30,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 class CJRuntime;
 class CJAbilityObject;
-struct InsightIntentExecutorInfo;
+struct CJInsightIntentExecutorInfo;
 using AbilityHandler = AppExecFwk::AbilityHandler;
 using AbilityInfo = AppExecFwk::AbilityInfo;
 using OHOSApplication = AppExecFwk::OHOSApplication;
@@ -270,6 +270,17 @@ public:
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
 
+    /**
+     * @brief Execute insight intent when an ability didn't started, schedule it to background.
+     *
+     * @param want Want.
+     * @param executeParam insight intent execute param.
+     * @param callback insight intent async callback.
+     */
+    virtual void ExecuteInsightIntentBackground(const AAFwk::Want &want,
+        const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+        std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
+
 protected:
     void DoOnForeground(const Want &want) override;
     void ContinuationRestore(const Want &want) override;
@@ -279,9 +290,8 @@ private:
     void RestorePageStack(const Want &want);
     void GetPageStackFromWant(const Want &want, std::string &pageStack);
     void AbilityContinuationOrRecover(const Want &want);
-    inline bool GetInsightIntentExecutorInfo(const Want &want,
-        const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
-        InsightIntentExecutorInfo& executeInfo);
+    inline bool GetInsightIntentExecutorInfo(const Want& want,
+        const std::shared_ptr<InsightIntentExecuteParam>& executeParam, CJInsightIntentExecutorInfo& executeInfo);
 
     sptr<Rosen::CJWindowStageImpl> cjWindowStage_;
     int32_t windowMode_ = 0;

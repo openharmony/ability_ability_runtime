@@ -273,6 +273,16 @@ void FfiCJApplicationContextSetSupportedProcessCache(int64_t id, bool isSupporte
     return context->OnSetSupportedProcessCacheSelf(isSupported, errCode);
 }
 
+int32_t FfiCJApplicationContextSetFontSizeScale(int64_t id, double fontSizeScale)
+{
+    auto context = FFI::FFIData::GetData<CJApplicationContext>(id);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
+    return context->OnSetFontSizeScale(fontSizeScale);
+}
+
 CJ_EXPORT napi_value FfiConvertApplicationContext2Napi(napi_env env, int64_t id)
 {
     napi_value undefined = nullptr;
