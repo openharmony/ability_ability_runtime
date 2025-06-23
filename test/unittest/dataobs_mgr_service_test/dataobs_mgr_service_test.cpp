@@ -18,6 +18,7 @@
 #include "gmock/gmock.h"
 
 #include "mock_data_ability_observer_stub.h"
+#include "token_setproc.h"
 #define private public
 #include "dataobs_mgr_service.h"
 
@@ -128,6 +129,35 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_RegisterObserver_030
     dataObsMgrServer->dataObsMgrInner_ = std::make_shared<DataObsMgrInner>();
 
     testing::Mock::AllowLeak(dataobsAbility);
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_RegisterObserver_0300 end";
+}
+
+/*
+ * Feature: DataObsMgrService
+ * Function: RegisterObserver
+ * SubFunction: NA
+ * FunctionPoints: DataObsMgrService RegisterObserver
+ * EnvConditions: NA
+ * CaseDescription: Verify that the DataObsMgrService RegisterObserver is abnormal.
+ */
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_RegisterObserver_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_RegisterObserver_0300 start";
+    const int testVal = static_cast<int>(DATAOBS_INVALID_USERID);
+    const sptr<MockDataAbilityObserverStub> dataobsAbility(new (std::nothrow) MockDataAbilityObserverStub());
+    auto originalToken = GetSelfTokenID();
+
+    SetSelfTokenID(0);
+    std::shared_ptr<Uri> uri =
+        std::make_shared<Uri>("dataability://device_id/com.domainname.dataability.persondata/person/10");
+    auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
+
+    EXPECT_EQ(testVal, dataObsMgrServer->RegisterObserver(*uri, dataobsAbility));
+    dataObsMgrServer->dataObsMgrInner_ = std::make_shared<DataObsMgrInner>();
+
+    testing::Mock::AllowLeak(dataobsAbility);
+
+    SetSelfTokenID(originalToken);
     GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_RegisterObserver_0300 end";
 }
 
@@ -586,6 +616,95 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_Dump_0100, TestSize.
     EXPECT_EQ(SUCCESS, ret);
 
     GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_Dump_0100 end";
+}
+
+/*
+ * Feature: DataObsMgrService
+ * Function: CheckSystemCallingPermission
+ * SubFunction: NA
+ * FunctionPoints: DataObsMgrService CheckSystemCallingPermission
+ * EnvConditions: NA
+ * CaseDescription: Verify that the DataObsMgrService CheckSystemCallingPermission is normal.
+ */
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 start";
+    const DataObsServiceRunningState testValue = DataObsServiceRunningState::STATE_RUNNING;
+    auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
+
+    DataObsOption opt;
+    int ret = 0;
+    // need check
+    opt.isSystem = true;
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 1";
+    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, -1);
+    EXPECT_EQ(ret, true);
+    // need check
+    opt.isSystem = true;
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 2";
+    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, 100);
+    EXPECT_EQ(ret, true);
+    // no need check
+    opt.isSystem = false;
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 3";
+    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, -1);
+    EXPECT_EQ(ret, true);
+    // need check
+    opt.isSystem = false;
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 4";
+    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, 100);
+    EXPECT_EQ(ret, true);
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 5";
+    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, 100, 101);
+    EXPECT_EQ(ret, true);
+
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 end";
+}
+
+/*
+ * Feature: DataObsMgrService
+ * Function: CheckSystemCallingPermission
+ * SubFunction: NA
+ * FunctionPoints: DataObsMgrService CheckSystemCallingPermission
+ * EnvConditions: NA
+ * CaseDescription: Verify that the DataObsMgrService CheckSystemCallingPermission is normal.
+ */
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 start";
+    const DataObsServiceRunningState testValue = DataObsServiceRunningState::STATE_RUNNING;
+    auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
+    auto originalToken = GetSelfTokenID();
+
+    SetSelfTokenID(0);
+    DataObsOption opt;
+    int ret = 0;
+    // need check
+    opt.isSystem = true;
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 1";
+    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, -1);
+    EXPECT_EQ(ret, false);
+    // need check
+    opt.isSystem = true;
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 2";
+    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, 100);
+    EXPECT_EQ(ret, false);
+    // no need check
+    opt.isSystem = false;
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 3";
+    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, -1);
+    EXPECT_EQ(ret, true);
+    // need check
+    opt.isSystem = false;
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 4";
+    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, 100);
+    EXPECT_EQ(ret, true);
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 5";
+    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, 100, 101);
+    EXPECT_EQ(ret, false);
+
+    SetSelfTokenID(originalToken);
+    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 end";
 }
 }  // namespace AAFwk
 }  // namespace OHOS

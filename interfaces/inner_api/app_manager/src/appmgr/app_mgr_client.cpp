@@ -794,8 +794,16 @@ void AppMgrClient::SetKeepAliveDkv(const std::string &bundleName, bool enable, i
     amsService_->SetKeepAliveDkv(bundleName, enable, uid);
 }
 
+void AppMgrClient::SetKeepAliveAppService(const std::string &bundleName, bool enable, int32_t uid)
+{
+    if (!IsAmsServiceReady()) {
+        return;
+    }
+    amsService_->SetKeepAliveAppService(bundleName, enable, uid);
+}
+
 void AppMgrClient::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-    int32_t requestId)
+    int32_t requestId, std::string customProcess)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call.");
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -806,7 +814,7 @@ void AppMgrClient::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecF
     if (amsService == nullptr) {
         return;
     }
-    amsService->StartSpecifiedProcess(want, abilityInfo, requestId);
+    amsService->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess);
 }
 
 void AppMgrClient::RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response)
@@ -1584,5 +1592,30 @@ AppMgrResultCode AppMgrClient::IsAppRunningByBundleNameAndUserId(const std::stri
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
+
+int32_t AppMgrClient::PromoteCurrentToCandidateMasterProcess(bool isInsertToHead)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->PromoteCurrentToCandidateMasterProcess(isInsertToHead);
+}
+
+int32_t AppMgrClient::DemoteCurrentFromCandidateMasterProcess()
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->DemoteCurrentFromCandidateMasterProcess();
+}
+
+
+
 }  // namespace AppExecFwk
 }  // namespace OHOS

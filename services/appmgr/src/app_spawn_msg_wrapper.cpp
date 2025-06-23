@@ -17,8 +17,8 @@
 
 #include "securec.h"
 
+#include "cJSON.h"
 #include "hilog_tag_wrapper.h"
-#include "nlohmann/json.hpp"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -49,48 +49,138 @@ AppSpawnMsgWrapper::~AppSpawnMsgWrapper()
 
 static std::string DumpToJson(const HspList &hspList)
 {
-    nlohmann::json hspListJson;
-    for (auto& hsp : hspList) {
-        hspListJson[HSPLIST_BUNDLES].emplace_back(hsp.bundleName);
-        hspListJson[HSPLIST_MODULES].emplace_back(hsp.moduleName);
-        hspListJson[HSPLIST_VERSIONS].emplace_back(VERSION_PREFIX + std::to_string(hsp.versionCode));
+    cJSON *hspListJson = cJSON_CreateObject();
+    if (hspListJson == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "create json object failed");
+        return {};
     }
-    return hspListJson.dump();
+    cJSON *bundlesItem = cJSON_CreateArray();
+    cJSON *modulesItem = cJSON_CreateArray();
+    cJSON *versionsItem = cJSON_CreateArray();
+    if (bundlesItem == nullptr || modulesItem == nullptr || versionsItem == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "create json array failed");
+        cJSON_Delete(bundlesItem);
+        cJSON_Delete(modulesItem);
+        cJSON_Delete(versionsItem);
+        cJSON_Delete(hspListJson);
+        return {};
+    }
+
+    for (auto& hsp : hspList) {
+        cJSON_AddItemToArray(bundlesItem, cJSON_CreateString(hsp.bundleName.c_str()));
+        cJSON_AddItemToArray(modulesItem, cJSON_CreateString(hsp.moduleName.c_str()));
+        std::string version = VERSION_PREFIX + std::to_string(hsp.versionCode);
+        cJSON_AddItemToArray(versionsItem, cJSON_CreateString(version.c_str()));
+    }
+
+    cJSON_AddItemToObject(hspListJson, HSPLIST_BUNDLES, bundlesItem);
+    cJSON_AddItemToObject(hspListJson, HSPLIST_MODULES, modulesItem);
+    cJSON_AddItemToObject(hspListJson, HSPLIST_VERSIONS, versionsItem);
+
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(hspListJson);
+    cJSON_Delete(hspListJson);
+    return jsonStr;
+}
+
+static bool DumpDataGroupInfoToJson(const DataGroupInfo &dataGroupInfo, cJSON *dataGroupInfoListJson,
+    bool isScreenLockDataProtect)
+{
+    if (dataGroupInfoListJson == nullptr || !cJSON_IsArray(dataGroupInfoListJson)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "json object is null or not array");
+        return false;
+    }
+    cJSON *dataGroupInfoJson = cJSON_CreateObject();
+    if (dataGroupInfoJson == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "create json object failed");
+        return false;
+    }
+
+    cJSON_AddStringToObject(dataGroupInfoJson, DATAGROUPINFOLIST_DATAGROUPID, dataGroupInfo.dataGroupId.c_str());
+    cJSON_AddStringToObject(dataGroupInfoJson, DATAGROUPINFOLIST_GID, std::to_string(dataGroupInfo.gid).c_str());
+    cJSON_AddStringToObject(dataGroupInfoJson, DATAGROUPINFOLIST_UUID, dataGroupInfo.uuid.c_str());
+    std::string dir = std::to_string(dataGroupInfo.userId) + JSON_GROUP + dataGroupInfo.uuid;
+
+    cJSON *dataGroupInfoJsonEl2 = cJSON_Duplicate(dataGroupInfoJson, 1);
+    if (dataGroupInfoJsonEl2 == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "duplicate json object failed");
+        cJSON_Delete(dataGroupInfoJson);
+        return false;
+    }
+    std::string el2Dir = std::string(JSON_DATA_APP_DIR_EL2) + dir;
+    cJSON_AddStringToObject(dataGroupInfoJsonEl2, DATAGROUPINFOLIST_DIR, el2Dir.c_str());
+    cJSON_AddItemToArray(dataGroupInfoListJson, dataGroupInfoJsonEl2);
+
+    cJSON *dataGroupInfoJsonEl3 = cJSON_Duplicate(dataGroupInfoJson, 1);
+    if (dataGroupInfoJsonEl3 == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "duplicate json object failed");
+        cJSON_Delete(dataGroupInfoJson);
+        return false;
+    }
+    std::string el3Dir = std::string(JSON_DATA_APP_DIR_EL3) + dir;
+    cJSON_AddStringToObject(dataGroupInfoJsonEl3, DATAGROUPINFOLIST_DIR, el3Dir.c_str());
+    cJSON_AddItemToArray(dataGroupInfoListJson, dataGroupInfoJsonEl3);
+
+    cJSON *dataGroupInfoJsonEl4 = cJSON_Duplicate(dataGroupInfoJson, 1);
+    if (dataGroupInfoJsonEl4 == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "duplicate json object failed");
+        cJSON_Delete(dataGroupInfoJson);
+        return false;
+    }
+    std::string el4Dir = std::string(JSON_DATA_APP_DIR_EL4) + dir;
+    cJSON_AddStringToObject(dataGroupInfoJsonEl4, DATAGROUPINFOLIST_DIR, el4Dir.c_str());
+    cJSON_AddItemToArray(dataGroupInfoListJson, dataGroupInfoJsonEl4);
+
+    if (isScreenLockDataProtect) {
+        cJSON *dataGroupInfoJsonEl5 = cJSON_Duplicate(dataGroupInfoJson, 1);
+        if (dataGroupInfoJsonEl5 == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "duplicate json object failed");
+            cJSON_Delete(dataGroupInfoJson);
+            return false;
+        }
+        std::string el5Dir = std::string(JSON_DATA_APP_DIR_EL5) + dir;
+        cJSON_AddStringToObject(dataGroupInfoJsonEl5, DATAGROUPINFOLIST_DIR, el5Dir.c_str());
+        cJSON_AddItemToArray(dataGroupInfoListJson, dataGroupInfoJsonEl5);
+    }
+
+    cJSON_Delete(dataGroupInfoJson);
+    return true;
 }
 
 static std::string DumpToJson(const DataGroupInfoList &dataGroupInfoList, bool isScreenLockDataProtect)
 {
-    nlohmann::json dataGroupInfoListJson;
+    cJSON *dataGroupInfoListJson = cJSON_CreateArray();
+    if (dataGroupInfoListJson == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "create json array failed");
+        return {};
+    }
+
     for (auto& dataGroupInfo : dataGroupInfoList) {
-        nlohmann::json dataGroupInfoJson;
-        dataGroupInfoJson[DATAGROUPINFOLIST_DATAGROUPID] = dataGroupInfo.dataGroupId;
-        dataGroupInfoJson[DATAGROUPINFOLIST_GID] = std::to_string(dataGroupInfo.gid);
-        dataGroupInfoJson[DATAGROUPINFOLIST_UUID] = dataGroupInfo.uuid;
-        std::string dir = std::to_string(dataGroupInfo.userId) + JSON_GROUP + dataGroupInfo.uuid;
-        dataGroupInfoJson[DATAGROUPINFOLIST_DIR] = JSON_DATA_APP_DIR_EL2 + dir;
-        dataGroupInfoListJson.emplace_back(dataGroupInfoJson);
-
-        dataGroupInfoJson[DATAGROUPINFOLIST_DIR] = JSON_DATA_APP_DIR_EL3 + dir;
-        dataGroupInfoListJson.emplace_back(dataGroupInfoJson);
-
-        dataGroupInfoJson[DATAGROUPINFOLIST_DIR] = JSON_DATA_APP_DIR_EL4 + dir;
-        dataGroupInfoListJson.emplace_back(dataGroupInfoJson);
-        if (isScreenLockDataProtect) {
-            dataGroupInfoJson[DATAGROUPINFOLIST_DIR] = JSON_DATA_APP_DIR_EL5 + dir;
-            dataGroupInfoListJson.emplace_back(dataGroupInfoJson);
+        if (!DumpDataGroupInfoToJson(dataGroupInfo, dataGroupInfoListJson, isScreenLockDataProtect)) {
+            cJSON_Delete(dataGroupInfoListJson);
+            return {};
         }
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "dataGroupInfoListJson %{public}s", dataGroupInfoListJson.dump().c_str());
-    return dataGroupInfoListJson.dump();
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(dataGroupInfoListJson);
+    cJSON_Delete(dataGroupInfoListJson);
+    TAG_LOGD(AAFwkTag::APPMGR, "dataGroupInfoListJson %{public}s", jsonStr.c_str());
+    return jsonStr;
 }
 
 static std::string DumpAppEnvToJson(const std::map<std::string, std::string> &appEnv)
 {
-    nlohmann::json appEnvJson;
-    for (const auto &[envName, envValue] : appEnv) {
-        appEnvJson[envName] = envValue;
+    cJSON *appEnvJson = cJSON_CreateObject();
+    if (appEnvJson == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "create json object failed");
+        return {};
     }
-    return appEnvJson.dump();
+
+    for (const auto &[envName, envValue] : appEnv) {
+        cJSON_AddStringToObject(appEnvJson, envName.c_str(), envValue.c_str());
+    }
+
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(appEnvJson);
+    cJSON_Delete(appEnvJson);
+    return jsonStr;
 }
 
 bool AppSpawnMsgWrapper::AssembleMsg(const AppSpawnStartMsg &startMsg)

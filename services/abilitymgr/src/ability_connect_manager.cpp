@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@
 #include "int_wrapper.h"
 #include "multi_instance_utils.h"
 #include "param.h"
+#include "request_id_util.h"
 #include "res_sched_util.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "startup_util.h"
@@ -81,6 +82,7 @@ constexpr const char* FROZEN_WHITE_DIALOG = "com.huawei.hmos.huaweicast";
 constexpr char BUNDLE_NAME_DIALOG[] = "com.ohos.amsdialog";
 constexpr char ABILITY_NAME_ASSERT_FAULT_DIALOG[] = "AssertFaultDialog";
 constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
+constexpr const char* PARAM_SPECIFIED_PROCESS_FLAG = "ohoSpecifiedProcessFlag";
 constexpr int32_t HALF_TIMEOUT = 2;
 
 constexpr uint32_t PROCESS_MODE_RUN_WITH_MAIN_PROCESS =
@@ -938,15 +940,10 @@ void AbilityConnectManager::DisconnectRecordForce(ConnectListType &list,
     list.emplace_back(connectRecord);
     bool isUIService = (abilityRecord->GetAbilityInfo().extensionAbilityType ==
         AppExecFwk::ExtensionAbilityType::UI_SERVICE);
-    if (abilityRecord->IsConnectListEmpty() && !isUIService) {
+    if (abilityRecord->IsConnectListEmpty() && abilityRecord->IsNeverStarted() && !isUIService) {
         TAG_LOGW(AAFwkTag::SERVICE_EXT, "force terminate ability record state: %{public}d",
             abilityRecord->GetAbilityState());
-        if (abilityRecord->IsNeverStarted()) {
-            TerminateRecord(abilityRecord);
-        } else {
-            connectRecord->CancelConnectTimeoutTask();
-            abilityRecord->DisconnectAbility();
-        }
+        TerminateRecord(abilityRecord);
     }
 }
 
@@ -1622,10 +1619,86 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
     loadParam.customProcessFlag = abilityRecord->GetCustomProcessFlag();
     loadParam.extensionProcessMode = abilityRecord->GetExtensionProcessMode();
     SetExtensionLoadParam(loadParam, abilityRecord);
-    AbilityRuntime::FreezeUtil::GetInstance().AddLifecycleEvent(loadParam.token,
-        "AbilityConnectManager::LoadAbility");
-    DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        loadParam, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(), abilityRecord->GetWant());
+    AbilityRuntime::FreezeUtil::GetInstance().AddLifecycleEvent(loadParam.token, "AbilityConnectManager::LoadAbility");
+    HandleLoadAbilityOrStartSpecifiedProcess(loadParam, abilityRecord);
+}
+
+void AbilityConnectManager::HandleLoadAbilityOrStartSpecifiedProcess(
+    const AbilityRuntime::LoadParam &loadParam, const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    if (abilityRecord->GetAbilityInfo().isolationProcess &&
+        AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "Is UIExtension and isolationProcess, StartSpecifiedProcess");
+        LoadAbilityContext context{ std::make_shared<AbilityRuntime::LoadParam>(loadParam),
+            std::make_shared<AppExecFwk::AbilityInfo>(abilityRecord->GetAbilityInfo()),
+            std::make_shared<AppExecFwk::ApplicationInfo>(abilityRecord->GetApplicationInfo()),
+            std::make_shared<Want>(abilityRecord->GetWant()) };
+        StartSpecifiedProcess(context, abilityRecord);
+    } else {
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "LoadAbility");
+        DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
+            loadParam, abilityRecord->GetAbilityInfo(), abilityRecord->GetApplicationInfo(), abilityRecord->GetWant());
+    }
+}
+
+void AbilityConnectManager::StartSpecifiedProcess(
+    const LoadAbilityContext &context, const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    std::lock_guard<std::mutex> guard(loadAbilityQueueLock_);
+    auto requestId = RequestIdUtil::GetRequestId();
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedProcess, requestId: %{public}d,", requestId);
+    std::map<int32_t, LoadAbilityContext> mapContext_ = { { requestId, context } };
+    loadAbilityQueue_.push_back(mapContext_);
+    if (loadAbilityQueue_.size() > 1) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "loadAbilityQueue_ size > 1, requestId: %{public}d", requestId);
+        return;
+    }
+    DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedProcess(
+        *context.want, *context.abilityInfo, requestId, context.loadParam->customProcessFlag);
+}
+
+void AbilityConnectManager::OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId)
+{
+    std::lock_guard<std::mutex> guard(loadAbilityQueueLock_);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessResponse, requestId: %{public}d, flag: %{public}s",
+        requestId, flag.c_str());
+    if (!loadAbilityQueue_.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessResponse LoadAbility");
+        auto &front = loadAbilityQueue_.front();
+        front[requestId].want->SetParam(PARAM_SPECIFIED_PROCESS_FLAG, flag);
+        DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(*front[requestId].loadParam,
+            *(front[requestId].abilityInfo), *(front[requestId].appInfo), *(front[requestId].want));
+        loadAbilityQueue_.pop_front();
+    }
+}
+
+void AbilityConnectManager::OnStartSpecifiedProcessTimeoutResponse(int32_t requestId)
+{
+    std::lock_guard<std::mutex> guard(loadAbilityQueueLock_);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessTimeoutResponse requestId: %{public}d", requestId);
+
+    if (!loadAbilityQueue_.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessTimeout pop_front");
+        loadAbilityQueue_.pop_front();
+    }
+
+    if (!loadAbilityQueue_.empty()) {
+        auto &front = loadAbilityQueue_.front();
+        DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(*(front[requestId].loadParam),
+            *(front[requestId].abilityInfo), *(front[requestId].appInfo), *(front[requestId].want));
+        loadAbilityQueue_.pop_front();
+    }
+}
+
+bool AbilityConnectManager::HasRequestIdInLoadAbilityQueue(int32_t requestId)
+{
+    std::lock_guard<std::mutex> guard(loadAbilityQueueLock_);
+    for (const auto &map : loadAbilityQueue_) {
+        if (map.find(requestId) != map.end()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void AbilityConnectManager::SetExtensionLoadParam(AbilityRuntime::LoadParam &loadParam,
@@ -2452,7 +2525,9 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
         return;
     }
 
-    if (abilityRecord->IsSceneBoard() && AmsConfigurationParameter::GetInstance().IsSupportSCBCrashReboot()) {
+    int32_t restart = OHOS::system::GetIntParameter<int32_t>("persist.sceneboard.restart", 0);
+    if (restart <= 0 && abilityRecord->IsSceneBoard() &&
+        AmsConfigurationParameter::GetInstance().IsSupportSCBCrashReboot()) {
         static int sceneBoardCrashCount = 0;
         static int64_t tickCount = GetTickCount();
         int64_t tickNow = GetTickCount();
@@ -3609,6 +3684,7 @@ std::string AbilityConnectManager::GenerateBundleName(const AbilityRequest &abil
 int32_t AbilityConnectManager::ReportXiaoYiToRSSIfNeeded(const AppExecFwk::AbilityInfo &abilityInfo)
 {
     if (abilityInfo.type != AppExecFwk::AbilityType::EXTENSION ||
+        abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE ||
         abilityInfo.bundleName != XIAOYI_BUNDLE_NAME) {
         return ERR_OK;
     }

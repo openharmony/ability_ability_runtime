@@ -93,6 +93,8 @@ public:
     static napi_value NapiTrigger(napi_env env, napi_callback_info info);
     static napi_value NapiTriggerAsync(napi_env env, napi_callback_info info);
     static napi_value NapiGetWantAgent(napi_env env, napi_callback_info info);
+    static napi_value NapiCreateLocalWantAgent(napi_env env, napi_callback_info info);
+    static napi_value NapiIsLocalWantAgent(napi_env env, napi_callback_info info);
     static napi_value NapiGetOperationType(napi_env env, napi_callback_info info);
     static napi_value NapiSetWantAgentMultithreading(napi_env env, napi_callback_info info);
     static napi_value CreateJsCompletedData(napi_env env, const CompletedDispatcher &data);
@@ -110,6 +112,8 @@ private:
     napi_value OnNapiTrigger(napi_env env, napi_callback_info info);
     napi_value OnNapiTriggerAsync(napi_env env, napi_callback_info info);
     napi_value OnNapiGetWantAgent(napi_env env, napi_callback_info info);
+    napi_value OnNapiCreateLocalWantAgent(napi_env env, napi_callback_info info);
+    napi_value OnNapiIsLocalWantAgent(napi_env env, napi_callback_info info);
     napi_value OnNapiGetOperationType(napi_env env, napi_callback_info info);
     napi_value OnNapiSetWantAgentMultithreading(napi_env env, napi_callback_info info);
     std::shared_ptr<AbilityRuntime::Context> ConvertToContext(std::shared_ptr<AbilityRuntime::Context> context);

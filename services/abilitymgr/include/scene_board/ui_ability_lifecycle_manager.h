@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -144,17 +144,8 @@ public:
     int32_t BackToCallerAbilityWithResult(std::shared_ptr<AbilityRecord> abilityRecord,
         int resultCode, const Want *resultWant, int64_t callerRequestCode);
 
-    /**
-     * CloseUIAbility, close the special ability by scb.
-     *
-     * @param abilityRecord, the ability to close.
-     * @param resultCode, the resultCode of the ability to terminate.
-     * @param resultWant, the Want of the ability to return.
-     * @param isClearSession Indicates whether to close UIAbility because the session is cleared.
-     * @return Returns ERR_OK on success, others on failure.
-     */
     int CloseUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
-        int resultCode, const Want *resultWant, bool isClearSession);
+        int resultCode, const Want *resultWant, bool isClearSession, bool isIndependentRecovery);
 
     /**
      * Set rootSceneSession by SCB.
@@ -239,13 +230,7 @@ public:
      */
     void OnStartSpecifiedFailed(int32_t requestId);
 
-    /**
-     * Start specified ability by SCB.
-     *
-     * @param want Want information.
-     * @param abilityRequest AbilityRequest information.
-     */
-    void StartSpecifiedAbilityBySCB(const Want &want, AbilityRequest &abilityRequest);
+    int32_t StartSpecifiedAbilityBySCB(AbilityRequest &abilityRequest);
 
     /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
@@ -496,14 +481,6 @@ private:
     bool HasAbilityRequest(const AbilityRequest &abilityRequest);
     void AddAbilityRequest(const AbilityRequest &abilityRequest, int32_t requestId);
     void RemoveAbilityRequest(int32_t requestId);
-    inline int32_t GetRequestId()
-    {
-        if (requestId_ == 0 || requestId_ == INT32_MAX) {
-            requestId_ = 1;
-        }
-        return requestId_++;
-    }
-
     void AddSpecifiedRequest(std::shared_ptr<SpecifiedRequest> request);
     void StartSpecifiedRequest(SpecifiedRequest &specifiedRequest);
     std::shared_ptr<SpecifiedRequest> PopAndGetNextSpecified(int32_t requestId);
@@ -527,6 +504,7 @@ private:
     bool TryProcessHookModule(SpecifiedRequest &specifiedRequest, bool isHookModule);
     bool IsStartSpecifiedProcessRequest(const AbilityRequest &abilityRequest);
     int32_t StartSpecifiedProcessRequest(const AbilityRequest &abilityRequest);
+    void RemoveInstanceKey(const AbilityRequest &abilityRequest) const;
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
@@ -536,7 +514,6 @@ private:
     std::unordered_map<std::shared_ptr<AbilityRecord>, std::list<AbilityRequest>> callRequestCache_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
     sptr<IRemoteObject> rootSceneSession_;
-    int32_t requestId_ = 0;
     sptr<ISessionHandler> handler_;
     ffrt::mutex statusBarDelegateManagerLock_;
     std::shared_ptr<StatusBarDelegateManager> statusBarDelegateManager_;

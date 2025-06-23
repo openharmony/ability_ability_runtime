@@ -38,15 +38,15 @@ constexpr const char* RECORD_CLASS_NAME = "Lescompat/Record;";
 STSFormExtension *STSFormExtension::Create(const std::unique_ptr<Runtime> &runtime)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "call___%{public}d", runtime->GetLanguage());
-    return new STSFormExtension(static_cast<STSRuntime &>(*runtime));
+    return new STSFormExtension(static_cast<ETSRuntime &>(*runtime));
 }
 
-const STSRuntime &STSFormExtension::GetSTSRuntime()
+const ETSRuntime &STSFormExtension::GetSTSRuntime()
 {
     return stsRuntime_;
 }
 
-STSFormExtension::STSFormExtension(STSRuntime &stsRuntime) : stsRuntime_(stsRuntime) {}
+STSFormExtension::STSFormExtension(ETSRuntime &stsRuntime) : stsRuntime_(stsRuntime) {}
 
 STSFormExtension::~STSFormExtension()
 {
@@ -374,7 +374,7 @@ bool STSFormExtension::ExtractFormData(ani_env *env, ani_ref nativeResult, AppEx
         return true;
     }
 
-    ani_boolean isUndefined = true;
+    ani_boolean isUndefined = ANI_TRUE;
     if ((status = env->Reference_IsUndefined(proxiesRef, &isUndefined)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Reference_IsUndefined status: %{public}d", status);
     }
@@ -634,8 +634,7 @@ void STSFormExtension::OnStop()
     ani_status status = env->Object_GetFieldByName_Ref(
         static_cast<ani_object>(stsAbilityObj_->aniRef), "onStop", &nameRef);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d, %{public}p, %{public}p",
-            status, stsAbilityObj_->aniRef, stsAbilityObj_->aniObj);
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d", status);
         return;
     }
     
@@ -656,25 +655,6 @@ void STSFormExtension::OnStop()
     TAG_LOGI(AAFwkTag::FORM_EXT, "OnStop End");
 }
 
-void STSFormExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
-{
-    TAG_LOGI(AAFwkTag::FORM_EXT, "OnConfigurationUpdated call");
-    FormExtension::OnConfigurationUpdated(configuration);
-
-    HandleScope handleScope(jsRuntime_);
-    napi_env env = jsRuntime_.GetNapiEnv();
-
-    // Notify extension context
-    auto fullConfig = GetContext()->GetConfiguration();
-    if (!fullConfig) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "null fullConfig");
-        return;
-    }
-    JsExtensionContext::ConfigurationUpdated(env, shellContextRef_, fullConfig);
-
-    napi_value napiConfiguration = OHOS::AppExecFwk::WrapConfiguration(env, *fullConfig);
-    CallObjectMethod("onConfigurationUpdate", "onConfigurationUpdated", &napiConfiguration, 1);
-}
 
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -23,6 +23,7 @@
 #include "connection_data.h"
 #include "connection_observer_client.h"
 #include "connection_observer_client_impl.h"
+#include "connection_observer_stub_impl.h"
 #ifdef WITH_DLP
 #include "dlp_state_data.h"
 #endif // WITH_DLP
@@ -328,6 +329,92 @@ HWTEST_F(ConnectionObserverTest, ConnectionObserver_Observer_0200, TestSize.Leve
 
     SetSelfTokenID(currentID);
     TAG_LOGI(AAFwkTag::TEST, "ConnectionObserver_Observer_0200 end");
+}
+
+/**
+ * @tc.name: ConnectionObserver_Observer_0300
+ * @tc.desc: test observer callback.
+ * @tc.type: FUNC
+ * @tc.require: issueI58213
+ */
+HWTEST_F(ConnectionObserverTest, ConnectionObserver_Observer_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ConnectionObserver_Observer_0300 start");
+
+    auto clientImpl = ConnectionObserverClient::GetInstance().clientImpl_;
+
+    std::shared_ptr<MyConnectionObserver> myObserver = nullptr;
+    clientImpl->userObservers_.emplace(myObserver);
+    ConnectionData connectionData;
+    clientImpl->HandleExtensionSuspended(connectionData);
+    clientImpl->HandleExtensionResumed(connectionData);
+    EXPECT_FALSE(connectionData.isSuspended);
+
+    TAG_LOGI(AAFwkTag::TEST, "ConnectionObserver_Observer_0300 end");
+}
+
+/**
+ * @tc.name: ConnectionObserver_Observer_0400
+ * @tc.desc: test observer callback.
+ * @tc.type: FUNC
+ * @tc.require: issueI58213
+ */
+HWTEST_F(ConnectionObserverTest, ConnectionObserver_Observer_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ConnectionObserver_Observer_0400 start");
+
+    auto clientImpl = ConnectionObserverClient::GetInstance().clientImpl_;
+    EXPECT_TRUE(clientImpl);
+    ConnectionObserverStubImpl connectionObserverStubImpl(clientImpl);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    connectionObserverStubImpl.OnRemoteRequest(
+        IConnectionObserver::ON_EXTENSION_SUSPENDED, data, reply, option);
+    connectionObserverStubImpl.OnRemoteRequest(
+        IConnectionObserver::ON_EXTENSION_RESUMED, data, reply, option);
+
+    ConnectionData connectionData;
+    connectionData.extensionPid = TEST_PID;
+    connectionData.extensionUid = TEST_UID;
+    connectionData.extensionBundleName = TEST_BUNDLE_NAME;
+    connectionData.extensionModuleName = TEST_MODULE_NAME;
+    connectionData.extensionName = TEST_ABILITY_NAME;
+    connectionData.extensionType = OHOS::AppExecFwk::ExtensionAbilityType::SERVICE;
+    connectionData.callerPid = TEST_CALLER_PID;
+    connectionData.callerUid = TEST_CALLER_UID;
+    connectionData.callerName = TEST_CALLER_NAME;
+
+    EXPECT_TRUE(connectionData.Marshalling(data));
+    connectionObserverStubImpl.OnRemoteRequest(
+        IConnectionObserver::ON_EXTENSION_SUSPENDED, data, reply, option);
+    connectionObserverStubImpl.OnRemoteRequest(
+        IConnectionObserver::ON_EXTENSION_RESUMED, data, reply, option);
+
+    TAG_LOGI(AAFwkTag::TEST, "ConnectionObserver_Observer_0400 end");
+}
+
+/**
+ * @tc.name: ConnectionObserver_Observer_0500
+ * @tc.desc: test observer callback.
+ * @tc.type: FUNC
+ * @tc.require: issueI58213
+ */
+HWTEST_F(ConnectionObserverTest, ConnectionObserver_Observer_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ConnectionObserver_Observer_0500 start");
+
+    auto clientImpl = ConnectionObserverClient::GetInstance().clientImpl_;
+    
+    ConnectionObserverStubImpl connectionObserverStubImpl(nullptr);
+
+    ConnectionData connectionData;
+    connectionObserverStubImpl.OnExtensionSuspended(connectionData);
+    connectionObserverStubImpl.OnExtensionResumed(connectionData);
+    EXPECT_FALSE(connectionData.isSuspended);
+
+    TAG_LOGI(AAFwkTag::TEST, "ConnectionObserver_Observer_0500 end");
 }
 #endif // WITH_DLP
 }  // namespace AbilityRuntime

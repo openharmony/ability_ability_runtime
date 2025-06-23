@@ -82,6 +82,24 @@ HWTEST_F(UIServiceExtensionTest, Create_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.number: Create_0200
+ * @tc.name: UIServiceExtension Create
+ * @tc.desc: UIServiceExtension Create.
+ */
+HWTEST_F(UIServiceExtensionTest, Create_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Create_0200 start");
+
+    Runtime::Options options;
+    options.lang = Runtime::Language::UNKNOWN;
+    auto runtime = Runtime::Create(options);
+    auto uIServiceExtensionPtr = UIServiceExtension::Create(runtime);
+    EXPECT_TRUE(uIServiceExtensionPtr != nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "Create_0100 end");
+}
+
+/**
  * @tc.number: CreateAndInitContext_0100
  * @tc.name: UIServiceExtension CreateAndInitContext
  * @tc.desc: UIServiceExtension CreateAndInitContext.

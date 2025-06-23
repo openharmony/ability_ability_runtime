@@ -236,7 +236,7 @@ int32_t AmsResidentProcessRdb::UpdateResidentProcessEnable(const std::string &bu
     return rdbMgr_->UpdateData(valuesBucket, absRdbPredicates);
 }
 
-int32_t AmsResidentProcessRdb::RemoveData(std::string &bundleName)
+int32_t AmsResidentProcessRdb::RemoveData(const std::string &bundleName)
 {
     if (bundleName.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null bundleName");

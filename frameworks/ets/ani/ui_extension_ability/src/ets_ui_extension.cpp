@@ -24,6 +24,8 @@
 #include "context.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
+#include "insight_intent_executor_info.h"
+#include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
 #include "ets_runtime.h"
 #include "ani_common_want.h"
@@ -202,8 +204,13 @@ void EtsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> s
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
         launchParam.launchReason = AAFwk::LaunchReason::LAUNCHREASON_INSIGHT_INTENT;
     }
-    ani_object launchParamRef = CreateEtsLaunchParam(env, launchParam);
-    CallObjectMethod(false, "onCreate", signature, launchParamRef);
+
+    ani_object launchParamObj = nullptr;
+    if (!WrapLaunchParam(env, launchParam, launchParamObj)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "WrapLaunchParam failed");
+        return;
+    }
+    CallObjectMethod(false, "onCreate", signature, launchParamObj);
 }
 
 void EtsUIExtension::OnStop()
@@ -660,7 +667,7 @@ bool EtsUIExtension::CallObjectMethod(bool withResult, const char *name, const c
     }
     env->ResetError();
     if (withResult) {
-        ani_boolean res = 0;
+        ani_boolean res = ANI_FALSE;
         va_list args;
         va_start(args, signature);
         if ((status = env->Object_CallMethod_Boolean(etsObj_->aniObj, method, &res, args)) != ANI_OK) {

@@ -18,20 +18,20 @@
 
 #include "ani.h"
 #include "form_extension.h"
-#include "sts_runtime.h"
+#include "ets_runtime.h"
 
 class NativeReference;
 class STSNativeReference;
 namespace OHOS {
 namespace AbilityRuntime {
 class FormExtension;
-class STSRuntime;
+class ETSRuntime;
 
 class STSFormExtension : public FormExtension {
 public:
     static STSFormExtension *Create(const std::unique_ptr<Runtime> &runtime);
-    const STSRuntime &GetSTSRuntime();
-    explicit STSFormExtension(STSRuntime &stsRuntime);
+    const ETSRuntime &GetSTSRuntime();
+    explicit STSFormExtension(ETSRuntime &stsRuntime);
     ~STSFormExtension() override;
 
     void Init(const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &record,
@@ -73,8 +73,8 @@ private:
     std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str);
     ani_status ANIUtils_FormIdToAniString(ani_env *env, int64_t formId, ani_string &formIdStr);
     std::unique_ptr<NativeReference> stsObj_;
-    std::shared_ptr<STSNativeReference> stsAbilityObj_;
-    STSRuntime &stsRuntime_;
+    std::shared_ptr<ETSNativeReference> stsAbilityObj_;
+    ETSRuntime &stsRuntime_;
     sptr<IRemoteObject> providerRemoteObject_ = nullptr;
 }; // namespace AbilityRuntime
 } // namespace AbilityRuntime

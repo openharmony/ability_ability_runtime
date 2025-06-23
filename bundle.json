@@ -83,7 +83,6 @@
             "input",
             "ipc",
             "json",
-            "jsoncpp",
             "kv_store",
             "libuv",
             "libxml2",
@@ -112,7 +111,8 @@
             "udmf",
             "webview",
             "window_manager",
-            "zlib"
+            "zlib",
+            "hiperf"
   ],
           "third_party": [
             "libjpeg-turbo"
@@ -232,6 +232,20 @@
               "header_files": []
             },
             "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native:cj_abilitykit_native_ffi"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/kits/native/ability/native/insight_intent_executor",
+              "header_files": []
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native:cj_insight_intent_executor"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/insight_intent/insight_intent_context",
+              "header_files": []
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/native/insight_intent/insight_intent_context:cj_insightintentcontext"
           },
           {
             "header": {

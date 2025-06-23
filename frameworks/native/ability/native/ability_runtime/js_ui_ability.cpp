@@ -1024,9 +1024,10 @@ void JsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
         abilityContext_->SetWeakSessionToken(sessionToken);
         ret = scene_->Init(displayId, abilityContext_, sceneListener_, option, sessionToken, identityToken,
             reusingWindow_);
+        RemoveShareRouterByBundleType(want);
         std::string navDestinationInfo = want.GetStringParam(Want::ATOMIC_SERVICE_SHARE_ROUTER);
         if (!navDestinationInfo.empty()) {
-            TAG_LOGI(AAFwkTag::UIABILITY, "SetNavDestinationInfo :%{public}s", navDestinationInfo.c_str());
+            TAG_LOGD(AAFwkTag::UIABILITY, "SetNavDestinationInfo :%{public}s", navDestinationInfo.c_str());
             scene_->SetNavDestinationInfo(navDestinationInfo);
         }
         if (abilityContext_->IsHook()) {
@@ -1649,6 +1650,17 @@ void JsUIAbility::UpdateContextConfiguration()
     JsAbilityContext::ConfigurationUpdated(env, shellContextRef_, abilityContext_->GetConfiguration());
 }
 
+void JsUIAbility::RemoveShareRouterByBundleType(const Want &want)
+{
+    auto abilityInfo = abilityContext_ ? abilityContext_->GetAbilityInfo() : nullptr;
+    if (abilityInfo == nullptr ||
+        abilityInfo->applicationInfo.bundleType != OHOS::AppExecFwk::BundleType::ATOMIC_SERVICE) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "not atomicService");
+        const_cast<Want &>(want).RemoveParam(Want::ATOMIC_SERVICE_SHARE_ROUTER);
+    }
+    return;
+}
+
 void JsUIAbility::OnNewWant(const Want &want)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
@@ -1656,6 +1668,7 @@ void JsUIAbility::OnNewWant(const Want &want)
 
 #ifdef SUPPORT_SCREEN
     if (scene_) {
+        RemoveShareRouterByBundleType(want);
         scene_->OnNewWant(want);
     }
     HandleCollaboration(want);

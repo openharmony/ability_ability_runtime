@@ -16,6 +16,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 group("cj_ability_packages") {
   deps = [
+    "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
     "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
     "${ability_runtime_path}/frameworks/cj/ffi/app/app_manager:cj_app_manager_ffi",
     "${ability_runtime_path}/frameworks/cj/ffi/app/errormanager:cj_errormanager_ffi",
@@ -28,6 +29,7 @@ group("cj_ability_packages") {
     "${ability_runtime_path}/frameworks/native/ability/native:cj_action_extension",
     "${ability_runtime_path}/frameworks/native/ability/native:cj_embedded_ui_extension",
     "${ability_runtime_path}/frameworks/native/ability/native:cj_extensionkit_native",
+    "${ability_runtime_path}/frameworks/native/ability/native:cj_insight_intent_executor",
     "${ability_runtime_path}/frameworks/native/ability/native:cj_form_extension",
     "${ability_runtime_path}/frameworks/native/ability/native:cj_photo_editor_extension",
     "${ability_runtime_path}/frameworks/native/ability/native:cj_share_extension",

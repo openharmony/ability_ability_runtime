@@ -571,6 +571,11 @@ public:
     bool IsKeepAliveDkv() const;
 
     /**
+     * @brief Whether the process is non-resident keep-alive app service extension.
+     */
+    bool IsKeepAliveAppService() const;
+
+    /**
      * @brief Whether the process can keep empty alive.
      */
     bool IsEmptyKeepAliveApp() const;
@@ -603,6 +608,8 @@ public:
      * @param isKeepAliveDkv new value
      */
     void SetKeepAliveDkv(bool isKeepAliveDkv);
+
+    void SetKeepAliveAppService(bool isKeepAliveAppService);
 
     /**
      * @brief roughly considered as a value from the process's bundle info.
@@ -1091,6 +1098,26 @@ public:
     std::optional<bool> IsSupportMultiProcessDeviceFeature() const;
     void SetSupportMultiProcessDeviceFeature(bool support);
 
+    inline void SetMasterProcess(bool isMasterProcess)
+    {
+        isMasterProcess_ = isMasterProcess;
+    }
+
+    inline bool GetIsMasterProcess() const
+    {
+        return isMasterProcess_;
+    }
+
+    inline void SetTimeStamp(int64_t timeStamp)
+    {
+        timeStamp_ = timeStamp;
+    }
+
+    inline int64_t GetTimeStamp() const
+    {
+        return timeStamp_;
+    }
+
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1143,6 +1170,7 @@ private:
     bool isKeepAliveBundle_ = false;
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
     bool isKeepAliveDkv_ = false; // Only non-resident keep-alive processes can be set to true, please choose carefully
+    bool isKeepAliveAppService_ = false;
     bool isMainProcess_ = true; // Only MainProcess can be keepalive
     bool isSingleton_ = false;
     bool isStageBasedModel_ = false;
@@ -1270,6 +1298,9 @@ private:
     std::shared_ptr<StartupTaskData> startupTaskData_ = nullptr;
     ffrt::mutex startupTaskDataLock_;
     mutable ffrt::mutex killReasonLock_;
+
+    bool isMasterProcess_ = false; // Only MasterProcess can be keepalive
+    int64_t timeStamp_ = 0; // the flag of BackUpMainControlProcess
 };
 
 }  // namespace AppExecFwk

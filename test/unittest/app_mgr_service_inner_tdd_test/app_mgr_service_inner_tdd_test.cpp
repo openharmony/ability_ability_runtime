@@ -885,42 +885,6 @@ HWTEST_F(AppMgrServiceInnerTest, GenerateRenderUid_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: StartRenderProcessImpl_001
- * @tc.desc: start render process.
- * @tc.type: FUNC
- * @tc.Function: StartRenderProcessImpl
- * @tc.SubFunction: NA
- * @tc.EnvConditions: NA
- */
-HWTEST_F(AppMgrServiceInnerTest, StartRenderProcessImpl_001, TestSize.Level2)
-{
-    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcessImpl_001 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    appMgrServiceInner->Init();
-    EXPECT_NE(appMgrServiceInner, nullptr);
-    BundleInfo bundleInfo;
-    std::string appName = "test_appName";
-    std::string processName = "test_processName";
-    std::string bundleName = "test_bundleName";
-    sptr<IRemoteObject> token = new MockAbilityToken();
-    std::shared_ptr<AppRunningRecord> appRecord =
-        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
-    EXPECT_NE(appRecord, nullptr);
-    pid_t hostPid = 1;
-    std::string renderParam = "test_render_param";
-    int32_t ipcFd = 1;
-    int32_t sharedFd = 1;
-    int32_t crashFd = 1;
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
-        FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), appRecord);
-    EXPECT_NE(renderRecord, nullptr);
-    pid_t renderPid = 1;
-    appMgrServiceInner->StartRenderProcessImpl(nullptr, nullptr, renderPid);
-    appMgrServiceInner->StartRenderProcessImpl(renderRecord, appRecord, renderPid);
-    TAG_LOGI(AAFwkTag::TEST, "StartRenderProcessImpl_001 end");
-}
-
-/**
  * @tc.name: NotifyAppFault_001
  * @tc.desc: Verify that the NotifyAppFault interface calls normally
  * @tc.type: FUNC
@@ -1242,6 +1206,244 @@ HWTEST_F(AppMgrServiceInnerTest, GetKernelPermissions_001, TestSize.Level1)
     appMgrServiceInner->GetKernelPermissions(accessTokenId, permissionsMap);
     EXPECT_EQ(permissionsMap.size(), 0);
     TAG_LOGI(AAFwkTag::TEST, "GetKernelPermissions_001 end");
+}
+
+/**
+ * @tc.name: KillSubProcessBypidInner
+ * @tc.desc: Kill subProcess inner
+ * @tc.type: FUNC
+ * @tc.Function: KillSubProcessBypidInner
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, KillSubProcessBypidInner_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypidInner_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    pid_t pid = 0;
+    std::string reason = "test";
+    AAFwk::EventInfo eventInfo;
+    auto ret = appMgrServiceInner->KillSubProcessBypidInner(pid, reason, eventInfo);
+    EXPECT_EQ(ret, AAFwk::ERR_KILL_PROCESS_NOT_EXIST);
+
+    pid = 65536;
+    ret = appMgrServiceInner->KillSubProcessBypidInner(pid, reason, eventInfo);
+    EXPECT_NE(ret, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypidInner_001 end");
+}
+
+/**
+ * @tc.name: KillSubProcessBypidInner
+ * @tc.desc: Kill subProcess inner
+ * @tc.type: FUNC
+ * @tc.Function: KillSubProcessBypidInner
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, KillSubProcessBypidInner_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypidInner_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    pid_t pid = 0;
+    std::string reason = "test";
+    AAFwk::EventInfo eventInfo;
+
+    pid = fork();
+    if (pid == -1) {
+        TAG_LOGI(AAFwkTag::TEST, "fork process failed");
+    } else if (pid == 0) {
+        TAG_LOGI(AAFwkTag::TEST, "fork process success");
+        sleep(3);
+        exit(0);
+    }
+    auto ret = appMgrServiceInner->KillSubProcessBypidInner(pid, reason, eventInfo);
+    EXPECT_EQ(ret, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypidInner_002 end");
+}
+
+/**
+ * @tc.name: KillSubProcessBypid
+ * @tc.desc: Kill subProcess
+ * @tc.type: FUNC
+ * @tc.Function: KillSubProcessBypid
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, KillSubProcessBypid_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypid_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    pid_t pid = 111;
+    std::string reason = "test";
+    auto ret = 0;
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    ret = appMgrServiceInner->KillSubProcessBypid(pid, reason);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypid_001 end");
+}
+
+/**
+ * @tc.name: KillSubProcessBypid
+ * @tc.desc: Kill subProcess
+ * @tc.type: FUNC
+ * @tc.Function: KillSubProcessBypid
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, KillSubProcessBypid_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypid_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    pid_t pid = 1;
+    std::string reason = "test";
+    auto ret = 0;
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+
+    int32_t recordId = 1;
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::string processName = "testProcess";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    
+    std::map<int32_t, std::shared_ptr<RenderRecord>> renderRecordMap;
+    int32_t uid = 1;
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(
+        pid, "param", FdGuard(0), FdGuard(0), FdGuard(0), appRecord);
+    renderRecord->SetPid(pid);
+    renderRecordMap.emplace(uid, renderRecord);
+    appRecord->renderRecordMap_ = renderRecordMap;
+
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRecord);
+
+    appMgrServiceInner->appRunningManager_ = appRunningManager;
+    ret = appMgrServiceInner->KillSubProcessBypid(pid, reason);
+    EXPECT_EQ(ret, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypid_002 end");
+}
+
+/**
+ * @tc.name: KillSubProcessBypid
+ * @tc.desc: Kill subProcess
+ * @tc.type: FUNC
+ * @tc.Function: KillSubProcessBypid
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, KillSubProcessBypid_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypid_003 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    pid_t pid = 1;
+    std::string reason = "test";
+    auto ret = 0;
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+
+    int32_t recordId = 1;
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::string processName = "testProcess";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    
+    std::map<pid_t, std::shared_ptr<ChildProcessRecord>> childProcessRecordMap;
+    std::string subProcessName = "subTestProcess";
+    std::shared_ptr<ApplicationInfo> subAppInfo = std::make_shared<ApplicationInfo>();
+    auto subAppRecord = std::make_shared<AppRunningRecord>(subAppInfo, recordId, subProcessName);
+    ChildProcessRequest request;
+    auto childProcessRecord = std::make_shared<ChildProcessRecord>(pid, request, subAppRecord);
+
+    childProcessRecordMap.emplace(pid, childProcessRecord);
+    appRecord->childProcessRecordMap_ = childProcessRecordMap;
+
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRecord);
+    appMgrServiceInner->appRunningManager_ = appRunningManager;
+    ret = appMgrServiceInner->KillSubProcessBypid(pid, reason);
+    EXPECT_EQ(ret, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypid_003 end");
+}
+
+/**
+ * @tc.name: KillSubProcessBypid
+ * @tc.desc: Kill subProcess
+ * @tc.type: FUNC
+ * @tc.Function: KillSubProcessBypid
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, KillSubProcessBypid_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypid_004 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    pid_t pid = 1;
+    std::string reason = "test";
+    auto ret = 0;
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+
+    int32_t recordId = 1;
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::string processName = "testProcess";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    
+    // std::map<int32_t, std::shared_ptr<RenderRecord>> renderRecordMap;
+    std::map<pid_t, std::weak_ptr<AppRunningRecord>> childAppRecordMap;
+    std::shared_ptr<ApplicationInfo> subAppInfo = std::make_shared<ApplicationInfo>();
+    std::string subProcessName = "subTestProcess";
+    auto subAppRecord = std::make_shared<AppRunningRecord>(subAppInfo, recordId, subProcessName);
+    childAppRecordMap.emplace(pid, subAppRecord);
+    appRecord->childAppRecordMap_ = childAppRecordMap;
+
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRecord);
+    appMgrServiceInner->appRunningManager_ = appRunningManager;
+    ret = appMgrServiceInner->KillSubProcessBypid(pid, reason);
+    EXPECT_EQ(ret, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypid_004 end");
+}
+
+/**
+ * @tc.name: KillSubProcessBypid
+ * @tc.desc: Kill subProcess
+ * @tc.type: FUNC
+ * @tc.Function: KillSubProcessBypid
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, KillSubProcessBypid_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypid_005 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    pid_t pid = 2;
+    std::string reason = "test";
+    auto ret = 0;
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+
+    int32_t recordId = 1;
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::string processName = "testProcess";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    
+    // std::map<int32_t, std::shared_ptr<RenderRecord>> renderRecordMap;
+    std::map<pid_t, std::weak_ptr<AppRunningRecord>> childAppRecordMap;
+    std::shared_ptr<ApplicationInfo> subAppInfo = std::make_shared<ApplicationInfo>();
+    std::string subProcessName = "subTestProcess";
+    auto subAppRecord = std::make_shared<AppRunningRecord>(subAppInfo, recordId, subProcessName);
+    childAppRecordMap.emplace(pid, subAppRecord);
+    appRecord->childAppRecordMap_ = childAppRecordMap;
+
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRecord);
+    appMgrServiceInner->appRunningManager_ = appRunningManager;
+    ret = appMgrServiceInner->KillSubProcessBypid(pid, reason);
+    EXPECT_EQ(ret, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "KillSubProcessBypid_005 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

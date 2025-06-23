@@ -686,6 +686,20 @@ void CJApplicationContext::OnSetSupportedProcessCacheSelf(bool isSupported, int3
     }
 }
 
+int32_t CJApplicationContext::OnSetFontSizeScale(double fontSizeScale)
+{
+    auto context = applicationContext_.lock();
+    if (!context) {
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
+        return ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+    }
+    if (context->SetFontSizeScale(fontSizeScale)) {
+        return ERR_OK;
+    } else {
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
+    }
+}
+
 extern "C" {
 CJ_EXPORT void OHOS_CjAppCtxFunc(int32_t type, int64_t id)
 {

@@ -163,6 +163,34 @@ HWTEST_F(AbilityLoaderTest, GetExtensionByName_0200, TestSize.Level1)
 }
 
 /**
+ * @tc.number: GetExtensionByName_0300
+ * @tc.name: GetExtensionByName
+ * @tc.desc: GetExtensionByName Test When AbilityRuntime::Extension is not nullptr.
+ */
+HWTEST_F(AbilityLoaderTest, GetExtensionByName_0300, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "AbilityLoaderTest GetExtensionByName_0300 start";
+    std::string abilityName = "AbilityRuntime::Extension";
+    CreateExtension createFunc;
+    auto createExtension = [](const std::string &language) -> AbilityRuntime::Extension *{
+        AbilityRuntime::Extension *callBack = new (std::nothrow) AbilityRuntime::Extension;
+        if (language == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
+            return callBack;
+        } else {
+            return nullptr;
+        }
+    };
+
+    AbilityLoader::GetInstance().extensions_.clear();
+    AbilityLoader::GetInstance().RegisterExtension(abilityName, createExtension);
+    EXPECT_TRUE(AbilityLoader::GetInstance().GetExtensionByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) != nullptr);
+    EXPECT_TRUE(AbilityLoader::GetInstance().GetExtensionByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) == nullptr);
+    GTEST_LOG_(INFO) << "AbilityLoaderTest GetExtensionByName_0300 end";
+}
+
+/**
  * @tc.number: RegisterUIAbility_0100
  * @tc.name: RegisterUIAbility
  * @tc.desc: RegisterUIAbility Test, return true.
@@ -217,4 +245,31 @@ HWTEST_F(AbilityLoaderTest, GetUIAbilityByName_0200, TestSize.Level1)
     EXPECT_FALSE(AbilityLoader::GetInstance().GetUIAbilityByName(abilityName,
         OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) != nullptr);
     GTEST_LOG_(INFO) << "AbilityLoaderTest GetUIAbilityByName_0200 start";
+}
+
+/**
+ * @tc.number: GetUIAbilityByName_0300
+ * @tc.name: GetUIAbilityByName
+ * @tc.desc: GetUIAbilityByName Test When UIAbility is not nullptr.
+ */
+HWTEST_F(AbilityLoaderTest, GetUIAbilityByName_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityLoaderTest GetUIAbilityByName_0300 start";
+    std::string abilityName = "UIAbility";
+    CreateAblity createFunc;
+    auto createAblity = [](const std::string &language) -> AbilityRuntime::UIAbility *{
+        AbilityRuntime::UIAbility *callBack = new (std::nothrow) AbilityRuntime::UIAbility;
+        if (language == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
+            return callBack;
+        } else {
+            return nullptr;
+        }
+    };
+    AbilityLoader::GetInstance().uiAbilities_.clear();
+    AbilityLoader::GetInstance().RegisterUIAbility(abilityName, createAblity);
+    EXPECT_TRUE(AbilityLoader::GetInstance().GetUIAbilityByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) != nullptr);
+    EXPECT_TRUE(AbilityLoader::GetInstance().GetUIAbilityByName(abilityName,
+        OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) == nullptr);
+    GTEST_LOG_(INFO) << "AbilityLoaderTest GetUIAbilityByName_0300 end";
 }

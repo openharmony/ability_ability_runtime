@@ -34,6 +34,10 @@ using OHOS::AppExecFwk::AbilityType;
 using OHOS::AppExecFwk::ExtensionAbilityType;
 namespace OHOS {
 namespace AAFwk {
+
+constexpr const char *CALLER_REQUEST_CODE = "ohos.extra.param.key.callerRequestCode";
+constexpr const char *DMS_CALLER_BUNDLE_NAME = "ohos.dms.param.sourceCallerBundleName";
+
 class UpdateCallerInfoUtilTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -210,6 +214,119 @@ HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromDialog_0002, TestSize.L
     Want want;
     bool ret = updateCallerUtil->UpdateAsCallerInfoFromDialog(want);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_UpdateAsCallerInfoFromToken_0001
+ * @tc.desc: Test the state of UpdateAsCallerInfoFromToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromToken_0001, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    ASSERT_NE(updateCallerUtil, nullptr);
+    Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    updateCallerUtil->UpdateAsCallerInfoFromToken(want, callerToken);
+    auto bundleName = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    EXPECT_TRUE(bundleName.empty());
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_UpdateAsCallerInfoFromToken_0002
+ * @tc.desc: Test the state of UpdateAsCallerInfoFromToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, UpdateAsCallerInfoFromToken_0002, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    ASSERT_NE(updateCallerUtil, nullptr);
+    Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
+    ASSERT_NE(abilityRecord, nullptr);
+    callerToken = abilityRecord->GetToken();
+    updateCallerUtil->UpdateAsCallerInfoFromToken(want, callerToken);
+    EXPECT_TRUE(want.HasParameter(Want::PARAM_RESV_CALLER_TOKEN));
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_UpdateBackToCallerFlag_0001
+ * @tc.desc: Test the state of UpdateBackToCallerFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, UpdateBackToCallerFlag_0001, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    ASSERT_NE(updateCallerUtil, nullptr);
+    Want want;
+    want.SetParam(OHOS::AAFwk::CALLER_REQUEST_CODE, 0);
+    sptr<IRemoteObject> callerToken = nullptr;
+    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
+    ASSERT_NE(abilityRecord, nullptr);
+    callerToken = abilityRecord->GetToken();
+    int32_t requestCode = 0;
+    bool backFlag = true;
+    updateCallerUtil->UpdateBackToCallerFlag(callerToken, want, requestCode, backFlag);
+    EXPECT_FALSE(want.HasParameter(OHOS::AAFwk::CALLER_REQUEST_CODE));
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_UpdateBackToCallerFlag_0002
+ * @tc.desc: Test the state of UpdateBackToCallerFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, UpdateBackToCallerFlag_0002, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    ASSERT_NE(updateCallerUtil, nullptr);
+    Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
+    ASSERT_NE(abilityRecord, nullptr);
+    callerToken = abilityRecord->GetToken();
+    int32_t requestCode = 0;
+    bool backFlag = true;
+    updateCallerUtil->UpdateBackToCallerFlag(callerToken, want, requestCode, backFlag);
+    EXPECT_FALSE(want.HasParameter(OHOS::AAFwk::CALLER_REQUEST_CODE));
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_UpdateBackToCallerFlag_0003
+ * @tc.desc: Test the state of UpdateBackToCallerFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, UpdateBackToCallerFlag_0003, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    ASSERT_NE(updateCallerUtil, nullptr);
+    Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
+    ASSERT_NE(abilityRecord, nullptr);
+    callerToken = abilityRecord->GetToken();
+    int32_t requestCode = 1;
+    bool backFlag = true;
+    updateCallerUtil->UpdateBackToCallerFlag(callerToken, want, requestCode, backFlag);
+    EXPECT_TRUE(want.HasParameter(OHOS::AAFwk::CALLER_REQUEST_CODE));
+}
+
+/**
+ * @tc.name: UpdateCallerInfoUtilTest_UpdateDmsCallerInfo_0001
+ * @tc.desc: Test the state of UpdateDmsCallerInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, UpdateDmsCallerInfo_0001, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    ASSERT_NE(updateCallerUtil, nullptr);
+    Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
+    ASSERT_NE(abilityRecord, nullptr);
+    callerToken = abilityRecord->GetToken();
+    updateCallerUtil->UpdateDmsCallerInfo(want, callerToken);
+    EXPECT_TRUE(want.HasParameter(OHOS::AAFwk::DMS_CALLER_BUNDLE_NAME));
 }
 } // namespace AAFwk
 } // namespace OHOS

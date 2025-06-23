@@ -43,7 +43,6 @@ public:
     };
 
     struct Options {
-        std::map<Language, bool> langs;
         Language lang = Language::JS;
         std::string bundleName;
         std::string moduleName;
@@ -75,6 +74,7 @@ public:
         std::map<std::string, std::string> pkgContextInfoJsonStringMap;
         std::map<std::string, std::string> packageNameList;
         std::map<std::string, int32_t> aotCompileStatusMap;
+        uint32_t versionCode = 0;
     };
 
     struct DebugOption {
@@ -89,7 +89,6 @@ public:
         bool isDeveloperMode;
     };
 
-    static std::vector<std::unique_ptr<Runtime>> CreateRuntimes(Options &options);
     static std::unique_ptr<Runtime> Create(Options &options);
     static void SavePreloaded(std::unique_ptr<Runtime>&& instance);
     static std::unique_ptr<Runtime> GetPreloaded();
@@ -134,7 +133,6 @@ public:
     Runtime(Runtime&&) = delete;
     Runtime& operator=(const Runtime&) = delete;
     Runtime& operator=(Runtime&&) = delete;
-    virtual void RegisterUncaughtExceptionHandler(void *uncaughtExceptionInfo) {}
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

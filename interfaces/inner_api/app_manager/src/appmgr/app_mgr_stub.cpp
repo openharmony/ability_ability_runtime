@@ -400,6 +400,10 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleLaunchAbility(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_CONFIGURATION_POLICY):
             return HandleUpdateConfigurationForBackgroundApp(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::PROMOTE_CURRENT_TO_CANDIDATE_MASTER_PROCESS):
+            return HandlePromoteCurrentToCandidateMasterProcess(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::DEMOTE_CURRENT_FROM_CANDIDATE_MASTER_PROCESS):
+            return HandleDemoteCurrentFromCandidateMasterProcess(data, reply);
     }
     return INVALID_FD;
 }
@@ -2010,5 +2014,30 @@ int32_t AppMgrStub::HandleLaunchAbility(MessageParcel &data, MessageParcel &repl
     }
     return NO_ERROR;
 }
+
+int32_t AppMgrStub::HandlePromoteCurrentToCandidateMasterProcess(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    bool isInsertToHead = data.ReadBool();
+    auto ret = PromoteCurrentToCandidateMasterProcess(isInsertToHead);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleDemoteCurrentFromCandidateMasterProcess(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    int32_t ret = DemoteCurrentFromCandidateMasterProcess();
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
+
+    return NO_ERROR;
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS

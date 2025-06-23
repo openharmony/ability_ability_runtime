@@ -37,6 +37,13 @@ UIExtensionSessionInfo *UIExtensionSessionInfo::Unmarshalling(Parcel &parcel)
     }
     info->elementName = *element;
     info->extensionAbilityType = static_cast<AppExecFwk::ExtensionAbilityType>(parcel.ReadInt32());
+    std::unique_ptr<AppExecFwk::ElementName> hostElement(parcel.ReadParcelable<AppExecFwk::ElementName>());
+    if (hostElement == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get hostElement failed");
+        delete info;
+        return nullptr;
+    }
+    info->hostElementName = *hostElement;
     return info;
 }
 
@@ -64,6 +71,11 @@ bool UIExtensionSessionInfo::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteInt32(static_cast<int32_t>(extensionAbilityType))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write extensionAbilityType failed");
+        return false;
+    }
+
+    if (!parcel.WriteParcelable(&hostElementName)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write hostElementName failed");
         return false;
     }
 

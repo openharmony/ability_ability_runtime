@@ -22,17 +22,15 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace ContextUtil {
-
-void BindApplicationInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+void BindApplicationInfo(ani_env *aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<Context> context);
-
-void BindResourceManager(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+void BindResourceManager(ani_env *aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<Context> context);
-
-void CreateEtsBaseContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+void CreateEtsBaseContext(ani_env *aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<Context> context);
-
-ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj);
+ani_object GetApplicationContextSync(ani_env *env, ani_object aniObj);
+void SwitchArea(ani_env *env, ani_object obj, ani_enum_item areaModeItem);
+ani_enum_item GetArea(ani_env *env, ani_object obj);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -36,6 +36,7 @@ public:
     AAFwk::UIExtensionUsage uiExtensionUsage = AAFwk::UIExtensionUsage::MODAL;
     AppExecFwk::ElementName elementName;
     AppExecFwk::ExtensionAbilityType extensionAbilityType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
+    AppExecFwk::ElementName hostElementName;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

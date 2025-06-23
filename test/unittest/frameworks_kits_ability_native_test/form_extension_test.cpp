@@ -308,5 +308,23 @@ HWTEST_F(FormExtensionTest, AaFwk_Form_Extension_1400, Function | MediumTest | L
     EXPECT_FALSE(result);
     GTEST_LOG_(INFO) << "AaFwk_Form_Extension_1400 end";
 }
+
+/**
+ * @tc.number: AaFwk_Form_Extension_1500
+ * @tc.name: onSizeChanged
+ * @tc.desc: Validation onSizeChanged succeeded.
+ */
+HWTEST_F(FormExtensionTest, AaFwk_Form_Extension_1500, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_Form_Extension_1500 start";
+    AbilityRuntime::Runtime::Options options;
+    std::unique_ptr<AbilityRuntime::Runtime> runtime = AbilityRuntime::Runtime::Create(options);
+    auto formExtension = AbilityRuntime::FormExtension::Create(runtime);
+    int64_t formId = 0;
+    std::string newDimension = "2*2";
+    AppExecFwk::Rect newRect;
+    formExtension->OnSizeChanged(formId, newDimension, newRect);
+    GTEST_LOG_(INFO) << "AaFwk_Form_Extension_1500 end";
+}
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -112,6 +112,7 @@ public:
     void OnRestartApp(AAFwk::Want want, int32_t *errCode);
     void OnClearUpApplicationData(int32_t *errCode);
     void OnSetSupportedProcessCacheSelf(bool isSupported, int32_t *errCode);
+    int32_t OnSetFontSizeScale(double fontSizeScale);
 
     int32_t OnOnEnvironment(void (*cfgCallback)(AbilityRuntime::CConfiguration),
         void (*memCallback)(int32_t), bool isSync, int32_t *errCode);

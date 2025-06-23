@@ -74,6 +74,7 @@ ohos_unittest("AmsAppRunningRecordTest") {
     "samgr:samgr_proxy",
     "window_manager:libwmutil",
     "window_manager:libwmutil_static",
+    "window_manager:libwmutil_base",
   ]
 
   if (ability_runtime_graphics) {

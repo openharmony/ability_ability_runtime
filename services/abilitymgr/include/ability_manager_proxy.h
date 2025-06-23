@@ -676,6 +676,8 @@ public:
 
     virtual int SendWantSender(sptr<IWantSender> target, SenderInfo &senderInfo) override;
 
+    virtual int SendLocalWantSender(const SenderInfo &senderInfo) override;
+
     virtual void CancelWantSender(const sptr<IWantSender> &sender) override;
 
     virtual int GetPendingWantUid(const sptr<IWantSender> &target) override;
@@ -1179,12 +1181,7 @@ public:
      */
     virtual void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart) override;
 
-    /**
-     * Start specified ability by SCB.
-     *
-     * @param want Want information.
-     */
-    void StartSpecifiedAbilityBySCB(const Want &want) override;
+    int32_t StartSpecifiedAbilityBySCB(const Want &want) override;
 
     /**
      * Notify sandbox app the result of saving file.

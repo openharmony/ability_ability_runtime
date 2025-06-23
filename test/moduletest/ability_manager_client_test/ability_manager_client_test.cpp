@@ -559,5 +559,33 @@ HWTEST_F(AbilityManagerClientTest, GetInsightIntentInfoByIntentName_0100, TestSi
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "GetInsightIntentInfoByIntentName_0100 end");
 }
+
+/**
+ * @tc.name: SuspendExtensionAbility_0100
+ * @tc.desc: SuspendExtensionAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, SuspendExtensionAbility_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SuspendExtensionAbility_0100 start");
+    sptr<IAbilityConnection> connect = sptr<MockIAbilityConnection>::MakeSptr();
+    auto result = AbilityManagerClient::GetInstance()->SuspendExtensionAbility(connect);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "SuspendExtensionAbility_0100 end");
+}
+
+/**
+ * @tc.name: ResumeExtensionAbility_0100
+ * @tc.desc: ResumeExtensionAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, ResumeExtensionAbility_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ResumeExtensionAbility_0100 start");
+    sptr<IAbilityConnection> connect = sptr<MockIAbilityConnection>::MakeSptr();
+    auto result = AbilityManagerClient::GetInstance()->ResumeExtensionAbility(connect);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "ResumeExtensionAbility_0100 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

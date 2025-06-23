@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #include "keep_alive_utils.h"
 
 #include "ability_resident_process_rdb.h"
-#include "ability_util.h"
 #include "keep_alive_process_manager.h"
 #include "main_element_utils.h"
 
@@ -49,7 +48,9 @@ bool KeepAliveUtils::IsKeepAliveBundle(const AppExecFwk::BundleInfo &bundleInfo,
     }
 
     bool keepAliveEnable = bundleInfo.isKeepAlive;
-    AbilityRuntime::AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfo.name, keepAliveEnable);
+    if (keepAliveEnable) {
+        AbilityRuntime::AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfo.name, keepAliveEnable);
+    }
     if (keepAliveEnable) {
         type = KeepAliveType::RESIDENT_PROCESS;
     }

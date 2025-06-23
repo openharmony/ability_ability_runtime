@@ -26,7 +26,6 @@ config("aafwk_module_test_config") {
 
   include_dirs = [
     "${ability_runtime_test_path}/moduletest/mock/include",
-    "//third_party/jsoncpp/include",
   ]
 }
 
@@ -69,7 +68,6 @@ group("moduletest") {
 
     external_deps = [
       "icu:shared_icuuc",
-      "jsoncpp:jsoncpp",
     ]
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,7 @@ constexpr static char APP_ACCOUNT_AUTHORIZATION_EXTENSION[] = "AppAccountAuthori
 constexpr static char FENCE_EXTENSION[] = "FenceExtension";
 constexpr static char CALLER_INFO_QUERY_EXTENSION[] = "CallerInfoQueryExtension";
 constexpr static char ASSET_ACCELERATION_EXTENSION[] = "AssetAccelerationExtension";
+constexpr static char SELECTION_EXTENSION[] = "SelectionExtensionAbility";
 }
 
 const std::map<AppExecFwk::ExtensionAbilityType, std::string> UI_EXTENSION_NAME_MAP = {
@@ -160,6 +161,8 @@ void ExtensionAbilityThread::CreateExtensionAbilityName(
         abilityName = CALLER_INFO_QUERY_EXTENSION;
     } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::ASSET_ACCELERATION) {
         abilityName = ASSET_ACCELERATION_EXTENSION;
+    } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::SELECTION) {
+        abilityName = SELECTION_EXTENSION;
     }
 #ifdef SUPPORT_GRAPHICS
     else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH) {
@@ -609,6 +612,60 @@ void ExtensionAbilityThread::DumpAbilityInfo(const std::vector<std::string> &par
         TAG_LOGE(AAFwkTag::EXT, "PostTask error");
     }
     TAG_LOGD(AAFwkTag::EXT, "End");
+}
+
+void ExtensionAbilityThread::ScheduleAbilityRequestFailure(const std::string &requestId,
+    const AppExecFwk::ElementName &element, const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::EXT, "ExtensionAbilityThread::ScheduleAbilityRequestFailure called");
+    if (extensionImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::EXT, "null extensionImpl_");
+        return;
+    }
+    wptr<ExtensionAbilityThread> weak = this;
+    auto task = [weak, requestId, element, message]() {
+        auto extensionAbilityThread = weak.promote();
+        if (extensionAbilityThread == nullptr) {
+            TAG_LOGE(AAFwkTag::EXT, "null extensionAbilityThread");
+            return;
+        }
+        if (extensionAbilityThread->extensionImpl_ != nullptr) {
+            extensionAbilityThread->extensionImpl_->ScheduleAbilityRequestFailure(requestId, element, message);
+            return;
+        }
+    };
+    bool ret = abilityHandler_->PostTask(task, "ExtensionAbilityThread:ScheduleAbilityRequestFailure");
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::EXT, "postTask error");
+        return;
+    }
+}
+
+void ExtensionAbilityThread::ScheduleAbilityRequestSuccess(const std::string &requestId,
+    const AppExecFwk::ElementName &element)
+{
+    TAG_LOGD(AAFwkTag::EXT, "ExtensionAbilityThread::ScheduleAbilityRequestSuccess called");
+    if (extensionImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::EXT, "null extensionImpl_");
+        return;
+    }
+    wptr<ExtensionAbilityThread> weak = this;
+    auto task = [weak, requestId, element]() {
+        auto extensionAbilityThread = weak.promote();
+        if (extensionAbilityThread == nullptr) {
+            TAG_LOGE(AAFwkTag::EXT, "null extensionAbilityThread");
+            return;
+        }
+        if (extensionAbilityThread->extensionImpl_ != nullptr) {
+            extensionAbilityThread->extensionImpl_->ScheduleAbilityRequestSuccess(requestId, element);
+            return;
+        }
+    };
+    bool ret = abilityHandler_->PostTask(task, "ExtensionAbilityThread:ScheduleAbilityRequestSuccess");
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::EXT, "postTask error");
+        return;
+    }
 }
 
 void ExtensionAbilityThread::DumpAbilityInfoInner(

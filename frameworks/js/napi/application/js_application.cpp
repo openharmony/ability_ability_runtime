@@ -17,6 +17,7 @@
 
 #include "ability_runtime_error_util.h"
 #include "accesstoken_kit.h"
+#include "app_mgr_client.h"
 #include "context_impl.h"
 #include "hilog_tag_wrapper.h"
 #include "js_application_context_utils.h"
@@ -24,6 +25,7 @@
 #include "js_runtime_utils.h"
 #include "js_context_utils.h"
 #include "napi_base_context.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -400,6 +402,85 @@ napi_value JsApplication::CreateJsContext(napi_env env, const std::shared_ptr<Co
     return object;
 }
 
+napi_value JsApplication::PromoteCurrentToCandidateMasterProcess(napi_env env, napi_callback_info info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    GET_NAPI_INFO_AND_CALL(env, info, JsApplication, OnPromoteCurrentToCandidateMasterProcess);
+}
+
+napi_value JsApplication::OnPromoteCurrentToCandidateMasterProcess(napi_env env, NapiCallbackInfo& info)
+{
+    // only support one params
+    if (info.argc == ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
+        ThrowInvalidParamError(env, "Not enough params");
+        return CreateJsUndefined(env);
+    }
+    
+    bool isInsertToHead = false;
+    if (!ConvertFromJsValue(env, info.argv[ARGC_ZERO], isInsertToHead)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Parse isInsertToHead failed");
+        ThrowInvalidParamError(env,
+            "Parse param isInsertToHead failed, isInsertToHead must be boolean.");
+        return CreateJsUndefined(env);
+    }
+
+    auto errCode = std::make_shared<int32_t>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute = [isInsertToHead, errCode]() {
+        auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
+        if (appMgrClient == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Null appMgrClient");
+            *errCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
+            return;
+        }
+        *errCode = appMgrClient->PromoteCurrentToCandidateMasterProcess(isInsertToHead);
+    };
+    NapiAsyncTask::CompleteCallback complete = [errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCode == ERR_OK) {
+            TAG_LOGD(AAFwkTag::APPKIT, "promote to standby master process success");
+            task.ResolveWithNoError(env, CreateJsUndefined(env));
+            return ;
+        }
+        task.Reject(env, CreateJsErrorByNativeErr(env, *errCode));
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsApplication::OnPromoteCurrentToCandidateMasterProcess",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsApplication::DemoteCurrentFromCandidateMasterProcess(napi_env env, napi_callback_info info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    GET_NAPI_INFO_AND_CALL(env, info, JsApplication, OnDemoteCurrentFromCandidateMasterProcess);
+}
+
+napi_value JsApplication::OnDemoteCurrentFromCandidateMasterProcess(napi_env env, NapiCallbackInfo& info)
+{
+    auto errCode = std::make_shared<int32_t>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute = [errCode]() {
+    auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
+        if (appMgrClient == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Null appMgrClient");
+            *errCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
+            return;
+        }
+        *errCode = appMgrClient->DemoteCurrentFromCandidateMasterProcess();
+    };
+    NapiAsyncTask::CompleteCallback complete = [errCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+        if (*errCode == ERR_OK) {
+            TAG_LOGD(AAFwkTag::APPKIT, "demote to standby master process success");
+            task.ResolveWithNoError(env, CreateJsUndefined(env));
+            return ;
+        }
+        task.Reject(env, CreateJsErrorByNativeErr(env, *errCode));
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsApplication::OnDemoteCurrentFromCandidateMasterProcess",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 napi_value ApplicationInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Called");
@@ -423,6 +504,13 @@ napi_value ApplicationInit(napi_env env, napi_value exportObj)
 
     BindNativeFunction(env, exportObj, "createPluginModuleContext", moduleName,
         JsApplication::CreatePluginModuleContext);
+
+    BindNativeFunction(env, exportObj, "promoteCurrentToCandidateMasterProcess", moduleName,
+        JsApplication::PromoteCurrentToCandidateMasterProcess);
+    
+    BindNativeFunction(env, exportObj, "demoteCurrentFromCandidateMasterProcess", moduleName,
+        JsApplication::DemoteCurrentFromCandidateMasterProcess);
+
     return CreateJsUndefined(env);
 }
 } // namespace AbilityRuntime

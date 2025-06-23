@@ -693,5 +693,94 @@ HWTEST_F(ExtensionRecordManagerSecondTest, QueryPreLoadUIExtensionRecord_0400, T
     EXPECT_EQ(recordNum, 1);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+
+/**
+ * @tc.name: GetOrCreateExtensionRecordInner_0100
+ * @tc.desc: Test GetOrCreateExtensionRecordInner.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerSecondTest, GetOrCreateExtensionRecordInner_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    std::string bundleName = "com.example.unittest";
+    std::string name = "MainAbility";
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = bundleName;
+    abilityRequest.abilityInfo.name = name;
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    abilityRequest.abilityInfo.extensionAbilityType = static_cast<AppExecFwk::ExtensionAbilityType>(1000);
+
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    bool boolResult;
+    EXPECT_EQ(extRecordMgr->GetOrCreateExtensionRecordInner(abilityRequest, bundleName, extRecord, boolResult),
+        ERR_INVALID_VALUE);
+
+    abilityRequest.extensionType = AppExecFwk::ExtensionAbilityType::EMBEDDED_UI;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::EMBEDDED_UI;
+    EXPECT_EQ(extRecordMgr->GetOrCreateExtensionRecordInner(abilityRequest, bundleName, extRecord, boolResult),
+        ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: GetOrCreateExtensionRecordInner_0200
+ * @tc.desc: Test GetOrCreateExtensionRecordInner.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerSecondTest, GetOrCreateExtensionRecordInner_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    std::string bundleName = "com.example.unittest";
+    std::string name = "MainAbility";
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = bundleName;
+    abilityRequest.abilityInfo.name = name;
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    abilityRequest.extensionType = AppExecFwk::ExtensionAbilityType::STATUS_BAR_VIEW;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::STATUS_BAR_VIEW;
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    bool boolResult;
+    EXPECT_EQ(extRecordMgr->GetOrCreateExtensionRecordInner(abilityRequest, bundleName, extRecord, boolResult),
+        ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
+
+/**
+ * @tc.name: GetHostBundleNameForExtensionId_0200
+ * @tc.desc: Test GetHostBundleNameForExtensionId.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ExtensionRecordManagerSecondTest, GetHostBundleNameForExtensionId_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin.");
+    int32_t extensionRecordId = 0;
+    std::string hostBundleName = "com.example.unittest";
+    std::string bundleName = "com.example.unittest";
+
+    AAFwk::AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = bundleName;
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::shared_ptr<ExtensionRecord> extRecord = std::make_shared<ExtensionRecord>(abilityRecord);
+    
+    auto extRecordMgr = std::make_shared<ExtensionRecordManager>(0);
+    EXPECT_EQ(extRecordMgr->GetHostBundleNameForExtensionId(extensionRecordId, hostBundleName), ERR_INVALID_VALUE);
+    extRecordMgr->extensionRecords_[extensionRecordId] = nullptr;
+    EXPECT_EQ(extRecordMgr->GetHostBundleNameForExtensionId(extensionRecordId, hostBundleName), ERR_INVALID_VALUE);
+    extRecordMgr->extensionRecords_[extensionRecordId] = extRecord;
+    EXPECT_EQ(extRecordMgr->GetHostBundleNameForExtensionId(extensionRecordId, hostBundleName), ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "end.");
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

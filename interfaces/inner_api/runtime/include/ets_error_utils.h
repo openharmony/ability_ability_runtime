@@ -21,23 +21,27 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-void ThrowEtsError(ani_env *env, ani_object err);
-void ThrowEtsError(ani_env *env, int32_t errCode, const std::string &errorMsg = "");
-void ThrowEtsError(ani_env *env, const AbilityErrorCode &err);
-void ThrowEtsInvalidCallerError(ani_env *env);
-void ThrowEtsTooFewParametersError(ani_env *env);
-void ThrowEtsInvalidNumParametersError(ani_env *env);
-void ThrowEtsNoPermissionError(ani_env *env, const std::string &permission);
-void ThrowEtsInvalidParamError(ani_env *env, const std::string &message);
-void ThrowEtsErrorByNativeErr(ani_env *env, int32_t err);
-void ThrowEtsNotSystemAppError(ani_env *env);
 
-ani_object CreateEtsError(ani_env *env, const AbilityErrorCode &err);
-ani_object CreateEtsError(ani_env *env, ani_int code, const std::string &msg);
-ani_object CreateEtsInvalidParamError(ani_env *env, const std::string &message);
-ani_object CreateEtsNoPermissionError(ani_env *env, const std::string &permission);
-ani_object CreateEtsErrorByNativeErr(ani_env *env, int32_t err, const std::string &permission = "");
-ani_object WrapEtsError(ani_env *env, const std::string &msg);
+class EtsErrorUtil {
+public:
+    static void ThrowError(ani_env *env, ani_object err);
+    static void ThrowError(ani_env *env, int32_t errCode, const std::string &errorMsg = "");
+    static void ThrowError(ani_env *env, const AbilityErrorCode &err);
+    static void ThrowInvalidCallerError(ani_env *env);
+    static void ThrowTooFewParametersError(ani_env *env);
+    static void ThrowInvalidNumParametersError(ani_env *env);
+    static void ThrowNoPermissionError(ani_env *env, const std::string &permission);
+    static void ThrowInvalidParamError(ani_env *env, const std::string &message);
+    static void ThrowErrorByNativeErr(ani_env *env, int32_t err);
+    static void ThrowNotSystemAppError(ani_env *env);
+
+    static ani_object CreateError(ani_env *env, const AbilityErrorCode &err);
+    static ani_object CreateError(ani_env *env, ani_int code, const std::string &msg);
+    static ani_object CreateInvalidParamError(ani_env *env, const std::string &message);
+    static ani_object CreateNoPermissionError(ani_env *env, const std::string &permission);
+    static ani_object CreateErrorByNativeErr(ani_env *env, int32_t err, const std::string &permission = "");
+    static ani_object WrapError(ani_env *env, const std::string &msg);
+};
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ETS_ERROR_UTILS_H

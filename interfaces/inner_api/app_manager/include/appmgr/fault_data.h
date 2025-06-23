@@ -35,6 +35,7 @@ enum class FaultDataType {
     JS_ERROR,
     CJ_ERROR,
     APP_FREEZE,
+    CPU_LOAD,
     PERFORMANCE_CONTROL,
     RESOURCE_CONTROL
 };

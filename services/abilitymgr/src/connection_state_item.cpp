@@ -102,12 +102,22 @@ public:
             return false;
         }
         std::lock_guard guard(connectionsMutex_);
+        auto it = connections_.find(connection);
+        if (it == connections_.end()) {
+            return false;
+        }
+
+        bool isUnAvaliable = (*it).second;
         connections_.erase(connection);
         if (connections_.empty()) {
             event.disconnectedEvent = true;
             return true;
         }
-        auto it = std::find_if(connections_.begin(), connections_.end(),
+
+        if (isUnAvaliable) {
+            return false;
+        }
+        it = std::find_if(connections_.begin(), connections_.end(),
             [](const std::pair<sptr<IRemoteObject>, bool>& pair)->bool {return pair.second == false;});
         if (it == connections_.end()) {
             event.suspendedEvent = true;
@@ -124,6 +134,10 @@ public:
         std::lock_guard guard(connectionsMutex_);
         auto it = connections_.find(connection);
         if (it == connections_.end()) {
+            return false;
+        }
+
+        if ((*it).second) {
             return false;
         }
         (*it).second = true;

@@ -358,6 +358,7 @@ HWTEST_F(AppSpawnClientSecondTest, AppspawnSetExtMsg_002, TestSize.Level2)
     startMsg.atomicAccount = "testAtomicAccount";
     startMsg.code = MSG_APP_SPAWN;
     startMsg.procName = "testProcName";
+    startMsg.apiTargetVersion = 1;
     AppSpawnReqMsgHandle reqHandle = nullptr;
     int ret = AppSpawnReqMsgCreate(static_cast<AppSpawnMsgType>(startMsg.code), startMsg.procName.c_str(), &reqHandle);
     EXPECT_EQ(ret, ERR_OK);

@@ -83,7 +83,6 @@ HWTEST_F(EventReportTest, ConvertEventName_0100, TestSize.Level2)
     EXPECT_EQ(EventReport::ConvertEventName(EventName::DRAWN_COMPLETED), "DRAWN_COMPLETED");
     EXPECT_EQ(EventReport::ConvertEventName(EventName::APP_STARTUP_TYPE), "APP_STARTUP_TYPE");
     EXPECT_EQ(EventReport::ConvertEventName(EventName::PROCESS_START_FAILED), "PROCESS_START_FAILED");
-    EXPECT_EQ(EventReport::ConvertEventName(EventName::APP_START_INTERCRPT_BY_EDM), "APP_START_INTERCRPT_BY_EDM");
     // key behavior event
     EXPECT_EQ(EventReport::ConvertEventName(EventName::GRANT_URI_PERMISSION), "GRANT_URI_PERMISSION");
     EXPECT_EQ(EventReport::ConvertEventName(EventName::FA_SHOW_ON_LOCK), "FA_SHOW_ON_LOCK");
@@ -97,6 +96,7 @@ HWTEST_F(EventReportTest, ConvertEventName_0100, TestSize.Level2)
         "ATOMIC_SERVICE_DRAWN_COMPLETE");
     EXPECT_EQ(EventReport::ConvertEventName(EventName::SHARE_UNPRIVILEGED_FILE_URI),
         "SHARE_UNPRIVILEGED_FILE_URI");
+    EXPECT_EQ(EventReport::ConvertEventName(EventName::USER_DATA_SIZE), "USER_DATA_SIZE");
 }
 
 /**
@@ -155,21 +155,6 @@ HWTEST_F(EventReportTest, SendAppEvent_0400, TestSize.Level2)
 {
     EventName eventName = EventName::APP_ATTACH;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "APP_ATTACH");
-    HiSysEventType type = HiSysEventType::BEHAVIOR;
-    EventInfo eventInfo;
-    EventReport::SendAppEvent(eventName, type, eventInfo);
-}
-
-/**
- * @tc.name: SendAppEvent_0500
- * @tc.desc: Check SendAppEvent Test
- * @tc.type: FUNC
- * @tc.require: issueI6HXXS
- */
-HWTEST_F(EventReportTest, SendAppEvent_0500, TestSize.Level2)
-{
-    EventName eventName = EventName::APP_START_INTERCRPT_BY_EDM;
-    EXPECT_EQ(EventReport::ConvertEventName(eventName), "APP_START_INTERCRPT_BY_EDM");
     HiSysEventType type = HiSysEventType::BEHAVIOR;
     EventInfo eventInfo;
     EventReport::SendAppEvent(eventName, type, eventInfo);
@@ -731,6 +716,22 @@ HWTEST_F(EventReportTest, SendAtomicServiceEvent_0100, TestSize.Level2)
     eventName = EventName::ATOMIC_SERVICE_DRAWN_COMPLETE;
     EXPECT_EQ(EventReport::ConvertEventName(eventName), "ATOMIC_SERVICE_DRAWN_COMPLETE");
     EventReport::SendAtomicServiceEvent(eventName, type, eventInfo);
+}
+
+/**
+ * @tc.name: SendReportDataPartitionUsageEvent_0100
+ * @tc.desc: Check SendReportDataPartitionUsageEvent Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventReportTest, SendReportDataPartitionUsageEvent_0100, TestSize.Level1)
+{
+    EventName eventName = static_cast<EventName>(-1);
+    EXPECT_EQ(EventReport::ConvertEventName(eventName), "INVALIDEVENTNAME");
+    EventInfo eventInfo;
+    EventReport::SendReportDataPartitionUsageEvent(eventName, HiSysEventType::STATISTIC, eventInfo);
+    eventName = EventName::USER_DATA_SIZE;
+    EXPECT_EQ(EventReport::ConvertEventName(eventName), "USER_DATA_SIZE");
+    EventReport::SendReportDataPartitionUsageEvent(eventName, HiSysEventType::STATISTIC, eventInfo);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

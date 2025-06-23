@@ -27,7 +27,7 @@ DataObsMgrInnerExt::DataObsMgrInnerExt() : root_(std::make_shared<Node>("root"))
 DataObsMgrInnerExt::~DataObsMgrInnerExt() {}
 
 Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver,
-    int32_t userId, bool isDescendants)
+    int32_t userId, uint32_t tokenId, bool isDescendants)
 {
     if (dataObserver->AsObject() == nullptr) {
         return DATA_OBSERVER_IS_NULL;
@@ -40,7 +40,7 @@ Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObs
 
     std::vector<std::string> path = { uri.GetScheme(), uri.GetAuthority() };
     uri.GetPathSegments(path);
-    if (root_ != nullptr && !root_->AddObserver(path, 0, Entry(dataObserver, userId,
+    if (root_ != nullptr && !root_->AddObserver(path, 0, Entry(dataObserver, userId, tokenId,
         deathRecipientRef, isDescendants))) {
         TAG_LOGE(AAFwkTag::DBOBSMGR,
             "subscribers:%{public}s num maxed",
@@ -206,10 +206,29 @@ void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint
     return;
 }
 
+bool DataObsMgrInnerExt::Node::IsLimit(const Entry &entry)
+{
+    if (entrys_.size() >= OBS_ALL_NUM_MAX) {
+        return true;
+    }
+    uint32_t count = 0;
+    for (Entry& existEntry : entrys_) {
+        if (existEntry.tokenId == entry.tokenId) {
+            count++;
+            if (count > OBS_NUM_MAX) {
+                return true;
+            }
+        }
+    }
+    TAG_LOGE(AAFwkTag::DBOBSMGR, "subscribers num :%{public}d", count);
+    return false;
+}
+
 bool DataObsMgrInnerExt::Node::AddObserver(const std::vector<std::string> &path, uint32_t index, const Entry &entry)
 {
     if (path.size() == index) {
-        if (entrys_.size() >= OBS_NUM_MAX) {
+        if (IsLimit(entry)) {
+            TAG_LOGE(AAFwkTag::DBOBSMGR, "subscribers num maxed, token:%{public}d", entry.tokenId);
             return false;
         }
         entry.deathRecipientRef->ref++;

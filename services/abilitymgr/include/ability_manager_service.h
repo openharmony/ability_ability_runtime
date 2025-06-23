@@ -395,7 +395,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
-        int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = DEFAULT_INVAL_VALUE) override;
+        int32_t userId = DEFAULT_INVAL_VALUE, int32_t requestCode = DEFAULT_INVAL_VALUE) override;
 
     /**
      * Pop-up launch of full-screen atomic service.
@@ -927,6 +927,8 @@ public:
         const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, int32_t uid = -1) override;
 
     virtual int SendWantSender(sptr<IWantSender> target, SenderInfo &senderInfo) override;
+
+    virtual int SendLocalWantSender(const SenderInfo &senderInfo) override;
 
     virtual void CancelWantSender(const sptr<IWantSender> &sender) override;
 
@@ -1531,12 +1533,7 @@ public:
      */
     virtual void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart) override;
 
-    /**
-     * Start specified ability by SCB.
-     *
-     * @param want Want information.
-     */
-    virtual void StartSpecifiedAbilityBySCB(const Want &want) override;
+    virtual int32_t StartSpecifiedAbilityBySCB(const Want &want) override;
 
     /**
      * Notify sandbox app the result of saving file.
@@ -2645,6 +2642,8 @@ private:
         bool isSendDialogResult, uint32_t specifyTokenId,
         const std::string& callerBundleName);
 
+    void CheckExtensionRateLimit();
+
     int32_t CheckStartPlugin(const Want& want, sptr<IRemoteObject> callerToken);
 
     int StartAbilityByConnectManager(const Want& want, const AbilityRequest& abilityRequest,
@@ -2755,16 +2754,19 @@ private:
 
     std::string GetConfigFileAbsolutePath(const std::string &relativePath);
 
-    int32_t ParseJsonValueFromFile(nlohmann::json &value, const std::string& fullPath);
+    int32_t ParseJsonValueFromFile(cJSON *&value, const std::string& fullPath);
 
     bool ConvertFullPath(const std::string& partialPath, std::string& fullPath);
 
-    bool GetJsonFromFile(const char *filePath, Json::Value &root);
+    bool GetJsonFromFile(const char *filePath, cJSON *root);
 
     bool ParseJsonFromBoot(const std::string &relativePath);
 
     void SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest);
     void CloseAssertDialog(const std::string &assertSessionId);
+
+    int32_t OpenLinkFreeInstallAtomicService(Want &convertedWant, const Want &originalWant,
+        sptr<IRemoteObject> callerToken, int32_t userId, int32_t requestCode, bool removeInsightIntentFlag);
 
     void ReportPreventStartAbilityResult(const AppExecFwk::AbilityInfo &callerAbilityInfo,
         const AppExecFwk::AbilityInfo &abilityInfo);
@@ -2827,7 +2829,7 @@ private:
 
     std::mutex prepareTermiationCallbackMutex_;
     std::map<std::string, sptr<IPrepareTerminateCallback>> prepareTermiationCallbacks_;
-    std::shared_ptr<AbilityEventUtil> abilityEventHelper_;
+    AbilityEventUtil abilityEventHelper_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

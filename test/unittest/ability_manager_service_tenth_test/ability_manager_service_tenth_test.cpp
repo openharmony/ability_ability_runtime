@@ -24,6 +24,7 @@
 #include "connection_observer_errors.h"
 #include "data_ability_manager.h"
 #include "hilog_tag_wrapper.h"
+#include "mock_task_handler_wrap.h"
 #include "start_ability_utils.h"
 
 using namespace testing;
@@ -701,6 +702,90 @@ HWTEST_F(AbilityManagerServiceTenhtTest, DoAbilityForeground_003, TestSize.Level
     int result = abilityMs_->DoAbilityForeground(token, flag);
     ASSERT_EQ(result, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest DoAbilityForeground_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartAutoStartupApps_001
+ * Function: StartAutoStartupApps
+ * SubFunction: NA
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceTenhtTest");
+    abilityMs->taskHandler_ = taskHandler;
+    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
+    AutoStartupInfo autoStartupInfo;
+    autoStartupInfo.abilityName = AbilityRuntime::EXTENSION_TYPE_APP_SERVICE;
+    std::queue<AutoStartupInfo> infoQueue;
+    infoQueue.push(autoStartupInfo);
+    abilityMs->StartAutoStartupApps(infoQueue);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartAutoStartupApps_002
+ * Function: StartAutoStartupApps
+ * SubFunction: NA
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceTenhtTest");
+    abilityMs->taskHandler_ = taskHandler;
+    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
+    AutoStartupInfo autoStartupInfo;
+    autoStartupInfo.appCloneIndex = 6;
+    std::queue<AutoStartupInfo> infoQueue;
+    infoQueue.push(autoStartupInfo);
+    abilityMs->StartAutoStartupApps(infoQueue);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartAutoStartupApps_003
+ * Function: StartAutoStartupApps
+ * SubFunction: NA
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_003 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceTenhtTest");
+    abilityMs->taskHandler_ = taskHandler;
+    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(0);
+    std::queue<AutoStartupInfo> infoQueue;
+    abilityMs->StartAutoStartupApps(infoQueue);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartAutoStartupApps_004
+ * Function: StartAutoStartupApps
+ * SubFunction: NA
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_004 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceTenhtTest");
+    abilityMs->taskHandler_ = taskHandler;
+    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
+    AutoStartupInfo autoStartupInfo;
+    std::queue<AutoStartupInfo> infoQueue;
+    infoQueue.push(autoStartupInfo);
+    abilityMs->StartAutoStartupApps(infoQueue);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_004 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

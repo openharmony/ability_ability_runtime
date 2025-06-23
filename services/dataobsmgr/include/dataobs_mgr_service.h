@@ -81,7 +81,8 @@ private:
     Status DeepCopyChangeInfo(const ChangeInfo &src, ChangeInfo &dst) const;
     void GetFocusedAppInfo(int32_t &windowId, sptr<IRemoteObject> &abilityToken) const;
     sptr<IRemoteObject> GetAbilityManagerService() const;
-    int32_t GetCallingUserId();
+    static int32_t GetCallingUserId();
+    static bool CheckSystemCallingPermission(DataObsOption &opt, int32_t userId = -1, int32_t callingUserId = -1);
 private:
     static constexpr std::uint32_t TASK_COUNT_MAX = 50;
     ffrt::mutex taskCountMutex_;

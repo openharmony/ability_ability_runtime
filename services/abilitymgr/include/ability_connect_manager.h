@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,13 @@ public:
 
     explicit AbilityConnectManager(int userId);
     virtual ~AbilityConnectManager();
+
+    struct LoadAbilityContext {
+        std::shared_ptr<AbilityRuntime::LoadParam> loadParam;
+        std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo;
+        std::shared_ptr<AppExecFwk::ApplicationInfo> appInfo;
+        std::shared_ptr<AAFwk::Want> want;
+    };
 
     /**
      * StartAbility with request.
@@ -386,6 +393,11 @@ public:
      */
     std::shared_ptr<AbilityRecord> GetServiceRecordByAbilityRequest(const AbilityRequest &abilityRequest);
 
+    bool HasRequestIdInLoadAbilityQueue(int32_t requestId);
+    void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId);
+    void OnStartSpecifiedProcessTimeoutResponse(int32_t requestId);
+    void StartSpecifiedProcess(const LoadAbilityContext &context, const std::shared_ptr<AbilityRecord> &abilityRecord);
+
 private:
     /**
      * StartAbilityLocked with request.
@@ -428,8 +440,9 @@ private:
      * @param abilityRecord, the ptr of the ability to load.
      */
     void LoadAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
-        std::function<void(const std::shared_ptr<AbilityRecord>&)> updateRecordCallback = nullptr);
-
+        std::function<void(const std::shared_ptr<AbilityRecord> &)> updateRecordCallback = nullptr);
+    void HandleLoadAbilityOrStartSpecifiedProcess(
+        const AbilityRuntime::LoadParam &loadParam, const std::shared_ptr<AbilityRecord> &abilityRecord);
     /**
      * ConnectAbility.Schedule connect ability
      *
@@ -726,6 +739,8 @@ private:
     std::mutex uiExtensionMapMutex_;
     std::mutex windowExtensionMapMutex_;
     std::mutex startServiceReqListLock_;
+    std::mutex loadAbilityQueueLock_;
+    std::deque<std::map<int32_t, LoadAbilityContext>> loadAbilityQueue_;
 
     DISALLOW_COPY_AND_MOVE(AbilityConnectManager);
 };

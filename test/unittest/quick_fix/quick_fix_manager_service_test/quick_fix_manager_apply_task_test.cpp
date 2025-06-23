@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "quick_fix_result_info.h"
 #include "system_ability_definition.h"
 #include "token_setproc.h"
+#include "json_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,6 +36,11 @@ using namespace testing::ext;
 namespace OHOS {
 namespace AAFwk {
 namespace {
+constexpr const char *QUICK_FIX_BUNDLE_NAME = "bundleName";
+constexpr const char *QUICK_FIX_BUNDLE_VERSION_CODE = "bundleVersionCode";
+constexpr const char *QUICK_FIX_PATCH_VERSION_CODE = "patchVersionCode";
+constexpr const char *QUICK_FIX_IS_SO_CONTAINED = "isSoContained";
+constexpr const char *QUICK_FIX_TYPE = "type";
 template<typename F>
 static void WaitUntilTaskCalled(const F& f, const std::shared_ptr<AppExecFwk::EventHandler>& handler,
     std::atomic<bool>& taskCalled)
@@ -992,6 +998,280 @@ HWTEST_F(QuickFixManagerApplyTaskTest, HandleRevokeQuickFixAppStop_0200, TestSiz
     applyTask->taskType_ = QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE;
     applyTask->HandleRevokeQuickFixAppStop();
     EXPECT_EQ(applyTask->quickFixMgrService_.promote(), quickFixMs_);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: ExtractQuickFixDataFromJson_0100
+ * @tc.desc: Verify the correctness of the function parsing
+ * @tc.type: FUNC
+ * @tc.require: issueI5OD2E
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, ExtractQuickFixDataFromJson_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, QUICK_FIX_BUNDLE_NAME, "com.example.bundle");
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_BUNDLE_VERSION_CODE, static_cast<double>(123));
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_PATCH_VERSION_CODE, static_cast<double>(456));
+    cJSON_AddBoolToObject(jsonData, QUICK_FIX_IS_SO_CONTAINED, true);
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_TYPE, static_cast<double>(2));
+
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    bool ret = applyTask->ExtractQuickFixDataFromJson(jsonData);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(applyTask->bundleName_, "com.example.bundle");
+    EXPECT_EQ(applyTask->bundleVersionCode_, 123);
+    EXPECT_EQ(applyTask->patchVersionCode_, 456);
+    EXPECT_EQ(applyTask->isSoContained_, true);
+    EXPECT_EQ(applyTask->type_, AppExecFwk::QuickFixType::HOT_RELOAD);
+    cJSON_Delete(jsonData);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: ExtractQuickFixDataFromJson_0200
+ * @tc.desc: Verify the parsing fail, when QUICK_FIX_BUNDLE_NAME is missing
+ * @tc.type: FUNC
+ * @tc.require: issueI5OD2E
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, ExtractQuickFixDataFromJson_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_BUNDLE_VERSION_CODE, static_cast<double>(123));
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_PATCH_VERSION_CODE, static_cast<double>(456));
+    cJSON_AddBoolToObject(jsonData, QUICK_FIX_IS_SO_CONTAINED, true);
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_TYPE, static_cast<double>(2));
+
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    bool ret = applyTask->ExtractQuickFixDataFromJson(jsonData);
+    EXPECT_FALSE(ret);
+    cJSON_Delete(jsonData);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: ExtractQuickFixDataFromJson_0300
+ * @tc.desc: Verify the parsing fail, when QUICK_FIX_BUNDLE_VERSION_CODE is missing
+ * @tc.type: FUNC
+ * @tc.require: issueI5OD2E
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, ExtractQuickFixDataFromJson_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, QUICK_FIX_BUNDLE_NAME, "com.example.bundle");
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_PATCH_VERSION_CODE, static_cast<double>(456));
+    cJSON_AddBoolToObject(jsonData, QUICK_FIX_IS_SO_CONTAINED, true);
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_TYPE, static_cast<double>(2));
+
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    bool ret = applyTask->ExtractQuickFixDataFromJson(jsonData);
+    EXPECT_FALSE(ret);
+    cJSON_Delete(jsonData);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: ExtractQuickFixDataFromJson_0400
+ * @tc.desc: Verify the parsing fail, when QUICK_FIX_PATCH_VERSION_CODE is missing
+ * @tc.type: FUNC
+ * @tc.require: issueI5OD2E
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, ExtractQuickFixDataFromJson_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, QUICK_FIX_BUNDLE_NAME, "com.example.bundle");
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_BUNDLE_VERSION_CODE, static_cast<double>(123));
+    cJSON_AddBoolToObject(jsonData, QUICK_FIX_IS_SO_CONTAINED, true);
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_TYPE, static_cast<double>(2));
+
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    bool ret = applyTask->ExtractQuickFixDataFromJson(jsonData);
+    EXPECT_FALSE(ret);
+    cJSON_Delete(jsonData);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: ExtractQuickFixDataFromJson_0500
+ * @tc.desc: Verify the parsing fail, when QUICK_FIX_IS_SO_CONTAINED is missing
+ * @tc.type: FUNC
+ * @tc.require: issueI5OD2E
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, ExtractQuickFixDataFromJson_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, QUICK_FIX_BUNDLE_NAME, "com.example.bundle");
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_BUNDLE_VERSION_CODE, static_cast<double>(123));
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_PATCH_VERSION_CODE, static_cast<double>(456));
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_TYPE, static_cast<double>(2));
+
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    bool ret = applyTask->ExtractQuickFixDataFromJson(jsonData);
+    EXPECT_FALSE(ret);
+    cJSON_Delete(jsonData);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: ExtractQuickFixDataFromJson_0600
+ * @tc.desc: Verify the parsing fail, when QUICK_FIX_TYPE is missing
+ * @tc.type: FUNC
+ * @tc.require: issueI5OD2E
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, ExtractQuickFixDataFromJson_0600, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, QUICK_FIX_BUNDLE_NAME, "com.example.bundle");
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_BUNDLE_VERSION_CODE, static_cast<double>(123));
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_PATCH_VERSION_CODE, static_cast<double>(456));
+    cJSON_AddBoolToObject(jsonData, QUICK_FIX_IS_SO_CONTAINED, true);
+
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    bool ret = applyTask->ExtractQuickFixDataFromJson(jsonData);
+    EXPECT_FALSE(ret);
+    cJSON_Delete(jsonData);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: ExtractQuickFixDataFromJson_0700
+ * @tc.desc: Verify the parsing fail, when QUICK_FIX_BUNDLE_NAME type is wrong
+ * @tc.type: FUNC
+ * @tc.require: issueI5OD2E
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, ExtractQuickFixDataFromJson_0700, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_BUNDLE_NAME, static_cast<double>(123));
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_BUNDLE_VERSION_CODE, static_cast<double>(123));
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_PATCH_VERSION_CODE, static_cast<double>(456));
+    cJSON_AddBoolToObject(jsonData, QUICK_FIX_IS_SO_CONTAINED, true);
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_TYPE, static_cast<double>(2));
+
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    bool ret = applyTask->ExtractQuickFixDataFromJson(jsonData);
+    EXPECT_FALSE(ret);
+    cJSON_Delete(jsonData);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: ExtractQuickFixDataFromJson_0800
+ * @tc.desc: Verify the parsing fail, when QUICK_FIX_BUNDLE_VERSION_CODE type is wrong
+ * @tc.type: FUNC
+ * @tc.require: issueI5OD2E
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, ExtractQuickFixDataFromJson_0800, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, QUICK_FIX_BUNDLE_NAME, "com.example.bundle");
+    cJSON_AddStringToObject(jsonData, QUICK_FIX_BUNDLE_VERSION_CODE, "invalid");
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_PATCH_VERSION_CODE, static_cast<double>(456));
+    cJSON_AddBoolToObject(jsonData, QUICK_FIX_IS_SO_CONTAINED, true);
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_TYPE, static_cast<double>(2));
+
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    bool ret = applyTask->ExtractQuickFixDataFromJson(jsonData);
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(applyTask->bundleName_, "com.example.bundle");
+    cJSON_Delete(jsonData);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: ExtractQuickFixDataFromJson_0900
+ * @tc.desc: Verify the parsing fail, when QUICK_FIX_PATCH_VERSION_CODE type is wrong
+ * @tc.type: FUNC
+ * @tc.require: issueI5OD2E
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, ExtractQuickFixDataFromJson_0900, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, QUICK_FIX_BUNDLE_NAME, "com.example.bundle");
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_BUNDLE_VERSION_CODE, static_cast<double>(123));
+    cJSON_AddStringToObject(jsonData, QUICK_FIX_PATCH_VERSION_CODE, "invalid");
+    cJSON_AddBoolToObject(jsonData, QUICK_FIX_IS_SO_CONTAINED, true);
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_TYPE, static_cast<double>(2));
+
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    bool ret = applyTask->ExtractQuickFixDataFromJson(jsonData);
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(applyTask->bundleName_, "com.example.bundle");
+    EXPECT_EQ(applyTask->bundleVersionCode_, 123);
+    cJSON_Delete(jsonData);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: ExtractQuickFixDataFromJson_1000
+ * @tc.desc: Verify the parsing fail, when QUICK_FIX_IS_SO_CONTAINED type is wrong
+ * @tc.type: FUNC
+ * @tc.require: issueI5OD2E
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, ExtractQuickFixDataFromJson_1000, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, QUICK_FIX_BUNDLE_NAME, "com.example.bundle");
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_BUNDLE_VERSION_CODE, static_cast<double>(123));
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_PATCH_VERSION_CODE, static_cast<double>(456));
+    cJSON_AddStringToObject(jsonData, QUICK_FIX_IS_SO_CONTAINED, "invalid");
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_TYPE, static_cast<double>(2));
+
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    bool ret = applyTask->ExtractQuickFixDataFromJson(jsonData);
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(applyTask->bundleName_, "com.example.bundle");
+    EXPECT_EQ(applyTask->bundleVersionCode_, 123);
+    EXPECT_EQ(applyTask->patchVersionCode_, 456);
+    cJSON_Delete(jsonData);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: ExtractQuickFixDataFromJson_1100
+ * @tc.desc: Verify the parsing fail, when QUICK_FIX_TYPE type is wrong
+ * @tc.type: FUNC
+ * @tc.require: issueI5OD2E
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, ExtractQuickFixDataFromJson_1100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    cJSON *jsonData = cJSON_CreateObject();
+    cJSON_AddStringToObject(jsonData, QUICK_FIX_BUNDLE_NAME, "com.example.bundle");
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_BUNDLE_VERSION_CODE, static_cast<double>(123));
+    cJSON_AddNumberToObject(jsonData, QUICK_FIX_PATCH_VERSION_CODE, static_cast<double>(456));
+    cJSON_AddBoolToObject(jsonData, QUICK_FIX_IS_SO_CONTAINED, false);
+    cJSON_AddStringToObject(jsonData, QUICK_FIX_TYPE, "invalid");
+
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    bool ret = applyTask->ExtractQuickFixDataFromJson(jsonData);
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(applyTask->bundleName_, "com.example.bundle");
+    EXPECT_EQ(applyTask->bundleVersionCode_, 123);
+    EXPECT_EQ(applyTask->patchVersionCode_, 456);
+    EXPECT_FALSE(applyTask->isSoContained_);
+    cJSON_Delete(jsonData);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 } // namespace AppExecFwk

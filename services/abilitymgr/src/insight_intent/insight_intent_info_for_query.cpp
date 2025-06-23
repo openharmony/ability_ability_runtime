@@ -15,14 +15,13 @@
 
 #include "insight_intent_info_for_query.h"
 
-#include "string_wrapper.h"
 #include "hilog_tag_wrapper.h"
-#include "json_util.h"
+#include "insight_intent_json_util.h"
+#include "json_utils.h"
+#include "string_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-using JsonType = AppExecFwk::JsonType;
-using ArrayType = AppExecFwk::ArrayType;
 namespace {
 int32_t g_parseResult = ERR_OK;
 std::mutex g_extraMutex;
@@ -41,91 +40,82 @@ const std::map<std::string, AppExecFwk::ExecuteMode> STRING_EXECUTE_MODE_MAP = {
 };
 }
 
-void from_json(const nlohmann::json &jsonObject, LinkInfoForQuery &linkInfo)
+void from_json(const cJSON *jsonObject, LinkInfoForQuery &linkInfo)
 {
     TAG_LOGD(AAFwkTag::INTENT, "LinkInfoForQuery from json");
-    const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENTS_URI,
-        linkInfo.uri,
-        true,
-        g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENTS_URI, linkInfo.uri, true, g_parseResult);
 }
 
-void to_json(nlohmann::json& jsonObject, const LinkInfoForQuery &info)
+bool to_json(cJSON *&jsonObject, const LinkInfoForQuery &info)
 {
     TAG_LOGD(AAFwkTag::INTENT, "LinkInfoForQuery to json");
-    jsonObject = nlohmann::json {
-        {INSIGHT_INTENTS_URI, info.uri}
-    };
+    jsonObject = cJSON_CreateObject();
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
+        return false;
+    }
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENTS_URI, info.uri.c_str());
+    return true;
 }
 
-void from_json(const nlohmann::json &jsonObject, PageInfoForQuery &pageInfo)
+void from_json(const cJSON *jsonObject, PageInfoForQuery &pageInfo)
 {
     TAG_LOGD(AAFwkTag::INTENT, "PageInfoForQuery from json");
-    const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_UI_ABILITY,
-        pageInfo.uiAbility,
-        true,
-        g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_PAGE_PATH,
-        pageInfo.pagePath,
-        true,
-        g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_NAVIGATION_ID,
-        pageInfo.navigationId,
-        true,
-        g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_NAV_DESTINATION_NAME,
-        pageInfo.navDestinationName,
-        true,
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_UI_ABILITY, pageInfo.uiAbility, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_PAGE_PATH, pageInfo.pagePath, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_NAVIGATION_ID, pageInfo.navigationId, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_NAV_DESTINATION_NAME, pageInfo.navDestinationName, true,
         g_parseResult);
 }
 
-void to_json(nlohmann::json& jsonObject, const PageInfoForQuery &info)
+bool to_json(cJSON *&jsonObject, const PageInfoForQuery &info)
 {
     TAG_LOGD(AAFwkTag::INTENT, "PageInfoForQuery to json");
-    jsonObject = nlohmann::json {
-        {INSIGHT_INTENT_UI_ABILITY, info.uiAbility},
-        {INSIGHT_INTENT_PAGE_PATH, info.pagePath},
-        {INSIGHT_INTENT_NAVIGATION_ID, info.navigationId},
-        {INSIGHT_INTENT_NAV_DESTINATION_NAME, info.navDestinationName}
-    };
+    jsonObject = cJSON_CreateObject();
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
+        return false;
+    }
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_UI_ABILITY, info.uiAbility.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_PAGE_PATH, info.pagePath.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_NAVIGATION_ID, info.navigationId.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_NAV_DESTINATION_NAME, info.navDestinationName.c_str());
+    return true;
 }
 
-void from_json(const nlohmann::json &jsonObject, EntryInfoForQuery &entryInfo)
+void GetExecuteModesFromJson(const cJSON *jsonObject, std::vector<AppExecFwk::ExecuteMode> executeModes)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "EntryInfoForQuery from json");
-    const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_ABILITY_NAME,
-        entryInfo.abilityName,
-        true,
-        g_parseResult);
-    if (jsonObject.find(INSIGHT_INTENT_EXECUTE_MODE) != jsonObjectEnd) {
-        const auto &modeArray = jsonObject[INSIGHT_INTENT_EXECUTE_MODE];
-        for (const auto &modeStr : modeArray) {
-            auto it = STRING_EXECUTE_MODE_MAP.find(modeStr.get<std::string>());
+    if (jsonObject == nullptr || !cJSON_IsArray(jsonObject)) {
+        return;
+    }
+    int size = cJSON_GetArraySize(jsonObject);
+    for (int i = 0; i < size; i++) {
+        cJSON *modeItem = cJSON_GetArrayItem(jsonObject, i);
+        if (modeItem != nullptr && cJSON_IsString(modeItem)) {
+            std::string modeStr = modeItem->valuestring;
+            auto it = STRING_EXECUTE_MODE_MAP.find(modeStr);
             if (it != STRING_EXECUTE_MODE_MAP.end()) {
-                entryInfo.executeMode.push_back(it->second);
+                executeModes.push_back(it->second);
             } else {
-                TAG_LOGW(AAFwkTag::INTENT, "Unknown ExecuteMode: %{public}s", modeStr.dump().c_str());
+                TAG_LOGW(AAFwkTag::INTENT, "Unknown ExecuteMode: %{public}s", modeStr.c_str());
             }
+        } else {
+            TAG_LOGW(AAFwkTag::INTENT, "ExecuteMode is null or not string type");
         }
     }
 }
 
-void to_json(nlohmann::json& jsonObject, const EntryInfoForQuery &info)
+void from_json(const cJSON *jsonObject, EntryInfoForQuery &entryInfo)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "EntryInfoForQuery from json");
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_ABILITY_NAME, entryInfo.abilityName, true, g_parseResult);
+    cJSON *executeModeItem = cJSON_GetObjectItem(jsonObject, INSIGHT_INTENT_EXECUTE_MODE);
+    if (executeModeItem != nullptr && cJSON_IsArray(executeModeItem)) {
+        GetExecuteModesFromJson(executeModeItem, entryInfo.executeMode);
+    }
+}
+
+bool to_json(cJSON *&jsonObject, const EntryInfoForQuery &info)
 {
     TAG_LOGD(AAFwkTag::INTENT, "EntryInfoForQuery to json");
     std::vector<std::string> modeStrings;
@@ -137,192 +127,175 @@ void to_json(nlohmann::json& jsonObject, const EntryInfoForQuery &info)
             modeStrings.push_back("UNKNOWN");
         }
     }
-    jsonObject = nlohmann::json {
-        {INSIGHT_INTENT_ABILITY_NAME, info.abilityName},
-        {INSIGHT_INTENT_EXECUTE_MODE, modeStrings}
-    };
+    jsonObject = cJSON_CreateObject();
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
+        return false;
+    }
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_ABILITY_NAME, info.abilityName.c_str());
+    cJSON *modeItem = nullptr;
+    if (!to_json(modeItem, modeStrings)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
+        cJSON_Delete(jsonObject);
+        return false;
+    }
+    cJSON_AddItemToObject(jsonObject, INSIGHT_INTENT_EXECUTE_MODE, modeItem);
+    return true;
 }
 
-void from_json(const nlohmann::json &jsonObject, FormInfoForQuery &formInfo)
+void from_json(const cJSON *jsonObject, FormInfoForQuery &formInfo)
 {
     TAG_LOGD(AAFwkTag::INTENT, "FormInfoForQuery from json");
-    const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_ABILITY_NAME,
-        formInfo.abilityName,
-        true,
-        g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_FORM_NAME,
-        formInfo.formName,
-        true,
-        g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_ABILITY_NAME, formInfo.abilityName, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_FORM_NAME, formInfo.formName, true, g_parseResult);
 }
 
-void to_json(nlohmann::json& jsonObject, const FormInfoForQuery &info)
+bool to_json(cJSON *&jsonObject, const FormInfoForQuery &info)
 {
     TAG_LOGD(AAFwkTag::INTENT, "FormInfoForQuery to json");
-    jsonObject = nlohmann::json {
-        {INSIGHT_INTENT_ABILITY_NAME, info.abilityName},
-        {INSIGHT_INTENT_FORM_NAME, info.formName}
-    };
+    jsonObject = cJSON_CreateObject();
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
+        return false;
+    }
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_ABILITY_NAME, info.abilityName.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_FORM_NAME, info.formName.c_str());
+    return true;
 }
 
-void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insightIntentInfo)
+void from_json(const cJSON *jsonObject, EntityInfoForQuery &entityInfo)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "EntityInfoForQuery from json");
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_ENTITY_CLASS_NAME, entityInfo.className, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_ENTITY_ID, entityInfo.entityId, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_ENTITY_CATEGORY, entityInfo.entityCategory, false,
+        g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_ENTITY_PARAMETERS, entityInfo.parameters, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_ENTITY_PARENT_CLASS_NAME, entityInfo.parentClassName, false,
+        g_parseResult);
+}
+
+bool to_json(cJSON *&jsonObject, const EntityInfoForQuery &info)
+{
+    TAG_LOGD(AAFwkTag::INTENT, "EntityInfoForQuery to json");
+    jsonObject = cJSON_CreateObject();
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
+        return false;
+    }
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_ENTITY_CLASS_NAME, info.className.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_ENTITY_ID, info.entityId.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_ENTITY_CATEGORY, info.entityCategory.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_PARAMETERS, info.parameters.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_ENTITY_PARENT_CLASS_NAME, info.parentClassName.c_str());
+    return true;
+}
+
+void from_json(const cJSON *jsonObject, InsightIntentInfoForQuery &insightIntentInfo)
 {
     TAG_LOGD(AAFwkTag::INTENT, "InsightIntentInfoForQuery from json");
-    const auto &jsonObjectEnd = jsonObject.end();
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_BUNDLE_NAME,
-        insightIntentInfo.bundleName,
-        true,
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_BUNDLE_NAME, insightIntentInfo.bundleName, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_MODULE_NAME, insightIntentInfo.moduleName, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_INTENT_NAME, insightIntentInfo.intentName, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_DOMAIN, insightIntentInfo.domain, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_INTENT_VERSION, insightIntentInfo.intentVersion, true,
         g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_MODULE_NAME,
-        insightIntentInfo.moduleName,
-        true,
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_DISPLAY_NAME, insightIntentInfo.displayName, true,
         g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_INTENT_NAME,
-        insightIntentInfo.intentName,
-        true,
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_DISPLAY_DESCRIPTION, insightIntentInfo.displayDescription, false,
         g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_DOMAIN,
-        insightIntentInfo.domain,
-        true,
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_SCHEMA, insightIntentInfo.schema, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_ICON, insightIntentInfo.icon, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_LLM_DESCRIPTION, insightIntentInfo.llmDescription, false,
         g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_INTENT_VERSION,
-        insightIntentInfo.intentVersion,
-        true,
-        g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_DISPLAY_NAME,
-        insightIntentInfo.displayName,
-        true,
-        g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_DISPLAY_DESCRIPTION,
-        insightIntentInfo.displayDescription,
-        false,
-        g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_SCHEMA,
-        insightIntentInfo.schema,
-        false,
-        g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_ICON,
-        insightIntentInfo.icon,
-        false,
-        g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_LLM_DESCRIPTION,
-        insightIntentInfo.llmDescription,
-        false,
-        g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_INTENT_TYPE,
-        insightIntentInfo.intentType,
-        true,
-        g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_PARAMETERS,
-        insightIntentInfo.parameters,
-        false,
-        g_parseResult);
-    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_RESULT,
-        insightIntentInfo.result,
-        false,
-        g_parseResult);
-    AppExecFwk::GetValueIfFindKey<std::vector<std::string>>(jsonObject,
-        jsonObjectEnd,
-        INSIGHT_INTENT_KEYWORDS,
-        insightIntentInfo.keywords,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::STRING);
+    GetObjectValuesIfFindKey(jsonObject, INSIGHT_INTENT_ENTITY_INFO, insightIntentInfo.entities, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_INTENT_TYPE, insightIntentInfo.intentType, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_PARAMETERS, insightIntentInfo.parameters, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_RESULT, insightIntentInfo.result, false, g_parseResult);
+    GetStringValuesIfFindKey(jsonObject, INSIGHT_INTENT_KEYWORDS, insightIntentInfo.keywords, false, g_parseResult);
 
     if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_LINK) {
-        AppExecFwk::GetValueIfFindKey<LinkInfoForQuery>(jsonObject,
-            jsonObjectEnd,
-            INSIGHT_INTENT_LINK_INFO,
-            insightIntentInfo.linkInfo,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetObjectValueIfFindKey(jsonObject, INSIGHT_INTENT_LINK_INFO, insightIntentInfo.linkInfo, false, g_parseResult);
     } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_PAGE) {
-        AppExecFwk::GetValueIfFindKey<PageInfoForQuery>(jsonObject,
-            jsonObjectEnd,
-            INSIGHT_INTENT_PAGE_INFO,
-            insightIntentInfo.pageInfo,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetObjectValueIfFindKey(jsonObject, INSIGHT_INTENT_PAGE_INFO, insightIntentInfo.pageInfo, false, g_parseResult);
     } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_ENTRY) {
-        AppExecFwk::GetValueIfFindKey<EntryInfoForQuery>(jsonObject,
-            jsonObjectEnd,
-            INSIGHT_INTENT_ENTRY_INFO,
-            insightIntentInfo.entryInfo,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetObjectValueIfFindKey(jsonObject, INSIGHT_INTENT_ENTRY_INFO, insightIntentInfo.entryInfo, false,
+            g_parseResult);
     } else if (insightIntentInfo.intentType == INSIGHT_INTENT_FORM_INFO) {
-        AppExecFwk::GetValueIfFindKey<FormInfoForQuery>(jsonObject,
-            jsonObjectEnd,
-            INSIGHT_INTENT_FORM_INFO,
-            insightIntentInfo.formInfo,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetObjectValueIfFindKey(jsonObject, INSIGHT_INTENT_FORM_INFO, insightIntentInfo.formInfo, false, g_parseResult);
     }
 }
 
-void to_json(nlohmann::json& jsonObject, const InsightIntentInfoForQuery &info)
+bool to_json(cJSON *&jsonObject, const InsightIntentInfoForQuery &info)
 {
     TAG_LOGD(AAFwkTag::INTENT, "InsightIntentInfoForQuery to json");
-    jsonObject = nlohmann::json {
-        {INSIGHT_INTENT_BUNDLE_NAME, info.bundleName},
-        {INSIGHT_INTENT_MODULE_NAME, info.moduleName},
-        {INSIGHT_INTENT_INTENT_NAME, info.intentName},
-        {INSIGHT_INTENT_DOMAIN, info.domain},
-        {INSIGHT_INTENT_INTENT_VERSION, info.intentVersion},
-        {INSIGHT_INTENT_DISPLAY_NAME, info.displayName},
-        {INSIGHT_INTENT_DISPLAY_DESCRIPTION, info.displayDescription},
-        {INSIGHT_INTENT_SCHEMA, info.schema},
-        {INSIGHT_INTENT_ICON, info.icon},
-        {INSIGHT_INTENT_LLM_DESCRIPTION, info.llmDescription},
-        {INSIGHT_INTENT_INTENT_TYPE, info.intentType},
-        {INSIGHT_INTENT_PARAMETERS, info.parameters},
-        {INSIGHT_INTENT_RESULT, info.result},
-        {INSIGHT_INTENT_KEYWORDS, info.keywords},
-        {INSIGHT_INTENT_LINK_INFO, info.linkInfo},
-        {INSIGHT_INTENT_PAGE_INFO, info.pageInfo},
-        {INSIGHT_INTENT_ENTRY_INFO, info.entryInfo},
-        {INSIGHT_INTENT_FORM_INFO, info.formInfo}
-    };
+    jsonObject = cJSON_CreateObject();
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
+        return false;
+    }
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_BUNDLE_NAME, info.bundleName.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_MODULE_NAME, info.moduleName.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_INTENT_NAME, info.intentName.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_DOMAIN, info.domain.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_INTENT_VERSION, info.intentVersion.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_DISPLAY_NAME, info.displayName.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_DISPLAY_DESCRIPTION, info.displayDescription.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_SCHEMA, info.schema.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_ICON, info.icon.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_LLM_DESCRIPTION, info.llmDescription.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_INTENT_TYPE, info.intentType.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_PARAMETERS, info.parameters.c_str());
+    cJSON_AddStringToObject(jsonObject, INSIGHT_INTENT_RESULT, info.result.c_str());
+
+    cJSON *keywordsItem = nullptr;
+    if (!to_json(keywordsItem, info.keywords)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json keywords failed");
+        cJSON_Delete(jsonObject);
+        return false;
+    }
+    cJSON_AddItemToObject(jsonObject, INSIGHT_INTENT_KEYWORDS, keywordsItem);
+
+    cJSON *linkInfoItem = nullptr;
+    if (!to_json(linkInfoItem, info.linkInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json linkInfo failed");
+        cJSON_Delete(jsonObject);
+        return false;
+    }
+    cJSON_AddItemToObject(jsonObject, INSIGHT_INTENT_LINK_INFO, linkInfoItem);
+
+    cJSON *pageInfoItem = nullptr;
+    if (!to_json(pageInfoItem, info.pageInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json pageInfo failed");
+        cJSON_Delete(jsonObject);
+        return false;
+    }
+    cJSON_AddItemToObject(jsonObject, INSIGHT_INTENT_PAGE_INFO, pageInfoItem);
+
+    cJSON *entryInfoItem = nullptr;
+    if (!to_json(entryInfoItem, info.entryInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json entryInfo failed");
+        cJSON_Delete(jsonObject);
+        return false;
+    }
+    cJSON_AddItemToObject(jsonObject, INSIGHT_INTENT_ENTRY_INFO, entryInfoItem);
+
+    cJSON *formInfoItem = nullptr;
+    if (!to_json(formInfoItem, info.formInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json formInfo failed");
+        cJSON_Delete(jsonObject);
+        return false;
+    }
+    cJSON_AddItemToObject(jsonObject, INSIGHT_INTENT_FORM_INFO, formInfoItem);
+
+    cJSON *entitiesItem = nullptr;
+    if (!to_json(entitiesItem, info.entities)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json entities failed");
+        cJSON_Delete(jsonObject);
+        return false;
+    }
+    cJSON_AddItemToObject(jsonObject, INSIGHT_INTENT_ENTITY_INFO, entitiesItem);
+    return true;
 }
 
 bool InsightIntentInfoForQuery::ReadFromParcel(Parcel &parcel)
@@ -343,14 +316,15 @@ bool InsightIntentInfoForQuery::ReadFromParcel(Parcel &parcel)
         TAG_LOGE(AAFwkTag::INTENT, "Fail read raw length = %{public}d", length);
         return false;
     }
-    nlohmann::json jsonObject = nlohmann::json::parse(data, nullptr, false);
-    if (jsonObject.is_discarded()) {
+    cJSON *jsonObject = cJSON_Parse(data);
+    if (jsonObject == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "failed to parse BundleInfo");
         return false;
     }
     std::lock_guard<std::mutex> lock(g_extraMutex);
     g_parseResult = ERR_OK;
-    *this = jsonObject.get<InsightIntentInfoForQuery>();
+    from_json(jsonObject, *this);
+    cJSON_Delete(jsonObject);
     if (g_parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "parse result: %{public}d", g_parseResult);
         g_parseResult = ERR_OK;
@@ -366,8 +340,13 @@ bool InsightIntentInfoForQuery::Marshalling(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::INTENT, "Conversion failed");
         return false;
     }
-    nlohmann::json jsonObject = *this;
-    std::string str = jsonObject.dump();
+    cJSON *jsonObject = nullptr;
+    if (!to_json(jsonObject, *this)) {
+        TAG_LOGE(AAFwkTag::INTENT, "to_json insightIntentInfoForQuery failed");
+        return false;
+    }
+    std::string str = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
+    cJSON_Delete(jsonObject);
     TAG_LOGD(AAFwkTag::INTENT, "Marshalling str: %{public}s", str.c_str());
     if (!messageParcel->WriteUint32(str.size() + 1)) {
         TAG_LOGE(AAFwkTag::INTENT, "Write intent info size failed");

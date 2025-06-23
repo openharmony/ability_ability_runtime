@@ -888,6 +888,11 @@ public:
 
     virtual int SendWantSender(sptr<IWantSender> target, SenderInfo &senderInfo) = 0;
 
+    virtual int SendLocalWantSender(const SenderInfo &senderInfo)
+    {
+        return 0;
+    }
+
     virtual void CancelWantSender(const sptr<IWantSender> &sender) = 0;
 
     virtual int GetPendingWantUid(const sptr<IWantSender> &target) = 0;
@@ -1539,8 +1544,12 @@ public:
      * Start specified ability by SCB.
      *
      * @param want Want information.
+     * @return Returns ERR_OK on success, others on failure.
      */
-    virtual void StartSpecifiedAbilityBySCB(const Want &want) {};
+    virtual int32_t StartSpecifiedAbilityBySCB(const Want &want)
+    {
+        return 0;
+    }
 
     /**
      * Notify sandbox app the result of saving file.

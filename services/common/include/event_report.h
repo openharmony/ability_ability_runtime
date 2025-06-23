@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,6 +66,11 @@ struct EventInfo {
     std::string lifeCycle;
     std::string intentName;
     std::string errMsg;
+    std::string componentName;
+    std::string partitionName;
+    uint64_t remainPartitionSize;
+    std::vector<std::string> fileOfFolderPath;
+    std::vector<uint64_t> fileOfFolderSize;
 };
 
 enum class EventName {
@@ -110,7 +115,6 @@ enum class EventName {
     DRAWN_COMPLETED,
     APP_STARTUP_TYPE,
     PROCESS_START_FAILED,
-    APP_START_INTERCRPT_BY_EDM,
 
     // key behavior event
     GRANT_URI_PERMISSION,
@@ -124,7 +128,10 @@ enum class EventName {
     ATOMIC_SERVICE_DRAWN_COMPLETE,
     
     // uri permission
-    SHARE_UNPRIVILEGED_FILE_URI
+    SHARE_UNPRIVILEGED_FILE_URI,
+
+    // report data
+    USER_DATA_SIZE
 };
 
 class EventReport {
@@ -148,6 +155,8 @@ public:
     static void SendGrantUriPermissionEvent(const EventName &eventName, const EventInfo &eventInfo);
     static void SendExecuteIntentEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
     static void SendLaunchFrameworkEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
+    static void SendReportDataPartitionUsageEvent(const EventName &eventName, HiSysEventType type,
+        const EventInfo &eventInfo);
 
 private:
     static std::string ConvertEventName(const EventName &eventName);

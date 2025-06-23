@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,6 +40,8 @@
 #include "mock_ability_connect_callback.h"
 #include "insight_intent_db_cache.h"
 #include "insight_intent_execute_param.h"
+#include "mock_want_utils.h"
+#include "mock_free_install_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -57,6 +58,15 @@ const std::string EMPTY_DEVICE_ID = "";
 const std::string  SESSIONID = "sessionId";
 const std::string  APPID = "1003";
 const int REQUESTCODE = 10;
+const std::string NOT_SHORTURL = "NOT_SHORTURL";
+const std::string IS_SHORTURL = "IS_SHORTURL";
+const std::string CONVERT_FAILED = "CONVERT_FAILED";
+const std::string ATOMIC_SERVICE = "ATOMIC_SERVICE";
+const std::string APP = "APP";
+const std::string FREE_INSTALL_ERR_OK = "FREE_INSTALL_ERR_OK";
+const std::string FREE_INSTALL_FAIL = "FREE_INSTALL_FAIL";
+const std::string FREE_INSTALL_NOT_TOP_ABILITY = "FREE_INSTALL_NOT_TOP_ABILITY";
+const std::string APP_LINKING_ONLY = "appLinkingOnly";
 }  // namespace
 class AbilityManagerServiceThirdTest : public testing::Test {
 public:
@@ -2269,7 +2279,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLink_001, TestSize.Level1)
     sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
     AAFwk::Want want;
     Uri uri("");
-    want.GetOperation().SetUri(uri);
+    want.SetUri(uri);
 
     auto result = abilityMs_->OpenLink(want, token, USER_ID_U100, REQUESTCODE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest OpenLink_001 call result %{public}d", result);
@@ -2287,10 +2297,219 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLink_002, TestSize.Level1)
     sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
     AAFwk::Want want;
     Uri uri("");
-    want.GetOperation().SetUri(uri);
+    want.SetUri(uri);
 
     auto result = abilityMs_->OpenLinkInner(want, token, USER_ID_U100, REQUESTCODE, true);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest OpenLink_002 call result %{public}d", result);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OpenLink
+ * FunctionPoints: OpenLink not shortUrl
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, OpenLink_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    AAFwk::Want want;
+    Uri uri(NOT_SHORTURL);
+    want.SetUri(uri);
+
+    auto result = abilityMs_->OpenLink(want, token, USER_ID_U100, REQUESTCODE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_003 call result %{public}d", result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OpenLink
+ * FunctionPoints: OpenLink CONVERT_FAILED
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, OpenLink_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_004 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    AAFwk::Want want;
+    Uri uri(CONVERT_FAILED);
+    want.SetUri(uri);
+
+    auto result = abilityMs_->OpenLink(want, token, USER_ID_U100, REQUESTCODE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_004 call result %{public}d", result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_004 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OpenLink
+ * FunctionPoints: OpenLink shortUrl ATOMIC_SERVICE
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, OpenLink_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_005 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    AAFwk::Want want;
+    Uri uri(ATOMIC_SERVICE);
+    want.SetUri(uri);
+
+    auto result = abilityMs_->OpenLink(want, token, USER_ID_U100, REQUESTCODE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_005 call result %{public}d", result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_005 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OpenLink
+ * FunctionPoints: OpenLink shortUrl APP
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, OpenLink_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_006 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    AAFwk::Want want;
+    Uri uri(APP);
+    want.SetUri(uri);
+
+    auto result = abilityMs_->OpenLink(want, token, USER_ID_U100, REQUESTCODE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_006 call result %{public}d", result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_006 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OpenLink
+ * FunctionPoints: OpenLink shortUrl not APP or ATOMIC_SERVICE; appLinkingOnly false
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, OpenLink_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_007 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    AAFwk::Want want;
+    Uri uri(IS_SHORTURL);
+    want.SetUri(uri);
+    want.SetParam(APP_LINKING_ONLY, false);
+
+    auto result = abilityMs_->OpenLink(want, token, USER_ID_U100, REQUESTCODE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_007 call result %{public}d", result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_007 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OpenLink
+ * FunctionPoints: OpenLink shortUrl not APP or ATOMIC_SERVICE; appLinkingOnly true
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, OpenLink_008, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_008 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    AAFwk::Want want;
+    Uri uri(IS_SHORTURL);
+    want.SetUri(uri);
+    want.SetParam(APP_LINKING_ONLY, true);
+
+    auto result = abilityMs_->OpenLink(want, token, USER_ID_U100, REQUESTCODE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_008 call result %{public}d", result);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest_OpenLink_008 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OpenLinkFreeInstallAtomicService
+ * FunctionPoints: OpenLinkFreeInstallAtomicService No freeInstallManager_ FREE_INSTALL_FAIL
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    AAFwk::Want want;
+    AAFwk::Want convertedWant;
+    Uri uri(FREE_INSTALL_FAIL);
+    convertedWant.SetUri(uri);
+    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(convertedWant, want,
+        token, USER_ID_U100, REQUESTCODE, true);
+    TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_001 call result %{public}d", result);
+    TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OpenLinkFreeInstallAtomicService
+ * FunctionPoints: OpenLinkFreeInstallAtomicService FREE_INSTALL_FAIL
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    AAFwk::Want want;
+    AAFwk::Want convertedWant;
+    Uri uri(FREE_INSTALL_FAIL);
+    convertedWant.SetUri(uri);
+    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(convertedWant, want,
+        token, USER_ID_U100, REQUESTCODE, true);
+    TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_002 call result %{public}d", result);
+    TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OpenLinkFreeInstallAtomicService
+ * FunctionPoints: OpenLinkFreeInstallAtomicService FREE_INSTALL_NOT_TOP_ABILITY
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    AAFwk::Want want;
+    AAFwk::Want convertedWant;
+    Uri uri(FREE_INSTALL_NOT_TOP_ABILITY);
+    convertedWant.SetUri(uri);
+    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(convertedWant, want,
+        token, USER_ID_U100, REQUESTCODE, true);
+    TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_003 call result %{public}d", result);
+    TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OpenLinkFreeInstallAtomicService
+ * FunctionPoints: OpenLinkFreeInstallAtomicService FREE_INSTALL_ERR_OK
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_004 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    AAFwk::Want want;
+    AAFwk::Want convertedWant;
+    Uri uri(FREE_INSTALL_ERR_OK);
+    convertedWant.SetUri(uri);
+    auto result = abilityMs_->OpenLinkFreeInstallAtomicService(convertedWant, want,
+        token, USER_ID_U100, REQUESTCODE, true);
+    TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_004 call result %{public}d", result);
+    TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_004 end");
 }
 
 /*
@@ -2443,8 +2662,9 @@ HWTEST_F(AbilityManagerServiceThirdTest, ParseJsonValueFromFile_001, TestSize.Le
     EXPECT_NE(abilityMs_, nullptr);
 
     std::string filePath = "hello";
-    nlohmann::json  value;
+    cJSON *value = nullptr;
     abilityMs_->ParseJsonValueFromFile(value, filePath);
+    cJSON_Delete(value);
 }
 
 /*

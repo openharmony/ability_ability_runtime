@@ -404,10 +404,10 @@ void StartSpecifiedAbilityResponse::OnTimeoutResponse(int32_t requestId)
 }
 
 void AppScheduler::StartSpecifiedProcess(
-    const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo, int32_t requestId)
+    const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo, int32_t requestId, std::string customProcess)
 {
     CHECK_POINTER(appMgrClient_);
-    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->StartSpecifiedProcess(want, abilityInfo, requestId));
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess));
 }
 
 void StartSpecifiedAbilityResponse::OnNewProcessRequestResponse(const std::string &flag, int32_t requestId)

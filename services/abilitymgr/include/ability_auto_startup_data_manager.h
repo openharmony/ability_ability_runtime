@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,6 @@
 
 #include "auto_startup_info.h"
 #include "distributed_kv_data_manager.h"
-#include "nlohmann/json.hpp"
 #include "singleton.h"
 
 namespace OHOS {
@@ -52,11 +51,13 @@ private:
     DistributedKv::Status GetKvStore();
     bool CheckKvStore();
     DistributedKv::Value ConvertAutoStartupStatusToValue(
-        bool isAutoStartup, bool isEdmForce, const std::string &abilityTypeName);
+        const AutoStartupInfo &info, bool isAutoStartup, bool isEdmForce);
     void ConvertAutoStartupStatusFromValue(const DistributedKv::Value &value, bool &isAutoStartup, bool &isEdmForce);
     DistributedKv::Key ConvertAutoStartupDataToKey(const AutoStartupInfo &info);
     AutoStartupInfo ConvertAutoStartupInfoFromKeyAndValue(
         const DistributedKv::Key &key, const DistributedKv::Value &value);
+    void ConvertAutoStartupInfoFromKey(const DistributedKv::Key &key, AutoStartupInfo &info);
+    void ConvertAutoStartupInfoFromValue(const DistributedKv::Value &value, AutoStartupInfo &info);
     bool IsEqual(const DistributedKv::Key &key, const AutoStartupInfo &info);
     bool IsEqual(const DistributedKv::Key &key, const std::string &accessTokenId);
     bool IsEqual(const DistributedKv::Key &key, int32_t userId);

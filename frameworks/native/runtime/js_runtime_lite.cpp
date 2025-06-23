@@ -24,11 +24,11 @@
 #include "js_module_reader.h"
 #include "js_runtime_common.h"
 #include "js_worker.h"
+#include "native_engine/native_create_env.h"
 #include "ohos_js_env_logger.h"
 #include "ohos_js_environment_impl.h"
 #include "parameters.h"
 #include "system_ability_definition.h"
-#include "native_engine/native_create_env.h"
 #include "worker_info.h"
 
 using Extractor = OHOS::AbilityBase::Extractor;
@@ -443,6 +443,7 @@ void JsRuntimeLite::SetChildOptions(const Options& options)
     childOptions_->jitEnabled = options.jitEnabled;
     childOptions_->pkgContextInfoJsonStringMap = options.pkgContextInfoJsonStringMap;
     childOptions_->packageNameList = options.packageNameList;
+    childOptions_->versionCode = options.versionCode;
 }
 
 std::shared_ptr<Options> JsRuntimeLite::GetChildOptions()
@@ -472,66 +473,79 @@ void JsRuntimeLite::GetPkgContextInfoListMap(const std::map<std::string, std::st
             TAG_LOGD(AAFwkTag::JSRUNTIME, "moduleName: %{public}s get pkgContextInfo failed", it->first.c_str());
             continue;
         }
-        auto jsonObject = nlohmann::json::parse(data.get(), data.get() + dataLen, nullptr, false);
-        if (jsonObject.is_discarded()) {
+        std::string jsonStr(reinterpret_cast<const char *>(data.get(), dataLen));
+        cJSON *jsonObject = cJSON_Parse(jsonStr.c_str());
+        if (jsonObject == nullptr) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s parse json error", it->first.c_str());
             continue;
         }
         ParsePkgContextInfoJson(jsonObject, pkgContextInfoList, pkgAliasMap);
+        cJSON_Delete(jsonObject);
         TAG_LOGI(AAFwkTag::JSRUNTIME, "moduleName: %{public}s parse json success", it->first.c_str());
         pkgContextInfoMap[it->first] = pkgContextInfoList;
     }
 }
 
-void JsRuntimeLite::ParsePkgContextInfoJson(nlohmann::json &jsonObject,
+void JsRuntimeLite::ParsePkgContextInfoJson(cJSON *jsonObject,
     std::vector<std::vector<std::string>> &pkgContextInfoList, std::map<std::string, std::string> &pkgAliasMap)
 {
-    for (nlohmann::json::iterator jsonIt = jsonObject.begin(); jsonIt != jsonObject.end(); jsonIt++) {
+    cJSON *childItem = jsonObject->child;
+    while (childItem != nullptr) {
         std::vector<std::string> items;
-        items.emplace_back(jsonIt.key());
-        nlohmann::json itemObject = jsonIt.value();
+        std::string key = childItem->string == nullptr ? "" : childItem->string;
+        items.emplace_back(key);
+
         std::string pkgName = "";
         items.emplace_back(PACKAGE_NAME);
-        if (itemObject[PACKAGE_NAME].is_null() || !itemObject[PACKAGE_NAME].is_string()) {
+        cJSON *packageNameItem = cJSON_GetObjectItem(childItem, PACKAGE_NAME.c_str());
+        if (packageNameItem == nullptr || !cJSON_IsString(packageNameItem)) {
             items.emplace_back(pkgName);
         } else {
-            pkgName = itemObject[PACKAGE_NAME].get<std::string>();
+            pkgName = packageNameItem->valuestring;
             items.emplace_back(pkgName);
         }
 
-        ParsePkgContextInfoJsonString(itemObject, BUNDLE_NAME, items);
-        ParsePkgContextInfoJsonString(itemObject, MODULE_NAME, items);
-        ParsePkgContextInfoJsonString(itemObject, VERSION, items);
-        ParsePkgContextInfoJsonString(itemObject, ENTRY_PATH, items);
+        ParsePkgContextInfoJsonString(childItem, BUNDLE_NAME, items);
+        ParsePkgContextInfoJsonString(childItem, MODULE_NAME, items);
+        ParsePkgContextInfoJsonString(childItem, VERSION, items);
+        ParsePkgContextInfoJsonString(childItem, ENTRY_PATH, items);
+
         items.emplace_back(IS_SO);
-        if (itemObject[IS_SO].is_null() || !itemObject[IS_SO].is_boolean()) {
+        cJSON *isSoItem = cJSON_GetObjectItem(childItem, IS_SO.c_str());
+        if (isSoItem == nullptr || !cJSON_IsBool(isSoItem)) {
             items.emplace_back("false");
         } else {
-            bool isSo = itemObject[IS_SO].get<bool>();
+            bool isSo = isSoItem->type == cJSON_True;
             if (isSo) {
                 items.emplace_back("true");
             } else {
                 items.emplace_back("false");
             }
         }
-        if (!itemObject[DEPENDENCY_ALIAS].is_null() && itemObject[DEPENDENCY_ALIAS].is_string()) {
-            std::string pkgAlias = itemObject[DEPENDENCY_ALIAS].get<std::string>();
+
+        cJSON *aliasItem = cJSON_GetObjectItem(childItem, DEPENDENCY_ALIAS.c_str());
+        if (aliasItem != nullptr && cJSON_IsString(aliasItem)) {
+            std::string pkgAlias = aliasItem->valuestring;
             if (!pkgAlias.empty()) {
                 pkgAliasMap[pkgAlias] = pkgName;
             }
         }
+
         pkgContextInfoList.emplace_back(items);
+
+        childItem = childItem->next;
     }
 }
 
 void JsRuntimeLite::ParsePkgContextInfoJsonString(
-    const nlohmann::json &itemObject, const std::string &key, std::vector<std::string> &items)
+    const cJSON *itemObject, const std::string &key, std::vector<std::string> &items)
 {
     items.emplace_back(key);
-    if (itemObject[key].is_null() || !itemObject[key].is_string()) {
+    cJSON *item = cJSON_GetObjectItem(itemObject, key.c_str());
+    if (item == nullptr || !cJSON_IsString(item)) {
         items.emplace_back("");
     } else {
-        items.emplace_back(itemObject[key].get<std::string>());
+        items.emplace_back(std::string(item->valuestring));
     }
 }
 } // namespace AbilityRuntime

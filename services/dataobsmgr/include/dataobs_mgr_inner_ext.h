@@ -39,7 +39,7 @@ public:
     virtual ~DataObsMgrInnerExt();
 
     Status HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId,
-        bool isDescendants = false);
+        uint32_t tokenId, bool isDescendants = false);
     Status HandleUnregisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver);
     Status HandleUnregisterObserver(sptr<IDataAbilityObserver> dataObserver);
     Status HandleNotifyChange(const ChangeInfo &changeInfo, int32_t userId);
@@ -53,12 +53,14 @@ private:
     };
 
     struct Entry {
-        Entry(sptr<IDataAbilityObserver> obs, int32_t userId, std::shared_ptr<DeathRecipientRef> deathRef, bool isDes)
-            : observer(obs), userId(userId), deathRecipientRef(deathRef), isDescendants(isDes)
+        Entry(sptr<IDataAbilityObserver> obs, int32_t userId, uint32_t tokenId,
+            std::shared_ptr<DeathRecipientRef> deathRef, bool isDes)
+            : observer(obs), userId(userId), tokenId(tokenId), deathRecipientRef(deathRef), isDescendants(isDes)
         {
         }
         sptr<IDataAbilityObserver> observer;
         int32_t userId;
+        uint32_t tokenId = 0;
         std::shared_ptr<DeathRecipientRef> deathRecipientRef;
         bool isDescendants;
     };
@@ -75,6 +77,7 @@ private:
             sptr<IDataAbilityObserver> dataObserver);
         inline bool RemoveObserver(sptr<IDataAbilityObserver> dataObserver);
         bool RemoveObserver(sptr<IRemoteObject> dataObserver);
+        bool IsLimit(const Entry &entry);
 
     private:
         std::string name_;
@@ -86,6 +89,7 @@ private:
     void RemoveObsDeathRecipient(const sptr<IRemoteObject> &dataObserver, bool isForce = false);
 
     static constexpr uint32_t OBS_NUM_MAX = 50;
+    static constexpr uint32_t OBS_ALL_NUM_MAX = OBS_NUM_MAX * OBS_NUM_MAX;
 
     ffrt::mutex nodeMutex_;
     std::shared_ptr<Node> root_;

@@ -215,6 +215,8 @@ private:
 
     inline int32_t WrapErrorCode(int32_t errorCode, int32_t &funcRet);
 
+    void StringVecToRawData(const std::vector<std::string> &stringVec, StorageFileRawData &rawData);
+
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     ErrCode Active(const UriPermissionRawData& policyRawData, std::vector<uint32_t>& res, int32_t& funcResult) override;
     bool RawDataToPolicyInfo(const UriPermissionRawData& policyRawData, std::vector<PolicyInfo>& policy);

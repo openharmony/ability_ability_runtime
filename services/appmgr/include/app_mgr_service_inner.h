@@ -879,7 +879,7 @@ public:
      * @param requestId for callback
      */
     void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t requestId = 0);
+        int32_t requestId = 0, std::string customProcess = "");
 
     void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response);
 
@@ -945,6 +945,18 @@ public:
      * @return
      */
     void NotifyAppStatus(const std::string &bundleName, int32_t appIndex, const std::string &eventData);
+
+    /**
+     * Notify application status by event name.
+     *
+     * @param bundleName Indicates the name of the bundle.
+     * @param eventName Indicates the event defined by CommonEventSupport
+     * @param want Want contains information of the event wish to notify.
+     *
+     * @return Returns 0 if the event is normal, 1 if the event needs to be managed.
+     */
+    int32_t NotifyAppStatusByCommonEventName(const std::string &bundleName, const std::string &eventName,
+        const Want &want);
 
     int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation");
 
@@ -1286,6 +1298,21 @@ public:
     virtual int32_t UnregisterNativeChildExitNotify(const sptr<INativeChildNotify> &callback);
 
     /**
+     * Elevate the current process to be a candidate master process.
+     *
+     * @param isInsertToHead Whether inset current process to the head of candidate master process list.
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t PromoteCurrentToCandidateMasterProcess(bool isInsertToHead);
+    
+    /**
+     * Revoke current process as a candidate master process.
+     *
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t DemoteCurrentFromCandidateMasterProcess();
+
+    /**
      * To clear the process by ability token.
      *
      * @param token the unique identification to the ability.
@@ -1371,6 +1398,8 @@ public:
      * @param uid indicates user, 0 for all users
      */
     void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid);
+
+    void SetKeepAliveAppService(const std::string &bundleName, bool enable, int32_t uid);
 
     int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 
@@ -2042,7 +2071,7 @@ private:
     void ReportEventToRSS(const AppExecFwk::AbilityInfo &abilityInfo,
         const std::shared_ptr<AppRunningRecord> &appRecord);
     void SetKeepAliveEnableStateAndNotify(const std::shared_ptr<AppRunningRecord>& appRecord, bool enable);
-    void SetKeepAliveDkvAndNotify(const std::shared_ptr<AppRunningRecord>& appRecord, bool enable);
+    void SetKeepAliveAppServiceAndNotify(const std::shared_ptr<AppRunningRecord>& appRecord, bool enable);
     bool GetKeepAliveState(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;

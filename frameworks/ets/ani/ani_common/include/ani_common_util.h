@@ -46,9 +46,6 @@ bool GetStdString(ani_env *env, ani_string str, std::string &value);
 ani_string GetAniString(ani_env *env, const std::string &str);
 bool GetAniStringArray(ani_env *env, const std::vector<std::string> &values, ani_array_ref *value);
 
-bool GetDoubleOrUndefined(ani_env *env, ani_object param, const char *name, ani_double &value);
-bool GetStringOrUndefined(ani_env *env, ani_object param, const char *name, std::string &res);
-
 ani_object CreateDouble(ani_env *env, ani_double value);
 ani_object CreateBoolean(ani_env *env, ani_boolean value);
 

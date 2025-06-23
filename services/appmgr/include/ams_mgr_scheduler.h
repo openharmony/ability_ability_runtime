@@ -286,7 +286,7 @@ public:
      * @param requestId for callback
      */
     virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t requestId = 0) override;
+        int32_t requestId = 0, std::string customProcess = "") override;
 
     /**
      * SetCurrentUserId, set the userid to app mgr by ability mgr when switching to another user.
@@ -396,6 +396,8 @@ public:
      * @param uid indicates user, 0 for all users
      */
     void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid) override;
+
+    void SetKeepAliveAppService(const std::string &bundleName, bool enable, int32_t uid) override;
 
     /**
      * To clear the process by ability token.

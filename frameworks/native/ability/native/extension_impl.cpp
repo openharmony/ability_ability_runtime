@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+const std::string JSON_KEY_ERR_MSG = "errMsg";
 ExtensionImpl::~ExtensionImpl()
 {
     TAG_LOGI(AAFwkTag::EXT, "~ExtensionImpl");
@@ -467,6 +468,30 @@ void ExtensionImpl::SetLaunchParam(const AAFwk::LaunchParam &launchParam)
     }
 
     extension_->SetLaunchParam(launchParam);
+}
+
+void ExtensionImpl::ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::EXT, "ScheduleAbilityRequestFailure called");
+    if (extension_ == nullptr) {
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
+        return;
+    }
+    extension_->OnExtensionAbilityRequestFailure(requestId, element, message);
+}
+
+void ExtensionImpl::ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)
+{
+    TAG_LOGD(AAFwkTag::EXT, "ScheduleAbilityRequestSuccess called");
+    if (extension_ == nullptr) {
+        TAG_LOGE(AAFwkTag::EXT, "null ability_");
+        return;
+    }
+    nlohmann::json jsonObject = nlohmann::json {
+        { JSON_KEY_ERR_MSG, "Succeeded" },
+    };
+    extension_->OnExtensionAbilityRequestSuccess(requestId, element, jsonObject.dump());
 }
 
 void ExtensionImpl::Foreground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)

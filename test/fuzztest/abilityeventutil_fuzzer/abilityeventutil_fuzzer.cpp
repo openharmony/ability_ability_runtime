@@ -52,11 +52,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityEventUtil->HandleModuleInfoUpdated(strParam, intParam, "", false);
 
     EventInfo eventInfo = {};
-    if (abilityEventUtil->taskHandler_ == nullptr) {
-        return false;
-    }
-    abilityEventUtil->SendStartAbilityErrorEvent(eventInfo, 1, "SendStartAbilityErrorEvent Test");
-    abilityEventUtil->taskHandler_ = nullptr;
     abilityEventUtil->SendStartAbilityErrorEvent(eventInfo, 1, "SendStartAbilityErrorEvent Test");
     return true;
 }

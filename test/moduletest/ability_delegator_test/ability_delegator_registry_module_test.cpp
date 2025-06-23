@@ -81,8 +81,7 @@ HWTEST_F(AbilityDelegatorRegistryModuleTest,
     }
     std::shared_ptr<AbilityDelegatorArgs> abilityArgs = std::make_shared<AbilityDelegatorArgs>(want);
     std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
-        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(
-            OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0),
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
         abilityArgs,
         true);
     std::shared_ptr<AbilityDelegator> abilityDelegator =
@@ -91,6 +90,41 @@ HWTEST_F(AbilityDelegatorRegistryModuleTest,
         OHOS::AbilityRuntime::Runtime::Language::JS);
 
     EXPECT_EQ(AbilityDelegatorRegistry::GetAbilityDelegator(OHOS::AbilityRuntime::Runtime::Language::JS),
+        abilityDelegator);
+    EXPECT_EQ(AbilityDelegatorRegistry::GetArguments(), abilityArgs);
+}
+
+/**
+ * @tc.number: Ability_Delegator_Registry_Module_Test_0200
+ * @tc.name: RegisterInstance and GetAbilityDelegator and GetArguments
+ * @tc.desc: Verify the RegisterInstance and GetAbilityDelegator and GetArguments.
+ */
+HWTEST_F(AbilityDelegatorRegistryModuleTest,
+    Ability_Delegator_Registry_Module_Test_0200, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Ability_Delegator_Registry_Module_Test_0200 is called");
+
+    std::map<std::string, std::string> paras;
+    paras.emplace(KEY_TEST_BUNDLE_NAME, VALUE_TEST_BUNDLE_NAME);
+    paras.emplace(KEY_TEST_RUNNER_CLASS, VALUE_TEST_RUNNER_CLASS);
+    paras.emplace(KEY_TEST_CASE, VALUE_TEST_CASE);
+    paras.emplace(KEY_TEST_WAIT_TIMEOUT, VALUE_TEST_WAIT_TIMEOUT);
+
+    Want want;
+    for (auto para : paras) {
+        want.SetParam(para.first, para.second);
+    }
+    std::shared_ptr<AbilityDelegatorArgs> abilityArgs = std::make_shared<AbilityDelegatorArgs>(want);
+    std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        abilityArgs,
+        true);
+    std::shared_ptr<AbilityDelegator> abilityDelegator =
+        std::make_shared<AbilityDelegator>(nullptr, std::move(testRunner), nullptr);
+    AbilityDelegatorRegistry::RegisterInstance(abilityDelegator, abilityArgs,
+        OHOS::AbilityRuntime::Runtime::Language::ETS);
+
+    EXPECT_EQ(AbilityDelegatorRegistry::GetAbilityDelegator(OHOS::AbilityRuntime::Runtime::Language::ETS),
         abilityDelegator);
     EXPECT_EQ(AbilityDelegatorRegistry::GetArguments(), abilityArgs);
 }

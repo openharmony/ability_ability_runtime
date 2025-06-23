@@ -46,6 +46,7 @@ private:
 
 private:
     std::shared_ptr<AbilityRuntime::ApplicationContext> context_ = nullptr;
+    bool hasCleaned_ = false;
 };
 } // namespace AppExecFwk
 } // namespace OHOS

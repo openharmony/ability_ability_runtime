@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
-#include <nlohmann/json.hpp>
 
 #include "startup_utils.h"
 
@@ -60,7 +59,7 @@ HWTEST_F(StartupUtilsTest, ParseJsonStringArray_001, TestSize.Level1)
         "nonArray" : "nonArray",
         "nonString": [1]
     })";
-    nlohmann::json json = nlohmann::json::parse(jsonStr);
+    cJSON *json = cJSON_Parse(jsonStr.c_str());
 
     std::vector<std::string> arr;
     StartupUtils::ParseJsonStringArray(json, "nonExist", arr);
@@ -78,6 +77,8 @@ HWTEST_F(StartupUtilsTest, ParseJsonStringArray_001, TestSize.Level1)
     StartupUtils::ParseJsonStringArray(json, "actions", arr3);
     EXPECT_EQ(arr3.size(), 2);
     GTEST_LOG_(INFO) << "ParseJsonStringArray_001 end";
+
+    cJSON_Delete(json);
 }
 }
 }

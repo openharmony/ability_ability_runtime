@@ -311,6 +311,18 @@ napi_value JsWantAgent::NapiGetWantAgent(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnNapiGetWantAgent(env, info) : nullptr;
 };
 
+napi_value JsWantAgent::NapiCreateLocalWantAgent(napi_env env, napi_callback_info info)
+{
+    JsWantAgent* me = CheckParamsAndGetThis<JsWantAgent>(env, info);
+    return (me != nullptr) ? me->OnNapiCreateLocalWantAgent(env, info) : nullptr;
+};
+
+napi_value JsWantAgent::NapiIsLocalWantAgent(napi_env env, napi_callback_info info)
+{
+    JsWantAgent* me = CheckParamsAndGetThis<JsWantAgent>(env, info);
+    return (me != nullptr) ? me->OnNapiIsLocalWantAgent(env, info) : nullptr;
+};
+
 napi_value JsWantAgent::NapiGetOperationType(napi_env env, napi_callback_info info)
 {
     JsWantAgent* me = CheckParamsAndGetThis<JsWantAgent>(env, info);
@@ -718,6 +730,13 @@ napi_value JsWantAgent::OnTrigger(napi_env env, napi_callback_info info)
     int32_t errCode = UnWrapTriggerInfoParam(env, info, wantAgent, triggerInfo, triggerObj);
     if (errCode != BUSINESS_ERROR_CODE_OK) {
         return RetErrMsg(env, argv[ARGC_TWO], errCode);
+    }
+
+    // Public api trigger does not support localWantAgent, switch to triggerAsync.
+    if (wantAgent->IsLocal()) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Tigger does not support localWantAgent");
+        ThrowInvalidParamError(env, "Agent can not be local.");
+        return CreateJsUndefined(env);
     }
 
     auto execute = [wantAgent, triggerObj, triggerInfo] () {
@@ -1166,6 +1185,14 @@ napi_value JsWantAgent::OnNapiTrigger(napi_env env, napi_callback_info info)
         ThrowInvalidParamError(env, "Parameter error!");
         return CreateJsUndefined(env);
     }
+
+    // Public api trigger does not support localWantAgent, switch to triggerAsync.
+    if (wantAgent->IsLocal()) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Tigger does not support localWantAgent");
+        ThrowInvalidParamError(env, "Agent can not be local.");
+        return CreateJsUndefined(env);
+    }
+
     auto execute = [wantAgent, triggerObj, triggerInfo] () {
         TAG_LOGD(AAFwkTag::WANTAGENT, "called");
         sptr<CompletedDispatcher> completedData;
@@ -1342,6 +1369,96 @@ void JsWantAgent::SetOnNapiGetWantAgentCallback(std::shared_ptr<WantAgentWantsPa
             task.ResolveWithNoError(env, jsWantAgent);
         }
     };
+}
+
+napi_value JsWantAgent::OnNapiCreateLocalWantAgent(napi_env env, napi_callback_info info)
+{
+    TAG_LOGI(AAFwkTag::WANTAGENT, "on create localWantAgent");
+    size_t argc = ARGS_MAX_COUNT;
+    napi_value argv[ARGS_MAX_COUNT] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Not enough params");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    if (!CheckCallerIsSystemApp()) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Non-system app");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
+        return CreateJsUndefined(env);
+    }
+
+    std::shared_ptr<WantAgentWantsParas> spParas = std::make_shared<WantAgentWantsParas>();
+    int32_t ret = GetWantAgentParam(env, info, *spParas);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to get wantAgent param");
+        ThrowInvalidParamError(env, "Parameter error! Info must be a WantAgentInfo.");
+        return CreateJsUndefined(env);
+    }
+
+    LocalWantAgentInfo localWantAgentInfo(spParas->requestCode,
+        static_cast<WantAgentConstant::OperationType>(spParas->operationType),
+        spParas->wants);
+    const auto context = OHOS::AbilityRuntime::Context::GetApplicationContext();
+    std::shared_ptr<WantAgent> wantAgent = nullptr;
+    ErrCode result = WantAgentHelper::CreateLocalWantAgent(context, localWantAgentInfo, wantAgent);
+    if (result != ERR_OK || wantAgent == nullptr) {
+        ThrowInvalidParamError(env, "Parameter error! CreateLocalWantAgent failed.");
+        return CreateJsUndefined(env);
+    }
+
+    WantAgent *pWantAgent = new (std::nothrow) WantAgent(wantAgent->GetLocalPendingWant());
+    if (pWantAgent == nullptr) {
+        ThrowInvalidParamError(env, "Parameter error! New wantAgent failed.");
+        return CreateJsUndefined(env);
+    }
+    napi_value jsWantAgent = OHOS::AppExecFwk::WrapWantAgent(env, pWantAgent, nullptr);
+    if (jsWantAgent == nullptr) {
+        delete pWantAgent;
+        pWantAgent = nullptr;
+        return CreateJsUndefined(env);
+    }
+    return jsWantAgent;
+}
+
+napi_value JsWantAgent::OnNapiIsLocalWantAgent(napi_env env, napi_callback_info info)
+{
+    TAG_LOGI(AAFwkTag::WANTAGENT, "on is localWantAgent");
+    size_t argc = ARGS_MAX_COUNT;
+    napi_value argv[ARGS_MAX_COUNT] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Not enough params");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    if (!CheckCallerIsSystemApp()) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Non-system app");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
+        return CreateJsUndefined(env);
+    }
+
+    if (!CheckTypeForNapiValue(env, argv[0], napi_object)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Type not Object");
+        ThrowInvalidParamError(env, "Parameter error! Agent must be a WantAgent.");
+        return CreateJsUndefined(env);
+    }
+
+    WantAgent* pWantAgent = nullptr;
+    UnwrapWantAgent(env, argv[0], reinterpret_cast<void **>(&pWantAgent));
+    if (pWantAgent == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Parse pWantAgent failed");
+        ThrowInvalidParamError(env, "Parse wantAgent failed! Agent must be a WantAgent.");
+        return CreateJsUndefined(env);
+    }
+
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
+    napi_value result = nullptr;
+    bool isLocal = wantAgent->IsLocal();
+    napi_get_boolean(env, isLocal, &result);
+    return result;
 }
 
 napi_value JsWantAgent::OnNapiGetOperationType(napi_env env, napi_callback_info info)

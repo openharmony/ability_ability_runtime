@@ -234,6 +234,43 @@ HWTEST_F(ConnectionStateManagerTest, SuspendConnection_002, TestSize.Level1)
 
 /*
  * Feature: ConnectionStateManager
+ * Function: SuspendConnection
+ * SubFunction: NA
+ * FunctionPoints: ConnectionStateManager SuspendConnection
+ * EnvConditions: NA
+ * CaseDescription: Verify SuspendConnection
+ */
+HWTEST_F(ConnectionStateManagerTest, SuspendConnection_003, TestSize.Level1)
+{
+    auto connectionRecord =
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
+    manager_->Init();
+    connectionRecord->callerPid_ = 0;
+    manager_->connectionStates_[0] = nullptr;
+    manager_->SuspendConnection(connectionRecord);
+    EXPECT_TRUE(manager_->connectionStates_[0] == nullptr);
+}
+
+/*
+ * Feature: ConnectionStateManager
+ * Function: SuspendConnection
+ * SubFunction: NA
+ * FunctionPoints: ConnectionStateManager SuspendConnection
+ * EnvConditions: NA
+ * CaseDescription: Verify SuspendConnection
+ */
+HWTEST_F(ConnectionStateManagerTest, SuspendConnection_004, TestSize.Level1)
+{
+    auto connectionRecord =
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
+    manager_->Init();
+    connectionRecord->callerPid_ = 0;
+    manager_->SuspendConnection(connectionRecord);
+    EXPECT_TRUE(manager_->connectionStates_.empty());
+}
+
+/*
+ * Feature: ConnectionStateManager
  * Function: ResumeConnection
  * SubFunction: NA
  * FunctionPoints: ConnectionStateManager ResumeConnection
@@ -272,6 +309,43 @@ HWTEST_F(ConnectionStateManagerTest, ResumeConnection_002, TestSize.Level1)
     manager_->SuspendConnection(connectionRecord);
     manager_->ResumeConnection(connectionRecord);
     EXPECT_TRUE(manager_ != nullptr);
+}
+
+/*
+ * Feature: ConnectionStateManager
+ * Function: ResumeConnection
+ * SubFunction: NA
+ * FunctionPoints: ConnectionStateManager ResumeConnection
+ * EnvConditions: NA
+ * CaseDescription: Verify ResumeConnection
+ */
+HWTEST_F(ConnectionStateManagerTest, ResumeConnection_003, TestSize.Level1)
+{
+    std::shared_ptr<ConnectionRecord> connectionRecord =
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
+    manager_->Init();
+    connectionRecord->callerPid_ = 0;
+    manager_->ResumeConnection(connectionRecord);
+    EXPECT_TRUE(manager_->connectionStates_.empty());
+}
+
+/*
+ * Feature: ConnectionStateManager
+ * Function: ResumeConnection
+ * SubFunction: NA
+ * FunctionPoints: ConnectionStateManager ResumeConnection
+ * EnvConditions: NA
+ * CaseDescription: Verify ResumeConnection
+ */
+HWTEST_F(ConnectionStateManagerTest, ResumeConnection_004, TestSize.Level1)
+{
+    std::shared_ptr<ConnectionRecord> connectionRecord =
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
+    manager_->Init();
+    connectionRecord->callerPid_ = 0;
+    manager_->connectionStates_[0] = nullptr;
+    manager_->ResumeConnection(connectionRecord);
+    EXPECT_TRUE(manager_->connectionStates_[0] == nullptr);
 }
 
 /*
@@ -341,6 +415,25 @@ HWTEST_F(ConnectionStateManagerTest, RemoveConnection_004, TestSize.Level1)
     manager_->Init();
     manager_->RemoveConnection(connectionRecord, isCallerDied);
     EXPECT_TRUE(manager_ != nullptr);
+}
+
+/*
+ * Feature: ConnectionStateManager
+ * Function: RemoveConnection
+ * SubFunction: NA
+ * FunctionPoints: ConnectionStateManager RemoveConnection
+ * EnvConditions: NA
+ * CaseDescription: Verify RemoveConnection
+ */
+HWTEST_F(ConnectionStateManagerTest, RemoveConnection_005, TestSize.Level1)
+{
+    std::shared_ptr<ConnectionRecord> connectionRecord =
+        ConnectionRecord::CreateConnectionRecord(abilityRecord_->GetToken(), abilityRecord_, callback_, nullptr);
+    bool isCallerDied = false;
+    manager_->Init();
+    manager_->AddConnection(connectionRecord);
+    manager_->RemoveConnection(connectionRecord, isCallerDied);
+    EXPECT_FALSE(manager_->connectionStates_.empty());
 }
 
 /*

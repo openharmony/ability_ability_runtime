@@ -187,6 +187,43 @@ HWTEST_F(ResidentProcessManagerTest, StartResidentProcessWithMainElementPerBundl
 
 /*
  * Feature: ResidentProcessManager
+ * Function: StartResidentProcessWithMainElementPerBundle
+ * SubFunction: NA
+ * FunctionPoints:ResidentProcessManager StartResidentProcessWithMainElementPerBundle
+ * EnvConditions: NA
+ * CaseDescription: Verify StartResidentProcessWithMainElementPerBundle
+ */
+HWTEST_F(ResidentProcessManagerTest, StartResidentProcessWithMainElementPerBundle_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StartResidentProcessWithMainElementPerBundle_002 start";
+
+    std::shared_ptr<ResidentProcessManager> manager = std::make_shared<ResidentProcessManager>();
+    AppExecFwk::BundleInfo bundleInfo;
+    bundleInfo.isKeepAlive = false;
+    bundleInfo.name = "com.example.test";
+    size_t index = 1;
+    std::set<uint32_t> needEraseIndexSet;
+    int32_t userId = 0;
+
+    bool keepAliveEnable = true;
+    EXPECT_CALL(AmsResidentProcessRdb::GetInstance(), GetResidentProcessEnable(_, _))
+        .Times(1)
+        .WillOnce(DoAll(SetArgReferee<1>(keepAliveEnable), Return(RdbResult::Rdb_OK)));
+
+    EXPECT_CALL(AmsResidentProcessRdb::GetInstance(), RemoveData(_))
+        .Times(1)
+        .WillOnce(Return(RdbResult::Rdb_OK));
+
+    manager->StartResidentProcessWithMainElementPerBundle(bundleInfo, index, needEraseIndexSet, userId);
+
+
+    EXPECT_EQ(needEraseIndexSet.size(), 1);
+
+    GTEST_LOG_(INFO) << "StartResidentProcessWithMainElementPerBundle_002 end";
+}
+
+/*
+ * Feature: ResidentProcessManager
  * Function: PutResidentAbility
  * SubFunction: NA
  * FunctionPoints:ResidentProcessManager PutResidentAbility
@@ -198,6 +235,63 @@ HWTEST_F(ResidentProcessManagerTest, PutResidentAbility_002, TestSize.Level1)
     auto manager = std::make_shared<ResidentProcessManager>();
     bool ret = manager->IsResidentAbility("", "", 0);
     EXPECT_FALSE(ret);
+}
+
+/*
+ * Feature: ResidentProcessManager
+ * Function: IsResidentAbility
+ * SubFunction: NA
+ * FunctionPoints:ResidentProcessManager IsResidentAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify IsResidentAbility
+ */
+HWTEST_F(ResidentProcessManagerTest, IsResidentAbility_001, TestSize.Level1)
+{
+    auto manager = std::make_shared<ResidentProcessManager>();
+    ASSERT_NE(manager, nullptr);
+    std::string bundleName = "com.example.resident.process";
+    std::string callerName = "resident.process.manager.test";
+    EXPECT_FALSE(manager->IsResidentAbility(bundleName, callerName, 0));
+}
+
+/*
+ * Feature: ResidentProcessManager
+ * Function: GetResidentBundleInfosForUser
+ * SubFunction: NA
+ * FunctionPoints:ResidentProcessManager GetResidentBundleInfosForUser
+ * EnvConditions: NA
+ * CaseDescription: Verify GetResidentBundleInfosForUser
+ */
+HWTEST_F(ResidentProcessManagerTest, GetResidentBundleInfosForUser_001, TestSize.Level1)
+{
+    auto manager = std::make_shared<ResidentProcessManager>();
+    ASSERT_NE(manager, nullptr);
+    BundleInfo bundleInfo;
+    HapModuleInfo hapModuleInfo;
+    hapModuleInfo.isModuleJson = false;
+    hapModuleInfo.mainAbility = "";
+    bundleInfo.isKeepAlive = true;
+    bundleInfo.applicationInfo.process = "";
+    std::vector<BundleInfo> bundleInfos;
+    bundleInfos.push_back(bundleInfo);
+    EXPECT_TRUE(manager->GetResidentBundleInfosForUser(bundleInfos, 0));
+}
+
+/*
+ * Feature: ResidentProcessManager
+ * Function: StartFailedResidentAbilities
+ * SubFunction: NA
+ * FunctionPoints:ResidentProcessManager StartFailedResidentAbilities
+ * EnvConditions: NA
+ * CaseDescription: Verify StartFailedResidentAbilities
+ */
+HWTEST_F(ResidentProcessManagerTest, StartFailedResidentAbilities_001, TestSize.Level1)
+{
+    auto manager = std::make_shared<ResidentProcessManager>();
+    ASSERT_NE(manager, nullptr);
+    manager->unlockedAfterBoot_ = false;
+    manager->StartFailedResidentAbilities();
+    EXPECT_TRUE(manager->unlockedAfterBoot_);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

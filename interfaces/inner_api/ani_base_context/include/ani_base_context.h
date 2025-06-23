@@ -48,7 +48,6 @@ ani_status IsStageContext(ani_env* env, ani_object object, ani_boolean& stageMod
  * @param object Native value of context.
  * @return The stage mode context.
  */
-class Context;
 std::shared_ptr<Context> GetStageModeContext(ani_env* env, ani_object object);
 }
 }

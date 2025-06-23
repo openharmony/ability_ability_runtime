@@ -53,40 +53,6 @@ config("module_context_config") {
   defines = [ "AMS_LOG_TAG = \"ApplicationUnitTest\"" ]
 }
 
-ohos_unittest("context_deal_interface_test") {
-  module_out_path = module_output_path
-  sources = [
-    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/include/mock_ability_manager_client_interface1.cpp",
-    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/include/mock_resourceManager_interface1.cpp",
-    "context_deal_interface1_test.cpp",
-  ]
-
-  configs = [ ":module_private_config" ]
-
-  deps = [
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
-    "${ability_runtime_native_path}/ability/native:abilitykit_native",
-  ]
-
-  external_deps = [
-    "bundle_framework:appexecfwk_base",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
-    "googletest:gmock_main",
-    "googletest:gtest_main",
-    "hilog:libhilog",
-    "init:libbegetutil",
-    "ipc:ipc_core",
-    "napi:ace_napi",
-    "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
-  ]
-
-  if (ability_runtime_graphics) {
-    external_deps += [ "input:libmmi-client" ]
-  }
-}
-
 ohos_unittest("application_test") {
   module_out_path = module_output_path
 
@@ -970,7 +936,6 @@ ohos_unittest("dump_runtime_helper_test") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "napi:ace_napi",
     "ffrt:libffrt",
     "storage_service:storage_manager_acl",
@@ -1023,6 +988,7 @@ ohos_unittest("idle_time_test") {
 
   external_deps = [
     "ability_runtime:runtime",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
@@ -1067,7 +1033,6 @@ ohos_unittest("dump_runtime_helper_second_test") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "napi:ace_napi",
     "ffrt:libffrt",
     "storage_service:storage_manager_acl",
@@ -1108,8 +1073,39 @@ ohos_unittest("native_lib_util_test") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "napi:ace_napi",
+  ]
+}
+
+ohos_unittest("application_cleaner_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../../cfi_blocklist.txt"
+  }
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/appkit/app",
+    "${ability_runtime_services_path}/common/include",
+    "mock/include",
+  ]
+  module_out_path = module_output_path
+
+  sources = [
+    "${ability_runtime_native_path}/appkit/app/application_cleaner.cpp",
+    "application_cleaner_test.cpp",
+    "mock/src/application_context.cpp",
+    "mock/src/os_account_manager_wrapper.cpp",
+  ]
+
+  configs = [ ":module_context_config" ]
+
+  external_deps = [
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
   ]
 }
 
@@ -1137,6 +1133,7 @@ ohos_unittest("startup_manager_test") {
     "${ability_runtime_native_path}/appkit/app_startup/startup_manager.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_task.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_utils.cpp",
+    "${ability_runtime_services_path}/common/src/json_utils.cpp",
     "app_startup_task_matcher_test.cpp",
     "startup_manager_test.cpp",
     "startup_utils_test.cpp",
@@ -1156,6 +1153,7 @@ ohos_unittest("startup_manager_test") {
     "ability_base:zuri",
     "ability_runtime:runtime",
     "c_utils:utils",
+    "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "faultloggerd:libfaultloggerd",
     "googletest:gtest_main",
@@ -1163,7 +1161,6 @@ ohos_unittest("startup_manager_test") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "napi:ace_napi",
   ]
 }
@@ -1197,6 +1194,7 @@ ohos_unittest("startup_manager_mock_test") {
     "${ability_runtime_native_path}/appkit/app_startup/startup_listener.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_manager.cpp",
     "${ability_runtime_native_path}/appkit/app_startup/startup_task.cpp",
+    "${ability_runtime_services_path}/common/src/json_utils.cpp",
     "${ability_runtime_test_path}/mock/start_up_and_intent/src/mock_extractor.cpp",
     "${ability_runtime_test_path}/mock/start_up_and_intent/src/mock_native_module_manager.cpp",
     "startup_manager_mock_test.cpp",
@@ -1215,6 +1213,7 @@ ohos_unittest("startup_manager_mock_test") {
     "ability_base:zuri",
     "ability_runtime:runtime",
     "c_utils:utils",
+    "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "faultloggerd:libfaultloggerd",
     "googletest:gtest_main",
@@ -1222,7 +1221,6 @@ ohos_unittest("startup_manager_mock_test") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "napi:ace_napi",
   ]
 }
@@ -1236,6 +1234,7 @@ group("unittest") {
   deps += [
     ":ability_stage_test",
     ":ability_start_setting_test",
+    ":application_cleaner_test",
     ":application_impl_test",
     ":application_test",
     ":assert_fault_test",
