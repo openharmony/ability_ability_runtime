@@ -91,15 +91,7 @@ HWTEST_F(NativeLibUtilTest, GetHspNativeLibPath_0300, TestSize.Level1)
     AppLibPathMap appAbcLibPaths;
     bool isPreInstallApp = true;
     hspInfo.nativeLibraryPath = "";
-<<<<<<< HEAD
-<<<<<<< HEAD
-    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp);
-=======
     AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp, "", appAbcLibPaths);
->>>>>>> fe783cf77a (feature SetAppAbcLibPath-2)
-=======
-    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp, appAbcLibPaths);
->>>>>>> 8c5b847421 (feature SetAppAbcLibPath)
     EXPECT_EQ(appLibPaths.empty(), true);
     
     hspInfo.nativeLibraryPath = "/data/test/nativeLibraryPath";
@@ -107,41 +99,17 @@ HWTEST_F(NativeLibUtilTest, GetHspNativeLibPath_0300, TestSize.Level1)
     hspInfo.moduleName = "library";
 
     hspInfo.compressNativeLibs = false;
-<<<<<<< HEAD
-<<<<<<< HEAD
-    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp);
-=======
     AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp, "", appAbcLibPaths);
->>>>>>> fe783cf77a (feature SetAppAbcLibPath-2)
-=======
-    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp, appAbcLibPaths);
->>>>>>> 8c5b847421 (feature SetAppAbcLibPath)
     EXPECT_EQ(appLibPaths.empty(), false);
 
     appLibPaths.clear();
     isPreInstallApp = false;
-<<<<<<< HEAD
-<<<<<<< HEAD
-    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp);
-=======
     AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp, "", appAbcLibPaths);
->>>>>>> fe783cf77a (feature SetAppAbcLibPath-2)
-=======
-    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp, appAbcLibPaths);
->>>>>>> 8c5b847421 (feature SetAppAbcLibPath)
     EXPECT_EQ(appLibPaths.empty(), false);
     
     appLibPaths.clear();
     hspInfo.compressNativeLibs = true;
-<<<<<<< HEAD
-<<<<<<< HEAD
-    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp);
-=======
     AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp, "", appAbcLibPaths);
->>>>>>> fe783cf77a (feature SetAppAbcLibPath-2)
-=======
-    AppExecFwk::GetHspNativeLibPath(hspInfo, appLibPaths, isPreInstallApp, appAbcLibPaths);
->>>>>>> 8c5b847421 (feature SetAppAbcLibPath)
     EXPECT_EQ(appLibPaths.empty(), false);
 }
 

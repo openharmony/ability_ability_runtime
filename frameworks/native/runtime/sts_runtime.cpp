@@ -291,16 +291,8 @@ void STSRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths, const AppLibPat
     StsEnv::STSEnvironment::InitSTSAppNS(appPath);
     StsEnv::STSEnvironment::InitSTSSDKNS(STS_RT_PATH);
     StsEnv::STSEnvironment::InitSTSSysNS(STS_SYSLIB_PATH);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 
     ark::ets::EtsNamespaceManager::SetAppLibPaths(appAbcLibPaths);
->>>>>>> 67eea06d18 (update frameworks/native/runtime/sts_runtime.cpp.)
-=======
-
-    // ark::ets::EtsNamespaceManager::SetAppLibPaths(appAbcLibPaths);
->>>>>>> 8c5b847421 (feature SetAppAbcLibPath)
 }
 
 bool STSRuntime::Initialize(const Options& options)
