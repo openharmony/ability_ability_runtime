@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+1
 export default class EventHub {
   private eventMap: Map<string, Array<Object>> = new Map<string, Array<Object>>();
 
