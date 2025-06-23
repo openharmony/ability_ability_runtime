@@ -308,7 +308,7 @@ void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object conte
 void StsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<ExtensionContext> context)
 {
-    ContextUtil::StsCreatContext(aniEnv, contextClass, contextObj, context);
+    ContextUtil::StsCreateContext(aniEnv, contextClass, contextObj, context);
     BindExtensionInfo(aniEnv, contextClass, contextObj, context, context->GetAbilityInfo());
 }
 

@@ -1047,7 +1047,7 @@ ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityConte
         TAG_LOGE(AAFwkTag::UIABILITY, "null contextObj");
         return nullptr;
     }
-    ContextUtil::StsCreatContext(env, cls, contextObj, context);
+    ContextUtil::StsCreateContext(env, cls, contextObj, context);
     if (!SetAbilityInfo(env, cls, contextObj, context)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "SetAbilityInfo failed");
         return nullptr;
