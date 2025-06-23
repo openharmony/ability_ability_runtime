@@ -246,7 +246,7 @@ sptr<IRemoteObject> EtsServiceExtension::OnConnect(const AAFwk::Want &want,
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
         return nullptr;
     }
-    ani_boolean isPromise = false;
+    ani_boolean isPromise = ANI_FALSE;
     if ((status = env->Object_CallMethod_Boolean(etsObj_->aniObj, method, &isPromise, aniRemoteobj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
         return nullptr;
@@ -270,7 +270,7 @@ sptr<IRemoteObject> EtsServiceExtension::OnConnectInner(ani_env *env, ani_object
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
         return nullptr;
     }
-    ani_boolean callResult = false;
+    ani_boolean callResult = ANI_FALSE;
     if ((status = env->Object_CallMethod_Boolean(etsObj_->aniObj, method, &callResult, aniRemoteobj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
         return nullptr;

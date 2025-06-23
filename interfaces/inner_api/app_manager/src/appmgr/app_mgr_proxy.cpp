@@ -18,6 +18,7 @@
 #include "ability_manager_errors.h"
 #include "appexecfwk_errors.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_chain_utils.h"
 #include "hitrace_meter.h"
 #include "ipc_capacity_wrap.h"
 #include "ipc_types.h"
@@ -943,6 +944,7 @@ int AppMgrProxy::GetRenderProcessTerminationStatus(pid_t renderPid, int &status)
 
 int32_t AppMgrProxy::UpdateConfiguration(const Configuration &config, const int32_t userId)
 {
+    Ability_MANAGER_HITRACE_CHAIN_NAME("UpdateConfiguration", HITRACE_FLAG_INCLUDE_ASYNC);
     TAG_LOGI(AAFwkTag::APPMGR, "AppMgrProxy UpdateConfiguration");
     MessageParcel data;
     MessageParcel reply;
@@ -1010,6 +1012,7 @@ int32_t AppMgrProxy::UpdateConfigurationForBackgroundApp(const std::vector<Backg
 int32_t AppMgrProxy::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
     int32_t appIndex)
 {
+    Ability_MANAGER_HITRACE_CHAIN_NAME("UpdateConfigurationByBundleName", HITRACE_FLAG_INCLUDE_ASYNC);
     TAG_LOGI(AAFwkTag::APPMGR, "AppMgrProxy UpdateConfigurationByBundleName");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -2421,5 +2424,38 @@ int32_t AppMgrProxy::LaunchAbility(sptr<IRemoteObject> token)
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::LAUNCH_ABILITY, data, reply, option);
     return reply.ReadInt32();
 }
+
+int32_t AppMgrProxy::PromoteCurrentToCandidateMasterProcess(bool isInsertToHead)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_INVALID_DATA;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, Bool, isInsertToHead);
+
+    MessageParcel reply;
+    MessageOption option;
+
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::PROMOTE_CURRENT_TO_CANDIDATE_MASTER_PROCESS, data, reply, option);
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::DemoteCurrentFromCandidateMasterProcess()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::DEMOTE_CURRENT_FROM_CANDIDATE_MASTER_PROCESS, data, reply, option);
+    return reply.ReadInt32();
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS

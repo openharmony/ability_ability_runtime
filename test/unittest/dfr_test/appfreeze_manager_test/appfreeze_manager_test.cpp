@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -320,17 +320,15 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetHitraceId_001, TestSize.L
 #endif
 
 /**
- * @tc.number: AppfreezeManagerTest_GetFreezeInfoFile_001
+ * @tc.number: AppfreezeManagerTest_ReportAppfreezeCpuInfo_001
  * @tc.desc: add testcase
  * @tc.type: FUNC
  */
-HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFreezeInfoFile_001, TestSize.Level1)
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_ReportAppfreezeCpuInfo_001, TestSize.Level1)
 {
     FaultData faultData;
     std::string bundleName = "AppfreezeManagerTest";
-    std::string freezeInfoFile = appfreezeManager->GetFreezeInfoFile(faultData, bundleName);
-    EXPECT_EQ(freezeInfoFile, "");
-    faultData.appfreezeInfo = "stackPath:test.txt;";
+    faultData.appfreezeInfo = "test.txt";
     faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
     AppfreezeManager::AppInfo appInfo = {
         .pid = getpid(),
@@ -338,10 +336,17 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFreezeInfoFile_001, TestS
         .bundleName = bundleName,
         .processName = bundleName,
     };
-    freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
+    std::string freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
     EXPECT_EQ(freezeInfoFile, "");
     faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
     freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
+    EXPECT_TRUE(!freezeInfoFile.empty());
+    faultData.errorObject.name = AppFreezeType::LIFECYCLE_HALF_TIMEOUT;
+    freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
+    EXPECT_EQ(freezeInfoFile, "");
+    faultData.errorObject.name = AppFreezeType::LIFECYCLE_TIMEOUT;
+    freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
+    EXPECT_TRUE(!freezeInfoFile.empty());
 }
 
 /**

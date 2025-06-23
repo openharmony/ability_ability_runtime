@@ -801,10 +801,8 @@ private:
     void SetAppDebug(uint32_t modeFlag, bool isDebug);
     void GetPluginNativeLibPath(std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos,
         AppLibPathMap &appLibPaths);
-    void AddRuntimeLang(ApplicationInfo &appInfo, AbilityRuntime::Runtime::Options &options);
-    bool IsNeedEtsInit(const ApplicationInfo &appInfo);
-    const std::unique_ptr<AbilityRuntime::Runtime> &GetVerOneRuntime(
-        const ApplicationInfo &appInfo, const std::vector<std::unique_ptr<Runtime>> &runtimes);
+    void SetRuntimeLang(ApplicationInfo &appInfo, AbilityRuntime::Runtime::Options &options);
+    bool IsEtsAPP(const ApplicationInfo &appInfo);
     void SetJsIdleCallback(const std::weak_ptr<OHOSApplication> &wpApplication,
         const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
 

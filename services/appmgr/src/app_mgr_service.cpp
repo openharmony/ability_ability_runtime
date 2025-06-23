@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 
 #include <chrono>
 #include <cstdlib>
-#include <nlohmann/json.hpp>
 #include <sys/types.h>
 #include <thread>
 
@@ -338,7 +337,6 @@ sptr<IAmsMgr> AppMgrService::GetAmsMgr()
 
 int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex, int32_t userId)
 {
-    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
         TAG_LOGE(AAFwkTag::APPMGR, "caller is not SA");
         return AAFwk::ERR_NOT_SYSTEM_APP;
@@ -375,7 +373,6 @@ int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, int
 
 int32_t AppMgrService::ClearUpApplicationDataBySelf(int32_t userId)
 {
-    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
@@ -1906,6 +1903,26 @@ int32_t AppMgrService::LaunchAbility(sptr<IRemoteObject> token)
         return AAFwk::ERR_NO_ALLOW_OUTSIDE_CALL;
     }
     return appMgrServiceInner_->LaunchAbility(token);
+}
+
+int32_t AppMgrService::PromoteCurrentToCandidateMasterProcess(bool isInsertToHead)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return AAFwk::ERR_NULL_APP_MGR_SERVICE_INNER;
+    }
+    return appMgrServiceInner_->PromoteCurrentToCandidateMasterProcess(isInsertToHead);
+}
+
+int32_t AppMgrService::DemoteCurrentFromCandidateMasterProcess()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return AAFwk::ERR_NULL_APP_MGR_SERVICE_INNER;
+    }
+    return appMgrServiceInner_->DemoteCurrentFromCandidateMasterProcess();
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -33,6 +33,11 @@ struct TotalTime {
     uint64_t totalRunningTime;
     uint64_t totalCpuTime;
 };
+
+struct CpuStartTime {
+    uint64_t halfStartTime;
+    uint64_t optimalCpuStartTime;
+};
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_APPFREEZE_DATA_H

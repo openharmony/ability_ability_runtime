@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,10 @@
 #include "ability_runtime_error_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "want_params_wrapper.h"
+#include "json_utils.h"
+#include "local_pending_want.h"
 #include "pending_want.h"
+#include "want_params_wrapper.h"
 #include "want_agent_client.h"
 #include "want_sender_info.h"
 #include "want_sender_interface.h"
@@ -182,12 +184,43 @@ std::shared_ptr<WantAgent> WantAgentHelper::GetWantAgent(const WantAgentInfo &pa
     return agent;
 }
 
+ErrCode WantAgentHelper::CreateLocalWantAgent(const std::shared_ptr<OHOS::AbilityRuntime::ApplicationContext> &context,
+    const LocalWantAgentInfo &paramsInfo, std::shared_ptr<WantAgent> &wantAgent)
+{
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
+    std::vector<std::shared_ptr<Want>> wants = paramsInfo.GetWants();
+    if (wants.empty() || wants[0] == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
+
+    WantAgentConstant::OperationType operationType = paramsInfo.GetOperationType();
+    std::string bundleName = context->GetBundleName();
+    std::shared_ptr<LocalPendingWant> localPendingWant = std::make_shared<LocalPendingWant>(bundleName, wants[0],
+        static_cast<int32_t>(operationType));
+    wantAgent = std::make_shared<WantAgent>(localPendingWant);
+    return ERR_OK;
+}
+
 WantAgentConstant::OperationType WantAgentHelper::GetType(std::shared_ptr<WantAgent> agent)
 {
-    if ((agent == nullptr) || (agent->GetPendingWant() == nullptr)) {
+    if (agent == nullptr) {
         return WantAgentConstant::OperationType::UNKNOWN_TYPE;
     }
 
+    if (agent->IsLocal()) {
+        if (agent->GetLocalPendingWant() == nullptr) {
+            return WantAgentConstant::OperationType::UNKNOWN_TYPE;
+        }
+        return static_cast<WantAgentConstant::OperationType>(agent->GetLocalPendingWant()->GetType());
+    }
+
+    if (agent->GetPendingWant() == nullptr) {
+        return WantAgentConstant::OperationType::UNKNOWN_TYPE;
+    }
     return agent->GetPendingWant()->GetType(agent->GetPendingWant()->GetTarget());
 }
 
@@ -200,9 +233,24 @@ ErrCode WantAgentHelper::TriggerWantAgent(std::shared_ptr<WantAgent> agent,
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
+
+    sptr<CompletedDispatcher> dispatcher = nullptr;
+    if (agent->IsLocal()) {
+        std::shared_ptr<LocalPendingWant> localPendingWant = agent->GetLocalPendingWant();
+        if (callback != nullptr) {
+            if (callerToken != nullptr) {
+                dispatcher = new (std::nothrow) CompletedDispatcher(localPendingWant, nullptr, nullptr);
+            } else {
+                dispatcher = new (std::nothrow) CompletedDispatcher(localPendingWant, callback, nullptr);
+            }
+        }
+        int32_t res = Send(localPendingWant, dispatcher, paramsInfo, callerToken);
+        data = std::move(dispatcher);
+        return res;
+    }
+
     std::shared_ptr<PendingWant> pendingWant = agent->GetPendingWant();
     WantAgentConstant::OperationType type = GetType(agent);
-    sptr<CompletedDispatcher> dispatcher = nullptr;
     if (callback != nullptr) {
         if (callerToken != nullptr) {
             dispatcher = new (std::nothrow) CompletedDispatcher(pendingWant, nullptr, nullptr);
@@ -235,11 +283,27 @@ ErrCode WantAgentHelper::Send(const std::shared_ptr<PendingWant> &pendingWant,
         callerToken);
 }
 
+ErrCode WantAgentHelper::Send(const std::shared_ptr<LocalPendingWant> &localPendingWant,
+    const sptr<CompletedDispatcher> &callBack, const TriggerInfo &paramsInfo,
+    sptr<IRemoteObject> callerToken)
+{
+    TAG_LOGD(AAFwkTag::WANTAGENT, "call");
+    if (localPendingWant == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
+    return localPendingWant->Send(callBack, paramsInfo, callerToken);
+}
+
 ErrCode WantAgentHelper::Cancel(const std::shared_ptr<WantAgent> agent, uint32_t flags)
 {
     if (agent == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
+
+    if (agent->IsLocal()) {
+        return NO_ERROR;
     }
 
     std::shared_ptr<PendingWant> pendingWant = agent->GetPendingWant();
@@ -261,6 +325,15 @@ ErrCode WantAgentHelper::IsEquals(
     if ((agent == nullptr) || (otherAgent == nullptr)) {
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
+
+    const int32_t NOTEQ = -1;
+    if (agent->IsLocal() != otherAgent->IsLocal()) {
+        return NOTEQ;
+    }
+    if (agent->IsLocal() == true && otherAgent->IsLocal() == true) {
+        return LocalPendingWant::IsEquals(agent->GetLocalPendingWant(), otherAgent->GetLocalPendingWant());
+    }
+
     return PendingWant::IsEquals(agent->GetPendingWant(), otherAgent->GetPendingWant());
 }
 
@@ -270,6 +343,15 @@ ErrCode WantAgentHelper::GetBundleName(const std::shared_ptr<WantAgent> &agent, 
     if (agent == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
+
+    if (agent->IsLocal()) {
+        if (agent->GetLocalPendingWant() == nullptr) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
+            return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        }
+        bundleName = agent->GetLocalPendingWant()->GetBundleName();
+        return NO_ERROR;
     }
 
     std::shared_ptr<PendingWant> pendingWant = agent->GetPendingWant();
@@ -288,6 +370,15 @@ ErrCode WantAgentHelper::GetUid(const std::shared_ptr<WantAgent> &agent, int32_t
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
 
+    if (agent->IsLocal()) {
+        if (agent->GetLocalPendingWant() == nullptr) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
+            return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        }
+        uid = agent->GetLocalPendingWant()->GetUid();
+        return NO_ERROR;
+    }
+
     std::shared_ptr<PendingWant> pendingWant = agent->GetPendingWant();
     if (pendingWant == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
@@ -303,6 +394,14 @@ std::shared_ptr<Want> WantAgentHelper::GetWant(const std::shared_ptr<WantAgent> 
     if (agent == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
         return nullptr;
+    }
+
+    if (agent->IsLocal()) {
+        if (agent->GetLocalPendingWant() == nullptr) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
+            return nullptr;
+        }
+        return agent->GetLocalPendingWant()->GetWant();
     }
 
     std::shared_ptr<PendingWant> pendingWant = agent->GetPendingWant();
@@ -366,25 +465,49 @@ std::string WantAgentHelper::ToString(const std::shared_ptr<WantAgent> &agent)
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid param");
         return "";
     }
-    nlohmann::json jsonObject;
-    jsonObject["requestCode"] = (*info.get()).requestCode;
-    jsonObject["operationType"] = (*info.get()).type;
-    jsonObject["flags"] = (*info.get()).flags;
 
-    nlohmann::json wants = nlohmann::json::array();
-    for (auto &wantInfo : (*info.get()).allWants) {
-        wants.emplace_back(wantInfo.want.ToString());
+    cJSON *jsonObject = cJSON_CreateObject();
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "create json object failed");
+        return "";
     }
-    jsonObject["wants"] = wants;
+
+    cJSON_AddNumberToObject(jsonObject, "requestCode", static_cast<double>((*info.get()).requestCode));
+    cJSON_AddNumberToObject(jsonObject, "operationType", static_cast<double>((*info.get()).type));
+    cJSON_AddNumberToObject(jsonObject, "flags", static_cast<double>((*info.get()).flags));
+
+    cJSON *wants = cJSON_CreateArray();
+    if (wants == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "create wants object failed");
+        cJSON_Delete(jsonObject);
+        return "";
+    }
+    for (auto &wantInfo : (*info.get()).allWants) {
+        cJSON *wantItem = cJSON_CreateString(wantInfo.want.ToString().c_str());
+        if (wantItem == nullptr) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "create want object failed");
+            cJSON_Delete(jsonObject);
+            cJSON_Delete(wants);
+            return "";
+        }
+        cJSON_AddItemToArray(wants, wantItem);
+    }
+    cJSON_AddItemToObject(jsonObject, "wants", wants);
 
     if ((*info.get()).allWants.size() > 0) {
-        nlohmann::json paramsObj;
+        cJSON *paramsObj = cJSON_CreateObject();
+        if (paramsObj == nullptr) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "create params object failed");
+            cJSON_Delete(jsonObject);
+            return "";
+        }
         AAFwk::WantParamWrapper wWrapper((*info.get()).allWants[0].want.GetParams());
-        paramsObj["extraInfoValue"] = wWrapper.ToString();
-        jsonObject["extraInfo"] = paramsObj;
+        cJSON_AddStringToObject(paramsObj, "extraInfoValue", wWrapper.ToString().c_str());
+        cJSON_AddItemToObject(jsonObject, "extraInfo", paramsObj);
     }
-
-    return jsonObject.dump();
+    std::string jsonStr = OHOS::AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
+    cJSON_Delete(jsonObject);
+    return jsonStr;
 }
 
 std::shared_ptr<WantAgent> WantAgentHelper::FromString(const std::string &jsonString, int32_t uid)
@@ -392,55 +515,64 @@ std::shared_ptr<WantAgent> WantAgentHelper::FromString(const std::string &jsonSt
     if (jsonString.empty()) {
         return nullptr;
     }
-    nlohmann::json jsonObject = nlohmann::json::parse(jsonString);
-    if (jsonObject.is_discarded()) {
+    cJSON *jsonObject = cJSON_Parse(jsonString.c_str());
+    if (jsonObject == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to parse json string");
         return nullptr;
     }
     int requestCode = -1;
-    if (jsonObject.contains("requestCode") && jsonObject["requestCode"].is_number_integer()) {
-        requestCode = jsonObject.at("requestCode").get<int>();
+    cJSON *requestCodeItem = cJSON_GetObjectItem(jsonObject, "requestCode");
+    if (requestCodeItem != nullptr && cJSON_IsNumber(requestCodeItem)) {
+        requestCode = static_cast<int>(requestCodeItem->valuedouble);
     }
 
     WantAgentConstant::OperationType operationType = WantAgentConstant::OperationType::UNKNOWN_TYPE;
-    if (jsonObject.contains("operationType") && jsonObject["operationType"].is_number_integer()) {
-        operationType = static_cast<WantAgentConstant::OperationType>(jsonObject.at("operationType").get<int>());
+    cJSON *operationTypeItem = cJSON_GetObjectItem(jsonObject, "operationType");
+    if (operationTypeItem != nullptr && cJSON_IsNumber(operationTypeItem)) {
+        operationType = static_cast<WantAgentConstant::OperationType>(static_cast<int>(operationTypeItem->valuedouble));
     }
 
     std::vector<WantAgentConstant::Flags> flagsVec = ParseFlags(jsonObject);
 
     std::vector<std::shared_ptr<AAFwk::Want>> wants = {};
-    if (jsonObject.contains("wants") && jsonObject["wants"].is_array()) {
-        for (auto &wantObj : jsonObject.at("wants")) {
-            if (wantObj.is_string()) {
-                auto wantString = wantObj.get<std::string>();
+    cJSON *wantsItem = cJSON_GetObjectItem(jsonObject, "wants");
+    if (wantsItem != nullptr && cJSON_IsArray(wantsItem)) {
+        int size = cJSON_GetArraySize(wantsItem);
+        for (int i = 0; i < size; i++) {
+            cJSON *wantItem = cJSON_GetArrayItem(wantsItem, i);
+            if (wantItem != nullptr && cJSON_IsString(wantItem)) {
+                std::string wantString = wantItem->valuestring;
                 wants.emplace_back(std::make_shared<AAFwk::Want>(*Want::FromString(wantString)));
             }
         }
     }
 
     std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
-    if (jsonObject.contains("extraInfo") && jsonObject["extraInfo"].is_object()) {
-        auto extraInfoObj = jsonObject.at("extraInfo");
-        if (extraInfoObj.contains("extraInfoValue") && extraInfoObj["extraInfoValue"].is_string()) {
-            auto pwWrapper = AAFwk::WantParamWrapper::Parse(extraInfoObj.at("extraInfoValue").get<std::string>());
+    cJSON *extraInfoItem = cJSON_GetObjectItem(jsonObject, "extraInfo");
+    if (extraInfoItem != nullptr && cJSON_IsObject(extraInfoItem)) {
+        cJSON *extraInfoValueItem = cJSON_GetObjectItem(extraInfoItem, "extraInfoValue");
+        if (extraInfoValueItem != nullptr && cJSON_IsString(extraInfoValueItem)) {
+            std::string extraInfoValue = extraInfoValueItem->valuestring;
+            auto pwWrapper = AAFwk::WantParamWrapper::Parse(extraInfoValue);
             AAFwk::WantParams params;
             if (pwWrapper->GetValue(params) == ERR_OK) {
                 extraInfo = std::make_shared<AAFwk::WantParams>(params);
             }
         }
     }
+    cJSON_Delete(jsonObject);
     WantAgentInfo info(requestCode, operationType, flagsVec, wants, extraInfo);
 
     return GetWantAgent(info, INVLID_WANT_AGENT_USER_ID, uid);
 }
 
-std::vector<WantAgentConstant::Flags> WantAgentHelper::ParseFlags(nlohmann::json jsonObject)
+std::vector<WantAgentConstant::Flags> WantAgentHelper::ParseFlags(cJSON *jsonObject)
 {
     int flags = -1;
     std::vector<WantAgentConstant::Flags> flagsVec = {};
-    if (jsonObject.contains("flags") && jsonObject.at("flags").is_number_integer()) {
-        flags = jsonObject.at("flags").get<int>();
+    cJSON *flagsItem = cJSON_GetObjectItem(jsonObject, "flags");
+    if (flagsItem != nullptr && cJSON_IsNumber(flagsItem)) {
+        flags = static_cast<int>(flagsItem->valuedouble);
     }
 
     if (flags < 0) {
@@ -471,18 +603,45 @@ std::vector<WantAgentConstant::Flags> WantAgentHelper::ParseFlags(nlohmann::json
 
 ErrCode WantAgentHelper::GetType(const std::shared_ptr<WantAgent> &agent, int32_t &operType)
 {
-    if ((agent == nullptr) || (agent->GetPendingWant() == nullptr)) {
+    if (agent == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT;
     }
 
+    if (agent->IsLocal()) {
+        if (agent->GetLocalPendingWant() == nullptr) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
+            return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        }
+        operType = agent->GetLocalPendingWant()->GetType();
+        return NO_ERROR;
+    }
+
+    if (agent->GetPendingWant() == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT;
+    }
     return agent->GetPendingWant()->GetType(agent->GetPendingWant()->GetTarget(), operType);
 }
 
 ErrCode WantAgentHelper::GetWant(const std::shared_ptr<WantAgent> &agent, std::shared_ptr<AAFwk::Want> &want)
 {
-    if ((agent == nullptr) || (agent->GetPendingWant() == nullptr)) {
+    if (agent == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param.");
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT;
+    }
+
+    if (agent->IsLocal()) {
+        if (agent->GetLocalPendingWant() == nullptr) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
+            return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        }
+        want = agent->GetLocalPendingWant()->GetWant();
+        return NO_ERROR;
+    }
+
+    if (agent->GetPendingWant() == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT;
     }
 

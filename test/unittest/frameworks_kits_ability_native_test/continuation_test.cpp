@@ -21,9 +21,14 @@
 #include "ability.h"
 #include "ability_impl.h"
 #include "abs_shared_result_set.h"
+#ifdef NO_RUNTIME_EMULATOR
+#include "app_event.h"
+#include "app_event_processor_mgr.h"
+#endif
 #include "bool_wrapper.h"
 #include "context_deal.h"
 #include "continuation_manager.h"
+#include "continuation_manager_stage.h"
 #include "continuation_handler.h"
 #include "data_ability_predicates.h"
 #include "mock_ability_connect_callback.h"
@@ -41,6 +46,9 @@ namespace AppExecFwk {
 using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::AppExecFwk;
+#ifdef NO_RUNTIME_EMULATOR
+using namespace OHOS::HiviewDFX;
+#endif
 using testing::_;
 using testing::Return;
 const std::string SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME = "ohos.extra.param.key.supportContinuePageStack";
@@ -53,14 +61,17 @@ const int32_t CONTINUE_GET_CONTENT_FAILED = 29360200;
 #endif
 class ContinuationTest : public testing::Test {
 public:
-    ContinuationTest() : continuationManager_(nullptr), ability_(nullptr), abilityInfo_(nullptr),
-        continueToken_(nullptr)
+    ContinuationTest() : continuationManager_(nullptr), continuationManagerStage_(nullptr),
+        ability_(nullptr), uiAbility_(nullptr), abilityInfo_(nullptr), continueToken_(nullptr)
     {}
     ~ContinuationTest()
     {}
     std::shared_ptr<ContinuationManager> continuationManager_;
+    std::shared_ptr<ContinuationManagerStage> continuationManagerStage_;
     std::shared_ptr<Ability> ability_;
+    std::shared_ptr<AbilityRuntime::UIAbility> uiAbility_;
     std::shared_ptr<MockContinuationAbility> mockAbility_;
+    std::shared_ptr<MockContinuationUIAbility> mockUIAbility_;
     std::shared_ptr<AbilityInfo> abilityInfo_;
     sptr<IRemoteObject> continueToken_;
 
@@ -98,6 +109,7 @@ void ContinuationTest::TearDownTestCase(void)
 void ContinuationTest::SetUp(void)
 {
     continuationManager_ = std::make_shared<ContinuationManager>();
+    continuationManagerStage_ = std::make_shared<ContinuationManagerStage>();
     continueToken_ = sptr<IRemoteObject>(new (std::nothrow)MockAbilityToken());
     abilityInfo_ = std::make_shared<AbilityInfo>();
     abilityInfo_->name = "ability";
@@ -108,6 +120,13 @@ void ContinuationTest::SetUp(void)
     ability_->Init(abilityInfo_, application, handler, continueToken_);
     mockAbility_ = std::make_shared<MockContinuationAbility>();
     mockAbility_->Init(abilityInfo_, application, handler, continueToken_);
+    mockUIAbility_ = std::make_shared<MockContinuationUIAbility>();
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo_, continueToken_,
+        want, 0);
+    mockUIAbility_->Init(record, application, handler, continueToken_);
+    uiAbility_ = std::make_shared<AbilityRuntime::UIAbility>();
+    uiAbility_->Init(record, application, handler, continueToken_);
 }
 
 void ContinuationTest::TearDown(void)
@@ -1396,6 +1415,77 @@ HWTEST_F(ContinuationTest, continue_manager_OnContinue_003, TestSize.Level1)
     EXPECT_EQ(ERR_OK, result);
     GTEST_LOG_(INFO) << "continue_manager_OnContinue_003 end";
 }
+
+#ifdef NO_RUNTIME_EMULATOR
+/*
+ * @tc.number: continue_manager_stage_OnContinue_001
+ * @tc.name: OnContinue
+ * @tc.desc: call OnContinue with ability_ is null or abilityInfo is nullptr
+ */
+HWTEST_F(ContinuationTest, continue_manager_stage_OnContinue_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continue_manager_OnContinue_stage_001 start";
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = uiAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(uiAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+    WantParams wantParams;
+    continuationManager_->ability_.reset();
+    bool isAsyncOnContinue = true;
+    AbilityInfo tmpAbilityInfo;
+    int32_t result = continuationManagerStage_->OnContinue(wantParams, isAsyncOnContinue, tmpAbilityInfo);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    GTEST_LOG_(INFO) << "continue_manager_stage_OnContinue_001 end";
+}
+
+/*
+ * @tc.number: continue_manager_stage_OnContinue_002
+ * @tc.name: OnContinue
+ * @tc.desc: call OnContinue with stageBased is false
+ */
+HWTEST_F(ContinuationTest, continue_manager_stage_OnContinue_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continue_manager_stage_OnContinue_002 start";
+    EXPECT_CALL(*mockUIAbility_, OnStartContinuation()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*mockUIAbility_, OnSaveData(_)).Times(1).WillOnce(Return(true));
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+    WantParams wantParams;
+    ability_->abilityInfo_->isStageBasedModel = false;
+    bool isAsyncOnContinue = true;
+    AbilityInfo tmpAbilityInfo;
+    int32_t result = continuationManagerStage_->OnContinue(wantParams, isAsyncOnContinue, tmpAbilityInfo);
+    EXPECT_EQ(ERR_OK, result);
+    GTEST_LOG_(INFO) << "continue_manager_stage_OnContinue_002 end";
+}
+
+/*
+ * @tc.number: continue_manager_stage_OnContinue_003
+ * @tc.name: OnContinue
+ * @tc.desc: call OnContinue with stageBased is true
+ */
+HWTEST_F(ContinuationTest, continue_manager_stage_OnContinue_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "continue_manager_stage_OnContinue_003 start";
+    EXPECT_CALL(*mockUIAbility_, OnContinue(_, _, _))
+        .Times(1)
+        .WillOnce(Return(ContinuationManagerStage::OnContinueResult::AGREE));
+    EXPECT_CALL(*mockUIAbility_, GetContentInfo()).Times(1).WillOnce(Return("ContentInfo"));
+    std::weak_ptr<ContinuationManagerStage> continuationManagerStage = continuationManagerStage_;
+    std::weak_ptr<AbilityRuntime::UIAbility> abilityTmp = mockUIAbility_;
+    auto continuationHandlerStage = std::make_shared<ContinuationHandlerStage>(continuationManagerStage, abilityTmp);
+    continuationManagerStage_->Init(mockUIAbility_, continueToken_, abilityInfo_, continuationHandlerStage);
+    WantParams wantParams;
+    ability_->abilityInfo_->isStageBasedModel = true;
+    bool isAsyncOnContinue = true;
+    AbilityInfo tmpAbilityInfo;
+    int32_t result = continuationManagerStage_->OnContinue(wantParams, isAsyncOnContinue, tmpAbilityInfo);
+    EXPECT_EQ(ERR_OK, result);
+    GTEST_LOG_(INFO) << "continue_manager_stage_OnContinue_003 end";
+}
+#endif
 
 /*
  * @tc.number: continue_manager_OnStartAndSaveData_001

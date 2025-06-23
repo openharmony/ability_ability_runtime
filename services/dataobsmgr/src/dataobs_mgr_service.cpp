@@ -107,9 +107,11 @@ std::pair<bool, struct ObserverNode> DataObsMgrService::ConstructObserverNode(sp
         userId = GetCallingUserId();
     }
     if (userId == -1) {
-        return std::make_pair(false, ObserverNode(dataObserver, userId));
+        // return false, tokenId default 0
+        return std::make_pair(false, ObserverNode(dataObserver, userId, 0));
     }
-    return std::make_pair(true, ObserverNode(dataObserver, userId));
+    uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
+    return std::make_pair(true, ObserverNode(dataObserver, userId, tokenId));
 }
 
 int32_t DataObsMgrService::GetCallingUserId()
@@ -130,9 +132,15 @@ int32_t DataObsMgrService::GetCallingUserId()
 }
 
 // GetTokenType use tokenId, and IsSystemApp use fullTokenId, these are different
-bool CheckSystemCallingPermission(DataObsOption &opt)
+bool DataObsMgrService::CheckSystemCallingPermission(DataObsOption &opt, int32_t userId, int32_t callingUserId)
 {
-    if (!opt.IsSystem()) {
+    bool checkUser = false;
+    if (userId == -1 || userId == callingUserId) {
+        checkUser = false;
+    } else {
+        checkUser = true;
+    }
+    if (!opt.IsSystem() && !checkUser) {
         return true;
     }
     uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
@@ -166,8 +174,17 @@ int DataObsMgrService::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserve
         return DATAOBS_SERVICE_INNER_IS_NULL;
     }
 
-    if (!CheckSystemCallingPermission(opt)) {
+    int32_t callingUserId = GetCallingUserId();
+    if (callingUserId == -1) {
+        return DATAOBS_INVALID_USERID;
+    }
+
+    if (!CheckSystemCallingPermission(opt, userId, callingUserId)) {
         return DATAOBS_NOT_SYSTEM_APP;
+    }
+    // If no user is specified, use current user.
+    if (userId == -1) {
+        userId = callingUserId;
     }
 
     auto [success, observerNode] = ConstructObserverNode(dataObserver, userId);
@@ -243,8 +260,17 @@ int DataObsMgrService::NotifyChange(const Uri &uri, int32_t userId, DataObsOptio
             CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_INNER_IS_NULL;
     }
-    if (!CheckSystemCallingPermission(opt)) {
+
+    int32_t callingUserId = GetCallingUserId();
+    if (callingUserId == -1) {
+        return DATAOBS_INVALID_USERID;
+    }
+    if (!CheckSystemCallingPermission(opt, userId, callingUserId)) {
         return DATAOBS_NOT_SYSTEM_APP;
+    }
+    // If no user is specified, the current user is notified.
+    if (userId == -1) {
+        userId = callingUserId;
     }
 
     {
@@ -255,16 +281,6 @@ int DataObsMgrService::NotifyChange(const Uri &uri, int32_t userId, DataObsOptio
             return DATAOBS_SERVICE_TASK_LIMMIT;
         }
         ++taskCount_;
-    }
-
-    // If no user is specified, the current user is notified.
-    if (userId == -1) {
-        userId = GetCallingUserId();
-    }
-    if (userId == -1) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "GetCurrentUserId fail, uri:%{public}s",
-            CommonUtils::Anonymous(uri.ToString()).c_str());
-        return GET_TOKENINFO_ERR;
     }
 
     ChangeInfo changeInfo = { ChangeInfo::ChangeType::OTHER, { uri } };
@@ -308,7 +324,8 @@ Status DataObsMgrService::RegisterObserverExt(const Uri &uri, sptr<IDataAbilityO
     }
 
     auto innerUri = uri;
-    return dataObsMgrInnerExt_->HandleRegisterObserver(innerUri, dataObserver, userId, isDescendants);
+    uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
+    return dataObsMgrInnerExt_->HandleRegisterObserver(innerUri, dataObserver, userId, tokenId, isDescendants);
 }
 
 Status DataObsMgrService::UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,

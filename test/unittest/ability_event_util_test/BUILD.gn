@@ -55,6 +55,7 @@ ohos_unittest("ability_event_util_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "ffrt:libffrt",
     "hisysevent:libhisysevent",
     "hilog:libhilog",
     "ipc:ipc_core",

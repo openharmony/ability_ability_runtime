@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,21 @@ void AbilityKeepAliveDataManagerTest::TearDownTestCase() {}
 void AbilityKeepAliveDataManagerTest::SetUp() {}
 
 void AbilityKeepAliveDataManagerTest::TearDown() {}
+
+/**
+ * Feature: AbilityKeepAliveDataManager
+ * Function: GetInstance
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager GetInstance
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, GetInstance_0100, TestSize.Level1)
+{
+    AbilityKeepAliveDataManager& instance1 = AbilityKeepAliveDataManager::GetInstance();
+    AbilityKeepAliveDataManager& instance2 = AbilityKeepAliveDataManager::GetInstance();
+    
+    // Verify we're getting the same instance
+    EXPECT_EQ(&instance1, &instance2);
+}
 
 /**
  * Feature: AbilityKeepAliveDataManager
@@ -621,6 +636,126 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, IsEqual_info_400, TestSize.Level1)
     auto result = abilityKeepAliveDataManager.IsEqual(key, info);
     EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "IsEqual_info_400 end";
+}
+
+/**
+ * Feature: AbilityKeepAliveDataManager
+ * Function: ConvertKeepAliveInfoFromKey
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager ConvertKeepAliveInfoFromKey
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, ConvertKeepAliveInfoFromKey_100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_100 start";
+    AbilityKeepAliveDataManager abilityKeepAliveDataManager;
+    DistributedKv::Key key;
+    auto retInfo_1 = abilityKeepAliveDataManager.ConvertKeepAliveInfoFromKey(key);
+    EXPECT_TRUE(retInfo_1.bundleName.empty());
+    KeepAliveInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.appType = KeepAliveAppType::THIRD_PARTY;
+    info.userId = 100;
+    key = abilityKeepAliveDataManager.ConvertKeepAliveDataToKey(info);
+    auto ret_Info_2 = abilityKeepAliveDataManager.ConvertKeepAliveInfoFromKey(key);
+    EXPECT_TRUE(!ret_Info_2.bundleName.empty());
+    GTEST_LOG_(INFO) << "ConvertKeepAliveInfoFromKey_100 end";
+}
+
+/**
+ * Feature: AbilityKeepAliveDataManager
+ * Function: DeleteKeepAliveDataWithSetterId
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager DeleteKeepAliveDataWithSetterId
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, DeleteKeepAliveDataWithSetterId_100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_100 start";
+    AbilityKeepAliveDataManager abilityKeepAliveDataManager;
+    KeepAliveInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.userId = 1;
+    info.setterId = 100;
+    auto result = abilityKeepAliveDataManager.DeleteKeepAliveDataWithSetterId(info);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_100 end";
+}
+
+/**
+ * Feature: AbilityKeepAliveDataManager
+ * Function: DeleteKeepAliveDataWithSetterId
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager DeleteKeepAliveDataWithSetterId
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, DeleteKeepAliveDataWithSetterId_200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_200 start";
+    AbilityKeepAliveDataManager abilityKeepAliveDataManager;
+    std::shared_ptr<DistributedKv::SingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    abilityKeepAliveDataManager.kvStorePtr_ = kvStorePtr;
+    EXPECT_EQ(true, abilityKeepAliveDataManager.CheckKvStore());
+
+    KeepAliveInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.userId = 1;
+    info.setterId = 100;
+    auto result = abilityKeepAliveDataManager.DeleteKeepAliveDataWithSetterId(info);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_200 end";
+}
+
+/**
+ * Feature: AbilityKeepAliveDataManager
+ * Function: IsEqualSetterId
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager IsEqualSetterId
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, IsEqualSetterId_100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqualSetterId_100 start";
+    AbilityKeepAliveDataManager abilityKeepAliveDataManager;
+    KeepAliveInfo info;
+    info.userId = 1;
+    DistributedKv::Key key;
+    auto result = abilityKeepAliveDataManager.IsEqualSetterId(key, info);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "IsEqualSetterId_100 end";
+}
+
+/**
+ * Feature: AbilityKeepAliveDataManager
+ * Function: IsEqualSetterId
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager IsEqualSetterId
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, IsEqualSetterId_200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqualSetterId_200 start";
+    AbilityKeepAliveDataManager abilityKeepAliveDataManager;
+    KeepAliveInfo info;
+    info.setterId = 100;
+    DistributedKv::Key key;
+    auto result = abilityKeepAliveDataManager.IsEqualSetterId(key, info);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "IsEqualSetterId_200 end";
+}
+
+/**
+ * Feature: AbilityKeepAliveDataManager
+ * Function: IsEqualSetterId
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager IsEqualSetterId
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, IsEqualSetterId_300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqualSetterId_300 start";
+    AbilityKeepAliveDataManager abilityKeepAliveDataManager;
+    KeepAliveInfo info;
+    info.userId = 1;
+    info.setterId = 100;
+    DistributedKv::Key key = abilityKeepAliveDataManager.ConvertKeepAliveDataToKey(info);;
+    auto result = abilityKeepAliveDataManager.IsEqualSetterId(key, info);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "IsEqualSetterId_300 end";
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

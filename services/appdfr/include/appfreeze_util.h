@@ -22,6 +22,7 @@ namespace OHOS {
 namespace AppExecFwk {
 class AppfreezeUtil {
 public:
+    static constexpr const char* const PROC_STAT_PATH = "/proc/stat";
     static constexpr const char* const LOG_FILE_PATH = "/data/log/eventlog/freeze";
     static constexpr const char* const EVENTLOG_PATH = "/data/log/eventlog";
     static constexpr int64_t SEC_TO_MILLISEC = 1000;

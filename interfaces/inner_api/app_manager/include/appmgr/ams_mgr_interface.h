@@ -272,7 +272,7 @@ public:
      * @param requestId for callback
      */
     virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t requestId = 0) = 0;
+        int32_t requestId = 0, std::string customProcess = "") = 0;
 
     /**
      * Get application info by process id.
@@ -411,6 +411,14 @@ public:
     virtual void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid) {};
 
     /**
+     * @brief Set non-resident keep-alive app service extension status.
+     * @param bundleName The application bundle name.
+     * @param enable The current updated enable status.
+     * @param uid indicates user.
+     */
+    virtual void SetKeepAliveAppService(const std::string &bundleName, bool enable, int32_t uid) {};
+
+    /**
      * To clear the process by ability token.
      *
      * @param token the unique identification to the ability.
@@ -541,6 +549,7 @@ public:
         IS_CALLER_KILLING,
         ENABLE_START_PROCESS_FLAG_BY_USER_ID,
         SET_KEEP_ALIVE_DKV,
+        SET_KEEP_ALIVE_APP_SERVICE,
         KILL_PROCESSES_IN_BATCH,
         PREPARE_TERMINATE_APP,
         IS_NO_REQUIRE_BIG_MEMORY,

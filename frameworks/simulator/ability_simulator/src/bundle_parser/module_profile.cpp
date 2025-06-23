@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <mutex>
 #include <set>
 #include <sstream>
+
 #include "bundle_constants.h"
 #include "bundle_info.h"
 #include "common_profile.h"
@@ -286,1095 +287,261 @@ struct ModuleJson {
     Module module;
 };
 
-void from_json(const nlohmann::json &jsonObject, Metadata &metadata)
+void from_json(const cJSON *jsonObject, Metadata &metadata)
 {
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "read metadata tag from module.json");
-    const auto &jsonObjectEnd = jsonObject.end();
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        META_DATA_NAME,
-        metadata.name,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        META_DATA_VALUE,
-        metadata.value,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        META_DATA_RESOURCE,
-        metadata.resource,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+    GetStringValueIfFindKey(jsonObject, META_DATA_NAME, metadata.name, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, META_DATA_VALUE, metadata.value, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, META_DATA_RESOURCE, metadata.resource, false, g_parseResult);
 }
 
-void from_json(const nlohmann::json &jsonObject, Ability &ability)
+void from_json(const cJSON *jsonObject, Ability &ability)
 {
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "read ability tag from module.json");
-    const auto &jsonObjectEnd = jsonObject.end();
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_NAME,
-        ability.name,
-        JsonType::STRING,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+    GetStringValueIfFindKey(jsonObject, ABILITY_NAME, ability.name, true, g_parseResult);
     // both srcEntry and srcEntrance can be configured, but srcEntry has higher priority
-    if (jsonObject.find(SRC_ENTRY) != jsonObject.end()) {
-        GetValueIfFindKey<std::string>(jsonObject,
-            jsonObjectEnd,
-            SRC_ENTRY,
-            ability.srcEntrance,
-            JsonType::STRING,
-            true,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+    cJSON *srcEntryItem = cJSON_GetObjectItem(jsonObject, SRC_ENTRY);
+    if (srcEntryItem != nullptr) {
+        GetStringValueIfFindKey(jsonObject, SRC_ENTRY, ability.srcEntrance, true, g_parseResult);
     } else {
-        GetValueIfFindKey<std::string>(jsonObject,
-            jsonObjectEnd,
-            SRC_ENTRANCE,
-            ability.srcEntrance,
-            JsonType::STRING,
-            true,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetStringValueIfFindKey(jsonObject, SRC_ENTRANCE, ability.srcEntrance, true, g_parseResult);
     }
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_LAUNCH_TYPE,
-        ability.launchType,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        DESCRIPTION,
-        ability.description,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        DESCRIPTION_ID,
-        ability.descriptionId,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        ICON,
-        ability.icon,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        ICON_ID,
-        ability.iconId,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        LABEL,
-        ability.label,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        LABEL_ID,
-        ability.labelId,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        PRIORITY,
-        ability.priority,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
-        jsonObjectEnd,
-        PERMISSIONS,
-        ability.permissions,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::STRING);
-    GetValueIfFindKey<std::vector<Metadata>>(jsonObject,
-        jsonObjectEnd,
-        META_DATA,
-        ability.metadata,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::OBJECT);
+    GetStringValueIfFindKey(jsonObject, ABILITY_LAUNCH_TYPE, ability.launchType, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, DESCRIPTION, ability.description, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, DESCRIPTION_ID, ability.descriptionId, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, ICON, ability.icon, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, ICON_ID, ability.iconId, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, LABEL, ability.label, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, LABEL_ID, ability.labelId, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, PRIORITY, ability.priority, false, g_parseResult);
+    GetStringValuesIfFindKey(jsonObject, PERMISSIONS, ability.permissions, false, g_parseResult);
+    GetObjectValuesIfFindKey(jsonObject, META_DATA, ability.metadata, false, g_parseResult);
     // both exported and visible can be configured, but exported has higher priority
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        VISIBLE,
-        ability.visible,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        EXPORTED,
-        ability.visible,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_CONTINUABLE,
-        ability.continuable,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_BACKGROUNDMODES,
-        ability.backgroundModes,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::STRING);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_START_WINDOW_ICON,
-        ability.startWindowIcon,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_START_WINDOW_ICON_ID,
-        ability.startWindowIconId,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_START_WINDOW_BACKGROUND,
-        ability.startWindowBackground,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_START_WINDOW_BACKGROUND_ID,
-        ability.startWindowBackgroundId,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_REMOVE_MISSION_AFTER_TERMINATE,
-        ability.removeMissionAfterTerminate,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_ORIENTATION,
-        ability.orientation,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_SUPPORT_WINDOW_MODE,
-        ability.windowModes,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::STRING);
-    GetValueIfFindKey<double>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_MAX_WINDOW_RATIO,
-        ability.maxWindowRatio,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<double>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_MIN_WINDOW_RATIO,
-        ability.minWindowRatio,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<uint32_t>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_MAX_WINDOW_WIDTH,
-        ability.maxWindowWidth,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<uint32_t>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_MIN_WINDOW_WIDTH,
-        ability.minWindowWidth,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<uint32_t>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_MAX_WINDOW_HEIGHT,
-        ability.maxWindowHeight,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<uint32_t>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_MIN_WINDOW_HEIGHT,
-        ability.minWindowHeight,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_EXCLUDE_FROM_MISSIONS,
-        ability.excludeFromMissions,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_RECOVERABLE,
-        ability.recoverable,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        ABILITY_UNCLEARABLE_MISSION,
-        ability.unclearableMission,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+    GetBoolValueIfFindKey(jsonObject, VISIBLE, ability.visible, false, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, EXPORTED, ability.visible, false, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, ABILITY_CONTINUABLE, ability.continuable, false, g_parseResult);
+    GetStringValuesIfFindKey(jsonObject, ABILITY_BACKGROUNDMODES, ability.backgroundModes, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, ABILITY_START_WINDOW_ICON, ability.startWindowIcon, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, ABILITY_START_WINDOW_ICON_ID, ability.startWindowIconId, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, ABILITY_START_WINDOW_BACKGROUND, ability.startWindowBackground, false,
+        g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, ABILITY_START_WINDOW_BACKGROUND_ID, ability.startWindowBackgroundId, false,
+        g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, ABILITY_REMOVE_MISSION_AFTER_TERMINATE, ability.removeMissionAfterTerminate,
+        false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, ABILITY_ORIENTATION, ability.orientation, false, g_parseResult);
+    GetStringValuesIfFindKey(jsonObject, ABILITY_SUPPORT_WINDOW_MODE, ability.windowModes, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, ABILITY_MAX_WINDOW_RATIO, ability.maxWindowRatio, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, ABILITY_MIN_WINDOW_RATIO, ability.minWindowRatio, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, ABILITY_MAX_WINDOW_WIDTH, ability.maxWindowWidth, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, ABILITY_MIN_WINDOW_WIDTH, ability.minWindowWidth, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, ABILITY_MAX_WINDOW_HEIGHT, ability.maxWindowHeight, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, ABILITY_MIN_WINDOW_HEIGHT, ability.minWindowHeight, false, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, ABILITY_EXCLUDE_FROM_MISSIONS, ability.excludeFromMissions, false, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, ABILITY_RECOVERABLE, ability.recoverable, false, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, ABILITY_UNCLEARABLE_MISSION, ability.unclearableMission, false, g_parseResult);
 }
 
-void from_json(const nlohmann::json &jsonObject, Extension &extension)
+void from_json(const cJSON *jsonObject, Extension &extension)
 {
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "read extension tag from module.json");
-    const auto &jsonObjectEnd = jsonObject.end();
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        EXTENSION_ABILITY_NAME,
-        extension.name,
-        JsonType::STRING,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+    if (jsonObject == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "jsonObject is null");
+        return;
+    }
+    GetStringValueIfFindKey(jsonObject, EXTENSION_ABILITY_NAME, extension.name, true, g_parseResult);
     // both srcEntry and srcEntrance can be configured, but srcEntry has higher priority
-    if (jsonObject.find(SRC_ENTRY) != jsonObject.end()) {
-        GetValueIfFindKey<std::string>(jsonObject,
-            jsonObjectEnd,
-            SRC_ENTRY,
-            extension.srcEntrance,
-            JsonType::STRING,
-            true,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+    cJSON *srcEntryItem = cJSON_GetObjectItem(jsonObject, SRC_ENTRY);
+    if (srcEntryItem != nullptr) {
+        GetStringValueIfFindKey(jsonObject, SRC_ENTRY, extension.srcEntrance, true, g_parseResult);
     } else {
-        GetValueIfFindKey<std::string>(jsonObject,
-            jsonObjectEnd,
-            SRC_ENTRANCE,
-            extension.srcEntrance,
-            JsonType::STRING,
-            true,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetStringValueIfFindKey(jsonObject, SRC_ENTRANCE, extension.srcEntrance, true, g_parseResult);
     }
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        ICON,
-        extension.icon,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        ICON_ID,
-        extension.iconId,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        LABEL,
-        extension.label,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        LABEL_ID,
-        extension.labelId,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        DESCRIPTION,
-        extension.description,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        DESCRIPTION_ID,
-        extension.descriptionId,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        PRIORITY,
-        extension.priority,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        EXTENSION_ABILITY_TYPE,
-        extension.type,
-        JsonType::STRING,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        EXTENSION_ABILITY_READ_PERMISSION,
-        extension.readPermission,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        EXTENSION_ABILITY_WRITE_PERMISSION,
-        extension.writePermission,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        EXTENSION_URI,
-        extension.uri,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
-        jsonObjectEnd,
-        PERMISSIONS,
-        extension.permissions,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::STRING);
+    GetStringValueIfFindKey(jsonObject, ICON, extension.icon, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, ICON_ID, extension.iconId, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, LABEL, extension.label, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, LABEL_ID, extension.labelId, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, DESCRIPTION, extension.description, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, DESCRIPTION_ID, extension.descriptionId, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, PRIORITY, extension.priority, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, EXTENSION_ABILITY_TYPE, extension.type, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, EXTENSION_ABILITY_READ_PERMISSION, extension.readPermission, false,
+        g_parseResult);
+    GetStringValueIfFindKey(jsonObject, EXTENSION_ABILITY_WRITE_PERMISSION, extension.writePermission, false,
+        g_parseResult);
+    GetStringValueIfFindKey(jsonObject, EXTENSION_URI, extension.uri, false, g_parseResult);
+    GetStringValuesIfFindKey(jsonObject, PERMISSIONS, extension.permissions, false, g_parseResult);
     // both exported and visible can be configured, but exported has higher priority
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        VISIBLE,
-        extension.visible,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        EXPORTED,
-        extension.visible,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::vector<Metadata>>(jsonObject,
-        jsonObjectEnd,
-        META_DATA,
-        extension.metadata,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::OBJECT);
+    GetBoolValueIfFindKey(jsonObject, VISIBLE, extension.visible, false, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, EXPORTED, extension.visible, false, g_parseResult);
+    GetObjectValuesIfFindKey(jsonObject, META_DATA, extension.metadata, false, g_parseResult);
+    if (g_parseResult != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "g_parseResult:%{public}d", g_parseResult);
+    }
+    return;
 }
 
-void from_json(const nlohmann::json &jsonObject, DeviceConfig &deviceConfig)
+void from_json(const cJSON *jsonObject, DeviceConfig &deviceConfig)
 {
-    const auto &jsonObjectEnd = jsonObject.end();
-    if (jsonObject.find(MIN_API_VERSION) != jsonObjectEnd) {
+    cJSON *minApiVersionItem = cJSON_GetObjectItem(jsonObject, MIN_API_VERSION);
+    if (minApiVersionItem != nullptr) {
         deviceConfig.minAPIVersion.first = true;
-        GetValueIfFindKey<int32_t>(jsonObject,
-            jsonObjectEnd,
-            MIN_API_VERSION,
-            deviceConfig.minAPIVersion.second,
-            JsonType::NUMBER,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetNumberValueIfFindKey(jsonObject, MIN_API_VERSION, deviceConfig.minAPIVersion.second, false, g_parseResult);
     }
-    if (jsonObject.find(DEVICE_CONFIG_KEEP_ALIVE) != jsonObjectEnd) {
+    cJSON *deviceConfigKeepAliveItem = cJSON_GetObjectItem(jsonObject, DEVICE_CONFIG_KEEP_ALIVE);
+    if (deviceConfigKeepAliveItem != nullptr) {
         deviceConfig.keepAlive.first = true;
-        GetValueIfFindKey<bool>(jsonObject,
-            jsonObjectEnd,
-            DEVICE_CONFIG_KEEP_ALIVE,
-            deviceConfig.keepAlive.second,
-            JsonType::BOOLEAN,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetBoolValueIfFindKey(jsonObject, DEVICE_CONFIG_KEEP_ALIVE, deviceConfig.keepAlive.second, false,
+            g_parseResult);
     }
-    if (jsonObject.find(DEVICE_CONFIG_REMOVABLE) != jsonObjectEnd) {
+    cJSON *deviceConfigRemovableItem = cJSON_GetObjectItem(jsonObject, DEVICE_CONFIG_REMOVABLE);
+    if (deviceConfigRemovableItem != nullptr) {
         deviceConfig.removable.first = true;
-        GetValueIfFindKey<bool>(jsonObject,
-            jsonObjectEnd,
-            DEVICE_CONFIG_REMOVABLE,
-            deviceConfig.removable.second,
-            JsonType::BOOLEAN,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetBoolValueIfFindKey(jsonObject, DEVICE_CONFIG_REMOVABLE, deviceConfig.removable.second, false, g_parseResult);
     }
-    if (jsonObject.find(DEVICE_CONFIG_SINGLETON) != jsonObjectEnd) {
+    cJSON *deviceConfigSingletonItem = cJSON_GetObjectItem(jsonObject, DEVICE_CONFIG_SINGLETON);
+    if (deviceConfigSingletonItem != nullptr) {
         deviceConfig.singleton.first = true;
-        GetValueIfFindKey<bool>(jsonObject,
-            jsonObjectEnd,
-            DEVICE_CONFIG_SINGLETON,
-            deviceConfig.singleton.second,
-            JsonType::BOOLEAN,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetBoolValueIfFindKey(jsonObject, DEVICE_CONFIG_SINGLETON, deviceConfig.singleton.second, false, g_parseResult);
     }
-    if (jsonObject.find(DEVICE_CONFIG_USER_DATA_CLEARABLE) != jsonObjectEnd) {
+    cJSON *deviceConfigUserDataClearableItem = cJSON_GetObjectItem(jsonObject, DEVICE_CONFIG_USER_DATA_CLEARABLE);
+    if (deviceConfigUserDataClearableItem != nullptr) {
         deviceConfig.userDataClearable.first = true;
-        GetValueIfFindKey<bool>(jsonObject,
-            jsonObjectEnd,
-            DEVICE_CONFIG_USER_DATA_CLEARABLE,
-            deviceConfig.userDataClearable.second,
-            JsonType::BOOLEAN,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetBoolValueIfFindKey(jsonObject, DEVICE_CONFIG_USER_DATA_CLEARABLE, deviceConfig.userDataClearable.second,
+            false, g_parseResult);
     }
-    if (jsonObject.find(DEVICE_CONFIG_ACCESSIBLE) != jsonObjectEnd) {
+    cJSON *deviceConfigAccessibleItem = cJSON_GetObjectItem(jsonObject, DEVICE_CONFIG_ACCESSIBLE);
+    if (deviceConfigAccessibleItem != nullptr) {
         deviceConfig.accessible.first = true;
-        GetValueIfFindKey<bool>(jsonObject,
-            jsonObjectEnd,
-            DEVICE_CONFIG_ACCESSIBLE,
-            deviceConfig.accessible.second,
-            JsonType::BOOLEAN,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetBoolValueIfFindKey(jsonObject, DEVICE_CONFIG_ACCESSIBLE, deviceConfig.accessible.second, false,
+            g_parseResult);
     }
 }
 
-void from_json(const nlohmann::json &jsonObject, App &app)
+void from_json(const cJSON *jsonObject, App &app)
 {
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "read app tag from module.json");
-    const auto &jsonObjectEnd = jsonObject.end();
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        APP_BUNDLE_NAME,
-        app.bundleName,
-        JsonType::STRING,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        ICON,
-        app.icon,
-        JsonType::STRING,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        LABEL,
-        app.label,
-        JsonType::STRING,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        APP_VERSION_CODE,
-        app.versionCode,
-        JsonType::NUMBER,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        APP_VERSION_NAME,
-        app.versionName,
-        JsonType::STRING,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<uint32_t>(jsonObject,
-        jsonObjectEnd,
-        APP_MIN_API_VERSION,
-        app.minAPIVersion,
-        JsonType::NUMBER,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        APP_TARGET_API_VERSION,
-        app.targetAPIVersion,
-        JsonType::NUMBER,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        APP_DEBUG,
-        app.debug,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        ICON_ID,
-        app.iconId,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        LABEL_ID,
-        app.labelId,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        DESCRIPTION,
-        app.description,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        DESCRIPTION_ID,
-        app.descriptionId,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        APP_VENDOR,
-        app.vendor,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        APP_MIN_COMPATIBLE_VERSION_CODE,
-        app.minCompatibleVersionCode,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        APP_API_RELEASETYPE,
-        app.apiReleaseType,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        APP_KEEP_ALIVE,
-        app.keepAlive,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
-        jsonObjectEnd,
-        APP_TARGETBUNDLELIST,
-        app.targetBundleList,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::STRING);
-    if (jsonObject.find(APP_REMOVABLE) != jsonObject.end()) {
+    GetStringValueIfFindKey(jsonObject, APP_BUNDLE_NAME, app.bundleName, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, ICON, app.icon, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, LABEL, app.label, true, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, APP_VERSION_CODE, app.versionCode, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, APP_VERSION_NAME, app.versionName, true, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, APP_MIN_API_VERSION, app.minAPIVersion, true, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, APP_TARGET_API_VERSION, app.targetAPIVersion, true, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, APP_DEBUG, app.debug, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, ICON_ID, app.iconId, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, LABEL_ID, app.labelId, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, DESCRIPTION, app.description, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, DESCRIPTION_ID, app.descriptionId, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, APP_VENDOR, app.vendor, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, APP_MIN_COMPATIBLE_VERSION_CODE, app.minCompatibleVersionCode, false,
+        g_parseResult);
+    GetStringValueIfFindKey(jsonObject, APP_API_RELEASETYPE, app.apiReleaseType, false, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, APP_KEEP_ALIVE, app.keepAlive, false, g_parseResult);
+    cJSON *appRemovableItem = cJSON_GetObjectItem(jsonObject, APP_REMOVABLE);
+    if (appRemovableItem != nullptr) {
         app.removable.first = true;
-        GetValueIfFindKey<bool>(jsonObject,
-            jsonObjectEnd,
-            APP_REMOVABLE,
-            app.removable.second,
-            JsonType::BOOLEAN,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetBoolValueIfFindKey(jsonObject, APP_REMOVABLE, app.removable.second, false, g_parseResult);
     }
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        APP_SINGLETON,
-        app.singleton,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        APP_USER_DATA_CLEARABLE,
-        app.userDataClearable,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        APP_ACCESSIBLE,
-        app.accessible,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        APP_ASAN_ENABLED,
-        app.asanEnabled,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        BUNDLE_TYPE,
-        app.bundleType,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    if (jsonObject.find(APP_PHONE) != jsonObjectEnd) {
+    GetBoolValueIfFindKey(jsonObject, APP_SINGLETON, app.singleton, false, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, APP_USER_DATA_CLEARABLE, app.userDataClearable, false, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, APP_ACCESSIBLE, app.accessible, false, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, APP_ASAN_ENABLED, app.asanEnabled, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, BUNDLE_TYPE, app.bundleType, false, g_parseResult);
+    cJSON *appPhoneItem = cJSON_GetObjectItem(jsonObject, APP_PHONE);
+    if (appPhoneItem != nullptr) {
         DeviceConfig deviceConfig;
-        GetValueIfFindKey<DeviceConfig>(jsonObject,
-            jsonObjectEnd,
-            APP_PHONE,
-            deviceConfig,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetObjectValueIfFindKey(jsonObject, APP_PHONE, deviceConfig, false, g_parseResult);
         app.deviceConfigs[APP_PHONE] = deviceConfig;
     }
-    if (jsonObject.find(APP_TABLET) != jsonObjectEnd) {
+    cJSON *appTableItem = cJSON_GetObjectItem(jsonObject, APP_TABLET);
+    if (appTableItem != nullptr) {
         DeviceConfig deviceConfig;
-        GetValueIfFindKey<DeviceConfig>(jsonObject,
-            jsonObjectEnd,
-            APP_TABLET,
-            deviceConfig,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetObjectValueIfFindKey(jsonObject, APP_TABLET, deviceConfig, false, g_parseResult);
         app.deviceConfigs[APP_TABLET] = deviceConfig;
     }
-    if (jsonObject.find(APP_TV) != jsonObjectEnd) {
+    cJSON *appTvItem = cJSON_GetObjectItem(jsonObject, APP_TV);
+    if (appTvItem != nullptr) {
         DeviceConfig deviceConfig;
-        GetValueIfFindKey<DeviceConfig>(jsonObject,
-            jsonObjectEnd,
-            APP_TV,
-            deviceConfig,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetObjectValueIfFindKey(jsonObject, APP_TV, deviceConfig, false, g_parseResult);
         app.deviceConfigs[APP_TV] = deviceConfig;
     }
-    if (jsonObject.find(APP_WEARABLE) != jsonObjectEnd) {
+    cJSON *appWearableItem = cJSON_GetObjectItem(jsonObject, APP_WEARABLE);
+    if (appWearableItem != nullptr) {
         DeviceConfig deviceConfig;
-        GetValueIfFindKey<DeviceConfig>(jsonObject,
-            jsonObjectEnd,
-            APP_WEARABLE,
-            deviceConfig,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetObjectValueIfFindKey(jsonObject, APP_WEARABLE, deviceConfig, false, g_parseResult);
         app.deviceConfigs[APP_WEARABLE] = deviceConfig;
     }
-    if (jsonObject.find(APP_LITE_WEARABLE) != jsonObjectEnd) {
+    cJSON *appLiteWearableItem = cJSON_GetObjectItem(jsonObject, APP_LITE_WEARABLE);
+    if (appLiteWearableItem != nullptr) {
         DeviceConfig deviceConfig;
-        GetValueIfFindKey<DeviceConfig>(jsonObject,
-            jsonObjectEnd,
-            APP_LITE_WEARABLE,
-            deviceConfig,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetObjectValueIfFindKey(jsonObject, APP_LITE_WEARABLE, deviceConfig, false, g_parseResult);
         app.deviceConfigs[APP_LITE_WEARABLE] = deviceConfig;
     }
-    if (jsonObject.find(APP_CAR) != jsonObjectEnd) {
+    cJSON *appCarItem = cJSON_GetObjectItem(jsonObject, APP_CAR);
+    if (appCarItem != nullptr) {
         DeviceConfig deviceConfig;
-        GetValueIfFindKey<DeviceConfig>(jsonObject,
-            jsonObjectEnd,
-            APP_CAR,
-            deviceConfig,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetObjectValueIfFindKey(jsonObject, APP_CAR, deviceConfig, false, g_parseResult);
         app.deviceConfigs[APP_CAR] = deviceConfig;
     }
-    if (jsonObject.find(APP_SMART_VISION) != jsonObjectEnd) {
+    cJSON *appSmartVersionItem = cJSON_GetObjectItem(jsonObject, APP_SMART_VISION);
+    if (appSmartVersionItem != nullptr) {
         DeviceConfig deviceConfig;
-        GetValueIfFindKey<DeviceConfig>(jsonObject,
-            jsonObjectEnd,
-            APP_SMART_VISION,
-            deviceConfig,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetObjectValueIfFindKey(jsonObject, APP_SMART_VISION, deviceConfig, false, g_parseResult);
         app.deviceConfigs[APP_SMART_VISION] = deviceConfig;
     }
-    if (jsonObject.find(APP_ROUTER) != jsonObjectEnd) {
+    cJSON *appRouterItem = cJSON_GetObjectItem(jsonObject, APP_ROUTER);
+    if (appRouterItem != nullptr) {
         DeviceConfig deviceConfig;
-        GetValueIfFindKey<DeviceConfig>(jsonObject,
-            jsonObjectEnd,
-            APP_ROUTER,
-            deviceConfig,
-            JsonType::OBJECT,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetObjectValueIfFindKey(jsonObject, APP_ROUTER, deviceConfig, false, g_parseResult);
         app.deviceConfigs[APP_ROUTER] = deviceConfig;
     }
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        APP_MULTI_PROJECTS,
-        app.multiProjects,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        APP_TARGET_BUNDLE_NAME,
-        app.targetBundle,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        APP_TARGET_PRIORITY,
-        app.targetPriority,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        COMPILE_SDK_VERSION,
-        app.compileSdkVersion,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        COMPILE_SDK_TYPE,
-        app.compileSdkType,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+    GetBoolValueIfFindKey(jsonObject, APP_MULTI_PROJECTS, app.multiProjects, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, APP_TARGET_BUNDLE_NAME, app.targetBundle, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, APP_TARGET_PRIORITY, app.targetPriority, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, COMPILE_SDK_VERSION, app.compileSdkVersion, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, COMPILE_SDK_TYPE, app.compileSdkType, false, g_parseResult);
 }
 
-void from_json(const nlohmann::json &jsonObject, Module &module)
+void from_json(const cJSON *jsonObject, Module &module)
 {
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "read module tag from module.json");
-    const auto &jsonObjectEnd = jsonObject.end();
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        MODULE_NAME,
-        module.name,
-        JsonType::STRING,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        MODULE_TYPE,
-        module.type,
-        JsonType::STRING,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
-        jsonObjectEnd,
-        MODULE_DEVICE_TYPES,
-        module.deviceTypes,
-        JsonType::ARRAY,
-        true,
-        g_parseResult,
-        ArrayType::STRING);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        MODULE_DELIVERY_WITH_INSTALL,
-        module.deliveryWithInstall,
-        JsonType::BOOLEAN,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        MODULE_PAGES,
-        module.pages,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+    GetStringValueIfFindKey(jsonObject, MODULE_NAME, module.name, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, MODULE_TYPE, module.type, true, g_parseResult);
+    GetStringValuesIfFindKey(jsonObject, MODULE_DEVICE_TYPES, module.deviceTypes, true, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, MODULE_DELIVERY_WITH_INSTALL, module.deliveryWithInstall, true, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, MODULE_PAGES, module.pages, false, g_parseResult);
     // both srcEntry and srcEntrance can be configured, but srcEntry has higher priority
-    if (jsonObject.find(SRC_ENTRY) != jsonObject.end()) {
-        GetValueIfFindKey<std::string>(jsonObject,
-            jsonObjectEnd,
-            SRC_ENTRY,
-            module.srcEntrance,
-            JsonType::STRING,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+    cJSON *srcEntryItem = cJSON_GetObjectItem(jsonObject, SRC_ENTRY);
+    if (srcEntryItem != nullptr) {
+        GetStringValueIfFindKey(jsonObject, SRC_ENTRY, module.srcEntrance, false, g_parseResult);
     } else {
-        GetValueIfFindKey<std::string>(jsonObject,
-            jsonObjectEnd,
-            SRC_ENTRANCE,
-            module.srcEntrance,
-            JsonType::STRING,
-            false,
-            g_parseResult,
-            ArrayType::NOT_ARRAY);
+        GetStringValueIfFindKey(jsonObject, SRC_ENTRANCE, module.srcEntrance, false, g_parseResult);
     }
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        DESCRIPTION,
-        module.description,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        DESCRIPTION_ID,
-        module.descriptionId,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        MODULE_PROCESS,
-        module.process,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        MODULE_MAIN_ELEMENT,
-        module.mainElement,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        MODULE_INSTALLATION_FREE,
-        module.installationFree,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        MODULE_VIRTUAL_MACHINE,
-        module.virtualMachine,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::vector<Metadata>>(jsonObject,
-        jsonObjectEnd,
-        META_DATA,
-        module.metadata,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::OBJECT);
-    GetValueIfFindKey<std::vector<Ability>>(jsonObject,
-        jsonObjectEnd,
-        MODULE_ABILITIES,
-        module.abilities,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::OBJECT);
-    GetValueIfFindKey<std::vector<Extension>>(jsonObject,
-        jsonObjectEnd,
-        MODULE_EXTENSION_ABILITIES,
-        module.extensionAbilities,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::OBJECT);
-    GetValueIfFindKey<std::vector<Dependency>>(jsonObject,
-        jsonObjectEnd,
-        MODULE_DEPENDENCIES,
-        module.dependencies,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::OBJECT);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        MODULE_COMPILE_MODE,
-        module.compileMode,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<bool>(jsonObject,
-        jsonObjectEnd,
-        MODULE_IS_LIB_ISOLATED,
-        module.isLibIsolated,
-        JsonType::BOOLEAN,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        MODULE_TARGET_MODULE_NAME,
-        module.targetModule,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<int32_t>(jsonObject,
-        jsonObjectEnd,
-        MODULE_TARGET_PRIORITY,
-        module.targetPriority,
-        JsonType::NUMBER,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::vector<ProxyData>>(jsonObject,
-        jsonObjectEnd,
-        MODULE_PROXY_DATAS,
-        module.proxyDatas,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::OBJECT);
-    GetValueIfFindKey<std::vector<ProxyData>>(jsonObject,
-        jsonObjectEnd,
-        MODULE_PROXY_DATA,
-        module.proxyData,
-        JsonType::ARRAY,
-        false,
-        g_parseResult,
-        ArrayType::OBJECT);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        MODULE_BUILD_HASH,
-        module.buildHash,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::string>(jsonObject,
-        jsonObjectEnd,
-        MODULE_ISOLATION_MODE,
-        module.isolationMode,
-        JsonType::STRING,
-        false,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+    GetStringValueIfFindKey(jsonObject, DESCRIPTION, module.description, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, DESCRIPTION_ID, module.descriptionId, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, MODULE_PROCESS, module.process, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, MODULE_MAIN_ELEMENT, module.mainElement, false, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, MODULE_INSTALLATION_FREE, module.installationFree, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, MODULE_VIRTUAL_MACHINE, module.virtualMachine, false, g_parseResult);
+    GetObjectValuesIfFindKey(jsonObject, META_DATA, module.metadata, false, g_parseResult);
+    GetObjectValuesIfFindKey(jsonObject, MODULE_ABILITIES, module.abilities, false, g_parseResult);
+    GetObjectValuesIfFindKey(jsonObject, MODULE_EXTENSION_ABILITIES, module.extensionAbilities, false, g_parseResult);
+    GetObjectValuesIfFindKey(jsonObject, MODULE_DEPENDENCIES, module.dependencies, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, MODULE_COMPILE_MODE, module.compileMode, false, g_parseResult);
+    GetBoolValueIfFindKey(jsonObject, MODULE_IS_LIB_ISOLATED, module.isLibIsolated, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, MODULE_TARGET_MODULE_NAME, module.targetModule, false, g_parseResult);
+    GetNumberValueIfFindKey(jsonObject, MODULE_TARGET_PRIORITY, module.targetPriority, false, g_parseResult);
+    GetObjectValuesIfFindKey(jsonObject, MODULE_PROXY_DATAS, module.proxyDatas, false, g_parseResult);
+    GetObjectValuesIfFindKey(jsonObject, MODULE_PROXY_DATA, module.proxyData, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, MODULE_BUILD_HASH, module.buildHash, false, g_parseResult);
+    GetStringValueIfFindKey(jsonObject, MODULE_ISOLATION_MODE, module.isolationMode, false, g_parseResult);
 }
 
-void from_json(const nlohmann::json &jsonObject, ModuleJson &moduleJson)
+void from_json(const cJSON *jsonObject, ModuleJson &moduleJson)
 {
-    const auto &jsonObjectEnd = jsonObject.end();
-    GetValueIfFindKey<App>(jsonObject,
-        jsonObjectEnd,
-        APP,
-        moduleJson.app,
-        JsonType::OBJECT,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<Module>(jsonObject,
-        jsonObjectEnd,
-        MODULE,
-        moduleJson.module,
-        JsonType::OBJECT,
-        true,
-        g_parseResult,
-        ArrayType::NOT_ARRAY);
+    GetObjectValueIfFindKey(jsonObject, APP, moduleJson.app, true, g_parseResult);
+    GetObjectValueIfFindKey(jsonObject, MODULE, moduleJson.module, true, g_parseResult);
 }
 } // namespace Profile
 
@@ -1827,31 +994,59 @@ bool ToInnerBundleInfo(const Profile::ModuleJson &moduleJson, InnerBundleInfo &i
     return true;
 }
 
-bool ParserAtomicModuleConfig(const nlohmann::json &jsonObject, InnerBundleInfo &innerBundleInfo)
+bool ParseAtomicServicePreloads(const cJSON *jsonObject, std::vector<std::string> &preloads)
 {
-    nlohmann::json moduleJson = jsonObject.at(Profile::MODULE);
+    if (!cJSON_IsArray(jsonObject)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "jsonObject not array");
+        return false;
+    }
+    int size = cJSON_GetArraySize(jsonObject);
+    if (size == 0) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "jsonObject is empty");
+        return true;
+    }
+    if (size > Constants::MAX_JSON_ARRAY_LENGTH) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "preloads config in module.json is oversize");
+        return false;
+    }
+    for (int i = 0; i < size; i++) {
+        cJSON *preloadItem = cJSON_GetArrayItem(jsonObject, i);
+        if (preloadItem == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITY_SIM, "preloads is null");
+            return false;
+        }
+        cJSON *preloadsModuleNameItem = cJSON_GetObjectItem(preloadItem, Profile::PRELOADS_MODULE_NAME);
+        if (preloadsModuleNameItem == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITY_SIM, "preloads must have moduleName");
+            return false;
+        }
+        std::string preloadName = preloadsModuleNameItem->valuestring;
+        preloads.emplace_back(preloadName);
+    }
+    return true;
+}
+
+bool ParserAtomicModuleConfig(const cJSON *jsonObject, InnerBundleInfo &innerBundleInfo)
+{
+    cJSON *moduleJson = cJSON_GetObjectItem(jsonObject, Profile::MODULE);
+    if (moduleJson == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "get module json failed");
+        return false;
+    }
+    cJSON *moduleNameItem = cJSON_GetObjectItem(moduleJson, Profile::MODULE_NAME);
+    if (moduleNameItem == nullptr || !cJSON_IsString(moduleNameItem)) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "get module name failed");
+        return false;
+    }
+    std::string moduleName = moduleNameItem->valuestring;
     std::vector<std::string> preloads;
-    std::string moduleName = moduleJson.at(Profile::MODULE_NAME);
-    if (moduleJson.contains(Profile::ATOMIC_SERVICE)) {
-        nlohmann::json moduleAtomicObj = moduleJson.at(Profile::ATOMIC_SERVICE);
-        if (moduleAtomicObj.contains(Profile::MODULE_ATOMIC_SERVICE_PRELOADS)) {
-            nlohmann::json preloadObj = moduleAtomicObj.at(Profile::MODULE_ATOMIC_SERVICE_PRELOADS);
-            if (preloadObj.empty()) {
-                TAG_LOGE(AAFwkTag::ABILITY_SIM, "reloadObj is empty");
-                return true;
-            }
-            if (preloadObj.size() > Constants::MAX_JSON_ARRAY_LENGTH) {
-                TAG_LOGE(AAFwkTag::ABILITY_SIM, "preloads config in module.json is oversize");
+    cJSON *moduleAtomicObj = cJSON_GetObjectItem(moduleJson, Profile::ATOMIC_SERVICE);
+    if (moduleAtomicObj != nullptr) {
+        cJSON *preloadObj = cJSON_GetObjectItem(moduleAtomicObj, Profile::MODULE_ATOMIC_SERVICE_PRELOADS);
+        if (preloadObj != nullptr) {
+            if (!ParseAtomicServicePreloads(preloadObj, preloads)) {
+                TAG_LOGE(AAFwkTag::ABILITY_SIM, "reloadObj not array");
                 return false;
-            }
-            for (const auto &preload : preloadObj) {
-                if (preload.contains(Profile::PRELOADS_MODULE_NAME)) {
-                    std::string preloadName = preload.at(Profile::PRELOADS_MODULE_NAME);
-                    preloads.emplace_back(preloadName);
-                } else {
-                    TAG_LOGE(AAFwkTag::ABILITY_SIM, "preloads must have moduleName");
-                    return false;
-                }
             }
         }
     }
@@ -1859,27 +1054,30 @@ bool ParserAtomicModuleConfig(const nlohmann::json &jsonObject, InnerBundleInfo 
     return true;
 }
 
-bool ParserAtomicConfig(const nlohmann::json &jsonObject, InnerBundleInfo &innerBundleInfo)
+bool ParserAtomicConfig(const cJSON *jsonObject, InnerBundleInfo &innerBundleInfo)
 {
-    if (!jsonObject.contains(Profile::MODULE) || !jsonObject.contains(Profile::APP)) {
+    cJSON *moduleJson = cJSON_GetObjectItem(jsonObject, Profile::MODULE);
+    cJSON *appJson = cJSON_GetObjectItem(jsonObject, Profile::APP);
+    if (moduleJson == nullptr || appJson == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "ParserAtomicConfig failed due to bad module.json");
         return false;
     }
-    nlohmann::json appJson = jsonObject.at(Profile::APP);
-    nlohmann::json moduleJson = jsonObject.at(Profile::MODULE);
-    if (!moduleJson.is_object() || !appJson.is_object()) {
+
+    if (!cJSON_IsObject(moduleJson) || !cJSON_IsObject(appJson)) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "module.json file lacks of invalid module or app properties");
         return false;
     }
     BundleType bundleType = BundleType::APP;
-    if (appJson.contains(Profile::BUNDLE_TYPE)) {
-        if (appJson.at(Profile::BUNDLE_TYPE) == Profile::BUNDLE_TYPE_ATOMIC_SERVICE) {
+    cJSON *bundleTypeItem = cJSON_GetObjectItem(appJson, Profile::BUNDLE_TYPE);
+    if (bundleTypeItem != nullptr && cJSON_IsString(bundleTypeItem)) {
+        std::string type = bundleTypeItem->valuestring;
+        if (type == Profile::BUNDLE_TYPE_ATOMIC_SERVICE) {
             bundleType = BundleType::ATOMIC_SERVICE;
-        } else if (appJson.at(Profile::BUNDLE_TYPE) == Profile::BUNDLE_TYPE_SHARED) {
+        } else if (type == Profile::BUNDLE_TYPE_SHARED) {
             bundleType = BundleType::SHARED;
-        } else if (appJson.at(Profile::BUNDLE_TYPE) == Profile::BUNDLE_TYPE_APP_SERVICE_FWK) {
+        } else if (type == Profile::BUNDLE_TYPE_APP_SERVICE_FWK) {
             bundleType = BundleType::APP_SERVICE_FWK;
-        } else if (appJson.at(Profile::BUNDLE_TYPE) == Profile::BUNDLE_TYPE_PLUGIN) {
+        } else if (type == Profile::BUNDLE_TYPE_PLUGIN) {
             bundleType = BundleType::APP_PLUGIN;
         }
     }
@@ -1898,13 +1096,16 @@ ErrCode ModuleProfile::TransformTo(const std::vector<uint8_t> &buf, InnerBundleI
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "transform module.json stream to InnerBundleInfo");
     std::vector<uint8_t> buffer = buf;
     buffer.push_back('\0');
-    nlohmann::json jsonObject = nlohmann::json::parse(buffer.data(), nullptr, false);
-    if (jsonObject.is_discarded()) {
+    std::string dataStr(buffer.begin(), buffer.end());
+    cJSON *jsonObject = cJSON_Parse(dataStr.c_str());
+    if (jsonObject == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "bad profile");
         return ERR_APPEXECFWK_PARSE_BAD_PROFILE;
     }
 
-    Profile::ModuleJson moduleJson = jsonObject.get<Profile::ModuleJson>();
+    Profile::ModuleJson moduleJson;
+    from_json(jsonObject, moduleJson);
+    cJSON_Delete(jsonObject);
     if (Profile::g_parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "g_parseResult:%{public}d", Profile::g_parseResult);
         int32_t ret = Profile::g_parseResult;

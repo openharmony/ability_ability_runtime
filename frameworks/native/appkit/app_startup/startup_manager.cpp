@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,13 +16,13 @@
 #include "startup_manager.h"
 
 #include <set>
-#include <nlohmann/json.hpp>
 
 #include "app_startup_task_matcher.h"
 #include "event_report.h"
-#include "hilog_tag_wrapper.h"
 #include "extractor.h"
+#include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "json_utils.h"
 #include "native_startup_task.h"
 #include "preload_so_startup_task.h"
 #include "startup_utils.h"
@@ -906,8 +906,8 @@ int32_t StartupManager::GetStartupConfigString(const ModuleStartupConfigInfo &in
         return ERR_STARTUP_CONFIG_PATH_ERROR;
     }
     std::string configData(startupConfig.get(), startupConfig.get() + len);
-    nlohmann::json profileJson = nlohmann::json::parse(configData, nullptr, false);
-    if (profileJson.is_discarded()) {
+    cJSON *profileJson = cJSON_Parse(configData.c_str());
+    if (profileJson == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "bad profile file");
         eventInfo.errCode = ERR_STARTUP_CONFIG_PARSE_ERROR;
         eventInfo.errReason = "bad profile file";
@@ -915,7 +915,8 @@ int32_t StartupManager::GetStartupConfigString(const ModuleStartupConfigInfo &in
             AAFwk::EventName::STARTUP_TASK_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_STARTUP_CONFIG_PARSE_ERROR;
     }
-    config = profileJson.dump();
+    config = AAFwk::JsonUtils::GetInstance().ToString(profileJson);
+    cJSON_Delete(profileJson);
     return ERR_OK;
 }
 
@@ -928,40 +929,55 @@ bool StartupManager::AnalyzeStartupConfig(const ModuleStartupConfigInfo& info, c
         return false;
     }
 
-    nlohmann::json startupConfigJson = nlohmann::json::parse(startupConfig, nullptr, false);
-    if (startupConfigJson.is_discarded()) {
+    cJSON *startupConfigJson = cJSON_Parse(startupConfig.c_str());
+    if (startupConfigJson == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "Failed to parse json string");
         return false;
     }
 
     if (info.moduleType_ == AppExecFwk::ModuleType::ENTRY || info.moduleType_ == AppExecFwk::ModuleType::FEATURE) {
-        if (!(startupConfigJson.contains(CONFIG_ENTRY) && startupConfigJson[CONFIG_ENTRY].is_string())) {
+        cJSON *configEntryItem = cJSON_GetObjectItem(startupConfigJson, CONFIG_ENTRY);
+        if (configEntryItem == nullptr || !cJSON_IsString(configEntryItem)) {
             TAG_LOGE(AAFwkTag::STARTUP, "no config entry.");
+            cJSON_Delete(startupConfigJson);
             return false;
         }
-        pendingConfigEntry = startupConfigJson.at(CONFIG_ENTRY).get<std::string>();
+        pendingConfigEntry = configEntryItem->valuestring;
         if (pendingConfigEntry.empty()) {
             TAG_LOGE(AAFwkTag::STARTUP, "startup config empty.");
+            cJSON_Delete(startupConfigJson);
             return false;
         }
     }
 
     if (!AnalyzeAppStartupTask(info, startupConfigJson, pendingStartupTaskInfos)) {
+        cJSON_Delete(startupConfigJson);
         return false;
     }
     if (!AnalyzePreloadSoStartupTask(info, startupConfigJson, preloadSoStartupTasks)) {
+        cJSON_Delete(startupConfigJson);
         return false;
     }
+    cJSON_Delete(startupConfigJson);
     return true;
 }
 
-bool StartupManager::AnalyzeAppStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
+bool StartupManager::AnalyzeAppStartupTask(const ModuleStartupConfigInfo& info, cJSON *startupConfigJson,
     std::vector<StartupTaskInfo>& pendingStartupTaskInfos)
 {
-    if (startupConfigJson.contains(STARTUP_TASKS) && startupConfigJson[STARTUP_TASKS].is_array()) {
-        for (const auto& module : startupConfigJson.at(STARTUP_TASKS).get<nlohmann::json>()) {
-            if (!module.contains(SRC_ENTRY) || !module[SRC_ENTRY].is_string() ||
-            !module.contains(NAME) || !module[NAME].is_string()) {
+    cJSON *startupTasksItem = cJSON_GetObjectItem(startupConfigJson, STARTUP_TASKS);
+    if (startupTasksItem != nullptr && cJSON_IsArray(startupTasksItem)) {
+        int size = cJSON_GetArraySize(startupTasksItem);
+        for (int i = 0; i < size; i++) {
+            cJSON *module = cJSON_GetArrayItem(startupTasksItem, i);
+            if (module == nullptr || !cJSON_IsObject(module)) {
+                TAG_LOGE(AAFwkTag::STARTUP, "Invalid module data");
+                return false;
+            }
+            cJSON *srcEntryItem = cJSON_GetObjectItem(module, SRC_ENTRY);
+            cJSON *nameItem = cJSON_GetObjectItem(module, NAME);
+            if ((srcEntryItem == nullptr || !cJSON_IsString(srcEntryItem)) ||
+                (nameItem == nullptr || !cJSON_IsString(nameItem))) {
                 TAG_LOGE(AAFwkTag::STARTUP, "Invalid module data");
                 return false;
             }
@@ -970,18 +986,26 @@ bool StartupManager::AnalyzeAppStartupTask(const ModuleStartupConfigInfo& info, 
                 return false;
             }
         }
-        return true;
     }
     return true;
 }
 
-bool StartupManager::AnalyzePreloadSoStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
+bool StartupManager::AnalyzePreloadSoStartupTask(const ModuleStartupConfigInfo& info, cJSON *startupConfigJson,
     std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks)
 {
-    if (startupConfigJson.contains(PRELOAD_STARTUP_TASKS) && startupConfigJson[PRELOAD_STARTUP_TASKS].is_array()) {
-        for (const auto& module : startupConfigJson.at(PRELOAD_STARTUP_TASKS).get<nlohmann::json>()) {
-            if (!module.contains(SRC_ENTRY) || !module[SRC_ENTRY].is_string() ||
-            !module.contains(NAME) || !module[NAME].is_string()) {
+    cJSON *startupTasksItem = cJSON_GetObjectItem(startupConfigJson, PRELOAD_STARTUP_TASKS);
+    if (startupTasksItem != nullptr && cJSON_IsArray(startupTasksItem)) {
+        int size = cJSON_GetArraySize(startupTasksItem);
+        for (int i = 0; i < size; i++) {
+            cJSON *module = cJSON_GetArrayItem(startupTasksItem, i);
+            if (module == nullptr || !cJSON_IsObject(module)) {
+                TAG_LOGE(AAFwkTag::STARTUP, "Invalid module data");
+                return false;
+            }
+            cJSON *srcEntryItem = cJSON_GetObjectItem(module, SRC_ENTRY);
+            cJSON *nameItem = cJSON_GetObjectItem(module, NAME);
+            if ((srcEntryItem == nullptr || !cJSON_IsString(srcEntryItem)) ||
+                (nameItem == nullptr || !cJSON_IsString(nameItem))) {
                 TAG_LOGE(AAFwkTag::STARTUP, "Invalid module data");
                 return false;
             }
@@ -990,17 +1014,18 @@ bool StartupManager::AnalyzePreloadSoStartupTask(const ModuleStartupConfigInfo& 
                 return false;
             }
         }
-        return true;
     }
     return true;
 }
 
 bool StartupManager::AnalyzeAppStartupTaskInner(const ModuleStartupConfigInfo& info,
-    const nlohmann::json& startupTaskJson,
+    const cJSON *startupTaskJson,
     std::vector<StartupTaskInfo>& pendingStartupTaskInfos)
 {
-    if (!startupTaskJson.contains(SRC_ENTRY) || !startupTaskJson[SRC_ENTRY].is_string() ||
-        !startupTaskJson.contains(NAME) || !startupTaskJson[NAME].is_string()) {
+    cJSON *srcEntryItem = cJSON_GetObjectItem(startupTaskJson, SRC_ENTRY);
+    cJSON *nameItem = cJSON_GetObjectItem(startupTaskJson, NAME);
+    if ((srcEntryItem == nullptr || !cJSON_IsString(srcEntryItem)) ||
+        (nameItem == nullptr || !cJSON_IsString(nameItem))) {
         TAG_LOGE(AAFwkTag::STARTUP, "Invalid startupTaskJson data");
         return false;
     }
@@ -1009,8 +1034,8 @@ bool StartupManager::AnalyzeAppStartupTaskInner(const ModuleStartupConfigInfo& i
     startupTaskInfo.hapPath = info.hapPath_;
     startupTaskInfo.esModule = info.esModule_;
 
-    startupTaskInfo.name = startupTaskJson.at(NAME).get<std::string>();
-    startupTaskInfo.srcEntry = startupTaskJson.at(SRC_ENTRY).get<std::string>();
+    startupTaskInfo.name = nameItem->valuestring;
+    startupTaskInfo.srcEntry = srcEntryItem->valuestring;
     if (startupTaskInfo.name.empty()) {
         TAG_LOGE(AAFwkTag::STARTUP, "startup task name is empty");
         return false;
@@ -1025,17 +1050,19 @@ bool StartupManager::AnalyzeAppStartupTaskInner(const ModuleStartupConfigInfo& i
 }
 
 bool StartupManager::AnalyzePreloadSoStartupTaskInner(const ModuleStartupConfigInfo& info,
-    const nlohmann::json &preloadStartupTaskJson,
+    const cJSON *preloadStartupTaskJson,
     std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks)
 {
-    if (!preloadStartupTaskJson.contains(NAME) || !preloadStartupTaskJson[NAME].is_string() ||
-        !preloadStartupTaskJson.contains(OHMURL) || !preloadStartupTaskJson[OHMURL].is_string()) {
+    cJSON *nameItem = cJSON_GetObjectItem(preloadStartupTaskJson, NAME);
+    cJSON *ohmUrlItem = cJSON_GetObjectItem(preloadStartupTaskJson, OHMURL);
+    if ((nameItem == nullptr || !cJSON_IsString(nameItem)) ||
+        (ohmUrlItem == nullptr || !cJSON_IsString(ohmUrlItem))) {
         TAG_LOGE(AAFwkTag::STARTUP, "Invalid startupTaskJson data");
         return false;
     }
 
-    std::string name = preloadStartupTaskJson.at(NAME).get<std::string>();
-    std::string ohmUrl = preloadStartupTaskJson.at(OHMURL).get<std::string>();
+    std::string name = nameItem->valuestring;
+    std::string ohmUrl = ohmUrlItem->valuestring;
     std::string path = bundleName_ + "/" + info.name_;
     auto task = std::make_shared<PreloadSoStartupTask>(name, ohmUrl, path);
 
@@ -1044,42 +1071,46 @@ bool StartupManager::AnalyzePreloadSoStartupTaskInner(const ModuleStartupConfigI
     return true;
 }
 
-void StartupManager::SetOptionalParameters(const nlohmann::json& module, AppExecFwk::ModuleType moduleType,
+void StartupManager::SetOptionalParameters(const cJSON *module, AppExecFwk::ModuleType moduleType,
     StartupTaskInfo& startupTaskInfo)
 {
-    if (module.contains(DEPENDENCIES) && module[DEPENDENCIES].is_array()) {
-        for (const auto& dependency : module.at(DEPENDENCIES)) {
-            if (dependency.is_string()) {
-                startupTaskInfo.dependencies.push_back(dependency.get<std::string>());
+    cJSON *dependenciesItem = cJSON_GetObjectItem(module, DEPENDENCIES);
+    if (dependenciesItem != nullptr && cJSON_IsArray(dependenciesItem)) {
+        int size = cJSON_GetArraySize(dependenciesItem);
+        for (int i = 0; i < size; i++) {
+            cJSON *dependencyItem = cJSON_GetArrayItem(dependenciesItem, i);
+            if (dependencyItem != nullptr && cJSON_IsString(dependencyItem)) {
+                startupTaskInfo.dependencies.push_back(std::string(dependencyItem->valuestring));
             }
         }
     }
 
-    if (module.contains(RUN_ON_THREAD) && module[RUN_ON_THREAD].is_string()) {
-        std::string profileName = module.at(RUN_ON_THREAD).get<std::string>();
-        if (profileName == TASK_POOL || profileName == TASK_POOL_LOWER) {
-            startupTaskInfo.callCreateOnMainThread = false;
-        } else {
-            startupTaskInfo.callCreateOnMainThread = true;
-        }
+    cJSON *runOnThreadItem = cJSON_GetObjectItem(module, RUN_ON_THREAD);
+    if (runOnThreadItem != nullptr && cJSON_IsString(runOnThreadItem)) {
+        std::string profileName = runOnThreadItem->valuestring;
+        startupTaskInfo.callCreateOnMainThread = !(profileName == TASK_POOL || profileName == TASK_POOL_LOWER);
     }
 
-    if (module.contains(WAIT_ON_MAIN_THREAD) && module[WAIT_ON_MAIN_THREAD].is_boolean()) {
-        startupTaskInfo.waitOnMainThread = module.at(WAIT_ON_MAIN_THREAD).get<bool>();
+    cJSON *waitOnMainThreadItem = cJSON_GetObjectItem(module, WAIT_ON_MAIN_THREAD);
+    if (waitOnMainThreadItem != nullptr && cJSON_IsBool(waitOnMainThreadItem)) {
+        startupTaskInfo.waitOnMainThread = waitOnMainThreadItem->type == cJSON_True;
     } else {
         startupTaskInfo.waitOnMainThread = true;
     }
 
-    if (module.contains(OHMURL) && module[OHMURL].is_string()) {
-        startupTaskInfo.ohmUrl = module.at(OHMURL).get<std::string>();
+    cJSON *ohmUrlItem = cJSON_GetObjectItem(module, OHMURL);
+    if (ohmUrlItem != nullptr && cJSON_IsString(ohmUrlItem)) {
+        startupTaskInfo.ohmUrl = ohmUrlItem->valuestring;
     }
 
     if (moduleType != AppExecFwk::ModuleType::ENTRY && moduleType != AppExecFwk::ModuleType::FEATURE) {
         startupTaskInfo.excludeFromAutoStart = true;
         return;
     }
-    if (module.contains(EXCLUDE_FROM_AUTO_START) && module[EXCLUDE_FROM_AUTO_START].is_boolean()) {
-        startupTaskInfo.excludeFromAutoStart = module.at(EXCLUDE_FROM_AUTO_START).get<bool>();
+
+    cJSON *excludeFromAutoStartItem = cJSON_GetObjectItem(module, EXCLUDE_FROM_AUTO_START);
+    if (excludeFromAutoStartItem != nullptr && cJSON_IsBool(excludeFromAutoStartItem)) {
+        startupTaskInfo.excludeFromAutoStart = excludeFromAutoStartItem->type == cJSON_True;
     } else {
         startupTaskInfo.excludeFromAutoStart = false;
     }
@@ -1087,7 +1118,7 @@ void StartupManager::SetOptionalParameters(const nlohmann::json& module, AppExec
     SetMatchRules(module, startupTaskInfo.matchRules);
 }
 
-void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExecFwk::ModuleType moduleType,
+void StartupManager::SetOptionalParameters(const cJSON *module, AppExecFwk::ModuleType moduleType,
     std::shared_ptr<PreloadSoStartupTask> &task)
 {
     if (task == nullptr) {
@@ -1102,8 +1133,10 @@ void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExec
         task->SetIsExcludeFromAutoStart(true);
         return;
     }
-    if (module.contains(EXCLUDE_FROM_AUTO_START) && module[EXCLUDE_FROM_AUTO_START].is_boolean()) {
-        task->SetIsExcludeFromAutoStart(module.at(EXCLUDE_FROM_AUTO_START).get<bool>());
+
+    cJSON *excludeFromAutoStartItem = cJSON_GetObjectItem(module, EXCLUDE_FROM_AUTO_START);
+    if (excludeFromAutoStartItem != nullptr && cJSON_IsBool(excludeFromAutoStartItem)) {
+        task->SetIsExcludeFromAutoStart(excludeFromAutoStartItem->type == cJSON_True);
     } else {
         task->SetIsExcludeFromAutoStart(false);
     }
@@ -1113,13 +1146,13 @@ void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExec
     task->SetMatchRules(matchRules);
 }
 
-void StartupManager::SetMatchRules(const nlohmann::json &module, StartupTaskMatchRules &matchRules)
+void StartupManager::SetMatchRules(const cJSON *module, StartupTaskMatchRules &matchRules)
 {
-    if (!module.contains(MATCH_RULES) || !module.at(MATCH_RULES).is_object()) {
+    cJSON *matchRulesJson = cJSON_GetObjectItem(module, MATCH_RULES);
+    if (matchRulesJson == nullptr || !cJSON_IsObject(matchRulesJson)) {
+        TAG_LOGE(AAFwkTag::STARTUP, "matchRulesJson error");
         return;
     }
-
-    const nlohmann::json &matchRulesJson = module.at(MATCH_RULES);
     StartupUtils::ParseJsonStringArray(matchRulesJson, URIS, matchRules.uris);
     StartupUtils::ParseJsonStringArray(matchRulesJson, INSIGHT_INTENTS, matchRules.insightIntents);
     StartupUtils::ParseJsonStringArray(matchRulesJson, ACTIONS, matchRules.actions);

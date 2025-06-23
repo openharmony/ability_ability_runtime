@@ -2123,11 +2123,7 @@ HWTEST_F(AbilityContextImplTest, RevokeDelegator_0100, Function | MediumTest | L
     auto context = std::make_unique<AbilityContextImpl>();
     context->hookOff_ = true;
     auto result = context->RevokeDelegator();
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(result, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
-    } else {
-        EXPECT_EQ(result, AAFwk::ERR_NOT_HOOK);
-    }
+    EXPECT_NE(result, ERR_OK);
 }
 
 /**

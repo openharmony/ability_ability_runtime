@@ -20,6 +20,7 @@
 #include "ability_manager_interface.h"
 #include "ability_util.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_chain_utils.h"
 #include "hitrace_meter.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -45,6 +46,7 @@ ErrCode WantAgentClient::GetWantSender(
     const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, sptr<IWantSender> &wantSender,
     int32_t uid)
 {
+    Ability_MANAGER_HITRACE_CHAIN_NAME("GetWantSender", HITRACE_FLAG_INCLUDE_ASYNC);
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY);
     MessageParcel data;
@@ -122,6 +124,29 @@ ErrCode WantAgentClient::SendWantSender(sptr<IWantSender> target, SenderInfo &se
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT;
     }
     return ERR_OK;
+}
+
+ErrCode WantAgentClient::SendLocalWantSender(const SenderInfo &senderInfo)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_AND_RETURN(abms, ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
+    if (!data.WriteParcelable(&senderInfo)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "senderInfo write failed");
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
+    auto error = abms->SendRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::SEND_LOCAL_PENDING_WANT_SENDER),
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "send request error: %{public}d", error);
+        return ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_TIMEOUT;
+    }
+    return reply.ReadInt32();
 }
 
 ErrCode WantAgentClient::CancelWantSender(const sptr<IWantSender> &sender, uint32_t flags)

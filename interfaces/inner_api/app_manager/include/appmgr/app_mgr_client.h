@@ -494,7 +494,7 @@ public:
      * @param requestId for callback
      */
     virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t requestId = 0);
+        int32_t requestId = 0, std::string customProcess = "");
 
     /**
      * Schedule accept want done.
@@ -725,6 +725,14 @@ public:
      * @param uid indicates user, 0 for all users
      */
     void SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid);
+
+    /**
+     * @brief Set non-resident keep-alive app service extension status.
+     * @param bundleName The application bundle name.
+     * @param enable The current updated enable status.
+     * @param uid indicates user.
+     */
+    void SetKeepAliveAppService(const std::string &bundleName, bool enable, int32_t uid);
 
     /**
      * Register application or process state observer.
@@ -978,6 +986,21 @@ public:
      */
     virtual AppMgrResultCode IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId,
         bool &isRunning);
+
+    /**
+     * Elevate the current process to be a candidate master process.
+     *
+     * @param isInsertToHead Whether insert current process to the head of candidate master process list.
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t PromoteCurrentToCandidateMasterProcess(bool isInsertToHead);
+    
+    /**
+     * Revoke current process as a candidate master process.
+     *
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t DemoteCurrentFromCandidateMasterProcess();
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

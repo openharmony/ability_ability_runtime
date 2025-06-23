@@ -13,6 +13,7 @@
 
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
+import("//foundation/ability/ability_runtime/test/unittest/ability_manager_service_third_test/abilitymgr.gni")
 
 module_output_path = "ability_runtime/ability_runtime/abilitymgr"
 
@@ -36,35 +37,30 @@ ohos_unittest("ability_manager_service_third_test") {
     "${ability_runtime_test_path}/mock/mock_sa_call",
     "${ability_runtime_test_path}/unittest/ability_manager_client_branch_test",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit/include",
+    "${ability_runtime_services_path}/appdfr/include",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection",
+    "${ability_runtime_services_path}/abilitymgr/include/mission",
+    "mock/include",
   ]
 
   sources = [
+    "ability_manager_service_third_test.cpp",
+    "mock/src/mock_free_install_manager.cpp",
+    "mock/src/mock_want_utils.cpp",
     "${ability_runtime_innerkits_path}/uri_permission/src/uri_permission_load_callback.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_auto_startup_data_manager.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_auto_startup_service.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_bundle_event_callback.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/utils/hmsf_utils.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_rdb_data_mgr.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_rdb_storage_mgr.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_db_cache.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/extract_insight_intent_profile.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_event_mgr.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_cache_manager.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_connect_callback_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/auto_startup_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/deeplink_reserve/deeplink_reserve_config.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/sub_managers_helper.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/utils/ability_event_util.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/utils/timeout_state_utils.cpp",
-    "${ability_runtime_services_path}/common/src/event_report.cpp",
     "${ability_runtime_services_path}/common/src/ffrt_task_handler_wrap.cpp",
     "${ability_runtime_services_path}/common/src/queue_task_handler_wrap.cpp",
     "${ability_runtime_services_path}/common/src/task_handler_wrap.cpp",
-    "ability_manager_service_third_test.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ability_manager_service.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/report_data_partition_usage_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/request_id_util.cpp",
   ]
+  sources += abilityms_files
 
-  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
+  configs = [
+    "${ability_runtime_services_path}/abilitymgr:abilityms_config",
+    "${ability_runtime_services_path}/abilitymgr:abilityms_exception_config",
+  ]
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
@@ -83,56 +79,158 @@ ohos_unittest("ability_manager_service_third_test") {
     "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:event_report",
     "${ability_runtime_services_path}/common:perm_verification",
+    "${ability_runtime_services_path}/common:rate_limiter",
     "${ability_runtime_services_path}/common:record_cost_time_util",
     "${ability_runtime_services_path}/common:task_handler_wrap",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit:aakit_mock",
+    "${ability_runtime_services_path}/abilitymgr:wantagent_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/ability_manager:start_window_option",
+    "${ability_runtime_innerkits_path}/connectionobs_manager:connection_obs_manager",
+    "${ability_runtime_innerkits_path}/session_handler:session_handler",
+    "${ability_runtime_services_path}/common:res_sched_util",
   ]
 
   external_deps = [
+    "ability_base:base",
+    "ability_base:configuration",
+    "ability_base:extractortool",
     "ability_base:session_info",
+    "ability_base:view_data",
     "ability_base:want",
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "bundle_framework:libappexecfwk_common",
-    "cJSON:cjson",
     "c_utils:utils",
+    "cJSON:cjson",
+    "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
+    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
+    "faultloggerd:libbacktrace_local",
     "ffrt:libffrt",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "hicollie:libhicollie",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "icu:shared_icuuc",
+    "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
+    "os_account:os_account_innerkits",
+    "qos_manager:concurrent_task_client",
+    "relational_store:native_appdatafwk",
+    "relational_store:native_dataability",
+    "relational_store:native_rdb",
     "safwk:api_cache_manager",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "selinux_adapter:librestorecon",
+    "window_manager:libmodal_system_ui_extension_client",
+    "window_manager:libwsutils",
+    "window_manager:scene_session",
+    "window_manager:session_manager_lite",
+    "window_manager:sms",
   ]
+  public_external_deps = [ "background_task_mgr:bgtaskmgr_innerkits" ]
 
-  if (ability_runtime_graphics) {
-    external_deps += [
-      "window_manager:libdm",
-      "window_manager:libwsutils",
-      "window_manager:scene_session",
-      "window_manager:session_manager_lite",
-    ]
+  if (background_task_mgr_continuous_task_enable) {
+    external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
   }
-  if (ability_runtime_feature_sandboxmanager) {
-    external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
-    defines = [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
+
+  if (resource_schedule_service_enable) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
   }
+
+  if (memmgr_override_enable) {
+    external_deps += [ "memmgr:memmgrclient" ]
+  }
+
   cflags_cc = []
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]
+    external_deps += [
+      "dlp_permission_service:libdlp_permission_sdk",
+      "dlp_permission_service:libdlpparse",
+    ]
+  }
+
+  defines = []
+
+  if (ability_runtime_auto_fill) {
+    defines += [ "SUPPORT_AUTO_FILL" ]
+  }
+
+  if (ability_runtime_child_process) {
+    defines += [ "SUPPORT_CHILD_PROCESS" ]
+  }
+
+  if (ability_runtime_graphics) {
+    defines += [ "SUPPORT_GRAPHICS" ]
+    external_deps += [
+      "ability_base:session_info",
+      "i18n:intl_util",
+      "icu:shared_icuuc",
+      "image_framework:image_native",
+      "input:libmmi-client",
+      "resource_management:global_resmgr",
+      "screenlock_mgr:screenlock_client",
+      "window_manager:libdm",
+      "window_manager:libmodal_system_ui_extension_client",
+      "window_manager:libwm",
+      "window_manager:libwsutils",
+      "window_manager:scene_session",
+      "window_manager:sms",
+    ]
+  }
+
+  if (ability_runtime_upms) {
+    defines += [ "SUPPORT_UPMS" ]
+    deps += [
+      "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    ]
+  }
+
+  if (ability_runtime_feature_sandboxmanager) {
+    external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
+    defines += [
+      "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER",
+      "SUPPORT_APP_SELECTOR"
+    ]
+  }
+
+  if (include_app_domain_verify) {
+    external_deps += [
+      "app_domain_verify:app_domain_verify_common",
+      "app_domain_verify:app_domain_verify_mgr_client",
+    ]
+    defines += [ "APP_DOMAIN_VERIFY_ENABLED" ]
+  }
+
+  if (ability_runtime_power) {
+    defines += [ "SUPPORT_POWER" ]
+    external_deps += [ "power_manager:powermgr_client" ]
+  }
+
+  if (ability_runtime_graphics &&
+      ability_runtime_start_window_options_with_pixelmap) {
+    defines += [ "START_WINDOW_OPTIONS_WITH_PIXELMAP" ]
+    external_deps += [ "image_framework:image_native" ]
+  }
+
+  if (ability_runtime_no_screen) {
+    defines += ["DISABLE_LAUNCHER"]
   }
 }
 

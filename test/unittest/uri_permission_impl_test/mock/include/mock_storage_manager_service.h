@@ -129,6 +129,13 @@ public:
         return E_OK;
     }
 
+    virtual int32_t NotifyVolumeDamaged(const std::string &volumeId,
+        const std::string &fsTypeStr, const std::string &fsUuid,
+        const std::string &path, const std::string &description) override
+    {
+        return E_OK;
+    }
+
     virtual int32_t NotifyVolumeStateChanged(const std::string &volumeId, uint32_t state) override
     {
         return E_OK;
@@ -140,6 +147,11 @@ public:
     }
 
     virtual int32_t Unmount(const std::string &volumeId) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t TryToFix(const std::string &volumeId) override
     {
         return E_OK;
     }
@@ -312,10 +324,10 @@ public:
         return E_OK;
     }
 
-    virtual int32_t CreateShareFile(const std::vector<std::string> &uriList,
+    virtual int32_t CreateShareFile(const StorageFileRawData &rawData,
         uint32_t tokenId, uint32_t flag, std::vector<int32_t> &funcResult) override
     {
-        int size = uriList.size();
+        int32_t size = static_cast<int32_t>(rawData.size);
         if (size <= 0) {
             return -1;
         }
@@ -327,7 +339,7 @@ public:
         return E_OK;
     }
 
-    virtual int32_t DeleteShareFile(uint32_t tokenId, const std::vector<std::string> &sharePathList) override
+    virtual int32_t DeleteShareFile(uint32_t tokenId, const StorageFileRawData &rawData) override
     {
         return E_OK;
     }
@@ -339,13 +351,6 @@ public:
     }
 
     virtual int32_t UpdateMemoryPara(int32_t size, int32_t &oldSize) override
-    {
-        return E_OK;
-    }
-
-    virtual int32_t GetBundleStatsForIncrease(uint32_t userId, const std::vector<std::string> &bundleNames,
-        const std::vector<int64_t> &incrementalBackTimes, std::vector<int64_t> &pkgFileSizes,
-        std::vector<int64_t> &incPkgFileSizes) override
     {
         return E_OK;
     }
@@ -378,6 +383,21 @@ public:
 
     int32_t SetBundleQuota(const std::string &bundleName, int32_t uid,
         const std::string &bundleDataDirPath, int32_t limitSizeMb) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t MountDisShareFile(int32_t userId, const std::map<std::string, std::string> &shareFiles)
+    {
+        return E_OK;
+    }
+
+    virtual int32_t UMountDisShareFile(int32_t userId, const std::string &networkId)
+    {
+        return E_OK;
+    }
+
+    virtual int32_t InactiveUserPublicDirKey(uint32_t userId) override
     {
         return E_OK;
     }

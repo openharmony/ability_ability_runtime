@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,13 @@
 
 #include <string>
 #include <memory>
+
+#include "cJSON.h"
 #include "context/application_context.h"
 #include "completed_callback.h"
 #include "completed_dispatcher.h"
 #include "event_handler.h"
+#include "local_want_agent_info.h"
 #include "nlohmann/json.hpp"
 #include "trigger_info.h"
 #include "want.h"
@@ -75,6 +78,18 @@ public:
      */
     static std::shared_ptr<WantAgent> GetWantAgent(const WantAgentInfo &paramsInfo,
         int32_t userId = INVLID_WANT_AGENT_USER_ID, int32_t uid = -1);
+
+    /**
+     * Creates a LocalWantAgent object.
+     *
+     * @param context Indicates the context of the caller. This parameter cannot be null.
+     * @param paramsInfo Indicates the LocalWantAgentInfo object that contains parameters of the
+     * WantAgent object to create.
+     * @return Returns ERR_OK If create local wantagent correctly.
+     */
+    static ErrCode CreateLocalWantAgent(
+        const std::shared_ptr<OHOS::AbilityRuntime::ApplicationContext> &context,
+        const LocalWantAgentInfo &paramsInfo, std::shared_ptr<WantAgent> &wantAgent);
 
     /**
      * Obtains an WantAgent object operation type.
@@ -195,9 +210,14 @@ private:
         const TriggerInfo &paramsInfo,
         sptr<IRemoteObject> callerToken);
 
+    static ErrCode Send(const std::shared_ptr<LocalPendingWant> &localPendingWant,
+        const sptr<CompletedDispatcher> &callBack,
+        const TriggerInfo &paramsInfo,
+        sptr<IRemoteObject> callerToken);
+
     static unsigned int FlagsTransformer(const std::vector<WantAgentConstant::Flags> &flags);
 
-    static std::vector<WantAgentConstant::Flags> ParseFlags(nlohmann::json jsonObject);
+    static std::vector<WantAgentConstant::Flags> ParseFlags(cJSON *jsonObject);
 };
 }  // namespace OHOS::AbilityRuntime::WantAgent
 #endif  // OHOS_ABILITY_RUNTIME_WANT_AGENT_HELPER_H

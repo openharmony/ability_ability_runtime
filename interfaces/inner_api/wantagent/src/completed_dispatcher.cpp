@@ -24,6 +24,11 @@ CompletedDispatcher::CompletedDispatcher(const std::shared_ptr<PendingWant> &pen
     : pendingWant_(pendingWant), callback_(callback), handler_(handler)
 {}
 
+CompletedDispatcher::CompletedDispatcher(const std::shared_ptr<LocalPendingWant> &localPendingWant,
+    const std::shared_ptr<CompletedCallback> &callback, const std::shared_ptr<AppExecFwk::EventHandler> &handler)
+    : localPendingWant_(localPendingWant), callback_(callback), handler_(handler)
+{}
+
 void CompletedDispatcher::Send(const int32_t resultCode)
 {}
 

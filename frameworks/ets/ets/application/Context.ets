@@ -23,9 +23,11 @@ export class Context extends BaseContext {
   static {
     loadLibrary("context_ani");
   }
-  area: contextConstant.AreaMode = contextConstant.AreaMode.EL1;
   filesDir: string = "";
   tempDir: string = "";
+  preferencesDir: string = "";
+  databaseDir: string = "";
+  cacheDir: string = "";
   applicationInfo: ApplicationInfo;
   resourceManager: resmgr.ResourceManager;
   native constructor();
@@ -35,8 +37,18 @@ export class Context extends BaseContext {
       this.resourceManager = resourceManager;
   }
   public native getApplicationContextSync(): ApplicationContext;
-  
+  private native switchArea(mode: contextConstant.AreaMode): void;
+  private native getArea(): contextConstant.AreaMode;
+
   getApplicationContext(): ApplicationContext {
     return this.getApplicationContextSync();
+  }
+
+  set area(mode: contextConstant.AreaMode) {
+    this.switchArea(mode);
+  }
+
+  get area(): contextConstant.AreaMode {
+    return this.getArea();
   }
 }

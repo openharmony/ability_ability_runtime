@@ -17,9 +17,10 @@
 
 namespace OHOS {
 namespace AppDomainVerify {
-bool AppDomainVerifyMgrClient::isAtomicServiceUrlFlag_ = false;
+bool AppDomainVerifyMgrClient::isShortUrlFlag_ = false;
 AAFwk::Want AppDomainVerifyMgrClient::explicitWant_;
 int AppDomainVerifyMgrClient::convertResultCode_ = 0;
+AppDomainVerify::TargetInfo AppDomainVerifyMgrClient::convertTargetInfo_;
 
 AppDomainVerifyMgrClient::AppDomainVerifyMgrClient()
 {
@@ -31,9 +32,9 @@ AppDomainVerifyMgrClient::~AppDomainVerifyMgrClient()
     taskHandler_.reset();
 }
 
-bool AppDomainVerifyMgrClient::IsAtomicServiceUrl(const std::string& url)
+bool AppDomainVerifyMgrClient::IsShortUrl(const std::string& url)
 {
-    return isAtomicServiceUrlFlag_;
+    return isShortUrlFlag_;
 }
 
 void AppDomainVerifyMgrClient::ConvertToExplicitWant(OHOS::AAFwk::Want& implicitWant, sptr<IConvertCallback>& callback)
@@ -43,7 +44,7 @@ void AppDomainVerifyMgrClient::ConvertToExplicitWant(OHOS::AAFwk::Want& implicit
             AppDomainVerifyMgrClient::explicitWant_.SetUri(want.GetUriString());
             if (callback != nullptr) {
                 callback->OnConvert(AppDomainVerifyMgrClient::convertResultCode_,
-                    AppDomainVerifyMgrClient::explicitWant_);
+                    AppDomainVerifyMgrClient::convertTargetInfo_);
             }
         });
     }

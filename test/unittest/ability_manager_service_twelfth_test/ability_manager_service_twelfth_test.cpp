@@ -40,6 +40,7 @@ using OHOS::AppExecFwk::AbilityType;
 using OHOS::AppExecFwk::ExtensionAbilityType;
 
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
+constexpr char KIOSK_MODE_ENABLED[] = "const.product.kioskmode.enabled";
 constexpr const char* DEBUG_APP = "debugApp";
 constexpr const char* START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
 constexpr int32_t ONE = 1;
@@ -1004,15 +1005,17 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, UpdateKioskApplicationList_Success, T
     IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
     IPCSkeleton::SetCallingTokenID(ONE);
     auto abilityManagerService = std::make_shared<AbilityManagerService>();
-    abilityManagerService->Init();
     std::vector<std::string> bundleNames;
     bundleNames.emplace_back("com.test.demo");
     bundleNames.emplace_back("com.test.demo1");
     bundleNames.emplace_back("com.test.demo2");
     MyFlag::flag_ = true;
-    auto result =
-        abilityManagerService->UpdateKioskApplicationList(bundleNames);
-    ASSERT_EQ(result, ERR_OK);
+    auto result = abilityManagerService->UpdateKioskApplicationList(bundleNames);
+    if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(result, ERR_OK);
+    }
 }
 
 /*
@@ -1025,15 +1028,17 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, UpdateKioskApplicationList_Fail, Test
     IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
     IPCSkeleton::SetCallingTokenID(ONE);
     auto abilityManagerService = std::make_shared<AbilityManagerService>();
-    abilityManagerService->Init();
     std::vector<std::string> bundleNames;
     bundleNames.emplace_back("com.test.demo");
     bundleNames.emplace_back("com.test.demo1");
     bundleNames.emplace_back("com.test.demo2");
     MyFlag::flag_ = false;
-    auto result =
-        abilityManagerService->UpdateKioskApplicationList(bundleNames);
-    ASSERT_EQ(result, CHECK_PERMISSION_FAILED);
+    auto result = abilityManagerService->UpdateKioskApplicationList(bundleNames);
+    if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(result, CHECK_PERMISSION_FAILED);
+    }
 }
 
 /*
@@ -1046,15 +1051,17 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, EnterKioskMode_Fail, TestSize.Level1)
     IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
     IPCSkeleton::SetCallingTokenID(ONE);
     auto abilityManagerService = std::make_shared<AbilityManagerService>();
-    abilityManagerService->Init();
     std::vector<std::string> bundleNames;
     bundleNames.emplace_back("com.test.demo");
     MyFlag::flag_ = true;
     auto result = abilityManagerService->UpdateKioskApplicationList(bundleNames);
     auto callerToken = MockToken(AbilityType::PAGE);
-    result =
-        abilityManagerService->EnterKioskMode(callerToken);
-    ASSERT_EQ(result, ERR_APP_NOT_IN_FOCUS);
+    result = abilityManagerService->EnterKioskMode(callerToken);
+    if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(result, ERR_APP_NOT_IN_FOCUS);
+    }
 }
 
 /*
@@ -1067,10 +1074,13 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, ExitKioskMode_Fail, TestSize.Level1) 
     IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
     IPCSkeleton::SetCallingTokenID(ONE);
     auto abilityManagerService = std::make_shared<AbilityManagerService>();
-    abilityManagerService->Init();
     auto callerToken = MockToken(AbilityType::PAGE);
     auto result = abilityManagerService->ExitKioskMode(callerToken);
-    ASSERT_EQ(result, ERR_KIOSK_MODE_NOT_IN_WHITELIST);
+    if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(result, ERR_KIOSK_MODE_NOT_IN_WHITELIST);
+    }
 }
 
 /*
@@ -1083,11 +1093,14 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, GetKioskStatus, TestSize.Level1) {
     IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
     IPCSkeleton::SetCallingTokenID(ONE);
     auto abilityManagerService = std::make_shared<AbilityManagerService>();
-    abilityManagerService->Init();
     KioskStatus kioskStatus;
     MyFlag::flag_ = true;
     auto result = abilityManagerService->GetKioskStatus(kioskStatus);
-    ASSERT_EQ(result, ERR_OK);
+    if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(result, ERR_OK);
+    }
 }
 
 /*
@@ -1105,7 +1118,11 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_UpdateKioskApplicationLi
     bundleNames.emplace_back("com.test.demo2");
     bundleNames.emplace_back("com.test.demo3");
     auto result = KioskManager::GetInstance().UpdateKioskApplicationList(bundleNames);
-    ASSERT_EQ(result, ERR_OK);
+    if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(result, ERR_OK);
+    }
 }
 
 /*
@@ -1117,7 +1134,11 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_UpdateKioskApplicationLi
 HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_EnterKioskMode_Fail_01, TestSize.Level1) {
     auto callerToken = MockToken(AbilityType::PAGE);
     auto result = KioskManager::GetInstance().EnterKioskMode(callerToken);
-    ASSERT_EQ(result, ERR_APP_NOT_IN_FOCUS);
+    if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(result, ERR_APP_NOT_IN_FOCUS);
+    }
 }
 
 /*
@@ -1129,7 +1150,11 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_EnterKioskMode_Fail_01, 
 HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_ExitKioskMode_Fail_01, TestSize.Level1) {
     auto callerToken = MockToken(AbilityType::PAGE);
     auto result = KioskManager::GetInstance().ExitKioskMode(callerToken);
-    ASSERT_EQ(result, ERR_KIOSK_MODE_NOT_IN_WHITELIST);
+    if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(result, ERR_KIOSK_MODE_NOT_IN_WHITELIST);
+    }
 }
 
 /*
@@ -1144,7 +1169,11 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_GetKioskStatus_Success, 
     MyFlag::flag_ = true;
     KioskStatus kioskStatus;
     auto result = KioskManager::GetInstance().GetKioskStatus(kioskStatus);
-    ASSERT_EQ(result, ERR_OK);
+    if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
+        ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        ASSERT_EQ(result, ERR_OK);
+    }
 }
 
 
@@ -1198,6 +1227,9 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, SuspendExtensionAbility_001, TestSize
     connect = new AbilityConnectCallback();
     EXPECT_EQ(abilityMs_->SuspendExtensionAbility(connect), ERR_NO_INIT);
 
+    MyFlag::flag_ = false;
+    EXPECT_EQ(abilityMs_->SuspendExtensionAbility(connect), CHECK_PERMISSION_FAILED);
+
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SuspendExtensionAbility_001 end");
 }
 
@@ -1218,7 +1250,60 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, ResumeExtensionAbility_001, TestSize.
     connect = new AbilityConnectCallback();
     EXPECT_EQ(abilityMs_->ResumeExtensionAbility(connect), ERR_NO_INIT);
 
+    MyFlag::flag_ = false;
+    EXPECT_EQ(abilityMs_->ResumeExtensionAbility(connect), CHECK_PERMISSION_FAILED);
+
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest ResumeExtensionAbility_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnAbilityDied
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnAbilityDied
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, OnAbilityDied_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest OnAbilityDied_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
+    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
+    EXPECT_NE(abilityRecord, nullptr);
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = false;
+    abilityMs->OnAbilityDied(abilityRecord);
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = true;
+    abilityMs->OnAbilityDied(abilityRecord);
+    EXPECT_NE(abilityRecord->GetToken(), nullptr);
+    KioskManager::GetInstance().whitelist_.emplace(abilityRecord->GetAbilityInfo().bundleName);
+    abilityMs->OnAbilityDied(abilityRecord);
+    if (system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
+        EXPECT_EQ(KioskManager::GetInstance().kioskStatus_.kioskBundleName_, "");
+    }
+    EXPECT_FALSE(abilityMs->VerificationToken(token));
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest OnAbilityDied_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: HandleExtensionAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService HandleExtensionAbility
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, HandleExtensionAbility_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest HandleExtensionAbility_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    sptr<IAbilityConnection> connect = nullptr;
+
+    EXPECT_EQ(abilityMs_->HandleExtensionAbility(connect,
+        [](std::shared_ptr<AbilityConnectManager> connectManager, sptr<IAbilityConnection> connect) {
+            return connectManager->ResumeExtensionAbilityLocked(connect);}), ERR_INVALID_VALUE);
+
+    connect = new AbilityConnectCallback();
+    EXPECT_EQ(abilityMs_->HandleExtensionAbility(connect,
+        [](std::shared_ptr<AbilityConnectManager> connectManager, sptr<IAbilityConnection> connect) {
+            return connectManager->ResumeExtensionAbilityLocked(connect);}), ERR_NO_INIT);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest HandleExtensionAbility_001 end");
 }
 } // namespace AAFwk
 } // namespace OHOS

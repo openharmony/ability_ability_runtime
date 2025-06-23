@@ -50,6 +50,8 @@ public:
     int permPermission_ = 1;
     bool perJudgeCallerIsAllowedToUseSystemAPI_ = true;
     bool paramGetBoolParameter_ = true;
+    std::shared_ptr<AbilityRecord> acmGetUIExtensionBySessionInfo_ = nullptr;
+    std::shared_ptr<AbilityRecord> acmGetUIExtensionBySessionFromServiceMap_ = nullptr;
 };
 } // namespace AAFwk
 } // namespace OHOS

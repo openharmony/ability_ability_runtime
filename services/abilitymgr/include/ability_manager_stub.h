@@ -125,6 +125,7 @@ private:
 
     int GetWantSenderInner(MessageParcel &data, MessageParcel &reply);
     int SendWantSenderInner(MessageParcel &data, MessageParcel &reply);
+    int SendLocalWantSenderInner(MessageParcel &data, MessageParcel &reply);
     int CancelWantSenderInner(MessageParcel &data, MessageParcel &reply);
 
     int GetPendingWantUidInner(MessageParcel &data, MessageParcel &reply);

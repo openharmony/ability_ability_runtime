@@ -18,6 +18,7 @@
 
 #include <string>
 #include <memory>
+#include "local_pending_want.h"
 #include "parcel.h"
 #include "pending_want.h"
 #include "want.h"
@@ -36,11 +37,25 @@ public:
     explicit WantAgent(const std::shared_ptr<PendingWant> &pendingWant);
 
     /**
+     * Constructor.
+     *
+     * @param obj The proxy object.
+     */
+    explicit WantAgent(const std::shared_ptr<LocalPendingWant> &localPendingWant);
+
+    /**
      * Gets proxy obj.
      *
      * @return Return obj.
      */
     std::shared_ptr<PendingWant> GetPendingWant();
+
+    /**
+     * Gets proxy obj.
+     *
+     * @return Return obj.
+     */
+    std::shared_ptr<LocalPendingWant> GetLocalPendingWant();
 
     /**
      * Sets proxy obj.
@@ -79,7 +94,11 @@ public:
      */
     static void SetIsMultithreadingSupported(bool isMultithreadingSupported);
 
+    bool IsLocal();
+
 private:
+    std::shared_ptr<LocalPendingWant> localPendingWant_;
+    bool isLocal_ = false;
     std::shared_ptr<PendingWant> pendingWant_;
     static bool isMultithreadingSupported_;
 };

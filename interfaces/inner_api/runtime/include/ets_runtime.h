@@ -35,6 +35,7 @@ using AppLibPathVec = std::vector<std::string>;
 namespace OHOS {
 namespace EtsEnv {
 class ETSEnvironment;
+struct ETSUncaughtExceptionInfo;
 } // namespace EtsEnv
 
 namespace AbilityRuntime {
@@ -46,7 +47,7 @@ struct ETSNativeReference {
 
 class ETSRuntime : public Runtime {
 public:
-    static std::unique_ptr<ETSRuntime> Create(const Options &options, Runtime *jsRuntime);
+    static std::unique_ptr<ETSRuntime> Create(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
     static void SetAppLibPath(const AppLibPathMap &appLibPaths);
     ~ETSRuntime() override;
     Language GetLanguage() const override
@@ -81,24 +82,25 @@ public:
     void DumpCpuProfile() override {};
     void AllowCrossThreadExecution() override {};
     void GetHeapPrepare() override {};
-    void RegisterUncaughtExceptionHandler(void *uncaughtExceptionInfo) override;
+    void RegisterUncaughtExceptionHandler(const EtsEnv::ETSUncaughtExceptionInfo &uncaughtExceptionInfo);
     ani_env *GetAniEnv();
     std::unique_ptr<ETSNativeReference> LoadModule(const std::string &moduleName, const std::string &modulePath,
         const std::string &hapPath, bool esmodule, bool useCommonChunk, const std::string &srcEntrance);
-    std::unique_ptr<ETSNativeReference> LoadEtsModule(const std::string &moduleName, const std::string &fileName,
-        const std::string &hapPath, const std::string &srcEntrance);
-    void HandleUncaughtError();
+    bool HandleUncaughtError();
+    const std::unique_ptr<AbilityRuntime::Runtime> &GetJsRuntime() const;
 
 private:
-    bool Initialize(const Options &options, Runtime *jsRuntime);
+    bool Initialize(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
     void Deinitialize();
     bool CreateEtsEnv(const Options &options, Runtime *jsRuntime);
-    bool LoadAbcLinker(ani_env *env, const std::string &moduleName, ani_class &abcCls, ani_object &abcObj);
+    std::unique_ptr<ETSNativeReference> LoadEtsModule(const std::string &moduleName, const std::string &fileName,
+        const std::string &hapPath, const std::string &srcEntrance);
     std::shared_ptr<EtsEnv::ETSEnvironment> etsEnv_;
     int32_t apiTargetVersion_ = 0;
     std::string codePath_;
     static AppLibPathVec appLibPaths_;
     std::string moduleName_;
+    std::unique_ptr<AbilityRuntime::Runtime> jsRuntime_ = nullptr;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

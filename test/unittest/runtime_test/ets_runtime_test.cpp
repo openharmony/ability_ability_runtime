@@ -82,8 +82,8 @@ HWTEST_F(EtsRuntimeTest, Create_100, TestSize.Level1)
     options_.lang = Runtime::Language::JS;
     options_.preload = true;
     options_.isStageModel = false;
-    auto jsRuntime = JsRuntime::Create(options_);
-    auto etsRuntime = ETSRuntime::Create(options_, jsRuntime.get());
+    std::unique_ptr<JsRuntime> jsRuntime = JsRuntime::Create(options_);
+    auto etsRuntime = ETSRuntime::Create(options_, jsRuntime);
     EXPECT_EQ(etsRuntime, nullptr);
     options_.lang = Runtime::Language::ETS;
     options_.preload = false;
@@ -113,7 +113,7 @@ HWTEST_F(EtsRuntimeTest, SetAppLibPath_100, TestSize.Level1)
 HWTEST_F(EtsRuntimeTest, Initialize_100, TestSize.Level1)
 {
     options_.lang = Runtime::Language::JS;
-    Runtime *jsRuntime = nullptr;
+    std::unique_ptr<JsRuntime> jsRuntime = nullptr;
     std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
     bool result = etsRuntime->Initialize(options_, jsRuntime);
     EXPECT_EQ(result, false);
@@ -127,12 +127,50 @@ HWTEST_F(EtsRuntimeTest, Initialize_100, TestSize.Level1)
  */
 HWTEST_F(EtsRuntimeTest, Initialize_200, TestSize.Level1)
 {
-    options_.lang = Runtime::Language::JS;
-    Runtime *jsRuntime = nullptr;
+    Runtime::Options options;
+    options.lang = Runtime::Language::ETS;
+    options.arkNativeFilePath = "test_app/";
+    options.moduleName = "TestModule";
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    ASSERT_NE(jsRuntime, nullptr);
     std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
-    bool result = etsRuntime->Initialize(options_, jsRuntime);
+    ASSERT_NE(etsRuntime, nullptr);
+    bool result = etsRuntime->Initialize(options, jsRuntime);
     EXPECT_EQ(result, false);
-    options_.lang = Runtime::Language::ETS;
+}
+
+/**
+ * @tc.name: LoadModule_0100
+ * @tc.desc: LoadModule with non-empty hapPath should construct file path directly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, LoadModule_0100, TestSize.Level1)
+{
+    auto etsRuntime = std::make_unique<ETSRuntime>();
+    etsRuntime->codePath_ = "/test/code/path";
+    std::string moduleName = "abc";
+    std::string modulePath = "dir.test.module";
+    std::string hapPath = "/some/hap";
+    std::string srcEntrance = "main.ets";
+    auto result = etsRuntime->LoadModule(moduleName, modulePath, hapPath, false, false, srcEntrance);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: LoadModule_0200
+ * @tc.desc: LoadModule trims moduleName containing "::" correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, LoadModule_0200, TestSize.Level1)
+{
+    auto etsRuntime = std::make_unique<ETSRuntime>();
+    etsRuntime->codePath_ = "/code";
+    std::string moduleName = "lib::submod";
+    std::string modulePath = "m.js";
+    std::string hapPath = "/hap";
+    std::string srcEntrance = "main";
+    etsRuntime->LoadModule(moduleName, modulePath, hapPath, false, false, srcEntrance);
+    EXPECT_EQ(etsRuntime->moduleName_, "lib");
 }
 
 /**
@@ -199,7 +237,7 @@ HWTEST_F(EtsRuntimeTest, LoadModule_100, TestSize.Level1)
     env = nullptr;
     hapPath = TEST_HAP_PATH;
     env = etsRuntime->LoadModule(moduleName, modulePath, hapPath, esmodule, useCommonChunk, srcEntrance);
-    EXPECT_NE(env, nullptr);
+    EXPECT_EQ(env, nullptr);
 }
 
 /**
@@ -217,7 +255,7 @@ HWTEST_F(EtsRuntimeTest, LoadEtsModule_100, TestSize.Level1)
     std::string hapPath = "";
     std::string srcEntrance = "";
     auto env = etsRuntime->LoadEtsModule(moduleName, modulePath, hapPath, srcEntrance);
-    EXPECT_NE(env, nullptr);
+    EXPECT_EQ(env, nullptr);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,12 +23,18 @@ namespace AAFwk {
 bool MainElementUtils::checkMainUIAbilityResult = false;
 bool MainElementUtils::checkStatusBarAbilityResult = false;
 bool MainElementUtils::checkAppServiceExtensionResult = false;
+int32_t MainElementUtils::usedUpdateMainElementTimes = 0;
+int32_t MainElementUtils::usedCheckMainUIAbilityTime = 0;
 
 void MainElementUtils::UpdateMainElement(const std::string &bundleName, const std::string &moduleName,
-    const std::string &mainElement, bool updateEnable, int32_t userId) {}
+    const std::string &mainElement, bool updateEnable, int32_t userId)
+{
+    usedUpdateMainElementTimes++;
+}
 
 bool MainElementUtils::CheckMainUIAbility(const AppExecFwk::BundleInfo &bundleInfo, std::string& mainElementName)
 {
+    usedCheckMainUIAbilityTime++;
     return checkMainUIAbilityResult;
 }
 

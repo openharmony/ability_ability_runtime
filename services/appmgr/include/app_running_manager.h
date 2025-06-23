@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,6 +101,21 @@ public:
      */
     bool CheckAppRunningRecordIsExist(const std::string &bundleName, const std::string &abilityName);
 #endif
+
+    /**
+     * CheckMasterProcessAppRunningRecordIsExist, Get master process record by application name and ability information.
+     *
+     * @param appName, the application name.
+     * @param abilityInfo, the ability information.
+     * @param uid, the process uid.
+     *
+     * @return process record.
+     */
+    std::shared_ptr<AppRunningRecord> FindMasterProcessAppRunningRecord(const std::string &appName,
+        const AppExecFwk::AbilityInfo &abilityInfo, const int uid);
+
+    bool CheckMasterProcessAppRunningRecordIsExist(const std::string &appName,
+        const AppExecFwk::AbilityInfo &abilityInfo, const int uid);
 
     /**
      * Check whether the process of the application exists.
@@ -426,6 +441,9 @@ public:
 
     void HandleChildRelation(
         std::shared_ptr<ChildProcessRecord> childRecord, std::shared_ptr<AppRunningRecord> appRecord);
+    std::shared_ptr<AppRunningRecord> CheckAppRunningRecordForUIExtension(
+        int32_t uid, const std::string &instanceKey, const std::string &customProcessFlag);
+
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);
@@ -435,6 +453,8 @@ private:
     void RemoveTimeoutDeadAppRecord();
     void ExecuteConfigurationTask(const BackgroundAppInfo& info, const int32_t userId);
     bool UpdateConfiguration(std::shared_ptr<AppRunningRecord> &appRecord, Rosen::ConfigMode configMode);
+    bool IsSameAbilityType(
+        const std::shared_ptr<AppRunningRecord> &appRecord, const AppExecFwk::AbilityInfo &abilityInfo);
 private:
     std::mutex runningRecordMapMutex_;
     std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> appRunningRecordMap_;

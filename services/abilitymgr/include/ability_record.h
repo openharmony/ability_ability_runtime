@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -253,6 +253,7 @@ struct AbilityRequest {
     bool isQueryERMS = false;
     bool isEmbeddedAllowed = false;
     bool callSpecifiedFlagTimeout = false;
+    bool hideStartWindow = false;
     int32_t restartCount = -1;
     int32_t uid = 0;
     int32_t collaboratorType = CollaboratorType::DEFAULT_TYPE;
@@ -412,7 +413,7 @@ public:
      * foreground the ability.
      *
      */
-    void ForegroundAbility(uint32_t sceneFlag = 0);
+    void ForegroundAbility(uint32_t sceneFlag = 0, bool hasLastWant = false);
     void ForegroundUIExtensionAbility(uint32_t sceneFlag = 0);
 
     /**
@@ -1213,6 +1214,16 @@ public:
         return launchWant_;
     }
 
+    inline void SetLastWant(std::shared_ptr<Want> lastWant)
+    {
+        lastWant_ = lastWant;
+    }
+
+    inline bool HasLastWant() const
+    {
+        return lastWant_ != nullptr;
+    }
+
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false,
         const std::string &taskName = "");
 
@@ -1449,6 +1460,7 @@ private:
 
     std::string killReason_ = "";
     std::shared_ptr<Want> launchWant_ = nullptr;
+    std::shared_ptr<Want> lastWant_ = nullptr;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

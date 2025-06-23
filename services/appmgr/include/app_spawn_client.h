@@ -72,6 +72,7 @@ struct AppSpawnStartMsg {
     uint32_t flags;
     uint32_t hapFlags = 0; // whether is pre installed hap
     uint32_t mountPermissionFlags;
+    uint32_t apiTargetVersion = 0;
     uint64_t accessTokenIdEx;
     std::vector<int32_t> gids;
     std::string procName;

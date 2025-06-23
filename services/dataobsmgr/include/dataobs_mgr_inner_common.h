@@ -24,12 +24,14 @@ namespace AAFwk {
 struct ObserverNode {
     sptr<IDataAbilityObserver> observer_ = nullptr;
     int32_t userId_ = -1;
+    uint32_t tokenId_ = 0;
 
-    ObserverNode(sptr<IDataAbilityObserver> observer, int32_t userId):observer_(observer), userId_(userId) {}
+    ObserverNode(sptr<IDataAbilityObserver> observer, int32_t userId, uint32_t tokenId):observer_(observer),
+        userId_(userId), tokenId_(tokenId) {}
 
     bool operator==(struct ObserverNode other) const
     {
-        return (observer_ == other.observer_) && (userId_ == other.userId_);
+        return (observer_ == other.observer_) && (userId_ == other.userId_) && (tokenId_ == other.tokenId_);
     }
 };
 

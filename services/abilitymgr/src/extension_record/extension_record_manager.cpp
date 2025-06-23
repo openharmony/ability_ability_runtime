@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -456,7 +456,7 @@ int32_t ExtensionRecordManager::GetOrCreateExtensionRecordInner(const AAFwk::Abi
     extensionRecord->hostBundleName_ = hostBundleName;
     abilityRecord->SetOwnerMissionUserId(userId_);
     abilityRecord->SetUIExtensionAbilityId(extensionRecordId);
-    result = UpdateProcessName(abilityRequest, extensionRecord);
+    result = SetAbilityProcessName(abilityRequest, abilityRecord, extensionRecord);
     if (result != ERR_OK) {
         return result;
     }
@@ -466,6 +466,19 @@ int32_t ExtensionRecordManager::GetOrCreateExtensionRecordInner(const AAFwk::Abi
     std::lock_guard<std::mutex> lock(mutex_);
     extensionRecords_[extensionRecordId] = extensionRecord;
     return ERR_OK;
+}
+
+int32_t ExtensionRecordManager::SetAbilityProcessName(const AAFwk::AbilityRequest &abilityRequest,
+    const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::shared_ptr<ExtensionRecord> &extensionRecord)
+{
+    if (abilityRequest.abilityInfo.isolationProcess &&
+        AAFwk::UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+        abilityRecord->SetProcessName(
+            abilityRequest.abilityInfo.bundleName + SEPARATOR + abilityRequest.abilityInfo.extensionTypeName);
+        return ERR_OK;
+    } else {
+        return UpdateProcessName(abilityRequest, extensionRecord);
+    }
 }
 
 int32_t ExtensionRecordManager::StartAbility(const AAFwk::AbilityRequest &abilityRequest)
@@ -632,6 +645,14 @@ int32_t ExtensionRecordManager::GetUIExtensionSessionInfo(
     uiExtensionSessionInfo.uiExtensionUsage = sessionInfo->uiExtensionUsage;
     uiExtensionSessionInfo.elementName = abilityRecord->GetElementName();
     uiExtensionSessionInfo.extensionAbilityType = abilityRecord->GetAbilityInfo().extensionAbilityType;
+
+    auto callerToken = sessionInfo->callerToken;
+    if (callerToken != nullptr) {
+        auto callerAbilityRecord = AAFwk::Token::GetAbilityRecordByToken(callerToken);
+        if (callerAbilityRecord != nullptr) {
+            uiExtensionSessionInfo.hostElementName = callerAbilityRecord->GetElementName();
+        }
+    }
     return ERR_OK;
 }
 

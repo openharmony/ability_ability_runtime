@@ -45,6 +45,7 @@ struct LoadParam : public Parcelable {
     sptr<IRemoteObject> preToken = nullptr;
     std::string instanceKey = "";
     bool isKeepAlive = false;
+    bool isKeepAliveAppService = false;
     bool isCallerSetProcess = false;
     std::string customProcessFlag = "";
     uint32_t extensionProcessMode = 0;
