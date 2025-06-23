@@ -633,5 +633,304 @@ HWTEST_F(AppUtilsTest, IsLaunchEmbededUIAbility_0100, TestSize.Level2)
     bool result = appUtils.IsLaunchEmbededUIAbility();
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.number: AppUtilsTest_2200
+ * @tc.desc: Test IsLauncher works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_2200, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_2200 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSceneBoard_ = true;
+    std::string abilityName = "com.ohos.sceneboard";
+    auto isLauncher = appUtils.IsLauncher(abilityName);
+    EXPECT_TRUE(isLauncher);
+}
+
+/**
+ * @tc.number: AppUtilsTest_2300
+ * @tc.desc: Test IsLauncher works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_2300, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_2300 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSceneBoard_ = false;
+    std::string abilityName = "com.ohos.launcher";
+    auto isLauncher = appUtils.IsLauncher(abilityName);
+    EXPECT_TRUE(isLauncher);
+}
+
+/**
+ * @tc.number: AppUtilsTest_2400
+ * @tc.desc: Test IsLauncherAbility works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_2400, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_2400 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSceneBoard_ = true;
+    std::string abilityName = "com.ohos.sceneboard.MainAbility";
+    auto isLauncherAbility = appUtils.IsLauncherAbility(abilityName);
+    EXPECT_TRUE(isLauncherAbility);
+}
+
+/**
+ * @tc.number: AppUtilsTest_2500
+ * @tc.desc: Test IsLauncherAbility works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_2500, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_2500 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSceneBoard_ = false;
+    std::string abilityName = "com.ohos.launcher.MainAbility";
+    auto isLauncherAbility = appUtils.IsLauncherAbility(abilityName);
+    EXPECT_TRUE(isLauncherAbility);
+}
+
+/**
+ * @tc.number: AppUtilsTest_2600
+ * @tc.desc: Test IsLaunchEmbededUIAbility works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_2600, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_2600 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isLaunchEmbededUIAbility_.isLoaded = false;
+    auto value = OHOS::system::GetBoolParameter("const.abilityms.launch_embeded_ui_ability", false);
+    auto isLaunchEmbededUIAbility = appUtils.IsLaunchEmbededUIAbility();
+    EXPECT_EQ(value, isLaunchEmbededUIAbility);
+}
+
+/**
+ * @tc.number: AppUtilsTest_2700
+ * @tc.desc: Test IsLaunchEmbededUIAbility works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_2700, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_2700 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isLaunchEmbededUIAbility_.isLoaded = true;
+    appUtils.isLaunchEmbededUIAbility_.value = true;
+    auto isLaunchEmbededUIAbility = appUtils.IsLaunchEmbededUIAbility();
+    EXPECT_TRUE(isLaunchEmbededUIAbility);
+}
+
+/**
+ * @tc.number: AppUtilsTest_2800
+ * @tc.desc: Test IsSystemReasonMessage works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_2800, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_2800 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    std::string reasonMessage = "ReasonMessage_SystemShare";
+    auto isSystemReasonMessage = appUtils.IsSystemReasonMessage(reasonMessage);
+    EXPECT_TRUE(isSystemReasonMessage);
+}
+
+/**
+ * @tc.number: AppUtilsTest_2900
+ * @tc.desc: Test IsCacheAbilityEnabled works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_2900, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_2900 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    auto value = OHOS::system::GetBoolParameter("persist.sys.abilityms.cache_ability_enable", false);
+    auto isCacheAbilityEnabled = appUtils.IsCacheAbilityEnabled();
+    EXPECT_EQ(value, isCacheAbilityEnabled);
+}
+
+/**
+ * @tc.number: AppUtilsTest_3000
+ * @tc.desc: Test IsSupportAppServiceExtension works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_3000, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_3000 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportAppServiceExtension_.isLoaded = false;
+    auto value = OHOS::system::GetBoolParameter("const.abilityms.support_app_service", false);
+    auto isSupportAppServiceExtension = appUtils.IsSupportAppServiceExtension();
+    EXPECT_EQ(value, isSupportAppServiceExtension);
+}
+
+/**
+ * @tc.number: AppUtilsTest_3100
+ * @tc.desc: Test IsSupportAppServiceExtension works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_3100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_3100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportAppServiceExtension_.isLoaded = true;
+    appUtils.isSupportAppServiceExtension_.value = true;
+    auto isSupportAppServiceExtension = appUtils.IsSupportAppServiceExtension();
+    EXPECT_TRUE(isSupportAppServiceExtension);
+}
+
+/**
+ * @tc.number: AppUtilsTest_3200
+ * @tc.desc: Test GetAncoAppIdentifiers works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_3200, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_3200 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    std::string value = system::GetParameter("persist.hmos_fusion_mgr.anco_identifier", "");
+    auto identifiers = appUtils.GetAncoAppIdentifiers();
+    EXPECT_EQ(value, identifiers);
+}
+
+/**
+ * @tc.number: AppUtilsTest_3300
+ * @tc.desc: Test GetMigrateClientBundleName works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_3300, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_3300 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.migrateClientBundleName_.isLoaded = false;
+    auto value = system::GetParameter("const.sys.abilityms.migrate_client_bundle_name", "");
+    auto migrateClientBundleName = appUtils.GetMigrateClientBundleName();
+    EXPECT_EQ(value, migrateClientBundleName);
+}
+
+/**
+ * @tc.number: AppUtilsTest_3400
+ * @tc.desc: Test GetMigrateClientBundleName works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_3400, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_3400 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.migrateClientBundleName_.isLoaded = true;
+    appUtils.migrateClientBundleName_.value = "value";
+    auto migrateClientBundleName = appUtils.GetMigrateClientBundleName();
+    EXPECT_EQ("value", migrateClientBundleName);
+}
+
+/**
+ * @tc.number: AppUtilsTest_3500
+ * @tc.desc: Test GetMigrateClientBundleName works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_3500, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_3500 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.maxMultiProcessFeatureChildProcess_.isLoaded = false;
+    auto value = system::GetIntParameter<int32_t>("const.sys.abilityms.max_multi_process_feature_child_process", 0);
+    auto maxProcess = appUtils.MaxMultiProcessFeatureChildProcess();
+    EXPECT_EQ(value, maxProcess);
+}
+
+/**
+ * @tc.number: AppUtilsTest_3600
+ * @tc.desc: Test IsAllowResidentInExtremeMemory works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_3600, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_3600 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.residentProcessInExtremeMemory_.value.emplace_back("bundleName", "abilityName");
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    auto ret = appUtils.IsAllowResidentInExtremeMemory(bundleName, abilityName);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: AppUtilsTest_3700
+ * @tc.desc: Test IsBigMemoryUnrelatedKeepAliveProc works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_3700, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_3700 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.processProhibitedFromRestarting_.value.emplace_back("bundleName");
+    std::string bundleName = "bundleName";
+    auto ret = appUtils.IsBigMemoryUnrelatedKeepAliveProc(bundleName);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: AppUtilsTest_3800
+ * @tc.desc: Test IsRequireBigMemoryProcess works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_3800, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_3800 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.requireBigMemoryApp_.value.emplace_back("bundleName");
+    std::string bundleName = "bundleName";
+    auto ret = appUtils.IsRequireBigMemoryProcess(bundleName);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: AppUtilsTest_3900
+ * @tc.desc: Test IsAllowStartAbilityWithoutCallerToken works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_3900, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_3900 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.startAbilityWithoutCallerToken_.value.emplace_back("bundleName", "abilityName");
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    auto ret = appUtils.IsAllowStartAbilityWithoutCallerToken(bundleName, abilityName);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: AppUtilsTest_4000
+ * @tc.desc: Test IsSupportNativeChildProcess works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_4000, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_4000 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportNativeChildProcess_.isLoaded = false;
+    auto value = system::GetBoolParameter("persist.sys.abilityms.start_native_child_process", false);
+    auto isSupportNativeChildProcess = appUtils.IsSupportNativeChildProcess();
+    EXPECT_EQ(value, isSupportNativeChildProcess);
+}
+
+/**
+ * @tc.number: AppUtilsTest_4100
+ * @tc.desc: Test IsSupportNativeChildProcess works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, AppUtilsTest_4100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppUtilsTest_4100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportNativeChildProcess_.isLoaded = true;
+    appUtils.isSupportNativeChildProcess_.value = true;
+    auto isSupportNativeChildProcess = appUtils.IsSupportNativeChildProcess();
+    EXPECT_TRUE(isSupportNativeChildProcess);
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

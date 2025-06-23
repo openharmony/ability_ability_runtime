@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 #include <gtest/gtest.h>
 
+#define private public
 #include "app_preloader.h"
+#undef private
 #include "ability_manager_errors.h"
 #include "hilog_tag_wrapper.h"
 
@@ -317,6 +319,52 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_GetLaunchWant_0100, TestSize.Level2)
     EXPECT_EQ(ret, AAFwk::ERR_TARGET_BUNDLE_NOT_EXIST);
 }
 
+/**
+ * @tc.number: AppPreloaderTest_GetLaunchWant_0200
+ * @tc.desc: Test GetLaunchWant works
+ * @tc.type: FUNC
+ * @tc.Function: GetLaunchWant
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GetLaunchWant_0200, TestSize.Level2)
+{
+    TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_GetLaunchWant_0200 start.");
+    auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
+    EXPECT_NE(manager, nullptr);
+
+    manager->remoteClientManager_ = nullptr;
+    std::string bundleName = "com.acts.preloadtest";
+    int32_t userId = -2;
+    Want want;
+    auto ret = manager->GetLaunchWant(bundleName, userId, want);
+    manager->remoteClientManager_ = remoteClientManager_;
+    EXPECT_FALSE(ret);
+}
+
+ /**
+ * @tc.number: AppPreloaderTest_GetLaunchAbilityInfo_0100
+ * @tc.desc: Test GetLaunchAbilityInfo works
+ * @tc.type: FUNC
+ * @tc.Function: GetLaunchAbilityInfo
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GetLaunchAbilityInfo_0100, TestSize.Level2)
+{
+    TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_GetLaunchAbilityInfo_0100 start.");
+    auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
+    EXPECT_NE(manager, nullptr);
+
+    manager->remoteClientManager_ = nullptr;
+    Want want;
+    int32_t userId = -2;
+    AbilityInfo abilityInfo;
+    auto ret = manager->GetLaunchAbilityInfo(want, userId, abilityInfo);
+    manager->remoteClientManager_ = remoteClientManager_;
+    EXPECT_FALSE(ret);
+}
+
  /**
  * @tc.number: AppPreloaderTest_GetLaunchAbilityInfo_0200
  * @tc.desc: Test GetLaunchAbilityInfo works
@@ -447,6 +495,50 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_GetBundleAndHapInfo_0200, TestSize.L
     PreloadRequest request;
     auto ret = manager->GeneratePreloadRequest(bundleName, userId, appIndex, request);
     EXPECT_EQ(ret, AAFwk::GET_BUNDLE_INFO_FAILED);
+}
+
+ /**
+ * @tc.number: AppPreloaderTest_GetBundleAndHapInfo_0300
+ * @tc.desc: Test GetBundleAndHapInfo works
+ * @tc.type: FUNC
+ * @tc.Function: GetBundleAndHapInfo
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GetBundleAndHapInfo_0300, TestSize.Level2)
+{
+    TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_GetBundleAndHapInfo_0300 start.");
+    auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
+    EXPECT_NE(manager, nullptr);
+
+    manager->remoteClientManager_ = nullptr;
+    std::string bundleName = "com.acts.preloadtest";
+    int32_t userId = -2;
+    AbilityInfo abilityInfo;
+    BundleInfo bundleInfo;
+    HapModuleInfo hapModuleInfo;
+    auto ret = manager->GetBundleAndHapInfo(bundleName, userId, abilityInfo, bundleInfo, hapModuleInfo);
+    manager->remoteClientManager_ = remoteClientManager_;
+    EXPECT_FALSE(ret);
+}
+
+ /**
+  * @tc.number: AppPreloaderTest_GetBundleManagerHelper_0100
+  * @tc.desc: Test GetBundleManagerHelper works
+  * @tc.type: FUNC
+  * @tc.Function: GetBundleManagerHelper
+  * @tc.SubFunction: NA
+  * @tc.EnvConditions: NA
+  */
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GetBundleManagerHelper_0100, TestSize.Level2)
+{
+    TAG_LOGD(AAFwkTag::TEST, "AppPreloaderTest_GetBundleManagerHelper_0100 start.");
+    auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
+    EXPECT_NE(manager, nullptr);
+    manager->remoteClientManager_ = nullptr;
+    auto ret = manager->GetBundleManagerHelper();
+    manager->remoteClientManager_ = remoteClientManager_;
+    EXPECT_EQ(ret, nullptr);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
