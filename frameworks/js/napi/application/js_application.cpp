@@ -421,7 +421,7 @@ napi_value JsApplication::OnPromoteCurrentToCandidateMasterProcess(napi_env env,
     if (!ConvertFromJsValue(env, info.argv[ARGC_ZERO], isInsertToHead)) {
         TAG_LOGE(AAFwkTag::APPKIT, "Parse isInsertToHead failed");
         ThrowInvalidParamError(env,
-            "Parse param isSupport failed, isInsertToHead must be boolean.");
+            "Parse param isInsertToHead failed, isInsertToHead must be boolean.");
         return CreateJsUndefined(env);
     }
 
@@ -431,6 +431,7 @@ napi_value JsApplication::OnPromoteCurrentToCandidateMasterProcess(napi_env env,
         if (appMgrClient == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "Null appMgrClient");
             *errCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
+            return;
         }
         *errCode = appMgrClient->PromoteCurrentToCandidateMasterProcess(isInsertToHead);
     };
@@ -462,6 +463,7 @@ napi_value JsApplication::OnDemoteCurrentFromCandidateMasterProcess(napi_env env
         if (appMgrClient == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "Null appMgrClient");
             *errCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
+            return;
         }
         *errCode = appMgrClient->DemoteCurrentFromCandidateMasterProcess();
     };
