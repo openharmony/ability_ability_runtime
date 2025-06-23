@@ -195,6 +195,12 @@ HWTEST_F(AbilityConnectManagerSecondTest, ReportXiaoYiToRSSIfNeeded_001, TestSiz
     res = connectManager->ReportXiaoYiToRSSIfNeeded(abilityRequest_.abilityInfo);
     EXPECT_EQ(res, ERR_OK);
 
+    abilityRequest_.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    abilityRequest_.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    abilityRequest_.abilityInfo.bundleName = VASSISTANT_BUNDLE_NAME;
+    res = connectManager->ReportXiaoYiToRSSIfNeeded(abilityRequest_.abilityInfo);
+    EXPECT_EQ(res, ERR_OK);
+
     TAG_LOGI(AAFwkTag::TEST, "ReportXiaoYiToRSSIfNeeded_001 end");
 }
 
