@@ -54,3 +54,49 @@ ohos_shared_library("insightintentcontext") {
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
+
+ohos_shared_library("cj_insightintentcontext") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  sources = [
+    "cj_insight_intent_context.cpp",
+    "insight_intent_context.cpp",
+  ]
+
+  defines = [ "AMS_LOG_TAG = \"InsigtIntent\"" ]
+  defines += [ "AMS_LOG_DOMAIN = 0xD001308" ]
+
+  public_configs = [ ":insight_intent_context_public_config" ]
+
+  deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/ability/native:cj_insight_intent_executor",
+    "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
+  ]
+  innerapi_tags = [ "platformsdk" ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
