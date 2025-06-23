@@ -194,6 +194,7 @@ private:
     sptr<Rosen::Window> CreateUIWindow(const std::shared_ptr<UIExtensionContext> context,
         const sptr<AAFwk::SessionInfo> &sessionInfo);
     void ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result);
+    bool BindNativeMethods();
 
     STSRuntime& stsRuntime_;
     std::shared_ptr<STSNativeReference> stsObj_ = nullptr;

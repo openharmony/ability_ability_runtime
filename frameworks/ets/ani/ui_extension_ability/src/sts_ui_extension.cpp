@@ -43,35 +43,12 @@
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
+namespace {
+constexpr const char* UIEXTENSION_CLASS_NAME = "L@ohos/app/ability/UIExtensionAbility/UIExtensionAbility;";
 
-static constexpr char UIEXTENSION_CLASS_NAME[] = "L@ohos/app/ability/UIExtensionAbility/UIExtensionAbility;";
-
-StsUIExtension* StsUIExtension::Create(const std::unique_ptr<Runtime>& runtime)
+void OnDestroyPromiseCallback(ani_env* env, ani_object aniObj)
 {
-    return new (std::nothrow) StsUIExtension(static_cast<STSRuntime&>(*runtime));
-}
-
-StsUIExtension::StsUIExtension(STSRuntime &stsRuntime) : stsRuntime_(stsRuntime)
-{
-}
-
-StsUIExtension::~StsUIExtension()
-{
-    auto context = GetContext();
-    if (context) {
-        context->Unbind();
-    }
-    contentSessions_.clear();
-}
-
-void StsUIExtension::ResetEnv(ani_env* env)
-{
-    env->DescribeError();
-    env->ResetError();
-}
-
-static void PromiseCallback(ani_env* env, ani_object aniObj)
-{
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnDestroyPromiseCallback called");
     if (env == nullptr || aniObj == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null env or null aniObj");
         return;
@@ -95,6 +72,33 @@ static void PromiseCallback(ani_env* env, ani_object aniObj)
         TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
         return;
     }
+}
+} // namespace
+
+StsUIExtension* StsUIExtension::Create(const std::unique_ptr<Runtime>& runtime)
+{
+    return new (std::nothrow) StsUIExtension(static_cast<STSRuntime&>(*runtime));
+}
+
+StsUIExtension::StsUIExtension(STSRuntime &stsRuntime) : stsRuntime_(stsRuntime) {}
+
+StsUIExtension::~StsUIExtension()
+{
+    auto context = GetContext();
+    if (context) {
+        context->Unbind();
+    }
+    contentSessions_.clear();
+}
+
+void StsUIExtension::ResetEnv(ani_env* env)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "env null");
+        return;
+    }
+    env->DescribeError();
+    env->ResetError();
 }
 
 void StsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
@@ -133,23 +137,37 @@ void StsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
         TAG_LOGE(AAFwkTag::UI_EXT, "stsObj_ null");
         return;
     }
+    if (!BindNativeMethods()) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "BindNativeMethods failed");
+        return;
+    }
+    BindContext(stsRuntime_.GetAniEnv(), record->GetWant());
+    RegisterDisplayInfoChangedListener();
+}
 
+bool StsUIExtension::BindNativeMethods()
+{
     auto env = stsRuntime_.GetAniEnv();
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null env");
-        return;
+        return false;
     }
     std::array functions = {
-        ani_native_function { "nativeOnDestroyCallback", ":V", reinterpret_cast<void*>(PromiseCallback) },
+        ani_native_function { "nativeOnDestroyCallback", ":V", reinterpret_cast<void*>(OnDestroyPromiseCallback) },
     };
-    ani_status status = ANI_ERROR;
-    if ((status = env->Class_BindNativeMethods(stsObj_->aniCls, functions.data(), functions.size())) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
+    ani_class cls {};
+    ani_status status = env->FindClass(UIEXTENSION_CLASS_NAME, &cls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "FindClass failed status: %{public}d", status);
+        return false;
     }
-    BindContext(env, record->GetWant());
+    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Class_BindNativeMethods status: %{public}d", status);
+        return false;
     SetExtensionCommon(
         EtsExtensionCommon::Create(stsRuntime_, static_cast<STSNativeReference &>(*stsObj_), shellContextRef_));
-    RegisterDisplayInfoChangedListener();
+    }
+    return true;
 }
 
 std::shared_ptr<STSNativeReference> StsUIExtension::LoadModule(ani_env *env)

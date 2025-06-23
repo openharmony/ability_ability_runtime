@@ -43,7 +43,7 @@ export class AbilityUtils {
     }
   }
 
-  public static isInherited(type: ClassType, methodName: string, stopBaseClassType: ClassType): boolean | undefined {
+  public static isOverride(type: ClassType, methodName: string, stopBaseClassType: ClassType): boolean | undefined {
     let currType = type;
     let level = 0;
     while (!currType.equals(stopBaseClassType)) {
@@ -52,26 +52,26 @@ export class AbilityUtils {
           const method = currType.getMethod(methodIdx)
           if (method.getName().equals(methodName)) {
             if (!method.isInherited()) {
-              return false;
+              return true;
             }
           }
         }
         let baseType = currType.getBaseType();
         if (baseType.equals(currType)) {
-          hilog.error(DOMAIN_ID, TAG, `isInherited: baseType equals currType (${currType.getName()})`);
+          hilog.error(DOMAIN_ID, TAG, `isOverride: baseType equals currType (${currType.getName()})`);
           return undefined;
         }
         level++;
         if (level >= LEVEL) {
-          hilog.error(DOMAIN_ID, TAG, `isInherited: inheritance level >= ${LEVEL}, aborting`);
+          hilog.error(DOMAIN_ID, TAG, `isOverride: inheritance level >= ${LEVEL}, aborting`);
           return undefined;
         }
         currType = baseType;
       } catch (err) {
-        hilog.error(DOMAIN_ID, TAG, `isInherited error: ${err}`);
+        hilog.error(DOMAIN_ID, TAG, `isOverride error: ${err}`);
         return undefined;
       }
     }
-    return true;
+    return false;
   }
 }
