@@ -50,6 +50,10 @@ export default class UIAbilityContext extends Context {
     this.currentHapModuleInfo = currentHapModuleInfo;
   }
 
+  initEventHubByUIAbilityContext() {
+    this.eventHub = new EventHub();
+  }
+
   private static native nativeTransferStatic(input: ESValue): Object;
   private static native nativeTransferDynamic(input: Object): ESValue;
   static transferStatic(input: Any): Object {
