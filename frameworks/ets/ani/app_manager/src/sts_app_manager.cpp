@@ -144,7 +144,7 @@ public:
     {
         TAG_LOGD(AAFwkTag::APPMGR, "GetRunningProcessInformation called");
         if (env == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "appManager null ptr");
+            TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
             return;
         }
         ani_object emptyArray = CreateEmptyAniArray(env);
@@ -217,24 +217,26 @@ public:
     {
         TAG_LOGD(AAFwkTag::APPMGR, "GetRunningMultiAppInfo called");
         if (env == nullptr) {
-            TAG_LOGE(AAFwkTag::APPMGR, "invalid argc");
+            TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
             return;
         }
         ani_object emtpyMultiAppInfo = CreateEmptyMultiAppInfo(env);
     #ifdef SUPPORT_SCREEN
         if (!CheckCallerIsSystemApp()) {
             TAG_LOGE(AAFwkTag::APPMGR, "Non-system app");
-            AppExecFwk::AsyncCallback(env, callback,
-                OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP)), emtpyMultiAppInfo);
+            AppExecFwk::AsyncCallback(env, callback, OHOS::AbilityRuntime::CreateStsError(env,
+                AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), emtpyMultiAppInfo);
+            return;
         }
     #endif
         std::string bundleName;
-        if (!OHOS::AppExecFwk::GetStdString(env, stsBundleName, bundleName)) {
+        if (!OHOS::AppExecFwk::GetStdString(env, stsBundleName, bundleName) || bundleName.empty()) {
             TAG_LOGE(AAFwkTag::APPMGR, "GetStdString Failed");
             AppExecFwk::AsyncCallback(env, callback,
-                OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env,
-                static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM)), emtpyMultiAppInfo);
+                OHOS::AbilityRuntime::CreateStsError(env,
+                    static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
+                    "Parse param bundleName failed, must be a string."), emtpyMultiAppInfo);
+            return;
         }
         auto appManager = GetAppManagerInstance();
         if (appManager == nullptr) {
@@ -250,8 +252,7 @@ public:
         TAG_LOGD(AAFwkTag::APPMGR, "GetRunningMultiAppInfoByBundleName ret: %{public}d", innerErrorCode);
         if (innerErrorCode != ERR_OK) {
             AppExecFwk::AsyncCallback(env, callback,
-                OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env,
-                static_cast<int32_t>(innerErrorCode)), emtpyMultiAppInfo);
+                OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, innerErrorCode), emtpyMultiAppInfo);
             return;
         }
         ani_object appinfoObj = WrapRunningMultiAppInfo(env, info);
@@ -261,8 +262,7 @@ public:
                 static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)), emtpyMultiAppInfo);
         } else {
             AppExecFwk::AsyncCallback(env, callback,
-                OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env,
-                    static_cast<int32_t>(innerErrorCode)), appinfoObj);
+                OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, innerErrorCode), appinfoObj);
         }
         TAG_LOGD(AAFwkTag::APPMGR, "GetRunningMultiAppInfo end");
     }
@@ -310,6 +310,7 @@ public:
         if (ret != ERR_OK) {
             AppExecFwk::AsyncCallback(env, callback,
                 OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, static_cast<int32_t>(ret)), emptyArray);
+            return;
         }
         ani_object aniInfos = CreateRunningProcessInfoArray(env, infos);
         if (aniInfos == nullptr) {
