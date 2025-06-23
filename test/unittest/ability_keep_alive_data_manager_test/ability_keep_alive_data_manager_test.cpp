@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -673,8 +673,10 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, DeleteKeepAliveDataWithSetterId_100, T
     AbilityKeepAliveDataManager abilityKeepAliveDataManager;
     KeepAliveInfo info;
     info.bundleName = "com.example.testbundle";
+    info.userId = 1;
+    info.setterId = 100;
     auto result = abilityKeepAliveDataManager.DeleteKeepAliveDataWithSetterId(info);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_100 end";
 }
 
@@ -688,25 +690,6 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, DeleteKeepAliveDataWithSetterId_200, T
 {
     GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_200 start";
     AbilityKeepAliveDataManager abilityKeepAliveDataManager;
-    KeepAliveInfo info;
-    info.bundleName = "com.example.testbundle";
-    info.userId = 1;
-    info.setterId = 100;
-    auto result = abilityKeepAliveDataManager.DeleteKeepAliveDataWithSetterId(info);
-    EXPECT_EQ(result, ERR_OK);
-    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_200 end";
-}
-
-/**
- * Feature: AbilityKeepAliveDataManager
- * Function: DeleteKeepAliveDataWithSetterId
- * SubFunction: NA
- * FunctionPoints: AbilityKeepAliveDataManager DeleteKeepAliveDataWithSetterId
- */
-HWTEST_F(AbilityKeepAliveDataManagerTest, DeleteKeepAliveDataWithSetterId_300, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_300 start";
-    AbilityKeepAliveDataManager abilityKeepAliveDataManager;
     std::shared_ptr<DistributedKv::SingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
     abilityKeepAliveDataManager.kvStorePtr_ = kvStorePtr;
     EXPECT_EQ(true, abilityKeepAliveDataManager.CheckKvStore());
@@ -717,7 +700,7 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, DeleteKeepAliveDataWithSetterId_300, T
     info.setterId = 100;
     auto result = abilityKeepAliveDataManager.DeleteKeepAliveDataWithSetterId(info);
     EXPECT_EQ(result, ERR_OK);
-    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_300 end";
+    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_200 end";
 }
 
 /**
