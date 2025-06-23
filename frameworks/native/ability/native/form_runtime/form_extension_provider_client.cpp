@@ -643,5 +643,40 @@ void FormExtensionProviderClient::NotifyFormExtensionUpdateLocation(const int64_
         HandleResultCode(errorCode, want, callerToken);
     }
 }
+
+int FormExtensionProviderClient::NotifySizeChanged(int64_t formId, const std::string &newDimension,
+    const Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken)
+{
+    TAG_LOGI(AAFwkTag::FORM_EXT, "called");
+    if (!FormProviderClient::CheckIsSystemApp()) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Permission denied");
+        return ERR_APPEXECFWK_FORM_PERMISSION_DENY;
+    }
+    std::shared_ptr<EventHandler> mainHandler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
+    std::function<void()> notifyExtensionSizeChangedFunc = [client = sptr<FormExtensionProviderClient>(this),
+        formId, newDimension, newRect, want, callerToken]() {
+        client->NotifyExtensionSizeChanged(formId, newDimension, newRect, want, callerToken);
+    };
+    mainHandler->PostSyncTask(notifyExtensionSizeChangedFunc,
+        "FormExtensionProviderClient::NotifySizeChanged");
+    return ERR_OK;
+}
+
+void FormExtensionProviderClient::NotifyExtensionSizeChanged(int64_t formId, const std::string &newDimension,
+    const Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken)
+{
+    TAG_LOGD(AAFwkTag::FORM_EXT, "called");
+    int errorCode = ERR_OK;
+    std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
+    if (ownerFormExtension == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "null Owner");
+        errorCode = ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
+    } else {
+        ownerFormExtension->OnSizeChanged(formId, newDimension, newRect);
+    }
+    if (want.HasParameter(Constants::FORM_CONNECT_ID)) {
+        HandleResultCode(errorCode, want, callerToken);
+    }
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

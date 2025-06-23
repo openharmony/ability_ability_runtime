@@ -779,5 +779,61 @@ HWTEST_F(FormExtensionProviderClientTest, FormExtensionProviderAcquireFormData_3
     EXPECT_EQ(result, false);
     GTEST_LOG_(INFO) << "FormExtensionProviderAcquireFormData_3000 end";
 }
+
+/**
+ * @tc.number: NotifyExtensionSizeChanged_3100
+ * @tc.name: NotifyExtensionSizeChanged
+ * @tc.desc: test NotifyExtensionSizeChanged.
+ */
+HWTEST_F(FormExtensionProviderClientTest, NotifyExtensionSizeChanged_3100,
+    Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyExtensionSizeChanged_3100 start";
+    AbilityRuntime::FormExtensionProviderClient formExtensionProviderClient;
+    
+    AbilityRuntime::Runtime::Options options;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    std::shared_ptr<AbilityRuntime::FormExtension> formExtension = nullptr;
+    formExtensionProviderClient.SetOwner(formExtension);
+    auto extension = formExtensionProviderClient.GetOwner();
+    EXPECT_TRUE(extension == nullptr);
+
+    int64_t formId = 10;
+    std::string newDimension = "2*2";
+    AppExecFwk::Rect newRect;
+    Want want;
+    sptr<IRemoteObject> formSupplyCallback = nullptr;
+    formExtensionProviderClient.NotifyExtensionSizeChanged(
+        formId, newDimension, newRect, want, formSupplyCallback);
+    GTEST_LOG_(INFO) << "NotifyExtensionSizeChanged_3100 end";
+}
+
+/**
+ * @tc.number: NotifyExtensionSizeChanged_3200
+ * @tc.name: NotifyExtensionSizeChanged
+ * @tc.desc: test NotifyExtensionSizeChanged.
+ */
+HWTEST_F(FormExtensionProviderClientTest, NotifyExtensionSizeChanged_3200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyExtensionSizeChanged_3200 start";
+    AbilityRuntime::FormExtensionProviderClient formExtensionProviderClient;
+    
+    AbilityRuntime::Runtime::Options options;
+    auto runtime = AbilityRuntime::Runtime::Create(options);
+    std::shared_ptr<AbilityRuntime::FormExtension> formExtension(AbilityRuntime::JsFormExtension::Create(runtime));
+    formExtensionProviderClient.SetOwner(formExtension);
+
+    auto extension = formExtensionProviderClient.GetOwner();
+    EXPECT_TRUE(formExtension == extension);
+
+    int64_t formId = 10;
+    std::string newDimension = "2*2";
+    AppExecFwk::Rect newRect;
+    Want want;
+    sptr<IRemoteObject> formSupplyCallback = nullptr;
+    formExtensionProviderClient.NotifyExtensionSizeChanged(
+        formId, newDimension, newRect, want, formSupplyCallback);
+    GTEST_LOG_(INFO) << "NotifyExtensionSizeChanged_3200 end";
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

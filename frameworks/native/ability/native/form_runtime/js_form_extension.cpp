@@ -37,6 +37,7 @@ namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 const int ON_EVENT_PARAMS_SIZE = 2;
 const int ARGC_TWO = 2;
+const int ARGC_THREE = 3;
 
 napi_value AttachFormExtensionContext(napi_env env, void* value, void*)
 {
@@ -547,6 +548,26 @@ void JsFormExtension::OnFormLocationChanged(const int64_t formId, const int32_t 
     napi_value napiLocation = WrapInt32ToJS(env, formLocation);
     napi_value argv[] = {napiFormId, napiLocation};
     CallObjectMethod("onFormLocationChanged", "OnFormLocationChanged", argv, ARGC_TWO);
+}
+
+void JsFormExtension::OnSizeChanged(int64_t formId, const std::string &newDimension, const Rect &newRect)
+{
+    TAG_LOGI(AAFwkTag::FORM_EXT, "Form size changed, formId: %{public}" PRId64, formId);
+    FormExtension::OnSizeChanged(formId, newDimension, newRect);
+ 
+    HandleScope handleScope(jsRuntime_);
+    napi_env env = jsRuntime_.GetNapiEnv();
+ 
+    napi_value napiFormId = WrapStringToJS(env, std::to_string(formId));
+    napi_value napinewDimension = WrapStringToJS(env, newDimension);
+    napi_value napiNewRect = nullptr;
+    napi_create_object(env, &napiNewRect);
+    napi_set_named_property(env, napiNewRect, "left", CreateJsValue(env, newRect.left));
+    napi_set_named_property(env, napiNewRect, "top", CreateJsValue(env, newRect.top));
+    napi_set_named_property(env, napiNewRect, "width", CreateJsValue(env, newRect.width));
+    napi_set_named_property(env, napiNewRect, "height", CreateJsValue(env, newRect.height));
+    napi_value argv[] = {napiFormId, napinewDimension, napiNewRect};
+    CallObjectMethod("onSizeChanged", "onSizeChanged", argv, ARGC_THREE);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
