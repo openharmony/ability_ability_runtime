@@ -59,6 +59,7 @@ struct RunningProcessInfo : public Parcelable {
     bool isTestMode = false;
     bool isStrictMode = false;
     bool isDebugApp = false;
+    bool isExiting = false;
     std::int32_t pid_;
     std::int32_t uid_;
     std::int32_t bundleType = 0;

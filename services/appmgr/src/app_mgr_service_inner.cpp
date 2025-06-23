@@ -2715,6 +2715,8 @@ void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecor
     info.extensionType_ = appRecord->GetExtensionType();
     info.preloadMode_ = appRecord->GetPreloadMode();
     info.isDebugApp  = appRecord->IsDebug();
+    info.isExiting = appRecord->IsTerminating() || appRecord->IsKilling()
+        || appRecord->GetRestartAppFlag() || appRecord->IsUserRequestCleaning();
     if (appRecord->GetUserTestInfo() != nullptr && system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
         info.isTestMode = true;
     }
