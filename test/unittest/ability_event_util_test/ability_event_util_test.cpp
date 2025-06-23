@@ -78,5 +78,23 @@ HWTEST_F(AbilityEventUtilTest, AbilityEventUtil_SendStartAbilityError_0200, Test
     EXPECT_EQ(eventInfo.userId, -1);
     TAG_LOGI(AAFwkTag::TEST, "AbilityEventUtil_SendStartAbilityError_0200 end");
 }
+
+/**
+ * @tc.name: AbilityEventUtil_SendKillProcessWithReasonEvent_0100
+ * @tc.desc: SendKillProcessWithReasonEvent
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityEventUtilTest, AbilityEventUtil_SendKillProcessWithReasonEvent_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityEventUtil_SendKillProcessWithReasonEvent_0100 start");
+    std::shared_ptr<AbilityEventUtil> eventUtil = std::make_shared<AbilityEventUtil>();
+    EventInfo eventInfo = {};
+    int32_t errCode = -1;
+    std::string errMsg = "test event";
+    eventUtil->SendKillProcessWithReasonEvent(errCode, errMsg, eventInfo);
+    EXPECT_EQ(eventInfo.userId, -1);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityEventUtil_SendKillProcessWithReasonEvent_0100 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

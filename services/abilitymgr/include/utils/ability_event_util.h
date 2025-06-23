@@ -33,6 +33,7 @@ public:
         bool isPlugin);
     void SendStartAbilityErrorEvent(EventInfo &eventInfo, int32_t errCode, const std::string errMsg,
         bool isSystemError = false);
+    void SendKillProcessWithReasonEvent(int32_t errCode, const std::string &errMsg, EventInfo &eventInfo);
 };
 
 } // namespace AAFwk
