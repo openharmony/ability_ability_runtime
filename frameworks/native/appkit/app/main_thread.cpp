@@ -1116,12 +1116,13 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
 #if defined(SUPPORT_GRAPHICS) && defined(SUPPORT_APP_PREFERRED_LANGUAGE)
-    UErrorCode status = U_ZERO_ERROR;
-    icu::Locale systemLocale = icu::Locale::forLanguageTag(
-        config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE), status);
+    icu::Locale systemLocale = Global::I18n::LocaleConfig::GetIcuLocale(
+        config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
+
     resConfig->SetLocaleInfo(systemLocale);
 
     if (Global::I18n::PreferredLanguage::IsSetAppPreferredLanguage()) {
+        UErrorCode status = U_ZERO_ERROR;
         icu::Locale preferredLocale =
             icu::Locale::forLanguageTag(Global::I18n::PreferredLanguage::GetAppPreferredLanguage(), status);
         resConfig->SetPreferredLocaleInfo(preferredLocale);
