@@ -942,6 +942,25 @@ HWTEST_F(AbilityManagerStubSecondTest, SuspendExtensionAbilityInner_001, TestSiz
 
 /*
  * Feature: AbilityManagerService
+ * Function: SuspendExtensionAbilityInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SuspendExtensionAbilityInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function SuspendExtensionAbilityInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubSecondTest, SuspendExtensionAbilityInner_002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IAbilityConnection> connect = new AbilityConnectCallback();
+    WriteInterfaceToken(data);
+    data.WriteParcelable(connect->AsObject());
+    auto res = stub_->SuspendExtensionAbilityInner(data, reply);
+    EXPECT_NE(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: ResumeExtensionAbilityInner
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService ResumeExtensionAbilityInner
@@ -954,6 +973,25 @@ HWTEST_F(AbilityManagerStubSecondTest, ResumeExtensionAbilityInner_001, TestSize
     MessageParcel reply;
     stub_->ResumeExtensionAbilityInner(data, reply);
     EXPECT_TRUE(stub_ != nullptr);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ResumeExtensionAbilityInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ResumeExtensionAbilityInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function ResumeExtensionAbilityInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubSecondTest, ResumeExtensionAbilityInner_002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IAbilityConnection> connect = new AbilityConnectCallback();
+    WriteInterfaceToken(data);
+    data.WriteParcelable(connect->AsObject());
+    auto res = stub_->ResumeExtensionAbilityInner(data, reply);
+    EXPECT_NE(res, NO_ERROR);
 }
 } // namespace AAFwk
 } // namespace OHOS
