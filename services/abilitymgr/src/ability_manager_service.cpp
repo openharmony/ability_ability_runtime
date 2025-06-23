@@ -2151,7 +2151,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         }
         abilityRequest.supportWindowModes = startOptions.supportWindowModes_;
         auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-        CHECK_POINTER_AND_RETURN_LOG(abilityRecord, ERR_INVALID_VALUE, "ability record is nullptr.");
         if (JudgeSelfCalled(abilityRecord)) {
             abilityRequest.hideStartWindow = startOptions.GetHideStartWindow();
         }
