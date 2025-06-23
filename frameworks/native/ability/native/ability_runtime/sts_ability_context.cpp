@@ -686,6 +686,28 @@ void StsAbilityContext::NativeRequestModalUIExtension(ani_env *env, ani_object a
     AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
 }
 
+void StsAbilityContext::SetColorMode(ani_env *env, ani_object aniObj, ani_enum_item colorMode)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "SetColorMode Call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "context is already released");
+        ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
+    }
+    ani_int mode = 0;
+    if (!AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(env, colorMode, mode)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "Parse colorMode failed");
+        ThrowStsInvalidParamError(env, "Parse param colorMode failed, colorMode must be number.");
+        return;
+    }
+    TAG_LOGD(AAFwkTag::UIABILITY, "colorMode is %{public}d", mode);
+    context->SetAbilityColorMode(static_cast<int32_t>(mode));
+}
 ani_object StsAbilityContext::NativeTransferStatic(ani_env *env, ani_object, ani_object input)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "transfer static UIAbilityContext");
@@ -814,6 +836,9 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void*>(StsAbilityContext::NativeMoveAbilityToBackground) },
             ani_native_function { "nativeRequestModalUIExtension", nullptr,
                 reinterpret_cast<void*>(StsAbilityContext::NativeRequestModalUIExtension) },
+            ani_native_function {"nativeSetColorMode",
+                "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ColorMode;:V",
+                reinterpret_cast<void*>(StsAbilityContext::SetColorMode)},
             ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
                 reinterpret_cast<void*>(StsAbilityContext::NativeTransferStatic) },
             ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",

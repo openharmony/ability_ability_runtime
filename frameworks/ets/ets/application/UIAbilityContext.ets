@@ -27,6 +27,7 @@ import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import OpenLinkOptions from '@ohos.app.ability.OpenLinkOptions';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
+import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 
 // remove local declaration after Any type is supported
 type Any = Object | null | undefined
@@ -93,6 +94,7 @@ export default class UIAbilityContext extends Context {
   private native nativeMoveAbilityToBackground(callback: AsyncCallbackWrapper<void>): void;
 
   private native nativeRequestModalUIExtension(pickerWant: Want, callback: AsyncCallbackWrapper<void>): void;
+  private native nativeSetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
 
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
@@ -368,5 +370,9 @@ export default class UIAbilityContext extends Context {
         this.nativeRequestModalUIExtension(pickerWant, syncCall);
       });
     });
+  }
+    
+  setColorMode(colorMode: ConfigurationConstant.ColorMode): void {
+    this.nativeSetColorMode(colorMode);
   }
 }
