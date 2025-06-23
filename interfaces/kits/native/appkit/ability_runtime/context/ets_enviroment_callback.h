@@ -32,7 +32,7 @@ public:
     bool UnRegister(int32_t callbackId);
 
 private:
-    ani_env *ani_env_ = nullptr;
+    ani_env *env_ = nullptr;
     std::map<int32_t, ani_ref> enviromentAniCallbacks_;
     int32_t serialNumber_ = 0;
     std::mutex Mutex_;
