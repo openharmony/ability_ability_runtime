@@ -14,27 +14,31 @@
  */
 
 #include "sts_ui_extension.h"
+
 #include "ability_context.h"
 #include "ability_delegator_registry.h"
 #include "ability_info.h"
 #include "ability_manager_client.h"
 #include "ability_start_setting.h"
+#include "ani_common_configuration.h"
+#include "ani_common_want.h"
 #include "array_wrapper.h"
 #include "configuration_utils.h"
 #include "connection_manager.h"
 #include "context.h"
-#include "hitrace_meter.h"
+#include "ets_extension_common.h"
+#include "ets_extension_context.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
+#include "string_wrapper.h"
+#include "sts_data_struct_converter.h"
 #include "sts_runtime.h"
-#include "ani_common_want.h"
+#include "sts_ui_extension_context.h"
 #include "ui_extension_window_command.h"
 #include "want_params_wrapper.h"
-#include "sts_data_struct_converter.h"
-#include "sts_ui_extension_context.h"
-#include "string_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -108,6 +112,7 @@ void StsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
         return;
     }
 
+    RegisterAbilityConfigUpdateCallback();
     if (record != nullptr) {
         token_ = record->GetToken();
     }
@@ -142,6 +147,8 @@ void StsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
     }
     BindContext(env, record->GetWant());
+    SetExtensionCommon(
+        EtsExtensionCommon::Create(stsRuntime_, static_cast<STSNativeReference &>(*stsObj_), shellContextRef_));
     RegisterDisplayInfoChangedListener();
 }
 
@@ -219,6 +226,9 @@ void StsUIExtension::BindContext(ani_env*env, std::shared_ptr<AAFwk::Want> want)
         TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
         ResetEnv(env);
     }
+    shellContextRef_ = std::make_shared<STSNativeReference>();
+    shellContextRef_->aniObj = contextObj;
+    shellContextRef_->aniRef = contextRef;
 }
 
 ani_object StsUIExtension::CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& param)
@@ -243,6 +253,9 @@ void StsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> s
     if (!env) {
         TAG_LOGE(AAFwkTag::UI_EXT, "env not found Ability.sts");
         return;
+    }
+    if (context != nullptr) {
+        EtsExtensionContext::ConfigurationUpdated(env, shellContextRef_, context->GetConfiguration());
     }
     const char *signature =
         "L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;:V";
@@ -689,18 +702,11 @@ bool StsUIExtension::CallObjectMethod(bool withResult, const char *name, const c
     return false;
 }
 
-void StsUIExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
+void StsUIExtension::OnAbilityConfigurationUpdated(const AppExecFwk::Configuration &configuration)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    Extension::OnConfigurationUpdated(configuration);
-    auto context = GetContext();
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "context null");
-        return;
-    }
-
-    auto configUtils = std::make_shared<ConfigurationUtils>();
-    configUtils->UpdateGlobalConfig(configuration, context->GetConfiguration(), context->GetResourceManager());
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnAbilityConfigurationUpdated called");
+    UIExtension::OnAbilityConfigurationUpdated(configuration);
     ConfigurationUpdated();
 }
 
@@ -728,7 +734,7 @@ void StsUIExtension::OnAbilityResult(int requestCode, int resultCode, const Want
 
 void StsUIExtension::ConfigurationUpdated()
 {
-    ani_env* env = stsRuntime_.GetAniEnv();
+    auto env = stsRuntime_.GetAniEnv();
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "env null");
         return;
@@ -738,12 +744,24 @@ void StsUIExtension::ConfigurationUpdated()
         TAG_LOGE(AAFwkTag::UI_EXT, "context null");
         return;
     }
-
+    auto abilityConfig = context->GetAbilityConfiguration();
     auto fullConfig = context->GetConfiguration();
     if (fullConfig == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "fullConfig null");
         return;
     }
+    auto realConfig = AppExecFwk::Configuration(*fullConfig);
+    if (abilityConfig != nullptr) {
+        std::vector<std::string> changeKeyV;
+        realConfig.CompareDifferent(changeKeyV, *abilityConfig);
+        if (!changeKeyV.empty()) {
+            realConfig.Merge(changeKeyV, *abilityConfig);
+        }
+    }
+    auto realConfigPtr = std::make_shared<Configuration>(realConfig);
+    EtsExtensionContext::ConfigurationUpdated(env, shellContextRef_, realConfigPtr);
+    ani_object aniConfiguration = OHOS::AppExecFwk::WrapConfiguration(env, realConfig);
+    CallObjectMethod(false, "onConfigurationUpdate", nullptr, aniConfiguration);
 }
 
 #ifdef SUPPORT_GRAPHICS

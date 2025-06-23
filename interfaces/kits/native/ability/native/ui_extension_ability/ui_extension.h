@@ -128,6 +128,22 @@ public:
     virtual bool ForegroundWindowWithInsightIntent(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
         bool needForeground) { return false; };
 
+    /**
+     * @brief Called when the system configuration is updated.
+     *
+     * @param configuration Indicates the updated configuration information.
+     */
+    void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration) override;
+
+    /**
+     * @brief Called when configuration changed, including system configuration and window configuration.
+     */
+    virtual void ConfigurationUpdated();
+
+    virtual void OnAbilityConfigurationUpdated(const AppExecFwk::Configuration &configuration);
+
+    void RegisterAbilityConfigUpdateCallback();
+
 protected:
     std::mutex uiWindowMutex_;
     std::map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
