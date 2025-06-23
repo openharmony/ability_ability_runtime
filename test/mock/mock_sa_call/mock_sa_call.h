@@ -118,6 +118,8 @@ public:
         const char* perms[] = {
             perms[0] = "ohos.permission.SET_PROCESS_CACHE_STATE",
             perms[1] = "ohos.permission.GET_RUNNING_INFO",
+            perms[2] = "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
+            perms[3] = "ohos.permission.UPDATE_CONFIGURATION",
         };
 
         NativeTokenInfoParams infoInstance = {
