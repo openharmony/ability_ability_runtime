@@ -90,7 +90,7 @@ public:
 
     static void StartAbility(ani_env* env, [[maybe_unused]]ani_object object, ani_object wantObj, ani_object callback);
 
-    static ani_ref GetCurrentTopAbility(ani_env* env);
+    static ani_ref GetCurrentTopAbility(ani_env* env, [[maybe_unused]]ani_class aniClass, ani_object callback);
 
 private:
     [[maybe_unused]] void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resString);
