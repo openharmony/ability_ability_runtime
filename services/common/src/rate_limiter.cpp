@@ -56,7 +56,7 @@ bool RateLimiter::CheckSingleLimit(int32_t uid, std::unordered_map<int32_t, std:
     auto it = std::lower_bound(timestamps.begin(), timestamps.end(), timeBefore);
     timestamps.erase(timestamps.begin(), it);
 
-    if (timestamps.size() >= maxLimit) {
+    if (timestamps.size() >= static_cast<size_t>(maxLimit)) {
         return true;
     }
 
