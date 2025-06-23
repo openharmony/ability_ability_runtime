@@ -162,6 +162,7 @@ private:
     ani_ref CallObjectMethod(bool withResult, const char* name, const char* signature, ...);
 
     void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want);
+
     ani_object CreateSTSContext(ani_env *env, std::shared_ptr<ServiceExtensionContext> context, int32_t screenMode);
 
     void GetSrcPath(std::string &srcPath);
