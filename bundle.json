@@ -111,7 +111,8 @@
             "udmf",
             "webview",
             "window_manager",
-            "zlib"
+            "zlib",
+            "hiperf"
   ],
           "third_party": [
             "libjpeg-turbo"
