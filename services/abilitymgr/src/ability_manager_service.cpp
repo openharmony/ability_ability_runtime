@@ -11545,6 +11545,21 @@ bool AbilityManagerService::ProcessLowMemoryKill(int32_t pid, const ExitReason &
 int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReason &reason)
 {
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
+    EventInfo eventInfo;
+    eventInfo.callerPid = IPCSkeleton::GetCallingPid();
+    eventInfo.pid = pid;
+    eventInfo.exitMsg = reason.exitMsg;
+    eventInfo.shouldKillForeground = reason.shouldKillForeground;
+    auto ret = KillProcessWithReasonInner(pid, reason);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "KillProcessWithReason ret: %{public}d", ret);
+    if (reason.reason == Reason::REASON_RESOURCE_CONTROL && reason.exitMsg == GlobalConstant::LOW_MEMORY_KILL) {
+        abilityEventHelper_.SendKillProcessWithReasonEvent(ret, "KillProcessWithReason", eventInfo);
+    }
+    return ret;
+}
+
+int32_t AbilityManagerService::KillProcessWithReasonInner(int32_t pid, const ExitReason &reason)
+{
     bool supportShell = AmsConfigurationParameter::GetInstance().IsSupportAAKillWithReason();
     auto isShellCall = PermissionVerification::GetInstance()->IsShellCall();
     auto isCallingPerm = PermissionVerification::GetInstance()->VerifyCallingPermission(

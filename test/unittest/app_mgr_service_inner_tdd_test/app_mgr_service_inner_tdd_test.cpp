@@ -1391,7 +1391,6 @@ HWTEST_F(AppMgrServiceInnerTest, KillSubProcessBypid_004, TestSize.Level1)
     std::string processName = "testProcess";
     auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
     
-    // std::map<int32_t, std::shared_ptr<RenderRecord>> renderRecordMap;
     std::map<pid_t, std::weak_ptr<AppRunningRecord>> childAppRecordMap;
     std::shared_ptr<ApplicationInfo> subAppInfo = std::make_shared<ApplicationInfo>();
     std::string subProcessName = "subTestProcess";
@@ -1430,7 +1429,6 @@ HWTEST_F(AppMgrServiceInnerTest, KillSubProcessBypid_005, TestSize.Level1)
     std::string processName = "testProcess";
     auto appRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
     
-    // std::map<int32_t, std::shared_ptr<RenderRecord>> renderRecordMap;
     std::map<pid_t, std::weak_ptr<AppRunningRecord>> childAppRecordMap;
     std::shared_ptr<ApplicationInfo> subAppInfo = std::make_shared<ApplicationInfo>();
     std::string subProcessName = "subTestProcess";

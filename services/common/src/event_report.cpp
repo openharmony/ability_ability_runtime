@@ -71,6 +71,9 @@ constexpr const char *EVENT_FILE_OR_FOLDER_SIZE = "FILE_OR_FOLDER_SIZE";
 constexpr const char *EVENT_COMPONENT_NAME_KEY = "COMPONENT_NAME";
 constexpr const char *EVENT_PARTITION_NAME_KEY = "PARTITION_NAME";
 constexpr const char *EVENT_REMAIN_PARTITION_SIZE_KEY = "REMAIN_PARTITION_SIZE";
+constexpr const char *EVENT_KEY_CALLER_PID = "CALLER_PID";
+constexpr const char *EVENT_KEY_EXIT_MESSAGE = "EXIT_MESSAGE";
+constexpr const char *EVENT_KEY_SHOULD_KILL_FOREGROUND = "SHOULD_KILL_FOREGROUND";
 
 constexpr const int32_t DEFAULT_EXTENSION_TYPE = -1;
 }
@@ -264,6 +267,20 @@ void EventReport::LogStartAbilityByAppLinking(const std::string &name, HiSysEven
     }
 }
 
+void EventReport::LogKillProcessWithReason(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+{
+    HiSysEventWrite(
+        HiSysEvent::Domain::AAFWK,
+        name,
+        type,
+        EVENT_KEY_CALLER_PID, eventInfo.callerPid,
+        EVENT_KEY_PID, eventInfo.pid,
+        EVENT_KEY_EXIT_MESSAGE, eventInfo.exitMsg,
+        EVENT_KEY_SHOULD_KILL_FOREGROUND, eventInfo.shouldKillForeground,
+        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
+        EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
+}
+
 void EventReport::LogUIExtensionErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
 {
     HiSysEventWrite(
@@ -341,6 +358,9 @@ void EventReport::SendAbilityEvent(const EventName &eventName, HiSysEventType ty
             break;
         case EventName::START_ABILITY_BY_APP_LINKING:
             LogStartAbilityByAppLinking(name, type, eventInfo);
+            break;
+        case EventName::KILL_PROCESS_WITH_REASON:
+            LogKillProcessWithReason(name, type, eventInfo);
             break;
         default:
             break;
@@ -837,7 +857,7 @@ std::string EventReport::ConvertEventName(const EventName &eventName)
         // ability behavior event
         "START_ABILITY", "TERMINATE_ABILITY", "CLOSE_ABILITY",
         "ABILITY_ONFOREGROUND", "ABILITY_ONBACKGROUND", "ABILITY_ONACTIVE", "ABILITY_ONINACTIVE",
-        "START_ABILITY_BY_APP_LINKING",
+        "START_ABILITY_BY_APP_LINKING", "KILL_PROCESS_WITH_REASON",
 
         // serviceExtensionAbility behavior event
         "START_SERVICE", "STOP_SERVICE", "CONNECT_SERVICE", "DISCONNECT_SERVICE", "START_ABILITY_OTHER_EXTENSION",
