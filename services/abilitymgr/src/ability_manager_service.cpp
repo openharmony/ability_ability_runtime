@@ -4586,15 +4586,6 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
 
     Want abilityWant = want;
     AbilityRequest abilityRequest;
-    if (isQueryExtensionOnly || AAFwk::UIExtensionUtils::IsUIExtension(extensionType)) {
-        result = GenerateExtensionAbilityRequest(abilityWant, abilityRequest, callerToken, validUserId);
-    } else {
-        result = GenerateAbilityRequest(abilityWant, DEFAULT_INVAL_VALUE, abilityRequest, callerToken, validUserId);
-    }
-    if (!HandleExecuteSAInterceptor(abilityWant, callerToken, abilityRequest, result)) {
-        return result;
-    }
-
     std::string uri = abilityWant.GetUri().ToString();
     bool isFileUri = (abilityWant.GetUri().GetScheme() == "file");
     if (!uri.empty() && !isFileUri) {
@@ -4905,6 +4896,10 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
     if (type != AppExecFwk::AbilityType::SERVICE && type != AppExecFwk::AbilityType::EXTENSION) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "ability failed, target ability not service");
         return TARGET_ABILITY_NOT_SERVICE;
+    }
+
+    if (!HandleExecuteSAInterceptor(want, callerToken, abilityRequest, result)) {
+        return result;
     }
 
     AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(abilityRequest.want, 0, GetUserId(),
