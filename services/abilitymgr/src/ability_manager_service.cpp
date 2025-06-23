@@ -2954,6 +2954,10 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
                 isColdStart = info.preloadMode_ == AppExecFwk::PreloadMode::PRESS_DOWN;
                 pid = info.pid_;
                 warmStartType = static_cast<int32_t>(info.preloadMode_);
+                if (info.isExiting) {
+                    isColdStart = true;
+                    pid = 0;
+                }
                 break;
             }
         }
