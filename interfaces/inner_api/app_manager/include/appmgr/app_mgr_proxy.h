@@ -848,10 +848,10 @@ public:
      */
     int32_t LaunchAbility(sptr<IRemoteObject> token) override;
     
-/**
+    /**
      * Elevate the current process to be a candidate master process.
      *
-     * @param isInsertToHead Whether inset current process to the head of candidate master process list.
+     * @param isInsertToHead Whether insert current process to the head of candidate master process list.
      * @return Return ERR_OK if success, others fail.
      */
     int32_t PromoteCurrentToCandidateMasterProcess(bool isInsertToHead) override;
