@@ -14,19 +14,20 @@
  */
 
 #include "ets_error_utils.h"
+
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char* ERR_MSG_TOO_FEW_PARAM = "Parameter error. Too few parameters.";
-constexpr const char* ERR_MSG_NOT_MAINTHREAD = "Caller error. Caller from non-main thread.";
-constexpr const char* ERR_MSG_INVALID_NUM_PARAMS = "Parameter error. The number of parameters is invalid.";
-constexpr const char* NOT_SYSTEM_APP = "The application is not system-app, can not use system-api.";
-constexpr const char* BUSINESS_ERROR_CLASS = "L@ohos/base/BusinessError;";
+constexpr const char *ERR_MSG_TOO_FEW_PARAM = "Parameter error. Too few parameters.";
+constexpr const char *ERR_MSG_NOT_MAINTHREAD = "Caller error. Caller from non-main thread.";
+constexpr const char *ERR_MSG_INVALID_NUM_PARAMS = "Parameter error. The number of parameters is invalid.";
+constexpr const char *NOT_SYSTEM_APP = "The application is not system-app, can not use system-api.";
+constexpr const char *BUSINESS_ERROR_CLASS = "L@ohos/base/BusinessError;";
 } // namespace
 
-void ThrowEtsError(ani_env *env, ani_object err)
+void EtsErrorUtil::ThrowError(ani_env *env, ani_object err)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
@@ -35,139 +36,135 @@ void ThrowEtsError(ani_env *env, ani_object err)
     env->ThrowError(static_cast<ani_error>(err));
 }
 
-void ThrowEtsError(ani_env *env, int32_t errCode, const std::string &errorMsg)
+void EtsErrorUtil::ThrowError(ani_env *env, int32_t errCode, const std::string &errorMsg)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return;
     }
-    ThrowEtsError(env, CreateEtsError(env, errCode, errorMsg));
+    EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(env, errCode, errorMsg));
 }
 
-void ThrowEtsError(ani_env *env, const AbilityErrorCode &err)
+void EtsErrorUtil::ThrowError(ani_env *env, const AbilityErrorCode &err)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return;
     }
-    ThrowEtsError(env, CreateEtsError(env, static_cast<int32_t>(err), GetErrorMsg(err)));
+    EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(env, static_cast<int32_t>(err), GetErrorMsg(err)));
 }
 
-void ThrowEtsInvalidCallerError(ani_env *env)
+void EtsErrorUtil::ThrowInvalidCallerError(ani_env *env)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return;
     }
-    ThrowEtsError(env, CreateEtsError(env,
-        static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CALLER),
-        ERR_MSG_NOT_MAINTHREAD));
+    EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(
+        env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CALLER), ERR_MSG_NOT_MAINTHREAD));
 }
 
-void ThrowEtsTooFewParametersError(ani_env *env)
+void EtsErrorUtil::ThrowTooFewParametersError(ani_env *env)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return;
     }
-    ThrowEtsError(env, CreateEtsError(env,
-        static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-        ERR_MSG_TOO_FEW_PARAM));
+    EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(
+        env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM), ERR_MSG_TOO_FEW_PARAM));
 }
 
-void ThrowEtsInvalidNumParametersError(ani_env *env)
+void EtsErrorUtil::ThrowInvalidNumParametersError(ani_env *env)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return;
     }
-    ThrowEtsError(env, CreateEtsError(env,
-        static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-        ERR_MSG_INVALID_NUM_PARAMS));
+    EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(
+        env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM), ERR_MSG_INVALID_NUM_PARAMS));
 }
 
-void ThrowEtsNoPermissionError(ani_env *env, const std::string &permission)
+void EtsErrorUtil::ThrowNoPermissionError(ani_env *env, const std::string &permission)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return;
     }
-    ThrowEtsError(env, CreateEtsError(env,
-        static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_PERMISSION_DENIED),
+    EtsErrorUtil::ThrowError(
+        env, EtsErrorUtil::CreateError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_PERMISSION_DENIED),
         GetNoPermissionErrorMsg(permission)));
 }
 
-void ThrowEtsNotSystemAppError(ani_env *env)
+void EtsErrorUtil::ThrowNotSystemAppError(ani_env *env)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return;
     }
-    ThrowEtsError(env, CreateEtsError(env,
-        static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
-        NOT_SYSTEM_APP));
+    EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(
+        env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), NOT_SYSTEM_APP));
 }
 
-void ThrowEtsInvalidParamError(ani_env *env, const std::string &message)
+void EtsErrorUtil::ThrowInvalidParamError(ani_env *env, const std::string &message)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return;
     }
-    ThrowEtsError(env, CreateEtsInvalidParamError(env, message));
+    EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateInvalidParamError(env, message));
 }
 
-void ThrowEtsErrorByNativeErr(ani_env *env, int32_t err)
+void EtsErrorUtil::ThrowErrorByNativeErr(ani_env *env, int32_t err)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return;
     }
-    ThrowEtsError(env, CreateEtsErrorByNativeErr(env, err));
+    EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateErrorByNativeErr(env, err));
 }
 
-ani_object CreateEtsError(ani_env *env, const AbilityErrorCode &err)
+ani_object EtsErrorUtil::CreateError(ani_env *env, const AbilityErrorCode &err)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return nullptr;
     }
-    return CreateEtsError(env, static_cast<int32_t>(err), GetErrorMsg(err));
+    return EtsErrorUtil::CreateError(env, static_cast<int32_t>(err), GetErrorMsg(err));
 }
 
-ani_object CreateEtsInvalidParamError(ani_env *env, const std::string &message)
+ani_object EtsErrorUtil::CreateInvalidParamError(ani_env *env, const std::string &message)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return nullptr;
     }
-    return CreateEtsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM), message);
+    return EtsErrorUtil::CreateError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM), message);
 }
 
-ani_object CreateEtsNoPermissionError(ani_env *env, const std::string &permission)
+ani_object EtsErrorUtil::CreateNoPermissionError(ani_env *env, const std::string &permission)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return nullptr;
     }
-    return CreateEtsError(env,
-        static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_PERMISSION_DENIED),
-        GetNoPermissionErrorMsg(permission));
+    return EtsErrorUtil::CreateError(
+        env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_PERMISSION_DENIED), GetNoPermissionErrorMsg(permission));
 }
 
-ani_object CreateEtsErrorByNativeErr(ani_env *env, int32_t err, const std::string &permission)
+ani_object EtsErrorUtil::CreateErrorByNativeErr(ani_env *env, int32_t err, const std::string &permission)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return nullptr;
     }
     auto errCode = GetJsErrorCodeByNativeError(err);
-    auto errMsg = (errCode == AbilityErrorCode::ERROR_CODE_PERMISSION_DENIED && !permission.empty()) ?
-        GetNoPermissionErrorMsg(permission) : GetErrorMsg(errCode);
-    return CreateEtsError(env, static_cast<int32_t>(errCode), errMsg);
+    auto errMsg = (errCode == AbilityErrorCode::ERROR_CODE_PERMISSION_DENIED && !permission.empty())
+                      ? GetNoPermissionErrorMsg(permission)
+                      : GetErrorMsg(errCode);
+    return EtsErrorUtil::CreateError(env, static_cast<int32_t>(errCode), errMsg);
 }
 
-ani_object WrapEtsError(ani_env *env, const std::string &msg)
+ani_object EtsErrorUtil::WrapError(ani_env *env, const std::string &msg)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
@@ -203,7 +200,7 @@ ani_object WrapEtsError(ani_env *env, const std::string &msg)
     return obj;
 }
 
-ani_object CreateEtsError(ani_env *env, ani_int code, const std::string &msg)
+ani_object EtsErrorUtil::CreateError(ani_env *env, ani_int code, const std::string &msg)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
@@ -220,14 +217,13 @@ ani_object CreateEtsError(ani_env *env, ani_int code, const std::string &msg)
         TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod failed %{public}d", status);
         return nullptr;
     }
-    ani_object error = WrapEtsError(env, msg);
+    ani_object error = EtsErrorUtil::WrapError(env, msg);
     if (error == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "error nulll");
         return nullptr;
     }
     ani_object obj = nullptr;
-    ani_double dCode(code);
-    if ((status = env->Object_New(cls, method, &obj, dCode, error)) != ANI_OK) {
+    if ((status = env->Object_New(cls, method, &obj, code, error)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Object_New failed %{public}d", status);
         return nullptr;
     }

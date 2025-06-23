@@ -201,13 +201,13 @@ ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unuse
     auto context = GetBaseContext(env, aniObj);
     if (!context) {
         TAG_LOGW(AAFwkTag::APPKIT, "null context");
-        ThrowEtsError(env, (int32_t)AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        EtsErrorUtil::ThrowError(env, (int32_t)AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return {};
     }
     auto applicationContext = context->GetApplicationContext();
     if (applicationContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
-        ThrowEtsError(env, (int32_t)AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        EtsErrorUtil::ThrowError(env, (int32_t)AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return {};
     }
     if (!applicationContext->GetApplicationInfoUpdateFlag()) {

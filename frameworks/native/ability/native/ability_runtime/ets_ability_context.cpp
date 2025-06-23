@@ -209,14 +209,14 @@ void EtsAbilityContext::OnStartAbility(
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     AAFwk::Want want;
     if (!OHOS::AppExecFwk::UnwrapWant(env, wantObj, want)) {
-        ThrowEtsInvalidParamError(env, "Parse param want failed, must be a Want");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, must be a Want");
         return;
     }
     InheritWindowMode(env, aniObj, want);
     auto context = EtsAbilityContext::GetAbilityContext(env, aniObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        ThrowEtsInvalidParamError(env, "null context");
+        EtsErrorUtil::ThrowInvalidParamError(env, "null context");
         return;
     }
     if ((want.GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
@@ -229,7 +229,8 @@ void EtsAbilityContext::OnStartAbility(
     if (opt != nullptr) {
         AAFwk::StartOptions startOptions;
         if (!OHOS::AppExecFwk::UnwrapStartOptions(env, opt, startOptions)) {
-            ThrowEtsInvalidParamError(env, "Parse param startOptions failed, startOptions must be StartOptions.");
+            EtsErrorUtil::ThrowInvalidParamError(env,
+                "Parse param startOptions failed, startOptions must be StartOptions.");
             TAG_LOGE(AAFwkTag::CONTEXT, "invalid options");
             return;
         }
@@ -237,9 +238,9 @@ void EtsAbilityContext::OnStartAbility(
     } else {
         innerErrCode = context->StartAbility(want, -1);
     }
-    ani_object aniObject = CreateEtsError(env, AbilityErrorCode::ERROR_OK);
+    ani_object aniObject = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
     if (innerErrCode != ERR_OK) {
-        aniObject = CreateEtsErrorByNativeErr(env, innerErrCode);
+        aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, innerErrCode);
     }
     if ((want.GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
         // to be done: free install
@@ -255,7 +256,7 @@ void EtsAbilityContext::OnStartAbilityForResult(
     auto context = EtsAbilityContext::GetAbilityContext(env, aniObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "GetAbilityContext is nullptr");
-        ThrowEtsErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        EtsErrorUtil::ThrowErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
         return;
     }
     AAFwk::Want want;
@@ -295,7 +296,7 @@ void EtsAbilityContext::OnStartAbilityForResult(
         }
         auto errCode = isInner ? resultCode : 0;
         AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
-            OHOS::AbilityRuntime::CreateEtsErrorByNativeErr(env, errCode), abilityResult);
+            OHOS::AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, errCode), abilityResult);
     };
     auto requestCode = GenerateRequestCode();
     (startOptionsObj == nullptr) ? context->StartAbilityForResult(want, requestCode, std::move(task))
@@ -307,7 +308,7 @@ void EtsAbilityContext::OnTerminateSelf(ani_env *env, ani_object aniObj, ani_obj
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null env or aniObj");
-        ani_object aniObject = CreateEtsInvalidParamError(env, "env null");
+        ani_object aniObject = EtsErrorUtil::CreateInvalidParamError(env, "env null");
         AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
@@ -315,15 +316,15 @@ void EtsAbilityContext::OnTerminateSelf(ani_env *env, ani_object aniObj, ani_obj
     auto context = EtsAbilityContext::GetAbilityContext(env, aniObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        aniObject = CreateEtsInvalidParamError(env, "context null");
+        aniObject = EtsErrorUtil::CreateInvalidParamError(env, "context null");
         AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
     ErrCode ret = context->TerminateSelf();
     if (ret == static_cast<ErrCode>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT) || ret == ERR_OK) {
-        aniObject = CreateEtsError(env, static_cast<AbilityErrorCode>(ret));
+        aniObject = EtsErrorUtil::CreateError(env, static_cast<AbilityErrorCode>(ret));
     } else {
-        aniObject = CreateEtsErrorByNativeErr(env, static_cast<int32_t>(ret));
+        aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
     }
     AsyncCallback(env, callback, aniObject, nullptr);
 }
@@ -333,7 +334,7 @@ void EtsAbilityContext::OnTerminateSelfWithResult(
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null env");
-        ani_object aniObject = CreateEtsInvalidParamError(env, "env null");
+        ani_object aniObject = EtsErrorUtil::CreateInvalidParamError(env, "env null");
         AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
@@ -341,7 +342,7 @@ void EtsAbilityContext::OnTerminateSelfWithResult(
     auto context = EtsAbilityContext::GetAbilityContext(env, aniObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "GetAbilityContext is nullptr");
-        aniObject = CreateEtsInvalidParamError(env, "context null");
+        aniObject = EtsErrorUtil::CreateInvalidParamError(env, "context null");
         AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
@@ -351,9 +352,9 @@ void EtsAbilityContext::OnTerminateSelfWithResult(
     context->SetTerminating(true);
     ErrCode ret = context->TerminateAbilityWithResult(want, resultCode);
     if (ret == static_cast<ErrCode>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT) || ret == ERR_OK) {
-        aniObject = CreateEtsError(env, static_cast<AbilityErrorCode>(ret));
+        aniObject = EtsErrorUtil::CreateError(env, static_cast<AbilityErrorCode>(ret));
     } else {
-        aniObject = CreateEtsErrorByNativeErr(env, static_cast<int32_t>(ret));
+        aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
     }
     AsyncCallback(env, callback, aniObject, nullptr);
 }
@@ -362,7 +363,7 @@ void EtsAbilityContext::OnReportDrawnCompleted(ani_env *env, ani_object aniObj, 
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null env");
-        ani_object aniObject = CreateEtsInvalidParamError(env, "env null");
+        ani_object aniObject = EtsErrorUtil::CreateInvalidParamError(env, "env null");
         AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
@@ -370,15 +371,15 @@ void EtsAbilityContext::OnReportDrawnCompleted(ani_env *env, ani_object aniObj, 
     auto context = GetAbilityContext(env, aniObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "context null");
-        aniObject = CreateEtsInvalidParamError(env, "context null");
+        aniObject = EtsErrorUtil::CreateInvalidParamError(env, "context null");
         AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
     ErrCode ret = context->ReportDrawnCompleted();
     if (ret == ERR_OK) {
-        aniObject = CreateEtsError(env, static_cast<AbilityErrorCode>(ret));
+        aniObject = EtsErrorUtil::CreateError(env, static_cast<AbilityErrorCode>(ret));
     } else {
-        aniObject = CreateEtsErrorByNativeErr(env, static_cast<int32_t>(ret));
+        aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
     }
     AsyncCallback(env, callback, aniObject, nullptr);
 }
