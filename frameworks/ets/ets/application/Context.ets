@@ -71,10 +71,10 @@ export class Context extends BaseContext {
   }
 
   getGroupDir(dataGroupID: string): Promise<string> {
-    return new Promise<string>((resolve: (data: string) => void, reject: (err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackWrapper<string>((err: BusinessError<void>, data: string) => {
-        if (err.code == 0) {
-          resolve(data);
+    return new Promise<string>((resolve: (data: string) => void, reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<string>((err: BusinessError | null, data: string | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as string);
         } else {
           reject(err);
         }

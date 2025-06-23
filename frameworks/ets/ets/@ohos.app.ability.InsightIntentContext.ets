@@ -19,14 +19,14 @@ import Want from '@ohos.app.ability.Want';
 export default class InsightIntentContext {
   nativeContext: long;
 
-  public native nativeStartAbilitySync(want: Want): BusinessError<void>;
+  public native nativeStartAbilitySync(want: Want): BusinessError;
 
   startAbility(want: Want, callback: AsyncCallback<void>): void {
-    let p1 = taskpool.execute((): BusinessError<void> => {
+    let p1 = taskpool.execute((): BusinessError => {
       return this.nativeStartAbilitySync(want);
     });
     p1.then((e: NullishType) => {
-      let retError = e as BusinessError<void>;
+      let retError = e as BusinessError;
       callback(retError, undefined);
     }, (err: Error): void => {
       callback(err as BusinessError, undefined);
@@ -34,12 +34,12 @@ export default class InsightIntentContext {
   }
 
   startAbility(want: Want): Promise<void> {
-    let p = new Promise<void>((resolve: (v: undefined) => void, reject: (error: BusinessError<void>) => void): void => {
-      let p1 = taskpool.execute((): BusinessError<void> => {
+    let p = new Promise<void>((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute((): BusinessError => {
         return this.nativeStartAbilitySync(want);
       });
       p1.then((e: NullishType) => {
-        let retError = e as BusinessError<void>;
+        let retError = e as BusinessError;
         if (retError.code === 0) {
           resolve(undefined);
         } else {
