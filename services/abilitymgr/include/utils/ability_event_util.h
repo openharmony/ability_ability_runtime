@@ -20,7 +20,7 @@
 
 #include "bundle_pack_info.h"
 #include "event_report.h"
-#include "task_handler_wrap.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -28,14 +28,11 @@ class AbilityEventUtil {
 public:
 
     AbilityEventUtil() = default;
-    AbilityEventUtil(std::shared_ptr<TaskHandlerWrap> taskHandler) : taskHandler_(taskHandler) {}
 
     void HandleModuleInfoUpdated(const std::string &bundleName, const int uid, const std::string &moduleName,
         bool isPlugin);
     void SendStartAbilityErrorEvent(EventInfo &eventInfo, int32_t errCode, const std::string errMsg,
         bool isSystemError = false);
-private:
-    std::shared_ptr<TaskHandlerWrap> taskHandler_;
 };
 
 } // namespace AAFwk
