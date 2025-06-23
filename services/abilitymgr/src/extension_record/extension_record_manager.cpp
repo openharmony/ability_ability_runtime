@@ -645,6 +645,14 @@ int32_t ExtensionRecordManager::GetUIExtensionSessionInfo(
     uiExtensionSessionInfo.uiExtensionUsage = sessionInfo->uiExtensionUsage;
     uiExtensionSessionInfo.elementName = abilityRecord->GetElementName();
     uiExtensionSessionInfo.extensionAbilityType = abilityRecord->GetAbilityInfo().extensionAbilityType;
+
+    auto callerToken = sessionInfo->callerToken;
+    if (callerToken != nullptr) {
+        auto callerAbilityRecord = AAFwk::Token::GetAbilityRecordByToken(callerToken);
+        if (callerAbilityRecord != nullptr) {
+            uiExtensionSessionInfo.hostElementName = callerAbilityRecord->GetElementName();
+        }
+    }
     return ERR_OK;
 }
 
