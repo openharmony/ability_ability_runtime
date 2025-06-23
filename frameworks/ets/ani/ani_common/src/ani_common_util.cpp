@@ -1024,31 +1024,27 @@ bool UnwrapArrayString(ani_env *env, const ani_object &arrayObj, std::vector<std
 
 ani_object CreateEmptyArray(ani_env *env)
 {
-    ani_class arrayCls = nullptr;
     ani_status status = ANI_OK;
-
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null env");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null env");
         return nullptr;
     }
-
+    ani_class arrayCls = nullptr;
     status = env->FindClass("Lescompat/Array;", &arrayCls);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "FindClass failed status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "FindClass failed status: %{public}d", status);
         return nullptr;
     }
-
     ani_method arrayCtor;
     status = env->Class_FindMethod(arrayCls, "<ctor>", ":V", &arrayCtor);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "find ctor failed status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "find ctor failed status: %{public}d", status);
         return nullptr;
     }
-
     ani_object arrayObj;
     status = env->Object_New(arrayCls, arrayCtor, &arrayObj);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Object_New array failed status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::JSNAPI, "Object_New array failed status: %{public}d", status);
         return nullptr;
     }
     return arrayObj;

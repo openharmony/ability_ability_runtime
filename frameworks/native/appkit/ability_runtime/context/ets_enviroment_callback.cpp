@@ -22,12 +22,22 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+constexpr const char* APPLICATION_ENVIROMENT_CALLBACK =
+    "L@ohos/app/ability/EnvironmentCallback/EnvironmentCallbackInner;";
+constexpr const char* APPLICATION_MEMORYLEVEL =
+    "L@ohos/app/ability/AbilityConstant/AbilityConstant/MemoryLevel;:V";
+constexpr const char* APPLICATION_MEMORYLEVEL_ENUM =
+    "L@ohos/app/ability/AbilityConstant/AbilityConstant/MemoryLevel;";
+constexpr const char* APPLICATION_CONFIGURATION =
+    "L@ohos/app/ability/Configuration/Configuration;:V";
+}
 EtsEnviromentCallback::EtsEnviromentCallback(ani_env *env)
-    : ani_env_(env) {}
+    : env_(env) {}
 
 int32_t EtsEnviromentCallback::Register(ani_object aniCallback)
 {
-    if (ani_env_ == nullptr) {
+    if (env_ == nullptr) {
         return -1;
     }
     int32_t callbackId = serialNumber_;
@@ -37,7 +47,7 @@ int32_t EtsEnviromentCallback::Register(ani_object aniCallback)
         serialNumber_ = 0;
     }
     ani_ref aniCallbackRef = nullptr;
-    ani_env_->GlobalReference_Create(aniCallback, &aniCallbackRef);
+    env_->GlobalReference_Create(aniCallback, &aniCallbackRef);
 
     std::lock_guard lock(Mutex_);
     enviromentAniCallbacks_.emplace(callbackId, aniCallbackRef);
@@ -58,63 +68,30 @@ bool EtsEnviromentCallback::UnRegister(int32_t callbackId)
 
 void EtsEnviromentCallback::OnMemoryLevel(const int level)
 {
-    std::lock_guard lock(Mutex_);
-    if (ani_env_ == nullptr || enviromentAniCallbacks_.empty()) {
+    TAG_LOGD(AAFwkTag::APPKIT, "OnMemoryLevel Call");
+    if (env_ == nullptr || enviromentAniCallbacks_.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "null aniEnv");
         return;
     }
-
-    for (auto &callback : enviromentAniCallbacks_) {
-        ani_status status = ANI_ERROR;
-        if (!callback.second) {
-            return;
-        }
-        ani_object envCallback = reinterpret_cast<ani_object>(callback.second);
-        ani_ref onMemoryLevelRef {};
-
-        if ((status = ani_env_->Object_GetFieldByName_Ref(envCallback,
-            "onMemoryLevel", &onMemoryLevelRef)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "get onMemoryLevel failed, status: %{public}d", status);
-            return;
-        }
-        ani_fn_object onMemoryLevelFunc = reinterpret_cast<ani_fn_object>(onMemoryLevelRef);
-
-        ani_enum_item memoryLevel {};
-        OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(ani_env_,
-            "L@ohos/app/ability/AbilityConstant/AbilityConstant/MemoryLevel;",
-            (AppExecFwk::MemoryLevel)level, memoryLevel);
-
-        ani_object memoryLevelObj = reinterpret_cast<ani_object>(memoryLevel);
-        if (memoryLevelObj == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "create memoryLevelObj failed");
-            return;
-        }
-
-        ani_ref memoryLevelRef = nullptr;
-        status = ani_env_->GlobalReference_Create(memoryLevelObj, &memoryLevelRef);
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "create memoryLevelRef failed status: %{public}d", status);
-            return;
-        }
-
-        ani_ref argv[] = {memoryLevelRef};
-        ani_ref result;
-        status = ani_env_->FunctionalObject_Call(onMemoryLevelFunc, 1, argv, &result);
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "FunctionalObject_Call failed status: %{public}d", status);
-            return;
-        }
-    }
-}
-
-void EtsEnviromentCallback::OnConfigurationUpdated(const AppExecFwk::Configuration &config)
-{
-    std::lock_guard lock(Mutex_);
-    if (ani_env_ == nullptr || enviromentAniCallbacks_.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null aniEnv");
+    ani_class cls {};
+    ani_status status = env_->FindClass(APPLICATION_ENVIROMENT_CALLBACK, &cls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass status: %{public}d", status);
         return;
     }
-
+    ani_method method {};
+    if ((status = env_->Class_FindMethod(cls, "onMemoryLevel", APPLICATION_MEMORYLEVEL, &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod status: %{public}d", status);
+        return;
+    }
+    ani_enum_item memoryLevel {};
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(env_,
+        APPLICATION_MEMORYLEVEL_ENUM, (AppExecFwk::MemoryLevel)level, memoryLevel);
+    if (memoryLevel == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "create memoryLevel failed");
+        return;
+    }
+    std::lock_guard lock(Mutex_);
     for (auto &callback : enviromentAniCallbacks_) {
         ani_status status = ANI_ERROR;
         if (!callback.second) {
@@ -122,33 +99,46 @@ void EtsEnviromentCallback::OnConfigurationUpdated(const AppExecFwk::Configurati
             return;
         }
         ani_object envCallback = reinterpret_cast<ani_object>(callback.second);
-        ani_ref onConfigurationUpdatedRef {};
+        if ((status = env_->Object_CallMethod_Void(envCallback, method, memoryLevel)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Object_CallMethod_Void status: %{public}d", status);
+        }
+    }
+}
 
-        if ((status = ani_env_->Object_GetFieldByName_Ref(envCallback,
-            "onConfigurationUpdated", &onConfigurationUpdatedRef)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "get onConfigurationUpdated failed, status: %{public}d", status);
+void EtsEnviromentCallback::OnConfigurationUpdated(const AppExecFwk::Configuration &config)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "OnConfigurationUpdated Call");
+    if (env_ == nullptr || enviromentAniCallbacks_.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null aniEnv");
+        return;
+    }
+    ani_class cls {};
+    ani_status status = env_->FindClass(APPLICATION_ENVIROMENT_CALLBACK, &cls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass status: %{public}d", status);
+        return;
+    }
+    ani_method method {};
+    if ((status = env_->Class_FindMethod(cls, "onConfigurationUpdated",
+        APPLICATION_CONFIGURATION, &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod status: %{public}d", status);
+        return;
+    }
+    ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env_, config);
+    if (configObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "create configObj failed");
+        return;
+    }
+    std::lock_guard lock(Mutex_);
+    for (auto &callback : enviromentAniCallbacks_) {
+        ani_status status = ANI_ERROR;
+        if (!callback.second) {
+            TAG_LOGE(AAFwkTag::APPKIT, "callback object is null");
             return;
         }
-        ani_fn_object onConfigurationUpdatedFunc = reinterpret_cast<ani_fn_object>(onConfigurationUpdatedRef);
-
-        ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(ani_env_, config);
-        if (configObj == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "create configObj failed");
-            return;
-        }
-        ani_ref configRef = nullptr;
-        status = ani_env_->GlobalReference_Create(configObj, &configRef);
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "create configRef failed, status: %{public}d", status);
-            return;
-        }
-
-        ani_ref argv[] = {configRef};
-        ani_ref result;
-        status = ani_env_->FunctionalObject_Call(onConfigurationUpdatedFunc, 1, argv, &result);
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "FunctionalObject_Call failed, status: %{public}d", status);
-            return;
+        ani_object envCallback = reinterpret_cast<ani_object>(callback.second);
+        if ((status = env_->Object_CallMethod_Void(envCallback, method, configObj)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Object_CallMethod_Void status: %{public}d", status);
         }
     }
 }
