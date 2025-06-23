@@ -2947,19 +2947,21 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
         int32_t pid = 0;
         int32_t warmStartType = -1;
         for (auto const &info : runningProcessInfos) {
-            if (info.uid_ == abilityInfo.applicationInfo.uid &&
-                info.processType_ == AppExecFwk::ProcessType::NORMAL &&
+            if (info.uid_ != abilityInfo.applicationInfo.uid ||
+                info.processType_ != AppExecFwk::ProcessType::NORMAL ||
                 std::find(info.bundleNames.begin(), info.bundleNames.end(),
-                abilityInfo.applicationInfo.bundleName) != info.bundleNames.end()){
-                isColdStart = info.preloadMode_ == AppExecFwk::PreloadMode::PRESS_DOWN;
-                pid = info.pid_;
-                warmStartType = static_cast<int32_t>(info.preloadMode_);
-                if (info.isExiting) {
-                    isColdStart = true;
-                    pid = 0;
-                }
-                break;
+                abilityInfo.applicationInfo.bundleName) == info.bundleNames.end()) {
+                continue;
             }
+            
+            isColdStart = info.preloadMode_ == AppExecFwk::PreloadMode::PRESS_DOWN;
+            pid = info.pid_;
+            warmStartType = static_cast<int32_t>(info.preloadMode_);
+            if (info.isExiting) {
+                isColdStart = true;
+                pid = 0;
+            }
+            break;
         }
         ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart, warmStartType);
     }
