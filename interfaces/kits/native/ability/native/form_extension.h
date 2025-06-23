@@ -17,9 +17,9 @@
 #define OHOS_ABILITY_RUNTIME_FORM_EXTENSION_H
 
 #include "extension_base.h"
+#include "form_instance.h"
 #include "form_provider_info.h"
 #include "form_state_info.h"
-#include "form_instance.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
