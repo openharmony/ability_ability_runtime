@@ -13,10 +13,14 @@
  * limitations under the License.
  */
 
-1
 class EventHub {
   constructor() {
     this.eventMap = {};
+    this.nativeEventHubRef = null;
+  }
+
+  setNativeEventHubRef(ref) {
+    this.nativeEventHubRef = ref;
   }
 
   on(event, callback) {
@@ -31,7 +35,7 @@ class EventHub {
     }
   }
 
-  off(event, callback) {
+  off(event, callback, fromNative = false) {
     if (typeof (event) !== 'string') {
       return;
     }
@@ -49,9 +53,29 @@ class EventHub {
         delete this.eventMap[event];
       }
     }
+    if (this.nativeEventHubRef && !fromNative) {
+      // call native eventHub off
+      this.nativeEventHubRef.off(event, callback, false);
+    }
   }
 
   emit(event, ...args) {
+    if (typeof (event) !== 'string') {
+      return;
+    }
+    if (this.eventMap[event]) {
+      const cloneArray = [...this.eventMap[event]];
+      const len = cloneArray.length;
+      for (let i = 0; i < len; ++i) {
+        cloneArray[i].apply(this, args);
+      }
+    }
+    if (this.nativeEventHubRef) {
+      this.nativeEventHubRef.emitByDynamicContext(event, ...args);
+    }
+  }
+
+  emitByNativeContext(event, ...args) {
     if (typeof (event) !== 'string') {
       return;
     }
