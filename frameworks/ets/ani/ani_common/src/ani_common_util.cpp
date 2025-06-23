@@ -435,17 +435,17 @@ ani_object CreateBoolean(ani_env *env, ani_boolean value)
         return nullptr;
     }
     ani_status status = ANI_ERROR;
-    ani_class cls;
+    ani_class cls = nullptr;
     if ((status = env->FindClass(CLASSNAME_BOOL, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return nullptr;
     }
-    ani_method ctor;
+    ani_method ctor = nullptr;
     if ((status = env->Class_FindMethod(cls, "<ctor>", "Z:V", &ctor)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return nullptr;
     }
-    ani_object obj;
+    ani_object obj = nullptr;
     if ((status = env->Object_New(cls, ctor, &obj, value)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return nullptr;
@@ -455,17 +455,21 @@ ani_object CreateBoolean(ani_env *env, ani_boolean value)
 
 bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result)
 {
-    ani_status status = ANI_ERROR;
-    ani_class clsCall {};
-
-    if ((status = env->FindClass(CLASSNAME_ASYNC_CALLBACK_WRAPPER, &clsCall)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
         return false;
     }
-    ani_method method {};
+    ani_status status = ANI_ERROR;
+    ani_class clsCall = nullptr;
+
+    if ((status = env->FindClass(CLASSNAME_ASYNC_CALLBACK_WRAPPER, &clsCall)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_method method = nullptr;
     if ((status = env->Class_FindMethod(
         clsCall, "invoke", "L@ohos/base/BusinessError;Lstd/core/Object;:V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
     if (result == nullptr) {
@@ -474,58 +478,7 @@ bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object r
         result = reinterpret_cast<ani_object>(nullRef);
     }
     if ((status = env->Object_CallMethod_Void(call, method, error, result)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
-        return false;
-    }
-    return true;
-}
-
-bool GetDoubleOrUndefined(ani_env *env, ani_object param, const char *name, ani_double &value)
-{
-    ani_ref obj = nullptr;
-    ani_boolean isUndefined = ANI_TRUE;
-    ani_status status = ANI_ERROR;
-
-    if ((status = env->Object_GetFieldByName_Ref(param, name, &obj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return false;
-    }
-    if ((status = env->Reference_IsUndefined(obj, &isUndefined)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return false;
-    }
-    if (isUndefined) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s : undefined", name);
-        return false;
-    }
-    if ((status = env->Object_CallMethodByName_Double(
-        reinterpret_cast<ani_object>(obj), "doubleValue", nullptr, &value)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return false;
-    }
-    return true;
-}
-
-bool GetStringOrUndefined(ani_env *env, ani_object param, const char *name, std::string &res)
-{
-    ani_ref obj = nullptr;
-    ani_boolean isUndefined = ANI_TRUE;
-    ani_status status = ANI_ERROR;
-
-    if ((status = env->Object_GetFieldByName_Ref(param, name, &obj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return false;
-    }
-    if ((status = env->Reference_IsUndefined(obj, &isUndefined)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return false;
-    }
-    if (isUndefined) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s : undefined", name);
-        return false;
-    }
-    if (!GetStdString(env, reinterpret_cast<ani_string>(obj), res)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
     return true;

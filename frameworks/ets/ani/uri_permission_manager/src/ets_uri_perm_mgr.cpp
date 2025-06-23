@@ -91,11 +91,11 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         return;
     }
     auto selfToken = IPCSkeleton::GetSelfTokenID();
-    ani_object etsErrCode = CreateEtsError(env, AbilityErrorCode::ERROR_OK);
+    ani_object etsErrCode = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
-        etsErrCode = CreateEtsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
-            NOT_SYSTEM_APP);
+        etsErrCode = EtsErrorUtil::CreateError(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), NOT_SYSTEM_APP);
         AsyncCallback(env, callback, etsErrCode, createDouble(env, ERR_FAILURE));
         return;
     }
@@ -111,7 +111,7 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         targetBundleName, appCloneIndexId);
     if (errCode != ERR_OK) {
         result = ERR_FAILURE;
-        etsErrCode = CreateEtsErrorByNativeErr(env, errCode);
+        etsErrCode = EtsErrorUtil::CreateErrorByNativeErr(env, errCode);
     }
     
     AsyncCallback(env, callback, etsErrCode, createDouble(env, result));
@@ -126,11 +126,11 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         return;
     }
     auto selfToken = IPCSkeleton::GetSelfTokenID();
-    ani_object etsErrCode = CreateEtsError(env, AbilityErrorCode::ERROR_OK);
+    ani_object etsErrCode = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
-        etsErrCode = CreateEtsError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP),
-            NOT_SYSTEM_APP);
+        etsErrCode = EtsErrorUtil::CreateError(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), NOT_SYSTEM_APP);
         AsyncCallback(env, callback, etsErrCode, createDouble(env, ERR_FAILURE));
         return;
     }
@@ -142,7 +142,7 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         targetBundleName, appCloneIndex);
     if (errCode != ERR_OK) {
         result = ERR_FAILURE;
-        etsErrCode = CreateEtsErrorByNativeErr(env, errCode);
+        etsErrCode = EtsErrorUtil::CreateErrorByNativeErr(env, errCode);
     }
     AsyncCallback(env, callback, etsErrCode, createDouble(env, result));
 }
