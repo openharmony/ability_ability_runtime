@@ -16,6 +16,7 @@
 import Context from 'application.Context';
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
+import ApplicationContext from 'application.ApplicationContext';
 
 export default namespace application {
   loadLibrary("application_ani.z")
@@ -25,12 +26,14 @@ export default namespace application {
   export native function nativeCreateBundleContext(context: Context, bundleName: string,
     callback: AsyncCallbackWrapper<Context>): void;
 
+  export native function nativeGetApplicationContext(): ApplicationContext;
+
   export function createModuleContext(context: Context, moduleName: string): Promise<Context> {
     let p =
-      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError<void>, data: Context) => {
-          if (err.code == 0) {
-            resolve(data);
+      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError | null, data: Context | undefined) => {
+          if (err == null || err.code == 0) {
+            resolve(data as Context);
           } else {
             reject(err);
           }
@@ -44,10 +47,10 @@ export default namespace application {
 
   export function createModuleContext(context: Context, bundleName: string, moduleName: string): Promise<Context> {
     let p =
-      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError<void>, data: Context) => {
-          if (err.code == 0) {
-            resolve(data);
+      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError | null, data: Context | undefined) => {
+          if (err == null || err.code == 0) {
+            resolve(data as Context);
           } else {
             reject(err);
           }
@@ -61,10 +64,10 @@ export default namespace application {
 
   export function createBundleContext(context: Context, bundleName: string): Promise<Context> {
     let p =
-      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError<void>, data: Context) => {
-          if (err.code == 0) {
-            resolve(data);
+      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError | null, data: Context | undefined) => {
+          if (err == null || err.code == 0) {
+            resolve(data as Context);
           } else {
             reject(err);
           }
@@ -74,5 +77,8 @@ export default namespace application {
         });
       });
     return p;
+  }
+  export function getApplicationContext(): ApplicationContext {
+    return nativeGetApplicationContext();
   }
 }

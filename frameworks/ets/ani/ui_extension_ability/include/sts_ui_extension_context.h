@@ -47,6 +47,8 @@ public:
     static UIExtensionContext* GetAbilityContext(ani_env *env, ani_object obj);
     void AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want,
         ani_object callback, UIExtensionContext* context);
+    static void NativeSetColorMode(ani_env *env, ani_object aniCls, ani_enum_item aniColorMode);
+    static void NativeReportDrawnCompleted(ani_env *env,  ani_object aniCls, ani_object callback);
 private:
     sptr<StsFreeInstallObserver> freeInstallObserver_ = nullptr;
 };

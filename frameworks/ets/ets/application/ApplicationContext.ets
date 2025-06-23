@@ -17,6 +17,7 @@ import Context from 'application.Context'
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { BusinessError, AsyncCallback } from '@ohos.base'
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
+import type ApplicationStateChangeCallback from '@ohos.app.ability.ApplicationStateChangeCallback';
 import Want from '@ohos.app.ability.Want';
 import { ProcessInformation } from 'application.ProcessInformation';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
@@ -41,6 +42,10 @@ export default class ApplicationContext extends Context {
   public native nativesetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
   public native nativesetFont(font: string): void;
   public native nativerestartApp(want: Want): void;
+  public native nativeOnApplicationStateChangeSync(callback: ApplicationStateChangeCallback): void;
+  public native nativeOffApplicationStateChangeSync(callback?: ApplicationStateChangeCallback): void;
+  public native nativegetCurrentAppCloneIndex(): number;
+  public native nativegetCurrentInstanceKey(): string;
   private static native nativeTransferStatic(input: ESValue): Object;
   private static native nativeTransferDynamic(input: Object): ESValue;
 
@@ -48,6 +53,14 @@ export default class ApplicationContext extends Context {
     taskpool.execute((): void => {
       this.setSupportedProcessCacheSync(isSupported);
     });
+  }
+
+  on(type: 'applicationStateChange', callback: ApplicationStateChangeCallback): void {
+    this.nativeOnApplicationStateChangeSync(callback);
+  }
+
+  off(type: 'applicationStateChange', callback?: ApplicationStateChangeCallback): void {
+    this.nativeOffApplicationStateChangeSync(callback);
   }
 
   on(type: 'environment', callback: EnvironmentCallback): number {
@@ -63,9 +76,9 @@ export default class ApplicationContext extends Context {
 
   off(type: 'environment', callbackId: number): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -80,9 +93,9 @@ export default class ApplicationContext extends Context {
 
   preloadUIExtensionAbility(want: Want): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -104,9 +117,9 @@ export default class ApplicationContext extends Context {
 
   killAllProcesses(): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -121,9 +134,9 @@ export default class ApplicationContext extends Context {
 
   killAllProcesses(clearPageStack: boolean): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -145,11 +158,11 @@ export default class ApplicationContext extends Context {
 
   getRunningProcessInformation(): Promise<Array<ProcessInformation>> {
     let p = new Promise<Array<ProcessInformation>>((resolve: (data: Array<ProcessInformation>) => void,
-      reject: (err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>((err: BusinessError<void>,
-        data: Array<ProcessInformation>) => {
-        if (err.code == 0) {
-          resolve(data);
+      reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>((err: BusinessError | null,
+        data: Array<ProcessInformation> | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as Array<ProcessInformation>);
         } else {
           reject(err);
         }
@@ -170,9 +183,9 @@ export default class ApplicationContext extends Context {
 
   clearUpApplicationData(): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -195,6 +208,14 @@ export default class ApplicationContext extends Context {
 
   setColorMode(colorMode: ConfigurationConstant.ColorMode): void {
     this.nativesetColorMode(colorMode);
+  }
+
+  getCurrentInstanceKey(): string {
+    return this.nativegetCurrentInstanceKey();
+  }
+
+  getCurrentAppCloneIndex(): number {
+    return this.nativegetCurrentAppCloneIndex();
   }
 
   setFont(font: string): void {
