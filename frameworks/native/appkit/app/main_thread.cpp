@@ -96,6 +96,9 @@
 #include "js_runtime_utils.h"
 #include "context/application_context.h"
 #include "os_account_manager_wrapper.h"
+#ifdef SUPPORT_HIPERF
+#include "appcapture_perf.h"
+#endif
 
 #if defined(NWEB)
 #include <thread>
@@ -3569,6 +3572,12 @@ int32_t MainThread::ScheduleNotifyAppFault(const FaultData &faultData)
     if (faultData.faultType == FaultDataType::APP_FREEZE) {
         return AppExecFwk::AppfreezeInner::GetInstance()->AppfreezeHandle(faultData, false);
     }
+
+#ifdef SUPPORT_HIPERF
+    if (faultData.faultType == FaultDataType::CPU_LOAD) {
+        return AppExecFwk::AppCapturePerf::GetInstance()->CapturePerf(faultData);
+    }
+#endif
 
     wptr<MainThread> weak = this;
     auto task = [weak, faultData] {
