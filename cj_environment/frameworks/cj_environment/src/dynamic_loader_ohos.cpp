@@ -230,7 +230,7 @@ void* DynamicLoadLibrary(Dl_namespace *ns, const char* dlPath, unsigned int mode
         dlns_get("moduleNs_default", ns);
     }
 
-    auto result = dlopen_ns(ns, dlPath, mode | RTLD_GLOBAL | RTLD_NOW);
+    auto result = dlopen_ns(ns, dlPath, mode | RTLD_GLOBAL | RTLD_LAZY);
     if (!result) {
         ReadDlError();
     }
