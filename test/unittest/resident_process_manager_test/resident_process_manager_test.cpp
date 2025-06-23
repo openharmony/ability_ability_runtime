@@ -21,6 +21,7 @@
 #undef private
 #undef protected
 #include "ability_manager_service.h"
+#include "ability_resident_process_rdb.h"
 #include "user_controller.h"
 
 using namespace testing;
@@ -162,6 +163,43 @@ HWTEST_F(ResidentProcessManagerTest, AddFailedResidentAbility_001, TestSize.Leve
     manager->StartFailedResidentAbilities();
     EXPECT_TRUE(manager->unlockedAfterBoot_);
     EXPECT_TRUE(manager->failedResidentAbilityInfos_.empty());
+}
+
+/*
+ * Feature: ResidentProcessManager
+ * Function: StartResidentProcessWithMainElementPerBundle
+ * SubFunction: NA
+ * FunctionPoints:ResidentProcessManager StartResidentProcessWithMainElementPerBundle
+ * EnvConditions: NA
+ * CaseDescription: Verify StartResidentProcessWithMainElementPerBundle
+ */
+HWTEST_F(ResidentProcessManagerTest, StartResidentProcessWithMainElementPerBundle_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StartResidentProcessWithMainElementPerBundle_002 start";
+
+    std::shared_ptr<ResidentProcessManager> manager = std::make_shared<ResidentProcessManager>();
+    AppExecFwk::BundleInfo bundleInfo;
+    bundleInfo.isKeepAlive = false;
+    bundleInfo.name = "com.example.test";
+    size_t index = 1;
+    std::set<uint32_t> needEraseIndexSet;
+    int32_t userId = 0;
+
+    bool keepAliveEnable = true;
+    EXPECT_CALL(AmsResidentProcessRdb::GetInstance(), GetResidentProcessEnable(_, _))
+        .Times(1)
+        .WillOnce(DoAll(SetArgReferee<1>(keepAliveEnable), Return(RdbResult::Rdb_OK)));
+
+    EXPECT_CALL(AmsResidentProcessRdb::GetInstance(), RemoveData(_))
+        .Times(1)
+        .WillOnce(Return(RdbResult::Rdb_OK));
+
+    manager->StartResidentProcessWithMainElementPerBundle(bundleInfo, index, needEraseIndexSet, userId);
+
+
+    EXPECT_EQ(needEraseIndexSet.size(), 1);
+
+    GTEST_LOG_(INFO) << "StartResidentProcessWithMainElementPerBundle_002 end";
 }
 }  // namespace AAFwk
 }  // namespace OHOS
