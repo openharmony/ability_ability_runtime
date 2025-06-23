@@ -16,6 +16,7 @@
 #include "uri_permission_manager_client.h"
 
 #include "ability_manager_errors.h"
+#include "app_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -28,28 +29,11 @@ namespace {
 const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
 const int MAX_URI_COUNT = 200000;
 constexpr size_t MAX_IPC_RAW_DATA_SIZE = 128 * 1024 * 1024; // 128M
-constexpr int32_t MAX_PARCEL_IPC_DATA_SIZE = 200 * 1024; // 200K
-
-inline size_t GetPadSize(size_t size)
-{
-    const size_t offset = 3;
-    return (((size + offset) & (~offset)) - size);
-}
 
 bool CheckUseRawData(const std::vector<std::string>& uriVec)
 {
-    size_t oriSize = sizeof(int32_t);
-    for (auto& uri : uriVec) {
-        // calculate ipc data size of string uri, reference to parcel.h
-        size_t desire = uri.length() + sizeof(char) + sizeof(int32_t);
-        size_t padSize = GetPadSize(desire);
-        oriSize += (desire + padSize);
-        if (oriSize > MAX_PARCEL_IPC_DATA_SIZE) {
-            TAG_LOGI(AAFwkTag::URIPERMMGR, "use raw data %{public}d", static_cast<int32_t>(oriSize));
-            return true;
-        }
-    }
-    return false;
+    // broker can't use raw data
+    return getuid() != AppUtils::GetInstance().GetCollaboratorBrokerUID();
 }
 } // namespace
 
