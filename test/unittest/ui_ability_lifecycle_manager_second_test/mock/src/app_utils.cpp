@@ -48,5 +48,10 @@ bool AppUtils::IsStartOptionsWithAnimation()
     TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", AppUtils::isStartOptionsWithAnimation_);
     return AppUtils::isStartOptionsWithAnimation_;
 }
+
+bool InOnNewProcessEnableList(const std::string &bundleName)
+{
+    return false;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

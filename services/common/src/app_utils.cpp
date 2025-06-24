@@ -90,6 +90,8 @@ constexpr const char* CACHE_ABILITY_LIST_PATH = "etc/ability/abilityms_cache_abi
 constexpr const char* CACHE_PROCESS_NAME = "cache_list";
 constexpr const char* RESIDENT_WHITE_LIST_PATH = "etc/ability_runtime/resident_process.json";
 constexpr const char* NORMAL_RESIDENT_APPS = "normal_resident_apps";
+constexpr const char* ON_NEW_PROCESS_ENABLE_LIST_PATH = "etc/ability_runtime/on_new_process_enable_list.json";
+constexpr const char* ON_NEW_PROCESS_ENABLE_LIST = "onNewProcessEnableList";
 }
 
 AppUtils::~AppUtils() {}
@@ -831,6 +833,45 @@ bool AppUtils::InResidentWhiteList(const std::string &bundleName)
         residentWhiteList_.isLoaded = true;
     }
     for (const auto &item: residentWhiteList_.value) {
+        if (bundleName == item) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void AppUtils::LoadOnNewProcessEnableList()
+{
+    cJSON *object = nullptr;
+    if (!JsonUtils::GetInstance().LoadConfiguration(ON_NEW_PROCESS_ENABLE_LIST_PATH, object)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "load onNewProcessEnableList file failed");
+        return;
+    }
+    cJSON *onNewProcessEnableListItem = cJSON_GetObjectItem(object, ON_NEW_PROCESS_ENABLE_LIST);
+    if (onNewProcessEnableListItem == nullptr || !cJSON_IsArray(onNewProcessEnableListItem)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "onNewProcessEnableList file invalid");
+        return;
+    }
+    int size = cJSON_GetArraySize(onNewProcessEnableListItem);
+    for (int i = 0; i < size; i++) {
+        cJSON *jsonObject = cJSON_GetArrayItem(onNewProcessEnableListItem, i);
+        if (jsonObject == nullptr || !cJSON_IsString(jsonObject)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "load onNewProcessEnableList bundleName failed");
+            return;
+        }
+        std::string jsonStr = jsonObject->valuestring;
+        onNewProcessEnableList_.value.emplace_back(jsonStr);
+    }
+}
+
+bool AppUtils::InOnNewProcessEnableList(const std::string &bundleName)
+{
+    std::lock_guard lock(onNewProcessEnableListMutex_);
+    if (!onNewProcessEnableList_.isLoaded) {
+        LoadOnNewProcessEnableList();
+        onNewProcessEnableList_.isLoaded = true;
+    }
+    for (const auto &item: onNewProcessEnableList_.value) {
         if (bundleName == item) {
             return true;
         }
