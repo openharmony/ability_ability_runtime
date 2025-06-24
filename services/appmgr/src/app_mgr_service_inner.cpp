@@ -5384,10 +5384,10 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
         TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
         return;
     }
-    std::string specifiedProcessFlag = GetSpecifiedProcessFlag(abilityInfo, want);
+
     std::string processName;
     auto abilityInfoPtr = std::make_shared<AbilityInfo>(abilityInfo);
-    MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, specifiedProcessFlag, processName, false);
+    MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, "", processName, false);
     bool isExtensionSandBox = IsIsolateExtensionSandBox(abilityInfoPtr, hapModuleInfo);
 
     std::vector<HapModuleInfo> hapModules;
@@ -5397,7 +5397,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
     auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
     auto customProcessFlag = abilityInfo.process;
     appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid, bundleInfo,
-        specifiedProcessFlag, nullptr, instanceKey, customProcessFlag);
+        "", nullptr, instanceKey, customProcessFlag);
     if (!appRecord) {
         bool appExistFlag = appRunningManager_->IsAppExist(appInfo->accessTokenId);
         bool appMultiUserExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByUid(bundleInfo.uid);
@@ -5442,7 +5442,6 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
         appRecord->SendEventForSpecifiedAbility();
         appRecord->SetAppIndex(appIndex);
         appRecord->SetExtensionSandBoxFlag(isExtensionSandBox);
-        appRecord->SetSpecifiedProcessFlag(specifiedProcessFlag);
         uint32_t startFlags = AppspawnUtil::BuildStartFlags(want, abilityInfo);
         StartProcess(appInfo->name, processName, startFlags, appRecord, appInfo->uid, bundleInfo, appInfo->bundleName,
             appIndex, appExistFlag);
