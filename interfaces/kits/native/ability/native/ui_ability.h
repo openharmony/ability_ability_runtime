@@ -416,7 +416,7 @@ public:
      * You can override this function to implement your own processing logic.
      */
     virtual void OnBackground();
-    
+
     /**
      * @brief Called before this ability enters the <b>STATE_FOREGROUND</b> state.
      * The ability in the <b>STATE_FOREGROUND</b> state is invisible.

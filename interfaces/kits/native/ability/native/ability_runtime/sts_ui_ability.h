@@ -216,6 +216,20 @@ public:
     void CallOnForegroundFunc(const Want &want) override;
 
     /**
+     * @brief Called before this ability enters the <b>STATE_FOREGROUND</b> state.
+     * The ability in the <b>STATE_FOREGROUND</b> state is invisible.
+     * You can override this function to implement your own processing logic.
+     */
+    void OnWillForeground() override;
+
+    /**
+     * @brief Called after wms show event.
+     * The ability in the <b>STATE_FOREGROUND</b> state is invisible.
+     * You can override this function to implement your own processing logic.
+     */
+    void OnDidForeground() override;
+
+    /**
      * @brief Request focus for current window, can be override.
      *
      * @param want Want
@@ -228,6 +242,20 @@ public:
      * You can override this function to implement your own processing logic.
      */
     void OnBackground() override;
+
+    /**
+     * @brief Called before OnBackground.
+     * The ability in the <b>STATE_BACKGROUND</b> state is invisible.
+     * You can override this function to implement your own processing logic.
+     */
+    void OnWillBackground() override;
+
+    /**
+     * @brief Called after wms hiden event.
+     * The ability in the <b>STATE_BACKGROUND</b> state is invisible.
+     * You can override this function to implement your own processing logic.
+     */
+    void OnDidBackground() override;
 
     /**
      * Called when back press is dispatched.
@@ -312,8 +340,8 @@ private:
     void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want,
         const std::string &moduleName, const std::string &srcPath);
     void DoOnForegroundForSceneIsNull(const Want &want);
-    void AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;
-    void AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;
+    void AddLifecycleEventBeforeETSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;
+    void AddLifecycleEventAfterETSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;
     bool CheckSatisfyTargetAPIVersion(int32_t targetAPIVersion);
     bool BackPressDefaultValue();
     void UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
