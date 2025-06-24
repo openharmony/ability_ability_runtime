@@ -1,0 +1,63 @@
+{
+    "groups": {
+        "https://gitee.com/aafwk_ability": [
+             "https://gitee.com/ccll",
+             "https://gitee.com/yangxuguang-huawei",
+             "https://gitee.com/jerry",
+             "https://gitee.com/jsjzju",
+             "https://gitee.com/JayLeeHW",
+             "https://gitee.com/gwang",
+             "https://gitee.com/xialiangwei",
+             "https://gitee.com/zhangyafei-echo",
+             "https://gitee.com/li-weifeng2",
+             "https://gitee.com/altay",
+             "https://gitee.com/duan-sizhao"
+        ]
+    },
+    "userInfos": {
+        "https://gitee.com/ccll": {
+            "info": "[AbilityRunTime ccl]",
+            "group": "https://gitee.com/aafwk_ability"
+        },
+        "https://gitee.com/yangxuguang-huawei": {
+            "info": "[AbilityRunTime yxg]",
+            "group": "https://gitee.com/aafwk_ability"
+        },
+        "https://gitee.com/jerry": {
+            "info": "[AbilityRunTime sjj]",
+            "group": "https://gitee.com/aafwk_ability"
+        },
+        "https://gitee.com/jsjzju": {
+            "info": "[AbilityRunTime jsj]",
+            "group": "https://gitee.com/aafwk_ability"
+        },
+        "https://gitee.com/JayLeeHW": {
+            "info": "[AbilityRunTime lq]",
+            "group": "https://gitee.com/aafwk_ability"
+        },
+        "https://gitee.com/gwang": {
+            "info": "[AbilityRunTime gwang]",
+            "group": "https://gitee.com/aafwk_ability"
+        },
+        "https://gitee.com/xialiangwei": {
+            "info": "[AbilityRunTime xlw]",
+            "group": "https://gitee.com/aafwk_ability"
+        },
+        "https://gitee.com/zhangyafei-echo": {
+            "info": "[AbilityRunTime zyf]",
+            "group": "https://gitee.com/aafwk_ability"
+        },
+        "https://gitee.com/li-weifeng2": {
+            "info": "[AbilityRunTime lfw]",
+            "group": "https://gitee.com/aafwk_ability"
+        },
+        "https://gitee.com/altay": {
+            "info": "[AbilityRunTime ywz]",
+            "group": "https://gitee.com/aafwk_ability"
+        },
+        "https://gitee.com/duan-sizhao": {
+            "info": "[AbilityRunTime dsz]",
+            "group": "https://gitee.com/aafwk_ability"
+        }
+    }
+}
