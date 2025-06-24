@@ -18,13 +18,13 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-    constexpr const char* ETS_EVENT_HUB_CLASS_NAME = "Lapplication/EventHub/EventHub;";
-    constexpr const char* ETS_CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
+constexpr const char* ETS_EVENT_HUB_CLASS_NAME = "Lapplication/EventHub/EventHub;";
+constexpr const char* ETS_CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
 }
  
 std::shared_ptr<AbilityContext> EventHub::GetAbilityContext(ani_env *env, ani_object aniObj)
 {
-    ani_long nativeContextLong;
+    ani_long nativeContextLong = ;
     ani_class cls {};
     ani_field contextField = nullptr;
     ani_status status = ANI_ERROR;
@@ -48,14 +48,14 @@ std::shared_ptr<AbilityContext> EventHub::GetAbilityContext(ani_env *env, ani_ob
     return weakContext != nullptr ? weakContext->lock() : nullptr;
 }
  
-ani_object EventHub::GetDynamicContextEventHub([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj)
+ani_object EventHub::GetDynamicContextEventHub(ani_env *env, ani_object aniObj)
 {
     TAG_LOGI(AAFwkTag::JSRUNTIME, "GetDynamicContextEventHub called");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "null env");
         return nullptr;
     }
-    ani_ref nativeContextRef;
+    ani_ref nativeContextRef = nullptr;
     ani_status status = ANI_ERROR;
     if ((status = env->Object_GetFieldByName_Ref(aniObj, "context", &nativeContextRef)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "status: %{public}d", status);
