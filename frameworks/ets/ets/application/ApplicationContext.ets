@@ -177,11 +177,11 @@ export default class ApplicationContext extends Context {
   
   getAllRunningInstanceKeys(): Promise<Array<string>> {
     let p = new Promise<Array<string>>((resolve: (data: Array<string>) => void,
-      reject: (err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackWrapper<Array<string>>((err: BusinessError<void>,
-        data: Array<string>) => {
-        if (err.code == 0) {
-          resolve(data);
+      reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<Array<string>>((err: BusinessError | null,
+        data: Array<string> | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as Array<string>);
         } else {
           reject(err);
         }
