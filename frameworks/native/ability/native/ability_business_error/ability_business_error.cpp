@@ -124,12 +124,12 @@ constexpr const char* ERROR_MSG_NOT_IN_KIOSK_MODE =
     "The current application is not in the kiosk mode. Exit is not allowed.";
 constexpr const char* ERROR_MSG_APP_NOT_IN_FOCUS = "The current ability is not foreground.";
 
-constexpr const char* ERROR_MSG_NOT_ISOLATION_PROCESS = "Current process is not running a component configured "
-                                        "with \"isolationProcess\", and cannot be set as a candidate master process.";
+constexpr const char* ERROR_MSG_NOT_ISOLATION_PROCESS = "The current process is not running a component configured "
+                                        "with \"isolationProcess\" and cannot be set as a candidate master process.";
 constexpr const char* ERROR_MSG_ALREADY_MASTER_PROCESS =
-    "Current process is already a master process, revocation is not supported.";
+    "The current process is already a master process and does not support cancellation.";
 constexpr const char* ERROR_MSG_NOT_CANDIDATE_MASTER_PROCESS =
-    "Current process is not a candidate master process, no need to revocation.";
+    "The current process is not a candidate master process and does not support cancellation.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
