@@ -206,11 +206,20 @@ static inline const char* GetTagInfoFromDomainId(AAFwkLogTag tag)
 
 using AAFwkTag = OHOS::AAFwk::AAFwkLogTag;
 
+inline uint8_t g_ExpectLevel = 0;
+inline AAFwkTag g_ExpectTag = AAFwkTag::DEFAULT;
+inline std::string g_ExpectFileName = "";
+inline uint32_t g_ExpectLogLineNum = 0;
+
 #define AAFWK_PRINT_LOG(level, tag, fmt, ...)                                                           \
     do {                                                                                                \
         AAFwkTag logTag = tag;                                                                          \
-        ((void)HILOG_IMPL(LOG_CORE, level, static_cast<uint32_t>(logTag),                                  \
-        OHOS::AAFwk::GetTagInfoFromDomainId(logTag), AAFWK_FUNC_FMT fmt, AAFWK_FUNC_INFO, ##__VA_ARGS__)); \
+        HILOG_IMPL(LOG_CORE, level, static_cast<uint32_t>(logTag),                                      \
+            OHOS::AAFwk::GetTagInfoFromDomainId(logTag), AAFWK_FUNC_FMT fmt, AAFWK_FUNC_INFO, ##__VA_ARGS__); \
+        g_ExpectLevel = level; \
+        g_ExpectTag = logTag; \
+        g_ExpectFileName = AAFWK_FILE_NAME; \
+        g_ExpectLogLineNum = __LINE__; \
     } while (0)
 
 #define TAG_LOGD(tag, fmt, ...) AAFWK_PRINT_LOG(LOG_DEBUG, tag, fmt, ##__VA_ARGS__)
@@ -219,4 +228,11 @@ using AAFwkTag = OHOS::AAFwk::AAFwkLogTag;
 #define TAG_LOGE(tag, fmt, ...) AAFWK_PRINT_LOG(LOG_ERROR, tag, fmt, ##__VA_ARGS__)
 #define TAG_LOGF(tag, fmt, ...) AAFWK_PRINT_LOG(LOG_FATAL, tag, fmt, ##__VA_ARGS__)
 
+#define EXPECT_LOG_EQ(level, tag, fileName, lineNum) \
+do {                                                 \
+    EXPECT_EQ(g_ExpectLevel, level);                 \
+    EXPECT_EQ(g_ExpectTag, tag);                     \
+    EXPECT_EQ(g_ExpectFileName, fileName);           \
+    EXPECT_EQ(g_ExpectLogLineNum, lineNum);          \
+} while (0)
 #endif  // OHOS_AAFWK_HILOG_TAG_WRAPPER_H
