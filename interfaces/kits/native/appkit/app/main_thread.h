@@ -800,7 +800,7 @@ private:
     bool GetHqfFileAndHapPath(const std::string &bundleName,
         std::vector<std::pair<std::string, std::string>> &fileMap);
     void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths,
-        AppLibPathMap &appAbcLibPaths);
+        std::map<std::string, std::string> &abcPathsToBundleModuleNameMap);
     void SetAppDebug(uint32_t modeFlag, bool isDebug);
     void GetPluginNativeLibPath(std::vector<AppExecFwk::PluginBundleInfo> &pluginBundleInfos,
         AppLibPathMap &appLibPaths);

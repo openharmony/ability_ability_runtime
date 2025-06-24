@@ -45,9 +45,6 @@ export function callback(cleaner: Cleaner): void {
 let destroyRegister = new FinalizationRegistry<Cleaner>(callback);
 let unregisterToken = new object();
 
-// remove local declaration after Any type is supported
-type Any = Object | null | undefined
-
 export default class UIAbilityContext extends Context {
   static {
     loadLibrary("context_ani");
