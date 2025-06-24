@@ -18,22 +18,29 @@ import ExtensionAbility from '@ohos.app.ability.ExtensionAbility';
 import Want from '@ohos.app.ability.Want';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
 import UIExtensionContext from 'application.UIExtensionContext';
+import { AbilityUtils } from './utils/AbilityUtils';
 
 export default class UIExtensionAbility extends ExtensionAbility {
 
-  private isOnDestroyAsync: boolean = true;
   private destroyCallbackPoint: long;
   private native nativeOnDestroyCallback(): void;
   private callOnDestroy(): boolean {
-    let p = this.onDestroyAsync();
-    if (this.isOnDestroyAsync) {
-      p.then<void>((): void => {
-        this.nativeOnDestroyCallback();
-      });
-    } else {
+    const derivedClassType = AbilityUtils.getClassType(this);
+    if (derivedClassType === undefined) {
       this.onDestroy();
+      return false;
     }
-    return this.isOnDestroyAsync;
+    const uiExtensionAbilityClassType = AbilityUtils.getClassType(new UIExtensionAbility());
+    if (uiExtensionAbilityClassType === undefined) {
+      this.onDestroy();
+      return false;
+    }
+    if (AbilityUtils.isOverride(derivedClassType, "onDestroyAsync", uiExtensionAbilityClassType)) {
+      this.onDestroyAsync().then(() => this.nativeOnDestroyCallback());
+      return true;
+    }
+    this.onDestroy();
+    return false;
   }
 
   context: UIExtensionContext = {};
@@ -51,7 +58,6 @@ export default class UIExtensionAbility extends ExtensionAbility {
   onDestroy(): void {}
 
   onDestroyAsync(): Promise<void> {
-    this.isOnDestroyAsync = false;
     return new Promise<void>((resolve: (a: undefined)=>void, reject: (err: Error)=>void): void => {});
   }
 }
