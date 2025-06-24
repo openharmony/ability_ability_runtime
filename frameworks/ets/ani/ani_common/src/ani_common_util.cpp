@@ -117,7 +117,7 @@ bool GetFixedStringArrayOrUndefined(ani_env *env, ani_object param, const char *
     }
 
     for (i = 0; i < size; i++) {
-        if ((status = env->Array_Get_Ref(reinterpret_cast<ani_array_ref>(obj), i, &ref)) != ANI_OK) {
+        if ((status = env->Array_Get(reinterpret_cast<ani_array>(obj), i, &ref)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d, index: %{public}zu", status, i);
             return false;
         }
@@ -138,7 +138,7 @@ bool SetFieldFixedArrayString(ani_env *env, ani_class cls, ani_object object, co
     const std::vector<std::string> &values)
 {
     ani_field field = nullptr;
-    ani_array_ref array = nullptr;
+    ani_array array = nullptr;
     ani_class stringCls = nullptr;
     ani_string string = nullptr;
     ani_ref undefinedRef = nullptr;
@@ -160,7 +160,7 @@ bool SetFieldFixedArrayString(ani_env *env, ani_class cls, ani_object object, co
         return false;
     }
 
-    status = env->Array_New_Ref(stringCls, values.size(), undefinedRef, &array);
+    status = env->Array_New(values.size(), undefinedRef, &array);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
         return false;
@@ -173,7 +173,7 @@ bool SetFieldFixedArrayString(ani_env *env, ani_class cls, ani_object object, co
             TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
             return false;
         }
-        status = env->Array_Set_Ref(array, i, string);
+        status = env->Array_Set(array, i, string);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
             return false;
@@ -1008,7 +1008,7 @@ bool UnwrapArrayString(ani_env *env, const ani_object &arrayObj, std::vector<std
     ani_ref ref;
     ani_size idx;
     for (idx = 0; idx < size; idx++) {
-        if ((status = env->Array_Get_Ref(reinterpret_cast<ani_array_ref>(arrayObj), idx, &ref)) != ANI_OK) {
+        if ((status = env->Array_Get(reinterpret_cast<ani_array>(arrayObj), idx, &ref)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d, index: %{public}zu", status, idx);
             return false;
         }
