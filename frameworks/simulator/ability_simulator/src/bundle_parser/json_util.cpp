@@ -88,7 +88,7 @@ void GetStringValuesIfFindKey(const cJSON *jsonObject,
             parseResult = ERR_APPEXECFWK_PARSE_PROFILE_PROP_TYPE_ERROR;
             return;
         }
-        if (std::string(item->valuestring).length() > Constants::MAX_JSON_ELEMENT_LENGTH) {
+        if (std::string(childItem->valuestring).length() > Constants::MAX_JSON_ELEMENT_LENGTH) {
             TAG_LOGE(AAFwkTag::ABILITY_SIM, "type:%{public}s string length error", key.c_str());
             parseResult = ERR_APPEXECFWK_PARSE_PROFILE_PROP_SIZE_CHECK_ERROR;
             return;
