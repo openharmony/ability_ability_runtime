@@ -92,6 +92,10 @@ ani_object EventHub::GetDynamicContextEventHub([[maybe_unused]]ani_env *env, [[m
     napi_env napiEnv = jsRuntime->GetNapiEnv();
     napi_value eventHub = nullptr;
     napi_get_named_property(napiEnv, dynamicContext->Get(), "eventHub", &eventHub);
+    if (eventHub == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "napi_get_named_property failed, eventHub nullptr");
+        return nullptr;
+    }
     napi_value setNativeEventHubRefFn = nullptr;
     napi_get_named_property(napiEnv, eventHub, "setNativeEventHubRef", &setNativeEventHubRefFn);
     if (setNativeEventHubRefFn == nullptr) {
