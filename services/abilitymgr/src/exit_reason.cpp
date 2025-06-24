@@ -42,6 +42,7 @@ bool ExitReason::ReadFromParcel(Parcel &parcel)
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, reasonData);
     subReason = reasonData;
     exitMsg = Str16ToStr8(parcel.ReadString16());
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, shouldKillForeground);
     return true;
 }
 
@@ -65,6 +66,7 @@ bool ExitReason::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(reason));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, subReason);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(exitMsg));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, shouldKillForeground);
     return true;
 }
 }  // namespace AppExecFwk

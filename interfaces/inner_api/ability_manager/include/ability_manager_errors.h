@@ -824,6 +824,11 @@ enum {
     ERR_NO_U1 = 2097338,
 
     /**
+     * Result (2097339) for kill foreground apps.
+     */
+    ERR_KILL_APP_WHILE_FOREGROUND = 2097339,
+
+    /**
      * Result (2097340-2097350) for uri permission error result.
      */
     ERR_UPMS_GET_FILE_URIS_BY_KEY_FAILED = 2097340,
