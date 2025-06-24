@@ -402,6 +402,7 @@ group("unittest") {
       "mission_listener_stub_second_test:unittest",
       "mission_listener_stub_test:unittest",
       "mission_listener_test:unittest",
+      "mission_manager_client_test:unittest",
       "modal_system_dialog_util_test:unittest",
       "multi_app_utils_test:unittest",
       "multi_instance_utils_second_test",

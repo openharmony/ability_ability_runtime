@@ -2693,5 +2693,35 @@ HWTEST_F(AbilityManagerClientBranchTest, GetKioskStatus, TestSize.Level1)
     KioskStatus kioskStatus;
     EXPECT_EQ(client_->GetKioskStatus(kioskStatus), ERR_OK);
 }
+
+/**
+ * @tc.name: RegisterSAInterceptor
+ * @tc.desc: RegisterSAInterceptor
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, RegisterSAInterceptor, TestSize.Level1)
+{
+    EXPECT_EQ(client_->RegisterSAInterceptor(nullptr), ERR_OK);
+}
+
+/**
+ * @tc.name: SuspendExtensionAbility
+ * @tc.desc: SuspendExtensionAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, SuspendExtensionAbility, TestSize.Level1)
+{
+    EXPECT_EQ(client_->SuspendExtensionAbility(nullptr), ERR_OK);
+}
+
+/**
+ * @tc.name: ResumeExtensionAbility
+ * @tc.desc: ResumeExtensionAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, ResumeExtensionAbility, TestSize.Level1)
+{
+    EXPECT_EQ(client_->ResumeExtensionAbility(nullptr), ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
