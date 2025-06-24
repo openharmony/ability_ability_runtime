@@ -30,61 +30,80 @@ export default class EventHub {
   private native getDynamicContextEventHub(): ESValue;
 
   setContext(context: Context) {
-    console.log("set context");
     this.context = context;
   }
 
   on(event: string, callback: Function): void {
-    console.log("1");
     if (!this.eventMap.has(event)) {
       this.eventMap.set(event, []);
     }
-    console.log("2");
     const callbacks = this.eventMap.get(event)!;
     callbacks.push(callback);
-    console.log("3");
     if (!this.dynamicContextEventHub) {
-      console.log("4");
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
-    console.log("5");
   }
 
-  off(event: string, callback?: Function, fromDynamic: boolean = false): void {
-    console.log("off 1");
+  off(event: string, callback: Function): void {
     if (!this.eventMap.has(event)) {
       return;
     }
-    console.log("off 2");
-    if (!callback) {
-      this.eventMap.delete(event);
-    } else {
-      const callbacks = this.eventMap.get(event)!;
-      const index = callbacks.indexOf(callback);
-      if (index > -1) {
-        callbacks.splice(index, 1);
-      }
-      if (callbacks.length === 0) {
-        this.eventMap.delete(event); 
-      }
+    const callbacks = this.eventMap.get(event)!;
+    const index = callbacks.indexOf(callback);
+    if (index > -1) {
+      callbacks.splice(index, 1);
     }
-    console.log("off 3");
+    if (callbacks.length === 0) {
+      this.eventMap.delete(event); 
+    }
+
     if (!this.dynamicContextEventHub) {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
-    console.log("off 4");
-    if (!fromDynamic) {
-      console.log("off 5");
-      this.dynamicContextEventHub!.invokeMethod("off", event, callback);
+    this.dynamicContextEventHub!.invokeMethod("off", event, callback);
+  }
+
+  offByDynamicContext(event: string, callback: Function): void {
+    if (!this.eventMap.has(event)) {
+      return;
+    }
+    const callbacks = this.eventMap.get(event)!;
+    const index = callbacks.indexOf(callback);
+    if (index > -1) {
+      callbacks.splice(index, 1);
+    }
+    if (callbacks.length === 0) {
+      this.eventMap.delete(event); 
+    }
+  }
+
+  off(event: string): void {
+    if (!this.eventMap.has(event)) {
+      return;
+    }
+    this.eventMap.delete(event);
+
+    if (!this.dynamicContextEventHub) {
+      this.dynamicContextEventHub = this.getDynamicContextEventHub();
+    }
+    this.dynamicContextEventHub!.invokeMethod("off", event);
+  }
+
+  offByDynamicContext(event: string): void {
+    if (!this.eventMap.has(event)) {
+      return;
+    }
+    this.eventMap.delete(event);
+
+    if (!this.dynamicContextEventHub) {
+      this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
   }
 
   private emitWithStaticContext(event: string, ...args: FixedArray<NullishType>): void {
-    console.log("emitWithStaticContext 1");
     if (!this.eventMap.has(event)) {
       return;
     }
-    console.log("emitWithStaticContext 2");
     const callbacks = [...this.eventMap.get(event)!];
 
     callbacks.forEach(callback => {
@@ -97,18 +116,14 @@ export default class EventHub {
   }
   
   emit(event: string, ...args: FixedArray<NullishType>): void {
-    console.log("emit 1");
     this.emitWithStaticContext(event, ...args);
-    console.log("emit 2");
     if (!this.dynamicContextEventHub) {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
-    console.log("emit 3");
     this.dynamicContextEventHub!.invokeMethod("emitByNativeContext", event, args);
   }
 
   emitByDynamicContext(event: string, ...args: FixedArray<NullishType>): void {
-    console.log("emitByDynamicContext 1");
     this.emitWithStaticContext(event, ...args);
   }
 }
