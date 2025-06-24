@@ -104,7 +104,7 @@ bool SetSupportWindowModes(ani_env *env, ani_object param, AAFwk::StartOptions &
     ani_ref supportWindowModesRef = nullptr;
     ani_boolean hasValue = true;
     if (GetPropertyRef(env, param, "supportWindowModes", supportWindowModesRef, hasValue) && !hasValue) {
-        ani_array_ref supportWindowModesArr = reinterpret_cast<ani_array_ref>(supportWindowModesRef);
+        ani_array supportWindowModesArr = reinterpret_cast<ani_array>(supportWindowModesRef);
         ani_size supportWindowModesLen = 0;
         if (env->Array_GetLength(supportWindowModesArr, &supportWindowModesLen) != ANI_OK) {
             TAG_LOGE(AAFwkTag::JSNAPI, "Array_GetLength failed");
@@ -113,8 +113,8 @@ bool SetSupportWindowModes(ani_env *env, ani_object param, AAFwk::StartOptions &
         for (size_t i = 0; i < supportWindowModesLen; ++i) {
             ani_ref supportWindowModeRef = nullptr;
             int32_t supportWindowMode = 0;
-            if (env->Array_Get_Ref(supportWindowModesArr, i, &supportWindowModeRef) != ANI_OK) {
-                TAG_LOGE(AAFwkTag::JSNAPI, "Array_Get_Ref failed");
+            if (env->Array_Get(supportWindowModesArr, i, &supportWindowModeRef) != ANI_OK) {
+                TAG_LOGE(AAFwkTag::JSNAPI, "Array_Get failed");
                 return false;
             }
             AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(
