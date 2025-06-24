@@ -52,8 +52,7 @@ export default class UIAbility {
       this.onDestroy();
       return false;
     }
-    const isInherited = AbilityUtils.isInherited(derivedClassType, "onDestroyAsync", uiAbilityClassType);
-    if (isInherited === false) {
+    if (AbilityUtils.isOverride(derivedClassType, "onDestroyAsync", uiAbilityClassType)) {
       this.onDestroyAsync().then(() => this.nativeOnDestroyCallback());
       return true;
     }
