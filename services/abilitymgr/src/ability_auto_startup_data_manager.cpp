@@ -554,7 +554,7 @@ void AbilityAutoStartupDataManager::ConvertAutoStartupInfoFromValue(
 
     cJSON *isEdmForceItem = cJSON_GetObjectItem(jsonValueObject, JSON_KEY_IS_EDM_FORCE.c_str());
     if (isEdmForceItem != nullptr && cJSON_IsBool(isEdmForceItem)) {
-        info.canUserModify = isEdmForceItem->type == cJSON_True;
+        info.canUserModify = !(isEdmForceItem->type == cJSON_True);
     }
 
     cJSON *setterUserIdItem = cJSON_GetObjectItem(jsonValueObject, JSON_KEY_SETTER_USERID.c_str());
