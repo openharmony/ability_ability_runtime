@@ -113,4 +113,20 @@ HWTEST(LocalPendingWantTest, LocalPendingWant_0700, Function | MediumTest | Leve
     ASSERT_EQ(localPendingWant.GetBundleName(), "TestBundleName");
     ASSERT_EQ(actual->GetBundleName(), "TestBundleName");
 }
+
+/*
+ * @tc.number    : LocalPendingWant_0800
+ * @tc.name      : LocalPendingWant IsEquals
+ * @tc.desc      : LocalPendingWant IsEquals
+ */
+HWTEST(LocalPendingWantTest, LocalPendingWant_0800, Function | MediumTest | Level1)
+{
+    std::shared_ptr<LocalPendingWant> localPendingWant = nullptr;
+    std::shared_ptr<LocalPendingWant> otherLocalPendingWant = nullptr;
+    ASSERT_EQ(LocalPendingWant::IsEquals(localPendingWant, otherLocalPendingWant), 0);
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    localPendingWant = std::make_shared<LocalPendingWant>("TestBundleName", want, 0);
+    otherLocalPendingWant = std::make_shared<LocalPendingWant>("TestBundleName", want, 0);
+    ASSERT_EQ(LocalPendingWant::IsEquals(localPendingWant, otherLocalPendingWant), -1);
+}
 }

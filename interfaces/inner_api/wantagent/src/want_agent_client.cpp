@@ -146,7 +146,11 @@ ErrCode WantAgentClient::SendLocalWantSender(const SenderInfo &senderInfo)
         TAG_LOGE(AAFwkTag::WANTAGENT, "send request error: %{public}d", error);
         return ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_TIMEOUT;
     }
-    return reply.ReadInt32();
+    const auto res = reply.ReadInt32();
+    if (res == CHECK_PERMISSION_FAILED) {
+        return ERR_ABILITY_RUNTIME_EXTERNAL_NO_ACCESS_PERMISSION;
+    }
+    return res;
 }
 
 ErrCode WantAgentClient::CancelWantSender(const sptr<IWantSender> &sender, uint32_t flags)
