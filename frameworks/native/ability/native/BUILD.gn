@@ -797,7 +797,6 @@ ohos_shared_library("uiabilitykit_native") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -810,6 +809,11 @@ ohos_shared_library("uiabilitykit_native") {
     "samgr:samgr_proxy",
     "window_manager:windowstageani_kit",
   ]
+  if (defined(ark_hybrid) && ark_hybrid) {
+    external_deps += [ "runtime_core:libarkruntime" ]
+  } else {
+    external_deps += [ "ets_runtime:libark_jsruntime" ]
+  }
   public_external_deps = [
     "bundle_framework:appexecfwk_core",
     "libuv:uv",
@@ -1057,15 +1061,16 @@ ohos_shared_library("service_extension") {
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/ability/native:insight_intent_executor",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
-    "${ability_runtime_native_path}/appkit:app_context_utils",
   ]
 
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
+    "bundle_framework:bms_ani_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
@@ -1078,7 +1083,6 @@ ohos_shared_library("service_extension") {
     "runtime_core:ani",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "bundle_framework:bms_ani_common",
   ]
 
   if (ability_runtime_graphics) {
@@ -1202,7 +1206,6 @@ ohos_shared_library("ui_service_extension") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
@@ -1212,7 +1215,11 @@ ohos_shared_library("ui_service_extension") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
-
+  if (defined(ark_hybrid) && ark_hybrid) {
+    external_deps += [ "runtime_core:libarkruntime" ]
+  } else {
+    external_deps += [ "ets_runtime:libark_jsruntime" ]
+  }
   public_external_deps = []
   if (ability_runtime_graphics) {
     external_deps += [
@@ -1280,7 +1287,6 @@ ohos_shared_library("ui_service_extension_module") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
     "form_fwk:fmskit_native",
     "hilog:libhilog",
@@ -1288,6 +1294,11 @@ ohos_shared_library("ui_service_extension_module") {
     "ipc:ipc_napi",
     "napi:ace_napi",
   ]
+  if (defined(ark_hybrid) && ark_hybrid) {
+    external_deps += [ "runtime_core:libarkruntime" ]
+  } else {
+    external_deps += [ "ets_runtime:libark_jsruntime" ]
+  }
 
   if (ability_runtime_graphics) {
     external_deps += [
