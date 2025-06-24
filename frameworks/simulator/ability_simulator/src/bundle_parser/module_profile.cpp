@@ -1105,24 +1105,27 @@ ErrCode ModuleProfile::TransformTo(const std::vector<uint8_t> &buf, InnerBundleI
 
     Profile::ModuleJson moduleJson;
     from_json(jsonObject, moduleJson);
-    cJSON_Delete(jsonObject);
     if (Profile::g_parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "g_parseResult:%{public}d", Profile::g_parseResult);
         int32_t ret = Profile::g_parseResult;
         // need recover parse result to ERR_OK
         Profile::g_parseResult = ERR_OK;
+        cJSON_Delete(jsonObject);
         return ret;
     }
 
     if (!ToInnerBundleInfo(moduleJson, innerBundleInfo)) {
+        cJSON_Delete(jsonObject);
         return ERR_APPEXECFWK_PARSE_PROFILE_PROP_CHECK_ERROR;
     }
 
     if (!ParserAtomicConfig(jsonObject, innerBundleInfo)) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "Parser atomicService config failed");
+        cJSON_Delete(jsonObject);
         return ERR_APPEXECFWK_PARSE_PROFILE_PROP_CHECK_ERROR;
     }
 
+    cJSON_Delete(jsonObject);
     return ERR_OK;
 }
 }  // namespace AppExecFwk
