@@ -109,6 +109,7 @@ ani_object EventHub::GetDynamicContextEventHub([[maybe_unused]]ani_env *env, [[m
     napi_value nativeEventHubRef {};
     if (!hybridgref_get_napi_value(napiEnv, nativeHybrigRef, &nativeEventHubRef)) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "hybridgref_get_napi_vlaue failed");
+        hybridgref_delete_from_ani(env, nativeHybrigRef);
         return nullptr;
     }
     hybridgref_delete_from_ani(env, nativeHybrigRef);
@@ -126,6 +127,7 @@ ani_object EventHub::GetDynamicContextEventHub([[maybe_unused]]ani_env *env, [[m
     success = hybridgref_get_esvalue(env, dynamicHybrigRef, &staticResult);
     if (!success) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "hybridgref_get_esvalue failed");
+        hybridgref_delete_from_napi(napiEnv, dynamicHybrigRef);
         return nullptr;
     }
     hybridgref_delete_from_napi(napiEnv, dynamicHybrigRef);
