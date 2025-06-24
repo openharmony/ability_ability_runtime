@@ -44,7 +44,10 @@ void BundleContainer::LoadBundleInfos(const std::vector<uint8_t> &buffer, const 
     bundleInfo_->GetApplicationInfo(0, Constants::UNSPECIFIED_USERID, *appInfo);
     if (appInfo != nullptr) {
         std::string bundleName = appInfo->bundleName;
-        std::string moduleName = appInfo->moduleInfos[0].moduleName;
+        std::string moduleName;
+        if (appInfo->moduleInfos.size() > 0) {
+            moduleName = appInfo->moduleInfos[0].moduleName;
+        }
         auto key = bundleName + std::string(FILE_SEPARATOR) + moduleName;
         bundleInfos_.emplace(key, bundleInfo_);
         resourcePaths_.emplace(key, resourcePath_);
