@@ -681,5 +681,81 @@ HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_3000, Function | MediumTest | Le
     impl->HandleInsightIntent(want);
     GTEST_LOG_(INFO) << "AaFwk_ExtensionImpl_3000 end";
 }
+
+/**
+ * @tc.number: AaFwk_ExtensionImpl_3100
+ * @tc.name: ScheduleAbilityRequestFailure
+ * @tc.desc: Verify ScheduleAbilityRequestFailure succeeded.
+ */
+HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_3100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_ExtensionImpl_3100 start";
+    auto impl = std::make_shared<AbilityRuntime::ExtensionImpl>();
+    ASSERT_NE(impl, nullptr);
+    auto extension = std::make_shared<AbilityRuntime::Extension>();
+    ASSERT_NE(extension, nullptr);
+    impl->extension_ = extension;
+    EXPECT_NE(impl->extension_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "failure";
+    impl->ScheduleAbilityRequestFailure(requestId, element, message);
+    GTEST_LOG_(INFO) << "AaFwk_ExtensionImpl_3100 end";
+}
+
+/**
+ * @tc.number: AaFwk_ExtensionImpl_3200
+ * @tc.name: ScheduleAbilityRequestFailure
+ * @tc.desc: Verify ScheduleAbilityRequestFailure succeeded.
+ */
+HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_3200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_ExtensionImpl_3200 start";
+    auto impl = std::make_shared<AbilityRuntime::ExtensionImpl>();
+    ASSERT_NE(impl, nullptr);
+    EXPECT_EQ(impl->extension_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string message = "failure";
+    impl->ScheduleAbilityRequestFailure(requestId, element, message);
+    GTEST_LOG_(INFO) << "AaFwk_ExtensionImpl_3200 end";
+}
+
+/**
+ * @tc.number: AaFwk_ExtensionImpl_3300
+ * @tc.name: ScheduleAbilityRequestSuccess
+ * @tc.desc: Verify ScheduleAbilityRequestSuccess succeeded.
+ */
+HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_3300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_ExtensionImpl_3300 start";
+    auto impl = std::make_shared<AbilityRuntime::ExtensionImpl>();
+    ASSERT_NE(impl, nullptr);
+    auto extension = std::make_shared<AbilityRuntime::Extension>();
+    ASSERT_NE(extension, nullptr);
+    impl->extension_ = extension;
+    EXPECT_NE(impl->extension_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    impl->ScheduleAbilityRequestSuccess(requestId, element);
+    GTEST_LOG_(INFO) << "AaFwk_ExtensionImpl_3300 end";
+}
+
+/**
+ * @tc.number: AaFwk_ExtensionImpl_3400
+ * @tc.name: ScheduleAbilityRequestSuccess
+ * @tc.desc: Verify ScheduleAbilityRequestSuccess succeeded.
+ */
+HWTEST_F(ExtensionImplTest, AaFwk_ExtensionImpl_3400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_ExtensionImpl_3400 start";
+    auto impl = std::make_shared<AbilityRuntime::ExtensionImpl>();
+    ASSERT_NE(impl, nullptr);
+    EXPECT_EQ(impl->extension_, nullptr);
+    std::string requestId = "1234567890";
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    impl->ScheduleAbilityRequestSuccess(requestId, element);
+    GTEST_LOG_(INFO) << "AaFwk_ExtensionImpl_3400 end";
+}
 } // namespace AppExecFwk
 } // namespace OHOS

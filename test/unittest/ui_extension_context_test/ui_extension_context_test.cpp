@@ -856,6 +856,27 @@ HWTEST_F(UIExtensionContextTest, AddCompletionHandler_0300, Function | MediumTes
 }
 
 /**
+ * @tc.number: AddCompletionHandler_0400
+ * @tc.name: AddCompletionHandler
+ * @tc.desc: Verify that function AddCompletionHandler.
+ */
+HWTEST_F(UIExtensionContextTest, AddCompletionHandler_0400, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto context = std::make_shared<UIExtensionContext>();
+    ASSERT_NE(context, nullptr);
+    context->onRequestResults_.emplace_back(requestId, onRequestSucc, onRequestFail);
+    auto result = context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    std::string norequestId = "test";
+    result = context->AddCompletionHandler(norequestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(context->onRequestResults_.size(), 2);
+    context->onRequestResults_.clear();
+}
+
+/**
  * @tc.number: OnRequestSuccess_0100
  * @tc.name: OnRequestSuccess
  * @tc.desc: Verify that function OnRequestSuccess.
@@ -889,6 +910,28 @@ HWTEST_F(UIExtensionContextTest, OnRequestSuccess_0200, Function | MediumTest | 
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
     context->OnRequestSuccess(requestId, element, "success");
     EXPECT_EQ(context->onRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: OnRequestSuccess_0300
+ * @tc.name: OnRequestSuccess
+ * @tc.desc: Verify that function OnRequestSuccess.
+ */
+HWTEST_F(UIExtensionContextTest, OnRequestSuccess_0300, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto context = std::make_shared<UIExtensionContext>();
+    ASSERT_NE(context, nullptr);
+    auto result = context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context->onRequestResults_.empty(), false);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string norequestId = "test";
+    context->OnRequestSuccess(norequestId, element, "success");
+    EXPECT_EQ(context->onRequestResults_.empty(), false);
+    context->onRequestResults_.clear();
 }
 
 /**
@@ -926,6 +969,28 @@ HWTEST_F(UIExtensionContextTest, OnRequestFailure_0200, Function | MediumTest | 
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
     context->OnRequestFailure(requestId, element, "failure");
     EXPECT_EQ(context->onRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: OnRequestFailure_0300
+ * @tc.name: OnRequestFailure
+ * @tc.desc: Verify that function OnRequestFailure.
+ */
+HWTEST_F(UIExtensionContextTest, OnRequestFailure_0300, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto context = std::make_shared<UIExtensionContext>();
+    ASSERT_NE(context, nullptr);
+    auto result = context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context->onRequestResults_.empty(), false);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string norequestId = "test";
+    context->OnRequestFailure(norequestId, element, "failure");
+    EXPECT_EQ(context->onRequestResults_.empty(), false);
+    context->onRequestResults_.clear();
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
