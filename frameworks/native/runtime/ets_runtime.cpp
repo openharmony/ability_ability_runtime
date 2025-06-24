@@ -28,6 +28,7 @@
 #include "file_path_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "hybrid_js_module_reader.h"
+#include "nocopyable.h"
 
 #ifdef SUPPORT_SCREEN
 #include "ace_forward_compatibility.h"
@@ -198,6 +199,41 @@ bool RegisterETSEnvFuncs()
     g_etsEnvFuncs = func();
     return true;
 }
+
+class EtsAppLibNamespaceMgr : public std::enable_shared_from_this<EtsAppLibNamespaceMgr>, public NoCopyable {
+public:
+    EtsAppLibNamespaceMgr(const AppLibPathMap& appLibPaths, bool isSystemApp)
+        : isSystemApp_(isSystemApp), appLibPathMap_(appLibPaths)
+    {
+    }
+
+    bool CreateNamespace(const std::string& bundleModuleName, std::string &nsName)
+    {
+        TAG_LOGD(AAFwkTag::ETSRUNTIME, "Create app ns: %{public}s", bundleModuleName.c_str());
+        if (bundleModuleName.empty()) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "empty bundleModuleName");
+            return false;
+        }
+        auto appLibPath = appLibPathMap_.find(bundleModuleName);
+        if (appLibPath == appLibPathMap_.end()) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "not found app lib path: %{public}s", bundleModuleName.c_str());
+            return false;
+        }
+
+        auto moduleManager = NativeModuleManager::GetInstance();
+        if (moduleManager == nullptr) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "null moduleManager");
+            return false;
+        }
+        moduleManager->SetAppLibPath(appLibPath->first, appLibPath->second, isSystemApp_);
+        return moduleManager->GetLdNamespaceName(appLibPath->first, nsName);
+    }
+
+private:
+    bool isSystemApp_ = false;
+    AppLibPathMap appLibPathMap_;
+};
+std::shared_ptr<EtsAppLibNamespaceMgr> g_etsAppLibNamespaceMgr;
 } // namespace
 
 std::unique_ptr<ETSRuntime> ETSRuntime::Create(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime)
@@ -232,7 +268,8 @@ std::unique_ptr<ETSRuntime> ETSRuntime::Create(const Options &options, std::uniq
     return instance;
 }
 
-void ETSRuntime::SetAppLibPath(const AppLibPathMap &appLibPaths)
+void ETSRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths,
+    const std::map<std::string, std::string>& abcPathsToBundleModuleNameMap, bool isSystemApp)
 {
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "SetAppLibPath called");
     if (!RegisterETSEnvFuncs()) {
@@ -256,6 +293,22 @@ void ETSRuntime::SetAppLibPath(const AppLibPathMap &appLibPaths)
         return;
     }
     g_etsEnvFuncs->InitETSSysNS(ETS_SYSLIB_PATH);
+
+    if (g_etsEnvFuncs->SetAppLibPath == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null SetAppLibPath");
+        return;
+    }
+    g_etsAppLibNamespaceMgr = std::make_shared<EtsAppLibNamespaceMgr>(appLibPaths, isSystemApp);
+    std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)> cb =
+        [weak = std::weak_ptr(g_etsAppLibNamespaceMgr)](const std::string &bundleModuleName, std::string &nsName) {
+        auto appLibNamespaceMgr = weak.lock();
+        if (appLibNamespaceMgr == nullptr) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "null appLibNamespaceMgr");
+            return false;
+        }
+        return appLibNamespaceMgr->CreateNamespace(bundleModuleName, nsName);
+    };
+    g_etsEnvFuncs->SetAppLibPath(abcPathsToBundleModuleNameMap, cb);
 }
 
 bool ETSRuntime::Initialize(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime)
