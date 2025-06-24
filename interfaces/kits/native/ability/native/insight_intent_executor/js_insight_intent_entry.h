@@ -96,6 +96,10 @@ private:
     bool PrepareParametersUIExtension(napi_env env, const std::shared_ptr<NativeReference>& pageLoader);
     bool PrepareParametersServiceExtension(napi_env env);
 
+    static std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> GetResultFromJs(napi_env env, napi_value resultJs);
+
+    static napi_value ResolveCbCpp(napi_env env, napi_callback_info info);
+
     bool AssignObject(napi_env env, const AAFwk::WantParams &wantParams);
 
     JsRuntime& runtime_;
