@@ -58,7 +58,6 @@ void BatchUri::InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mod
     const std::string &callerAlterBundleName, const std::string &targetAlterBundleName)
 {
     auto &&authority = uriInner.GetAuthority();
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "Authority of uri is %{public}s.", authority.c_str());
     // media uri
     if (authority == "media") {
         mediaUris.emplace_back(uriInner.ToString());
