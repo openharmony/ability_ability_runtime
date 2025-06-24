@@ -35,7 +35,7 @@ class EventHub {
     }
   }
 
-  off(event, callback, fromNative = false) {
+  offByNativeContext(event, callback) {
     if (typeof (event) !== 'string') {
       return;
     }
@@ -53,7 +53,27 @@ class EventHub {
         delete this.eventMap[event];
       }
     }
-    if (this.nativeEventHubRef && !fromNative) {
+  }
+
+  off(event, callback) {
+    if (typeof (event) !== 'string') {
+      return;
+    }
+    if (this.eventMap[event]) {
+      if (callback) {
+        let cbArray = this.eventMap[event];
+        let index = cbArray.indexOf(callback);
+        if (index > -1) {
+          for (; index + 1 < cbArray.length; index++) {
+            cbArray[index] = cbArray[index + 1];
+          }
+          cbArray.pop();
+        }
+      } else {
+        delete this.eventMap[event];
+      }
+    }
+    if (this.nativeEventHubRef) {
       // call native eventHub off
       this.nativeEventHubRef.off(event, callback, false);
     }
