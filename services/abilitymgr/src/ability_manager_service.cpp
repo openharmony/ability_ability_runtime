@@ -5374,6 +5374,11 @@ int AbilityManagerService::SendLocalWantSender(const SenderInfo &senderInfo)
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     auto pendingWantManager = GetCurrentPendingWantManager();
     CHECK_POINTER_AND_RETURN(pendingWantManager, ERR_INVALID_VALUE);
+    if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(senderInfo.tokenId,
+        PermissionConstants::PERMISSION_TRIGGER_LOCAL_WANTAGENT)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "no permission to trigger local wantagent");
+        return CHECK_PERMISSION_FAILED;
+    }
     return pendingWantManager->SendLocalWantSender(senderInfo);
 }
 
