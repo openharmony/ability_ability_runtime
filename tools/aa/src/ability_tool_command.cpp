@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,6 +103,10 @@ const int32_t ARG_LIST_INDEX_OFFSET = 2;
 AbilityToolCommand::AbilityToolCommand(int argc, char* argv[]) : ShellCommand(argc, argv, ABILITY_TOOL_NAME)
 {
     for (int i = 0; i < argc_; i++) {
+        if (i > 1) {
+            TAG_LOGI(AAFwkTag::AA_TOOL, "argc greater than 2, ignoring the rest");
+            break;
+        }
         TAG_LOGI(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s", i, argv_[i]);
     }
 
