@@ -15,13 +15,7 @@
 import Context from 'application.Context';
 import hilog from '@ohos.hilog';
 
-type RegisterEmitFunction = (event: string, ...args: FixedArray<NullishType>) => void;
-
-interface EventHubRegistration {
-  registerOn: (event: string, callback: Function) => void;
-  registerOff: (event: string, callback?: Function) => void;
-  registerEmit: RegisterEmitFunction;
-}
+export type ESValueArgs = ESValue | Object | null | undefined
 
 export default class EventHub {
   private context?: Context;
@@ -42,28 +36,37 @@ export default class EventHub {
     if (!this.dynamicContextEventHub) {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
+    console.log(this.eventMap);
   }
 
   off(event: string, callback: Function): void {
+    console.log("off with callback");
     if (!this.eventMap.has(event)) {
+      console.log(`Event '${event}' does not exist.`);
       return;
     }
     const callbacks = this.eventMap.get(event)!;
     const index = callbacks.indexOf(callback);
-    if (index > -1) {
+    if (index === -1) {
+      console.log(`Callback not found for event '${event}'.`);
+    } else {
       callbacks.splice(index, 1);
+      console.log(`Callback removed for event '${event}'.`);
     }
     if (callbacks.length === 0) {
-      this.eventMap.delete(event); 
+      this.eventMap.delete(event);
+      console.log(`Event '${event}' has no more callbacks, deleted from eventMap.`);
     }
 
     if (!this.dynamicContextEventHub) {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
-    this.dynamicContextEventHub!.invokeMethod("off", event, callback);
+    this.dynamicContextEventHub!.getProperty("eventHub").invokeMethod("offByNativeContext", ESValue.wrap(event), ESValue.wrap(callback));
+    console.log(this.eventMap);
   }
 
   offByDynamicContext(event: string, callback: Function): void {
+    console.log("offByDynamicContext with callback");
     if (!this.eventMap.has(event)) {
       return;
     }
@@ -78,6 +81,7 @@ export default class EventHub {
   }
 
   off(event: string): void {
+    console.log("off without callback");
     if (!this.eventMap.has(event)) {
       return;
     }
@@ -86,10 +90,13 @@ export default class EventHub {
     if (!this.dynamicContextEventHub) {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
-    this.dynamicContextEventHub!.invokeMethod("off", event);
+    console.log("offByDynamicContext 4");
+    this.dynamicContextEventHub!.getProperty("eventHub").invokeMethod("offByNativeContext", ESValue.wrap(event));
+    console.log(this.eventMap);
   }
 
   offByDynamicContext(event: string): void {
+    console.log("offByDynamicContext without callback");
     if (!this.eventMap.has(event)) {
       return;
     }
@@ -98,12 +105,16 @@ export default class EventHub {
     if (!this.dynamicContextEventHub) {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
+    console.log("offByDynamicContext 4");
+    console.log(this.eventMap);
   }
 
-  private emitWithStaticContext(event: string, ...args: FixedArray<NullishType>): void {
+  private emitWithStaticContext(event: string, ...args: FixedArray<(Object|null|undefined)>): void {
+    console.log("emitWithStaticContext 1");
     if (!this.eventMap.has(event)) {
       return;
     }
+    console.log("emitWithStaticContext 2");
     const callbacks = [...this.eventMap.get(event)!];
 
     callbacks.forEach(callback => {
@@ -115,15 +126,21 @@ export default class EventHub {
     });
   }
   
-  emit(event: string, ...args: FixedArray<NullishType>): void {
+  emit(event: string, ...args: FixedArray<(Object|null|undefined)>): void {
     this.emitWithStaticContext(event, ...args);
     if (!this.dynamicContextEventHub) {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
-    this.dynamicContextEventHub!.invokeMethod("emitByNativeContext", event, args);
+    let params: FixedArray<ESValueArgs> = new ESValueArgs[args.length + 1];
+    params[0] = ESValue.wrap(event);
+    for (let i = 0; i < args.length; i++) {
+      params[i + 1] = ESValue.wrap(args[i]);
+    }
+    this.dynamicContextEventHub!.getProperty("eventHub").invokeMethod("emitByNativeContext", ...params);
   }
 
-  emitByDynamicContext(event: string, ...args: FixedArray<NullishType>): void {
+  emitByDynamicContext(event: string, ...args: FixedArray<(Object|null|undefined)>): void {
+    console.log("emitByDynamicContext 1");
     this.emitWithStaticContext(event, ...args);
   }
 }
