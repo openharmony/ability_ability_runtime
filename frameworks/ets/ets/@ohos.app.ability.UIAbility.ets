@@ -92,7 +92,19 @@ export default class UIAbility {
   onForeground(): void {
   }
 
+  onWillForeground(): void {
+  }
+
+  onDidForeground(): void {
+  }
+
   onBackground(): void {
+  }
+
+  onWillBackground(): void {
+  }
+
+  onDidBackground(): void {
   }
 
   onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
