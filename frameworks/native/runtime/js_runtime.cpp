@@ -1698,7 +1698,7 @@ std::vector<panda::HmsMap> JsRuntime::GetSystemKitsMap(uint32_t version)
         return systemKitsMap;
     }
     cJSON *systemKitsItem = cJSON_GetObjectItem(jsonBuf, SYSTEM_KITS.c_str());
-    if (systemKitsItem == nullptr || !cJSON_IsArray(systemKitsItem)) {
+    if (systemKitsItem == nullptr) {
         cJSON_Delete(jsonBuf);
         return systemKitsMap;
     }
