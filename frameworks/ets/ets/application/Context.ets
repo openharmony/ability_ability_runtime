@@ -36,6 +36,10 @@ export class Context extends BaseContext {
   preferencesDir: string = "";
   databaseDir: string = "";
   cacheDir: string = "";
+  cloudFileDir: string = "";
+  distributedFilesDir: string = "";
+  bundleCodeDir: string = "";
+  resourceDir: string = "";
   applicationInfo: ApplicationInfo;
   eventHub: EventHub = new EventHub();
   resourceManager: resmgr.ResourceManager;
