@@ -307,6 +307,7 @@ HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentGenericInfo_0100, Te
     TEST_INSIGHT_INTENT_GENERIC_INFO.decoratorType = "@InsightIntentLink";
     auto result = utils.ConvertExtractInsightIntentGenericInfo(TEST_INSIGHT_INTENT_GENERIC_INFO, insightIntentInfoForQuery);
     EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(insightIntentInfoForQuery.intentType, "@InsightIntentLink");
     Mock::VerifyAndClear(mockBundleMgr);
     testing::Mock::AllowLeak(mockBundleMgr);
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest ConvertExtractInsightIntentGenericInfo_0100 end.");
