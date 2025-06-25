@@ -30,7 +30,7 @@ void ExtensionContextConstructor()
 {
 }
  
-void UIAbilityContextConstructor(ani_env *env, ani_object aniObject)
+void UIAbilityContextConstructor()
 {
 }
  
