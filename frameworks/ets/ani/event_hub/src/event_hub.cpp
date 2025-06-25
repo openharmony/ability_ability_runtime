@@ -18,8 +18,8 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-    constexpr const char* ETS_EVENT_HUB_CLASS_NAME = "Lapplication/EventHub/EventHub;";
-    constexpr const char* ETS_CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
+constexpr const char* ETS_EVENT_HUB_CLASS_NAME = "Lapplication/EventHub/EventHub;";
+constexpr const char* ETS_CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
 }
  
 std::shared_ptr<AbilityContext> EventHub::GetAbilityContext(ani_env *env, ani_object aniObj)
@@ -51,8 +51,8 @@ std::shared_ptr<AbilityContext> EventHub::GetAbilityContext(ani_env *env, ani_ob
 ani_object EventHub::GetDynamicContextEventHub(ani_env *env, ani_object aniObj)
 {
     TAG_LOGI(AAFwkTag::APPKIT, "GetDynamicContextEventHub called");
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+    if (env == nullptr || aniObject == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "env or aniObj is null");
         return nullptr;
     }
     ani_ref nativeContextRef = nullptr;
@@ -80,53 +80,66 @@ ani_object EventHub::GetDynamicContextEventHub(ani_env *env, ani_object aniObj)
         TAG_LOGE(AAFwkTag::APPKIT, "null dynamicContext");
         return nullptr;
     }
-    JsRuntime *jsRuntime = JsRuntime::GetInstance();
-    if (jsRuntime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null jsRuntime");
-        return nullptr;
-    }
-    napi_env napiEnv = jsRuntime->GetNapiEnv();
-    napi_value eventHub = nullptr;
-    napi_get_named_property(napiEnv, dynamicContext->Get(), "eventHub", &eventHub);
-    if (eventHub == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "napi_get_named_property failed, eventHub nullptr");
-        return nullptr;
-    }
-    napi_value setNativeEventHubRefFn = nullptr;
-    napi_get_named_property(napiEnv, eventHub, "setNativeEventHubRef", &setNativeEventHubRefFn);
-    if (setNativeEventHubRefFn == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null method: setNativeEventHubRef");
-        return nullptr;
-    }
-    hybridgref nativeHybrigRef = nullptr;
-    bool success = hybridgref_create_from_ani(env, static_cast<ani_ref>(aniObj), &nativeHybrigRef);
-    if (!success) {
-        TAG_LOGE(AAFwkTag::APPKIT, "hybridgref_create_from_ani failed");
-        return nullptr;
-    }
-    napi_value nativeEventHubRef {};
-    if (!hybridgref_get_napi_value(napiEnv, nativeHybrigRef, &nativeEventHubRef)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "hybridgref_get_napi_vlaue failed");
+    ani_object staticResult = nullptr;
+    {
+        napi_env napiEnv = {};
+        if (!arkts_napi_scope_open(env, &napiEnv)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "arkts_napi_scope_open failed");
+            return nullptr;
+        }
+        napi_value eventHub = nullptr;
+        if (napi_get_named_property(napiEnv, dynamicContext->Get(), "eventHub", &eventHub) != napi_ok) {
+            TAG_LOGE(AAFwkTag::APPKIT, "napi_get_named_property failed");
+            return nullptr;
+        }
+        if (eventHub == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "napi_get_named_property failed, eventHub nullptr");
+            return nullptr;
+        }
+        napi_value setNativeEventHubRefFn = nullptr;
+        if (napi_get_named_property(napiEnv, eventHub, "setNativeEventHubRef", &setNativeEventHubRefFn) != napi_ok) {
+            TAG_LOGE(AAFwkTag::APPKIT, "napi_get_named_property failed");
+            return nullptr;
+        }
+        if (setNativeEventHubRefFn == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null method: setNativeEventHubRef");
+            return nullptr;
+        }
+        hybridgref nativeHybrigRef = nullptr;
+        bool success = hybridgref_create_from_ani(env, static_cast<ani_ref>(aniObj), &nativeHybrigRef);
+        if (!success) {
+            TAG_LOGE(AAFwkTag::APPKIT, "hybridgref_create_from_ani failed");
+            return nullptr;
+        }
+        napi_value nativeEventHubRef {};
+        if (!hybridgref_get_napi_value(napiEnv, nativeHybrigRef, &nativeEventHubRef)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "hybridgref_get_napi_vlaue failed");
+            hybridgref_delete_from_ani(env, nativeHybrigRef);
+            return nullptr;
+        }
         hybridgref_delete_from_ani(env, nativeHybrigRef);
-        return nullptr;
-    }
-    hybridgref_delete_from_ani(env, nativeHybrigRef);
-    napi_value dynamicResult;
-    napi_call_function(napiEnv, eventHub, setNativeEventHubRefFn, 1, &nativeEventHubRef, &dynamicResult);
-    hybridgref dynamicHybrigRef = nullptr;
-    success = hybridgref_create_from_napi(napiEnv, dynamicContext->Get(), &dynamicHybrigRef);
-    if (!success) {
-        TAG_LOGE(AAFwkTag::APPKIT, "hybridgref_create_from_napi failed");
-        return nullptr;
-    }
-    ani_object staticResult;
-    success = hybridgref_get_esvalue(env, dynamicHybrigRef, &staticResult);
-    if (!success) {
-        TAG_LOGE(AAFwkTag::APPKIT, "hybridgref_get_esvalue failed");
+        napi_value dynamicResult;
+        if (napi_call_function(napiEnv, eventHub, setNativeEventHubRefFn, 1, &nativeEventHubRef,
+            &dynamicResult) != napi_ok) {
+            TAG_LOGE(AAFwkTag::APPKIT, "napi_call_function failed");
+            return nullptr;
+        }
+        hybridgref dynamicHybrigRef = nullptr;
+        if (!hybridgref_create_from_napi(napiEnv, dynamicContext->Get(), &dynamicHybrigRef)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "hybridgref_create_from_napi failed");
+            return nullptr;
+        }
+        if (!hybridgref_get_esvalue(env, dynamicHybrigRef, &staticResult)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "hybridgref_get_esvalue failed");
+            hybridgref_delete_from_napi(napiEnv, dynamicHybrigRef);
+            return nullptr;
+        }
         hybridgref_delete_from_napi(napiEnv, dynamicHybrigRef);
-        return nullptr;
+        if (!arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "arkts_napi_scope_close_n failed");
+            return nullptr;
+        }
     }
-    hybridgref_delete_from_napi(napiEnv, dynamicHybrigRef);
     return staticResult;
 }
  
