@@ -53,7 +53,10 @@ ohos_shared_library("uri_permission_mgr") {
   sources += filter_include(output_values, [ "*_proxy.cpp" ])
   sources += filter_include(output_values, [ "*_stub.cpp" ])
 
-  deps = [ ":uri_permission_manager_interface" ]
+  deps = [
+    ":uri_permission_manager_interface",
+    "${ability_runtime_services_path}/common:app_util",
+  ]
 
   external_deps = [
     "ability_base:zuri",
