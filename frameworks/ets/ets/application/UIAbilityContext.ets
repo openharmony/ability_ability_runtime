@@ -50,7 +50,7 @@ export default class UIAbilityContext extends Context {
     this.currentHapModuleInfo = currentHapModuleInfo;
   }
 
-  initEventHubByUIAbilityContext() {
+  initEventHub() {
     this.eventHub = new EventHub();
   }
 

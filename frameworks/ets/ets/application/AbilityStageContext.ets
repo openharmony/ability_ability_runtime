@@ -33,6 +33,10 @@ export default class AbilityStageContext extends Context {
       this.currentHapModuleInfo = currentHapModuleInfo;
     }
 
+    initEventHub() {
+      this.eventHub = new EventHub();
+    }
+
     private static native nativeTransferStatic(input: ESValue): Object;
     private static native nativeTransferDynamic(input: Object): ESValue;
 

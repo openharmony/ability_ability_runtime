@@ -32,4 +32,8 @@ export default class ExtensionContext extends Context {
         this.extensionAbilityInfo = extensionAbilityInfo;
         this.currentHapModuleInfo = currentHapModuleInfo;
     }
+
+    initEventHub() {
+        this.eventHub = new EventHub();
+    }
 }
