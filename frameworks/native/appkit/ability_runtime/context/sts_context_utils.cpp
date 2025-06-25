@@ -20,6 +20,7 @@
 #include "application_context.h"
 #include "application_context_manager.h"
 #include "common_fun_ani.h"
+#include "event_hub.h"
 #include "hilog_tag_wrapper.h"
 #include "resourceManager.h"
 #include "sts_error_utils.h"
@@ -228,6 +229,16 @@ void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object context
     }
     context_ = context;
     BindParentProperty(aniEnv, contextClass, contextObj, context);
+    // set eventhub context
+    TAG_LOGI(AAFwkTag::APPKIT, "set eventhub context");
+    ani_ref eventHubRef = nullptr;
+    ani_status status = ANI_OK;
+    if ((status = aniEnv->Object_GetFieldByName_Ref(contextObj, "eventHub", &eventHubRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_GetFieldByName_Ref failed status: %{public}d", status);
+        return;
+    }
+ 
+    AbilityRuntime::EventHub::SetEventHubContext(aniEnv, eventHubRef, reinterpret_cast<ani_ref>(contextObj));
 }
 
 bool CheckCallerIsSystemApp()
