@@ -54,9 +54,9 @@ export default class ApplicationContext extends Context {
 
   off(type: 'environment', callbackId: number): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -71,9 +71,9 @@ export default class ApplicationContext extends Context {
 
   preloadUIExtensionAbility(want: Want): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -95,9 +95,9 @@ export default class ApplicationContext extends Context {
 
   killAllProcesses(): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -112,9 +112,9 @@ export default class ApplicationContext extends Context {
 
   killAllProcesses(clearPageStack: boolean): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -136,11 +136,11 @@ export default class ApplicationContext extends Context {
 
   getRunningProcessInformation(): Promise<Array<ProcessInformation>> {
     let p = new Promise<Array<ProcessInformation>>((resolve: (data: Array<ProcessInformation>) => void,
-      reject: (err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>((err: BusinessError<void>,
-        data: Array<ProcessInformation>) => {
-        if (err.code == 0) {
-          resolve(data);
+      reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<Array<ProcessInformation>>((err: BusinessError | null,
+        data: Array<ProcessInformation> | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as Array<ProcessInformation>);
         } else {
           reject(err);
         }
@@ -161,9 +161,9 @@ export default class ApplicationContext extends Context {
 
   clearUpApplicationData(): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);

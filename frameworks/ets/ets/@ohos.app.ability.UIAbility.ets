@@ -21,19 +21,26 @@ import window from '@ohos.window';
 import { AbilityUtils } from './utils/AbilityUtils';
 
 export type OnReleaseCallback = (msg: string) => void;
+
 export type CalleeCallback = (indata: rpc.MessageSequence) => rpc.Parcelable;
+
 export interface Caller {
   call(method: string, data: rpc.Parcelable): Promise<void>;
+
   onRelease(callback: OnReleaseCallback): void;
+
   release(): void;
 }
+
 export interface Callee {
   on(method: string, callback: CalleeCallback): void;
 }
 
 export default class UIAbility {
   private destroyCallbackPoint: long;
+
   private native nativeOnDestroyCallback(): void;
+
   private callOnDestroy(): boolean {
     const derivedClassType = AbilityUtils.getClassType(this);
     if (derivedClassType === undefined) {
@@ -59,16 +66,35 @@ export default class UIAbility {
   lastRequestWant: Want = new Want();
   callee: Callee | null = null;
 
-  onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {}
-  onWindowStageCreate(windowStage: window.WindowStage): void {}
-  onWindowStageWillDestroy(windowStage: window.WindowStage): void {}
-  onWindowStageDestroy(): void {}
-  onWindowStageRestore(windowStage: window.WindowStage): void {}
-  onDestroy(): void {}
-  onDestroyAsync(): Promise<void> {
-    return new Promise<void>((resolve: (a: undefined)=>void, reject: (err: Error)=>void): void => {});
+  onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
   }
-  onForeground(): void {}
-  onBackground(): void {}
-  onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {}
+
+  onWindowStageCreate(windowStage: window.WindowStage): void {
+  }
+
+  onWindowStageWillDestroy(windowStage: window.WindowStage): void {
+  }
+
+  onWindowStageDestroy(): void {
+  }
+
+  onWindowStageRestore(windowStage: window.WindowStage): void {
+  }
+
+  onDestroy(): void {
+  }
+
+  onDestroyAsync(): Promise<void> {
+    return new Promise<void>((resolve: (a: undefined) => void, reject: (err: Error) => void): void => {
+    });
+  }
+
+  onForeground(): void {
+  }
+
+  onBackground(): void {
+  }
+
+  onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+  }
 }
