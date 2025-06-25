@@ -17,15 +17,10 @@ class EventHub {
   constructor() {
     this.eventMap = {};
     this.nativeEventHubRef = null;
-    console.log("constructor")
   }
 
   setNativeEventHubRef(ref) {
-    console.log(111);
-    console.dir(ref);
     this.nativeEventHubRef = ref;
-    console.log(this.nativeEventHubRef)
-    console.log(222);
   }
 
   on(event, callback) {
@@ -82,8 +77,9 @@ class EventHub {
       // call native eventHub off
       if (callback) {
         this.nativeEventHubRef.offByDynamicContext(event, callback);
+      } else {
+        this.nativeEventHubRef.offByDynamicContext(event);
       }
-      this.nativeEventHubRef.offByDynamicContext(event);
     }
   }
 
@@ -98,9 +94,6 @@ class EventHub {
         cloneArray[i].apply(this, args);
       }
     }
-    console.log("emit 111")
-    console.log(this.nativeEventHubRef == null);
-    console.log(this.nativeEventHubRef);
     if (this.nativeEventHubRef != null) {
       this.nativeEventHubRef.emitByDynamicContext(event, ...args);
     }
