@@ -394,7 +394,7 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         TAG_LOGE(AAFwkTag::WANTAGENT, "null wantsRef");
         return PARAMETER_ERROR;
     }
-    ani_array_ref wantsArr = reinterpret_cast<ani_array_ref>(wantsRef);
+    ani_array wantsArr = reinterpret_cast<ani_array>(wantsRef);
     ani_size length = 0;
     if ((status = env->Object_GetPropertyByName_Ref(info, "wants", &wantsRef)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Object_GetPropertyByName_Ref failed status: %{public}d", status);
@@ -407,8 +407,8 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
     for (size_t i = 0; i < length; i++) {
         ani_ref wantRef = nullptr;
         std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
-        if ((status = env->Array_Get_Ref(wantsArr, i, &wantRef)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "Array_Get_Ref failed status: %{public}d", status);
+        if ((status = env->Array_Get(wantsArr, i, &wantRef)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "Array_Get failed status : %{public}d", status);
             return PARAMETER_ERROR;
         }
         if (!AppExecFwk::UnwrapWant(env, reinterpret_cast<ani_object>(wantRef), *want)) {
@@ -441,7 +441,7 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
         return PARAMETER_ERROR;
     }
-    ani_array_ref actionFlagsArr = reinterpret_cast<ani_array_ref>(actionFlagsRef);
+    ani_array actionFlagsArr = reinterpret_cast<ani_array>(actionFlagsRef);
     if (!isUndefined) {
         ani_size actionFlagsLen = 0;
         if ((status = env->Array_GetLength(actionFlagsArr, &actionFlagsLen)) != ANI_OK) {
@@ -451,8 +451,8 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         for (size_t i = 0; i < actionFlagsLen; i++) {
             ani_ref actionFlagRef = nullptr;
             int32_t actionFlag = 0;
-            if ((status = env->Array_Get_Ref(actionFlagsArr, i, &actionFlagRef)) != ANI_OK) {
-                TAG_LOGE(AAFwkTag::WANTAGENT, "Array_Get_Ref failed status: %{public}d", status);
+            if ((status = env->Array_Get(actionFlagsArr, i, &actionFlagRef)) != ANI_OK) {
+                TAG_LOGE(AAFwkTag::WANTAGENT, "Array_Get failed status: %{public}d", status);
                 return PARAMETER_ERROR;
             }
             AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(

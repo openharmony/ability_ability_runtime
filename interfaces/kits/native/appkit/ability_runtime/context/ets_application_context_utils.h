@@ -51,6 +51,8 @@ public:
         ani_object callback);
     static void GetRunningProcessInformation([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         ani_object callback);
+    static void GetAllRunningInstanceKeys([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_object callback);
     static ani_double NativeOnSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         ani_string type, ani_object envCallback);
     static void NativeOffSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,

@@ -261,6 +261,22 @@ ohos_prebuilt_etc("ability_runtime_ability_context_constant_abc_etc") {
   deps = [ ":ability_runtime_ability_context_constant_abc" ]
 }
 
+generate_static_abc("ability_runtime_data_uri_utils_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.dataUriUtils.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_runtime_data_uri_utils_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_data_uri_utils_abc_etc") {
+  source = "$target_out_dir/ability_runtime_data_uri_utils_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_data_uri_utils_abc" ]
+}
+
 generate_static_abc("ability_runtime_ui_ability_abc") {
   base_url = "./"
   files = [ "./@ohos.app.ability.UIAbility.ets" ]
@@ -916,6 +932,26 @@ ohos_prebuilt_etc("ability_runtime_AbilityRunningInfo_abc_etc") {
   deps = [ ":ability_runtime_AbilityRunningInfo_abc" ]
 }
 
+generate_static_abc("uri_permission_manager_abc") {
+  base_url = "./"
+
+  files = [ "./@ohos.application.uriPermissionManager.ets" ]
+
+  dst_file = "$target_out_dir/uri_permission_manager.abc"
+  out_puts = [ "$target_out_dir/uri_permission_manager.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/uri_permission_manager.abc"
+}
+
+ohos_prebuilt_etc("uri_permission_manager_abc_etc") {
+  source = "$target_out_dir/uri_permission_manager.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":uri_permission_manager_abc" ]
+}
+
 generate_static_abc("ability_runtime_custom_data_abc") {
   base_url = "./"
   files = [ "./application/CustomData.ets" ]
@@ -948,6 +984,55 @@ ohos_prebuilt_etc("ability_runtime_extension_running_info_abc_etc") {
   deps = [ ":ability_runtime_extension_running_info_abc" ]
 }
 
+generate_static_abc("ability_runtime_extension_ability_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.ExtensionAbility.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_runtime_extension_ability_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_extension_ability_abc_etc") {
+  source = "$target_out_dir/ability_runtime_extension_ability_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_extension_ability_abc" ]
+}
+
+generate_static_abc("ability_runtime_ability_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.Ability.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_runtime_ability_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_ability_abc_etc") {
+  source = "$target_out_dir/ability_runtime_ability_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_ability_abc" ]
+}
+
+generate_static_abc("ability_runtime_error_code_abc") {
+  base_url = "./"
+  files = [ "./@ohos.ability.errorCode.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_runtime_error_code_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_error_code_abc_etc") {
+  source = "$target_out_dir/ability_runtime_error_code_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_error_code_abc" ]
+}
+
 group("ets_packages") {
   deps = [
     ":ability_ability_application_abc_etc",
@@ -958,6 +1043,7 @@ group("ets_packages") {
     ":ability_delegator_args_abc_etc",
     ":ability_delegator_registry_abc_etc",
     ":ability_runtime_abilityResult_abc_etc",
+    ":ability_runtime_ability_abc_etc",
     ":ability_runtime_ability_callee_abc_etc",
     ":ability_runtime_ability_caller_abc_etc",
     ":ability_runtime_ability_constant_abc_etc",
@@ -978,8 +1064,11 @@ group("ets_packages") {
     ":ability_runtime_configuration_constant_abc_etc",
     ":ability_runtime_context_abc_etc",
     ":ability_runtime_custom_data_abc_etc",
+    ":ability_runtime_data_uri_utils_abc_etc",
     ":ability_runtime_environment_callback_abc_etc",
+    ":ability_runtime_error_code_abc_etc",
     ":ability_runtime_event_hub_abc_etc",
+    ":ability_runtime_extension_ability_abc_etc",
     ":ability_runtime_extension_context_abc_etc",
     ":ability_runtime_extension_running_info_abc_etc",
     ":ability_runtime_insight_intent_abc_etc",
@@ -1004,6 +1093,7 @@ group("ets_packages") {
     ":ability_runtime_want_constant_abc_etc",
     ":service_extension_ability_abc_etc",
     ":ui_extension_ability_ani_etc",
+    ":uri_permission_manager_abc_etc",
     ":ability_runtime_OpenLink_Options_abc_etc",
     ":ability_runtime_AbilityRunningInfo_abc_etc",
   ]

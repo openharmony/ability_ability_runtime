@@ -329,7 +329,7 @@ ani_object CreateStsUIExtensionContext(ani_env *env, std::shared_ptr<UIExtension
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return nullptr;
     }
-    OHOS::AbilityRuntime::ContextUtil::StsCreatContext(env, cls, contextObj, context);
+    OHOS::AbilityRuntime::ContextUtil::StsCreateContext(env, cls, contextObj, context);
     OHOS::AbilityRuntime::CreatEtsExtensionContext(env, cls, contextObj, context, context->GetAbilityInfo());
     return contextObj;
 }
