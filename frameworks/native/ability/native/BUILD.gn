@@ -1655,6 +1655,7 @@ ohos_shared_library("ui_extension") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "ipc:rpc_ani",
     "napi:ace_napi",
     "runtime_core:ani",
     "window_manager:embeddablewindowstage_kit",
