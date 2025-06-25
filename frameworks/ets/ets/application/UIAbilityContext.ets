@@ -96,6 +96,8 @@ export default class UIAbilityContext extends Context {
   private native nativeRequestModalUIExtension(pickerWant: Want, callback: AsyncCallbackWrapper<void>): void;
   private native nativeSetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
 
+  private native nativeBackToCallerAbilityWithResult(abilityResult: AbilityResult, requestCode: string, callback: AsyncCallbackWrapper<void>): void;
+
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
@@ -374,5 +376,20 @@ export default class UIAbilityContext extends Context {
     
   setColorMode(colorMode: ConfigurationConstant.ColorMode): void {
     this.nativeSetColorMode(colorMode);
+  }
+
+  backToCallerAbilityWithResult(abilityResult: AbilityResult, requestCode: string): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let syncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute(() => {
+        this.nativeBackToCallerAbilityWithResult(abilityResult, requestCode, syncCall);
+      });
+    });
   }
 }

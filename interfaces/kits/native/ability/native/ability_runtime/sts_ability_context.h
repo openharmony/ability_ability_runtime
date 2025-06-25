@@ -70,6 +70,8 @@ public:
     static void SetColorMode(ani_env *env, ani_object aniObj, ani_enum_item colorMode);
     static ani_object NativeTransferStatic(ani_env *env, ani_object aniObj, ani_object input);
     static ani_object NativeTransferDynamic(ani_env *env, ani_object aniObj, ani_object input);
+    static void NativeBackToCallerAbilityWithResult(ani_env *env, ani_object aniObj,
+        ani_object abilityResultObj, ani_string requestCodeObj, ani_object callBackObj);
 
 private:
     static void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
