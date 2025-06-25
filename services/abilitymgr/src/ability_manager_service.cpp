@@ -2954,13 +2954,9 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
                 continue;
             }
             
-            isColdStart = info.preloadMode_ == AppExecFwk::PreloadMode::PRESS_DOWN;
-            pid = info.pid_;
+            isColdStart = info.isExiting ? true : info.preloadMode_ == AppExecFwk::PreloadMode::PRESS_DOWN;
+            pid = info.isExiting ? 0 : info.pid_;
             warmStartType = static_cast<int32_t>(info.preloadMode_);
-            if (info.isExiting) {
-                isColdStart = true;
-                pid = 0;
-            }
             break;
         }
         ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart, warmStartType);
