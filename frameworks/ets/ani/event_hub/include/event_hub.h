@@ -20,6 +20,7 @@
 #include "ability_context.h"
 #include "hilog_tag_wrapper.h"
 #include "interop_js/arkts_esvalue.h"
+#include "interop_js/arkts_interop_js_api.h"
 #include "interop_js/hybridgref_ani.h"
 #include "interop_js/hybridgref_napi.h"
 #include "js_runtime.h"

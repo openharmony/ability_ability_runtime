@@ -22,42 +22,12 @@ void ContextConstructor()
 {
 }
 
-void AbilityStageContextConstructor(ani_env *env, ani_object aniObject)
+void AbilityStageContextConstructor()
 {
-    ani_class cls {};
-    ani_status status = ANI_ERROR;
-    if ((status = env->FindClass("Lapplication/AbilityStageContext/AbilityStageContext;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
-        return;
-    }
-    ani_method method {};
-    if ((status = env->Class_FindMethod(cls, "initEventHub", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "status : %{public}d", status);
-        return;
-    }
-    if ((status = env->Object_CallMethod_Void(aniObject, method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
-        return;
-    }
 }
 
-void ExtensionContextConstructor(ani_env *env, ani_object aniObject)
+void ExtensionContextConstructor()
 {
-    ani_class cls {};
-    ani_status status = ANI_ERROR;
-    if ((status = env->FindClass("Lapplication/ExtensionContext/ExtensionContext;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
-        return;
-    }
-    ani_method method {};
-    if ((status = env->Class_FindMethod(cls, "initEventHub", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "status : %{public}d", status);
-        return;
-    }
-    if ((status = env->Object_CallMethod_Void(aniObject, method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
-        return;
-    }
 }
 
 void UIAbilityContextConstructor(ani_env *env, ani_object aniObject)

@@ -27,6 +27,7 @@ import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import OpenLinkOptions from '@ohos.app.ability.OpenLinkOptions';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
+import EventHub from 'application.EventHub';
 
 // remove local declaration after Any type is supported
 type Any = Object | null | undefined
