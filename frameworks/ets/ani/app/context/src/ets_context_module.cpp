@@ -387,7 +387,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     EtsContextModuleInit(aniEnv);
-    // FIXME
     AbilityRuntime::EventHub::InitAniEventHub(aniEnv);
     *result = ANI_VERSION_1;
     TAG_LOGD(AAFwkTag::CONTEXT, "ANI_Constructor finish");
