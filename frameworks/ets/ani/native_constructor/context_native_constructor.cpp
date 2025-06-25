@@ -21,19 +21,64 @@ namespace AbilityRuntime {
 void ContextConstructor()
 {
 }
- 
-void AbilityStageContextConstructor()
+
+void AbilityStageContextConstructor(ani_env *env, ani_object aniObject)
 {
+    ani_class cls {};
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass("Lapplication/AbilityStageContext/AbilityStageContext;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
+        return;
+    }
+    ani_method method {};
+    if ((status = env->Class_FindMethod(cls, "initEventHub", ":V", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "status : %{public}d", status);
+        return;
+    }
+    if ((status = env->Object_CallMethod_Void(aniObject, method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
+        return;
+    }
 }
- 
-void ExtensionContextConstructor()
+
+void ExtensionContextConstructor(ani_env *env, ani_object aniObject)
 {
+    ani_class cls {};
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass("Lapplication/ExtensionContext/ExtensionContext;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
+        return;
+    }
+    ani_method method {};
+    if ((status = env->Class_FindMethod(cls, "initEventHub", ":V", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "status : %{public}d", status);
+        return;
+    }
+    if ((status = env->Object_CallMethod_Void(aniObject, method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "status: %{public}d", status);
+        return;
+    }
 }
- 
+
 void UIAbilityContextConstructor(ani_env *env, ani_object aniObject)
 {
+    ani_class cls {};
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass("Lapplication/UIAbilityContext/UIAbilityContext;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
+        return;
+    }
+    ani_method method {};
+    if ((status = env->Class_FindMethod(cls, "initEventHub", ":V", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "status : %{public}d", status);
+        return;
+    }
+    if ((status = env->Object_CallMethod_Void(aniObject, method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "status: %{public}d", status);
+        return;
+    }
 }
- 
+
 extern "C" {
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
@@ -106,7 +151,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TAG_LOGE(AAFwkTag::STSRUNTIME, "Cannot bind native ctor to class %{public}s.", abilityStageContextClassName);
         return ANI_ERROR;
     };
-
+ 
     *result = ANI_VERSION_1;
     return ANI_OK;
 }
