@@ -572,16 +572,6 @@ void EtsApplicationContextUtils::SetAndBindApplicationObject(ani_env* aniEnv, an
         return;
     }
     applicationContext->Bind(contextGlobalRef);
-
-    // set eventhub context
-    TAG_LOGI(AAFwkTag::JSRUNTIME, "set eventhub context");
-    ani_ref eventHubRef = nullptr;
-    if ((status = aniEnv->Object_GetFieldByName_Ref(applicationContextObject, "eventHub", &eventHubRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Object_GetFieldByName_Ref failed status: %{public}d", status);
-        return;
-    }
-
-    AbilityRuntime::EventHub::SetEventHubContext(aniEnv, eventHubRef, applicationContextObjectRef);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
