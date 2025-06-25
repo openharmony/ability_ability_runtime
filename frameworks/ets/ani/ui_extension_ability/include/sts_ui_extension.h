@@ -125,13 +125,6 @@ public:
     virtual void OnStopCallBack() override;
 
     /**
-     * @brief Called when the system configuration is updated.
-     *
-     * @param configuration Indicates the updated configuration information.
-     */
-    virtual void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration) override;
-
-    /**
      * @brief Called when this extension enters the <b>STATE_FOREGROUND</b> state.
      *
      *
@@ -172,7 +165,9 @@ public:
     /**
      * @brief Called when configuration changed, including system configuration and window configuration.
      */
-    void ConfigurationUpdated();
+    void ConfigurationUpdated() override;
+
+    void OnAbilityConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
 
     void ResetEnv(ani_env* env);
 
@@ -199,6 +194,7 @@ private:
     sptr<Rosen::Window> CreateUIWindow(const std::shared_ptr<UIExtensionContext> context,
         const sptr<AAFwk::SessionInfo> &sessionInfo);
     void ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result);
+    bool BindNativeMethods();
 
     STSRuntime& stsRuntime_;
     std::shared_ptr<STSNativeReference> stsObj_ = nullptr;

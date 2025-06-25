@@ -30,10 +30,10 @@ export default namespace application {
 
   export function createModuleContext(context: Context, moduleName: string): Promise<Context> {
     let p =
-      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError<void>, data: Context) => {
-          if (err.code == 0) {
-            resolve(data);
+      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError | null, data: Context | undefined) => {
+          if (err == null || err.code == 0) {
+            resolve(data as Context);
           } else {
             reject(err);
           }
@@ -47,10 +47,10 @@ export default namespace application {
 
   export function createModuleContext(context: Context, bundleName: string, moduleName: string): Promise<Context> {
     let p =
-      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError<void>, data: Context) => {
-          if (err.code == 0) {
-            resolve(data);
+      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError | null, data: Context | undefined) => {
+          if (err == null || err.code == 0) {
+            resolve(data as Context);
           } else {
             reject(err);
           }
@@ -64,10 +64,10 @@ export default namespace application {
 
   export function createBundleContext(context: Context, bundleName: string): Promise<Context> {
     let p =
-      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError<void>, data: Context) => {
-          if (err.code == 0) {
-            resolve(data);
+      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError | null, data: Context | undefined) => {
+          if (err == null || err.code == 0) {
+            resolve(data as Context);
           } else {
             reject(err);
           }

@@ -55,17 +55,42 @@
 namespace OHOS {
 namespace AbilityRuntime {
 std::mutex StsAbilityContext::requestCodeMutex_;
-const std::string APP_LINKING_ONLY = "appLinkingOnly";
-namespace {
-    static std::once_flag g_bindNativeMethodsFlag;
 
+namespace {
+static std::once_flag g_bindNativeMethodsFlag;
 constexpr const char* UI_ABILITY_CONTEXT_CLASS_NAME = "Lapplication/UIAbilityContext/UIAbilityContext;";
 constexpr int32_t CALLER_TIME_OUT = 10; // 10s
+const std::string APP_LINKING_ONLY = "appLinkingOnly";
+constexpr uint64_t MAX_REQUEST_CODE = (1ULL << 49) - 1;
+constexpr size_t MAX_REQUEST_CODE_LENGTH = 15;
+constexpr int32_t BASE_REQUEST_CODE_NUM = 10;
+
 struct StartAbilityByCallData {
     sptr<IRemoteObject> remoteCallee;
     std::mutex mutexlock;
     std::condition_variable condition;
 };
+
+int64_t RequestCodeFromStringToInt64(const std::string &requestCode)
+{
+    if (requestCode.size() > MAX_REQUEST_CODE_LENGTH) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "requestCode too long: %{public}s", requestCode.c_str());
+        return 0;
+    }
+    std::regex formatRegex("^[1-9]\\d*|0$");
+    std::smatch sm;
+    if (!std::regex_match(requestCode, sm, formatRegex)) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "requestCode match failed: %{public}s", requestCode.c_str());
+        return 0;
+    }
+    int64_t parsedRequestCode = 0;
+    parsedRequestCode = strtoll(requestCode.c_str(), nullptr, BASE_REQUEST_CODE_NUM);
+    if (parsedRequestCode < 0 || static_cast<uint64_t>(parsedRequestCode) > MAX_REQUEST_CODE) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "requestCode too large: %{public}s", requestCode.c_str());
+        return 0;
+    }
+    return parsedRequestCode;
+}
 
 void GenerateCallerCallBack(std::shared_ptr<StartAbilityByCallData> calls,
     std::shared_ptr<CallerCallBack> callerCallBack)
@@ -105,6 +130,7 @@ void WaitForCalleeObj(std::shared_ptr<StartAbilityByCallData> callData)
     }
 }
 }
+
 std::shared_ptr<AbilityContext> StsAbilityContext::GetAbilityContext(ani_env *env, ani_object aniObj)
 {
     ani_long nativeContextLong;
@@ -113,6 +139,10 @@ std::shared_ptr<AbilityContext> StsAbilityContext::GetAbilityContext(ani_env *en
     ani_status status = ANI_ERROR;
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return nullptr;
+    }
+    if (aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null aniObj");
         return nullptr;
     }
     if ((status = env->FindClass(UI_ABILITY_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
@@ -686,6 +716,28 @@ void StsAbilityContext::NativeRequestModalUIExtension(ani_env *env, ani_object a
     AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
 }
 
+void StsAbilityContext::SetColorMode(ani_env *env, ani_object aniObj, ani_enum_item colorMode)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "SetColorMode Call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "context is already released");
+        ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
+    }
+    ani_int mode = 0;
+    if (!AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(env, colorMode, mode)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "Parse colorMode failed");
+        ThrowStsInvalidParamError(env, "Parse param colorMode failed, colorMode must be number.");
+        return;
+    }
+    TAG_LOGD(AAFwkTag::UIABILITY, "colorMode is %{public}d", mode);
+    context->SetAbilityColorMode(static_cast<int32_t>(mode));
+}
 ani_object StsAbilityContext::NativeTransferStatic(ani_env *env, ani_object, ani_object input)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "transfer static UIAbilityContext");
@@ -767,6 +819,46 @@ ani_object StsAbilityContext::NativeTransferDynamic(ani_env *env, ani_object, an
     return nullptr;
 }
 
+void StsAbilityContext::NativeBackToCallerAbilityWithResult(ani_env *env, ani_object aniObj,
+    ani_object abilityResultObj, ani_string requestCodeObj, ani_object callBackObj)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "NativeBackToCallerAbilityWithResult call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env");
+        return;
+    }
+    ani_object errorObject = nullptr;
+    AAFwk::Want want;
+    int resultCode = 0;
+    if (!OHOS::AppExecFwk::UnWrapAbilityResult(env, abilityResultObj, resultCode, want)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "UnWrapAbilityResult failed");
+        errorObject = CreateStsInvalidParamError(env, "Failed to parse abilityResult.");
+        AppExecFwk::AsyncCallback(env, callBackObj, errorObject, nullptr);
+        return;
+    }
+    std::string requestCodeStr;
+    if (!AppExecFwk::GetStdString(env, requestCodeObj, requestCodeStr)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Failed to parse label");
+        errorObject = CreateStsInvalidParamError(env, "Failed to parse label.");
+        AppExecFwk::AsyncCallback(env, callBackObj, errorObject, nullptr);
+        return;
+    }
+    auto requestCode = RequestCodeFromStringToInt64(requestCodeStr);
+    auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        AppExecFwk::AsyncCallback(env, callBackObj,
+            OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)), nullptr);
+        return;
+    }
+
+    ErrCode ret = ERR_OK;
+    ret = context->BackToCallerAbilityWithResult(want, resultCode, requestCode);
+    errorObject = CreateStsErrorByNativeErr(env, static_cast<int32_t>(ret));
+    AppExecFwk::AsyncCallback(env, callBackObj, errorObject, nullptr);
+}
+
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
     ani_status status = env->FindClass(UI_ABILITY_CONTEXT_CLASS_NAME, &cls);
@@ -814,10 +906,16 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void*>(StsAbilityContext::NativeMoveAbilityToBackground) },
             ani_native_function { "nativeRequestModalUIExtension", nullptr,
                 reinterpret_cast<void*>(StsAbilityContext::NativeRequestModalUIExtension) },
+            ani_native_function {"nativeSetColorMode",
+                "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ColorMode;:V",
+                reinterpret_cast<void*>(StsAbilityContext::SetColorMode)},
             ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
                 reinterpret_cast<void*>(StsAbilityContext::NativeTransferStatic) },
             ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",
                 reinterpret_cast<void*>(StsAbilityContext::NativeTransferDynamic) },
+            ani_native_function { "nativeBackToCallerAbilityWithResult",
+                "Lability/abilityResult/AbilityResult;Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+                reinterpret_cast<void*>(StsAbilityContext::NativeBackToCallerAbilityWithResult) },
         };
         status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
     });
@@ -1047,7 +1145,7 @@ ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityConte
         TAG_LOGE(AAFwkTag::UIABILITY, "null contextObj");
         return nullptr;
     }
-    ContextUtil::StsCreatContext(env, cls, contextObj, context);
+    ContextUtil::StsCreateContext(env, cls, contextObj, context);
     if (!SetAbilityInfo(env, cls, contextObj, context)) {
         TAG_LOGE(AAFwkTag::UIABILITY, "SetAbilityInfo failed");
         return nullptr;
