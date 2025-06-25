@@ -2949,9 +2949,9 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
             if (info.uid_ == abilityInfo.applicationInfo.uid &&
                 info.processType_ == AppExecFwk::ProcessType::NORMAL &&
                 std::find(info.bundleNames.begin(), info.bundleNames.end(),
-                abilityInfo.applicationInfo.bundleName) != info.bundleNames.end()){
-                isColdStart = info.preloadMode_ == AppExecFwk::PreloadMode::PRESS_DOWN;
-                pid = info.pid_;
+                abilityInfo.applicationInfo.bundleName) != info.bundleNames.end()) {
+                isColdStart = info.isExiting ? true : info.preloadMode_ == AppExecFwk::PreloadMode::PRESS_DOWN;
+                pid = info.isExiting ? 0 : info.pid_;
                 warmStartType = static_cast<int32_t>(info.preloadMode_);
                 break;
             }
