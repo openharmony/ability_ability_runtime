@@ -766,10 +766,15 @@ panda::ecmascript::EcmaVM *SimulatorImpl::CreateJSVM()
 std::string SimulatorImpl::ReadSourceMap()
 {
     std::string normalizedPath = options_.modulePath;
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "modulePath:%{public}s", normalizedPath.c_str());
     std::replace(normalizedPath.begin(), normalizedPath.end(), '\\', '/');
     auto sourceMapPath = std::regex_replace(normalizedPath, std::regex(MERGE_ABC_PATH), SOURCE_MAPS_PATH);
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "is mac sourceMapPath:%{public}s", sourceMapPath.c_str());
 
+#if defined(WINDOWS_PLATFORM)
     std::replace(sourceMapPath.begin(), sourceMapPath.end(), '/', '\\');
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "is windows sourceMapPath:%{public}s", sourceMapPath.c_str());
+#endif
     std::ifstream stream(sourceMapPath, std::ios::ate | std::ios::binary);
     if (!stream.is_open()) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "open:%{public}s failed", sourceMapPath.c_str());
