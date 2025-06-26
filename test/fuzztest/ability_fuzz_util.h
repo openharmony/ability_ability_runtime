@@ -24,6 +24,7 @@
 #include "auto_startup_info.h"
 #include "bundle_info.h"
 #include "bundle_user_info.h"
+#include "extract_insight_intent_profile.h"
 #include "keep_alive_process_manager.h"
 
 namespace OHOS {
@@ -45,6 +46,63 @@ std::vector<std::string> GenerateStringArray(FuzzedDataProvider& fdp, size_t arr
     }
 
     return result;
+}
+
+AppExecFwk::ElementName GenerateElementName(FuzzedDataProvider& fdp, AppExecFwk::ElementName &elementName)
+{
+    std::string deviceId;
+    std::string bundleName;
+    std::string abilityName;
+    std::string moduleName;
+    deviceId = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    AppExecFwk::ElementName name(deviceId, bundleName, abilityName, moduleName);
+
+    return name;
+}
+
+void GetRandomExtractInsightIntentGenericInfo(FuzzedDataProvider& fdp, ExtractInsightIntentGenericInfo& info)
+{
+    info.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.intentName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.displayName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.decoratorType = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+}
+
+void GetRandomInsightIntentInfoForQuery(FuzzedDataProvider& fdp, InsightIntentInfoForQuery& info)
+{
+    info.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.intentName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.domain = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.intentVersion = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.displayName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.displayDescription = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.schema = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.icon = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.llmDescription = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.intentType = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.parameters = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.result = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.keywords = GenerateStringArray(fdp);
+}
+
+void GetRandomExtractInsightIntentInfo(FuzzedDataProvider& fdp, ExtractInsightIntentInfo& info)
+{
+    info.decoratorFile = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.decoratorClass = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.displayDescription = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.domain = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.intentVersion = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.schema = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.icon = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.llmDescription = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.result = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.example = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.keywords = GenerateStringArray(fdp);
 }
 
 void GenerateSignatureInfo(FuzzedDataProvider& fdp, SignatureInfo &signatureInfo)
