@@ -88,7 +88,8 @@ int32_t StartSpecifiedAbilityResponseProxy::SendTransactCmd(uint32_t code, Messa
     return remote->SendRequest(code, data, reply, option);
 }
 
-void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestResponse(const std::string &flag, int32_t requestId)
+void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestResponse(const std::string &flag,
+    int32_t requestId, const std::string &callerProcessName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "On satrt specified process response by proxy.");
     MessageParcel data;
@@ -97,7 +98,7 @@ void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestResponse(const std::
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    if (!data.WriteString(flag) || !data.WriteInt32(requestId)) {
+    if (!data.WriteString(flag) || !data.WriteInt32(requestId) || !data.WriteString(callerProcessName)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write data failed.");
         return;
     }
