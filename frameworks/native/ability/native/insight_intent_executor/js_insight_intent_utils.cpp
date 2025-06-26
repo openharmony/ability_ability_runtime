@@ -51,7 +51,7 @@ std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> JsInsightIntentUtils::Ge
 {
     TAG_LOGD(AAFwkTag::INTENT, "get result from js");
     auto resultCpp = std::make_shared<AppExecFwk::InsightIntentExecuteResult>();
-    if (!UnwrapExecuteResult(env, resultJs, *resultCpp)) {
+    if (!UnwrapExecuteResult(env, resultJs, *resultCpp, true)) {
         // error log has printed
         return nullptr;
     }

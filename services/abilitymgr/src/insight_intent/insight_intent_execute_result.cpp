@@ -27,6 +27,7 @@ bool InsightIntentExecuteResult::ReadFromParcel(Parcel &parcel)
         return false;
     }
     flags = parcel.ReadInt32();
+    isDecorator = parcel.ReadBool();
     return true;
 }
 
@@ -45,6 +46,9 @@ bool InsightIntentExecuteResult::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteInt32(flags)) {
+        return false;
+    }
+    if (!parcel.WriteBool(isDecorator)) {
         return false;
     }
     return true;

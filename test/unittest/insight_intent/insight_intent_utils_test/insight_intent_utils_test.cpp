@@ -466,6 +466,9 @@ HWTEST_F(InsightIntentUtilsTest, ConvertExtractInsightIntentInfo_0300, TestSize.
     bool getEntity = true;
     auto result = utils.ConvertExtractInsightIntentInfo(TEST_INSIGHT_INTENT_INFO, insightIntentInfoForQuery, getEntity);
     EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(TEST_INSIGHT_INTENT_INFO.genericInfo.bundleName, insightIntentInfoForQuery.bundleName);
+    EXPECT_EQ(TEST_INSIGHT_INTENT_INFO.genericInfo.moduleName, insightIntentInfoForQuery.moduleName);
+    EXPECT_EQ(TEST_INSIGHT_INTENT_INFO.genericInfo.intentName, insightIntentInfoForQuery.intentName);
     EXPECT_EQ(TEST_INSIGHT_INTENT_INFO.entities[0].className, insightIntentInfoForQuery.entities[0].className);
     Mock::VerifyAndClear(mockBundleMgr);
     testing::Mock::AllowLeak(mockBundleMgr);
