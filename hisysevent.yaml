@@ -257,6 +257,14 @@ START_ABILITY_BY_APP_LINKING:
   CALLER_BUNDLENAME: {type: STRING, desc: caller bundle name}
   URI: {type: STRING, desc: uri information}
 
+KILL_PROCESS_WITH_REASON:
+  __BASE: {type: STATISTIC, level: MINOR, desc: kill process with reason}
+  CALLER_PID: {type: INT32, desc: caller pid}
+  PID: {type: INT32, desc: killed pid}
+  EXIT_MESSAGE: {type: STRING, desc: exit message}
+  SHOULD_KILL_FOREGROUND: {type: INT32, desc: should kill foreground process or not}
+  MESSAGE: {type: STRING, desc: kill message}
+  ERROR_CODE: {type: INT32, desc: error code}
 # serviceExtensionAbility behavior event
 
 START_SERVICE:
