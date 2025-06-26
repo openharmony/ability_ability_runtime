@@ -5176,8 +5176,9 @@ int AbilityManagerService::StartSyncRemoteMissions(const std::string& devId, boo
     }
     DistributedClient dmsClient;
     int32_t callingUid = IPCSkeleton::GetCallingUid();
+    uint32_t callingTokenId = IPCSkeleton::GetCallingTokenID();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "fixConflict: %{public}d, tag: %{public}" PRId64, fixConflict, tag);
-    return dmsClient.StartSyncRemoteMissions(devId, fixConflict, tag, callingUid);
+    return dmsClient.StartSyncRemoteMissions(devId, fixConflict, tag, callingUid, callingTokenId);
 }
 
 int AbilityManagerService::StopSyncRemoteMissions(const std::string& devId)
