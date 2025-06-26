@@ -105,6 +105,27 @@ void GetRandomExtractInsightIntentInfo(FuzzedDataProvider& fdp, ExtractInsightIn
     info.keywords = GenerateStringArray(fdp);
 }
 
+void GetRandomInsightIntentExecuteParam(FuzzedDataProvider& fdp, InsightIntentExecuteParam& info)
+{
+    info.executeMode_ = fdp.ConsumeIntegral<int32_t>();
+    info.displayId_ = fdp.ConsumeIntegral<int32_t>();
+    info.flags_ = fdp.ConsumeIntegral<int32_t>();
+    info.insightIntentId_ = fdp.ConsumeIntegral<uint64_t>();
+    info.bundleName_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.moduleName_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.abilityName_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.insightIntentName_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.uris_ = GenerateStringArray(fdp);
+    info.decoratorType_ = fdp.ConsumeIntegral<int8_t>();
+    info.srcEntrance_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.className_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.methodName_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.methodParams_ = GenerateStringArray(fdp);
+    info.pagePath_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.navigationId_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.navDestinationName_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+}
+
 void GenerateSignatureInfo(FuzzedDataProvider& fdp, SignatureInfo &signatureInfo)
 {
     signatureInfo.appId = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
