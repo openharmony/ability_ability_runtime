@@ -125,7 +125,8 @@ public:
     {}
     void OnTimeoutResponse(int32_t requestId) override
     {}
-    void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId) override
+    void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId,
+        const std::string &callerProcessName) override
     {}
     void OnNewProcessRequestTimeoutResponse(int32_t requestId) override
     {}

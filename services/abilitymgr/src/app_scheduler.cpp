@@ -410,9 +410,11 @@ void AppScheduler::StartSpecifiedProcess(
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess));
 }
 
-void StartSpecifiedAbilityResponse::OnNewProcessRequestResponse(const std::string &flag, int32_t requestId)
+void StartSpecifiedAbilityResponse::OnNewProcessRequestResponse(const std::string &flag, int32_t requestId,
+    const std::string &callerProcessName)
 {
-    DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedProcessResponse(flag, requestId);
+    DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedProcessResponse(flag, requestId,
+        callerProcessName);
 }
 
 void StartSpecifiedAbilityResponse::OnNewProcessRequestTimeoutResponse(int32_t requestId)
