@@ -468,6 +468,26 @@ ohos_prebuilt_etc("ability_runtime_ui_ability_context_abc_etc") {
   deps = [ ":ability_runtime_ui_ability_context_abc" ]
 }
 
+generate_static_abc("ability_runtime_caller_callee_abc") {
+  base_url = "./"
+  files = [
+    "./application/Callee.ets",
+    "./application/Caller.ets",
+  ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_runtime_caller_callee_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_caller_callee_abc_etc") {
+  source = "$target_out_dir/ability_runtime_caller_callee_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_caller_callee_abc" ]
+}
+
 generate_static_abc("ability_delegator_application_testRunner_abc") {
   base_url = "./"
   files = [ "./@ohos.application.testRunner.ets" ]
@@ -1169,6 +1189,7 @@ group("ets_packages") {
     ":ability_runtime_auto_fill_type_abc_etc",
     ":ability_runtime_application_state_change_callback_abc_etc",
     ":ability_runtime_base_context_abc_etc",
+    ":ability_runtime_caller_callee_abc_etc",
     ":ability_runtime_configuration_abc_etc",
     ":ability_runtime_configuration_constant_abc_etc",
     ":ability_runtime_connect_options_abc_etc",

@@ -29,18 +29,6 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace { // nameless
-static std::map<NativeValueType, std::string> logcast = {
-    { NATIVE_UNDEFINED, std::string("NATIVE_UNDEFINED") },
-    { NATIVE_NULL, std::string("NATIVE_NULL") },
-    { NATIVE_BOOLEAN, std::string("NATIVE_BOOLEAN") },
-    { NATIVE_NUMBER, std::string("NATIVE_NUMBER") },
-    { NATIVE_STRING, std::string("NATIVE_STRING") },
-    { NATIVE_SYMBOL, std::string("NATIVE_SYMBOL") },
-    { NATIVE_OBJECT, std::string("NATIVE_OBJECT") },
-    { NATIVE_FUNCTION, std::string("NATIVE_FUNCTION") },
-    { NATIVE_EXTERNAL, std::string("NATIVE_EXTERNAL") },
-    { NATIVE_BIGINT, std::string("NATIVE_BIGINT") },
-};
 
 class JsCallerComplex {
 public:
