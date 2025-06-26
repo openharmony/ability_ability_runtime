@@ -432,10 +432,13 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag, bool hasLastWant)
 #endif // SUPPORT_SCREEN
     lifeCycleStateInfo_.sceneFlag = sceneFlag;
     Want want;
-    if (hasLastWant && lastWant_ != nullptr) {
-        SetWant(*lastWant_);
-        lifeCycleStateInfo_.isNewWant = true;
-        lastWant_ = nullptr;
+    if (hasLastWant) {
+        if (HasLastWant()) {
+            SetWant(*lastWant_);
+            lifeCycleStateInfo_.isNewWant = true;
+            lastWant_ = nullptr;
+        }
+        SetBackgroundDrivenFlag(false);
     }
     want = GetWant();
     UpdateDmsCallerInfo(want);
