@@ -433,6 +433,7 @@ group("unittest") {
       "render_state_observer_manager_test:unittest",
       "render_state_observer_proxy_test:unittest",
       "render_state_observer_stub_test:unittest",
+      "report_data_partition_usage_manager_test:unittest",
       "res_sched_util_test:unittest",
       "resident_process_manager_test:unittest",
       "restart_app_manager_test:unittest",
