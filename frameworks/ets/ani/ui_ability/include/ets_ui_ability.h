@@ -130,6 +130,8 @@ public:
      */
     void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
 
+    sptr<IRemoteObject> CallRequest() override;
+
     static void CreateAndBindContext(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
         const std::unique_ptr<Runtime>& runtime);
 

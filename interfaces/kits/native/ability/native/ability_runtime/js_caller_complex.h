@@ -24,8 +24,6 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-using ReleaseCallFunc = std::function<ErrCode(std::shared_ptr<CallerCallBack>&)>;
-
 napi_value CreateJsCallerComplex(
     napi_env env, ReleaseCallFunc releaseCallFunc, sptr<IRemoteObject> callee,
     std::shared_ptr<CallerCallBack> callerCallBack);
