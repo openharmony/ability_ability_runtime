@@ -1,0 +1,72 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "page_show",
+      "value": "page from package"
+    },
+    {
+      "name": "Cont_title_syyt",
+      "value": "syyt"
+    },
+    {
+      "name": "Detail_title_ytts",
+      "value": "ytts"
+    },
+    {
+      "name": "Detail_subtitle_ytxx",
+      "value": "ytxx"
+    },
+    {
+      "name": "Detail_subtitle_ytcs",
+      "value": "ytcs"
+    },
+    {
+      "name": "Detail_btn_zxyt",
+      "value": "zxyt"
+    },
+    {
+      "name": "Detail_stitle_zxjg",
+      "value": "zxjg"
+    },
+    {
+      "name": "Detail_yybm",
+      "value": "yybm"
+    },
+    {
+      "name": "Detail_ytmc",
+      "value": "ytmc"
+    },
+    {
+      "name": "Detail_zxms",
+      "value": "zxms"
+    },
+    {
+      "name": "Tips_bt",
+      "value": "required"
+    },
+    {
+      "name": "Btn_qr",
+      "value": "sure"
+    },
+    {
+      "name": "Btn_tj",
+      "value": "add"
+    },
+    {
+      "name": "Btn_sc",
+      "value": "delete"
+    }
+  ]
+}
