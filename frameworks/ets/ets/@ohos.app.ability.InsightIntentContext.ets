@@ -34,12 +34,12 @@ export default class InsightIntentContext {
   }
 
   startAbility(want: Want): Promise<void> {
-    let p = new Promise<void>((resolve: (v: undefined) => void, reject: (error: BusinessError<void>) => void): void => {
-      let p1 = taskpool.execute((): BusinessError<void> => {
+    let p = new Promise<void>((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute((): BusinessError => {
         return this.nativeStartAbilitySync(want);
       });
       p1.then((e: NullishType) => {
-        let retError = e as BusinessError<void>;
+        let retError = e as BusinessError;
         if (retError.code === 0) {
           resolve(undefined);
         } else {

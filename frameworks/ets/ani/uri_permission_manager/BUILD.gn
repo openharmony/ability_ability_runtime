@@ -83,23 +83,3 @@ ohos_shared_library("uri_permission_manager_ani_kit") {
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
-
-generate_static_abc("uri_permission_manager_abc") {
-  base_url = "./ets"
-
-  files = [ "./ets/@ohos.application.uriPermissionManager.ets" ]
-
-  dst_file = "$target_out_dir/uri_permission_manager.abc"
-  out_puts = [ "$target_out_dir/uri_permission_manager.abc" ]
-
-  is_boot_abc = "True"
-  device_dst_file = "/system/framework/uri_permission_manager.abc"
-}
-
-ohos_prebuilt_etc("uri_permission_manager_abc_etc") {
-  source = "$target_out_dir/uri_permission_manager.abc"
-  module_install_dir = "framework"
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-  deps = [ ":uri_permission_manager_abc" ]
-}
