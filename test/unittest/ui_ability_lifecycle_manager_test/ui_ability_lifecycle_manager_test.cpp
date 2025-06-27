@@ -433,9 +433,11 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnAbilityRequestDone_002, TestSize.Level
     EXPECT_NE(mgr, nullptr);
     AbilityRequest abilityRequest;
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    mgr->sessionAbilityMap_[1] = abilityRecord;
     auto&& token = abilityRecord->GetToken()->AsObject();
-    mgr->OnAbilityRequestDone(token, 1);
-    EXPECT_NE(mgr, nullptr);
+    int32_t foreground = 2;
+    mgr->OnAbilityRequestDone(token, foreground);
+    EXPECT_EQ(abilityRecord->GetPendingState(), AbilityState::INITIAL);
 }
 
 /**
@@ -943,11 +945,11 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_001, TestSize.Level1)
 HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_002, TestSize.Level1)
 {
     auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->currentState_ = AbilityState::BACKGROUNDING;
     abilityRecord->SetPendingState(AbilityState::FOREGROUND);
     uiAbilityLifecycleManager->CompleteBackground(abilityRecord);
+    EXPECT_EQ(abilityRecord->GetAbilityState(), AbilityState::FOREGROUNDING);
     uiAbilityLifecycleManager.reset();
 }
 
@@ -963,22 +965,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_003, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->currentState_ = AbilityState::BACKGROUNDING;
     abilityRecord->SetPendingState(AbilityState::BACKGROUND);
-    uiAbilityLifecycleManager->CompleteBackground(abilityRecord);
-    uiAbilityLifecycleManager.reset();
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_CompleteBackground_0400
- * @tc.desc: CompleteBackground
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_004, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
-    abilityRecord->currentState_ = AbilityState::BACKGROUNDING;
-    abilityRecord->SetPendingState(AbilityState::FOREGROUND);
     uiAbilityLifecycleManager->CompleteBackground(abilityRecord);
     uiAbilityLifecycleManager.reset();
 }
@@ -5243,8 +5229,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnAbilityRequestDone_0001, TestSize.Leve
     record->SetAbilityState(AbilityState::TERMINATING);
     auto token = record->GetToken();
     mgr->sessionAbilityMap_[1] = record;
-
-    mgr->OnAbilityRequestDone(token, static_cast<int32_t>(AppAbilityState::ABILITY_STATE_FOREGROUND));
+    int32_t foreground = 2;
+    mgr->OnAbilityRequestDone(token, foreground);
 
     EXPECT_EQ(record->GetPendingState(), AbilityState::INITIAL);
 }
