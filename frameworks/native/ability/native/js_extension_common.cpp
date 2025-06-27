@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,7 +97,7 @@ napi_value JsExtensionCommon::CallObjectMethod(const char* name, napi_value cons
 
     napi_value method = nullptr;
     napi_get_named_property(env, obj, name, &method);
-    if (!CheckTypeForNapiValue(env, obj, napi_function)) {
+    if (!CheckTypeForNapiValue(env, method, napi_function)) {
         TAG_LOGE(AAFwkTag::EXT, "get '%{public}s' failed", name);
         return nullptr;
     }
