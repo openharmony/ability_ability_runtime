@@ -35,6 +35,12 @@ constexpr const char* FORM_BINDING_DATA_CLASS_NAME =
 constexpr const char* RECORD_CLASS_NAME = "Lescompat/Record;";
 }
 
+extern "C" __attribute__((visibility("default"))) FormExtension *OHOS_ABILITY_STSFormExtension(
+    const std::unique_ptr<Runtime> &runtime)
+{
+    return new STSFormExtension(static_cast<STSRuntime &>(*runtime));
+}
+
 STSFormExtension *STSFormExtension::Create(const std::unique_ptr<Runtime> &runtime)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "call___%{public}d", runtime->GetLanguage());
