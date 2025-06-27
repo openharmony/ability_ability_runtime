@@ -51,6 +51,15 @@ const char ETS_SYS_NSNAME[] = "ets_system";
 } // namespace
 
 ETSRuntimeAPI ETSEnvironment::lazyApis_ {};
+std::unique_ptr<ETSEnvironment> instance_ = nullptr;
+
+std::unique_ptr<ETSEnvironment> &ETSEnvironment::GetInstance()
+{
+    if (instance_ == nullptr) {
+        instance_ = std::make_unique<ETSEnvironment>();
+    }
+    return instance_;
+}
 
 bool ETSEnvironment::LoadBootPathFile(std::string &bootfiles)
 {
@@ -194,7 +203,7 @@ void ETSEnvironment::InitETSSysNS(const std::string &path)
     dlns_inherit(&ns, &ndk, "allow_all_shared_libs");
 }
 
-bool ETSEnvironment::Initialize(napi_env napiEnv, std::vector<ani_option> &options)
+bool ETSEnvironment::Initialize(void *napiEnv, const std::string &aotPath)
 {
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "Initialize called");
     if (!LoadRuntimeApis()) {
@@ -206,6 +215,15 @@ bool ETSEnvironment::Initialize(napi_env napiEnv, std::vector<ani_option> &optio
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "LoadBootPathFile failed");
         return false;
     }
+
+    std::vector<ani_option> options;
+    std::string aotPathString = "";
+    if (!aotPath.empty()) {
+        aotPathString = "--ext:--aot-file=" + aotPath;
+        options.push_back(ani_option { aotPathString.data(), nullptr });
+        options.push_back(ani_option { "--ext:--enable-an", nullptr });
+        TAG_LOGD(AAFwkTag::ETSRUNTIME, "aotPathString: %{public}s", aotPathString.c_str());
+    }
     // Create boot-panda-files options
     std::string bootString = "--ext:--boot-panda-files=" + bootfiles;
     options.push_back(ani_option { bootString.data(), nullptr });
@@ -214,7 +232,7 @@ bool ETSEnvironment::Initialize(napi_env napiEnv, std::vector<ani_option> &optio
     options.push_back(ani_option { "--ext:--log-level=info", nullptr });
     options.push_back(ani_option { "--ext:--verification-enabled=true", nullptr });
     options.push_back(ani_option { "--ext:--verification-mode=on-the-fly", nullptr });
-    options.push_back(ani_option { "--ext:interop", (void *)napiEnv });
+    options.push_back(ani_option { "--ext:interop", napiEnv });
     ani_options optionsPtr = { options.size(), options.data() };
     ani_status status = ANI_ERROR;
     if ((status = lazyApis_.ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vmEntry_.aniVm_)) != ANI_OK) {
@@ -408,8 +426,8 @@ bool ETSEnvironment::LoadAbcLinker(ani_env *env, const std::string &modulePath, 
     return true;
 }
 
-bool ETSEnvironment::LoadModule(const std::string &modulePath, const std::string &srcEntrance, ani_class &cls,
-    ani_object &obj, ani_ref &ref)
+bool ETSEnvironment::LoadModule(const std::string &modulePath, const std::string &srcEntrance, void *&cls,
+    void *&obj, void *&ref)
 {
     ani_env *env = GetAniEnv();
     if (env == nullptr) {
@@ -434,26 +452,65 @@ bool ETSEnvironment::LoadModule(const std::string &modulePath, const std::string
         return false;
     }
     ani_ref clsRef = nullptr;
+    ani_class clsAni = nullptr;
     if ((status = env->Object_CallMethod_Ref(abcObj, loadClassMethod, &clsRef, clsStr, false)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_CallMethod_Ref failed, status: %{public}d", status);
         return false;
-    } else {
-        cls = static_cast<ani_class>(clsRef);
     }
+    clsAni = static_cast<ani_class>(clsRef);
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(clsAni, "<ctor>", ":V", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod failed, status: %{public}d", status);
         return false;
     }
-    if ((status = env->Object_New(cls, method, &obj)) != ANI_OK) {
+    ani_object objAni = nullptr;
+    if ((status = env->Object_New(clsAni, method, &objAni)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_New failed, status: %{public}d", status);
         return false;
     }
-    if ((status = env->GlobalReference_Create(obj, &ref)) != ANI_OK) {
+    ani_ref refAni = nullptr;
+    if ((status = env->GlobalReference_Create(objAni, &refAni)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "GlobalReference_Create failed, status: %{public}d", status);
         return false;
     }
+    cls = reinterpret_cast<void *>(clsAni);
+    obj = reinterpret_cast<void *>(objAni);
+    ref = reinterpret_cast<void *>(refAni);
     return true;
+}
+
+ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
+{
+    static ETSEnvFuncs funcs {
+        .InitETSSDKNS = [](const std::string &path) {
+            ETSEnvironment::InitETSSDKNS(path);
+        },
+        .InitETSSysNS = [](const std::string &path) {
+            ETSEnvironment::InitETSSysNS(path);
+        },
+        .Initialize = [](void *napiEnv, const std::string &aotPath) {
+            return ETSEnvironment::GetInstance()->Initialize(napiEnv, aotPath);
+        },
+        .RegisterUncaughtExceptionHandler = [](const ETSUncaughtExceptionInfo &exceptionInfo) {
+            ETSEnvironment::GetInstance()->RegisterUncaughtExceptionHandler(exceptionInfo);
+        },
+        .GetAniEnv = []() {
+            return ETSEnvironment::GetInstance()->GetAniEnv();
+        },
+        .PreloadModule = [](const std::string &modulePath) {
+            return ETSEnvironment::GetInstance()->PreloadModule(modulePath);
+        },
+        .LoadModule = [](const std::string &modulePath, const std::string &srcEntrance, void *&cls,
+             void *&obj,  void *&ref) {
+            return ETSEnvironment::GetInstance()->LoadModule(modulePath, srcEntrance, cls, obj, ref);
+        }
+    };
+    return &funcs;
 }
 } // namespace EtsEnv
 } // namespace OHOS
+
+ETS_EXPORT extern "C" ETSEnvFuncs *OHOS_ETS_ENV_RegisterFuncs()
+{
+    return OHOS::EtsEnv::ETSEnvironment::RegisterFuncs();
+}

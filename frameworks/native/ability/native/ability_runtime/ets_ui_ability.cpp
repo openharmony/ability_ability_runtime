@@ -212,7 +212,7 @@ void EtsUIAbility::CreateEtsContext(int32_t screenMode, const std::shared_ptr<OH
             TAG_LOGE(AAFwkTag::UIABILITY, "Object_SetFieldByName_Ref status: %{public}d", status);
             return;
         }
-        shellContextRef_ = std::make_shared<ETSNativeReference>();
+        shellContextRef_ = std::make_shared<AppExecFwk::ETSNativeReference>();
         shellContextRef_->aniObj = contextObj;
         shellContextRef_->aniRef = contextGlobalRef;
     }
@@ -363,7 +363,7 @@ void EtsUIAbility::OnSceneCreated()
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return;
     }
-    etsWindowStageObj_ = std::make_shared<ETSNativeReference>();
+    etsWindowStageObj_ = std::make_shared<AppExecFwk::ETSNativeReference>();
     etsWindowStageObj_->aniObj = etsAppWindowStage;
     ani_ref entryObjectRef = nullptr;
     env->GlobalReference_Create(etsAppWindowStage, &entryObjectRef);

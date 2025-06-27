@@ -18,7 +18,7 @@
 
 #include "ability_delegator.h"
 #include "ability_delegator_args.h"
-#include "ets_runtime.h"
+#include "ani.h"
 
 namespace OHOS {
 namespace AbilityDelegatorEts {

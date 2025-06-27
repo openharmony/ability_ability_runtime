@@ -13,14 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_REGISTRY_H
-#define OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_REGISTRY_H
+#ifndef OHOS_ABILITY_RUNTIME_ETS_NATIVE_REFERENCE_H
+#define OHOS_ABILITY_RUNTIME_ETS_NATIVE_REFERENCE_H
 
+#include <string>
 #include "ani.h"
 
 namespace OHOS {
-namespace AbilityDelegatorEts {
-void EtsAbilityDelegatorRegistryInit(ani_env *env);
-} // namespace AbilityDelegatorEts
+namespace AppExecFwk {
+struct ETSNativeReference {
+    ani_class aniCls = nullptr;
+    ani_object aniObj = nullptr;
+    ani_ref aniRef = nullptr;
+};
+}
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_REGISTRY_H
+#endif // OHOS_ABILITY_RUNTIME_ETS_NATIVE_REFERENCE_H
