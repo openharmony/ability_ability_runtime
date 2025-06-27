@@ -40,7 +40,7 @@ class RecordWriter {
     } else {
       const objType = Type.of(obj);
       if (objType instanceof ArrayType) {
-        this.writeBuildArray(obj as Object, Value.of(obj) as ArrayValue);
+        this.writeBuildArray(obj as Object, reflect.Value.of(obj) as ArrayValue);
       } else {
         this.buffer.append('null');
       }
@@ -150,7 +150,7 @@ class RecordWriter {
 export class RecordSerializeTool {
   public static stringifyNoThrow(obj: Record<string, Object>): String {
     try {
-      return RecordSerializeTool.stringify(obj as Object as Record<string, NullishType>);
+      return JSON.stringify(obj as Object as Record<string, NullishType>);
     } catch (err) {
       console.log('err: ' + err.toString());
       return '';

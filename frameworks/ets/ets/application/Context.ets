@@ -23,38 +23,59 @@ import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 
+// remove local declaration after Any type is supported
+type Any = Object | null | undefined
+
 export class Context extends BaseContext {
-    static {
-        loadLibrary("context_ani");
-    }
-    area: contextConstant.AreaMode = contextConstant.AreaMode.EL1;
-    filesDir: string = "";
-    tempDir: string = "";
-    preferencesDir: string = "";
-    databaseDir: string = "";
-    cacheDir: string = "";
-    applicationInfo: ApplicationInfo;
-    eventHub: EventHub = new EventHub();
-    resourceManager: resmgr.ResourceManager;
-    processName: string = "";
-    native constructor();
-    constructor(applicationInfo: ApplicationInfo, resourceManager: resmgr.ResourceManager) {
-        super();
-        this.applicationInfo = applicationInfo;
-        this.resourceManager = resourceManager;
-    }
+  static {
+    loadLibrary("context_ani");
+    loadLibrary("context_ani_kit.z");
+  }
+  filesDir: string = "";
+  tempDir: string = "";
+  preferencesDir: string = "";
+  databaseDir: string = "";
+  cacheDir: string = "";
+  applicationInfo: ApplicationInfo;
+  eventHub: EventHub = new EventHub();
+  resourceManager: resmgr.ResourceManager;
+  processName: string = "";
 
-    public native getApplicationContextSync(): ApplicationContext;
-    public native createModuleResourceManagerSync(bundleName: string, moduleName: string): resmgr.ResourceManager;
-    public native nativeGetGroupDir(dataGroupID: string, callback: AsyncCallbackWrapper<string>): void;
+  native constructor();
 
-    getApplicationContext(): ApplicationContext {
-        return this.getApplicationContextSync();
-    }
+  constructor(applicationInfo: ApplicationInfo, resourceManager: resmgr.ResourceManager) {
+    super();
+    this.applicationInfo = applicationInfo;
+    this.resourceManager = resourceManager;
+  }
 
-    createModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager {
-        return this.createModuleResourceManagerSync(bundleName, moduleName);
-    }
+  public native getApplicationContextSync(): ApplicationContext;
+
+  public native createModuleResourceManagerSync(bundleName: string, moduleName: string): resmgr.ResourceManager;
+
+  public native nativeGetGroupDir(dataGroupID: string, callback: AsyncCallbackWrapper<string>): void;
+
+  private static native nativeTransferStatic(input: ESValue): Object;
+
+  private static native nativeTransferDynamic(input: Object): ESValue;
+
+  private native switchArea(mode: contextConstant.AreaMode): void;
+
+  private native getArea(): contextConstant.AreaMode;
+
+  public native nativeCreateDisplayContext(displayId: number): Context;
+
+  public native nativeCreateAreaModeContext(areaMode: contextConstant.AreaMode): Context;
+
+  public native nativeCreateSystemHspModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager;
+
+  getApplicationContext(): ApplicationContext {
+    return this.getApplicationContextSync();
+  }
+
+  createModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager {
+    return this.createModuleResourceManagerSync(bundleName, moduleName);
+  }
 
   getGroupDir(dataGroupID: string, callback: AsyncCallback<string>): void {
     let myCall = new AsyncCallbackWrapper<string>(callback);
@@ -64,10 +85,10 @@ export class Context extends BaseContext {
   }
 
   getGroupDir(dataGroupID: string): Promise<string> {
-    return new Promise<string>((resolve: (data: string) => void, reject: (err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackWrapper<string>((err: BusinessError<void>, data: string) => {
-        if (err.code == 0) {
-          resolve(data);
+    return new Promise<string>((resolve: (data: string) => void, reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<string>((err: BusinessError | null, data: string | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as string);
         } else {
           reject(err);
         }
@@ -76,5 +97,33 @@ export class Context extends BaseContext {
         this.nativeGetGroupDir(dataGroupID, myCall);
       });
     });
+  }
+
+  static transferStatic(input: Any): Object {
+    return Context.nativeTransferStatic(ESValue.wrap(input));
+  }
+
+  static transferDynamic(input: Object): Any {
+    return Context.nativeTransferDynamic(input).unwrap();
+  }
+
+  set area(mode: contextConstant.AreaMode) {
+    this.switchArea(mode);
+  }
+
+  get area(): contextConstant.AreaMode {
+    return this.getArea();
+  }
+
+  createDisplayContext(displayId: number): Context {
+    return this.nativeCreateDisplayContext(displayId);
+  }
+
+  createAreaModeContext(areaMode: contextConstant.AreaMode): Context {
+    return this.nativeCreateAreaModeContext(areaMode);
+  }
+
+  createSystemHspModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager {
+    return this.nativeCreateSystemHspModuleResourceManager(bundleName, moduleName);
   }
 }
