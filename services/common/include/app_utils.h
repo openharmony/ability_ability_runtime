@@ -340,6 +340,8 @@ public:
 
     const std::vector<std::string> &GetResidentWhiteList();
 
+    bool InOnNewProcessEnableList(const std::string &bundleName);
+
 private:
     /**
      * LoadResidentProcessInExtremeMemory, load resident process in extreme low memory.
@@ -388,6 +390,12 @@ private:
      *
      */
     void LoadResidentWhiteList();
+
+    /**
+     * LoadOnNewProcessEnableList, load on new process enable list.
+     *
+     */
+    void LoadOnNewProcessEnableList();
 
     /**
      * AppUtils, private constructor.
@@ -441,6 +449,8 @@ private:
         cacheAbilityList_ = {false, {}};
     DeviceConfiguration<std::vector<std::string>> residentWhiteList_ = {false, {}};
     std::mutex residentWhiteListMutex_;
+    DeviceConfiguration<std::vector<std::string>> onNewProcessEnableList_ = {false, {}};
+    std::mutex onNewProcessEnableListMutex_;
     DISALLOW_COPY_AND_MOVE(AppUtils);
 };
 }  // namespace AAFwk
