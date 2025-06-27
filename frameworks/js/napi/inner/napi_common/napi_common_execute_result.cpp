@@ -50,7 +50,33 @@ bool UnwrapResultOfExecuteResult(napi_env env, napi_value param, InsightIntentEx
     return true;
 }
 
-bool UnwrapExecuteResult(napi_env env, napi_value param, InsightIntentExecuteResult &executeResult)
+bool UnwrapResultOfDecoratorExecuteResult(napi_env env, napi_value param, InsightIntentExecuteResult &executeResult)
+{
+    if (param == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "decorator param null");
+        return false;
+    }
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, param, &valueType);
+    if (valueType != napi_object) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "type not object");
+        return false;
+    }
+    auto wp = std::make_shared<AAFwk::WantParams>();
+    if (!AppExecFwk::UnwrapWantParams(env, param, *wp)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "unwrap want failed");
+        return false;
+    }
+    if (!executeResult.CheckResult(wp)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Check wp fail");
+        return false;
+    }
+    executeResult.result = wp;
+    return true;
+}
+
+bool UnwrapExecuteResult(
+    napi_env env, napi_value param, InsightIntentExecuteResult &executeResult, bool isDecorator)
 {
     TAG_LOGD(AAFwkTag::JSNAPI, "called");
 
@@ -58,6 +84,15 @@ bool UnwrapExecuteResult(napi_env env, napi_value param, InsightIntentExecuteRes
         TAG_LOGE(AAFwkTag::JSNAPI, "UnwrapExecuteResult not object");
         return false;
     }
+    if (isDecorator) {
+        executeResult.isDecorator = true;
+        if (!UnwrapResultOfDecoratorExecuteResult(env, param, executeResult)) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "unwrap decorator fail");
+            return false;
+        }
+        return true;
+    }
+
     int32_t code = 0;
     if (!UnwrapInt32ByPropertyName(env, param, "code", code)) {
         TAG_LOGE(AAFwkTag::JSNAPI, "parse code fail");
