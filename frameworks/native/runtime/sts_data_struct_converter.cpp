@@ -75,16 +75,14 @@ ani_object CreateStsLastExitDetailInfo(ani_env* env, const AAFwk::LastExitDetail
         TAG_LOGE(AAFwkTag::STSRUNTIME, "null object");
         return nullptr;
     }
-    env->Object_SetPropertyByName_Ref(object, "pid", GetAniString(env, std::to_string(lastExitDetailInfo.pid)));
+    env->Object_SetPropertyByName_Double(object, "pid", lastExitDetailInfo.pid);
     env->Object_SetPropertyByName_Ref(object, "processName", GetAniString(env, lastExitDetailInfo.processName));
-    env->Object_SetPropertyByName_Ref(object, "uid", GetAniString(env, std::to_string(lastExitDetailInfo.uid)));
-    env->Object_SetPropertyByName_Ref(object, "exitSubReason",
-        GetAniString(env, std::to_string(lastExitDetailInfo.exitSubReason)));
+    env->Object_SetPropertyByName_Double(object, "uid", lastExitDetailInfo.uid);
+    env->Object_SetPropertyByName_Double(object, "exitSubReason", lastExitDetailInfo.exitSubReason);
     env->Object_SetPropertyByName_Ref(object, "exitMsg", GetAniString(env, lastExitDetailInfo.exitMsg));
-    env->Object_SetPropertyByName_Ref(object, "rss", GetAniString(env, std::to_string(lastExitDetailInfo.rss)));
-    env->Object_SetPropertyByName_Ref(object, "pss", GetAniString(env, std::to_string(lastExitDetailInfo.pss)));
-    env->Object_SetPropertyByName_Ref(object, "timestamp",
-        GetAniString(env, std::to_string(lastExitDetailInfo.timestamp)));
+    env->Object_SetPropertyByName_Double(object, "rss", lastExitDetailInfo.rss);
+    env->Object_SetPropertyByName_Double(object, "pss", lastExitDetailInfo.pss);
+    env->Object_SetPropertyByName_Double(object, "timestamp", lastExitDetailInfo.timestamp);
 
     return object;
 }
