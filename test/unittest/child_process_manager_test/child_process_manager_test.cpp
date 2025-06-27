@@ -23,6 +23,7 @@
 #include "js_runtime.h"
 #include "mock_app_mgr_service.h"
 #include "mock_bundle_manager.h"
+#include "parameters.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 #include "hilog_tag_wrapper.h"
@@ -522,12 +523,43 @@ HWTEST_F(ChildProcessManagerTest, IsMultiProcessFeatureApp_0400, TestSize.Level2
 
     std::vector<std::string> deviceFeatures;
     deviceFeatures.push_back("multi_process");
-    moduleInfo.deviceFeatures = deviceFeatures;
+    std::map<std::string, std::vector<std::string>> requiredDeviceFeatures;
+    auto deviceType = OHOS::system::GetDeviceType();
+    requiredDeviceFeatures[deviceType] = deviceFeatures;
+    moduleInfo.requiredDeviceFeatures = requiredDeviceFeatures;
 
     hapModuleInfos.push_back(moduleInfo);
     bundleInfo.hapModuleInfos = hapModuleInfos;
     bool ret = ChildProcessManager::GetInstance().IsMultiProcessFeatureApp(bundleInfo);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: IsMultiProcessFeatureApp_0500
+ * @tc.desc: Test IsMultiProcessFeatureApp works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessManagerTest, IsMultiProcessFeatureApp_0500, TestSize.Level2)
+{
+    TAG_LOGD(AAFwkTag::TEST, "IsMultiProcessFeatureApp_0500 called.");
+
+    AppExecFwk::BundleInfo bundleInfo;
+    std::vector<AppExecFwk::HapModuleInfo> hapModuleInfos;
+    AppExecFwk::HapModuleInfo moduleInfo;
+    moduleInfo.name = "entry";
+    moduleInfo.moduleName = "entry";
+    moduleInfo.moduleType = AppExecFwk::ModuleType::ENTRY;
+
+    std::vector<std::string> deviceFeatures;
+    deviceFeatures.push_back("multi_process");
+    std::map<std::string, std::vector<std::string>> requiredDeviceFeatures;
+    requiredDeviceFeatures["invalid_type"] = deviceFeatures;
+    moduleInfo.requiredDeviceFeatures = requiredDeviceFeatures;
+
+    hapModuleInfos.push_back(moduleInfo);
+    bundleInfo.hapModuleInfos = hapModuleInfos;
+    bool ret = ChildProcessManager::GetInstance().IsMultiProcessFeatureApp(bundleInfo);
+    EXPECT_FALSE(ret);
 }
 
 /**
