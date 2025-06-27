@@ -28,7 +28,6 @@
 #include "napi_common_util.h"
 #include "napi_common_want.h"
 #include "native_reference.h"
-#include "string_wrapper.h"
 
 #undef STATE_PATTERN_NAIVE_H
 #define STATE_PATTERN_NAIVE_STATE state_
@@ -214,41 +213,6 @@ void JsInsightIntentEntry::ReplySucceededInner(std::shared_ptr<AppExecFwk::Insig
     JsInsightIntentUtils::ReplySucceeded(callback, resultCpp);
 }
 
-napi_value JsInsightIntentEntry::ResolveCbCpp(napi_env env, napi_callback_info info)
-{
-    TAG_LOGD(AAFwkTag::INTENT, "Resolve function");
-    constexpr size_t argc = 1;
-    napi_value argv[argc] = {nullptr};
-    size_t actualArgc = argc;
-    void* data = nullptr;
-    NAPI_CALL_BASE(env, napi_get_cb_info(env, info, &actualArgc, argv, nullptr, &data), nullptr);
-
-    auto* callback = static_cast<InsightIntentExecutorAsyncCallback*>(data);
-    napi_value resultJs = argv[0];
-    if (resultJs == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "callback invalid");
-        JsInsightIntentUtils::ReplyFailed(callback);
-        return nullptr;
-    }
-
-    auto resultCpp = GetResultFromJs(env, resultJs);
-    JsInsightIntentUtils::ReplySucceeded(callback, resultCpp);
-    return nullptr;
-}
-
-std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> JsInsightIntentEntry::GetResultFromJs(
-    napi_env env, napi_value resultJs)
-{
-    TAG_LOGD(AAFwkTag::INTENT, "Get result for intent func");
-    auto resultCpp = std::make_shared<AppExecFwk::InsightIntentExecuteResult>();
-    auto resultStr = JsInsightIntentUtils::StringifyObject(env, resultJs);
-    auto wantParams = std::make_shared<AAFwk::WantParams>();
-    wantParams->SetParam("methodResult", AAFwk::String::Box(resultStr));
-    resultCpp->result = wantParams;
-    resultCpp->code = InsightIntentInnerErr::INSIGHT_INTENT_ERR_OK;
-    return resultCpp;
-}
-
 bool JsInsightIntentEntry::HandleResultReturnedFromJsFunc(napi_value resultJs)
 {
     TAG_LOGD(AAFwkTag::INTENT, "handle result returned");
@@ -274,7 +238,7 @@ bool JsInsightIntentEntry::HandleResultReturnedFromJsFunc(napi_value resultJs)
     NAPI_CALL_BASE(env, napi_get_named_property(env, resultJs, "then", &then), ExecuteIntentCheckError());
     napi_value resolveCbJs = nullptr;
     NAPI_CALL_BASE(env, napi_create_function(env, TMP_NAPI_ANONYMOUS_FUNC, strlen(TMP_NAPI_ANONYMOUS_FUNC),
-        ResolveCbCpp, callback, &resolveCbJs), ExecuteIntentCheckError());
+        JsInsightIntentUtils::ResolveCbCpp, callback, &resolveCbJs), ExecuteIntentCheckError());
     constexpr size_t argcThen = 1;
     napi_value argvThen[argcThen] = { resolveCbJs };
     NAPI_CALL_BASE(env, napi_call_function(env, resultJs, then, argcThen, argvThen, nullptr),
