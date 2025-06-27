@@ -40,8 +40,7 @@ public:
     {
         return context_.lock();
     }
-    static ani_object CreateStsAbilityStageContext(ani_env* env, std::shared_ptr<Context> context,
-        std::weak_ptr<AppExecFwk::OHOSApplication> application);
+    static ani_object CreateStsAbilityStageContext(ani_env* env, std::shared_ptr<Context> context);
     static void ResetEnv(ani_env* env);
 
 private:

@@ -67,6 +67,11 @@ public:
     static void NativeMoveAbilityToBackground(ani_env *env, ani_object aniObj, ani_object callBack);
     static void NativeRequestModalUIExtension(ani_env *env, ani_object aniObj, ani_string pickerWantObj,
         ani_object callBackObj);
+    static void SetColorMode(ani_env *env, ani_object aniObj, ani_enum_item colorMode);
+    static ani_object NativeTransferStatic(ani_env *env, ani_object aniObj, ani_object input);
+    static ani_object NativeTransferDynamic(ani_env *env, ani_object aniObj, ani_object input);
+    static void NativeBackToCallerAbilityWithResult(ani_env *env, ani_object aniObj,
+        ani_object abilityResultObj, ani_string requestCodeObj, ani_object callBackObj);
 
 private:
     static void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
@@ -83,6 +88,7 @@ private:
         ani_object optionsObj, ani_object callbackobj, bool haveOptionsParm, bool haveCallBackParm);
     void CreateOpenLinkTask(ani_env *env, const ani_object callbackobj,
         std::shared_ptr<AbilityContext> context, AAFwk::Want &want, int &requestCode);
+    static bool IsInstanceOf(ani_env *env, ani_object aniObj);
 
     sptr<StsFreeInstallObserver> freeInstallObserver_ = nullptr;
     static std::mutex requestCodeMutex_;
@@ -94,8 +100,7 @@ bool SetConfiguration(
     ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<AbilityContext> &context);
 bool SetHapModuleInfo(
     ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<AbilityContext> &context);
-ani_ref CreateStsAbilityContext(
-    ani_env *env, const std::shared_ptr<AbilityContext> &context, const std::shared_ptr<OHOSApplication> &application);
+ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context);
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_SIMULATOR_STS_ABILITY_CONTEXT_H

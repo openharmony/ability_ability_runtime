@@ -20,14 +20,14 @@ const DOMAIN_ID = 0xD001300;
 const TAG = 'AbilityUtils';
 const LEVEL = 100;
 
-export default class AsyncCallbackWrapper<T> {
-  private myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
+export default class AsyncCallbackWrapper<T, E = void> {
+  private myFun_: AsyncCallback<T, E> = (err: BusinessError<E> | null, data: T | undefined) => {}
 
-  constructor(myFun:AsyncCallback<T, void>){
+  constructor(myFun: AsyncCallback<T, E>) {
     this.myFun_ = myFun;
   }
 
-  invoke(err: BusinessError<void>, data: T) : void {
+  invoke(err: BusinessError<E> | null, data: T | undefined): void {
     this.myFun_(err, data);
   }
 }
@@ -43,7 +43,7 @@ export class AbilityUtils {
     }
   }
 
-  public static isInherited(type: ClassType, methodName: string, stopBaseClassType: ClassType): boolean | undefined {
+  public static isOverride(type: ClassType, methodName: string, stopBaseClassType: ClassType): boolean | undefined {
     let currType = type;
     let level = 0;
     while (!currType.equals(stopBaseClassType)) {
@@ -52,26 +52,26 @@ export class AbilityUtils {
           const method = currType.getMethod(methodIdx)
           if (method.getName().equals(methodName)) {
             if (!method.isInherited()) {
-              return false;
+              return true;
             }
           }
         }
         let baseType = currType.getBaseType();
         if (baseType.equals(currType)) {
-          hilog.error(DOMAIN_ID, TAG, `isInherited: baseType equals currType (${currType.getName()})`);
+          hilog.error(DOMAIN_ID, TAG, `isOverride: baseType equals currType (${currType.getName()})`);
           return undefined;
         }
         level++;
         if (level >= LEVEL) {
-          hilog.error(DOMAIN_ID, TAG, `isInherited: inheritance level >= ${LEVEL}, aborting`);
+          hilog.error(DOMAIN_ID, TAG, `isOverride: inheritance level >= ${LEVEL}, aborting`);
           return undefined;
         }
         currType = baseType;
       } catch (err) {
-        hilog.error(DOMAIN_ID, TAG, `isInherited error: ${err}`);
+        hilog.error(DOMAIN_ID, TAG, `isOverride error: ${err}`);
         return undefined;
       }
     }
-    return true;
+    return false;
   }
 }

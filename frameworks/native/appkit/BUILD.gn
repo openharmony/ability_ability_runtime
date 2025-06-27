@@ -195,7 +195,6 @@ ohos_shared_library("appkit_native") {
     "bundle_framework:bms_ani_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
     "faultloggerd:libbacktrace_local",
     "faultloggerd:libdfx_procinfo",
@@ -225,6 +224,11 @@ ohos_shared_library("appkit_native") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+  if (defined(ark_hybrid) && ark_hybrid) {
+    external_deps += [ "runtime_core:libarkruntime" ]
+  } else {
+    external_deps += [ "ets_runtime:libark_jsruntime" ]
+  }
   public_external_deps = [ "ability_base:configuration" ]
 
   defines = []
@@ -341,6 +345,7 @@ ohos_shared_library("app_context") {
     "${ability_runtime_native_path}/appkit/ability_runtime/context/application_state_change_callback.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/context_impl.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/environment_callback.cpp",
+    "${ability_runtime_native_path}/appkit/ability_runtime/context/ets_application_state_change_callback.cpp",
     "${ability_runtime_native_path}/appkit/app/overlay_event_subscriber.cpp",
     "${ability_runtime_native_path}/appkit/app/sys_mgr_client.cpp",
   ]
@@ -409,12 +414,12 @@ ohos_shared_library("app_context_utils") {
   public_configs = [ ":appkit_public_config" ]
 
   sources = [
+    "ability_runtime/context/ets_application_context_utils.cpp",
     "ability_runtime/context/ets_enviroment_callback.cpp",
     "ability_runtime/context/js_application_context_utils.cpp",
     "ability_runtime/context/js_context_utils.cpp",
     "ability_runtime/context/js_resource_manager_utils.cpp",
     "ability_runtime/context/sts_context_utils.cpp",
-    "ability_runtime/context/ets_application_context_utils.cpp",
   ]
   cflags = []
   if (target_cpu == "arm") {
@@ -613,7 +618,6 @@ ohos_shared_library("application_context_manager") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/inner_api/runtime/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_path}/sts_environment/interfaces/inner_api",
   ]
 
   sources = [ "${ability_runtime_native_path}/appkit/ability_runtime/context/application_context_manager.cpp" ]
@@ -624,11 +628,14 @@ ohos_shared_library("application_context_manager") {
   }
 
   external_deps = [
-    "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
     "napi:ace_napi",
-    "runtime_core:ani",
   ]
+  if (defined(ark_hybrid) && ark_hybrid) {
+    external_deps += [ "runtime_core:libarkruntime" ]
+  } else {
+    external_deps += [ "ets_runtime:libark_jsruntime" ]
+  }
 
   public_configs = [ ":application_context_manager_config" ]
 

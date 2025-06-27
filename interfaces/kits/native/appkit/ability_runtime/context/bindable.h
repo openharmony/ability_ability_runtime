@@ -41,6 +41,16 @@ public:
     }
 
     template<class T>
+    void Bind(T* object)
+    {
+        static_assert(IsValidType<T>(), "T must be ani_ref or NativeReference");
+        const std::string typeName = GetTypeString<T>();
+        std::lock_guard guard(objectsMutex_);
+        std::unique_ptr<void, void (*)(void*)> obj(object, SimpleRelease<T>);
+        objects_.emplace(typeName, std::move(obj));
+    }
+
+    template<class T>
     T* Get()
     {
         const std::string typeName = GetTypeString<T>();
@@ -114,6 +124,14 @@ public:
     {
         if (object_) {
             object_->Bind(runtime, object);
+        }
+    }
+
+    template<class T>
+    void Bind(T* object)
+    {
+        if (object_) {
+            object_->Bind(object);
         }
     }
 

@@ -49,11 +49,11 @@ export default namespace insightIntentDriver {
   export function execute(param: ExecuteParam): Promise<insightIntent.ExecuteResult> {
     let pPromise = new Promise<insightIntent.ExecuteResult>((
       resolve: (data: insightIntent.ExecuteResult) => void,
-      reject: (error: BusinessError<void>) => void) => {
+      reject: (err: BusinessError) => void) => {
       let pCallback = new AsyncCallbackWrapper<insightIntent.ExecuteResult>((
-        err: BusinessError<void>, data: insightIntent.ExecuteResult) => {
-        if (err.code == 0) {
-          resolve(data);
+        err: BusinessError | null, data: insightIntent.ExecuteResult | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as insightIntent.ExecuteResult);
         } else {
           reject(err);
         }

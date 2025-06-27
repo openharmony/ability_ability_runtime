@@ -62,7 +62,8 @@ public:
 class STSRuntime : public Runtime {
 public:
     static std::unique_ptr<STSRuntime> Create(const Options& options, JsRuntime* jsRuntime);
-    static void SetAppLibPath(const AppLibPathMap& appLibPaths);
+    static void SetAppLibPath(const AppLibPathMap& appLibPaths,
+        const std::map<std::string, std::string>& abcPathsToBundleModuleNameMap, bool isSystemApp);
     ~STSRuntime() override;
     Language GetLanguage() const override
     {

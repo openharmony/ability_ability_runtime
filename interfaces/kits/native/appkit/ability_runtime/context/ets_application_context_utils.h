@@ -21,6 +21,8 @@
 #include "ani_common_util.h"
 #include "ani_common_want.h"
 #include "application_context.h"
+#include "ets_enviroment_callback.h"
+#include "ets_application_state_change_callback.h"
 #include "sts_context_utils.h"
 #include "sts_error_utils.h"
 #include "sts_runtime.h"
@@ -31,6 +33,10 @@ class EtsApplicationContextUtils {
 public:
     explicit EtsApplicationContextUtils() {}
     virtual ~EtsApplicationContextUtils() = default;
+    static ani_string GetCurrentInstanceKey([[maybe_unused]]ani_env *env,
+        [[maybe_unused]]ani_object aniObj);
+    static ani_double GetCurrentAppCloneIndex([[maybe_unused]]ani_env *env,
+        [[maybe_unused]]ani_object aniObj);
     static void RestartApp([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         ani_object wantObj);
     static void SetFont([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
@@ -45,10 +51,16 @@ public:
         ani_object callback);
     static void GetRunningProcessInformation([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         ani_object callback);
+    static void GetAllRunningInstanceKeys([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_object callback);
     static ani_double NativeOnSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         ani_string type, ani_object envCallback);
     static void NativeOffSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         ani_string type, ani_double callbackId, ani_object call);
+    static void NativeOnApplicationStateChangeSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_object callback);
+    static void NativeOffApplicationStateChangeSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
+        ani_object callback);
     static void killAllProcesses([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         ani_boolean clearPageStack, ani_object call);
     static void PreloadUIExtensionAbility([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
@@ -56,8 +68,10 @@ public:
     static void SetSupportedProcessCacheSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj,
         ani_boolean value);
     static void SetApplicationContextToEts(const std::shared_ptr<ApplicationContext> &abilityRuntimeContext);
-    static void CreateEtsApplicationContext(ani_env* aniEnv, void* applicationContextObjRef);
+    static void CreateEtsApplicationContext(ani_env* aniEnv);
     static void BindApplicationContextFunc(ani_env* aniEnv, ani_class& contextClass);
+    static void SetAndBindApplicationObject(ani_env* aniEnv, ani_object applicationContextObject,
+        std::shared_ptr<ApplicationContext> applicationContext);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
