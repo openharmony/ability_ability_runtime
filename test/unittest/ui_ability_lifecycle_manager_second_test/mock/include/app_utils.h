@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_APP_UTILS_H
 
 #include "nocopyable.h"
+#include <string>
 
 namespace OHOS {
 namespace AAFwk {
@@ -29,6 +30,7 @@ public:
     bool IsStartOptionsWithAnimation();
     bool IsStartSpecifiedProcess();
     bool IsStartOptionsWithProcessOptions();
+    bool InOnNewProcessEnableList(const std::string &bundleName);
 
 private:
     AppUtils();
