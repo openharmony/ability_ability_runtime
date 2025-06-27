@@ -49,10 +49,10 @@ export default namespace abilityManager {
   }
 
   export function getTopAbility():Promise<ElementName> {
-    let p = new Promise<ElementName>((resolve: (data: ElementName)=>void, reject:(err: BusinessError<void>)=>void):void => {
-      let myCall = new AsyncCallbackWrapper<ElementName>((err: BusinessError<void>, data: ElementName)=>{
-        if (err.code == 0) {
-          resolve(data);
+    let p = new Promise<ElementName>((resolve: (data: ElementName)=>void, reject:(err: BusinessError)=>void):void => {
+      let myCall = new AsyncCallbackWrapper<ElementName>((err: BusinessError | null, data: ElementName | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as ElementName);
         } else {
           reject(err);
         }
