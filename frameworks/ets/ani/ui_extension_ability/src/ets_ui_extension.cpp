@@ -27,7 +27,6 @@
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
-#include "ets_runtime.h"
 #include "ani_common_want.h"
 #include "ui_extension_window_command.h"
 #include "want_params_wrapper.h"
@@ -564,11 +563,11 @@ sptr<Rosen::Window> EtsUIExtension::CreateUIWindow(const std::shared_ptr<UIExten
     return Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
 }
 
-std::unique_ptr<ETSNativeReference> EtsUIExtension::CreateAppWindowStage(sptr<Rosen::Window> uiWindow,
+std::unique_ptr<AppExecFwk::ETSNativeReference> EtsUIExtension::CreateAppWindowStage(sptr<Rosen::Window> uiWindow,
     sptr<AAFwk::SessionInfo> sessionInfo)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
-    return std::make_unique<ETSNativeReference>();
+    return std::make_unique<AppExecFwk::ETSNativeReference>();
 }
 
 void EtsUIExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo)

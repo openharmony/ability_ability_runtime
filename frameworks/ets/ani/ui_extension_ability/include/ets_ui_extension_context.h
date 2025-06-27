@@ -15,10 +15,11 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_UI_EXTENSION_CONTEXT_H
 #define OHOS_ABILITY_RUNTIME_ETS_UI_EXTENSION_CONTEXT_H
 
-#include "ets_runtime.h"
 #include <array>
 #include <iostream>
 #include <unistd.h>
+
+#include "ani.h"
 #include "ui_extension_context.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"

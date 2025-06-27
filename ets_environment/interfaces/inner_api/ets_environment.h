@@ -21,10 +21,18 @@
 #include <string>
 #include <uv.h>
 
-#include "ani.h"
 #include "ets_exception_callback.h"
+#include "ets_interface.h"
+#include "ets_native_reference.h"
 #include "event_handler.h"
-#include "napi/native_api.h"
+
+#ifndef ETS_EXPORT
+#ifndef __WINDOWS__
+#define ETS_EXPORT __attribute__((visibility("default")))
+#else
+#define ETS_EXPORT __declspec(dllexport)
+#endif
+#endif
 
 namespace OHOS {
 namespace EtsEnv {
@@ -37,16 +45,18 @@ class ETSEnvironment final : public std::enable_shared_from_this<ETSEnvironment>
 public:
     ETSEnvironment() {};
 
+    static std::unique_ptr<ETSEnvironment> &GetInstance();
     static void InitETSSDKNS(const std::string &path);
     static void InitETSSysNS(const std::string &path);
+    static ETSEnvFuncs *RegisterFuncs();
 
-    bool Initialize(napi_env napiEnv, std::vector<ani_option> &options);
+    bool Initialize(void *napiEnv, const std::string &aotPath);
     void RegisterUncaughtExceptionHandler(const ETSUncaughtExceptionInfo &handle);
     ani_env *GetAniEnv();
     bool HandleUncaughtError();
     bool PreloadModule(const std::string &modulePath);
-    bool LoadModule(const std::string &modulePath, const std::string &srcEntrance, ani_class &cls,
-        ani_object &obj, ani_ref &ref);
+    bool LoadModule(const std::string &modulePath, const std::string &srcEntrance, void *&cls,
+        void *&obj, void *&ref);
 
     struct VMEntry {
         ani_vm *aniVm_;

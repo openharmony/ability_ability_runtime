@@ -52,6 +52,8 @@
 #include "dump_ipc_helper.h"
 #include "dump_process_helper.h"
 #include "dump_runtime_helper.h"
+#include "ets_exception_callback.h"
+#include "ets_runtime.h"
 #include "exit_reason.h"
 #include "extension_ability_info.h"
 #include "extension_module_loader.h"
@@ -75,7 +77,6 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "js_runtime.h"
-#include "ets_runtime.h"
 #ifdef CJ_FRONTEND
 #include "cj_runtime.h"
 #endif

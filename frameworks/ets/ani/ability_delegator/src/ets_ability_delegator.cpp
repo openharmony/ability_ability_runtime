@@ -24,6 +24,7 @@
 #include "ets_ability_monitor.h"
 #include "ets_context_utils.h"
 #include "ets_error_utils.h"
+#include "ets_native_reference.h"
 #include "hilog_tag_wrapper.h"
 #include "shell_cmd_result.h"
 
@@ -32,8 +33,8 @@ namespace AbilityDelegatorEts {
 
 using namespace OHOS::AbilityRuntime;
 
-std::map<std::shared_ptr<ETSNativeReference>, std::shared_ptr<EtsAbilityMonitor>> g_monitorRecord;
-std::map<std::weak_ptr<ETSNativeReference>, sptr<IRemoteObject>, std::owner_less<>> g_abilityRecord;
+std::map<std::shared_ptr<AppExecFwk::ETSNativeReference>, std::shared_ptr<EtsAbilityMonitor>> g_monitorRecord;
+std::map<std::weak_ptr<AppExecFwk::ETSNativeReference>, sptr<IRemoteObject>, std::owner_less<>> g_abilityRecord;
 std::mutex g_mtxMonitorRecord;
 std::mutex g_mutexAbilityRecord;
 
@@ -434,7 +435,7 @@ bool EtsAbilityDelegator::ParseMonitorPara(ani_env *env, ani_object monitorObj,
     {
         std::unique_lock<std::mutex> lck(g_mtxMonitorRecord);
         for (auto iter = g_monitorRecord.begin(); iter != g_monitorRecord.end(); ++iter) {
-            std::shared_ptr<ETSNativeReference> etsMonitor = iter->first;
+            std::shared_ptr<AppExecFwk::ETSNativeReference> etsMonitor = iter->first;
             ani_boolean result = ANI_FALSE;
             ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(monitorObj),
                 reinterpret_cast<ani_ref>(etsMonitor->aniObj), &result);
@@ -497,7 +498,7 @@ bool EtsAbilityDelegator::ParseMonitorParaInner(ani_env *env, ani_object monitor
         abilityMonitor->SetEtsAbilityMonitor(env, monitorObj);
     }
     monitorImpl = abilityMonitor;
-    std::shared_ptr<ETSNativeReference> reference = std::make_shared<ETSNativeReference>();
+    std::shared_ptr<AppExecFwk::ETSNativeReference> reference = std::make_shared<AppExecFwk::ETSNativeReference>();
     if (reference != nullptr) {
         reference->aniObj = monitorObj;
     }

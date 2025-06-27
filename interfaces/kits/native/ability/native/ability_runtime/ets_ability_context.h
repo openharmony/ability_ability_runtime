@@ -17,8 +17,8 @@
 #define OHOS_ABILITY_RUNTIME_SIMULATOR_ETS_ABILITY_CONTEXT_H
 
 #include "ability_context.h"
+#include "ani.h"
 #include "configuration.h"
-#include "ets_runtime.h"
 #include "ohos_application.h"
 
 namespace OHOS {
