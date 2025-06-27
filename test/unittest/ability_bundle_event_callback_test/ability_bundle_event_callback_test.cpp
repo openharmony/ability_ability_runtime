@@ -39,6 +39,38 @@ void AbilityBundleEventCallbackTest::TearDownTestCase(void) {}
 void AbilityBundleEventCallbackTest::TearDown() {}
 void AbilityBundleEventCallbackTest::SetUp() {}
 
+class MockTaskHandlerWrap : public AAFwk::TaskHandlerWrap {
+public:
+    explicit MockTaskHandlerWrap(const std::string &queueName = "") : TaskHandlerWrap(queueName) {};
+
+    virtual ~MockTaskHandlerWrap() {};
+
+    std::shared_ptr<AAFwk::InnerTaskHandle> SubmitTaskInner(
+        std::function<void()>&& task, const AAFwk::TaskAttribute& taskAttr) override
+    {
+        taskCount++;
+        task();
+        return nullptr;
+    }
+
+    bool CancelTaskInner(const std::shared_ptr<AAFwk::InnerTaskHandle>& taskHandle) override
+    {
+        return false;
+    }
+
+    void WaitTaskInner(const std::shared_ptr<AAFwk::InnerTaskHandle>& taskHandle) override
+    {
+        return;
+    }
+
+    uint64_t GetTaskCount() override
+    {
+        return tasks_.size();
+    }
+
+    int32_t taskCount = 0;
+};
+
 /**
  * @tc.name: AbilityBundleEventCallbackTest_OnReceiveEvent_0100
  * @tc.desc: Test the state of OnReceiveEvent
@@ -68,6 +100,62 @@ HWTEST_F(AbilityBundleEventCallbackTest, OnReceiveEvent_0200, TestSize.Level1)
     EventFwk::CommonEventData eventData;
     abilityBundleEventCallback_->OnReceiveEvent(eventData);
     EXPECT_NE(abilityBundleEventCallback_->taskHandler_, nullptr);
+}
+
+/**
+ * @tc.name: AbilityBundleEventCallbackTest_OnReceiveEvent_0300
+ * @tc.desc: Test the state of OnReceiveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityBundleEventCallbackTest, OnReceiveEvent_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "OnReceiveEvent_0300 start";
+
+    sptr<AbilityBundleEventCallback> abilityBundleEventCallback_ =
+        new (std::nothrow) AbilityBundleEventCallback(nullptr, nullptr);
+    EXPECT_NE(abilityBundleEventCallback_, nullptr);
+
+    auto mockHandler = std::make_shared<MockTaskHandlerWrap>();
+    abilityBundleEventCallback_->taskHandler_ = mockHandler;
+    EventFwk::CommonEventData eventData;
+    Want want;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
+    want.SetBundle("com.test.demo");
+    want.SetParam("isRecover", false);
+    eventData.SetWant(want);
+
+    abilityBundleEventCallback_->OnReceiveEvent(eventData);
+    EXPECT_TRUE(mockHandler->taskCount >= 0);
+
+    GTEST_LOG_(INFO) << "OnReceiveEvent_0300 end";
+}
+
+/**
+ * @tc.name: AbilityBundleEventCallbackTest_OnReceiveEvent_0400
+ * @tc.desc: Test the state of OnReceiveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityBundleEventCallbackTest, OnReceiveEvent_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "OnReceiveEvent_0400 start";
+
+    sptr<AbilityBundleEventCallback> abilityBundleEventCallback_ =
+        new (std::nothrow) AbilityBundleEventCallback(nullptr, nullptr);
+    EXPECT_NE(abilityBundleEventCallback_, nullptr);
+
+    auto mockHandler = std::make_shared<MockTaskHandlerWrap>();
+    abilityBundleEventCallback_->taskHandler_ = mockHandler;
+    EventFwk::CommonEventData eventData;
+    Want want;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
+    want.SetBundle("com.test.demo");
+    want.SetParam("isRecover", true);
+    eventData.SetWant(want);
+
+    abilityBundleEventCallback_->OnReceiveEvent(eventData);
+    EXPECT_TRUE(mockHandler->taskCount >= 1);
+
+    GTEST_LOG_(INFO) << "OnReceiveEvent_0400 end";
 }
 } // namespace AAFwk
 } // namespace OHOS
