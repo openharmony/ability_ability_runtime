@@ -24,6 +24,8 @@
 #include "auto_startup_info.h"
 #include "bundle_info.h"
 #include "bundle_user_info.h"
+#include "dlp_connection_info.h"
+#include "dlp_state_data.h"
 #include "extract_insight_intent_profile.h"
 #include "keep_alive_process_manager.h"
 
@@ -124,6 +126,37 @@ void GetRandomInsightIntentExecuteParam(FuzzedDataProvider& fdp, InsightIntentEx
     info.pagePath_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     info.navigationId_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     info.navDestinationName_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+}
+
+void GetRandomDlpConnectionInfo(FuzzedDataProvider& fdp, DlpConnectionInfo& info)
+{
+    info.dlpUid = fdp.ConsumeIntegral<int32_t>();
+    info.openedAbilityCount = fdp.ConsumeIntegral<int32_t>();
+}
+
+void GetRandomConnectionData(FuzzedDataProvider& fdp, ConnectionData& info)
+{
+    info.isSuspended = fdp.ConsumeBool();
+    info.extensionPid = fdp.ConsumeIntegral<uint32_t>();
+    info.extensionUid = fdp.ConsumeIntegral<uint32_t>();
+    info.callerUid = fdp.ConsumeIntegral<uint32_t>();
+    info.callerPid = fdp.ConsumeIntegral<uint32_t>();
+    info.extensionBundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.extensionModuleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.extensionName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.callerName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+}
+
+void GetRandomDlpStateData(FuzzedDataProvider& fdp, DlpStateData& info)
+{
+    info.targetPid = fdp.ConsumeIntegral<uint32_t>();
+    info.targetUid = fdp.ConsumeIntegral<uint32_t>();
+    info.callerUid = fdp.ConsumeIntegral<uint32_t>();
+    info.callerPid = fdp.ConsumeIntegral<uint32_t>();
+    info.callerName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.targetBundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.targetModuleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.targetAbilityName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
 }
 
 void GenerateSignatureInfo(FuzzedDataProvider& fdp, SignatureInfo &signatureInfo)
