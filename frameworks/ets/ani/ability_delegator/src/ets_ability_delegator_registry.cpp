@@ -20,11 +20,12 @@
 #include "ability_delegator_registry.h"
 #include "ets_ability_delegator.h"
 #include "ets_ability_delegator_utils.h"
+#include "ets_native_reference.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AbilityDelegatorEts {
-std::unique_ptr<AbilityRuntime::ETSNativeReference> etsReference;
+std::unique_ptr<AppExecFwk::ETSNativeReference> etsReference;
 std::mutex etsReferenceMutex;
 
 static ani_object GetAbilityDelegator(ani_env *env, [[maybe_unused]]ani_class aniClass)
@@ -53,7 +54,7 @@ static ani_object GetAbilityDelegator(ani_env *env, [[maybe_unused]]ani_class an
             TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_IsNullishValue");
             return {};
         }
-        etsReference = std::make_unique<AbilityRuntime::ETSNativeReference>();
+        etsReference = std::make_unique<AppExecFwk::ETSNativeReference>();
         ani_ref result;
         auto status = env->GlobalReference_Create(value, &(result));
         if (status != ANI_OK) {

@@ -181,16 +181,8 @@ HWTEST_F(EtsRuntimeTest, LoadModule_0200, TestSize.Level1)
 HWTEST_F(EtsRuntimeTest, Deinitialize_100, TestSize.Level1)
 {
     std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
-    std::shared_ptr<EtsEnv::ETSEnvironment> etsEnv = etsRuntime->etsEnv_;
-
-    etsRuntime->etsEnv_ == nullptr;
     etsRuntime->Deinitialize();
-    EXPECT_EQ(etsRuntime->etsEnv_, nullptr);
-
-    etsRuntime->etsEnv_ = std::make_shared<EtsEnv::ETSEnvironment>();
-    etsRuntime->Deinitialize();
-    EXPECT_NE(etsRuntime->etsEnv_, nullptr);
-    etsRuntime->etsEnv_ = etsEnv;
+    EXPECT_EQ(etsRuntime->jsRuntime_, nullptr);
 }
 
 /**
@@ -201,17 +193,8 @@ HWTEST_F(EtsRuntimeTest, Deinitialize_100, TestSize.Level1)
 HWTEST_F(EtsRuntimeTest, GetAniEnv_100, TestSize.Level1)
 {
     std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
-    std::shared_ptr<EtsEnv::ETSEnvironment> etsEnv = etsRuntime->etsEnv_;
-
-    etsRuntime->etsEnv_ == nullptr;
     auto env = etsRuntime->GetAniEnv();
     EXPECT_EQ(env, nullptr);
-
-    env = nullptr;
-    etsRuntime->etsEnv_ = std::make_shared<EtsEnv::ETSEnvironment>();
-    env = etsRuntime->GetAniEnv();
-    EXPECT_EQ(env, nullptr);
-    etsRuntime->etsEnv_ = etsEnv;
 }
 
 /**
@@ -256,6 +239,18 @@ HWTEST_F(EtsRuntimeTest, LoadEtsModule_100, TestSize.Level1)
     std::string srcEntrance = "";
     auto env = etsRuntime->LoadEtsModule(moduleName, modulePath, hapPath, srcEntrance);
     EXPECT_EQ(env, nullptr);
+}
+
+/**
+ * @tc.name: GetLanguage_100
+ * @tc.desc: EtsRuntime test for GetLanguage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, GetLanguage_100, TestSize.Level1)
+{
+    std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
+    auto language = etsRuntime->GetLanguage();
+    EXPECT_EQ(language, Runtime::Language::ETS);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

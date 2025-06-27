@@ -16,7 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_CONTEXT_UTILS_H
 #define OHOS_ABILITY_RUNTIME_ETS_CONTEXT_UTILS_H
 
-#include "ets_runtime.h"
+#include "ani.h"
 #include "context.h"
 
 namespace OHOS {

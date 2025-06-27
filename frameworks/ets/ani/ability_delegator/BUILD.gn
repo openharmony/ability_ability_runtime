@@ -26,7 +26,6 @@ ohos_shared_library("ability_delegator_registry_ani_kit") {
 
   include_dirs = [
     "./include",
-    "${ability_runtime_path}/ets_environment/interfaces/inner_api",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/ability_delegator/include",
