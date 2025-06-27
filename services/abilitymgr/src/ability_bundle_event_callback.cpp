@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@ constexpr const char* OLD_WEB_BUNDLE_NAME = "com.ohos.nweb";
 constexpr const char* NEW_WEB_BUNDLE_NAME = "com.ohos.arkwebcore";
 constexpr const char* ARKWEB_CORE_PACKAGE_NAME = "persist.arkwebcore.package_name";
 constexpr const char* BUNDLE_TYPE = "bundleType";
+constexpr const char* IS_RECOVER = "isRecover";
 }
 AbilityBundleEventCallback::AbilityBundleEventCallback(
     std::shared_ptr<TaskHandlerWrap> taskHandler, std::shared_ptr<AbilityAutoStartupService> abilityAutoStartupService)
@@ -85,6 +86,11 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
         // install or uninstall module/bundle
         HandleUpdatedModuleInfo(bundleName, uid, moduleName, false);
         AbilityRuntime::InsightIntentEventMgr::UpdateInsightIntentEvent(want.GetElement(), userId);
+        bool isRecover = want.GetBoolParam(IS_RECOVER, false);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "COMMON_EVENT_PACKAGE_ADDED, isRecover:%{public}d", isRecover);
+        if (isRecover) {
+            HandleAppUpgradeCompleted(uid);
+        }
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
         if (bundleName == NEW_WEB_BUNDLE_NAME || bundleName == OLD_WEB_BUNDLE_NAME ||
             bundleName == system::GetParameter(ARKWEB_CORE_PACKAGE_NAME, "false")) {
