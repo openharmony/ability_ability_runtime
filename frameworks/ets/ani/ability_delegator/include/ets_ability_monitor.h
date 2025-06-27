@@ -18,8 +18,8 @@
 
 #include <memory>
 #include <string>
+#include "ani.h"
 #include "iability_monitor.h"
-#include "ets_runtime.h"
 
 namespace OHOS {
 namespace AbilityDelegatorEts {
@@ -117,23 +117,23 @@ public:
      *
      * @return the saved ets object.
      */
-    std::unique_ptr<AbilityRuntime::ETSNativeReference> &GetEtsAbilityMonitor()
+    std::unique_ptr<AppExecFwk::ETSNativeReference> &GetEtsAbilityMonitor()
     {
         return etsAbilityMonitor_;
     }
 
 private:
     void CallLifecycleCBFunction(const std::string &functionName,
-        const std::shared_ptr<AbilityRuntime::ETSNativeReference> &abilityObj);
+        const std::shared_ptr<AppExecFwk::ETSNativeReference> &abilityObj);
     ani_env* GetAniEnv();
-    std::shared_ptr<AbilityRuntime::ETSNativeReference> GetRuntimeObject(
+    std::shared_ptr<AppExecFwk::ETSNativeReference> GetRuntimeObject(
         const std::weak_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &abilityObj);
 
 private:
     ani_vm* vm_ = nullptr;
     std::string abilityName_;
     std::string moduleName_;
-    std::unique_ptr<AbilityRuntime::ETSNativeReference> etsAbilityMonitor_;
+    std::unique_ptr<AppExecFwk::ETSNativeReference> etsAbilityMonitor_;
 };
 }  // namespace AbilityDelegatorJs
 }  // namespace OHOS

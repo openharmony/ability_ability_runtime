@@ -40,7 +40,6 @@
 #include "resource_manager.h"
 #include "runtime.h"
 #include "watchdog.h"
-#include "ets_exception_callback.h"
 
 #ifdef CJ_FRONTEND
 #include "cj_envsetup.h"
@@ -58,6 +57,9 @@ namespace JsEnv {
 struct ErrorObject;
 using UncatchableTask = std::function<void(std::string summary, const JsEnv::ErrorObject errorObject)>;
 }  // namespace JsEnv
+namespace EtsEnv {
+struct ETSUncaughtExceptionInfo;
+} // namespace EtsEnv
 namespace AppExecFwk {
 using namespace OHOS::Global;
 using OHOS::AbilityRuntime::Runtime;
