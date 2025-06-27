@@ -1653,6 +1653,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
                 options.hapModulePath[hapModuleInfo.moduleName] = hapModuleInfo.hapPath;
                 options.packageNameList[hapModuleInfo.moduleName] = hapModuleInfo.packageName;
+                if (hapModuleInfo.moduleType == AppExecFwk::ModuleType::SHARED &&
+                    hapModuleInfo.codeLanguage != AppExecFwk::Constants::CODE_LANGUAGE_1_1) {
+                    TAG_LOGI(AAFwkTag::JSRUNTIME, "appInnerHspPathList: %{public}s", hapModuleInfo.hapPath.c_str());
+                    options.appInnerHspPathList.push_back(hapModuleInfo.hapPath);
+                }
+
                 options.aotCompileStatusMap[hapModuleInfo.moduleName] =
                     static_cast<int32_t>(hapModuleInfo.aotCompileStatus);
             }
