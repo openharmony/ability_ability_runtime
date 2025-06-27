@@ -268,7 +268,7 @@ public:
     }
 
     static void GetRunningProcessInfoByBundleNameAndUserId(ani_env *env, ani_string stsBundleName,
-        ani_int stsUserId, ani_object callback)
+        ani_double stsUserId, ani_object callback)
     {
         TAG_LOGD(AAFwkTag::APPMGR, "GetRunningProcessInfoByBundleNameAndUserId called");
         if (env == nullptr) {
@@ -291,10 +291,8 @@ public:
                 static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM)), emptyArray);
             return;
         }
-        int userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
-        if (stsUserId != AppExecFwk::Constants::INVALID_UID) {
-            userId = static_cast<int>(stsUserId);
-        }
+        TAG_LOGD(AAFwkTag::APPMGR, "GetRunningProcessInfoByBundleNameAndUserId userid:%{public}f", stsUserId);
+        int32_t userId = static_cast<int32_t>(stsUserId);
         auto appManager = GetAppManagerInstance();
         if (appManager == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "appManager nullptr");
@@ -327,7 +325,8 @@ public:
     static void GetRunningProcessInfoByBundleName(ani_env *env, ani_string stsBundleName,
         ani_object callback)
     {
-        GetRunningProcessInfoByBundleNameAndUserId(env, stsBundleName, AppExecFwk::Constants::INVALID_UID, callback);
+        int userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
+        GetRunningProcessInfoByBundleNameAndUserId(env, stsBundleName, static_cast<double>(userId), callback);
     }
 
 static ani_double OnOnApplicationStateInner(ani_env *env, ani_string type,
