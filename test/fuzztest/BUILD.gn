@@ -194,6 +194,7 @@ group("fuzztest") {
     "abilitystubluckmissiondone_fuzzer:fuzztest",
     "abilitystubmaximizemultiwindowdone_fuzzer:fuzztest",
     "abilitystubminimizeability_fuzzer:fuzztest",
+    "abilitystubminimizeabilitydone_fuzzer:fuzztest",
     "abilitystubminimizemultiwindowdone_fuzzer:fuzztest",
     "abilitystubminimizeuiabilitybyscb_fuzzer:fuzztest",
     "abilitystubminimizeuiextensionability_fuzzer:fuzztest",
