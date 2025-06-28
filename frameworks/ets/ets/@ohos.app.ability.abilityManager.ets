@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
+import AbilityStateData from 'application.AbilityStateData';
 import { ElementName } from 'bundleManager.ElementName'
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
 import { AbilityRunningInfo as _AbilityRunningInfo } from 'application.AbilityRunningInfo';
 import { ExtensionRunningInfo as _ExtensionRunningInfo } from 'application.ExtensionRunningInfo';
 import _AbilityForegroundStateObserver from 'application.AbilityForegroundStateObserver';
-import _AbilityStateData from 'application.AbilityStateData';
 
 export default namespace abilityManager {
   loadLibrary("ability_ability_manager_ani_kit.z")
@@ -115,8 +115,6 @@ export function getTopAbility(callback: AsyncCallback<ElementName, void>): void 
   }
 
   export type AbilityRunningInfo = _AbilityRunningInfo;
-
-  export type AbilityStateData = _AbilityStateData;
 
   export type ExtensionRunningInfo = _ExtensionRunningInfo;
 
