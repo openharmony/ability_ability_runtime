@@ -26,7 +26,6 @@ namespace AAFwk {
 using namespace OHOS::AppExecFwk;
 namespace {
 const int64_t USER_SWITCH_TIMEOUT = 3 * 1000; // 3s
-constexpr int32_t U1_USER_ID = 1;
 constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
 }
 

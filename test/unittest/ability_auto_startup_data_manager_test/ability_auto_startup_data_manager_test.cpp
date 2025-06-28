@@ -23,6 +23,7 @@
 #undef protected
 
 #include "auto_startup_info.h"
+#include "json_utils.h"
 #include "types.h"
 using namespace testing;
 using namespace testing::ext;
@@ -131,8 +132,9 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, InsertAutoStartupData_300, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
+    info.setterType = AutoStartupSetterType::SYSTEM;
     struct AutoStartupStatus AutoStartupStatus;
     AutoStartupStatus.isAutoStartup = false;
     AutoStartupStatus.isEdmForce = false;
@@ -161,8 +163,9 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, InsertAutoStartupData_400, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
+    info.setterType = AutoStartupSetterType::SYSTEM;
     struct AutoStartupStatus AutoStartupStatus;
     AutoStartupStatus.isAutoStartup = false;
     AutoStartupStatus.isEdmForce = false;
@@ -205,8 +208,9 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_200, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
+    info.setterType = AutoStartupSetterType::SYSTEM;
     bool isAutoStartup = false;
     bool isEdmForce = false;
     auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
@@ -251,8 +255,9 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_400, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
+    info.setterType = AutoStartupSetterType::SYSTEM;
     bool isAutoStartup = false;
     bool isEdmForce = false;
     auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
@@ -308,7 +313,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, DeleteAutoStartupData_300, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
     auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info);
     EXPECT_EQ(result, ERR_OK);
@@ -333,7 +338,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, DeleteAutoStartupData_400, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
     auto result = abilityAutoStartupDataManager.DeleteAutoStartupData(info);
     EXPECT_EQ(result, ERR_OK);
@@ -443,7 +448,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAutoStartupData_300, TestSize.L
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
     auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info);
     EXPECT_EQ(result.code, ERR_NAME_NOT_FOUND);
@@ -468,7 +473,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAutoStartupData_400, TestSize.L
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
     auto result = abilityAutoStartupDataManager.QueryAutoStartupData(info);
     EXPECT_EQ(result.code, ERR_NAME_NOT_FOUND);
@@ -487,7 +492,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAllAutoStartupApplications_100,
     AbilityAutoStartupDataManager abilityAutoStartupDataManager;
     std::vector<AutoStartupInfo> infoList;
     int32_t userID = 100;
-    auto result = abilityAutoStartupDataManager.QueryAllAutoStartupApplications(infoList, userID);
+    bool isCalledByEDM = false;
+    auto result = abilityAutoStartupDataManager.QueryAllAutoStartupApplications(infoList, userID, isCalledByEDM);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "QueryAllAutoStartupApplications_100 end";
 }
@@ -508,7 +514,8 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAllAutoStartupApplications_200,
 
     std::vector<AutoStartupInfo> infoList;
     int32_t userID = 100;
-    auto result = abilityAutoStartupDataManager.QueryAllAutoStartupApplications(infoList, userID);
+    bool isCalledByEDM = true;
+    auto result = abilityAutoStartupDataManager.QueryAllAutoStartupApplications(infoList, userID, isCalledByEDM);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "QueryAllAutoStartupApplications_200 end";
 }
@@ -566,11 +573,69 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, ConvertAutoStartupStatusFromValue_10
     GTEST_LOG_(INFO) << "ConvertAutoStartupStatusFromValue_100 start";
     auto abilityAutoStartupDataManager = DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance();
     DistributedKv::Value value;
-    bool isAutoStartup = false;
-    bool isEdmForce = false;
-    abilityAutoStartupDataManager->ConvertAutoStartupStatusFromValue(value, isAutoStartup, isEdmForce);
+    AutoStartupStatus asustatus;
+    abilityAutoStartupDataManager->ConvertAutoStartupStatusFromValue(value, asustatus);
     EXPECT_NE(abilityAutoStartupDataManager, nullptr);
     GTEST_LOG_(INFO) << "ConvertAutoStartupStatusFromValue_100 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: ConvertAutoStartupStatusFromValue
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager ConvertAutoStartupStatusFromValue
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, ConvertAutoStartupStatusFromValue_200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConvertAutoStartupStatusFromValue_200 start";
+    auto abilityAutoStartupDataManager = DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance();
+    EXPECT_NE(abilityAutoStartupDataManager, nullptr);
+    bool isAutoStartup = true;
+    bool isEdmForce = false;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.canUserModify = true;
+    info.setterType = AutoStartupSetterType::SYSTEM;
+    AutoStartupStatus asustatus;
+    DistributedKv::Value value =
+        abilityAutoStartupDataManager->ConvertAutoStartupStatusToValue(info, isAutoStartup, isEdmForce);
+    
+    abilityAutoStartupDataManager->ConvertAutoStartupStatusFromValue(value, asustatus);
+    EXPECT_EQ(asustatus.isAutoStartup, isAutoStartup);
+    EXPECT_EQ(asustatus.isEdmForce, isEdmForce);
+    EXPECT_EQ(asustatus.setterUserId, info.setterUserId);
+    EXPECT_EQ(asustatus.setterType, info.setterType);
+    GTEST_LOG_(INFO) << "ConvertAutoStartupStatusFromValue_200 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: ConvertAutoStartupStatusFromValue
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager ConvertAutoStartupStatusFromValue
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, ConvertAutoStartupStatusFromValue_300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConvertAutoStartupStatusFromValue_300 start";
+    auto abilityAutoStartupDataManager = DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance();
+    EXPECT_NE(abilityAutoStartupDataManager, nullptr);
+    cJSON *jsonObject = cJSON_CreateObject();
+    EXPECT_NE(jsonObject, nullptr);
+    cJSON_AddStringToObject(jsonObject, "test", "test");
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
+    cJSON_Delete(jsonObject);
+    DistributedKv::Value value(jsonStr);
+    AutoStartupStatus asustatus;
+    abilityAutoStartupDataManager->ConvertAutoStartupStatusFromValue(value, asustatus);
+    EXPECT_EQ(asustatus.isAutoStartup, false);
+    EXPECT_EQ(asustatus.isEdmForce, false);
+    EXPECT_EQ(asustatus.setterUserId, -1);
+    EXPECT_EQ(asustatus.setterType, AutoStartupSetterType::UNSPECIFIED);
+    GTEST_LOG_(INFO) << "ConvertAutoStartupStatusFromValue_300 end";
 }
 
 /**
@@ -597,15 +662,345 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_info_100, TestSize.Level1)
  * SubFunction: NA
  * FunctionPoints: AbilityAutoStartupDataManager IsEqual
  */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_info_200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_info_200 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.canUserModify = true;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.IsEqual(key, info);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "IsEqual_info_200 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_info_300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_info_300 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.canUserModify = true;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    info.bundleName = "com.example.testbundle1";
+    auto result = abilityAutoStartupDataManager.IsEqual(key, info);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "IsEqual_info_300 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_info_400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_info_400 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.canUserModify = true;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    info.abilityName = "testDemoAbility1";
+    auto result = abilityAutoStartupDataManager.IsEqual(key, info);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "IsEqual_info_400 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_info_500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_info_500 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.canUserModify = true;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    info.moduleName = "ModuleName";
+    auto result = abilityAutoStartupDataManager.IsEqual(key, info);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "IsEqual_info_500 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_info_600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_info_600 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.canUserModify = true;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    info.accessTokenId = "1234";
+    auto result = abilityAutoStartupDataManager.IsEqual(key, info);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "IsEqual_info_600 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_info_700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_info_700 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.canUserModify = true;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    info.appCloneIndex = 1;
+    auto result = abilityAutoStartupDataManager.IsEqual(key, info);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "IsEqual_info_700 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_info_800, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_info_800 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.canUserModify = true;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    info.userId = 1;
+    auto result = abilityAutoStartupDataManager.IsEqual(key, info);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "IsEqual_info_800 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
 HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_userId_100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "IsEqual_userId_100 start";
     AbilityAutoStartupDataManager abilityAutoStartupDataManager;
-    DistributedKv::Key key;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.canUserModify = true;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
     int32_t userId = 100;
     auto result = abilityAutoStartupDataManager.IsEqual(key, userId);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "IsEqual_userId_100 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_userId_200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_userId_200 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    bool isAutoStartup = true;
+    bool isEdmForce = false;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.canUserModify = true;
+    int32_t userId = 100;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.IsEqual(key, userId);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "IsEqual_userId_200 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_userId_300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_userId_300 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    bool isAutoStartup = true;
+    bool isEdmForce = false;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 1;
+    info.canUserModify = true;
+    int32_t userId = 100;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.IsEqual(key, userId);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "IsEqual_userId_300 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_userId_400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_userId_400 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    bool isAutoStartup = true;
+    bool isEdmForce = false;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 1;
+    info.userId = 1;
+    info.canUserModify = true;
+    int32_t userId = 100;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.IsEqual(key, userId);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "IsEqual_userId_400 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_userId_500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_userId_500 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    bool isAutoStartup = true;
+    bool isEdmForce = false;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 0;
+    info.userId = 1;
+    info.canUserModify = true;
+    int32_t userId = 100;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.IsEqual(key, userId);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "IsEqual_userId_500 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_userId_600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_userId_600 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    bool isAutoStartup = true;
+    bool isEdmForce = false;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 101;
+    info.userId = 1;
+    info.canUserModify = true;
+    int32_t userId = 100;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.IsEqual(key, userId);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "IsEqual_userId_600 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_userId_700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_userId_700 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    bool isAutoStartup = true;
+    bool isEdmForce = false;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 0;
+    info.userId = 0;
+    info.canUserModify = true;
+    int32_t userId = 100;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.IsEqual(key, userId);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "IsEqual_userId_700 end";
 }
 
 /**
@@ -616,13 +1011,61 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_userId_100, TestSize.Level1)
  */
 HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_accessTokenId_100, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "IsEqual_userId_100 start";
+    GTEST_LOG_(INFO) << "IsEqual_accessTokenId_100 start";
     AbilityAutoStartupDataManager abilityAutoStartupDataManager;
     DistributedKv::Key key;
     std::string accessTokenId = "123";
     auto result = abilityAutoStartupDataManager.IsEqual(key, accessTokenId);
     EXPECT_FALSE(result);
     GTEST_LOG_(INFO) << "IsEqual_accessTokenId_100 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_accessTokenId_200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_accessTokenId_200 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 0;
+    info.userId = 0;
+    info.canUserModify = true;
+    std::string accessTokenId = "1231";
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.IsEqual(key, accessTokenId);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "IsEqual_accessTokenId_200 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: IsEqual
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager IsEqual
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, IsEqual_accessTokenId_300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqual_accessTokenId_300 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 0;
+    info.userId = 0;
+    info.canUserModify = true;
+    std::string accessTokenId = "123";
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    auto result = abilityAutoStartupDataManager.IsEqual(key, accessTokenId);
+    EXPECT_TRUE(result);
+    GTEST_LOG_(INFO) << "IsEqual_accessTokenId_300 end";
 }
 
 /**
@@ -641,8 +1084,9 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_500, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
+    info.setterType = AutoStartupSetterType::SYSTEM;
     bool isAutoStartup = true;
     bool isEdmForce = false;
     kvStorePtr->Put_ = DistributedKv::Status::INVALID_FORMAT;
@@ -652,6 +1096,56 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_500, TestSize.
     kvStorePtr->Put_ = DistributedKv::Status::SUCCESS;
     GTEST_LOG_(INFO) << "UpdateAutoStartupData_500 end";
 }
+
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: UpdateAutoStartupData
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager UpdateAutoStartupData
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdateAutoStartupData_600 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = -1;
+    info.userId = 100;
+    info.setterType = AutoStartupSetterType::SYSTEM;
+    bool isAutoStartup = false;
+    bool isEdmForce = false;
+    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "UpdateAutoStartupData_600 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: UpdateAutoStartupData
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager UpdateAutoStartupData
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, UpdateAutoStartupData_700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "UpdateAutoStartupData_700 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.setterType = AutoStartupSetterType::UNSPECIFIED;
+    bool isAutoStartup = false;
+    bool isEdmForce = false;
+    auto result = abilityAutoStartupDataManager.UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "UpdateAutoStartupData_700 end";
+}
+
 
 /**
  * Feature: AbilityAutoStartupDataManager
@@ -669,7 +1163,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, DeleteAutoStartupData_500, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
     kvStorePtr->Delete_ = DistributedKv::Status::INVALID_FORMAT;
 
@@ -719,7 +1213,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, QueryAutoStartupData_500, TestSize.L
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
     kvStorePtr->GetEntries_ = DistributedKv::Status::INVALID_FORMAT;
 
@@ -807,8 +1301,9 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, InsertAutoStartupData_500, TestSize.
     info.bundleName = "com.example.testbundle";
     info.abilityName = "testDemoAbility";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
+    info.setterType = AutoStartupSetterType::SYSTEM;
     struct AutoStartupStatus AutoStartupStatus;
     AutoStartupStatus.isAutoStartup = false;
     AutoStartupStatus.isEdmForce = false;
@@ -819,6 +1314,164 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, InsertAutoStartupData_500, TestSize.
     EXPECT_EQ(result, ERR_INVALID_OPERATION);
     kvStorePtr->Put_ = DistributedKv::Status::SUCCESS;
     GTEST_LOG_(INFO) << "InsertAutoStartupData_500 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: InsertAutoStartupData
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager InsertAutoStartupData
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, InsertAutoStartupData_600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "InsertAutoStartupData_600 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    bool isAutoStartup = false;
+    bool isEdmForce = false;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.setterType = AutoStartupSetterType::UNSPECIFIED;
+    auto result = abilityAutoStartupDataManager.InsertAutoStartupData(info, isAutoStartup, isEdmForce);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "InsertAutoStartupData_600 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: InsertAutoStartupData
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager InsertAutoStartupData
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, InsertAutoStartupData_700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "InsertAutoStartupData_700 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    bool isAutoStartup = false;
+    bool isEdmForce = false;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = -1;
+    info.userId = 100;
+    info.setterType = AutoStartupSetterType::SYSTEM;
+    auto result = abilityAutoStartupDataManager.InsertAutoStartupData(info, isAutoStartup, isEdmForce);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "InsertAutoStartupData_700 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: ConvertAutoStartupInfoFromKey
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager ConvertAutoStartupInfoFromKey
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, ConvertAutoStartupInfoFromKey_100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConvertAutoStartupInfoFromKey_100 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.canUserModify = true;
+    DistributedKv::Key key = abilityAutoStartupDataManager.ConvertAutoStartupDataToKey(info);
+    AutoStartupInfo info1;
+    abilityAutoStartupDataManager.ConvertAutoStartupInfoFromKey(key, info1);
+    EXPECT_EQ(info1.bundleName, info.bundleName);
+    EXPECT_EQ(info1.abilityName, info.abilityName);
+    EXPECT_EQ(info1.moduleName, info.moduleName);
+    EXPECT_EQ(info1.accessTokenId, info.accessTokenId);
+    EXPECT_EQ(info1.userId, info.userId);
+    GTEST_LOG_(INFO) << "ConvertAutoStartupInfoFromKey_100 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: ConvertAutoStartupInfoFromKey
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager ConvertAutoStartupInfoFromKey
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, ConvertAutoStartupInfoFromKey_200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConvertAutoStartupInfoFromKey_200 start";
+    auto abilityAutoStartupDataManager = DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance();
+    EXPECT_NE(abilityAutoStartupDataManager, nullptr);
+    cJSON *jsonObject = cJSON_CreateObject();
+    EXPECT_NE(jsonObject, nullptr);
+    cJSON_AddStringToObject(jsonObject, "test", "test");
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
+    cJSON_Delete(jsonObject);
+    DistributedKv::Key key(jsonStr);
+    AutoStartupInfo info1;
+    abilityAutoStartupDataManager->ConvertAutoStartupInfoFromKey(key, info1);
+    EXPECT_EQ(info1.bundleName, "");
+    EXPECT_EQ(info1.abilityName, "");
+    EXPECT_EQ(info1.moduleName, "");
+    EXPECT_EQ(info1.accessTokenId, "");
+    EXPECT_EQ(info1.userId, -1);
+    GTEST_LOG_(INFO) << "ConvertAutoStartupInfoFromKey_200 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: ConvertAutoStartupInfoFromValue
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager ConvertAutoStartupInfoFromValue
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, ConvertAutoStartupInfoFromValue_100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConvertAutoStartupInfoFromValue_100 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    bool isAutoStartup = true;
+    bool isEdmForce = false;
+    AutoStartupInfo info;
+    info.bundleName = "com.example.testbundle";
+    info.abilityName = "testDemoAbility";
+    info.accessTokenId = "123";
+    info.abilityTypeName = "UIAbility";
+    info.setterUserId = 100;
+    info.userId = 100;
+    info.canUserModify = true;
+    info.setterType = AutoStartupSetterType::SYSTEM;
+    AutoStartupStatus asustatus;
+    DistributedKv::Value value =
+        abilityAutoStartupDataManager.ConvertAutoStartupStatusToValue(info, isAutoStartup, isEdmForce);
+    AutoStartupInfo info1;
+    abilityAutoStartupDataManager.ConvertAutoStartupInfoFromValue(value, info1);
+    EXPECT_EQ(info1.setterUserId, info.setterUserId);
+    EXPECT_EQ(info1.abilityTypeName, info.abilityTypeName);
+    GTEST_LOG_(INFO) << "ConvertAutoStartupInfoFromValue_100 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: ConvertAutoStartupInfoFromValue
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager ConvertAutoStartupInfoFromValue
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, ConvertAutoStartupInfoFromValue_200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ConvertAutoStartupInfoFromValue_200 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    cJSON *jsonObject = cJSON_CreateObject();
+    EXPECT_NE(jsonObject, nullptr);
+    cJSON_AddStringToObject(jsonObject, "test", "test");
+    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
+    cJSON_Delete(jsonObject);
+    DistributedKv::Value value(jsonStr);
+    AutoStartupInfo info1;
+    abilityAutoStartupDataManager.ConvertAutoStartupInfoFromValue(value, info1);
+    EXPECT_EQ(info1.setterUserId, -1);
+    EXPECT_EQ(info1.abilityTypeName, "");
+    EXPECT_EQ(info1.canUserModify, false);
+    GTEST_LOG_(INFO) << "ConvertAutoStartupInfoFromValue_200 end";
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

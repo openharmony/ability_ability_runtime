@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,9 @@ void GetRandomAutoStartupInfo(FuzzedDataProvider& fdp, AutoStartupInfo& info)
     info.appCloneIndex = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
     info.userId = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
     info.retryCount = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
+    info.userId = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
+    info.setterUserId = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
+    info.canUserModify = fdp.ConsumeIntegralInRange<bool>(false, true);
     info.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     info.abilityName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     info.moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
@@ -54,11 +57,12 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     std::vector<AutoStartupInfo> infoList;
     int32_t in32Param = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
     size_t arraySize = fdp.ConsumeIntegralInRange<size_t>(0, U32_AT_SIZE);
+    bool isCalledByEDM = fdp.ConsumeIntegralInRange<bool>(false, true);
     for (size_t i = 0; i < arraySize; ++i) {
         GetRandomAutoStartupInfo(fdp, info);
         infoList.emplace_back(info);
     }
-    abilityAutoStartupDataManager->QueryAllAutoStartupApplications(infoList, in32Param);
+    abilityAutoStartupDataManager->QueryAllAutoStartupApplications(infoList, in32Param, isCalledByEDM);
     return true;
 }
 }
