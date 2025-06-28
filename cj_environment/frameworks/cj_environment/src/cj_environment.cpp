@@ -241,6 +241,7 @@ const char *CJEnvironment::cjCompatibilitySDKNSName = "cj_compatibility_sdk";
 std::string CJEnvironment::appVersion = "5.1.0.0";
 const uint32_t CJEnvironment::majorVersion = 5;
 const uint32_t CJEnvironment::minorVersion = 1;
+SanitizerKind CJEnvironment::sanitizerKind = SanitizerKind::NONE;
 
 #ifdef WITH_EVENT_HANDLER
 static std::shared_ptr<AppExecFwk::EventHandler>GetGHandler()
@@ -806,6 +807,9 @@ CJEnvironment::NSMode CJEnvironment::DetectAppNSMode()
     if (tokens.size() <= 1) {
         return NSMode::SINK;
     }
+    if (CJEnvironment::sanitizerKind != SanitizerKind::NONE) {
+        return NSMode::APP;
+    }
     if (tokens[0] > CJEnvironment::majorVersion ||
         (tokens[0] == CJEnvironment::majorVersion && tokens[1] >= CJEnvironment::minorVersion)) {
         return NSMode::SINK;
@@ -832,13 +836,24 @@ void CJEnvironment::InitCJNS(const std::string& appPath)
 #ifdef __OHOS__
     InitNewCJAppNS(appPath.empty() ? SANDBOX_LIB_PATH : appPath);
 #endif
-    StartRuntime();
+    if (!StartRuntime()) {
+        LOGE("Failed to start cj runtime.");
+        delete lazyApis_;
+        lazyApis_ = nullptr;
+        return;
+    }
     StartUIScheduler();
 }
 
 void CJEnvironment::SetAppVersion(std::string& version)
 {
     CJEnvironment::appVersion = version;
+}
+
+void CJEnvironment::SetSanitizerKindRuntimeVersion(SanitizerKind kind)
+{
+    LOGI("Set sanitizer for cj.");
+    CJEnvironment::sanitizerKind = kind;
 }
 
 CJEnvMethods* CJEnvironment::CreateEnvMethods()
@@ -882,7 +897,7 @@ CJEnvMethods* CJEnvironment::CreateEnvMethods()
             return CJEnvironment::GetInstance()->RegisterCJUncaughtExceptionHandler(handle);
         },
         .setSanitizerKindRuntimeVersion = [](SanitizerKind kind) {
-            return CJEnvironment::GetInstance()->SetSanitizerKindRuntimeVersion(kind);
+            CJEnvironment::SetSanitizerKindRuntimeVersion(kind);
         },
         .checkLoadCJLibrary = []() {
             return CJEnvironment::GetInstance()->CheckLoadCJLibrary();
