@@ -32,8 +32,12 @@ namespace AbilityDelegatorEts {
 
 using namespace OHOS::AbilityRuntime;
 
-std::map<std::shared_ptr<STSNativeReference>, std::shared_ptr<EtsAbilityMonitor>> g_monitorRecord;
-std::map<std::shared_ptr<STSNativeReference>, std::shared_ptr<EtsAbilityStageMonitor>> g_stageMonitorRecord;
+std::map<std::weak_ptr<STSNativeReference>,
+    std::shared_ptr<EtsAbilityMonitor>,
+    std::owner_less<std::weak_ptr<STSNativeReference>>> g_monitorRecord;
+std::map<std::weak_ptr<STSNativeReference>,
+    std::shared_ptr<EtsAbilityStageMonitor>,
+    std::owner_less<std::weak_ptr<STSNativeReference>>> g_stageMonitorRecord;
 std::map<std::weak_ptr<STSNativeReference>, sptr<IRemoteObject>, std::owner_less<>> g_abilityRecord;
 std::mutex g_mtxMonitorRecord;
 std::mutex g_mtxStageMonitorRecord;
@@ -50,7 +54,6 @@ constexpr int COMMON_FAILED = -1;
 #endif
 
 namespace {
-constexpr const char* AREA_MODE_ENUM_NAME = "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;";
 constexpr const char* CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
 constexpr const char* SHELL_CMD_RESULT_CLASS_NAME = "Lapplication/shellCmdResult/ShellCmdResultImpl;";
 constexpr const char* ABILITY_MONITOR_INNER_CLASS_NAME = "Lapplication/AbilityMonitor/AbilityMonitorInner;";
@@ -102,18 +105,6 @@ ani_object EtsAbilityDelegator::CreateEtsBaseContext(ani_env* aniEnv, ani_class 
     }
     if ((status = aniEnv->Object_New(contextClass, method, &contextObj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_New failed status: %{public}d", status);
-        return {};
-    }
-    ani_field areaField;
-    if (aniEnv->Class_FindField(contextClass, "area", &areaField) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "find area failed");
-        return {};
-    }
-    ani_enum_item areaModeItem {};
-    OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(aniEnv,
-        AREA_MODE_ENUM_NAME, context->GetArea(), areaModeItem);
-    if (aniEnv->Object_SetField_Ref(contextObj, areaField, (ani_ref)areaModeItem) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Int failed");
         return {};
     }
     ani_field filesDirField;
@@ -498,20 +489,7 @@ void EtsAbilityDelegator::RemoveAbilityMonitor(ani_env* env, [[maybe_unused]]ani
         resultCode = COMMON_FAILED;
     } else {
         delegator->RemoveAbilityMonitor(monitorImpl);
-        std::unique_lock<std::mutex> lck(g_mtxMonitorRecord);
-        for (auto iter = g_monitorRecord.begin(); iter != g_monitorRecord.end(); ++iter) {
-            std::shared_ptr<STSNativeReference> etsMonitor = iter->first;
-            ani_boolean result = false;
-            ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(monitorObj),
-            reinterpret_cast<ani_ref>(etsMonitor->aniObj), &result);
-            if (status != ANI_OK) {
-                TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_StrictEquals failed status: %{public}d", status);
-            }
-            if (result) {
-                g_monitorRecord.erase(iter);
-                break;
-            }
-        }
+        GetInstance().CleanAndFindMonitorRecord(env, monitorObj);
     }
     ani_ref callbackRef = nullptr;
     auto status = env->GlobalReference_Create(callback, &callbackRef);
@@ -548,22 +526,7 @@ void EtsAbilityDelegator::RemoveAbilityMonitorSync(ani_env* env, [[maybe_unused]
         return;
     }
     delegator->RemoveAbilityMonitor(monitorImpl);
-    {
-        std::unique_lock<std::mutex> lck(g_mtxMonitorRecord);
-        for (auto iter = g_monitorRecord.begin(); iter != g_monitorRecord.end(); ++iter) {
-            std::shared_ptr<STSNativeReference> etsMonitor = iter->first;
-            ani_boolean result = false;
-            ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(monitorObj),
-            reinterpret_cast<ani_ref>(etsMonitor->aniObj), &result);
-            if (status != ANI_OK) {
-                TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_StrictEquals failed status: %{public}d", status);
-            }
-            if (result) {
-                g_monitorRecord.erase(iter);
-                break;
-            }
-        }
-    }
+    GetInstance().CleanAndFindMonitorRecord(env, monitorObj);
     return;
 }
 
@@ -961,15 +924,25 @@ void EtsAbilityDelegator::AbilityLifecycleStateToEts(
 bool EtsAbilityDelegator::ParseMonitorPara(ani_env *env, ani_object monitorObj,
     std::shared_ptr<EtsAbilityMonitor> &monitorImpl)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "monitorRecord size: %{public}zu", g_monitorRecord.size());
     if (env == nullptr || monitorObj == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env or monitorObj is nullptr");
         return false;
     }
     {
         std::unique_lock<std::mutex> lck(g_mtxMonitorRecord);
-        for (auto iter = g_monitorRecord.begin(); iter != g_monitorRecord.end(); ++iter) {
-            std::shared_ptr<STSNativeReference> etsMonitor = iter->first;
+        TAG_LOGI(AAFwkTag::DELEGATOR, "monitorRecord size: %{public}zu", g_monitorRecord.size());
+        for (auto iter = g_monitorRecord.begin(); iter != g_monitorRecord.end();) {
+            if (iter->first.expired()) {
+                TAG_LOGE(AAFwkTag::DELEGATOR, "g_monitorRecord expired");
+                iter = g_monitorRecord.erase(iter);
+                continue;
+            }
+            std::shared_ptr<STSNativeReference> etsMonitor = iter->first.lock();
+            if (etsMonitor == nullptr) {
+                TAG_LOGE(AAFwkTag::DELEGATOR, "etsMonitor is nullptr");
+                iter = g_monitorRecord.erase(iter);
+                continue;
+            }
             ani_boolean result = false;
             ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(monitorObj),
                 reinterpret_cast<ani_ref>(etsMonitor->aniObj), &result);
@@ -980,6 +953,7 @@ bool EtsAbilityDelegator::ParseMonitorPara(ani_env *env, ani_object monitorObj,
                 monitorImpl = iter->second;
                 return monitorImpl ? true : false;
             }
+            ++iter;
         }
     }
     if (!ParseMonitorParaInner(env, monitorObj, monitorImpl)) {
@@ -1044,7 +1018,6 @@ bool EtsAbilityDelegator::ParseMonitorParaInner(ani_env *env, ani_object monitor
 bool EtsAbilityDelegator::ParseStageMonitorPara(ani_env *env, ani_object stageMonitorObj,
     std::shared_ptr<EtsAbilityStageMonitor> &stageMonitor, bool &isExisted)
 {
-    TAG_LOGI(AAFwkTag::DELEGATOR, "stageMonitorRecord size: %{public}zu", g_stageMonitorRecord.size());
     if (env == nullptr || stageMonitorObj == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env or stageMonitorObj is nullptr");
         return false;
@@ -1052,15 +1025,20 @@ bool EtsAbilityDelegator::ParseStageMonitorPara(ani_env *env, ani_object stageMo
     isExisted = false;
     {
         std::unique_lock<std::mutex> lck(g_mtxStageMonitorRecord);
-        for (auto iter = g_stageMonitorRecord.begin(); iter != g_stageMonitorRecord.end(); ++iter) {
-            std::shared_ptr<STSNativeReference> etsMonitor = iter->first;
-            ani_boolean result = false;
+        TAG_LOGI(AAFwkTag::DELEGATOR, "stageMonitorRecord size: %{public}zu", g_stageMonitorRecord.size());
+        for (auto iter = g_stageMonitorRecord.begin(); iter != g_stageMonitorRecord.end();) {
+            if (iter->first.expired()) {
+                TAG_LOGE(AAFwkTag::DELEGATOR, "g_stageMonitorRecord expired");
+                iter = g_stageMonitorRecord.erase(iter);
+                continue;
+            }
+            std::shared_ptr<STSNativeReference> etsMonitor = iter->first.lock();
             if (etsMonitor == nullptr) {
                 TAG_LOGE(AAFwkTag::DELEGATOR, "etsMonitor is nullptr");
+                iter = g_stageMonitorRecord.erase(iter);
+                continue;
             }
-            if (env == nullptr) {
-                TAG_LOGE(AAFwkTag::DELEGATOR, "env  is nullptr");
-            }
+            ani_boolean result = false;
             ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(stageMonitorObj),
                 reinterpret_cast<ani_ref>(etsMonitor->aniObj), &result);
             if (status != ANI_OK) {
@@ -1072,6 +1050,7 @@ bool EtsAbilityDelegator::ParseStageMonitorPara(ani_env *env, ani_object stageMo
                 stageMonitor = iter->second;
                 return stageMonitor ? true : false;
             }
+            ++iter;
         }
     }
     if (!ParseStageMonitorParaInner(env, stageMonitorObj, stageMonitor)) {
@@ -1124,34 +1103,21 @@ void EtsAbilityDelegator::AddStageMonitorRecord(ani_env *env, ani_object stageMo
     const std::shared_ptr<EtsAbilityStageMonitor> &stageMonitor)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "AddStageMonitorRecord called");
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
+    if (env == nullptr || stageMonitor == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "env or stageMonitor is nullptr");
         return;
     }
     if (!AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
         return;
     }
-    std::shared_ptr<STSNativeReference> reference = nullptr;
-    ani_ref objRef = nullptr;
-    ani_status status = env->GlobalReference_Create(stageMonitorObj, &objRef);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "GlobalReference_Create failed status:  %{public}d", status);
-        return;
-    }
-    reference.reset(reinterpret_cast<STSNativeReference*>(objRef));
+    std::shared_ptr<STSNativeReference> reference = std::make_shared<STSNativeReference>();
+    reference->aniObj = stageMonitorObj;
     {
         std::unique_lock<std::mutex> lck(g_mtxStageMonitorRecord);
-        if (reference == nullptr) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "null reference");
-        }
-        if (stageMonitor == nullptr) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "null reference");
-        }
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Add g_stageMonitorRecord test");
         g_stageMonitorRecord.emplace(reference, stageMonitor);
+        TAG_LOGI(AAFwkTag::DELEGATOR, "end, size: %{public}zu", g_stageMonitorRecord.size());
     }
-    TAG_LOGI(AAFwkTag::DELEGATOR, "end, size: %{public}zu", g_stageMonitorRecord.size());
 }
 
 void EtsAbilityDelegator::RemoveStageMonitorRecord(ani_env *env, ani_object stageMonitorObj)
@@ -1165,8 +1131,18 @@ void EtsAbilityDelegator::RemoveStageMonitorRecord(ani_env *env, ani_object stag
         return;
     }
     std::unique_lock<std::mutex> lck(g_mtxStageMonitorRecord);
-    for (auto iter = g_stageMonitorRecord.begin(); iter != g_stageMonitorRecord.end(); ++iter) {
-        std::shared_ptr<STSNativeReference> etsMonitor = iter->first;
+    for (auto iter = g_stageMonitorRecord.begin(); iter != g_stageMonitorRecord.end();) {
+        if (iter->first.expired()) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "g_stageMonitorRecord expired");
+            iter = g_stageMonitorRecord.erase(iter);
+            continue;
+        }
+        std::shared_ptr<STSNativeReference> etsMonitor = iter->first.lock();
+        if (etsMonitor == nullptr) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "etsMonitor is nullptr");
+            iter = g_stageMonitorRecord.erase(iter);
+            continue;
+        }
         ani_boolean result = false;
         ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(stageMonitorObj),
         reinterpret_cast<ani_ref>(etsMonitor->aniObj), &result);
@@ -1178,6 +1154,7 @@ void EtsAbilityDelegator::RemoveStageMonitorRecord(ani_env *env, ani_object stag
             TAG_LOGI(AAFwkTag::DELEGATOR, "end, size: %{public}zu", g_stageMonitorRecord.size());
             break;
         }
+        ++iter;
     }
 }
 
@@ -1211,11 +1188,18 @@ bool EtsAbilityDelegator::ParseAbilityCommonPara(ani_env *env, ani_object abilit
     std::unique_lock<std::mutex> lck(g_mutexAbilityRecord);
     for (auto iter = g_abilityRecord.begin(); iter != g_abilityRecord.end();) {
         if (iter->first.expired()) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "g_abilityRecord expired");
+            iter = g_abilityRecord.erase(iter);
+            continue;
+        }
+        std::shared_ptr<STSNativeReference> etsMonitor = iter->first.lock();
+        if (etsMonitor == nullptr) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "etsMonitor is null");
             iter = g_abilityRecord.erase(iter);
             continue;
         }
         ani_boolean result = false;
-        ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(iter->first.lock()->aniObj),
+        ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(etsMonitor->aniObj),
         reinterpret_cast<ani_ref>(abilityObj), &result);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_StrictEquals failed status: %{public}d", status);
@@ -1258,6 +1242,39 @@ bool EtsAbilityDelegator::CheckPropertyValue(ani_env *env, int &resultCode, ani_
         return false;
     }
     return  true;
+}
+
+void EtsAbilityDelegator::CleanAndFindMonitorRecord(ani_env *env, ani_object monitorObj)
+{
+    if (env == nullptr || monitorObj == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "env or monitorObj is nullptr");
+        return;
+    }
+    std::unique_lock<std::mutex> lck(g_mtxMonitorRecord);
+    for (auto iter = g_monitorRecord.begin(); iter != g_monitorRecord.end();) {
+        if (iter->first.expired()) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "g_monitorRecord expired");
+            iter = g_monitorRecord.erase(iter);
+            continue;
+        }
+        std::shared_ptr<STSNativeReference> etsMonitor = iter->first.lock();
+        if (etsMonitor == nullptr) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "etsMonitor is null");
+            iter = g_monitorRecord.erase(iter);
+            continue;
+        }
+        ani_boolean result = false;
+        ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(monitorObj),
+        reinterpret_cast<ani_ref>(etsMonitor->aniObj), &result);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_StrictEquals failed status: %{public}d", status);
+        }
+        if (result) {
+            g_monitorRecord.erase(iter);
+            break;
+        }
+        ++iter;
+    }
 }
 } // namespace AbilityDelegatorEts
 } // namespace OHOS
