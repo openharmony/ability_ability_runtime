@@ -1370,6 +1370,8 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
     std::string backgroundColor =
         hasStartWindowOption ? sessionInfo->startWindowOption->startWindowBackgroundColor : "";
     sessionInfo->hideStartWindow = abilityRequest.hideStartWindow;
+    sessionInfo->animationOptions = abilityRequest.startOptions.animationOptions_;
+    sessionInfo->animationSystemOptions = abilityRequest.startOptions.animationSystemOptions_;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "appCloneIndex:%{public}d, instanceKey:%{public}s, "
         "hasStartWindow:%{public}d, backgroundColor:%{public}s, hideStartWindow: %{public}d",
         (sessionInfo->want).GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0), sessionInfo->instanceKey.c_str(),

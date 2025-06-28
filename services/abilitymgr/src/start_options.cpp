@@ -18,6 +18,7 @@
 #include "hilog_tag_wrapper.h"
 #include "process_options.h"
 #include "start_window_option.h"
+#include "wm_animation_common.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -50,6 +51,8 @@ StartOptions::StartOptions(const StartOptions &other)
     startWindowOption = other.startWindowOption;
     supportWindowModes_ = other.supportWindowModes_;
     requestId_ = other.requestId_;
+    animationOptions_ = other.animationOptions_;
+    animationSystemOptions_ = other.animationSystemOptions_;
 }
 
 StartOptions &StartOptions::operator=(const StartOptions &other)
@@ -80,6 +83,8 @@ StartOptions &StartOptions::operator=(const StartOptions &other)
         startWindowOption = other.startWindowOption;
         supportWindowModes_ = other.supportWindowModes_;
         requestId_ = other.requestId_;
+        animationOptions_ = other.animationOptions_;
+        animationSystemOptions_ = other.animationSystemOptions_;
     }
     return *this;
 }
@@ -118,6 +123,8 @@ bool StartOptions::ReadFromParcel(Parcel &parcel)
         supportWindowModes_.emplace_back(AppExecFwk::SupportWindowMode(parcel.ReadInt32()));
     }
     requestId_ = parcel.ReadString();
+    animationOptions_.reset(parcel.ReadParcelable<Rosen::StartAnimationOptions>());
+    animationSystemOptions_.reset(parcel.ReadParcelable<Rosen::StartAnimationSystemOptions>());
     return true;
 }
 
@@ -178,6 +185,20 @@ bool StartOptions::Marshalling(Parcel &parcel) const
         }
     }
     parcel.WriteString(requestId_);
+    return MarshallingTwo(parcel);
+}
+
+bool StartOptions::MarshallingTwo(Parcel &parcel) const
+{
+    if (!parcel.WriteParcelable(animationOptions_.get())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write animationOptions_ failed");
+        return false;
+    }
+
+    if (!parcel.WriteParcelable(animationSystemOptions_.get())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write animationSystemOptions failed");
+        return false;
+    }
     return true;
 }
 
