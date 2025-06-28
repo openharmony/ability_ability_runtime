@@ -124,6 +124,8 @@ private:
 
     bool CheckPropertyValue(ani_env *env, int &resultCode, ani_object &resultAniOj,
         std::shared_ptr<AppExecFwk::ETSDelegatorAbilityStageProperty> etsProperty);
+
+    void CleanAndFindMonitorRecord(ani_env *env, ani_object monitorObj);
 };
 } // namespace AbilityDelegatorEts
 } // namespace OHOS
