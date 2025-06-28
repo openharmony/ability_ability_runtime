@@ -35,6 +35,7 @@ const std::string AUTO_STARTUP_SERVICE_BUNDLENAME = "bundleName";
 const std::string AUTO_STARTUP_SERVICE_ABILITYNAME = "abilityName";
 const bool AUTO_STARTUP_SERVICE_TRUE = true;
 const bool AUTO_STARTUP_SERVICE_FALSE = false;
+const int32_t MAX_APP_CLONE_INDEX_NUM = 10000;
 } // namespace
 
 using namespace testing;
@@ -84,6 +85,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, RegisterAutoStartupSystemCallback_001, T
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest RegisterAutoStartupSystemCallback_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     sptr<IRemoteObject> callback;
     auto result = abilityAutoStartupService->RegisterAutoStartupSystemCallback(callback);
     EXPECT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
@@ -100,6 +102,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, UnregisterAutoStartupSystemCallback_001,
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest UnregisterAutoStartupSystemCallback_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     sptr<IRemoteObject> callback;
     auto result = abilityAutoStartupService->UnregisterAutoStartupSystemCallback(callback);
     EXPECT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
@@ -116,6 +119,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, SetApplicationAutoStartup_001, TestSize.
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest SetApplicationAutoStartup_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     auto result = abilityAutoStartupService->SetApplicationAutoStartup(info);
     EXPECT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
@@ -132,6 +136,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, InnerSetApplicationAutoStartup_001, Test
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetApplicationAutoStartup_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     info.abilityName = AUTO_STARTUP_SERVICE_EMPTY;
     auto result = abilityAutoStartupService->InnerSetApplicationAutoStartup(info);
@@ -149,12 +154,14 @@ HWTEST_F(AbilityAutoStartupServiceTest, InnerSetApplicationAutoStartup_002, Test
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetApplicationAutoStartup_002 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     info.abilityName = AUTO_STARTUP_SERVICE_ABILITYNAME;
     info.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
+    info.setterType = AutoStartupSetterType::USER;
     auto result = abilityAutoStartupService->InnerSetApplicationAutoStartup(info);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetApplicationAutoStartup_002 end";
@@ -170,6 +177,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, CancelApplicationAutoStartup_001, TestSi
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CancelApplicationAutoStartup start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     auto result = abilityAutoStartupService->CancelApplicationAutoStartup(info);
     EXPECT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
@@ -186,6 +194,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, InnerCancelApplicationAutoStartup_001, T
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelApplicationAutoStartup_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     info.abilityName = AUTO_STARTUP_SERVICE_EMPTY;
     auto result = abilityAutoStartupService->InnerCancelApplicationAutoStartup(info);
@@ -203,12 +212,14 @@ HWTEST_F(AbilityAutoStartupServiceTest, InnerCancelApplicationAutoStartup_002, T
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelApplicationAutoStartup_002 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     info.abilityName = AUTO_STARTUP_SERVICE_ABILITYNAME;
     info.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
+    info.setterType = AutoStartupSetterType::USER;
     auto result = abilityAutoStartupService->InnerCancelApplicationAutoStartup(info);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelApplicationAutoStartup_002 end";
@@ -224,11 +235,32 @@ HWTEST_F(AbilityAutoStartupServiceTest, QueryAllAutoStartupApplications_001, Tes
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest QueryAllAutoStartupApplications_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     std::vector<AutoStartupInfo> infoList;
     int32_t userId = 100;
     auto result = abilityAutoStartupService->QueryAllAutoStartupApplications(infoList, userId);
     EXPECT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest QueryAllAutoStartupApplications_001 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: QueryAllAutoStartupApplications
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService QueryAllAutoStartupApplications
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, QueryAllAutoStartupApplications_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest QueryAllAutoStartupApplications_002 start";
+    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    std::vector<AutoStartupInfo> infoList;
+    int32_t userId = 100;
+    auto result = abilityAutoStartupService->QueryAllAutoStartupApplications(infoList, userId);
+    EXPECT_EQ(result, ERR_OK);
+    AAFwk::IsMockSaCall::IsMockKillAppProcessesPermission();
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest QueryAllAutoStartupApplications_002 end";
 }
 
 /*
@@ -241,6 +273,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, QueryAllAutoStartupApplicationsWithoutPe
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest QueryAllAutoStartupApplicationsWithoutPermission_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     std::vector<AutoStartupInfo> infoList;
     int32_t userId = 100;
     auto result = abilityAutoStartupService->QueryAllAutoStartupApplicationsWithoutPermission(infoList, userId);
@@ -258,6 +291,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, DeleteAutoStartupData_001, TestSize.Leve
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest DeleteAutoStartupData_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     std::string bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     int32_t accessTokenId = 0;
     auto result = abilityAutoStartupService->DeleteAutoStartupData(bundleName, accessTokenId);
@@ -275,10 +309,28 @@ HWTEST_F(AbilityAutoStartupServiceTest, CheckAutoStartupData_001, TestSize.Level
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckAutoStartupData_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     std::string bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     auto result = abilityAutoStartupService->CheckAutoStartupData(bundleName, -1);
     EXPECT_EQ(result, INNER_ERR);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckAutoStartupData_001 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: CheckAutoStartupData
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService CheckAutoStartupData
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, CheckAutoStartupData_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckAutoStartupData_002 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    std::string bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
+    auto result = abilityAutoStartupService->CheckAutoStartupData(bundleName, 100);
+    EXPECT_EQ(result, INNER_ERR);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckAutoStartupData_002 end";
 }
 
 /*
@@ -296,6 +348,63 @@ HWTEST_F(AbilityAutoStartupServiceTest, ExecuteCallbacks_001, TestSize.Level1)
     bool isCallOn = AUTO_STARTUP_SERVICE_TRUE;
     abilityAutoStartupService->ExecuteCallbacks(isCallOn, info);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest ExecuteCallbacks_001 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: ExecuteCallbacks
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService ExecuteCallbacks
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, ExecuteCallbacks_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest ExecuteCallbacks_002 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    AutoStartupInfo info;
+    info.userId = 0;
+    info.setterUserId = 1;
+    bool isCallOn = AUTO_STARTUP_SERVICE_TRUE;
+    abilityAutoStartupService->ExecuteCallbacks(isCallOn, info);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest ExecuteCallbacks_002 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: ExecuteCallbacks
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService ExecuteCallbacks
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, ExecuteCallbacks_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest ExecuteCallbacks_003 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    AutoStartupInfo info;
+    info.userId = 0;
+    info.setterUserId = 0;
+    bool isCallOn = AUTO_STARTUP_SERVICE_FALSE;
+    abilityAutoStartupService->ExecuteCallbacks(isCallOn, info);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest ExecuteCallbacks_003 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: ExecuteCallbacks
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService ExecuteCallbacks
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, ExecuteCallbacks_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest ExecuteCallbacks_004 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    AutoStartupInfo info;
+    info.userId = 100;
+    info.setterUserId = 1;
+    bool isCallOn = AUTO_STARTUP_SERVICE_TRUE;
+    abilityAutoStartupService->ExecuteCallbacks(isCallOn, info);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest ExecuteCallbacks_004 end";
 }
 
 /*
@@ -358,6 +467,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetSelfApplicationBundleName_001, TestSi
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetSelfApplicationBundleName_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     auto result = abilityAutoStartupService->GetSelfApplicationBundleName();
     EXPECT_EQ(result, AUTO_STARTUP_SERVICE_EMPTY);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetSelfApplicationBundleName_001 end";
@@ -373,8 +483,10 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetSelfApplicationBundleName_002, TestSi
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetSelfApplicationBundleName_002 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AbilityAutoStartupService autoStartupService;
     autoStartupService.bundleMgrClient_ = std::make_shared<AppExecFwk::BundleMgrClient>();
+    EXPECT_NE(autoStartupService.bundleMgrClient_, nullptr);
     auto result = abilityAutoStartupService->GetSelfApplicationBundleName();
     EXPECT_EQ(result, AUTO_STARTUP_SERVICE_EMPTY);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetSelfApplicationBundleName_002 end";
@@ -390,6 +502,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, CheckSelfApplication_001, TestSize.Level
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckSelfApplication_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     std::string bundleName;
     auto result = abilityAutoStartupService->CheckSelfApplication(bundleName);
     EXPECT_TRUE(result);
@@ -406,12 +519,12 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetBundleInfo_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetBundleInfo_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     std::string bundleName;
-    int32_t userId = -1;
-    int32_t uid = 20000000;
+    int32_t userId = 100;
     int32_t appIndex = 0;
     AppExecFwk::BundleInfo bundleInfo;
-    auto result = abilityAutoStartupService->GetBundleInfo(bundleName, bundleInfo, uid, userId, appIndex);
+    auto result = abilityAutoStartupService->GetBundleInfo(bundleName, userId, appIndex, bundleInfo);
     EXPECT_FALSE(result);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetBundleInfo_001 end";
 }
@@ -426,12 +539,12 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetBundleInfo_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetBundleInfo_002 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     std::string bundleName;
-    int32_t userId = -1;
-    int32_t uid = 20000000;
+    int32_t userId = 100;
     int32_t appIndex = 1;
     AppExecFwk::BundleInfo bundleInfo;
-    auto result = abilityAutoStartupService->GetBundleInfo(bundleName, bundleInfo, uid, userId, appIndex);
+    auto result = abilityAutoStartupService->GetBundleInfo(bundleName, userId, appIndex, bundleInfo);
     EXPECT_FALSE(result);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetBundleInfo_002 end";
 }
@@ -446,34 +559,14 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetBundleInfo_003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetBundleInfo_003 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     std::string bundleName;
-    int32_t userId = -1;
-    int32_t uid = 20000000;
-    int32_t appIndex = 6;
+    int32_t userId = 100;
+    int32_t appIndex = MAX_APP_CLONE_INDEX_NUM;
     AppExecFwk::BundleInfo bundleInfo;
-    auto result = abilityAutoStartupService->GetBundleInfo(bundleName, bundleInfo, uid, userId, appIndex);
-    EXPECT_FALSE(result);
+    auto result = abilityAutoStartupService->GetBundleInfo(bundleName, userId, appIndex, bundleInfo);
+    EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetBundleInfo_003 end";
-}
-
-/*
- * Feature: AbilityAutoStartupService
- * Function: GetBundleInfo
- * SubFunction: NA
- * FunctionPoints: AbilityAutoStartupService GetBundleInfo
- */
-HWTEST_F(AbilityAutoStartupServiceTest, GetBundleInfo_004, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetBundleInfo_004 start";
-    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
-    std::string bundleName;
-    int32_t userId = -1;
-    int32_t uid = 200000;
-    int32_t appIndex = 0;
-    AppExecFwk::BundleInfo bundleInfo;
-    auto result = abilityAutoStartupService->GetBundleInfo(bundleName, bundleInfo, uid, userId, appIndex);
-    EXPECT_FALSE(result);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetBundleInfo_004 end";
 }
 
 /*
@@ -486,12 +579,13 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetAbilityData_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetAbilityData_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     AutoStartupAbilityData abilityData;
     abilityData.abilityTypeName = AUTO_STARTUP_SERVICE_EMPTY;
     abilityData.isVisible = AUTO_STARTUP_SERVICE_FALSE;
     abilityData.accessTokenId = "0";
-    abilityData.currentUserId = 100;
+    abilityData.setterUserId = 100;
     auto result = abilityAutoStartupService->GetAbilityData(info, abilityData);
     EXPECT_FALSE(result);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetAbilityData_001 end";
@@ -507,6 +601,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetAbilityTypeName_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetAbilityTypeName_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.type = AppExecFwk::AbilityType::PAGE;
     auto result = abilityAutoStartupService->GetAbilityTypeName(abilityInfo);
@@ -524,6 +619,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetAbilityTypeName_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetAbilityTypeName_002 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
     auto result = abilityAutoStartupService->GetAbilityTypeName(abilityInfo);
@@ -541,6 +637,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetExtensionTypeName_001, TestSize.Level
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetExtensionTypeName_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AppExecFwk::ExtensionAbilityInfo extensionInfo;
     extensionInfo.type = AppExecFwk::ExtensionAbilityType::SERVICE;
     auto result = abilityAutoStartupService->GetExtensionTypeName(extensionInfo);
@@ -558,6 +655,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetExtensionTypeName_002, TestSize.Level
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetExtensionTypeName_002 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AppExecFwk::ExtensionAbilityInfo extensionInfo;
     extensionInfo.type = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
     auto result = abilityAutoStartupService->GetExtensionTypeName(extensionInfo);
@@ -575,6 +673,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetExtensionTypeName_003, TestSize.Level
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetExtensionTypeName_003 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AppExecFwk::ExtensionAbilityInfo extensionInfo;
     extensionInfo.type = AppExecFwk::ExtensionAbilityType::DATASHARE;
     auto result = abilityAutoStartupService->GetExtensionTypeName(extensionInfo);
@@ -592,6 +691,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetBundleMgrClient_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetBundleMgrClient_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     auto result = abilityAutoStartupService->GetBundleMgrClient();
     EXPECT_NE(result, nullptr);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetBundleMgrClient_001 end";
@@ -607,6 +707,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, CheckPermissionForSystem_001, TestSize.L
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckPermissionForSystem_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     auto result = abilityAutoStartupService->CheckPermissionForSystem();
     EXPECT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckPermissionForSystem_001 end";
@@ -622,6 +723,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, CheckPermissionForSelf_001, TestSize.Lev
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckPermissionForSelf_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     std::string bundleName = AUTO_STARTUP_SERVICE_EMPTY;
     auto result = abilityAutoStartupService->CheckPermissionForSelf(bundleName);
     EXPECT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
@@ -638,11 +740,12 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetAbilityInfo_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetAbilityInfo_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     AutoStartupAbilityData abilityData;
     abilityData.abilityTypeName = AUTO_STARTUP_SERVICE_ABILITYNAME;
     abilityData.accessTokenId = "0";
-    abilityData.currentUserId = 100;
+    abilityData.setterUserId = 100;
     auto result = abilityAutoStartupService->GetAbilityInfo(info, abilityData);
     EXPECT_EQ(result, INNER_ERR);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetAbilityInfo_001 end";
@@ -659,6 +762,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, SetApplicationAutoStartupByEDM_001, Test
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest SetApplicationAutoStartupByEDM_001 start";
     MyFlag::flag_ = 1;
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     info.abilityName = "abilityName";
     info.bundleName = "bundleName";
@@ -680,6 +784,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, SetApplicationAutoStartupByEDM_002, Test
     AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
     MyFlag::flag_ = 0;
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     info.abilityName = "abilityName";
     info.bundleName = "bundleName";
@@ -701,6 +806,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, CancelApplicationAutoStartupByEDM_001, T
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CancelApplicationAutoStartupByEDM_001 start";
     MyFlag::flag_ = 1;
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     info.abilityName = "abilityName";
     info.bundleName = "bundleName";
@@ -722,6 +828,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, CancelApplicationAutoStartupByEDM_002, T
     AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
     MyFlag::flag_ = 0;
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     info.abilityName = "abilityName";
     info.bundleName = "bundleName";
@@ -742,6 +849,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, InnerApplicationAutoStartupByEDM_001, Te
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerApplicationAutoStartupByEDM_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     bool isSet = AUTO_STARTUP_SERVICE_FALSE;
     bool flag = AUTO_STARTUP_SERVICE_FALSE;
@@ -760,12 +868,14 @@ HWTEST_F(AbilityAutoStartupServiceTest, InnerApplicationAutoStartupByEDM_002, Te
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerApplicationAutoStartupByEDM_002 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     info.abilityName = AUTO_STARTUP_SERVICE_ABILITYNAME;
     info.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
+    info.setterType = AutoStartupSetterType::USER;
     bool isSet = AUTO_STARTUP_SERVICE_FALSE;
     bool flag = AUTO_STARTUP_SERVICE_FALSE;
     auto result = abilityAutoStartupService->InnerApplicationAutoStartupByEDM(info, isSet, flag);
@@ -784,6 +894,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, CheckPermissionForEDM_001, TestSize.Leve
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckPermissionForEDM_001 start";
     MyFlag::flag_ = 1;
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     auto result = abilityAutoStartupService->CheckPermissionForEDM();
     EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckPermissionForEDM_001 end";
@@ -801,6 +912,7 @@ HWTEST_F(AbilityAutoStartupServiceTest, CheckPermissionForEDM_002, TestSize.Leve
     AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
     MyFlag::flag_ = 0;
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     auto result = abilityAutoStartupService->CheckPermissionForEDM();
     EXPECT_EQ(result, ERR_OK);
     AAFwk::IsMockSaCall::IsMockKillAppProcessesPermission();
@@ -817,12 +929,14 @@ HWTEST_F(AbilityAutoStartupServiceTest, IsTargetAbility_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest IsTargetAbility_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     info.abilityName = AUTO_STARTUP_SERVICE_ABILITYNAME;
     info.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
+    info.setterType = AutoStartupSetterType::USER;
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     abilityInfo.name = AUTO_STARTUP_SERVICE_ABILITYNAME;
@@ -842,13 +956,15 @@ HWTEST_F(AbilityAutoStartupServiceTest, IsTargetAbility_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest IsTargetAbility_002 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     info.abilityName = AUTO_STARTUP_SERVICE_ABILITYNAME;
     info.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     info.moduleName = "moduleName1";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
+    info.setterType = AutoStartupSetterType::USER;
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     abilityInfo.name = AUTO_STARTUP_SERVICE_ABILITYNAME;
@@ -868,12 +984,14 @@ HWTEST_F(AbilityAutoStartupServiceTest, IsTargetExtension_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest IsTargetExtension_001 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     info.abilityName = AUTO_STARTUP_SERVICE_ABILITYNAME;
     info.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
+    info.setterType = AutoStartupSetterType::USER;
     AppExecFwk::ExtensionAbilityInfo extensionInfo;
     extensionInfo.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     extensionInfo.name = AUTO_STARTUP_SERVICE_ABILITYNAME;
@@ -893,13 +1011,15 @@ HWTEST_F(AbilityAutoStartupServiceTest, IsTargetExtension_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest IsTargetExtension_002 start";
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
     AutoStartupInfo info;
     info.abilityName = AUTO_STARTUP_SERVICE_ABILITYNAME;
     info.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     info.moduleName = "moduleName1";
     info.accessTokenId = "123";
-    info.currentUserId = 100;
+    info.setterUserId = 100;
     info.userId = 100;
+    info.setterType = AutoStartupSetterType::USER;
     AppExecFwk::ExtensionAbilityInfo extensionInfo;
     extensionInfo.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     extensionInfo.name = AUTO_STARTUP_SERVICE_ABILITYNAME;
@@ -907,6 +1027,71 @@ HWTEST_F(AbilityAutoStartupServiceTest, IsTargetExtension_002, TestSize.Level1)
     auto result = abilityAutoStartupService->IsTargetExtension(info, extensionInfo);
     EXPECT_FALSE(result);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest IsTargetExtension_002 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: GetValidUserId
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService GetValidUserId
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, GetValidUserId_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetValidUserId_001 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    int32_t userId = -1;
+    abilityAutoStartupService->GetValidUserId(userId);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetValidUserId_001 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: GetValidUserId
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService GetValidUserId
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, GetValidUserId_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetValidUserId_002 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    int32_t userId = 100;
+    auto validUserId = abilityAutoStartupService->GetValidUserId(userId);
+    EXPECT_EQ(userId, validUserId);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetValidUserId_002 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: GetValidUserId
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService GetValidUserId
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, GetValidUserId_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetValidUserId_003 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    int32_t userId = 0;
+    abilityAutoStartupService->GetValidUserId(userId);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetValidUserId_003 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: GetValidUserId
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService GetValidUserId
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, GetValidUserId_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetValidUserId_004 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    int32_t userId = 1;
+    abilityAutoStartupService->GetValidUserId(userId);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetValidUserId_004 end";
 }
 } // namespace AAFwk
 } // namespace OHOS

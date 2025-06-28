@@ -241,7 +241,6 @@ const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
 };
 std::atomic<bool> g_isDmsAlive = false;
 constexpr int32_t PIPE_MSG_READ_BUFFER = 1024;
-constexpr int32_t U1_USER_ID = 1;
 constexpr const char* APPSPAWN_STARTED = "startup.service.ctl.appspawn.pid";
 constexpr const char* APP_LINKING_ONLY = "appLinkingOnly";
 

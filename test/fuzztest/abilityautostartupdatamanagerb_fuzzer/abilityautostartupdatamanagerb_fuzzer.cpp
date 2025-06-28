@@ -82,7 +82,7 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     info.abilityName = "MainAbility";
     info.appCloneIndex = int32Param;
     info.accessTokenId = "accessTokenId";
-    info.currentUserId = int32Param;
+    info.setterUserId = int32Param;
     info.userId = int32Param;
     dataMgr->ConvertAutoStartupDataToKey(info);
 
