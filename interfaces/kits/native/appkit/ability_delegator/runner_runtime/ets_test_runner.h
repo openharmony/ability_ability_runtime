@@ -36,7 +36,7 @@ public:
      * @param bundleInfo Indicates the bundle info.
      * @return the TestRunner object if JsTestRunner object is created successfully; returns null otherwise.
      */
-    static std::unique_ptr<TestRunner> Create(const std::unique_ptr<Runtime> &runtime,
+    static TestRunner *Create(const std::unique_ptr<Runtime> &runtime,
         const std::shared_ptr<AbilityDelegatorArgs> &args, const AppExecFwk::BundleInfo &bundleInfo);
 
     /**

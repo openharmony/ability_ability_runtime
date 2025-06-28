@@ -96,7 +96,7 @@ bool WrapLaunchParam(ani_env *env, const AAFwk::LaunchParam &launchParam, ani_ob
         return false;
     }
     if ((status = env->Object_SetPropertyByName_Ref(
-            object, "lastExitMessage", GetAniString(env, launchParam.lastExitMessage))) != ANI_OK) {
+        object, "lastExitMessage", GetAniString(env, launchParam.lastExitMessage))) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to set lastExitMessage");
         return false;
     }
