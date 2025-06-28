@@ -112,7 +112,12 @@ bool ChildProcessManager::IsMultiProcessFeatureApp(const AppExecFwk::BundleInfo 
         if (info.moduleType != AppExecFwk::ModuleType::ENTRY) {
             continue;
         }
-        auto &deviceFeatures = info.deviceFeatures;
+        auto deviceType = OHOS::system::GetDeviceType();
+        auto it = info.requiredDeviceFeatures.find(deviceType);
+        if (it == info.requiredDeviceFeatures.end()) {
+            return false;
+        }
+        auto &deviceFeatures = it->second;
         return std::find(deviceFeatures.begin(), deviceFeatures.end(), MULTI_PROCESS) != deviceFeatures.end();
     }
     return false;
