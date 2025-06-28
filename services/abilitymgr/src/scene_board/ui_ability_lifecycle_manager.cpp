@@ -3732,7 +3732,6 @@ bool UIAbilityLifecycleManager::HandleColdAcceptWantDone(const AAFwk::Want &want
     UpdateSpecifiedFlag(uiAbilityRecord, flag);
     uiAbilityRecord->SetSpecifiedFlag(flag);
     auto isShellCall = specifiedRequest.abilityRequest.want.GetBoolParam(IS_SHELL_CALL, false);
-    uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
     uiAbilityRecord->ProcessForegroundAbility(specifiedRequest.callingTokenId,
         specifiedRequest.sceneFlag, isShellCall);
     SendKeyEvent(specifiedRequest.abilityRequest);
