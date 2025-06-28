@@ -32,7 +32,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 class ETSAbilityStage : public AbilityStage {
 public:
-    static std::shared_ptr<AbilityStage> Create(
+    static AbilityStage *Create(
         const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo);
 
     ETSAbilityStage(ETSRuntime& etsRuntime, std::unique_ptr<AppExecFwk::ETSNativeReference>&& ETSAbilityStageObj);

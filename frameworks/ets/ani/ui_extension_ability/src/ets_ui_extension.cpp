@@ -33,6 +33,12 @@
 #include "ets_data_struct_converter.h"
 #include "ets_ui_extension_context.h"
 
+#ifdef WINDOWS_PLATFORM
+#define ETS_EXPORT __declspec(dllexport)
+#else
+#define ETS_EXPORT __attribute__((visibility("default")))
+#endif
+
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
@@ -800,3 +806,9 @@ void EtsUIExtension::UnregisterDisplayInfoChangedListener()
 #endif // SUPPORT_GRAPHICS
 } // namespace AbilityRuntime
 } // namespace OHOS
+
+ETS_EXPORT extern "C" OHOS::AbilityRuntime::Extension *OHOS_ETS_Extension_Create(
+    const std::unique_ptr<OHOS::AbilityRuntime::Runtime> &runtime)
+{
+    return OHOS::AbilityRuntime::EtsUIExtension::Create(runtime);
+}

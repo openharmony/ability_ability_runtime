@@ -21,7 +21,7 @@
 #include "js_service_extension.h"
 #include "runtime.h"
 #include "service_extension_context.h"
-#include "ets_service_extension.h"
+#include "ets_service_extension_instance.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -48,7 +48,7 @@ ServiceExtension* ServiceExtension::Create(const std::unique_ptr<Runtime>& runti
         case Runtime::Language::JS:
             return JsServiceExtension::Create(runtime);
         case Runtime::Language::ETS:
-            return EtsServiceExtension::Create(runtime);
+            return CreateETSServiceExtension(runtime);
         default:
             return new ServiceExtension();
     }
