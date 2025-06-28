@@ -78,11 +78,9 @@ HWTEST_F(CjEnvironmentTest, CJEnvironment_IsRuntimeStarted_0100, TestSize.Level1
  */
 HWTEST_F(CjEnvironmentTest, CJEnvironment_SetSanitizerKindRuntimeVersion_0100, TestSize.Level1)
 {
-    auto cJEnvironment = std::make_shared<CJEnvironment>(CJEnvironment::NSMode::APP);
     SanitizerKind kind = SanitizerKind::ASAN;
-
-    cJEnvironment->SetSanitizerKindRuntimeVersion(kind);
-    EXPECT_NE(cJEnvironment->sanitizerKind_, SanitizerKind::NONE);
+    CJEnvironment::SetSanitizerKindRuntimeVersion(kind);
+    EXPECT_NE(CJEnvironment::sanitizerKind, SanitizerKind::NONE);
 }
 
 /**
@@ -406,7 +404,23 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitNewCJAppNS_001andInitCJSDKNS_01
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestDetectAppNSModeandInitCJNS_0100, TestSize.Level2)
 {
+    SanitizerKind kind = SanitizerKind::ASAN;
+    CJEnvironment::SetSanitizerKindRuntimeVersion(kind);
+    EXPECT_NE(CJEnvironment::sanitizerKind, SanitizerKind::NONE);
     auto test = CJEnvironment::DetectAppNSMode();
-    EXPECT_EQ(test, CJEnvironment::NSMode::SINK);
+    EXPECT_EQ(test, CJEnvironment::NSMode::APP);
+}
+
+/**
+ * @tc.name: InitCJNS_0100
+ * @tc.desc: Test InitCJNS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJNS_0100, TestSize.Level2)
+{
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    std::string appPath = "com/ohos/unittest/test/";
+    cJEnvironment.InitCJNS(appPath);
+    EXPECT_EQ(cJEnvironment.isRuntimeStarted_, false);
 }
 } // namespace OHOS

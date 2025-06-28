@@ -1628,15 +1628,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     TAG_LOGD(AAFwkTag::APPKIT, "the application isSystemApp: %{public}d", isSystemApp);
 #ifdef CJ_FRONTEND
     AbilityRuntime::CJRuntime::SetAppVersion(bundleInfo.applicationInfo.compileSdkVersion);
+    if (appInfo.asanEnabled) {
+        AbilityRuntime::CJRuntime::SetSanitizerVersion(SanitizerKind::ASAN);
+    }
     if (isCJApp) {
         AbilityRuntime::CJRuntime::SetAppLibPath(appLibPaths);
-        if (appInfo.asanEnabled) {
-            AbilityRuntime::CJRuntime::SetSanitizerVersion(SanitizerKind::ASAN);
-        } else if (appInfo.tsanEnabled) {
-            AbilityRuntime::CJRuntime::SetSanitizerVersion(SanitizerKind::TSAN);
-        } else if (appInfo.hwasanEnabled) {
-            AbilityRuntime::CJRuntime::SetSanitizerVersion(SanitizerKind::HWASAN);
-        }
     } else {
 #endif
         if (IsEtsAPP(appInfo)) {

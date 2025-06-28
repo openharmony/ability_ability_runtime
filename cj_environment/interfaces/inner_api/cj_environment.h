@@ -53,10 +53,7 @@ public:
         return isRuntimeStarted_;
     }
 
-    void SetSanitizerKindRuntimeVersion(SanitizerKind kind)
-    {
-        sanitizerKind_ = kind;
-    }
+    static void SetSanitizerKindRuntimeVersion(SanitizerKind kind);
 
     bool StartRuntime();
     void StopRuntime();
@@ -121,6 +118,7 @@ public:
     static std::string appVersion;
     static const uint32_t majorVersion;
     static const uint32_t minorVersion;
+    static SanitizerKind sanitizerKind;
 
 private:
     bool LoadRuntimeApis();
@@ -130,8 +128,7 @@ private:
     bool isLoadCJLibrary_{false};
     bool isUISchedulerStarted_{false};
     void* uiScheduler_ {nullptr};
-    SanitizerKind sanitizerKind_ {SanitizerKind::NONE};
-    NSMode nsMode_;
+    NSMode nsMode_ {NSMode::SINK};
     std::vector<void*> preloadLibs_;
 };
 
