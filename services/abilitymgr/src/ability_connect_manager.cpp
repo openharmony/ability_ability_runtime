@@ -940,10 +940,17 @@ void AbilityConnectManager::DisconnectRecordForce(ConnectListType &list,
     list.emplace_back(connectRecord);
     bool isUIService = (abilityRecord->GetAbilityInfo().extensionAbilityType ==
         AppExecFwk::ExtensionAbilityType::UI_SERVICE);
-    if (abilityRecord->IsConnectListEmpty() && abilityRecord->IsNeverStarted() && !isUIService) {
-        TAG_LOGW(AAFwkTag::SERVICE_EXT, "force terminate ability record state: %{public}d",
-            abilityRecord->GetAbilityState());
-        TerminateRecord(abilityRecord);
+    if (abilityRecord->IsConnectListEmpty() && !isUIService) {
+        if (abilityRecord->IsNeverStarted()) {
+            TAG_LOGW(AAFwkTag::SERVICE_EXT, "force terminate ability record state: %{public}d",
+                abilityRecord->GetAbilityState());
+            TerminateRecord(abilityRecord);
+        } else if (abilityRecord->IsAbilityState(AbilityState::ACTIVE)) {
+            TAG_LOGW(AAFwkTag::SERVICE_EXT, "force disconnect ability record state: %{public}d",
+                abilityRecord->GetAbilityState());
+            connectRecord->CancelConnectTimeoutTask();
+            abilityRecord->DisconnectAbility();
+        }
     }
 }
 
