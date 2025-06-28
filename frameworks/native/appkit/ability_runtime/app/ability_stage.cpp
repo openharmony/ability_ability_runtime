@@ -22,7 +22,7 @@
 #include "cj_ability_stage.h"
 #endif
 #include "js_ability_stage.h"
-#include "ets_ability_stage.h"
+#include "ets_ability_stage_instance.h"
 #include "runtime.h"
 
 namespace OHOS {
@@ -43,7 +43,7 @@ std::shared_ptr<AbilityStage> AbilityStage::Create(
             return CJAbilityStage::Create(runtime, hapModuleInfo);
 #endif
         case Runtime::Language::ETS:
-            return ETSAbilityStage::Create(runtime, hapModuleInfo);
+            return std::shared_ptr<AbilityStage>(CreateETSAbilityStage(runtime, hapModuleInfo));
         default:
             return std::make_shared<AbilityStage>();
     }
