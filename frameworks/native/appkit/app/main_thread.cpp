@@ -1712,6 +1712,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     static_cast<int32_t>(hapModuleInfo.aotCompileStatus);
             }
         }
+        options.enableWarmStartupSmartGC =
+            (appLaunchData.GetAppPreloadMode() == AppExecFwk::PreloadMode::PRE_MAKE ||
+             appLaunchData.GetAppPreloadMode() == AppExecFwk::PreloadMode::PRELOAD_MODULE);
+        TAG_LOGI(AAFwkTag::APPKIT, "SmartGC: process is start. enable warm startup SmartGC: %{public}d",
+            static_cast<int32_t>(options.enableWarmStartupSmartGC));
         auto runtime = AbilityRuntime::Runtime::Create(options);
         if (!runtime) {
             TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
@@ -1939,7 +1944,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         HandleNWebPreload();
     }
 #endif
-    if (appLaunchData.IsNeedPreloadModule()) {
+    if (appLaunchData.GetAppPreloadMode() == AppExecFwk::PreloadMode::PRELOAD_MODULE) {
         PreloadModule(entryHapModuleInfo, application_->GetRuntime());
     }
 }
