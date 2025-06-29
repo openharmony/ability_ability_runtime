@@ -79,6 +79,7 @@ struct RunningProcessInfo : public Parcelable {
     static RunningProcessInfo *Unmarshalling(Parcel &parcel);
     ProcessType processType_ = ProcessType::NORMAL;
     ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
+    bool isCached = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

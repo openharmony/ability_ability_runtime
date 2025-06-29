@@ -2944,19 +2944,25 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
         }
         bool isColdStart = true;
         int32_t pid = 0;
-        int32_t warmStartType = -1;
+        bool supportWarmSmartGC = false;
         for (auto const &info : runningProcessInfos) {
             if (info.uid_ == abilityInfo.applicationInfo.uid &&
                 info.processType_ == AppExecFwk::ProcessType::NORMAL &&
-                std::find(info.bundleNames.begin(), info.bundleNames.end(),
+                    std::find(info.bundleNames.begin(), info.bundleNames.end(),
                 abilityInfo.applicationInfo.bundleName) != info.bundleNames.end()) {
                 isColdStart = info.isExiting ? true : info.preloadMode_ == AppExecFwk::PreloadMode::PRESS_DOWN;
                 pid = info.isExiting ? 0 : info.pid_;
-                warmStartType = static_cast<int32_t>(info.preloadMode_);
+                AppExecFwk::PreloadMode mode = info.preloadMode_;
+                bool isSuggestCache = info.isCached;
+                bool supportWarmSmartGC = (isSuggestCache ||
+                    mode == AppExecFwk::PreloadMode::PRE_MAKE ||
+                    mode == AppExecFwk::PreloadMode::PRELOAD_MODULE);
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "SmartGC: Process %{public}d report to RSS, start type: %{public}d, isCached: %{public}d, supportWarmGC: %{public}d",
+                        pid, static_cast<int32_t>(mode), static_cast<int32_t>(isSuggestCache), static_cast<int32_t>(supportWarmSmartGC));
                 break;
             }
         }
-        ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart, warmStartType);
+        ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart, supportWarmSmartGC);
     }
 }
 

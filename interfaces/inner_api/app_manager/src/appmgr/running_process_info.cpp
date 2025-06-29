@@ -71,6 +71,7 @@ bool RunningProcessInfo::ReadFromParcel(Parcel &parcel)
     int32_t pssData;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, pssData);
     pssValue = static_cast<int32_t>(pssData);
+    isCached = parcel.ReadBool();
     return true;
 }
 
@@ -111,6 +112,7 @@ bool RunningProcessInfo::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(appMode));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(rssValue));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, static_cast<int32_t>(pssValue));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isCached);
     return true;
 }
 }  // namespace AppExecFwk

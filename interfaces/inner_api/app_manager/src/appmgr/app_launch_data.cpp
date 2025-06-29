@@ -117,7 +117,12 @@ bool AppLaunchData::MarshallingExtend(Parcel &parcel) const
     }
 
     if (!parcel.WriteBool(isNeedPreloadModule_)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Marshalling, Failed to write instance key.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Marshalling, Failed to write is need preload module.");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(static_cast<int32_t>(appPreloadMode_))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Marshalling, Failed to write app preload mode");
         return false;
     }
 
@@ -190,6 +195,7 @@ bool AppLaunchData::ReadFromParcel(Parcel &parcel)
     isErrorInfoEnhance_ = parcel.ReadBool();
     instanceKey_ = parcel.ReadString();
     isNeedPreloadModule_ = parcel.ReadBool();
+    appPreloadMode_ = static_cast<PreloadMode>(parcel.ReadInt32());
     isAllowedNWebPreload_ = parcel.ReadBool();
     preloadModuleName_ = parcel.ReadString();
     isDebugFromLocal_ = parcel.ReadBool();
@@ -309,6 +315,16 @@ void AppLaunchData::SetIsNeedPreloadModule(bool isNeedPreloadModule)
 bool AppLaunchData::IsNeedPreloadModule() const
 {
     return isNeedPreloadModule_;
+}
+
+void AppLaunchData::SetAppPreloadMode(PreloadMode preloadMode)
+{
+    appPreloadMode_ = preloadMode;
+}
+
+PreloadMode AppLaunchData::GetAppPreloadMode() const
+{
+    return appPreloadMode_;
 }
 
 void AppLaunchData::SetNWebPreload(const bool isAllowedNWebPreload)
