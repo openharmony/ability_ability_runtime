@@ -136,5 +136,32 @@ HWTEST_F(PreloadUIextStateObserverTest, OnAppCacheStateChanged_001, Function | M
     EXPECT_TRUE(record == nullptr);
     GTEST_LOG_(INFO) << "OnAppCacheStateChanged_001 end";
 }
+
+/**
+ * @tc.number: OnAppCacheStateChanged_002
+ * @tc.name: OnAppCacheStateChanged
+ * @tc.desc: Test whether OnAppCacheStateChanged is called normally.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreloadUIextStateObserverTest, OnAppCacheStateChanged_002, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "OnAppCacheStateChanged_002 start";
+    Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord =
+        std::make_shared<AAFwk::AbilityRecord>(want, abilityInfo, applicationInfo);
+    auto extensionRecordSharedPtr = std::make_shared<AbilityRuntime::ExtensionRecord>(abilityRecord);
+    auto hostPid = extensionRecordSharedPtr->hostPid_ = 10;
+    std::weak_ptr<AbilityRuntime::ExtensionRecord> extensionRecord = extensionRecordSharedPtr;
+    PreLoadUIExtStateObserver preLoadUIExtStateObserver(extensionRecord);
+    AppExecFwk::AppStateData appStateData;
+    int32_t diedPid = appStateData.pid;
+    preLoadUIExtStateObserver.OnAppCacheStateChanged(appStateData);
+    auto record = preLoadUIExtStateObserver.extensionRecord_.lock();
+    EXPECT_TRUE(record != nullptr);
+    EXPECT_TRUE(record->hostPid_ != diedPid);
+    GTEST_LOG_(INFO) << "OnAppCacheStateChanged_002 end";
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
