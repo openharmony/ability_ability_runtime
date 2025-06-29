@@ -25,6 +25,26 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+void* DetachNewAbilityStageContext(napi_env, void* nativeObject, void*)
+{
+    auto* origContext = static_cast<std::weak_ptr<AbilityStageContext> *>(nativeObject);
+    if (origContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "origContext is null");
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "New detached abilityStage context");
+    auto* detachNewContext = new (std::nothrow) std::weak_ptr<AbilityStageContext>(*origContext);
+    return detachNewContext;
+}
+
+void DetachFinalizeAbilityStageContext(void* detachedObject, void*)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Finalizer detached abilityStage context");
+    delete static_cast<std::weak_ptr<AbilityStageContext> *>(detachedObject);
+}
+}
+
 void JsAbilityStageContext::ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
     const std::shared_ptr<AppExecFwk::Configuration> &config)
 {
@@ -96,14 +116,15 @@ napi_value AttachAbilityStageContext(napi_env env, void *value, void *hint)
         return nullptr;
     }
 
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityStageContext>(ptr);
     auto status = napi_coerce_to_native_binding_object(
-        env, contextObj, DetachCallbackFunc, AttachAbilityStageContext, value, nullptr);
+        env, contextObj, DetachNewAbilityStageContext, AttachAbilityStageContext, workContext, nullptr);
     if (status != napi_ok) {
         TAG_LOGW(AAFwkTag::APPKIT, "coerce ability stage context failed: %{public}d", status);
         return nullptr;
     }
+    napi_add_detached_finalizer(env, contextObj, DetachFinalizeAbilityStageContext, nullptr);
 
-    auto workContext = new (std::nothrow) std::weak_ptr<AbilityStageContext>(ptr);
     status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr ability stage context");
