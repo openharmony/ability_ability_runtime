@@ -583,9 +583,8 @@ bool STSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
         return false;
     }
 
-    static const char *recordSetName = "X{C{std.core.Numeric}C{std.core.String}}C{std.core.Object}:";
     ani_method recordSetMethod;
-    status = env->Class_FindMethod(recordCls, "$_set", recordSetName, &recordSetMethod);
+    status = env->Class_FindMethod(recordCls, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod set failed: %{public}d", status);
         return false;
