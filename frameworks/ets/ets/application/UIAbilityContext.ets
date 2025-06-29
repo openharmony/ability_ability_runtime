@@ -29,9 +29,6 @@ import OpenLinkOptions from '@ohos.app.ability.OpenLinkOptions';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 
-// remove local declaration after Any type is supported
-type Any = Object | null | undefined
-
 export default class UIAbilityContext extends Context {
   static {
     loadLibrary("context_ani");

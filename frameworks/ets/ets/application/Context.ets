@@ -23,9 +23,6 @@ import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 
-// remove local declaration after Any type is supported
-type Any = Object | null | undefined
-
 export class Context extends BaseContext {
   static {
     loadLibrary("context_ani");
