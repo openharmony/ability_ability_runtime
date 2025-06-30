@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef OHOS_ABILITY_RUNTIME_REQUEST_ID_UTIL_H
+#define OHOS_ABILITY_RUNTIME_REQUEST_ID_UTIL_H
+
 #include <atomic>
 #include <climits>
 
@@ -28,3 +30,4 @@ private:
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_REQUEST_ID_UTIL_H
