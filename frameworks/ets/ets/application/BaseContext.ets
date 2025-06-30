@@ -14,6 +14,6 @@
  */
 
 export default class BaseContext {
-    public nativeContext : long = 0;
-    public stageMode: boolean;
+    public nativeContext: long = 0;
+    public stageMode: boolean = true;
 }

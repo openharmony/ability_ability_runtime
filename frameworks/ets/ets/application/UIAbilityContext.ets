@@ -34,16 +34,11 @@ import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 type Any = Object | null | undefined
 
 export default class UIAbilityContext extends Context {
-  static {
-    loadLibrary("context_ani");
-  }
 
-  config: Configuration;
-  abilityInfo: AbilityInfo;
-  windowStage: window.WindowStage;
-  currentHapModuleInfo: HapModuleInfo;
-
-  native constructor();
+  config!: Configuration;
+  abilityInfo!: AbilityInfo;
+  windowStage!: window.WindowStage;
+  currentHapModuleInfo!: HapModuleInfo;
 
   constructor(config: Configuration, abilityInfo: AbilityInfo, windowStage: window.WindowStage,
     currentHapModuleInfo: HapModuleInfo) {

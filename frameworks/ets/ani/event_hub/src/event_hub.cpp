@@ -187,6 +187,5 @@ void EventHub::SetEventHubContext(ani_env *aniEnv, ani_ref eventHubRef, ani_ref 
         return;
     }
 }
-
 }
 }
