@@ -1,7 +1,15 @@
 [Docs Uri Permission]
-services/uripermmgr/include/file_permission_manager.h @hobbycao
-services/uripermmgr/src/file_permission_manager.cpp @hobbycao
+services/uripermmgr/include/file_permission_manager.h @hobbycao @aafwk_ability required_reviewers=2
+services/uripermmgr/src/file_permission_manager.cpp @hobbycao @aafwk_ability required_reviewers=2
 
-[UPMS]
-services/uripermmgr @duan-sizhao
-interfaces/inner_api/uri_permission @duan-sizhao
+[AAFWK ABILITY]
+cj_environment/ @aafwk_ability
+ets_environment/ @aafwk_ability
+frameworks/ @aafwk_ability
+interfaces/ @aafwk_ability
+js_environment/ @aafwk_ability
+service_router_framework/ @aafwk_ability
+services/ @aafwk_ability
+test/ @aafwk_ability
+tools/ @aafwk_ability
+utils/ @aafwk_ability

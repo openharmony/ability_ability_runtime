@@ -251,9 +251,9 @@ HWTEST_F(EtsEnvironmentTest, Initialize_0100, TestSize.Level0)
 {
     auto etsEnv = std::make_shared<ETSEnvironment>();
     ASSERT_NE(etsEnv, nullptr);
-    napi_env napiEnv = reinterpret_cast<napi_env>(0x1);
-    std::vector<ani_option> options;
-    bool result = etsEnv->Initialize(napiEnv, options);
+    void *napiEnv = reinterpret_cast<void *>(0x1);
+    std::string aotStr = "";
+    bool result = etsEnv->Initialize(napiEnv, aotStr);
     EXPECT_FALSE(result);
 }
 
@@ -307,9 +307,9 @@ HWTEST_F(EtsEnvironmentTest, LoadModule_0100, TestSize.Level0)
 {
     auto etsEnv = std::make_shared<ETSEnvironment>();
     ASSERT_NE(etsEnv, nullptr);
-    ani_class cls = nullptr;
-    ani_object obj = nullptr;
-    ani_ref ref = nullptr;
+    void *cls = nullptr;
+    void *obj = nullptr;
+    void *ref = nullptr;
     bool result = etsEnv->LoadModule("testModule", "testModule", cls, obj, ref);
     EXPECT_FALSE(result);
 }

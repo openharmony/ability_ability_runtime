@@ -310,6 +310,20 @@ public:
     bool IsNeedPreloadModule() const;
 
     /**
+     * @brief Setting preload mode.
+     *
+     * @param preloadMode PreloadMode enum
+     */
+    void SetAppPreloadMode(PreloadMode preloadMode);
+
+    /**
+     * @brief Obtains preload mode.
+     *
+     * @return Returns preloadMode enum
+     */
+    PreloadMode GetAppPreloadMode() const;
+
+    /**
      * @brief Setting if allow nweb preload.
      *
      * @param isAllowedNWebPreload, if allow nweb preload.
@@ -342,6 +356,7 @@ private:
     bool isMultiThread_ = false;
     bool isErrorInfoEnhance_ = false;
     bool isNeedPreloadModule_ = false;
+    PreloadMode appPreloadMode_ = PreloadMode::PRELOAD_NONE;
     bool isAllowedNWebPreload_ = false;
     int32_t recordId_ = 0;
     int32_t uId_ = 0;

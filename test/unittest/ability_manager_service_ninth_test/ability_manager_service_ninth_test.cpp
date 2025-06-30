@@ -380,6 +380,29 @@ HWTEST_F(AbilityManagerServiceNinthTest, KillProcessWithReason_001, TestSize.Lev
 
 /*
  * Feature: AbilityManagerService
+ * Name: KillProcessWithReason_002
+ * Function: InitFocusListener
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService KillProcessWithReason
+ */
+HWTEST_F(AbilityManagerServiceNinthTest, KillProcessWithReason_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest KillProcessWithReason_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    int32_t pid = 1;
+    ExitReason exitReason;
+    exitReason.reason = Reason::REASON_RESOURCE_CONTROL;
+    exitReason.exitMsg = "LowMemoryKill";
+    MyFlag::flag_ = 1;
+    auto result = abilityMs_->KillProcessWithReason(pid, exitReason);
+    MyFlag::flag_ = 0;
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceNinthTest KillProcessWithReason_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Name: NotifySaveAsResult_001
  * Function: InitFocusListener
  * SubFunction: NA

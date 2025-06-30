@@ -73,7 +73,7 @@ std::shared_ptr<AbilityStage> ETSAbilityStage::Create(
             srcPath.append(".abc");
         }
     }
-    std::unique_ptr<ETSNativeReference> moduleObj;
+    std::unique_ptr<AppExecFwk::ETSNativeReference> moduleObj;
     if (!hapModuleInfo.srcEntrance.empty()) {
         TAG_LOGD(AAFwkTag::APPKIT, "entry path: %{public}s", hapModuleInfo.srcEntrance.c_str());
         moduleObj = etsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
@@ -83,7 +83,8 @@ std::shared_ptr<AbilityStage> ETSAbilityStage::Create(
     return std::make_shared<ETSAbilityStage>(etsRuntime, std::move(moduleObj));
 }
 
-ETSAbilityStage::ETSAbilityStage(ETSRuntime & etsRuntime, std::unique_ptr<ETSNativeReference>&& etsAbilityStageObj)
+ETSAbilityStage::ETSAbilityStage(ETSRuntime & etsRuntime,
+    std::unique_ptr<AppExecFwk::ETSNativeReference>&& etsAbilityStageObj)
     : etsRuntime_(etsRuntime), etsAbilityStageObj_(std::move(etsAbilityStageObj))
 {}
 

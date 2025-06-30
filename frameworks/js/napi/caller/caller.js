@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,7 @@ const ERROR_CODE_CLAAEE_INVALID = 16200002;
 const ERROR_CODE_INNER_ERROR = 16000050;
 
 const ERROR_MSG_INVALID_PARAM = 'Invalid input parameter.';
-const ERROR_MSG_CALLER_RELEASED = 'Caller released. The caller has been released.';
+const ERROR_MSG_CALLER_RELEASED = 'The caller has been released.';
 const ERROR_MSG_CLAAEE_INVALID = 'The callee does not exist.';
 const ERROR_MSG_INNER_ERROR = 'Inner Error.';
 

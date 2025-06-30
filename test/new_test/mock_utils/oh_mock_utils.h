@@ -45,7 +45,8 @@ private:
 inline std::map<std::string, std::vector<ResultWrap>> g_mockMap;
 
 /**
- * @brief Mock a member function. This macro function while create a definition of a function that expected to be mocked.
+ * @brief Mock a member function.
+ *        This macro function while create a definition of a function that expected to be mocked.
  * @param ret Indicate the type of return value.
  *            Warning: this param only support basic type e.g int/string, if you need mock a function with sptr, use
  *            OH_MOCK_METHOD_RET_SPTR instead.
@@ -61,7 +62,8 @@ ret funcName(__VA_ARGS__)                                                       
         std::vector<ResultWrap> expectRets;                                        \
         g_mockMap[key] = expectRets;                                               \
     }                                                                              \
-    ResultWrap tempRet;                                                            \
+    ret temp;                                                                      \
+    ResultWrap tempRet(temp);                                                      \
     auto it = g_mockMap.find(key);                                                 \
     if (it != g_mockMap.end()) {                                                   \
         std::vector<ResultWrap> expectRets = it->second;                           \
@@ -75,7 +77,8 @@ ret funcName(__VA_ARGS__)                                                       
 }
 
 /**
- * @brief Mock a member function with return sptr<xxx> type value. This macro function while create a definition of a function that expected to be mocked.
+ * @brief Mock a member function with return sptr<xxx> type value.
+ *        This macro function while create a definition of a function that expected to be mocked.
  * @param ret Indicate the type of return value.
  *            Warning: ret must be sptr<xxx>
  * @param className Indicate the className of function.
@@ -101,7 +104,8 @@ ret funcName(__VA_ARGS__)                                                       
 }
 
 /**
- * @brief Mock a virtual member function. This macro function while create a definition of a function that expected to be mocked.
+ * @brief Mock a virtual member function.
+ *        This macro function while create a definition of a function that expected to be mocked.
  * @param ret Indicate the type of return value.
  *            Warning: this param only support basic type e.g int/string, if you need mock a function with sptr, use
  *            OH_MOCK_METHOD_RET_SPTR instead.
@@ -131,7 +135,8 @@ virtual ret funcName(__VA_ARGS__)                                               
 }
 
 /**
- * @brief Mock a global function. This macro function while create a definition of a function that expected to be mocked.
+ * @brief Mock a global function.
+ *        This macro function while create a definition of a function that expected to be mocked.
  * @param ret Indicate the type of return value.
  *            Warning: this param only support basic type e.g int/string.
  * @param funcName Indicate the functionName of function.
@@ -155,7 +160,8 @@ ret funcName(__VA_ARGS__)                                                       
 }
 
 /**
- * @brief Mock a global template function with return sptr<xxx> type value. This macro function while create a definition of a function that expected to be mocked.
+ * @brief Mock a global template function with return sptr<xxx> type value.
+ *        This macro function while create a definition of a function that expected to be mocked.
  * @param ret Indicate the type of return value.
  *            Warning: ret must be sptr<xxx>
  * @param className Indicate the className of function.
@@ -181,13 +187,13 @@ template <typename INTERFACE> sptr<INTERFACE> funcName(__VA_ARGS__)             
 }
 
 /**
- * @brief Mock a serial of expect results for specified member function. 
+ * @brief Mock a serial of expect results for specified member function.
  * @param expectRetVec Indicate expect results vector.
  * @param className Indicate the className of function.
  * @param funcName Indicate the functionName of function.
  * @param ... Indicate the params of function.
  */
-#define OH_MOCK_METHOD_EXPECT_RET(expectRetVec, className, funcName,...)           \
+#define OH_MOCK_METHOD_EXPECT_RET(expectRetVec, className, funcName, ...)          \
 do {                                                                               \
     std::string key = #className"_"#funcName"_"#__VA_ARGS__;                       \
     std::vector<ResultWrap> v;                                                     \
@@ -199,12 +205,12 @@ do {                                                                            
 } while (0)
 
 /**
- * @brief Mock a serial of expect results for specified global function. 
+ * @brief Mock a serial of expect results for specified global function.
  * @param expectRetVec Indicate expect results vector.
  * @param funcName Indicate the functionName of function.
  * @param ... Indicate the params of function.
  */
-#define OH_MOCK_GLOBAL_METHOD_EXPECT_RET(expectRetVec, funcName,...)               \
+#define OH_MOCK_GLOBAL_METHOD_EXPECT_RET(expectRetVec, funcName, ...)              \
 do {                                                                               \
     std::string key = #funcName"_"#__VA_ARGS__;                                    \
     std::vector<ResultWrap> v;                                                     \
@@ -214,5 +220,4 @@ do {                                                                            
     }                                                                              \
     g_mockMap[key] = v;                                                            \
 } while (0)
-
 #endif  // OHOS_MOCK_UTIL_H

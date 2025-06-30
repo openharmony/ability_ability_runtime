@@ -59,6 +59,7 @@ struct RunningProcessInfo : public Parcelable {
     bool isTestMode = false;
     bool isStrictMode = false;
     bool isDebugApp = false;
+    bool isExiting = false;
     std::int32_t pid_;
     std::int32_t uid_;
     std::int32_t bundleType = 0;
@@ -78,6 +79,7 @@ struct RunningProcessInfo : public Parcelable {
     static RunningProcessInfo *Unmarshalling(Parcel &parcel);
     ProcessType processType_ = ProcessType::NORMAL;
     ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
+    bool isCached = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

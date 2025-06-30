@@ -37,6 +37,7 @@ public:
     int32_t flags = 0;
     std::shared_ptr<WantParams> result = nullptr;
     std::vector<std::string> uris;
+    bool isDecorator = false;
 
     bool ReadFromParcel(Parcel &parcel);
     bool Marshalling(Parcel &parcel) const override;

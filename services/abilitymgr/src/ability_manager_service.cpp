@@ -2944,19 +2944,25 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
         }
         bool isColdStart = true;
         int32_t pid = 0;
-        int32_t warmStartType = -1;
+        bool supportWarmSmartGC = false;
         for (auto const &info : runningProcessInfos) {
             if (info.uid_ == abilityInfo.applicationInfo.uid &&
                 info.processType_ == AppExecFwk::ProcessType::NORMAL &&
-                std::find(info.bundleNames.begin(), info.bundleNames.end(),
-                abilityInfo.applicationInfo.bundleName) != info.bundleNames.end()){
-                isColdStart = info.preloadMode_ == AppExecFwk::PreloadMode::PRESS_DOWN;
-                pid = info.pid_;
-                warmStartType = static_cast<int32_t>(info.preloadMode_);
+                    std::find(info.bundleNames.begin(), info.bundleNames.end(),
+                abilityInfo.applicationInfo.bundleName) != info.bundleNames.end()) {
+                isColdStart = info.isExiting ? true : info.preloadMode_ == AppExecFwk::PreloadMode::PRESS_DOWN;
+                pid = info.isExiting ? 0 : info.pid_;
+                AppExecFwk::PreloadMode mode = info.preloadMode_;
+                bool isSuggestCache = info.isCached;
+                bool supportWarmSmartGC = (isSuggestCache ||
+                    mode == AppExecFwk::PreloadMode::PRE_MAKE ||
+                    mode == AppExecFwk::PreloadMode::PRELOAD_MODULE);
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "SmartGC: Process %{public}d report to RSS, start type: %{public}d, isCached: %{public}d, supportWarmGC: %{public}d",
+                        pid, static_cast<int32_t>(mode), static_cast<int32_t>(isSuggestCache), static_cast<int32_t>(supportWarmSmartGC));
                 break;
             }
         }
-        ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart, warmStartType);
+        ResSchedUtil::GetInstance().ReportAbilityStartInfoToRSS(abilityInfo, pid, isColdStart, supportWarmSmartGC);
     }
 }
 
@@ -5374,6 +5380,11 @@ int AbilityManagerService::SendLocalWantSender(const SenderInfo &senderInfo)
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     auto pendingWantManager = GetCurrentPendingWantManager();
     CHECK_POINTER_AND_RETURN(pendingWantManager, ERR_INVALID_VALUE);
+    if (!PermissionVerification::GetInstance()->VerifyPermissionByTokenId(senderInfo.tokenId,
+        PermissionConstants::PERMISSION_TRIGGER_LOCAL_WANTAGENT)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "no permission to trigger local wantagent");
+        return CHECK_PERMISSION_FAILED;
+    }
     return pendingWantManager->SendLocalWantSender(senderInfo);
 }
 
@@ -11545,6 +11556,21 @@ bool AbilityManagerService::ProcessLowMemoryKill(int32_t pid, const ExitReason &
 int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReason &reason)
 {
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
+    EventInfo eventInfo;
+    eventInfo.callerPid = IPCSkeleton::GetCallingPid();
+    eventInfo.pid = pid;
+    eventInfo.exitMsg = reason.exitMsg;
+    eventInfo.shouldKillForeground = reason.shouldKillForeground;
+    auto ret = KillProcessWithReasonInner(pid, reason);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "KillProcessWithReason ret: %{public}d", ret);
+    if (reason.reason == Reason::REASON_RESOURCE_CONTROL && reason.exitMsg == GlobalConstant::LOW_MEMORY_KILL) {
+        abilityEventHelper_.SendKillProcessWithReasonEvent(ret, "KillProcessWithReason", eventInfo);
+    }
+    return ret;
+}
+
+int32_t AbilityManagerService::KillProcessWithReasonInner(int32_t pid, const ExitReason &reason)
+{
     bool supportShell = AmsConfigurationParameter::GetInstance().IsSupportAAKillWithReason();
     auto isShellCall = PermissionVerification::GetInstance()->IsShellCall();
     auto isCallingPerm = PermissionVerification::GetInstance()->VerifyCallingPermission(
@@ -11552,6 +11578,15 @@ int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReas
     if (!isCallingPerm && !(supportShell && isShellCall)) {
         TAG_LOGE(AAFwkTag::APPMGR, "permission verification fail");
         return ERR_PERMISSION_DENIED;
+    }
+
+    if (!reason.shouldKillForeground) {
+        AppExecFwk::RunningProcessInfo processInfo;
+        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(pid, processInfo);
+        if (processInfo.isAbilityForegrounding || processInfo.isFocused) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "do not kill foreground apps, pid = %{public}d", pid);
+            return ERR_KILL_APP_WHILE_FOREGROUND;
+        }
     }
 
     if (ProcessLowMemoryKill(pid, reason)) {

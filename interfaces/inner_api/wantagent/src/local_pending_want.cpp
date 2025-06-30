@@ -113,9 +113,14 @@ ErrCode LocalPendingWant::Send(const sptr<CompletedDispatcher> &callBack, const 
     senderInfo.code = paramsInfo.GetResultCode();
     senderInfo.finishedReceiver = callBack;
     senderInfo.operType = operType_;
+    senderInfo.uid = uid_;
+    senderInfo.tokenId = tokenId_;
     senderInfo.callerToken = callerToken;
     const auto result = AAFwk::WantAgentClient::GetInstance().SendLocalWantSender(senderInfo);
-    return result != 0 ? ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY : result;
+    if (result != 0 && result != ERR_ABILITY_RUNTIME_EXTERNAL_NO_ACCESS_PERMISSION) {
+        return ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY;
+    }
+    return result;
 }
 
 bool LocalPendingWant::Marshalling(Parcel &parcel) const
@@ -141,7 +146,7 @@ bool LocalPendingWant::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteUint32(tokenId_)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to write operType");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to write tokenId");
         return false;
     }
     return true;
@@ -176,7 +181,7 @@ LocalPendingWant *LocalPendingWant::Unmarshalling(Parcel &parcel)
     }
     uint32_t tokenId = 0;
     if (!parcel.ReadUint32(tokenId)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to read operType");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to read tokenId");
         return nullptr;
     }
     LocalPendingWant *localPendingWant = new (std::nothrow) LocalPendingWant(

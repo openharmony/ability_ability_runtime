@@ -473,7 +473,8 @@ void JsRuntimeLite::GetPkgContextInfoListMap(const std::map<std::string, std::st
             TAG_LOGD(AAFwkTag::JSRUNTIME, "moduleName: %{public}s get pkgContextInfo failed", it->first.c_str());
             continue;
         }
-        std::string jsonStr(reinterpret_cast<const char *>(data.get(), dataLen));
+        const char *str = reinterpret_cast<const char *>(data.get());
+        std::string jsonStr = str == nullptr ? "" : std::string(reinterpret_cast<const char *>(data.get()), dataLen);
         cJSON *jsonObject = cJSON_Parse(jsonStr.c_str());
         if (jsonObject == nullptr) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s parse json error", it->first.c_str());

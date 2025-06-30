@@ -16,11 +16,10 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_TEST_RUNNER_H
 #define OHOS_ABILITY_RUNTIME_ETS_TEST_RUNNER_H
 
-#include "bundle_info.h"
+#include "ets_native_reference.h"
 #include "ets_runtime.h"
+#include "bundle_info.h"
 #include "test_runner.h"
-
-class ETSNativeReference;
 
 namespace OHOS {
 namespace RunnerRuntime {
@@ -62,7 +61,7 @@ private:
     void CallOnRunMethod(ani_env* aniEnv);
 
     ETSRuntime &etsRuntime_;
-    std::unique_ptr<ETSNativeReference> etsTestRunnerObj_;
+    std::unique_ptr<AppExecFwk::ETSNativeReference> etsTestRunnerObj_;
     std::string srcPath_;
     std::string hapPath_;
 };

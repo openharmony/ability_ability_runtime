@@ -22,12 +22,15 @@
 #include <unordered_map>
 
 namespace OHOS {
+namespace AppExecFwk {
+struct ETSNativeReference;
+}
+
 namespace AbilityRuntime {
 struct EnvData {
     napi_env env;
     EnvData(napi_env napienv) : env(napienv) {}
 };
-struct ETSNativeReference;
 class ApplicationContextManager {
 public:
     ApplicationContextManager(const ApplicationContextManager&) = delete;
@@ -42,9 +45,9 @@ public:
 
     void RemoveGlobalObject(napi_env env);
 
-    void SetEtsGlobalObject(std::shared_ptr<AbilityRuntime::ETSNativeReference> applicationContextObj);
+    void SetEtsGlobalObject(std::shared_ptr<AppExecFwk::ETSNativeReference> applicationContextObj);
 
-    std::shared_ptr<AbilityRuntime::ETSNativeReference> GetEtsGlobalObject();
+    std::shared_ptr<AppExecFwk::ETSNativeReference> GetEtsGlobalObject();
 
 private:
     ApplicationContextManager();
@@ -52,7 +55,7 @@ private:
     ~ApplicationContextManager();
 
     std::unordered_map<napi_env, std::shared_ptr<NativeReference>> applicationContextMap_;
-    std::shared_ptr<AbilityRuntime::ETSNativeReference> etsApplicationContextRef_;
+    std::shared_ptr<AppExecFwk::ETSNativeReference> etsApplicationContextRef_;
     std::mutex applicationContextMutex_;
 };
 } // namespace AbilityRuntime

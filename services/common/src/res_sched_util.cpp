@@ -63,7 +63,7 @@ void ResSchedUtil::ReportSubHealtyPerfInfoToRSS()
 }
 
 void ResSchedUtil::ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, int32_t pid, bool isColdStart,
-    int32_t warmStartType)
+    bool supportWarmSmartGC)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::RES_TYPE_APP_ABILITY_START;
@@ -73,7 +73,7 @@ void ResSchedUtil::ReportAbilityStartInfoToRSS(const AbilityInfo &abilityInfo, i
         { "bundleName", abilityInfo.applicationInfo.bundleName },
         { "abilityName", abilityInfo.name },
         { "pid", std::to_string(pid) },
-        { "warmStartType", std::to_string(warmStartType) }
+        { "supportWarmSmartGC", supportWarmSmartGC ? "1": "0" }
     };
     TAG_LOGD(AAFwkTag::DEFAULT, "call");
     ResourceSchedule::ResSchedClient::GetInstance().ReportData(resType, isColdStart ? 1 : 0, eventParams);

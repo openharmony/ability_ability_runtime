@@ -16,7 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_URI_PERM_MGR_H
 #define OHOS_ABILITY_RUNTIME_ETS_URI_PERM_MGR_H
 
-#include "ets_runtime.h"
+#include <string>
+#include "ani.h"
 
 namespace OHOS {
 namespace AbilityRuntime {

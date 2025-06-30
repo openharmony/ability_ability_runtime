@@ -33,13 +33,14 @@ constexpr const char* ERROR_MSG_INNER = "Internal error.";
 constexpr const char* ERROR_MSG_RESOLVE_ABILITY = "The specified ability does not exist.";
 constexpr const char* ERROR_MSG_INVALID_ABILITY_TYPE = "Incorrect ability type.";
 constexpr const char* ERROR_MSG_INVALID_ID = "The specified ID does not exist.";
-constexpr const char* ERROR_MSG_INVISIBLE = "Failed to start the invisible ability.";
+constexpr const char* ERROR_MSG_INVISIBLE = "Cannot start an invisible component.";
 constexpr const char* ERROR_MSG_STATIC_CFG_PERMISSION = "The specified process does not have the permission.";
 constexpr const char* ERROR_MSG_CROSS_USER = "Cross-user operations are not allowed.";
 constexpr const char* ERROR_MSG_SERVICE_BUSY = "Service busy. There are concurrent tasks. Try again later.";
 constexpr const char* ERROR_MSG_CROWDTEST_EXPIRED = "The crowdtesting application expires.";
 constexpr const char* ERROR_MSG_WUKONG_MODE = "An ability cannot be started or stopped in Wukong mode.";
-constexpr const char* ERROR_MSG_CONTINUATION_FLAG = "The call with the continuation flag is forbidden.";
+constexpr const char* ERROR_MSG_CONTINUATION_FLAG =
+    "The call with the continuation and prepare continuation flag is forbidden.";
 constexpr const char* ERROR_MSG_INVALID_CONTEXT = "The context does not exist.";
 constexpr const char* ERROR_MSG_CONTROLLED = "The application is controlled.";
 constexpr const char* ERROR_MSG_EDM_CONTROLLED = "The application is controlled by EDM.";
@@ -54,7 +55,7 @@ constexpr const char* ERROR_MSG_FREE_INSTALL_CROSS_DEVICE = "Cross-device instal
 constexpr const char* ERROR_MSG_INVALID_URI_FLAG = "Invalid URI flag.";
 constexpr const char* ERROR_MSG_INVALID_URI_TYPE = "Invalid URI type.";
 constexpr const char* ERROR_MSG_GRANT_URI_PERMISSION = "A sandbox application cannot grant URI permission.";
-constexpr const char* ERROR_MSG_GET_BUNDLE_INFO_FAILED = "Get target application info failed.";
+constexpr const char* ERROR_MSG_GET_BUNDLE_INFO_FAILED = "Failed to obtain the target application information.";
 constexpr const char* ERROR_MSG_OPERATION_NOT_SUPPORTED = "Operation not supported.";
 constexpr const char* ERROR_MSG_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND =
     "The number of child processes exceeds the upper limit.";
@@ -77,7 +78,7 @@ constexpr const char* ERROR_MSG_NOT_SUPPORT_CROSS_APP_START =
     "Redirection to a third-party application is not allowed in API version greater than 11.";
 constexpr const char* ERROR_MSG_CANNOT_MATCH_ANY_COMPONENT = "No matching ability is found.";
 constexpr const char* ERROR_MSG_TARGET_BUNDLE_NOT_EXIST = "The bundle does not exist or no patch has been applied.";
-constexpr const char* ERROR_MSG_NO_MAIN_ABILITY = "The target bundle has no main ability.";
+constexpr const char* ERROR_MSG_NO_MAIN_ABILITY = "The target bundle has no MainAbility.";
 constexpr const char* ERROR_MSG_NO_STATUS_BAR_ABILITY = "The target app has no status-bar ability.";
 constexpr const char* ERROR_MSG_NOT_ATTACHED_TO_STATUS_BAR = "The target app is not attached to a status bar.";
 constexpr const char* ERROR_MSG_NO_RESIDENT_PERMISSION =
@@ -93,7 +94,7 @@ constexpr const char* ERROR_MSG_NOT_SUPPROT_BACK_TO_CALLER =
 constexpr const char* ERROR_MSG_EXTENSION_START_THIRD_PARTY_APP_CONTROLLED =
     "The extension can not start the specified third party application.";
 constexpr const char* ERROR_MSG_EXTENSION_START_SERVICE_CONTROLLED = "The extension can not start the service.";
-constexpr const char* ERROR_MSG_FREE_INSTALL_TASK_NOT_EXIST = "The target free install task does not exist.";
+constexpr const char* ERROR_MSG_FREE_INSTALL_TASK_NOT_EXIST = "The target free-installation task does not exist.";
 constexpr const char* ERROR_MSG_MULTI_INSTANCE_NOT_SUPPORTED = "Multi-instance is not supported.";
 constexpr const char* ERROR_MSG_INVALID_APP_INSTANCE_KEY = "The app instance key does not exist.";
 constexpr const char* ERROR_MSG_UPPER_LIMIT = "The number of app instances reaches the limit.";
@@ -102,9 +103,9 @@ constexpr const char* ERROR_MSG_CREATE_NEW_INSTANCE_NOT_SUPPORT = "Creating a ne
 constexpr const char* ERROR_MSG_UI_ABILITY_IS_STARTING = "The UIAbility is being started.";
 constexpr const char* ERROR_MSG_EXTENSION_START_ABILITY_CONTROLLED =
     "The extension can not start the ability due to extension control.";
-constexpr const char* ERROR_MSG_NOT_HOOK = "Only allow DelegatorAbility to call the method once.";
+constexpr const char* ERROR_MSG_NOT_HOOK = "Only DelegatorAbility is allowed to call this API, and only once.";
 constexpr const char* ERROR_MSG_FROM_WINDOW =
-    "The interaction process between Ability and Window encountered an error.";
+    "An error occurred during the interaction between the ability and window.";
 constexpr const char* ERROR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST = "The target not in app identifier allow list.";
 constexpr const char* ERROR_TARGET_NOT_STARTED = "The target has not been started yet.";
 constexpr const char* ERROR_MSG_CALLER_NOT_ATOMIC_SERVICE =
@@ -124,12 +125,12 @@ constexpr const char* ERROR_MSG_NOT_IN_KIOSK_MODE =
     "The current application is not in the kiosk mode. Exit is not allowed.";
 constexpr const char* ERROR_MSG_APP_NOT_IN_FOCUS = "The current ability is not foreground.";
 
-constexpr const char* ERROR_MSG_NOT_ISOLATION_PROCESS = "Current process is not running a component configured "
-                                        "with \"isolationProcess\", and cannot be set as a candidate master process.";
+constexpr const char* ERROR_MSG_NOT_ISOLATION_PROCESS = "The current process is not running a component configured "
+                                        "with \"isolationProcess\" and cannot be set as a candidate master process.";
 constexpr const char* ERROR_MSG_ALREADY_MASTER_PROCESS =
-    "Current process is already a master process, revocation is not supported.";
+    "The current process is already a master process and does not support cancellation.";
 constexpr const char* ERROR_MSG_NOT_CANDIDATE_MASTER_PROCESS =
-    "Current process is not a candidate master process, no need to revocation.";
+    "The current process is not a candidate master process and does not support cancellation.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,16 @@ void AbilityEventUtil::SendStartAbilityErrorEvent(EventInfo &eventInfo, int32_t 
     eventInfo.errMsg = errMsg;
     ffrt::submit([name, eventInfo]() {
         EventReport::SendAbilityEvent(name, HiSysEventType::FAULT, eventInfo);
+        }, ffrt::task_attr().timeout(FFRT_TASK_TIMEOUT));
+}
+
+void AbilityEventUtil::SendKillProcessWithReasonEvent(int32_t errCode, const std::string &errMsg, EventInfo &eventInfo)
+{
+    EventName name = EventName::KILL_PROCESS_WITH_REASON;
+    eventInfo.errCode = errCode;
+    eventInfo.errMsg = errMsg;
+    ffrt::submit([name, eventInfo]() {
+        EventReport::SendAbilityEvent(name, HiSysEventType::STATISTIC, eventInfo);
         }, ffrt::task_attr().timeout(FFRT_TASK_TIMEOUT));
 }
 } // namespace AAFwk

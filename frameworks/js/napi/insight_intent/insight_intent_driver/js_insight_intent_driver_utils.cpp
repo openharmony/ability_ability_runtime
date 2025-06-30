@@ -30,6 +30,9 @@ napi_value CreateJsExecuteResult(napi_env env, const AppExecFwk::InsightIntentEx
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
+    if (result.isDecorator) {
+        return result.result ? OHOS::AppExecFwk::CreateJsWantParams(env, *result.result) : objValue;
+    }
 
     napi_set_named_property(env, objValue, "code", CreateJsValue(env, result.code));
     if (result.result != nullptr) {
