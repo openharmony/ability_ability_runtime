@@ -22,7 +22,8 @@ export default class ExtensionContext extends Context {
     extensionAbilityInfo!: ExtensionAbilityInfo;
     config!: Configuration;
     currentHapModuleInfo!: HapModuleInfo;
-    constructor(config: Configuration, extensionAbilityInfo: ExtensionAbilityInfo, currentHapModuleInfo: HapModuleInfo) {
+    constructor(config: Configuration, extensionAbilityInfo: ExtensionAbilityInfo,
+        currentHapModuleInfo: HapModuleInfo) {
         super();
         this.config = config;
         this.extensionAbilityInfo = extensionAbilityInfo;

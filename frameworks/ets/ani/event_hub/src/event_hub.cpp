@@ -119,7 +119,8 @@ ani_object EventHub::GetDynamicContextEventHub(ani_env *aniEnv, ani_object aniOb
     return staticResult;
 }
 
-bool EventHub::CallNapiSetNativeEventHubRefFn(ani_env *aniEnv, ani_object aniObj, napi_env napiEnv, napi_value eventHub)
+bool EventHub::CallNapiSetNativeEventHubRefFn(ani_env *aniEnv, ani_object aniObj, napi_env napiEnv,
+    napi_value eventHub)
 {
     napi_value setNativeEventHubRefFn = nullptr;
     if (napi_get_named_property(napiEnv, eventHub, "setNativeEventHubRef", &setNativeEventHubRefFn) != napi_ok) {
@@ -143,7 +144,8 @@ bool EventHub::CallNapiSetNativeEventHubRefFn(ani_env *aniEnv, ani_object aniObj
     }
     hybridgref_delete_from_ani(aniEnv, nativeHybrigRef);
     napi_value dynamicResult;
-    if (napi_call_function(napiEnv, eventHub, setNativeEventHubRefFn, 1, &nativeEventHubRef, &dynamicResult) != napi_ok) {
+    if (napi_call_function(napiEnv, eventHub, setNativeEventHubRefFn, 1, &nativeEventHubRef,
+        &dynamicResult) != napi_ok) {
         TAG_LOGE(AAFwkTag::APPKIT, "napi_call_function failed");
         return false;
     }
