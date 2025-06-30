@@ -43,9 +43,6 @@ public:
     static void FinishTest(ani_env* env, [[maybe_unused]]ani_object object,
         ani_string msg, ani_double code, ani_object callback);
 
-    static ani_object CreateEtsBaseContext(ani_env* aniEnv, ani_class contextClass,
-        std::shared_ptr<AbilityRuntime::Context> context);
-
     static ani_object GetAppContext(ani_env* env, [[maybe_unused]]ani_object object, ani_class clss);
 
     static void PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg);

@@ -89,53 +89,6 @@ EtsAbilityDelegator::EtsAbilityDelegator()
 
 EtsAbilityDelegator::~EtsAbilityDelegator() = default;
 
-ani_object EtsAbilityDelegator::CreateEtsBaseContext(ani_env* aniEnv, ani_class contextClass,
-    std::shared_ptr<AbilityRuntime::Context> context)
-{
-    if (aniEnv == nullptr || context == nullptr) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "null aniEnv or context");
-        return {};
-    }
-    ani_object contextObj = nullptr;
-    ani_method method = nullptr;
-    ani_status status = aniEnv->Class_FindMethod(contextClass, "<ctor>", ":V", &method);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status: %{public}d", status);
-        return {};
-    }
-    if ((status = aniEnv->Object_New(contextClass, method, &contextObj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_New failed status: %{public}d", status);
-        return {};
-    }
-    ani_field filesDirField;
-    if (aniEnv->Class_FindField(contextClass, "filesDir", &filesDirField) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "find filesDir failed");
-        return {};
-    }
-    auto filesDir = context->GetFilesDir();
-    ani_string filesDir_string{};
-    aniEnv->String_NewUTF8(filesDir.c_str(), filesDir.size(), &filesDir_string);
-    if (aniEnv->Object_SetField_Ref(contextObj, filesDirField, reinterpret_cast<ani_ref>(filesDir_string)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Ref failed");
-        return {};
-    }
-    ani_field tempDirField;
-    if (aniEnv->Class_FindField(contextClass, "tempDir", &tempDirField) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "find find tempDir failed");
-        return {};
-    }
-    auto tempDir = context->GetTempDir();
-    ani_string tempDir_string{};
-    aniEnv->String_NewUTF8(tempDir.c_str(), tempDir.size(), &tempDir_string);
-    if (aniEnv->Object_SetField_Ref(contextObj, tempDirField, reinterpret_cast<ani_ref>(tempDir_string)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Object_SetField_Ref failed");
-        return {};
-    }
-    ContextUtil::BindApplicationInfo(aniEnv, contextClass, contextObj, context);
-    ContextUtil::BindResourceManager(aniEnv, contextClass, contextObj, context);
-    return contextObj;
-}
-
 ani_object EtsAbilityDelegator::WrapShellCmdResult(ani_env* env, std::unique_ptr<AppExecFwk::ShellCmdResult> result)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "WrapShellCmdResult called");
@@ -208,7 +161,7 @@ ani_object EtsAbilityDelegator::GetAppContext(ani_env* env, [[maybe_unused]]ani_
         TAG_LOGE(AAFwkTag::DELEGATOR, "null context");
         return nullobj;
     }
-    ani_object objectContext = CreateEtsBaseContext(env, cls, context);
+    ani_object objectContext = ContextUtil::CreateContextObject(env, cls, context);
     TAG_LOGD(AAFwkTag::DELEGATOR, "GetAppContext end");
     return objectContext;
 }
