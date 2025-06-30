@@ -38,6 +38,7 @@ public:
  
 private:
     static std::shared_ptr<AbilityContext> GetAbilityContext(ani_env *env, ani_object aniObj);
+    static bool CallNapiSetNativeEventHubRefFn(ani_env *aniEnv, ani_object aniObj, napi_env napiEnv, napi_value eventHub);
 };
  
 } // namespace AbilityRuntime
