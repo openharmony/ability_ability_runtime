@@ -22,16 +22,10 @@ type Any = Object | null | undefined
 
 export default class AbilityStageContext extends Context {
     static {
-      loadLibrary("context_ani");
       loadLibrary("ability_stage_context_ani_kit.z");
     }
     config?: Configuration;
-    currentHapModuleInfo: HapModuleInfo;
-    native constructor();
-    constructor(currentHapModuleInfo: HapModuleInfo) {
-      super();
-      this.currentHapModuleInfo = currentHapModuleInfo;
-    }
+    currentHapModuleInfo!: HapModuleInfo;
 
     private static native nativeTransferStatic(input: ESValue): Object;
     private static native nativeTransferDynamic(input: Object): ESValue;

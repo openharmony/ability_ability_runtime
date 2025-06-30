@@ -27,7 +27,6 @@ import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import OpenLinkOptions from '@ohos.app.ability.OpenLinkOptions';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
-import EventHub from 'application.EventHub';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 
 // remove local declaration after Any type is supported
@@ -39,19 +38,6 @@ export default class UIAbilityContext extends Context {
   abilityInfo!: AbilityInfo;
   windowStage!: window.WindowStage;
   currentHapModuleInfo!: HapModuleInfo;
-
-  constructor(config: Configuration, abilityInfo: AbilityInfo, windowStage: window.WindowStage,
-    currentHapModuleInfo: HapModuleInfo) {
-    super();
-    this.config = config;
-    this.abilityInfo = abilityInfo;
-    this.windowStage = windowStage;
-    this.currentHapModuleInfo = currentHapModuleInfo;
-  }
-
-  initEventHub() {
-    this.eventHub = new EventHub();
-  }
 
   private static native nativeTransferStatic(input: ESValue): Object;
   private static native nativeTransferDynamic(input: Object): ESValue;
