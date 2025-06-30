@@ -57,7 +57,7 @@ HWTEST_F(JsModuleReaderTest, JsModuleReaderTest_0100, TestSize.Level0)
     uint8_t *buff = nullptr;
     size_t buffSize = 0;
     std::string errorMsg = "";
-    auto result = jsModuleReader("", &buff, &buffSize, errorMsg);
+    auto result = jsModuleReader("", false, &buff, &buffSize, errorMsg);
     EXPECT_EQ(result, false);
 }
 
@@ -73,7 +73,7 @@ HWTEST_F(JsModuleReaderTest, JsModuleReaderTest_0200, TestSize.Level0)
     uint8_t *buff = nullptr;
     size_t buffSize = 0;
     std::string errorMsg = "";
-    auto result = jsModuleReader("bundleName/moduleName", &buff, &buffSize, errorMsg);
+    auto result = jsModuleReader("bundleName/moduleName", false, &buff, &buffSize, errorMsg);
     EXPECT_EQ(result, false);
 }
 
