@@ -17,6 +17,7 @@
 
 #include "configuration_utils.h"
 #include "form_extension_context.h"
+#include "form_runtime/sts_form_extension_instance.h"
 #include "form_runtime/js_form_extension.h"
 #include "sts_form_extension.h"
 #include "hilog_tag_wrapper.h"
@@ -35,7 +36,7 @@ FormExtension* FormExtension::Create(const std::unique_ptr<Runtime>& runtime)
         case Runtime::Language::JS:
             return JsFormExtension::Create(runtime);
         case Runtime::Language::STS:
-            return STSFormExtension::Create(runtime);
+            return CreateSTSFormExtension(runtime);
         default:
             return new FormExtension();
     }
