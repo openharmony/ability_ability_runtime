@@ -168,24 +168,8 @@ void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object cont
     BindApplicationInfo(aniEnv, contextClass, contextObj, context);
     BindResourceManager(aniEnv, contextClass, contextObj, context);
     BindContextDir(aniEnv, contextObj, context);
-
-    // bind parent context property
-    ani_field areaField;
     ani_status status = ANI_ERROR;
-    if ((status = aniEnv->Class_FindField(contextClass, "area", &areaField)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "find area failed, status: %{public}d", status);
-        return;
-    }
-    auto area = context->GetArea();
-    ani_enum_item areaModeItem = nullptr;
-    OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(aniEnv, AREA_MODE_ENUM_NAME, area, areaModeItem);
-
-    if ((status = aniEnv->Object_SetField_Ref(contextObj, areaField, (ani_ref)areaModeItem)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Int failed, status: %{public}d", status);
-        return;
-    }
-
-    ani_field processNameField;
+    ani_field processNameField = nullptr;
     if ((status = aniEnv->Class_FindField(contextClass, "processName", &processNameField)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "find processName failed status: %{public}d", status);
         return;
