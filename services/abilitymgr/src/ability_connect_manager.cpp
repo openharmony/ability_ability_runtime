@@ -1678,11 +1678,6 @@ void AbilityConnectManager::OnStartSpecifiedProcessTimeoutResponse(int32_t reque
     TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessTimeoutResponse requestId: %{public}d", requestId);
 
     if (!loadAbilityQueue_.empty()) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessTimeout pop_front");
-        loadAbilityQueue_.pop_front();
-    }
-
-    if (!loadAbilityQueue_.empty()) {
         auto &front = loadAbilityQueue_.front();
         DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(*(front[requestId].loadParam),
             *(front[requestId].abilityInfo), *(front[requestId].appInfo), *(front[requestId].want));
