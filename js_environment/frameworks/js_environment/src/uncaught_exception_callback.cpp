@@ -78,7 +78,6 @@ void NapiUncaughtExceptionCallback::operator()(panda::TryCatch& trycatch)
     }
 }
 
-
 void NapiUncaughtExceptionCallback::CallbackTask(napi_value& obj)
 {
     std::string errorMsg = GetNativeStrFromJsTaggedObj(obj, "message");
@@ -103,6 +102,11 @@ void NapiUncaughtExceptionCallback::CallbackTask(napi_value& obj)
     }
     if (errorStack.find(BACKTRACE) != std::string::npos) {
         summary += "Stacktrace:\n" + GetFuncNameAndBuildId(errorStack);
+        std::string submitterStack = GetSubmitterStackLocal();
+        if (!submitterStack.empty()) {
+            summary.append("========SubmitterStacktrace========\n");
+            summary.append(submitterStack);
+        }
     } else {
         summary += "Stacktrace:\n" + errorStack;
     }
@@ -112,11 +116,6 @@ void NapiUncaughtExceptionCallback::CallbackTask(napi_value& obj)
         summary.append(str);
     }
 #endif // SUPPORT_GRAPHICS
-    std::string submitterStack = GetSubmitterStackLocal();
-    if (!submitterStack.empty()) {
-        summary.append("========SubmitterStacktrace========\n");
-        summary.append(submitterStack);
-    }
     if (uncaughtTask_) {
         uncaughtTask_(summary, errorObj);
     }
@@ -183,16 +182,19 @@ std::string NapiUncaughtExceptionCallback::GetSubmitterStackLocal()
     }
     sbmitterStack = reinterpret_cast<SubmitterStackFunc>(dlsym(handle, "DfxGetSubmitterStackLocal"));
     if (sbmitterStack == nullptr) {
-        TAG_LOGE(AAFwkTag::JSENV, "dlsym libasync_stack failed");
+        TAG_LOGE(AAFwkTag::JSENV, "dlsym libasync_stack failed, %{public}s", dlerror());
+        dlclose(handle);
         return "";
     }
     const size_t bufferSize = 64 * 1024;
     char stackTrace[bufferSize] = {0};
     int result = sbmitterStack(stackTrace, bufferSize);
     if (result == 0) {
+        dlclose(handle);
         return stackTrace;
     } else {
-        TAG_LOGE(AAFwkTag::JSENV, "submitterStack interface failed");
+        TAG_LOGE(AAFwkTag::JSENV, "submitterStack interface failed, result: %{public}d", result);
+        dlclose(handle);
         return "";
     }
 }
