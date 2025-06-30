@@ -306,6 +306,30 @@ void UIAbility::DestroyInstance()
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
 }
 
+bool UIAbility::CreateProperty(std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext,
+    std::shared_ptr<AppExecFwk::BaseDelegatorAbilityProperty> delegatorAbilityProperty)
+{
+    if (abilityContext == nullptr || delegatorAbilityProperty == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext or delegatorAbilityProperty");
+        return false;
+    }
+    delegatorAbilityProperty->token_ = abilityContext->GetToken();
+    delegatorAbilityProperty->name_ = GetAbilityName();
+    delegatorAbilityProperty->moduleName_ = GetModuleName();
+    if (GetApplicationInfo() == nullptr || GetApplicationInfo()->bundleName.empty()) {
+        delegatorAbilityProperty->fullName_ = GetAbilityName();
+    } else {
+        std::string::size_type pos = GetAbilityName().find(GetApplicationInfo()->bundleName);
+        if (pos == std::string::npos || pos != 0) {
+            delegatorAbilityProperty->fullName_ = GetApplicationInfo()->bundleName + "." + GetAbilityName();
+        } else {
+            delegatorAbilityProperty->fullName_ = GetAbilityName();
+        }
+    }
+    delegatorAbilityProperty->lifecycleState_ = GetState();
+    return true;
+}
+
 bool UIAbility::IsRestoredInContinuation() const
 {
     if (abilityContext_ == nullptr) {
