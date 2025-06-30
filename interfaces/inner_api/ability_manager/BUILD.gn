@@ -241,6 +241,7 @@ ohos_shared_library("ability_start_options") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "ipc:ipc_core",
+    "window_manager:window_animation_utils",
   ]
 
   cflags_cc = []
