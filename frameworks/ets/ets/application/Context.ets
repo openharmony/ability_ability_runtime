@@ -28,7 +28,6 @@ type Any = Object | null | undefined
 
 export class Context extends BaseContext {
   static {
-    loadLibrary("context_ani");
     loadLibrary("context_ani_kit.z");
   }
   filesDir: string = "";
@@ -36,12 +35,16 @@ export class Context extends BaseContext {
   preferencesDir: string = "";
   databaseDir: string = "";
   cacheDir: string = "";
-  applicationInfo: ApplicationInfo;
+  applicationInfo!: ApplicationInfo;
   eventHub: EventHub = new EventHub();
-  resourceManager: resmgr.ResourceManager;
+  resourceManager!: resmgr.ResourceManager;
   processName: string = "";
 
-  native constructor();
+  constructor() {
+    if (this.eventHub == null) {
+      this.eventHub = new EventHub();
+    }
+  }
 
   constructor(applicationInfo: ApplicationInfo, resourceManager: resmgr.ResourceManager) {
     super();
