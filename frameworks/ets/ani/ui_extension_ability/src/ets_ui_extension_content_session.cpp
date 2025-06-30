@@ -75,14 +75,12 @@ EtsUIExtensionContentSession* EtsUIExtensionContentSession::GetEtsContentSession
     return etsContentSession;
 }
 
-ani_object EtsUIExtensionContentSession::NativeSetReceiveDataCallback(ani_env* env, ani_object obj)
+void EtsUIExtensionContentSession::NativeSetReceiveDataCallback(ani_env* env, ani_object clsObj, ani_object funcObj)
 {
-    auto etsContentSession = EtsUIExtensionContentSession::GetEtsContentSession(env, obj);
-    ani_object object = nullptr;
+    auto etsContentSession = GetEtsContentSession(env, clsObj);
     if (etsContentSession != nullptr) {
-        object = etsContentSession->SetReceiveDataCallback(env, obj);
+        etsContentSession->SetReceiveDataCallback(env, funcObj);
     }
-    return object;
 }
 
 void EtsUIExtensionContentSession::NativeSendData(ani_env* env, ani_object obj, ani_object data)
@@ -328,10 +326,111 @@ ani_object EtsUIExtensionContentSession::GetUIExtensionHostWindowProxy(ani_env* 
     return reinterpret_cast<ani_object>(resultRef);
 }
 
-ani_object EtsUIExtensionContentSession::SetReceiveDataCallback(ani_env* env, ani_object object)
+void EtsUIExtensionContentSession::SetReceiveDataCallback(ani_env* env, ani_object functionObj)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "called");
-    return nullptr;
+    TAG_LOGD(AAFwkTag::UI_EXT, "SetReceiveDataCallback call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "env null");
+        return;
+    }
+    if (!isRegistered_) {
+        SetReceiveDataCallbackRegister(env, functionObj);
+    } else {
+        if (receiveDataCallback_ == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "null receiveDataCallback_");
+            EtsErrorUtil::ThrowErrorByNativeErr(env,
+                static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER));
+            return;
+        }
+        ani_status status = ANI_OK;
+        if ((status = env->GlobalReference_Delete(receiveDataCallback_)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "GlobalReference_Delete failed status = %{public}d", status);
+            EtsErrorUtil::ThrowErrorByNativeErr(env,
+                static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER));
+            return;
+        }
+        receiveDataCallback_ = nullptr;
+        if ((status = env->GlobalReference_Create(functionObj, &receiveDataCallback_)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "GlobalReference_Create failed status:%{public}d", status);
+            EtsErrorUtil::ThrowErrorByNativeErr(env,
+                static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER));
+            return;
+        }
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "SetReceiveDataCallback end");
+}
+
+void EtsUIExtensionContentSession::SetReceiveDataCallbackRegister(ani_env* env, ani_object functionObj)
+{
+    if (uiWindow_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "uiWindow_ is nullptr");
+        EtsErrorUtil::ThrowErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER));
+        return;
+    }
+    ani_status status = ANI_OK;
+    if (receiveDataCallback_ == nullptr) {
+        if ((status = env->GlobalReference_Create(functionObj, &receiveDataCallback_)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "GlobalReference_Create receiveDataCallback_ failed status:%{public}d", status);
+            EtsErrorUtil::ThrowErrorByNativeErr(env,
+                static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER));
+            return;
+        }
+    }
+    ani_vm *aniVM = nullptr;
+    if (env->GetVM(&aniVM) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "get aniVM failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Get aniVm failed.");
+        return;
+    }
+    auto callbackRef = receiveDataCallback_;
+    auto handler = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+    uiWindow_->RegisterTransferComponentDataListener([aniVM, handler, callbackRef] (
+        const AAFwk::WantParams& wantParams) {
+        if (handler) {
+            handler->PostTask([aniVM, callbackRef, wantParams]() {
+                EtsUIExtensionContentSession::CallReceiveDataCallback(aniVM, callbackRef, wantParams);
+                }, "EtsUIExtensionContentSession:OnSetReceiveDataCallback");
+        }
+    });
+    isRegistered_ = true;
+}
+
+void EtsUIExtensionContentSession::CallReceiveDataCallback(ani_vm* vm, ani_ref callbackRef,
+    const AAFwk::WantParams& wantParams)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "CallReceiveDataCallback call");
+    if (vm == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "vm is nullptr");
+        return;
+    }
+    ani_env *env = nullptr;
+    ani_status status = ANI_OK;
+    if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "GetEnv failed status: %{public}d", status);
+        return;
+    }
+    if (callbackRef == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "callbackPtr is nullptr");
+        return;
+    }
+    ani_object callbackObj = static_cast<ani_object>(callbackRef);
+    ani_fn_object callbackFunc = reinterpret_cast<ani_fn_object>(callbackObj);
+    if (callbackFunc == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "callbackFunc is nullptr");
+        return;
+    }
+    ani_ref wantObj = AppExecFwk::WrapWantParams(env, wantParams);
+    if (wantObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "wantObj is nullptr");
+        return;
+    }
+    ani_ref argv[] = {wantObj};
+    ani_ref result;
+    if ((status = env->FunctionalObject_Call(callbackFunc, 1, argv, &result)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "FunctionalObjectCall failed status %{public}d", status);
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "CallReceiveDataCallback end");
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

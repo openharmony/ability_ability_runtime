@@ -78,7 +78,7 @@ public:
     static void NativeSetWindowBackgroundColor(ani_env* env, ani_object obj, ani_string color);
     static int NativeTerminateSelfWithResult(ani_env* env, ani_object obj,
         ani_object abilityResult, ani_object callback);
-    static ani_object NativeSetReceiveDataCallback(ani_env* env, ani_object obj);
+    static void NativeSetReceiveDataCallback(ani_env* env, ani_object clsObj, ani_object funcObj);
     static ani_object NativeGetUIExtensionHostWindowProxy(ani_env* env, ani_object obj);
 
     void SendData(ani_env* env, ani_object object, ani_object data);
@@ -87,14 +87,16 @@ public:
     int32_t TerminateSelfWithResult();
     void SetWindowBackgroundColor(ani_env* env, ani_string color);
     ani_object GetUIExtensionHostWindowProxy(ani_env* env, ani_object object);
-    ani_object SetReceiveDataCallback(ani_env* env, ani_object object);
+    void SetReceiveDataCallback(ani_env* env, ani_object functionObj);
+    static void CallReceiveDataCallback(ani_vm* vm, ani_ref callbackRef, const AAFwk::WantParams& wantParams);
 
 private:
+    void SetReceiveDataCallbackRegister(ani_env* env, ani_object functionObj);
     sptr<AAFwk::SessionInfo> sessionInfo_;
     sptr<Rosen::Window> uiWindow_;
     std::weak_ptr<AbilityRuntime::Context> context_;
-    std::shared_ptr<CallbackWrapper> receiveDataCallback_;
-    bool isRegistered = false;
+    ani_ref receiveDataCallback_ = nullptr;
+    bool isRegistered_ = false;
     std::shared_ptr<CallbackWrapper> receiveDataForResultCallback_;
     bool isSyncRegistered = false;
     std::shared_ptr<EtsUISessionAbilityResultListener> listener_;
