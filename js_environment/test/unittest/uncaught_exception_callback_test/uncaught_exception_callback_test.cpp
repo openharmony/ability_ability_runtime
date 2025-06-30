@@ -327,6 +327,7 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, GetFuncNameAndBuildIdTest_0100, Test
 {
     GTEST_LOG_(INFO) << "GetFuncNameAndBuildIdTest_0100 start";
     std::ostringstream stack;
+    stack << "Cannot get SourceMap info, dump raw stack:\n";
     Backtrace(stack);
     std::string stackinfo = NapiUncaughtExceptionCallback::GetFuncNameAndBuildId(stack.str());
     ASSERT_EQ(stackinfo.find("GetFuncNameAndBuildIdTest") != std::string::npos, true);
@@ -363,6 +364,7 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, GetSubmitterStackLocal_0100, TestSiz
 {
     GTEST_LOG_(INFO) << "GetSubmitterStackLocal_0100 start";
     setenv("HAP_DEBUGGABLE", "true", 1);
+    ASSERT_EQ(NapiUncaughtExceptionCallback::GetSubmitterStackLocal(), "");
     uv_timer_t timerHandle;
     uv_work_t work;
     uv_loop_t* loop = uv_default_loop();
