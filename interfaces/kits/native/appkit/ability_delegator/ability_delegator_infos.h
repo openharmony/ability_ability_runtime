@@ -41,7 +41,7 @@ struct ADelegatorAbilityProperty : public BaseDelegatorAbilityProperty {
     std::weak_ptr<NativeReference> object_;
 };
 
-struct ETSDelegatorAbilityProperty  : public BaseDelegatorAbilityProperty {
+struct EtsDelegatorAbilityProperty  : public BaseDelegatorAbilityProperty {
     std::weak_ptr<AppExecFwk::ETSNativeReference> object_;
 };
 

@@ -154,7 +154,6 @@ private:
 private:
     bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...);
     ani_object CreateAppWindowStage();
-    std::shared_ptr<AppExecFwk::ETSDelegatorAbilityProperty> CreateADelegatorAbilityProperty();
     void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<Want> want,
         const std::string &moduleName, const std::string &srcPath, const std::shared_ptr<OHOSApplication> &application);
     void DoOnForegroundForSceneIsNull(const Want &want);

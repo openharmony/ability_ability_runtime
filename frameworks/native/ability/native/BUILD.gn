@@ -818,6 +818,7 @@ ohos_shared_library("uiabilitykit_native") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_delegator",
     "${ability_runtime_path}/utils/global/time/include",
     "${ability_runtime_services_path}/common/include",
   ]
