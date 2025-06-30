@@ -340,6 +340,7 @@ void UpdateCallerInfoUtil::ClearProtectedWantParam(Want &want)
         // only system app can set unifiedDataKey
         want.RemoveParam(Want::PARAM_ABILITY_UNIFIED_DATA_KEY);
     }
+    want.RemoveParam(SPECIFIED_ABILITY_FLAG);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

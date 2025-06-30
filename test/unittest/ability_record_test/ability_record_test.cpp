@@ -2483,6 +2483,23 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_006, TestSize.Leve
  * EnvConditions: NA
  * CaseDescription: Verify AbilityRecord ForegroundAbility
  */
+HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_007, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->SetLastWant(std::make_shared<Want>());
+    abilityRecord->GetApplicationInfo().isSystemApp = true;
+    abilityRecord->ForegroundAbility(0, true);
+    EXPECT_TRUE(abilityRecord != nullptr);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: ForegroundAbility
+ * SubFunction: ForegroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ForegroundAbility
+ */
 HWTEST_F(AbilityRecordTest, AbilityRecord_ForegroundAbility_001, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
