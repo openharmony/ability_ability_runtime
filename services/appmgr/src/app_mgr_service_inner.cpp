@@ -309,7 +309,7 @@ constexpr int32_t PC_MAX_CHILD_PROCESS_NUM = 50;
 constexpr int32_t USER100 = 100;
 constexpr const char* LIFE_CYCLE_STATE_START_FOREGROUND = "start foreground";
 constexpr const char* LIFE_CYCLE_STATE_START_BACKGROUND = "start background";
-const std::string MULTI_PROCESS = "multi_process";
+const std::string LARGE_SCREEN = "large_screen";
 
 int32_t GetUserIdByUid(int32_t uid)
 {
@@ -8290,7 +8290,7 @@ bool AppMgrServiceInner::AllowChildProcessInMultiProcessFeatureApp(std::shared_p
         }
         auto &deviceFeatures = it->second;
         auto supportMultiProcess =
-            std::find(deviceFeatures.begin(), deviceFeatures.end(), MULTI_PROCESS) != deviceFeatures.end();
+            std::find(deviceFeatures.begin(), deviceFeatures.end(), LARGE_SCREEN) != deviceFeatures.end();
         appRecord->SetSupportMultiProcessDeviceFeature(supportMultiProcess);
         return supportMultiProcess;
     }
