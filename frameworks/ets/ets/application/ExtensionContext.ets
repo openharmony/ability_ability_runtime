@@ -19,13 +19,9 @@ import { Configuration } from '@ohos.app.ability.Configuration';
 import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 
 export default class ExtensionContext extends Context {
-    static {
-        loadLibrary("context_ani");
-    }
-    extensionAbilityInfo: ExtensionAbilityInfo;
-    config: Configuration;
-    currentHapModuleInfo: HapModuleInfo;
-    native constructor();
+    extensionAbilityInfo!: ExtensionAbilityInfo;
+    config!: Configuration;
+    currentHapModuleInfo!: HapModuleInfo;
     constructor(config: Configuration, extensionAbilityInfo: ExtensionAbilityInfo, currentHapModuleInfo: HapModuleInfo) {
         super();
         this.config = config;
