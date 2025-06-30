@@ -30,7 +30,7 @@ const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
 const int MAX_URI_COUNT = 200000;
 constexpr size_t MAX_IPC_RAW_DATA_SIZE = 128 * 1024 * 1024; // 128M
 
-bool CheckUseRawData(const std::vector<std::string>& uriVec)
+bool CheckUseRawData(const std::vector<std::string> &uriVec)
 {
     // broker can't use raw data
     return getuid() != AppUtils::GetInstance().GetCollaboratorBrokerUID();

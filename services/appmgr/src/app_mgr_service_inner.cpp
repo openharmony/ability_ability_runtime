@@ -498,14 +498,11 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
         masterAppRecord->ScheduleNewProcessRequest(want, hapModuleInfo.moduleName);
         return;
     }
-    std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     TAG_LOGI(AAFwkTag::APPMGR, "main process do not exists.");
+    std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     if (abilityInfo.type == AppExecFwk::AbilityType::PAGE) {
-        appRecord = !AAFwk::AppUtils::GetInstance().InOnNewProcessEnableList(bundleInfo.name) ? nullptr :
-            appRunningManager_->CheckAppRunningRecordForSpecifiedProcess(appInfo->uid, instanceKey, customProcessFlag);
-    } else {
         appRecord =
-            appRunningManager_->CheckAppRunningRecordForUIExtension(appInfo->uid, instanceKey, customProcessFlag);
+            appRunningManager_->CheckAppRunningRecordForSpecifiedProcess(appInfo->uid, instanceKey, customProcessFlag);
     }
     if (appRecord != nullptr) {
         TAG_LOGI(AAFwkTag::APPMGR, "starting process [%{public}s]", processName.c_str());
