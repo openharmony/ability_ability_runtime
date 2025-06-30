@@ -44,6 +44,7 @@
 #include "hdc_register.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "hybrid_js_module_reader.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "js_runtime.h"
@@ -290,6 +291,10 @@ void STSRuntime::PostFork(const Options &options, std::vector<ani_option>& aniOp
 
     ani_env* aniEnv = GetAniEnv();
     ark::ets::ETSAni::Postfork(aniEnv, aniOptions);
+
+    auto vm = jsRuntime->GetEcmaVm();
+    panda::JSNApi::SetHostResolveBufferTrackerForHybridApp(
+        vm, HybridJsModuleReader(options.bundleName, options.hapPath, options.isUnique));
 }
 
 std::unique_ptr<STSRuntime> STSRuntime::Create(const Options& options, JsRuntime* jsRuntime)
