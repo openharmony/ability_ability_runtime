@@ -27,6 +27,7 @@ namespace OHOS {
 namespace AAFwk {
 struct EventInfo {
     bool isPreload = false;
+    bool shouldKillForeground = true;
     int32_t pid = -1;
     int32_t userId = -1;
     int32_t extensionType = -1;
@@ -68,6 +69,7 @@ struct EventInfo {
     std::string errMsg;
     std::string componentName;
     std::string partitionName;
+    std::string exitMsg = "";
     uint64_t remainPartitionSize;
     std::vector<std::string> fileOfFolderPath;
     std::vector<uint64_t> fileOfFolderSize;
@@ -96,6 +98,7 @@ enum class EventName {
     ABILITY_ONACTIVE,
     ABILITY_ONINACTIVE,
     START_ABILITY_BY_APP_LINKING,
+    KILL_PROCESS_WITH_REASON,
 
     // serviceExtensionAbility behavior event
     START_SERVICE,
@@ -172,6 +175,7 @@ private:
     static void LogUIExtensionErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogUIServiceExtErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogSystemErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
+    static void LogKillProcessWithReason(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
 };
 }  // namespace AAFWK
 }  // namespace OHOS

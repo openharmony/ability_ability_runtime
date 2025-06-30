@@ -5894,5 +5894,27 @@ HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0002, TestSize.Level1)
     std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
     EXPECT_EQ(result, "");
 }
+
+/**
+ * @tc.name: GetSpecifiedProcessFlag_0003
+ * @tc.desc: Verify that GetSpecifiedProcessFlag returns an empty string when the flag is set in the want but
+ * AbilityInfo does not meet the conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0003, TestSize.Level1)
+{
+    AbilityInfo abilityInfo;
+    abilityInfo.type = AbilityType::PAGE;
+    abilityInfo.isStageBasedModel = false;
+    abilityInfo.isolationProcess = false;
+    abilityInfo.extensionAbilityType = ExtensionAbilityType::UNSPECIFIED;
+    AAFwk::Want want;
+    std::string flag = "uiext_flag";
+    want.SetParam("ohoSpecifiedProcessFlag", flag);
+
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
+    EXPECT_EQ(result, "");
+}
 } // namespace AppExecFwk
 } // namespace OHOS

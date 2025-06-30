@@ -53,6 +53,8 @@
 #include "dump_ipc_helper.h"
 #include "dump_process_helper.h"
 #include "dump_runtime_helper.h"
+#include "ets_exception_callback.h"
+#include "ets_runtime.h"
 #include "exit_reason.h"
 #include "extension_ability_info.h"
 #include "extension_module_loader.h"
@@ -76,7 +78,6 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "js_runtime.h"
-#include "ets_runtime.h"
 #ifdef CJ_FRONTEND
 #include "cj_runtime.h"
 #endif
@@ -1119,12 +1120,13 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
 #if defined(SUPPORT_GRAPHICS) && defined(SUPPORT_APP_PREFERRED_LANGUAGE)
-    UErrorCode status = U_ZERO_ERROR;
-    icu::Locale systemLocale = icu::Locale::forLanguageTag(
-        config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE), status);
+    icu::Locale systemLocale = Global::I18n::LocaleConfig::GetIcuLocale(
+        config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
+
     resConfig->SetLocaleInfo(systemLocale);
 
     if (Global::I18n::PreferredLanguage::IsSetAppPreferredLanguage()) {
+        UErrorCode status = U_ZERO_ERROR;
         icu::Locale preferredLocale =
             icu::Locale::forLanguageTag(Global::I18n::PreferredLanguage::GetAppPreferredLanguage(), status);
         resConfig->SetPreferredLocaleInfo(preferredLocale);
@@ -1710,6 +1712,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                     static_cast<int32_t>(hapModuleInfo.aotCompileStatus);
             }
         }
+        options.enableWarmStartupSmartGC =
+            (appLaunchData.GetAppPreloadMode() == AppExecFwk::PreloadMode::PRE_MAKE ||
+             appLaunchData.GetAppPreloadMode() == AppExecFwk::PreloadMode::PRELOAD_MODULE);
+        TAG_LOGI(AAFwkTag::APPKIT, "SmartGC: process is start. enable warm startup SmartGC: %{public}d",
+            static_cast<int32_t>(options.enableWarmStartupSmartGC));
         auto runtime = AbilityRuntime::Runtime::Create(options);
         if (!runtime) {
             TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
@@ -1937,7 +1944,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         HandleNWebPreload();
     }
 #endif
-    if (appLaunchData.IsNeedPreloadModule()) {
+    if (appLaunchData.GetAppPreloadMode() == AppExecFwk::PreloadMode::PRELOAD_MODULE) {
         PreloadModule(entryHapModuleInfo, application_->GetRuntime());
     }
 }

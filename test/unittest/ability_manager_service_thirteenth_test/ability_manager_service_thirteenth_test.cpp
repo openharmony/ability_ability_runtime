@@ -19,6 +19,7 @@
 #include "hilog_tag_wrapper.h"
 #include "sub_managers_helper.h"
 #include "mission_list_manager.h"
+#include "global_constant.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -33,6 +34,7 @@ constexpr int32_t ONE = 1;
 constexpr int32_t TWO = 2;
 constexpr int32_t FOUNDATION_UID = 5523;
 constexpr int32_t DMS_UID = 5522;
+constexpr int32_t LOW_MEMORY_KILL_WHILE_STARTING = 1111;
 
 namespace OHOS {
 namespace AAFwk {
@@ -1191,6 +1193,39 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetMissionIdByAbilityTokenInner_00
     EXPECT_EQ(abilityMs_->GetMissionIdByAbilityTokenInner(token), -1);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetMissionIdByAbilityTokenInner_004 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: KillProcessWithReason_002
+ * Function: KillProcessWithReason
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService KillProcessWithReason
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, KillProcessWithReason_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest KillProcessWithReason_002 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(mockSubManagersHelper, nullptr);
+    auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
+    EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
+    abilityMs_->subManagersHelper_ = mockSubManagersHelper;
+    abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
+
+    int32_t pid = LOW_MEMORY_KILL_WHILE_STARTING;
+    MyStatus::GetInstance().permPermission_ = 1;
+    ExitReason reason;
+    reason.exitMsg = AbilityRuntime::GlobalConstant::LOW_MEMORY_KILL;
+    reason.reason = Reason::REASON_RESOURCE_CONTROL;
+    MyStatus::GetInstance().smhGetUIAbilityManagerByUid_ = true;
+
+    EXPECT_EQ(abilityMs_->KillProcessWithReason(pid, reason), ERR_KILL_APP_WHILE_STARTING);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest KillProcessWithReason_002 end");
 }
 
 /*

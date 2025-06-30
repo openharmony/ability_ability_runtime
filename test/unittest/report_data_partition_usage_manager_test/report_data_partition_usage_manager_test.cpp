@@ -131,5 +131,16 @@ HWTEST_F(ReportDataPartitionUsageManagerTest, IsExistPath_0200, TestSize.Level1)
     auto result = ReportDataPartitionUsageManager::IsExistPath(INVALID_PATH);
     EXPECT_EQ(result, false);
 }
+
+/*
+ * @tc.number: IsExistPath_0300
+ * @tc.name: IsExistPath
+ * @tc.desc:
+ */
+HWTEST_F(ReportDataPartitionUsageManagerTest, IsExistPath_0300, TestSize.Level1)
+{
+    auto result = ReportDataPartitionUsageManager::IsExistPath("");
+    EXPECT_EQ(result, false);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

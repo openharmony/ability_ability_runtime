@@ -637,6 +637,8 @@ void JsRuntime::PostPreload(const Options& options)
     TAG_LOGD(AAFwkTag::JSRUNTIME, "ASMM JIT Verify PostFork, jitEnabled: %{public}d", options.jitEnabled);
     postOption.SetEnableJIT(options.jitEnabled);
     postOption.SetAOTCompileStatusMap(options.aotCompileStatusMap);
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "SmartGC: set options enableWarmStartupSmartGC to RuntimeOption");
+    postOption.SetEnableWarmStartupSmartGC(options.enableWarmStartupSmartGC);
     {
         HITRACE_METER_NAME(HITRACE_TAG_APP, "panda::JSNApi::PostFork");
         panda::JSNApi::PostFork(vm, postOption);
@@ -1698,7 +1700,7 @@ std::vector<panda::HmsMap> JsRuntime::GetSystemKitsMap(uint32_t version)
         return systemKitsMap;
     }
     cJSON *systemKitsItem = cJSON_GetObjectItem(jsonBuf, SYSTEM_KITS.c_str());
-    if (systemKitsItem == nullptr || !cJSON_IsArray(systemKitsItem)) {
+    if (systemKitsItem == nullptr) {
         cJSON_Delete(jsonBuf);
         return systemKitsMap;
     }

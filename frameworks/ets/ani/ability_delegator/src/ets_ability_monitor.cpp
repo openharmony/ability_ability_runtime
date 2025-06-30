@@ -14,6 +14,7 @@
  */
 #include "ability_delegator_registry.h"
 #include "ets_ability_monitor.h"
+#include "ets_native_reference.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -104,7 +105,7 @@ void EtsAbilityMonitor::SetEtsAbilityMonitor(ani_env *env, ani_object &abilityMo
         TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
         return;
     }
-    etsAbilityMonitor_ = std::make_unique<ETSNativeReference>();
+    etsAbilityMonitor_ = std::make_unique<AppExecFwk::ETSNativeReference>();
     ani_ref objRef = nullptr;
     if (env->GlobalReference_Create(abilityMonitorObj, &objRef) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "GlobalReference_Create failed");
@@ -126,7 +127,7 @@ void EtsAbilityMonitor::SetEtsAbilityMonitor(ani_env *env, ani_object &abilityMo
 }
 
 void EtsAbilityMonitor::CallLifecycleCBFunction(const std::string &functionName,
-    const std::shared_ptr<AbilityRuntime::ETSNativeReference> &abilityObj)
+    const std::shared_ptr<AppExecFwk::ETSNativeReference> &abilityObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "CallLifecycleCBFunction, name: %{public}s start", functionName.c_str());
     if (functionName.empty()) {
@@ -175,7 +176,7 @@ ani_env* EtsAbilityMonitor::GetAniEnv()
     return aniEnv;
 }
 
-std::shared_ptr<AbilityRuntime::ETSNativeReference> EtsAbilityMonitor::GetRuntimeObject(
+std::shared_ptr<AppExecFwk::ETSNativeReference> EtsAbilityMonitor::GetRuntimeObject(
     const std::weak_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &abilityObj)
 {
     auto baseProperty = abilityObj.lock();

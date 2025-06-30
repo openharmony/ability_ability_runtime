@@ -38,9 +38,9 @@ public:
 private:
     JsRuntimeCommon();
     ~JsRuntimeCommon();
-    bool debugMode_ = false;
-    bool debugApp_ = false;
-    bool nativeStart_ = false;
+    std::atomic<bool> debugMode_ = false;
+    std::atomic<bool> debugApp_ = false;
+    std::atomic<bool> nativeStart_ = false;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

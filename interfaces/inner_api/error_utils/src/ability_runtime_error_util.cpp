@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ const std::map<int32_t, std::string> ERROR_MSG_MAP = {
     { ERR_ABILITY_RUNTIME_EXTERNAL_NO_SUCH_ID,
         "The specified ID does not exist." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_VISIBILITY_VERIFICATION_FAILED,
-        "Failed to start the invisible ability." },
+        "Cannot start an invisible component." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_CROSS_USER_OPERATION,
         "Cannot cross user operations." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY,
@@ -81,7 +81,7 @@ const std::map<int32_t, std::string> ERROR_MSG_MAP = {
     { ERR_ABILITY_RUNTIME_EXTERNAL_EXECUTE_SHELL_COMMAND_FAILED,
         "Execute shell command failed." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT,
-        "Invalid wantagent object." },
+        "Invalid wantAgent object." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_WANTAGENT_NOT_FOUND,
         "The wantAgent object does not exist." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_NOT_ABILITY_CONTEXT,
@@ -91,7 +91,7 @@ const std::map<int32_t, std::string> ERROR_MSG_MAP = {
     { ERR_ABILITY_RUNTIME_EXTERNAL_FA_NOT_SUPPORT_OPERATION,
         "Ability type error. The specified ability type is wrong." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_CALLER_RELEASED,
-        "Caller released. The caller has been released." },
+        "The caller has been released." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_CALLEE_INVALID,
         "The callee does not exist." },
     { ERR_ABILITY_RUNTIME_EXTERNAL_RELEASE_ERROR,

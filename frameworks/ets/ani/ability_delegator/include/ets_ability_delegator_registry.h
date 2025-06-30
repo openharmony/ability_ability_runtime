@@ -16,7 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_REGISTRY_H
 #define OHOS_ABILITY_RUNTIME_ETS_ABILITY_DELEGATOR_REGISTRY_H
 
-#include "ets_runtime.h"
+#include "ani.h"
 
 namespace OHOS {
 namespace AbilityDelegatorEts {

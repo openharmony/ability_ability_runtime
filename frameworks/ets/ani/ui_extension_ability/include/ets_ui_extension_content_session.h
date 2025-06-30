@@ -16,10 +16,10 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_UI_EXTENSION_CONTENT_SESSION_H
 #define OHOS_ABILITY_RUNTIME_ETS_UI_EXTENSION_CONTENT_SESSION_H
 
+#include "ani.h"
 #include "session_info.h"
 #include "start_options.h"
 #include "window.h"
-#include "ets_runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {

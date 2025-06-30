@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -238,6 +238,10 @@ constexpr struct option LONG_OPTIONS_SEND_MEMORY_LEVEL[] = {
 AbilityManagerShellCommand::AbilityManagerShellCommand(int argc, char* argv[]) : ShellCommand(argc, argv, TOOL_NAME)
 {
     for (int i = 0; i < argc_; i++) {
+        if (i > 1) {
+            TAG_LOGI(AAFwkTag::AA_TOOL, "argc greater than 2, ignoring the rest");
+            return;
+        }
         TAG_LOGI(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s", i, argv_[i]);
     }
 }

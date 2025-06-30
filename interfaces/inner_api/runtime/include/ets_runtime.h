@@ -26,25 +26,23 @@
 
 #include "runtime.h"
 #include "js_runtime.h"
-#include "ets_exception_callback.h"
-#include "ani.h"
 
 using AppLibPathMap = std::map<std::string, std::vector<std::string>>;
 using AppLibPathVec = std::vector<std::string>;
+struct __ani_env;
+using ani_env = __ani_env;
 
 namespace OHOS {
 namespace EtsEnv {
 class ETSEnvironment;
 struct ETSUncaughtExceptionInfo;
-} // namespace EtsEnv
+}
+
+namespace AppExecFwk {
+struct ETSNativeReference;
+}
 
 namespace AbilityRuntime {
-struct ETSNativeReference {
-    ani_class aniCls = nullptr;
-    ani_object aniObj = nullptr;
-    ani_ref aniRef = nullptr;
-};
-
 class ETSRuntime : public Runtime {
 public:
     static std::unique_ptr<ETSRuntime> Create(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
@@ -84,8 +82,9 @@ public:
     void GetHeapPrepare() override {};
     void RegisterUncaughtExceptionHandler(const EtsEnv::ETSUncaughtExceptionInfo &uncaughtExceptionInfo);
     ani_env *GetAniEnv();
-    std::unique_ptr<ETSNativeReference> LoadModule(const std::string &moduleName, const std::string &modulePath,
-        const std::string &hapPath, bool esmodule, bool useCommonChunk, const std::string &srcEntrance);
+    std::unique_ptr<AppExecFwk::ETSNativeReference> LoadModule(const std::string &moduleName,
+        const std::string &modulePath, const std::string &hapPath, bool esmodule,
+        bool useCommonChunk, const std::string &srcEntrance);
     bool HandleUncaughtError();
     const std::unique_ptr<AbilityRuntime::Runtime> &GetJsRuntime() const;
 
@@ -93,12 +92,10 @@ private:
     bool Initialize(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
     void Deinitialize();
     bool CreateEtsEnv(const Options &options, Runtime *jsRuntime);
-    std::unique_ptr<ETSNativeReference> LoadEtsModule(const std::string &moduleName, const std::string &fileName,
-        const std::string &hapPath, const std::string &srcEntrance);
-    std::shared_ptr<EtsEnv::ETSEnvironment> etsEnv_;
+    std::unique_ptr<AppExecFwk::ETSNativeReference> LoadEtsModule(const std::string &moduleName,
+        const std::string &fileName, const std::string &hapPath, const std::string &srcEntrance);
     int32_t apiTargetVersion_ = 0;
     std::string codePath_;
-    static AppLibPathVec appLibPaths_;
     std::string moduleName_;
     std::unique_ptr<AbilityRuntime::Runtime> jsRuntime_ = nullptr;
 };

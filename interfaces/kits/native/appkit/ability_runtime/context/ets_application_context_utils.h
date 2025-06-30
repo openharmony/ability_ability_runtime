@@ -16,13 +16,13 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_APPLICATION_CONTEXT_UTILS_H
 #define OHOS_ABILITY_RUNTIME_ETS_APPLICATION_CONTEXT_UTILS_H
 
+#include "ani.h"
 #include "ability_manager_client.h"
 #include "ani_common_util.h"
 #include "ani_common_want.h"
 #include "application_context.h"
 #include "ets_context_utils.h"
 #include "ets_error_utils.h"
-#include "ets_runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {

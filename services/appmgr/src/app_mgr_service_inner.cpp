@@ -501,7 +501,7 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
     std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     TAG_LOGI(AAFwkTag::APPMGR, "main process do not exists.");
     if (abilityInfo.type == AppExecFwk::AbilityType::PAGE) {
-        appRecord =
+        appRecord = !AAFwk::AppUtils::GetInstance().InOnNewProcessEnableList(bundleInfo.name) ? nullptr :
             appRunningManager_->CheckAppRunningRecordForSpecifiedProcess(appInfo->uid, instanceKey, customProcessFlag);
     } else {
         appRecord =
@@ -2715,6 +2715,9 @@ void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecor
     info.extensionType_ = appRecord->GetExtensionType();
     info.preloadMode_ = appRecord->GetPreloadMode();
     info.isDebugApp  = appRecord->IsDebug();
+    info.isExiting = appRecord->IsTerminating() || appRecord->IsKilling()
+        || appRecord->GetRestartAppFlag() || appRecord->IsUserRequestCleaning();
+    info.isCached = DelayedSingleton<CacheProcessManager>::GetInstance()->IsCachedProcess(appRecord);
     if (appRecord->GetUserTestInfo() != nullptr && system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
         info.isTestMode = true;
     }
@@ -7011,8 +7014,7 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
         }
     }
     if (eventName == AppFreezeType::LIFECYCLE_TIMEOUT || eventName == AppFreezeType::APP_INPUT_BLOCK ||
-        eventName == AppFreezeType::THREAD_BLOCK_6S || eventName == AppFreezeType::THREAD_BLOCK_3S ||
-        eventName == AppFreezeType::LIFECYCLE_TIMEOUT_WARNING) {
+        eventName == AppFreezeType::THREAD_BLOCK_6S || eventName == AppFreezeType::THREAD_BLOCK_3S) {
         if (AppExecFwk::AppfreezeManager::GetInstance()->IsNeedIgnoreFreezeEvent(pid, eventName)) {
             TAG_LOGE(AAFwkTag::APPDFR, "appFreeze happend, pid:%{public}d, eventName:%{public}s",
                 pid, eventName.c_str());
@@ -7078,8 +7080,7 @@ void AppMgrServiceInner::TimeoutNotifyApp(int32_t pid, int32_t uid,
     const std::string& bundleName, const std::string& processName, const FaultData &faultData)
 {
     bool isNeedExit = (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) ||
-        (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT) ||
-        (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT_WARNING);
+        (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT);
 #ifdef APP_NO_RESPONSE_DIALOG
     bool isDialogExist = appRunningManager_ ?
         appRunningManager_->CheckAppRunningRecordIsExist(APP_NO_RESPONSE_BUNDLENAME, APP_NO_RESPONSE_ABILITY) :
@@ -8283,7 +8284,12 @@ bool AppMgrServiceInner::AllowChildProcessInMultiProcessFeatureApp(std::shared_p
         if (info.moduleType != AppExecFwk::ModuleType::ENTRY) {
             continue;
         }
-        auto &deviceFeatures = info.deviceFeatures;
+        auto deviceType = OHOS::system::GetDeviceType();
+        auto it = info.requiredDeviceFeatures.find(deviceType);
+        if (it == info.requiredDeviceFeatures.end()) {
+            return false;
+        }
+        auto &deviceFeatures = it->second;
         auto supportMultiProcess =
             std::find(deviceFeatures.begin(), deviceFeatures.end(), MULTI_PROCESS) != deviceFeatures.end();
         appRecord->SetSupportMultiProcessDeviceFeature(supportMultiProcess);

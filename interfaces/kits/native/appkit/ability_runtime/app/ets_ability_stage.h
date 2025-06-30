@@ -23,9 +23,10 @@
 
 #include "ability_stage.h"
 #include "configuration.h"
+#include "ets_native_reference.h"
+#include "ets_runtime.h"
 #include "resource_manager.h"
 #include "native_engine/native_value.h"
-#include "ets_runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -34,7 +35,7 @@ public:
     static std::shared_ptr<AbilityStage> Create(
         const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo);
 
-    ETSAbilityStage(ETSRuntime& etsRuntime, std::unique_ptr<ETSNativeReference>&& ETSAbilityStageObj);
+    ETSAbilityStage(ETSRuntime& etsRuntime, std::unique_ptr<AppExecFwk::ETSNativeReference>&& ETSAbilityStageObj);
     ~ETSAbilityStage() override;
 
     void Init(const std::shared_ptr<Context> &context,
@@ -58,7 +59,7 @@ private:
     void SetEtsAbilityStage(const std::shared_ptr<Context> &context);
 
     ETSRuntime& etsRuntime_;
-    std::unique_ptr<ETSNativeReference> etsAbilityStageObj_;
+    std::unique_ptr<AppExecFwk::ETSNativeReference> etsAbilityStageObj_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

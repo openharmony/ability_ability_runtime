@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_ABILITY_STAGE_CONTEXT_H
 #define OHOS_ABILITY_RUNTIME_ETS_ABILITY_STAGE_CONTEXT_H
 
+#include "ani.h"
 #include "configuration.h"
 #include "ets_runtime.h"
 
