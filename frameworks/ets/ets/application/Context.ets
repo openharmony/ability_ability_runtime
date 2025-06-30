@@ -46,12 +46,6 @@ export class Context extends BaseContext {
     }
   }
 
-  constructor(applicationInfo: ApplicationInfo, resourceManager: resmgr.ResourceManager) {
-    super();
-    this.applicationInfo = applicationInfo;
-    this.resourceManager = resourceManager;
-  }
-
   public native getApplicationContextSync(): ApplicationContext;
 
   public native createModuleResourceManagerSync(bundleName: string, moduleName: string): resmgr.ResourceManager;
