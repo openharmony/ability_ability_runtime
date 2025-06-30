@@ -223,7 +223,8 @@ ani_object EtsErrorUtil::CreateError(ani_env *env, ani_int code, const std::stri
         return nullptr;
     }
     ani_object obj = nullptr;
-    if ((status = env->Object_New(cls, method, &obj, code, error)) != ANI_OK) {
+    ani_double dCode(code);
+    if ((status = env->Object_New(cls, method, &obj, dCode, error)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Object_New failed %{public}d", status);
         return nullptr;
     }
