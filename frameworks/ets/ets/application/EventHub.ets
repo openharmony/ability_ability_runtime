@@ -16,6 +16,7 @@ import Context from 'application.Context';
 import hilog from '@ohos.hilog';
 
 export type ESValueArgs = ESValue | Object | null | undefined
+export type FixedArgs = Object | null | undefined
 
 export default class EventHub {
   private context?: Context;
@@ -32,7 +33,16 @@ export default class EventHub {
       this.eventMap.set(event, []);
     }
     const callbacks = this.eventMap.get(event)!;
-    callbacks.push(callback);
+    let foundIndex = -1;
+    for (let i = 0; i < callbacks.length; i++) {
+      if (callbacks[i] == callback) {
+        foundIndex = i;
+        break;
+      }
+    }
+    if (foundIndex == -1) {
+      callbacks.push(callback);
+    }
     if (!this.dynamicContextEventHub) {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
@@ -100,8 +110,12 @@ export default class EventHub {
     });
   }
   
-  emit(event: string, ...args: FixedArray<(Object|null|undefined)>): void {
-    this.emitByStaticContext(event, ...args);
+  emit(event: string, ...args: (Object|null|undefined)[]): void {
+    let fixedArgs: FixedArray<(Object|null|undefined)> = new FixedArgs[args.length];
+    for (let i = 0; i < args.length; i++) {
+      fixedArgs[i] = args[i];
+    }
+    this.emitByStaticContext(event, ...fixedArgs);
     if (!this.dynamicContextEventHub) {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
