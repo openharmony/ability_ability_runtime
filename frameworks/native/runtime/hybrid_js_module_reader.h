@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_JS_MODULE_READER_H
-#define OHOS_ABILITY_RUNTIME_JS_MODULE_READER_H
+#ifndef OHOS_ABILITY_RUNTIME_HYBRID_JS_MODULE_READER_H
+#define OHOS_ABILITY_RUNTIME_HYBRID_JS_MODULE_READER_H
 
 #include <sstream>
 #include <string>
@@ -26,7 +26,7 @@ using Extractor = OHOS::AbilityBase::Extractor;
 
 namespace OHOS {
 namespace AbilityRuntime {
-class JsModuleReader final : private JsModuleSearcher {
+class HybridJsModuleReader final : private JsModuleSearcher {
 public:
     static constexpr char ABS_CODE_PATH[] = "/data/storage/el1/";
     static constexpr char ABS_DATA_CODE_PATH[] = "/data/app/el1/bundle/public/";
@@ -34,23 +34,24 @@ public:
     static constexpr char MERGE_ABC_PATH[] = "ets/modules.abc";
     static constexpr char SYS_ABS_CODE_PATH[] = "/system/app/appServiceFwk/";
     static constexpr char SHARED_FILE_SUFFIX[] = ".hsp";
-    JsModuleReader(const std::string& bundleName, const std::string& hapPath, bool isFormRender = false);
-    ~JsModuleReader() = default;
+    static constexpr char ABILITY_FILE_SUFFIX[] = ".hap";
+    HybridJsModuleReader(const std::string& bundleName, const std::string& hapPath, bool isFormRender = false);
+    ~HybridJsModuleReader() = default;
 
-    JsModuleReader(const JsModuleReader&) = default;
-    JsModuleReader(JsModuleReader&&) = default;
-    JsModuleReader& operator=(const JsModuleReader&) = default;
-    JsModuleReader& operator=(JsModuleReader&&) = default;
+    HybridJsModuleReader(const HybridJsModuleReader&) = default;
+    HybridJsModuleReader(HybridJsModuleReader&&) = default;
+    HybridJsModuleReader& operator=(const HybridJsModuleReader&) = default;
+    HybridJsModuleReader& operator=(HybridJsModuleReader&&) = default;
 
     bool operator()(const std::string& inputPath, uint8_t **buff, size_t *buffSize, std::string& errorMsg) const;
     static std::string GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName);
-    static void GetHapPathList(const std::string &bundleName, std::vector<std::string> &hapList);
 
 private:
-    std::string GetAppHspPath(const std::string& inputPath) const;
-    std::string GetCommonAppHspPath(const std::string& inputPath) const;
-    std::string GetFormAppHspPath(const std::string& inputPath) const;
+    std::string GetAppPath(const std::string& inputPath, const std::string& suffix) const;
+    std::string GetCommonAppPath(const std::string& inputPath, const std::string& suffix) const;
+    std::string GetFormAppPath(const std::string& inputPath, const std::string& suffix) const;
     std::string GetModuleName(const std::string& inputPath) const;
+    std::shared_ptr<Extractor> GetExtractor(const std::string& inputPath, std::string& errorMsg) const;
     static std::string GetOtherHspPath(const std::string& bundleName, const std::string& moduleName,
         const std::string& inputPath);
 
@@ -60,4 +61,4 @@ private:
 } // namespace AbilityRuntime
 } // namespace OHOS
 
-#endif // OHOS_ABILITY_RUNTIME_JS_MODULE_READER_H
+#endif // OHOS_ABILITY_RUNTIME_HYBRID_JS_MODULE_READER_H
