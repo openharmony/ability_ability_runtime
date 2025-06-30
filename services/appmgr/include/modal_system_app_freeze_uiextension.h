@@ -34,7 +34,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 
-constexpr const char *APP_NO_RESPONSE_ABILITY = "AppAbnormalAbility";
+constexpr const char *APP_NO_RESPONSE_ABILITY = "AlertDialogAbility";
 
 class ModalSystemAppFreezeUIExtension {
 public:
