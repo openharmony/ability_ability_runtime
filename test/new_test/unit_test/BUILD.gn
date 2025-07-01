@@ -19,6 +19,8 @@ group("unittest") {
   deps = [
     "ability_auto_startup_client_unit_test:unittest",
     "ability_connection_unit_test:unittest",
+    "app_startup/ext_native_startup_task_test:unittest",
+    "app_startup/ext_native_startup_manager_test:unittest",
     "user_controller_unit_test:unittest",
   ]
 }
