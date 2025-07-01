@@ -637,9 +637,10 @@ int32_t AppExitReasonDataManager::DeleteAbilityRecoverInfo(
         recoverInfoList.erase(std::remove(recoverInfoList.begin(), recoverInfoList.end(), recoverInfo),
             recoverInfoList.end());
         int index = std::distance(recoverInfoList.begin(), pos);
-        sessionIdList.erase(std::remove(sessionIdList.begin(), sessionIdList.end(), sessionIdList[index]),
+        int sessionId = sessionIdList[index];
+        sessionIdList.erase(std::remove(sessionIdList.begin(), sessionIdList.end(), sessionId),
             sessionIdList.end());
-        InnerDeleteSessionId(sessionIdList[index]);
+        InnerDeleteSessionId(sessionId);
         UpdateAbilityRecoverInfo(accessTokenId, recoverInfoList, sessionIdList);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "DeleteAbilityRecoverInfo remove recoverInfo succeed");
     }
