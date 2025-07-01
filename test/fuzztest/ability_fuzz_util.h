@@ -274,6 +274,279 @@ void GetRandomKeepAliveAppInfo(FuzzedDataProvider& fdp, AppInfo& info)
     info.instanceKey = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     info.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
 }
+void GetRandomAppqfInfo(FuzzedDataProvider& fdp, AppqfInfo& deployedAppqfInfo)
+{
+    deployedAppqfInfo.type = static_cast<QuickFixType>(fdp.ConsumeIntegralInRange<int8_t>(0, CODE_TWO));
+    deployedAppqfInfo.versionCode = fdp.ConsumeIntegral<int32_t>();
+    deployedAppqfInfo.versionName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    deployedAppqfInfo.cpuAbi = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    deployedAppqfInfo.nativeLibraryPath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    std::vector<HqfInfo> hqfInfos;
+}
+
+void GetRandomDeployingAppqfInfo(FuzzedDataProvider& fdp, AppqfInfo& deployingAppqfInfo)
+{
+    deployingAppqfInfo.type = static_cast<QuickFixType>(fdp.ConsumeIntegralInRange<int8_t>(0, CODE_TWO));
+    deployingAppqfInfo.versionCode = fdp.ConsumeIntegral<int32_t>();
+    deployingAppqfInfo.versionName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    deployingAppqfInfo.cpuAbi = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    deployingAppqfInfo.nativeLibraryPath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    std::vector<HqfInfo> hqfInfos;
+}
+
+void GetRandomAppQuickFix(FuzzedDataProvider& fdp, AppQuickFix& appQuickFix)
+{
+    appQuickFix.versionCode = fdp.ConsumeIntegral<int32_t>();
+    appQuickFix.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appQuickFix.versionName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    GetRandomAppqfInfo(fdp, appQuickFix.deployedAppqfInfo);
+    GetRandomDeployingAppqfInfo(fdp, appQuickFix.deployingAppqfInfo);
+}
+
+void GetRandomResourceInfo(FuzzedDataProvider& fdp, Resource& labelResource)
+{
+    labelResource.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    labelResource.moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    labelResource.id = fdp.ConsumeIntegral<int32_t>();
+}
+
+void GetRandomApplicationInfo(FuzzedDataProvider& fdp, ApplicationInfo& appInfo)
+{
+    appInfo.name = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.versionCode = fdp.ConsumeIntegral<int32_t>();
+    appInfo.versionName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.minCompatibleVersionCode = fdp.ConsumeIntegral<int32_t>();
+    appInfo.apiCompatibleVersion = fdp.ConsumeIntegral<int32_t>();
+    appInfo.apiTargetVersion = fdp.ConsumeIntegral<int32_t>();
+    appInfo.crowdtestDeadline = fdp.ConsumeIntegral<int64_t>();
+    appInfo.iconPath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.iconId = fdp.ConsumeIntegral<int32_t>();
+    GetRandomResourceInfo(fdp, appInfo.labelResource);
+    appInfo.label = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.labelId = fdp.ConsumeIntegral<int32_t>();
+    GetRandomResourceInfo(fdp, appInfo.labelResource);
+    appInfo.description = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.descriptionId = fdp.ConsumeIntegral<int32_t>();
+    GetRandomResourceInfo(fdp, appInfo.labelResource);
+    appInfo.keepAlive = fdp.ConsumeBool();
+    appInfo.removable = fdp.ConsumeBool();
+    appInfo.singleton = fdp.ConsumeBool();
+    appInfo.userDataClearable = fdp.ConsumeBool();
+    appInfo.allowAppRunWhenDeviceFirstLocked = fdp.ConsumeBool();
+    appInfo.accessible = fdp.ConsumeBool();
+    appInfo.runningResourcesApply = fdp.ConsumeBool();
+    appInfo.associatedWakeUp = fdp.ConsumeBool();
+    appInfo.hideDesktopIcon = fdp.ConsumeBool();
+    appInfo.formVisibleNotify = fdp.ConsumeBool();
+    appInfo.installedForAllUser = fdp.ConsumeBool();
+    appInfo.allowEnableNotification = fdp.ConsumeBool();
+    appInfo.allowMultiProcess = fdp.ConsumeBool();
+    appInfo.gwpAsanEnabled = fdp.ConsumeBool();
+    appInfo.hasPlugin = fdp.ConsumeBool();
+    appInfo.allowCommonEvent = GenerateStringArray(fdp);
+    appInfo.assetAccessGroups = GenerateStringArray(fdp);
+    appInfo.isSystemApp = fdp.ConsumeBool();
+    appInfo.isLauncherApp = fdp.ConsumeBool();
+    appInfo.isFreeInstallApp = fdp.ConsumeBool();
+    appInfo.asanEnabled = fdp.ConsumeBool();
+    appInfo.asanLogPath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.codePath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.dataDir = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.dataBaseDir = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.cacheDir = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.entryDir = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.apiReleaseType = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.debug = fdp.ConsumeBool();
+    appInfo.deviceId = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.distributedNotificationEnabled = fdp.ConsumeBool();
+    appInfo.entityType = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.process = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.supportedModes = fdp.ConsumeIntegral<int32_t>();
+    appInfo.vendor = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.appPrivilegeLevel = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.appDistributionType = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.appProvisionType = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.accessTokenId = fdp.ConsumeIntegral<int32_t>();
+    appInfo.applicationReservedFlag = fdp.ConsumeIntegral<int32_t>();
+    appInfo.accessTokenIdEx = fdp.ConsumeIntegral<int64_t>();
+    appInfo.enabled = fdp.ConsumeBool();
+    appInfo.appIndex = fdp.ConsumeIntegral<int64_t>();
+    appInfo.uid = fdp.ConsumeIntegral<int32_t>();
+    appInfo.maxChildProcess = fdp.ConsumeIntegral<int32_t>();
+    appInfo.nativeLibraryPath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.cpuAbi = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.arkNativeFilePath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.arkNativeFileAbi = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.permissions = GenerateStringArray(fdp);
+    appInfo.moduleSourceDirs = GenerateStringArray(fdp);
+    appInfo.targetBundleList = GenerateStringArray(fdp);
+    appInfo.fingerprint = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    GetRandomAppQuickFix(fdp, appInfo.appQuickFix);
+    appInfo.icon = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.flags = fdp.ConsumeIntegral<int32_t>();
+    appInfo.entryModuleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.isCompressNativeLibs = fdp.ConsumeBool();
+    appInfo.signatureKey = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.multiProjects = fdp.ConsumeBool();
+    appInfo.tsanEnabled = fdp.ConsumeBool();
+    appInfo.hwasanEnabled = fdp.ConsumeBool();
+    appInfo.ubsanEnabled = fdp.ConsumeBool();
+    appInfo.cloudFileSyncEnabled = fdp.ConsumeBool();
+    appInfo.needAppDetail = fdp.ConsumeBool();
+    appInfo.appDetailAbilityLibraryPath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.targetBundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.targetPriority = fdp.ConsumeIntegral<int32_t>();
+    appInfo.overlayState = fdp.ConsumeIntegral<int32_t>();
+    appInfo.bundleType = static_cast<BundleType>(fdp.ConsumeIntegralInRange<int32_t>(0, CODE_TWO));
+    appInfo.compileSdkVersion = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.compileSdkType = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.organization = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.installSource = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    appInfo.configuration = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+}
+
+void GetRandomStartWindowResourceInfo(FuzzedDataProvider& fdp, StartWindowResource& startWindowResource)
+{
+    startWindowResource.startWindowAppIconId = fdp.ConsumeIntegral<uint32_t>();
+    startWindowResource.startWindowIllustrationId = fdp.ConsumeIntegral<uint32_t>();
+    startWindowResource.startWindowBrandingImageId = fdp.ConsumeIntegral<uint32_t>();
+    startWindowResource.startWindowBackgroundColorId = fdp.ConsumeIntegral<uint32_t>();
+    startWindowResource.startWindowBackgroundImageId = fdp.ConsumeIntegral<uint32_t>();
+    startWindowResource.startWindowBackgroundImageFit = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+}
+
+void GetRandomAbilityInfo(FuzzedDataProvider& fdp, AbilityInfo& abilityInfo)
+{
+    abilityInfo.name = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.label = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.description = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.iconPath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.labelId = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.descriptionId = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.iconId = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.theme = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.visible = fdp.ConsumeBool();
+    abilityInfo.kind = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.type = static_cast<AbilityType>(fdp.ConsumeIntegralInRange<int32_t>(0, CODE_TWO));
+    abilityInfo.extensionAbilityType = 
+    static_cast<ExtensionAbilityType>(fdp.ConsumeIntegralInRange<int32_t>(0, CODE_TWO));
+    abilityInfo.orientation = static_cast<DisplayOrientation>(fdp.ConsumeIntegralInRange<int32_t>(0, CODE_TWO));
+    abilityInfo.launchMode = static_cast<LaunchMode>(fdp.ConsumeIntegralInRange<int32_t>(0, CODE_TWO));
+    abilityInfo.srcPath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.srcLanguage = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.permissions = GenerateStringArray(fdp);
+    abilityInfo.process = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.deviceTypes = GenerateStringArray(fdp);
+    abilityInfo.deviceCapabilities = GenerateStringArray(fdp);
+    abilityInfo.uri = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.targetAbility = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.isLauncherAbility = fdp.ConsumeBool();
+    abilityInfo.isNativeAbility = fdp.ConsumeBool();
+    abilityInfo.enabled = fdp.ConsumeBool();
+    abilityInfo.supportPipMode = fdp.ConsumeBool();
+    abilityInfo.formEnabled = fdp.ConsumeBool();
+    abilityInfo.removeMissionAfterTerminate = fdp.ConsumeBool();
+    abilityInfo.readPermission = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.writePermission = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.configChanges = GenerateStringArray(fdp);
+    abilityInfo.formEntity = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.minFormHeight = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.defaultFormHeight = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.minFormWidth = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.defaultFormWidth = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.backgroundModes = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.package = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.applicationName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.codePath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.resourcePath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.hapPath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.srcEntrance = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.isModuleJson = fdp.ConsumeBool();
+    abilityInfo.isStageBasedModel = fdp.ConsumeBool();
+    abilityInfo.continuable = fdp.ConsumeBool();
+    abilityInfo.priority = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.startWindow = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.startWindowIcon = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.startWindowIconId = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.startWindowBackground = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.startWindowBackgroundId = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.preferMultiWindowOrientation = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.excludeFromMissions = fdp.ConsumeBool();
+    abilityInfo.unclearableMission = fdp.ConsumeBool();
+    abilityInfo.excludeFromDock = fdp.ConsumeBool();
+    abilityInfo.recoverable = fdp.ConsumeBool();
+    abilityInfo.isolationProcess = fdp.ConsumeBool();
+    abilityInfo.linkType = static_cast<LinkType>(fdp.ConsumeIntegralInRange<int8_t>(0, CODE_TWO));
+    abilityInfo.orientationId = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.startWindowId = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.appIndex = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.continueType = GenerateStringArray(fdp);
+    abilityInfo.maxWindowRatio = fdp.ConsumeIntegral<uint64_t>();
+    abilityInfo.minWindowRatio = fdp.ConsumeIntegral<uint64_t>();
+    abilityInfo.maxWindowWidth = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.minWindowWidth = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.maxWindowHeight = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.minWindowHeight = fdp.ConsumeIntegral<uint32_t>();
+    GetRandomStartWindowResourceInfo(fdp, abilityInfo.startWindowResource);
+    abilityInfo.compileMode = static_cast<CompileMode>(fdp.ConsumeIntegralInRange<int32_t>(0, CODE_TWO));
+    abilityInfo.originalBundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.appName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.privacyUrl = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.privacyName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.downloadUrl = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.versionName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.className = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.originalClassName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.uriPermissionMode = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.uriPermissionPath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.packageSize = fdp.ConsumeIntegral<uint32_t>();
+    abilityInfo.multiUserShared = fdp.ConsumeBool();
+    abilityInfo.grantPermission = fdp.ConsumeBool();
+    abilityInfo.directLaunch = fdp.ConsumeBool();
+    abilityInfo.subType = static_cast<AbilitySubType>(fdp.ConsumeIntegralInRange<int32_t>(0, CODE_TWO));
+    abilityInfo.libPath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.deviceId = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityInfo.installTime = fdp.ConsumeIntegral<uint64_t>();
+    abilityInfo.supportExtNames = GenerateStringArray(fdp);
+    abilityInfo.supportMimeTypes = GenerateStringArray(fdp);
+}
+
+void GetRandomAbilityRequestInfo(FuzzedDataProvider& fdp, AbilityRequest& info)
+{
+    info.restart = fdp.ConsumeBool();
+    info.startRecent = fdp.ConsumeBool();
+    info.uriReservedFlag = fdp.ConsumeBool();
+    info.isFromIcon = fdp.ConsumeBool();
+    info.isShellCall = fdp.ConsumeBool();
+    info.isQueryERMS = fdp.ConsumeBool();
+    info.isEmbeddedAllowed = fdp.ConsumeBool();
+    info.callSpecifiedFlagTimeout = fdp.ConsumeBool();
+    info.hideStartWindow = fdp.ConsumeBool();
+    info.restartCount = fdp.ConsumeIntegral<uint32_t>();
+    info.uid = fdp.ConsumeIntegral<uint32_t>();
+    info.collaboratorType = static_cast<CollaboratorType>(fdp.ConsumeIntegralInRange<int32_t>(0, CODE_TWO));
+    info.callerTokenRecordId = fdp.ConsumeIntegral<uint32_t>();
+    info.userId = fdp.ConsumeIntegral<uint32_t>();
+    info.callerAccessTokenId = fdp.ConsumeIntegral<uint32_t>();
+    info.specifyTokenId = fdp.ConsumeIntegral<uint32_t>();
+    info.callerUid = fdp.ConsumeIntegral<uint32_t>();
+    info.requestCode = fdp.ConsumeIntegral<uint32_t>();
+    info.callType = static_cast<AbilityCallType>(fdp.ConsumeIntegralInRange<int32_t>(0, CODE_TWO));
+    info.restartTime = fdp.ConsumeIntegral<uint64_t>();
+    info.extensionType = static_cast<ExtensionAbilityType>(fdp.ConsumeIntegralInRange<int32_t>(0, CODE_TWO));
+    info.extensionProcessMode = static_cast<ExtensionProcessMode>(fdp.ConsumeIntegralInRange<int32_t>(0, CODE_TWO));
+    info.specifiedFlag = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.customProcess = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.reservedBundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.appId = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.startTime = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    Want want;
+    GetRandomAbilityInfo(fdp, info.abilityInfo);
+    GetRandomApplicationInfo(fdp, info.appInfo);
+}
 }  // namespace AbilityFuzzUtil
 }  // namespace AppExecFwk
 }  // namespace OHOS

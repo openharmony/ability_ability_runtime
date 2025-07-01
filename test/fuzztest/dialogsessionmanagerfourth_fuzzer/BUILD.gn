@@ -19,11 +19,11 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 module_output_path = "ability_runtime/abilitymgr"
 
 ##############################fuzztest##########################################
-ohos_fuzztest("DialogSessionManagerFuzzTest") {
+ohos_fuzztest("DialogSessionManagerFourthFuzzTest") {
   module_out_path = module_output_path
 
   fuzz_config_file =
-      "${ability_runtime_test_path}/fuzztest/dialogsessionmanager_fuzzer"
+      "${ability_runtime_test_path}/fuzztest/dialogsessionmanagerfourth_fuzzer"
   include_dirs = [
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
@@ -36,9 +36,10 @@ ohos_fuzztest("DialogSessionManagerFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/query_erms_manager.cpp",
     "${ability_runtime_path}/services/abilitymgr/src/dialog_session/dialog_session_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/start_ability_utils.cpp",
-    "dialogsessionmanager_fuzzer.cpp",
+    "dialogsessionmanagerfourth_fuzzer.cpp",
   ]
 
   configs = [
@@ -96,7 +97,7 @@ group("fuzztest") {
   deps = []
   deps += [
     # deps file
-    ":DialogSessionManagerFuzzTest",
+    ":DialogSessionManagerFourthFuzzTest",
   ]
 }
 ###############################################################################
