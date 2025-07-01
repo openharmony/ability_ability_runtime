@@ -39,6 +39,43 @@ namespace {
 constexpr const char* AREA_MODE_ENUM_NAME = "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;";
 constexpr const char* CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
 
+void BindContextDirInner(ani_env *aniEnv, ani_object contextObj, std::shared_ptr<Context> context)
+{
+    ani_status status = ANI_ERROR;
+    auto cloudFileDir = context->GetCloudFileDir();
+    ani_string cloudFileDirString = nullptr;
+    aniEnv->String_NewUTF8(cloudFileDir.c_str(), cloudFileDir.size(), &cloudFileDirString);
+    if ((status = aniEnv->Object_SetFieldByName_Ref(contextObj, "cloudFileDir", cloudFileDirString)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "cloudFileDir SetField status: %{public}d", status);
+        return;
+    }
+
+    auto distributedFilesDir = context->GetDistributedFilesDir();
+    ani_string distributedFilesDirString = nullptr;
+    aniEnv->String_NewUTF8(distributedFilesDir.c_str(), distributedFilesDir.size(), &distributedFilesDirString);
+    if ((status = aniEnv->Object_SetFieldByName_Ref(contextObj, "distributedFilesDir",
+        distributedFilesDirString)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "distributedFilesDir SetField status: %{public}d", status);
+        return;
+    }
+
+    auto bundleCodeDir = context->GetBundleCodeDir();
+    ani_string bundleCodeDirString = nullptr;
+    aniEnv->String_NewUTF8(bundleCodeDir.c_str(), bundleCodeDir.size(), &bundleCodeDirString);
+    if ((status = aniEnv->Object_SetFieldByName_Ref(contextObj, "bundleCodeDir", bundleCodeDirString)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "bundleCodeDir SetField status: %{public}d", status);
+        return;
+    }
+
+    auto resourceDir = context->GetResourceDir();
+    ani_string resourceDirString = nullptr;
+    aniEnv->String_NewUTF8(resourceDir.c_str(), resourceDir.size(), &resourceDirString);
+    if ((status = aniEnv->Object_SetFieldByName_Ref(contextObj, "resourceDir", resourceDirString)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "resourceDir SetField status: %{public}d", status);
+        return;
+    }
+}
+
 void BindContextDir(ani_env *aniEnv, ani_object contextObj, std::shared_ptr<Context> context)
 {
     if (aniEnv == nullptr || context == nullptr) {
@@ -85,6 +122,7 @@ void BindContextDir(ani_env *aniEnv, ani_object contextObj, std::shared_ptr<Cont
         TAG_LOGE(AAFwkTag::APPKIT, "tempDir SetField status: %{public}d", status);
         return;
     }
+    BindContextDirInner(aniEnv, contextObj, context);
 }
 } // namespace
 
@@ -146,12 +184,7 @@ void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object cont
         TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Int failed, status: %{public}d", status);
         return;
     }
-}
 
-void BindParentPropertyInner(ani_env *aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<Context> context)
-{
-    ani_status status = ANI_ERROR;
     ani_field processNameField;
     if ((status = aniEnv->Class_FindField(contextClass, "processName", &processNameField)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "find processName failed status: %{public}d", status);
