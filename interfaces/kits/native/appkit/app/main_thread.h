@@ -807,6 +807,8 @@ private:
     bool IsEtsAPP(const ApplicationInfo &appInfo);
     void SetJsIdleCallback(const std::weak_ptr<OHOSApplication> &wpApplication,
         const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
+    void PreloadAppStartup(const BundleInfo &bundleInfo, const AppLaunchData &appLaunchData) const;
+    void RunNativeStartupTask(const BundleInfo &bundleInfo, const AppLaunchData &appLaunchData);
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;
