@@ -97,6 +97,7 @@ public:
     static int32_t usedSupportStatusBarTimes;
     static int32_t usedStartAbilityTimes;
     static int32_t usedIsInStatusBar;
+    static int32_t usedStartExtensionAbilityTimes;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
