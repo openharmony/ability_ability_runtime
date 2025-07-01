@@ -314,6 +314,20 @@ int AppScheduler::KillApplicationByUid(const std::string &bundleName, int32_t ui
     return ERR_OK;
 }
 
+int AppScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid,
+    const bool isUpgrade)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s] enter", __FUNCTION__);
+    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    int ret = (int)appMgrClient_->NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail kill app");
+        return INNER_ERR;
+    }
+
+    return ERR_OK;
+}
+
 void AppScheduler::AttachTimeOut(const sptr<IRemoteObject> &token)
 {
     CHECK_POINTER(appMgrClient_);

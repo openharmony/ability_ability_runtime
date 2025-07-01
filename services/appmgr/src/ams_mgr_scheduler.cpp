@@ -386,6 +386,41 @@ int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, con
     return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid, reason);
 }
 
+int32_t AmsMgrScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int uid,
+    const bool isUpgrade)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, uid = %{public}d", bundleName.c_str(), uid);
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t pid = getprocpid();
+    if (callingPid != pid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not allow other process to call");
+        return ERR_PERMISSION_DENIED;
+    }
+    
+    return amsMgrServiceInner_->NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
+}
+
+void AmsMgrScheduler::NotifyUninstallOrUpgradeAppEnd(const int uid)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "uid = %{public}d", uid);
+    if (!IsReady()) {
+        return;
+    }
+
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t pid = getprocpid();
+    if (callingPid != pid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not allow other process to call");
+        return;
+    }
+
+    amsMgrServiceInner_->NotifyUninstallOrUpgradeAppEnd(uid);
+}
+
 int32_t AmsMgrScheduler::KillApplicationSelf(const bool clearPageStack, const std::string& reason)
 {
     if (!IsReady()) {
