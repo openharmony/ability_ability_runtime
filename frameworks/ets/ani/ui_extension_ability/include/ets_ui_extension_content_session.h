@@ -89,6 +89,8 @@ public:
     ani_object GetUIExtensionHostWindowProxy(ani_env* env, ani_object object);
     void SetReceiveDataCallback(ani_env* env, ani_object functionObj);
     static void CallReceiveDataCallback(ani_vm* vm, ani_ref callbackRef, const AAFwk::WantParams& wantParams);
+    std::shared_ptr<AbilityRuntime::Context> GetContext();
+    sptr<Rosen::Window> GetUIWindow();
 
 private:
     void SetReceiveDataCallbackRegister(ani_env* env, ani_object functionObj);
