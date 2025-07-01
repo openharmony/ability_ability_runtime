@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,12 +29,25 @@ namespace OHOS {
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     Parcel wantAgentParcel;
+    bool isMultithreadingSupported;
     WantAgent* wantAgent = nullptr;
     if (wantAgentParcel.WriteBuffer(data, size)) {
+        std::shared_ptr<PendingWant> pendingWant = nullptr;
+        std::shared_ptr<WantAgent> wantAgent1 = std::make_shared<WantAgent>(pendingWant);
+        Parcel parcel;
+        wantAgent1->Marshalling(parcel);
         wantAgent = WantAgent::Unmarshalling(wantAgentParcel);
         if (wantAgent) {
-            std::shared_ptr<PendingWant> pendingWant = wantAgent->GetPendingWant();
-            std::shared_ptr<WantAgent> sptrAgent = std::make_shared<WantAgent>(pendingWant);
+            std::shared_ptr<PendingWant> pendingWant1 = wantAgent->GetPendingWant();
+            wantAgent->GetLocalPendingWant();
+            wantAgent->SetPendingWant(pendingWant1);
+            wantAgent->GetIsMultithreadingSupported();
+            isMultithreadingSupported = true;
+            wantAgent->SetIsMultithreadingSupported(isMultithreadingSupported);
+            isMultithreadingSupported = false;
+            wantAgent->SetIsMultithreadingSupported(isMultithreadingSupported);
+            wantAgent->IsLocal();
+            std::shared_ptr<WantAgent> sptrAgent = std::make_shared<WantAgent>(pendingWant1);
             std::string str = WantAgentHelper::ToString(sptrAgent);
             auto newWantAgent = WantAgentHelper::FromString(str);
             (void)newWantAgent;
