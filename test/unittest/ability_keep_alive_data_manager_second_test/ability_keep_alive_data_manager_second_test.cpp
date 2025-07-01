@@ -868,5 +868,100 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, CheckKvStore_300, TestSize.Level1)
     EXPECT_FALSE(result);
     GTEST_LOG_(INFO) << "CheckKvStore_300 end";
 }
+
+/**
+ * Feature: AbilityKeepAliveDataManager
+ * Function: DeleteKeepAliveDataWithSetterId
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager DeleteKeepAliveDataWithSetterId
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, DeleteKeepAliveDataWithSetterId_300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_300 start";
+    AbilityKeepAliveDataManager abilityKeepAliveDataManager;
+    KeepAliveInfo info;
+    info.userId = 1;
+    info.setterId = 100;
+    DistributedKv::DistributedKvDataManager::isAlreadySet_ = false;
+    abilityKeepAliveDataManager.kvStorePtr_ = nullptr;
+
+    auto result = abilityKeepAliveDataManager.DeleteKeepAliveDataWithSetterId(info);
+    EXPECT_EQ(result, ERR_NO_INIT);
+    DistributedKv::DistributedKvDataManager::isAlreadySet_ = true;
+    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_300 end";
+}
+
+/**
+ * Feature: AbilityKeepAliveDataManager
+ * Function: DeleteKeepAliveDataWithSetterId
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager DeleteKeepAliveDataWithSetterId
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, DeleteKeepAliveDataWithSetterId_400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_400 start";
+    AbilityKeepAliveDataManager abilityKeepAliveDataManager;
+    KeepAliveInfo info;
+    info.userId = 1;
+    info.setterId = 100;
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    kvStorePtr->getEntries_ = DistributedKv::Status::INVALID_ARGUMENT;
+    abilityKeepAliveDataManager.kvStorePtr_ = kvStorePtr;
+
+    auto result = abilityKeepAliveDataManager.DeleteKeepAliveDataWithSetterId(info);
+    EXPECT_EQ(result, ERR_INVALID_OPERATION);
+    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_400 end";
+}
+
+/**
+ * Feature: AbilityKeepAliveDataManager
+ * Function: DeleteKeepAliveDataWithSetterId
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager DeleteKeepAliveDataWithSetterId
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, DeleteKeepAliveDataWithSetterId_500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_500 start";
+    AbilityKeepAliveDataManager abilityKeepAliveDataManager;
+    KeepAliveInfo info;
+    info.userId = 1;
+    info.setterId = 100;
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    kvStorePtr->getEntries_ = DistributedKv::Status::SUCCESS;
+    kvStorePtr->delete_ = DistributedKv::Status::SUCCESS;
+    DistributedKv::Key key = abilityKeepAliveDataManager.ConvertKeepAliveDataToKey(info);
+    kvStorePtr->testKey_ = key;
+    abilityKeepAliveDataManager.kvStorePtr_ = kvStorePtr;
+    
+    auto result = abilityKeepAliveDataManager.DeleteKeepAliveDataWithSetterId(info);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_500 end";
+}
+
+/**
+ * Feature: AbilityKeepAliveDataManager
+ * Function: DeleteKeepAliveDataWithSetterId
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager DeleteKeepAliveDataWithSetterId
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, DeleteKeepAliveDataWithSetterId_600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_600 start";
+    AbilityKeepAliveDataManager abilityKeepAliveDataManager;
+    KeepAliveInfo info;
+    info.userId = 1;
+    info.setterId = 100;
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    kvStorePtr->getEntries_ = DistributedKv::Status::SUCCESS;
+    kvStorePtr->delete_ = DistributedKv::Status::INVALID_ARGUMENT;
+    DistributedKv::Key key = abilityKeepAliveDataManager.ConvertKeepAliveDataToKey(info);
+    kvStorePtr->testKey_ = key;
+    abilityKeepAliveDataManager.kvStorePtr_ = kvStorePtr;
+    
+    auto result = abilityKeepAliveDataManager.DeleteKeepAliveDataWithSetterId(info);
+    EXPECT_EQ(result, ERR_INVALID_OPERATION);
+    GTEST_LOG_(INFO) << "DeleteKeepAliveDataWithSetterId_600 end";
+}
+
 } // namespace AbilityRuntime
 } // namespace OHOS
