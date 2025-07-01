@@ -89,10 +89,20 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     DialogAbilityInfo callerAbilityInfo;
     dialogSessionManager->GenerateCallerAbilityInfo(abilityRequest, callerAbilityInfo);
     dialogSessionManager->GenerateSelectorTargetAbilityInfos(dialogAppInfos, targetAbilityInfos);
-    dialogSessionManager->GenerateDialogCallerInfo(abilityRequest, int32Param, dialogCallerInfo, isSelector);
-    dialogSessionManager->NotifySCBToRecoveryAfterInterception(dialogSessionId, abilityRequest);
+    SelectorType type = SelectorType::WITHOUT_SELECTOR;
     dialogSessionManager->GenerateDialogSessionRecordCommon(abilityRequest, int32Param, wantParams,
-        dialogAppInfos, isSelector);
+        dialogAppInfos, type, isSelector);
+    type = SelectorType::IMPLICIT_START_SELECTOR;
+    dialogSessionManager->GenerateDialogSessionRecordCommon(abilityRequest, int32Param, wantParams,
+        dialogAppInfos, type, isSelector);
+    type = SelectorType::APP_CLONE_SELECTOR;
+    dialogSessionManager->GenerateDialogSessionRecordCommon(abilityRequest, int32Param, wantParams,
+        dialogAppInfos, type, isSelector);
+    type = SelectorType::INTERCEPTOR_SELECTOR;
+    dialogSessionManager->GenerateDialogSessionRecordCommon(abilityRequest, int32Param, wantParams,
+        dialogAppInfos, type, isSelector);
+    dialogSessionManager->GenerateDialogCallerInfo(abilityRequest, int32Param, dialogCallerInfo, type, isSelector);
+    dialogSessionManager->NotifySCBToRecoveryAfterInterception(dialogSessionId, abilityRequest);
     dialogSessionManager->CreateJumpModalDialog(abilityRequest, int32Param, want);
     dialogSessionManager->CreateImplicitSelectorModalDialog(abilityRequest, want, int32Param, dialogAppInfos);
     dialogSessionManager->CreateCloneSelectorModalDialog(abilityRequest, want, int32Param, dialogAppInfos,
