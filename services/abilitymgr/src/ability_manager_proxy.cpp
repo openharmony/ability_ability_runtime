@@ -6907,5 +6907,30 @@ int32_t AbilityManagerProxy::QueryKeepAliveAppServiceExtensions(std::vector<Keep
 
     return reply.ReadInt32();
 }
+
+int32_t AbilityManagerProxy::SetOnNewWantSkipScenarios(sptr<IRemoteObject> callerToken, int32_t scenarios)
+{
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null token");
+        return ERR_INVALID_CONTEXT;
+    }
+
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken failed");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, RemoteObject, callerToken);
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, scenarios);
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = SendRequest(AbilityManagerInterfaceCode::SET_ON_NEW_WANT_SKIP_SCENARIOS, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
 } // namespace AAFwk
 } // namespace OHOS

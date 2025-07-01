@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,6 +75,7 @@ public:
     static napi_value SetRestoreEnabled(napi_env env, napi_callback_info info);
     static napi_value SetColorMode(napi_env env, napi_callback_info info);
     static napi_value RevokeDelegator(napi_env env, napi_callback_info info);
+    static napi_value SetOnNewWantSkipScenarios(napi_env env, napi_callback_info info);
     static napi_value StartAppServiceExtensionAbility(napi_env env, napi_callback_info info);
     static napi_value StopAppServiceExtensionAbility(napi_env env, napi_callback_info info);
     static napi_value ConnectAppServiceExtensionAbility(napi_env env, napi_callback_info info);
@@ -152,6 +153,7 @@ private:
     napi_value OnDisconnectUIServiceExtension(napi_env env, NapiCallbackInfo& info);
     napi_value OnSetColorMode(napi_env env, NapiCallbackInfo& info);
     napi_value OnRevokeDelegator(napi_env env, NapiCallbackInfo& info);
+    napi_value OnSetOnNewWantSkipScenarios(napi_env env, NapiCallbackInfo& info);
     napi_value OnStartAppServiceExtensionAbility(napi_env env, NapiCallbackInfo& info);
     napi_value OnStopAppServiceExtensionAbility(napi_env env, NapiCallbackInfo& info);
     napi_value OnConnectAppServiceExtensionAbility(napi_env env, NapiCallbackInfo& info);
