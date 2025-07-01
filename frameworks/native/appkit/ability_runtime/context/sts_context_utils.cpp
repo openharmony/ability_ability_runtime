@@ -246,7 +246,6 @@ void StsCreatContext(ani_env* aniEnv, ani_class contextClass, ani_object context
     }
     if (!SetHapModuleInfo(aniEnv, contextClass, contextObj, context)) {
         TAG_LOGE(AAFwkTag::APPKIT, "SetHapModuleInfo fail");
-        return;
     }
     context_ = context;
     BindParentProperty(aniEnv, contextClass, contextObj, context);
@@ -295,7 +294,7 @@ ani_object CreateModuleResourceManagerSync([[maybe_unused]]ani_env *env, [[maybe
 
 ani_object GetApplicationContextSync([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object aniObj)
 {
-    auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetStsGlobalObject(env);
+    auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetEtsGlobalObject();
     if (appContextObj != nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "appContextObj is not nullptr");
         return appContextObj->aniObj;
