@@ -144,6 +144,7 @@ private:
     ani_object CreateRuntimeLinker(ani_env *aniEnv, ani_class cls, ani_ref undefined_ref, ani_array refArray);
 
 public:
+    static AbilityRuntime::JsRuntime* jsRuntime_;
     bool debugMode_ = false;
 private:
     std::vector<std::string> appInnerHspPathList_;
