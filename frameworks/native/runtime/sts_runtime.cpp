@@ -63,6 +63,7 @@
 
 #ifdef SUPPORT_SCREEN
 #include "ace_forward_compatibility.h"
+#include "arkts_module_preloader.h"
 #include "declarative_module_preloader.h"
 #include "hot_reloader.h"
 #endif //SUPPORT_SCREEN
@@ -370,7 +371,14 @@ bool STSRuntime::Initialize(const Options& options)
         TAG_LOGE(AAFwkTag::STSRUNTIME, "Init loop failed");
         return false;
     }
-
+#ifdef SUPPORT_SCREEN
+    auto aniEngine = GetAniEnv();
+    if (aniEngine == nullptr) {
+        TAG_LOGE(AAFwkTag::STSRUNTIME, "GetAniEnv failed");
+        return false;
+    }
+    OHOS::Ace::ArkTSModulePreloader::Preload(aniEngine);
+#endif
     return true;
 }
 
