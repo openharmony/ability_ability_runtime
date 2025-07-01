@@ -85,6 +85,21 @@ static void TerminateSelfWithResultSync([[maybe_unused]] ani_env *env, [[maybe_u
     AppExecFwk::UnWrapAbilityResult(env, abilityResult, resultCode, want);
     auto token = context->GetToken();
     AAFwk::AbilityManagerClient::GetInstance()->TransferAbilityResultForExtension(token, resultCode, want);
+#ifdef SUPPORT_SCREEN
+    OHOS::sptr<OHOS::Rosen::Window> uiWindow = context->GetWindow();
+    if (!uiWindow) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
+        AppExecFwk::AsyncCallback(env, callback,
+            CreateStsErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM)), nullptr);
+        return;
+    }
+    auto result = uiWindow->TransferAbilityResult(resultCode, want);
+    if (result != OHOS::Rosen::WMError::WM_OK) {
+        AppExecFwk::AsyncCallback(env, callback,
+            CreateStsErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM)), nullptr);
+        return;
+    }
+#endif // SUPPORT_SCREEN
     ret = context->TerminateSelf();
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::UI_EXT, "TerminateSelf failed, errorCode is %{public}d", ret);
