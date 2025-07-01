@@ -1235,6 +1235,16 @@ public:
         return isLastWantBackgroundDriven_.load();
     }
 
+    inline void SetOnNewWantSkipScenarios(int32_t scenarios)
+    {
+        scenarios_.store(scenarios);
+    }
+
+    inline int32_t GetOnNewWantSkipScenarios() const
+    {
+        return scenarios_.load();
+    }
+
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false,
         const std::string &taskName = "");
 
@@ -1473,6 +1483,7 @@ private:
     std::shared_ptr<Want> launchWant_ = nullptr;
     std::shared_ptr<Want> lastWant_ = nullptr;
     std::atomic_bool isLastWantBackgroundDriven_ = false;
+    std::atomic<int32_t> scenarios_ = 0;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

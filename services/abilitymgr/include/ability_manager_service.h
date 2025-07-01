@@ -2038,6 +2038,8 @@ public:
      */
     virtual int32_t RevokeDelegator(sptr<IRemoteObject> token) override;
 
+    virtual int32_t SetOnNewWantSkipScenarios(sptr<IRemoteObject> callerToken, int32_t scenarios) override;
+
     virtual int32_t StartAbilityWithWait(Want &want, sptr<IAbilityStartWithWaitObserver> &observer) override;
 
     /**

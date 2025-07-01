@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -992,6 +992,45 @@ HWTEST_F(AbilityManagerStubSecondTest, ResumeExtensionAbilityInner_002, TestSize
     data.WriteParcelable(connect->AsObject());
     auto res = stub_->ResumeExtensionAbilityInner(data, reply);
     EXPECT_NE(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SetOnNewWantSkipScenariosInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetOnNewWantSkipScenariosInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function SetOnNewWantSkipScenariosInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubSecondTest, SetOnNewWantSkipScenariosInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto ret = stub_->SetOnNewWantSkipScenariosInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SetOnNewWantSkipScenariosInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetOnNewWantSkipScenariosInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function SetOnNewWantSkipScenariosInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubSecondTest, SetOnNewWantSkipScenariosInner_002, TestSize.Level1)
+{
+    MessageParcel data;
+    sptr<IAbilityConnection> connect = new AbilityConnectCallback();
+    WriteInterfaceToken(data);
+    data.WriteRemoteObject(connect->AsObject());
+    int32_t scenarios = 1;
+    data.WriteInt32(scenarios);
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_ON_NEW_WANT_SKIP_SCENARIOS), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
 }
 } // namespace AAFwk
 } // namespace OHOS

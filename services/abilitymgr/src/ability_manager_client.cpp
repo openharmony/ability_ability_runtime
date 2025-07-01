@@ -2335,5 +2335,14 @@ ErrCode AbilityManagerClient::ResumeExtensionAbility(sptr<IAbilityConnection> co
     return abms->ResumeExtensionAbility(connect);
 }
 
+ErrCode AbilityManagerClient::SetOnNewWantSkipScenarios(sptr<IRemoteObject> callerToken, int32_t scenarios)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scenarios:%{public}d", scenarios);
+    return abms->SetOnNewWantSkipScenarios(callerToken, scenarios);
+}
+
 } // namespace AAFwk
 } // namespace OHOS
