@@ -515,5 +515,46 @@ int32_t AppRunningManager::QueryUIExtensionBindItemById(
     bindInfo.notifyProcessBind = AAFwk::MyStatus::GetInstance().notifyProcessBind_;
     return AAFwk::MyStatus::GetInstance().queryUIExtensionBindItemById_;
 }
+
+std::shared_ptr<AppRunningRecord> AppRunningManager::FindMasterProcessAppRunningRecord(
+    const std::string &appName, const AppExecFwk::AbilityInfo &abilityInfo, const int uid)
+{
+    AAFwk::MyStatus::GetInstance().isFindMasterProcessAppRunningRecordCalled_ = true;
+    return AAFwk::MyStatus::GetInstance().masterProcessRunningRecord_;
+}
+
+std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordForSpecifiedProcess(
+    int32_t uid, const std::string &instanceKey, const std::string &customProcessFlag)
+{
+    AAFwk::MyStatus::GetInstance().isCheckAppRunningRecordForSpecifiedProcessCalled_ = true;
+    return AAFwk::MyStatus::GetInstance().appRecordForSpecifiedProcess_;
+}
+
+int32_t AppRunningManager::DumpCjHeapMemory(OHOS::AppExecFwk::CjHeapDumpInfo &info)
+{
+    return ERR_OK;
+}
+
+void AppRunningManager::HandleChildRelation(
+    std::shared_ptr<ChildProcessRecord> childRecord, std::shared_ptr<AppRunningRecord> appRecord)
+{
+}
+
+std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByChildRecordPid(const pid_t pid)
+{
+    return nullptr;
+}
+
+int32_t AppRunningManager::UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo> &appInfos,
+    const AppExecFwk::ConfigurationPolicy& policy, const int32_t userId)
+{
+    return ERR_OK;
+}
+
+bool AppRunningManager::CheckMasterProcessAppRunningRecordIsExist(
+    const std::string &appName, const AppExecFwk::AbilityInfo &abilityInfo, const int uid)
+{
+    return false;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

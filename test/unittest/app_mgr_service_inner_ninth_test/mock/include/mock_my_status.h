@@ -359,8 +359,13 @@ public:
         getAbilityRunningRecordByTokenCalled_ = false;
         runningRecord_ = nullptr;
     }
+    std::shared_ptr<AppExecFwk::AppRunningRecord> masterProcessRunningRecord_ = nullptr;
+    std::shared_ptr<AppExecFwk::AppRunningRecord> appRecordForSpecifiedProcess_ = nullptr;
 private:
     MyStatus() = default;
+    bool isLogoutUserCalled_ = false;
+    bool isFindMasterProcessAppRunningRecordCalled_ = false;
+    bool isCheckAppRunningRecordForSpecifiedProcessCalled_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

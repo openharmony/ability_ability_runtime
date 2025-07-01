@@ -25,6 +25,8 @@ class AppUtils {
 public:
     static AppUtils &GetInstance();
     static bool isStartOptionsWithAnimation_;
+    static bool isStartSpecifiedProcess_;
+    static bool isInOnNewProcessEnableList_;
 
     ~AppUtils();
     bool IsStartOptionsWithAnimation();

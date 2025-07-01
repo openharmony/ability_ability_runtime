@@ -34,6 +34,7 @@ UserRecordManager &UserRecordManager::GetInstance()
  
 bool UserRecordManager::IsLogoutUser(int32_t userId)
 {
+    AAFwk::MyStatus::GetInstance().isLogoutUserCalled_ = true;
     return AAFwk::MyStatus::GetInstance().isLogoutUser_;
 }
 
