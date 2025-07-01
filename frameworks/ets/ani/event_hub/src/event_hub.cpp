@@ -14,7 +14,13 @@
  */
  
 #include "event_hub.h"
- 
+
+#include "interop_js/arkts_esvalue.h"
+#include "interop_js/arkts_interop_js_api.h"
+#include "interop_js/hybridgref_ani.h"
+#include "interop_js/hybridgref_napi.h"
+#include "js_runtime.h"
+
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
