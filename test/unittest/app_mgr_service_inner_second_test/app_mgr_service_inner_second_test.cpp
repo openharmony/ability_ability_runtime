@@ -54,6 +54,8 @@ constexpr int32_t USER_SCALE = 200000;
 constexpr int32_t TEST_PID_100 = 100;
 constexpr int32_t PID_1000 = 1000;
 constexpr int32_t FOUNDATION_UID = 5523;
+constexpr int32_t UID_ONE = 1;
+constexpr int32_t UID_TWO = 2;
 const std::string PARAM_SPECIFIED_PROCESS_FLAG = "ohoSpecifiedProcessFlag";
 const std::string TEST_FLAG = "testFlag";
 const std::string TEST_PROCESS_NAME = "testProcessName";
@@ -2522,5 +2524,97 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_SetKeepAlive
     IPCSkeleton::SetCallingUid(0);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_SetKeepAliveAppService_0100 end");
 }
+
+/**
+ * @tc.name: PreCheckStartProcess_001
+ * @tc.desc: Test PreCheckStartProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, PreCheckStartProcess_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreCheckStartProcess_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    std::string bundleName = "test.bundle.name";
+    int32_t uid = UID_ONE;
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    auto ret = appMgrServiceInner->PreCheckStartProcess(bundleName, uid, want);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "PreCheckStartProcess_001 end");
+}
+
+/**
+ * @tc.name: PreCheckStartProcess_002
+ * @tc.desc: Test PreCheckStartProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, PreCheckStartProcess_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreCheckStartProcess_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    std::string bundleName = "test.bundle.name";
+    int32_t uid = UID_ONE;
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    appMgrServiceInner->InsertUninstallOrUpgradeUidSet(UID_ONE);
+    bool flag = appMgrServiceInner->IsUninstallingOrUpgrading(UID_ONE);
+    EXPECT_EQ(flag, true);
+    auto ret = appMgrServiceInner->PreCheckStartProcess(bundleName, uid, want);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "PreCheckStartProcess_002 end");
+}
+
+/**
+ * @tc.name: RemoveUninstallOrUpgradeUidSet_001
+ * @tc.desc: Test RemoveUninstallOrUpgradeUidSet
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, RemoveUninstallOrUpgradeUidSet_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "RemoveUninstallOrUpgradeUidSet_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->InsertUninstallOrUpgradeUidSet(UID_ONE);
+    appMgrServiceInner->InsertUninstallOrUpgradeUidSet(UID_TWO);
+    auto ret = appMgrServiceInner->IsUninstallingOrUpgrading(UID_ONE);
+    EXPECT_EQ(ret, true);
+    appMgrServiceInner->RemoveUninstallOrUpgradeUidSet(UID_TWO);
+    ret = appMgrServiceInner->IsUninstallingOrUpgrading(UID_ONE);
+    EXPECT_EQ(ret, true);
+    appMgrServiceInner->RemoveUninstallOrUpgradeUidSet(UID_ONE);
+    ret = appMgrServiceInner->IsUninstallingOrUpgrading(UID_ONE);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "RemoveUninstallOrUpgradeUidSet_001 end");
+}
+
+/**
+ * @tc.name: NotifyUninstallOrUpgradeApp_001
+ * @tc.desc: Test NotifyUninstallOrUpgradeApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, NotifyUninstallOrUpgradeApp_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "NotifyUninstallOrUpgradeApp_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    std::string bundleName = "test.bundle.name";
+    int32_t uid = UID_ONE;
+    bool isUpgrade = true;
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    auto ret = appMgrServiceInner->NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
+    EXPECT_EQ(ret, ERR_NO_INIT); //appRunningManager_ null
+
+    appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
+    MyFlag::flag_ = 0;
+    ret = appMgrServiceInner->NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED); //permission verification fail
+
+    MyFlag::flag_ = MyFlag::IS_SA_CALL;
+    appMgrServiceInner->remoteClientManager_ = nullptr;
+    ret = appMgrServiceInner->NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
+    EXPECT_EQ(ret, ERR_OK); //remoteClientManager_ null
+
+    appMgrServiceInner->remoteClientManager_ = std::make_shared<RemoteClientManager>();
+    ret = appMgrServiceInner->NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
+    EXPECT_EQ(ret, ERR_OK); //unstart
+    TAG_LOGI(AAFwkTag::TEST, "NotifyUninstallOrUpgradeApp_001 end");
+}
+
 } // namespace AppExecFwk
 } // namespace OHOS

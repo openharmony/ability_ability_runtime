@@ -72,7 +72,8 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
     }
 
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
-        DelayedSingleton<AppScheduler>::GetInstance()->KillApplicationByUid(bundleName, uid, "UninstallAppEnd");
+        IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppExecFwk::AppMgrClient>::
+            GetInstance()->NotifyUninstallOrUpgradeAppEnd(uid));
         // uninstall bundle
         HandleRemoveUriPermission(tokenId);
         HandleUpdatedModuleInfo(bundleName, uid, moduleName, false);
@@ -92,6 +93,8 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
             HandleAppUpgradeCompleted(uid);
         }
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
+        IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppExecFwk::AppMgrClient>::
+            GetInstance()->NotifyUninstallOrUpgradeAppEnd(uid));
         if (bundleName == NEW_WEB_BUNDLE_NAME || bundleName == OLD_WEB_BUNDLE_NAME ||
             bundleName == system::GetParameter(ARKWEB_CORE_PACKAGE_NAME, "false")) {
             HandleRestartResidentProcessDependedOnWeb();

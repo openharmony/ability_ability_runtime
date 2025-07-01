@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include "ability_manager_errors.h"
+#include "bundle_mgr_helper.h"
 #include "ability_window_configuration.h"
 #include "accesstoken_kit.h"
 #include "app_config_data_manager.h"
@@ -1967,6 +1968,47 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
         return result;
     }
     return WaitProcessesExitAndKill(pids, startTime, reason);
+}
+
+void AppMgrServiceInner::InsertUninstallOrUpgradeUidSet(int32_t uid)
+{
+    std::lock_guard lock(updateOrUninstallUidSetLock_);
+    auto ret = updateOrUninstallUidSet_.insert(uid);
+    if (!ret.second) {
+        TAG_LOGD(AAFwkTag::APPMGR, "already inserted");
+    }
+}
+
+void AppMgrServiceInner::RemoveUninstallOrUpgradeUidSet(int32_t uid)
+{
+    std::lock_guard lock(updateOrUninstallUidSetLock_);
+    auto ret = updateOrUninstallUidSet_.erase(uid);
+    if (ret == 0) {
+        TAG_LOGD(AAFwkTag::APPMGR, "not exist");
+    }
+}
+
+bool AppMgrServiceInner::IsUninstallingOrUpgrading(int32_t uid)
+{
+    std::lock_guard lock(updateOrUninstallUidSetLock_);
+    if (updateOrUninstallUidSet_.find(uid) != updateOrUninstallUidSet_.end()) {
+        return true;
+    } 
+    return false;
+}
+
+int32_t AppMgrServiceInner::NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
+    const bool isUpgrade)
+{
+    std::unique_lock lock(startProcessLock_);
+    std::string killReason = isUpgrade ? "UpgradeApp" : "UninstallApp";
+    InsertUninstallOrUpgradeUidSet(uid);
+    return KillApplicationByUid(bundleName, uid, killReason);
+}
+
+void AppMgrServiceInner::NotifyUninstallOrUpgradeAppEnd(const int32_t uid)
+{
+    RemoveUninstallOrUpgradeUidSet(uid);
 }
 
 int32_t AppMgrServiceInner::UpdateProcessMemoryState(const std::vector<ProcessMemoryState> &procMemState)
@@ -4193,10 +4235,17 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
     sptr<IRemoteObject> token, std::shared_ptr<AAFwk::Want> want, ExtensionAbilityType extensionAbilityType)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    std::shared_lock lock(startProcessLock_);
     TAG_LOGD(AAFwkTag::APPMGR, "bundleName: %{public}s, isPreload: %{public}d", bundleName.c_str(), isPreload);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
         return ERR_INVALID_VALUE;
+    }
+
+    auto ret = PreCheckStartProcess(bundleName, uid, want);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "precheck failed");
+        return ret;
     }
     bool isCJApp = IsCjApplication(bundleInfo);
     if (!remoteClientManager_ || !remoteClientManager_->GetSpawnClient()) {
@@ -4229,7 +4278,7 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
     startMsgParam.networkEnableFlags = appRecord->GetNetworkEnableFlags();
     startMsgParam.saEnableFlags = appRecord->GetSAEnableFlags();
     startMsgParam.extensionAbilityType = extensionAbilityType;
-    auto ret = CreateStartMsg(startMsgParam, startMsg);
+    ret = CreateStartMsg(startMsgParam, startMsg);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "createStartMsg fail");
         appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
@@ -10228,5 +10277,69 @@ void AppMgrServiceInner::OnProcessDied(std::shared_ptr<AppRunningRecord> appReco
     }
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
 }
+
+bool AppMgrServiceInner::IsBolckedByDisposeRules(const std::string &bundleName, int32_t userId, 
+    int32_t appIndex)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    // get bms
+    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null bundleMgrHelper");
+        return false;
+    }
+
+    // get disposed status
+    auto appControlMgr = bundleMgrHelper->GetAppControlProxy();
+    if (appControlMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appControlMgr");
+        return false;
+    }
+    std::vector<AppExecFwk::DisposedRule> disposedRuleList;
+    {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "GetAbilityRunningControlRule");
+        int32_t ret = ERR_OK;
+        if (appIndex > 0 && appIndex <= AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
+            ret = IN_PROCESS_CALL(appControlMgr->GetAbilityRunningControlRule(bundleName,
+                userId, disposedRuleList, appIndex));
+        } else {
+            ret = IN_PROCESS_CALL(appControlMgr->GetAbilityRunningControlRule(bundleName,
+                userId, disposedRuleList, 0));
+        }
+        if (ret != ERR_OK || disposedRuleList.empty()) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "Get No DisposedRule");
+            return false;
+        }
+    }
+
+    for (auto &rule: disposedRuleList) {
+        if (rule.controlType == AppExecFwk::ControlType::DISALLOWED_LIST &&
+            rule.disposedType == AppExecFwk::DisposedType::BLOCK_APPLICATION) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int32_t AppMgrServiceInner:: PreCheckStartProcess(const std::string &bundleName, int32_t uid,
+    std::shared_ptr<AAFwk::Want> &want)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!IsUninstallingOrUpgrading(uid)) {
+        return ERR_OK;
+    }
+    int32_t userId = uid / BASE_USER_RANGE;
+    int32_t appIndex = 0;
+    if (want != nullptr) {
+        (void)AbilityRuntime::StartupUtil::GetAppIndex(*want, appIndex);
+    }
+    if (IsBolckedByDisposeRules(bundleName, userId, appIndex)) {
+        return AAFwk::ERR_UNINSTALLING_OR_UPGRADING_APP;
+    }
+    RemoveUninstallOrUpgradeUidSet(uid);
+    return ERR_OK;
+}
+
 } // namespace AppExecFwk
 }  // namespace OHOS

@@ -195,6 +195,17 @@ public:
      */
     virtual int KillApplicationByUid(const std::string &bundleName, const int uid,
         const std::string& reason = "KillApplicationByUid") = 0;
+    
+    virtual int NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
+        const bool isUpgrade)
+    {
+        return ERR_OK;
+    }
+    
+    virtual void NotifyUninstallOrUpgradeAppEnd(const int32_t uid)
+    {
+        return;
+    }
 
     /**
      * Kill the application self.
@@ -553,6 +564,8 @@ public:
         KILL_PROCESSES_IN_BATCH,
         PREPARE_TERMINATE_APP,
         IS_NO_REQUIRE_BIG_MEMORY,
+        NOTIFY_UNINSTALL_OR_UPGRADE_APP,
+        NOTIFY_UNINSTALL_OR_UPGRADE_APP_END,
         // Add enumeration values above
         END
     };
