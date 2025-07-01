@@ -13,17 +13,12 @@
  * limitations under the License.
  */
  
-#ifndef EVENT_HUB_H
-#define EVENT_HUB_H
+#ifndef OHOS_ABILITY_RUNTIME_EVENT_HUB_H
+#define OHOS_ABILITY_RUNTIME_EVENT_HUB_H
  
 #include <napi/native_api.h>
 #include "ability_context.h"
 #include "hilog_tag_wrapper.h"
-#include "interop_js/arkts_esvalue.h"
-#include "interop_js/arkts_interop_js_api.h"
-#include "interop_js/hybridgref_ani.h"
-#include "interop_js/hybridgref_napi.h"
-#include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "sts_runtime.h"
  
@@ -45,4 +40,4 @@ private:
 } // namespace AbilityRuntime
 } // namespace OHOS
  
-#endif // EVENT_HUB_H
+#endif // OHOS_ABILITY_RUNTIME_EVENT_HUB_H
