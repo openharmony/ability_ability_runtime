@@ -182,7 +182,7 @@ bool RegisterETSEnvFuncs()
     if (g_etsEnvFuncs != nullptr) {
         return true;
     }
-    auto handle = dlopen(ETS_ENV_LIBNAME, RTLD_NOW);
+    auto handle = dlopen(ETS_ENV_LIBNAME, RTLD_LAZY);
     if (!handle) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "dlopen failed %{public}s, %{public}s", ETS_ENV_LIBNAME, dlerror());
         return false;
