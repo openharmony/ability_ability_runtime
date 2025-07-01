@@ -1168,7 +1168,8 @@ public:
     void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId);
     void OnStartSpecifiedAbilityTimeoutResponse(int32_t requestId);
 
-    void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId = 0);
+    void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId = 0,
+        const std::string &callerProcessName = "");
     void OnStartSpecifiedProcessTimeoutResponse(int32_t requestId);
     void OnStartSpecifiedFailed(int32_t requestId);
 

@@ -59,6 +59,7 @@ constexpr const char* PARAM_SPECIFIED_PROCESS_FLAG = "ohoSpecifiedProcessFlag";
 constexpr const char* DMS_PROCESS_NAME = "distributedsched";
 constexpr const char* DMS_PERSISTENT_ID = "ohos.dms.persistentId";
 constexpr const char* IS_SHELL_CALL = "isShellCall";
+constexpr const char* SPECIFED_PROCESS_CALLER_PROCESS = "ohoSpecifiedProcessCallerProcess";
 #ifdef SUPPORT_ASAN
 constexpr int KILL_TIMEOUT_MULTIPLE = 45;
 #else
@@ -2187,7 +2188,8 @@ void UIAbilityLifecycleManager::OnStartSpecifiedFailed(int32_t requestId)
     }
 }
 
-void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId)
+void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId,
+    const std::string &callerProcessName)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessResponse, %{public}d", requestId);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -2201,8 +2203,11 @@ void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const std::strin
     auto &abilityRequest = request->abilityRequest;
     abilityRequest.want.SetParam(PARAM_SPECIFIED_PROCESS_FLAG, flag);
     if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
+        abilityRequest.want.RemoveParam(SPECIFED_PROCESS_CALLER_PROCESS);
+        abilityRequest.want.SetParam(SPECIFED_PROCESS_CALLER_PROCESS, callerProcessName);
         request->specifiedProcessState = SpecifiedProcessState::STATE_ABILITY;
         StartSpecifiedRequest(*request);
+        abilityRequest.want.RemoveParam(SPECIFED_PROCESS_CALLER_PROCESS);
         return;
     }
     auto nextRequest = PopAndGetNextSpecified(requestId);

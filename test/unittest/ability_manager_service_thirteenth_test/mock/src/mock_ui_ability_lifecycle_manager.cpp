@@ -411,7 +411,8 @@ void UIAbilityLifecycleManager::OnStartSpecifiedFailed(int32_t requestId)
 {
 }
 
-void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId)
+void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId,
+    const std::string &callerProcessName)
 {
 }
 
