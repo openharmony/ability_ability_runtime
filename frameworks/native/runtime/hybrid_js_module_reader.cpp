@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,25 @@
  * limitations under the License.
  */
 
-#include <regex>
-#include "js_module_reader.h"
+#include "hybrid_js_module_reader.h"
 
+#include <regex>
 #include "bundle_info.h"
 #include "bundle_mgr_helper.h"
 #include "bundle_mgr_proxy.h"
-#include "file_path_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
 #include "js_runtime_utils.h"
 #include "singleton.h"
-#include "system_ability_definition.h"
 
 using namespace OHOS::AbilityBase;
 
 namespace OHOS {
 namespace AbilityRuntime {
-using IBundleMgr = AppExecFwk::IBundleMgr;
-bool JsModuleReader::needFindPluginHsp_ = true;
+bool HybridJsModuleReader::needFindPluginHsp_ = true;
 
-JsModuleReader::JsModuleReader(const std::string& bundleName, const std::string& hapPath, bool isFormRender)
+HybridJsModuleReader::HybridJsModuleReader(const std::string& bundleName, const std::string& hapPath, bool isFormRender)
     : JsModuleSearcher(bundleName), isFormRender_(isFormRender)
 {
     if (!hapPath.empty() && hapPath.find(std::string(ABS_DATA_CODE_PATH)) != 0) {
@@ -44,8 +41,44 @@ JsModuleReader::JsModuleReader(const std::string& bundleName, const std::string&
     }
 }
 
-bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
-    size_t *buffSize, std::string& errorMsg) const
+std::shared_ptr<Extractor> HybridJsModuleReader::GetExtractor(
+    const std::string& inputPath, std::string& errorMsg) const
+{
+    auto realHapPath = GetAppPath(inputPath, SHARED_FILE_SUFFIX);
+    if (realHapPath.empty()) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "empty realHapPath");
+        return nullptr;
+    }
+    if (needFindPluginHsp_) {
+        realHapPath = GetPluginHspPath(inputPath);
+        if (realHapPath.empty()) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "empty realHapPath");
+            return nullptr;
+        }
+        needFindPluginHsp_ = true;
+    }
+    bool newCreate = false;
+    std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(realHapPath, newCreate);
+    if (extractor != nullptr) {
+        return extractor;
+    }
+
+    realHapPath = GetAppPath(inputPath, ABILITY_FILE_SUFFIX);
+    if (realHapPath.empty()) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "empty realHapPath");
+        return nullptr;
+    }
+    extractor = ExtractorUtil::GetExtractor(realHapPath, newCreate);
+    if (extractor == nullptr) {
+        errorMsg = "hap path error: " + inputPath;
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "inputPath %{private}s GetExtractor failed", inputPath.c_str());
+        return nullptr;
+    }
+    return extractor;
+}
+
+bool HybridJsModuleReader::operator()(const std::string& inputPath,
+    uint8_t **buff, size_t *buffSize, std::string& errorMsg) const
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called start: %{private}s", inputPath.c_str());
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -54,27 +87,9 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
         return false;
     }
 
-    auto realHapPath = GetAppHspPath(inputPath);
-    if (realHapPath.empty()) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "empty realHapPath");
-        return false;
-    }
-
-    if (needFindPluginHsp_) {
-        // find plugin
-        realHapPath = GetPluginHspPath(inputPath);
-        if (realHapPath.empty()) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "empty realHapPath");
-            return false;
-        }
-        needFindPluginHsp_ = true;
-    }
-
-    bool newCreate = false;
-    std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(realHapPath, newCreate);
+    std::shared_ptr<Extractor> extractor = GetExtractor(inputPath, errorMsg);
     if (extractor == nullptr) {
-        errorMsg = "hap path error: " + realHapPath;
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "realHapPath %{private}s GetExtractor failed", realHapPath.c_str());
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "failed to get extractor %{private}s", inputPath.c_str());
         return false;
     }
 
@@ -89,7 +104,7 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
     return true;
 }
 
-std::string JsModuleReader::GetPluginHspPath(const std::string& inputPath) const
+std::string HybridJsModuleReader::GetPluginHspPath(const std::string& inputPath) const
 {
     std::string presetAppHapPath = "";
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
@@ -131,18 +146,17 @@ std::string JsModuleReader::GetPluginHspPath(const std::string& inputPath) const
     return presetAppHapPath;
 }
 
-std::string JsModuleReader::GetAppHspPath(const std::string& inputPath) const
+std::string HybridJsModuleReader::GetAppPath(const std::string& inputPath, const std::string& suffix) const
 {
     if (isFormRender_) {
-        return GetFormAppHspPath(inputPath);
+        return GetFormAppPath(inputPath, suffix);
     }
-    return GetCommonAppHspPath(inputPath);
+    return GetCommonAppPath(inputPath, suffix);
 }
 
-std::string JsModuleReader::GetFormAppHspPath(const std::string& inputPath) const
+std::string HybridJsModuleReader::GetFormAppPath(const std::string& inputPath, const std::string& suffix) const
 {
     std::string realHapPath;
-    std::string suffix = std::string(SHARED_FILE_SUFFIX);
     realHapPath.append("/data/bundles/")
         .append(bundleName_).append("/")
         .append(GetModuleName(inputPath))
@@ -158,14 +172,13 @@ std::string JsModuleReader::GetFormAppHspPath(const std::string& inputPath) cons
     return realHapPath;
 }
 
-std::string JsModuleReader::GetModuleName(const std::string& inputPath) const
+std::string HybridJsModuleReader::GetModuleName(const std::string& inputPath) const
 {
     return inputPath.substr(inputPath.find_last_of("/") + 1);
 }
 
-std::string JsModuleReader::GetCommonAppHspPath(const std::string& inputPath) const
+std::string HybridJsModuleReader::GetCommonAppPath(const std::string& inputPath, const std::string& suffix) const
 {
-    std::string suffix = std::string(SHARED_FILE_SUFFIX);
     std::string realHapPath = GetPresetAppHapPath(inputPath, bundleName_);
     if ((realHapPath.find(ABS_DATA_CODE_PATH) == 0) || (realHapPath == inputPath)) {
         realHapPath = std::string(ABS_CODE_PATH) + inputPath + suffix;
@@ -181,7 +194,7 @@ std::string JsModuleReader::GetCommonAppHspPath(const std::string& inputPath) co
     return realHapPath;
 }
 
-std::string JsModuleReader::GetOtherHspPath(const std::string& bundleName, const std::string& moduleName,
+std::string HybridJsModuleReader::GetOtherHspPath(const std::string& bundleName, const std::string& moduleName,
     const std::string& inputPath)
 {
     std::string presetAppHapPath = inputPath;
@@ -223,7 +236,7 @@ std::string JsModuleReader::GetOtherHspPath(const std::string& bundleName, const
     return presetAppHapPath;
 }
 
-std::string JsModuleReader::GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName)
+std::string HybridJsModuleReader::GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName)
 {
     std::string presetAppHapPath = inputPath;
     std::string moduleName = inputPath.substr(inputPath.find_last_of("/") + 1);
@@ -255,25 +268,6 @@ std::string JsModuleReader::GetPresetAppHapPath(const std::string& inputPath, co
         presetAppHapPath = GetOtherHspPath(bundleName, moduleName, presetAppHapPath);
     }
     return presetAppHapPath;
-}
-
-void JsModuleReader::GetHapPathList(const std::string &bundleName, std::vector<std::string> &hapList)
-{
-    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
-    if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null bundleMgrHelper");
-        return;
-    }
-    AppExecFwk::BundleInfo bundleInfo;
-    auto getInfoResult = bundleMgrHelper->GetBundleInfoForSelf(static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::
-        GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
-    if (getInfoResult != 0 || bundleInfo.hapModuleInfos.empty()) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "GetBundleInfoForSelf failed");
-        return;
-    }
-    for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
-        hapList.emplace_back(hapModuleInfo.hapPath);
-    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
