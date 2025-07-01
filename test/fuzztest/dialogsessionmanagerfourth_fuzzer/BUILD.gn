@@ -36,8 +36,12 @@ ohos_fuzztest("DialogSessionManagerFourthFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
-    "${ability_runtime_services_path}/abilitymgr/src/query_erms_manager.cpp",
     "${ability_runtime_path}/services/abilitymgr/src/dialog_session/dialog_session_manager.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/query_erms_manager.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/query_erms_observer_manager.cpp",
+    "${ability_runtime_path}/services/common/src/task_handler_wrap.cpp",
+    "${ability_runtime_path}/services/common/src/queue_task_handler_wrap.cpp",
+    "${ability_runtime_path}/services/common/src/ffrt_task_handler_wrap.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/start_ability_utils.cpp",
     "dialogsessionmanagerfourth_fuzzer.cpp",
   ]
