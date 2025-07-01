@@ -324,10 +324,10 @@ public:
         return E_OK;
     }
 
-    virtual int32_t CreateShareFile(const StorageFileRawData &rawData,
+    virtual int32_t CreateShareFile(const StorageFileRawData &storageShareRawData,
         uint32_t tokenId, uint32_t flag, std::vector<int32_t> &funcResult) override
     {
-        int32_t size = static_cast<int32_t>(rawData.size);
+        int32_t size = static_cast<int32_t>(storageShareRawData.size);
         if (size <= 0) {
             return -1;
         }
