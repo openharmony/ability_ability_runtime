@@ -49,7 +49,7 @@ bool AppUtils::IsStartOptionsWithAnimation()
     return AppUtils::isStartOptionsWithAnimation_;
 }
 
-bool InOnNewProcessEnableList(const std::string &bundleName)
+bool AppUtils::InOnNewProcessEnableList(const std::string &bundleName)
 {
     return false;
 }
