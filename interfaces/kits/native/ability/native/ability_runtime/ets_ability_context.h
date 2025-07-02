@@ -19,6 +19,8 @@
 #include "ability_context.h"
 #include "ani.h"
 #include "configuration.h"
+#include "ets_free_install_observer.h"
+#include "ets_runtime.h"
 #include "ohos_application.h"
 
 namespace OHOS {
@@ -53,9 +55,14 @@ private:
     void OnTerminateSelf(ani_env *env, ani_object aniObj, ani_object callback);
     void OnTerminateSelfWithResult(ani_env *env, ani_object aniObj, ani_object abilityResult, ani_object callback);
     void OnReportDrawnCompleted(ani_env *env, ani_object aniObj, ani_object call);
+    void AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want, ani_object callback,
+        const std::shared_ptr<AbilityContext> &context, bool isAbilityResult = false, bool isOpenLink = false);
+    void StartAbilityForResultInner(ani_env *env, const AAFwk::StartOptions &startOptions, AAFwk::Want &want,
+        std::shared_ptr<AbilityContext> context, ani_object startOptionsObj, ani_object callback);
     int32_t GenerateRequestCode();
 
     static std::mutex requestCodeMutex_;
+    sptr<EtsFreeInstallObserver> freeInstallObserver_ = nullptr;
 };
 
 ani_object CreateEtsAbilityContext(
