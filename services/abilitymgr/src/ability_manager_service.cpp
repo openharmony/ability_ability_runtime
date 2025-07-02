@@ -14741,5 +14741,20 @@ int32_t AbilityManagerService::QueryKeepAliveAppServiceExtensions(std::vector<Ke
 {
     return KeepAliveProcessManager::GetInstance().QueryKeepAliveAppServiceExtensions(list, false);
 }
+
+int32_t AbilityManagerService::SetOnNewWantSkipScenarios(sptr<IRemoteObject> callerToken, int32_t scenarios)
+{
+    auto record = Token::GetAbilityRecordByToken(callerToken);
+    if (record == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "The toke from context is invalid");
+        return ERR_INVALID_CONTEXT;
+    }
+    if (!JudgeSelfCalled(record)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid callerToken");
+        return ERR_INVALID_CALLER;
+    }
+    record->SetOnNewWantSkipScenarios(scenarios);
+    return ERR_OK;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

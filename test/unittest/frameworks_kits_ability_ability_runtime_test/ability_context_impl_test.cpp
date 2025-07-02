@@ -2358,5 +2358,17 @@ HWTEST_F(AbilityContextImplTest, OnRequestFailure_0200, Function | MediumTest | 
     context_->OnRequestFailure(requestId, element, "failure");
     EXPECT_EQ(context_->onRequestResults_.empty(), true);
 }
+
+/**
+ * @tc.number: Ability_Context_Impl_SetOnNewWantSkipScenarios_0100
+ * @tc.name: SetOnNewWantSkipScenarios
+ * @tc.desc: Verify that function SetOnNewWantSkipScenarios.
+ */
+HWTEST_F(AbilityContextImplTest, SetOnNewWantSkipScenariose_0100, Function | MediumTest | Level1)
+{
+    auto context = std::make_unique<AbilityContextImpl>();
+    auto ret = context->SetOnNewWantSkipScenarios(0);
+    EXPECT_EQ(ret, 0);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

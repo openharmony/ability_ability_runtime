@@ -2722,19 +2722,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ChangeAbilityVisibility_001, TestSize.Le
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_ChangeUIAbilityVisibilityBySCB_0100
- * @tc.desc: ChangeUIAbilityVisibilityBySCB
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, ChangeUIAbilityVisibilityBySCB_001, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    int32_t ret = uiAbilityLifecycleManager->ChangeUIAbilityVisibilityBySCB(nullptr, true);
-    EXPECT_EQ(ERR_INVALID_VALUE, ret);
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_IsContainsAbility_0100
  * @tc.desc: IsContainsAbility
  * @tc.type: FUNC

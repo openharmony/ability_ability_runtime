@@ -544,6 +544,11 @@ public:
     {
         return;
     }
+
+    virtual ErrCode SetOnNewWantSkipScenarios(int32_t scenarios)
+    {
+        return 0;
+    }
 private:
     std::unique_ptr<NativeReference> mockContentStorage_ = nullptr;
 };

@@ -1858,6 +1858,8 @@ public:
      */
     ErrCode ResumeExtensionAbility(sptr<IAbilityConnection> connect);
 
+    ErrCode SetOnNewWantSkipScenarios(sptr<IRemoteObject> callerToken, int32_t scenarios);
+
 private:
     AbilityManagerClient();
     DISALLOW_COPY_AND_MOVE(AbilityManagerClient);

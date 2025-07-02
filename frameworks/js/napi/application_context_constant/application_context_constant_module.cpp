@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,17 @@ static napi_value InitStartupVisibilityObject(napi_env env)
     return object;
 }
 
+static napi_value InitScenariosObject(napi_env env)
+{
+    napi_value object = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &object));
+
+    NAPI_CALL(env, SetEnumItem(env, object, "SCENARIO_MOVE_MISSION_TO_FRONT", CREATE_VALUE_ONE));
+    NAPI_CALL(env, SetEnumItem(env, object, "SCENARIO_SHOW_ABILITY", CREATE_VALUE_TWO));
+    NAPI_CALL(env, SetEnumItem(env, object, "SCENARIO_BACK_TO_CALLER_ABILITY_WITH_RESULT", CREATE_VALUE_FOUR));
+    return object;
+}
+
 /*
  * The module initialization.
  */
@@ -84,11 +95,14 @@ static napi_value ApplicationContextConstantInit(napi_env env, napi_value export
     NAPI_ASSERT(env, processMode != nullptr, "failed to create ProcessMode object");
     napi_value startupVisibility = InitStartupVisibilityObject(env);
     NAPI_ASSERT(env, startupVisibility != nullptr, "failed to create StartupVisibility object");
+    napi_value scenarios = InitScenariosObject(env);
+    NAPI_ASSERT(env, scenarios != nullptr, "failed to create scenarios object");
 
     napi_property_descriptor exportObjs[] = {
         DECLARE_NAPI_PROPERTY("AreaMode", areaMode),
         DECLARE_NAPI_PROPERTY("ProcessMode", processMode),
         DECLARE_NAPI_PROPERTY("StartupVisibility", startupVisibility),
+        DECLARE_NAPI_PROPERTY("Scenarios", scenarios),
     };
 
     napi_status status = napi_define_properties(env, exports, sizeof(exportObjs) / sizeof(exportObjs[0]), exportObjs);

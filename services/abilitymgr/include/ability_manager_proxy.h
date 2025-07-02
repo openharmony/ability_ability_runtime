@@ -1779,6 +1779,8 @@ public:
      */
     virtual int32_t ResumeExtensionAbility(sptr<IAbilityConnection> connect) override;
 
+    virtual int32_t SetOnNewWantSkipScenarios(sptr<IRemoteObject> callerToken, int32_t scenarios) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);

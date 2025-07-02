@@ -1412,5 +1412,11 @@ ErrCode AbilityContextImpl::ConnectAppServiceExtensionAbility(const AAFwk::Want&
     }
     return ret;
 }
+
+ErrCode AbilityContextImpl::SetOnNewWantSkipScenarios(int32_t scenarios)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return AAFwk::AbilityManagerClient::GetInstance()->SetOnNewWantSkipScenarios(token_, scenarios);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
