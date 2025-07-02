@@ -201,16 +201,16 @@ extern "C" int DFX_SetAppRunningUniqueId(const char* appRunningId, size_t len) _
 } // namespace
 
 void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths,
-    AppLibPathMap &appAbcLibPaths)
+    std::map<std::string, std::string> &abcPathsToBundleModuleNameMap)
 {
     std::string patchNativeLibraryPath = bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.nativeLibraryPath;
+    abcPathsToBundleModuleNameMap["default"] = "default";
     if (!patchNativeLibraryPath.empty()) {
         // libraries in patch lib path has a higher priority when loading.
         std::string patchLibPath = LOCAL_CODE_PATH;
         patchLibPath += (patchLibPath.back() == '/') ? patchNativeLibraryPath : "/" + patchNativeLibraryPath;
         TAG_LOGD(AAFwkTag::APPKIT, "lib path = %{private}s", patchLibPath.c_str());
         appLibPaths["default"].emplace_back(patchLibPath);
-        appAbcLibPaths["default"].emplace_back(patchLibPath);
     }
 
     std::string nativeLibraryPath = bundleInfo.applicationInfo.nativeLibraryPath;
@@ -222,7 +222,6 @@ void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &h
         libPath += (libPath.back() == '/') ? nativeLibraryPath : "/" + nativeLibraryPath;
         TAG_LOGD(AAFwkTag::APPKIT, "lib path = %{private}s", libPath.c_str());
         appLibPaths["default"].emplace_back(libPath);
-        appAbcLibPaths["default"].emplace_back(libPath);
     } else {
         TAG_LOGI(AAFwkTag::APPKIT, "nativeLibraryPath is empty");
     }
@@ -231,15 +230,15 @@ void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &h
         TAG_LOGD(AAFwkTag::APPKIT,
             "moduleName: %{public}s, isLibIsolated: %{public}d, compressNativeLibs: %{public}d.",
             hapInfo.moduleName.c_str(), hapInfo.isLibIsolated, hapInfo.compressNativeLibs);
-        GetPatchNativeLibPath(hapInfo, patchNativeLibraryPath, appLibPaths, appAbcLibPaths);
-        GetHapSoPath(hapInfo, appLibPaths, hapInfo.hapPath.find(ABS_CODE_PATH), appAbcLibPaths);
+        GetPatchNativeLibPath(hapInfo, patchNativeLibraryPath, appLibPaths, abcPathsToBundleModuleNameMap);
+        GetHapSoPath(hapInfo, appLibPaths, hapInfo.hapPath.find(ABS_CODE_PATH), abcPathsToBundleModuleNameMap);
     }
 
     for (auto &hspInfo : hspList) {
         TAG_LOGD(AAFwkTag::APPKIT, "bundle:%s, module:%s, nativeLibraryPath:%s", hspInfo.bundleName.c_str(),
             hspInfo.moduleName.c_str(), hspInfo.nativeLibraryPath.c_str());
         GetHspNativeLibPath(hspInfo, appLibPaths, hspInfo.hapPath.find(ABS_CODE_PATH) != 0u,
-            bundleInfo.applicationInfo.bundleName, appAbcLibPaths);
+            bundleInfo.applicationInfo.bundleName, abcPathsToBundleModuleNameMap);
     }
 }
 
@@ -1583,8 +1582,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 
     AppLibPathMap appLibPaths {};
-    AppLibPathMap appAbcLibPaths {};
-    GetNativeLibPath(bundleInfo, hspList, appLibPaths, appAbcLibPaths);
+    std::map<std::string, std::string> abcPathsToBundleModuleNameMap {};
+    GetNativeLibPath(bundleInfo, hspList, appLibPaths, abcPathsToBundleModuleNameMap);
     bool isSystemApp = bundleInfo.applicationInfo.isSystemApp;
     TAG_LOGD(AAFwkTag::APPKIT, "the application isSystemApp: %{public}d", isSystemApp);
 #ifdef CJ_FRONTEND
@@ -1600,7 +1599,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     } else {
 #endif
         AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, isSystemApp);
-        AbilityRuntime::STSRuntime::SetAppLibPath(appLibPaths, appAbcLibPaths);
+        AbilityRuntime::STSRuntime::SetAppLibPath(appLibPaths, abcPathsToBundleModuleNameMap, isSystemApp);
 #ifdef CJ_FRONTEND
     }
 #endif
@@ -1654,6 +1653,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
                 options.hapModulePath[hapModuleInfo.moduleName] = hapModuleInfo.hapPath;
                 options.packageNameList[hapModuleInfo.moduleName] = hapModuleInfo.packageName;
+                if (hapModuleInfo.moduleType == AppExecFwk::ModuleType::SHARED &&
+                    hapModuleInfo.codeLanguage != AppExecFwk::Constants::CODE_LANGUAGE_1_1) {
+                    TAG_LOGI(AAFwkTag::JSRUNTIME, "appInnerHspPathList: %{public}s", hapModuleInfo.hapPath.c_str());
+                    options.appInnerHspPathList.push_back(hapModuleInfo.hapPath);
+                }
+
                 options.aotCompileStatusMap[hapModuleInfo.moduleName] =
                     static_cast<int32_t>(hapModuleInfo.aotCompileStatus);
             }
