@@ -43,7 +43,8 @@ public:
         const std::string &callerBundleName);
     int32_t ConnectRemoteAbility(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect);
     int32_t DisconnectRemoteAbility(const sptr<IRemoteObject>& connect, int32_t callerUid, uint32_t accessToken);
-    int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag, int32_t callingUid);
+    int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
+        int32_t callingUid, uint32_t callingTokenId = 0);
     int32_t StopSyncRemoteMissions(const std::string& devId, int32_t callingUid);
     int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj, int32_t callingUid);
     int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid);
