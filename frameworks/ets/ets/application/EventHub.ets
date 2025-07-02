@@ -12,21 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Context from 'application.Context';
-import hilog from '@ohos.hilog';
 
 export type ESValueArgs = ESValue | Object | null | undefined
 export type FixedArgs = Object | null | undefined
 
 export default class EventHub {
-  private context?: Context;
+  private nativeContext: long = 0;
   private eventMap: Map<string, Function[]> = new Map<string, Function[]>();
   private dynamicContextEventHub?: ESValue;
   private native getDynamicContextEventHub(): ESValue;
-
-  setContext(context: Context) {
-    this.context = context;
-  }
 
   on(event: string, callback: Function): void {
     if (!this.eventMap.has(event)) {
