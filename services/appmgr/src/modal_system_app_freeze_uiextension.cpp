@@ -92,7 +92,7 @@ void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const Fau
     }
 }
 
-bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string pid, std::string bundleName)
+bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string& pid, std::string& bundleName)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Create Modal UIExtension Called");
     sptr<IRemoteObject> token;
@@ -120,7 +120,7 @@ bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string pid, st
 }
 
 bool ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(
-    std::string pid, std::string bundleName, sptr<IRemoteObject> &token, AAFwk::Want &want)
+    std::string& pid, std::string& bundleName, sptr<IRemoteObject> token, AAFwk::Want &want)
 {
     want.SetElementName(APP_NO_RESPONSE_BUNDLENAME, APP_NO_RESPONSE_ABILITY);
     want.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
