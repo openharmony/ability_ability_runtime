@@ -14,18 +14,17 @@
  */
  
 #include "event_hub.h"
-
+ 
 #include "interop_js/arkts_esvalue.h"
 #include "interop_js/arkts_interop_js_api.h"
 #include "interop_js/hybridgref_ani.h"
 #include "interop_js/hybridgref_napi.h"
 #include "js_runtime.h"
-
+ 
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char* ETS_EVENT_HUB_CLASS_NAME = "Lapplication/EventHub/EventHub;";
-constexpr const char* ETS_CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
 }
  
 std::shared_ptr<AbilityContext> EventHub::GetAbilityContext(ani_env *env, ani_object aniObj)
@@ -38,7 +37,7 @@ std::shared_ptr<AbilityContext> EventHub::GetAbilityContext(ani_env *env, ani_ob
         TAG_LOGE(AAFwkTag::APPKIT, "null env");
         return nullptr;
     }
-    if ((status = env->FindClass(ETS_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
+    if ((status = env->FindClass(ETS_EVENT_HUB_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
         return nullptr;
     }
@@ -61,17 +60,7 @@ ani_object EventHub::GetDynamicContextEventHub(ani_env *aniEnv, ani_object aniOb
         TAG_LOGE(AAFwkTag::APPKIT, "aniEnv or aniObj is null");
         return nullptr;
     }
-    ani_ref nativeContextRef = nullptr;
-    ani_status status = ANI_ERROR;
-    if ((status = aniEnv->Object_GetFieldByName_Ref(aniObj, "context", &nativeContextRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
-        return nullptr;
-    }
-    if (nativeContextRef == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null nativeContextRef");
-        return nullptr;
-    }
-    auto context = GetAbilityContext(aniEnv, static_cast<ani_object>(nativeContextRef));
+    auto context = GetAbilityContext(aniEnv, aniObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return nullptr;
@@ -124,7 +113,7 @@ ani_object EventHub::GetDynamicContextEventHub(ani_env *aniEnv, ani_object aniOb
     }
     return staticResult;
 }
-
+ 
 bool EventHub::CallNapiSetNativeEventHubRefFn(ani_env *aniEnv, ani_object aniObj, napi_env napiEnv,
     napi_value eventHub)
 {
@@ -177,8 +166,8 @@ void EventHub::InitAniEventHub(ani_env *aniEnv)
     aniEnv->Class_BindNativeMethods(contextCls, contextFunctions.data(),
         contextFunctions.size());
 }
-
-void EventHub::SetEventHubContext(ani_env *aniEnv, ani_ref eventHubRef, ani_ref contextRef)
+ 
+void EventHub::SetEventHubContext(ani_env *aniEnv, ani_ref eventHubRef, ani_long nativeContextLong)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (aniEnv == nullptr) {
@@ -192,13 +181,13 @@ void EventHub::SetEventHubContext(ani_env *aniEnv, ani_ref eventHubRef, ani_ref 
         return;
     }
     ani_field contextField;
-    if ((status = aniEnv->Class_FindField(contextCls, "context", &contextField)) != ANI_OK) {
+    if ((status = aniEnv->Class_FindField(contextCls, "nativeContext", &contextField)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed status: %{public}d", status);
         return;
     }
-    if ((status = aniEnv->Object_SetField_Ref(static_cast<ani_object>(eventHubRef), contextField,
-        contextRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed status: %{public}d", status);
+    if ((status = aniEnv->Object_SetField_Long(static_cast<ani_object>(eventHubRef), contextField,
+        nativeContextLong)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Long failed status: %{public}d", status);
         return;
     }
 }
