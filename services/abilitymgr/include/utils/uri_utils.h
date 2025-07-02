@@ -31,7 +31,8 @@ public:
     static UriUtils &GetInstance();
 
     std::vector<Uri> GetPermissionedUriList(const std::vector<std::string> &uriVec,
-        const std::vector<bool> &checkResults, Want &want);
+        const std::vector<bool> &checkResults, uint32_t callerTokenId,
+        const std::string &targetBundleName, Want &want);
 
     bool GetUriListFromWant(Want &want, std::vector<std::string> &uriVec);
 
@@ -81,6 +82,13 @@ private:
     bool CheckIsInAncoAppIdentifier(const std::string &identifier, const std::string &bundleName);
 
     void ProcessUDMFKey(Want &want);
+
+    bool ProcessWantUri(bool checkResult, int32_t apiVersion, Want &want, std::vector<Uri> &permissionedUris);
+
+    bool GetCallerNameAndApiVersion(uint32_t tokenId, std::string &callerName, int32_t &apiVersion);
+
+    bool SendGrantUriPermissionEvent(const std::string &callerBundleName, const std::string &targetBundleName,
+        const std::string &oriUri, int32_t apiVersion, const std::string &eventType);
 
     DISALLOW_COPY_AND_MOVE(UriUtils);
 };
