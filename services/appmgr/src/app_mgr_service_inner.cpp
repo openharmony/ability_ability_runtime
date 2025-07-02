@@ -7759,6 +7759,10 @@ int32_t AppMgrServiceInner::CheckCallingIsUserTestModeInner(const pid_t pid, boo
 }
 
 bool AppMgrServiceInner::IsSceneBoardCall() {
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not system app call");
+        return false;
+    }
     if (remoteClientManager_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "The remoteClientManager_ is nullptr.");
         return false;
