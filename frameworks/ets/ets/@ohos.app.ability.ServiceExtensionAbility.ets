@@ -18,6 +18,7 @@ import Want from '@ohos.app.ability.Want';
 import ServiceExtensionContext from 'application.ServiceExtensionContext';
 import { Configuration } from '@ohos.app.ability.Configuration'
 import hilog from '@ohos.hilog';
+import { AbilityUtils } from './utils/AbilityUtils';
 
 class MyService extends rpc.RemoteObject {
   constructor(descriptor: string) {
@@ -35,7 +36,7 @@ class MyService extends rpc.RemoteObject {
 }
 
 export default class ServiceExtensionAbility {
-  private connectCallbackPoint: long;
+  private connectCallback: long;
 
   private native nativeOnConnectCallback(service: rpc.RemoteObject): boolean;
 
@@ -51,20 +52,28 @@ export default class ServiceExtensionAbility {
     return this.nativeOnConnectCallback(remoteObj);
   }
 
-  private isOnDisconnectAsync: boolean = true;
-  private disconnectCallbackPoint: long;
+  private disconnectCallback: long;
 
   private native nativeOnDisconnectCallback(): void;
 
-  private callOnDisconnect(want: Want): void {
-    let p = this.onDisconnectAsync(want);
-    if (this.isOnDisconnectAsync) {
-      p.then<void>((a: undefined): void => {
-        this.nativeOnDisconnectCallback();
-      });
-    } else {
+  private callOnDisconnect(want: Want): boolean {
+    const derivedClassType = AbilityUtils.getClassType(this);
+    if (derivedClassType === undefined) {
       this.onDisconnect(want);
+      return false;
     }
+    const serviceExtensionClassType = AbilityUtils.getClassType(new ServiceExtensionAbility());
+    if (serviceExtensionClassType === undefined) {
+      this.onDisconnect(want);
+      return false;
+    }
+    const isOverride = AbilityUtils.isOverride(derivedClassType, "onDisconnectAsync", serviceExtensionClassType);
+    if (isOverride) {
+      this.onDisconnectAsync(want).then(() => this.nativeOnDisconnectCallback());
+      return true;
+    }
+    this.onDisconnect(want);
+    return false;
   }
 
   launchWant: Want = new Want();
@@ -89,9 +98,6 @@ export default class ServiceExtensionAbility {
   }
 
   onDisconnectAsync(want: Want): Promise<void> {
-    console.log("onDisconnectAsync");
-    this.isOnDisconnectAsync = false;
-    return new Promise<void>((resolve: (a: undefined) => void, reject: (err: Error) => void): void => {
-    });
+    return new Promise<void>((resolve: (a: undefined) => void, reject: (err: Error) => void): void => {});
   }
 }

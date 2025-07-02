@@ -78,10 +78,10 @@ public:
     IFreeInstallObserverMock() = default;
     virtual ~IFreeInstallObserverMock() = default;
     void OnInstallFinished(const std::string &bundleName, const std::string &abilityName,
-    const std::string &startTime, const int &resultCode) override {};
+    const std::string &startTime, int32_t resultCode) override {};
 
     void OnInstallFinishedByUrl(const std::string &startTime, const std::string &url,
-        const int &resultCode) override {};
+        int32_t resultCode) override {};
     sptr<IRemoteObject> AsObject() override {return nullptr;};
 };
 /**
