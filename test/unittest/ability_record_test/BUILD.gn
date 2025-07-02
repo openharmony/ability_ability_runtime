@@ -23,19 +23,18 @@ ohos_unittest("ability_record_test") {
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/system_ability_mock",
     "${ability_runtime_test_path}/mock/common/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
+    "${ability_runtime_path}/services/common/include",
     "mock/include",
   ]
 
   sources = [
     "${ability_runtime_native_path}/appkit/ability_bundle_manager_helper/bundle_mgr_helper.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/lifecycle_deal.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_record.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/uri_utils.cpp",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
     "ability_record_test.cpp",  # add mock file
     "mock/src/mock_my_flag.cpp",
     "mock/src/mock_permission_verification.cpp",
-    "mock/src/mock_app_utils.cpp",
   ]
 
   configs = [
