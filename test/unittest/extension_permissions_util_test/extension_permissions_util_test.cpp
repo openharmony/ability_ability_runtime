@@ -297,6 +297,23 @@ HWTEST_F(ExtensionPermissionsUtilTest, CheckSAPermission_015, TestSize.Level1)
  * Feature: ExtensionPermissionsUtil
  * Function: CheckSAPermission
  * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckSAPermission
+ */
+HWTEST_F(ExtensionPermissionsUtilTest, CheckSAPermission_016, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ExtensionPermissionsUtilTest CheckSAPermission_016 start");
+
+    MyFlag::flag_ = 1;
+    MyFlag::hasPerm_ = true;
+    EXPECT_TRUE(ExtensionPermissionsUtil::CheckSAPermission(ExtensionAbilityType::SELECTION));
+    MyFlag::flag_ = 0;
+    TAG_LOGI(AAFwkTag::TEST, "ExtensionPermissionsUtilTest CheckSAPermission_016 end");
+}
+
+/*
+ * Feature: ExtensionPermissionsUtil
+ * Function: CheckSAPermission
+ * SubFunction: NA
  * FunctionPoints: AbilityManagerService CheckSAPermissionMore
  */
 HWTEST_F(ExtensionPermissionsUtilTest, CheckSAPermissionMore_001, TestSize.Level1)
