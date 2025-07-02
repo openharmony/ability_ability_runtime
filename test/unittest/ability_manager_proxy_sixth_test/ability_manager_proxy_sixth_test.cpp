@@ -959,5 +959,49 @@ HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_QueryKeepAliveAppServ
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_APP_SERVICE_EXTENSIONS_KEEP_ALIVE), mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
 }
+
+/*
+ * @tc.name: AbilityManagerProxy_SetOnNewWantSkipScenarios_001
+ * Function: SetOnNewWantSkipScenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_SetOnNewWantSkipScenarios_001, TestSize.Level1)
+{
+    sptr<IRemoteObject> callerToken = nullptr;
+    int32_t scenarios = 0;
+    EXPECT_NE(proxy_, nullptr);
+    auto res = proxy_->SetOnNewWantSkipScenarios(callerToken, scenarios);
+    EXPECT_EQ(res, ERR_INVALID_CONTEXT);
+}
+
+/*
+ * @tc.name: AbilityManagerProxy_SetOnNewWantSkipScenarios_002
+ * Function: SetOnNewWantSkipScenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_SetOnNewWantSkipScenarios_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(-1));
+    auto token = sptr<MockAbilityToken>::MakeSptr();
+    auto res = proxy_->SetOnNewWantSkipScenarios(token, 0);
+    EXPECT_EQ(res, -1);
+}
+
+/*
+ * @tc.name: AbilityManagerProxy_SetOnNewWantSkipScenarios_003
+ * Function: SetOnNewWantSkipScenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_SetOnNewWantSkipScenarios_003, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    auto token = sptr<MockAbilityToken>::MakeSptr();
+    auto res = proxy_->SetOnNewWantSkipScenarios(token, 0);
+    EXPECT_EQ(res, NO_ERROR);
+}
 } // namespace AAFwk
 } // namespace OHOS

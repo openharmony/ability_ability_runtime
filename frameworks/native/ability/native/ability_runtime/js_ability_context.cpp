@@ -439,6 +439,11 @@ napi_value JsAbilityContext::RevokeDelegator(napi_env env, napi_callback_info in
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnRevokeDelegator);
 }
 
+napi_value JsAbilityContext::SetOnNewWantSkipScenarios(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnSetOnNewWantSkipScenarios);
+}
+
 void JsAbilityContext::ClearFailedCallConnection(
     const std::weak_ptr<AbilityContext>& abilityContext, const std::shared_ptr<CallerCallBack> &callback)
 {
@@ -2241,6 +2246,8 @@ napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> 
         JsAbilityContext::ConnectAppServiceExtensionAbility);
     BindNativeFunction(env, object, "disconnectAppServiceExtensionAbility", moduleName,
         JsAbilityContext::DisconnectAppServiceExtensionAbility);
+    BindNativeFunction(env, object, "setOnNewWantSkipScenarios", moduleName,
+        JsAbilityContext::SetOnNewWantSkipScenarios);
     return object;
 }
 
@@ -3089,6 +3096,45 @@ napi_value JsAbilityContext::OnRevokeDelegator(napi_env env, NapiCallbackInfo& i
 
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnRevokeDelegator",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsAbilityContext::OnSetOnNewWantSkipScenarios(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "OnSetOnNewWantSkipScenarios called");
+    if (info.argc < ARGC_ONE) {
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+    int32_t scenarios = 0;
+    if (!OHOS::AppExecFwk::UnwrapInt32FromJS2(env, info.argv[INDEX_ZERO], scenarios)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid first params");
+        ThrowInvalidParamError(env, "Failed to parse scenarios. Scenarios must be a number.");
+        return CreateJsUndefined(env);
+    }
+    auto innerErrCode = std::make_shared<int32_t>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute =
+        [weak = context_, innerErrCode, scenarios] {
+            auto context = weak.lock();
+            if (!context) {
+                TAG_LOGW(AAFwkTag::CONTEXT, "released context");
+                *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+                return;
+            }
+            *innerErrCode = context->SetOnNewWantSkipScenarios(scenarios);
+    };
+    NapiAsyncTask::CompleteCallback complete =
+        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (*innerErrCode == ERR_OK) {
+                task.Resolve(env, CreateJsUndefined(env));
+            } else {
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+            }
+        };
+
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnSetOnNewWantSkipScenarios",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
