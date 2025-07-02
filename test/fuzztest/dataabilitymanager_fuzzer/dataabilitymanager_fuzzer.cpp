@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 
 #define private public
 #include "data_ability_manager.h"
@@ -29,8 +30,9 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-constexpr size_t U32_AT_SIZE = 4;
 constexpr uint8_t ENABLE = 2;
+constexpr size_t U32_AT_SIZE = 4;
+constexpr size_t STRING_MAX_LENGTH = 128;
 }
 
 uint32_t GetU32Data(const char* ptr)
@@ -63,20 +65,26 @@ sptr<Token> GetFuzzAbilityToken()
     return token;
 }
 
-bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
-    bool boolParam = *data % ENABLE;
-    int intParam = static_cast<int>(GetU32Data(data));
-    int32_t int32Param = static_cast<int32_t>(GetU32Data(data));
-    int64_t int64Param = static_cast<int64_t>(GetU32Data(data));
-    std::string stringParam(data, size);
+    auto dataAbilityManager = std::make_shared<DataAbilityManager>();
+    bool boolParam;
+    bool isClient;
+    int intParam;
+    int32_t int32Param;
+    int64_t int64Param;
+    std::string stringParam;
     std::shared_ptr<AbilityRecord> abilityRecord = GetFuzzAbilityRecord();
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
     std::vector<std::string> info;
     AbilityRequest abilityRequest;
-
-    // fuzz for DataAbilityManager
-    auto dataAbilityManager = std::make_shared<DataAbilityManager>();
+    FuzzedDataProvider fdp(data, size);
+    boolParam = fdp.ConsumeBool();
+    isClient = fdp.ConsumeBool();
+    intParam = fdp.ConsumeIntegral<int>();
+    int32Param = fdp.ConsumeIntegral<int32_t>();
+    int64Param = fdp.ConsumeIntegral<int64_t>();
+    stringParam = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     sptr<IRemoteObject> client;
     dataAbilityManager->Acquire(abilityRequest, boolParam, client, boolParam);
     sptr<IAbilityScheduler> scheduler;
@@ -91,15 +99,17 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     dataAbilityManager->GetAbilityRecordById(int64Param);
     dataAbilityManager->GetAbilityRecordByToken(token);
     dataAbilityManager->GetAbilityRecordByScheduler(scheduler);
-    dataAbilityManager->Dump(data, intParam);
+    char *func = new char[stringParam.length() + 1];
+    dataAbilityManager->Dump(func, intParam);
     dataAbilityManager->LoadLocked(stringParam, abilityRequest);
-    dataAbilityManager->DumpLocked(data, intParam);
+    dataAbilityManager->DumpLocked(func, intParam);
     dataAbilityManager->DumpState(info, stringParam);
+    std::shared_ptr<DataAbilityRecord> record;
+    dataAbilityManager->DumpClientInfo(info, isClient, record);
     dataAbilityManager->DumpSysState(info, boolParam, stringParam);
     std::vector<AbilityRunningInfo> AbilityRunningInfoVector;
     dataAbilityManager->GetAbilityRunningInfos(AbilityRunningInfoVector, boolParam);
     dataAbilityManager->RestartDataAbility(abilityRecord);
-    std::shared_ptr<DataAbilityRecord> record;
     dataAbilityManager->ReportDataAbilityAcquired(client, boolParam, record);
     dataAbilityManager->ReportDataAbilityReleased(client, boolParam, record);
 
@@ -110,33 +120,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    if (data == nullptr) {
-        return 0;
-    }
-
-    /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE) {
-        return 0;
-    }
-
-    char* ch = static_cast<char*>(malloc(size + 1));
-    if (ch == nullptr) {
-        std::cout << "malloc failed." << std::endl;
-        return 0;
-    }
-
-    (void)memset_s(ch, size + 1, 0x00, size + 1);
-    if (memcpy_s(ch, size, data, size) != EOK) {
-        std::cout << "copy failed." << std::endl;
-        free(ch);
-        ch = nullptr;
-        return 0;
-    }
-
-    OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-    free(ch);
-    ch = nullptr;
+    // Run your code on data.
+    OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
-

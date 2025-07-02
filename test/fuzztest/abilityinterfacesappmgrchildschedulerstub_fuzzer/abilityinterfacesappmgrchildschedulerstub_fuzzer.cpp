@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 
 #define private public
 #include "child_scheduler_stub.h"
@@ -32,23 +33,9 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-constexpr int INPUT_ZERO = 0;
-constexpr int INPUT_ONE = 1;
-constexpr int INPUT_TWO = 2;
-constexpr int INPUT_THREE = 3;
-constexpr size_t U32_AT_SIZE = 4;
-constexpr size_t OFFSET_ZERO = 24;
-constexpr size_t OFFSET_ONE = 16;
-constexpr size_t OFFSET_TWO = 8;
-constexpr uint8_t ENABLE = 2;
+constexpr size_t STRING_MAX_LENGTH = 128;
 }
 const std::u16string CHILD_SCHEDULER_TOKEN = u"ohos.appexecfwk.ChildScheduler";
-uint32_t GetU32Data(const char* ptr)
-{
-    // convert fuzz input data to an integer
-    return (ptr[INPUT_ZERO] << OFFSET_ZERO) | (ptr[INPUT_ONE] << OFFSET_ONE) | (ptr[INPUT_TWO] << OFFSET_TWO) |
-        ptr[INPUT_THREE];
-}
 
 class ChildSchedulerStubFUZZ : public ChildSchedulerStub {
 public:
@@ -61,35 +48,27 @@ public:
     bool ScheduleRunNativeProc(const sptr<IRemoteObject> &mainProcessCb) override{ return true; };
 };
 
-sptr<Token> GetFuzzAbilityToken()
+bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
-    sptr<Token> token = nullptr;
-    AbilityRequest abilityRequest;
-    abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
-    abilityRequest.abilityInfo.name = "MainAbility";
-    abilityRequest.abilityInfo.type = AbilityType::DATA;
-    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    if (abilityRecord) {
-        token = abilityRecord->GetToken();
-    }
-    return token;
-}
-
-bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
-{
-    uint32_t code = static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_LOAD_JS);
+    std::shared_ptr<ChildSchedulerStub> stub = std::make_shared<ChildSchedulerStubFUZZ>();
+    uint32_t code;
     MessageParcel parcel;
-    parcel.WriteInterfaceToken(CHILD_SCHEDULER_TOKEN);
-    parcel.WriteBuffer(data, size);
-    parcel.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
-    std::shared_ptr<ChildSchedulerStub> abms = std::make_shared<ChildSchedulerStubFUZZ>();
-    abms->OnRemoteRequest(code, parcel, reply, option);
+    FuzzedDataProvider fdp(data, size);
+    parcel.WriteInterfaceToken(CHILD_SCHEDULER_TOKEN);
+    parcel.WriteString(fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
+    parcel.WriteInt32(fdp.ConsumeIntegral<int32_t>());
+    parcel.RewindRead(0);
+    code = static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_LOAD_JS);
+    stub->OnRemoteRequest(code, parcel, reply, option);
     code = static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_EXIT_PROCESS_SAFELY);
-    abms->OnRemoteRequest(code, parcel, reply, option);
+    stub->OnRemoteRequest(code, parcel, reply, option);
     code = static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_RUN_NATIVE_PROC);
-    abms->OnRemoteRequest(code, parcel, reply, option);
+    stub->OnRemoteRequest(code, parcel, reply, option);
+    stub->HandleScheduleLoadChild(parcel, reply);
+    stub->HandleScheduleExitProcessSafely(parcel, reply);
+    stub->HandleScheduleRunNativeProc(parcel, reply);
     return true;
 }
 }
@@ -97,34 +76,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    if (data == nullptr) {
-        std::cout << "invalid data" << std::endl;
-        return 0;
-    }
-
-    /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE) {
-        return 0;
-    }
-
-    char* ch = static_cast<char*>(malloc(size + 1));
-    if (ch == nullptr) {
-        std::cout << "malloc failed." << std::endl;
-        return 0;
-    }
-
-    (void)memset_s(ch, size + 1, 0x00, size + 1);
-    if (memcpy_s(ch, size + 1, data, size) != EOK) {
-        std::cout << "copy failed." << std::endl;
-        free(ch);
-        ch = nullptr;
-        return 0;
-    }
-
-    OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-    free(ch);
-    ch = nullptr;
+    // Run your code on data.
+    OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
-
