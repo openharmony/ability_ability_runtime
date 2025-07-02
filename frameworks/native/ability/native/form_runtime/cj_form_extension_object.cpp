@@ -155,9 +155,9 @@ void CJFormExtensionObject::OnChangeFormVisibility(const std::map<int64_t, int32
         valuesHead[i] = item.second;
         i++;
     }
-    record.keys.size = formEventsMap.size();
+    record.keys.size = static_cast<int64_t>(formEventsMap.size());
     record.keys.head = keysHead;
-    record.values.size = formEventsMap.size();
+    record.values.size = static_cast<int64_t>(formEventsMap.size());
     record.values.head = valuesHead;
     g_cjFuncs.cjFormExtAbilityOnChangeFormVisibility(cjID_, record);
     free(keysHead);
