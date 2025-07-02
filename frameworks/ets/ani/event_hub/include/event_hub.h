@@ -29,7 +29,7 @@ class EventHub {
 public:
     static ani_object GetDynamicContextEventHub(ani_env *env, ani_object aniObj);
     static void InitAniEventHub(ani_env *aniEnv);
-    static void SetEventHubContext(ani_env *aniEnv, ani_ref eventHubRef, ani_ref contextRef);
+    static void SetEventHubContext(ani_env *aniEnv, ani_ref eventHubRef, ani_long nativeContextLong);
  
 private:
     static std::shared_ptr<AbilityContext> GetAbilityContext(ani_env *env, ani_object aniObj);
