@@ -24,6 +24,7 @@
 #include "sts_error_utils.h"
 #include "ets_extension_context.h"
 #include "ani_common_start_options.h"
+#include "ani_common_ability_result.h"
 #include "ani_common_util.h"
 #include "ani_enum_convert.h"
 
@@ -122,6 +123,19 @@ static void StartAbilityWithOption([[maybe_unused]] ani_env *env, [[maybe_unused
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "StartAbilityWithOption");
     StsUIExtensionContext::GetInstance().StartAbilityInner(env, aniObj, wantObj, opt, call);
+}
+
+static void StartAbilityForResult(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "StartAbilityForResult called");
+    StsUIExtensionContext::GetInstance().StartAbilityForResultInner(env, aniObj, wantObj, nullptr, callback);
+}
+
+static void StartAbilityForResultWithOptions(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_object startOptionsObj, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "StartAbilityForResultWithOptions called");
+    StsUIExtensionContext::GetInstance().StartAbilityForResultInner(env, aniObj, wantObj, startOptionsObj, callback);
 }
 
 ani_double StsUIExtensionContext::OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
@@ -328,6 +342,61 @@ void StsUIExtensionContext::StartAbilityInner([[maybe_unused]] ani_env *env, [[m
     }
 }
 
+void StsUIExtensionContext::StartAbilityForResultInner(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_object startOptionsObj, ani_object callback)
+{
+    auto context = StsUIExtensionContext::GetAbilityContext(env, aniObj);
+    if (env == nullptr || context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "env is nullptr or GetAbilityContext is nullptr");
+        ThrowStsErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        return;
+    }
+
+    AAFwk::Want want;
+    OHOS::AppExecFwk::UnwrapWant(env, wantObj, want);
+    AAFwk::StartOptions startOptions;
+    if (startOptionsObj) {
+        OHOS::AppExecFwk::UnwrapStartOptions(env, startOptionsObj, startOptions);
+    }
+    
+    ani_ref callbackRef = nullptr;
+    env->GlobalReference_Create(callback, &callbackRef);
+    ani_vm *etsVm = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->GetVM(&etsVm)) != ANI_OK || etsVm == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "GetVM failed, status: %{public}d", status);
+        return;
+    }
+    RuntimeTask task = [etsVm, callbackRef]
+        (int resultCode, const AAFwk::Want &want, bool isInner) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "start async callback");
+        ani_status status = ANI_ERROR;
+        ani_env *env = nullptr;
+        if ((status = etsVm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "GetEnv failed, status: %{public}d", status);
+            return;
+        }
+        
+        ani_object abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
+        if (abilityResult == nullptr) {
+            TAG_LOGW(AAFwkTag::UI_EXT, "null abilityResult");
+            AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
+                CreateStsError(env, AbilityErrorCode::ERROR_CODE_INNER), nullptr);
+            env->GlobalReference_Delete(callbackRef);
+            return;
+        }
+        auto errCode = isInner ? resultCode : 0;
+        AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
+            OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, errCode), abilityResult);
+        env->GlobalReference_Delete(callbackRef);
+    };
+    want.SetParam(AAFwk::Want::PARAM_RESV_FOR_RESULT, true);
+    auto requestCode = context->GenerateCurRequestCode();
+    (startOptionsObj == nullptr) ? context->StartAbilityForResult(want, requestCode, std::move(task))
+                                 : context->StartAbilityForResult(want, startOptions, requestCode, std::move(task));
+    return;
+}
+
 void StsUIExtensionContext::NativeSetColorMode(ani_env *env, ani_object aniContext, ani_enum_item aniColorMode)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "NativeSetColorMode called");
@@ -426,6 +495,13 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/"
             "AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(StartAbilityWithOption) },
+        ani_native_function { "nativeStartAbilityForResult",
+            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void*>(StartAbilityForResult) },
+        ani_native_function { "nativeStartAbilityForResult",
+            "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/"
+            "AsyncCallbackWrapper;:V",
+            reinterpret_cast<void*>(StartAbilityForResultWithOptions) },
         ani_native_function { "setColorMode", nullptr,
             reinterpret_cast<void*>(StsUIExtensionContext::NativeSetColorMode)},
         ani_native_function { "nativeReportDrawnCompleted", nullptr,

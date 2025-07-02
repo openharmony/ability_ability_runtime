@@ -65,6 +65,8 @@ public:
     static UIExtensionContext* GetAbilityContext(ani_env *env, ani_object obj);
     void AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want,
         ani_object callback, UIExtensionContext* context);
+    void StartAbilityForResultInner(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_object startOptinsObj, ani_object callback);
     static void NativeSetColorMode(ani_env *env, ani_object aniCls, ani_enum_item aniColorMode);
     static void NativeReportDrawnCompleted(ani_env *env,  ani_object aniCls, ani_object callback);
     static ani_double OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
