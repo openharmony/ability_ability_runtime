@@ -78,6 +78,12 @@ constexpr const int32_t API12 = 12;
 constexpr const int32_t API_VERSION_MOD = 100;
 constexpr const char* UI_ABILITY_CONTEXT_CLASS_NAME = "Lapplication/UIAbilityContext/UIAbilityContext;";
 constexpr const char* UI_ABILITY_CLASS_NAME = "L@ohos/app/ability/UIAbility/UIAbility;";
+constexpr const char* UI_ABILITY_SIGNATURE_VOID = ":V";
+constexpr const char* UI_ABILITY_SIGNATURE_WANT_LAUNCH_VOID =
+    "L@ohos/app/ability/Want/Want;L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;:V";
+constexpr const char* UI_ABILITY_SIGNATURE_WINDOWSTAGE_VOID =
+    "L@ohos/window/window/WindowStage;:V";
+
 
 void OnDestroyPromiseCallback(ani_env* env, ani_object aniObj)
 {
@@ -324,7 +330,7 @@ void StsUIAbility::CreateAniContext(ani_env *env, ani_ref contextGlobalRef, int3
 void StsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnStart ability: %{public}s", GetAbilityName().c_str());
     UIAbility::OnStart(want, sessionInfo);
 
     if (!stsAbilityObj_) {
@@ -366,16 +372,14 @@ void StsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
         launchParam.launchReason = AAFwk::LaunchReason::LAUNCHREASON_INSIGHT_INTENT;
     }
     ani_ref launchParamRef = CreateStsLaunchParam(env, launchParam);
-    const char *signature =
-        "L@ohos/app/ability/Want/Want;L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;:V";
 
     std::string methodName = "OnStart";
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
     }
-    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
-    CallObjectMethod(false, "onCreate", signature, wantRef, launchParamRef);
-    AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
+    AddLifecycleEventBeforeETSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
+    CallObjectMethod(false, "onCreate", UI_ABILITY_SIGNATURE_WANT_LAUNCH_VOID, wantRef, launchParamRef);
+    AddLifecycleEventAfterETSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
         AbilityRuntime::Runtime::Language::STS);
     if (delegator) {
@@ -388,13 +392,13 @@ void StsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
 
-void StsUIAbility::AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
+void StsUIAbility::AddLifecycleEventBeforeETSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
 {
     auto entry = std::string("StsUIAbility::") + methodName + " begin";
     FreezeUtil::GetInstance().AddLifecycleEvent(AbilityContext::token_, entry);
 }
 
-void StsUIAbility::AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
+void StsUIAbility::AddLifecycleEventAfterETSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const
 {
     auto entry = std::string("StsUIAbility::") + methodName + " end";
     FreezeUtil::GetInstance().AddLifecycleEvent(AbilityContext::token_, entry);
@@ -509,7 +513,7 @@ void StsUIAbility::OnStopCallback()
 void StsUIAbility::OnSceneCreated()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnSceneCreated ability: %{public}s", GetAbilityName().c_str());
     UIAbility::OnSceneCreated();
     auto stsAppWindowStage = CreateAppWindowStage();
     if (stsAppWindowStage == nullptr) {
@@ -539,10 +543,9 @@ void StsUIAbility::OnSceneCreated()
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "onWindowStageCreate");
         std::string methodName = "OnSceneCreated";
-        AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
-        const char *signature = "L@ohos/window/window/WindowStage;:V";
-        CallObjectMethod(false, "onWindowStageCreate", signature, stsAppWindowStage);
-        AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
+        AddLifecycleEventBeforeETSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
+        CallObjectMethod(false, "onWindowStageCreate", UI_ABILITY_SIGNATURE_WINDOWSTAGE_VOID, stsAppWindowStage);
+        AddLifecycleEventAfterETSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     }
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
@@ -578,7 +581,7 @@ void StsUIAbility::OnSceneRestored()
 
 void StsUIAbility::OnSceneWillDestroy()
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnSceneWillDestroy ability: %{public}s", GetAbilityName().c_str());
     if (stsWindowStageObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null stsWindowStageObj_");
         return;
@@ -588,7 +591,7 @@ void StsUIAbility::OnSceneWillDestroy()
 
 void StsUIAbility::onSceneDestroyed()
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
+    TAG_LOGD(AAFwkTag::UIABILITY, "onSceneDestroyed ability: %{public}s", GetAbilityName().c_str());
     UIAbility::onSceneDestroyed();
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
@@ -596,8 +599,7 @@ void StsUIAbility::onSceneDestroyed()
     }
 
     UpdateStsWindowStage(nullptr);
-    const char *signature = ":V";
-    CallObjectMethod(false, "onWindowStageDestroy", signature);
+    CallObjectMethod(false, "onWindowStageDestroy", UI_ABILITY_SIGNATURE_VOID);
 
     if (scene_ != nullptr) {
         auto window = scene_->GetMainWindow();
@@ -623,7 +625,7 @@ void StsUIAbility::onSceneDestroyed()
 void StsUIAbility::OnForeground(const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnForeground ability: %{public}s", GetAbilityName().c_str());
     if (abilityInfo_) {
     }
 
@@ -665,9 +667,9 @@ void StsUIAbility::CallOnForegroundFunc(const Want &want)
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
     }
     std::string methodName = "OnForeground";
-    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
+    AddLifecycleEventBeforeETSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     CallObjectMethod(false, "onForeground", nullptr, wantRef);
-    AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
+    AddLifecycleEventAfterETSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
         AbilityRuntime::Runtime::Language::STS);
@@ -685,16 +687,15 @@ void StsUIAbility::CallOnForegroundFunc(const Want &want)
 void StsUIAbility::OnBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnBackground ability: %{public}s", GetAbilityName().c_str());
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
     }
     std::string methodName = "OnBackground";
 
-    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
-    const char *signature = ":V";
-    CallObjectMethod(false, "onBackground", signature);
-    AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
+    AddLifecycleEventBeforeETSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
+    CallObjectMethod(false, "onBackground", UI_ABILITY_SIGNATURE_VOID);
+    AddLifecycleEventAfterETSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
 
     UIAbility::OnBackground();
 
@@ -714,7 +715,7 @@ void StsUIAbility::OnBackground()
 bool StsUIAbility::OnBackPress()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnBackPress ability: %{public}s", GetAbilityName().c_str());
     UIAbility::OnBackPress();
     bool ret = CallObjectMethod(true, "onBackPressed", nullptr);
     TAG_LOGD(AAFwkTag::UIABILITY, "ret: %{public}d", ret);
@@ -851,11 +852,65 @@ void StsUIAbility::DoOnForeground(const Want &want)
         return;
     }
 
+    OnWillForeground();
+
     TAG_LOGD(AAFwkTag::UIABILITY, "move scene to foreground, sceneFlag_: %{public}d", UIAbility::sceneFlag_);
-    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, METHOD_NAME);
+    AddLifecycleEventBeforeETSCall(FreezeUtil::TimeoutState::FOREGROUND, METHOD_NAME);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "scene_->GoForeground");
     scene_->GoForeground(UIAbility::sceneFlag_);
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
+}
+
+void StsUIAbility::OnWillForeground()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnWillForeground ability: %{public}s", GetAbilityName().c_str());
+    UIAbility::OnWillForeground();
+
+    std::string methodName = "OnWillForeground";
+    AddLifecycleEventBeforeETSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
+    CallObjectMethod(false, "onWillForeground", UI_ABILITY_SIGNATURE_VOID);
+    AddLifecycleEventAfterETSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
+}
+
+void StsUIAbility::OnDidForeground()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnDidForeground ability: %{public}s", GetAbilityName().c_str());
+    UIAbility::OnDidForeground();
+
+    std::string methodName = "OnDidForeground";
+    AddLifecycleEventBeforeETSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
+    CallObjectMethod(false, "onDidForeground", UI_ABILITY_SIGNATURE_VOID);
+    AddLifecycleEventAfterETSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
+
+    if (scene_ != nullptr) {
+        scene_->GoResume();
+    }
+}
+
+void StsUIAbility::OnWillBackground()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnWillBackground ability: %{public}s", GetAbilityName().c_str());
+    UIAbility::OnWillBackground();
+
+    std::string methodName = "OnWillBackground";
+    AddLifecycleEventBeforeETSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
+    CallObjectMethod(false, "onWillBackground", UI_ABILITY_SIGNATURE_VOID);
+    AddLifecycleEventAfterETSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
+}
+
+void StsUIAbility::OnDidBackground()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnDidBackground ability: %{public}s", GetAbilityName().c_str());
+    UIAbility::OnDidBackground();
+
+    std::string methodName = "OnDidBackground";
+    AddLifecycleEventBeforeETSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
+    CallObjectMethod(false, "onDidBackground", UI_ABILITY_SIGNATURE_VOID);
+    AddLifecycleEventAfterETSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
 }
 
 void StsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
@@ -919,7 +974,7 @@ void StsUIAbility::RequestFocus(const Want &want)
         window->SetWindowMode(static_cast<Rosen::WindowMode>(windowMode));
         TAG_LOGD(AAFwkTag::UIABILITY, "set window mode: %{public}d", windowMode);
     }
-    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, METHOD_NAME);
+    AddLifecycleEventBeforeETSCall(FreezeUtil::TimeoutState::FOREGROUND, METHOD_NAME);
     scene_->GoForeground(UIAbility::sceneFlag_);
     TAG_LOGI(AAFwkTag::UIABILITY, "end");
 }
@@ -1216,11 +1271,9 @@ void StsUIAbility::OnNewWant(const Want &want)
     }
     ani_ref launchParamRef = CreateStsLaunchParam(env, launchParam);
     std::string methodName = "OnNewWant";
-    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
-    const char *signature =
-        "L@ohos/app/ability/Want/Want;L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;:V";
-    CallObjectMethod(false, "onNewWant", signature, wantRef, launchParamRef);
-    AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
+    AddLifecycleEventBeforeETSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
+    CallObjectMethod(false, "onNewWant", UI_ABILITY_SIGNATURE_WANT_LAUNCH_VOID, wantRef, launchParamRef);
+    AddLifecycleEventAfterETSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {

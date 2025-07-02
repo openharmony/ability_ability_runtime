@@ -36,9 +36,6 @@ void BindResourceManager(ani_env* aniEnv, ani_class contextClass, ani_object con
 void BindParentProperty(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<Context> context);
 
-void BindParentPropertyInner(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
-    std::shared_ptr<Context> context);
-
 void BindContextDir(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<Context> context);
 

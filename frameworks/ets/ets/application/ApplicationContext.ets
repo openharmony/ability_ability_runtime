@@ -22,9 +22,6 @@ import Want from '@ohos.app.ability.Want';
 import { ProcessInformation } from 'application.ProcessInformation';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 
-// remove local declaration after Any type is supported
-type Any = Object | null | undefined
-
 export default class ApplicationContext extends Context {
   static {
     loadLibrary("application_context_ani_kit.z");

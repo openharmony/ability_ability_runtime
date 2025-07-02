@@ -17,9 +17,6 @@ import Context from 'application.Context'
 import { Configuration } from '@ohos.app.ability.Configuration'
 import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 
-// remove local declaration after Any type is supported
-type Any = Object | null | undefined
-
 export default class AbilityStageContext extends Context {
     static {
       loadLibrary("ability_stage_context_ani_kit.z");

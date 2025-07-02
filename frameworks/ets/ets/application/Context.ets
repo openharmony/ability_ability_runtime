@@ -23,9 +23,6 @@ import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 
-// remove local declaration after Any type is supported
-type Any = Object | null | undefined
-
 export class Context extends BaseContext {
   static {
     loadLibrary("context_ani_kit.z");
@@ -36,6 +33,10 @@ export class Context extends BaseContext {
   databaseDir: string = "";
   cacheDir: string = "";
   applicationInfo!: ApplicationInfo;
+  cloudFileDir: string = "";
+  distributedFilesDir: string = "";
+  bundleCodeDir: string = "";
+  resourceDir: string = "";
   eventHub: EventHub = new EventHub();
   resourceManager!: resmgr.ResourceManager;
   processName: string = "";
