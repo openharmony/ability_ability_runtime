@@ -43,6 +43,7 @@ constexpr int32_t TEST_UID = 200000;
 constexpr int32_t TEST_PID = 100;
 constexpr int32_t ONE = 1;
 constexpr int32_t TWO = 2;
+constexpr int32_t THREE = 3;
 constexpr int32_t RECORD_ID = 1;
 }
 class AppRunningManagerFourthTest : public testing::Test {
@@ -1069,5 +1070,428 @@ HWTEST_F(AppRunningManagerFourthTest, ExecuteConfigurationTask_0100, TestSize.Le
     std::string value = appRecord->delayConfiguration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     EXPECT_TRUE(value == ConfigurationInner::EMPTY_STRING);
 }
+
+/**
+ * @tc.name: AppRunningManager_IsSameAbilityType_0100
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_IsSameAbilityType_0100, TestSize.Level1)
+{
+    int uid = 0;
+    BundleInfo bundleInfo;
+
+    std::shared_ptr<AppRunningRecord> record =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(record, nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    auto ret = appRunningManager_->IsSameAbilityType(nullptr, abilityInfo);
+    EXPECT_EQ(ret, false);
+
+    record->processType_ = ProcessType::NORMAL;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    ret = appRunningManager_->IsSameAbilityType(record, abilityInfo);
+    EXPECT_EQ(ret, true);
+
+    record->processType_ = ProcessType::NORMAL;
+    abilityInfo.type = AppExecFwk::AbilityType::FORM;
+    ret = appRunningManager_->IsSameAbilityType(record, abilityInfo);
+    EXPECT_EQ(ret, false);
+
+    record->extensionType_ = AppExecFwk::ExtensionAbilityType::SERVICE;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    ret = appRunningManager_->IsSameAbilityType(record, abilityInfo);
+    EXPECT_EQ(ret, true);
+
+    record->extensionType_ = AppExecFwk::ExtensionAbilityType::DATASHARE;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    ret = appRunningManager_->IsSameAbilityType(record, abilityInfo);
+    EXPECT_EQ(ret, true);
+
+    record->extensionType_ = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    ret = appRunningManager_->IsSameAbilityType(record, abilityInfo);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: AppRunningManager_CheckMasterProcessAppRunningRecordIsExist_0100
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_CheckMasterProcessAppRunningRecordIsExist_0100, TestSize.Level1)
+{
+    int uid = 0;
+    BundleInfo bundleInfo;
+    std::string processName;
+    std::shared_ptr<AppRunningRecord> record =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(record, nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+
+    record->processType_ = ProcessType::NORMAL;
+    record->SetMasterProcess(true);
+    record->SetUid(uid);
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    appRunningManager_->appRunningRecordMap_.clear();
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, record));
+    auto ret = appRunningManager_->CheckMasterProcessAppRunningRecordIsExist(APP_NAME_EMPTY, abilityInfo, uid);
+    EXPECT_EQ(ret, true);
+
+    record->processType_ = ProcessType::EXTENSION;
+    record->SetMasterProcess(true);
+    record->SetUid(uid);
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    appRunningManager_->appRunningRecordMap_.clear();
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, record));
+    ret = appRunningManager_->CheckMasterProcessAppRunningRecordIsExist(APP_NAME_EMPTY, abilityInfo, uid);
+    EXPECT_EQ(ret, false);
+
+    record->processType_ = ProcessType::NORMAL;
+    record->SetMasterProcess(false);
+    record->SetUid(uid);
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    appRunningManager_->appRunningRecordMap_.clear();
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, record));
+    ret = appRunningManager_->CheckMasterProcessAppRunningRecordIsExist(APP_NAME_EMPTY, abilityInfo, uid);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: AppRunningManager_FindMasterProcessAppRunningRecord_0100
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_FindMasterProcessAppRunningRecord_0100, TestSize.Level1)
+{
+    int uid = 0;
+    BundleInfo bundleInfo;
+    std::shared_ptr<AppRunningRecord> recordOne =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordOne, nullptr);
+    std::shared_ptr<AppRunningRecord> recordTwo =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordTwo, nullptr);
+    std::shared_ptr<AppRunningRecord> recordThree =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordThree, nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    recordOne->processType_ = ProcessType::NORMAL;
+    recordOne->SetMasterProcess(true);
+    recordOne->SetUid(uid);
+    recordTwo->processType_ = ProcessType::NORMAL;
+    recordTwo->SetMasterProcess(false);
+    recordTwo->SetUid(uid);
+    recordThree->processType_ = ProcessType::EXTENSION;
+    recordThree->SetMasterProcess(true);
+    recordThree->SetUid(uid);
+    appRunningManager_->appRunningRecordMap_.clear();
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, recordOne));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(TWO, recordTwo));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(THREE, recordThree));
+    auto ret = appRunningManager_->FindMasterProcessAppRunningRecord(APP_NAME_EMPTY, abilityInfo, uid);
+    EXPECT_EQ(ret, recordOne);
+}
+
+/**
+ * @tc.name: AppRunningManager_FindMasterProcessAppRunningRecord_0200
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_FindMasterProcessAppRunningRecord_0200, TestSize.Level1)
+{
+    int uid = 0;
+    BundleInfo bundleInfo;
+    std::shared_ptr<AppRunningRecord> recordOne =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordOne, nullptr);
+    std::shared_ptr<AppRunningRecord> recordTwo =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordTwo, nullptr);
+    std::shared_ptr<AppRunningRecord> recordThree =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordThree, nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    recordOne->processType_ = ProcessType::NORMAL;
+    recordOne->SetMasterProcess(false);
+    recordOne->SetUid(uid);
+    recordTwo->processType_ = ProcessType::NORMAL;
+    recordTwo->SetMasterProcess(false);
+    recordTwo->SetTimeStamp(1);
+    recordTwo->SetUid(uid);
+    recordThree->processType_ = ProcessType::NORMAL;
+    recordThree->SetTimeStamp(-1);
+    recordThree->SetMasterProcess(false);
+    recordThree->SetUid(uid);
+    appRunningManager_->appRunningRecordMap_.clear();
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, recordOne));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(TWO, recordTwo));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(THREE, recordThree));
+    auto ret = appRunningManager_->FindMasterProcessAppRunningRecord(APP_NAME_EMPTY, abilityInfo, uid);
+    EXPECT_EQ(ret, recordTwo);
+}
+
+/**
+ * @tc.name: AppRunningManager_FindMasterProcessAppRunningRecord_0300
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_FindMasterProcessAppRunningRecord_0300, TestSize.Level1)
+{
+    int uid = 0;
+    BundleInfo bundleInfo;
+    std::shared_ptr<AppRunningRecord> recordOne =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordOne, nullptr);
+    std::shared_ptr<AppRunningRecord> recordTwo =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordTwo, nullptr);
+    std::shared_ptr<AppRunningRecord> recordThree =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordThree, nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    recordOne->processType_ = ProcessType::NORMAL;
+    recordOne->SetMasterProcess(true);
+    recordOne->SetUid(uid);
+    recordTwo->processType_ = ProcessType::NORMAL;
+    recordTwo->SetMasterProcess(false);
+    recordTwo->SetTimeStamp(1);
+    recordTwo->SetUid(uid);
+    recordThree->processType_ = ProcessType::NORMAL;
+    recordThree->SetTimeStamp(-1);
+    recordThree->SetMasterProcess(false);
+    recordThree->SetUid(uid);
+    appRunningManager_->appRunningRecordMap_.clear();
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, recordOne));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(TWO, recordTwo));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(THREE, recordThree));
+    auto ret = appRunningManager_->FindMasterProcessAppRunningRecord(APP_NAME_EMPTY, abilityInfo, uid);
+    EXPECT_EQ(ret, recordOne);
+}
+
+/**
+ * @tc.name: AppRunningManager_FindMasterProcessAppRunningRecord_0400
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_FindMasterProcessAppRunningRecord_0400, TestSize.Level1)
+{
+    int uid = 0;
+    BundleInfo bundleInfo;
+    std::shared_ptr<AppRunningRecord> recordOne =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordOne, nullptr);
+    std::shared_ptr<AppRunningRecord> recordTwo =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordTwo, nullptr);
+    std::shared_ptr<AppRunningRecord> recordThree =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordThree, nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordOne->processType_ = ProcessType::NORMAL;
+    recordOne->SetMasterProcess(true);
+    recordOne->SetUid(uid);
+    recordTwo->extensionType_ = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordTwo->SetMasterProcess(true);
+    recordTwo->SetTimeStamp(0);
+    recordTwo->SetUid(uid);
+    recordThree->extensionType_ = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordThree->SetTimeStamp(-1);
+    recordThree->SetMasterProcess(false);
+    recordThree->SetUid(uid);
+    appRunningManager_->appRunningRecordMap_.clear();
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, recordOne));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(TWO, recordTwo));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(THREE, recordThree));
+    auto ret = appRunningManager_->FindMasterProcessAppRunningRecord(APP_NAME_EMPTY, abilityInfo, uid);
+    EXPECT_EQ(ret, recordTwo);
+}
+
+/**
+ * @tc.name: AppRunningManager_FindMasterProcessAppRunningRecord_0500
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_FindMasterProcessAppRunningRecord_0500, TestSize.Level1)
+{
+    int uid = 0;
+    BundleInfo bundleInfo;
+    std::shared_ptr<AppRunningRecord> recordOne =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordOne, nullptr);
+    std::shared_ptr<AppRunningRecord> recordTwo =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordTwo, nullptr);
+    std::shared_ptr<AppRunningRecord> recordThree =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordThree, nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordOne->processType_ = ProcessType::NORMAL;
+    recordOne->SetMasterProcess(true);
+    recordOne->SetUid(uid);
+    recordTwo->extensionType_ = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordTwo->SetMasterProcess(false);
+    recordTwo->SetTimeStamp(-2);
+    recordTwo->SetUid(uid);
+    recordThree->extensionType_ = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordThree->SetTimeStamp(-1);
+    recordThree->SetMasterProcess(false);
+    recordThree->SetUid(uid);
+    appRunningManager_->appRunningRecordMap_.clear();
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, recordOne));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(TWO, recordTwo));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(THREE, recordThree));
+    auto ret = appRunningManager_->FindMasterProcessAppRunningRecord(APP_NAME_EMPTY, abilityInfo, uid);
+    EXPECT_EQ(ret, recordThree);
+}
+
+/**
+ * @tc.name: AppRunningManager_FindMasterProcessAppRunningRecord_0600
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_FindMasterProcessAppRunningRecord_0600, TestSize.Level1)
+{
+    int uid = 0;
+    BundleInfo bundleInfo;
+    std::shared_ptr<AppRunningRecord> recordOne =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordOne, nullptr);
+    std::shared_ptr<AppRunningRecord> recordTwo =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordTwo, nullptr);
+    std::shared_ptr<AppRunningRecord> recordThree =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordThree, nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordOne->extensionType_ = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordOne->SetMasterProcess(true);
+    recordOne->SetUid(uid);
+    recordTwo->extensionType_ = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordTwo->SetMasterProcess(false);
+    recordTwo->SetTimeStamp(-2);
+    recordTwo->SetUid(uid);
+    recordThree->extensionType_ = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordThree->SetTimeStamp(-1);
+    recordThree->SetMasterProcess(false);
+    recordThree->SetUid(uid);
+    appRunningManager_->appRunningRecordMap_.clear();
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, recordOne));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(TWO, recordTwo));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(THREE, recordThree));
+    auto ret = appRunningManager_->FindMasterProcessAppRunningRecord(APP_NAME_EMPTY, abilityInfo, uid);
+    EXPECT_EQ(ret, recordOne);
+}
+
+/**
+ * @tc.name: AppRunningManager_FindMasterProcessAppRunningRecord_0700
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_FindMasterProcessAppRunningRecord_0700, TestSize.Level1)
+{
+    int uid = 0;
+    BundleInfo bundleInfo;
+    std::shared_ptr<AppRunningRecord> recordOne =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordOne, nullptr);
+    std::shared_ptr<AppRunningRecord> recordTwo =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordTwo, nullptr);
+    std::shared_ptr<AppRunningRecord> recordThree =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordThree, nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordOne->extensionType_ = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordOne->SetMasterProcess(false);
+    recordOne->SetUid(uid);
+    recordOne->appRecordId_ = 0;
+    recordTwo->extensionType_ = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordTwo->SetMasterProcess(false);
+    recordTwo->SetTimeStamp(0);
+    recordTwo->SetUid(uid);
+    recordTwo->appRecordId_ = 1;
+    recordThree->extensionType_ = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    recordThree->SetTimeStamp(0);
+    recordThree->SetMasterProcess(false);
+    recordThree->SetUid(uid);
+    recordThree->appRecordId_ = 2;
+    appRunningManager_->appRunningRecordMap_.clear();
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, recordOne));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(TWO, recordTwo));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(THREE, recordThree));
+    auto ret = appRunningManager_->FindMasterProcessAppRunningRecord(APP_NAME_EMPTY, abilityInfo, uid);
+    EXPECT_EQ(ret, recordOne);
+}
+
+/**
+ * @tc.name: AppRunningManager_FindMasterProcessAppRunningRecord_0800
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_FindMasterProcessAppRunningRecord_0800, TestSize.Level1)
+{
+    int uid = 0;
+    BundleInfo bundleInfo;
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
+    auto ret = appRunningManager_->FindMasterProcessAppRunningRecord(APP_NAME_EMPTY, abilityInfo, uid);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: AppRunningManager_FindMasterProcessAppRunningRecord_0900
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_FindMasterProcessAppRunningRecord_0900, TestSize.Level1)
+{
+    int uid = 0;
+    BundleInfo bundleInfo;
+    std::shared_ptr<AppRunningRecord> recordOne =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordOne, nullptr);
+    std::shared_ptr<AppRunningRecord> recordTwo =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordTwo, nullptr);
+    std::shared_ptr<AppRunningRecord> recordThree =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordThree, nullptr);
+    AppExecFwk::AbilityInfo abilityInfo;
+
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    recordOne->processType_ = ProcessType::NORMAL;
+    recordOne->SetMasterProcess(false);
+    recordOne->SetUid(uid);
+    recordTwo->processType_ = ProcessType::NORMAL;
+    recordTwo->SetMasterProcess(false);
+    recordTwo->SetUid(uid);
+    recordThree->processType_ = ProcessType::EXTENSION;
+    recordThree->SetMasterProcess(false);
+    recordThree->SetUid(uid);
+    appRunningManager_->appRunningRecordMap_.clear();
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, recordOne));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(TWO, recordTwo));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(THREE, recordThree));
+    auto ret = appRunningManager_->FindMasterProcessAppRunningRecord(APP_NAME_EMPTY, abilityInfo, uid);
+    EXPECT_EQ(ret, nullptr);
+}
+
 } // namespace AppExecFwk
 } // namespace OHOS
