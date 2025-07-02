@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,18 +39,16 @@ std::string StartupUtils::GetErrorMessage(int32_t errCode)
     return iter->second;
 }
 
-bool StartupUtils::ParseJsonStringArray(const cJSON *json, const std::string key, std::vector<std::string> &array)
+bool StartupUtils::ParseJsonStringArray(const nlohmann::json &json, const std::string key,
+    std::vector<std::string> &arr)
 {
-    cJSON *jsonObject = cJSON_GetObjectItem(json, key.c_str());
-    if (jsonObject == nullptr || !cJSON_IsArray(jsonObject)) {
+    if (!json.contains(key) || !json[key].is_array()) {
         return false;
     }
-    int size = cJSON_GetArraySize(jsonObject);
-    for (int i = 0; i < size; i++) {
-        cJSON *item = cJSON_GetArrayItem(jsonObject, i);
-        if (item != nullptr && cJSON_IsString(item)) {
-            std::string jsonStr = item->valuestring;
-            array.push_back(jsonStr);
+
+    for (const auto &item : json.at(key)) {
+        if (item.is_string()) {
+            arr.push_back(item.get<std::string>());
         }
     }
     return true;
