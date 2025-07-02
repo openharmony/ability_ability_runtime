@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #ifndef OHOS_ABILITY_RUNTIME_STARTUP_UTILS_H
 #define OHOS_ABILITY_RUNTIME_STARTUP_UTILS_H
 
+#include <nlohmann/json.hpp>
 #include <string>
 
-#include "cJSON.h"
 #include "errors.h"
 
 namespace OHOS {
@@ -41,7 +41,7 @@ enum {
 class StartupUtils {
 public:
     static std::string GetErrorMessage(int32_t errCode);
-    static bool ParseJsonStringArray(const cJSON *json, const std::string key, std::vector<std::string> &array);
+    static bool ParseJsonStringArray(const nlohmann::json &json, const std::string key, std::vector<std::string> &arr);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

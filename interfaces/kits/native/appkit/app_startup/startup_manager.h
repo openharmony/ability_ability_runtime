@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,8 +26,8 @@
 #include "app_startup_task.h"
 #include "app_startup_task_matcher.h"
 #include "bundle_info.h"
-#include "cJSON.h"
 #include "native_startup_task.h"
+#include "nlohmann/json.hpp"
 #include "preload_so_startup_task.h"
 #include "singleton.h"
 #include "startup_config.h"
@@ -171,19 +171,21 @@ private:
     bool AnalyzeStartupConfig(const ModuleStartupConfigInfo& info, const std::string& startupConfig,
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks,
         std::vector<StartupTaskInfo>& pendingStartupTaskInfos, std::string& pendingConfigEntry);
-    static bool AnalyzeAppStartupTask(const ModuleStartupConfigInfo& info, cJSON *startupConfigJson,
+    static bool AnalyzeAppStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
         std::vector<StartupTaskInfo>& pendingStartupTaskInfos);
-    bool AnalyzePreloadSoStartupTask(const ModuleStartupConfigInfo& info, cJSON *startupConfigJson,
+    bool AnalyzePreloadSoStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks);
-    static bool AnalyzeAppStartupTaskInner(const ModuleStartupConfigInfo& info, const cJSON *startupTaskJson,
+    static bool AnalyzeAppStartupTaskInner(const ModuleStartupConfigInfo& info,
+        const nlohmann::json &startupTaskJson,
         std::vector<StartupTaskInfo>& pendingStartupTaskInfos);
-    bool AnalyzePreloadSoStartupTaskInner(const ModuleStartupConfigInfo& info, const cJSON *preloadStartupTaskJson,
+    bool AnalyzePreloadSoStartupTaskInner(const ModuleStartupConfigInfo& info,
+        const nlohmann::json &preloadStartupTaskJson,
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks);
-    static void SetOptionalParameters(const cJSON *module, AppExecFwk::ModuleType moduleType,
+    static void SetOptionalParameters(const nlohmann::json& module, AppExecFwk::ModuleType moduleType,
         StartupTaskInfo& startupTaskInfo);
-    static void SetOptionalParameters(const cJSON *module, AppExecFwk::ModuleType moduleType,
+    static void SetOptionalParameters(const nlohmann::json &module, AppExecFwk::ModuleType moduleType,
         std::shared_ptr<PreloadSoStartupTask> &task);
-    static void SetMatchRules(const cJSON *module, StartupTaskMatchRules &matchRules);
+    static void SetMatchRules(const nlohmann::json &module, StartupTaskMatchRules &matchRules);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
