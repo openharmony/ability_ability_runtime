@@ -859,6 +859,35 @@ void StsAbilityContext::NativeBackToCallerAbilityWithResult(ani_env *env, ani_ob
     AppExecFwk::AsyncCallback(env, callBackObj, errorObject, nullptr);
 }
 
+void StsAbilityContext::OnSetMissionLabel(ani_env *env, ani_object aniObj, ani_string labelObj,
+    ani_object callbackObj)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnSetMissionLabel call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env");
+        return;
+    }
+    ani_object errorObject = nullptr;
+    std::string label;
+    if (!AppExecFwk::GetStdString(env, labelObj, label)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Failed to parse label");
+        errorObject = CreateStsInvalidParamError(env, "Failed to parse label.");
+        AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
+        return;
+    }
+    auto context = StsAbilityContext::GetAbilityContext(env, aniObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)), nullptr);
+        return;
+    }
+    auto errCode = context->SetMissionLabel(label);
+    errorObject = CreateStsErrorByNativeErr(env, static_cast<int32_t>(errCode));
+    AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
+}
+
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
     ani_status status = env->FindClass(UI_ABILITY_CONTEXT_CLASS_NAME, &cls);
@@ -916,6 +945,9 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             ani_native_function { "nativeBackToCallerAbilityWithResult",
                 "Lability/abilityResult/AbilityResult;Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void*>(StsAbilityContext::NativeBackToCallerAbilityWithResult) },
+            ani_native_function { "nativeSetMissionLabel",
+                "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+                reinterpret_cast<void *>(StsAbilityContext::OnSetMissionLabel) },
         };
         status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
     });

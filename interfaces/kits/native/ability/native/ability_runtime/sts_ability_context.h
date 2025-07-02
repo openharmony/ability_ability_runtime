@@ -72,7 +72,7 @@ public:
     static ani_object NativeTransferDynamic(ani_env *env, ani_object aniObj, ani_object input);
     static void NativeBackToCallerAbilityWithResult(ani_env *env, ani_object aniObj,
         ani_object abilityResultObj, ani_string requestCodeObj, ani_object callBackObj);
-
+    static void OnSetMissionLabel(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object callbackObj);
 private:
     static void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
     void StartAbilityInner([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object aniObj,
