@@ -221,7 +221,7 @@ void from_json(const cJSON *jsonObject, InsightIntentInfoForQuery &insightIntent
     } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_ENTRY) {
         GetObjectValueIfFindKey(jsonObject, INSIGHT_INTENT_ENTRY_INFO, insightIntentInfo.entryInfo, false,
             g_parseResult);
-    } else if (insightIntentInfo.intentType == INSIGHT_INTENT_FORM_INFO) {
+    } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_FORM) {
         GetObjectValueIfFindKey(jsonObject, INSIGHT_INTENT_FORM_INFO, insightIntentInfo.formInfo, false, g_parseResult);
     }
 }

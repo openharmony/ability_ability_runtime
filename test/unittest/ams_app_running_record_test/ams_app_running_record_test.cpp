@@ -2943,6 +2943,23 @@ HWTEST_F(AmsAppRunningRecordTest, ChangeAppGcState_002, TestSize.Level1)
     TAG_LOGD(AAFwkTag::TEST, "ChangeAppGcState_002 end.");
 }
 
+/*
+ * Feature: AMS
+ * Function: ChangeAppGcState
+ * SubFunction: ChangeAppGcState_003
+ * FunctionPoints: check params
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Change app Gc state
+ */
+HWTEST_F(AmsAppRunningRecordTest, ChangeAppGcState_003, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "ChangeAppGcState_003 start.");
+    auto record = GetTestAppRunningRecord();
+    record->appLifeCycleDeal_ = std::make_shared<AppLifeCycleDeal>();
+    EXPECT_EQ(ERR_INVALID_VALUE, record->ChangeAppGcState(0, 1));
+    TAG_LOGD(AAFwkTag::TEST, "ChangeAppGcState_003 end.");
+}
+
 /**
  * @tc.name: IsAbilitiesBackgrounded_001
  * @tc.desc: verify that ModuleRunningRecord correctly judges Abilitiesbackground

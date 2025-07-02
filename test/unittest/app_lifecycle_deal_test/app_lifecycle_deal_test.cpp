@@ -150,6 +150,22 @@ HWTEST_F(AppLifecycleDealTest, ChangeAppGcState_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ChangeAppGcState_002
+ * @tc.desc: Verify that the ChangeAppGcState interface calls normally
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppLifecycleDealTest, ChangeAppGcState_002, TestSize.Level1)
+{
+    auto appLifeCycle = std::make_shared<AppLifeCycleDeal>();
+    int32_t result = appLifeCycle->ChangeAppGcState(0, 1);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    sptr<MockAppScheduler> mockAppScheduler = new (std::nothrow) MockAppScheduler();
+    appLifeCycle->SetApplicationClient(mockAppScheduler);
+    int32_t result1 = appLifeCycle->ChangeAppGcState(0, 1);
+    EXPECT_EQ(ERR_OK, result1);
+}
+
+/**
  * @tc.name: UpdateApplicationInfoInstalled_001
  * @tc.desc: Test the normal state of UpdateApplicationInfoInstalled
  * @tc.type: FUNC
