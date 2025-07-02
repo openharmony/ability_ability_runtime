@@ -412,6 +412,7 @@ bool ImplicitStartProcessor::NeedQueryFromAG(const AbilityRequest &request, bool
     if (applinkExist) {
         return false;
     }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "need query from ag");
     return true;
 }
 

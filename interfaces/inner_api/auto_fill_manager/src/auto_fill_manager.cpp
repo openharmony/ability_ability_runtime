@@ -124,7 +124,7 @@ int32_t AutoFillManager::HandleRequestExecuteInner(Ace::UIContent *uiContent, co
     extensionCallback->SetWindowType(autoFillWindowType);
     extensionCallback->SetExtensionType(isSmartAutoFill);
     extensionCallback->SetAutoFillRequest(request);
-    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "callbackId: %{public}u", callbackId);
+    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "add callbackId: %{public}u", callbackId);
     std::lock_guard<std::mutex> lock(extensionCallbacksMutex_);
     extensionCallbacks_.emplace(callbackId, extensionCallback);
     return AutoFill::AUTO_FILL_SUCCESS;
@@ -349,7 +349,7 @@ std::shared_ptr<AutoFillExtensionCallback> AutoFillManager::GetAutoFillExtension
 
 void AutoFillManager::RemoveAutoFillExtensionCallback(uint32_t callbackId)
 {
-    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "callbackId: %{public}u", callbackId);
+    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "remove callbackId: %{public}u", callbackId);
     std::lock_guard<std::mutex> lock(extensionCallbacksMutex_);
     extensionCallbacks_.erase(callbackId);
 }
