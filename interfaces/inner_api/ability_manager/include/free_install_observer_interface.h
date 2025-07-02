@@ -34,7 +34,7 @@ public:
      * @param resultCode The result of this free install.
      */
     virtual void OnInstallFinished(const std::string &bundleName, const std::string &abilityName,
-        const std::string &startTime, const int &resultCode) = 0;
+        const std::string &startTime, int32_t resultCode) = 0;
 
     /**
      * OnInstallFinishedByUrl, return free install result.
@@ -44,7 +44,7 @@ public:
      * @param resultCode The result of this free install.
      */
     virtual void OnInstallFinishedByUrl(const std::string &startTime, const std::string &url,
-        const int &resultCode) = 0;
+        int32_t resultCode) = 0;
 
     enum {
         ON_INSTALL_FINISHED = 1,

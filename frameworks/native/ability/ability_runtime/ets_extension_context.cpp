@@ -24,46 +24,46 @@ namespace AbilityRuntime {
 bool SetExtensionAbilityInfo(ani_env *aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<Context> context, std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
 {
-    bool iRet = false;
     if (aniEnv == nullptr || context == nullptr || abilityInfo == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "aniEnv or context or abilityInfo is nullptr");
-        return iRet;
+        return false;
     }
     auto hapModuleInfo = context->GetHapModuleInfo();
-    ani_status status = ANI_OK;
-    if (abilityInfo && hapModuleInfo) {
-        auto isExist = [&abilityInfo](const AppExecFwk::ExtensionAbilityInfo &info) {
-            TAG_LOGD(AAFwkTag::CONTEXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
-            return info.bundleName == abilityInfo->bundleName && info.name == abilityInfo->name;
-        };
-        auto infoIter =
-            std::find_if(hapModuleInfo->extensionInfos.begin(), hapModuleInfo->extensionInfos.end(), isExist);
-        if (infoIter == hapModuleInfo->extensionInfos.end()) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "set extensionAbilityInfo fail");
-            return iRet;
-        }
-        ani_field extensionAbilityInfoField;
-        status = aniEnv->Class_FindField(contextClass, "extensionAbilityInfo", &extensionAbilityInfoField);
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
-            return iRet;
-        }
-        ani_object extAbilityInfoObj = AppExecFwk::CommonFunAni::ConvertExtensionInfo(aniEnv, *infoIter);
-        status = aniEnv->Object_SetField_Ref(
-            contextObj, extensionAbilityInfoField, reinterpret_cast<ani_ref>(extAbilityInfoObj));
-        if (status != ANI_OK) {
-            TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
-            return iRet;
-        }
-        iRet = true;
+    if (hapModuleInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null hapModuleInfo");
+        return false;
     }
-    return iRet;
+    ani_status status = ANI_OK;
+    auto isExist = [&abilityInfo](const AppExecFwk::ExtensionAbilityInfo &info) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "%{public}s, %{public}s", info.bundleName.c_str(), info.name.c_str());
+        return info.bundleName == abilityInfo->bundleName && info.name == abilityInfo->name;
+    };
+    ani_field extensionAbilityInfoField = nullptr;
+    status = aniEnv->Class_FindField(contextClass, "extensionAbilityInfo", &extensionAbilityInfoField);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+        return false;
+    }
+    auto infoIter =
+        std::find_if(hapModuleInfo->extensionInfos.begin(), hapModuleInfo->extensionInfos.end(), isExist);
+    if (infoIter == hapModuleInfo->extensionInfos.end()) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "set extensionAbilityInfo fail");
+        return false;
+    }
+    ani_object extAbilityInfoObj = AppExecFwk::CommonFunAni::ConvertExtensionInfo(aniEnv, *infoIter);
+    status = aniEnv->Object_SetField_Ref(
+        contextObj, extensionAbilityInfoField, reinterpret_cast<ani_ref>(extAbilityInfoObj));
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+        return false;
+    }
+    return true;
 }
 
-void CreatEtsExtensionContext(ani_env *aniEnv, ani_class contextClass, ani_object contextObj,
+void CreateEtsExtensionContext(ani_env *aniEnv, ani_class contextClass, ani_object &contextObj,
     std::shared_ptr<ExtensionContext> context, std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "CreatEtsExtensionContext Call");
+    TAG_LOGD(AAFwkTag::CONTEXT, "CreateEtsExtensionContext Call");
     if (aniEnv == nullptr || context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "aniEnv or context is nullptr");
         return;
