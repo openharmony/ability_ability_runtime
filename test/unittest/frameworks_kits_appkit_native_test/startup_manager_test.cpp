@@ -618,36 +618,31 @@ HWTEST_F(StartupManagerTest, AnalyzeStartupConfig_0100, Function | MediumTest | 
     ret = startupManager->AnalyzeStartupConfig(info, startupConfig, preloadSoStartupTasks,
         pendingStartupTaskInfos, pendingConfigEntry);
     EXPECT_EQ(ret, false);
-    std::string jsonStr = R"({
-        "startupConfig" : [{
-            "srcEntry" : "test_entry",
-            "name" : "test_name"
-        }]
-    })";
-    cJSON *startupConfig_json = cJSON_Parse(jsonStr.c_str());
-    char *str = cJSON_PrintUnformatted(startupConfig_json);
-    startupConfig = (str == nullptr) ? "" : str;
+    const nlohmann::json startupConfig_json = R"(
+        {
+            "startupConfig" : [
+                {
+                    "srcEntry" : "test_entry",
+                    "name" : "test_name"
+                }
+            ]
+        }
+    )"_json;
+    startupConfig = startupConfig_json.dump();
     ret = startupManager->AnalyzeStartupConfig(info, startupConfig, preloadSoStartupTasks,
         pendingStartupTaskInfos, pendingConfigEntry);
     EXPECT_EQ(ret, true);
-    cJSON_Delete(startupConfig_json);
-    cJSON_free(str);
 
     info.moduleType_ = AppExecFwk::ModuleType::ENTRY;
-    cJSON *item1 = cJSON_CreateObject();
-    cJSON *item2 = cJSON_CreateArray();
-    cJSON *array1 = cJSON_CreateString("configEntry");
-    cJSON *array2 = cJSON_CreateString("test_configEntry");
-    cJSON_AddItemToArray(item2, array1);
-    cJSON_AddItemToArray(item2, array2);
-    cJSON_AddItemToObject(item1, "startupConfig", item2);
-    char *str1 = cJSON_PrintUnformatted(item1);
-    startupConfig = (str1 == nullptr) ? "" : str1;
+    nlohmann::json startupConfigJson = {
+        {"startupConfig", {
+            {"configEntry", "test_configEntry"}
+        }}
+    };
+    startupConfig = startupConfigJson.dump();
     ret = startupManager->AnalyzeStartupConfig(info, startupConfig, preloadSoStartupTasks,
         pendingStartupTaskInfos, pendingConfigEntry);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(item1);
-    cJSON_free(str1);
     GTEST_LOG_(INFO) << "StartupManagerTest AnalyzeStartupConfig_0100 end";
 }
 
@@ -664,16 +659,14 @@ HWTEST_F(StartupManagerTest, AnalyzeAppStartupTask_0100, Function | MediumTest |
     std::string name = "test_name";
     ModuleStartupConfigInfo info(name, "", "", AppExecFwk::ModuleType::UNKNOWN, false);
     std::vector<StartupTaskInfo> pendingStartupTaskInfos;
-    const std::string jsonStr = R"(
+    nlohmann::json startupTasksJson = R"(
         {
         }
-    )";
-    cJSON *startupTasksJson = cJSON_Parse(jsonStr.c_str());
+    )"_json;
     bool ret = startupManager->AnalyzeAppStartupTask(info, startupTasksJson, pendingStartupTaskInfos);
     EXPECT_EQ(ret, true);
-    cJSON_Delete(startupTasksJson);
 
-    const std::string jsonStr2 = R"(
+    nlohmann::json startupTasksJson2 = R"(
         {
             "startupTasks": [
                 {
@@ -682,13 +675,11 @@ HWTEST_F(StartupManagerTest, AnalyzeAppStartupTask_0100, Function | MediumTest |
                 }
             ]
         }
-    )";
-    cJSON *startupTasksJson2 = cJSON_Parse(jsonStr2.c_str());
+    )"_json;
     ret = startupManager->AnalyzeAppStartupTask(info, startupTasksJson2, pendingStartupTaskInfos);
     EXPECT_EQ(ret, true);
-    cJSON_Delete(startupTasksJson2);
 
-    const std::string jsonStr3 = R"(
+    nlohmann::json startupTasksJson3 = R"(
         {
             "startupTasks": [
                 {
@@ -696,11 +687,9 @@ HWTEST_F(StartupManagerTest, AnalyzeAppStartupTask_0100, Function | MediumTest |
                 }
             ]
         }
-    )";
-    cJSON *startupTasksJson3 = cJSON_Parse(jsonStr3.c_str());
+    )"_json;
     ret = startupManager->AnalyzeAppStartupTask(info, startupTasksJson3, pendingStartupTaskInfos);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(startupTasksJson3);
     GTEST_LOG_(INFO) << "StartupManagerTest AnalyzeAppStartupTask_0100 end";
 }
 
@@ -717,7 +706,7 @@ HWTEST_F(StartupManagerTest, AnalyzeAppStartupTask_0200, Function | MediumTest |
     std::string name = "test_name";
     ModuleStartupConfigInfo info(name, "", "", AppExecFwk::ModuleType::UNKNOWN, false);
     std::vector<StartupTaskInfo> pendingStartupTaskInfos;
-    const std::string jsonStr = R"(
+    nlohmann::json startupTasksJson = R"(
         {
             "startupTasks": [
                 {
@@ -725,13 +714,11 @@ HWTEST_F(StartupManagerTest, AnalyzeAppStartupTask_0200, Function | MediumTest |
                 }
             ]
         }
-    )";
-    cJSON *startupTasksJson = cJSON_Parse(jsonStr.c_str());
+    )"_json;
     bool ret = startupManager->AnalyzeAppStartupTask(info, startupTasksJson, pendingStartupTaskInfos);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(startupTasksJson);
 
-    const std::string jsonStr2 = R"(
+    nlohmann::json startupTasksJson2 = R"(
         {
             "startupTasks": [
                 {
@@ -740,8 +727,7 @@ HWTEST_F(StartupManagerTest, AnalyzeAppStartupTask_0200, Function | MediumTest |
                 }
             ]
         }
-    )";
-    cJSON *startupTasksJson2 = cJSON_Parse(jsonStr2.c_str());
+    )"_json;
     ret = startupManager->AnalyzeAppStartupTask(info, startupTasksJson2, pendingStartupTaskInfos);
     EXPECT_EQ(ret, false);
     GTEST_LOG_(INFO) << "StartupManagerTest AnalyzeAppStartupTask_0200 end";
@@ -760,16 +746,14 @@ HWTEST_F(StartupManagerTest, AnalyzePreloadSoStartupTask_0100, Function | Medium
     std::string name = "test_name";
     ModuleStartupConfigInfo info(name, "", "", AppExecFwk::ModuleType::UNKNOWN, false);
     std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSoStartupTasks;
-    const std::string jsonStr = R"(
+    nlohmann::json preloadHintStartupTasksJson = R"(
         {
         }
-    )";
-    cJSON *preloadHintStartupTasksJson = cJSON_Parse(jsonStr.c_str());
+    )"_json;
     bool ret = startupManager->AnalyzePreloadSoStartupTask(info, preloadHintStartupTasksJson, preloadSoStartupTasks);
     EXPECT_EQ(ret, true);
-    cJSON_Delete(preloadHintStartupTasksJson);
 
-    const std::string jsonStr2 = R"(
+    nlohmann::json preloadHintStartupTasksJson2 = R"(
         {
             "appPreloadHintStartupTasks": [
                 {
@@ -778,13 +762,11 @@ HWTEST_F(StartupManagerTest, AnalyzePreloadSoStartupTask_0100, Function | Medium
                 }
             ]
         }
-    )";
-    cJSON *preloadHintStartupTasksJson2 = cJSON_Parse(jsonStr2.c_str());
+    )"_json;
     ret = startupManager->AnalyzePreloadSoStartupTask(info, preloadHintStartupTasksJson2, preloadSoStartupTasks);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(preloadHintStartupTasksJson2);
 
-    const std::string jsonStr3 = R"(
+    nlohmann::json preloadHintStartupTasksJson3 = R"(
         {
             "appPreloadHintStartupTasks": [
                 {
@@ -792,11 +774,9 @@ HWTEST_F(StartupManagerTest, AnalyzePreloadSoStartupTask_0100, Function | Medium
                 }
             ]
         }
-    )";
-    cJSON *preloadHintStartupTasksJson3 = cJSON_Parse(jsonStr3.c_str());
+    )"_json;
     ret = startupManager->AnalyzePreloadSoStartupTask(info, preloadHintStartupTasksJson3, preloadSoStartupTasks);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(preloadHintStartupTasksJson3);
     GTEST_LOG_(INFO) << "StartupManagerTest AnalyzePreloadSoStartupTask_0100 end";
 }
 
@@ -813,7 +793,7 @@ HWTEST_F(StartupManagerTest, AnalyzePreloadSoStartupTask_0200, Function | Medium
     std::string name = "test_name";
     ModuleStartupConfigInfo info(name, "", "", AppExecFwk::ModuleType::UNKNOWN, false);
     std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSoStartupTasks;
-    const std::string jsonStr = R"(
+    nlohmann::json preloadHintStartupTasksJson = R"(
         {
             "appPreloadHintStartupTasks": [
                 {
@@ -821,13 +801,11 @@ HWTEST_F(StartupManagerTest, AnalyzePreloadSoStartupTask_0200, Function | Medium
                 }
             ]
         }
-    )";
-    cJSON *preloadHintStartupTasksJson = cJSON_Parse(jsonStr.c_str());
+    )"_json;
     bool ret = startupManager->AnalyzePreloadSoStartupTask(info, preloadHintStartupTasksJson, preloadSoStartupTasks);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(preloadHintStartupTasksJson);
 
-    const std::string jsonStr2 = R"(
+    nlohmann::json preloadHintStartupTasksJson2 = R"(
         {
             "appPreloadHintStartupTasks": [
                 {
@@ -836,11 +814,9 @@ HWTEST_F(StartupManagerTest, AnalyzePreloadSoStartupTask_0200, Function | Medium
                 }
             ]
         }
-    )";
-    cJSON *preloadHintStartupTasksJson2 = cJSON_Parse(jsonStr2.c_str());
+    )"_json;
     ret = startupManager->AnalyzePreloadSoStartupTask(info, preloadHintStartupTasksJson2, preloadSoStartupTasks);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(preloadHintStartupTasksJson2);
     GTEST_LOG_(INFO) << "StartupManagerTest AnalyzePreloadSoStartupTask_0200 end";
 }
 
@@ -857,45 +833,36 @@ HWTEST_F(StartupManagerTest, AnalyzeAppStartupTaskInner_0100, Function | MediumT
     std::string name = "test_name";
     ModuleStartupConfigInfo info(name, "", "", AppExecFwk::ModuleType::UNKNOWN, false);
     std::vector<StartupTaskInfo> pendingStartupTaskInfos;
-    const std::string jsonStr = R"(
+    nlohmann::json appStartupTaskInnerJson = R"(
         {
         }
-    )";
-    cJSON *appStartupTaskInnerJson = cJSON_Parse(jsonStr.c_str());
+    )"_json;
     bool ret = startupManager->AnalyzeAppStartupTaskInner(info, appStartupTaskInnerJson, pendingStartupTaskInfos);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(appStartupTaskInnerJson);
 
-    const std::string jsonStr1 = R"(
+    nlohmann::json appStartupTaskInnerJson1 = R"(
         {
             "srcEntry": "test_entry",
             "name": "test_name"
         }
-    )";
-    cJSON *appStartupTaskInnerJson1 = cJSON_Parse(jsonStr1.c_str());
+    )"_json;
     ret = startupManager->AnalyzeAppStartupTaskInner(info, appStartupTaskInnerJson1, pendingStartupTaskInfos);
     EXPECT_EQ(ret, true);
-    cJSON_Delete(appStartupTaskInnerJson1);
 
-    const std::string jsonStr2 = R"(
+    nlohmann::json appStartupTaskInnerJson2 = R"(
         {
             "srcEntry": []
         }
-    )";
-    cJSON *appStartupTaskInnerJson2 = cJSON_Parse(jsonStr2.c_str());
+    )"_json;
     ret = startupManager->AnalyzeAppStartupTaskInner(info, appStartupTaskInnerJson2, pendingStartupTaskInfos);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(appStartupTaskInnerJson2);
-
-    const std::string jsonStr3 = R"(
+    nlohmann::json appStartupTaskInnerJson3 = R"(
         {
             "srcEntry": "test_entry"
         }
-    )";
-    cJSON *appStartupTaskInnerJson3 = cJSON_Parse(jsonStr3.c_str());
+    )"_json;
     ret = startupManager->AnalyzeAppStartupTaskInner(info, appStartupTaskInnerJson3, pendingStartupTaskInfos);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(appStartupTaskInnerJson3);
     GTEST_LOG_(INFO) << "StartupManagerTest AnalyzeAppStartupTaskInner_0100 end";
 }
 
@@ -912,38 +879,32 @@ HWTEST_F(StartupManagerTest, AnalyzeAppStartupTaskInner_0200, Function | MediumT
     std::string name = "test_name";
     ModuleStartupConfigInfo info(name, "", "", AppExecFwk::ModuleType::UNKNOWN, false);
     std::vector<StartupTaskInfo> pendingStartupTaskInfos;
-    const std::string jsonStr = R"(
+    nlohmann::json appStartupTaskInnerJson = R"(
         {
             "srcEntry": "test_entry",
             "name": []
         }
-    )";
-    cJSON *appStartupTaskInnerJson = cJSON_Parse(jsonStr.c_str());
+    )"_json;
     bool ret = startupManager->AnalyzeAppStartupTaskInner(info, appStartupTaskInnerJson, pendingStartupTaskInfos);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(appStartupTaskInnerJson);
 
-    const std::string jsonStr2 = R"(
+    nlohmann::json appStartupTaskInnerJson2 = R"(
         {
             "srcEntry": "",
             "name": "test_name"
         }
-    )";
-    cJSON *appStartupTaskInnerJson2 = cJSON_Parse(jsonStr2.c_str());
+    )"_json;
     ret = startupManager->AnalyzeAppStartupTaskInner(info, appStartupTaskInnerJson2, pendingStartupTaskInfos);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(appStartupTaskInnerJson2);
 
-    const std::string jsonStr3 = R"(
+    nlohmann::json appStartupTaskInnerJson3 = R"(
         {
             "srcEntry": "test_entry",
             "name": ""
         }
-    )";
-    cJSON *appStartupTaskInnerJson3 = cJSON_Parse(jsonStr3.c_str());
+    )"_json;
     ret = startupManager->AnalyzeAppStartupTaskInner(info, appStartupTaskInnerJson3, pendingStartupTaskInfos);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(appStartupTaskInnerJson3);
     GTEST_LOG_(INFO) << "StartupManagerTest AnalyzeAppStartupTaskInner_0200 end";
 }
 
@@ -960,38 +921,32 @@ HWTEST_F(StartupManagerTest, AnalyzePreloadSoStartupTaskInner_0100, Function | M
     std::string name = "test_name";
     ModuleStartupConfigInfo info(name, "", "", AppExecFwk::ModuleType::UNKNOWN, false);
     std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSoStartupTasks;
-    const std::string jsonStr = R"(
+    nlohmann::json preloadSoStartupTaskInnerJson = R"(
         {
         }
-    )";
-    cJSON *preloadSoStartupTaskInnerJson = cJSON_Parse(jsonStr.c_str());
+    )"_json;
     bool ret = startupManager->AnalyzePreloadSoStartupTaskInner(info, preloadSoStartupTaskInnerJson,
         preloadSoStartupTasks);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(preloadSoStartupTaskInnerJson);
 
-    const std::string jsonStr1 = R"(
+    nlohmann::json preloadSoStartupTaskInnerJson1 = R"(
         {
             "ohmurl": "test_ohmurl",
             "name": "test_name"
         }
-    )";
-    cJSON *preloadSoStartupTaskInnerJson1 = cJSON_Parse(jsonStr1.c_str());
+    )"_json;
     ret = startupManager->AnalyzePreloadSoStartupTaskInner(info, preloadSoStartupTaskInnerJson1,
         preloadSoStartupTasks);
     EXPECT_EQ(ret, true);
-    cJSON_Delete(preloadSoStartupTaskInnerJson1);
 
-    const std::string jsonStr2 = R"(
+    nlohmann::json preloadSoStartupTaskInnerJson2 = R"(
         {
             "ohmurl": []
         }
-    )";
-    cJSON *preloadSoStartupTaskInnerJson2 = cJSON_Parse(jsonStr2.c_str());
+    )"_json;
     ret = startupManager->AnalyzePreloadSoStartupTaskInner(info, preloadSoStartupTaskInnerJson2,
         preloadSoStartupTasks);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(preloadSoStartupTaskInnerJson2);
     GTEST_LOG_(INFO) << "StartupManagerTest AnalyzePreloadSoStartupTaskInner_0100 end";
 }
 
@@ -1008,28 +963,24 @@ HWTEST_F(StartupManagerTest, AnalyzePreloadSoStartupTaskInner_0200, Function | M
     std::string name = "test_name";
     ModuleStartupConfigInfo info(name, "", "", AppExecFwk::ModuleType::UNKNOWN, false);
     std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSoStartupTasks;
-    const std::string jsonStr = R"(
+    nlohmann::json preloadSoStartupTaskInnerJson = R"(
         {
             "ohmurl": "test_ohmurl"
         }
-    )";
-    cJSON *preloadSoStartupTaskInnerJson = cJSON_Parse(jsonStr.c_str());
+    )"_json;
     bool ret = startupManager->AnalyzePreloadSoStartupTaskInner(info, preloadSoStartupTaskInnerJson,
         preloadSoStartupTasks);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(preloadSoStartupTaskInnerJson);
 
-    const std::string jsonStr2 = R"(
+    nlohmann::json preloadSoStartupTaskInnerJson2 = R"(
         {
             "ohmurl": "test_ohmurl",
             "name": []
         }
-    )";
-    cJSON *preloadSoStartupTaskInnerJson2 = cJSON_Parse(jsonStr2.c_str());
+    )"_json;
     ret = startupManager->AnalyzePreloadSoStartupTaskInner(info, preloadSoStartupTaskInnerJson2,
         preloadSoStartupTasks);
     EXPECT_EQ(ret, false);
-    cJSON_Delete(preloadSoStartupTaskInnerJson2);
     GTEST_LOG_(INFO) << "StartupManagerTest AnalyzePreloadSoStartupTaskInner_0200 end";
 }
 
