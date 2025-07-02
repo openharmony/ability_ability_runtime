@@ -209,7 +209,7 @@ bool CJFormExtension::OnAcquireData(int64_t formId, AAFwk::WantParams &wantParam
 bool CJFormExtension::ConvertFromDataProxies(CArrProxyData cArrProxyData,
     std::vector<FormDataProxy> &formDataProxies)
 {
-    uint32_t len = cArrProxyData.size;
+    uint32_t len = static_cast<uint32_t>(cArrProxyData.size);
     if (cArrProxyData.head == nullptr) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "null head");
         return false;
