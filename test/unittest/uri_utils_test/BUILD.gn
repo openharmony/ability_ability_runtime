@@ -30,8 +30,12 @@ ohos_unittest("uri_utils_test") {
     "-Dprotected=public",
   ]
   defines = [ "SUPPORT_UPMS" ]
+  include_dirs = [
+    "${ability_runtime_test_path}/new_test/mock/security"
+  ]
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/utils/uri_utils.cpp",
+    "${ability_runtime_test_path}/new_test/mock/security/accesstoken_kit.cpp",
     "uri_utils_test.cpp",
   ]
 
@@ -43,6 +47,7 @@ ohos_unittest("uri_utils_test") {
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:app_util",
+    "${ability_runtime_services_path}/common:event_report"
   ]
 
   external_deps = [
@@ -55,6 +60,7 @@ ohos_unittest("uri_utils_test") {
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
   ]
