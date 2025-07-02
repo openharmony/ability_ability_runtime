@@ -214,7 +214,7 @@ ErrCode DistributedClient::NotifyCompleteContinuation(
 }
 
 int32_t DistributedClient::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
-    int32_t callingUid)
+    int32_t callingUid, uint32_t callingTokenId)
 {
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
@@ -231,6 +231,7 @@ int32_t DistributedClient::StartSyncRemoteMissions(const std::string& devId, boo
     PARCEL_WRITE_HELPER(data, Bool, fixConflict);
     PARCEL_WRITE_HELPER(data, Int64, tag);
     PARCEL_WRITE_HELPER(data, Int32, callingUid);
+    PARCEL_WRITE_HELPER(data, Uint32, callingTokenId);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, START_SYNC_MISSIONS, data, reply);
 }
 
