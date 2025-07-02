@@ -28,6 +28,7 @@
 #include "dlp_state_data.h"
 #include "ecological_rule/ability_ecological_rule_mgr_service_param.h"
 #include "extract_insight_intent_profile.h"
+#include "keep_alive_info.h"
 #include "keep_alive_process_manager.h"
 
 namespace OHOS {
@@ -127,6 +128,44 @@ void GetRandomInsightIntentExecuteParam(FuzzedDataProvider& fdp, InsightIntentEx
     info.pagePath_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     info.navigationId_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     info.navDestinationName_ = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+}
+
+void GetRandomExtractInsightIntentProfileInfo(FuzzedDataProvider& fdp, ExtractInsightIntentProfileInfo& info)
+{
+    info.decoratorFile = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.decoratorClass = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.decoratorType = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.intentName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.domain = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.intentVersion = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.displayName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.displayDescription = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.schema = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.icon = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.llmDescription = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.keywords = GenerateStringArray(fdp);
+    info.parameters = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.result = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.example = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.uri = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.uiAbility = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.pagePath = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.navigationId = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.navDestinationName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.abilityName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.executeMode = GenerateStringArray(fdp);
+    info.functionName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    info.functionParams = GenerateStringArray(fdp);
+    info.formName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+}
+
+void GetRandomKeepAliveStatus(FuzzedDataProvider& fdp, KeepAliveStatus& status)
+{
+    status.code = fdp.ConsumeIntegral<int32_t>();
+    status.setterId = fdp.ConsumeIntegral<int32_t>();
+    status.setter = static_cast<KeepAliveSetter>(fdp.ConsumeIntegralInRange<int32_t>(0, CODE_TWO));
 }
 
 void GetRandomDlpConnectionInfo(FuzzedDataProvider& fdp, DlpConnectionInfo& info)
