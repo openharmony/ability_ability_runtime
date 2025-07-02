@@ -483,5 +483,66 @@ bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object r
     }
     return true;
 }
+
+bool GetDoubleOrUndefined(ani_env *env, ani_object param, const char *name, ani_double &value)
+{
+    ani_ref obj = nullptr;
+    ani_boolean isUndefined = true;
+    ani_status status = ANI_ERROR;
+
+    if  (env == nullptr || param == nullptr || name == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env or param or name");
+        return false;
+    }
+
+    if ((status = env->Object_GetFieldByName_Ref(param, name, &obj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status : %{public}d", status);
+        return false;
+    }
+    if ((status = env->Reference_IsUndefined(obj, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status : %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::ANI, "%{public}s : undefined", name);
+        return false;
+    }
+    if ((status = env->Object_CallMethodByName_Double(
+        reinterpret_cast<ani_object>(obj), "doubleValue", nullptr, &value)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status : %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool GetStringOrUndefined(ani_env *env, ani_object param, const char *name, std::string &res)
+{
+    ani_ref obj = nullptr;
+    ani_boolean isUndefined = true;
+    ani_status status = ANI_ERROR;
+
+    if (env == nullptr || param == nullptr || name == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env or param or name");
+        return false;
+    }
+
+    if ((status = env->Object_GetFieldByName_Ref(param, name, &obj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status : %{public}d", status);
+        return false;
+    }
+    if ((status = env->Reference_IsUndefined(obj, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status : %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::ANI, "%{public}s : undefined", name);
+        return false;
+    }
+    if (!GetStdString(env, reinterpret_cast<ani_string>(obj), res)) {
+        TAG_LOGE(AAFwkTag::ANI, "GetStdString failed");
+        return false;
+    }
+    return true;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -16,17 +16,16 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_ABILITY_STAGE_H
 #define OHOS_ABILITY_RUNTIME_ETS_ABILITY_STAGE_H
 
-#include "ability_delegator_infos.h"
-
 #include <memory>
 #include <vector>
 
+#include "ability_delegator_infos.h"
 #include "ability_stage.h"
 #include "configuration.h"
 #include "ets_native_reference.h"
 #include "ets_runtime.h"
-#include "resource_manager.h"
 #include "native_engine/native_value.h"
+#include "resource_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -35,8 +34,8 @@ public:
     static AbilityStage *Create(
         const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo);
 
-    ETSAbilityStage(ETSRuntime& etsRuntime, std::unique_ptr<AppExecFwk::ETSNativeReference>&& ETSAbilityStageObj);
-    ~ETSAbilityStage() override;
+    ETSAbilityStage(ETSRuntime &etsRuntime, std::unique_ptr<AppExecFwk::ETSNativeReference> &&ETSAbilityStageObj);
+    ~ETSAbilityStage() override {}
 
     void Init(const std::shared_ptr<Context> &context,
         const std::weak_ptr<AppExecFwk::OHOSApplication> application) override;
@@ -45,16 +44,14 @@ public:
 
     void OnDestroy() const override;
 
-    void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration) override;
+    void OnConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
 
 private:
-    bool CallObjectMethod(bool withResult, const char* name, const char* signature, ...) const;
+    bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...) const;
 
     std::shared_ptr<AppExecFwk::DelegatorAbilityStageProperty> CreateStageProperty() const;
 
     std::string GetHapModuleProp(const std::string &propName) const;
-
-    static bool UseCommonChunk(const AppExecFwk::HapModuleInfo& hapModuleInfo);
 
     void SetEtsAbilityStage(const std::shared_ptr<Context> &context);
 

@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_ETS_UI_EXTENSION_CONTENT_SESSION_H
 
 #include "ani.h"
+#include "ets_runtime.h"
 #include "session_info.h"
 #include "start_options.h"
 #include "window.h"
@@ -50,7 +51,7 @@ public:
     virtual void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData) {}
     virtual bool IsMatch(int requestCode) {return true;}
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData) {}
-    void SaveResultCallbacks(int requestCode, RuntimeTask&& task) {}
+    void SaveResultCallbacks(int requestCode, RuntimeTask &&task) {}
 private:
     std::map<int, RuntimeTask> resultCallbacks_;
 };
@@ -60,40 +61,40 @@ private:
     class CallbackWrapper;
 public:
     EtsUIExtensionContentSession(sptr<AAFwk::SessionInfo> sessionInfo,
-        sptr<Rosen::Window> uiWindow, std::weak_ptr<AbilityRuntime::Context>& context,
-        std::shared_ptr<EtsAbilityResultListeners>& abilityResultListeners);
+        sptr<Rosen::Window> uiWindow, std::weak_ptr<AbilityRuntime::Context> &context,
+        std::shared_ptr<EtsAbilityResultListeners> &abilityResultListeners);
     EtsUIExtensionContentSession(sptr<AAFwk::SessionInfo> sessionInfo,
         sptr<Rosen::Window> uiWindow);
     virtual ~EtsUIExtensionContentSession() = default;
-    static EtsUIExtensionContentSession* GetEtsContentSession(ani_env* env, ani_object obj);
-    static ani_object CreateEtsUIExtensionContentSession(ani_env* env,
+    static EtsUIExtensionContentSession* GetEtsContentSession(ani_env *env, ani_object obj);
+    static ani_object CreateEtsUIExtensionContentSession(ani_env *env,
         sptr<AAFwk::SessionInfo> sessionInfo, sptr<Rosen::Window> uiWindow,
         std::weak_ptr<AbilityRuntime::Context> context,
-        std::shared_ptr<EtsAbilityResultListeners>& abilityResultListeners,
+        std::shared_ptr<EtsAbilityResultListeners> &abilityResultListeners,
         std::shared_ptr<EtsUIExtensionContentSession> contentSessionPtr);
 
-    static void NativeSendData(ani_env* env, ani_object obj, ani_object data);
-    static void NativeLoadContent(ani_env* env, ani_object obj, ani_string path, ani_object storage);
-    static void NativeTerminateSelf(ani_env* env, ani_object obj, ani_object callback);
-    static void NativeSetWindowBackgroundColor(ani_env* env, ani_object obj, ani_string color);
-    static int NativeTerminateSelfWithResult(ani_env* env, ani_object obj,
+    static void NativeSendData(ani_env *env, ani_object obj, ani_object data);
+    static void NativeLoadContent(ani_env *env, ani_object obj, ani_string path, ani_object storage);
+    static void NativeTerminateSelf(ani_env *env, ani_object obj, ani_object callback);
+    static void NativeSetWindowBackgroundColor(ani_env *env, ani_object obj, ani_string color);
+    static int NativeTerminateSelfWithResult(ani_env *env, ani_object obj,
         ani_object abilityResult, ani_object callback);
-    static void NativeSetReceiveDataCallback(ani_env* env, ani_object clsObj, ani_object funcObj);
+    static void NativeSetReceiveDataCallback(ani_env *env, ani_object clsObj, ani_object funcObj);
     static ani_object NativeGetUIExtensionHostWindowProxy(ani_env* env, ani_object obj);
 
-    void SendData(ani_env* env, ani_object object, ani_object data);
-    void LoadContent(ani_env* env, ani_object object, ani_string path, ani_object storage);
+    void SendData(ani_env *env, ani_object object, ani_object data);
+    void LoadContent(ani_env *env, ani_object object, ani_string path, ani_object storage);
     void TerminateSelf();
     int32_t TerminateSelfWithResult();
-    void SetWindowBackgroundColor(ani_env* env, ani_string color);
-    ani_object GetUIExtensionHostWindowProxy(ani_env* env, ani_object object);
-    void SetReceiveDataCallback(ani_env* env, ani_object functionObj);
-    static void CallReceiveDataCallback(ani_vm* vm, ani_ref callbackRef, const AAFwk::WantParams& wantParams);
+    void SetWindowBackgroundColor(ani_env *env, ani_string color);
+    ani_object GetUIExtensionHostWindowProxy(ani_env *env, ani_object object);
+    void SetReceiveDataCallback(ani_env *env, ani_object functionObj);
+    static void CallReceiveDataCallback(ani_vm *vm, ani_ref callbackRef, const AAFwk::WantParams& wantParams);
     std::shared_ptr<AbilityRuntime::Context> GetContext();
     sptr<Rosen::Window> GetUIWindow();
 
 private:
-    void SetReceiveDataCallbackRegister(ani_env* env, ani_object functionObj);
+    void SetReceiveDataCallbackRegister(ani_env *env, ani_object functionObj);
     sptr<AAFwk::SessionInfo> sessionInfo_;
     sptr<Rosen::Window> uiWindow_;
     std::weak_ptr<AbilityRuntime::Context> context_;
