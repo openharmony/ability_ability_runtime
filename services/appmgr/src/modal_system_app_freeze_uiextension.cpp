@@ -67,7 +67,7 @@ void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const Fau
     FaultDataType faultType = faultData.faultType;
     std::string name = faultData.errorObject.name;
     bool isAppFreezeDialog = name == AppFreezeType::THREAD_BLOCK_6S || name == AppFreezeType::APP_INPUT_BLOCK ||
-                             name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S;
+        name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S;
     uint64_t now =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
             .count();
@@ -151,13 +151,15 @@ bool ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(
     }
     bool infoReady = false;
     for (const auto &info : infos) {
-        if (info->IsFocused()) {
-            posX = info->rect_.posX_;
-            posY = info->rect_.posY_;
-            width = info->rect_.width_;
-            height = info->rect_.height_;
-            infoReady = true;
-            break;
+        if (info != nullptr) {
+            if (info->IsFocused()) {
+                posX = info->rect_.posX_;
+                posY = info->rect_.posY_;
+                width = info->rect_.width_;
+                height = info->rect_.height_;
+                infoReady = true;
+                break;
+            }
         }
     }
     if (!infoReady) {
