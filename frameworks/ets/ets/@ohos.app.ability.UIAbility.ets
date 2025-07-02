@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import Ability from '@ohos.app.ability.Ability';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import UIAbilityContext from 'application.UIAbilityContext';
 import Want from '@ohos.app.ability.Want';
@@ -36,7 +37,7 @@ export interface Callee {
   on(method: string, callback: CalleeCallback): void;
 }
 
-export default class UIAbility {
+export default class UIAbility extends Ability {
   private destroyCallbackPoint: long;
 
   private native nativeOnDestroyCallback(): void;
