@@ -1373,6 +1373,22 @@ HWTEST_F(AppMgrServiceTest, ChangeAppGcState_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ChangeAppGcState_002
+ * @tc.desc: Change app Gc state
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, ChangeAppGcState_002, TestSize.Level1)
+{
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
+    int32_t res = appMgrService->ChangeAppGcState(0, 0, 1);
+    EXPECT_EQ(ERR_INVALID_VALUE, res);
+    appMgrService->appMgrServiceInner_ = nullptr;
+}
+
+/**
  * @tc.name: IsAppRunning_001
  * @tc.desc: Determine that the application is running by returning a value.
  * @tc.type: FUNC
