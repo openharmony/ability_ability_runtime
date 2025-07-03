@@ -29,6 +29,9 @@
 #include "ecological_rule/ability_ecological_rule_mgr_service_param.h"
 #include "extract_insight_intent_profile.h"
 #include "keep_alive_process_manager.h"
+#include "ability_record.h"
+#include "ability_info.h"
+#include "application_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -405,16 +408,6 @@ void GetRandomApplicationInfo(FuzzedDataProvider& fdp, ApplicationInfo& appInfo)
     appInfo.organization = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     appInfo.installSource = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     appInfo.configuration = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-}
-
-void GetRandomStartWindowResourceInfo(FuzzedDataProvider& fdp, StartWindowResource& startWindowResource)
-{
-    startWindowResource.startWindowAppIconId = fdp.ConsumeIntegral<uint32_t>();
-    startWindowResource.startWindowIllustrationId = fdp.ConsumeIntegral<uint32_t>();
-    startWindowResource.startWindowBrandingImageId = fdp.ConsumeIntegral<uint32_t>();
-    startWindowResource.startWindowBackgroundColorId = fdp.ConsumeIntegral<uint32_t>();
-    startWindowResource.startWindowBackgroundImageId = fdp.ConsumeIntegral<uint32_t>();
-    startWindowResource.startWindowBackgroundImageFit = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
 }
 
 void GetRandomAbilityRequestInfo(FuzzedDataProvider& fdp, AbilityRequest& info)
