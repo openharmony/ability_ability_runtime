@@ -15,9 +15,10 @@
 
 #include "form_runtime/sts_form_extension_instance.h"
 
-#include "hilog_tag_wrapper.h"
-#include "form_extension.h"
 #include <dlfcn.h>
+
+#include "form_extension.h"
+#include "hilog_tag_wrapper.h"
 #include "runtime.h"
 
 namespace OHOS {
@@ -41,7 +42,7 @@ static constexpr char STS_FORM_EXT_CREATE_FUNC[] = "OHOS_ABILITY_STSFormExtensio
 #define STS_EXPORT __declspec(dllexport)
 #endif
 #endif
-}  // namespace
+} // namespace
 
 FormExtension *CreateSTSFormExtension(const std::unique_ptr<Runtime> &runtime)
 {
@@ -69,5 +70,5 @@ FormExtension *CreateSTSFormExtension(const std::unique_ptr<Runtime> &runtime)
 
     return instance;
 }
-}  // namespace AbilityRuntime
-}  // namespace OHOS
+} // namespace AbilityRuntime
+} // namespace OHOS
