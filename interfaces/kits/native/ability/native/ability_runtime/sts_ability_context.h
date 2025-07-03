@@ -32,6 +32,24 @@ class STSNativeReference;
 namespace OHOS {
 namespace AbilityRuntime {
 using OHOSApplication = AppExecFwk::OHOSApplication;
+class ETSAbilityConnection : public AbilityConnectCallback {
+public:
+    explicit ETSAbilityConnection(ani_vm *etsVm);
+    ~ETSAbilityConnection();
+    void OnAbilityConnectDone(
+        const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int32_t resultCode) override;
+    void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t resultCode) override;
+    void CallEtsFailed(int32_t errorCode);
+    void SetConnectionId(int32_t id);
+    int32_t GetConnectionId() { return connectionId_; }
+    void SetConnectionRef(ani_object connectOptionsObj);
+    void RemoveConnectionObject();
+protected:
+    ani_vm *etsVm_ = nullptr;
+    int32_t connectionId_ = -1;
+    ani_ref stsConnectionRef_ = nullptr;
+};
+
 class StsAbilityContext final {
 public:
     static StsAbilityContext &GetInstance()
@@ -75,6 +93,10 @@ public:
     static void OnSetMissionLabel(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object callbackObj);
     static void ConfigurationUpdated(ani_env *env, std::shared_ptr<STSNativeReference> &stsContext,
         const std::shared_ptr<AppExecFwk::Configuration> &config);
+    static ani_int OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
+        ani_object wantObj, ani_object connectOptionsObj);
+    static void OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
+        ani_int connectId, ani_object connectOptionsObj);
 
 private:
     static void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
@@ -104,6 +126,19 @@ bool SetConfiguration(
 bool SetHapModuleInfo(
     ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<AbilityContext> &context);
 ani_ref CreateStsAbilityContext(ani_env *env, const std::shared_ptr<AbilityContext> &context);
+
+struct EtsConnectionKey {
+    AAFwk::Want want;
+    int32_t id = 0;
+    int32_t accountId = 0;
+};
+
+struct EtsKeyCompare {
+    bool operator()(const EtsConnectionKey &key1, const EtsConnectionKey &key2) const
+    {
+        return key1.id < key2.id;
+    }
+};
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_SIMULATOR_STS_ABILITY_CONTEXT_H
