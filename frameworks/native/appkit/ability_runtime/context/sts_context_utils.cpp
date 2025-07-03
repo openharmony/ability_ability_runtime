@@ -20,6 +20,7 @@
 #include "application_context.h"
 #include "application_context_manager.h"
 #include "common_fun_ani.h"
+#include "event_hub.h"
 #include "hilog_tag_wrapper.h"
 #include "resourceManager.h"
 #include "sts_error_utils.h"
@@ -224,6 +225,23 @@ void StsCreateContext(ani_env* aniEnv, ani_class contextClass, ani_object contex
         TAG_LOGE(AAFwkTag::APPKIT, "SetHapModuleInfo fail");
     }
     BindParentProperty(aniEnv, contextClass, contextObj, context);
+    // set eventhub context
+    TAG_LOGI(AAFwkTag::APPKIT, "set eventhub context");
+    ani_ref eventHubRef = nullptr;
+    ani_status status = ANI_OK;
+    if ((status = aniEnv->Object_GetFieldByName_Ref(contextObj, "eventHub", &eventHubRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_GetFieldByName_Ref failed status: %{public}d", status);
+        return;
+    }
+    
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::Context>(context);
+    if (workContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "workContext nullptr");
+        return;
+    }
+    ani_long nativeContextLong = (ani_long)workContext;
+ 
+    AbilityRuntime::EventHub::SetEventHubContext(aniEnv, eventHubRef, nativeContextLong);
 }
 
 std::shared_ptr<Context> GetBaseContext(ani_env *env, ani_object aniObj)

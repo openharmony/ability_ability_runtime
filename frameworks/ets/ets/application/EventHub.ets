@@ -13,180 +13,115 @@
  * limitations under the License.
  */
 
+export type ESValueArgs = ESValue | Object | null | undefined
+export type FixedArgs = Object | null | undefined
+
 export default class EventHub {
-  private eventMap: Map<string, Array<Object>> = new Map<string, Array<Object>>();
+  private nativeContext: long = 0;
+  private eventMap: Map<string, Function[]> = new Map<string, Function[]>();
+  private dynamicContextEventHub?: ESValue;
+  private native getDynamicContextEventHub(): ESValue;
 
-  private getCloneArray(event: string): Array<Object> {
-    if (this.eventMap.get(event)) {
-      const array: Array<Object> = this.eventMap.get(event) as Array<Object>;
-      const cloneArray = deepcopy<Array<Object>>(array) as Array<Object>;
-      return cloneArray;
+  on(event: string, callback: Function): void {
+    if (!this.eventMap.has(event)) {
+      this.eventMap.set(event, []);
     }
-    return new Array<Object>();
+    const callbacks = this.eventMap.get(event)!;
+    let foundIndex = -1;
+    for (let i = 0; i < callbacks.length; i++) {
+      if (callbacks[i] == callback) {
+        foundIndex = i;
+        break;
+      }
+    }
+    if (foundIndex == -1) {
+      callbacks.push(callback);
+    }
+    if (!this.dynamicContextEventHub) {
+      this.dynamicContextEventHub = this.getDynamicContextEventHub();
+    }
   }
 
-  on(event: string, callback: Object) {
-    if (!this.eventMap.get(event)) {
-      this.eventMap.set(event, new Array<Object>());
+  offByNativeContext(event: string, callback?: Function): void {
+    if (!this.eventMap.has(event)) {
+      return;
     }
-    let array: Array<Object> = this.eventMap.get(event) as Array<Object>;
-    if (array.indexOf(callback) === -1) {
-        array.push(callback);
-    }
-  }
-
-  off(event: string, callback: Object) {
-    if (this.eventMap.get(event)) {
-      let cbArray: Array<Object> = this.eventMap.get(event) as Array<Object>;
-      let index: number = cbArray.indexOf(callback);
-      if (index > -1) {
-        for (; index + 1 < cbArray.length; index++) {
-          cbArray[index] = cbArray[index + 1];
+    if (!callback) {
+      this.eventMap.delete(event);
+    } else {
+      const callbacks = this.eventMap.get(event)!;
+      let foundIndex = -1;
+      for (let i = 0; i < callbacks.length; i++) {
+        if (callbacks[i] == callback) {
+          foundIndex = i;
+          break;
         }
-        cbArray.pop();
+      }
+      if (foundIndex > -1) {
+        callbacks.splice(foundIndex, 1);
+      }
+      if (callbacks.length === 0) {
+        this.eventMap.delete(event);
       }
     }
   }
 
-  off(event: string) {
-    if (this.eventMap.get(event)) {
-      this.eventMap.delete(event);
+  off(event: string, callback: Function): void {
+    this.offByNativeContext(event, callback);
+    if (!this.dynamicContextEventHub) {
+      this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
+    this.dynamicContextEventHub!.getProperty("eventHub").invokeMethod("offByNativeContext", ESValue.wrap(event), ESValue.wrap(callback));
   }
 
-  emit(event:string) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      let f = cloneArray[i] as () => void;
-      f();
-    }
+  offByDynamicContext(event: string, callback: Function): void {
+    this.offByNativeContext(event, callback);
   }
 
-  emit<P1>(event:string, p1: P1) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      let f = cloneArray[i] as (p1: P1) => void;
-      f(p1);
+  off(event: string): void {
+    this.offByNativeContext(event, undefined);
+    if (!this.dynamicContextEventHub) {
+      this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
+    this.dynamicContextEventHub!.getProperty("eventHub").invokeMethod("offByNativeContext", ESValue.wrap(event));
   }
 
-  emit<P1, P2>(event: string, p1: P1, p2: P2) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2) => void;
-      f(p1, p2);
-    }
+  offByDynamicContext(event: string): void {
+    this.offByNativeContext(event, undefined);
   }
 
-  emit<P1, P2, P3>(event: string, p1: P1, p2: P2, p3: P3) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3) => void;
-      f(p1, p2, p3);
+  private emitByStaticContext(event: string, ...args: FixedArray<(Object|null|undefined)>): void {
+    if (!this.eventMap.has(event)) {
+      return;
     }
+    const callbacks = [...this.eventMap.get(event)!];
+    callbacks.forEach(callback => {
+      try {
+        callback.unsafeCall(...args);
+      } catch (err) {
+        console.error(`Error '${event}'`, err);
+      }
+    });
+  }
+  
+  emit(event: string, ...args: (Object|null|undefined)[]): void {
+    let fixedArgs: FixedArray<(Object|null|undefined)> = new FixedArgs[args.length];
+    for (let i = 0; i < args.length; i++) {
+      fixedArgs[i] = args[i];
+    }
+    this.emitByStaticContext(event, ...fixedArgs);
+    if (!this.dynamicContextEventHub) {
+      this.dynamicContextEventHub = this.getDynamicContextEventHub();
+    }
+    let params: FixedArray<ESValueArgs> = new ESValueArgs[args.length + 1];
+    params[0] = ESValue.wrap(event);
+    for (let i = 0; i < args.length; i++) {
+      params[i + 1] = ESValue.wrap(args[i]);
+    }
+    this.dynamicContextEventHub!.getProperty("eventHub").invokeMethod("emitByNativeContext", ...params);
   }
 
-  emit<P1, P2, P3, P4>(event: string, p1: P1, p2: P2, p3: P3, p4: P4) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3, p4: P4) => void;
-      f(p1, p2, p3, p4);
-    }
-  }
-
-  emit<P1, P2, P3, P4, P5>(event: string, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3, p4: P4, p5: P5) => void;
-      f(p1, p2, p3, p4, p5);
-    }
-  }
-
-  emit<P1, P2, P3, P4, P5, P6>(event: string, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6) => void;
-      f(p1, p2, p3, p4, p5, p6);
-    }
-  }
-
-  emit<P1, P2, P3, P4, P5, P6, P7>(event: string, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7) => void;
-      f(p1, p2, p3, p4, p5, p6, p7);
-    }
-  }
-
-  emit<P1, P2, P3, P4, P5, P6, P7, P8>(event: string, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8) => void;
-      f(p1, p2, p3, p4, p5, p6, p7, p8);
-    }
-  }
-
-  emit<P1, P2, P3, P4, P5, P6, P7, P8, P9>(event: string, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9) => void;
-      f(p1, p2, p3, p4, p5, p6, p7, p8, p9);
-    }
-  }
-
-  emit<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10>(event: string, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10) => void;
-      f(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
-    }
-  }
-
-  emit<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11>(event: string, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11) => void;
-      f(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11);
-    }
-  }
-
-  emit<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12>(event: string, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12) => void;
-      f(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12);
-    }
-  }
-
-  emit<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13>(event: string, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13) => void;
-      f(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13);
-    }
-  }
-
-  emit<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14>(event: string, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14) => void;
-      f(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
-    }
-  }
-
-  emit<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15>(event: string, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15) => void;
-      f(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15);
-    }
-  }
-
-  emit<P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16>(event: string, p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, p16: P16) {
-    const cloneArray: Array<Object> = this.getCloneArray(event);
-    for (let i = 0; i < cloneArray.length; ++i) {
-      const f = cloneArray[i] as (p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9, p10: P10, p11: P11, p12: P12, p13: P13, p14: P14, p15: P15, p16: P16) => void;
-      f(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16);
-    }
+  emitByDynamicContext(event: string, ...args: FixedArray<(Object|null|undefined)>): void {
+    this.emitByStaticContext(event, ...args);
   }
 }
