@@ -172,7 +172,7 @@ HWTEST_F(PreloadUIextStateObserverTest, OnAppCacheStateChanged_002, Function | M
  */
 HWTEST_F(PreloadUIextStateObserverTest, OnAppCacheStateChanged_003, Function | MediumTest | Level1)
 {
-    GTEST_LOG_(INFO) << "OnAppCacheStateChanged_003 start";  
+    GTEST_LOG_(INFO) << "OnAppCacheStateChanged_003 start";
     Want want;
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo applicationInfo;

@@ -2299,8 +2299,8 @@ napi_value AttachJsUIAbilityContext(napi_env env, void *value, void *hint)
     }
 
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityContext>(ptr);
-    auto status = napi_coerce_to_native_binding_object(env, contextObj, DetachNewAbilityContext, AttachJsUIAbilityContext,
-        workContext, nullptr);
+    auto status = napi_coerce_to_native_binding_object(
+        env, contextObj, DetachNewAbilityContext, AttachJsUIAbilityContext, workContext, nullptr);
     if (status != napi_ok) {
         TAG_LOGW(AAFwkTag::CONTEXT, "coerce ability context failed: %{public}d", status);
         delete workContext;
