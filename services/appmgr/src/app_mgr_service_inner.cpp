@@ -60,6 +60,7 @@
 #include "killing_process_manager.h"
 #include "last_exit_detail_info.h"
 #include "os_account_manager.h"
+#include "overlay_manager_client.h"
 #include "app_native_spawn_manager.h"
 #ifdef SUPPORT_SCREEN
 #include "locale_config.h"
@@ -3709,22 +3710,19 @@ void AppMgrServiceInner::SetOverlayInfo(const std::string &bundleName,
         TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper null");
         return;
     }
-    auto overlayMgrProxy = bundleMgrHelper->GetOverlayManagerProxy();
-    if (overlayMgrProxy !=  nullptr) {
-        std::vector<OverlayModuleInfo> overlayModuleInfo;
-        TAG_LOGD(AAFwkTag::APPMGR, "Check overlay app begin.");
-        HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetOverlayModuleInfoForTarget");
-        auto targetRet = IN_PROCESS_CALL(overlayMgrProxy->GetOverlayModuleInfoForTarget(
-            bundleName, "", overlayModuleInfo, userId));
-        if (targetRet == ERR_OK && overlayModuleInfo.size() != 0) {
-            TAG_LOGD(AAFwkTag::APPMGR, "Start an overlay app process.");
-            startMsg.flags = startMsg.flags | APP_OVERLAY_FLAG;
-            std::string overlayInfoPaths;
-            for (auto it : overlayModuleInfo) {
-                overlayInfoPaths += (it.hapPath + "|");
-            }
-            startMsg.overlayInfo = overlayInfoPaths;
+    std::vector<OverlayModuleInfo> overlayModuleInfo;
+    TAG_LOGD(AAFwkTag::APPMGR, "Check overlay app begin.");
+    HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetOverlayModuleInfoForTarget");
+    auto targetRet = IN_PROCESS_CALL(AppExecFwk::OverlayManagerClient::GetInstance().GetOverlayModuleInfoForTarget(
+        bundleName, "", overlayModuleInfo, userId));
+    if (targetRet == ERR_OK && overlayModuleInfo.size() != 0) {
+        TAG_LOGD(AAFwkTag::APPMGR, "Start an overlay app process.");
+        startMsg.flags = startMsg.flags | APP_OVERLAY_FLAG;
+        std::string overlayInfoPaths;
+        for (auto it : overlayModuleInfo) {
+            overlayInfoPaths += (it.hapPath + "|");
         }
+        startMsg.overlayInfo = overlayInfoPaths;
     }
 }
 

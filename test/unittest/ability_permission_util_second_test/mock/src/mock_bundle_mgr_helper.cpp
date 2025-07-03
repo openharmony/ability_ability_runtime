@@ -154,12 +154,6 @@ bool BundleMgrHelper::GetGroupDir(const std::string& dataGroupId, std::string& d
     return false;
 }
 
-sptr<IOverlayManager> BundleMgrHelper::GetOverlayManagerProxy()
-{
-    sptr<AppExecFwk::IOverlayManager> getOverlay_ = nullptr;
-    return getOverlay_;
-}
-
 bool BundleMgrHelper::QueryAbilityInfo(const Want& want, AbilityInfo& abilityInfo)
 {
     return false;
