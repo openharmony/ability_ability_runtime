@@ -23,12 +23,12 @@
 #include "keep_alive_process_manager.h"
 #undef private
 
+#include "ability_fuzz_util.h"
 #include "ability_keep_alive_service.h"
 #include "ability_util.h"
 #include "app_mgr_client.h"
 #include "parameters.h"
 #include "permission_verification.h"
-#include "../ability_fuzz_util.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;

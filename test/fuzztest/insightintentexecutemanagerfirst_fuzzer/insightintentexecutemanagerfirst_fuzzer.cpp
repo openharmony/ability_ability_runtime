@@ -24,7 +24,7 @@
 #include "insight_intent_execute_param.h"
 #undef private
 
-#include "../ability_fuzz_util.h"
+#include "ability_fuzz_util.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
