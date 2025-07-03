@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,18 +127,21 @@ private:
 
     // read only after initialization
     std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSoStartupTasks_;
+    std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSystemSoStartupTasks_;
     std::map<std::string, std::shared_ptr<AppStartupTask>> appStartupTasks_;
     std::vector<StartupTaskInfo> pendingStartupTaskInfos_;
     std::string pendingConfigEntry_;
 
     std::mutex autoPreloadSoTaskManagerMutex_;
     std::weak_ptr<StartupTaskManager> autoPreloadSoTaskManager_;
+    std::weak_ptr<StartupTaskManager> autoPreloadSystemSoTaskManager_;
     bool autoPreloadSoStopped_ = false;
 
     std::shared_ptr<StartupConfig> defaultConfig_;
     std::map<std::string, std::shared_ptr<StartupConfig>> moduleConfigs_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> preloadHandler_;
+    std::unordered_set<std::string> preloadSystemSoAllowlist_;
 
     static int32_t AddStartupTask(const std::string &name, std::map<std::string, std::shared_ptr<StartupTask>> &taskMap,
         std::map<std::string, std::shared_ptr<AppStartupTask>> &allTasks);
@@ -155,13 +158,19 @@ private:
     std::shared_ptr<NativeStartupTask> CreateAppPreloadSoTask(
         const std::map<std::string, std::shared_ptr<StartupTask>> &currentPreloadSoTasks);
 
+    void InitPreloadSystemSoAllowlist();
+    bool ReadPreloadSystemSoAllowlistFile(nlohmann::json &jsonStr);
+    bool ParsePreloadSystemSoAllowlist(const nlohmann::json &jsonStr, std::unordered_set<std::string> &allowlist);
+
     void PreloadAppHintStartupTask(std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData);
     int32_t AddLoadAppStartupConfigTask(std::map<std::string, std::shared_ptr<StartupTask>> &preloadAppHintTasks);
     int32_t RunLoadAppStartupConfigTask();
     int32_t AddAppAutoPreloadSoTask(std::map<std::string, std::shared_ptr<StartupTask>> &preloadAppHintTasks,
         std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData);
     int32_t RunAppAutoPreloadSoTask(std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData);
-    int32_t RunAppPreloadSoTask(const std::map<std::string, std::shared_ptr<StartupTask>> &appPreloadSoTasks);
+    int32_t RunAppAutoPreloadSystemSoTask();
+    int32_t RunAppPreloadSoTask(const std::map<std::string, std::shared_ptr<StartupTask>> &appPreloadSoTasks,
+        bool isSystemSo = false);
     int32_t GetAppAutoPreloadSoTasks(std::map<std::string, std::shared_ptr<StartupTask>> &appAutoPreloadSoTasks,
         std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData);
     int32_t RunAppPreloadSoTaskMainThread(const std::map<std::string, std::shared_ptr<StartupTask>> &appPreloadSoTasks,
@@ -170,6 +179,7 @@ private:
     static int32_t GetStartupConfigString(const ModuleStartupConfigInfo& info, std::string& config);
     bool AnalyzeStartupConfig(const ModuleStartupConfigInfo& info, const std::string& startupConfig,
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks,
+        std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSystemSoStartupTasks,
         std::vector<StartupTaskInfo>& pendingStartupTaskInfos, std::string& pendingConfigEntry);
     static bool AnalyzeAppStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
         std::vector<StartupTaskInfo>& pendingStartupTaskInfos);
@@ -180,6 +190,10 @@ private:
         std::vector<StartupTaskInfo>& pendingStartupTaskInfos);
     bool AnalyzePreloadSoStartupTaskInner(const ModuleStartupConfigInfo& info,
         const nlohmann::json &preloadStartupTaskJson,
+        std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks);
+    void AnalyzePreloadSystemSoStartupTask(nlohmann::json &startupConfigJson,
+        std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks);
+    void AnalyzePreloadSystemSoStartupTaskInner(const nlohmann::json &preloadStartupTaskJson,
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks);
     static void SetOptionalParameters(const nlohmann::json& module, AppExecFwk::ModuleType moduleType,
         StartupTaskInfo& startupTaskInfo);
