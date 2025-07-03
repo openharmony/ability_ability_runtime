@@ -550,7 +550,7 @@ void JsFormExtension::OnFormLocationChanged(const int64_t formId, const int32_t 
     CallObjectMethod("onFormLocationChanged", "OnFormLocationChanged", argv, ARGC_TWO);
 }
 
-void JsFormExtension::OnSizeChanged(int64_t formId, const std::string &newDimension, const Rect &newRect)
+void JsFormExtension::OnSizeChanged(const int64_t formId, const int32_t newDimension, const Rect &newRect)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "Form size changed, formId: %{public}" PRId64, formId);
     FormExtension::OnSizeChanged(formId, newDimension, newRect);
@@ -559,7 +559,7 @@ void JsFormExtension::OnSizeChanged(int64_t formId, const std::string &newDimens
     napi_env env = jsRuntime_.GetNapiEnv();
  
     napi_value napiFormId = WrapStringToJS(env, std::to_string(formId));
-    napi_value napinewDimension = WrapStringToJS(env, newDimension);
+    napi_value napinewDimension = WrapInt32ToJS(env, newDimension);
     napi_value napiNewRect = nullptr;
     napi_create_object(env, &napiNewRect);
     napi_set_named_property(env, napiNewRect, "left", CreateJsValue(env, newRect.left));
