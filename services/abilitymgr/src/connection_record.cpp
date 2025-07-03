@@ -130,7 +130,8 @@ int ConnectionRecord::DisconnectAbility()
             TAG_LOGI(AAFwkTag::CONNECTION, "Disconnect UIServiceExtension ability, set correct want");
             targetService_->DisconnectAbilityWithWant(GetConnectWant());
         } else {
-            TAG_LOGI(AAFwkTag::CONNECTION, "DisconnectAbility called");
+            TAG_LOGI(AAFwkTag::CONNECTION, "DisconnectAbility %{public}s called",
+                targetService_->GetAbilityInfo().name.c_str());
             targetService_->DisconnectAbility();
         }
     } else {

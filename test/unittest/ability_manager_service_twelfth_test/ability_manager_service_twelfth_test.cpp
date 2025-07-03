@@ -1212,6 +1212,59 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, QueryKeepAliveAppServiceExtensions_00
 
 /*
  * Feature: AbilityManagerService
+ * Function: SetOnNewWantSkipScenarios
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetOnNewWantSkipScenarios
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, SetOnNewWantSkipScenarios_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SetOnNewWantSkipScenarios_001 start");
+    auto abilityMs = std::make_unique<AbilityManagerService>();
+    int32_t result = abilityMs->SetOnNewWantSkipScenarios(nullptr, 0);
+    EXPECT_EQ(result, ERR_INVALID_CONTEXT);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SetOnNewWantSkipScenarios_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SetOnNewWantSkipScenarios
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetOnNewWantSkipScenarios
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, SetOnNewWantSkipScenarios_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SetOnNewWantSkipScenarios_002 start");
+    auto abilityMs = std::make_unique<AbilityManagerService>();
+    auto abilityRecord = MockAbilityRecord(AbilityType::PAGE);
+    int32_t result = abilityMs->SetOnNewWantSkipScenarios(abilityRecord->GetToken(), 0);
+    EXPECT_EQ(result, ERR_INVALID_CALLER);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SetOnNewWantSkipScenarios_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SetOnNewWantSkipScenarios
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetOnNewWantSkipScenarios
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, SetOnNewWantSkipScenarios_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SetOnNewWantSkipScenarios_003 start");
+    auto abilityMs = std::make_unique<AbilityManagerService>();
+    auto token = MockToken(AbilityType::PAGE);
+    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
+    EXPECT_NE(abilityRecord, nullptr);
+    token->abilityRecord_ = abilityRecord;
+    auto abilityRecordTest = Token::GetAbilityRecordByToken(token);
+    EXPECT_NE(abilityRecordTest, nullptr);
+    abilityRecordTest->abilityInfo_.applicationInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    int32_t result = abilityMs->SetOnNewWantSkipScenarios(token, 0);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SetOnNewWantSkipScenarios_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: SuspendExtensionAbility
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService SuspendExtensionAbility
@@ -1229,6 +1282,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, SuspendExtensionAbility_001, TestSize
 
     MyFlag::flag_ = false;
     EXPECT_EQ(abilityMs_->SuspendExtensionAbility(connect), CHECK_PERMISSION_FAILED);
+    MyFlag::flag_ = true;
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SuspendExtensionAbility_001 end");
 }
@@ -1252,6 +1306,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, ResumeExtensionAbility_001, TestSize.
 
     MyFlag::flag_ = false;
     EXPECT_EQ(abilityMs_->ResumeExtensionAbility(connect), CHECK_PERMISSION_FAILED);
+    MyFlag::flag_ = true;
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest ResumeExtensionAbility_001 end");
 }

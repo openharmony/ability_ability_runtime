@@ -417,6 +417,11 @@ HWTEST_F(AbilityManagerServiceSixthTest, CheckUIExtensionUsage_001, TestSize.Lev
     extensionType = AppExecFwk::ExtensionAbilityType::WINDOW;
     ret = abilityMs->CheckUIExtensionUsage(uiExtensionUsage, extensionType);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    uiExtensionUsage = UIExtensionUsage::PRE_VIEW_EMBEDDED;
+    extensionType = AppExecFwk::ExtensionAbilityType::FORM;
+    ret = abilityMs->CheckUIExtensionUsage(uiExtensionUsage, extensionType);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckUIExtensionUsage_001 end");
     MyFlag::flag_ = 0;
 }
@@ -1119,6 +1124,56 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_002, TestSize.Level
     Mock::VerifyAndClear(mockBundleMgr);
     bundleMgrHelper_->bundleMgr_ = nullptr;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_002 end");
+}
+
+/*
+ * Feature: ConnectLocalAbility_003
+ * Function: ConnectLocalAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ConnectLocalAbility
+ */
+HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_003 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    Want want;
+    want.SetElementName("device", "testBundleName", "testAbilityName", "entry");
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.uid = 10000;
+    applicationInfo.singleton = 0;
+    applicationInfo.name = "app";
+    applicationInfo.bundleName = "testBundleName";
+    abilityInfo.applicationInfo = applicationInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::SERVICE;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    abilityInfo.name = "testAbilityName";
+    abilityInfo.bundleName = "testBundleName";
+    abilityInfo.moduleName = "entry";
+    abilityInfo.isStageBasedModel = false;
+    auto mockBundleMgr = sptr<MockBundleManagerProxy>::MakeSptr(nullptr);
+    bundleMgrHelper_->bundleMgr_ = mockBundleMgr;
+    EXPECT_CALL(*mockBundleMgr, QueryAbilityInfo(testing::_, testing::_, testing::_, testing::_))
+        .WillRepeatedly(DoAll(SetArgReferee<3>(abilityInfo), Return(true)));
+
+    auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->Init();
+    auto token = abilityRecord->token_;
+
+    sptr<SessionInfo> sessionInfo = nullptr;
+    sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr;
+    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::SERVICE;
+    int32_t userId = 0;
+    bool isQueryExtensionOnly = false;
+
+    MyFlag::flag_ = 1;
+    auto ret = abilityMs->ConnectLocalAbility(
+        want, userId, impl, token, extensionType, sessionInfo, isQueryExtensionOnly, connectInfo);
+
+    EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_003 end");
 }
 
 /*

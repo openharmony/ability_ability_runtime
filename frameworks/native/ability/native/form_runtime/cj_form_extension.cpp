@@ -60,6 +60,10 @@ void CJFormExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     TAG_LOGD(AAFwkTag::FORM_EXT, "call");
     FormExtension::Init(record, application, handler, token);
     // init and bindContext
+    if (abilityInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "abilityInfo_ is nullptr");
+        return;
+    }
     int32_t ret = cjObj_.Init(abilityInfo_->name, this);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "cjFormExtension Init failed");
@@ -104,7 +108,12 @@ void CJFormExtension::OnStop()
 {
     TAG_LOGD(AAFwkTag::FORM_EXT, "call");
     cjObj_.OnStop();
-    bool ret = ConnectionManager::GetInstance().DisconnectCaller(GetContext()->GetToken());
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "context is nullptr");
+        return;
+    }
+    bool ret = ConnectionManager::GetInstance().DisconnectCaller(context->GetToken());
     if (ret) {
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
         TAG_LOGD(AAFwkTag::FORM_EXT, "disconnected failed");
@@ -159,8 +168,16 @@ void CJFormExtension::OnConfigurationUpdated(const AppExecFwk::Configuration& co
 {
     FormExtension::OnConfigurationUpdated(configuration);
     TAG_LOGD(AAFwkTag::FORM_EXT, "call");
-
-    auto fullConfig = GetContext()->GetConfiguration();
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "context is nullptr");
+        return;
+    }
+    auto fullConfig = context->GetConfiguration();
+    if (fullConfig == nullptr) {
+        TAG_LOGE(AAFwkTag::FORM_EXT, "fullConfig is nullptr");
+        return;
+    }
     cjObj_.OnConfigurationUpdate(fullConfig);
 }
 
@@ -192,7 +209,7 @@ bool CJFormExtension::OnAcquireData(int64_t formId, AAFwk::WantParams &wantParam
 bool CJFormExtension::ConvertFromDataProxies(CArrProxyData cArrProxyData,
     std::vector<FormDataProxy> &formDataProxies)
 {
-    uint32_t len = cArrProxyData.size;
+    uint32_t len = static_cast<uint32_t>(cArrProxyData.size);
     if (cArrProxyData.head == nullptr) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "null head");
         return false;

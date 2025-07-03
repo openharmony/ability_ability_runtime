@@ -376,5 +376,11 @@ ErrCode BundleMgrHelper::UnregisterPluginEventCallback(sptr<IBundleEventCallback
 {
     return ERR_OK;
 }
+
+ErrCode BundleMgrHelper::GetPluginHapModuleInfo(const std::string &hostBundleName, const std::string &pluginBundleName,
+    const std::string &pluginModuleName, const int32_t userId, HapModuleInfo &hapModuleInfo)
+{
+    return ERR_OK;
+}
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -46,6 +46,7 @@ class LifeCycle;
 class ContinuationHandlerStage;
 class ContinuationManagerStage;
 class InsightIntentExecuteParam;
+struct BaseDelegatorAbilityProperty;
 struct InsightIntentExecuteResult;
 using InsightIntentExecutorAsyncCallback = AbilityTransactionCallbackInfo<InsightIntentExecuteResult>;
 } // namespace AppExecFwk
@@ -334,6 +335,9 @@ public:
     bool CheckIsSilentForeground() const;
 
     void SetIsSilentForeground(bool isSilentForeground);
+
+    bool CreateProperty(std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext,
+        std::shared_ptr<AppExecFwk::BaseDelegatorAbilityProperty> delegatorAbilityProperty);
 
 protected:
     const AAFwk::LaunchParam &GetLaunchParam() const;

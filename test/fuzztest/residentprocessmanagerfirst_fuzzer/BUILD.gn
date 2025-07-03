@@ -27,6 +27,7 @@ ohos_fuzztest("ResidentProcessManagerFirstFuzzTest") {
   include_dirs = [
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_innerkits_path}/dataobs_manager/include",
+    "${ability_runtime_test_path}/fuzztest/",
   ]
   cflags = [
     "-g",
@@ -65,7 +66,6 @@ ohos_fuzztest("ResidentProcessManagerFirstFuzzTest") {
     "hisysevent:libhisysevent",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "napi:ace_napi",
     "relational_store:native_dataability",
     "relational_store:native_rdb",

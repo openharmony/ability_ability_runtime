@@ -522,7 +522,7 @@ HWTEST_F(ChildProcessManagerTest, IsMultiProcessFeatureApp_0400, TestSize.Level2
     moduleInfo.moduleType = AppExecFwk::ModuleType::ENTRY;
 
     std::vector<std::string> deviceFeatures;
-    deviceFeatures.push_back("multi_process");
+    deviceFeatures.push_back("large_screen");
     std::map<std::string, std::vector<std::string>> requiredDeviceFeatures;
     auto deviceType = OHOS::system::GetDeviceType();
     requiredDeviceFeatures[deviceType] = deviceFeatures;
@@ -551,7 +551,7 @@ HWTEST_F(ChildProcessManagerTest, IsMultiProcessFeatureApp_0500, TestSize.Level2
     moduleInfo.moduleType = AppExecFwk::ModuleType::ENTRY;
 
     std::vector<std::string> deviceFeatures;
-    deviceFeatures.push_back("multi_process");
+    deviceFeatures.push_back("large_screen");
     std::map<std::string, std::vector<std::string>> requiredDeviceFeatures;
     requiredDeviceFeatures["invalid_type"] = deviceFeatures;
     moduleInfo.requiredDeviceFeatures = requiredDeviceFeatures;

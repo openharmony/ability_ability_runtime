@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -439,6 +439,11 @@ napi_value JsAbilityContext::RevokeDelegator(napi_env env, napi_callback_info in
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnRevokeDelegator);
 }
 
+napi_value JsAbilityContext::SetOnNewWantSkipScenarios(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityContext, OnSetOnNewWantSkipScenarios);
+}
+
 void JsAbilityContext::ClearFailedCallConnection(
     const std::weak_ptr<AbilityContext>& abilityContext, const std::shared_ptr<CallerCallBack> &callback)
 {
@@ -576,17 +581,10 @@ napi_value JsAbilityContext::OnStartAbility(napi_env env, NapiCallbackInfo& info
             return;
         }
         if (!startOptions.requestId_.empty()) {
-            cJSON *jsonObject = cJSON_CreateObject();
-            if (jsonObject == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "create json object failed");
-                return;
-            }
             std::string errMsg = want.GetBoolParam(Want::PARAM_RESV_START_RECENT, false) ?
                 "Failed to call startRecentAbility" : "Failed to call startAbility";
-            cJSON_AddStringToObject(jsonObject, JSON_KEY_ERR_MSG.c_str(), errMsg.c_str());
-            std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-            cJSON_Delete(jsonObject);
-            context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonStr);
+            nlohmann::json jsonObject = nlohmann::json { { JSON_KEY_ERR_MSG, errMsg } };
+            context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
         }
     };
 
@@ -994,15 +992,10 @@ napi_value JsAbilityContext::OnStartAbilityAsCallerInner(napi_env env, NapiCallb
                 return;
             }
             if (!startOptions.requestId_.empty()) {
-                cJSON *jsonObject = cJSON_CreateObject();
-                if (jsonObject == nullptr) {
-                    TAG_LOGW(AAFwkTag::CONTEXT, "create json object failed");
-                    return;
-                }
-                cJSON_AddStringToObject(jsonObject, JSON_KEY_ERR_MSG.c_str(), "Failed to call startAbilityAsCaller");
-                std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-                cJSON_Delete(jsonObject);
-                context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonStr);
+                nlohmann::json jsonObject = nlohmann::json {
+                    { JSON_KEY_ERR_MSG, "Failed to call startAbilityAsCaller" }
+                };
+                context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
             }
         };
 
@@ -1117,15 +1110,10 @@ napi_value JsAbilityContext::OnStartAbilityWithAccount(napi_env env, NapiCallbac
                 return;
             }
             if (!startOptions.requestId_.empty()) {
-                cJSON *jsonObject = cJSON_CreateObject();
-                if (jsonObject == nullptr) {
-                    TAG_LOGW(AAFwkTag::CONTEXT, "create json object failed");
-                    return;
-                }
-                cJSON_AddStringToObject(jsonObject, JSON_KEY_ERR_MSG.c_str(), "Failed to call startAbilityWithAccount");
-                std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-                cJSON_Delete(jsonObject);
-                context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonStr);
+                nlohmann::json jsonObject = nlohmann::json {
+                    { JSON_KEY_ERR_MSG, "Failed to call startAbilityWithAccount" }
+                };
+                context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
             }
     };
     napi_value lastParam = (info.argc > unwrapArgc) ? info.argv[unwrapArgc] : nullptr;
@@ -2241,6 +2229,8 @@ napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> 
         JsAbilityContext::ConnectAppServiceExtensionAbility);
     BindNativeFunction(env, object, "disconnectAppServiceExtensionAbility", moduleName,
         JsAbilityContext::DisconnectAppServiceExtensionAbility);
+    BindNativeFunction(env, object, "setOnNewWantSkipScenarios", moduleName,
+        JsAbilityContext::SetOnNewWantSkipScenarios);
     return object;
 }
 
@@ -3089,6 +3079,45 @@ napi_value JsAbilityContext::OnRevokeDelegator(napi_env env, NapiCallbackInfo& i
 
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnRevokeDelegator",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsAbilityContext::OnSetOnNewWantSkipScenarios(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "OnSetOnNewWantSkipScenarios called");
+    if (info.argc < ARGC_ONE) {
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+    int32_t scenarios = 0;
+    if (!OHOS::AppExecFwk::UnwrapInt32FromJS2(env, info.argv[INDEX_ZERO], scenarios)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid first params");
+        ThrowInvalidParamError(env, "Failed to parse scenarios. Scenarios must be a number.");
+        return CreateJsUndefined(env);
+    }
+    auto innerErrCode = std::make_shared<int32_t>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute =
+        [weak = context_, innerErrCode, scenarios] {
+            auto context = weak.lock();
+            if (!context) {
+                TAG_LOGW(AAFwkTag::CONTEXT, "released context");
+                *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+                return;
+            }
+            *innerErrCode = context->SetOnNewWantSkipScenarios(scenarios);
+    };
+    NapiAsyncTask::CompleteCallback complete =
+        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (*innerErrCode == ERR_OK) {
+                task.Resolve(env, CreateJsUndefined(env));
+            } else {
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+            }
+        };
+
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnSetOnNewWantSkipScenarios",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }

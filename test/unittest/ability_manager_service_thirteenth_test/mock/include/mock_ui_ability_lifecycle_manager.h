@@ -215,7 +215,8 @@ public:
      *
      * @param requestId target ability requestId.
      */
-    void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId);
+    void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId,
+        const std::string &callerProcessName = "");
 
     /**
      * OnStartSpecifiedAbilityTimeoutResponse.

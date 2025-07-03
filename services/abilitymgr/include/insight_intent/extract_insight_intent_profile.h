@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 
-#include "cJSON.h"
 #include "insight_intent_execute_param.h"
 
 namespace OHOS {
@@ -225,7 +224,7 @@ struct ExtractInsightIntentProfileInfoVec {
 class ExtractInsightIntentProfile {
 public:
     static bool TransformTo(const std::string &profileStr, ExtractInsightIntentProfileInfoVec &infos);
-    static bool ToJson(const ExtractInsightIntentProfileInfo &info, cJSON *&jsonObject);
+    static bool ToJson(const ExtractInsightIntentProfileInfo &info, nlohmann::json &jsonObject);
     static bool ProfileInfoFormat(const ExtractInsightIntentProfileInfo &insightIntent, ExtractInsightIntentInfo &info);
 };
 } // namespace AbilityRuntime

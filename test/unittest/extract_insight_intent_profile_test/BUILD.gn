@@ -31,11 +31,7 @@ ohos_unittest("extract_insight_intent_profile_test") {
     "${ability_runtime_services_path}/abilitymgr:abilityms",
   ]
 
-  sources = [
-    "${ability_runtime_services_path}/abilitymgr/src/insight_intent/insight_intent_json_util.cpp",
-    "${ability_runtime_services_path}/common/src/json_utils.cpp",
-    "extract_insight_intent_profile_test.cpp",
-  ]
+  sources = [ "extract_insight_intent_profile_test.cpp" ]
 
   deps = [ "${ability_runtime_abilitymgr_path}/:abilityms" ]
 
@@ -47,7 +43,6 @@ ohos_unittest("extract_insight_intent_profile_test") {
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "config_policy:configpolicy_util",
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",

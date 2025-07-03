@@ -29,6 +29,9 @@
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr int32_t U1_USER_ID = 1;
+}
 class AbilityManagerService : public std::enable_shared_from_this<AbilityManagerService> {
     DECLARE_DELAYED_SINGLETON(AbilityManagerService)
 public:

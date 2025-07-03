@@ -32,18 +32,18 @@ constexpr const char* ETS_HAPMODULEINFO_CLASS_NAME = "LbundleManager/HapModuleIn
 class Context;
 class ETSAbilityStageContext final {
 public:
-    explicit ETSAbilityStageContext(const std::shared_ptr<Context>& context) : context_(context) {}
+    explicit ETSAbilityStageContext(const std::shared_ptr<Context> &context) : context_(context) {}
     ~ETSAbilityStageContext() = default;
 
-    static void ConfigurationUpdated(ani_env* env, const std::shared_ptr<AppExecFwk::Configuration> &config);
+    static void ConfigurationUpdated(ani_env *env, const std::shared_ptr<AppExecFwk::Configuration> &config);
 
     std::shared_ptr<Context> GetContext()
     {
         return context_.lock();
     }
-    static ani_object CreateEtsAbilityStageContext(ani_env* env, std::shared_ptr<Context> context);
+    static ani_object CreateEtsAbilityStageContext(ani_env *env, std::shared_ptr<Context> context);
 private:
-    static void SetConfiguration(ani_env* env, ani_class stageCls, ani_object stageCtxObj,
+    static void SetConfiguration(ani_env *env, ani_class stageCls, ani_object stageCtxObj,
         std::shared_ptr<Context> &context);
 private:
     std::weak_ptr<Context> context_;

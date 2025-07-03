@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "bundle_constants.h"
 #include "hilog_tag_wrapper.h"
 #include "json_util.h"
+#include "nlohmann/json.hpp"
 #include "string_ex.h"
 
 namespace OHOS {
@@ -49,86 +50,234 @@ const std::string PROCESS = "process";
 const std::string COMPILE_MODE = "compileMode";
 const std::string UID = "uid";
 }; // namespace
-
-bool to_json(cJSON *&jsonObject, const ExtensionAbilityInfo &extensionInfo)
+void to_json(nlohmann::json &jsonObject, const ExtensionAbilityInfo &extensionInfo)
 {
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
-    jsonObject = cJSON_CreateArray();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
-        return false;
-    }
-    cJSON_AddStringToObject(jsonObject, Constants::BUNDLE_NAME, extensionInfo.bundleName.c_str());
-    cJSON_AddStringToObject(jsonObject, Constants::MODULE_NAME, extensionInfo.moduleName.c_str());
-    cJSON_AddStringToObject(jsonObject, NAME.c_str(), extensionInfo.name.c_str());
-    cJSON_AddStringToObject(jsonObject, SRC_ENTRANCE.c_str(), extensionInfo.srcEntrance.c_str());
-    cJSON_AddStringToObject(jsonObject, ICON.c_str(), extensionInfo.icon.c_str());
-    cJSON_AddNumberToObject(jsonObject, ICON_ID.c_str(), static_cast<double>(extensionInfo.iconId));
-    cJSON_AddStringToObject(jsonObject, LABEL.c_str(), extensionInfo.label.c_str());
-    cJSON_AddNumberToObject(jsonObject, LABEL_ID.c_str(), static_cast<double>(extensionInfo.labelId));
-    cJSON_AddStringToObject(jsonObject, DESCRIPTION.c_str(), extensionInfo.description.c_str());
-    cJSON_AddNumberToObject(jsonObject, DESCRIPTION_ID.c_str(), static_cast<double>(extensionInfo.descriptionId));
-    cJSON_AddNumberToObject(jsonObject, PRIORITY.c_str(), static_cast<double>(extensionInfo.priority));
-    cJSON_AddNumberToObject(jsonObject, TYPE.c_str(), static_cast<double>(extensionInfo.type));
-    cJSON_AddStringToObject(jsonObject, READ_PERMISSION.c_str(), extensionInfo.readPermission.c_str());
-    cJSON_AddStringToObject(jsonObject, WRITE_PERMISSION.c_str(), extensionInfo.writePermission.c_str());
-    cJSON_AddStringToObject(jsonObject, URI.c_str(), extensionInfo.uri.c_str());
-
-    cJSON *permissionsItem = nullptr;
-    if (!to_json(permissionsItem, extensionInfo.permissions)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json permissions failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, PERMISSIONS.c_str(), permissionsItem);
-
-    cJSON_AddBoolToObject(jsonObject, VISIBLE.c_str(), extensionInfo.visible);
-
-    cJSON *metadataItem = nullptr;
-    if (!to_json(metadataItem, extensionInfo.metadata)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json metadata failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, META_DATA.c_str(), metadataItem);
-
-    cJSON_AddStringToObject(jsonObject, RESOURCE_PATH.c_str(), extensionInfo.resourcePath.c_str());
-    cJSON_AddStringToObject(jsonObject, Constants::HAP_PATH, extensionInfo.hapPath.c_str());
-    cJSON_AddBoolToObject(jsonObject, ENABLED.c_str(), extensionInfo.enabled);
-    cJSON_AddStringToObject(jsonObject, PROCESS.c_str(), extensionInfo.process.c_str());
-    cJSON_AddNumberToObject(jsonObject, COMPILE_MODE.c_str(), static_cast<double>(extensionInfo.compileMode));
-    cJSON_AddNumberToObject(jsonObject, UID.c_str(), static_cast<double>(extensionInfo.uid));
-    return true;
+    jsonObject = nlohmann::json {
+        {Constants::BUNDLE_NAME, extensionInfo.bundleName},
+        {Constants::MODULE_NAME, extensionInfo.moduleName},
+        {NAME, extensionInfo.name},
+        {SRC_ENTRANCE, extensionInfo.srcEntrance},
+        {ICON, extensionInfo.icon},
+        {ICON_ID, extensionInfo.iconId},
+        {LABEL, extensionInfo.label},
+        {LABEL_ID, extensionInfo.labelId},
+        {DESCRIPTION, extensionInfo.description},
+        {DESCRIPTION_ID, extensionInfo.descriptionId},
+        {PRIORITY, extensionInfo.priority},
+        {TYPE, extensionInfo.type},
+        {READ_PERMISSION, extensionInfo.readPermission},
+        {WRITE_PERMISSION, extensionInfo.writePermission},
+        {URI, extensionInfo.uri},
+        {PERMISSIONS, extensionInfo.permissions},
+        {VISIBLE, extensionInfo.visible},
+        {META_DATA, extensionInfo.metadata},
+        {RESOURCE_PATH, extensionInfo.resourcePath},
+        {Constants::HAP_PATH, extensionInfo.hapPath},
+        {ENABLED, extensionInfo.enabled},
+        {PROCESS, extensionInfo.process},
+        {COMPILE_MODE, extensionInfo.compileMode},
+        {UID, extensionInfo.uid}
+    };
 }
 
-void from_json(const cJSON *jsonObject, ExtensionAbilityInfo &extensionInfo)
+void from_json(const nlohmann::json &jsonObject, ExtensionAbilityInfo &extensionInfo)
 {
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
+    const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
-    GetStringValueIfFindKey(jsonObject, Constants::BUNDLE_NAME, extensionInfo.bundleName, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, Constants::MODULE_NAME, extensionInfo.moduleName, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, NAME, extensionInfo.name, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, SRC_ENTRANCE, extensionInfo.srcEntrance, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, ICON, extensionInfo.icon, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, ICON_ID, extensionInfo.iconId, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, LABEL, extensionInfo.label, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, LABEL_ID, extensionInfo.labelId, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, DESCRIPTION, extensionInfo.description, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, DESCRIPTION_ID, extensionInfo.descriptionId, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, PRIORITY, extensionInfo.priority, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, TYPE, extensionInfo.type, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, READ_PERMISSION, extensionInfo.readPermission, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, WRITE_PERMISSION, extensionInfo.writePermission, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, URI, extensionInfo.uri, false, parseResult);
-    GetStringValuesIfFindKey(jsonObject, PERMISSIONS, extensionInfo.permissions, false, parseResult);
-    GetBoolValueIfFindKey(jsonObject, VISIBLE, extensionInfo.visible, false, parseResult);
-    GetObjectValuesIfFindKey(jsonObject, META_DATA, extensionInfo.metadata, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, RESOURCE_PATH, extensionInfo.resourcePath, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, Constants::HAP_PATH, extensionInfo.hapPath, false, parseResult);
-    GetBoolValueIfFindKey(jsonObject, ENABLED, extensionInfo.enabled, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, PROCESS, extensionInfo.process, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, COMPILE_MODE, extensionInfo.compileMode, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, UID, extensionInfo.uid, false, parseResult);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        Constants::BUNDLE_NAME,
+        extensionInfo.bundleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        Constants::MODULE_NAME,
+        extensionInfo.moduleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        NAME,
+        extensionInfo.name,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        SRC_ENTRANCE,
+        extensionInfo.srcEntrance,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        ICON,
+        extensionInfo.icon,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        ICON_ID,
+        extensionInfo.iconId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        LABEL,
+        extensionInfo.label,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        LABEL_ID,
+        extensionInfo.labelId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        DESCRIPTION,
+        extensionInfo.description,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        DESCRIPTION_ID,
+        extensionInfo.descriptionId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        PRIORITY,
+        extensionInfo.priority,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<ExtensionAbilityType>(jsonObject,
+        jsonObjectEnd,
+        TYPE,
+        extensionInfo.type,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        READ_PERMISSION,
+        extensionInfo.readPermission,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        WRITE_PERMISSION,
+        extensionInfo.writePermission,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        URI,
+        extensionInfo.uri,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        PERMISSIONS,
+        extensionInfo.permissions,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        VISIBLE,
+        extensionInfo.visible,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<Metadata>>(jsonObject,
+        jsonObjectEnd,
+        META_DATA,
+        extensionInfo.metadata,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        RESOURCE_PATH,
+        extensionInfo.resourcePath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        Constants::HAP_PATH,
+        extensionInfo.hapPath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        ENABLED,
+        extensionInfo.enabled,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        PROCESS,
+        extensionInfo.process,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<CompileMode>(jsonObject,
+        jsonObjectEnd,
+        COMPILE_MODE,
+        extensionInfo.compileMode,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        UID,
+        extensionInfo.uid,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "ExtensionAbilityInfo error:%{public}d", parseResult);
     }

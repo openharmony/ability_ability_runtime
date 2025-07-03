@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -159,6 +159,14 @@ HWTEST_F(StartOptionsTest, start_options_test_005, TestSize.Level1)
     EXPECT_EQ(marshallResult, true);
     auto unmarshallResult = startOptions.Unmarshalling(parcel);
     EXPECT_EQ(unmarshallResult->GetHideStartWindow(), hideStartWindow);
+}
+
+HWTEST_F(StartOptionsTest, MarshallingTwo_test_001, TestSize.Level1)
+{
+    StartOptions startOptions;
+    Parcel parcel;
+    bool marshallResult = startOptions.MarshallingTwo(parcel);
+    EXPECT_EQ(marshallResult, true);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

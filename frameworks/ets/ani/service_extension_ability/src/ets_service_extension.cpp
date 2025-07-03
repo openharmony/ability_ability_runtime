@@ -24,18 +24,23 @@
 #include "hitrace_meter.h"
 #include "js_service_extension_context.h"
 
+#ifdef WINDOWS_PLATFORM
+#define ETS_EXPORT __declspec(dllexport)
+#else
+#define ETS_EXPORT __attribute__((visibility("default")))
+#endif
+
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 namespace {
-constexpr const char *CLASSNAME_SERVICE_ABILITY =
-    "L@ohos/app/ability/ServiceExtensionAbility/ServiceExtensionAbility;";
+constexpr const char *CLASSNAME_SERVICE_ABILITY = "L@ohos/app/ability/ServiceExtensionAbility/ServiceExtensionAbility;";
 constexpr const char *NATIVE_ONCONNECT_CALLBACK_SIGNATURE = "L@ohos/rpc/rpc/RemoteObject;:Z";
 constexpr const char *ON_CREATE_SIGNATURE = "L@ohos/app/ability/Want/Want;:V";
 constexpr const char *VOID_SIGNATURE = ":V";
 constexpr const char *ON_CONNECT_SIGNATURE = "L@ohos/app/ability/Want/Want;:Lstd/core/Object;";
 constexpr const char *CHECK_PROMISE_SIGNATURE = "Lstd/core/Object;:Z";
-constexpr const char *CALL_PROMISE_SIGNATURE = "Lstd/core/Object;:Z";
+constexpr const char *CALL_PROMISE_SIGNATURE = "Lstd/core/Promise;:Z";
 constexpr const char *ON_DISCONNECT_SIGNATURE = "L@ohos/app/ability/Want/Want;:V";
 constexpr const char *ON_REQUEST_SIGNATURE = "L@ohos/app/ability/Want/Want;D:V";
 
@@ -46,14 +51,13 @@ void DisconnectPromiseCallback(ani_env *env, ani_object aniObj)
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
         return;
     }
-    ani_long disconnectCallbackPoint = 0;
+    ani_long disconnectCallback = 0;
     ani_status status = ANI_ERROR;
-    if ((status = env->Object_GetFieldByName_Long(aniObj, "disconnectCallbackPoint", &disconnectCallbackPoint)) !=
-        ANI_OK) {
+    if ((status = env->Object_GetFieldByName_Long(aniObj, "disconnectCallback", &disconnectCallback)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
         return;
     }
-    auto *callbackInfo = reinterpret_cast<AppExecFwk::AbilityTransactionCallbackInfo<> *>(disconnectCallbackPoint);
+    auto *callbackInfo = reinterpret_cast<AppExecFwk::AbilityTransactionCallbackInfo<> *>(disconnectCallback);
     if (callbackInfo == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null callbackInfo");
         return;
@@ -69,9 +73,9 @@ void ConnectPromiseCallback(ani_env *env, ani_object aniObj, ani_object obj)
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
         return;
     }
-    ani_long connectCallbackPoint = 0;
+    ani_long connectCallback = 0;
     ani_status status = ANI_ERROR;
-    if ((status = env->Object_GetFieldByName_Long(aniObj, "connectCallbackPoint", &connectCallbackPoint)) != ANI_OK) {
+    if ((status = env->Object_GetFieldByName_Long(aniObj, "connectCallback", &connectCallback)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
         return;
     }
@@ -80,7 +84,7 @@ void ConnectPromiseCallback(ani_env *env, ani_object aniObj, ani_object obj)
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null remoteObject");
     }
     auto *callbackInfo =
-        reinterpret_cast<AppExecFwk::AbilityTransactionCallbackInfo<sptr<IRemoteObject>> *>(connectCallbackPoint);
+        reinterpret_cast<AppExecFwk::AbilityTransactionCallbackInfo<sptr<IRemoteObject>> *>(connectCallback);
     if (callbackInfo == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null callbackInfo");
         return;
@@ -93,7 +97,7 @@ void ConnectPromiseCallback(ani_env *env, ani_object aniObj, ani_object obj)
 
 EtsServiceExtension *EtsServiceExtension::Create(const std::unique_ptr<Runtime> &runtime)
 {
-    return new EtsServiceExtension(static_cast<ETSRuntime &>(*runtime));
+    return new (std::nothrow) EtsServiceExtension(static_cast<ETSRuntime &>(*runtime));
 }
 
 EtsServiceExtension::EtsServiceExtension(ETSRuntime &etsRuntime) : etsRuntime_(etsRuntime) {}
@@ -228,14 +232,14 @@ sptr<IRemoteObject> EtsServiceExtension::OnConnect(const AAFwk::Want &want,
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null wantRef");
         return nullptr;
     }
-    ani_long connectCallbackPoint = (ani_long)callbackInfo;
+    ani_long connectCallback = (ani_long)callbackInfo;
     ani_status status = ANI_ERROR;
     ani_field callbackField = nullptr;
-    if ((status = env->Class_FindField(etsObj_->aniCls, "connectCallbackPoint", &callbackField)) != ANI_OK) {
+    if ((status = env->Class_FindField(etsObj_->aniCls, "connectCallback", &callbackField)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
         return nullptr;
     }
-    if ((status = env->Object_SetField_Long(etsObj_->aniObj, callbackField, connectCallbackPoint)) != ANI_OK) {
+    if ((status = env->Object_SetField_Long(etsObj_->aniObj, callbackField, connectCallback)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
         return nullptr;
     }
@@ -317,18 +321,25 @@ void EtsServiceExtension::OnDisconnect(
         OnDisconnect(want);
         return;
     }
-    ani_long disconnectCallbackPoint = (ani_long)callbackInfo;
-    ani_status status = ANI_ERROR;
+    ani_long disconnectCallback = (ani_long)callbackInfo;
+
     ani_field field = nullptr;
-    if ((status = env->Class_FindField(etsObj_->aniCls, "disconnectCallbackPoint", &field)) != ANI_OK) {
+    ani_status status = env->Class_FindField(etsObj_->aniCls, "disconnectCallback", &field);
+    if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
         return;
     }
-    if ((status = env->Object_SetField_Long(etsObj_->aniObj, field, disconnectCallbackPoint)) != ANI_OK) {
+    if (field == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null field");
+        return;
+    }
+    if ((status = env->Object_SetField_Long(etsObj_->aniObj, field, disconnectCallback)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
         return;
     }
-    CallObjectMethod(false, "callOnDisconnect", ON_DISCONNECT_SIGNATURE, wantRef);
+    ani_boolean callResult = ANI_FALSE;
+    CallObjectMethod(true, "callOnDisconnect", ON_DISCONNECT_SIGNATURE, &callResult, wantRef);
+    isAsyncCallback = callResult;
 }
 
 void EtsServiceExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId)
@@ -392,3 +403,9 @@ void EtsServiceExtension::ConfigurationUpdated() {}
 void EtsServiceExtension::Dump(const std::vector<std::string> &params, std::vector<std::string> &info) {}
 } // namespace AbilityRuntime
 } // namespace OHOS
+
+ETS_EXPORT extern "C" OHOS::AbilityRuntime::ServiceExtension *OHOS_ETS_Service_Extension_Create(
+    const std::unique_ptr<OHOS::AbilityRuntime::Runtime> &runtime)
+{
+    return OHOS::AbilityRuntime::EtsServiceExtension::Create(runtime);
+}

@@ -25,16 +25,17 @@
 #include "child_process_record.h"
 #include "cache_process_manager.h"
 #undef private
-#include "user_record_manager.h"
-#include "mock_my_status.h"
-#include "ability_manager_errors.h"
-#include "overlay_manager_proxy.h"
 #include "ability_connect_callback_stub.h"
+#include "ability_manager_errors.h"
 #include "app_scheduler_const.h"
-#include "want.h"
 #include "application_info.h"
 #include "mock_app_scheduler.h"
+#include "mock_my_status.h"
+#include "mock_start_specified_ability_response.h"
+#include "overlay_manager_proxy.h"
 #include "parameters.h"
+#include "user_record_manager.h"
+#include "want.h"
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::AAFwk;
@@ -88,7 +89,8 @@ public:
     {}
     void OnTimeoutResponse(int32_t requestId) override
     {}
-    void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId) override
+    void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId,
+        const std::string &callerProcessName) override
     {}
     void OnNewProcessRequestTimeoutResponse(int32_t requestId) override
     {}
@@ -1919,6 +1921,200 @@ HWTEST_F(AppMgrServiceInnerNinthTest, StartAbility_011, TestSize.Level1)
     EXPECT_TRUE(AAFwk::MyStatus::GetInstance().getStateCalled_);
     EXPECT_TRUE(AAFwk::MyStatus::GetInstance().startAbility_launchAbility_called_);
     TAG_LOGI(AAFwkTag::TEST, "StartAbility_011 end");
+}
+
+/**
+ * @tc.name: StartSpecifiedProcess_0100
+ * @tc.desc: Test StartSpecifiedProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedProcess_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0100 start");
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = nullptr;
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    ASSERT_NE(appMgrServiceInner->remoteClientManager_, nullptr);
+    EXPECT_EQ(appMgrServiceInner->remoteClientManager_->GetBundleManagerHelper(), nullptr);
+    AAFwk::Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    int32_t requestId = 100;
+    std::string customProcess = "customProcess";
+    appMgrServiceInner->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess);
+    BundleInfo bundleInfo;
+    HapModuleInfo hapModuleInfo;
+    auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo.applicationInfo);
+    EXPECT_EQ(appMgrServiceInner->GetBundleAndHapInfo(abilityInfo, appInfo, bundleInfo, hapModuleInfo, 0), false);
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0100 end");
+}
+
+/**
+ * @tc.name: StartSpecifiedProcess_0200
+ * @tc.desc: Test StartSpecifiedProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedProcess_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0200 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    ASSERT_NE(appMgrServiceInner->remoteClientManager_, nullptr);
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
+    EXPECT_NE(appMgrServiceInner->remoteClientManager_->GetBundleManagerHelper(), nullptr);
+    AAFwk::MyStatus::GetInstance().getBundleInfoV9_ = 0;
+    AAFwk::MyStatus::GetInstance().getHapModuleInfo_ = true;
+    AAFwk::MyStatus::GetInstance().isLogoutUser_ = true;
+    AAFwk::Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    int32_t requestId = 100;
+    std::string customProcess = "customProcess";
+    appMgrServiceInner->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess);
+    EXPECT_TRUE(AAFwk::MyStatus::GetInstance().isLogoutUserCalled_);
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0200 end");
+}
+
+/**
+ * @tc.name: StartSpecifiedProcess_0300
+ * @tc.desc: Test StartSpecifiedProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedProcess_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0300 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appMgrServiceInner->remoteClientManager_, nullptr);
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
+    EXPECT_NE(appMgrServiceInner->remoteClientManager_->GetBundleManagerHelper(), nullptr);
+    AAFwk::MyStatus::GetInstance().getBundleInfoV9_ = 0;
+    AAFwk::MyStatus::GetInstance().getHapModuleInfo_ = true;
+    AAFwk::MyStatus::GetInstance().isLogoutUser_ = false;
+    AAFwk::MyStatus::GetInstance().masterProcessRunningRecord_ = nullptr;
+    AAFwk::MyStatus::GetInstance().checkAppRunningCall_ = 0;
+    ApplicationInfo appInfo;
+    appInfo.name = "app";
+    appInfo.bundleName = "bundleName";
+    auto app = std::make_shared<ApplicationInfo>(appInfo);
+    AAFwk::MyStatus::GetInstance().checkAppRunning_ =
+        std::make_shared<AppRunningRecord>(app, 123, "bundleName");
+    AAFwk::Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SHARE;
+    int32_t requestId = 100;
+    std::string customProcess = "customProcess";
+    appMgrServiceInner->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess);
+    EXPECT_TRUE(AAFwk::MyStatus::GetInstance().isFindMasterProcessAppRunningRecordCalled_);
+    EXPECT_EQ(AAFwk::MyStatus::GetInstance().checkAppRunningCall_, 1);
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0300 end");
+}
+
+/**
+ * @tc.name: StartSpecifiedProcess_0400
+ * @tc.desc: Test StartSpecifiedProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedProcess_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0400 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appMgrServiceInner->remoteClientManager_, nullptr);
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
+    EXPECT_NE(appMgrServiceInner->remoteClientManager_->GetBundleManagerHelper(), nullptr);
+    AAFwk::MyStatus::GetInstance().getBundleInfoV9_ = 0;
+    AAFwk::MyStatus::GetInstance().getHapModuleInfo_ = true;
+    AAFwk::MyStatus::GetInstance().isLogoutUser_ = false;
+    AAFwk::MyStatus::GetInstance().masterProcessRunningRecord_ = nullptr;
+    AAFwk::MyStatus::GetInstance().checkAppRunningCall_ = 0;
+    ApplicationInfo appInfo;
+    appInfo.name = "app";
+    appInfo.bundleName = "bundleName";
+    auto app = std::make_shared<ApplicationInfo>(appInfo);
+    AAFwk::MyStatus::GetInstance().checkAppRunning_ =
+        std::make_shared<AppRunningRecord>(app, 123, "bundleName");
+    AAFwk::Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    int32_t requestId = 100;
+    std::string customProcess = "customProcess";
+    appMgrServiceInner->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess);
+    EXPECT_NE(AAFwk::MyStatus::GetInstance().checkAppRunningCall_, 0);
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0400 end");
+}
+
+/**
+ * @tc.name: StartSpecifiedProcess_0500
+ * @tc.desc: Test StartSpecifiedProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedProcess_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0500 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appMgrServiceInner->remoteClientManager_, nullptr);
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
+    EXPECT_NE(appMgrServiceInner->remoteClientManager_->GetBundleManagerHelper(), nullptr);
+    AAFwk::MyStatus::GetInstance().getBundleInfoV9_ = 0;
+    AAFwk::MyStatus::GetInstance().getHapModuleInfo_ = true;
+    AAFwk::MyStatus::GetInstance().isLogoutUser_ = false;
+    ApplicationInfo appInfo;
+    appInfo.name = "app";
+    appInfo.bundleName = "bundleName";
+    auto app = std::make_shared<ApplicationInfo>(appInfo);
+    AAFwk::MyStatus::GetInstance().masterProcessRunningRecord_ = nullptr;
+    AAFwk::MyStatus::GetInstance().checkAppRunning_ = nullptr;
+    AAFwk::MyStatus::GetInstance().appRecordForSpecifiedProcess_ =
+        std::make_shared<AppRunningRecord>(app, 123, "bundleName1");
+    AAFwk::Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    int32_t requestId = 100;
+    std::string customProcess = "customProcess";
+    appMgrServiceInner->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess);
+    EXPECT_TRUE(AAFwk::MyStatus::GetInstance().isCheckAppRunningRecordForSpecifiedProcessCalled_);
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0500 end");
+}
+
+/**
+ * @tc.name: StartSpecifiedProcess_0600
+ * @tc.desc: Test StartSpecifiedProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedProcess_0600, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0600 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
+    auto response = sptr<MockStartSpecifiedAbilityResponse>::MakeSptr();
+    appMgrServiceInner->startSpecifiedAbilityResponse_ = response;
+    bool isOnNewProcessRequestResponseCalled = false;
+    EXPECT_CALL(*response, OnNewProcessRequestResponse)
+        .WillOnce([&isOnNewProcessRequestResponseCalled](const std::string&, int32_t, const std::string&) {
+            isOnNewProcessRequestResponseCalled = true;
+        });
+    ASSERT_NE(appMgrServiceInner->startSpecifiedAbilityResponse_, nullptr);
+    ASSERT_NE(appMgrServiceInner->remoteClientManager_, nullptr);
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
+    EXPECT_NE(appMgrServiceInner->remoteClientManager_->GetBundleManagerHelper(), nullptr);
+    AAFwk::MyStatus::GetInstance().getBundleInfoV9_ = 0;
+    AAFwk::MyStatus::GetInstance().getHapModuleInfo_ = true;
+    AAFwk::MyStatus::GetInstance().getSandboxHapModuleInfo_ = 0;
+    AAFwk::MyStatus::GetInstance().isLogoutUser_ = false;
+    AAFwk::MyStatus::GetInstance().masterProcessRunningRecord_ = nullptr;
+    AAFwk::MyStatus::GetInstance().checkAppRunning_ = nullptr;
+    AAFwk::MyStatus::GetInstance().appRecordForSpecifiedProcess_ = nullptr;
+    AAFwk::Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    int32_t requestId = 100;
+    std::string customProcess = "customProcess";
+    appMgrServiceInner->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess);
+    EXPECT_TRUE(isOnNewProcessRequestResponseCalled);
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0600 end");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

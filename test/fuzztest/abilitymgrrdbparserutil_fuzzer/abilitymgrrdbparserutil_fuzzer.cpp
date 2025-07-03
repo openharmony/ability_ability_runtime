@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,10 +71,9 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     instance.ParsePreInstallAbilityConfig(jsonStr, list);
     std::vector<std::string> rootDirList;
     instance.GetPreInstallRootDirList(rootDirList);
-    cJSON *jsonBuf = nullptr;
+    nlohmann::json jsonBuf;
     instance.ReadFileIntoJson(jsonStr, jsonBuf);
     instance.FilterInfoFromJson(jsonBuf, list);
-    cJSON_Delete(jsonBuf);
     return true;
 }
 }

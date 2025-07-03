@@ -19,9 +19,9 @@
 #include <cstdint>
 #include <fuzzer/FuzzedDataProvider.h>
 
+#include "ability_fuzz_util.h"
 #include "insight_intent_execute_param.h"
 #include "insight_intent_utils.h"
-#include "../ability_fuzz_util.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;

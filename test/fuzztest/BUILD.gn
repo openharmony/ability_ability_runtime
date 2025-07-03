@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 group("fuzztest") {
@@ -67,6 +66,7 @@ group("fuzztest") {
     "abilitycontext_fuzzer:fuzztest",
     "abilitydebugdeal_fuzzer:fuzztest",
     "abilitydebugresponseproxy_fuzzer:fuzztest",
+    "abilityecologicalrulemgrservicefirst_fuzzer:fuzztest",
     "abilityeventutil_fuzzer:fuzztest",
     "abilityfirstframestateobservermanager_fuzzer:fuzztest",
     "abilityforegroundstateobserverproxy_fuzzer:fuzztest",
@@ -83,6 +83,7 @@ group("fuzztest") {
     "abilityinterfacesappmgrnativechildnotifyproxy_fuzzer:fuzztest",
     "abilityinterfacesappmgrnativechildnotifystub_fuzzer:fuzztest",
     "abilityinterfacesappmgrrenderstateobserverstub_fuzzer:fuzztest",
+    "abilitykeepalivedatamanager_fuzzer:fuzztest",
     "abilitymanagerserviceb_fuzzer:fuzztest",
     "abilitymanagerservicec_fuzzer:fuzztest",
     "abilitymanagerserviced_fuzzer:fuzztest",
@@ -298,14 +299,26 @@ group("fuzztest") {
     "completefirstframedrawing_fuzzer:fuzztest",
     "connectability_fuzzer:fuzztest",
     "connectionobserverclient_fuzzer:fuzztest",
+    "connectionobserverclientimplfifth_fuzzer:fuzztest",
+    "connectionobserverclientimplfirst_fuzzer:fuzztest",
+    "connectionobserverclientimplfourth_fuzzer:fuzztest",
+    "connectionobserverclientimplsecond_fuzzer:fuzztest",
+    "connectionobserverclientimplthird_fuzzer:fuzztest",
     "connectionstatemanager_fuzzer:fuzztest",
     "continueability_fuzzer:fuzztest",
     "continuemission_fuzzer:fuzztest",
     "crowdtestinterceptor_fuzzer:fuzztest",
     "dataabilitymanager_fuzzer:fuzztest",
+    "dataabilityrecord_fuzzer:fuzztest",
     "deeplinkreserveconfig_fuzzer:fuzztest",
     "delegatordoabilityforeground_fuzzer:fuzztest",
     "dialogsessioninfo_fuzzer:fuzztest",
+    "dialogsessionmanager_fuzzer:fuzztest",
+    "dialogsessionmanagerfirst_fuzzer:fuzztest",
+    "dialogsessionmanagersecond_fuzzer:fuzztest",
+    "dialogsessionmanagerthird_fuzzer:fuzztest",
+    "dialogsessionmanagerfourth_fuzzer:fuzztest",
+    "dialogsessionmanagerfifth_fuzzer:fuzztest",
     "disposedobserver_fuzzer:fuzztest",
     "doabilitybackground_fuzzer:fuzztest",
     "doabilityforeground_fuzzer:fuzztest",
@@ -329,6 +342,7 @@ group("fuzztest") {
     "getrunningprocessinfobytoken_fuzzer:fuzztest",
     "getwantsender_fuzzer:fuzztest",
     "handledlpapp_fuzzer:fuzztest",
+    "insightintentdbcache_fuzzer:fuzztest",
     "insightintentexecutecallbackstub_fuzzer:fuzztest",
     "insightintentexecutemanagerfirst_fuzzer:fuzztest",
     "insightintentexecutemanagersecond_fuzzer:fuzztest",
@@ -367,6 +381,7 @@ group("fuzztest") {
     "killprocessesbybundlename_fuzzer:fuzztest",
     "killprocessesbyuserid_fuzzer:fuzztest",
     "loadability_fuzzer:fuzztest",
+    "localpendingwant_fuzzer:fuzztest",
     "lockmissionforcleanup_fuzzer:fuzztest",
     "minimizeability_fuzzer:fuzztest",
     "missiondatastorage_fuzzer:fuzztest",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,13 @@
 #include "insight_intent_profile.h"
 
 #include "hilog_tag_wrapper.h"
-#include "insight_intent_json_util.h"
+#include "json_util.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
+using JsonType = AppExecFwk::JsonType;
+using ArrayType = AppExecFwk::ArrayType;
+
 namespace {
 int32_t g_parseResult = ERR_OK;
 std::mutex g_mutex;
@@ -75,46 +78,136 @@ struct InsightIntentProfileInfoVec {
     std::vector<InsightIntentProfileInfo> insightIntents {};
 };
 
-void from_json(const cJSON *jsonObject, UIAbilityProfileInfo &info)
+void from_json(const nlohmann::json &jsonObject, UIAbilityProfileInfo &info)
 {
-    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_ABILITY, info.abilityName, true, g_parseResult);
-    GetStringValuesIfFindKey(jsonObject, INSIGHT_INTENT_EXECUTE_MODE, info.supportExecuteMode, true, g_parseResult);
-}
-
-void from_json(const cJSON *jsonObject, UIExtensionProfileInfo &info)
-{
-    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_ABILITY, info.abilityName, true, g_parseResult);
-}
-
-void from_json(const cJSON *jsonObject, ServiceExtensionProfileInfo &info)
-{
-    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_ABILITY, info.abilityName, true, g_parseResult);
-}
-
-void from_json(const cJSON *jsonObject, FormProfileInfo &info)
-{
-    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_ABILITY, info.abilityName, true, g_parseResult);
-    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_FORM_NAME, info.formName, true, g_parseResult);
-}
-
-void from_json(const cJSON *jsonObject, InsightIntentProfileInfo &insightIntentInfo)
-{
-    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_NAME, insightIntentInfo.intentName, true, g_parseResult);
-    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_DOMAIN, insightIntentInfo.intentDomain, true, g_parseResult);
-    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_VERSION, insightIntentInfo.intentVersion, true, g_parseResult);
-    GetStringValueIfFindKey(jsonObject, INSIGHT_INTENT_SRC_ENTRY, insightIntentInfo.srcEntry, true, g_parseResult);
-    GetObjectValueIfFindKey(jsonObject, INSIGHT_INTENT_UI_ABILITY, insightIntentInfo.uiAbilityProfileInfo, false,
+    const auto &jsonObjectEnd = jsonObject.end();
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_ABILITY,
+        info.abilityName,
+        true,
         g_parseResult);
-    GetObjectValueIfFindKey(jsonObject, INSIGHT_INTENT_UI_EXTENSION, insightIntentInfo.uiExtensionProfileInfo, false,
-        g_parseResult);
-    GetObjectValueIfFindKey(jsonObject, INSIGHT_INTENT_SERVICE_EXTENSION, insightIntentInfo.serviceExtensionProfileInfo,
-        false, g_parseResult);
-    GetObjectValueIfFindKey(jsonObject, INSIGHT_INTENT_FORM, insightIntentInfo.formProfileInfo, false, g_parseResult);
+    AppExecFwk::GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_EXECUTE_MODE,
+        info.supportExecuteMode,
+        JsonType::ARRAY,
+        true,
+        g_parseResult,
+        ArrayType::STRING);
 }
 
-void from_json(const cJSON *jsonObject, InsightIntentProfileInfoVec &infos)
+void from_json(const nlohmann::json &jsonObject, UIExtensionProfileInfo &info)
 {
-    GetObjectValuesIfFindKey(jsonObject, INSIGHT_INTENTS, infos.insightIntents, false, g_parseResult);
+    const auto &jsonObjectEnd = jsonObject.end();
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_ABILITY,
+        info.abilityName,
+        true,
+        g_parseResult);
+}
+
+void from_json(const nlohmann::json &jsonObject, ServiceExtensionProfileInfo &info)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_ABILITY,
+        info.abilityName,
+        true,
+        g_parseResult);
+}
+
+void from_json(const nlohmann::json &jsonObject, FormProfileInfo &info)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_ABILITY,
+        info.abilityName,
+        true,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_FORM_NAME,
+        info.formName,
+        true,
+        g_parseResult);
+}
+
+void from_json(const nlohmann::json &jsonObject, InsightIntentProfileInfo &insightIntentInfo)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_NAME,
+        insightIntentInfo.intentName,
+        true,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_DOMAIN,
+        insightIntentInfo.intentDomain,
+        true,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_VERSION,
+        insightIntentInfo.intentVersion,
+        true,
+        g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_SRC_ENTRY,
+        insightIntentInfo.srcEntry,
+        true,
+        g_parseResult);
+    AppExecFwk::GetValueIfFindKey<UIAbilityProfileInfo>(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_UI_ABILITY,
+        insightIntentInfo.uiAbilityProfileInfo,
+        JsonType::OBJECT,
+        false,
+        g_parseResult,
+        ArrayType::NOT_ARRAY);
+    AppExecFwk::GetValueIfFindKey<UIExtensionProfileInfo>(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_UI_EXTENSION,
+        insightIntentInfo.uiExtensionProfileInfo,
+        JsonType::OBJECT,
+        false,
+        g_parseResult,
+        ArrayType::NOT_ARRAY);
+    AppExecFwk::GetValueIfFindKey<ServiceExtensionProfileInfo>(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_SERVICE_EXTENSION,
+        insightIntentInfo.serviceExtensionProfileInfo,
+        JsonType::OBJECT,
+        false,
+        g_parseResult,
+        ArrayType::NOT_ARRAY);
+    AppExecFwk::GetValueIfFindKey<FormProfileInfo>(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_FORM,
+        insightIntentInfo.formProfileInfo,
+        JsonType::OBJECT,
+        false,
+        g_parseResult,
+        ArrayType::NOT_ARRAY);
+}
+
+void from_json(const nlohmann::json &jsonObject, InsightIntentProfileInfoVec &infos)
+{
+    const auto &jsonObjectEnd = jsonObject.end();
+    AppExecFwk::GetValueIfFindKey<std::vector<InsightIntentProfileInfo>>(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENTS,
+        infos.insightIntents,
+        JsonType::ARRAY,
+        false,
+        g_parseResult,
+        ArrayType::OBJECT);
 }
 
 bool TransformToInsightIntentInfo(const InsightIntentProfileInfo &insightIntent, InsightIntentInfo &info)
@@ -165,8 +258,8 @@ bool TransformToInfos(const InsightIntentProfileInfoVec &profileInfos, std::vect
 bool InsightIntentProfile::TransformTo(const std::string &profileStr, std::vector<InsightIntentInfo> &intentInfos)
 {
     TAG_LOGD(AAFwkTag::INTENT, "called");
-    cJSON *jsonObject = cJSON_Parse(profileStr.c_str());
-    if (jsonObject == nullptr) {
+    auto jsonObject = nlohmann::json::parse(profileStr, nullptr, false);
+    if (jsonObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::INTENT, "discarded jsonObject");
         return false;
     }
@@ -175,17 +268,16 @@ bool InsightIntentProfile::TransformTo(const std::string &profileStr, std::vecto
     {
         std::lock_guard<std::mutex> lock(g_mutex);
         g_parseResult = ERR_OK;
-        from_json(jsonObject, profileInfos);
+        profileInfos = jsonObject.get<InsightIntentProfileInfoVec>();
         if (g_parseResult != ERR_OK) {
             TAG_LOGE(AAFwkTag::INTENT, "g_parseResult :%{public}d", g_parseResult);
             int32_t ret = g_parseResult;
             // need recover parse result to ERR_OK
             g_parseResult = ERR_OK;
-            cJSON_Delete(jsonObject);
             return ret;
         }
     }
-    cJSON_Delete(jsonObject);
+
     return TransformToInfos(profileInfos, intentInfos);
 }
 } // namespace AbilityRuntime

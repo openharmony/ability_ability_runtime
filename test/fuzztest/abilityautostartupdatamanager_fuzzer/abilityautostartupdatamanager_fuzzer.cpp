@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,21 +53,27 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     AbilityRuntime::AutoStartupInfo info;
     bool isAutoStartup = *data % ENABLE;
     bool isEdmForce = *data % ENABLE;
+    bool isCalledByEDM = *data % ENABLE;
     abilityAutoStartupDataManager->InsertAutoStartupData(info, isAutoStartup, isEdmForce);
     abilityAutoStartupDataManager->UpdateAutoStartupData(info, isAutoStartup, isEdmForce);
     std::string strParam(data, size);
     int32_t in32Param = static_cast<int32_t>(GetU32Data(data));
     abilityAutoStartupDataManager->QueryAutoStartupData(info);
     std::vector<AbilityRuntime::AutoStartupInfo> infoList;
-    abilityAutoStartupDataManager->QueryAllAutoStartupApplications(infoList, in32Param);
+    abilityAutoStartupDataManager->QueryAllAutoStartupApplications(infoList, in32Param, isCalledByEDM);
     abilityAutoStartupDataManager->GetCurrentAppAutoStartupData(strParam, infoList, strParam);
     abilityAutoStartupDataManager->GetKvStore();
     abilityAutoStartupDataManager->CheckKvStore();
     DistributedKv::Value value;
     DistributedKv::Key key;
-    abilityAutoStartupDataManager->ConvertAutoStartupStatusFromValue(value, isAutoStartup, isEdmForce);
+    AbilityRuntime::AutoStartupStatus asustatus;
+    asustatus.isAutoStartup = *data % ENABLE;
+    asustatus.isEdmForce = *data % ENABLE;
+    asustatus.setterUserId = in32Param;
+    abilityAutoStartupDataManager->ConvertAutoStartupStatusFromValue(value, asustatus);
     abilityAutoStartupDataManager->ConvertAutoStartupDataToKey(info);
     abilityAutoStartupDataManager->ConvertAutoStartupInfoFromKeyAndValue(key, value);
+    nlohmann::json jsonObject;
     std::string keys(data, size);
     std::string values(data, size);
     bool checkEmpty = *data % ENABLE;

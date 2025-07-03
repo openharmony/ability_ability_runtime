@@ -31,6 +31,7 @@ ohos_fuzztest("KeepAliveProcessManagerEighthFuzzTest") {
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include/keep_alive",
     "${ability_runtime_services_path}/common/include",
+    "${ability_runtime_test_path}/fuzztest/",
   ]
   cflags = [
     "-g",
@@ -87,7 +88,6 @@ ohos_fuzztest("KeepAliveProcessManagerEighthFuzzTest") {
     "init:libbeget_proxy",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "kv_store:distributeddata_inner",
     "napi:ace_napi",
     "relational_store:native_dataability",

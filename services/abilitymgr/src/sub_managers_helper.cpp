@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +25,6 @@
 
 namespace OHOS {
 namespace AAFwk {
-constexpr int32_t U0_USER_ID = 0;
-constexpr int32_t U1_USER_ID = 1;
 constexpr int32_t INVALID_USER_ID = -1;
 
 SubManagersHelper::SubManagersHelper(

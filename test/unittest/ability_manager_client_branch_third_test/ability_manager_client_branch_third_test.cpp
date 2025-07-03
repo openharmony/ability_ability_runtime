@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1192,6 +1192,20 @@ HWTEST_F(AbilityManagerClientBranchThirdTest, TerminateMission_0400, TestSize.Le
         .WillOnce(Return(WMError::WM_DO_NOTHING));
     auto result = client_->TerminateMission(0);
     EXPECT_EQ(result, static_cast<ErrCode>(WMError::WM_DO_NOTHING));
+}
+
+/**
+ * @tc.name: AbilityManagerClient_SetOnNewWantSkipScenarios_0100
+ * @tc.desc: SetOnNewWantSkipScenarios_0100
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchThirdTest, SetOnNewWantSkipScenarios_0100, TestSize.Level1)
+{
+    sptr<IRemoteObject> callerToken = nullptr;
+    int32_t scenarios = 0;
+    EXPECT_NE(client_, nullptr);
+    auto result = client_->SetOnNewWantSkipScenarios(callerToken, scenarios);
+    EXPECT_EQ(result, ERR_OK);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

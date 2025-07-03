@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,6 +27,7 @@ ohos_fuzztest("BundleMgrHelperFuzzTest") {
   include_dirs = [
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_innerkits_path}/dataobs_manager/include",
+    "${ability_runtime_test_path}/fuzztest",
   ]
   cflags = [
     "-g",
@@ -67,6 +68,8 @@ ohos_fuzztest("BundleMgrHelperFuzzTest") {
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "safwk:system_ability_fwk",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
     "ipc:ipc_core",

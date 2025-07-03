@@ -752,10 +752,30 @@ HWTEST_F(AbilityKeepAliveDataManagerTest, IsEqualSetterId_300, TestSize.Level1)
     KeepAliveInfo info;
     info.userId = 1;
     info.setterId = 100;
-    DistributedKv::Key key = abilityKeepAliveDataManager.ConvertKeepAliveDataToKey(info);;
+    DistributedKv::Key key = abilityKeepAliveDataManager.ConvertKeepAliveDataToKey(info);
     auto result = abilityKeepAliveDataManager.IsEqualSetterId(key, info);
     EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "IsEqualSetterId_300 end";
+}
+
+/**
+ * Feature: AbilityKeepAliveDataManager
+ * Function: IsEqualSetterId
+ * SubFunction: NA
+ * FunctionPoints: AbilityKeepAliveDataManager IsEqualSetterId
+ */
+HWTEST_F(AbilityKeepAliveDataManagerTest, IsEqualSetterId_400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsEqualSetterId_400 start";
+    AbilityKeepAliveDataManager abilityKeepAliveDataManager;
+    KeepAliveInfo info;
+    info.userId = 1;
+    info.setterId = 100;
+    DistributedKv::Key key = abilityKeepAliveDataManager.ConvertKeepAliveDataToKey(info);
+    info.setterId = 101;
+    auto result = abilityKeepAliveDataManager.IsEqualSetterId(key, info);
+    EXPECT_FALSE(result);
+    GTEST_LOG_(INFO) << "IsEqualSetterId_400 end";
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
