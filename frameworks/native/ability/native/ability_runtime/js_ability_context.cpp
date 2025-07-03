@@ -81,6 +81,24 @@ constexpr int64_t MAX_REQUEST_CODE = 562949953421311;
 constexpr size_t MAX_REQUEST_CODE_LENGTH = 15;
 constexpr int32_t BASE_REQUEST_CODE_NUM = 10;
 
+void* DetachNewAbilityContext(napi_env, void* nativeObject, void*)
+{
+    auto* origContext = static_cast<std::weak_ptr<AbilityContext> *>(nativeObject);
+    if (origContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "origContext is null");
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::CONTEXT, "New detached ability context");
+    auto* detachNewContext = new (std::nothrow) std::weak_ptr<AbilityContext>(*origContext);
+    return detachNewContext;
+}
+
+void DetachFinalizeAbilityContext(void* detachedObject, void*)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "Finalizer detached ability context");
+    delete static_cast<std::weak_ptr<AbilityContext> *>(detachedObject);
+}
+
 int64_t RequestCodeFromStringToInt64(const std::string &requestCode)
 {
     if (requestCode.size() > MAX_REQUEST_CODE_LENGTH) {
@@ -2280,14 +2298,14 @@ napi_value AttachJsUIAbilityContext(napi_env env, void *value, void *hint)
         return nullptr;
     }
 
-    auto status = napi_coerce_to_native_binding_object(
-        env, contextObj, DetachCallbackFunc, AttachJsUIAbilityContext, value, nullptr);
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityContext>(ptr);
+    auto status = napi_coerce_to_native_binding_object(env, contextObj, DetachNewAbilityContext, AttachJsUIAbilityContext,
+        workContext, nullptr);
     if (status != napi_ok) {
         TAG_LOGW(AAFwkTag::CONTEXT, "coerce ability context failed: %{public}d", status);
         return nullptr;
     }
-
-    auto workContext = new (std::nothrow) std::weak_ptr<AbilityContext>(ptr);
+    napi_add_detached_finalizer(env, contextObj, DetachFinalizeAbilityContext, nullptr);
     status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void*) {
             TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr ui ability context");
