@@ -58,17 +58,17 @@ void *DetachNewBaseContext(napi_env, void *nativeObject, void *)
 {
     auto *origContext = static_cast<std::weak_ptr<Context> *>(nativeObject);
     if (origContext == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "origContext is null");
+        TAG_LOGE(AAFwkTag::APPKIT, "origContext is null");
         return nullptr;
     }
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "New detached base context");
+    TAG_LOGD(AAFwkTag::APPKIT, "New detached base context");
     auto *detachNewContext = new (std::nothrow) std::weak_ptr<Context>(*origContext);
     return detachNewContext;
 }
 
 void DetachFinalizeBaseContext(void *detachedObject, void *)
 {
-    TAG_LOGD(AAFwkTag::ABILITY_SIM, "Finalizer detached base context");
+    TAG_LOGD(AAFwkTag::APPKIT, "Finalizer detached base context");
     delete static_cast<std::weak_ptr<Context> *>(detachedObject);
 }
 
