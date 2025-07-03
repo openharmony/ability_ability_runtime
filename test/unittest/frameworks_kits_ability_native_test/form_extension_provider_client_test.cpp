@@ -799,7 +799,7 @@ HWTEST_F(FormExtensionProviderClientTest, NotifyExtensionSizeChanged_3100,
     EXPECT_TRUE(extension == nullptr);
 
     int64_t formId = 10;
-    std::string newDimension = "2*2";
+    int32_t newDimension = 1;
     AppExecFwk::Rect newRect;
     Want want;
     sptr<IRemoteObject> formSupplyCallback = nullptr;
@@ -827,7 +827,7 @@ HWTEST_F(FormExtensionProviderClientTest, NotifyExtensionSizeChanged_3200, Funct
     EXPECT_TRUE(formExtension == extension);
 
     int64_t formId = 10;
-    std::string newDimension = "2*2";
+    int32_t newDimension = 1;
     AppExecFwk::Rect newRect;
     Want want;
     sptr<IRemoteObject> formSupplyCallback = nullptr;
