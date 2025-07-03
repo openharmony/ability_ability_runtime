@@ -55,6 +55,12 @@ public:
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex = 0) override;
 
     /**
+     * Launch Application Finished
+     * @param recordId id of the app record
+     */
+    virtual void PreloadModuleFinished(const int32_t recordId) override;
+
+    /**
      * ApplicationForegrounded, call ApplicationForegrounded() through proxy object,
      * set the application to Foreground State.
      *
