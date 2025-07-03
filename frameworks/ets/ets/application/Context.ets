@@ -25,7 +25,6 @@ import AsyncCallbackWrapper from '../utils/AbilityUtils';
 
 export class Context extends BaseContext {
   static {
-    loadLibrary("context_ani");
     loadLibrary("context_ani_kit.z");
   }
   filesDir: string = "";
@@ -33,21 +32,19 @@ export class Context extends BaseContext {
   preferencesDir: string = "";
   databaseDir: string = "";
   cacheDir: string = "";
+  applicationInfo!: ApplicationInfo;
   cloudFileDir: string = "";
   distributedFilesDir: string = "";
   bundleCodeDir: string = "";
   resourceDir: string = "";
-  applicationInfo: ApplicationInfo;
   eventHub: EventHub = new EventHub();
-  resourceManager: resmgr.ResourceManager;
+  resourceManager!: resmgr.ResourceManager;
   processName: string = "";
 
-  native constructor();
-
-  constructor(applicationInfo: ApplicationInfo, resourceManager: resmgr.ResourceManager) {
-    super();
-    this.applicationInfo = applicationInfo;
-    this.resourceManager = resourceManager;
+  constructor() {
+    if (this.eventHub == null) {
+      this.eventHub = new EventHub();
+    }
   }
 
   public native getApplicationContextSync(): ApplicationContext;

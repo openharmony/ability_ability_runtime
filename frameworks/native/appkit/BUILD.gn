@@ -407,6 +407,7 @@ ohos_shared_library("app_context_utils") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
     "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
     "${ability_runtime_path}/frameworks/ets/ani/app_manager/include",
+    "${ability_runtime_path}/frameworks/ets/ani/event_hub/include",
   ]
 
   configs = [ ":appkit_config" ]
@@ -438,6 +439,7 @@ ohos_shared_library("app_context_utils") {
     "${ability_runtime_native_path}/appkit:application_context_manager",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
     "${ability_runtime_path}/frameworks/ets/ani/app_manager:ability_app_manager_ani_kit",
+    "${ability_runtime_path}/frameworks/ets/ani/event_hub:event_hub_ani_kit",
   ]
 
   external_deps = [
@@ -458,6 +460,7 @@ ohos_shared_library("app_context_utils") {
     "resource_management:resmgr_napi_core",
     "resource_management:resourceManager_ani",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
   public_external_deps = [ "ability_base:configuration" ]
   if (ability_runtime_graphics) {
