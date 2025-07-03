@@ -13,25 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_OHOS_ABILITY_RUNTIME_OS_ACCOUNT_MANAGER_WRAPPER_H
-#define MOCK_OHOS_ABILITY_RUNTIME_OS_ACCOUNT_MANAGER_WRAPPER_H
-
-#include "errors.h"
-#include "singleton.h"
+#include "parameters.h"
 #include "oh_mock_utils.h"
 
 namespace OHOS {
-namespace AppExecFwk {
-class OsAccountManagerWrapper : public DelayedSingleton<OsAccountManagerWrapper> {
-public:
-    ErrCode GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id)
-    {
-        return 0;
-    }
+namespace system {
+std::string GetParameter(const std::string& key, const std::string& def)
+{
+    return "";
+}
 
-    OH_MOCK_METHOD_WITH_OUTPUT_1(ErrCode, isOsAccountExists, OsAccountManagerWrapper,
-        IsOsAccountExists, const int, bool& isOsAccountExists);
-};
-} // namespace AppExecFwk
+bool GetBoolParameter(const std::string& key, bool def)
+{
+    return false;
+}
+
+bool SetParameter(const std::string& key, const std::string& value)
+{
+    return false;
+}
+
+std::string GetDeviceType(void)
+{
+    return "";
+}
+} // namespace system
 } // namespace OHOS
-#endif
