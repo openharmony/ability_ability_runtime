@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,12 +64,10 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     innerMissionInfo.FromJsonStr(jsonStr);
     std::vector<std::string> info;
     innerMissionInfo.Dump(info);
-    cJSON *value = cJSON_CreateObject();
+    nlohmann::json value;
     std::string node(data, size);
     JsonType jsonType = JsonType::STRING;
-    bool result = innerMissionInfo.CheckJsonNode(value, node, jsonType);
-    cJSON_Delete(value);
-    return result;
+    return innerMissionInfo.CheckJsonNode(value, node, jsonType);
 }
 }
 

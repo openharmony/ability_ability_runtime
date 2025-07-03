@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,9 @@
 #include "ability_runtime_error_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "json_utils.h"
 #include "local_pending_want.h"
-#include "pending_want.h"
 #include "want_params_wrapper.h"
+#include "pending_want.h"
 #include "want_agent_client.h"
 #include "want_sender_info.h"
 #include "want_sender_interface.h"
@@ -465,49 +464,25 @@ std::string WantAgentHelper::ToString(const std::shared_ptr<WantAgent> &agent)
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid param");
         return "";
     }
+    nlohmann::json jsonObject;
+    jsonObject["requestCode"] = (*info.get()).requestCode;
+    jsonObject["operationType"] = (*info.get()).type;
+    jsonObject["flags"] = (*info.get()).flags;
 
-    cJSON *jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "create json object failed");
-        return "";
-    }
-
-    cJSON_AddNumberToObject(jsonObject, "requestCode", static_cast<double>((*info.get()).requestCode));
-    cJSON_AddNumberToObject(jsonObject, "operationType", static_cast<double>((*info.get()).type));
-    cJSON_AddNumberToObject(jsonObject, "flags", static_cast<double>((*info.get()).flags));
-
-    cJSON *wants = cJSON_CreateArray();
-    if (wants == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "create wants object failed");
-        cJSON_Delete(jsonObject);
-        return "";
-    }
+    nlohmann::json wants = nlohmann::json::array();
     for (auto &wantInfo : (*info.get()).allWants) {
-        cJSON *wantItem = cJSON_CreateString(wantInfo.want.ToString().c_str());
-        if (wantItem == nullptr) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "create want object failed");
-            cJSON_Delete(jsonObject);
-            cJSON_Delete(wants);
-            return "";
-        }
-        cJSON_AddItemToArray(wants, wantItem);
+        wants.emplace_back(wantInfo.want.ToString());
     }
-    cJSON_AddItemToObject(jsonObject, "wants", wants);
+    jsonObject["wants"] = wants;
 
     if ((*info.get()).allWants.size() > 0) {
-        cJSON *paramsObj = cJSON_CreateObject();
-        if (paramsObj == nullptr) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "create params object failed");
-            cJSON_Delete(jsonObject);
-            return "";
-        }
+        nlohmann::json paramsObj;
         AAFwk::WantParamWrapper wWrapper((*info.get()).allWants[0].want.GetParams());
-        cJSON_AddStringToObject(paramsObj, "extraInfoValue", wWrapper.ToString().c_str());
-        cJSON_AddItemToObject(jsonObject, "extraInfo", paramsObj);
+        paramsObj["extraInfoValue"] = wWrapper.ToString();
+        jsonObject["extraInfo"] = paramsObj;
     }
-    std::string jsonStr = OHOS::AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-    cJSON_Delete(jsonObject);
-    return jsonStr;
+
+    return jsonObject.dump();
 }
 
 std::shared_ptr<WantAgent> WantAgentHelper::FromString(const std::string &jsonString, int32_t uid)
@@ -515,64 +490,55 @@ std::shared_ptr<WantAgent> WantAgentHelper::FromString(const std::string &jsonSt
     if (jsonString.empty()) {
         return nullptr;
     }
-    cJSON *jsonObject = cJSON_Parse(jsonString.c_str());
-    if (jsonObject == nullptr) {
+    nlohmann::json jsonObject = nlohmann::json::parse(jsonString);
+    if (jsonObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to parse json string");
         return nullptr;
     }
     int requestCode = -1;
-    cJSON *requestCodeItem = cJSON_GetObjectItem(jsonObject, "requestCode");
-    if (requestCodeItem != nullptr && cJSON_IsNumber(requestCodeItem)) {
-        requestCode = static_cast<int>(requestCodeItem->valuedouble);
+    if (jsonObject.contains("requestCode") && jsonObject["requestCode"].is_number_integer()) {
+        requestCode = jsonObject.at("requestCode").get<int>();
     }
 
     WantAgentConstant::OperationType operationType = WantAgentConstant::OperationType::UNKNOWN_TYPE;
-    cJSON *operationTypeItem = cJSON_GetObjectItem(jsonObject, "operationType");
-    if (operationTypeItem != nullptr && cJSON_IsNumber(operationTypeItem)) {
-        operationType = static_cast<WantAgentConstant::OperationType>(static_cast<int>(operationTypeItem->valuedouble));
+    if (jsonObject.contains("operationType") && jsonObject["operationType"].is_number_integer()) {
+        operationType = static_cast<WantAgentConstant::OperationType>(jsonObject.at("operationType").get<int>());
     }
 
     std::vector<WantAgentConstant::Flags> flagsVec = ParseFlags(jsonObject);
 
     std::vector<std::shared_ptr<AAFwk::Want>> wants = {};
-    cJSON *wantsItem = cJSON_GetObjectItem(jsonObject, "wants");
-    if (wantsItem != nullptr && cJSON_IsArray(wantsItem)) {
-        int size = cJSON_GetArraySize(wantsItem);
-        for (int i = 0; i < size; i++) {
-            cJSON *wantItem = cJSON_GetArrayItem(wantsItem, i);
-            if (wantItem != nullptr && cJSON_IsString(wantItem)) {
-                std::string wantString = wantItem->valuestring;
+    if (jsonObject.contains("wants") && jsonObject["wants"].is_array()) {
+        for (auto &wantObj : jsonObject.at("wants")) {
+            if (wantObj.is_string()) {
+                auto wantString = wantObj.get<std::string>();
                 wants.emplace_back(std::make_shared<AAFwk::Want>(*Want::FromString(wantString)));
             }
         }
     }
 
     std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
-    cJSON *extraInfoItem = cJSON_GetObjectItem(jsonObject, "extraInfo");
-    if (extraInfoItem != nullptr && cJSON_IsObject(extraInfoItem)) {
-        cJSON *extraInfoValueItem = cJSON_GetObjectItem(extraInfoItem, "extraInfoValue");
-        if (extraInfoValueItem != nullptr && cJSON_IsString(extraInfoValueItem)) {
-            std::string extraInfoValue = extraInfoValueItem->valuestring;
-            auto pwWrapper = AAFwk::WantParamWrapper::Parse(extraInfoValue);
+    if (jsonObject.contains("extraInfo") && jsonObject["extraInfo"].is_object()) {
+        auto extraInfoObj = jsonObject.at("extraInfo");
+        if (extraInfoObj.contains("extraInfoValue") && extraInfoObj["extraInfoValue"].is_string()) {
+            auto pwWrapper = AAFwk::WantParamWrapper::Parse(extraInfoObj.at("extraInfoValue").get<std::string>());
             AAFwk::WantParams params;
             if (pwWrapper->GetValue(params) == ERR_OK) {
                 extraInfo = std::make_shared<AAFwk::WantParams>(params);
             }
         }
     }
-    cJSON_Delete(jsonObject);
     WantAgentInfo info(requestCode, operationType, flagsVec, wants, extraInfo);
 
     return GetWantAgent(info, INVLID_WANT_AGENT_USER_ID, uid);
 }
 
-std::vector<WantAgentConstant::Flags> WantAgentHelper::ParseFlags(cJSON *jsonObject)
+std::vector<WantAgentConstant::Flags> WantAgentHelper::ParseFlags(nlohmann::json jsonObject)
 {
     int flags = -1;
     std::vector<WantAgentConstant::Flags> flagsVec = {};
-    cJSON *flagsItem = cJSON_GetObjectItem(jsonObject, "flags");
-    if (flagsItem != nullptr && cJSON_IsNumber(flagsItem)) {
-        flags = static_cast<int>(flagsItem->valuedouble);
+    if (jsonObject.contains("flags") && jsonObject.at("flags").is_number_integer()) {
+        flags = jsonObject.at("flags").get<int>();
     }
 
     if (flags < 0) {

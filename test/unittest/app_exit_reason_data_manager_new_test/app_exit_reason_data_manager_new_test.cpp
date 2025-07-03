@@ -17,8 +17,6 @@
 #include "gmock/gmock.h"
 #include <memory>
 #include <string>
-
-#include "cJSON.h"
 #define private public
 #define protected public
 #include "app_exit_reason_data_manager.h"
@@ -207,12 +205,10 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_ConvertReasonFro
 {
     bool withKillMsg = false;
     std::string killMsg = "test_value";
-    cJSON *jsonObject = cJSON_CreateObject();
-    cJSON_AddStringToObject(jsonObject, "kill_msg", killMsg.c_str());
+    nlohmann::json jsonObject = nlohmann::json{{ "kill_msg", killMsg }};
     AAFwk::ExitReason exitReason = {AAFwk::REASON_JS_ERROR, "Js Error."};
     DelayedSingleton<AppExitReasonDataManager>::GetInstance()->ConvertReasonFromValue(jsonObject, exitReason,
         withKillMsg);
-    cJSON_Delete(jsonObject);
     EXPECT_EQ(withKillMsg, true);
 }
 
@@ -388,13 +384,11 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_SetAppExitReason
 HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_ConvertReasonFromValue_002, TestSize.Level1)
 {
     bool withKillMsg = false;
-    cJSON *jsonObject = cJSON_CreateObject();
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_REASON.c_str(), AAFwk::Reason::REASON_NORMAL);
+    nlohmann::json jsonObject = nlohmann::json{{ JSON_KEY_REASON, AAFwk::Reason::REASON_NORMAL }};
     AAFwk::ExitReason exitReason;
     DelayedSingleton<AppExitReasonDataManager>::GetInstance()->ConvertReasonFromValue(jsonObject, exitReason,
         withKillMsg);
     EXPECT_EQ(exitReason.reason, AAFwk::Reason::REASON_NORMAL);
-    cJSON_Delete(jsonObject);
 }
 
 /* *
@@ -405,14 +399,12 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_ConvertReasonFro
 HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_ConvertReasonFromValue_003, TestSize.Level1)
 {
     bool withKillMsg = false;
-    cJSON *jsonObject = cJSON_CreateObject();
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_SUB_KILL_REASON.c_str(), 0);
+    nlohmann::json jsonObject = nlohmann::json{{ JSON_KEY_SUB_KILL_REASON, 0 }};
     AAFwk::ExitReason exitReason;
     exitReason.subReason = -1;
     DelayedSingleton<AppExitReasonDataManager>::GetInstance()->ConvertReasonFromValue(jsonObject, exitReason,
         withKillMsg);
     EXPECT_EQ(exitReason.subReason, 0);
-    cJSON_Delete(jsonObject);
 }
 
 /* *
@@ -423,13 +415,11 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_ConvertReasonFro
 HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_ConvertReasonFromValue_004, TestSize.Level1)
 {
     bool withKillMsg = false;
-    cJSON *jsonObject = cJSON_CreateObject();
-    cJSON_AddStringToObject(jsonObject, JSON_KEY_EXIT_MSG.c_str(), "exitMsg");
+    nlohmann::json jsonObject = nlohmann::json{{ JSON_KEY_EXIT_MSG, "exitMsg" }};
     AAFwk::ExitReason exitReason;
     DelayedSingleton<AppExitReasonDataManager>::GetInstance()->ConvertReasonFromValue(jsonObject, exitReason,
         withKillMsg);
     EXPECT_EQ(exitReason.exitMsg, "exitMsg");
-    cJSON_Delete(jsonObject);
 }
 
 /* *
@@ -524,17 +514,17 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_ConvertAppExitRe
 {
     std::string extensionListName = "testExtensionListName";
     bool withKillMsg = true;
+    nlohmann::json jsonObject = nlohmann::json{{ JSON_KEY_REASON, AAFwk::Reason::REASON_NORMAL }};
     AAFwk::ExitReason exitReason;
     exitReason.exitMsg = "exitMsg";
     AppExecFwk::RunningProcessInfo processInfo;
     auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()
         ->ConvertAppExitReasonInfoToValueOfExtensionName(extensionListName, exitReason, processInfo, withKillMsg);
     std::string jsonString = result.ToString();
-    cJSON *jsonObject = cJSON_Parse(jsonString.c_str());
-    cJSON *exitMsgItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_EXIT_MSG.c_str());
-    ASSERT_TRUE(exitMsgItem != nullptr);
-    ASSERT_TRUE(cJSON_IsString(exitMsgItem) && exitMsgItem->type == cJSON_String);
-    std::string exitMsg = exitMsgItem->valuestring;
+    jsonObject = nlohmann::json::parse(jsonString);
+    ASSERT_TRUE(jsonObject.contains(JSON_KEY_EXIT_MSG));
+    ASSERT_TRUE(jsonObject[JSON_KEY_EXIT_MSG].is_string());
+    auto exitMsg = jsonObject.at(JSON_KEY_EXIT_MSG).get<std::string>();
     EXPECT_EQ(exitMsg, exitReason.exitMsg);
 }
 } // namespace AbilityRuntime

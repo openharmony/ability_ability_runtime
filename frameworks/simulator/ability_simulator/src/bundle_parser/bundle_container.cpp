@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "bundle_container.h"
+
+#include <nlohmann/json.hpp>
 
 #include "hilog_tag_wrapper.h"
 #include "json_serializer.h"
@@ -44,10 +46,7 @@ void BundleContainer::LoadBundleInfos(const std::vector<uint8_t> &buffer, const 
     bundleInfo_->GetApplicationInfo(0, Constants::UNSPECIFIED_USERID, *appInfo);
     if (appInfo != nullptr) {
         std::string bundleName = appInfo->bundleName;
-        std::string moduleName;
-        if (appInfo->moduleInfos.size() > 0) {
-            moduleName = appInfo->moduleInfos[0].moduleName;
-        }
+        std::string moduleName = appInfo->moduleInfos[0].moduleName;
         auto key = bundleName + std::string(FILE_SEPARATOR) + moduleName;
         bundleInfos_.emplace(key, bundleInfo_);
         resourcePaths_.emplace(key, resourcePath_);

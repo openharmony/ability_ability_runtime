@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -288,14 +288,13 @@ HWTEST_F(JsRuntimeLiteTest, InitLoop_0100, TestSize.Level1)
  */
 HWTEST_F(JsRuntimeLiteTest, ParsePkgContextInfoJsonString_0100, TestSize.Level1)
 {
-    cJSON *itemObject = cJSON_CreateObject();
-    cJSON_AddStringToObject(itemObject, "key", "value");
+    nlohmann::json itemObject;
+    itemObject["key"] = "value";
     std::string key = "key";
     std::vector<std::string> items = {};
     JsRuntimeLite::GetInstance().ParsePkgContextInfoJsonString(itemObject, key, items);
     auto rBeginIt = items.rbegin();
     EXPECT_EQ(*rBeginIt, "value");
-    cJSON_Delete(itemObject);
 }
 
 /**
@@ -305,14 +304,13 @@ HWTEST_F(JsRuntimeLiteTest, ParsePkgContextInfoJsonString_0100, TestSize.Level1)
  */
 HWTEST_F(JsRuntimeLiteTest, ParsePkgContextInfoJsonString_0200, TestSize.Level1)
 {
-    cJSON *itemObject = cJSON_CreateObject();
-    cJSON_AddStringToObject(itemObject, "key", "value");
+    nlohmann::json itemObject;
+    itemObject["key"] = "value";
     std::string key = "FakeKey";
     std::vector<std::string> items = {};
     JsRuntimeLite::GetInstance().ParsePkgContextInfoJsonString(itemObject, key, items);
     auto rBeginIt = items.rbegin();
     EXPECT_EQ(*rBeginIt, "");
-    cJSON_Delete(itemObject);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

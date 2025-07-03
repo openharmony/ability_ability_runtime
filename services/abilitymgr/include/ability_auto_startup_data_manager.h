@@ -21,6 +21,7 @@
 
 #include "auto_startup_info.h"
 #include "distributed_kv_data_manager.h"
+#include "nlohmann/json.hpp"
 #include "singleton.h"
 
 namespace OHOS {

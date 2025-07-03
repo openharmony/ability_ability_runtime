@@ -74,6 +74,7 @@ ohos_unittest("keep_alive_utils_test") {
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_mgr",
     "memory_utils:libmeminfo",
     "napi:ace_napi",

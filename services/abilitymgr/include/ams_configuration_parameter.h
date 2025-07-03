@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,7 @@
 
 #include <fstream>
 #include <map>
-
-#include "cJSON.h"
+#include <nlohmann/json.hpp>
 #include "nocopyable.h"
 #include "parameters.h"
 
@@ -129,12 +128,12 @@ public:
     /**
      * set picker json object.
      */
-    void SetPickerJsonObject(cJSON *jsonObject);
+    void SetPickerJsonObject(nlohmann::json jsonObject);
 
     /**
      * get picker json object.
      */
-    cJSON *GetPickerJsonObject() const;
+    nlohmann::json GetPickerJsonObject() const;
 
     int MultiUserType() const;
 
@@ -149,18 +148,18 @@ private:
      *
      */
     int LoadAmsConfiguration(const std::string &filePath);
-    int LoadAppConfigurationForStartUpService(cJSON *Object);
-    int LoadAppConfigurationForMemoryThreshold(cJSON *Object);
-    int LoadSystemConfiguration(cJSON *Object);
-    void LoadPickerConfiguration(cJSON *Object);
-    bool CheckServiceConfigEnable(cJSON *Object, const std::string &configName, JsonValueType type);
-    void UpdateStartUpServiceConfigInteger(cJSON *Object, const std::string &configName, int32_t &value);
-    void UpdateStartUpServiceConfigString(cJSON *Object, const std::string &configName, std::string &value);
-    void UpdatePickerConfigurationString(cJSON *Object, const std::string &configName, std::string &value);
+    int LoadAppConfigurationForStartUpService(nlohmann::json& Object);
+    int LoadAppConfigurationForMemoryThreshold(nlohmann::json& Object);
+    int LoadSystemConfiguration(nlohmann::json& Object);
+    void LoadPickerConfiguration(nlohmann::json& Object);
+    bool CheckServiceConfigEnable(nlohmann::json& Object, const std::string &configName, JsonValueType type);
+    void UpdateStartUpServiceConfigInteger(nlohmann::json& Object, const std::string &configName, int32_t &value);
+    void UpdateStartUpServiceConfigString(nlohmann::json& Object, const std::string &configName, std::string &value);
+    void UpdatePickerConfigurationString(nlohmann::json& Object, const std::string &configName, std::string &value);
     void LoadUIExtensionPickerConfig(const std::string &filePath);
-    int32_t LoadBackToCallerConfig(cJSON *Object);
-    int32_t LoadSupportAAKillWithReasonConfig(cJSON *Object);
-    int32_t LoadSupportSCBCrashRebootConfig(cJSON *Object);
+    int32_t LoadBackToCallerConfig(nlohmann::json& Object);
+    int32_t LoadSupportAAKillWithReasonConfig(nlohmann::json& Object);
+    int32_t LoadSupportSCBCrashRebootConfig(nlohmann::json& Object);
 
 private:
     bool nonConfigFile_ {false};
@@ -183,7 +182,7 @@ private:
     std::string abilityName_ {""};
     std::string pickerType_ {""};
     std::map<std::string, std::string> picker_;
-    cJSON *pickerJsonObject_ = nullptr;
+    nlohmann::json pickerJsonObject_ = nlohmann::json::object();
 };
 }  // namespace AAFwk
 }  // namespace OHOS
