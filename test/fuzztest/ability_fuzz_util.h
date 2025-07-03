@@ -489,6 +489,32 @@ void GetRandomAbilityRequestInfo(FuzzedDataProvider& fdp, AbilityRequest& info)
     GetRandomAbilityInfo(fdp, info.abilityInfo);
     GetRandomApplicationInfo(fdp, info.appInfo);
 }
+
+void GetRandomStartOptions(FuzzedDataProvider& fdp, StartOptions& startOptions)
+{
+    startOptions.windowLeftUsed_ = fdp.ConsumeBool();
+    startOptions.windowTopUsed_ = fdp.ConsumeBool();
+    startOptions.windowWidthUsed_ = fdp.ConsumeBool();
+    startOptions.windowHeightUsed_ = fdp.ConsumeBool();
+    startOptions.minWindowWidthUsed_ = fdp.ConsumeBool();
+    startOptions.minWindowHeightUsed_ = fdp.ConsumeBool();
+    startOptions.maxWindowWidthUsed_ = fdp.ConsumeBool();
+    startOptions.maxWindowHeightUsed_ = fdp.ConsumeBool();
+    startOptions.requestId_ = fdp.ConsumeRandomLengthString();
+    startOptions.SetWithAnimation(fdp.ConsumeBool());
+    startOptions.SetWindowFocused(fdp.ConsumeBool());
+    startOptions.SetHideStartWindow(fdp.ConsumeBool());
+    startOptions.SetWindowMode(fdp.ConsumeIntegral<int32_t>());
+    startOptions.SetDisplayID(fdp.ConsumeIntegral<int32_t>());
+    startOptions.SetWindowLeft(fdp.ConsumeIntegral<int32_t>());
+    startOptions.SetWindowTop(fdp.ConsumeIntegral<int32_t>());
+    startOptions.SetWindowWidth(fdp.ConsumeIntegral<int32_t>());
+    startOptions.SetWindowHeight(fdp.ConsumeIntegral<int32_t>());
+    startOptions.SetMinWindowWidth(fdp.ConsumeIntegral<int32_t>());
+    startOptions.SetMinWindowHeight(fdp.ConsumeIntegral<int32_t>());
+    startOptions.SetMaxWindowWidth(fdp.ConsumeIntegral<int32_t>());
+    startOptions.SetMaxWindowHeight(fdp.ConsumeIntegral<int32_t>());
+}
 }  // namespace AbilityFuzzUtil
 }  // namespace AppExecFwk
 }  // namespace OHOS
