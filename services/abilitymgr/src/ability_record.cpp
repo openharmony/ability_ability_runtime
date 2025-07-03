@@ -97,6 +97,7 @@ constexpr const char* PARAM_SEND_RESULT_CALLER_BUNDLENAME = "ohos.anco.param.sen
 constexpr const char* PARAM_SEND_RESULT_CALLER_TOKENID = "ohos.anco.param.sendResultCallerTokenId";
 constexpr const char* PARAM_RESV_ANCO_IS_NEED_UPDATE_NAME = "ohos.anco.param.isNeedUpdateName";
 constexpr const char* DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
+constexpr const char* SPECIFIED_ABILITY_FLAG = "ohos.ability.params.specifiedAbilityFlag";
 // Developer mode param
 constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
 constexpr const char* APP_PROVISION_TYPE_DEBUG = "debug";
@@ -444,6 +445,10 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag, bool hasLastWant)
     UpdateDmsCallerInfo(want);
     AbilityRuntime::ErrorMsgGuard errorMsgGuard(token_ ? token_->AsObject() : nullptr,
         reinterpret_cast<uintptr_t>(GetScheduler().GetRefPtr()), "ScheduleAbilityTransaction");
+    if (AAFwk::AppUtils::GetInstance().IsStartSpecifiedProcess() && GetApplicationInfo().isSystemApp) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "GetSpecifiedFlag: %{public}s", GetSpecifiedFlag().c_str());
+        want.SetParam(SPECIFIED_ABILITY_FLAG, GetSpecifiedFlag());
+    }
     lifecycleDeal_->ForegroundNew(want, lifeCycleStateInfo_, GetSessionInfo());
     SetIsNewWant(false);
     lifeCycleStateInfo_.sceneFlag = 0;
