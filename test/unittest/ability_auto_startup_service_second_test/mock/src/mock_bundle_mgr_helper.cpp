@@ -21,6 +21,8 @@ namespace OHOS {
 namespace AppExecFwk {
 namespace {
 const int32_t TOKENID_LENGTH = 4;
+constexpr int32_t DEFAULT_APPLICATION_UID = 100;
+constexpr int32_t U1_USER_APPLICATION_UID = 1;
 bool IsDigitString(std::string name)
 {
     for (int i = 0; i < name.size(); i++) {
@@ -29,6 +31,32 @@ bool IsDigitString(std::string name)
         }
     }
     return true;
+}
+
+bool IsExtensionCase(const std::string& bundleName)
+{
+    return bundleName.find("extensionInfo") != std::string::npos ||
+        bundleName.find("extensionInfos") != std::string::npos;
+}
+
+void ProcessExtension(
+    BundleInfo& bundleInfo, const std::string& bundleName, const std::string& moduleName, int32_t accessTokenId)
+{
+    ExtensionAbilityInfo info;
+    info.bundleName = bundleName;
+    info.applicationInfo.accessTokenId = accessTokenId;
+    info.name = "nameTest";
+    info.moduleName = moduleName;
+    if ("extensionInfoTypeAppService" == bundleName) {
+        info.type = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+        info.visible = true;
+        info.applicationInfo.uid = DEFAULT_APPLICATION_UID;
+    } else if ("extensionInfoTypeAppServiceU1" == bundleName) {
+        info.type = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+        info.visible = true;
+        info.applicationInfo.uid = U1_USER_APPLICATION_UID;
+    }
+    bundleInfo.extensionInfos.emplace_back(info);
 }
 } // namespace
 
@@ -62,15 +90,9 @@ bool BundleMgrHelper::GetBundleInfo(
             accessTokenId++;
         }
         std::string moduleName = "moduleName";
-        if ("extensionInfosModuleNameIsempty" == bundleName || "extensionInfosModuleNameNotempty" == bundleName) {
+        if (IsExtensionCase(bundleName)) {
             moduleName = "moduleNameTest";
-            ExtensionAbilityInfo extensionAbilityInfo;
-            extensionAbilityInfo.bundleName = bundleName;
-            extensionAbilityInfo.applicationInfo.accessTokenId = accessTokenId;
-            extensionAbilityInfo.bundleName = bundleName;
-            extensionAbilityInfo.name = "nameTest";
-            extensionAbilityInfo.moduleName = moduleName;
-            bundleInfo.extensionInfos.emplace_back(extensionAbilityInfo);
+            ProcessExtension(bundleInfo, bundleName, moduleName, accessTokenId);
         } else {
             AbilityInfo abilityInfo;
             bundleInfo.applicationInfo.accessTokenId = accessTokenId;
@@ -86,6 +108,14 @@ bool BundleMgrHelper::GetBundleInfo(
             if ("hapModuleInfosModuleNameIsempty" == bundleName || "hapModuleInfosModuleNameNotempty" == bundleName) {
                 abilityInfo.bundleName = bundleName;
                 abilityInfo.moduleName = "moduleNameTest";
+                HapModuleInfo hapModuleInfo;
+                hapModuleInfo.abilityInfos.emplace_back(abilityInfo);
+                bundleInfo.hapModuleInfos.emplace_back(hapModuleInfo);
+            }
+            if ("hapAbilityInfoVisible" == bundleName) {
+                abilityInfo.bundleName = bundleName;
+                abilityInfo.moduleName = "moduleNameTest";
+                abilityInfo.visible = true;
                 HapModuleInfo hapModuleInfo;
                 hapModuleInfo.abilityInfos.emplace_back(abilityInfo);
                 bundleInfo.hapModuleInfos.emplace_back(hapModuleInfo);

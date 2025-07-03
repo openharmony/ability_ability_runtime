@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,6 @@ constexpr char FOUNDATION_PROCESS_NAME[] = "foundation";
 constexpr int MAX_RETRY_TIMES = 3;
 constexpr int RETRY_INTERVAL_MICRO_SECONDS = 200000; // 200ms
 constexpr int CREATE_STATUS_BAR_TIMEOUT_MICRO_SECONDS = 5000000; // 5s
-constexpr int32_t U1_USER_ID = 1;
 } // namespace
 
 void CheckStatusBarTask::Cancel()

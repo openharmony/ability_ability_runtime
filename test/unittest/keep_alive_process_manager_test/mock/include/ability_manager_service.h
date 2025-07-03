@@ -21,6 +21,7 @@
 #include <singleton.h>
 
 #include "ability_keep_alive_service.h"
+#include "ability_manager_constants.h"
 #include "keep_alive_info.h"
 #include "start_options.h"
 #include "want.h"

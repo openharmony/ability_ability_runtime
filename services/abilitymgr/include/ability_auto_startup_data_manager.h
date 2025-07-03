@@ -41,7 +41,7 @@ public:
 
     AutoStartupStatus QueryAutoStartupData(const AutoStartupInfo &info);
 
-    int32_t QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList, int32_t userId);
+    int32_t QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList, int32_t userId, bool isCalledByEDM);
 
     int32_t GetCurrentAppAutoStartupData(const std::string &bundleName,
         std::vector<AutoStartupInfo> &infoList, const std::string &accessTokenId);
@@ -52,7 +52,7 @@ private:
     bool CheckKvStore();
     DistributedKv::Value ConvertAutoStartupStatusToValue(
         const AutoStartupInfo &info, bool isAutoStartup, bool isEdmForce);
-    void ConvertAutoStartupStatusFromValue(const DistributedKv::Value &value, bool &isAutoStartup, bool &isEdmForce);
+    void ConvertAutoStartupStatusFromValue(const DistributedKv::Value &value, AutoStartupStatus &startupStatus);
     DistributedKv::Key ConvertAutoStartupDataToKey(const AutoStartupInfo &info);
     AutoStartupInfo ConvertAutoStartupInfoFromKeyAndValue(
         const DistributedKv::Key &key, const DistributedKv::Value &value);
