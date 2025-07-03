@@ -1493,5 +1493,50 @@ HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_FindMasterProcessAppRunn
     EXPECT_EQ(ret, nullptr);
 }
 
+
+/**
+ * @tc.name: CheckAppRunningRecordForSpecifiedProcess_0100
+ * @tc.desc: CheckAppRunningRecordForSpecifiedProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, CheckAppRunningRecordForSpecifiedProcess_0100, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    int32_t uid = 12345;
+    std::string instanceKey = "instanceKey";
+    std::string customProcessFlag = "customProcessFlag";
+    ApplicationInfo appInfo;
+    appInfo.name = "KeepAliveApp";
+    appInfo.bundleName = "KeepAliveApplication";
+    appInfo.uid = uid;
+    auto app = std::make_shared<ApplicationInfo>(appInfo);
+    std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(app, 111, "KeepAliveApplication");
+    appRecord->SetInstanceKey(instanceKey);
+    appRecord->SetUid(uid);
+    appRecord->SetCustomProcessFlag(customProcessFlag);
+
+    appRunningManager->appRunningRecordMap_.emplace(111, appRecord);
+    auto result = appRunningManager->CheckAppRunningRecordForSpecifiedProcess(uid, instanceKey, customProcessFlag);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: CheckAppRunningRecordForSpecifiedProcess_0200
+ * @tc.desc: CheckAppRunningRecordForSpecifiedProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, CheckAppRunningRecordForSpecifiedProcess_0200, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    int32_t uid = 12345;
+    std::string instanceKey = "instanceKey";
+    std::string customProcessFlag = "customProcessFlag";
+    auto result = appRunningManager->CheckAppRunningRecordForSpecifiedProcess(uid, instanceKey, customProcessFlag);
+    EXPECT_EQ(result, nullptr);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

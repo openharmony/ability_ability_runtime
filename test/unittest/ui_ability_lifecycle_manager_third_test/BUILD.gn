@@ -20,12 +20,12 @@ ohos_unittest("ui_ability_lifecycle_manager_third_test") {
   module_out_path = module_output_path
 
   include_dirs = [
+    "mock/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_services_path}/abilitymgr/include/",
     "${ability_runtime_services_path}/abilitymgr/include/scene_board/",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/ability_scheduler_mock",
-    "mock/include",
   ]
 
   cflags = [
@@ -53,6 +53,7 @@ ohos_unittest("ui_ability_lifecycle_manager_third_test") {
     "mock/src/app_utils.cpp",
     "mock/src/mock_my_flag.cpp",
     "mock/src/mock_permission_verification.cpp",
+    "mock/src/session_manager_lite.cpp",
     "ui_ability_lifecycle_manager_third_test.cpp",
   ]
 
@@ -98,7 +99,6 @@ ohos_unittest("ui_ability_lifecycle_manager_third_test") {
     "napi:ace_napi",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "window_manager:session_manager_lite",
   ]
 
   if (background_task_mgr_continuous_task_enable) {
@@ -110,6 +110,7 @@ ohos_unittest("ui_ability_lifecycle_manager_third_test") {
       "window_manager:libdm",
       "window_manager:libwsutils",
       "window_manager:scene_session",
+      "window_manager:scene_session_manager",
     ]
   }
   cflags_cc = []
