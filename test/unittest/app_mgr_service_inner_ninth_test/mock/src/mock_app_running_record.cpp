@@ -1328,5 +1328,20 @@ void AppRunningRecord::SetSupportMultiProcessDeviceFeature(bool support)
 {
     supportMultiProcessDeviceFeature_ = support;
 }
+
+void AppRunningRecord::SetExtensionSandBoxFlag(bool extensionSandBoxFlag)
+{
+    isExtensionSandBox_ = extensionSandBoxFlag;
+}
+
+bool AppRunningRecord::IsKeepAliveAppService() const
+{
+    return isKeepAliveAppService_;
+}
+
+void AppRunningRecord::SetKeepAliveAppService(bool isKeepAliveAppService)
+{
+    isKeepAliveAppService_ = isKeepAliveAppService;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

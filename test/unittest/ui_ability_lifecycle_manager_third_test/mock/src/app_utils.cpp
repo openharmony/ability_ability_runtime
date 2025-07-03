@@ -20,6 +20,8 @@
 namespace OHOS {
 namespace AAFwk {
 bool AppUtils::isStartOptionsWithAnimation_ = false;
+bool AppUtils::isStartSpecifiedProcess_ = false;
+bool AppUtils::isInOnNewProcessEnableList_ = false;
 
 AppUtils::~AppUtils() {}
 
@@ -33,8 +35,8 @@ AppUtils &AppUtils::GetInstance()
 
 bool AppUtils::IsStartSpecifiedProcess()
 {
-    TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", AppUtils::isStartOptionsWithAnimation_);
-    return AppUtils::isStartOptionsWithAnimation_;
+    TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", AppUtils::isStartSpecifiedProcess_);
+    return AppUtils::isStartSpecifiedProcess_;
 }
 
 bool AppUtils::IsStartOptionsWithProcessOptions()
@@ -51,7 +53,7 @@ bool AppUtils::IsStartOptionsWithAnimation()
 
 bool AppUtils::InOnNewProcessEnableList(const std::string &bundleName)
 {
-    return false;
+    return isInOnNewProcessEnableList_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
