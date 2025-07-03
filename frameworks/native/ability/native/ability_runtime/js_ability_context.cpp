@@ -2303,6 +2303,7 @@ napi_value AttachJsUIAbilityContext(napi_env env, void *value, void *hint)
         workContext, nullptr);
     if (status != napi_ok) {
         TAG_LOGW(AAFwkTag::CONTEXT, "coerce ability context failed: %{public}d", status);
+        delete workContext;
         return nullptr;
     }
     napi_add_detached_finalizer(env, contextObj, DetachFinalizeAbilityContext, nullptr);
