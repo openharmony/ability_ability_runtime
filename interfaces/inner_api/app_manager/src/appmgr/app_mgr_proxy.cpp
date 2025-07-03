@@ -78,6 +78,20 @@ int32_t AppMgrProxy::PreloadApplication(const std::string &bundleName, int32_t u
     return reply.ReadInt32();
 }
 
+void AppMgrProxy::PreloadModuleFinished(const int32_t recordId)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "PreloadModuleFinished called");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "PreloadModuleFinished write interface token failed");
+        return;
+    }
+    PARCEL_UTIL_WRITE_NORET(data, Int32, recordId);
+    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::PRELOAD_MODULE_FINISHED, data, reply, option);
+}
+
 void AppMgrProxy::ApplicationForegrounded(const int32_t recordId)
 {
     MessageParcel data;

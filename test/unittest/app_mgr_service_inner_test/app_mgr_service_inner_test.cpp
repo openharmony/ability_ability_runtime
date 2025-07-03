@@ -5446,6 +5446,28 @@ HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_1200, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LPreloadModuleFinished_0001
+ * @tc.desc: PreloadModuleFinished
+ * @tc.type: FUNC
+ * @tc.Function: PreloadModuleFinished
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadModuleFinished_0001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadModuleFinished_0001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    int32_t appRecord = 0;
+
+    std::shared_ptr<MockTaskHandlerWrap> taskHandler = MockTaskHandlerWrap::CreateQueueHandler("app_mgr_tasks_queue");
+    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(AtLeast(1));
+    appMgrServiceInner->SetTaskHandler(taskHandler);
+
+    appMgrServiceInner->PreloadModuleFinished(appRecord);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadModuleFinished_0001 end");
+}
+
+/**
  * @tc.name: SetSupportedProcessCacheSelf_001
  * @tc.desc: The application sets itself whether or not to support process cache.
  * @tc.type: FUNC
