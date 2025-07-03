@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #include "inner_mission_info.h"
 
 #include "hilog_tag_wrapper.h"
-#include "json_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -40,95 +39,107 @@ const std::string KEY_HAS_RECONER_INFO = "hasRecoverInfo";
 }
 std::string InnerMissionInfo::ToJsonStr() const
 {
-    cJSON *jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "create json object failed");
-        return "";
-    }
-    cJSON_AddStringToObject(jsonObject, KEY_MISSION_NAME.c_str(), missionName.c_str());
-    cJSON_AddNumberToObject(jsonObject, KEY_LAUNCH_MODE.c_str(), static_cast<double>(launchMode));
-    cJSON_AddBoolToObject(jsonObject, KEY_IS_TEMPORARY.c_str(), isTemporary);
-    cJSON_AddStringToObject(jsonObject, KEY_BUNDLE_NAME.c_str(), bundleName.c_str());
-    cJSON_AddNumberToObject(jsonObject, KEY_START_METHOD.c_str(), static_cast<double>(startMethod));
-    cJSON_AddNumberToObject(jsonObject, KEY_UID.c_str(), static_cast<double>(uid));
-    cJSON_AddStringToObject(jsonObject, KEY_SPEC_FLAG.c_str(), specifiedFlag.c_str());
-    cJSON_AddNumberToObject(jsonObject, KEY_MISSION_ID.c_str(), static_cast<double>(missionInfo.id));
-    cJSON_AddNumberToObject(jsonObject, KEY_RUNNING_STATE.c_str(), static_cast<double>(missionInfo.runningState));
-    cJSON_AddBoolToObject(jsonObject, KEY_LOCKED_STATE.c_str(), missionInfo.lockedState);
-    cJSON_AddBoolToObject(jsonObject, KEY_CONTINUABLE.c_str(), missionInfo.continuable);
-    cJSON_AddStringToObject(jsonObject, KEY_TIME.c_str(), missionInfo.time.c_str());
-    cJSON_AddStringToObject(jsonObject, KEY_LABEL.c_str(), missionInfo.label.c_str());
-    cJSON_AddStringToObject(jsonObject, KEY_ICON_PATH.c_str(), missionInfo.iconPath.c_str());
-    cJSON_AddStringToObject(jsonObject, KEY_WANT.c_str(), missionInfo.want.ToUri().c_str());
-    cJSON_AddBoolToObject(jsonObject, KEY_HAS_RECONER_INFO.c_str(), hasRecoverInfo);
+    nlohmann::json value;
+    value[KEY_MISSION_NAME] = missionName;
+    value[KEY_LAUNCH_MODE] = launchMode;
+    value[KEY_IS_TEMPORARY] = isTemporary;
+    value[KEY_BUNDLE_NAME] = bundleName;
+    value[KEY_START_METHOD] = startMethod;
+    value[KEY_UID] = uid;
+    value[KEY_SPEC_FLAG] = specifiedFlag;
+    value[KEY_MISSION_ID] = missionInfo.id;
+    value[KEY_RUNNING_STATE] = missionInfo.runningState;
+    value[KEY_LOCKED_STATE] = missionInfo.lockedState;
+    value[KEY_CONTINUABLE] = missionInfo.continuable;
+    value[KEY_TIME] = missionInfo.time;
+    value[KEY_LABEL] = missionInfo.label;
+    value[KEY_ICON_PATH] = missionInfo.iconPath;
+    value[KEY_WANT] = missionInfo.want.ToUri();
+    value[KEY_HAS_RECONER_INFO] = hasRecoverInfo;
 
-    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-    cJSON_Delete(jsonObject);
-    return jsonStr;
+    return value.dump();
 }
 
 bool InnerMissionInfo::FromJsonStr(const std::string &jsonStr)
 {
+    // Do not throw exceptions in nlohmann::json::parse
     if (jsonStr.empty()) {
         return false;
     }
-
-    cJSON *value = cJSON_Parse(jsonStr.c_str());
-    if (value == nullptr) {
+    nlohmann::json value = nlohmann::json::parse(jsonStr, nullptr, false);
+    if (value.is_discarded()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "json failed: %{private}s", jsonStr.c_str());
         return false;
     }
 
-    cJSON *missionNameItem = cJSON_GetObjectItem(value, KEY_MISSION_NAME.c_str());
-    cJSON *launchModeItem = cJSON_GetObjectItem(value, KEY_LAUNCH_MODE.c_str());
-    cJSON *isTemporaryItem = cJSON_GetObjectItem(value, KEY_IS_TEMPORARY.c_str());
-    cJSON *startMethodItem = cJSON_GetObjectItem(value, KEY_START_METHOD.c_str());
-    cJSON *bundleNameItem = cJSON_GetObjectItem(value, KEY_BUNDLE_NAME.c_str());
-    cJSON *uidItem = cJSON_GetObjectItem(value, KEY_UID.c_str());
-    cJSON *specifiedFlagItem = cJSON_GetObjectItem(value, KEY_SPEC_FLAG.c_str());
-    cJSON *missionIdItem = cJSON_GetObjectItem(value, KEY_MISSION_ID.c_str());
-    cJSON *runningStateItem = cJSON_GetObjectItem(value, KEY_RUNNING_STATE.c_str());
-    cJSON *lockedStateItem = cJSON_GetObjectItem(value, KEY_LOCKED_STATE.c_str());
-    cJSON *continuableItem = cJSON_GetObjectItem(value, KEY_CONTINUABLE.c_str());
-    cJSON *timeItem = cJSON_GetObjectItem(value, KEY_TIME.c_str());
-    cJSON *labelItem = cJSON_GetObjectItem(value, KEY_LABEL.c_str());
-    cJSON *iconPathItem = cJSON_GetObjectItem(value, KEY_ICON_PATH.c_str());
-    cJSON *hasRecoverInfoItem = cJSON_GetObjectItem(value, KEY_HAS_RECONER_INFO.c_str());
-    cJSON *wantItem = cJSON_GetObjectItem(value, KEY_WANT.c_str());
-    if (!CheckJsonValue(missionNameItem, JsonType::STRING) || !CheckJsonValue(launchModeItem, JsonType::NUMBER) ||
-        !CheckJsonValue(isTemporaryItem, JsonType::BOOLEAN) || !CheckJsonValue(startMethodItem, JsonType::NUMBER) ||
-        !CheckJsonValue(bundleNameItem, JsonType::STRING) || !CheckJsonValue(uidItem, JsonType::NUMBER) ||
-        !CheckJsonValue(specifiedFlagItem, JsonType::STRING) || !CheckJsonValue(missionIdItem, JsonType::NUMBER) ||
-        !CheckJsonValue(runningStateItem, JsonType::NUMBER) || !CheckJsonValue(lockedStateItem, JsonType::BOOLEAN) ||
-        !CheckJsonValue(continuableItem, JsonType::BOOLEAN) || !CheckJsonValue(timeItem, JsonType::STRING) ||
-        !CheckJsonValue(labelItem, JsonType::STRING) || !CheckJsonValue(iconPathItem, JsonType::STRING) ||
-        !CheckJsonValue(hasRecoverInfoItem, JsonType::BOOLEAN) || !CheckJsonValue(wantItem, JsonType::STRING)) {
-        cJSON_Delete(value);
+    if (!CheckJsonNode(value, KEY_MISSION_NAME, JsonType::STRING)) {
         return false;
     }
-    missionName = missionNameItem->valuestring;
-    launchMode = static_cast<int32_t>(launchModeItem->valuedouble);
-    isTemporary = isTemporaryItem->type == cJSON_True;
-    startMethod = static_cast<int32_t>(startMethodItem->valuedouble);
-    bundleName = bundleNameItem->valuestring;
-    uid = static_cast<int32_t>(uidItem->valuedouble);
-    specifiedFlag = specifiedFlagItem->valuestring;
-    missionInfo.id = static_cast<int32_t>(missionIdItem->valuedouble);
-    missionInfo.runningState = static_cast<int32_t>(runningStateItem->valuedouble);
-    missionInfo.lockedState = lockedStateItem->type == cJSON_True;
-    missionInfo.continuable = continuableItem->type == cJSON_True;
-    missionInfo.time = timeItem->valuestring;
-    missionInfo.label = labelItem->valuestring;
-    missionInfo.iconPath = iconPathItem->valuestring;
-    hasRecoverInfo = hasRecoverInfoItem->type == cJSON_True;
-    std::string wantStr = wantItem->valuestring;
+    missionName = value[KEY_MISSION_NAME].get<std::string>();
 
-    Want* want = Want::ParseUri(wantStr);
+    if (!CheckJsonNode(value, KEY_LAUNCH_MODE, JsonType::NUMBER)) {
+        return false;
+    }
+    launchMode = value[KEY_LAUNCH_MODE].get<int32_t>();
+    if (!CheckJsonNode(value, KEY_IS_TEMPORARY, JsonType::BOOLEAN)) {
+        return false;
+    }
+    isTemporary = value[KEY_IS_TEMPORARY].get<bool>();
+    if (!CheckJsonNode(value, KEY_START_METHOD, JsonType::NUMBER)) {
+        return false;
+    }
+    startMethod = value[KEY_START_METHOD].get<int32_t>();
+    if (!CheckJsonNode(value, KEY_BUNDLE_NAME, JsonType::STRING)) {
+        return false;
+    }
+    bundleName = value[KEY_BUNDLE_NAME].get<std::string>();
+    if (!CheckJsonNode(value, KEY_UID, JsonType::NUMBER)) {
+        return false;
+    }
+    uid = value[KEY_UID].get<int32_t>();
+    if (!CheckJsonNode(value, KEY_SPEC_FLAG, JsonType::STRING)) {
+        return false;
+    }
+    specifiedFlag = value[KEY_SPEC_FLAG].get<std::string>();
+    if (!CheckJsonNode(value, KEY_MISSION_ID, JsonType::NUMBER)) {
+        return false;
+    }
+    missionInfo.id = value[KEY_MISSION_ID].get<int32_t>();
+    if (!CheckJsonNode(value, KEY_RUNNING_STATE, JsonType::NUMBER)) {
+        return false;
+    }
+    missionInfo.runningState = value[KEY_RUNNING_STATE].get<int32_t>();
+    if (!CheckJsonNode(value, KEY_LOCKED_STATE, JsonType::BOOLEAN)) {
+        return false;
+    }
+    missionInfo.lockedState = value[KEY_LOCKED_STATE].get<bool>();
+    if (!CheckJsonNode(value, KEY_CONTINUABLE, JsonType::BOOLEAN)) {
+        return false;
+    }
+    missionInfo.continuable = value[KEY_CONTINUABLE].get<bool>();
+    if (!CheckJsonNode(value, KEY_TIME, JsonType::STRING)) {
+        return false;
+    }
+    missionInfo.time = value[KEY_TIME].get<std::string>();
+    if (!CheckJsonNode(value, KEY_LABEL, JsonType::STRING)) {
+        return false;
+    }
+    missionInfo.label = value[KEY_LABEL].get<std::string>();
+    if (!CheckJsonNode(value, KEY_ICON_PATH, JsonType::STRING)) {
+        return false;
+    }
+    missionInfo.iconPath = value[KEY_ICON_PATH].get<std::string>();
+    if (!CheckJsonNode(value, KEY_WANT, JsonType::STRING)) {
+        return false;
+    }
+    if (!CheckJsonNode(value, KEY_HAS_RECONER_INFO, JsonType::BOOLEAN)) {
+        return false;
+    }
+    hasRecoverInfo = value[KEY_HAS_RECONER_INFO].get<bool>();
+    Want* want = Want::ParseUri(value[KEY_WANT].get<std::string>());
     if (want) {
         missionInfo.want = *want;
     }
-
-    cJSON_Delete(value);
     return true;
 }
 
@@ -154,37 +165,21 @@ void InnerMissionInfo::Dump(std::vector<std::string> &info) const
     info.push_back(dumpInfo);
 }
 
-bool InnerMissionInfo::CheckJsonValue(cJSON *value, JsonType jsonType)
+bool InnerMissionInfo::CheckJsonNode(nlohmann::json &value, const std::string &node, JsonType jsonType)
 {
-    if (value == nullptr) {
-        return false;
-    }
-    if (jsonType == JsonType::NUMBER) {
-        return cJSON_IsNumber(value);
-    } else if (jsonType == JsonType::STRING) {
-        return cJSON_IsString(value);
-    } else if (jsonType == JsonType::BOOLEAN) {
-        return cJSON_IsBool(value);
-    }
-    return false;
-}
-
-bool InnerMissionInfo::CheckJsonNode(cJSON *value, const std::string &node, JsonType jsonType)
-{
-    cJSON *item = cJSON_GetObjectItem(value, node.c_str());
-    if (item == nullptr) {
+    if (value.find(node) == value.end()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "node %{private}s null", node.c_str());
         return false;
     }
 
     if (jsonType == JsonType::NUMBER) {
-        return cJSON_IsNumber(item);
+        return value[node].is_number();
     }
     if (jsonType == JsonType::STRING) {
-        return cJSON_IsString(item);
+        return value[node].is_string();
     }
     if (jsonType == JsonType::BOOLEAN) {
-        return cJSON_IsBool(item);
+        return value[node].is_boolean();
     }
     return false;
 }

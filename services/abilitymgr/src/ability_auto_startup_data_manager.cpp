@@ -21,7 +21,6 @@
 #include "accesstoken_kit.h"
 #include "hilog_tag_wrapper.h"
 #include "json_utils.h"
-#include "insight_intent_json_util.h"
 #include "os_account_manager_wrapper.h"
 
 namespace OHOS {
@@ -431,22 +430,14 @@ int32_t AbilityAutoStartupDataManager::GetCurrentAppAutoStartupData(
 DistributedKv::Value AbilityAutoStartupDataManager::ConvertAutoStartupStatusToValue(
     const AutoStartupInfo &info, bool isAutoStartup, bool isEdmForce)
 {
-    cJSON *jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "create jsonObject failed");
-        return DistributedKv::Value();
-    }
-
-    cJSON_AddBoolToObject(jsonObject, JSON_KEY_IS_AUTO_STARTUP.c_str(), isAutoStartup);
-    cJSON_AddBoolToObject(jsonObject, JSON_KEY_IS_EDM_FORCE.c_str(), isEdmForce);
-    cJSON_AddStringToObject(jsonObject, JSON_KEY_TYPE_NAME.c_str(), info.abilityTypeName.c_str());
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_SETTER_USERID.c_str(), static_cast<double>(info.setterUserId));
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_SETTER_TYPE.c_str(), static_cast<double>(info.setterType));
-
-    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-    cJSON_Delete(jsonObject);
-    DistributedKv::Value value(jsonStr);
-
+    nlohmann::json jsonObject = nlohmann::json {
+        { JSON_KEY_IS_AUTO_STARTUP, isAutoStartup },
+        { JSON_KEY_IS_EDM_FORCE, isEdmForce },
+        { JSON_KEY_TYPE_NAME, info.abilityTypeName },
+        { JSON_KEY_SETTER_USERID, info.setterUserId },
+        { JSON_KEY_SETTER_TYPE, info.setterType },
+    };
+    DistributedKv::Value value(jsonObject.dump());
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "value: %{public}s", value.ToString().c_str());
     return value;
 }
@@ -454,46 +445,36 @@ DistributedKv::Value AbilityAutoStartupDataManager::ConvertAutoStartupStatusToVa
 void AbilityAutoStartupDataManager::ConvertAutoStartupStatusFromValue(
     const DistributedKv::Value &value, AutoStartupStatus &startupStatus)
 {
-    cJSON *jsonObject = cJSON_Parse(value.ToString().c_str());
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "parse jsonObject failed");
+    nlohmann::json jsonObject = nlohmann::json::parse(value.ToString(), nullptr, false);
+    if (jsonObject.is_discarded()) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "parse jsonObject fail");
         return;
     }
-    cJSON *isAutoStartupItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_IS_AUTO_STARTUP.c_str());
-    if (isAutoStartupItem != nullptr && cJSON_IsBool(isAutoStartupItem)) {
-        startupStatus.isAutoStartup = isAutoStartupItem->type == cJSON_True;
+    if (jsonObject.contains(JSON_KEY_IS_AUTO_STARTUP) && jsonObject[JSON_KEY_IS_AUTO_STARTUP].is_boolean()) {
+        startupStatus.isAutoStartup = jsonObject.at(JSON_KEY_IS_AUTO_STARTUP).get<bool>();
     }
-    cJSON *isEdmForceItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_IS_EDM_FORCE.c_str());
-    if (isEdmForceItem != nullptr && cJSON_IsBool(isEdmForceItem)) {
-        startupStatus.isEdmForce = isEdmForceItem->type == cJSON_True;
+    if (jsonObject.contains(JSON_KEY_IS_EDM_FORCE) && jsonObject[JSON_KEY_IS_EDM_FORCE].is_boolean()) {
+        startupStatus.isEdmForce = jsonObject.at(JSON_KEY_IS_EDM_FORCE).get<bool>();
     }
-    cJSON *setterUserIdItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_SETTER_USERID.c_str());
-    if (setterUserIdItem != nullptr && cJSON_IsNumber(setterUserIdItem)) {
-        startupStatus.setterUserId = static_cast<int32_t>(setterUserIdItem->valuedouble);
+    if (jsonObject.contains(JSON_KEY_SETTER_USERID) && jsonObject[JSON_KEY_SETTER_USERID].is_boolean()) {
+        startupStatus.setterUserId = jsonObject.at(JSON_KEY_SETTER_USERID).get<int32_t>();
     }
-    cJSON *setterTypeItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_SETTER_TYPE.c_str());
-    if (setterTypeItem != nullptr && cJSON_IsNumber(setterTypeItem)) {
-        startupStatus.setterType = static_cast<AutoStartupSetterType>(setterTypeItem->valuedouble);
+    if (jsonObject.contains(JSON_KEY_SETTER_TYPE) && jsonObject[JSON_KEY_SETTER_TYPE].is_boolean()) {
+        startupStatus.setterType = jsonObject.at(JSON_KEY_SETTER_TYPE).get<AutoStartupSetterType>();
     }
-    cJSON_Delete(jsonObject);
 }
 
 DistributedKv::Key AbilityAutoStartupDataManager::ConvertAutoStartupDataToKey(const AutoStartupInfo &info)
 {
-    cJSON *jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "create jsonObject failed");
-        return DistributedKv::Key();
-    }
-    cJSON_AddStringToObject(jsonObject, JSON_KEY_BUNDLE_NAME.c_str(), info.bundleName.c_str());
-    cJSON_AddStringToObject(jsonObject, JSON_KEY_MODULE_NAME.c_str(), info.moduleName.c_str());
-    cJSON_AddStringToObject(jsonObject, JSON_KEY_ABILITY_NAME.c_str(), info.abilityName.c_str());
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_APP_CLONE_INDEX.c_str(), static_cast<double>(info.appCloneIndex));
-    cJSON_AddStringToObject(jsonObject, JSON_KEY_ACCESS_TOKENID.c_str(), info.accessTokenId.c_str());
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_USERID.c_str(), static_cast<double>(info.userId));
-    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-    cJSON_Delete(jsonObject);
-    DistributedKv::Key key(jsonStr);
+    nlohmann::json jsonObject = nlohmann::json {
+        { JSON_KEY_BUNDLE_NAME, info.bundleName },
+        { JSON_KEY_MODULE_NAME, info.moduleName },
+        { JSON_KEY_ABILITY_NAME, info.abilityName },
+        { JSON_KEY_APP_CLONE_INDEX, info.appCloneIndex },
+        { JSON_KEY_ACCESS_TOKENID, info.accessTokenId },
+        { JSON_KEY_USERID, info.userId },
+    };
+    DistributedKv::Key key(jsonObject.dump());
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "key: %{public}s", key.ToString().c_str());
     return key;
 }
@@ -510,76 +491,64 @@ AutoStartupInfo AbilityAutoStartupDataManager::ConvertAutoStartupInfoFromKeyAndV
 void AbilityAutoStartupDataManager::ConvertAutoStartupInfoFromKey(
     const DistributedKv::Key &key, AutoStartupInfo &info)
 {
-    cJSON *jsonObject = cJSON_Parse(key.ToString().c_str());
-    if (jsonObject == nullptr) {
+    nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
+    if (jsonObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "parse jsonObject fail");
         return;
     }
 
-    cJSON *bundleNameItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_BUNDLE_NAME.c_str());
-    if (bundleNameItem != nullptr && cJSON_IsString(bundleNameItem)) {
-        info.bundleName = bundleNameItem->valuestring;
+    if (jsonObject.contains(JSON_KEY_BUNDLE_NAME) && jsonObject[JSON_KEY_BUNDLE_NAME].is_string()) {
+        info.bundleName = jsonObject.at(JSON_KEY_BUNDLE_NAME).get<std::string>();
     }
 
-    cJSON *moduleNameItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_MODULE_NAME.c_str());
-    if (moduleNameItem != nullptr && cJSON_IsString(moduleNameItem)) {
-        info.moduleName = moduleNameItem->valuestring;
+    if (jsonObject.contains(JSON_KEY_MODULE_NAME) && jsonObject[JSON_KEY_MODULE_NAME].is_string()) {
+        info.moduleName = jsonObject.at(JSON_KEY_MODULE_NAME).get<std::string>();
     }
 
-    cJSON *abilityNameItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_ABILITY_NAME.c_str());
-    if (abilityNameItem != nullptr && cJSON_IsString(abilityNameItem)) {
-        info.abilityName = abilityNameItem->valuestring;
+    if (jsonObject.contains(JSON_KEY_ABILITY_NAME) && jsonObject[JSON_KEY_ABILITY_NAME].is_string()) {
+        info.abilityName = jsonObject.at(JSON_KEY_ABILITY_NAME).get<std::string>();
     }
 
-    cJSON *appCloneIndexItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_APP_CLONE_INDEX.c_str());
-    if (appCloneIndexItem != nullptr && cJSON_IsNumber(appCloneIndexItem)) {
-        info.appCloneIndex = static_cast<int32_t>(appCloneIndexItem->valuedouble);
+    if (jsonObject.contains(JSON_KEY_APP_CLONE_INDEX) && jsonObject[JSON_KEY_APP_CLONE_INDEX].is_number()) {
+        info.appCloneIndex = jsonObject.at(JSON_KEY_APP_CLONE_INDEX).get<int32_t>();
     }
 
-    cJSON *accessTokenIdItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_ACCESS_TOKENID.c_str());
-    if (accessTokenIdItem != nullptr && cJSON_IsString(accessTokenIdItem)) {
-        info.accessTokenId = accessTokenIdItem->valuestring;
+    if (jsonObject.contains(JSON_KEY_ACCESS_TOKENID) && jsonObject[JSON_KEY_ACCESS_TOKENID].is_string()) {
+        info.accessTokenId = jsonObject.at(JSON_KEY_ACCESS_TOKENID).get<std::string>();
     }
 
-    cJSON *userIdItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_USERID.c_str());
-    if (userIdItem != nullptr && cJSON_IsNumber(userIdItem)) {
-        info.userId = static_cast<int32_t>(userIdItem->valuedouble);
+    if (jsonObject.contains(JSON_KEY_USERID) && jsonObject[JSON_KEY_USERID].is_number()) {
+        info.userId = jsonObject.at(JSON_KEY_USERID).get<int32_t>();
     }
-    cJSON_Delete(jsonObject);
 }
 
 void AbilityAutoStartupDataManager::ConvertAutoStartupInfoFromValue(
     const DistributedKv::Value &value, AutoStartupInfo &info)
 {
-    cJSON *jsonValueObject = cJSON_Parse(value.ToString().c_str());
-    if (jsonValueObject == nullptr) {
+    nlohmann::json jsonValueObject = nlohmann::json::parse(value.ToString(), nullptr, false);
+    if (jsonValueObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "parse jsonValueObject fail");
         return;
     }
 
-    cJSON *typeNameItem = cJSON_GetObjectItem(jsonValueObject, JSON_KEY_TYPE_NAME.c_str());
-    if (typeNameItem != nullptr && cJSON_IsString(typeNameItem)) {
-        info.abilityTypeName = typeNameItem->valuestring;
+    if (jsonValueObject.contains(JSON_KEY_TYPE_NAME) && jsonValueObject[JSON_KEY_TYPE_NAME].is_string()) {
+        info.abilityTypeName = jsonValueObject.at(JSON_KEY_TYPE_NAME).get<std::string>();
     }
 
-    cJSON *isEdmForceItem = cJSON_GetObjectItem(jsonValueObject, JSON_KEY_IS_EDM_FORCE.c_str());
-    if (isEdmForceItem != nullptr && cJSON_IsBool(isEdmForceItem)) {
-        info.canUserModify = !(isEdmForceItem->type == cJSON_True);
+    if (jsonValueObject.contains(JSON_KEY_IS_EDM_FORCE) && jsonValueObject[JSON_KEY_IS_EDM_FORCE].is_boolean()) {
+        info.canUserModify = !(jsonValueObject.at(JSON_KEY_IS_EDM_FORCE).get<bool>());
     }
 
-    cJSON *setterUserIdItem = cJSON_GetObjectItem(jsonValueObject, JSON_KEY_SETTER_USERID.c_str());
-    if (setterUserIdItem != nullptr && cJSON_IsNumber(setterUserIdItem)) {
-        info.setterUserId = static_cast<int32_t>(setterUserIdItem->valuedouble);
+    if (jsonValueObject.contains(JSON_KEY_SETTER_USERID) && jsonValueObject[JSON_KEY_SETTER_USERID].is_number()) {
+        info.setterUserId = jsonValueObject.at(JSON_KEY_SETTER_USERID).get<int32_t>();
     }
-
-    cJSON_Delete(jsonValueObject);
 }
 
 bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, const AutoStartupInfo &info)
 {
-    cJSON *jsonObject = cJSON_Parse(key.ToString().c_str());
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "parse jsonObject failed");
+    nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
+    if (jsonObject.is_discarded()) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "parse jsonObject fail");
         return false;
     }
 
@@ -589,36 +558,31 @@ bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, const
         || !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_APP_CLONE_INDEX, info.appCloneIndex)
         || !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_ACCESS_TOKENID, info.accessTokenId)
         || !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_USERID, info.userId)) {
-        cJSON_Delete(jsonObject);
         return false;
     }
-    cJSON_Delete(jsonObject);
     return true;
 }
 
 bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, const std::string &accessTokenId)
 {
-    cJSON *jsonObject = cJSON_Parse(key.ToString().c_str());
-    if (jsonObject == nullptr) {
+    nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
+    if (jsonObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "parse jsonObject fail");
         return false;
     }
 
-    cJSON *itemObject = cJSON_GetObjectItem(jsonObject, JSON_KEY_ACCESS_TOKENID.c_str());
-    if (itemObject != nullptr && cJSON_IsString(itemObject)) {
-        if (accessTokenId == std::string(itemObject->valuestring)) {
-            cJSON_Delete(jsonObject);
+    if (jsonObject.contains(JSON_KEY_ACCESS_TOKENID) && jsonObject[JSON_KEY_ACCESS_TOKENID].is_string()) {
+        if (accessTokenId == jsonObject.at(JSON_KEY_ACCESS_TOKENID).get<std::string>()) {
             return true;
         }
     }
-    cJSON_Delete(jsonObject);
     return false;
 }
 
 bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, int32_t userId)
 {
-    cJSON *jsonObject = cJSON_Parse(key.ToString().c_str());
-    if (jsonObject == nullptr) {
+    nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
+    if (jsonObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "parse jsonObject fail");
         return false;
     }
@@ -626,10 +590,8 @@ bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, int32
     if (jsonUtil.IsEqual(jsonObject, JSON_KEY_USERID, userId) ||
         jsonUtil.IsEqual(jsonObject, JSON_KEY_USERID, U0_USER_ID) ||
         jsonUtil.IsEqual(jsonObject, JSON_KEY_USERID, U1_USER_ID)) {
-        cJSON_Delete(jsonObject);
         return true;
     }
-    cJSON_Delete(jsonObject);
     return false;
 }
 } // namespace AbilityRuntime

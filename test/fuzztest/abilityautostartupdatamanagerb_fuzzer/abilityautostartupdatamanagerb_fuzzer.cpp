@@ -100,8 +100,7 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     dataMgr->ConvertAutoStartupInfoFromKeyAndValue(key2, value2Illegal);
     dataMgr->ConvertAutoStartupInfoFromKeyAndValue(key2, value3);
 
-    cJSON *jsonObject = cJSON_Parse(key1.ToString().c_str());
-    cJSON_Delete(jsonObject);
+    nlohmann::json jsonObject = nlohmann::json::parse(key1.ToString(), nullptr, false);
     dataMgr->IsEqual(key1, info);
     dataMgr->IsEqual(key2, info);
     dataMgr->IsEqual(key1Illegal, info);

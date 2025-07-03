@@ -87,7 +87,6 @@ ohos_fuzztest("KeepAliveProcessManagerFifteenthFuzzTest") {
     "init:libbeget_proxy",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "kv_store:distributeddata_inner",
     "napi:ace_napi",
     "relational_store:native_dataability",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -197,16 +197,11 @@ void ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::OnAbilityConnec
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write parameters failed");
         return;
     }
-    cJSON *param = cJSON_CreateObject();
-    if (param == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "create json object failed");
-        return;
-    }
-    cJSON_AddStringToObject(param, UIEXTENSION_TYPE_KEY.c_str(), want_.GetStringParam(UIEXTENSION_TYPE_KEY).c_str());
-    cJSON_AddStringToObject(param, APP_FREEZE_PID.c_str(), want_.GetStringParam(APP_FREEZE_PID).c_str());
-    cJSON_AddStringToObject(param, START_BUNDLE_NAME.c_str(), want_.GetStringParam(START_BUNDLE_NAME).c_str());
-    std::string paramStr = AAFwk::JsonUtils::GetInstance().ToString(param);
-    cJSON_Delete(param);
+    nlohmann::json param;
+    param[UIEXTENSION_TYPE_KEY.c_str()] = want_.GetStringParam(UIEXTENSION_TYPE_KEY);
+    param[APP_FREEZE_PID.c_str()] = want_.GetStringParam(APP_FREEZE_PID);
+    param[START_BUNDLE_NAME.c_str()] = want_.GetStringParam(START_BUNDLE_NAME);
+    std::string paramStr = param.dump();
     if (!data.WriteString16(Str8ToStr16(paramStr))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write paramStr failed");
         return;

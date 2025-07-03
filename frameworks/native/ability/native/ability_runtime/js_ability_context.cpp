@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -581,17 +581,10 @@ napi_value JsAbilityContext::OnStartAbility(napi_env env, NapiCallbackInfo& info
             return;
         }
         if (!startOptions.requestId_.empty()) {
-            cJSON *jsonObject = cJSON_CreateObject();
-            if (jsonObject == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "create json object failed");
-                return;
-            }
             std::string errMsg = want.GetBoolParam(Want::PARAM_RESV_START_RECENT, false) ?
                 "Failed to call startRecentAbility" : "Failed to call startAbility";
-            cJSON_AddStringToObject(jsonObject, JSON_KEY_ERR_MSG.c_str(), errMsg.c_str());
-            std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-            cJSON_Delete(jsonObject);
-            context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonStr);
+            nlohmann::json jsonObject = nlohmann::json { { JSON_KEY_ERR_MSG, errMsg } };
+            context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
         }
     };
 
@@ -999,15 +992,10 @@ napi_value JsAbilityContext::OnStartAbilityAsCallerInner(napi_env env, NapiCallb
                 return;
             }
             if (!startOptions.requestId_.empty()) {
-                cJSON *jsonObject = cJSON_CreateObject();
-                if (jsonObject == nullptr) {
-                    TAG_LOGW(AAFwkTag::CONTEXT, "create json object failed");
-                    return;
-                }
-                cJSON_AddStringToObject(jsonObject, JSON_KEY_ERR_MSG.c_str(), "Failed to call startAbilityAsCaller");
-                std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-                cJSON_Delete(jsonObject);
-                context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonStr);
+                nlohmann::json jsonObject = nlohmann::json {
+                    { JSON_KEY_ERR_MSG, "Failed to call startAbilityAsCaller" }
+                };
+                context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
             }
         };
 
@@ -1122,15 +1110,10 @@ napi_value JsAbilityContext::OnStartAbilityWithAccount(napi_env env, NapiCallbac
                 return;
             }
             if (!startOptions.requestId_.empty()) {
-                cJSON *jsonObject = cJSON_CreateObject();
-                if (jsonObject == nullptr) {
-                    TAG_LOGW(AAFwkTag::CONTEXT, "create json object failed");
-                    return;
-                }
-                cJSON_AddStringToObject(jsonObject, JSON_KEY_ERR_MSG.c_str(), "Failed to call startAbilityWithAccount");
-                std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-                cJSON_Delete(jsonObject);
-                context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonStr);
+                nlohmann::json jsonObject = nlohmann::json {
+                    { JSON_KEY_ERR_MSG, "Failed to call startAbilityWithAccount" }
+                };
+                context->OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
             }
     };
     napi_value lastParam = (info.argc > unwrapArgc) ? info.argv[unwrapArgc] : nullptr;

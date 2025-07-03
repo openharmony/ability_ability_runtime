@@ -71,7 +71,6 @@ ohos_unittest("app_running_status_module_test") {
     "window_manager:libwm",
     "window_manager:libwsutils",
     "json:nlohmann_json_static",
-    "jsoncpp:jsoncpp",
   ]
 
   if (ability_runtime_child_process) {

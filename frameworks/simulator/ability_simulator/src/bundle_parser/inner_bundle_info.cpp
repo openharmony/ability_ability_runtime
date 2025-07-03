@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 
 #include "common_profile.h"
 #include "hilog_tag_wrapper.h"
-#include "json_serializer.h"
 #include "string_ex.h"
 
 namespace OHOS {
@@ -178,376 +177,738 @@ InnerBundleInfo::~InnerBundleInfo()
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "instance destroyed");
 }
 
-bool to_json(cJSON *&jsonObject, const Distro &distro)
+void to_json(nlohmann::json &jsonObject, const Distro &distro)
 {
-    jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
-        return false;
-    }
-    cJSON_AddBoolToObject(jsonObject, ProfileReader::BUNDLE_MODULE_PROFILE_KEY_DELIVERY_WITH_INSTALL,
-        distro.deliveryWithInstall);
-    cJSON_AddStringToObject(jsonObject, ProfileReader::BUNDLE_MODULE_PROFILE_KEY_MODULE_NAME,
-        distro.moduleName.c_str());
-    cJSON_AddStringToObject(jsonObject, ProfileReader::BUNDLE_MODULE_PROFILE_KEY_MODULE_TYPE,
-        distro.moduleType.c_str());
-    cJSON_AddBoolToObject(jsonObject, ProfileReader::BUNDLE_MODULE_PROFILE_KEY_MODULE_INSTALLATION_FREE,
-        distro.installationFree);
-    return true;
+    jsonObject = nlohmann::json {
+            {ProfileReader::BUNDLE_MODULE_PROFILE_KEY_DELIVERY_WITH_INSTALL, distro.deliveryWithInstall},
+            {ProfileReader::BUNDLE_MODULE_PROFILE_KEY_MODULE_NAME, distro.moduleName},
+            {ProfileReader::BUNDLE_MODULE_PROFILE_KEY_MODULE_TYPE, distro.moduleType},
+            {ProfileReader::BUNDLE_MODULE_PROFILE_KEY_MODULE_INSTALLATION_FREE, distro.installationFree}
+    };
 }
 
-bool to_json(cJSON *&jsonObject, const Dependency &dependency)
+void to_json(nlohmann::json &jsonObject, const Dependency &dependency)
 {
-    jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
-        return false;
-    }
-    cJSON_AddStringToObject(jsonObject, Profile::DEPENDENCIES_MODULE_NAME, dependency.moduleName.c_str());
-    cJSON_AddStringToObject(jsonObject, Profile::DEPENDENCIES_BUNDLE_NAME, dependency.bundleName.c_str());
-    cJSON_AddNumberToObject(jsonObject, Profile::APP_VERSION_CODE, static_cast<double>(dependency.versionCode));
-    return true;
+    jsonObject = nlohmann::json {
+        {Profile::DEPENDENCIES_MODULE_NAME, dependency.moduleName},
+        {Profile::DEPENDENCIES_BUNDLE_NAME, dependency.bundleName},
+        {Profile::APP_VERSION_CODE, dependency.versionCode}
+    };
 }
 
-bool to_json(cJSON *&jsonObject, const InnerModuleInfo &info)
+void to_json(nlohmann::json &jsonObject, const InnerModuleInfo &info)
 {
-    jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
-        return false;
-    }
-
-    cJSON_AddStringToObject(jsonObject, NAME.c_str(), info.name.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_PACKAGE.c_str(), info.modulePackage.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_NAME.c_str(), info.moduleName.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_PATH.c_str(), info.modulePath.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_DATA_DIR.c_str(), info.moduleDataDir.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_RES_PATH.c_str(), info.moduleResPath.c_str());
-    cJSON_AddBoolToObject(jsonObject, MODULE_IS_ENTRY.c_str(), info.isEntry);
-
-    cJSON *metaDataItem = nullptr;
-    if (!to_json(metaDataItem, info.metaData)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json metaData failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, MODULE_METADATA.c_str(), metaDataItem);
-
-    cJSON_AddNumberToObject(jsonObject, MODULE_COLOR_MODE.c_str(), static_cast<double>(info.colorMode));
-
-    cJSON *distroItem = nullptr;
-    if (!to_json(distroItem, info.distro)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json distro failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, MODULE_DISTRO.c_str(), distroItem);
-
-    cJSON_AddStringToObject(jsonObject, MODULE_DESCRIPTION.c_str(), info.description.c_str());
-    cJSON_AddNumberToObject(jsonObject, MODULE_DESCRIPTION_ID.c_str(), static_cast<double>(info.descriptionId));
-    cJSON_AddStringToObject(jsonObject, MODULE_ICON.c_str(), info.icon.c_str());
-    cJSON_AddNumberToObject(jsonObject, MODULE_ICON_ID.c_str(), static_cast<double>(info.iconId));
-    cJSON_AddStringToObject(jsonObject, MODULE_LABEL.c_str(), info.label.c_str());
-    cJSON_AddNumberToObject(jsonObject, MODULE_LABEL_ID.c_str(), static_cast<double>(info.labelId));
-    cJSON_AddBoolToObject(jsonObject, MODULE_DESCRIPTION_INSTALLATION_FREE.c_str(), info.installationFree);
-
-    cJSON *isRemovableItem = nullptr;
-    if (!to_json(isRemovableItem, info.isRemovable)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json isRemovable failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, MODULE_IS_REMOVABLE.c_str(), isRemovableItem);
-
-    cJSON_AddNumberToObject(jsonObject, MODULE_UPGRADE_FLAG.c_str(), static_cast<double>(info.upgradeFlag));
-    
-    cJSON *reqCapabilitiesItem = nullptr;
-    if (!to_json(reqCapabilitiesItem, info.reqCapabilities)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json reqCapabilities failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, MODULE_REQ_CAPABILITIES.c_str(), reqCapabilitiesItem);
-
-    cJSON *abilityKeysItem = nullptr;
-    if (!to_json(abilityKeysItem, info.abilityKeys)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json abilityKeys failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, MODULE_ABILITY_KEYS.c_str(), abilityKeysItem);
-
-    cJSON_AddStringToObject(jsonObject, MODULE_MAIN_ABILITY.c_str(), info.mainAbility.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_ENTRY_ABILITY_KEY.c_str(), info.entryAbilityKey.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_SRC_PATH.c_str(), info.srcPath.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_HASH_VALUE.c_str(), info.hashValue.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_PROCESS.c_str(), info.process.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_SRC_ENTRANCE.c_str(), info.srcEntrance.c_str());
-
-    cJSON *deviceTypesItem = nullptr;
-    if (!to_json(deviceTypesItem, info.deviceTypes)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json deviceTypes failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, MODULE_DEVICE_TYPES.c_str(), deviceTypesItem);
-
-    cJSON_AddStringToObject(jsonObject, MODULE_VIRTUAL_MACHINE.c_str(), info.virtualMachine.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_UI_SYNTAX.c_str(), info.uiSyntax.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_PAGES.c_str(), info.pages.c_str());
-
-    cJSON *metadataItem = nullptr;
-    if (!to_json(metadataItem, info.metadata)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json metadata failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, MODULE_META_DATA.c_str(), metadataItem);
-
-    cJSON *extensionKeysItem = nullptr;
-    if (!to_json(extensionKeysItem, info.extensionKeys)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json extensionKeys failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, MODULE_EXTENSION_KEYS.c_str(), extensionKeysItem);
-
-    cJSON_AddBoolToObject(jsonObject, MODULE_IS_MODULE_JSON.c_str(), info.isModuleJson);
-    cJSON_AddBoolToObject(jsonObject, MODULE_IS_STAGE_BASED_MODEL.c_str(), info.isStageBasedModel);
-
-    cJSON *dependenciesItem = nullptr;
-    if (!to_json(dependenciesItem, info.dependencies)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json dependencies failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, MODULE_DEPENDENCIES.c_str(), dependenciesItem);
-
-    cJSON_AddBoolToObject(jsonObject, MODULE_IS_LIB_ISOLATED.c_str(), info.isLibIsolated);
-    cJSON_AddStringToObject(jsonObject, MODULE_NATIVE_LIBRARY_PATH.c_str(), info.nativeLibraryPath.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_CPU_ABI.c_str(), info.cpuAbi.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_HAP_PATH.c_str(), info.hapPath.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_COMPILE_MODE.c_str(), info.compileMode.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_TARGET_MODULE_NAME.c_str(), info.targetModuleName.c_str());
-    cJSON_AddNumberToObject(jsonObject, MODULE_TARGET_PRIORITY.c_str(), static_cast<double>(info.targetPriority));
-    cJSON_AddNumberToObject(jsonObject, MODULE_ATOMIC_SERVICE_MODULE_TYPE.c_str(),
-        static_cast<double>(info.atomicServiceModuleType));
-
-    cJSON *preloadsItem = nullptr;
-    if (!to_json(preloadsItem, info.preloads)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json preloads failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, MODULE_PRELOADS.c_str(), preloadsItem);
-
-    cJSON_AddNumberToObject(jsonObject, MODULE_BUNDLE_TYPE.c_str(), static_cast<double>(info.bundleType));
-    cJSON_AddNumberToObject(jsonObject, MODULE_VERSION_CODE.c_str(), static_cast<double>(info.versionCode));
-    cJSON_AddStringToObject(jsonObject, MODULE_VERSION_NAME.c_str(), info.versionName.c_str());
-
-    cJSON *proxyDatasItem = nullptr;
-    if (!to_json(proxyDatasItem, info.proxyDatas)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json proxyDatas failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, MODULE_PROXY_DATAS.c_str(), proxyDatasItem);
-
-    cJSON_AddStringToObject(jsonObject, MODULE_BUILD_HASH.c_str(), info.buildHash.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_ISOLATION_MODE.c_str(), info.isolationMode.c_str());
-    cJSON_AddBoolToObject(jsonObject, MODULE_COMPRESS_NATIVE_LIBS.c_str(), info.compressNativeLibs);
-
-    cJSON *nativeLibraryFileNamesItem = nullptr;
-    if (!to_json(nativeLibraryFileNamesItem, info.nativeLibraryFileNames)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json nativeLibraryFileNames failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, MODULE_NATIVE_LIBRARY_FILE_NAMES.c_str(), nativeLibraryFileNamesItem);
-
-    cJSON_AddNumberToObject(jsonObject, MODULE_AOT_COMPILE_STATUS.c_str(), static_cast<double>(info.aotCompileStatus));
-    return true;
+    jsonObject = nlohmann::json {
+        {NAME, info.name},
+        {MODULE_PACKAGE, info.modulePackage},
+        {MODULE_NAME, info.moduleName},
+        {MODULE_PATH, info.modulePath},
+        {MODULE_DATA_DIR, info.moduleDataDir},
+        {MODULE_RES_PATH, info.moduleResPath},
+        {MODULE_IS_ENTRY, info.isEntry},
+        {MODULE_METADATA, info.metaData},
+        {MODULE_COLOR_MODE, info.colorMode},
+        {MODULE_DISTRO, info.distro},
+        {MODULE_DESCRIPTION, info.description},
+        {MODULE_DESCRIPTION_ID, info.descriptionId},
+        {MODULE_ICON, info.icon},
+        {MODULE_ICON_ID, info.iconId},
+        {MODULE_LABEL, info.label},
+        {MODULE_LABEL_ID, info.labelId},
+        {MODULE_DESCRIPTION_INSTALLATION_FREE, info.installationFree},
+        {MODULE_IS_REMOVABLE, info.isRemovable},
+        {MODULE_UPGRADE_FLAG, info.upgradeFlag},
+        {MODULE_REQ_CAPABILITIES, info.reqCapabilities},
+        {MODULE_ABILITY_KEYS, info.abilityKeys},
+        {MODULE_MAIN_ABILITY, info.mainAbility},
+        {MODULE_ENTRY_ABILITY_KEY, info.entryAbilityKey},
+        {MODULE_SRC_PATH, info.srcPath},
+        {MODULE_HASH_VALUE, info.hashValue},
+        {MODULE_PROCESS, info.process},
+        {MODULE_SRC_ENTRANCE, info.srcEntrance},
+        {MODULE_DEVICE_TYPES, info.deviceTypes},
+        {MODULE_VIRTUAL_MACHINE, info.virtualMachine},
+        {MODULE_UI_SYNTAX, info.uiSyntax},
+        {MODULE_PAGES, info.pages},
+        {MODULE_META_DATA, info.metadata},
+        {MODULE_EXTENSION_KEYS, info.extensionKeys},
+        {MODULE_IS_MODULE_JSON, info.isModuleJson},
+        {MODULE_IS_STAGE_BASED_MODEL, info.isStageBasedModel},
+        {MODULE_DEPENDENCIES, info.dependencies},
+        {MODULE_IS_LIB_ISOLATED, info.isLibIsolated},
+        {MODULE_NATIVE_LIBRARY_PATH, info.nativeLibraryPath},
+        {MODULE_CPU_ABI, info.cpuAbi},
+        {MODULE_HAP_PATH, info.hapPath},
+        {MODULE_COMPILE_MODE, info.compileMode},
+        {MODULE_TARGET_MODULE_NAME, info.targetModuleName},
+        {MODULE_TARGET_PRIORITY, info.targetPriority},
+        {MODULE_ATOMIC_SERVICE_MODULE_TYPE, info.atomicServiceModuleType},
+        {MODULE_PRELOADS, info.preloads},
+        {MODULE_BUNDLE_TYPE, info.bundleType},
+        {MODULE_VERSION_CODE, info.versionCode},
+        {MODULE_VERSION_NAME, info.versionName},
+        {MODULE_PROXY_DATAS, info.proxyDatas},
+        {MODULE_BUILD_HASH, info.buildHash},
+        {MODULE_ISOLATION_MODE, info.isolationMode},
+        {MODULE_COMPRESS_NATIVE_LIBS, info.compressNativeLibs},
+        {MODULE_NATIVE_LIBRARY_FILE_NAMES, info.nativeLibraryFileNames},
+        {MODULE_AOT_COMPILE_STATUS, info.aotCompileStatus},
+    };
 }
 
-bool InnerBundleInfo::ToJson(cJSON *&jsonObject) const
+void InnerBundleInfo::ToJson(nlohmann::json &jsonObject) const
 {
-    jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
-        return false;
-    }
-    cJSON_AddNumberToObject(jsonObject, APP_TYPE.c_str(), static_cast<double>(appType_));
-    cJSON_AddNumberToObject(jsonObject, BUNDLE_STATUS.c_str(), static_cast<double>(bundleStatus_));
-
-    cJSON *allowedAclsItem = nullptr;
-    if (!to_json(allowedAclsItem, allowedAcls_)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json allowedAcls failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, ALLOWED_ACLS.c_str(), allowedAclsItem);
-
-    cJSON *baseApplicationInfoItem = nullptr;
-    if (!to_json(baseApplicationInfoItem, *baseApplicationInfo_)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json baseApplicationInfo failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, BASE_APPLICATION_INFO.c_str(), baseApplicationInfoItem);
-
-    cJSON *baseBundleInfoItem = nullptr;
-    if (!to_json(baseBundleInfoItem, *baseBundleInfo_)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json baseBundleInfo failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, BASE_BUNDLE_INFO.c_str(), baseBundleInfoItem);
-
-    cJSON *baseAbilityInfosItem = nullptr;
-    if (!to_json(baseAbilityInfosItem, baseAbilityInfos_)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json baseAbilityInfos failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, BASE_ABILITY_INFO.c_str(), baseAbilityInfosItem);
-
-    cJSON *innerModuleInfosItem = nullptr;
-    if (!to_json(innerModuleInfosItem, innerModuleInfos_)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json innerModuleInfos failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, INNER_MODULE_INFO.c_str(), innerModuleInfosItem);
-
-    cJSON_AddNumberToObject(jsonObject, USER_ID.c_str(), static_cast<double>(userId_));
-    cJSON_AddStringToObject(jsonObject, APP_FEATURE.c_str(), appFeature_.c_str());
-    cJSON_AddBoolToObject(jsonObject, BUNDLE_IS_NEW_VERSION.c_str(), isNewVersion_);
-
-    cJSON *baseExtensionInfosItem = nullptr;
-    if (!to_json(baseExtensionInfosItem, baseExtensionInfos_)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json baseExtensionInfos failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, BUNDLE_BASE_EXTENSION_INFOS.c_str(), baseExtensionInfosItem);
-
-    cJSON_AddNumberToObject(jsonObject, APP_INDEX.c_str(), static_cast<double>(appIndex_));
-    cJSON_AddBoolToObject(jsonObject, BUNDLE_IS_SANDBOX_APP.c_str(), isSandboxApp_);
-    cJSON_AddNumberToObject(jsonObject, OVERLAY_TYPE.c_str(), static_cast<double>(overlayType_));
-    return true;
+    jsonObject[APP_TYPE] = appType_;
+    jsonObject[BUNDLE_STATUS] = bundleStatus_;
+    jsonObject[ALLOWED_ACLS] = allowedAcls_;
+    jsonObject[BASE_APPLICATION_INFO] = *baseApplicationInfo_;
+    jsonObject[BASE_BUNDLE_INFO] = *baseBundleInfo_;
+    jsonObject[BASE_ABILITY_INFO] = baseAbilityInfos_;
+    jsonObject[INNER_MODULE_INFO] = innerModuleInfos_;
+    jsonObject[USER_ID] = userId_;
+    jsonObject[APP_FEATURE] = appFeature_;
+    jsonObject[BUNDLE_IS_NEW_VERSION] = isNewVersion_;
+    jsonObject[BUNDLE_BASE_EXTENSION_INFOS] = baseExtensionInfos_;
+    jsonObject[APP_INDEX] = appIndex_;
+    jsonObject[BUNDLE_IS_SANDBOX_APP] = isSandboxApp_;
+    jsonObject[OVERLAY_TYPE] = overlayType_;
 }
 
-void from_json(const cJSON *jsonObject, InnerModuleInfo &info)
+void from_json(const nlohmann::json &jsonObject, InnerModuleInfo &info)
 {
     // these are not required fields.
+    const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
-    GetStringValueIfFindKey(jsonObject, NAME, info.name, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_PACKAGE, info.modulePackage, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_NAME, info.moduleName, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_PATH, info.modulePath, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_DATA_DIR, info.moduleDataDir, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_HAP_PATH, info.hapPath, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_RES_PATH, info.moduleResPath, false, parseResult);
-    GetBoolValueIfFindKey(jsonObject, MODULE_IS_ENTRY, info.isEntry, false, parseResult);
-    GetObjectValueIfFindKey(jsonObject, MODULE_METADATA, info.metaData, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, MODULE_COLOR_MODE, info.colorMode, false, parseResult);
-    GetObjectValueIfFindKey(jsonObject, MODULE_DISTRO, info.distro, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_DESCRIPTION, info.description, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, MODULE_DESCRIPTION_ID, info.descriptionId, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_ICON, info.icon, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, MODULE_ICON_ID, info.iconId, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_LABEL, info.label, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, MODULE_LABEL_ID, info.labelId, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_MAIN_ABILITY, info.mainAbility, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_ENTRY_ABILITY_KEY, info.entryAbilityKey, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_SRC_PATH, info.srcPath, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_HASH_VALUE, info.hashValue, false, parseResult);
-    GetBoolValueIfFindKey(jsonObject, MODULE_DESCRIPTION_INSTALLATION_FREE, info.installationFree, false, parseResult);
-    GetBoolValueMapIfFindKey(jsonObject, MODULE_IS_REMOVABLE, info.isRemovable, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, MODULE_UPGRADE_FLAG, info.upgradeFlag, false, parseResult);
-    GetStringValuesIfFindKey(jsonObject, MODULE_REQ_CAPABILITIES, info.reqCapabilities, false, parseResult);
-    GetStringValuesIfFindKey(jsonObject, MODULE_ABILITY_KEYS, info.abilityKeys, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_PROCESS, info.process, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_SRC_ENTRANCE, info.srcEntrance, false, parseResult);
-    GetStringValuesIfFindKey(jsonObject, MODULE_DEVICE_TYPES, info.deviceTypes, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_VIRTUAL_MACHINE, info.virtualMachine, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_UI_SYNTAX, info.uiSyntax, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_PAGES, info.pages, false, parseResult);
-    GetObjectValuesIfFindKey(jsonObject, MODULE_META_DATA, info.metadata, false, parseResult);
-    GetStringValuesIfFindKey(jsonObject, MODULE_EXTENSION_KEYS, info.extensionKeys, false, parseResult);
-    GetBoolValueIfFindKey(jsonObject, MODULE_IS_MODULE_JSON, info.isModuleJson, false, parseResult);
-    GetBoolValueIfFindKey(jsonObject, MODULE_IS_STAGE_BASED_MODEL, info.isStageBasedModel, false, parseResult);
-    GetObjectValuesIfFindKey(jsonObject, MODULE_DEPENDENCIES, info.dependencies, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_COMPILE_MODE, info.compileMode, false, parseResult);
-    GetBoolValueIfFindKey(jsonObject, MODULE_IS_LIB_ISOLATED, info.isLibIsolated, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_NATIVE_LIBRARY_PATH, info.nativeLibraryPath, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_CPU_ABI, info.cpuAbi, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_TARGET_MODULE_NAME, info.targetModuleName, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, MODULE_TARGET_PRIORITY, info.targetPriority, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, MODULE_ATOMIC_SERVICE_MODULE_TYPE, info.atomicServiceModuleType, false,
-        parseResult);
-    GetStringValuesIfFindKey(jsonObject, MODULE_PRELOADS, info.preloads, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, MODULE_BUNDLE_TYPE, info.bundleType, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, MODULE_VERSION_CODE, info.versionCode, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_VERSION_NAME, info.versionName, false, parseResult);
-    GetObjectValuesIfFindKey(jsonObject, MODULE_PROXY_DATAS, info.proxyDatas, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_BUILD_HASH, info.buildHash, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_ISOLATION_MODE, info.isolationMode, false, parseResult);
-    GetBoolValueIfFindKey(jsonObject, MODULE_COMPRESS_NATIVE_LIBS, info.compressNativeLibs, false, parseResult);
-    GetStringValuesIfFindKey(jsonObject, MODULE_NATIVE_LIBRARY_FILE_NAMES, info.nativeLibraryFileNames, false,
-        parseResult);
-    GetNumberValueIfFindKey(jsonObject, MODULE_AOT_COMPILE_STATUS, info.aotCompileStatus, false, parseResult);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        NAME,
+        info.name,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_PACKAGE,
+        info.modulePackage,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_NAME,
+        info.moduleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_PATH,
+        info.modulePath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_DATA_DIR,
+        info.moduleDataDir,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_HAP_PATH,
+        info.hapPath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_RES_PATH,
+        info.moduleResPath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        MODULE_IS_ENTRY,
+        info.isEntry,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<MetaData>(jsonObject,
+        jsonObjectEnd,
+        MODULE_METADATA,
+        info.metaData,
+        JsonType::OBJECT,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<ModuleColorMode>(jsonObject,
+        jsonObjectEnd,
+        MODULE_COLOR_MODE,
+        info.colorMode,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<Distro>(jsonObject,
+        jsonObjectEnd,
+        MODULE_DISTRO,
+        info.distro,
+        JsonType::OBJECT,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_DESCRIPTION,
+        info.description,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        MODULE_DESCRIPTION_ID,
+        info.descriptionId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_ICON,
+        info.icon,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        MODULE_ICON_ID,
+        info.iconId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_LABEL,
+        info.label,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        MODULE_LABEL_ID,
+        info.labelId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_MAIN_ABILITY,
+        info.mainAbility,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_ENTRY_ABILITY_KEY,
+        info.entryAbilityKey,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_SRC_PATH,
+        info.srcPath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_HASH_VALUE,
+        info.hashValue,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        MODULE_DESCRIPTION_INSTALLATION_FREE,
+        info.installationFree,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::map<std::string, bool>>(jsonObject,
+        jsonObjectEnd,
+        MODULE_IS_REMOVABLE,
+        info.isRemovable,
+        JsonType::OBJECT,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        MODULE_UPGRADE_FLAG,
+        info.upgradeFlag,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        MODULE_REQ_CAPABILITIES,
+        info.reqCapabilities,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        MODULE_ABILITY_KEYS,
+        info.abilityKeys,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_PROCESS,
+        info.process,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_SRC_ENTRANCE,
+        info.srcEntrance,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        MODULE_DEVICE_TYPES,
+        info.deviceTypes,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_VIRTUAL_MACHINE,
+        info.virtualMachine,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_UI_SYNTAX,
+        info.uiSyntax,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_PAGES,
+        info.pages,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<Metadata>>(jsonObject,
+        jsonObjectEnd,
+        MODULE_META_DATA,
+        info.metadata,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        MODULE_EXTENSION_KEYS,
+        info.extensionKeys,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        MODULE_IS_MODULE_JSON,
+        info.isModuleJson,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        MODULE_IS_STAGE_BASED_MODEL,
+        info.isStageBasedModel,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<Dependency>>(jsonObject,
+        jsonObjectEnd,
+        MODULE_DEPENDENCIES,
+        info.dependencies,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_COMPILE_MODE,
+        info.compileMode,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        MODULE_IS_LIB_ISOLATED,
+        info.isLibIsolated,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_NATIVE_LIBRARY_PATH,
+        info.nativeLibraryPath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_CPU_ABI,
+        info.cpuAbi,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_TARGET_MODULE_NAME,
+        info.targetModuleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        MODULE_TARGET_PRIORITY,
+        info.targetPriority,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<AtomicServiceModuleType>(jsonObject,
+        jsonObjectEnd,
+        MODULE_ATOMIC_SERVICE_MODULE_TYPE,
+        info.atomicServiceModuleType,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        MODULE_PRELOADS,
+        info.preloads,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<BundleType>(jsonObject,
+        jsonObjectEnd,
+        MODULE_BUNDLE_TYPE,
+        info.bundleType,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<uint32_t>(jsonObject,
+        jsonObjectEnd,
+        MODULE_VERSION_CODE,
+        info.versionCode,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_VERSION_NAME,
+        info.versionName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<ProxyData>>(jsonObject,
+        jsonObjectEnd,
+        MODULE_PROXY_DATAS,
+        info.proxyDatas,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_BUILD_HASH,
+        info.buildHash,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_ISOLATION_MODE,
+        info.isolationMode,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        MODULE_COMPRESS_NATIVE_LIBS,
+        info.compressNativeLibs,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        MODULE_NATIVE_LIBRARY_FILE_NAMES,
+        info.nativeLibraryFileNames,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<AOTCompileStatus>(jsonObject,
+        jsonObjectEnd,
+        MODULE_AOT_COMPILE_STATUS,
+        info.aotCompileStatus,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "read InnerModuleInfo from database error:%{public}d", parseResult);
+        TAG_LOGE(
+            AAFwkTag::ABILITY_SIM, "read InnerModuleInfo from database error:%{public}d", parseResult);
     }
 }
 
-void from_json(const cJSON *jsonObject, Dependency &dependency)
+void from_json(const nlohmann::json &jsonObject, Dependency &dependency)
 {
+    const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
-    GetStringValueIfFindKey(jsonObject, Profile::DEPENDENCIES_MODULE_NAME, dependency.moduleName, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, Profile::DEPENDENCIES_BUNDLE_NAME, dependency.bundleName, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, Profile::APP_VERSION_CODE, dependency.versionCode, false, parseResult);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        Profile::DEPENDENCIES_MODULE_NAME,
+        dependency.moduleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        Profile::DEPENDENCIES_BUNDLE_NAME,
+        dependency.bundleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int>(jsonObject,
+        jsonObjectEnd,
+        Profile::APP_VERSION_CODE,
+        dependency.versionCode,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "Dependency error:%{public}d", parseResult);
     }
 }
 
-void from_json(const cJSON *jsonObject, Distro &distro)
+void from_json(const nlohmann::json &jsonObject, Distro &distro)
 {
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "called");
+    const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
-    GetBoolValueIfFindKey(jsonObject, ProfileReader::BUNDLE_MODULE_PROFILE_KEY_DELIVERY_WITH_INSTALL,
-        distro.deliveryWithInstall, true, parseResult);
-    GetStringValueIfFindKey(jsonObject, ProfileReader::BUNDLE_MODULE_PROFILE_KEY_MODULE_NAME, distro.moduleName, true,
-        parseResult);
-    GetStringValueIfFindKey(jsonObject, ProfileReader::BUNDLE_MODULE_PROFILE_KEY_MODULE_TYPE, distro.moduleType, true,
-        parseResult);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        ProfileReader::BUNDLE_MODULE_PROFILE_KEY_DELIVERY_WITH_INSTALL,
+        distro.deliveryWithInstall,
+        JsonType::BOOLEAN,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        ProfileReader::BUNDLE_MODULE_PROFILE_KEY_MODULE_NAME,
+        distro.moduleName,
+        JsonType::STRING,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        ProfileReader::BUNDLE_MODULE_PROFILE_KEY_MODULE_TYPE,
+        distro.moduleType,
+        JsonType::STRING,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     // mustFlag decide by distro.moduleType
-    GetBoolValueIfFindKey(jsonObject, ProfileReader::BUNDLE_MODULE_PROFILE_KEY_MODULE_INSTALLATION_FREE,
-        distro.installationFree, false, parseResult);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        ProfileReader::BUNDLE_MODULE_PROFILE_KEY_MODULE_INSTALLATION_FREE,
+        distro.installationFree,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "Distro error:%{public}d", parseResult);
     }
 }
 
-int32_t InnerBundleInfo::FromJson(const cJSON *jsonObject)
+int32_t InnerBundleInfo::FromJson(const nlohmann::json &jsonObject)
 {
+    const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
-    GetNumberValueIfFindKey(jsonObject, APP_TYPE, appType_, true, parseResult);
-    GetStringValuesIfFindKey(jsonObject, ALLOWED_ACLS, allowedAcls_, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, BUNDLE_STATUS, bundleStatus_, true, parseResult);
-    GetObjectValueIfFindKey(jsonObject, BASE_BUNDLE_INFO, *baseBundleInfo_, true, parseResult);
-    GetObjectValueIfFindKey(jsonObject, BASE_APPLICATION_INFO, *baseApplicationInfo_, true, parseResult);
-    GetObjectValueMapIfFindKey(jsonObject, BASE_ABILITY_INFO, baseAbilityInfos_, true, parseResult);
-    GetObjectValueMapIfFindKey(jsonObject, INNER_MODULE_INFO, innerModuleInfos_, true, parseResult);
-    GetNumberValueIfFindKey(jsonObject, USER_ID, userId_, true, parseResult);
-    GetStringValueIfFindKey(jsonObject, APP_FEATURE, appFeature_, true, parseResult);
-    GetBoolValueIfFindKey(jsonObject, BUNDLE_IS_NEW_VERSION, isNewVersion_, false, parseResult);
-    GetObjectValueMapIfFindKey(jsonObject, BUNDLE_BASE_EXTENSION_INFOS, baseExtensionInfos_, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, APP_INDEX, appIndex_, false, parseResult);
-    GetBoolValueIfFindKey(jsonObject, BUNDLE_IS_SANDBOX_APP, isSandboxApp_, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, OVERLAY_TYPE, overlayType_, false, parseResult);
+    GetValueIfFindKey<Constants::AppType>(jsonObject,
+        jsonObjectEnd,
+        APP_TYPE,
+        appType_,
+        JsonType::NUMBER,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        ALLOWED_ACLS,
+        allowedAcls_,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<BundleStatus>(jsonObject,
+        jsonObjectEnd,
+        BUNDLE_STATUS,
+        bundleStatus_,
+        JsonType::NUMBER,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<BundleInfo>(jsonObject,
+        jsonObjectEnd,
+        BASE_BUNDLE_INFO,
+        *baseBundleInfo_,
+        JsonType::OBJECT,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<ApplicationInfo>(jsonObject,
+        jsonObjectEnd,
+        BASE_APPLICATION_INFO,
+        *baseApplicationInfo_,
+        JsonType::OBJECT,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::map<std::string, AbilityInfo>>(jsonObject,
+        jsonObjectEnd,
+        BASE_ABILITY_INFO,
+        baseAbilityInfos_,
+        JsonType::OBJECT,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::map<std::string, InnerModuleInfo>>(jsonObject,
+        jsonObjectEnd,
+        INNER_MODULE_INFO,
+        innerModuleInfos_,
+        JsonType::OBJECT,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int>(jsonObject,
+        jsonObjectEnd,
+        USER_ID,
+        userId_,
+        JsonType::NUMBER,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APP_FEATURE,
+        appFeature_,
+        JsonType::STRING,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        BUNDLE_IS_NEW_VERSION,
+        isNewVersion_,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::map<std::string, ExtensionAbilityInfo>>(jsonObject,
+        jsonObjectEnd,
+        BUNDLE_BASE_EXTENSION_INFOS,
+        baseExtensionInfos_,
+        JsonType::OBJECT,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int>(jsonObject,
+        jsonObjectEnd,
+        APP_INDEX,
+        appIndex_,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        BUNDLE_IS_SANDBOX_APP,
+        isSandboxApp_,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        OVERLAY_TYPE,
+        overlayType_,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(
             AAFwkTag::ABILITY_SIM, "read InnerBundleInfo from database error:%{public}d", parseResult);
@@ -694,14 +1055,9 @@ ErrCode InnerBundleInfo::FindAbilityInfo(
 
 std::string InnerBundleInfo::ToString() const
 {
-    cJSON *jsonObject = nullptr;
-    if (!ToJson(jsonObject)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ToJson failed");
-        return {};
-    }
-    std::string jsonStr = JsonToString(jsonObject);
-    cJSON_Delete(jsonObject);
-    return jsonStr;
+    nlohmann::json j;
+    ToJson(j);
+    return j.dump();
 }
 
 void InnerBundleInfo::GetApplicationInfo(int32_t flags, int32_t userId, ApplicationInfo &appInfo) const
