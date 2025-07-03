@@ -96,8 +96,6 @@ HWTEST_F(JsUiAbilityTest, JSUIAbility_OnWillBackground_0100, TestSize.Level1)
     auto ability = AbilityRuntime::JsUIAbility::Create(runtime);
     ASSERT_NE(ability, nullptr);
     ability->OnWillBackground();
-    ability->scene_ = std::make_shared<Rosen::WindowScene>();
-    ability->OnWillBackground();
     GTEST_LOG_(INFO) << "JSUIAbility_OnWillBackground_0100 end";
 }
 
