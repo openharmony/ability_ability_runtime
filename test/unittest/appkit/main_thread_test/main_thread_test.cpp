@@ -2460,6 +2460,18 @@ HWTEST_F(MainThreadTest, ScheduleChangeAppGcState_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScheduleChangeAppGcState_0200
+ * @tc.desc: Schedule Gc state chage.
+ * @tc.type: FUNC
+ * @tc.require: issuesI85VVU
+ */
+HWTEST_F(MainThreadTest, ScheduleChangeAppGcState_0200, TestSize.Level1)
+{
+    auto ret = mainThread_->ScheduleChangeAppGcState(0, 1);
+    EXPECT_EQ(ret, NO_ERROR);
+}
+
+/**
  * @tc.name: GetPluginNativeLibPath_0100
  * @tc.desc: Get native library path when lib compressed and not isolated.
  * @tc.type: FUNC

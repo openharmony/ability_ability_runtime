@@ -376,6 +376,7 @@ HWTEST_F(AppMgrStubTest, HandleChangeAppGcState_001, TestSize.Level1)
     WriteInterfaceToken(data);
     data.WriteInt32(0);
     data.WriteInt32(0);
+    data.WriteInt32(1);
     auto result = mockAppMgrService_->OnRemoteRequest(
             static_cast<uint32_t>(AppMgrInterfaceCode::CHANGE_APP_GC_STATE), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
