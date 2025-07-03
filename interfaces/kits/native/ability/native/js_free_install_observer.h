@@ -59,7 +59,7 @@ public:
      * @param resultCode The result of this free install.
      */
     void OnInstallFinished(const std::string &bundleName, const std::string &abilityName,
-        const std::string &startTime, const int &resultCode) override;
+        const std::string &startTime, int32_t resultCode) override;
 
     /**
      * OnInstallFinishedByUrl, return free install result.
@@ -69,7 +69,7 @@ public:
      * @param resultCode The result of this free install.
      */
     void OnInstallFinishedByUrl(const std::string &startTime, const std::string &url,
-        const int &resultCode) override;
+        int32_t resultCode) override;
 
     /**
      * OnInstallFinished, return free install result.
@@ -147,7 +147,7 @@ private:
      * @param resultCode The result code.
      */
     void HandleOnInstallFinished(const std::string &bundleName, const std::string &abilityName,
-        const std::string &startTime, const int &resultCode);
+        const std::string &startTime, int32_t resultCode);
 
     /**
      * HandleOnInstallFinishedByUrl, handle the event of free install upon finished.
@@ -157,7 +157,7 @@ private:
      * @param resultCode The result code.
      */
     void HandleOnInstallFinishedByUrl(const std::string &startTime, const std::string &url,
-        const int &resultCode);
+        int32_t resultCode);
 
     /**
      * AddJsObserverCommon, helper of AddJsObserverObject.

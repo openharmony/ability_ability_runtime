@@ -20,7 +20,7 @@ namespace AbilityRuntime {
 namespace {
     bool g_jitEnabled = false;
     AbilityRuntime::Runtime::DebugOption g_debugOption;
-    const std::string MULTI_PROCESS = "multi_process";
+    const std::string LARGE_SCREEN = "large_screen";
 }
 bool ChildProcessManager::signalRegistered_ = false;
 

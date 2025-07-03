@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,6 @@
 #include "display_info.h"
 #include "display_manager.h"
 #include "hitrace_meter.h"
-#include "json_utils.h"
 #include "scene_board_judgement.h"
 #include "ui_extension_utils.h"
 
@@ -128,17 +127,11 @@ Want SystemDialogScheduler::GetTipsDialogWant(const sptr<IRemoteObject> &callerT
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_TIPS, position);
 
-    AAFwk::Want want;
-    cJSON *jsonObj = cJSON_CreateObject();
-    if (jsonObj == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "create json object failed");
-        return want;
-    }
-    cJSON_AddBoolToObject(jsonObj, IS_DEFAULT_SELECTOR.c_str(),
-        AppUtils::GetInstance().IsSelectorDialogDefaultPossion());
-    std::string params = AAFwk::JsonUtils::GetInstance().ToString(jsonObj);
-    cJSON_Delete(jsonObj);
+    nlohmann::json jsonObj;
+    jsonObj[IS_DEFAULT_SELECTOR] = AppUtils::GetInstance().IsSelectorDialogDefaultPossion();
+    const std::string params = jsonObj.dump();
 
+    AAFwk::Want want;
     want.SetElementName(BUNDLE_NAME_DIALOG, ABILITY_NAME_TIPS_DIALOG);
     want.SetParam(DIALOG_POSITION, GetDialogPositionParams(position));
     want.SetParam(DIALOG_PARAMS, params);
@@ -156,18 +149,12 @@ Want SystemDialogScheduler::GetJumpInterceptorDialogWant(Want &targetWant)
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_JUMP_INTERCEPTOR, position);
 
-    cJSON *jsonObj = cJSON_CreateObject();
-    if (jsonObj == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "create json object failed");
-        return targetWant;
-    }
-    cJSON_AddBoolToObject(jsonObj, IS_DEFAULT_SELECTOR.c_str(),
-        AppUtils::GetInstance().IsSelectorDialogDefaultPossion());
-    cJSON_AddStringToObject(jsonObj, "bundleName", targetWant.GetElement().GetBundleName().c_str());
-    cJSON_AddStringToObject(jsonObj, "abilityName", targetWant.GetElement().GetAbilityName().c_str());
-    cJSON_AddStringToObject(jsonObj, "moduleName", targetWant.GetElement().GetModuleName().c_str());
-    std::string params = AAFwk::JsonUtils::GetInstance().ToString(jsonObj);
-    cJSON_Delete(jsonObj);
+    nlohmann::json jsonObj;
+    jsonObj[IS_DEFAULT_SELECTOR] = AppUtils::GetInstance().IsSelectorDialogDefaultPossion();
+    jsonObj["bundleName"] = targetWant.GetElement().GetBundleName();
+    jsonObj["abilityName"] = targetWant.GetElement().GetAbilityName();
+    jsonObj["moduleName"] = targetWant.GetElement().GetModuleName();
+    const std::string params = jsonObj.dump();
 
     targetWant.SetElementName(BUNDLE_NAME_DIALOG, ABILITY_NAME_JUMP_INTERCEPTOR_DIALOG);
     targetWant.SetParam(DIALOG_POSITION, GetDialogPositionParams(position));
@@ -341,42 +328,25 @@ const std::string SystemDialogScheduler::GetSelectorParams(const std::vector<Dia
         return {};
     }
 
-    cJSON *jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "create json object failed");
-        return {};
-    }
-    cJSON_AddBoolToObject(jsonObject, IS_DEFAULT_SELECTOR.c_str(),
-        AppUtils::GetInstance().IsSelectorDialogDefaultPossion());
+    nlohmann::json jsonObject;
+    jsonObject[IS_DEFAULT_SELECTOR] = AppUtils::GetInstance().IsSelectorDialogDefaultPossion();
 
-    cJSON *hapListObj = cJSON_CreateArray();
-    if (hapListObj == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "create json array failed");
-        cJSON_Delete(jsonObject);
-        return {};
+    nlohmann::json hapListObj = nlohmann::json::array();
+    for (const auto &aInfo : infos) {
+        nlohmann::json aObj;
+        aObj["label"] = std::to_string(aInfo.abilityLabelId);
+        aObj["icon"] = std::to_string(aInfo.abilityIconId);
+        aObj["bundle"] = aInfo.bundleName;
+        aObj["ability"] = aInfo.abilityName;
+        aObj["module"] = aInfo.moduleName;
+        aObj["appIndex"] = std::to_string(aInfo.appIndex);
+        aObj["bundleLabel"] = std::to_string(aInfo.bundleLabelId);
+        aObj["bundleIcon"] = std::to_string(aInfo.bundleIconId);
+        hapListObj.emplace_back(aObj);
     }
-    for (const auto &info : infos) {
-        cJSON *aObj = cJSON_CreateObject();
-        if (aObj == nullptr) {
-            TAG_LOGE(AAFwkTag::DIALOG, "create json object failed");
-            cJSON_Delete(jsonObject);
-            cJSON_Delete(hapListObj);
-            return {};
-        }
-        cJSON_AddStringToObject(aObj, "label", std::to_string(info.abilityLabelId).c_str());
-        cJSON_AddStringToObject(aObj, "icon", std::to_string(info.abilityIconId).c_str());
-        cJSON_AddStringToObject(aObj, "bundle", info.bundleName.c_str());
-        cJSON_AddStringToObject(aObj, "ability", info.abilityName.c_str());
-        cJSON_AddStringToObject(aObj, "module", info.moduleName.c_str());
-        cJSON_AddStringToObject(aObj, "appIndex", std::to_string(info.appIndex).c_str());
-        cJSON_AddStringToObject(aObj, "bundleLabel", std::to_string(info.bundleLabelId).c_str());
-        cJSON_AddStringToObject(aObj, "bundleIcon", std::to_string(info.bundleIconId).c_str());
-        cJSON_AddItemToArray(hapListObj, aObj);
-    }
-    cJSON_AddItemToObject(jsonObject, "hapList", hapListObj);
-    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-    cJSON_Delete(jsonObject);
-    return jsonStr;
+    jsonObject["hapList"] = hapListObj;
+
+    return jsonObject.dump();
 }
 
 int SystemDialogScheduler::GetPcSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos, Want &requestWant,
@@ -403,46 +373,33 @@ const std::string SystemDialogScheduler::GetPcSelectorParams(const std::vector<D
         return {};
     }
 
-    cJSON *jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "create json object failed");
-        return {};
+    nlohmann::json jsonObject;
+    jsonObject[IS_DEFAULT_SELECTOR] = AppUtils::GetInstance().IsSelectorDialogDefaultPossion();
+    jsonObject[ACTION] = action;
+    if (type == TYPE_ONLY_MATCH_WILDCARD) {
+        jsonObject[MODEL_FLAG] = true;
+    } else {
+        jsonObject[MODEL_FLAG] = false;
     }
-    cJSON_AddBoolToObject(jsonObject, IS_DEFAULT_SELECTOR.c_str(),
-        AppUtils::GetInstance().IsSelectorDialogDefaultPossion());
-    cJSON_AddStringToObject(jsonObject, ACTION.c_str(), action.c_str());
-    cJSON_AddBoolToObject(jsonObject, MODEL_FLAG.c_str(), type == TYPE_ONLY_MATCH_WILDCARD ? true : false);
 
-    cJSON *hapListObj = cJSON_CreateArray();
-    if (hapListObj == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "create json array failed");
-        cJSON_Delete(jsonObject);
-        return {};
-    }
+    nlohmann::json hapListObj = nlohmann::json::array();
     for (const auto &info : infos) {
-        cJSON *aObj = cJSON_CreateObject();
-        if (aObj == nullptr) {
-            TAG_LOGE(AAFwkTag::DIALOG, "create json object failed");
-            cJSON_Delete(jsonObject);
-            cJSON_Delete(hapListObj);
-            return {};
-        }
-        cJSON_AddStringToObject(aObj, "label", std::to_string(info.abilityLabelId).c_str());
-        cJSON_AddStringToObject(aObj, "icon", std::to_string(info.abilityIconId).c_str());
-        cJSON_AddStringToObject(aObj, "bundle", info.bundleName.c_str());
-        cJSON_AddStringToObject(aObj, "ability", info.abilityName.c_str());
-        cJSON_AddStringToObject(aObj, "module", info.moduleName.c_str());
-        cJSON_AddStringToObject(aObj, "type", type.c_str());
-        cJSON_AddStringToObject(aObj, "userId", std::to_string(userId).c_str());
-        cJSON_AddStringToObject(aObj, "appIndex", std::to_string(info.appIndex).c_str());
-        cJSON_AddStringToObject(aObj, "bundleLabel", std::to_string(info.bundleLabelId).c_str());
-        cJSON_AddStringToObject(aObj, "bundleIcon", std::to_string(info.bundleIconId).c_str());
-        cJSON_AddItemToArray(hapListObj, aObj);
+        nlohmann::json aObj;
+        aObj["label"] = std::to_string(info.abilityLabelId);
+        aObj["icon"] = std::to_string(info.abilityIconId);
+        aObj["bundle"] = info.bundleName;
+        aObj["ability"] = info.abilityName;
+        aObj["module"] = info.moduleName;
+        aObj["type"] = type;
+        aObj["userId"] = std::to_string(userId);
+        aObj["appIndex"] = std::to_string(info.appIndex);
+        aObj["bundleLabel"] = std::to_string(info.bundleLabelId);
+        aObj["bundleIcon"] = std::to_string(info.bundleIconId);
+        hapListObj.emplace_back(aObj);
     }
-    cJSON_AddItemToObject(jsonObject, "hapList", hapListObj);
-    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-    cJSON_Delete(jsonObject);
-    return jsonStr;
+    jsonObject["hapList"] = hapListObj;
+
+    return jsonObject.dump();
 }
 
 int SystemDialogScheduler::GetSelectorDialogWantCommon(const std::vector<DialogAppInfo> &dialogAppInfos,
@@ -489,19 +446,13 @@ int SystemDialogScheduler::GetSelectorDialogWantCommon(const std::vector<DialogA
 
 const std::string SystemDialogScheduler::GetDialogPositionParams(const DialogPosition position) const
 {
-    cJSON *dialogPositionData = cJSON_CreateObject();
-    if (dialogPositionData == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "create json object failed");
-        return {};
-    }
-    cJSON_AddNumberToObject(dialogPositionData, OFF_SET_X.c_str(), static_cast<double>(position.offsetX));
-    cJSON_AddNumberToObject(dialogPositionData, OFF_SET_Y.c_str(), static_cast<double>(position.offsetY));
-    cJSON_AddNumberToObject(dialogPositionData, WIDTH.c_str(), static_cast<double>(position.width));
-    cJSON_AddNumberToObject(dialogPositionData, HEIGHT.c_str(), static_cast<double>(position.height));
-    cJSON_AddBoolToObject(dialogPositionData, OVERSIZE_HEIGHT.c_str(), position.oversizeHeight);
-    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(dialogPositionData);
-    cJSON_Delete(dialogPositionData);
-    return jsonStr;
+    nlohmann::json dialogPositionData;
+    dialogPositionData[OFF_SET_X] = position.offsetX;
+    dialogPositionData[OFF_SET_Y] = position.offsetY;
+    dialogPositionData[WIDTH] = position.width;
+    dialogPositionData[HEIGHT] = position.height;
+    dialogPositionData[OVERSIZE_HEIGHT] = position.oversizeHeight;
+    return dialogPositionData.dump();
 }
 
 void SystemDialogScheduler::InitDialogPosition(DialogType type, DialogPosition &position) const

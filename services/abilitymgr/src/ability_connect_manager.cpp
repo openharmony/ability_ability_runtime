@@ -89,7 +89,6 @@ constexpr uint32_t PROCESS_MODE_RUN_WITH_MAIN_PROCESS =
     1 << static_cast<uint32_t>(AppExecFwk::ExtensionProcessMode::RUN_WITH_MAIN_PROCESS);
 
 const std::string XIAOYI_BUNDLE_NAME = "com.huawei.hmos.vassistant";
-constexpr int32_t U1_USER_ID = 1;
 
 bool IsSpecialAbility(const AppExecFwk::AbilityInfo &abilityInfo)
 {
@@ -480,21 +479,31 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
         if (isCreatedByConnect) {
             targetService->SetCreateByConnectMode();
         }
-        if (abilityRequest.abilityInfo.name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
-            targetService->SetLauncherRoot();
-            targetService->SetRestartTime(abilityRequest.restartTime);
-            targetService->SetRestartCount(abilityRequest.restartCount);
-        } else if (IsAbilityNeedKeepAlive(targetService)) {
-            targetService->SetRestartTime(abilityRequest.restartTime);
-            targetService->SetRestartCount(abilityRequest.restartCount);
-        }
-        if (MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo)) {
-            targetService->SetInstanceKey(MultiInstanceUtils::GetValidExtensionInstanceKey(abilityRequest));
-        }
+        SetServiceAfterNewCreate(abilityRequest, *targetService);
         AddToServiceMap(serviceKey, targetService);
         isLoadedAbility = false;
     }
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "service map add, serviceKey: %{public}s", serviceKey.c_str());
+}
+
+void AbilityConnectManager::SetServiceAfterNewCreate(const AbilityRequest &abilityRequest,
+    AbilityRecord &targetService)
+{
+    if (abilityRequest.abilityInfo.name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
+        targetService.SetLauncherRoot();
+        targetService.SetRestartTime(abilityRequest.restartTime);
+        targetService.SetRestartCount(abilityRequest.restartCount);
+    } else if (IsAbilityNeedKeepAlive(targetService.shared_from_this())) {
+        targetService.SetRestartTime(abilityRequest.restartTime);
+        targetService.SetRestartCount(abilityRequest.restartCount);
+    }
+    if (MultiInstanceUtils::IsMultiInstanceApp(abilityRequest.appInfo)) {
+        targetService.SetInstanceKey(MultiInstanceUtils::GetValidExtensionInstanceKey(abilityRequest));
+    }
+    if (targetService.IsSceneBoard()) {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "create sceneboard");
+        sceneBoardTokenId_ = abilityRequest.appInfo.accessTokenId;
+    }
 }
 
 void AbilityConnectManager::RemoveServiceFromMapSafe(const std::string &serviceKey)
@@ -940,10 +949,17 @@ void AbilityConnectManager::DisconnectRecordForce(ConnectListType &list,
     list.emplace_back(connectRecord);
     bool isUIService = (abilityRecord->GetAbilityInfo().extensionAbilityType ==
         AppExecFwk::ExtensionAbilityType::UI_SERVICE);
-    if (abilityRecord->IsConnectListEmpty() && abilityRecord->IsNeverStarted() && !isUIService) {
-        TAG_LOGW(AAFwkTag::SERVICE_EXT, "force terminate ability record state: %{public}d",
-            abilityRecord->GetAbilityState());
-        TerminateRecord(abilityRecord);
+    if (abilityRecord->IsConnectListEmpty() && !isUIService) {
+        if (abilityRecord->IsNeverStarted()) {
+            TAG_LOGW(AAFwkTag::SERVICE_EXT, "force terminate ability record state: %{public}d",
+                abilityRecord->GetAbilityState());
+            TerminateRecord(abilityRecord);
+        } else if (abilityRecord->IsAbilityState(AbilityState::ACTIVE)) {
+            TAG_LOGW(AAFwkTag::SERVICE_EXT, "force disconnect ability record state: %{public}d",
+                abilityRecord->GetAbilityState());
+            connectRecord->CancelConnectTimeoutTask();
+            abilityRecord->DisconnectAbility();
+        }
     }
 }
 
@@ -973,10 +989,6 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "ability:%{public}s", element.c_str());
     abilityRecord->RemoveLoadTimeoutTask();
     AbilityRuntime::FreezeUtil::GetInstance().DeleteLifecycleEvent(token);
-    if (abilityRecord->IsSceneBoard()) {
-        TAG_LOGI(AAFwkTag::SERVICE_EXT, "attach Ability: %{public}s", element.c_str());
-        sceneBoardTokenId_ = abilityRecord->GetAbilityInfo().applicationInfo.accessTokenId;
-    }
     abilityRecord->SetScheduler(scheduler);
     abilityRecord->RemoveSpecifiedWantParam(UIEXTENSION_ABILITY_ID);
     abilityRecord->RemoveSpecifiedWantParam(UIEXTENSION_ROOT_HOST_PID);
@@ -1676,11 +1688,6 @@ void AbilityConnectManager::OnStartSpecifiedProcessTimeoutResponse(int32_t reque
 {
     std::lock_guard<std::mutex> guard(loadAbilityQueueLock_);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessTimeoutResponse requestId: %{public}d", requestId);
-
-    if (!loadAbilityQueue_.empty()) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessTimeout pop_front");
-        loadAbilityQueue_.pop_front();
-    }
 
     if (!loadAbilityQueue_.empty()) {
         auto &front = loadAbilityQueue_.front();

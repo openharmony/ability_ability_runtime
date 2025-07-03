@@ -189,6 +189,7 @@ constexpr const char* PERMISSION_PROTECT_SCREEN_LOCK_DATA = "ohos.permission.PRO
 constexpr const char* PERMISSION_TEMP_JIT_ALLOW = "TEMPJITALLOW";
 constexpr const char* TARGET_UID_KEY = "ohos.aafwk.param.targetUid";
 constexpr const char* REUSING_WINDOW = "ohos.ability_runtime.reusing_window";
+constexpr const char* SPECIFED_PROCESS_CALLER_PROCESS = "ohoSpecifiedProcessCallerProcess";
 constexpr const int32_t KILL_PROCESS_BY_USER_INTERVAL = 20;
 constexpr const int32_t KILL_PROCESS_BY_USER_DELAY_BASE = 500;
 constexpr const int64_t PRELOAD_FREEZE_TIMEOUT = 11000;
@@ -309,7 +310,7 @@ constexpr int32_t PC_MAX_CHILD_PROCESS_NUM = 50;
 constexpr int32_t USER100 = 100;
 constexpr const char* LIFE_CYCLE_STATE_START_FOREGROUND = "start foreground";
 constexpr const char* LIFE_CYCLE_STATE_START_BACKGROUND = "start background";
-const std::string MULTI_PROCESS = "multi_process";
+const std::string LARGE_SCREEN = "large_screen";
 
 int32_t GetUserIdByUid(int32_t uid)
 {
@@ -498,14 +499,11 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
         masterAppRecord->ScheduleNewProcessRequest(want, hapModuleInfo.moduleName);
         return;
     }
-    std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     TAG_LOGI(AAFwkTag::APPMGR, "main process do not exists.");
+    std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     if (abilityInfo.type == AppExecFwk::AbilityType::PAGE) {
-        appRecord = !AAFwk::AppUtils::GetInstance().InOnNewProcessEnableList(bundleInfo.name) ? nullptr :
-            appRunningManager_->CheckAppRunningRecordForSpecifiedProcess(appInfo->uid, instanceKey, customProcessFlag);
-    } else {
         appRecord =
-            appRunningManager_->CheckAppRunningRecordForUIExtension(appInfo->uid, instanceKey, customProcessFlag);
+            appRunningManager_->CheckAppRunningRecordForSpecifiedProcess(appInfo->uid, instanceKey, customProcessFlag);
     }
     if (appRecord != nullptr) {
         TAG_LOGI(AAFwkTag::APPMGR, "starting process [%{public}s]", processName.c_str());
@@ -5388,9 +5386,15 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
         return;
     }
 
-    std::string processName;
+    std::string specifiedProcessFlag = GetSpecifiedProcessFlag(abilityInfo, want);
     auto abilityInfoPtr = std::make_shared<AbilityInfo>(abilityInfo);
-    MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, "", processName, false);
+    std::string processName;
+    if (specifiedProcessFlag == "") {
+        MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, "", processName, false);
+    } else {
+        processName = want.GetStringParam(SPECIFED_PROCESS_CALLER_PROCESS);
+        const_cast<AAFwk::Want&>(want).RemoveParam(SPECIFED_PROCESS_CALLER_PROCESS);
+    }
     bool isExtensionSandBox = IsIsolateExtensionSandBox(abilityInfoPtr, hapModuleInfo);
 
     std::vector<HapModuleInfo> hapModules;
@@ -5544,8 +5548,9 @@ void AppMgrServiceInner::ScheduleNewProcessRequestDone(
     appRecord->ScheduleNewProcessRequestDone();
     appRecord->ResetNewProcessRequest();
 
+    const std::string callerProcessName = appRecord->GetProcessName();
     if (startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnNewProcessRequestResponse(flag, requestId);
+        startSpecifiedAbilityResponse_->OnNewProcessRequestResponse(flag, requestId, callerProcessName);
     }
     appRecord->ResetNewProcessRequest();
 }
@@ -8291,7 +8296,7 @@ bool AppMgrServiceInner::AllowChildProcessInMultiProcessFeatureApp(std::shared_p
         }
         auto &deviceFeatures = it->second;
         auto supportMultiProcess =
-            std::find(deviceFeatures.begin(), deviceFeatures.end(), MULTI_PROCESS) != deviceFeatures.end();
+            std::find(deviceFeatures.begin(), deviceFeatures.end(), LARGE_SCREEN) != deviceFeatures.end();
         appRecord->SetSupportMultiProcessDeviceFeature(supportMultiProcess);
         return supportMultiProcess;
     }

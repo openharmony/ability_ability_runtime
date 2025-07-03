@@ -48,7 +48,7 @@ public:
      * @param resultCode The result of this free install.
      */
     virtual void OnInstallFinished(const std::string &bundleName, const std::string &abilityName,
-        const std::string &startTime, const int &resultCode) override;
+        const std::string &startTime, int32_t resultCode) override;
 
     /**
      * OnInstallFinishedByUrl, return free install result.
@@ -58,7 +58,7 @@ public:
      * @param resultCode The result of this free install.
      */
     virtual void OnInstallFinishedByUrl(const std::string &startTime, const std::string &url,
-        const int &resultCode) override;
+        int32_t resultCode) override;
 
 private:
     /**

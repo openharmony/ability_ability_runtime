@@ -36,6 +36,10 @@ constexpr const char* CONFIGURATION_IMPL_CLASS_NAME = "L@ohos/app/ability/Config
 
 void SetBasicConfiguration(ani_env *env, ani_object object, const AppExecFwk::Configuration &configuration)
 {
+    if (env == nullptr || object == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env or object");
+        return;
+    }
     std::string str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
     env->Object_SetPropertyByName_Ref(object, "language", GetAniString(env, str));
 

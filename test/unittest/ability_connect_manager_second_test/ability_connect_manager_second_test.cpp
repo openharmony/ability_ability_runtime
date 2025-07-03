@@ -454,5 +454,176 @@ HWTEST_F(AbilityConnectManagerSecondTest, HandleRestartResidentTask_003, TestSiz
     ASSERT_TRUE(connectManager->restartResidentTaskList_.empty());
     TAG_LOGI(AAFwkTag::TEST, "HandleRestartResidentTask_003 end");
 }
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: DisconnectRecordForce
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, DisconnectRecordForce_ConnectRecordIsNotLast_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DisconnectRecordForce_ConnectRecordIsNotLast_001 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    AbilityRequest req;
+    req.want.SetElementName("com.example.bundle", "com.example.module", "MainAbility");
+
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(req);
+    EXPECT_TRUE(abilityRecord);
+    EXPECT_TRUE(abilityRecord->IsConnectListEmpty());
+
+    auto token = abilityRecord->GetToken();
+    auto connectionRecord = ConnectionRecord::CreateConnectionRecord(token, abilityRecord, nullptr, connectManager);
+    EXPECT_TRUE(connectionRecord);
+
+    abilityRecord->AddConnectRecordToList(connectionRecord);
+    EXPECT_FALSE(abilityRecord->IsConnectListEmpty());
+
+    auto connectionRecord2 = ConnectionRecord::CreateConnectionRecord(nullptr, nullptr, nullptr, connectManager);
+    EXPECT_TRUE(connectionRecord2);
+    abilityRecord->AddConnectRecordToList(connectionRecord2);
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI_SERVICE;
+
+    std::list<std::shared_ptr<ConnectionRecord>> list;
+    connectManager->DisconnectRecordForce(list, connectionRecord);
+    EXPECT_TRUE(connectManager->terminatingExtensionList_.empty());
+
+    TAG_LOGI(AAFwkTag::TEST, "DisconnectRecordForce_ConnectRecordIsNotLast_001 end");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: DisconnectRecordForce
+ */
+HWTEST_F(AbilityConnectManagerSecondTest, DisconnectRecordForce_ConnectRecordIsLastAndIsUISERVICE_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DisconnectRecordForce_ConnectRecordIsLastAndIsUISERVICE_001 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    AbilityRequest req;
+    req.want.SetElementName("com.example.bundle", "com.example.module", "MainAbility");
+
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(req);
+    EXPECT_TRUE(abilityRecord);
+    EXPECT_TRUE(abilityRecord->IsConnectListEmpty());
+
+    auto token = abilityRecord->GetToken();
+    auto connectionRecord = ConnectionRecord::CreateConnectionRecord(token, abilityRecord, nullptr, connectManager);
+    EXPECT_TRUE(connectionRecord);
+
+    abilityRecord->AddConnectRecordToList(connectionRecord);
+    EXPECT_FALSE(abilityRecord->IsConnectListEmpty());
+
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI_SERVICE;
+
+    std::list<std::shared_ptr<ConnectionRecord>> list;
+    connectManager->DisconnectRecordForce(list, connectionRecord);
+    EXPECT_TRUE(connectManager->terminatingExtensionList_.empty());
+
+    TAG_LOGI(AAFwkTag::TEST, "DisconnectRecordForce_ConnectRecordIsLastAndIsUISERVICE_001 end");
+}
+
+HWTEST_F(AbilityConnectManagerSecondTest, DisconnectRecordForce_ConnectRecordIsLastAndNotUISERVICE_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DisconnectRecordForce_ConnectRecordIsLastAndNotUISERVICE_001 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    AbilityRequest req;
+    req.want.SetElementName("com.example.bundle", "com.example.module", "MainAbility");
+
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(req);
+    EXPECT_TRUE(abilityRecord);
+    EXPECT_TRUE(abilityRecord->IsConnectListEmpty());
+
+    auto token = abilityRecord->GetToken();
+    auto connectionRecord = ConnectionRecord::CreateConnectionRecord(token, abilityRecord, nullptr, connectManager);
+    EXPECT_TRUE(connectionRecord);
+
+    abilityRecord->AddConnectRecordToList(connectionRecord);
+    EXPECT_FALSE(abilityRecord->IsConnectListEmpty());
+
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::INPUTMETHOD;
+    abilityRecord->SetCreateByConnectMode(true);
+    abilityRecord->startId_ = 0;
+
+    std::list<std::shared_ptr<ConnectionRecord>> list;
+    connectManager->DisconnectRecordForce(list, connectionRecord);
+    EXPECT_TRUE(abilityRecord->IsConnectListEmpty());
+    EXPECT_TRUE(abilityRecord->IsNeverStarted());
+
+    TAG_LOGI(AAFwkTag::TEST, "DisconnectRecordForce_ConnectRecordIsLastAndNotUISERVICE_001 end");
+}
+
+HWTEST_F(AbilityConnectManagerSecondTest, DisconnectRecordForce_StartButNotActiveStatus_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DisconnectRecordForce_StartButNotActiveStatus_001 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    AbilityRequest req;
+    req.want.SetElementName("com.example.bundle", "com.example.module", "MainAbility");
+
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(req);
+    EXPECT_TRUE(abilityRecord);
+    EXPECT_TRUE(abilityRecord->IsConnectListEmpty());
+
+    auto token = abilityRecord->GetToken();
+    auto connectionRecord = ConnectionRecord::CreateConnectionRecord(token, abilityRecord, nullptr, connectManager);
+    EXPECT_TRUE(connectionRecord);
+
+    abilityRecord->AddConnectRecordToList(connectionRecord);
+    EXPECT_FALSE(abilityRecord->IsConnectListEmpty());
+
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::INPUTMETHOD;
+    abilityRecord->SetCreateByConnectMode(false);
+    abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
+
+    std::list<std::shared_ptr<ConnectionRecord>> list;
+    abilityRecord->isConnected = true;
+    EXPECT_TRUE(abilityRecord->isConnected);
+    connectManager->DisconnectRecordForce(list, connectionRecord);
+    EXPECT_TRUE(abilityRecord->IsConnectListEmpty());
+    EXPECT_FALSE(abilityRecord->IsNeverStarted());
+    EXPECT_TRUE(connectManager->terminatingExtensionList_.empty());
+    EXPECT_FALSE(abilityRecord->isConnected);
+
+    TAG_LOGI(AAFwkTag::TEST, "DisconnectRecordForce_StartButNotActiveStatus_001 end");
+}
+
+HWTEST_F(AbilityConnectManagerSecondTest, DisconnectRecordForce_StartButIsActiveStatus_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "DisconnectRecordForce_StartButIsActiveStatus_001 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    AbilityRequest req;
+    req.want.SetElementName("com.example.bundle", "com.example.module", "MainAbility");
+
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(req);
+    EXPECT_TRUE(abilityRecord);
+    EXPECT_TRUE(abilityRecord->IsConnectListEmpty());
+
+    auto token = abilityRecord->GetToken();
+    auto connectionRecord = ConnectionRecord::CreateConnectionRecord(token, abilityRecord, nullptr, connectManager);
+    EXPECT_TRUE(connectionRecord);
+
+    abilityRecord->AddConnectRecordToList(connectionRecord);
+    EXPECT_FALSE(abilityRecord->IsConnectListEmpty());
+
+    abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::INPUTMETHOD;
+    abilityRecord->SetCreateByConnectMode(false);
+    abilityRecord->SetAbilityState(AbilityState::ACTIVE);
+
+    std::list<std::shared_ptr<ConnectionRecord>> list;
+    abilityRecord->isConnected = true;
+    connectManager->DisconnectRecordForce(list, connectionRecord);
+    EXPECT_TRUE(connectManager->terminatingExtensionList_.empty());
+    EXPECT_FALSE(abilityRecord->isConnected);
+
+    TAG_LOGI(AAFwkTag::TEST, "DisconnectRecordForce_StartButIsActiveStatus_001 end");
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS

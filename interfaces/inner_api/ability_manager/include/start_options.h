@@ -23,6 +23,11 @@
 #include "parcel.h"
 
 namespace OHOS {
+namespace Rosen {
+struct StartAnimationOptions;
+struct StartAnimationSystemOptions;
+}
+
 namespace AbilityRuntime {
 using OnRequestResult = std::function<void(const AppExecFwk::ElementName&, const std::string&)>;
 struct OnRequestResultElement {
@@ -56,6 +61,8 @@ public:
     std::shared_ptr<StartWindowOption> startWindowOption = nullptr;
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
     std::string requestId_;
+    std::shared_ptr<Rosen::StartAnimationOptions> animationOptions_ = nullptr;
+    std::shared_ptr<Rosen::StartAnimationSystemOptions> animationSystemOptions_ = nullptr;
 
     StartOptions() = default;
     ~StartOptions() = default;
@@ -64,6 +71,7 @@ public:
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
+    bool MarshallingTwo(Parcel &parcel) const;
     static StartOptions *Unmarshalling(Parcel &parcel);
 
     void SetWindowMode(int32_t windowMode);

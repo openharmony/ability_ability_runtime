@@ -144,7 +144,6 @@ ohos_shared_library("app_util") {
 
   external_deps = [
     "c_utils:utils",
-    "cJSON:cjson",
     "config_policy:configpolicy_util",
     "hicollie:libhicollie",
     "hilog:libhilog",

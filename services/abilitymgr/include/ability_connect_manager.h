@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_ABILITY_CONNECT_MANAGER_H
 #define OHOS_ABILITY_RUNTIME_ABILITY_CONNECT_MANAGER_H
 
+#include <atomic>
 #include <list>
 #include <map>
 #include <string>
@@ -554,6 +555,7 @@ private:
      */
     void GetOrCreateServiceRecord(const AbilityRequest &abilityRequest, const bool isCreatedByConnect,
         std::shared_ptr<AbilityRecord> &targetAbilityRecord, bool &isLoadedAbility);
+    void SetServiceAfterNewCreate(const AbilityRequest &abilityRequest, AbilityRecord &targetService);
 
     void RemoveServiceFromMapSafe(const std::string &serviceKey);
 
@@ -715,7 +717,7 @@ private:
     const std::string TASK_ON_ABILITY_DIED = "OnAbilityDiedTask";
 
     int userId_;
-    uint32_t sceneBoardTokenId_ = 0;
+    std::atomic_uint32_t sceneBoardTokenId_ = 0;
 
     ConnectMapType connectMap_;
     ServiceMapType serviceMap_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,9 @@ namespace OHOS::AbilityRuntime {
 namespace ServerConstant {
 constexpr const char* DLP_INDEX = "ohos.dlp.params.index";
 constexpr const char* IS_CALL_BY_SCB = "isCallBySCB";
+constexpr int32_t SCENARIO_MOVE_MISSION_TO_FRONT = 0x00000001;
+constexpr int32_t SCENARIO_SHOW_ABILITY = 0x00000002;
+constexpr int32_t SCENARIO_BACK_TO_CALLER_ABILITY_WITH_RESULT = 0x00000004;
 }  // namespace ServerConstant
 }  // namespace OHOS::AbilityRuntime
 #endif  // OHOS_ABILITY_RUNTIME_SERVER_CONSTANT_H

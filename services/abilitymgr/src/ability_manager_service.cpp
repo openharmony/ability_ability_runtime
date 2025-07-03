@@ -241,7 +241,6 @@ const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
 };
 std::atomic<bool> g_isDmsAlive = false;
 constexpr int32_t PIPE_MSG_READ_BUFFER = 1024;
-constexpr int32_t U1_USER_ID = 1;
 constexpr const char* APPSPAWN_STARTED = "startup.service.ctl.appspawn.pid";
 constexpr const char* APP_LINKING_ONLY = "appLinkingOnly";
 
@@ -2140,6 +2139,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
     RemoveUnauthorizedLaunchReasonMessage(want, abilityRequest, callerTokenId);
     abilityRequest.want.RemoveParam(PARAM_SPECIFIED_PROCESS_FLAG);
+    abilityRequest.startOptions = startOptions;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         abilityRequest.userId = oriValidUserId;
         abilityRequest.want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
@@ -4591,15 +4591,6 @@ int32_t AbilityManagerService::ConnectAbilityCommon(
 
     Want abilityWant = want;
     AbilityRequest abilityRequest;
-    if (isQueryExtensionOnly || AAFwk::UIExtensionUtils::IsUIExtension(extensionType)) {
-        result = GenerateExtensionAbilityRequest(abilityWant, abilityRequest, callerToken, validUserId);
-    } else {
-        result = GenerateAbilityRequest(abilityWant, DEFAULT_INVAL_VALUE, abilityRequest, callerToken, validUserId);
-    }
-    if (!HandleExecuteSAInterceptor(abilityWant, callerToken, abilityRequest, result)) {
-        return result;
-    }
-
     std::string uri = abilityWant.GetUri().ToString();
     bool isFileUri = (abilityWant.GetUri().GetScheme() == "file");
     if (!uri.empty() && !isFileUri) {
@@ -4912,6 +4903,10 @@ int32_t AbilityManagerService::ConnectLocalAbility(const Want &want, const int32
         return TARGET_ABILITY_NOT_SERVICE;
     }
 
+    if (!HandleExecuteSAInterceptor(want, callerToken, abilityRequest, result)) {
+        return result;
+    }
+
     AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(abilityRequest.want, 0, GetUserId(),
         false, callerToken, std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo));
     result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
@@ -5182,8 +5177,9 @@ int AbilityManagerService::StartSyncRemoteMissions(const std::string& devId, boo
     }
     DistributedClient dmsClient;
     int32_t callingUid = IPCSkeleton::GetCallingUid();
+    uint32_t callingTokenId = IPCSkeleton::GetCallingTokenID();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "fixConflict: %{public}d, tag: %{public}" PRId64, fixConflict, tag);
-    return dmsClient.StartSyncRemoteMissions(devId, fixConflict, tag, callingUid);
+    return dmsClient.StartSyncRemoteMissions(devId, fixConflict, tag, callingUid, callingTokenId);
 }
 
 int AbilityManagerService::StopSyncRemoteMissions(const std::string& devId)
@@ -8474,7 +8470,8 @@ void AbilityManagerService::OnStartSpecifiedAbilityTimeoutResponse(int32_t reque
     missionListManager->OnStartSpecifiedAbilityTimeoutResponse();
 }
 
-void AbilityManagerService::OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId)
+void AbilityManagerService::OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId,
+    const std::string &callerProcessName)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "flag = %{public}s", flag.c_str());
     auto connectManager = GetCurrentConnectManager();
@@ -8488,7 +8485,7 @@ void AbilityManagerService::OnStartSpecifiedProcessResponse(const std::string &f
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = GetCurrentUIAbilityManager();
         CHECK_POINTER(uiAbilityManager);
-        uiAbilityManager->OnStartSpecifiedProcessResponse(flag, requestId);
+        uiAbilityManager->OnStartSpecifiedProcessResponse(flag, requestId, callerProcessName);
         return;
     }
 }
@@ -13159,47 +13156,31 @@ bool AbilityManagerService::IsInWhiteList(const std::string &callerBundleName, c
 
 bool AbilityManagerService::ParseJsonFromBoot(const std::string &relativePath)
 {
-    cJSON *jsonObj = nullptr;
+    nlohmann::json jsonObj;
     std::string absolutePath = GetConfigFileAbsolutePath(relativePath);
     if (ParseJsonValueFromFile(jsonObj, absolutePath) != ERR_OK) {
         return false;
     }
     std::lock_guard<std::mutex> locker(whiteListMutex_);
-    cJSON *whiteListJsonList = cJSON_GetObjectItem(jsonObj, WHITE_LIST);
-    if (whiteListJsonList == nullptr) {
-        cJSON_Delete(jsonObj);
-        return false;
-    }
-    cJSON *childItem = whiteListJsonList->child;
-    while (childItem != nullptr) {
-        std::string key = childItem->string == nullptr ? "" : childItem->string;
-        if (!cJSON_IsArray(childItem)) {
+    nlohmann::json whiteListJsonList = jsonObj[WHITE_LIST];
+    for (const auto& [key, value] : whiteListJsonList.items()) {
+        if (!value.is_array()) {
             continue;
         }
         whiteListMap_.emplace(key, std::list<std::string>());
-        int size = cJSON_GetArraySize(childItem);
-        for (int i = 0; i < size; i++) {
-            cJSON *valueItem = cJSON_GetArrayItem(childItem, i);
-            if (valueItem != nullptr && cJSON_IsString(valueItem)) {
-                std::string value = valueItem->valuestring;
-                whiteListMap_[key].push_back(value);
+        for (const auto& it : value) {
+            if (it.is_string()) {
+                whiteListMap_[key].push_back(it);
             }
         }
-        
-        childItem = childItem->next;
     }
-
-    cJSON *exposedWhiteListItem = cJSON_GetObjectItem(jsonObj, "exposed_white_list");
-    if (exposedWhiteListItem == nullptr || !cJSON_IsArray(exposedWhiteListItem)) {
-        cJSON_Delete(jsonObj);
+    if (!jsonObj.contains("exposed_white_list")) {
         return false;
     }
-    int size = cJSON_GetArraySize(exposedWhiteListItem);
-    for (int i = 0; i < size; i++) {
-        cJSON *exposedWhiteItem = cJSON_GetArrayItem(exposedWhiteListItem, i);
-        if (exposedWhiteItem != nullptr && cJSON_IsString(exposedWhiteItem)) {
-            std::string exportWhiteStr = exposedWhiteItem->valuestring;
-            exportWhiteList_.push_back(exportWhiteStr);
+    nlohmann::json exportWhiteJsonList = jsonObj["exposed_white_list"];
+    for (const auto& it : exportWhiteJsonList) {
+        if (it.is_string()) {
+            exportWhiteList_.push_back(it);
         }
     }
     return true;
@@ -13221,7 +13202,7 @@ std::string AbilityManagerService::GetConfigFileAbsolutePath(const std::string &
     return std::string(absolutePath);
 }
 
-int32_t AbilityManagerService::ParseJsonValueFromFile(cJSON *&value, const std::string &filePath)
+int32_t AbilityManagerService::ParseJsonValueFromFile(nlohmann::json &value, const std::string &filePath)
 {
     std::ifstream fin;
     std::string realPath;
@@ -13240,10 +13221,8 @@ int32_t AbilityManagerService::ParseJsonValueFromFile(cJSON *&value, const std::
         os << buffer;
     }
     const std::string data = os.str();
-    fin.close();
-
-    value = cJSON_Parse(data.c_str());
-    if (value == nullptr) {
+    value = nlohmann::json::parse(data, nullptr, false);
+    if (value.is_discarded()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed due data discarded");
         return ERR_INVALID_VALUE;
     }
@@ -14737,6 +14716,21 @@ int32_t AbilityManagerService::SetAppServiceExtensionKeepAlive(const std::string
 int32_t AbilityManagerService::QueryKeepAliveAppServiceExtensions(std::vector<KeepAliveInfo> &list)
 {
     return KeepAliveProcessManager::GetInstance().QueryKeepAliveAppServiceExtensions(list, false);
+}
+
+int32_t AbilityManagerService::SetOnNewWantSkipScenarios(sptr<IRemoteObject> callerToken, int32_t scenarios)
+{
+    auto record = Token::GetAbilityRecordByToken(callerToken);
+    if (record == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "The toke from context is invalid");
+        return ERR_INVALID_CONTEXT;
+    }
+    if (!JudgeSelfCalled(record)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid callerToken");
+        return ERR_INVALID_CALLER;
+    }
+    record->SetOnNewWantSkipScenarios(scenarios);
+    return ERR_OK;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

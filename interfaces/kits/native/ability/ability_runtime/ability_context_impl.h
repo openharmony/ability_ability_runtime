@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -368,6 +368,7 @@ public:
     ErrCode StopAppServiceExtensionAbility(const Want& want) override;
     ErrCode ConnectAppServiceExtensionAbility(const AAFwk::Want& want,
         const sptr<AbilityConnectCallback>& connectCallback) override;
+    ErrCode SetOnNewWantSkipScenarios(int32_t scenarios) override;
 
 private:
     sptr<IRemoteObject> token_ = nullptr;

@@ -89,7 +89,6 @@ namespace AAFwk {
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 enum class ServiceRunningState { STATE_NOT_START, STATE_RUNNING };
 constexpr int32_t BASE_USER_RANGE = 200000;
-constexpr int32_t U0_USER_ID = 0;
 constexpr int32_t INVALID_USER_ID = -1;
 constexpr const char* KEY_SESSION_ID = "com.ohos.param.sessionId";
 constexpr const char* KEY_REQUEST_ID = "com.ohos.param.requestId";
@@ -1168,7 +1167,8 @@ public:
     void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId);
     void OnStartSpecifiedAbilityTimeoutResponse(int32_t requestId);
 
-    void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId = 0);
+    void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId = 0,
+        const std::string &callerProcessName = "");
     void OnStartSpecifiedProcessTimeoutResponse(int32_t requestId);
     void OnStartSpecifiedFailed(int32_t requestId);
 
@@ -2037,6 +2037,8 @@ public:
      */
     virtual int32_t RevokeDelegator(sptr<IRemoteObject> token) override;
 
+    virtual int32_t SetOnNewWantSkipScenarios(sptr<IRemoteObject> callerToken, int32_t scenarios) override;
+
     virtual int32_t StartAbilityWithWait(Want &want, sptr<IAbilityStartWithWaitObserver> &observer) override;
 
     /**
@@ -2754,11 +2756,9 @@ private:
 
     std::string GetConfigFileAbsolutePath(const std::string &relativePath);
 
-    int32_t ParseJsonValueFromFile(cJSON *&value, const std::string& fullPath);
+    int32_t ParseJsonValueFromFile(nlohmann::json &value, const std::string& fullPath);
 
     bool ConvertFullPath(const std::string& partialPath, std::string& fullPath);
-
-    bool GetJsonFromFile(const char *filePath, cJSON *root);
 
     bool ParseJsonFromBoot(const std::string &relativePath);
 

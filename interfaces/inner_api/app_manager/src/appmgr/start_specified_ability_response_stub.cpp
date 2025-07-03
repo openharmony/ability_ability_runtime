@@ -44,7 +44,9 @@ int32_t StartSpecifiedAbilityResponseStub::HandleOnTimeoutResponse(MessageParcel
 int32_t StartSpecifiedAbilityResponseStub::HandleOnNewProcessRequestResponse(MessageParcel &data, MessageParcel &reply)
 {
     auto flag = Str16ToStr8(data.ReadString16());
-    OnNewProcessRequestResponse(flag, data.ReadInt32());
+    auto requestId = data.ReadInt32();
+    auto callerProcessName = Str16ToStr8(data.ReadString16());
+    OnNewProcessRequestResponse(flag, requestId, callerProcessName);
     return NO_ERROR;
 }
 

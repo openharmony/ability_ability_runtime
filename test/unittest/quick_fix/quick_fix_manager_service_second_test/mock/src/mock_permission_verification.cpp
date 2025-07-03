@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "../../mock/include/mock_permission_verification.h"
-#include "../../mock/include/mock_my_flag.h"
+#include "mock_my_flag.h"
+#include "mock_permission_verification.h"
 
 namespace OHOS {
 namespace AAFwk {

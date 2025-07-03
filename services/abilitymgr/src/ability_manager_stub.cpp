@@ -886,6 +886,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentyFirst(uint32_t code, MessagePa
     if (interfaceCode == AbilityManagerInterfaceCode::RESUME_EXTENSION_ABILITY) {
         return ResumeExtensionAbilityInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::SET_ON_NEW_WANT_SKIP_SCENARIOS) {
+        return SetOnNewWantSkipScenariosInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -4843,6 +4846,22 @@ int AbilityManagerStub::QueryKeepAliveAppServiceExtensionsInner(MessageParcel &d
         return ERR_INVALID_VALUE;
     }
     return result;
+}
+
+int32_t AbilityManagerStub::SetOnNewWantSkipScenariosInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (!token) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "read ability token fail");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t scenarios = data.ReadInt32();
+    int32_t result = SetOnNewWantSkipScenarios(token, scenarios);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
+        return ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    return NO_ERROR;
 }
 } // namespace AAFwk
 } // namespace OHOS

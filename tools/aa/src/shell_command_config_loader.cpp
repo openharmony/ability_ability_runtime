@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,11 @@
 #include "shell_command_config_loader.h"
 #include <fstream>
 #include <sstream>
+#include <nlohmann/json.hpp>
 #include <unistd.h>
-#include "cJSON.h"
 #include "hilog_tag_wrapper.h"
 
+using json = nlohmann::json;
 namespace OHOS {
 namespace AAFwk {
 namespace {
@@ -54,59 +55,51 @@ bool ShellCommandConfigLoader::ReadConfig(const std::string &filePath)
         TAG_LOGI(AAFwkTag::AA_TOOL, "read aa config error");
         return false;
     }
-    std::string fileContent((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
-    inFile.close();
 
-    cJSON *aaJson = cJSON_Parse(fileContent.c_str());
-    if (aaJson == nullptr) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "json parse error");
+    json aaJson;
+    inFile >> aaJson;
+    inFile.close();
+    if (aaJson.is_discarded()) {
+        TAG_LOGI(AAFwkTag::AA_TOOL, "json discarded error");
         return false;
     }
 
-    if (cJSON_IsNull(aaJson) || !cJSON_IsObject(aaJson)) {
+    if (aaJson.is_null() || aaJson.empty()) {
         TAG_LOGI(AAFwkTag::AA_TOOL, "invalid jsonObj");
         return false;
     }
 
-    cJSON *commonListItem = cJSON_GetObjectItem(aaJson, AA_TOOL_COMMAND_LIST);
-    if (commonListItem == nullptr) {
+    if (!aaJson.contains(AA_TOOL_COMMAND_LIST)) {
         TAG_LOGI(AAFwkTag::AA_TOOL, "config not contains the key");
-        cJSON_Delete(aaJson);
         return false;
     }
 
-    if (!cJSON_IsArray(commonListItem)) {
-        TAG_LOGI(AAFwkTag::AA_TOOL, "invalid command obj");
-        cJSON_Delete(aaJson);
-        return false;
-    }
-    int commonListSize = cJSON_GetArraySize(commonListItem);
-    if (commonListSize <= 0) {
+    if (aaJson[AA_TOOL_COMMAND_LIST].is_null() || !aaJson[AA_TOOL_COMMAND_LIST].is_array() ||
+        aaJson[AA_TOOL_COMMAND_LIST].empty()) {
         TAG_LOGI(AAFwkTag::AA_TOOL, "invalid command obj size");
-        cJSON_Delete(aaJson);
         return false;
     }
-    if (commonListSize > COMMANDS_MAX_SIZE) {
+
+    if (aaJson[AA_TOOL_COMMAND_LIST].size() > COMMANDS_MAX_SIZE) {
         TAG_LOGI(AAFwkTag::AA_TOOL, "command obj size overflow");
-        cJSON_Delete(aaJson);
         return false;
     }
     
     std::lock_guard<std::mutex> lock(mtxRead_);
-    for (int i = 0; i < commonListSize; i++) {
-        cJSON *cmdItem = cJSON_GetArrayItem(commonListItem, i);
-        if (cmdItem == nullptr || !cJSON_IsString(cmdItem)) {
+    for (size_t i = 0; i < aaJson[AA_TOOL_COMMAND_LIST].size(); i++) {
+        if (aaJson[AA_TOOL_COMMAND_LIST][i].is_null() || !aaJson[AA_TOOL_COMMAND_LIST][i].is_string()) {
             continue;
         }
-        std::string cmd = cmdItem->valuestring;
+        std::string cmd = aaJson[AA_TOOL_COMMAND_LIST][i].get<std::string>();
         TAG_LOGD(AAFwkTag::AA_TOOL, "add cmd: %{public}s", cmd.c_str());
         commands_.emplace(cmd);
     }
 
-    cJSON_Delete(aaJson);
+    aaJson.clear();
     TAG_LOGI(AAFwkTag::AA_TOOL, "read config success");
     configState_ = true;
     return true;
 }
+
 }  // namespace AAFwk
 }  // namespace OHOS

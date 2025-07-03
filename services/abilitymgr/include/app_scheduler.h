@@ -131,7 +131,8 @@ public:
         int32_t requestId) override;
     virtual void OnTimeoutResponse(int32_t requestId) override;
 
-    virtual void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId) override;
+    virtual void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId,
+        const std::string &callerProcessName = "") override;
     virtual void OnNewProcessRequestTimeoutResponse(int32_t requestId) override;
 
     virtual void OnStartSpecifiedFailed(int32_t requestId) override;

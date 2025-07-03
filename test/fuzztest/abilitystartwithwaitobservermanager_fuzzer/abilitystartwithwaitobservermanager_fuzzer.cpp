@@ -47,6 +47,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     infos->NotifyAATerminateWait(want);
     infos->NotifyAATerminateWait(abilityRecord);
     infos->SetColdStartForShellCall(abilityRecord);
+    infos->GenerateDeathRecipient(observer);
     return true;
 }
 }

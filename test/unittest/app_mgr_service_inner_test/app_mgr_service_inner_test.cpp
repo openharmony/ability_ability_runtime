@@ -4611,6 +4611,24 @@ HWTEST_F(AppMgrServiceInnerTest, ChangeAppGcState_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ChangeAppGcState_002
+ * @tc.desc: Change app Gc state
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, ChangeAppGcState_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ChangeAppGcState_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    int32_t pid = 0;
+    int32_t state = 0;
+    uint64_t tid = 1;
+    int32_t ret = appMgrServiceInner->ChangeAppGcState(pid, state, tid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "ChangeAppGcState_002 end");
+}
+
+/**
  * @tc.name: SendReStartProcessEvent_001
  * @tc.desc: Change app Gc state
  * @tc.type: FUNC

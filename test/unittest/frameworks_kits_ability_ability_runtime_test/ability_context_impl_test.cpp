@@ -104,9 +104,9 @@ public:
 
 class MockIFreeInstallObserver : public IFreeInstallObserver {
     MOCK_METHOD4(OnInstallFinished, void(const std::string &bundleName, const std::string &abilityName,
-        const std::string &startTime, const int &resultCode));
+        const std::string &startTime, int32_t resultCode));
     MOCK_METHOD3(OnInstallFinishedByUrl, void(const std::string &startTime, const std::string &url,
-        const int &resultCode));
+        int32_t resultCode));
     MOCK_METHOD0(AsObject, sptr<IRemoteObject>());
 };
 
@@ -2357,6 +2357,18 @@ HWTEST_F(AbilityContextImplTest, OnRequestFailure_0200, Function | MediumTest | 
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
     context_->OnRequestFailure(requestId, element, "failure");
     EXPECT_EQ(context_->onRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_SetOnNewWantSkipScenarios_0100
+ * @tc.name: SetOnNewWantSkipScenarios
+ * @tc.desc: Verify that function SetOnNewWantSkipScenarios.
+ */
+HWTEST_F(AbilityContextImplTest, SetOnNewWantSkipScenariose_0100, Function | MediumTest | Level1)
+{
+    auto context = std::make_unique<AbilityContextImpl>();
+    auto ret = context->SetOnNewWantSkipScenarios(0);
+    EXPECT_EQ(ret, 0);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -30,9 +30,11 @@
 #include "app_mgr_client.h"
 #include "display_util.h"
 #include "mock_ability_info_callback_stub.h"
+#include "mock_scene_session_manager_lite.h"
 #include "process_options.h"
 #include "session/host/include/session.h"
 #include "session_info.h"
+#include "session_manager_lite.h"
 #include "startup_util.h"
 #include "status_bar_delegate_interface.h"
 #include "scene_board/status_bar_delegate_manager.h"
@@ -1434,6 +1436,69 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, HandleColdAcceptWantDone_004, TestS
     auto ret = uiAbilityLifecycleManager->HandleColdAcceptWantDone(want, "", *specifiedRequestPtr);
 
     EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedAbilityBySCB_0200
+ * @tc.desc: StartSpecifiedAbilityBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedAbilityBySCB_002, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.isolationProcess = true;
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.isStageBasedModel = true;
+    AppUtils::isStartSpecifiedProcess_ = true;
+    auto result = uiAbilityLifecycleManager->StartSpecifiedAbilityBySCB(abilityRequest);
+    EXPECT_EQ(result, uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest));
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedProcessRequest_0100
+ * @tc.desc: StartSpecifiedProcessRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedProcessRequest_0100, TestSize.Level1)
+{
+    auto mockSceneSessionManagerLite = new (std::nothrow) Rosen::MockSceneSessionManagerLite();
+    Rosen::SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = mockSceneSessionManagerLite;
+    EXPECT_CALL(*mockSceneSessionManagerLite, CreateNewInstanceKey(_, _))
+        .Times(1)
+        .WillOnce(Return(Rosen::WMError(-1)));
+
+    AppUtils::isInOnNewProcessEnableList_ = true;
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.applicationInfo.multiAppMode.multiAppModeType =
+        AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+    abilityRequest.want.SetParam(Want::CREATE_APP_INSTANCE_KEY, true);
+    auto result = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest);
+    EXPECT_EQ(result, ERR_CREATE_INSTANCE_KEY_FAILED);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedProcessRequest_0200
+ * @tc.desc: StartSpecifiedProcessRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedProcessRequest_0200, TestSize.Level1)
+{
+    auto mockSceneSessionManagerLite = new (std::nothrow) Rosen::MockSceneSessionManagerLite();
+    Rosen::SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = mockSceneSessionManagerLite;
+    EXPECT_CALL(*mockSceneSessionManagerLite, CreateNewInstanceKey(_, _))
+        .Times(1)
+        .WillOnce(Return(Rosen::WMError::WM_OK));
+
+    AppUtils::isInOnNewProcessEnableList_ = true;
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.applicationInfo.multiAppMode.multiAppModeType =
+        AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+    abilityRequest.want.SetParam(Want::CREATE_APP_INSTANCE_KEY, true);
+    auto result = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest);
+    EXPECT_EQ(result, ERR_OK);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

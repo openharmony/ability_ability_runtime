@@ -23,8 +23,8 @@
 #include "ability_auto_startup_client.h"
 #undef private
 
+#include "ability_fuzz_util.h"
 #include "securec.h"
-#include "../ability_fuzz_util.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;

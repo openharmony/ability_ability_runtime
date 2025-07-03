@@ -20,11 +20,13 @@
 #include "napi_common_util.h"
 #include "napi_common_want.h"
 #include "int_wrapper.h"
+#include "js_window_animation_utils.h"
 #include "process_options.h"
 #include "start_window_option.h"
 #ifdef START_WINDOW_OPTIONS_WITH_PIXELMAP
 #include "pixel_map_napi.h"
 #endif
+#include "wm_animation_common.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -228,6 +230,17 @@ bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &sta
         for (int32_t mode : supportWindowModes) {
             startOptions.supportWindowModes_.emplace_back(AppExecFwk::SupportWindowMode(mode));
         }
+    }
+
+    Rosen::StartAnimationOptions animationOptions;
+    if (Rosen::ConvertStartAnimationOptionsFromJsValue(env, param, animationOptions)) {
+        startOptions.animationOptions_ = std::make_shared<Rosen::StartAnimationOptions>(animationOptions);
+    }
+
+    Rosen::StartAnimationSystemOptions animationSystemOptions;
+    if (Rosen::ConvertStartAnimationSystemOptionsFromJsValue(env, param, animationSystemOptions)) {
+        startOptions.animationSystemOptions_ =
+            std::make_shared<Rosen::StartAnimationSystemOptions>(animationSystemOptions);
     }
 
     return true;

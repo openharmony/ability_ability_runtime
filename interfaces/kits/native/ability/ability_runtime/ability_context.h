@@ -393,6 +393,7 @@ public:
     virtual bool GetHookOff() = 0;
     virtual void SetHookOff(bool hookOff) = 0;
     virtual ErrCode RevokeDelegator() = 0;
+    virtual ErrCode SetOnNewWantSkipScenarios(int32_t scenarios) = 0;
 
     virtual std::shared_ptr<AAFwk::Want> GetWant() = 0;
 

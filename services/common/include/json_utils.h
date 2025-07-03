@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include <map>
 #include <optional>
 
-#include "cJSON.h"
+#include "nlohmann/json.hpp"
 #include "singleton.h"
 
 namespace OHOS {
@@ -56,7 +56,7 @@ public:
      * @param defaultPath The default output path.
      * @return Whether or not the load operation succeeds.
      */
-    bool LoadConfiguration(const std::string& path, cJSON *&jsonBuf, const std::string& defaultPath = "");
+    bool LoadConfiguration(const std::string& path, nlohmann::json& jsonBuf, const std::string& defaultPath = "");
 
     /**
      * IsEqual, check if json object contains certain key.
@@ -67,7 +67,8 @@ public:
      * @param checkEmpty The flag indicates whether the value can be empty.
      * @return Whether or not the json object contains certain key.
      */
-    bool IsEqual(cJSON *jsonObject, const std::string &key, const std::string &value, bool checkEmpty = false);
+    bool IsEqual(nlohmann::json &jsonObject, const std::string &key,
+        const std::string &value, bool checkEmpty = false);
     
     /**
      * IsEqual, check if json object contains certain key.
@@ -77,7 +78,7 @@ public:
      * @param value The int32_t value.
      * @return Whether or not the json object contains certain key.
      */
-    bool IsEqual(cJSON *jsonObject, const std::string &key, int32_t value);
+    bool IsEqual(nlohmann::json &jsonObject, const std::string &key, int32_t value);
 
     /**
      * parse json to optional bool.
@@ -86,13 +87,11 @@ public:
      * @param key The key.
      * @return optional boolean value.
      */
-    std::optional<bool> JsonToOptionalBool(const cJSON *jsonObject, const std::string &key);
-
-    std::string ToString(const cJSON *jsonObject);
+    std::optional<bool> JsonToOptionalBool(const nlohmann::json &jsonObject, const std::string &key);
 
 private:
     std::string GetConfigPath(const std::string& path, const std::string& defaultPath);
-    bool ReadFileInfoJson(const std::string &filePath, cJSON *&jsonBuf);
+    bool ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf);
     JsonUtils() = default;
     DISALLOW_COPY_AND_MOVE(JsonUtils);
 };

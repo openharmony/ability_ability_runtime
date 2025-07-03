@@ -48,14 +48,14 @@ static ani_object GetAbilityDelegator(ani_env *env, [[maybe_unused]]ani_class an
             TAG_LOGE(AAFwkTag::DELEGATOR, "value is nullptr");
             return {};
         }
-        ani_boolean isValue;
+        ani_boolean isValue = false;
         env->Reference_IsNullishValue(value, &isValue);
         if (isValue) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_IsNullishValue");
             return {};
         }
         etsReference = std::make_unique<AppExecFwk::ETSNativeReference>();
-        ani_ref result;
+        ani_ref result = nullptr;
         auto status = env->GlobalReference_Create(value, &(result));
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "Create Gloabl ref for delegator failed %{public}d", status);
@@ -96,7 +96,7 @@ void EtsAbilityDelegatorRegistryInit(ani_env *env)
         TAG_LOGE(AAFwkTag::DELEGATOR, "ResetError failed");
     }
 
-    ani_namespace ns;
+    ani_namespace ns = nullptr;
     status = env->FindNamespace("L@ohos/app/ability/abilityDelegatorRegistry/abilityDelegatorRegistry;", &ns);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindNamespace abilityDelegatorRegistry failed status: %{public}d", status);
@@ -104,8 +104,11 @@ void EtsAbilityDelegatorRegistryInit(ani_env *env)
     }
 
     std::array kitFunctions = {
-        ani_native_function {"getAbilityDelegator", nullptr, reinterpret_cast<void *>(GetAbilityDelegator)},
-        ani_native_function {"getArguments", nullptr, reinterpret_cast<void *>(GetArguments)},
+        ani_native_function {"getAbilityDelegator",
+            ":Lapplication/AbilityDelegator/AbilityDelegator;",
+            reinterpret_cast<void *>(GetAbilityDelegator)},
+        ani_native_function {"getArguments", ":Lapplication/abilityDelegatorArgs/AbilityDelegatorArgs;",
+            reinterpret_cast<void *>(GetArguments)},
     };
 
     status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());
