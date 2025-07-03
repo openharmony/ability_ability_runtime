@@ -1670,6 +1670,7 @@ std::string JsRuntime::GetSystemKitPath()
 std::vector<panda::HmsMap> JsRuntime::GetSystemKitsMap(uint32_t version)
 {
     std::vector<panda::HmsMap> systemKitsMap;
+    nlohmann::json jsonBuf;
     std::string configPath = GetSystemKitPath();
     if (configPath == "" || access(configPath.c_str(), F_OK) != 0) {
         return systemKitsMap;
@@ -1692,41 +1693,32 @@ std::vector<panda::HmsMap> JsRuntime::GetSystemKitsMap(uint32_t version)
     }
 
     in.seekg(0, std::ios::beg);
-    std::string fileContent((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    jsonBuf = nlohmann::json::parse(in, nullptr, false);
     in.close();
+    if (jsonBuf.is_discarded()) {
+        return systemKitsMap;
+    }
 
-    cJSON *jsonBuf = cJSON_Parse(fileContent.c_str());
-    if (jsonBuf == nullptr) {
+    if (!jsonBuf.contains(SYSTEM_KITS)) {
         return systemKitsMap;
     }
-    cJSON *systemKitsItem = cJSON_GetObjectItem(jsonBuf, SYSTEM_KITS.c_str());
-    if (systemKitsItem == nullptr) {
-        cJSON_Delete(jsonBuf);
-        return systemKitsMap;
-    }
-    cJSON *childItem = systemKitsItem->child;
-    while (childItem != nullptr) {
-        cJSON *nameSpaceItem = cJSON_GetObjectItem(childItem, NAMESPACE.c_str());
-        cJSON *targetOhmItem = cJSON_GetObjectItem(childItem, TARGET_OHM.c_str());
-        cJSON *sinceVerItem = cJSON_GetObjectItem(childItem, SINCE_VERSION.c_str());
-        if (nameSpaceItem == nullptr || !cJSON_IsString(nameSpaceItem) ||
-            targetOhmItem == nullptr || !cJSON_IsString(targetOhmItem) ||
-            sinceVerItem == nullptr || !cJSON_IsNumber(sinceVerItem)) {
+    for (auto &item : jsonBuf.at(SYSTEM_KITS).items()) {
+        nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.contains(NAMESPACE) || !jsonObject.at(NAMESPACE).is_string() ||
+            !jsonObject.contains(TARGET_OHM) || !jsonObject.at(TARGET_OHM).is_string() ||
+            !jsonObject.contains(SINCE_VERSION) || !jsonObject.at(SINCE_VERSION).is_number()) {
             continue;
         }
-        uint32_t sinceVersion = static_cast<uint32_t>(sinceVerItem->valuedouble);
+        uint32_t sinceVersion = jsonObject.at(SINCE_VERSION).get<uint32_t>();
         if (version >= sinceVersion) {
             panda::HmsMap hmsMap = {
-                .originalPath = nameSpaceItem->valuestring,
-                .targetPath = targetOhmItem->valuestring,
+                .originalPath = jsonObject.at(NAMESPACE).get<std::string>(),
+                .targetPath = jsonObject.at(TARGET_OHM).get<std::string>(),
                 .sinceVersion = sinceVersion
             };
             systemKitsMap.emplace_back(hmsMap);
         }
-
-        childItem = childItem->next;
     }
-    cJSON_Delete(jsonBuf);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "The size of the map is %{public}zu", systemKitsMap.size());
     return systemKitsMap;
 }

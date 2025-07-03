@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 
 using namespace testing;
 using namespace testing::ext;
+using json = nlohmann::json;
 namespace {
 constexpr const char* EXTENSION_CONFIG_NAME = "extension_config_name";
 constexpr const char* EXTENSION_TYPE_NAME = "extension_type_name";
@@ -65,9 +66,8 @@ void AbilityExtensionConfigTest::TearDown()
 
 void AbilityExtensionConfigTest::LoadTestConfig(const std::string &configStr)
 {
-    cJSON *jsonConfig = cJSON_Parse(configStr.c_str());
+    nlohmann::json jsonConfig = nlohmann::json::parse(configStr);
     extensionConfig_->LoadExtensionConfig(jsonConfig);
-    cJSON_Delete(jsonConfig);
 }
 
 /*
@@ -92,30 +92,15 @@ HWTEST_F(AbilityExtensionConfigTest, GetExtensionConfigPath_001, TestSize.Level1
  */
 HWTEST_F(AbilityExtensionConfigTest, LoadExtensionServiceBlockedList_001, TestSize.Level1)
 {
-    cJSON *jsOnFile = cJSON_CreateObject();
+    json jsOnFile;
     extensionConfig_->LoadExtensionServiceBlockedList(jsOnFile, "aa");
-    
-    cJSON_AddBoolToObject(jsOnFile, EXTENSION_SERVICE_STARTUP_ENABLE_FLAG, false);
+    jsOnFile[EXTENSION_SERVICE_STARTUP_ENABLE_FLAG] = false;
     extensionConfig_->LoadExtensionServiceBlockedList(jsOnFile, "aa");
-
-    cJSON *item = cJSON_GetObjectItem(jsOnFile, EXTENSION_SERVICE_STARTUP_ENABLE_FLAG);
-    if (item != nullptr) {
-        cJSON_DetachItemViaPointer(jsOnFile, item);
-        cJSON_Delete(item);
-    }
-    cJSON_AddBoolToObject(jsOnFile, EXTENSION_SERVICE_STARTUP_ENABLE_FLAG, true);
+    jsOnFile[EXTENSION_SERVICE_STARTUP_ENABLE_FLAG] = true;
     extensionConfig_->LoadExtensionServiceBlockedList(jsOnFile, "aa");
-
-    cJSON *arraysItem = cJSON_CreateArray();
-    cJSON *array1Item = cJSON_CreateString("aa");
-    cJSON *array2Item = cJSON_CreateString("bb");
-    cJSON_AddItemToArray(arraysItem, array1Item);
-    cJSON_AddItemToArray(arraysItem, array2Item);
-    cJSON_AddItemToObject(jsOnFile, EXTENSION_SERVICE_BLOCKED_LIST_NAME, arraysItem);
+    jsOnFile[EXTENSION_SERVICE_BLOCKED_LIST_NAME] = {"aa", "bb"};
     extensionConfig_->LoadExtensionServiceBlockedList(jsOnFile, "aa");
-    
     EXPECT_TRUE(extensionConfig_ != nullptr);
-    cJSON_Delete(jsOnFile);
 }
 
 /*
@@ -125,23 +110,14 @@ HWTEST_F(AbilityExtensionConfigTest, LoadExtensionServiceBlockedList_001, TestSi
  */
 HWTEST_F(AbilityExtensionConfigTest, LoadExtensionThirdPartyAppBlockedList_001, TestSize.Level1)
 {
-    cJSON *jsOnFile = cJSON_CreateObject();
+    json jsOnFile;
     std::string extensionTypeName = "aa";
     extensionConfig_->LoadExtensionThirdPartyAppBlockedList(jsOnFile, extensionTypeName);
-
-    cJSON_AddBoolToObject(jsOnFile, EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME, false);
+    jsOnFile[EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME] = false;
     extensionConfig_->LoadExtensionThirdPartyAppBlockedList(jsOnFile, extensionTypeName);
-
-    cJSON *item = cJSON_GetObjectItem(jsOnFile, EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME);
-    if (item != nullptr) {
-        cJSON_DetachItemViaPointer(jsOnFile, item);
-        cJSON_Delete(item);
-    }
-    cJSON_AddBoolToObject(jsOnFile, EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME, true);
+    jsOnFile[EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME] = true;
     extensionConfig_->LoadExtensionThirdPartyAppBlockedList(jsOnFile, extensionTypeName);
-    
     EXPECT_TRUE(extensionConfig_ != nullptr);
-    cJSON_Delete(jsOnFile);
 }
 
 /*
@@ -151,16 +127,12 @@ HWTEST_F(AbilityExtensionConfigTest, LoadExtensionThirdPartyAppBlockedList_001, 
  */
 HWTEST_F(AbilityExtensionConfigTest, LoadExtensionAutoDisconnectTime_001, TestSize.Level1)
 {
-    cJSON *jsOnFile = cJSON_CreateObject();
-
+    json jsOnFile;
     std::string extensionTypeName = "aa";
     extensionConfig_->LoadExtensionAutoDisconnectTime(jsOnFile, extensionTypeName);
-
-    cJSON_AddNumberToObject(jsOnFile, EXTENSION_AUTO_DISCONNECT_TIME, 100);
+    jsOnFile[EXTENSION_AUTO_DISCONNECT_TIME] = 100;
     extensionConfig_->LoadExtensionAutoDisconnectTime(jsOnFile, extensionTypeName);
-
     EXPECT_TRUE(extensionConfig_ != nullptr);
-    cJSON_Delete(jsOnFile);
 }
 
 /*
@@ -170,25 +142,15 @@ HWTEST_F(AbilityExtensionConfigTest, LoadExtensionAutoDisconnectTime_001, TestSi
  */
 HWTEST_F(AbilityExtensionConfigTest, LoadExtensionConfig_001, TestSize.Level1)
 {
-    cJSON *jsOnFile = cJSON_CreateObject();
-    
-    cJSON *jsOnItems = cJSON_CreateArray();
-    cJSON *jsOnItem = cJSON_CreateObject();
-    cJSON *jsOnItem2 = cJSON_CreateObject();
-    cJSON *jsOnItem3 = cJSON_CreateObject();
+    json jsOnFile;
+    json jsOnItem;
+    json jsOnItem2;
     extensionConfig_->LoadExtensionConfig(jsOnFile);
-
-    cJSON_AddStringToObject(jsOnItem, EXTENSION_TYPE_NAME, "aa");
-    cJSON_AddStringToObject(jsOnItem2, EXTENSION_TYPE_NAME, "bb");
-    cJSON_AddStringToObject(jsOnItem3, EXTENSION_TYPE_NAME, "cc");
-    cJSON_AddItemToArray(jsOnItems, jsOnItem);
-    cJSON_AddItemToArray(jsOnItems, jsOnItem2);
-    cJSON_AddItemToArray(jsOnItems, jsOnItem3);
-    cJSON_AddItemToObject(jsOnFile, EXTENSION_CONFIG_NAME, jsOnItems);
+    jsOnItem[EXTENSION_TYPE_NAME] = "aa";
+    jsOnItem2[EXTENSION_TYPE_NAME] = "bb";
+    jsOnFile[EXTENSION_CONFIG_NAME] = {jsOnItem, jsOnItem2, "cc"};
     extensionConfig_->LoadExtensionConfig(jsOnFile);
-
     EXPECT_TRUE(extensionConfig_ != nullptr);
-    cJSON_Delete(jsOnFile);
 }
 
 /*
@@ -228,22 +190,14 @@ HWTEST_F(AbilityExtensionConfigTest, IsExtensionStartServiceEnable_002, TestSize
  */
 HWTEST_F(AbilityExtensionConfigTest, IsExtensionStartServiceEnable_003, TestSize.Level1)
 {
-    cJSON *jsOnFile = cJSON_CreateObject();
+    json jsOnFile;
     auto extType = "form";
-    cJSON_AddBoolToObject(jsOnFile, EXTENSION_SERVICE_STARTUP_ENABLE_FLAG, true);
-    cJSON *items = cJSON_CreateArray();
-    cJSON *item1 = cJSON_CreateString("aa");
-    cJSON *item2 = cJSON_CreateString("bb");
-    cJSON *item3 = cJSON_CreateString("/bundle/module/ability");
-    cJSON_AddItemToArray(items, item1);
-    cJSON_AddItemToArray(items, item2);
-    cJSON_AddItemToArray(items, item3);
-    cJSON_AddItemToObject(jsOnFile, EXTENSION_SERVICE_BLOCKED_LIST_NAME, items);
+    jsOnFile[EXTENSION_SERVICE_STARTUP_ENABLE_FLAG] = true;
+    jsOnFile[EXTENSION_SERVICE_BLOCKED_LIST_NAME] = {"aa", "bb", "/bundle/module/ability"};
     extensionConfig_->LoadExtensionServiceBlockedList(jsOnFile, extType);
     // uri not valid
     bool enable = extensionConfig_->IsExtensionStartServiceEnable(extType, "bb");
     EXPECT_EQ(enable, true);
-    cJSON_Delete(jsOnFile);
 }
 
 /*
@@ -253,22 +207,14 @@ HWTEST_F(AbilityExtensionConfigTest, IsExtensionStartServiceEnable_003, TestSize
  */
 HWTEST_F(AbilityExtensionConfigTest, IsExtensionStartServiceEnable_004, TestSize.Level1)
 {
-    cJSON *jsOnFile = cJSON_CreateObject();
+    json jsOnFile;
     auto extType = "form";
-    cJSON_AddBoolToObject(jsOnFile, EXTENSION_SERVICE_STARTUP_ENABLE_FLAG, true);
-    cJSON *items = cJSON_CreateArray();
-    cJSON *item1 = cJSON_CreateString("aa");
-    cJSON *item2 = cJSON_CreateString("bb");
-    cJSON *item3 = cJSON_CreateString("/bundle/module/ability");
-    cJSON_AddItemToArray(items, item1);
-    cJSON_AddItemToArray(items, item2);
-    cJSON_AddItemToArray(items, item3);
-    cJSON_AddItemToObject(jsOnFile, EXTENSION_SERVICE_BLOCKED_LIST_NAME, items);
+    jsOnFile[EXTENSION_SERVICE_STARTUP_ENABLE_FLAG] = true;
+    jsOnFile[EXTENSION_SERVICE_BLOCKED_LIST_NAME] = {"aa", "bb", "/bundle/module/ability"};
     extensionConfig_->LoadExtensionServiceBlockedList(jsOnFile, extType);
     // uri is valid
     bool enable = extensionConfig_->IsExtensionStartServiceEnable(extType, "/bundle/module/ability");
     EXPECT_EQ(enable, false);
-    cJSON_Delete(jsOnFile);
 }
 
 /*
@@ -278,10 +224,9 @@ HWTEST_F(AbilityExtensionConfigTest, IsExtensionStartServiceEnable_004, TestSize
  */
 HWTEST_F(AbilityExtensionConfigTest, ReadFileInfoJson_001, TestSize.Level1)
 {
-    cJSON *jsOne = nullptr;
+    nlohmann::json jsOne;
     auto result = extensionConfig_->ReadFileInfoJson("d://dddd", jsOne);
     EXPECT_EQ(result, false);
-    cJSON_Delete(jsOne);
 }
 
 /*

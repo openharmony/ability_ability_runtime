@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +18,11 @@
 #include <native_engine/native_engine.h>
 
 #include "ability_manager_client.h"
-#include "application_configuration_manager.h"
-#include "configuration_convertor.h"
+#include "hitrace_meter.h"
 #include "connection_manager.h"
 #include "dialog_request_callback_impl.h"
 #include "dialog_ui_extension_callback.h"
 #include "hilog_tag_wrapper.h"
-#include "hitrace_meter.h"
 #include "json_utils.h"
 #include "remote_object_wrapper.h"
 #include "request_constants.h"
@@ -36,6 +34,8 @@
 #include "ui_content.h"
 #endif // SUPPORT_SCREEN
 #include "want_params_wrapper.h"
+#include "configuration_convertor.h"
+#include "application_configuration_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -268,15 +268,10 @@ ErrCode AbilityContextImpl::StartAbilityForResult(const AAFwk::Want& want, const
         TAG_LOGE(AAFwkTag::CONTEXT, "ret=%{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
         if (!startOptions.requestId_.empty()) {
-            cJSON *jsonObject = cJSON_CreateObject();
-            if (jsonObject == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "create jsonObject failed");
-                return AAFwk::INNER_ERR;
-            }
-            cJSON_AddStringToObject(jsonObject, JSON_KEY_ERR_MSG.c_str(), "Failed to call startAbilityForResult");
-            std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-            cJSON_Delete(jsonObject);
-            OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonStr);
+            nlohmann::json jsonObject = nlohmann::json {
+                { JSON_KEY_ERR_MSG, "Failed to call startAbilityForResult" },
+            };
+            OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
         }
     }
     return err;
@@ -294,16 +289,10 @@ ErrCode AbilityContextImpl::StartAbilityForResultWithAccount(
         TAG_LOGE(AAFwkTag::CONTEXT, "ret=%{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
         if (!startOptions.requestId_.empty()) {
-            cJSON *jsonObject = cJSON_CreateObject();
-            if (jsonObject == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "create jsonObject failed");
-                return AAFwk::INNER_ERR;
-            }
-            cJSON_AddStringToObject(jsonObject, JSON_KEY_ERR_MSG.c_str(),
-                "Failed to call startAbilityForResultWithAccount");
-            std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-            cJSON_Delete(jsonObject);
-            OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonStr);
+            nlohmann::json jsonObject = nlohmann::json {
+                { JSON_KEY_ERR_MSG, "Failed to call startAbilityForResultWithAccount" },
+            };
+            OnRequestFailure(startOptions.requestId_, want.GetElement(), jsonObject.dump());
         }
     }
     return err;

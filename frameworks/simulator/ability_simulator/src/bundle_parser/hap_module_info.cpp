@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "bundle_constants.h"
 #include "hilog_tag_wrapper.h"
 #include "json_util.h"
+#include "nlohmann/json.hpp"
 #include "string_ex.h"
 
 namespace OHOS {
@@ -108,430 +109,811 @@ const std::string MODULE_OVERLAY_PRIORITY = "priority";
 const std::string MODULE_OVERLAY_STATE = "state";
 const std::string MODULE_TARGET_MODULE_NAME = "targetModuleName";
 }
-
-bool to_json(cJSON *&jsonObject, const PreloadItem &preloadItem)
+void to_json(nlohmann::json &jsonObject, const PreloadItem &preloadItem)
 {
-    jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
-        return false;
-    }
-    cJSON_AddStringToObject(jsonObject, PRELOAD_ITEM_MODULE_NAME.c_str(), preloadItem.moduleName.c_str());
-    return true;
+    jsonObject = nlohmann::json {
+        {PRELOAD_ITEM_MODULE_NAME, preloadItem.moduleName}
+    };
 }
 
-void from_json(const cJSON *jsonObject, PreloadItem &preloadItem)
+void from_json(const nlohmann::json &jsonObject, PreloadItem &preloadItem)
 {
+    const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
-    GetStringValueIfFindKey(jsonObject, PRELOAD_ITEM_MODULE_NAME, preloadItem.moduleName, false, parseResult);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        PRELOAD_ITEM_MODULE_NAME,
+        preloadItem.moduleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "read PreloadItem error:%{public}d", parseResult);
     }
 }
 
-bool to_json(cJSON *&jsonObject, const ProxyData &proxyData)
+void to_json(nlohmann::json &jsonObject, const ProxyData &proxyData)
 {
-    jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
-        return false;
-    }
-    cJSON_AddStringToObject(jsonObject, PROXY_DATA_URI.c_str(), proxyData.uri.c_str());
-    cJSON_AddStringToObject(jsonObject, PROXY_DATA_REQUIRED_READ_PERMISSION.c_str(),
-        proxyData.requiredReadPermission.c_str());
-    cJSON_AddStringToObject(jsonObject, PROXY_DATA_REQUIRED_WRITE_PERMISSION.c_str(),
-        proxyData.requiredWritePermission.c_str());
-    cJSON *metadataItem = nullptr;
-    if (!to_json(metadataItem, proxyData.metadata)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json metadata failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, PROXY_DATA_METADATA.c_str(), metadataItem);
-    return true;
+    jsonObject = nlohmann::json {
+        {PROXY_DATA_URI, proxyData.uri},
+        {PROXY_DATA_REQUIRED_READ_PERMISSION, proxyData.requiredReadPermission},
+        {PROXY_DATA_REQUIRED_WRITE_PERMISSION, proxyData.requiredWritePermission},
+        {PROXY_DATA_METADATA, proxyData.metadata}
+    };
 }
 
-void from_json(const cJSON *jsonObject, ProxyData &proxyData)
+void from_json(const nlohmann::json &jsonObject, ProxyData &proxyData)
 {
+    const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
-    GetStringValueIfFindKey(jsonObject, PROXY_DATA_URI, proxyData.uri, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, PROXY_DATA_REQUIRED_READ_PERMISSION, proxyData.requiredReadPermission, false,
-        parseResult);
-    GetStringValueIfFindKey(jsonObject, PROXY_DATA_REQUIRED_WRITE_PERMISSION, proxyData.requiredWritePermission, false,
-        parseResult);
-    GetObjectValueIfFindKey(jsonObject, PROXY_DATA_METADATA, proxyData.metadata, false, parseResult);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        PROXY_DATA_URI,
+        proxyData.uri,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        PROXY_DATA_REQUIRED_READ_PERMISSION,
+        proxyData.requiredReadPermission,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        PROXY_DATA_REQUIRED_WRITE_PERMISSION,
+        proxyData.requiredWritePermission,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<Metadata>(jsonObject,
+        jsonObjectEnd,
+        PROXY_DATA_METADATA,
+        proxyData.metadata,
+        JsonType::OBJECT,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "read ProxyData from database error:%{public}d", parseResult);
     }
 }
 
-bool to_json(cJSON *&jsonObject, const OverlayModuleInfo &overlayModuleInfo)
+void to_json(nlohmann::json &jsonObject, const OverlayModuleInfo &overlayModuleInfo)
 {
-    jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
-        return false;
-    }
-    cJSON_AddStringToObject(jsonObject, MODULE_OVERLAY_BUNDLE_NAME.c_str(), overlayModuleInfo.bundleName.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_OVERLAY_MODULE_NAME.c_str(), overlayModuleInfo.moduleName.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_TARGET_MODULE_NAME.c_str(), overlayModuleInfo.targetModuleName.c_str());
-    cJSON_AddStringToObject(jsonObject, MODULE_OVERLAY_HAP_PATH.c_str(), overlayModuleInfo.hapPath.c_str());
-    cJSON_AddNumberToObject(jsonObject, MODULE_OVERLAY_PRIORITY.c_str(),
-        static_cast<double>(overlayModuleInfo.priority));
-    cJSON_AddNumberToObject(jsonObject, MODULE_OVERLAY_STATE.c_str(), static_cast<double>(overlayModuleInfo.state));
-    return true;
+    jsonObject = nlohmann::json {
+        {MODULE_OVERLAY_BUNDLE_NAME, overlayModuleInfo.bundleName},
+        {MODULE_OVERLAY_MODULE_NAME, overlayModuleInfo.moduleName},
+        {MODULE_TARGET_MODULE_NAME, overlayModuleInfo.targetModuleName},
+        {MODULE_OVERLAY_HAP_PATH, overlayModuleInfo.hapPath},
+        {MODULE_OVERLAY_PRIORITY, overlayModuleInfo.priority},
+        {MODULE_OVERLAY_STATE, overlayModuleInfo.state}
+    };
 }
 
-void from_json(const cJSON *jsonObject, OverlayModuleInfo &overlayModuleInfo)
+void from_json(const nlohmann::json &jsonObject, OverlayModuleInfo &overlayModuleInfo)
 {
+    const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
-    GetStringValueIfFindKey(jsonObject, MODULE_OVERLAY_BUNDLE_NAME, overlayModuleInfo.bundleName, true, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_OVERLAY_MODULE_NAME, overlayModuleInfo.moduleName, true, parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_TARGET_MODULE_NAME, overlayModuleInfo.targetModuleName, true,
-        parseResult);
-    GetStringValueIfFindKey(jsonObject, MODULE_OVERLAY_HAP_PATH, overlayModuleInfo.hapPath, true, parseResult);
-    GetNumberValueIfFindKey(jsonObject, MODULE_OVERLAY_PRIORITY, overlayModuleInfo.priority, true, parseResult);
-    GetNumberValueIfFindKey(jsonObject, MODULE_OVERLAY_STATE, overlayModuleInfo.state, true, parseResult);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_OVERLAY_BUNDLE_NAME,
+        overlayModuleInfo.bundleName,
+        JsonType::STRING,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_OVERLAY_MODULE_NAME,
+        overlayModuleInfo.moduleName,
+        JsonType::STRING,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_TARGET_MODULE_NAME,
+        overlayModuleInfo.targetModuleName,
+        JsonType::STRING,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        MODULE_OVERLAY_HAP_PATH,
+        overlayModuleInfo.hapPath,
+        JsonType::STRING,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        MODULE_OVERLAY_PRIORITY,
+        overlayModuleInfo.priority,
+        JsonType::NUMBER,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        MODULE_OVERLAY_STATE,
+        overlayModuleInfo.state,
+        JsonType::NUMBER,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "overlayModuleInfo from_json error : %{public}d", parseResult);
     }
 }
 
-bool to_json(cJSON *&jsonObject, const RouterItem &routerItem)
+void to_json(nlohmann::json &jsonObject, const RouterItem &routerItem)
 {
-    jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
-        return false;
-    }
-    cJSON_AddStringToObject(jsonObject, ROUTER_ITEM_KEY_NAME.c_str(), routerItem.name.c_str());
-    cJSON_AddStringToObject(jsonObject, ROUTER_ITEM_KEY_PAGE_SOURCE_FILE.c_str(), routerItem.pageSourceFile.c_str());
-    cJSON_AddStringToObject(jsonObject, ROUTER_ITEM_KEY_BUILD_FUNCTION.c_str(), routerItem.buildFunction.c_str());
-
-    cJSON *dataItem = nullptr;
-    if (!to_json(dataItem, routerItem.data)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json data failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, ROUTER_ITEM_KEY_DATA.c_str(), dataItem);
-
-    cJSON_AddStringToObject(jsonObject, ROUTER_ITEM_KEY_CUSTOM_DATA.c_str(), routerItem.customData.c_str());
-    cJSON_AddStringToObject(jsonObject, ROUTER_ITEM_KEY_OHMURL.c_str(), routerItem.ohmurl.c_str());
-    cJSON_AddStringToObject(jsonObject, ROUTER_ITEM_KEY_BUNDLE_NAME.c_str(), routerItem.bundleName.c_str());
-    cJSON_AddStringToObject(jsonObject, ROUTER_ITEM_KEY_MODULE_NAME.c_str(), routerItem.moduleName.c_str());
-    return true;
+    jsonObject = nlohmann::json {
+        {ROUTER_ITEM_KEY_NAME, routerItem.name},
+        {ROUTER_ITEM_KEY_PAGE_SOURCE_FILE, routerItem.pageSourceFile},
+        {ROUTER_ITEM_KEY_BUILD_FUNCTION, routerItem.buildFunction},
+        {ROUTER_ITEM_KEY_DATA, routerItem.data},
+        {ROUTER_ITEM_KEY_CUSTOM_DATA, routerItem.customData},
+        {ROUTER_ITEM_KEY_OHMURL, routerItem.ohmurl},
+        {ROUTER_ITEM_KEY_BUNDLE_NAME, routerItem.bundleName},
+        {ROUTER_ITEM_KEY_MODULE_NAME, routerItem.moduleName}
+    };
 }
 
-void from_json(const cJSON *jsonObject, RouterItem &routerItem)
+void from_json(const nlohmann::json &jsonObject, RouterItem &routerItem)
 {
+    const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
-    GetStringValueIfFindKey(jsonObject, ROUTER_ITEM_KEY_NAME.c_str(), routerItem.name, true, parseResult);
-    GetStringValueIfFindKey(jsonObject, ROUTER_ITEM_KEY_PAGE_SOURCE_FILE.c_str(), routerItem.pageSourceFile, true,
-        parseResult);
-    GetStringValueIfFindKey(jsonObject, ROUTER_ITEM_KEY_BUILD_FUNCTION.c_str(), routerItem.buildFunction, true,
-        parseResult);
-    GetStringValueIfFindKey(jsonObject, ROUTER_ITEM_KEY_OHMURL.c_str(), routerItem.ohmurl, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, ROUTER_ITEM_KEY_BUNDLE_NAME.c_str(), routerItem.bundleName, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, ROUTER_ITEM_KEY_MODULE_NAME.c_str(), routerItem.moduleName, false, parseResult);
-    GetObjectValueMapIfFindKey(jsonObject, ROUTER_ITEM_KEY_DATA.c_str(), routerItem.data, false, parseResult);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        ROUTER_ITEM_KEY_NAME,
+        routerItem.name,
+        JsonType::STRING,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        ROUTER_ITEM_KEY_PAGE_SOURCE_FILE,
+        routerItem.pageSourceFile,
+        JsonType::STRING,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        ROUTER_ITEM_KEY_BUILD_FUNCTION,
+        routerItem.buildFunction,
+        JsonType::STRING,
+        true,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        ROUTER_ITEM_KEY_OHMURL,
+        routerItem.ohmurl,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        ROUTER_ITEM_KEY_BUNDLE_NAME,
+        routerItem.bundleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        ROUTER_ITEM_KEY_MODULE_NAME,
+        routerItem.moduleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::map<std::string, std::string>>(jsonObject,
+        jsonObjectEnd,
+        ROUTER_ITEM_KEY_DATA,
+        routerItem.data,
+        JsonType::OBJECT,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "read RouterItem jsonObject error : %{public}d", parseResult);
     }
 }
 
-bool to_json(cJSON *&jsonObject, const AppEnvironment &appEnvironment)
+void to_json(nlohmann::json &jsonObject, const AppEnvironment &appEnvironment)
 {
-    jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
-        return false;
-    }
-    cJSON_AddStringToObject(jsonObject, APP_ENVIRONMENTS_NAME.c_str(), appEnvironment.name.c_str());
-    cJSON_AddStringToObject(jsonObject, APP_ENVIRONMENTS_VALUE.c_str(), appEnvironment.value.c_str());
-    return true;
+    jsonObject = nlohmann::json {
+        {APP_ENVIRONMENTS_NAME, appEnvironment.name},
+        {APP_ENVIRONMENTS_VALUE, appEnvironment.value}
+    };
 }
 
-void from_json(const cJSON *jsonObject, AppEnvironment &appEnvironment)
+void from_json(const nlohmann::json &jsonObject, AppEnvironment &appEnvironment)
 {
+    const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
-    GetStringValueIfFindKey(jsonObject, APP_ENVIRONMENTS_NAME, appEnvironment.name, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, APP_ENVIRONMENTS_VALUE, appEnvironment.value, false, parseResult);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APP_ENVIRONMENTS_NAME,
+        appEnvironment.name,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        APP_ENVIRONMENTS_VALUE,
+        appEnvironment.value,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "read AppEnvironment error : %{public}d", parseResult);
     }
 }
 
-bool to_json(cJSON *&jsonObject, const HapModuleInfo &hapModuleInfo)
+void to_json(nlohmann::json &jsonObject, const HapModuleInfo &hapModuleInfo)
 {
-    jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "create json object failed");
-        return false;
-    }
-
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_NAME.c_str(), hapModuleInfo.name.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_PACKAGE.c_str(), hapModuleInfo.package.c_str());
-    cJSON_AddStringToObject(jsonObject, Constants::MODULE_NAME, hapModuleInfo.moduleName.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_DESCRIPTION.c_str(), hapModuleInfo.description.c_str());
-    cJSON_AddNumberToObject(jsonObject, HAP_MODULE_INFO_DESCRIPTION_ID.c_str(),
-        static_cast<double>(hapModuleInfo.descriptionId));
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_ICON_PATH.c_str(), hapModuleInfo.iconPath.c_str());
-    cJSON_AddNumberToObject(jsonObject, HAP_MODULE_INFO_ICON_ID.c_str(), static_cast<double>(hapModuleInfo.iconId));
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_LABEL.c_str(), hapModuleInfo.label.c_str());
-    cJSON_AddNumberToObject(jsonObject, HAP_MODULE_INFO_LABEL_ID.c_str(), static_cast<double>(hapModuleInfo.labelId));
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_BACKGROUND_IMG.c_str(), hapModuleInfo.backgroundImg.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_MAIN_ABILITY.c_str(), hapModuleInfo.mainAbility.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_SRC_PATH.c_str(), hapModuleInfo.srcPath.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_HASH_VALUE.c_str(), hapModuleInfo.hashValue.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_HAP_PATH.c_str(), hapModuleInfo.hapPath.c_str());
-    cJSON_AddNumberToObject(jsonObject, HAP_MODULE_INFO_SUPPORTED_MODES.c_str(),
-        static_cast<double>(hapModuleInfo.supportedModes));
-
-    cJSON *reqCapabilitiesItem = nullptr;
-    if (!to_json(reqCapabilitiesItem, hapModuleInfo.reqCapabilities)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json reqCapabilities failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, HAP_MODULE_INFO_REQ_CAPABILITIES.c_str(), reqCapabilitiesItem);
-
-    cJSON *deviceTypesItem = nullptr;
-    if (!to_json(deviceTypesItem, hapModuleInfo.deviceTypes)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json deviceTypes failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, HAP_MODULE_INFO_DEVICE_TYPES.c_str(), deviceTypesItem);
-
-    cJSON *abilityInfosItem = nullptr;
-    if (!to_json(abilityInfosItem, hapModuleInfo.abilityInfos)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json abilityInfos failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, HAP_MODULE_INFO_ABILITY_INFOS.c_str(), abilityInfosItem);
-    
-    cJSON_AddNumberToObject(jsonObject, HAP_MODULE_INFO_COLOR_MODE.c_str(),
-        static_cast<double>(hapModuleInfo.colorMode));
-    cJSON_AddStringToObject(jsonObject, Constants::BUNDLE_NAME, hapModuleInfo.bundleName.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_MAIN_ELEMENTNAME.c_str(),
-        hapModuleInfo.mainElementName.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_PAGES.c_str(), hapModuleInfo.pages.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_SYSTEM_THEME.c_str(), hapModuleInfo.systemTheme.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_PROCESS.c_str(), hapModuleInfo.process.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_RESOURCE_PATH.c_str(), hapModuleInfo.resourcePath.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_SRC_ENTRANCE.c_str(), hapModuleInfo.srcEntrance.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_UI_SYNTAX.c_str(), hapModuleInfo.uiSyntax.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_VIRTUAL_MACHINE.c_str(), hapModuleInfo.virtualMachine.c_str());
-    cJSON_AddBoolToObject(jsonObject, HAP_MODULE_INFO_DELIVERY_WITH_INSTALL.c_str(), hapModuleInfo.deliveryWithInstall);
-    cJSON_AddBoolToObject(jsonObject, HAP_MODULE_INFO_INSTALLATION_FREE.c_str(), hapModuleInfo.installationFree);
-    cJSON_AddBoolToObject(jsonObject, HAP_MODULE_INFO_IS_MODULE_JSON.c_str(), hapModuleInfo.isModuleJson);
-    cJSON_AddBoolToObject(jsonObject, HAP_MODULE_INFO_IS_STAGE_BASED_MODEL.c_str(), hapModuleInfo.isStageBasedModel);
-
-    cJSON *isRemovableItem = nullptr;
-    if (!to_json(isRemovableItem, hapModuleInfo.isRemovable)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json isRemovable failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, HAP_MODULE_INFO_IS_REMOVABLE.c_str(), isRemovableItem);
-
-    cJSON_AddNumberToObject(jsonObject, HAP_MODULE_INFO_UPGRADE_FLAG.c_str(),
-        static_cast<double>(hapModuleInfo.upgradeFlag));
-    cJSON_AddNumberToObject(jsonObject, HAP_MODULE_INFO_MODULE_TYPE.c_str(),
-        static_cast<double>(hapModuleInfo.moduleType));
-
-    cJSON *extensionInfosItem = nullptr;
-    if (!to_json(extensionInfosItem, hapModuleInfo.extensionInfos)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json extensionInfos failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, HAP_MODULE_INFO_EXTENSION_INFOS.c_str(), extensionInfosItem);
-
-    cJSON *metadataItem = nullptr;
-    if (!to_json(metadataItem, hapModuleInfo.metadata)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json metadata failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, HAP_MODULE_INFO_META_DATA.c_str(), metadataItem);
-
-    cJSON *dependenciesItem = nullptr;
-    if (!to_json(dependenciesItem, hapModuleInfo.dependencies)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json dependencies failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, HAP_MODULE_INFO_DEPENDENCIES.c_str(), dependenciesItem);
-
-    cJSON_AddNumberToObject(jsonObject, HAP_MODULE_INFO_COMPILE_MODE.c_str(),
-        static_cast<double>(hapModuleInfo.compileMode));
-    cJSON_AddBoolToObject(jsonObject, HAP_MODULE_INFO_IS_LIB_ISOLATED.c_str(), hapModuleInfo.isLibIsolated);
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_NATIVE_LIBRARY_PATH.c_str(),
-        hapModuleInfo.nativeLibraryPath.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_CPU_ABI.c_str(), hapModuleInfo.cpuAbi.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_MODULE_SOURCE_DIR.c_str(),
-        hapModuleInfo.moduleSourceDir.c_str());
-    
-    cJSON *overlayModuleInfosItem = nullptr;
-    if (!to_json(overlayModuleInfosItem, hapModuleInfo.overlayModuleInfos)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json overlayModuleInfos failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, HAP_OVERLAY_MODULE_INFO.c_str(), overlayModuleInfosItem);
-
-    cJSON_AddNumberToObject(jsonObject, HAP_MODULE_INFO_ATOMIC_SERVICE_MODULE_TYPE.c_str(),
-        static_cast<double>(hapModuleInfo.atomicServiceModuleType));
-
-    cJSON *preloadsItem = nullptr;
-    if (!to_json(preloadsItem, hapModuleInfo.preloads)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json preloads failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, HAP_MODULE_INFO_PRELOADS.c_str(), preloadsItem);
-
-    cJSON *proxyDatasItem = nullptr;
-    if (!to_json(proxyDatasItem, hapModuleInfo.proxyDatas)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json proxyDatas failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, HAP_MODULE_INFO_PROXY_DATAS.c_str(), proxyDatasItem);
-
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_BUILD_HASH.c_str(), hapModuleInfo.buildHash.c_str());
-    cJSON_AddNumberToObject(jsonObject, HAP_MODULE_INFO_ISOLATION_MODE.c_str(),
-        static_cast<double>(hapModuleInfo.isolationMode));
-    cJSON_AddNumberToObject(jsonObject, HAP_MODULE_INFO_AOT_COMPILE_STATUS.c_str(),
-        static_cast<double>(hapModuleInfo.aotCompileStatus));
-    cJSON_AddBoolToObject(jsonObject, HAP_MODULE_INFO_COMPRESS_NATIVE_LIBS.c_str(), hapModuleInfo.compressNativeLibs);
-
-    cJSON *nativeLibraryFileNamesItem = nullptr;
-    if (!to_json(nativeLibraryFileNamesItem, hapModuleInfo.nativeLibraryFileNames)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json nativeLibraryFileNames failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, HAP_MODULE_INFO_NATIVE_LIBRARY_FILE_NAMES.c_str(), nativeLibraryFileNamesItem);
-
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_FILE_CONTEXT_MENU.c_str(),
-        hapModuleInfo.fileContextMenu.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_ROUTER_MAP.c_str(), hapModuleInfo.routerMap.c_str());
-
-    cJSON *routerArrayItem = nullptr;
-    if (!to_json(routerArrayItem, hapModuleInfo.routerArray)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json routerArray failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, HAP_MODULE_INFO_ROUTER_ARRAY.c_str(), routerArrayItem);
-
-    cJSON *appEnvironmentsItem = nullptr;
-    if (!to_json(appEnvironmentsItem, hapModuleInfo.appEnvironments)) {
-        TAG_LOGE(AAFwkTag::ABILITY_SIM, "to_json appEnvironments failed");
-        cJSON_Delete(jsonObject);
-        return false;
-    }
-    cJSON_AddItemToObject(jsonObject, HAP_MODULE_INFO_APP_ENVIRONMENTS.c_str(), appEnvironmentsItem);
-
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_PACKAGE_NAME.c_str(), hapModuleInfo.packageName.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_ABILITY_SRC_ENTRY_DELEGATOR.c_str(),
-        hapModuleInfo.abilitySrcEntryDelegator.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_ABILITY_STAGE_SRC_ENTRY_DELEGATOR.c_str(),
-        hapModuleInfo.abilityStageSrcEntryDelegator.c_str());
-    cJSON_AddStringToObject(jsonObject, HAP_MODULE_INFO_APP_STARTUP.c_str(), hapModuleInfo.appStartup.c_str());
-
-    return true;
+    jsonObject = nlohmann::json {
+        {HAP_MODULE_INFO_NAME, hapModuleInfo.name}, {HAP_MODULE_INFO_PACKAGE, hapModuleInfo.package},
+        {Constants::MODULE_NAME, hapModuleInfo.moduleName}, {HAP_MODULE_INFO_DESCRIPTION, hapModuleInfo.description},
+        {HAP_MODULE_INFO_DESCRIPTION_ID, hapModuleInfo.descriptionId},
+        {HAP_MODULE_INFO_ICON_PATH, hapModuleInfo.iconPath}, {HAP_MODULE_INFO_ICON_ID, hapModuleInfo.iconId},
+        {HAP_MODULE_INFO_LABEL, hapModuleInfo.label}, {HAP_MODULE_INFO_LABEL_ID, hapModuleInfo.labelId},
+        {HAP_MODULE_INFO_BACKGROUND_IMG, hapModuleInfo.backgroundImg},
+        {HAP_MODULE_INFO_MAIN_ABILITY, hapModuleInfo.mainAbility},
+        {HAP_MODULE_INFO_SRC_PATH, hapModuleInfo.srcPath}, {HAP_MODULE_INFO_HASH_VALUE, hapModuleInfo.hashValue},
+        {HAP_MODULE_INFO_HAP_PATH, hapModuleInfo.hapPath},
+        {HAP_MODULE_INFO_SUPPORTED_MODES, hapModuleInfo.supportedModes},
+        {HAP_MODULE_INFO_REQ_CAPABILITIES, hapModuleInfo.reqCapabilities},
+        {HAP_MODULE_INFO_DEVICE_TYPES, hapModuleInfo.deviceTypes},
+        {HAP_MODULE_INFO_ABILITY_INFOS, hapModuleInfo.abilityInfos},
+        {HAP_MODULE_INFO_COLOR_MODE, hapModuleInfo.colorMode}, {Constants::BUNDLE_NAME, hapModuleInfo.bundleName},
+        {HAP_MODULE_INFO_MAIN_ELEMENTNAME, hapModuleInfo.mainElementName}, {HAP_MODULE_INFO_PAGES, hapModuleInfo.pages},
+        {HAP_MODULE_INFO_SYSTEM_THEME, hapModuleInfo.systemTheme},
+        {HAP_MODULE_INFO_PROCESS, hapModuleInfo.process}, {HAP_MODULE_INFO_RESOURCE_PATH, hapModuleInfo.resourcePath},
+        {HAP_MODULE_INFO_SRC_ENTRANCE, hapModuleInfo.srcEntrance}, {HAP_MODULE_INFO_UI_SYNTAX, hapModuleInfo.uiSyntax},
+        {HAP_MODULE_INFO_VIRTUAL_MACHINE, hapModuleInfo.virtualMachine},
+        {HAP_MODULE_INFO_DELIVERY_WITH_INSTALL, hapModuleInfo.deliveryWithInstall},
+        {HAP_MODULE_INFO_INSTALLATION_FREE, hapModuleInfo.installationFree},
+        {HAP_MODULE_INFO_IS_MODULE_JSON, hapModuleInfo.isModuleJson},
+        {HAP_MODULE_INFO_IS_STAGE_BASED_MODEL, hapModuleInfo.isStageBasedModel},
+        {HAP_MODULE_INFO_IS_REMOVABLE, hapModuleInfo.isRemovable},
+        {HAP_MODULE_INFO_UPGRADE_FLAG, hapModuleInfo.upgradeFlag},
+        {HAP_MODULE_INFO_MODULE_TYPE, hapModuleInfo.moduleType},
+        {HAP_MODULE_INFO_EXTENSION_INFOS, hapModuleInfo.extensionInfos},
+        {HAP_MODULE_INFO_META_DATA, hapModuleInfo.metadata},
+        {HAP_MODULE_INFO_DEPENDENCIES, hapModuleInfo.dependencies},
+        {HAP_MODULE_INFO_COMPILE_MODE, hapModuleInfo.compileMode},
+        {HAP_MODULE_INFO_IS_LIB_ISOLATED, hapModuleInfo.isLibIsolated},
+        {HAP_MODULE_INFO_NATIVE_LIBRARY_PATH, hapModuleInfo.nativeLibraryPath},
+        {HAP_MODULE_INFO_CPU_ABI, hapModuleInfo.cpuAbi},
+        {HAP_MODULE_INFO_MODULE_SOURCE_DIR, hapModuleInfo.moduleSourceDir},
+        {HAP_OVERLAY_MODULE_INFO, hapModuleInfo.overlayModuleInfos},
+        {HAP_MODULE_INFO_ATOMIC_SERVICE_MODULE_TYPE, hapModuleInfo.atomicServiceModuleType},
+        {HAP_MODULE_INFO_PRELOADS, hapModuleInfo.preloads},
+        {HAP_MODULE_INFO_PROXY_DATAS, hapModuleInfo.proxyDatas},
+        {HAP_MODULE_INFO_BUILD_HASH, hapModuleInfo.buildHash},
+        {HAP_MODULE_INFO_ISOLATION_MODE, hapModuleInfo.isolationMode},
+        {HAP_MODULE_INFO_AOT_COMPILE_STATUS, hapModuleInfo.aotCompileStatus},
+        {HAP_MODULE_INFO_COMPRESS_NATIVE_LIBS, hapModuleInfo.compressNativeLibs},
+        {HAP_MODULE_INFO_NATIVE_LIBRARY_FILE_NAMES, hapModuleInfo.nativeLibraryFileNames},
+        {HAP_MODULE_INFO_FILE_CONTEXT_MENU, hapModuleInfo.fileContextMenu},
+        {HAP_MODULE_INFO_ROUTER_MAP, hapModuleInfo.routerMap},
+        {HAP_MODULE_INFO_ROUTER_ARRAY, hapModuleInfo.routerArray},
+        {HAP_MODULE_INFO_APP_ENVIRONMENTS, hapModuleInfo.appEnvironments},
+        {HAP_MODULE_INFO_PACKAGE_NAME, hapModuleInfo.packageName},
+        {HAP_MODULE_ABILITY_SRC_ENTRY_DELEGATOR, hapModuleInfo.abilitySrcEntryDelegator},
+        {HAP_MODULE_ABILITY_STAGE_SRC_ENTRY_DELEGATOR, hapModuleInfo.abilityStageSrcEntryDelegator},
+        {HAP_MODULE_INFO_APP_STARTUP, hapModuleInfo.appStartup}
+    };
 }
 
-void from_json(const cJSON *jsonObject, HapModuleInfo &hapModuleInfo)
+void from_json(const nlohmann::json &jsonObject, HapModuleInfo &hapModuleInfo)
 {
+    const auto &jsonObjectEnd = jsonObject.end();
     int32_t parseResult = ERR_OK;
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_NAME, hapModuleInfo.name, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_PACKAGE, hapModuleInfo.package, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, Constants::MODULE_NAME, hapModuleInfo.moduleName, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_DESCRIPTION, hapModuleInfo.description, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, HAP_MODULE_INFO_DESCRIPTION_ID, hapModuleInfo.descriptionId, false,
-        parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_ICON_PATH, hapModuleInfo.iconPath, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, HAP_MODULE_INFO_ICON_ID, hapModuleInfo.iconId, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_LABEL, hapModuleInfo.label, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, HAP_MODULE_INFO_LABEL_ID, hapModuleInfo.labelId, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_BACKGROUND_IMG, hapModuleInfo.backgroundImg, false,
-        parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_MAIN_ABILITY, hapModuleInfo.mainAbility, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_SRC_PATH, hapModuleInfo.srcPath, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_HASH_VALUE, hapModuleInfo.hashValue, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_HAP_PATH, hapModuleInfo.hapPath, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, HAP_MODULE_INFO_SUPPORTED_MODES, hapModuleInfo.supportedModes, false,
-        parseResult);
-    GetStringValuesIfFindKey(jsonObject, HAP_MODULE_INFO_REQ_CAPABILITIES, hapModuleInfo.reqCapabilities, false,
-        parseResult);
-    GetStringValuesIfFindKey(jsonObject, HAP_MODULE_INFO_DEVICE_TYPES, hapModuleInfo.deviceTypes, false, parseResult);
-    GetObjectValuesIfFindKey(jsonObject, HAP_MODULE_INFO_ABILITY_INFOS, hapModuleInfo.abilityInfos, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, HAP_MODULE_INFO_COLOR_MODE, hapModuleInfo.colorMode, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, Constants::BUNDLE_NAME, hapModuleInfo.bundleName, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_MAIN_ELEMENTNAME, hapModuleInfo.mainElementName, false,
-        parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_PAGES, hapModuleInfo.pages, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_SYSTEM_THEME, hapModuleInfo.systemTheme, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_PROCESS, hapModuleInfo.process, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_RESOURCE_PATH, hapModuleInfo.resourcePath, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_SRC_ENTRANCE, hapModuleInfo.srcEntrance, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_UI_SYNTAX, hapModuleInfo.uiSyntax, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_VIRTUAL_MACHINE, hapModuleInfo.virtualMachine, false,
-        parseResult);
-    GetBoolValueIfFindKey(jsonObject, HAP_MODULE_INFO_DELIVERY_WITH_INSTALL, hapModuleInfo.deliveryWithInstall, false,
-        parseResult);
-    GetBoolValueIfFindKey(jsonObject, HAP_MODULE_INFO_INSTALLATION_FREE, hapModuleInfo.installationFree, false,
-        parseResult);
-    GetBoolValueIfFindKey(jsonObject, HAP_MODULE_INFO_IS_MODULE_JSON, hapModuleInfo.isModuleJson, false, parseResult);
-    GetBoolValueIfFindKey(jsonObject, HAP_MODULE_INFO_IS_STAGE_BASED_MODEL, hapModuleInfo.isStageBasedModel, false,
-        parseResult);
-    GetBoolValueMapIfFindKey(jsonObject, HAP_MODULE_INFO_IS_REMOVABLE, hapModuleInfo.isRemovable, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, HAP_MODULE_INFO_UPGRADE_FLAG, hapModuleInfo.upgradeFlag, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, HAP_MODULE_INFO_MODULE_TYPE, hapModuleInfo.moduleType, false, parseResult);
-    GetObjectValuesIfFindKey(jsonObject, HAP_MODULE_INFO_EXTENSION_INFOS, hapModuleInfo.extensionInfos, false,
-        parseResult);
-    GetObjectValuesIfFindKey(jsonObject, HAP_MODULE_INFO_META_DATA, hapModuleInfo.metadata, false, parseResult);
-    GetObjectValuesIfFindKey(jsonObject, HAP_MODULE_INFO_DEPENDENCIES, hapModuleInfo.dependencies, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, HAP_MODULE_INFO_COMPILE_MODE, hapModuleInfo.compileMode, false, parseResult);
-    GetObjectValueIfFindKey(jsonObject, HAP_MODULE_INFO_HQF_INFO, hapModuleInfo.hqfInfo, false, parseResult);
-    GetBoolValueIfFindKey(jsonObject, HAP_MODULE_INFO_IS_LIB_ISOLATED, hapModuleInfo.isLibIsolated, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_NATIVE_LIBRARY_PATH, hapModuleInfo.nativeLibraryPath, false,
-        parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_CPU_ABI, hapModuleInfo.cpuAbi, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_MODULE_SOURCE_DIR, hapModuleInfo.moduleSourceDir, false,
-        parseResult);
-    GetObjectValuesIfFindKey(jsonObject, HAP_OVERLAY_MODULE_INFO, hapModuleInfo.overlayModuleInfos, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, HAP_MODULE_INFO_ATOMIC_SERVICE_MODULE_TYPE,
-        hapModuleInfo.atomicServiceModuleType, false, parseResult);
-    GetObjectValuesIfFindKey(jsonObject, HAP_MODULE_INFO_PRELOADS, hapModuleInfo.preloads, false, parseResult);
-    GetObjectValuesIfFindKey(jsonObject, HAP_MODULE_INFO_PROXY_DATAS, hapModuleInfo.proxyDatas, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_BUILD_HASH, hapModuleInfo.buildHash, false, parseResult);
-    GetNumberValueIfFindKey(jsonObject, HAP_MODULE_INFO_ISOLATION_MODE, hapModuleInfo.isolationMode, false,
-        parseResult);
-    GetNumberValueIfFindKey(jsonObject, HAP_MODULE_INFO_AOT_COMPILE_STATUS, hapModuleInfo.aotCompileStatus, false,
-        parseResult);
-    GetBoolValueIfFindKey(jsonObject, HAP_MODULE_INFO_COMPRESS_NATIVE_LIBS, hapModuleInfo.compressNativeLibs, false,
-        parseResult);
-    GetStringValuesIfFindKey(jsonObject, HAP_MODULE_INFO_NATIVE_LIBRARY_FILE_NAMES,
-        hapModuleInfo.nativeLibraryFileNames, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_FILE_CONTEXT_MENU, hapModuleInfo.fileContextMenu, false,
-        parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_ROUTER_MAP, hapModuleInfo.routerMap, false, parseResult);
-    GetObjectValuesIfFindKey(jsonObject, HAP_MODULE_INFO_ROUTER_ARRAY, hapModuleInfo.routerArray, false, parseResult);
-    GetObjectValuesIfFindKey(jsonObject, HAP_MODULE_INFO_APP_ENVIRONMENTS, hapModuleInfo.appEnvironments, false,
-        parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_PACKAGE_NAME, hapModuleInfo.packageName, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_ABILITY_SRC_ENTRY_DELEGATOR, hapModuleInfo.abilitySrcEntryDelegator,
-        false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_ABILITY_STAGE_SRC_ENTRY_DELEGATOR,
-        hapModuleInfo.abilityStageSrcEntryDelegator, false, parseResult);
-    GetStringValueIfFindKey(jsonObject, HAP_MODULE_INFO_APP_STARTUP, hapModuleInfo.appStartup, false, parseResult);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_NAME,
+        hapModuleInfo.name,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_PACKAGE,
+        hapModuleInfo.package,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        Constants::MODULE_NAME,
+        hapModuleInfo.moduleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_DESCRIPTION,
+        hapModuleInfo.description,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_DESCRIPTION_ID,
+        hapModuleInfo.descriptionId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_ICON_PATH,
+        hapModuleInfo.iconPath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_ICON_ID,
+        hapModuleInfo.iconId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_LABEL,
+        hapModuleInfo.label,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_LABEL_ID,
+        hapModuleInfo.labelId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_BACKGROUND_IMG,
+        hapModuleInfo.backgroundImg,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_MAIN_ABILITY,
+        hapModuleInfo.mainAbility,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_SRC_PATH,
+        hapModuleInfo.srcPath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_HASH_VALUE,
+        hapModuleInfo.hashValue,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_HAP_PATH,
+        hapModuleInfo.hapPath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_SUPPORTED_MODES,
+        hapModuleInfo.supportedModes,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_REQ_CAPABILITIES,
+        hapModuleInfo.reqCapabilities,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_DEVICE_TYPES,
+        hapModuleInfo.deviceTypes,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<std::vector<AbilityInfo>>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_ABILITY_INFOS,
+        hapModuleInfo.abilityInfos,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<ModuleColorMode>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_COLOR_MODE,
+        hapModuleInfo.colorMode,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        Constants::BUNDLE_NAME,
+        hapModuleInfo.bundleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_MAIN_ELEMENTNAME,
+        hapModuleInfo.mainElementName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_PAGES,
+        hapModuleInfo.pages,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_SYSTEM_THEME,
+        hapModuleInfo.systemTheme,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_PROCESS,
+        hapModuleInfo.process,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_RESOURCE_PATH,
+        hapModuleInfo.resourcePath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_SRC_ENTRANCE,
+        hapModuleInfo.srcEntrance,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_UI_SYNTAX,
+        hapModuleInfo.uiSyntax,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_VIRTUAL_MACHINE,
+        hapModuleInfo.virtualMachine,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_DELIVERY_WITH_INSTALL,
+        hapModuleInfo.deliveryWithInstall,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_INSTALLATION_FREE,
+        hapModuleInfo.installationFree,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_IS_MODULE_JSON,
+        hapModuleInfo.isModuleJson,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_IS_STAGE_BASED_MODEL,
+        hapModuleInfo.isStageBasedModel,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::map<std::string, bool>>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_IS_REMOVABLE,
+        hapModuleInfo.isRemovable,
+        JsonType::OBJECT,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_UPGRADE_FLAG,
+        hapModuleInfo.upgradeFlag,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<ModuleType>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_MODULE_TYPE,
+        hapModuleInfo.moduleType,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<ExtensionAbilityInfo>>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_EXTENSION_INFOS,
+        hapModuleInfo.extensionInfos,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<std::vector<Metadata>>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_META_DATA,
+        hapModuleInfo.metadata,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<std::vector<Dependency>>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_DEPENDENCIES,
+        hapModuleInfo.dependencies,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<CompileMode>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_COMPILE_MODE,
+        hapModuleInfo.compileMode,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<HqfInfo>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_HQF_INFO,
+        hapModuleInfo.hqfInfo,
+        JsonType::OBJECT,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_IS_LIB_ISOLATED,
+        hapModuleInfo.isLibIsolated,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_NATIVE_LIBRARY_PATH,
+        hapModuleInfo.nativeLibraryPath,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_CPU_ABI,
+        hapModuleInfo.cpuAbi,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_MODULE_SOURCE_DIR,
+        hapModuleInfo.moduleSourceDir,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<OverlayModuleInfo>>(jsonObject,
+        jsonObjectEnd,
+        HAP_OVERLAY_MODULE_INFO,
+        hapModuleInfo.overlayModuleInfos,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<AtomicServiceModuleType>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_ATOMIC_SERVICE_MODULE_TYPE,
+        hapModuleInfo.atomicServiceModuleType,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<PreloadItem>>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_PRELOADS,
+        hapModuleInfo.preloads,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<std::vector<ProxyData>>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_PROXY_DATAS,
+        hapModuleInfo.proxyDatas,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_BUILD_HASH,
+        hapModuleInfo.buildHash,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<IsolationMode>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_ISOLATION_MODE,
+        hapModuleInfo.isolationMode,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<AOTCompileStatus>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_AOT_COMPILE_STATUS,
+        hapModuleInfo.aotCompileStatus,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<bool>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_COMPRESS_NATIVE_LIBS,
+        hapModuleInfo.compressNativeLibs,
+        JsonType::BOOLEAN,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_NATIVE_LIBRARY_FILE_NAMES,
+        hapModuleInfo.nativeLibraryFileNames,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_FILE_CONTEXT_MENU,
+        hapModuleInfo.fileContextMenu,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_ROUTER_MAP,
+        hapModuleInfo.routerMap,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<RouterItem>>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_ROUTER_ARRAY,
+        hapModuleInfo.routerArray,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<std::vector<AppEnvironment>>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_APP_ENVIRONMENTS,
+        hapModuleInfo.appEnvironments,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::OBJECT);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_PACKAGE_NAME,
+        hapModuleInfo.packageName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_ABILITY_SRC_ENTRY_DELEGATOR,
+        hapModuleInfo.abilitySrcEntryDelegator,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_ABILITY_STAGE_SRC_ENTRY_DELEGATOR,
+        hapModuleInfo.abilityStageSrcEntryDelegator,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        HAP_MODULE_INFO_APP_STARTUP,
+        hapModuleInfo.appStartup,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "HapModuleInfo error:%{public}d", parseResult);
     }

@@ -23,6 +23,7 @@
 #undef protected
 
 #include "auto_startup_info.h"
+#include "cJSON.h"
 #include "json_utils.h"
 #include "types.h"
 using namespace testing;
@@ -46,6 +47,17 @@ void AbilityAutoStartupDataManagerTest::TearDownTestCase() {}
 void AbilityAutoStartupDataManagerTest::SetUp() {}
 
 void AbilityAutoStartupDataManagerTest::TearDown() {}
+
+std::string JsonToString(cJSON *jsonObject)
+{
+    if (jsonObject == nullptr) {
+        return "";
+    }
+    char *str = cJSON_PrintUnformatted(jsonObject);
+    std::string jsonStr = str == nullptr ? "" : str;
+    cJSON_free(str);
+    return jsonStr;
+}
 
 /**
  * Feature: AbilityAutoStartupDataManager
@@ -626,7 +638,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, ConvertAutoStartupStatusFromValue_30
     cJSON *jsonObject = cJSON_CreateObject();
     EXPECT_NE(jsonObject, nullptr);
     cJSON_AddStringToObject(jsonObject, "test", "test");
-    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
+    std::string jsonStr = JsonToString(jsonObject);
     cJSON_Delete(jsonObject);
     DistributedKv::Value value(jsonStr);
     AutoStartupStatus asustatus;
@@ -1406,7 +1418,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, ConvertAutoStartupInfoFromKey_200, T
     cJSON *jsonObject = cJSON_CreateObject();
     EXPECT_NE(jsonObject, nullptr);
     cJSON_AddStringToObject(jsonObject, "test", "test");
-    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
+    std::string jsonStr = JsonToString(jsonObject);
     cJSON_Delete(jsonObject);
     DistributedKv::Key key(jsonStr);
     AutoStartupInfo info1;
@@ -1463,7 +1475,7 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, ConvertAutoStartupInfoFromValue_200,
     cJSON *jsonObject = cJSON_CreateObject();
     EXPECT_NE(jsonObject, nullptr);
     cJSON_AddStringToObject(jsonObject, "test", "test");
-    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
+    std::string jsonStr = JsonToString(jsonObject);
     cJSON_Delete(jsonObject);
     DistributedKv::Value value(jsonStr);
     AutoStartupInfo info1;

@@ -65,7 +65,6 @@ ohos_fuzztest("ResidentProcessManagerTwelfthFuzzTest") {
     "hisysevent:libhisysevent",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "napi:ace_napi",
     "relational_store:native_dataability",
     "relational_store:native_rdb",

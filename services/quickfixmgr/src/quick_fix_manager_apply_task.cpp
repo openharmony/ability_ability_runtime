@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -531,79 +531,69 @@ void QuickFixManagerApplyTask::RemoveTimeoutTask()
     eventHandler_->RemoveTask(TIMEOUT_TASK_NAME);
 }
 
-bool QuickFixManagerApplyTask::ExtractQuickFixDataFromJson(cJSON *resultJson)
+bool QuickFixManagerApplyTask::ExtractQuickFixDataFromJson(nlohmann::json& resultJson)
 {
-    cJSON *bundleNameItem = cJSON_GetObjectItem(resultJson, QUICK_FIX_BUNDLE_NAME);
-    if (bundleNameItem == nullptr || !cJSON_IsString(bundleNameItem)) {
+    if (!resultJson.contains(QUICK_FIX_BUNDLE_NAME) || !resultJson.at(QUICK_FIX_BUNDLE_NAME).is_string()) {
         TAG_LOGE(AAFwkTag::QUICKFIX, "Invalid bundleName");
         return false;
     }
-    bundleName_ = bundleNameItem->valuestring;
+    bundleName_ = resultJson.at(QUICK_FIX_BUNDLE_NAME).get<std::string>();
 
-    cJSON *bundleVersionCodeItem = cJSON_GetObjectItem(resultJson, QUICK_FIX_BUNDLE_VERSION_CODE);
-    if (bundleVersionCodeItem == nullptr || !cJSON_IsNumber(bundleVersionCodeItem)) {
+    if (!resultJson.contains(QUICK_FIX_BUNDLE_VERSION_CODE) ||
+        !resultJson.at(QUICK_FIX_BUNDLE_VERSION_CODE).is_number()) {
         TAG_LOGE(AAFwkTag::QUICKFIX, "Invalid bundle version code");
         return false;
     }
-    bundleVersionCode_ = static_cast<int32_t>(bundleVersionCodeItem->valuedouble);
+    bundleVersionCode_ = resultJson.at(QUICK_FIX_BUNDLE_VERSION_CODE).get<int32_t>();
 
-    cJSON *patchVersionCodeItem = cJSON_GetObjectItem(resultJson, QUICK_FIX_PATCH_VERSION_CODE);
-    if (patchVersionCodeItem == nullptr || !cJSON_IsNumber(patchVersionCodeItem)) {
+    if (!resultJson.contains(QUICK_FIX_PATCH_VERSION_CODE) ||
+        !resultJson.at(QUICK_FIX_PATCH_VERSION_CODE).is_number()) {
         TAG_LOGE(AAFwkTag::QUICKFIX, "Invalid patch version code");
         return false;
     }
-    patchVersionCode_ = static_cast<int32_t>(patchVersionCodeItem->valuedouble);
+    patchVersionCode_ = resultJson.at(QUICK_FIX_PATCH_VERSION_CODE).get<int32_t>();
 
-    cJSON *isSoContainedItem = cJSON_GetObjectItem(resultJson, QUICK_FIX_IS_SO_CONTAINED);
-    if (isSoContainedItem == nullptr || !cJSON_IsBool(isSoContainedItem)) {
+    if (!resultJson.contains(QUICK_FIX_IS_SO_CONTAINED) || !resultJson.at(QUICK_FIX_IS_SO_CONTAINED).is_boolean()) {
         TAG_LOGE(AAFwkTag::QUICKFIX, "Invalid so status");
         return false;
     }
-    isSoContained_ = isSoContainedItem->type == cJSON_True;
+    isSoContained_ = resultJson.at(QUICK_FIX_IS_SO_CONTAINED).get<bool>();
 
-    cJSON *typeItem = cJSON_GetObjectItem(resultJson, QUICK_FIX_TYPE);
-    if (typeItem == nullptr || !cJSON_IsNumber(typeItem)) {
+    if (!resultJson.contains(QUICK_FIX_TYPE) || !resultJson.at(QUICK_FIX_TYPE).is_number()) {
         TAG_LOGE(AAFwkTag::QUICKFIX, "Invalid quickfix type");
         return false;
     }
-    type_ = static_cast<AppExecFwk::QuickFixType>(static_cast<int32_t>(typeItem->valuedouble));
+    type_ = static_cast<AppExecFwk::QuickFixType>(resultJson.at(QUICK_FIX_TYPE).get<int32_t>());
     return true;
 }
 
 bool QuickFixManagerApplyTask::SetQuickFixInfo(const std::shared_ptr<AppExecFwk::QuickFixResult> &result)
 {
-    cJSON *resultJson = cJSON_Parse(result->ToString().c_str());
-    if (resultJson == nullptr) {
+    auto resultJson = nlohmann::json::parse(result->ToString(), nullptr, false);
+    if (resultJson.is_discarded()) {
         TAG_LOGE(AAFwkTag::QUICKFIX, "failed to parse json sting");
         return false;
     }
     if (ExtractQuickFixDataFromJson(resultJson) != true) {
-        cJSON_Delete(resultJson);
         return false;
     }
     if (type_ != AppExecFwk::QuickFixType::PATCH && type_ != AppExecFwk::QuickFixType::HOT_RELOAD) {
         TAG_LOGE(AAFwkTag::QUICKFIX, "quick fix type invalid");
-        cJSON_Delete(resultJson);
         return false;
     }
 
-    cJSON *moduleNameItem = cJSON_GetObjectItem(resultJson, QUICK_FIX_MODULE_NAME);
-    if (moduleNameItem == nullptr || !cJSON_IsArray(moduleNameItem)) {
+    if (!resultJson.contains(QUICK_FIX_MODULE_NAME) || !resultJson.at(QUICK_FIX_MODULE_NAME).is_array()) {
         TAG_LOGE(AAFwkTag::QUICKFIX, "Invalid moduleName");
-        cJSON_Delete(resultJson);
         return false;
     }
     moduleNames_.clear();
-    int size = cJSON_GetArraySize(moduleNameItem);
-    for (int i = 0; i < size; i++) {
-        cJSON *subModuleNameItem = cJSON_GetArrayItem(moduleNameItem, i);
-        if (subModuleNameItem != nullptr && cJSON_IsString(subModuleNameItem)) {
-            std::string moduleName = subModuleNameItem->valuestring;
-            moduleNames_.emplace_back(moduleName);
+    auto size = resultJson[QUICK_FIX_MODULE_NAME].size();
+    for (size_t i = 0; i < size; i++) {
+        if (resultJson[QUICK_FIX_MODULE_NAME][i].is_string()) {
+            moduleNames_.emplace_back(resultJson[QUICK_FIX_MODULE_NAME][i]);
         }
     }
 
-    cJSON_Delete(resultJson);
     TAG_LOGI(AAFwkTag::QUICKFIX, "bundleName: %{public}s, bundleVersion: %{public}d, patchVersion: %{public}d,"
                 "soContained: %{public}d, ""type: %{public}d", bundleName_.c_str(), bundleVersionCode_,
         patchVersionCode_, isSoContained_, static_cast<int32_t>(type_));

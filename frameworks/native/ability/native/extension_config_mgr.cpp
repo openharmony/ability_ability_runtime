@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #include "extension_config_mgr.h"
 
 #include <fstream>
+#include <nlohmann/json.hpp>
 
 #include "app_module_checker.h"
-#include "cJSON.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 
@@ -31,6 +31,7 @@ void ExtensionConfigMgr::Init()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::EXT, "Init begin");
+    // clear cached data
     blocklistConfig_.clear();
     extensionBlocklist_.clear();
 
@@ -41,41 +42,31 @@ void ExtensionConfigMgr::Init()
         TAG_LOGE(AAFwkTag::EXT, "read extension config error");
         return;
     }
-    std::string fileContent((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
-    inFile.close();
-
-    cJSON *extensionConfig = cJSON_Parse(fileContent.c_str());
-    if (extensionConfig == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "extension config json parse error");
+    nlohmann::json extensionConfig;
+    inFile >> extensionConfig;
+    if (extensionConfig.is_discarded()) {
+        TAG_LOGE(AAFwkTag::EXT, "extension config json discarded error");
+        inFile.close();
         return;
     }
-    cJSON *blockListItem = cJSON_GetObjectItem(extensionConfig, ExtensionConfigItem::ITEM_NAME_BLOCKLIST);
-    if (blockListItem == nullptr) {
+    if (!extensionConfig.contains(ExtensionConfigItem::ITEM_NAME_BLOCKLIST)) {
         TAG_LOGE(AAFwkTag::EXT, "extension config file have no blocklist node");
-        cJSON_Delete(extensionConfig);
+        inFile.close();
         return;
     }
+    auto blackList = extensionConfig.at(ExtensionConfigItem::ITEM_NAME_BLOCKLIST);
     std::unordered_set<std::string> currentBlockList;
-    cJSON *childItem = blockListItem->child;
-    while (childItem != nullptr) {
-        if (!cJSON_IsArray(childItem)) {
+    for (const auto& item : blackList.items()) {
+        if (!blackList[item.key()].is_array()) {
             continue;
         }
-        int size = cJSON_GetArraySize(childItem);
-        for (int i = 0; i < size; i++) {
-            cJSON *item = cJSON_GetArrayItem(childItem, i);
-            if (item != nullptr && cJSON_IsString(item)) {
-                std::string value = item->valuestring;
-                currentBlockList.emplace(value);
-            }
+        for (const auto& value : blackList[item.key()]) {
+            currentBlockList.emplace(value.get<std::string>());
         }
-        std::string key = childItem->string == nullptr ? "" : childItem->string;
-        blocklistConfig_.emplace(key, std::move(currentBlockList));
+        blocklistConfig_.emplace(item.key(), std::move(currentBlockList));
         currentBlockList.clear();
-
-        childItem = childItem->next;
     }
-    cJSON_Delete(extensionConfig);
+    inFile.close();
     TAG_LOGD(AAFwkTag::EXT, "Init end");
 }
 
