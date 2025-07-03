@@ -24,8 +24,7 @@
 
 namespace OHOS {
 namespace Rosen {
-struct StartAnimationOptions;
-struct StartAnimationSystemOptions;
+struct WindowCreateParams;
 }
 
 namespace AbilityRuntime {
@@ -61,8 +60,7 @@ public:
     std::shared_ptr<StartWindowOption> startWindowOption = nullptr;
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
     std::string requestId_;
-    std::shared_ptr<Rosen::StartAnimationOptions> animationOptions_ = nullptr;
-    std::shared_ptr<Rosen::StartAnimationSystemOptions> animationSystemOptions_ = nullptr;
+    std::shared_ptr<Rosen::WindowCreateParams> windowCreateParams_ = nullptr;
 
     StartOptions() = default;
     ~StartOptions() = default;
