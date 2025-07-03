@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,15 +60,13 @@ std::string ExtensionConfig::GetExtensionConfigPath() const
 void ExtensionConfig::LoadExtensionConfiguration()
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
-    cJSON *jsonBuf = nullptr;
+    nlohmann::json jsonBuf;
     if (!ReadFileInfoJson(GetExtensionConfigPath().c_str(), jsonBuf)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "parse file failed");
         return;
     }
 
     LoadExtensionConfig(jsonBuf);
-
-    cJSON_Delete(jsonBuf);
 }
 
 int32_t ExtensionConfig::GetExtensionAutoDisconnectTime(const std::string &extensionTypeName)
@@ -112,22 +110,20 @@ bool ExtensionConfig::IsExtensionStartServiceEnable(const std::string &extension
     return EXTENSION_START_SERVICE_ENABLE_FLAG_DEFAULT;
 }
 
-void ExtensionConfig::LoadExtensionConfig(const cJSON *object)
+void ExtensionConfig::LoadExtensionConfig(const nlohmann::json &object)
 {
-    cJSON *itemObject = cJSON_GetObjectItem(object, EXTENSION_CONFIG_NAME);
-    if (itemObject == nullptr || !cJSON_IsArray(itemObject)) {
+    if (!object.contains(EXTENSION_CONFIG_NAME) || !object.at(EXTENSION_CONFIG_NAME).is_array()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "extension config null");
         return;
     }
-    int size = cJSON_GetArraySize(itemObject);
-    for (int i = 0; i < size; i++) {
-        cJSON *jsonObject = cJSON_GetArrayItem(itemObject, i);
-        cJSON *typeNameItem = cJSON_GetObjectItem(jsonObject, EXTENSION_TYPE_NAME);
-        if (typeNameItem == nullptr || !cJSON_IsString(typeNameItem)) {
+
+    for (auto &item : object.at(EXTENSION_CONFIG_NAME).items()) {
+        const nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.contains(EXTENSION_TYPE_NAME) || !jsonObject.at(EXTENSION_TYPE_NAME).is_string()) {
             continue;
         }
         std::lock_guard lock(configMapMutex_);
-        std::string extensionTypeName = typeNameItem->valuestring;
+        std::string extensionTypeName = jsonObject.at(EXTENSION_TYPE_NAME).get<std::string>();
         LoadExtensionAutoDisconnectTime(jsonObject, extensionTypeName);
         bool hasAbilityAccess = LoadExtensionAbilityAccess(jsonObject, extensionTypeName);
         if (!hasAbilityAccess) {
@@ -139,58 +135,59 @@ void ExtensionConfig::LoadExtensionConfig(const cJSON *object)
     }
 }
 
-void ExtensionConfig::LoadExtensionAutoDisconnectTime(const cJSON *object, const std::string &extensionTypeName)
+void ExtensionConfig::LoadExtensionAutoDisconnectTime(const nlohmann::json &object,
+    const std::string &extensionTypeName)
 {
-    cJSON *itemObject = cJSON_GetObjectItem(object, EXTENSION_AUTO_DISCONNECT_TIME);
-    if (itemObject == nullptr || !cJSON_IsNumber(itemObject)) {
+    if (!object.contains(EXTENSION_AUTO_DISCONNECT_TIME) ||
+        !object.at(EXTENSION_AUTO_DISCONNECT_TIME).is_number()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "auto disconnect time config null");
         return;
     }
-    int32_t extensionAutoDisconnectTime = static_cast<int32_t>(itemObject->valuedouble);
+    int32_t extensionAutoDisconnectTime = object.at(EXTENSION_AUTO_DISCONNECT_TIME).get<int32_t>();
     configMap_[extensionTypeName].extensionAutoDisconnectTime = extensionAutoDisconnectTime;
 }
 
-void ExtensionConfig::LoadExtensionThirdPartyAppBlockedList(const cJSON *object, std::string extensionTypeName)
+void ExtensionConfig::LoadExtensionThirdPartyAppBlockedList(const nlohmann::json &object,
+    std::string extensionTypeName)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
-    cJSON *itemObject = cJSON_GetObjectItem(object, EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME);
-    if (itemObject == nullptr || !cJSON_IsBool(itemObject)) {
+    if (!object.contains(EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME) ||
+        !object.at(EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME).is_boolean()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "third Party config null");
         return;
     }
-    bool flag = itemObject->type == cJSON_True;
+    bool flag = object.at(EXTENSION_THIRD_PARTY_APP_BLOCKED_FLAG_NAME).get<bool>();
     configMap_[extensionTypeName].thirdPartyAppEnableFlag = flag;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "The %{public}s extension's third party app blocked flag is %{public}d",
         extensionTypeName.c_str(), flag);
 }
 
-void ExtensionConfig::LoadExtensionServiceBlockedList(const cJSON *object, std::string extensionTypeName)
+void ExtensionConfig::LoadExtensionServiceBlockedList(const nlohmann::json &object, std::string extensionTypeName)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
-    cJSON *startupEnableFlagItem = cJSON_GetObjectItem(object, EXTENSION_SERVICE_STARTUP_ENABLE_FLAG);
-    if (startupEnableFlagItem == nullptr || !cJSON_IsBool(startupEnableFlagItem)) {
+    if (!object.contains(EXTENSION_SERVICE_STARTUP_ENABLE_FLAG) ||
+        !object.at(EXTENSION_SERVICE_STARTUP_ENABLE_FLAG).is_boolean()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "service enable config null");
         return;
     }
-    bool serviceEnableFlag = startupEnableFlagItem->type == cJSON_True;
+    bool serviceEnableFlag = object.at(EXTENSION_SERVICE_STARTUP_ENABLE_FLAG).get<bool>();
     if (!serviceEnableFlag) {
         configMap_[extensionTypeName].serviceEnableFlag = serviceEnableFlag;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s Service startup is blocked.", extensionTypeName.c_str());
         return;
     }
-    cJSON *blockedListNameItem = cJSON_GetObjectItem(object, EXTENSION_SERVICE_BLOCKED_LIST_NAME);
-    if (blockedListNameItem == nullptr || !cJSON_IsArray(blockedListNameItem)) {
+    if (!object.contains(EXTENSION_SERVICE_BLOCKED_LIST_NAME) ||
+        !object.at(EXTENSION_SERVICE_BLOCKED_LIST_NAME).is_array()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "service config null");
         return;
     }
     std::unordered_set<std::string> serviceBlockedList;
-    int size = cJSON_GetArraySize(blockedListNameItem);
-    for (int i = 0; i < size; i++) {
-        cJSON *childItem = cJSON_GetArrayItem(blockedListNameItem, i);
-        if (childItem == nullptr || !cJSON_IsString(childItem)) {
+    for (auto &item : object.at(EXTENSION_SERVICE_BLOCKED_LIST_NAME).items()) {
+        const nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.is_string()) {
             continue;
         }
-        std::string serviceUri = childItem->valuestring;
+        std::string serviceUri = jsonObject.get<std::string>();
         if (CheckExtensionUriValid(serviceUri)) {
             serviceBlockedList.emplace(serviceUri);
         }
@@ -200,17 +197,17 @@ void ExtensionConfig::LoadExtensionServiceBlockedList(const cJSON *object, std::
         extensionTypeName.c_str(), serviceBlockedList.size());
 }
 
-bool ExtensionConfig::LoadExtensionAbilityAccess(const cJSON *object, const std::string &extensionTypeName)
+bool ExtensionConfig::LoadExtensionAbilityAccess(const nlohmann::json &object, const std::string &extensionTypeName)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
-    cJSON *accessJson = cJSON_GetObjectItem(object, ABILITY_ACCESS);
-    if (accessJson == nullptr || !cJSON_IsObject(accessJson)) {
+    if (!object.contains(ABILITY_ACCESS) || !object.at(ABILITY_ACCESS).is_object()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "parse ability_access failed");
         configMap_[extensionTypeName].hasAbilityAccess = false;
         return false;
     }
 
     configMap_[extensionTypeName].hasAbilityAccess = true;
+    const nlohmann::json &accessJson = object.at(ABILITY_ACCESS);
     auto &abilityAccess = configMap_[extensionTypeName].abilityAccess;
     auto &jsonUtils = JsonUtils::GetInstance();
     abilityAccess.thirdPartyAppAccessFlag = jsonUtils.JsonToOptionalBool(accessJson, THIRD_PARTY_APP_ACCESS_FLAG);
@@ -236,52 +233,50 @@ std::string ExtensionConfig::FormatAccessFlag(const std::optional<bool> &flag)
     return flag.value() ? "true" : "false";
 }
 
-void ExtensionConfig::LoadExtensionAllowOrBlockedList(const cJSON *object, const std::string &key,
+void ExtensionConfig::LoadExtensionAllowOrBlockedList(const nlohmann::json &object, const std::string &key,
     std::unordered_set<std::string> &list)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "LoadExtensionAllowOrBlockedList.");
-    cJSON *itemObject = cJSON_GetObjectItem(object, key.c_str());
-    if (itemObject == nullptr || !cJSON_IsArray(itemObject)) {
+    if (!object.contains(key) || !object.at(key).is_array()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s config null", key.c_str());
         return;
     }
     list.clear();
-    int size = cJSON_GetArraySize(itemObject);
-    for (int i = 0; i < size; i++) {
-        cJSON *childItem = cJSON_GetArrayItem(itemObject, i);
-        if (childItem == nullptr || !cJSON_IsString(childItem)) {
+    for (auto &item : object.at(key).items()) {
+        const nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.is_string()) {
             continue;
         }
-        std::string serviceUri = childItem->valuestring;
+        std::string serviceUri = jsonObject.get<std::string>();
         if (CheckExtensionUriValid(serviceUri)) {
             list.emplace(serviceUri);
         }
     }
 }
 
-void ExtensionConfig::LoadExtensionNetworkEnable(const cJSON *object, const std::string &extensionTypeName)
+void ExtensionConfig::LoadExtensionNetworkEnable(const nlohmann::json &object,
+    const std::string &extensionTypeName)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "LoadExtensionNetworkEnable call");
-    cJSON *itemObject = cJSON_GetObjectItem(object, NETWORK_ACCESS_ENABLE_FLAG);
-    if (itemObject == nullptr || !cJSON_IsBool(itemObject)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "network enable flag null");
+    if (!object.contains(NETWORK_ACCESS_ENABLE_FLAG) || !object.at(NETWORK_ACCESS_ENABLE_FLAG).is_boolean()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "network enable flag null");
         return;
     }
-    bool flag = itemObject->type == cJSON_True;
+    bool flag = object.at(NETWORK_ACCESS_ENABLE_FLAG).get<bool>();
     configMap_[extensionTypeName].networkEnableFlag = flag;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "The %{public}s extension's network enable flag is %{public}d",
         extensionTypeName.c_str(), flag);
 }
 
-void ExtensionConfig::LoadExtensionSAEnable(const cJSON *object, const std::string &extensionTypeName)
+void ExtensionConfig::LoadExtensionSAEnable(const nlohmann::json &object,
+    const std::string &extensionTypeName)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "LoadExtensionSAEnable call");
-    cJSON *itemObject = cJSON_GetObjectItem(object, SA_ACCESS_ENABLE_FLAG);
-    if (itemObject == nullptr || !cJSON_IsBool(itemObject)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "sa enable flag null");
+    if (!object.contains(SA_ACCESS_ENABLE_FLAG) || !object.at(SA_ACCESS_ENABLE_FLAG).is_boolean()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "sa enable flag null");
         return;
     }
-    bool flag = itemObject->type == cJSON_True;
+    bool flag = object.at(SA_ACCESS_ENABLE_FLAG).get<bool>();
     configMap_[extensionTypeName].saEnableFlag = flag;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "The %{public}s extension's sa enable flag is %{public}d",
         extensionTypeName.c_str(), flag);
@@ -413,7 +408,7 @@ bool ExtensionConfig::IsExtensionSAEnable(const std::string &extensionTypeName)
     return EXTENSION_SA_ENABLE_FLAG_DEFAULT;
 }
 
-bool ExtensionConfig::ReadFileInfoJson(const std::string &filePath, cJSON *&jsonBuf)
+bool ExtensionConfig::ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf)
 {
     if (access(filePath.c_str(), F_OK) != 0) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s, not existed", filePath.c_str());
@@ -439,11 +434,9 @@ bool ExtensionConfig::ReadFileInfoJson(const std::string &filePath, cJSON *&json
     }
 
     in.seekg(0, std::ios::beg);
-    std::string fileContent((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    jsonBuf = nlohmann::json::parse(in, nullptr, false);
     in.close();
-
-    jsonBuf = cJSON_Parse(fileContent.c_str());
-    if (jsonBuf == nullptr) {
+    if (jsonBuf.is_discarded()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "bad profile file");
         return false;
     }

@@ -79,6 +79,7 @@ ohos_unittest("ability_permission_util_test") {
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_mgr",
     "memory_utils:libmeminfo",
     "napi:ace_napi",

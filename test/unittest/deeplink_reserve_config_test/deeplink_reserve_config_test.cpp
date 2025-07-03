@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,7 +56,7 @@ HWTEST_F(DeepLinkReserveConfigTest, AaFwk_DeepLinkReserveConfigTest_0200, TestSi
 {
     GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfigTest_0200 start";
     DeepLinkReserveConfig deepLinkReserveConfig;
-    const std::string jsonStr = R"(
+    const nlohmann::json DEFAULT_CONFIG = R"(
         {
             "deepLinkReservedUri": [
                 {
@@ -76,14 +76,12 @@ HWTEST_F(DeepLinkReserveConfigTest, AaFwk_DeepLinkReserveConfigTest_0200, TestSi
                 }
             ]
         }
-    )";
-    cJSON *DEFAULT_CONFIG = cJSON_Parse(jsonStr.c_str());
+    )"_json;
     deepLinkReserveConfig.LoadReservedUriList(DEFAULT_CONFIG);
     std::string linkString = "http://www.xxx.com:80/pathRegex";
     std::string bundleName = "just a test";
     auto ans = deepLinkReserveConfig.IsLinkReserved(linkString, bundleName);
     EXPECT_EQ(ans, true);
-    cJSON_Delete(DEFAULT_CONFIG);
     GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfigTest_0200 end";
 }
 

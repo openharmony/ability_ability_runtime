@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,12 @@
 
 #include "app_native_spawn_manager.h"
 
+#include <nlohmann/json.hpp>
 #include <sys/epoll.h>
 
 #include "ability_manager_errors.h"
 #include "appspawn.h"
 #include "c/executor_task.h"
-#include "cJSON.h"
 #include "ffrt.h"
 #include "ffrt_inner.h"
 #include "hilog_tag_wrapper.h"
@@ -165,33 +165,26 @@ static void ProcessSignalData(void *token, uint32_t event)
     std::string bundleName = "";
     std::string bufferStr = buffer;
     TAG_LOGD(AAFwkTag::APPMGR, "buffer read: %{public}s", bufferStr.c_str());
-    cJSON *jsonObject = cJSON_Parse(bufferStr.c_str());
-    if (jsonObject == nullptr) {
+    nlohmann::json jsonObject = nlohmann::json::parse(bufferStr, nullptr, false);
+    if (jsonObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::APPMGR, "parse json string failed");
         return;
     }
-    cJSON *pidItem = cJSON_GetObjectItem(jsonObject, "pid");
-    cJSON *signalItem = cJSON_GetObjectItem(jsonObject, "signal");
-    cJSON *uidItem = cJSON_GetObjectItem(jsonObject, "uid");
-    cJSON *bundleNameItem = cJSON_GetObjectItem(jsonObject, "bundleName");
-    if (pidItem == nullptr || signalItem == nullptr || uidItem == nullptr || bundleNameItem == nullptr) {
+    if (!jsonObject.contains("pid") || !jsonObject.contains("signal") || !jsonObject.contains("uid")
+        || !jsonObject.contains("bundleName")) {
         TAG_LOGE(AAFwkTag::APPMGR, "info lost!");
-        cJSON_Delete(jsonObject);
         return;
     }
-    if (!cJSON_IsNumber(pidItem) || !cJSON_IsNumber(signalItem) || !cJSON_IsNumber(uidItem) ||
-        !cJSON_IsString(bundleNameItem)) {
+    if (!jsonObject["pid"].is_number_integer() || !jsonObject["signal"].is_number_integer() ||
+        !jsonObject["uid"].is_number_integer() || !jsonObject["bundleName"].is_string()) {
         TAG_LOGE(AAFwkTag::APPMGR, "info type err!");
-        cJSON_Delete(jsonObject);
         return;
     }
 
-    pid = static_cast<int32_t>(pidItem->valuedouble);
-    signal = static_cast<int32_t>(signalItem->valuedouble);
-    uid = static_cast<int32_t>(uidItem->valuedouble);
-    bundleName = bundleNameItem->valuestring;
-    cJSON_Delete(jsonObject);
-
+    pid = jsonObject["pid"];
+    signal = jsonObject["signal"];
+    uid = jsonObject["uid"];
+    bundleName = jsonObject["bundleName"];
     TAG_LOGI(AAFwkTag::APPMGR, "pid:%{public}d, signal:%{public}d, uid:%{public}d, bundleName:%{public}s",
         pid, signal, uid, bundleName.c_str());
     AppNativeSpawnManager::GetInstance().NotifyChildProcessExitTask(pid, signal, bundleName);

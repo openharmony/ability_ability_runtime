@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 
 #include <unistd.h>
 
-#include "cJSON.h"
 #include "hilog_tag_wrapper.h"
 #include "json_utils.h"
 
@@ -351,17 +350,12 @@ int32_t AbilityKeepAliveDataManager::DeleteKeepAliveDataWithSetterId(const KeepA
 
 DistributedKv::Value AbilityKeepAliveDataManager::ConvertKeepAliveStatusToValue(const KeepAliveInfo &info)
 {
-    cJSON *jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "create jsonObject failed");
-        return DistributedKv::Value();
-    }
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_SETTER.c_str(), static_cast<double>(info.setter));
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_SETTERID.c_str(), static_cast<double>(info.setterId));
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_POLICY.c_str(), static_cast<double>(info.policy));
-    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-    cJSON_Delete(jsonObject);
-    DistributedKv::Value value(jsonStr);
+    nlohmann::json jsonObject = nlohmann::json {
+        { JSON_KEY_SETTER, info.setter },
+        { JSON_KEY_SETTERID, info.setterId },
+        { JSON_KEY_POLICY, info.policy },
+    };
+    DistributedKv::Value value(jsonObject.dump());
     TAG_LOGD(AAFwkTag::KEEP_ALIVE, "value: %{public}s", value.ToString().c_str());
     return value;
 }
@@ -369,42 +363,33 @@ DistributedKv::Value AbilityKeepAliveDataManager::ConvertKeepAliveStatusToValue(
 void AbilityKeepAliveDataManager::ConvertKeepAliveStatusFromValue(const DistributedKv::Value &value,
     KeepAliveStatus &status)
 {
-    cJSON *jsonObject = cJSON_Parse(value.ToString().c_str());
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "parse jsonObject failed");
+    nlohmann::json jsonObject = nlohmann::json::parse(value.ToString(), nullptr, false);
+    if (jsonObject.is_discarded()) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "parse jsonObject fail");
         return;
     }
-    cJSON *setterItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_SETTER.c_str());
-    if (setterItem != nullptr && cJSON_IsNumber(setterItem)) {
-        status.setter = static_cast<KeepAliveSetter>(setterItem->valuedouble);
+    if (jsonObject.contains(JSON_KEY_SETTER) && jsonObject[JSON_KEY_SETTER].is_number()) {
+        status.setter = KeepAliveSetter(jsonObject.at(JSON_KEY_SETTER).get<int32_t>());
     }
-    cJSON *setterIdItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_SETTERID.c_str());
-    if (setterIdItem != nullptr && cJSON_IsNumber(setterIdItem)) {
-        status.setterId = static_cast<int32_t>(setterIdItem->valuedouble);
+    if (jsonObject.contains(JSON_KEY_SETTERID) && jsonObject[JSON_KEY_SETTERID].is_number()) {
+        status.setterId = jsonObject.at(JSON_KEY_SETTERID).get<int32_t>();
     }
-    cJSON *policyItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_POLICY.c_str());
-    if (policyItem != nullptr && cJSON_IsNumber(policyItem)) {
-        status.policy = static_cast<KeepAlivePolicy>(policyItem->valuedouble);
+    if (jsonObject.contains(JSON_KEY_POLICY) && jsonObject[JSON_KEY_POLICY].is_number()) {
+        status.policy = KeepAlivePolicy(jsonObject.at(JSON_KEY_POLICY).get<int32_t>());
     }
-    cJSON_Delete(jsonObject);
 }
 
 DistributedKv::Key AbilityKeepAliveDataManager::ConvertKeepAliveDataToKey(const KeepAliveInfo &info)
 {
-    cJSON *jsonObject = cJSON_CreateObject();
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "create jsonObject failed");
-        return DistributedKv::Key();
-    }
-    cJSON_AddStringToObject(jsonObject, JSON_KEY_BUNDLE_NAME.c_str(), info.bundleName.c_str());
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_USERID.c_str(), static_cast<double>(info.userId));
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_APP_TYPE.c_str(), static_cast<double>(info.appType));
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_SETTER.c_str(), static_cast<double>(info.setter));
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_SETTERID.c_str(), static_cast<double>(info.setterId));
-    cJSON_AddNumberToObject(jsonObject, JSON_KEY_POLICY.c_str(), static_cast<double>(info.policy));
-    std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-    cJSON_Delete(jsonObject);
-    DistributedKv::Key key(jsonStr);
+    nlohmann::json jsonObject = nlohmann::json {
+        { JSON_KEY_BUNDLE_NAME, info.bundleName },
+        { JSON_KEY_USERID, info.userId },
+        { JSON_KEY_APP_TYPE, info.appType },
+        { JSON_KEY_SETTER, info.setter },
+        { JSON_KEY_SETTERID, info.setterId },
+        { JSON_KEY_POLICY, info.policy },
+    };
+    DistributedKv::Key key(jsonObject.dump());
     TAG_LOGD(AAFwkTag::KEEP_ALIVE, "key: %{public}s", key.ToString().c_str());
     return key;
 }
@@ -412,84 +397,81 @@ DistributedKv::Key AbilityKeepAliveDataManager::ConvertKeepAliveDataToKey(const 
 KeepAliveInfo AbilityKeepAliveDataManager::ConvertKeepAliveInfoFromKey(const DistributedKv::Key &key)
 {
     KeepAliveInfo info;
-    cJSON *jsonObject = cJSON_Parse(key.ToString().c_str());
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "parse jsonObject failed");
+    nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
+    if (jsonObject.is_discarded()) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "parse jsonObject fail");
         return info;
     }
-    cJSON *bundleNameItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_BUNDLE_NAME.c_str());
-    if (bundleNameItem != nullptr && cJSON_IsString(bundleNameItem)) {
-        info.bundleName = bundleNameItem->valuestring;
+
+    if (jsonObject.contains(JSON_KEY_BUNDLE_NAME) && jsonObject[JSON_KEY_BUNDLE_NAME].is_string()) {
+        info.bundleName = jsonObject.at(JSON_KEY_BUNDLE_NAME).get<std::string>();
     }
-    cJSON *userIdItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_USERID.c_str());
-    if (userIdItem != nullptr && cJSON_IsNumber(userIdItem)) {
-        info.userId = static_cast<int32_t>(userIdItem->valuedouble);
+
+    if (jsonObject.contains(JSON_KEY_USERID) && jsonObject[JSON_KEY_USERID].is_number()) {
+        info.userId = jsonObject.at(JSON_KEY_USERID).get<int32_t>();
     }
-    cJSON *appTypeItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_APP_TYPE.c_str());
-    if (appTypeItem != nullptr && cJSON_IsNumber(appTypeItem)) {
-        info.appType = static_cast<KeepAliveAppType>(static_cast<int32_t>(appTypeItem->valuedouble));
+
+    if (jsonObject.contains(JSON_KEY_APP_TYPE) && jsonObject[JSON_KEY_APP_TYPE].is_number()) {
+        info.appType = KeepAliveAppType(jsonObject.at(JSON_KEY_APP_TYPE).get<int32_t>());
     }
-    cJSON *setterItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_SETTER.c_str());
-    if (setterItem != nullptr && cJSON_IsNumber(setterItem)) {
-        info.setter = static_cast<KeepAliveSetter>(static_cast<int32_t>(setterItem->valuedouble));
+
+    if (jsonObject.contains(JSON_KEY_SETTER) && jsonObject[JSON_KEY_SETTER].is_number()) {
+        info.setter = KeepAliveSetter(jsonObject.at(JSON_KEY_SETTER).get<int32_t>());
     }
-    cJSON *setterIdItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_SETTERID.c_str());
-    if (setterIdItem != nullptr && cJSON_IsNumber(setterIdItem)) {
-        info.setterId = static_cast<int32_t>(setterIdItem->valuedouble);
+
+    if (jsonObject.contains(JSON_KEY_SETTERID) && jsonObject[JSON_KEY_SETTERID].is_number()) {
+        info.setterId = jsonObject.at(JSON_KEY_SETTERID).get<int32_t>();
     }
-    cJSON *policyItem = cJSON_GetObjectItem(jsonObject, JSON_KEY_POLICY.c_str());
-    if (policyItem != nullptr && cJSON_IsNumber(policyItem)) {
-        info.policy = static_cast<KeepAlivePolicy>(policyItem->valuedouble);
+
+    if (jsonObject.contains(JSON_KEY_POLICY) && jsonObject[JSON_KEY_POLICY].is_number()) {
+        info.policy = KeepAlivePolicy(jsonObject.at(JSON_KEY_POLICY).get<int32_t>());
     }
-    cJSON_Delete(jsonObject);
+
     return info;
 }
 
 bool AbilityKeepAliveDataManager::IsEqualSetterId(const DistributedKv::Key &key, const KeepAliveInfo &info)
 {
-    cJSON *jsonObject = cJSON_Parse(key.ToString().c_str());
-    if (jsonObject == nullptr) {
+    nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
+    if (jsonObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::KEEP_ALIVE, "parse jsonObject fail");
         return false;
     }
 
     if (!AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_USERID, U1_USER_ID)) {
-        cJSON_Delete(jsonObject);
         return false;
     }
 
     if (info.setterId != -1 &&
         !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_SETTERID, info.setterId)) {
-        cJSON_Delete(jsonObject);
         return false;
     }
 
-    cJSON_Delete(jsonObject);
     return true;
 }
 
 bool AbilityKeepAliveDataManager::IsEqual(const DistributedKv::Key &key, const KeepAliveInfo &info)
 {
-    cJSON *jsonObject = cJSON_Parse(key.ToString().c_str());
-    if (jsonObject == nullptr) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "parse jsonObject failed");
+    nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
+    if (jsonObject.is_discarded()) {
+        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "parse jsonObject fail");
         return false;
     }
+
     if (!AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_USERID, info.userId)) {
-        cJSON_Delete(jsonObject);
         return false;
     }
+
     if (!info.bundleName.empty() &&
         !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_BUNDLE_NAME, info.bundleName)) {
-        cJSON_Delete(jsonObject);
         return false;
     }
+
     if (info.appType != KeepAliveAppType::UNSPECIFIED &&
         !AAFwk::JsonUtils::GetInstance().IsEqual(jsonObject, JSON_KEY_APP_TYPE, static_cast<int32_t>(info.appType))) {
-        cJSON_Delete(jsonObject);
         return false;
     }
-    cJSON_Delete(jsonObject);
+
     return true;
 }
 } // namespace AbilityRuntime

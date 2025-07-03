@@ -121,6 +121,7 @@ ohos_shared_library("runtime") {
     "i18n:intl_register",
     "init:syscap_ts",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",

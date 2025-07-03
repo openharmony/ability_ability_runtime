@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,11 +18,11 @@
 
 #include <map>
 #include <mutex>
+#include <nlohmann/json.hpp>
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>
 
-#include "cJSON.h"
 #include "extension_ability_info.h"
 #include "singleton.h"
 
@@ -71,17 +71,17 @@ public:
     bool IsExtensionNetworkEnable(const std::string &extensionTypeName);
     bool IsExtensionSAEnable(const std::string &extensionTypeName);
 private:
-    void LoadExtensionConfig(const cJSON *object);
-    bool ReadFileInfoJson(const std::string &filePath, cJSON *&jsonBuf);
+    void LoadExtensionConfig(const nlohmann::json &object);
+    bool ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf);
 
     std::string GetExtensionConfigPath() const;
-    void LoadExtensionAutoDisconnectTime(const cJSON *object, const std::string &extensionTypeName);
-    void LoadExtensionThirdPartyAppBlockedList(const cJSON *object, std::string extensionTypeName);
-    void LoadExtensionServiceBlockedList(const cJSON *object, std::string extensionTypeNameobject);
-    void LoadExtensionNetworkEnable(const cJSON *object, const std::string &extensionTypeName);
-    void LoadExtensionSAEnable(const cJSON *object, const std::string &extensionTypeName);
-    bool LoadExtensionAbilityAccess(const cJSON *object, const std::string &extensionTypeName);
-    void LoadExtensionAllowOrBlockedList(const cJSON *object, const std::string &key,
+    void LoadExtensionAutoDisconnectTime(const nlohmann::json &object, const std::string &extensionTypeName);
+    void LoadExtensionThirdPartyAppBlockedList(const nlohmann::json &object, std::string extensionTypeName);
+    void LoadExtensionServiceBlockedList(const nlohmann::json &object, std::string extensionTypeNameobject);
+    void LoadExtensionNetworkEnable(const nlohmann::json &object, const std::string &extensionTypeName);
+    void LoadExtensionSAEnable(const nlohmann::json &object, const std::string &extensionTypeName);
+    bool LoadExtensionAbilityAccess(const nlohmann::json &object, const std::string &extensionTypeName);
+    void LoadExtensionAllowOrBlockedList(const nlohmann::json &object, const std::string &key,
         std::unordered_set<std::string> &list);
 
     std::optional<bool> GetSingleAccessFlag(const std::string &extensionTypeName,

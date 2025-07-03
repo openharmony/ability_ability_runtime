@@ -14,8 +14,7 @@
  */
 
 #include "insight_intent_rdb_storage_mgr.h"
-
-#include "json_utils.h"
+#include "nlohmann/json.hpp"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -109,14 +108,12 @@ int32_t InsightRdbStorageMgr::SaveStorageInsightIntentData(const std::string &bu
     for (auto profileInfo : profileInfos.insightIntents) {
         std::string key = std::to_string(userId).append("/").append(bundleName).append("/")
             .append(moduleName).append("/").append(profileInfo.intentName);
-        cJSON *jsonObject = nullptr;
+        nlohmann::json jsonObject;
         if (!ExtractInsightIntentProfile::ToJson(profileInfo, jsonObject)) {
             TAG_LOGE(AAFwkTag::INTENT, "Transform error, key: %{private}s", key.c_str());
             return ERR_INVALID_VALUE;
         }
-        std::string jsonStr = AAFwk::JsonUtils::GetInstance().ToString(jsonObject);
-        cJSON_Delete(jsonObject);
-        bool result = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->InsertData(key, jsonStr);
+        bool result = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->InsertData(key, jsonObject.dump());
         if (!result) {
             TAG_LOGE(AAFwkTag::INTENT, "InsertData error, key: %{private}s", key.c_str());
         }

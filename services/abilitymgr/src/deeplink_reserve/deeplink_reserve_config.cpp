@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,22 +59,18 @@ bool DeepLinkReserveConfig::LoadConfiguration()
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     std::string configPath = GetConfigPath();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Deeplink reserve config path is: %{public}s", configPath.c_str());
-    cJSON *jsonBuf = nullptr;
+    nlohmann::json jsonBuf;
     if (!ReadFileInfoJson(configPath, jsonBuf)) {
-        return false;
-    }
-    if (jsonBuf == nullptr) {
         return false;
     }
     if (!LoadReservedUriList(jsonBuf)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "load fail");
-        cJSON_Delete(jsonBuf);
         return false;
     }
-    cJSON_Delete(jsonBuf);
+
     return true;
 }
-
+   
 bool DeepLinkReserveConfig::IsLinkReserved(const std::string &linkString, std::string &bundleName)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
@@ -178,54 +174,46 @@ bool DeepLinkReserveConfig::IsUriMatched(const ReserveUri &reservedUri, const st
     return false;
 }
 
-void DeepLinkReserveConfig::LoadReservedUrilItem(const cJSON *jsonUriObject, std::vector<ReserveUri> &uriList)
+void DeepLinkReserveConfig::LoadReservedUrilItem(const nlohmann::json &jsonUriObject, std::vector<ReserveUri> &uriList)
 {
     ReserveUri reserveUri;
-    cJSON *schemeNameItem = cJSON_GetObjectItem(jsonUriObject, SCHEME_NAME.c_str());
-    if (schemeNameItem != nullptr && cJSON_IsString(schemeNameItem)) {
-        std::string schemeName = schemeNameItem->valuestring;
+    if (jsonUriObject.contains(SCHEME_NAME) && jsonUriObject.at(SCHEME_NAME).is_string()) {
+        std::string schemeName = jsonUriObject.at(SCHEME_NAME).get<std::string>();
         reserveUri.scheme = schemeName;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "scheme:%{public}s", reserveUri.scheme.c_str());
     }
-    cJSON *hostNameItem = cJSON_GetObjectItem(jsonUriObject, HOST_NAME.c_str());
-    if (hostNameItem != nullptr && cJSON_IsString(hostNameItem)) {
-        std::string hostName = hostNameItem->valuestring;
+    if (jsonUriObject.contains(HOST_NAME) && jsonUriObject.at(HOST_NAME).is_string()) {
+        std::string hostName = jsonUriObject.at(HOST_NAME).get<std::string>();
         reserveUri.host = hostName;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "host:%{public}s", reserveUri.host.c_str());
     }
-    cJSON *portNameItem = cJSON_GetObjectItem(jsonUriObject, PORT_NAME.c_str());
-    if (portNameItem != nullptr && cJSON_IsString(portNameItem)) {
-        std::string portName = portNameItem->valuestring;
+    if (jsonUriObject.contains(PORT_NAME) && jsonUriObject.at(PORT_NAME).is_string()) {
+        std::string portName = jsonUriObject.at(PORT_NAME).get<std::string>();
         reserveUri.port = portName;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "port:%{public}s", reserveUri.port.c_str());
     }
-    cJSON *pathNameItem = cJSON_GetObjectItem(jsonUriObject, PATH_NAME.c_str());
-    if (pathNameItem != nullptr && cJSON_IsString(pathNameItem)) {
-        std::string pathName = pathNameItem->valuestring;
+    if (jsonUriObject.contains(PATH_NAME) && jsonUriObject.at(PATH_NAME).is_string()) {
+        std::string pathName = jsonUriObject.at(PATH_NAME).get<std::string>();
         reserveUri.path = PATH_NAME;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "path:%{public}s", reserveUri.path.c_str());
     }
-    cJSON *pathStartWithItem = cJSON_GetObjectItem(jsonUriObject, PATH_START_WITH_NAME.c_str());
-    if (pathStartWithItem != nullptr && cJSON_IsString(pathStartWithItem)) {
-        std::string pathStartWith = pathStartWithItem->valuestring;
-        reserveUri.pathStartWith = pathStartWith;
+    if (jsonUriObject.contains(PATH_START_WITH_NAME) && jsonUriObject.at(PATH_START_WITH_NAME).is_string()) {
+        std::string pathStartWithName = jsonUriObject.at(PATH_START_WITH_NAME).get<std::string>();
+        reserveUri.pathStartWith = pathStartWithName;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "pathStartWith:%{public}s", reserveUri.pathStartWith.c_str());
     }
-    cJSON *pathRegexNameItem = cJSON_GetObjectItem(jsonUriObject, PATH_REGEX_NAME.c_str());
-    if (pathRegexNameItem != nullptr && cJSON_IsString(pathRegexNameItem)) {
-        std::string pathRegexName = pathRegexNameItem->valuestring;
+    if (jsonUriObject.contains(PATH_REGEX_NAME) && jsonUriObject.at(PATH_REGEX_NAME).is_string()) {
+        std::string pathRegexName = jsonUriObject.at(PATH_REGEX_NAME).get<std::string>();
         reserveUri.pathRegex = pathRegexName;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "pathRegex:%{public}s", reserveUri.pathRegex.c_str());
     }
-    cJSON *typeNameItem = cJSON_GetObjectItem(jsonUriObject, TYPE_NAME.c_str());
-    if (typeNameItem != nullptr && cJSON_IsString(typeNameItem)) {
-        std::string typeName = typeNameItem->valuestring;
+    if (jsonUriObject.contains(TYPE_NAME) && jsonUriObject.at(TYPE_NAME).is_string()) {
+        std::string typeName = jsonUriObject.at(TYPE_NAME).get<std::string>();
         reserveUri.type = typeName;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "type:%{public}s", reserveUri.type.c_str());
     }
-    cJSON *utdNameItem = cJSON_GetObjectItem(jsonUriObject, UTD_NAME.c_str());
-    if (utdNameItem != nullptr && cJSON_IsString(utdNameItem)) {
-        std::string utdName = utdNameItem->valuestring;
+    if (jsonUriObject.contains(UTD_NAME) && jsonUriObject.at(UTD_NAME).is_string()) {
+        std::string utdName = jsonUriObject.at(UTD_NAME).get<std::string>();
         reserveUri.utd = utdName;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "utd:%{public}s", reserveUri.utd.c_str());
     }
@@ -233,43 +221,35 @@ void DeepLinkReserveConfig::LoadReservedUrilItem(const cJSON *jsonUriObject, std
     uriList.emplace_back(reserveUri);
 }
 
-bool DeepLinkReserveConfig::LoadReservedUriList(const cJSON *object)
+bool DeepLinkReserveConfig::LoadReservedUriList(const nlohmann::json &object)
 {
-    cJSON *uriNameItems = cJSON_GetObjectItem(object, DEEPLINK_RESERVED_URI_NAME.c_str());
-    if (uriNameItems == nullptr || !cJSON_IsArray(uriNameItems)) {
+    if (!object.contains(DEEPLINK_RESERVED_URI_NAME) || !object.at(DEEPLINK_RESERVED_URI_NAME).is_array()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "uri config absent");
         return false;
     }
-    int size = cJSON_GetArraySize(uriNameItems);
-    for (int i = 0; i < size; i++) {
-        cJSON *uriNameItem = cJSON_GetArrayItem(uriNameItems, i);
-        if (uriNameItem == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "item is null");
-            return false;
-        }
-        cJSON *bundleNameItem = cJSON_GetObjectItem(uriNameItem, BUNDLE_NAME.c_str());
-        if (bundleNameItem == nullptr || !cJSON_IsString(bundleNameItem)) {
+
+    for (auto &item : object.at(DEEPLINK_RESERVED_URI_NAME).items()) {
+        const nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.contains(BUNDLE_NAME) || !jsonObject.at(BUNDLE_NAME).is_string()) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "reserve bundleName fail");
             return false;
         }
-        cJSON *urisNameItems = cJSON_GetObjectItem(uriNameItem, URIS_NAME.c_str());
-        if (urisNameItems == nullptr || !cJSON_IsArray(urisNameItems)) {
+        if (!jsonObject.contains(URIS_NAME) || !jsonObject.at(URIS_NAME).is_array()) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "reserve uris fail");
             return false;
         }
-        std::string bundleName = bundleNameItem->valuestring;
+        std::string bundleName = jsonObject.at(BUNDLE_NAME).get<std::string>();
         std::vector<ReserveUri> uriList;
-        int uriSize = cJSON_GetArraySize(urisNameItems);
-        for (int j = 0; j < uriSize; j++) {
-            cJSON *urisNameItem = cJSON_GetArrayItem(urisNameItems, j);
-            LoadReservedUrilItem(urisNameItem, uriList);
+        for (auto &uriItem : jsonObject.at(URIS_NAME).items()) {
+            const nlohmann::json& jsonUriObject = uriItem.value();
+            LoadReservedUrilItem(jsonUriObject, uriList);
         }
         deepLinkReserveUris_.insert(std::make_pair(bundleName, uriList));
     }
     return true;
 }
 
-bool DeepLinkReserveConfig::ReadFileInfoJson(const std::string &filePath, cJSON *&jsonBuf)
+bool DeepLinkReserveConfig::ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf)
 {
     if (access(filePath.c_str(), F_OK) != 0) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reserve config absent");
@@ -306,11 +286,9 @@ bool DeepLinkReserveConfig::ReadFileInfoJson(const std::string &filePath, cJSON 
     }
 
     in.seekg(0, std::ios::beg);
-    std::string fileContent((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+    jsonBuf = nlohmann::json::parse(in, nullptr, false);
     in.close();
-
-    jsonBuf = cJSON_Parse(fileContent.c_str());
-    if (jsonBuf == nullptr) {
+    if (jsonBuf.is_discarded()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "bad profile file");
         return false;
     }

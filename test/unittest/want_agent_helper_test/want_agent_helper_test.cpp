@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -771,57 +771,46 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_3500, Function | MediumTest | Leve
 HWTEST_F(WantAgentHelperTest, WantAgentHelper_3600, Function | MediumTest | Level1)
 {
     std::vector<WantAgentConstant::Flags> flagsVec;
+    nlohmann::json jsonObject;
 
-    cJSON *jsonObject = cJSON_CreateObject();
-    cJSON_AddNumberToObject(jsonObject, "flags", static_cast<double>(-1));
+    jsonObject["flags"] = -1;
     flagsVec = WantAgentHelper::ParseFlags(jsonObject);
     EXPECT_EQ(flagsVec.size(), 0);
-    cJSON_Delete(jsonObject);
-    jsonObject = nullptr;
 
-    jsonObject = cJSON_CreateObject();
-    cJSON_AddNumberToObject(jsonObject, "flags", static_cast<double>(1111000000));
+    jsonObject.clear();
+    jsonObject["flags"] = 1111000000;
     flagsVec = WantAgentHelper::ParseFlags(jsonObject);
     std::vector<WantAgentConstant::Flags>::iterator oneTimeIt = std::find(flagsVec.begin(), flagsVec.end(),
         WantAgentConstant::Flags::ONE_TIME_FLAG);
     EXPECT_EQ(oneTimeIt != flagsVec.end(), true);
-    cJSON_Delete(jsonObject);
-    jsonObject = nullptr;
 
-    jsonObject = cJSON_CreateObject();
-    cJSON_AddNumberToObject(jsonObject, "flags", static_cast<double>(111100000000000));
+    jsonObject.clear();
+    jsonObject["flags"] = 111100000000000;
     flagsVec = WantAgentHelper::ParseFlags(jsonObject);
     std::vector<WantAgentConstant::Flags>::iterator cancelPresentIt = std::find(flagsVec.begin(), flagsVec.end(),
         WantAgentConstant::Flags::CANCEL_PRESENT_FLAG);
     EXPECT_EQ(cancelPresentIt != flagsVec.end(), true);
-    cJSON_Delete(jsonObject);
-    jsonObject = nullptr;
 
-    jsonObject = cJSON_CreateObject();
-    cJSON_AddNumberToObject(jsonObject, "flags", static_cast<double>(111100000000000));
+    jsonObject.clear();
+    jsonObject["flags"] = 111100000000000;
     flagsVec = WantAgentHelper::ParseFlags(jsonObject);
     std::vector<WantAgentConstant::Flags>::iterator updateResentIt = std::find(flagsVec.begin(), flagsVec.end(),
         WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
     EXPECT_EQ(updateResentIt != flagsVec.end(), true);
-    cJSON_Delete(jsonObject);
-    jsonObject = nullptr;
 
-    jsonObject = cJSON_CreateObject();
-    cJSON_AddNumberToObject(jsonObject, "flags", static_cast<double>(111100000000000));
+    jsonObject.clear();
+    jsonObject["flags"] = 111100000000000;
     flagsVec = WantAgentHelper::ParseFlags(jsonObject);
     std::vector<WantAgentConstant::Flags>::iterator constantIt = std::find(flagsVec.begin(), flagsVec.end(),
         WantAgentConstant::Flags::CONSTANT_FLAG);
     EXPECT_EQ(constantIt != flagsVec.end(), true);
-    cJSON_Delete(jsonObject);
-    jsonObject = nullptr;
 
-    jsonObject = cJSON_CreateObject();
-    cJSON_AddNumberToObject(jsonObject, "flags", static_cast<double>(1000000000));
+    jsonObject.clear();
+    jsonObject["flags"] = 1000000000;
     flagsVec = WantAgentHelper::ParseFlags(jsonObject);
     std::vector<WantAgentConstant::Flags>::iterator noBuildIt = std::find(flagsVec.begin(), flagsVec.end(),
         WantAgentConstant::Flags::NO_BUILD_FLAG);
     EXPECT_EQ(noBuildIt != flagsVec.end(), true);
-    cJSON_Delete(jsonObject);
 }
 
 /*

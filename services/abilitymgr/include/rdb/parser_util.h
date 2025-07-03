@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,9 @@
 #ifndef OHOS_ABILITY_RUNTIME_RDB_PARSER_UTIL_H
 #define OHOS_ABILITY_RUNTIME_RDB_PARSER_UTIL_H
 
+#include <nlohmann/json.hpp>
 #include <tuple>
 #include <unordered_map>
-
-#include "cJSON.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -33,8 +32,9 @@ private:
     void ParsePreInstallAbilityConfig(
         const std::string &filePath, std::vector<std::tuple<std::string, std::string, std::string>> &list);
     void GetPreInstallRootDirList(std::vector<std::string> &rootDirList);
-    bool ReadFileIntoJson(const std::string &filePath, cJSON *&jsonBuf);
-    bool FilterInfoFromJson(cJSON *jsonBuf, std::vector<std::tuple<std::string, std::string, std::string>> &list);
+    bool ReadFileIntoJson(const std::string &filePath, nlohmann::json &jsonBuf);
+    bool FilterInfoFromJson(
+        nlohmann::json &jsonBuf, std::vector<std::tuple<std::string, std::string, std::string>> &list);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
