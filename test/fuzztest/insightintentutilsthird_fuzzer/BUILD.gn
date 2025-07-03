@@ -24,7 +24,10 @@ ohos_fuzztest("InsightIntentUtilsThirdFuzzTest") {
 
   fuzz_config_file = "${ability_runtime_test_path}/fuzztest/insightintentutilsthird_fuzzer"
 
-  include_dirs = [ "${ability_runtime_innerkits_path}/wantagent/include" ]
+  include_dirs = [
+    "${ability_runtime_innerkits_path}/wantagent/include",
+    "${ability_runtime_test_path}/fuzztest/",
+  ]
 
   cflags = [
     "-g",
