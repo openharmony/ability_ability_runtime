@@ -18,6 +18,7 @@
 #include "hilog_tag_wrapper.h"
 #include "sts_app_manager_utils.h"
 #include "ani_enum_convert.h"
+#include "sts_context_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -585,6 +586,7 @@ void EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniEnv)
         delete workContext;
         return;
     }
+    ContextUtil::StsCreateContext(aniEnv, applicationContextCls, applicationContextObject, applicationContext);
     SetAndBindApplicationObject(aniEnv, applicationContextObject, applicationContext);
 }
 
