@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,32 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_PRELOAD_SO_STARTUP_TASK_H
-#define OHOS_ABILITY_RUNTIME_PRELOAD_SO_STARTUP_TASK_H
+#ifndef OHOS_ABILITY_RUNTIME_PRELOAD_SYSTEM_SO_STARTUP_TASK_H
+#define OHOS_ABILITY_RUNTIME_PRELOAD_SYSTEM_SO_STARTUP_TASK_H
 
-#include "app_startup_task.h"
+#include <string>
+#include "preload_so_startup_task.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-class PreloadSoStartupTask : public AppStartupTask {
+class PreloadSystemSoStartupTask : public PreloadSoStartupTask {
 public:
     static const std::string TASK_TYPE;
 
-    PreloadSoStartupTask(const std::string& name, const std::string& ohmUrl, const std::string& path = "");
+    PreloadSystemSoStartupTask(const std::string& name, const std::string& ohmUrl);
 
-    ~PreloadSoStartupTask() override;
+    ~PreloadSystemSoStartupTask() override;
 
     const std::string &GetType() const override;
 
     int32_t RunTaskInit(std::unique_ptr<StartupTaskResultCallback> callback) override;
-
-    int32_t RunTaskOnDependencyCompleted(const std::string& dependencyName,
-        const std::shared_ptr<StartupTaskResult>& result) override;
-
-protected:
-    std::string ohmUrl_;
-    std::string path_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_PRELOAD_SO_STARTUP_TASK_H
+#endif // OHOS_ABILITY_RUNTIME_PRELOAD_SYSTEM_SO_STARTUP_TASK_H
