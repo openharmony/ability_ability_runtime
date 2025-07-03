@@ -13,25 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_OHOS_ABILITY_RUNTIME_OS_ACCOUNT_MANAGER_WRAPPER_H
-#define MOCK_OHOS_ABILITY_RUNTIME_OS_ACCOUNT_MANAGER_WRAPPER_H
-
-#include "errors.h"
-#include "singleton.h"
-#include "oh_mock_utils.h"
+#include "ability_manager_service.h"
 
 namespace OHOS {
-namespace AppExecFwk {
-class OsAccountManagerWrapper : public DelayedSingleton<OsAccountManagerWrapper> {
-public:
-    ErrCode GetOsAccountLocalIdFromUid(const int32_t uid, int32_t &id)
-    {
-        return 0;
-    }
+namespace AAFwk {
+AbilityManagerService::AbilityManagerService() {}
 
-    OH_MOCK_METHOD_WITH_OUTPUT_1(ErrCode, isOsAccountExists, OsAccountManagerWrapper,
-        IsOsAccountExists, const int, bool& isOsAccountExists);
-};
-} // namespace AppExecFwk
-} // namespace OHOS
-#endif
+AbilityManagerService::~AbilityManagerService() {}
+}
+}

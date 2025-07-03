@@ -22,9 +22,11 @@
 #include "ability_manager_errors.h"
 #include "app_scheduler.h"
 #include "mission_list_manager_interface.h"
+#include "oh_mock_utils.h"
 #include "parameters.h"
 #include "refbase.h"
 #include "singleton.h"
+#include "task_handler_wrap.h"
 #include "user_callback.h"
 
 namespace OHOS {
@@ -35,26 +37,16 @@ constexpr int32_t U1_USER_ID = 1;
 class AbilityManagerService : public std::enable_shared_from_this<AbilityManagerService> {
     DECLARE_DELAYED_SINGLETON(AbilityManagerService)
 public:
-    std::shared_ptr<TaskHandlerWrap> GetTaskHandler()
-    {
-        return nullptr;
-    }
+    OH_MOCK_METHOD(std::shared_ptr<TaskHandlerWrap>, AbilityManagerService, GetTaskHandler);
+    OH_MOCK_METHOD(std::shared_ptr<MissionListWrap>, AbilityManagerService, GetMissionListWrap);
 
     void RemoveLauncherDeathRecipient(int32_t userId) {}
     void StartFreezingScreen() {}
     void StopFreezingScreen() {}
     void UserStarted(int32_t userId) {}
 
-    std::shared_ptr<MissionListWrap> GetMissionListWrap()
-    {
-        return nullptr;
-    }
-
-    int SwitchToUser(int32_t oldUserId, int32_t userId, sptr<IUserCallback> callback, bool isAppRecovery = false)
-    {
-        return 0;
-    }
-
+    OH_MOCK_METHOD(int, AbilityManagerService, SwitchToUser, int32_t, int32_t,
+        sptr<AAFwk::IUserCallback>, bool isAppRecovery = false);
     void ClearUserData(int32_t userId) {}
 };
 }  // namespace AAFwk
