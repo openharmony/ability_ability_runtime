@@ -43,7 +43,8 @@ public:
     
     virtual void OnAbilitysDebugStarted(const std::vector<sptr<IRemoteObject>> &tokens) override{};
     virtual void OnAbilitysDebugStoped(const std::vector<sptr<IRemoteObject>> &tokens) override{};
-    virtual void OnAbilitysAssertDebugChange(const std::vector<sptr<IRemoteObject>> &tokens, bool isAssertDebug) override{};
+    virtual void OnAbilitysAssertDebugChange(
+        const std::vector<sptr<IRemoteObject>> &tokens, bool isAssertDebug) override{};
 };
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
