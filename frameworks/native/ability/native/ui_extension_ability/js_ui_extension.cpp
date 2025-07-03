@@ -836,6 +836,7 @@ napi_value JsUIExtension::CallObjectMethod(const char *name, napi_value const *a
         return handleEscape.Escape(result);
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "JsUIExtension CallFunction(%{public}s), success", name);
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     napi_call_function(env, obj, method, argc, argv, nullptr);
     return nullptr;
 }
