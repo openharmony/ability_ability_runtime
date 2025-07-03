@@ -72,7 +72,7 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     std::shared_ptr<AbilityAutoStartupDataManager> dataMgr = std::make_shared<AbilityAutoStartupDataManager>();
     dataMgr->CheckKvStore();
     AutoStartupInfo info1;
-    info1.currentUserId = int32Param;
+    info1.setterUserId = int32Param;
     info1.userId = int32Param;
     dataMgr->InsertAutoStartupData(info1, boolParam, boolParam); // branch info1.bundleName empty
     info1.bundleName = "com.example.fuzzTest";
@@ -83,7 +83,7 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     dataMgr->InsertAutoStartupData(info1, boolParam, boolParam); // branch info1.accestoken empty
 
     AutoStartupInfo info2;
-    info2.currentUserId = int32Param;
+    info2.setterUserId = int32Param;
     info2.userId = int32Param;
     dataMgr->UpdateAutoStartupData(info2, boolParam, boolParam); // branch info2.bundleName empty
     info2.bundleName = "com.example.fuzzTest";
@@ -94,7 +94,7 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     dataMgr->UpdateAutoStartupData(info2, boolParam, boolParam); // branch info2.accestoken empty
 
     AutoStartupInfo info3;
-    info3.currentUserId = int32Param;
+    info3.setterUserId = int32Param;
     info3.userId = int32Param;
     dataMgr->UpdateAutoStartupData(info3, boolParam, boolParam); // branch info3.bundleName empty
     info3.bundleName = "com.example.fuzzTest";
@@ -107,7 +107,7 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
     dataMgr->DeleteAutoStartupData(stringParam, int32Param); // called
 
     AutoStartupInfo info4;
-    info4.currentUserId = int32Param;
+    info4.setterUserId = int32Param;
     info4.userId = int32Param;
     dataMgr->QueryAutoStartupData(info4); // branch info3.bundleName empty
     info4.bundleName = "com.example.fuzzTest";
@@ -119,7 +119,7 @@ void AbilityAutoStartupDataManagerFuzztest1(bool boolParam, std::string &stringP
 
     std::vector<AutoStartupInfo> vecs;
     vecs.emplace_back(info1);
-    dataMgr->QueryAllAutoStartupApplications(vecs, int32Param); // called
+    dataMgr->QueryAllAutoStartupApplications(vecs, int32Param, boolParam); // called
     dataMgr->GetCurrentAppAutoStartupData(stringParam, vecs, stringParam); //called
 }
 
@@ -127,18 +127,22 @@ void AbilityAutoStartupDataManagerFuzztest2(bool boolParam, std::string &stringP
 {
     std::shared_ptr<AbilityAutoStartupDataManager> dataMgr = std::make_shared<AbilityAutoStartupDataManager>();
     AutoStartupInfo info1;
-    info1.currentUserId = int32Param;
+    info1.setterUserId = int32Param;
     info1.userId = int32Param;
+    AutoStartupStatus asustatus;
+    asustatus.isAutoStartup = boolParam;
+    asustatus.isEdmForce = boolParam;
+    asustatus.setterUserId = int32Param;
     dataMgr->ConvertAutoStartupStatusToValue(info1, boolParam, boolParam);
 
     DistributedKv::Value value1(jsonStr1);
-    dataMgr->ConvertAutoStartupStatusFromValue(value1, boolParam, boolParam); // branch json
+    dataMgr->ConvertAutoStartupStatusFromValue(value1, asustatus); // branch json
     DistributedKv::Value value2(jsonStr2);
-    dataMgr->ConvertAutoStartupStatusFromValue(value2, boolParam, boolParam); // branch json
+    dataMgr->ConvertAutoStartupStatusFromValue(value2, asustatus); // branch json
     DistributedKv::Value value3(jsonStr3);
-    dataMgr->ConvertAutoStartupStatusFromValue(value3, boolParam, boolParam); // branch json
+    dataMgr->ConvertAutoStartupStatusFromValue(value3, asustatus); // branch json
     DistributedKv::Value value4(jsonStr4);
-    dataMgr->ConvertAutoStartupStatusFromValue(value4, boolParam, boolParam); // branch discard jsonstr
+    dataMgr->ConvertAutoStartupStatusFromValue(value4, asustatus); // branch discard jsonstr
 }
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)

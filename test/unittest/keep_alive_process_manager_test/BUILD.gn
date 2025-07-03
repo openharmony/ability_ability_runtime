@@ -21,8 +21,9 @@ ohos_unittest("keep_alive_process_manager_test") {
 
   include_dirs = [
     "mock/include",
-    "${ability_runtime_services_path}/abilitymgr/include/utils",
+    "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/abilitymgr/include/keep_alive",
+    "${ability_runtime_services_path}/abilitymgr/include/utils",
   ]
 
   sources = [

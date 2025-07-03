@@ -39,6 +39,7 @@ namespace AAFwk {
 namespace {
     const int32_t USER_ID_U100 = 100;
     const int32_t MIN_DUMP_ARGUMENT_NUM = 2;
+    const int32_t MAX_APP_CLONE_INDEX_NUM = 10000;
 }  // namespace
 
 class MockAbilityToken : public IRemoteStub<IAbilityToken> {
@@ -719,7 +720,7 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_001, TestSize.Leve
     abilityMs->taskHandler_ = taskHandler;
     EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
     AutoStartupInfo autoStartupInfo;
-    autoStartupInfo.abilityName = AbilityRuntime::EXTENSION_TYPE_APP_SERVICE;
+    autoStartupInfo.abilityTypeName = AbilityRuntime::EXTENSION_TYPE_APP_SERVICE;
     std::queue<AutoStartupInfo> infoQueue;
     infoQueue.push(autoStartupInfo);
     abilityMs->StartAutoStartupApps(infoQueue);
@@ -741,7 +742,7 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_002, TestSize.Leve
     abilityMs->taskHandler_ = taskHandler;
     EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
     AutoStartupInfo autoStartupInfo;
-    autoStartupInfo.appCloneIndex = 6;
+    autoStartupInfo.appCloneIndex = MAX_APP_CLONE_INDEX_NUM;
     std::queue<AutoStartupInfo> infoQueue;
     infoQueue.push(autoStartupInfo);
     abilityMs->StartAutoStartupApps(infoQueue);

@@ -23,6 +23,16 @@
 namespace OHOS {
 namespace AbilityRuntime {
 /**
+ * @class AutoStartupSetterType
+ * defines who sets the auto-startup flag for apps.
+ */
+enum class AutoStartupSetterType : int32_t {
+    UNSPECIFIED = -1,
+    SYSTEM = 0,
+    USER = 1,
+};
+
+/**
  * @struct AutoStartupInfo
  * Defines auto startup info.
  */
@@ -31,15 +41,15 @@ public:
     int32_t appCloneIndex = 0;
     int32_t userId = -1;
     int32_t setterUserId = -1;
-    int32_t currentUserId = -1;
     bool canUserModify = false;
-    // Only use in count, don't mashall and unmashall
-    int32_t retryCount = 0;
     std::string bundleName;
     std::string abilityName;
     std::string moduleName;
     std::string abilityTypeName;
     std::string accessTokenId;
+    // Only use, don't marshalling and unmarshalling
+    int32_t retryCount = 0;
+    AutoStartupSetterType setterType = AutoStartupSetterType::UNSPECIFIED;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
@@ -49,6 +59,8 @@ public:
 struct AutoStartupStatus {
     bool isAutoStartup = false;
     bool isEdmForce = false;
+    int32_t setterUserId = -1;
+    AutoStartupSetterType setterType = AutoStartupSetterType::UNSPECIFIED;
     int32_t code = -1;
 };
 
@@ -57,7 +69,6 @@ struct AutoStartupAbilityData {
     std::string accessTokenId;
     int32_t userId = -1;
     int32_t setterUserId = -1;
-    int32_t currentUserId = -1;
     bool isVisible = false;
 };
 } // namespace AbilityRuntime
