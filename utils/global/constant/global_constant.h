@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@ constexpr int32_t TIMEOUT_UNIT_TIME = 1000;
 
 constexpr int32_t PREPARE_TERMINATE_TIMEOUT_TIME = 10000;
 constexpr int32_t DEFAULT_FFRT_TASK_TIMEOUT = 60 * 1000 * 1000; // 60s = 60 000 000us
+constexpr int32_t FFRT_TASK_TIMEOUT = 5 * 1000 * 1000;  // 5s
 constexpr const char* LOW_MEMORY_KILL = "LowMemoryKill";
 
 #ifdef SUPPORT_ASAN

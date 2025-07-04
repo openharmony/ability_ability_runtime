@@ -1207,5 +1207,32 @@ HWTEST_F(AbilityManagerClientBranchThirdTest, SetOnNewWantSkipScenarios_0100, Te
     auto result = client_->SetOnNewWantSkipScenarios(callerToken, scenarios);
     EXPECT_EQ(result, ERR_OK);
 }
+
+/**
+ * @tc.name: AbilityManagerClient_NotifyStartupExceptionBySCB_0100
+ * @tc.desc: NotifyStartupExceptionBySCB_0100
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchThirdTest, NotifyStartupExceptionBySCB_0100, TestSize.Level1)
+{
+    auto client = std::make_shared<AbilityManagerClient>();
+    EXPECT_NE(client, nullptr);
+    int32_t requestId = 0;
+    auto result = client->NotifyStartupExceptionBySCB(requestId);
+    EXPECT_EQ(result, ABILITY_SERVICE_NOT_CONNECTED);
+}
+
+/**
+ * @tc.name: AbilityManagerClient_NotifyStartupExceptionBySCB_0200
+ * @tc.desc: NotifyStartupExceptionBySCB_0100
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchThirdTest, NotifyStartupExceptionBySCB_0200, TestSize.Level1)
+{
+    int32_t requestId = 0;
+    EXPECT_NE(client_, nullptr);
+    auto result = client_->NotifyStartupExceptionBySCB(requestId);
+    EXPECT_EQ(result, ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -1032,5 +1032,28 @@ HWTEST_F(AbilityManagerStubSecondTest, SetOnNewWantSkipScenariosInner_002, TestS
         static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_ON_NEW_WANT_SKIP_SCENARIOS), data, reply, option);
     EXPECT_EQ(ret, NO_ERROR);
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: NotifyStartupExceptionBySCBInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService NotifyStartupExceptionBySCBInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function NotifyStartupExceptionBySCBInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubSecondTest, NotifyStartupExceptionBySCBInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    sptr<IAbilityConnection> connect = new AbilityConnectCallback();
+    WriteInterfaceToken(data);
+    data.WriteRemoteObject(connect->AsObject());
+    int32_t requestId = 1;
+    data.WriteInt32(requestId);
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::NOTIFY_STARTUP_EXCEPTION_BY_SCB), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+}
 } // namespace AAFwk
 } // namespace OHOS

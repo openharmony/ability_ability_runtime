@@ -393,6 +393,8 @@ public:
 
     void RecordPidKilling(pid_t pid, const std::string &reason);
 
+    int32_t NotifyStartupExceptionBySCB(int32_t requestId);
+
 private:
     void AddStartingPid(pid_t pid);
     void RemoveStartingPid(pid_t pid);
@@ -470,6 +472,7 @@ private:
         int32_t pid, const std::vector<sptr<IRemoteObject>> &tokens);
 
     bool GetContentAndTypeId(uint32_t msgId, std::string &msgContent, int &typeId) const;
+    void SendAbilityEvent(const AppExecFwk::AbilityInfo &abilityInfo) const;
 
     bool CheckSessionInfo(sptr<SessionInfo> sessionInfo) const;
     std::shared_ptr<AbilityRecord> CreateAbilityRecord(AbilityRequest &abilityRequest,
@@ -489,11 +492,9 @@ private:
     std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         bool &isColdStart);
     std::shared_ptr<AbilityRecord> FindRecordFromTmpMap(const AbilityRequest &abilityRequest);
-    void PostCallTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord);
     bool AddStartCallerTimestamp(int32_t callerUid);
     std::shared_ptr<AbilityRecord> FindRecordFromSessionMap(const AbilityRequest &abilityRequest);
     bool HasAbilityRequest(const AbilityRequest &abilityRequest);
-    void AddAbilityRequest(const AbilityRequest &abilityRequest, int32_t requestId);
     void RemoveAbilityRequest(int32_t requestId);
     void AddSpecifiedRequest(std::shared_ptr<SpecifiedRequest> request);
     void StartSpecifiedRequest(SpecifiedRequest &specifiedRequest);
