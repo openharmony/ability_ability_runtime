@@ -52,6 +52,8 @@ public:
     bool paramGetBoolParameter_ = true;
     std::shared_ptr<AbilityRecord> acmGetUIExtensionBySessionInfo_ = nullptr;
     std::shared_ptr<AbilityRecord> acmGetUIExtensionBySessionFromServiceMap_ = nullptr;
+    bool isSupportStartAbilities_ = true;
+    bool isSupportMultiInstance_ = true;
 };
 } // namespace AAFwk
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -160,6 +160,8 @@ int AbilitySchedulerStub::OnRemoteRequestInnerThird(
             return ScheduleAbilityRequestFailureInner(data);
         case SCHEDULE_ABILITY_REQUEST_SUCCESS:
             return ScheduleAbilityRequestSuccessInner(data);
+        case SCHEDULE_ABILITIES_REQUEST_DONE:
+            return ScheduleAbilitiesRequestDoneInner(data);
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -777,6 +779,14 @@ int AbilitySchedulerStub::ScheduleAbilityRequestSuccessInner(MessageParcel &data
         return ERR_INVALID_VALUE;
     }
     ScheduleAbilityRequestSuccess(requestId, *element);
+    return NO_ERROR;
+}
+
+int AbilitySchedulerStub::ScheduleAbilitiesRequestDoneInner(MessageParcel &data)
+{
+    std::string requestKey = data.ReadString();
+    int32_t resultCode = data.ReadInt32();
+    ScheduleAbilitiesRequestDone(requestKey, resultCode);
     return NO_ERROR;
 }
 

@@ -29,12 +29,15 @@ using OHOS::AppExecFwk::ExtensionAbilityType;
 
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 constexpr const char* DEBUG_APP = "debugApp";
+constexpr const char* DLP_PARAMS_SANDBOX = "ohos.dlp.params.sandbox";
+constexpr const char* DLP_INDEX = "ohos.dlp.params.index";
 constexpr const char* START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
 constexpr int32_t ONE = 1;
 constexpr int32_t TWO = 2;
 constexpr int32_t FOUNDATION_UID = 5523;
 constexpr int32_t DMS_UID = 5522;
 constexpr int32_t LOW_MEMORY_KILL_WHILE_STARTING = 1111;
+constexpr int32_t DEFAULT_INVAL_VALUE = -1;
 
 namespace OHOS {
 namespace AAFwk {
@@ -1226,6 +1229,707 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, KillProcessWithReason_002, TestSiz
     EXPECT_EQ(abilityMs_->KillProcessWithReason(pid, reason), ERR_KILL_APP_WHILE_STARTING);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest KillProcessWithReason_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilities_001
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities CCM false SCB false
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilities_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_001 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<Want> wantList;
+    std::string requestKey;
+    sptr<IRemoteObject> callerToken = nullptr;
+
+    MyStatus::GetInstance().isSupportStartAbilities_ = false;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = false;
+
+    EXPECT_EQ(abilityMs_->StartUIAbilities(wantList, requestKey, callerToken), ERR_CAPABILITY_NOT_SUPPORT);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilities_002
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities CCM true SCB false
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilities_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_002 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<Want> wantList;
+    std::string requestKey;
+    sptr<IRemoteObject> callerToken = nullptr;
+
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = false;
+
+    EXPECT_EQ(abilityMs_->StartUIAbilities(wantList, requestKey, callerToken), ERR_CAPABILITY_NOT_SUPPORT);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilities_003
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities CCM false SCB true
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilities_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_003 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<Want> wantList;
+    std::string requestKey;
+    sptr<IRemoteObject> callerToken = nullptr;
+
+    MyStatus::GetInstance().isSupportStartAbilities_ = false;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+
+    EXPECT_EQ(abilityMs_->StartUIAbilities(wantList, requestKey, callerToken), ERR_CAPABILITY_NOT_SUPPORT);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilities_004
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities CCM true SCB true listSize = 0
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilities_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_004 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<Want> wantList(6);
+    std::string requestKey;
+    sptr<IRemoteObject> callerToken = nullptr;
+
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+
+    EXPECT_EQ(abilityMs_->StartUIAbilities(wantList, requestKey, callerToken), START_UI_ABILITIES_WANT_LIST_SIZE_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_004 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilities_005
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities listSize > 4
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilities_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_005 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<Want> wantList(5);
+    std::string requestKey;
+    sptr<IRemoteObject> callerToken = nullptr;
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+
+    EXPECT_EQ(abilityMs_->StartUIAbilities(wantList, requestKey, callerToken), START_UI_ABILITIES_WANT_LIST_SIZE_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_005 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilities_006
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities callerToken = nullptr
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilities_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_006 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(mockSubManagersHelper, nullptr);
+    auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
+    EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
+    abilityMs_->subManagersHelper_ = mockSubManagersHelper;
+    abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
+
+    std::vector<Want> wantList(2);
+    std::string requestKey;
+    sptr<IRemoteObject> callerToken = nullptr;
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+
+    EXPECT_EQ(abilityMs_->StartUIAbilities(wantList, requestKey, callerToken), ERR_INVALID_CALLER);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_006 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilities_007
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities verifyToken failed
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilities_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_007 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(mockSubManagersHelper, nullptr);
+    auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
+    EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
+    abilityMs_->subManagersHelper_ = mockSubManagersHelper;
+    abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
+
+    std::vector<Want> wantList(2);
+    std::string requestKey;
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::EXTENSION);
+    MyStatus::GetInstance().smhVerificationAllToken_ = false;
+
+    EXPECT_EQ(abilityMs_->StartUIAbilities(wantList, requestKey, callerToken), ERR_INVALID_CALLER);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_007 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilities_008
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities handleWant failed
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilities_008, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_008 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(mockSubManagersHelper, nullptr);
+    auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
+    EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
+    abilityMs_->subManagersHelper_ = mockSubManagersHelper;
+    abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
+
+    std::vector<Want> wantList(2);
+    std::string requestKey;
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::EXTENSION);
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    EXPECT_NE(abilityMs_->StartUIAbilities(wantList, requestKey, callerToken), ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilities_008 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesHandleWant_001
+ * Function: StartUIAbilitiesHandleWant
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesHandleWant startPlugin
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesHandleWant_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_001 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<AbilityRequest> abilityRequestList;
+    std::string requestKey;
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::EXTENSION);
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    Want want;
+    want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesHandleWant(want, callerToken, abilityRequestList),
+        START_UI_ABILITIES_NOT_SUPPORT_START_PLUGIN);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesHandleWant_002
+ * Function: StartUIAbilitiesHandleWant
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesHandleWant createInstance
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesHandleWant_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_002 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<AbilityRequest> abilityRequestList;
+    std::string requestKey;
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::EXTENSION);
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    Want want;
+    want.SetParam(AAFwk::Want::CREATE_APP_INSTANCE_KEY, true);
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesHandleWant(want, callerToken, abilityRequestList),
+        START_UI_ABILITIES_NOT_SUPPORT_CREATE_APP_INSTANCE_KEY);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesHandleWant_003
+ * Function: StartUIAbilitiesHandleWant
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesHandleWant dlp failed with dlp
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesHandleWant_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_003 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<AbilityRequest> abilityRequestList;
+    std::string requestKey;
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::EXTENSION);
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    Want want;
+    want.SetParam(DLP_PARAMS_SANDBOX, true);
+    want.SetElementName("com.ohos.test", "MainAbility");
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesHandleWant(want, callerToken, abilityRequestList),
+        START_UI_ABILITIES_NOT_SUPPORT_DLP);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesHandleWant_004
+ * Function: StartUIAbilitiesHandleWant
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesHandleWant appCloneIndexError
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesHandleWant_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_004 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<AbilityRequest> abilityRequestList;
+    std::string requestKey;
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    Want want;
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    MyStatus::GetInstance().permPermission_ = true;
+
+    want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, -5);
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesHandleWant(want, callerToken, abilityRequestList),
+        ERR_APP_CLONE_INDEX_INVALID);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_004 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesHandleWant_005
+ * Function: StartUIAbilitiesHandleWant
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesHandleWant multiInstanceError
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesHandleWant_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_005 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<AbilityRequest> abilityRequestList;
+    std::string requestKey;
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    MyStatus::GetInstance().permPermission_ = true;
+
+    want.SetParam(Want::APP_INSTANCE_KEY, 2);
+    MyStatus::GetInstance().isSupportMultiInstance_ = false;
+
+    EXPECT_NE(abilityMs_->StartUIAbilitiesHandleWant(want, callerToken, abilityRequestList),
+        ERR_OK);
+
+    MyStatus::GetInstance().isSupportMultiInstance_ = true;
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_005 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesHandleWant_006
+ * Function: StartUIAbilitiesHandleWant
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesHandleWant OperateRemoteError
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesHandleWant_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_006 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<AbilityRequest> abilityRequestList;
+    std::string requestKey;
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    MyStatus::GetInstance().permPermission_ = true;
+
+    want.SetDeviceId("deviceId");
+
+    EXPECT_NE(abilityMs_->StartUIAbilitiesHandleWant(want, callerToken, abilityRequestList),
+        ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_006 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesHandleWant_007
+ * Function: StartUIAbilitiesHandleWant
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesHandleWant CrossUserError?
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesHandleWant_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_007 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<AbilityRequest> abilityRequestList;
+    std::string requestKey;
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    MyStatus::GetInstance().permPermission_ = true;
+
+    want.SetDeviceId("deviceId");
+
+    EXPECT_NE(abilityMs_->StartUIAbilitiesHandleWant(want, callerToken, abilityRequestList),
+        ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_007 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesHandleWant_008
+ * Function: StartUIAbilitiesHandleWant
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesHandleWant ImplicitStartError
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesHandleWant_008, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_008 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<AbilityRequest> abilityRequestList;
+    std::string requestKey;
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    Want want;
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    MyStatus::GetInstance().permPermission_ = true;
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesHandleWant(want, callerToken, abilityRequestList),
+        START_UI_ABILITIES_NOT_SUPPORT_IMPLICIT_START);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_008 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesHandleWant_009
+ * Function: StartUIAbilitiesHandleWant
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesHandleWant generateRequestPass
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesHandleWant_009, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_009 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<AbilityRequest> abilityRequestList;
+    std::string requestKey;
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    Want want;
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    MyStatus::GetInstance().permPermission_ = true;
+    want.SetElementName("com.ohos.test", "MainAbility");
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesHandleWant(want, callerToken, abilityRequestList),
+        RESOLVE_ABILITY_ERR);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesHandleWant_009 end");
+}
+
+#ifdef WITH_DLP
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesCheckDlp_001
+ * Function: StartUIAbilitiesCheckDlp
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesCheckDlp handleDLP == true
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesCheckDlp_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesCheckDlp_001 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<AbilityRequest> abilityRequestList;
+    std::string requestKey;
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::EXTENSION);
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    Want want;
+    want.SetParam(DLP_PARAMS_SANDBOX, true);
+    want.SetElementName("com.ohos.test", "MainAbility");
+    int32_t userId = DEFAULT_INVAL_VALUE;
+
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesCheckDlp(want, callerToken, userId),
+        START_UI_ABILITIES_NOT_SUPPORT_DLP);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesCheckDlp_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesCheckDlp_002
+ * Function: StartUIAbilitiesCheckDlp
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesCheckDlp false false false
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesCheckDlp_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesCheckDlp_002 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<AbilityRequest> abilityRequestList;
+    std::string requestKey;
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    Want want;
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    MyStatus::GetInstance().permPermission_ = true;
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesCheckDlp(want, callerToken, userId),
+        ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesCheckDlp_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesCheckDlp_003
+ * Function: StartUIAbilitiesCheckDlp
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesCheckDlp true false false
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesCheckDlp_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesCheckDlp_003 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<AbilityRequest> abilityRequestList;
+    std::string requestKey;
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    Want want;
+    want.SetParam(DLP_INDEX, 1);
+    MyStatus::GetInstance().permPermission_ = false;
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::EXTENSION);
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesCheckDlp(want, callerToken, userId),
+        CHECK_PERMISSION_FAILED);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesCheckDlp_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesCheckDlp_004
+ * Function: StartUIAbilitiesCheckDlp
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesCheckDlp true true false
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesCheckDlp_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesCheckDlp_004 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    std::vector<AbilityRequest> abilityRequestList;
+    std::string requestKey;
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    Want want;
+    want.SetParam(DLP_INDEX, 1);
+    MyStatus::GetInstance().permPermission_ = false;
+    int32_t userId = 0;
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::EXTENSION);
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesCheckDlp(want, callerToken, userId),
+        CHECK_PERMISSION_FAILED);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesCheckDlp_004 end");
+}
+#endif // WITH_DLP
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesInterceptorCheck_001
+ * Function: StartUIAbilitiesInterceptorCheck
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInterceptorCheck generateRequestPass
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesInterceptorCheck_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInterceptorCheck_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    MyStatus::GetInstance().isSupportStartAbilities_ = true;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+
+    int32_t appIndex = 0;
+    Want want;
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t userId = DEFAULT_INVAL_VALUE;
+    MyStatus::GetInstance().permPermission_ = true;
+    want.SetElementName("com.ohos.test", "MainAbility");
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesInterceptorCheck(want, abilityRequest, callerToken, appIndex),
+        START_UI_ABILITIES_INTERCEPTOR_CHECK_FAILED);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInterceptorCheck_001 end");
 }
 
 /*

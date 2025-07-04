@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1289,6 +1289,32 @@ void AbilitySchedulerProxy::ScheduleAbilityRequestSuccess(const std::string &req
         return;
     }
     int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITY_REQUEST_SUCCESS, data, reply, option);
+    if (err != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, err: %{public}d", err);
+    }
+    return;
+}
+
+void AbilitySchedulerProxy::ScheduleAbilitiesRequestDone(const std::string &requestKey, int32_t resultCode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token failed");
+        return;
+    }
+
+    if (!data.WriteString(requestKey)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write requestKey failed");
+        return;
+    }
+    if (!data.WriteInt32(resultCode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write resultCode failed");
+        return;
+    }
+
+    int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITIES_REQUEST_DONE, data, reply, option);
     if (err != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, err: %{public}d", err);
     }
