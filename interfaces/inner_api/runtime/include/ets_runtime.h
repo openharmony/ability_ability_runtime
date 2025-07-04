@@ -58,14 +58,14 @@ public:
     void NotifyApplicationState(bool isBackground) override {}
     bool SuspendVM(uint32_t tid) override { return false; }
     void ResumeVM(uint32_t tid) override {}
-    void PreloadSystemModule(const std::string &moduleName) override {}
+    void PreloadSystemModule(const std::string &moduleName) override;
     void PreloadMainAbility(const std::string &moduleName, const std::string &srcPath, const std::string &hapPath,
         bool isEsMode, const std::string &srcEntrance) override {}
     void PreloadModule(const std::string &moduleName, const std::string &srcPath, const std::string &hapPath,
         bool isEsMode, bool useCommonTrunk) override {}
     void PreloadModule(
         const std::string &moduleName, const std::string &hapPath, bool isEsMode, bool useCommonTrunk) override;
-    void FinishPreload() override {}
+    void FinishPreload() override;
     bool LoadRepairPatch(const std::string &patchFile, const std::string &baseFile) override { return false; }
     bool NotifyHotReloadPage() override { return false; }
     bool UnLoadRepairPatch(const std::string &patchFile) override { return false; }
@@ -87,13 +87,16 @@ public:
         bool useCommonChunk, const std::string &srcEntrance);
     bool HandleUncaughtError();
     const std::unique_ptr<AbilityRuntime::Runtime> &GetJsRuntime() const;
+    std::unique_ptr<AbilityRuntime::Runtime> MoveJsRuntime();
+    static std::unique_ptr<ETSRuntime> PreFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
 
 private:
     bool Initialize(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
     void Deinitialize();
-    bool CreateEtsEnv(const Options &options, Runtime *jsRuntime);
+    bool CreateEtsEnv(const Options &options);
     std::unique_ptr<AppExecFwk::ETSNativeReference> LoadEtsModule(const std::string &moduleName,
         const std::string &fileName, const std::string &hapPath, const std::string &srcEntrance);
+    void PostFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
     int32_t apiTargetVersion_ = 0;
     std::string codePath_;
     std::string moduleName_;

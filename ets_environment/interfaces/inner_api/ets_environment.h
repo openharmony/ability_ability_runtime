@@ -50,13 +50,15 @@ public:
     static void InitETSSysNS(const std::string &path);
     static ETSEnvFuncs *RegisterFuncs();
 
-    bool Initialize(void *napiEnv, const std::string &aotPath);
+    bool Initialize();
     void RegisterUncaughtExceptionHandler(const ETSUncaughtExceptionInfo &handle);
     ani_env *GetAniEnv();
     bool HandleUncaughtError();
     bool PreloadModule(const std::string &modulePath);
     bool LoadModule(const std::string &modulePath, const std::string &srcEntrance, void *&cls,
         void *&obj, void *&ref);
+    void FinishPreload();
+    void PostFork(void *napiEnv, const std::string &aotPath);
 
     struct VMEntry {
         ani_vm *aniVm_;
