@@ -75,8 +75,12 @@ public:
     virtual WMError Destroy(uint32_t reason = 0) {return WMError::WM_OK;}
     virtual WMError Show(uint32_t reason = 0, bool withAnimation = false,
         bool withFocus = true) {return WMError::WM_OK;}
+    virtual WMError Show(uint32_t reason, bool withAnimation,
+        bool withFocus, bool needAttach) {return WMError::WM_OK;}
     virtual WMError Hide(uint32_t reason = 0, bool withAnimation = false,
         bool isFromInnerkits = true) {return WMError::WM_OK;}
+    virtual WMError Hide(uint32_t reason, bool withAnimation,
+        bool isFromInnerkits, bool needDetach) {return WMError::WM_OK;}
     virtual WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) {return WMError::WM_OK;}
     virtual WMError Resize(uint32_t width, uint32_t height,
