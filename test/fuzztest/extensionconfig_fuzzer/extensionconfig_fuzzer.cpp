@@ -70,6 +70,10 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     extensionConfig->LoadExtensionServiceBlockedList(object, strParam);
     extensionConfig->LoadExtensionAbilityAccess(object, strParam);
     extensionConfig->CheckExtensionUriValid(strParam);
+    extensionConfig->LoadExtensionNetworkEnable(object, strParam);
+    extensionConfig->LoadExtensionSAEnable(object, strParam);
+    extensionConfig->IsExtensionNetworkEnable(strParam);
+    extensionConfig->IsExtensionSAEnable(strParam);
     return true;
 }
 } // namespace OHOS
