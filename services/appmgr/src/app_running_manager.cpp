@@ -120,7 +120,7 @@ bool AppRunningManager::CheckAppProcessNameIsSame(const std::shared_ptr<AppRunni
 std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExist(const std::string &appName,
     const std::string &processName, const int uid, const BundleInfo &bundleInfo,
     const std::string &specifiedProcessFlag, bool *isProCache, const std::string &instanceKey,
-    const std::string &customProcessFlag)
+    const std::string &customProcessFlag, const bool notReuseCachedPorcess)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR,
@@ -174,6 +174,10 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
             auto appInfoIter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
             if (appInfoIter == appInfoList.end()) {
                 continue;
+            }
+            // preload feature just check appRecord exist or not
+            if (notReuseCachedPorcess) {
+                return appRecord;
             }
             bool isProcCacheInner =
                 DelayedSingleton<CacheProcessManager>::GetInstance()->ReuseCachedProcess(appRecord);
