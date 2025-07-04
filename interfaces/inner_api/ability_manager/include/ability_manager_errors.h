@@ -1155,6 +1155,11 @@ enum NativeFreeInstallError {
      */
     ERR_WRITE_SA_INTERCEPTOR_FAILED = 29360219,
 
+    /*
+     * Result(29360219) for SCB intercepted this startup attempt.
+     */
+    ERR_SCB_INTERCEPTION = 29360220,
+
     /**
      * Undefine error code.
      */

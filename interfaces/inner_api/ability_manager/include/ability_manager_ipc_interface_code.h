@@ -420,6 +420,8 @@ enum class AbilityManagerInterfaceCode {
 
     SET_ON_NEW_WANT_SKIP_SCENARIOS = 1071,
 
+    NOTIFY_STARTUP_EXCEPTION_BY_SCB = 1072,
+
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 

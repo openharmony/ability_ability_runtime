@@ -1248,37 +1248,7 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Notify scb's abilityId is %{public}" PRIu64 ".", sessionInfo->uiAbilityId);
     tmpAbilityMap_.emplace(sessionInfo->requestId, uiAbilityRecord);
-    PostCallTimeoutTask(uiAbilityRecord);
     return NotifySCBPendingActivation(sessionInfo, abilityRequest, errMsg);
-}
-
-void UIAbilityLifecycleManager::PostCallTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord)
-{
-    CHECK_POINTER(abilityRecord);
-
-    std::weak_ptr<AbilityRecord> weakRecord(abilityRecord);
-    auto timeoutTask = [self = shared_from_this(), weakRecord]() {
-        auto abilityRecord = weakRecord.lock();
-        if (!abilityRecord) {
-            return;
-        }
-
-        std::lock_guard guard(self->sessionLock_);
-        for (auto it = self->tmpAbilityMap_.begin(); it != self->tmpAbilityMap_.end(); ++it) {
-            if (abilityRecord == it->second) {
-                TAG_LOGW(AAFwkTag::ABILITYMGR, "CallUIAbilityBySCB timeout: %{public}s",
-                    abilityRecord->GetURI().c_str());
-                self->tmpAbilityMap_.erase(it);
-                self->callRequestCache_.erase(abilityRecord);
-                return;
-            }
-        }
-    };
-
-    int timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
-        GlobalConstant::COLDSTART_TIMEOUT_MULTIPLE * GlobalConstant::TIMEOUT_UNIT_TIME;
-    ffrt::submit(std::move(timeoutTask), ffrt::task_attr().delay(timeout)
-        .timeout(GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 }
 
 void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)
@@ -3550,21 +3520,6 @@ bool UIAbilityLifecycleManager::HasAbilityRequest(const AbilityRequest &abilityR
     return false;
 }
 
-void UIAbilityLifecycleManager::AddAbilityRequest(const AbilityRequest &abilityRequest, int32_t requestId)
-{
-    auto newRequest = std::make_shared<AbilityRequest>(abilityRequest);
-    startAbilityCheckMap_.emplace(requestId, newRequest);
-    TaskHandlerWrap::GetFfrtHandler()->SubmitTask([wThis = weak_from_this(), requestId]() {
-        auto pThis = wThis.lock();
-        if (pThis) {
-            std::lock_guard guard(pThis->sessionLock_);
-            if (pThis->startAbilityCheckMap_.erase(requestId)) {
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call timeout: %{public}d", requestId);
-            }
-        }
-        }, GlobalConstant::CONCURRENT_START_TIMEOUT * GlobalConstant::TIMEOUT_UNIT_TIME);
-}
-
 void UIAbilityLifecycleManager::RemoveAbilityRequest(int32_t requestId)
 {
     if (requestId != 0 && startAbilityCheckMap_.erase(requestId)) {
@@ -3868,6 +3823,52 @@ int32_t UIAbilityLifecycleManager::RevokeDelegator(sptr<IRemoteObject> token)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "scb error");
         return ERR_FROM_WINDOW;
     }
+}
+
+int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb notify exception:%{public}d", requestId);
+    std::lock_guard guard(sessionLock_);
+    for (auto it = tmpAbilityMap_.begin(); it != tmpAbilityMap_.end(); ++it) {
+        if (requestId == it->first) {
+            auto abilityRecord = it->second;
+            if (abilityRecord != nullptr) {
+                TAG_LOGW(AAFwkTag::ABILITYMGR, "startup exception: %{public}s", abilityRecord->GetURI().c_str());
+                SendAbilityEvent(abilityRecord->GetAbilityInfo());
+            }
+            tmpAbilityMap_.erase(it);
+            callRequestCache_.erase(abilityRecord);
+            return ERR_OK;
+        }
+    }
+
+    auto request = GetSpecifiedRequest(requestId);
+    if (request != nullptr) {
+        SendAbilityEvent(request->abilityRequest.abilityInfo);
+    }
+
+    auto nextRequest = PopAndGetNextSpecified(requestId);
+    if (nextRequest) {
+        ffrt::submit([nextRequest, pThis = shared_from_this()]() {
+            std::lock_guard lock(pThis->sessionLock_);
+            pThis->StartSpecifiedRequest(*nextRequest);
+            }, ffrt::task_attr().timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
+    }
+    return ERR_OK;
+}
+
+void UIAbilityLifecycleManager::SendAbilityEvent(const AppExecFwk::AbilityInfo &abilityInfo) const
+{
+    EventInfo eventInfo;
+    eventInfo.userId = userId_;
+    eventInfo.abilityName = abilityInfo.name;
+    eventInfo.bundleName = abilityInfo.bundleName;
+    eventInfo.moduleName = abilityInfo.moduleName;
+    eventInfo.errCode = ERR_SCB_INTERCEPTION;
+    eventInfo.errMsg = "SCB intercepted this startup attempt";
+    ffrt::submit([eventInfo]() {
+        EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+        }, ffrt::task_attr().timeout(AbilityRuntime::GlobalConstant::FFRT_TASK_TIMEOUT));
 }
 }  // namespace AAFwk
 }  // namespace OHOS
