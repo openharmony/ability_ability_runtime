@@ -63,6 +63,9 @@ public:
     static int32_t isAppRunningReturnCode;
     static int32_t usedKillAppTimes;
     static bool isAppRunningReturnValue;
+    static bool isKeepAliveAppservice;
+    static int32_t ret;
+    static std::vector<RunningProcessInfo> infos;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

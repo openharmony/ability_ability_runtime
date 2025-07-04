@@ -925,6 +925,31 @@ HWTEST_F(KeepAliveProcessManagerTest, OnAppStateChanged_001, TestSize.Level1)
 }
 
 /*
+ * Feature:  KeepAliveProcessManager
+ * Function: OnAppStateChanged
+ * SubFunction: NA
+ * FunctionPoints:OnAppStateChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify OnAppStateChanged
+ */
+HWTEST_F(KeepAliveProcessManagerTest, OnAppStateChanged_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "OnAppStateChanged_002 start";
+
+    AppInfo info;
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    info.state = AppState::BEGIN;
+    info.pid = getpid();
+    AppScheduler::bundleNameValue = "testBundleName";
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    AbilityKeepAliveService::callIsKeepAliveResult = true;
+    keepAliveProcessManager->OnAppStateChanged(info);
+    EXPECT_TRUE(AppMgrClient::isKeepAliveAppservice);
+    GTEST_LOG_(INFO) << "OnAppStateChanged_002 end";
+}
+
+/*
  * Feature: KeepAliveProcessManager
  * Function: SetAppServiceExtensionKeepAlive
  * SubFunction: NA
@@ -2004,6 +2029,363 @@ HWTEST_F(KeepAliveProcessManagerTest, CheckPermission_002, TestSize.Level1)
     int32_t result = keepAliveProcessManager->CheckPermission();
     EXPECT_EQ(result, ERR_NOT_SYSTEM_APP);
     GTEST_LOG_(INFO) << "CheckPermission_002 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: SaveAppSeriviceRestartAfterUpgrade
+ * SubFunction: NA
+ * FunctionPoints:SaveAppSeriviceRestartAfterUpgrade
+ * EnvConditions: NA
+ * CaseDescription: Verify SaveAppSeriviceRestartAfterUpgrade
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SaveAppSeriviceRestartAfterUpgrade_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_001 start";
+    int32_t uid = 1;
+    std::string bundleName = "testBundleName";
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    AbilityKeepAliveService::callIsKeepAliveResult = false;
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->SaveAppSeriviceRestartAfterUpgrade(bundleName, uid);
+    EXPECT_TRUE(AppMgrClient::isKeepAliveAppservice);
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_001 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: SaveAppSeriviceRestartAfterUpgrade
+ * SubFunction: NA
+ * FunctionPoints:SaveAppSeriviceRestartAfterUpgrade
+ * EnvConditions: NA
+ * CaseDescription: Verify SaveAppSeriviceRestartAfterUpgrade
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SaveAppSeriviceRestartAfterUpgrade_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_002 start";
+    int32_t uid = 1;
+    std::string bundleName = "testBundleName";
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    AbilityKeepAliveService::callIsKeepAliveResult = true;
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->SaveAppSeriviceRestartAfterUpgrade(bundleName, uid);
+    EXPECT_TRUE(AppMgrClient::isKeepAliveAppservice);
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_002 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: SaveAppSeriviceRestartAfterUpgrade
+ * SubFunction: NA
+ * FunctionPoints:SaveAppSeriviceRestartAfterUpgrade
+ * EnvConditions: NA
+ * CaseDescription: Verify SaveAppSeriviceRestartAfterUpgrade
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SaveAppSeriviceRestartAfterUpgrade_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_003 start";
+    int32_t uid = 1;
+    std::string bundleName = "testBundleName";
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    AbilityKeepAliveService::callIsKeepAliveResult = true;
+    AppMgrClient::ret = 0;
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->SaveAppSeriviceRestartAfterUpgrade(bundleName, uid);
+    EXPECT_TRUE(AppMgrClient::isKeepAliveAppservice);
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_003 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: SaveAppSeriviceRestartAfterUpgrade
+ * SubFunction: NA
+ * FunctionPoints:SaveAppSeriviceRestartAfterUpgrade
+ * EnvConditions: NA
+ * CaseDescription: Verify SaveAppSeriviceRestartAfterUpgrade
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SaveAppSeriviceRestartAfterUpgrade_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_004 start";
+    int32_t uid = 1;
+    std::string bundleName = "testBundleName";
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    AbilityKeepAliveService::callIsKeepAliveResult = true;
+    AppMgrClient::ret = 0;
+    RunningProcessInfo info;
+    info.uid_ = -1;
+    info.isKeepAliveAppService = false;
+    AppMgrClient::infos = { info };
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->SaveAppSeriviceRestartAfterUpgrade(bundleName, uid);
+    EXPECT_TRUE(AppMgrClient::isKeepAliveAppservice);
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_004 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: SaveAppSeriviceRestartAfterUpgrade
+ * SubFunction: NA
+ * FunctionPoints:SaveAppSeriviceRestartAfterUpgrade
+ * EnvConditions: NA
+ * CaseDescription: Verify SaveAppSeriviceRestartAfterUpgrade
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SaveAppSeriviceRestartAfterUpgrade_005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_005 start";
+    int32_t uid = 1;
+    std::string bundleName = "testBundleName";
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    AbilityKeepAliveService::callIsKeepAliveResult = true;
+    AppMgrClient::ret = 0;
+    RunningProcessInfo info;
+    info.uid_ = uid;
+    info.isKeepAliveAppService = false;
+    AppMgrClient::infos = { info };
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->SaveAppSeriviceRestartAfterUpgrade(bundleName, uid);
+    EXPECT_TRUE(AppMgrClient::isKeepAliveAppservice);
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_005 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: SaveAppSeriviceRestartAfterUpgrade
+ * SubFunction: NA
+ * FunctionPoints:SaveAppSeriviceRestartAfterUpgrade
+ * EnvConditions: NA
+ * CaseDescription: Verify SaveAppSeriviceRestartAfterUpgrade
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SaveAppSeriviceRestartAfterUpgrade_006, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_006 start";
+    int32_t uid = 1;
+    std::string bundleName = "testBundleName";
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    AbilityKeepAliveService::callIsKeepAliveResult = true;
+    AppMgrClient::ret = 0;
+    RunningProcessInfo info;
+    info.uid_ = -1;
+    info.isKeepAliveAppService = true;
+    AppMgrClient::infos = { info };
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->SaveAppSeriviceRestartAfterUpgrade(bundleName, uid);
+    EXPECT_TRUE(AppMgrClient::isKeepAliveAppservice);
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_006 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: SaveAppSeriviceRestartAfterUpgrade
+ * SubFunction: NA
+ * FunctionPoints:SaveAppSeriviceRestartAfterUpgrade
+ * EnvConditions: NA
+ * CaseDescription: Verify SaveAppSeriviceRestartAfterUpgrade
+ */
+HWTEST_F(KeepAliveProcessManagerTest, SaveAppSeriviceRestartAfterUpgrade_007, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_007 start";
+    int32_t uid = 1;
+    std::string bundleName = "testBundleName";
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    AbilityKeepAliveService::callIsKeepAliveResult = true;
+    AppMgrClient::ret = 0;
+    RunningProcessInfo info;
+    info.uid_ = uid;
+    info.isKeepAliveAppService = true;
+    AppMgrClient::infos = { info };
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->SaveAppSeriviceRestartAfterUpgrade(bundleName, uid);
+    EXPECT_FALSE(AppMgrClient::isKeepAliveAppservice);
+    GTEST_LOG_(INFO) << "SaveAppSeriviceRestartAfterUpgrade_007 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: Run
+ * SubFunction: NA
+ * FunctionPoints:CheckNeedRestartAfterUpgrade
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckNeedRestartAfterUpgrade
+ */
+HWTEST_F(KeepAliveProcessManagerTest, CheckNeedRestartAfterUpgrade_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckNeedRestartAfterUpgrade_001 start";
+    int32_t uid = 1;
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    auto ret = keepAliveProcessManager->CheckNeedRestartAfterUpgrade(uid);
+    EXPECT_FALSE(ret);
+    GTEST_LOG_(INFO) << "CheckNeedRestartAfterUpgrade_001 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: Run
+ * SubFunction: NA
+ * FunctionPoints:CheckNeedRestartAfterUpgrade
+ * EnvConditions: NA
+ * CaseDescription: Verify CheckNeedRestartAfterUpgrade
+ */
+HWTEST_F(KeepAliveProcessManagerTest, CheckNeedRestartAfterUpgrade_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckNeedRestartAfterUpgrade_002 start";
+    int32_t uid = 1;
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->restartAfterUpgradeList_.insert(uid);
+    auto ret = keepAliveProcessManager->CheckNeedRestartAfterUpgrade(uid);
+    EXPECT_TRUE(ret);
+    GTEST_LOG_(INFO) << "CheckNeedRestartAfterUpgrade_002 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: StartKeepAliveAppServiceExtension
+ * SubFunction: NA
+ * FunctionPoints:StartKeepAliveAppServiceExtension
+ * EnvConditions: NA
+ * CaseDescription: Verify StartKeepAliveAppServiceExtension
+ */
+HWTEST_F(KeepAliveProcessManagerTest, StartKeepAliveAppServiceExtension_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StartKeepAliveAppServiceExtension_001 start";
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    AppExecFwk::BundleInfo bundleInfo;
+    std::vector<AppExecFwk::BundleInfo> bundleInfos = {bundleInfo};
+    AbilityKeepAliveService::callIsKeepAliveTimes = 0;
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->StartKeepAliveAppServiceExtension(bundleInfos);
+    auto callTimes = AbilityKeepAliveService::callIsKeepAliveTimes;
+    EXPECT_EQ(callTimes, 1);
+    GTEST_LOG_(INFO) << "StartKeepAliveAppServiceExtension_001 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: StartKeepAliveAppServiceExtensionPerBundle
+ * SubFunction: NA
+ * FunctionPoints:StartKeepAliveAppServiceExtensionPerBundle
+ * EnvConditions: NA
+ * CaseDescription: Verify StartKeepAliveAppServiceExtensionPerBundle
+ */
+HWTEST_F(KeepAliveProcessManagerTest, StartKeepAliveAppServiceExtensionPerBundle_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StartKeepAliveAppServiceExtension_001 start";
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    AppExecFwk::BundleInfo bundleInfo;
+    AbilityKeepAliveService::callIsKeepAliveResult = false;
+    AbilityKeepAliveService::callIsKeepAliveTimes = 0;
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->StartKeepAliveAppServiceExtensionPerBundle(bundleInfo);
+    auto callTimes = AbilityKeepAliveService::callIsKeepAliveTimes;
+    EXPECT_EQ(callTimes, 1);
+    GTEST_LOG_(INFO) << "StartKeepAliveAppServiceExtension_001 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: StartKeepAliveAppServiceExtensionPerBundle
+ * SubFunction: NA
+ * FunctionPoints:StartKeepAliveAppServiceExtensionPerBundle
+ * EnvConditions: NA
+ * CaseDescription: Verify StartKeepAliveAppServiceExtensionPerBundle
+ */
+HWTEST_F(KeepAliveProcessManagerTest, StartKeepAliveAppServiceExtensionPerBundle_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StartKeepAliveAppServiceExtensionPerBundle_002 start";
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    AppExecFwk::BundleInfo bundleInfo;
+    AbilityKeepAliveService::callIsKeepAliveResult = true;
+    AbilityKeepAliveService::callIsKeepAliveTimes = 0;
+    MainElementUtils::checkAppServiceExtensionResult = false;
+    MainElementUtils::usedCheckAppServiceExtensionTimes = 0;
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->StartKeepAliveAppServiceExtensionPerBundle(bundleInfo);
+    auto callTimes = AbilityKeepAliveService::callIsKeepAliveTimes;
+    EXPECT_EQ(callTimes, 1);
+    callTimes = MainElementUtils::usedCheckAppServiceExtensionTimes;
+    EXPECT_EQ(callTimes, 1);
+    GTEST_LOG_(INFO) << "StartKeepAliveAppServiceExtensionPerBundle_002 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: StartKeepAliveAppServiceExtensionPerBundle
+ * SubFunction: NA
+ * FunctionPoints:StartKeepAliveAppServiceExtensionPerBundle
+ * EnvConditions: NA
+ * CaseDescription: Verify StartKeepAliveAppServiceExtensionPerBundle
+ */
+HWTEST_F(KeepAliveProcessManagerTest, StartKeepAliveAppServiceExtensionPerBundle_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StartKeepAliveAppServiceExtensionPerBundle_003 start";
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    AppExecFwk::BundleInfo bundleInfo;
+    AbilityKeepAliveService::callIsKeepAliveResult = true;
+    AbilityKeepAliveService::callIsKeepAliveTimes = 0;
+    MainElementUtils::checkAppServiceExtensionResult = true;
+    MainElementUtils::usedCheckAppServiceExtensionTimes = 0;
+    AbilityManagerService::startExtensionAbilityResult = ERR_OK;
+    AbilityManagerService::usedStartExtensionAbilityTimes = 0;
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->StartKeepAliveAppServiceExtensionPerBundle(bundleInfo);
+    auto callTimes = AbilityKeepAliveService::callIsKeepAliveTimes;
+    EXPECT_EQ(callTimes, 1);
+    callTimes = MainElementUtils::usedCheckAppServiceExtensionTimes;
+    EXPECT_EQ(callTimes, 1);
+    callTimes = AbilityManagerService::usedStartExtensionAbilityTimes;
+    EXPECT_EQ(callTimes, 1);
+    GTEST_LOG_(INFO) << "StartKeepAliveAppServiceExtensionPerBundle_003 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: StartKeepAliveAppServiceExtensionPerBundle
+ * SubFunction: NA
+ * FunctionPoints:StartKeepAliveAppServiceExtensionPerBundle
+ * EnvConditions: NA
+ * CaseDescription: Verify StartKeepAliveAppServiceExtensionPerBundle
+ */
+HWTEST_F(KeepAliveProcessManagerTest, StartKeepAliveAppServiceExtensionPerBundle_004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StartKeepAliveAppServiceExtensionPerBundle_004 start";
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+    EXPECT_EQ(system::GetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false), true);
+    AppExecFwk::BundleInfo bundleInfo;
+    AbilityKeepAliveService::callIsKeepAliveResult = true;
+    AbilityKeepAliveService::callIsKeepAliveTimes = 0;
+    MainElementUtils::checkAppServiceExtensionResult = true;
+    MainElementUtils::usedCheckAppServiceExtensionTimes = 0;
+    AbilityManagerService::startExtensionAbilityResult = INNER_ERR;
+    AbilityManagerService::usedStartExtensionAbilityTimes = 0;
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    keepAliveProcessManager->StartKeepAliveAppServiceExtensionPerBundle(bundleInfo);
+    auto callTimes = AbilityKeepAliveService::callIsKeepAliveTimes;
+    EXPECT_EQ(callTimes, 1);
+    callTimes = MainElementUtils::usedCheckAppServiceExtensionTimes;
+    EXPECT_EQ(callTimes, 1);
+    GTEST_LOG_(INFO) << "StartKeepAliveAppServiceExtensionPerBundle_004 end";
+}
+
+/*
+ * Feature:  KeepAliveProcessManager
+ * Function: StartKeepAliveAppServiceExtensionInner
+ * SubFunction: NA
+ * FunctionPoints:StartKeepAliveAppServiceExtensionInner
+ * EnvConditions: NA
+ * CaseDescription: Verify StartKeepAliveAppServiceExtensionInner
+ */
+HWTEST_F(KeepAliveProcessManagerTest, StartKeepAliveAppServiceExtensionInner_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StartKeepAliveAppServiceExtensionInner_001 start";
+    KeepAliveAbilityInfo info;
+    AbilityManagerService::startExtensionAbilityResult = ERR_OK;
+    auto keepAliveProcessManager = std::make_shared<KeepAliveProcessManager>();
+    auto ret = keepAliveProcessManager->StartKeepAliveAppServiceExtensionInner(info);
+    EXPECT_EQ(ret, ERR_OK);
+    GTEST_LOG_(INFO) << "StartKeepAliveAppServiceExtensionInner_001 end";
 }
 }  // namespace AAFwk
 }  // namespace OHOS
