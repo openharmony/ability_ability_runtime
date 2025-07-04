@@ -2151,7 +2151,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         }
         abilityRequest.supportWindowModes = startOptions.supportWindowModes_;
         auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-        if (JudgeSelfCalled(abilityRecord)) {
+        std::string callerBundleName = abilityRecord ? abilityRecord->GetAbilityInfo().bundleName : "";
+        if (abilityRequest.want.GetElement().GetBundleName() == callerBundleName) {
             abilityRequest.hideStartWindow = startOptions.GetHideStartWindow();
         }
         auto uiAbilityManager = GetUIAbilityManagerByUserId(oriValidUserId);
