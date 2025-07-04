@@ -21,6 +21,9 @@
 #include <string>
 #include <vector>
 
+#include "ability_record.h"
+#include "ability_info.h"
+#include "application_info.h"
 #include "auto_startup_info.h"
 #include "bundle_info.h"
 #include "bundle_user_info.h"
@@ -29,9 +32,6 @@
 #include "ecological_rule/ability_ecological_rule_mgr_service_param.h"
 #include "extract_insight_intent_profile.h"
 #include "keep_alive_process_manager.h"
-#include "ability_record.h"
-#include "ability_info.h"
-#include "application_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
