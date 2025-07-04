@@ -644,7 +644,7 @@ void FormExtensionProviderClient::NotifyFormExtensionUpdateLocation(const int64_
     }
 }
 
-int FormExtensionProviderClient::NotifySizeChanged(const int64_t formId, const int32_t newDimension,
+int FormExtensionProviderClient::NotifySizeChanged(int64_t formId, int32_t newDimension,
     const Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "called");
@@ -662,7 +662,7 @@ int FormExtensionProviderClient::NotifySizeChanged(const int64_t formId, const i
     return ERR_OK;
 }
 
-void FormExtensionProviderClient::NotifyExtensionSizeChanged(const int64_t formId, const int32_t newDimension,
+void FormExtensionProviderClient::NotifyExtensionSizeChanged(int64_t formId, int32_t newDimension,
     const Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken)
 {
     TAG_LOGD(AAFwkTag::FORM_EXT, "called");
