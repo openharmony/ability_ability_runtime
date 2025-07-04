@@ -333,6 +333,7 @@ group("fuzztest") {
     "extensioncontrolinterceptor_fuzzer:fuzztest",
     "extensionpermissionsutil_fuzzer:fuzztest",
     "extensionrecordfactory_fuzzer:fuzztest",
+    "extensionrecordmanager_fuzzer:fuzztest",
     "extensionrecordmanagera_fuzzer:fuzztest",
     "faultdata_fuzzer:fuzztest",
     "forcetimeoutfortest_fuzzer:fuzztest",

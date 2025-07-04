@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,131 +17,115 @@
 
 #include <cstddef>
 #include <cstdint>
-
-#define private public
-#include "extension_record_manager.h"
-#undef private
+#include <fuzzer/FuzzedDataProvider.h>
 
 #include "ability_record.h"
+#include "extension_record_factory.h"
+#define private public
+#define inline
+#include "extension_record.h"
+#include "extension_record_manager.h"
+#define inline
+#undef private
+#include "ability_fuzz_util.h"
 
 using namespace OHOS::AAFwk;
+using namespace OHOS::AbilityRuntime;
 using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-constexpr int INPUT_ZERO = 0;
-constexpr int INPUT_ONE = 1;
-constexpr int INPUT_TWO = 2;
-constexpr int INPUT_THREE = 3;
-constexpr size_t U32_AT_SIZE = 4;
-constexpr size_t OFFSET_ZERO = 24;
-constexpr size_t OFFSET_ONE = 16;
-constexpr size_t OFFSET_TWO = 8;
-constexpr uint8_t ENABLE = 2;
+constexpr size_t STRING_MAX_LENGTH = 128;
 } // namespace
 
-uint32_t GetU32Data(const char* ptr)
+bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
-    // convert fuzz input data to an integer
-    return (ptr[INPUT_ZERO] << OFFSET_ZERO) | (ptr[INPUT_ONE] << OFFSET_ONE) | (ptr[INPUT_TWO] << OFFSET_TWO) |
-        ptr[INPUT_THREE];
-}
-
-sptr<Token> GetFuzzAbilityToken()
-{
-    sptr<Token> token = nullptr;
-    AbilityRequest abilityRequest;
-    abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
-    abilityRequest.abilityInfo.name = "MainAbility";
-    abilityRequest.abilityInfo.type = AbilityType::DATA;
-    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    if (abilityRecord) {
-        token = abilityRecord->GetToken();
-    }
-    return token;
-}
-bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
-{
-    int32_t int32Param = static_cast<int32_t>(GetU32Data(data));
-    auto extensionRecordManager = std::make_shared<AbilityRuntime::ExtensionRecordManager>(int32Param);
-    extensionRecordManager->GenerateExtensionRecordId(int32Param);
+    auto extensionRecordManager = std::make_shared<ExtensionRecordManager>(0);
+    int32_t userId;
+    int32_t extensionRecordId;
+    int32_t pid;
+    int32_t hostPid;
+    int32_t recordNum;
     std::shared_ptr<AbilityRuntime::ExtensionRecord> record;
-    extensionRecordManager->AddExtensionRecord(int32Param, record);
-    extensionRecordManager->RemoveExtensionRecord(int32Param);
-    extensionRecordManager->AddExtensionRecordToTerminatedList(int32Param);
-    AppExecFwk::AbilityInfo abilityInfo;
-    extensionRecordManager->IsBelongToManager(abilityInfo);
-    auto focusToken = GetFuzzAbilityToken();
-    extensionRecordManager->IsFocused(int32Param, focusToken, focusToken);
-    std::vector<std::string> extensionList;
-    extensionRecordManager->GetActiveUIExtensionList(int32Param, extensionList);
-    std::string strParam(data, size);
-    extensionRecordManager->GetActiveUIExtensionList(strParam, extensionList);
-    AAFwk::AbilityRequest abilityRequest;
-    extensionRecordManager->StartAbility(abilityRequest);
     std::shared_ptr<AbilityRuntime::ExtensionRecord> extensionRecord;
-    extensionRecordManager->CreateExtensionRecord(abilityRequest, strParam, extensionRecord, int32Param);
-    bool boolParam = *data % ENABLE;
-    extensionRecordManager->IsPreloadExtensionRecord(abilityRequest, strParam, extensionRecord, boolParam);
     std::shared_ptr<AAFwk::AbilityRecord> abilityRecord;
-    extensionRecordManager->AddPreloadUIExtensionRecord(abilityRecord);
-    AbilityRuntime::ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo;
-    extensionRecordManager->RemoveAllPreloadUIExtensionRecord(preLoadUIExtensionInfo);
-    std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey;
-    extensionRecordManager->RemovePreloadUIExtensionRecord(extensionRecordMapKey);
-    extensionRecordManager->RemovePreloadUIExtensionRecordById(extensionRecordMapKey, int32Param);
-    extensionRecordManager->GetOrCreateExtensionRecord(abilityRequest, strParam, abilityRecord, boolParam);
-    sptr<AAFwk::SessionInfo> sessionInfo;
-    extensionRecordManager->GetAbilityRecordBySessionInfo(sessionInfo);
-    auto token = GetFuzzAbilityToken();
-    extensionRecordManager->GetUIExtensionRootHostInfo(token);
-    UIExtensionSessionInfo uiExtensionSessionInfo;
-    extensionRecordManager->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo);
-    extensionRecordManager->LoadTimeout(int32Param);
-    extensionRecordManager->ForegroundTimeout(int32Param);
-    extensionRecordManager->BackgroundTimeout(int32Param);
-    extensionRecordManager->TerminateTimeout(int32Param);
-    extensionRecordManager->GetHostBundleNameForExtensionId(int32Param, strParam);
-    extensionRecordManager->GetRootCallerTokenLocked(int32Param);
-    extensionRecordManager->GetOrCreateExtensionRecordInner(abilityRequest, strParam, extensionRecord, boolParam);
-    extensionRecordManager->IsHostSpecifiedProcessValid(abilityRequest, record, strParam);
     std::list<sptr<IRemoteObject>> callerList;
-    mgr->GetCallerTokenList(int32Param, callerList);
+    std::string hostBundleName;
+    std::string bundleName;
+    std::string process;
+    std::string moduleName;
+    bool isLoaded;
+    AbilityInfo abilityInfo;
+    AbilityRequest abilityRequest;
+    ExtensionRecordManager::PreLoadUIExtensionMapKey preLoadUIExtensionInfo;
+    UIExtensionSessionInfo uiExtensionSessionInfo;
+    ElementName element;
+    std::vector<std::string> extensionList;
+    sptr<AAFwk::SessionInfo> sessionInfo;
+    sptr<IRemoteObject> focusedCallerToken;
+    sptr<IRemoteObject> token;
+    sptr<IRemoteObject> focusToken;
+    std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey;
 
+    FuzzedDataProvider fdp(data, size);
+    userId = fdp.ConsumeIntegral<int32_t>();
+    extensionRecordId = fdp.ConsumeIntegral<int32_t>();
+    pid = fdp.ConsumeIntegral<int32_t>();
+    hostPid = fdp.ConsumeIntegral<int32_t>();
+    recordNum = fdp.ConsumeIntegral<int32_t>();
+    hostBundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    process = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    isLoaded = fdp.ConsumeBool();
+    extensionList = AbilityFuzzUtil::GenerateStringArray(fdp);
+    AbilityFuzzUtil::GetRandomAbilityInfo(fdp, abilityInfo);
+    AbilityFuzzUtil::GetRandomAbilityRequestInfo(fdp, abilityRequest);
+    AbilityFuzzUtil::GenerateElementName(fdp, element);
+
+    extensionRecordManager->GenerateExtensionRecordId(extensionRecordId);
+    extensionRecordManager->AddExtensionRecord(extensionRecordId, record);
+    extensionRecordManager->RemoveExtensionRecord(extensionRecordId);
+    extensionRecordManager->AddExtensionRecordToTerminatedList(extensionRecordId);
+    extensionRecordManager->GetExtensionRecord(extensionRecordId, hostBundleName, extensionRecord, isLoaded);
+    extensionRecordManager->IsBelongToManager(abilityInfo);
+    extensionRecordManager->GetActiveUIExtensionList(pid, extensionList);
+    extensionRecordManager->GetActiveUIExtensionList(bundleName, extensionList);
+    extensionRecordManager->GetOrCreateExtensionRecord(abilityRequest, hostBundleName, abilityRecord, isLoaded);
+    extensionRecordManager->GetAbilityRecordBySessionInfo(sessionInfo);
+    extensionRecordManager->IsHostSpecifiedProcessValid(abilityRequest, record, process);
+    extensionRecordManager->UpdateProcessName(abilityRequest, record);
+    extensionRecordManager->GetHostBundleNameForExtensionId(extensionRecordId, hostBundleName);
+    extensionRecordManager->AddPreloadUIExtensionRecord(abilityRecord);
+    extensionRecordManager->RemoveAllPreloadUIExtensionRecord(preLoadUIExtensionInfo);
+    extensionRecordManager->IsPreloadExtensionRecord(abilityRequest, hostBundleName, extensionRecord, isLoaded);
+    extensionRecordManager->RemovePreloadUIExtensionRecordById(extensionRecordMapKey, extensionRecordId);
+    extensionRecordManager->RemovePreloadUIExtensionRecord(extensionRecordMapKey);
+    extensionRecordManager->GetOrCreateExtensionRecordInner(abilityRequest, hostBundleName, extensionRecord, isLoaded);
+    extensionRecordManager->SetAbilityProcessName(abilityRequest, abilityRecord, extensionRecord);
+    extensionRecordManager->StartAbility(abilityRequest);
+    extensionRecordManager->SetCachedFocusedCallerToken(extensionRecordId, focusedCallerToken);
+    extensionRecordManager->GetCachedFocusedCallerToken(extensionRecordId);
+    extensionRecordManager->GetRootCallerTokenLocked(extensionRecordId, abilityRecord);
+    extensionRecordManager->CreateExtensionRecord(abilityRequest, hostBundleName, extensionRecord, hostPid);
+    extensionRecordManager->GetUIExtensionRootHostInfo(token);
+    extensionRecordManager->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo);
+    extensionRecordManager->GetExtensionRecordById(extensionRecordId);
+    extensionRecordManager->LoadTimeout(extensionRecordId);
+    extensionRecordManager->ForegroundTimeout(extensionRecordId);
+    extensionRecordManager->BackgroundTimeout(extensionRecordId);
+    extensionRecordManager->TerminateTimeout(extensionRecordId);
+    extensionRecordManager->GetCallerTokenList(abilityRecord, callerList);
+    extensionRecordManager->IsFocused(extensionRecordId, token, focusToken);
+    extensionRecordManager->QueryPreLoadUIExtensionRecord(element, moduleName, hostBundleName, recordNum);
     return true;
 }
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    if (data == nullptr) {
-        std::cout << "invalid data" << std::endl;
-        return 0;
-    }
-
-    /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE) {
-        return 0;
-    }
-
-    char *ch = static_cast<char*>(malloc(size + 1));
-    if (ch == nullptr) {
-        std::cout << "malloc failed." << std::endl;
-        return 0;
-    }
-
-    (void)memset_s(ch, size + 1, 0x00, size + 1);
-    if (memcpy_s(ch, size + 1, data, size) != EOK) {
-        std::cout << "copy failed." << std::endl;
-        free(ch);
-        ch = nullptr;
-        return 0;
-    }
-
-    OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-    free(ch);
-    ch = nullptr;
+    // Run your code on data.
+    OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
