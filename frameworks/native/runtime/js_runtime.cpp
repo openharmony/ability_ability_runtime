@@ -138,7 +138,7 @@ std::unique_ptr<JsRuntime> JsRuntime::Create(const Options& options)
     std::unique_ptr<JsRuntime> instance;
     JsRuntimeLite::InitJsRuntimeLite(options);
     if (!options.preload && options.isStageModel) {
-        auto preloadedInstance = Runtime::GetPreloaded();
+        auto preloadedInstance = Runtime::GetPreloaded(Language::JS);
 #ifdef SUPPORT_SCREEN
         // reload ace if compatible mode changes
         if (Ace::AceForwardCompatibility::PipelineChanged() && preloadedInstance) {

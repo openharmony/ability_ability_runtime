@@ -420,7 +420,7 @@ HWTEST_F(JsRuntimeTest, RuntimeSavePreloadedTest_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "SavePreloaded start");
 
     Runtime::SavePreloaded(nullptr);
-    auto result = Runtime::GetPreloaded();
+    auto result = Runtime::GetPreloaded(Runtime::Language::JS);
     EXPECT_EQ(result, nullptr);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
