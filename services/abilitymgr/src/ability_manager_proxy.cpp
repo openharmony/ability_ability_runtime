@@ -6987,5 +6987,25 @@ int32_t AbilityManagerProxy::SetOnNewWantSkipScenarios(sptr<IRemoteObject> calle
     }
     return reply.ReadInt32();
 }
+
+int32_t AbilityManagerProxy::NotifyStartupExceptionBySCB(int32_t requestId)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken failed");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, requestId);
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = SendRequest(AbilityManagerInterfaceCode::NOTIFY_STARTUP_EXCEPTION_BY_SCB, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error: %{public}d", ret);
+        return ret;
+    }
+
+    return reply.ReadInt32();
+}
 } // namespace AAFwk
 } // namespace OHOS

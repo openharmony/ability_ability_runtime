@@ -251,10 +251,6 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
     return 0;
 }
 
-void UIAbilityLifecycleManager::PostCallTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord)
-{
-}
-
 void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)
 {
 }
@@ -717,10 +713,6 @@ bool UIAbilityLifecycleManager::HasAbilityRequest(const AbilityRequest &abilityR
     return false;
 }
 
-void UIAbilityLifecycleManager::AddAbilityRequest(const AbilityRequest &abilityRequest, int32_t requestId)
-{
-}
-
 void UIAbilityLifecycleManager::RemoveAbilityRequest(int32_t requestId)
 {
 }
@@ -781,6 +773,11 @@ bool UIAbilityLifecycleManager::UpdateSpecifiedFlag(std::shared_ptr<AbilityRecor
 }
 
 int32_t UIAbilityLifecycleManager::RevokeDelegator(sptr<IRemoteObject> token)
+{
+    return ERR_OK;
+}
+
+int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId)
 {
     return ERR_OK;
 }
