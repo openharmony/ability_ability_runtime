@@ -30,8 +30,6 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-constexpr uint8_t ENABLE = 2;
-constexpr size_t U32_AT_SIZE = 4;
 constexpr size_t STRING_MAX_LENGTH = 128;
 }
 
@@ -87,6 +85,17 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     stringParam = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     sptr<IRemoteObject> client;
     dataAbilityManager->Acquire(abilityRequest, boolParam, client, boolParam);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::DATA;
+    dataAbilityManager->Acquire(abilityRequest, boolParam, client, boolParam);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::UNKNOWN;
+    dataAbilityManager->Acquire(abilityRequest, boolParam, client, boolParam);
+    abilityRequest.abilityInfo.bundleName = "";
+    abilityRequest.abilityInfo.name = "";
+    dataAbilityManager->Acquire(abilityRequest, boolParam, client, boolParam);
+    boolParam = true;
+    dataAbilityManager->Acquire(abilityRequest, boolParam, client, boolParam);
+    boolParam = false;
+    dataAbilityManager->Acquire(abilityRequest, boolParam, client, boolParam);
     sptr<IAbilityScheduler> scheduler;
     dataAbilityManager->Release(scheduler, client, boolParam);
     dataAbilityManager->ContainsDataAbility(scheduler);
@@ -95,6 +104,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     dataAbilityManager->OnAbilityRequestDone(token, int32Param);
     dataAbilityManager->OnAbilityDied(abilityRecord);
     AppInfo appInfo;
+    dataAbilityManager->OnAppStateChanged(appInfo);
+    appInfo.bundleName = abilityRecord->GetApplicationInfo().bundleName;
+    appInfo.appIndex = abilityRecord->GetAppIndex();
+    appInfo.instanceKey = abilityRecord->GetInstanceKey();
     dataAbilityManager->OnAppStateChanged(appInfo);
     dataAbilityManager->GetAbilityRecordById(int64Param);
     dataAbilityManager->GetAbilityRecordByToken(token);
