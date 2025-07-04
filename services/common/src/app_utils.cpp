@@ -42,6 +42,7 @@ constexpr const char* LIMIT_MAXIMUM_OF_RENDER_PROCESS = "persist.sys.abilityms.l
 constexpr const char* GRANT_PERSIST_URI_PERMISSION = "persist.sys.abilityms.grant_persist_uri_permission";
 constexpr const char* GRANT_TEMPORARY_URI_PERMISSION = "persist.sys.abilityms.grant_temporary_uri_permission";
 constexpr const char* START_OPTIONS_WITH_ANIMATION = "persist.sys.abilityms.start_options_with_animation";
+constexpr const char* SUPPORT_START_ABILITIES = "persist.sys.abilityms.enable_start_abilities";
 constexpr const char* MULTI_PROCESS_MODEL = "persist.sys.abilityms.multi_process_model";
 constexpr const char* PARAM_ANCO_APP_IDENTIFIER = "persist.hmos_fusion_mgr.anco_identifier";
 constexpr const char* ALLOW_CHILD_PROCESS_IN_MULTI_PROCESS_FEATURE_APP =
@@ -225,6 +226,16 @@ bool AppUtils::IsStartOptionsWithAnimation()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isStartOptionsWithAnimation_.value);
     return isStartOptionsWithAnimation_.value;
+}
+
+bool AppUtils::IsSupportStartAbilities()
+{
+    if (!isSupportStartAbilities_.isLoaded) {
+        isSupportStartAbilities_.value = system::GetBoolParameter(SUPPORT_START_ABILITIES, false);
+        isSupportStartAbilities_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isSupportStartAbilities_.value);
+    return isSupportStartAbilities_.value;
 }
 
 bool AppUtils::IsMultiProcessModel()

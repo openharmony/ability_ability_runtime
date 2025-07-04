@@ -41,8 +41,11 @@ namespace {
 }
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 constexpr int32_t CYCLE_LIMIT = 1000;
+constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t MAX_AUTO_STARTUP_COUNT = 100;
 constexpr int32_t MAX_UPDATE_CONFIG_SIZE = 100;
+constexpr int32_t MAX_WANT_LIST_SIZE = 4;
+constexpr int32_t MAX_IPC_CAPACITY_FOR_WANT_LIST = 4 * 216 * 1024;
 bool AbilityManagerProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(AbilityManagerProxy::GetDescriptor())) {
@@ -500,6 +503,58 @@ int AbilityManagerProxy::StartAbilityForResultAsCaller(const Want &want, const S
     MessageOption option;
     int error =
         SendRequest(AbilityManagerInterfaceCode::START_ABILITY_FOR_RESULT_AS_CALLER_FOR_OPTIONS, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+ErrCode AbilityManagerProxy::StartUIAbilities(const std::vector<AAFwk::Want> &wantList,
+    const std::string &requestKey, sptr<IRemoteObject> callerToken)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return INVALID_CALLER_TOKEN;
+    }
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    int32_t size = static_cast<int32_t>(wantList.size());
+    if (size < INDEX_ONE || size > MAX_WANT_LIST_SIZE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "vector size error");
+        return START_UI_ABILITIES_WANT_LIST_SIZE_ERROR;
+    }
+
+    (data).SetMaxCapacity(MAX_IPC_CAPACITY_FOR_WANT_LIST);
+
+    if (!data.WriteInt32(size)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write size fail");
+        return ERR_WRITE_INT32_FAILED;
+    }
+    for (const Want &item : wantList) {
+        if (!data.WriteParcelable(&item)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write want fail");
+            return ERR_WRITE_WANT;
+        }
+    }
+
+    if (!data.WriteString(requestKey)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write requestKey fail");
+        return ERR_WRITE_STRING_FAILED;
+    }
+
+    if (!data.WriteRemoteObject(callerToken)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callerToken fail");
+        return ERR_WRITE_CALLER_TOKEN_FAILED;
+    }
+
+    auto error = SendRequest(AbilityManagerInterfaceCode::START_UI_ABILITIES, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;

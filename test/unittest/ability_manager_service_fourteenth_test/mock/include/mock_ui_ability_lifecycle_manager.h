@@ -445,11 +445,11 @@ private:
 
     void NotifyStartSpecifiedAbility(AbilityRequest &request, const AAFwk::Want &want);
     void NotifyRestartSpecifiedAbility(const AbilityRequest &request, const sptr<IRemoteObject> &token);
-    int MoveAbilityToFront(const AbilityRequest &abilityRequest, const std::shared_ptr<AbilityRecord> &abilityRecord,
-        std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions, int32_t requestId);
+    int MoveAbilityToFront(const SpecifiedRequest &specifiedRequest,
+        const std::shared_ptr<AbilityRecord> abilityRecord, std::shared_ptr<AbilityRecord> callerAbility);
     int SendSessionInfoToSCB(std::shared_ptr<AbilityRecord> &callerAbility, sptr<SessionInfo> &sessionInfo);
-    int StartAbilityBySpecifed(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &callerAbility,
-        int32_t requestId);
+    int StartAbilityBySpecifed(const SpecifiedRequest &specifiedRequest,
+        std::shared_ptr<AbilityRecord> callerAbility);
 
     void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void SetReceiverInfo(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord) const;
@@ -505,7 +505,7 @@ private:
     bool HandleStartSpecifiedCold(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag);
     bool HandleColdAcceptWantDone(const AAFwk::Want &want, const std::string &flag,
         const SpecifiedRequest &specifiedRequest);
-    void HandleLegacyAcceptWantDone(AbilityRequest &abilityRequest, int32_t requestId,
+    void HandleLegacyAcceptWantDone(SpecifiedRequest &specifiedRequest,
         const std::string &flag, const AAFwk::Want &want);
     std::shared_ptr<SpecifiedRequest> GetSpecifiedRequest(int32_t requestId);
     bool CheckPrepareTerminateTokens(const std::vector<sptr<IRemoteObject>> &tokens,

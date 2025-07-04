@@ -261,6 +261,19 @@ ErrCode AbilityManagerClient::StartAbilityForResultAsCaller(const Want &want, co
     return abms->StartAbilityForResultAsCaller(want, startOptions, callerToken, requestCode, userId);
 }
 
+ErrCode AbilityManagerClient::StartUIAbilities(const std::vector<AAFwk::Want> &wantList,
+    const std::string &requestKey, sptr<IRemoteObject> callerToken)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call StartUIAbilities");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    for (const Want &item : wantList) {
+        HandleDlpApp(const_cast<Want &>(item));
+    }
+    return abms->StartUIAbilities(wantList, requestKey, callerToken);
+}
+
 ErrCode AbilityManagerClient::StartAbilityByUIContentSession(const Want &want, const StartOptions &startOptions,
     sptr<IRemoteObject> callerToken, sptr<AAFwk::SessionInfo> sessionInfo,
     int requestCode, int32_t userId)
