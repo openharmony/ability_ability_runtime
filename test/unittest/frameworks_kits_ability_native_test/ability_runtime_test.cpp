@@ -108,7 +108,7 @@ HWTEST_F(RuntimeTest, GetPreloaded_0100, TestSize.Level2)
     std::unique_ptr<Runtime> runtime = std::make_unique<MockRuntime>();
     auto instance = std::make_unique<MockRuntime>();
     runtime->SavePreloaded(std::move(instance));
-    EXPECT_TRUE(runtime->GetPreloaded() != nullptr);
+    EXPECT_TRUE(runtime->GetPreloaded(Runtime::Language::JS) != nullptr);
     GTEST_LOG_(INFO) << "RuntimeTest GetPreloaded_0100 end";
 }
 
