@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,75 +17,71 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 
 #define private public
 #include "app_exit_reason_helper.h"
 #include "ability_manager_service.h"
 #undef private
 
-#include "securec.h"
+#include "ability_fuzz_util.h"
 #include "ability_record.h"
+#include "securec.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
-constexpr int INPUT_ZERO = 0;
-constexpr int INPUT_ONE = 1;
-constexpr int INPUT_TWO = 2;
-constexpr int INPUT_THREE = 3;
-constexpr size_t U32_AT_SIZE = 4;
-constexpr size_t OFFSET_ZERO = 24;
-constexpr size_t OFFSET_ONE = 16;
-constexpr size_t OFFSET_TWO = 8;
-constexpr uint8_t ENABLE = 2;
-}
-uint32_t GetU32Data(const char* ptr)
-{
-    // convert fuzz input data to an integer
-    return (ptr[INPUT_ZERO] << OFFSET_ZERO) | (ptr[INPUT_ONE] << OFFSET_ONE) | (ptr[INPUT_TWO] << OFFSET_TWO) |
-        ptr[INPUT_THREE];
+constexpr size_t STRING_MAX_LENGTH = 128;
 }
 
-sptr<Token> GetFuzzAbilityToken()
-{
-    sptr<Token> token = nullptr;
-    AbilityRequest abilityRequest;
-    abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
-    abilityRequest.abilityInfo.name = "MainAbility";
-    abilityRequest.abilityInfo.type = AbilityType::DATA;
-    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    if (abilityRecord) {
-        token = abilityRecord->GetToken();
-    }
-    return token;
-}
-
-bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     std::shared_ptr<SubManagersHelper> subManagersHelper;
     std::shared_ptr<AppExitReasonHelper> infos = std::make_shared<AppExitReasonHelper>(subManagersHelper);
-    std::string jsonStr(data, size);
-    Reason reasonmin = Reason::REASON_MIN;
-    Reason reasonmax = Reason::REASON_MAX;
-    for (int i  = reasonmin; i <= reasonmax; ++i) {
-        Reason reason = static_cast<Reason>(i);
-        ExitReason exitReason(reason, jsonStr);
-        infos->RecordAppExitReason(exitReason);
-        int32_t uid = static_cast<int32_t>(GetU32Data(data));
-        int32_t appIndex = static_cast<int32_t>(GetU32Data(data));
-        infos->RecordAppExitReason(jsonStr, uid, appIndex, exitReason);
-        int32_t pid = static_cast<int32_t>(GetU32Data(data));
-        infos->RecordProcessExtensionExitReason(pid, jsonStr, exitReason, {}, false);
-        infos->RecordProcessExitReason(pid, exitReason, false);
-        uint32_t accessTokenId = static_cast<uint32_t>(GetU32Data(data));
-        infos->RecordProcessExitReason(pid, jsonStr, uid, accessTokenId, exitReason, {}, false, false);
-        std::vector<std::string> abilityLists;
-        infos->GetActiveAbilityList(uid, abilityLists, pid);
-        infos->GetActiveAbilityListFromUIAbilityManager(uid, abilityLists, pid);
-        infos->IsExitReasonValid(exitReason);
-    }
+    ExitReason exitReason;
+    RunningProcessInfo processInfo;
+    std::vector<std::string> abilities;
+    std::vector<std::string> abilityLists;
+    std::vector<std::string> abilityList;
+    int32_t pid;
+    std::string bundleName;
+    std::string abilityName;
+    int32_t uid;
+    int32_t appIndex;
+    uint32_t accessTokenId;
+    int32_t userId;
+    bool searchDead;
+    bool withKillMsg;
+    bool fromKillWithReason;
+    FuzzedDataProvider fdp(data, size);
+    pid = fdp.ConsumeIntegral<int32_t>();
+    fromKillWithReason = fdp.ConsumeBool();
+    bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    uid = fdp.ConsumeIntegral<int32_t>();
+    appIndex = fdp.ConsumeIntegral<int32_t>();
+    accessTokenId = fdp.ConsumeIntegral<int32_t>();
+    userId = fdp.ConsumeIntegral<int32_t>();
+    searchDead = fdp.ConsumeBool();
+    withKillMsg = fdp.ConsumeBool();
+    abilities = AbilityFuzzUtil::GenerateStringArray(fdp);
+    abilityLists = AbilityFuzzUtil::GenerateStringArray(fdp);
+    abilityList = AbilityFuzzUtil::GenerateStringArray(fdp);
+    infos->RecordAppExitReason(exitReason);
+    infos->RecordProcessExitReason(pid, exitReason, fromKillWithReason);
+    infos->RecordAppExitReason(bundleName, uid, appIndex, exitReason);
+    infos->RecordProcessExitReason(pid, uid, exitReason);
+    infos->RecordProcessExitReason(pid, bundleName, uid, accessTokenId,
+        exitReason, processInfo, fromKillWithReason, searchDead);
+    infos->RecordProcessExtensionExitReason(pid, bundleName, exitReason, processInfo, withKillMsg);
+    infos->GetActiveAbilityList(uid, abilityLists, pid);
+    infos->GetActiveAbilityListFromUIAbilityManager(uid, abilityLists, pid);
+    infos->IsExitReasonValid(exitReason);
+    infos->GetActiveAbilityListWithPid(uid, abilityList, pid);
+    infos->RecordUIAbilityExitReason(pid, abilityName, exitReason);
+    infos->GetRunningProcessInfo(pid, userId, bundleName, processInfo);
     return true;
 }
 }
@@ -93,34 +89,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    if (data == nullptr) {
-        std::cout << "invalid data" << std::endl;
-        return 0;
-    }
-
-    /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE) {
-        return 0;
-    }
-
-    char* ch = static_cast<char*>(malloc(size + 1));
-    if (ch == nullptr) {
-        std::cout << "malloc failed." << std::endl;
-        return 0;
-    }
-
-    (void)memset_s(ch, size + 1, 0x00, size + 1);
-    if (memcpy_s(ch, size + 1, data, size) != EOK) {
-        std::cout << "copy failed." << std::endl;
-        free(ch);
-        ch = nullptr;
-        return 0;
-    }
-
-    OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-    free(ch);
-    ch = nullptr;
+    // Run your code on data.
+    OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
-
