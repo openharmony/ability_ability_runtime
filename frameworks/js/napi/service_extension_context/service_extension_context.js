@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,6 +77,11 @@ class ServiceExtensionContext extends ExtensionContext {
   startServiceExtensionAbilityWithAccount(want, accountId, callback) {
     hilog.sLogI(domainID, TAG, 'startServiceExtensionAbilityWithAccount');
     return this.__context_impl__.startServiceExtensionAbilityWithAccount(want, accountId, callback);
+  }
+
+  startUIAbilities(wantList) {
+    hilog.sLogI(domainID, TAG, 'startUIAbilities');
+    return this.__context_impl__.startUIAbilities(wantList);
   }
 
   stopServiceExtensionAbility(want, callback) {

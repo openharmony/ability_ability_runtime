@@ -15,15 +15,18 @@
 
 #include "startup_manager.h"
 
+#include <fstream>
 #include <set>
 #include <nlohmann/json.hpp>
 
 #include "app_startup_task_matcher.h"
+#include "config_policy_utils.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
 #include "extractor.h"
 #include "hitrace_meter.h"
 #include "native_startup_task.h"
+#include "preload_system_so_startup_task.h"
 #include "preload_so_startup_task.h"
 #include "startup_utils.h"
 
@@ -54,6 +57,9 @@ constexpr const char* URIS = "uris";
 constexpr const char* INSIGHT_INTENTS = "insightIntents";
 constexpr const char* ACTIONS = "actions";
 constexpr const char* CUSTOMIZATION = "customization";
+constexpr const char* PRELOAD_SYSTEM_SO_STARTUP_TASKS = "systemPreloadHintStartupTasks";
+constexpr const char* PRELOAD_SYSTEM_SO_ALLOWLIST_FILE_PATH = "/etc/ability_runtime_app_startup.json";
+constexpr const char* SYSTEM_PRELOAD_SO_ALLOW_LIST = "systemPreloadSoAllowList";
 
 struct StartupTaskResultCallbackInfo {
     std::unique_ptr<StartupTaskResultCallback> callback_;
@@ -377,10 +383,13 @@ void StartupManager::StopAutoPreloadSoTask()
     std::lock_guard guard(autoPreloadSoTaskManagerMutex_);
     autoPreloadSoStopped_ = true;
     auto task = autoPreloadSoTaskManager_.lock();
-    if (task == nullptr) {
-        return;
+    if (task != nullptr) {
+        task->TimeoutStop();
     }
-    task->TimeoutStop();
+    auto systemSoTask = autoPreloadSystemSoTaskManager_.lock();
+    if (systemSoTask != nullptr) {
+        systemSoTask->TimeoutStop();
+    }
 }
 
 bool StartupManager::HasAppStartupConfig() const
@@ -640,10 +649,11 @@ int32_t StartupManager::RunLoadModuleStartupConfigTask(
         return result;
     }
     std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSoStartupTasks;
+    std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSystemSoStartupTasks;
     std::vector<StartupTaskInfo> pendingStartupTaskInfos;
     std::string pendingConfigEntry;
-    bool success = AnalyzeStartupConfig(configInfo, configStr,
-        preloadSoStartupTasks_, pendingStartupTaskInfos_, pendingConfigEntry);
+    bool success = AnalyzeStartupConfig(configInfo, configStr, preloadSoStartupTasks,
+        preloadSystemSoStartupTasks, pendingStartupTaskInfos, pendingConfigEntry);
     if (!success) {
         TAG_LOGE(AAFwkTag::STARTUP, "failed to parse app startup module %{public}s, type: %{public}d",
             configInfo.name_.c_str(), configInfo.moduleType_);
@@ -669,7 +679,9 @@ int32_t StartupManager::RunLoadAppStartupConfigTask()
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    InitPreloadSystemSoAllowlist();
     std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSoStartupTasks;
+    std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSystemSoStartupTasks;
     std::vector<StartupTaskInfo> pendingStartupTaskInfos;
     std::string pendingConfigEntry;
     for (const auto& item : moduleStartupConfigInfos_) {
@@ -682,8 +694,8 @@ int32_t StartupManager::RunLoadAppStartupConfigTask()
         if (result != ERR_OK) {
             return result;
         }
-        bool success = AnalyzeStartupConfig(item, configStr,
-            preloadSoStartupTasks, pendingStartupTaskInfos, pendingConfigEntry);
+        bool success = AnalyzeStartupConfig(item, configStr, preloadSoStartupTasks,
+            preloadSystemSoStartupTasks, pendingStartupTaskInfos, pendingConfigEntry);
         if (!success) {
             TAG_LOGE(AAFwkTag::STARTUP, "failed to parse app startup module %{public}s, type: %{public}d",
                 item.name_.c_str(), item.moduleType_);
@@ -698,6 +710,7 @@ int32_t StartupManager::RunLoadAppStartupConfigTask()
         return ERR_OK;
     }
     preloadSoStartupTasks_ = preloadSoStartupTasks;
+    preloadSystemSoStartupTasks_ = preloadSystemSoStartupTasks;
     pendingStartupTaskInfos_ = pendingStartupTaskInfos;
     pendingConfigEntry_ = pendingConfigEntry;
     isAppStartupConfigInited_ = true;
@@ -721,6 +734,7 @@ int32_t StartupManager::AddAppAutoPreloadSoTask(
                 return ERR_STARTUP_INTERNAL_ERROR;
             }
             int32_t result = self->RunAppAutoPreloadSoTask(data);
+            self->RunAppAutoPreloadSystemSoTask();
             OnCompletedCallback::OnCallback(std::move(callback), result);
             return result;
         });
@@ -751,8 +765,24 @@ int32_t StartupManager::RunAppAutoPreloadSoTask(std::shared_ptr<AppExecFwk::Star
     return RunAppPreloadSoTask(appAutoPreloadSoTasks);
 }
 
+int32_t StartupManager::RunAppAutoPreloadSystemSoTask()
+{
+    if (preloadSystemSoStartupTasks_.empty()) {
+        TAG_LOGD(AAFwkTag::STARTUP, "no preload system so startup task");
+        return ERR_OK;
+    }
+
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    std::map<std::string, std::shared_ptr<StartupTask>> appAutoPreloadSystemSoTasks;
+    for (const auto& [name, task] : preloadSystemSoStartupTasks_) {
+        appAutoPreloadSystemSoTasks.emplace(name, task);
+    }
+
+    return RunAppPreloadSoTask(appAutoPreloadSystemSoTasks, true);
+}
+
 int32_t StartupManager::RunAppPreloadSoTask(
-    const std::map<std::string, std::shared_ptr<StartupTask>> &appPreloadSoTasks)
+    const std::map<std::string, std::shared_ptr<StartupTask>> &appPreloadSoTasks, bool isSystemSo)
 {
     std::shared_ptr<StartupTaskManager> startupTaskManager;
     int32_t result = BuildStartupTaskManager(appPreloadSoTasks, startupTaskManager);
@@ -767,7 +797,8 @@ int32_t StartupManager::RunAppPreloadSoTask(
             startupTaskManager->OnTimeout();
             return ERR_STARTUP_TIMEOUT;
         }
-        autoPreloadSoTaskManager_ = startupTaskManager;
+        isSystemSo ? (autoPreloadSystemSoTaskManager_ = startupTaskManager)
+            : (autoPreloadSoTaskManager_ = startupTaskManager);
     }
 
     result = startupTaskManager->Prepare();
@@ -921,6 +952,7 @@ int32_t StartupManager::GetStartupConfigString(const ModuleStartupConfigInfo &in
 
 bool StartupManager::AnalyzeStartupConfig(const ModuleStartupConfigInfo& info, const std::string& startupConfig,
     std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks,
+    std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSystemSoStartupTasks,
     std::vector<StartupTaskInfo>& pendingStartupTaskInfos, std::string& pendingConfigEntry)
 {
     if (startupConfig.empty()) {
@@ -952,6 +984,7 @@ bool StartupManager::AnalyzeStartupConfig(const ModuleStartupConfigInfo& info, c
     if (!AnalyzePreloadSoStartupTask(info, startupConfigJson, preloadSoStartupTasks)) {
         return false;
     }
+    AnalyzePreloadSystemSoStartupTask(startupConfigJson, preloadSystemSoStartupTasks);
     return true;
 }
 
@@ -1044,6 +1077,52 @@ bool StartupManager::AnalyzePreloadSoStartupTaskInner(const ModuleStartupConfigI
     return true;
 }
 
+void StartupManager::AnalyzePreloadSystemSoStartupTask(nlohmann::json &startupConfigJson,
+    std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks)
+{
+    if (preloadSystemSoAllowlist_.empty()) {
+        TAG_LOGD(AAFwkTag::STARTUP, "preload system so allowlist is empty, skip analyzing");
+        return;
+    }
+
+    if (!startupConfigJson.contains(PRELOAD_SYSTEM_SO_STARTUP_TASKS) ||
+        !startupConfigJson[PRELOAD_SYSTEM_SO_STARTUP_TASKS].is_array()) {
+        TAG_LOGD(AAFwkTag::STARTUP, "no preload system so startup tasks");
+        return;
+    }
+
+    for (const auto& module : startupConfigJson.at(PRELOAD_SYSTEM_SO_STARTUP_TASKS).get<nlohmann::json>()) {
+        AnalyzePreloadSystemSoStartupTaskInner(module, preloadSoStartupTasks);
+    }
+}
+
+void StartupManager::AnalyzePreloadSystemSoStartupTaskInner(
+    const nlohmann::json &preloadStartupTaskJson,
+    std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks)
+{
+    if (!preloadStartupTaskJson.is_object() ||
+        !preloadStartupTaskJson.contains(NAME) || !preloadStartupTaskJson[NAME].is_string() ||
+        !preloadStartupTaskJson.contains(OHMURL) || !preloadStartupTaskJson[OHMURL].is_string()) {
+        TAG_LOGE(AAFwkTag::STARTUP, "Invalid preload system so startup task JSON data");
+        return;
+    }
+
+    std::string ohmUrl = preloadStartupTaskJson.at(OHMURL).get<std::string>();
+    if (preloadSystemSoAllowlist_.find(ohmUrl) == preloadSystemSoAllowlist_.end()) {
+        TAG_LOGE(AAFwkTag::STARTUP, "ohmUrl %{public}s is in forbidden whitelist", ohmUrl.c_str());
+        return;
+    }
+
+    std::string name = preloadStartupTaskJson.at(NAME).get<std::string>();
+    if (name.empty()) {
+        TAG_LOGE(AAFwkTag::STARTUP, "field name cannot be empty, ohmUrl is %{public}s", ohmUrl.c_str());
+        return;
+    }
+    auto task = std::make_shared<PreloadSystemSoStartupTask>(name, ohmUrl);
+    preloadSoStartupTasks.emplace(name, task);
+    return;
+}
+
 void StartupManager::SetOptionalParameters(const nlohmann::json& module, AppExecFwk::ModuleType moduleType,
     StartupTaskInfo& startupTaskInfo)
 {
@@ -1128,6 +1207,79 @@ void StartupManager::SetMatchRules(const nlohmann::json &module, StartupTaskMatc
         "SetMatchRules uris:%{public}zu, insightIntents:%{public}zu, actions:%{public}zu, customization:%{public}zu",
         matchRules.uris.size(), matchRules.insightIntents.size(), matchRules.actions.size(),
         matchRules.customization.size());
+}
+
+void StartupManager::InitPreloadSystemSoAllowlist()
+{
+    nlohmann::json parseResult;
+    if (!ReadPreloadSystemSoAllowlistFile(parseResult)) {
+        TAG_LOGE(AAFwkTag::STARTUP, "failed to parse preload system so allowlist file");
+        preloadSystemSoAllowlist_.clear();
+        return;
+    }
+
+    if (!ParsePreloadSystemSoAllowlist(parseResult, preloadSystemSoAllowlist_)) {
+        TAG_LOGE(AAFwkTag::STARTUP, "parsing failed. Clear the blank list of names.");
+        preloadSystemSoAllowlist_.clear();
+    }
+}
+
+bool StartupManager::ReadPreloadSystemSoAllowlistFile(nlohmann::json &jsonStr)
+{
+    auto getConfigPath = []() -> const std::string {
+        char buf[MAX_PATH_LEN] = {0};
+        char *configPath = GetOneCfgFile(PRELOAD_SYSTEM_SO_ALLOWLIST_FILE_PATH, buf, MAX_PATH_LEN);
+        if (configPath == nullptr || configPath[0] == '\0' || strlen(configPath) > MAX_PATH_LEN) {
+            return "";
+        }
+        char path[PATH_MAX] = {0};
+        if (realpath(configPath, path) == nullptr) {
+            return "";
+        }
+        return std::string(path);
+    };
+
+    std::string configPath = getConfigPath();
+    if (configPath.empty()) {
+        TAG_LOGD(AAFwkTag::STARTUP, "failed to get preload system so allowlist config path");
+        return true;
+    }
+
+    std::ifstream preloadSystemSoAllowFile;
+    preloadSystemSoAllowFile.open(configPath, std::ios::in);
+    if (!preloadSystemSoAllowFile.is_open()) {
+        TAG_LOGE(AAFwkTag::STARTUP, "failed to open preload system so allowlist file: %{public}s",
+            configPath.c_str());
+        return false;
+    }
+
+    std::string fileContent(
+        (std::istreambuf_iterator<char>(preloadSystemSoAllowFile)), std::istreambuf_iterator<char>());
+    preloadSystemSoAllowFile.close();
+
+    jsonStr = nlohmann::json::parse(fileContent, nullptr, false);
+    return true;
+}
+
+bool StartupManager::ParsePreloadSystemSoAllowlist(
+    const nlohmann::json &jsonStr, std::unordered_set<std::string> &allowlist)
+{
+    if (jsonStr.is_discarded() || !jsonStr.is_object()) {
+        TAG_LOGE(AAFwkTag::STARTUP, "failed to parse JSON string for allowlist.");
+        return false;
+    }
+    if (!jsonStr.contains(SYSTEM_PRELOAD_SO_ALLOW_LIST) || !jsonStr[SYSTEM_PRELOAD_SO_ALLOW_LIST].is_array()) {
+        TAG_LOGE(AAFwkTag::STARTUP, "json does not contain valid 'systemPreloadSoAllowList' array.");
+        return false;
+    }
+    allowlist.clear();
+    for (const auto &item : jsonStr[SYSTEM_PRELOAD_SO_ALLOW_LIST]) {
+        if (!item.is_string()) {
+            continue;
+        }
+        allowlist.insert(item.get<std::string>());
+    }
+    return true;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

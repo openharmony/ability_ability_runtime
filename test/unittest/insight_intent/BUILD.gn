@@ -30,5 +30,6 @@ group("unittest") {
     "js_insight_intent_page_second_test:unittest",
     "js_insight_intent_page_test:unittest",
     "js_insight_intent_utils_test:unittest",
+    "insight_intent_sys_event_receiver_test:unittest",
   ]
 }

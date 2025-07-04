@@ -489,6 +489,22 @@ HWTEST_F(AbilityManagerClientTest, StartAbilityByCallWithErrMsg_0100, TestSize.L
 }
 
 /**
+ * @tc.name: AbilityManagerClient_StartUIAbilities_0100
+ * @tc.desc: StartUIAbilities
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, StartUIAbilities_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartUIAbilities_0100 start");
+    std::vector<Want> wantList(2);
+    std::string requestKey = "12345";
+    sptr<IRemoteObject> callToken = sptr<AbilityRuntime::MockIRemoteObject>::MakeSptr();
+    auto result = AbilityManagerClient::GetInstance()->StartUIAbilities(wantList, requestKey, callToken);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "StartUIAbilities_0100 end");
+}
+
+/**
  * @tc.name: AbilityManagerClient_QueryPreLoadUIExtensionRecord_0100
  * @tc.desc: QueryPreLoadUIExtensionRecord
  * @tc.type: FUNC

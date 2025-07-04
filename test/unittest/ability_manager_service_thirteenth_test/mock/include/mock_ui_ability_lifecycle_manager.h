@@ -164,6 +164,8 @@ public:
     void SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession);
 
     int NotifySCBToStartUIAbility(AbilityRequest &abilityRequest);
+    int32_t NotifySCBToStartUIAbilities(std::vector<AbilityRequest> &abilityRequestList,
+        const std::string &requestKey);
 
     int NotifySCBToPreStartUIAbility(const AbilityRequest &abilityRequest,
         sptr<SessionInfo> &sessionInfo);
@@ -391,6 +393,8 @@ public:
 
     void RecordPidKilling(pid_t pid, const std::string &reason);
 
+    int32_t NotifyStartupExceptionBySCB(int32_t requestId);
+
 private:
     void AddStartingPid(pid_t pid);
     void RemoveStartingPid(pid_t pid);
@@ -446,11 +450,11 @@ private:
 
     void NotifyStartSpecifiedAbility(AbilityRequest &request, const AAFwk::Want &want);
     void NotifyRestartSpecifiedAbility(const AbilityRequest &request, const sptr<IRemoteObject> &token);
-    int MoveAbilityToFront(const AbilityRequest &abilityRequest, const std::shared_ptr<AbilityRecord> &abilityRecord,
-        std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions, int32_t requestId);
+    int MoveAbilityToFront(const SpecifiedRequest &specifiedRequest,
+        const std::shared_ptr<AbilityRecord> abilityRecord, std::shared_ptr<AbilityRecord> callerAbility);
     int SendSessionInfoToSCB(std::shared_ptr<AbilityRecord> &callerAbility, sptr<SessionInfo> &sessionInfo);
-    int StartAbilityBySpecifed(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &callerAbility,
-        int32_t requestId);
+    int StartAbilityBySpecifed(const SpecifiedRequest &specifiedRequest,
+        std::shared_ptr<AbilityRecord> callerAbility);
 
     void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void SetReceiverInfo(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord) const;
@@ -485,11 +489,9 @@ private:
     std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         bool &isColdStart);
     std::shared_ptr<AbilityRecord> FindRecordFromTmpMap(const AbilityRequest &abilityRequest);
-    void PostCallTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord);
     bool AddStartCallerTimestamp(int32_t callerUid);
     std::shared_ptr<AbilityRecord> FindRecordFromSessionMap(const AbilityRequest &abilityRequest);
     bool HasAbilityRequest(const AbilityRequest &abilityRequest);
-    void AddAbilityRequest(const AbilityRequest &abilityRequest, int32_t requestId);
     void RemoveAbilityRequest(int32_t requestId);
     inline int32_t GetRequestId()
     {
@@ -506,7 +508,7 @@ private:
     bool HandleStartSpecifiedCold(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag);
     bool HandleColdAcceptWantDone(const AAFwk::Want &want, const std::string &flag,
         const SpecifiedRequest &specifiedRequest);
-    void HandleLegacyAcceptWantDone(AbilityRequest &abilityRequest, int32_t requestId,
+    void HandleLegacyAcceptWantDone(SpecifiedRequest &specifiedRequest,
         const std::string &flag, const AAFwk::Want &want);
     std::shared_ptr<SpecifiedRequest> GetSpecifiedRequest(int32_t requestId);
     bool CheckPrepareTerminateTokens(const std::vector<sptr<IRemoteObject>> &tokens,

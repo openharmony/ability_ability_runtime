@@ -43,6 +43,7 @@ constexpr const char* WANT_PARAMS_APP_RESTART_FLAG = "ohos.aafwk.app.restart";
 constexpr const char* CALLER_REQUEST_CODE = "ohos.extra.param.key.callerRequestCode";
 constexpr const char* IS_SHELL_CALL = "isShellCall";
 constexpr const char* COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
+constexpr const char* SPECIFIED_ABILITY_FLAG = "ohos.ability.params.specifiedAbilityFlag";
 }
 
 UpdateCallerInfoUtil &UpdateCallerInfoUtil::GetInstance()
@@ -340,6 +341,7 @@ void UpdateCallerInfoUtil::ClearProtectedWantParam(Want &want)
         // only system app can set unifiedDataKey
         want.RemoveParam(Want::PARAM_ABILITY_UNIFIED_DATA_KEY);
     }
+    want.RemoveParam(SPECIFIED_ABILITY_FLAG);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
