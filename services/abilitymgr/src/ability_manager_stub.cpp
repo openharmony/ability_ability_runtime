@@ -889,6 +889,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentyFirst(uint32_t code, MessagePa
     if (interfaceCode == AbilityManagerInterfaceCode::SET_ON_NEW_WANT_SKIP_SCENARIOS) {
         return SetOnNewWantSkipScenariosInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::NOTIFY_STARTUP_EXCEPTION_BY_SCB) {
+        return NotifyStartupExceptionBySCBInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -4859,6 +4862,18 @@ int32_t AbilityManagerStub::SetOnNewWantSkipScenariosInner(MessageParcel &data, 
     int32_t result = SetOnNewWantSkipScenarios(token, scenarios);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
+        return ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::NotifyStartupExceptionBySCBInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    int32_t requestId = data.ReadInt32();
+    int32_t result = NotifyStartupExceptionBySCB(requestId);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to write result.");
         return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
