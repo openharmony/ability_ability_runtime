@@ -1182,6 +1182,7 @@ public:
         const std::string &message);
 
     void NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element);
+    void NotifyAbilitiesRequestDone(const std::string &requestKey, int32_t resultCode);
 
     void ScheduleCollaborate(const Want &want);
 

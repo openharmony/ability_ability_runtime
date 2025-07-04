@@ -305,6 +305,20 @@ public:
     }
 
     /**
+     * Start UI abilities simultaneously.
+     *
+     * @param wantList a list of want to start UI abilities.
+     * @param requestKey, The unique key of this StartUIAbilities request.
+     * @param callerToken current caller ability token.
+     * @return Returns ERR_OK if success.
+     */
+    virtual ErrCode StartUIAbilities(const std::vector<AAFwk::Want> &wantList,
+        const std::string &requestKey, sptr<IRemoteObject> callerToken)
+    {
+        return 0;
+    }
+
+    /**
      * Start ui session ability with extension session info, send session info to ability manager service.
      *
      * @param want, the want of the ability to start.

@@ -422,6 +422,9 @@ enum class AbilityManagerInterfaceCode {
 
     NOTIFY_STARTUP_EXCEPTION_BY_SCB = 1072,
 
+    // ipc id for start UI abilities
+    START_UI_ABILITIES = 1073,
+
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 

@@ -391,7 +391,7 @@ void UIAbilityLifecycleManager::OnAcceptWantResponse(const AAFwk::Want &want, co
 {
 }
 
-void UIAbilityLifecycleManager::HandleLegacyAcceptWantDone(AbilityRequest &abilityRequest, int32_t requestId,
+void UIAbilityLifecycleManager::HandleLegacyAcceptWantDone(SpecifiedRequest &specifiedRequest,
     const std::string &flag, const AAFwk::Want &want)
 {
 }
@@ -427,9 +427,8 @@ void UIAbilityLifecycleManager::NotifyStartSpecifiedAbility(AbilityRequest &abil
 {
 }
 
-int UIAbilityLifecycleManager::MoveAbilityToFront(const AbilityRequest &abilityRequest,
-    const std::shared_ptr<AbilityRecord> &abilityRecord, std::shared_ptr<AbilityRecord> callerAbility,
-    std::shared_ptr<StartOptions> startOptions, int32_t requestId)
+int UIAbilityLifecycleManager::MoveAbilityToFront(const SpecifiedRequest &specifiedRequest,
+    const std::shared_ptr<AbilityRecord> abilityRecord, std::shared_ptr<AbilityRecord> callerAbility)
 {
     return ERR_OK;
 }
@@ -440,8 +439,8 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(std::shared_ptr<AbilityRecor
     return ERR_OK;
 }
 
-int UIAbilityLifecycleManager::StartAbilityBySpecifed(const AbilityRequest &abilityRequest,
-    std::shared_ptr<AbilityRecord> &callerAbility, int32_t requestId)
+int UIAbilityLifecycleManager::StartAbilityBySpecifed(const SpecifiedRequest &specifiedRequest,
+    std::shared_ptr<AbilityRecord> callerAbility)
 {
     return ERR_OK;
 }

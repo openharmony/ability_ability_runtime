@@ -154,6 +154,14 @@ ErrCode ServiceExtensionContext::StartAbilityWithAccount(
     return err;
 }
 
+ErrCode ServiceExtensionContext::StartUIAbilities(const std::vector<AAFwk::Want> &wantList,
+    const std::string &requestKey)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "call StartUIAbilities");
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilities(wantList, requestKey, token_);
+    return err;
+}
+
 ErrCode ServiceExtensionContext::StartServiceExtensionAbility(const AAFwk::Want &want, int32_t accountId) const
 {
     TAG_LOGD(AAFwkTag::APPKIT, "begin");
