@@ -342,6 +342,19 @@ void STSEnvironment::PostTask(const std::function<void()>& task, const std::stri
     }
 }
 
+DebuggerPostTask STSEnvironment::GetDebuggerPostTask()
+{
+    auto debuggerPostTask = [weak = weak_from_this()](std::function<void()>&& task) {
+        auto stsEnv = weak.lock();
+        if (stsEnv == nullptr) {
+            TAG_LOGE(AAFwkTag::JSENV, "StsEnv is invalid");
+            return;
+        }
+        stsEnv->PostTask(task, "StsEnvironment:GetDebuggerPostTask");
+    };
+    return debuggerPostTask;
+}
+
 void STSEnvironment::PostSyncTask(const std::function<void()>& task, const std::string& name)
 {
     LOGI("PostSyncTask: %{public}s", name.c_str());

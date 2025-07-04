@@ -33,6 +33,7 @@ struct STSRuntimeAPI;
 using TaskFuncType = void (*)();
 namespace StsEnv {
 class StsEnvironmentImpl;
+using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
 class STSEnvironment final : public std::enable_shared_from_this<STSEnvironment> {
 public:
     explicit STSEnvironment(std::unique_ptr<StsEnvironmentImpl> impl);
@@ -75,6 +76,7 @@ public:
     void PostTask(const std::function<void()>& task, const std::string& name = "", int64_t delayTime = 0);
     void PostSyncTask(const std::function<void()>& task, const std::string& name);
     void RemoveTask(const std::string& name);
+    DebuggerPostTask GetDebuggerPostTask();
     bool InitLoop(bool isStage);
     void DeInitLoop();
     bool ReInitUVLoop();

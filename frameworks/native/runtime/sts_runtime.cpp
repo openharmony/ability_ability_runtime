@@ -249,6 +249,7 @@ std::shared_ptr<StsAppLibNamespaceMgr> g_stsAppLibNamespaceMgr;
 } // namespace
 
 AppLibPathVec STSRuntime::appLibPaths_;
+AbilityRuntime::JsRuntime* STSRuntime::jsRuntime_ = nullptr;
 
 std::unique_ptr<STSRuntime> STSRuntime::PreFork(const Options& options)
 {
@@ -301,6 +302,7 @@ void STSRuntime::PostFork(const Options &options, std::vector<ani_option>& aniOp
 std::unique_ptr<STSRuntime> STSRuntime::Create(const Options& options, JsRuntime* jsRuntime)
 {
     TAG_LOGD(AAFwkTag::STSRUNTIME, "create ets runtime");
+    STSRuntime::jsRuntime_ = static_cast<AbilityRuntime::JsRuntime*>(jsRuntime);
     std::unique_ptr<STSRuntime> instance;
     auto preloadedInstance = Runtime::GetPreloaded(options.lang);
 #ifdef SUPPORT_SCREEN
@@ -441,7 +443,7 @@ void STSRuntime::StartDebugMode(const DebugOption dOption)
             }
             int32_t identifierId = weak->ParseHdcRegisterOption(option);
             if (identifierId == -1) {
-                TAG_LOGE(AAFwkTag::JSENV, "Abnormal parsing of tid results");
+                TAG_LOGE(AAFwkTag::STSRUNTIME, "Abnormal parsing of tid results");
                 return;
             }
             weak->debugMode_ = ark::ArkDebugNativeAPI::StartDebuggerForSocketPair(identifierId, socketFd);
@@ -457,7 +459,14 @@ void STSRuntime::DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebu
         TAG_LOGE(AAFwkTag::STSRUNTIME, "null stsEnv");
         return;
     }
-    ark::ArkDebugNativeAPI::NotifyDebugMode(getproctid(), instanceId_, isStartWithDebug);
+    auto dTask = stsEnv_->GetDebuggerPostTask();
+    if (STSRuntime::jsRuntime_ == nullptr) {
+        TAG_LOGD(AAFwkTag::STSRUNTIME, "jsRuntime_ is nullptr");
+        return;
+    }
+    ark::ArkDebugNativeAPI::NotifyDebugMode(getproctid(), instanceId_, isStartWithDebug,
+                                            STSRuntime::jsRuntime_->GetEcmaVm(),
+                                            dTask);
 }
 
 void STSRuntime::UnLoadSTSAppLibrary()
@@ -986,7 +995,11 @@ void STSRuntime::StopDebugMode()
     CHECK_POINTER(stsEnv_);
     if (stsEnv_->debugMode_) {
         ConnectServerManager::Get().RemoveInstance(instanceId_);
-        ark::ArkDebugNativeAPI::StopDebugger();
+        if (STSRuntime::jsRuntime_ == nullptr) {
+            TAG_LOGD(AAFwkTag::STSRUNTIME, "jsRuntime_ is nullptr");
+            return;
+        }
+        ark::ArkDebugNativeAPI::StopDebugger(STSRuntime::jsRuntime_->GetEcmaVm());
     }
 }
 
