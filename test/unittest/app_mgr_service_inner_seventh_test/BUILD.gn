@@ -85,6 +85,7 @@ ohos_unittest("app_mgr_service_inner_seventh_test") {
     "mock/src/mock_permission_verification.cpp",
     "mock/src/mock_remote_client_manager.cpp",
     "mock/src/mock_user_record_manager.cpp",
+    "mock/src/session_manager_lite.cpp",
   ]
 
   sources +=[ "mock/src/overlay_manager_client.cpp" ]
@@ -139,7 +140,6 @@ ohos_unittest("app_mgr_service_inner_seventh_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "selinux_adapter:librestorecon",
-    "window_manager:session_manager_lite",
   ]
   defines = []
   if (ability_runtime_child_process) {

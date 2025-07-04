@@ -17,6 +17,7 @@
 
 #include "ability_manager_service.h"
 #include "hilog_tag_wrapper.h"
+#include "insight_intent_db_cache.h"
 #include "sub_managers_helper.h"
 #include "mission_list_manager.h"
 #include "global_constant.h"
@@ -1849,6 +1850,62 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, GetInsightIntentInfoByIntentName_0
     auto ret = abilityMs->GetInsightIntentInfoByIntentName(flag, bundleName, moduleName, intentName, info);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest GetInsightIntentInfoByIntentName_004 end");
+}
+
+/*
+* Feature: AbilityManagerService
+* Function: IntentOpenLinkInner
+* FunctionPoints: AbilityManagerService IntentOpenLinkInner
+*/
+HWTEST_F(AbilityManagerServiceThirteenthTest, AbilityManagerServiceTest_IntentOpenLinkInner_001, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    AppExecFwk::InsightIntentExecuteParam param{};
+    param.insightIntentParam_ = std::make_shared<WantParams>();
+    param.uris_.push_back("");
+    AbilityRuntime::ExtractInsightIntentGenericInfo info{};
+    auto paramPtr = std::make_shared<InsightIntentExecuteParam>(param);
+    int res = abilityMs->IntentOpenLinkInner(paramPtr, info, -1);
+    EXPECT_NE(res, ERR_OK);
+}
+
+/*
+* Feature: AbilityManagerService
+* Function: IntentOpenLinkInner
+* FunctionPoints: AbilityManagerService IntentOpenLinkInner
+*/
+HWTEST_F(AbilityManagerServiceThirteenthTest, AbilityManagerServiceTest_IntentOpenLinkInner_002, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    AppExecFwk::InsightIntentExecuteParam param{};
+    param.insightIntentParam_ = std::make_shared<WantParams>();
+    param.uris_.push_back("123");
+    AbilityRuntime::ExtractInsightIntentGenericInfo info{};
+    auto paramPtr = std::make_shared<InsightIntentExecuteParam>(param);
+    int res = abilityMs->IntentOpenLinkInner(paramPtr, info, -1);
+    EXPECT_NE(res, ERR_OK);
+}
+
+/*
+* Feature: AbilityManagerService
+* Function: IntentOpenLinkInner
+* FunctionPoints: AbilityManagerService IntentOpenLinkInner
+*/
+HWTEST_F(AbilityManagerServiceThirteenthTest, AbilityManagerServiceTest_IntentOpenLinkInner_003, TestSize.Level1)
+{
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    AppExecFwk::InsightIntentExecuteParam param{};
+    param.insightIntentParam_ = std::make_shared<WantParams>();
+    param.uris_.push_back("123");
+    AbilityRuntime::ExtractInsightIntentGenericInfo info{};
+    auto refLinkInfo = info.get<InsightIntentLinkInfo>();
+    refLinkInfo.uri = "123";
+    auto paramPtr = std::make_shared<InsightIntentExecuteParam>(param);
+    int res = abilityMs->IntentOpenLinkInner(paramPtr, info, -1);
+    EXPECT_NE(res, ERR_OK);
 }
 } // namespace AAFwk
 } // namespace OHOS
