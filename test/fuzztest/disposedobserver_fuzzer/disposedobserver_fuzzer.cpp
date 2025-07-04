@@ -37,7 +37,9 @@ bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     Parcel parcel;
     parcel.WriteString(fdp->ConsumeRandomLengthString());
     sptr<AppExecFwk::AbilityStateData> abilityStateData = AppExecFwk::AbilityStateData::Unmarshalling(parcel);
+    sptr<AppExecFwk::PageStateData> pageStateData = AppExecFwk::PageStateData::Unmarshalling(parcel);
     disposedObserver->OnAbilityStateChanged(*abilityStateData);
+    disposedObserver->OnPageShow(*pageStateData);
     return true;
 }
 } // namespace OHOS
