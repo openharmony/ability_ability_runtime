@@ -1141,6 +1141,21 @@ HWTEST_F(StartupManagerTest, GetModuleConfig_0100, Function | MediumTest | Level
 }
 
 /**
+ * @tc.name: GetModuleConfig_0200
+ * @tc.type: FUNC
+ * @tc.Function: GetModuleConfig
+ */
+HWTEST_F(StartupManagerTest, GetModuleConfig_0200, Function | MediumTest | Level1)
+{
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    EXPECT_TRUE(startupManager != nullptr);
+    std::string moduleName = "application";
+    auto config = std::make_shared<StartupConfig>();
+    startupManager->SetModuleConfig(config, moduleName, true);
+    EXPECT_EQ(startupManager->defaultConfig_, config);
+}
+
+/**
  * @tc.name: RunLoadModuleStartupConfigTask_0100
  * @tc.type: FUNC
  * @tc.Function: RunLoadModuleStartupConfigTask

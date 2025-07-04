@@ -236,6 +236,12 @@ HWTEST_F(AppStartupTaskMatcherTest, UriStartupTaskMatcher_0100, Function | Mediu
     UriStartupTaskMatcher matcher3(want3);
     ret = matcher3.Match(task);
     EXPECT_EQ(ret, true);
+
+    std::shared_ptr<AAFwk::Want> nullWant = nullptr;
+    UriStartupTaskMatcher matcher4(nullWant);
+    ret = matcher4.Match(task);
+    EXPECT_EQ(ret, false);
+
     GTEST_LOG_(INFO) << "UriStartupTaskMatcher_0100 end";
 }
 
