@@ -116,6 +116,7 @@ group("fuzztest") {
     "abilitymgruiextensionrecord_fuzzer:fuzztest",
     "abilitymgruiextensionrecord_fuzzer:fuzztest",
     "abilitymgruiextensionsessioninfo_fuzzer:fuzztest",
+    "abilityresidentprocessrdb_fuzzer:fuzztest",
     "abilityrunningrecord_fuzzer:fuzztest",
     "abilitystartwithwaitdata_fuzzer:fuzztest",
     "abilitystartwithwaitobservermanager_fuzzer:fuzztest",
