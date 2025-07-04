@@ -54,7 +54,7 @@ ohos_shared_library("ets_environment") {
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "runtime_core:ani",
-    "runtime_core:libarkruntime"
+    "runtime_core:libarkruntime",
   ]
 
   if (ability_runtime_graphics) {
