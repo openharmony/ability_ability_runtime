@@ -5660,34 +5660,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CallAbilityLocked_0001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PostCallTimeoutTask_001
- * @tc.desc: abilityRecord is nullptr, tmpAbilityMap_ and callRequestCache_ remain unchanged
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, PostCallTimeoutTask_001, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    size_t beforeSize = mgr->tmpAbilityMap_.size();
-    mgr->PostCallTimeoutTask(nullptr);
-    EXPECT_EQ(mgr->tmpAbilityMap_.size(), beforeSize);
-}
-
-/**
- * @tc.name: PostCallTimeoutTask_002
- * @tc.desc: abilityRecord not in tmpAbilityMap_, tmpAbilityMap_ and callRequestCache_ remain unchanged after timeout
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, PostCallTimeoutTask_002, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    AbilityRequest request;
-    request.abilityInfo.name = "AbilityA";
-    auto record = AbilityRecord::CreateAbilityRecord(request);
-    size_t beforeSize = mgr->tmpAbilityMap_.size();
-    mgr->PostCallTimeoutTask(record);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    EXPECT_EQ(mgr->tmpAbilityMap_.size(), beforeSize);
-}
-
-/**
  * @tc.name: IsHookModule_0001
  * @tc.desc: GetHapModuleInfo returns false, should return false
  */

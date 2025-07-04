@@ -1860,6 +1860,8 @@ public:
 
     ErrCode SetOnNewWantSkipScenarios(sptr<IRemoteObject> callerToken, int32_t scenarios);
 
+    ErrCode NotifyStartupExceptionBySCB(int32_t requestId);
+
 private:
     AbilityManagerClient();
     DISALLOW_COPY_AND_MOVE(AbilityManagerClient);
