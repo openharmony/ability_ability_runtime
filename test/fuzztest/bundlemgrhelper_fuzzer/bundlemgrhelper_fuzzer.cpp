@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,6 +104,7 @@ void BundleMgrHelperFuzztest1(bool boolParam, std::string &stringParam, int32_t 
     bmHelper->GetBundleInfoForSelf(int32Param, bundleInfo);
     bmHelper->GetDependentBundleInfo(stringParam, bundleInfo, static_cast<GetDependentBundleInfoFlag>(int32Param));
     bmHelper->GetGroupDir(stringParam, stringParam);
+    bmHelper->GetOverlayManagerProxy();
     bmHelper->QueryAbilityInfo(want, abilityInfo);
     bmHelper->QueryAbilityInfo(want, int32Param, int32Param, abilityInfo);
     std::vector<BundleInfo> bundleInfos;

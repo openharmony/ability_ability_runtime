@@ -28,6 +28,7 @@ ohos_unittest("quick_fix_manager_service_second_test") {
 
   sources = [
     "${ability_runtime_test_path}/mock/services_appmgr_test/src/mock_bundle_manager.cpp",
+    "${ability_runtime_test_path}/mock/services_appmgr_test/src/mock_overlay_manager.cpp",
     "${ability_runtime_test_path}/unittest/quick_fix/mock/src/mock_quick_fix_util.cpp",
     "mock/src/mock_my_flag.cpp",
     "mock/src/mock_permission_verification.cpp",
