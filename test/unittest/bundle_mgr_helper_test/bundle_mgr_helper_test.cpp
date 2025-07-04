@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,6 +165,17 @@ HWTEST_F(BundleMgrHelperTest, BundleMgrHelperTest_GetGroupDir_001, TestSize.Leve
     std::string dir;
     auto ret = bundleMgrHelper->GetGroupDir(dataGroupId, dir);
     EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: BundleMgrHelperTest_GetOverlayManagerProxy_001
+ * @tc.desc: GetOverlayManagerProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleMgrHelperTest, BundleMgrHelperTest_GetOverlayManagerProxy_001, TestSize.Level1)
+{
+    auto ret = bundleMgrHelper->GetOverlayManagerProxy();
+    EXPECT_NE(ret, nullptr);
 }
 
 /**
