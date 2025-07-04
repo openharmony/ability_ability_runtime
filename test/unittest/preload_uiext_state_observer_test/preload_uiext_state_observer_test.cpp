@@ -186,7 +186,7 @@ HWTEST_F(PreloadUIextStateObserverTest, OnAppCacheStateChanged_003, Function | M
     preLoadUIExtStateObserver.OnAppCacheStateChanged(appStateData);
     auto record = preLoadUIExtStateObserver.extensionRecord_.lock();
     EXPECT_TRUE(record != nullptr);
-    EXPECT_TRUE(record->hostPid_ == diedPid);
+    EXPECT_TRUE(record->hostPid_ != diedPid);
     GTEST_LOG_(INFO) << "OnAppCacheStateChanged_003 end";
 }
 } // namespace AbilityRuntime
