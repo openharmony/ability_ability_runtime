@@ -123,6 +123,7 @@ group("fuzztest") {
     "abilitypermissionutil_fuzzer:fuzztest",
     "abilitymissioninfo_fuzzer:fuzztest",
     "abilityprocessoptions_fuzzer:fuzztest",
+    "abilityresidentprocessrdb_fuzzer:fuzztest",
     "abilityrunningrecord_fuzzer:fuzztest",
     "abilitystartwithwaitdata_fuzzer:fuzztest",
     "abilitystartwithwaitobservermanager_fuzzer:fuzztest",
