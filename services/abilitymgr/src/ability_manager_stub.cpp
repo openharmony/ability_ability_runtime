@@ -32,8 +32,10 @@ using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 namespace {
 const std::u16string extensionDescriptor = u"ohos.aafwk.ExtensionManager";
 constexpr int32_t CYCLE_LIMIT = 1000;
+constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t MAX_KILL_PROCESS_PID_COUNT = 100;
 constexpr int32_t MAX_UPDATE_CONFIG_SIZE = 100;
+constexpr int32_t MAX_WANT_LIST_SIZE = 4;
 } // namespace
 AbilityManagerStub::AbilityManagerStub()
 {}
@@ -578,6 +580,9 @@ int AbilityManagerStub::OnRemoteRequestInnerFourteenth(uint32_t code, MessagePar
     if (interfaceCode == AbilityManagerInterfaceCode::CLOSE_UI_EXTENSION_ABILITY_BY_SCB) {
         return CloseUIExtensionAbilityBySCBInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::START_UI_ABILITIES) {
+        return StartUIAbilitiesInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -888,6 +893,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentyFirst(uint32_t code, MessagePa
     }
     if (interfaceCode == AbilityManagerInterfaceCode::SET_ON_NEW_WANT_SKIP_SCENARIOS) {
         return SetOnNewWantSkipScenariosInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::NOTIFY_STARTUP_EXCEPTION_BY_SCB) {
+        return NotifyStartupExceptionBySCBInner(data, reply);
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -3865,6 +3873,38 @@ int AbilityManagerStub::StartAbilityForResultAsCallerInner(MessageParcel &data, 
     return NO_ERROR;
 }
 
+int32_t AbilityManagerStub::StartUIAbilitiesInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call StartUIAbilitiesInner");
+
+    std::vector<Want> wantList;
+    int32_t size = data.ReadInt32();
+    if (size < INDEX_ONE || size > MAX_WANT_LIST_SIZE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "vector size error");
+        return START_UI_ABILITIES_WANT_LIST_SIZE_ERROR;
+    }
+    for (auto i = 0; i < size; i++) {
+        std::unique_ptr<Want> want(data.ReadParcelable<Want>());
+        if (want == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null want");
+            return ERR_NATIVE_IPC_PARCEL_FAILED;
+        }
+        wantList.emplace_back(*want);
+    }
+
+    std::string requestKey = data.ReadString();
+
+    sptr<IRemoteObject> callerToken = data.ReadRemoteObject();
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return INVALID_CALLER_TOKEN;
+    }
+
+    int32_t result = StartUIAbilities(wantList, requestKey, callerToken);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::StartAbilityForResultAsCallerForOptionsInner(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
@@ -4859,6 +4899,18 @@ int32_t AbilityManagerStub::SetOnNewWantSkipScenariosInner(MessageParcel &data, 
     int32_t result = SetOnNewWantSkipScenarios(token, scenarios);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
+        return ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::NotifyStartupExceptionBySCBInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    int32_t requestId = data.ReadInt32();
+    int32_t result = NotifyStartupExceptionBySCB(requestId);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Fail to write result.");
         return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;

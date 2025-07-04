@@ -1003,5 +1003,35 @@ HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_SetOnNewWantSkipScena
     auto res = proxy_->SetOnNewWantSkipScenarios(token, 0);
     EXPECT_EQ(res, NO_ERROR);
 }
+
+/*
+ * @tc.name: AbilityManagerProxy_NotifyStartupExceptionBySCB_001
+ * Function: NotifyStartupExceptionBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_NotifyStartupExceptionBySCB_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(-1));
+    int32_t requestId = 0;
+    auto res = proxy_->NotifyStartupExceptionBySCB(requestId);
+    EXPECT_EQ(res, -1);
+}
+
+/*
+ * @tc.name: AbilityManagerProxy_NotifyStartupExceptionBySCB_002
+ * Function: NotifyStartupExceptionBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_SNotifyStartupExceptionBySCB_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    int32_t requestId = 0;
+    auto res = proxy_->NotifyStartupExceptionBySCB(requestId);
+    EXPECT_EQ(res, NO_ERROR);
+}
 } // namespace AAFwk
 } // namespace OHOS
