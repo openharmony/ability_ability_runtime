@@ -20,6 +20,9 @@ namespace AppExecFwk {
 int32_t AppMgrClient::isAppRunningReturnCode = ERR_OK;
 int32_t AppMgrClient::usedKillAppTimes = 0;
 bool AppMgrClient::isAppRunningReturnValue = false;
+bool AppMgrClient::isKeepAliveAppservice = true;
+int32_t AppMgrClient::ret = -1;
+std::vector<RunningProcessInfo> AppMgrClient::infos = {};
 
 AppMgrClient::AppMgrClient() {}
 
@@ -40,11 +43,15 @@ int32_t AppMgrClient::IsAppRunningByBundleNameAndUserId(const std::string &bundl
 
 void AppMgrClient::SetKeepAliveDkv(const std::string &bundleName, bool enable, int32_t uid) {}
 
-void AppMgrClient::SetKeepAliveAppService(const std::string &bundleName, bool enable, int32_t uid) {}
+void AppMgrClient::SetKeepAliveAppService(const std::string &bundleName, bool enable, int32_t uid)
+{
+    isKeepAliveAppservice = enable;
+}
 
 int32_t AppMgrClient::GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId)
 {
-    return -1;
+    info = infos;
+    return ret;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
