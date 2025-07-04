@@ -14732,5 +14732,16 @@ int32_t AbilityManagerService::SetOnNewWantSkipScenarios(sptr<IRemoteObject> cal
     record->SetOnNewWantSkipScenarios(scenarios);
     return ERR_OK;
 }
+
+int32_t AbilityManagerService::NotifyStartupExceptionBySCB(int32_t requestId)
+{
+    if (!IsCallerSceneBoard()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "permission deny");
+        return ERR_PERMISSION_DENIED;
+    }
+    auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
+    CHECK_POINTER_AND_RETURN_LOG(uiAbilityManager, ERR_NULL_OBJECT, "uiAbilityLifecycleManager nullptr");
+    return uiAbilityManager->NotifyStartupExceptionBySCB(requestId);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

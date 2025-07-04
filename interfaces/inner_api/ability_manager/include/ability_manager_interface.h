@@ -2290,6 +2290,17 @@ public:
     {
         return 0;
     }
+
+    /**
+     * SCB notifies AbilityManagerService that UIAbility startup was intercepted.
+     *
+     * @param requestId The request id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t NotifyStartupExceptionBySCB(int32_t requestId)
+    {
+        return 0;
+    }
 };
 }  // namespace AAFwk
 }  // namespace OHOS

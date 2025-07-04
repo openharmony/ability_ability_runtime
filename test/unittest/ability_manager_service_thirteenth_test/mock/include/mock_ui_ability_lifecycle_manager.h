@@ -391,6 +391,8 @@ public:
 
     void RecordPidKilling(pid_t pid, const std::string &reason);
 
+    int32_t NotifyStartupExceptionBySCB(int32_t requestId);
+
 private:
     void AddStartingPid(pid_t pid);
     void RemoveStartingPid(pid_t pid);
@@ -485,11 +487,9 @@ private:
     std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         bool &isColdStart);
     std::shared_ptr<AbilityRecord> FindRecordFromTmpMap(const AbilityRequest &abilityRequest);
-    void PostCallTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord);
     bool AddStartCallerTimestamp(int32_t callerUid);
     std::shared_ptr<AbilityRecord> FindRecordFromSessionMap(const AbilityRequest &abilityRequest);
     bool HasAbilityRequest(const AbilityRequest &abilityRequest);
-    void AddAbilityRequest(const AbilityRequest &abilityRequest, int32_t requestId);
     void RemoveAbilityRequest(int32_t requestId);
     inline int32_t GetRequestId()
     {
