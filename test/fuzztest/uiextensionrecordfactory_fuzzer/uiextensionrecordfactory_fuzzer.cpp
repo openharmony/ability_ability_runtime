@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,11 @@
 
 #include <cstddef>
 #include <cstdint>
-
+#define private public
 #define protected public
 #include "ui_extension_record_factory.h"
 #undef protected
-
+#undef private
 #include "ability_record.h"
 
 using namespace OHOS::AAFwk;
@@ -56,6 +56,9 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     factory->PreCheck(abilityRequest, strParam);
     std::shared_ptr<AbilityRuntime::ExtensionRecord> extensionRecord;
     factory->CreateRecord(abilityRequest, extensionRecord);
+    factory->NeedReuse(abilityRequest, int32Param);
+    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord;
+    factory->CreateDebugRecord(abilityRequest, abilityRecord);
 
     return true;
 }

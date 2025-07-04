@@ -39,6 +39,7 @@
 #endif
 #include "os_account_manager_wrapper.h"
 #include "overlay_event_subscriber.h"
+#include "overlay_manager_client.h"
 #include "overlay_module_info.h"
 #include "parameters.h"
 #include "running_process_info.h"
@@ -485,7 +486,14 @@ std::shared_ptr<Context> ContextImpl::CreatePluginContext(const std::string &plu
         return nullptr;
     }
 
-    auto appContext = std::make_shared<ContextImpl>();
+    return WrapContext(pluginBundleName, moduleName, inputContext, pluginBundleInfo, inputContext->GetBundleName());
+}
+
+std::shared_ptr<Context> ContextImpl::WrapContext(const std::string &pluginBundleName, const std::string &moduleName,
+    std::shared_ptr<Context> inputContext, AppExecFwk::PluginBundleInfo& pluginBundleInfo,
+    const std::string &hostBundleName)
+{
+    std::shared_ptr<ContextImpl> appContext = std::make_shared<ContextImpl>();
     appContext->SetConfiguration(config_);
     appContext->SetProcessName(processName_);
     appContext->isPlugin_ = true;
@@ -499,7 +507,6 @@ std::shared_ptr<Context> ContextImpl::CreatePluginContext(const std::string &plu
     if (resourceManager == nullptr) {
         return nullptr;
     }
-
     for (auto pluginModuleInfo : pluginBundleInfo.pluginModuleInfos) {
         TAG_LOGD(AAFwkTag::APPKIT, "moduleName: %{public}s", pluginModuleInfo.moduleName.c_str());
         std::string loadPath = pluginModuleInfo.hapPath;
@@ -507,14 +514,24 @@ std::shared_ptr<Context> ContextImpl::CreatePluginContext(const std::string &plu
         if (loadPath.empty()) {
             continue;
         }
-        std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + inputContext->GetBundleName());
-        loadPath = std::regex_replace(loadPath, pattern, LOCAL_CODE_PATH);
-        bool newCreate = false;
-        std::shared_ptr<AbilityBase::Extractor> extractor =
-            AbilityBase::ExtractorUtil::GetExtractor(loadPath, newCreate, true);
-        if (!extractor) {
-            TAG_LOGE(AAFwkTag::APPKIT, "hapPath[%{private}s]", hapPath.c_str());
-            return nullptr;
+        if (moduleName != pluginModuleInfo.moduleName) {
+            TAG_LOGD(AAFwkTag::APPKIT, "not the target plugin");
+            continue;
+        }
+        if (inputContext->GetBundleName() == hostBundleName) {
+            std::regex pattern(
+                std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + inputContext->GetBundleName());
+            loadPath = std::regex_replace(loadPath, pattern, LOCAL_CODE_PATH);
+            bool newCreate = false;
+            std::shared_ptr<AbilityBase::Extractor> extractor =
+                AbilityBase::ExtractorUtil::GetExtractor(loadPath, newCreate, true);
+            if (!extractor) {
+                TAG_LOGE(AAFwkTag::APPKIT, "hapPath[%{private}s]", hapPath.c_str());
+                return nullptr;
+            }
+        } else {
+            std::regex pattern(ABS_CODE_PATH);
+            loadPath = std::regex_replace(loadPath, pattern, LOCAL_BUNDLES);
         }
         TAG_LOGD(AAFwkTag::APPKIT, "loadPath: %{public}s", loadPath.c_str());
         if (!resourceManager->AddResource(loadPath.c_str())) {
@@ -1435,42 +1452,14 @@ Global::Resource::DeviceType ContextImpl::GetDeviceType() const
     return deviceType_;
 }
 
-ErrCode ContextImpl::GetOverlayMgrProxy()
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    int errCode = GetBundleManager();
-    if (errCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed, errCode: %{public}d", errCode);
-        return errCode;
-    }
-
-    std::lock_guard<std::mutex> lock(overlayMgrProxyMutex_);
-    if (overlayMgrProxy_ != nullptr) {
-        return ERR_OK;
-    }
-
-    overlayMgrProxy_ = bundleMgr_->GetOverlayManagerProxy();
-    if (overlayMgrProxy_ == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null overlayMgrProxy");
-        return ERR_NULL_OBJECT;
-    }
-
-    TAG_LOGD(AAFwkTag::APPKIT, "Success.");
-    return ERR_OK;
-}
-
 int ContextImpl::GetOverlayModuleInfos(const std::string &bundleName, const std::string &moduleName,
     std::vector<AppExecFwk::OverlayModuleInfo> &overlayModuleInfos)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    int errCode = GetOverlayMgrProxy();
-    if (errCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed, errCode: %{public}d", errCode);
-        return errCode;
-    }
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "overlayMgrProxy_->GetTargetOverlayModuleInfo");
-        auto ret = overlayMgrProxy_->GetTargetOverlayModuleInfo(moduleName, overlayModuleInfos);
+        auto ret =
+            AppExecFwk::OverlayManagerClient::GetInstance().GetTargetOverlayModuleInfo(moduleName, overlayModuleInfos);
         if (ret != ERR_OK) {
             TAG_LOGD(AAFwkTag::APPKIT, "GetOverlayModuleInfo form bms failed");
             return ret;
@@ -1634,10 +1623,6 @@ void ContextImpl::ShallowCopySelf(std::shared_ptr<ContextImpl> &contextImpl)
         std::lock_guard<std::mutex> lock(bundleManagerMutex_);
         contextImpl->bundleMgr_ = bundleMgr_;
     }
-    {
-        std::lock_guard<std::mutex> lock(overlayMgrProxyMutex_);
-        contextImpl->overlayMgrProxy_ = overlayMgrProxy_;
-    }
     contextImpl->resetFlag_ = resetFlag_;
     contextImpl->processName_ = processName_;
 }
@@ -1798,5 +1783,40 @@ bool ContextImpl::GetDisplayConfig(uint64_t displayId, float &density, std::stri
     return getDisplayConfigCallback_(displayId, density, directionStr);
 }
 #endif
+
+std::shared_ptr<Context> ContextImpl::CreateTargetPluginContext(const std::string &hostBundName,
+    const std::string &pluginBundleName, const std::string &moduleName, std::shared_ptr<Context> inputContext)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (hostBundName.empty() || pluginBundleName.empty() || moduleName.empty() || inputContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "input params is null");
+        return nullptr;
+    }
+
+    TAG_LOGD(AAFwkTag::APPKIT, "hostBundName: %{public}s, pluginBundleName: %{public}s, moduleName: %{public}s",
+        hostBundName.c_str(), pluginBundleName.c_str(), moduleName.c_str());
+
+    int32_t errCode = GetBundleManager();
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GetBundleManager failed, errCode: %{public}d", errCode);
+        return nullptr;
+    }
+    int accountId = GetCurrentAccountId();
+    if (accountId == 0) {
+        accountId = GetCurrentActiveAccountId();
+    }
+    if (bundleMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgr_");
+        return nullptr;
+    }
+    AppExecFwk::PluginBundleInfo pluginBundleInfo;
+    errCode = bundleMgr_->GetPluginInfoForTarget(hostBundName, pluginBundleName, accountId, pluginBundleInfo);
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GetPluginInfosForTarget failed, errCode: %{public}d", errCode);
+        return nullptr;
+    }
+
+    return WrapContext(pluginBundleName, moduleName, inputContext, pluginBundleInfo, hostBundName);
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

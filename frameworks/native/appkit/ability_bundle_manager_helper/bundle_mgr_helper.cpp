@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -464,19 +464,6 @@ bool BundleMgrHelper::GetGroupDir(const std::string &dataGroupId, std::string &d
 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetGroupDir(dataGroupId, dir);
-}
-
-sptr<IOverlayManager> BundleMgrHelper::GetOverlayManagerProxy()
-{
-    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
-    auto bundleMgr = Connect();
-    if (bundleMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null bundleMgr");
-        return nullptr;
-    }
-
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    return bundleMgr->GetOverlayManagerProxy();
 }
 
 bool BundleMgrHelper::QueryAbilityInfo(const Want &want, AbilityInfo &abilityInfo)
@@ -1117,6 +1104,19 @@ ErrCode BundleMgrHelper::GetLauncherAbilityInfoSync(const std::string &bundleNam
     }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetLauncherAbilityInfoSync(bundleName, userId, abilityInfo);
+}
+
+ErrCode BundleMgrHelper::GetPluginInfoForTarget(const std::string &hostBundleName,
+    const std::string &pluginBundleName, int32_t userId, PluginBundleInfo &pluginBundleInfo)
+{
+    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null bundleMgr");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->GetPluginInfo(hostBundleName, pluginBundleName, userId, pluginBundleInfo);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -99,5 +99,19 @@ HWTEST_F(BundleMgrHelperSecondTest, BundleMgrHelperSecondTest_GetDataDir_001, Te
     auto ret = bundleMgrHelper->GetDataDir(bundleName, appIndex);
     EXPECT_NE(ret, "");
 }
+
+/**
+ * @tc.name: BundleMgrHelperSecondTest_GetPluginInfoForTarget_001
+ * @tc.desc: GetDataDir
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleMgrHelperSecondTest, BundleMgrHelperSecondTest_GetPluginInfoForTarget_001, TestSize.Level1)
+{
+    std::string hostBundleName = "hostBundleName";
+    std::string pluginBundleName = "pluginBundleName";
+    AppExecFwk::PluginBundleInfo pluginBundleInfo;
+    auto ret = bundleMgrHelper->GetPluginInfoForTarget(hostBundleName, pluginBundleName, 0, pluginBundleInfo);
+    EXPECT_NE(ret, ERR_OK);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

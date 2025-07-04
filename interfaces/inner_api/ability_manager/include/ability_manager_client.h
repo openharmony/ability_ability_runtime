@@ -285,6 +285,17 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
+     * Start UI abilities simultaneously.
+     *
+     * @param wantList a list of want to start UI abilities.
+     * @param requestKey, The unique key of this StartUIAbilities request.
+     * @param callerToken current caller ability token.
+     * @return Returns ERR_OK if success.
+     */
+    ErrCode StartUIAbilities(const std::vector<AAFwk::Want> &wantList,
+        const std::string &requestKey, sptr<IRemoteObject> callerToken);
+
+    /**
      * Start ui session ability with extension session info, send session info to ability manager service.
      *
      * @param want Ability want.
@@ -1859,6 +1870,8 @@ public:
     ErrCode ResumeExtensionAbility(sptr<IAbilityConnection> connect);
 
     ErrCode SetOnNewWantSkipScenarios(sptr<IRemoteObject> callerToken, int32_t scenarios);
+
+    ErrCode NotifyStartupExceptionBySCB(int32_t requestId);
 
 private:
     AbilityManagerClient();

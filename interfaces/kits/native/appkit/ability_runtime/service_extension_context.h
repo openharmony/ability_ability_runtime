@@ -122,6 +122,8 @@ public:
 
     ErrCode StartAbilityWithAccount(
         const AAFwk::Want &want, int accountId, const AAFwk::StartOptions &startOptions) const;
+    
+    ErrCode StartUIAbilities(const std::vector<AAFwk::Want> &wantList, const std::string &requestKey);
 
     ErrCode StartServiceExtensionAbility(const AAFwk::Want &want, int32_t accountId = -1) const;
 

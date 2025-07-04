@@ -83,6 +83,7 @@
 #include "native_lib_util.h"
 #include "nlohmann/json.hpp"
 #include "ohos_application.h"
+#include "overlay_manager_client.h"
 #include "overlay_module_info.h"
 #include "parameters.h"
 #include "res_helper.h"
@@ -3658,13 +3659,7 @@ int MainThread::GetOverlayModuleInfos(const std::string &bundleName, const std::
         return ERR_INVALID_VALUE;
     }
 
-    auto overlayMgrProxy = bundleMgrHelper->GetOverlayManagerProxy();
-    if (overlayMgrProxy == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null overlayMgrProxy");
-        return ERR_INVALID_VALUE;
-    }
-
-    auto ret = overlayMgrProxy->GetTargetOverlayModuleInfo(moduleName, overlayModuleInfos);
+    auto ret = OverlayManagerClient::GetInstance().GetTargetOverlayModuleInfo(moduleName, overlayModuleInfos);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "failed");
         return ret;

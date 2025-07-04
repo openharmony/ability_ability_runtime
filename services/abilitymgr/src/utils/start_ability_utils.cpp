@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -394,6 +394,38 @@ bool StartAbilityUtils::IsCallFromAncoShellOrBroker(const sptr<IRemoteObject> &c
         return callerAbilityInfo.bundleName == AppUtils::GetInstance().GetBrokerDelegateBundleName();
     }
     return false;
+}
+
+void StartAbilityUtils::SetTargetCloneIndexInSameBundle(const Want &want, sptr<IRemoteObject> callerToken)
+{
+    auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
+    CHECK_POINTER(callerRecord);
+    if (callerRecord->GetAbilityInfo().bundleName != want.GetElement().GetBundleName()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "not the same bundle");
+        return;
+    }
+    if (want.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "want with app clone index.");
+        return;
+    }
+    int32_t appIndex = callerRecord->GetApplicationInfo().appIndex;
+    if (appIndex >= 0 && appIndex < AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
+        (const_cast<Want &>(want)).SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
+    }
+}
+
+int32_t StartAbilityUtils::StartUIAbilitiesProcessAppIndex(Want &want,
+    sptr<IRemoteObject> callerToken, int32_t &appIndex)
+{
+    SetTargetCloneIndexInSameBundle(want, callerToken);
+    if (!want.HasParameter(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY)) {
+        want.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
+    }
+    if (!StartAbilityUtils::GetAppIndex(want, callerToken, appIndex)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUIAbilities GetAppIndex failed.");
+        return ERR_APP_CLONE_INDEX_INVALID;
+    }
+    return ERR_OK;
 }
 }
 }
