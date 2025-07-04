@@ -122,6 +122,12 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
     return ERR_OK;
 }
 
+int32_t UIAbilityLifecycleManager::NotifySCBToStartUIAbilities(std::vector<AbilityRequest> &abilityRequestList,
+    const std::string &requestKey)
+{
+    return ERR_OK;
+}
+
 int32_t UIAbilityLifecycleManager::NotifySCBToRecoveryAfterInterception(const AbilityRequest &abilityRequest)
 {
     return ERR_OK;
@@ -243,10 +249,6 @@ bool UIAbilityLifecycleManager::IsAbilityStarted(AbilityRequest &abilityRequest,
 int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRequest, std::string &errMsg)
 {
     return 0;
-}
-
-void UIAbilityLifecycleManager::PostCallTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord)
-{
 }
 
 void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)
@@ -398,7 +400,7 @@ void UIAbilityLifecycleManager::OnAcceptWantResponse(const AAFwk::Want &want, co
 {
 }
 
-void UIAbilityLifecycleManager::HandleLegacyAcceptWantDone(AbilityRequest &abilityRequest, int32_t requestId,
+void UIAbilityLifecycleManager::HandleLegacyAcceptWantDone(SpecifiedRequest &specifiedRequest,
     const std::string &flag, const AAFwk::Want &want)
 {
 }
@@ -434,9 +436,8 @@ void UIAbilityLifecycleManager::NotifyStartSpecifiedAbility(AbilityRequest &abil
 {
 }
 
-int UIAbilityLifecycleManager::MoveAbilityToFront(const AbilityRequest &abilityRequest,
-    const std::shared_ptr<AbilityRecord> &abilityRecord, std::shared_ptr<AbilityRecord> callerAbility,
-    std::shared_ptr<StartOptions> startOptions, int32_t requestId)
+int UIAbilityLifecycleManager::MoveAbilityToFront(const SpecifiedRequest &specifiedRequest,
+    const std::shared_ptr<AbilityRecord> abilityRecord, std::shared_ptr<AbilityRecord> callerAbility)
 {
     return ERR_OK;
 }
@@ -447,8 +448,8 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(std::shared_ptr<AbilityRecor
     return ERR_OK;
 }
 
-int UIAbilityLifecycleManager::StartAbilityBySpecifed(const AbilityRequest &abilityRequest,
-    std::shared_ptr<AbilityRecord> &callerAbility, int32_t requestId)
+int UIAbilityLifecycleManager::StartAbilityBySpecifed(const SpecifiedRequest &specifiedRequest,
+    std::shared_ptr<AbilityRecord> callerAbility)
 {
     return ERR_OK;
 }
@@ -712,10 +713,6 @@ bool UIAbilityLifecycleManager::HasAbilityRequest(const AbilityRequest &abilityR
     return false;
 }
 
-void UIAbilityLifecycleManager::AddAbilityRequest(const AbilityRequest &abilityRequest, int32_t requestId)
-{
-}
-
 void UIAbilityLifecycleManager::RemoveAbilityRequest(int32_t requestId)
 {
 }
@@ -776,6 +773,11 @@ bool UIAbilityLifecycleManager::UpdateSpecifiedFlag(std::shared_ptr<AbilityRecor
 }
 
 int32_t UIAbilityLifecycleManager::RevokeDelegator(sptr<IRemoteObject> token)
+{
+    return ERR_OK;
+}
+
+int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId)
 {
     return ERR_OK;
 }

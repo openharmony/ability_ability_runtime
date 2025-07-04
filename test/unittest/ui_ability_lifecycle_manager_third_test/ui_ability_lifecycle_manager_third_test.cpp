@@ -350,50 +350,6 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifySCBToStartUIAbility_004, Test
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_PostCallTimeoutTask_001
- * @tc.desc: PostCallTimeoutTask
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerThirdTest, PostCallTimeoutTask_001, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    mgr->PostCallTimeoutTask(nullptr);
-    EXPECT_NE(mgr, nullptr);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_PostCallTimeoutTask_002
- * @tc.desc: PostCallTimeoutTask
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerThirdTest, PostCallTimeoutTask_002, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    AbilityRequest abilityRequest;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    mgr->PostCallTimeoutTask(abilityRecord);
-    abilityRecord.reset();
-    usleep(TIMEOUT_VALUE);
-    EXPECT_NE(mgr, nullptr);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_PostCallTimeoutTask_003
- * @tc.desc: PostCallTimeoutTask
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerThirdTest, PostCallTimeoutTask_003, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    AbilityRequest abilityRequest;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    mgr->tmpAbilityMap_.emplace(0, abilityRecord);
-    mgr->PostCallTimeoutTask(abilityRecord);
-    usleep(TIMEOUT_VALUE);
-    EXPECT_TRUE(mgr->tmpAbilityMap_.empty());
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_StartSpecifiedRequest_001
  * @tc.desc: StartSpecifiedRequest
  * @tc.type: FUNC
@@ -845,8 +801,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, MoveAbilityToFront_001, TestSize.Le
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
 
     AppUtils::isStartOptionsWithAnimation_ = true;
-
-    uiAbilityLifecycleManager->MoveAbilityToFront(abilityRequest, abilityRecord, abilityRecord, nullptr, 0);
+    SpecifiedRequest specifiedRequest(0, abilityRequest);
+    uiAbilityLifecycleManager->MoveAbilityToFront(specifiedRequest, abilityRecord, abilityRecord);
 
     auto sessionInfo = abilityRecord->GetSessionInfo();
     EXPECT_NE(sessionInfo->processOptions, nullptr);
@@ -870,8 +826,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, MoveAbilityToFront_002, TestSize.Le
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
 
     AppUtils::isStartOptionsWithAnimation_ = false;
-
-    uiAbilityLifecycleManager->MoveAbilityToFront(abilityRequest, abilityRecord, abilityRecord, nullptr, 0);
+    SpecifiedRequest specifiedRequest(0, abilityRequest);
+    uiAbilityLifecycleManager->MoveAbilityToFront(specifiedRequest, abilityRecord, abilityRecord);
 
     auto sessionInfo = abilityRecord->GetSessionInfo();
     EXPECT_EQ(sessionInfo->processOptions, nullptr);
@@ -898,13 +854,12 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, MoveAbilityToFront_003, TestSize.Le
 
     AppUtils::isStartOptionsWithAnimation_ = false;
 
-    auto startOptions = std::make_shared<StartOptions>();
-    startOptions->windowMode_ = AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY;
-
-    uiAbilityLifecycleManager->MoveAbilityToFront(abilityRequest, abilityRecord, abilityRecord, startOptions, 0);
+    SpecifiedRequest specifiedRequest(0, abilityRequest);
+    specifiedRequest.requestListId = 0;
+    uiAbilityLifecycleManager->MoveAbilityToFront(specifiedRequest, abilityRecord, abilityRecord);
 
     auto ret = abilityRecord->want_.GetIntParam(Want::PARAM_RESV_WINDOW_MODE, -1);
-    EXPECT_EQ(ret, AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY);
+    EXPECT_EQ(ret, AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED);
 }
 
 /**
@@ -928,10 +883,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, MoveAbilityToFront_004, TestSize.Le
 
     AppUtils::isStartOptionsWithAnimation_ = false;
 
-    auto startOptions = std::make_shared<StartOptions>();
-    startOptions->windowMode_ = AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY;
-
-    uiAbilityLifecycleManager->MoveAbilityToFront(abilityRequest, abilityRecord, abilityRecord, nullptr, 0);
+    SpecifiedRequest specifiedRequest(0, abilityRequest);
+    uiAbilityLifecycleManager->MoveAbilityToFront(specifiedRequest, abilityRecord, abilityRecord);
 
     auto ret = abilityRecord->want_.GetIntParam(Want::PARAM_RESV_WINDOW_MODE, -1);
     EXPECT_EQ(ret, -1);
@@ -1452,7 +1405,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedAbilityBySCB_002, Tes
     abilityRequest.abilityInfo.isStageBasedModel = true;
     AppUtils::isStartSpecifiedProcess_ = true;
     auto result = uiAbilityLifecycleManager->StartSpecifiedAbilityBySCB(abilityRequest);
-    EXPECT_EQ(result, uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest));
+    EXPECT_EQ(result, uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest, nullptr));
 }
 
 /**
@@ -1474,7 +1427,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedProcessRequest_0100, 
     abilityRequest.abilityInfo.applicationInfo.multiAppMode.multiAppModeType =
         AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     abilityRequest.want.SetParam(Want::CREATE_APP_INSTANCE_KEY, true);
-    auto result = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest);
+    auto result = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest, nullptr);
     EXPECT_EQ(result, ERR_CREATE_INSTANCE_KEY_FAILED);
 }
 
@@ -1497,8 +1450,63 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedProcessRequest_0200, 
     abilityRequest.abilityInfo.applicationInfo.multiAppMode.multiAppModeType =
         AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     abilityRequest.want.SetParam(Want::CREATE_APP_INSTANCE_KEY, true);
-    auto result = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest);
+    auto result = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest, nullptr);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_NotifyStartupExceptionBySCB_001
+ * @tc.desc: NotifyStartupExceptionBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifyStartupExceptionBySCB_001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    EXPECT_NE(mgr, nullptr);
+
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.name = "Name";
+    abilityRequest.abilityInfo.bundleName = "BundleName";
+    abilityRequest.abilityInfo.moduleName = "ModuleName";
+    
+    auto callerAbilityRecord = std::make_shared<AbilityRecord>(
+        abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
+    int32_t requestId = 1;
+    mgr->tmpAbilityMap_ = {{requestId, callerAbilityRecord}};
+
+    auto ret = mgr->NotifyStartupExceptionBySCB(requestId);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(mgr->tmpAbilityMap_.size(), 0);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_NotifyStartupExceptionBySCB_002
+ * @tc.desc: NotifyStartupExceptionBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifyStartupExceptionBySCB_002, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
+
+    int32_t requestId1 = 1;
+    int32_t requestId2 = 2;
+
+    AbilityRequest abilityRequest;
+    auto abilityRecord = std::make_shared<AbilityRecord>(
+        abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
+
+    auto specifiedRequestPtr = std::make_shared<SpecifiedRequest>(requestId1, abilityRequest);
+    specifiedRequestPtr->requestId = 1;
+    auto specifiedRequest2Ptr = std::make_shared<SpecifiedRequest>(requestId2, abilityRequest);
+    specifiedRequest2Ptr->requestId = 2;
+
+    uiAbilityLifecycleManager->specifiedRequestList_ = {
+        {"NewKawasaki", {specifiedRequestPtr, specifiedRequest2Ptr}}
+    };
+    int32_t requestId = 1;
+    auto ret = uiAbilityLifecycleManager->NotifyStartupExceptionBySCB(requestId);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

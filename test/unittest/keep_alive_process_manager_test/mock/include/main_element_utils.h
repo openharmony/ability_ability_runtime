@@ -69,6 +69,7 @@ public:
     static uint32_t accessTokenId_;
     static int32_t usedUpdateMainElementTimes;
     static int32_t usedCheckMainUIAbilityTime;
+    static int32_t usedCheckAppServiceExtensionTimes;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
