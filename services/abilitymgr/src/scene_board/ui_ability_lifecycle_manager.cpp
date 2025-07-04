@@ -2386,12 +2386,9 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(std::shared_ptr<AbilityRecor
     sptr<SessionInfo> &sessionInfo)
 {
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call"
-        "windowLeft=%{public}d,windowTop=%{public}d,"
-        "windowHeight=%{public}d,windowWidth=%{public}d,"
-        "minWindowWidth=%{public}d,minWindowHeight=%{public}d,"
-        "maxWindowWidth=%{public}d,mixWindowHeight=%{public}d,"
-        "specifiedFlag=%{public}s",
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call SendSessionInfoToSCB,windowLeft=%{public}d,windowTop=%{public}d,"
+        "windowHeight=%{public}d,windowWidth=%{public}d,minWindowWidth=%{public}d,minWindowHeight=%{public}d,"
+        "maxWindowWidth=%{public}d,mixWindowHeight=%{public}d,specifiedFlag=%{public}s",
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
@@ -2402,29 +2399,37 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(std::shared_ptr<AbilityRecor
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_MAX_WINDOW_HEIGHT, 0),
         sessionInfo->specifiedFlag.c_str());
     auto tmpSceneSession = iface_cast<Rosen::ISession>(rootSceneSession_);
-    if (callerAbility != nullptr) {
-        auto callerSessionInfo = callerAbility->GetSessionInfo();
-        if (callerSessionInfo != nullptr && callerSessionInfo->sessionToken != nullptr) {
-            auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
-            CHECK_POINTER_AND_RETURN(callerSession, ERR_INVALID_VALUE);
-            CheckCallerFromBackground(callerAbility, sessionInfo);
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession, target: %{public}s",
-                sessionInfo->want.GetElement().GetAbilityName().c_str());
-            callerSession->PendingSessionActivation(sessionInfo);
-        } else {
-            CHECK_POINTER_AND_RETURN(tmpSceneSession, ERR_INVALID_VALUE);
-            sessionInfo->canStartAbilityFromBackground = true;
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "NotifySCBPendingActivation for rootSceneSession, target:%{public}s",
-                sessionInfo->want.GetElement().GetAbilityName().c_str());
-            tmpSceneSession->PendingSessionActivation(sessionInfo);
+    sptr<SessionInfo> callerSessionInfo = nullptr;
+    if (callerAbility != nullptr && (callerSessionInfo = callerAbility->GetSessionInfo()) != nullptr &&
+        callerSessionInfo->sessionToken != nullptr) {
+        auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
+        CHECK_POINTER_AND_RETURN(callerSession, ERR_INVALID_VALUE);
+        CheckCallerFromBackground(callerAbility, sessionInfo);
+        auto requestId = sessionInfo->want.GetStringParam(KEY_REQUEST_ID);
+        if (!requestId.empty()) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "notify request success, requestId:%{public}s", requestId.c_str());
+            callerAbility->NotifyAbilityRequestSuccess(requestId, sessionInfo->want.GetElement());
         }
-    } else {
-        CHECK_POINTER_AND_RETURN(tmpSceneSession, ERR_INVALID_VALUE);
-        sessionInfo->canStartAbilityFromBackground = true;
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for rootSceneSession, target: %{public}s",
+        sessionInfo->want.RemoveParam(KEY_REQUEST_ID);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession, target: %{public}s",
             sessionInfo->want.GetElement().GetAbilityName().c_str());
-        tmpSceneSession->PendingSessionActivation(sessionInfo);
+        callerSession->PendingSessionActivation(sessionInfo);
+        return ERR_OK;
     }
+    CHECK_POINTER_AND_RETURN(tmpSceneSession, ERR_INVALID_VALUE);
+    sessionInfo->canStartAbilityFromBackground = true;
+    auto abilityRecord = Token::GetAbilityRecordByToken(sessionInfo->callerToken);
+    if (abilityRecord != nullptr) {
+        auto requestId = sessionInfo->want.GetStringParam(KEY_REQUEST_ID);
+        if (!requestId.empty()) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "notify request success, requestId:%{public}s", requestId.c_str());
+            abilityRecord->NotifyAbilityRequestSuccess(requestId, sessionInfo->want.GetElement());
+        }
+        sessionInfo->want.RemoveParam(KEY_REQUEST_ID);
+    }
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for rootSceneSession, target: %{public}s",
+        sessionInfo->want.GetElement().GetAbilityName().c_str());
+    tmpSceneSession->PendingSessionActivation(sessionInfo);
     return ERR_OK;
 }
 
