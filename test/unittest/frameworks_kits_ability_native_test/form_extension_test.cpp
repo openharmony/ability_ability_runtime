@@ -321,7 +321,7 @@ HWTEST_F(FormExtensionTest, AaFwk_Form_Extension_1500, Function | MediumTest | L
     std::unique_ptr<AbilityRuntime::Runtime> runtime = AbilityRuntime::Runtime::Create(options);
     auto formExtension = AbilityRuntime::FormExtension::Create(runtime);
     int64_t formId = 0;
-    std::string newDimension = "2*2";
+    int32_t newDimension = 1;
     AppExecFwk::Rect newRect;
     formExtension->OnSizeChanged(formId, newDimension, newRect);
     GTEST_LOG_(INFO) << "AaFwk_Form_Extension_1500 end";
