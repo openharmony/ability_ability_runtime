@@ -28,6 +28,7 @@ ohos_fuzztest("DialogSessionManagerFirstFuzzTest") {
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
+    "${ability_runtime_test_path}/fuzztest",
   ]
   cflags = [
     "-g",
