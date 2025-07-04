@@ -19,17 +19,28 @@
 #include <chrono>
 #include <mutex>
 
+#include "ability_record.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "scene_board_judgement.h"
+#include "session_manager_lite.h"
+#include "window_visibility_info.h"
+
+using namespace OHOS::AAFwk;
+using namespace OHOS::Rosen;
 
 namespace OHOS {
 namespace AppExecFwk {
 const std::string UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
 const std::string UIEXTENSION_SYS_COMMON_UI = "sysDialog/common";
 const std::string APP_FREEZE_PID = "APP_FREEZE_PID";
+const std::string FREEZE_WINDOW_POSX = "FREEZE_WINDOW_POSX";
+const std::string FREEZE_WINDOW_POSY = "FREEZE_WINDOW_POSY";
+const std::string FREEZE_WINDOW_WIDTH = "FREEZE_WINDOW_WIDTH";
+const std::string FREEZE_WINDOW_HEIGHT = "FREEZE_WINDOW_HEIGHT";
 const std::string START_BUNDLE_NAME = "startBundleName";
+const std::string APP_FREEZE_TOKEN = "freezeToken";
 constexpr int32_t INVALID_USERID = -1;
 constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 3;
 constexpr uint32_t COMMAND_START_DIALOG = 1;
@@ -43,21 +54,7 @@ ModalSystemAppFreezeUIExtension &ModalSystemAppFreezeUIExtension::GetInstance()
 }
 
 ModalSystemAppFreezeUIExtension::~ModalSystemAppFreezeUIExtension()
-{
-    dialogConnectionCallback_ = nullptr;
-}
-
-sptr<ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection> ModalSystemAppFreezeUIExtension::GetConnection()
-{
-    if (dialogConnectionCallback_ == nullptr) {
-        std::lock_guard lock(dialogConnectionMutex_);
-        if (dialogConnectionCallback_ == nullptr) {
-            dialogConnectionCallback_ = new (std::nothrow) AppFreezeDialogConnection();
-        }
-    }
-
-    return dialogConnectionCallback_;
-}
+{}
 
 void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const FaultData &faultData, std::string pid,
     std::string bundleName, std::function<void()> callback, bool isDialogExist)
@@ -71,12 +68,13 @@ void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const Fau
     std::string name = faultData.errorObject.name;
     bool isAppFreezeDialog = name == AppFreezeType::THREAD_BLOCK_6S || name == AppFreezeType::APP_INPUT_BLOCK ||
         name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S;
-    uint64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::
-        now().time_since_epoch()).count();
+    uint64_t now =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch())
+            .count();
     bool timeout = now - lastFreezeTime > TIMEOUT_INTERVAL_MS;
     TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "%{public}s is %{public}s.pid:%{public}s lastFreezePid:%{public}s,timeout %{public}lu", bundleName.c_str(),
-        focusFlag ? "focus" : "not focus", pid.c_str(), lastFreezePid.c_str(), now - lastFreezeTime);
+        "%{public}s is %{public}s.pid:%{public}s lastFreezePid:%{public}s", bundleName.c_str(),
+        focusFlag ? "focus" : "not focus", pid.c_str(), lastFreezePid.c_str());
     bool isPullUpBox =
         isAppFreezeDialog && (pid != lastFreezePid || (pid == lastFreezePid && timeout && !isDialogExist));
     bool updateTypeName = name == AppFreezeType::THREAD_BLOCK_6S || name == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S;
@@ -84,12 +82,7 @@ void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const Fau
         lastFreezeTime = now;
     }
     if (focusFlag && isPullUpBox) {
-        std::string appNoResponseBundleName = APP_NO_RESPONSE_BUNDLENAME;
-        if (appNoResponseBundleName == "com.ohos.taskmanager") {
-            callback();
-        } else {
-            CreateModalUIExtension(pid, bundleName);
-        }
+        CreateModalUIExtension(pid, bundleName);
     } else if (callback && (faultType != FaultDataType::APP_FREEZE || !isAppFreezeDialog)) {
         callback();
     }
@@ -99,129 +92,88 @@ void ModalSystemAppFreezeUIExtension::ProcessAppFreeze(bool focusFlag, const Fau
     }
 }
 
-bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string pid, std::string bundleName)
+bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string& pid, std::string& bundleName)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-    AAFwk::Want want = CreateSystemDialogWant(pid, bundleName);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Create Modal UIExtension Called");
+    sptr<IRemoteObject> token;
+    AAFwk::Want want;
     std::unique_lock<std::mutex> lockAssertResult(appFreezeResultMutex_);
-    auto callback = GetConnection();
-    if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callback");
+    if (!CreateSystemDialogWant(pid, bundleName, token, want)) {
         return false;
     }
-    callback->SetReqeustAppFreezeDialogWant(want);
     auto abilityManagerClient = AAFwk::AbilityManagerClient::GetInstance();
     if (abilityManagerClient == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null abilityManagerClient");
         return false;
     }
-    AAFwk::Want systemUIWant;
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        systemUIWant.SetElementName("com.ohos.sceneboard", "com.ohos.sceneboard.systemdialog");
-    } else {
-        systemUIWant.SetElementName("com.ohos.systemui", "com.ohos.systemui.dialog");
-    }
-    IN_PROCESS_CALL_WITHOUT_RET(abilityManagerClient->DisconnectAbility(callback));
-    auto result = IN_PROCESS_CALL(abilityManagerClient->ConnectAbility(systemUIWant, callback, INVALID_USERID));
+    auto result = IN_PROCESS_CALL(abilityManagerClient->StartExtensionAbility(want, token));
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR,
-            "fail, result = %{public}d", result);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartExtensionAbility failed, result = %{public}d", result);
         return false;
     }
     lastFreezePid = pid;
     lastFocusStatus = true;
     lastFreezeTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::steady_clock::now().time_since_epoch()).count();
-    TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "success, result = %{public}d", result);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "success, result = %{public}d", result);
     return true;
 }
 
-AAFwk::Want ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(std::string pid, std::string bundleName)
+bool ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(
+    std::string& pid, std::string& bundleName, sptr<IRemoteObject> token, AAFwk::Want &want)
 {
-    AAFwk::Want want;
     want.SetElementName(APP_NO_RESPONSE_BUNDLENAME, APP_NO_RESPONSE_ABILITY);
     want.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
     want.SetParam(APP_FREEZE_PID, pid);
     want.SetParam(START_BUNDLE_NAME, bundleName);
-    return want;
-}
 
-void ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::SetReqeustAppFreezeDialogWant(const AAFwk::Want &want)
-{
-    want_ = want;
-}
+    auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    if (!sceneSessionManager) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "sceneSessionManager is null proxy!");
+        return false;
+    }
+    auto ret = static_cast<int>(sceneSessionManager->GetFocusSessionToken(token));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get focus session token err: %{public}d", ret);
+        return false;
+    }
+    want.SetParam(APP_FREEZE_TOKEN, token);
 
-bool ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::WriteWantElement(MessageParcel &data)
-{
-    if (!data.WriteString16(u"bundleName")) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write bundleName failed");
+    int32_t posX = 0;
+    int32_t posY = 0;
+    int32_t width = 10;
+    int32_t height  = 10;
+    std::vector<sptr<Rosen::WindowVisibilityInfo>> infos;
+    ret = static_cast<int>(sceneSessionManager->GetVisibilityWindowInfo(infos));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get visibility window info err: %{public}d", ret);
         return false;
     }
-    if (!data.WriteString16(Str8ToStr16(want_.GetElement().GetBundleName()))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write element bundlename failed");
+    bool infoReady = false;
+    for (const auto &info : infos) {
+        if (info != nullptr) {
+            if (info->IsFocused()) {
+                posX = info->rect_.posX_;
+                posY = info->rect_.posY_;
+                width = info->rect_.width_;
+                height = info->rect_.height_;
+                infoReady = true;
+                break;
+            }
+        }
+    }
+    if (!infoReady) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "No fucused window!");
         return false;
     }
-    if (!data.WriteString16(u"abilityName")) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write abilityName failed");
-        return false;
-    }
-    if (!data.WriteString16(Str8ToStr16(want_.GetElement().GetAbilityName()))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write element abilityName failed");
-        return false;
-    }
+    want.SetParam(FREEZE_WINDOW_POSX, std::to_string(posX));
+    want.SetParam(FREEZE_WINDOW_POSY, std::to_string(posY));
+    want.SetParam(FREEZE_WINDOW_WIDTH, std::to_string(width));
+    want.SetParam(FREEZE_WINDOW_HEIGHT, std::to_string(height));
+
     return true;
 }
 
-void ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::OnAbilityConnectDone(
-    const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remote, int resultCode)
-{
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-    if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null remote");
-        return;
-    }
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInt32(MESSAGE_PARCEL_KEY_SIZE)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write MESSAGE_PARCEL_KEY_SIZE failed");
-        return;
-    }
-    if (!WriteWantElement(data)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write element failed");
-        return;
-    }
-    if (!data.WriteString16(u"parameters")) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write parameters failed");
-        return;
-    }
-    nlohmann::json param;
-    param[UIEXTENSION_TYPE_KEY.c_str()] = want_.GetStringParam(UIEXTENSION_TYPE_KEY);
-    param[APP_FREEZE_PID.c_str()] = want_.GetStringParam(APP_FREEZE_PID);
-    param[START_BUNDLE_NAME.c_str()] = want_.GetStringParam(START_BUNDLE_NAME);
-    std::string paramStr = param.dump();
-    if (!data.WriteString16(Str8ToStr16(paramStr))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write paramStr failed");
-        return;
-    }
-    uint32_t code = !Rosen::SceneBoardJudgement::IsSceneBoardEnabled() ?
-        COMMAND_START_DIALOG :
-        AAFwk::IAbilityConnection::ON_ABILITY_CONNECT_DONE;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "show dialog");
-    auto ret = remote->SendRequest(code, data, reply, option);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "show dialog fail");
-        return;
-    }
-}
-
-void ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::OnAbilityDisconnectDone(
-    const AppExecFwk::ElementName &element, int resultCode)
-{
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
-}
-} // namespace AppExecFwk
-} // namespace OHOS
-#endif // APP_NO_RESPONSE_DIALOG
+}  // namespace AppExecFwk
+}  // namespace OHOS
+#endif  // APP_NO_RESPONSE_DIALOG

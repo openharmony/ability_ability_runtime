@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,6 +59,9 @@ struct StartAbilityUtils {
     static std::vector<int32_t> GetCloneAppIndexes(const std::string &bundleName, int32_t userId);
 
     static bool IsCallFromAncoShellOrBroker(const sptr<IRemoteObject> &callerToken);
+    static void SetTargetCloneIndexInSameBundle(const Want &want, sptr<IRemoteObject> callerToken);
+    static int32_t StartUIAbilitiesProcessAppIndex(Want &want,
+        sptr<IRemoteObject> callerToken, int32_t &appIndex);
 
     static thread_local std::shared_ptr<StartAbilityInfo> startAbilityInfo;
     static thread_local std::shared_ptr<StartAbilityInfo> callerAbilityInfo;

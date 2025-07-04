@@ -160,6 +160,9 @@ public:
 
     virtual void ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)
     {}
+
+    virtual void ScheduleAbilitiesRequestDone(const std::string &requestKey, int32_t resultCode)
+    {}
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

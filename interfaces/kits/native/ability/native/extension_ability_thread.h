@@ -135,6 +135,8 @@ public:
 
     void ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element) override;
 
+    void ScheduleAbilitiesRequestDone(const std::string &requestKey, int32_t resultCode) override;
+
 private:
     /**
      * @brief Dump Ability Info Inner
