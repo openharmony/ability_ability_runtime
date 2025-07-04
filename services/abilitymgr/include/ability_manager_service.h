@@ -336,6 +336,17 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE) override;
 
     /**
+     * Start UI abilities simultaneously.
+     *
+     * @param wantList a list of want to start UI abilities.
+     * @param requestKey, The unique key of this StartUIAbilities request.
+     * @param callerToken current caller ability token.
+     * @return Returns ERR_OK if success.
+     */
+    ErrCode StartUIAbilities(const std::vector<AAFwk::Want> &wantList,
+        const std::string &requestKey, sptr<IRemoteObject> callerToken) override;
+
+    /**
      * Start ui session ability with extension session info, send session info to ability manager service.
      *
      * @param want, the want of the ability to start.
@@ -1262,8 +1273,6 @@ public:
 
     void RemoveSelectorIdentity(int32_t tokenId);
 
-    void SetTargetCloneIndexInSameBundle(const Want &want, sptr<IRemoteObject> callerToken);
-
     virtual int RegisterAbilityFirstFrameStateObserver(const sptr<IAbilityFirstFrameStateObserver> &observer,
         const std::string &bundleName) override;
 
@@ -2111,6 +2120,8 @@ public:
      */
     virtual int32_t QueryKeepAliveAppServiceExtensions(std::vector<KeepAliveInfo> &list) override;
 
+    virtual int32_t NotifyStartupExceptionBySCB(int32_t requestId) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -2545,6 +2556,11 @@ private:
 
     virtual int RegisterSessionHandler(const sptr<IRemoteObject> &object) override;
 
+    int32_t StartUIAbilitiesHandleWant(const Want &want, sptr<IRemoteObject> callerToken,
+        std::vector<AbilityRequest> &abilityRequestList);
+    int32_t StartUIAbilitiesCheckDlp(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId);
+    int32_t StartUIAbilitiesInterceptorCheck(const Want &want, AbilityRequest &abilityRequest,
+        sptr<IRemoteObject> callerToken,  int32_t appIndex);
     /**
      * Start switch user dialog Extension ability.
      */

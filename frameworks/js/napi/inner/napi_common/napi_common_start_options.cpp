@@ -232,15 +232,15 @@ bool UnwrapStartOptions(napi_env env, napi_value param, AAFwk::StartOptions &sta
         }
     }
 
-    Rosen::StartAnimationOptions animationOptions;
-    if (Rosen::ConvertStartAnimationOptionsFromJsValue(env, param, animationOptions)) {
-        startOptions.animationOptions_ = std::make_shared<Rosen::StartAnimationOptions>(animationOptions);
-    }
-
-    Rosen::StartAnimationSystemOptions animationSystemOptions;
-    if (Rosen::ConvertStartAnimationSystemOptionsFromJsValue(env, param, animationSystemOptions)) {
-        startOptions.animationSystemOptions_ =
-            std::make_shared<Rosen::StartAnimationSystemOptions>(animationSystemOptions);
+    bool hasWindowCreateParams = false;
+    napi_has_named_property(env, param, "windowCreateParams", &hasWindowCreateParams);
+    if (hasWindowCreateParams) {
+        napi_value windowJsObject = nullptr;
+        napi_get_named_property(env, param, "windowCreateParams", &windowJsObject);
+        Rosen::WindowCreateParams windowCreateParams;
+        if (Rosen::ConvertWindowCreateParamsFromJsValue(env, windowJsObject, windowCreateParams)) {
+            startOptions.windowCreateParams_ = std::make_shared<Rosen::WindowCreateParams>(windowCreateParams);
+        }
     }
 
     return true;

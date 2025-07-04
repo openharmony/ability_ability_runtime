@@ -104,7 +104,6 @@ void BundleMgrHelperFuzztest1(bool boolParam, std::string &stringParam, int32_t 
     bmHelper->GetBundleInfoForSelf(int32Param, bundleInfo);
     bmHelper->GetDependentBundleInfo(stringParam, bundleInfo, static_cast<GetDependentBundleInfoFlag>(int32Param));
     bmHelper->GetGroupDir(stringParam, stringParam);
-    bmHelper->GetOverlayManagerProxy();
     bmHelper->QueryAbilityInfo(want, abilityInfo);
     bmHelper->QueryAbilityInfo(want, int32Param, int32Param, abilityInfo);
     std::vector<BundleInfo> bundleInfos;

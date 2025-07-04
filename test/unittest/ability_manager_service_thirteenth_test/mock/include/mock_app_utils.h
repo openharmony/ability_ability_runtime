@@ -133,6 +133,13 @@ public:
     bool IsStartOptionsWithAnimation();
 
     /**
+     * IsSupportStartAbilities, check whether the StartUIAbilities API is supported.
+     *
+     * @return Whether the StartUIAbilities API is supported.
+     */
+    bool IsSupportStartAbilities();
+
+    /**
      * IsStartOptionsWithAnimation, check whether it is a multi-process model.
      *
      * @return Whether it is a multi-process model.

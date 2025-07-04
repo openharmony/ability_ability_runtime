@@ -98,6 +98,8 @@ public:
      */
     ErrCode StartServiceExtensionAbility(const AAFwk::Want &want, int32_t accountId = -1);
 
+    ErrCode StartUIAbilities(const std::vector<AAFwk::Want> &wantList, const std::string &requestKey);
+
     /**
      * Start other ability for result.
      *

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -39,7 +39,6 @@ ohos_unittest("cj_ability_stage_object_test") {
     "${ability_runtime_path}/frameworks/native/appkit/ability_runtime/app/cj_ability_stage_context.cpp",
     "${ability_runtime_path}/frameworks/native/appkit/ability_runtime/app/cj_ability_stage_object.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/mock_bundle_manager.cpp",
-    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/mock_overlay_manager.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/sys_mgr_client_mock.cpp",
     "cj_ability_stage_object_test.cpp",
   ]

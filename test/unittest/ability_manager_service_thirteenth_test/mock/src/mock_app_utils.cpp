@@ -192,7 +192,7 @@ int32_t AppUtils::MaxChildProcess()
 
 bool AppUtils::IsSupportMultiInstance()
 {
-    return true;
+    return MyStatus::GetInstance().isSupportMultiInstance_;
 }
 
 std::string AppUtils::GetMigrateClientBundleName()
@@ -248,5 +248,9 @@ bool AppUtils::IsSupportAppServiceExtension()
     return true;
 }
 
+bool AppUtils::IsSupportStartAbilities()
+{
+    return MyStatus::GetInstance().isSupportStartAbilities_;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

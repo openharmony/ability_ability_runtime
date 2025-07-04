@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "ability_record.h"
+#include "app_utils.h"
 #undef private
 #undef protected
 
@@ -2471,6 +2472,82 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_006, TestSize.Leve
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     abilityRecord->SetLastWant(std::make_shared<Want>());
+    abilityRecord->ForegroundAbility(0, true);
+    EXPECT_TRUE(abilityRecord != nullptr);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: ForegroundAbility
+ * SubFunction: ForegroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ForegroundAbility
+ */
+HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_007, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->SetLastWant(std::make_shared<Want>());
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = true;
+    abilityRecord->abilityInfo_.applicationInfo.isSystemApp = true;
+    abilityRecord->ForegroundAbility(0, true);
+    EXPECT_TRUE(abilityRecord != nullptr);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: ForegroundAbility
+ * SubFunction: ForegroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ForegroundAbility
+ */
+HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_008, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->SetLastWant(std::make_shared<Want>());
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = true;
+    abilityRecord->abilityInfo_.applicationInfo.isSystemApp = false;
+    abilityRecord->ForegroundAbility(0, true);
+    EXPECT_TRUE(abilityRecord != nullptr);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: ForegroundAbility
+ * SubFunction: ForegroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ForegroundAbility
+ */
+HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_009, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->SetLastWant(std::make_shared<Want>());
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = false;
+    abilityRecord->abilityInfo_.applicationInfo.isSystemApp = true;
+    abilityRecord->ForegroundAbility(0, true);
+    EXPECT_TRUE(abilityRecord != nullptr);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: ForegroundAbility
+ * SubFunction: ForegroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ForegroundAbility
+ */
+HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_010, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->SetLastWant(std::make_shared<Want>());
+    AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartSpecifiedProcess_.value = false;
+    abilityRecord->abilityInfo_.applicationInfo.isSystemApp = false;
     abilityRecord->ForegroundAbility(0, true);
     EXPECT_TRUE(abilityRecord != nullptr);
 }

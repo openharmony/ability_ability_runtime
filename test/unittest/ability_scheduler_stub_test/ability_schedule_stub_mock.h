@@ -170,6 +170,8 @@ public:
     virtual void ScheduleAbilityRequestSuccess(const std::string &requestId,
         const AppExecFwk::ElementName &element) override
     {}
+    void ScheduleAbilitiesRequestDone(const std::string &requestKey, int32_t resultCode) override
+    {}
 };
 }  // namespace AAFwk
 }  // namespace OHOS

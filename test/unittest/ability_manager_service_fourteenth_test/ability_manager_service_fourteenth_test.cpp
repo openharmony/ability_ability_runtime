@@ -380,6 +380,48 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, IsCallerSceneBoard_004, TestSize.L
 
 /*
  * Feature: AbilityManagerService
+ * Function: NotifyStartupExceptionBySCB
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService NotifyStartupExceptionBySCB
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, NotifyStartupExceptionBySCB_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest NotifyStartupExceptionBySCB_001 start");
+    auto abilityMs = std::make_unique<AbilityManagerService>();
+    int32_t requestId = 0;
+    int32_t result = abilityMs->NotifyStartupExceptionBySCB(requestId);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest NotifyStartupExceptionBySCB_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: NotifyStartupExceptionBySCB
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService NotifyStartupExceptionBySCB
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, NotifyStartupExceptionBySCB_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest NotifyStartupExceptionBySCB_002 start");
+    MyStatus::GetInstance().smhGetConnectManagerByToken_ = true;
+    MyStatus::GetInstance().ipcGetCallingTokenID_ = 1;
+
+    auto abilityMs = std::make_unique<AbilityManagerService>();
+    auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(mockSubManagersHelper, nullptr);
+    auto mockCurrentConnectManager = std::make_shared<AbilityConnectManager>(0);
+    EXPECT_NE(mockCurrentConnectManager, nullptr);
+    mockCurrentConnectManager->sceneBoardTokenId_ = 1;
+    abilityMs->subManagersHelper_ = mockSubManagersHelper;
+    abilityMs->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
+    int32_t requestId = 0;
+    int32_t result = abilityMs->NotifyStartupExceptionBySCB(requestId);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest NotifyStartupExceptionBySCB_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Name: AcquireShareData_001
  * Function: AcquireShareData
  * SubFunction: NA

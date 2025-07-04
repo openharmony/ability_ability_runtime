@@ -213,6 +213,9 @@ public:
     std::shared_ptr<Context> CreatePluginContext(const std::string &pluginBundleName,
         const std::string &moduleName, std::shared_ptr<Context> inputContext);
 
+    std::shared_ptr<Context> CreateTargetPluginContext(const std::string &hostBundName,
+        const std::string &pluginBundleName, const std::string &moduleName, std::shared_ptr<Context> inputContext);
+
     std::string GetBundleNameWithContext(std::shared_ptr<Context> inputContext = nullptr) const;
 
     /**
@@ -522,7 +525,6 @@ private:
     int32_t GetBundleInfo(const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo, bool &currentBundle);
     void GetBundleInfo(const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo,
         std::shared_ptr<Context> inputContext = nullptr);
-    ErrCode GetOverlayMgrProxy();
     void UnsubscribeToOverlayEvents();
     void ShallowCopySelf(std::shared_ptr<ContextImpl> &contextImpl);
     bool UpdateDisplayConfiguration(std::shared_ptr<ContextImpl> &contextImpl, uint64_t displayId,
@@ -546,8 +548,6 @@ private:
 
     std::mutex bundleManagerMutex_;
     std::shared_ptr<AppExecFwk::BundleMgrHelper> bundleMgr_;
-    std::mutex overlayMgrProxyMutex_;
-    sptr<AppExecFwk::IOverlayManager> overlayMgrProxy_ = nullptr;
 
     // True: need to get a new fms remote object,
     // False: no need to get a new fms remote object.
@@ -560,6 +560,9 @@ private:
     static std::mutex getDisplayConfigCallbackMutex_;
     static GetDisplayConfigCallback getDisplayConfigCallback_;
 #endif
+    std::shared_ptr<Context> WrapContext(const std::string &pluginBundleName, const std::string &moduleName,
+        std::shared_ptr<Context> inputContext, AppExecFwk::PluginBundleInfo &pluginBundleInfo,
+        const std::string &hostBundleName);
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
