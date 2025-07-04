@@ -51,8 +51,7 @@ StartOptions::StartOptions(const StartOptions &other)
     startWindowOption = other.startWindowOption;
     supportWindowModes_ = other.supportWindowModes_;
     requestId_ = other.requestId_;
-    animationOptions_ = other.animationOptions_;
-    animationSystemOptions_ = other.animationSystemOptions_;
+    windowCreateParams_ = other.windowCreateParams_;
 }
 
 StartOptions &StartOptions::operator=(const StartOptions &other)
@@ -83,8 +82,7 @@ StartOptions &StartOptions::operator=(const StartOptions &other)
         startWindowOption = other.startWindowOption;
         supportWindowModes_ = other.supportWindowModes_;
         requestId_ = other.requestId_;
-        animationOptions_ = other.animationOptions_;
-        animationSystemOptions_ = other.animationSystemOptions_;
+        windowCreateParams_ = other.windowCreateParams_;
     }
     return *this;
 }
@@ -123,8 +121,7 @@ bool StartOptions::ReadFromParcel(Parcel &parcel)
         supportWindowModes_.emplace_back(AppExecFwk::SupportWindowMode(parcel.ReadInt32()));
     }
     requestId_ = parcel.ReadString();
-    animationOptions_.reset(parcel.ReadParcelable<Rosen::StartAnimationOptions>());
-    animationSystemOptions_.reset(parcel.ReadParcelable<Rosen::StartAnimationSystemOptions>());
+    windowCreateParams_.reset(parcel.ReadParcelable<Rosen::WindowCreateParams>());
     return true;
 }
 
@@ -190,13 +187,8 @@ bool StartOptions::Marshalling(Parcel &parcel) const
 
 bool StartOptions::MarshallingTwo(Parcel &parcel) const
 {
-    if (!parcel.WriteParcelable(animationOptions_.get())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write animationOptions_ failed");
-        return false;
-    }
-
-    if (!parcel.WriteParcelable(animationSystemOptions_.get())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write animationSystemOptions failed");
+    if (!parcel.WriteParcelable(windowCreateParams_.get())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write windowCreateParams_ failed");
         return false;
     }
     return true;
