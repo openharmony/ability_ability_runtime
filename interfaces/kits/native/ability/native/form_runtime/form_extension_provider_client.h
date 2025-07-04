@@ -186,7 +186,7 @@ public:
      * @param callerToken Caller ability token.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int NotifySizeChanged(const int64_t formId, const int32_t newDimension, const AppExecFwk::Rect &newRect,
+    int NotifySizeChanged(int64_t formId, int32_t newDimension, const AppExecFwk::Rect &newRect,
         const Want &want, const sptr<IRemoteObject> &callerToken) override;
 
 private:
@@ -219,7 +219,7 @@ private:
     void NotifyFormExtensionUpdateLocation(const int64_t formId, const Want &want,
         const sptr<IRemoteObject> &callerToken);
 
-    void NotifyExtensionSizeChanged(const int64_t formId, const int32_t newDimension,
+    void NotifyExtensionSizeChanged(int64_t formId, int32_t newDimension,
         const AppExecFwk::Rect &newRect, const Want &want, const sptr<IRemoteObject> &callerToken);
 
 private:

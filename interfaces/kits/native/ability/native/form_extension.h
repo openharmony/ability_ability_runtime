@@ -176,7 +176,7 @@ public:
      * @param newRect The rect value to be updated.
      * @return none.
      */
-    virtual void OnSizeChanged(const int64_t formId, const int32_t newDimension, const AppExecFwk::Rect &newRect);
+    virtual void OnSizeChanged(int64_t formId, int32_t newDimension, const AppExecFwk::Rect &newRect);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
