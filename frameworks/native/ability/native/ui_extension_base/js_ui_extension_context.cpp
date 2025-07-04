@@ -26,8 +26,10 @@
 #include "js_extension_context.h"
 #include "js_error_utils.h"
 #include "js_data_struct_converter.h"
+#include "js_deferred_callback.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
+#include "js_start_abilities_observer.h"
 #include "js_uiservice_uiext_connection.h"
 #include "js_ui_service_proxy.h"
 #include "napi/native_api.h"
@@ -51,6 +53,7 @@ constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t INDEX_TWO = 2;
 constexpr int32_t INDEX_THREE = 3;
+constexpr int32_t INDEX_FOUR = 4;
 constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
@@ -142,6 +145,11 @@ napi_value JsUIExtensionContext::StartAbilityForResult(napi_env env, napi_callba
 napi_value JsUIExtensionContext::StartAbilityForResultAsCaller(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContext, OnStartAbilityForResultAsCaller);
+}
+
+napi_value JsUIExtensionContext::StartUIAbilities(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContext, OnStartUIAbilities);
 }
 
 napi_value JsUIExtensionContext::TerminateSelfWithResult(napi_env env, napi_callback_info info)
@@ -562,6 +570,84 @@ napi_value JsUIExtensionContext::OnStartAbilityForResultAsCaller(napi_env env, N
         context->StartAbilityForResultAsCaller(want, startOptions, curRequestCode, std::move(task));
     TAG_LOGD(AAFwkTag::UI_EXT, "End.");
     return result;
+}
+
+napi_value JsUIExtensionContext::OnStartUIAbilities(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGI(AAFwkTag::UI_EXT, "call OnStartUIAbilities");
+    if (info.argc < ARGC_ONE) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Too few parameters.");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    std::vector<AAFwk::Want> wantList;
+    std::string requestKey = std::to_string(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count());
+
+    if (!UnwrapWantList(env, info, wantList)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Unwrap wantList param failed.");
+        return CreateJsUndefined(env);
+    }
+    
+    TAG_LOGD(AAFwkTag::UI_EXT, "startUIAbilities wantListLength: %{public}zu", wantList.size());
+
+    JsDeferredCallback callback(env);
+    JsStartAbilitiesObserver::GetInstance().AddObserver(requestKey, callback);
+    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute = [weak = context_, wantList, requestKey, innerErrCode]() {
+        auto context = weak.lock();
+        if (!context) {
+            TAG_LOGW(AAFwkTag::UI_EXT, "null context");
+            *innerErrCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            return;
+        }
+        *innerErrCode = context->StartUIAbilities(wantList, requestKey);
+    };
+
+    NapiAsyncTask::CompleteCallback complete = [innerErrCode, weak = context_, requestKey]
+        (napi_env, NapiAsyncTask&, int32_t) {
+            TAG_LOGI(AAFwkTag::UI_EXT, "startUIAbilities complete innerErrCode: %{public}d", *innerErrCode);
+            if (*innerErrCode == AAFwk::START_UI_ABILITIES_WAITING_SPECIFIED_CODE)  {
+                TAG_LOGI(AAFwkTag::UI_EXT, "startUIAbilities waiting specified.");
+                return;
+            }
+            JsStartAbilitiesObserver::GetInstance().HandleFinished(requestKey, *innerErrCode);
+    };
+
+    NapiAsyncTask::ScheduleHighQos("JSUIExtensionConnection::OnStartUIAbilities", env,
+        CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), nullptr));
+    return callback.result;
+}
+
+bool JsUIExtensionContext::UnwrapWantList(napi_env env, NapiCallbackInfo &info, std::vector<AAFwk::Want> &wantList)
+{
+    AppExecFwk::ComplexArrayData jsWantList;
+    if (!AppExecFwk::UnwrapArrayComplexFromJS(env, info.argv[INDEX_ZERO], jsWantList)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "wantList not array.");
+        ThrowInvalidParamError(env, "WantList is not an array.");
+        return false;
+    }
+
+    size_t jsWantSize = jsWantList.objectList.size();
+    if (jsWantSize < INDEX_ONE || jsWantSize > INDEX_FOUR) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "wantList size not support");
+        ThrowErrorByNativeErr(env, AAFwk::START_UI_ABILITIES_WANT_LIST_SIZE_ERROR);
+        return false;
+    }
+
+    for (uint32_t index = 0; index < jsWantSize; index++) {
+        AAFwk::Want curWant;
+        if (!OHOS::AppExecFwk::UnwrapWant(env, jsWantList.objectList[index], curWant)) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "startUIAbilities parse want failed");
+            ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
+            return false;
+        }
+        TAG_LOGD(AAFwkTag::UI_EXT, "startUIAbilities ability:%{public}s",
+            curWant.GetElement().GetAbilityName().c_str());
+        wantList.emplace_back(curWant);
+    }
+    return true;
 }
 
 napi_value JsUIExtensionContext::OnConnectAbility(napi_env env, NapiCallbackInfo& info)
@@ -1331,6 +1417,7 @@ napi_value JsUIExtensionContext::CreateJsUIExtensionContext(napi_env env,
     BindNativeFunction(env, objValue, "startAbilityForResult", moduleName, StartAbilityForResult);
     BindNativeFunction(env, objValue, "terminateSelfWithResult", moduleName, TerminateSelfWithResult);
     BindNativeFunction(env, objValue, "startAbilityForResultAsCaller", moduleName, StartAbilityForResultAsCaller);
+    BindNativeFunction(env, objValue, "startUIAbilities", moduleName, StartUIAbilities);
     BindNativeFunction(env, objValue, "connectServiceExtensionAbility", moduleName, ConnectAbility);
     BindNativeFunction(env, objValue, "disconnectServiceExtensionAbility", moduleName, DisconnectAbility);
     BindNativeFunction(env, objValue, "reportDrawnCompleted", moduleName, ReportDrawnCompleted);

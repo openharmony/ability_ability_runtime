@@ -801,8 +801,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, MoveAbilityToFront_001, TestSize.Le
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
 
     AppUtils::isStartOptionsWithAnimation_ = true;
-
-    uiAbilityLifecycleManager->MoveAbilityToFront(abilityRequest, abilityRecord, abilityRecord, nullptr, 0);
+    SpecifiedRequest specifiedRequest(0, abilityRequest);
+    uiAbilityLifecycleManager->MoveAbilityToFront(specifiedRequest, abilityRecord, abilityRecord);
 
     auto sessionInfo = abilityRecord->GetSessionInfo();
     EXPECT_NE(sessionInfo->processOptions, nullptr);
@@ -826,8 +826,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, MoveAbilityToFront_002, TestSize.Le
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
 
     AppUtils::isStartOptionsWithAnimation_ = false;
-
-    uiAbilityLifecycleManager->MoveAbilityToFront(abilityRequest, abilityRecord, abilityRecord, nullptr, 0);
+    SpecifiedRequest specifiedRequest(0, abilityRequest);
+    uiAbilityLifecycleManager->MoveAbilityToFront(specifiedRequest, abilityRecord, abilityRecord);
 
     auto sessionInfo = abilityRecord->GetSessionInfo();
     EXPECT_EQ(sessionInfo->processOptions, nullptr);
@@ -854,13 +854,12 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, MoveAbilityToFront_003, TestSize.Le
 
     AppUtils::isStartOptionsWithAnimation_ = false;
 
-    auto startOptions = std::make_shared<StartOptions>();
-    startOptions->windowMode_ = AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY;
-
-    uiAbilityLifecycleManager->MoveAbilityToFront(abilityRequest, abilityRecord, abilityRecord, startOptions, 0);
+    SpecifiedRequest specifiedRequest(0, abilityRequest);
+    specifiedRequest.requestListId = 0;
+    uiAbilityLifecycleManager->MoveAbilityToFront(specifiedRequest, abilityRecord, abilityRecord);
 
     auto ret = abilityRecord->want_.GetIntParam(Want::PARAM_RESV_WINDOW_MODE, -1);
-    EXPECT_EQ(ret, AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY);
+    EXPECT_EQ(ret, AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED);
 }
 
 /**
@@ -884,10 +883,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, MoveAbilityToFront_004, TestSize.Le
 
     AppUtils::isStartOptionsWithAnimation_ = false;
 
-    auto startOptions = std::make_shared<StartOptions>();
-    startOptions->windowMode_ = AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY;
-
-    uiAbilityLifecycleManager->MoveAbilityToFront(abilityRequest, abilityRecord, abilityRecord, nullptr, 0);
+    SpecifiedRequest specifiedRequest(0, abilityRequest);
+    uiAbilityLifecycleManager->MoveAbilityToFront(specifiedRequest, abilityRecord, abilityRecord);
 
     auto ret = abilityRecord->want_.GetIntParam(Want::PARAM_RESV_WINDOW_MODE, -1);
     EXPECT_EQ(ret, -1);
@@ -1408,7 +1405,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedAbilityBySCB_002, Tes
     abilityRequest.abilityInfo.isStageBasedModel = true;
     AppUtils::isStartSpecifiedProcess_ = true;
     auto result = uiAbilityLifecycleManager->StartSpecifiedAbilityBySCB(abilityRequest);
-    EXPECT_EQ(result, uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest));
+    EXPECT_EQ(result, uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest, nullptr));
 }
 
 /**
@@ -1430,7 +1427,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedProcessRequest_0100, 
     abilityRequest.abilityInfo.applicationInfo.multiAppMode.multiAppModeType =
         AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     abilityRequest.want.SetParam(Want::CREATE_APP_INSTANCE_KEY, true);
-    auto result = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest);
+    auto result = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest, nullptr);
     EXPECT_EQ(result, ERR_CREATE_INSTANCE_KEY_FAILED);
 }
 
@@ -1453,7 +1450,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedProcessRequest_0200, 
     abilityRequest.abilityInfo.applicationInfo.multiAppMode.multiAppModeType =
         AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
     abilityRequest.want.SetParam(Want::CREATE_APP_INSTANCE_KEY, true);
-    auto result = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest);
+    auto result = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest, nullptr);
     EXPECT_EQ(result, ERR_OK);
 }
 
