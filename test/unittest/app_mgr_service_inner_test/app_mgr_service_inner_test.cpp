@@ -5936,6 +5936,28 @@ HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSpecifiedProcessFlag_0004
+ * @tc.desc: Verify that GetSpecifiedProcessFlag returns an empty string when AbilityInfo is a UIExtension and
+ * isolationProcess is false, even if the flag is set in want.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0004, TestSize.Level1)
+{
+    AbilityInfo abilityInfo;
+    abilityInfo.type = AbilityType::PAGE;
+    abilityInfo.isStageBasedModel = false;
+    abilityInfo.isolationProcess = false;
+    abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+
+    AAFwk::Want want;
+    std::string flag = "uiext_flag";
+    want.SetParam("ohoSpecifiedProcessFlag", flag);
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
+    EXPECT_EQ(result, "");
+}
+
+/**
  * @tc.name: AfterLoadAbility_0001
  * @tc.desc: AfterLoadAbility
  * @tc.type: FUNC

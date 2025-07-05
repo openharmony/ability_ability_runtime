@@ -403,8 +403,8 @@ void StartSpecifiedAbilityResponse::OnTimeoutResponse(int32_t requestId)
     DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedAbilityTimeoutResponse(requestId);
 }
 
-void AppScheduler::StartSpecifiedProcess(
-    const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo, int32_t requestId, std::string customProcess)
+void AppScheduler::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
+    int32_t requestId, const std::string &customProcess)
 {
     CHECK_POINTER(appMgrClient_);
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess));
