@@ -1211,15 +1211,15 @@ void UriPermissionManagerStubImpl::BoolVecToCharVec(const std::vector<bool>& boo
     }
 }
 
-void UriPermissionManagerStubImpl::BoolVecToRawData(const std::vector<bool>& boolVector, UriPermissionRawData& rawData,
-    std::vector<char>& charVector)
+void UriPermissionManagerStubImpl::BoolVecToRawData(const std::vector<bool> &boolVector, UriPermissionRawData &rawData,
+    std::vector<char> &charVector)
 {
     BoolVecToCharVec(boolVector, charVector);
     std::stringstream ss;
     uint32_t boolCount = boolVector.size();
     ss.write(reinterpret_cast<const char *>(&boolCount), sizeof(boolCount));
-    for (uint32_t i = 0; i < boolCount; i++) {
-        ss.write(reinterpret_cast<const char *>(&charVector[i]), sizeof(boolVector[i]));
+    for (uint32_t i = 0; i < boolCount; ++i) {
+        ss.write(reinterpret_cast<const char *>(&charVector[i]), sizeof(charVector[i]));
     }
     std::string result = ss.str();
     rawData.ownedData = std::move(result);
@@ -1227,8 +1227,8 @@ void UriPermissionManagerStubImpl::BoolVecToRawData(const std::vector<bool>& boo
     rawData.size = rawData.ownedData.size();
 }
 
-ErrCode UriPermissionManagerStubImpl::RawDataToStringVec(const UriPermissionRawData& rawData,
-    std::vector<std::string>& stringVec)
+ErrCode UriPermissionManagerStubImpl::RawDataToStringVec(const UriPermissionRawData &rawData,
+    std::vector<std::string> &stringVec)
 {
     if (rawData.data == nullptr) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "null data");
