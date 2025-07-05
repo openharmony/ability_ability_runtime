@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+#define private public
 #include "dump_runtime_helper.h"
+#undef private
+#include "parameters.h"
 
 using namespace testing::ext;
 
@@ -38,10 +41,14 @@ void DumpRuntimeHelperTest::TearDownTestCase(void)
 {}
 
 void DumpRuntimeHelperTest::SetUp(void)
-{}
+{
+    OHOS::system::SetParameter("hiview.oomdump.switch", "");
+}
 
 void DumpRuntimeHelperTest::TearDown(void)
-{}
+{
+    OHOS::system::SetParameter("hiview.oomdump.switch", "");
+}
 
 /**
  * @tc.number: DumpJsHeap_0100
@@ -62,6 +69,22 @@ HWTEST_F(DumpRuntimeHelperTest, DumpJsHeap_0100, Function | MediumTest | Level1)
     helper->DumpJsHeap(info);
     EXPECT_NE(application, nullptr);
     GTEST_LOG_(INFO) << "DumpRuntimeHelperTest DumpJsHeap_0100 end";
+}
+
+/**
+ * @tc.number: CheckOomdumpSwitch_0100
+ * @tc.name: CheckOomdumpSwitch
+ * @tc.desc: Test the function of CheckOomdumpSwitch.
+ */
+HWTEST_F(DumpRuntimeHelperTest, CheckOomdumpSwitch_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "DumpRuntimeHelperTest CheckOomdumpSwitch_0100 start";
+    EXPECT_TRUE(DumpRuntimeHelper::CheckOomdumpSwitch());
+    OHOS::system::SetParameter("hiview.oomdump.switch", "disable");
+    EXPECT_FALSE(DumpRuntimeHelper::CheckOomdumpSwitch());
+    OHOS::system::SetParameter("hiview.oomdump.switch", "unknown");
+    EXPECT_TRUE(DumpRuntimeHelper::CheckOomdumpSwitch());
+    GTEST_LOG_(INFO) << "DumpRuntimeHelperTest CheckOomdumpSwitch_0100 end";
 }
 }
 }
