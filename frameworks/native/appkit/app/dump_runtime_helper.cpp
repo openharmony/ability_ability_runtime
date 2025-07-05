@@ -98,6 +98,10 @@ void DumpRuntimeHelper::SetAppFreezeFilterCallback()
             TAG_LOGE(AAFwkTag::APPKIT, "null client");
             return false;
         }
+        if (!CheckOomdumpSwitch()) {
+            TAG_LOGE(AAFwkTag::APPKIT, "failed to check oomdump switch");
+            return false;
+        }
         if (g_betaVersion || g_developMode || !needDecreaseQuota) {
             TAG_LOGI(AAFwkTag::APPKIT, "no need to check quota, just dump."
                 " beta: %{public}d, develop: %{public}d, hidumper: %{public}d",
@@ -117,6 +121,14 @@ void DumpRuntimeHelper::SetAppFreezeFilterCallback()
     };
     auto vm = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetEcmaVm();
     panda::DFXJSNApi::SetAppFreezeFilterCallback(vm, appfreezeFilterCallback);
+}
+
+bool DumpRuntimeHelper::CheckOomdumpSwitch()
+{
+    // if value is disable, then no dump whatever
+    std::string switchValue = OHOS::system::GetParameter("hiview.oomdump.switch", "unknown");
+    TAG_LOGI(AAFwkTag::APPKIT, "oomdump switch: %{public}s", switchValue.c_str());
+    return switchValue != "disable";
 }
 
 bool DumpRuntimeHelper::Check2CQuota()
@@ -160,10 +172,6 @@ bool DumpRuntimeHelper::Check2CQuota()
 
 bool DumpRuntimeHelper::Check2DQuota(bool needDecreaseQuota)
 {
-    if (OHOS::system::GetParameter("hiview.oomdump.switch", "unknown") == "disable") {
-        TAG_LOGE(AAFwkTag::APPKIT, "oom dump is disabled");
-        return false;
-    }
     if (!Check2DOOMDumpOpt()) {
         TAG_LOGE(AAFwkTag::APPKIT, "Check2DOOMDumpOpt failed");
         return false;

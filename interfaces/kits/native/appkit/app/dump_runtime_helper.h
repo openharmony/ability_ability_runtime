@@ -55,6 +55,7 @@ private:
     static bool ForceCreateDirectory(const std::string &path);
     static bool CreateDir(const std::string &path);
     static void CreateDirDelay(const std::string &path);
+    static bool CheckOomdumpSwitch();
     static bool Check2CQuota();
     static bool Check2DQuota(bool needDecreaseQuota);
     static bool SafeStoll(const std::string &str, long long &value);
