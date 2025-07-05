@@ -25,6 +25,16 @@ constexpr size_t ARGC_ONE = 1;
 }
 JSAbilityForegroundStateObserver::JSAbilityForegroundStateObserver(napi_env env) : env_(env) {}
 
+void JSAbilityForegroundStateObserver::CleanUp(void *data)
+{
+    auto observerInstance = reinterpret_cast<JSAbilityForegroundStateObserver*>(data);
+    if (observerInstance == nullptr) {
+        return;
+    }
+    observerInstance->RemoveAllJsObserverObject();
+    delete observerInstance;
+}
+
 void JSAbilityForegroundStateObserver::OnAbilityStateChanged(const AbilityStateData &abilityStateData)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
