@@ -58,7 +58,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
 std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExist(const std::string &appName,
     const std::string &processName, const int uid, const BundleInfo &bundleInfo,
     const std::string &specifiedProcessFlag, bool *isProCache, const std::string &instanceKey,
-    const std::string &customProcessFlag)
+    const std::string &customProcessFlag, const bool notReuseCachedPorcess)
 {
     AAFwk::MyStatus::GetInstance().checkAppRunningCall_++;
     if (AAFwk::MyStatus::GetInstance().checkAppRunning_) {
