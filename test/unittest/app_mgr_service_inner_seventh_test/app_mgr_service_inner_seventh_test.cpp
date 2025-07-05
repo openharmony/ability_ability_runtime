@@ -26,10 +26,12 @@
 #include "ability_manager_errors.h"
 #include "overlay_manager_proxy.h"
 #include "ability_connect_callback_stub.h"
+#include "session_manager_lite.h"
 
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::AAFwk;
+using namespace OHOS::Rosen;
 using OHOS::AppExecFwk::ExtensionAbilityType;
 constexpr int32_t FOUNDATION_UID = 5523;
 constexpr int32_t SHADER_CACHE_GROUPID = 3099;
@@ -2877,6 +2879,266 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, AllowChildProcessInMultiProcessFeatureAp
     ret = appMgrServiceInner->AllowChildProcessInMultiProcessFeatureApp(appRecord);
     EXPECT_FALSE(ret);
     TAG_LOGI(AAFwkTag::TEST, "AllowChildProcessInMultiProcessFeatureApp_002 end");
+}
+
+/**
+* @tc.name: GetBackgroundAppInfo_001
+* @tc.desc: test GetBackgroundAppInfo_001
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetBackgroundAppInfo_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    auto res = appMgrServiceInner->GetBackgroundAppInfo({});
+    EXPECT_EQ(res.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_001 end");
+}
+
+/**
+* @tc.name: GetBackgroundAppInfo_002
+* @tc.desc: test GetBackgroundAppInfo_002
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetBackgroundAppInfo_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = nullptr;
+    auto res = appMgrServiceInner->GetBackgroundAppInfo({});
+    EXPECT_EQ(res.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_002 end");
+}
+
+/**
+* @tc.name: GetBackgroundAppInfo_003
+* @tc.desc: test GetBackgroundAppInfo_003
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetBackgroundAppInfo_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_003 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = std::make_shared<SceneSessionManagerLite>();
+    auto res = appMgrServiceInner->GetBackgroundAppInfo({});
+    EXPECT_EQ(res.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_003 end");
+}
+
+/**
+* @tc.name: GetBackgroundAppInfo_004
+* @tc.desc: test GetBackgroundAppInfo_004
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetBackgroundAppInfo_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_004 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = std::make_shared<SceneSessionManagerLite>();
+
+    RecentSessionInfo info1;
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_->recentSessionInfoList_ = {info1};
+    auto res = appMgrServiceInner->GetBackgroundAppInfo({});
+    EXPECT_EQ(res.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_004 end");
+}
+
+/**
+* @tc.name: GetBackgroundAppInfo_005
+* @tc.desc: test GetBackgroundAppInfo_005
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetBackgroundAppInfo_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_005 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = std::make_shared<SceneSessionManagerLite>();
+
+    RecentSessionInfo info1;
+    RecentSessionInfo info2;
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_->recentSessionInfoList_ = {info1, info2};
+    auto res = appMgrServiceInner->GetBackgroundAppInfo({});
+    EXPECT_EQ(res.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_005 end");
+}
+
+/**
+* @tc.name: GetBackgroundAppInfo_006
+* @tc.desc: test GetBackgroundAppInfo_006
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetBackgroundAppInfo_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_006 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = std::make_shared<SceneSessionManagerLite>();
+
+    RecentSessionInfo info1;
+    info1.bundleName = "app1";
+    info1.appIndex = 0;
+
+    RecentSessionInfo info2;
+    info2.bundleName = "app2";
+    info2.appIndex = 0;
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_->recentSessionInfoList_ = {info1, info2};
+    auto res = appMgrServiceInner->GetBackgroundAppInfo({});
+    EXPECT_EQ(res.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_006 end");
+}
+
+/**
+* @tc.name: GetBackgroundAppInfo_007
+* @tc.desc: test GetBackgroundAppInfo_007
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetBackgroundAppInfo_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_007 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = std::make_shared<SceneSessionManagerLite>();
+
+    RecentSessionInfo info1;
+    info1.bundleName = "app1";
+    info1.appIndex = 0;
+
+    RecentSessionInfo info2;
+    info2.bundleName = "app2";
+    info2.appIndex = 0;
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_->recentSessionInfoList_ = {info1, info2};
+
+    BackgroundAppInfo appInfo1;
+    auto res = appMgrServiceInner->GetBackgroundAppInfo({appInfo1});
+    EXPECT_EQ(res.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_007 end");
+}
+
+/**
+* @tc.name: GetBackgroundAppInfo_008
+* @tc.desc: test GetBackgroundAppInfo_008
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetBackgroundAppInfo_008, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_008 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = std::make_shared<SceneSessionManagerLite>();
+
+    RecentSessionInfo info1;
+    info1.bundleName = "app1";
+    info1.sessionState = RecentSessionState::BACKGROUND;
+
+    RecentSessionInfo info2;
+    info2.bundleName = "app2";
+    info2.sessionState = RecentSessionState::BACKGROUND;
+
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_->recentSessionInfoList_ = {info1, info2};
+
+    BackgroundAppInfo appInfo1;
+    appInfo1.bandleName = "app1";
+
+    BackgroundAppInfo appInfo2;
+    appInfo2.bandleName = "app2";
+
+    auto res = appMgrServiceInner->GetBackgroundAppInfo({appInfo1, appInfo2});
+    EXPECT_EQ(res.size(), 2);
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_008 end");
+}
+
+/**
+* @tc.name: GetBackgroundAppInfo_009
+* @tc.desc: test GetBackgroundAppInfo_009
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetBackgroundAppInfo_009, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_009 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = std::make_shared<SceneSessionManagerLite>();
+
+    RecentSessionInfo info1;
+    info1.bundleName = "app1";
+    info1.sessionState = RecentSessionState::FOREGROUND;
+
+    RecentSessionInfo info2;
+    info2.bundleName = "app2";
+    info2.sessionState = RecentSessionState::BACKGROUND;
+
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_->recentSessionInfoList_ = {info1, info2};
+
+    BackgroundAppInfo appInfo1;
+    appInfo1.bandleName = "app1";
+
+    BackgroundAppInfo appInfo2;
+    appInfo2.bandleName = "app2";
+
+    auto res = appMgrServiceInner->GetBackgroundAppInfo({appInfo1, appInfo2});
+    EXPECT_EQ(res.size(), 1);
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_009 end");
+}
+
+/**
+* @tc.name: GetBackgroundAppInfo_010
+* @tc.desc: test GetBackgroundAppInfo_010
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetBackgroundAppInfo_010, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_010 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = std::make_shared<SceneSessionManagerLite>();
+
+    RecentSessionInfo info1;
+    info1.bundleName = "app1";
+    info1.sessionState = RecentSessionState::FOREGROUND;
+
+    RecentSessionInfo info2;
+    info2.bundleName = "app2";
+    info2.sessionState = RecentSessionState::FOREGROUND;
+
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_->recentSessionInfoList_ = {info1, info2};
+
+    BackgroundAppInfo appInfo1;
+    appInfo1.bandleName = "app1";
+
+    BackgroundAppInfo appInfo2;
+    appInfo2.bandleName = "app2";
+
+    auto res = appMgrServiceInner->GetBackgroundAppInfo({appInfo1, appInfo2});
+    EXPECT_EQ(res.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_010 end");
+}
+
+
+/**
+* @tc.name: GetBackgroundAppInfo_011
+* @tc.desc: test GetBackgroundAppInfo_011
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetBackgroundAppInfo_011, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_011 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = std::make_shared<SceneSessionManagerLite>();
+
+    RecentSessionInfo info1;
+    info1.bundleName = "app1";
+    info1.sessionState = RecentSessionState::FOREGROUND;
+
+    RecentSessionInfo info2;
+    info2.bundleName = "app2";
+    info2.sessionState = RecentSessionState::FOREGROUND;
+
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_->recentSessionInfoList_ = {info1, info2};
+
+    BackgroundAppInfo appInfo1;
+    appInfo1.bandleName = "app3";
+
+    BackgroundAppInfo appInfo2;
+    appInfo2.bandleName = "app4";
+
+    auto res = appMgrServiceInner->GetBackgroundAppInfo({appInfo1, appInfo2});
+    EXPECT_EQ(res.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_011 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS
