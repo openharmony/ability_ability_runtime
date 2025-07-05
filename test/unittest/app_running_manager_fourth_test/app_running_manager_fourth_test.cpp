@@ -308,6 +308,43 @@ HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_CheckAppRunningRecordIsE
 }
 
 /**
+ * @tc.name: AppRunningManager_CheckAppRunningRecordIsExist_0401
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_CheckAppRunningRecordIsExist_0401, TestSize.Level1)
+{
+    int uid = TEST_UID;
+    BundleInfo bundleInfo;
+    std::string specifiedProcessFlag;
+    bool *isProCache = nullptr;
+    std::string instanceKey;
+    std::string customProcessFlag;
+
+    appInfo_->name = APP_NAME;
+    std::shared_ptr<AppRunningRecord> record =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    appRunningManager_->appRunningRecordMap_.clear();
+    record->appInfos_.insert(std::make_pair("test", appInfo_));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, record));
+    auto ret = appRunningManager_->CheckAppRunningRecordIsExist(APP_NAME, PROCESS_NAME,
+        uid, bundleInfo, specifiedProcessFlag, isProCache, instanceKey, customProcessFlag);
+    EXPECT_NE(ret, nullptr);
+
+    bool value = false;
+    isProCache = &value;
+    record = appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    appRunningManager_->appRunningRecordMap_.clear();
+    record->appInfos_.insert(std::make_pair("test", appInfo_));
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, record));
+
+    bool notReuseCachedPorcess = true;
+    ret = appRunningManager_->CheckAppRunningRecordIsExist(APP_NAME, PROCESS_NAME,
+        uid, bundleInfo, specifiedProcessFlag, isProCache, instanceKey, customProcessFlag, notReuseCachedPorcess);
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
  * @tc.name: AppRunningManager_GetProcessInfosByUserId_0100
  * @tc.desc: NA
  * @tc.type: FUNC

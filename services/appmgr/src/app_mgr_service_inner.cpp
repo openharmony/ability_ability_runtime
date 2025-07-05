@@ -623,9 +623,9 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
 
     CHECK_POINTER_AND_RETURN_LOG(appRunningManager_, "handlePreloadApplication fail");
     std::shared_ptr<AppRunningRecord> appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
-        processName, appInfo->uid, bundleInfo, specifiedProcessFlag);
+        processName, appInfo->uid, bundleInfo, specifiedProcessFlag, nullptr, "", "", true);
     if (appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord already exists");
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord already exists when preload application");
         return;
     }
 
