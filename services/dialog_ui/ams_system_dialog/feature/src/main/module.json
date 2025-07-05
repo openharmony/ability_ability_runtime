@@ -1,0 +1,48 @@
+{
+  "module": {
+    "name": "default",
+    "type": "feature",
+    "description": "$string:module_desc",
+    "mainElement": "EntryAbility",
+    "requestPermissions": [
+      {
+        "name" : "ohos.permission.START_ABILITIES_FROM_BACKGROUND"
+      },
+      {
+        "name" : "ohos.permission.ABILITY_BACKGROUND_COMMUNICATION"
+      },
+      {
+        "name" : "ohos.permission.EXECUTE_INSIGHT_INTENT"
+      },
+      {
+        "name" : "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED"
+      },
+      {
+        "name" : "ohos.permission.INTERNET"
+      }
+    ],
+    "deviceTypes": [
+      "phone"
+    ],
+    "metadata": [
+      {
+        "name": "support_debug_intents"
+      }
+    ],
+    "deliveryWithInstall": true,
+    "installationFree": false,
+    "pages": "$profile:main_pages",
+    "abilities": [
+      {
+        "name": "EntryAbility",
+        "srcEntry": "./ets/entryability/EntryAbility.ets",
+        "description": "$string:EntryAbility_desc",
+        "icon": "$media:layered_image",
+        "label": "$string:EntryAbility_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background",
+        "exported": true
+      }
+    ]
+  }
+}

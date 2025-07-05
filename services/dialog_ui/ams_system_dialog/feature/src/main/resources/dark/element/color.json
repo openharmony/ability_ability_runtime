@@ -1,0 +1,32 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#000000"
+    },
+    {
+      "name": "cont_background",
+      "value": "#000000"
+    },
+    {
+      "name": "background_white",
+      "value": "#000000"
+    },
+    {
+      "name": "background_list",
+      "value": "#FFF"
+    },
+    {
+      "name": "background_input",
+      "value": "#FFF"
+    },
+    {
+      "name": "btn_background",
+      "value": "#317AF7"
+    },
+    {
+      "name": "error_color",
+      "value": "#D94838"
+    }
+  ]
+}

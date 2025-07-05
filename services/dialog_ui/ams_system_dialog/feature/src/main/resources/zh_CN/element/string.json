@@ -1,0 +1,60 @@
+{
+  "string": [
+    {
+      "name": "page_show",
+      "value": "page from package"
+    },
+    {
+      "name": "Cont_title_syyt",
+      "value": "所有意图"
+    },
+    {
+      "name": "Detail_title_ytts",
+      "value": "意图调试"
+    },
+    {
+      "name": "Detail_subtitle_ytxx",
+      "value": "意图信息"
+    },
+    {
+      "name": "Detail_subtitle_ytcs",
+      "value": "意图参数"
+    },
+    {
+      "name": "Detail_btn_zxyt",
+      "value": "执行意图"
+    },
+    {
+      "name": "Detail_stitle_zxjg",
+      "value": "执行结果"
+    },
+    {
+      "name": "Detail_yybm",
+      "value": "意图包名"
+    },
+    {
+      "name": "Detail_ytmc",
+      "value": "意图名称"
+    },
+    {
+      "name": "Detail_zxms",
+      "value": "执行模式"
+    },
+    {
+      "name": "Tips_bt",
+      "value": "必填"
+    },
+    {
+      "name": "Btn_qr",
+      "value": "确认"
+    },
+    {
+      "name": "Btn_tj",
+      "value": "添加"
+    },
+    {
+      "name": "Btn_sc",
+      "value": "删除"
+    }
+  ]
+}
