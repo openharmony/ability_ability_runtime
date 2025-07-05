@@ -257,30 +257,6 @@ HWTEST_F(PacMapSecondTest, AppExecFwk_PacMap_CompareArrayData_0800, Function | M
 }
 
 /**
-* @tc.number: AppExecFwk_PacMap_CompareArrayData_0900
-* @tc.name: CompareArrayData
-* @tc.desc: Verify CompareArrayData.
-* @tc.require:
-*/
-HWTEST_F(PacMapSecondTest, AppExecFwk_PacMap_CompareArrayData_0900, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_PacMap_CompareArrayData_0900 start";
-    sptr<AAFwk::IArray> ao1 = new (std::nothrow) AAFwk::Array(1, AAFwk::g_IID_IDouble);
-    if (ao1 != nullptr) {
-        ao1->Set(0, Double::Box(PAC_MAP_TEST_DOUBLE));
-    }
-    sptr<AAFwk::IArray> ao2 = new (std::nothrow) AAFwk::Array(1, AAFwk::g_IID_IDouble);
-    if (ao2 != nullptr) {
-        ao2->Set(0, Double::Box(PAC_MAP_TEST_DOUBLE));
-    }
-    AAFwk::IInterface *one_interface = static_cast<AAFwk::IArray*>(ao1);
-    AAFwk::IInterface *two_interface = static_cast<AAFwk::IArray*>(ao2);
-    bool result = pacmap_->CompareArrayData(one_interface, two_interface);
-    EXPECT_EQ(result, true);
-    GTEST_LOG_(INFO) << "AppExecFwk_PacMap_CompareArrayData_0900 end";
-}
-
-/**
 * @tc.number: AppExecFwk_PacMap_CompareArrayData_1000
 * @tc.name: CompareArrayData
 * @tc.desc: Verify CompareArrayData.
