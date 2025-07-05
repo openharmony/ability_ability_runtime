@@ -485,7 +485,7 @@ void ExtensionImpl::ScheduleAbilityRequestSuccess(const std::string &requestId, 
 {
     TAG_LOGD(AAFwkTag::EXT, "ScheduleAbilityRequestSuccess called");
     if (extension_ == nullptr) {
-        TAG_LOGE(AAFwkTag::EXT, "null ability_");
+        TAG_LOGE(AAFwkTag::EXT, "null extension_");
         return;
     }
     nlohmann::json jsonObject = nlohmann::json {
