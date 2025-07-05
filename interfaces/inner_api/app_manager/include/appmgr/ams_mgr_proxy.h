@@ -273,7 +273,7 @@ public:
      * @param requestId for callback
      */
     virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t requestId = 0, std::string customProcess = "") override;
+        int32_t requestId = 0, const std::string &customProcess = "") override;
 
     virtual void SetCurrentUserId(const int32_t userId) override;
 

@@ -454,7 +454,7 @@ void AmsMgrScheduler::PrepareTerminateApp(const pid_t pid, const std::string &mo
 }
 
 void AmsMgrScheduler::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-    int32_t requestId, std::string customProcess)
+    int32_t requestId, const std::string &customProcess)
 {
     if (!IsReady()) {
         TAG_LOGW(AAFwkTag::APPMGR, "not ready");
