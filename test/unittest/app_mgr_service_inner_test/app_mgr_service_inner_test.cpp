@@ -5934,5 +5934,35 @@ HWTEST_F(AppMgrServiceInnerTest, GetSpecifiedProcessFlag_0003, TestSize.Level1)
     std::string result = appMgrServiceInner->GetSpecifiedProcessFlag(abilityInfo, want);
     EXPECT_EQ(result, "");
 }
+
+/**
+ * @tc.name: AfterLoadAbility_0001
+ * @tc.desc: AfterLoadAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, AfterLoadAbility_0001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AfterLoadAbility_0001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    BundleInfo info;
+    std::string processName = "test_processName";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, info, "");
+    AbilityInfo abilityInfo;
+    abilityInfo.visible = true;
+    abilityInfo.applicationName = "hiUiextension";
+    abilityInfo.type = AbilityType::EXTENSION;
+    abilityInfo.name = "UiextensionAbility";
+    abilityInfo.bundleName = "com.ix.hiuiextension";
+    abilityInfo.moduleName = "entry";
+    abilityInfo.deviceId = "device";
+    abilityInfo.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
+    std::shared_ptr<AbilityInfo> abilityInfoSptr = std::make_shared<AbilityInfo>(abilityInfo);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    appMgrServiceInner->taskHandler_ = nullptr;
+    appMgrServiceInner->AfterLoadAbility(appRecord, abilityInfoSptr, loadParam);
+    ASSERT_NE(appRecord, nullptr);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

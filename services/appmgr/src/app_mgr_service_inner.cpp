@@ -954,7 +954,7 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
         taskHandler_->SubmitTask(reportLoadTask, "reportLoadTask");
     }
     //UIExtension notifies Extension & Ability state changes
-    if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())) {
+    if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
         UpdateExtensionState(loadParam->token, ExtensionState::EXTENSION_STATE_CREATE);
     }
     appRecord->UpdateAbilityState(loadParam->token, AbilityState::ABILITY_STATE_CREATE);
