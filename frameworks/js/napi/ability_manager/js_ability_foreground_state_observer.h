@@ -33,6 +33,8 @@ public:
     explicit JSAbilityForegroundStateObserver(napi_env engine);
     virtual ~JSAbilityForegroundStateObserver() = default;
 
+    static void CleanUp(void *data);
+
     void OnAbilityStateChanged(const AbilityStateData &abilityStateData);
     void HandleOnAbilityStateChanged(const AbilityStateData &abilityStateData);
     void CallJsFunction(const napi_value &value, const char *methodName, const napi_value *argv, const size_t argc);

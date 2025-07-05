@@ -188,6 +188,7 @@ private:
                 ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
                 return CreateJsUndefined(env);
             }
+            napi_add_env_cleanup_hook(env, JSAbilityForegroundStateObserver::CleanUp, observerForeground_);
         }
 
         if (observerForeground_->IsEmpty()) {
