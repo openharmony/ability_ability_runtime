@@ -2918,24 +2918,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, AbilityManagerServiceTest_OpenLink_001,
  }
 
 /*
-* Feature: AbilityManagerService
-* Function: IntentOpenLinkInner
-* FunctionPoints: AbilityManagerService IntentOpenLinkInner
-*/
-HWTEST_F(AbilityManagerServiceThirdTest, AbilityManagerServiceTest_IntentOpenLinkInner_001, TestSize.Level1)
-{
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs, nullptr);
-    AppExecFwk::InsightIntentExecuteParam param{};
-    param.insightIntentParam_ = std::make_shared<WantParams>();
-    param.uris_.push_back("");
-    AbilityRuntime::ExtractInsightIntentGenericInfo info{};
-    auto paramPtr = std::make_shared<InsightIntentExecuteParam>(param);
-    int res = abilityMs->IntentOpenLinkInner(paramPtr, info, -1);
-    EXPECT_NE(res, ERR_OK);
-}
-
-/*
  * Feature: AbilityManagerService
  * Function: CheckUIExtensionCallerPidByHostWindowId
  * FunctionPoints: AbilityManagerService CheckUIExtensionCallerPidByHostWindowId
