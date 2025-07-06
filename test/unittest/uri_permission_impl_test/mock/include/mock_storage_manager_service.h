@@ -401,6 +401,16 @@ public:
     {
         return E_OK;
     }
+
+    virtual int32_t RegisterUeceActivationCallback(const sptr<IUeceActivationCallback> &ueceCallback) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t UnregisterUeceActivationCallback() override
+    {
+        return E_OK;
+    }
 };
 
 bool StorageManagerServiceMock::isZero = true;
