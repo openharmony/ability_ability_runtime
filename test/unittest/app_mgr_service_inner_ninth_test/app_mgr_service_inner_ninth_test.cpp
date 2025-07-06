@@ -2060,6 +2060,7 @@ HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedProcess_0500, TestSize.Level
     AAFwk::MyStatus::GetInstance().getBundleInfoV9_ = 0;
     AAFwk::MyStatus::GetInstance().getHapModuleInfo_ = true;
     AAFwk::MyStatus::GetInstance().isLogoutUser_ = false;
+    AAFwk::MyStatus::GetInstance().v9BundleInfo_.name = "com.test.app";
     ApplicationInfo appInfo;
     appInfo.name = "app";
     appInfo.bundleName = "bundleName";
@@ -2073,6 +2074,10 @@ HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedProcess_0500, TestSize.Level
     abilityInfo.type = AppExecFwk::AbilityType::PAGE;
     int32_t requestId = 100;
     std::string customProcess = "customProcess";
+    std::string bundleName = "com.test.app";
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.onNewProcessEnableList_.isLoaded = true;
+    appUtils.onNewProcessEnableList_.value.emplace_back("com.test.app");
     appMgrServiceInner->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess);
     EXPECT_TRUE(AAFwk::MyStatus::GetInstance().isCheckAppRunningRecordForSpecifiedProcessCalled_);
     TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0500 end");
