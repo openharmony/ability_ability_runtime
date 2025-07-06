@@ -2723,5 +2723,15 @@ HWTEST_F(AbilityManagerClientBranchTest, ResumeExtensionAbility, TestSize.Level1
 {
     EXPECT_EQ(client_->ResumeExtensionAbility(nullptr), ERR_OK);
 }
+
+/**
+ * @tc.name: RegisterSAInterceptor_0100
+ * @tc.desc: RegisterSAInterceptor
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, RegisterSAInterceptor_0100, TestSize.Level1)
+{
+    EXPECT_EQ(client_->RegisterSAInterceptor(nullptr), ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
