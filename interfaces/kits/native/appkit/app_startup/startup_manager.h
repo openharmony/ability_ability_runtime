@@ -111,6 +111,9 @@ public:
 
     bool HasAppStartupConfig() const;
 
+    int32_t BuildStartupTaskManager(const std::map<std::string, std::shared_ptr<StartupTask>> &tasks,
+        std::shared_ptr<StartupTaskManager> &startupTaskManager);
+
 private:
     // read only after initialization
     std::vector<ModuleStartupConfigInfo> moduleStartupConfigInfos_;
@@ -147,8 +150,6 @@ private:
         std::map<std::string, std::shared_ptr<AppStartupTask>> &allTasks);
     int32_t RegisterPreloadSoStartupTask(
         const std::string &name, const std::shared_ptr<PreloadSoStartupTask> &startupTask);
-    int32_t BuildStartupTaskManager(const std::map<std::string, std::shared_ptr<StartupTask>> &tasks,
-        std::shared_ptr<StartupTaskManager> &startupTaskManager);
     bool FilterMatchedStartupTask(const AppStartupTaskMatcher &taskMatcher,
         const std::map<std::string, std::shared_ptr<AppStartupTask>> &inTasks,
         std::map<std::string, std::shared_ptr<StartupTask>> &outTasks,
