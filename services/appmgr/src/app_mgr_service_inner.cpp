@@ -443,7 +443,7 @@ AppMgrServiceInner::~AppMgrServiceInner()
 {}
 
 void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
-    int32_t requestId, std::string customProcess)
+    int32_t requestId, const std::string &customProcess)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "StartSpecifiedProcess, requestId = %{public}d, customProcess = %{public}s", requestId,
         customProcess.c_str());
