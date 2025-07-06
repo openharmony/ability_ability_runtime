@@ -58,6 +58,8 @@
 #include "extension_ability_info.h"
 #include "extension_module_loader.h"
 #include "extension_plugin_info.h"
+#include "ext_native_startup_manager.h"
+#include "ext_native_startup_task.h"
 #include "extract_resource_manager.h"
 #include "ffrt.h"
 #include "file_path_utils.h"
@@ -81,6 +83,7 @@
 #include "cj_runtime.h"
 #endif
 #include "native_lib_util.h"
+#include "native_startup_task.h"
 #include "nlohmann/json.hpp"
 #include "ohos_application.h"
 #include "overlay_manager_client.h"
@@ -187,6 +190,7 @@ const std::string DEFAULT_APP_FONT_SIZE_SCALE = "nonFollowSystem";
 const std::string SYSTEM_DEFAULT_FONTSIZE_SCALE = "1.0";
 const char* PC_LIBRARY_PATH = "/system/lib64/liblayered_parameters_manager.z.so";
 const char* PC_FUNC_INFO = "DetermineResourceType";
+const char* PRELOAD_APP_STARTUP = "PreloadAppStartup";
 const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
 
@@ -204,6 +208,18 @@ constexpr int32_t PRELOAD_TASK_DELAY_TIME = 2000;  //millisecond
 #endif
 
 extern "C" int DFX_SetAppRunningUniqueId(const char* appRunningId, size_t len) __attribute__((weak));
+
+class LoadExtStartupTask : public AbilityRuntime::ExtNativeStartupTask {
+public:
+    LoadExtStartupTask() : ExtNativeStartupTask("LoadExtStartupTask")
+    {}
+
+    int32_t RunTask() override
+    {
+        AbilityRuntime::ExtNativeStartupManager::LoadExtStartupTask();
+        return ERR_OK;
+    }
+};
 } // namespace
 
 void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths)
@@ -1650,8 +1666,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 #endif
 
-    application_->PreloadAppStartup(bundleInfo, appLaunchData.GetPreloadModuleName(),
-        appLaunchData.GetStartupTaskData());
+    RunNativeStartupTask(bundleInfo, appLaunchData);
 
     if (isStageBased) {
         // Create runtime
@@ -4095,6 +4110,47 @@ void MainThread::SetJsIdleCallback(const std::weak_ptr<OHOSApplication> &wpAppli
 
     auto helper = std::make_shared<DumpRuntimeHelper>(application_);
     helper->SetAppFreezeFilterCallback();
+}
+
+void MainThread::PreloadAppStartup(const BundleInfo &bundleInfo, const AppLaunchData &appLaunchData) const
+{
+    if (application_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null application_");
+        return;
+    }
+    application_->PreloadAppStartup(bundleInfo, appLaunchData.GetPreloadModuleName(),
+        appLaunchData.GetStartupTaskData());
+}
+
+void MainThread::RunNativeStartupTask(const BundleInfo &bundleInfo, const AppLaunchData &appLaunchData)
+{
+    std::map<std::string, std::shared_ptr<AbilityRuntime::StartupTask>> nativeStartupTask;
+    wptr<MainThread> weak = this;
+    auto task = [weak, bundleInfo, appLaunchData](
+        std::unique_ptr<AbilityRuntime::StartupTaskResultCallback> callback)->int32_t {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appThread");
+            AbilityRuntime::OnCompletedCallback::OnCallback(std::move(callback),
+                AbilityRuntime::ERR_STARTUP_INTERNAL_ERROR);
+            return AbilityRuntime::ERR_STARTUP_INTERNAL_ERROR;
+        }
+        appThread->PreloadAppStartup(bundleInfo, appLaunchData);
+        AbilityRuntime::OnCompletedCallback::OnCallback(std::move(callback), ERR_OK);
+        return ERR_OK;
+    };
+    auto preloadAppStartup = std::make_shared<AbilityRuntime::NativeStartupTask>(PRELOAD_APP_STARTUP, task);
+    nativeStartupTask.emplace(preloadAppStartup->GetName(), preloadAppStartup);
+
+    auto loadExtStartupTask = std::make_shared<LoadExtStartupTask>();
+    std::shared_ptr<AbilityRuntime::StartupTask> extStartupTask;
+    AbilityRuntime::ExtNativeStartupManager::BuildExtStartupTask(loadExtStartupTask, extStartupTask);
+    if (extStartupTask != nullptr) {
+        nativeStartupTask.emplace(extStartupTask->GetName(), extStartupTask);
+    } else {
+        TAG_LOGE(AAFwkTag::APPKIT, "null extStartupTask");
+    }
+    AbilityRuntime::ExtNativeStartupManager::RunNativeStartupTask(nativeStartupTask);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
