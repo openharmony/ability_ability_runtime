@@ -27,7 +27,6 @@ ohos_moduletest("start_ability_implicit_module_test") {
     "${ace_engine_path}/adapter/ohos/services/uiservice/include",
     "${windowmanager_path}/interfaces/innerkits",
     "${multimodalinput_path}/interfaces/native/innerkits/event/include",
-    "//third_party/jsoncpp/include",
   ]
 
   sources = [ "start_ability_implicit_module_test.cpp" ]
