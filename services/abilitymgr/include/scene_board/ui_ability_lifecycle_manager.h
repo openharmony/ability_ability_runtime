@@ -494,8 +494,6 @@ private:
     std::shared_ptr<AbilityRecord> FindRecordFromTmpMap(const AbilityRequest &abilityRequest);
     bool AddStartCallerTimestamp(int32_t callerUid);
     std::shared_ptr<AbilityRecord> FindRecordFromSessionMap(const AbilityRequest &abilityRequest);
-    bool HasAbilityRequest(const AbilityRequest &abilityRequest);
-    void RemoveAbilityRequest(int32_t requestId);
     void AddSpecifiedRequest(std::shared_ptr<SpecifiedRequest> request);
     void StartSpecifiedRequest(SpecifiedRequest &specifiedRequest);
     std::shared_ptr<SpecifiedRequest> PopAndGetNextSpecified(int32_t requestId);
@@ -541,7 +539,6 @@ private:
 
     ffrt::mutex startUIAbilityCallerTimestampsLock_;
     std::map<int32_t, std::vector<int64_t>> startUIAbilityCallerTimestamps_;
-    std::map<int32_t, std::shared_ptr<AbilityRequest>> startAbilityCheckMap_;
 
     std::map<std::string, std::list<std::shared_ptr<SpecifiedRequest>>> specifiedRequestList_;
 
