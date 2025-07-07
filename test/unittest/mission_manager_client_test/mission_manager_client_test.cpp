@@ -858,5 +858,19 @@ HWTEST_F(MissionManagerClientTest, MissionManagerClient_TerminateMission_0100, T
     EXPECT_NE(client_, nullptr);
     GTEST_LOG_(INFO) << "MissionManagerClient_TerminateMission_0100 end";
 }
+
+/**
+ * @tc.name: MissionManagerClient_Release_0100
+ * @tc.desc: Release
+ * @tc.type: FUNC
+ */
+HWTEST_F(MissionManagerClientTest, MissionManagerClient_Release_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "MissionManagerClient_Release_0100 start";
+    auto &client = MissionManagerClient::GetInstance();
+    auto ret = client.Release();
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    GTEST_LOG_(INFO) << "MissionManagerClient_Release_0100 end";
+}
 }
 }
