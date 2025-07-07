@@ -39,12 +39,14 @@ ohos_shared_library("application_ani") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_services_path}/common:perm_verification",
   ]
 
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_core",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "napi:ace_napi",
     "runtime_core:ani",
   ]
