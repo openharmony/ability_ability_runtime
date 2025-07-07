@@ -237,11 +237,11 @@ void AppScheduler::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abili
     callback->OnAppRemoteDied(abilityTokens);
 }
 
-void AppScheduler::OnStartProcessFailed(sptr<IRemoteObject> token)
+void AppScheduler::OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens)
 {
     auto callback = callback_.lock();
     CHECK_POINTER(callback);
-    callback->OnStartProcessFailed(token);
+    callback->OnStartProcessFailed(abilityTokens);
 }
 
 void AppScheduler::OnCacheExitInfo(uint32_t accessTokenId, const AppExecFwk::RunningProcessInfo &exitInfo,

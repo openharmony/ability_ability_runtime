@@ -114,8 +114,8 @@ public:
      * @param abilityTokens abilities in died process.
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
-    
-    virtual void OnStartProcessFailed(sptr<IRemoteObject> token) {}
+
+    virtual void OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 
     virtual void OnCacheExitInfo(uint32_t accessTokenId, const AppExecFwk::RunningProcessInfo &exitInfo,
         const std::string &bundleName, const std::vector<std::string> &abilityNames,
@@ -651,8 +651,7 @@ protected:
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
-    virtual void OnStartProcessFailed(sptr<IRemoteObject> token) override;
-
+    virtual void OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
     /**
      * @brief Notify abilityms app process pre cache
      * @param pid process pid.

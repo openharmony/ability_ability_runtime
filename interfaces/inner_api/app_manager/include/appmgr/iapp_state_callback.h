@@ -78,9 +78,9 @@ public:
 
     /**
      * @brief Notify abilityms start process failed when load ability
-     * @param token Failed ability token.
+     * @param abilityTokens abilities in died process.
      */
-    virtual void OnStartProcessFailed(sptr<IRemoteObject> token) {}
+    virtual void OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 
     /**
      * @brief Notify abilityms app process pre cache

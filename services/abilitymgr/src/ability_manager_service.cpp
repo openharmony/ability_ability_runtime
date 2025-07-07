@@ -12468,18 +12468,24 @@ void AbilityManagerService::OnAppRemoteDied(const std::vector<sptr<IRemoteObject
     }
 }
 
-void AbilityManagerService::OnStartProcessFailed(sptr<IRemoteObject> token)
+void AbilityManagerService::OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens)
 {
-    auto abilityRecord = Token::GetAbilityRecordByToken(token);
-    CHECK_POINTER_LOG(abilityRecord, "Null record.");
-    TAG_LOGW(AAFwkTag::ABILITYMGR, "NotifStartProcessFailed, ability:%{public}s, bundle:%{public}s",
-        abilityRecord->GetAbilityInfo().name.c_str(), abilityRecord->GetAbilityInfo().bundleName.c_str());
-
-    if (abilityRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::EXTENSION) {
-        auto connectManager = GetConnectManagerByToken(token);
-        CHECK_POINTER(connectManager);
-        connectManager->OnLoadAbilityFailed(abilityRecord);
-        return;
+    std::shared_ptr<AbilityRecord> abilityRecord;
+    for (auto &token : abilityTokens) {
+        abilityRecord = Token::GetAbilityRecordByToken(token);
+        if (abilityRecord == nullptr) {
+            continue;
+        }
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "NotifyStartProcessFailed, ability:%{public}s, bundle:%{public}s",
+            abilityRecord->GetAbilityInfo().name.c_str(), abilityRecord->GetAbilityInfo().bundleName.c_str());
+        if (abilityRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::EXTENSION) {
+            auto connectManager = GetConnectManagerByToken(token);
+            if (connectManager == nullptr) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "null connectManager");
+                continue;
+            }
+            connectManager->OnLoadAbilityFailed(abilityRecord);
+        }
     }
 }
 
