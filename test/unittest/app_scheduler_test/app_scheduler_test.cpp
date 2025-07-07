@@ -1138,5 +1138,54 @@ HWTEST_F(AppSchedulerTest, AppScheduler_RegisterAbilityDebugResponse_001, TestSi
     int res = DelayedSingleton<AppScheduler>::GetInstance()->RegisterAbilityDebugResponse(response);
     EXPECT_EQ(res, INNER_ERR);
 }
+
+/**
+ * @tc.name: AppScheduler_PreloadApplicationByPhase_0100
+ * @tc.desc: PreloadApplicationByPhase
+ * @tc.type: FUNC
+ * @tc.require: SR000GH1GO
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_PreloadApplicationByPhase_0100, TestSize.Level1)
+{
+    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
+    std::string bundleName = "bundleName";
+    int32_t userId = -1;
+    int32_t appIndex = 0;
+    AppExecFwk::PreloadPhase preloadPhase = AppExecFwk::PreloadPhase::UNSPECIFIED;
+    auto result = DelayedSingleton<AppScheduler>::GetInstance()->PreloadApplicationByPhase(
+        bundleName, userId, appIndex, preloadPhase);
+    EXPECT_EQ(result, INNER_ERR);
+}
+
+/**
+ * @tc.name: AppScheduler_NotifyPreloadAbilityStateChanged_0100
+ * @tc.desc: NotifyPreloadAbilityStateChanged
+ * @tc.type: FUNC
+ * @tc.require: SR000GH1GO
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_NotifyPreloadAbilityStateChanged_0100, TestSize.Level1)
+{
+    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
+    auto result = DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(nullptr);
+    EXPECT_EQ(result, INNER_ERR);
+}
+
+/**
+ * @tc.name: AppScheduler_CheckPreloadAppRecordExist_0100
+ * @tc.desc: CheckPreloadAppRecordExist
+ * @tc.type: FUNC
+ * @tc.require: SR000GH1GO
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_CheckPreloadAppRecordExist_0100, TestSize.Level1)
+{
+    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
+    std::string bundleName = "bundleName";
+    int32_t userId = -1;
+    int32_t appIndex = 0;
+    bool isExist = false;
+    auto result = DelayedSingleton<AppScheduler>::GetInstance()->CheckPreloadAppRecordExist(
+        bundleName, userId, appIndex, isExist);
+    EXPECT_EQ(result, INNER_ERR);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

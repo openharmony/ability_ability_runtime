@@ -897,6 +897,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentyFirst(uint32_t code, MessagePa
     if (interfaceCode == AbilityManagerInterfaceCode::NOTIFY_STARTUP_EXCEPTION_BY_SCB) {
         return NotifyStartupExceptionBySCBInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::PRELOAD_APPLICATION) {
+        return PreloadApplicationInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -4919,6 +4922,19 @@ int AbilityManagerStub::NotifyStartupExceptionBySCBInner(MessageParcel &data, Me
         return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
+}
+
+int AbilityManagerStub::PreloadApplicationInner(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::string bundleName = data.ReadString();
+    int32_t userId = data.ReadInt32();
+    int32_t appIndex = data.ReadInt32();
+    int32_t result = PreloadApplication(bundleName, userId, appIndex);
+    if (!reply.WriteInt32(result)) {
+        return ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    return result;
 }
 } // namespace AAFwk
 } // namespace OHOS

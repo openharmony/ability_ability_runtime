@@ -1024,7 +1024,7 @@ HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_NotifyStartupExceptio
  * Function: NotifyStartupExceptionBySCB
  * @tc.type: FUNC
  */
-HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_SNotifyStartupExceptionBySCB_002, TestSize.Level1)
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_NotifyStartupExceptionBySCB_002, TestSize.Level1)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
@@ -1032,6 +1032,40 @@ HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_SNotifyStartupExcepti
     int32_t requestId = 0;
     auto res = proxy_->NotifyStartupExceptionBySCB(requestId);
     EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * @tc.name: AbilityManagerProxy_PreloadApplication_001
+ * Function: PreloadApplication
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_PreloadApplication_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(-1));
+    std::string bundleName = "bundleName";
+    int32_t userId = -1;
+    int32_t appIndex = 0;
+    auto res = proxy_->PreloadApplication(bundleName, userId, appIndex);
+    EXPECT_EQ(res, -1);
+}
+
+/*
+ * @tc.name: AbilityManagerProxy_PreloadApplication_002
+ * Function: PreloadApplication
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxySixthTest, AbilityManagerProxy_PreloadApplication_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(0));
+    std::string bundleName = "bundleName";
+    int32_t userId = -1;
+    int32_t appIndex = 0;
+    auto res = proxy_->PreloadApplication(bundleName, userId, appIndex);
+    EXPECT_EQ(res, 0);
 }
 } // namespace AAFwk
 } // namespace OHOS

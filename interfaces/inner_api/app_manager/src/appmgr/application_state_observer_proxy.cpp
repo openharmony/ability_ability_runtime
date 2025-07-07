@@ -439,5 +439,28 @@ void ApplicationStateObserverProxy::OnKeepAliveStateChanged(const ProcessData &p
             processData.bundleName.c_str());
     }
 }
+
+void ApplicationStateObserverProxy::OnPreloadProcessStateChanged(const PreloadProcessData &preloadProcessData)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "OnPreloadProcessStateChanged, WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteParcelable(&preloadProcessData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "OnPreloadProcessStateChanged write preloadProcessData failed");
+        return;
+    }
+    int32_t ret = SendTransactCmd(
+        static_cast<uint32_t>(IApplicationStateObserver::Message::TRANSACT_ON_PRELOAD_PROCESS_STATE_CHANGED),
+        data, reply, option);
+    if (ret != NO_ERROR && ret != ERR_INVALID_STUB) {
+        TAG_LOGW(AAFwkTag::APPMGR,
+            "OnPreloadProcessStateChanged ssendRequest is wrong, error code: %{public}d, pid:%{public}d.",
+            ret, preloadProcessData.pid);
+    }
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

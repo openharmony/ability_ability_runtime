@@ -69,6 +69,8 @@ int ApplicationStateObserverStub::OnRemoteRequest(
             return HandleOnProcessBindingRelationChanged(data, reply);
         case Message::TRANSACT_ON_KEEP_ALIVE_STATE_CHANGED:
             return HandleOnKeepAliveStateChanged(data, reply);
+        case Message::TRANSACT_ON_PRELOAD_PROCESS_STATE_CHANGED:
+            return HandleOnPreloadProcessStateChanged(data, reply);
     }
     TAG_LOGW(AAFwkTag::APPMGR, "ApplicationStateObserverStub::OnRemoteRequest, default case, need check");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -132,6 +134,9 @@ void ApplicationStateObserverStub::OnProcessBindingRelationChanged(const Process
 {}
 
 void ApplicationStateObserverStub::OnKeepAliveStateChanged(const ProcessData &processData)
+{}
+
+void ApplicationStateObserverStub::OnPreloadProcessStateChanged(const PreloadProcessData &preloadProcessData)
 {}
 
 int32_t ApplicationStateObserverStub::HandleOnForegroundApplicationChanged(MessageParcel &data, MessageParcel &reply)
@@ -371,6 +376,18 @@ int32_t ApplicationStateObserverStub::HandleOnKeepAliveStateChanged(MessageParce
     }
 
     OnKeepAliveStateChanged(*processData);
+    return NO_ERROR;
+}
+
+int32_t ApplicationStateObserverStub::HandleOnPreloadProcessStateChanged(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<PreloadProcessData> preloadProcessData(data.ReadParcelable<PreloadProcessData>());
+    if (!preloadProcessData) {
+        TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable<PreloadProcessData> failed");
+        return ERR_APPEXECFWK_PARCEL_ERROR;
+    }
+
+    OnPreloadProcessStateChanged(*preloadProcessData);
     return NO_ERROR;
 }
 

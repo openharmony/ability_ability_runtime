@@ -37,7 +37,9 @@ bool AppPreloader::PreCheck(const std::string &bundleName, PreloadMode preloadMo
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "PreloadApplication PreCheck, bundleName: %{public}s, preloadMode:%{public}d",
         bundleName.c_str(), preloadMode);
-    if (preloadMode == PreloadMode::PRE_MAKE || preloadMode == PreloadMode::PRELOAD_MODULE) {
+    if (preloadMode == PreloadMode::PRE_MAKE ||
+        preloadMode == PreloadMode::PRELOAD_MODULE ||
+        preloadMode == AppExecFwk::PreloadMode::PRELOAD_BY_PHASE) {
         return true;
     }
     int32_t mode = static_cast<int32_t>(preloadMode);
@@ -77,6 +79,12 @@ int32_t AppPreloader::GeneratePreloadRequest(const std::string &bundleName, int3
     if (!GetBundleAndHapInfo(bundleName, userId, abilityInfo, bundleInfo, hapModuleInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "GetBundleAndHapInfo failed");
         return AAFwk::GET_BUNDLE_INFO_FAILED;
+    }
+
+    if (request.preloadMode == PreloadMode::PRELOAD_BY_PHASE &&
+        hapModuleInfo.moduleType != AppExecFwk::ModuleType::ENTRY) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not entry module.");
+        return AAFwk::ERR_PRELOAD_NOT_ENTRY_MODULE;
     }
 
     request.abilityInfo =  std::make_shared<AbilityInfo>(abilityInfo);

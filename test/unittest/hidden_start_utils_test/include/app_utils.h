@@ -24,9 +24,11 @@ class AppUtils {
 public:
     static AppUtils &GetInstance();
     static bool isStartOptionsWithAnimation_;
+    static bool isPreloadApplicationEnabled_;
 
     ~AppUtils();
     bool IsStartOptionsWithAnimation();
+    bool IsPreloadApplicationEnabled();
 
 private:
     AppUtils();

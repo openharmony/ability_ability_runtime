@@ -349,6 +349,8 @@ public:
 
     bool InOnNewProcessEnableList(const std::string &bundleName);
 
+    bool IsPreloadApplicationEnabled();
+
 private:
     /**
      * LoadResidentProcessInExtremeMemory, load resident process in extreme low memory.
@@ -432,6 +434,7 @@ private:
     volatile DeviceConfiguration<bool> isSupportAppServiceExtension_ = {false, false};
     volatile DeviceConfiguration<bool> isGrantTempUriPermission_ = {false, true};
     volatile DeviceConfiguration<bool> isSupportStartAbilities_ = {false, false};
+    volatile DeviceConfiguration<bool> isPreloadApplicationEnabled_ = {false, false};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         residentProcessInExtremeMemory_ = {false, {}};
     std::mutex residentProcessInExtremeMemoryMutex_;

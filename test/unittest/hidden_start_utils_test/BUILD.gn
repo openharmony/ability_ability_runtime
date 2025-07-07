@@ -25,19 +25,17 @@ ohos_unittest("hidden_start_utils_test") {
 
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/start_options.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/utils/hidden_start_utils.cpp",
     "hidden_start_utils_test.cpp",
     "src/app_utils.cpp",
-    "src/mock_my_flag.cpp",
     "src/mock_permission_verification.cpp",
   ]
 
   configs = []
 
   deps = [
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:process_options",
     "${ability_runtime_innerkits_path}/ability_manager:start_window_option",
-    "${ability_runtime_services_path}/abilitymgr:abilityms",
   ]
 
   external_deps = [

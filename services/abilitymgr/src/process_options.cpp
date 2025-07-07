@@ -26,6 +26,7 @@ bool ProcessOptions::ReadFromParcel(Parcel &parcel)
     processName = parcel.ReadString();
     isRestartKeepAlive = parcel.ReadBool();
     isStartFromNDK = parcel.ReadBool();
+    isPreloadStart = parcel.ReadBool();
     return true;
 }
 
@@ -64,6 +65,10 @@ bool ProcessOptions::Marshalling(Parcel &parcel) const
     }
     if (!parcel.WriteBool(isStartFromNDK)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "isStartFromNDK write failed");
+        return false;
+    }
+    if (!parcel.WriteBool(isPreloadStart)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "isPreloadStart write failed");
         return false;
     }
     return true;

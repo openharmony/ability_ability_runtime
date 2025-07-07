@@ -13,28 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_PERMISSION_VERIFICATION_H
-#define OHOS_ABILITY_RUNTIME_PERMISSION_VERIFICATION_H
+#ifndef OHOS_ABILITY_RUNTIME_PRELOAD_PROCESS_DATA_H
+#define OHOS_ABILITY_RUNTIME_PRELOAD_PROCESS_DATA_H
 
-#include <gmock/gmock.h>
+#include <string>
+#include <unistd.h>
 
-#include "ipc_skeleton.h"
-#include "singleton.h"
-#include "want.h"
-#include "mock_my_flag.h"
+#include "parcel.h"
 
 namespace OHOS {
-namespace AAFwk {
+namespace AppExecFwk {
+struct PreloadProcessData : public Parcelable {
+    
+    virtual bool Marshalling(Parcel &parcel) const override;
+    
+    static PreloadProcessData *Unmarshalling(Parcel &parcel);
+    
+    bool ReadFromParcel(Parcel &parcel);
 
-class PermissionVerification : public DelayedSingleton<PermissionVerification> {
-public:
-    PermissionVerification() = default;
-    ~PermissionVerification() = default;
-
-    bool IsSACall() const;
-
-    bool VerifyStartUIAbilityToHiddenPermission() const;
+    pid_t pid = 0;
+    int32_t uid = 0;
+    int32_t state = 0;
+    std::string bundleName;
 };
-}  // namespace AAFwk
+}  // namespace AppExecFwk
 }  // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_PERMISSION_VERIFICATION_H
+#endif  // OHOS_ABILITY_RUNTIME_PRELOAD_PROCESS_DATA_H
