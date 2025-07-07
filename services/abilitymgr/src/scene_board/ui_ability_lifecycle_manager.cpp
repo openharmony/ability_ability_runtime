@@ -3812,21 +3812,24 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
                 RemoveInstanceKey(request);
             }
             sessionInfo->want.RemoveAllFd();
-        }
-        if (!specifiedRequest.isCold) {
+        } else {
             DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(request.want,
                 request.abilityInfo, specifiedRequest.requestId);
         }
     }
-
+    if (request.want.GetBoolParam("debugApp", false) || request.want.GetBoolParam("nativeDebug", false) ||
+        DelayedSingleton<AppScheduler>::GetInstance()->IsAttachDebug(request.abilityInfo.bundleName)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedRequest debug mode");
+        return;
+    }
     auto timeoutTask = [requestId = specifiedRequest.requestId, wThis = weak_from_this()]() {
         auto pThis = wThis.lock();
         if (pThis) {
             pThis->OnStartSpecifiedFailed(requestId);
         }
     };
-    TaskHandlerWrap::GetFfrtHandler()->SubmitTaskJust(timeoutTask, "SpecifiedFinalTimeout",
-        GlobalConstant::TIMEOUT_UNIT_TIME * GlobalConstant::COLDSTART_TIMEOUT_MULTIPLE);
+    ffrt::submit(std::move(timeoutTask), ffrt::task_attr().name("SpecifiedFinalTimeout")
+        .delay(GlobalConstant::TIMEOUT_UNIT_TIME_MICRO * (int64_t)GlobalConstant::COLDSTART_TIMEOUT_MULTIPLE));
 }
 
 void UIAbilityLifecycleManager::RemoveInstanceKey(const AbilityRequest &abilityRequest) const
