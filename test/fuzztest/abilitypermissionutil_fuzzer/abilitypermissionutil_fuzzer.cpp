@@ -28,6 +28,7 @@ namespace {
 constexpr uint8_t ENABLE = 2;
 constexpr size_t U32_AT_SIZE = 4;
 constexpr size_t STRING_MAX_LENGTH = 128;
+const std::string PARAM_APP_CLONE_INDEX_KEY("ohos.extra.param.key.appCloneIndex");
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
@@ -41,11 +42,38 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     int32_t maxCount = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
     std::vector<std::string> info;
     AAFwk::AbilityRequest abilityRequest;
+    int32_t int32Param = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
+    bool boolParam = (size > 0) ? (*data % ENABLE) : false;
+    abilityRequest.want.SetParam(PARAM_APP_CLONE_INDEX_KEY, int32Param);
+
     std::shared_ptr<AAFwk::AbilityRecord> abilityRecord = nullptr;
     pid_t pid = 0;
     util.CheckMultiInstance(want, callerToken, maxCount, isCreating);
     util.UpdateInstanceKey(want, instanceKey, info, instanceKey);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
     util.CheckMultiInstanceKeyForExtension(abilityRequest);
+    util.CheckStartRecentAbility(want, abilityRequest);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::SERVICE;
+    util.CheckMultiInstanceKeyForExtension(abilityRequest);
+    util.CheckStartRecentAbility(want, abilityRequest);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    util.CheckMultiInstanceKeyForExtension(abilityRequest);
+    util.CheckStartRecentAbility(want, abilityRequest);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::DATA;
+    util.CheckMultiInstanceKeyForExtension(abilityRequest);
+    util.CheckStartRecentAbility(want, abilityRequest);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::FORM;
+    util.CheckMultiInstanceKeyForExtension(abilityRequest);
+    util.CheckStartRecentAbility(want, abilityRequest);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::UNKNOWN;
+    util.CheckMultiInstanceKeyForExtension(abilityRequest);
+    util.CheckStartRecentAbility(want, abilityRequest);
+    abilityRequest.abilityInfo.bundleName = "com.ohos.test";
+    util.CheckMultiInstanceKeyForExtension(abilityRequest);
+    util.CheckStartRecentAbility(want, abilityRequest);
+    abilityRequest.abilityInfo.name = "test";
+    util.CheckMultiInstanceKeyForExtension(abilityRequest);
+    util.CheckStartRecentAbility(want, abilityRequest);
     util.CheckStartRecentAbility(want, abilityRequest);
     util.CheckStartCallHasFloatingWindow(callerToken);
     util.AddStartSelfUIAbilityRecord(pid, maxCount);
