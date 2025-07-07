@@ -456,10 +456,10 @@ void AbilityAutoStartupDataManager::ConvertAutoStartupStatusFromValue(
     if (jsonObject.contains(JSON_KEY_IS_EDM_FORCE) && jsonObject[JSON_KEY_IS_EDM_FORCE].is_boolean()) {
         startupStatus.isEdmForce = jsonObject.at(JSON_KEY_IS_EDM_FORCE).get<bool>();
     }
-    if (jsonObject.contains(JSON_KEY_SETTER_USERID) && jsonObject[JSON_KEY_SETTER_USERID].is_boolean()) {
+    if (jsonObject.contains(JSON_KEY_SETTER_USERID) && jsonObject[JSON_KEY_SETTER_USERID].is_number()) {
         startupStatus.setterUserId = jsonObject.at(JSON_KEY_SETTER_USERID).get<int32_t>();
     }
-    if (jsonObject.contains(JSON_KEY_SETTER_TYPE) && jsonObject[JSON_KEY_SETTER_TYPE].is_boolean()) {
+    if (jsonObject.contains(JSON_KEY_SETTER_TYPE) && jsonObject[JSON_KEY_SETTER_TYPE].is_number()) {
         startupStatus.setterType = jsonObject.at(JSON_KEY_SETTER_TYPE).get<AutoStartupSetterType>();
     }
 }

@@ -344,7 +344,7 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentInfoForQuery &insi
             false,
             g_parseResult,
             ArrayType::NOT_ARRAY);
-    } else if (insightIntentInfo.intentType == INSIGHT_INTENT_FORM_INFO) {
+    } else if (insightIntentInfo.intentType == INSIGHT_INTENTS_TYPE_FORM) {
         AppExecFwk::GetValueIfFindKey<FormInfoForQuery>(jsonObject,
             jsonObjectEnd,
             INSIGHT_INTENT_FORM_INFO,

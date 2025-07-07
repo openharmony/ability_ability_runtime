@@ -60,7 +60,6 @@ ohos_fuzztest("MissionSnapshotFuzzTest") {
     "image_framework:image_native",
     "input:libmmi-client",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "napi:ace_napi",
     "relational_store:native_dataability",
     "relational_store:native_rdb",

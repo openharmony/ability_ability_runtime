@@ -1841,6 +1841,7 @@ ohos_shared_library("dialog_request_callback") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
   ]
   if (ability_runtime_graphics) {
     defines = [

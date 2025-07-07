@@ -76,7 +76,6 @@ ohos_fuzztest("UriUtilsFuzzTest") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
-    "jsoncpp:jsoncpp",
     "libjpeg-turbo:turbojpeg",
     "napi:ace_napi",
     "safwk:api_cache_manager",
