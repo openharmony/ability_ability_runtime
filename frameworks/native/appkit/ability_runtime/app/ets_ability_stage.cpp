@@ -12,17 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "ets_ability_stage.h"
-#include "ability_delegator_registry.h"
-#include "freeze_util.h"
-#include "hilog_tag_wrapper.h"
-#include "configuration_convertor.h"
-#include "ets_ability_stage_context.h"
-#include "ani_common_configuration.h"
-#include "ohos_application.h"
-#include "startup_manager.h"
-#include "hitrace_meter.h"
+
 #include <algorithm>
 #include <cstring>
 #include <exception>
@@ -30,6 +21,16 @@
 #include <iterator>
 #include <memory>
 #include <string>
+
+#include "ability_delegator_registry.h"
+#include "ani_common_configuration.h"
+#include "configuration_convertor.h"
+#include "ets_ability_stage_context.h"
+#include "freeze_util.h"
+#include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
+#include "ohos_application.h"
+#include "startup_manager.h"
 
 #ifdef WINDOWS_PLATFORM
 #define ETS_EXPORT __declspec(dllexport)
@@ -39,20 +40,6 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-
-bool ETSAbilityStage::UseCommonChunk(const AppExecFwk::HapModuleInfo& hapModuleInfo)
-{
-    for (auto &md: hapModuleInfo.metadata) {
-        if (md.name == "USE_COMMON_CHUNK") {
-            if (md.value != "true") {
-                TAG_LOGE(AAFwkTag::APPKIT, "USE_COMMON_CHUNK = %s{public}s", md.value.c_str());
-                return false;
-            }
-            return true;
-        }
-    }
-    return false;
-}
 
 AbilityStage *ETSAbilityStage::Create(
     const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo)
@@ -68,7 +55,6 @@ AbilityStage *ETSAbilityStage::Create(
     std::string srcPath(hapModuleInfo.name);
     std::string moduleName(hapModuleInfo.moduleName);
     moduleName.append("::").append("AbilityStage");
-    bool commonChunkFlag = UseCommonChunk(hapModuleInfo);
 
     srcPath.append("/");
     if (!hapModuleInfo.srcEntrance.empty()) {
@@ -79,24 +65,19 @@ AbilityStage *ETSAbilityStage::Create(
             srcPath.append(".abc");
         }
     }
-    std::unique_ptr<AppExecFwk::ETSNativeReference> moduleObj;
+    std::unique_ptr<AppExecFwk::ETSNativeReference> moduleObj = nullptr;
     if (!hapModuleInfo.srcEntrance.empty()) {
         TAG_LOGD(AAFwkTag::APPKIT, "entry path: %{public}s", hapModuleInfo.srcEntrance.c_str());
-        moduleObj = etsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
-            hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag,
-            hapModuleInfo.srcEntrance);
+        moduleObj = etsRuntime.LoadModule(moduleName, srcPath,
+            hapModuleInfo.hapPath, false, false, hapModuleInfo.srcEntrance);
     }
     return new (std::nothrow) ETSAbilityStage(etsRuntime, std::move(moduleObj));
 }
 
-ETSAbilityStage::ETSAbilityStage(ETSRuntime & etsRuntime,
-    std::unique_ptr<AppExecFwk::ETSNativeReference>&& etsAbilityStageObj)
+ETSAbilityStage::ETSAbilityStage(
+    ETSRuntime &etsRuntime, std::unique_ptr<AppExecFwk::ETSNativeReference> &&etsAbilityStageObj)
     : etsRuntime_(etsRuntime), etsAbilityStageObj_(std::move(etsAbilityStageObj))
 {}
-
-ETSAbilityStage::~ETSAbilityStage()
-{
-}
 
 void ETSAbilityStage::Init(const std::shared_ptr<Context> &context,
     const std::weak_ptr<AppExecFwk::OHOSApplication> application)
@@ -136,7 +117,7 @@ void ETSAbilityStage::OnDestroy() const
     CallObjectMethod(false, "onDestroy", ":V");
 }
 
-void ETSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
+void ETSAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration &configuration)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "OnConfigurationUpdated called");
     AbilityStage::OnConfigurationUpdated(configuration);

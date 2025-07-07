@@ -30,7 +30,7 @@ JsFreeInstallObserver::JsFreeInstallObserver(napi_env env) : env_(env) {}
 JsFreeInstallObserver::~JsFreeInstallObserver() = default;
 
 void JsFreeInstallObserver::OnInstallFinished(const std::string &bundleName, const std::string &abilityName,
-    const std::string &startTime, const int &resultCode)
+    const std::string &startTime, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
     wptr<JsFreeInstallObserver> jsObserver = this;
@@ -49,7 +49,7 @@ void JsFreeInstallObserver::OnInstallFinished(const std::string &bundleName, con
 }
 
 void JsFreeInstallObserver::OnInstallFinishedByUrl(const std::string &startTime, const std::string& url,
-    const int &resultCode)
+    int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
     wptr<JsFreeInstallObserver> jsObserver = this;
@@ -110,7 +110,7 @@ void JsFreeInstallObserver::OnInstallFinished(const std::string &bundleName, con
 }
 
 void JsFreeInstallObserver::HandleOnInstallFinished(const std::string &bundleName, const std::string &abilityName,
-    const std::string &startTime, const int &resultCode)
+    const std::string &startTime, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
     std::vector<napi_deferred> promises;
@@ -150,7 +150,7 @@ void JsFreeInstallObserver::HandleOnInstallFinished(const std::string &bundleNam
 }
 
 void JsFreeInstallObserver::HandleOnInstallFinishedByUrl(const std::string &startTime, const std::string& url,
-    const int &resultCode)
+    int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
     std::vector<napi_deferred> promises;
