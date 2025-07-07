@@ -202,7 +202,6 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         "scenarios:%{public}d", sessionInfo->persistentId, abilityRequest.abilityInfo.bundleName.c_str(),
         abilityRequest.abilityInfo.name.c_str(), sessionInfo->instanceKey.c_str(),
         sessionInfo->requestId, isCallBySCB, sessionInfo->reuseDelegatorWindow, sessionInfo->scenarios);
-    RemoveAbilityRequest(sessionInfo->requestId);
     abilityRequest.sessionInfo = sessionInfo;
     auto uiAbilityRecord = GenerateAbilityRecord(abilityRequest, sessionInfo, isColdStart);
     CHECK_POINTER_AND_RETURN(uiAbilityRecord, ERR_INVALID_VALUE);
@@ -2984,15 +2983,6 @@ void UIAbilityLifecycleManager::UninstallApp(const std::string &bundleName, int3
         }
         it++;
     }
-
-    for (auto it = startAbilityCheckMap_.begin(); it != startAbilityCheckMap_.end();) {
-        const auto &request = it->second;
-        if (request && request->appInfo.uid == uid) {
-            it = startAbilityCheckMap_.erase(it);
-        } else {
-            ++it;
-        }
-    }
 }
 
 void UIAbilityLifecycleManager::GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info, bool isPerm) const
@@ -3700,23 +3690,6 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::FindRecordFromSessionM
         }
     }
     return nullptr;
-}
-
-bool UIAbilityLifecycleManager::HasAbilityRequest(const AbilityRequest &abilityRequest)
-{
-    for (const auto &[requestId, item] : startAbilityCheckMap_) {
-        if (item && CompareTwoRequest(*item, abilityRequest)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void UIAbilityLifecycleManager::RemoveAbilityRequest(int32_t requestId)
-{
-    if (requestId != 0 && startAbilityCheckMap_.erase(requestId)) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "RemoveAbilityRequest: %{public}d", requestId);
-    }
 }
 
 void UIAbilityLifecycleManager::AddSpecifiedRequest(std::shared_ptr<SpecifiedRequest> request)

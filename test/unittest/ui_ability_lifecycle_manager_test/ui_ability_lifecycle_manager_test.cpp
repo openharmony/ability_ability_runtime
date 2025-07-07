@@ -4804,28 +4804,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleStartSpecifiedCold_0100, TestSize.
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_HasAbilityRequest_0100
- * @tc.desc: HasAbilityRequest
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, HasAbilityRequest_0100, TestSize.Level1)
-{
-    AbilityRequest abilityRequest;
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-
-    auto abilityRequest1 = std::make_shared<AbilityRequest>(abilityRequest);
-    uiAbilityLifecycleManager->startAbilityCheckMap_.emplace(1, abilityRequest1);
-    auto result = uiAbilityLifecycleManager->HasAbilityRequest(abilityRequest);
-    EXPECT_EQ(result, true);
-
-    uiAbilityLifecycleManager->startAbilityCheckMap_.clear();
-    auto abilityRequest2 = std::make_shared<AbilityRequest>();
-    abilityRequest2->abilityInfo.bundleName = "otherBundleName";
-    uiAbilityLifecycleManager->startAbilityCheckMap_.emplace(1, abilityRequest2);
-    result = uiAbilityLifecycleManager->HasAbilityRequest(abilityRequest);
-    EXPECT_EQ(result, false);
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_TryPrepareTerminateByPidsDone_0100
  * @tc.desc: TryPrepareTerminateByPidsDone
  */
