@@ -1388,13 +1388,35 @@ void AppMgrServiceInner::NotifyLoadAbilityFailed(sptr<IRemoteObject> token)
     }
 }
 
-void AppMgrServiceInner::NotifyStartProcessFailed(sptr<IRemoteObject> token)
+void AppMgrServiceInner::NotifyStartProcessFailed(std::shared_ptr<AppRunningRecord> appRecord)
 {
-    CHECK_POINTER_AND_RETURN_LOG(token, "token null.");
+    CHECK_POINTER_AND_RETURN_LOG(appRecord, "AppRecord null.");
+    std::vector<sptr<IRemoteObject>> abilityTokens;
+    for (const auto &token : appRecord->GetAbilities()) {
+        abilityTokens.emplace_back(token.first);
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "start process fail name: %{public}s %{public}zu", appRecord->GetProcessName().c_str(),
+        abilityTokens.size());
+    if (abilityTokens.empty()) {
+        return;
+    }
     std::lock_guard lock(appStateCallbacksLock_);
     for (const auto &item : appStateCallbacks_) {
         if (item.callback != nullptr) {
-            item.callback->OnStartProcessFailed(token);
+            item.callback->OnStartProcessFailed(abilityTokens);
+        }
+    }
+}
+
+void AppMgrServiceInner::NotifyStartProcessFailed(sptr<IRemoteObject> token)
+{
+    CHECK_POINTER_AND_RETURN_LOG(token, "token null.");
+    std::vector<sptr<IRemoteObject>> abilityTokens;
+    abilityTokens.emplace_back(token);
+    std::lock_guard lock(appStateCallbacksLock_);
+    for (const auto &item : appStateCallbacks_) {
+        if (item.callback != nullptr) {
+            item.callback->OnStartProcessFailed(abilityTokens);
         }
     }
 }

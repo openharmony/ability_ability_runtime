@@ -78,6 +78,11 @@ public:
     {
         dealed = true;
     }
+    void OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens)
+    {
+        dealed = true;
+        tokenSize = abilityTokens.size();
+    }
     void OnCacheExitInfo(uint32_t accessTokenId, const RunningProcessInfo &exitInfo,
         const std::string &bundleName, const std::vector<std::string> &abilityNames,
         const std::vector<std::string> &uiExtensionNames) override
@@ -93,6 +98,7 @@ public:
         return nullptr;
     }
     bool dealed = false;
+    int32_t tokenSize = 0;
 };
 
 class AppMgrServiceInnerTest : public testing::Test {
@@ -398,6 +404,110 @@ HWTEST_F(AppMgrServiceInnerTest, NotifyLoadAbilityFailed_001, TestSize.Level2)
         if (rawPtr) {
             sptr<MockIAppStateCallback> iapp(rawPtr);
             EXPECT_EQ(iapp->dealed, true);
+        }
+    }
+}
+
+/**
+ * @tc.name: NotifyStartProcessFailed_001
+ * @tc.desc: NotifyStartProcessFailed
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, NotifyStartProcessFailed_001, TestSize.Level2)
+{
+    std::shared_ptr<AppExecFwk::AppRunningRecord> appRecord =
+        std::make_shared<AppExecFwk::AppRunningRecord>(nullptr, 1, "111");
+
+    auto moduleRunningRecord =
+        std::make_shared<AppExecFwk::ModuleRunningRecord>(nullptr, nullptr);
+    sptr<IRemoteObject> iremoteObject =
+        sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto abilityRunningRecord =
+        std::make_shared<AppExecFwk::AbilityRunningRecord>(nullptr, nullptr, 1);
+    moduleRunningRecord->abilities_.emplace(iremoteObject, abilityRunningRecord);
+    std::vector<std::shared_ptr<AppExecFwk::ModuleRunningRecord>> modulerunningrecordVector;
+    modulerunningrecordVector.push_back(moduleRunningRecord);
+    appRecord->hapModules_.emplace(std::make_pair("111", modulerunningrecordVector));
+
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AppMgrServiceInner::AppStateCallbackWithUserId appStateCallbackWithUserId;
+    appStateCallbackWithUserId.callback = nullptr;
+    appMgrServiceInner->appStateCallbacks_.push_back(appStateCallbackWithUserId);
+    appMgrServiceInner->NotifyStartProcessFailed(appRecord);
+
+    appMgrServiceInner->appStateCallbacks_.clear();
+    appStateCallbackWithUserId.callback = sptr<MockIAppStateCallback>::MakeSptr();
+    appMgrServiceInner->appStateCallbacks_.push_back(appStateCallbackWithUserId);
+    appMgrServiceInner->NotifyStartProcessFailed(appRecord);
+    for (auto &item : appMgrServiceInner->appStateCallbacks_) {
+        MockIAppStateCallback* rawPtr =
+            static_cast<MockIAppStateCallback*>(item.callback.GetRefPtr());
+        if (rawPtr) {
+            sptr<MockIAppStateCallback> iapp(rawPtr);
+            EXPECT_EQ(iapp->dealed, true);
+            EXPECT_EQ(iapp->tokenSize, 1);
+        }
+    }
+}
+
+/**
+ * @tc.name: NotifyStartProcessFailed_002
+ * @tc.desc: NotifyStartProcessFailed
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, NotifyStartProcessFailed_002, TestSize.Level2)
+{
+    std::shared_ptr<AppExecFwk::AppRunningRecord> appRecord =
+        std::make_shared<AppExecFwk::AppRunningRecord>(nullptr, 1, "111");
+
+    auto moduleRunningRecord =
+        std::make_shared<AppExecFwk::ModuleRunningRecord>(nullptr, nullptr);
+    sptr<IRemoteObject> iremoteObject =
+        sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto abilityRunningRecord =
+        std::make_shared<AppExecFwk::AbilityRunningRecord>(nullptr, nullptr, 1);
+    std::vector<std::shared_ptr<AppExecFwk::ModuleRunningRecord>> modulerunningrecordVector;
+    modulerunningrecordVector.push_back(moduleRunningRecord);
+    appRecord->hapModules_.emplace(std::make_pair("111", modulerunningrecordVector));
+
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AppMgrServiceInner::AppStateCallbackWithUserId appStateCallbackWithUserId;
+    appStateCallbackWithUserId.callback = sptr<MockIAppStateCallback>::MakeSptr();
+    appMgrServiceInner->appStateCallbacks_.push_back(appStateCallbackWithUserId);
+    appMgrServiceInner->NotifyStartProcessFailed(appRecord);
+    for (auto &item : appMgrServiceInner->appStateCallbacks_) {
+        MockIAppStateCallback* rawPtr =
+            static_cast<MockIAppStateCallback*>(item.callback.GetRefPtr());
+        if (rawPtr) {
+            sptr<MockIAppStateCallback> iapp(rawPtr);
+            EXPECT_EQ(iapp->dealed, false);
+            EXPECT_EQ(iapp->tokenSize, 0);
+        }
+    }
+}
+
+/**
+ * @tc.name: NotifyStartProcessFailed_token_001
+ * @tc.desc: NotifyStartProcessFailed
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, NotifyStartProcessFailed_token_001, TestSize.Level2)
+{
+    sptr<IRemoteObject> iremoteObject =
+        sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AppMgrServiceInner::AppStateCallbackWithUserId appStateCallbackWithUserId;
+    appStateCallbackWithUserId.callback = sptr<MockIAppStateCallback>::MakeSptr();
+    appMgrServiceInner->appStateCallbacks_.push_back(appStateCallbackWithUserId);
+    appMgrServiceInner->NotifyStartProcessFailed(iremoteObject);
+    for (auto &item : appMgrServiceInner->appStateCallbacks_) {
+        MockIAppStateCallback* rawPtr =
+            static_cast<MockIAppStateCallback*>(item.callback.GetRefPtr());
+        if (rawPtr) {
+            sptr<MockIAppStateCallback> iapp(rawPtr);
+            EXPECT_EQ(iapp->dealed, true);
+            EXPECT_EQ(iapp->tokenSize, 1);
         }
     }
 }

@@ -705,6 +705,12 @@ public:
      */
     void OnRemoteDied(const wptr<IRemoteObject> &remote, bool isRenderProcess = false, bool isChildProcess = false);
 
+    /**
+     * @brief Call the callbacks to notify one process should go dying due fatal error.
+     * @param appRecord indicates the process is going to die.
+     */
+    void NotifyStartProcessFailed(std::shared_ptr<AppRunningRecord> appRecord);
+
     void HandleTimeOut(const AAFwk::EventWrap &event);
 
     void CacheExitInfo(const std::shared_ptr<AppRunningRecord> &appRecord);
