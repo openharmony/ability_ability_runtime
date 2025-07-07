@@ -31,7 +31,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     if (processOption == nullptr) {
         return false;
     }
-    AAFwk::ProcessMode processMode = AAFwk::ProcessMode::UNSPECIFIED;
+
     int32_t value;
     FuzzedDataProvider fdp(data, size);
     value = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
@@ -42,6 +42,50 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     AAFwk::ProcessOptions::Unmarshalling(parcel);
     AAFwk::ProcessOptions::ConvertInt32ToProcessMode(value);
     AAFwk::ProcessOptions::ConvertInt32ToStartupVisibility(value);
+
+    AAFwk::ProcessMode processMode = AAFwk::ProcessMode::UNSPECIFIED;
+    processOption->IsNewProcessMode(processMode);
+    processOption->IsAttachToStatusBarMode(processMode);
+    processOption->IsValidProcessMode(processMode);
+    processOption->IsNoAttachmentMode(processMode);
+    processOption->IsAttachToStatusBarItemMode(processMode);
+    processOption->IsNewHiddenProcessMode(processMode);
+    processMode = AAFwk::ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT;
+    processOption->IsNewProcessMode(processMode);
+    processOption->IsAttachToStatusBarMode(processMode);
+    processOption->IsValidProcessMode(processMode);
+    processOption->IsNoAttachmentMode(processMode);
+    processOption->IsAttachToStatusBarItemMode(processMode);
+    processOption->IsNewHiddenProcessMode(processMode);
+    processMode = AAFwk::ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM;
+    processOption->IsNewProcessMode(processMode);
+    processOption->IsAttachToStatusBarMode(processMode);
+    processOption->IsValidProcessMode(processMode);
+    processOption->IsNoAttachmentMode(processMode);
+    processOption->IsAttachToStatusBarItemMode(processMode);
+    processOption->IsNewHiddenProcessMode(processMode);
+    processMode = AAFwk::ProcessMode::ATTACH_TO_STATUS_BAR_ITEM;
+    processOption->IsNewProcessMode(processMode);
+    processOption->IsAttachToStatusBarMode(processMode);
+    processOption->IsValidProcessMode(processMode);
+    processOption->IsNoAttachmentMode(processMode);
+    processOption->IsAttachToStatusBarItemMode(processMode);
+    processOption->IsNewHiddenProcessMode(processMode);
+    processMode = AAFwk::ProcessMode::NEW_HIDDEN_PROCESS;
+    processOption->IsNewProcessMode(processMode);
+    processOption->IsAttachToStatusBarMode(processMode);
+    processOption->IsValidProcessMode(processMode);
+    processOption->IsNoAttachmentMode(processMode);
+    processOption->IsAttachToStatusBarItemMode(processMode);
+    processOption->IsNewHiddenProcessMode(processMode);
+    processMode = AAFwk::ProcessMode::NO_ATTACHMENT;
+    processOption->IsNewProcessMode(processMode);
+    processOption->IsAttachToStatusBarMode(processMode);
+    processOption->IsValidProcessMode(processMode);
+    processOption->IsNoAttachmentMode(processMode);
+    processOption->IsAttachToStatusBarItemMode(processMode);
+    processOption->IsNewHiddenProcessMode(processMode);
+    processMode = AAFwk::ProcessMode::END;
     processOption->IsNewProcessMode(processMode);
     processOption->IsAttachToStatusBarMode(processMode);
     processOption->IsValidProcessMode(processMode);
