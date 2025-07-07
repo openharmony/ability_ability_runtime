@@ -454,6 +454,26 @@ ohos_prebuilt_etc("ability_runtime_ability_stage_context_abc_etc") {
   deps = [ ":ability_runtime_ability_stage_context_abc" ]
 }
 
+generate_static_abc("uri_permission_manager_abc") {
+  base_url = "./"
+
+  files = [ "./@ohos.application.uriPermissionManager.ets" ]
+
+  dst_file = "$target_out_dir/uri_permission_manager.abc"
+  out_puts = [ "$target_out_dir/uri_permission_manager.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/uri_permission_manager.abc"
+}
+
+ohos_prebuilt_etc("uri_permission_manager_abc_etc") {
+  source = "$target_out_dir/uri_permission_manager.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":uri_permission_manager_abc" ]
+}
+
 group("ets_packages") {
   deps = [
     ":ability_delegator_abc_etc",
@@ -481,6 +501,7 @@ group("ets_packages") {
     ":ability_runtime_ui_ability_context_abc_etc",
     ":service_extension_ability_abc_etc",
     ":ui_extension_ability_ani_etc",
+    ":uri_permission_manager_abc_etc",
     ":form_extension_ability_etc",
   ]
 }
