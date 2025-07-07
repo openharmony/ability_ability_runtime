@@ -276,21 +276,22 @@ void EtsUIExtensionContentSession::SendData(ani_env *env, ani_object object, ani
 
 void EtsUIExtensionContentSession::LoadContent(ani_env *env, ani_object object, ani_string path, ani_object storage)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    TAG_LOGD(AAFwkTag::UI_EXT, "LoadContent called");
     std::string contextPath;
-    ani_size sz {};
-    env->String_GetUTF8Size(path, &sz);
-    contextPath.resize(sz + 1);
-    env->String_GetUTF8SubString(path, 0, sz, contextPath.data(), contextPath.size(), &sz);
-
+    if (!OHOS::AppExecFwk::GetStdString(env, path, contextPath)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "invalid param");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parameter error: Path must be a string.");
+        return;
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "contextPath: %{public}s", contextPath.c_str());
     if (uiWindow_ == nullptr || sessionInfo_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "uiWindow_ or sessionInfo_ is nullptr");
         EtsErrorUtil::ThrowErrorByNativeErr(env,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER));
         return;
     }
-
     if (sessionInfo_->isAsyncModalBinding && isFirstTriggerBindModal_) {
+        TAG_LOGD(AAFwkTag::UI_EXT, "Trigger binding UIExtension modal window");
         uiWindow_->TriggerBindModalUIExtension();
         isFirstTriggerBindModal_ = false;
     }
@@ -302,6 +303,7 @@ void EtsUIExtensionContentSession::LoadContent(ani_env *env, ani_object object, 
         EtsErrorUtil::ThrowErrorByNativeErr(env,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER));
     }
+    TAG_LOGD(AAFwkTag::UI_EXT, "LoadContent end");
     return;
 }
 
@@ -321,10 +323,11 @@ void EtsUIExtensionContentSession::SetWindowBackgroundColor(ani_env *env, ani_st
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "SetWindowBackgroundColor call");
     std::string strColor;
-    ani_size sz {};
-    env->String_GetUTF8Size(color, &sz);
-    strColor.resize(sz + 1);
-    env->String_GetUTF8SubString(color, 0, sz, strColor.data(), strColor.size(), &sz);
+    if (!OHOS::AppExecFwk::GetStdString(env, color, strColor)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "invalid param");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parameter error: color must be a string.");
+        return;
+    }
     if (uiWindow_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "uiWindow_ is nullptr");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
