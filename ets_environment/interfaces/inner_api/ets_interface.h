@@ -26,7 +26,7 @@ struct ETSEnvFuncs {
     void (*InitETSSDKNS)(const std::string &path) = nullptr;
     void (*InitETSSysNS)(const std::string &path) = nullptr;
 
-    bool (*Initialize)(void *napiEnv, const std::string &aotPath) = nullptr;
+    bool (*Initialize)() = nullptr;
     void (*RegisterUncaughtExceptionHandler)(
         const OHOS::EtsEnv::ETSUncaughtExceptionInfo &uncaughtExceptionInfo) = nullptr;
     ani_env *(*GetAniEnv)() = nullptr;
@@ -34,6 +34,8 @@ struct ETSEnvFuncs {
     bool (*PreloadModule)(const std::string &modulePath) = nullptr;
     bool (*LoadModule)(const std::string &modulePath, const std::string &srcEntrance, void *&cls,
         void *&obj, void *&ref) = nullptr;
+    void (*FinishPreload)() = nullptr;
+    void (*PostFork)(void *napiEnv, const std::string &aotPath) = nullptr;
 };
 }
 #endif // OHOS_ABILITY_RUNTIME_ETS_INTERFACE_H
