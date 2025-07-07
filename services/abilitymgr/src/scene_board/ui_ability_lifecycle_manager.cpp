@@ -1493,6 +1493,17 @@ sptr<SessionInfo> UIAbilityLifecycleManager::CreateSessionInfo(const AbilityRequ
     return sessionInfo;
 }
 
+AppExecFwk::ElementName UIAbilityLifecycleManager::GetWantElement(
+    sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest)
+{
+    if (sessionInfo != nullptr && sessionInfo->isAtomicService) {
+        AppExecFwk::ElementName element;
+        element.SetBundleName(abilityRequest.want.GetElement().GetBundleName());
+        return element;
+    }
+    return abilityRequest.want.GetElement();
+}
+
 int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo,
     const AbilityRequest &abilityRequest, std::string &errMsg)
 {
@@ -1527,7 +1538,7 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         CheckCallerFromBackground(abilityRecord, sessionInfo);
         auto requestId = abilityRequest.want.GetStringParam(KEY_REQUEST_ID);
         if (!requestId.empty()) {
-            abilityRecord->NotifyAbilityRequestSuccess(requestId, abilityRequest.want.GetElement());
+            abilityRecord->NotifyAbilityRequestSuccess(requestId, GetWantElement(sessionInfo, abilityRequest));
         }
         const_cast<AbilityRequest &>(abilityRequest).want.RemoveParam(KEY_REQUEST_ID);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession, target: %{public}s"
@@ -1545,7 +1556,7 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         auto requestId = abilityRequest.want.GetStringParam(KEY_REQUEST_ID);
         if (!requestId.empty()) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "notify request success, requestId:%{public}s", requestId.c_str());
-            abilityRecord->NotifyAbilityRequestSuccess(requestId, abilityRequest.want.GetElement());
+            abilityRecord->NotifyAbilityRequestSuccess(requestId, GetWantElement(sessionInfo, abilityRequest));
         }
         const_cast<AbilityRequest &>(abilityRequest).want.RemoveParam(KEY_REQUEST_ID);
     }
