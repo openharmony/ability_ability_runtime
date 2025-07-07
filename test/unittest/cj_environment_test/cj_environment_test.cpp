@@ -267,3 +267,47 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestGetSymbol_001, TestSize.Level2)
     auto ret = cJEnvironment.GetSymbol(nullptr, "dlName");
     EXPECT_EQ(ret, nullptr);
 }
+
+/**
+ * @tc.name: InitCJNS_0100
+ * @tc.desc: Test InitCJNS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJNS_0100, TestSize.Level2)
+{
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    std::string appPath = "com/ohos/unittest/test/";
+    cJEnvironment.InitCJNS(appPath);
+    EXPECT_EQ(cJEnvironment.IsRuntimeStarted(), false);
+}
+
+/**
+ * @tc.name: SanitizerKindRuntimeVersion_001
+ * @tc.desc: Test SanitizerKindRuntimeVersion.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestSanitizerKindRuntimeVersion_001, TestSize.Level2)
+{
+    CJEnvMethods* cjEnv = CJEnvironment::CreateEnvMethods();
+    SanitizerKind kind = SanitizerKind::ASAN;
+    cjEnv->setSanitizerKindRuntimeVersion(kind);
+    EXPECT_NE(OHOS::CJEnvironment::sanitizerKind, SanitizerKind::NONE);
+    kind = SanitizerKind::NONE;
+    cjEnv->setSanitizerKindRuntimeVersion(kind);
+    EXPECT_EQ(OHOS::CJEnvironment::sanitizerKind, SanitizerKind::NONE);
+}
+
+/**
+ * @tc.name: CjEnvironmentTestDetectAppNSMode_001
+ * @tc.desc: Test DetectAppNSMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestDetectAppNSMode_001, TestSize.Level2)
+{
+    SanitizerKind kind = SanitizerKind::ASAN;
+    OHOS::CJEnvironment::SetSanitizerKindRuntimeVersion(kind);
+    EXPECT_EQ(OHOS::CJEnvironment::DetectAppNSMode(), OHOS::CJEnvironment::NSMode::APP);
+    kind = SanitizerKind::NONE;
+    OHOS::CJEnvironment::SetSanitizerKindRuntimeVersion(kind);
+    EXPECT_EQ(OHOS::CJEnvironment::DetectAppNSMode(), OHOS::CJEnvironment::NSMode::SINK);
+}

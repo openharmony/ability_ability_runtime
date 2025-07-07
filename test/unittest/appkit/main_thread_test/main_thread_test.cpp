@@ -573,6 +573,31 @@ HWTEST_F(MainThreadTest, HandleLaunchApplication_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleLaunchApplicationWithCJSAN_0100
+ * @tc.desc: HandleLaunchApplicationWithCJSAN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainThreadTest, HandleLaunchApplicationWithCJSAN_0100, TestSize.Level1)
+{
+    Configuration config;
+    AppLaunchData lanchdata;
+    ProcessInfo processing("TestProcess", 9999);
+    ApplicationInfo appinf;
+    appinf.name = "MockTestApplication";
+    appinf.bundleName = "com.ohos.noasan";
+    lanchdata.SetApplicationInfo(appinf);
+    lanchdata.SetProcessInfo(processing);
+    mainThread_->HandleLaunchApplication(lanchdata, config);
+    EXPECT_TRUE(mainThread_->application_ != nullptr);
+
+    appinf.bundleName = "com.ohos.asan";
+    appinf.asanEnabled = true;
+    lanchdata.SetApplicationInfo(appinf);
+    mainThread_->HandleLaunchApplication(lanchdata, config);
+    EXPECT_TRUE(mainThread_->application_ != nullptr);
+}
+
+/**
  * @tc.name: ConnectToAppMgr_0100
  * @tc.desc: ConnectToAppMgr.
  * @tc.type: FUNC
