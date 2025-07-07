@@ -91,6 +91,8 @@ public:
     void SetReceiveDataForResultCallback(ani_env* env, ani_object object);
     static void CallReceiveDataCallbackForResult(ani_vm* vm, ani_ref callbackRef,
         const AAFwk::WantParams& wantParams, AAFwk::WantParams& retWantParams);
+    std::shared_ptr<AbilityRuntime::Context> GetContext();
+    sptr<Rosen::Window> GetUIWindow();
 
 private:
     bool SetReceiveDataCallbackUnRegist(ani_env* env, ani_object functionObj);
