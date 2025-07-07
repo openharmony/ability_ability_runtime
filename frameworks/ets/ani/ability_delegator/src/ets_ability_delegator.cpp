@@ -47,11 +47,7 @@ enum ERROR_CODE {
     INCORRECT_PARAMETERS    = 401,
 };
 
-#ifdef ENABLE_ERRCODE
 constexpr int COMMON_FAILED = 16000100;
-#else
-constexpr int COMMON_FAILED = -1;
-#endif
 
 namespace {
 constexpr const char* CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
@@ -398,25 +394,45 @@ void EtsAbilityDelegator::StartAbility(ani_env* env, [[maybe_unused]]ani_object 
     return;
 }
 
-ani_ref EtsAbilityDelegator::GetCurrentTopAbility(ani_env* env)
+ani_ref EtsAbilityDelegator::GetCurrentTopAbility(ani_env* env, [[maybe_unused]]ani_class aniClass, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "called");
     ani_object objValue = nullptr;
-    auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::STS);
-    if (delegator != nullptr) {
+    int32_t resultCode = COMMON_FAILED;
+    std::string resultMsg = "Calling GetCurrentTopAbility failed.";
+    do {
+        auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(
+            AbilityRuntime::Runtime::Language::STS);
+        if (delegator == nullptr) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "delegator is nullptr");
+            break;
+        }
         auto property = delegator->GetCurrentTopAbility();
         auto etsbaseProperty = std::static_pointer_cast<AppExecFwk::ETSDelegatorAbilityProperty>(property);
-        if (!etsbaseProperty || etsbaseProperty->object_.expired()) {
-            TAG_LOGE(AAFwkTag::DELEGATOR, "invalid property");
-            return {};
+        if (etsbaseProperty == nullptr) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "property is nullptr");
+            break;
         }
+        auto ability = etsbaseProperty->object_.lock();
+        if (ability == nullptr) {
+            TAG_LOGE(AAFwkTag::DELEGATOR, "invalid property");
+            break;
+        }
+        resultCode = 0;
+        resultMsg = "";
         std::unique_lock<std::mutex> lck(g_mutexAbilityRecord);
         g_abilityRecord.emplace(etsbaseProperty->object_, etsbaseProperty->token_);
-        return etsbaseProperty->object_.lock()->aniRef;
-    } else {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "delegator is nullptr");
-        return {};
+        objValue = ability->aniObj;
+    } while (0);
+    ani_ref callbackRef = nullptr;
+    auto status = env->GlobalReference_Create(callback, &callbackRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Create Gloabl ref for delegator failed %{public}d", status);
+        AbilityRuntime::ThrowStsError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+        return objValue;
     }
+    AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
+        OHOS::AbilityRuntime::CreateStsError(env, resultCode, resultMsg), objValue);
     return objValue;
 }
 
