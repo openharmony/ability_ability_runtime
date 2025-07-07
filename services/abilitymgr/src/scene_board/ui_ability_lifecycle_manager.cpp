@@ -3440,7 +3440,11 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
         DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(request.want,
             request.abilityInfo, specifiedRequest.requestId);
     }
-
+    if (request.want.GetBoolParam("debugApp", false) || request.want.GetBoolParam("nativeDebug", false) ||
+        DelayedSingleton<AppScheduler>::GetInstance()->IsAttachDebug(request.abilityInfo.bundleName)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedRequest debug mode");
+        return;
+    }
     auto timeoutTask = [requestId = specifiedRequest.requestId, wThis = weak_from_this()]() {
         auto pThis = wThis.lock();
         if (pThis) {
