@@ -35,6 +35,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
+constexpr int32_t ERR_FAILURE = -1;
 constexpr const char* UI_SESSION_CLASS_NAME =
     "L@ohos/app/ability/UIExtensionContentSession/UIExtensionContentSession;";
 }
@@ -124,11 +125,43 @@ int NativeTerminateSelfWithResult(ani_env* env, ani_object obj, [[maybe_unused]]
     TAG_LOGD(AAFwkTag::UI_EXT, "NativeTerminateSelfWithResult called");
     int ret = 0;
     auto stsContentSession = GetStsContentSession(env, obj);
-    if (stsContentSession != nullptr) {
-        ret = stsContentSession->TerminateSelfWithResult();
-        OHOS::AppExecFwk::AsyncCallback(env, callback,
-            OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
+    if (stsContentSession == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null stsContentSession");
+        return ERR_FAILURE;
     }
+    OHOS::AAFwk::Want want;
+    int32_t resultCode = 0;
+    OHOS::AppExecFwk::UnWrapAbilityResult(env, abilityResult, resultCode, want);
+    auto context = stsContentSession->GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        OHOS::AppExecFwk::AsyncCallback(env, callback, OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER)), nullptr);
+        return ERR_FAILURE;
+    }
+    auto token = context->GetToken();
+    OHOS::AAFwk::AbilityManagerClient::GetInstance()->TransferAbilityResultForExtension(token, resultCode, want);
+    auto uiWindow = stsContentSession->GetUIWindow();
+    if (uiWindow == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
+        OHOS::AppExecFwk::AsyncCallback(env, callback, OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER)), nullptr);
+        return ERR_FAILURE;
+    }
+    auto result = uiWindow->TransferAbilityResult(resultCode, want);
+    if (result != Rosen::WMError::WM_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "TransferAbilityResult failed, errorCode is %{public}d", result);
+        OHOS::AppExecFwk::AsyncCallback(env, callback, OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER)), nullptr);
+        return ERR_FAILURE;
+    }
+    ret = stsContentSession->TerminateSelfWithResult();
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "TerminateSelfWithResult failed, errorCode is %{public}d", ret);
+        return ERR_FAILURE;
+    }
+    OHOS::AppExecFwk::AsyncCallback(env, callback, OHOS::AbilityRuntime::CreateStsErrorByNativeErr(env,
+        static_cast<int32_t>(ret)), nullptr);
     return ret;
 }
 
@@ -563,6 +596,16 @@ void StsUIExtensionContentSession::CallReceiveDataCallbackForResult(ani_vm* vm, 
         TAG_LOGE(AAFwkTag::UI_EXT, "UnwrapWantParams failed");
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "CallReceiveDataCallbackForResult end");
+}
+
+std::shared_ptr<AbilityRuntime::Context> StsUIExtensionContentSession::GetContext()
+{
+    return context_.lock();
+}
+
+sptr<Rosen::Window> StsUIExtensionContentSession::GetUIWindow()
+{
+    return uiWindow_;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
