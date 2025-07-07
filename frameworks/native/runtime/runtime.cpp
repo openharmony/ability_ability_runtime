@@ -50,7 +50,7 @@ std::unique_ptr<Runtime> Runtime::Create(Runtime::Options &options)
     }
 }
 
-void Runtime::SavePreloaded(std::unique_ptr<Runtime>&& instance)
+void Runtime::SavePreloaded(std::unique_ptr<Runtime> &&instance)
 {
     if (instance) {
         instance->FinishPreload();
@@ -58,8 +58,13 @@ void Runtime::SavePreloaded(std::unique_ptr<Runtime>&& instance)
     g_preloadedInstance = std::move(instance);
 }
 
-std::unique_ptr<Runtime> Runtime::GetPreloaded()
+std::unique_ptr<Runtime> Runtime::GetPreloaded(Language key)
 {
+    if (g_preloadedInstance &&
+        g_preloadedInstance->GetLanguage() == Language::ETS &&
+        key == Language::JS) {
+        return static_cast<ETSRuntime *>(g_preloadedInstance.get())->MoveJsRuntime();
+    }
     return std::move(g_preloadedInstance);
 }
 }  // namespace AbilityRuntime

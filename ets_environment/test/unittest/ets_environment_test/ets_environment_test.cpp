@@ -251,9 +251,7 @@ HWTEST_F(EtsEnvironmentTest, Initialize_0100, TestSize.Level0)
 {
     auto etsEnv = std::make_shared<ETSEnvironment>();
     ASSERT_NE(etsEnv, nullptr);
-    void *napiEnv = reinterpret_cast<void *>(0x1);
-    std::string aotStr = "";
-    bool result = etsEnv->Initialize(napiEnv, aotStr);
+    bool result = etsEnv->Initialize();
     EXPECT_FALSE(result);
 }
 
