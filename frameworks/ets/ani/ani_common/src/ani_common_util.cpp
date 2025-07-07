@@ -459,26 +459,29 @@ bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object r
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return false;
     }
-    ani_status status = ANI_ERROR;
     ani_class clsCall = nullptr;
-
-    if ((status = env->FindClass(CLASSNAME_ASYNC_CALLBACK_WRAPPER, &clsCall)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+    ani_status status = env->FindClass(CLASSNAME_ASYNC_CALLBACK_WRAPPER, &clsCall);
+    if (status!= ANI_OK || clsCall == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "FindClass status: %{public}d, or null clsCall", status);
         return false;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(
-        clsCall, "invoke", "L@ohos/base/BusinessError;Lstd/core/Object;:V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+    if ((status = env->Class_FindMethod(clsCall, "invoke", nullptr, &method)) != ANI_OK || method == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod status: %{public}d, or null method", status);
         return false;
     }
-    if (result == nullptr) {
+    if (error == nullptr) {
         ani_ref nullRef = nullptr;
         env->GetNull(&nullRef);
-        result = reinterpret_cast<ani_object>(nullRef);
+        error = reinterpret_cast<ani_object>(nullRef);
+    }
+    if (result == nullptr) {
+        ani_ref undefinedRef = nullptr;
+        env->GetUndefined(&undefinedRef);
+        result = reinterpret_cast<ani_object>(undefinedRef);
     }
     if ((status = env->Object_CallMethod_Void(call, method, error, result)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::ANI, "Object_CallMethod_Void status: %{public}d", status);
         return false;
     }
     return true;
