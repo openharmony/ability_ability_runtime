@@ -1,10 +1,6 @@
 {
   "string": [
     {
-      "name": "page_show",
-      "value": "page from package"
-    },
-    {
       "name": "Cont_title_syyt",
       "value": "所有意图"
     },
@@ -29,7 +25,7 @@
       "value": "执行结果"
     },
     {
-      "name": "Detail_yybm",
+      "name": "Detail_ytbm",
       "value": "意图包名"
     },
     {
@@ -55,6 +51,10 @@
     {
       "name": "Btn_sc",
       "value": "删除"
+    },
+    {
+      "name": "tips_qsbtzd",
+      "value": "缺少必填字段"
     }
   ]
 }

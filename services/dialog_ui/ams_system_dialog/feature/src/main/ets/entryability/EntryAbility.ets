@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import Want from '@ohos.app.ability.Want';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
@@ -24,6 +25,7 @@ const DOMAIN = 0x1323;
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
+    AppStorage.setAndLink('context', this.context);
     hilog.info(DOMAIN, 'InsightIntents', '%{public}s', 'Ability onCreate');
   }
 
@@ -32,16 +34,32 @@ export default class EntryAbility extends UIAbility {
   }
 
   onWindowStageCreate(windowStage: window.WindowStage): void {
-    hilog.info(DOMAIN, 'InsightIntents', '%{public}s', 'Ability onWindowStageCreate');
 
-    windowStage.loadContent('pages/Index', (err) => {
-      if (err.code) {
-        hilog.error(DOMAIN, 'InsightIntents', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
-        return;
+    let windowClass: window.Window;
+    windowStage.getMainWindow((err, data) => {
+      windowClass = data;
+      windowClass.setWindowLayoutFullScreen(true).then(() => {
+        hilog.info(DOMAIN, 'InsightIntents', 'Set Window Layout Full Screen.');
+      })
+
+      try {
+        const top = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM).topRect
+        let navigationHeight = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM).bottomRect.height
+        PersistentStorage.PersistProps([{
+          key: 'navigationHeight', defaultValue: navigationHeight
+        }])
+      } catch (err){
+        hilog.error(DOMAIN, 'InsightIntents', 'Failed to getWindowAvoidArea.', JSON.stringify(err));
       }
-      hilog.info(DOMAIN, 'InsightIntents', 'Succeeded in loading the content.');
 
-      windowStage.getMainWindowSync().setWindowBackgroundColor('#F1F3F5');
+
+      windowStage.loadContent('pages/Index', (err) => {
+        if (err.code) {
+          hilog.error(DOMAIN, 'InsightIntents', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
+          return;
+        }
+        hilog.info(DOMAIN, 'InsightIntents', 'Succeeded in loading the content.');
+      });
     });
   }
 
