@@ -534,20 +534,39 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
     }
 }
 
+int32_t AppMgrServiceInner::PreloadApplicationByPhase(const std::string &bundleName, int32_t userId, int32_t appIndex,
+    AppExecFwk::PreloadPhase preloadPhase)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::APPMGR, "PreloadApplicationByPhase bundleName:%{public}s, userId:%{public}d, \
+    appIndex:%{public}d, preloadPhase:%{public}d", bundleName.c_str(), userId, appIndex,
+        static_cast<int32_t>(preloadPhase));
+    if (!AAFwk::AppUtils::GetInstance().IsPreloadApplicationEnabled()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "preload application not supported");
+        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+    }
+    return PreloadApplication(bundleName, userId, appIndex, AppExecFwk::PreloadMode::PRELOAD_BY_PHASE, preloadPhase);
+}
+
 int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, int32_t userId,
     AppExecFwk::PreloadMode preloadMode, int32_t appIndex)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::APPMGR,
-        "bundleName:%{public}s, userId:%{public}d, preloadMode:%{public}d, appIndex:%{public}d",
-        bundleName.c_str(), userId, preloadMode, appIndex);
-
     CHECK_CALLER_IS_SYSTEM_APP;
-    auto isPerm = AAFwk::PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission();
-    if (!isPerm) {
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission()) {
         TAG_LOGE(AAFwkTag::APPMGR, "permission verify fail");
         return ERR_PERMISSION_DENIED;
     }
+    return PreloadApplication(bundleName, userId, appIndex, preloadMode, AppExecFwk::PreloadPhase::UNSPECIFIED);
+}
+
+int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex,
+    AppExecFwk::PreloadMode preloadMode, AppExecFwk::PreloadPhase preloadPhase)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::APPMGR, "PreloadApplication, bundleName:%{public}s, userId:%{public}d, \
+    appIndex:%{public}d, preloadMode:%{public}d, preloadPhase:%{public}d", bundleName.c_str(), userId, appIndex,
+        static_cast<int32_t>(preloadMode), static_cast<int32_t>(preloadPhase));
+
     if (!appPreloader_) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appPreloader");
         return ERR_INVALID_VALUE;
@@ -566,13 +585,14 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
     }
 
     PreloadRequest request;
+    request.preloadMode = preloadMode;
+    request.preloadPhase = preloadPhase;
     auto ret = appPreloader_->GeneratePreloadRequest(bundleName, userId, appIndex, request);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "generatePreloadRequest fail");
+        TAG_LOGE(AAFwkTag::APPMGR, "generatePreloadRequest fail, ret:%{public}d", ret);
         return ret;
     }
     SetPreloadDebugApp(request.want, request.appInfo);
-    request.preloadMode = preloadMode;
     auto task = [innerServiceWeak = weak_from_this(), request] () {
         auto innerService = innerServiceWeak.lock();
         CHECK_POINTER_AND_RETURN_LOG(innerService, "get appMgrServiceInner fail");
@@ -634,24 +654,20 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName:%{public}s, abilityName:%{public}s, \
     appIndex:%{public}d", bundleInfo.name.c_str(), abilityInfo->name.c_str(), request.appIndex);
 
-    auto appInfo = request.appInfo;
-    auto hapModuleInfo = request.hapModuleInfo;
-
-    auto want = request.want;
-    std::string specifiedProcessFlag = GetSpecifiedProcessFlag(abilityInfo, want);
-
+    CHECK_POINTER_AND_RETURN_LOG(appRunningManager_, "handlePreloadApplication fail, appRunningManager null");
     std::string processName;
-    MakeProcessName(abilityInfo, appInfo, hapModuleInfo, request.appIndex, specifiedProcessFlag, processName, false);
-    bool isExtensionSandBox = IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
-    TAG_LOGD(AAFwkTag::APPMGR, "HandlePreloadApplication processName = %{public}s", processName.c_str());
-
-    CHECK_POINTER_AND_RETURN_LOG(appRunningManager_, "handlePreloadApplication fail");
-    std::shared_ptr<AppRunningRecord> appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
-        processName, appInfo->uid, bundleInfo, specifiedProcessFlag, nullptr, "", "", true);
-    if (appRecord) {
+    std::string specifiedProcessFlag;
+    if (CheckAppRecordExistByPreloadRequest(request, processName, specifiedProcessFlag)) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord already exists when preload application");
         return;
     }
+
+    auto appInfo = request.appInfo;
+    auto hapModuleInfo = request.hapModuleInfo;
+    auto want = request.want;
+
+    bool isExtensionSandBox = IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
+    TAG_LOGD(AAFwkTag::APPMGR, "HandlePreloadApplication processName = %{public}s", processName.c_str());
 
     AAFwk::ResSchedUtil::GetInstance().ReportPreloadApplicationToRSS(abilityInfo,
         static_cast<int32_t>(request.preloadMode));
@@ -662,11 +678,12 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
             bundleInfo.name, appInfo->uid, AbilityRuntime::RunningStatus::APP_RUNNING_START);
     }
     auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
-    appRecord = CreateAppRunningRecord(loadParam, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, want);
+    auto appRecord = CreateAppRunningRecord(loadParam, appInfo, abilityInfo, processName, bundleInfo, hapModuleInfo, want);
     if (appRecord != nullptr) {
         appRecord->SetPreloadState(PreloadState::PRELOADING);
         appRecord->SetPreloadMode(request.preloadMode);
-        appRecord->SetNeedPreloadModule(request.preloadMode == AppExecFwk::PreloadMode::PRELOAD_MODULE);
+        appRecord->SetNeedPreloadModule(request.preloadMode == AppExecFwk::PreloadMode::PRELOAD_MODULE ||
+            request.preloadPhase == AppExecFwk::PreloadPhase::ABILITY_STAGE_CREATED);
         appRecord->SetNeedLimitPrio(request.preloadMode != PreloadMode::PRESS_DOWN);
         appRecord->SetExtensionSandBoxFlag(isExtensionSandBox);
         LoadAbilityNoAppRecord(appRecord, false, appInfo, abilityInfo, processName, specifiedProcessFlag, bundleInfo,
@@ -676,6 +693,44 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
             reportpreLoadTask(appRecord);
         }
     }
+}
+
+bool AppMgrServiceInner::CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::APPMGR, "CheckPreload, bundleName:%{public}s, userId:%{public}d, appIndex:%{public}d",
+        bundleName.c_str(), userId, appIndex);
+    if (!appPreloader_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null appPreloader");
+        return false;
+    }
+    PreloadRequest request;
+    auto ret = appPreloader_->GeneratePreloadRequest(bundleName, userId, appIndex, request);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "generatePreloadRequest fail, ret:%{public}d", ret);
+        return false;
+    }
+    std::string processName;
+    std::string specifiedProcessFlag;
+    return CheckAppRecordExistByPreloadRequest(request, processName, specifiedProcessFlag);
+}
+
+bool AppMgrServiceInner::CheckAppRecordExistByPreloadRequest(const PreloadRequest &request, std::string &processName,
+    std::string &specifiedProcessFlag)
+{
+    auto &abilityInfo = request.abilityInfo;
+    auto &appInfo = request.appInfo;
+
+    specifiedProcessFlag = GetSpecifiedProcessFlag(abilityInfo, request.want);
+    MakeProcessName(abilityInfo, appInfo, request.hapModuleInfo, request.appIndex, specifiedProcessFlag, processName, false);
+
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
+        return false;
+    }
+    auto appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid, request.bundleInfo,
+        specifiedProcessFlag, nullptr, "", "", true);
+    return appRecord != nullptr;
 }
 
 void AppMgrServiceInner::reportpreLoadTask(const std::shared_ptr<AppRunningRecord> appRecord)
@@ -690,6 +745,26 @@ void AppMgrServiceInner::reportpreLoadTask(const std::shared_ptr<AppRunningRecor
     if (rssTaskHandler_) {
         rssTaskHandler_->SubmitTask(reportLoadTask, "reportpreLoadTask");
     }
+}
+
+int32_t AppMgrServiceInner::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::APPMGR, "NotifyPreloadAbilityStateChanged");
+    if (!token) {
+        TAG_LOGE(AAFwkTag::APPMGR, "token null");
+        return AAFwk::INVALID_CALLER_TOKEN;
+    }
+    auto appRecord = GetAppRunningRecordByAbilityToken(token);
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord not exist");
+        return ERR_NULL_OBJECT;
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "NotifyPreloadAbilityStateChanged bundle:%{public}s, pid:%{public}d",
+        appRecord->GetBundleName().c_str(), appRecord->GetPid());
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnPreloadProcessStateChanged(appRecord,
+        ApplicationState::APP_STATE_PRE_FOREGROUND);
+    return ERR_OK;
 }
 
 int32_t AppMgrServiceInner::MakeKiaProcess(std::shared_ptr<AAFwk::Want> want, bool &isKia,
@@ -6210,6 +6285,11 @@ int AppMgrServiceInner::VerifyRequestPermission() const
         TAG_LOGE(AAFwkTag::APPMGR, "permission verification fail, callerUid: %{public}d", callerUid);
         return ERR_PERMISSION_DENIED;
     }
+}
+
+bool AppMgrServiceInner::IsFoundationCall() const
+{
+    return IPCSkeleton::GetCallingUid() == FOUNDATION_UID;
 }
 
 int AppMgrServiceInner::PreStartNWebSpawnProcess(const pid_t hostPid)

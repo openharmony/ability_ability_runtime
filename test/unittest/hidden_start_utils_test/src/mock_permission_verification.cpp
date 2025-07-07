@@ -13,19 +13,23 @@
  * limitations under the License.
  */
 
-#include "mock_permission_verification.h"
+#include "permission_verification.h"
+
+#include "mock_my_flag.h"
 
 namespace OHOS {
 namespace AAFwk {
-
-bool PermissionVerification::IsSACall() const
-{
-    return (MyFlag::flag_ & MyFlag::FLAG::IS_SA_CALL);
-}
+bool MyFlag::retVerifyStartUIAbilityToHiddenPermission = false;
+bool MyFlag::retVerifyPreloadApplicationPermission = false;
 
 bool PermissionVerification::VerifyStartUIAbilityToHiddenPermission()const
 {
-    return MyFlag::flag_;
+    return MyFlag::retVerifyStartUIAbilityToHiddenPermission;
+}
+
+bool PermissionVerification::VerifyPreloadApplicationPermission()const
+{
+    return MyFlag::retVerifyPreloadApplicationPermission;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

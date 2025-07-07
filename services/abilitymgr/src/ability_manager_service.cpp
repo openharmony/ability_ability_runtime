@@ -29,6 +29,7 @@
 #include "app_utils.h"
 #include "app_exit_reason_data_manager.h"
 #include "application_util.h"
+#include "app_mgr_constants.h"
 #include "app_mgr_util.h"
 #include "recovery_info_timer.h"
 #include "assert_fault_callback_death_mgr.h"
@@ -77,6 +78,7 @@
 #include "multi_app_utils.h"
 #include "os_account_manager_wrapper.h"
 #include "permission_constants.h"
+#include "preload_manager_service.h"
 #include "process_options.h"
 #include "rate_limiter.h"
 #include "recovery_param.h"
@@ -1774,12 +1776,14 @@ int AbilityManagerService::StartUIAbilityForOptionWrap(const Want &want, const S
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     int32_t ret = ERR_OK;
 
-    if (HiddenStartUtils::IsHiddenStart(want, options)) {
-        ret = HiddenStartUtils::CheckHiddenStartSupported(want, options);
+    if (HiddenStartUtils::IsHiddenStart(options)) {
+        ret = HiddenStartUtils::CheckHiddenStartSupported(options);
     } else if (AbilityPermissionUtil::GetInstance().IsStartSelfUIAbility() &&
                options.processOptions != nullptr &&
                options.processOptions->isStartFromNDK) {
         ret = CheckStartSelfUIAbilityStartOptions(want, options);
+    } else if (HiddenStartUtils::IsPreloadStart(options)) {
+        ret = HiddenStartUtils::CheckPreloadStartSupported();
     } else {
         ret = CheckProcessOptions(want, options, userId);
     }
@@ -14969,6 +14973,11 @@ int32_t AbilityManagerService::NotifyStartupExceptionBySCB(int32_t requestId)
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN_LOG(uiAbilityManager, ERR_NULL_OBJECT, "uiAbilityLifecycleManager nullptr");
     return uiAbilityManager->NotifyStartupExceptionBySCB(requestId);
+}
+
+int32_t AbilityManagerService::PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex)
+{
+    return PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

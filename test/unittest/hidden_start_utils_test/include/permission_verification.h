@@ -13,10 +13,24 @@
  * limitations under the License.
  */
 
-#include "mock_my_flag.h"
+#ifndef OHOS_ABILITY_RUNTIME_PERMISSION_VERIFICATION_H
+#define OHOS_ABILITY_RUNTIME_PERMISSION_VERIFICATION_H
+
+#include <gmock/gmock.h>
+
+#include "singleton.h"
 
 namespace OHOS {
 namespace AAFwk {
-int MyFlag::flag_ = 0;
-} // namespace AAFwk
-} // namespace OHOS
+
+class PermissionVerification : public DelayedSingleton<PermissionVerification> {
+public:
+    PermissionVerification() = default;
+    ~PermissionVerification() = default;
+
+    bool VerifyStartUIAbilityToHiddenPermission() const;
+    bool VerifyPreloadApplicationPermission() const;
+};
+}  // namespace AAFwk
+}  // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_PERMISSION_VERIFICATION_H

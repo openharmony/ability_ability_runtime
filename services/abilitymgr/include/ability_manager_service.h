@@ -96,6 +96,7 @@ using OHOS::AppExecFwk::IAbilityController;
 struct StartAbilityInfo;
 class WindowFocusChangedListener;
 class WindowVisibilityChangedListener;
+class PreloadManagerService;
 
 /**
  * @class AbilityManagerService
@@ -108,6 +109,7 @@ class AbilityManagerService : public SystemAbility,
     DECLARE_DELAYED_SINGLETON(AbilityManagerService)
     DECLEAR_SYSTEM_ABILITY(AbilityManagerService)
 public:
+    friend class PreloadManagerService;
     static std::shared_ptr<AbilityManagerService> GetPubInstance();
 
     void OnStart() override;
@@ -2121,6 +2123,15 @@ public:
     virtual int32_t QueryKeepAliveAppServiceExtensions(std::vector<KeepAliveInfo> &list) override;
 
     virtual int32_t NotifyStartupExceptionBySCB(int32_t requestId) override;
+
+    /**
+     * Preload application.
+     * @param bundleName Name of the application.
+     * @param userId user id.
+     * @param appIndex app clone index.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex) override;
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;

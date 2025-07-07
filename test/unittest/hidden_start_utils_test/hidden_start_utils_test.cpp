@@ -14,7 +14,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "mock_permission_verification.h"
+#include "mock_my_flag.h"
 
 #include "hidden_start_utils.h"
 #include "app_utils.h"
@@ -50,25 +50,25 @@ void HiddenStartUtilsTest::TearDown() {}
  */
 HWTEST_F(HiddenStartUtilsTest, HiddenStartUtils_IsHiddenStart_001, TestSize.Level1)
 {
-    AAFwk::Want want;
     StartOptions options;
-    MyFlag::flag_ = 0;
     auto utils = std::make_shared<HiddenStartUtils>();
-    bool result = utils->IsHiddenStart(want, options);
+    
+    MyFlag::retVerifyStartUIAbilityToHiddenPermission = false;
+    bool result = utils->IsHiddenStart(options);
     EXPECT_EQ(result, false);
 
-    MyFlag::flag_ = 1;
+    MyFlag::retVerifyStartUIAbilityToHiddenPermission = true;
     options.processOptions = nullptr;
-    result = utils->IsHiddenStart(want, options);
+    result = utils->IsHiddenStart(options);
     EXPECT_EQ(result, false);
 
     options.processOptions = std::make_shared<ProcessOptions>();
     options.processOptions->startupVisibility = OHOS::AAFwk::StartupVisibility::STARTUP_SHOW;
-    result = utils->IsHiddenStart(want, options);
+    result = utils->IsHiddenStart(options);
     EXPECT_EQ(result, false);
 
     options.processOptions->startupVisibility = OHOS::AAFwk::StartupVisibility::STARTUP_HIDE;
-    result = utils->IsHiddenStart(want, options);
+    result = utils->IsHiddenStart(options);
     EXPECT_EQ(result, true);
 }
 
@@ -79,20 +79,61 @@ HWTEST_F(HiddenStartUtilsTest, HiddenStartUtils_IsHiddenStart_001, TestSize.Leve
  */
 HWTEST_F(HiddenStartUtilsTest, HiddenStartUtils_CheckHiddenStartSupported_001, TestSize.Level1)
 {
-    AAFwk::Want want;
     StartOptions options;
     auto utils = std::make_shared<HiddenStartUtils>();
-    int32_t result = utils->CheckHiddenStartSupported(want, options);
+    int32_t result = utils->CheckHiddenStartSupported(options);
     EXPECT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
 
     AppUtils::isStartOptionsWithAnimation_ = true;
     options.processOptions = nullptr;
-    result = utils->CheckHiddenStartSupported(want, options);
+    result = utils->CheckHiddenStartSupported(options);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 
     options.processOptions = std::make_shared<ProcessOptions>();
     options.processOptions->processMode = ProcessMode::NO_ATTACHMENT;
-    result = utils->CheckHiddenStartSupported(want, options);
+    result = utils->CheckHiddenStartSupported(options);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/* *
+ * @tc.name: HiddenStartUtils_IsPreloadStart_001
+ * @tc.desc: IsPreloadStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(HiddenStartUtilsTest, HiddenStartUtils_IsPreloadStart_001, TestSize.Level1)
+{
+    StartOptions options;
+    auto utils = std::make_shared<HiddenStartUtils>();
+    int32_t result = utils->IsPreloadStart(options);
+    EXPECT_FALSE(result);
+
+    MyFlag::retVerifyPreloadApplicationPermission = true;
+    result = utils->IsPreloadStart(options);
+    EXPECT_FALSE(result);
+
+    options.processOptions = std::make_shared<ProcessOptions>();
+    options.processOptions->startupVisibility = OHOS::AAFwk::StartupVisibility::STARTUP_HIDE;
+    result = utils->IsPreloadStart(options);
+    EXPECT_FALSE(result);
+    
+    options.processOptions->isPreloadStart = true;
+    result = utils->IsPreloadStart(options);
+    EXPECT_TRUE(result);
+}
+
+/* *
+ * @tc.name: HiddenStartUtils_CheckPreloadStartSupported_001
+ * @tc.desc: CheckPreloadStartSupported
+ * @tc.type: FUNC
+ */
+HWTEST_F(HiddenStartUtilsTest, HiddenStartUtils_CheckPreloadStartSupported_001, TestSize.Level1)
+{
+    auto utils = std::make_shared<HiddenStartUtils>();
+    int32_t result = utils->CheckPreloadStartSupported();
+    EXPECT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+
+    AppUtils::isPreloadApplicationEnabled_ = true;
+    result = utils->CheckPreloadStartSupported();
     EXPECT_EQ(result, ERR_OK);
 }
 } // namespace AAFwk

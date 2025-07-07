@@ -153,6 +153,9 @@ abilityms_files = [
 
   "src/exit_info_data_manager.cpp",
 
+  # preload_manager_service
+  "src/preload_manager_service.cpp",
+
   #utils
   "src/utils/request_id_util.cpp",
   "src/utils/ability_event_util.cpp",

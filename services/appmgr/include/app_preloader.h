@@ -33,6 +33,7 @@ struct PreloadRequest {
     std::shared_ptr<AAFwk::Want> want = nullptr;
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
+    PreloadPhase preloadPhase = PreloadPhase::UNSPECIFIED;
 };
 
 class AppPreloader {

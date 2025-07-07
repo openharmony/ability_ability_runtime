@@ -6049,17 +6049,17 @@ int32_t AbilityManagerProxy::SetApplicationKeepAlive(const std::string &bundleNa
     }
 
     if (!data.WriteString(bundleName)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write bundleName");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write bundleName");
         return ERR_INVALID_VALUE;
     }
 
     if (!data.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write userID");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write userID");
         return ERR_INVALID_VALUE;
     }
 
     if (!data.WriteBool(flag)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write flag");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write flag");
         return ERR_INVALID_VALUE;
     }
 
@@ -6084,12 +6084,12 @@ int32_t AbilityManagerProxy::QueryKeepAliveApplications(int32_t appType, int32_t
     }
 
     if (!data.WriteInt32(appType)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write appType");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write appType");
         return ERR_INVALID_VALUE;
     }
 
     if (!data.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write userID");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write userID");
         return ERR_INVALID_VALUE;
     }
 
@@ -6121,22 +6121,22 @@ int32_t AbilityManagerProxy::SetApplicationKeepAliveByEDM(const std::string &bun
     }
 
     if (!data.WriteString(bundleName)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write bundleName");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write bundleName");
         return ERR_INVALID_VALUE;
     }
 
     if (!data.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write userID");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write userID");
         return ERR_INVALID_VALUE;
     }
 
     if (!data.WriteBool(flag)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write flag");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write flag");
         return ERR_INVALID_VALUE;
     }
 
     if (!data.WriteBool(isAllowUserToCancel)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write isAllowUserToCancel");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write isAllowUserToCancel");
         return ERR_INVALID_VALUE;
     }
 
@@ -6161,12 +6161,12 @@ int32_t AbilityManagerProxy::QueryKeepAliveApplicationsByEDM(int32_t appType, in
     }
 
     if (!data.WriteInt32(appType)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write appType");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write appType");
         return ERR_INVALID_VALUE;
     }
 
     if (!data.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write userID");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write userID");
         return ERR_INVALID_VALUE;
     }
 
@@ -6921,12 +6921,12 @@ int32_t AbilityManagerProxy::SetAppServiceExtensionKeepAlive(const std::string &
     }
 
     if (!data.WriteString(bundleName)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write bundleName");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write bundleName");
         return ERR_INVALID_VALUE;
     }
 
     if (!data.WriteBool(flag)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "faled to write flag");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write flag");
         return ERR_INVALID_VALUE;
     }
 
@@ -7004,6 +7004,41 @@ int32_t AbilityManagerProxy::NotifyStartupExceptionBySCB(int32_t requestId)
     MessageParcel reply;
     MessageOption option;
     auto ret = SendRequest(AbilityManagerInterfaceCode::NOTIFY_STARTUP_EXCEPTION_BY_SCB, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error: %{public}d", ret);
+        return ret;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken fail");
+        return ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write bundleName");
+        return ERR_WRITE_STRING_FAILED;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write userId");
+        return ERR_WRITE_INT_FAILED;
+    }
+
+    if (!data.WriteInt32(appIndex)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to write appIndex");
+        return ERR_WRITE_INT_FAILED;
+    }
+
+    auto ret = SendRequest(AbilityManagerInterfaceCode::PRELOAD_APPLICATION, data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error: %{public}d", ret);
         return ret;

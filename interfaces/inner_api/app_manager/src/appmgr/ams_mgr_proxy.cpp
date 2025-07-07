@@ -14,14 +14,16 @@
  */
 
 #include "ams_mgr_proxy.h"
+
+#include "ability_manager_errors.h"
+#include "appexecfwk_errors.h"
 #include "freeze_util.h"
+#include "hilog_tag_wrapper.h"
 #include "ipc_types.h"
 #include "iremote_object.h"
 #include "param.h"
+#include "parcel_util.h"
 #include "string_ex.h"
-
-#include "appexecfwk_errors.h"
-#include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -62,23 +64,6 @@ bool AmsMgrProxy::WriteInterfaceToken(MessageParcel &data)
         return false;
     }
     return true;
-}
-namespace {
-bool WriteTokenObject(MessageParcel &data, sptr<IRemoteObject> token)
-{
-    if (token) {
-        if (!data.WriteBool(true) || !data.WriteRemoteObject(token)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Failed to write flag or token");
-            return false;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Failed to write flag");
-            return false;
-        }
-    }
-    return true;
-}
 }
 
 void AmsMgrProxy::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInfo,
@@ -1577,6 +1562,85 @@ bool AmsMgrProxy::IsCallerKilling(const std::string& callerKey)
         return false;
     }
     return reply.ReadBool();
+}
+
+int32_t AmsMgrProxy::PreloadApplicationByPhase(const std::string &bundleName, int32_t userId, int32_t appIndex,
+    AppExecFwk::PreloadPhase preloadPhase)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return AAFwk::ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, String, bundleName);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, userId);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, appIndex);
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, static_cast<int32_t>(preloadPhase));
+
+    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::PRELOAD_APPLICATION_BY_PHASE), data, reply,
+        option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request failed, err: %{public}d.", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AmsMgrProxy::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+{
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "token null.");
+        return AAFwk::INVALID_CALLER_TOKEN;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return AAFwk::ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write token failed.");
+        return AAFwk::ERR_WRITE_CALLER_TOKEN_FAILED;
+    }
+
+    auto ret = SendTransactCmd(
+        static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_PRELOAD_ABILITY_STATE_CHANGED), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request failed, err: %{public}d.", ret);
+        return ret;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrProxy::CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,
+    bool &isExist)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "CheckPreloadAppRecordExist start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return AAFwk::ERR_WRITE_CALLER_TOKEN_FAILED;
+    }
+    PARCEL_UTIL_WRITE_RET_BOOL(data, String, bundleName);
+    PARCEL_UTIL_WRITE_RET_BOOL(data, Int32, userId);
+    PARCEL_UTIL_WRITE_RET_BOOL(data, Int32, appIndex);
+
+    int32_t ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::CHECK_PRELOAD_APP_RECORD_EXIST),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request failed, err: %{public}d.", ret);
+        return ret;
+    }
+    auto replyRet = reply.ReadInt32();
+    if (replyRet != NO_ERROR) {
+        return replyRet;
+    }
+    isExist = reply.ReadBool();
+    return NO_ERROR;
 }
 } // namespace AppExecFwk
 } // namespace OHOS

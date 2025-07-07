@@ -52,6 +52,7 @@ ohos_unittest("ability_manager_service_third_test") {
     "${ability_runtime_services_path}/common/src/queue_task_handler_wrap.cpp",
     "${ability_runtime_services_path}/common/src/task_handler_wrap.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_manager_service.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/preload_manager_service.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/report_data_partition_usage_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/utils/request_id_util.cpp",
   ]

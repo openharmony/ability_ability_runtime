@@ -2366,5 +2366,13 @@ ErrCode AbilityManagerClient::NotifyStartupExceptionBySCB(int32_t requestId)
     return abms->NotifyStartupExceptionBySCB(requestId);
 }
 
+ErrCode AbilityManagerClient::PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "PreloadApplication call");
+    return abms->PreloadApplication(bundleName, userId, appIndex);
+}
 } // namespace AAFwk
 } // namespace OHOS

@@ -20,6 +20,7 @@
 namespace OHOS {
 namespace AAFwk {
 bool AppUtils::isStartOptionsWithAnimation_ = false;
+bool AppUtils::isPreloadApplicationEnabled_ = false;
 
 AppUtils::~AppUtils() {}
 
@@ -35,6 +36,12 @@ bool AppUtils::IsStartOptionsWithAnimation()
 {
     TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isStartOptionsWithAnimation_);
     return isStartOptionsWithAnimation_;
+}
+
+bool AppUtils::IsPreloadApplicationEnabled()
+{
+    TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isPreloadApplicationEnabled_);
+    return isPreloadApplicationEnabled_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

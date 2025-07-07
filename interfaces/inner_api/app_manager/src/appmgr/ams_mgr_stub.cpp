@@ -229,6 +229,12 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleSetKeepAliveAppService(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::KILL_PROCESSES_IN_BATCH):
             return HandleKillProcessesInBatch(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::PRELOAD_APPLICATION_BY_PHASE):
+            return HandlePreloadApplicationByPhase(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_PRELOAD_ABILITY_STATE_CHANGED):
+            return HandleNotifyPreloadAbilityStateChanged(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::CHECK_PRELOAD_APP_RECORD_EXIST):
+            return HandleCheckPreloadAppRecordExist(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -970,6 +976,52 @@ int32_t AmsMgrStub::HandleIsCallerKilling(MessageParcel &data, MessageParcel &re
     if (!reply.WriteBool(isCallerKilling)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result");
         return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandlePreloadApplicationByPhase(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    auto bundleName = data.ReadString();
+    auto userId = data.ReadInt32();
+    auto appIndex = data.ReadInt32();
+    auto preloadPhase = data.ReadInt32();
+    PreloadApplicationByPhase(bundleName, userId, appIndex, static_cast<AppExecFwk::PreloadPhase>(preloadPhase));
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleNotifyPreloadAbilityStateChanged(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null token");
+        return AAFwk::INVALID_CALLER_TOKEN;
+    }
+    auto ret = NotifyPreloadAbilityStateChanged(token);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write ret");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleCheckPreloadAppRecordExist(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    auto bundleName = data.ReadString();
+    auto userId = data.ReadInt32();
+    auto appIndex = data.ReadInt32();
+    bool isExist = false;
+    auto ret = CheckPreloadAppRecordExist(bundleName, userId, appIndex, isExist);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write ret");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    if (ret == NO_ERROR && !reply.WriteBool(isExist)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write isExist");
+        return AAFwk::ERR_WRITE_BOOL_FAILED;
     }
     return NO_ERROR;
 }
