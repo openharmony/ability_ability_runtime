@@ -427,6 +427,36 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_005, TestSize
 }
 
 /**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedRequest_006
+ * @tc.desc: StartSpecifiedRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_006, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    SpecifiedRequest specifiedRequest(0, AbilityRequest());
+    specifiedRequest.abilityRequest.want.SetParam("debugApp", true);
+    mgr->StartSpecifiedRequest(specifiedRequest);
+    usleep(TIMEOUT_VALUE);
+    EXPECT_TRUE(specifiedRequest.isCold);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedRequest_007
+ * @tc.desc: StartSpecifiedRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_007, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    SpecifiedRequest specifiedRequest(0, AbilityRequest());
+    specifiedRequest.abilityRequest.want.SetParam("nativeDebug", true);
+    mgr->StartSpecifiedRequest(specifiedRequest);
+    usleep(TIMEOUT_VALUE);
+    EXPECT_TRUE(specifiedRequest.isCold);
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_DispatchForeground_0200
  * @tc.desc: DispatchForeground
  * @tc.type: FUNC
