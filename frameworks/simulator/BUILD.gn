@@ -125,21 +125,11 @@ ohos_copy("copy_ability_simulator") {
   out_path = get_label_info("${arkui_path}/napi:ace_napi", "root_out_dir")
   sources += [ out_path + "/arkui/napi/libace_napi" + dylib_suffix ]
 
-  if (defined(ark_hybrid) && ark_hybrid) {
-    deps += [ "//arkcompiler/runtime_core/static_core/runtime:libarkruntime" ]
-    out_path = get_label_info(
-            "//arkcompiler/runtime_core/static_core/runtime:libarkruntime",
-            "root_out_dir")
-    sources += [ out_path +
-                 "/arkcompiler/runtime_core/static_core/runtime/libarkruntime" +
-                 dylib_suffix ]
-  } else {
-    deps += [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
-    out_path = get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
-                              "root_out_dir")
-    sources += [ out_path + "/arkcompiler/ets_runtime/libark_jsruntime" +
-                 dylib_suffix ]
-  }
+  deps += [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
+  out_path = get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
+                            "root_out_dir")
+  sources +=
+      [ out_path + "/arkcompiler/ets_runtime/libark_jsruntime" + dylib_suffix ]
 
   deps += [ "//arkcompiler/toolchain/tooling:libark_ecma_debugger" ]
   out_path =
