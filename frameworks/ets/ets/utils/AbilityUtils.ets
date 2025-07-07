@@ -19,14 +19,14 @@ const DOMAIN_ID = 0xD001300;
 const TAG = 'AbilityUtils';
 const LEVEL = 100;
 
-export default class AsyncCallbackWrapper<T> {
-  private myFun_:AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {}
+export default class AsyncCallbackWrapper<T, E = void> {
+  private myFun_: AsyncCallback<T, E> = (err: BusinessError<E> | null, data: T | undefined) => {}
 
-  constructor(myFun:AsyncCallback<T, void>){
+  constructor(myFun: AsyncCallback<T, E>) {
     this.myFun_ = myFun;
   }
 
-  invoke(err: BusinessError<void>, data: T) : void {
+  invoke(err: BusinessError<E> | null, data: T | undefined): void {
     this.myFun_(err, data);
   }
 }
