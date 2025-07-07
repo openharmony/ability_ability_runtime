@@ -132,6 +132,8 @@ private:
 
     void NotifyAbilityRequestFailure(const std::string &dialogSessionId, const Want &want);
 
+    AppExecFwk::ElementName GetWantElement(const Want &want);
+
     mutable ffrt::mutex dialogSessionRecordLock_;
     std::unordered_map<std::string, sptr<DialogSessionInfo>> dialogSessionInfoMap_;
     std::unordered_map<std::string, std::shared_ptr<DialogCallerInfo>> dialogCallerInfoMap_;

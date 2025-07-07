@@ -872,5 +872,22 @@ HWTEST_F(DialogSessionManagerTest, HandleErmsResultBySCB_001, TestSize.Level1)
     EXPECT_NE(result, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "HandleErmsResultBySCB_001 end";
 }
+
+/**
+ * @tc.name: GetWantElement_001
+ * @tc.desc: test GetWantElement function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogSessionManagerTest, GetWantElement_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetWantElement_001 start";
+    DialogSessionManager dialogSessionManager;
+    Want want;
+    AppExecFwk::ElementName element("", "com.test.demo", "MainAbility");
+    want.SetElement(element);
+    AppExecFwk::ElementName result = dialogSessionManager.GetWantElement(want);
+    EXPECT_EQ(result.GetAbilityName(), "MainAbility");
+    GTEST_LOG_(INFO) << "GetWantElement_001 end";
+}
 }  // namespace AAFwk
 }  // namespace OHOS
