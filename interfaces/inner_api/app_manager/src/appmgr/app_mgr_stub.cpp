@@ -1821,9 +1821,11 @@ int32_t AppMgrStub::HandleIsSpecifiedModuleLoaded(MessageParcel &data, MessagePa
     }
 
     bool exist = false;
-    auto ret = IsSpecifiedModuleLoaded(*want, *abilityInfo, exist);
+    bool isDebug = false;
+    auto ret = IsSpecifiedModuleLoaded(*want, *abilityInfo, exist, isDebug);
     if (ret == ERR_OK) {
         reply.WriteBool(exist);
+        reply.WriteBool(isDebug);
     }
     return ret;
 }
