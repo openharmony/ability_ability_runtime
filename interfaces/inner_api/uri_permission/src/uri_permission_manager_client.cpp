@@ -407,6 +407,10 @@ bool UriPermissionManagerClient::RawDataToBoolVec(const UriPermissionRawData& ra
         TAG_LOGE(AAFwkTag::URIPERMMGR, "vector size not match");
         return false;
     }
+    if (boolCount == 0 || boolCount > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "boolVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
+        return false;
+    }
     for (uint32_t i = 0; i < boolCount; ++i) {
         bool resBool = false;
         ss.read(reinterpret_cast<char *>(&resBool), sizeof(resBool));
