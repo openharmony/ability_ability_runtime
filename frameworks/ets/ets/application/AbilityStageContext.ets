@@ -18,20 +18,28 @@ import { Configuration } from '@ohos.app.ability.Configuration'
 import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 
 export default class AbilityStageContext extends Context {
-    static {
-      loadLibrary("ability_stage_context_ani_kit.z");
-    }
-    config?: Configuration;
-    currentHapModuleInfo!: HapModuleInfo;
+  static {
+    loadLibrary("ability_stage_context_ani_kit.z");
+  }
+  config?: Configuration;
+  currentHapModuleInfo!: HapModuleInfo;
 
-    private static native nativeTransferStatic(input: ESValue): Object;
-    private static native nativeTransferDynamic(input: Object): ESValue;
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
+  private static native nativeTransferDynamic(input: Object): ESValue;
+  private static contextType: string = 'AbilityStageContext';
 
-    static transferStatic(input: Any): Object {
-      return AbilityStageContext.nativeTransferStatic(ESValue.wrap(input));
+  static transferStatic(input: Any): Object {
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
     }
+    console.log('transferStatic type: ' + type);
+    return AbilityStageContext.nativeTransferStatic(ESValue.wrap(input), type);
+  }
 
-    static transferDynamic(input: Object): Any {
-      return AbilityStageContext.nativeTransferDynamic(input).unwrap();
-    }
+  static transferDynamic(input: Object): Any {
+    return AbilityStageContext.nativeTransferDynamic(input).unwrap();
+  }
 }

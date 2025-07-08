@@ -1053,5 +1053,42 @@ ani_object CreateEmptyArray(ani_env *env)
     }
     return arrayObj;
 }
+
+bool GetStaticFieldString(ani_env *env, ani_class classObj, const char *fieldName, std::string &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null env");
+        return false;
+    }
+
+    ani_status status = ANI_ERROR;
+    ani_static_field field {};
+    if ((status = env->Class_FindStaticField(classObj, fieldName, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Class_FindStaticField status: %{public}d", status);
+        return false;
+    }
+
+    ani_ref obj = nullptr;
+    if ((status = env->Class_GetStaticField_Ref(classObj, field, &obj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Class_GetStaticField_Ref status: %{public}d", status);
+        return false;
+    }
+
+    ani_boolean isUndefined = true;
+    if ((status = env->Reference_IsUndefined(obj, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s : undefined", fieldName);
+        return false;
+    }
+
+    if (!AppExecFwk::GetStdString(env, reinterpret_cast<ani_string>(obj), value)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
+        return false;
+    }
+    return true;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

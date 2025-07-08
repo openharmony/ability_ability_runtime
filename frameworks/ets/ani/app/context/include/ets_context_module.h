@@ -34,19 +34,21 @@ public:
     EtsContextModule& operator=(const EtsContextModule&) = delete;
     EtsContextModule& operator=(EtsContextModule&&) = delete;
 
-    static ani_object NativeTransferStatic(ani_env *env, ani_object aniObj, ani_object input);
-    static ani_object NativeTransferDynamic(ani_env *env, ani_object aniObj, ani_object input);
-
-private:
+    static ani_object NativeTransferStatic(ani_env *env, ani_object aniObj, ani_object input, ani_object type);
+    static ani_object NativeTransferDynamic(ani_env *env, ani_class aniCls, ani_object input);
     static ani_object GetOrCreateAniObject(ani_env *aniEnv, std::shared_ptr<Context> context);
     static std::unique_ptr<NativeReference> GetOrCreateNativeReference(napi_env napiEnv,
         std::shared_ptr<Context> context);
+
+private:
     static std::unique_ptr<NativeReference> CreateNativeReference(napi_env napiEnv,
         std::shared_ptr<Context> context);
     static std::unique_ptr<NativeReference> CreateApplicationNativeReference(napi_env napiEnv,
         std::shared_ptr<ApplicationContext> applicationContext);
     static std::unique_ptr<NativeReference> CreateAbilityStageNativeReference(napi_env napiEnv,
         std::shared_ptr<AbilityStageContext> abilityStageContext);
+    static ani_object CreateDynamicObject(ani_env *aniEnv, ani_class aniCls,
+        std::shared_ptr<Context> applicationContext);
 };
 
 void EtsContextModuleInit(ani_env *aniEnv);

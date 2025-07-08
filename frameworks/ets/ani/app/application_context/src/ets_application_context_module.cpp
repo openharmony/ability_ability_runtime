@@ -19,10 +19,14 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 #include "ani_base_context.h"
+#include "ani_common_util.h"
 #include "application_context_manager.h"
+#include "bindable_sub_thread.h"
+#include "context_transfer.h"
 #include "ets_application_context_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "interop_js/arkts_esvalue.h"
+#include "interop_js/arkts_interop_js_api.h"
 #include "interop_js/hybridgref_ani.h"
 #include "interop_js/hybridgref_napi.h"
 #include "js_application_context_utils.h"
@@ -37,7 +41,8 @@ namespace {
 constexpr const char *ETS_APPLICATION_CONTEXT_CLASS_NAME = "Lapplication/ApplicationContext/ApplicationContext;";
 } // namespace
 
-ani_object EtsApplicationContextModule::NativeTransferStatic(ani_env *aniEnv, ani_object, ani_object input)
+ani_object EtsApplicationContextModule::NativeTransferStatic(ani_env *aniEnv, ani_object self, ani_object input,
+    ani_object type)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "transfer static ApplicationContext");
     if (aniEnv == nullptr) {
@@ -86,15 +91,22 @@ ani_object EtsApplicationContextModule::NativeTransferStatic(ani_env *aniEnv, an
     }
 
     // create a new one
-    EtsApplicationContextUtils::CreateEtsApplicationContext(aniEnv);
-    auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetEtsGlobalObject();
-    if (appContextObj == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "appContextObj is nullptr");
+    std::string contextType;
+    if (!AppExecFwk::GetStdString(aniEnv, reinterpret_cast<ani_string>(type), contextType)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
+        ThrowStsTransferClassError(aniEnv);
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::CONTEXT, "contextType %{public}s", contextType.c_str());
+
+    auto contextObj = ContextTransfer::GetInstance().GetStaticObject(contextType, aniEnv, context);
+    if (contextObj == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "create object failed");
         ThrowStsTransferClassError(aniEnv);
         return nullptr;
     }
 
-    return appContextObj->aniObj;
+    return contextObj;
 }
 
 std::unique_ptr<NativeReference> EtsApplicationContextModule::CreateNativeReference(napi_env napiEnv,
@@ -155,7 +167,17 @@ std::unique_ptr<NativeReference> EtsApplicationContextModule::GetOrCreateNativeR
 
     // if sub-thread, create a new applicationContext and return
     if (getpid() != syscall(SYS_gettid)) {
-        return CreateNativeReference(napiEnv, applicationContext);
+        auto subThreadObj = static_cast<NativeReference *>(
+            applicationContext->GetSubThreadObject(static_cast<void *>(napiEnv)));
+        if (subThreadObj != nullptr) {
+            return std::unique_ptr<NativeReference>(subThreadObj);
+        }
+        auto subThreadRef = CreateNativeReference(napiEnv, applicationContext);
+        if (subThreadRef == nullptr) {
+            return nullptr;
+        }
+        applicationContext->BindSubThreadObject(static_cast<void *>(napiEnv), static_cast<void *>(subThreadRef.get()));
+        return subThreadRef;
     }
 
     // if main-thread, get bindingObj firstly
@@ -182,11 +204,11 @@ std::unique_ptr<NativeReference> EtsApplicationContextModule::GetOrCreateNativeR
     return nativeRef;
 }
 
-ani_object EtsApplicationContextModule::NativeTransferDynamic(ani_env *aniEnv, ani_object, ani_object input)
+ani_object EtsApplicationContextModule::NativeTransferDynamic(ani_env *aniEnv, ani_class aniCls, ani_object input)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "transfer dynamic ApplicationContext");
     if (!IsInstanceOf(aniEnv, input)) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "not AbilityStageContext");
+        TAG_LOGE(AAFwkTag::CONTEXT, "not ApplicationContext");
         ThrowStsTransferClassError(aniEnv);
         return nullptr;
     }
@@ -198,16 +220,69 @@ ani_object EtsApplicationContextModule::NativeTransferDynamic(ani_env *aniEnv, a
         return nullptr;
     }
 
-    auto applicationContext = Context::ConvertTo<ApplicationContext>(context);
+    std::shared_ptr<ApplicationContext> applicationContext = Context::ConvertTo<ApplicationContext>(context);
     if (applicationContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "invalid applicationContext");
         ThrowStsTransferClassError(aniEnv);
         return nullptr;
     }
 
-    // Not support yet
-    ThrowStsTransferClassError(aniEnv);
-    return nullptr;
+    ani_object object = CreateDynamicObject(aniEnv, aniCls, applicationContext);
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid object");
+        ThrowStsTransferClassError(aniEnv);
+        return nullptr;
+    }
+
+    return object;
+}
+
+ani_object EtsApplicationContextModule::CreateDynamicObject(ani_env *aniEnv, ani_class aniCls,
+    std::shared_ptr<ApplicationContext> applicationContext)
+{
+    std::string contextType;
+    if (!AppExecFwk::GetStaticFieldString(aniEnv, aniCls, "contextType", contextType)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "get context type failed");
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::CONTEXT, "contextType %{public}s", contextType.c_str());
+
+    // get napiEnv from aniEnv
+    napi_env napiEnv = {};
+    if (!arkts_napi_scope_open(aniEnv, &napiEnv)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "arkts_napi_scope_open failed");
+        return nullptr;
+    }
+
+    // create normal application context
+    auto contextObj = ContextTransfer::GetInstance().GetDynamicObject(contextType, napiEnv, applicationContext);
+    if (contextObj == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "create ApplicationContext failed");
+        return nullptr;
+    }
+
+    hybridgref ref = nullptr;
+    bool success = hybridgref_create_from_napi(napiEnv, contextObj, &ref);
+    if (!success) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "hybridgref_create_from_napi failed");
+        return nullptr;
+    }
+
+    ani_object result = nullptr;
+    success = hybridgref_get_esvalue(aniEnv, ref, &result);
+    if (!success) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "hybridgref_get_esvalue failed");
+        return nullptr;
+    }
+
+    hybridgref_delete_from_napi(napiEnv, ref);
+
+    if (!arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "arkts_napi_scope_close_n failed");
+        return nullptr;
+    }
+
+    return result;
 }
 
 bool EtsApplicationContextModule::IsInstanceOf(ani_env *aniEnv, ani_object aniObj)
@@ -246,7 +321,7 @@ void EtsApplicationContextModuleInit(ani_env *aniEnv)
     }
 
     std::array nativeFuncs = {
-        ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
+        ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;Lstd/core/String;:Lstd/core/Object;",
             reinterpret_cast<void*>(EtsApplicationContextModule::NativeTransferStatic) },
         ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",
             reinterpret_cast<void*>(EtsApplicationContextModule::NativeTransferDynamic) },
@@ -256,6 +331,33 @@ void EtsApplicationContextModuleInit(ani_env *aniEnv)
         TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);
         return;
     }
+
+    ContextTransfer::GetInstance().RegisterStaticObjectCreator("ApplicationContext",
+        [](ani_env *aniEnv, std::shared_ptr<Context> context) -> ani_object {
+            EtsApplicationContextUtils::CreateEtsApplicationContext(aniEnv);
+            auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetEtsGlobalObject();
+            if (appContextObj == nullptr) {
+                TAG_LOGE(AAFwkTag::CONTEXT, "appContextObj is nullptr");
+                return nullptr;
+            }
+
+            return appContextObj->aniObj;
+    });
+
+    ContextTransfer::GetInstance().RegisterDynamicObjectCreator("ApplicationContext",
+        [](napi_env napiEnv, std::shared_ptr<Context> context) -> napi_value {
+            auto applicationContext = Context::ConvertTo<ApplicationContext>(context);
+            if (applicationContext == nullptr) {
+                TAG_LOGE(AAFwkTag::CONTEXT, "invalid applicationContext");
+                return nullptr;
+            }
+
+            auto ref = EtsApplicationContextModule::GetOrCreateNativeReference(napiEnv, applicationContext);
+            if (ref == nullptr) {
+                return nullptr;
+            }
+            return ref->Get();
+    });
 
     TAG_LOGD(AAFwkTag::CONTEXT, "Init application context kit end");
 }

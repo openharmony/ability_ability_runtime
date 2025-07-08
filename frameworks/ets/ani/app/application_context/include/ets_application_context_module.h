@@ -33,14 +33,16 @@ public:
     EtsApplicationContextModule& operator=(const EtsApplicationContextModule&) = delete;
     EtsApplicationContextModule& operator=(EtsApplicationContextModule&&) = delete;
 
-    static ani_object NativeTransferStatic(ani_env *aniEnv, ani_object aniObj, ani_object input);
-    static ani_object NativeTransferDynamic(ani_env *aniEnv, ani_object aniObj, ani_object input);
+    static ani_object NativeTransferStatic(ani_env *aniEnv, ani_object aniObj, ani_object input, ani_object type);
+    static ani_object NativeTransferDynamic(ani_env *aniEnv, ani_class aniCls, ani_object input);
+    static std::unique_ptr<NativeReference> GetOrCreateNativeReference(napi_env napiEnv,
+        std::shared_ptr<ApplicationContext> applicationContext);
 
 private:
     static bool IsInstanceOf(ani_env *aniEnv, ani_object aniObj);
-    static std::unique_ptr<NativeReference> GetOrCreateNativeReference(napi_env napiEnv,
-        std::shared_ptr<ApplicationContext> applicationContext);
     static std::unique_ptr<NativeReference> CreateNativeReference(napi_env napiEnv,
+        std::shared_ptr<ApplicationContext> applicationContext);
+    static ani_object CreateDynamicObject(ani_env *aniEnv, ani_class aniCls,
         std::shared_ptr<ApplicationContext> applicationContext);
 };
 
