@@ -12,13 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "common_fun_ani.h"
 #include "ets_ui_extension_context.h"
-#include "ui_extension_context.h"
-#include "ani_common_want.h"
+
 #include "ability_manager_client.h"
+#include "ani_common_want.h"
+#include "common_fun_ani.h"
 #include "ets_context_utils.h"
 #include "ets_error_utils.h"
+#include "ui_extension_context.h"
 
 const char *INVOKE_METHOD_NAME = "invoke";
 const char *UI_EXTENSION_CONTEXT_CLASS_NAME = "Lapplication/UIExtensionContext/UIExtensionContext;";
@@ -80,6 +81,21 @@ void EtsUIExtensionContext::TerminateSelfWithResultSync(ani_env *env,  ani_objec
     OHOS::AppExecFwk::UnWrapAbilityResult(env, abilityResult, resultCode, want);
     auto token = context->GetToken();
     OHOS::AAFwk::AbilityManagerClient::GetInstance()->TransferAbilityResultForExtension(token, resultCode, want);
+#ifdef SUPPORT_SCREEN
+    OHOS::sptr<OHOS::Rosen::Window> uiWindow = context->GetWindow();
+    if (!uiWindow) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null uiWindow");
+        OHOS::AppExecFwk::AsyncCallback(env, callback, OHOS::AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+            static_cast<int32_t>(OHOS::AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM)), nullptr);
+        return;
+    }
+    auto result = uiWindow->TransferAbilityResult(resultCode, want);
+    if (result != OHOS::Rosen::WMError::WM_OK) {
+        OHOS::AppExecFwk::AsyncCallback(env, callback, OHOS::AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+            static_cast<int32_t>(OHOS::AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM)), nullptr);
+        return;
+    }
+#endif // SUPPORT_SCREEN
     ret = context->TerminateSelf();
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::UI_EXT, "TerminateSelf failed, errorCode is %{public}d", ret);
@@ -89,7 +105,7 @@ void EtsUIExtensionContext::TerminateSelfWithResultSync(ani_env *env,  ani_objec
         OHOS::AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
 }
 
-void EtsUIExtensionContext::BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+void EtsUIExtensionContext::BindExtensionInfo(ani_env *aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
@@ -122,7 +138,7 @@ void EtsUIExtensionContext::BindExtensionInfo(ani_env* aniEnv, ani_class context
     }
 }
 
-void EtsUIExtensionContext::EtsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+void EtsUIExtensionContext::EtsCreatExtensionContext(ani_env *aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context)
 {
     OHOS::AbilityRuntime::ContextUtil::CreateEtsBaseContext(aniEnv, contextClass, contextObj, context);
