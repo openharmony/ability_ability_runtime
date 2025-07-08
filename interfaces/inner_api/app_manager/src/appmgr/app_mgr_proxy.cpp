@@ -2349,7 +2349,8 @@ void AppMgrProxy::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::strin
     PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID, data, reply, option);
 }
 
-int32_t AppMgrProxy::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
+int32_t AppMgrProxy::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result,
+    bool &isDebug)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2363,6 +2364,7 @@ int32_t AppMgrProxy::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const Abil
 
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::IS_SPECIFIED_MODULE_LOADED, data, reply, option);
     result = reply.ReadBool();
+    isDebug = reply.ReadBool();
     return ERR_OK;
 }
 

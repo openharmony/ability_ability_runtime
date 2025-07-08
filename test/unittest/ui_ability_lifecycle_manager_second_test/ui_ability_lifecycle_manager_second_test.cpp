@@ -183,7 +183,8 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, IsSpecifiedModuleLoaded_001, TestS
     TAG_LOGI(AAFwkTag::TEST, "IsSpecifiedModuleLoaded_001 begin.");
     auto mgr = std::make_shared<UIAbilityLifecycleManager>();
     AbilityRequest abilityRequest;
-    EXPECT_FALSE(mgr->IsSpecifiedModuleLoaded(abilityRequest));
+    bool isDebug = false;
+    EXPECT_FALSE(mgr->IsSpecifiedModuleLoaded(abilityRequest, isDebug));
     TAG_LOGI(AAFwkTag::TEST, "IsSpecifiedModuleLoaded_001 end.");
 }
 
@@ -984,8 +985,8 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, IsSpecifiedModuleLoaded_002, TestS
     auto mgr = std::make_shared<UIAbilityLifecycleManager>();
     AppMgrUtil::appMgr_= nullptr;
     AbilityRequest abilityRequest;
-
-    auto ret = mgr->IsSpecifiedModuleLoaded(abilityRequest);
+    bool isDebug = false;
+    auto ret = mgr->IsSpecifiedModuleLoaded(abilityRequest, isDebug);
     EXPECT_EQ(ret, false);
 }
 
