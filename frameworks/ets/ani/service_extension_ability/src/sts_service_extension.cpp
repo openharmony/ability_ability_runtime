@@ -38,6 +38,10 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+constexpr const char *CLASSNAME_SERVICE_ABILITY = "L@ohos/app/ability/ServiceExtensionAbility/ServiceExtensionAbility;";
+constexpr const int ANI_ALREADY_BINDED = 8;
+}
 
 void DisconnectPromiseCallback(ani_env* env, ani_object aniObj)
 {
@@ -139,13 +143,19 @@ void StsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
         return;
     }
+    ani_class cls = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass(CLASSNAME_SERVICE_ABILITY, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "status: %{public}d", status);
+        return;
+    }
     std::array functions = {
         ani_native_function { "nativeOnDisconnectCallback", ":V", reinterpret_cast<void*>(DisconnectPromiseCallback) },
         ani_native_function { "nativeOnConnectCallback", nullptr, reinterpret_cast<void*>(ConnectPromiseCallback) },
     };
 
-    ani_status status = env->Class_BindNativeMethods(stsObj_->aniCls, functions.data(), functions.size());
-    if (ANI_OK != status) {
+    status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
+    if (ANI_OK != status && status != ANI_ALREADY_BINDED) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Class_BindNativeMethods is fail %{public}d", status);
     };
     BindContext(env, record->GetWant());
