@@ -33,14 +33,16 @@ public:
     EtsAbilityStageContextModule& operator=(const EtsAbilityStageContextModule&) = delete;
     EtsAbilityStageContextModule& operator=(EtsAbilityStageContextModule&&) = delete;
 
-    static ani_object NativeTransferStatic(ani_env *aniEnv, ani_object aniObj, ani_object input);
-    static ani_object NativeTransferDynamic(ani_env *aniEnv, ani_object aniObj, ani_object input);
+    static ani_object NativeTransferStatic(ani_env *aniEnv, ani_object aniObj, ani_object input, ani_object type);
+    static ani_object NativeTransferDynamic(ani_env *aniEnv, ani_class aniCls, ani_object input);
+    static std::unique_ptr<NativeReference> GetOrCreateNativeReference(napi_env napiEnv,
+        std::shared_ptr<AbilityStageContext> abilityStageContext);
 
 private:
     static bool IsInstanceOf(ani_env *aniEnv, ani_object aniObj);
-    static std::unique_ptr<NativeReference> GetOrCreateNativeReference(napi_env napiEnv,
-        std::shared_ptr<AbilityStageContext> abilityStageContext);
     static std::unique_ptr<NativeReference> CreateNativeReference(napi_env napiEnv,
+        std::shared_ptr<AbilityStageContext> abilityStageContext);
+    static ani_object CreateDynamicObject(ani_env *aniEnv, ani_class aniCls,
         std::shared_ptr<AbilityStageContext> abilityStageContext);
 };
 

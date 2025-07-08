@@ -19,11 +19,14 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 #include "ani_base_context.h"
+#include "ani_common_util.h"
 #include "application_context_manager.h"
+#include "context_transfer.h"
 #include "ets_application_context_utils.h"
 #include "event_hub.h"
 #include "hilog_tag_wrapper.h"
 #include "interop_js/arkts_esvalue.h"
+#include "interop_js/arkts_interop_js_api.h"
 #include "interop_js/hybridgref_ani.h"
 #include "interop_js/hybridgref_napi.h"
 #include "js_ability_stage_context.h"
@@ -32,6 +35,7 @@
 #include "js_runtime_utils.h"
 #include "native_engine/native_engine.h"
 #include "sts_ability_stage_context.h"
+#include "sts_context_utils.h"
 #include "sts_error_utils.h"
 
 namespace OHOS {
@@ -40,7 +44,7 @@ namespace {
 constexpr const char *ETS_CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
 } // namespace
 
-ani_object EtsContextModule::NativeTransferStatic(ani_env *aniEnv, ani_object, ani_object input)
+ani_object EtsContextModule::NativeTransferStatic(ani_env *aniEnv, ani_object self, ani_object input, ani_object type)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "transfer static Context");
     if (aniEnv == nullptr) {
@@ -80,6 +84,14 @@ ani_object EtsContextModule::NativeTransferStatic(ani_env *aniEnv, ani_object, a
         return reinterpret_cast<ani_object>(*staticContext);
     }
 
+    std::string contextType;
+    if (!AppExecFwk::GetStdString(aniEnv, reinterpret_cast<ani_string>(type), contextType)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
+        ThrowStsTransferClassError(aniEnv);
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::CONTEXT, "contextType %{public}s", contextType.c_str());
+
     auto contextObj = GetOrCreateAniObject(aniEnv, context);
     if (contextObj == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "contextObj invalid");
@@ -115,7 +127,13 @@ ani_object EtsContextModule::GetOrCreateAniObject(ani_env *aniEnv, std::shared_p
         }
     }
 
-    return nullptr;
+    ani_class cls {};
+    ani_status status = ANI_ERROR;
+    if ((status = aniEnv->FindClass("Lapplication/Context/Context;", &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+        return nullptr;
+    }
+    return ContextUtil::CreateContextObject(aniEnv, cls, context);
 }
 
 std::unique_ptr<NativeReference> EtsContextModule::CreateNativeReference(napi_env napiEnv,
@@ -313,7 +331,7 @@ std::unique_ptr<NativeReference> EtsContextModule::GetOrCreateNativeReference(na
     return nativeRef;
 }
 
-ani_object EtsContextModule::NativeTransferDynamic(ani_env *aniEnv, ani_object, ani_object input)
+ani_object EtsContextModule::NativeTransferDynamic(ani_env *aniEnv, ani_class aniCls, ani_object input)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "transfer dynamic Context");
     if (aniEnv == nullptr) {
@@ -328,16 +346,69 @@ ani_object EtsContextModule::NativeTransferDynamic(ani_env *aniEnv, ani_object, 
         return nullptr;
     }
 
-    auto contextPtr = Context::ConvertTo<Context>(context);
+    std::shared_ptr<Context> contextPtr = Context::ConvertTo<Context>(context);
     if (contextPtr == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "invalid Context");
         ThrowStsTransferClassError(aniEnv);
         return nullptr;
     }
 
-    // Not support yet
-    ThrowStsTransferClassError(aniEnv);
-    return nullptr;
+    ani_object object = CreateDynamicObject(aniEnv, aniCls, contextPtr);
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid object");
+        ThrowStsTransferClassError(aniEnv);
+        return nullptr;
+    }
+
+    return object;
+}
+
+ani_object EtsContextModule::CreateDynamicObject(ani_env *aniEnv, ani_class aniCls,
+    std::shared_ptr<Context> contextPtr)
+{
+    std::string contextType;
+    if (!AppExecFwk::GetStaticFieldString(aniEnv, aniCls, "contextType", contextType)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "get context type failed");
+        return nullptr;
+    }
+    TAG_LOGD(AAFwkTag::CONTEXT, "contextType %{public}s", contextType.c_str());
+
+    // get napiEnv from aniEnv
+    napi_env napiEnv = {};
+    if (!arkts_napi_scope_open(aniEnv, &napiEnv)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "arkts_napi_scope_open failed");
+        return nullptr;
+    }
+
+    // create normal context
+    auto contextObj = ContextTransfer::GetInstance().GetDynamicObject(contextType, napiEnv, contextPtr);
+    if (contextObj == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "create Context failed");
+        return nullptr;
+    }
+
+    hybridgref ref = nullptr;
+    bool success = hybridgref_create_from_napi(napiEnv, contextObj, &ref);
+    if (!success) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "hybridgref_create_from_napi failed");
+        return nullptr;
+    }
+
+    ani_object result = nullptr;
+    success = hybridgref_get_esvalue(aniEnv, ref, &result);
+    if (!success) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "hybridgref_get_esvalue failed");
+        return nullptr;
+    }
+
+    hybridgref_delete_from_napi(napiEnv, ref);
+
+    if (!arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "arkts_napi_scope_close_n failed");
+        return nullptr;
+    }
+
+    return result;
 }
 
 void EtsContextModuleInit(ani_env *aniEnv)
@@ -356,7 +427,7 @@ void EtsContextModuleInit(ani_env *aniEnv)
     }
 
     std::array nativeFuncs = {
-        ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
+        ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;Lstd/core/String;:Lstd/core/Object;",
             reinterpret_cast<void*>(EtsContextModule::NativeTransferStatic) },
         ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",
             reinterpret_cast<void*>(EtsContextModule::NativeTransferDynamic) },
@@ -366,6 +437,26 @@ void EtsContextModuleInit(ani_env *aniEnv)
         TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);
         return;
     }
+
+    ContextTransfer::GetInstance().RegisterStaticObjectCreator("Context",
+        [](ani_env *aniEnv, std::shared_ptr<Context> context) -> ani_object {
+            ani_class cls {};
+            ani_status status = ANI_ERROR;
+            if ((status = aniEnv->FindClass("Lapplication/Context/Context;", &cls)) != ANI_OK) {
+                TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+                return nullptr;
+            }
+            return ContextUtil::CreateContextObject(aniEnv, cls, context);
+    });
+
+    ContextTransfer::GetInstance().RegisterDynamicObjectCreator("Context",
+        [](napi_env napiEnv, std::shared_ptr<Context> context) -> napi_value {
+            auto ref = EtsContextModule::GetOrCreateNativeReference(napiEnv, context);
+            if (ref == nullptr) {
+                return nullptr;
+            }
+            return ref->Get();
+    });
 
     TAG_LOGD(AAFwkTag::CONTEXT, "Init Context kit end");
 }
