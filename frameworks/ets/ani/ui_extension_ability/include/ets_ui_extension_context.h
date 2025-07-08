@@ -21,25 +21,27 @@
 
 #include "ani.h"
 #include "ui_extension_context.h"
+#include "ets_runtime.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "ohos_application.h"
+#include "ui_extension_context.h"
 
 ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context);
 
 class EtsUIExtensionContext final {
 public:
-    explicit EtsUIExtensionContext(const std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext>& context)
+    explicit EtsUIExtensionContext(const std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> &context)
         : context_(context) {}
     virtual ~EtsUIExtensionContext() = default;
 
     static void TerminateSelfSync(ani_env *env, ani_object obj, ani_object callback);
     static void TerminateSelfWithResultSync(ani_env *env, ani_object obj, ani_object abilityResult, ani_object callback);
 
-    static void EtsCreatExtensionContext(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    static void EtsCreatExtensionContext(ani_env *aniEnv, ani_class contextClass, ani_object contextObj,
         std::shared_ptr<OHOS::AbilityRuntime::ExtensionContext> context);
 private:
-    static void BindExtensionInfo(ani_env* aniEnv, ani_class contextClass, ani_object contextObj,
+    static void BindExtensionInfo(ani_env *aniEnv, ani_class contextClass, ani_object contextObj,
         std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo);
 
 protected:
