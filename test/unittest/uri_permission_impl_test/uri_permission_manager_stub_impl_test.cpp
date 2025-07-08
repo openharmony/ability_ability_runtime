@@ -20,6 +20,7 @@
 
 #define private public
 #define protected public
+#include "uri_permission_manager_client.h"
 #include "uri_permission_manager_stub_impl.h"
 #include "ability_manager_errors.h"
 #undef private
@@ -30,6 +31,10 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr int OFFSET = 30;
+const std::string POLICY_INFO_PATH = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
+}
 class UriPermissionManagerStubImplTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -651,11 +656,17 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_RawDataToStringVec_002, TestSiz
 HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_RawDataToStringVec_003, TestSize.Level1)
 {
     auto upmsi = std::make_shared<UriPermissionManagerStubImpl>();
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::vector<std::string> strArray;
+    strArray.emplace_back(POLICY_INFO_PATH);
     UriPermissionRawData rawData;
-    rawData.data = "0001000000";
-    rawData.size = 10;
+    upmc.StringVecToRawData(strArray, rawData);
+    rawData.size -= OFFSET;
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
     std::vector<std::string> stringVec;
-    auto result = upmsi->RawDataToStringVec(rawData, stringVec);
+    auto result = upmsi->RawDataToStringVec(stubRawData, stringVec);
     EXPECT_EQ(result, ERR_DEAD_OBJECT);
 }
 
@@ -669,12 +680,21 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_RawDataToPolicyInfo_001, TestSi
 {
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     auto upmsi = std::make_shared<UriPermissionManagerStubImpl>();
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    PolicyInfo policyInfo;
+    policyInfo.path = POLICY_INFO_PATH;
+    policyInfo.mode = 1;
+    std::vector<PolicyInfo> policyInfoArray;
+    policyInfoArray.push_back(policyInfo);
     UriPermissionRawData policyRawData;
-    policyRawData.data = "0001000000";
-    policyRawData.size = 10;
+    upmc.PolicyInfoToRawData(policyInfoArray, policyRawData);
+    policyRawData.size -= OFFSET;
+    UriPermissionRawData stubPolicyRawData;
+    stubPolicyRawData.size = policyRawData.size;
+    EXPECT_EQ(stubPolicyRawData.RawDataCpy(policyRawData.data), ERR_NONE);
     std::vector<PolicyInfo> policy;
-    auto result = upmsi->RawDataToPolicyInfo(policyRawData, policy);
-    EXPECT_FALSE(result);
+    auto result = upmsi->RawDataToPolicyInfo(stubPolicyRawData, policy);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
 #endif
 }
 }  // namespace AAFwk

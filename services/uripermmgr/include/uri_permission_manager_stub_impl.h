@@ -219,7 +219,7 @@ private:
 
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     ErrCode Active(const UriPermissionRawData& policyRawData, std::vector<uint32_t>& res, int32_t& funcResult) override;
-    bool RawDataToPolicyInfo(const UriPermissionRawData& policyRawData, std::vector<PolicyInfo>& policy);
+    ErrCode RawDataToPolicyInfo(const UriPermissionRawData& policyRawData, std::vector<PolicyInfo>& policy);
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 
     class ProxyDeathRecipient : public IRemoteObject::DeathRecipient {
