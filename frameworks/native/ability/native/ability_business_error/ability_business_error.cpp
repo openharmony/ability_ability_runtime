@@ -133,7 +133,7 @@ constexpr const char* ERROR_MSG_NOT_CANDIDATE_MASTER_PROCESS =
     "The current process is not a candidate master process and does not support cancellation.";
 constexpr const char* ERROR_MSG_EXCEEDS_WANT_LIST_MAXIMUM_SIZE =
     "A maximum of four UIAbility instances can be started simultaneously."
-    "The current parameter exceeds the maximum number.";
+    "The current parameter exceeds the maximum number or is less than 1.";
 constexpr const char* ERROR_MSG_TARGET_TYPE_NOT_UI_ABILITY = "The target component type is not a UIAbility.";
 constexpr const char* ERROR_MSG_TARGET_BLOCKED_BY_SYSTEM_MODULE =
     "The target component is blocked by the system module and does not support startup.";

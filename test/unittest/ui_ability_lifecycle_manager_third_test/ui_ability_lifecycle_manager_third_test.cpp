@@ -1455,6 +1455,31 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedProcessRequest_0200, 
 }
 
 /**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedProcessRequest_0300
+ * @tc.desc: StartSpecifiedProcessRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedProcessRequest_0300, TestSize.Level1)
+{
+    auto mockSceneSessionManagerLite = new (std::nothrow) Rosen::MockSceneSessionManagerLite();
+    Rosen::SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = mockSceneSessionManagerLite;
+    EXPECT_CALL(*mockSceneSessionManagerLite, CreateNewInstanceKey(_, _))
+        .Times(1)
+        .WillOnce(Return(Rosen::WMError::WM_OK));
+
+    AppUtils::isInOnNewProcessEnableList_ = true;
+    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo.applicationInfo.multiAppMode.multiAppModeType =
+        AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+    abilityRequest.want.SetParam(Want::CREATE_APP_INSTANCE_KEY, true);
+    auto abilitiesRequest = std::make_shared<AbilitiesRequest>();
+    EXPECT_NE(abilitiesRequest, nullptr);
+    auto result = uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest, abilitiesRequest);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_NotifyStartupExceptionBySCB_001
  * @tc.desc: NotifyStartupExceptionBySCB
  * @tc.type: FUNC
