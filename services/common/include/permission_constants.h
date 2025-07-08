@@ -80,6 +80,7 @@ constexpr const char* PERMISSION_FILE_ACCESS_PERSIST = "ohos.permission.FILE_ACC
 constexpr const char* PERMISSION_SUPPORT_APP_SERVICE_EXTENSION = "ohos.permission.SUPPORT_APP_SERVICE_EXTENSION";
 constexpr const char* PERMISSION_MANAGE_EDM_POLICY = "ohos.permission.MANAGE_EDM_POLICY";
 constexpr const char* PERMISSION_TRIGGER_LOCAL_WANTAGENT = "ohos.permission.TRIGGER_LOCAL_WANTAGENT";
+constexpr const char* PERMISSION_GET_EDM_CONFIG = "ohos.permission.GET_EDM_CONFIG";
 } // namespace PermissionConstants
 } // namespace AAFwk
 } // namespace OHOS

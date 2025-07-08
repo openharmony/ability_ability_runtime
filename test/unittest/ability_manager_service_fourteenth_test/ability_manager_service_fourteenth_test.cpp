@@ -1324,6 +1324,38 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, CheckExtensionRateLimit_003, TestS
 
 /*
  * Feature: AbilityManagerService
+ * Function: EnterKioskMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService EnterKioskMode
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, EnterKioskMode_004, TestSize.Level1) {
+    MyStatus::GetInstance().arGetAbilityRecord_ = nullptr;
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityManagerService, nullptr);
+    auto callerToken = MockToken(AbilityType::PAGE);
+    ASSERT_NE(callerToken, nullptr);
+    auto result = abilityManagerService->EnterKioskMode(callerToken);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ExitKioskMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ExitKioskMode
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, ExitKioskMode_004, TestSize.Level1) {
+    MyStatus::GetInstance().arGetAbilityRecord_ = nullptr;
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityManagerService, nullptr);
+    auto callerToken = MockToken(AbilityType::PAGE);
+    ASSERT_NE(callerToken, nullptr);
+    auto result = abilityManagerService->ExitKioskMode(callerToken);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: NotifyStartupExceptionBySCB
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService NotifyStartupExceptionBySCB

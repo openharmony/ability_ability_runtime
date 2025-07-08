@@ -62,6 +62,7 @@ void KioskStatus::Clear()
     isKioskMode_ = false;
     kioskBundleUid_ = 0;
     kioskBundleName_.clear();
+    kioskToken_ = nullptr;
 }
 } // namespace AAFwk
 } // namespace OHOS
