@@ -689,6 +689,7 @@ config("insight_intent_executor_public_config") {
 
 ohos_shared_library("insight_intent_executor") {
   sources = [
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/ets_insight_intent_executor_instance.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/insight_intent_executor.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/insight_intent_executor_mgr.cpp",
     "${ability_runtime_native_path}/ability/native/insight_intent_executor/js_insight_intent_entry.cpp",
@@ -724,6 +725,56 @@ ohos_shared_library("insight_intent_executor") {
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "window_manager:libwm",
+  ]
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_shared_library("insight_intent_executor_ani") {
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  sources = [
+    "${ability_runtime_native_path}/ability/native/insight_intent_executor/ets_insight_intent_executor.cpp",
+    "${ability_runtime_path}/frameworks/native/insight_intent/insight_intent_context/ets_insight_intent_context.cpp",
+  ]
+
+  public_configs = [ ":insight_intent_executor_public_config" ]
+
+  deps = [
+    ":insight_intent_executor",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_services_path}/common:event_report",
+  ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:want",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "napi:ace_napi",
+    "runtime_core:ani",
     "window_manager:libwm",
   ]
 
@@ -809,7 +860,6 @@ config("uiability_config") {
 }
 
 ohos_shared_library("ui_ability_ani") {
-
   branch_protector_ret = "pac_ret"
 
   sanitize = {
@@ -821,17 +871,18 @@ ohos_shared_library("ui_ability_ani") {
 
   include_dirs = [
     "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
+    "${ability_runtime_path}/frameworks/ets/ani/ui_ability/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_ability",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_delegator",
     "${ability_runtime_path}/utils/global/time/include",
     "${ability_runtime_services_path}/common/include",
   ]
 
   sources = [
-    "${ability_runtime_native_path}/ability/native/ability_runtime/ets_ability_context.cpp",
-    "${ability_runtime_native_path}/ability/native/ability_runtime/ets_ui_ability.cpp",
-    "${ability_runtime_native_path}/ability/native/ets_free_install_observer.cpp",
+    "${ability_runtime_path}/frameworks/ets/ani/ui_ability/src/ets_ability_context.cpp",
+    "${ability_runtime_path}/frameworks/ets/ani/ui_ability/src/ets_ui_ability.cpp",
   ]
 
   public_configs = [ ":uiability_config" ]
@@ -1414,7 +1465,8 @@ ohos_shared_library("service_extension_ani") {
 
   sources = [
     "${ability_runtime_path}/frameworks/ets/ani/service_extension_ability/src/ets_service_extension.cpp",
-  ]
+    "${ability_runtime_path}/frameworks/ets/ani/service_extension_ability/src/ets_service_extension_context.cpp",
+    ]
 
   deps = [
     ":abilitykit_native",
@@ -1428,9 +1480,10 @@ ohos_shared_library("service_extension_ani") {
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/ability/native:insight_intent_executor",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
-    "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_path}/utils/global/freeze:freeze_util",
   ]
 
   external_deps = [
@@ -1449,6 +1502,7 @@ ohos_shared_library("service_extension_ani") {
     "runtime_core:ani",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "bundle_framework:bms_ani_common",
   ]
 
   if (ability_runtime_graphics) {
@@ -2030,7 +2084,6 @@ ohos_shared_library("ui_extension") {
 }
 
 ohos_shared_library("ui_extension_ani") {
-
   sanitize = {
     cfi = true
     cfi_cross_dso = true

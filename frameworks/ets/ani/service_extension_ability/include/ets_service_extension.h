@@ -18,6 +18,9 @@
 #include "configuration.h"
 #include "ets_native_reference.h"
 #include "ets_runtime.h"
+#include "insight_intent_execute_param.h"
+#include "insight_intent_execute_result.h"
+#include "insight_intent_executor_info.h"
 #include "service_extension.h"
 
 namespace OHOS {
@@ -116,6 +119,13 @@ public:
     virtual void OnCommand(const AAFwk::Want &want, bool restart, int startId) override;
 
     /**
+     * @brief Called back when Service is started by intent driver.
+     *
+     * @param want Indicates request to handle.
+     */
+    bool HandleInsightIntent(const AAFwk::Want &want) override;
+
+    /**
      * @brief Called when this extension enters the <b>STATE_STOP</b> state.
      *
      * The extension in the <b>STATE_STOP</b> is being destroyed.
@@ -142,6 +152,8 @@ private:
     void ConfigurationUpdated();
     ani_ref CallObjectMethod(bool withResult, const char *name, const char *signature, ...);
     sptr<IRemoteObject> OnConnectInner(ani_env *env, ani_object &aniRemoteobj, bool &isAsyncCallback);
+    void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want);
+    ani_object CreateETSContext(ani_env *env, std::shared_ptr<ServiceExtensionContext> context);
 
     ETSRuntime &etsRuntime_;
     std::unique_ptr<AppExecFwk::ETSNativeReference> etsObj_;

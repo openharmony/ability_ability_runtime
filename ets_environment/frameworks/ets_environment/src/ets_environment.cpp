@@ -48,6 +48,9 @@ using ANIGetCreatedVMsType = ani_status (*)(ani_vm **vms_buffer, ani_size vms_bu
 
 const char ETS_SDK_NSNAME[] = "ets_sdk";
 const char ETS_SYS_NSNAME[] = "ets_system";
+
+constexpr const char* CLASSNAME_STRING = "Lstd/core/String;";
+constexpr const char* CLASSNAME_LINKER = "Lstd/core/AbcRuntimeLinker;";
 } // namespace
 
 ETSRuntimeAPI ETSEnvironment::lazyApis_ {};
@@ -248,7 +251,14 @@ bool ETSEnvironment::Initialize(void *napiEnv, const std::string &aotPath)
 
 ani_env *ETSEnvironment::GetAniEnv()
 {
-    return vmEntry_.aniEnv_;
+    if (vmEntry_.aniVm_ == nullptr) {
+        return nullptr;
+    }
+    ani_env* env = nullptr;
+    if (vmEntry_.aniVm_->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
+        return nullptr;
+    }
+    return env;
 }
 
 bool ETSEnvironment::HandleUncaughtError()
@@ -384,7 +394,7 @@ bool ETSEnvironment::LoadAbcLinker(ani_env *env, const std::string &modulePath, 
     }
     ani_status status = ANI_ERROR;
     ani_class stringCls = nullptr;
-    if ((status = env->FindClass("Lstd/core/String;", &stringCls)) != ANI_OK) {
+    if ((status = env->FindClass(CLASSNAME_STRING, &stringCls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "FindClass failed, status: %{public}d", status);
         return false;
     }
@@ -407,7 +417,7 @@ bool ETSEnvironment::LoadAbcLinker(ani_env *env, const std::string &modulePath, 
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_Set_Ref failed, status: %{public}d", status);
         return false;
     }
-    if ((status = env->FindClass("Lstd/core/AbcRuntimeLinker;", &abcCls)) != ANI_OK) {
+    if ((status = env->FindClass(CLASSNAME_LINKER, &abcCls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "FindClass failed, status: %{public}d", status);
         return false;
     }
