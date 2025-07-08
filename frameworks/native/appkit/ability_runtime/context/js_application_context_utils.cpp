@@ -1748,6 +1748,9 @@ napi_value JsApplicationContextUtils::CreateJsApplicationContext(napi_env env)
         napi_set_named_property(env, object, "resourceManager", CreateJsResourceManager(env, resourceManager, context));
     }
 
+    std::string type = "ApplicationContext";
+    napi_set_named_property(env, object, "contextType", CreateJsValue(env, type));
+
     BindNativeApplicationContextOne(env, object);
     BindNativeApplicationContextTwo(env, object);
     return object;
