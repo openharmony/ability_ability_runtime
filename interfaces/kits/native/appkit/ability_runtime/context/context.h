@@ -21,6 +21,7 @@
 
 #include "application_info.h"
 #include "bindable.h"
+#include "bindable_sub_thread.h"
 #include "hap_module_info.h"
 #include "iremote_object.h"
 #include "resource_manager.h"
@@ -40,7 +41,9 @@ class Configuration;
 namespace AbilityRuntime {
 class ApplicationContext;
 
-class Context : public Bindable, public std::enable_shared_from_this<Context> {
+class Context : public Bindable,
+                public BindableSubThread,
+                public std::enable_shared_from_this<Context> {
 public:
     Context() = default;
     ~Context() override = default;

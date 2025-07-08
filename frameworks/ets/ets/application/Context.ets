@@ -53,9 +53,11 @@ export class Context extends BaseContext {
 
   public native nativeGetGroupDir(dataGroupID: string, callback: AsyncCallbackWrapper<string>): void;
 
-  private static native nativeTransferStatic(input: ESValue): Object;
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
 
   private static native nativeTransferDynamic(input: Object): ESValue;
+
+  private static contextType: string = 'Context';
 
   private native switchArea(mode: contextConstant.AreaMode): void;
 
@@ -98,7 +100,14 @@ export class Context extends BaseContext {
   }
 
   static transferStatic(input: Any): Object {
-    return Context.nativeTransferStatic(ESValue.wrap(input));
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    console.log('transferStatic type: ' + type);
+    return Context.nativeTransferStatic(ESValue.wrap(input), type);
   }
 
   static transferDynamic(input: Object): Any {

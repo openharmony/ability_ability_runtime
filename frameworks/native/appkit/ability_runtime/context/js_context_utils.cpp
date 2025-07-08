@@ -986,6 +986,9 @@ napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, b
         }
     }
 
+    std::string type = "Context";
+    napi_set_named_property(env, object, "contextType", CreateJsValue(env, type));
+
     const char *moduleName = "JsBaseContext";
     BindPropertyAndFunction(env, object, moduleName);
     return object;

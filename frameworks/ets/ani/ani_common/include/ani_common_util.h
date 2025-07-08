@@ -68,7 +68,8 @@ bool SetRefProperty(ani_env *env, ani_object param, const char *name, ani_ref va
 bool WrapArrayString(ani_env *env, ani_object &arrayObj, const std::vector<std::string> &values);
 bool UnwrapArrayString(ani_env *env, const ani_object &arrayObj, std::vector<std::string> &stringList);
 ani_object CreateEmptyArray(ani_env *env);
+
+bool GetStaticFieldString(ani_env *env, ani_class classObj, const char *fieldName, std::string &value);
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_ANI_COMMON_UTIL_H
- 

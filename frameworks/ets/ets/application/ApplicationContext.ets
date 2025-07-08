@@ -44,8 +44,9 @@ export default class ApplicationContext extends Context {
   public native nativeOffApplicationStateChangeSync(callback?: ApplicationStateChangeCallback): void;
   public native nativegetCurrentAppCloneIndex(): number;
   public native nativegetCurrentInstanceKey(): string;
-  private static native nativeTransferStatic(input: ESValue): Object;
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
   private static native nativeTransferDynamic(input: Object): ESValue;
+  private static contextType: string = 'ApplicationContext';
 
   setSupportedProcessCache(isSupported: boolean): void {
     taskpool.execute((): void => {
@@ -171,7 +172,7 @@ export default class ApplicationContext extends Context {
     });
     return p;
   }
-  
+
   getAllRunningInstanceKeys(): Promise<Array<string>> {
     let p = new Promise<Array<string>>((resolve: (data: Array<string>) => void,
       reject: (err: BusinessError) => void): void => {
@@ -245,7 +246,14 @@ export default class ApplicationContext extends Context {
   }
 
   static transferStatic(input: Any): Object {
-    return ApplicationContext.nativeTransferStatic(ESValue.wrap(input));
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    console.log('transferStatic contextType: ' + type);
+    return ApplicationContext.nativeTransferStatic(ESValue.wrap(input), type);
   }
 
   static transferDynamic(input: Object): Any {
