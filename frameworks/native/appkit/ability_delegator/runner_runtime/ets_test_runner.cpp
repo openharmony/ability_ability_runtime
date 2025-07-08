@@ -19,6 +19,12 @@
 #include "hilog_tag_wrapper.h"
 #include "runner_runtime/ets_test_runner.h"
 
+#ifdef WINDOWS_PLATFORM
+#define ETS_EXPORT __declspec(dllexport)
+#else
+#define ETS_EXPORT __attribute__((visibility("default")))
+#endif
+
 namespace OHOS {
 namespace RunnerRuntime {
 namespace {
@@ -26,7 +32,7 @@ const std::string CAPITALTESTRUNNER = "/ets/TestRunner/";
 const std::string LOWERCASETESTRUNNER = "/ets/testrunner/";
 } // namespace
 
-std::unique_ptr<TestRunner> ETSTestRunner::Create(const std::unique_ptr<Runtime> &runtime,
+TestRunner *ETSTestRunner::Create(const std::unique_ptr<Runtime> &runtime,
     const std::shared_ptr<AbilityDelegatorArgs> &args, const AppExecFwk::BundleInfo &bundleInfo)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "ETSTestRunner Create");
@@ -46,7 +52,7 @@ std::unique_ptr<TestRunner> ETSTestRunner::Create(const std::unique_ptr<Runtime>
         return nullptr;
     }
 
-    return std::unique_ptr<ETSTestRunner>(pTestRunner);
+    return pTestRunner;
 }
 
 ETSTestRunner::ETSTestRunner(
@@ -177,3 +183,11 @@ void ETSTestRunner::Run()
 }
 } // namespace RunnerRuntime
 } // namespace OHOS
+
+ETS_EXPORT extern "C" OHOS::AppExecFwk::TestRunner *OHOS_ETS_Test_Runner_Create(
+    const std::unique_ptr<OHOS::AbilityRuntime::Runtime> &runtime,
+    const std::shared_ptr<OHOS::AppExecFwk::AbilityDelegatorArgs> &args,
+    const OHOS::AppExecFwk::BundleInfo &bundleInfo)
+{
+    return OHOS::RunnerRuntime::ETSTestRunner::Create(runtime, args, bundleInfo);
+}

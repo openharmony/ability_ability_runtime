@@ -24,6 +24,12 @@
 #include "hitrace_meter.h"
 #include "js_service_extension_context.h"
 
+#ifdef WINDOWS_PLATFORM
+#define ETS_EXPORT __declspec(dllexport)
+#else
+#define ETS_EXPORT __attribute__((visibility("default")))
+#endif
+
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
@@ -392,3 +398,9 @@ void EtsServiceExtension::ConfigurationUpdated() {}
 void EtsServiceExtension::Dump(const std::vector<std::string> &params, std::vector<std::string> &info) {}
 } // namespace AbilityRuntime
 } // namespace OHOS
+
+ETS_EXPORT extern "C" OHOS::AbilityRuntime::ServiceExtension *OHOS_ETS_Service_Extension_Create(
+    const std::unique_ptr<OHOS::AbilityRuntime::Runtime> &runtime)
+{
+    return OHOS::AbilityRuntime::EtsServiceExtension::Create(runtime);
+}

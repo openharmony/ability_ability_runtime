@@ -31,6 +31,12 @@
 #include <memory>
 #include <string>
 
+#ifdef WINDOWS_PLATFORM
+#define ETS_EXPORT __declspec(dllexport)
+#else
+#define ETS_EXPORT __attribute__((visibility("default")))
+#endif
+
 namespace OHOS {
 namespace AbilityRuntime {
 
@@ -48,7 +54,7 @@ bool ETSAbilityStage::UseCommonChunk(const AppExecFwk::HapModuleInfo& hapModuleI
     return false;
 }
 
-std::shared_ptr<AbilityStage> ETSAbilityStage::Create(
+AbilityStage *ETSAbilityStage::Create(
     const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo)
 {
     if (runtime == nullptr) {
@@ -80,7 +86,7 @@ std::shared_ptr<AbilityStage> ETSAbilityStage::Create(
             hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag,
             hapModuleInfo.srcEntrance);
     }
-    return std::make_shared<ETSAbilityStage>(etsRuntime, std::move(moduleObj));
+    return new (std::nothrow) ETSAbilityStage(etsRuntime, std::move(moduleObj));
 }
 
 ETSAbilityStage::ETSAbilityStage(ETSRuntime & etsRuntime,
@@ -267,3 +273,10 @@ void ETSAbilityStage::SetEtsAbilityStage(const std::shared_ptr<Context> &context
 
 }  // namespace AbilityRuntime
 }  // namespace OHOS
+
+ETS_EXPORT extern "C" OHOS::AbilityRuntime::AbilityStage *OHOS_ETS_Ability_Stage_Create(
+    const std::unique_ptr<OHOS::AbilityRuntime::Runtime> &runtime,
+    const OHOS::AppExecFwk::HapModuleInfo &hapModuleInfo)
+{
+    return OHOS::AbilityRuntime::ETSAbilityStage::Create(runtime, hapModuleInfo);
+}

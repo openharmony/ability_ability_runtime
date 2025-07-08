@@ -31,6 +31,12 @@
 #include "hitrace_meter.h"
 #include "string_wrapper.h"
 
+#ifdef WINDOWS_PLATFORM
+#define ETS_EXPORT __declspec(dllexport)
+#else
+#define ETS_EXPORT __attribute__((visibility("default")))
+#endif
+
 namespace OHOS {
 namespace AbilityRuntime {
 std::once_flag EtsUIAbility::singletonFlag_;
@@ -776,3 +782,9 @@ std::shared_ptr<AppExecFwk::ETSDelegatorAbilityProperty> EtsUIAbility::CreateADe
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
+
+ETS_EXPORT extern "C" OHOS::AbilityRuntime::UIAbility *OHOS_ETS_Ability_Create(
+    const std::unique_ptr<OHOS::AbilityRuntime::Runtime> &runtime)
+{
+    return OHOS::AbilityRuntime::EtsUIAbility::Create(runtime);
+}
