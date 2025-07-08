@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "form_runtime/sts_form_extension_instance.h"
+#include "form_runtime/ets_form_extension_instance.h"
 
 #include <dlfcn.h>
 
@@ -25,46 +25,46 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 #if defined(WINDOWS_PLATFORM)
-constexpr char STS_FORM_EXT_LIB_NAME[] = "libsts_form_extension.dll";
+constexpr char ETS_FORM_EXT_LIB_NAME[] = "libets_form_extension.dll";
 #elif defined(MAC_PLATFORM)
-constexpr char STS_FORM_EXT_LIB_NAME[] = "libsts_form_extension.dylib";
+constexpr char ETS_FORM_EXT_LIB_NAME[] = "libets_form_extension.dylib";
 #else
-constexpr char STS_FORM_EXT_LIB_NAME[] = "libsts_form_extension.z.so";
+constexpr char ETS_FORM_EXT_LIB_NAME[] = "libets_form_extension.z.so";
 #endif
 
 using CreateFunc = FormExtension *(*)();
-static constexpr char STS_FORM_EXT_CREATE_FUNC[] = "OHOS_ABILITY_STSFormExtension";
+static constexpr char ETS_FORM_EXT_CREATE_FUNC[] = "OHOS_ABILITY_ETSFormExtension";
 
-#ifndef STS_EXPORT
+#ifndef ETS_EXPORT
 #ifndef __WINDOWS__
-#define STS_EXPORT __attribute__((visibility("default")))
+#define ETS_EXPORT __attribute__((visibility("default")))
 #else
-#define STS_EXPORT __declspec(dllexport)
+#define ETS_EXPORT __declspec(dllexport)
 #endif
 #endif
 } // namespace
 
-FormExtension *CreateSTSFormExtension(const std::unique_ptr<Runtime> &runtime)
+FormExtension *CreateETSFormExtension(const std::unique_ptr<Runtime> &runtime)
 {
-    void *handle = dlopen(STS_FORM_EXT_LIB_NAME, RTLD_LAZY);
+    void *handle = dlopen(ETS_FORM_EXT_LIB_NAME, RTLD_LAZY);
     if (handle == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "open sts_form_extension library %{public}s failed, reason: %{public}sn",
-                 STS_FORM_EXT_LIB_NAME, dlerror());
+        TAG_LOGE(AAFwkTag::FORM_EXT, "open ets_form_extension library %{public}s failed, reason: %{public}sn",
+                 ETS_FORM_EXT_LIB_NAME, dlerror());
         return new FormExtension();
     }
 
-    auto entry = reinterpret_cast<CreateFunc>(dlsym(handle, STS_FORM_EXT_CREATE_FUNC));
+    auto entry = reinterpret_cast<CreateFunc>(dlsym(handle, ETS_FORM_EXT_CREATE_FUNC));
     if (entry == nullptr) {
         dlclose(handle);
-        TAG_LOGE(AAFwkTag::FORM_EXT, "get sts_form_extension symbol %{public}s in %{public}s failed",
-                 STS_FORM_EXT_CREATE_FUNC, STS_FORM_EXT_LIB_NAME);
+        TAG_LOGE(AAFwkTag::FORM_EXT, "get ets_form_extension symbol %{public}s in %{public}s failed",
+                 ETS_FORM_EXT_CREATE_FUNC, ETS_FORM_EXT_LIB_NAME);
         return new FormExtension();
     }
 
     auto instance = entry();
     if (instance == nullptr) {
         dlclose(handle);
-        TAG_LOGE(AAFwkTag::FORM_EXT, "get sts_form_extension instance in %{public}s failed", STS_FORM_EXT_LIB_NAME);
+        TAG_LOGE(AAFwkTag::FORM_EXT, "get ets_form_extension instance in %{public}s failed", ETS_FORM_EXT_LIB_NAME);
         return new FormExtension();
     }
 
