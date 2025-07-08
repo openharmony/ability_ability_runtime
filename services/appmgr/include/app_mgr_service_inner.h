@@ -2073,6 +2073,7 @@ private:
     void SetKeepAliveEnableStateAndNotify(const std::shared_ptr<AppRunningRecord>& appRecord, bool enable);
     void SetKeepAliveAppServiceAndNotify(const std::shared_ptr<AppRunningRecord>& appRecord, bool enable);
     bool GetKeepAliveState(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void OnProcessDied(std::shared_ptr<AppRunningRecord> appRecord);
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;
     std::atomic<int32_t> willKillPidsNum_ = 0;

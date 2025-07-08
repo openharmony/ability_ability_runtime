@@ -1608,5 +1608,6 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_SignRestartAppFlag_0300,
     EXPECT_TRUE(record->GetRestartAppFlag());
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_SignRestartAppFlag_0300 end");
 }
+
 } // namespace AppExecFwk
 } // namespace OHOS
