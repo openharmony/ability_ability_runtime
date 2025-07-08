@@ -36,6 +36,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         return false;
     }
     callback->OnCallBack(screenLockResult);
+    callback->screenLockResult_ = nullptr;
+    callback->OnCallBack(screenLockResult);
     return true;
 }
 }
