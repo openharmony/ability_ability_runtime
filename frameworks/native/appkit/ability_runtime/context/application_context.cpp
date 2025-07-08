@@ -18,12 +18,13 @@
 #include <algorithm>
 
 #include "ability_manager_errors.h"
+#include "ability_util.h"
 #include "configuration_convertor.h"
+#include "exit_reason.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "js_runtime.h"
 #include "running_process_info.h"
-#include "exit_reason.h"
-#include "ability_util.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -824,6 +825,11 @@ void ApplicationContext::RegisterProcessSecurityExit(AppProcessExitCallback appP
     appProcessExitCallback_ = appProcessExitCallback;
 }
 
+void ApplicationContext::RegisterAppGetSpecifiedRuntime(AppGetSpecifiedRuntimeCallback appGetSpecifiedRuntimeCallback)
+{
+    appGetSpecifiedRuntimeCallback_ = appGetSpecifiedRuntimeCallback;
+}
+
 #ifdef SUPPORT_GRAPHICS
 void ApplicationContext::RegisterGetDisplayConfig(GetDisplayConfigCallback getDisplayConfigCallback)
 {
@@ -901,6 +907,26 @@ void ApplicationContext::ProcessSecurityExit(const AAFwk::ExitReason &exitReason
 
     TAG_LOGI(AAFwkTag::APPKIT, "Proc exit, reason: %{public}s", exitReason.exitMsg.c_str());
     appProcessExitCallback_(exitReason);
+}
+
+napi_env ApplicationContext::GetMainNapiEnv() const
+{
+    if (appGetSpecifiedRuntimeCallback_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null callback");
+        return nullptr;
+    }
+    const std::unique_ptr<Runtime> &runtime = appGetSpecifiedRuntimeCallback_(AppExecFwk::Constants::CODE_LANGUAGE_1_1);
+    if (runtime == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
+        return nullptr;
+    }
+
+    if (runtime->GetLanguage() != Runtime::Language::JS) {
+        TAG_LOGD(AAFwkTag::APPKIT, "not js runtime");
+        return nullptr;
+    }
+    napi_env env = static_cast<JsRuntime&>(*runtime).GetNapiEnv();
+    return env;
 }
 
 std::string ApplicationContext::GetDataDir()

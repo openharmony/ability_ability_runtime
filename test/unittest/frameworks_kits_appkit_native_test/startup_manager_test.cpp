@@ -1299,5 +1299,41 @@ HWTEST_F(StartupManagerTest, RunAppAutoPreloadSystemSoTask_0100, Function | Medi
 
     EXPECT_EQ(ERR_STARTUP_TIMEOUT, startupManager->RunAppAutoPreloadSystemSoTask());
 }
+
+/**
+ * @tc.name: ParseJsonStringArray_001
+ * @tc.desc: test ParseJsonStringArray
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupManagerTest, ParseJsonStringArray_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ParseJsonStringArray_001 start";
+    const std::string jsonStr = R"({
+        "actions": [
+            "action1",
+            "action2"
+        ],
+        "nonArray" : "nonArray",
+        "nonString": [1]
+    })";
+    nlohmann::json json = nlohmann::json::parse(jsonStr);
+
+    std::vector<std::string> arr;
+    StartupManager::ParseJsonStringArray(json, "nonExist", arr);
+    EXPECT_EQ(arr.size(), 0);
+
+    std::vector<std::string> arr1;
+    StartupManager::ParseJsonStringArray(json, "nonArray", arr1);
+    EXPECT_EQ(arr1.size(), 0);
+
+    std::vector<std::string> arr2;
+    StartupManager::ParseJsonStringArray(json, "nonString", arr2);
+    EXPECT_EQ(arr2.size(), 0);
+
+    std::vector<std::string> arr3;
+    StartupManager::ParseJsonStringArray(json, "actions", arr3);
+    EXPECT_EQ(arr3.size(), 2);
+    GTEST_LOG_(INFO) << "ParseJsonStringArray_001 end";
+}
 }
 }

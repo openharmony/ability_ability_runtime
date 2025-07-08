@@ -1174,7 +1174,7 @@ void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExec
         return;
     }
     std::vector<std::string> dependencies;
-    StartupUtils::ParseJsonStringArray(module, DEPENDENCIES, dependencies);
+    ParseJsonStringArray(module, DEPENDENCIES, dependencies);
     task->SetDependencies(dependencies);
 
     if (moduleType != AppExecFwk::ModuleType::ENTRY && moduleType != AppExecFwk::ModuleType::FEATURE) {
@@ -1199,10 +1199,10 @@ void StartupManager::SetMatchRules(const nlohmann::json &module, StartupTaskMatc
     }
 
     const nlohmann::json &matchRulesJson = module.at(MATCH_RULES);
-    StartupUtils::ParseJsonStringArray(matchRulesJson, URIS, matchRules.uris);
-    StartupUtils::ParseJsonStringArray(matchRulesJson, INSIGHT_INTENTS, matchRules.insightIntents);
-    StartupUtils::ParseJsonStringArray(matchRulesJson, ACTIONS, matchRules.actions);
-    StartupUtils::ParseJsonStringArray(matchRulesJson, CUSTOMIZATION, matchRules.customization);
+    ParseJsonStringArray(matchRulesJson, URIS, matchRules.uris);
+    ParseJsonStringArray(matchRulesJson, INSIGHT_INTENTS, matchRules.insightIntents);
+    ParseJsonStringArray(matchRulesJson, ACTIONS, matchRules.actions);
+    ParseJsonStringArray(matchRulesJson, CUSTOMIZATION, matchRules.customization);
     TAG_LOGD(AAFwkTag::STARTUP,
         "SetMatchRules uris:%{public}zu, insightIntents:%{public}zu, actions:%{public}zu, customization:%{public}zu",
         matchRules.uris.size(), matchRules.insightIntents.size(), matchRules.actions.size(),
@@ -1278,6 +1278,21 @@ bool StartupManager::ParsePreloadSystemSoAllowlist(
             continue;
         }
         allowlist.insert(item.get<std::string>());
+    }
+    return true;
+}
+
+bool StartupManager::ParseJsonStringArray(const nlohmann::json &json, const std::string &key,
+    std::vector<std::string> &arr)
+{
+    if (!json.contains(key) || !json[key].is_array()) {
+        return false;
+    }
+
+    for (const auto &item : json.at(key)) {
+        if (item.is_string()) {
+            arr.push_back(item.get<std::string>());
+        }
     }
     return true;
 }

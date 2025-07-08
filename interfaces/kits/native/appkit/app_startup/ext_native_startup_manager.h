@@ -18,20 +18,43 @@
 
 #include <map>
 #include <memory>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "ext_native_startup_task.h"
+#include "nocopyable.h"
 #include "startup_task.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-class ExtNativeStartupManager {
+enum class SchedulerPhase {
+    PostLaunchApplication,
+};
+class ExtNativeStartupManager : public NoCopyable {
 public:
+    static ExtNativeStartupManager &GetInstance();
+
     static void LoadExtStartupTask();
 
     static int32_t BuildExtStartupTask(const std::shared_ptr<ExtNativeStartupTask> &extNativeStartupTask,
         std::shared_ptr<StartupTask> &startupTask);
 
     static int32_t RunNativeStartupTask(const std::map<std::string, std::shared_ptr<StartupTask>> &nativeStartupTask);
+
+    int32_t RegisterExtStartupTask(
+        const std::shared_ptr<ExtNativeStartupTask> &extNativeStartupTask, const SchedulerPhase phase);
+
+    void RunPhaseTasks(const SchedulerPhase phase);
+
+private:
+    ExtNativeStartupManager();
+
+    ~ExtNativeStartupManager() override;
+
+    std::mutex mutex_;
+    std::unordered_map<SchedulerPhase, std::vector<std::shared_ptr<ExtNativeStartupTask>>> extNativeStartupTasks_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
