@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_ABILITY_CONNECT_MANAGER_H
 
 #include <atomic>
+#include <deque>
 #include <list>
 #include <map>
 #include <string>
