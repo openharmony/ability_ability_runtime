@@ -51,6 +51,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     connectionObserverClientImpl->RegisterObserverToServiceLocked(proxy);
     connectionObserverClientImpl->UnregisterFromServiceLocked(proxy);
     connectionObserverClientImpl->AddObserversLocked(observer);
+    sptr<IRemoteObject> remoteObj;
+    proxy = std::make_shared<ServiceProxyAdapter>(remoteObj);
+    connectionObserverClientImpl->RegisterObserverToServiceLocked(proxy);
+    connectionObserverClientImpl->UnregisterFromServiceLocked(proxy);
     return true;
 }
 }
