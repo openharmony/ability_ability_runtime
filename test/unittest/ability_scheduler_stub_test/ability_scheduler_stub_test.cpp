@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -310,6 +310,26 @@ HWTEST_F(AbilitySchedulerStubTest, ScheduleAbilityRequestSuccessInner_001, TestS
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
     data.WriteParcelable(&element);
     auto res = stub_->OnRemoteRequest(IAbilityScheduler::SCHEDULE_ABILITY_REQUEST_SUCCESS, data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: ScheduleAbilitiesRequestDoneInner_001
+ * @tc.desc: test ScheduleAbilitiesRequestDoneInner
+ * @tc.type: FUNC
+ * @tc.require: SR000GH1GO
+ */
+HWTEST_F(AbilitySchedulerStubTest, ScheduleAbilitiesRequestDoneInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+    std::string requestKey = "12345";
+    data.WriteString(requestKey);
+    int32_t resultCode = 1;
+    data.WriteInt32(resultCode);
+    auto res = stub_->OnRemoteRequest(IAbilityScheduler::SCHEDULE_ABILITIES_REQUEST_DONE, data, reply, option);
     EXPECT_EQ(res, NO_ERROR);
 }
 }  // namespace AAFwk
