@@ -417,7 +417,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_005, TestSize
     auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
     AppMgrUtil::appMgr_ = appmgr;
     EXPECT_CALL(*appmgr, IsSpecifiedModuleLoaded)
-        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result) {
+        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result, bool &) {
             result = true;
             return 0;
         });
@@ -454,6 +454,45 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_007, TestSize
     mgr->StartSpecifiedRequest(specifiedRequest);
     usleep(TIMEOUT_VALUE);
     EXPECT_TRUE(specifiedRequest.isCold);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedRequest_008
+ * @tc.desc: StartSpecifiedRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_008, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    SpecifiedRequest specifiedRequest(0, AbilityRequest());
+    specifiedRequest.abilityRequest.want.SetParam("perfCmd", std::string("perfCmd"));
+    mgr->StartSpecifiedRequest(specifiedRequest);
+    usleep(TIMEOUT_VALUE);
+    EXPECT_TRUE(specifiedRequest.isCold);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_StartSpecifiedRequest_009
+ * @tc.desc: StartSpecifiedRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_009, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    SpecifiedRequest specifiedRequest(0, AbilityRequest());
+    auto originAppMgr = AppMgrUtil::appMgr_;
+    auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
+    AppMgrUtil::appMgr_ = appmgr;
+    EXPECT_CALL(*appmgr, IsSpecifiedModuleLoaded)
+        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result, bool &isDebug) {
+            result = false;
+            isDebug = true;
+            return 0;
+        });
+    mgr->StartSpecifiedRequest(specifiedRequest);
+    usleep(TIMEOUT_VALUE);
+    EXPECT_TRUE(specifiedRequest.isCold);
+    AppMgrUtil::appMgr_ = originAppMgr;
 }
 
 /**
@@ -1302,8 +1341,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, IsSpecifiedModuleLoaded_001, TestSi
 
     AppMgrUtil::appMgr_ = nullptr;
     SysMrgClient::instance_ = nullptr;
-
-    auto ret = uiAbilityLifecycleManager->IsSpecifiedModuleLoaded(abilityRequest);
+    bool isDebug = false;
+    auto ret = uiAbilityLifecycleManager->IsSpecifiedModuleLoaded(abilityRequest, isDebug);
 
     EXPECT_EQ(ret, false);
 }

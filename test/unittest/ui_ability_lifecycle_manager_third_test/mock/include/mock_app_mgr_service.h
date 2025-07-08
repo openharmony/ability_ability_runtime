@@ -123,7 +123,7 @@ public:
 
     MOCK_METHOD1(RegisterKiaInterceptor, int32_t(const sptr<IKiaInterceptor> &interceptor));
     MOCK_METHOD2(CheckIsKiaProcess, int32_t(pid_t pid, bool &isKia));
-    MOCK_METHOD3(IsSpecifiedModuleLoaded, int32_t(const AAFwk::Want &, const AbilityInfo &, bool &));
+    MOCK_METHOD4(IsSpecifiedModuleLoaded, int32_t(const AAFwk::Want &, const AbilityInfo &, bool &, bool &));
     virtual int StartUserTestProcess(
         const AAFwk::Want &want, const sptr<IRemoteObject> &observer, const BundleInfo &bundleInfo, int32_t userId)
     {

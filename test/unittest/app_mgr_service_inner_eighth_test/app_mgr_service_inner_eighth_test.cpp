@@ -2549,7 +2549,8 @@ HWTEST_F(AppMgrServiceInnerEighthTest, IsSpecifiedModuleLoaded_001, TestSize.Lev
 
     AAFwk::Want want;
     AbilityInfo abilityInfo;
-    auto ret = appMgrServiceInner->IsSpecifiedModuleLoaded(want, abilityInfo);
+    bool isDebug = false;
+    auto ret = appMgrServiceInner->IsSpecifiedModuleLoaded(want, abilityInfo, isDebug);
     EXPECT_EQ(ret, false);
     TAG_LOGI(AAFwkTag::TEST, "IsSpecifiedModuleLoaded_001 end");
 }
