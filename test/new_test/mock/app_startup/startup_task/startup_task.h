@@ -50,14 +50,14 @@ public:
 
     virtual const std::string &GetType() const = 0;
     virtual int32_t RunTaskInit(std::unique_ptr<StartupTaskResultCallback> callback) = 0;
-    virtual int32_t RunTaskOnDependencyCompleted(const std::string& dependencyName,
-        const std::shared_ptr<StartupTaskResult>& result) = 0;
+    virtual int32_t RunTaskOnDependencyCompleted(const std::string &dependencyName,
+        const std::shared_ptr<StartupTaskResult> &result) = 0;
 
     MOCK_METHOD(bool, GetWaitOnMainThread, ());
     MOCK_METHOD(void, SetWaitOnMainThread, (bool));
     MOCK_METHOD(bool, GetCallCreateOnMainThread, ());
     MOCK_METHOD(void, SetCallCreateOnMainThread, (bool));
-
+    MOCK_METHOD((const std::string&), GetName, (), (const));
     std::string name_;
 };
 } // namespace AbilityRuntime

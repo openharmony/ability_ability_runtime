@@ -750,6 +750,8 @@ void MainThread::ScheduleLaunchApplication(const AppLaunchData &data, const Conf
         }
         appThread->HandleInitAssertFaultTask(data.GetDebugApp(), data.GetApplicationInfo().debug);
         appThread->HandleLaunchApplication(data, config);
+        AbilityRuntime::ExtNativeStartupManager::GetInstance().RunPhaseTasks(
+            AbilityRuntime::SchedulerPhase::PostLaunchApplication);
     };
     if (!mainHandler_->PostTask(task, "MainThread:LaunchApplication")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
