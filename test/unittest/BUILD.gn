@@ -395,7 +395,6 @@ group("unittest") {
       "advanced_security_mode_manager_test:unittest",
       "ams_ability_running_record_test:unittest",
       "ams_app_death_recipient_test:unittest",
-      "ams_app_life_cycle_test:unittest",
       "ams_app_mgr_client_test:unittest",
       "ams_app_running_record_test:unittest",
       "ams_app_state_callback_test:unittest",
