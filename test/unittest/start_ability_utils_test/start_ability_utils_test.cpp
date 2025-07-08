@@ -15,8 +15,15 @@
 
 #include <gtest/gtest.h>
 
+#define private public
+#define protected public
+#include "ability_record.h"
+#undef private
+#undef protected
+
 #include "ability_manager_errors.h"
 #include "extension_ability_info.h"
+#include "hilog_tag_wrapper.h"
 #include "mock_my_status.h"
 #include "start_ability_utils.h"
 #include "want.h"
@@ -323,6 +330,203 @@ HWTEST_F(StartAbilityUtilsTest, CreateStartAbilityInfo_001, TestSize.Level1)
     int32_t appIndex = 0;
     auto ret = StartAbilityInfo::CreateStartAbilityInfo(want, userId, appIndex, nullptr);
     ASSERT_NE(ret, nullptr);
+}
+
+
+/**
+ * @tc.name: SetTargetCloneIndexInSameBundle_001
+ * @tc.desc: test class StartAbilityUtil SetTargetCloneIndexInSameBundle caller nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, SetTargetCloneIndexInSameBundle_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest SetTargetCloneIndexInSameBundle_001 start");
+    Want want;
+    want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0);
+    sptr<IRemoteObject> callerToken = nullptr;
+
+    StartAbilityUtils::SetTargetCloneIndexInSameBundle(want, callerToken);
+    int32_t appCloneIndex = want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1);
+    EXPECT_EQ(appCloneIndex, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest SetTargetCloneIndexInSameBundle_001 end");
+}
+
+/**
+ * @tc.name: SetTargetCloneIndexInSameBundle_002
+ * @tc.desc: test class StartAbilityUtil SetTargetCloneIndexInSameBundle bundleName not equal
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, SetTargetCloneIndexInSameBundle_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest SetTargetCloneIndexInSameBundle_002 start");
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    abilityRecord->abilityInfo_.bundleName = "com.ohos.test1";
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+
+    StartAbilityUtils::SetTargetCloneIndexInSameBundle(want, callerToken);
+    int32_t appCloneIndex = want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1);
+    EXPECT_EQ(appCloneIndex, -1);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest SetTargetCloneIndexInSameBundle_002 end");
+}
+
+/**
+ * @tc.name: SetTargetCloneIndexInSameBundle_003
+ * @tc.desc: test class StartAbilityUtil SetTargetCloneIndexInSameBundle has key
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, SetTargetCloneIndexInSameBundle_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest SetTargetCloneIndexInSameBundle_003 start");
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0);
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    abilityRecord->abilityInfo_.bundleName = "com.ohos.test";
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+
+    StartAbilityUtils::SetTargetCloneIndexInSameBundle(want, callerToken);
+    int32_t appCloneIndex = want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1);
+    EXPECT_EQ(appCloneIndex, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest SetTargetCloneIndexInSameBundle_003 end");
+}
+
+/**
+ * @tc.name: SetTargetCloneIndexInSameBundle_004
+ * @tc.desc: test class StartAbilityUtil SetTargetCloneIndexInSameBundle caller index valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, SetTargetCloneIndexInSameBundle_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest SetTargetCloneIndexInSameBundle_004 start");
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    abilityRecord->abilityInfo_.bundleName = "com.ohos.test";
+    abilityRecord->abilityInfo_.applicationInfo.appIndex = 1;
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+
+    StartAbilityUtils::SetTargetCloneIndexInSameBundle(want, callerToken);
+    int32_t appCloneIndex = want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1);
+    EXPECT_EQ(appCloneIndex, 1);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest SetTargetCloneIndexInSameBundle_004 end");
+}
+
+/**
+ * @tc.name: SetTargetCloneIndexInSameBundle_005
+ * @tc.desc: test class StartAbilityUtil SetTargetCloneIndexInSameBundle caller index invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, SetTargetCloneIndexInSameBundle_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest SetTargetCloneIndexInSameBundle_005 start");
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    abilityRecord->abilityInfo_.bundleName = "com.ohos.test";
+    abilityRecord->abilityInfo_.applicationInfo.appIndex = -2;
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+
+    StartAbilityUtils::SetTargetCloneIndexInSameBundle(want, callerToken);
+    int32_t appCloneIndex = want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1);
+    EXPECT_EQ(appCloneIndex, -1);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest SetTargetCloneIndexInSameBundle_005 end");
+}
+
+/**
+ * @tc.name: StartUIAbilitiesProcessAppIndex_001
+ * @tc.desc: test class StartAbilityUtil StartUIAbilitiesProcessAppIndex bundleName not equal; no index
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, StartUIAbilitiesProcessAppIndex_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest StartUIAbilitiesProcessAppIndex_001 start");
+    int32_t appIndex;
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    abilityRecord->abilityInfo_.bundleName = "com.ohos.test1";
+    abilityRecord->abilityInfo_.applicationInfo.appIndex = -2;
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+
+    StartAbilityUtils::StartUIAbilitiesProcessAppIndex(want, callerToken, appIndex);
+    int32_t appCloneIndex = want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1);
+    EXPECT_EQ(appCloneIndex, appIndex);
+    EXPECT_EQ(appIndex, 0);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest StartUIAbilitiesProcessAppIndex_001 end");
+}
+
+/**
+ * @tc.name: StartUIAbilitiesProcessAppIndex_002
+ * @tc.desc: test class StartAbilityUtil StartUIAbilitiesProcessAppIndex has index valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, StartUIAbilitiesProcessAppIndex_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest StartUIAbilitiesProcessAppIndex_002 start");
+    int32_t appIndex;
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, 1);
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    abilityRecord->abilityInfo_.bundleName = "com.ohos.test";
+    abilityRecord->abilityInfo_.applicationInfo.appIndex = -2;
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+
+    int32_t ret = StartAbilityUtils::StartUIAbilitiesProcessAppIndex(want, callerToken, appIndex);
+    int32_t appCloneIndex = want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1);
+    EXPECT_EQ(appCloneIndex, appIndex);
+    EXPECT_EQ(appIndex, 1);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest StartUIAbilitiesProcessAppIndex_002 end");
+}
+
+/**
+ * @tc.name: StartUIAbilitiesProcessAppIndex_003
+ * @tc.desc: test class StartAbilityUtil StartUIAbilitiesProcessAppIndex has index invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartAbilityUtilsTest, StartUIAbilitiesProcessAppIndex_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest StartUIAbilitiesProcessAppIndex_003 start");
+    int32_t appIndex;
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, -5);
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    abilityRecord->abilityInfo_.bundleName = "com.ohos.test";
+    abilityRecord->abilityInfo_.applicationInfo.appIndex = -2;
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+
+    int32_t ret = StartAbilityUtils::StartUIAbilitiesProcessAppIndex(want, callerToken, appIndex);
+    int32_t appCloneIndex = want.GetIntParam(Want::PARAM_APP_CLONE_INDEX_KEY, -1);
+    EXPECT_EQ(appCloneIndex, appIndex);
+    EXPECT_EQ(appIndex, -5);
+    EXPECT_EQ(ret, ERR_APP_CLONE_INDEX_INVALID);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartAbilityUtilsTest StartUIAbilitiesProcessAppIndex_003 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS
