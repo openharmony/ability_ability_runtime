@@ -104,9 +104,9 @@ public:
 
 class MockIFreeInstallObserver : public IFreeInstallObserver {
     MOCK_METHOD4(OnInstallFinished, void(const std::string &bundleName, const std::string &abilityName,
-        const std::string &startTime, const int &resultCode));
+        const std::string &startTime, int32_t resultCode));
     MOCK_METHOD3(OnInstallFinishedByUrl, void(const std::string &startTime, const std::string &url,
-        const int &resultCode));
+        int32_t resultCode));
     MOCK_METHOD0(AsObject, sptr<IRemoteObject>());
 };
 

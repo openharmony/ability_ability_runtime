@@ -16,10 +16,18 @@
 #include "ui_extension.h"
 
 #include "ets_ui_extension_instance.h"
+#include "ability_manager_client.h"
+#include "array_wrapper.h"
+#include "connection_manager.h"
+#include "ets_ui_extension.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
+#include "int_wrapper.h"
 #include "js_ui_extension.h"
 #include "runtime.h"
+#include "string_wrapper.h"
 #include "ui_extension_context.h"
+#include "want_params_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -62,6 +70,195 @@ std::shared_ptr<UIExtensionContext> UIExtension::CreateAndInitContext(
         TAG_LOGE(AAFwkTag::UI_EXT, "null context");
     }
     return context;
+}
+
+bool UIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "HandleSessionCreate called");
+    return true;
+}
+
+void UIExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "ForegroundWindow called");
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!HandleSessionCreate(want, sessionInfo)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "HandleSessionCreate failed");
+        return;
+    }
+    std::lock_guard<std::mutex> lock(uiWindowMutex_);
+    TAG_LOGI(AAFwkTag::UI_EXT, "Before window show UIExtcomponent id: %{public}" PRId64,
+        sessionInfo->uiExtensionComponentId);
+    auto componentId = sessionInfo->uiExtensionComponentId;
+    auto& uiWindow = uiWindowMap_[componentId];
+    if (uiWindow) {
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "Rosen::Window::show");
+        uiWindow->Show();
+        foregroundWindows_.emplace(componentId);
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
+}
+
+void UIExtension::BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "BackgroundWindow called");
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (sessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
+        return;
+    }
+    std::lock_guard<std::mutex> lock(uiWindowMutex_);
+    auto componentId = sessionInfo->uiExtensionComponentId;
+    if (uiWindowMap_.find(componentId) == uiWindowMap_.end()) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "find uiWindow failed");
+        return;
+    }
+    auto& uiWindow = uiWindowMap_[componentId];
+    TAG_LOGI(AAFwkTag::UI_EXT, "Befor window hide UIExtcomponent id: %{public}" PRId64,
+        sessionInfo->uiExtensionComponentId);
+    if (uiWindow) {
+        uiWindow->Hide();
+        foregroundWindows_.erase(componentId);
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
+}
+
+void UIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "DestroyWindow called");
+}
+
+bool UIExtension::ForegroundWindowWithInsightIntent(
+    const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo, bool needForeground)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "ForegroundWindowWithInsightIntent called");
+    return true;
+}
+
+void UIExtension::OnStopCallBack()
+{
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        return;
+    }
+    bool ret = ConnectionManager::GetInstance().DisconnectCaller(context->GetToken());
+    if (ret) {
+        ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
+        TAG_LOGD(AAFwkTag::UI_EXT, "The service connection is not disconnected");
+    }
+}
+
+void UIExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    Extension::OnCommand(want, restart, startId);
+}
+
+void UIExtension::OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
+    AAFwk::WindowCommand winCmd)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (sessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null sessionInfo");
+        return;
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin. persistentId: %{private}d, winCmd: %{public}d",
+        sessionInfo->persistentId, winCmd);
+    Extension::OnCommandWindow(want, sessionInfo, winCmd);
+    if (InsightIntentExecuteParam::IsInsightIntentExecute(want) && winCmd == AAFwk::WIN_CMD_FOREGROUND) {
+        if (ForegroundWindowWithInsightIntent(want, sessionInfo, false)) {
+            return;
+        }
+    }
+    switch (winCmd) {
+        case AAFwk::WIN_CMD_FOREGROUND:
+            ForegroundWindow(want, sessionInfo);
+            break;
+        case AAFwk::WIN_CMD_BACKGROUND:
+            BackgroundWindow(sessionInfo);
+            break;
+        case AAFwk::WIN_CMD_DESTROY:
+            DestroyWindow(sessionInfo);
+            break;
+        default:
+            TAG_LOGD(AAFwkTag::UI_EXT, "unsupported cmd");
+            break;
+    }
+    OnCommandWindowDone(sessionInfo, winCmd);
+}
+
+void UIExtension::OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        return;
+    }
+    AAFwk::AbilityCommand abilityCmd;
+    std::lock_guard<std::mutex> lock(uiWindowMutex_);
+    if (uiWindowMap_.empty()) {
+        abilityCmd = AAFwk::ABILITY_CMD_DESTROY;
+    } else if (foregroundWindows_.empty()) {
+        abilityCmd = AAFwk::ABILITY_CMD_BACKGROUND;
+    } else {
+        abilityCmd = AAFwk::ABILITY_CMD_FOREGROUND;
+    }
+    AAFwk::AbilityManagerClient::GetInstance()->ScheduleCommandAbilityWindowDone(
+        context->GetToken(), sessionInfo, winCmd, abilityCmd);
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
+}
+
+void UIExtension::OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &sessionInfo,
+    const AppExecFwk::InsightIntentExecuteResult &result)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (sessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
+        return;
+    }
+    std::lock_guard<std::mutex> lock(uiWindowMutex_);
+    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64, sessionInfo->uiExtensionComponentId);
+    auto componentId = sessionInfo->uiExtensionComponentId;
+    auto res = uiWindowMap_.find(componentId);
+    if (res != uiWindowMap_.end() && res->second != nullptr) {
+        WantParams params;
+        params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT_CODE, AAFwk::Integer::Box(result.innerErr));
+        WantParams resultParams;
+        resultParams.SetParam("code", AAFwk::Integer::Box(result.code));
+        if (result.result != nullptr) {
+            sptr<AAFwk::IWantParams> pWantParams = WantParamWrapper::Box(*result.result);
+            if (pWantParams != nullptr) {
+                resultParams.SetParam("result", pWantParams);
+            }
+        }
+        auto size = result.uris.size();
+        sptr<IArray> uriArray = new (std::nothrow) Array(size, g_IID_IString);
+        if (uriArray == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "new uriArray failed");
+            return;
+        }
+        for (std::size_t i = 0; i < size; i++) {
+            uriArray->Set(i, String::Box(result.uris[i]));
+        }
+        resultParams.SetParam("uris", uriArray);
+        resultParams.SetParam("flags", AAFwk::Integer::Box(result.flags));
+        sptr<AAFwk::IWantParams> pWantParams = WantParamWrapper::Box(resultParams);
+        if (pWantParams != nullptr) {
+            params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT, pWantParams);
+        }
+        Rosen::WMError ret = res->second->TransferExtensionData(params);
+        if (ret == Rosen::WMError::WM_OK) {
+            TAG_LOGD(AAFwkTag::UI_EXT, "TransferExtensionData success");
+        } else {
+            TAG_LOGE(AAFwkTag::UI_EXT, "TransferExtensionData failed, ret=%{public}d", ret);
+        }
+        res->second->Show();
+        foregroundWindows_.emplace(componentId);
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 }
 }

@@ -224,6 +224,7 @@ void EtsAbilityContext::OnStartAbility(
             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
                 .count());
         want.SetParam(AAFwk::Want::PARAM_RESV_START_TIME, startTime);
+        AddFreeInstallObserver(env, want, call, context);
     }
     ErrCode innerErrCode = ERR_OK;
     if (opt != nullptr) {
@@ -238,18 +239,19 @@ void EtsAbilityContext::OnStartAbility(
     } else {
         innerErrCode = context->StartAbility(want, -1);
     }
-    ani_object aniObject = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
-    if (innerErrCode != ERR_OK) {
-        aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, innerErrCode);
-    }
+    ani_object aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, innerErrCode);
     if ((want.GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
-        // to be done: free install
-    } else {
-        AsyncCallback(env, call, aniObject, nullptr);
+        if (innerErrCode != ERR_OK && freeInstallObserver_ != nullptr) {
+            std::string bundleName = want.GetElement().GetBundleName();
+            std::string abilityName = want.GetElement().GetAbilityName();
+            std::string startTime = want.GetStringParam(AAFwk::Want::PARAM_RESV_START_TIME);
+            freeInstallObserver_->OnInstallFinished(bundleName, abilityName, startTime, innerErrCode);
+        }
+        return;
     }
+    AsyncCallback(env, call, aniObject, nullptr);
 }
 
-// to be done: free install
 void EtsAbilityContext::OnStartAbilityForResult(
     ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj, ani_object callback)
 {
@@ -266,6 +268,12 @@ void EtsAbilityContext::OnStartAbilityForResult(
         OHOS::AppExecFwk::UnwrapStartOptions(env, startOptionsObj, startOptions);
     }
     TAG_LOGE(AAFwkTag::CONTEXT, "displayId:%{public}d", startOptions.GetDisplayID());
+    StartAbilityForResultInner(env, startOptions, want, context, startOptionsObj, callback);
+}
+
+void EtsAbilityContext::StartAbilityForResultInner(ani_env *env, const AAFwk::StartOptions &startOptions,
+    AAFwk::Want &want, std::shared_ptr<AbilityContext> context, ani_object startOptionsObj, ani_object callback)
+{
     std::string startTime = std::to_string(
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
             .count());
@@ -277,8 +285,12 @@ void EtsAbilityContext::OnStartAbilityForResult(
         TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
         return;
     }
-    RuntimeTask task = [etsVm, callbackRef, element = want.GetElement(), flags = want.GetFlags(), startTime](
-                           int resultCode, const AAFwk::Want &want, bool isInner) {
+    if ((want.GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
+        want.SetParam(AAFwk::Want::PARAM_RESV_START_TIME, startTime);
+        AddFreeInstallObserver(env, want, callback, context, true);
+    }
+    RuntimeTask task = [etsVm, callbackRef, element = want.GetElement(), flags = want.GetFlags(), startTime,
+        observer = freeInstallObserver_](int resultCode, const AAFwk::Want &want, bool isInner) {
         TAG_LOGD(AAFwkTag::CONTEXT, "start async callback");
         ani_status status = ANI_ERROR;
         ani_env *env = nullptr;
@@ -293,6 +305,12 @@ void EtsAbilityContext::OnStartAbilityForResult(
             TAG_LOGW(AAFwkTag::CONTEXT, "null abilityResult");
             isInner = true;
             resultCode = ERR_INVALID_VALUE;
+        }
+        if ((flags & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND
+            && observer != nullptr) {
+            isInner ? observer->OnInstallFinished(bundleName, abilityName, startTime, resultCode)
+                    : observer->OnInstallFinished(bundleName, abilityName, startTime, abilityResult);
+            return;
         }
         auto errCode = isInner ? resultCode : 0;
         AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
@@ -382,6 +400,49 @@ void EtsAbilityContext::OnReportDrawnCompleted(ani_env *env, ani_object aniObj, 
         aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
     }
     AsyncCallback(env, callback, aniObject, nullptr);
+}
+
+void EtsAbilityContext::AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want, ani_object callback,
+    const std::shared_ptr<AbilityContext> &context, bool isAbilityResult, bool isOpenLink)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "AddFreeInstallObserver");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env");
+        return;
+    }
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return;
+    }
+    if (freeInstallObserver_ == nullptr) {
+        ani_vm *etsVm = nullptr;
+        ani_status status = ANI_ERROR;
+        if ((status = env->GetVM(&etsVm)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+        }
+        if (etsVm == nullptr) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "null etsVm");
+            return;
+        }
+        freeInstallObserver_ = new (std::nothrow) EtsFreeInstallObserver(etsVm);
+        if (freeInstallObserver_ == nullptr) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "null freeInstallObserver");
+            return;
+        }
+        if (context->AddFreeInstallObserver(freeInstallObserver_) != ERR_OK) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "addFreeInstallObserver error");
+            return;
+        }
+    }
+    std::string startTime = want.GetStringParam(AAFwk::Want::PARAM_RESV_START_TIME);
+    if (isOpenLink) {
+        std::string url = want.GetUriString();
+        freeInstallObserver_->AddEtsObserverObject(env, startTime, url, callback, isAbilityResult);
+        return;
+    }
+    std::string bundleName = want.GetElement().GetBundleName();
+    std::string abilityName = want.GetElement().GetAbilityName();
+    freeInstallObserver_->AddEtsObserverObject(env, bundleName, abilityName, startTime, callback, isAbilityResult);
 }
 
 namespace {

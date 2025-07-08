@@ -831,6 +831,7 @@ ohos_shared_library("ui_ability_ani") {
   sources = [
     "${ability_runtime_native_path}/ability/native/ability_runtime/ets_ability_context.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/ets_ui_ability.cpp",
+    "${ability_runtime_native_path}/ability/native/ets_free_install_observer.cpp",
   ]
 
   public_configs = [ ":uiability_config" ]

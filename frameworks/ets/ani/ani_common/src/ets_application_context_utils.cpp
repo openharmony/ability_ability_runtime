@@ -16,6 +16,7 @@
 #include "ani_enum_convert.h"
 #include "application_context_manager.h"
 #include "ets_application_context_utils.h"
+#include "ets_context_utils.h"
 #include "ets_native_reference.h"
 #include "hilog_tag_wrapper.h"
 
@@ -164,6 +165,12 @@ ani_object EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniE
     etsReference->aniObj = applicationContextObject;
     AbilityRuntime::ApplicationContextManager::GetApplicationContextManager().SetEtsGlobalObject(etsReference);
     BindApplicationContextFunc(aniEnv);
+    ani_class applicationContextClass = nullptr;
+    if ((status = aniEnv->FindClass(ETS_APPLICATION_CONTEXT_CLASS_NAME, &applicationContextClass)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass ApplicationContext failed status: %{public}d", status);
+        return nullptr;
+    }
+    ContextUtil::CreateEtsBaseContext(aniEnv, applicationContextClass, applicationContextObject, applicationContext);
     return applicationContextObject;
 }
 } // namespace AbilityRuntime
