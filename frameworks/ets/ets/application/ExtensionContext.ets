@@ -15,15 +15,21 @@
 
 import Context from 'application.Context'
 import {ExtensionAbilityInfo}  from 'bundleManager.ExtensionAbilityInfo'
+import { Configuration } from '@ohos.app.ability.Configuration'
+import { HapModuleInfo } from 'bundleManager.HapModuleInfo'
 
 export default class ExtensionContext extends Context {
     static {
         loadLibrary("context_ani");
     }
     extensionAbilityInfo: ExtensionAbilityInfo;
+    config: Configuration;
+    currentHapModuleInfo: HapModuleInfo;
     native constructor();
-    constructor(extensionAbilityInfo: ExtensionAbilityInfo) {
+    constructor(config: Configuration, extensionAbilityInfo: ExtensionAbilityInfo, currentHapModuleInfo: HapModuleInfo) {
         super();
+        this.config = config;
         this.extensionAbilityInfo = extensionAbilityInfo;
+        this.currentHapModuleInfo = currentHapModuleInfo;
     }
 }

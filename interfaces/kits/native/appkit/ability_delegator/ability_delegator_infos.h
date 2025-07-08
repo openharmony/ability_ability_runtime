@@ -41,14 +41,21 @@ struct ADelegatorAbilityProperty : public BaseDelegatorAbilityProperty {
     std::weak_ptr<NativeReference> object_;
 };
 
-struct ETSDelegatorAbilityProperty  : public BaseDelegatorAbilityProperty {
+struct EtsDelegatorAbilityProperty  : public BaseDelegatorAbilityProperty {
     std::weak_ptr<AppExecFwk::ETSNativeReference> object_;
 };
 
-struct DelegatorAbilityStageProperty {
+struct BaseDelegatorAbilityStageProperty {
     std::string moduleName_;
     std::string srcEntrance_;
+};
+
+struct DelegatorAbilityStageProperty  : public BaseDelegatorAbilityStageProperty {
     std::weak_ptr<NativeReference> object_;
+};
+
+struct EtsDelegatorAbilityStageProperty  : public BaseDelegatorAbilityStageProperty {
+    std::weak_ptr<AppExecFwk::ETSNativeReference> object_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

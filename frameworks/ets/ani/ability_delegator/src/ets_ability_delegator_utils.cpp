@@ -19,14 +19,34 @@
 #include "ets_ability_delegator.h"
 #include "hilog_tag_wrapper.h"
 
-
 namespace OHOS {
 namespace AbilityDelegatorEts {
 namespace {
 constexpr const char* ABILITY_DELEGATOR_CLASS_NAME = "Lapplication/AbilityDelegator/AbilityDelegatorInner;";
 constexpr const char* RECORD_CLASS_NAME = "Lescompat/Record;";
+constexpr const char* VOID_CONTEXT = ":Lapplication/Context/Context;";
+constexpr const char* STRING_NUMBER_ASYNCCALLBACK = "Lstd/core/String;DLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char* STRING_VOID = "Lstd/core/String;:V";
+constexpr const char* MONITOR_ASYNCCALLBACK_VOID =
+    "Lapplication/AbilityMonitor/AbilityMonitor;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char* WANT_ASYNCCALLBACK = "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char* ARGS_ABILITY_DELEGATOR_CLASS_NAME =
     "Lapplication/abilityDelegatorArgs/AbilityDelegatorArgsInner;";
+constexpr const char* SIGNATURE_MONITOR_VOID = "Lapplication/AbilityMonitor/AbilityMonitor;:V";
+constexpr const char* SIGNATURE_MONITOR_NUMBER_ASYNCCALLBACK =
+    "Lapplication/AbilityMonitor/AbilityMonitor;DLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char* STAGEMONITOR_ASYNCCALLBACK_VOID =
+    "Lapplication/AbilityStageMonitor/AbilityStageMonitor;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char* STAGEMONITOR_VOID =
+    "Lapplication/AbilityStageMonitor/AbilityStageMonitor;:V";
+constexpr const char* SIGNATURE_STAGEMONITOR_NUMBER_ASYNCCALLBACK =
+    "Lapplication/AbilityStageMonitor/AbilityStageMonitor;DLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char* STAGEMONITOR_UIABILITY_ASYNCCALLBACK =
+    "L@ohos/app/ability/UIAbility/UIAbility;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char* STRING_ASYNCCALLBACK_VOID = "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char* STRING_UIABILITY_NUMBER = "L@ohos/app/ability/UIAbility/UIAbility;:D";
+constexpr const char* STRING_CALLBACK_UIABILITY =
+    "Lutils/AbilityUtils/AsyncCallbackWrapper;:L@ohos/app/ability/UIAbility/UIAbility;";
 }
 
 bool BindFunctions(ani_env *aniEnv, ani_class abilityDelegator)
@@ -35,16 +55,45 @@ bool BindFunctions(ani_env *aniEnv, ani_class abilityDelegator)
         return false;
     }
     std::array functions = {
-        ani_native_function {"getAppContext", nullptr, reinterpret_cast<void *>(EtsAbilityDelegator::GetAppContext)},
-        ani_native_function {"nativeExecuteShellCommand", nullptr,
+        ani_native_function {"getAppContext", VOID_CONTEXT,
+            reinterpret_cast<void *>(EtsAbilityDelegator::GetAppContext)},
+        ani_native_function {"nativeExecuteShellCommand", STRING_NUMBER_ASYNCCALLBACK,
             reinterpret_cast<void *>(EtsAbilityDelegator::ExecuteShellCommand)},
-        ani_native_function {"nativeFinishTest", nullptr, reinterpret_cast<void *>(EtsAbilityDelegator::FinishTest)},
-        ani_native_function {"printSync", nullptr, reinterpret_cast<void *>(EtsAbilityDelegator::PrintSync)},
-        ani_native_function {"nativeAddAbilityMonitor", nullptr,
+        ani_native_function {"nativeFinishTest", STRING_NUMBER_ASYNCCALLBACK,
+            reinterpret_cast<void *>(EtsAbilityDelegator::FinishTest)},
+        ani_native_function {"printSync", STRING_VOID, reinterpret_cast<void *>(EtsAbilityDelegator::PrintSync)},
+        ani_native_function {"nativeAddAbilityMonitor", MONITOR_ASYNCCALLBACK_VOID,
             reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityMonitor)},
-        ani_native_function {"nativeStartAbility",
-            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+        ani_native_function {"nativeStartAbility", WANT_ASYNCCALLBACK,
             reinterpret_cast<void *>(EtsAbilityDelegator::StartAbility)},
+        ani_native_function {"addAbilityMonitorSync", SIGNATURE_MONITOR_VOID,
+            reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityMonitorSync)},
+        ani_native_function {"removeAbilityMonitorAsync", MONITOR_ASYNCCALLBACK_VOID,
+            reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityMonitor)},
+        ani_native_function {"removeAbilityMonitorSync", SIGNATURE_MONITOR_VOID,
+            reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityMonitorSync)},
+        ani_native_function {"waitAbilityMonitorAsync", SIGNATURE_MONITOR_NUMBER_ASYNCCALLBACK,
+            reinterpret_cast<void *>(EtsAbilityDelegator::WaitAbilityMonitor)},
+        ani_native_function {"addAbilityStageMonitorAsync", STAGEMONITOR_ASYNCCALLBACK_VOID,
+            reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityStageMonitor)},
+        ani_native_function {"addAbilityStageMonitorSync", STAGEMONITOR_VOID,
+            reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityStageMonitorSync)},
+        ani_native_function {"removeAbilityStageMonitorAsync", STAGEMONITOR_ASYNCCALLBACK_VOID,
+            reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityStageMonitor)},
+        ani_native_function {"removeAbilityStageMonitorSync", STAGEMONITOR_VOID,
+            reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityStageMonitorSync)},
+        ani_native_function {"waitAbilityStageMonitorAsync", SIGNATURE_STAGEMONITOR_NUMBER_ASYNCCALLBACK,
+            reinterpret_cast<void *>(EtsAbilityDelegator::WaitAbilityStageMonitor)},
+        ani_native_function {"doAbilityForegroundAsync", STAGEMONITOR_UIABILITY_ASYNCCALLBACK,
+            reinterpret_cast<void *>(EtsAbilityDelegator::DoAbilityForeground)},
+        ani_native_function {"doAbilityBackgroundAsync", STAGEMONITOR_UIABILITY_ASYNCCALLBACK,
+            reinterpret_cast<void *>(EtsAbilityDelegator::DoAbilityBackground)},
+        ani_native_function {"printAsync", STRING_ASYNCCALLBACK_VOID,
+            reinterpret_cast<void *>(EtsAbilityDelegator::Print)},
+        ani_native_function {"getAbilityState", STRING_UIABILITY_NUMBER,
+            reinterpret_cast<void *>(EtsAbilityDelegator::GetAbilityState)},
+        ani_native_function {"nativeGetCurrentTopAbility", STRING_CALLBACK_UIABILITY,
+            reinterpret_cast<void *>(EtsAbilityDelegator::GetCurrentTopAbility)}
     };
     ani_status status = aniEnv->Class_BindNativeMethods(abilityDelegator, functions.data(), functions.size());
     if (status != ANI_OK) {
@@ -100,7 +149,7 @@ void SetBundleName(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
         return;
     }
     ani_status status = ANI_ERROR;
-    ani_string aniStr;
+    ani_string aniStr = nullptr;
     // Get a ani_string from std::string
     status = aniEnv->String_NewUTF8(bundleName.c_str(), bundleName.length(), &aniStr);
     if (status != ANI_OK) {
@@ -110,7 +159,7 @@ void SetBundleName(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
     TAG_LOGD(AAFwkTag::DELEGATOR, "String_NewUTF8 success");
 
     // find the setter method
-    ani_method nameSetter;
+    ani_method nameSetter = nullptr;
     status = aniEnv->Class_FindMethod(arguments, "<set>bundleName", nullptr, &nameSetter);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
@@ -136,25 +185,25 @@ void SetParameters(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
         return;
     }
     ani_status status = ANI_ERROR;
-    ani_class recordCls;
+    ani_class recordCls = nullptr;
     status = aniEnv->FindClass(RECORD_CLASS_NAME, &recordCls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status: %{public}d", status);
         return;
     }
-    ani_method recordGetMethod;
+    ani_method recordGetMethod = nullptr;
     status = aniEnv->Class_FindMethod(recordCls, "$_get", "Lstd/core/Object;:Lstd/core/Object;", &recordGetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
     }
-    ani_method recordSetMethod;
+    ani_method recordSetMethod = nullptr;
     status = aniEnv->Class_FindMethod(recordCls, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
     }
-    ani_ref parameterRef;
+    ani_ref parameterRef = nullptr;
     status = aniEnv->Object_CallMethodByName_Ref(argumentObject, "<get>parameters", ":Lescompat/Record;",
         &parameterRef);
     if (status != ANI_OK) {
@@ -165,8 +214,8 @@ void SetParameters(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
     for (auto iter = paras.begin(); iter != paras.end(); ++iter) {
         std::string key = iter->first;
         std::string value = iter->second;
-        ani_string ani_key;
-        ani_string ani_value;
+        ani_string ani_key = nullptr;
+        ani_string ani_value = nullptr;
         status = aniEnv->String_NewUTF8(key.c_str(), key.length(), &ani_key);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "String_NewUTF8 key failed status: %{public}d", status);
@@ -193,7 +242,7 @@ void SetTestCaseNames(ani_env *aniEnv, ani_class arguments, ani_object argumentO
         return;
     }
     ani_status status = ANI_ERROR;
-    ani_string aniStr;
+    ani_string aniStr = nullptr;
     status = aniEnv->String_NewUTF8(testcaseNames.c_str(), testcaseNames.length(), &aniStr);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "String_NewUTF8 failed status: %{public}d", status);
@@ -202,7 +251,7 @@ void SetTestCaseNames(ani_env *aniEnv, ani_class arguments, ani_object argumentO
     TAG_LOGD(AAFwkTag::DELEGATOR, "String_NewUTF8 success");
 
     // find the setter method
-    ani_method nameSetter;
+    ani_method nameSetter = nullptr;
     status = aniEnv->Class_FindMethod(arguments, "<set>testCaseNames", nullptr, &nameSetter);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
@@ -227,7 +276,7 @@ void SetTestRunnerClassName(ani_env *aniEnv, ani_class arguments, ani_object arg
         return;
     }
     ani_status status = ANI_ERROR;
-    ani_string aniStr;
+    ani_string aniStr = nullptr;
     status = aniEnv->String_NewUTF8(className.c_str(), className.length(), &aniStr);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "String_NewUTF8 failed status: %{public}d", status);
@@ -236,7 +285,7 @@ void SetTestRunnerClassName(ani_env *aniEnv, ani_class arguments, ani_object arg
     TAG_LOGD(AAFwkTag::DELEGATOR, "String_NewUTF8 success");
 
     // find the setter method
-    ani_method nameSetter;
+    ani_method nameSetter = nullptr;
     status = aniEnv->Class_FindMethod(arguments, "<set>testRunnerClassName", nullptr, &nameSetter);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
