@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -519,6 +519,25 @@ HWTEST_F(AbilitySchedulerProxyTest, ScheduleAbilityRequestSuccess_001, TestSize.
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
     abilitySchedulerProxy_->ScheduleAbilityRequestSuccess(requestId, element);
     EXPECT_EQ(IAbilityScheduler::SCHEDULE_ABILITY_REQUEST_SUCCESS, mock_->code_);
+}
+
+/*
+ * Feature: AbilitySchedulerProxy
+ * Function: ScheduleAbilitiesRequestDone
+ * SubFunction: NA
+ * FunctionPoints: AbilitySchedulerProxy ScheduleAbilitiesRequestDone
+ * EnvConditions: NA
+ * CaseDescription: verify ScheduleAbilitiesRequestDone Normal case
+ */
+HWTEST_F(AbilitySchedulerProxyTest, ScheduleAbilitiesRequestDone_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilitySchedulerMock::InvokeSendRequest));
+    std::string requestKey = "1234567890";
+    int32_t resultCode = 1;
+    abilitySchedulerProxy_->ScheduleAbilitiesRequestDone(requestKey, resultCode);
+    EXPECT_EQ(IAbilityScheduler::SCHEDULE_ABILITIES_REQUEST_DONE, mock_->code_);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

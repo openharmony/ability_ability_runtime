@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,11 @@
 
 #include <gtest/gtest.h>
 #include "app_process_data.h"
+#define private public
+#define protected public
 #include "lifecycle_deal.h"
+#undef private
+#undef protected
 #include "ability_scheduler_mock.h"
 #include "session_info.h"
 
@@ -412,6 +416,41 @@ HWTEST_F(LifecycleDealTest, UpdateSessionToken_001, TestSize.Level1)
     EXPECT_EQ(abilityScheduler_->code_, 0);
     lifecycleDeal_->UpdateSessionToken(sessionToken);
     EXPECT_EQ(abilityScheduler_->code_, ABILITY_SCHEDULER_MOCK_VALUE);
+}
+
+/*
+ * Feature: NotifyAbilitiesRequestDone
+ * Function: ShareData
+ * SubFunction: NA
+ * FunctionPoints: NotifyAbilitiesRequestDone
+ * EnvConditions:NA
+ * CaseDescription: Verify NotifyAbilitiesRequestDone operation and call mock once
+ */
+HWTEST_F(LifecycleDealTest, NotifyAbilitiesRequestDone_001, TestSize.Level1)
+{
+    lifecycleDeal_->SetScheduler(abilityScheduler_);
+    EXPECT_EQ(abilityScheduler_->code_, 0);
+    std::string requestKey = "12345";
+    int32_t requestCode = 0;
+    lifecycleDeal_->NotifyAbilitiesRequestDone(requestKey, requestCode);
+    EXPECT_EQ(abilityScheduler_->code_, ABILITY_SCHEDULER_MOCK_VALUE);
+}
+
+/*
+ * Feature: NotifyAbilitiesRequestDone
+ * Function: ShareData
+ * SubFunction: NA
+ * FunctionPoints: NotifyAbilitiesRequestDone
+ * EnvConditions:NA
+ * CaseDescription: Verify NotifyAbilitiesRequestDone abilityScheduler nullptr
+ */
+HWTEST_F(LifecycleDealTest, NotifyAbilitiesRequestDone_002, TestSize.Level1)
+{
+    lifecycleDeal_->SetScheduler(nullptr);
+    std::string requestKey = "12345";
+    EXPECT_EQ(lifecycleDeal_->GetScheduler(), nullptr);
+    int32_t requestCode = 0;
+    lifecycleDeal_->NotifyAbilitiesRequestDone(requestKey, requestCode);
 }
 
 /*

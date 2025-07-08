@@ -2833,6 +2833,79 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RestartApp_0100, TestSize.
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::RESTART_APP), mock_->code_);
 }
 
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartUIAbilities callerToken nullptr
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUIAbilities_001, TestSize.Level1)
+{
+    std::vector<AAFwk::Want> wantList(2);
+    sptr<IRemoteObject> callerToken = nullptr;
+    std::string requestKey = "12345";
+    auto res = proxy_->StartUIAbilities(wantList, requestKey, callerToken);
+    EXPECT_EQ(res, INVALID_CALLER_TOKEN);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartUIAbilities callerToken wantList size error
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUIAbilities_002, TestSize.Level1)
+{
+    std::vector<AAFwk::Want> wantList(5);
+    OHOS::sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    std::string requestKey = "12345";
+    auto res = proxy_->StartUIAbilities(wantList, requestKey, callerToken);
+    EXPECT_EQ(res, START_UI_ABILITIES_WANT_LIST_SIZE_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartUIAbilities callerToken wantList size error
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUIAbilities_003, TestSize.Level1)
+{
+    std::vector<AAFwk::Want> wantList(0);
+    OHOS::sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    std::string requestKey = "12345";
+    auto res = proxy_->StartUIAbilities(wantList, requestKey, callerToken);
+    EXPECT_EQ(res, START_UI_ABILITIES_WANT_LIST_SIZE_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilities
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilities
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartUIAbilities
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUIAbilities_004, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+
+    std::vector<AAFwk::Want> wantList(2);
+    OHOS::sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    std::string requestKey = "12345";
+    auto res = proxy_->StartUIAbilities(wantList, requestKey, callerToken);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES), mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
 /**
  * @tc.name: AbilityManagerProxy_RestartSelfAtomicService_0100
  * @tc.desc: RestartSelfAtomicService

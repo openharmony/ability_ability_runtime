@@ -953,6 +953,8 @@ enum {
 
     ERR_WRITE_STRING_FAILED = 2097381,
 
+    START_UI_ABILITIES_SPECIFIED_FAILED_ERROR = 2097382,
+
     /**
      * Native error(3000000) for target bundle not exist.
      */

@@ -796,22 +796,33 @@ void UIAbilityLifecycleManager::HandleAbilitiesRequestDone(int32_t requestId, in
     }
     auto abilitiesRequest = it->second;
     CHECK_POINTER_LOG(abilitiesRequest, "abilitiesUIRequest nullptr");
+
+    auto callerRecord = Token::GetAbilityRecordByToken(abilitiesRequest->callerToken);
+    if (callerRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "startUIAbilities callerRecord not exist.");
+        abilitiesRequestMap_.erase(it);
+        return;
+    }
+    if (sessionInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "startUIAbilities sessionInfo not exist.");
+        abilitiesRequestMap_.erase(it);
+        callerRecord->NotifyAbilitiesRequestDone(abilitiesRequest->requestKey,
+            START_UI_ABILITIES_SPECIFIED_FAILED_ERROR);
+        return;
+    }
+
     abilitiesRequest->doneCount++;
     auto &sessionInfoList = abilitiesRequest->sessionInfoList;
     for (auto &item : sessionInfoList) {
         if (item.first == requestId) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "requestdone %{public}d", requestId);
             item.second = sessionInfo;
+            break;
         }
     }
     if (abilitiesRequest->doneCount == sessionInfoList.size()) {
         int32_t ret = BatchNotifySCBPendingActivations(*abilitiesRequest);
         abilitiesRequestMap_.erase(it);
-        auto callerRecord = Token::GetAbilityRecordByToken(abilitiesRequest->callerToken);
-        if (callerRecord == nullptr) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "callerRecord not exist.");
-            return;
-        }
         callerRecord->NotifyAbilitiesRequestDone(abilitiesRequest->requestKey, ret);
     }
 }

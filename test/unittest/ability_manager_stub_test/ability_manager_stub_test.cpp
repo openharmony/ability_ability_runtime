@@ -3724,6 +3724,135 @@ HWTEST_F(AbilityManagerStubTest, ChangeUIAbilityVisibilityBySCB_0100, TestSize.L
 
 /*
  * Feature: AbilityManagerService
+ * Function: StartUIAbilitiesInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInner
+ * EnvConditions: NA
+ * CaseDescription: nothing in data
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIAbilitiesInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int res = stub_->OnRemoteRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES),
+        data, reply, option);
+    EXPECT_EQ(res, START_UI_ABILITIES_WANT_LIST_SIZE_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilitiesInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInner
+ * EnvConditions: NA
+ * CaseDescription: size in data but invalid
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIAbilitiesInner_002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t size = 0;
+    data.WriteInt32(size);
+    int res = stub_->OnRemoteRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES),
+        data, reply, option);
+    EXPECT_EQ(res, START_UI_ABILITIES_WANT_LIST_SIZE_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilitiesInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInner
+ * EnvConditions: NA
+ * CaseDescription: size in data but invalid
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIAbilitiesInner_003, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t size = 5;
+    data.WriteInt32(size);
+    int res = stub_->OnRemoteRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES),
+        data, reply, option);
+    EXPECT_EQ(res, START_UI_ABILITIES_WANT_LIST_SIZE_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilitiesInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInner
+ * EnvConditions: NA
+ * CaseDescription: callerToken nullptr
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIAbilitiesInner_004, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t size = 1;
+    data.WriteInt32(size);
+
+    Want want;
+    data.WriteParcelable(&want);
+
+    std::string requestKey = "12345";
+    data.WriteString(requestKey);
+
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+
+    int res = stub_->OnRemoteRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES),
+        data, reply, option);
+    EXPECT_EQ(res, INVALID_CALLER_TOKEN);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilitiesInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInner
+ * EnvConditions: NA
+ * CaseDescription: callerToken nullptr
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIAbilitiesInner_005, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t size = 1;
+    data.WriteInt32(size);
+
+    Want want;
+    data.WriteParcelable(&want);
+
+    std::string requestKey = "12345";
+    data.WriteString(requestKey);
+
+    sptr<IRemoteObject> token =
+        sptr<AppExecFwk::MockAbilityToken>(new (std::nothrow) AppExecFwk::MockAbilityToken());
+    data.WriteRemoteObject(token);
+
+    int res = stub_->OnRemoteRequest(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES),
+        data, reply, option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: TerminateMissionInner
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService TerminateMissionInner

@@ -3149,6 +3149,42 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_NotifyAbilityRequestFailure_002, TestS
 
 /*
  * Feature: AbilityRecord
+ * Function: NotifyAbilitiesRequestDone
+ * SubFunction: NotifyAbilitiesRequestDone
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord NotifyAbilitiesRequestDone
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_NotifyAbilitiesRequestDone_001, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    EXPECT_NE(abilityRecord_->lifecycleDeal_, nullptr);
+    std::string requestKey = "1234567890";
+    int32_t resultCode = 1;
+    abilityRecord_->NotifyAbilitiesRequestDone(requestKey, resultCode);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: NotifyAbilitiesRequestDone
+ * SubFunction: NotifyAbilitiesRequestDone
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord NotifyAbilitiesRequestDone
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_NotifyAbilitiesRequestDone_002, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    EXPECT_NE(abilityRecord_->lifecycleDeal_, nullptr);
+    abilityRecord_->lifecycleDeal_ = nullptr;
+    EXPECT_EQ(abilityRecord_->lifecycleDeal_, nullptr);
+    std::string requestKey = "1234567890";
+    int32_t resultCode = 1;
+    abilityRecord_->NotifyAbilitiesRequestDone(requestKey, resultCode);
+}
+
+/*
+ * Feature: AbilityRecord
  * Function: NotifyAbilityRequestSuccess
  * SubFunction: NotifyAbilityRequestSuccess
  * FunctionPoints: NA
