@@ -279,5 +279,31 @@ HWTEST_F(AppfreezeCpuFreqManagerTest, WriteCpuInfoToFileTest_001, TestSize.Level
         testValue, getuid(), getpid(), testValue);
     EXPECT_TRUE(!ret.empty());
 }
+
+/**
+ * @tc.number: WriteCpuInfoToFileTest_002
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeCpuFreqManagerTest, WriteCpuInfoToFileTest_002, TestSize.Level0)
+{
+    int32_t pid = getpid();
+    int32_t uid = static_cast<int>(getuid());
+    std::string eventType = "WriteCpuInfoToFileTest_001";
+    std::string testValue = "AppfreezeCpuFreqManagerTest";
+    bool result = AppfreezeCpuFreqManager::GetInstance().InitCpuDataProcessor(eventType, pid, uid, testValue);
+    EXPECT_TRUE(result);
+    int32_t newPid = pid + 10;
+    std::string ret = AppfreezeCpuFreqManager::GetInstance().WriteCpuInfoToFile(eventType,
+        testValue, getuid(), newPid, testValue);
+    EXPECT_TRUE(ret.empty());
+    int left = 7;
+    while (left > 0) {
+        left = sleep(left);
+    }
+    ret = AppfreezeCpuFreqManager::GetInstance().WriteCpuInfoToFile(eventType,
+        testValue, getuid(), pid, testValue);
+    EXPECT_TRUE(ret.empty());
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
