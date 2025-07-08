@@ -426,6 +426,54 @@ HWTEST_F(AppUtilsTest, AppUtilsTest_2100, TestSize.Level2)
 }
 
 /**
+ * @tc.number: IsSupportStartAbilities_0100
+ * @tc.desc: Test IsSupportStartAbilities works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsSupportStartAbilities_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsSupportStartAbilities_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportStartAbilities_.isLoaded = false;
+    bool isSupportStartAbilities = appUtils.IsSupportStartAbilities();
+    std::string deviceType = OHOS::system::GetDeviceType();
+    TAG_LOGI(AAFwkTag::TEST, "current deviceType is %{public}s", deviceType.c_str());
+    if (deviceType == "default") {
+        EXPECT_TRUE(isSupportStartAbilities == false);
+    } else if (deviceType == "phone") {
+        EXPECT_TRUE(isSupportStartAbilities == true);
+    } else if (deviceType == "2in1") {
+        EXPECT_TRUE(isSupportStartAbilities == false);
+    } else if (deviceType == "tablet") {
+        EXPECT_TRUE(isSupportStartAbilities == true);
+    }
+}
+
+/**
+ * @tc.number: IsSupportStartAbilities_0200
+ * @tc.desc: Test IsSupportStartAbilities works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsSupportStartAbilities_0200, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsSupportStartAbilities_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportStartAbilities_.isLoaded = true;
+    bool isSupportStartAbilities = appUtils.IsSupportStartAbilities();
+    std::string deviceType = OHOS::system::GetDeviceType();
+    TAG_LOGI(AAFwkTag::TEST, "current deviceType is %{public}s", deviceType.c_str());
+    if (deviceType == "default") {
+        EXPECT_TRUE(isSupportStartAbilities == false);
+    } else if (deviceType == "phone") {
+        EXPECT_TRUE(isSupportStartAbilities == true);
+    } else if (deviceType == "2in1") {
+        EXPECT_TRUE(isSupportStartAbilities == false);
+    } else if (deviceType == "tablet") {
+        EXPECT_TRUE(isSupportStartAbilities == true);
+    }
+}
+
+/**
  * @tc.number: IsLauncher_0100
  * @tc.desc: Test IsLauncher works
  * @tc.type: FUNC
