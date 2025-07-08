@@ -21,20 +21,7 @@ import { AbilityResult } from 'ability.abilityResult';
 import { Configuration } from '@ohos.app.ability.Configuration';
 import Context from 'application.Context';
 import window from '@ohos.window';
-
-export class AsyncCallbackWrapper<T> {
-  myFun_: AsyncCallback<T, void> = (err: BusinessError<void>, data: T) => {
-  }
-
-  constructor(myFun: AsyncCallback<T, void>) {
-    console.log("AsyncCallbackWrapper");
-    this.myFun_ = myFun;
-  }
-
-  invoke(err: BusinessError<void>, data: T): void {
-    this.myFun_(err, data);
-  }
-}
+import AsyncCallbackWrapper from '../utils/AbilityUtils';
 
 export default class UIAbilityContext extends Context {
   static {
@@ -85,9 +72,9 @@ export default class UIAbilityContext extends Context {
 
   startAbility(want: Want): Promise<void> {
     let p: Promise<void> =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -102,9 +89,9 @@ export default class UIAbilityContext extends Context {
 
   startAbility(want: Want, options: StartOptions): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -133,10 +120,10 @@ export default class UIAbilityContext extends Context {
 
   startAbilityForResult(want: Want): Promise<AbilityResult> {
     let p = new Promise<AbilityResult>((resolve: (data: AbilityResult) => void,
-      reject: (err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError<void>, data: AbilityResult) => {
-        if (err.code == 0) {
-          resolve(data);
+      reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError | null, data: AbilityResult | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as AbilityResult);
         } else {
           reject(err);
         }
@@ -150,10 +137,10 @@ export default class UIAbilityContext extends Context {
 
   startAbilityForResult(want: Want, startOptions: StartOptions): Promise<AbilityResult> {
     let p = new Promise<AbilityResult>((resolve: (data: AbilityResult) => void,
-      reject: (err: BusinessError<void>) => void): void => {
-      let myCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError<void>, data: AbilityResult) => {
-        if (err.code == 0) {
-          resolve(data);
+      reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError | null, data: AbilityResult | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as AbilityResult);
         } else {
           reject(err);
         }
@@ -174,9 +161,9 @@ export default class UIAbilityContext extends Context {
 
   terminateSelf(): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
@@ -198,9 +185,9 @@ export default class UIAbilityContext extends Context {
 
   terminateSelfWithResult(parameter: AbilityResult): Promise<void> {
     let p =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError<void>) => void): void => {
-        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError<void>) => {
-          if (err.code == 0) {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
             resolve(undefined);
           } else {
             reject(err);
