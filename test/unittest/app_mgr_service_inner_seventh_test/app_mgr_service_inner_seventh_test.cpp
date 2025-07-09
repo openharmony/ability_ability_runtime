@@ -1107,6 +1107,27 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, SetOverlayInfo_002, TestSize.Level1)
 }
 
 /**
+* @tc.name: SetOverlayInfo_003
+* @tc.desc: test SetOverlayInfo_003
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, SetOverlayInfo_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetOverlayInfo_003 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
+    AAFwk::MyStatus::GetInstance().getOverlayCall_ = 0;
+    AAFwk::MyStatus::GetInstance().getOverlay_ = new (std::nothrow) AppExecFwk::OverlayManagerProxy(nullptr);
+
+    std::string bundleName = "";
+    int32_t userId = 0;
+    AppSpawnStartMsg startMs;
+    appMgrServiceInner->SetOverlayInfo(bundleName, userId, startMs);
+    EXPECT_EQ(AAFwk::MyStatus::GetInstance().getOverlayCall_, 1);
+    TAG_LOGI(AAFwkTag::TEST, "SetOverlayInfo_003 end");
+}
+
+/**
 * @tc.name: CreatNewStartMsg_001
 * @tc.desc: test CreatNewStartMsg_001
 * @tc.type: FUNC

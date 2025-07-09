@@ -39,7 +39,6 @@
 #endif
 #include "os_account_manager_wrapper.h"
 #include "overlay_event_subscriber.h"
-#include "overlay_manager_client.h"
 #include "overlay_module_info.h"
 #include "parameters.h"
 #include "running_process_info.h"
@@ -1452,14 +1451,42 @@ Global::Resource::DeviceType ContextImpl::GetDeviceType() const
     return deviceType_;
 }
 
+ErrCode ContextImpl::GetOverlayMgrProxy()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    int errCode = GetBundleManager();
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "failed, errCode: %{public}d", errCode);
+        return errCode;
+    }
+
+    std::lock_guard<std::mutex> lock(overlayMgrProxyMutex_);
+    if (overlayMgrProxy_ != nullptr) {
+        return ERR_OK;
+    }
+
+    overlayMgrProxy_ = bundleMgr_->GetOverlayManagerProxy();
+    if (overlayMgrProxy_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null overlayMgrProxy");
+        return ERR_NULL_OBJECT;
+    }
+
+    TAG_LOGD(AAFwkTag::APPKIT, "Success.");
+    return ERR_OK;
+}
+
 int ContextImpl::GetOverlayModuleInfos(const std::string &bundleName, const std::string &moduleName,
     std::vector<AppExecFwk::OverlayModuleInfo> &overlayModuleInfos)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    int errCode = GetOverlayMgrProxy();
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "failed, errCode: %{public}d", errCode);
+        return errCode;
+    }
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "overlayMgrProxy_->GetTargetOverlayModuleInfo");
-        auto ret =
-            AppExecFwk::OverlayManagerClient::GetInstance().GetTargetOverlayModuleInfo(moduleName, overlayModuleInfos);
+        auto ret = overlayMgrProxy_->GetTargetOverlayModuleInfo(moduleName, overlayModuleInfos);
         if (ret != ERR_OK) {
             TAG_LOGD(AAFwkTag::APPKIT, "GetOverlayModuleInfo form bms failed");
             return ret;
@@ -1622,6 +1649,10 @@ void ContextImpl::ShallowCopySelf(std::shared_ptr<ContextImpl> &contextImpl)
     {
         std::lock_guard<std::mutex> lock(bundleManagerMutex_);
         contextImpl->bundleMgr_ = bundleMgr_;
+    }
+    {
+        std::lock_guard<std::mutex> lock(overlayMgrProxyMutex_);
+        contextImpl->overlayMgrProxy_ = overlayMgrProxy_;
     }
     contextImpl->resetFlag_ = resetFlag_;
     contextImpl->processName_ = processName_;
