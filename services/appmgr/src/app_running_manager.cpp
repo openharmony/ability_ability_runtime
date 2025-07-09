@@ -1604,7 +1604,7 @@ bool AppRunningManager::NeedNotifyAppStateChangeWhenProcessDied(std::shared_ptr<
         return false;
     }
     std::lock_guard guard(runningRecordMapMutex_);
-    bool hasBackgroundApp = false;
+    bool needNotify = false;
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord == nullptr) {
@@ -1625,12 +1625,9 @@ bool AppRunningManager::NeedNotifyAppStateChangeWhenProcessDied(std::shared_ptr<
         if (state == ApplicationState::APP_STATE_FOREGROUND) {
             return false;
         }
-        hasBackgroundApp = true;
+        needNotify = true;
     }
-    if (!hasBackgroundApp) {
-        return false;
-    }
-    return true;
+    return needNotify;
 }
 
 #ifdef SUPPORT_SCREEN
