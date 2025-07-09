@@ -51,6 +51,9 @@ JsEnvironment::~JsEnvironment()
         delete engine_;
         engine_ = nullptr;
     }
+    if (vm_ != nullptr) {
+        vm_ = nullptr;
+    }
 }
 
 bool JsEnvironment::Initialize(const panda::RuntimeOption& pandaOption, void* jsEngine)
@@ -63,17 +66,18 @@ bool JsEnvironment::Initialize(const panda::RuntimeOption& pandaOption, void* js
     }
 
     engine_ = new ArkNativeEngine(vm_, jsEngine);
-    if (engine_ != nullptr) {
-        auto cleanEnv = [weak = weak_from_this()] {
-            auto jsEnv = weak.lock();
-            if (jsEnv == nullptr) {
-                TAG_LOGE(AAFwkTag::JSENV, "null jsEnv");
-                return;
-            }
-            jsEnv->ClearJsEnv();
-        };
-        engine_->SetCleanEnv(cleanEnv);
+    if (engine_ == nullptr) {
+        return false;
     }
+    auto capturedVm = vm_;
+    auto cleanEnv = [capturedVm] {
+        if (capturedVm == nullptr) {
+            TAG_LOGE(AAFwkTag::JSENV, "null jsEnv vm");
+            return;
+        }
+        panda::JSNApi::DestroyJSVM(capturedVm);
+    };
+    engine_->SetCleanEnv(cleanEnv);
     return true;
 }
 
@@ -429,14 +433,6 @@ int32_t JsEnvironment::ParseHdcRegisterOption(std::string& option)
 bool JsEnvironment::GetDebugMode() const
 {
     return debugMode_;
-}
-
-void JsEnvironment::ClearJsEnv()
-{
-    if (vm_ != nullptr) {
-        panda::JSNApi::DestroyJSVM(vm_);
-        vm_ = nullptr;
-    }
 }
 } // namespace JsEnv
 } // namespace OHOS
