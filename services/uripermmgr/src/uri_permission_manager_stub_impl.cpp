@@ -778,7 +778,8 @@ ErrCode UriPermissionManagerStubImpl::CheckUriAuthorization(const std::vector<st
         tokenId, flag, uriStrVec.size());
     funcResult = std::vector<bool>(uriStrVec.size(), false);
     if (uriStrVec.size() == 0 || uriStrVec.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d uriStrVec size: %{public}d",
+            MAX_URI_COUNT, uriStrVec.size());
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
     if (!UPMSUtils::IsSAOrSystemAppCall()) {
@@ -1242,8 +1243,13 @@ ErrCode UriPermissionManagerStubImpl::RawDataToStringVec(const UriPermissionRawD
     ss.write(reinterpret_cast<const char *>(rawData.data), rawData.size);
     uint32_t stringVecSize = 0;
     ss.read(reinterpret_cast<char *>(&stringVecSize), sizeof(stringVecSize));
+    if (stringVecSize == 0 || stringVecSize > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d, stringVecSize: %{public}d",
+            MAX_URI_COUNT, stringVecSize);
+        return ERR_URI_LIST_OUT_OF_RANGE;
+    }
     uint32_t ssLength = static_cast<uint32_t>(ss.str().length());
-    for (uint32_t i = 0; i < stringVecSize; i++) {
+    for (uint32_t i = 0; i < stringVecSize; ++i) {
         uint32_t strLen = 0;
         ss.read(reinterpret_cast<char *>(&strLen), sizeof(strLen));
         if (strLen > ssLength - static_cast<uint32_t>(ss.tellg())) {
@@ -1254,10 +1260,6 @@ ErrCode UriPermissionManagerStubImpl::RawDataToStringVec(const UriPermissionRawD
         str.resize(strLen);
         ss.read(&str[0], strLen);
         stringVec.emplace_back(str);
-    }
-    if (stringVec.empty() || stringVec.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
-        return ERR_URI_LIST_OUT_OF_RANGE;
     }
     return ERR_OK;
 }
@@ -1278,14 +1280,10 @@ ErrCode UriPermissionManagerStubImpl::Active(const UriPermissionRawData& policyR
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
     std::vector<PolicyInfo> policy;
     auto result = RawDataToPolicyInfo(policyRawData, policy);
-    if (!result) {
+    if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "RawDataToPolicyInfo failed");
-        funcResult = INVALID_PARAMETERS_ERR;
+        funcResult = result;
         return funcResult;
-    }
-    if (policy.empty() || policy.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "policy empty or exceed maxSize %{public}d", MAX_URI_COUNT);
-        return ERR_URI_LIST_OUT_OF_RANGE;
     }
     uint64_t timeNow = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::high_resolution_clock::now().time_since_epoch()).count());
@@ -1302,7 +1300,7 @@ ErrCode UriPermissionManagerStubImpl::Active(const UriPermissionRawData& policyR
     return ERR_OK;
 }
 
-bool UriPermissionManagerStubImpl::RawDataToPolicyInfo(const UriPermissionRawData& policyRawData,
+ErrCode UriPermissionManagerStubImpl::RawDataToPolicyInfo(const UriPermissionRawData& policyRawData,
     std::vector<PolicyInfo>& policy)
 {
     std::stringstream ss;
@@ -1311,12 +1309,17 @@ bool UriPermissionManagerStubImpl::RawDataToPolicyInfo(const UriPermissionRawDat
     uint32_t ssLength = static_cast<uint32_t>(ss.str().length());
     uint32_t policyInfoSize = 0;
     ss.read(reinterpret_cast<char *>(&policyInfoSize), sizeof(policyInfoSize));
-    for (uint32_t i = 0; i < policyInfoSize; i++) {
+    if (policyInfoSize == 0 || policyInfoSize > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "policy empty or exceed maxSize %{public}d, policyInfoSize: %{public}d",
+            MAX_URI_COUNT, policyInfoSize);
+        return ERR_URI_LIST_OUT_OF_RANGE;
+    }
+    for (uint32_t i = 0; i < policyInfoSize; ++i) {
         uint32_t pathLen = 0;
         ss.read(reinterpret_cast<char *>(&pathLen), sizeof(pathLen));
         if (pathLen > ssLength - static_cast<uint32_t>(ss.tellg())) {
             TAG_LOGE(AAFwkTag::URIPERMMGR, "path eln:%{public}u is invalid", pathLen);
-            return false;
+            return INVALID_PARAMETERS_ERR;
         }
         PolicyInfo info;
         info.path.resize(pathLen);
@@ -1324,7 +1327,7 @@ bool UriPermissionManagerStubImpl::RawDataToPolicyInfo(const UriPermissionRawDat
         ss.read(reinterpret_cast<char *>(&info.mode), sizeof(info.mode));
         policy.emplace_back(info);
     }
-    return true;
+    return ERR_OK;
 }
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 }  // namespace AAFwk

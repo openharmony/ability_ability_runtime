@@ -42,6 +42,10 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr int MAX_URI_COUNT = 200000;
+const std::string POLICY_INFO_PATH = "file://com.example.app1001/data/storage/el2/base/haps/entry/files/test_001.txt";
+}
 class UriPermissionImplTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -2126,6 +2130,110 @@ HWTEST_F(UriPermissionImplTest, GrantUriPermissionByKey_004, TestSize.Level1)
     auto ret = upms->GrantUriPermissionByKey(key, flag, targetTokenId, funcResult);
     MyFlag::isSystemAppCall_ = false;
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: BoolVecToRawData
+ * SubFunction: NA
+ * FunctionPoints: call BoolVecToRawData and RawDataToBoolVec failed.
+*/
+HWTEST_F(UriPermissionImplTest, RawDataToBoolVec_001, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::vector<bool> boolVec;
+    UriPermissionRawData rawData;
+    std::vector<char> boolVecToCharVec;
+    upms->BoolVecToRawData(boolVec, rawData, boolVecToCharVec);
+
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    std::vector<bool> resultBoolVec(1, false);
+    auto result = upmc.RawDataToBoolVec(stubRawData, resultBoolVec);
+    EXPECT_EQ(result, false);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: BoolVecToRawData
+ * SubFunction: NA
+ * FunctionPoints: call BoolVecToRawData and RawDataToBoolVec failed.
+*/
+HWTEST_F(UriPermissionImplTest, RawDataToBoolVec_002, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::vector<bool> boolVec(MAX_URI_COUNT + 1, true);
+    UriPermissionRawData rawData;
+    std::vector<char> boolVecToCharVec;
+    upms->BoolVecToRawData(boolVec, rawData, boolVecToCharVec);
+
+    UriPermissionRawData stubRawData;
+    stubRawData.size = rawData.size;
+    EXPECT_EQ(stubRawData.RawDataCpy(rawData.data), ERR_NONE);
+
+    std::vector<bool> resultBoolVec(1, false);
+    auto result = upmc.RawDataToBoolVec(stubRawData, resultBoolVec);
+    EXPECT_EQ(result, false);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: RawDataToPolicyInfo
+ * SubFunction: NA
+ * FunctionPoints: call PolicyInfoToRawData and RawDataToPolicyInfo failed.
+*/
+HWTEST_F(UriPermissionImplTest, RawDataToPolicyInfo_002, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::vector<PolicyInfo> policyInfoArray;
+    UriPermissionRawData policyRawData;
+    upmc.PolicyInfoToRawData(policyInfoArray, policyRawData);
+
+    UriPermissionRawData stubPolicyRawData;
+    stubPolicyRawData.size = policyRawData.size;
+    EXPECT_EQ(stubPolicyRawData.RawDataCpy(policyRawData.data), ERR_NONE);
+
+    std::vector<PolicyInfo> resultPolicyInfo;
+    auto result = upms->RawDataToPolicyInfo(stubPolicyRawData, resultPolicyInfo);
+    EXPECT_EQ(result, ERR_URI_LIST_OUT_OF_RANGE);
+}
+
+/*
+ * Feature: UriPermissionManagerStubImpl
+ * Function: RawDataToPolicyInfo
+ * SubFunction: NA
+ * FunctionPoints: call PolicyInfoToRawData and RawDataToPolicyInfo failed.
+*/
+HWTEST_F(UriPermissionImplTest, RawDataToPolicyInfo_003, TestSize.Level1)
+{
+    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
+    ASSERT_NE(upms, nullptr);
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    PolicyInfo policyInfo;
+    policyInfo.path = POLICY_INFO_PATH;
+    policyInfo.mode = 1;
+    std::vector<PolicyInfo> policyInfoArray;
+    for (int32_t i = 0; i < MAX_URI_COUNT + 1; ++i) {
+        policyInfoArray.push_back(policyInfo);
+    }
+    UriPermissionRawData policyRawData;
+    upmc.PolicyInfoToRawData(policyInfoArray, policyRawData);
+
+    UriPermissionRawData stubPolicyRawData;
+    stubPolicyRawData.size = policyRawData.size;
+    EXPECT_EQ(stubPolicyRawData.RawDataCpy(policyRawData.data), ERR_NONE);
+
+    std::vector<PolicyInfo> resultPolicyInfo;
+    auto result = upms->RawDataToPolicyInfo(stubPolicyRawData, resultPolicyInfo);
+    EXPECT_EQ(result, ERR_URI_LIST_OUT_OF_RANGE);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
