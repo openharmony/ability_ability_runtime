@@ -3140,5 +3140,29 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, GetBackgroundAppInfo_011, TestSize.Level
     EXPECT_EQ(res.size(), 0);
     TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_011 end");
 }
+
+/**
+* @tc.name: GetBackgroundAppInfo_012
+* @tc.desc: test GetBackgroundAppInfo_012
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetBackgroundAppInfo_012, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_012 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_ = std::make_shared<SceneSessionManagerLite>();
+
+    RecentSessionInfo info1;
+    info1.bundleName = "app1";
+    info1.appIndex = 1;
+
+    RecentSessionInfo info2;
+    info2.bundleName = "app2";
+    info2.appIndex = 1;
+    SessionManagerLite::GetInstance().sceneSessionManagerLiteProxy_->recentSessionInfoList_ = {info1, info2};
+    auto res = appMgrServiceInner->GetBackgroundAppInfo({});
+    EXPECT_EQ(res.size(), 0);
+    TAG_LOGI(AAFwkTag::TEST, "GetBackgroundAppInfo_012 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS
