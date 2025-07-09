@@ -26,18 +26,12 @@ namespace OHOS {
 namespace AppExecFwk {
 const int32_t CAPTURE_DURATION = 1000;
 const int32_t FREQ = 100;
- 
-std::shared_ptr<AppCapturePerf> AppCapturePerf::instance_ = nullptr;
-std::mutex AppCapturePerf::singletonMutex_;
- 
-std::shared_ptr<AppCapturePerf> AppCapturePerf::GetInstance()
+const int32_t ERROR = -1;
+const int32_t NO_ERROR = 0;
+
+AppCapturePerf &AppCapturePerf::GetInstance()
 {
-    if (instance_ == nullptr) {
-        std::lock_guard<std::mutex> lock(singletonMutex_);
-        if (instance_ == nullptr) {
-            instance_ = std::make_shared<AppCapturePerf>();
-        }
-    }
+    static AppCapturePerf instance_;
     return instance_;
 }
  
@@ -54,53 +48,55 @@ std::vector<std::string> AppCapturePerf::SplitStr(const std::string &s, char del
  
 int32_t AppCapturePerf::CapturePerf(const FaultData &faultData)
 {
+    std::lock_guard<std::mutex> lock(singletonMutex_);
+
+    int64_t perfId = 0;
+    auto ret = std::from_chars(faultData.timeoutMarkers.c_str(),
+        faultData.timeoutMarkers.c_str() + faultData.timeoutMarkers.size(), perfId);
+    if (ret.ec != std::errc()) {
+        TAG_LOGE(AAFwkTag::APPDFR, "perfId stoi(%{public}s) failed", faultData.timeoutMarkers.c_str());
+        return ERROR;
+    }
+
     std::vector<int32_t> tids;
     std::vector<std::string> threads = SplitStr(faultData.errorObject.stack, ',');
-    for (int32_t i = 0; i < threads.size(); i++) {
+    for (uint32_t i = 0; i < threads.size(); i++) {
         if (threads[i] == "") {
             continue;
         }
-        tids.push_back(stoi(threads[i]));
+        int32_t tid = -1;
+        auto res = std::from_chars(threads[i].c_str(), threads[i].c_str() + threads[i].size(), tid);
+        if (res.ec != std::errc()) {
+            TAG_LOGE(AAFwkTag::APPDFR, "tid conversion failed");
+        }
+        tids.push_back(tid);
     }
-    int res = -2;
+    if (tids.empty()) {
+        TAG_LOGE(AAFwkTag::APPDFR, "No valid thread IDs found");
+        return ERROR;
+    }
+    int res = 0;
     auto &instance = Developtools::HiPerf::HiPerfLocal::Lperf::GetInstance();
     res = instance.StartProcessStackSampling(tids, FREQ, CAPTURE_DURATION, false);
     if (res != 0) {
         TAG_LOGE(AAFwkTag::APPDFR, "hiperf stack capture failed");
-        return 0;
     }
     std::vector<std::string> perf;
-    for (int32_t i = 0; i < tids.size(); i++) {
-        std::string stack;
-        res = instance.CollectSampleStackByTid(tids[i], stack);
+    for (uint32_t i = 0; i < tids.size(); i++) {
+        std::string info;
+        res = instance.CollectSampleStackByTid(tids[i], info);
         if (res != 0) {
             perf.push_back("");
             continue;
         }
-        perf.push_back(stack);
+        perf.push_back(info);
     }
-    res = instance.FinishProcessStackSampling();
-    if (res != 0) {
-        TAG_LOGE(AAFwkTag::APPDFR, "hiperf stack clean failed");
-    }
-    int64_t perfId = std::strtoll(faultData.timeoutMarkers.c_str(), nullptr, 10);
-    int ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::RELIABILITY, "CPU_LOAD_CAPTURE_STACK",
+    instance.FinishProcessStackSampling();
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "CPU_LOAD_CAPTURE_STACK",
         HiviewDFX::HiSysEvent::EventType::STATISTIC, "APP_NAME", faultData.errorObject.name,
         "TIDS", tids, "PERF", perf, "PERFID", perfId);
-    if (ret != 0) {
-        TAG_LOGE(AAFwkTag::APPDFR, "HiSysEventWrite CPU_LOAD_CAPTURE_STACK failed");
-    }
-    return 0;
+    return NO_ERROR;
 }
- 
-void AppCapturePerf::DestroyInstance()
-{
-    std::lock_guard<std::mutex> lock(singletonMutex_);
-    if (instance_ != nullptr) {
-        instance_.reset();
-        instance_ = nullptr;
-    }
-}
- 
+
 }  // namespace AppExecFwk
 }  // namespace OHOS
