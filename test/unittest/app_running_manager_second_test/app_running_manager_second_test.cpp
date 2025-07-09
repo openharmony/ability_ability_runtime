@@ -1608,5 +1608,177 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_SignRestartAppFlag_0300,
     EXPECT_TRUE(record->GetRestartAppFlag());
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_SignRestartAppFlag_0300 end");
 }
+
+/**
+ * @tc.name: AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0100
+ * @tc.desc: Test NeedNotifyAppStateChangeWhenProcessDied
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0100,
+    TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize AppRunningManager instance
+     * @tc.expected: expect step1 succeed
+     */
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0100 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    /**
+     * @tc.steps: step1. Initialize AppRunningManager instance
+     * @tc.expected: expect true
+     */
+    auto ret = appRunningManager->NeedNotifyAppStateChangeWhenProcessDied(nullptr);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0100 end");
+}
+
+/**
+ * @tc.name: AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0200
+ * @tc.desc: Test NeedNotifyAppStateChangeWhenProcessDied
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0200,
+    TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize AppRunningManager instance
+     * @tc.expected: expect step1 succeed
+     */
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0200 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+
+    /**
+     * @tc.steps: step1. Initialize AppRunningManager instance
+     * @tc.expected: expect true
+     */
+    auto currentRecord = std::make_shared<AppRunningRecord>(appInfo_, 1, PROCESS_NAME);
+    currentRecord->SetState(ApplicationState::APP_STATE_BACKGROUND);
+    auto ret = appRunningManager->NeedNotifyAppStateChangeWhenProcessDied(currentRecord);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0200 end");
+}
+
+/**
+ * @tc.name: AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0300
+ * @tc.desc: Test NeedNotifyAppStateChangeWhenProcessDied
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0300,
+    TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize AppRunningManager instance
+     * @tc.expected: expect step1 succeed
+     */
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0300 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+    auto recordId = AppRecordId::Create();
+    appRunningManager->appRunningRecordMap_.emplace(recordId, nullptr);
+
+    /**
+     * @tc.steps: step1. Initialize AppRunningManager instance
+     * @tc.expected: expect true
+     */
+    auto currentRecord = std::make_shared<AppRunningRecord>(appInfo_, 1, PROCESS_NAME);
+    currentRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
+    auto ret = appRunningManager->NeedNotifyAppStateChangeWhenProcessDied(currentRecord);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0300 end");
+}
+
+/**
+ * @tc.name: AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0400
+ * @tc.desc: Test NeedNotifyAppStateChangeWhenProcessDied
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0400,
+    TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize AppRunningManager instance
+     * @tc.expected: expect step1 succeed
+     */
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0400 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+    appInfo_->bundleName = BUNDLE_NAME;
+    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    record->extensionType_ = AppExecFwk::ExtensionAbilityType::UI;
+    /**
+     * @tc.steps: step1. Initialize AppRunningManager instance
+     * @tc.expected: expect true
+     */
+    auto currentRecord = std::make_shared<AppRunningRecord>(appInfo_, 1, PROCESS_NAME);
+    currentRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
+    auto ret = appRunningManager->NeedNotifyAppStateChangeWhenProcessDied(currentRecord);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0400 end");
+}
+
+/**
+ * @tc.name: AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0500
+ * @tc.desc: Test NeedNotifyAppStateChangeWhenProcessDied
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0500,
+    TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize AppRunningManager instance
+     * @tc.expected: expect step1 succeed
+     */
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0500 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+    appInfo_->bundleName = BUNDLE_NAME;
+    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    record->extensionType_ = AppExecFwk::ExtensionAbilityType::SERVICE;
+    record->SetState(ApplicationState::APP_STATE_FOREGROUND);
+    /**
+     * @tc.steps: step1. Initialize AppRunningManager instance
+     * @tc.expected: expect true
+     */
+    auto currentRecord = std::make_shared<AppRunningRecord>(appInfo_, 1, PROCESS_NAME);
+    currentRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
+    record->SetUid(currentRecord->GetUid());
+    auto ret = appRunningManager->NeedNotifyAppStateChangeWhenProcessDied(currentRecord);
+    EXPECT_FALSE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0500 end");
+}
+
+/**
+ * @tc.name: AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0600
+ * @tc.desc: Test NeedNotifyAppStateChangeWhenProcessDied
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0600,
+    TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize AppRunningManager instance
+     * @tc.expected: expect step1 succeed
+     */
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0600 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+    appInfo_->bundleName = BUNDLE_NAME;
+    auto record = appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    record->extensionType_ = AppExecFwk::ExtensionAbilityType::SERVICE;
+    record->SetState(ApplicationState::APP_STATE_BACKGROUND);
+    /**
+     * @tc.steps: step1. Initialize AppRunningManager instance
+     * @tc.expected: expect true
+     */
+    auto currentRecord = std::make_shared<AppRunningRecord>(appInfo_, 1, PROCESS_NAME);
+    currentRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
+    record->SetUid(currentRecord->GetUid());
+    auto ret = appRunningManager->NeedNotifyAppStateChangeWhenProcessDied(currentRecord);
+    EXPECT_TRUE(ret);
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0600 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS
