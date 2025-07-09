@@ -708,15 +708,6 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::FindRecordFromSessionM
     return nullptr;
 }
 
-bool UIAbilityLifecycleManager::HasAbilityRequest(const AbilityRequest &abilityRequest)
-{
-    return false;
-}
-
-void UIAbilityLifecycleManager::RemoveAbilityRequest(int32_t requestId)
-{
-}
-
 void UIAbilityLifecycleManager::AddSpecifiedRequest(std::shared_ptr<SpecifiedRequest> request)
 {
 }
