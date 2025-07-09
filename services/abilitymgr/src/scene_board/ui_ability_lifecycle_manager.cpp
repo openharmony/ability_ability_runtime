@@ -3427,8 +3427,7 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
             PreCreateProcessName(request);
         }
 
-        if (specifiedRequest.specifiedProcessState == SpecifiedProcessState::STATE_NONE &&
-            !isLoaded) {
+        if (specifiedRequest.specifiedProcessState == SpecifiedProcessState::STATE_NONE && !isLoaded) {
             specifiedRequest.isCold = true;
             auto sessionInfo = CreateSessionInfo(request);
             sessionInfo->requestCode = request.requestCode;
