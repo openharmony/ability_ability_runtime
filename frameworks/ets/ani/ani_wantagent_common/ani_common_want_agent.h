@@ -22,10 +22,8 @@
 namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime::WantAgent;
-
 ani_object WrapWantAgent(ani_env *env, WantAgent *wantAgent);
 void UnwrapWantAgent(ani_env *env, ani_object agent, void** result);
-
 } // namespace AppExecFwk
 } // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_ANI_COMMON_WANT_AGENT_H
+#endif // OHOS_ABILITY_RUNTIME_ANI_COMMON_WANT_AGENT_H

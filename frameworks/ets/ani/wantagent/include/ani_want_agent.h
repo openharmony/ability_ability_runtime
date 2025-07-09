@@ -47,7 +47,7 @@ struct TriggerReceiveDataWorker {
     ani_ref call = nullptr;
 };
 
-struct WantAgentWantsParas {
+struct WantAgentParams {
     std::vector<std::shared_ptr<AAFwk::Want>> wants = {};
     int32_t operationType = -1;
     int32_t requestCode = -1;
@@ -59,7 +59,7 @@ class EtsWantAgent : public std::enable_shared_from_this<EtsWantAgent> {
 public:
     EtsWantAgent() = default;
     ~EtsWantAgent() = default;
-    static EtsWantAgent &GetInstance();
+    static EtsWantAgent& GetInstance();
     static void Equal(ani_env *env, ani_object agent, ani_object otherAgent, ani_object call);
     static void GetWant(ani_env *env, ani_object agent, ani_object call);
     static void GetOperationType(ani_env *env, ani_object agent, ani_object call);
@@ -68,6 +68,7 @@ public:
     static void Cancel(ani_env *env, ani_object agent, ani_object call);
     static void Trigger(ani_env *env, ani_object agent, ani_object triggerInfoObj, ani_object call);
     static void GetWantAgent(ani_env *env, ani_object info, ani_object call);
+    static void Clean(ani_env *env, ani_object object);
 
 private:
     void OnEqual(ani_env *env, ani_object agent, ani_object otherAgent, ani_object call);
@@ -79,7 +80,7 @@ private:
     void OnTrigger(ani_env *env, ani_object agent, ani_object triggerInfoObj, ani_object call);
     void OnGetWantAgent(ani_env *env, ani_object info, ani_object call);
     int32_t GetTriggerInfo(ani_env *env, ani_object triggerInfoObj, TriggerInfo &triggerInfo);
-    int32_t GetWantAgentParam(ani_env *env, ani_object info, WantAgentWantsParas &paras);
+    int32_t GetWantAgentParam(ani_env *env, ani_object info, WantAgentParams &params);
 };
 
 class TriggerCompleteCallBack : public CompletedCallback {
@@ -96,5 +97,5 @@ public:
 private:
     CallbackInfo triggerCompleteInfo_;
 };
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_ANI_WANT_AGENT_H
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_ANI_WANT_AGENT_H

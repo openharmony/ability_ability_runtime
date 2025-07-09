@@ -47,6 +47,7 @@ ohos_shared_library("aniwantagent") {
     "access_token:libtokenid_sdk",
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_core",
     "runtime_core:ani",
   ]
 
