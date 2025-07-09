@@ -67,6 +67,7 @@ private:
     std::shared_ptr<PendingWantKey> key_ = {};
     std::list<sptr<IWantReceiver>> mCancelCallbacks_ = {};
     ffrt::mutex lock_ = {};
+    std::mutex mCancelCallbacksMutex_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

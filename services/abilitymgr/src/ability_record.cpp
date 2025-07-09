@@ -3793,7 +3793,10 @@ void AbilityRecord::SetDebugAppByWaitingDebugFlag()
 
     if (IN_PROCESS_CALL(DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->IsWaitingDebugApp(
         abilityInfo_.applicationInfo.bundleName))) {
-        want_.SetParam(DEBUG_APP, true);
+        {
+            std::lock_guard guard(wantLock_);
+            want_.SetParam(DEBUG_APP, true);
+        }
         launchDebugInfo_.isDebugAppSet = true;
         launchDebugInfo_.debugApp = true;
         IN_PROCESS_CALL_WITHOUT_RET(
