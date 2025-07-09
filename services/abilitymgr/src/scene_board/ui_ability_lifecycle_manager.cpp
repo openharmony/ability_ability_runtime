@@ -3795,8 +3795,7 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
         if (specifiedRequest.preCreateProcessName) {
             PreCreateProcessName(request);
         }
-        auto isHookModule = IsHookModule(request);
-        if (TryProcessHookModule(specifiedRequest, isHookModule)) {
+        if (TryProcessHookModule(specifiedRequest, IsHookModule(request))) {
             return;
         }
         if (specifiedRequest.specifiedProcessState == SpecifiedProcessState::STATE_NONE &&
