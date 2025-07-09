@@ -195,7 +195,7 @@ void AppStateCallbackProxy::OnAppRemoteDied(const std::vector<sptr<IRemoteObject
     }
 }
 
-void AppStateCallbackProxy::OnStartProcessFailed(sptr<IRemoteObject> token)
+void AppStateCallbackProxy::OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -205,9 +205,15 @@ void AppStateCallbackProxy::OnStartProcessFailed(sptr<IRemoteObject> token)
         return;
     }
 
-    if (!data.WriteRemoteObject(token.GetRefPtr())) {
-        TAG_LOGE(AAFwkTag::APPMGR, "write token failed");
+    if (!data.WriteInt32(abilityTokens.size())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write token size failed.");
         return;
+    }
+    for (auto &token : abilityTokens) {
+        if (!data.WriteRemoteObject(token.GetRefPtr())) {
+            TAG_LOGE(AAFwkTag::APPMGR, "write token failed");
+            return;
+        }
     }
     auto ret = SendTransactCmd(
         static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_START_PROCESS_FAILED),
