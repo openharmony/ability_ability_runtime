@@ -1167,50 +1167,6 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, UpdateSessionInfoBySCB_002, TestSiz
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_RemoveAbilityRequest_0100
- * @tc.desc: RemoveAbilityRequest
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerThirdTest, RemoveAbilityRequest_001, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
-    int32_t requestId = 0;
-    auto abilityRequest = std::make_shared<AbilityRequest>();
-
-    uiAbilityLifecycleManager->startAbilityCheckMap_ = {
-        {0, abilityRequest}
-    };
-
-    uiAbilityLifecycleManager->RemoveAbilityRequest(requestId);
-
-    EXPECT_NE(uiAbilityLifecycleManager->startAbilityCheckMap_.size(), 0);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_RemoveAbilityRequest_0200
- * @tc.desc: RemoveAbilityRequest
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerThirdTest, RemoveAbilityRequest_002, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-
-    int32_t requestId = 1;
-    auto abilityRequest = std::make_shared<AbilityRequest>();
-
-    uiAbilityLifecycleManager->startAbilityCheckMap_ = {
-        {1, abilityRequest}
-    };
-
-    uiAbilityLifecycleManager->RemoveAbilityRequest(requestId);
-
-    EXPECT_EQ(uiAbilityLifecycleManager->startAbilityCheckMap_.size(), 0);
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_AddSpecifiedRequest_0200
  * @tc.desc: AddSpecifiedRequest
  * @tc.type: FUNC

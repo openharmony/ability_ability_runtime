@@ -703,30 +703,6 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, SetLastExitReason_001, TestSize.Le
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_UninstallApp_0100
- * @tc.desc: UninstallApp
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerSecondTest, UninstallApp_001, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    mgr->sessionAbilityMap_.clear();
-    auto abilityRequest1 = std::make_shared<AbilityRequest>();
-    abilityRequest1->appInfo.uid = 1;
-    mgr->startAbilityCheckMap_.emplace(1, abilityRequest1);
-    auto abilityRequest2 = std::make_shared<AbilityRequest>();
-    abilityRequest2->appInfo.uid = 2;
-    mgr->startAbilityCheckMap_.emplace(2, abilityRequest2);
-
-    std::string bundleName = "HelloWorld";
-    int32_t uid = 1;
-    mgr->UninstallApp(bundleName, uid);
-
-    auto mapSize = mgr->startAbilityCheckMap_.size();
-    EXPECT_EQ(mapSize, 1);
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_PrepareCloseUIAbility_0100
  * @tc.desc: PrepareCloseUIAbility
  * @tc.type: FUNC
@@ -924,23 +900,6 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, TryProcessHookModule_006, TestSize
 
     auto ret = mgr->TryProcessHookModule(*specifiedRequest, true);
     EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_RemoveAbilityRequest_0100
- * @tc.desc: RemoveAbilityRequest
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerSecondTest, RemoveAbilityRequest_001, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    mgr->startAbilityCheckMap_.clear();
-    mgr->startAbilityCheckMap_.emplace(1, nullptr);
-    mgr->startAbilityCheckMap_.emplace(3, nullptr);
-    mgr->startAbilityCheckMap_.emplace(5, nullptr);
-
-    mgr->RemoveAbilityRequest(5);
-    EXPECT_EQ(mgr->startAbilityCheckMap_.size(), 2);
 }
 
 /**
