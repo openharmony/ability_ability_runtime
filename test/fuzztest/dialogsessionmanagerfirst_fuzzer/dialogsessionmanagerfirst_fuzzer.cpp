@@ -20,9 +20,9 @@
 #define private public
 #include "dialog_session_manager.h"
 #undef private
+#include "ability_fuzz_util.h"
 #include "ability_record.h"
 #include "dialog_session_manager.h"
-#include "../ability_fuzz_util.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
