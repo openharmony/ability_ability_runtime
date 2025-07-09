@@ -328,10 +328,11 @@ void StsUIExtensionContentSession::SetWindowBackgroundColor(ani_env* env, ani_st
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "SetWindowBackgroundColor call");
     std::string strColor;
-    ani_size sz {};
-    env->String_GetUTF8Size(color, &sz);
-    strColor.resize(sz + 1);
-    env->String_GetUTF8SubString(color, 0, sz, strColor.data(), strColor.size(), &sz);
+    if (!OHOS::AppExecFwk::GetStdString(env, color, strColor)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "invalid param");
+        ThrowStsInvalidParamError(env, "Parameter error: color must be a string.");
+        return;
+    }
     if (uiWindow_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "uiWindow_ is nullptr");
         ThrowStsError(env, AbilityErrorCode::ERROR_CODE_INNER);
