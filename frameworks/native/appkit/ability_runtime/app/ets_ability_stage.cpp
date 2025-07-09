@@ -187,9 +187,9 @@ bool ETSAbilityStage::CallObjectMethod(bool withResult, const char *name, const 
     return false;
 }
 
-std::shared_ptr<AppExecFwk::DelegatorAbilityStageProperty> ETSAbilityStage::CreateStageProperty() const
+std::shared_ptr<AppExecFwk::EtsDelegatorAbilityStageProperty> ETSAbilityStage::CreateStageProperty() const
 {
-    auto property = std::make_shared<AppExecFwk::DelegatorAbilityStageProperty>();
+    auto property = std::make_shared<AppExecFwk::EtsDelegatorAbilityStageProperty>();
     property->moduleName_ = GetHapModuleProp("name");
     property->srcEntrance_ = GetHapModuleProp("srcEntrance");
     return property;

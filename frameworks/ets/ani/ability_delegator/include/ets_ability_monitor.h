@@ -130,11 +130,11 @@ private:
         const std::weak_ptr<AppExecFwk::BaseDelegatorAbilityProperty> &abilityObj);
 
 private:
-    ani_vm* vm_ = nullptr;
+    ani_vm *vm_ = nullptr;
     std::string abilityName_;
     std::string moduleName_;
     std::unique_ptr<AppExecFwk::ETSNativeReference> etsAbilityMonitor_;
 };
-}  // namespace AbilityDelegatorJs
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_ETS_ABILITY_MONITOR_H
+} // namespace AbilityDelegatorJs
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_ETS_ABILITY_MONITOR_H

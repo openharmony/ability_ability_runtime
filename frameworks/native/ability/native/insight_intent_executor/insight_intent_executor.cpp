@@ -14,6 +14,8 @@
  */
 
 #include "insight_intent_executor.h"
+#include "ets_insight_intent_executor_instance.h"
+#include "ets_runtime.h"
 #include "hilog_tag_wrapper.h"
 #include "js_insight_intent_entry.h"
 #include "js_insight_intent_executor.h"
@@ -47,6 +49,8 @@ std::shared_ptr<InsightIntentExecutor> InsightIntentExecutor::Create(Runtime& ru
                     return nullptr;
                 }
             }
+        case Runtime::Language::ETS:
+            return std::shared_ptr<InsightIntentExecutor>(CreateETSInsightIntentExecutor(runtime));
         default:
             return nullptr;
     }

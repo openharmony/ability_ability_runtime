@@ -188,6 +188,9 @@ void EtsUIExtension::BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want
     if ((status = env->Object_SetField_Ref(etsObj_->aniObj, contextField, contextRef)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "status: %{public}d", status);
     }
+    shellContextRef_ = std::make_shared<AppExecFwk::ETSNativeReference>();
+    shellContextRef_->aniObj = contextObj;
+    shellContextRef_->aniRef = contextRef;
 }
 
 void EtsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
@@ -294,35 +297,32 @@ void EtsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callba
     }
 }
 
-void EtsUIExtension::OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
-    AAFwk::WindowCommand winCmd)
+bool EtsUIExtension::ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::Want &want,
+    const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        return false;
+    }
     if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "sessionInfo null");
-        return;
+        TAG_LOGE(AAFwkTag::UI_EXT, "null sessionInfo");
+        return false;
     }
-    Extension::OnCommandWindow(want, sessionInfo, winCmd);
-    if (InsightIntentExecuteParam::IsInsightIntentExecute(want) && winCmd == AAFwk::WIN_CMD_FOREGROUND) {
-        if (ForegroundWindowWithInsightIntent(want, sessionInfo, false)) {
-            return;
-        }
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = context->GetAbilityInfo();
+    if (abilityInfo != nullptr) {
+        executorInfo.hapPath = abilityInfo->hapPath;
+        executorInfo.windowMode = abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE;
     }
-    switch (winCmd) {
-        case AAFwk::WIN_CMD_FOREGROUND:
-            ForegroundWindow(want, sessionInfo);
-            break;
-        case AAFwk::WIN_CMD_BACKGROUND:
-            BackgroundWindow(sessionInfo);
-            break;
-        case AAFwk::WIN_CMD_DESTROY:
-            DestroyWindow(sessionInfo);
-            break;
-        default:
-            TAG_LOGD(AAFwkTag::UI_EXT, "unsupported cmd");
-            break;
-    }
-    OnCommandWindowDone(sessionInfo, winCmd);
+    executorInfo.token = context->GetToken();
+    executorInfo.etsPageLoader = reinterpret_cast<void *>(contentSessions_[sessionInfo->uiExtensionComponentId]);
+    executorInfo.executeParam = std::make_shared<InsightIntentExecuteParam>();
+    InsightIntentExecuteParam::GenerateFromWant(want, *executorInfo.executeParam);
+    executorInfo.executeParam->executeMode_ = UI_EXTENSION_ABILITY;
+    executorInfo.srcEntry = want.GetStringParam(INSIGHT_INTENT_SRC_ENTRY);
+    TAG_LOGD(AAFwkTag::UI_EXT, "executorInfo, insightIntentId: %{public}" PRIu64,
+        executorInfo.executeParam->insightIntentId_);
+    return true;
 }
 
 bool EtsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
@@ -342,34 +342,42 @@ bool EtsUIExtension::ForegroundWindowWithInsightIntent(const AAFwk::Want &want,
     }
 
     auto uiExtension = std::static_pointer_cast<EtsUIExtension>(shared_from_this());
-    executorCallback->Push([uiExtension, sessionInfo, needForeground](AppExecFwk::InsightIntentExecuteResult result) {
+    executorCallback->Push([uiExtension, sessionInfo, needForeground, want](
+        AppExecFwk::InsightIntentExecuteResult result) {
         if (uiExtension == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "UI extension is nullptr");
             return;
         }
 
+        InsightIntentExecuteParam executeParam;
+        InsightIntentExecuteParam::GenerateFromWant(want, executeParam);
+        if (result.uris.size() > 0) {
+            uiExtension->ExecuteInsightIntentDone(executeParam.insightIntentId_, result);
+        }
         uiExtension->PostInsightIntentExecuted(sessionInfo, result, needForeground);
     });
 
-    auto context = GetContext();
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "context null");
+    InsightIntentExecutorInfo executorInfo;
+    if (!ForegroundWindowInitInsightIntentExecutorInfo(want, sessionInfo, executorInfo)) {
         return false;
     }
-    InsightIntentExecutorInfo executorInfo;
-    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = context->GetAbilityInfo();
-    if (abilityInfo != nullptr) {
-        executorInfo.hapPath = abilityInfo->hapPath;
-        executorInfo.windowMode = abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE;
+
+    int32_t ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+        etsRuntime_, executorInfo, std::move(executorCallback));
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Execute insight intent failed");
     }
-    executorInfo.token = context->GetToken();
-    executorInfo.executeParam = std::make_shared<InsightIntentExecuteParam>();
-    InsightIntentExecuteParam::GenerateFromWant(want, *executorInfo.executeParam);
-    executorInfo.executeParam->executeMode_ = UI_EXTENSION_ABILITY;
-    executorInfo.srcEntry = want.GetStringParam(INSIGHT_INTENT_SRC_ENTRY);
     return true;
 }
 
+void EtsUIExtension::ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "intentId %{public}" PRIu64"", intentId);
+    auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token_, intentId, result);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "notify execute done failed");
+    }
+}
 void EtsUIExtension::PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &sessionInfo,
     const AppExecFwk::InsightIntentExecuteResult &result, bool needForeground)
 {
@@ -399,6 +407,7 @@ void EtsUIExtension::OnForeground(const Want &want, sptr<AAFwk::SessionInfo> ses
         TAG_LOGE(AAFwkTag::UI_EXT, "sessionInfo nullptr");
         return;
     }
+    Extension::OnForeground(want, sessionInfo);
     if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
         bool finish = ForegroundWindowWithInsightIntent(want, sessionInfo, true);
         if (finish) {
@@ -413,6 +422,7 @@ void EtsUIExtension::OnBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CallObjectMethod(false, "onBackground", nullptr);
+    Extension::OnBackground();
 }
 
 bool EtsUIExtension::IsEmbeddableStart(int32_t screenMode)
@@ -559,6 +569,7 @@ void EtsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
 bool EtsUIExtension::CallObjectMethod(bool withResult, const char *name, const char *signature, ...)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
+    TAG_LOGD(AAFwkTag::UI_EXT, "CallObjectMethod %{public}s", name);
     if (etsObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "etsObj_ nullptr");
         return false;

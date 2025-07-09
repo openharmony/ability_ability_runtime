@@ -19,11 +19,16 @@
 #include "extension_base.h"
 
 namespace OHOS {
+namespace AppExecFwk {
+class InsightIntentExecuteParam;
+struct InsightIntentExecuteResult;
+}
 namespace AbilityRuntime {
 class ServiceExtensionContext;
 class Runtime;
 class ServiceExtension;
 using CreatorFunc = std::function<ServiceExtension* (const std::unique_ptr<Runtime>& runtime)>;
+struct InsightIntentExecutorInfo;
 /**
  * @brief Basic service components.
  */
@@ -82,6 +87,27 @@ public:
      */
     void OnConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
 
+    /**
+     * @brief Get the executor info.
+     *
+     * @param want The want.
+     * @param executeParam The execute param.
+     * @param executorInfo The executor info.
+     * @return True if success, otherwise false.
+     */
+    virtual bool GetInsightIntentExecutorInfo(const Want &want,
+        const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &executeParam,
+        InsightIntentExecutorInfo &executorInfo);
+
+    /**
+     * @brief On execute done.
+     *
+     * @param intentId The intent id.
+     * @param result The execute result.
+     * @return True if success, otherwise false.
+     */
+    bool OnInsightIntentExecuteDone(uint64_t intentId,
+        const AppExecFwk::InsightIntentExecuteResult &result) override;
 private:
     static CreatorFunc creator_;
 };

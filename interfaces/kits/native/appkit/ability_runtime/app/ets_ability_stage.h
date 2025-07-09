@@ -49,7 +49,7 @@ public:
 private:
     bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...) const;
 
-    std::shared_ptr<AppExecFwk::DelegatorAbilityStageProperty> CreateStageProperty() const;
+    std::shared_ptr<AppExecFwk::EtsDelegatorAbilityStageProperty> CreateStageProperty() const;
 
     std::string GetHapModuleProp(const std::string &propName) const;
 

@@ -23,6 +23,7 @@
 #include "ani.h"
 #include "configuration.h"
 #include "ets_runtime.h"
+#include "insight_intent_executor_info.h"
 #include "ets_ui_extension_content_session.h"
 #include "ui_extension.h"
 #include "ui_extension_context.h"
@@ -75,9 +76,6 @@ public:
      * @param sessionInfo The session info of the ability.
      */
     void OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo) override;
-
-    void OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
-        AAFwk::WindowCommand winCmd) override;
 
     /**
      * @brief Called when this ui extension enters the <b>STATE_STOP</b> state.
@@ -145,6 +143,8 @@ private:
     bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...);
     ani_status CallOnDisconnect(const AAFwk::Want &want, bool withResult = false);
     void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo) override;
+    bool ForegroundWindowInitInsightIntentExecutorInfo(const AAFwk::Want &want,
+        const sptr<AAFwk::SessionInfo> &sessionInfo, InsightIntentExecutorInfo &executorInfo);
     bool ForegroundWindowWithInsightIntent(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
         bool needForeground) override;
     bool HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo) override;
@@ -156,13 +156,12 @@ private:
         const sptr<AAFwk::SessionInfo> &sessionInfo);
     static void PromiseCallback(ani_env *env, ani_object aniObj);
     bool IsEmbeddableStart(int32_t screenMode);
+    void ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result);
 
     ETSRuntime &etsRuntime_;
     std::shared_ptr<AppExecFwk::ETSNativeReference> etsObj_ = nullptr;
     std::shared_ptr<AppExecFwk::ETSNativeReference> shellContextRef_ = nullptr;
     std::mutex uiWindowMutex_;
-    std::map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
-    std::set<uint64_t> foregroundWindows_;
     std::map<uint64_t, ani_ref> contentSessions_;
     int32_t screenMode_ = AAFwk::IDLE_SCREEN_MODE;
     std::shared_ptr<int32_t> screenModePtr_;
@@ -201,6 +200,6 @@ private:
     sptr<EtsUIExtensionAbilityDisplayListener> etsUIExtensionAbilityDisplayListener_ = nullptr;
 #endif
 };
-}  // namespace AbilityRuntime
-}  // namespace OHOS
+} // namespace AbilityRuntime
+} // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_ETS_UI_EXTENSION_H

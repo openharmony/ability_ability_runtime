@@ -134,7 +134,7 @@ std::shared_ptr<BaseDelegatorAbilityProperty> AbilityDelegator::WaitAbilityMonit
     return obtainedAbility;
 }
 
-std::shared_ptr<DelegatorAbilityStageProperty> AbilityDelegator::WaitAbilityStageMonitor(
+std::shared_ptr<BaseDelegatorAbilityStageProperty> AbilityDelegator::WaitAbilityStageMonitor(
     const std::shared_ptr<IAbilityStageMonitor> &monitor)
 {
     if (!monitor) {
@@ -170,7 +170,7 @@ std::shared_ptr<BaseDelegatorAbilityProperty> AbilityDelegator::WaitAbilityMonit
     return obtainedAbility;
 }
 
-std::shared_ptr<DelegatorAbilityStageProperty> AbilityDelegator::WaitAbilityStageMonitor(
+std::shared_ptr<BaseDelegatorAbilityStageProperty> AbilityDelegator::WaitAbilityStageMonitor(
     const std::shared_ptr<IAbilityStageMonitor> &monitor, const int64_t timeoutMs)
 {
     if (!monitor) {
@@ -394,7 +394,7 @@ void AbilityDelegator::PostPerformStart(const std::shared_ptr<BaseDelegatorAbili
     }
 }
 
-void AbilityDelegator::PostPerformStageStart(const std::shared_ptr<DelegatorAbilityStageProperty> &abilityStage)
+void AbilityDelegator::PostPerformStageStart(const std::shared_ptr<BaseDelegatorAbilityStageProperty> &abilityStage)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
     if (!abilityStage) {
