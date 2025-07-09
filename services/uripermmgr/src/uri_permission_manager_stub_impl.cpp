@@ -778,7 +778,8 @@ ErrCode UriPermissionManagerStubImpl::CheckUriAuthorization(const std::vector<st
         tokenId, flag, uriStrVec.size());
     funcResult = std::vector<bool>(uriStrVec.size(), false);
     if (uriStrVec.size() == 0 || uriStrVec.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d uriStrVec size: %{public}d",
+            MAX_URI_COUNT, uriStrVec.size());
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
     if (!UPMSUtils::IsSAOrSystemAppCall()) {
@@ -1243,7 +1244,8 @@ ErrCode UriPermissionManagerStubImpl::RawDataToStringVec(const UriPermissionRawD
     uint32_t stringVecSize = 0;
     ss.read(reinterpret_cast<char *>(&stringVecSize), sizeof(stringVecSize));
     if (stringVecSize == 0 || stringVecSize > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d", MAX_URI_COUNT);
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d, stringVecSize: %{public}d",
+            MAX_URI_COUNT, stringVecSize);
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
     uint32_t ssLength = static_cast<uint32_t>(ss.str().length());
@@ -1308,7 +1310,8 @@ ErrCode UriPermissionManagerStubImpl::RawDataToPolicyInfo(const UriPermissionRaw
     uint32_t policyInfoSize = 0;
     ss.read(reinterpret_cast<char *>(&policyInfoSize), sizeof(policyInfoSize));
     if (policyInfoSize == 0 || policyInfoSize > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "policy empty or exceed maxSize %{public}d", MAX_URI_COUNT);
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "policy empty or exceed maxSize %{public}d, policyInfoSize: %{public}d",
+            MAX_URI_COUNT, policyInfoSize);
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
     for (uint32_t i = 0; i < policyInfoSize; ++i) {

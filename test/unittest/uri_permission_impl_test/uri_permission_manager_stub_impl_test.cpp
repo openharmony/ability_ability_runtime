@@ -656,7 +656,7 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_RawDataToStringVec_002, TestSiz
 HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_RawDataToStringVec_003, TestSize.Level1)
 {
     auto upmsi = std::make_shared<UriPermissionManagerStubImpl>();
-    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    auto &upmc = AAFwk::UriPermissionManagerClient::GetInstance();
     std::vector<std::string> strArray;
     strArray.emplace_back(POLICY_INFO_PATH);
     UriPermissionRawData rawData;
@@ -680,7 +680,7 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_RawDataToPolicyInfo_001, TestSi
 {
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     auto upmsi = std::make_shared<UriPermissionManagerStubImpl>();
-    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    auto &upmc = AAFwk::UriPermissionManagerClient::GetInstance();
     PolicyInfo policyInfo;
     policyInfo.path = POLICY_INFO_PATH;
     policyInfo.mode = 1;
