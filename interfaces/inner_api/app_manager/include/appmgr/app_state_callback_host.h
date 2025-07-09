@@ -75,7 +75,11 @@ public:
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
-    virtual void OnStartProcessFailed(sptr<IRemoteObject> token) override;
+    /**
+     * @brief Notify abilityms app process StartProcessFailed.
+     * @param abilityTokens abilities in died process.
+     */
+    virtual void OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
     /**
      * @brief Notify abilityms app process pre cache

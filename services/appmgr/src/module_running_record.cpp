@@ -279,6 +279,7 @@ void ModuleRunningRecord::TerminateAbility(const std::shared_ptr<AppRunningRecor
         auto serviceInner = appMgrServiceInner_.lock();
         if (serviceInner) {
             serviceInner->TerminateApplication(appRecord);
+            serviceInner->NotifyStartProcessFailed(appRecord);
         }
     }
 

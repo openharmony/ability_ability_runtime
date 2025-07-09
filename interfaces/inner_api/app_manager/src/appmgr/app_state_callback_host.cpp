@@ -102,7 +102,7 @@ void AppStateCallbackHost::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
 
-void AppStateCallbackHost::OnStartProcessFailed(sptr<IRemoteObject> token)
+void AppStateCallbackHost::OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
@@ -213,12 +213,21 @@ int32_t AppStateCallbackHost::HandleOnAppRemoteDied(MessageParcel &data, Message
 
 int32_t AppStateCallbackHost::HandleOnStartProcessFailed(MessageParcel &data, MessageParcel &reply)
 {
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    if (!token) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null token");
+    std::vector<sptr<IRemoteObject>> abilityTokens;
+    int32_t infoSize = data.ReadInt32();
+    if (infoSize > CYCLE_LIMIT) {
+        TAG_LOGE(AAFwkTag::APPMGR, "infoSize is too large");
         return ERR_INVALID_VALUE;
     }
-    OnStartProcessFailed(token);
+    for (int32_t i = 0; i < infoSize; i++) {
+        sptr<IRemoteObject> obj = data.ReadRemoteObject();
+        if (!obj) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Read token failed.");
+            return ERR_INVALID_VALUE;
+        }
+        abilityTokens.emplace_back(obj);
+    }
+    OnStartProcessFailed(abilityTokens);
     return NO_ERROR;
 }
 
