@@ -117,7 +117,6 @@ public:
 
     int32_t ParseHdcRegisterOption(std::string& option);
 
-    void ClearJsEnv();
 private:
     std::unique_ptr<JsEnvironmentImpl> impl_ = nullptr;
     NativeEngine* engine_ = nullptr;
