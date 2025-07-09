@@ -92,6 +92,7 @@ public:
     bool getApplicationInfo_ = false;
     AppExecFwk::ApplicationInfo applicationInfo_;
     int getOverlayCall_ = 0;
+    sptr<AppExecFwk::IOverlayManager> getOverlay_ = nullptr;
     int getBaseSharedBundleInfos_ = 0;
     std::vector<AppExecFwk::BaseSharedBundleInfo> baseSharedBundleInfos_;
     bool queryDataGroupInfos_ = false;

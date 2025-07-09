@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "ability_info.h"
 #include "application_info.h"
 #include "hilog_tag_wrapper.h"
+#include "mock_overlay_manager.h"
 namespace {
 const int32_t HQF_VERSION_CODE = 1000;
 }
@@ -120,6 +121,12 @@ bool BundleMgrProxy::GetApplicationInfo(
 std::string BundleMgrProxy::GetAppType(const std::string& bundleName)
 {
     return "system";
+}
+
+sptr<IOverlayManager> BundleMgrProxy::GetOverlayManagerProxy()
+{
+    sptr<IOverlayManager> overlayModuleProxy = new (std::nothrow) OverlayManagerProxy(nullptr);
+    return overlayModuleProxy;
 }
 
 int BundleMgrStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
@@ -377,6 +384,12 @@ ErrCode BundleMgrService::GetBundleInfoForSelf(int32_t flags, BundleInfo &bundle
         ConstructHqfInfo(bundleInfo);
     }
     return ERR_OK;
+}
+
+sptr<IOverlayManager> BundleMgrService::GetOverlayManagerProxy()
+{
+    sptr<IOverlayManager> overlayManagerProxy = new (std::nothrow) OverlayManagerProxy(nullptr);
+    return overlayManagerProxy;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

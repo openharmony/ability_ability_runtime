@@ -148,6 +148,12 @@ bool BundleMgrHelper::GetGroupDir(const std::string& dataGroupId, std::string& d
     return false;
 }
 
+sptr<IOverlayManager> BundleMgrHelper::GetOverlayManagerProxy()
+{
+    AAFwk::MyStatus::GetInstance().getOverlayCall_++;
+    return AAFwk::MyStatus::GetInstance().getOverlay_;
+}
+
 bool BundleMgrHelper::QueryAbilityInfo(const Want& want, AbilityInfo& abilityInfo)
 {
     return false;

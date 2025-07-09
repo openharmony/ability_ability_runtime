@@ -39,7 +39,6 @@ ohos_unittest("app_mgr_service_inner_seventh_test") {
     "${ability_runtime_path}/tools/aa/include",
     "${ability_runtime_utils_path}/global/constant",
   ]
-  include_dirs += [ "mock/include/overlay_manager_client.h"]
 
   sources = [
     #"${ability_runtime_services_path}/abilitymgr/src/ability_connect_callback_stub.cpp",
@@ -88,7 +87,6 @@ ohos_unittest("app_mgr_service_inner_seventh_test") {
     "mock/src/session_manager_lite.cpp",
   ]
 
-  sources +=[ "mock/src/overlay_manager_client.cpp" ]
   configs = []
 
   deps = [
