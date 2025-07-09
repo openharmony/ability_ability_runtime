@@ -46,7 +46,7 @@ public:
     int32_t RegisterExtStartupTask(
         const std::shared_ptr<ExtNativeStartupTask> &extNativeStartupTask, const SchedulerPhase phase);
 
-    void RunPhaseTasks(const SchedulerPhase phase);
+    int32_t RunPhaseTasks(const SchedulerPhase phase);
 
 private:
     ExtNativeStartupManager();

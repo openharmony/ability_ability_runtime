@@ -264,6 +264,48 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_SetApplicationConte
 }
 
 /*
+ * @tc.number: AppExecFwk_OHOSApplicationTest_SetApplicationContext_0300
+ * @tc.name: SetApplicationContext
+ * @tc.desc: Verify function SetApplicationContext RegisterAppGetSpecifiedRuntime
+ */
+HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_SetApplicationContext_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_SetApplicationContext_0300 start.";
+    std::shared_ptr<AbilityRuntime::ApplicationContext> abilityRuntimeContext =
+        std::make_shared<AbilityRuntime::ApplicationContext>();
+    EXPECT_TRUE(abilityRuntimeContext != nullptr);
+    ohosApplication_->SetApplicationContext(abilityRuntimeContext);
+    EXPECT_TRUE(ohosApplication_->abilityRuntimeContext_ != nullptr);
+    ASSERT_NE(abilityRuntimeContext->appGetSpecifiedRuntimeCallback_, nullptr);
+
+    ohosApplication_->runtime_ = std::make_unique<AbilityRuntime::MockRuntime>();
+    const auto &runtime = abilityRuntimeContext->appGetSpecifiedRuntimeCallback_("");
+    EXPECT_EQ(ohosApplication_->runtime_.get(), runtime.get());
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_SetApplicationContext_0300 end.";
+}
+
+/*
+ * @tc.number: AppExecFwk_OHOSApplicationTest_SetApplicationContext_0400
+ * @tc.name: SetApplicationContext
+ * @tc.desc: Verify function SetApplicationContext RegisterAppGetSpecifiedRuntime null applicationSptr
+ */
+HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_SetApplicationContext_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_SetApplicationContext_0400 start.";
+    std::shared_ptr<AbilityRuntime::ApplicationContext> abilityRuntimeContext =
+        std::make_shared<AbilityRuntime::ApplicationContext>();
+    EXPECT_TRUE(abilityRuntimeContext != nullptr);
+    ohosApplication_->SetApplicationContext(abilityRuntimeContext);
+    EXPECT_TRUE(ohosApplication_->abilityRuntimeContext_ != nullptr);
+    ASSERT_NE(abilityRuntimeContext->appGetSpecifiedRuntimeCallback_, nullptr);
+
+    ohosApplication_ = nullptr;
+    const auto &runtime = abilityRuntimeContext->appGetSpecifiedRuntimeCallback_("");
+    EXPECT_EQ(runtime, nullptr);
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_SetApplicationContext_0400 end.";
+}
+
+/*
 * @tc.number: AppExecFwk_OHOSApplicationTest_SetAbilityRecordMgr_0100
 * @tc.name: SetAbilityRecordMgr
 * @tc.desc: Verify function SetAbilityRecordMgr pointer abilityRecordMgr_ empty
