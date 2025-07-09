@@ -1592,6 +1592,44 @@ bool AppRunningManager::IsApplicationBackground(const AppRunningRecord &backgrou
     }
     return true;
 }
+
+bool AppRunningManager::NeedNotifyAppStateChangeWhenProcessDied(std::shared_ptr<AppRunningRecord> currentAppRecord)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "NeedNotifyAppStateChangeWhenProcessDied called");
+    if (currentAppRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null currentAppRecord");
+        return false;
+    }
+    if (currentAppRecord->GetState() != ApplicationState::APP_STATE_FOREGROUND) {
+        return false;
+    }
+    std::lock_guard guard(runningRecordMapMutex_);
+    bool needNotify = false;
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &appRecord = item.second;
+        if (appRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
+            continue;
+        }
+        if (appRecord == currentAppRecord) {
+            continue;
+        }
+        if (AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())
+            || AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())) {
+            continue;
+        }
+        auto state = appRecord->GetState();
+        if (appRecord->GetUid() != currentAppRecord->GetUid()) {
+            continue;
+        }
+        if (state == ApplicationState::APP_STATE_FOREGROUND) {
+            return false;
+        }
+        needNotify = true;
+    }
+    return needNotify;
+}
+
 #ifdef SUPPORT_SCREEN
 void AppRunningManager::OnWindowVisibilityChanged(
     const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos)

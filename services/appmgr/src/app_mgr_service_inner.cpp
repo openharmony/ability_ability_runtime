@@ -1577,7 +1577,8 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     }
     appRecord->PopForegroundingAbilityTokens();
 
-    TAG_LOGI(AAFwkTag::APPMGR, "ApplicationForegrounded, bundle: %{public}s", appRecord->GetBundleName().c_str());
+    TAG_LOGI(AAFwkTag::APPMGR, "ApplicationForegrounded, bundle: %{public}s, pendingState: %{public}d",
+        appRecord->GetBundleName().c_str(), appRecord->GetApplicationPendingState());
     if (appRecord->GetApplicationPendingState() == ApplicationPendingState::BACKGROUNDING) {
         appRecord->ScheduleBackgroundRunning();
     } else if (appRecord->GetApplicationPendingState() == ApplicationPendingState::FOREGROUNDING) {
@@ -4632,7 +4633,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
         appRecord->StateChangedNotifyObserver(abilityRecord,
             static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
     }
-    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
+    OnProcessDied(appRecord);
     DelayedSingleton<CacheProcessManager>::GetInstance()->OnProcessKilled(appRecord);
 
     // kill render if exist.
@@ -4775,7 +4776,7 @@ void AppMgrServiceInner::TerminateApplication(const std::shared_ptr<AppRunningRe
     if (!GetAppRunningStateByBundleName(appRecord->GetBundleName())) {
         RemoveRunningSharedBundleList(appRecord->GetBundleName());
     }
-    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
+    OnProcessDied(appRecord);
     DelayedSingleton<CacheProcessManager>::GetInstance()->OnProcessKilled(appRecord);
     auto appInfo = appRecord->GetApplicationInfo();
     if (appInfo != nullptr && !appRunningManager_->IsAppExist(appInfo->accessTokenId)) {
@@ -7989,7 +7990,7 @@ void AppMgrServiceInner::ApplicationTerminatedSendProcessEvent(const std::shared
         return;
     }
 
-    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
+    OnProcessDied(appRecord);
     DelayedSingleton<CacheProcessManager>::GetInstance()->OnProcessKilled(appRecord);
     if (!GetAppRunningStateByBundleName(appRecord->GetBundleName())) {
         RemoveRunningSharedBundleList(appRecord->GetBundleName());
@@ -10216,5 +10217,16 @@ int32_t AppMgrServiceInner::DemoteCurrentFromCandidateMasterProcess()
     return ERR_OK;
 }
 
+void AppMgrServiceInner::OnProcessDied(std::shared_ptr<AppRunningRecord> appRecord)
+{
+    if (appRunningManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "running manager null");
+        return;
+    }
+    if (appRunningManager_->NeedNotifyAppStateChangeWhenProcessDied(appRecord)) {
+        OnAppStateChanged(appRecord, ApplicationState::APP_STATE_BACKGROUND, true, false);
+    }
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
+}
 } // namespace AppExecFwk
 }  // namespace OHOS

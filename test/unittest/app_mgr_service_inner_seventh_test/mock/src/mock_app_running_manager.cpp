@@ -321,6 +321,11 @@ bool AppRunningManager::IsApplicationBackground(const AppRunningRecord &backgrou
 {
     return true;
 }
+
+bool AppRunningManager::NeedNotifyAppStateChangeWhenProcessDied(std::shared_ptr<AppRunningRecord> currentAppRecord)
+{
+    return true;
+}
 #ifdef SUPPORT_SCREEN
 void AppRunningManager::OnWindowVisibilityChanged(
     const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos)
