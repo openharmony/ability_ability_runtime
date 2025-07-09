@@ -44,6 +44,7 @@ void PendingWantRecord::Send(SenderInfo &senderInfo)
 
 void PendingWantRecord::RegisterCancelListener(const sptr<IWantReceiver> &receiver)
 {
+    std::lock_guard guard(mCancelCallbacksMutex_);
     if (receiver == nullptr) {
         return;
     }
@@ -52,6 +53,7 @@ void PendingWantRecord::RegisterCancelListener(const sptr<IWantReceiver> &receiv
 
 void PendingWantRecord::UnregisterCancelListener(const sptr<IWantReceiver> &receiver)
 {
+    std::lock_guard guard(mCancelCallbacksMutex_);
     if (receiver == nullptr) {
         return;
     }
@@ -200,6 +202,7 @@ void PendingWantRecord::SetCallerUid(const int32_t callerUid)
 
 std::list<sptr<IWantReceiver>> PendingWantRecord::GetCancelCallbacks()
 {
+    std::lock_guard guard(mCancelCallbacksMutex_);
     return mCancelCallbacks_;
 }
 
