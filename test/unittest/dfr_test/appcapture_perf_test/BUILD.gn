@@ -17,7 +17,6 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
  
 module_output_path = "ability_runtime/freeze_checker"
  
-###############################################################################
 config("module_context_config") {
   visibility = [ ":*" ]
   include_dirs = [
