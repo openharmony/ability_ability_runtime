@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,7 +45,7 @@ public:
     /**
      * @brief Set application auto start up state by EDM.
      * @param info The auto startup info, include bundle name, module name, ability name.
-     * @param flag Indicate whether to allow the application to change the auto start up state.
+     * @param flag Indicate whether the application is prohibited from changing the auto start up state.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag);
@@ -53,7 +53,7 @@ public:
     /**
      * @brief Cancel application auto start up state by EDM.
      * @param info The auto startup info, include bundle name, module name, ability name.
-     * @param flag Indicate whether to allow the application to change the auto start up state.
+     * @param flag Indicate whether the application is prohibited from changing the auto start up state.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag);
