@@ -169,6 +169,7 @@ constexpr int REGISTER_PID_VISIBILITY_DELAY = 5000;
 constexpr int PHONE_MAX_RENDER_PROCESS_NUM = 40;
 constexpr int PROCESS_RESTART_MARGIN_MICRO_SECONDS = 2000;
 constexpr int32_t DFX_TASKWORKER_NUM = 2;
+constexpr int32_t RSS_TASKWORKER_NUM = 3;
 constexpr const int32_t API10 = 10;
 constexpr const int32_t API15 = 15;
 constexpr const int32_t API_VERSION_MOD = 100;
@@ -193,7 +194,7 @@ constexpr const char* REUSING_WINDOW = "ohos.ability_runtime.reusing_window";
 constexpr const char* SPECIFED_PROCESS_CALLER_PROCESS = "ohoSpecifiedProcessCallerProcess";
 constexpr const int32_t KILL_PROCESS_BY_USER_INTERVAL = 20;
 constexpr const int32_t KILL_PROCESS_BY_USER_DELAY_BASE = 500;
-constexpr const int64_t PRELOAD_FREEZE_TIMEOUT = 11000;
+constexpr const int64_t PRELOAD_FREEZE_TIMEOUT = 60000;
 constexpr size_t MAX_PROCESS_NAME_LENGTH = 64;
 
 #ifdef WITH_DLP
@@ -428,6 +429,9 @@ void AppMgrServiceInner::Init()
     dfxTaskHandler_ = AAFwk::TaskHandlerWrap::CreateConcurrentQueueHandler(
         "dfx_freeze_task_queue", DFX_TASKWORKER_NUM, AAFwk::TaskQoS::USER_INITIATED);
     dfxTaskHandler_->SetPrintTaskLog(true);
+    rssTaskHandler_ = AAFwk::TaskHandlerWrap::CreateConcurrentQueueHandler(
+        "rss_report_task_queue", RSS_TASKWORKER_NUM, AAFwk::TaskQoS::USER_INITIATED);
+    rssTaskHandler_->SetPrintTaskLog(true);
     willKillPidsNum_ = 0;
     if (securityModeManager_) {
         securityModeManager_->Init();
@@ -584,6 +588,26 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
     return ERR_OK;
 }
 
+void AppMgrServiceInner::PreloadModuleFinished(const int32_t pid)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "AppMgrServiceInner PreloadModuleFinished call.");
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord not found by pid %{public}d", pid);
+        return;
+    }
+    auto reportLoadTask = [appRecord]() {
+        auto priorityObj = appRecord->GetPriorityObject();
+        if (priorityObj) {
+            AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::PRELOAD_END, 
+                priorityObj->GetPid(), appRecord->GetUid(), 0, 0);
+        }
+    };
+    if (rssTaskHandler_) {
+        rssTaskHandler_->SubmitTask(reportLoadTask, "reportPreloadTask");
+    }
+}
+
 void AppMgrServiceInner::SetPreloadDebugApp(std::shared_ptr<AAFwk::Want> want, std::shared_ptr<ApplicationInfo> appInfo)
 {
     CHECK_POINTER_AND_RETURN_LOG(want, "SetPreloadDebugApp want null");
@@ -663,8 +687,8 @@ void AppMgrServiceInner::reportpreLoadTask(const std::shared_ptr<AppRunningRecor
                 priorityObj->GetPid(), appRecord->GetUid(), PRELOAD_FREEZE_TIMEOUT, 0);
         }
     };
-    if (taskHandler_) {
-        taskHandler_->SubmitTask(reportLoadTask, "reportpreLoadTask");
+    if (rssTaskHandler_) {
+        rssTaskHandler_->SubmitTask(reportLoadTask, "reportpreLoadTask");
     }
 }
 
@@ -951,8 +975,8 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
                 priorityObj->GetPid(), appRecord->GetUid(), timeOut, static_cast<int64_t>(abilityRecordId));
         }
     };
-    if (taskHandler_) {
-        taskHandler_->SubmitTask(reportLoadTask, "reportLoadTask");
+    if (rssTaskHandler_) {
+        rssTaskHandler_->SubmitTask(reportLoadTask, "reportLoadTask");
     }
     //UIExtension notifies Extension & Ability state changes
     if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {

@@ -84,6 +84,15 @@ public:
     }
 
     /**
+     * Launch Application Finished
+     * @param recordId id of the app record
+     */
+    virtual void PreloadModuleFinished(const int32_t recordId)
+    {
+        return;
+    }
+
+    /**
      * ApplicationForegrounded, call ApplicationForegrounded() through proxy object,
      * set the application to Foreground State.
      *

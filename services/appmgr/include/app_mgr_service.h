@@ -83,6 +83,12 @@ public:
     virtual int32_t PreloadApplication(const std::string &bundleName, int32_t userId,
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex) override;
 
+    /**
+     * Launch Application Finished
+     * @param recordId id of the app record
+     */
+    virtual void PreloadModuleFinished(const int32_t recordId) override;
+
     // notify the ams update the state of an app, when it entered foreground.
 
     /**
