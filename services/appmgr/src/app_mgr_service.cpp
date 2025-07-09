@@ -222,6 +222,19 @@ int32_t AppMgrService::PreloadApplication(const std::string &bundleName, int32_t
     return appMgrServiceInner_->PreloadApplication(bundleName, userId, preloadMode, appIndex);
 }
 
+void AppMgrService::PreloadModuleFinished(const int32_t recordId)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "PreloadModuleFinished called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "PreloadModuleFinished failed");
+        return;
+    }
+    if (!JudgeAppSelfCalled(recordId)) {
+        return;
+    }
+    return appMgrServiceInner_->PreloadModuleFinished(IPCSkeleton::GetCallingPid());
+}
+
 void AppMgrService::ApplicationForegrounded(const int32_t recordId)
 {
     if (!IsReady()) {

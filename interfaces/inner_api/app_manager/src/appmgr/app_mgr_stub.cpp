@@ -136,6 +136,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data
             return HandleRegisterApplicationStateObserver(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_APPLICATION_STATE_OBSERVER):
             return HandleUnregisterApplicationStateObserver(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::PRELOAD_MODULE_FINISHED):
+            return HandlePreloadModuleFinished(data, reply);
     }
     return INVALID_FD;
 }
@@ -434,6 +436,16 @@ int32_t AppMgrStub::HandlePreloadApplication(MessageParcel &data, MessageParcel 
     }
     return NO_ERROR;
 }
+
+int32_t AppMgrStub::HandlePreloadModuleFinished(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandlePreloadModuleFinished called");
+    HITRACE_METER(HITRACE_TAG_APP);
+    int32_t recordId = data.ReadInt32();
+    PreloadModuleFinished(recordId);
+    return NO_ERROR;
+}
+
 
 int32_t AppMgrStub::HandleApplicationForegrounded(MessageParcel &data, MessageParcel &reply)
 {

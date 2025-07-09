@@ -1958,6 +1958,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 #endif
     if (appLaunchData.GetAppPreloadMode() == AppExecFwk::PreloadMode::PRELOAD_MODULE) {
         PreloadModule(entryHapModuleInfo, application_->GetRuntime());
+        if (appMgr_ == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null appMgr");
+            return;
+        }
+        appMgr_->PreloadModuleFinished(applicationImpl_->GetRecordId());
+        TAG_LOGI(AAFwkTag::APPKIT, "preoload module finished");
     }
 }
 

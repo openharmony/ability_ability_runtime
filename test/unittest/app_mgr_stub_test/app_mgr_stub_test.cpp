@@ -679,6 +679,27 @@ HWTEST_F(AppMgrStubTest, PreloadApplication_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PreloadModuleFinished_0100
+ * @tc.desc: Preload application.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, PreloadModuleFinished_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    int32_t recordId = 0;
+    data.WriteInt32(recordId);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::PRELOAD_MODULE_FINISHED), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
  * @tc.name: SetSupportedProcessCacheSelf_001
  * @tc.desc: The application sets itself whether or not to support process cache.
  * @tc.type: FUNC

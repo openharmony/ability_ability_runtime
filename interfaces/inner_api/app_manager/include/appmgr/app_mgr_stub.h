@@ -78,6 +78,7 @@ private:
     int32_t HandleGetProcessRunningInfosByUserId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetProcessRunningInformation(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAllRenderProcesses(MessageParcel &data, MessageParcel &reply);
+    int32_t HandlePreloadModuleFinished(MessageParcel &data, MessageParcel &reply);
 #ifdef SUPPORT_CHILD_PROCESS
     int32_t HandleGetAllChildrenProcesses(MessageParcel &data, MessageParcel &reply);
 #endif  // SUPPORT_CHILD_PROCESS

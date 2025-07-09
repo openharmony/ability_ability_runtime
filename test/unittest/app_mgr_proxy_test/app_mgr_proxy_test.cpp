@@ -835,6 +835,24 @@ HWTEST_F(AppMgrProxyTest, PreloadApplication_0800, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PreloadModuleFinished_0001
+ * @tc.desc: Preload application.
+ * @tc.type: FUNC
+ * @tc.Function: PreloadModuleFinished
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrProxyTest, PreloadModuleFinished_0001, TestSize.Level1)
+{
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mockAppMgrService_.GetRefPtr(), &MockAppMgrService::InvokeSendRequest));
+
+    int32_t recordId = 0;
+    appMgrProxy_->PreloadModuleFinished(recordId);
+}
+
+/**
  * @tc.name: SetSupportedProcessCacheSelf_001
  * @tc.desc: The application sets itself whether or not to support process cache.
  * @tc.type: FUNC

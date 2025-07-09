@@ -252,6 +252,12 @@ public:
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex);
 
     /**
+     * Launch Application Finished
+     * @param recordId id of the app record
+     */
+    virtual void PreloadModuleFinished(const int32_t pid);
+
+    /**
      * ApplicationForegrounded, set the application to Foreground State.
      *
      * @param recordId, a unique record that identifies this Application from others.
@@ -2083,6 +2089,7 @@ private:
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
     std::shared_ptr<AppRunningManager> appRunningManager_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
+    std::shared_ptr<AAFwk::TaskHandlerWrap> rssTaskHandler_;
     std::shared_ptr<AMSEventHandler> eventHandler_;
     ffrt::mutex userTestLock_;
     ffrt::mutex appStateCallbacksLock_;
