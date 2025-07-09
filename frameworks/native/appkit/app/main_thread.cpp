@@ -3582,7 +3582,7 @@ int32_t MainThread::ScheduleNotifyAppFault(const FaultData &faultData)
 
 #ifdef SUPPORT_HIPERF
     if (faultData.faultType == FaultDataType::CPU_LOAD) {
-        return AppExecFwk::AppCapturePerf::GetInstance()->CapturePerf(faultData);
+        return AppExecFwk::AppCapturePerf::GetInstance().CapturePerf(faultData);
     }
 #endif
 
