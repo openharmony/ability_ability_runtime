@@ -228,21 +228,21 @@ int32_t ExtNativeStartupManager::RegisterExtStartupTask(
     return ERR_OK;
 }
 
-void ExtNativeStartupManager::RunPhaseTasks(const SchedulerPhase phase)
+int32_t ExtNativeStartupManager::RunPhaseTasks(const SchedulerPhase phase)
 {
     TAG_LOGD(AAFwkTag::STARTUP, "call");
     std::lock_guard guard(mutex_);
     auto findRes = extNativeStartupTasks_.find(phase);
     if (findRes == extNativeStartupTasks_.end()) {
         TAG_LOGD(AAFwkTag::STARTUP, "no phase task");
-        return;
+        return ERR_OK;
     }
     if (findRes->second.empty()) {
         TAG_LOGD(AAFwkTag::STARTUP, "no phase task");
-        return;
+        return ERR_OK;
     }
     std::map<std::string, std::shared_ptr<StartupTask>> nativeStartupTask;
-    for (const auto &item :findRes->second) {
+    for (const auto &item : findRes->second) {
         std::shared_ptr<StartupTask> startupTask;
         int32_t res = BuildExtStartupTask(item, startupTask);
         if (res != ERR_OK) {
@@ -258,12 +258,13 @@ void ExtNativeStartupManager::RunPhaseTasks(const SchedulerPhase phase)
 
     if (nativeStartupTask.empty()) {
         TAG_LOGD(AAFwkTag::STARTUP, "no valid task");
-        return;
+        return ERR_STARTUP_INTERNAL_ERROR;
     }
     auto runTaskInitCallback = [nativeStartupTask]() {
         RunNativeStartupTask(nativeStartupTask);
     };
     ffrt::submit(runTaskInitCallback);
+    return ERR_OK;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

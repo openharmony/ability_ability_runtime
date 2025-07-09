@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #define private public
 #include "application_context.h"
 #undef private
@@ -26,6 +27,7 @@
 #include "ability_manager_errors.h"
 #include "exit_reason.h"
 #include "configuration.h"
+#include "js_runtime.h"
 using namespace testing::ext;
 
 
@@ -55,6 +57,12 @@ void ApplicationContextTest::SetUp()
 
 void ApplicationContextTest::TearDown()
 {}
+
+class MockRuntime : public JsRuntime {
+public:
+    MOCK_METHOD(Runtime::Language, GetLanguage, (), (const override));
+    MOCK_METHOD(napi_env, GetNapiEnv, (), (const override));
+};
 
 /**
  * @tc.number: RegisterAbilityLifecycleCallback_0100
@@ -1583,6 +1591,25 @@ HWTEST_F(ApplicationContextTest, RegisterProcessSecurityExit_0100, TestSize.Leve
 }
 
 /**
+ * @tc.number:RegisterAppGetSpecifiedRuntime_0100
+ * @tc.name: RegisterAppGetSpecifiedRuntime
+ * @tc.desc: RegisterAppGetSpecifiedRuntime
+ */
+HWTEST_F(ApplicationContextTest, RegisterAppGetSpecifiedRuntime_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "RegisterAppGetSpecifiedRuntime_0100 start";
+    AppGetSpecifiedRuntimeCallback appGetSpecifiedRuntimeCallback =
+        [](const std::string &codeLanguage)-> const std::unique_ptr<AbilityRuntime::Runtime>& {
+        static std::unique_ptr<Runtime> runtime = nullptr;
+        return runtime;
+    };
+    context_->appGetSpecifiedRuntimeCallback_ = nullptr;
+    context_->RegisterAppGetSpecifiedRuntime(appGetSpecifiedRuntimeCallback);
+    EXPECT_TRUE(context_->appGetSpecifiedRuntimeCallback_ != nullptr);
+    GTEST_LOG_(INFO) << "RegisterAppGetSpecifiedRuntime_0100 end";
+}
+
+/**
  * @tc.number:SetCurrentInstanceKey_0100
  * @tc.name: SetCurrentInstanceKey
  * @tc.desc: SetCurrentInstanceKey fail with no permission
@@ -1624,6 +1651,80 @@ HWTEST_F(ApplicationContextTest, ProcessSecurityExit_0100, TestSize.Level1)
     context_->ProcessSecurityExit(exitReason);
     EXPECT_TRUE(context_->appProcessExitCallback_ == nullptr);
     GTEST_LOG_(INFO) << "ProcessSecurityExit_0100 end";
+}
+
+/**
+ * @tc.number:GetMainNapiEnv_0100
+ * @tc.name: GetMainNapiEnv
+ * @tc.desc: GetMainNapiEnv fail with null runtime
+ */
+HWTEST_F(ApplicationContextTest, GetMainNapiEnv_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetMainNapiEnv_0100 start";
+    context_->appGetSpecifiedRuntimeCallback_ = nullptr;
+    EXPECT_EQ(context_->GetMainNapiEnv(), nullptr);
+    GTEST_LOG_(INFO) << "GetMainNapiEnv_0100 end";
+}
+
+/**
+ * @tc.number:GetMainNapiEnv_0200
+ * @tc.name: GetMainNapiEnv
+ * @tc.desc: GetMainNapiEnv fail with null callback
+ */
+HWTEST_F(ApplicationContextTest, GetMainNapiEnv_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetMainNapiEnv_0200 start";
+    AppGetSpecifiedRuntimeCallback appGetSpecifiedRuntimeCallback =
+        [](const std::string &codeLanguage)-> const std::unique_ptr<AbilityRuntime::Runtime>& {
+        EXPECT_EQ(codeLanguage, AppExecFwk::Constants::CODE_LANGUAGE_1_1);
+        static std::unique_ptr<Runtime> runtime = nullptr;
+        return runtime;
+    };
+    context_->RegisterAppGetSpecifiedRuntime(appGetSpecifiedRuntimeCallback);
+    EXPECT_EQ(context_->GetMainNapiEnv(), nullptr);
+    GTEST_LOG_(INFO) << "GetMainNapiEnv_0200 end";
+}
+
+/**
+ * @tc.number:GetMainNapiEnv_0300
+ * @tc.name: GetMainNapiEnv
+ * @tc.desc: GetMainNapiEnv fail with wrong language
+ */
+HWTEST_F(ApplicationContextTest, GetMainNapiEnv_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetMainNapiEnv_0300 start";
+    std::unique_ptr<MockRuntime> mockRuntime = std::make_unique<MockRuntime>();
+    EXPECT_CALL(*mockRuntime, GetLanguage()).Times(1).WillOnce(testing::Return(Runtime::Language::UNKNOWN));
+    std::unique_ptr<Runtime> runtime = std::move(mockRuntime);
+    AppGetSpecifiedRuntimeCallback appGetSpecifiedRuntimeCallback =
+        [&runtime](const std::string &codeLanguage)-> const std::unique_ptr<AbilityRuntime::Runtime>& {
+        EXPECT_EQ(codeLanguage, AppExecFwk::Constants::CODE_LANGUAGE_1_1);
+        return runtime;
+    };
+    context_->RegisterAppGetSpecifiedRuntime(appGetSpecifiedRuntimeCallback);
+    EXPECT_EQ(context_->GetMainNapiEnv(), nullptr);
+    GTEST_LOG_(INFO) << "GetMainNapiEnv_0300 end";
+}
+
+/**
+ * @tc.number:GetMainNapiEnv_0400
+ * @tc.name: GetMainNapiEnv
+ * @tc.desc: GetMainNapiEnv
+ */
+HWTEST_F(ApplicationContextTest, GetMainNapiEnv_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetMainNapiEnv_0400 start";
+    std::unique_ptr<MockRuntime> mockRuntime = std::make_unique<MockRuntime>();
+    EXPECT_CALL(*mockRuntime, GetLanguage()).Times(1).WillOnce(testing::Return(Runtime::Language::JS));
+    std::unique_ptr<Runtime> runtime = std::move(mockRuntime);
+    AppGetSpecifiedRuntimeCallback appGetSpecifiedRuntimeCallback =
+        [&runtime](const std::string &codeLanguage)-> const std::unique_ptr<AbilityRuntime::Runtime>& {
+            EXPECT_EQ(codeLanguage, AppExecFwk::Constants::CODE_LANGUAGE_1_1);
+            return runtime;
+    };
+    context_->RegisterAppGetSpecifiedRuntime(appGetSpecifiedRuntimeCallback);
+    EXPECT_EQ(context_->GetMainNapiEnv(), nullptr);
+    GTEST_LOG_(INFO) << "GetMainNapiEnv_0400 end";
 }
 
 /**
