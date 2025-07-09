@@ -19,6 +19,8 @@ namespace OHOS {
 namespace AbilityRuntime {
 void ContextConstructor() {}
 
+void AbilityStageContextConstructor() {}
+
 void ExtensionContextConstructor() {}
 
 void UIAbilityContextConstructor() {}
@@ -77,6 +79,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     if (ANI_OK != env->Class_BindNativeMethods(uiAbilityClass, classMethodsUiAbility.data(),
         classMethodsUiAbility.size())) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Cannot bind native ctor to class %{public}s.", uiAbilityClassName);
+        return ANI_ERROR;
+    };
+    
+    ani_class abilityStageContextClass = nullptr;
+    static const char *abilityStageContextClassName = "Lapplication/AbilityStageContext/AbilityStageContext;";
+    if (ANI_OK != env->FindClass(abilityStageContextClassName, &abilityStageContextClass)) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Not found class %{public}s.", abilityStageContextClassName);
+        return ANI_NOT_FOUND;
+    }
+    std::array classMethodsAbilityStage = {
+        ani_native_function {"<ctor>", ":V", reinterpret_cast<void *>(AbilityStageContextConstructor)},
+    };
+    if (ANI_OK != env->Class_BindNativeMethods(abilityStageContextClass, classMethodsAbilityStage.data(),
+        classMethodsAbilityStage.size())) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Cannot bind native ctor to class %{public}s.", abilityStageContextClassName);
         return ANI_ERROR;
     };
     *result = ANI_VERSION_1;

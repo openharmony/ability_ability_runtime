@@ -32,6 +32,7 @@ struct InsightIntentExecutorInfo {
     int32_t windowMode = 0;
     sptr<IRemoteObject> token = nullptr;
     std::shared_ptr<NativeReference> pageLoader = nullptr;
+    void *etsPageLoader = nullptr;
     std::shared_ptr<InsightIntentExecuteParam> executeParam = nullptr;
 };
 } // namespace OHOS::AbilityRuntime

@@ -151,7 +151,7 @@ public:
      * @param monitor, Indicates the specified stage monitor object.
      * @return the obtained abilityStage.
      */
-    std::shared_ptr<DelegatorAbilityStageProperty> WaitAbilityStageMonitor(
+    std::shared_ptr<BaseDelegatorAbilityStageProperty> WaitAbilityStageMonitor(
         const std::shared_ptr<IAbilityStageMonitor> &monitor);
 
     /**
@@ -171,7 +171,7 @@ public:
      * @param timeoutMs, Indicates the specified time out time, in milliseconds.
      * @return the obtained abilityStage.
      */
-    std::shared_ptr<DelegatorAbilityStageProperty> WaitAbilityStageMonitor(
+    std::shared_ptr<BaseDelegatorAbilityStageProperty> WaitAbilityStageMonitor(
         const std::shared_ptr<IAbilityStageMonitor> &monitor, const int64_t timeoutMs);
 
     /**
@@ -266,7 +266,7 @@ public:
      *
      * @param abilityStage , Indicates the abilityStage properties.
      */
-    void PostPerformStageStart(const std::shared_ptr<DelegatorAbilityStageProperty> &abilityStage);
+    void PostPerformStageStart(const std::shared_ptr<BaseDelegatorAbilityStageProperty> &abilityStage);
 
     /**
      * Saves ability properties when scence is created and notify monitors of state changes.
