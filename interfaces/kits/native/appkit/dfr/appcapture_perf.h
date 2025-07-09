@@ -18,6 +18,7 @@
 #include <memory>
 #include <mutex>
 #include <thread>
+#include <charconv>
  
 #include "fault_data.h"
  
@@ -27,13 +28,11 @@ class AppCapturePerf {
 public:
     AppCapturePerf() {}
     ~AppCapturePerf() {}
-    static std::shared_ptr<AppCapturePerf> GetInstance();
-    static void DestroyInstance();
+    static AppCapturePerf &GetInstance();
     int32_t CapturePerf(const FaultData &faultData);
     std::vector<std::string> SplitStr(const std::string &s, char delimiter);
 private:
-    static std::shared_ptr<AppCapturePerf> instance_;
-    static std::mutex singletonMutex_;
+    std::mutex singletonMutex_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
