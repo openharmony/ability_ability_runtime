@@ -52,7 +52,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     int32_t appIndex;
     uint32_t accessTokenId;
     int32_t userId;
-    bool searchDead;
     bool withKillMsg;
     bool fromKillWithReason;
     FuzzedDataProvider fdp(data, size);
@@ -64,7 +63,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     appIndex = fdp.ConsumeIntegral<int32_t>();
     accessTokenId = fdp.ConsumeIntegral<int32_t>();
     userId = fdp.ConsumeIntegral<int32_t>();
-    searchDead = fdp.ConsumeBool();
     withKillMsg = fdp.ConsumeBool();
     abilities = AbilityFuzzUtil::GenerateStringArray(fdp);
     abilityLists = AbilityFuzzUtil::GenerateStringArray(fdp);
@@ -74,7 +72,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     infos->RecordAppExitReason(bundleName, uid, appIndex, exitReason);
     infos->RecordProcessExitReason(pid, uid, exitReason);
     infos->RecordProcessExitReason(pid, bundleName, uid, accessTokenId,
-        exitReason, processInfo, fromKillWithReason, searchDead);
+        exitReason, processInfo, fromKillWithReason);
     infos->RecordProcessExtensionExitReason(pid, bundleName, exitReason, processInfo, withKillMsg);
     infos->GetActiveAbilityList(uid, abilityLists, pid);
     infos->GetActiveAbilityListFromUIAbilityManager(uid, abilityLists, pid);

@@ -196,7 +196,6 @@ private:
         MessageParcel &reply, MessageOption &option);
     int32_t HandleGetSupportedProcessCachePids(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateProcessMemoryState(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleGetKilledProcessInfo(MessageParcel &data, MessageParcel &reply);
     int32_t HandleLaunchAbility(MessageParcel &data, MessageParcel &reply);
     int32_t HandlePromoteCurrentToCandidateMasterProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleDemoteCurrentFromCandidateMasterProcess(MessageParcel &data, MessageParcel &reply);

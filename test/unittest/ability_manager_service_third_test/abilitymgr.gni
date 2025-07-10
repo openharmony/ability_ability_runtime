@@ -145,7 +145,6 @@ abilityms_files = [
   "${ability_runtime_services_path}/abilitymgr/src/keep_alive/keep_alive_process_manager.cpp",
 
   "${ability_runtime_services_path}/abilitymgr/src/ability_manager_event_subscriber.cpp",
-  "${ability_runtime_services_path}/abilitymgr/src/ability_record_death_manager.cpp",
 
   "${ability_runtime_services_path}/abilitymgr/src/exit_info_data_manager.cpp",
 

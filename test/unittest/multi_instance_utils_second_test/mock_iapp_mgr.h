@@ -38,7 +38,6 @@
 #include "iremote_object.h"
 #include "irender_state_observer.h"
 #include "kia_interceptor_interface.h"
-#include "killed_process_info.h"
 #include "memory_level_info.h"
 #include "page_state_data.h"
 #include "process_memory_state.h"
@@ -532,15 +531,6 @@ public:
     virtual int32_t UpdateProcessMemoryState(const std::vector<ProcessMemoryState>& procMemState)
     {
         return 0;
-    }
-
-    virtual int32_t GetKilledProcessInfo(int pid, int uid, KilledProcessInfo& info)
-    {
-        if (pid == 0 || uid == 0) {
-            return -1;
-        } else {
-            return 0;
-        }
     }
 };
 } // namespace AppExecFwk

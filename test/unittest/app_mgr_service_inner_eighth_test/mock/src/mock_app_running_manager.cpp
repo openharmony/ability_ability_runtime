@@ -478,18 +478,5 @@ bool AppRunningManager::CheckAppRunningRecordIsLast(const std::shared_ptr<AppRun
 void AppRunningManager::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey)
 {
 }
-
-std::shared_ptr<AppRunningRecord> AppRunningManager::QueryAppRecordPlus(int32_t pid, int32_t uid)
-{
-    return AAFwk::MyStatus::GetInstance().queryAppRecordPlus_;
-}
-
-void AppRunningManager::AddRecordToDeadList(std::shared_ptr<AppRunningRecord> appRecord)
-{
-}
-
-void AppRunningManager::RemoveTimeoutDeadAppRecord()
-{
-}
 }  // namespace AppExecFwk
 }  // namespace OHOS

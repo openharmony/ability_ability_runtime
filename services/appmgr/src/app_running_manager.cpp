@@ -697,7 +697,6 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
         appRecord = iter->second;
         appRunningRecordMap_.erase(iter);
     }
-    AddRecordToDeadList(appRecord);
     if (appRecord != nullptr) {
         {
             std::lock_guard guard(updateConfigurationDelayedLock_);
@@ -2206,58 +2205,6 @@ void AppRunningManager::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std:
             TAG_LOGI(AAFwkTag::APPMGR, "set instanceKey:%{public}s", instanceKey.c_str());
             appRecord->SetInstanceKey(instanceKey);
         }
-    }
-}
-
-std::shared_ptr<AppRunningRecord> AppRunningManager::QueryAppRecordPlus(int32_t pid, int32_t uid)
-{
-    std::lock_guard guard(runningRecordMapMutex_);
-    for (const auto &[id, appRecord] : appRunningRecordMap_) {
-        if (appRecord && appRecord->GetPid() == pid && appRecord->GetUid() == uid) {
-            return appRecord;
-        }
-    }
-
-    for (const auto &[deadTime, appRecord] : deadAppRecordList_) {
-        if (appRecord && appRecord->GetPid() == pid && appRecord->GetUid() == uid) {
-            return appRecord;
-        }
-    }
-    return nullptr;
-}
-
-void AppRunningManager::AddRecordToDeadList(std::shared_ptr<AppRunningRecord> appRecord)
-{
-    if (appRecord == nullptr) {
-        return;
-    }
-    std::lock_guard guard(runningRecordMapMutex_);
-    deadAppRecordList_.emplace_back(AbilityRuntime::TimeUtil::CurrentTimeMillis(), appRecord);
-    if (deadAppRecordList_.size() == 1) {
-        AAFwk::TaskHandlerWrap::GetFfrtHandler()->SubmitTask([wThis = weak_from_this()]() {
-            auto pThis = wThis.lock();
-            if (pThis) {
-                pThis->RemoveTimeoutDeadAppRecord();
-            }
-            }, DEAD_APP_RECORD_CLEAR_TIME);
-    }
-}
-
-void AppRunningManager::RemoveTimeoutDeadAppRecord()
-{
-    std::lock_guard guard(runningRecordMapMutex_);
-    auto timeEnd = AbilityRuntime::TimeUtil::CurrentTimeMillis() - DEAD_APP_RECORD_CLEAR_TIME;
-    auto it = deadAppRecordList_.begin();
-    while (it != deadAppRecordList_.end() && it->first <= timeEnd) {
-        it = deadAppRecordList_.erase(it);
-    }
-    if (!deadAppRecordList_.empty()) {
-        AAFwk::TaskHandlerWrap::GetFfrtHandler()->SubmitTask([wThis = weak_from_this()]() {
-            auto pThis = wThis.lock();
-            if (pThis) {
-                pThis->RemoveTimeoutDeadAppRecord();
-            }
-            }, DEAD_APP_RECORD_CLEAR_TIME);
     }
 }
 

@@ -84,7 +84,6 @@ public:
     pid_t handleUserRequestCleanUid_ = 0;
     bool handleUserRequestClean_ = false;
     ErrCode checkIsKiaProcess_ = ERR_OK;
-    std::shared_ptr<AppExecFwk::AppRunningRecord> queryAppRecordPlus_ = nullptr;
     // mock accesstoken_kit
     int clearUserGranted_ = 0;
     // mock bundle

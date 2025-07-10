@@ -17,7 +17,6 @@
 
 #include "ability_manager_service.h"
 #include "ability_permission_util.h"
-#include "ability_record_death_manager.h"
 #include "ability_start_with_wait_observer_manager.h"
 #include "ability_start_with_wait_observer_utils.h"
 #include "appfreeze_manager.h"
@@ -1131,14 +1130,12 @@ void UIAbilityLifecycleManager::EraseAbilityRecord(const std::shared_ptr<Ability
     for (auto iter = sessionAbilityMap_.begin(); iter != sessionAbilityMap_.end(); iter++) {
         if (iter->second != nullptr && iter->second->GetToken()->AsObject() == abilityRecord->GetToken()->AsObject()) {
             sessionAbilityMap_.erase(iter);
-            AbilityRecordDeathManager::GetInstance().AddRecordToDeadList(abilityRecord);
             break;
         }
     }
     for (auto iter = lowMemKillAbilityMap_.begin(); iter != lowMemKillAbilityMap_.end(); iter++) {
         if (iter->second != nullptr && iter->second->GetToken()->AsObject() == abilityRecord->GetToken()->AsObject()) {
             lowMemKillAbilityMap_.erase(iter);
-            AbilityRecordDeathManager::GetInstance().AddRecordToDeadList(abilityRecord);
             break;
         }
     }

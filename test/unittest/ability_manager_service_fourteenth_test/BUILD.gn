@@ -82,7 +82,6 @@ ohos_unittest("ability_manager_service_fourteenth_test") {
     "${ability_runtime_services_path}/abilitymgr/src/ability_manager_event_subscriber.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_manager_service.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_manager_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_record_death_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_running_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_scheduler_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_start_with_wait_observer_manager/ability_start_with_wait_observer_manager.cpp",
