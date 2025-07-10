@@ -223,7 +223,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         ProcessColdStartBranch(abilityRequest, sessionInfo, uiAbilityRecord, isColdStart)) {
         return ERR_OK;
     }
-    auto scenarios = uiAbilityRecord->GetOnNewWantSkipScenarios() & sessionInfo->scenarios;
+    auto scenarios = uiAbilityRecord->GetOnNewWantSkipScenarios() & static_cast<uint32_t>(sessionInfo->scenarios);
     if (uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped");
         uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
@@ -3536,7 +3536,8 @@ int UIAbilityLifecycleManager::ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> 
     }
     std::shared_ptr<AbilityRecord> uiAbilityRecord = iter->second;
     CHECK_POINTER_AND_RETURN(uiAbilityRecord, ERR_INVALID_VALUE);
-    if ((uiAbilityRecord->GetOnNewWantSkipScenarios() & ServerConstant::SCENARIO_SHOW_ABILITY) == 0) {
+    if ((uiAbilityRecord->GetOnNewWantSkipScenarios() &
+        static_cast<uint32_t>(ServerConstant::SCENARIO_SHOW_ABILITY)) == 0) {
         uiAbilityRecord->SetIsNewWant(sessionInfo->isNewWant);
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "change ability visibility: %{public}d, isNewWant: %{public}d",
