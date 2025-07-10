@@ -111,6 +111,7 @@ ohos_shared_library("runtime") {
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "config_policy:configpolicy_util",
+    "ets_runtime:libark_jsruntime",
     "ets_utils:console",
     "ets_utils:timer",
     "ets_utils:worker",
@@ -125,18 +126,10 @@ ohos_shared_library("runtime") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "runtime_core:ani",
+    "runtime_core:libarkruntime",
     "samgr:samgr_proxy",
     "zlib:shared_libz",
   ]
-
-  if (defined(ark_hybrid) && ark_hybrid) {
-    external_deps += [ "runtime_core:libarkruntime" ]
-  } else {
-    external_deps += [
-      "ets_runtime:libark_jsruntime",
-      "runtime_core:libarkruntime",
-    ]
-  }
 
   public_external_deps = [
     "ability_base:session_info",
