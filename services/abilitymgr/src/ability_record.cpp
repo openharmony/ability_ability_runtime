@@ -1355,7 +1355,11 @@ bool AbilityRecord::PrepareTerminateAbility(bool isSCBCall)
     };
     auto task = [weak = weak_from_this()]() {
         auto self = weak.lock();
-        if (self == nullptr || !self->lifecycleDeal_ || !self->lifecycleDeal_->PrepareTerminateAbility()) {
+        if (self == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null abilityRecord, prepareTerminateAbility error");
+            return;
+        }
+        if (!self->lifecycleDeal_ || !self->lifecycleDeal_->PrepareTerminateAbility()) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "PrepareTerminateAbility error");
             self->isPrepareTerminateAbilityDone_.store(true);
             self->isPrepareTerminateAbilityCalled_.store(false);
