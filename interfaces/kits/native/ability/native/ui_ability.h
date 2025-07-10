@@ -27,6 +27,7 @@
 #include "continuation_handler_stage.h"
 #include "fa_ability_context.h"
 #include "iability_callback.h"
+#include "recovery_param.h"
 #include "resource_config_helper.h"
 #include "want.h"
 
@@ -49,6 +50,11 @@ class InsightIntentExecuteParam;
 struct BaseDelegatorAbilityProperty;
 struct InsightIntentExecuteResult;
 using InsightIntentExecutorAsyncCallback = AbilityTransactionCallbackInfo<InsightIntentExecuteResult>;
+struct OnSaveStateResult {
+    int32_t status;
+    WantParams wantParams;
+    StateReason reason;
+};
 } // namespace AppExecFwk
 namespace AbilityRuntime {
 class Runtime;

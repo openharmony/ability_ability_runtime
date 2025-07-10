@@ -25,7 +25,7 @@ namespace AppExecFwk {
 template<typename T = void>
 class AbilityTransactionCallbackInfo {
 public:
-    using CallbackFunc = std::function<void(T&)>;
+    using CallbackFunc = std::function<void(T &)>;
 
     AbilityTransactionCallbackInfo() = default;
     ~AbilityTransactionCallbackInfo() = default;
@@ -66,7 +66,7 @@ public:
         const std::shared_ptr<StartupTaskResult> &));
 
     static void OnCallback(std::unique_ptr<StartupTaskResultCallback> callback, int32_t resultCode,
-        const std::string& resultMessage = "")
+        const std::string &resultMessage = "")
     {
         GetStaticInstance().MockOnCallback(std::move(callback), resultCode, resultMessage);
     }
@@ -81,4 +81,3 @@ public:
 } // namespace OHOS
 
 #endif // OHOS_ABILITY_RUNTIME_STARTUP_TASK_RESULT_H
-
