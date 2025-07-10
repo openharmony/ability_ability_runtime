@@ -250,15 +250,6 @@ void AppExitReasonDataManager::UpdateAppExitReason(uint32_t accessTokenId, const
 
     DistributedKv::Key key(std::to_string(accessTokenId));
     DistributedKv::Status status;
-    {
-        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-        status = kvStorePtr_->Delete(key);
-    }
-    if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "error: %{public}d", status);
-        return;
-    }
-
     DistributedKv::Value value = ConvertAppExitReasonInfoToValue(abilityList, exitReason, processInfo, withKillMsg);
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
