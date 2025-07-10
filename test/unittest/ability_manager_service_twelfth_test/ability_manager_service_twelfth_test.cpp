@@ -61,6 +61,7 @@ public:
 
     std::shared_ptr<AbilityRecord> MockAbilityRecord(AbilityType);
     sptr<Token> MockToken(AbilityType);
+    sptr<Token> MockToken(AbilityType, uint32_t accessTokenId);
     AbilityRequest GenerateAbilityRequest(const std::string& deviceName, const std::string& abilityName,
         const std::string& appName, const std::string& bundleName, const std::string& moduleName);
 
@@ -88,6 +89,20 @@ std::shared_ptr<AbilityRecord> AbilityManagerServiceTwelfthTest::MockAbilityReco
 sptr<Token> AbilityManagerServiceTwelfthTest::MockToken(AbilityType abilityType)
 {
     abilityRecord = MockAbilityRecord(abilityType);
+    if (!abilityRecord) {
+        return nullptr;
+    }
+    return abilityRecord->GetToken();
+}
+
+sptr<Token> AbilityManagerServiceTwelfthTest::MockToken(AbilityType abilityType, uint32_t accessTokenId)
+{
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.test.demo";
+    abilityRequest.appInfo.accessTokenId = accessTokenId;
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = abilityType;
+    abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     if (!abilityRecord) {
         return nullptr;
     }
@@ -1055,7 +1070,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, EnterKioskMode_Fail, TestSize.Level1)
     bundleNames.emplace_back("com.test.demo");
     MyFlag::flag_ = true;
     auto result = abilityManagerService->UpdateKioskApplicationList(bundleNames);
-    auto callerToken = MockToken(AbilityType::PAGE);
+    auto callerToken = MockToken(AbilityType::PAGE, ONE);
     result = abilityManagerService->EnterKioskMode(callerToken);
     if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
         ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
@@ -1074,7 +1089,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, ExitKioskMode_Fail, TestSize.Level1) 
     IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
     IPCSkeleton::SetCallingTokenID(ONE);
     auto abilityManagerService = std::make_shared<AbilityManagerService>();
-    auto callerToken = MockToken(AbilityType::PAGE);
+    auto callerToken = MockToken(AbilityType::PAGE, ONE);
     auto result = abilityManagerService->ExitKioskMode(callerToken);
     if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
         ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
@@ -1296,7 +1311,9 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, SuspendExtensionAbility_001, TestSize
 HWTEST_F(AbilityManagerServiceTwelfthTest, ResumeExtensionAbility_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest ResumeExtensionAbility_001 start");
+    MyFlag::flag_ = true;
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityMs_, nullptr);
     sptr<IAbilityConnection> connect = nullptr;
 
     EXPECT_EQ(abilityMs_->ResumeExtensionAbility(connect), ERR_INVALID_VALUE);
@@ -1359,6 +1376,44 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, HandleExtensionAbility_001, TestSize.
         [](std::shared_ptr<AbilityConnectManager> connectManager, sptr<IAbilityConnection> connect) {
             return connectManager->ResumeExtensionAbilityLocked(connect);}), ERR_NO_INIT);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest HandleExtensionAbility_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: EnterKioskMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService EnterKioskMode
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, EnterKioskMode_003, TestSize.Level1) {
+    IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
+    IPCSkeleton::SetCallingTokenID(ONE);
+    MyFlag::flag_ = true;
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityManagerService, nullptr);
+    uint32_t tokenId = 0;
+    auto callerToken = MockToken(AbilityType::PAGE, tokenId);
+    ASSERT_NE(callerToken, nullptr);
+    auto result = abilityManagerService->EnterKioskMode(callerToken);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ExitKioskMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ExitKioskMode
+ */
+HWTEST_F(AbilityManagerServiceTwelfthTest, ExitKioskMode_003, TestSize.Level1) {
+    IPCSkeleton::SetCallingUid(BASE_USER_RANGE);
+    IPCSkeleton::SetCallingTokenID(ONE);
+    MyFlag::flag_ = true;
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityManagerService, nullptr);
+    uint32_t tokenId = 0;
+    auto callerToken = MockToken(AbilityType::PAGE, tokenId);
+    ASSERT_NE(callerToken, nullptr);
+    auto result = abilityManagerService->ExitKioskMode(callerToken);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
 }
 } // namespace AAFwk
 } // namespace OHOS

@@ -21,11 +21,11 @@ namespace AAFwk {
 bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName,
                                                      const uint32_t specifyTokenId) const
 {
-    return !!(MyFlag::flag_);
+    return !!(MyFlag::permissionFlag_);
 }
 bool PermissionVerification::IsSACall() const
 {
-    return (MyFlag::flag_ & MyFlag::FLAG::IS_SA_CALL);
+    return (MyFlag::saFlag_ & MyFlag::FLAG::IS_SA_CALL);
 }
 bool PermissionVerification::IsShellCall() const
 {

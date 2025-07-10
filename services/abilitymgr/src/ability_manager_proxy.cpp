@@ -6876,6 +6876,10 @@ int32_t AbilityManagerProxy::GetKioskStatus(KioskStatus &kioskStatus)
         return ERR_READ_RESULT_PARCEL_FAILED;
     }
     kioskStatus = *info;
+    sptr<IRemoteObject> token = reply.ReadRemoteObject();
+    if (token != nullptr) {
+        kioskStatus.kioskToken_ = token;
+    }
     return reply.ReadInt32();
 }
 

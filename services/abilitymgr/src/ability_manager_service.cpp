@@ -14778,12 +14778,30 @@ int32_t AbilityManagerService::UpdateKioskApplicationList(const std::vector<std:
 int32_t AbilityManagerService::EnterKioskMode(sptr<IRemoteObject> callerToken)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "request EnterKioskMode");
+    auto record = Token::GetAbilityRecordByToken(callerToken);
+    if (!record) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "record null");
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (!JudgeSelfCalled(record)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not self call");
+        return CHECK_PERMISSION_FAILED;
+    }
     return KioskManager::GetInstance().EnterKioskMode(callerToken);
 }
 
 int32_t AbilityManagerService::ExitKioskMode(sptr<IRemoteObject> callerToken)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "request ExitKioskMode");
+    auto record = Token::GetAbilityRecordByToken(callerToken);
+    if (!record) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "record null");
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (!JudgeSelfCalled(record)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not self call");
+        return CHECK_PERMISSION_FAILED;
+    }
     return KioskManager::GetInstance().ExitKioskMode(callerToken);
 }
 

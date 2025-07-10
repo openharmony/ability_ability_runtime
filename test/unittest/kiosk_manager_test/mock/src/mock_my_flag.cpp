@@ -18,5 +18,7 @@
 namespace OHOS {
 namespace AAFwk {
 int MyFlag::flag_ = 1;
+int MyFlag::saFlag_ = 1;
+int MyFlag::permissionFlag_ = 1;
 } // namespace AAFwk
 } // namespace OHOS
