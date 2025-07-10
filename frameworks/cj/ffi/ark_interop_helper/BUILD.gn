@@ -22,17 +22,13 @@ ohos_shared_library("ark_interop_helper_ffi") {
   external_deps = [
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
+    "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
     "napi:ark_interop",
   ]
-  if (defined(ark_hybrid) && ark_hybrid) {
-    external_deps += [ "runtime_core:libarkruntime" ]
-  } else {
-    external_deps += [ "ets_runtime:libark_jsruntime" ]
-  }
   sanitize = {
     cfi = true
     cfi_cross_dso = true
