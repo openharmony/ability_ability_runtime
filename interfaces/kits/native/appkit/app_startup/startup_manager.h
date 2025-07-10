@@ -201,6 +201,7 @@ private:
     static void SetOptionalParameters(const nlohmann::json &module, AppExecFwk::ModuleType moduleType,
         std::shared_ptr<PreloadSoStartupTask> &task);
     static void SetMatchRules(const nlohmann::json &module, StartupTaskMatchRules &matchRules);
+    static bool ParseJsonStringArray(const nlohmann::json &json, const std::string &key, std::vector<std::string> &arr);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

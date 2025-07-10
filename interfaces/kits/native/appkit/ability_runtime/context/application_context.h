@@ -32,6 +32,7 @@ struct ExitReason;
 namespace AbilityRuntime {
 using AppConfigUpdateCallback = std::function<void(const AppExecFwk::Configuration &config)>;
 using AppProcessExitCallback = std::function<void(const AAFwk::ExitReason &exitReason)>;
+using AppGetSpecifiedRuntimeCallback = std::function<const std::unique_ptr<Runtime>&(const std::string &)>;
 class ApplicationContext : public Context {
 public:
     ApplicationContext() = default;
@@ -143,6 +144,7 @@ public:
     void RegisterAppConfigUpdateObserver(AppConfigUpdateCallback appConfigChangeCallback);
     void RegisterAppFontObserver(AppConfigUpdateCallback appFontCallback);
     void RegisterProcessSecurityExit(AppProcessExitCallback appProcessExitCallback);
+    void RegisterAppGetSpecifiedRuntime(AppGetSpecifiedRuntimeCallback appGetSpecifiedRuntimeCallback);
 #ifdef SUPPORT_GRAPHICS
     void RegisterGetDisplayConfig(GetDisplayConfigCallback getDisplayConfigCallback);
 #endif
@@ -158,6 +160,7 @@ public:
     int32_t GetCurrentAppMode();
     void SetCurrentAppMode(int32_t appIndex);
     void ProcessSecurityExit(const AAFwk::ExitReason &exitReason);
+    napi_env GetMainNapiEnv() const;
 
     using SelfType = ApplicationContext;
     static const size_t CONTEXT_TYPE_ID;
@@ -181,6 +184,7 @@ private:
     AppConfigUpdateCallback appConfigChangeCallback_ = nullptr;
     AppConfigUpdateCallback appFontCallback_ = nullptr;
     AppProcessExitCallback appProcessExitCallback_ = nullptr;
+    AppGetSpecifiedRuntimeCallback appGetSpecifiedRuntimeCallback_ = nullptr;
     std::string appRunningUniqueId_;
     int32_t appIndex_ = 0;
     int32_t appMode_ = 0;

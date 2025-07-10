@@ -157,4 +157,124 @@ HWTEST_F(ExtNativeStartupManagerTest, RunNativeStartupTask_002, TestSize.Level1)
     int32_t res = ExtNativeStartupManager::RunNativeStartupTask(nativeStartupTask);
     EXPECT_EQ(res, ERR_OK);
 }
+
+/**
+ * @tc.name: RegisterExtStartupTask_001
+ * @tc.desc: Verify RegisterExtStartupTask call.
+ *           Branch null extNativeStartupTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtNativeStartupManagerTest, RegisterExtStartupTask_001, TestSize.Level1)
+{
+    ExtNativeStartupManager::GetInstance().extNativeStartupTasks_.clear();
+    std::shared_ptr<ExtNativeStartupTask> extNativeStartupTask;
+    int32_t res = ExtNativeStartupManager::GetInstance().RegisterExtStartupTask(
+        extNativeStartupTask, SchedulerPhase::PostLaunchApplication);
+    EXPECT_EQ(res, ERR_STARTUP_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: RegisterExtStartupTask_002
+ * @tc.desc: Verify RegisterExtStartupTask call.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtNativeStartupManagerTest, RegisterExtStartupTask_002, TestSize.Level1)
+{
+    ExtNativeStartupManager::GetInstance().extNativeStartupTasks_.clear();
+    auto &tasks = ExtNativeStartupManager::GetInstance().extNativeStartupTasks_[SchedulerPhase::PostLaunchApplication];
+    ASSERT_EQ(tasks.size(), 0);
+    auto extNativeStartupTask1 = std::make_shared<TestExtNativeStartupTask>(TEST_EXT_NATIVE_STARTUP_TASK_NAME);
+    int32_t res = ExtNativeStartupManager::GetInstance().RegisterExtStartupTask(
+        extNativeStartupTask1, SchedulerPhase::PostLaunchApplication);
+    EXPECT_EQ(res, ERR_OK);
+    tasks = ExtNativeStartupManager::GetInstance().extNativeStartupTasks_[SchedulerPhase::PostLaunchApplication];
+    ASSERT_EQ(tasks.size(), 1);
+    auto extNativeStartupTask2 = std::make_shared<TestExtNativeStartupTask>(TEST_EXT_NATIVE_STARTUP_TASK_NAME);
+    res = ExtNativeStartupManager::GetInstance().RegisterExtStartupTask(
+        extNativeStartupTask2, SchedulerPhase::PostLaunchApplication);
+    EXPECT_EQ(res, ERR_OK);
+    tasks = ExtNativeStartupManager::GetInstance().extNativeStartupTasks_[SchedulerPhase::PostLaunchApplication];
+    ASSERT_EQ(tasks.size(), 2);
+    tasks.clear();
+}
+
+/**
+ * @tc.name: RunPhaseTasks_001
+ * @tc.desc: Verify RunPhaseTasks call.
+ *           Branch no task
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtNativeStartupManagerTest, RunPhaseTasks_001, TestSize.Level1)
+{
+    ExtNativeStartupManager::GetInstance().extNativeStartupTasks_.clear();
+    int32_t res = ExtNativeStartupManager::GetInstance().RunPhaseTasks(SchedulerPhase::PostLaunchApplication);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: RunPhaseTasks_002
+ * @tc.desc: Verify RunPhaseTasks call.
+ *           Branch empty task
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtNativeStartupManagerTest, RunPhaseTasks_002, TestSize.Level1)
+{
+    ExtNativeStartupManager::GetInstance().extNativeStartupTasks_.clear();
+    auto &tasks = ExtNativeStartupManager::GetInstance().extNativeStartupTasks_[SchedulerPhase::PostLaunchApplication];
+    ASSERT_EQ(tasks.size(), 0);
+    int32_t res = ExtNativeStartupManager::GetInstance().RunPhaseTasks(SchedulerPhase::PostLaunchApplication);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: RunPhaseTasks_003
+ * @tc.desc: Verify RunPhaseTasks call.
+ *           Branch invalid task
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtNativeStartupManagerTest, RunPhaseTasks_003, TestSize.Level1)
+{
+    ExtNativeStartupManager::GetInstance().extNativeStartupTasks_.clear();
+    auto &tasks = ExtNativeStartupManager::GetInstance().extNativeStartupTasks_[SchedulerPhase::PostLaunchApplication];
+    ASSERT_EQ(tasks.size(), 0);
+    tasks.emplace_back(nullptr);
+    int32_t res = ExtNativeStartupManager::GetInstance().RunPhaseTasks(SchedulerPhase::PostLaunchApplication);
+    EXPECT_EQ(res, ERR_STARTUP_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: RunPhaseTasks_004
+ * @tc.desc: Verify RunPhaseTasks call.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtNativeStartupManagerTest, RunPhaseTasks_004, TestSize.Level1)
+{
+    ExtNativeStartupManager::GetInstance().extNativeStartupTasks_.clear();
+    auto &tasks = ExtNativeStartupManager::GetInstance().extNativeStartupTasks_[SchedulerPhase::PostLaunchApplication];
+    ASSERT_EQ(tasks.size(), 0);
+    auto extNativeStartupTask = std::make_shared<TestExtNativeStartupTask>(TEST_EXT_NATIVE_STARTUP_TASK_NAME);
+    tasks.emplace_back(extNativeStartupTask);
+    EXPECT_CALL(*tasks[0], GetName()).Times(1).WillOnce(ReturnRef(TEST_EXT_NATIVE_STARTUP_TASK_NAME));
+    StartupTaskInstanceMgr &mgr = StartupTaskInstanceMgr::GetInstance();
+    auto check = [](StartupTask& task) {
+        EXPECT_CALL(task, SetCallCreateOnMainThread(false)).Times(1);
+        EXPECT_CALL(task, SetWaitOnMainThread(false)).Times(1);
+        EXPECT_CALL(task, GetName()).Times(1).WillOnce(ReturnRef(TEST_EXT_NATIVE_STARTUP_TASK_NAME));
+    };
+    EXPECT_CALL(mgr, Constructor(_)).Times(1).WillOnce(Invoke(check));
+    std::shared_ptr<StartupTaskManager> taskManager = std::make_shared<StartupTaskManager>();
+    auto check2 = [taskManager](
+        const StartupTaskMap &, std::shared_ptr<StartupTaskManager> &startupTaskManager) {
+        startupTaskManager = taskManager;
+        return ERR_OK;
+    };
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    ASSERT_NE(startupManager, nullptr);
+    EXPECT_CALL(*startupManager, BuildStartupTaskManager(_, _)).Times(1).WillOnce(Invoke(check2));
+
+    EXPECT_CALL(*taskManager, Prepare()).Times(1).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*taskManager, Run(_)).Times(1).WillOnce(Return(ERR_OK));
+    int32_t res = ExtNativeStartupManager::GetInstance().RunPhaseTasks(SchedulerPhase::PostLaunchApplication);
+    EXPECT_EQ(res, ERR_OK);
+}
 } // namespace OHOS::AbilityRuntime

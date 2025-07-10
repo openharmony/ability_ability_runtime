@@ -207,6 +207,16 @@ void OHOSApplication::SetApplicationContext(
         return applicationSptr->GetDisplayConfig(displayId, density, directionStr);
     });
 #endif
+    abilityRuntimeContext_->RegisterAppGetSpecifiedRuntime(
+        [applicationWptr](const std::string &codeLanguage)-> const std::unique_ptr<AbilityRuntime::Runtime>& {
+            std::shared_ptr<OHOSApplication> applicationSptr = applicationWptr.lock();
+            if (applicationSptr == nullptr) {
+                TAG_LOGE(AAFwkTag::APPKIT, "null applicationSptr");
+                static std::unique_ptr<AbilityRuntime::Runtime> runtime = nullptr;
+                return runtime;
+            }
+            return applicationSptr->GetSpecifiedRuntime(codeLanguage);
+        });
 }
 
 /**
