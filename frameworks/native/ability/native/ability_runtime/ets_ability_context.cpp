@@ -33,7 +33,6 @@ std::mutex EtsAbilityContext::requestCodeMutex_;
 namespace {
 static std::once_flag g_bindNativeMethodsFlag;
 constexpr const char *UI_ABILITY_CONTEXT_CLASS_NAME = "Lapplication/UIAbilityContext/UIAbilityContext;";
-constexpr const char *CLASSNAME_ASYNC_CALLBACK_WRAPPER = "Lutils/AbilityUtils/AsyncCallbackWrapper;";
 } // namespace
 
 std::shared_ptr<AbilityContext> EtsAbilityContext::GetAbilityContext(ani_env *env, ani_object aniObj)
@@ -168,41 +167,6 @@ void EtsAbilityContext::InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk
 #endif
 }
 
-bool EtsAbilityContext::AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result)
-{
-    if (env == nullptr || call == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "env or call is nullptr");
-        return false;
-    }
-    ani_class clsCall = nullptr;
-    ani_status status = env->FindClass(CLASSNAME_ASYNC_CALLBACK_WRAPPER, &clsCall);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "FindClass status: %{public}d", status);
-        return false;
-    }
-    ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(clsCall, "invoke", "L@ohos/base/BusinessError;Lstd/core/Object;:V", &method)) !=
-        ANI_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Class_FindMethod status: %{public}d", status);
-        return false;
-    }
-    if (error == nullptr) {
-        ani_ref nullRef = nullptr;
-        env->GetNull(&nullRef);
-        error = reinterpret_cast<ani_object>(nullRef);
-    }
-    if (result == nullptr) {
-        ani_ref undefinedRef = nullptr;
-        env->GetUndefined(&undefinedRef);
-        result = reinterpret_cast<ani_object>(undefinedRef);
-    }
-    if ((status = env->Object_CallMethod_Void(call, method, error, result)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
-        return false;
-    }
-    return true;
-}
-
 void EtsAbilityContext::OnStartAbility(
     ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call)
 {
@@ -249,7 +213,7 @@ void EtsAbilityContext::OnStartAbility(
         }
         return;
     }
-    AsyncCallback(env, call, aniObject, nullptr);
+    AppExecFwk::AsyncCallback(env, call, aniObject, nullptr);
 }
 
 void EtsAbilityContext::OnStartAbilityForResult(
@@ -313,7 +277,7 @@ void EtsAbilityContext::StartAbilityForResultInner(ani_env *env, const AAFwk::St
             return;
         }
         auto errCode = isInner ? resultCode : 0;
-        AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
+        AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
             OHOS::AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, errCode), abilityResult);
     };
     auto requestCode = GenerateRequestCode();
@@ -327,7 +291,7 @@ void EtsAbilityContext::OnTerminateSelf(ani_env *env, ani_object aniObj, ani_obj
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null env or aniObj");
         ani_object aniObject = EtsErrorUtil::CreateInvalidParamError(env, "env null");
-        AsyncCallback(env, callback, aniObject, nullptr);
+        AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
     ani_object aniObject = nullptr;
@@ -335,7 +299,7 @@ void EtsAbilityContext::OnTerminateSelf(ani_env *env, ani_object aniObj, ani_obj
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
         aniObject = EtsErrorUtil::CreateInvalidParamError(env, "context null");
-        AsyncCallback(env, callback, aniObject, nullptr);
+        AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
     ErrCode ret = context->TerminateSelf();
@@ -344,7 +308,7 @@ void EtsAbilityContext::OnTerminateSelf(ani_env *env, ani_object aniObj, ani_obj
     } else {
         aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
     }
-    AsyncCallback(env, callback, aniObject, nullptr);
+    AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
 }
 
 void EtsAbilityContext::OnTerminateSelfWithResult(
@@ -353,7 +317,7 @@ void EtsAbilityContext::OnTerminateSelfWithResult(
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null env");
         ani_object aniObject = EtsErrorUtil::CreateInvalidParamError(env, "env null");
-        AsyncCallback(env, callback, aniObject, nullptr);
+        AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
     ani_object aniObject = nullptr;
@@ -361,7 +325,7 @@ void EtsAbilityContext::OnTerminateSelfWithResult(
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "GetAbilityContext is nullptr");
         aniObject = EtsErrorUtil::CreateInvalidParamError(env, "context null");
-        AsyncCallback(env, callback, aniObject, nullptr);
+        AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
     AAFwk::Want want;
@@ -374,7 +338,7 @@ void EtsAbilityContext::OnTerminateSelfWithResult(
     } else {
         aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
     }
-    AsyncCallback(env, callback, aniObject, nullptr);
+    AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
 }
 
 void EtsAbilityContext::OnReportDrawnCompleted(ani_env *env, ani_object aniObj, ani_object callback)
@@ -382,7 +346,7 @@ void EtsAbilityContext::OnReportDrawnCompleted(ani_env *env, ani_object aniObj, 
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null env");
         ani_object aniObject = EtsErrorUtil::CreateInvalidParamError(env, "env null");
-        AsyncCallback(env, callback, aniObject, nullptr);
+        AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
     ani_object aniObject = nullptr;
@@ -390,7 +354,7 @@ void EtsAbilityContext::OnReportDrawnCompleted(ani_env *env, ani_object aniObj, 
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "context null");
         aniObject = EtsErrorUtil::CreateInvalidParamError(env, "context null");
-        AsyncCallback(env, callback, aniObject, nullptr);
+        AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
         return;
     }
     ErrCode ret = context->ReportDrawnCompleted();
@@ -399,7 +363,7 @@ void EtsAbilityContext::OnReportDrawnCompleted(ani_env *env, ani_object aniObj, 
     } else {
         aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
     }
-    AsyncCallback(env, callback, aniObject, nullptr);
+    AppExecFwk::AsyncCallback(env, callback, aniObject, nullptr);
 }
 
 void EtsAbilityContext::AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want, ani_object callback,
@@ -456,26 +420,25 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
     std::call_once(g_bindNativeMethodsFlag, [&status, env, cls]() {
         std::array functions = {
             ani_native_function { "nativeStartAbilitySync",
-                "L@ohos/app/ability/Want/Want;Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
+                "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsAbilityContext::StartAbility) },
             ani_native_function { "nativeStartAbilitySync",
-                "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lapplication/"
-                "UIAbilityContext/AsyncCallbackWrapper;:V",
+                "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/"
+                "AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsAbilityContext::StartAbilityWithOptions) },
             ani_native_function { "nativeStartAbilityForResult",
-                "L@ohos/app/ability/Want/Want;Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
+                "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsAbilityContext::StartAbilityForResult) },
             ani_native_function { "nativeStartAbilityForResult",
-                "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lapplication/"
-                "UIAbilityContext/AsyncCallbackWrapper;:V",
+                "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/"
+                "AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsAbilityContext::StartAbilityForResultWithOptions) },
-            ani_native_function { "nativeTerminateSelfSync", "Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
+            ani_native_function { "nativeTerminateSelfSync", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsAbilityContext::TerminateSelf) },
             ani_native_function { "nativeTerminateSelfWithResult",
-                "Lability/abilityResult/AbilityResult;Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
+                "Lability/abilityResult/AbilityResult;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsAbilityContext::TerminateSelfWithResult) },
-            ani_native_function { "nativeReportDrawnCompletedSync",
-                "Lapplication/UIAbilityContext/AsyncCallbackWrapper;:V",
+            ani_native_function { "nativeReportDrawnCompletedSync", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<ani_int *>(EtsAbilityContext::ReportDrawnCompleted) },
         };
         status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
