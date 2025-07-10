@@ -429,33 +429,6 @@ HWTEST_F(AppMgrServiceSecondTest, UpdateProcessMemoryState_0100, TestSize.Level1
 }
 
 /**
- * @tc.name: GetKilledProcessInfo_0100
- * @tc.desc: GetKilledProcessInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceSecondTest, GetKilledProcessInfo_0100, TestSize.Level1)
-{
-    auto appMgrService = std::make_shared<AppMgrService>();
-    int pid = 1;
-    int uid = 0;
-    KilledProcessInfo info;
-    auto ret = appMgrService->GetKilledProcessInfo(pid, uid, info);
-    EXPECT_EQ(ret, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
-
-    appMgrService->taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler(Constants::APP_MGR_SERVICE_NAME);
-    appMgrService->appMgrServiceInner_ = std::make_shared<AppMgrServiceInner>();
-    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(appMgrService->taskHandler_,
-        appMgrService->appMgrServiceInner_);
-    IPCSkeleton::pid_ = 0;
-    ret = appMgrService->GetKilledProcessInfo(pid, uid, info);
-    EXPECT_EQ(ret, AAFwk::ERR_NO_ALLOW_OUTSIDE_CALL);
-
-    IPCSkeleton::pid_ = getprocpid();
-    ret = appMgrService->GetKilledProcessInfo(pid, uid, info);
-    EXPECT_NE(ret, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
-}
-
-/**
  * @tc.name: IsProcessCacheSupported_0100
  * @tc.desc: IsProcessCacheSupported.
  * @tc.type: FUNC
