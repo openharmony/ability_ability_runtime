@@ -25,6 +25,8 @@ public:
         IS_SA_AND_SHELL_CALL,
     };
     static int flag_;
+    static int saFlag_;
+    static int permissionFlag_;
 };
 } // namespace AAFwk
 } // namespace OHOS
