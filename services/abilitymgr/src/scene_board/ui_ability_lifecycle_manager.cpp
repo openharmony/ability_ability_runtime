@@ -3760,6 +3760,8 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedRequest: %{public}d", specifiedRequest.requestId);
     auto &request = specifiedRequest.abilityRequest;
 
+    bool isDebug = false;
+    bool isLoaded = IsSpecifiedModuleLoaded(request, isDebug);
     if (specifiedRequest.specifiedProcessState == SpecifiedProcessState::STATE_PROCESS) {
         DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedProcess(request.want,
             request.abilityInfo, specifiedRequest.requestId);
@@ -3767,12 +3769,11 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
         if (specifiedRequest.preCreateProcessName) {
             PreCreateProcessName(request);
         }
-        auto isHookModule = IsHookModule(request);
-        if (TryProcessHookModule(specifiedRequest, isHookModule)) {
+        if (TryProcessHookModule(specifiedRequest, IsHookModule(request))) {
             return;
         }
         if (specifiedRequest.specifiedProcessState == SpecifiedProcessState::STATE_NONE &&
-            specifiedRequest.requestListId == REQUEST_LIST_ID_INIT && !IsSpecifiedModuleLoaded(request)) {
+            specifiedRequest.requestListId == REQUEST_LIST_ID_INIT && !isLoaded) {
             specifiedRequest.isCold = true;
             auto sessionInfo = CreateSessionInfo(request);
             sessionInfo->requestCode = request.requestCode;
@@ -3786,21 +3787,24 @@ void UIAbilityLifecycleManager::StartSpecifiedRequest(SpecifiedRequest &specifie
                 RemoveInstanceKey(request);
             }
             sessionInfo->want.RemoveAllFd();
-        }
-        if (!specifiedRequest.isCold) {
+        } else {
             DelayedSingleton<AppScheduler>::GetInstance()->StartSpecifiedAbility(request.want,
                 request.abilityInfo, specifiedRequest.requestId);
         }
     }
-
+    if (request.want.GetBoolParam("debugApp", false) || request.want.GetBoolParam("nativeDebug", false) ||
+        !request.want.GetStringParam("perfCmd").empty() || isDebug) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedRequest debug mode");
+        return;
+    }
     auto timeoutTask = [requestId = specifiedRequest.requestId, wThis = weak_from_this()]() {
         auto pThis = wThis.lock();
         if (pThis) {
             pThis->OnStartSpecifiedFailed(requestId);
         }
     };
-    TaskHandlerWrap::GetFfrtHandler()->SubmitTaskJust(timeoutTask, "SpecifiedFinalTimeout",
-        GlobalConstant::TIMEOUT_UNIT_TIME * GlobalConstant::COLDSTART_TIMEOUT_MULTIPLE);
+    ffrt::submit(std::move(timeoutTask), ffrt::task_attr().name("SpecifiedFinalTimeout")
+        .delay(GlobalConstant::TIMEOUT_UNIT_TIME_MICRO * (int64_t)GlobalConstant::COLDSTART_TIMEOUT_MULTIPLE));
 }
 
 void UIAbilityLifecycleManager::RemoveInstanceKey(const AbilityRequest &abilityRequest) const
@@ -3835,7 +3839,7 @@ std::shared_ptr<SpecifiedRequest> UIAbilityLifecycleManager::PopAndGetNextSpecif
     return nullptr;
 }
 
-bool UIAbilityLifecycleManager::IsSpecifiedModuleLoaded(const AbilityRequest &abilityRequest)
+bool UIAbilityLifecycleManager::IsSpecifiedModuleLoaded(const AbilityRequest &abilityRequest, bool &isDebug)
 {
     auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
@@ -3844,7 +3848,7 @@ bool UIAbilityLifecycleManager::IsSpecifiedModuleLoaded(const AbilityRequest &ab
     }
     bool appExist = false;
     auto ret = IN_PROCESS_CALL(appMgr->IsSpecifiedModuleLoaded(abilityRequest.want,
-        abilityRequest.abilityInfo, appExist));
+        abilityRequest.abilityInfo, appExist, isDebug));
     return ret == ERR_OK && appExist;
 }
 

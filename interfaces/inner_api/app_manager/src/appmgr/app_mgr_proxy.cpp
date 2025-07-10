@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2349,7 +2349,8 @@ void AppMgrProxy::UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::strin
     PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::UPDATE_INSTANCE_KEY_BY_SPECIFIED_ID, data, reply, option);
 }
 
-int32_t AppMgrProxy::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result)
+int32_t AppMgrProxy::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result,
+    bool &isDebug)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2363,6 +2364,7 @@ int32_t AppMgrProxy::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const Abil
 
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::IS_SPECIFIED_MODULE_LOADED, data, reply, option);
     result = reply.ReadBool();
+    isDebug = reply.ReadBool();
     return ERR_OK;
 }
 
