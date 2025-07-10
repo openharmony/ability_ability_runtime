@@ -105,7 +105,7 @@ export default class ServiceExtensionAbility {
   }
 
   onDump(params: Array<string>): Array<string> {
-    let ret:Array<string>;
+    let ret:Array<string> = [];
     return ret;
   }
 }
