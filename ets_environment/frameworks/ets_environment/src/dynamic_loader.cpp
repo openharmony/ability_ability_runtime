@@ -41,7 +41,9 @@ static void ReadDlError()
         return;
     }
     auto ends = sprintf_s(g_dlError, sizeof(g_dlError), "%s", errMsg);
-    if (ends >= ERROR_BUF_SIZE) {
+    if (ends < 0) {
+        return;
+    } else if (ends >= ERROR_BUF_SIZE) {
         g_dlError[ERROR_BUF_SIZE - 1] = '\0';
     } else {
         g_dlError[ends] = '\0';

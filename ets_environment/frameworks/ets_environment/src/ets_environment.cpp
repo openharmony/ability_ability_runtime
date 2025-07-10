@@ -76,7 +76,7 @@ bool ETSEnvironment::LoadBootPathFile(std::string &bootfiles)
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "read json error");
         return false;
     }
-    nlohmann::json jsonObject = nlohmann::json::parse(inFile);
+    nlohmann::json jsonObject = nlohmann::json::parse(inFile, nullptr, false);
     if (jsonObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "json discarded error");
         inFile.close();
