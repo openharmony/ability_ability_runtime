@@ -51,7 +51,9 @@ JsEnvironment::~JsEnvironment()
         delete engine_;
         engine_ = nullptr;
     }
+
     if (vm_ != nullptr) {
+        panda::JSNApi::DestroyJSVM(vm_);
         vm_ = nullptr;
     }
 }
@@ -66,18 +68,6 @@ bool JsEnvironment::Initialize(const panda::RuntimeOption& pandaOption, void* js
     }
 
     engine_ = new ArkNativeEngine(vm_, jsEngine);
-    if (engine_ == nullptr) {
-        return false;
-    }
-    auto capturedVm = vm_;
-    auto cleanEnv = [capturedVm] {
-        if (capturedVm == nullptr) {
-            TAG_LOGE(AAFwkTag::JSENV, "null jsEnv vm");
-            return;
-        }
-        panda::JSNApi::DestroyJSVM(capturedVm);
-    };
-    engine_->SetCleanEnv(cleanEnv);
     return true;
 }
 

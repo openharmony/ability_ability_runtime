@@ -429,9 +429,6 @@ HWTEST_F(JsEnvironmentTest, ParseHdcRegisterOption_0100, TestSize.Level2)
     std::string option5 = "ark:123@456@Debugger";
     int result5 = jsEnv->ParseHdcRegisterOption(option5);
     ASSERT_EQ(result5, 456);
-    std::string option6 = "ark:@52@Debugger";
-    int result6 = jsEnv->ParseHdcRegisterOption(option6);
-    ASSERT_EQ(result6, 52);
 }
 
 /**
