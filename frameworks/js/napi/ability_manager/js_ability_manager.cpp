@@ -188,7 +188,8 @@ private:
                 ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
                 return CreateJsUndefined(env);
             }
-            napi_add_env_cleanup_hook(env, JSAbilityForegroundStateObserver::CleanUp, observerForeground_);
+            napi_add_env_cleanup_hook(env, JSAbilityForegroundStateObserver::CleanUp,
+                new wptr<JSAbilityForegroundStateObserver>(observerForeground_));
         }
 
         if (observerForeground_->IsEmpty()) {
