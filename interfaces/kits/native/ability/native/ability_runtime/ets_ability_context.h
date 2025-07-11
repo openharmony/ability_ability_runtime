@@ -47,7 +47,6 @@ public:
     static std::shared_ptr<AbilityContext> GetAbilityContext(ani_env *env, ani_object aniObj);
 
 private:
-    static bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
     void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
     void OnStartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call);
     void OnStartAbilityForResult(
