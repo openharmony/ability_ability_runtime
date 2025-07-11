@@ -5749,7 +5749,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0001, TestSiz
 
 /**
  * @tc.name: HandleAbilitiesRequestDone_0002
- * @tc.desc: requestListId found but nullptr
+ * @tc.desc: requestListId found; abilitiesRequest nullptr
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0002, TestSize.Level1)
 {
@@ -5768,7 +5768,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0002, TestSiz
 
 /**
  * @tc.name: HandleAbilitiesRequestDone_0003
- * @tc.desc: requestListId found; callerRecord nullptr
+ * @tc.desc: requestListId normal; sessionInfo nullptr; callerRecord nullptr
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0003, TestSize.Level1)
 {
@@ -5781,19 +5781,19 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0003, TestSiz
 
     auto abilitiesRequest = std::make_shared<AbilitiesRequest>();
     EXPECT_NE(abilitiesRequest, nullptr);
-    abilitiesRequest->sessionInfoList.emplace_back(requestId, sessionInfo);
+    abilitiesRequest->sessionInfoList.emplace_back(requestId, nullptr);
     abilitiesRequest->doneCount = 0;
     abilitiesRequest->callerToken = nullptr;
     mgr->abilitiesRequestMap_.emplace(requestListId, abilitiesRequest);
 
-    mgr->HandleAbilitiesRequestDone(requestId, requestListId, sessionInfo);
+    mgr->HandleAbilitiesRequestDone(requestId, requestListId, nullptr);
     mgr->abilitiesRequestMap_.clear();
     TAG_LOGI(AAFwkTag::TEST, "UIAbilityLifecycleManagerTest HandleAbilitiesRequestDone_0003 end");
 }
 
 /**
  * @tc.name: HandleAbilitiesRequestDone_0004
- * @tc.desc: requestListId found; requestId found; callerRecord exist; sessionInfo nullptr
+ * @tc.desc: requestListId normal; sessionInfo nullptr; callerRecord exist
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0004, TestSize.Level1)
 {
@@ -5806,8 +5806,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0004, TestSiz
 
     auto abilitiesRequest = std::make_shared<AbilitiesRequest>();
     EXPECT_NE(abilitiesRequest, nullptr);
-    abilitiesRequest->sessionInfoList.emplace_back(requestId, sessionInfo);
-    abilitiesRequest->doneCount = 1;
+    abilitiesRequest->sessionInfoList.emplace_back(requestId, nullptr);
+    abilitiesRequest->doneCount = 0;
 
     AbilityRequest abilityRequest;
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
@@ -5823,7 +5823,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0004, TestSiz
 
 /**
  * @tc.name: HandleAbilitiesRequestDone_0005
- * @tc.desc: requestListId found;requestId found; callerRecord exist; sessionInfo exist; allEnd;
+ * @tc.desc: requestListId normal; sessionInfo exist; requestId found
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0005, TestSize.Level1)
 {
@@ -5853,7 +5853,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0005, TestSiz
 
 /**
  * @tc.name: HandleAbilitiesRequestDone_0006
- * @tc.desc: requestListId found;requestId not found; not End;
+ * @tc.desc: requestListId normal; sessionInfo exist; requestId not found
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0006, TestSize.Level1)
 {
@@ -5869,13 +5869,14 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0006, TestSiz
     int32_t otherRequestId = 2;
     abilitiesRequest->sessionInfoList.emplace_back(otherRequestId, sessionInfo);
     abilitiesRequest->doneCount = 0;
-    mgr->abilitiesRequestMap_.emplace(requestListId, abilitiesRequest);
 
     AbilityRequest abilityRequest;
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     EXPECT_NE(abilityRecord, nullptr);
     sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
     abilitiesRequest->callerToken = callerToken;
+    mgr->abilitiesRequestMap_.emplace(requestListId, abilitiesRequest);
+
     mgr->HandleAbilitiesRequestDone(requestId, requestListId, sessionInfo);
     mgr->abilitiesRequestMap_.clear();
     TAG_LOGI(AAFwkTag::TEST, "UIAbilityLifecycleManagerTest HandleAbilitiesRequestDone_0006 end");
@@ -5883,7 +5884,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0006, TestSiz
 
 /**
  * @tc.name: HandleAbilitiesRequestDone_0007
- * @tc.desc: requestListId found;requestId found; all End
+ * @tc.desc: requestId found; pendingActivations; callerRecord nullptr
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0007, TestSize.Level1)
 {
@@ -5899,12 +5900,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0007, TestSiz
     abilitiesRequest->sessionInfoList.clear();
     abilitiesRequest->sessionInfoList.emplace_back(requestId, sessionInfo);
     abilitiesRequest->doneCount = 0;
-
-    AbilityRequest abilityRequest;
-    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    EXPECT_NE(abilityRecord, nullptr);
-    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
-    abilitiesRequest->callerToken = callerToken;
+    abilitiesRequest->callerToken = nullptr;
     mgr->abilitiesRequestMap_.emplace(requestListId, abilitiesRequest);
 
     mgr->HandleAbilitiesRequestDone(requestId, requestListId, sessionInfo);
@@ -5914,7 +5910,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0007, TestSiz
 
 /**
  * @tc.name: HandleAbilitiesRequestDone_0008
- * @tc.desc: requestListId found;requestId not found; End; caller exist
+ * @tc.desc: requestId found; pendingActivations; callerRecord exist
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0008, TestSize.Level1)
 {
@@ -5927,9 +5923,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0008, TestSiz
 
     auto abilitiesRequest = std::make_shared<AbilitiesRequest>();
     EXPECT_NE(abilitiesRequest, nullptr);
-    int32_t otherRequestId = 2;
-    abilitiesRequest->sessionInfoList.emplace_back(otherRequestId, sessionInfo);
-    abilitiesRequest->doneCount = 1;
+    abilitiesRequest->sessionInfoList.emplace_back(requestId, sessionInfo);
+    abilitiesRequest->doneCount = 0;
     AbilityRequest abilityRequest;
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     EXPECT_NE(abilityRecord, nullptr);
@@ -5940,6 +5935,35 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0008, TestSiz
     mgr->HandleAbilitiesRequestDone(requestId, requestListId, sessionInfo);
     mgr->abilitiesRequestMap_.clear();
     TAG_LOGI(AAFwkTag::TEST, "UIAbilityLifecycleManagerTest HandleAbilitiesRequestDone_0008 end");
+}
+
+/**
+ * @tc.name: HandleAbilitiesRequestDone_0009
+ * @tc.desc: requestId found; not pendingActivations
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, HandleAbilitiesRequestDone_0009, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UIAbilityLifecycleManagerTest HandleAbilitiesRequestDone_0009 start");
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    EXPECT_NE(mgr, nullptr);
+    int32_t requestId = 1;
+    int32_t requestListId = 1;
+    sptr<SessionInfo> sessionInfo = new SessionInfo();
+
+    auto abilitiesRequest = std::make_shared<AbilitiesRequest>();
+    EXPECT_NE(abilitiesRequest, nullptr);
+    abilitiesRequest->sessionInfoList.emplace_back(requestId, sessionInfo);
+    abilitiesRequest->doneCount = 50;
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    abilitiesRequest->callerToken = callerToken;
+    mgr->abilitiesRequestMap_.emplace(requestListId, abilitiesRequest);
+
+    mgr->HandleAbilitiesRequestDone(requestId, requestListId, sessionInfo);
+    mgr->abilitiesRequestMap_.clear();
+    TAG_LOGI(AAFwkTag::TEST, "UIAbilityLifecycleManagerTest HandleAbilitiesRequestDone_0009 end");
 }
 
 /**

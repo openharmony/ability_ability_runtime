@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,8 +20,14 @@ ohos_unittest("start_ability_utils_test") {
   module_out_path = module_output_path
 
   include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime/",
     "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
+    "${ability_runtime_test_path}/mock/ability_manager_collaborator",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
+    "${ability_runtime_test_path}/mock/mock_sa_call",
+    "${ability_runtime_test_path}/mock/prepare_terminate_callback",
+    "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "mock/include",
   ]
@@ -38,8 +44,11 @@ ohos_unittest("start_ability_utils_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
+  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
+
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
@@ -47,10 +56,16 @@ ohos_unittest("start_ability_utils_test") {
   ]
 
   external_deps = [
+    "ability_base:base",
+    "ability_base:configuration",
     "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_deps_wrapper",
+    "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
     "googletest:gmock_main",
     "googletest:gtest_main",
