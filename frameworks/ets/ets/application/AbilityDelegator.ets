@@ -100,7 +100,7 @@ export interface AbilityDelegator {
 }
 
 class AbilityDelegatorInner implements AbilityDelegator {
-  public native nativeGetCurrentTopAbility(): UIAbility;
+  public native nativeGetCurrentTopAbility(callback: AsyncCallbackWrapper<UIAbility>): UIAbility;
 
   public native printSync(msg: string): void;
 
@@ -458,37 +458,28 @@ class AbilityDelegatorInner implements AbilityDelegator {
     return p;
   }
 
-  getCurrentTopAbility(callback: AsyncCallback<UIAbility>): void {
-    let p = taskpool.execute((): UIAbility => {
-      return this.nativeGetCurrentTopAbility()
-    });
-    console.log("getCurrentTopAbility callback2_04");
-    p.then((e: NullishType) => {
-      let ability = e as UIAbility;
-      let resultCode: Int = 0;
-      let error: BusinessError = { code: resultCode, data: undefined };
-      callback(error, ability);
-      console.log("getCurrentTopAbility callback2_06");
-    }).catch((err: BusinessError): void => {
-      console.log("getCurrentTopAbility callback2_0606 err end");
-      callback(err, {});
-    });
-  }
-  getCurrentTopAbility(): Promise<UIAbility> {
-    let p: Promise<UIAbility>  = new Promise<UIAbility>((resolve: (v: UIAbility) => void, reject: (error: Error) => void) => {
-      console.log("getCurrentTopAbility promise1_01");
-      let pPromise1 = taskpool.execute((): UIAbility => {
-        return this.nativeGetCurrentTopAbility();
+  getCurrentTopAbility(callback: AsyncCallback<UIAbility, void>): void {
+      let getCurrentTopAbilityCall = new AsyncCallbackWrapper<UIAbility>(callback);
+      let p = taskpool.execute((): UIAbility => {
+        this.nativeGetCurrentTopAbility(getCurrentTopAbilityCall)
       });
-      pPromise1.then((e: NullishType) => {
-        console.log("getCurrentTopAbility promise1_04");
-        let r: UIAbility = e as UIAbility;
-        resolve(r);
-      }).catch((err: BusinessError): void => {
-        reject(err);
-        console.log("getCurrentTopAbility promise1 end");
+      console.log("getCurrentTopAbility callback2_04");
+    }
+
+    getCurrentTopAbility(): Promise<UIAbility> {
+      let p: Promise<UIAbility>  = new Promise<UIAbility>((resolve: (v: UIAbility) => void, reject: (error: Error) => void) => {
+        console.log("getCurrentTopAbility promise1_01");
+        let getCurrentTopAbilityCall = new AsyncCallbackWrapper<UIAbility>((err: BusinessError | null, data: UIAbility | undefined) => {
+          if (err == null || err.code == 0) {
+            resolve(data as UIAbility);
+          } else {
+            reject(err);
+          }
+        });
+        taskpool.execute((): UIAbility => {
+          this.nativeGetCurrentTopAbility(getCurrentTopAbilityCall);
+        });
       });
-    });
-    return p;
-  }
+      return p;
+    }
 }
