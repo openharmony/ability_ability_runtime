@@ -2089,7 +2089,7 @@ private:
     void SetKeepAliveAppServiceAndNotify(const std::shared_ptr<AppRunningRecord>& appRecord, bool enable);
     bool GetKeepAliveState(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnProcessDied(std::shared_ptr<AppRunningRecord> appRecord);
-    bool IsBolckedByDisposeRules(const std::string &bundleName, int32_t userId,
+    bool IsBlockedByDisposeRules(const std::string &bundleName, int32_t userId,
         int32_t appIndex);
     int32_t PreCheckStartProcess(const std::string &bundleName, int32_t uid,
         std::shared_ptr<AAFwk::Want> &want);
@@ -2158,8 +2158,8 @@ private:
     std::map<int32_t, std::unordered_map<pid_t, int32_t>> uiExtensionBindReleations_;
 
     std::shared_mutex startProcessLock_;
-    ffrt::mutex updateOrUninstallUidSetLock_;
-    std::unordered_set<int32_t> updateOrUninstallUidSet_ {};
+    ffrt::mutex uninstallOrUpgradeUidSetLock_;
+    std::unordered_set<int32_t> uninstallOrUpgradeUidSet_ {};
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
