@@ -18,8 +18,6 @@ import { Configuration } from '@ohos.app.ability.Configuration'
 import { HapModuleInfo } from 'bundleManager.HapModuleInfo'
 
 export default class AbilityStageContext extends Context {
-  static {
-  }
   config?: Configuration;
   currentHapModuleInfo!: HapModuleInfo;
 }
