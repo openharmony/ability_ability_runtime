@@ -1152,7 +1152,7 @@ ani_object EtsAbilityContext::NativeTransferStatic(ani_env *env, ani_object, ani
 
 ani_object EtsAbilityContext::NativeTransferDynamic(ani_env *env, ani_object, ani_object input)
 {
-    auto context = GetAbilityContext(env, input);
+    auto context = ContextUtil::GetBaseContext(env, input);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null context");
         return nullptr;

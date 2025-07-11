@@ -72,9 +72,7 @@ public:
         const std::shared_ptr<OHOSApplication> application,
         std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token) override;
 
-    static void CreateAndBindContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
-        const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
-        const std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext,
+    static void CreateAndBindContext(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
         const std::unique_ptr<Runtime>& runtime);
 
     /**
