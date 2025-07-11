@@ -615,7 +615,7 @@ int32_t AmsMgrProxy::NotifyUninstallOrUpgradeApp(const std::string &bundleName, 
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_UNINSTALL_OR_UPGRADE_APP), data, reply, option);
     if (ret != NO_ERROR) {
-        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
+        TAG_LOGE(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
         return ret;
     }
     return reply.ReadInt32();
