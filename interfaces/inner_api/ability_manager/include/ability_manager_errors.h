@@ -923,6 +923,11 @@ enum {
      */
     ERR_NOT_CANDIDATE_MASTER_PROCESS = 2097366,
 
+    /*
+    * Result(2097367) App is unstalling or upgrading and can not start new process.
+    */
+    ERR_UNINSTALLING_OR_UPGRADING_APP = 2097367,
+
     /**
      * Result (2097370-2097379) for StartUIAbilities Error.
      */

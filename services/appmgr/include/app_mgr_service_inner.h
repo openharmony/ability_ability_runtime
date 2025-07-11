@@ -340,6 +340,11 @@ public:
      */
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid,
         const std::string& reason = "KillApplicationByUid");
+    
+    virtual int32_t NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
+        const bool isUpgrade);
+    
+    virtual void NotifyUninstallOrUpgradeAppEnd(const int32_t uid);
 
     /**
      * KillApplicationSelf, this allows app to terminate itself.
@@ -2084,6 +2089,13 @@ private:
     void SetKeepAliveAppServiceAndNotify(const std::shared_ptr<AppRunningRecord>& appRecord, bool enable);
     bool GetKeepAliveState(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnProcessDied(std::shared_ptr<AppRunningRecord> appRecord);
+    bool IsBolckedByDisposeRules(const std::string &bundleName, int32_t userId,
+        int32_t appIndex);
+    int32_t PreCheckStartProcess(const std::string &bundleName, int32_t uid,
+        std::shared_ptr<AAFwk::Want> &want);
+    void InsertUninstallOrUpgradeUidSet(int32_t uid);
+    void RemoveUninstallOrUpgradeUidSet(int32_t uid);
+    bool IsUninstallingOrUpgrading(int32_t uid);
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;
     std::atomic<int32_t> willKillPidsNum_ = 0;
@@ -2144,6 +2156,10 @@ private:
 
     std::mutex uiExtensionBindReleationsLock_;
     std::map<int32_t, std::unordered_map<pid_t, int32_t>> uiExtensionBindReleations_;
+
+    std::shared_mutex startProcessLock_;
+    ffrt::mutex updateOrUninstallUidSetLock_;
+    std::unordered_set<int32_t> updateOrUninstallUidSet_ {};
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
