@@ -25,6 +25,7 @@ namespace AbilityRuntime {
 namespace {
 constexpr const char* SERVICE_EXTENSION_CONTEXT_CLASS_NAME =
     "Lapplication/ServiceExtensionContext/ServiceExtensionContext;";
+constexpr const int ANI_ALREADY_BINDED = 8;
 }
 
 const char *INVOKE_METHOD_NAME = "invoke";
@@ -329,7 +330,8 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
         ani_native_function { "nativeStopServiceExtensionAbility", nullptr,
             reinterpret_cast<ani_int*>(StopServiceExtensionAbilitySync) },
     };
-    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
+    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK
+        && status != ANI_ALREADY_BINDED) {
         TAG_LOGE(AAFwkTag::UI_EXT, "bind method status : %{public}d", status);
         return false;
     }
