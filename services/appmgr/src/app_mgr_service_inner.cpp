@@ -27,7 +27,6 @@
 #include <unistd.h>
 
 #include "ability_manager_errors.h"
-#include "bundle_mgr_helper.h"
 #include "ability_window_configuration.h"
 #include "accesstoken_kit.h"
 #include "app_config_data_manager.h"
@@ -41,6 +40,7 @@
 #include "application_state_observer_stub.h"
 #include "appspawn_util.h"
 #include "bundle_constants.h"
+#include "bundle_mgr_helper.h"
 #include "common_event.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -1972,8 +1972,8 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
 
 void AppMgrServiceInner::InsertUninstallOrUpgradeUidSet(int32_t uid)
 {
-    std::lock_guard lock(updateOrUninstallUidSetLock_);
-    auto ret = updateOrUninstallUidSet_.insert(uid);
+    std::lock_guard lock(uninstallOrUpgradeUidSetLock_);
+    auto ret = uninstallOrUpgradeUidSet_.insert(uid);
     if (!ret.second) {
         TAG_LOGD(AAFwkTag::APPMGR, "already inserted");
     }
@@ -1981,8 +1981,8 @@ void AppMgrServiceInner::InsertUninstallOrUpgradeUidSet(int32_t uid)
 
 void AppMgrServiceInner::RemoveUninstallOrUpgradeUidSet(int32_t uid)
 {
-    std::lock_guard lock(updateOrUninstallUidSetLock_);
-    auto ret = updateOrUninstallUidSet_.erase(uid);
+    std::lock_guard lock(uninstallOrUpgradeUidSetLock_);
+    auto ret = uninstallOrUpgradeUidSet_.erase(uid);
     if (ret == 0) {
         TAG_LOGD(AAFwkTag::APPMGR, "not exist");
     }
@@ -1990,8 +1990,8 @@ void AppMgrServiceInner::RemoveUninstallOrUpgradeUidSet(int32_t uid)
 
 bool AppMgrServiceInner::IsUninstallingOrUpgrading(int32_t uid)
 {
-    std::lock_guard lock(updateOrUninstallUidSetLock_);
-    if (updateOrUninstallUidSet_.find(uid) != updateOrUninstallUidSet_.end()) {
+    std::lock_guard lock(uninstallOrUpgradeUidSetLock_);
+    if (uninstallOrUpgradeUidSet_.find(uid) != uninstallOrUpgradeUidSet_.end()) {
         return true;
     } 
     return false;
@@ -10258,7 +10258,7 @@ void AppMgrServiceInner::OnProcessDied(std::shared_ptr<AppRunningRecord> appReco
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
 }
 
-bool AppMgrServiceInner::IsBolckedByDisposeRules(const std::string &bundleName, int32_t userId, 
+bool AppMgrServiceInner::IsBlockedByDisposeRules(const std::string &bundleName, int32_t userId, 
     int32_t appIndex)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -10314,7 +10314,7 @@ int32_t AppMgrServiceInner:: PreCheckStartProcess(const std::string &bundleName,
     if (want != nullptr) {
         (void)AbilityRuntime::StartupUtil::GetAppIndex(*want, appIndex);
     }
-    if (IsBolckedByDisposeRules(bundleName, userId, appIndex)) {
+    if (IsBlockedByDisposeRules(bundleName, userId, appIndex)) {
         return AAFwk::ERR_UNINSTALLING_OR_UPGRADING_APP;
     }
     RemoveUninstallOrUpgradeUidSet(uid);
