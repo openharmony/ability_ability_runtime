@@ -787,6 +787,21 @@ ohos_prebuilt_etc("ability_runtime_insight_intent_executor_abc_etc") {
   deps = [ ":ability_runtime_insight_intent_executor_abc" ]
 }
 
+generate_static_abc("appRecovery_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.appRecovery.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/appRecovery_abc.abc"
+}
+
+ohos_prebuilt_etc("appRecovery_abc_etc") {
+  source = "$target_out_dir/appRecovery_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":appRecovery_abc" ]
+}
+
 group("ets_packages") {
   deps = [
     ":ability_application_abc_etc",
@@ -836,5 +851,6 @@ group("ets_packages") {
     ":ui_extension_ability_ani_etc",
     ":uri_permission_manager_abc_etc",
     ":form_extension_ability_etc",
+    ":appRecovery_abc_etc",
   ]
 }
