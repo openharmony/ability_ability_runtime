@@ -48,7 +48,8 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
     size_t *buffSize, std::string& errorMsg) const
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called start: %{private}s", inputPath.c_str());
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::string traceTag = __PRETTY_FUNCTION__ + inputPath;
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, traceTag);
     if (inputPath.empty() || buff == nullptr || buffSize == nullptr) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid param");
         return false;
