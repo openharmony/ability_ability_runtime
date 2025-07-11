@@ -43,26 +43,13 @@ let destroyRegister = new FinalizationRegistry<Cleaner>(callback);
 let unregisterToken = new object();
 
 export default class UIAbilityContext extends Context {
-  static {
-    loadLibrary("context_ani");
-  }
 
   private cleaner: Cleaner | null = null;
   etsAbilityContextPtr: long = 0;
-  config: Configuration;
-  abilityInfo: AbilityInfo;
-  windowStage: window.WindowStage;
-  currentHapModuleInfo: HapModuleInfo;
-
-  native constructor();
-
-  constructor(config: Configuration, abilityInfo: AbilityInfo, windowStage: window.WindowStage, currentHapModuleInfo: HapModuleInfo) {
-    super();
-    this.config = config;
-    this.abilityInfo = abilityInfo;
-    this.windowStage = windowStage;
-    this.currentHapModuleInfo = currentHapModuleInfo;
-  }
+  config!: Configuration;
+  abilityInfo!: AbilityInfo;
+  windowStage!: window.WindowStage;
+  currentHapModuleInfo!: HapModuleInfo;
 
   private setEtsAbilityContextPtr(ptr: long) {
     if (this.etsAbilityContextPtr == 0) {

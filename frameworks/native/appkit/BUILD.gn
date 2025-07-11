@@ -506,6 +506,7 @@ ohos_shared_library("app_context_utils") {
     "${ability_runtime_napi_path}/ability_auto_startup_callback",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
+    "${ability_runtime_path}/frameworks/ets/ani/event_hub/include",
   ]
 
   configs = [ ":appkit_config" ]
@@ -532,6 +533,8 @@ ohos_shared_library("app_context_utils") {
     "${ability_runtime_native_path}/ability/native:auto_startup_callback",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:application_context_manager",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_path}/frameworks/ets/ani/event_hub:event_hub_ani_kit",
   ]
 
   external_deps = [
@@ -549,6 +552,8 @@ ohos_shared_library("app_context_utils") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "resource_management:resmgr_napi_core",
+    "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
 
   public_external_deps = [ "ability_base:configuration" ]
