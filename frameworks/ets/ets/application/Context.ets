@@ -33,9 +33,6 @@ let destroyRegister = new FinalizationRegistry<Cleaner>(callback);
 let unregisterToken = new object();
 
 export class Context extends BaseContext {
-  static {
-    loadLibrary("context_ani");
-  }
   etsContextPtr: long = 0;
   private cleaner: Cleaner | null = null;
   filesDir: string = "";
@@ -43,14 +40,14 @@ export class Context extends BaseContext {
   preferencesDir: string = "";
   databaseDir: string = "";
   cacheDir: string = "";
-  applicationInfo: ApplicationInfo;
-  resourceManager: resmgr.ResourceManager;
-  native constructor();
-  constructor(applicationInfo: ApplicationInfo, resourceManager: resmgr.ResourceManager) {
-      super();
-      this.applicationInfo = applicationInfo;
-      this.resourceManager = resourceManager;
+  applicationInfo!: ApplicationInfo;
+  resourceManager!: resmgr.ResourceManager;
+  constructor() {
+    if (this.eventHub == null) {
+      this.eventHub = new EventHub();
+    }
   }
+
   private setEtsContextPtr(ptr: long) {
     if (this.etsContextPtr == 0) {
       this.etsContextPtr = ptr;
