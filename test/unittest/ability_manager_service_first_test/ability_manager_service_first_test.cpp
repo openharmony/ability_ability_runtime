@@ -1834,7 +1834,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, UninstallAppInner_0300, TestSize.Level1
     std::string exitMsg = "App upgrade.";
     int32_t appIndex = 0;
     auto result = abilityMs->UninstallAppInner(bundleName, uid, appIndex, false, exitMsg);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(result, AAFwk::UNINSTALL_APP_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest UninstallAppInner_0300 end");
 }
 
@@ -1853,7 +1853,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, UninstallAppInner_0400, TestSize.Level1
     std::string exitMsg = "App upgrade.";
     int32_t appIndex = 0;
     auto result = abilityMs->UninstallAppInner(bundleName, uid, appIndex, false, exitMsg);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(result, AAFwk::UNINSTALL_APP_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest UninstallAppInner_0400 end");
 }
 

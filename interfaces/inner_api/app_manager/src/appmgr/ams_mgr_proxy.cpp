@@ -590,6 +590,59 @@ int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const i
     return reply.ReadInt32();
 }
 
+int32_t AmsMgrProxy::NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
+    const bool isUpgrade)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to write bundle name");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(uid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write uid");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isUpgrade)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write isUpgradeFlag");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t ret =
+        SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_UNINSTALL_OR_UPGRADE_APP), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
+void AmsMgrProxy::NotifyUninstallOrUpgradeAppEnd(const int32_t uid)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return;
+    }
+    if (!data.WriteInt32(uid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write uid");
+        return;
+    }
+    int32_t ret = SendTransactCmd(
+        static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_UNINSTALL_OR_UPGRADE_APP_END), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "end");
+}
+
+
 int32_t AmsMgrProxy::KillApplicationSelf(const bool clearPageStack, const std::string& reason)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");

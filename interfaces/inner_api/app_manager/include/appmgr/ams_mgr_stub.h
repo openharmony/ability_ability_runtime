@@ -107,6 +107,8 @@ private:
     int32_t HandleIsProcessContainsOnlyUIAbility(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsProcessAttached(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsCallerKilling(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleNotifyUninstallOrUpgradeApp(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleNotifyUninstallOrUpgradeAppEnd(MessageParcel &data, MessageParcel &reply);
     DISALLOW_COPY_AND_MOVE(AmsMgrStub);
 };
 }  // namespace AppExecFwk

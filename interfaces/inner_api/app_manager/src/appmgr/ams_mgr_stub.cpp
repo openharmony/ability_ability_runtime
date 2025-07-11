@@ -115,6 +115,10 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data
             return HandleKillApplicationSelf(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::GET_RUNNING_PROCESS_INFO_BY_TOKEN):
             return HandleGetRunningProcessInfoByToken(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_UNINSTALL_OR_UPGRADE_APP):
+            return HandleNotifyUninstallOrUpgradeApp(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_UNINSTALL_OR_UPGRADE_APP_END):
+            return HandleNotifyUninstallOrUpgradeAppEnd(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -448,6 +452,30 @@ ErrCode AmsMgrStub::HandleKillApplicationByUid(MessageParcel &data, MessageParce
     TAG_LOGW(AAFwkTag::APPMGR, "KillApplicationByUid,callingPid=%{public}d", IPCSkeleton::GetCallingPid());
     int32_t result = KillApplicationByUid(bundleName, uid, reason);
     reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+ErrCode AmsMgrStub::HandleNotifyUninstallOrUpgradeApp(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::string bundleName = data.ReadString();
+    int uid = data.ReadInt32();
+    bool isUpgrade = data.ReadBool();
+    TAG_LOGW(AAFwkTag::APPMGR, "NotifyUninstallOrUpgradeApp, callingPid=%{public}d", IPCSkeleton::GetCallingPid());
+    int32_t result = NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "result write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+ErrCode AmsMgrStub::HandleNotifyUninstallOrUpgradeAppEnd(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    int uid = data.ReadInt32();
+    TAG_LOGW(AAFwkTag::APPMGR, "NotifyUninstallOrUpgradeAppEnd, callingPid=%{public}d", IPCSkeleton::GetCallingPid());
+    NotifyUninstallOrUpgradeAppEnd(uid);
     return NO_ERROR;
 }
 
