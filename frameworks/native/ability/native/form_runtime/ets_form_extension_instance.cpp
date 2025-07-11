@@ -32,7 +32,7 @@ constexpr char ETS_FORM_EXT_LIB_NAME[] = "libets_form_extension.dylib";
 constexpr char ETS_FORM_EXT_LIB_NAME[] = "libets_form_extension.z.so";
 #endif
 
-using CreateFunc = FormExtension *(*)();
+using CreateFunc = FormExtension *(*)(void*);
 static constexpr char ETS_FORM_EXT_CREATE_FUNC[] = "OHOS_ABILITY_ETSFormExtension";
 
 #ifndef ETS_EXPORT
@@ -46,6 +46,7 @@ static constexpr char ETS_FORM_EXT_CREATE_FUNC[] = "OHOS_ABILITY_ETSFormExtensio
 
 FormExtension *CreateETSFormExtension(const std::unique_ptr<Runtime> &runtime)
 {
+    std::unique_ptr<Runtime>* runtimePtr = const_cast<std::unique_ptr<Runtime>*>(&runtime);
     void *handle = dlopen(ETS_FORM_EXT_LIB_NAME, RTLD_LAZY);
     if (handle == nullptr) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "open ets_form_extension library %{public}s failed, reason: %{public}sn",
@@ -61,7 +62,7 @@ FormExtension *CreateETSFormExtension(const std::unique_ptr<Runtime> &runtime)
         return new FormExtension();
     }
 
-    auto instance = entry();
+    auto instance = entry(reinterpret_cast<void*>(runtimePtr));
     if (instance == nullptr) {
         dlclose(handle);
         TAG_LOGE(AAFwkTag::FORM_EXT, "get ets_form_extension instance in %{public}s failed", ETS_FORM_EXT_LIB_NAME);
