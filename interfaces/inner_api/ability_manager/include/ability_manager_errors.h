@@ -965,7 +965,7 @@ enum {
     
     START_UI_ABILITIES_SPECIFIED_FAILED_ERROR = 2097382,
     
-    ERR_PRELOAD_APP_REOCRD_ALREADY_EXIST = 2097383,
+    ERR_PRELOAD_APP_RECORD_ALREADY_EXIST = 2097383,
 
     /**
      * Native error(3000000) for target bundle not exist.

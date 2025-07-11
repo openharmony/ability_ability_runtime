@@ -422,6 +422,7 @@ group("unittest") {
       "pending_want_record_test:unittest",
       "pending_want_test:unittest",
       "permission_verification_test:unittest",
+      "preload_manager_service_test:unittest",
       "preload_uiext_state_observer_test:unittest",
       "prepare_terminate_callback_proxy_test:unittest",
       "query_erms_manager_test:unittest",
