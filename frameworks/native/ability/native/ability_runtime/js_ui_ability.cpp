@@ -304,18 +304,20 @@ void JsUIAbility::UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
         false, abilityInfo->srcEntrance);
 }
 
-void JsUIAbility::CreateAndBindContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
-    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
-    const std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext,
+void JsUIAbility::CreateAndBindContext(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
     const std::unique_ptr<Runtime>& runtime)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    if (application == nullptr || record == nullptr || abilityContext == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null application or record or abilityContext");
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
         return;
     }
     if (runtime == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null runtime");
+        return;
+    }
+    if (runtime->GetLanguage() != Runtime::Language::JS) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "wrong runtime language");
         return;
     }
     auto& jsRuntime = static_cast<JsRuntime&>(*runtime);
@@ -325,13 +327,7 @@ void JsUIAbility::CreateAndBindContext(const std::shared_ptr<AppExecFwk::OHOSApp
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return;
     }
-    auto want = record->GetWant();
-    if (want == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null want");
-        return;
-    }
-    int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::ScreenMode::IDLE_SCREEN_MODE);
-    abilityContext->SetScreenMode(screenMode);
+    int32_t screenMode = abilityContext->GetScreenMode();
 
     std::unique_ptr<NativeReference> contextRef;
     if (screenMode == AAFwk::IDLE_SCREEN_MODE) {

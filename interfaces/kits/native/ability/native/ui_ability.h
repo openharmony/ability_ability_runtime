@@ -365,7 +365,7 @@ private:
     void SetLaunchParam(const AAFwk::LaunchParam &launchParam);
     void InitConfigurationProperties(const AppExecFwk::Configuration &changeConfiguration,
         ResourceConfigHelper &resourceConfig);
-    void BindStsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    void BindEtsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
         const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record);
     void BindJsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
         const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record);
