@@ -915,7 +915,8 @@ napi_env ApplicationContext::GetMainNapiEnv() const
         TAG_LOGE(AAFwkTag::APPKIT, "null callback");
         return nullptr;
     }
-    const std::unique_ptr<Runtime> &runtime = appGetSpecifiedRuntimeCallback_(AppExecFwk::Constants::CODE_LANGUAGE_1_1);
+    const std::unique_ptr<Runtime> &runtime = appGetSpecifiedRuntimeCallback_(
+        AppExecFwk::Constants::ARKTS_MODE_DYNAMIC);
     if (runtime == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return nullptr;
