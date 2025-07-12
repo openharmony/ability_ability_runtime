@@ -1845,7 +1845,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         if (!isCJApp) {
 #endif
             if (application_ != nullptr) {
-                TAG_LOGD(AAFwkTag::APPKIT, "LoadAllExtensions lan:%{public}s", appInfo.codeLanguage.c_str());
+                TAG_LOGD(AAFwkTag::APPKIT, "LoadAllExtensions lan:%{public}s", appInfo.arkTSMode.c_str());
                 LoadAllExtensions();
             }
             if (!IsEtsAPP(appInfo)) {
@@ -1866,7 +1866,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     auto usertestInfo = appLaunchData.GetUserTestInfo();
     if (usertestInfo) {
         if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo, bundleInfo.targetVersion,
-            appInfo.codeLanguage)) {
+            appInfo.arkTSMode)) {
             TAG_LOGE(AAFwkTag::APPKIT, "PrepareAbilityDelegator failed");
             return;
         }
@@ -4057,8 +4057,8 @@ void MainThread::HandleCacheProcess()
 
 void MainThread::SetRuntimeLang(ApplicationInfo &appInfo, AbilityRuntime::Runtime::Options &options)
 {
-    if (appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
-        appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
+    if (appInfo.arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
+        appInfo.arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
         options.lang = AbilityRuntime::Runtime::Language::ETS;
     } else {
         options.lang = AbilityRuntime::Runtime::Language::JS;
@@ -4067,8 +4067,8 @@ void MainThread::SetRuntimeLang(ApplicationInfo &appInfo, AbilityRuntime::Runtim
 
 bool MainThread::IsEtsAPP(const ApplicationInfo &appInfo)
 {
-    return appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
-        appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID;
+    return appInfo.arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
+        appInfo.arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID;
 }
 
 void MainThread::HandleConfigByPlugin(Configuration &config, BundleInfo &bundleInfo)
