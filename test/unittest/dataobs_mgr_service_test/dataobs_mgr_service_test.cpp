@@ -17,10 +17,13 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include "access_token.h"
+#include "dataobs_mgr_interface.h"
 #include "mock_data_ability_observer_stub.h"
 #include "token_setproc.h"
 #define private public
 #include "dataobs_mgr_service.h"
+#include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -150,12 +153,17 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_RegisterObserver_040
     SetSelfTokenID(0);
     std::shared_ptr<Uri> uri =
         std::make_shared<Uri>("dataability://device_id/com.domainname.dataability.persondata/person/10");
-    auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
+    auto dataObsMgrServer = std::make_shared<DataObsMgrService>();
 
     EXPECT_EQ(testVal, dataObsMgrServer->RegisterObserver(*uri, dataobsAbility));
     dataObsMgrServer->dataObsMgrInner_ = std::make_shared<DataObsMgrInner>();
-
     testing::Mock::AllowLeak(dataobsAbility);
+    int count = 0;
+    ON_CALL(*dataobsAbility, OnChange()).WillByDefault(testing::Invoke([&count]() {
+        count++;
+    }));
+    dataObsMgrServer->NotifyChange(*uri);
+    EXPECT_EQ(count, 0);
 
     SetSelfTokenID(originalToken);
     GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_RegisterObserver_0300 end";
@@ -628,37 +636,42 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_Dump_0100, TestSize.
  */
 HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 start";
-    const DataObsServiceRunningState testValue = DataObsServiceRunningState::STATE_RUNNING;
-    auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 start");
+    auto dataObsMgrServer = std::make_shared<DataObsMgrService>();
+    auto originalToken = GetSelfTokenID();
 
+    // set system app
+    uint64_t systemAppMask = (static_cast<uint64_t>(1) << 32);
+    uint32_t tokenID = Security::AccessToken::DEFAULT_TOKEN_VERSION;
+    Security::AccessToken::AccessTokenIDInner *idInner =
+        reinterpret_cast<Security::AccessToken::AccessTokenIDInner *>(&tokenID);
+    idInner->type = Security::AccessToken::TOKEN_HAP;
+    uint64_t fullTokenId = systemAppMask | tokenID;
+    SetSelfTokenID(fullTokenId);
     DataObsOption opt;
-    int ret = 0;
-    // need check
+    bool ret = 0;
     opt.isSystem = true;
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 1";
-    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, -1);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, -1);
+    EXPECT_EQ(ret, false);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, 100);
     EXPECT_EQ(ret, true);
-    // need check
-    opt.isSystem = true;
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 2";
-    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, 100);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, 100, 101);
     EXPECT_EQ(ret, true);
-    // no need check
-    opt.isSystem = false;
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 3";
-    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, -1);
-    EXPECT_EQ(ret, true);
-    // need check
-    opt.isSystem = false;
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 4";
-    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, 100);
-    EXPECT_EQ(ret, true);
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 5";
-    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, 100, 101);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt);
     EXPECT_EQ(ret, true);
 
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 end";
+    opt.isSystem = false;
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, -1);
+    EXPECT_EQ(ret, false);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, 100);
+    EXPECT_EQ(ret, true);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, 100, 101);
+    EXPECT_EQ(ret, true);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt);
+    EXPECT_EQ(ret, true);
+
+    SetSelfTokenID(originalToken);
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 end");
 }
 
 /*
@@ -671,40 +684,93 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_CheckSystemCallingPe
  */
 HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0200, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 start";
-    const DataObsServiceRunningState testValue = DataObsServiceRunningState::STATE_RUNNING;
-    auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0200 start");
+    auto dataObsMgrServer = std::make_shared<DataObsMgrService>();
     auto originalToken = GetSelfTokenID();
 
-    SetSelfTokenID(0);
+    // set token native
+    uint32_t tokenID = Security::AccessToken::DEFAULT_TOKEN_VERSION;
+    Security::AccessToken::AccessTokenIDInner *idInner =
+        reinterpret_cast<Security::AccessToken::AccessTokenIDInner *>(&tokenID);
+    idInner->type = Security::AccessToken::TOKEN_NATIVE;
+    SetSelfTokenID(tokenID);
+
     DataObsOption opt;
-    int ret = 0;
-    // need check
-    opt.isSystem = true;
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 1";
-    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, -1);
-    EXPECT_EQ(ret, false);
-    // need check
-    opt.isSystem = true;
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 2";
-    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, 100);
-    EXPECT_EQ(ret, false);
-    // no need check
+    bool ret = 0;
     opt.isSystem = false;
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 3";
-    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, -1);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, -1);
+    EXPECT_EQ(ret, false);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, 100);
     EXPECT_EQ(ret, true);
-    // need check
-    opt.isSystem = false;
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 4";
-    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, -1, 100);
-    EXPECT_EQ(ret, true);
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 5";
-    ret = dataObsMgrServer->CheckSystemCallingPermission(opt, 100, 101);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, 100, 101);
+    EXPECT_EQ(ret, false);
+    opt.isSystem = true;
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, 100);
     EXPECT_EQ(ret, false);
 
     SetSelfTokenID(originalToken);
-    GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0100 end";
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0200 end");
 }
+
+/*
+ * Feature: DataObsMgrService
+ * Function: GetDataMgrServiceUid
+ * SubFunction: NA
+ * FunctionPoints: DataObsMgrService GetDataMgrServiceUid
+ * EnvConditions: NA
+ * CaseDescription: Verify that the DataObsMgrService GetDataMgrServiceUid is normal.
+ */
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_GetDataMgrServiceUid_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_GetDataMgrServiceUid_0100 start");
+    auto dataObsMgrServer = std::make_shared<DataObsMgrService>();
+
+    auto uid1 = dataObsMgrServer->GetDataMgrServiceUid();
+    EXPECT_NE(uid1, 0);
+    auto uid2 = dataObsMgrServer->GetDataMgrServiceUid();
+    EXPECT_EQ(uid1, uid2);
+
+    uint32_t tokenID = Security::AccessToken::DEFAULT_TOKEN_VERSION;
+    Security::AccessToken::AccessTokenIDInner *idInner =
+        reinterpret_cast<Security::AccessToken::AccessTokenIDInner *>(&tokenID);
+    idInner->type = Security::AccessToken::TOKEN_NATIVE;
+    bool ret = dataObsMgrServer->IsDataMgrService(tokenID, uid1);
+    EXPECT_EQ(ret, true);
+    idInner->type = Security::AccessToken::TOKEN_HAP;
+    ret = dataObsMgrServer->IsDataMgrService(tokenID, uid1);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_GetDataMgrServiceUid_0100 end");
+}
+
+/*
+ * Feature: DataObsMgrService
+ * Function: GetDataMgrServiceUid
+ * SubFunction: NA
+ * FunctionPoints: DataObsMgrService GetDataMgrServiceUid
+ * EnvConditions: NA
+ * CaseDescription: Verify that the DataObsMgrService IsSystemApp is normal.
+ */
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_IsSystemApp_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_IsSystemApp_0100 start");
+    auto dataObsMgrServer = std::make_shared<DataObsMgrService>();
+    auto originalToken = GetSelfTokenID();
+
+    // set system app
+    uint64_t systemAppMask = (static_cast<uint64_t>(1) << 32);
+    uint32_t tokenID = Security::AccessToken::DEFAULT_TOKEN_VERSION;
+    Security::AccessToken::AccessTokenIDInner *idInner =
+        reinterpret_cast<Security::AccessToken::AccessTokenIDInner *>(&tokenID);
+    idInner->type = Security::AccessToken::TOKEN_HAP;
+    uint64_t fullTokenId = systemAppMask | tokenID;
+
+    bool ret = dataObsMgrServer->IsSystemApp(tokenID, fullTokenId);
+    EXPECT_EQ(ret, true);
+    idInner->type = Security::AccessToken::TOKEN_NATIVE;
+    ret = dataObsMgrServer->IsSystemApp(tokenID, fullTokenId);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_IsSystemApp_0100 end");
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS

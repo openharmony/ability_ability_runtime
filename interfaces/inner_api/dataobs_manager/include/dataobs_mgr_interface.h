@@ -63,6 +63,8 @@ public:
         TRANS_BUTT,
     };
 
+    static constexpr int DATAOBS_DEFAULT_CURRENT_USER = -1;
+
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.
      *
@@ -71,7 +73,8 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1,
+    virtual int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+        int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
         DataObsOption opt = DataObsOption()) = 0;
 
     /**
@@ -83,7 +86,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int UnregisterObserver(const Uri &uri,
-        sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1, DataObsOption opt = DataObsOption()) = 0;
+        sptr<IDataAbilityObserver> dataObserver, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
+        DataObsOption opt = DataObsOption()) = 0;
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uri.
@@ -92,7 +96,8 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int NotifyChange(const Uri &uri, int32_t userId = -1, DataObsOption opt = DataObsOption()) = 0;
+    virtual int NotifyChange(const Uri &uri, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
+        DataObsOption opt = DataObsOption()) = 0;
 
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.
