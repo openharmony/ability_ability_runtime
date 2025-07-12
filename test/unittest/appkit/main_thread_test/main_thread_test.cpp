@@ -2592,13 +2592,13 @@ HWTEST_F(MainThreadTest, HandleUpdatePluginInfoInstalled_0100, TestSize.Level1)
 
 /**
  * @tc.name: SetRuntimeLang_0100
- * @tc.desc: SetRuntimeLang codeLanguage 1.2, options.lang get ETS.
+ * @tc.desc: SetRuntimeLang arkTSMode 1.2, options.lang get ETS.
  * @tc.type: FUNC
  */
 HWTEST_F(MainThreadTest, SetRuntimeLang_0100, TestSize.Level1)
 {
     ApplicationInfo appInfo;
-    appInfo.codeLanguage = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2;
+    appInfo.arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2;
     AbilityRuntime::Runtime::Options options;
     mainThread_->SetRuntimeLang(appInfo, options);
     EXPECT_EQ(options.lang, AbilityRuntime::Runtime::Language::ETS);
@@ -2606,13 +2606,13 @@ HWTEST_F(MainThreadTest, SetRuntimeLang_0100, TestSize.Level1)
 
 /**
  * @tc.name: IsEtsAPP_0100
- * @tc.desc: IsEtsAPP return true if codeLanguage is CODE_LANGUAGE_ARKTS_1_2.
+ * @tc.desc: IsEtsAPP return true if arkTSMode is CODE_LANGUAGE_ARKTS_1_2.
  * @tc.type: FUNC
  */
 HWTEST_F(MainThreadTest, IsEtsAPP_0100, TestSize.Level1)
 {
     ApplicationInfo appInfo;
-    appInfo.codeLanguage = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2;
+    appInfo.arkTSMode = AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2;
     auto result = mainThread_->IsEtsAPP(appInfo);
     EXPECT_EQ(result, true);
 }
