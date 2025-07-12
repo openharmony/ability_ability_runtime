@@ -19,12 +19,8 @@ namespace OHOS {
 namespace AAFwk {
 class MyFlag {
 public:
-    enum FLAG {
-        IS_SA_CALL = 1,
-        IS_SHELL_CALL,
-        IS_SA_AND_SHELL_CALL,
-    };
-    static int flag_;
+    static bool retVerifyStartUIAbilityToHiddenPermission;
+    static bool retVerifyPreloadApplicationPermission;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -738,5 +738,37 @@ void AppScheduler::SetProcessCacheStatus(int32_t pid, bool isSupport)
     }
     appMgrClient_->SetSupportedProcessCache(pid, isSupport);
 }
+
+int32_t AppScheduler::PreloadApplicationByPhase(const std::string &bundleName, int32_t userId, int32_t appIndex,
+    AppExecFwk::PreloadPhase preloadPhase)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (appMgrClient_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
+        return INNER_ERR;
+    }
+    return IN_PROCESS_CALL(appMgrClient_->PreloadApplicationByPhase(bundleName, userId, appIndex, preloadPhase));
+}
+
+int32_t AppScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (appMgrClient_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
+        return INNER_ERR;
+    }
+    return IN_PROCESS_CALL(appMgrClient_->NotifyPreloadAbilityStateChanged(token));
+}
+
+int32_t AppScheduler::CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,
+    bool &isExist)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (appMgrClient_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
+        return INNER_ERR;
+    }
+    return IN_PROCESS_CALL(appMgrClient_->CheckPreloadAppRecordExist(bundleName, userId, appIndex, isExist));
+}
 } // namespace AAFwk
 }  // namespace OHOS

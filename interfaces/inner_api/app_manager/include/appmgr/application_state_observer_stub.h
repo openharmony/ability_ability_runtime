@@ -158,6 +158,8 @@ public:
      */
     virtual void OnKeepAliveStateChanged(const ProcessData &processData) override;
 
+    virtual void OnPreloadProcessStateChanged(const PreloadProcessData &preloadProcessData) override;
+
 private:
     int32_t HandleOnForegroundApplicationChanged(MessageParcel &data, MessageParcel &reply);
 
@@ -194,6 +196,8 @@ private:
     int32_t HandleOnProcessBindingRelationChanged(MessageParcel &data, MessageParcel &reply);
 
     int32_t HandleOnKeepAliveStateChanged(MessageParcel &data, MessageParcel &reply);
+
+    int32_t HandleOnPreloadProcessStateChanged(MessageParcel &data, MessageParcel &reply);
 
     static std::mutex callbackMutex_;
 

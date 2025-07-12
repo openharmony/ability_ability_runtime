@@ -24,7 +24,7 @@
 
 namespace OHOS {
 namespace AAFwk {
-bool HiddenStartUtils::IsHiddenStart(const Want &want, const StartOptions &options)
+bool HiddenStartUtils::IsHiddenStart(const StartOptions &options)
 {
     if (!PermissionVerification::GetInstance()->VerifyStartUIAbilityToHiddenPermission()) {
         return false;
@@ -41,7 +41,24 @@ bool HiddenStartUtils::IsHiddenStart(const Want &want, const StartOptions &optio
     return true;
 }
 
-int32_t HiddenStartUtils::CheckHiddenStartSupported(const Want &want, const StartOptions &options)
+bool HiddenStartUtils::IsPreloadStart(const StartOptions &options)
+{
+    if (!PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission()) {
+        return false;
+    }
+
+    if (options.processOptions == nullptr) {
+        return false;
+    }
+
+    if (options.processOptions->startupVisibility != OHOS::AAFwk::StartupVisibility::STARTUP_HIDE) {
+        return false;
+    }
+
+    return options.processOptions->isPreloadStart;
+}
+
+int32_t HiddenStartUtils::CheckHiddenStartSupported(const StartOptions &options)
 {
     if (!AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "start ability silently is not supported in this device");
@@ -53,6 +70,16 @@ int32_t HiddenStartUtils::CheckHiddenStartSupported(const Want &want, const Star
         !ProcessOptions::IsNoAttachmentMode(options.processOptions->processMode))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "this processMode is not supported in hidden start");
         return ERR_INVALID_VALUE;
+    }
+
+    return ERR_OK;
+}
+
+int32_t HiddenStartUtils::CheckPreloadStartSupported()
+{
+    if (!AppUtils::GetInstance().IsPreloadApplicationEnabled()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "preload is not supported");
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
 
     return ERR_OK;

@@ -109,6 +109,9 @@ private:
     int32_t HandleIsCallerKilling(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyUninstallOrUpgradeApp(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyUninstallOrUpgradeAppEnd(MessageParcel &data, MessageParcel &reply);
+    int32_t HandlePreloadApplicationByPhase(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleNotifyPreloadAbilityStateChanged(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleCheckPreloadAppRecordExist(MessageParcel &data, MessageParcel &reply);
     DISALLOW_COPY_AND_MOVE(AmsMgrStub);
 };
 }  // namespace AppExecFwk

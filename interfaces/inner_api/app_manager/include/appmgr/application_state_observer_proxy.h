@@ -156,6 +156,13 @@ public:
      */
     virtual void OnKeepAliveStateChanged(const ProcessData &processData) override;
 
+    /**
+     * Will be called when preload process state change.
+     *
+     * @param preloadProcessData Preload process data.
+     */
+    virtual void OnPreloadProcessStateChanged(const PreloadProcessData &preloadProcessData) override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     static inline BrokerDelegator<ApplicationStateObserverProxy> delegator_;

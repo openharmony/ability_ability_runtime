@@ -28,10 +28,13 @@ namespace AAFwk {
 
 class HiddenStartUtils final {
 public:
+    static bool IsHiddenStart(const StartOptions &options);
 
-    static bool IsHiddenStart(const Want &want, const StartOptions &options);
+    static int32_t CheckHiddenStartSupported(const StartOptions &options);
 
-    static int32_t CheckHiddenStartSupported(const Want &want, const StartOptions &options);
+    static bool IsPreloadStart(const StartOptions &options);
+
+    static int32_t CheckPreloadStartSupported();
 };
 }
 }

@@ -37,8 +37,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     StartOptions startOptions;
     AbilityFuzzUtil::GetRandomStartOptions(fdp, startOptions);
 
-    HiddenStartUtils::IsHiddenStart(want, startOptions);
-    HiddenStartUtils::CheckHiddenStartSupported(want, startOptions);
+    HiddenStartUtils::IsHiddenStart(startOptions);
+    HiddenStartUtils::CheckHiddenStartSupported(startOptions);
 
     return true;
 }

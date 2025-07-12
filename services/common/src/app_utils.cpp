@@ -81,6 +81,7 @@ constexpr const char* SUPPORT_MULTI_INSTANCE = "const.abilityms.support_multi_in
 constexpr const char* MIGRATE_CLIENT_BUNDLE_NAME = "const.sys.abilityms.migrate_client_bundle_name";
 constexpr const char* CONNECT_SUPPORT_CROSS_USER = "const.abilityms.connect_support_cross_user";
 constexpr const char* SUPPORT_APP_SERVICE_EXTENSION = "const.abilityms.support_app_service";
+constexpr const char* PRODUCT_PRELOAD_APPLICATION_SETTING_ENABLED = "const.product.preload_application.setting.enabled";
 // Support prepare terminate
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
@@ -804,6 +805,17 @@ bool AppUtils::IsSupportAppServiceExtension()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isSupportAppServiceExtension_.value);
     return isSupportAppServiceExtension_.value;
+}
+
+bool AppUtils::IsPreloadApplicationEnabled()
+{
+    if (!isPreloadApplicationEnabled_.isLoaded) {
+        isPreloadApplicationEnabled_.value = system::GetBoolParameter(
+            PRODUCT_PRELOAD_APPLICATION_SETTING_ENABLED, false);
+        isPreloadApplicationEnabled_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isPreloadApplicationEnabled_.value);
+    return isPreloadApplicationEnabled_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

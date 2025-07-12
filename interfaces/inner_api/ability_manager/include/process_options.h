@@ -57,6 +57,7 @@ public:
 
     bool isRestartKeepAlive = false;
     bool isStartFromNDK = false;
+    bool isPreloadStart = false;
     ProcessMode processMode = ProcessMode::UNSPECIFIED;
     StartupVisibility startupVisibility = StartupVisibility::UNSPECIFIED;
     std::string processName;

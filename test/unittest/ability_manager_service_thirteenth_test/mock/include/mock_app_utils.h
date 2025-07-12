@@ -319,6 +319,8 @@ public:
 
     const std::vector<std::string> &GetResidentWhiteList();
 
+    bool IsPreloadApplicationEnabled();
+
 private:
     /**
      * LoadResidentProcessInExtremeMemory, load resident process in extreme low memory.

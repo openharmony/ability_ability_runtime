@@ -1234,5 +1234,20 @@ HWTEST_F(AbilityManagerClientBranchThirdTest, NotifyStartupExceptionBySCB_0200, 
     auto result = client_->NotifyStartupExceptionBySCB(requestId);
     EXPECT_EQ(result, ERR_OK);
 }
+
+/**
+ * @tc.name: AbilityManagerClient_PreloadApplication_0100
+ * @tc.desc: PreloadApplication_0100
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchThirdTest, PreloadApplication_0100, TestSize.Level1)
+{
+    EXPECT_NE(client_, nullptr);
+    std::string bundleName = "bundleName";
+    int32_t userId = -1;
+    int32_t appIndex = 0;
+    auto result = client_->PreloadApplication(bundleName, userId, appIndex);
+    EXPECT_EQ(result, ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
