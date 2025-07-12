@@ -27,10 +27,6 @@
 
 namespace OHOS {
 namespace RunnerRuntime {
-namespace {
-const std::string CAPITALTESTRUNNER = "/ets/TestRunner/";
-const std::string LOWERCASETESTRUNNER = "/ets/testrunner/";
-} // namespace
 
 TestRunner *ETSTestRunner::Create(const std::unique_ptr<Runtime> &runtime,
     const std::shared_ptr<AbilityDelegatorArgs> &args, const AppExecFwk::BundleInfo &bundleInfo)
@@ -64,18 +60,9 @@ ETSTestRunner::ETSTestRunner(
     if (args) {
         std::string srcPath;
         if (bundleInfo.hapModuleInfos.back().isModuleJson) {
-            srcPath.append(args->GetTestModuleName());
-            if (args->GetTestRunnerClassName().find("/") == std::string::npos) {
-                srcPath.append(LOWERCASETESTRUNNER);
-            }
+            srcPath.append(args->GetTestRunnerPath());
             moduleName = args->GetTestModuleName();
-        } else {
-            srcPath.append(args->GetTestPackageName());
-            srcPath.append("/assets/sts/TestRunner/");
-            moduleName = args->GetTestPackageName();
         }
-        srcPath.append(args->GetTestRunnerClassName());
-        srcPath.append(".abc");
         srcPath_ = srcPath;
     }
     TAG_LOGI(AAFwkTag::DELEGATOR, "srcPath: %{public}s", srcPath_.c_str());
@@ -105,14 +92,8 @@ ETSTestRunner::ETSTestRunner(
     etsTestRunnerObj_ = etsRuntime_.LoadModule(moduleName, srcPath_, hapPath_,
         bundleInfo.hapModuleInfos.back().compileMode == AppExecFwk::CompileMode::ES_MODULE,
         false, srcPath_);
-    if (!etsTestRunnerObj_ && srcPath_.find(LOWERCASETESTRUNNER) != std::string::npos) {
-        TAG_LOGI(AAFwkTag::DELEGATOR, "not found %{public}s , retry load capital address", srcPath_.c_str());
-        std::regex src_pattern(LOWERCASETESTRUNNER);
-        srcPath_ = std::regex_replace(srcPath_, src_pattern, CAPITALTESTRUNNER);
-        TAG_LOGI(AAFwkTag::DELEGATOR, "capital address is %{public}s", srcPath_.c_str());
-        etsTestRunnerObj_ = etsRuntime_.LoadModule(moduleName, srcPath_, hapPath_,
-            bundleInfo.hapModuleInfos.back().compileMode == AppExecFwk::CompileMode::ES_MODULE,
-            false, srcPath_);
+    if (!etsTestRunnerObj_) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "load testrunner failed");
     }
 }
 

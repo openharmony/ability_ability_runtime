@@ -121,12 +121,29 @@ public:
      */
     bool FindDebugFlag() const;
 
+    /**
+     * Set testrunner type and path
+     */
+    void SetTestRunnerModeAndPath(const std::string arktsMode, const std::string testRunnerSrcPath);
+
+    /**
+     * Get testrunner ark ts mode
+     */
+    std::string GetTestRunnerMode() const;
+
+    /**
+     * Get testrunner test runner path
+     */
+    std::string GetTestRunnerPath() const;
+
 private:
     std::string GetParamValue(const std::string &key) const;
 
 private:
     std::string bundleName_;
     std::map<std::string, std::string> params_;
+    std::string arktsMode_;
+    std::string testRunnerSrcPath_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
