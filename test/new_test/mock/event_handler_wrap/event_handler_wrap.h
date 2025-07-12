@@ -31,7 +31,7 @@ public:
 };
 class EventWrap {
 public:
-    EventWrap(uint32_t eventId) : EventWrap(eventId, 0) {}
+    explicit EventWrap(uint32_t eventId) : EventWrap(eventId, 0) {}
     EventWrap(uint32_t eventId, int64_t param) {}
     EventWrap(uint32_t eventId, int64_t param, bool isExtension) {}
     EventWrap(uint32_t eventId, int64_t param, bool isExtension, const std::string &taskName) {}
@@ -70,16 +70,16 @@ public:
         return false;
     }
 
-    void SetRunCount(int runCount) {}
+    void SetCreateTime(int64_t) {}
 
-    int GetRunCount() const
+    int64_t GetCreateTime() const
     {
         return 0;
     }
 
-    void SetTimeout(uint32_t timeout) {}
+    void SetTimeout(int64_t) {}
 
-    uint32_t GetTimeout() const
+    int64_t GetTimeout() const
     {
         return 0;
     }
