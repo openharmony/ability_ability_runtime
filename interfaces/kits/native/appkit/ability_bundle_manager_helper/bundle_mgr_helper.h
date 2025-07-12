@@ -128,6 +128,8 @@ public:
         std::vector<AbilityInfo> &abilityInfo);
     ErrCode GetPluginInfoForTarget(const std::string &hostBundleName, const std::string &pluginBundleName,
         int32_t userId, PluginBundleInfo &pluginBundleInfo);
+    ErrCode GetTestRunnerTypeAndPath(const std::string &bundleName, const std::string &moduleName,
+        ModuleTestRunner &testRunner);
 
 private:
     sptr<IBundleMgr> Connect();

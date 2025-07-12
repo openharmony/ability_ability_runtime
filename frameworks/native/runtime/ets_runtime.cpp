@@ -55,124 +55,6 @@ const std::string ETS_SYSLIB_PATH =
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
 constexpr char SANDBOX_ARK_CACHE_PATH[] = "/data/storage/ark-cache/";
 constexpr char MERGE_ABC_PATH[] = "/ets/modules_static.abc";
-constexpr char ENTRY_PATH_MAP_FILE[] = "/system/framework/entrypath.json"; // will deprecated
-constexpr char ENTRY_PATH_MAP_KEY[] = "entryPath"; // will deprecated
-constexpr char DEFAULT_ENTRY_ABILITY_CLASS[] = "entry/src/main/ets/entryability/EntryAbility/EntryAbility";
-constexpr int32_t DOT_START_LEN = 2;
-
-class EntryPathManager {
-public:
-    static EntryPathManager &GetInstance()
-    {
-        static EntryPathManager instance;
-        return instance;
-    }
-
-    bool Init()
-    {
-        std::ifstream inFile;
-        inFile.open(ENTRY_PATH_MAP_FILE, std::ios::in);
-        if (!inFile.is_open()) {
-            TAG_LOGD(AAFwkTag::ETSRUNTIME, "no entrypath file");
-            return false;
-        }
-        nlohmann::json filePathsJson;
-        inFile >> filePathsJson;
-        if (filePathsJson.is_discarded()) {
-            TAG_LOGE(AAFwkTag::ETSRUNTIME, "json discarded error");
-            inFile.close();
-            return false;
-        }
-
-        if (filePathsJson.is_null() || filePathsJson.empty()) {
-            TAG_LOGE(AAFwkTag::ETSRUNTIME, "invalid json");
-            inFile.close();
-            return false;
-        }
-
-        if (!filePathsJson.contains(ENTRY_PATH_MAP_KEY)) {
-            TAG_LOGD(AAFwkTag::ETSRUNTIME, "no entrypath key");
-            return false;
-        }
-        const auto &entryPathMap = filePathsJson[ENTRY_PATH_MAP_KEY];
-        if (!entryPathMap.is_object()) {
-            TAG_LOGE(AAFwkTag::ETSRUNTIME, "entrypath is not object");
-            return false;
-        }
-
-        for (const auto &entryPath : entryPathMap.items()) {
-            std::string key = entryPath.key();
-            if (!entryPath.value().is_string()) {
-                TAG_LOGE(AAFwkTag::ETSRUNTIME, "val is not string, key: %{public}s", key.c_str());
-                continue;
-            }
-            std::string val = entryPath.value();
-            TAG_LOGD(AAFwkTag::ETSRUNTIME, "key: %{public}s, value: %{public}s", key.c_str(), val.c_str());
-            entryPathMap_.emplace(key, val);
-        }
-        inFile.close();
-        return true;
-    }
-
-    std::string GetEntryPath(const std::string &srcEntry)
-    {
-        auto const &iter = entryPathMap_.find(srcEntry);
-        if (iter == entryPathMap_.end()) {
-            if (StartsWithDotSlash(srcEntry)) {
-                TAG_LOGD(AAFwkTag::ETSRUNTIME, "not found srcEntry: %{public}s", srcEntry.c_str());
-                return DEFAULT_ENTRY_ABILITY_CLASS;
-            }
-            TAG_LOGD(AAFwkTag::ETSRUNTIME, "srcEntry as class: %{public}s", srcEntry.c_str());
-            return HandleOhmUrlSrcEntry(srcEntry);
-        }
-        TAG_LOGD(AAFwkTag::ETSRUNTIME, "found srcEntry: %{public}s, output: %{public}s",
-                 srcEntry.c_str(), iter->second.c_str());
-        return iter->second;
-    }
-
-private:
-    EntryPathManager() = default;
-
-    ~EntryPathManager() = default;
-
-    static bool StartsWithDotSlash(const std::string &str)
-    {
-        if (str.length() < DOT_START_LEN) {
-            return false;
-        }
-        std::string prefix = str.substr(0, DOT_START_LEN);
-        return prefix == "./";
-    }
-
-    static std::string HandleOhmUrlSrcEntry(const std::string &srcEntry)
-    {
-        size_t lastSlashPos = srcEntry.rfind('/');
-        if (lastSlashPos == std::string::npos) {
-            std::string fileName = srcEntry;
-            // If there is no slash, the entire string is processed directly.
-            HandleOhmUrlFileName(fileName);
-            return fileName;
-        }
-        std::string base = srcEntry.substr(0, lastSlashPos + 1);
-        std::string fileName = srcEntry.substr(lastSlashPos + 1);
-        HandleOhmUrlFileName(fileName);
-        return base + fileName;
-    }
-
-    static void HandleOhmUrlFileName(std::string &fileName)
-    {
-        size_t colonPos = fileName.rfind(':');
-        if (colonPos != std::string::npos) {
-            // <fileName>:<className>  =>  <fileName>/<className>
-            fileName.replace(colonPos, 1, "/");
-        } else {
-            // <fileName>  =>  <fileName>/<fileName>
-            fileName = fileName + "/" + fileName;
-        }
-    }
-
-    std::map<std::string, std::string> entryPathMap_ {};
-};
 
 const char *ETS_ENV_LIBNAME = "libets_environment.z.so";
 const char *ETS_ENV_REGISTER_FUNCS = "OHOS_ETS_ENV_RegisterFuncs";
@@ -208,7 +90,6 @@ std::unique_ptr<ETSRuntime> ETSRuntime::PreFork(const Options &options, std::uni
     if (!instance->Initialize(options, jsRuntime)) {
         return std::unique_ptr<ETSRuntime>();
     }
-    EntryPathManager::GetInstance().Init();
     return instance;
 }
 
@@ -444,7 +325,7 @@ std::unique_ptr<AppExecFwk::ETSNativeReference> ETSRuntime::LoadEtsModule(const 
     }
 
     std::string modulePath = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
-    std::string entryPath = EntryPathManager::GetInstance().GetEntryPath(srcEntrance);
+    std::string entryPath = HandleOhmUrlSrcEntry(srcEntrance);
     void *cls = nullptr;
     void *obj = nullptr;
     void *ref = nullptr;
@@ -485,6 +366,33 @@ void ETSRuntime::PreloadSystemModule(const std::string &moduleName)
 {
     if (jsRuntime_ != nullptr) {
         jsRuntime_->PreloadSystemModule(moduleName);
+    }
+}
+
+std::string ETSRuntime::HandleOhmUrlSrcEntry(const std::string &srcEntry)
+{
+    size_t lastSlashPos = srcEntry.rfind('/');
+    if (lastSlashPos == std::string::npos) {
+        std::string fileName = srcEntry;
+        // If there is no slash, the entire string is processed directly.
+        HandleOhmUrlFileName(fileName);
+        return fileName;
+    }
+    std::string base = srcEntry.substr(0, lastSlashPos + 1);
+    std::string fileName = srcEntry.substr(lastSlashPos + 1);
+    HandleOhmUrlFileName(fileName);
+    return base + fileName;
+}
+
+void ETSRuntime::HandleOhmUrlFileName(std::string &fileName)
+{
+    size_t colonPos = fileName.rfind(':');
+    if (colonPos != std::string::npos) {
+        // <fileName>:<className>  =>  <fileName>/<className>
+        fileName.replace(colonPos, 1, "/");
+    } else {
+        // <fileName>  =>  <fileName>/<fileName>
+        fileName = fileName + "/" + fileName;
     }
 }
 } // namespace AbilityRuntime
