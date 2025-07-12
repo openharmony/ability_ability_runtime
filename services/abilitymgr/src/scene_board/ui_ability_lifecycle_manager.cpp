@@ -194,6 +194,18 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo invalid");
         return ERR_INVALID_VALUE;
     }
+    bool preloadStartCheck = sessionInfo->processOptions != nullptr && sessionInfo->processOptions->isPreloadStart;
+    auto iter = sessionAbilityMap_.find(sessionInfo->persistentId);
+    if (iter != sessionAbilityMap_.end() && preloadStartCheck && iter->second != nullptr &&
+        !iter->second->IsPreloaded()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "preload check: already has record");
+        return ERR_OK;
+    }
+
+    if (preloadStartCheck) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, preload start");
+        abilityRequest.processOptions = sessionInfo->processOptions;
+    }
     auto isCallBySCB = sessionInfo->want.GetBoolParam(ServerConstant::IS_CALL_BY_SCB, true);
     sessionInfo->want.RemoveParam(ServerConstant::IS_CALL_BY_SCB);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartUIAbility session:%{public}d. bundle:%{public}s, ability:%{public}s, "
@@ -523,6 +535,12 @@ int UIAbilityLifecycleManager::AbilityTransactionDone(const sptr<IRemoteObject> 
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     auto abilityRecord = GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    if (state == AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_NEW &&
+        abilityRecord->IsPreloadStart() && !abilityRecord->IsPreloaded()) {
+        abilityRecord->SetPreloaded();
+        auto ret = DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(token);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "NotifyPreloadAbilityStateChanged ret: %{public}d", ret);
+    }
     abilityRecord->RemoveSignatureInfo();
     std::string element = abilityRecord->GetElementName().GetURI();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
@@ -1214,6 +1232,11 @@ void UIAbilityLifecycleManager::UpdateAbilityRecordLaunchReason(
 
     if (abilityRequest.IsAcquireShareData()) {
         abilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_SHARE);
+        return;
+    }
+
+    if (abilityRequest.processOptions != nullptr && abilityRequest.processOptions->isPreloadStart) {
+        abilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_PRELOAD);
         return;
     }
 

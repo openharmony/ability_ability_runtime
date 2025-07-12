@@ -252,5 +252,10 @@ bool AppUtils::IsSupportStartAbilities()
 {
     return MyStatus::GetInstance().isSupportStartAbilities_;
 }
+
+bool AppUtils::IsPreloadApplicationEnabled()
+{
+    return false;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

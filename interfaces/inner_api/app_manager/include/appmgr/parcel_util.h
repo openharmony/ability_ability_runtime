@@ -36,6 +36,14 @@ namespace AppExecFwk {
         } \
     } while (0)
 
+#define PARCEL_UTIL_WRITE_RET_BOOL(parcel, type, value) \
+    do { \
+        if (!(parcel).Write##type(value)) { \
+            TAG_LOGE(AAFwkTag::APPMGR, "failed to write %{public}s", #value); \
+            return false; \
+        } \
+    } while (0)
+
 #define PARCEL_UTIL_SENDREQ_NORET(code, data, reply, option) \
     do { \
         int32_t ret = SendRequest(code, data, reply, option); \

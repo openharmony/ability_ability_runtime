@@ -667,6 +667,9 @@ enum class AbilityManagerInterfaceCode {
 
     // ipc id for start UIExtension ability pre view embedded
     START_UI_EXTENSION_PRE_VIEW_EMBEDDED = 6150,
+
+    // preload application
+    PRELOAD_APPLICATION = 6151,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

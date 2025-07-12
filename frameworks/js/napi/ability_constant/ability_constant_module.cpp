@@ -78,6 +78,7 @@ static napi_value InitLaunchReasonObject(napi_env env)
     NAPI_CALL(env, SetEnumItem(env, object, "AUTO_STARTUP", LAUNCHREASON_AUTO_STARTUP));
     NAPI_CALL(env, SetEnumItem(env, object, "INSIGHT_INTENT", LAUNCHREASON_INSIGHT_INTENT));
     NAPI_CALL(env, SetEnumItem(env, object, "PREPARE_CONTINUATION", LAUNCHREASON_PREPARE_CONTINUATION));
+    NAPI_CALL(env, SetEnumItem(env, object, "PRELOAD", LAUNCHREASON_PRELOAD));
 
     return object;
 }

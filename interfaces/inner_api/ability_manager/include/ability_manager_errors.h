@@ -928,6 +928,11 @@ enum {
     */
     ERR_UNINSTALLING_OR_UPGRADING_APP = 2097367,
 
+    /*
+     * Result(2097368) Not entry module when preload application.
+     */
+    ERR_PRELOAD_NOT_ENTRY_MODULE = 2097368,
+
     /**
      * Result (2097370-2097379) for StartUIAbilities Error.
      */
@@ -957,8 +962,10 @@ enum {
     ERR_WRITE_INT32_FAILED = 2097380,
 
     ERR_WRITE_STRING_FAILED = 2097381,
-
+    
     START_UI_ABILITIES_SPECIFIED_FAILED_ERROR = 2097382,
+    
+    ERR_PRELOAD_APP_REOCRD_ALREADY_EXIST = 2097383,
 
     /**
      * Native error(3000000) for target bundle not exist.
@@ -1175,12 +1182,12 @@ enum NativeFreeInstallError {
     /*
      * Result(29360216) for write caller token failed.
      */
-     ERR_WRITE_CALLER_TOKEN_FAILED = 29360216,
+    ERR_WRITE_CALLER_TOKEN_FAILED = 29360216,
 
     /*
      * Result(29360217) for caller is not atomic service.
      */
-     ERR_CALLER_NOT_ATOMIC_SERVICE = 29360217,
+    ERR_CALLER_NOT_ATOMIC_SERVICE = 29360217,
 
     /*
      * Result(29360218) for failed to create instance key from SCB.
@@ -1196,6 +1203,11 @@ enum NativeFreeInstallError {
      * Result(29360219) for SCB intercepted this startup attempt.
      */
     ERR_SCB_INTERCEPTION = 29360220,
+
+    /*
+     * Result(29360221) for write int failed.
+     */
+    ERR_WRITE_INT_FAILED = 29360221,
 
     /**
      * Undefine error code.

@@ -1246,6 +1246,26 @@ public:
         return scenarios_.load();
     }
 
+    inline void SetPreloadStart(bool isPreloadStart)
+    {
+        isPreloadStart_ = isPreloadStart;
+    }
+
+    inline bool IsPreloadStart() const
+    {
+        return isPreloadStart_;
+    }
+
+    inline void SetPreloaded()
+    {
+        isPreloaded_.store(true);
+    }
+
+    inline bool IsPreloaded() const
+    {
+        return isPreloaded_.load();
+    }
+
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false,
         const std::string &taskName = "");
 
@@ -1345,6 +1365,8 @@ private:
     void GetColdStartingWindowResource(std::shared_ptr<Media::PixelMap> &bg, uint32_t &bgColor);
     void SetAbilityStateInner(AbilityState state);
 #endif
+
+    bool isPreloadStart_ = false;           // is ability started via preload
 
     static std::atomic<int64_t> abilityRecordId;
     bool isReady_ = false;                            // is ability thread attached?
@@ -1485,6 +1507,7 @@ private:
     std::shared_ptr<Want> lastWant_ = nullptr;
     std::atomic_bool isLastWantBackgroundDriven_ = false;
     std::atomic<int32_t> scenarios_ = 0;
+    std::atomic<bool> isPreloaded_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

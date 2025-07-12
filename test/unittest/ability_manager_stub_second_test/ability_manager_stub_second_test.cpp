@@ -1055,5 +1055,30 @@ HWTEST_F(AbilityManagerStubSecondTest, NotifyStartupExceptionBySCBInner_001, Tes
         static_cast<uint32_t>(AbilityManagerInterfaceCode::NOTIFY_STARTUP_EXCEPTION_BY_SCB), data, reply, option);
     EXPECT_EQ(ret, NO_ERROR);
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: PreloadApplicationInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService PreloadApplicationInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function PreloadApplicationInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubSecondTest, PreloadApplicationInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    WriteInterfaceToken(data);
+    std::string bundleName = "bundleName";
+    data.WriteString(bundleName);
+    int32_t userId = -1;
+    data.WriteInt32(userId);
+    int32_t appIndex = 0;
+    data.WriteInt32(appIndex);
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::PRELOAD_APPLICATION), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+}
 } // namespace AAFwk
 } // namespace OHOS

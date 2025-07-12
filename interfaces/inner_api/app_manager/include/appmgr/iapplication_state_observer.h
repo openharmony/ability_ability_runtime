@@ -19,6 +19,7 @@
 #include "ability_state_data.h"
 #include "app_state_data.h"
 #include "page_state_data.h"
+#include "preload_process_data.h"
 #include "process_data.h"
 #include "process_bind_data.h"
 #include "iremote_broker.h"
@@ -157,6 +158,13 @@ public:
      * @param processData Process data.
      */
     virtual void OnKeepAliveStateChanged(const ProcessData &processData) {};
+    
+    /**
+     * Will be called when preload process state change.
+     *
+     * @param preloadProcessData Preload process data.
+     */
+    virtual void OnPreloadProcessStateChanged(const PreloadProcessData &preloadProcessData) {};
 
     enum class Message {
         TRANSACT_ON_FOREGROUND_APPLICATION_CHANGED = 0,
@@ -177,6 +185,7 @@ public:
         TRANSACT_ON_WINDOW_HIDDEN,
         TRANSACT_ON_PROCESS_BINDINGRELATION_CHANGED,
         TRANSACT_ON_KEEP_ALIVE_STATE_CHANGED,
+        TRANSACT_ON_PRELOAD_PROCESS_STATE_CHANGED,
     };
 };
 }  // namespace AppExecFwk

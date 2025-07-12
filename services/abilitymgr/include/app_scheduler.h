@@ -304,7 +304,7 @@ public:
     int NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid,
         const bool isUpgrade);
 
-     /**
+    /**
      * update the application info after new module installed.
      *
      * @param bundleName, bundle name in Application record.
@@ -612,6 +612,13 @@ public:
     bool IsProcessAttached(sptr<IRemoteObject> token) const;
 
     bool IsCallerKilling(const std::string& callerKey) const;
+
+    int32_t PreloadApplicationByPhase(const std::string &bundleName, int32_t userId, int32_t appIndex,
+        AppExecFwk::PreloadPhase preloadPhase);
+
+    int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token);
+
+    int32_t CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex, bool &isExist);
 
 protected:
     /**

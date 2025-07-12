@@ -246,6 +246,10 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     abilityRecord->SetAppIndex(appIndex);
     abilityRecord->SetSecurityFlag(abilityRequest.want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false));
     abilityRecord->SetCallerAccessTokenId(abilityRequest.callerAccessTokenId);
+    if (abilityRequest.processOptions != nullptr && abilityRequest.processOptions->isPreloadStart) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "start by preload");
+        abilityRecord->SetPreloadStart(true);
+    }
     abilityRecord->sessionInfo_ = abilityRequest.sessionInfo;
     if (AppUtils::GetInstance().IsMultiProcessModel() && abilityRequest.abilityInfo.isStageBasedModel &&
         abilityRequest.abilityInfo.type == AppExecFwk::AbilityType::PAGE &&

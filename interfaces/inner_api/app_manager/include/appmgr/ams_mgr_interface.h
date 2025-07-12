@@ -506,6 +506,23 @@ public:
         return false;
     }
 
+    virtual int32_t PreloadApplicationByPhase(const std::string &bundleName, int32_t userId, int32_t appIndex,
+        AppExecFwk::PreloadPhase preloadPhase)
+    {
+        return ERR_OK;
+    }
+
+    virtual int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+    {
+        return ERR_OK;
+    }
+
+    virtual int32_t CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,
+        bool &isExist)
+    {
+        return ERR_OK;
+    }
+
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -566,6 +583,9 @@ public:
         IS_NO_REQUIRE_BIG_MEMORY,
         NOTIFY_UNINSTALL_OR_UPGRADE_APP,
         NOTIFY_UNINSTALL_OR_UPGRADE_APP_END,
+        PRELOAD_APPLICATION_BY_PHASE,
+        NOTIFY_PRELOAD_ABILITY_STATE_CHANGED,
+        CHECK_PRELOAD_APP_RECORD_EXIST,
         // Add enumeration values above
         END
     };
