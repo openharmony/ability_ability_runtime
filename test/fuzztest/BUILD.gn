@@ -280,7 +280,6 @@ group("fuzztest") {
     "abilitystubupdatemissionsnapshotfromwms_fuzzer:fuzztest",
     "abilitystubverifypermission_fuzzer:fuzztest",
     "abilitytransitiondone_fuzzer:fuzztest",
-    "abilityunlockscreencallback_fuzzer:fuzztest",
     "abilityuriextensionhostinfo_fuzzer:fuzztest",
     "acquiredataability_fuzzer:fuzztest",
     "addabilitystagedone_fuzzer:fuzztest",
@@ -444,7 +443,6 @@ group("fuzztest") {
     "schedulecommandabilitydone_fuzzer:fuzztest",
     "scheduleconnectabilitydone_fuzzer:fuzztest",
     "scheduledisconnectabilitydone_fuzzer:fuzztest",
-    "screenunlockinterceptor_fuzzer:fuzztest",
     "sendresulttoability_fuzzer:fuzztest",
     "setabilitycontroller_fuzzer:fuzztest",
     "setmissioncontinuestate_fuzzer:fuzztest",
@@ -495,6 +493,12 @@ group("fuzztest") {
       "abilitychildprocessinfo_fuzzer:fuzztest",
       "abilitychildprocessrecord_fuzzer:fuzztest",
       "abilitychildprocessrecordfirst_fuzzer:fuzztest",
+    ]
+  }
+  if (ability_runtime_screenlock_enable) {
+    deps += [
+      "abilityunlockscreencallback_fuzzer:fuzztest",
+      "screenunlockinterceptor_fuzzer:fuzztest",
     ]
   }
 }

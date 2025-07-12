@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,8 +26,10 @@
 #ifdef SUPPORT_GRAPHICS
 #include "unlock_screen_callback.h"
 #ifdef SUPPORT_SCREEN
+#ifdef ABILITY_RUNTIME_SCREENLOCK_ENABLE
 #include "screenlock_manager.h"
 #include "screenlock_common.h"
+#endif // ABILITY_RUNTIME_SCREENLOCK_ENABLE
 #endif
 #endif
 
@@ -51,17 +53,13 @@ bool UnlockScreenManager::UnlockScreen()
 {
     bool isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
     bool isDeveloperMode = system::GetBoolParameter(DEVELOPER_MODE_STATE, false);
-    if (!isShellCall) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "not aa start call, just start ability");
-        return true;
-    }
-    if (!isDeveloperMode) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "not devlop mode, just start ability");
+    if (!isShellCall || !isDeveloperMode) {
         return true;
     }
 
 #ifdef SUPPORT_GRAPHICS
 #ifdef SUPPORT_SCREEN
+#ifdef ABILITY_RUNTIME_SCREENLOCK_ENABLE
     bool isScreenLocked = OHOS::ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
     bool isScreenSecured = OHOS::ScreenLock::ScreenLockManager::GetInstance()->GetSecure();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "isScreenLocked: %{public}d, isScreenSecured: %{public}d",
@@ -69,6 +67,7 @@ bool UnlockScreenManager::UnlockScreen()
     if (isScreenLocked && isScreenSecured) {
         return false;
     }
+#endif // ABILITY_RUNTIME_SCREENLOCK_ENABLE
 #endif
 #endif
 
@@ -82,6 +81,7 @@ bool UnlockScreenManager::UnlockScreen()
 #endif
 
 #ifdef SUPPORT_GRAPHICS
+#ifdef ABILITY_RUNTIME_SCREENLOCK_ENABLE
     if (isScreenLocked) {
         auto promise = std::make_shared<std::promise<bool>>();
         sptr<UnlockScreenCallback> listener = sptr<UnlockScreenCallback>::MakeSptr(promise);
@@ -96,6 +96,7 @@ bool UnlockScreenManager::UnlockScreen()
         TAG_LOGI(AAFwkTag::ABILITYMGR, "UnlockScreen end");
         return future.get();
     }
+#endif // ABILITY_RUNTIME_SCREENLOCK_ENABLE
 #endif
     TAG_LOGI(AAFwkTag::ABILITYMGR, "UnlockScreen end");
     return true;

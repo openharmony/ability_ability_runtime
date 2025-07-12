@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,9 @@
 #include "parameters.h"
 #include "start_ability_utils.h"
 #ifdef SUPPORT_SCREEN
+#ifdef ABILITY_RUNTIME_SCREENLOCK_ENABLE
 #include "screenlock_manager.h"
+#endif // ABILITY_RUNTIME_SCREENLOCK_ENABLE
 #endif
 
 namespace OHOS {
@@ -61,9 +63,11 @@ ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
     }
 
 #ifdef SUPPORT_SCREEN
+#ifdef ABILITY_RUNTIME_SCREENLOCK_ENABLE
     if (!OHOS::ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked()) {
         return ERR_OK;
     }
+#endif // ABILITY_RUNTIME_SCREENLOCK_ENABLE
 #endif
 
     if (targetAbilityInfo.applicationInfo.isSystemApp) {
