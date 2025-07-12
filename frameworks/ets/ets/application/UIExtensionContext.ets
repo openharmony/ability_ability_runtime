@@ -16,6 +16,7 @@
 import { AbilityResult } from 'ability.abilityResult';
 import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
+import { ConnectOptions } from 'ability.connectOptions';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import ExtensionContext from 'application.ExtensionContext';
 import StartOptions from '@ohos.app.ability.StartOptions';
@@ -54,6 +55,12 @@ export default class UIExtensionContext extends ExtensionContext {
   native terminateSelfWithResultSync(parameter: AbilityResult, callback: AsyncCallbackWrapper<void>): void;
   native nativeStartAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
   native nativeStartAbility(want: Want, options: StartOptions, callback:AsyncCallbackWrapper<void>): void;
+  private native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): double;
+  private native nativeDisconnectServiceExtensionAbilitySync(connection: double, callback: AsyncCallbackWrapper<void>): void;
+  private native nativeStartAbilityForResultAsCaller(want: Want, callback: AsyncCallbackWrapper<void>, options?: StartOptions): void;
+  private native nativeStartAbilityForResult(want: Want, callback:AsyncCallbackWrapper<AbilityResult>): void;
+  private native nativeStartAbilityForResult(want: Want, startOptions: StartOptions,
+    callback:AsyncCallbackWrapper<AbilityResult>): void;
 
   terminateSelf(callback:AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
@@ -128,5 +135,81 @@ export default class UIExtensionContext extends ExtensionContext {
         this.nativeStartAbility(want, options, myCall);
       });
     });
+  }
+
+  connectServiceExtensionAbility(want: Want, options: ConnectOptions): number {
+    return this.nativeConnectServiceExtensionAbility(want, options);
+  }
+
+  disconnectServiceExtensionAbility(connection: number, callback: AsyncCallback<void>): void {
+    let syncCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeDisconnectServiceExtensionAbilitySync(connection, syncCall);
+    });
+  }
+
+  disconnectServiceExtensionAbility(connection: number): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let syncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeDisconnectServiceExtensionAbilitySync(connection, syncCall);
+      })
+    });
+  }
+
+  startAbilityForResult(want: Want, callback: AsyncCallback<AbilityResult, void>): void {
+    let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
+    taskpool.execute((): void => {
+      this.nativeStartAbilityForResult(want, myCall);
+    });
+  }
+
+  startAbilityForResult(want: Want, startOptions: StartOptions, callback: AsyncCallback<AbilityResult, void>): void {
+    let myCall = new AsyncCallbackWrapper<AbilityResult>(callback);
+    taskpool.execute((): void => {
+      this.nativeStartAbilityForResult(want, startOptions, myCall);
+    });
+  }
+
+  startAbilityForResult(want: Want): Promise<AbilityResult> {
+    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult) => void,
+      reject: (err: BusinessError) => void): void => {
+      let myCall =
+        new AsyncCallbackWrapper<AbilityResult>((err: BusinessError | null, data: AbilityResult | undefined) => {
+          if (err == null || err.code == 0) {
+            resolve(data as AbilityResult);
+          } else {
+            reject(err);
+          }
+        });
+      taskpool.execute((): void => {
+        this.nativeStartAbilityForResult(want, myCall);
+      });
+    });
+    return p;
+  }
+
+  startAbilityForResult(want: Want, startOptions: StartOptions): Promise<AbilityResult> {
+    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult) => void,
+      reject: (err: BusinessError) => void): void => {
+      let myCall =
+        new AsyncCallbackWrapper<AbilityResult>((err: BusinessError | null, data: AbilityResult | undefined) => {
+          if (err == null || err.code == 0) {
+            resolve(data as AbilityResult);
+          } else {
+            reject(err);
+          }
+        });
+      taskpool.execute((): void => {
+        this.nativeStartAbilityForResult(want, startOptions, myCall);
+      });
+    });
+    return p;
   }
 }

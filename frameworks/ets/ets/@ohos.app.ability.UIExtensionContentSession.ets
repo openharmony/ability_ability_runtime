@@ -19,6 +19,7 @@ import { BusinessError } from '@ohos.base';
 import uiExtensionHost from '@ohos.uiExtensionHost';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
+import AbilityStartCallback from 'application.AbilityStartCallback';
 
 class Cleaner {
   static callback(cleaner: Cleaner): void {
@@ -57,6 +58,7 @@ export default class UIExtensionContentSession {
   native nativeSetReceiveDataForResultCallback(callback: (data: Record<string, Object>) => Record<string, Object>): void;
   native terminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
   native terminateSelfWithResultSync(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
+  private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): BusinessError<void>;
 
   sendData(data: Record<string, Object>): void {
     this.nativeSendData(data);
@@ -111,6 +113,39 @@ export default class UIExtensionContentSession {
       });
       taskpool.execute((): void => {
         this.terminateSelfWithResultSync(parameter, myCall);
+      });
+    });
+    return p;
+  }
+
+  startAbilityByType(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback,
+    callback: AsyncCallback<void>): void {
+    let p1 = taskpool.execute((): BusinessError<void> => {
+      return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
+    });
+    p1.then((e: NullishType) => {
+      let retError = e as BusinessError<void>;
+      callback(retError, undefined);
+    }, (err: Error): void => {
+      callback(err as BusinessError, undefined);
+    });
+  }
+
+  startAbilityByType(type: string, wantParam: Record<string, Object>,
+    startCallback: AbilityStartCallback): Promise<void> {
+    let p = new Promise<void>((resolve: (v: undefined) => void, reject: (error: BusinessError<void>) => void): void => {
+      let p1 = taskpool.execute((): BusinessError<void> => {
+        return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
+      });
+      p1.then((e: NullishType) => {
+        let retError = e as BusinessError<void>;
+        if (retError.code === 0) {
+          resolve(undefined);
+        } else {
+          reject(retError);
+        }
+      }).catch((err: Error): void => {
+        reject(err as BusinessError);
       });
     });
     return p;

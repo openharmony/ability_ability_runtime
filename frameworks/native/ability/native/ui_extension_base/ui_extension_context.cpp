@@ -15,13 +15,15 @@
 
 #include "ui_extension_context.h"
 
+#include "ability_business_error.h"
 #include "ability_manager_client.h"
 #include "bool_wrapper.h"
+#include "configuration.h"
+#include "configuration_convertor.h"
 #include "connection_manager.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "configuration_convertor.h"
-#include "configuration.h"
+#include "string_wrapper.h"
 #include "ui_content.h"
 
 namespace OHOS {
@@ -302,6 +304,56 @@ Ace::UIContent* UIExtensionContext::GetUIContent()
         return nullptr;
     }
     return window_->GetUIContent();
+}
+
+ErrCode UIExtensionContext::StartAbilityByType(
+    const std::string &type, AAFwk::WantParams &wantParam, std::shared_ptr<UIExtensionCallback> uiExtensionCallback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "StartAbilityByType call");
+    auto uiContent = GetUIContent();
+    if (uiContent == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null uiContent");
+        return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
+    }
+    wantParam.SetParam(UIEXTENSION_TARGET_TYPE_KEY, AAFwk::String::Box(type));
+    AAFwk::Want want;
+    want.SetParams(wantParam);
+    if (wantParam.HasParam(FLAG_AUTH_READ_URI_PERMISSION)) {
+        want.SetFlags(wantParam.GetIntParam(FLAG_AUTH_READ_URI_PERMISSION, 0));
+        wantParam.Remove(FLAG_AUTH_READ_URI_PERMISSION);
+    }
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null window");
+        return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
+    }
+    TAG_LOGI(AAFwkTag::UI_EXT, "window displayId %{public}" PRIu64, window->GetDisplayId());
+    want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, static_cast<int32_t>(window->GetDisplayId()));
+
+    Ace::ModalUIExtensionCallbacks callback;
+    if (uiExtensionCallback == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null uiExtensionCallback");
+        return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
+    }
+    callback.onError = [uiExtensionCallback](int32_t arg, const std::string &str1, const std::string &str2) {
+        uiExtensionCallback->OnError(arg);
+    };
+    callback.onRelease = [uiExtensionCallback](int32_t arg) {
+        uiExtensionCallback->OnRelease(arg);
+    };
+    callback.onResult = [uiExtensionCallback](int32_t arg1, const OHOS::AAFwk::Want arg2) {
+        uiExtensionCallback->OnResult(arg1, arg2);
+    };
+
+    Ace::ModalUIExtensionConfig config;
+    int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
+    if (sessionId == 0) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "createModalUIExtension failed");
+        return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
+    }
+    uiExtensionCallback->SetUIContent(uiContent);
+    uiExtensionCallback->SetSessionId(sessionId);
+    return ERR_OK;
 }
 #endif // SUPPORT_SCREEN
 ErrCode UIExtensionContext::OpenAtomicService(AAFwk::Want& want, const AAFwk::StartOptions &options, int requestCode,

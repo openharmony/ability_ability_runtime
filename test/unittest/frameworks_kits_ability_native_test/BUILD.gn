@@ -3263,6 +3263,7 @@ ohos_unittest("js_ui_extension_Callback_test") {
 
   sources = [
     "${ability_runtime_native_path}/ability/native/js_ui_extension_callback.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_callback.cpp",
     "js_ui_extension_Callback_test.cpp",
   ]
 

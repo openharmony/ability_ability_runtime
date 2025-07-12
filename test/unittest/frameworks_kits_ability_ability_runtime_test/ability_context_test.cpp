@@ -474,7 +474,7 @@ public:
         return nullptr;
     }
     virtual ErrCode StartAbilityByType(const std::string &type, AAFwk::WantParams &wantParam,
-        const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks)
+        std::shared_ptr<UIExtensionCallback> uiExtensionCallback)
     {
         return ERR_OK;
     }

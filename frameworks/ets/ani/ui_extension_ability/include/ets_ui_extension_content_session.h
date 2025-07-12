@@ -20,6 +20,7 @@
 #include "ets_runtime.h"
 #include "session_info.h"
 #include "start_options.h"
+#include "ui_extension_context.h"
 #include "window.h"
 
 namespace OHOS {
@@ -82,6 +83,8 @@ public:
     static void NativeSetReceiveDataCallback(ani_env *env, ani_object clsObj, ani_object funcObj);
     static void NativeSetReceiveDataForResultCallback(ani_env *env, ani_object clsObj, ani_object funcObj);
     static ani_object NativeGetUIExtensionHostWindowProxy(ani_env *env, ani_object obj);
+    static ani_object NativeStartAbilityByTypeSync(
+        ani_env *env, ani_object obj, ani_string type, ani_ref wantParam, ani_object startCallback);
 
     void SendData(ani_env *env, ani_object object, ani_object data);
     void LoadContent(ani_env *env, ani_object object, ani_string path, ani_object storage);
@@ -101,6 +104,7 @@ public:
 private:
     void SetReceiveDataCallbackRegister(ani_env *env, ani_object functionObj);
     void SetReceiveDataForResultCallbackRegister(ani_env *env, ani_object funcObj);
+    ani_object StartAbilityByTypeSync(ani_env *env, ani_string aniType, ani_ref aniWantParam, ani_object startCallback);
 
     sptr<AAFwk::SessionInfo> sessionInfo_;
     sptr<Rosen::Window> uiWindow_;

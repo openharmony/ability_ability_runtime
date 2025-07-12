@@ -34,8 +34,8 @@ public:
     static AbilityStage *Create(
         const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo);
 
-    ETSAbilityStage(ETSRuntime &etsRuntime, std::unique_ptr<AppExecFwk::ETSNativeReference> &&ETSAbilityStageObj);
-    ~ETSAbilityStage() override {}
+    ETSAbilityStage(ETSRuntime &etsRuntime, std::unique_ptr<AppExecFwk::ETSNativeReference> &&etsAbilityStageObj);
+    ~ETSAbilityStage() override;
 
     void Init(const std::shared_ptr<Context> &context,
         const std::weak_ptr<AppExecFwk::OHOSApplication> application) override;
@@ -44,8 +44,13 @@ public:
 
     void OnDestroy() const override;
 
+    std::string OnAcceptWant(const AAFwk::Want &want) override;
+
+    std::string OnNewProcessRequest(const AAFwk::Want &want) override;
+
     void OnConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
 
+    void OnMemoryLevel(int32_t level) override;
 private:
     bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...) const;
 

@@ -15,6 +15,9 @@
 
 import BaseContext from 'application.BaseContext'
 import ApplicationContext from 'application.ApplicationContext'
+import AsyncCallbackWrapper from '../utils/AbilityUtils';
+import { AsyncCallback } from '@ohos.base';
+import { BusinessError } from '@ohos.base';
 import contextConstant from '@ohos.app.ability.contextConstant'
 import { ApplicationInfo } from 'bundleManager.ApplicationInfo'
 import resmgr from '@ohos.resourceManager'
@@ -43,8 +46,13 @@ export class Context extends BaseContext {
   preferencesDir: string = "";
   databaseDir: string = "";
   cacheDir: string = "";
+  cloudFileDir: string = "";
+  distributedFilesDir: string = "";
+  bundleCodeDir: string = "";
+  resourceDir: string = "";
   applicationInfo: ApplicationInfo;
   resourceManager: resmgr.ResourceManager;
+  processName: string = "";
   native constructor();
   constructor(applicationInfo: ApplicationInfo, resourceManager: resmgr.ResourceManager) {
       super();
@@ -68,6 +76,10 @@ export class Context extends BaseContext {
   public native createModuleResourceManagerSync(bundleName: string, moduleName: string): resmgr.ResourceManager;
   private native switchArea(mode: contextConstant.AreaMode): void;
   private native getArea(): contextConstant.AreaMode;
+  public native nativeGetGroupDir(dataGroupID: string, callback: AsyncCallbackWrapper<string>): void;
+  public native nativeCreateDisplayContext(displayId: number): Context;
+  public native nativeCreateAreaModeContext(areaMode: contextConstant.AreaMode): Context;
+  public native nativeCreateSystemHspModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager;
 
   getApplicationContext(): ApplicationContext {
     return this.getApplicationContextSync();
@@ -83,5 +95,39 @@ export class Context extends BaseContext {
 
   get area(): contextConstant.AreaMode {
     return this.getArea();
+  }
+
+  getGroupDir(dataGroupID: string, callback: AsyncCallback<string>): void {
+    let myCall = new AsyncCallbackWrapper<string>(callback);
+    taskpool.execute((): void => {
+      this.nativeGetGroupDir(dataGroupID, myCall);
+    });
+  }
+
+  getGroupDir(dataGroupID: string): Promise<string> {
+    return new Promise<string>((resolve: (data: string) => void, reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<string>((err: BusinessError | null, data: string | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as string);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeGetGroupDir(dataGroupID, myCall);
+      });
+    });
+  }
+
+  createDisplayContext(displayId: number): Context {
+    return this.nativeCreateDisplayContext(displayId);
+  }
+
+  createAreaModeContext(areaMode: contextConstant.AreaMode): Context {
+    return this.nativeCreateAreaModeContext(areaMode);
+  }
+
+  createSystemHspModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager {
+    return this.nativeCreateSystemHspModuleResourceManager(bundleName, moduleName);
   }
 }
