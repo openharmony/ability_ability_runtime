@@ -166,16 +166,12 @@ group("unittest") {
       "ability_manager_service_eighth_test:unittest",
       "ability_manager_service_eleven_test:unittest",
       "ability_manager_service_first_test:unittest",
-      "ability_manager_service_fourteenth_test:unittest",
       "ability_manager_service_fourth_test:unittest",
       "ability_manager_service_mock_test:unittest",
       "ability_manager_service_ninth_test:unittest",
-      "ability_manager_service_second_test:unittest",
       "ability_manager_service_seventh_test:unittest",
       "ability_manager_service_sixth_test:unittest",
       "ability_manager_service_tenth_test:unittest",
-      "ability_manager_service_third_test:unittest",
-      "ability_manager_service_thirteenth_test:unittest",
       "ability_manager_service_twelfth_test:unittest",
       "ability_manager_stub_second_test:unittest",
       "ability_manager_stub_test:unittest",
@@ -325,7 +321,6 @@ group("unittest") {
       "connection_state_item_test:unittest",
       "connection_state_manager_test:unittest",
       "continuation_test:unittest",
-      "crowd_test_interceptor_test:unittest",
       "data_ability_manager_test:unittest",
       "data_ability_observer_proxy_test:unittest",
       "data_ability_observer_stub_test:unittest",
@@ -449,7 +444,6 @@ group("unittest") {
       "sa_interceptor_manager_test:unittest",
       "sa_interceptor_proxy_test:unittest",
       "sa_interceptor_stub_test:unittest",
-      "screen_unlock_interceptor_test:unittest",
       "sender_info_test:unittest",
       "service_extension_context_test:unittest",
       "service_router_mgr_service_test:unittest",
@@ -477,7 +471,6 @@ group("unittest") {
       "ui_extension_record_factory_test:unittest",
       "ui_extension_record_test:unittest",
       "ui_extension_utils_test:unittest",
-      "unlock_screen_test:unittest",
       "update_caller_info_util_test:unittest",
       "uri_utils_second_test",
       "uri_utils_test:unittest",
@@ -562,6 +555,18 @@ group("unittest") {
         "status_bar_delegate_manager_test:unittest",
         "ui_ability_lifecycle_manager_test:unittest",
         "ui_ability_lifecycle_manager_third_test:unittest",
+      ]
+    }
+
+    if (ability_runtime_screenlock_enable) {
+      deps += [
+        "ability_manager_service_second_test:unittest",
+        "ability_manager_service_third_test:unittest",
+        "ability_manager_service_thirteenth_test:unittest",
+        "ability_manager_service_fourteenth_test:unittest",
+        "crowd_test_interceptor_test:unittest",
+        "screen_unlock_interceptor_test:unittest",
+        "unlock_screen_test:unittest",
       ]
     }
 
