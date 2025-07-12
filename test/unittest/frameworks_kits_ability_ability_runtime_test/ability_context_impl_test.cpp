@@ -2370,5 +2370,6 @@ HWTEST_F(AbilityContextImplTest, SetOnNewWantSkipScenariose_0100, Function | Med
     auto ret = context->SetOnNewWantSkipScenarios(0);
     EXPECT_EQ(ret, 0);
 }
+1
 } // namespace AppExecFwk
 } // namespace OHOS
