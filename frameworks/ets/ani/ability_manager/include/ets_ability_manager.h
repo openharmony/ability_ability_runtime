@@ -21,6 +21,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 void EtsAbilityManagerRegistryInit(ani_env *env);
+void GetAbilityRunningInfos(ani_env *env, ani_object callback);
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ETS_ABILITY_MANAGER_H

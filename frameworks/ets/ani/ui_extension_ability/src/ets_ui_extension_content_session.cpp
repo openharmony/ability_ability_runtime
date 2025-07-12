@@ -21,6 +21,7 @@
 #include "ani_common_want.h"
 #include "ani_extension_window.h"
 #include "ets_error_utils.h"
+#include "ets_ui_extension_callback.h"
 #include "ets_ui_extension_context.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
@@ -166,6 +167,17 @@ ani_object EtsUIExtensionContentSession::NativeGetUIExtensionHostWindowProxy(ani
     ani_object object = nullptr;
     if (etsContentSession != nullptr) {
         object = etsContentSession->GetUIExtensionHostWindowProxy(env, obj);
+    }
+    return object;
+}
+
+ani_object EtsUIExtensionContentSession::NativeStartAbilityByTypeSync(
+    ani_env *env, ani_object obj, ani_string type, ani_ref wantParam, ani_object startCallback)
+{
+    auto etsContentSession = EtsUIExtensionContentSession::GetEtsContentSession(env, obj);
+    ani_object object = nullptr;
+    if (etsContentSession != nullptr) {
+        object = etsContentSession->StartAbilityByTypeSync(env, type, wantParam, startCallback);
     }
     return object;
 }
@@ -567,6 +579,54 @@ void EtsUIExtensionContentSession::SetReceiveDataForResultCallbackRegister(ani_e
             return retWantParams;
     });
     isSyncRegistered_ = true;
+}
+
+
+ani_object EtsUIExtensionContentSession::StartAbilityByTypeSync(
+    ani_env *env, ani_string aniType, ani_ref aniWantParam, ani_object startCallback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "StartAbilityByTypeSync call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return nullptr;
+    }
+    ani_object aniObject = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INNER);
+    std::string type;
+    if (!AppExecFwk::GetStdString(env, aniType, type)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "parse type failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parameter error: Failed to parse type! Type must be a string.");
+        return aniObject;
+    }
+
+    AAFwk::WantParams wantParam;
+    if (!AppExecFwk::UnwrapWantParams(env, aniWantParam, wantParam)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "parse wantParam failed");
+        EtsErrorUtil::ThrowInvalidParamError(
+            env, "Parameter error: Failed to parse wantParam, must be a Record<string, Object>.");
+        return aniObject;
+    }
+
+    ani_vm *vm = nullptr;
+    if (env->GetVM(&vm) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "get vm failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Get vm failed.");
+        return aniObject;
+    }
+    ErrCode innerErrCode = ERR_OK;
+    std::shared_ptr<EtsUIExtensionCallback> callback = std::make_shared<EtsUIExtensionCallback>(vm);
+    callback->SetEtsCallbackObject(startCallback);
+    auto context = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(context_.lock());
+    if (!context) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        return EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+    }
+#ifdef SUPPORT_SCREEN
+    innerErrCode = context->StartAbilityByType(type, wantParam, callback);
+#endif
+    if (innerErrCode != ERR_OK) {
+        return EtsErrorUtil::CreateErrorByNativeErr(env, innerErrCode);
+    }
+    return aniObject;
 }
 
 void EtsUIExtensionContentSession::CallReceiveDataCallbackForResult(ani_vm* vm, ani_ref callbackRef,

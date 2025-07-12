@@ -21,8 +21,9 @@
 #include "ani_common_util.h"
 #include "ani_common_want.h"
 #include "application_context.h"
+#include "ets_application_state_change_callback.h"
 #include "ets_context_utils.h"
-#include "ets_error_utils.h"
+#include "ets_enviroment_callback.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -50,6 +51,13 @@ public:
     static ani_object CreateEtsApplicationContext(ani_env* aniEnv,
         const std::shared_ptr<ApplicationContext> &applicationContext);
     static void BindApplicationContextFunc(ani_env* aniEnv);
+    static ani_double GetCurrentAppCloneIndex(ani_env *env, ani_object aniObj);
+    static ani_string GetCurrentInstanceKey(ani_env *env, ani_object aniObj);
+    static void GetAllRunningInstanceKeys(ani_env *env, ani_object aniObj, ani_object callback);
+    static void NativeOffApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
+    static void NativeOnApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
+    static void NativeOffEnvironmentSync(ani_env *env, ani_object aniObj, ani_double callbackId, ani_object callback);
+    static ani_double NativeOnEnvironmentSync(ani_env *env, ani_object aniObj, ani_object envCallback);
 protected:
     std::weak_ptr<ApplicationContext> applicationContext_;
 private:
@@ -63,6 +71,15 @@ private:
     void OnkillAllProcesses(ani_env *env, ani_object aniObj, ani_boolean clearPageStack, ani_object callback);
     void OnPreloadUIExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callback);
     void OnSetSupportedProcessCacheSync(ani_env *env, ani_object aniObj, ani_boolean value);
+    ani_double OnGetCurrentAppCloneIndex(ani_env *env, ani_object aniObj);
+    ani_string OnGetCurrentInstanceKey(ani_env *env, ani_object aniObj);
+    void OnGetAllRunningInstanceKeys(ani_env *env, ani_object aniObj, ani_object callback);
+    void OnNativeOffApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
+    void OnNativeOnApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
+    void OnNativeOffEnvironmentSync(ani_env *env, ani_object aniObj, ani_double callbackId, ani_object callback);
+    ani_double OnNativeOnEnvironmentSync(ani_env *env, ani_object aniObj, ani_object envCallback);
+    std::shared_ptr<EtsEnviromentCallback> etsEnviromentCallback_;
+    std::shared_ptr<EtsApplicationStateChangeCallback> applicationStateCallback_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
