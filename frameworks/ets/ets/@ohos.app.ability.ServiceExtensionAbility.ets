@@ -40,7 +40,7 @@ export default class ServiceExtensionAbility {
 
   private native nativeOnConnectCallback(service: rpc.RemoteObject): boolean;
 
-  private checkPromise(obj: NullishType): boolean {
+  private checkPromise(obj: Any): boolean {
     if (obj instanceof Promise) {
       return true;
     }
