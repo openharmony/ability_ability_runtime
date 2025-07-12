@@ -240,9 +240,7 @@ export default class ApplicationContext extends Context {
   }
 
   restartApp(want: Want): void {
-    taskpool.execute((): void => {
-      this.nativerestartApp(want);
-    });
+    this.nativerestartApp(want);
   }
 
   static transferStatic(input: Any): Object {
