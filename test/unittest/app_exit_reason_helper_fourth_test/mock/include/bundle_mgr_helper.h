@@ -216,7 +216,8 @@ public:
         return false;
     }
 
-    bool CleanBundleDataFiles(const std::string& bundleName, int32_t userId, int32_t appCloneIndex)
+    bool CleanBundleDataFiles(
+        const std::string& bundleName, int32_t userId, int32_t appCloneIndex, int32_t callerUid)
     {
         return false;
     }

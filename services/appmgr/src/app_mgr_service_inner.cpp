@@ -2333,7 +2333,7 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(const std::string &bu
         return AAFwk::ERR_APP_CLONE_INDEX_INVALID;
     }
     // 2.delete bundle side user data
-    if (!IN_PROCESS_CALL(bundleMgrHelper->CleanBundleDataFiles(bundleName, userId, appCloneIndex))) {
+    if (!IN_PROCESS_CALL(bundleMgrHelper->CleanBundleDataFiles(bundleName, userId, appCloneIndex, callerUid))) {
         TAG_LOGE(AAFwkTag::APPMGR, "delete user data fail");
         return AAFwk::ERR_APP_CLONE_INDEX_INVALID;
     }
