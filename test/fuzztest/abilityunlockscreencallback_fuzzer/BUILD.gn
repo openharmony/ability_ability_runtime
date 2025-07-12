@@ -52,8 +52,17 @@ ohos_fuzztest("AbilityUnlockScreenCallbackFuzzTest") {
     "napi:ace_napi",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "screenlock_mgr:screenlock_client",
   ]
+
+  defines = []
+  if (ability_runtime_graphics && ability_runtime_screenlock_enable) {
+    defines += [
+      "ABILITY_RUNTIME_SCREENLOCK_ENABLE"
+    ]
+    external_deps += [
+      "screenlock_mgr:screenlock_client",
+    ]
+  }
 }
 
 ###############################################################################

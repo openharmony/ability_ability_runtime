@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #ifdef SUPPORT_GRAPHICS
 #ifdef SUPPORT_SCREEN
+#ifdef ABILITY_RUNTIME_SCREENLOCK_ENABLE
 #include <future>
 
 #include "screenlock_manager.h"
@@ -35,6 +36,7 @@ public:
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
+#endif // ABILITY_RUNTIME_SCREENLOCK_ENABLE
 #endif // SUPPORT_SCREEN
 #endif // SUPPORT_GRAPHICS
 #endif // OHOS_ABILITY_RUNTIME_UNLOCK_SCREEN_CALLBACK_H
