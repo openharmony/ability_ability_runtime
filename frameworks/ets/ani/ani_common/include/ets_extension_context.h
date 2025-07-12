@@ -20,7 +20,16 @@
 #include "extension_context.h"
 
 namespace OHOS {
+namespace AppExecFwk {
+struct ETSNativeReference;
+}
 namespace AbilityRuntime {
+class EtsExtensionContext final {
+public:
+    static void ConfigurationUpdated(ani_env *env, const std::shared_ptr<AppExecFwk::ETSNativeReference> &EtsContext,
+        const std::shared_ptr<AppExecFwk::Configuration> &config);
+};
+
 void CreateEtsExtensionContext(ani_env *aniEnv, ani_class contextClass, ani_object &contextObj,
     std::shared_ptr<ExtensionContext> context, std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
 } // namespace AbilityRuntime

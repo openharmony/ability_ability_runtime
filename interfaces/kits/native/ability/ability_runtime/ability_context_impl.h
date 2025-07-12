@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -230,8 +230,8 @@ public:
      */
     ErrCode SetMissionContinueState(const AAFwk::ContinueState &state) override;
 #ifdef SUPPORT_SCREEN
-    ErrCode StartAbilityByType(const std::string &type,
-        AAFwk::WantParams &wantParam, const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks) override;
+    ErrCode StartAbilityByType(const std::string &type, AAFwk::WantParams &wantParam,
+        std::shared_ptr<UIExtensionCallback> uiExtensionCallback) override;
 #endif
     ErrCode RequestModalUIExtension(const Want &want) override;
 

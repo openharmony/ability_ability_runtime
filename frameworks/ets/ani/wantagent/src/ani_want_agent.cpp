@@ -316,7 +316,8 @@ void EtsWantAgent::OnGetWant(ani_env *env, ani_object agent, ani_object call)
     WantAgent* pWantAgent = nullptr;
     if (!CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Non-system app");
-        EtsErrorUtil::ThrowError(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
+        EtsErrorUtil::ThrowError(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP,
+            AbilityRuntimeErrorUtil::GetErrMessage(ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP));
         return;
     }
     UnwrapWantAgent(env, agent, reinterpret_cast<void **>(&pWantAgent));
@@ -568,7 +569,8 @@ int32_t EtsWantAgent::GetTriggerInfo(ani_env *env, ani_object triggerInfoObj, Tr
     if (!isUndefined) {
         if (!CheckCallerIsSystemApp()) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "Non-system app");
-            EtsErrorUtil::ThrowError(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
+            EtsErrorUtil::ThrowError(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP,
+                AbilityRuntimeErrorUtil::GetErrMessage(ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP));
             return ERR_NOT_OK;
         }
         startOptions = std::make_shared<AAFwk::StartOptions>();

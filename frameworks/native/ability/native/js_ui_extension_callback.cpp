@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,16 +69,7 @@ JsUIExtensionCallback::~JsUIExtensionCallback()
     }
 }
 
-void JsUIExtensionCallback::SetSessionId(int32_t sessionId)
-{
-    sessionId_ = sessionId;
-}
 #ifdef SUPPORT_SCREEN
-void JsUIExtensionCallback::SetUIContent(Ace::UIContent* uiContent)
-{
-    uiContent_ = uiContent;
-}
-
 void JsUIExtensionCallback::SetJsCallbackObject(napi_value jsCallbackObject)
 {
     napi_ref ref = nullptr;
@@ -108,11 +99,7 @@ void JsUIExtensionCallback::OnError(int32_t number)
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsUIExtensionCallback::OnError:",
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
-    if (uiContent_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null uiContent_");
-        return;
-    }
-    uiContent_->CloseModalUIExtension(sessionId_);
+    CloseModalUIExtension();
 }
 
 void JsUIExtensionCallback::OnResult(int32_t resultCode, const AAFwk::Want &want)
@@ -134,11 +121,7 @@ void JsUIExtensionCallback::OnResult(int32_t resultCode, const AAFwk::Want &want
     std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
     NapiAsyncTask::Schedule("JsUIExtensionCallback::OnResult:",
         env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
-    if (uiContent_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null uiContent_");
-        return;
-    }
-    uiContent_->CloseModalUIExtension(sessionId_);
+    CloseModalUIExtension();
 }
 
 void JsUIExtensionCallback::CallJsResult(int32_t resultCode, const AAFwk::Want &want)
@@ -177,15 +160,6 @@ void JsUIExtensionCallback::CallJsResult(int32_t resultCode, const AAFwk::Want &
     TAG_LOGI(AAFwkTag::UI_EXT, "end");
 }
 
-void JsUIExtensionCallback::OnRelease(int32_t code)
-{
-    TAG_LOGI(AAFwkTag::UI_EXT, "call, code:%{public}d", code);
-    if (uiContent_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null uiContent_");
-        return;
-    }
-    uiContent_->CloseModalUIExtension(sessionId_);
-}
 #endif // SUPPORT_SCREEN
 void JsUIExtensionCallback::CallJsError(int32_t number)
 {

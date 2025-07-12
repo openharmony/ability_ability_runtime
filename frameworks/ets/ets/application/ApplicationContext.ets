@@ -19,6 +19,8 @@ import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import Want from '@ohos.app.ability.Want';
 import { ProcessInformation } from 'application.ProcessInformation';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
+import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
+import type ApplicationStateChangeCallback from '@ohos.app.ability.ApplicationStateChangeCallback';
 
 class Cleaner {
   public ptr: long = 0;
@@ -66,6 +68,13 @@ export default class ApplicationContext extends Context {
   public native nativesetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
   public native nativesetFont(font: string): void; 
   public native nativerestartApp(want: Want): void;
+  public native nativeGetAllRunningInstanceKeys(callback: AsyncCallbackWrapper<Array<string>>): void;
+  public native nativeOnEnvironmentSync(callback: EnvironmentCallback): number;
+  public native nativeOffEnvironmentSync(callbackId: number, callback: AsyncCallbackWrapper<void>): void;
+  public native nativeOnApplicationStateChangeSync(callback: ApplicationStateChangeCallback): void;
+  public native nativeOffApplicationStateChangeSync(callback?: ApplicationStateChangeCallback): void;
+  public native nativegetCurrentAppCloneIndex(): number;
+  public native nativegetCurrentInstanceKey(): string;
 
   setSupportedProcessCache(isSupported : boolean):void {
     this.setSupportedProcessCacheSync(isSupported);
@@ -195,5 +204,67 @@ export default class ApplicationContext extends Context {
 
   restartApp(want: Want): void {
     this.nativerestartApp(want);
+  }
+
+  getAllRunningInstanceKeys(): Promise<Array<string>> {
+    let p = new Promise<Array<string>>((resolve: (data: Array<string>) => void,
+      reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<Array<string>>((err: BusinessError | null,
+        data: Array<string> | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as Array<string>);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeGetAllRunningInstanceKeys(myCall);
+      });
+    });
+    return p;
+  }
+
+  on(type: 'environment', callback: EnvironmentCallback): number {
+    return this.nativeOnEnvironmentSync(callback);
+  }
+
+  off(type: 'environment', callbackId: number, callback: AsyncCallback<void>): void {
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeOffEnvironmentSync(callbackId, myCall);
+    });
+  }
+
+  off(type: 'environment', callbackId: number): Promise<void> {
+    let p =
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+          if (err == null || err.code == 0) {
+            resolve(undefined);
+          } else {
+            reject(err);
+          }
+        });
+        taskpool.execute((): void => {
+          this.nativeOffEnvironmentSync(callbackId, myCall);
+        });
+      });
+    return p;
+  }
+
+  on(type: 'applicationStateChange', callback: ApplicationStateChangeCallback): void {
+    this.nativeOnApplicationStateChangeSync(callback);
+  }
+
+  off(type: 'applicationStateChange', callback?: ApplicationStateChangeCallback): void {
+    this.nativeOffApplicationStateChangeSync(callback);
+  }
+
+  getCurrentInstanceKey(): string {
+    return this.nativegetCurrentInstanceKey();
+  }
+
+  getCurrentAppCloneIndex(): number {
+    return this.nativegetCurrentAppCloneIndex();
   }
 }
