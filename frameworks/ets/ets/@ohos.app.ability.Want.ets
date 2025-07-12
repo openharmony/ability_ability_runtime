@@ -17,7 +17,7 @@ import hilog from '@ohos.hilog'
 import rpc from '@ohos.rpc';
 import { RecordData } from '@ohos.base';
 
-type valueType = NullishType;
+type valueType = Any;
 const DOMAIN_ID = 0xD001300;
 const TAG = 'WantSerializeTool';
 
@@ -30,7 +30,7 @@ class RecordWriter {
     return this.buffer.toString();
   }
 
-  private writeObject(obj: NullishType): void {
+  private writeObject(obj: Any): void {
     if (obj === null) {
       this.buffer.append('null');
     } else if (obj === undefined) {
@@ -156,7 +156,7 @@ class RecordWriter {
 export class RecordSerializeTool {
   public static stringifyNoThrow(obj: Record<string, Object>): String {
     try {
-      return JSON.stringify(obj as Object as Record<string, NullishType>);
+      return JSON.stringify(obj as Object as Record<string, Any>);
     } catch (err) {
       hilog.error(DOMAIN_ID, TAG, `RecordSerializeTool.stringify error: ${err}`);
       return '';

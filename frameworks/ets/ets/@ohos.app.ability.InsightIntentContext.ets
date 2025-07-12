@@ -25,7 +25,7 @@ export default class InsightIntentContext {
     let p1 = taskpool.execute((): BusinessError => {
       return this.nativeStartAbilitySync(want);
     });
-    p1.then((e: NullishType) => {
+    p1.then((e: Any) => {
       let retError = e as BusinessError;
       callback(retError, undefined);
     }, (err: BusinessError): void => {
@@ -38,7 +38,7 @@ export default class InsightIntentContext {
       let p1 = taskpool.execute((): BusinessError => {
         return this.nativeStartAbilitySync(want);
       });
-      p1.then((e: NullishType) => {
+      p1.then((e: Any) => {
         let retError = e as BusinessError;
         if (retError.code === 0) {
           resolve(undefined);
