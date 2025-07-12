@@ -22,6 +22,7 @@
 #include "runner_runtime/ets_test_runner_instance.h"
 #include "runner_runtime/js_test_runner.h"
 #include "runtime.h"
+#include "ets_runtime.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 
@@ -66,7 +67,17 @@ std::unique_ptr<TestRunner> TestRunner::Create(const std::unique_ptr<AbilityRunt
             return RunnerRuntime::CJTestRunner::Create(runtime, args, bundleInfo);
 #endif
         case AbilityRuntime::Runtime::Language::ETS:
-            return std::unique_ptr<TestRunner>(RunnerRuntime::CreateETSTestRunner(runtime, args, bundleInfo));
+            if (args->GetTestRunnerMode() == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
+                return std::unique_ptr<TestRunner>(RunnerRuntime::CreateETSTestRunner(runtime, args, bundleInfo));
+            } else {
+                auto &etsRuntime = (static_cast<AbilityRuntime::ETSRuntime &>(*runtime));
+                auto &jsRuntime = etsRuntime.GetJsRuntime();
+                if (jsRuntime != nullptr) {
+                    return RunnerRuntime::JsTestRunner::Create(jsRuntime, args, bundleInfo, isFaJsModel);
+                } else {
+                    TAG_LOGE(AAFwkTag::DELEGATOR, "get jsruntime failed in stsruntime");
+                }
+            }
         default:
             return std::make_unique<TestRunner>();
     }
