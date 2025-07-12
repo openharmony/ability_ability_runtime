@@ -27,6 +27,7 @@
 #include "hilog_tag_wrapper.h"
 #include "iability_callback.h"
 #include "ipc_object_stub.h"
+#include "js_ui_extension_callback.h"
 #include "mock_context.h"
 #include "mock_lifecycle_observer.h"
 #include "mock_serviceability_manager_service.h"

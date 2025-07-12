@@ -87,13 +87,6 @@ public:
     void OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback) override;
 
     /**
-     * @brief Called when the system configuration is updated.
-     *
-     * @param configuration Indicates the updated configuration information.
-     */
-    void OnConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
-
-    /**
      * @brief Called when this extension enters the <b>STATE_FOREGROUND</b> state.
      *
      *
@@ -134,7 +127,14 @@ public:
     /**
      * @brief Called when configuration changed, including system configuration and window configuration.
      */
-    void ConfigurationUpdated();
+    void ConfigurationUpdated() override;
+
+    /**
+     * @brief Called when the configuration changes, including system and window configuration.
+     *
+     * @param configuration The updated configuration information.
+     */
+    void OnAbilityConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
 
 private:
     virtual void BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want);
@@ -154,9 +154,9 @@ private:
         sptr<AAFwk::SessionInfo> sessionInfo);
     sptr<Rosen::Window> CreateUIWindow(const std::shared_ptr<UIExtensionContext> context,
         const sptr<AAFwk::SessionInfo> &sessionInfo);
-    static void PromiseCallback(ani_env *env, ani_object aniObj);
     bool IsEmbeddableStart(int32_t screenMode);
     void ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result);
+    bool BindNativeMethods();
 
     ETSRuntime &etsRuntime_;
     std::shared_ptr<AppExecFwk::ETSNativeReference> etsObj_ = nullptr;

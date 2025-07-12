@@ -17,6 +17,8 @@ import AbilityStateData from 'application.AbilityStateData';
 import { ElementName } from 'bundleManager.ElementName'
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
+import { AbilityRunningInfo as _AbilityRunningInfo } from 'application.AbilityRunningInfo';
+import _AbilityStateData from 'application.AbilityStateData';
 
 export default namespace abilityManager {
   loadLibrary("ability_manager_ani_kit.z")
@@ -24,6 +26,7 @@ export default namespace abilityManager {
   export native function nativeGetForegroundUIAbilities(): Array<AbilityStateData>;
   export native function getForegroundUIAbilitiesCallback(callback:AsyncCallbackWrapper<Array<AbilityStateData>>) : void;
   export native function nativeGetTopAbility(callback:AsyncCallbackWrapper<ElementName>) : void;
+  export native function nativeGetAbilityRunningInfos(callback:AsyncCallbackWrapper<Array<AbilityRunningInfo>>) : void;
 
   export function getForegroundUIAbilities():Promise<Array<AbilityStateData>> {
     let p = new Promise<Array<AbilityStateData>>((resolve: (data: Array<AbilityStateData>) => void, reject: (error: Error) => void): void => {
@@ -69,4 +72,47 @@ export function getTopAbility(callback: AsyncCallback<ElementName, void>): void 
         abilityManager.nativeGetTopAbility(myCall);
     });
 }
+
+  function getAbilityRunningInfos(): Promise<Array<AbilityRunningInfo>> {
+    return new Promise<Array<AbilityRunningInfo>>((resolve: (data: Array<AbilityRunningInfo>) => void,
+      reject: (err: BusinessError) => void): void => {
+      let syncCall = new AsyncCallbackWrapper<Array<AbilityRunningInfo>>((err: BusinessError | null,
+        data: Array<AbilityRunningInfo> | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as Array<AbilityRunningInfo>);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        abilityManager.nativeGetAbilityRunningInfos(syncCall);
+      });
+    });
+  }
+
+  function getAbilityRunningInfos(callback: AsyncCallback<Array<AbilityRunningInfo>>): void {
+    let syncCall = new AsyncCallbackWrapper<Array<AbilityRunningInfo>>(callback);
+    taskpool.execute((): void => {
+      abilityManager.nativeGetAbilityRunningInfos(syncCall);
+    });
+  }
+
+  export enum AbilityState {
+    INITIAL = 0,
+    FOCUS = 2,
+    FOREGROUND = 9,
+    BACKGROUND = 10,
+    FOREGROUNDING = 11,
+    BACKGROUNDING = 12
+  }
+
+  export enum UserStatus {
+    ASSERT_TERMINATE = 0,
+    ASSERT_CONTINUE = 1,
+    ASSERT_RETRY = 2
+  }
+
+  export type AbilityRunningInfo = _AbilityRunningInfo;
+
+  export type AbilityStateData = _AbilityStateData;
 }

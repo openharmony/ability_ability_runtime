@@ -19,11 +19,14 @@ import StartOptions from '@ohos.app.ability.StartOptions';
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import { AbilityResult } from 'ability.abilityResult';
 import { Configuration } from '@ohos.app.ability.Configuration';
+import { ConnectOptions } from 'ability.connectOptions';
 import Context from 'application.Context';
 import window from '@ohos.window';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import OpenLinkOptions from '@ohos.app.ability.OpenLinkOptions';
 import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
+import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
+import AbilityStartCallback from 'application.AbilityStartCallback';
 
 class Cleaner {
   public ptr: long = 0;
@@ -104,6 +107,19 @@ export default class UIAbilityContext extends Context {
   private native nativeMoveAbilityToBackground(callback: AsyncCallbackWrapper<void>): void;
 
   private native nativeRequestModalUIExtension(pickerWant: Want, callback: AsyncCallbackWrapper<void>): void;
+
+  private native nativeBackToCallerAbilityWithResult(abilityResult: AbilityResult, requestCode: string, callback: AsyncCallbackWrapper<void>): void;
+
+  private native nativeSetMissionLabel(label: string, callback: AsyncCallbackWrapper<void>): void;
+
+  private native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): double;
+
+  private native nativeDisconnectServiceExtensionAbility(connection: double, callback: AsyncCallbackWrapper<void>): void;
+
+  private native nativeSetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
+
+  private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>,
+    startCallback: AbilityStartCallback): BusinessError;
 
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
@@ -332,5 +348,105 @@ export default class UIAbilityContext extends Context {
         this.nativeRequestModalUIExtension(pickerWant, syncCall);
       });
     });
+  }
+
+  backToCallerAbilityWithResult(abilityResult: AbilityResult, requestCode: string): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let syncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute(() => {
+        this.nativeBackToCallerAbilityWithResult(abilityResult, requestCode, syncCall);
+      });
+    });
+  }
+
+  setMissionLabel(label: string, callback: AsyncCallback<void>): void {
+    let syncCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeSetMissionLabel(label, syncCall);
+    });
+  }
+
+  setMissionLabel(label: string): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let syncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute(() => {
+        this.nativeSetMissionLabel(label, syncCall);
+      });
+    });
+  }
+
+  connectServiceExtensionAbility(want: Want, options: ConnectOptions): number {
+    return this.nativeConnectServiceExtensionAbility(want, options);
+  }
+
+  disconnectServiceExtensionAbility(connection: number, callback: AsyncCallback<void>): void {
+    let syncCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeDisconnectServiceExtensionAbility(connection, syncCall);
+    });
+  }
+
+  disconnectServiceExtensionAbility(connection: number): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let callback = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeDisconnectServiceExtensionAbility(connection, callback);
+      })
+    });
+  }
+
+  setColorMode(colorMode: ConfigurationConstant.ColorMode): void {
+    this.nativeSetColorMode(colorMode);
+  }
+
+  startAbilityByType(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback,
+    callback: AsyncCallback<void>): void {
+    let p1 = taskpool.execute((): BusinessError => {
+      return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
+    });
+    p1.then((e: NullishType) => {
+      let retError = e as BusinessError;
+      callback(retError, undefined);
+    }, (err: Error): void => {
+      callback(err as BusinessError, undefined);
+    });
+  }
+
+  startAbilityByType(type: string, wantParam: Record<string, Object>,
+    startCallback: AbilityStartCallback): Promise<void> {
+    let p = new Promise<void>((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
+      let p1 = taskpool.execute((): BusinessError => {
+        return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
+      });
+      p1.then((e: NullishType) => {
+        let retError = e as BusinessError;
+        if (retError.code === 0) {
+          resolve(undefined);
+        } else {
+          reject(retError);
+        }
+      }).catch((err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
+    return p;
   }
 }
