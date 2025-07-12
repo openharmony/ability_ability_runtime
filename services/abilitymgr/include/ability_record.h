@@ -1248,12 +1248,12 @@ public:
 
     inline void SetPreloadStart(bool isPreloadStart)
     {
-        isPreloadStart_ = isPreloadStart;
+        isPreloadStart_.store(isPreloadStart);
     }
 
     inline bool IsPreloadStart() const
     {
-        return isPreloadStart_;
+        return isPreloadStart_.load();
     }
 
     inline void SetPreloaded()
@@ -1366,7 +1366,7 @@ private:
     void SetAbilityStateInner(AbilityState state);
 #endif
 
-    bool isPreloadStart_ = false;           // is ability started via preload
+    std::atomic<bool> isPreloadStart_ = false;           // is ability started via preload
 
     static std::atomic<int64_t> abilityRecordId;
     bool isReady_ = false;                            // is ability thread attached?
