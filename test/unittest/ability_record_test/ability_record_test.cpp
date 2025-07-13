@@ -33,6 +33,7 @@
 #include "mock_my_flag.h"
 #include "mock_permission_verification.h"
 #include "parameters.h"
+#include "process_options.h"
 #include "sa_mgr_client.h"
 #include "system_ability_definition.h"
 #include "ui_extension_utils.h"
@@ -717,6 +718,25 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_CreateAbilityRecord_002, TestSize.Le
     ASSERT_EQ(last, recordIds.end()) << "Dulpicate ability RecordId";
 
     GTEST_LOG_(INFO) << "AaFwk_AbilityMS_CreateAbilityRecord_002 end";
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: CreateAbilityRecord
+ * SubFunction: CreateAbilityRecord
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord CreateAbilityRecord
+ */
+HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_CreateAbilityRecord_003, TestSize.Level1)
+{
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityStartSetting> abilityStartSetting = std::make_shared<AbilityStartSetting>();
+    abilityRequest.processOptions = std::make_shared<ProcessOptions>();
+    abilityRequest.processOptions->isPreloadStart = true;
+    auto res = abilityRecord_->CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(res, nullptr);
+    EXPECT_TRUE(res->IsPreloadStart());
 }
 
 /*
