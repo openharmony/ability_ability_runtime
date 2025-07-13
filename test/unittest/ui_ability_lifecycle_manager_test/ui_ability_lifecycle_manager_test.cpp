@@ -295,6 +295,53 @@ HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StartUIAbility_1000
+ * @tc.desc: StartUIAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_1000, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->persistentId = 1;
+    sessionInfo->processOptions = std::make_shared<ProcessOptions>();
+    sessionInfo->processOptions->isPreloadStart = true;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    mgr->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    bool isColdStart = false;
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, isColdStart), ERR_OK);
+}
+
+/**
+ * @tc.name: StartUIAbility_1100
+ * @tc.desc: StartUIAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, StartUIAbility_1100, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    Rosen::SessionInfo info;
+    sptr<SessionInfo> sessionInfo(new SessionInfo());
+    sessionInfo->sessionToken = new Rosen::Session(info);
+    sessionInfo->persistentId = 1;
+    sessionInfo->reuseDelegatorWindow = true;
+    sessionInfo->processOptions = std::make_shared<ProcessOptions>();
+    sessionInfo->processOptions->isPreloadStart = true;
+    abilityRequest.sessionInfo = sessionInfo;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->SetPreloaded();
+    mgr->sessionAbilityMap_.emplace(sessionInfo->persistentId, abilityRecord);
+    bool isColdStart = false;
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, sessionInfo, 0, isColdStart), ERR_OK);
+    EXPECT_NE(abilityRequest.processOptions, nullptr);
+    EXPECT_TRUE(abilityRequest.processOptions->isPreloadStart);
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_CreateSessionInfo_0100
  * @tc.desc: CreateSessionInfo
  * @tc.type: FUNC
@@ -339,6 +386,25 @@ HWTEST_F(UIAbilityLifecycleManagerTest, AbilityTransactionDone_002, TestSize.Lev
     int state = 6;
     PacMap saveData;
     EXPECT_EQ(mgr->AbilityTransactionDone(token, state, saveData), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AbilityTransactionDone_0300
+ * @tc.desc: AbilityTransactionDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, AbilityTransactionDone_0300, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    abilityRecord->SetPreloadStart(true);
+    mgr->terminateAbilityList_.emplace_back(abilityRecord);
+    auto token = abilityRecord->GetToken()->AsObject();
+    int state = static_cast<int>(AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_NEW);
+    PacMap saveData;
+    mgr->AbilityTransactionDone(token, state, saveData);
+    EXPECT_TRUE(abilityRecord->IsPreloaded());
 }
 
 /**
@@ -549,6 +615,23 @@ HWTEST_F(UIAbilityLifecycleManagerTest, UpdateAbilityRecordLaunchReason_004, Tes
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     mgr->UpdateAbilityRecordLaunchReason(abilityRequest, abilityRecord);
     EXPECT_NE(mgr, nullptr);
+}
+
+/**
+ * @tc.name: UpdateAbilityRecordLaunchReason_0500
+ * @tc.desc: UpdateAbilityRecordLaunchReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, UpdateAbilityRecordLaunchReason_0500, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_NE(mgr, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.processOptions = std::make_shared<ProcessOptions>();
+    abilityRequest.processOptions->isPreloadStart = true;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    mgr->UpdateAbilityRecordLaunchReason(abilityRequest, abilityRecord);
+    EXPECT_EQ(abilityRecord->lifeCycleStateInfo_.launchParam.launchReason, LaunchReason::LAUNCHREASON_PRELOAD);
 }
 
 /**
