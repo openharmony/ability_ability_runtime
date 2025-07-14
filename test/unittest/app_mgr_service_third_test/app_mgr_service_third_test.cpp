@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#define private public
 #include "app_mgr_service.h"
 #include "app_utils.h"
 #include "ability_manager_errors.h"
@@ -23,6 +24,9 @@
 #include "parameters.h"
 #include "mock_permission_verification.h"
 #include "mock_my_flag.h"
+#include "system_ability_definition.h"
+#include "uri_permission_manager_client.h"
+#undef private
 
 using namespace testing;
 using namespace testing::ext;
@@ -362,6 +366,42 @@ HWTEST_F(AppMgrServiceThirdTest, UpdateConfigurationForBackgroundApp_002, TestSi
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
     int32_t res = appMgrService->UpdateConfigurationForBackgroundApp(appInfos, policy, userId);
     EXPECT_EQ(res, ERR_PERMISSION_DENIED);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: OnAddSystemAbility
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService OnAddSystemAbility
+ * EnvConditions: NA
+ * CaseDescription: Verify add upms.
+ */
+HWTEST_F(AppMgrServiceThirdTest, OnAddSystemAbility_0100, TestSize.Level2)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    std::string deviceId = "";
+    int32_t serviceId = URI_PERMISSION_MGR_SERVICE_ID;
+    AAFwk::UriPermissionManagerClient::GetInstance().isUriPermServiceStarted_.store(false);
+    // appMs is not ready
+    appMgrService->OnAddSystemAbility(serviceId, deviceId);
+    EXPECT_FALSE(AAFwk::UriPermissionManagerClient::GetInstance().IsUriPermServiceStarted());
+
+    // appMs is ready
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
+    appMgrService->OnAddSystemAbility(serviceId, deviceId);
+    EXPECT_TRUE(AAFwk::UriPermissionManagerClient::GetInstance().IsUriPermServiceStarted());
+
+    // upms is not start
+    serviceId = 0;
+    AAFwk::UriPermissionManagerClient::GetInstance().isUriPermServiceStarted_.store(false);
+    appMgrService->OnAddSystemAbility(serviceId, deviceId);
+    EXPECT_FALSE(AAFwk::UriPermissionManagerClient::GetInstance().IsUriPermServiceStarted());
+    
+    // add wms
+    serviceId = WINDOW_MANAGER_SERVICE_ID;
+    appMgrService->OnAddSystemAbility(serviceId, deviceId);
+    EXPECT_FALSE(AAFwk::UriPermissionManagerClient::GetInstance().IsUriPermServiceStarted());
 }
 } // namespace AppExecFwk
 } // namespace OHOS
