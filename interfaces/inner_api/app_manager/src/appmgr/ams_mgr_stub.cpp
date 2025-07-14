@@ -987,7 +987,12 @@ int32_t AmsMgrStub::HandlePreloadApplicationByPhase(MessageParcel &data, Message
     auto userId = data.ReadInt32();
     auto appIndex = data.ReadInt32();
     auto preloadPhase = data.ReadInt32();
-    PreloadApplicationByPhase(bundleName, userId, appIndex, static_cast<AppExecFwk::PreloadPhase>(preloadPhase));
+    auto ret = PreloadApplicationByPhase(bundleName, userId, appIndex,
+        static_cast<AppExecFwk::PreloadPhase>(preloadPhase));
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write ret");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
+    }
     return NO_ERROR;
 }
 
@@ -999,11 +1004,7 @@ int32_t AmsMgrStub::HandleNotifyPreloadAbilityStateChanged(MessageParcel &data, 
         TAG_LOGE(AAFwkTag::APPMGR, "null token");
         return AAFwk::INVALID_CALLER_TOKEN;
     }
-    auto ret = NotifyPreloadAbilityStateChanged(token);
-    if (!reply.WriteInt32(ret)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write ret");
-        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
-    }
+    NotifyPreloadAbilityStateChanged(token);
     return NO_ERROR;
 }
 

@@ -2011,5 +2011,175 @@ HWTEST_F(AppMgrServiceInnerTenthTest, RemoveUIExtensionBindItem_007, TestSize.Le
     EXPECT_TRUE(AAFwk::MyStatus::GetInstance().removeUIExtensionBindItemByIdCalled_);
     TAG_LOGI(AAFwkTag::TEST, "RemoveUIExtensionBindItem_007 end");
 }
+
+/**
+ * @tc.name: NotifyPreloadAbilityStateChanged_001
+ * @tc.desc: Test NotifyPreloadAbilityStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, NotifyPreloadAbilityStateChanged_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+
+    auto ret = appMgrServiceInner->NotifyPreloadAbilityStateChanged(nullptr);
+    EXPECT_EQ(ret, AAFwk::INVALID_CALLER_TOKEN);
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_001 end");
+}
+
+/**
+ * @tc.name: NotifyPreloadAbilityStateChanged_002
+ * @tc.desc: Test NotifyPreloadAbilityStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, NotifyPreloadAbilityStateChanged_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+
+    AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = nullptr;
+    sptr<IRemoteObject> token = new MockAppScheduler();
+    auto ret = appMgrServiceInner->NotifyPreloadAbilityStateChanged(token);
+    EXPECT_NE(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_002 end");
+}
+
+/**
+ * @tc.name: NotifyPreloadAbilityStateChanged_003
+ * @tc.desc: Test NotifyPreloadAbilityStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, NotifyPreloadAbilityStateChanged_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_003 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+
+    AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    sptr<IRemoteObject> token = new MockAppScheduler();
+    auto ret = appMgrServiceInner->NotifyPreloadAbilityStateChanged(token);
+    EXPECT_EQ(ret, ERR_OK);
+
+    AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = nullptr;
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_003 end");
+}
+
+/**
+ * @tc.name: CheckPreloadAppRecordExist_001
+ * @tc.desc: Test CheckPreloadAppRecordExist
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, CheckPreloadAppRecordExist_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckPreloadAppRecordExist_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+    appMgrServiceInner->appPreloader_ = nullptr;
+
+    auto ret = appMgrServiceInner->CheckPreloadAppRecordExist("com.test.demo", 100, 0);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "CheckPreloadAppRecordExist_001 end");
+}
+
+/**
+ * @tc.name: CheckPreloadAppRecordExist_002
+ * @tc.desc: Test CheckPreloadAppRecordExist
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, CheckPreloadAppRecordExist_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckPreloadAppRecordExist_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+
+    auto ret = appMgrServiceInner->CheckPreloadAppRecordExist("com.test.demo", 100, 0);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "CheckPreloadAppRecordExist_002 end");
+}
+
+/**
+ * @tc.name: CheckAppRecordExistByPreloadRequest_001
+ * @tc.desc: Test CheckAppRecordExistByPreloadRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, CheckAppRecordExistByPreloadRequest_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckAppRecordExistByPreloadRequest_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+    appMgrServiceInner->appRunningManager_ = nullptr;
+
+    PreloadRequest request;
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    request.appInfo = appInfo;
+    std::string processName;
+    std::string specifiedProcessFlag;
+    auto ret = appMgrServiceInner->CheckAppRecordExistByPreloadRequest(request, processName, specifiedProcessFlag);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "CheckAppRecordExistByPreloadRequest_001 end");
+}
+
+/**
+ * @tc.name: CheckAppRecordExistByPreloadRequest_002
+ * @tc.desc: Test CheckAppRecordExistByPreloadRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, CheckAppRecordExistByPreloadRequest_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckAppRecordExistByPreloadRequest_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+
+    PreloadRequest request;
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    request.appInfo = appInfo;
+    std::string processName;
+    std::string specifiedProcessFlag;
+    auto ret = appMgrServiceInner->CheckAppRecordExistByPreloadRequest(request, processName, specifiedProcessFlag);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "CheckAppRecordExistByPreloadRequest_002 end");
+}
+
+/**
+ * @tc.name: PreloadApplicationByPhase_001
+ * @tc.desc: Test PreloadApplicationByPhase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, PreloadApplicationByPhase_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplicationByPhase_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+
+    AAFwk::AppUtils::GetInstance().isPreloadApplicationEnabled_.isLoaded = true;
+    AAFwk::AppUtils::GetInstance().isPreloadApplicationEnabled_.value = false;
+
+    auto ret = appMgrServiceInner->PreloadApplicationByPhase("com.test.demo", 100, 0, PreloadPhase::PROCESS_CREATED);
+    EXPECT_EQ(ret, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
+    AAFwk::AppUtils::GetInstance().isPreloadApplicationEnabled_.isLoaded = false;
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplicationByPhase_001 end");
+}
+
+/**
+ * @tc.name: PreloadApplicationByPhase_002
+ * @tc.desc: Test PreloadApplicationByPhase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, PreloadApplicationByPhase_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplicationByPhase_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+
+    AAFwk::AppUtils::GetInstance().isPreloadApplicationEnabled_.isLoaded = true;
+    AAFwk::AppUtils::GetInstance().isPreloadApplicationEnabled_.value = true;
+
+    auto ret = appMgrServiceInner->PreloadApplicationByPhase("com.test.demo", 100, 0, PreloadPhase::PROCESS_CREATED);
+    EXPECT_NE(ret, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
+    AAFwk::AppUtils::GetInstance().isPreloadApplicationEnabled_.isLoaded = false;
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplicationByPhase_002 end");
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
