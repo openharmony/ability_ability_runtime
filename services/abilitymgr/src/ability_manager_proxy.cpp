@@ -26,6 +26,9 @@
 #include "mission_listener_interface.h"
 #include "mission_snapshot.h"
 #include "snapshot.h"
+#ifdef SUPPORT_SCREEN
+#include "pixel_map.h"
+#endif //SUPPORT_SCREEN
 
 namespace OHOS {
 namespace AAFwk {
