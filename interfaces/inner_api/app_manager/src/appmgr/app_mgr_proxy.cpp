@@ -985,7 +985,7 @@ int32_t AppMgrProxy::UpdateConfiguration(const Configuration &config, const int3
 int32_t AppMgrProxy::UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo>& appInfos,
     const AppExecFwk::ConfigurationPolicy& policy, const int32_t userId)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "AppMgrProxy UpdateConfigurationForBackgroundApp");
+    TAG_LOGD(AAFwkTag::APPMGR, "AppMgrProxy UpdateConfigurationForBackgroundApp");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -1027,7 +1027,7 @@ int32_t AppMgrProxy::UpdateConfigurationByBundleName(const Configuration &config
     int32_t appIndex)
 {
     Ability_MANAGER_HITRACE_CHAIN_NAME("UpdateConfigurationByBundleName", HITRACE_FLAG_INCLUDE_ASYNC);
-    TAG_LOGI(AAFwkTag::APPMGR, "AppMgrProxy UpdateConfigurationByBundleName");
+    TAG_LOGD(AAFwkTag::APPMGR, "AppMgrProxy UpdateConfigurationByBundleName");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_INVALID_DATA;
