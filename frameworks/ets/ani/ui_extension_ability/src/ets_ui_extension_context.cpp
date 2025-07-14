@@ -19,6 +19,7 @@
 #include "ani_common_start_options.h"
 #include "ani_common_remote.h"
 #include "ani_common_want.h"
+#include "ani_enum_convert.h"
 #include "ani_remote_object.h"
 #include "common_fun_ani.h"
 #include "ets_context_utils.h"
@@ -291,7 +292,7 @@ void EtsUIExtensionContext::OnStartAbilityForResult(ani_env *env, ani_object ani
     if (startOptionsObj) {
         OHOS::AppExecFwk::UnwrapStartOptions(env, startOptionsObj, startOptions);
     }
-    
+
     ani_ref callbackRef = nullptr;
     env->GlobalReference_Create(callback, &callbackRef);
     ani_vm *etsVm = nullptr;
@@ -309,7 +310,7 @@ void EtsUIExtensionContext::OnStartAbilityForResult(ani_env *env, ani_object ani
             TAG_LOGE(AAFwkTag::UI_EXT, "GetEnv failed, status: %{public}d", status);
             return;
         }
-        
+
         ani_object abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
         if (abilityResult == nullptr) {
             TAG_LOGW(AAFwkTag::UI_EXT, "null abilityResult");
@@ -498,6 +499,71 @@ void EtsUIExtensionContext::Clean(ani_env *env, ani_object object)
     }
 }
 
+void EtsUIExtensionContext::SetColorMode(ani_env *env, ani_object aniObj, ani_enum_item aniColorMode)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "SetColorMode called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    auto etsUiExtensionContext = GetEtsUIExtensionContext(env, aniObj);
+    if (etsUiExtensionContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsUiExtensionContext");
+        return;
+    }
+    etsUiExtensionContext->OnSetColorMode(env, aniObj, aniColorMode);
+}
+
+void EtsUIExtensionContext::ReportDrawnCompleted(ani_env *env,  ani_object aniObj, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "ReportDrawnCompleted called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    auto etsUiExtensionContext = GetEtsUIExtensionContext(env, aniObj);
+    if (etsUiExtensionContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsUiExtensionContext");
+        return;
+    }
+    etsUiExtensionContext->OnReportDrawnCompleted(env, aniObj, callback);
+}
+
+void EtsUIExtensionContext::OnSetColorMode(ani_env *env, ani_object aniContext, ani_enum_item aniColorMode)
+{
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        EtsErrorUtil::ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        return;
+    }
+    ani_int colorMode = 0;
+    if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, aniColorMode, colorMode)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "param aniColorMode err");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param colorMode failed, colorMode must be number.");
+        return;
+    }
+    context->SetAbilityColorMode(colorMode);
+    TAG_LOGD(AAFwkTag::UI_EXT, "NativeSetColorMode end");
+}
+
+void EtsUIExtensionContext::OnReportDrawnCompleted(ani_env* env, ani_object aniCls, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnReportDrawnCompleted called");
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)), nullptr);
+        return;
+    }
+    int32_t innerErrorCode = context->ReportDrawnCompleted();
+    AppExecFwk::AsyncCallback(env, callback, AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+        static_cast<int32_t>(innerErrorCode)), nullptr);
+    TAG_LOGD(AAFwkTag::UI_EXT, "NativeReportDrawnCompleted end");
+}
+
 bool EtsUIExtensionContext::BindNativePtrCleaner(ani_env *env)
 {
     if (env == nullptr) {
@@ -563,6 +629,12 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
             "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/"
             "AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(EtsUIExtensionContext::StartAbilityForResultWithOptions) },
+        ani_native_function{"setColorMode",
+            "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ColorMode;:V",
+            reinterpret_cast<void *>(EtsUIExtensionContext::SetColorMode)},
+        ani_native_function{"nativeReportDrawnCompleted",
+            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void*>(EtsUIExtensionContext::ReportDrawnCompleted)}
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);

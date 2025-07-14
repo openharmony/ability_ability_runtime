@@ -21,6 +21,7 @@ import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import ExtensionContext from 'application.ExtensionContext';
 import StartOptions from '@ohos.app.ability.StartOptions';
 import Want from '@ohos.app.ability.Want';
+import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 
 class Cleaner {
   static callback(cleaner: Cleaner): void {
@@ -61,6 +62,8 @@ export default class UIExtensionContext extends ExtensionContext {
   private native nativeStartAbilityForResult(want: Want, callback:AsyncCallbackWrapper<AbilityResult>): void;
   private native nativeStartAbilityForResult(want: Want, startOptions: StartOptions,
     callback:AsyncCallbackWrapper<AbilityResult>): void;
+  native setColorMode(colorMode: ConfigurationConstant.ColorMode): void;
+  native nativeReportDrawnCompleted(callback:AsyncCallbackWrapper<void>): void;
 
   terminateSelf(callback:AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
@@ -211,5 +214,12 @@ export default class UIExtensionContext extends ExtensionContext {
       });
     });
     return p;
+  }
+
+  reportDrawnCompleted(callback: AsyncCallback<void>): void {
+    let myCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeReportDrawnCompleted(myCall);
+    });
   }
 }
