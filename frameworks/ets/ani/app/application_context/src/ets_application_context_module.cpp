@@ -157,7 +157,7 @@ std::unique_ptr<NativeReference> EtsApplicationContextModule::CreateNativeRefere
     return systemModule;
 }
 
-std::unique_ptr<NativeReference> EtsApplicationContextModule::GetOrCreateNativeReference(napi_env napiEnv,
+napi_value EtsApplicationContextModule::GetOrCreateDynamicObject(napi_env napiEnv,
     std::shared_ptr<ApplicationContext> applicationContext)
 {
     if (napiEnv == nullptr || applicationContext == nullptr) {
@@ -170,14 +170,16 @@ std::unique_ptr<NativeReference> EtsApplicationContextModule::GetOrCreateNativeR
         auto subThreadObj = static_cast<NativeReference *>(
             applicationContext->GetSubThreadObject(static_cast<void *>(napiEnv)));
         if (subThreadObj != nullptr) {
-            return std::unique_ptr<NativeReference>(subThreadObj);
+            return subThreadObj->Get();
         }
         auto subThreadRef = CreateNativeReference(napiEnv, applicationContext);
         if (subThreadRef == nullptr) {
             return nullptr;
         }
-        applicationContext->BindSubThreadObject(static_cast<void *>(napiEnv), static_cast<void *>(subThreadRef.get()));
-        return subThreadRef;
+        auto newObject = subThreadRef->Get();
+        applicationContext->BindSubThreadObject(
+            static_cast<void *>(napiEnv), static_cast<void *>(subThreadRef.release()));
+        return newObject;
     }
 
     // if main-thread, get bindingObj firstly
@@ -191,7 +193,7 @@ std::unique_ptr<NativeReference> EtsApplicationContextModule::GetOrCreateNativeR
     auto dynamicContext = bindingObj->Get<NativeReference>();
     if (dynamicContext != nullptr) {
         TAG_LOGI(AAFwkTag::UIABILITY, "there exist a dynamicContext");
-        return std::unique_ptr<NativeReference>(dynamicContext);
+        return dynamicContext->Get();
     }
 
     // if main-thread bindingObj didn't exist, create and bind
@@ -200,8 +202,9 @@ std::unique_ptr<NativeReference> EtsApplicationContextModule::GetOrCreateNativeR
         return nullptr;
     }
 
-    applicationContext->Bind(nativeRef.get());
-    return nativeRef;
+    auto object = nativeRef->Get();
+    applicationContext->Bind(nativeRef.release());
+    return object;
 }
 
 ani_object EtsApplicationContextModule::NativeTransferDynamic(ani_env *aniEnv, ani_class aniCls, ani_object input)
@@ -258,6 +261,7 @@ ani_object EtsApplicationContextModule::CreateDynamicObject(ani_env *aniEnv, ani
     auto contextObj = ContextTransfer::GetInstance().GetDynamicObject(contextType, napiEnv, applicationContext);
     if (contextObj == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "create ApplicationContext failed");
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
         return nullptr;
     }
 
@@ -265,6 +269,7 @@ ani_object EtsApplicationContextModule::CreateDynamicObject(ani_env *aniEnv, ani
     bool success = hybridgref_create_from_napi(napiEnv, contextObj, &ref);
     if (!success) {
         TAG_LOGE(AAFwkTag::CONTEXT, "hybridgref_create_from_napi failed");
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
         return nullptr;
     }
 
@@ -272,6 +277,8 @@ ani_object EtsApplicationContextModule::CreateDynamicObject(ani_env *aniEnv, ani
     success = hybridgref_get_esvalue(aniEnv, ref, &result);
     if (!success) {
         TAG_LOGE(AAFwkTag::CONTEXT, "hybridgref_get_esvalue failed");
+        hybridgref_delete_from_napi(napiEnv, ref);
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
         return nullptr;
     }
 
@@ -279,6 +286,7 @@ ani_object EtsApplicationContextModule::CreateDynamicObject(ani_env *aniEnv, ani
 
     if (!arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr)) {
         TAG_LOGE(AAFwkTag::CONTEXT, "arkts_napi_scope_close_n failed");
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
         return nullptr;
     }
 
@@ -352,11 +360,12 @@ void EtsApplicationContextModuleInit(ani_env *aniEnv)
                 return nullptr;
             }
 
-            auto ref = EtsApplicationContextModule::GetOrCreateNativeReference(napiEnv, applicationContext);
-            if (ref == nullptr) {
+            auto object = EtsApplicationContextModule::GetOrCreateDynamicObject(napiEnv, applicationContext);
+            if (object == nullptr) {
+                TAG_LOGE(AAFwkTag::CONTEXT, "get or create object failed");
                 return nullptr;
             }
-            return ref->Get();
+            return object;
     });
 
     TAG_LOGD(AAFwkTag::CONTEXT, "Init application context kit end");
