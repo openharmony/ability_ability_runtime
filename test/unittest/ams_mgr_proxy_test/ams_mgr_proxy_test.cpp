@@ -15,8 +15,10 @@
 
 #include <gtest/gtest.h>
 
+#include "ability_manager_errors.h"
 #include "ams_mgr_proxy.h"
 #include "mock_ability_debug_response_stub.h"
+#include "mock_ability_token.h"
 #include "mock_ams_mgr_scheduler.h"
 #include "mock_app_debug_listener_stub.h"
 
@@ -181,6 +183,136 @@ HWTEST_F(AmsMgrProxyTest, NotifyAppMgrRecordExitReason_0100, TestSize.Level1)
     std::string exitMsg = "JsError";
     auto result = amsMgrProxy_->NotifyAppMgrRecordExitReason(reason, pid, exitMsg);
     EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.name: PreloadApplicationByPhase_0100
+ * @tc.desc: PreloadApplicationByPhase.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrProxyTest, PreloadApplicationByPhase_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PreloadApplicationByPhase_0100 start";
+    ASSERT_NE(amsMgrProxy_, nullptr);
+
+    EXPECT_CALL(*mockAmsMgrScheduler_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(ERR_NULL_OBJECT));
+    auto result = amsMgrProxy_->PreloadApplicationByPhase("com.acts.test", 100, 0, PreloadPhase::PROCESS_CREATED);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+    GTEST_LOG_(INFO) << "PreloadApplicationByPhase_0100 end";
+}
+
+/**
+ * @tc.name: PreloadApplicationByPhase_0200
+ * @tc.desc: PreloadApplicationByPhase.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrProxyTest, PreloadApplicationByPhase_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "PreloadApplicationByPhase_0200 start";
+    ASSERT_NE(amsMgrProxy_, nullptr);
+
+    EXPECT_CALL(*mockAmsMgrScheduler_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    auto result = amsMgrProxy_->PreloadApplicationByPhase("com.acts.test", 100, 0, PreloadPhase::PROCESS_CREATED);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "PreloadApplicationByPhase_0200 end";
+}
+
+/**
+ * @tc.name: NotifyPreloadAbilityStateChanged_0100
+ * @tc.desc: NotifyPreloadAbilityStateChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrProxyTest, NotifyPreloadAbilityStateChanged_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyPreloadAbilityStateChanged_0100 start";
+    ASSERT_NE(amsMgrProxy_, nullptr);
+
+    auto result = amsMgrProxy_->NotifyPreloadAbilityStateChanged(nullptr);
+    EXPECT_EQ(result, AAFwk::INVALID_CALLER_TOKEN);
+    GTEST_LOG_(INFO) << "NotifyPreloadAbilityStateChanged_0100 end";
+}
+
+/**
+ * @tc.name: NotifyPreloadAbilityStateChanged_0200
+ * @tc.desc: NotifyPreloadAbilityStateChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrProxyTest, NotifyPreloadAbilityStateChanged_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyPreloadAbilityStateChanged_0200 start";
+    ASSERT_NE(amsMgrProxy_, nullptr);
+
+    EXPECT_CALL(*mockAmsMgrScheduler_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(ERR_NULL_OBJECT));
+
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    auto result = amsMgrProxy_->NotifyPreloadAbilityStateChanged(token);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+    GTEST_LOG_(INFO) << "NotifyPreloadAbilityStateChanged_0200 end";
+}
+
+/**
+ * @tc.name: NotifyPreloadAbilityStateChanged_0300
+ * @tc.desc: NotifyPreloadAbilityStateChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrProxyTest, NotifyPreloadAbilityStateChanged_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "NotifyPreloadAbilityStateChanged_0300 start";
+    ASSERT_NE(amsMgrProxy_, nullptr);
+
+    EXPECT_CALL(*mockAmsMgrScheduler_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
+    auto result = amsMgrProxy_->NotifyPreloadAbilityStateChanged(token);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "NotifyPreloadAbilityStateChanged_0300 end";
+}
+
+/**
+ * @tc.name: CheckPreloadAppRecordExist_0100
+ * @tc.desc: CheckPreloadAppRecordExist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrProxyTest, CheckPreloadAppRecordExist_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckPreloadAppRecordExist_0100 start";
+    ASSERT_NE(amsMgrProxy_, nullptr);
+
+    EXPECT_CALL(*mockAmsMgrScheduler_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(ERR_NULL_OBJECT));
+    bool isExist = false;
+    auto result = amsMgrProxy_->CheckPreloadAppRecordExist("com.acts.test", 100, 0, isExist);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+    GTEST_LOG_(INFO) << "CheckPreloadAppRecordExist_0100 end";
+}
+
+/**
+ * @tc.name: CheckPreloadAppRecordExist_0200
+ * @tc.desc: CheckPreloadAppRecordExist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrProxyTest, CheckPreloadAppRecordExist_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CheckPreloadAppRecordExist_0200 start";
+    ASSERT_NE(amsMgrProxy_, nullptr);
+
+    EXPECT_CALL(*mockAmsMgrScheduler_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+    bool isExist = false;
+    auto result = amsMgrProxy_->CheckPreloadAppRecordExist("com.acts.test", 100, 0, isExist);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "CheckPreloadAppRecordExist_0200 end";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

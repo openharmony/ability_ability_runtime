@@ -30,6 +30,7 @@ namespace AppExecFwk {
         UID_CHECK_PRELOAD_CONDITIONS = -7,
         UID_CHECK_BUNDLE_INFO = -9,
         UID_CHECK_BUNDLE_INFO_FAILED = -10,
+        UID_CHECK_NOT_ENTRY_HAP_MODULE_INFO = -11,
     };
 
 using Want = OHOS::AAFwk::Want;
@@ -97,8 +98,16 @@ public:
 
     bool GetHapModuleInfo(const AbilityInfo &abilityInfo, int32_t userId, HapModuleInfo &hapModuleInfo)
     {
-        if (userId == UID_CHECK_BUNDLE_INFO_FAILED) {
-            return false;
+        switch (userId) {
+            case UID_CHECK_BUNDLE_INFO_FAILED:
+                hapModuleInfo.moduleType = AppExecFwk::ModuleType::ENTRY;
+                return false;
+            case UID_CHECK_NOT_ENTRY_HAP_MODULE_INFO:
+                hapModuleInfo.moduleType = AppExecFwk::ModuleType::FEATURE;
+                break;
+            default:
+                hapModuleInfo.moduleType = AppExecFwk::ModuleType::ENTRY;
+                break;
         }
         return true;
     }

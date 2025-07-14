@@ -668,7 +668,7 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
 
     bool isExtensionSandBox = IsIsolateExtensionSandBox(abilityInfo, hapModuleInfo);
     TAG_LOGD(AAFwkTag::APPMGR, "HandlePreloadApplication processName = %{public}s", processName.c_str());
-
+    CHECK_POINTER_AND_RETURN_LOG(appInfo, "appInfo null");
     AAFwk::ResSchedUtil::GetInstance().ReportPreloadApplicationToRSS(abilityInfo,
         static_cast<int32_t>(request.preloadMode));
     bool appExistFlag = appRunningManager_->IsAppExist(appInfo->accessTokenId);
@@ -720,6 +720,7 @@ bool AppMgrServiceInner::CheckAppRecordExistByPreloadRequest(const PreloadReques
 {
     auto &abilityInfo = request.abilityInfo;
     auto &appInfo = request.appInfo;
+    CHECK_POINTER_AND_RETURN_VALUE(appInfo, false);
 
     specifiedProcessFlag = GetSpecifiedProcessFlag(abilityInfo, request.want);
     MakeProcessName(abilityInfo, appInfo, request.hapModuleInfo, request.appIndex, specifiedProcessFlag, processName, false);

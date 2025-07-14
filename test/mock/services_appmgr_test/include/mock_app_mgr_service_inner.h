@@ -81,6 +81,10 @@ public:
     MOCK_METHOD5(StartNativeChildProcess, int32_t(const pid_t hostPid, const std::string &libName,
         int32_t childProcessCount, const sptr<IRemoteObject> &callback, const std::string &customProcessName));
 #endif // SUPPORT_CHILD_PROCESS
+    MOCK_METHOD4(PreloadApplicationByPhase, int32_t(const std::string&, int32_t, int32_t, AppExecFwk::PreloadPhase));
+    MOCK_METHOD1(NotifyPreloadAbilityStateChanged, int32_t(sptr<IRemoteObject>));
+    MOCK_METHOD3(CheckPreloadAppRecordExist, bool(const std::string&, int32_t, int32_t));
+    MOCK_CONST_METHOD0(IsFoundationCall, bool());
 
     void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t)
     {}
