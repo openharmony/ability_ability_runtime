@@ -136,7 +136,7 @@ void BundleMgrHelperFuzztest2(bool boolParam, std::string &stringParam, int32_t 
     std::vector<AbilityInfo> abilityInfos;
     std::vector<ExtensionAbilityInfo> extensionInfos;
     bmHelper->ImplicitQueryInfos(want, int32Param, int32Param, boolParam, abilityInfos, extensionInfos, boolParam);
-    bmHelper->CleanBundleDataFiles(stringParam, int32Param, int32Param);
+    bmHelper->CleanBundleDataFiles(stringParam, int32Param, int32Param， int32Param);
     std::vector<DataGroupInfo> infos;
     bmHelper->QueryDataGroupInfos(stringParam, int32Param, infos);
     bmHelper->RegisterBundleEventCallback(nullptr);
