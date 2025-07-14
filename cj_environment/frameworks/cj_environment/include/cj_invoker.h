@@ -30,17 +30,17 @@ using UpdateStackInfoFuncType = void(*)(unsigned long long, void*, unsigned int)
 struct CJUncaughtExceptionInfo;
 
 struct CJRuntimeAPI {
-    int (*InitCJRuntime)(const struct RuntimeParam*);
-    void* (*InitUIScheduler)();
-    int (*RunUIScheduler)(unsigned long long);
-    int (*FiniCJRuntime)();
-    int (*InitCJLibrary)(const char*);
-    void (*RegisterEventHandlerCallbacks)(PostTaskType, HasHigherPriorityType);
-    void (*RegisterCJUncaughtExceptionHandler)(const CJUncaughtExceptionInfo& handle);
-    void (*RegisterArkVMInRuntime)(unsigned long long);
-    void (*RegisterStackInfoCallbacks)(UpdateStackInfoFuncType);
-    void (*DumpHeapSnapshot)(int fd);
-    void (*ForceFullGC)();
+    int (*InitCJRuntime)(const struct RuntimeParam*) = nullptr;
+    void* (*InitUIScheduler)() = nullptr;
+    int (*RunUIScheduler)(unsigned long long) = nullptr;
+    int (*FiniCJRuntime)() = nullptr;
+    int (*InitCJLibrary)(const char*) = nullptr;
+    void (*RegisterEventHandlerCallbacks)(PostTaskType, HasHigherPriorityType) = nullptr;
+    void (*RegisterCJUncaughtExceptionHandler)(const CJUncaughtExceptionInfo& handle) = nullptr;
+    void (*RegisterArkVMInRuntime)(unsigned long long) = nullptr;
+    void (*RegisterStackInfoCallbacks)(UpdateStackInfoFuncType) = nullptr;
+    void (*DumpHeapSnapshot)(int fd) = nullptr;
+    void (*ForceFullGC)() = nullptr;
 };
 }
 
