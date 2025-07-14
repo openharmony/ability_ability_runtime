@@ -57,7 +57,7 @@ HWTEST_F(DataObsMgrServiceThirdTest, DataObsMgrServiceThirdTest_GetCallingUserId
     TAG_LOGI(AAFwkTag::TEST, "DataObsMgrServiceThirdTest_GetCallingUserId_001 start");
     AccessTokenKit::tokenTypeFlag_ = Security::AccessToken::TOKEN_NATIVE;
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
-    int32_t ret = dataObsMgrServer->GetCallingUserId();
+    int32_t ret = dataObsMgrServer->GetCallingUserId(0);
     EXPECT_EQ(ret, 0);
     TAG_LOGI(AAFwkTag::TEST, "DataObsMgrServiceThirdTest_GetCallingUserId_001 end");
 }
@@ -75,7 +75,7 @@ HWTEST_F(DataObsMgrServiceThirdTest, DataObsMgrServiceThirdTest_GetCallingUserId
     TAG_LOGI(AAFwkTag::TEST, "DataObsMgrServiceThirdTest_GetCallingUserId_002 start");
     AccessTokenKit::tokenTypeFlag_ = Security::AccessToken::TOKEN_SHELL;
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
-    int32_t ret = dataObsMgrServer->GetCallingUserId();
+    int32_t ret = dataObsMgrServer->GetCallingUserId(0);
     EXPECT_EQ(ret, 0);
     TAG_LOGI(AAFwkTag::TEST, "DataObsMgrServiceThirdTest_GetCallingUserId_002 end");
 }
@@ -93,7 +93,7 @@ HWTEST_F(DataObsMgrServiceThirdTest, DataObsMgrServiceThirdTest_GetCallingUserId
     AccessTokenKit::tokenTypeFlag_ = Security::AccessToken::TOKEN_HAP;
     AccessTokenKit::hapTokenInfo_ = -1;
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
-    int32_t ret = dataObsMgrServer->GetCallingUserId();
+    int32_t ret = dataObsMgrServer->GetCallingUserId(0);
     EXPECT_EQ(ret, -1);
     TAG_LOGI(AAFwkTag::TEST, "DataObsMgrServiceThirdTest_GetCallingUserId_003 end");
 }
@@ -112,7 +112,7 @@ HWTEST_F(DataObsMgrServiceThirdTest, DataObsMgrServiceThirdTest_GetCallingUserId
     AccessTokenKit::hapTokenInfo_ = 0;
     AccessTokenKit::hapTokenUserId_ = 2;
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
-    int32_t ret = dataObsMgrServer->GetCallingUserId();
+    int32_t ret = dataObsMgrServer->GetCallingUserId(0);
     EXPECT_EQ(ret, 2);
     TAG_LOGI(AAFwkTag::TEST, "DataObsMgrServiceThirdTest_GetCallingUserId_004 end");
 }
