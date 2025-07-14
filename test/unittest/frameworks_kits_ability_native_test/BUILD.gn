@@ -82,11 +82,13 @@ ohos_unittest("ability_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -235,6 +237,7 @@ ohos_unittest("ability_context_test") {
   configs = [ ":module_ability_context_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_napi_path}/inner/napi_ability_common:napi_ability_common",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
@@ -282,7 +285,9 @@ ohos_unittest("page_ability_impl_test") {
 
     deps = [
       "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+      "${ability_runtime_innerkits_path}/runtime:runtime",
       "${ability_runtime_native_path}/ability/native:abilitykit_native",
+      "${ability_runtime_native_path}/ability/native:abilitykit_utils",
       "${ability_runtime_native_path}/appkit:app_context",
       "${ability_runtime_native_path}/appkit:appkit_native",
     ]
@@ -305,6 +310,7 @@ ohos_unittest("page_ability_impl_test") {
       "napi:ace_napi",
       "resource_management:global_resmgr",
       "samgr:samgr_proxy",
+      "window_manager:sms",
     ]
   }
 }
@@ -320,8 +326,10 @@ ohos_unittest("service_ability_impl_test") {
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
   ]
@@ -341,6 +349,7 @@ ohos_unittest("service_ability_impl_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "window_manager:sms",
   ]
 
   if (ability_runtime_graphics) {
@@ -413,6 +422,7 @@ ohos_unittest("data_ability_helper_test") {
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:data_ability_helper",
@@ -448,6 +458,7 @@ ohos_unittest("data_ability_helper_test") {
     "relational_store:rdb_data_ability_adapter",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "window_manager:sms",
   ]
 
   if (ability_runtime_graphics) {
@@ -481,6 +492,7 @@ ohos_unittest("data_ability_helper_impl_test") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:data_ability_helper",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -626,15 +638,18 @@ ohos_unittest("ability_impl_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
+    "${ability_runtime_path}/services/abilitymgr:abilityms_target",
   ]
 
   external_deps = [
@@ -686,6 +701,7 @@ ohos_unittest("ui_ability_impl_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:process_options",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
@@ -693,11 +709,13 @@ ohos_unittest("ui_ability_impl_test") {
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
+    "${ability_runtime_path}/services/abilitymgr:abilityms_target",
   ]
 
   external_deps = [
@@ -770,7 +788,9 @@ ohos_unittest("ability_thread_test") {
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
+    "${ability_runtime_native_path}/ability/native:extensionkit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
@@ -855,7 +875,9 @@ ohos_unittest("fa_ability_thread_test") {
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
+    "${ability_runtime_native_path}/ability/native:extensionkit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
@@ -915,6 +937,8 @@ ohos_unittest("extension_ability_thread_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
+    "${ability_runtime_native_path}/ability/native:extensionkit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
   ]
@@ -977,6 +1001,7 @@ ohos_unittest("ui_ability_thread_test") {
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -1093,6 +1118,7 @@ ohos_unittest("ability_process_test") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
   ]
@@ -1141,6 +1167,8 @@ ohos_unittest("extension_test") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
+    "${ability_runtime_native_path}/ability/native:extensionkit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
   ]
@@ -1168,6 +1196,7 @@ ohos_unittest("extension_test") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "window_manager:sms",
   ]
 
   if (ability_runtime_graphics) {
@@ -1193,6 +1222,9 @@ ohos_unittest("extension_second_test") {
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
+    "${ability_runtime_native_path}/ability/native:extensionkit_native",
   ]
 
   external_deps = [
@@ -1241,6 +1273,7 @@ ohos_unittest("form_extension_test") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:form_extension",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
@@ -1295,6 +1328,7 @@ ohos_unittest("ability_thread_call_request_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/appkit:app_context",
   ]
 
@@ -1315,6 +1349,7 @@ ohos_unittest("ability_thread_call_request_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "window_manager:sms",
   ]
 
   if (ability_runtime_graphics) {
@@ -1366,6 +1401,7 @@ ohos_unittest("form_extension_provider_client_test") {
       "napi:ace_napi",
       "resource_management:global_resmgr",
       "samgr:samgr_proxy",
+      "window_manager:sms",
     ]
   }
 }
@@ -1402,6 +1438,7 @@ ohos_unittest("data_ability_impl_test") {
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
@@ -1478,6 +1515,7 @@ ohos_unittest("data_ability_impl_file_secondpart_test") {
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
@@ -1545,6 +1583,7 @@ ohos_unittest("data_ability_impl_file_test") {
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
@@ -1614,6 +1653,7 @@ ohos_unittest("ability_thread_dataability_test") {
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
@@ -1691,6 +1731,7 @@ ohos_unittest("data_uri_utils_test") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
+    "cJSON:cjson",
     "eventhandler:libeventhandler",
     "googletest:gtest_main",
     "hilog:libhilog",
@@ -1718,6 +1759,8 @@ ohos_unittest("extension_impl_test") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
+    "${ability_runtime_native_path}/ability/native:extensionkit_native",
     "${ability_runtime_native_path}/ability/native:form_extension",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
@@ -1786,6 +1829,7 @@ ohos_unittest("ability_permission_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "form_fwk:fmskit_native",
     "googletest:gmock",
     "googletest:gmock_main",
     "googletest:gtest_main",
@@ -1796,6 +1840,7 @@ ohos_unittest("ability_permission_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "window_manager:sms",
   ]
   if (ability_runtime_graphics) {
     external_deps += [ "input:libmmi-client" ]
@@ -1842,16 +1887,19 @@ ohos_unittest("ui_ability_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
+    "${ability_runtime_path}/services/abilitymgr:abilityms_target",
   ]
 
   external_deps = [
@@ -1943,6 +1991,7 @@ ohos_unittest("form_host_client_test") {
       "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
       "${ability_runtime_native_path}/ability/native:ability_thread",
       "${ability_runtime_native_path}/ability/native:abilitykit_native",
+      "${ability_runtime_native_path}/ability/native:abilitykit_utils",
       "${ability_runtime_native_path}/ability/native:configuration_helper",
       "${ability_runtime_native_path}/appkit:app_context",
       "${ability_runtime_native_path}/appkit:appkit_manager_helper",
@@ -1994,10 +2043,12 @@ ohos_unittest("continuation_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -2029,8 +2080,8 @@ ohos_unittest("continuation_test") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 
   defines = []
@@ -2097,7 +2148,9 @@ ohos_unittest("new_ability_impl_test") {
 
     deps = [
       "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+      "${ability_runtime_innerkits_path}/runtime:runtime",
       "${ability_runtime_native_path}/ability/native:abilitykit_native",
+      "${ability_runtime_native_path}/ability/native:abilitykit_utils",
       "${ability_runtime_native_path}/appkit:app_context",
       "${ability_runtime_native_path}/appkit:appkit_native",
       "${ability_runtime_path}/utils/global/freeze:freeze_util",
@@ -2122,6 +2175,7 @@ ohos_unittest("new_ability_impl_test") {
       "resource_management:global_resmgr",
       "samgr:samgr_proxy",
       "window_manager:libwsutils",
+      "window_manager:sms",
     ]
   }
 }
@@ -2179,7 +2233,9 @@ ohos_unittest("reserse_continuation_scheduler_primary_proxy_test") {
 
     deps = [
       "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+      "${ability_runtime_innerkits_path}/runtime:runtime",
       "${ability_runtime_native_path}/ability/native:abilitykit_native",
+      "${ability_runtime_native_path}/ability/native:abilitykit_utils",
       "${ability_runtime_native_path}/appkit:app_context",
       "${ability_runtime_path}/utils/global/freeze:freeze_util",
     ]
@@ -2202,6 +2258,7 @@ ohos_unittest("reserse_continuation_scheduler_primary_proxy_test") {
       "resource_management:global_resmgr",
       "samgr:samgr_proxy",
       "window_manager:libwsutils",
+      "window_manager:sms",
     ]
   }
 }
@@ -2217,9 +2274,11 @@ ohos_unittest("distributed_client_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:mission_info",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/appkit:app_context",
   ]
 
@@ -2259,10 +2318,12 @@ ohos_unittest("ability_window_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
@@ -2299,13 +2360,13 @@ ohos_unittest("ability_window_test") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
+    "runtime_core:ani",
     "samgr:samgr_proxy",
     "window_manager:extensionwindow_napi",
     "window_manager:libwm",
     "window_manager:libwm_lite",
     "window_manager:libwsutils",
     "window_manager:scene_session",
-    "runtime_core:ani",
   ]
 
   if (ability_runtime_graphics) {
@@ -2336,6 +2397,7 @@ ohos_unittest("ability_handler_test") {
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
@@ -2396,6 +2458,7 @@ ohos_unittest("ability_impl_factory_test") {
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:continuation_ipc",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -2433,8 +2496,11 @@ ohos_unittest("ability_impl_factory_test") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "relational_store:rdb_data_share_adapter",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
+    "window_manager:libdm",
+    "window_manager:libwm",
+    "window_manager:sms",
   ]
 
   if (ability_runtime_graphics) {
@@ -2457,7 +2523,10 @@ ohos_unittest("ability_loader_test") {
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
+    "${ability_runtime_native_path}/ability/native:extensionkit_native",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
   ]
@@ -2498,6 +2567,7 @@ ohos_unittest("ability_local_record_test") {
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
   ]
@@ -2516,6 +2586,7 @@ ohos_unittest("ability_local_record_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "window_manager:sms",
   ]
 
   if (ability_runtime_graphics) {
@@ -2555,6 +2626,7 @@ ohos_unittest("reverse_continuation_scheduler_replica_proxy_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "window_manager:sms",
   ]
 
   if (ability_runtime_graphics) {
@@ -2593,6 +2665,7 @@ ohos_unittest("reverse_continuation_scheduler_replica_stub_test") {
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "window_manager:sms",
   ]
 
   if (ability_runtime_graphics) {
@@ -2617,6 +2690,7 @@ ohos_unittest("ability_connection_manager_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
@@ -2739,6 +2813,7 @@ ohos_unittest("action_extension_module_loader_test") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:extractortool",
     "c_utils:utils",
     "googletest:gmock_main",
@@ -2746,6 +2821,7 @@ ohos_unittest("action_extension_module_loader_test") {
     "hilog:libhilog",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "resource_management:global_resmgr",
     "samgr:samgr_proxy",
   ]
 
@@ -2769,9 +2845,11 @@ ohos_unittest("action_extension_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:action_extension",
     "${ability_runtime_native_path}/ability/native:ui_extension",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -2817,6 +2895,7 @@ ohos_unittest("share_extension_module_loader_test") {
   deps = [
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:share_extension",
     "${ability_runtime_native_path}/ability/native:ui_extension",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -2860,6 +2939,7 @@ ohos_unittest("share_extension_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:share_extension",
     "${ability_runtime_native_path}/ability/native:ui_extension",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -2948,6 +3028,8 @@ ohos_unittest("auto_fill_extension_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
+    "${ability_runtime_native_path}/ability/native:extensionkit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
   ]
@@ -2967,6 +3049,8 @@ ohos_unittest("auto_fill_extension_test") {
     "ipc:ipc_napi",
     "napi:ace_napi",
     "samgr:samgr_proxy",
+    "window_manager:libdm",
+    "window_manager:libwm",
   ]
   if (ability_runtime_auto_fill) {
     deps +=
@@ -3000,6 +3084,7 @@ ohos_unittest("embedded_ui_extension_module_loader_test") {
   ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:extractortool",
     "c_utils:utils",
     "googletest:gmock_main",
@@ -3007,6 +3092,7 @@ ohos_unittest("embedded_ui_extension_module_loader_test") {
     "hilog:libhilog",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "resource_management:global_resmgr",
     "samgr:samgr_proxy",
   ]
 
@@ -3033,6 +3119,7 @@ ohos_unittest("embedded_ui_extension_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:embedded_ui_extension",
     "${ability_runtime_native_path}/ability/native:ui_extension",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -3078,6 +3165,7 @@ ohos_unittest("app_module_checker_test") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
   ]
 
@@ -3179,6 +3267,7 @@ ohos_unittest("js_ui_extension_Callback_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:extensionkit_native",
   ]
 
   external_deps = [
@@ -3276,11 +3365,13 @@ ohos_unittest("ability_second_test") {
   ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
     "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
