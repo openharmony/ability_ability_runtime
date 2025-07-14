@@ -849,6 +849,8 @@ enum {
 
     ERR_UPMS_KEY_IS_NOT_CREATE_BY_CALLER = 2097348,
 
+    ERR_UPMS_SERVICE_NOT_START = 2097349,
+
     /**
      * Result (2097351) target not in whitelist.
      */
