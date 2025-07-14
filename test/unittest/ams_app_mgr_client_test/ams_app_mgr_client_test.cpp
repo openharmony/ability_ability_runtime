@@ -516,5 +516,277 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_021, TestSize.Level1)
     EXPECT_EQ(ans, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "ams_app_mgr_client_test_021 end");
 }
+
+/*
+ * Feature: AppMgrService
+ * Function: AppMgrClient::PreloadApplicationByPhase
+ * SubFunction: PreloadApplicationByPhase
+ * FunctionPoints: AppMgrClient PreloadApplicationByPhase interface
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Test PreloadApplicationByPhase when mgrHolder_ is nullptr.
+ */
+HWTEST_F(AmsAppMgrClientTest, PreloadApplicationByPhase_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplicationByPhase_001 start");
+    client_->mgrHolder_ = nullptr;
+
+    std::string bundleName = "com.example.test";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    AppExecFwk::PreloadPhase preloadPhase = AppExecFwk::PreloadPhase::PROCESS_CREATED;
+    
+    int32_t result = client_->PreloadApplicationByPhase(bundleName, userId, appIndex, preloadPhase);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplicationByPhase_001 end");
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: AppMgrClient::PreloadApplicationByPhase
+ * SubFunction: PreloadApplicationByPhase
+ * FunctionPoints: AppMgrClient PreloadApplicationByPhase interface
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Test PreloadApplicationByPhase when service is nullptr.
+ */
+HWTEST_F(AmsAppMgrClientTest, PreloadApplicationByPhase_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplicationByPhase_002 start");
+    client_->SetServiceManager(nullptr);
+    
+    std::string bundleName = "com.example.test";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    AppExecFwk::PreloadPhase preloadPhase = AppExecFwk::PreloadPhase::PROCESS_CREATED;
+    
+    int32_t result = client_->PreloadApplicationByPhase(bundleName, userId, appIndex, preloadPhase);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplicationByPhase_002 end");
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: AppMgrClient::PreloadApplicationByPhase
+ * SubFunction: PreloadApplicationByPhase
+ * FunctionPoints: AppMgrClient PreloadApplicationByPhase interface
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Test PreloadApplicationByPhase when amsService is nullptr.
+ */
+HWTEST_F(AmsAppMgrClientTest, PreloadApplicationByPhase_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplicationByPhase_003 start");
+    EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->ConnectAppMgrService());
+
+    sptr<IAmsMgr> amsMgrScheduler = nullptr;
+    EXPECT_CALL(*(static_cast<MockAppMgrService*>((iface_cast<IAppMgr>(client_->GetRemoteObject())).GetRefPtr())),
+        GetAmsMgr())
+        .Times(1)
+        .WillOnce(Return(amsMgrScheduler));
+
+    std::string bundleName = "com.example.test";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    AppExecFwk::PreloadPhase preloadPhase = AppExecFwk::PreloadPhase::PROCESS_CREATED;
+    
+    int32_t result = client_->PreloadApplicationByPhase(bundleName, userId, appIndex, preloadPhase);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplicationByPhase_003 end");
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: AppMgrClient::PreloadApplicationByPhase
+ * SubFunction: PreloadApplicationByPhase
+ * FunctionPoints: AppMgrClient PreloadApplicationByPhase interface
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Test PreloadApplicationByPhase with valid parameters.
+ */
+HWTEST_F(AmsAppMgrClientTest, PreloadApplicationByPhase_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplicationByPhase_004 start");
+    EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->ConnectAppMgrService());
+    
+    sptr<MockAmsMgrScheduler> mockAmsMgrScheduler(new MockAmsMgrScheduler());
+    EXPECT_CALL(*(static_cast<MockAppMgrService*>((iface_cast<IAppMgr>(client_->GetRemoteObject())).GetRefPtr())),
+        GetAmsMgr())
+        .Times(1)
+        .WillOnce(Return(mockAmsMgrScheduler));
+    
+    EXPECT_CALL(*mockAmsMgrScheduler, PreloadApplicationByPhase(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(AppMgrResultCode::RESULT_OK));
+    
+    std::string bundleName = "com.example.test";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    AppExecFwk::PreloadPhase preloadPhase = AppExecFwk::PreloadPhase::PROCESS_CREATED;
+    
+    int32_t result = client_->PreloadApplicationByPhase(bundleName, userId, appIndex, preloadPhase);
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+    TAG_LOGI(AAFwkTag::TEST, "PreloadApplicationByPhase_004 end");
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: AppMgrClient::NotifyPreloadAbilityStateChanged
+ * SubFunction: NotifyPreloadAbilityStateChanged
+ * FunctionPoints: AppMgrClient NotifyPreloadAbilityStateChanged interface
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Test NotifyPreloadAbilityStateChanged with valid parameters.
+ */
+HWTEST_F(AmsAppMgrClientTest, NotifyPreloadAbilityStateChanged_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_001 start");
+    client_->mgrHolder_ = nullptr;
+
+    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_001 end");
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: AppMgrClient::NotifyPreloadAbilityStateChanged
+ * SubFunction: NotifyPreloadAbilityStateChanged
+ * FunctionPoints: AppMgrClient NotifyPreloadAbilityStateChanged interface
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Test NotifyPreloadAbilityStateChanged with valid parameters.
+ */
+HWTEST_F(AmsAppMgrClientTest, NotifyPreloadAbilityStateChanged_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_002 start");
+    client_->SetServiceManager(nullptr);
+
+    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_002 end");
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: AppMgrClient::NotifyPreloadAbilityStateChanged
+ * SubFunction: NotifyPreloadAbilityStateChanged
+ * FunctionPoints: AppMgrClient NotifyPreloadAbilityStateChanged interface
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Test NotifyPreloadAbilityStateChanged with valid parameters.
+ */
+HWTEST_F(AmsAppMgrClientTest, NotifyPreloadAbilityStateChanged_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_003 start");
+    EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->ConnectAppMgrService());
+
+    sptr<IAmsMgr> amsMgrScheduler = nullptr;
+    EXPECT_CALL(*(static_cast<MockAppMgrService*>((iface_cast<IAppMgr>(client_->GetRemoteObject())).GetRefPtr())),
+        GetAmsMgr())
+        .Times(1)
+        .WillOnce(Return(amsMgrScheduler));
+
+    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_003 end");
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: AppMgrClient::NotifyPreloadAbilityStateChanged
+ * SubFunction: NotifyPreloadAbilityStateChanged
+ * FunctionPoints: AppMgrClient NotifyPreloadAbilityStateChanged interface
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Test NotifyPreloadAbilityStateChanged with valid parameters.
+ */
+HWTEST_F(AmsAppMgrClientTest, NotifyPreloadAbilityStateChanged_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_004 start");
+    EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->ConnectAppMgrService());
+    
+    sptr<MockAmsMgrScheduler> mockAmsMgrScheduler(new MockAmsMgrScheduler());
+    EXPECT_CALL(*(static_cast<MockAppMgrService*>((iface_cast<IAppMgr>(client_->GetRemoteObject())).GetRefPtr())),
+        GetAmsMgr())
+        .Times(1)
+        .WillOnce(Return(mockAmsMgrScheduler));
+    
+    EXPECT_CALL(*mockAmsMgrScheduler, NotifyPreloadAbilityStateChanged(_))
+        .Times(1)
+        .WillOnce(Return(AppMgrResultCode::RESULT_OK));
+
+    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_004 end");
+}
+
+HWTEST_F(AmsAppMgrClientTest, CheckPreloadAppRecordExist_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckPreloadAppRecordExist_001 start");
+    client_->mgrHolder_ = nullptr;
+    
+    std::string bundleName = "com.example.test";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    bool isExist = false;
+    
+    int32_t result = client_->CheckPreloadAppRecordExist(bundleName, userId, appIndex, isExist);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
+    TAG_LOGI(AAFwkTag::TEST, "CheckPreloadAppRecordExist_001 end");
+}
+
+HWTEST_F(AmsAppMgrClientTest, CheckPreloadAppRecordExist_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckPreloadAppRecordExist_002 start");
+    client_->SetServiceManager(nullptr);
+    
+    std::string bundleName = "com.example.test";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    bool isExist = false;
+    
+    int32_t result = client_->CheckPreloadAppRecordExist(bundleName, userId, appIndex, isExist);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
+    TAG_LOGI(AAFwkTag::TEST, "CheckPreloadAppRecordExist_002 end");
+}
+
+HWTEST_F(AmsAppMgrClientTest, CheckPreloadAppRecordExist_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckPreloadAppRecordExist_003 start");
+    EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->ConnectAppMgrService());
+    
+    sptr<IAmsMgr> amsMgrScheduler = nullptr;
+    EXPECT_CALL(*(static_cast<MockAppMgrService*>((iface_cast<IAppMgr>(client_->GetRemoteObject())).GetRefPtr())),
+        GetAmsMgr())
+        .Times(1)
+        .WillOnce(Return(amsMgrScheduler));
+    
+    std::string bundleName = "com.example.test";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    bool isExist = false;
+    
+    int32_t result = client_->CheckPreloadAppRecordExist(bundleName, userId, appIndex, isExist);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
+    TAG_LOGI(AAFwkTag::TEST, "CheckPreloadAppRecordExist_003 end");
+}
+
+HWTEST_F(AmsAppMgrClientTest, CheckPreloadAppRecordExist_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CheckPreloadAppRecordExist_004 start");
+    EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->ConnectAppMgrService());
+    
+    sptr<MockAmsMgrScheduler> mockAmsMgrScheduler(new MockAmsMgrScheduler());
+    EXPECT_CALL(*(static_cast<MockAppMgrService*>((iface_cast<IAppMgr>(client_->GetRemoteObject())).GetRefPtr())),
+        GetAmsMgr())
+        .Times(1)
+        .WillOnce(Return(mockAmsMgrScheduler));
+    
+    EXPECT_CALL(*mockAmsMgrScheduler, CheckPreloadAppRecordExist(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(AppMgrResultCode::RESULT_OK));
+    
+    std::string bundleName = "com.example.test";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    bool isExist = false;
+    
+    int32_t result = client_->CheckPreloadAppRecordExist(bundleName, userId, appIndex, isExist);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "CheckPreloadAppRecordExist_004 end");
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

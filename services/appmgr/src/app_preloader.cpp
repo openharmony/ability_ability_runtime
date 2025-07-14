@@ -39,7 +39,7 @@ bool AppPreloader::PreCheck(const std::string &bundleName, PreloadMode preloadMo
         bundleName.c_str(), preloadMode);
     if (preloadMode == PreloadMode::PRE_MAKE ||
         preloadMode == PreloadMode::PRELOAD_MODULE ||
-        preloadMode == AppExecFwk::PreloadMode::PRELOAD_BY_PHASE) {
+        preloadMode == PreloadMode::PRELOAD_BY_PHASE) {
         return true;
     }
     int32_t mode = static_cast<int32_t>(preloadMode);

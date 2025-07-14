@@ -25,6 +25,7 @@
 #undef protected
 
 #include "ability_info.h"
+#include "ability_manager_errors.h"
 #include "application_info.h"
 #include "mock_app_mgr_service_inner.h"
 #include "mock_native_token.h"
@@ -2291,6 +2292,169 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_SetKeepAliveAppSer
     EXPECT_TRUE(appRecord->isKeepAliveAppService_);
 
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_SetKeepAliveAppService_001 end");
+}
+
+/*
+ * @tc.name: AmsMgrSchedulerSecondTest_PreloadApplicationByPhase_001
+ * @tc.desc: Test PreloadApplicationByPhase when service not ready
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, PreloadApplicationByPhase_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_PreloadApplicationByPhase_001 start");
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(nullptr, nullptr);
+
+    int32_t ret = amsMgrScheduler->PreloadApplicationByPhase("", 100, 0, PreloadPhase::WINDOW_STAGE_CREATED);
+    EXPECT_EQ(ret, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_PreloadApplicationByPhase_001 end");
+}
+
+/*
+ * @tc.name: AmsMgrSchedulerSecondTest_PreloadApplicationByPhase_002
+ * @tc.desc: Test PreloadApplicationByPhase when not foundation call
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, PreloadApplicationByPhase_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_PreloadApplicationByPhase_002 start");
+    auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
+    EXPECT_CALL(*appMgrServiceInner, IsFoundationCall()).WillOnce(Return(false));
+
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
+    int32_t ret = amsMgrScheduler->PreloadApplicationByPhase("", 100, 0, PreloadPhase::WINDOW_STAGE_CREATED);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_PreloadApplicationByPhase_002 end");
+}
+
+/*
+ * @tc.name: AmsMgrSchedulerSecondTest_PreloadApplicationByPhase_003
+ * @tc.desc: Test PreloadApplicationByPhase success
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, PreloadApplicationByPhase_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_PreloadApplicationByPhase_003 start");
+    auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
+    EXPECT_CALL(*appMgrServiceInner, IsFoundationCall()).WillOnce(Return(true));
+    EXPECT_CALL(*appMgrServiceInner, PreloadApplicationByPhase(_, _, _, _)).WillOnce(Return(ERR_OK));
+
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
+    int32_t ret = amsMgrScheduler->PreloadApplicationByPhase("bundleName", 100, 0, PreloadPhase::WINDOW_STAGE_CREATED);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_PreloadApplicationByPhase_003 end");
+}
+
+/*
+ * @tc.name: AmsMgrSchedulerSecondTest_NotifyPreloadAbilityStateChanged_001
+ * @tc.desc: Test NotifyPreloadAbilityStateChanged when service not ready
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, NotifyPreloadAbilityStateChanged_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_NotifyPreloadAbilityStateChanged_001 start");
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(nullptr, nullptr);
+
+    int32_t ret = amsMgrScheduler->NotifyPreloadAbilityStateChanged(nullptr);
+    EXPECT_EQ(ret, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_NotifyPreloadAbilityStateChanged_001 end");
+}
+
+/*
+ * @tc.name: AmsMgrSchedulerSecondTest_NotifyPreloadAbilityStateChanged_002
+ * @tc.desc: Test NotifyPreloadAbilityStateChanged when not foundation call
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, NotifyPreloadAbilityStateChanged_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_NotifyPreloadAbilityStateChanged_002 start");
+    auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
+    EXPECT_CALL(*appMgrServiceInner, IsFoundationCall()).WillOnce(Return(false));
+
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
+    int32_t ret = amsMgrScheduler->NotifyPreloadAbilityStateChanged(nullptr);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_NotifyPreloadAbilityStateChanged_002 end");
+}
+
+/*
+ * @tc.name: AmsMgrSchedulerSecondTest_NotifyPreloadAbilityStateChanged_003
+ * @tc.desc: Test NotifyPreloadAbilityStateChanged success
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, NotifyPreloadAbilityStateChanged_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_NotifyPreloadAbilityStateChanged_003 start");
+    auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
+    EXPECT_CALL(*appMgrServiceInner, IsFoundationCall()).WillOnce(Return(true));
+    EXPECT_CALL(*appMgrServiceInner, NotifyPreloadAbilityStateChanged(_)).WillOnce(Return(ERR_OK));
+
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
+    int32_t ret = amsMgrScheduler->NotifyPreloadAbilityStateChanged(nullptr);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_NotifyPreloadAbilityStateChanged_003 end");
+}
+
+/*
+ * @tc.name: AmsMgrSchedulerSecondTest_CheckPreloadAppRecordExist_001
+ * @tc.desc: Test CheckPreloadAppRecordExist when service not ready
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, CheckPreloadAppRecordExist_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_CheckPreloadAppRecordExist_001 start");
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(nullptr, nullptr);
+
+    bool isExist = false;
+    int32_t ret = amsMgrScheduler->CheckPreloadAppRecordExist("", 0, 0, isExist);
+    EXPECT_EQ(ret, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_CheckPreloadAppRecordExist_001 end");
+}
+
+/*
+ * @tc.name: AmsMgrSchedulerSecondTest_CheckPreloadAppRecordExist_002
+ * @tc.desc: Test CheckPreloadAppRecordExist when not foundation call
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, CheckPreloadAppRecordExist_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_CheckPreloadAppRecordExist_002 start");
+    auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
+    EXPECT_CALL(*appMgrServiceInner, IsFoundationCall()).WillOnce(Return(false));
+
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
+    bool isExist = false;
+    int32_t ret = amsMgrScheduler->CheckPreloadAppRecordExist("", 0, 0, isExist);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_CheckPreloadAppRecordExist_002 end");
+}
+
+/*
+ * @tc.name: AmsMgrSchedulerSecondTest_CheckPreloadAppRecordExist_003
+ * @tc.desc: Test CheckPreloadAppRecordExist success
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrSchedulerSecondTest, CheckPreloadAppRecordExist_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_CheckPreloadAppRecordExist_003 start");
+    auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
+    EXPECT_CALL(*appMgrServiceInner, IsFoundationCall()).WillOnce(Return(true));
+    EXPECT_CALL(*appMgrServiceInner, CheckPreloadAppRecordExist(_, _, _)).WillOnce(Return(true));
+
+    std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
+        std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
+    bool isExist = false;
+    int32_t ret = amsMgrScheduler->CheckPreloadAppRecordExist("bundleName", 0, 0, isExist);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_TRUE(isExist);
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_CheckPreloadAppRecordExist_003 end");
 }
 } // AppExecFwk
 } // OHOS

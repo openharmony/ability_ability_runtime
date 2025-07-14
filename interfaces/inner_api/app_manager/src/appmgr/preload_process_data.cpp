@@ -35,7 +35,7 @@ bool PreloadProcessData::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteInt32(uid)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "write pid failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "write uid failed.");
         return false;
     }
     if (!parcel.WriteInt32(state)) {
