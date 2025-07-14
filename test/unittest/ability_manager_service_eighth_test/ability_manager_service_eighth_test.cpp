@@ -465,10 +465,11 @@ HWTEST_F(AbilityManagerServiceEighthTest, Dump_001, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceEighthTest Dump_001 start");
     std::vector<std::u16string> args;
     std::stringstream buffer;
-    int fd = fileno(tmpfile());
+    FILE *fp = tmpfile();
+    int fd = fileno(fp);
     int result = abilityMs_->Dump(fd, args);
     EXPECT_EQ(result, 0);
-    fclose(fdopen(fd, "r"));
+    fclose(fp);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceEighthTest Dump_001 end");
 }
 
@@ -481,7 +482,10 @@ HWTEST_F(AbilityManagerServiceEighthTest, Dump_001, TestSize.Level1)
 HWTEST_F(AbilityManagerServiceEighthTest, OnAppStateChanged_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceEighthTest OnAppStateChanged_001 start");
-    abilityMs_->Init();
+    std::shared_ptr<TaskHandlerWrap> taskHandler =
+        TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
+    std::shared_ptr<AbilityEventHandler> eventHandler = std::make_shared<AbilityEventHandler>(taskHandler, abilityMs_);
+    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler, eventHandler);
     EXPECT_TRUE(abilityMs_->subManagersHelper_ != nullptr);
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = std::make_shared<UIAbilityLifecycleManager>();
     abilityMs_->subManagersHelper_->currentConnectManager_ = std::make_shared<AbilityConnectManager>(ONE);
