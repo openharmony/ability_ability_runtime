@@ -21,6 +21,7 @@
 #include "ability_manager_client.h"
 #include "app_mgr_client.h"
 #include "application_context.h"
+#include "bindable_sub_thread.h"
 #include "bundle_mgr_helper.h"
 #include "bundle_mgr_proxy.h"
 #include "common_event_manager.h"
@@ -89,6 +90,11 @@ const int32_t ERR_ABILITY_RUNTIME_EXTERNAL_NOT_SYSTEM_HSP = 16400001;
 const int AREA2 = 2;
 const int AREA3 = 3;
 const int AREA4 = 4;
+
+ContextImpl::ContextImpl()
+{
+    subThreadObject_ = std::make_unique<BindableSubThread>();
+}
 
 ContextImpl::~ContextImpl()
 {

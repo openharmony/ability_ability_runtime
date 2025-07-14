@@ -36,7 +36,7 @@ using GetDisplayConfigCallback = std::function<bool(uint64_t displayId, float &d
 #endif
 class ContextImpl : public Context {
 public:
-    ContextImpl() = default;
+    ContextImpl();
     virtual ~ContextImpl();
 
     /**
