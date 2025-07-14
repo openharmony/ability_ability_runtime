@@ -77,9 +77,10 @@ void EtsApplicationContextUtils::SetFont([[maybe_unused]]ani_env *env, [[maybe_u
         return;
     }
     std::string stdFont = "";
-    if (!AppExecFwk::GetStdString(env, font, stdFont)) {
+    if (!AppExecFwk::GetStdString(env, font, stdFont) || stdFont.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "Parse font failed");
         ThrowStsInvalidParamError(env, "Parse param font failed, font must be string.");
+        return;
     }
     TAG_LOGD(AAFwkTag::APPKIT, "SetFont font %{public}s", stdFont.c_str());
     applicationContext->SetFont(stdFont);
