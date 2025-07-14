@@ -1391,7 +1391,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
 
 void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppScheduler> &appScheduler)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "called");
+    TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called", __func__);
     if (pid <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid pid:%{public}d", pid);
         return;
@@ -1417,7 +1417,7 @@ void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppSched
         NotifyAppAttachFailed(appRecord);
         return;
     }
-    TAG_LOGI(AAFwkTag::APPMGR, "attach pid:%{public}d, bundle:%{public}s", pid, eventInfo.bundleName.c_str());
+    TAG_LOGD(AAFwkTag::APPMGR, "attach pid:%{public}d, bundle:%{public}s", pid, eventInfo.bundleName.c_str());
     sptr<AppDeathRecipient> appDeathRecipient = sptr<AppDeathRecipient>::MakeSptr();
     CHECK_POINTER_AND_RETURN_LOG(appDeathRecipient, "Failed to create death recipient.");
     appDeathRecipient->SetTaskHandler(taskHandler_);
@@ -4784,7 +4784,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     ClearAppRunningDataForKeepAlive(appRecord);
 
     auto uid = appRecord->GetUid();
-    TAG_LOGW(AAFwkTag::APPMGR, "before NotifyAppRunningStatusEvent");
+    TAG_LOGD(AAFwkTag::APPMGR, "before NotifyAppRunningStatusEvent");
     NotifyAppRunningStatusEvent(appRecord->GetBundleName(), uid, AbilityRuntime::RunningStatus::APP_RUNNING_STOP);
 }
 

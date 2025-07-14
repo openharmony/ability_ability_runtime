@@ -727,7 +727,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
 void AbilityConnectManager::HandleActiveAbility(std::shared_ptr<AbilityRecord> &targetService,
     std::shared_ptr<ConnectionRecord> &connectRecord)
 {
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "called");
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "HandleActiveAbility");
     if (targetService == nullptr) {
         TAG_LOGW(AAFwkTag::SERVICE_EXT, "null targetService");
         return;
