@@ -12,19 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 import { IntentInfo } from './IntentContent';
 import { DetailItem } from './DetailItem';
 import insightIntentDriver from '@ohos.app.ability.insightIntentDriver';
 import insightIntent from '@ohos.app.ability.insightIntent';
 import { format, jsClone, addArrayParams, removeArrayParams, romoveFormData } from './format';
-
-type PropType = Record<string, Object>;
-type parameType = Record<string, string>;
-
-interface parameGroup {
-  parameters: Record<string, Object>;
-}
 
 interface propertiesInfo {
   name: string
@@ -55,34 +48,34 @@ interface FormField {
 }
 
 type ObjVal = string | number | null;
-type ObjType = Record<string, object>
-type ArrType = ObjType[]
+type ObjType = Record<string, object>;
+type ArrType = ObjType[];
 
-type FormDataType = Record<string, ObjVal | ObjType | ArrType>
+type FormDataType = Record<string, ObjVal | ObjType | ArrType>;
 
 @Extend(UIExtensionComponent)
 function extStyle() {
   .width('100%')
   .height('100%')
-  .borderRadius(16)
+  .borderRadius(20)
   .shadow({
-    radius: 26,
-    color: 'rgba(0,0,0,0.05)',
+    radius: 60,
+    color: '#33000000',
     offsetX: 0,
-    offsetY: 0
+    offsetY: 10
   })
   .clip(true)
   .onReceive((data) => {
-    console.info(`onReceive, data:${JSON.stringify(data)}`)
+    console.info(`onReceive, data:${JSON.stringify(data)}`);
   })
   .onTerminated((info) => {
     console.info(`onTerminated, info:${JSON.stringify(info)}`);
   })
   .onRemoteReady((proxy) => {
-    console.info(`onRemoteReady, info:${JSON.stringify(proxy)}`)
+    console.info(`onRemoteReady, info:${JSON.stringify(proxy)}`);
   })
   .onError((data) => {
-    console.info(`onError, data:${JSON.stringify(data)}`)
+    console.info(`onError, data:${JSON.stringify(data)}`);
   })
 }
 
@@ -114,7 +107,7 @@ export struct IntentDetailPage {
       'ability.want.params.uiExtensionType': 'share',
       'ohos.insightIntent.executeParam.name': 'TestIntentNameEntry',
       'ohos.insightIntent.executeParam.param': {}
-    },
+    }
   };
   inputType: Record<string, string> = {
     'string': 'text',
@@ -122,7 +115,7 @@ export struct IntentDetailPage {
     'enum': 'select',
     'object': 'object',
     'array': 'array',
-  }
+  };
 
   aboutToAppear(): void {
     this.intentDetail = this.articlePathStack.getParamByName('intentDetail')[0] as IntentInfo;
@@ -133,7 +126,7 @@ export struct IntentDetailPage {
     this.required = (this.getAttribute(this.intentDetail?.parameters, 'required') === '') ? [] :
       this.getAttribute(this.intentDetail?.parameters, 'required') as string[];
     this.abilityName = this.getAttribute(this.intentDetail?.subIntentInfo, 'abilityName') as string;
-    if(this.intentDetail?.intentType === '@InsightIntentPage'){
+    if (this.intentDetail?.intentType === '@InsightIntentPage') {
       this.abilityName = this.getAttribute(this.intentDetail?.subIntentInfo, 'uiAbility') as string;
     }
     this.uri = this.getAttribute(this.intentDetail?.subIntentInfo, 'uri') as string;
@@ -152,14 +145,14 @@ export struct IntentDetailPage {
 
   getAttribute(subInfo: object | undefined, attributeName: string): string | string[] {
     if (subInfo && Object.keys(subInfo).includes(attributeName)) {
-      return subInfo[attributeName]
+      return subInfo[attributeName];
     } else {
       return '';
     }
   }
 
   changeProperties(properties: Record<string, propertiesInfo>, fatherKey?: string, fatherType?: string) {
-    const formArr: FormField[] = []
+    const formArr: FormField[] = [];
     Object.keys(properties).forEach((propKey: string, index: number) => {
       const obj = properties[propKey];
       let key = propKey;
@@ -233,7 +226,7 @@ export struct IntentDetailPage {
         prop = this.findProperties(obj[key]);
       }
     })
-    return prop
+    return prop;
   }
 
   async executeLinkIntent(insightIntentParam: Record<string, Object>) {
@@ -282,12 +275,12 @@ export struct IntentDetailPage {
     } else {
       try {
         let resultData: insightIntent.ExecuteResult = await insightIntentDriver.execute(param);
-        this.result = JSON.stringify(resultData);
+        this.result = JSON.stringify(resultData, null, 2);
         if (this.result != '') {
           this.isShow = true;
         }
       } catch (error) {
-        this.result = JSON.stringify(error);
+        this.result = JSON.stringify(error, null, 2) + '\n' + JSON.stringify(param, null, 2);
         if (this.result != '') {
           this.isShow = true;
         }
@@ -297,7 +290,17 @@ export struct IntentDetailPage {
 
   submitForm() {
     const excuteParam = format(this.formData);
-    this.executeLinkIntent(excuteParam as Record<string, Object>);
+    let validate: boolean = true;
+    this.required?.forEach((key: string) => {
+      if (!excuteParam[key]) {
+        if (validate) {
+          validate = false;
+        }
+      }
+    })
+    if (validate) {
+      this.executeLinkIntent(excuteParam as Record<string, Object>);
+    }
   }
 
   @Builder
@@ -311,7 +314,7 @@ export struct IntentDetailPage {
         .height('100%')
         .width('100%')
         .padding({
-          top: 14,
+          top: 28,
           left: 22,
           right: 22,
           bottom: 48
@@ -328,7 +331,14 @@ export struct IntentDetailPage {
           })
             .width('100%')
             .height('80%')
-            .shadow({ radius: 30, color: '#bfbfbf' })
+            .borderRadius(20)
+            .shadow({
+              radius: 60,
+              color: '#33000000',
+              offsetX: 0,
+              offsetY: 10
+            })
+            .clip(true)
         }
         .padding({
           top: 14,
@@ -343,7 +353,7 @@ export struct IntentDetailPage {
           .width('100%')
           .textAlign(TextAlign.Start)
           .fontSize(14)
-          .fontColor('#000')
+          .fontColor($r('app.color.font_color_09'))
           .lineHeight(18)
           .padding({
             top: 20,
@@ -362,7 +372,7 @@ export struct IntentDetailPage {
     Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Start }) {
       Text(field.name)
         .fontSize(16)
-        .fontColor('rgba(0,0,0,0.4)')
+        .fontColor($r('app.color.font_color_04'))
         .width(165)
         .height(40)
         .borderRadius(20)
@@ -373,14 +383,14 @@ export struct IntentDetailPage {
         .maxLines(1)
       Column() {
         TextInput({
-          placeholder: `${field.type} ${field.description ? ',' + field.description : ''}`,
+          placeholder: `${field.type} ${field.description ? '，' + field.description : ''}`,
           text: `${this.formData[field.key] ?? ''}`
         })
           .maxLength(field.maxLength)
           .width('100%')
           .height(40)
-          .fontSize(18)
-          .fontColor('rgba(0,0,0,0.9)')
+          .fontSize(16)
+          .fontColor($r('app.color.font_color_09'))
           .padding({ right: 16, left: 16 })
           .backgroundColor($r('app.color.background_input'))
           .onChange((value: string) => {
@@ -409,7 +419,7 @@ export struct IntentDetailPage {
     Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Start }) {
       Text(field.name)
         .fontSize(16)
-        .fontColor('rgba(0,0,0,0.4)')
+        .fontColor($r('app.color.font_color_04'))
         .width(165)
         .height(40)
         .borderRadius(20)
@@ -419,13 +429,16 @@ export struct IntentDetailPage {
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .maxLines(1)
       Column() {
-        TextInput({ placeholder: `${field.type} ${field.description ? ',' + field.description : ''}` })
+        TextInput({
+          placeholder: `${field.type} ${field.description ? '，' + field.description : ''}`,
+          text: `${this.formData[field.key] ?? ''}`
+        })
           .maxLength(field.maxLength)
           .type(InputType.Number)
           .width('100%')
           .height(40)
-          .fontSize(18)
-          .fontColor('rgba(0,0,0,0.9)')
+          .fontSize(16)
+          .fontColor($r('app.color.font_color_09'))
           .padding({ right: 16, left: 16 })
           .backgroundColor($r('app.color.background_input'))
           .onChange((value: string) => {
@@ -455,7 +468,7 @@ export struct IntentDetailPage {
     Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Start }) {
       Text(field.name)
         .fontSize(16)
-        .fontColor('rgba(0,0,0,0.4)')
+        .fontColor($r('app.color.font_color_04'))
         .width(165)
         .height(40)
         .borderRadius(20)
@@ -468,16 +481,19 @@ export struct IntentDetailPage {
         Select(field.options?.map(option => {
           const opt: SelectOption = { value: option.toString() }
           return opt
-        }))
-          .selected(field.default)
+        }))// .selected(field.default)
           .width('100%')
           .height(40)
-          .fontColor('rgba(0,0,0,0.9)')
-          .padding({ right: 16, left: 16 })
+          .font({ size: 16, weight: 400 })
+          .fontColor($r('app.color.font_color_09'))
+          .padding({ right: 6, left: 8 })
           .backgroundColor($r('app.color.background_input'))
+          .optionWidth(224)
+          .optionFont({ size: 16, weight: 500 })
+          .optionFontColor($r('app.color.font_color_09'))
           .onSelect((index: number, value: string) => {
-            const selVal = field.type === 'string' ? value : parseInt(value)
-            this.formData[field.key] = selVal
+            const selVal = field.type === 'string' ? value : parseInt(value);
+            this.formData[field.key] = selVal;
           })
         Row() {
           if (field.required) {
@@ -490,7 +506,7 @@ export struct IntentDetailPage {
           Text(field.description)
             .fontSize(12)
             .lineHeight(16)
-            .fontColor('rgba(0,0,0,0.4)')
+            .fontColor($r('app.color.font_color_04'))
             .padding({ left: 10 })
         }
         .width('100%')
@@ -521,7 +537,7 @@ export struct IntentDetailPage {
                   .fontSize(14)
                   .lineHeight(20)
                   .fontWeight(500)
-                  .fontColor('rgba(0,0,0,0.6)')
+                  .fontColor($r('app.color.font_color_06'))
                   .width('100%')
                   .padding({ left: 12 })
               }
@@ -541,7 +557,7 @@ export struct IntentDetailPage {
                 Text(field.name)
                   .fontSize(14)
                   .fontWeight(500)
-                  .fontColor('rgba(0,0,0,0.6)')
+                  .fontColor($r('app.color.font_color_06'))
                   .width('100%')
                   .lineHeight(20)
                 if (arrIndex === 0) {
@@ -555,7 +571,7 @@ export struct IntentDetailPage {
 
                         this.getUIContext().showAlertDialog(
                           {
-                            message: `最大节点不超过${field.maxLength}个`,
+                            message: `最大节点数不超过${field.maxLength}个`,
                             autoCancel: true,
                             alignment: DialogAlignment.Center,
                             offset: { dx: 0, dy: -20 },
@@ -618,19 +634,18 @@ export struct IntentDetailPage {
             .width(8.68)
             .height(16.48)
             .opacity(0.6)
-            .id('btn-back')
         }
         .width(40)
         .height(40)
         .borderRadius(20)
-        .backgroundColor('rgba(0,0,0,0.05)')
+        .backgroundColor($r('app.color.btn_bg_005'))
         .justifyContent(FlexAlign.Center)
 
         Text($r('app.string.Detail_title_ytts'))
           .margin({ left: 8 })
           .fontSize(20)
           .fontWeight(700)
-          .fontColor('rgba(0,0,0,0.9)')
+          .fontColor($r('app.color.font_color_09'))
       }
       .width('100%')
       .height(56)
@@ -649,14 +664,14 @@ export struct IntentDetailPage {
 
       Scroll(this.scroller) {
         Column() {
-          DetailItem({ intentDetail: this.intentDetail, intentDetailAll: this.intentDetailEntries })
+          DetailItem({ intentDetail: this.intentDetail })
 
           Column() {
             Text($r('app.string.Detail_subtitle_ytcs'))
               .fontFamily('HarmonyHeiTi-Medium')
               .fontSize(18)
               .fontWeight(700)
-              .fontColor('rgba(0,0,0,0.9)')
+              .fontColor($r('app.color.font_color_09'))
               .lineHeight(24)
               .padding({
                 top: 24,
@@ -686,7 +701,7 @@ export struct IntentDetailPage {
                           .fontSize(14)
                           .lineHeight(20)
                           .fontWeight(500)
-                          .fontColor('rgba(0,0,0,0.6)')
+                          .fontColor($r('app.color.font_color_06'))
                           .width('100%')
                           .padding({ left: 12 })
                       }
@@ -705,7 +720,7 @@ export struct IntentDetailPage {
                       }) {
                         Text(field.name)
                           .fontSize(14)
-                          .fontColor('rgba(0,0,0,0.6)')
+                          .fontColor($r('app.color.font_color_06'))
                           .width('50%')
                           .lineHeight(20)
                           .fontWeight(500)
@@ -794,7 +809,6 @@ export struct IntentDetailPage {
       .width('100%')
       .height('100%')
       .padding({ top: 56, bottom: 0 })
-      .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
       .clip(true)
 
       Row() {
@@ -820,7 +834,7 @@ export struct IntentDetailPage {
         top: 16,
         left: 16,
         right: 16,
-        bottom: 39
+        bottom: 6
       })
       .position({ bottom: 0, left: 0 })
       .backgroundColor($r('app.color.background_cont'))
@@ -828,7 +842,14 @@ export struct IntentDetailPage {
     .hideTitleBar(true)
     .width('100%')
     .height('100%')
-    .padding({ top: 1, bottom: 1 })
+    .padding({ top: 36, bottom: 36 })
     .backgroundColor($r('app.color.background_cont'))
+    .clip(true)
+    .gesture(
+      SwipeGesture({ direction: SwipeDirection.Horizontal })
+        .onAction((event: GestureEvent) => {
+          this.articlePathStack.pop();
+        })
+    )
   }
 }

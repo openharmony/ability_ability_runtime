@@ -5,8 +5,8 @@
       "value": "#000000"
     },
     {
-      "name": "cont_background",
-      "value": "#000000"
+      "name": "background_cont",
+      "value": "#FF151515"
     },
     {
       "name": "background_white",
@@ -14,19 +14,47 @@
     },
     {
       "name": "background_list",
-      "value": "#FFF"
+      "value": "#000000d6"
     },
     {
       "name": "background_input",
-      "value": "#FFF"
+      "value": "#000000"
+    },
+    {
+      "name": "bg_color_black_01",
+      "value": "#1AFFFFFF"
     },
     {
       "name": "btn_background",
-      "value": "#317AF7"
+      "value": "#0A59F7"
+    },
+    {
+      "name": "btn_bg_005",
+      "value": "#0DFFFFFF"
+    },
+    {
+      "name": "border_color_02",
+      "value": "#33FFFFFF"
     },
     {
       "name": "error_color",
-      "value": "#D94838"
+      "value": "#E84026"
+    },
+    {
+      "name": "font_color_04",
+      "value": "#66FFFFFF"
+    },
+    {
+      "name": "font_color_06",
+      "value": "#99FFFFFF"
+    },
+    {
+      "name": "font_color_09",
+      "value": "#E6FFFFFF"
+    },
+    {
+      "name": "font_color_black",
+      "value": "#FFFFFF"
     }
   ]
 }

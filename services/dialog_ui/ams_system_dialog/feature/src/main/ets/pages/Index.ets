@@ -22,6 +22,10 @@ struct Index {
   @Provide('articlePathStack') articlePathStack: NavPathStack = new NavPathStack();
   scroller: Scroller = new Scroller();
 
+  onBackPress(): boolean {
+    return true;
+  }
+
   @Builder
   intentRouter(name: string, param?: IntentInfo) {
     if (name === 'intentDetail') {
@@ -38,5 +42,6 @@ struct Index {
       .navDestination(this.intentRouter)
       .hideTitleBar(true)
       .mode(NavigationMode.Stack)
+
   }
 }
