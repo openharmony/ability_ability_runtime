@@ -222,6 +222,54 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0800, TestSiz
 }
 
 /**
+ * @tc.number: AppPreloaderTest_GeneratePreloadRequest_0900
+ * @tc.desc: Test GeneratePreloadRequest works
+ * @tc.type: FUNC
+ * @tc.Function: GeneratePreloadRequest
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_0900, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppPreloaderTest_GeneratePreloadRequest_0900 start.");
+    auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
+    EXPECT_NE(manager, nullptr);
+
+    std::string bundleName = "com.acts.preloadtest";
+    int32_t userId = UidCheckCode::UID_CHECK_NOT_ENTRY_HAP_MODULE_INFO;
+    int32_t appIndex = 0;
+    PreloadRequest request;
+    request.preloadMode = PreloadMode::PRELOAD_BY_PHASE;
+    auto ret = manager->GeneratePreloadRequest(bundleName, userId, appIndex, request);
+    EXPECT_EQ(ret, AAFwk::ERR_PRELOAD_NOT_ENTRY_MODULE);
+    TAG_LOGI(AAFwkTag::TEST, "AppPreloaderTest_GeneratePreloadRequest_0900 ned.");
+}
+
+/**
+ * @tc.number: AppPreloaderTest_GeneratePreloadRequest_1000
+ * @tc.desc: Test GeneratePreloadRequest works
+ * @tc.type: FUNC
+ * @tc.Function: GeneratePreloadRequest
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_GeneratePreloadRequest_1000, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppPreloaderTest_GeneratePreloadRequest_1000 start.");
+    auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
+    EXPECT_NE(manager, nullptr);
+
+    std::string bundleName = "com.acts.preloadtest";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    PreloadRequest request;
+    request.preloadMode = PreloadMode::PRELOAD_BY_PHASE;
+    auto ret = manager->GeneratePreloadRequest(bundleName, userId, appIndex, request);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AppPreloaderTest_GeneratePreloadRequest_1000 ned.");
+}
+
+/**
  * @tc.number: AppPreloaderTest_PreCheck_0100
  * @tc.desc: Test PreCheck works
  * @tc.type: FUNC
@@ -295,6 +343,26 @@ HWTEST_F(AppPreloaderTest, AppPreloaderTest_PreCheck_0400, TestSize.Level2)
     std::string bundleName = "com.acts.testxxxx";
     auto ret = manager->PreCheck(bundleName, PreloadMode::PRESS_DOWN);
     EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.number: AppPreloaderTest_PreCheck_0500
+ * @tc.desc: Test PreCheck works
+ * @tc.type: FUNC
+ * @tc.Function: GeneratePreloadRequest
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppPreloaderTest, AppPreloaderTest_PreCheck_0500, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppPreloaderTest_PreCheck_0500 start.");
+    auto manager = std::make_shared<AppPreloader>(remoteClientManager_);
+    EXPECT_NE(manager, nullptr);
+
+    std::string bundleName = "com.acts.testxxxx";
+    auto ret = manager->PreCheck(bundleName, PreloadMode::PRELOAD_BY_PHASE);
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "AppPreloaderTest_PreCheck_0500 end.");
 }
 
 /**

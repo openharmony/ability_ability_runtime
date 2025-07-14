@@ -15,7 +15,9 @@
 
 #include <gtest/gtest.h>
 
+#include "ability_manager_errors.h"
 #include "mock_ability_debug_response_stub.h"
+#include "mock_ability_token.h"
 #include "mock_ams_mgr_scheduler.h"
 #include "mock_app_debug_listener_stub.h"
 
@@ -299,6 +301,138 @@ HWTEST_F(AmsMgrStubTest, NotifyAppMgrRecordExitReason_0100, TestSize.Level1)
     auto result = mockAmsMgrScheduler_->OnRemoteRequest(
         static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_APP_MGR_RECORD_EXIT_REASON), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandlePreloadApplicationByPhase_0100
+ * @tc.desc: Handle preload application with valid parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrStubTest, HandlePreloadApplicationByPhase_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadApplicationByPhase_0100 start.");
+    EXPECT_NE(mockAmsMgrScheduler_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+
+    std::string bundleName = "com.example.bundle";
+    int32_t userId = 100;
+    int32_t appIndex = 1;
+    int32_t preloadPhase = static_cast<int32_t>(PreloadPhase::PROCESS_CREATED);
+    data.WriteString(bundleName);
+    data.WriteInt32(userId);
+    data.WriteInt32(appIndex);
+    data.WriteInt32(preloadPhase);
+
+    auto result = mockAmsMgrScheduler_->OnRemoteRequest(
+        static_cast<uint32_t>(IAmsMgr::Message::PRELOAD_APPLICATION_BY_PHASE), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "HandlePreloadApplicationByPhase_0100 end.");
+}
+
+/**
+ * @tc.name: HandleNotifyPreloadAbilityStateChanged_0100
+ * @tc.desc: HandleNotifyPreloadAbilityStateChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrStubTest, HandleNotifyPreloadAbilityStateChanged_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleNotifyPreloadAbilityStateChanged_0100 start.");
+    EXPECT_NE(mockAmsMgrScheduler_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+
+    auto result = mockAmsMgrScheduler_->OnRemoteRequest(
+        static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_PRELOAD_ABILITY_STATE_CHANGED), data, reply, option);
+    EXPECT_EQ(result, AAFwk::INVALID_CALLER_TOKEN);
+    TAG_LOGI(AAFwkTag::TEST, "HandleNotifyPreloadAbilityStateChanged_0100 end.");
+}
+
+/**
+ * @tc.name: HandleNotifyPreloadAbilityStateChanged_0200
+ * @tc.desc: HandleNotifyPreloadAbilityStateChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrStubTest, HandleNotifyPreloadAbilityStateChanged_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleNotifyPreloadAbilityStateChanged_0100 start.");
+    EXPECT_NE(mockAmsMgrScheduler_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+
+    sptr<MockAbilityToken> token = new (std::nothrow) MockAbilityToken();
+    data.WriteRemoteObject(token);
+
+    auto result = mockAmsMgrScheduler_->OnRemoteRequest(
+        static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_PRELOAD_ABILITY_STATE_CHANGED), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "HandleNotifyPreloadAbilityStateChanged_0200 end.");
+}
+
+/**
+ * @tc.name: HandleCheckPreloadAppRecordExist_0100
+ * @tc.desc: HandleCheckPreloadAppRecordExist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrStubTest, HandleCheckPreloadAppRecordExist_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleCheckPreloadAppRecordExist_0100 start.");
+    EXPECT_NE(mockAmsMgrScheduler_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+
+    std::string bundleName = "testBundle";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    data.WriteString(bundleName);
+    data.WriteInt32(userId);
+    data.WriteInt32(appIndex);
+
+    EXPECT_CALL(*mockAmsMgrScheduler_, CheckPreloadAppRecordExist(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(ERR_INVALID_VALUE));
+    auto result = mockAmsMgrScheduler_->OnRemoteRequest(
+        static_cast<uint32_t>(IAmsMgr::Message::CHECK_PRELOAD_APP_RECORD_EXIST), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "HandleCheckPreloadAppRecordExist_0100 end.");
+}
+
+/**
+ * @tc.name: HandleCheckPreloadAppRecordExist_0200
+ * @tc.desc: HandleCheckPreloadAppRecordExist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsMgrStubTest, HandleCheckPreloadAppRecordExist_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleCheckPreloadAppRecordExist_0200 start.");
+    EXPECT_NE(mockAmsMgrScheduler_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+
+    std::string bundleName = "testBundle";
+    int32_t userId = 100;
+    int32_t appIndex = 0;
+    data.WriteString(bundleName);
+    data.WriteInt32(userId);
+    data.WriteInt32(appIndex);
+
+    EXPECT_CALL(*mockAmsMgrScheduler_, CheckPreloadAppRecordExist(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(NO_ERROR));
+    auto result = mockAmsMgrScheduler_->OnRemoteRequest(
+        static_cast<uint32_t>(IAmsMgr::Message::CHECK_PRELOAD_APP_RECORD_EXIST), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+    TAG_LOGI(AAFwkTag::TEST, "HandleCheckPreloadAppRecordExist_0200 end.");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
