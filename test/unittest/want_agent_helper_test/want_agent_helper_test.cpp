@@ -1404,4 +1404,117 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_6600, Function | MediumTest | Leve
     const auto retCode = WantAgentHelper::GetBundleName(wantAgent, actualBundleName);
     ASSERT_TRUE(retCode == ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
 }
+
+/**
+ * @tc.name: CreateLocalWantAgent_0100
+ * @tc.desc: Test CreateLocalWantAgent with null context
+ * @tc.type: FUNC
+ */
+HWTEST_F(WantAgentHelperTest, CreateLocalWantAgent_0100, TestSize.Level1)
+{
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    std::vector<std::shared_ptr<Want>> wants = {want};
+    LocalWantAgentInfo paramsInfo(10, WantAgentConstant::OperationType::START_ABILITY, wants);
+    
+    auto requestCode = paramsInfo.GetRequestCode();
+    EXPECT_EQ(requestCode, 10);
+    auto operationType = paramsInfo.GetOperationType();
+    EXPECT_EQ(operationType, WantAgentConstant::OperationType::START_ABILITY);
+    auto wantGet = paramsInfo.GetWants();
+    EXPECT_EQ(wantGet.size(), 1);
+
+    std::shared_ptr<WantAgent> wantAgent;
+    ErrCode result = WantAgentHelper::CreateLocalWantAgent(nullptr, paramsInfo, wantAgent);
+    
+    EXPECT_EQ(result, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: CreateLocalWantAgent_0200
+ * @tc.desc: Test CreateLocalWantAgent with empty wants
+ * @tc.type: FUNC
+ */
+HWTEST_F(WantAgentHelperTest, CreateLocalWantAgent_0200, TestSize.Level1)
+{
+    auto context = std::make_shared<ApplicationContext>();
+    
+    std::vector<std::shared_ptr<Want>> wants;
+    LocalWantAgentInfo paramsInfo(10, WantAgentConstant::OperationType::START_ABILITY, wants);
+
+    std::shared_ptr<WantAgent> wantAgent;
+    ErrCode result = WantAgentHelper::CreateLocalWantAgent(context, paramsInfo, wantAgent);
+    
+    EXPECT_EQ(result, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: CreateLocalWantAgent_0300
+ * @tc.desc: Test CreateLocalWantAgent with null want in wants
+ * @tc.type: FUNC
+ */
+HWTEST_F(WantAgentHelperTest, CreateLocalWantAgent_0300, TestSize.Level1)
+{
+    auto context = std::make_shared<ApplicationContext>();
+
+    std::vector<std::shared_ptr<Want>> wants = {nullptr};
+    LocalWantAgentInfo paramsInfo(10, WantAgentConstant::OperationType::START_ABILITY, wants);
+
+    std::shared_ptr<WantAgent> wantAgent;
+    ErrCode result = WantAgentHelper::CreateLocalWantAgent(context, paramsInfo, wantAgent);
+    
+    EXPECT_EQ(result, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: CreateLocalWantAgent_0400
+ * @tc.desc: Test CreateLocalWantAgent with valid parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(WantAgentHelperTest, CreateLocalWantAgent_0400, TestSize.Level1)
+{
+    auto context = std::make_shared<ApplicationContext>();
+    
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    std::vector<std::shared_ptr<Want>> wants = {want};
+    LocalWantAgentInfo paramsInfo(10, WantAgentConstant::OperationType::START_ABILITY, wants);
+
+    std::shared_ptr<WantAgent> wantAgent;
+    ErrCode result = WantAgentHelper::CreateLocalWantAgent(context, paramsInfo, wantAgent);
+    
+    EXPECT_EQ(result, ERR_OK);
+    
+    // Verify the created WantAgent
+    std::shared_ptr<Want> retrievedWant;
+    ErrCode getWantResult = WantAgentHelper::GetWant(wantAgent, retrievedWant);
+    EXPECT_EQ(getWantResult, ERR_OK);
+    
+    int32_t operationType;
+    ErrCode getTypeResult = WantAgentHelper::GetType(wantAgent, operationType);
+    EXPECT_EQ(getTypeResult, ERR_OK);
+    EXPECT_EQ(operationType, static_cast<int32_t>(WantAgentConstant::OperationType::START_ABILITY));
+}
+
+/**
+ * @tc.name: CreateLocalWantAgent_0500
+ * @tc.desc: Test CreateLocalWantAgent with different operation types
+ * @tc.type: FUNC
+ */
+HWTEST_F(WantAgentHelperTest, CreateLocalWantAgent_0500, TestSize.Level1)
+{
+    auto context = std::make_shared<ApplicationContext>();
+    
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    std::vector<std::shared_ptr<Want>> wants = {want};
+    LocalWantAgentInfo paramsInfo(10, WantAgentConstant::OperationType::SEND_COMMON_EVENT, wants);
+    
+    std::shared_ptr<WantAgent> wantAgent;
+    ErrCode result = WantAgentHelper::CreateLocalWantAgent(context, paramsInfo, wantAgent);
+    
+    EXPECT_EQ(result, ERR_OK);
+    
+    int32_t operationType;
+    ErrCode getTypeResult = WantAgentHelper::GetType(wantAgent, operationType);
+    EXPECT_EQ(getTypeResult, ERR_OK);
+    EXPECT_EQ(operationType, static_cast<int32_t>(WantAgentConstant::OperationType::SEND_COMMON_EVENT));
+}
 }  // namespace OHOS::AbilityRuntime::WantAgent
