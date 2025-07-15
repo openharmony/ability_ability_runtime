@@ -52,6 +52,14 @@ using UncatchableTask = std::function<void(std::string summary, const JsEnv::Err
 
 using AppLibPathMap = std::map<std::string, std::vector<std::string>>;
 
+#ifdef APP_USE_ARM
+constexpr char ARK_DEBUGGER_LIB_PATH[] = "libark_inspector.z.so";
+#elif defined(APP_USE_X86_64)
+constexpr char ARK_DEBUGGER_LIB_PATH[] = "libark_inspector.z.so";
+#else
+constexpr char ARK_DEBUGGER_LIB_PATH[] = "libark_inspector.z.so";
+#endif
+
 namespace AbilityRuntime {
 class TimerTask;
 
@@ -107,6 +115,7 @@ public:
         bool isEsMode, bool useCommonTrunk) override {}
     bool PopPreloadObj(const std::string& key, std::unique_ptr<NativeReference>& obj);
     void StartDebugMode(const DebugOption debugOption) override;
+    bool ShouldSkipDebugMode(const DebugOption debugOption);
     void SetDebugOption(const DebugOption debugOption) override;
     void StartLocalDebugMode(bool isDebugFromLocal) override;
     void DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug);
