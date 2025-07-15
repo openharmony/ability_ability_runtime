@@ -251,7 +251,7 @@ HWTEST_F(EtsEnvironmentTest, Initialize_0100, TestSize.Level0)
 {
     auto etsEnv = std::make_shared<ETSEnvironment>();
     ASSERT_NE(etsEnv, nullptr);
-    bool result = etsEnv->Initialize();
+    bool result = etsEnv->Initialize(nullptr, false);
     EXPECT_FALSE(result);
 }
 
@@ -352,6 +352,45 @@ HWTEST_F(EtsEnvironmentTest, PreloadSystemClass_0100, TestSize.Level0)
     std::string className = "className";
     auto result = etsEnv->PreloadSystemClass(className.c_str());
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetDebuggerPostTask_0100
+ * @tc.desc: Sts environment GetDebuggerPostTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, GetDebuggerPostTask_0100, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    auto task = etsEnv->GetDebuggerPostTask();
+    ASSERT_NE(task, nullptr);
+}
+
+/**
+ * @tc.name: ParseHdcRegisterOption_0100
+ * @tc.desc: Js environment ParseHdcRegisterOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, ParseHdcRegisterOption_0100, TestSize.Level2)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    std::string option1 = "";
+    int result1 = etsEnv->ParseHdcRegisterOption(option1);
+    ASSERT_EQ(result1, -1);
+    std::string option2 = "@";
+    int result2 = etsEnv->ParseHdcRegisterOption(option2);
+    ASSERT_EQ(result2, -1);
+    std::string option3 = ":";
+    int result3 = etsEnv->ParseHdcRegisterOption(option3);
+    ASSERT_EQ(result3, -1);
+    std::string option4 = "ark:123@Debugger";
+    int result4 = etsEnv->ParseHdcRegisterOption(option4);
+    ASSERT_EQ(result4, 123);
+    std::string option5 = "ark:123@456@Debugger";
+    int result5 = etsEnv->ParseHdcRegisterOption(option5);
+    ASSERT_EQ(result5, 456);
 }
 } // namespace StsEnv
 } // namespace OHOS
