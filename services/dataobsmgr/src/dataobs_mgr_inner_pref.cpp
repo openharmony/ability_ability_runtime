@@ -28,7 +28,7 @@ DataObsMgrInnerPref::~DataObsMgrInnerPref() {}
 
 int DataObsMgrInnerPref::HandleRegisterObserver(const Uri &uri, struct ObserverNode observerNode)
 {
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
 
     auto [obsPair, flag] = observers_.try_emplace(uri.ToString(), std::list<struct ObserverNode>());
     if (!flag && obsPair->second.size() >= OBS_ALL_NUM_MAX) {
@@ -64,7 +64,7 @@ int DataObsMgrInnerPref::HandleRegisterObserver(const Uri &uri, struct ObserverN
 
 int DataObsMgrInnerPref::HandleUnregisterObserver(const Uri &uri, struct ObserverNode observerNode)
 {
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
 
     auto obsPair = observers_.find(uri.ToString());
     if (obsPair == observers_.end()) {
@@ -100,7 +100,7 @@ int DataObsMgrInnerPref::HandleUnregisterObserver(const Uri &uri, struct Observe
 int DataObsMgrInnerPref::HandleNotifyChange(const Uri &uri, int32_t userId)
 {
     std::list<struct ObserverNode> obsList;
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     {
         std::string uriStr = uri.ToString();
         size_t pos = uriStr.find('?');
@@ -182,7 +182,7 @@ void DataObsMgrInnerPref::OnCallBackDied(const wptr<IRemoteObject> &remote)
     if (dataObserver == nullptr) {
         return;
     }
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
 
     if (dataObserver == nullptr) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "null dataObserver");
