@@ -291,5 +291,29 @@ bool UnwrapStartWindowOption(ani_env *env, ani_object param,
     startWindowOption = option;
     return true;
 }
+
+bool UnwrapAtomicServiceOptions(ani_env *env, ani_object optionsObj, AAFwk::Want &want,
+    AAFwk::StartOptions &startOptions)
+{
+    if (!UnwrapStartOptionsWithProcessOption(env, optionsObj, startOptions)) {
+        TAG_LOGE(AAFwkTag::ANI, "UnwrapStartOptions filed");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_ref paramRef = nullptr;
+    if ((status = env->Object_GetPropertyByName_Ref(optionsObj, "parameters", &paramRef))  == ANI_OK) {
+        AAFwk::WantParams wantParam;
+        if (UnwrapWantParams(env, paramRef, wantParam)) {
+            want.SetParams(wantParam);
+        } else {
+            TAG_LOGE(AAFwkTag::ANI, "UnwrapWantParams failed");
+        }
+    }
+    double flags = 0.0;
+    if (GetDoublePropertyObject(env, optionsObj, "flags", flags)) {
+        want.SetFlags(flags);
+    }
+    return true;
+}
 } // namespace AppExecFwk
 } // namespace OHOS
