@@ -58,7 +58,7 @@ export default namespace missionManager {
 
   export function clearAllMissions(): Promise<void> {
     let p: Promise<void> =
-      new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
+      new Promise<void>((resolve: (data: undefined) => void, reject: (err: Error) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
           if (err == null || err.code == 0) {
             resolve(undefined);
