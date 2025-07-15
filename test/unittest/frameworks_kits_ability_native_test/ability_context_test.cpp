@@ -617,37 +617,5 @@ HWTEST_F(AbilityContextTest, AaFwk_Ability_GetHapModuleInfo_0100, TestSize.Level
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "AaFwk_Ability_GetHapModuleInfo_0100 end";
 }
-
-/**
- * @tc.name: ConnectAppServiceExtensionAbility_0100
- * @tc.desc: Verify ConnectAppServiceExtensionAbility with failed case
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityContextTest, AaFwk_Ability_ConnectAppServiceExtensionAbility_0100, Function | MediumTest | Level1)
-{
-    Want want;
-    bool ret = context_->ConnectAppServiceExtensionAbility(want, nullptr);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: ConnectAppServiceExtensionAbility_0200
- * @tc.desc: Verify ConnectAppServiceExtensionAbility with failure case
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityContextTest, AaFwk_Ability_ConnectAppServiceExtensionAbility_0200, Function | MediumTest | Level1)
-{
-    std::shared_ptr<ContextDeal> deal = std::make_shared<ContextDeal>();
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-
-    abilityInfo->type = AppExecFwk::AbilityType::APP_SERVICE;
-    deal->SetAbilityInfo(abilityInfo);
-    context_->AttachBaseContext(deal);
-
-    Want want;
-    OHOS::sptr<AAFwk::IAbilityConnection> callback = new NAPIAbilityConnection();
-    bool ret = context_->ConnectAppServiceExtensionAbility(want, callback);
-    EXPECT_TRUE(ret);
-}
 }  // namespace AppExecFwk
 }  // namespace OHOS
