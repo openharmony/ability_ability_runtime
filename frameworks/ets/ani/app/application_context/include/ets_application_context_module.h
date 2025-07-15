@@ -35,7 +35,7 @@ public:
 
     static ani_object NativeTransferStatic(ani_env *aniEnv, ani_object aniObj, ani_object input, ani_object type);
     static ani_object NativeTransferDynamic(ani_env *aniEnv, ani_class aniCls, ani_object input);
-    static std::unique_ptr<NativeReference> GetOrCreateNativeReference(napi_env napiEnv,
+    static napi_value GetOrCreateDynamicObject(napi_env napiEnv,
         std::shared_ptr<ApplicationContext> applicationContext);
 
 private:

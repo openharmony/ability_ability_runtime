@@ -20,22 +20,31 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
 struct HookData {
-    BindableSubThread* instance;
-    napi_env env;
+    std::weak_ptr<BindableSubThread> instance;
+    napi_env env = nullptr;
 };
+} // namespace
+
+BindableSubThread::~BindableSubThread()
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "destructor");
+}
 
 void BindableSubThread::BindSubThreadObject(void* napiEnv, void* object)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "bind sub thread object");
+    uintptr_t key = reinterpret_cast<uintptr_t>(napiEnv);
     std::lock_guard guard(objectsMutex_);
-    auto it = objects_.find(napiEnv);
+    auto it = objects_.find(key);
     if (it != objects_.end()) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "object has bound");
         return;
     }
 
     napi_env acutalEnv = static_cast<napi_env>(napiEnv);
-    HookData* data = new HookData { this, acutalEnv };
+    HookData* data = new HookData { weak_from_this(), acutalEnv };
     if (data == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "data err");
         return;
@@ -49,16 +58,22 @@ void BindableSubThread::BindSubThreadObject(void* napiEnv, void* object)
         return;
     }
 
-    std::unique_ptr<void, void (*)(void*)> obj(object, nullptr);
-    objects_.emplace(napiEnv, std::move(obj));
+    std::unique_ptr<void, void (*)(void*)> obj(object,
+        [](void* ptr) {
+            TAG_LOGD(AAFwkTag::CONTEXT, "delete sub thread ptr");
+            delete static_cast<NativeReference*>(ptr);
+        });
+    objects_.emplace(key, std::move(obj));
 }
 
 void* BindableSubThread::GetSubThreadObject(void* napiEnv)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "get sub thread object");
+    uintptr_t key = reinterpret_cast<uintptr_t>(napiEnv);
     std::lock_guard guard(objectsMutex_);
-    const auto& iter = objects_.find(napiEnv);
+    const auto& iter = objects_.find(key);
     if (iter == objects_.end()) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "not found target object");
         return nullptr;
     }
     return static_cast<void*>(iter->second.get());
@@ -67,18 +82,45 @@ void* BindableSubThread::GetSubThreadObject(void* napiEnv)
 void BindableSubThread::RemoveSubThreadObject(void* napiEnv)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "remove sub thread object");
+    uintptr_t key = reinterpret_cast<uintptr_t>(napiEnv);
     std::lock_guard guard(objectsMutex_);
-    objects_.erase(napiEnv);
+    const auto& iter = objects_.find(key);
+    if (iter == objects_.end()) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "not found target object");
+        return;
+    }
+    objects_.erase(key);
+}
+
+void BindableSubThread::RemoveAllObject()
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "remove all object");
+    std::lock_guard guard(objectsMutex_);
+    objects_.clear();
 }
 
 void BindableSubThread::StaticRemoveSubThreadObject(void* arg)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "remove sub thread object");
     HookData* data = static_cast<HookData*>(arg);
-    if (data) {
-        data->instance->RemoveSubThreadObject(data->env);
-        delete data;
+    if (data == nullptr) {
+        return;
     }
+
+    std::shared_ptr<BindableSubThread> instance = data->instance.lock();
+    if (instance == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "instance nullptr");
+        delete data;
+        return;
+    }
+
+    if (instance.use_count() == 0) {
+        delete data;
+        return;
+    }
+
+    instance->RemoveSubThreadObject(data->env);
+    delete data;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

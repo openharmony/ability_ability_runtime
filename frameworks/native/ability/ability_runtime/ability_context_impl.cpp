@@ -18,6 +18,7 @@
 #include <native_engine/native_engine.h>
 
 #include "ability_manager_client.h"
+#include "bindable_sub_thread.h"
 #include "hitrace_meter.h"
 #include "connection_manager.h"
 #include "dialog_request_callback_impl.h"
@@ -50,6 +51,11 @@ struct RequestResult {
     AAFwk::Want resultWant;
     RequestDialogResultTask task;
 };
+
+AbilityContextImpl::AbilityContextImpl()
+{
+    subThreadObject_ = std::make_unique<BindableSubThread>();
+}
 
 Global::Resource::DeviceType AbilityContextImpl::GetDeviceType() const
 {
