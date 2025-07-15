@@ -155,7 +155,7 @@ std::unique_ptr<NativeReference> EtsAbilityStageContextModule::CreateNativeRefer
     return systemModule;
 }
 
-std::unique_ptr<NativeReference> EtsAbilityStageContextModule::GetOrCreateNativeReference(napi_env napiEnv,
+napi_value EtsAbilityStageContextModule::GetOrCreateDynamicObject(napi_env napiEnv,
     std::shared_ptr<AbilityStageContext> abilityStageContext)
 {
     if (napiEnv == nullptr || abilityStageContext == nullptr) {
@@ -168,14 +168,16 @@ std::unique_ptr<NativeReference> EtsAbilityStageContextModule::GetOrCreateNative
         auto subThreadObj = static_cast<NativeReference *>(
             abilityStageContext->GetSubThreadObject(static_cast<void *>(napiEnv)));
         if (subThreadObj != nullptr) {
-            return std::unique_ptr<NativeReference>(subThreadObj);
+            return subThreadObj->Get();
         }
         auto subThreadRef = CreateNativeReference(napiEnv, abilityStageContext);
         if (subThreadRef == nullptr) {
             return nullptr;
         }
-        abilityStageContext->BindSubThreadObject(static_cast<void *>(napiEnv), static_cast<void *>(subThreadRef.get()));
-        return subThreadRef;
+        auto newObject = subThreadRef->Get();
+        abilityStageContext->BindSubThreadObject(
+            static_cast<void *>(napiEnv), static_cast<void *>(subThreadRef.release()));
+        return newObject;
     }
 
     // if main-thread, get bindingObj firstly
@@ -189,7 +191,7 @@ std::unique_ptr<NativeReference> EtsAbilityStageContextModule::GetOrCreateNative
     auto dynamicContext = bindingObj->Get<NativeReference>();
     if (dynamicContext != nullptr) {
         TAG_LOGI(AAFwkTag::UIABILITY, "there exist a dynamicContext");
-        return std::unique_ptr<NativeReference>(dynamicContext);
+        return dynamicContext->Get();
     }
 
     // if main-thread bindingObj didn't exist, create and bind
@@ -198,8 +200,9 @@ std::unique_ptr<NativeReference> EtsAbilityStageContextModule::GetOrCreateNative
         return nullptr;
     }
 
-    abilityStageContext->Bind(nativeRef.get());
-    return nativeRef;
+    auto object = nativeRef->Get();
+    abilityStageContext->Bind(nativeRef.release());
+    return object;
 }
 
 ani_object EtsAbilityStageContextModule::NativeTransferDynamic(ani_env *aniEnv, ani_class aniCls, ani_object input)
@@ -256,6 +259,7 @@ ani_object EtsAbilityStageContextModule::CreateDynamicObject(ani_env *aniEnv, an
     auto contextObj = ContextTransfer::GetInstance().GetDynamicObject(contextType, napiEnv, abilityStageContext);
     if (contextObj == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "create AbilityStageContext failed");
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
         return nullptr;
     }
 
@@ -263,6 +267,7 @@ ani_object EtsAbilityStageContextModule::CreateDynamicObject(ani_env *aniEnv, an
     bool success = hybridgref_create_from_napi(napiEnv, contextObj, &ref);
     if (!success) {
         TAG_LOGE(AAFwkTag::CONTEXT, "hybridgref_create_from_napi failed");
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
         return nullptr;
     }
 
@@ -270,6 +275,8 @@ ani_object EtsAbilityStageContextModule::CreateDynamicObject(ani_env *aniEnv, an
     success = hybridgref_get_esvalue(aniEnv, ref, &result);
     if (!success) {
         TAG_LOGE(AAFwkTag::CONTEXT, "hybridgref_get_esvalue failed");
+        hybridgref_delete_from_napi(napiEnv, ref);
+        arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
         return nullptr;
     }
 
@@ -349,11 +356,12 @@ void EtsAbilityStageContextModuleInit(ani_env *aniEnv)
                 return nullptr;
             }
 
-            auto ref = EtsAbilityStageContextModule::GetOrCreateNativeReference(napiEnv, abilityStageContext);
-            if (ref == nullptr) {
+            auto object = EtsAbilityStageContextModule::GetOrCreateDynamicObject(napiEnv, abilityStageContext);
+            if (object == nullptr) {
+                TAG_LOGE(AAFwkTag::CONTEXT, "get or create object failed");
                 return nullptr;
             }
-            return ref->Get();
+            return object;
     });
 
     TAG_LOGD(AAFwkTag::CONTEXT, "Init AbilityStageContext kit end");
