@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import insightIntentDriver from '@ohos.app.ability.insightIntentDriver';
 import base from '@ohos.base'
 import hilog from '@ohos.hilog';
@@ -46,7 +47,12 @@ export struct IntentContent {
   @State pixelMap: image.PixelMap | ResourceStr | DrawableDescriptor | undefined = undefined;
 
   aboutToAppear() {
-    this.getInfos();
+    this.getInfos()
+  }
+
+  onBackPress() {
+    let context = AppStorage.get('context') as common.UIAbilityContext;
+    context.terminateSelf();
   }
 
   async getInfos() {
@@ -298,13 +304,6 @@ export struct IntentContent {
     .height('100%')
     .padding({top:36})
     .backgroundColor($r('app.color.background_cont'))
-    .gesture(
-      SwipeGesture({ direction: SwipeDirection.Horizontal })
-        .onAction((event: GestureEvent) => {
-          let context = AppStorage.get('context') as common.UIAbilityContext;
-          context.terminateSelf();
-        })
-    )
   }
 }
 
