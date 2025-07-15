@@ -2370,5 +2370,30 @@ HWTEST_F(AbilityContextImplTest, SetOnNewWantSkipScenariose_0100, Function | Med
     auto ret = context->SetOnNewWantSkipScenarios(0);
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.number: Ability_Context_Impl_ConnectAppServiceExtensionAbility_0100
+ * @tc.name: ConnectAppServiceExtensionAbility
+ * @tc.desc: Verify that function ConnectAppServiceExtensionAbility.
+ */
+HWTEST_F(AbilityContextImplTest, ConnectAppServiceExtensionAbility_0100, Function | MediumTest | Level1)
+{
+    AAFwk::Want want;
+    bool ret = context_->ConnectAppServiceExtensionAbility(want, nullptr);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_ConnectAppServiceExtensionAbility_0100
+ * @tc.name: ConnectAppServiceExtensionAbility
+ * @tc.desc: Verify that function ConnectAppServiceExtensionAbility.
+ */
+HWTEST_F(AbilityContextImplTest, ConnectAppServiceExtensionAbility_0200, Function | MediumTest | Level1)
+{
+    AAFwk::Want want;
+    sptr<AbilityConnectCallback> connectCallback;
+    bool ret = context_->ConnectAppServiceExtensionAbility(want, connectCallback);
+    EXPECT_NE(ret, ERR_OK);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
