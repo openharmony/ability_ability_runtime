@@ -1945,6 +1945,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, SendStartAbilityOtherExtensionEvent_001
  */
 HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_003, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_003 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
     auto impl = sptr<InsightIntentExecuteConnection>::MakeSptr();
@@ -1958,6 +1959,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_003, TestSize.Leve
     auto ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::UI_SERVICE,
         INT_MAX, false);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_003 end");
 }
 
 /*
@@ -1968,6 +1970,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_003, TestSize.Leve
  */
 HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_004, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_004 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
     abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
@@ -2007,6 +2010,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_004, TestSize.Leve
         -1, false);
     Mock::VerifyAndClear(mockBundleMgr);
     bundleMgrHelper_->bundleMgr_ = nullptr;
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_004 end");
 }
 
 /*
@@ -2017,6 +2021,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_004, TestSize.Leve
  */
 HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_005, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_005 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
     abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
@@ -2030,6 +2035,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_005, TestSize.Leve
     auto ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::UI_SERVICE,
         -1, false);
     EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectAbilityCommon_005 end");
 }
 
 /*
@@ -2039,6 +2045,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_005, TestSize.Leve
  */
 HWTEST_F(AbilityManagerServiceSixthTest, StartExtensionAbilityInner_001, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartExtensionAbilityInner_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
     Want want;
@@ -2068,6 +2075,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartExtensionAbilityInner_001, TestSiz
     result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
         isImplicit, isDlp);
     EXPECT_EQ(result, ERR_INVALID_CALLER);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartExtensionAbilityInner_001 end");
 }
 
 /*
@@ -2077,12 +2085,14 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartExtensionAbilityInner_001, TestSiz
  */
 HWTEST_F(AbilityManagerServiceSixthTest, SendIntentReport_001, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest SendIntentReport_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
     std::string intentName = "test";
     EventInfo eventInfo;
     abilityMs->SendIntentReport(eventInfo, ERR_OK, intentName);
     EXPECT_EQ(eventInfo.intentName, intentName);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest SendIntentReport_001 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS
