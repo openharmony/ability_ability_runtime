@@ -15,6 +15,7 @@
 
 import { IntentContent, IntentInfo } from '../view/IntentContent'
 import { IntentDetailPage } from '../view/IntentDetailPage'
+import common from '@ohos.app.ability.common';
 
 @Entry
 @Component
@@ -22,8 +23,9 @@ struct Index {
   @Provide('articlePathStack') articlePathStack: NavPathStack = new NavPathStack();
   scroller: Scroller = new Scroller();
 
-  onBackPress(): boolean {
-    return true;
+  onBackPress() {
+      let context = AppStorage.get('context') as common.UIAbilityContext;
+      context.terminateSelf();
   }
 
   @Builder
