@@ -18,6 +18,7 @@ import { DetailItem } from './DetailItem';
 import insightIntentDriver from '@ohos.app.ability.insightIntentDriver';
 import insightIntent from '@ohos.app.ability.insightIntent';
 import { format, jsClone, addArrayParams, removeArrayParams, romoveFormData } from './format';
+import common from '@ohos.app.ability.common';
 
 interface propertiesInfo {
   name: string
@@ -136,6 +137,11 @@ export struct IntentDetailPage {
         this.formFields = this.changeProperties(this.properties);
       }
     }
+  }
+
+  onBackPress() {
+    let context = AppStorage.get('context') as common.UIAbilityContext;
+    context.terminateSelf();
   }
 
   @Provide InputTypeData: Record<string, InputType> = {
@@ -481,7 +487,7 @@ export struct IntentDetailPage {
         Select(field.options?.map(option => {
           const opt: SelectOption = { value: option.toString() }
           return opt
-        }))// .selected(field.default)
+        }))
           .width('100%')
           .height(40)
           .font({ size: 16, weight: 400 })
@@ -845,11 +851,5 @@ export struct IntentDetailPage {
     .padding({ top: 36, bottom: 36 })
     .backgroundColor($r('app.color.background_cont'))
     .clip(true)
-    .gesture(
-      SwipeGesture({ direction: SwipeDirection.Horizontal })
-        .onAction((event: GestureEvent) => {
-          this.articlePathStack.pop();
-        })
-    )
   }
 }
