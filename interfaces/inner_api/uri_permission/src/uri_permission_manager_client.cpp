@@ -67,7 +67,7 @@ int UriPermissionManagerClient::GrantUriPermission(const std::vector<Uri> &uriVe
     TAG_LOGI(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s, uriVecSize:%{public}zu", targetBundleName.c_str(),
         uriVec.size());
     if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d, uriVec size: %{public}d",
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d, uriVec size: %{public}zu",
             MAX_URI_COUNT, uriVec.size());
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
@@ -111,7 +111,7 @@ int32_t UriPermissionManagerClient::GrantUriPermissionPrivileged(const std::vect
     TAG_LOGI(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s, uriVecSize:%{public}zu",
         targetBundleName.c_str(), uriVec.size());
     if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d, uriVec size: %{public}d",
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d, uriVec size: %{public}zu",
             MAX_URI_COUNT, uriVec.size());
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
@@ -239,7 +239,7 @@ std::vector<bool> UriPermissionManagerClient::CheckUriAuthorization(const std::v
     TAG_LOGI(AAFwkTag::URIPERMMGR, "flag:%{public}u, tokenId:%{public}u", flag, tokenId);
     std::vector<bool> errorRes(size, false);
     if (uriVec.empty() || uriVec.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d, uriVec size: %{public}d",
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d, uriVec size: %{public}zu",
             MAX_URI_COUNT, uriVec.size());
         return errorRes;
     }
@@ -450,7 +450,7 @@ int32_t UriPermissionManagerClient::Active(const std::vector<PolicyInfo> &policy
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
     if (policy.empty() || policy.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d, policy size: %{public}d",
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d, policy size: %{public}zu",
             MAX_URI_COUNT, policy.size());
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
