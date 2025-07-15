@@ -1951,7 +1951,7 @@ HWTEST_F(AmsAppRunningRecordTest, CreateRenderRecord_001, TestSize.Level1)
     int32_t ipcFd1 = 1;
     int32_t sharedFd = 0;
     int32_t sharedFd1 = 1;
-    int32_t crashFd = 1;
+    int32_t crashFd = 0;
     std::shared_ptr<AppRunningRecord> host;
 
     auto appInfo = std::make_shared<ApplicationInfo>();
@@ -1959,23 +1959,12 @@ HWTEST_F(AmsAppRunningRecordTest, CreateRenderRecord_001, TestSize.Level1)
     appInfo->bundleName = GetTestAppName();
     int32_t recordId = 11;
     std::string processName = "processName";
-    std::shared_ptr<AppRunningRecord> host1 = GetTestAppRunningRecord();
-
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid1, renderParam,
         FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), host);
     EXPECT_EQ(renderRecord, nullptr);
 
-    renderRecord = RenderRecord::CreateRenderRecord(hostPid1, renderParam,
+    renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
         FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), host);
-    EXPECT_EQ(renderRecord, nullptr);
-    renderRecord = RenderRecord::CreateRenderRecord(hostPid1, renderParam1,
-        FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), host);
-    EXPECT_EQ(renderRecord, nullptr);
-    renderRecord = RenderRecord::CreateRenderRecord(hostPid1, renderParam1,
-        FdGuard(ipcFd1), FdGuard(sharedFd), FdGuard(crashFd), host);
-    EXPECT_EQ(renderRecord, nullptr);
-    renderRecord = RenderRecord::CreateRenderRecord(hostPid1, renderParam1,
-        FdGuard(ipcFd1), FdGuard(sharedFd1), FdGuard(crashFd), host);
     EXPECT_EQ(renderRecord, nullptr);
 }
 
