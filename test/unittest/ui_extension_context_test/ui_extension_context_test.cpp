@@ -614,6 +614,23 @@ HWTEST_F(UIExtensionContextTest, GetAbilityInfoType_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.number: StartUIAbilities_1000
+ * @tc.name: StartUIAbilities
+ * @tc.desc: Start abilitys.
+ */
+HWTEST_F(UIExtensionContextTest, StartUIAbilities_1000, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartUIAbilities_1000 start");
+
+    auto context = std::make_shared<UIExtensionContext>();
+    std::vector<AAFwk::Want> wantList;
+    std::string requestKey = "12345";
+    EXPECT_TRUE(context->StartUIAbilities(wantList, requestKey) != ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartUIAbilities_1000 end");
+}
+
+/**
  * @tc.number: StartAbility_0300
  * @tc.name: StartAbility
  * @tc.desc: Start a new ability.
