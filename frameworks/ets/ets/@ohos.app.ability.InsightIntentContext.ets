@@ -30,8 +30,8 @@ export default class InsightIntentContext {
     p1.then((e: Any) => {
       let retError = e as BusinessError;
       callback(retError, undefined);
-    }, (err: BusinessError): void => {
-      callback(err, undefined);
+    }, (err: Error): void => {
+      callback(err as BusinessError, undefined);
     });
   }
 
@@ -48,8 +48,8 @@ export default class InsightIntentContext {
         } else {
           reject(retError);
         }
-      }).catch((err: BusinessError): void => {
-        reject(err);
+      }).catch((err: Error): void => {
+        reject(err as BusinessError);
       });
     });
     return p;
