@@ -87,7 +87,7 @@ public:
     bool ImplicitQueryInfos(const Want& want, int32_t flags, int32_t userId, bool withDefault,
         std::vector<AbilityInfo>& abilityInfos, std::vector<ExtensionAbilityInfo>& extensionInfos,
         bool& findDefaultApp);
-    bool CleanBundleDataFiles(const std::string& bundleName, int32_t userId, int32_t appCloneIndex);
+    bool CleanBundleDataFiles(const std::string& bundleName, int32_t userId, int32_t appCloneIndex, int32_t callerUid);
     bool QueryDataGroupInfos(const std::string& bundleName, int32_t userId, std::vector<DataGroupInfo>& infos);
     bool RegisterBundleEventCallback(const sptr<IBundleEventCallback>& bundleEventCallback);
     bool GetBundleInfos(
