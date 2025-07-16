@@ -310,7 +310,7 @@ bool JsInsightIntentFunc::ParseParams(napi_env env, const AAFwk::WantParams& par
         auto it = paramMap.find(propName);
         if (it != paramMap.end()) {
             auto iter = it->second;
-            TAG_LOGD(AAFwkTag::INTENT, "param %{public}s matched, id %{public}d", propName.c_str(), iter);
+            TAG_LOGD(AAFwkTag::INTENT, "param %{public}s matched, id %{public}zu", propName.c_str(), iter);
             argv[iter] = propValue;
         }
     }
