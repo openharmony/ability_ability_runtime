@@ -546,7 +546,7 @@ void EtsAbilityContext::OnStartAbilityForResult(
 ani_object EtsAbilityContext::StartAbilityByCall(ani_env *env, ani_object aniObj, ani_object wantObj)
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "StartAbilityByCall");
-    auto etsContext = GetAbilityContext(env, aniObj);
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
     auto context = etsContext ? etsContext->context_.lock() : nullptr;
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "GetAbilityContext is nullptr");

@@ -226,7 +226,7 @@ void StartAbilityByCallComplete(napi_env env, NapiAsyncTask& task, std::weak_ptr
         TAG_LOGD(AAFwkTag::CONTEXT, "callComplete end");
         return;
     }
-    auto releaseCallAbilityFunc = [abilityContext] (const std::shared_ptr<CallerCallBack> callback) -> ErrCode {
+    auto releaseCallAbilityFunc = [abilityContext] (std::shared_ptr<CallerCallBack> callback) -> ErrCode {
         auto contextForRelease = abilityContext.lock();
         if (contextForRelease == nullptr) {
             TAG_LOGE(AAFwkTag::CONTEXT, "null releaseCallAbilityFunction");

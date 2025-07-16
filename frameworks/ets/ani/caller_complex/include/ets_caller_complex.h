@@ -50,7 +50,7 @@ struct CallbackWrap {
     CallbackWrap(CallbackWrap &) = delete;
     void operator=(CallbackWrap &) = delete;
     ~CallbackWrap();
-    void Invoke(const std::string &msg);
+    void Invoke(const std::string &msg) const;
 private:
     ani_vm *aniVM = nullptr;
     ani_ref callbackRef = nullptr;

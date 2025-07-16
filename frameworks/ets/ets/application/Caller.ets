@@ -21,24 +21,32 @@ import { Caller, OnReleaseCallback, OnRemoteStateChangeCallback } from '@ohos.ap
 const domainID = 0x0000;
 const TAG = 'UIAbility';
 
+const EVENT_CALL_NOTIFY = 1;
+const REQUEST_SUCCESS = 0;
+
 const ERROR_CODE_INVALID_PARAM = 401;
 const ERROR_CODE_CALLER_RELEASED = 16200001;
-const ERROR_CODE_CLAAEE_INVALID = 16200002;
+const ERROR_CODE_CALLEE_INVALID = 16200002;
 const ERROR_CODE_INNER_ERROR = 16000050;
 
 const ERROR_MSG_INVALID_PARAM = 'Invalid input parameter.';
 const ERROR_MSG_CALLER_RELEASED = 'Caller released. The caller has been released.';
-const ERROR_MSG_CLAAEE_INVALID = 'The callee does not exist.';
+const ERROR_MSG_CALLEE_INVALID = 'The callee does not exist.';
 const ERROR_MSG_INNER_ERROR = 'Inner Error.';
 
 let errMap = new Map<number, string>();
 errMap.set(ERROR_CODE_INVALID_PARAM, ERROR_MSG_INVALID_PARAM);
 errMap.set(ERROR_CODE_CALLER_RELEASED, ERROR_MSG_CALLER_RELEASED);
-errMap.set(ERROR_CODE_CLAAEE_INVALID, ERROR_MSG_CLAAEE_INVALID);
+errMap.set(ERROR_CODE_CALLEE_INVALID, ERROR_MSG_CALLEE_INVALID);
 errMap.set(ERROR_CODE_INNER_ERROR, ERROR_MSG_INNER_ERROR);
 
 function buildError(code: number): BusinessError {
-  return new BusinessError(code, new Error(errMap.get(code) as string));
+  let msg: string = errMap.has(code) ? errMap.get(code) as string : ERROR_MSG_INNER_ERROR;
+  return new BusinessError(code, new Error(msg));
+}
+
+function buildInvalidParamError(msg: string): BusinessError {
+  return new BusinessError(ERROR_CODE_INVALID_PARAM, new Error(ERROR_MSG_INVALID_PARAM + msg));
 }
 
 export class CallerImpl implements Caller {
@@ -46,6 +54,7 @@ export class CallerImpl implements Caller {
   private callee: rpc.IRemoteObject | null = null;
   private releaseState = false;
   private releaseCb: OnReleaseCallback = (msg: String) => {};
+  private stateChangeCb: OnRemoteStateChangeCallback = (msg: String) => {};
 
   private native nativeReleaseSync(): void;
 
@@ -54,21 +63,98 @@ export class CallerImpl implements Caller {
     hilog.info(domainID, TAG, 'Caller::constructor');
   }
 
-  call(method: string, data: rpc.Parcelable): Promise<void> {
-    return new Promise<void>((resolve: (data: undefined) => void, reject: (error: Error) => void): void => {
-      hilog.info(domainID, TAG, 'Caller call');
-      resolve(undefined);
-      return;
-    });
+  private callCheck(method: string, data: rpc.Parcelable): BusinessError | null {
+    if (method.length == 0) {
+      hilog.info(domainID, TAG, 'empty method');
+      return buildInvalidParamError('Parameter error: method or data is empty, Please check it.');
+    }
+
+    if (this.releaseState) {
+      hilog.info(domainID, TAG, 'Caller callCheck this.callee release');
+      return buildError(ERROR_CODE_CALLER_RELEASED);
+    }
+
+    if (this.callee == null) {
+      hilog.info(domainID, TAG, 'Caller callCheck this.callee is null');
+      return buildError(ERROR_CODE_CALLEE_INVALID);
+    }
+    return null;
   }
 
-  callWithResult(method: string, data: rpc.Parcelable): Promise<rpc.MessageSequence> {
-    return new Promise<rpc.MessageSequence>((resolve: (data: rpc.MessageSequence )=> void,
-      reject: (error: Error) => void): void => {
-      hilog.info(domainID, TAG, 'Caller callWithResult');
-      resolve(rpc.MessageSequence.create());
-      return;
-    });
+  private buildMsgData(method: string, data: rpc.Parcelable): rpc.MessageSequence {
+    let msgData = rpc.MessageSequence.create();
+    msgData.writeString(method);
+    msgData.writeParcelable(data);
+    return msgData;
+  }
+
+  async call(method: string, data: rpc.Parcelable): Promise<void> {
+    hilog.info(domainID, TAG, 'Caller call');
+    const checkError = this.callCheck(method, data);
+    if (checkError != null) {
+      throw checkError;
+    }
+
+    hilog.info(domainID, TAG, 'Caller call msgData rpc.MessageSequence create');
+    let msgData = this.buildMsgData(method, data);
+    let msgReply = rpc.MessageSequence.create();
+    try {
+      let remoteObj = this.callee as rpc.IRemoteObject;
+      let retData = await remoteObj.sendMessageRequest(EVENT_CALL_NOTIFY, msgData, msgReply,
+        new rpc.MessageOption());
+      hilog.info(domainID, TAG, 'Caller call msgData rpc.sendMessageRequest called');
+      if (retData.errCode != REQUEST_SUCCESS) {
+        hilog.info(domainID, TAG, 'Caller call return errCode ' + retData.errCode);
+        throw buildError(retData.errCode);
+      }
+      let retVal = retData.reply.readInt();
+      let str = retData.reply.readString();
+      if (retVal != REQUEST_SUCCESS || str != 'object') {
+        hilog.info(domainID, TAG, 'call retVal is [' + retVal + '], str [' + str + ']');
+        throw buildError(retVal);
+      }
+    } catch (error) {
+      hilog.info(domainID, TAG, 'Caller call msgData rpc.sendMessageRequest error ' + error);
+      throw error;
+    } finally {
+      msgData.reclaim();
+      msgReply.reclaim();
+    }
+  }
+
+  async callWithResult(method: string, data: rpc.Parcelable): Promise<rpc.MessageSequence> {
+    hilog.info(domainID, TAG, 'Caller callWithResult');
+    const checkError = this.callCheck(method, data);
+    if (checkError != null) {
+      throw checkError;
+    }
+
+    hilog.info(domainID, TAG, 'Caller callWithResult msgData rpc.MessageSequence create');
+    let msgData = this.buildMsgData(method, data);
+    let msgReply = rpc.MessageSequence.create();
+    try {
+      let remoteObj = this.callee as rpc.IRemoteObject;
+      let retData = await remoteObj.sendMessageRequest(EVENT_CALL_NOTIFY, msgData, msgReply,
+        new rpc.MessageOption());
+      hilog.info(domainID, TAG, 'Caller callWithResult msgData rpc.sendMessageRequest called');
+      if (retData.errCode != REQUEST_SUCCESS) {
+        hilog.info(domainID, TAG, 'Caller callWithResult return errCode ' + retData.errCode);
+        throw buildError(retData.errCode);
+      }
+      let retVal = retData.reply.readInt();
+      let str = retData.reply.readString();
+      if (retVal != REQUEST_SUCCESS || str != 'object') {
+        hilog.info(domainID, TAG, 'callWithResult retVal is [' + retVal + '], str [' + str + ']');
+        throw buildError(retVal);
+      }
+      return retData.reply;
+    } catch (error) {
+      hilog.info(domainID, TAG, 'callWithResult msgData rpc.sendMessageRequest error ' + error);
+      msgReply.reclaim();
+      throw error;
+    } finally {
+      msgData.reclaim();
+    }
   }
 
   release(): void {
@@ -80,7 +166,7 @@ export class CallerImpl implements Caller {
 
     if (this.callee == null) {
       hilog.info(domainID, TAG, 'Caller release call remoteObj is released');
-      throw buildError(ERROR_CODE_CLAAEE_INVALID);
+      throw buildError(ERROR_CODE_CALLEE_INVALID);
     }
 
     this.releaseState = true;
@@ -91,6 +177,9 @@ export class CallerImpl implements Caller {
 
   onRelease(callback: OnReleaseCallback): void {
     hilog.info(domainID, TAG, 'onRelease called');
+    if (this.releaseState) {
+      throw buildError(ERROR_CODE_CALLER_RELEASED);
+    }
     this.releaseCb = callback;
   }
   private onReleaseCb(msg: string): void {
@@ -99,15 +188,31 @@ export class CallerImpl implements Caller {
 
   onRemoteStateChange(callback: OnRemoteStateChangeCallback): void {
     hilog.info(domainID, TAG, 'onRemoteStateChange called');
+    if (this.releaseState) {
+      throw buildError(ERROR_CODE_CALLER_RELEASED);
+    }
+    this.stateChangeCb = callback;
+  }
+  private onRemoteChangeCb(msg: string): void {
+    this.stateChangeCb(msg);
   }
 
   on(type: string, callback: OnReleaseCallback): void {
     hilog.info(domainID, TAG, 'on called');
+    if (type != 'release') {
+      throw buildInvalidParamError('Parameter error: Failed to get type, must be string type release.');
+    }
+    this.onRelease(callback);
   }
   off(type: string, callback: OnReleaseCallback): void {
     hilog.info(domainID, TAG, 'off called');
+    if (type != 'release') {
+      throw buildInvalidParamError('Parameter error: Failed to get type, must be string type release.');
+    }
+    // do nothing
   }
   off(type: string): void {
     hilog.info(domainID, TAG, 'off called');
+    // do nothing
   }
 }

@@ -25,7 +25,7 @@
 namespace { // nameless
 using namespace OHOS;
 using namespace OHOS::AbilityRuntime;
-constexpr const char* CALLER_CLASS_NAME = "Lcaller/Caller/CallerImpl;";
+constexpr const char* CALLER_CLASS_NAME = "Lapplication/Caller/CallerImpl;";
 static std::once_flag g_bindNativeMethodsFlag;
 
 void ReleaseNativeRemote(ani_env *env, ani_ref aniObj)
@@ -141,7 +141,7 @@ ani_object EtsCallerComplex::CreateEtsCaller(ani_env *env, ReleaseCallFunc relea
     if (!BindNativeMethods(env, cls)) {
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "status : %{public}d", status);
         return nullptr;
     }
@@ -150,8 +150,19 @@ ani_object EtsCallerComplex::CreateEtsCaller(ani_env *env, ReleaseCallFunc relea
         TAG_LOGE(AAFwkTag::ABILITY, "status : %{public}d", status);
         return nullptr;
     }
-
-    auto remoteObj = ANI_ohos_rpc_CreateJsRemoteObject(env, callee);
+    if ((status = env->FindClass("L@ohos/rpc/rpc/RemoteProxy;", cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "FindClass RemoteProxy: %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "RemoteProxy ctor: %{public}d", status);
+        return nullptr;
+    }
+    ani_object remoteObj = nullptr;
+    if ((status = env->Object_New(cls, method, &remoteObj, (ani_long)(callee.GetRefPtr()))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "RemoteProxy create: %{public}d", status);
+        return nullptr;
+    }
     if ((status = env->Object_SetFieldByName_Ref(callerObj, "callee", remoteObj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "status : %{public}d", status);
         return nullptr;
@@ -168,11 +179,11 @@ void EtsCallerComplex::SetCallerCallback(std::shared_ptr<CallerCallBack> callbac
         return;
     }
 
-    callback->SetOnRelease([callbackObj = std::make_shared_ptr<CallbackWrap>(env, callerObj, "onReleaseCb")](
+    callback->SetOnRelease([callbackObj = std::make_shared<CallbackWrap>(env, callerObj, "onReleaseCb")](
         const std::string &msg) {
             callbackObj->Invoke(msg);
         });
-    callback->SetOnRemoteStateChanged([callbackObj = std::make_shared_ptr<CallbackWrap>(env, 
+    callback->SetOnRemoteStateChanged([callbackObj = std::make_shared<CallbackWrap>(env, 
         callerObj, "onRemoteChangeCb")](const std::string &msg) {
             callbackObj->Invoke(msg);
         });
@@ -193,13 +204,6 @@ CallbackWrap::CallbackWrap(ani_env *env, ani_object callerObj, const std::string
     name = callbackName;
 }
 
-CallbackWrap::CallbackWrap(CallbackWrap &&other)
-    : aniVM(other.aniVM), callbackRef(other.callbackRef), name(std::move(other.name))
-{
-    other.callbackRef = nullptr;
-    other.aniVM = nullptr;
-}
-
 CallbackWrap::~CallbackWrap()
 {
     if (callbackRef == nullptr) {
@@ -215,7 +219,7 @@ CallbackWrap::~CallbackWrap()
     callbackRef = nullptr;
 }
 
-void CallbackWrap::Invoke(const std::string &msg)
+void CallbackWrap::Invoke(const std::string &msg) const
 {
     if (callbackRef == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITY, "callbackRef null");
@@ -235,7 +239,7 @@ void CallbackWrap::Invoke(const std::string &msg)
     status = aniEnv->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(callbackRef), name.c_str(),
         "Lstd/core/String;:V", aniMsg);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "OnRelease call failed %{public}d", status);
+        TAG_LOGE(AAFwkTag::ABILITY, "%{public}s failed %{public}d", name.c_str(), status);
     }
 }
 } // namespace AbilityRuntime
