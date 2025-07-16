@@ -58,7 +58,7 @@ void RenderStateObserverProxy::OnRenderStateChanged(const RenderStateData &rende
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IRenderStateObserver::ON_RENDER_STATE_CHANGED),
         data, reply, option);
-    if (ret != NO_ERROR || ret != ERR_INVALID_STUB) {
+    if (ret != NO_ERROR && ret != ERR_INVALID_STUB) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
         return;
     }
