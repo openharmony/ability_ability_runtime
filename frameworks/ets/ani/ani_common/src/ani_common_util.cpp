@@ -1076,7 +1076,7 @@ bool GetStringArrayProperty(ani_env *env, ani_object param, const char *name, st
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref stringEntryRef;
         status = env->Object_CallMethodByName_Ref(reinterpret_cast<ani_object>(arrayObj),
-            "$_get", "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)i);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::ANI, "status: %{public}d, index: %{public}d", status, i);
             return false;
@@ -1303,7 +1303,7 @@ bool SetStringArrayProperty(ani_env *env, ani_object param, const char *name, co
         return false;
     }
 
-    status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
+    status = env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
@@ -1323,7 +1323,7 @@ bool SetStringArrayProperty(ani_env *env, ani_object param, const char *name, co
             return false;
         }
 
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", i, string);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", i, string);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
             return false;

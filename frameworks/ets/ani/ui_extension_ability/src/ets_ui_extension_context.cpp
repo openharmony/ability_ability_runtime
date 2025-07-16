@@ -33,12 +33,12 @@ namespace AbilityRuntime {
 static std::mutex g_connectsMutex;
 int32_t g_serialNumber = 0;
 static std::map<EtsUIExtensionConnectionKey, sptr<EtsUIExtensionConnection>, Etskey_compare> g_connects;
-const char *UI_EXTENSION_CONTEXT_CLASS_NAME = "Lapplication/UIExtensionContext/UIExtensionContext;";
-const char *UI_EXTENSION_CONTEXT_CLEANER_CLASS_NAME = "Lapplication/UIExtensionContext/Cleaner;";
+const char *UI_EXTENSION_CONTEXT_CLASS_NAME = "C{application.UIExtensionContext.UIExtensionContext}";
+const char *UI_EXTENSION_CONTEXT_CLEANER_CLASS_NAME = "C{application.UIExtensionContext.Cleaner}";
 constexpr const int FAILED_CODE = -1;
 constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
-    "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
-constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "C{@ohos.app.ability.Want.Want}C{ability.connectOptions.ConnectOptions}:l";
+constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "lC{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
 
