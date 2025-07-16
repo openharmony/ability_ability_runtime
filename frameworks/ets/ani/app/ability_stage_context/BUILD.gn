@@ -55,6 +55,7 @@ ohos_shared_library("ability_stage_context_ani_kit") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "napi:ace_napi",
     "runtime_core:ani",
     "runtime_core:ani_helpers",

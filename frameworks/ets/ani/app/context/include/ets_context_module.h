@@ -36,20 +36,13 @@ public:
 
     static ani_object NativeTransferStatic(ani_env *env, ani_object aniObj, ani_object input, ani_object type);
     static ani_object NativeTransferDynamic(ani_env *env, ani_class aniCls, ani_object input);
-    static ani_object GetOrCreateAniObject(ani_env *aniEnv, std::shared_ptr<Context> context);
     static napi_value GetOrCreateDynamicObject(napi_env napiEnv, std::shared_ptr<Context> context);
 
 private:
-    static std::unique_ptr<NativeReference> CreateNativeReference(napi_env napiEnv,
-        std::shared_ptr<Context> context);
-    static std::unique_ptr<NativeReference> CreateBaseNativeReference(napi_env napiEnv,
-        std::shared_ptr<Context> context);
-    static std::unique_ptr<NativeReference> CreateApplicationNativeReference(napi_env napiEnv,
-        std::shared_ptr<ApplicationContext> applicationContext);
-    static std::unique_ptr<NativeReference> CreateAbilityStageNativeReference(napi_env napiEnv,
-        std::shared_ptr<AbilityStageContext> abilityStageContext);
-    static ani_object CreateDynamicObject(ani_env *aniEnv, ani_class aniCls,
-        std::shared_ptr<Context> applicationContext);
+    static bool LoadTargetModule(ani_env *aniEnv, const std::string &className);
+    static std::unique_ptr<NativeReference> CreateNativeReference(napi_env napiEnv, std::shared_ptr<Context> context);
+    static ani_object CreateStaticObject(ani_env *aniEnv, ani_object type, std::shared_ptr<Context> context);
+    static ani_object CreateDynamicObject(ani_env *aniEnv, ani_class aniCls, std::shared_ptr<Context> context);
 };
 
 void EtsContextModuleInit(ani_env *aniEnv);
