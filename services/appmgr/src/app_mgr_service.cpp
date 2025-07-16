@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
 #include "cache_process_manager.h"
+#include "uri_permission_manager_client.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -118,6 +119,9 @@ void AppMgrService::OnStart()
     appMgrServiceState_.serviceRunningState = ServiceRunningState::STATE_RUNNING;
     if (!AddSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID)) {
         TAG_LOGE(AAFwkTag::APPMGR, "OnStart, add listener err");
+    }
+    if (!AddSystemAbilityListener(URI_PERMISSION_MGR_SERVICE_ID)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to add upms listener");
     }
     TAG_LOGI(AAFwkTag::APPMGR, "start service success");
     PerfProfile::GetInstance().SetAmsLoadEndTime(GetTickCount());
@@ -1357,6 +1361,9 @@ void AppMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::strin
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return;
+    }
+    if (systemAbilityId == URI_PERMISSION_MGR_SERVICE_ID) {
+        AAFwk::UriPermissionManagerClient::GetInstance().SetUriPermServiceStarted();
     }
 
     if (systemAbilityId != WINDOW_MANAGER_SERVICE_ID) {

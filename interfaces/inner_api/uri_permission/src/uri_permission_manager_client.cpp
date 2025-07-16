@@ -383,19 +383,33 @@ void UriPermissionManagerClient::UpmsDeathRecipient::OnRemoteDied([[maybe_unused
     proxy_();
 }
 
+void UriPermissionManagerClient::SetUriPermServiceStarted()
+{
+    isUriPermServiceStarted_.store(true);
+}
+
+bool UriPermissionManagerClient::IsUriPermServiceStarted()
+{
+    return isUriPermServiceStarted_.load();
+}
+
 int32_t UriPermissionManagerClient::ClearPermissionTokenByMap(const uint32_t tokenId)
 {
-    TAG_LOGD(AAFwkTag::URIPERMMGR, "clear call");
-    auto uriPermMgr = GetUriPermMgr();
+    if (!IsUriPermServiceStarted()) {
+        TAG_LOGD(AAFwkTag::URIPERMMGR, "upms is not started");
+        return ERR_UPMS_SERVICE_NOT_START;
+    }
+    auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
         int32_t funcResult = -1;
         auto res = uriPermMgr->ClearPermissionTokenByMap(tokenId, funcResult);
         if (res != ERR_OK) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
             return INNER_ERR;
         }
         return funcResult;
     }
+    TAG_LOGE(AAFwkTag::URIPERMMGR, "uriPermMgr nullptr");
     return INNER_ERR;
 }
 
