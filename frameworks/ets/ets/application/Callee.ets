@@ -21,6 +21,10 @@ import { Callee, CalleeCallback } from '@ohos.app.ability.UIAbility';
 const domainID = 0x0000;
 const TAG = 'UIAbility';
 
+const EVENT_CALL_NOTIFY = 1;
+const REQUEST_SUCCESS = 0;
+const REQUEST_FAILED = 1;
+
 const ERROR_CODE_INVALID_PARAM = 401;
 const ERROR_CODE_FUNC_REGISTERED = 16200004;
 const ERROR_CODE_FUNC_NOT_EXIST = 16200005;
@@ -46,20 +50,63 @@ export class CalleeImpl extends rpc.RemoteObject implements Callee {
   private startUpNewRule = false;
   constructor() {
     super('rpc.application.callee');
-    hilog.info(domainID, TAG, 'Callee constructor is OK');
+    hilog.info(domainID, TAG, 'Callee::constructor');
   }
 
-  setNewRuleFlag(flag: boolean): void {
+  private setNewRuleFlag(flag: boolean): void {
+    hilog.info(domainID, TAG, 'Callee::setNewRuleFlag: ' + flag);
     this.startUpNewRule = flag;
+  }
+  private StartUpRuleCheck(): boolean {
+    return true;
   }
 
   onRemoteMessageRequest(code: number, data: rpc.MessageSequence, reply: rpc.MessageSequence,
-    option: rpc.MessageOption): Boolean|Promise<Boolean> {
+    option: rpc.MessageOption): Boolean | Promise<Boolean> {
     hilog.info(domainID, TAG, 'Callee onRemoteMessageRequest code [' + code + ']');
+    if (!this.StartUpRuleCheck()) {
+      return false;
+    }
+
+    if (code != EVENT_CALL_NOTIFY) {
+      hilog.info(domainID, TAG, 'Callee onRemoteMessageRequest error, code is ' + code);
+      return false;
+    }
+
+    if (this.callList.size == 0) {
+      hilog.info(domainID, TAG, 'Callee onRemoteMessageRequest error, this.callList is empty');
+      return false;
+    }
+    let method = data.readString();
+    hilog.info(domainID, TAG, 'Callee onRemoteMessageRequest method [' + method + ']');
+    let func = this.callList.get(method);
+    if (typeof func != 'function') {
+      hilog.info(domainID, TAG, 'Callee onRemoteMessageRequest error, get func is ' + typeof func);
+      return false;
+    }
+
+    let callback = func as CalleeCallback;
+    let result = callback(data);
+    if (typeof result == 'object' && result != null) {
+      reply.writeInt(REQUEST_SUCCESS);
+      reply.writeString(typeof result);
+      reply.writeParcelable(result);
+      hilog.info(domainID, TAG, 'Callee onRemoteMessageRequest code proc Packed data');
+    } else {
+      reply.writeInt(REQUEST_FAILED);
+      reply.writeString(typeof result);
+      hilog.info(domainID, TAG, 'Callee onRemoteMessageRequest error, retVal is ' +
+        REQUEST_FAILED + ', type is ' + typeof result);
+    }
     return true;
   }
 
   on(method: string, callback: CalleeCallback): void {
+    if (method.length == 0) {
+      hilog.info(domainID, TAG, 'Callee::on method is empty');
+      throw buildError(ERROR_CODE_INVALID_PARAM);
+    }
+
     if (this.callList.has(method)) {
       hilog.info(domainID, TAG, 'Callee on error, [' + method + '] has registered');
       throw buildError(ERROR_CODE_FUNC_REGISTERED);
@@ -70,6 +117,11 @@ export class CalleeImpl extends rpc.RemoteObject implements Callee {
   }
 
   off(method: string): void {
+    if (method.length == 0) {
+      hilog.info(domainID, TAG, 'Callee::on method is empty');
+      throw buildError(ERROR_CODE_INVALID_PARAM);
+    }
+
     if (!this.callList.has(method)) {
       hilog.info(domainID, TAG, 'Callee off error, this.callList not found ' + method);
       throw buildError(ERROR_CODE_FUNC_NOT_EXIST);

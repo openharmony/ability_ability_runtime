@@ -23,14 +23,21 @@ import { AbilityUtils } from './utils/AbilityUtils';
 import { CalleeImpl } from './application/Callee';
 
 export type OnReleaseCallback = (msg: string) => void;
+export type OnRemoteStateChangeCallback = (msg: string) => void;
 export type CalleeCallback = (indata: rpc.MessageSequence) => rpc.Parcelable;
 export interface Caller {
   call(method: string, data: rpc.Parcelable): Promise<void>;
-  onRelease(callback: OnReleaseCallback): void;
+  callWithResult(method: string, data: rpc.Parcelable): Promise<rpc.MessageSequence>;
   release(): void;
+  onRelease(callback: OnReleaseCallback): void;
+  onRemoteStateChange(callback: OnRemoteStateChangeCallback): void;
+  on(type: string, callback: OnReleaseCallback): void;
+  off(type: string, callback: OnReleaseCallback): void;
+  off(type: string): void;
 }
 export interface Callee {
   on(method: string, callback: CalleeCallback): void;
+  off(method: string): void;
 }
 
 export default class UIAbility extends Ability {
