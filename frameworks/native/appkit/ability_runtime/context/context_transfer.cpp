@@ -63,5 +63,19 @@ napi_value ContextTransfer::GetDynamicObject(const std::string &contextType, nap
     }
     return nullptr;
 }
+
+bool ContextTransfer::IsStaticCreatorExist(const std::string &contextType)
+{
+    std::lock_guard<std::mutex> lock(creatorMutex_);
+    auto it = staticCreators_.find(contextType);
+    return it != staticCreators_.end();
+}
+
+bool ContextTransfer::IsDynamicCreatorExist(const std::string &contextType)
+{
+    std::lock_guard<std::mutex> lock(creatorMutex_);
+    auto it = dynamicCreators_.find(contextType);
+    return it != dynamicCreators_.end();
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

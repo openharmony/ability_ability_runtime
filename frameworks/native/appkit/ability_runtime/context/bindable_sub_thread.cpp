@@ -44,7 +44,7 @@ void BindableSubThread::BindSubThreadObject(void* napiEnv, void* object)
     }
 
     napi_env acutalEnv = static_cast<napi_env>(napiEnv);
-    HookData* data = new HookData { weak_from_this(), acutalEnv };
+    HookData* data = new (std::nothrow) HookData { weak_from_this(), acutalEnv };
     if (data == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "data err");
         return;
@@ -110,11 +110,6 @@ void BindableSubThread::StaticRemoveSubThreadObject(void* arg)
     std::shared_ptr<BindableSubThread> instance = data->instance.lock();
     if (instance == nullptr) {
         TAG_LOGW(AAFwkTag::CONTEXT, "instance nullptr");
-        delete data;
-        return;
-    }
-
-    if (instance.use_count() == 0) {
         delete data;
         return;
     }

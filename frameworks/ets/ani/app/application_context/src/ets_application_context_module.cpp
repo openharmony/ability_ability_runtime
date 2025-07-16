@@ -25,6 +25,7 @@
 #include "context_transfer.h"
 #include "ets_application_context_utils.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "interop_js/arkts_esvalue.h"
 #include "interop_js/arkts_interop_js_api.h"
 #include "interop_js/hybridgref_ani.h"
@@ -44,6 +45,7 @@ constexpr const char *ETS_APPLICATION_CONTEXT_CLASS_NAME = "Lapplication/Applica
 ani_object EtsApplicationContextModule::NativeTransferStatic(ani_env *aniEnv, ani_object self, ani_object input,
     ani_object type)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::CONTEXT, "transfer static ApplicationContext");
     if (aniEnv == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null aniEnv");
@@ -112,6 +114,7 @@ ani_object EtsApplicationContextModule::NativeTransferStatic(ani_env *aniEnv, an
 std::unique_ptr<NativeReference> EtsApplicationContextModule::CreateNativeReference(napi_env napiEnv,
     std::shared_ptr<ApplicationContext> applicationContext)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (napiEnv == nullptr || applicationContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null param");
         return nullptr;
@@ -160,6 +163,7 @@ std::unique_ptr<NativeReference> EtsApplicationContextModule::CreateNativeRefere
 napi_value EtsApplicationContextModule::GetOrCreateDynamicObject(napi_env napiEnv,
     std::shared_ptr<ApplicationContext> applicationContext)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (napiEnv == nullptr || applicationContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null param");
         return nullptr;
@@ -209,6 +213,7 @@ napi_value EtsApplicationContextModule::GetOrCreateDynamicObject(napi_env napiEn
 
 ani_object EtsApplicationContextModule::NativeTransferDynamic(ani_env *aniEnv, ani_class aniCls, ani_object input)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::CONTEXT, "transfer dynamic ApplicationContext");
     if (!IsInstanceOf(aniEnv, input)) {
         TAG_LOGE(AAFwkTag::CONTEXT, "not ApplicationContext");
@@ -243,6 +248,7 @@ ani_object EtsApplicationContextModule::NativeTransferDynamic(ani_env *aniEnv, a
 ani_object EtsApplicationContextModule::CreateDynamicObject(ani_env *aniEnv, ani_class aniCls,
     std::shared_ptr<ApplicationContext> applicationContext)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string contextType;
     if (!AppExecFwk::GetStaticFieldString(aniEnv, aniCls, "contextType", contextType)) {
         TAG_LOGE(AAFwkTag::CONTEXT, "get context type failed");

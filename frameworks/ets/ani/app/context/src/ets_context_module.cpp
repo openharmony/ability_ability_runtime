@@ -25,6 +25,7 @@
 #include "ets_application_context_utils.h"
 #include "event_hub.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "interop_js/arkts_esvalue.h"
 #include "interop_js/arkts_interop_js_api.h"
 #include "interop_js/hybridgref_ani.h"
@@ -42,10 +43,27 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char *ETS_CONTEXT_CLASS_NAME = "Lapplication/Context/Context;";
+
+std::string GetClassNameByContextType(const std::string &contextType)
+{
+    std::string className;
+    static const std::unordered_map<std::string, std::string> mapping = {
+        {"Context", "Lapplication/Context/Context;"},
+        {"ApplicationContext", "Lapplication/ApplicationContext/ApplicationContext;"},
+        {"AbilityStageContext", "Lapplication/AbilityStageContext/AbilityStageContext;"},
+        {"UIAbilityContext", "Lapplication/UIAbilityContext/UIAbilityContext;"}
+    };
+    auto it = mapping.find(contextType);
+    if (it != mapping.end()) {
+        className = it->second;
+    }
+    return className;
+}
 } // namespace
 
 ani_object EtsContextModule::NativeTransferStatic(ani_env *aniEnv, ani_object self, ani_object input, ani_object type)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::CONTEXT, "transfer static Context");
     if (aniEnv == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null aniEnv");
@@ -84,15 +102,7 @@ ani_object EtsContextModule::NativeTransferStatic(ani_env *aniEnv, ani_object se
         return reinterpret_cast<ani_object>(*staticContext);
     }
 
-    std::string contextType;
-    if (!AppExecFwk::GetStdString(aniEnv, reinterpret_cast<ani_string>(type), contextType)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
-        ThrowStsTransferClassError(aniEnv);
-        return nullptr;
-    }
-    TAG_LOGD(AAFwkTag::CONTEXT, "contextType %{public}s", contextType.c_str());
-
-    auto contextObj = GetOrCreateAniObject(aniEnv, context);
+    auto contextObj = CreateStaticObject(aniEnv, type, context);
     if (contextObj == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "contextObj invalid");
         ThrowStsTransferClassError(aniEnv);
@@ -102,43 +112,55 @@ ani_object EtsContextModule::NativeTransferStatic(ani_env *aniEnv, ani_object se
     return contextObj;
 }
 
-ani_object EtsContextModule::GetOrCreateAniObject(ani_env *aniEnv, std::shared_ptr<Context> context)
+ani_object EtsContextModule::CreateStaticObject(ani_env *aniEnv, ani_object type, std::shared_ptr<Context> context)
 {
-    // If context is UIAbilityContext, then the bindingObj->Get<ani_ref> will not nullptr,
-    // So check ApplicationContext and AbilityStageContext.
-    auto appContext = Context::ConvertTo<ApplicationContext>(context);
-    if (appContext != nullptr) {
-        TAG_LOGI(AAFwkTag::CONTEXT, "Context is ApplicationContext");
-        EtsApplicationContextUtils::CreateEtsApplicationContext(aniEnv);
-        auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetEtsGlobalObject();
-        if (appContextObj != nullptr) {
-            TAG_LOGI(AAFwkTag::CONTEXT, "appContextObj is valid");
-            return appContextObj->aniObj;
-        }
-    }
-
-    auto abilityStageContext = Context::ConvertTo<AbilityStageContext>(context);
-    if (abilityStageContext != nullptr) {
-        TAG_LOGI(AAFwkTag::CONTEXT, "Context is AbilityStageContext");
-        auto newContext = STSAbilityStageContext::CreateStsAbilityStageContext(aniEnv, abilityStageContext);
-        if (newContext != nullptr) {
-            TAG_LOGI(AAFwkTag::CONTEXT, "newContext is valid");
-            return newContext;
-        }
-    }
-
-    ani_class cls {};
-    ani_status status = ANI_ERROR;
-    if ((status = aniEnv->FindClass("Lapplication/Context/Context;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+    std::string contextType;
+    if (!AppExecFwk::GetStdString(aniEnv, reinterpret_cast<ani_string>(type), contextType)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
         return nullptr;
     }
-    return ContextUtil::CreateContextObject(aniEnv, cls, context);
+    TAG_LOGD(AAFwkTag::CONTEXT, "contextType %{public}s", contextType.c_str());
+
+    if (!ContextTransfer::GetInstance().IsStaticCreatorExist(contextType)) {
+        std::string className = GetClassNameByContextType(contextType);
+        if (!LoadTargetModule(aniEnv, className)) {
+            return nullptr;
+        }
+    }
+
+    auto contextObj = ContextTransfer::GetInstance().GetStaticObject(contextType, aniEnv, context);
+    if (contextObj == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "contextObj invalid");
+        return nullptr;
+    }
+
+    return contextObj;
 }
 
-std::unique_ptr<NativeReference> EtsContextModule::CreateBaseNativeReference(napi_env napiEnv,
+bool EtsContextModule::LoadTargetModule(ani_env *aniEnv, const std::string &className)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    ani_class contextCls = nullptr;
+    auto status = aniEnv->FindClass(className.c_str(), &contextCls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "FindClass %{public}s failed status: %{public}d", className.c_str(), status);
+        return false;
+    }
+
+    std::string gotContextType;
+    if (!AppExecFwk::GetStaticFieldString(aniEnv, contextCls, "contextType", gotContextType)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "get context type failed");
+        return false;
+    }
+
+    TAG_LOGD(AAFwkTag::CONTEXT, "gotContext %{public}s", gotContextType.c_str());
+    return true;
+}
+
+std::unique_ptr<NativeReference> EtsContextModule::CreateNativeReference(napi_env napiEnv,
     std::shared_ptr<Context> context)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (napiEnv == nullptr || context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null param");
         return nullptr;
@@ -184,124 +206,9 @@ std::unique_ptr<NativeReference> EtsContextModule::CreateBaseNativeReference(nap
     return systemModule;
 }
 
-std::unique_ptr<NativeReference> EtsContextModule::CreateApplicationNativeReference(napi_env napiEnv,
-    std::shared_ptr<ApplicationContext> applicationContext)
-{
-    if (napiEnv == nullptr || applicationContext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null param");
-        return nullptr;
-    }
-
-    auto value = JsApplicationContextUtils::CreateJsApplicationContext(napiEnv);
-    auto systemModule = JsRuntime::LoadSystemModuleByEngine(napiEnv, "application.ApplicationContext", &value, 1);
-    if (systemModule == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null system module");
-        return nullptr;
-    }
-
-    napi_value object = systemModule->GetNapiValue();
-    if (!CheckTypeForNapiValue(napiEnv, object, napi_object)) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "check type failed");
-        return nullptr;
-    }
-
-    auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(applicationContext);
-    if (workContext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null workContext");
-        return nullptr;
-    }
-    auto status = napi_coerce_to_native_binding_object(napiEnv, object, DetachCallbackFunc, AttachApplicationContext,
-        workContext, nullptr);
-    if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "coerce applicationContext failed: %{public}d", status);
-        delete workContext;
-        return nullptr;
-    }
-
-    status = napi_wrap(napiEnv, object, workContext,
-        [](napi_env, void *data, void *) {
-            TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr applicationContext");
-            delete static_cast<std::weak_ptr<ApplicationContext> *>(data);
-        }, nullptr, nullptr);
-    if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "wrap failed: %{public}d", status);
-        delete workContext;
-        return nullptr;
-    }
-
-    return systemModule;
-}
-
-std::unique_ptr<NativeReference> EtsContextModule::CreateAbilityStageNativeReference(napi_env napiEnv,
-    std::shared_ptr<AbilityStageContext> abilityStageContext)
-{
-    if (napiEnv == nullptr || abilityStageContext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null param");
-        return nullptr;
-    }
-
-    auto value = CreateJsAbilityStageContext(napiEnv, abilityStageContext);
-    auto systemModule = JsRuntime::LoadSystemModuleByEngine(napiEnv, "application.AbilityStageContext", &value, 1);
-    if (systemModule == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null systemModule");
-        return nullptr;
-    }
-
-    napi_value object = systemModule->GetNapiValue();
-    if (!CheckTypeForNapiValue(napiEnv, object, napi_object)) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "check type failed");
-        return nullptr;
-    }
-
-    auto workContext = new (std::nothrow) std::weak_ptr<AbilityStageContext>(abilityStageContext);
-    if (workContext == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null workContext");
-        return nullptr;
-    }
-    auto status = napi_coerce_to_native_binding_object(napiEnv, object, DetachCallbackFunc, AttachAbilityStageContext,
-        workContext, nullptr);
-    if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "coerce AbilityStageContext failed: %{public}d", status);
-        delete workContext;
-        return nullptr;
-    }
-
-    status = napi_wrap(napiEnv, object, workContext,
-        [](napi_env, void *data, void *) {
-            TAG_LOGD(AAFwkTag::CONTEXT, "finalizer for weak_ptr AbilityStageContext");
-            delete static_cast<std::weak_ptr<AbilityStageContext> *>(data);
-        }, nullptr, nullptr);
-    if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "wrap failed: %{public}d", status);
-        delete workContext;
-        return nullptr;
-    }
-
-    return systemModule;
-}
-
-std::unique_ptr<NativeReference> EtsContextModule::CreateNativeReference(napi_env napiEnv,
-    std::shared_ptr<Context> context)
-{
-    // If context is UIAbilityContext, then the bindingObj->Get<NativeReference>() will not nullptr,
-    // So check ApplicationContext and AbilityStageContext.
-    auto appContext = Context::ConvertTo<ApplicationContext>(context);
-    if (appContext != nullptr) {
-        TAG_LOGI(AAFwkTag::CONTEXT, "Context is ApplicationContext");
-        return CreateApplicationNativeReference(napiEnv, appContext);
-    }
-
-    auto abilityStageContext = Context::ConvertTo<AbilityStageContext>(context);
-    if (abilityStageContext != nullptr) {
-        TAG_LOGI(AAFwkTag::CONTEXT, "Context is AbilityStageContext");
-        return CreateAbilityStageNativeReference(napiEnv, abilityStageContext);
-    }
-
-    return CreateBaseNativeReference(napiEnv, context);
-}
-
 napi_value EtsContextModule::GetOrCreateDynamicObject(napi_env napiEnv, std::shared_ptr<Context> context)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (napiEnv == nullptr || context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null param");
         return nullptr;
@@ -349,6 +256,7 @@ napi_value EtsContextModule::GetOrCreateDynamicObject(napi_env napiEnv, std::sha
 
 ani_object EtsContextModule::NativeTransferDynamic(ani_env *aniEnv, ani_class aniCls, ani_object input)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::CONTEXT, "transfer dynamic Context");
     if (aniEnv == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null aniEnv");
@@ -375,12 +283,20 @@ ani_object EtsContextModule::NativeTransferDynamic(ani_env *aniEnv, ani_class an
 ani_object EtsContextModule::CreateDynamicObject(ani_env *aniEnv, ani_class aniCls,
     std::shared_ptr<Context> contextPtr)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string contextType;
     if (!AppExecFwk::GetStaticFieldString(aniEnv, aniCls, "contextType", contextType)) {
         TAG_LOGE(AAFwkTag::CONTEXT, "get context type failed");
         return nullptr;
     }
     TAG_LOGD(AAFwkTag::CONTEXT, "contextType %{public}s", contextType.c_str());
+
+    if (!ContextTransfer::GetInstance().IsDynamicCreatorExist(contextType)) {
+        std::string className = GetClassNameByContextType(contextType);
+        if (!LoadTargetModule(aniEnv, className)) {
+            return nullptr;
+        }
+    }
 
     // get napiEnv from aniEnv
     napi_env napiEnv = {};
