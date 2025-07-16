@@ -24,15 +24,6 @@ class MyService extends rpc.RemoteObject {
   constructor(descriptor: string) {
     super(descriptor);
   }
-
-  public onRemoteMessageRequest(
-    code: number,
-    data: rpc.MessageSequence,
-    reply: rpc.MessageSequence,
-    options: rpc.MessageOption
-  ): boolean | Promise<boolean> {
-    return false;
-  }
 }
 
 export default class ServiceExtensionAbility {
