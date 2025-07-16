@@ -41,6 +41,7 @@ ohos_unittest("app_mgr_service_inner_ninth_test") {
     "${ability_runtime_path}/utils/global/time/include",
     "${ability_runtime_path}/tools/aa/include",
     "${ability_runtime_utils_path}/global/constant",
+    "${ability_runtime_test_path}/new_test/mock/upms/uri_permission_mgr/include",
   ]
 
   sources = [
@@ -68,6 +69,7 @@ ohos_unittest("app_mgr_service_inner_ninth_test") {
     "${ability_runtime_services_path}/appmgr/src/window_focus_changed_listener.cpp",
     "${ability_runtime_services_path}/appmgr/src/window_pid_visibility_changed_listener.cpp",
     "${ability_runtime_services_path}/appmgr/src/window_visibility_changed_listener.cpp",
+    "${ability_runtime_test_path}/new_test/mock/upms/uri_permission_mgr/src/uri_permission_manager_client.cpp",
     "app_mgr_service_inner_ninth_test.cpp",
     "mock/src/mock_ability_running_record.cpp",
     "mock/src/mock_accesstoken_kit.cpp",

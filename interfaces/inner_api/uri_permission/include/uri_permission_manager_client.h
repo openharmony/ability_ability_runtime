@@ -109,6 +109,10 @@ public:
     int32_t GrantUriPermissionByKeyAsCaller(const std::string &key, uint32_t flag, uint32_t callerTokenId,
         uint32_t targetTokenId);
 
+    void SetUriPermServiceStarted();
+
+    bool IsUriPermServiceStarted();
+
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
     int32_t Active(const std::vector<PolicyInfo> &policy, std::vector<uint32_t> &result);
 #endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
@@ -144,6 +148,7 @@ private:
     std::condition_variable loadSaVariable_;
     bool saLoadFinished_ = false;
     sptr<IUriPermissionManager> uriPermMgr_ = nullptr;
+    std::atomic_bool isUriPermServiceStarted_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
