@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1024,6 +1024,49 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_HandleDisconnectExte
     Want want;
     extensionabilitythread->HandleDisconnectExtension(want);
     GTEST_LOG_(INFO) << "ExtensionAbilityThread_HandleDisconnectExtension_0100 end";
+}
+
+/**
+ * @tc.number: ExtensionAbilityThread_ScheduleAbilitiesRequestDone_0100
+ * @tc.name: ScheduleAbilitiesRequestDone
+ * @tc.desc: Test ScheduleAbilitiesRequestDone function
+ */
+HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleAbilitiesRequestDone_0100,
+    Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ExtensionAbilityThread_ScheduleAbilitiesRequestDone_0100 start";
+    AbilityRuntime::ExtensionAbilityThread *extensionabilitythread =
+        new (std::nothrow) AbilityRuntime::ExtensionAbilityThread();
+    EXPECT_NE(extensionabilitythread, nullptr);
+    extensionabilitythread->extensionImpl_ = std::make_shared<AbilityRuntime::ExtensionImpl>();
+    EXPECT_NE(extensionabilitythread->extensionImpl_, nullptr);
+    extensionabilitythread->abilityHandler_ = std::make_shared<AbilityHandler>(nullptr);
+    EXPECT_NE(extensionabilitythread->abilityHandler_, nullptr);
+    std::string requestKey = "1234567890";
+    int32_t resultCode = 123;
+    extensionabilitythread->ScheduleAbilitiesRequestDone(requestKey, resultCode);
+    GTEST_LOG_(INFO) << "ExtensionAbilityThread_ScheduleAbilitiesRequestDone_0100 end";
+}
+
+/**
+ * @tc.number: ExtensionAbilityThread_ScheduleAbilitiesRequestDone_0200
+ * @tc.name: ScheduleAbilitiesRequestDone
+ * @tc.desc: Test ScheduleAbilitiesRequestDone function
+ */
+HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleAbilitiesRequestDone_0200,
+    Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "ExtensionAbilityThread_ScheduleAbilitiesRequestDone_0200 start";
+    AbilityRuntime::ExtensionAbilityThread *extensionabilitythread =
+        new (std::nothrow) AbilityRuntime::ExtensionAbilityThread();
+    EXPECT_NE(extensionabilitythread, nullptr);
+    extensionabilitythread->extensionImpl_ = std::make_shared<AbilityRuntime::ExtensionImpl>();
+    EXPECT_NE(extensionabilitythread->extensionImpl_, nullptr);
+    extensionabilitythread->abilityHandler_ = nullptr;
+    std::string requestKey = "1234567890";
+    int32_t resultCode = 123;
+    extensionabilitythread->ScheduleAbilitiesRequestDone(requestKey, resultCode);
+    GTEST_LOG_(INFO) << "ExtensionAbilityThread_ScheduleAbilitiesRequestDone_0200 end";
 }
 
 /**
