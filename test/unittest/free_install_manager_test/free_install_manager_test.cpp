@@ -544,7 +544,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_StartRemoteFreeInstall_001, TestSize.Level
     abilityRequest.abilityInfo.type = AbilityType::PAGE;
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     abilityRecord->missionId_ = -1;
-    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    sptr<IRemoteObject> callerToken = nullptr;
     int result = freeInstallManager_->StartRemoteFreeInstall(want, 0, 0, callerToken);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
