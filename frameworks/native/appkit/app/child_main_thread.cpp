@@ -288,8 +288,8 @@ void ChildMainThread::InitNativeLib(const BundleInfo &bundleInfo)
     }
 
     AppLibPathMap appLibPaths {};
-    AppLibPathMap appAbcLibPaths {};
-    GetNativeLibPath(bundleInfo, hspList, appLibPaths, appAbcLibPaths);
+    std::map<std::string, std::string> abcPathsToBundleModuleNameMap {};
+    GetNativeLibPath(bundleInfo, hspList, appLibPaths, abcPathsToBundleModuleNameMap);
     bool isSystemApp = bundleInfo.applicationInfo.isSystemApp;
     TAG_LOGD(AAFwkTag::APPKIT, "the application isSystemApp: %{public}d", isSystemApp);
 
@@ -427,9 +427,10 @@ void ChildMainThread::UpdateNativeChildLibModuleName(const AppLibPathMap &appLib
 }
 
 void ChildMainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList,
-    AppLibPathMap &appLibPaths, AppLibPathMap &appAbcLibPaths)
+    AppLibPathMap &appLibPaths, std::map<std::string, std::string> &abcPathsToBundleModuleNameMap)
 {
     std::string nativeLibraryPath = bundleInfo.applicationInfo.nativeLibraryPath;
+    abcPathsToBundleModuleNameMap["default"] = "default";
     if (!nativeLibraryPath.empty()) {
         if (nativeLibraryPath.back() == '/') {
             nativeLibraryPath.pop_back();
@@ -438,21 +439,20 @@ void ChildMainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspLi
         libPath += (libPath.back() == '/') ? nativeLibraryPath : "/" + nativeLibraryPath;
         TAG_LOGI(AAFwkTag::APPKIT, "napi lib path = %{public}s", libPath.c_str());
         appLibPaths["default"].emplace_back(libPath);
-        appAbcLibPaths["default"].emplace_back(libPath);
     }
 
     for (auto &hapInfo : bundleInfo.hapModuleInfos) {
         TAG_LOGD(AAFwkTag::APPKIT,
             "moduleName: %{public}s, isLibIsolated: %{public}d, compressNativeLibs: %{public}d",
             hapInfo.moduleName.c_str(), hapInfo.isLibIsolated, hapInfo.compressNativeLibs);
-        GetHapSoPath(hapInfo, appLibPaths, hapInfo.hapPath.find(ABS_CODE_PATH), appAbcLibPaths);
+        GetHapSoPath(hapInfo, appLibPaths, hapInfo.hapPath.find(ABS_CODE_PATH), abcPathsToBundleModuleNameMap);
     }
 
     for (auto &hspInfo : hspList) {
         TAG_LOGD(AAFwkTag::APPKIT, "bundle:%s, module:%s, nativeLibraryPath:%s", hspInfo.bundleName.c_str(),
             hspInfo.moduleName.c_str(), hspInfo.nativeLibraryPath.c_str());
         GetHspNativeLibPath(hspInfo, appLibPaths, hspInfo.hapPath.find(ABS_CODE_PATH) != 0u,
-            bundleInfo.applicationInfo.bundleName, appAbcLibPaths);
+            bundleInfo.applicationInfo.bundleName, abcPathsToBundleModuleNameMap);
     }
 }
 }  // namespace AppExecFwk
