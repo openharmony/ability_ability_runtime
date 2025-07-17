@@ -1962,6 +1962,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     }
 
     AbilityRequest abilityRequest;
+    abilityRequest.startOptions = startOptions;
 #ifdef SUPPORT_SCREEN
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "is implicit start action");
@@ -2144,7 +2145,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
     RemoveUnauthorizedLaunchReasonMessage(want, abilityRequest, callerTokenId);
     abilityRequest.want.RemoveParam(PARAM_SPECIFIED_PROCESS_FLAG);
-    abilityRequest.startOptions = startOptions;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         abilityRequest.userId = oriValidUserId;
         abilityRequest.want.SetParam(ServerConstant::IS_CALL_BY_SCB, false);
