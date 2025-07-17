@@ -27,6 +27,8 @@
 namespace OHOS {
 namespace AAFwk {
 std::mutex DataObsMgrClient::mutex_;
+constexpr const int32_t RETRY_MAX_TIMES = 100;
+constexpr const int64_t RETRY_SLEEP_TIME_MILLISECOND = 1; // 1ms
 using namespace DataShare;
 
 class DataObsMgrClient::SystemAbilityStatusChangeListener
@@ -73,7 +75,21 @@ DataObsMgrClient::~DataObsMgrClient()
         TAG_LOGE(AAFwkTag::DBOBSMGR, "null systemmgr");
         return;
     }
-    systemManager->UnSubscribeSystemAbility(DATAOBS_MGR_SERVICE_SA_ID, callback_);
+    auto res = systemManager->UnSubscribeSystemAbility(DATAOBS_MGR_SERVICE_SA_ID, callback_);
+    if (res != 0) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "UnSubscribeSystemAbility failed, errCode is %{public}d.", res);
+        systemManager->UnSubscribeSystemAbility(DATAOBS_MGR_SERVICE_SA_ID, callback_);
+    }
+
+    int32_t retryTimes = 0;
+    while ((callback_ != nullptr) && (callback_->GetSptrRefCount() > 1) && (retryTimes < RETRY_MAX_TIMES)) {
+        retryTimes++;
+        std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_SLEEP_TIME_MILLISECOND));
+    }
+
+    if ((callback_ != nullptr) && (callback_->GetSptrRefCount() > 1)) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "Callback has other in use: %{public}d.", callback_->GetSptrRefCount());
+    }
 }
 
 /**
