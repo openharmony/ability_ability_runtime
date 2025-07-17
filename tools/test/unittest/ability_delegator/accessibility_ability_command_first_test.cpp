@@ -1060,7 +1060,7 @@ AccessibilityAbilityShellCommand_RunAsGetEnabledAbilities_0100, TestSize.Level1)
     int argc = sizeof(argv) / sizeof(argv[0]) - 1;
     AccessibilityAbilityShellCommand cmd(argc, argv);
     ErrCode result = cmd.RunAsGetEnabledAbilities();
-    EXPECT_EQ(result, OHOS::ERR_INVALID_VALUE);
+    EXPECT_EQ(result, OHOS::ERR_OK);
     GTEST_LOG_(INFO) << "AccessibilityAbilityShellCommand_RunAsGetEnabledAbilities_0100 end";
 }
 
