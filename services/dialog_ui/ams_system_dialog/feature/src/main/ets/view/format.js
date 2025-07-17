@@ -91,7 +91,7 @@ export function removeArrayParams(fieldSubProperties, fieldName, arrIndex) {
     return newArr;
 }
 
-export function romoveFormData(formData, fieldName, arrIndex) {
+export function removeFormData(formData, fieldName, arrIndex) {
     Object.keys(formData).forEach((name) => {
         if (name.includes(`${fieldName}.array${arrIndex}.`)) {
             delete formData[name];
