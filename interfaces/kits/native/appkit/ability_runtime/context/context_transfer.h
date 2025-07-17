@@ -37,6 +37,9 @@ public:
     void RegisterDynamicObjectCreator(const std::string &contextType, const CreateDynamicObject &createFunc);
     napi_value GetDynamicObject(const std::string &contextType, napi_env napiEnv, std::shared_ptr<Context> context);
 
+    bool IsStaticCreatorExist(const std::string &contextType);
+    bool IsDynamicCreatorExist(const std::string &contextType);
+
 private:
     ContextTransfer(const ContextTransfer&) = delete;
     ContextTransfer(ContextTransfer&&) = delete;

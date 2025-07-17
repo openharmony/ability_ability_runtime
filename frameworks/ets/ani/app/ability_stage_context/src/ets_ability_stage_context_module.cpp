@@ -23,6 +23,7 @@
 #include "ani_common_util.h"
 #include "context_transfer.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "interop_js/arkts_esvalue.h"
 #include "interop_js/arkts_interop_js_api.h"
 #include "interop_js/hybridgref_ani.h"
@@ -42,6 +43,7 @@ constexpr const char *ETS_ABILITY_STAGE_CONTEXT_CLASS_NAME = "Lapplication/Abili
 ani_object EtsAbilityStageContextModule::NativeTransferStatic(ani_env *aniEnv, ani_object, ani_object input,
     ani_object type)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::CONTEXT, "transfer static AbilityStageContext");
     if (aniEnv == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null aniEnv");
@@ -110,6 +112,7 @@ ani_object EtsAbilityStageContextModule::NativeTransferStatic(ani_env *aniEnv, a
 std::unique_ptr<NativeReference> EtsAbilityStageContextModule::CreateNativeReference(napi_env napiEnv,
     std::shared_ptr<AbilityStageContext> abilityStageContext)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (napiEnv == nullptr || abilityStageContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null param");
         return nullptr;
@@ -158,6 +161,7 @@ std::unique_ptr<NativeReference> EtsAbilityStageContextModule::CreateNativeRefer
 napi_value EtsAbilityStageContextModule::GetOrCreateDynamicObject(napi_env napiEnv,
     std::shared_ptr<AbilityStageContext> abilityStageContext)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (napiEnv == nullptr || abilityStageContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null param");
         return nullptr;
@@ -207,6 +211,7 @@ napi_value EtsAbilityStageContextModule::GetOrCreateDynamicObject(napi_env napiE
 
 ani_object EtsAbilityStageContextModule::NativeTransferDynamic(ani_env *aniEnv, ani_class aniCls, ani_object input)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::CONTEXT, "transfer dynamic AbilityStageContext");
     if (!IsInstanceOf(aniEnv, input)) {
         TAG_LOGE(AAFwkTag::CONTEXT, "not AbilityStageContext");
@@ -241,6 +246,7 @@ ani_object EtsAbilityStageContextModule::NativeTransferDynamic(ani_env *aniEnv, 
 ani_object EtsAbilityStageContextModule::CreateDynamicObject(ani_env *aniEnv, ani_class aniCls,
     std::shared_ptr<AbilityStageContext> abilityStageContext)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string contextType;
     if (!AppExecFwk::GetStaticFieldString(aniEnv, aniCls, "contextType", contextType)) {
         TAG_LOGE(AAFwkTag::CONTEXT, "get context type failed");
