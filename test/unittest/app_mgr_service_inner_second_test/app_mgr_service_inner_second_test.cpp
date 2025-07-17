@@ -2435,8 +2435,14 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_SetKeepAlive
     appMgrServiceInner->SetKeepAliveDkv("InvalidBundleName", true, 0);
     EXPECT_FALSE(appRecord->isKeepAliveDkv_);
 
-    // case 5, set success.
+    // case 5, not mainElement running.
     appRecord->extensionType_ = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    appMgrServiceInner->SetKeepAliveDkv(TEST_BUNDLE_NAME, true, 0);
+    EXPECT_FALSE(appRecord->isKeepAliveDkv_);
+
+    // case 6, set success.
+    appRecord->extensionType_ = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    appRecord->isMainElementRunning_ = true;
     appMgrServiceInner->SetKeepAliveDkv(TEST_BUNDLE_NAME, true, 0);
     EXPECT_TRUE(appRecord->isKeepAliveDkv_);
 
