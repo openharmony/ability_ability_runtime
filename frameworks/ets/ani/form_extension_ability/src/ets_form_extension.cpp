@@ -150,7 +150,7 @@ void ETSFormExtension::BindContext(std::shared_ptr<AbilityInfo> &abilityInfo, st
         return;
     }
     if (etsAbilityObj_ == nullptr || want == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "null etsAbilityObj_ or abilityContext_ or want");
+        TAG_LOGE(AAFwkTag::FORM_EXT, "etsAbilityObj_ or abilityContext_ or want is null");
         return;
     }
 
@@ -169,14 +169,17 @@ void ETSFormExtension::BindContext(std::shared_ptr<AbilityInfo> &abilityInfo, st
     ani_status status = ANI_ERROR;
 
     if ((status = env->GlobalReference_Create(contextObj, &contextGlobalRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::FORM_EXT, "GlobalReference_Create failed, status : %{public}d", status);
+        return;
     }
     if ((status = env->Class_FindField(etsAbilityObj_->aniCls, "context", &field)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindField failed, status : %{public}d", status);
+        return;
     }
 
     if ((status = env->Object_SetField_Ref(etsAbilityObj_->aniObj, field, contextGlobalRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_SetField_Ref failed, status : %{public}d", status);
+        return;
     }
 
     TAG_LOGI(AAFwkTag::FORM_EXT, "BindContext End");
@@ -200,7 +203,13 @@ std::string ETSFormExtension::ANIUtils_ANIStringToStdString(ani_env *env, ani_st
         return "";
     }
 
-    utf8_buffer[bytes_written] = '\0';
+    if (bytes_written <= strSize) {
+        utf8_buffer[bytes_written] = '\0';
+    } else {
+        utf8_buffer[strSize] = '\0';
+        TAG_LOGW(AAFwkTag::FORM_EXT, "ANIUtils_ANIStringToStdString bytes_written exceeds buffer size");
+    }
+
     std::string content = std::string(utf8_buffer);
     TAG_LOGI(AAFwkTag::FORM_EXT, "ANIUtils_ANIStringToStdString End");
     return content;
@@ -222,7 +231,7 @@ bool ETSFormExtension::ConvertFromDataProxies(
         return false;
     }
 
-    int proxyLength = int(length);
+    int proxyLength = static_cast<int>(std::round(length));
     for (int i = 0; i < proxyLength; i++) {
         FormDataProxy formDataProxy("", "");
         ani_ref stringEntryRef;
@@ -570,59 +579,50 @@ bool ETSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
     ani_object &recordObject)
 {
     ani_status status = ANI_OK;
-
     ani_class recordCls;
     status = env->FindClass(RECORD_CLASS_NAME, &recordCls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "FindClass failed status: %{public}d", status);
         return false;
     }
-
     ani_method objectMethod;
     if ((status = env->Class_FindMethod(recordCls, "<ctor>", ":V", &objectMethod)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod constructor failed: %{public}d", status);
         return false;
     }
-
     if ((status = env->Object_New(recordCls, objectMethod, &recordObject)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Object_New failed: %{public}d", status);
         return false;
     }
-
     ani_method recordSetMethod;
     status = env->Class_FindMethod(recordCls, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod set failed: %{public}d", status);
         return false;
     }
-
     for (auto iter = formEventsMap.begin(); iter != formEventsMap.end(); ++iter) {
         std::string key = std::to_string(iter->first);
         ani_string ani_key;
         ani_int ani_value = iter->second;
-
         if ((status = env->String_NewUTF8(key.c_str(), key.length(), &ani_key)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::FORM_EXT, "String_NewUTF8 key failed status : %{public}d", status);
             return false;
         }
-
         static const char *className = "Lstd/core/Int;";
         ani_class persion_cls;
         if (ANI_OK != env->FindClass(className, &persion_cls)) {
-            TAG_LOGE(AAFwkTag::FORM_EXT, "Not found ");
+            TAG_LOGE(AAFwkTag::FORM_EXT, "FindClass failed status: %{public}d", status);
             return false;
         }
         ani_method personInfoCtor;
         env->Class_FindMethod(persion_cls, "<ctor>", "I:V", &personInfoCtor);
         ani_object personInfoObj;
         env->Object_New(persion_cls, personInfoCtor, &personInfoObj, ani_value);
-
         if ((status = env->Object_CallMethod_Void(recordObject, recordSetMethod, ani_key, personInfoObj)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::FORM_EXT, "Object_CallMethod_Void failed status : %{public}d", status);
             return false;
         }
     }
-
     return true;
 }
 
