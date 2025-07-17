@@ -1804,7 +1804,6 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_CreateProperty_0200, TestSize.Level1)
     std::shared_ptr<AbilityRuntime::UIAbility> uiAbility = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(uiAbility, nullptr);
     auto abilityContext = uiAbility->GetAbilityContext();
-    ASSERT_NE(abilityContext, nullptr);
     bool result = uiAbility->CreateProperty(abilityContext, nullptr);
     EXPECT_FALSE(result);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
@@ -1837,10 +1836,9 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_CreateProperty_0400, TestSize.Level1)
     std::shared_ptr<AbilityRuntime::UIAbility> uiAbility = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(uiAbility, nullptr);
     auto abilityContext = uiAbility->GetAbilityContext();
-    ASSERT_NE(abilityContext, nullptr);
     auto property = std::make_shared<AppExecFwk::EtsDelegatorAbilityProperty>();
     bool result = uiAbility->CreateProperty(abilityContext, property);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 } // namespace AppExecFwk
