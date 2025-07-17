@@ -761,7 +761,7 @@ int32_t ImplicitStartProcessor::ImplicitStartAbilityInner(const Want &targetWant
     int32_t result = ERR_OK;
     switch (request.callType) {
         case AbilityCallType::START_OPTIONS_TYPE: {
-            StartOptions startOptions;
+            StartOptions startOptions = request.startOptions;
             auto displayId = targetWant.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, 0);
             auto windowMode = targetWant.GetIntParam(Want::PARAM_RESV_WINDOW_MODE, 0);
             startOptions.SetDisplayID(static_cast<int32_t>(displayId));
