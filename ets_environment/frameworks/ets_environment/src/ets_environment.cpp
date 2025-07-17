@@ -25,7 +25,13 @@
 #include <vector>
 
 #include "static_core/plugins/ets/runtime/ets_namespace_manager.h"
-
+#include "ets_ani_expo.h"
+#ifdef LIKELY
+#undef LIKELY
+#endif
+#ifdef UNLIKELY
+#undef UNLIKELY
+#endif
 #include "dynamic_loader.h"
 #include "elf_factory.h"
 #include "event_handler.h"
@@ -208,7 +214,7 @@ void ETSEnvironment::InitETSSysNS(const std::string &path)
     dlns_inherit(&ns, &ndk, "allow_all_shared_libs");
 }
 
-bool ETSEnvironment::Initialize(void *napiEnv, const std::string &aotPath)
+bool ETSEnvironment::Initialize()
 {
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "Initialize called");
     if (!LoadRuntimeApis()) {
@@ -222,19 +228,11 @@ bool ETSEnvironment::Initialize(void *napiEnv, const std::string &aotPath)
     }
 
     std::vector<ani_option> options;
-    std::string aotPathString = "";
-    if (!aotPath.empty()) {
-        aotPathString = "--ext:--aot-file=" + aotPath;
-        options.push_back(ani_option { aotPathString.data(), nullptr });
-        options.push_back(ani_option { "--ext:--enable-an", nullptr });
-        TAG_LOGD(AAFwkTag::ETSRUNTIME, "aotPathString: %{public}s", aotPathString.c_str());
-    }
     // Create boot-panda-files options
     std::string bootString = "--ext:--boot-panda-files=" + bootfiles;
     options.push_back(ani_option { bootString.data(), nullptr });
     options.push_back(ani_option { "--ext:--compiler-enable-jit=false", nullptr });
     options.push_back(ani_option { "--ext:--log-level=info", nullptr });
-    options.push_back(ani_option { "--ext:interop", napiEnv });
     options.push_back(ani_option { "--ext:taskpool-support-interop=true", nullptr });
     ani_options optionsPtr = { options.size(), options.data() };
     ani_status status = ANI_ERROR;
@@ -493,6 +491,36 @@ bool ETSEnvironment::LoadModule(const std::string &modulePath, const std::string
     return true;
 }
 
+void ETSEnvironment::FinishPreload() {
+    ani_env *env = GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed: ANI env nullptr");
+        return;
+    }
+    ark::ets::ETSAni::Prefork(env);
+}
+
+void ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath)
+{
+    std::vector<ani_option> options;
+    std::string aotPathString = "";
+    if (!aotPath.empty()) {
+        aotPathString = "--ext:--aot-file=" + aotPath;
+        options.push_back(ani_option { aotPathString.data(), nullptr });
+        options.push_back(ani_option { "--ext:--enable-an", nullptr });
+        TAG_LOGD(AAFwkTag::ETSRUNTIME, "aotPathString: %{public}s", aotPathString.c_str());
+    }
+
+    options.push_back(ani_option { "--ext:interop", napiEnv });
+
+    ani_env *env = GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed: ANI env nullptr");
+        return;
+    }
+    ark::ets::ETSAni::Postfork(env, options);
+}
+
 ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
 {
     static ETSEnvFuncs funcs {
@@ -502,8 +530,8 @@ ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
         .InitETSSysNS = [](const std::string &path) {
             ETSEnvironment::InitETSSysNS(path);
         },
-        .Initialize = [](void *napiEnv, const std::string &aotPath) {
-            return ETSEnvironment::GetInstance()->Initialize(napiEnv, aotPath);
+        .Initialize = []() {
+            return ETSEnvironment::GetInstance()->Initialize();
         },
         .RegisterUncaughtExceptionHandler = [](const ETSUncaughtExceptionInfo &exceptionInfo) {
             ETSEnvironment::GetInstance()->RegisterUncaughtExceptionHandler(exceptionInfo);
@@ -521,6 +549,12 @@ ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
         .SetAppLibPath = [](const std::map<std::string, std::string> &abcPathsToBundleModuleNameMap,
             std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)> &cb) {
             ark::ets::EtsNamespaceManager::SetAppLibPaths(abcPathsToBundleModuleNameMap, cb);
+        },
+        .FinishPreload = []() {
+            ETSEnvironment::GetInstance()->FinishPreload();
+        },
+        .PostFork = [](void *napiEnv, const std::string &aotPath) {
+            ETSEnvironment::GetInstance()->PostFork(napiEnv, aotPath);
         }
     };
     return &funcs;
