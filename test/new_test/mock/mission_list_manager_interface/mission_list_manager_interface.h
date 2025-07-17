@@ -20,6 +20,7 @@ namespace OHOS {
 namespace AAFwk {
 class MissionListWrap {
 public:
+    virtual ~MissionListWrap() = default;
     virtual void RemoveUserDir(int32_t userId) {}
 };
 }  // namespace AAFwk

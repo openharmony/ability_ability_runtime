@@ -13,7 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_COMMON_H
-#define MOCK_COMMON_H
+#include "app_scheduler.h"
 
-#endif
+namespace OHOS {
+namespace AAFwk {
+AppScheduler::AppScheduler() {}
+
+AppScheduler::~AppScheduler() {}
+
+} // namespace AAFwk
+} // namespace OHOS

@@ -105,7 +105,7 @@ HWTEST_F(AbilityConnectionTest, OnAbilityConnectDone_003, TestSize.Level1)
     AppExecFwk::ElementName element;
     sptr<IRemoteObject> remoteObject = sptr<IRemoteObject>::MakeSptr();
     int resultCode = 0;
-    OH_MOCK_METHOD_EXPECT_RET({true}, ConnectionManager, DisconnectNonexistentService, const AppExecFwk::ElementName&,
+    OH_EXPECT_RET({true}, ConnectionManager, DisconnectNonexistentService, const AppExecFwk::ElementName&,
         const sptr<AbilityConnection>);
     instance->OnAbilityConnectDone(element, remoteObject, resultCode);
     EXPECT_LOG_EQ(LOG_WARN, AAFwkTag::CONNECTION, "ability_connection.cpp", 50);
@@ -127,7 +127,7 @@ HWTEST_F(AbilityConnectionTest, OnAbilityConnectDone_004, TestSize.Level1)
     AppExecFwk::ElementName element;
     sptr<IRemoteObject> remoteObject = sptr<IRemoteObject>::MakeSptr();
     int resultCode = 0;
-    OH_MOCK_METHOD_EXPECT_RET({false}, ConnectionManager, DisconnectNonexistentService, const AppExecFwk::ElementName&,
+    OH_EXPECT_RET({false}, ConnectionManager, DisconnectNonexistentService, const AppExecFwk::ElementName&,
         const sptr<AbilityConnection>);
     instance->OnAbilityConnectDone(element, remoteObject, resultCode);
     EXPECT_EQ(instance->connectionState_, AbilityRuntime::CONNECTION_STATE_CONNECTED);
@@ -191,7 +191,7 @@ HWTEST_F(AbilityConnectionTest, OnAbilityDisconnectDone_003, TestSize.Level1)
     instance->abilityConnectCallbackList_.emplace_back(callback);
     AppExecFwk::ElementName element;
     int resultCode = -1;
-    OH_MOCK_METHOD_EXPECT_RET({true}, ConnectionManager, RemoveConnection, const sptr<AbilityConnection>);
+    OH_EXPECT_RET({true}, ConnectionManager, RemoveConnection, const sptr<AbilityConnection>);
     instance->OnAbilityDisconnectDone(element, resultCode);
     EXPECT_EQ(instance->connectionState_, AbilityRuntime::CONNECTION_STATE_DISCONNECTED);
     EXPECT_LOG_EQ(LOG_INFO, AAFwkTag::CONNECTION, "ability_connection.cpp", 83);
@@ -214,7 +214,7 @@ HWTEST_F(AbilityConnectionTest, OnAbilityDisconnectDone_004, TestSize.Level1)
     instance->abilityConnectCallbackList_.emplace_back(callback);
     AppExecFwk::ElementName element;
     int resultCode = -1;
-    OH_MOCK_METHOD_EXPECT_RET({false}, ConnectionManager, RemoveConnection, const sptr<AbilityConnection>);
+    OH_EXPECT_RET({false}, ConnectionManager, RemoveConnection, const sptr<AbilityConnection>);
     instance->OnAbilityDisconnectDone(element, resultCode);
     EXPECT_EQ(instance->connectionState_, AbilityRuntime::CONNECTION_STATE_DISCONNECTED);
     EXPECT_EQ(instance->remoteObject_, nullptr);

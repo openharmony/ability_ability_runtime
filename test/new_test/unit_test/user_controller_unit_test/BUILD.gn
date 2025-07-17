@@ -70,6 +70,9 @@ ohos_unittest("user_controller_unit_test") {
 
   sources += [
     "user_controller_unit_test.cpp",
+    "../../mock/ability_manager_service/ability_manager_service.cpp",
+    "../../mock/app_scheduler/app_scheduler.cpp",
+    "../../mock/parameters/parameters.cpp",
   ]
 
   deps = [

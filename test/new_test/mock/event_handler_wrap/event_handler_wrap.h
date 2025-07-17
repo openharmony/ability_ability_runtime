@@ -22,6 +22,7 @@
 #include <functional>
 
 #include "task_handler_wrap.h"
+#include "oh_mock_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -38,20 +39,14 @@ public:
     EventWrap(uint32_t eventId, const std::string &taskName) {}
     EventWrap(uint32_t eventId, std::shared_ptr<EventDataBase> data) {}
 
-    uint32_t GetEventId() const
-    {
-        return 0;
-    }
+    OH_MOCK_METHOD_WITH_PREFIX_AMD_SUFFIX(, const, uint32_t, EventWrap, GetEventId);
 
     int64_t GetParam() const
     {
         return 0;
     }
 
-    std::shared_ptr<EventDataBase> GetEventData() const
-    {
-        return nullptr;
-    }
+    OH_MOCK_METHOD_WITH_PREFIX_AMD_SUFFIX(, const, std::shared_ptr<EventDataBase>, EventWrap, GetEventData);
 
     TaskHandle GetEventTask() const
     {

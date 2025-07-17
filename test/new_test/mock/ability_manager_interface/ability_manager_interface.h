@@ -27,9 +27,9 @@ class IAbilityManager : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.aafwk.AbilityManager")
 
-    OH_MOCK_VIRTUAL_METHOD(int32_t, IAbilityManager, SetApplicationAutoStartupByEDM,
+    OH_MOCK_METHOD_WITH_DECORATOR(virtual, int32_t, IAbilityManager, SetApplicationAutoStartupByEDM,
         const AbilityRuntime::AutoStartupInfo &, bool);
-    OH_MOCK_VIRTUAL_METHOD(int32_t, IAbilityManager, CancelApplicationAutoStartupByEDM,
+    OH_MOCK_METHOD_WITH_DECORATOR(virtual, int32_t, IAbilityManager, CancelApplicationAutoStartupByEDM,
         const AbilityRuntime::AutoStartupInfo &, bool);
 
     virtual int32_t QueryAllAutoStartupApplications(std::vector<AbilityRuntime::AutoStartupInfo> &infoList)
