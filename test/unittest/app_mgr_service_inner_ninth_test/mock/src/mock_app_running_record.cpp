@@ -504,6 +504,16 @@ void AppRunningRecord::SetKeepAliveDkv(bool isKeepAliveDkv)
     isKeepAliveDkv_ = isKeepAliveDkv;
 }
 
+void AppRunningRecord::SetMainElementRunning(bool isMainElementRunning)
+{
+    isMainElementRunning_ = isMainElementRunning;
+}
+
+bool AppRunningRecord::IsMainElementRunning() const
+{
+    return isMainElementRunning_;
+}
+
 void AppRunningRecord::SetKeepAliveBundle(bool isKeepAliveBundle)
 {
     isKeepAliveBundle_ = isKeepAliveBundle;
