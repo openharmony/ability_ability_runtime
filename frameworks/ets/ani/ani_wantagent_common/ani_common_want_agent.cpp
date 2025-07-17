@@ -20,78 +20,89 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-constexpr const char* LONG_CLASS = "Lstd/core/Long;";
+constexpr const char* WANT_AGENT_CLASS = "L@ohos/app/ability/wantAgent/wantAgent/WantAgentCls;";
 
-ani_object createLong(ani_env *env, ani_long value)
+ani_object CreateWantAgent(ani_env *env, ani_long ptr)
 {
-    ani_class persion_cls;
-    ani_status status = ANI_ERROR;
-    if ((status = env->FindClass(LONG_CLASS, &persion_cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    ani_class cls = nullptr;
+    ani_status status = env->FindClass(WANT_AGENT_CLASS, &cls);
+    if (status != ANI_OK || cls == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "FindClass status: %{public}d, or null cls", status);
         return nullptr;
     }
-    ani_method personInfoCtor;
-    if ((status = env->Class_FindMethod(persion_cls, "<ctor>", "J:V", &personInfoCtor)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    ani_method method = nullptr;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK || method == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Class_FindMethod status: %{public}d, or null method", status);
         return nullptr;
     }
-    ani_object personInfoObj;
-    if ((status = env->Object_New(persion_cls, personInfoCtor, &personInfoObj, value)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
+    ani_object obj = nullptr;
+    if ((status = env->Object_New(cls, method, &obj, ptr)) != ANI_OK || obj == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Object_New status: %{public}d, or null obj", status);
         return nullptr;
     }
-    return personInfoObj;
+    return obj;
 }
 } // namespace
 
 ani_object WrapWantAgent(ani_env *env, WantAgent *wantAgent)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "WrapWantAgent called");
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
         return nullptr;
     }
     if (wantAgent == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "wantAgent null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null wantAgent");
         return nullptr;
     }
-    ani_long pWantAgent = reinterpret_cast<ani_long>(wantAgent);
-    ani_object longObj =  createLong(env, pWantAgent);
-    if (longObj == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "null object");
+    ani_long pWantAgent = (ani_long)wantAgent;
+    ani_object wantAgentCls =  CreateWantAgent(env, pWantAgent);
+    if (wantAgentCls == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null wantAgent");
         return nullptr;
     }
-    return longObj;
+    return wantAgentCls;
 }
 
 void UnwrapWantAgent(ani_env *env, ani_object agent, void** result)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "UnwrapWantAgent called");
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
         return;
     }
     if (agent == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "agent null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null agent");
         return;
     }
-    ani_long param_value;
-    ani_status status = ANI_ERROR;
-    ani_class cls {};
-    ani_method method {};
-    if ((status = env->FindClass(LONG_CLASS, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "FindClass failed status: %{public}d", status);
+    ani_class cls = nullptr;
+    ani_status status = env->FindClass(WANT_AGENT_CLASS, &cls);
+    if (status != ANI_OK || cls == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "FindClass status: %{public}d, or null cls", status);
         return;
     }
-    if ((status = env->Class_FindMethod(cls, "unboxed", nullptr, &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Class_FindMethod failed status: %{public}d", status);
+    ani_boolean isWantAgentCls = ANI_FALSE;
+    if ((status = env->Object_InstanceOf(agent, cls, &isWantAgentCls)) != ANI_OK || !isWantAgentCls) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Object_InstanceOf failed: status=%{public}d, isWantAgentCls=%{public}d", status,
+            isWantAgentCls);
         return;
     }
-    if ((status = env->Object_CallMethod_Long(agent, method, &param_value)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Object_CallMethod_Long failed status: %{public}d", status);
+    ani_field wantAgentPtrField = nullptr;
+    if ((status = env->Class_FindField(cls, "wantAgentPtr", &wantAgentPtrField)) != ANI_OK ||
+        wantAgentPtrField == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Class_FindField status: %{public}d, or null wantAgentPtrField", status);
         return;
     }
-    *result = reinterpret_cast<void*>(param_value);
+    ani_long wantAgentPtr = 0;
+    if ((status = env->Object_GetField_Long(agent, wantAgentPtrField, &wantAgentPtr)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "wantAgentPtr GetField status: %{public}d", status);
+        return;
+    }
+    if (wantAgentPtr == 0) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null wantAgentPtr");
+        return;
+    }
+    *result = reinterpret_cast<void*>(wantAgentPtr);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
