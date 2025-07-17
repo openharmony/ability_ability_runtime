@@ -50,8 +50,8 @@ public:
         return u"";
     }
 
-    OH_MOCK_VIRTUAL_METHOD(bool, IRemoteObject, IsProxyObject);
-    OH_MOCK_VIRTUAL_METHOD(bool, IRemoteObject, AddDeathRecipient, const sptr<DeathRecipient> &);
+    OH_MOCK_METHOD_WITH_DECORATOR(virtual, bool, IRemoteObject, IsProxyObject);
+    OH_MOCK_METHOD_WITH_DECORATOR(virtual, bool, IRemoteObject, AddDeathRecipient, const sptr<DeathRecipient> &);
 
     virtual bool RemoveDeathRecipient(const sptr<DeathRecipient> &recipient)
     {

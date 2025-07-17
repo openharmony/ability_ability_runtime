@@ -210,6 +210,7 @@ inline uint8_t g_ExpectLevel = 0;
 inline AAFwkTag g_ExpectTag = AAFwkTag::DEFAULT;
 inline std::string g_ExpectFileName = "";
 inline uint32_t g_ExpectLogLineNum = 0;
+inline std::string g_ExpectLogInfo = "";
 
 #define AAFWK_PRINT_LOG(level, tag, fmt, ...)                                                           \
     do {                                                                                                \
@@ -220,6 +221,7 @@ inline uint32_t g_ExpectLogLineNum = 0;
         g_ExpectTag = logTag; \
         g_ExpectFileName = AAFWK_FILE_NAME; \
         g_ExpectLogLineNum = __LINE__; \
+        g_ExpectLogInfo = fmt; \
     } while (0)
 
 #define TAG_LOGD(tag, fmt, ...) AAFWK_PRINT_LOG(LOG_DEBUG, tag, fmt, ##__VA_ARGS__)
@@ -234,5 +236,13 @@ do {                                                 \
     EXPECT_EQ(g_ExpectTag, tag);                     \
     EXPECT_EQ(g_ExpectFileName, fileName);           \
     EXPECT_EQ(g_ExpectLogLineNum, lineNum);          \
+} while (0)
+
+#define EXPECT_LOG_MATCH(level, tag, fileName, logInfo)           \
+do {                                                              \
+    EXPECT_EQ(g_ExpectLevel, level);                              \
+    EXPECT_EQ(g_ExpectTag, tag);                                  \
+    EXPECT_EQ(g_ExpectFileName, fileName);                        \
+    EXPECT_NE(g_ExpectLogInfo.find(logInfo), std::string::npos);  \
 } while (0)
 #endif  // OHOS_AAFWK_HILOG_TAG_WRAPPER_H
