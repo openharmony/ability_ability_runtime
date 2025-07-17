@@ -75,7 +75,7 @@ private:
     std::shared_ptr<AppExecFwk::ETSNativeReference> etsAbilityObj_;
     ETSRuntime &etsRuntime_;
     sptr<IRemoteObject> providerRemoteObject_ = nullptr;
-}; // namespace AbilityRuntime
+};
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_SIMULATOR_ETS_ABILITY_CONTEXT_H
