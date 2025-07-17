@@ -24,6 +24,7 @@
 #include "hilog_tag_wrapper.h"
 #include "start_options.h"
 #include "want_agent_helper.h"
+#include "tokenid_kit.h"
 
 using namespace OHOS::AbilityRuntime;
 namespace OHOS {
@@ -32,7 +33,18 @@ constexpr int32_t ERR_NOT_OK = -1;
 constexpr int32_t BUSINESS_ERROR_CODE_OK = 0;
 constexpr int32_t PARAMETER_ERROR = -1;
 constexpr const char* COMPLETE_DATA_IMPL_CLASS_NAME = "L@ohos/app/ability/wantAgent/wantAgent/CompleteDataImpl;";
-constexpr const char* WANT_AGENT_CLASS = "L@ohos/app/ability/wantAgent/wantAgent;";
+constexpr const char* WANT_AGENT_NAMESPACE = "L@ohos/app/ability/wantAgent/wantAgent;";
+constexpr const char* CLEANER_CLASS = "L@ohos/app/ability/wantAgent/wantAgent/Cleaner;";
+
+bool CheckCallerIsSystemApp()
+{
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Non-system app forbidden to call");
+        return false;
+    }
+    return true;
+}
 } // namespace
 
 TriggerCompleteCallBack::TriggerCompleteCallBack()
@@ -55,48 +67,40 @@ void TriggerCompleteCallBack::SetWantAgentInstance(std::shared_ptr<WantAgent> wa
 void OnSendFinishedCallback(TriggerReceiveDataWorker *dataWorker)
 {
     if (dataWorker == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "dataWorker null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null dataWorker");
         return;
     }
     ani_vm *etsVm = dataWorker->vm;
-    ani_env *env = nullptr;
-    ani_status status = ANI_ERROR;
     if (etsVm == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "etsVm null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null etsVm");
         return;
     }
-    if ((status = etsVm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetEnv failed status: %{public}d", status);
+    ani_env *env = nullptr;
+    ani_status status = etsVm->GetEnv(ANI_VERSION_1, &env);
+    if (status != ANI_OK || env == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "GetEnv failed status: %{public}d, or null env", status);
         return;
     }
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env null");
+    ani_class cls = nullptr;
+    if ((status = env->FindClass(COMPLETE_DATA_IMPL_CLASS_NAME, &cls)) != ANI_OK || cls == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "FindClass failed status: %{public}d, or null class", status);
         return;
     }
-    ani_class cls {};
     ani_method method = nullptr;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Class_FindMethod failed status: %{public}d, or null method", status);
+        return;
+    }
     ani_object object = nullptr;
-    if ((status = env->FindClass(COMPLETE_DATA_IMPL_CLASS_NAME, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "FindClass failed status: %{public}d", status);
-        return;
-    }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Class_FindMethod failed status: %{public}d", status);
-        return;
-    }
-    if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Object_New failed status: %{public}d", status);
-        return;
-    }
-    if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "null object");
+    if ((status = env->Object_New(cls, method, &object)) != ANI_OK || object == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Object_New failed status: %{public}d, or null object", status);
         return;
     }
     env->Object_SetPropertyByName_Ref(object, "info", WrapWantAgent(env, dataWorker->wantAgent));
-    env->Object_SetPropertyByName_Ref(object, "want", AppExecFwk::WrapWant(env, dataWorker->want));
+    env->Object_SetPropertyByName_Ref(object, "want", WrapWant(env, dataWorker->want));
     env->Object_SetPropertyByName_Double(object, "finalCode", static_cast<ani_double>(dataWorker->resultCode));
     env->Object_SetPropertyByName_Ref(object, "finalData", GetAniString(env, dataWorker->resultData));
-    env->Object_SetPropertyByName_Ref(object, "extraInfo", AppExecFwk::WrapWantParams(env, dataWorker->resultExtras));
+    env->Object_SetPropertyByName_Ref(object, "extraInfo", WrapWantParams(env, dataWorker->resultExtras));
 
     ani_object error = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     AsyncCallback(env, reinterpret_cast<ani_object>(dataWorker->call), error, object);
@@ -108,12 +112,12 @@ void TriggerCompleteCallBack::OnSendFinished(
 {
     TAG_LOGD(AAFwkTag::WANTAGENT, "OnSendFinished");
     if (triggerCompleteInfo_.call == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "CallBack is nullptr");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null CallBack");
         return;
     }
     TriggerReceiveDataWorker* dataWorker = new (std::nothrow) TriggerReceiveDataWorker();
     if (dataWorker == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "dataWorker null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null dataWorker");
         return;
     }
     dataWorker->want = want;
@@ -123,7 +127,7 @@ void TriggerCompleteCallBack::OnSendFinished(
     dataWorker->vm = triggerCompleteInfo_.vm;
     dataWorker->call = triggerCompleteInfo_.call;
     if (triggerCompleteInfo_.wantAgent != nullptr) {
-        dataWorker->wantAgent = new WantAgent(triggerCompleteInfo_.wantAgent->GetPendingWant());
+        dataWorker->wantAgent = new (std::nothrow) WantAgent(triggerCompleteInfo_.wantAgent->GetPendingWant());
     }
     OnSendFinishedCallback(dataWorker);
     if (dataWorker != nullptr) {
@@ -132,7 +136,7 @@ void TriggerCompleteCallBack::OnSendFinished(
     }
 }
 
-EtsWantAgent &EtsWantAgent::GetInstance()
+EtsWantAgent& EtsWantAgent::GetInstance()
 {
     static EtsWantAgent instance;
     return instance;
@@ -140,293 +144,264 @@ EtsWantAgent &EtsWantAgent::GetInstance()
 
 void EtsWantAgent::GetBundleName(ani_env *env, ani_object agent, ani_object call)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "GetBundleName called");
     GetInstance().OnGetBundleName(env, agent, call);
 };
 
 void EtsWantAgent::GetUid(ani_env *env, ani_object agent, ani_object call)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "GetUid called");
     GetInstance().OnGetUid(env, agent, call);
 };
 
 void EtsWantAgent::Cancel(ani_env *env, ani_object agent, ani_object call)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "Cancel called");
     GetInstance().OnCancel(env, agent, call);
 };
 
 void EtsWantAgent::Equal(ani_env *env, ani_object agent, ani_object otherAgent, ani_object call)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "Equal called");
     GetInstance().OnEqual(env, agent, otherAgent, call);
 };
 
 void EtsWantAgent::GetWant(ani_env *env, ani_object agent, ani_object call)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "GetWant called");
     GetInstance().OnGetWant(env, agent, call);
 };
 
 void EtsWantAgent::GetOperationType(ani_env *env, ani_object agent, ani_object call)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "GetOperationType called");
     GetInstance().OnGetOperationType(env, agent, call);
 };
 
 void EtsWantAgent::Trigger(ani_env *env, ani_object agent, ani_object triggerInfoObj, ani_object call)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "Trigger called");
     GetInstance().OnTrigger(env, agent, triggerInfoObj, call);
 };
 
 void EtsWantAgent::GetWantAgent(ani_env *env, ani_object info, ani_object call)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "GetWantAgent called");
     GetInstance().OnGetWantAgent(env, info, call);
+}
+
+void EtsWantAgent::Clean(ani_env *env, ani_object object)
+{
+    TAG_LOGD(AAFwkTag::WANTAGENT, "Clean called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
+        return;
+    }
+    ani_long ptr = 0;
+    ani_status status = env->Object_GetFieldByName_Long(object, "ptr", &ptr);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "ptr GetField status: %{public}d", status);
+        return;
+    }
+    if (ptr != 0) {
+        delete reinterpret_cast<WantAgent *>(ptr);
+    }
 }
 
 void EtsWantAgent::OnGetBundleName(ani_env *env, ani_object agent, ani_object call)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
         return;
     }
     WantAgent* pWantAgent = nullptr;
-    ErrCode resultCode = ERR_OK;
-    ani_object aniObject = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     UnwrapWantAgent(env, agent, reinterpret_cast<void **>(&pWantAgent));
-    std::string bundleName = "";
     if (pWantAgent == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Parse pWantAgent failed");
-        aniObject = CreateStsErrorByNativeErr(env, ERR_NOT_OK);
-#ifdef ENABLE_ERRCODE
         ThrowStsInvalidParamError(env, "Parse pWantAgent failed. Agent must be a WantAgent.");
         return;
-#else
-        AsyncCallback(env, call, aniObject, GetAniString(env, bundleName));
-        return;
-#endif
     }
     std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
-    resultCode = WantAgentHelper::GetBundleName(wantAgent, bundleName);
+    std::string bundleName = "";
+    ErrCode resultCode = WantAgentHelper::GetBundleName(wantAgent, bundleName);
+    ani_object error = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     if (resultCode != ERR_OK) {
-        aniObject = CreateStsErrorByNativeErr(env, resultCode);
+        error = CreateStsError(env, resultCode, AbilityRuntimeErrorUtil::GetErrMessage(resultCode));
     }
     ani_string aniBundleName = GetAniString(env, bundleName);
-    AsyncCallback(env, call, aniObject, reinterpret_cast<ani_object>(aniBundleName));
+    AsyncCallback(env, call, error, reinterpret_cast<ani_object>(aniBundleName));
 }
 
 void EtsWantAgent::OnGetUid(ani_env *env, ani_object agent, ani_object call)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
         return;
     }
     WantAgent* pWantAgent = nullptr;
-    ErrCode resultCode = ERR_OK;
-    ani_object aniObject = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     UnwrapWantAgent(env, agent, reinterpret_cast<void **>(&pWantAgent));
     if (pWantAgent == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Parse pWantAgent failed");
-        aniObject = CreateStsErrorByNativeErr(env, ERR_NOT_OK);
-#ifdef ENABLE_ERRCODE
         ThrowStsInvalidParamError(env, "Parse pWantAgent failed. Agent must be a WantAgent.");
         return;
-#else
-        AsyncCallback(env, call, aniObject, createDouble(env, ERR_NOT_OK));
-        return;
-#endif
     }
     std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
     int uid = -1;
-    resultCode = WantAgentHelper::GetUid(wantAgent, uid);
+    ErrCode resultCode = WantAgentHelper::GetUid(wantAgent, uid);
+    ani_object error = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     if (resultCode != ERR_OK) {
-        aniObject = CreateStsErrorByNativeErr(env, resultCode);
+        error = CreateStsError(env, resultCode, AbilityRuntimeErrorUtil::GetErrMessage(resultCode));
     }
-    AsyncCallback(env, call, aniObject, createDouble(env, static_cast<ani_double>(uid)));
+    AsyncCallback(env, call, error, createDouble(env, static_cast<ani_double>(uid)));
 }
 
 void EtsWantAgent::OnCancel(ani_env *env, ani_object agent, ani_object call)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
         return;
     }
     WantAgent* pWantAgent = nullptr;
-    ErrCode resultCode = ERR_OK;
-    ani_object aniObject = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     UnwrapWantAgent(env, agent, reinterpret_cast<void **>(&pWantAgent));
     if (pWantAgent == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Parse pWantAgent failed");
-        aniObject = CreateStsErrorByNativeErr(env, ERR_NOT_OK);
-#ifdef ENABLE_ERRCODE
         ThrowStsInvalidParamError(env, "Parse pWantAgent failed. Agent must be a WantAgent.");
         return;
-#else
-        AsyncCallback(env, call, aniObject, nullptr);
-        return;
-#endif
     }
     std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
-    resultCode = WantAgentHelper::Cancel(wantAgent);
+    ErrCode resultCode = WantAgentHelper::Cancel(wantAgent);
+    ani_object error = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     if (resultCode != NO_ERROR) {
-        aniObject = CreateStsErrorByNativeErr(env, resultCode);
+        error = CreateStsError(env, resultCode, AbilityRuntimeErrorUtil::GetErrMessage(resultCode));
     }
-    AsyncCallback(env, call, aniObject, nullptr);
+    AsyncCallback(env, call, error, nullptr);
 }
 
 void EtsWantAgent::OnEqual(ani_env *env, ani_object agent, ani_object otherAgent, ani_object call)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
         return;
     }
     WantAgent* pWantAgentFirst = nullptr;
     WantAgent* pWantAgentSecond = nullptr;
-    ErrCode resultCode = ERR_OK;
-    ani_object aniObject = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     UnwrapWantAgent(env, agent, reinterpret_cast<void **>(&pWantAgentFirst));
     UnwrapWantAgent(env, otherAgent, reinterpret_cast<void **>(&pWantAgentSecond));
-    if (pWantAgentFirst == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Parse pWantAgentFirst failed");
-        aniObject = CreateStsErrorByNativeErr(env, ERR_NOT_OK);
-#ifdef ENABLE_ERRCODE
+    if (pWantAgentFirst == nullptr || pWantAgentSecond == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null pWantAgentFirst or pWantAgentSecond");
         ThrowStsInvalidParamError(env, "Parse pWantAgent failed. Agent must be a WantAgent.");
         return;
-#else
-        AsyncCallback(env, call, aniObject, createBoolean(env, false));
-        return;
-#endif
-    }
-    if (pWantAgentSecond == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Parse pWantAgentSecond failed");
-        aniObject = CreateStsErrorByNativeErr(env, ERR_NOT_OK);
-#ifdef ENABLE_ERRCODE
-        ThrowStsInvalidParamError(env, "Parse pWantAgent failed. Agent must be a WantAgent.");
-        return;
-#else
-        AsyncCallback(env, call, aniObject, createBoolean(env, false));
-        return;
-#endif
     }
     std::shared_ptr<WantAgent> wantAgentFirst = std::make_shared<WantAgent>(*pWantAgentFirst);
     std::shared_ptr<WantAgent> wantAgentSecond = std::make_shared<WantAgent>(*pWantAgentSecond);
-    resultCode = WantAgentHelper::IsEquals(wantAgentFirst, wantAgentSecond);
+    ErrCode resultCode = WantAgentHelper::IsEquals(wantAgentFirst, wantAgentSecond);
+    ani_object error = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     bool ret = false;
     if (resultCode == ERR_NOT_OK) {
         ret = false;
     } else if (resultCode == ERR_OK) {
         ret = true;
     } else {
-        aniObject = CreateStsErrorByNativeErr(env, resultCode);
+        error = CreateStsError(env, resultCode, AbilityRuntimeErrorUtil::GetErrMessage(resultCode));
     }
-    AsyncCallback(env, call, aniObject, createBoolean(env, static_cast<ani_boolean>(ret)));
+    AsyncCallback(env, call, error, createBoolean(env, static_cast<ani_boolean>(ret)));
 }
 
 void EtsWantAgent::OnGetWant(ani_env *env, ani_object agent, ani_object call)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
         return;
     }
-    std::shared_ptr<Want> want = std::make_shared<Want>(AAFwk::Want());
-    ani_object wantAniObj = AppExecFwk::WrapWant(env, *want);
     WantAgent* pWantAgent = nullptr;
-    ani_object aniObject = CreateStsError(env, AbilityErrorCode::ERROR_OK);
+    if (!CheckCallerIsSystemApp()) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Non-system app");
+        ThrowStsError(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP,
+            AbilityRuntimeErrorUtil::GetErrMessage(ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP));
+        return;
+    }
     UnwrapWantAgent(env, agent, reinterpret_cast<void **>(&pWantAgent));
     if (pWantAgent == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Parse pWantAgent failed");
-        aniObject = CreateStsErrorByNativeErr(env, ERR_NOT_OK);
-#ifdef ENABLE_ERRCODE
         ThrowStsInvalidParamError(env, "Parse pWantAgent failed. Agent must be a WantAgent.");
         return;
-#else
-        AsyncCallback(env, call, aniObject, wantAniObj);
-        return;
-#endif
     }
     std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
-    want = WantAgentHelper::GetWant(wantAgent);
-    if (want == nullptr) {
-        aniObject = CreateStsError(env, ERR_NOT_OK, "WantAgentHelper::GetWant result nullptr.");
+    std::shared_ptr<Want> want = std::make_shared<Want>();
+    auto retCode = WantAgentHelper::GetWant(wantAgent, want);
+    ani_object wantAniObj = nullptr;
+    ani_object error = CreateStsError(env, AbilityErrorCode::ERROR_OK);
+    if (retCode != NO_ERROR) {
+        error = CreateStsError(env, retCode, AbilityRuntimeErrorUtil::GetErrMessage(retCode));
+        wantAniObj = WrapWant(env, AAFwk::Want());
     } else {
-        wantAniObj = AppExecFwk::WrapWant(env, *want);
+        wantAniObj = WrapWant(env, *want);
     }
-    AsyncCallback(env, call, aniObject, wantAniObj);
+    AsyncCallback(env, call, error, wantAniObj);
 }
 
 void EtsWantAgent::OnGetOperationType(ani_env *env, ani_object agent, ani_object call)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
         return;
     }
     WantAgent* pWantAgent = nullptr;
-    ani_object aniObject = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     UnwrapWantAgent(env, agent, reinterpret_cast<void **>(&pWantAgent));
     if (pWantAgent == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Parse pWantAgent failed");
-        aniObject = CreateStsErrorByNativeErr(env, ERR_NOT_OK);
-#ifdef ENABLE_ERRCODE
         ThrowStsInvalidParamError(env, "Parse pWantAgent failed. Agent must be a WantAgent.");
         return;
-#else
-        AsyncCallback(env, call, aniObject, createDouble(env, ERR_NOT_OK));
-        return;
-#endif
     }
     std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
-    auto ret = WantAgentHelper::GetType(wantAgent);
-    AsyncCallback(env, call, aniObject, createDouble(env, static_cast<ani_double>(ret)));
+    int32_t operType = NO_ERROR;
+    int32_t retCode = NO_ERROR;
+    retCode = WantAgentHelper::GetType(wantAgent, operType);
+    ani_object error = CreateStsError(env, AbilityErrorCode::ERROR_OK);
+    if (retCode != NO_ERROR) {
+        error = CreateStsError(env, retCode, AbilityRuntimeErrorUtil::GetErrMessage(retCode));
+    }
+    AsyncCallback(env, call, error, createDouble(env, static_cast<ani_double>(operType)));
 }
 
-int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgentWantsParas &paras)
+int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgentParams &params)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
-    ani_status status = ANI_ERROR;
+    TAG_LOGD(AAFwkTag::WANTAGENT, "GetWantAgentParam called");
     ani_ref wantsRef = nullptr;
-    if ((status = env->Object_GetPropertyByName_Ref(info, "wants", &wantsRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Object_GetPropertyByName_Ref failed status: %{public}d", status);
+    ani_status status = env->Object_GetPropertyByName_Ref(info, "wants", &wantsRef);
+    if (status != ANI_OK || wantsRef == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "wants GetProperty status: %{public}d, or null wantsRef", status);
         return PARAMETER_ERROR;
     }
-    if (wantsRef == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "null wantsRef");
-        return PARAMETER_ERROR;
-    }
-    ani_array wantsArr = reinterpret_cast<ani_array>(wantsRef);
+    ani_array_ref wantsArr = reinterpret_cast<ani_array_ref>(wantsRef);
     ani_size length = 0;
-    if ((status = env->Object_GetPropertyByName_Ref(info, "wants", &wantsRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Object_GetPropertyByName_Ref failed status: %{public}d", status);
-        return PARAMETER_ERROR;
-    }
     if ((status = env->Array_GetLength(wantsArr, &length)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Array_GetLength failed status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "wants Array_GetLength failed status: %{public}d", status);
         return PARAMETER_ERROR;
     }
     for (size_t i = 0; i < length; i++) {
         ani_ref wantRef = nullptr;
-        std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
-        if ((status = env->Array_Get(wantsArr, i, &wantRef)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "Array_Get failed status : %{public}d", status);
+        if ((status = env->Array_Get_Ref(wantsArr, i, &wantRef)) != ANI_OK || wantRef == nullptr) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "Array_Get_Ref failed status: %{public}d, or null wantRef", status);
             return PARAMETER_ERROR;
         }
-        if (!AppExecFwk::UnwrapWant(env, reinterpret_cast<ani_object>(wantRef), *want)) {
+        std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+        if (!UnwrapWant(env, reinterpret_cast<ani_object>(wantRef), *want)) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "UnwrapWant  failed");
             return PARAMETER_ERROR;
         }
-        paras.wants.emplace_back(want);
+        params.wants.emplace_back(want);
     }
 
     ani_boolean isUndefined = true;
     ani_ref actionTypeRef = nullptr;
-    if (!AppExecFwk::GetPropertyRef(env, info, "actionType", actionTypeRef, isUndefined)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
+    if (!GetPropertyRef(env, info, "actionType", actionTypeRef, isUndefined) || actionTypeRef == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed, or null actionTypeRef");
         return PARAMETER_ERROR;
     }
     if (!isUndefined) {
         AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(
-            env, reinterpret_cast<ani_enum_item>(actionTypeRef), paras.operationType);
+            env, reinterpret_cast<ani_enum_item>(actionTypeRef), params.operationType);
     }
 
     ani_double dRequestCode = 0.0;
@@ -434,14 +409,14 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         TAG_LOGE(AAFwkTag::WANTAGENT, "Object_GetPropertyByName_Double failed status: %{public}d", status);
         return PARAMETER_ERROR;
     }
-    paras.requestCode = dRequestCode;
+    params.requestCode = dRequestCode;
 
     ani_ref actionFlagsRef = nullptr;
-    if (!AppExecFwk::GetPropertyRef(env, info, "actionFlags", actionFlagsRef, isUndefined)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
+    if (!GetPropertyRef(env, info, "actionFlags", actionFlagsRef, isUndefined) || actionFlagsRef == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed, or null actionFlagsRef");
         return PARAMETER_ERROR;
     }
-    ani_array actionFlagsArr = reinterpret_cast<ani_array>(actionFlagsRef);
+    ani_array_ref actionFlagsArr = reinterpret_cast<ani_array_ref>(actionFlagsRef);
     if (!isUndefined) {
         ani_size actionFlagsLen = 0;
         if ((status = env->Array_GetLength(actionFlagsArr, &actionFlagsLen)) != ANI_OK) {
@@ -450,30 +425,31 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         }
         for (size_t i = 0; i < actionFlagsLen; i++) {
             ani_ref actionFlagRef = nullptr;
-            int32_t actionFlag = 0;
-            if ((status = env->Array_Get(actionFlagsArr, i, &actionFlagRef)) != ANI_OK) {
-                TAG_LOGE(AAFwkTag::WANTAGENT, "Array_Get failed status: %{public}d", status);
+            if ((status = env->Array_Get_Ref(actionFlagsArr, i, &actionFlagRef)) != ANI_OK ||
+                actionFlagRef == nullptr) {
+                TAG_LOGE(AAFwkTag::WANTAGENT, "Array_Get_Ref failed status: %{public}d, or null actionFlagRef", status);
                 return PARAMETER_ERROR;
             }
+            int32_t actionFlag = 0;
             AAFwk::AniEnumConvertUtil::EnumConvertStsToNative(
                 env, reinterpret_cast<ani_object>(actionFlagRef), actionFlag);
-            paras.wantAgentFlags.emplace_back(static_cast<WantAgentConstant::Flags>(actionFlag));
+            params.wantAgentFlags.emplace_back(static_cast<WantAgentConstant::Flags>(actionFlag));
         }
     }
 
     ani_ref extraInfoRef = nullptr;
-    if (!AppExecFwk::GetPropertyRef(env, info, "extraInfos", extraInfoRef, isUndefined)) {
+    if (!GetPropertyRef(env, info, "extraInfos", extraInfoRef, isUndefined)) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
         return PARAMETER_ERROR;
     }
     if (isUndefined) {
-        if (!AppExecFwk::GetPropertyRef(env, info, "extraInfo", extraInfoRef, isUndefined)) {
+        if (!GetPropertyRef(env, info, "extraInfo", extraInfoRef, isUndefined)) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
             return PARAMETER_ERROR;
         }
     }
     if (!isUndefined) {
-        if (!UnwrapWantParams(env, extraInfoRef, paras.extraInfo)) {
+        if (!UnwrapWantParams(env, extraInfoRef, params.extraInfo)) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "Convert extraInfo failed");
             return PARAMETER_ERROR;
         }
@@ -484,29 +460,27 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
 void EtsWantAgent::OnTrigger(ani_env *env, ani_object agent, ani_object triggerInfoObj, ani_object call)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
         return;
     }
-    std::shared_ptr<WantAgent> wantAgent = nullptr;
     WantAgent* pWantAgent = nullptr;
-    TriggerInfo triggerInfo;
     UnwrapWantAgent(env, agent, reinterpret_cast<void **>(&pWantAgent));
     if (pWantAgent == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Parse pWantAgent failed");
         ThrowStsInvalidParamError(env, "Parse pWantAgent failed. Agent must be a WantAgent.");
         return;
     }
-    wantAgent = std::make_shared<WantAgent>(*pWantAgent);
+    TriggerInfo triggerInfo;
     int32_t ret = GetTriggerInfo(env, triggerInfoObj, triggerInfo);
-    if (ret != 0) {
+    if (ret != BUSINESS_ERROR_CODE_OK) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Get trigger info error");
         ThrowStsInvalidParamError(env, "Get trigger info error. TriggerInfo must be a TriggerInfo.");
         return;
     }
-    auto triggerObj = std::make_shared<TriggerCompleteCallBack>();
     ani_vm *etsVm = nullptr;
-    ani_ref callbackRef = nullptr;
-    ani_status status = ANI_ERROR;
-    if ((status = env->GetVM(&etsVm)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetVM failed status: %{public}d", status);
+    ani_status status = env->GetVM(&etsVm);
+    if (status != ANI_OK || etsVm == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "GetVM failed status: %{public}d, or null etsVm", status);
         return;
     }
     ani_boolean isUndefined = true;
@@ -514,78 +488,94 @@ void EtsWantAgent::OnTrigger(ani_env *env, ani_object agent, ani_object triggerI
         TAG_LOGE(AAFwkTag::WANTAGENT, "Reference_IsUndefined failed status: %{public}d", status);
         return;
     }
+    ani_ref callbackRef = nullptr;
     if (!isUndefined) {
         if ((status = env->GlobalReference_Create(call, &callbackRef)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "GlobalReference_Create failed status: %{public}d", status);
             return;
         }
     }
+    auto triggerObj = std::make_shared<TriggerCompleteCallBack>();
     triggerObj->SetCallbackInfo(etsVm, callbackRef);
     triggerObj->SetWantAgentInstance(std::make_shared<WantAgent>(pWantAgent->GetPendingWant()));
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
     WantAgentHelper::TriggerWantAgent(wantAgent, triggerObj, triggerInfo);
 }
 
 int32_t EtsWantAgent::GetTriggerInfo(ani_env *env, ani_object triggerInfoObj, TriggerInfo &triggerInfo)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "called");
-    ani_status status = ANI_ERROR;
-
-    ani_double dCode { 0.0 };
-    if ((status = env->Object_GetPropertyByName_Double(triggerInfoObj, "code", &dCode)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Object_GetPropertyByName_Double failed status: %{public}d", status);
-        return PARAMETER_ERROR;
+    TAG_LOGD(AAFwkTag::WANTAGENT, "GetTriggerInfo called");
+    ani_double dCode = 0.0;
+    ani_status status = env->Object_GetPropertyByName_Double(triggerInfoObj, "code", &dCode);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "code GetProperty failed status: %{public}d", status);
+        return ERR_NOT_OK;
     }
     const int32_t code = static_cast<int32_t>(dCode);
 
-    std::shared_ptr<AAFwk::Want> want = nullptr;
     ani_ref wantRef = nullptr;
     ani_boolean isUndefined = true;
-    if (!AppExecFwk::GetPropertyRef(env, triggerInfoObj, "want", wantRef, isUndefined)) {
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    if (!GetPropertyRef(env, triggerInfoObj, "want", wantRef, isUndefined)) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
-        return PARAMETER_ERROR;
+        return ERR_NOT_OK;
     }
     if (!isUndefined) {
         want = std::make_shared<AAFwk::Want>();
-        if (!AppExecFwk::UnwrapWant(env, reinterpret_cast<ani_object>(wantRef), *want)) {
+        if (!UnwrapWant(env, reinterpret_cast<ani_object>(wantRef), *want)) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "UnwrapWant failed");
-            return PARAMETER_ERROR;
+            return ERR_NOT_OK;
         }
     }
 
     std::string permission = "";
-    AppExecFwk::GetStringOrUndefined(env, triggerInfoObj, "permission", permission);
-
-    std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
-    ani_ref extraInfoRef = nullptr;
-    if (!AppExecFwk::GetPropertyRef(env, triggerInfoObj, "extraInfos", extraInfoRef, isUndefined)) {
+    ani_ref permissionRef = nullptr;
+    if (!GetPropertyRef(env, triggerInfoObj, "permission", permissionRef, isUndefined)) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
-        return PARAMETER_ERROR;
+        return ERR_NOT_OK;
+    }
+    if (!isUndefined && !GetStdString(env, reinterpret_cast<ani_string>(permissionRef), permission)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to get permission string from permissionRef");
+        return ERR_NOT_OK;
+    }
+
+    ani_ref extraInfoRef = nullptr;
+    if (!GetPropertyRef(env, triggerInfoObj, "extraInfos", extraInfoRef, isUndefined)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
+        return ERR_NOT_OK;
     }
     if (isUndefined) {
-        if (!AppExecFwk::GetPropertyRef(env, triggerInfoObj, "extraInfo", extraInfoRef, isUndefined)) {
+        if (!GetPropertyRef(env, triggerInfoObj, "extraInfo", extraInfoRef, isUndefined)) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
-            return PARAMETER_ERROR;
+            return ERR_NOT_OK;
         }
     }
+    std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
     if (!isUndefined) {
         extraInfo = std::make_shared<AAFwk::WantParams>();
         if (!UnwrapWantParams(env, extraInfoRef, *extraInfo)) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "Convert extraInfo failed");
-            return PARAMETER_ERROR;
+            return ERR_NOT_OK;
         }
     }
 
-    std::shared_ptr<AAFwk::StartOptions> startOptions = nullptr;
     ani_ref startOptionsRef = nullptr;
-    if (!AppExecFwk::GetPropertyRef(env, triggerInfoObj, "startOptions", startOptionsRef, isUndefined)) {
+    if (!GetPropertyRef(env, triggerInfoObj, "startOptions", startOptionsRef, isUndefined)) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
-        return PARAMETER_ERROR;
+        return ERR_NOT_OK;
     }
+    std::shared_ptr<AAFwk::StartOptions> startOptions = nullptr;
     if (!isUndefined) {
+        if (!CheckCallerIsSystemApp()) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "Non-system app");
+            ThrowStsError(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP,
+                AbilityRuntimeErrorUtil::GetErrMessage(ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP));
+            return ERR_NOT_OK;
+        }
         startOptions = std::make_shared<AAFwk::StartOptions>();
-        if (!UnwrapStartOptionsWithProcessOption(env, reinterpret_cast<ani_object>(startOptionsRef), *startOptions)) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "UnwrapStartOptionsWithProcessOption failed");
-            return PARAMETER_ERROR;
+        if (!UnwrapStartOptions(env, reinterpret_cast<ani_object>(startOptionsRef), *startOptions)) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "UnwrapStartOptions failed");
+            return ERR_NOT_OK;
         }
     }
 
@@ -597,10 +587,10 @@ int32_t EtsWantAgent::GetTriggerInfo(ani_env *env, ani_object triggerInfoObj, Tr
 void EtsWantAgent::OnGetWantAgent(ani_env *env, ani_object info, ani_object call)
 {
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env null");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
         return;
     }
-    std::shared_ptr<WantAgentWantsParas> parasobj = std::make_shared<WantAgentWantsParas>();
+    std::shared_ptr<WantAgentParams> parasobj = std::make_shared<WantAgentParams>();
     int32_t ret = GetWantAgentParam(env, info, *parasobj);
     if (ret != 0) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Failed to get wantAgent parameter. Agent must be a WantAgent.");
@@ -615,55 +605,73 @@ void EtsWantAgent::OnGetWantAgent(ani_env *env, ani_object info, ani_object call
                                 extraInfo);
     auto context = OHOS::AbilityRuntime::Context::GetApplicationContext();
     std::shared_ptr<WantAgent> wantAgent = nullptr;
-    WantAgentHelper::GetWantAgent(context, wantAgentInfo, wantAgent);
-
-    WantAgent* pWantAgent = nullptr;
-    ani_object error = CreateStsErrorByNativeErr(env, ERR_NOT_OK);
+    ErrCode result = WantAgentHelper::GetWantAgent(context, wantAgentInfo, wantAgent);
+    ani_object error = CreateStsError(env, AbilityErrorCode::ERROR_OK);
     ani_object retObj = createLong(env, ERR_NOT_OK);
-    if (wantAgent != nullptr) {
-        pWantAgent = new (std::nothrow) WantAgent(wantAgent->GetPendingWant());
-        error = CreateStsError(env, AbilityErrorCode::ERROR_OK);
-        retObj = WrapWantAgent(env, pWantAgent);
+    if (result != NO_ERROR) {
+        error = CreateStsError(env, result, AbilityRuntimeErrorUtil::GetErrMessage(result));
+        AsyncCallback(env, call, error, retObj);
+        return;
     }
-    AsyncCallback(env, call, error, retObj);
+    if (wantAgent == nullptr) {
+        result = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        error = CreateStsError(env, result, AbilityRuntimeErrorUtil::GetErrMessage(result));
+        AsyncCallback(env, call, error, retObj);
+        return;
+    }
+    WantAgent *pWantAgent = new (std::nothrow) WantAgent(wantAgent->GetPendingWant());
+    if (pWantAgent == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null pWantAgent");
+        result = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        error = CreateStsError(env, result, AbilityRuntimeErrorUtil::GetErrMessage(result));
+        AsyncCallback(env, call, error, retObj);
+    } else {
+        retObj = WrapWantAgent(env, pWantAgent);
+        if (retObj == nullptr) {
+            delete pWantAgent;
+            pWantAgent = nullptr;
+        }
+        AsyncCallback(env, call, error, retObj);
+    }
 }
 
-bool BindNativeFunctions(ani_env *env, ani_namespace &ns)
+ani_status BindNativeFunctions(ani_env *env)
 {
-    ani_status status = ANI_ERROR;
-    if ((status = env->FindNamespace(WANT_AGENT_CLASS, &ns)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "FindNamespace failed status: %{public}d", status);
-        return false;
+    ani_namespace ns = nullptr;
+    ani_status status = env->FindNamespace(WANT_AGENT_NAMESPACE, &ns);
+    if (status != ANI_OK || ns == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "FindNamespace failed status: %{public}d, or null ns", status);
+        return status;
     }
     std::array functions = {
-        ani_native_function { "nativeGetBundleName", nullptr, reinterpret_cast<void*>(EtsWantAgent::GetBundleName) },
-        ani_native_function { "nativeGetUid", nullptr, reinterpret_cast<void*>(EtsWantAgent::GetUid) },
+        ani_native_function { "nativeGetBundleName", nullptr, reinterpret_cast<void *>(EtsWantAgent::GetBundleName) },
+        ani_native_function { "nativeGetUid", nullptr, reinterpret_cast<void *>(EtsWantAgent::GetUid) },
         ani_native_function {
-            "nativeGetOperationType", nullptr, reinterpret_cast<void*>(EtsWantAgent::GetOperationType) },
-        ani_native_function { "nativeCancel", nullptr, reinterpret_cast<void*>(EtsWantAgent::Cancel) },
-        ani_native_function { "nativeEqual", nullptr, reinterpret_cast<void*>(EtsWantAgent::Equal) },
-        ani_native_function { "nativeTrigger", nullptr, reinterpret_cast<void*>(EtsWantAgent::Trigger) },
-        ani_native_function { "nativeGetWant", nullptr, reinterpret_cast<void*>(EtsWantAgent::GetWant) },
-        ani_native_function { "nativeGetWantAgent", nullptr, reinterpret_cast<void*>(EtsWantAgent::GetWantAgent) },
+            "nativeGetOperationType", nullptr, reinterpret_cast<void *>(EtsWantAgent::GetOperationType) },
+        ani_native_function { "nativeCancel", nullptr, reinterpret_cast<void *>(EtsWantAgent::Cancel) },
+        ani_native_function { "nativeEqual", nullptr, reinterpret_cast<void *>(EtsWantAgent::Equal) },
+        ani_native_function { "nativeTrigger", nullptr, reinterpret_cast<void *>(EtsWantAgent::Trigger) },
+        ani_native_function { "nativeGetWant", nullptr, reinterpret_cast<void *>(EtsWantAgent::GetWant) },
+        ani_native_function { "nativeGetWantAgent", nullptr, reinterpret_cast<void *>(EtsWantAgent::GetWantAgent) },
     };
     if ((status = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Namespace_BindNativeFunctions failed status: %{public}d", status);
-        return false;
+        return status;
     }
-    return true;
-}
 
-void EtsWantAgentInit(ani_env *env)
-{
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "env null");
-        return;
+    ani_class cleanerCls = nullptr;
+    if ((status = env->FindClass(CLEANER_CLASS, &cleanerCls)) != ANI_OK || cleanerCls == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Cleaner FindClass failed status: %{public}d, or null cleanerCls", status);
+        return status;
     }
-    ani_namespace ns;
-    if (!BindNativeFunctions(env, ns)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "BindNativeFunctions failed");
-        return;
+    std::array cleanerMethods = {
+        ani_native_function {"clean", nullptr, reinterpret_cast<void *>(EtsWantAgent::Clean) },
+    };
+    if ((status = env->Class_BindNativeMethods(cleanerCls, cleanerMethods.data(), cleanerMethods.size())) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Class_BindNativeMethods failed status: %{public}d", status);
+        return status;
     }
+    return ANI_OK;
 }
 
 extern "C" {
@@ -671,16 +679,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
 {
     TAG_LOGD(AAFwkTag::WANTAGENT, "ANI_Constructor");
     ani_env *env = nullptr;
-    ani_status status = ANI_ERROR;
-    status = vm->GetEnv(ANI_VERSION_1, &env);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetEnv failed status: %{public}d", status);
+    if (vm == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null vm");
         return ANI_NOT_FOUND;
     }
-
-    EtsWantAgentInit(env);
+    ani_status status = vm->GetEnv(ANI_VERSION_1, &env);
+    if (status != ANI_OK || env == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "GetEnv failed status: %{public}d, or null env", status);
+        return status;
+    }
+    if ((status = BindNativeFunctions(env)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "BindNativeFunctions failed status: %{public}d", status);
+        return status;
+    }
     *result = ANI_VERSION_1;
     return ANI_OK;
 }
 }
-}  // namespace OHOS
+} // namespace OHOS
