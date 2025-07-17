@@ -584,7 +584,7 @@ bool ETSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
         TAG_LOGE(AAFwkTag::FORM_EXT, "FindClass failed status: %{public}d", status);
         return false;
     }
-    ani_method objectMethod;
+    ani_method objectMethod, recordSetMethod;
     if ((status = env->Class_FindMethod(recordCls, "<ctor>", ":V", &objectMethod)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod constructor failed: %{public}d", status);
         return false;
@@ -593,7 +593,6 @@ bool ETSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
         TAG_LOGE(AAFwkTag::FORM_EXT, "Object_New failed: %{public}d", status);
         return false;
     }
-    ani_method recordSetMethod;
     if (status = env->Class_FindMethod(recordCls, "$_set", "Lstd/core/Object;Lstd/core/Object;:V",
                                        &recordSetMethod) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod set failed: %{public}d", status);
