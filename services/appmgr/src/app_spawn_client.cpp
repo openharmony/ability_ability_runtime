@@ -365,7 +365,10 @@ int32_t AppSpawnClient::AppspawnSetExtMsg(const AppSpawnStartMsg &startMsg, AppS
     }
 
     if (!startMsg.appEnv.empty()) {
-        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_APP_ENV, DumpAppEnvToJson(startMsg.appEnv).c_str());
+        std::string appEnv = DumpAppEnvToJson(startMsg.appEnv);
+        TAG_LOGD(AAFwkTag::APPMGR, "bundleName: %{public}s, appEnv: %{public}s",
+            startMsg.bundleName.c_str(), appEnv.c_str());
+        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_APP_ENV, appEnv.c_str());
         if (ret) {
             TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
             return ret;
