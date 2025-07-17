@@ -49,7 +49,7 @@ FormExtension *CreateETSFormExtension(const std::unique_ptr<Runtime> &runtime)
     std::unique_ptr<Runtime>* runtimePtr = const_cast<std::unique_ptr<Runtime>*>(&runtime);
     void *handle = dlopen(ETS_FORM_EXT_LIB_NAME, RTLD_LAZY);
     if (handle == nullptr) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "open ets_form_extension library %{public}s failed, reason: %{public}sn",
+        TAG_LOGE(AAFwkTag::FORM_EXT, "open ets_form_extension library %{public}s failed, reason: %{public}s",
                  ETS_FORM_EXT_LIB_NAME, dlerror());
         return new FormExtension();
     }
