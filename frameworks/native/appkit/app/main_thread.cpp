@@ -67,7 +67,7 @@
 #include "hilog_tag_wrapper.h"
 #include "resource_config_helper.h"
 #ifdef SUPPORT_SCREEN
-#include "locale_config.h"
+#include "locale_config_ext.h"
 #include "ace_forward_compatibility.h"
 #include "form_constants.h"
 #include "cache.h"
@@ -1138,7 +1138,7 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
 #if defined(SUPPORT_GRAPHICS) && defined(SUPPORT_APP_PREFERRED_LANGUAGE)
-    icu::Locale systemLocale = Global::I18n::LocaleConfig::GetIcuLocale(
+    icu::Locale systemLocale = Global::I18n::LocaleConfigExt::GetIcuLocale(
         config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
 
     resConfig->SetLocaleInfo(systemLocale);
