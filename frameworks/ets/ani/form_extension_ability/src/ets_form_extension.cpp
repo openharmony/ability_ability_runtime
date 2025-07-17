@@ -595,7 +595,7 @@ bool ETSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
         return false;
     }
     ani_method recordSetMethod;
-    status = env->Class_FindMethod(recordCls, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", &recordSetMethod)
+    status = env->Class_FindMethod(recordCls, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod set failed: %{public}d", status);
         return false;
