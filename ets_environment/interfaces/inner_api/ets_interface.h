@@ -16,6 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_ETS_INTERFACE_H
 #define OHOS_ABILITY_RUNTIME_ETS_INTERFACE_H
 
+#include <functional>
+#include <map>
 #include <string>
 #include "ets_exception_callback.h"
 #include "ets_native_reference.h"
@@ -34,6 +36,8 @@ struct ETSEnvFuncs {
     bool (*PreloadModule)(const std::string &modulePath) = nullptr;
     bool (*LoadModule)(const std::string &modulePath, const std::string &srcEntrance, void *&cls,
         void *&obj, void *&ref) = nullptr;
+    void (*SetAppLibPath)(const std::map<std::string, std::string> &abcPathsToBundleModuleNameMap,
+        std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)> &cb) = nullptr;
 };
 }
 #endif // OHOS_ABILITY_RUNTIME_ETS_INTERFACE_H

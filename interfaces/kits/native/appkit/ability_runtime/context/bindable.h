@@ -17,38 +17,57 @@
 #define OHOS_ABILITY_RUNTIME_BINDABLE_H
 
 #include <memory>
+#include <mutex>
 
+class NativeReference;
+typedef class __ani_ref *ani_ref;
 namespace OHOS {
 namespace AbilityRuntime {
 class Runtime;
 
 class BindingObject final {
 public:
-    template<class T>
-    BindingObject(Runtime& runtime, T* ptr) : runtime_(runtime), object_(ptr, SimpleRelease<T>) {}
+    BindingObject() = default;
     ~BindingObject() = default;
+
+    template<class T>
+    void Bind(Runtime& runtime, T* object)
+    {
+        static_assert(IsValidType<T>(), "T must be ani_ref or NativeReference");
+        const std::string typeName = GetTypeString<T>();
+        std::lock_guard guard(objectsMutex_);
+        std::unique_ptr<void, void (*)(void*)> obj(object, SimpleRelease<T>);
+        objects_.emplace(typeName, std::move(obj));
+    }
 
     template<class T>
     T* Get()
     {
-        return static_cast<T*>(object_.get());
-    }
-
-    void Reset()
-    {
-        object_.reset();
+        const std::string typeName = GetTypeString<T>();
+        std::lock_guard guard(objectsMutex_);
+        const auto& iter = objects_.find(typeName);
+        if (iter == objects_.end()) {
+            return nullptr;
+        }
+        return static_cast<T*>(iter->second.get());
     }
 
     void Unbind()
     {
-        if (object_) {
-            object_.release();
-        }
+        // Consistency with previous behavior
+        Unbind<NativeReference>();
     }
 
-    Runtime& GetRuntime()
+    template<class T>
+    void Unbind()
     {
-        return runtime_;
+        const std::string typeName = GetTypeString<T>();
+        std::lock_guard guard(objectsMutex_);
+        const auto& iter = objects_.find(typeName);
+        if (iter == objects_.end()) {
+            return;
+        }
+        iter->second.release();
     }
 
     BindingObject(const BindingObject&) = delete;
@@ -63,8 +82,27 @@ private:
         delete static_cast<T*>(ptr);
     }
 
-    Runtime& runtime_;
-    std::unique_ptr<void, void(*)(void*)> object_;
+    template<class T>
+    static constexpr bool IsValidType()
+    {
+        if (std::is_same_v<T, ani_ref> || std::is_same_v<T, NativeReference>) {
+            return true;
+        }
+        return false;
+    }
+
+    template<class T>
+    static std::string GetTypeString()
+    {
+        if (std::is_same_v<T, ani_ref>) {
+            return "ani_ref";
+        } else {
+            return "NativeReference";
+        }
+    }
+
+    std::map<std::string, std::unique_ptr<void, void (*)(void*)>> objects_;
+    std::mutex objectsMutex_;
 };
 
 class Bindable {
@@ -74,13 +112,23 @@ public:
     template<class T>
     void Bind(Runtime& runtime, T* object)
     {
-        object_ = std::make_unique<BindingObject>(runtime, object);
+        if (object_) {
+            object_->Bind(runtime, object);
+        }
     }
 
-    void Unbind()
+    void Unbind() const
     {
         if (object_) {
             object_->Unbind();
+        }
+    }
+
+    template<class T>
+    void Unbind() const
+    {
+        if (object_) {
+            object_->Unbind<T>();
         }
     }
 
@@ -93,8 +141,8 @@ protected:
     Bindable() = default;
 
 private:
-    std::unique_ptr<BindingObject> object_;
+    std::unique_ptr<BindingObject> object_ = std::make_unique<BindingObject>();
 };
-}  // namespace AbilityRuntime
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_BINDABLE_H
+} // namespace AbilityRuntime
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_BINDABLE_H

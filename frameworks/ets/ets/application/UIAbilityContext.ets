@@ -83,6 +83,15 @@ export default class UIAbilityContext extends Context {
     destroyRegister.unregister(unregisterToken);
   }
 
+  private static native nativeTransferStatic(input: ESValue): Object;
+  private static native nativeTransferDynamic(input: Object): ESValue;
+  static transferStatic(input: Any): Object {
+    return UIAbilityContext.nativeTransferStatic(ESValue.wrap(input));
+  }
+  static transferDynamic(input: Object): Any {
+    return UIAbilityContext.nativeTransferDynamic(input).unwrap();
+  }
+
   private native nativeStartAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
 
   private native nativeStartAbilitySync(want: Want, options: StartOptions, callback: AsyncCallbackWrapper<void>): void;

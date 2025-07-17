@@ -130,6 +130,9 @@ public:
      */
     void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
 
+    static void CreateAndBindContext(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
+        const std::unique_ptr<Runtime>& runtime);
+
 #ifdef SUPPORT_SCREEN
 public:
     /**
