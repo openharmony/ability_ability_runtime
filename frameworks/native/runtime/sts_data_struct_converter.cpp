@@ -123,6 +123,8 @@ ani_object CreateStsLaunchParam(ani_env* env, const AAFwk::LaunchParam& launchPa
         return nullptr;
     }
     env->Object_SetPropertyByName_Ref(object, "lastExitMessage", GetAniString(env, launchParam.lastExitMessage));
+    env->Object_SetPropertyByName_Ref(object, "launchReasonMessage", GetAniString(env,
+        launchParam.launchReasonMessage));
 
     ani_enum_item launchReasonItem {};
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvertNativeToSts(env,
