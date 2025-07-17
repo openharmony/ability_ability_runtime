@@ -580,11 +580,12 @@ bool ETSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
 {
     ani_status status = ANI_OK;
     ani_class recordCls;
-    if (status = env->FindClass(RECORD_CLASS_NAME, &recordCls) != ANI_OK) {
+    status = env->FindClass(RECORD_CLASS_NAME, &recordCls);
+    if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "FindClass failed status: %{public}d", status);
         return false;
     }
-    ani_method objectMethod, recordSetMethod;
+    ani_method objectMethod;
     if ((status = env->Class_FindMethod(recordCls, "<ctor>", ":V", &objectMethod)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod constructor failed: %{public}d", status);
         return false;
@@ -593,8 +594,9 @@ bool ETSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
         TAG_LOGE(AAFwkTag::FORM_EXT, "Object_New failed: %{public}d", status);
         return false;
     }
-    if (status = env->Class_FindMethod(recordCls, "$_set", "Lstd/core/Object;Lstd/core/Object;:V",
-                                       &recordSetMethod) != ANI_OK) {
+    ani_method recordSetMethod;
+    status = env->Class_FindMethod(recordCls, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", &recordSetMethod)
+    if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod set failed: %{public}d", status);
         return false;
     }
@@ -613,15 +615,9 @@ bool ETSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
             return false;
         }
         ani_method personInfoCtor;
-        if ((status = env->Class_FindMethod(persion_cls, "<ctor>", "I:V", &personInfoCtor)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod constructor failed: %{public}d", status);
-            return false;
-        }
+        env->Class_FindMethod(persion_cls, "<ctor>", "I:V", &personInfoCtor);
         ani_object personInfoObj;
-        if ((status = env->Object_New(persion_cls, personInfoCtor, &personInfoObj, ani_value)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::FORM_EXT, "Object_New failed: %{public}d", status);
-            return false;
-        }
+        env->Object_New(persion_cls, personInfoCtor, &personInfoObj, ani_value);
         if ((status = env->Object_CallMethod_Void(recordObject, recordSetMethod, ani_key, personInfoObj)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::FORM_EXT, "Object_CallMethod_Void failed status : %{public}d", status);
             return false;
