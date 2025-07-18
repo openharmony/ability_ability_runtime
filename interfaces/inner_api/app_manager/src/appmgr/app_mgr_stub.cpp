@@ -872,12 +872,12 @@ int32_t AppMgrStub::HandleStartUserTestProcess(MessageParcel &data, MessageParce
         TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
         return ERR_INVALID_VALUE;
     }
+    auto observer = data.ReadRemoteObject();
     std::unique_ptr<BundleInfo> bundleInfo(data.ReadParcelable<BundleInfo>());
     if (bundleInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
         return ERR_INVALID_VALUE;
     }
-    auto observer = data.ReadRemoteObject();
     int32_t userId = data.ReadInt32();
     int32_t result = StartUserTestProcess(*want, observer, *bundleInfo, userId);
     reply.WriteInt32(result);
