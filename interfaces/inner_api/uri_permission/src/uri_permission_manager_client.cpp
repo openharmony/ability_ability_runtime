@@ -432,11 +432,7 @@ bool UriPermissionManagerClient::RawDataToBoolVec(const UriPermissionRawData& ra
     for (uint32_t i = 0; i < boolCount; ++i) {
         char resChar;
         ss.read(reinterpret_cast<char *>(&resChar), sizeof(resChar));
-        if (resChar == 0) {
-            boolVec.at(i) = false;
-        } else {
-            boolVec.at(i) = true;
-        }
+        boolVec.at(i) = (resChar != 0);
     }
     return true;
 }
