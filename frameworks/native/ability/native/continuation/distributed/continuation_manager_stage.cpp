@@ -266,7 +266,7 @@ int32_t ContinuationManagerStage::OnContinue(WantParams &wantParams, bool &isAsy
 #ifdef NO_RUNTIME_EMULATOR
     int64_t processorId = -1;
     processorId = AddProcessor();
-    TAG_LOGI(AAFwkTag::CONTINUATION, "Add processor start.Processor id is %{public}lld", processorId);
+    TAG_LOGI(AAFwkTag::CONTINUATION, "Add processor start.Processor id is %{public}" PRId64, processorId);
     time_t beginTime = time(nullptr);
     std::string transId = std::string("transId_") + std::to_string(std::rand());
 #endif
