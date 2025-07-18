@@ -21,6 +21,7 @@
 #include "ability_manager_interface.h"
 #include "ani_common_ability_state_data.h"
 #include "ani_common_want.h"
+#include "ets_ability_manager_utils.h"
 #include "ets_error_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
@@ -104,6 +105,20 @@ static void GetTopAbility(ani_env *env, ani_object callback)
     return;
 }
 
+void GetAbilityRunningInfos(ani_env *env, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "GetAbilityRunningInfos");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return;
+    }
+    std::vector<AAFwk::AbilityRunningInfo> infos;
+    auto errcode = AAFwk::AbilityManagerClient::GetInstance()->GetAbilityRunningInfos(infos);
+    ani_object retObject = nullptr;
+    AbilityManagerEts::WrapAbilityRunningInfoArray(env, retObject, infos);
+    AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateErrorByNativeErr(env, errcode), retObject);
+}
+
 void EtsAbilityManagerRegistryInit(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call EtsAbilityManagerRegistryInit");
@@ -128,6 +143,8 @@ void EtsAbilityManagerRegistryInit(ani_env *env)
         },
         ani_native_function {"nativeGetTopAbility", ETS_ABILITY_MANAGER_SIGNATURE_CALLBACK,
             reinterpret_cast<void *>(GetTopAbility)},
+        ani_native_function { "nativeGetAbilityRunningInfos", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(GetAbilityRunningInfos) },
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
     if (status != ANI_OK) {

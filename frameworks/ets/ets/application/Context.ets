@@ -15,6 +15,9 @@
 
 import BaseContext from 'application.BaseContext'
 import ApplicationContext from 'application.ApplicationContext'
+import AsyncCallbackWrapper from '../utils/AbilityUtils';
+import { AsyncCallback } from '@ohos.base';
+import { BusinessError } from '@ohos.base';
 import contextConstant from '@ohos.app.ability.contextConstant'
 import { ApplicationInfo } from 'bundleManager.ApplicationInfo'
 import resmgr from '@ohos.resourceManager'
@@ -33,6 +36,10 @@ let destroyRegister = new FinalizationRegistry<Cleaner>(callback);
 let unregisterToken = new object();
 
 export class Context extends BaseContext {
+  static {
+    loadLibrary("context_ani_kit.z");
+  }
+
   etsContextPtr: long = 0;
   private cleaner: Cleaner | null = null;
   filesDir: string = "";
@@ -40,6 +47,11 @@ export class Context extends BaseContext {
   preferencesDir: string = "";
   databaseDir: string = "";
   cacheDir: string = "";
+  cloudFileDir: string = "";
+  distributedFilesDir: string = "";
+  bundleCodeDir: string = "";
+  resourceDir: string = "";
+  processName: string = "";
   applicationInfo!: ApplicationInfo;
   resourceManager!: resmgr.ResourceManager;
   constructor() {
@@ -61,10 +73,18 @@ export class Context extends BaseContext {
   unregisterCleaner(): void {
     destroyRegister.unregister(unregisterToken);
   }
+
   public native getApplicationContextSync(): ApplicationContext;
   public native createModuleResourceManagerSync(bundleName: string, moduleName: string): resmgr.ResourceManager;
   private native switchArea(mode: contextConstant.AreaMode): void;
   private native getArea(): contextConstant.AreaMode;
+  public native nativeGetGroupDir(dataGroupID: string, callback: AsyncCallbackWrapper<string>): void;
+  public native nativeCreateDisplayContext(displayId: number): Context;
+  public native nativeCreateAreaModeContext(areaMode: contextConstant.AreaMode): Context;
+  public native nativeCreateSystemHspModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager;
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
+  private static native nativeTransferDynamic(input: Object): ESValue;
+  private static contextType: string = 'Context';
 
   getApplicationContext(): ApplicationContext {
     return this.getApplicationContextSync();
@@ -80,5 +100,54 @@ export class Context extends BaseContext {
 
   get area(): contextConstant.AreaMode {
     return this.getArea();
+  }
+
+  getGroupDir(dataGroupID: string, callback: AsyncCallback<string>): void {
+    let myCall = new AsyncCallbackWrapper<string>(callback);
+    taskpool.execute((): void => {
+      this.nativeGetGroupDir(dataGroupID, myCall);
+    });
+  }
+
+  getGroupDir(dataGroupID: string): Promise<string> {
+    return new Promise<string>((resolve: (data: string) => void, reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<string>((err: BusinessError | null, data: string | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as string);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeGetGroupDir(dataGroupID, myCall);
+      });
+    });
+  }
+
+  static transferStatic(input: Any): Object {
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    console.log('transferStatic type: ' + type);
+    return Context.nativeTransferStatic(ESValue.wrap(input), type);
+  }
+
+  static transferDynamic(input: Object): Any {
+    return Context.nativeTransferDynamic(input).unwrap();
+  }
+
+  createDisplayContext(displayId: number): Context {
+    return this.nativeCreateDisplayContext(displayId);
+  }
+
+  createAreaModeContext(areaMode: contextConstant.AreaMode): Context {
+    return this.nativeCreateAreaModeContext(areaMode);
+  }
+
+  createSystemHspModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager {
+    return this.nativeCreateSystemHspModuleResourceManager(bundleName, moduleName);
   }
 }

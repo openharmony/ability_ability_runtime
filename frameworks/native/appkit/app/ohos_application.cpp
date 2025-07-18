@@ -445,7 +445,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             stageContext->SetResourceManager(rm);
         }
 
-        auto &runtimeStage = GetSpecifiedRuntime(hapModuleInfo->codeLanguage);
+        auto &runtimeStage = GetSpecifiedRuntime(hapModuleInfo->abilityStageCodeLanguage);
         abilityStage = AbilityRuntime::AbilityStage::Create(runtimeStage, *hapModuleInfo);
         if (abilityStage == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null abilityStage");
@@ -654,7 +654,7 @@ bool OHOSApplication::AddAbilityStage(
         stageContext->SetResourceManager(rm);
     }
 
-    auto &runtime = GetSpecifiedRuntime(moduleInfo->codeLanguage);
+    auto &runtime = GetSpecifiedRuntime(moduleInfo->abilityStageCodeLanguage);
     auto abilityStage = AbilityRuntime::AbilityStage::Create(runtime, *moduleInfo);
     if (abilityStage == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null abilityStage");
@@ -708,11 +708,6 @@ void OHOSApplication::CleanAbilityStage(const sptr<IRemoteObject> &token,
 std::shared_ptr<AbilityRuntime::Context> OHOSApplication::GetAppContext() const
 {
     return abilityRuntimeContext_;
-}
-
-const std::unique_ptr<AbilityRuntime::Runtime> &OHOSApplication::GetRuntime() const
-{
-    return runtime_;
 }
 
 const std::unique_ptr<AbilityRuntime::Runtime> &OHOSApplication::GetSpecifiedRuntime(

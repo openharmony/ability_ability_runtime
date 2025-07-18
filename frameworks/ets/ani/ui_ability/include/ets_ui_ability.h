@@ -32,6 +32,7 @@ using Want = AppExecFwk::Want;
 using InsightIntentExecuteResult = AppExecFwk::InsightIntentExecuteResult;
 using InsightIntentExecuteParam = AppExecFwk::InsightIntentExecuteParam;
 using InsightIntentExecutorAsyncCallback = AppExecFwk::InsightIntentExecutorAsyncCallback;
+using Configuration = AppExecFwk::Configuration;
 
 class EtsUIAbility : public UIAbility {
 public:
@@ -85,6 +86,23 @@ public:
     void OnStopCallback() override;
 
     /**
+     * @brief Update configuration
+     * @param configuration Indicates the updated configuration information.
+     */
+    void OnConfigurationUpdated(const Configuration &configuration) override;
+
+    /**
+     * @brief Update Contextconfiguration
+     */
+    void UpdateContextConfiguration() override;
+
+    /**
+     * @brief Called when the system configuration is updated.
+     * @param level Indicates the memory trim level, which shows the current memory usage status.
+     */
+    void OnMemoryLevel(int level) override;
+
+    /**
      * @brief Called when the launch mode of an ability is set to singleInstance. This happens when you re-launch an
      * ability that has been at the top of the ability stack.
      * @param want Indicates the new Want containing information about the ability.
@@ -104,6 +122,16 @@ public:
      * value can be null.
      */
     void OnAbilityResult(int requestCode, int resultCode, const Want &resultData) override;
+
+    /**
+     * @brief dump ability info
+     * @param params dump params that indicate different dump targets
+     * @param info dump ability info
+     */
+    void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
+
+    static void CreateAndBindContext(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
+        const std::unique_ptr<Runtime>& runtime);
 
 #ifdef SUPPORT_SCREEN
 public:
@@ -146,11 +174,45 @@ public:
     void CallOnForegroundFunc(const Want &want) override;
 
     /**
+     * @brief Called before this ability enters the <b>STATE_FOREGROUND</b> state.
+     * The ability in the <b>STATE_FOREGROUND</b> state is invisible.
+     * You can override this function to implement your own processing logic.
+     */
+    void OnWillForeground() override;
+
+    /**
+     * @brief Called after wms show event.
+     * The ability in the <b>STATE_FOREGROUND</b> state is invisible.
+     * You can override this function to implement your own processing logic.
+     */
+    void OnDidForeground() override;
+
+    /**
      * @brief Called when this ability enters the <b>STATE_BACKGROUND</b> state.
      * The ability in the <b>STATE_BACKGROUND</b> state is invisible.
      * You can override this function to implement your own processing logic.
      */
     void OnBackground() override;
+
+    /**
+     * @brief Called before OnBackground.
+     * The ability in the <b>STATE_BACKGROUND</b> state is invisible.
+     * You can override this function to implement your own processing logic.
+     */
+    void OnWillBackground() override;
+
+    /**
+     * @brief Called after wms hiden event.
+     * The ability in the <b>STATE_BACKGROUND</b> state is invisible.
+     * You can override this function to implement your own processing logic.
+     */
+    void OnDidBackground() override;
+
+    /**
+     * Called when back press is dispatched.
+     * Return true if ability will be moved to background; return false if will be terminated
+     */
+    bool OnBackPress() override;
 
     /**
      * @brief Execute insight intent when an ability is in foreground, schedule it to foreground repeatly.

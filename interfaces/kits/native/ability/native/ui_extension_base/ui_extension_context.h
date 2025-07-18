@@ -22,6 +22,7 @@
 #include "extension_context.h"
 #include "free_install_observer_interface.h"
 #include "start_options.h"
+#include "ui_extension_callback.h"
 #include "ui_holder_extension_context.h"
 #include "want.h"
 #include "js_ui_extension_callback.h"
@@ -172,6 +173,8 @@ public:
     sptr<Rosen::Window> GetWindow();
 
     Ace::UIContent* GetUIContent() override;
+    ErrCode StartAbilityByType(const std::string &type, AAFwk::WantParams &wantParam,
+        const std::shared_ptr<UIExtensionCallback> uiExtensionCallback);
 #endif // SUPPORT_SCREEN
 
     ErrCode OpenLink(const AAFwk::Want& want, int reuqestCode);

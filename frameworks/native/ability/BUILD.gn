@@ -63,6 +63,7 @@ ohos_shared_library("ability_context_native") {
     "ability_runtime/local_call_container.cpp",
     "ability_runtime/local_call_record.cpp",
     "native/js_ui_extension_callback.cpp",
+    "native/ui_extension_callback.cpp",
   ]
 
   deps = [
@@ -82,9 +83,9 @@ ohos_shared_library("ability_context_native") {
     "ability_base:base",
     "ability_base:session_info",
     "ability_base:want",
-    "bundle_framework:libappexecfwk_common",
     "access_token:libaccesstoken_sdk",
     "access_token:libtoken_callback_sdk",
+    "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
