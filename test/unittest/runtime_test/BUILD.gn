@@ -300,6 +300,7 @@ ohos_unittest("ets_runtime_test") {
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "runtime_core:ani",
+    "runtime_core:libarkruntime",
   ]
 
   if (ability_runtime_graphics) {

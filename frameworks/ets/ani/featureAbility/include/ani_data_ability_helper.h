@@ -16,12 +16,13 @@
 #ifndef OHOS_ABILITY_RUNTIME_ANI_DATA_ABILITY_HELPER_H
 #define OHOS_ABILITY_RUNTIME_ANI_DATA_ABILITY_HELPER_H
 
-#include "ani.h"
-#include "data_ability_helper_impl.h"
+typedef struct __ani_env ani_env;
+typedef class __ani_object *ani_object;
 
 namespace OHOS {
 namespace AppExecFwk {
-void AnalysisPacMap(AppExecFwk::PacMap &pacMap, ani_env* env, const ani_object &aniObject);
+class PacMap;
+void AnalysisPacMap(PacMap &pacMap, ani_env* env, const ani_object &aniObject);
 } // namespace AppExecFwk
 } // namespace OHOS
 #endif /* OHOS_ABILITY_RUNTIME_ANI_DATA_ABILITY_HELPER_H */
