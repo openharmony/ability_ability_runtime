@@ -685,11 +685,9 @@ void CallOnAbilityResult(int requestCode, int resultCode, const Want &resultData
         return;
     }
 
-    auto work = new uv_work_t;
     auto onAbilityCB = new (std::nothrow) OnAbilityCallback;
     if (onAbilityCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "Failed to allocate OnAbilityCallback");
-        delete work;
         return;
     }
 
@@ -698,8 +696,10 @@ void CallOnAbilityResult(int requestCode, int resultCode, const Want &resultData
     onAbilityCB->resultData = resultData;
     onAbilityCB->cb = callbackInfo;
 
+    auto work = new (std::nothrow) uv_work_t;
     if (work == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null work");
+        delete onAbilityCB;
         return;
     }
     work->data = static_cast<void *>(onAbilityCB);
