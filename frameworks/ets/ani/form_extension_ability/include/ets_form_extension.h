@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_STS_FORM_EXTENSION_H
-#define OHOS_ABILITY_RUNTIME_STS_FORM_EXTENSION_H
+#ifndef OHOS_ABILITY_RUNTIME_ETS_FORM_EXTENSION_H
+#define OHOS_ABILITY_RUNTIME_ETS_FORM_EXTENSION_H
 
 #include "ani.h"
 #include "ets_native_reference.h"
@@ -26,12 +26,12 @@ namespace AbilityRuntime {
 class FormExtension;
 class ETSRuntime;
 
-class STSFormExtension : public FormExtension {
+class ETSFormExtension : public FormExtension {
 public:
-    static STSFormExtension *Create(const std::unique_ptr<Runtime> &runtime);
-    const ETSRuntime &GetSTSRuntime();
-    explicit STSFormExtension(ETSRuntime &stsRuntime);
-    ~STSFormExtension() override;
+    static ETSFormExtension *Create(const std::unique_ptr<Runtime> &runtime);
+    const ETSRuntime &GetETSRuntime();
+    explicit ETSFormExtension(ETSRuntime &etsRuntime);
+    ~ETSFormExtension() override;
 
     void Init(const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &record,
         const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
@@ -75,11 +75,11 @@ private:
     bool ConvertFromDataProxies(ani_env *env, ani_object arrayValue, std::vector<FormDataProxy> &formDataProxies);
     std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str);
     ani_status ANIUtils_FormIdToAniString(ani_env *env, int64_t formId, ani_string &formIdStr);
-    std::unique_ptr<NativeReference> stsObj_;
-    std::shared_ptr<AppExecFwk::ETSNativeReference> stsAbilityObj_;
-    ETSRuntime &stsRuntime_;
+    std::unique_ptr<NativeReference> etsObj_;
+    std::shared_ptr<AppExecFwk::ETSNativeReference> etsAbilityObj_;
+    ETSRuntime &etsRuntime_;
     sptr<IRemoteObject> providerRemoteObject_ = nullptr;
-}; // namespace AbilityRuntime
+};
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_SIMULATOR_STS_ABILITY_CONTEXT_H
+#endif // OHOS_ABILITY_RUNTIME_SIMULATOR_ETS_ABILITY_CONTEXT_H

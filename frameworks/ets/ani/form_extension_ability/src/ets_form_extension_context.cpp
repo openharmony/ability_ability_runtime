@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "sts_form_extension_context.h"
+#include "ets_form_extension_context.h"
 
 #include <algorithm>
 #include <iterator>
@@ -28,7 +28,7 @@ namespace {
 constexpr const char* FORM_EXTENSION_CONTEXT_CLASS_NAME = "Lapplication/FormExtensionContext/FormExtensionContext;";
 }
 
-ani_object STSFormExtensionContext::SetFormExtensionContext(
+ani_object ETSFormExtensionContext::SetFormExtensionContext(
     ani_env *env, const std::shared_ptr<FormExtensionContext> &context)
 {
     TAG_LOGI(AAFwkTag::FORM_EXT, "SetFormExtensionContext call");
@@ -45,27 +45,32 @@ ani_object STSFormExtensionContext::SetFormExtensionContext(
 
     if ((status = env->FindClass(FORM_EXTENSION_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        return nullptr;
     }
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        return nullptr;
     }
     if ((status = env->Object_New(cls, method, &contextObj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        return nullptr;
     }
     if ((status = env->Class_FindField(cls, "nativeContext", &field)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        return nullptr;
     }
     if ((status = env->Object_SetField_Long(contextObj, field, nativeContextLong)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        return nullptr;
     }
     TAG_LOGI(AAFwkTag::FORM_EXT, "SetFormExtensionContext end");
     return contextObj;
 }
 
-ani_ref STSFormExtensionContext::CreateStsExtensionContext(ani_env *env,
+ani_ref ETSFormExtensionContext::CreateEtsExtensionContext(ani_env *env,
     const std::shared_ptr<FormExtensionContext> &context, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> &abilityInfo)
 {
-    TAG_LOGI(AAFwkTag::FORM_EXT, "CreateStsExtensionContext call");
+    TAG_LOGI(AAFwkTag::FORM_EXT, "CreateEtsExtensionContext call");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "env null");
         return nullptr;
@@ -80,18 +85,18 @@ ani_ref STSFormExtensionContext::CreateStsExtensionContext(ani_env *env,
         return nullptr;
     }
 
-    ani_object contextObj = STSFormExtensionContext::SetFormExtensionContext(env, context);
+    ani_object contextObj = ETSFormExtensionContext::SetFormExtensionContext(env, context);
 
-    TAG_LOGI(AAFwkTag::FORM_EXT, "CreateStsExtensionContext end");
+    TAG_LOGI(AAFwkTag::FORM_EXT, "CreateEtsExtensionContext end");
     return contextObj;
 }
 
-ani_ref CreateStsFormExtensionContext(ani_env *env, std::shared_ptr<FormExtensionContext> &context)
+ani_ref CreateEtsFormExtensionContext(ani_env *env, std::shared_ptr<FormExtensionContext> &context)
 {
-    TAG_LOGI(AAFwkTag::FORM_EXT, "CreateStsFormExtensionContext call");
+    TAG_LOGI(AAFwkTag::FORM_EXT, "CreateEtsFormExtensionContext call");
     auto abilityInfo = context->GetAbilityInfo();
-    ani_ref object = STSFormExtensionContext::CreateStsExtensionContext(env, context, abilityInfo);
-    TAG_LOGI(AAFwkTag::FORM_EXT, "CreateStsFormExtensionContext end");
+    ani_ref object = ETSFormExtensionContext::CreateEtsExtensionContext(env, context, abilityInfo);
+    TAG_LOGI(AAFwkTag::FORM_EXT, "CreateEtsFormExtensionContext end");
     return object;
 }
 } // namespace AbilityRuntime
