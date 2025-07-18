@@ -1050,5 +1050,54 @@ HWTEST_F(AbilityConnectManagerFourthTest, AAFWK_Kit_ResumeExtensionAbilityLocked
     auto result3 = ConnectManager()->ResumeExtensionAbilityLocked(callbackA_);
     EXPECT_EQ(result3, OHOS::ERR_OK);
 }
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: OnTimeOut
+ * SubFunction: OnTimeOut
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityConnectManager OnTimeOut
+ */
+HWTEST_F(AbilityConnectManagerFourthTest, AAFwk_AbilityMS_OnTimeOut_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AAFwk_AbilityMS_OnTimeOut_002 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AbilityType::PAGE;
+    abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SHARE;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    int64_t abilityRecordId = 1;
+    uint32_t msgId = 111;
+    connectManager->terminatingExtensionList_.push_back(abilityRecord);
+    connectManager->OnTimeOut(msgId, abilityRecordId);
+    abilityRecordId = abilityRecord->GetAbilityRecordId();
+    connectManager->OnTimeOut(msgId, abilityRecordId);
+    connectManager->terminatingExtensionList_.clear();
+    TAG_LOGI(AAFwkTag::TEST, "AAFwk_AbilityMS_OnTimeOut_002 end");
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: OnTimeOut
+ * SubFunction: OnTimeOut
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityConnectManager OnTimeOut
+ */
+HWTEST_F(AbilityConnectManagerFourthTest, AAFwk_AbilityMS_OnTimeOut_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AAFwk_AbilityMS_OnTimeOut_003 start");
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    std::shared_ptr<AbilityRecord> abilityRecord = serviceRecord_;
+    uint32_t msgId = 111;
+    connectManager->terminatingExtensionList_.push_back(abilityRecord);
+    int64_t abilityRecordId = abilityRecord->GetAbilityRecordId();
+    connectManager->OnTimeOut(msgId, abilityRecordId);
+    connectManager->terminatingExtensionList_.clear();
+    TAG_LOGI(AAFwkTag::TEST, "AAFwk_AbilityMS_OnTimeOut_003 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS
