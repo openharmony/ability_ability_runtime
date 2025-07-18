@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_ETS_ABILITY_MANAGER_H
-#define OHOS_ABILITY_RUNTIME_ETS_ABILITY_MANAGER_H
+import { AbilityFirstFrameStateData } from 'application.AbilityFirstFrameStateData';
 
-#include "ani.h"
+export interface AbilityFirstFrameStateObserver {
+  onAbilityFirstFrameDrawn(data: AbilityFirstFrameStateData): void;
+}
 
-namespace OHOS {
-namespace AbilityRuntime {
-void EtsAbilityManagerRegistryInit(ani_env *env);
-} // namespace AbilityRuntime
-} // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_ETS_ABILITY_MANAGER_H
+export default class AbilityFirstFrameStateObserverInner implements AbilityFirstFrameStateObserver {
+  onAbilityFirstFrameDrawn(data: AbilityFirstFrameStateData): void {}
+}

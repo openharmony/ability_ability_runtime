@@ -21,6 +21,9 @@ import _ProcessData from 'application.ProcessData';
 import _ApplicationStateObserver from 'application.ApplicationStateObserver';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
 import bundleManager from '@ohos.bundle.bundleManager';
+import _AppForegroundStateObserver from 'application.AppForegroundStateObserver';
+import { AbilityFirstFrameStateObserver as _AbilityFirstFrameStateObserver } from 'application.AbilityFirstFrameStateObserver';
+import { AbilityFirstFrameStateData as _AbilityFirstFrameStateData } from 'application.AbilityFirstFrameStateData';
 
 export default namespace appManager {
 loadLibrary("app_manager_ani.z")
@@ -31,6 +34,9 @@ export type AppStateData = _AppStateData;
 export type RunningMultiAppInfo = _RunningMultiAppInfo;
 export type ProcessData = _ProcessData;
 export type ApplicationStateObserver = _ApplicationStateObserver;
+export type AppForegroundStateObserver = _AppForegroundStateObserver;
+export type AbilityFirstFrameStateObserver = _AbilityFirstFrameStateObserver;
+export type AbilityFirstFrameStateData = _AbilityFirstFrameStateData;
 
 export enum PreloadMode {
   PRESS_DOWN
@@ -349,6 +355,26 @@ export function killProcessesByBundleName(bundleName: string, clearPageStack: bo
       });
     });
     return p;
+}
+
+export native function nativeOnAbilityFirstFrameState(type: string, observer: AbilityFirstFrameStateObserver, bundleName?: string) : void;
+export function on(type: 'abilityFirstFrameState', observer: AbilityFirstFrameStateObserver, bundleName?: string) : void {
+  appManager.nativeOnAbilityFirstFrameState('abilityFirstFrameState', observer, bundleName);
+}
+
+export native function nativeOffAbilityFirstFrameState(type: string, observer?: AbilityFirstFrameStateObserver) : void;
+export function off(type: 'abilityFirstFrameState', observer?: AbilityFirstFrameStateObserver) : void {
+  appManager.nativeOffAbilityFirstFrameState('abilityFirstFrameState', observer);
+}
+
+export native function nativeOnAppForeGroundState(type: string, observer: AppForegroundStateObserver) : void;
+export function on(type: 'appForegroundState', observer: AppForegroundStateObserver) : void {
+  appManager.nativeOnAppForeGroundState('appForegroundState', observer);
+}
+
+export native function nativeOffAppForeGroundState(type: string, observer?: AppForegroundStateObserver) : void;
+export function off(type: 'appForegroundState', observer?: AppForegroundStateObserver) : void {
+  appManager.nativeOffAppForeGroundState('appForegroundState', observer);
 }
 
 export native function nativeKillProcessWithAccountSync(bundleName: string, accountId: int, callback: AsyncCallbackWrapper<void>) : void;

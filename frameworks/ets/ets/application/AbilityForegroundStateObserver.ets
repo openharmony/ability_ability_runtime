@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License"),
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -12,15 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import AbilityStateData from 'application.AbilityStateData';
 
-#ifndef OHOS_ABILITY_RUNTIME_ETS_ABILITY_MANAGER_H
-#define OHOS_ABILITY_RUNTIME_ETS_ABILITY_MANAGER_H
+interface AbilityForegroundStateObserver {
+  onAbilityStateChanged(abilityStateData: AbilityStateData): void;
+}
 
-#include "ani.h"
-
-namespace OHOS {
-namespace AbilityRuntime {
-void EtsAbilityManagerRegistryInit(ani_env *env);
-} // namespace AbilityRuntime
-} // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_ETS_ABILITY_MANAGER_H
+export default class AbilityForegroundStateObserverInner implements AbilityForegroundStateObserver {
+  onAbilityStateChanged(abilityStateData: AbilityStateData): void {}
+}
