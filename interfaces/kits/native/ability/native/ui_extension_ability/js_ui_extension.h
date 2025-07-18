@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -120,13 +120,6 @@ public:
     virtual void OnStopCallBack() override;
 
     /**
-     * @brief Called when the system configuration is updated.
-     *
-     * @param configuration Indicates the updated configuration information.
-     */
-    virtual void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration) override;
-
-    /**
      * @brief Called when this extension enters the <b>STATE_FOREGROUND</b> state.
      *
      *
@@ -167,16 +160,14 @@ public:
     /**
      * @brief Called when configuration changed, including system configuration and window configuration.
      */
-    void ConfigurationUpdated();
+    void ConfigurationUpdated() override;
 
-    void OnAbilityConfigurationUpdated(const AppExecFwk::Configuration& configuration);
+    void OnAbilityConfigurationUpdated(const AppExecFwk::Configuration& configuration) override;
 
 private:
     virtual void BindContext(napi_env env, napi_value obj, std::shared_ptr<AAFwk::Want> want);
     void CreateJSContext(napi_env env, napi_value &contextObj,
         std::shared_ptr<UIExtensionContext> context, int32_t screenMode);
-
-    void RegisterAbilityConfigUpdateCallback();
 
     napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
         bool withResult = false);

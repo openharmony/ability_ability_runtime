@@ -23,7 +23,7 @@
 #include "context.h"
 #include "free_install_observer_interface.h"
 #include "iability_callback.h"
-#include "js_ui_extension_callback.h"
+#include "ui_extension_callback.h"
 #include "mission_info.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
@@ -393,6 +393,15 @@ public:
     virtual bool GetHookOff() = 0;
     virtual void SetHookOff(bool hookOff) = 0;
     virtual ErrCode RevokeDelegator() = 0;
+    void SetScreenMode(int32_t screenMode)
+    {
+        screenMode_ = screenMode;
+    }
+
+    int32_t GetScreenMode() const
+    {
+        return screenMode_;
+    }
 
     virtual std::shared_ptr<AAFwk::Want> GetWant() = 0;
 
@@ -442,7 +451,7 @@ public:
      */
     virtual Ace::UIContent* GetUIContent() = 0;
     virtual ErrCode StartAbilityByType(const std::string &type, AAFwk::WantParams &wantParam,
-        const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks) = 0;
+        std::shared_ptr<UIExtensionCallback> uiExtensionCallback) = 0;
     virtual ErrCode CreateModalUIExtensionWithApp(const AAFwk::Want &want) = 0;
     virtual void EraseUIExtension(int32_t sessionId) = 0;
 #endif
@@ -492,6 +501,9 @@ protected:
     {
         return contextTypeId == CONTEXT_TYPE_ID || Context::IsContext(contextTypeId);
     }
+
+private:
+    int32_t screenMode_ = AAFwk::ScreenMode::IDLE_SCREEN_MODE;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

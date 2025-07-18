@@ -17,6 +17,8 @@
 
 #include "ani_common_configuration.h"
 #include "common_fun_ani.h"
+#include "ets_native_reference.h"
+#include "ets_runtime.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -103,6 +105,22 @@ void CreateEtsExtensionContext(ani_env *aniEnv, ani_class contextClass, ani_obje
 
     if (!SetConfiguration(aniEnv, contextClass, contextObj, context)) {
         TAG_LOGE(AAFwkTag::CONTEXT, "SetConfiguration fail");
+        return;
+    }
+}
+
+void EtsExtensionContext::ConfigurationUpdated(ani_env *env,
+    const std::shared_ptr<AppExecFwk::ETSNativeReference> &EtsContext,
+    const std::shared_ptr<AppExecFwk::Configuration> &config)
+{
+    if (env == nullptr || EtsContext == nullptr || config == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "env or EtsContext or config is null");
+        return;
+    }
+    ani_ref configurationRef = AppExecFwk::WrapConfiguration(env, *config);
+    ani_status status = env->Object_SetFieldByName_Ref(EtsContext->aniObj, "config", configurationRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Object_SetFieldByName_Ref status: %{public}d", status);
         return;
     }
 }

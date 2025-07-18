@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,12 +74,12 @@ Ace::UIContent* UIServiceExtensionContext::GetUIContent()
     return window_->GetUIContent();
 }
 
-ErrCode UIServiceExtensionContext::StartAbilityByType(const std::string &type,
-    AAFwk::WantParams &wantParam, const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks)
+ErrCode UIServiceExtensionContext::StartAbilityByType(
+    const std::string &type, AAFwk::WantParams &wantParam, std::shared_ptr<UIExtensionCallback> uiExtensionCallback)
 {
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "StartAbilityByType begin.");
-    if (uiExtensionCallbacks == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null uiExtensionCallbacks");
+    if (uiExtensionCallback == nullptr) {
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "null uiExtensionCallback");
         return ERR_INVALID_VALUE;
     }
     auto uiContent = GetUIContent();
@@ -98,14 +98,14 @@ ErrCode UIServiceExtensionContext::StartAbilityByType(const std::string &type,
 
     OHOS::Ace::ModalUIExtensionCallbacks callback;
     OHOS::Ace::ModalUIExtensionConfig config;
-    callback.onError = [uiExtensionCallbacks](int32_t arg, const std::string &str1, const std::string &str2) {
-        uiExtensionCallbacks->OnError(arg);
+    callback.onError = [uiExtensionCallback](int32_t arg, const std::string &str1, const std::string &str2) {
+        uiExtensionCallback->OnError(arg);
     };
-    callback.onRelease = [uiExtensionCallbacks](int32_t arg) {
-        uiExtensionCallbacks->OnRelease(arg);
+    callback.onRelease = [uiExtensionCallback](int32_t arg) {
+        uiExtensionCallback->OnRelease(arg);
     };
-    callback.onResult = [uiExtensionCallbacks](int32_t arg1, const OHOS::AAFwk::Want arg2) {
-        uiExtensionCallbacks->OnResult(arg1, arg2);
+    callback.onResult = [uiExtensionCallback](int32_t arg1, const OHOS::AAFwk::Want arg2) {
+        uiExtensionCallback->OnResult(arg1, arg2);
     };
 
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
@@ -113,8 +113,8 @@ ErrCode UIServiceExtensionContext::StartAbilityByType(const std::string &type,
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "sessionId zero");
         return ERR_INVALID_VALUE;
     }
-    uiExtensionCallbacks->SetUIContent(uiContent);
-    uiExtensionCallbacks->SetSessionId(sessionId);
+    uiExtensionCallback->SetUIContent(uiContent);
+    uiExtensionCallback->SetSessionId(sessionId);
     return ERR_OK;
 }
 

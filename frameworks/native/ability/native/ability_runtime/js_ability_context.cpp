@@ -34,6 +34,7 @@
 #include "js_error_utils.h"
 #include "js_runtime_utils.h"
 #include "js_uiservice_ability_connection.h"
+#include "js_ui_extension_callback.h"
 #include "js_ui_service_proxy.h"
 #include "json_utils.h"
 #include "mission_info.h"
@@ -2166,6 +2167,9 @@ napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> 
     if (configuration != nullptr) {
         napi_set_named_property(env, object, "config", CreateJsConfiguration(env, *configuration));
     }
+
+    std::string type = "UIAbilityContext";
+    napi_set_named_property(env, object, "contextType", CreateJsValue(env, type));
 
     const char *moduleName = "JsAbilityContext";
     BindNativeFunction(env, object, "startAbility", moduleName, JsAbilityContext::StartAbility);
