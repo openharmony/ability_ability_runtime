@@ -40,7 +40,7 @@ namespace {
 constexpr const char* ABILITY_WANT_CLASS_NAME = "L@ohos/app/ability/Want/Want;";
 constexpr const char* TOOL_CLASS_NAME = "L@ohos/app/ability/Want/RecordSerializeTool;";
 constexpr const char* INNER_CLASS_NAME = "Lability/abilityResult/AbilityResultInner;";
-constexpr const char* ELEMENTNAME_CLASS_NAME = "LbundleManager/ElementName/ElementName;";
+constexpr const char* ELEMENTNAME_CLASS_NAME = "LbundleManager/ElementNameInner/ElementNameInner;";
 
 bool InnerWrapWantParams(ani_env* env, ani_class wantCls, ani_object wantObject, const AAFwk::WantParams& wantParams)
 {
