@@ -257,6 +257,7 @@ ohos_shared_library("configuration_helper") {
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",
@@ -1318,6 +1319,7 @@ ohos_shared_library("form_extension_module") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "window_manager:libwm",
@@ -1824,6 +1826,7 @@ ohos_shared_library("service_extension_module") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
     "napi:ace_napi",
   ]
@@ -2459,6 +2462,7 @@ ohos_shared_library("share_extension_module") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
     "napi:ace_napi",
   ]
 
@@ -2522,6 +2526,7 @@ ohos_shared_library("action_extension_module") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
     "napi:ace_napi",
   ]
 
@@ -2742,6 +2747,7 @@ ohos_shared_library("embedded_ui_extension_module") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
     "napi:ace_napi",
   ]
 
@@ -2841,6 +2847,7 @@ ohos_shared_library("auto_fill_extension_module") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
     "napi:ace_napi",
     "window_manager:libwm",
   ]
@@ -3017,6 +3024,7 @@ ohos_shared_library("photo_editor_extension_module") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
     "napi:ace_napi",
   ]
 
