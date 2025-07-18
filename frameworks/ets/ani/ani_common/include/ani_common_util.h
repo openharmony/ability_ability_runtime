@@ -74,6 +74,8 @@ bool SetDoublePropertyObject(ani_env *env, ani_object param, const char *name, d
 bool SetDoublePropertyValue(ani_env *env, ani_object param, const char *name, double value);
 bool SetStringArrayProperty(ani_env *env, ani_object param, const char *name, const std::vector<std::string> &values);
 bool SetRefProperty(ani_env *env, ani_object param, const char *name, ani_ref value);
+
+bool GetStaticFieldString(ani_env *env, ani_class classObj, const char *fieldName, std::string &value);
 } // namespace AppExecFwk
 } // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_ANI_COMMON_UTIL_H

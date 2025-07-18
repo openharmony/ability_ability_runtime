@@ -14,8 +14,11 @@
 */
 #include "ani_data_ability_helper.h"
 
+#include "ani.h"
 #include "ani_common_util.h"
+#include "data_ability_helper_impl.h"
 #include "hilog_tag_wrapper.h"
+
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
@@ -24,6 +27,7 @@ constexpr const char* CLASSNAME_BOOL = "Lstd/core/Boolean;";
 constexpr const char* CLASSNAME_STRING = "Lstd/core/String;";
 constexpr const char* CLASSNAME_ARRAY = "Lescompat/Array;";
 }
+
 bool IsInstanceOf(ani_env* env, const char* name, ani_object aniValue)
 {
     if (env == nullptr) {
@@ -33,8 +37,8 @@ bool IsInstanceOf(ani_env* env, const char* name, ani_object aniValue)
 
     ani_status status = ANI_ERROR;
     ani_class cls = nullptr;
-    if ((status = env->FindClass(name, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+    if ((status = env->FindClass(name, &cls)) != ANI_OK || cls == nullptr) {
+        TAG_LOGE(AAFwkTag::FA, "status: %{public}d", status);
         return false;
     }
     ani_boolean isInstanceOf;
@@ -52,11 +56,6 @@ void SetPacMapObject(AppExecFwk::PacMap &pacMap, ani_env* env, std::string keySt
         return;
     }
     ani_status status = ANI_ERROR;
-    ani_boolean isNull = ANI_FALSE;
-    if ((status = env->Reference_IsNull(aniValue, &isNull)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::FA, "Reference_IsNull status: %{public}d", status);
-        return;
-    }
     if (IsInstanceOf(env, CLASSNAME_DOUBLE, aniValue)) {
         ani_double value = 0;
         if ((status = env->Object_CallMethodByName_Double(aniValue, "doubleValue", nullptr, &value)) != ANI_OK) {
@@ -64,14 +63,18 @@ void SetPacMapObject(AppExecFwk::PacMap &pacMap, ani_env* env, std::string keySt
             return;
         }
         pacMap.PutDoubleValue(keyStr, static_cast<double>(value));
-    } else if (IsInstanceOf(env, CLASSNAME_BOOL, aniValue)) {
+        return;
+    }
+    if (IsInstanceOf(env, CLASSNAME_BOOL, aniValue)) {
         ani_boolean value = ANI_FALSE;
         if ((status = env->Object_CallMethodByName_Boolean(aniValue, "unboxed", nullptr, &value)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::FA, "Object_CallMethodByName_Boolean status: %{public}d", status);
             return;
         }
         pacMap.PutBooleanValue(keyStr, static_cast<bool>(value));
-    } else if (IsInstanceOf(env, CLASSNAME_STRING, aniValue)) {
+        return;
+    }
+    if (IsInstanceOf(env, CLASSNAME_STRING, aniValue)) {
         ani_string aniString = static_cast<ani_string>(aniValue);
         std::string value = "";
         if (!GetStdString(env, aniString, value)) {
@@ -79,21 +82,26 @@ void SetPacMapObject(AppExecFwk::PacMap &pacMap, ani_env* env, std::string keySt
             return;
         }
         pacMap.PutStringValue(keyStr, value);
-    } else if (IsInstanceOf(env, CLASSNAME_ARRAY, aniValue)) {
+        return;
+    }
+    if (IsInstanceOf(env, CLASSNAME_ARRAY, aniValue)) {
         std::vector<std::string> stringList;
         if (!UnwrapArrayString(env, aniValue, stringList)) {
             TAG_LOGE(AAFwkTag::FA, "UnwrapArrayString failed");
             return;
         }
         pacMap.PutStringValueArray(keyStr, stringList);
-    } else if (isNull) {
-        pacMap.PutObject(keyStr, nullptr);
-    } else {
-        TAG_LOGE(AAFwkTag::FA, "pacMap type error");
+        return;
     }
+    ani_boolean isNull = ANI_FALSE;
+    if ((status = env->Reference_IsNull(aniValue, &isNull)) != ANI_OK || !isNull) {
+        TAG_LOGE(AAFwkTag::FA, "Reference_IsNull status: %{public}d or pacMap type error", status);
+        return;
+    }
+    pacMap.PutObject(keyStr, nullptr);
 }
 
-void AnalysisPacMap(AppExecFwk::PacMap &pacMap, ani_env* env, const ani_object &aniObject)
+void AnalysisPacMap(PacMap &pacMap, ani_env* env, const ani_object &aniObject)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "env null");

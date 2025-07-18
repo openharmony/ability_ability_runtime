@@ -837,6 +837,13 @@ ani_object EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniE
         return nullptr;
     }
     ContextUtil::CreateEtsBaseContext(aniEnv, applicationContextClass, applicationContextObject, applicationContext);
+    ani_ref* contextGlobalRef = new (std::nothrow) ani_ref;
+    if ((status = aniEnv->GlobalReference_Create(applicationContextObject, contextGlobalRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GlobalReference_Create failed status: %{public}d", status);
+        delete contextGlobalRef;
+        return nullptr;
+    }
+    applicationContext->Bind(contextGlobalRef);
     return applicationContextObject;
 }
 } // namespace AbilityRuntime
