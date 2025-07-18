@@ -48,6 +48,7 @@ let unregisterToken = new object();
 export default class UIAbilityContext extends Context {
   static {
     loadLibrary("context_ani");
+    loadLibrary("ability_context_ani_kit.z");
   }
 
   private cleaner: Cleaner | null = null;
@@ -83,10 +84,19 @@ export default class UIAbilityContext extends Context {
     destroyRegister.unregister(unregisterToken);
   }
 
-  private static native nativeTransferStatic(input: ESValue): Object;
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
   private static native nativeTransferDynamic(input: Object): ESValue;
+  private static contextType: string = 'UIAbilityContext';
+
   static transferStatic(input: Any): Object {
-    return UIAbilityContext.nativeTransferStatic(ESValue.wrap(input));
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    console.log('transferStatic type: ' + type);
+    return UIAbilityContext.nativeTransferStatic(ESValue.wrap(input), type);
   }
   static transferDynamic(input: Object): Any {
     return UIAbilityContext.nativeTransferDynamic(input).unwrap();

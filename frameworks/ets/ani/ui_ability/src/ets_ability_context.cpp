@@ -1277,10 +1277,6 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void*>(EtsAbilityContext::SetColorMode)},
             ani_native_function { "nativeStartAbilityByTypeSync", nullptr,
                 reinterpret_cast<void*>(EtsAbilityContext::StartAbilityByType) },
-            ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
-                reinterpret_cast<void*>(EtsAbilityContext::NativeTransferStatic) },
-            ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",
-                reinterpret_cast<void*>(EtsAbilityContext::NativeTransferDynamic) },
         };
         if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
             TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);
