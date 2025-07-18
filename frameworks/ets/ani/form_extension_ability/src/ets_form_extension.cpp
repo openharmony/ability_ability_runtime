@@ -19,7 +19,9 @@
 #include <vector>
 
 #include "ability_info.h"
+#include "ani_common_configuration.h"
 #include "ani_common_want.h"
+#include "ani_enum_convert.h"
 #include "ets_runtime.h"
 #include "form_provider_data.h"
 #include "form_runtime/form_extension_provider_client.h"
@@ -727,7 +729,7 @@ FormState ETSFormExtension::OnAcquireFormState(const Want &want)
         return AppExecFwk::FormState::DEFAULT;
     }
     int32_t state = static_cast<int32_t>(FormState::DEFAULT);
-    AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, static_cast<ani_enum_item>(result), state);
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, static_cast<ani_enum_item>(result), state);
     TAG_LOGI(AAFwkTag::FORM_EXT, "state: %{public}d", state);
     if (state <= static_cast<int32_t>(AppExecFwk::FormState::UNKNOWN) ||
         state > static_cast<int32_t>(AppExecFwk::FormState::READY)) {
