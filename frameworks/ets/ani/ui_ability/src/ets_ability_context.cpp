@@ -1122,29 +1122,41 @@ void EtsAbilityContext::ConfigurationUpdated(ani_env *env, std::shared_ptr<AppEx
 
 ani_object EtsAbilityContext::NativeTransferStatic(ani_env *env, ani_object, ani_object input)
 {
+    TAG_LOGD(AAFwkTag::UIABILITY, "transfer static UIAbilityContext");
     void *unwrapResult = nullptr;
     bool success = arkts_esvalue_unwrap(env, input, &unwrapResult);
     if (!success) {
         TAG_LOGE(AAFwkTag::UIABILITY, "failed to unwrap");
+        EtsErrorUtil::ThrowEtsTransferClassError(env);
         return nullptr;
     }
     if (unwrapResult == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null unwrapResult");
+        EtsErrorUtil::ThrowEtsTransferClassError(env);
         return nullptr;
     }
     auto context = reinterpret_cast<std::weak_ptr<AbilityContext> *>(unwrapResult)->lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null context");
+        EtsErrorUtil::ThrowEtsTransferClassError(env);
         return nullptr;
     }
-    auto &bindingObj = context->GetBindingObject();
+    auto abilityContext = Context::ConvertTo<AbilityContext>(context);
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+        EtsErrorUtil::ThrowEtsTransferClassError(env);
+        return nullptr;
+    }
+    auto &bindingObj = abilityContext->GetBindingObject();
     if (bindingObj == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObj");
+        EtsErrorUtil::ThrowEtsTransferClassError(env);
         return nullptr;
     }
     auto staticContext = bindingObj->Get<ani_ref>();
     if (staticContext == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null staticContext");
+        EtsErrorUtil::ThrowEtsTransferClassError(env);
         return nullptr;
     }
     return reinterpret_cast<ani_object>(*staticContext);
@@ -1152,22 +1164,59 @@ ani_object EtsAbilityContext::NativeTransferStatic(ani_env *env, ani_object, ani
 
 ani_object EtsAbilityContext::NativeTransferDynamic(ani_env *env, ani_object, ani_object input)
 {
+    TAG_LOGD(AAFwkTag::UIABILITY, "transfer dynamic UIAbilityContext");
+    if (!IsInstanceOf(env, input)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "not UIAbilityContext");
+        EtsErrorUtil::ThrowEtsTransferClassError(env);
+        return nullptr;
+    }
     auto context = ContextUtil::GetBaseContext(env, input);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null context");
+        EtsErrorUtil::ThrowEtsTransferClassError(env);
         return nullptr;
     }
-    auto &bindingObj = context->GetBindingObject();
+    auto abilityContext = Context::ConvertTo<AbilityContext>(context);
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+        EtsErrorUtil::ThrowEtsTransferClassError(env);
+        return nullptr;
+    }
+    auto &bindingObj = abilityContext->GetBindingObject();
     if (bindingObj == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObj");
+        EtsErrorUtil::ThrowEtsTransferClassError(env);
         return nullptr;
     }
     auto dynamicContext = bindingObj->Get<NativeReference>();
     if (dynamicContext == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null dynamicContext");
+        EtsErrorUtil::ThrowEtsTransferClassError(env);
         return nullptr;
     }
+    // Not support yet
+    EtsErrorUtil::ThrowEtsTransferClassError(env);
     return nullptr;
+}
+
+bool EtsAbilityContext::IsInstanceOf(ani_env *env, ani_object aniObj)
+{
+    ani_class cls {};
+    ani_status status = ANI_ERROR;
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return false;
+    }
+    if ((status = env->FindClass(UI_ABILITY_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isInstanceOf = false;
+    if ((status = env->Object_InstanceOf(aniObj, cls, &isInstanceOf)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        return false;
+    }
+    return isInstanceOf;
 }
 
 namespace {

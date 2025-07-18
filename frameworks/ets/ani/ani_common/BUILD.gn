@@ -49,6 +49,7 @@ ohos_shared_library("ani_common") {
     "src/ani_common_start_options.cpp",
     "src/ani_common_util.cpp",
     "src/ani_common_want.cpp",
+    "src/context_transfer.cpp",
     "src/ets_application_context_utils.cpp",
     "src/ets_application_state_change_callback.cpp",
     "src/ets_context_utils.cpp",

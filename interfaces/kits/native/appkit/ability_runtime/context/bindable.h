@@ -41,6 +41,16 @@ public:
     }
 
     template<class T>
+    void Bind(T* object)
+    {
+        static_assert(IsValidType<T>(), "T must be ani_ref or NativeReference");
+        const std::string typeName = GetTypeString<T>();
+        std::lock_guard guard(objectsMutex_);
+        std::unique_ptr<void, void (*)(void*)> obj(object, SimpleRelease<T>);
+        objects_.emplace(typeName, std::move(obj));
+    }
+
+    template<class T>
     T* Get()
     {
         const std::string typeName = GetTypeString<T>();
@@ -105,6 +115,23 @@ private:
     std::mutex objectsMutex_;
 };
 
+class BindingObjectSubThread {
+public:
+    BindingObjectSubThread() = default;
+    virtual ~BindingObjectSubThread() = default;
+
+    virtual void BindSubThreadObject(void* napiEnv, void* object);
+    virtual void* GetSubThreadObject(void* napiEnv);
+    virtual void RemoveSubThreadObject(void* napiEnv);
+    virtual void RemoveAllObject();
+
+private:
+    BindingObjectSubThread(const BindingObjectSubThread&) = delete;
+    BindingObjectSubThread(BindingObjectSubThread&&) = delete;
+    BindingObjectSubThread& operator=(const BindingObjectSubThread&) = delete;
+    BindingObjectSubThread& operator=(BindingObjectSubThread&&) = delete;
+};
+
 class Bindable {
 public:
     virtual ~Bindable() = default;
@@ -117,10 +144,22 @@ public:
         }
     }
 
+    template<class T>
+    void Bind(T* object)
+    {
+        if (object_) {
+            object_->Bind(object);
+        }
+    }
+
     void Unbind() const
     {
         if (object_) {
             object_->Unbind();
+        }
+
+        if (subThreadObject_) {
+            subThreadObject_->RemoveAllObject();
         }
     }
 
@@ -130,6 +169,10 @@ public:
         if (object_) {
             object_->Unbind<T>();
         }
+
+        if (subThreadObject_) {
+            subThreadObject_->RemoveAllObject();
+        }
     }
 
     const std::unique_ptr<BindingObject>& GetBindingObject() const
@@ -137,8 +180,24 @@ public:
         return object_;
     }
 
+    void BindSubThreadObject(void* napiEnv, void* object)
+    {
+        if (subThreadObject_) {
+            subThreadObject_->BindSubThreadObject(napiEnv, object);
+        }
+    }
+
+    void* GetSubThreadObject(void* napiEnv)
+    {
+        if (subThreadObject_) {
+            return subThreadObject_->GetSubThreadObject(napiEnv);
+        }
+        return nullptr;
+    }
+
 protected:
     Bindable() = default;
+    std::unique_ptr<BindingObjectSubThread> subThreadObject_ = nullptr;
 
 private:
     std::unique_ptr<BindingObject> object_ = std::make_unique<BindingObject>();

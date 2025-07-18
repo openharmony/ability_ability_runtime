@@ -40,6 +40,10 @@ let destroyRegister = new FinalizationRegistry<Cleaner>(callback);
 let unregisterToken = new object();
 
 export default class ApplicationContext extends Context {
+  static {
+    loadLibrary("application_context_ani_kit.z");
+  }
+
   etsApplicationContextPtr: long = 0;
   private cleaner: Cleaner | null = null;
 
@@ -58,6 +62,7 @@ export default class ApplicationContext extends Context {
   unregisterCleaner(): void {
     destroyRegister.unregister(unregisterToken);
   }
+
   public native nativekillAllProcessesSync(clearPageStack: boolean, callback: AsyncCallbackWrapper<void>): void;
   public native nativepreloadUIExtensionAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
   public native setSupportedProcessCacheSync(isSupported : boolean):void;
@@ -66,7 +71,7 @@ export default class ApplicationContext extends Context {
   public native nativesetLanguage(language: string): void;
   public native nativesetFontSizeScale(fontSizeScale: number): void;
   public native nativesetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
-  public native nativesetFont(font: string): void; 
+  public native nativesetFont(font: string): void;
   public native nativerestartApp(want: Want): void;
   public native nativeGetAllRunningInstanceKeys(callback: AsyncCallbackWrapper<Array<string>>): void;
   public native nativeOnEnvironmentSync(callback: EnvironmentCallback): number;
@@ -75,6 +80,9 @@ export default class ApplicationContext extends Context {
   public native nativeOffApplicationStateChangeSync(callback?: ApplicationStateChangeCallback): void;
   public native nativegetCurrentAppCloneIndex(): number;
   public native nativegetCurrentInstanceKey(): string;
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
+  private static native nativeTransferDynamic(input: Object): ESValue;
+  private static contextType: string = 'ApplicationContext';
 
   setSupportedProcessCache(isSupported : boolean):void {
     this.setSupportedProcessCacheSync(isSupported);
@@ -266,5 +274,20 @@ export default class ApplicationContext extends Context {
 
   getCurrentAppCloneIndex(): number {
     return this.nativegetCurrentAppCloneIndex();
+  }
+
+  static transferStatic(input: Any): Object {
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    console.log('transferStatic contextType: ' + type);
+    return ApplicationContext.nativeTransferStatic(ESValue.wrap(input), type);
+  }
+
+  static transferDynamic(input: Object): Any {
+    return ApplicationContext.nativeTransferDynamic(input).unwrap();
   }
 }
