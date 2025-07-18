@@ -1153,7 +1153,7 @@ ohos_shared_library("ability_thread") {
   part_name = "ability_runtime"
 }
 
-ohos_shared_library("sts_form_extension") {
+ohos_shared_library("ets_form_extension") {
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -1177,8 +1177,8 @@ ohos_shared_library("sts_form_extension") {
     ]
 
     sources = [
-      "${ability_runtime_path}/frameworks/ets/ani/form_extension_ability/src/sts_form_extension.cpp",
-      "${ability_runtime_path}/frameworks/ets/ani/form_extension_ability/src/sts_form_extension_context.cpp",
+      "${ability_runtime_path}/frameworks/ets/ani/form_extension_ability/src/ets_form_extension.cpp",
+      "${ability_runtime_path}/frameworks/ets/ani/form_extension_ability/src/ets_form_extension_context.cpp",
     ]
 
     deps = [
