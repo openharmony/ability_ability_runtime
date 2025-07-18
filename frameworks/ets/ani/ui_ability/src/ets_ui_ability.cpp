@@ -320,6 +320,11 @@ void EtsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformStart");
         delegator->PostPerformStart(CreateADelegatorAbilityProperty());
     }
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityCreate");
+        applicationContext->DispatchOnAbilityCreate(etsAbilityObj_);
+    }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnStart end");
 }
 
@@ -400,6 +405,12 @@ void EtsUIAbility::OnStopCallback()
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
         TAG_LOGD(AAFwkTag::UIABILITY, "the service connection is not disconnected");
     }
+
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityDestroy");
+        applicationContext->DispatchOnAbilityDestroy(etsAbilityObj_);
+    }
 }
 
 #ifdef SUPPORT_SCREEN
@@ -430,6 +441,12 @@ void EtsUIAbility::OnSceneCreated()
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceCreated");
         delegator->PostPerformScenceCreated(CreateADelegatorAbilityProperty());
+    }
+
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnWindowStageCreate");
+        applicationContext->DispatchOnWindowStageCreate(etsAbilityObj_, etsWindowStageObj_);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnSceneCreated end");
 }
@@ -491,6 +508,12 @@ void EtsUIAbility::onSceneDestroyed()
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceDestroyed");
         delegator->PostPerformScenceDestroyed(CreateADelegatorAbilityProperty());
     }
+
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnWindowStageDestroy");
+        applicationContext->DispatchOnWindowStageDestroy(etsAbilityObj_, etsWindowStageObj_);
+    }
     TAG_LOGD(AAFwkTag::UIABILITY, "onSceneDestroyed end");
 }
 
@@ -534,6 +557,12 @@ void EtsUIAbility::CallOnForegroundFunc(const Want &want)
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformForeground");
         delegator->PostPerformForeground(CreateADelegatorAbilityProperty());
     }
+
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityForeground");
+        applicationContext->DispatchOnAbilityForeground(etsAbilityObj_);
+    }
     TAG_LOGD(AAFwkTag::UIABILITY, "CallOnForegroundFunc end");
 }
 
@@ -548,6 +577,17 @@ void EtsUIAbility::OnBackground()
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformBackground");
         delegator->PostPerformBackground(CreateADelegatorAbilityProperty());
+    }
+
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        auto env = etsRuntime_.GetAniEnv();
+        if (env == nullptr || etsAbilityObj_ == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null env or ability");
+            return;
+        }
+        TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityBackground");
+        applicationContext->DispatchOnAbilityBackground(etsAbilityObj_);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnBackground end");
 }

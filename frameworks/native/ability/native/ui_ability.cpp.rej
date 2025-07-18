@@ -1,0 +1,16 @@
+diff a/frameworks/native/ability/native/ui_ability.cpp b/frameworks/native/ability/native/ui_ability.cpp	(rejected hunks)
+@@ -15,11 +15,14 @@
+ 
+ #include "ui_ability.h"
+ 
++#include "ability_context_impl.h"
+ #include "ability_lifecycle.h"
+ #include "ability_recovery.h"
++#include "application_configuration_manager.h"
+ #include "configuration_convertor.h"
+ #include "display_util.h"
+ #include "display_info.h"
++#include "ets_ui_ability.h"
+ #include "event_report.h"
+ #include "hilog_tag_wrapper.h"
+ #include "hitrace_meter.h"

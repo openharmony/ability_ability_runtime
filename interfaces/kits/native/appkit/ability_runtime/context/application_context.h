@@ -43,18 +43,26 @@ public:
     void UnregisterEnvironmentCallback(const std::shared_ptr<EnvironmentCallback> &environmentCallback);
     void RegisterApplicationStateChangeCallback(
         const std::weak_ptr<ApplicationStateChangeCallback> &applicationStateChangeCallback);
-    void DispatchOnAbilityCreate(const std::shared_ptr<NativeReference> &ability);
-    void DispatchOnWindowStageCreate(const std::shared_ptr<NativeReference> &ability,
-        const std::shared_ptr<NativeReference> &windowStage);
-    void DispatchOnWindowStageDestroy(const std::shared_ptr<NativeReference> &ability,
-        const std::shared_ptr<NativeReference> &windowStage);
+    void DispatchOnAbilityCreate(std::shared_ptr<NativeReference> ability);
+    void DispatchOnAbilityCreate(std::shared_ptr<STSNativeReference> ability);
+    void DispatchOnWindowStageCreate(std::shared_ptr<NativeReference> ability,
+        std::shared_ptr<NativeReference> windowStage);
+    void DispatchOnWindowStageCreate(std::shared_ptr<STSNativeReference> ability,
+        std::shared_ptr<STSNativeReference> windowStage);
+    void DispatchOnWindowStageDestroy(std::shared_ptr<NativeReference> ability,
+        std::shared_ptr<NativeReference> windowStage);
+    void DispatchOnWindowStageDestroy(std::shared_ptr<STSNativeReference> ability,
+        std::shared_ptr<STSNativeReference> windowStage);
     void DispatchWindowStageFocus(const std::shared_ptr<NativeReference> &ability,
         const std::shared_ptr<NativeReference> &windowStage);
     void DispatchWindowStageUnfocus(const std::shared_ptr<NativeReference> &ability,
         const std::shared_ptr<NativeReference> &windowStage);
-    void DispatchOnAbilityDestroy(const std::shared_ptr<NativeReference> &ability);
-    void DispatchOnAbilityForeground(const std::shared_ptr<NativeReference> &ability);
-    void DispatchOnAbilityBackground(const std::shared_ptr<NativeReference> &ability);
+    void DispatchOnAbilityDestroy(std::shared_ptr<NativeReference> ability);
+    void DispatchOnAbilityDestroy(std::shared_ptr<STSNativeReference> ability);
+    void DispatchOnAbilityForeground(std::shared_ptr<NativeReference> ability);
+    void DispatchOnAbilityForeground(std::shared_ptr<STSNativeReference> ability);
+    void DispatchOnAbilityBackground(std::shared_ptr<NativeReference> ability);
+    void DispatchOnAbilityBackground(std::shared_ptr<STSNativeReference> ability);
     void DispatchOnAbilityContinue(const std::shared_ptr<NativeReference> &ability);
     void DispatchOnAbilityWillContinue(const std::shared_ptr<NativeReference> &ability);
     void DispatchOnWindowStageWillRestore(const std::shared_ptr<NativeReference> &ability,
@@ -172,9 +180,11 @@ protected:
 private:
     std::shared_ptr<ContextImpl> contextImpl_;
     static std::vector<std::shared_ptr<AbilityLifecycleCallback>> callbacks_;
+    static std::vector<std::shared_ptr<AbilityLifecycleCallback>> dynamicCallbacks_;
     static std::vector<std::shared_ptr<EnvironmentCallback>> envCallbacks_;
     static std::vector<std::weak_ptr<ApplicationStateChangeCallback>> applicationStateCallback_;
     std::recursive_mutex callbackLock_;
+    std::recursive_mutex dynamicCallbackLock_;
     std::recursive_mutex envCallbacksLock_;
     std::recursive_mutex applicationStateCallbackLock_;
     bool applicationInfoUpdateFlag_ = false;
