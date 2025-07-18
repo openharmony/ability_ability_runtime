@@ -997,6 +997,36 @@ ohos_prebuilt_etc("appRecovery_abc_etc") {
   deps = [ ":appRecovery_abc" ]
 }
 
+generate_static_abc("ability_runtime_mission_info_abc") {
+  base_url = "./"
+  files = [ "./application/MissionInfo.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_runtime_mission_info_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_mission_info_abc_etc") {
+  source = "$target_out_dir/ability_runtime_mission_info_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_mission_info_abc" ]
+}
+
+generate_static_abc("ability_runtime_ability_mission_manager_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.missionManager.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_runtime_ability_mission_manager_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_ability_mission_manager_abc_etc") {
+  source = "$target_out_dir/ability_runtime_ability_mission_manager_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_ability_mission_manager_abc" ]
+}
+
 group("ets_packages") {
   deps = [
     ":ability_application_abc_etc",
@@ -1010,6 +1040,7 @@ group("ets_packages") {
     ":ability_runtime_ability_abc_etc",
     ":ability_runtime_ability_constant_abc_etc",
     ":ability_runtime_ability_context_constant_abc_etc",
+    ":ability_runtime_ability_mission_manager_abc_etc",
     ":ability_runtime_ability_result_abc_etc",
     ":ability_runtime_ability_stage_abc_etc",
     ":ability_runtime_ability_stage_context_abc_etc",
@@ -1038,6 +1069,7 @@ group("ets_packages") {
     ":ability_runtime_insight_intent_context_abc_etc",
     ":ability_runtime_insight_intent_driver_abc_etc",
     ":ability_runtime_insight_intent_executor_abc_etc",
+    ":ability_runtime_mission_info_abc_etc",
     ":ability_runtime_openLink_options_abc_etc",
     ":ability_runtime_shell_cmd_result_abc_etc",
     ":ability_runtime_start_options_abc_etc",
