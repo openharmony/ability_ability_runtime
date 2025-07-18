@@ -19,7 +19,7 @@
 #include <sstream>
 #include <string>
 
-#include "js_modu le_searcher.h"
+#include "js_module_searcher.h"
 #include "extractor.h"
 
 using Extractor = OHOS::AbilityBase::Extractor;
