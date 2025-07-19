@@ -55,6 +55,7 @@ export class Context extends BaseContext {
   processName: string = "";
   applicationInfo!: ApplicationInfo;
   resourceManager!: resmgr.ResourceManager;
+  eventHub: EventHub = new EventHub();
   constructor() {
     if (this.eventHub == null) {
       this.eventHub = new EventHub();
