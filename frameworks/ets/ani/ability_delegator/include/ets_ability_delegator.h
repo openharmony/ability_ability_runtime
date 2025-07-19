@@ -32,48 +32,59 @@ class EtsAbilityDelegator {
 public:
     EtsAbilityDelegator();
     ~EtsAbilityDelegator();
-    static void ExecuteShellCommand(ani_env *env, ani_string cmd, ani_double timeoutSecs, ani_object callback);
+    static void ExecuteShellCommand(ani_env *env, [[maybe_unused]]ani_object object,
+        ani_string cmd, ani_double timeoutSecs, ani_object callback);
 
-    static void FinishTest(ani_env *env, ani_string msg, ani_double code, ani_object callback);
+    static void FinishTest(ani_env *env, [[maybe_unused]]ani_object object,
+        ani_string msg, ani_double code, ani_object callback);
 
     static ani_object SetAppContext(ani_env *env, const std::shared_ptr<AbilityRuntime::Context> &context);
 
-    static ani_object GetAppContext(ani_env *env, ani_class clss);
+    static ani_object GetAppContext(ani_env *env, [[maybe_unused]]ani_object object, ani_class clss);
 
-    static void PrintSync(ani_env *env, ani_string msg);
+    static void PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg);
 
-    static void AddAbilityMonitor(ani_env *env, ani_object monitorObj, ani_object callback);
+    static void AddAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
+        ani_object monitorObj, ani_object callback);
 
-    static void AddAbilityMonitorSync(ani_env *env, ani_object monitorObj);
+    static void AddAbilityMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj);
 
-    static void RemoveAbilityMonitor(ani_env *env, ani_object monitorObj, ani_object callback);
+    static void RemoveAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
+        ani_object monitorObj, ani_object callback);
 
-    static void RemoveAbilityMonitorSync(ani_env *env, ani_object monitorObj);
+    static void RemoveAbilityMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj);
 
-    static void WaitAbilityMonitor(ani_env *env, ani_object monitorOb0, ani_double timeout, ani_object callback);
+    static void WaitAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
+        ani_object monitorOb0, ani_double timeout, ani_object callback);
 
-    static void AddAbilityStageMonitor(ani_env *env, ani_object stageMonitorObj, ani_object callback);
+    static void AddAbilityStageMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
+        ani_object stageMonitorObj, ani_object callback);
 
-    static void AddAbilityStageMonitorSync(ani_env *env, ani_object stageMonitorObj);
+    static void AddAbilityStageMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass,
+        ani_object stageMonitorObj);
 
-    static void RemoveAbilityStageMonitor(ani_env *env, ani_object stageMonitorObj, ani_object callback);
+    static void RemoveAbilityStageMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
+        ani_object stageMonitorObj, ani_object callback);
 
-    static void RemoveAbilityStageMonitorSync(ani_env *env, ani_object stageMonitorObj);
+    static void RemoveAbilityStageMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass,
+        ani_object stageMonitorObj);
 
-    static void WaitAbilityStageMonitor(ani_env *env, ani_object stageMonitorObj, ani_double timeout,
-        ani_object callback);
+    static void WaitAbilityStageMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
+        ani_object stageMonitorObj, ani_double timeout, ani_object callback);
 
-    static void DoAbilityForeground(ani_env *env, ani_object abilityObj, ani_object callback);
+    static void DoAbilityForeground(ani_env *env, [[maybe_unused]]ani_object object,
+        ani_object abilityObj, ani_object callback);
 
-    static void DoAbilityBackground(ani_env *env, ani_object abilityObj, ani_object callback);
+    static void DoAbilityBackground(ani_env *env, [[maybe_unused]]ani_object object,
+        ani_object abilityObj, ani_object callback);
 
-    static void Print(ani_env *env, ani_string msg, ani_object callback);
+    static void Print(ani_env *env, [[maybe_unused]]ani_object object, ani_string msg, ani_object callback);
 
-    static ani_double GetAbilityState(ani_env *env, ani_object abilityObj);
+    static ani_double GetAbilityState(ani_env *env, [[maybe_unused]]ani_object object, ani_object abilityObj);
 
-    static void StartAbility(ani_env *env, ani_object wantObj, ani_object callback);
+    static void StartAbility(ani_env *env, [[maybe_unused]]ani_object object, ani_object wantObj, ani_object callback);
 
-    static ani_ref GetCurrentTopAbility(ani_env* env, ani_object callback);
+    static ani_ref GetCurrentTopAbility(ani_env* env, [[maybe_unused]]ani_class aniClass, ani_object callback);
 
 private:
     static void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resString);
