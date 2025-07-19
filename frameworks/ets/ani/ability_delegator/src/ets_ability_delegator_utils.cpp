@@ -47,6 +47,10 @@ constexpr const char* STRING_ASYNCCALLBACK_VOID = "Lstd/core/String;Lutils/Abili
 constexpr const char* STRING_UIABILITY_NUMBER = "L@ohos/app/ability/UIAbility/UIAbility;:D";
 constexpr const char* STRING_CALLBACK_UIABILITY =
     "Lutils/AbilityUtils/AsyncCallbackWrapper;:L@ohos/app/ability/UIAbility/UIAbility;";
+constexpr const char* RECORD_GET_NAME =
+    "X{C{std.core.BaseEnum}C{std.core.Numeric}C{std.core.String}}:C{std.core.Object}";
+constexpr const char* RECORD_SET_NAME =
+    "X{C{std.core.BaseEnum}C{std.core.Numeric}C{std.core.String}}C{std.core.Object}:";
 }
 
 bool BindFunctions(ani_env *aniEnv, ani_class abilityDelegator)
@@ -191,16 +195,14 @@ void SetParameters(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status: %{public}d", status);
         return;
     }
-    static const char *recordGetName = "X{C{std.core.Numeric}C{std.core.String}}:C{std.core.Object}";
-    ani_method recordGetMethod;
-    status = aniEnv->Class_FindMethod(recordCls, "$_get", recordGetName, &recordGetMethod);
+    ani_method recordGetMethod = nullptr;
+    status = aniEnv->Class_FindMethod(recordCls, "$_get", RECORD_GET_NAME, &recordGetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
     }
-    static const char *recordSetName = "X{C{std.core.Numeric}C{std.core.String}}C{std.core.Object}:";
-    ani_method recordSetMethod;
-    status = aniEnv->Class_FindMethod(recordCls, "$_set", recordSetName, &recordSetMethod);
+    ani_method recordSetMethod = nullptr;
+    status = aniEnv->Class_FindMethod(recordCls, "$_set", RECORD_SET_NAME, &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
