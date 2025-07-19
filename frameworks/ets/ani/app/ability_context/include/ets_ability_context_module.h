@@ -17,8 +17,8 @@
 #define OHOS_ABILITY_RUNTIME_ETS_ABILITY_CONTEXT_MODULE_H
 
 #include <memory>
-#include "ani.h"
 #include "ability_context.h"
+#include "ani.h"
 #include "native_engine/native_engine.h"
 
 namespace OHOS {
