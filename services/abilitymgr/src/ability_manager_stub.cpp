@@ -2500,6 +2500,9 @@ int AbilityManagerStub::StartUIAbilityBySCBInner(MessageParcel &data, MessagePar
     sptr<SessionInfo> sessionInfo = nullptr;
     if (data.ReadBool()) {
         sessionInfo = data.ReadParcelable<SessionInfo>();
+        if (sessionInfo) {
+            sessionInfo->want.CloseAllFd();
+        }
     }
     uint32_t sceneFlag = data.ReadUint32();
     bool isColdStart = false;
@@ -4549,6 +4552,7 @@ int32_t AbilityManagerStub::StartSelfUIAbilityInner(MessageParcel &data, Message
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
         return INNER_ERR;
     }
+    want->CloseAllFd();
     return NO_ERROR;
 }
 
@@ -4569,6 +4573,7 @@ int32_t AbilityManagerStub::StartSelfUIAbilityWithStartOptionsInner(MessageParce
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write StartSelfUIAbilityWithStartOptions result fail");
         return ERR_WRITE_START_SELF_UI_ABILITY_RESULT;
     }
+    want->CloseAllFd();
     return NO_ERROR;
 }
 
