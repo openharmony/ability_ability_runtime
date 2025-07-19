@@ -14,6 +14,7 @@
  */
 
 import BaseContext from 'application.BaseContext'
+import EventHub from 'application.EventHub';
 import ApplicationContext from 'application.ApplicationContext'
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import { AsyncCallback } from '@ohos.base';
