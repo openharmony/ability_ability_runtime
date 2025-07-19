@@ -1419,63 +1419,92 @@ void ETSAbilityConnection::SetConnectionRef(ani_object connectOptionsObj)
 void ETSAbilityConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int32_t resultCode)
 {
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnAbilityConnectDone");
     if (etsVm_ == nullptr || stsConnectionRef_ == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null stsConnectionRef or etsVm");
         return;
     }
-    ani_env *env = nullptr;
-    ani_status status = ANI_ERROR;
-    ani_options aniArgs {0, nullptr};
-    if ((status = (etsVm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env))) != ANI_OK || env == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Failed to get env, status: %{public}d", status);
+    ani_env *env = AttachCurrentThread();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "GetEnv failed");
         return;
     }
     ani_ref refElement = AppExecFwk::WrapElementName(env, element);
     if (refElement == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null refElement");
-        etsVm_->DetachCurrentThread();
+        DetachCurrentThread();
+        return;
+    }
+    if (remoteObject == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null remoteObject");
+        DetachCurrentThread();
         return;
     }
     ani_object refRemoteObject = ANI_ohos_rpc_CreateJsRemoteObject(env, remoteObject);
     if (refRemoteObject == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null refRemoteObject");
-        etsVm_->DetachCurrentThread();
+        DetachCurrentThread();
         return;
     }
+    ani_status status = ANI_ERROR;
     if ((status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onConnect",
         SIGNATURE_ONCONNECT, refElement, refRemoteObject)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "Failed to call onConnect, status: %{public}d", status);
     }
-    if ((status = etsVm_->DetachCurrentThread()) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
-    }
+    DetachCurrentThread();
 }
-
 void ETSAbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t resultCode)
 {
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnAbilityDisconnectDone");
     if (etsVm_ == nullptr || stsConnectionRef_ == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null stsConnectionRef or etsVm");
         return;
     }
-    ani_env *env = nullptr;
-    ani_status status = ANI_ERROR;
-    ani_options aniArgs {0, nullptr};
-    if ((status = (etsVm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env))) != ANI_OK || env == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Failed to get env, status: %{public}d", status);
+    ani_env *env = AttachCurrentThread();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "GetEnv failed");
         return;
     }
     ani_ref refElement = AppExecFwk::WrapElementName(env, element);
     if (refElement == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null refElement");
-        etsVm_->DetachCurrentThread();
+        DetachCurrentThread();
         return;
     }
+    ani_status status = ANI_ERROR;
     if ((status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onDisconnect",
         SIGNATURE_ONDISCONNECT, refElement)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "Failed to call onDisconnect, status: %{public}d", status);
     }
-    if ((status = etsVm_->DetachCurrentThread()) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+    DetachCurrentThread();
+}
+
+ani_env *ETSAbilityConnection::AttachCurrentThread()
+{
+    ani_env *env = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = etsVm_->GetEnv(ANI_VERSION_1, &env)) == ANI_OK) {
+        return env;
+    }
+    ani_option interopEnabled { "--interop=disable", nullptr };
+    ani_options aniArgs { 1, &interopEnabled };
+    if ((status = etsVm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "status: %{public}d", status);
+        return nullptr;
+    }
+    isAttachThread_ = true;
+    return env;
+}
+
+void ETSAbilityConnection::DetachCurrentThread()
+{
+    if (etsVm_ == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null etsVm");
+        return;
+    }
+    if (isAttachThread_) {
+        etsVm_->DetachCurrentThread();
+        isAttachThread_ = false;
     }
 }
 } // namespace AbilityRuntime

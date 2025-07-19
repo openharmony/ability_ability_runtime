@@ -364,10 +364,11 @@ ani_long EtsUIExtensionContext::OnConnectServiceExtensionAbility(ani_env *env, a
         return FAILED_CODE;
     }
     auto innerErrCode = context->ConnectAbility(want, connection);
-    int32_t connectId = connection->GetConnectionId();
-    if (innerErrCode != ERR_OK) {
+    int32_t errcode = static_cast<int32_t>(GetJsErrorCodeByNativeError(innerErrCode));
+    double connectId = connection->GetConnectionId();
+    if (errcode) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Faied to ConnectAbility, innerErrCode is %{public}d", innerErrCode);
-        connection->CallEtsFailed(connectId);
+        connection->CallEtsFailed(errcode);
         return FAILED_CODE;
     }
     return static_cast<ani_long>(connectId);
@@ -687,103 +688,93 @@ void EtsUIExtensionConnection::SetConnectionRef(ani_object connectOptionsObj)
 void EtsUIExtensionConnection::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnAbilityConnectDone");
     if (etsVm_ == nullptr || stsConnectionRef_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null stsConnectionRef or etsVm");
         return;
     }
-    ani_env *env = nullptr;
-    ani_status status = ANI_ERROR;
-    ani_option interopEnabled { "--interop=disable", nullptr };
-    ani_options aniArgs { 1, &interopEnabled };
-    if ((status = (etsVm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env))) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
-        return;
-    }
+    ani_env *env = AttachCurrentThread();
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
-        return;
-    }
-    ani_class cls = nullptr;
-    if ((status = env->FindClass(CONNECT_OPTIONS_CLASS_NAME, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to find connectOptions calss, status: %{public}d", status);
-        return;
-    }
-    if (cls == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null cls");
-        return;
-    }
-    ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "onConnect", SIGNATURE_ONCONNECT, &method))) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to find onConnect method, status: %{public}d", status);
-        return;
-    }
-    if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null method");
+        TAG_LOGE(AAFwkTag::UI_EXT, "GetEnv failed");
         return;
     }
     ani_ref refElement = AppExecFwk::WrapElementName(env, element);
     if (refElement == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null refElement");
+        DetachCurrentThread();
+        return;
+    }
+    if (remoteObject == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null remoteObject");
+        DetachCurrentThread();
         return;
     }
     ani_object refRemoteObject = ANI_ohos_rpc_CreateJsRemoteObject(env, remoteObject);
-    status = env->Object_CallMethod_Void(
-        reinterpret_cast<ani_object>(stsConnectionRef_), method, refElement, refRemoteObject);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Object_CallMethod_Void status: %{public}d", status);
+    if (refRemoteObject == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null refRemoteObject");
+        DetachCurrentThread();
+        return;
     }
-    if ((status = etsVm_->DetachCurrentThread()) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onConnect",
+        SIGNATURE_ONCONNECT, refElement, refRemoteObject)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call onConnect, status: %{public}d", status);
     }
+    DetachCurrentThread();
 }
 
 void EtsUIExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
 {
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnAbilityDisconnectDone");
     if (etsVm_ == nullptr || stsConnectionRef_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null stsConnectionRef or etsVm");
         return;
     }
-    ani_env *env = nullptr;
-    ani_status status = ANI_ERROR;
-    ani_option interopEnabled { "--interop=disable", nullptr };
-    ani_options aniArgs { 1, &interopEnabled };
-    if ((status = (etsVm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env))) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
-        return;
-    }
+    ani_env *env = AttachCurrentThread();
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
-        return;
-    }
-    ani_class cls = nullptr;
-    if ((status = env->FindClass(CONNECT_OPTIONS_CLASS_NAME, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to find connectOptions calss, status: %{public}d", status);
-        return;
-    }
-    if (cls == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null cls");
-        return;
-    }
-    ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "onDisconnect", SIGNATURE_ONDISCONNECT, &method))) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to find onDisconnect method, status: %{public}d", status);
-        return;
-    }
-    if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null method");
+        TAG_LOGE(AAFwkTag::UI_EXT, "GetEnv failed");
         return;
     }
     ani_ref refElement = AppExecFwk::WrapElementName(env, element);
     if (refElement == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null refElement");
+        DetachCurrentThread();
         return;
     }
-    status = env->Object_CallMethod_Void(reinterpret_cast<ani_object>(stsConnectionRef_), method, refElement);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Object_CallMethod_Void status: %{public}d", status);
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onDisconnect",
+        SIGNATURE_ONDISCONNECT, refElement)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call onDisconnect, status: %{public}d", status);
     }
-    if ((status = etsVm_->DetachCurrentThread()) != ANI_OK) {
+    DetachCurrentThread();
+}
+
+ani_env *EtsUIExtensionConnection::AttachCurrentThread()
+{
+    ani_env *env = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = etsVm_->GetEnv(ANI_VERSION_1, &env)) == ANI_OK) {
+        return env;
+    }
+    ani_option interopEnabled { "--interop=disable", nullptr };
+    ani_options aniArgs { 1, &interopEnabled };
+    if ((status = etsVm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
+        return nullptr;
+    }
+    isAttachThread_ = true;
+    return env;
+}
+
+void EtsUIExtensionConnection::DetachCurrentThread()
+{
+    if (etsVm_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsVm");
+        return;
+    }
+    if (isAttachThread_) {
+        etsVm_->DetachCurrentThread();
+        isAttachThread_ = false;
     }
 }
 } // namespace AbilityRuntime
