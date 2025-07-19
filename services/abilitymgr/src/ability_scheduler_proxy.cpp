@@ -61,6 +61,7 @@ bool AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const L
         AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey, "write want failed");
         return false;
     }
+    const_cast<Want &>(want).CloseAllFd();
     data.WriteParcelable(&stateInfo);
     if (sessionInfo) {
         SessionInfo tmpInfo = *sessionInfo;
@@ -70,10 +71,8 @@ bool AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const L
             AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey, "write sessionInfo failed");
             return false;
         }
-    } else {
-        if (!data.WriteBool(false)) {
-            return false;
-        }
+    } else if (!data.WriteBool(false)) {
+        return false;
     }
     int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITY_TRANSACTION, data, reply, option);
     if (err != NO_ERROR) {
