@@ -16,11 +16,11 @@
 import Want from '@ohos.app.ability.Want';
 
 export interface AbilityResult {
-  resultCode: number;
+  resultCode: int;
   want?: Want;
 }
 
 class AbilityResultInner implements AbilityResult {
-  resultCode: number;
+  resultCode: int;
   want?: Want | undefined = {};
 }

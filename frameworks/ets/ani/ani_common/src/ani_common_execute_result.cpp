@@ -65,12 +65,12 @@ bool UnwrapExecuteResult(ani_env *env, ani_object &param, InsightIntentExecuteRe
         return false;
     }
 
-    ani_double code = 0;
-    if (!GetDoublePropertyValue(env, param, "code", code)) {
+    int32_t code = 0;
+    if (!GetIntPropertyValue(env, param, "code", code)) {
         TAG_LOGE(AAFwkTag::INTENT, "parse code fail");
         return false;
     }
-    executeResult.code = static_cast<int32_t>(code);
+    executeResult.code = code;
 
     if (IsExistsProperty(env, param, "result")) {
         if (!UnwrapResultOfExecuteResult(env, param, executeResult)) {
@@ -89,12 +89,12 @@ bool UnwrapExecuteResult(ani_env *env, ani_object &param, InsightIntentExecuteRe
     }
 
     if (IsExistsProperty(env, param, "flags")) {
-        double flags = 0.0;
-        if (!GetDoublePropertyObject(env, param, "flags", flags)) {
+        int32_t flags = 0;
+        if (!GetIntPropertyObject(env, param, "flags", flags)) {
             TAG_LOGE(AAFwkTag::INTENT, "unwrap flags is null");
             return false;
         }
-        executeResult.flags = static_cast<int32_t>(flags);
+        executeResult.flags = flags;
     }
 
     return true;
@@ -128,8 +128,8 @@ ani_object WrapExecuteResult(ani_env *env, const AppExecFwk::InsightIntentExecut
         return nullptr;
     }
 
-    if (!SetDoublePropertyValue(env, objValue, "code", static_cast<double>(executeResult.code))) {
-        TAG_LOGE(AAFwkTag::INTENT, "SetDoubleProperty failded");
+    if (!SetIntPropertyValue(env, objValue, "code", executeResult.code)) {
+        TAG_LOGE(AAFwkTag::INTENT, "SetIntPropertyValue failded");
         return nullptr;
     }
     if (executeResult.result != nullptr) {
@@ -138,7 +138,7 @@ ani_object WrapExecuteResult(ani_env *env, const AppExecFwk::InsightIntentExecut
     if (executeResult.uris.size() > 0) {
         SetStringArrayProperty(env, objValue, "uris", executeResult.uris);
     }
-    SetDoublePropertyObject(env, objValue, "flags", static_cast<double>(executeResult.flags));
+    SetIntPropertyObject(env, objValue, "flags", executeResult.flags);
 
     return objValue;
 }

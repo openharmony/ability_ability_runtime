@@ -47,8 +47,8 @@ bool SetProcessData(ani_env* env, ani_object object, const AppExecFwk::ProcessDa
 bool UnWrapArrayString(ani_env *env, ani_object arrayObj, std::vector<std::string> &stringList);
 ani_object CreateEmptyAniArray(ani_env *env);
 ani_object CreateEmptyMultiAppInfo(ani_env *env);
-ani_object CreateDoubleAniArray(ani_env *env, const std::vector<int32_t> &dataArry);
-bool UnWrapArrayDouble(ani_env *env, ani_object arrayObj, std::vector<int32_t> &list);
+ani_object CreateIntAniArray(ani_env *env, const std::vector<int32_t> &dataArry);
+bool UnWrapArrayInt(ani_env *env, ani_object arrayObj, std::vector<int32_t> &list);
 ani_object CreateKeepAliveInfoArray(ani_env *env, const std::vector<AbilityRuntime::KeepAliveInfo> &infos);
 ani_object WrapKeepAliveInfo(ani_env *env, const AbilityRuntime::KeepAliveInfo &keepAliveInfo);
 bool SetKeepAliveInfo(ani_env *env, ani_object object, const AbilityRuntime::KeepAliveInfo &keepInfo);
