@@ -128,11 +128,11 @@ bool WrapAbilityRunningInfoInner(
     ani_env *env, ani_object &infoObj, const AAFwk::AbilityRunningInfo &info, ani_class cls)
 {
     ani_status status = ANI_ERROR;
-    if ((status = env->Object_SetPropertyByName_Double(infoObj, "pid", info.pid)) != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Int(infoObj, "pid", info.pid)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "set pid failed, status: %{public}d", status);
         return false;
     }
-    if ((status = env->Object_SetPropertyByName_Double(infoObj, "uid", info.uid)) != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Int(infoObj, "uid", info.uid)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "set uid failed, status: %{public}d", status);
         return false;
     }
@@ -140,7 +140,7 @@ bool WrapAbilityRunningInfoInner(
         TAG_LOGE(AAFwkTag::ABILITYMGR, "set processName failed");
         return false;
     }
-    if ((status = env->Object_SetPropertyByName_Double(infoObj, "startTime", info.startTime)) != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Long(infoObj, "startTime", info.startTime)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "set processName failed, status: %{public}d", status);
         return false;
     }
@@ -254,11 +254,11 @@ bool WrapExtensionRunningInfoInner(
     ani_env *env, ani_object &infoObj, const AAFwk::ExtensionRunningInfo &info, ani_class cls)
 {
     ani_status status = ANI_ERROR;
-    if ((status = env->Object_SetPropertyByName_Double(infoObj, "pid", info.pid)) != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Int(infoObj, "pid", info.pid)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "set pid failed, status: %{public}d", status);
         return false;
     }
-    if ((status = env->Object_SetPropertyByName_Double(infoObj, "uid", info.uid)) != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Int(infoObj, "uid", info.uid)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "set uid failed, status: %{public}d", status);
         return false;
     }
@@ -266,7 +266,7 @@ bool WrapExtensionRunningInfoInner(
         TAG_LOGE(AAFwkTag::ABILITYMGR, "set processName failed");
         return false;
     }
-    if ((status = env->Object_SetPropertyByName_Double(infoObj, "startTime", info.startTime)) != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Long(infoObj, "startTime", info.startTime)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "set startTimee failed, status: %{public}d", status);
         return false;
     }

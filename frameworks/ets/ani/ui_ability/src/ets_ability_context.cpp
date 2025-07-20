@@ -53,8 +53,8 @@ constexpr const char* SIGNATURE_OPEN_LINK = "Lstd/core/String;Lutils/AbilityUtil
 constexpr const char *SIGNATURE_ONCONNECT = "LbundleManager/ElementName/ElementName;L@ohos/rpc/rpc/IRemoteObject;:V";
 constexpr const char *SIGNATURE_ONDISCONNECT = "LbundleManager/ElementName/ElementName;:V";
 constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
-    "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:D";
-constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "DLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
+constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
 
 int64_t RequestCodeFromStringToInt64(const std::string &requestCode)
 {
@@ -377,7 +377,7 @@ void EtsAbilityContext::SetMissionLabel(ani_env *env, ani_object aniObj, ani_str
     etsContext->OnSetMissionLabel(env, aniObj, labelObj, callbackObj);
 }
 
-ani_int EtsAbilityContext::ConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+ani_long EtsAbilityContext::ConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
     ani_object connectOptionsObj)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "ConnectServiceExtensionAbility called");
@@ -390,7 +390,7 @@ ani_int EtsAbilityContext::ConnectServiceExtensionAbility(ani_env *env, ani_obje
     return etsContext->OnConnectServiceExtensionAbility(env, aniObj, wantObj, connectOptionsObj);
 }
 
-void EtsAbilityContext::DisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_double connectId,
+void EtsAbilityContext::DisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
     ani_object callback)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "DisconnectServiceExtensionAbility called");
@@ -849,7 +849,7 @@ void EtsAbilityContext::OnSetMissionLabel(ani_env *env, ani_object aniObj, ani_s
     AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
 }
 
-ani_int EtsAbilityContext::OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+ani_long EtsAbilityContext::OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
     ani_object connectOptionsObj)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "OnConnectServiceExtensionAbility call");
@@ -887,10 +887,10 @@ ani_int EtsAbilityContext::OnConnectServiceExtensionAbility(ani_env *env, ani_ob
         RemoveConnection(connectId);
         return FAILED_CODE;
     }
-    return connectId;
+    return static_cast<ani_long>(connectId);
 }
 
-void EtsAbilityContext::OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_double connectId,
+void EtsAbilityContext::OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
     ani_object callback)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "OnDisconnectServiceExtensionAbility call");

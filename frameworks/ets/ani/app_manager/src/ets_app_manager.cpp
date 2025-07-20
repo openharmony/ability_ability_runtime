@@ -43,13 +43,13 @@ constexpr const char* APP_MANAGER_SPACE_NAME = "L@ohos/app/ability/appManager/ap
 
 class EtsAppManager final {
 public:
-    static void PreloadApplication(ani_env *env, ani_object callback, ani_string aniBundleName, ani_double aniUserId,
+    static void PreloadApplication(ani_env *env, ani_object callback, ani_string aniBundleName, ani_int aniUserId,
         ani_enum_item aniMode, ani_object aniAppIndex);
     static void GetRunningProcessInformation(ani_env *env, ani_object callback);
     static void GetForegroundApplications(ani_env *env, ani_object callback);
     static void GetRunningMultiAppInfo(ani_env *env, ani_string aniBundleName, ani_object callback);
     static void GetRunningProcessInfoByBundleNameAndUserId(ani_env *env, ani_string aniBundleName,
-        ani_double aniUserId, ani_object callback);
+        ani_int aniUserId, ani_object callback);
     static void GetRunningProcessInfoByBundleName(ani_env *env, ani_string aniBundleName, ani_object callback);
     static void GetAppMemorySize(ani_env *env, ani_object callback);
     static void IsRamConstrainedDevice(ani_env *env, ani_object callback);
@@ -57,21 +57,21 @@ public:
     static void NativeKillProcessesByBundleNameSync(ani_env *env, ani_string bundleName, ani_object callback);
     static void NativeKillProcessesByBundleName(
         ani_env *env, ani_object callback, ani_string bundleName, ani_boolean clearPageStack, ani_object stsAppIndex);
-    static void NativeKillProcessWithAccountSync(ani_env *env, ani_string aniBundleName, ani_double aniAccountId,
+    static void NativeKillProcessWithAccountSync(ani_env *env, ani_string aniBundleName, ani_int aniAccountId,
         ani_object callback);
     static void NativeKillProcessWithAccount(ani_env *env, ani_object callback, ani_string aniBundleName,
-        ani_double aniAccountId, ani_boolean clearPageStack, ani_object aniAppIndex);
-    static void NativeGetProcessMemoryByPid(ani_env *env, ani_double aniPid, ani_object callback);
+        ani_int aniAccountId, ani_boolean clearPageStack, ani_object aniAppIndex);
+    static void NativeGetProcessMemoryByPid(ani_env *env, ani_int aniPid, ani_object callback);
     static void GetRunningProcessInformationByBundleType(
         ani_env *env, ani_enum_item aniBundleType, ani_object callback);
     static void NativeIsSharedBundleRunning(ani_env *env, ani_string aniBundleName,
-        ani_double aniVersionCode, ani_object callback);
+        ani_long aniVersionCode, ani_object callback);
     static void NativeGetSupportedProcessCachePids(ani_env *env, ani_string aniBundleName, ani_object callback);
     static void NativeKillProcessesInBatch(ani_env *env, ani_object pids, ani_object callback);
     static void NativeIsAppRunning(
         ani_env *env, ani_object callback, ani_string aniBundleName, ani_object aniAppCloneIndex);
     static void NativeSetKeepAliveForBundle(
-        ani_env *env, ani_string aniBundleName, ani_double aniUserId, ani_boolean enable, ani_object callback);
+        ani_env *env, ani_string aniBundleName, ani_int aniUserId, ani_boolean enable, ani_object callback);
     static void NativeGetKeepAliveBundles(ani_env *env, ani_object callback, ani_enum_item aniType,
         ani_object aniUserId);
 private:
@@ -85,7 +85,7 @@ private:
     static void KillProcessesByBundleNameInner(ani_env *env, ani_object callback, ani_string stsBundleName,
         ani_boolean clearPageStack, ani_object stsAppIndex);
     static void KillProcessWithAccountInner(ani_env *env, ani_object callback, ani_string aniBundleName,
-        ani_double aniAccountId, ani_boolean clearPageStack, ani_object aniAppIndex);
+        ani_int aniAccountId, ani_boolean clearPageStack, ani_object aniAppIndex);
 };
 
 sptr<AppExecFwk::IAppMgr> EtsAppManager::GetAppManagerInstance()
@@ -114,7 +114,7 @@ bool EtsAppManager::CheckCallerIsSystemApp()
 #endif
 
 void EtsAppManager::PreloadApplication(ani_env *env, ani_object callback, ani_string aniBundleName,
-    ani_double aniUserId, ani_enum_item aniMode, ani_object aniAppIndex)
+    ani_int aniUserId, ani_enum_item aniMode, ani_object aniAppIndex)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "PreloadApplication");
     if (env == nullptr) {
@@ -129,9 +129,8 @@ void EtsAppManager::PreloadApplication(ani_env *env, ani_object callback, ani_st
                 env, static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM)), nullptr);
         return;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "PreloadApplication userId:%{public}f, bundleName %{public}s",
+    TAG_LOGD(AAFwkTag::APPMGR, "PreloadApplication userId:%{public}d, bundleName %{public}s",
         aniUserId, bundleName.c_str());
-    int32_t userId = static_cast<int32_t>(aniUserId);
 
     ani_int mode = 0;
     if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, aniMode, mode)) {
@@ -149,18 +148,16 @@ void EtsAppManager::PreloadApplication(ani_env *env, ani_object callback, ani_st
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to check undefined status : %{public}d", status);
         return;
     }
-    ani_double dval = 0.0;
     if (!isUndefined) {
-        if ((status = env->Object_CallMethodByName_Double(aniAppIndex, "doubleValue", nullptr, &dval)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Double status : %{public}d", status);
+        if ((status = env->Object_CallMethodByName_Int(aniAppIndex, "intValue", nullptr, &appIndex)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Int status : %{public}d", status);
             return;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "aniAppIndex: %{public}f", dval);
-        appIndex = static_cast<int32_t>(dval);
+        TAG_LOGD(AAFwkTag::APPMGR, "aniAppIndex: %{public}d", appIndex);
     }
     TAG_LOGD(AAFwkTag::APPMGR, "PreloadApplication userId:%{public}d, mode:%{public}d, appIndex:%{public}d",
-        userId, mode, appIndex);
-    sptr<AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();
+        aniUserId, mode, appIndex);
+    sptr<OHOS::AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();
     if (appMgr == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "appManager null ptr");
         AppExecFwk::AsyncCallback(env, callback,
@@ -168,7 +165,7 @@ void EtsAppManager::PreloadApplication(ani_env *env, ani_object callback, ani_st
                 env, static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)), nullptr);
         return;
     }
-    auto ret = appMgr->PreloadApplication(bundleName, userId, static_cast<AppExecFwk::PreloadMode>(mode), appIndex);
+    auto ret = appMgr->PreloadApplication(bundleName, aniUserId, static_cast<AppExecFwk::PreloadMode>(mode), appIndex);
     TAG_LOGD(AAFwkTag::APPMGR, "PreloadApplication ret %{public}d", ret);
 
     AppExecFwk::AsyncCallback(env, callback,
@@ -305,7 +302,7 @@ void EtsAppManager::GetRunningMultiAppInfo(ani_env *env, ani_string aniBundleNam
 }
 
 void EtsAppManager::GetRunningProcessInfoByBundleNameAndUserId(
-    ani_env *env, ani_string aniBundleName, ani_double aniUserId, ani_object callback)
+    ani_env *env, ani_string aniBundleName, ani_int aniUserId, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "GetRunningProcessInfoByBundleNameAndUserId called");
     if (env == nullptr) {
@@ -328,8 +325,7 @@ void EtsAppManager::GetRunningProcessInfoByBundleNameAndUserId(
                 env, static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM)), emptyArray);
         return;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "GetRunningProcessInfoByBundleNameAndUserId userid:%{public}f", aniUserId);
-    int32_t userId = static_cast<int32_t>(aniUserId);
+    TAG_LOGD(AAFwkTag::APPMGR, "GetRunningProcessInfoByBundleNameAndUserId userid:%{public}d", aniUserId);
     auto appManager = GetAppManagerInstance();
     if (appManager == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "appManager nullptr");
@@ -339,7 +335,7 @@ void EtsAppManager::GetRunningProcessInfoByBundleNameAndUserId(
         return;
     }
     std::vector<AppExecFwk::RunningProcessInfo> infos;
-    int32_t ret = appManager->GetRunningProcessInformation(bundleName, userId, infos);
+    int32_t ret = appManager->GetRunningProcessInformation(bundleName, aniUserId, infos);
     TAG_LOGD(AAFwkTag::APPMGR, "GetRunningProcessInformation ret: %{public}d, size:%{public}zu", ret, infos.size());
     if (ret != ERR_OK) {
         AppExecFwk::AsyncCallback(env, callback,
@@ -361,7 +357,7 @@ void EtsAppManager::GetRunningProcessInfoByBundleNameAndUserId(
 void EtsAppManager::GetRunningProcessInfoByBundleName(ani_env *env, ani_string aniBundleName, ani_object callback)
 {
     int userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
-    GetRunningProcessInfoByBundleNameAndUserId(env, aniBundleName, static_cast<double>(userId), callback);
+    GetRunningProcessInfoByBundleNameAndUserId(env, aniBundleName, userId, callback);
 }
 
 void EtsAppManager::GetAppMemorySize(ani_env *env, ani_object callback)
@@ -377,7 +373,7 @@ void EtsAppManager::GetAppMemorySize(ani_env *env, ani_object callback)
         AppExecFwk::AsyncCallback(env, callback,
             AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
             static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)),
-            AppExecFwk::CreateDouble(env, ERR_FAILURE));
+            AppExecFwk::CreateInt(env, ERR_FAILURE));
         return;
     }
     int32_t memorySize = abilityManager->GetAppMemorySize();
@@ -385,7 +381,7 @@ void EtsAppManager::GetAppMemorySize(ani_env *env, ani_object callback)
 
     AppExecFwk::AsyncCallback(env, callback,
         AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ERR_OK)),
-        AppExecFwk::CreateDouble(env, static_cast<ani_double>(memorySize)));
+        AppExecFwk::CreateInt(env, memorySize));
     TAG_LOGD(AAFwkTag::APPMGR, "GetAppMemorySize end");
 }
 
@@ -485,15 +481,14 @@ void EtsAppManager::KillProcessesByBundleNameInner(ani_env *env, ani_object call
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to check undefined status : %{public}d", status);
         return;
     }
-    ani_double dval = 0.0;
+    
     if (!isUndefined) {
-        if ((status = env->Object_CallMethodByName_Double(stsAppIndex,
-            "toDouble", nullptr, &dval)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Double status : %{public}d", status);
+        if ((status = env->Object_CallMethodByName_Int(stsAppIndex,
+            "toInt", nullptr, &appIndex)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Int status : %{public}d", status);
             return;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "stsAppIndex: %{public}f", dval);
-        appIndex = static_cast<int32_t>(dval);
+        TAG_LOGD(AAFwkTag::APPMGR, "stsAppIndex: %{public}d", appIndex);
     }
     auto ret = abilityManager->KillProcess(bundleName, clearPageStack, appIndex);
     TAG_LOGD(AAFwkTag::APPMGR, "KillProcess ret: %{public}d", ret);
@@ -502,7 +497,7 @@ void EtsAppManager::KillProcessesByBundleNameInner(ani_env *env, ani_object call
     TAG_LOGD(AAFwkTag::APPMGR, "KillProcessesByBundleNameInner end");
 }
 
-void EtsAppManager::NativeKillProcessWithAccountSync(ani_env *env, ani_string aniBundleName, ani_double aniAccountId,
+void EtsAppManager::NativeKillProcessWithAccountSync(ani_env *env, ani_string aniBundleName, ani_int aniAccountId,
     ani_object callback)
 {
     if (env == nullptr) {
@@ -516,14 +511,14 @@ void EtsAppManager::NativeKillProcessWithAccountSync(ani_env *env, ani_string an
 }
 
 void EtsAppManager::NativeKillProcessWithAccount(ani_env *env, ani_object callback, ani_string aniBundleName,
-    ani_double aniAccountId, ani_boolean clearPageStack, ani_object aniAppIndex)
+    ani_int aniAccountId, ani_boolean clearPageStack, ani_object aniAppIndex)
 {
     KillProcessWithAccountInner(env, callback, aniBundleName, aniAccountId,
         clearPageStack, aniAppIndex);
 }
 
 void EtsAppManager::KillProcessWithAccountInner(ani_env *env, ani_object callback, ani_string aniBundleName,
-    ani_double aniAccountId, ani_boolean clearPageStack, ani_object aniAppIndex)
+    ani_int aniAccountId, ani_boolean clearPageStack, ani_object aniAppIndex)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "KillProcessWithAccountInner called");
     if (env == nullptr) {
@@ -545,8 +540,7 @@ void EtsAppManager::KillProcessWithAccountInner(ani_env *env, ani_object callbac
         return;
     }
 
-    TAG_LOGD(AAFwkTag::APPMGR, "KillProcessWithAccount accountId:%{public}f", aniAccountId);
-    int32_t accountId = static_cast<int32_t>(aniAccountId);
+    TAG_LOGD(AAFwkTag::APPMGR, "KillProcessWithAccount accountId:%{public}d", aniAccountId);
 
     int32_t appIndex = 0;
     ani_status status = ANI_OK;
@@ -555,32 +549,29 @@ void EtsAppManager::KillProcessWithAccountInner(ani_env *env, ani_object callbac
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to check undefined status : %{public}d", status);
         return;
     }
-    ani_double dval = 0.0;
     if (!isUndefined) {
-        if ((status = env->Object_CallMethodByName_Double(aniAppIndex,
-            "toDouble", nullptr, &dval)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Double status : %{public}d", status);
+        if ((status = env->Object_CallMethodByName_Int(aniAppIndex,
+            "toInt", nullptr, &appIndex)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Int status : %{public}d", status);
             return;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "stsAppIndex: %{public}f", dval);
-        appIndex = static_cast<int32_t>(dval);
+        TAG_LOGD(AAFwkTag::APPMGR, "stsAppIndex: %{public}d", appIndex);
     }
-    auto ret = appMgr->GetAmsMgr()->KillProcessWithAccount(bundleName, accountId, clearPageStack, appIndex);
+    auto ret = appMgr->GetAmsMgr()->KillProcessWithAccount(bundleName, aniAccountId, clearPageStack, appIndex);
     TAG_LOGD(AAFwkTag::APPMGR, "KillProcessWithAccount ret: %{public}d", ret);
     AppExecFwk::AsyncCallback(env, callback,
         AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret)), nullptr);
     TAG_LOGD(AAFwkTag::APPMGR, "KillProcessWithAccount end");
 }
 
-void EtsAppManager::NativeGetProcessMemoryByPid(ani_env *env, ani_double aniPid, ani_object callback)
+void EtsAppManager::NativeGetProcessMemoryByPid(ani_env *env, ani_int aniPid, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "NativeGetProcessMemoryByPid called");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
         return;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "NativeGetProcessMemoryByPid pid:%{public}f", aniPid);
-    int32_t pid = static_cast<int64_t>(aniPid);
+    TAG_LOGD(AAFwkTag::APPMGR, "NativeGetProcessMemoryByPid pid:%{public}d", aniPid);
 
     sptr<AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();
     if (appMgr == nullptr) {
@@ -588,15 +579,15 @@ void EtsAppManager::NativeGetProcessMemoryByPid(ani_env *env, ani_double aniPid,
         AppExecFwk::AsyncCallback(env, callback,
             AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
             static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)),
-            AppExecFwk::CreateDouble(env, ERR_FAILURE));
+            AppExecFwk::CreateInt(env, ERR_FAILURE));
         return;
     }
     int32_t memSize = 0;
-    int32_t ret = appMgr->GetProcessMemoryByPid(pid, memSize);
+    int32_t ret = appMgr->GetProcessMemoryByPid(aniPid, memSize);
     TAG_LOGD(AAFwkTag::APPMGR, "NativeGetProcessMemoryByPid memSize: %{public}d, ret:%{public}d", memSize, ret);
     AppExecFwk::AsyncCallback(env, callback,
         AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret)),
-        AppExecFwk::CreateDouble(env, static_cast<ani_double>(memSize)));
+        AppExecFwk::CreateInt(env, memSize));
     TAG_LOGD(AAFwkTag::APPMGR, "NativeGetProcessMemoryByPid end");
 }
 
@@ -646,7 +637,7 @@ void EtsAppManager::GetRunningProcessInformationByBundleType(
 }
 
 void EtsAppManager::NativeIsSharedBundleRunning(ani_env *env, ani_string aniBundleName,
-    ani_double aniVersionCode, ani_object callback)
+    ani_long aniVersionCode, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "NativeIsSharedBundleRunning called");
     if (env == nullptr) {
@@ -662,8 +653,8 @@ void EtsAppManager::NativeIsSharedBundleRunning(ani_env *env, ani_string aniBund
             AppExecFwk::CreateBoolean(env, false));
         return;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "NativeGetProcessMemoryByPid pid:%{public}f", aniVersionCode);
-    int32_t versionCode = static_cast<int64_t>(aniVersionCode);
+    TAG_LOGD(AAFwkTag::APPMGR, "NativeGetProcessMemoryByPid pid:%{public}lld", aniVersionCode);
+    uint32_t versionCode = static_cast<uint32_t>(aniVersionCode);
 
     std::string bundleName;
     if (!AppExecFwk::GetStdString(env, aniBundleName, bundleName)) {
@@ -709,7 +700,7 @@ void EtsAppManager::NativeGetSupportedProcessCachePids(ani_env *env, ani_string 
             AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret)), emptyArray);
         return;
     }
-    ani_object arrayObj = CreateDoubleAniArray(env, list);
+    ani_object arrayObj = CreateIntAniArray(env, list);
     if (arrayObj == nullptr) {
         AppExecFwk::AsyncCallback(env, callback,
             AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
@@ -737,7 +728,7 @@ void EtsAppManager::NativeKillProcessesInBatch(ani_env *env, ani_object pids, an
         return;
     }
     std::vector<int32_t> pidList;
-    if (!UnWrapArrayDouble(env, pids, pidList)) {
+    if (!UnWrapArrayInt(env, pids, pidList)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Parse pids failed");
         AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(env, "Parse param pids failed, must be array of numbers.");
         return;
@@ -779,15 +770,13 @@ void EtsAppManager::NativeIsAppRunning(ani_env *env, ani_object callback, ani_st
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to check undefined status : %{public}d", status);
         return;
     }
-    ani_double dval = 0.0;
     if (!isUndefined) {
-        if ((status = env->Object_CallMethodByName_Double(aniAppCloneIndex,
-            "toDouble", nullptr, &dval)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Double status : %{public}d", status);
+        if ((status = env->Object_CallMethodByName_Int(aniAppCloneIndex,
+            "toInt", nullptr, &appCloneIndex)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Int status : %{public}d", status);
             return;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "aniAppCloneIndex: %{public}f", dval);
-        appCloneIndex = static_cast<int32_t>(dval);
+        TAG_LOGD(AAFwkTag::APPMGR, "aniAppCloneIndex: %{public}d", appCloneIndex);
     }
     bool isRunnig = false;
     int32_t innerErrorCode = appMgr->IsAppRunning(bundleName, appCloneIndex, isRunnig);
@@ -805,7 +794,7 @@ void EtsAppManager::NativeIsAppRunning(ani_env *env, ani_object callback, ani_st
 }
 
 void EtsAppManager::NativeSetKeepAliveForBundle(ani_env *env, ani_string aniBundleName,
-    ani_double aniUserId, ani_boolean enable, ani_object callback)
+    ani_int aniUserId, ani_boolean enable, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "NativeSetKeepAliveForBundle called");
     if (env == nullptr) {
@@ -824,9 +813,8 @@ void EtsAppManager::NativeSetKeepAliveForBundle(ani_env *env, ani_string aniBund
         AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
         return;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "KillProcessWithAccount aniUserId:%{public}f", aniUserId);
-    int32_t userId = static_cast<int32_t>(aniUserId);
-    int32_t innerErrCode = abilityManager->SetApplicationKeepAlive(bundleName, userId, enable);
+    TAG_LOGD(AAFwkTag::APPMGR, "KillProcessWithAccount aniUserId:%{public}d", aniUserId);
+    int32_t innerErrCode = abilityManager->SetApplicationKeepAlive(bundleName, aniUserId, enable);
     TAG_LOGD(AAFwkTag::APPMGR, "innerErrCode:%{public}d", innerErrCode);
     AppExecFwk::AsyncCallback(env, callback,
         AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(innerErrCode)), nullptr);
@@ -861,15 +849,13 @@ void EtsAppManager::NativeGetKeepAliveBundles(ani_env *env, ani_object callback,
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to check undefined status : %{public}d", status);
         return;
     }
-    ani_double dval = 0.0;
     if (!isUndefined) {
-        if ((status = env->Object_CallMethodByName_Double(aniUserId,
-            "toDouble", nullptr, &dval)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Double status : %{public}d", status);
+        if ((status = env->Object_CallMethodByName_Int(aniUserId,
+            "toInt", nullptr, &userId)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Int status : %{public}d", status);
             return;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "stsAppIndex: %{public}f", dval);
-        userId = static_cast<int32_t>(dval);
+        TAG_LOGD(AAFwkTag::APPMGR, "stsAppIndex: %{public}d", userId);
     }
     std::vector<AbilityRuntime::KeepAliveInfo> infoList;
     int32_t innerErrCode = abilityManager->QueryKeepAliveApplications(appType, userId, infoList);

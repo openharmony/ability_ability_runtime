@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 export interface RunningAppClone {
-    appCloneIndex: number;
-    uid: number;
-    pids: Array<number>;
+    appCloneIndex: int;
+    uid: int;
+    pids: Array<int>;
 }
 
 class RunningAppCloneInner implements RunningAppClone {
-  appCloneIndex: number;
-  uid: number;
-  pids: Array<number> = new Array<number>();
+  appCloneIndex: int;
+  uid: int;
+  pids: Array<int> = new Array<int>();
 }
