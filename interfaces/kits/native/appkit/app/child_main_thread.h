@@ -57,7 +57,7 @@ private:
     void HandleExitProcessSafely();
     void ExitProcessSafely();
     void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths,
-        AppLibPathMap &appAbcLibPaths);
+        std::map<std::string, std::string> &abcPathsToBundleModuleNameMap);
     void HandleRunNativeProc(const sptr<IRemoteObject> &mainProcessCb);
     void UpdateNativeChildLibModuleName(const AppLibPathMap &appLibPaths, bool isSystemApp);
 

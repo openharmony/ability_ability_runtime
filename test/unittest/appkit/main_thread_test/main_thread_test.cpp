@@ -927,7 +927,7 @@ HWTEST_F(MainThreadTest, PrepareAbilityDelegator_0100, TestSize.Level1)
     std::shared_ptr<UserTestRecord> usertestInfo = std::make_shared<UserTestRecord>();
     bool isStageBased = true;
     HapModuleInfo hapModuleInfo;
-    EXPECT_TRUE(mainThread_->PrepareAbilityDelegator(usertestInfo, isStageBased, hapModuleInfo));
+    EXPECT_TRUE(mainThread_->PrepareAbilityDelegator(usertestInfo, isStageBased, hapModuleInfo, 0, "1.1"));
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
@@ -942,7 +942,7 @@ HWTEST_F(MainThreadTest, PrepareAbilityDelegator_0200, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     bool isStageBased = true;
     HapModuleInfo hapModuleInfo;
-    EXPECT_FALSE(mainThread_->PrepareAbilityDelegator(nullptr, isStageBased, hapModuleInfo));
+    EXPECT_FALSE(mainThread_->PrepareAbilityDelegator(nullptr, isStageBased, hapModuleInfo, 0, "1.1"));
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
@@ -961,7 +961,7 @@ HWTEST_F(MainThreadTest, PrepareAbilityDelegator_0300, TestSize.Level1)
     AbilityInfo abilityInfo;
     HapModuleInfo hapModuleInfo;
     hapModuleInfo.abilityInfos.emplace_back(abilityInfo);
-    EXPECT_FALSE(mainThread_->PrepareAbilityDelegator(usertestInfo, isStageBased, hapModuleInfo));
+    EXPECT_FALSE(mainThread_->PrepareAbilityDelegator(usertestInfo, isStageBased, hapModuleInfo, 0, "1.1"));
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
@@ -978,7 +978,7 @@ HWTEST_F(MainThreadTest, PrepareAbilityDelegator_0400, TestSize.Level1)
     std::shared_ptr<UserTestRecord> usertestInfo = std::make_shared<UserTestRecord>();
     bool isStageBased = false;
     HapModuleInfo hapModuleInfo;
-    EXPECT_FALSE(mainThread_->PrepareAbilityDelegator(usertestInfo, isStageBased, hapModuleInfo));
+    EXPECT_FALSE(mainThread_->PrepareAbilityDelegator(usertestInfo, isStageBased, hapModuleInfo, 0, "1.1"));
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
@@ -1915,7 +1915,7 @@ HWTEST_F(MainThreadTest, HandleLaunchAbility_0200, TestSize.Level1)
     abilityRecord3->abilityInfo_ = nullptr;
     AbilityRuntime::Runtime::Options options;
     auto runtime = AbilityRuntime::Runtime::Create(options);
-    mainThread_->application_->SetRuntime(std::move(runtime));
+    mainThread_->application_->AddRuntime(std::move(runtime));
     auto contextDeal = std::make_shared<ContextDeal>();
     auto appInfo = std::make_shared<ApplicationInfo>();
     appInfo->debug = true;
@@ -2257,7 +2257,7 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0100, TestSize.Level1)
     BundleInfo bundleInfo;
     HspList hspList;
     AppLibPathMap appLibPaths;
-    AppLibPathMap appAbcLibPaths;
+    std::map<std::string, std::string> abcPathsToBundleModuleNameMap;
 
     bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.nativeLibraryPath = "patch_1001/libs/arm";
     bundleInfo.applicationInfo.nativeLibraryPath = "libs/arm";
@@ -2271,11 +2271,13 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0100, TestSize.Level1)
     BaseSharedBundleInfo hspInfo1;
     hspList.emplace_back(hspInfo1);
 
-    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths, appAbcLibPaths);
+    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths, abcPathsToBundleModuleNameMap);
     ASSERT_EQ(appLibPaths.size(), size_t(1));
     ASSERT_EQ(appLibPaths["default"].size(), size_t(2));
     EXPECT_EQ(appLibPaths["default"][0], "/data/storage/el1/bundle/patch_1001/libs/arm");
     EXPECT_EQ(appLibPaths["default"][1], "/data/storage/el1/bundle/libs/arm");
+    EXPECT_EQ(abcPathsToBundleModuleNameMap.size(), 1);
+    EXPECT_EQ(abcPathsToBundleModuleNameMap["default"], "default");
 }
 
 /**
@@ -2289,7 +2291,8 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0200, TestSize.Level1)
     BundleInfo bundleInfo;
     HspList hspList;
     AppLibPathMap appLibPaths;
-    AppLibPathMap appAbcLibPaths;
+    std::map<std::string, std::string> abcPathsToBundleModuleNameMap;
+    bundleInfo.applicationInfo.bundleName = "com.ohos.myapplication";
 
     // if all hap lib is compressed and isolated, nativeLibraryPath of application is empty.
     HapModuleInfo hapModuleInfo1;
@@ -2317,7 +2320,7 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0200, TestSize.Level1)
     hspInfo1.nativeLibraryPath = "library/libs/arm";
     hspList.emplace_back(hspInfo1);
 
-    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths, appAbcLibPaths);
+    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths, abcPathsToBundleModuleNameMap);
     ASSERT_EQ(appLibPaths.size(), size_t(3));
     ASSERT_EQ(appLibPaths["com.ohos.myapplication/entry"].size(), size_t(2));
     EXPECT_EQ(appLibPaths["com.ohos.myapplication/entry"][0], "/data/storage/el1/bundle/patch_1001/entry/libs/arm");
@@ -2330,6 +2333,15 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0200, TestSize.Level1)
     ASSERT_EQ(appLibPaths["com.ohos.myapplication/library"].size(), size_t(1));
     EXPECT_EQ(appLibPaths["com.ohos.myapplication/library"][0],
         "/data/storage/el1/bundle/com.ohos.myapplication/library/libs/arm");
+
+    EXPECT_EQ(abcPathsToBundleModuleNameMap.size(), 4);
+    EXPECT_EQ(abcPathsToBundleModuleNameMap["default"], "default");
+    EXPECT_EQ(abcPathsToBundleModuleNameMap["/data/storage/el1/bundle/entry/ets/modules_static.abc"],
+        "com.ohos.myapplication/entry");
+    EXPECT_EQ(abcPathsToBundleModuleNameMap["/data/storage/el1/bundle/feature/ets/modules_static.abc"],
+        "com.ohos.myapplication/feature");
+    EXPECT_EQ(abcPathsToBundleModuleNameMap["/data/storage/el1/bundle/library/ets/modules_static.abc"],
+        "com.ohos.myapplication/library");
 }
 
 /**
@@ -2343,7 +2355,8 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0300, TestSize.Level1)
     BundleInfo bundleInfo;
     HspList hspList;
     AppLibPathMap appLibPaths;
-    AppLibPathMap appAbcLibPaths;
+    std::map<std::string, std::string> abcPathsToBundleModuleNameMap;
+    bundleInfo.applicationInfo.bundleName = "com.ohos.myapplication";
 
     // if all hap lib is uncompressed, nativeLibraryPath of application is empty.
     bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.nativeLibraryPath = "patch_1001/libs/arm";
@@ -2374,7 +2387,7 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0300, TestSize.Level1)
     hspInfo1.nativeLibraryPath = "library.hsp!/libs/armeabi-v7a";
     hspList.emplace_back(hspInfo1);
 
-    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths, appAbcLibPaths);
+    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths, abcPathsToBundleModuleNameMap);
     ASSERT_EQ(appLibPaths.size(), size_t(4));
     ASSERT_EQ(appLibPaths["default"].size(), size_t(1));
     EXPECT_EQ(appLibPaths["default"][0], "/data/storage/el1/bundle/patch_1001/libs/arm");
@@ -2391,6 +2404,15 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0300, TestSize.Level1)
     ASSERT_EQ(appLibPaths["com.ohos.myapplication/library"].size(), size_t(1));
     EXPECT_EQ(appLibPaths["com.ohos.myapplication/library"][0],
         "/data/storage/el1/bundle/com.ohos.myapplication/library/library.hsp!/libs/armeabi-v7a");
+
+    EXPECT_EQ(abcPathsToBundleModuleNameMap.size(), 4);
+    EXPECT_EQ(abcPathsToBundleModuleNameMap["default"], "default");
+    EXPECT_EQ(abcPathsToBundleModuleNameMap["/data/storage/el1/bundle/entry/ets/modules_static.abc"],
+        "com.ohos.myapplication/entry");
+    EXPECT_EQ(abcPathsToBundleModuleNameMap["/data/storage/el1/bundle/feature/ets/modules_static.abc"],
+        "com.ohos.myapplication/feature");
+    EXPECT_EQ(abcPathsToBundleModuleNameMap["/data/storage/el1/bundle/library/ets/modules_static.abc"],
+        "com.ohos.myapplication/library");
 }
 
 /**
@@ -2404,7 +2426,8 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0400, TestSize.Level1)
     BundleInfo bundleInfo;
     HspList hspList;
     AppLibPathMap appLibPaths;
-    AppLibPathMap appAbcLibPaths;
+    std::map<std::string, std::string> abcPathsToBundleModuleNameMap;
+    bundleInfo.applicationInfo.bundleName = "com.ohos.myapplication";
 
     // if all hap lib is uncompressed and isolated, nativeLibraryPath of application is empty.
     HapModuleInfo hapModuleInfo1;
@@ -2435,7 +2458,7 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0400, TestSize.Level1)
     hspInfo1.nativeLibraryPath = "library.hsp!/libs/armeabi-v7a";
     hspList.emplace_back(hspInfo1);
 
-    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths, appAbcLibPaths);
+    mainThread_->GetNativeLibPath(bundleInfo, hspList, appLibPaths, abcPathsToBundleModuleNameMap);
     ASSERT_EQ(appLibPaths.size(), size_t(3));
     ASSERT_EQ(appLibPaths["com.ohos.myapplication/entry"].size(), size_t(2));
     EXPECT_EQ(appLibPaths["com.ohos.myapplication/entry"][0], "/data/storage/el1/bundle/patch_1001/entry/libs/arm");
@@ -2449,6 +2472,15 @@ HWTEST_F(MainThreadTest, GetNativeLibPath_0400, TestSize.Level1)
     ASSERT_EQ(appLibPaths["com.ohos.myapplication/library"].size(), size_t(1));
     EXPECT_EQ(appLibPaths["com.ohos.myapplication/library"][0],
         "/data/storage/el1/bundle/com.ohos.myapplication/library/library.hsp!/libs/armeabi-v7a");
+
+    EXPECT_EQ(abcPathsToBundleModuleNameMap.size(), 4);
+    EXPECT_EQ(abcPathsToBundleModuleNameMap["default"], "default");
+    EXPECT_EQ(abcPathsToBundleModuleNameMap["/data/storage/el1/bundle/entry/ets/modules_static.abc"],
+        "com.ohos.myapplication/entry");
+    EXPECT_EQ(abcPathsToBundleModuleNameMap["/data/storage/el1/bundle/feature/ets/modules_static.abc"],
+        "com.ohos.myapplication/feature");
+    EXPECT_EQ(abcPathsToBundleModuleNameMap["/data/storage/el1/bundle/library/ets/modules_static.abc"],
+        "com.ohos.myapplication/library");
 }
 
 /**
