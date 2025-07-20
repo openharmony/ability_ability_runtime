@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_STS_FORM_EXTENSION_EXTENSION_INSTANCE_H
-#define OHOS_ABILITY_RUNTIME_STS_FORM_EXTENSION_EXTENSION_INSTANCE_H
+#ifndef OHOS_ABILITY_RUNTIME_ETS_FORM_EXTENSION_EXTENSION_INSTANCE_H
+#define OHOS_ABILITY_RUNTIME_ETS_FORM_EXTENSION_EXTENSION_INSTANCE_H
 
 #include <memory>
 
@@ -24,9 +24,9 @@ namespace OHOS {
 namespace AbilityRuntime {
 class FormExtension;
 
-FormExtension *CreateSTSFormExtension(const std::unique_ptr<Runtime> &runtime);
+FormExtension *CreateETSFormExtension(const std::unique_ptr<Runtime> &runtime);
 
 } // namespace AbilityRuntime
 } // namespace OHOS
 
-#endif // OHOS_ABILITY_RUNTIME_STS_FORM_EXTENSION_EXTENSION_INSTANCE_H
+#endif // OHOS_ABILITY_RUNTIME_ETS_FORM_EXTENSION_EXTENSION_INSTANCE_H

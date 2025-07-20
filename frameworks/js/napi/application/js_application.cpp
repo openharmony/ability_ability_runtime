@@ -63,6 +63,27 @@ napi_value JsApplication::OnGetApplicationContext(napi_env env, NapiCallbackInfo
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
         return CreateJsUndefined(env);
     }
+
+    auto applicationContext = ApplicationContext::GetInstance();
+    auto workContext = new (std::nothrow) std::weak_ptr<ApplicationContext>(applicationContext);
+    napi_coerce_to_native_binding_object(
+        env, object, DetachCallbackFunc, AttachApplicationContext, workContext, nullptr);
+    if (workContext != nullptr) {
+        auto res = napi_wrap(env, object, workContext,
+            [](napi_env, void *data, void *) {
+              TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr application context is called");
+              delete static_cast<std::weak_ptr<ApplicationContext> *>(data);
+              data = nullptr;
+            },
+            nullptr, nullptr);
+        if (res != napi_ok && workContext != nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "napi_wrap failed:%{public}d", res);
+            delete workContext;
+            AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
+            return CreateJsUndefined(env);
+        }
+    }
+
     return object;
 }
 
@@ -330,7 +351,7 @@ void JsApplication::SetCreateCompleteCallback(std::shared_ptr<std::shared_ptr<Co
         auto context = *contextPtr;
         if (!context) {
             TAG_LOGE(AAFwkTag::APPKIT, "failed to create context");
-            task.Reject(env, CreateJsError(env, 
+            task.Reject(env, CreateJsError(env,
                 static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM), "invalid param."));
             return;
         }

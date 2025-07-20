@@ -593,7 +593,7 @@ bool GetStringOrUndefined(ani_env *env, ani_object param, const char *name, std:
     ani_ref obj = nullptr;
     ani_boolean isUndefined = true;
     ani_status status = ANI_ERROR;
- 
+
     if (env == nullptr || param == nullptr || name == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env or param or name");
         return false;
@@ -1308,6 +1308,43 @@ bool SetRefProperty(ani_env *env, ani_object param, const char *name, ani_ref va
     ani_status status = ANI_ERROR;
     if ((status = env->Object_SetPropertyByName_Ref(param, name, value)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool GetStaticFieldString(ani_env *env, ani_class classObj, const char *fieldName, std::string &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "null env");
+        return false;
+    }
+
+    ani_status status = ANI_ERROR;
+    ani_static_field field {};
+    if ((status = env->Class_FindStaticField(classObj, fieldName, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Class_FindStaticField status: %{public}d", status);
+        return false;
+    }
+
+    ani_ref obj = nullptr;
+    if ((status = env->Class_GetStaticField_Ref(classObj, field, &obj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Class_GetStaticField_Ref status: %{public}d", status);
+        return false;
+    }
+
+    ani_boolean isUndefined = true;
+    if ((status = env->Reference_IsUndefined(obj, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "status: %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s : undefined", fieldName);
+        return false;
+    }
+
+    if (!AppExecFwk::GetStdString(env, reinterpret_cast<ani_string>(obj), value)) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
         return false;
     }
     return true;
