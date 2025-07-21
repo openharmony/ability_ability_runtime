@@ -71,14 +71,14 @@ bool WrapMissionInfo(ani_env *env, ani_class cls, ani_object object, const AAFwk
         TAG_LOGE(AAFwkTag::MISSION, "result or env is null");
         return false;
     }
-    if (!AppExecFwk::SetDoublePropertyValue(env, object, KEY_MISSION_ID, missionInfo.id) ||
-        !AppExecFwk::SetDoublePropertyValue(env, object, KEY_RUNNING_STATE, missionInfo.runningState) ||
+    if (!AppExecFwk::SetIntPropertyValue(env, object, KEY_MISSION_ID, missionInfo.id) ||
+        !AppExecFwk::SetIntPropertyValue(env, object, KEY_RUNNING_STATE, missionInfo.runningState) ||
         !AppExecFwk::SetFieldBoolByName(env, cls, object, KEY_LOCKED_STATE, missionInfo.lockedState) ||
         !AppExecFwk::SetFieldStringByName(env, cls, object, KEY_TIMESTAMP, missionInfo.time) ||
         !AppExecFwk::SetFieldStringByName(env, cls, object, KEY_LABEL, missionInfo.label) ||
         !AppExecFwk::SetFieldStringByName(env, cls, object, KEY_ICON_PATH, missionInfo.iconPath) ||
         !AppExecFwk::SetFieldBoolByName(env, cls, object, KEY_CONTINUABLE, missionInfo.continuable) ||
-        !AppExecFwk::SetDoublePropertyValue(env, object, KEY_ABILITY_STATE, missionInfo.abilityState) ||
+        !AppExecFwk::SetIntPropertyValue(env, object, KEY_ABILITY_STATE, missionInfo.abilityState) ||
         !AppExecFwk::SetFieldBoolByName(env, cls, object, KEY_UNCLEARABLE, missionInfo.unclearable)) {
             TAG_LOGE(AAFwkTag::MISSION, "set mission info failed");
             return false;
