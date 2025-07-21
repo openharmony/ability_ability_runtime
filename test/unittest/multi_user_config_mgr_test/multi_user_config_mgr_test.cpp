@@ -308,5 +308,29 @@ HWTEST_F(MultiUserConfigMgrTest, GetConfigurationByUserId_0100, TestSize.Level1)
     EXPECT_NE(multiUserConfigurationMgr->GetConfigurationByUserId(userId), nullptr);
 }
 
+/**
+* @tc.name: GetConfigurationByUserId_0300
+* @tc.desc: GetConfigurationByUserId.
+* @tc.type: FUNC
+*/
+HWTEST_F(MultiUserConfigMgrTest, GetConfigurationByUserId_0300, TestSize.Level1)
+{
+    auto multiUserConfigurationMgr =
+        std::make_shared<AppExecFwk::MultiUserConfigurationMgr>();
+    multiUserConfigurationMgr->globalConfiguration_ = nullptr;
+    EXPECT_EQ(multiUserConfigurationMgr->GetConfigurationByUserId(100), nullptr);
+}
+
+/**
+* @tc.name: GetConfigurationByUserId_0400
+* @tc.desc: GetConfigurationByUserId.
+* @tc.type: FUNC
+*/
+HWTEST_F(MultiUserConfigMgrTest, GetConfigurationByUserId_0400, TestSize.Level1)
+{
+    auto multiUserConfigurationMgr = std::make_shared<AppExecFwk::MultiUserConfigurationMgr>();
+    multiUserConfigurationMgr->globalConfiguration_ = std::make_shared<AppExecFwk::Configuration>();
+    EXPECT_NE(multiUserConfigurationMgr->GetConfigurationByUserId(100), nullptr);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

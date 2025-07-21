@@ -36,6 +36,7 @@
 
 #ifdef SUPPORT_SCREEN
 #include "ace_forward_compatibility.h"
+#include "arkts_module_preloader.h"
 #include "declarative_module_preloader.h"
 #include "hot_reloader.h"
 #endif //SUPPORT_SCREEN
@@ -158,7 +159,9 @@ bool ETSRuntime::PostFork(const Options &options, std::unique_ptr<JsRuntime> &js
         aotFilePath = SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath + options.moduleName + ".an";
     }
     napi_env napiEnv = static_cast<AbilityRuntime::JsRuntime *>(jsRuntime_.get())->GetNapiEnv();
-    g_etsEnvFuncs->PostFork(reinterpret_cast<void *>(napiEnv), aotFilePath);
+
+    g_etsEnvFuncs->PostFork(reinterpret_cast<void *>(napiEnv), aotFilePath, options.appInnerHspPathList,
+        options.commonHspBundleInfos);
     return true;
 }
  
@@ -281,6 +284,15 @@ bool ETSRuntime::Initialize(const Options &options, std::unique_ptr<JsRuntime> &
 
     apiTargetVersion_ = options.apiTargetVersion;
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "Initialize: %{public}d", apiTargetVersion_);
+
+#ifdef SUPPORT_SCREEN
+    auto aniEngine = GetAniEnv();
+    if (aniEngine == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "GetAniEnv failed");
+        return false;
+    }
+    OHOS::Ace::ArkTSModulePreloader::Preload(aniEngine);
+#endif
     return true;
 }
 
