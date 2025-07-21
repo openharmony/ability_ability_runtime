@@ -748,7 +748,7 @@ void AppMgrServiceInner::reportpreLoadTask(const std::shared_ptr<AppRunningRecor
     }
 }
 
-int32_t AppMgrServiceInner::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+int32_t AppMgrServiceInner::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "NotifyPreloadAbilityStateChanged");
@@ -761,10 +761,21 @@ int32_t AppMgrServiceInner::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject>
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord not exist");
         return ERR_NULL_OBJECT;
     }
-    TAG_LOGI(AAFwkTag::APPMGR, "NotifyPreloadAbilityStateChanged bundle:%{public}s, pid:%{public}d",
-        appRecord->GetBundleName().c_str(), appRecord->GetPid());
-    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnPreloadProcessStateChanged(appRecord,
-        ApplicationState::APP_STATE_PRE_FOREGROUND);
+    if (appRecord->IsPreForeground() == isPreForeground) {
+        TAG_LOGI(AAFwkTag::APPMGR,"NotifyPreloadAbilityStateChanged, pid:%{public}d, isPreForeground Same:%{public}d",
+            appRecord->GetPid(), isPreForeground);
+        return AAFwk::ERR_NOTIFY_PRELOAD_ABILITY_NO_CHANGE;
+    }
+    if (isPreForeground && appRecord->GetAbilities().size() > 1) {
+        TAG_LOGI(AAFwkTag::APPMGR,"NotifyPreloadAbilityStateChanged, has other ability, pid:%{public}d",
+            appRecord->GetPid());
+        return AAFwk::ERR_NOTIFY_PRELOAD_ABILITY_HAS_OTHER;
+    }
+    TAG_LOGI(AAFwkTag::APPMGR,
+        "NotifyPreloadAbilityStateChanged bundle:%{public}s, pid:%{public}d, isPreForeground:%{public}d",
+        appRecord->GetBundleName().c_str(), appRecord->GetPid(), isPreForeground);
+    appRecord->SetPreForeground(isPreForeground);
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessPreForegroundChanged(appRecord);
     return ERR_OK;
 }
 
@@ -2880,6 +2891,7 @@ void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecor
     info.isDebugApp  = appRecord->IsDebug();
     info.isExiting = appRecord->IsTerminating() || appRecord->IsKilling()
         || appRecord->GetRestartAppFlag() || appRecord->IsUserRequestCleaning();
+    info.isPreForeground  = appRecord->IsPreForeground();
     info.isCached = DelayedSingleton<CacheProcessManager>::GetInstance()->IsCachedProcess(appRecord);
     if (appRecord->GetUserTestInfo() != nullptr && system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
         info.isTestMode = true;
@@ -3177,18 +3189,15 @@ void AppMgrServiceInner::UpdateAbilityState(const sptr<IRemoteObject> &token, co
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "state %{public}d.", static_cast<int32_t>(state));
-    if (!token) {
-        TAG_LOGE(AAFwkTag::APPMGR, "token null");
-        return;
-    }
-
+    CHECK_POINTER_AND_RETURN_LOG(token, "token null");
     if (state == AbilityState::ABILITY_STATE_FOREGROUND) {
         AbilityRuntime::FreezeUtil::GetInstance().AppendLifecycleEvent(token, "ServiceInner::UpdateAbilityState");
     }
     auto appRecord = GetAppRunningRecordByAbilityToken(token);
-    if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "app unexist");
-        return;
+    CHECK_POINTER_AND_RETURN_LOG(appRecord, "app unexist");
+    if (appRecord->IsPreForeground() && state == AbilityState::ABILITY_STATE_FOREGROUND) {
+        appRecord->SetPreForeground(false);
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessPreForegroundChanged(appRecord);
     }
     auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(token);
     if (!abilityRecord) {

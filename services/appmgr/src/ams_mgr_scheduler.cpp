@@ -851,7 +851,7 @@ int32_t AmsMgrScheduler::PreloadApplicationByPhase(const std::string &bundleName
     return amsMgrServiceInner_->PreloadApplicationByPhase(bundleName, userId, appIndex, preloadPhase);
 }
 
-int32_t AmsMgrScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+int32_t AmsMgrScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner is not ready.");
@@ -861,7 +861,7 @@ int32_t AmsMgrScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> to
         TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
         return ERR_PERMISSION_DENIED;
     }
-    return amsMgrServiceInner_->NotifyPreloadAbilityStateChanged(token);
+    return amsMgrServiceInner_->NotifyPreloadAbilityStateChanged(token, isPreForeground);
 }
 
 int32_t AmsMgrScheduler::CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,

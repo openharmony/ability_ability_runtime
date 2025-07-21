@@ -86,7 +86,7 @@ public:
     MOCK_METHOD2(DumpHeapMemory, int32_t(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo));
     MOCK_METHOD1(GetProcessRunningInformation, int32_t(RunningProcessInfo &info));
     MOCK_METHOD4(PreloadApplicationByPhase, int32_t(const std::string&, int32_t, int32_t, AppExecFwk::PreloadPhase));
-    MOCK_METHOD1(NotifyPreloadAbilityStateChanged, int32_t(sptr<IRemoteObject>));
+    MOCK_METHOD2(NotifyPreloadAbilityStateChanged, int32_t(sptr<IRemoteObject>, bool));
     MOCK_METHOD3(CheckPreloadAppRecordExist, bool(const std::string&, int32_t, int32_t));
     MOCK_CONST_METHOD0(IsFoundationCall, bool());
 

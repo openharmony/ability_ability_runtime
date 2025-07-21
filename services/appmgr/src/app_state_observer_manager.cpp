@@ -1364,11 +1364,10 @@ void AppStateObserverManager::HandleOnKeepAliveStateChanged(const std::shared_pt
     }
 }
 
-void AppStateObserverManager::OnPreloadProcessStateChanged(std::shared_ptr<AppRunningRecord> appRecord,
-    ApplicationState state)
+void AppStateObserverManager::OnProcessPreForegroundChanged(std::shared_ptr<AppRunningRecord> appRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::APPMGR, "OnPreloadProcessStateChanged");
+    TAG_LOGI(AAFwkTag::APPMGR, "OnProcessPreForegroundChanged");
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
@@ -1378,20 +1377,19 @@ void AppStateObserverManager::OnPreloadProcessStateChanged(std::shared_ptr<AppRu
         return;
     }
 
-    auto task = [weak = weak_from_this(), appRecord, state]() {
+    auto task = [weak = weak_from_this(), appRecord]() {
         auto self = weak.lock();
         if (self == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "OnPreloadProcessStateChanged task.");
-        self->HandleOnPreloadProcessStateChanged(appRecord, state);
+        TAG_LOGD(AAFwkTag::APPMGR, "OnProcessPreForegroundChanged task.");
+        self->HandleOnProcessPreForegroundChanged(appRecord);
     };
     handler_->SubmitTask(task);
 }
 
-void AppStateObserverManager::HandleOnPreloadProcessStateChanged(
-    std::shared_ptr<AppRunningRecord> appRecord, ApplicationState state)
+void AppStateObserverManager::HandleOnProcessPreForegroundChanged(std::shared_ptr<AppRunningRecord> appRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (appRecord == nullptr) {
@@ -1401,20 +1399,20 @@ void AppStateObserverManager::HandleOnPreloadProcessStateChanged(
 
     auto bundleName = appRecord->GetBundleName();
     PreloadProcessData preloadProcessData;
+    preloadProcessData.isPreForeground = appRecord->IsPreForeground();
     preloadProcessData.pid = appRecord->GetPid();
     preloadProcessData.uid = appRecord->GetUid();
-    preloadProcessData.state = static_cast<int32_t>(state);
     preloadProcessData.bundleName = bundleName;
 
     TAG_LOGI(AAFwkTag::APPMGR,
-        "HandleOnPreloadProcessStateChanged, pid:%{public}d, bundle:%{public}s, uid:%{public}d, state:%{public}d",
-        preloadProcessData.pid, bundleName.c_str(), preloadProcessData.uid, preloadProcessData.state);
+        "HandleOnProcessPreForegroundChanged, pid:%{public}d, bundle:%{public}s, uid:%{public}d, isPreFore:%{public}d",
+        preloadProcessData.pid, bundleName.c_str(), preloadProcessData.uid, preloadProcessData.isPreForeground);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), bundleName);
         if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
-            it->first->OnPreloadProcessStateChanged(preloadProcessData);
+            it->first->OnProcessPreForegroundChanged(preloadProcessData);
         }
     }
 }

@@ -1891,6 +1891,16 @@ bool AppRunningRecord::IsKilling() const
     return isKilling_.load();
 }
 
+void AppRunningRecord::SetPreForeground(bool isPreForeground)
+{
+    isPreForeground_.store(isPreForeground);
+}
+
+bool AppRunningRecord::IsPreForeground() const
+{
+    return isPreForeground_.load();
+}
+
 bool AppRunningRecord::NeedUpdateConfigurationBackground()
 {
     bool needUpdate = false;

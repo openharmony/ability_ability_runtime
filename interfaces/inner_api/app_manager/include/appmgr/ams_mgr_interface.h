@@ -512,7 +512,7 @@ public:
         return ERR_OK;
     }
 
-    virtual int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+    virtual int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground)
     {
         return ERR_OK;
     }

@@ -1266,6 +1266,16 @@ public:
         return isPreloaded_.load();
     }
 
+    inline void SetFrozenByPreload(bool isFrozenByPreload)
+    {
+        isFrozenByPreload_.store(isFrozenByPreload);
+    }
+
+    inline bool IsFrozenByPreload() const
+    {
+        return isFrozenByPreload_.load();
+    }
+
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false,
         const std::string &taskName = "");
 
@@ -1508,6 +1518,7 @@ private:
     std::atomic_bool isLastWantBackgroundDriven_ = false;
     std::atomic<int32_t> scenarios_ = 0;
     std::atomic<bool> isPreloaded_ = false;
+    std::atomic<bool> isFrozenByPreload_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
