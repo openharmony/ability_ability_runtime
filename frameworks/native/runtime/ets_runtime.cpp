@@ -550,5 +550,16 @@ void ETSRuntime::PreloadSystemModule(const std::string &moduleName)
         jsRuntime_->PreloadSystemModule(moduleName);
     }
 }
+
+void ETSRuntime::PreloadSystemClass(const char *className)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "PreloadSystemClass called");
+    if (g_etsEnvFuncs == nullptr ||
+        g_etsEnvFuncs->PreloadSystemClass == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or PreloadSystemClass");
+        return;
+    }
+    g_etsEnvFuncs->PreloadSystemClass(className);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
