@@ -14,9 +14,9 @@
  */
 export default class ProcessData {
     bundleName: string = '';
-    pid: number;
-    uid: number;
-    state: number;
+    pid: int;
+    uid: int;
+    state: int;
     isContinuousTask: boolean;
     isKeepAlive: boolean;
 }

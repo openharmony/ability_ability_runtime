@@ -49,58 +49,58 @@ bool UnwrapStartOptionsWithProcessOption(ani_env* env, ani_object param, AAFwk::
 
 void UnwrapStartOptionsWindowOptions(ani_env *env, ani_object param, AAFwk::StartOptions &startOptions)
 {
-    ani_double windowLeft = 0.0;
-    if (GetFieldDoubleByName(env, param, "windowLeft", windowLeft)) {
-        TAG_LOGD(AAFwkTag::ANI, "windowLeft:%{public}f", windowLeft);
+    ani_int windowLeft = 0;
+    if (GetFieldIntByName(env, param, "windowLeft", windowLeft)) {
+        TAG_LOGD(AAFwkTag::ANI, "windowLeft:%{public}d", windowLeft);
         startOptions.SetWindowLeft(windowLeft);
         startOptions.windowLeftUsed_ = true;
     }
 
-    ani_double windowTop = 0.0;
-    if (GetFieldDoubleByName(env, param, "windowTop", windowTop)) {
-        TAG_LOGD(AAFwkTag::ANI, "windowTop:%{public}f", windowTop);
+    ani_int windowTop = 0;
+    if (GetFieldIntByName(env, param, "windowTop", windowTop)) {
+        TAG_LOGD(AAFwkTag::ANI, "windowTop:%{public}d", windowTop);
         startOptions.SetWindowTop(windowTop);
         startOptions.windowTopUsed_ = true;
     }
 
-    ani_double windowWidth = 0.0;
-    if (GetFieldDoubleByName(env, param, "windowWidth", windowWidth)) {
-        TAG_LOGD(AAFwkTag::ANI, "windowWidth:%{public}f", windowWidth);
+    ani_int windowWidth = 0;
+    if (GetFieldIntByName(env, param, "windowWidth", windowWidth)) {
+        TAG_LOGD(AAFwkTag::ANI, "windowWidth:%{public}d", windowWidth);
         startOptions.SetWindowWidth(windowWidth);
         startOptions.windowWidthUsed_ = true;
     }
 
-    ani_double windowHeight = 0.0;
-    if (GetFieldDoubleByName(env, param, "windowHeight", windowHeight)) {
-        TAG_LOGD(AAFwkTag::ANI, "windowHeight:%{public}f", windowHeight);
+    ani_int windowHeight = 0;
+    if (GetFieldIntByName(env, param, "windowHeight", windowHeight)) {
+        TAG_LOGD(AAFwkTag::ANI, "windowHeight:%{public}d", windowHeight);
         startOptions.SetWindowHeight(windowHeight);
         startOptions.windowHeightUsed_ = true;
     }
 
-    ani_double minWindowWidth = 0.0;
-    if (GetFieldDoubleByName(env, param, "minWindowWidth", minWindowWidth)) {
-        TAG_LOGD(AAFwkTag::ANI, "minWindowWidth:%{public}f", minWindowWidth);
+    ani_int minWindowWidth = 0;
+    if (GetFieldIntByName(env, param, "minWindowWidth", minWindowWidth)) {
+        TAG_LOGD(AAFwkTag::ANI, "minWindowWidth:%{public}d", minWindowWidth);
         startOptions.SetMinWindowWidth(minWindowWidth);
         startOptions.minWindowWidthUsed_ = true;
     }
 
-    ani_double minWindowHeight = 0.0;
-    if (GetFieldDoubleByName(env, param, "minWindowHeight", minWindowHeight)) {
-        TAG_LOGD(AAFwkTag::ANI, "minWindowHeight:%{public}f", minWindowHeight);
+    ani_int minWindowHeight = 0;
+    if (GetFieldIntByName(env, param, "minWindowHeight", minWindowHeight)) {
+        TAG_LOGD(AAFwkTag::ANI, "minWindowHeight:%{public}d", minWindowHeight);
         startOptions.SetMinWindowHeight(minWindowHeight);
         startOptions.minWindowHeightUsed_ = true;
     }
 
-    ani_double maxWindowWidth = 0.0;
-    if (GetFieldDoubleByName(env, param, "maxWindowWidth", maxWindowWidth)) {
-        TAG_LOGD(AAFwkTag::ANI, "maxWindowWidth:%{public}f", maxWindowWidth);
+    ani_int maxWindowWidth = 0;
+    if (GetFieldIntByName(env, param, "maxWindowWidth", maxWindowWidth)) {
+        TAG_LOGD(AAFwkTag::ANI, "maxWindowWidth:%{public}d", maxWindowWidth);
         startOptions.SetMaxWindowWidth(maxWindowWidth);
         startOptions.maxWindowWidthUsed_ = true;
     }
 
-    ani_double maxWindowHeight = 0.0;
-    if (GetFieldDoubleByName(env, param, "maxWindowHeight", maxWindowHeight)) {
-        TAG_LOGD(AAFwkTag::ANI, "maxWindowHeight:%{public}f", maxWindowHeight);
+    ani_int maxWindowHeight = 0;
+    if (GetFieldIntByName(env, param, "maxWindowHeight", maxWindowHeight)) {
+        TAG_LOGD(AAFwkTag::ANI, "maxWindowHeight:%{public}d", maxWindowHeight);
         startOptions.SetMaxWindowHeight(maxWindowHeight);
         startOptions.maxWindowHeightUsed_ = true;
     }
@@ -143,14 +143,14 @@ bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &sta
         return false;
     }
 
-    ani_double windowMode = 0.0;
-    if (GetFieldDoubleByName(env, param, "windowMode", windowMode)) {
-        TAG_LOGD(AAFwkTag::ANI, "windowMode:%{public}f", windowMode);
+    ani_int windowMode = 0;
+    if (GetFieldIntByName(env, param, "windowMode", windowMode)) {
+        TAG_LOGD(AAFwkTag::ANI, "windowMode:%{public}d", windowMode);
         startOptions.SetWindowMode(windowMode);
     }
 
-    ani_double displayId = 0.0;
-    if (GetFieldDoubleByName(env, param, "displayId", displayId)) {
+    ani_long displayId = 0;
+    if (GetFieldLongByName(env, param, "displayId", displayId)) {
         startOptions.SetDisplayID(static_cast<int>(displayId));
     }
 
@@ -289,6 +289,30 @@ bool UnwrapStartWindowOption(ani_env *env, ani_object param,
     }
 #endif
     startWindowOption = option;
+    return true;
+}
+
+bool UnwrapAtomicServiceOptions(ani_env *env, ani_object optionsObj, AAFwk::Want &want,
+    AAFwk::StartOptions &startOptions)
+{
+    if (!UnwrapStartOptionsWithProcessOption(env, optionsObj, startOptions)) {
+        TAG_LOGE(AAFwkTag::ANI, "UnwrapStartOptions filed");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_ref paramRef = nullptr;
+    if ((status = env->Object_GetPropertyByName_Ref(optionsObj, "parameters", &paramRef))  == ANI_OK) {
+        AAFwk::WantParams wantParam;
+        if (UnwrapWantParams(env, paramRef, wantParam)) {
+            want.SetParams(wantParam);
+        } else {
+            TAG_LOGE(AAFwkTag::ANI, "UnwrapWantParams failed");
+        }
+    }
+    double flags = 0.0;
+    if (GetDoublePropertyObject(env, optionsObj, "flags", flags)) {
+        want.SetFlags(flags);
+    }
     return true;
 }
 } // namespace AppExecFwk
