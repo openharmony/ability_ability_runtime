@@ -148,6 +148,7 @@ std::string SAInterceptorManager::GenerateSAInterceptorParams(const AAFwk::Want 
     jsonObj["targetUid"] = abilityInfo.applicationInfo.uid;
     jsonObj["targetAbilityType"] = abilityInfo.type;
     jsonObj["targetAppIndex"] = abilityInfo.appIndex;
+    jsonObj["targetExtensionAbilityType"] = abilityInfo.extensionAbilityType;
     jsonObj["linking"] = want.GetUriString();
     jsonObj["dialogSessionId"] = dialogSessionId;
     return jsonObj.dump();
