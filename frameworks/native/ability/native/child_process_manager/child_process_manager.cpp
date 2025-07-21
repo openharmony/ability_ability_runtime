@@ -155,10 +155,8 @@ ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessWithArgs(
     request.isStartWithDebug = g_debugOption.isStartWithDebug;
     request.args = args;
     request.options = options;
-    std::lock_guard<std::mutex> lock(childProcessCountLock_);
-    request.childProcessCount = childProcessCount_;
+    request.childProcessCount = childProcessCount_.fetch_add(1);
     auto ret = appMgr->StartChildProcess(pid, request);
-    childProcessCount_++;
     TAG_LOGD(AAFwkTag::PROCESSMGR, "AppMgr StartChildProcess ret:%{public}d", ret);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "StartChildProcess error:%{public}d", ret);
@@ -190,16 +188,15 @@ ChildProcessManagerErrorCode ChildProcessManager::StartNativeChildProcessByAppSp
         return ChildProcessManagerErrorCode::ERR_GET_APP_MGR_FAILED;
     }
 
-    std::lock_guard<std::mutex> lock(childProcessCountLock_);
-    auto ret = appMgr->StartNativeChildProcess(libName, childProcessCount_, callbackStub, customProcessName);
-    TAG_LOGD(AAFwkTag::PROCESSMGR, "StartNativeChildProcess ret:%{public}d", ret);
+    int32_t childProcessCount = childProcessCount_.fetch_add(1);
+    auto ret = appMgr->CreateNativeChildProcess(libName, childProcessCount, callbackStub, customProcessName);
+    TAG_LOGD(AAFwkTag::PROCESSMGR, "CreateNativeChildProcess ret:%{public}d", ret);
 
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::PROCESSMGR, "StartNativeChildProcess error:%{public}d", ret);
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "CreateNativeChildProcess error:%{public}d", ret);
         return ChildProcessManagerErrorUtil::GetChildProcessManagerErrorCode(ret);
     }
 
-    ++childProcessCount_;
     return ChildProcessManagerErrorCode::ERR_OK;
 }
 
@@ -535,9 +532,7 @@ void ChildProcessManager::MakeProcessName(const std::string &srcEntry)
             processName.append(filename);
         }
     }
-    std::lock_guard<std::mutex> lock(childProcessCountLock_);
-    processName.append(std::to_string(childProcessCount_));
-    childProcessCount_++;
+    processName.append(std::to_string(childProcessCount_.fetch_add(1)));
     TAG_LOGD(AAFwkTag::PROCESSMGR, "processName: %{public}s", processName.c_str());
     g_debugOption.processName = processName;
 }
