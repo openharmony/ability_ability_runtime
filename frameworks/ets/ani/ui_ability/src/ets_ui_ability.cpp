@@ -30,6 +30,9 @@
 #include "ets_data_struct_converter.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "insight_intent_executor_info.h"
+#include "insight_intent_executor_mgr.h"
+#include "insight_intent_execute_param.h"
 #include "string_wrapper.h"
 
 #ifdef WINDOWS_PLATFORM
@@ -144,7 +147,7 @@ void EtsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
 
     std::string moduleName(abilityInfo->moduleName);
     moduleName.append("::").append(abilityInfo->name);
-    SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath, application);
+    SetAbilityContext(abilityInfo, record->GetWant(), moduleName, srcPath);
 }
 
 bool EtsUIAbility::BindNativeMethods()
@@ -187,7 +190,7 @@ void EtsUIAbility::UpdateAbilityObj(
 }
 
 void EtsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<Want> want,
-    const std::string &moduleName, const std::string &srcPath, const std::shared_ptr<OHOSApplication> &application)
+    const std::string &moduleName, const std::string &srcPath)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "SetAbilityContext called");
     UpdateAbilityObj(abilityInfo, moduleName, srcPath);
@@ -196,10 +199,10 @@ void EtsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, s
         return;
     }
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::ScreenMode::IDLE_SCREEN_MODE);
-    CreateEtsContext(screenMode, application);
+    CreateEtsContext(screenMode);
 }
 
-void EtsUIAbility::CreateEtsContext(int32_t screenMode, const std::shared_ptr<OHOSApplication> &application)
+void EtsUIAbility::CreateEtsContext(int32_t screenMode)
 {
     auto env = etsRuntime_.GetAniEnv();
     if (env == nullptr) {
@@ -207,7 +210,7 @@ void EtsUIAbility::CreateEtsContext(int32_t screenMode, const std::shared_ptr<OH
         return;
     }
     if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
-        ani_object contextObj = CreateEtsAbilityContext(env, abilityContext_, application);
+        ani_object contextObj = CreateEtsAbilityContext(env, abilityContext_);
         if (contextObj == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null contextObj");
             return;
@@ -241,7 +244,7 @@ void EtsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
         return;
     }
-    ani_object wantObj = OHOS::AppExecFwk::WrapWant(env, want);
+    ani_object wantObj = AppExecFwk::WrapWant(env, want);
     if (wantObj == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null wantObj");
         return;
@@ -390,6 +393,44 @@ void EtsUIAbility::OnSceneCreated()
     TAG_LOGD(AAFwkTag::UIABILITY, "OnSceneCreated end");
 }
 
+void EtsUIAbility::OnSceneRestored()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    UIAbility::OnSceneRestored();
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnSceneRestored called");
+
+    auto etsAppWindowStage = CreateAppWindowStage();
+    if (etsAppWindowStage == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null etsAppWindowStage");
+        return;
+    }
+    UpdateEtsWindowStage(reinterpret_cast<ani_ref>(etsAppWindowStage));
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    if (etsWindowStageObj_ && etsWindowStageObj_->aniRef) {
+        env->GlobalReference_Delete(etsWindowStageObj_->aniRef);
+    }
+    etsWindowStageObj_ = std::make_shared<AppExecFwk::ETSNativeReference>();
+    etsWindowStageObj_->aniObj = etsAppWindowStage;
+    ani_ref entryObjectRef = nullptr;
+    env->GlobalReference_Create(etsAppWindowStage, &entryObjectRef);
+    etsWindowStageObj_->aniRef = entryObjectRef;
+    CallObjectMethod(false, "onWindowStageRestore", nullptr, etsAppWindowStage);
+}
+
+void EtsUIAbility::OnSceneWillDestroy()
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
+    if (etsWindowStageObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null etsWindowStageObj_");
+        return;
+    }
+    CallObjectMethod(false, "onWindowStageWillDestroy", nullptr, etsWindowStageObj_->aniRef);
+}
+
 void EtsUIAbility::onSceneDestroyed()
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
@@ -438,7 +479,7 @@ void EtsUIAbility::CallOnForegroundFunc(const Want &want)
         return;
     }
     ani_status status = ANI_ERROR;
-    ani_ref wantRef = OHOS::AppExecFwk::WrapWant(env, want);
+    ani_ref wantRef = AppExecFwk::WrapWant(env, want);
     if (wantRef == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null wantObj");
         return;
@@ -474,6 +515,16 @@ void EtsUIAbility::OnBackground()
         delegator->PostPerformBackground(property);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnBackground end");
+}
+
+bool EtsUIAbility::OnBackPress()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnBackPress ability: %{public}s", GetAbilityName().c_str());
+    UIAbility::OnBackPress();
+    bool ret = CallObjectMethod(true, "onBackPressed", nullptr);
+    TAG_LOGD(AAFwkTag::UIABILITY, "ret: %{public}d", ret);
+    return ret;
 }
 
 ani_object EtsUIAbility::CreateAppWindowStage()
@@ -526,6 +577,7 @@ void EtsUIAbility::AbilityContinuationOrRecover(const Want &want)
         launchParam_.lastExitReason);
     if (IsRestoredInContinuation()) {
         RestorePageStack(want);
+        OnSceneRestored();
         NotifyContinuationResult(want, true);
         return;
     }
@@ -581,7 +633,7 @@ void EtsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
     scene_ = std::make_shared<Rosen::WindowScene>();
     int32_t displayId = AAFwk::DisplayUtil::GetDefaultDisplayId();
     if (setting_ != nullptr) {
-        std::string strDisplayId = setting_->GetProperty(OHOS::AppExecFwk::AbilityStartSetting::WINDOW_DISPLAY_ID_KEY);
+        std::string strDisplayId = setting_->GetProperty(AppExecFwk::AbilityStartSetting::WINDOW_DISPLAY_ID_KEY);
         std::regex formatRegex("[0-9]{0,9}$");
         std::smatch sm;
         bool flag = std::regex_match(strDisplayId, sm, formatRegex);
@@ -633,6 +685,7 @@ void EtsUIAbility::ContinuationRestore(const Want &want)
         return;
     }
     RestorePageStack(want);
+    OnSceneRestored();
     NotifyContinuationResult(want, true);
 }
 
@@ -650,9 +703,9 @@ void EtsUIAbility::UpdateEtsWindowStage(ani_ref windowStage)
     }
     ani_status status = ANI_ERROR;
     if (windowStage == nullptr) {
-        ani_ref undefinedRef = nullptr;
-        env->GetUndefined(&undefinedRef);
-        if ((status = env->Object_SetFieldByName_Ref(shellContextRef_->aniObj, "windowStage", undefinedRef)) !=
+        ani_ref nullRef = nullptr;
+        env->GetNull(&nullRef);
+        if ((status = env->Object_SetFieldByName_Ref(shellContextRef_->aniObj, "windowStage", nullRef)) !=
             ANI_OK) {
             TAG_LOGE(AAFwkTag::UIABILITY, "Object_SetFieldByName_Ref status: %{public}d", status);
             return;
@@ -663,6 +716,150 @@ void EtsUIAbility::UpdateEtsWindowStage(ani_ref windowStage)
         TAG_LOGE(AAFwkTag::UIABILITY, "Object_SetFieldByName_Ref status: %{public}d", status);
         return;
     }
+}
+
+void EtsUIAbility::ExecuteInsightIntentRepeateForeground(const Want &want,
+    const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+    std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "ExecuteInsightIntentRepeateForeground called");
+    if (executeParam == nullptr) {
+        TAG_LOGW(AAFwkTag::UIABILITY, "null executeParam");
+        RequestFocus(want);
+        InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback), ERR_OK);
+        return;
+    }
+
+    auto asyncCallback = [weak = weak_from_this(), want](InsightIntentExecuteResult result) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "request focus");
+        auto ability = weak.lock();
+        if (ability == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
+            return;
+        }
+        ability->RequestFocus(want);
+    };
+    callback->Push(asyncCallback);
+
+    InsightIntentExecutorInfo executeInfo;
+    auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
+        InsightIntentExecutorMgr::TriggerCallbackInner(
+            std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        return;
+    }
+
+    ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+        etsRuntime_, executeInfo, std::move(callback));
+    if (!ret) {
+        // callback has removed, release in insight intent executor.
+        TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+    }
+}
+
+void EtsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
+    const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+    std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "ExecuteInsightIntentMoveToForeground called");
+    if (executeParam == nullptr) {
+        TAG_LOGW(AAFwkTag::UIABILITY, "null executeParam");
+        OnForeground(want);
+        InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback), ERR_OK);
+        return;
+    }
+
+    if (abilityInfo_) {
+    }
+    UIAbility::OnForeground(want);
+
+    auto asyncCallback = [weak = weak_from_this(), want](InsightIntentExecuteResult result) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "begin call onForeground");
+        auto ability = weak.lock();
+        if (ability == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
+            return;
+        }
+        ability->CallOnForegroundFunc(want);
+    };
+    callback->Push(asyncCallback);
+
+    InsightIntentExecutorInfo executeInfo;
+    auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
+        InsightIntentExecutorMgr::TriggerCallbackInner(
+            std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        return;
+    }
+
+    ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+        etsRuntime_, executeInfo, std::move(callback));
+    if (!ret) {
+        // callback has removed, release in insight intent executor.
+        TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+    }
+}
+
+void EtsUIAbility::ExecuteInsightIntentBackground(const Want &want,
+    const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+    std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "ExecuteInsightIntentBackground called");
+    if (executeParam == nullptr) {
+        TAG_LOGW(AAFwkTag::UIABILITY, "null executeParam");
+        InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback), ERR_OK);
+        return;
+    }
+
+    if (abilityInfo_) {
+    }
+
+    InsightIntentExecutorInfo executeInfo;
+    auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
+    if (!ret) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "get intentExecutor failed");
+        InsightIntentExecutorMgr::TriggerCallbackInner(
+            std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        return;
+    }
+
+    ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+        etsRuntime_, executeInfo, std::move(callback));
+    if (!ret) {
+        // callback has removed, release in insight intent executor.
+        TAG_LOGE(AAFwkTag::UIABILITY, "execute insightIntent failed");
+    }
+}
+
+bool EtsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
+    const std::shared_ptr<InsightIntentExecuteParam> &executeParam, InsightIntentExecutorInfo &executeInfo)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "GetInsightIntentExecutorInfo called");
+
+    auto context = GetAbilityContext();
+    if (executeParam == nullptr || context == nullptr || abilityInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "param invalid");
+        return false;
+    }
+
+    if (executeParam->executeMode_ == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND &&etsWindowStageObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "param invalid");
+        return false;
+    }
+
+    const WantParams &wantParams = want.GetParams();
+    executeInfo.srcEntry = wantParams.GetStringParam("ohos.insightIntent.srcEntry");
+    executeInfo.hapPath = abilityInfo_->hapPath;
+    executeInfo.esmodule = abilityInfo_->compileMode == AppExecFwk::CompileMode::ES_MODULE;
+    executeInfo.windowMode = windowMode_;
+    executeInfo.token = context->GetToken();
+    if (etsWindowStageObj_ != nullptr) {
+        executeInfo.etsPageLoader = reinterpret_cast<void *>(etsWindowStageObj_->aniRef);
+    }
+    executeInfo.executeParam = executeParam;
+    return true;
 }
 #endif
 
@@ -685,7 +882,7 @@ void EtsUIAbility::OnNewWant(const Want &want)
         TAG_LOGE(AAFwkTag::UIABILITY, "null etsAbilityObj_");
         return;
     }
-    ani_object wantObj = OHOS::AppExecFwk::WrapWant(env, want);
+    ani_object wantObj = AppExecFwk::WrapWant(env, want);
     if (wantObj == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null wantObj");
         return;

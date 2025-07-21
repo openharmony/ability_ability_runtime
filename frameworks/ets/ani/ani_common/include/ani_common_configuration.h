@@ -23,6 +23,6 @@ namespace OHOS {
 namespace AppExecFwk {
 ani_object WrapConfiguration(ani_env *env, const AppExecFwk::Configuration &configuration);
 bool UnwrapConfiguration(ani_env *env, ani_object param, Configuration &config);
-}  // namespace AppExecFwk
-}  // namespace OHOS
+} // namespace AppExecFwk
+} // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_ANI_COMMON_CONFIGURATION_H

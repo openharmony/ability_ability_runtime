@@ -66,6 +66,12 @@ public:
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback,
         bool& isAsync) = 0;
 
+    virtual bool HandleExecuteIntent(
+        std::shared_ptr<InsightIntentExecuteParam> executeParam,
+        void *pageLoader,
+        std::unique_ptr<InsightIntentExecutorAsyncCallback> callback,
+        bool& isAsync) { return false; };
+
     /**
      * @brief Get current insight intent context.
      *

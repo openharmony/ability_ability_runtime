@@ -24,10 +24,14 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+struct InsightIntentExecutorInfo;
 using AbilityHandler = AppExecFwk::AbilityHandler;
 using AbilityInfo = AppExecFwk::AbilityInfo;
 using OHOSApplication = AppExecFwk::OHOSApplication;
 using Want = AppExecFwk::Want;
+using InsightIntentExecuteResult = AppExecFwk::InsightIntentExecuteResult;
+using InsightIntentExecuteParam = AppExecFwk::InsightIntentExecuteParam;
+using InsightIntentExecutorAsyncCallback = AppExecFwk::InsightIntentExecutorAsyncCallback;
 
 class EtsUIAbility : public UIAbility {
 public:
@@ -113,7 +117,19 @@ public:
      * @brief Called after ability stoped.
      * You can override this function to implement your own processing logic.
      */
+    void OnSceneWillDestroy() override;
+
+    /**
+     * @brief Called after ability stoped.
+     * You can override this function to implement your own processing logic.
+     */
     void onSceneDestroyed() override;
+
+    /**
+     * @brief Called after ability restored.
+     * You can override this function to implement your own processing logic.
+     */
+    void OnSceneRestored() override;
 
     /**
      * @brief Called when this ability enters the <b>STATE_FOREGROUND</b> state.
@@ -136,6 +152,45 @@ public:
      */
     void OnBackground() override;
 
+    /**
+     * Called when back press is dispatched.
+     * Return true if ability will be moved to background; return false if will be terminated
+     */
+    bool OnBackPress() override;
+
+    /**
+     * @brief Execute insight intent when an ability is in foreground, schedule it to foreground repeatly.
+     *
+     * @param want Want.
+     * @param executeParam insight intent execute param.
+     * @param callback insight intent async callback.
+     */
+    void ExecuteInsightIntentRepeateForeground(const Want &want,
+        const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+        std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
+
+    /**
+     * @brief Execute insight intent when an ability didn't started or in background, schedule it to foreground.
+     *
+     * @param want Want.
+     * @param executeParam insight intent execute param.
+     * @param callback insight intent async callback.
+     */
+    void ExecuteInsightIntentMoveToForeground(const Want &want,
+        const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+        std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
+
+    /**
+     * @brief Execute insight intent when an ability didn't started, schedule it to background.
+     *
+     * @param want Want.
+     * @param executeParam insight intent execute param.
+     * @param callback insight intent async callback.
+     */
+    virtual void ExecuteInsightIntentBackground(const AAFwk::Want &want,
+        const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+        std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
+
 protected:
     void DoOnForeground(const Want &want) override;
     void ContinuationRestore(const Want &want) override;
@@ -146,6 +201,9 @@ private:
     void GetPageStackFromWant(const Want &want, std::string &pageStack);
     void AbilityContinuationOrRecover(const Want &want);
     void UpdateEtsWindowStage(ani_ref windowStage);
+    inline bool GetInsightIntentExecutorInfo(const Want &want,
+        const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+        InsightIntentExecutorInfo& executeInfo);
     
     std::shared_ptr<AppExecFwk::ETSNativeReference> etsWindowStageObj_;
     int32_t windowMode_ = 0;
@@ -155,11 +213,11 @@ private:
     bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...);
     ani_object CreateAppWindowStage();
     void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<Want> want,
-        const std::string &moduleName, const std::string &srcPath, const std::shared_ptr<OHOSApplication> &application);
+        const std::string &moduleName, const std::string &srcPath);
     void DoOnForegroundForSceneIsNull(const Want &want);
     void UpdateAbilityObj(std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &moduleName, const std::string &srcPath);
-    void CreateEtsContext(int32_t screenMode, const std::shared_ptr<OHOSApplication> &application);
+    void CreateEtsContext(int32_t screenMode);
     bool BindNativeMethods();
 
     ETSRuntime &etsRuntime_;
