@@ -3264,5 +3264,25 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_ProcessForegroundAbility_002, TestSize
     abilityRecord_->ProcessForegroundAbility(tokenId);
     EXPECT_EQ(abilityRecord_->lifeCycleStateInfo_.sceneFlagBak, 0);
 }
+
+/*
+ * Feature: AbilityRecord
+ * Function: ProcessForegroundAbility
+ * SubFunction: ProcessForegroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ProcessForegroundAbility
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_ProcessForegroundAbility_003, TestSize.Level1)
+{
+    EXPECT_NE(abilityRecord_, nullptr);
+    uint32_t tokenId = 0;
+    abilityRecord_->isReady_ = true;
+    abilityRecord_->currentState_ = AbilityState::FOREGROUND;
+    abilityRecord_->pid_ = pid_;
+    abilityRecord_->SetFrozenByPreload(true);
+    abilityRecord_->ProcessForegroundAbility(tokenId);
+    EXPECT_EQ(abilityRecord_->IsFrozenByPreload(), false);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

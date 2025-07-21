@@ -539,7 +539,8 @@ int UIAbilityLifecycleManager::AbilityTransactionDone(const sptr<IRemoteObject> 
     if (state == AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_NEW &&
         abilityRecord->IsPreloadStart() && !abilityRecord->IsPreloaded()) {
         abilityRecord->SetPreloaded();
-        auto ret = DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(token);
+        abilityRecord->SetFrozenByPreload(true);
+        auto ret = DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(token, true);
         TAG_LOGI(AAFwkTag::ABILITYMGR, "NotifyPreloadAbilityStateChanged ret: %{public}d", ret);
     }
     abilityRecord->RemoveSignatureInfo();

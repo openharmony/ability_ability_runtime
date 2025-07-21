@@ -26,7 +26,8 @@ namespace OHOS {
 namespace AAFwk {
 bool HiddenStartUtils::IsHiddenStart(const StartOptions &options)
 {
-    if (!PermissionVerification::GetInstance()->VerifyStartUIAbilityToHiddenPermission()) {
+    if (!PermissionVerification::GetInstance()->VerifyStartUIAbilityToHiddenPermission() &&
+        !PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission()) {
         return false;
     }
 
@@ -41,45 +42,20 @@ bool HiddenStartUtils::IsHiddenStart(const StartOptions &options)
     return true;
 }
 
-bool HiddenStartUtils::IsPreloadStart(const StartOptions &options)
-{
-    if (!PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission()) {
-        return false;
-    }
-
-    if (options.processOptions == nullptr) {
-        return false;
-    }
-
-    if (options.processOptions->startupVisibility != OHOS::AAFwk::StartupVisibility::STARTUP_HIDE) {
-        return false;
-    }
-
-    return options.processOptions->isPreloadStart;
-}
-
 int32_t HiddenStartUtils::CheckHiddenStartSupported(const StartOptions &options)
 {
-    if (!AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
+    if (!AppUtils::GetInstance().IsStartOptionsWithAnimation() &&
+        !AppUtils::GetInstance().IsPreloadApplicationEnabled()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "start ability silently is not supported in this device");
         return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
 
     if (options.processOptions == nullptr ||
         (!ProcessOptions::IsNewHiddenProcessMode(options.processOptions->processMode) &&
-        !ProcessOptions::IsNoAttachmentMode(options.processOptions->processMode))) {
+        !ProcessOptions::IsNoAttachmentMode(options.processOptions->processMode) &&
+        !options.processOptions->isPreloadStart)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "this processMode is not supported in hidden start");
         return ERR_INVALID_VALUE;
-    }
-
-    return ERR_OK;
-}
-
-int32_t HiddenStartUtils::CheckPreloadStartSupported()
-{
-    if (!AppUtils::GetInstance().IsPreloadApplicationEnabled()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "preload is not supported");
-        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
 
     return ERR_OK;

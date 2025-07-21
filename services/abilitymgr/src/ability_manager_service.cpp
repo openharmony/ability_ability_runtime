@@ -1782,8 +1782,6 @@ int AbilityManagerService::StartUIAbilityForOptionWrap(const Want &want, const S
                options.processOptions != nullptr &&
                options.processOptions->isStartFromNDK) {
         ret = CheckStartSelfUIAbilityStartOptions(want, options);
-    } else if (HiddenStartUtils::IsPreloadStart(options)) {
-        ret = HiddenStartUtils::CheckPreloadStartSupported();
     } else {
         ret = CheckProcessOptions(want, options, userId);
     }
