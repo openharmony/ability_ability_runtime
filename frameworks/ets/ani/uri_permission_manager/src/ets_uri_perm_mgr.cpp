@@ -83,7 +83,7 @@ static std::string GetStdString(ani_env* env, ani_string str)
 }
 
 static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_double appCloneIndex, ani_object callback)
+    ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_int appCloneIndex, ani_object callback)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "grantUriPermissionCallbackSync run");
     if (env == nullptr) {
@@ -105,10 +105,9 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, flagEnum, flag);
     int32_t flagId = static_cast<int32_t>(flag);
     std::string targetBundleName = GetStdString(env, targetName);
-    int32_t appCloneIndexId = static_cast<int32_t>(appCloneIndex);
     int32_t result = ERR_OK;
     int32_t errCode = AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uriVec, flagId,
-        targetBundleName, appCloneIndexId);
+        targetBundleName, appCloneIndex);
     if (errCode != ERR_OK) {
         result = ERR_FAILURE;
         etsErrCode = EtsErrorUtil::CreateErrorByNativeErr(env, errCode);
@@ -118,7 +117,7 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
 }
 
 static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
-    ani_string uri, ani_string targetName, ani_double appCloneIndex, ani_object callback)
+    ani_string uri, ani_string targetName, ani_int appCloneIndex, ani_object callback)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "revokeUriPermissionCallbackSync run");
     if (env == nullptr) {
@@ -166,13 +165,13 @@ void EtsUriPermissionManagerInit(ani_env *env)
     std::array functions = {
         ani_native_function {
             "grantUriPermissionCallbackSync",
-            "Lstd/core/String;L@ohos/app/ability/wantConstant/wantConstant/Flags;Lstd/core/String;D"
+            "Lstd/core/String;L@ohos/app/ability/wantConstant/wantConstant/Flags;Lstd/core/String;I"
             "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(grantUriPermissionCallbackSync)
         },
         ani_native_function {
             "revokeUriPermissionCallbackSync",
-            "Lstd/core/String;Lstd/core/String;D"
+            "Lstd/core/String;Lstd/core/String;I"
             "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(revokeUriPermissionCallbackSync)
         },

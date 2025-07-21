@@ -80,7 +80,7 @@ export class Context extends BaseContext {
   private native switchArea(mode: contextConstant.AreaMode): void;
   private native getArea(): contextConstant.AreaMode;
   public native nativeGetGroupDir(dataGroupID: string, callback: AsyncCallbackWrapper<string>): void;
-  public native nativeCreateDisplayContext(displayId: number): Context;
+  public native nativeCreateDisplayContext(displayId: long): Context;
   public native nativeCreateAreaModeContext(areaMode: contextConstant.AreaMode): Context;
   public native nativeCreateSystemHspModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager;
   private static native nativeTransferStatic(input: ESValue, type: string): Object;
@@ -140,7 +140,7 @@ export class Context extends BaseContext {
     return Context.nativeTransferDynamic(input).unwrap();
   }
 
-  createDisplayContext(displayId: number): Context {
+  createDisplayContext(displayId: long): Context {
     return this.nativeCreateDisplayContext(displayId);
   }
 

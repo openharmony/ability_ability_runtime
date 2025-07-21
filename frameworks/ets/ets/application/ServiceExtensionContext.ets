@@ -16,6 +16,7 @@
 import { AsyncCallback } from '@ohos.base';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import { BusinessError } from '@ohos.base';
+import { ConnectOptions } from 'ability.connectOptions';
 import ExtensionContext from 'application.ExtensionContext';
 import StartOptions from '@ohos.app.ability.StartOptions';
 import Want from '@ohos.app.ability.Want';
@@ -66,6 +67,10 @@ export default class ServiceExtensionContext extends ExtensionContext {
   native nativeStartServiceExtensionAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
 
   native nativeStopServiceExtensionAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
+
+  native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): long;
+
+  native nativeDisconnectServiceExtensionAbility(connection: long, callback: AsyncCallbackWrapper<void>): void;
 
   terminateSelf(callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
@@ -159,6 +164,32 @@ export default class ServiceExtensionContext extends ExtensionContext {
       taskpool.execute((): void => {
         this.nativeStopServiceExtensionAbility(want, myCall);
       });
+    });
+  }
+
+  connectServiceExtensionAbility(want: Want, options: ConnectOptions): long {
+    return this.nativeConnectServiceExtensionAbility(want, options);
+  }
+
+  disconnectServiceExtensionAbility(connection: long, callback: AsyncCallback<void>): void {
+    let asyncCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeDisconnectServiceExtensionAbility(connection, asyncCall);
+    });
+  }
+
+  disconnectServiceExtensionAbility(connection: long): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeDisconnectServiceExtensionAbility(connection, asyncCall);
+      })
     });
   }
 }

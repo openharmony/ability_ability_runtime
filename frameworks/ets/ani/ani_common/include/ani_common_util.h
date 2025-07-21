@@ -26,6 +26,9 @@ struct RunningProcessInfo;
 bool GetFieldDoubleByName(ani_env *env, ani_object object, const char *name, double &value);
 bool SetFieldDoubleByName(ani_env *env, ani_class cls, ani_object object, const char *name, double value);
 
+bool GetFieldLongByName(ani_env *env, ani_object object, const char *name, int64_t &value);
+bool SetFieldLongByName(ani_env *env, ani_class cls, ani_object object, const char *name, int64_t value);
+
 bool GetFieldBoolByName(ani_env *env, ani_object object, const char *name, bool &value);
 bool SetFieldBoolByName(ani_env *env, ani_class cls, ani_object object, const char *name, bool value);
 
@@ -33,8 +36,8 @@ bool GetFieldStringByName(ani_env *env, ani_object object, const char *name, std
 bool SetFieldStringByName(ani_env *env, ani_class cls, ani_object object, const char *name,
     const std::string &value);
 
-bool GetFieldIntByName(ani_env *env, ani_object object, const char *name, int &value);
-bool SetFieldIntByName(ani_env *env, ani_class cls, ani_object object, const char *name, int value);
+bool GetFieldIntByName(ani_env *env, ani_object object, const char *name, int32_t &value);
+bool SetFieldIntByName(ani_env *env, ani_class cls, ani_object object, const char *name, int32_t value);
 
 bool GetFieldStringArrayByName(ani_env *env, ani_object object, const char *name, std::vector<std::string> &value);
 bool SetFieldArrayStringByName(ani_env *env, ani_class cls, ani_object object, const char *name,
@@ -67,11 +70,16 @@ bool IsExistsProperty(ani_env *env, ani_object param, const char *name);
 bool GetStringProperty(ani_env *env, ani_object param, const char *name, std::string &value);
 bool GetStringArrayProperty(ani_env *env, ani_object param, const char *name, std::vector<std::string> &value);
 bool GetDoublePropertyObject(ani_env *env, ani_object param, const char *name, double &value);
+bool GetIntPropertyObject(ani_env *env, ani_object param, const char *name, ani_int &value);
+bool GetLongPropertyObject(ani_env *env, ani_object param, const char *name, ani_long &value);
 bool GetDoublePropertyValue(ani_env *env, ani_object param, const char *name, double &value);
+bool GetIntPropertyValue(ani_env *env, ani_object param, const char *name, int32_t &value);
 bool GetRefProperty(ani_env *env, ani_object param, const char *name, ani_ref &value);
 
 bool SetDoublePropertyObject(ani_env *env, ani_object param, const char *name, double value);
 bool SetDoublePropertyValue(ani_env *env, ani_object param, const char *name, double value);
+bool SetIntPropertyObject(ani_env *env, ani_object param, const char *name, int32_t value);
+bool SetIntPropertyValue(ani_env *env, ani_object param, const char *name, int32_t value);
 bool SetStringArrayProperty(ani_env *env, ani_object param, const char *name, const std::vector<std::string> &values);
 bool SetRefProperty(ani_env *env, ani_object param, const char *name, ani_ref value);
 

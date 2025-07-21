@@ -18,21 +18,21 @@ import image from '@ohos.multimedia.image';
 import bundleManager from '@ohos.bundle.bundleManager';
 
 export default class StartOptions {
-  windowMode?: number;
-  displayId?: number;
+  windowMode?: int;
+  displayId?: long;
   withAnimation?: boolean;
-  windowLeft?: number;
-  windowTop?: number;
-  windowWidth?: number;
-  windowHeight?: number;
+  windowLeft?: int;
+  windowTop?: int;
+  windowWidth?: int;
+  windowHeight?: int;
   windowFocused?: boolean;
   processMode?: contextConstant.ProcessMode;
   startupVisibility?: contextConstant.StartupVisibility;
   startWindowBackgroundColor?: string;
   startWindowIcon?: image.PixelMap;
   supportWindowModes?: Array<bundleManager.SupportWindowMode>;
-  minWindowWidth?: number;
-  minWindowHeight?: number;
-  maxWindowWidth?: number;
-  maxWindowHeight?: number;
+  minWindowWidth?: int;
+  minWindowHeight?: int;
+  maxWindowWidth?: int;
+  maxWindowHeight?: int;
 }
