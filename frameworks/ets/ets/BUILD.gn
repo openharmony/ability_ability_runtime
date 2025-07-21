@@ -855,7 +855,7 @@ ohos_prebuilt_etc("ability_runtime_AbilityRunningInfo_abc_etc") {
 generate_static_abc("ability_runtime_connect_options_abc") {
   base_url = "./"
   files = [ "./ability/connectOptions.ets" ]
- 
+
   is_boot_abc = "True"
   device_dst_file = "/system/framework/ability_runtime_connect_options_abc.abc"
 }
@@ -1043,6 +1043,22 @@ ohos_prebuilt_etc("atomic_service_options_abc_etc") {
   deps = [ ":atomic_service_options_abc" ]
 }
 
+generate_static_abc("application_state_observer_abc") {
+  base_url = "./"
+  files = [ "./application/ApplicationStateObserver.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file ="/system/framework/application_state_observer_abc.abc"
+}
+
+ohos_prebuilt_etc("application_state_observer_abc_etc") {
+  source = "$target_out_dir/application_state_observer_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":application_state_observer_abc" ]
+}
+
 group("ets_packages") {
   deps = [
     ":ability_application_abc_etc",
@@ -1102,6 +1118,7 @@ group("ets_packages") {
     ":ability_runtime_want_agent_info_abc_etc",
     ":ability_runtime_want_constant_abc_etc",
     ":atomic_service_options_abc_etc",
+    ":application_state_observer_abc_etc",
     ":form_extension_ability_etc",
     ":service_extension_ability_abc_etc",
     ":ui_extension_ability_ani_etc",
