@@ -15,27 +15,27 @@
 
 import Want from '@ohos.app.ability.Want';
 export interface MissionInfo {
-  missionId: number;
-  runningState: number;
+  missionId: int;
+  runningState: int;
   lockedState: boolean;
   timestamp: string;
   want: Want;
   label: string;
   iconPath: string;
   continuable: boolean;
-  abilityState: number;
+  abilityState: int;
   unclearable: boolean;
 }
 
 class MissionInfoInner implements MissionInfo {
-  public missionId: number;
-  public runningState: number;
+  public missionId: int;
+  public runningState: int;
   public lockedState: boolean;
   public timestamp: string = '';
   public want: Want = {};
   public label: string = '';
   public iconPath: string = '';
   public continuable: boolean;
-  public abilityState: number;
+  public abilityState: int;
   public unclearable: boolean;
 }
