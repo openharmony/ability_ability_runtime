@@ -105,6 +105,8 @@ private:
     void SetReceiveDataCallbackRegister(ani_env *env, ani_object functionObj);
     void SetReceiveDataForResultCallbackRegister(ani_env *env, ani_object funcObj);
     ani_object StartAbilityByTypeSync(ani_env *env, ani_string aniType, ani_ref aniWantParam, ani_object startCallback);
+    bool CheckStartAbilityByTypeParam(
+        ani_env *env, ani_string aniType, ani_ref aniWantParam, std::string &type, AAFwk::WantParams &wantParam);
 
     sptr<AAFwk::SessionInfo> sessionInfo_;
     sptr<Rosen::Window> uiWindow_;
@@ -115,6 +117,9 @@ private:
     bool isSyncRegistered_ = false;
     std::shared_ptr<EtsUISessionAbilityResultListener> listener_;
     bool isFirstTriggerBindModal_ = true;
+#ifdef SUPPORT_SCREEN
+    void InitDisplayId(AAFwk::Want &want);
+#endif
 };
 
 } // namespace AbilityRuntime
