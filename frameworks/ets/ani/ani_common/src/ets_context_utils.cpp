@@ -259,7 +259,7 @@ void BindNativeFunction(ani_env *aniEnv)
                 reinterpret_cast<void *>(ContextUtil::CreateModuleResourceManagerSync)},
             ani_native_function {"nativeGetGroupDir", nullptr,
                 reinterpret_cast<void *>(ContextUtil::NativeGetGroupDir)},
-            ani_native_function {"nativeCreateDisplayContext", "D:Lapplication/Context/Context;",
+            ani_native_function {"nativeCreateDisplayContext", "J:Lapplication/Context/Context;",
                 reinterpret_cast<void *>(ContextUtil::NativeCreateDisplayContext)},
             ani_native_function {"nativeCreateAreaModeContext",
                 "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;:Lapplication/Context/Context;",
@@ -424,7 +424,7 @@ void NativeGetGroupDir([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object 
     AppExecFwk::AsyncCallback(env, callBackObj, errorObject, aniPath);
 }
 
-ani_object NativeCreateDisplayContext(ani_env *env, ani_object aniObj, ani_double displayId)
+ani_object NativeCreateDisplayContext(ani_env *env, ani_object aniObj, ani_long displayId)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "NativeCreateDisplayContext");
     if (env == nullptr) {

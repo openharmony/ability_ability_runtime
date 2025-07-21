@@ -14,30 +14,28 @@
  */
 
 import Want from '@ohos.app.ability.Want';
-import wantConstant from '@ohos.app.ability.wantConstant';
-
-namespace insightIntent {
-
-  export enum ExecuteMode {
-    UI_ABILITY_FOREGROUND = 0,
-    UI_ABILITY_BACKGROUND = 1,
-    UI_EXTENSION_ABILITY = 2,
-    SERVICE_EXTENSION_ABILITY = 3,
-  }
-
-  export interface ExecuteResult {
-    code: int;
-    result?: Record<string, Object>;
-    uris?: Array<string>;
-    flags?: int;
-  }
-
-  export class ExecuteResultInner implements ExecuteResult{
-    code: int;
-    result?: Record<string, Object>;
-    uris?: Array<string>;
-    flags?: int;
-  }
+export interface MissionInfo {
+  missionId: number;
+  runningState: number;
+  lockedState: boolean;
+  timestamp: string;
+  want: Want;
+  label: string;
+  iconPath: string;
+  continuable: boolean;
+  abilityState: number;
+  unclearable: boolean;
 }
 
-export default insightIntent;
+class MissionInfoInner implements MissionInfo {
+  public missionId: number;
+  public runningState: number;
+  public lockedState: boolean;
+  public timestamp: string = '';
+  public want: Want = {};
+  public label: string = '';
+  public iconPath: string = '';
+  public continuable: boolean;
+  public abilityState: number;
+  public unclearable: boolean;
+}

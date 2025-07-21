@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-interface ShellCmdResult {
-    stdResult: string;
-    exitCode: int;
-  }
+#ifndef OHOS_ABILITY_RUNTIME_ETS_MISSION_MANAGER_H
+#define OHOS_ABILITY_RUNTIME_ETS_MISSION_MANAGER_H
 
-  class ShellCmdResultImpl implements ShellCmdResult {
-    public stdResult: string = '';
-    public exitCode: int = 0;
-  }
+typedef struct __ani_env ani_env;
 
-  export default ShellCmdResult;
+namespace OHOS {
+namespace AbilityRuntime {
+void EtsMissionManagerInit(ani_env* env);
+} // namespace AbilityRuntime
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_ETS_MISSION_MANAGER_H

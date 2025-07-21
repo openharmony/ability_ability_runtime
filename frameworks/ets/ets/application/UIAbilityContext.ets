@@ -48,6 +48,7 @@ let unregisterToken = new object();
 export default class UIAbilityContext extends Context {
   static {
     loadLibrary("context_ani");
+    loadLibrary("ability_context_ani_kit.z");
   }
 
   private cleaner: Cleaner | null = null;
@@ -83,10 +84,19 @@ export default class UIAbilityContext extends Context {
     destroyRegister.unregister(unregisterToken);
   }
 
-  private static native nativeTransferStatic(input: ESValue): Object;
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
   private static native nativeTransferDynamic(input: Object): ESValue;
+  private static contextType: string = 'UIAbilityContext';
+
   static transferStatic(input: Any): Object {
-    return UIAbilityContext.nativeTransferStatic(ESValue.wrap(input));
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    console.log('transferStatic type: ' + type);
+    return UIAbilityContext.nativeTransferStatic(ESValue.wrap(input), type);
   }
   static transferDynamic(input: Object): Any {
     return UIAbilityContext.nativeTransferDynamic(input).unwrap();
@@ -121,9 +131,9 @@ export default class UIAbilityContext extends Context {
 
   private native nativeSetMissionLabel(label: string, callback: AsyncCallbackWrapper<void>): void;
 
-  private native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): double;
+  private native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): long;
 
-  private native nativeDisconnectServiceExtensionAbility(connection: double, callback: AsyncCallbackWrapper<void>): void;
+  private native nativeDisconnectServiceExtensionAbility(connection: long, callback: AsyncCallbackWrapper<void>): void;
 
   private native nativeSetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
 
@@ -396,18 +406,18 @@ export default class UIAbilityContext extends Context {
     });
   }
 
-  connectServiceExtensionAbility(want: Want, options: ConnectOptions): number {
+  connectServiceExtensionAbility(want: Want, options: ConnectOptions): long {
     return this.nativeConnectServiceExtensionAbility(want, options);
   }
 
-  disconnectServiceExtensionAbility(connection: number, callback: AsyncCallback<void>): void {
+  disconnectServiceExtensionAbility(connection: long, callback: AsyncCallback<void>): void {
     let syncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeDisconnectServiceExtensionAbility(connection, syncCall);
     });
   }
 
-  disconnectServiceExtensionAbility(connection: number): Promise<void> {
+  disconnectServiceExtensionAbility(connection: long): Promise<void> {
     return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
       let callback = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
         if (err == null || err.code == 0) {

@@ -38,8 +38,8 @@ constexpr const char *CONNECT_OPTIONS_CLASS_NAME = "Lability/connectOptions/Conn
 constexpr const char *SIGNATURE_ONCONNECT = "LbundleManager/ElementName/ElementName;L@ohos/rpc/rpc/IRemoteObject;:V";
 constexpr const char *SIGNATURE_ONDISCONNECT = "LbundleManager/ElementName/ElementName;:V";
 constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
-    "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:D";
-constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "DLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
+constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
 
 void EtsUIExtensionContext::TerminateSelfSync(ani_env *env, ani_object obj, ani_object callback)
 {
@@ -87,7 +87,7 @@ void EtsUIExtensionContext::StartAbility(ani_env *env, ani_object aniObj, ani_ob
     etsUiExtensionContext->OnStartAbility(env, aniObj, wantObj, nullptr, call);
 }
 
-ani_double EtsUIExtensionContext::ConnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
+ani_long EtsUIExtensionContext::ConnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
     ani_object wantObj, ani_object connectOptionsObj)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "ConnectServiceExtensionAbility");
@@ -101,7 +101,7 @@ ani_double EtsUIExtensionContext::ConnectServiceExtensionAbility(ani_env *env, a
 }
 
 void EtsUIExtensionContext::DisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
-    ani_double connectId, ani_object callback)
+    ani_long connectId, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "DisconnectServiceExtensionAbility");
     auto etsUiExtensionContext = GetEtsUIExtensionContext(env, aniObj);
@@ -329,7 +329,7 @@ void EtsUIExtensionContext::OnStartAbilityForResult(ani_env *env, ani_object ani
     return;
 }
 
-ani_double EtsUIExtensionContext::OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
+ani_long EtsUIExtensionContext::OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
     ani_object wantObj, ani_object connectOptionsObj)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "OnConnectServiceExtensionAbility");
@@ -364,17 +364,17 @@ ani_double EtsUIExtensionContext::OnConnectServiceExtensionAbility(ani_env *env,
         return FAILED_CODE;
     }
     auto innerErrCode = context->ConnectAbility(want, connection);
-    double connectId = connection->GetConnectionId();
+    int32_t connectId = connection->GetConnectionId();
     if (innerErrCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Faied to ConnectAbility, innerErrCode is %{public}d", innerErrCode);
         connection->CallEtsFailed(connectId);
         return FAILED_CODE;
     }
-    return connectId;
+    return static_cast<ani_long>(connectId);
 }
 
 void EtsUIExtensionContext::OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
-    ani_double connectId, ani_object callback)
+    ani_long connectId, ani_object callback)
 {
     TAG_LOGE(AAFwkTag::UI_EXT, "OnDisconnectServiceExtensionAbility");
     ani_object aniObject = nullptr;
