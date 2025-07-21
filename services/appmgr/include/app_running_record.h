@@ -735,6 +735,8 @@ public:
     void SendAppStartupTypeEvent(const std::shared_ptr<AbilityRunningRecord> &ability, const AppStartType startType);
     void SetKilling();
     bool IsKilling() const;
+    void SetPreForeground(bool isPreForeground);
+    bool IsPreForeground() const;
     void SetAppIndex(const int32_t appIndex);
     int32_t GetAppIndex() const;
     void SetInstanceKey(const std::string& instanceKey);
@@ -1216,6 +1218,7 @@ private:
     bool isExtensionSandBox_ = false;
     std::atomic<bool> isKilling_ = false;
     std::atomic_bool isSpawned_ = false;
+    std::atomic<bool> isPreForeground_ = false;
 
     int32_t appRecordId_ = 0;
     int32_t mainUid_;

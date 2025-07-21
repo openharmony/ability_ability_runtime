@@ -1166,7 +1166,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_PreloadApplicationByPhase_0100, TestSize
 HWTEST_F(AppSchedulerTest, AppScheduler_NotifyPreloadAbilityStateChanged_0100, TestSize.Level1)
 {
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
-    auto result = DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(nullptr);
+    auto result = DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(nullptr, true);
     EXPECT_EQ(result, INNER_ERR);
 }
 

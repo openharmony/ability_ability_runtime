@@ -464,7 +464,7 @@ public:
     virtual int32_t PreloadApplicationByPhase(const std::string &bundleName, int32_t userId, int32_t appIndex,
         AppExecFwk::PreloadPhase preloadPhase) override;
 
-    virtual int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token) override;
+    virtual int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground) override;
 
     virtual int32_t CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,
         bool &isExist) override;

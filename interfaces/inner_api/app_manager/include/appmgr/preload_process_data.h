@@ -31,9 +31,9 @@ struct PreloadProcessData : public Parcelable {
     
     bool ReadFromParcel(Parcel &parcel);
 
+    bool isPreForeground = false;
     pid_t pid = 0;
     int32_t uid = 0;
-    int32_t state = 0;
     std::string bundleName;
 };
 }  // namespace AppExecFwk
