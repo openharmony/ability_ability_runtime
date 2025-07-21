@@ -33,10 +33,10 @@ public:
     EtsAbilityDelegator();
     ~EtsAbilityDelegator();
     static void ExecuteShellCommand(ani_env *env, [[maybe_unused]]ani_object object,
-        ani_string cmd, ani_double timeoutSecs, ani_object callback);
+        ani_string cmd, ani_long timeoutSecs, ani_object callback);
 
     static void FinishTest(ani_env *env, [[maybe_unused]]ani_object object,
-        ani_string msg, ani_double code, ani_object callback);
+        ani_string msg, ani_long code, ani_object callback);
 
     static ani_object SetAppContext(ani_env *env, const std::shared_ptr<AbilityRuntime::Context> &context);
 
@@ -55,7 +55,7 @@ public:
     static void RemoveAbilityMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object monitorObj);
 
     static void WaitAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
-        ani_object monitorOb0, ani_double timeout, ani_object callback);
+        ani_object monitorOb0, ani_long timeout, ani_object callback);
 
     static void AddAbilityStageMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
         ani_object stageMonitorObj, ani_object callback);
@@ -70,7 +70,7 @@ public:
         ani_object stageMonitorObj);
 
     static void WaitAbilityStageMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
-        ani_object stageMonitorObj, ani_double timeout, ani_object callback);
+        ani_object stageMonitorObj, ani_long timeout, ani_object callback);
 
     static void DoAbilityForeground(ani_env *env, [[maybe_unused]]ani_object object,
         ani_object abilityObj, ani_object callback);
@@ -80,7 +80,7 @@ public:
 
     static void Print(ani_env *env, [[maybe_unused]]ani_object object, ani_string msg, ani_object callback);
 
-    static ani_double GetAbilityState(ani_env *env, [[maybe_unused]]ani_object object, ani_object abilityObj);
+    static ani_int GetAbilityState(ani_env *env, [[maybe_unused]]ani_object object, ani_object abilityObj);
 
     static void StartAbility(ani_env *env, [[maybe_unused]]ani_object object, ani_object wantObj, ani_object callback);
 

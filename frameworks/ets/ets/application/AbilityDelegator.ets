@@ -28,15 +28,15 @@ export interface AbilityDelegator {
 
   getAppContext(): Context;
 
-  finishTest(msg: string, code: number, callback: AsyncCallback<void>): void;
+  finishTest(msg: string, code: long, callback: AsyncCallback<void>): void;
 
-  finishTest(msg: string, code: number): Promise<void>;
+  finishTest(msg: string, code: long): Promise<void>;
 
   executeShellCommand(cmd: String, callback: AsyncCallback<ShellCmdResult>): void;
 
-  executeShellCommand(cmd: String, timeoutSecs: number, callback: AsyncCallback<ShellCmdResult>): void;
+  executeShellCommand(cmd: String, timeoutSecs: long, callback: AsyncCallback<ShellCmdResult>): void;
 
-  executeShellCommand(cmd: string, timeoutSecs?: number): Promise<ShellCmdResult>;
+  executeShellCommand(cmd: string, timeoutSecs?: long): Promise<ShellCmdResult>;
 
   addAbilityMonitor(monitor: AbilityMonitor, callback: AsyncCallback<void>): void;
 
@@ -52,9 +52,9 @@ export interface AbilityDelegator {
 
   waitAbilityMonitor(monitor: AbilityMonitor, callback: AsyncCallback<UIAbility>): void;
 
-  waitAbilityMonitor(monitor: AbilityMonitor, timeout: number, callback: AsyncCallback<UIAbility>): void;
+  waitAbilityMonitor(monitor: AbilityMonitor, timeout: long, callback: AsyncCallback<UIAbility>): void;
 
-  waitAbilityMonitor(monitor: AbilityMonitor, timeout?: number): Promise<UIAbility>;
+  waitAbilityMonitor(monitor: AbilityMonitor, timeout?: long): Promise<UIAbility>;
 
   addAbilityStageMonitor(monitor: AbilityStageMonitor, callback: AsyncCallback<void>): void;
 
@@ -70,9 +70,9 @@ export interface AbilityDelegator {
 
   waitAbilityStageMonitor(monitor: AbilityStageMonitor, callback: AsyncCallback<AbilityStage>): void;
 
-  waitAbilityStageMonitor(monitor: AbilityStageMonitor, timeout: number, callback: AsyncCallback<AbilityStage>): void;
+  waitAbilityStageMonitor(monitor: AbilityStageMonitor, timeout: long, callback: AsyncCallback<AbilityStage>): void;
 
-  waitAbilityStageMonitor(monitor: AbilityStageMonitor, timeout?: number): Promise<AbilityStage>;
+  waitAbilityStageMonitor(monitor: AbilityStageMonitor, timeout?: long): Promise<AbilityStage>;
 
   doAbilityForeground(ability: UIAbility, callback: AsyncCallback<void>): void;
 
@@ -86,7 +86,7 @@ export interface AbilityDelegator {
 
   print(msg: string): Promise<void>;
 
-  getAbilityState(ability: UIAbility): number;
+  getAbilityState(ability: UIAbility): int;
 
   setMockList(mockList: Record<string, string>): void;
 
@@ -106,9 +106,9 @@ class AbilityDelegatorInner implements AbilityDelegator {
 
   public native getAppContext(): Context;
 
-  public native nativeFinishTest(msg: String, code: number, callback: AsyncCallbackWrapper<void>): void;
+  public native nativeFinishTest(msg: String, code: long, callback: AsyncCallbackWrapper<void>): void;
 
-  public native nativeExecuteShellCommand(cmd: string, timeoutSecs: number,
+  public native nativeExecuteShellCommand(cmd: string, timeoutSecs: long,
     callback: AsyncCallbackWrapper<ShellCmdResult>): void;
 
   public native nativeAddAbilityMonitor(monitor: AbilityMonitor, callback: AsyncCallbackWrapper<void>): void;
@@ -119,7 +119,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
 
   public native removeAbilityMonitorSync(monitor: AbilityMonitor): void;
 
-  public native waitAbilityMonitorAsync(monitor: AbilityMonitor, timeout: number,
+  public native waitAbilityMonitorAsync(monitor: AbilityMonitor, timeout: long,
     callback: AsyncCallbackWrapper<UIAbility>): void;
 
   public native addAbilityStageMonitorAsync(monitor: AbilityStageMonitor, callback: AsyncCallbackWrapper<void>): void;
@@ -131,7 +131,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
 
   public native removeAbilityStageMonitorSync(monitor: AbilityStageMonitor): void;
 
-  public native waitAbilityStageMonitorAsync(monitor: AbilityStageMonitor, timeout: number,
+  public native waitAbilityStageMonitorAsync(monitor: AbilityStageMonitor, timeout: long,
     callback: AsyncCallbackWrapper<AbilityStage>): void;
 
   public native doAbilityForegroundAsync(ability: UIAbility, callback: AsyncCallbackWrapper<void>): void;
@@ -142,17 +142,17 @@ class AbilityDelegatorInner implements AbilityDelegator {
 
   public native setMockList(mockList: Record<string, string>): void;
 
-  public native getAbilityState(ability: UIAbility): number;
+  public native getAbilityState(ability: UIAbility): int;
 
   public native nativeStartAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
 
-  finishTest(msg: string, code: number, callback: AsyncCallback<void>): void {
+  finishTest(msg: string, code: long, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeFinishTest(msg, code, myCall);
     });
   }
-  finishTest(msg: string, code: number): Promise<void> {
+  finishTest(msg: string, code: long): Promise<void> {
     let p: Promise<void> =
       new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
@@ -176,13 +176,13 @@ class AbilityDelegatorInner implements AbilityDelegator {
       this.nativeExecuteShellCommand(cmd, timeoutSecs, myCall);
     });
   }
-  executeShellCommand(cmd: string, timeoutSecs: number, callback: AsyncCallback<ShellCmdResult, void>): void {
+  executeShellCommand(cmd: string, timeoutSecs: long, callback: AsyncCallback<ShellCmdResult, void>): void {
     let myCall = new AsyncCallbackWrapper<ShellCmdResult>(callback);
     taskpool.execute((): void => {
       this.nativeExecuteShellCommand(cmd, timeoutSecs, myCall);
     });
   }
-  executeShellCommand(cmd: string, timeoutSecs?: number): Promise<ShellCmdResult> {
+  executeShellCommand(cmd: string, timeoutSecs?: long): Promise<ShellCmdResult> {
     let p = new Promise<ShellCmdResult>((resolve: (data: ShellCmdResult) => void,
       reject: (err: BusinessError) => void): void => {
       let myCall =
@@ -197,7 +197,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
         if (timeoutSecs == null) {
           this.nativeExecuteShellCommand(cmd, 0, myCall);
         } else {
-          this.nativeExecuteShellCommand(cmd, timeoutSecs as double, myCall);
+          this.nativeExecuteShellCommand(cmd, timeoutSecs as long, myCall);
         }
       });
     });
@@ -257,13 +257,13 @@ class AbilityDelegatorInner implements AbilityDelegator {
       this.waitAbilityMonitorAsync(monitor, timeout, myCall);
     });
   }
-  waitAbilityMonitor(monitor: AbilityMonitor, timeout: number, callback: AsyncCallback<UIAbility, void>): void {
+  waitAbilityMonitor(monitor: AbilityMonitor, timeout: long, callback: AsyncCallback<UIAbility, void>): void {
     let myCall = new AsyncCallbackWrapper<UIAbility>(callback);
     taskpool.execute((): void => {
       this.waitAbilityMonitorAsync(monitor, timeout, myCall);
     });
   }
-  waitAbilityMonitor(monitor: AbilityMonitor, timeout?: number): Promise<UIAbility> {
+  waitAbilityMonitor(monitor: AbilityMonitor, timeout?: long): Promise<UIAbility> {
     let p = new Promise<UIAbility>((resolve: (data: UIAbility) => void,
       reject: (err: BusinessError) => void): void => {
       let myCall = new AsyncCallbackWrapper<UIAbility>((err: BusinessError | null, data: UIAbility | undefined) => {
@@ -277,7 +277,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
         if (timeout == null) {
           this.waitAbilityMonitorAsync(monitor, -1, myCall);
         } else {
-          this.waitAbilityMonitorAsync(monitor, timeout as double, myCall);
+          this.waitAbilityMonitorAsync(monitor, timeout as long, myCall);
         }
       });
     });
@@ -337,14 +337,14 @@ class AbilityDelegatorInner implements AbilityDelegator {
       this.waitAbilityStageMonitorAsync(monitor, timeout, myCall);
     });
   }
-  waitAbilityStageMonitor(monitor: AbilityStageMonitor, timeout: number,
+  waitAbilityStageMonitor(monitor: AbilityStageMonitor, timeout: long,
     callback: AsyncCallback<AbilityStage, void>): void {
     let myCall = new AsyncCallbackWrapper<AbilityStage>(callback);
     taskpool.execute((): void => {
       this.waitAbilityStageMonitorAsync(monitor, timeout, myCall);
     });
   }
-  waitAbilityStageMonitor(monitor: AbilityStageMonitor, timeout?: number): Promise<AbilityStage> {
+  waitAbilityStageMonitor(monitor: AbilityStageMonitor, timeout?: long): Promise<AbilityStage> {
     let p = new Promise<AbilityStage>((resolve: (data: AbilityStage) => void,
       reject: (err: BusinessError) => void): void => {
       let myCall =
@@ -359,7 +359,7 @@ class AbilityDelegatorInner implements AbilityDelegator {
         if (timeout == null) {
           this.waitAbilityStageMonitorAsync(monitor, -1, myCall);
         } else {
-          this.waitAbilityStageMonitorAsync(monitor, timeout as double, myCall);
+          this.waitAbilityStageMonitorAsync(monitor, timeout as long, myCall);
         }
       });
     });

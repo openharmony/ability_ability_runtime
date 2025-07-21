@@ -102,7 +102,7 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
     SetFieldStringByName(env, cls, object, "moduleName", elementName.GetModuleName());
     SetFieldStringByName(env, cls, object, "uri", want.GetUriString());
     SetFieldStringByName(env, cls, object, "type", want.GetType());
-    SetFieldDoubleByName(env, cls, object, "flags", want.GetFlags());
+    SetFieldIntByName(env, cls, object, "flags", want.GetFlags());
     SetFieldStringByName(env, cls, object, "action", want.GetAction());
     InnerWrapWantParams(env, cls, object, want.GetParams());
     SetFieldArrayStringByName(env, cls, object, "entities", want.GetEntities());
@@ -210,10 +210,10 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
         want.SetUri(uri);
     }
 
-    double flags = 0.0;
-    if (GetFieldDoubleByName(env, param, "flags", flags)) {
-        TAG_LOGD(AAFwkTag::ANI, "flags %{public}f", flags);
-        want.SetFlags(static_cast<int>(flags));
+    int32_t flags = 0;
+    if (GetFieldIntByName(env, param, "flags", flags)) {
+        TAG_LOGD(AAFwkTag::ANI, "flags %{public}d", flags);
+        want.SetFlags(flags);
     }
 
     std::string type = "";
@@ -309,13 +309,13 @@ bool GetResultCode(ani_env *env, ani_object param, ani_class cls, int &resultCod
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
-    ani_double dResultCode = 0.0;
-    status = env->Object_CallMethod_Double(param, method, &dResultCode);
+    ani_int iResultCode = 0;
+    status = env->Object_CallMethod_Int(param, method, &iResultCode);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
-    resultCode = static_cast<int>(dResultCode);
+    resultCode = static_cast<int>(iResultCode);
     return true;
 }
 
