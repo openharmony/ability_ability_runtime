@@ -1873,6 +1873,33 @@ HWTEST_F(AppMgrServiceInnerTest, StartProcess_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StartProcess_null_spawnclient_001
+ * @tc.desc: start process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartProcess_null_spawnclient_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartProcess_null_spawnclient_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string appName = "test_appName";
+    std::string processName = "test_processName";
+    std::string bundleName = "test_bundleName";
+    sptr<IRemoteObject> token = new MockAbilityToken();
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
+    EXPECT_NE(appRecord, nullptr);
+    appMgrServiceInner->remoteClientManager_ = nullptr;
+    appMgrServiceInner->StartProcess(appName, processName, 0, nullptr, 0, bundleInfo, bundleName, 0);
+    uint32_t ret = appMgrServiceInner->StartProcess(appName, processName, 0, appRecord, 0, bundleInfo, bundleName, 0);
+    EXPECT_EQ(ret, AAFwk::ERR_GET_SPAWN_CLIENT_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "StartProcess_null_spawnclient_001 end");
+}
+
+/**
  * @tc.name: OnRemoteDied_001
  * @tc.desc: on remote died.
  * @tc.type: FUNC

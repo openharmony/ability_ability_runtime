@@ -974,6 +974,11 @@ enum {
     ERR_NOTIFY_PRELOAD_ABILITY_HAS_OTHER = 2097385,
 
     /**
+     * Result (2097386) for the PID of the process created by APPSPAWN is invalid.
+     */
+    ERR_PROCESS_START_INVALID_PID = 2097386,
+
+    /**
      * Native error(3000000) for target bundle not exist.
      */
     ERR_CODE_NOT_EXIST = 3000000,
