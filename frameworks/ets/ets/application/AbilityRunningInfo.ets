@@ -18,18 +18,18 @@ import abilityManager from '@ohos.app.ability.abilityManager';
 
 export interface AbilityRunningInfo {
     ability: ElementName;
-    pid: number;
-    uid: number;
+    pid: int;
+    uid: int;
     processName: string;
-    startTime: number;
+    startTime: long;
     abilityState: abilityManager.AbilityState;
 }
 
 class AbilityRunningInfoImpl implements AbilityRunningInfo {
     ability: ElementName = {};
-    pid: number;
-    uid: number;
+    pid: int;
+    uid: int;
     processName: string = '';
-    startTime: number;
+    startTime: long;
     abilityState: abilityManager.AbilityState = abilityManager.AbilityState.INITIAL;
-}
+}

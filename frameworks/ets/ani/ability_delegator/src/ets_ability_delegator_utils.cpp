@@ -25,7 +25,7 @@ namespace {
 constexpr const char* ABILITY_DELEGATOR_CLASS_NAME = "Lapplication/AbilityDelegator/AbilityDelegatorInner;";
 constexpr const char* RECORD_CLASS_NAME = "Lescompat/Record;";
 constexpr const char* VOID_CONTEXT = ":Lapplication/Context/Context;";
-constexpr const char* STRING_NUMBER_ASYNCCALLBACK = "Lstd/core/String;DLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char* STRING_NUMBER_ASYNCCALLBACK = "Lstd/core/String;JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char* STRING_VOID = "Lstd/core/String;:V";
 constexpr const char* MONITOR_ASYNCCALLBACK_VOID =
     "Lapplication/AbilityMonitor/AbilityMonitor;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
@@ -34,19 +34,23 @@ constexpr const char* ARGS_ABILITY_DELEGATOR_CLASS_NAME =
     "Lapplication/abilityDelegatorArgs/AbilityDelegatorArgsInner;";
 constexpr const char* SIGNATURE_MONITOR_VOID = "Lapplication/AbilityMonitor/AbilityMonitor;:V";
 constexpr const char* SIGNATURE_MONITOR_NUMBER_ASYNCCALLBACK =
-    "Lapplication/AbilityMonitor/AbilityMonitor;DLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "Lapplication/AbilityMonitor/AbilityMonitor;JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char* STAGEMONITOR_ASYNCCALLBACK_VOID =
     "Lapplication/AbilityStageMonitor/AbilityStageMonitor;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char* STAGEMONITOR_VOID =
     "Lapplication/AbilityStageMonitor/AbilityStageMonitor;:V";
 constexpr const char* SIGNATURE_STAGEMONITOR_NUMBER_ASYNCCALLBACK =
-    "Lapplication/AbilityStageMonitor/AbilityStageMonitor;DLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "Lapplication/AbilityStageMonitor/AbilityStageMonitor;JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char* STAGEMONITOR_UIABILITY_ASYNCCALLBACK =
     "L@ohos/app/ability/UIAbility/UIAbility;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char* STRING_ASYNCCALLBACK_VOID = "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
-constexpr const char* STRING_UIABILITY_NUMBER = "L@ohos/app/ability/UIAbility/UIAbility;:D";
+constexpr const char* STRING_UIABILITY_NUMBER = "L@ohos/app/ability/UIAbility/UIAbility;:I";
 constexpr const char* STRING_CALLBACK_UIABILITY =
     "Lutils/AbilityUtils/AsyncCallbackWrapper;:L@ohos/app/ability/UIAbility/UIAbility;";
+constexpr const char* RECORD_GET_NAME =
+    "X{C{std.core.BaseEnum}C{std.core.Numeric}C{std.core.String}}:C{std.core.Object}";
+constexpr const char* RECORD_SET_NAME =
+    "X{C{std.core.BaseEnum}C{std.core.Numeric}C{std.core.String}}C{std.core.Object}:";
 }
 
 bool BindFunctions(ani_env *aniEnv, ani_class abilityDelegator)
@@ -191,16 +195,14 @@ void SetParameters(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindClass failed status: %{public}d", status);
         return;
     }
-    static const char *recordGetName = "X{C{std.core.Numeric}C{std.core.String}}:C{std.core.Object}";
-    ani_method recordGetMethod;
-    status = aniEnv->Class_FindMethod(recordCls, "$_get", recordGetName, &recordGetMethod);
+    ani_method recordGetMethod = nullptr;
+    status = aniEnv->Class_FindMethod(recordCls, "$_get", RECORD_GET_NAME, &recordGetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
     }
-    static const char *recordSetName = "X{C{std.core.Numeric}C{std.core.String}}C{std.core.Object}:";
-    ani_method recordSetMethod;
-    status = aniEnv->Class_FindMethod(recordCls, "$_set", recordSetName, &recordSetMethod);
+    ani_method recordSetMethod = nullptr;
+    status = aniEnv->Class_FindMethod(recordCls, "$_set", RECORD_SET_NAME, &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
