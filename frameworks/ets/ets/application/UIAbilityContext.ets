@@ -27,6 +27,7 @@ import OpenLinkOptions from '@ohos.app.ability.OpenLinkOptions';
 import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 import AbilityStartCallback from 'application.AbilityStartCallback';
+import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
 
 class Cleaner {
   public ptr: long = 0;
@@ -140,6 +141,7 @@ export default class UIAbilityContext extends Context {
   private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>,
     startCallback: AbilityStartCallback): BusinessError;
 
+  private native nativeOpenAtomicService(appId: string, callback: AsyncCallbackWrapper<AbilityResult>, options?: AtomicServiceOptions): void;
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
@@ -467,5 +469,20 @@ export default class UIAbilityContext extends Context {
       });
     });
     return p;
+  }
+
+  openAtomicService(appId: string, options?: AtomicServiceOptions): Promise<AbilityResult> {
+    return new Promise<AbilityResult>((resolve: (data: AbilityResult) => void, reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError | null, data: AbilityResult | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as AbilityResult);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute(() => {
+        this.nativeOpenAtomicService(appId, asyncCall, options);
+      });
+    });
   }
 }
