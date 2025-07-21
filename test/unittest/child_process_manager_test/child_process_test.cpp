@@ -54,7 +54,7 @@ HWTEST_F(ChildProcessTest, ChildProcessCreate_0100, TestSize.Level0)
     TAG_LOGD(AAFwkTag::TEST, "ChildProcessCreate_0100 called.");
     std::unique_ptr<Runtime> runtime;
     auto process = ChildProcess::Create(runtime);
-    EXPECT_TRUE(process != nullptr);
+    EXPECT_TRUE(std::dynamic_pointer_cast<ChildProcess>(process) != nullptr);
 }
 
 /**
