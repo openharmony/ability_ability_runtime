@@ -18,21 +18,21 @@ import appManager from '@ohos.app.ability.appManager';
 import bundleManager from '@ohos.bundle.bundleManager';
 
 export interface ProcessInformation {
-    pid: number;
-    uid: number;
+    pid: int;
+    uid: int;
     processName: string;
     bundleNames: Array<string>;
     state: appManager.ProcessState;
     bundleType: bundleManager.BundleType;
-    appCloneIndex?: number;
+    appCloneIndex?: int;
 }
 
 export default class ProcessInformationInner implements ProcessInformation {
-  pid: number;
-  uid: number;
+  pid: int;
+  uid: int;
   processName: string = '';
   bundleNames: Array<string> = new Array<string>();
   state: appManager.ProcessState = appManager.ProcessState.STATE_CREATE;
   bundleType: bundleManager.BundleType = bundleManager.BundleType.APP;
-  appCloneIndex?: number;
+  appCloneIndex?: int;
 }

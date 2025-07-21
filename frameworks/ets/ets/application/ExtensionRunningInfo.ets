@@ -18,20 +18,20 @@ import bundle from '@ohos.bundle.bundleManager';
 
 export interface ExtensionRunningInfo {
   extension: ElementName;
-  pid: number;
-  uid: number;
+  pid: int;
+  uid: int;
   processName: string;
-  startTime: number;
+  startTime: long;
   clientPackage: Array<String>;
   type: bundle.ExtensionAbilityType;
 }
 
 class ExtensionRunningInfoInner implements ExtensionRunningInfo {
   extension: ElementName = {};
-  pid: number;
-  uid: number;
+  pid: int;
+  uid: int;
   processName: string = '';
-  startTime: number;
+  startTime: long;
   clientPackage: Array<String> = new Array<String>();
   type: bundle.ExtensionAbilityType = bundle.ExtensionAbilityType.FORM;
 }

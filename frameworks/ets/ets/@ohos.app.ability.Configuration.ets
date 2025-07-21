@@ -20,11 +20,11 @@ export interface Configuration {
   colorMode?: ConfigurationConstant.ColorMode;
   direction?: ConfigurationConstant.Direction;
   screenDensity?: ConfigurationConstant.ScreenDensity;
-  displayId?: number;
+  displayId?: long;
   hasPointerDevice?: boolean;
   fontId?: string;
-  fontSizeScale?: number;
-  fontWeightScale?: number;
+  fontSizeScale?: double;
+  fontWeightScale?: double;
   mcc?: string;
   mnc?: string;
 }
@@ -34,11 +34,11 @@ class ConfigurationImpl implements Configuration {
   colorMode?: ConfigurationConstant.ColorMode;
   direction?: ConfigurationConstant.Direction;
   screenDensity?: ConfigurationConstant.ScreenDensity;
-  displayId?: number;
+  displayId?: long;
   hasPointerDevice?: boolean;
   fontId?: string;
-  fontSizeScale?: number;
-  fontWeightScale?: number;
+  fontSizeScale?: double;
+  fontWeightScale?: double;
   mcc?: string;
   mnc?: string;
 }

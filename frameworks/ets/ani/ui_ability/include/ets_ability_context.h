@@ -74,9 +74,9 @@ public:
         ani_object abilityResultObj, ani_string requestCodeObj, ani_object callBackObj);
     static void SetMissionLabel(ani_env *env, ani_object aniObj, ani_string labelObj,
         ani_object callbackObj);
-    static ani_int ConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+    static ani_long ConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object connectOptionsObj);
-    static void DisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_double connectId,
+    static void DisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
         ani_object callback);
     static void SetColorMode(ani_env *env, ani_object aniObj, ani_enum_item colorMode);
     static ani_object StartAbilityByType(
@@ -114,9 +114,9 @@ private:
     void OnBackToCallerAbilityWithResult(ani_env *env, ani_object aniObj,
         ani_object abilityResultObj, ani_string requestCodeObj, ani_object callBackObj);
     void OnSetMissionLabel(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object callbackObj);
-    ani_int OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_long OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object connectOptionsObj);
-    void OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_double connectId,
+    void OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
         ani_object callback);
     void OnSetColorMode(ani_env *env, ani_object aniObj, ani_enum_item colorMode);
     ani_object OnStartAbilityByType(

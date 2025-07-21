@@ -61,9 +61,9 @@ public:
     static void StartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object call);
     static void StartAbilityWithOption(
         ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call);
-    static ani_double ConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+    static ani_long ConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object connectOptionsObj);
-    static void DisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_double connectId,
+    static void DisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
         ani_object callback);
     static void StartAbilityForResult(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callback);
     static void StartAbilityForResultWithOptions(ani_env *env, ani_object aniObj, ani_object wantObj,
@@ -80,9 +80,9 @@ private:
         ani_object callback);
     void AddFreeInstallObserver(
         ani_env *env, const AAFwk::Want &want, ani_object callbackObj, std::shared_ptr<UIExtensionContext> context);
-    ani_double OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_long OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object connectOptionsObj);
-    void OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_double connectId,
+    void OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
         ani_object callback);
     static bool CheckConnectionParam(ani_env *env, ani_object connectOptionsObj,
         sptr<EtsUIExtensionConnection>& connection, AAFwk::Want& want);
