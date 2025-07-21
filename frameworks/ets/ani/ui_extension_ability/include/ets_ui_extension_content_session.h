@@ -77,10 +77,11 @@ public:
     static void NativeLoadContent(ani_env *env, ani_object obj, ani_string path, ani_object storage);
     static void NativeTerminateSelf(ani_env *env, ani_object obj, ani_object callback);
     static void NativeSetWindowBackgroundColor(ani_env *env, ani_object obj, ani_string color);
-    static int NativeTerminateSelfWithResult(ani_env *env, ani_object obj,
-        ani_object abilityResult, ani_object callback);
+    static int NativeTerminateSelfWithResult(
+        ani_env *env, ani_object obj, ani_object abilityResult, ani_object callback);
     static void NativeSetReceiveDataCallback(ani_env *env, ani_object clsObj, ani_object funcObj);
-    static ani_object NativeGetUIExtensionHostWindowProxy(ani_env* env, ani_object obj);
+    static void NativeSetReceiveDataForResultCallback(ani_env *env, ani_object clsObj, ani_object funcObj);
+    static ani_object NativeGetUIExtensionHostWindowProxy(ani_env *env, ani_object obj);
 
     void SendData(ani_env *env, ani_object object, ani_object data);
     void LoadContent(ani_env *env, ani_object object, ani_string path, ani_object storage);
@@ -89,23 +90,29 @@ public:
     void SetWindowBackgroundColor(ani_env *env, ani_string color);
     ani_object GetUIExtensionHostWindowProxy(ani_env *env, ani_object object);
     void SetReceiveDataCallback(ani_env *env, ani_object functionObj);
-    static void CallReceiveDataCallback(ani_vm *vm, ani_ref callbackRef, const AAFwk::WantParams& wantParams);
+    static void CallReceiveDataCallback(ani_vm *vm, ani_ref callbackRef, const AAFwk::WantParams &wantParams);
+    void SetReceiveDataForResultCallback(ani_env *env, ani_object object);
+    static void CallReceiveDataCallbackForResult(
+        ani_vm *vm, ani_ref callbackRef, const AAFwk::WantParams &wantParams, AAFwk::WantParams &retWantParams);
     std::shared_ptr<AbilityRuntime::Context> GetContext();
     sptr<Rosen::Window> GetUIWindow();
-
+    static bool BindNativePtrCleaner(ani_env *env);
+    static void Clean(ani_env *env, ani_object object);
 private:
     void SetReceiveDataCallbackRegister(ani_env *env, ani_object functionObj);
+    void SetReceiveDataForResultCallbackRegister(ani_env *env, ani_object funcObj);
+
     sptr<AAFwk::SessionInfo> sessionInfo_;
     sptr<Rosen::Window> uiWindow_;
     std::weak_ptr<AbilityRuntime::Context> context_;
     ani_ref receiveDataCallback_ = nullptr;
     bool isRegistered_ = false;
-    std::shared_ptr<CallbackWrapper> receiveDataForResultCallback_;
-    bool isSyncRegistered = false;
+    ani_ref receiveDataForResultCallback_ = nullptr;
+    bool isSyncRegistered_ = false;
     std::shared_ptr<EtsUISessionAbilityResultListener> listener_;
     bool isFirstTriggerBindModal_ = true;
 };
 
-}  // namespace AbilityRuntime
-}  // namespace OHOS
+} // namespace AbilityRuntime
+} // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_ETS_UI_EXTENSION_CONTENT_SESSION_H

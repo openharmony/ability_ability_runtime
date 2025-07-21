@@ -192,5 +192,5 @@ std::shared_ptr<AppExecFwk::ETSNativeReference> EtsAbilityMonitor::GetRuntimeObj
     }
     return runtimeObj;
 }
-}  // namespace AbilityDelegatorJs
-}  // namespace OHOS
+} // namespace AbilityDelegatorJs
+} // namespace OHOS

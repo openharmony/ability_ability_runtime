@@ -127,6 +127,7 @@
           "//foundation/ability/ability_runtime/interfaces/inner_api:innerkits_target",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:ability_thread",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:extension_module",
+          "//foundation/ability/ability_runtime/frameworks/native/ability/native:insight_intent_executor_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:service_extension_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:ui_ability_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:ui_extension_ani",
@@ -349,6 +350,7 @@
             "header": {
               "header_base": "//foundation/ability/ability_runtime/frameworks/ets/ani/ani_common/include",
               "header_files": [
+                "ani_common_ability_state_data.h",
                 "ani_common_start_options.h",
                 "ani_common_want.h",
                 "ets_native_reference.h"
@@ -363,6 +365,15 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/frameworks/js/napi/inner/napi_ability_common:napi_ability_common"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/ets/ani/ani_wantagent_common",
+              "header_files": [
+                "ani_common_want_agent.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/ets/ani/ani_wantagent_common:ani_wantagent_common"
           },
           {
             "header": {

@@ -45,6 +45,7 @@ public:
 private:
     static void SetConfiguration(ani_env *env, ani_class stageCls, ani_object stageCtxObj,
         std::shared_ptr<Context> &context);
+    static ani_object CreateHapModuleInfo(ani_env* env, const std::shared_ptr<Context> &context);
 private:
     std::weak_ptr<Context> context_;
     static ani_ref etsAbilityStageContextObj_;
