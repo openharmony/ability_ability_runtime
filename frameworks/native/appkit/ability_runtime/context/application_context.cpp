@@ -29,7 +29,6 @@ namespace OHOS {
 namespace AbilityRuntime {
 const size_t ApplicationContext::CONTEXT_TYPE_ID(std::hash<const char*> {} ("ApplicationContext"));
 std::vector<std::shared_ptr<AbilityLifecycleCallback>> ApplicationContext::callbacks_;
-std::vector<std::shared_ptr<AbilityLifecycleCallback>> ApplicationContext::callbacks_;
 std::vector<std::shared_ptr<EnvironmentCallback>> ApplicationContext::envCallbacks_;
 std::vector<std::weak_ptr<ApplicationStateChangeCallback>> ApplicationContext::applicationStateCallback_;
 
@@ -120,7 +119,7 @@ void ApplicationContext::DispatchOnAbilityCreate(std::shared_ptr<NativeReference
     }
 }
 
-void ApplicationContext::DispatchOnAbilityCreate(std::shared_ptr<STSNativeReference> ability)
+void ApplicationContext::DispatchOnAbilityCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability)
 {
     if (!ability) {
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
@@ -149,8 +148,8 @@ void ApplicationContext::DispatchOnWindowStageCreate(std::shared_ptr<NativeRefer
     }
 }
 
-void ApplicationContext::DispatchOnWindowStageCreate(std::shared_ptr<STSNativeReference> ability,
-    std::shared_ptr<STSNativeReference> windowStage)
+void ApplicationContext::DispatchOnWindowStageCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
+    std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage)
 {
     if (!ability || !windowStage) {
         TAG_LOGE(AAFwkTag::APPKIT, "null ability or windowStage");
@@ -179,8 +178,8 @@ void ApplicationContext::DispatchOnWindowStageDestroy(std::shared_ptr<NativeRefe
     }
 }
 
-void ApplicationContext::DispatchOnWindowStageDestroy(std::shared_ptr<STSNativeReference> ability,
-    std::shared_ptr<STSNativeReference> windowStage)
+void ApplicationContext::DispatchOnWindowStageDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
+    std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage)
 {
     if (ability == nullptr || windowStage == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null env or ability or windowStage");
@@ -240,7 +239,7 @@ void ApplicationContext::DispatchOnAbilityDestroy(std::shared_ptr<NativeReferenc
     }
 }
 
-void ApplicationContext::DispatchOnAbilityDestroy(std::shared_ptr<STSNativeReference> ability)
+void ApplicationContext::DispatchOnAbilityDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability)
 {
     if (ability == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null env or ability");
@@ -268,7 +267,7 @@ void ApplicationContext::DispatchOnAbilityForeground(std::shared_ptr<NativeRefer
     }
 }
 
-void ApplicationContext::DispatchOnAbilityForeground(std::shared_ptr<STSNativeReference> ability)
+void ApplicationContext::DispatchOnAbilityForeground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability)
 {
     if (ability == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null env or ability");
@@ -296,7 +295,7 @@ void ApplicationContext::DispatchOnAbilityBackground(std::shared_ptr<NativeRefer
     }
 }
 
-void ApplicationContext::DispatchOnAbilityBackground(std::shared_ptr<STSNativeReference> ability)
+void ApplicationContext::DispatchOnAbilityBackground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability)
 {
     if (ability == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null env or ability");

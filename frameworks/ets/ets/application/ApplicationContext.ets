@@ -64,8 +64,8 @@ export default class ApplicationContext extends Context {
     destroyRegister.unregister(unregisterToken);
   }
 
-  public native nativeOnLifecycleCallbackSync(type: string, callback: Object): number;
-  public native nativeOffLifecycleCallbackSync(type: string, callbackId: number,
+  public native nativeOnLifecycleCallbackSync(type: string, callback: Object): int;
+  public native nativeOffLifecycleCallbackSync(type: string, callbackId: int,
     callback: AsyncCallbackWrapper<void>): void;
   public native nativekillAllProcessesSync(clearPageStack: boolean, callback: AsyncCallbackWrapper<void>): void;
   public native nativepreloadUIExtensionAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
@@ -295,11 +295,11 @@ export default class ApplicationContext extends Context {
     return ApplicationContext.nativeTransferDynamic(input).unwrap();
   }
 
-  on(type: 'abilityLifecycle', callback: AbilityLifecycleCallback): number {
+  on(type: 'abilityLifecycle', callback: AbilityLifecycleCallback): int {
     return this.nativeOnLifecycleCallbackSync(type, callback);
   }
 
-  off(type: 'abilityLifecycle', callbackId: number): Promise<void> {
+  off(type: 'abilityLifecycle', callbackId: int): Promise<void> {
     let p: Promise<void> =
       new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
@@ -316,7 +316,7 @@ export default class ApplicationContext extends Context {
     return p;
   }
 
-  off(type: 'abilityLifecycle', callbackId: number, callback: AsyncCallback<void>): void {
+  off(type: 'abilityLifecycle', callbackId: int, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeOffLifecycleCallbackSync(type, callbackId, myCall);
