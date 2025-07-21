@@ -1270,5 +1270,15 @@ void AppRunningRecord::SetSupportMultiProcessDeviceFeature(bool support)
 {
     supportMultiProcessDeviceFeature_ = support;
 }
+
+void AppRunningRecord::SetPreForeground(bool isPreForeground)
+{
+    isPreForeground_.store(isPreForeground);
+}
+
+bool AppRunningRecord::IsPreForeground() const
+{
+    return isPreForeground_.load();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

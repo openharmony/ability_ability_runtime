@@ -1749,6 +1749,46 @@ HWTEST_F(AppMgrServiceInnerSecondTest, UpdateAbilityState_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateAbilityState_002
+ * @tc.desc: update ability state.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, UpdateAbilityState_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UpdateAbilityState_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+
+    BundleInfo bundleInfo;
+    HapModuleInfo hapModuleInfo;
+    std::shared_ptr<AAFwk::Want> want;
+    std::string processName = "test_processName";
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    OHOS::sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    loadParam->token = token;
+    std::shared_ptr<AppRunningRecord> appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam,
+        applicationInfo_, nullptr, processName, bundleInfo, hapModuleInfo, want);
+    ASSERT_NE(appRecord, nullptr);
+    appRecord->AddModule(applicationInfo_, abilityInfo_, token, hapModuleInfo, nullptr, 0);
+
+    appRecord->SetPreForeground(false);
+    appMgrServiceInner->UpdateAbilityState(token, AbilityState::ABILITY_STATE_FOREGROUND);
+    EXPECT_EQ(appRecord->IsPreForeground(), false);
+
+    appRecord->SetPreForeground(true);
+    appMgrServiceInner->UpdateAbilityState(token, AbilityState::ABILITY_STATE_CREATE);
+    EXPECT_EQ(appRecord->IsPreForeground(), true);
+
+    appRecord->SetPreForeground(true);
+    appMgrServiceInner->UpdateAbilityState(token, AbilityState::ABILITY_STATE_FOREGROUND);
+    EXPECT_EQ(appRecord->IsPreForeground(), false);
+
+    TAG_LOGI(AAFwkTag::TEST, "UpdateAbilityState_002 end");
+}
+
+/**
  * @tc.name: KillProcessByAbilityToken_001
  * @tc.desc: kill process by ability token.
  * @tc.type: FUNC

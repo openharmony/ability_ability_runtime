@@ -1277,5 +1277,15 @@ void AppRunningRecord::SetKeepAliveAppService(bool isKeepAliveAppService)
 {
     isKeepAliveAppService_ = isKeepAliveAppService;
 }
+
+void AppRunningRecord::SetPreForeground(bool isPreForeground)
+{
+    isPreForeground_.store(isPreForeground);
+}
+
+bool AppRunningRecord::IsPreForeground() const
+{
+    return isPreForeground_.load();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

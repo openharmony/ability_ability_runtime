@@ -1635,7 +1635,7 @@ int32_t AppMgrClient::PreloadApplicationByPhase(const std::string &bundleName, i
     return amsService->PreloadApplicationByPhase(bundleName, userId, appIndex, preloadPhase);
 }
 
-int32_t AppMgrClient::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+int32_t AppMgrClient::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground)
 {
     if (mgrHolder_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "mgrHolder is nullptr.");
@@ -1651,7 +1651,7 @@ int32_t AppMgrClient::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token
         TAG_LOGE(AAFwkTag::APPMGR, "amsService is nullptr.");
         return ERROR_SERVICE_NOT_CONNECTED;
     }
-    return amsService->NotifyPreloadAbilityStateChanged(token);
+    return amsService->NotifyPreloadAbilityStateChanged(token, isPreForeground);
 }
 
 int32_t AppMgrClient::CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,

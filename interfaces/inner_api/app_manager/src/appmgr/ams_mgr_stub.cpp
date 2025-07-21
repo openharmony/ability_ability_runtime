@@ -1000,11 +1000,16 @@ int32_t AmsMgrStub::HandleNotifyPreloadAbilityStateChanged(MessageParcel &data, 
 {
     HITRACE_METER(HITRACE_TAG_APP);
     sptr<IRemoteObject> token = data.ReadRemoteObject();
+    bool isPreForeground = data.ReadBool();
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null token");
         return AAFwk::INVALID_CALLER_TOKEN;
     }
-    NotifyPreloadAbilityStateChanged(token);
+    auto ret = NotifyPreloadAbilityStateChanged(token, isPreForeground);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write ret");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
+    }
     return NO_ERROR;
 }
 

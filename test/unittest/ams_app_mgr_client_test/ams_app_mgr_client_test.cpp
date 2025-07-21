@@ -638,7 +638,7 @@ HWTEST_F(AmsAppMgrClientTest, NotifyPreloadAbilityStateChanged_001, TestSize.Lev
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_001 start");
     client_->mgrHolder_ = nullptr;
 
-    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_);
+    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_, true);
     EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_001 end");
 }
@@ -656,7 +656,7 @@ HWTEST_F(AmsAppMgrClientTest, NotifyPreloadAbilityStateChanged_002, TestSize.Lev
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_002 start");
     client_->SetServiceManager(nullptr);
 
-    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_);
+    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_, true);
     EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_002 end");
 }
@@ -680,7 +680,7 @@ HWTEST_F(AmsAppMgrClientTest, NotifyPreloadAbilityStateChanged_003, TestSize.Lev
         .Times(1)
         .WillOnce(Return(amsMgrScheduler));
 
-    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_);
+    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_, true);
     EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_003 end");
 }
@@ -704,11 +704,11 @@ HWTEST_F(AmsAppMgrClientTest, NotifyPreloadAbilityStateChanged_004, TestSize.Lev
         .Times(1)
         .WillOnce(Return(mockAmsMgrScheduler));
     
-    EXPECT_CALL(*mockAmsMgrScheduler, NotifyPreloadAbilityStateChanged(_))
+    EXPECT_CALL(*mockAmsMgrScheduler, NotifyPreloadAbilityStateChanged(_, _))
         .Times(1)
         .WillOnce(Return(AppMgrResultCode::RESULT_OK));
 
-    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_);
+    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_, true);
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_004 end");
 }

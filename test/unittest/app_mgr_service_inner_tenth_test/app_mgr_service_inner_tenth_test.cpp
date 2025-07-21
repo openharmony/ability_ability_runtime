@@ -2023,7 +2023,7 @@ HWTEST_F(AppMgrServiceInnerTenthTest, NotifyPreloadAbilityStateChanged_001, Test
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
 
-    auto ret = appMgrServiceInner->NotifyPreloadAbilityStateChanged(nullptr);
+    auto ret = appMgrServiceInner->NotifyPreloadAbilityStateChanged(nullptr, true);
     EXPECT_EQ(ret, AAFwk::INVALID_CALLER_TOKEN);
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_001 end");
 }
@@ -2041,7 +2041,7 @@ HWTEST_F(AppMgrServiceInnerTenthTest, NotifyPreloadAbilityStateChanged_002, Test
 
     AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = nullptr;
     sptr<IRemoteObject> token = new MockAppScheduler();
-    auto ret = appMgrServiceInner->NotifyPreloadAbilityStateChanged(token);
+    auto ret = appMgrServiceInner->NotifyPreloadAbilityStateChanged(token, true);
     EXPECT_NE(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_002 end");
 }
@@ -2057,13 +2057,90 @@ HWTEST_F(AppMgrServiceInnerTenthTest, NotifyPreloadAbilityStateChanged_003, Test
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
 
-    AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    auto appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = appRecord;
+    appRecord->SetPreForeground(true);
     sptr<IRemoteObject> token = new MockAppScheduler();
-    auto ret = appMgrServiceInner->NotifyPreloadAbilityStateChanged(token);
+    auto ret = appMgrServiceInner->NotifyPreloadAbilityStateChanged(token, true);
+    EXPECT_NE(ret, ERR_OK);
+
+    AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = nullptr;
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_004 end");
+}
+
+/**
+ * @tc.name: NotifyPreloadAbilityStateChanged_004
+ * @tc.desc: Test NotifyPreloadAbilityStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, NotifyPreloadAbilityStateChanged_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_004 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+
+    auto appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = appRecord;
+    appRecord->SetPreForeground(true);
+    sptr<IRemoteObject> token = new MockAppScheduler();
+    auto ret = appMgrServiceInner->NotifyPreloadAbilityStateChanged(token, false);
     EXPECT_EQ(ret, ERR_OK);
 
     AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = nullptr;
-    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_003 end");
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_004 end");
+}
+
+/**
+ * @tc.name: NotifyPreloadAbilityStateChanged_005
+ * @tc.desc: Test NotifyPreloadAbilityStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, NotifyPreloadAbilityStateChanged_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_005 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+
+    AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    auto &abilitiesMap = AAFwk::MyStatus::GetInstance().abilitiesMap_;
+
+    auto abilityInfo1 = std::make_shared<AbilityInfo>();
+    sptr<IRemoteObject> token1 = new MockAppScheduler();
+    auto abilityRecord1 = std::make_shared<AbilityRunningRecord>(abilityInfo1, token1, 1);
+
+    auto abilityInfo2 = std::make_shared<AbilityInfo>();
+    sptr<IRemoteObject> token2 = new MockAppScheduler();
+    auto abilityRecord2 = std::make_shared<AbilityRunningRecord>(abilityInfo2, token2, 2);
+
+    abilitiesMap[token1] = abilityRecord1;
+    abilitiesMap[token2] = abilityRecord2;
+
+    sptr<IRemoteObject> token = new MockAppScheduler();
+    auto ret = appMgrServiceInner->NotifyPreloadAbilityStateChanged(token, true);
+    EXPECT_NE(ret, ERR_OK);
+
+    AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = nullptr;
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_005 end");
+}
+
+/**
+ * @tc.name: NotifyPreloadAbilityStateChanged_006
+ * @tc.desc: Test NotifyPreloadAbilityStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, NotifyPreloadAbilityStateChanged_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_006 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+
+    AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    sptr<IRemoteObject> token = new MockAppScheduler();
+    auto ret = appMgrServiceInner->NotifyPreloadAbilityStateChanged(token, true);
+    EXPECT_EQ(ret, ERR_OK);
+
+    AAFwk::MyStatus::GetInstance().getAppRunningByToken_ = nullptr;
+    TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_006 end");
 }
 
 /**

@@ -90,7 +90,7 @@ public:
     void OnPageHide(const PageStateData pageStateData);
     void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
     void OnKeepAliveStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
-    void OnPreloadProcessStateChanged(std::shared_ptr<AppRunningRecord> appRecord, ApplicationState state);
+    void OnProcessPreForegroundChanged(std::shared_ptr<AppRunningRecord> appRecord);
 
 private:
     void HandleOnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord);
@@ -140,7 +140,7 @@ private:
     void HandleOnProcessBindingRelationChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
         const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation);
     void HandleOnKeepAliveStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
-    void HandleOnPreloadProcessStateChanged(std::shared_ptr<AppRunningRecord> appRecord, ApplicationState state);
+    void HandleOnProcessPreForegroundChanged(std::shared_ptr<AppRunningRecord> appRecord);
 
 private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> handler_;
