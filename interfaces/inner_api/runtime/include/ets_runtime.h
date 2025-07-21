@@ -90,6 +90,7 @@ public:
     const std::unique_ptr<AbilityRuntime::Runtime> &GetJsRuntime() const;
     std::unique_ptr<AbilityRuntime::Runtime> MoveJsRuntime();
     static std::unique_ptr<ETSRuntime> PreFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
+    void PreloadSystemClass(const char *className) override;
 
 private:
     bool Initialize(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);

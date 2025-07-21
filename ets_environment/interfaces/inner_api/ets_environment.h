@@ -59,6 +59,7 @@ public:
         void *&obj, void *&ref);
     void FinishPreload();
     void PostFork(void *napiEnv, const std::string &aotPath);
+    void PreloadSystemClass(const char *className);
 
     struct VMEntry {
         ani_vm *aniVm_;
