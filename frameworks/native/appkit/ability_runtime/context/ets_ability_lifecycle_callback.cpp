@@ -19,7 +19,8 @@
 #include "js_runtime_utils.h"
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
-#include "sts_runtime.h"
+#include "ets_runtime.h"
+#include "ets_native_reference.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -64,7 +65,7 @@ ani_env *EtsAbilityLifecycleCallback::GetAniEnv()
 int32_t EtsAbilityLifecycleCallback::serialNumber_ = 0;
 
 void EtsAbilityLifecycleCallback::CallObjectMethod(const char *methodName,
-    const char *signature, std::shared_ptr<STSNativeReference> ability)
+    const char *signature, std::shared_ptr<AppExecFwk::ETSNativeReference> ability)
 {
     ani_env *aniEnv = GetAniEnv();
     if (aniEnv == nullptr || ability == nullptr) {
@@ -101,7 +102,7 @@ void EtsAbilityLifecycleCallback::CallObjectMethod(const char *methodName,
 }
 
 void EtsAbilityLifecycleCallback::CallObjectMethod(const char *methodName, const char *signature,
-    std::shared_ptr<STSNativeReference> ability, std::shared_ptr<STSNativeReference> windowStage)
+    std::shared_ptr<AppExecFwk::ETSNativeReference> ability, std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage)
 {
     ani_env *aniEnv = GetAniEnv();
     if (aniEnv == nullptr || ability == nullptr || windowStage == nullptr) {
@@ -174,37 +175,36 @@ bool EtsAbilityLifecycleCallback::Unregister(int32_t callbackId)
     return callbacks_.erase(callbackId);
 }
 
-void EtsAbilityLifecycleCallback::OnAbilityCreate(std::shared_ptr<STSNativeReference> ability)
+void EtsAbilityLifecycleCallback::OnAbilityCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability)
 {
     CallObjectMethod("onAbilityCreate", SIGNATURE_UIABILITY, ability);
 }
 
-void EtsAbilityLifecycleCallback::OnWindowStageCreate(std::shared_ptr<STSNativeReference> ability,
-    std::shared_ptr<STSNativeReference> windowStage)
+void EtsAbilityLifecycleCallback::OnWindowStageCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
+    std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage)
 {
     CallObjectMethod("onWindowStageCreate", SIGNATURE_UIABILITY_WINDOW_STAGE, ability, windowStage);
 }
 
-void EtsAbilityLifecycleCallback::OnWindowStageDestroy(std::shared_ptr<STSNativeReference> ability,
-    std::shared_ptr<STSNativeReference> windowStage)
+void EtsAbilityLifecycleCallback::OnWindowStageDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
+    std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage)
 {
     CallObjectMethod("onWindowStageDestroy", SIGNATURE_UIABILITY_WINDOW_STAGE, ability, windowStage);
 }
 
-void EtsAbilityLifecycleCallback::OnAbilityDestroy(std::shared_ptr<STSNativeReference> ability)
+void EtsAbilityLifecycleCallback::OnAbilityDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability)
 {
     CallObjectMethod("onAbilityDestroy", SIGNATURE_UIABILITY, ability);
 }
 
-void EtsAbilityLifecycleCallback::OnAbilityForeground(std::shared_ptr<STSNativeReference> ability)
+void EtsAbilityLifecycleCallback::OnAbilityForeground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability)
 {
     CallObjectMethod("onAbilityForeground", SIGNATURE_UIABILITY, ability);
 }
 
-void EtsAbilityLifecycleCallback::OnAbilityBackground(std::shared_ptr<STSNativeReference> ability)
+void EtsAbilityLifecycleCallback::OnAbilityBackground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability)
 {
     CallObjectMethod("onAbilityBackground", SIGNATURE_UIABILITY, ability);
 }
-
 }  // namespace AbilityRuntime
 }  // namespace OHOS

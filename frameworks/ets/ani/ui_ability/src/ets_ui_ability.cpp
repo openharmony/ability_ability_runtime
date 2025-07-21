@@ -26,6 +26,7 @@
 #endif
 #include "app_recovery.h"
 #include "connection_manager.h"
+#include "context/application_context.h"
 #include "display_util.h"
 #include "ets_ability_context.h"
 #include "ets_data_struct_converter.h"

@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "ability_lifecycle_callback.h"
+#include "ani.h"
 
 typedef struct __ani_env ani_env;
 typedef struct __ani_vm ani_vm;
@@ -27,21 +28,23 @@ typedef class __ani_object *ani_object;
 typedef class __ani_ref *ani_ref;
 
 namespace OHOS {
+namespace AppExecFwk {
+struct ETSNativeReference;
+}  // namespace AppExecFwk
 namespace AbilityRuntime {
-struct STSNativeReference;
 
 class EtsAbilityLifecycleCallback : public AbilityLifecycleCallback,
                                    public std::enable_shared_from_this<EtsAbilityLifecycleCallback> {
 public:
     explicit EtsAbilityLifecycleCallback(ani_env *env);
-    void OnAbilityCreate(std::shared_ptr<STSNativeReference> ability) override;
-    void OnWindowStageCreate(std::shared_ptr<STSNativeReference> ability,
-        std::shared_ptr<STSNativeReference> windowStage) override;
-    void OnWindowStageDestroy(std::shared_ptr<STSNativeReference> ability,
-        std::shared_ptr<STSNativeReference> windowStage) override;
-    void OnAbilityDestroy(std::shared_ptr<STSNativeReference> ability) override;
-    void OnAbilityForeground(std::shared_ptr<STSNativeReference> ability) override;
-    void OnAbilityBackground(std::shared_ptr<STSNativeReference> ability) override;
+    void OnAbilityCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) override;
+    void OnWindowStageCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
+        std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage) override;
+    void OnWindowStageDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
+        std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage) override;
+    void OnAbilityDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) override;
+    void OnAbilityForeground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) override;
+    void OnAbilityBackground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) override;
 
     int32_t Register(ani_object callback);
     bool Unregister(int32_t callbackId);
@@ -50,9 +53,9 @@ public:
 private:
     ani_env *GetAniEnv();
     void CallObjectMethod(const char *methodName, const char *signature,
-        std::shared_ptr<STSNativeReference> ability);
+        std::shared_ptr<AppExecFwk::ETSNativeReference> ability);
     void CallObjectMethod(const char *methodName, const char *signature,
-        std::shared_ptr<STSNativeReference> ability, std::shared_ptr<STSNativeReference> windowStage);
+        std::shared_ptr<AppExecFwk::ETSNativeReference> ability, std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage);
 
 private:
     static int32_t serialNumber_;

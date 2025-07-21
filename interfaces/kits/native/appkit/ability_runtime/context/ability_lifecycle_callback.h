@@ -24,8 +24,10 @@ typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
 
 namespace OHOS {
+namespace AppExecFwk {
+struct ETSNativeReference;
+}
 namespace AbilityRuntime {
-struct STSNativeReference;
 
 class AbilityLifecycleCallback {
 public:
@@ -67,14 +69,14 @@ public:
     virtual void OnDidBackground(const std::shared_ptr<NativeReference> &ability) {}
 
 /*----------------------------------for arkts 1.2 listening UIAbility 1.2--------------------------------------------*/
-    virtual void OnAbilityCreate(std::shared_ptr<STSNativeReference> ability) {}
-    virtual void OnWindowStageCreate(std::shared_ptr<STSNativeReference> ability,
-        std::shared_ptr<STSNativeReference> windowStage) {}
-    virtual void OnWindowStageDestroy(std::shared_ptr<STSNativeReference> ability,
-        std::shared_ptr<STSNativeReference> windowStage) {}
-    virtual void OnAbilityDestroy(std::shared_ptr<STSNativeReference> ability) {}
-    virtual void OnAbilityForeground(std::shared_ptr<STSNativeReference> ability) {}
-    virtual void OnAbilityBackground(std::shared_ptr<STSNativeReference> ability) {}
+    virtual void OnAbilityCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) {}
+    virtual void OnWindowStageCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
+        std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage) {}
+    virtual void OnWindowStageDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
+        std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage) {}
+    virtual void OnAbilityDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) {}
+    virtual void OnAbilityForeground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) {}
+    virtual void OnAbilityBackground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) {}
 };
 
 class JsAbilityLifecycleCallback : public AbilityLifecycleCallback,
