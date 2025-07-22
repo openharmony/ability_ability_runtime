@@ -49,10 +49,8 @@ export class AbilityUtils {
       try {
         for (let methodIdx = 0; methodIdx < currType.getMethodsNum(); methodIdx++) {
           const method = currType.getMethod(methodIdx)
-          if (method.getName().equals(methodName)) {
-            if (!method.isInherited()) {
-              return true;
-            }
+          if (method.getName().equals(methodName) && method.getOwnerType().equals(currType)) {
+            return true;
           }
         }
         let baseType = currType.getBaseType();
