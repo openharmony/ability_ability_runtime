@@ -71,12 +71,14 @@ bool UPMSUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uin
     }
     for (size_t i = 0; i < resVec.size(); i++) {
         if (resVec[i]) {
-            eventInfo.uri = uriVec[i];
+            Uri uri(uriVec[i]);
+            eventInfo.uri = uri.GetScheme() + ":" + uri.GetAuthority();
             EventReport::SendGrantUriPermissionEvent(EventName::GRANT_URI_PERMISSION, eventInfo);
+            return true;
         }
     }
     TAG_LOGD(AAFwkTag::URIPERMMGR, "send grant uri permission event end.");
-    return true;
+    return false;
 }
 
 bool UPMSUtils::CheckAndCreateEventInfo(uint32_t callerTokenId, uint32_t targetTokenId,
