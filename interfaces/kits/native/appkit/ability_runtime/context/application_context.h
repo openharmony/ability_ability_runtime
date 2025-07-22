@@ -43,18 +43,26 @@ public:
     void UnregisterEnvironmentCallback(const std::shared_ptr<EnvironmentCallback> &environmentCallback);
     void RegisterApplicationStateChangeCallback(
         const std::weak_ptr<ApplicationStateChangeCallback> &applicationStateChangeCallback);
-    void DispatchOnAbilityCreate(const std::shared_ptr<NativeReference> &ability);
-    void DispatchOnWindowStageCreate(const std::shared_ptr<NativeReference> &ability,
-        const std::shared_ptr<NativeReference> &windowStage);
-    void DispatchOnWindowStageDestroy(const std::shared_ptr<NativeReference> &ability,
-        const std::shared_ptr<NativeReference> &windowStage);
+    void DispatchOnAbilityCreate(std::shared_ptr<NativeReference> ability);
+    void DispatchOnAbilityCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability);
+    void DispatchOnWindowStageCreate(std::shared_ptr<NativeReference> ability,
+        std::shared_ptr<NativeReference> windowStage);
+    void DispatchOnWindowStageCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
+        std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage);
+    void DispatchOnWindowStageDestroy(std::shared_ptr<NativeReference> ability,
+        std::shared_ptr<NativeReference> windowStage);
+    void DispatchOnWindowStageDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
+        std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage);
     void DispatchWindowStageFocus(const std::shared_ptr<NativeReference> &ability,
         const std::shared_ptr<NativeReference> &windowStage);
     void DispatchWindowStageUnfocus(const std::shared_ptr<NativeReference> &ability,
         const std::shared_ptr<NativeReference> &windowStage);
-    void DispatchOnAbilityDestroy(const std::shared_ptr<NativeReference> &ability);
-    void DispatchOnAbilityForeground(const std::shared_ptr<NativeReference> &ability);
-    void DispatchOnAbilityBackground(const std::shared_ptr<NativeReference> &ability);
+    void DispatchOnAbilityDestroy(std::shared_ptr<NativeReference> ability);
+    void DispatchOnAbilityDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability);
+    void DispatchOnAbilityForeground(std::shared_ptr<NativeReference> ability);
+    void DispatchOnAbilityForeground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability);
+    void DispatchOnAbilityBackground(std::shared_ptr<NativeReference> ability);
+    void DispatchOnAbilityBackground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability);
     void DispatchOnAbilityContinue(const std::shared_ptr<NativeReference> &ability);
     void DispatchOnAbilityWillContinue(const std::shared_ptr<NativeReference> &ability);
     void DispatchOnWindowStageWillRestore(const std::shared_ptr<NativeReference> &ability,

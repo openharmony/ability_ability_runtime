@@ -24,195 +24,38 @@ typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
 
 namespace OHOS {
+namespace AppExecFwk {
+struct ETSNativeReference;
+}
 namespace AbilityRuntime {
+
 class AbilityLifecycleCallback {
 public:
     virtual ~AbilityLifecycleCallback() {}
-    /**
-     * Called back when the ability is started for initialization.
-     *
-     * @since 9
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @StageModelOnly
-     */
-    virtual void OnAbilityCreate(const std::shared_ptr<NativeReference> &ability) = 0;
-
-    /**
-     * Called back when the window stage is created.
-     *
-     * @since 9
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @param windowStage: Indicates the window stage to create.
-     * @StageModelOnly
-     */
+/*----------------------------------for arkts 1.1 listening UIAbility 1.1--------------------------------------------*/
+    virtual void OnAbilityCreate(const std::shared_ptr<NativeReference> &ability) {}
     virtual void OnWindowStageCreate(const std::shared_ptr<NativeReference> &ability,
-        const std::shared_ptr<NativeReference> &windowStage) = 0;
-
-    /**
-     * Called back when the window stage is destroy.
-     *
-     * @since 9
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @param windowStage: Indicates the window stage to destroy.
-     * @StageModelOnly
-     */
+        const std::shared_ptr<NativeReference> &windowStage) {}
     virtual void OnWindowStageDestroy(const std::shared_ptr<NativeReference> &ability,
-        const std::shared_ptr<NativeReference> &windowStage) = 0;
-
-    /**
-     * Called back when the window stage is active.
-     *
-     * @since 9
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @param windowStage: Indicates the window stage to active.
-     * @StageModelOnly
-     */
+        const std::shared_ptr<NativeReference> &windowStage) {}
     virtual void OnWindowStageActive(const std::shared_ptr<NativeReference> &ability,
-        const std::shared_ptr<NativeReference> &windowStage) = 0;
-
-    /**
-     * Called back when the window stage is inactive.
-     *
-     * @since 9
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @param windowStage: Indicates the window stage to inactive.
-     * @StageModelOnly
-     */
+        const std::shared_ptr<NativeReference> &windowStage) {}
     virtual void OnWindowStageInactive(const std::shared_ptr<NativeReference> &ability,
-        const std::shared_ptr<NativeReference> &windowStage) = 0;
-
-    /**
-     * Called back when the ability is destroy.
-     *
-     * @since 9
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @StageModelOnly
-     */
-    virtual void OnAbilityDestroy(const std::shared_ptr<NativeReference> &ability) = 0;
-
-    /**
-     * Called back after the UIAbility called onNewWant.
-     *
-     * @since 12
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @StageModelOnly
-     */
-    virtual void OnNewWant(const std::shared_ptr<NativeReference> &ability)
-    {}
-
-    /**
-     * Called back before the UIAbility will called onNewWant.
-     *
-     * @since 12
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @StageModelOnly
-     */
-    virtual void OnWillNewWant(const std::shared_ptr<NativeReference> &ability)
-    {}
-
-    /**
-     * Called back before an ability is started for initialization.
-     *
-     * @since 12
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @StageModelOnly
-     */
-    virtual void OnAbilityWillCreate(const std::shared_ptr<NativeReference> &ability)
-    {}
-
-    /**
-     * Called back before a window stage is created.
-     *
-     * @since 12
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @param windowStage: Indicates the window stage to active.
-     * @StageModelOnly
-     */
+        const std::shared_ptr<NativeReference> &windowStage) {}
+    virtual void OnAbilityDestroy(const std::shared_ptr<NativeReference> &ability) {}
+    virtual void OnNewWant(const std::shared_ptr<NativeReference> &ability) {}
+    virtual void OnWillNewWant(const std::shared_ptr<NativeReference> &ability) {}
+    virtual void OnAbilityWillCreate(const std::shared_ptr<NativeReference> &ability) {}
     virtual void OnWindowStageWillCreate(const std::shared_ptr<NativeReference> &ability,
         const std::shared_ptr<NativeReference> &windowStage) {}
-
-    /**
-     * Called back before a window stage is destroyed.
-     *
-     * @since 12
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @param windowStage: Indicates the window stage to active.
-     * @StageModelOnly
-     */
     virtual void OnWindowStageWillDestroy(const std::shared_ptr<NativeReference> &ability,
         const std::shared_ptr<NativeReference> &windowStage) {}
-
-    /**
-     * Called back before an ability is destroyed.
-     *
-     * @since 12
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @StageModelOnly
-     */
     virtual void OnAbilityWillDestroy(const std::shared_ptr<NativeReference> &ability) {}
-
-    /**
-     * Called back before the state of an ability changes to foreground.
-     *
-     * @since 12
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @StageModelOnly
-     */
     virtual void OnAbilityWillForeground(const std::shared_ptr<NativeReference> &ability) {}
-
-    /**
-     * Called back before the state of an ability changes to background.
-     *
-     * @since 12
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @StageModelOnly
-     */
     virtual void OnAbilityWillBackground(const std::shared_ptr<NativeReference> &ability) {}
-
-    /**
-     * Called back when the ability is foreground.
-     *
-     * @since 9
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @StageModelOnly
-     */
-    virtual void OnAbilityForeground(const std::shared_ptr<NativeReference> &ability) = 0;
-
-    /**
-     * Called back when the ability is background.
-     *
-     * @since 9
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @StageModelOnly
-     */
-    virtual void OnAbilityBackground(const std::shared_ptr<NativeReference> &ability) = 0;
-
-    /**
-     * Called back when the ability is continue.
-     *
-     * @since 9
-     * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
-     * @param ability: Indicates the ability to register for listening.
-     * @StageModelOnly
-     */
-    virtual void OnAbilityContinue(const std::shared_ptr<NativeReference> &ability) = 0;
-
+    virtual void OnAbilityForeground(const std::shared_ptr<NativeReference> &ability) {}
+    virtual void OnAbilityBackground(const std::shared_ptr<NativeReference> &ability) {}
+    virtual void OnAbilityContinue(const std::shared_ptr<NativeReference> &ability) {}
     virtual void OnAbilityWillContinue(const std::shared_ptr<NativeReference> &ability) {}
     virtual void OnWindowStageWillRestore(const std::shared_ptr<NativeReference> &ability,
         const std::shared_ptr<NativeReference> &windowStage) {}
@@ -224,6 +67,16 @@ public:
     virtual void OnDidForeground(const std::shared_ptr<NativeReference> &ability) {}
     virtual void OnWillBackground(const std::shared_ptr<NativeReference> &ability) {}
     virtual void OnDidBackground(const std::shared_ptr<NativeReference> &ability) {}
+
+/*----------------------------------for arkts 1.2 listening UIAbility 1.2--------------------------------------------*/
+    virtual void OnAbilityCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) {}
+    virtual void OnWindowStageCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
+        std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage) {}
+    virtual void OnWindowStageDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
+        std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage) {}
+    virtual void OnAbilityDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) {}
+    virtual void OnAbilityForeground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) {}
+    virtual void OnAbilityBackground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) {}
 };
 
 class JsAbilityLifecycleCallback : public AbilityLifecycleCallback,
