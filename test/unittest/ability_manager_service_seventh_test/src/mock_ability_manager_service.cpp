@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,29 +23,6 @@
 
 namespace OHOS {
 namespace AAFwk {
-int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const StartOptions &startOptions, int32_t userId)
-{
-    if (startOptions.processOptions == nullptr ||
-        !ProcessOptions::IsValidProcessMode(startOptions.processOptions->processMode)) {
-        return ERR_OK;
-    }
-
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "start ability with process options");
-
-    bool isStartupVisibilityHide =
-        (startOptions.processOptions->startupVisibility == StartupVisibility::STARTUP_HIDE);
-    bool hasStartBackgroundAbilityPermission = PermissionVerification::GetInstance()->
-        VerifyStartUIAbilityToHiddenPermission();
-    bool canStartupHide = (ProcessOptions::IsNoAttachmentMode(startOptions.processOptions->processMode) &&
-        isStartupVisibilityHide && hasStartBackgroundAbilityPermission);
-    if (!canStartupHide) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not self application and has no start background ability permission");
-        return ERR_NOT_SELF_APPLICATION;
-    }
-
-    return ERR_OK;
-}
-
 int32_t AbilityManagerService::BlockAllAppStart(bool flag)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
-#define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_RECORD_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_RECORD_H
 
-#include "ffrt.h"
-#include "start_options.h"
-#include "want.h"
+#include <memory>
+
+#include "ability_info.h"
 
 namespace OHOS {
 namespace AAFwk {
 /**
- * @class AbilityManagerService
- * AbilityManagerService provides a facility for managing ability life cycle.
+ * @class AbilityRecord
+ * AbilityRecord records ability info and states and used to schedule ability life.
  */
-class AbilityManagerService : public std::enable_shared_from_this<AbilityManagerService> {
+class AbilityRecord : public std::enable_shared_from_this<AbilityRecord> {
 public:
-    int32_t BlockAllAppStart(bool flag);
-    bool ShouldBlockAllAppStart();
+    AbilityRecord();
+
+    ~AbilityRecord();
+
+    /**
+     * get ability's info.
+     *
+     * @return ability info.
+     */
+    const AppExecFwk::AbilityInfo &GetAbilityInfo() const;
 
 public:
-    ffrt::mutex shouldBlockAllAppStartMutex_;
-    bool shouldBlockAllAppStart_ = false;
+    AppExecFwk::AbilityInfo abilityInfo;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_RECORD_H

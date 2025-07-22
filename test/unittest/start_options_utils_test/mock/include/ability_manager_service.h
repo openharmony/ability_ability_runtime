@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,10 @@
 #ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
 #define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
 
-#include "ffrt.h"
-#include "start_options.h"
-#include "want.h"
+#include <memory>
+#include <singleton.h>
+
+#include "ui_ability_lifecycle_manager.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -27,13 +28,10 @@ namespace AAFwk {
  * AbilityManagerService provides a facility for managing ability life cycle.
  */
 class AbilityManagerService : public std::enable_shared_from_this<AbilityManagerService> {
+    DECLARE_DELAYED_SINGLETON(AbilityManagerService)
 public:
-    int32_t BlockAllAppStart(bool flag);
-    bool ShouldBlockAllAppStart();
-
-public:
-    ffrt::mutex shouldBlockAllAppStartMutex_;
-    bool shouldBlockAllAppStart_ = false;
+    bool CheckCallingTokenId(const std::string &bundleName, int32_t userId, int32_t appIndex);
+    std::shared_ptr<UIAbilityLifecycleManager> GetUIAbilityManagerByUid(int32_t uid);
 };
 }  // namespace AAFwk
 }  // namespace OHOS
