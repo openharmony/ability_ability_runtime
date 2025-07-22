@@ -2294,5 +2294,79 @@ HWTEST_F(AppMgrServiceTest, SetProcessCacheEnable_0100, TestSize.Level1)
     auto ret = appMgrService->SetProcessCacheEnable(pid, enable);
     EXPECT_EQ(ret, AAFwk::ERR_NO_PERMISSION_CALLER);
 }
+
+/**
+ * @tc.name: QueryRunningSharedBundles_001
+ * @tc.desc: verify QueryRunningSharedBundles works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, QueryRunningSharedBundles_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_001 start.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(nullptr);
+
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    int32_t result = appMgrService->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(result, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_001 end.");
+}
+
+/**
+ * @tc.name: QueryRunningSharedBundles_002
+ * @tc.desc: verify QueryRunningSharedBundles works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, QueryRunningSharedBundles_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_002 start.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, IsFoundationCall())
+        .Times(1)
+        .WillOnce(Return(false));
+
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    int32_t result = appMgrService->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_002 end.");
+}
+
+/**
+ * @tc.name: QueryRunningSharedBundles_003
+ * @tc.desc: verify QueryRunningSharedBundles works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, QueryRunningSharedBundles_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_003 start.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, IsFoundationCall())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*mockAppMgrServiceInner_, QueryRunningSharedBundles(_, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    int32_t result = appMgrService->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_003 end.");
+}
 } // namespace AppExecFwk
 } // namespace OHOS

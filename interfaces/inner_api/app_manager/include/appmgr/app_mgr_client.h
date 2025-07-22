@@ -1015,6 +1015,8 @@ public:
      */
     int32_t DemoteCurrentFromCandidateMasterProcess();
 
+    int32_t QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles);
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

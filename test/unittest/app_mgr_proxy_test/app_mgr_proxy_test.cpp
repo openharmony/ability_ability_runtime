@@ -1031,5 +1031,94 @@ HWTEST_F(AppMgrProxyTest, SetProcessCacheEnable_0100, TestSize.Level1)
     auto ret = appMgrProxy_->SetProcessCacheEnable(pid, enable);
     EXPECT_EQ(ret, NO_ERROR);
 }
+
+/**
+ * @tc.name: QueryRunningSharedBundles_0100
+ * @tc.desc: Test QueryRunningSharedBundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrProxyTest, QueryRunningSharedBundles_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_0100 start.");
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Return(ERR_INVALID_VALUE));
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    auto ret = appMgrProxy_->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_0100 end.");
+}
+
+/**
+ * @tc.name: QueryRunningSharedBundles_0200
+ * @tc.desc: Test QueryRunningSharedBundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrProxyTest, QueryRunningSharedBundles_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_0100 start.");
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce([](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) {
+            reply.WriteInt32(ERR_INVALID_VALUE);
+            return NO_ERROR;
+        });
+
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    auto ret = appMgrProxy_->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_0200 end.");
+}
+
+/**
+ * @tc.name: QueryRunningSharedBundles_0300
+ * @tc.desc: Test QueryRunningSharedBundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrProxyTest, QueryRunningSharedBundles_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_0100 start.");
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce([](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) {
+            reply.WriteInt32(ERR_OK);
+            reply.WriteInt32(1001);
+            return NO_ERROR;
+        });
+
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    auto ret = appMgrProxy_->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_0300 end.");
+}
+
+/**
+ * @tc.name: QueryRunningSharedBundles_0400
+ * @tc.desc: Test QueryRunningSharedBundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrProxyTest, QueryRunningSharedBundles_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_0400 start.");
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce([](uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) {
+            reply.WriteInt32(ERR_OK);
+            reply.WriteInt32(1);
+            reply.WriteString("com.test.example");
+            reply.WriteUint32(10000);
+            return NO_ERROR;
+        });
+
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    auto ret = appMgrProxy_->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_FALSE(sharedBundles.empty());
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_0300 end.");
+}
 } // namespace AppExecFwk
 } // namespace OHOS

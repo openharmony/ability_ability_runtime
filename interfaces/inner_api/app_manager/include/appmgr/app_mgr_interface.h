@@ -1007,6 +1007,18 @@ public:
     {
         return 0;
     }
+    
+    /**
+     * Query running shared bundle infos.
+     *
+     * @param pid process id.
+     * @param sharedBundles shared bundle infos.
+     * @return Returns ERR_OK if success, AAFwk::ERR_NO_APP_RECORD if app record not exist.
+     */
+    virtual int32_t QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles)
+    {
+        return 0;
+    }
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
