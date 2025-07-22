@@ -32,6 +32,10 @@ ShellCommand::ShellCommand(int argc, char* argv[], std::string name)
         cmd_ = "help";
         return;
     }
+    if (argv == nullptr) {
+        TAG_LOGE(AAFwkTag::AA_TOOL, "null argv");
+        return;
+    }
     cmd_ = argv[1];
     for (int i = 2; i < argc; i++) {
         argList_.push_back(argv[i]);
