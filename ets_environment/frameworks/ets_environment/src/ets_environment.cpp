@@ -521,6 +521,21 @@ void ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath)
     ark::ets::ETSAni::Postfork(env, options);
 }
 
+void ETSEnvironment::PreloadSystemClass(const char *className)
+{
+    ani_env* env = GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "GetAniEnv failed");
+        return;
+    }
+
+    ani_class cls = nullptr;
+    if (env->FindClass(className, &cls) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Find preload class failed");
+        return;
+    }
+}
+
 ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
 {
     static ETSEnvFuncs funcs {
@@ -555,6 +570,9 @@ ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
         },
         .PostFork = [](void *napiEnv, const std::string &aotPath) {
             ETSEnvironment::GetInstance()->PostFork(napiEnv, aotPath);
+        },
+        .PreloadSystemClass = [](const char *className) {
+            ETSEnvironment::GetInstance()->PreloadSystemClass(className);
         }
     };
     return &funcs;

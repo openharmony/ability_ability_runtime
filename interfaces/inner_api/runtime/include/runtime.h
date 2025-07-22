@@ -130,6 +130,7 @@ public:
     virtual void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const {}
     virtual void SetDeviceDisconnectCallback(const std::function<bool()> &cb) = 0;
     virtual void SetStopPreloadSoCallback(const std::function<void()> &callback) {}
+    virtual void PreloadSystemClass(const char *className) {}
     Runtime(const Runtime&) = delete;
     Runtime(Runtime&&) = delete;
     Runtime& operator=(const Runtime&) = delete;
