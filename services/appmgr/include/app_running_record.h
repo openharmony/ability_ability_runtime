@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -609,6 +609,10 @@ public:
      */
     void SetKeepAliveDkv(bool isKeepAliveDkv);
 
+    void SetMainElementRunning(bool isMainElementRunning);
+
+    bool IsMainElementRunning() const;
+
     void SetKeepAliveAppService(bool isKeepAliveAppService);
 
     /**
@@ -1172,6 +1176,7 @@ private:
     bool isKeepAliveBundle_ = false;
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
     bool isKeepAliveDkv_ = false; // Only non-resident keep-alive processes can be set to true, please choose carefully
+    bool isMainElementRunning_ = false;
     bool isKeepAliveAppService_ = false;
     bool isMainProcess_ = true; // Only MainProcess can be keepalive
     bool isSingleton_ = false;

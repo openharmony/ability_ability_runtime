@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_MAIN_ELEMENT_UTILS_H
 
 #include "bundle_info.h"
+#include "param.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -52,6 +53,19 @@ public:
      */
     static void UpdateMainElement(const std::string &bundleName, const std::string &moduleName,
         const std::string &mainElement, bool updateEnable, int32_t userId);
+
+    /**
+     * IsMainUIAbility, Verify IsMainUIAbility.
+     *
+     * @param bundleName The bundle name.
+     * @param abilityName The ability name.
+     * @param userId User id.
+     * @return Whether or not the ability is main ability.
+     */
+    static bool IsMainUIAbility(const std::string &bundleName, const std::string &abilityName, int32_t userId);
+
+    static void SetMainUIAbilityKeepAliveFlag(bool isMainUIAbility,
+        const std::string &bundleName, AbilityRuntime::LoadParam &loadParam);
 
     /**
      * CheckMainUIAbility, check if bundle has main UIAbility.

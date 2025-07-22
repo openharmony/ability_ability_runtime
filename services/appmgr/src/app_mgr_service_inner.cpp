@@ -994,6 +994,14 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         }
     } else {
         TAG_LOGI(AAFwkTag::APPMGR, "have apprecord");
+        if (!appRecord->IsKeepAliveDkv()) {
+            TAG_LOGD(AAFwkTag::APPMGR, "appRecord setKeepAlive");
+            appRecord->SetKeepAliveDkv(loadParam->isKeepAlive);
+        }
+        if (!appRecord->IsMainElementRunning()) {
+            TAG_LOGD(AAFwkTag::APPMGR, "appRecord SetMainElementRunning");
+            appRecord->SetMainElementRunning(loadParam->isMainElementRunning);
+        }
         ReportEventToRSS(*abilityInfo, appRecord);
         appRunningManager_->UpdateConfigurationDelayed(appRecord);
         if (!isProcCache) {
@@ -3113,6 +3121,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(
     appRecord->SetProcessAndExtensionType(abilityInfo, loadParam->extensionProcessMode);
     appRecord->SetKeepAliveEnableState(bundleInfo.isKeepAlive);
     appRecord->SetKeepAliveDkv(loadParam->isKeepAlive);
+    appRecord->SetMainElementRunning(loadParam->isMainElementRunning);
     appRecord->SetKeepAliveAppService(loadParam->isKeepAliveAppService);
     appRecord->SetEmptyKeepAliveAppState(false);
     appRecord->SetTaskHandler(taskHandler_);
@@ -9309,7 +9318,7 @@ void AppMgrServiceInner::SetKeepAliveDkv(const std::string &bundleName, bool ena
     for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
         if (appRecord != nullptr && appRecord->GetBundleName() == bundleName &&
-            (uid == 0 || appRecord->GetUid() == uid)) {
+            (uid == 0 || appRecord->GetUid() == uid) && appRecord->IsMainElementRunning()) {
             TAG_LOGD(AAFwkTag::APPMGR, "%{public}s update state: %{public}d",
                 bundleName.c_str(), static_cast<int32_t>(enable));
                 appRecord->SetKeepAliveDkv(enable);
