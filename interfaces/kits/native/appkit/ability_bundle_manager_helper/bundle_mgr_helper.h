@@ -125,6 +125,9 @@ public:
         int32_t userId, BundleInfo &bundleInfo);
     ErrCode GetLauncherAbilityInfoSync(const std::string &bundleName, int32_t userId,
         std::vector<AbilityInfo> &abilityInfo);
+    ErrCode GetTestRunnerTypeAndPath(const std::string &bundleName, const std::string &moduleName,
+        ModuleTestRunner &testRunner);
+
 private:
     sptr<IBundleMgr> Connect();
     sptr<IBundleMgr> Connect(bool checkBmsReady);

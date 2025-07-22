@@ -18,9 +18,12 @@
 
 #include <memory>
 #include "ability_delegator_args.h"
+#include "bundle_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
+const std::string CAPITALTESTRUNNER = "/ets/TestRunner/";
+const std::string LOWERCASETESTRUNNER = "/ets/testrunner/";
 class Runtime;
 }
 
