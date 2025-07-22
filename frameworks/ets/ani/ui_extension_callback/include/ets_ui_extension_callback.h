@@ -32,6 +32,7 @@ public:
 
 private:
     ani_env *GetAniEnv();
+    void CallObjectMethod(const char *name, const char *signature, ...);
 
     ani_vm *vm_ = nullptr;
     ani_ref callback_ = nullptr;
