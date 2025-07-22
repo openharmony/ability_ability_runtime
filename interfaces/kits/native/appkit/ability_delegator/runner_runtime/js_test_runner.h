@@ -70,6 +70,7 @@ private:
     std::string srcPath_;
     std::string hapPath_;
     bool isFaJsModel_ = false;
+    std::string GetTestRunnerPath(const std::shared_ptr<AbilityDelegatorArgs> &args);
 };
 }  // namespace RunnerRuntime
 }  // namespace OHOS

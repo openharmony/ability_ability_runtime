@@ -76,6 +76,7 @@ struct UncatchableTaskInfo {
     std::string processName;
 };
 class ContextDeal;
+struct ModuleTestRunner;
 // class Global::Resource::ResourceManager;
 class AppMgrDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
@@ -627,8 +628,7 @@ private:
      *
      */
     bool PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
-        const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion,
-		const std::string &applicationCodeLanguage);
+        const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion);
 
     /**
      * @brief Set current process extension type
@@ -808,6 +808,8 @@ private:
     bool IsEtsAPP(const ApplicationInfo &appInfo);
     void SetJsIdleCallback(const std::weak_ptr<OHOSApplication> &wpApplication,
         const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
+    bool GetTestRunnerTypeAndPath(const std::string bundleName, const std::string moduleName,
+        AppExecFwk::ModuleTestRunner &tsTestRunner);
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;
