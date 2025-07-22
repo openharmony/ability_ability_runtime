@@ -914,5 +914,67 @@ HWTEST_F(AppMgrStubTest, HandleSetProcessCacheEnable_0100, TestSize.Level1)
         static_cast<uint32_t>(AppMgrInterfaceCode::SET_PROCESS_CACHE_ENABLE), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 }
+
+/**
+ * @tc.name: HandleQueryRunningSharedBundles_0100
+ * @tc.desc: Test HandleQueryRunningSharedBundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleQueryRunningSharedBundles_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleQueryRunningSharedBundles_0100 start.");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    pid_t pid = 1;
+    bool enable = false;
+    data.WriteInt32(pid);
+    data.WriteBool(enable);
+
+    EXPECT_CALL(*mockAppMgrService_, QueryRunningSharedBundles(_, _))
+        .Times(1)
+        .WillOnce(Return(ERR_INVALID_VALUE));
+
+    auto ret = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::QUERY_RUNNING_SHARED_BUNDLES), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+
+    auto replyResult = reply.ReadInt32();
+    EXPECT_EQ(replyResult, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "HandleQueryRunningSharedBundles_0100 end.");
+}
+
+/**
+ * @tc.name: HandleQueryRunningSharedBundles_0200
+ * @tc.desc: Test HandleQueryRunningSharedBundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleQueryRunningSharedBundles_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleQueryRunningSharedBundles_0200 start.");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    pid_t pid = 1;
+    bool enable = false;
+    data.WriteInt32(pid);
+    data.WriteBool(enable);
+
+    EXPECT_CALL(*mockAppMgrService_, QueryRunningSharedBundles(_, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    auto ret = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::QUERY_RUNNING_SHARED_BUNDLES), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+
+    auto replyResult = reply.ReadInt32();
+    EXPECT_EQ(replyResult, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "HandleQueryRunningSharedBundles_0200 end.");
+}
 } // namespace AppExecFwk
 } // namespace OHOS

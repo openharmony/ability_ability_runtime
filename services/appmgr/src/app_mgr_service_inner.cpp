@@ -10411,5 +10411,20 @@ int32_t AppMgrServiceInner:: PreCheckStartProcess(const std::string &bundleName,
     return ERR_OK;
 }
 
+int32_t AppMgrServiceInner::QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "QueryRunningSharedBundles call, pid:%{public}d", pid);
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (!appRecord) {
+        TAG_LOGW(AAFwkTag::APPMGR, "No app record for pid: %{public}d", pid);
+        return AAFwk::ERR_NO_APP_RECORD;
+    }
+    const auto &hspList = appRecord->GetStartMsg().hspList;
+    for (const auto &item: hspList) {
+        sharedBundles.emplace(item.bundleName, item.versionCode);
+    }
+    return ERR_OK;
+}
 } // namespace AppExecFwk
 }  // namespace OHOS
