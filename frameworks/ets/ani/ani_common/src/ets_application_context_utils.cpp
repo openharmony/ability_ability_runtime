@@ -571,7 +571,7 @@ ani_int EtsApplicationContextUtils::NativeOnLifecycleCallbackSync(ani_env *env,
         return ani_int(ERROR_CODE_NULL_ENV);
     }
     auto etsContext = GeApplicationContext(env, aniObj);
-    if (ets == nullptr) {
+    if (etsContext == nullptr) {
         EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
         return ani_int(ERROR_CODE_NULL_CONTEXT);
     }
