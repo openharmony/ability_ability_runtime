@@ -1928,5 +1928,19 @@ int32_t AppMgrService::DemoteCurrentFromCandidateMasterProcess()
     }
     return appMgrServiceInner_->DemoteCurrentFromCandidateMasterProcess();
 }
+
+int32_t AppMgrService::QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service not ready");
+        return AAFwk::ERR_APP_MGR_SERVICE_NOT_READY;
+    }
+    if (!appMgrServiceInner_->IsFoundationCall()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
+        return ERR_PERMISSION_DENIED;
+    }
+    return appMgrServiceInner_->QueryRunningSharedBundles(pid, sharedBundles);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

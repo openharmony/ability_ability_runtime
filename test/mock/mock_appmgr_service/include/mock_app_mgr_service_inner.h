@@ -89,6 +89,7 @@ public:
     MOCK_METHOD2(NotifyPreloadAbilityStateChanged, int32_t(sptr<IRemoteObject>, bool));
     MOCK_METHOD3(CheckPreloadAppRecordExist, bool(const std::string&, int32_t, int32_t));
     MOCK_CONST_METHOD0(IsFoundationCall, bool());
+    MOCK_METHOD2(QueryRunningSharedBundles, int32_t(pid_t pid, std::map<std::string, uint32_t> &sharedBundles));
 
     void StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t)
     {}
