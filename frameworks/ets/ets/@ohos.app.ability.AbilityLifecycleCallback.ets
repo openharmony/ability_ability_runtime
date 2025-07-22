@@ -16,7 +16,16 @@
 import UIAbility from '@ohos.app.ability.UIAbility';
 import window from '@ohos.window';
 
-export default class AbilityLifecycleCallback {
+interface AbilityLifecycleCallback {
+  onAbilityCreate(ability: UIAbility): void;
+  onAbilityForeground(ability: UIAbility): void;
+  onAbilityBackground(ability: UIAbility): void;
+  onAbilityDestroy(ability: UIAbility): void;
+  onWindowStageCreate(ability: UIAbility, windowStage: window.WindowStage): void;
+  onWindowStageDestroy(ability: UIAbility, windowStage: window.WindowStage): void;
+}
+
+class AbilityLifecycleCallbackInner implements AbilityLifecycleCallback {
   onAbilityCreate(ability: UIAbility): void {};
   onAbilityForeground(ability: UIAbility): void {};
   onAbilityBackground(ability: UIAbility): void {};
@@ -24,3 +33,5 @@ export default class AbilityLifecycleCallback {
   onWindowStageCreate(ability: UIAbility, windowStage: window.WindowStage): void {};
   onWindowStageDestroy(ability: UIAbility, windowStage: window.WindowStage): void {};
 }
+
+export default AbilityLifecycleCallback;
