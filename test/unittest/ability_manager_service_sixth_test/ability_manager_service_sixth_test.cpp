@@ -430,59 +430,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, CheckUIExtensionUsage_001, TestSize.Lev
 
 /*
  * Feature: AbilityManagerService
- * Function: CheckProcessOptions
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService CheckProcessOptions
- */
-HWTEST_F(AbilityManagerServiceSixthTest, CheckProcessOptions_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckProcessOptions_001 start");
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-
-    Want want;
-    StartOptions startOptions;
-    auto ret = abilityMs->CheckProcessOptions(want, startOptions, -1);
-    EXPECT_EQ(ret, ERR_OK);
-
-    startOptions.processOptions = std::make_shared<ProcessOptions>();
-    ret = abilityMs->CheckProcessOptions(want, startOptions, -1);
-    EXPECT_EQ(ret, ERR_OK);
-
-    startOptions.processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT;
-    ret = abilityMs->CheckProcessOptions(want, startOptions, -1);
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, ERR_CAPABILITY_NOT_SUPPORT);
-    }
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckProcessOptions_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: CheckStartSelfUIAbilityStartOptions
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService CheckStartSelfUIAbilityStartOptions
- */
-HWTEST_F(AbilityManagerServiceSixthTest, CheckStartSelfUIAbilityStartOptions_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckStartSelfUIAbilityStartOptions_001 start");
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-
-    Want want;
-    StartOptions startOptions;
-    auto ret = abilityMs->CheckStartSelfUIAbilityStartOptions(want, startOptions);
-    EXPECT_EQ(ret, ERR_OK);
-
-    startOptions.processOptions = std::make_shared<ProcessOptions>();
-    startOptions.processOptions->isStartFromNDK = true;
-    ret = abilityMs->CheckStartSelfUIAbilityStartOptions(want, startOptions);
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, ERR_CAPABILITY_NOT_SUPPORT);
-    }
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckStartSelfUIAbilityStartOptions_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: PreStartFreeInstall
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService PreStartFreeInstall

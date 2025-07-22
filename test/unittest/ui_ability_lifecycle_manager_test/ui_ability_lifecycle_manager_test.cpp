@@ -87,10 +87,10 @@ public:
     }
 };
 
-class UIAbilityLifcecycleManagerTestStub : public IRemoteStub<IAbilityConnection> {
+class UIAbilityLifecycleManagerTestStub : public IRemoteStub<IAbilityConnection> {
 public:
-    UIAbilityLifcecycleManagerTestStub() {};
-    virtual ~UIAbilityLifcecycleManagerTestStub() {};
+    UIAbilityLifecycleManagerTestStub() {};
+    virtual ~UIAbilityLifecycleManagerTestStub() {};
 
     virtual int OnRemoteRequest(
         uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
@@ -2262,7 +2262,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ReleaseCallLocked_001, TestSize.Level1)
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    sptr<IAbilityConnection> connect = new UIAbilityLifcecycleManagerTestStub();
+    sptr<IAbilityConnection> connect = new UIAbilityLifecycleManagerTestStub();
     AppExecFwk::ElementName element;
     auto ret = uiAbilityLifecycleManager->ReleaseCallLocked(connect, element);
     EXPECT_EQ(ret, RELEASE_CALL_ABILITY_INNER_ERR);
@@ -2279,7 +2279,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ReleaseCallLocked_002, TestSize.Level1)
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     auto abilityRecord = InitAbilityRecord();
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
-    sptr<IAbilityConnection> connect = new UIAbilityLifcecycleManagerTestStub();
+    sptr<IAbilityConnection> connect = new UIAbilityLifecycleManagerTestStub();
     AppExecFwk::ElementName element("", "com.example.unittest", "MainAbility");
     auto ret = uiAbilityLifecycleManager->ReleaseCallLocked(connect, element);
     EXPECT_EQ(ret, RELEASE_CALL_ABILITY_INNER_ERR);
@@ -4273,7 +4273,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ResolveAbility_003, TestSize.Level1)
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     AbilityRequest abilityRequest;
-    abilityRequest.connect = new UIAbilityLifcecycleManagerTestStub();
+    abilityRequest.connect = new UIAbilityLifecycleManagerTestStub();
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     auto targetAbility = AbilityRecord::CreateAbilityRecord(abilityRequest);
     targetAbility->callContainer_ = std::make_shared<CallContainer>();
@@ -4291,7 +4291,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ResolveAbility_004, TestSize.Level1)
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     AbilityRequest abilityRequest;
-    abilityRequest.connect = new UIAbilityLifcecycleManagerTestStub();
+    abilityRequest.connect = new UIAbilityLifecycleManagerTestStub();
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     auto targetAbility = AbilityRecord::CreateAbilityRecord(abilityRequest);
     targetAbility->isReady_ = true;

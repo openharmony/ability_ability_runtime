@@ -97,6 +97,7 @@ struct StartAbilityInfo;
 class WindowFocusChangedListener;
 class WindowVisibilityChangedListener;
 class PreloadManagerService;
+class StartOptionsUtils;
 
 /**
  * @class AbilityManagerService
@@ -110,6 +111,7 @@ class AbilityManagerService : public SystemAbility,
     DECLEAR_SYSTEM_ABILITY(AbilityManagerService)
 public:
     friend class PreloadManagerService;
+    friend class StartOptionsUtils;
     static std::shared_ptr<AbilityManagerService> GetPubInstance();
 
     void OnStart() override;
@@ -2551,10 +2553,6 @@ private:
     bool CheckCollaboratorType(int32_t type);
 
     bool CheckUserIdActive(int32_t userId);
-
-    int32_t CheckProcessOptions(const Want &want, const StartOptions &startOptions, int32_t userId);
-
-    int32_t CheckStartSelfUIAbilityStartOptions(const Want &want, const StartOptions &startOptions);
 
     void GetConnectManagerAndUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo,
         std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility,

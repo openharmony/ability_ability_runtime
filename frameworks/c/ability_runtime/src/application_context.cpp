@@ -305,7 +305,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetResourceDir(cons
 
 AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbility(AbilityBase_Want *want)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "startSelfUIAbility called");
+    TAG_LOGD(AAFwkTag::APPKIT, "StartSelfUIAbility called");
     auto ret = CheckWant(want);
     if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AAFwkTag::APPKIT, "CheckWant failed: %{public}d", ret);
@@ -323,7 +323,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbility(AbilityBase_Want *
 AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions(AbilityBase_Want *want,
     AbilityRuntime_StartOptions *options)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "startSelfUIAbility called");
+    TAG_LOGD(AAFwkTag::APPKIT, "StartSelfUIAbilityWithStartOptions called");
     auto ret = CheckWant(want);
     if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AAFwkTag::APPKIT, "CheckWant failed: %{public}d", ret);

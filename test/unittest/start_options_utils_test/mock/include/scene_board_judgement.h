@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_HIDDEN_START_UTILS_H
-#define OHOS_ABILITY_RUNTIME_HIDDEN_START_UTILS_H
-
-#include "start_options.h"
+#ifndef OHOS_ROSEN_WINDOW_SCENE_SCENE_BOARD_JUDGEMENT_H
+#define OHOS_ROSEN_WINDOW_SCENE_SCENE_BOARD_JUDGEMENT_H
 
 namespace OHOS {
-namespace AAFwk {
-/**
-* @class HiddenStartUtils
-* provides hidden start utilities.
-*/
-
-class HiddenStartUtils final {
+namespace Rosen {
+class SceneBoardJudgement final {
 public:
-    static bool IsHiddenStart(const StartOptions &options);
-
-    static int32_t CheckHiddenStartSupported(const StartOptions &options);
+    static bool IsSceneBoardEnabled();
 };
-}
-}
-#endif //OHOS_ABILITY_RUNTIME_HIDDEN_START_UTILS_H
+} // namespace Rosen
+} // namespace OHOS
+
+#endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_BOARD_JUDGEMENT_H
