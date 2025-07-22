@@ -28,8 +28,8 @@ class EventRunner;
 } // namespace AppExecFwk
 namespace AbilityRuntime {
 namespace {
-const std::string CODE_LANGUAGE_ARKTS_1_0 = "1.1";
-const std::string CODE_LANGUAGE_ARKTS_1_2 = "1.2";
+const std::string CODE_LANGUAGE_ARKTS_1_0 = "dynamic";
+const std::string CODE_LANGUAGE_ARKTS_1_2 = "static";
 const std::string CODE_LANGUAGE_ARKTS_HYBRID = "hybrid";
 } // namespace
 

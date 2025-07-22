@@ -41,6 +41,7 @@ ohos_shared_library("app_manager_ani") {
   sources = [
     "./src/ets_app_manager.cpp",
     "./src/ets_app_manager_utils.cpp",
+    "./src/ets_app_state_observer.cpp",
   ]
 
   cflags = []

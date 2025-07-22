@@ -42,10 +42,13 @@ public:
     int32_t GetConnectionId() { return connectionId_; }
     void SetConnectionRef(ani_object connectOptionsObj);
     void RemoveConnectionObject();
+    ani_env *AttachCurrentThread();
+    void DetachCurrentThread();
 protected:
     ani_vm *etsVm_ = nullptr;
     int32_t connectionId_ = -1;
     ani_ref stsConnectionRef_ = nullptr;
+    bool isAttachThread_ = false;
 };
 
 class EtsAbilityContext final {
@@ -83,6 +86,8 @@ public:
         ani_env *env, ani_object aniObj, ani_string aniType, ani_ref aniWantParam, ani_object startCallback);
     static void ConfigurationUpdated(ani_env *env, std::shared_ptr<AppExecFwk::ETSNativeReference> &etsContext,
         const std::shared_ptr<AppExecFwk::Configuration> &config);
+    static void OpenAtomicService(
+        ani_env *env, ani_object aniObj, ani_string aniAppId, ani_object callbackObj, ani_object optionsObj);
 
     static void Clean(ani_env *env, ani_object object);
     static ani_object SetEtsAbilityContext(ani_env *env, std::shared_ptr<AbilityContext> context);
@@ -121,12 +126,16 @@ private:
     void OnSetColorMode(ani_env *env, ani_object aniObj, ani_enum_item colorMode);
     ani_object OnStartAbilityByType(
         ani_env *env, ani_object aniObj, ani_string aniType, ani_ref aniWantParam, ani_object startCallback);
+    void OnOpenAtomicService(
+        ani_env *env, ani_object aniObj, ani_string aniAppId, ani_object callbackObj, ani_object optionsObj);
 
     void UnWrapOpenLinkOptions(ani_env *env, ani_object optionsObj, AAFwk::OpenLinkOptions &openLinkOptions,
         AAFwk::Want &want);
     void CreateOpenLinkTask(ani_env *env, const ani_object callbackobj,
         std::shared_ptr<AbilityContext> context, AAFwk::Want &want, int &requestCode);
     int32_t GenerateRequestCode();
+    void OpenAtomicServiceInner(ani_env *env, ani_object aniObj, AAFwk::Want &want,
+        AAFwk::StartOptions &options, std::string appId, ani_object callbackObj);
 
     std::weak_ptr<AbilityContext> context_;
     static std::mutex requestCodeMutex_;
