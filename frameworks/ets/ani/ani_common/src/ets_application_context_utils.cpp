@@ -63,8 +63,12 @@ ani_double EtsApplicationContextUtils::OnNativeOnEnvironmentSync(ani_env *env, a
     if (etsEnviromentCallback_ != nullptr) {
         return ani_double(etsEnviromentCallback_->Register(envCallback));
     }
-
-    etsEnviromentCallback_ = std::make_shared<EtsEnviromentCallback>(env);
+    ani_vm *aniVM = nullptr;
+    if (env->GetVM(&aniVM) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "get aniVM failed");
+        return ANI_ERROR;
+    }
+    etsEnviromentCallback_ = std::make_shared<EtsEnviromentCallback>(aniVM);
     int32_t callbackId = etsEnviromentCallback_->Register(envCallback);
     applicationContext->RegisterEnvironmentCallback(etsEnviromentCallback_);
 
@@ -120,7 +124,12 @@ void EtsApplicationContextUtils::OnNativeOnApplicationStateChangeSync(ani_env *e
         applicationStateCallback_->Register(callback);
         return;
     }
-    applicationStateCallback_ = std::make_shared<EtsApplicationStateChangeCallback>(env);
+    ani_vm *aniVM = nullptr;
+    if (env->GetVM(&aniVM) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "get aniVM failed");
+        return;
+    }
+    applicationStateCallback_ = std::make_shared<EtsApplicationStateChangeCallback>(aniVM);
     applicationStateCallback_->Register(callback);
     applicationContext->RegisterApplicationStateChangeCallback(applicationStateCallback_);
 }
