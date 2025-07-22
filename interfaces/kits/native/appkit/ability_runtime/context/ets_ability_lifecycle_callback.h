@@ -55,7 +55,8 @@ private:
     void CallObjectMethod(const char *methodName, const char *signature,
         std::shared_ptr<AppExecFwk::ETSNativeReference> ability);
     void CallObjectMethod(const char *methodName, const char *signature,
-        std::shared_ptr<AppExecFwk::ETSNativeReference> ability, std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage);
+        std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
+        std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage);
 
 private:
     static int32_t serialNumber_;
