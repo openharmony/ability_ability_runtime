@@ -29,7 +29,7 @@ constexpr const char *SIGNATURE_UIABILITY = "L@ohos/app/ability/UIAbility/UIAbil
 constexpr const char *SIGNATURE_UIABILITY_WINDOW_STAGE =
     "L@ohos/app/ability/UIAbility/UIAbility;L@ohos/window/window/WindowStage;:V";
 constexpr const char *SIGNATURE_ABILITY_LIFECYCLE_CALLBACK =
-    "L@ohos/app/ability/AbilityLifecycleCallback/AbilityLifecycleCallback;";
+    "L@ohos/app/ability/AbilityLifecycleCallback/AbilityLifecycleCallbackInner;";
 constexpr const int32_t ERROR_CODE_NULL_ENV = -1;
 constexpr const int32_t ERROR_CODE_NULL_CALLBACK = -2;
 constexpr const int32_t ERROR_CODE_NULL_REF = -3;
