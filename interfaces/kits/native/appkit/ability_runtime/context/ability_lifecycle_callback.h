@@ -45,7 +45,7 @@ public:
     virtual void OnAbilityDestroy(const std::shared_ptr<NativeReference> &ability) {}
     virtual void OnNewWant(const std::shared_ptr<NativeReference> &ability) {}
     virtual void OnWillNewWant(const std::shared_ptr<NativeReference> &ability) {}
-    virtual void OnAbilityWillCreate(const std::shared_ptr<NativeReference> &ability){}
+    virtual void OnAbilityWillCreate(const std::shared_ptr<NativeReference> &ability) {}
     virtual void OnWindowStageWillCreate(const std::shared_ptr<NativeReference> &ability,
         const std::shared_ptr<NativeReference> &windowStage) {}
     virtual void OnWindowStageWillDestroy(const std::shared_ptr<NativeReference> &ability,
