@@ -232,6 +232,20 @@ void BindParentProperty(ani_env *aniEnv, ani_class contextClass, ani_object cont
     BindApplicationInfo(aniEnv, contextClass, contextObj, context);
     BindResourceManager(aniEnv, contextClass, contextObj, context);
     BindContextDir(aniEnv, contextObj, context);
+    ani_status status = ANI_ERROR;
+    ani_field processNameField;
+    if ((status = aniEnv->Class_FindField(contextClass, "processName", &processNameField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find processName failed status: %{public}d", status);
+        return;
+    }
+    auto processName = context->GetProcessName();
+    ani_string processNameString = nullptr;
+    aniEnv->String_NewUTF8(processName.c_str(), processName.size(), &processNameString);
+    if ((status = aniEnv->Object_SetField_Ref(contextObj, processNameField,
+        reinterpret_cast<ani_ref>(processNameString))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed, status: %{public}d", status);
+        return;
+    }
 }
 
 void BindNativeFunction(ani_env *aniEnv)
