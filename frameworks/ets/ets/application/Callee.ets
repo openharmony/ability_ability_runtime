@@ -15,6 +15,7 @@
 
 import hilog from '@ohos.hilog';
 import rpc from '@ohos.rpc';
+import transfer from '@ohos.transfer';
 import { BusinessError } from '@ohos.base';
 import { Callee, CalleeCallback } from '@ohos.app.ability.UIAbility';
 
@@ -25,24 +26,105 @@ const EVENT_CALL_NOTIFY = 1;
 const REQUEST_SUCCESS = 0;
 const REQUEST_FAILED = 1;
 
-const ERROR_CODE_INVALID_PARAM = 401;
-const ERROR_CODE_FUNC_REGISTERED = 16200004;
-const ERROR_CODE_FUNC_NOT_EXIST = 16200005;
-const ERROR_CODE_INNER_ERROR = 16000050;
+const ERROR_CODE_INVALID_PARAM: int = 401;
+const ERROR_CODE_FUNC_REGISTERED: int = 16200004;
+const ERROR_CODE_FUNC_NOT_EXIST: int = 16200005;
+const ERROR_CODE_INNER_ERROR: int = 16000050;
+const ERROR_CODE_TRANSFER_CLASS_NOT_FOUND: int = 10200067;
 
 const ERROR_MSG_INVALID_PARAM = 'Invalid input parameter.';
 const ERROR_MSG_FUNC_REGISTERED = 'Method registered. The method has registered.';
 const ERROR_MSG_FUNC_NOT_EXIST = 'The method has not been registered.';
 const ERROR_MSG_INNER_ERROR = 'Inner Error.';
+const ERROR_MSG_TRANSFER_CLASS_NOT_FOUND = "Unable to find the class for transferring.";
 
-let errMap = new Map<number, string>();
+let errMap = new Map<int, string>();
 errMap.set(ERROR_CODE_INVALID_PARAM, ERROR_MSG_INVALID_PARAM);
 errMap.set(ERROR_CODE_FUNC_REGISTERED, ERROR_MSG_FUNC_REGISTERED);
 errMap.set(ERROR_CODE_FUNC_NOT_EXIST, ERROR_MSG_FUNC_NOT_EXIST);
 errMap.set(ERROR_CODE_INNER_ERROR, ERROR_MSG_INNER_ERROR);
+errMap.set(ERROR_CODE_TRANSFER_CLASS_NOT_FOUND, ERROR_MSG_TRANSFER_CLASS_NOT_FOUND);
 
-function buildError(code: number): BusinessError {
-  return new BusinessError(code, new Error(errMap.get(code) as string));
+function buildError(code: int): BusinessError {
+  let msg = ERROR_MSG_INNER_ERROR;
+  if (errMap.has(code)) {
+    msg = errMap.get(code) as string;;
+  }
+  return new BusinessError(code, new Error(msg));
+}
+
+class CalleeFromJs implements Callee {
+  jsObj: Any;
+  constructor(jsObj: Any) {
+    this.jsObj = jsObj;
+  }
+  on(method: string, callback: CalleeCallback): void {
+    if (CoroutineExtras.isMainWorker()) {
+      ESValue.wrap(this.jsObj).invokeMethod("on", method, (seq: Any): rpc.Parcelable => {
+        let data = transfer.transferStatic(seq, 'rpc.MessageSequence') as rpc.MessageSequence;
+        return callback(data);
+      });
+      return;
+    }
+    EAWorker.postToMain<void>((): void => {
+      ESValue.wrap(this.jsObj).invokeMethod("on", method, (seq: Any): rpc.Parcelable => {
+        let data = transfer.transferStatic(seq, 'rpc.MessageSequence') as rpc.MessageSequence;
+        return callback(data);
+      });
+    });
+  }
+
+  off(method: string): void {
+    ESValue.wrap(this.jsObj).invokeMethod("off", method);
+  }
+}
+
+class JsParcelable implements rpc.Parcelable {
+  jsObj: Any;
+  constructor(jsObj: Any) {
+    this.jsObj = jsObj;
+  }
+  marshalling(dataOut: rpc.MessageSequence): boolean {
+    let ret = ESValue.wrap(this.jsObj).invokeMethod("marshalling",
+      ESValue.wrap(transfer.transferDynamic(dataOut, 'rpc.MessageSequence')));
+    return ret.toBoolean();
+  }
+  unmarshalling(dataIn: rpc.MessageSequence): boolean {
+    let ret = ESValue.wrap(this.jsObj).invokeMethod("unmarshalling",
+      ESValue.wrap(transfer.transferDynamic(dataIn, 'rpc.MessageSequence')));
+    return ret.toBoolean();
+  }
+}
+
+class CalleeFromEts {
+  callee: Callee;
+  constructor(callee: Callee) {
+    this.callee = callee;
+  }
+  on(method: string, callback: (indata: Any) => Any): void {
+    this.callee.on(method, (indata: rpc.MessageSequence): rpc.Parcelable => {
+      if (CoroutineExtras.isMainWorker()) {
+        let retData = callback(transfer.transferDynamic(indata, 'rpc.MessageSequence'));
+        if (retData instanceof rpc.Parcelable) {
+          return retData;
+        }
+        return new JsParcelable(retData);
+      }
+      let job = EAWorker.postToMain<Any>((): Any => {
+        // Expect user to read data as js Parcelable.
+        return callback(transfer.transferDynamic(indata, 'rpc.MessageSequence'));
+      });
+      let retData = job.Await();
+      if (retData instanceof rpc.Parcelable) {
+        return retData;
+      }
+      return new JsParcelable(retData);
+    });
+  }
+
+  off(method: string): void {
+    this.callee.off(method);
+  }
 }
 
 export class CalleeImpl extends rpc.RemoteObject implements Callee {
@@ -53,6 +135,25 @@ export class CalleeImpl extends rpc.RemoteObject implements Callee {
     hilog.info(domainID, TAG, 'Callee::constructor');
   }
 
+  static transferStatic(input: Any): Object {
+    hilog.info(domainID, TAG, 'Callee::transferStatic');
+    if (input instanceof CalleeFromEts) {
+      return input.callee;
+    }
+    return new CalleeFromJs(input);
+  }
+
+  static transferDynamic(input: Object): Any {
+    hilog.info(domainID, TAG, 'Callee::transferDynamic');
+    if (input instanceof CalleeFromJs) {
+      return input.jsObj;
+    }
+    if (input instanceof CalleeImpl) {
+      return new CalleeFromEts(input);
+    }
+    throw buildError(ERROR_CODE_TRANSFER_CLASS_NOT_FOUND);
+  }
+
   private setNewRuleFlag(flag: boolean): void {
     hilog.info(domainID, TAG, 'Callee::setNewRuleFlag: ' + flag);
     this.startUpNewRule = flag;
@@ -61,8 +162,8 @@ export class CalleeImpl extends rpc.RemoteObject implements Callee {
     return true;
   }
 
-  onRemoteMessageRequest(code: number, data: rpc.MessageSequence, reply: rpc.MessageSequence,
-    option: rpc.MessageOption): Boolean | Promise<Boolean> {
+  onRemoteMessageRequest(code: int, data: rpc.MessageSequence, reply: rpc.MessageSequence,
+    option: rpc.MessageOption): boolean {
     hilog.info(domainID, TAG, 'Callee onRemoteMessageRequest code [' + code + ']');
     if (!this.StartUpRuleCheck()) {
       return false;

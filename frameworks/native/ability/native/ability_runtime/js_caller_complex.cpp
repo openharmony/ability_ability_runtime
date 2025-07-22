@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -517,6 +517,15 @@ napi_value CreateJsCalleeRemoteObject(napi_env env, sptr<IRemoteObject> callee)
         TAG_LOGE(AAFwkTag::DEFAULT, "null remoteObj");
     }
     return napiRemoteObject;
+}
+
+sptr<IRemoteObject> GetJsCallerRemoteObj(uintptr_t jsCallerComplex)
+{
+    auto callerPtr = reinterpret_cast<JsCallerComplex*>(jsCallerComplex);
+    if (callerPtr == nullptr) {
+        return nullptr;
+    }
+    return callerPtr->GetRemoteObject();
 }
 } // AbilityRuntime
 } // OHOS

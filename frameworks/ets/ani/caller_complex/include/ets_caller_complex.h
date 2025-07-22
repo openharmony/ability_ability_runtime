@@ -26,8 +26,9 @@ namespace OHOS {
 namespace AbilityRuntime {
 class EtsCallerComplex {
 public:
-    EtsCallerComplex(ReleaseCallFunc releaseCallFunc, std::shared_ptr<CallerCallBack> callerCallBack)
-        : releaseCallFunc_(releaseCallFunc), callerCallBack_(callerCallBack) {}
+    EtsCallerComplex(ReleaseCallFunc releaseCallFunc, std::shared_ptr<CallerCallBack> callerCallBack,
+        sptr<IRemoteObject> callee) : releaseCallFunc_(releaseCallFunc), callerCallBack_(callerCallBack),
+        remoteObj_(callee) {}
     ~EtsCallerComplex() = default;
 
     static void ReleaseCall(ani_env *env, ani_object aniObj);
@@ -36,13 +37,18 @@ public:
         sptr<IRemoteObject> callee, std::shared_ptr<CallerCallBack> callback);
     static EtsCallerComplex* GetComplexPtrFrom(ani_env *env, ani_object aniObj);
     static ani_ref GetEtsRemoteObj(ani_env *env, ani_object aniObj);
-    static bool BindNativeMethods(ani_env *env, ani_class &cls);
     static void SetCallerCallback(std::shared_ptr<CallerCallBack> callback, ani_env *env, ani_object callerObj);
+
+    static ani_object NativeTransferStatic(ani_env *env, ani_object, ani_object input);
+    static ani_object NativeTransferDynamic(ani_env *env, ani_object, ani_object input);
+    static bool IsInstanceOf(ani_env *env, ani_object aniObj);
+    static ani_object CreateDynamicCaller(ani_env *env, sptr<IRemoteObject> remoteObj);
 protected:
     void ReleaseCallInner(ani_env *env);
 private:
     ReleaseCallFunc releaseCallFunc_;
     std::shared_ptr<CallerCallBack> callerCallBack_;
+    wptr<IRemoteObject> remoteObj_;
 };
 
 struct CallbackWrap {

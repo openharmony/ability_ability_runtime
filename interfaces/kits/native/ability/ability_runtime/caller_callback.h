@@ -96,6 +96,7 @@ private:
 
 using ReleaseCallFunc = std::function<ErrCode(std::shared_ptr<CallerCallBack>)>;
 struct StartAbilityByCallData {
+    StartAbilityByCallData() = default;
     StartAbilityByCallData(StartAbilityByCallData &) = delete;
     void operator=(StartAbilityByCallData &) = delete;
     sptr<IRemoteObject> remoteCallee;
