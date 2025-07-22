@@ -3719,7 +3719,7 @@ void AppMgrServiceInner::OnAppStateChanged(
         std::lock_guard lock(appStateCallbacksLock_);
         for (const auto &item : appStateCallbacks_) {
             if (item.callback != nullptr) {
-                item.callback->OnAppStateChanged(WrapAppProcessData(appRecord, state));
+                item.callback->OnAppStateChanged(WrapAppProcessData(appRecord, state, isFromWindowFocusChanged));
             }
         }
     }
@@ -3768,7 +3768,7 @@ void AppMgrServiceInner::OnAppStopped(const std::shared_ptr<AppRunningRecord> &a
 }
 
 AppProcessData AppMgrServiceInner::WrapAppProcessData(const std::shared_ptr<AppRunningRecord> &appRecord,
-    const ApplicationState state)
+    const ApplicationState state, bool isFromWindowFocusChanged)
 {
     AppProcessData processData;
     CHECK_POINTER_AND_RETURN_VALUE(appRecord, processData);
@@ -3789,6 +3789,7 @@ AppProcessData AppMgrServiceInner::WrapAppProcessData(const std::shared_ptr<AppR
     processData.appIndex = appRecord->GetAppIndex();
     processData.instanceKey = appRecord->GetInstanceKey();
     processData.bundleName = appRecord->GetBundleName();
+    processData.isFromWindowFocusChanged = isFromWindowFocusChanged;
     auto renderRecordMap = appRecord->GetRenderRecordMap();
     if (!renderRecordMap.empty()) {
         for (auto iter : renderRecordMap) {
@@ -6737,7 +6738,7 @@ void AppMgrServiceInner::HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> 
     if (appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND) {
         OnAppStateChanged(appRecord, ApplicationState::APP_STATE_FOREGROUND, needNotifyApp, true);
     }
-    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord, true);
 }
 
 void AppMgrServiceInner::HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo)
@@ -6768,7 +6769,7 @@ void AppMgrServiceInner::HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo
 
     bool needNotifyApp = appRunningManager_->IsApplicationUnfocused(appRecord->GetBundleName());
     OnAppStateChanged(appRecord, appRecord->GetState(), needNotifyApp, true);
-    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord, true);
 }
 
 void AppMgrServiceInner::InitWindowVisibilityChangedListener()

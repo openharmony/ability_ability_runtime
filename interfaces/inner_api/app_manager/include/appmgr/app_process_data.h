@@ -61,6 +61,7 @@ struct AppProcessData : public Parcelable {
     std::string processName;
     std::string instanceKey = "";
     std::string bundleName = "";
+    bool isFromWindowFocusChanged = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

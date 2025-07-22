@@ -1731,7 +1731,7 @@ private:
     bool GetBundleAndHapInfo(const AbilityInfo &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo,
         BundleInfo &bundleInfo, HapModuleInfo &hapModuleInfo, int32_t appIndex = 0) const;
     AppProcessData WrapAppProcessData(const std::shared_ptr<AppRunningRecord> &appRecord,
-        const ApplicationState state);
+        const ApplicationState state, bool isFromWindowFocusChanged = false);
 
     int UserTestAbnormalFinish(const sptr<IRemoteObject> &observer, const std::string &msg);
     int GetHapModuleInfoForTestRunner(const AAFwk::Want &want, const sptr<IRemoteObject> &observer,
