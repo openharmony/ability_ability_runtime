@@ -54,6 +54,10 @@ public:
     static ani_double GetCurrentAppCloneIndex(ani_env *env, ani_object aniObj);
     static ani_string GetCurrentInstanceKey(ani_env *env, ani_object aniObj);
     static void GetAllRunningInstanceKeys(ani_env *env, ani_object aniObj, ani_object callback);
+    static ani_int NativeOnLifecycleCallbackSync(ani_env *env, ani_object aniObj, ani_string type,
+        ani_object callback);
+    static void NativeOffLifecycleCallbackSync(ani_env *env, ani_object aniObj, ani_string type,
+        ani_int callbackId, ani_object callback);
     static void NativeOffApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
     static void NativeOnApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
     static void NativeOffEnvironmentSync(ani_env *env, ani_object aniObj, ani_double callbackId, ani_object callback);
@@ -61,6 +65,8 @@ public:
 protected:
     std::weak_ptr<ApplicationContext> applicationContext_;
 private:
+    ani_int RegisterAbilityLifecycleCallback(ani_env *env, ani_object callback);
+    void UnregisterAbilityLifecycleCallback(ani_env *env, int32_t callbackId, ani_object callback);
     void OnRestartApp(ani_env *env, ani_object aniObj, ani_object wantObj);
     void OnSetFont(ani_env *env, ani_object aniObj, ani_string font);
     void OnSetColorMode(ani_env *env, ani_object aniObj, ani_enum_item colorMode);
