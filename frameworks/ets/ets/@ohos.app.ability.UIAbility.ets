@@ -146,4 +146,8 @@ export default class UIAbility extends Ability {
 
   onShare(wantParam: Record<string, Object>): void {
   }
+
+  onCollaborate(wantParams: Record<string, Object>): AbilityConstant.CollaborateResult {
+    return AbilityConstant.CollaborateResult.REJECT;
+  }
 }
