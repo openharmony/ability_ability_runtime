@@ -200,10 +200,9 @@ public:
     virtual AppMgrResultCode KillApplicationByUid(const std::string &bundleName, const int uid,
         const std::string& reason = "KillApplicationByUid");
     
-    virtual AppMgrResultCode NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
-        const bool isUpgrade);
+    virtual AppMgrResultCode NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade);
 
-    virtual void NotifyUninstallOrUpgradeAppEnd(const int32_t uid);
+    virtual void NotifyUninstallOrUpgradeAppEnd(int32_t uid);
 
     /**
      * Kill the application self.

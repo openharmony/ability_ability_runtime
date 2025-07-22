@@ -375,8 +375,7 @@ AppMgrResultCode AppMgrClient::KillApplicationByUid(const std::string &bundleNam
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
-    const bool isUpgrade)
+AppMgrResultCode AppMgrClient::NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
@@ -392,7 +391,7 @@ AppMgrResultCode AppMgrClient::NotifyUninstallOrUpgradeApp(const std::string &bu
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-void AppMgrClient::NotifyUninstallOrUpgradeAppEnd(const int32_t uid)
+void AppMgrClient::NotifyUninstallOrUpgradeAppEnd(int32_t uid)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service == nullptr) {
@@ -405,7 +404,6 @@ void AppMgrClient::NotifyUninstallOrUpgradeAppEnd(const int32_t uid)
         return;
     }
     amsService->NotifyUninstallOrUpgradeAppEnd(uid);
-    return;
 }
 
 AppMgrResultCode AppMgrClient::KillApplicationSelf(const bool clearPageStack, const std::string& reason)

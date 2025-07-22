@@ -387,8 +387,7 @@ int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, con
     return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid, reason);
 }
 
-int32_t AmsMgrScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int uid,
-    const bool isUpgrade)
+int32_t AmsMgrScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleName, int uid, bool isUpgrade)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, uid = %{public}d", bundleName.c_str(), uid);
     if (!IsReady()) {
@@ -405,7 +404,7 @@ int32_t AmsMgrScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleNa
     return amsMgrServiceInner_->NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
 }
 
-void AmsMgrScheduler::NotifyUninstallOrUpgradeAppEnd(const int uid)
+void AmsMgrScheduler::NotifyUninstallOrUpgradeAppEnd(int uid)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "uid = %{public}d", uid);
     if (!IsReady()) {
