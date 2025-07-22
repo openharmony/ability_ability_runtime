@@ -17,6 +17,7 @@
 #include "ability_manager_client.h"
 #include "ani_common_ability_result.h"
 #include "ani_common_start_options.h"
+#include "ani_common_remote.h"
 #include "ani_common_want.h"
 #include "ani_remote_object.h"
 #include "common_fun_ani.h"
@@ -709,7 +710,7 @@ void EtsUIExtensionConnection::OnAbilityConnectDone(const AppExecFwk::ElementNam
         DetachCurrentThread();
         return;
     }
-    ani_object refRemoteObject = ANI_ohos_rpc_CreateJsRemoteObject(env, remoteObject);
+    ani_object refRemoteObject = AniRemote::CreateAniRemoteObject(env, remoteObject);
     if (refRemoteObject == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null refRemoteObject");
         DetachCurrentThread();
