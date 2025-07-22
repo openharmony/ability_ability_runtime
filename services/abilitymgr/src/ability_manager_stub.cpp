@@ -2500,9 +2500,6 @@ int AbilityManagerStub::StartUIAbilityBySCBInner(MessageParcel &data, MessagePar
     sptr<SessionInfo> sessionInfo = nullptr;
     if (data.ReadBool()) {
         sessionInfo = data.ReadParcelable<SessionInfo>();
-        if (sessionInfo) {
-            sessionInfo->want.CloseAllFd();
-        }
     }
     uint32_t sceneFlag = data.ReadUint32();
     bool isColdStart = false;
