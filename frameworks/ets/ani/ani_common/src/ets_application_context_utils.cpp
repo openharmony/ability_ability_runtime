@@ -652,7 +652,8 @@ void EtsApplicationContextUtils::NativeOffLifecycleCallbackSync(ani_env *env,
         (ani_int)AbilityErrorCode::ERROR_CODE_INVALID_PARAM, "Unknown type."), nullptr);
 }
 
-void EtsApplicationContextUtils::UnregisterAbilityLifecycleCallback(ani_env *env, int32_t callbackId, ani_object callback)
+void EtsApplicationContextUtils::UnregisterAbilityLifecycleCallback(ani_env *env, int32_t callbackId,
+    ani_object callback)
 {
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
