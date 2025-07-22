@@ -37,7 +37,8 @@ constexpr const char *KEEP_ALIVE_APP_TYPE_ENUM_NAME = "L@ohos/app/ability/appMan
 constexpr const char *KEEP_ALIVE_APP_SETTER_ENUM_NAME = "L@ohos/app/ability/appManager/appManager/KeepAliveSetter;";
 constexpr const char *KEEP_ALIVE_BUNDLE_INFO_INNER_CLASS_NAME =
     "L@ohos/app/ability/appManager/appManager/KeepAliveBundleInfoInner;";
-
+constexpr const char *ABILITY_FIRST_FRAME_STATE_DATA_CLASS_NAME =
+    "Lapplication/AbilityFirstFrameStateData/AbilityFirstFrameStateDataInner;";
 }  // namespace
 
 ani_object WrapAppStateData(ani_env *env, const AppExecFwk::AppStateData &appStateData)
@@ -869,6 +870,133 @@ ani_object CreateKeepAliveInfoArray(ani_env *env, const std::vector<AbilityRunti
         index++;
     }
     return arrayObj;
+}
+#ifdef SUPPORT_GRAPHICS
+bool SetAbilityFirstFrameStateData(ani_env *env, ani_object object,
+    const AppExecFwk::AbilityFirstFrameStateData &abilityFirstFrameStateData)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null env");
+        return false;
+    }
+    ani_status status = ANI_OK;
+    const std::string &strBundleName = abilityFirstFrameStateData.bundleName;
+    if ((status = env->Object_SetPropertyByName_Ref(object, "bundleName",
+        OHOS::AppExecFwk::GetAniString(env, strBundleName))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundleName failed status:%{public}d", status);
+        return false;
+    }
+    const std::string &strModuleName = abilityFirstFrameStateData.moduleName;
+    if ((status = env->Object_SetPropertyByName_Ref(object, "moduleName",
+        OHOS::AppExecFwk::GetAniString(env, strModuleName))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "moduleName failed status:%{public}d", status);
+        return false;
+    }
+    const std::string &strAbilityName = abilityFirstFrameStateData.abilityName;
+    if ((status = env->Object_SetPropertyByName_Ref(object, "abilityName",
+        OHOS::AppExecFwk::GetAniString(env, strAbilityName))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityName failed status:%{public}d", status);
+        return false;
+    }
+    if ((status = env->Object_SetPropertyByName_Int(object, "appIndex",
+        abilityFirstFrameStateData.appIndex)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appIndex failed status:%{public}d", status);
+        return false;
+    }
+    if ((status = env->Object_SetPropertyByName_Boolean(object, "isColdStart",
+        abilityFirstFrameStateData.coldStart)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "isColdStart failed status:%{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+ani_object WrapAbilityFirstFrameStateData(ani_env *env,
+    const AppExecFwk::AbilityFirstFrameStateData &abilityFirstFrameStateData)
+{
+    ani_class cls {};
+    ani_status status = ANI_ERROR;
+    ani_method method {};
+    ani_object object = nullptr;
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null env");
+        return nullptr;
+    }
+    if ((status = env->FindClass(ABILITY_FIRST_FRAME_STATE_DATA_CLASS_NAME, &cls)
+        ) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "find class failed status : %{public}d", status);
+        return nullptr;
+    }
+    if (cls == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null cls");
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "find ctor failed status : %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Object_New AbilityFirstFrameStateData failed status : %{public}d", status);
+        return nullptr;
+    }
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null object");
+        return nullptr;
+    }
+    if (!SetAbilityFirstFrameStateData(env, object, abilityFirstFrameStateData)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SetAbilityFirstFrameStateData failed");
+        return nullptr;
+    }
+    return object;
+}
+#endif
+
+bool AttachAniEnv(ani_vm *etsVm, ani_env *&env)
+{
+    if (etsVm == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "etsVm nullptr");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    if ((status = etsVm->GetEnv(ANI_VERSION_1, &env)) == ANI_OK) {
+        return env != nullptr;
+    }
+    ani_option interopEnabled { "--interop=disable", nullptr };
+    ani_options aniArgs { 1, &interopEnabled };
+    if ((status = (etsVm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "status: %{public}d", status);
+        return false;
+    }
+    return env != nullptr;
+}
+
+void DetachAniEnv(ani_vm *etsVm)
+{
+    if (etsVm == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "etsVm nullptr");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    if ((status = etsVm->DetachCurrentThread()) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "status: %{public}d", status);
+    }
+}
+
+void ReleaseObjectReference(ani_vm *etsVm, ani_ref etsObjRef)
+{
+    if (etsVm == nullptr || etsObjRef == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "etsVm null or etsObjRef null");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_env *env = nullptr;
+    if ((status = etsVm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetEnv failed status:%{public}d", status);
+        return;
+    }
+    if ((status = env->GlobalReference_Delete(etsObjRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GlobalReference_Delete status: %{public}d", status);
+    }
 }
 
 } // namespace AppManagerEts

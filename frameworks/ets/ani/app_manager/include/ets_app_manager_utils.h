@@ -17,13 +17,17 @@
 
 #include <vector>
 
+#include "ability_state_data.h"
 #include "ani.h"
 #include "app_state_data.h"
 #include "ets_runtime.h"
+#include "keep_alive_info.h"
 #include "process_data.h"
 #include "running_multi_info.h"
 #include "running_process_info.h"
-#include "keep_alive_info.h"
+#ifdef SUPPORT_GRAPHICS
+#include "ability_first_frame_state_data.h"
+#endif
 
 namespace OHOS {
 namespace AppManagerEts {
@@ -52,6 +56,16 @@ bool UnWrapArrayInt(ani_env *env, ani_object arrayObj, std::vector<int32_t> &lis
 ani_object CreateKeepAliveInfoArray(ani_env *env, const std::vector<AbilityRuntime::KeepAliveInfo> &infos);
 ani_object WrapKeepAliveInfo(ani_env *env, const AbilityRuntime::KeepAliveInfo &keepAliveInfo);
 bool SetKeepAliveInfo(ani_env *env, ani_object object, const AbilityRuntime::KeepAliveInfo &keepInfo);
+#ifdef SUPPORT_GRAPHICS
+ani_object WrapAbilityFirstFrameStateData(ani_env *env,
+    const AppExecFwk::AbilityFirstFrameStateData &abilityFirstFrameStateData);
+bool SetAbilityFirstFrameStateData(ani_env *env, ani_object object,
+    const AppExecFwk::AbilityFirstFrameStateData &abilityFirstFrameStateData);
+#endif
+bool AttachAniEnv(ani_vm *etsVm, ani_env *&env);
+void DetachAniEnv(ani_vm *etsVm);
+void ReleaseObjectReference(ani_vm *etsVm, ani_ref etsObjRef);
+
 } // namespace AppManagerEts
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ETS_APP_MANAGER_UTILS_H

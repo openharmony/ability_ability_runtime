@@ -1058,6 +1058,70 @@ ohos_prebuilt_etc("atomic_service_options_abc_etc") {
   part_name = "ability_runtime"
   deps = [ ":atomic_service_options_abc" ]
 }
+generate_static_abc("ability_first_frame_state_data_abc") {
+  base_url = "./"
+  files = [ "./application/AbilityFirstFrameStateData.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_first_frame_state_data_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_first_frame_state_data_abc_etc") {
+  source = "$target_out_dir/ability_first_frame_state_data_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_first_frame_state_data_abc" ]
+}
+
+generate_static_abc("ability_first_frame_state_observer_abc") {
+  base_url = "./"
+  files = [ "./application/AbilityFirstFrameStateObserver.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_first_frame_state_observer_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_first_frame_state_observer_abc_etc") {
+  source = "$target_out_dir/ability_first_frame_state_observer_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_first_frame_state_observer_abc" ]
+}
+
+generate_static_abc("app_foreground_state_observer_abc") {
+  base_url = "./"
+  files = [ "./application/AppForegroundStateObserver.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/app_foreground_state_observer_abc.abc"
+}
+
+ohos_prebuilt_etc("app_foreground_state_observer_abc_etc") {
+  source = "$target_out_dir/app_foreground_state_observer_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":app_foreground_state_observer_abc" ]
+}
+
+generate_static_abc("ability_foreground_state_observer_abc") {
+  base_url = "."
+  files = [ "./application/AbilityForegroundStateObserver.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_foreground_state_observer_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_foreground_state_observer_abc_etc") {
+  source = "$target_out_dir/ability_foreground_state_observer_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_foreground_state_observer_abc" ]
+}
 
 generate_static_abc("application_state_observer_abc") {
   base_url = "./"
@@ -1084,6 +1148,9 @@ group("ets_packages") {
     ":ability_delegator_application_testRunner_abc_etc",
     ":ability_delegator_args_abc_etc",
     ":ability_delegator_registry_abc_etc",
+    ":ability_foreground_state_observer_abc_etc",
+    ":ability_first_frame_state_data_abc_etc",
+    ":ability_first_frame_state_observer_abc_etc",
     ":ability_runtime_AbilityRunningInfo_abc_etc",
     ":ability_runtime_ability_abc_etc",
     ":ability_runtime_ability_constant_abc_etc",
