@@ -61,7 +61,7 @@ ETSTestRunner::ETSTestRunner(
         std::string srcPath;
         if (bundleInfo.hapModuleInfos.back().isModuleJson) {
             moduleName = args->GetTestModuleName();
-            srcPath.append(args->GetTestRunnerPath());
+            srcPath.append(GetTestRunnerPath(args));
         } else {
             srcPath.append(args->GetTestPackageName());
             srcPath.append("/assets/sts/TestRunner/");
@@ -101,6 +101,22 @@ ETSTestRunner::ETSTestRunner(
     if (!etsTestRunnerObj_) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "load testrunner failed");
     }
+}
+
+std::string ETSTestRunner::GetTestRunnerPath(const std::shared_ptr<AbilityDelegatorArgs> &args)
+{
+    std::string result;
+    if (!args->GetTestRunnerPath().empty()) {
+        result.append(args->GetTestRunnerPath());
+    } else {
+        result.append(args->GetTestModuleName());
+        if (args->GetTestRunnerClassName().find("/") == std::string::npos) {
+            result.append(LOWERCASETESTRUNNER);
+        }
+        result.append(args->GetTestRunnerClassName());
+        result.append(".abc");
+    }
+    return result;
 }
 
 ETSTestRunner::~ETSTestRunner() = default;
