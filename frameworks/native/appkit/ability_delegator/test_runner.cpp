@@ -67,9 +67,7 @@ std::unique_ptr<TestRunner> TestRunner::Create(const std::unique_ptr<AbilityRunt
             return RunnerRuntime::CJTestRunner::Create(runtime, args, bundleInfo);
 #endif
         case AbilityRuntime::Runtime::Language::ETS:
-            if (args->GetTestRunnerMode() == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
-                return std::unique_ptr<TestRunner>(RunnerRuntime::CreateETSTestRunner(runtime, args, bundleInfo));
-            } else {
+            if (args->GetTestRunnerMode() == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0) {
                 auto &etsRuntime = (static_cast<AbilityRuntime::ETSRuntime &>(*runtime));
                 auto &jsRuntime = etsRuntime.GetJsRuntime();
                 if (jsRuntime != nullptr) {
@@ -77,6 +75,8 @@ std::unique_ptr<TestRunner> TestRunner::Create(const std::unique_ptr<AbilityRunt
                 } else {
                     TAG_LOGE(AAFwkTag::DELEGATOR, "get jsruntime failed in stsruntime");
                 }
+            } else {
+                return std::unique_ptr<TestRunner>(RunnerRuntime::CreateETSTestRunner(runtime, args, bundleInfo));
             }
         default:
             return std::make_unique<TestRunner>();

@@ -327,3 +327,39 @@ HWTEST_F(JsTestRunnerTest, Js_Test_Runner_Test_0600, Function | MediumTest | Lev
 
     EXPECT_TRUE(iface_cast<MockTestObserverStub>(shobserver)->testStatusFlag);
 }
+
+
+/**
+ * @tc.number: Js_Test_Runner_Test_0700
+ * @tc.name: ReportStatus
+ * @tc.desc: Verify the ReportStatus is valid.
+ */
+HWTEST_F(JsTestRunnerTest, Js_Test_Runner_Test_0700, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Js_Test_Runner_Test_0700 is called");
+
+    MockAbilityDelegatorStub::finishFlag_ = false;
+    std::map<std::string, std::string> paras;
+    paras.emplace(KEY_TEST_BUNDLE_NAME, VALUE_TEST_BUNDLE_NAME);
+    paras.emplace(KEY_TEST_RUNNER_CLASS, VALUE_TEST_RUNNER_CLASS);
+    paras.emplace(KEY_TEST_CASE, VALUE_TEST_CASE);
+    paras.emplace(KEY_TEST_WAIT_TIMEOUT, VALUE_TEST_WAIT_TIMEOUT);
+
+    Want want;
+    for (auto para : paras) {
+        want.SetParam(para.first, para.second);
+    }
+
+    std::shared_ptr<AbilityDelegatorArgs> abilityArgs = std::make_shared<AbilityDelegatorArgs>(want);
+
+    std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
+    std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        abilityArgs,
+        true);
+
+    JsTestRunner* pTestRunner = static_cast<JsTestRunner*>(static_cast<void*>((testRunner.get())));
+    std::string runnerPath = pTestRunner->GetTestRunnerPath(abilityArgs);
+    std::string resultPath = "/ets/testrunner/JSUserTestRunnerjs";
+    EXPECT_TRUE(runnerPath == resultPath);
+}
