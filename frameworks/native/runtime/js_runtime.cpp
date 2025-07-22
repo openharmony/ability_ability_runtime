@@ -1710,14 +1710,12 @@ std::vector<panda::HmsMap> JsRuntime::GetSystemKitsMap(uint32_t version)
             continue;
         }
         uint32_t sinceVersion = jsonObject.at(SINCE_VERSION).get<uint32_t>();
-        if (version >= sinceVersion) {
-            panda::HmsMap hmsMap = {
-                .originalPath = jsonObject.at(NAMESPACE).get<std::string>(),
-                .targetPath = jsonObject.at(TARGET_OHM).get<std::string>(),
-                .sinceVersion = sinceVersion
-            };
-            systemKitsMap.emplace_back(hmsMap);
-        }
+        panda::HmsMap hmsMap = {
+            .originalPath = jsonObject.at(NAMESPACE).get<std::string>(),
+            .targetPath = jsonObject.at(TARGET_OHM).get<std::string>(),
+            .sinceVersion = sinceVersion
+        };
+        systemKitsMap.emplace_back(hmsMap);
     }
     TAG_LOGD(AAFwkTag::JSRUNTIME, "The size of the map is %{public}zu", systemKitsMap.size());
     return systemKitsMap;
