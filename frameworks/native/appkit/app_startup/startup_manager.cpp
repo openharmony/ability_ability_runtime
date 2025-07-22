@@ -575,6 +575,11 @@ std::shared_ptr<NativeStartupTask> StartupManager::CreateAppPreloadSoTask(
     return task;
 }
 
+bool StartupManager::EnableLazyLoadingAppStartupTasks() const
+{
+    return enableLazyLoadingAppStartupTasks_;
+}
+
 void StartupManager::PreloadAppHintStartupTask(std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData)
 {
     std::map<std::string, std::shared_ptr<StartupTask>> preloadAppHintTasks;
@@ -1163,7 +1168,7 @@ void StartupManager::SetOptionalParameters(const nlohmann::json& module, AppExec
         startupTaskInfo.excludeFromAutoStart = false;
     }
 
-    SetMatchRules(module, startupTaskInfo.matchRules);
+    SetMatchRules(module, startupTaskInfo.matchRules, false);
 }
 
 void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExecFwk::ModuleType moduleType,
@@ -1188,14 +1193,18 @@ void StartupManager::SetOptionalParameters(const nlohmann::json &module, AppExec
     }
 
     StartupTaskMatchRules matchRules;
-    SetMatchRules(module, matchRules);
+    SetMatchRules(module, matchRules, true);
     task->SetMatchRules(matchRules);
 }
 
-void StartupManager::SetMatchRules(const nlohmann::json &module, StartupTaskMatchRules &matchRules)
+void StartupManager::SetMatchRules(const nlohmann::json &module, StartupTaskMatchRules &matchRules,
+    bool isPreloadSoStartupTask)
 {
     if (!module.contains(MATCH_RULES) || !module.at(MATCH_RULES).is_object()) {
         return;
+    }
+    if (!isPreloadSoStartupTask) {
+        enableLazyLoadingAppStartupTasks_ = true;
     }
 
     const nlohmann::json &matchRulesJson = module.at(MATCH_RULES);

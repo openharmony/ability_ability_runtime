@@ -30,6 +30,20 @@ struct StartupTaskMatchRules {
     std::vector<std::string> customization;
 };
 
+struct StartupTaskInfo {
+    std::string name;
+    std::string srcEntry;
+    std::string ohmUrl;
+    std::string moduleName;
+    std::string hapPath;
+    std::vector<std::string> dependencies;
+    bool excludeFromAutoStart = false;
+    bool callCreateOnMainThread = true;
+    bool waitOnMainThread = true;
+    bool esModule = true;
+    StartupTaskMatchRules matchRules;
+};
+
 class AppStartupTask : public StartupTask {
 public:
     explicit AppStartupTask(const std::string& name);

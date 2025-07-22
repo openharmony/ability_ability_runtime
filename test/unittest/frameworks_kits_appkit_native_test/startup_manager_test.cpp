@@ -1335,5 +1335,19 @@ HWTEST_F(StartupManagerTest, ParseJsonStringArray_001, Function | MediumTest | L
     EXPECT_EQ(arr3.size(), 2);
     GTEST_LOG_(INFO) << "ParseJsonStringArray_001 end";
 }
+
+/**
+ * @tc.name: EnableLazyLoadingAppStartupTasks_001
+ * @tc.desc: test EnableLazyLoadingAppStartupTasks
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupManagerTest, EnableLazyLoadingAppStartupTasks_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "EnableLazyLoadingAppStartupTasks_001 start";
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    ASSERT_NE(startupManager, nullptr);
+    EXPECT_EQ(startupManager->EnableLazyLoadingAppStartupTasks(), startupManager->enableLazyLoadingAppStartupTasks_);
+    GTEST_LOG_(INFO) << "EnableLazyLoadingAppStartupTasks_001 end";
+}
 }
 }
