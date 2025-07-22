@@ -17,6 +17,7 @@
 
 #include "ability_business_error.h"
 #include "ani_common_ability_result.h"
+#include "ani_common_util.h"
 #include "hilog_tag_wrapper.h"
 #ifdef SUPPORT_SCREEN
 #include "ui_content.h"
@@ -48,23 +49,7 @@ EtsUIExtensionCallback::~EtsUIExtensionCallback()
 
 void EtsUIExtensionCallback::OnError(int32_t number)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "call");
-    auto env = GetAniEnv();
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
-        return;
-    }
-    ani_status status = ANI_ERROR;
-    ani_class clsCall = nullptr;
-    if ((status = env->FindClass(ABILITY_START_CLASS_NAME, &clsCall)) != ANI_OK || clsCall == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "find AbilityStartCallback class failed, status: %{public}d, or null cls", status);
-        return;
-    }
-    ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(clsCall, "onError", nullptr, &method)) != ANI_OK || method == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "find onError method failed, status: %{public}d, or null method", status);
-        return;
-    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnError call");
     std::string name;
     std::string message;
 #ifdef SUPPORT_SCREEN
@@ -74,37 +59,44 @@ void EtsUIExtensionCallback::OnError(int32_t number)
         message = "StartAbilityByType failed.";
     }
 #endif // SUPPORT_SCREEN
-    ani_string aniName;
-    if ((status = env->String_NewUTF8(name.c_str(), name.length(), &aniName)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "String_NewUTF8 failed, status: %{public}d", status);
+    auto env = GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
         return;
     }
-    ani_string aniMsg;
+    ani_string aniName = nullptr;
+    ani_status status = env->String_NewUTF8(name.c_str(), name.length(), &aniName);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "aniName String_NewUTF8 failed, status: %{public}d", status);
+        return;
+    }
+    ani_string aniMsg = nullptr;
     if ((status = env->String_NewUTF8(message.c_str(), message.length(), &aniMsg)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "String_NewUTF8 failed, status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::UI_EXT, "aniMsg String_NewUTF8 failed, status: %{public}d", status);
         return;
     }
-    if ((status = env->Object_CallMethod_Void(reinterpret_cast<ani_object>(callback_),
-        method, (ani_double)number, aniName, aniMsg)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "call onError method failed, status: %{public}d", status);
-        return;
-    }
+    CallObjectMethod("onError", nullptr, (ani_double)number, aniName, aniMsg);
     CloseModalUIExtension();
 }
 
 void EtsUIExtensionCallback::OnResult(int32_t resultCode, const AAFwk::Want &want)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "call");
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnResult call");
     auto env = GetAniEnv();
     if (env == nullptr || callback_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env or callback_");
         return;
     }
-    ani_status status = ANI_ERROR;
     ani_object startCallback = reinterpret_cast<ani_object>(callback_);
-    ani_ref onResultRef {};
-    if ((status = env->Object_GetPropertyByName_Ref(startCallback, "onResult", &onResultRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "get onResult failed, status: %{public}d", status);
+    ani_boolean isUndefined = true;
+    ani_ref onResultRef = nullptr;
+    if (!AppExecFwk::GetPropertyRef(env, startCallback, "onResult", onResultRef, isUndefined) ||
+        onResultRef == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "GetPropertyRef failed, or null onResultRef");
+        return;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "onResult is undefined");
         return;
     }
     ani_fn_object onResultFn = reinterpret_cast<ani_fn_object>(onResultRef);
@@ -114,12 +106,43 @@ void EtsUIExtensionCallback::OnResult(int32_t resultCode, const AAFwk::Want &wan
         return;
     }
     ani_ref argv[] = { abilityResultObj };
-    ani_ref result;
-    if ((status = env->FunctionalObject_Call(onResultFn, 1, argv, &result)) != ANI_OK) {
+    ani_ref result = nullptr;
+    ani_status status = env->FunctionalObject_Call(onResultFn, 1, argv, &result);
+    if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "call onResult fn failed, status: %{public}d", status);
         return;
     }
     CloseModalUIExtension();
+}
+
+void EtsUIExtensionCallback::CallObjectMethod(const char *name, const char *signature, ...)
+{
+    TAG_LOGD(AAFwkTag::EXT, "name: %{public}s", name);
+    auto env = GetAniEnv();
+    if (env == nullptr || callback_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env or callback_");
+        return;
+    }
+    ani_class clsCall = nullptr;
+    ani_status status = env->FindClass(ABILITY_START_CLASS_NAME, &clsCall);
+    if (status != ANI_OK || clsCall == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "find AbilityStartCallback class failed, status: %{public}d, or null cls", status);
+        return;
+    }
+    ani_method method = nullptr;
+    if ((status = env->Class_FindMethod(clsCall, name, signature, &method)) != ANI_OK || method == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "find onError method failed, status: %{public}d, or null method", status);
+        env->ResetError();
+        return;
+    }
+    va_list args;
+    va_start(args, signature);
+    if ((status = env->Object_CallMethod_Void_V(reinterpret_cast<ani_object>(callback_), method, args)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::EXT, "Object_CallMethod name: %{public}s, status: %{public}d", name, status);
+        return;
+    }
+    va_end(args);
+    TAG_LOGI(AAFwkTag::EXT, "CallObjectMethod end, name: %{public}s", name);
 }
 
 void EtsUIExtensionCallback::SetEtsCallbackObject(ani_object aniObject)

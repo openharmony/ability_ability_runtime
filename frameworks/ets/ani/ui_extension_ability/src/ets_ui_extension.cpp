@@ -162,9 +162,9 @@ bool EtsUIExtension::BindNativeMethods()
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Class_BindNativeMethods status: %{public}d", status);
         return false;
+    }
     SetExtensionCommon(
         EtsExtensionCommon::Create(etsRuntime_, static_cast<ETSNativeReference &>(*etsObj_), shellContextRef_));
-    }
     return true;
 }
 
