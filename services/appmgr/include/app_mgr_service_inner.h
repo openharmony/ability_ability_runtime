@@ -1572,6 +1572,8 @@ public:
 
     int32_t LaunchAbility(sptr<IRemoteObject> token);
 
+    virtual int32_t QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles);
+
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);

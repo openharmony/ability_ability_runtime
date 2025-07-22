@@ -2258,5 +2258,44 @@ HWTEST_F(AppMgrServiceInnerTenthTest, PreloadApplicationByPhase_002, TestSize.Le
     AAFwk::AppUtils::GetInstance().isPreloadApplicationEnabled_.isLoaded = false;
     TAG_LOGI(AAFwkTag::TEST, "PreloadApplicationByPhase_002 end");
 }
+
+/**
+ * @tc.name: QueryRunningSharedBundles_001
+ * @tc.desc: Test QueryRunningSharedBundles
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, QueryRunningSharedBundles_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = nullptr;
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    auto ret = appMgrServiceInner->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(ret, AAFwk::ERR_NO_APP_RECORD);
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_001 end");
+}
+
+/**
+ * @tc.name: QueryRunningSharedBundles_002
+ * @tc.desc: Test QueryRunningSharedBundles
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, QueryRunningSharedBundles_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    auto ret = appMgrServiceInner->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(ret, ERR_OK);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = nullptr;
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_002 end");
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

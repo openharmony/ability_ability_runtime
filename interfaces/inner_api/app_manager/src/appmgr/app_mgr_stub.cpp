@@ -404,6 +404,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandlePromoteCurrentToCandidateMasterProcess(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::DEMOTE_CURRENT_FROM_CANDIDATE_MASTER_PROCESS):
             return HandleDemoteCurrentFromCandidateMasterProcess(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::QUERY_RUNNING_SHARED_BUNDLES):
+            return HandleQueryRunningSharedBundles(data, reply);
     }
     return INVALID_FD;
 }
@@ -2039,5 +2041,32 @@ int32_t AppMgrStub::HandleDemoteCurrentFromCandidateMasterProcess(MessageParcel 
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleQueryRunningSharedBundles(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleQueryRunningSharedBundles call");
+    pid_t pid = data.ReadInt32();
+    std::map<std::string, uint32_t> sharedBundles;
+
+    int32_t result = QueryRunningSharedBundles(pid, sharedBundles);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write result fail");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    if (result != ERR_OK) {
+        return NO_ERROR;
+    }
+
+    if (!reply.WriteInt32(static_cast<int32_t>(sharedBundles.size()))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write size fail");
+        return IPC_STUB_ERR;
+    }
+    for (const auto &item : sharedBundles) {
+        if (!reply.WriteString(item.first) || !reply.WriteUint32(item.second)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "write item fail");
+            return IPC_STUB_ERR;
+        }
+    }
+    return NO_ERROR;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
