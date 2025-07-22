@@ -1260,6 +1260,7 @@ HWTEST_F(AppMgrServiceInnerTenthTest, SetKeepAliveDkv_006, TestSize.Level2)
     auto appRecord = std::make_shared<AppRunningRecord>(applicationInfo, testRecordId, processName);
     AAFwk::MyStatus::GetInstance().getAppRunningRecordMap_.clear();
     AAFwk::MyStatus::GetInstance().getAppRunningRecordMap_.insert({testRecordId, appRecord});
+    appRecord->isMainElementRunning_ = true;
     appMgrServiceInner->SetKeepAliveDkv("test.bundle.name", true, 0);
     EXPECT_TRUE(AAFwk::MyStatus::GetInstance().setKeepAliveDkvCalled_);
     TAG_LOGI(AAFwkTag::TEST, "SetKeepAliveDkv_006 end");
@@ -1289,6 +1290,32 @@ HWTEST_F(AppMgrServiceInnerTenthTest, SetKeepAliveDkv_007, TestSize.Level2)
     appMgrServiceInner->SetKeepAliveDkv("test.bundle.name", true, 2);
     EXPECT_FALSE(AAFwk::MyStatus::GetInstance().setKeepAliveDkvCalled_);
     TAG_LOGI(AAFwkTag::TEST, "SetKeepAliveDkv_007 end");
+}
+
+/**
+ * @tc.name: SetKeepAliveDkv_008
+ * @tc.desc: Test SetKeepAliveDkv
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTenthTest, SetKeepAliveDkv_008, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetKeepAliveDkv_008 start");
+    AAFwk::MyStatus::GetInstance().resetRunningRecordFunctionFlag();
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->appRunningManager_ = std::make_shared<AppRunningManager>();
+    AAFwk::MyStatus::GetInstance().getCallingUid_ = FOUNDATION_UID;
+    auto applicationInfo = std::make_shared<ApplicationInfo>();
+    applicationInfo->name = "test.bundle.name";
+    applicationInfo->bundleName = "test.bundle.name";
+    const int32_t testRecordId = 1234;
+    const std::string processName = "test_process";
+    auto appRecord = std::make_shared<AppRunningRecord>(applicationInfo, testRecordId, processName);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordMap_.clear();
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordMap_.insert({testRecordId, appRecord});
+    appRecord->isMainElementRunning_ = false;
+    appMgrServiceInner->SetKeepAliveDkv("test.bundle.name", true, 0);
+    EXPECT_FALSE(AAFwk::MyStatus::GetInstance().setKeepAliveDkvCalled_);
+    TAG_LOGI(AAFwkTag::TEST, "SetKeepAliveDkv_008 end");
 }
 
 /**

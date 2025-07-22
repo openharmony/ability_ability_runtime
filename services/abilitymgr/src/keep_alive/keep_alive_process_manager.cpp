@@ -310,11 +310,7 @@ void KeepAliveProcessManager::OnAppStateChanged(const AppInfo &info)
         return;
     }
 
-    bool localEnable = IsKeepAliveBundle(bundleName, -1);
     bool localEnableForAppservice = IsKeepAliveBundle(bundleName, U1_USER_ID);
-    if (localEnable) {
-        IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveDkv(bundleName, localEnable, uid));
-    }
     if (localEnableForAppservice) {
         IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveAppService(bundleName, localEnableForAppservice, uid));
     }

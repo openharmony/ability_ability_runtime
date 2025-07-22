@@ -45,6 +45,7 @@ ohos_fuzztest("MainElementUtilsFuzzTest") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_path}/utils/server/startup:startup_util",
   ]
 
   external_deps = [
