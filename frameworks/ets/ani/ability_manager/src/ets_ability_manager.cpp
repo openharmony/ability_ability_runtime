@@ -23,6 +23,8 @@
 #include "ani_base_context.h"
 #include "ani_common_ability_state_data.h"
 #include "ani_common_want.h"
+#include "app_mgr_interface.h"
+#include "ets_ability_foreground_state_observer.h"
 #include "ets_ability_manager_utils.h"
 #include "ets_error_utils.h"
 #include "hilog_tag_wrapper.h"
@@ -36,18 +38,43 @@ namespace {
 constexpr const char* ETS_ABILITY_MANAGER_NAMESPACE = "L@ohos/app/ability/abilityManager/abilityManager;";
 constexpr const char* ETS_ABILITY_MANAGER_SIGNATURE_ARRAY = ":Lescompat/Array;";
 constexpr const char* ETS_ABILITY_MANAGER_SIGNATURE_CALLBACK = "Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char *ON_OFF_TYPE_ABILITY_FOREGROUND_STATE = "abilityForegroundState";
 constexpr int32_t ERR_FAILURE = -1;
 }
 
-sptr<AppExecFwk::IAbilityManager> GetAbilityManagerInstance()
+class EtsAbilityManager final {
+public:
+    static ani_object GetForegroundUIAbilities(ani_env *env);
+    static void GetTopAbility(ani_env *env, ani_object callback);
+    static void GetAbilityRunningInfos(ani_env *env, ani_object callback);
+    static void IsEmbeddedOpenAllowed(ani_env *env, ani_object contextObj, ani_string aniAppId, ani_object callbackObj);
+    static void NativeOn(ani_env *env, ani_string aniType, ani_object aniObserver);
+    static void NativeOff(ani_env *env, ani_string aniType, ani_object aniObserver);
+private:
+    static sptr<AppExecFwk::IAbilityManager> GetAbilityManagerInstance();
+    static sptr<AppExecFwk::IAppMgr> GetAppManagerInstance();
+    static sptr<AbilityRuntime::ETSAbilityForegroundStateObserver> observerForeground_;
+};
+
+sptr<AbilityRuntime::ETSAbilityForegroundStateObserver> EtsAbilityManager::observerForeground_ = nullptr;
+
+sptr<AppExecFwk::IAbilityManager> EtsAbilityManager::GetAbilityManagerInstance()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    sptr<IRemoteObject> abilityManagerObj =
-        systemAbilityManager->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
+    sptr<IRemoteObject> abilityManagerObj = systemAbilityManager->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
     return iface_cast<AppExecFwk::IAbilityManager>(abilityManagerObj);
 }
-static ani_object GetForegroundUIAbilities(ani_env *env)
+
+sptr<AppExecFwk::IAppMgr> EtsAbilityManager::GetAppManagerInstance()
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> appObject = systemAbilityManager->GetSystemAbility(APP_MGR_SERVICE_ID);
+    return iface_cast<AppExecFwk::IAppMgr>(appObject);
+}
+
+ani_object EtsAbilityManager::GetForegroundUIAbilities(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call GetForegroundUIAbilities");
 
@@ -80,7 +107,7 @@ static ani_object GetForegroundUIAbilities(ani_env *env)
     return aniArray;
 }
 
-static void GetTopAbility(ani_env *env, ani_object callback)
+void EtsAbilityManager::GetTopAbility(ani_env *env, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call GetTopAbility");
     if (env == nullptr) {
@@ -107,7 +134,7 @@ static void GetTopAbility(ani_env *env, ani_object callback)
     return;
 }
 
-void GetAbilityRunningInfos(ani_env *env, ani_object callback)
+void EtsAbilityManager::GetAbilityRunningInfos(ani_env *env, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "GetAbilityRunningInfos");
     if (env == nullptr) {
@@ -121,7 +148,8 @@ void GetAbilityRunningInfos(ani_env *env, ani_object callback)
     AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateErrorByNativeErr(env, errcode), retObject);
 }
 
-void IsEmbeddedOpenAllowed(ani_env *env, ani_object contextObj, ani_string aniAppId, ani_object callbackObj)
+void EtsAbilityManager::IsEmbeddedOpenAllowed(ani_env *env, ani_object contextObj,
+    ani_string aniAppId, ani_object callbackObj)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "IsEmbeddedOpenAllowed");
     if (env == nullptr) {
@@ -151,6 +179,98 @@ void IsEmbeddedOpenAllowed(ani_env *env, ani_object contextObj, ani_string aniAp
         EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK),  AppExecFwk::CreateBoolean(env, ret));
 }
 
+void EtsAbilityManager::NativeOn(ani_env *env, ani_string aniType, ani_object aniObserver)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "nativeOn called %{public}p", aniObserver);
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "env null ptr");
+        return;
+    }
+    std::string strType;
+    if (!AppExecFwk::GetStdString(env, aniType, strType) || strType != ON_OFF_TYPE_ABILITY_FOREGROUND_STATE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetStdString failed");
+        EtsErrorUtil::ThrowInvalidParamError(env,
+            "Parse param observer failed, must be a AbilityForegroundStateObserver.");
+        return;
+    }
+    ani_vm *aniVM = nullptr;
+    if (env->GetVM(&aniVM) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get aniVM failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Get aniVm failed.");
+        return;
+    }
+    if (observerForeground_ == nullptr) {
+        observerForeground_ = new (std::nothrow) AbilityRuntime::ETSAbilityForegroundStateObserver(aniVM);
+        if (observerForeground_ == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null observerForeground_");
+            EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+            return;
+        }
+    }
+    if (observerForeground_->IsEmpty()) {
+        auto appManager = GetAppManagerInstance();
+        if (appManager == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "appManager null ptr");
+            EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+            return;
+        }
+        int32_t ret = appManager->RegisterAbilityForegroundStateObserver(observerForeground_);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "ret: %{public}d", ret);
+        if (ret != NO_ERROR) {
+            EtsErrorUtil::ThrowErrorByNativeErr(env, static_cast<int32_t>(ret));
+            return;
+        }
+    }
+    observerForeground_->AddEtsObserverObject(env, aniObserver);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "nativeOn end");
+}
+
+void EtsAbilityManager::NativeOff(ani_env *env, ani_string aniType, ani_object aniObserver)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "nativeOff called %{public}p", aniObserver);
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "env null ptr");
+        return;
+    }
+    std::string strType;
+    if (!AppExecFwk::GetStdString(env, aniType, strType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetStdString failed");
+        EtsErrorUtil::ThrowInvalidParamError(env,
+            "Parse param observer failed, must be a AbilityForegroundStateObserver.");
+        return;
+    }
+    if (observerForeground_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null observer");
+        EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+        return;
+    }
+    ani_status status = ANI_OK;
+    ani_boolean isUndefined = false;
+    if ((status = env->Reference_IsUndefined(aniObserver, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to check undefined status : %{public}d", status);
+        return;
+    }
+    if (!isUndefined) {
+        observerForeground_->RemoveEtsObserverObject(aniObserver);
+    } else {
+        observerForeground_->RemoveAllEtsObserverObject();
+    }
+    if (observerForeground_->IsEmpty()) {
+        auto appManager = GetAppManagerInstance();
+        if (appManager == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "appManager null ptr");
+            EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
+            return;
+        }
+        int32_t ret = appManager->UnregisterAbilityForegroundStateObserver(observerForeground_);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "ret: %{public}d", ret);
+        if (ret != NO_ERROR) {
+            EtsErrorUtil::ThrowErrorByNativeErr(env, static_cast<int32_t>(ret));
+        }
+    }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "nativeOff end");
+}
+
 void EtsAbilityManagerRegistryInit(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call EtsAbilityManagerRegistryInit");
@@ -171,15 +291,17 @@ void EtsAbilityManagerRegistryInit(ani_env *env)
     std::array methods = {
         ani_native_function {
             "nativeGetForegroundUIAbilities", ETS_ABILITY_MANAGER_SIGNATURE_ARRAY,
-            reinterpret_cast<void *>(GetForegroundUIAbilities)
+            reinterpret_cast<void *>(EtsAbilityManager::GetForegroundUIAbilities)
         },
         ani_native_function {"nativeGetTopAbility", ETS_ABILITY_MANAGER_SIGNATURE_CALLBACK,
-            reinterpret_cast<void *>(GetTopAbility)},
+            reinterpret_cast<void *>(EtsAbilityManager::GetTopAbility)},
         ani_native_function { "nativeGetAbilityRunningInfos", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
-            reinterpret_cast<void *>(GetAbilityRunningInfos) },
+            reinterpret_cast<void *>(EtsAbilityManager::GetAbilityRunningInfos) },
         ani_native_function { "nativeIsEmbeddedOpenAllowed",
             "Lapplication/Context/Context;Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
-            reinterpret_cast<void *>(IsEmbeddedOpenAllowed) },
+            reinterpret_cast<void *>(EtsAbilityManager::IsEmbeddedOpenAllowed) },
+        ani_native_function { "nativeOn", nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeOn) },
+        ani_native_function { "nativeOff", nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeOff) }
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
     if (status != ANI_OK) {
