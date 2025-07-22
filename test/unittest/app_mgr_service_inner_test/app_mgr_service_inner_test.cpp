@@ -3083,7 +3083,7 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_001, TestSize.Level2)
     pid_t hostPid = 0;
     std::string renderParam = "";
     pid_t renderPid = 0;
-    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0),
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1),
         renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_001 end");
