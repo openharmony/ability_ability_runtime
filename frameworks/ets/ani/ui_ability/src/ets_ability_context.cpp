@@ -1272,6 +1272,31 @@ bool EtsAbilityContext::IsInstanceOf(ani_env *env, ani_object aniObj)
     return isInstanceOf;
 }
 
+void EtsAbilityContext::NativeOnSetRestoreEnabled(ani_env *env, ani_object aniObj, ani_boolean aniEnabled)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "NativeOnSetRestoreEnabled");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+
+    auto abilityContext = GetEtsAbilityContext(env, aniObj);
+    if (abilityContext == nullptr) {
+        TAG_LOGW(AAFwkTag::CONTEXT, "null abilityContext");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
+    }
+
+    bool enabled = static_cast<bool>(aniEnabled);
+    auto context = abilityContext->context_.lock();
+    if (context == nullptr) {
+    TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+    EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+    return;
+}
+context->SetRestoreEnabled(enabled);
+}
+
 void EtsAbilityContext::OpenAtomicServiceInner(ani_env *env, ani_object aniObj, AAFwk::Want &want,
     AAFwk::StartOptions &options, std::string appId, ani_object callbackObj)
 {
@@ -1385,6 +1410,8 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void*>(EtsAbilityContext::StartAbilityByType) },
             ani_native_function { "nativeOpenAtomicService", SIGNATURE_OPEN_ATOMIC_SERVICE,
                 reinterpret_cast<void *>(EtsAbilityContext::OpenAtomicService) },
+            ani_native_function { "nativeOnSetRestoreEnabled", "Z:V",
+                reinterpret_cast<void*>(EtsAbilityContext::NativeOnSetRestoreEnabled) },
         };
         if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
             TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);
