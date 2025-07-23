@@ -32,6 +32,6 @@ struct AbilityStartWithWaitObserverData : public Parcelable {
     std::string bundleName;
     std::string abilityName;
 };
-}  // namespace AAFwk
-}  // namespace OHOS
+} // namespace AAFwk
+} // namespace OHOS
 #endif  // OHOS_ABILITY_ABILITY_START_WITH_WAIT_OBSERVER_DATA_H
