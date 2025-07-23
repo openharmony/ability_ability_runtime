@@ -311,6 +311,10 @@ constexpr const char* LIFE_CYCLE_STATE_START_FOREGROUND = "start foreground";
 constexpr const char* LIFE_CYCLE_STATE_START_BACKGROUND = "start background";
 const std::string MULTI_PROCESS = "multi_process";
 
+// runtime language arkts version
+const std::string CODE_LANGUAGE_ARKTS_1_2 = "static";
+const std::string CODE_LANGUAGE_ARKTS_HYBRID = "hybrid";
+
 int32_t GetUserIdByUid(int32_t uid)
 {
     return uid / BASE_USER_RANGE;
@@ -4205,6 +4209,8 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
         }
         SendCreateAtomicServiceProcessEvent(appRecord, bundleType, moduleName, abilityName);
         errCode = remoteClientManager_->GetCJSpawnClient()->StartProcess(startMsg, pid);
+    } else if (appInfo->arkTSMode == CODE_LANGUAGE_ARKTS_1_2 || appInfo->arkTSMode == CODE_LANGUAGE_ARKTS_HYBRID) {
+        errCode = remoteClientManager_->GetHybridSpawnClient()->StartProcess(startMsg, pid);
     } else {
         SendCreateAtomicServiceProcessEvent(appRecord, bundleType, moduleName, abilityName);
         startMsg.gids.push_back(SHADER_CACHE_GROUPID);
