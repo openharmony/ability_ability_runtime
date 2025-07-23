@@ -24,9 +24,8 @@ enum class TerminateReason {
     TERMINATE_FOR_NON_UI_ABILITY,
     TERMINATE_FOR_UI_ABILITY_FOREGROUND_FAILED,
 };
-}  // namespace AbilityStartWithWaitObserverUtil
-}  // namespace AAFwk
-}  // namespace OHOS
- 
-#endif  // OHOS_ABILITY_RUNTIME_ABILITY_START_WITH_WAIT_OBSERVER_UTIL_H
- 
+} // namespace AbilityStartWithWaitObserverUtil
+} // namespace AAFwk
+} // namespace OHOS
+
+#endif // OHOS_ABILITY_RUNTIME_ABILITY_START_WITH_WAIT_OBSERVER_UTIL_H
