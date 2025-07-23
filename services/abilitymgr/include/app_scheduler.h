@@ -301,8 +301,7 @@ public:
     int KillApplicationByUid(const std::string &bundleName, int32_t uid,
         const std::string& reason = "KillApplicationByUid");
 
-    int NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid,
-        const bool isUpgrade);
+    int NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade);
 
     /**
      * update the application info after new module installed.

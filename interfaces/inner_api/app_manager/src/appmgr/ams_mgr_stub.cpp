@@ -465,7 +465,7 @@ ErrCode AmsMgrStub::HandleNotifyUninstallOrUpgradeApp(MessageParcel &data, Messa
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
-    int uid = data.ReadInt32();
+    int32_t uid = data.ReadInt32();
     bool isUpgrade = data.ReadBool();
     TAG_LOGW(AAFwkTag::APPMGR, "NotifyUninstallOrUpgradeApp, callingPid=%{public}d", IPCSkeleton::GetCallingPid());
     int32_t result = NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
@@ -479,7 +479,7 @@ ErrCode AmsMgrStub::HandleNotifyUninstallOrUpgradeApp(MessageParcel &data, Messa
 ErrCode AmsMgrStub::HandleNotifyUninstallOrUpgradeAppEnd(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
-    int uid = data.ReadInt32();
+    int32_t uid = data.ReadInt32();
     TAG_LOGW(AAFwkTag::APPMGR, "NotifyUninstallOrUpgradeAppEnd, callingPid=%{public}d", IPCSkeleton::GetCallingPid());
     NotifyUninstallOrUpgradeAppEnd(uid);
     return NO_ERROR;

@@ -575,8 +575,7 @@ int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const i
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
-    const bool isUpgrade)
+int32_t AmsMgrProxy::NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -606,7 +605,7 @@ int32_t AmsMgrProxy::NotifyUninstallOrUpgradeApp(const std::string &bundleName, 
     return reply.ReadInt32();
 }
 
-void AmsMgrProxy::NotifyUninstallOrUpgradeAppEnd(const int32_t uid)
+void AmsMgrProxy::NotifyUninstallOrUpgradeAppEnd(int32_t uid)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;

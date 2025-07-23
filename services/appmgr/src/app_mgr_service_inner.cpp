@@ -2092,8 +2092,7 @@ bool AppMgrServiceInner::IsUninstallingOrUpgrading(int32_t uid)
     return false;
 }
 
-int32_t AppMgrServiceInner::NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
-    const bool isUpgrade)
+int32_t AppMgrServiceInner::NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade)
 {
     std::unique_lock lock(startProcessLock_);
     std::string killReason = isUpgrade ? "UpgradeApp" : "UninstallApp";
@@ -2101,7 +2100,7 @@ int32_t AppMgrServiceInner::NotifyUninstallOrUpgradeApp(const std::string &bundl
     return KillApplicationByUid(bundleName, uid, killReason);
 }
 
-void AppMgrServiceInner::NotifyUninstallOrUpgradeAppEnd(const int32_t uid)
+void AppMgrServiceInner::NotifyUninstallOrUpgradeAppEnd(int32_t uid)
 {
     RemoveUninstallOrUpgradeUidSet(uid);
 }
