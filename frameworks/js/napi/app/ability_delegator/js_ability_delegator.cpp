@@ -583,14 +583,15 @@ napi_value JSAbilityDelegator::OnWaitAbilityStageMonitor(napi_env env, NapiCallb
             TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
             return;
         }
-        std::shared_ptr<DelegatorAbilityStageProperty> result;
+        std::shared_ptr<BaseDelegatorAbilityStageProperty> result;
         result = opt.hasTimeoutPara ?
             delegator->WaitAbilityStageMonitor(monitor, timeout) : delegator->WaitAbilityStageMonitor(monitor);
-        if (!result || result->object_.expired()) {
+        auto jsStageProperty = std::static_pointer_cast<AppExecFwk::DelegatorAbilityStageProperty>(result);
+        if (!jsStageProperty || jsStageProperty->object_.expired()) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "waitAbilityStageMonitor failed");
             return;
         }
-        abilityStageObjBox->object_ = result->object_;
+        abilityStageObjBox->object_ = jsStageProperty->object_;
     };
 
     NapiAsyncTask::CompleteCallback complete = [abilityStageObjBox](napi_env env, NapiAsyncTask &task, int32_t status) {
