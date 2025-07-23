@@ -15,6 +15,7 @@
 
 #include "ets_extension_context.h"
 
+#include "ani_common_configuration.h"
 #include "common_fun_ani.h"
 #include "hilog_tag_wrapper.h"
 
@@ -60,6 +61,32 @@ bool SetExtensionAbilityInfo(ani_env *aniEnv, ani_class contextClass, ani_object
     return true;
 }
 
+bool SetConfiguration(
+    ani_env *env, ani_class cls, ani_object contextObj, const std::shared_ptr<OHOS::AbilityRuntime::Context> &context)
+{
+    if (env == nullptr || context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "aniEnv or context is nullptr");
+        return false;
+    }
+
+    ani_field field = nullptr;
+    auto configuration = context->GetConfiguration();
+    ani_ref configurationRef = OHOS::AppExecFwk::WrapConfiguration(env, *configuration);
+
+    ani_status status = env->Class_FindField(cls, "config", &field);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+        return false;
+    }
+
+    status = env->Object_SetField_Ref(contextObj, field, configurationRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 void CreateEtsExtensionContext(ani_env *aniEnv, ani_class contextClass, ani_object &contextObj,
     std::shared_ptr<ExtensionContext> context, std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo)
 {
@@ -71,6 +98,11 @@ void CreateEtsExtensionContext(ani_env *aniEnv, ani_class contextClass, ani_obje
 
     if (!SetExtensionAbilityInfo(aniEnv, contextClass, contextObj, context, abilityInfo)) {
         TAG_LOGE(AAFwkTag::CONTEXT, "SetExtensionAbilityInfo fail");
+        return;
+    }
+
+    if (!SetConfiguration(aniEnv, contextClass, contextObj, context)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "SetConfiguration fail");
         return;
     }
 }

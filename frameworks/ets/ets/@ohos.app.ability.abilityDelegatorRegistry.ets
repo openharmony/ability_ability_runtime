@@ -15,6 +15,9 @@
 
 import { AbilityDelegator as _AbilityDelegator } from 'application.AbilityDelegator';
 import { AbilityDelegatorArgs as _AbilityDelegatorArgs } from 'application.abilityDelegatorArgs';
+import { AbilityMonitor as _AbilityMonitor } from 'application.AbilityMonitor';
+import { AbilityStageMonitor as _AbilityStageMonitor } from 'application.AbilityStageMonitor';
+import { ShellCmdResult as _ShellCmdResult } from 'application.shellCmdResult';
 
 export default namespace abilityDelegatorRegistry {
   loadLibrary("ability_delegator_registry_ani_kit.z")
@@ -23,6 +26,16 @@ export default namespace abilityDelegatorRegistry {
 
   export native function getArguments(): AbilityDelegatorArgs;
 
+  export enum AbilityLifecycleState {
+    UNINITIALIZED,
+    CREATE,
+    FOREGROUND,
+    BACKGROUND,
+    DESTROY
+  }
   export type AbilityDelegator = _AbilityDelegator;
   export type AbilityDelegatorArgs = _AbilityDelegatorArgs;
+  export type AbilityMonitor = _AbilityMonitor;
+  export type ShellCmdResult = _ShellCmdResult;
+  export type AbilityStageMonitor = _AbilityStageMonitor;
 }
