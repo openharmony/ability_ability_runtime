@@ -47,10 +47,10 @@ constexpr const char* ON_OFF_TYPE_ABILITY_FIRST_FRAME_STATE = "abilityFirstFrame
 constexpr const char* ON_OFF_TYPE_APP_FOREGROUND_STATE = "appForegroundState";
 
 constexpr const char *APPLICATION_STATE_WITH_BUNDLELIST_ON_SIGNATURE =
-    "Lstd/core/String;Lapplication/ApplicationStateObserver/ApplicationStateObserver;Lescompat/Array;:D";
+    "Lstd/core/String;Lapplication/ApplicationStateObserver/ApplicationStateObserver;Lescompat/Array;:I";
 constexpr const char *APPLICATION_STATE_ON_SIGNATURE =
-    "Lstd/core/String;Lapplication/ApplicationStateObserver/ApplicationStateObserver;:D";
-constexpr const char *APPLICATION_STATE_OFF_SIGNATURE = "Lstd/core/String;DLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "Lstd/core/String;Lapplication/ApplicationStateObserver/ApplicationStateObserver;:I";
+constexpr const char *APPLICATION_STATE_OFF_SIGNATURE = "Lstd/core/String;ILutils/AbilityUtils/AsyncCallbackWrapper;:V";
 static const char* ON_SIGNATURE_ABILITY_FIRST_FRAME_STATE
     = "Lstd/core/String;Lapplication/AbilityFirstFrameStateObserver/AbilityFirstFrameStateObserver;Lstd/core/String;:V";
 static const char* ON_SIGNATURE_APP_FOREGROUND_STATE
@@ -94,10 +94,10 @@ public:
         ani_env *env, ani_string aniBundleName, ani_int aniUserId, ani_boolean enable, ani_object callback);
     static void NativeGetKeepAliveBundles(ani_env *env, ani_object callback, ani_enum_item aniType,
         ani_object aniUserId);
-    static ani_double OnOnApplicationStateWithBundleList(ani_env *env, ani_string type,
+    static ani_int OnOnApplicationStateWithBundleList(ani_env *env, ani_string type,
         ani_object observer, ani_object etsBundleNameList);
-    static ani_double OnOnApplicationState(ani_env *env, ani_string type, ani_object observer);
-    static void OnOff(ani_env *env, ani_string type, ani_double etsObserverId, ani_object callback);
+    static ani_int OnOnApplicationState(ani_env *env, ani_string type, ani_object observer);
+    static void OnOff(ani_env *env, ani_string type, ani_int etsObserverId, ani_object callback);
     static void OnOnAppForegroundState(ani_env *env, ani_string type, ani_object observer);
     static void OnOffAppForegroundState(ani_env *env, ani_string type, ani_object observer);
     static void OnOnAbilityFirstFrameState(
@@ -112,7 +112,7 @@ private:
 #endif
     static bool CheckOnOnApplicationStateInnerParam(ani_env *env, ani_string type, ani_object observer,
         ani_object etsBundleNameList, std::vector<std::string> &bundleNameList);
-    static ani_double OnOnApplicationStateInner(
+    static ani_int OnOnApplicationStateInner(
         ani_env *env, ani_string type, ani_object observer, ani_object aniBundleNameList);
     static void KillProcessesByBundleNameInner(ani_env *env, ani_object callback, ani_string etsBundleName,
         ani_boolean clearPageStack, ani_object etsAppIndex);
@@ -441,7 +441,7 @@ bool EtsAppManager::CheckOnOnApplicationStateInnerParam(ani_env *env, ani_string
     return true;
 }
 
-ani_double EtsAppManager::OnOnApplicationStateInner(ani_env *env, ani_string type, ani_object observer,
+ani_int EtsAppManager::OnOnApplicationStateInner(ani_env *env, ani_string type, ani_object observer,
     ani_object etsBundleNameList)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "OnOnApplicationStateInner called");
@@ -478,13 +478,13 @@ ani_double EtsAppManager::OnOnApplicationStateInner(ani_env *env, ani_string typ
     return ANI_ERROR;
 }
 
-ani_double EtsAppManager::OnOnApplicationStateWithBundleList(ani_env *env, ani_string type,
+ani_int EtsAppManager::OnOnApplicationStateWithBundleList(ani_env *env, ani_string type,
     ani_object observer, ani_object etsBundleNameList)
 {
     return OnOnApplicationStateInner(env, type, observer, etsBundleNameList);
 }
 
-ani_double EtsAppManager::OnOnApplicationState(ani_env *env, ani_string type, ani_object observer)
+ani_int EtsAppManager::OnOnApplicationState(ani_env *env, ani_string type, ani_object observer)
 {
     ani_ref undefined = nullptr;
     if (env == nullptr) {
@@ -495,7 +495,7 @@ ani_double EtsAppManager::OnOnApplicationState(ani_env *env, ani_string type, an
     return OnOnApplicationStateInner(env, type, observer, static_cast<ani_object>(undefined));
 }
 
-void EtsAppManager::OnOff(ani_env *env, ani_string type, ani_double etsObserverId, ani_object callback)
+void EtsAppManager::OnOff(ani_env *env, ani_string type, ani_int etsObserverId, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "OnOff called");
     if (env == nullptr) {
@@ -509,7 +509,7 @@ void EtsAppManager::OnOff(ani_env *env, ani_string type, ani_double etsObserverI
             env, "Parse param type failed, must be a string, value must be applicationState.");
         return;
     }
-    TAG_LOGD(AAFwkTag::APPMGR, "observerId:%{public}f", etsObserverId);
+    TAG_LOGD(AAFwkTag::APPMGR, "observerId:%{public}d", etsObserverId);
     int64_t observerId = static_cast<int64_t>(etsObserverId);
 
     sptr<AppExecFwk::IAppMgr> appMgr = GetAppManagerInstance();

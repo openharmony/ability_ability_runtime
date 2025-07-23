@@ -50,7 +50,7 @@ constexpr const char *VOID_SIGNATURE = ":V";
 constexpr const char *CHECK_PROMISE_SIGNATURE = "Lstd/core/Object;:Z";
 constexpr const char *CALL_PROMISE_SIGNATURE = "Lstd/core/Promise;:Z";
 constexpr const char *ON_DISCONNECT_SIGNATURE = "L@ohos/app/ability/Want/Want;:V";
-constexpr const char *ON_REQUEST_SIGNATURE = "L@ohos/app/ability/Want/Want;D:V";
+constexpr const char *ON_REQUEST_SIGNATURE = "L@ohos/app/ability/Want/Want;I:V";
 constexpr const char *ON_CONFIGURATION_UPDATE_SIGNATURE = "L@ohos/app/ability/Configuration/Configuration;:V";
 constexpr const char *ON_DUMP_SIGNATURE = "Lescompat/Array;:Lescompat/Array;";
 
