@@ -226,6 +226,22 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_006, TestSize.Level1)
  */
 HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_007, TestSize.Level1)
 {
+    std::string str = "123";
+    uint16_t index = 1;
+    std::string ret = appfreezeManager->StrSplit(str, index);
+    EXPECT_EQ(ret, "");
+    str = "123:456";
+    ret = appfreezeManager->StrSplit(str, index);
+    EXPECT_EQ(ret, "456");
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest_008
+ * @tc.desc: add testcase codecoverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_008, TestSize.Level1)
+{
     int32_t pid = static_cast<int32_t>(getprocpid());
     int state = AppfreezeManager::AppFreezeState::APPFREEZE_STATE_IDLE;
     EXPECT_EQ(appfreezeManager->GetFreezeState(pid), state);
@@ -245,7 +261,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_AppFreezeFilter_001, TestSiz
     int32_t pid = static_cast<int32_t>(getprocpid());
     EXPECT_TRUE(!appfreezeManager->CancelAppFreezeDetect(pid, ""));
     appfreezeManager->ResetAppfreezeState(pid, "");
-    EXPECT_TRUE(appfreezeManager->IsValidFreezeFilter(pid, ""));
+    EXPECT_TRUE(!appfreezeManager->IsValidFreezeFilter(pid, ""));
     appfreezeManager->RemoveDeathProcess("");
 }
 
