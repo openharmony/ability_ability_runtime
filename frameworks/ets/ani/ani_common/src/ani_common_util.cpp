@@ -214,8 +214,23 @@ bool GetFieldIntByName(ani_env *env, ani_object object, const char *name, int32_
         return false;
     }
     ani_status status = ANI_ERROR;
+    ani_ref field = nullptr;
+    if ((status = env->Object_GetFieldByName_Ref(object, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isUndefined = ANI_TRUE;
+    if ((status = env->Reference_IsUndefined(field, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::ANI, "%{public}s: undefined", name);
+        return false;
+    }
     ani_int aniInt = 0;
-    if ((status = env->Object_GetFieldByName_Int(object, name, &aniInt)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Int(
+        reinterpret_cast<ani_object>(field), "intValue", nullptr, &aniInt)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
@@ -235,7 +250,12 @@ bool SetFieldIntByName(ani_env *env, ani_class cls, ani_object object, const cha
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
-    if ((status = env->Object_SetField_Int(object, field, value)) != ANI_OK) {
+    ani_object obj = CreateInt(env, value);
+    if (obj == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "obj is null");
+        return false;
+    }
+    if ((status = env->Object_SetField_Ref(object, field, reinterpret_cast<ani_ref>(obj))) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
@@ -249,8 +269,23 @@ bool GetFieldLongByName(ani_env *env, ani_object object, const char *name, int64
         return false;
     }
     ani_status status = ANI_ERROR;
+    ani_ref field = nullptr;
+    if ((status = env->Object_GetFieldByName_Ref(object, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isUndefined = ANI_TRUE;
+    if ((status = env->Reference_IsUndefined(field, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::ANI, "%{public}s: undefined", name);
+        return false;
+    }
     ani_long aniLong = 0;
-    if ((status = env->Object_GetFieldByName_Long(object, name, &aniLong)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Long(
+        reinterpret_cast<ani_object>(field), "longValue", nullptr, &aniLong)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
@@ -270,7 +305,12 @@ bool SetFieldLongByName(ani_env *env, ani_class cls, ani_object object, const ch
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
-    if ((status = env->Object_SetField_Long(object, field, value)) != ANI_OK) {
+    ani_object obj = CreateLong(env, value);
+    if (obj == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "CreateLong failed");
+        return false;
+    }
+    if ((status = env->Object_SetField_Ref(object, field, reinterpret_cast<ani_ref>(obj))) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }

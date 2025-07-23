@@ -16,6 +16,6 @@
 import StartOptions from '@ohos.app.ability.StartOptions';
 
 export default class AtomicServiceOptions extends StartOptions {
-  flags?: number;
+  flags?: int;
   parameters?: Record<string, Object>;
 }

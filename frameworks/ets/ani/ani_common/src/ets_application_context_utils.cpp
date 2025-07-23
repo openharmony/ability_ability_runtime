@@ -55,7 +55,7 @@ void EtsApplicationContextUtils::Clean(ani_env *env, ani_object object)
     }
 }
 
-ani_double EtsApplicationContextUtils::OnNativeOnEnvironmentSync(ani_env *env, ani_object aniObj,
+ani_int EtsApplicationContextUtils::OnNativeOnEnvironmentSync(ani_env *env, ani_object aniObj,
     ani_object envCallback)
 {
     if (env == nullptr) {
@@ -69,18 +69,18 @@ ani_double EtsApplicationContextUtils::OnNativeOnEnvironmentSync(ani_env *env, a
         return ANI_ERROR;
     }
     if (etsEnviromentCallback_ != nullptr) {
-        return ani_double(etsEnviromentCallback_->Register(envCallback));
+        return etsEnviromentCallback_->Register(envCallback);
     }
 
     etsEnviromentCallback_ = std::make_shared<EtsEnviromentCallback>(env);
     int32_t callbackId = etsEnviromentCallback_->Register(envCallback);
     applicationContext->RegisterEnvironmentCallback(etsEnviromentCallback_);
 
-    return ani_double(callbackId);
+    return callbackId;
 }
 
 void EtsApplicationContextUtils::OnNativeOffEnvironmentSync(ani_env *env, ani_object aniObj,
-    ani_double callbackId, ani_object callback)
+    ani_int callbackId, ani_object callback)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
@@ -161,7 +161,7 @@ void EtsApplicationContextUtils::OnNativeOffApplicationStateChangeSync(ani_env *
     }
 }
 
-ani_double EtsApplicationContextUtils::OnGetCurrentAppCloneIndex(ani_env *env, ani_object aniObj)
+ani_int EtsApplicationContextUtils::OnGetCurrentAppCloneIndex(ani_env *env, ani_object aniObj)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null env");
@@ -179,7 +179,7 @@ ani_double EtsApplicationContextUtils::OnGetCurrentAppCloneIndex(ani_env *env, a
         return ANI_ERROR;
     }
     int32_t appIndex = context->GetCurrentAppCloneIndex();
-    return ani_double(appIndex);
+    return appIndex;
 }
 
 ani_string EtsApplicationContextUtils::OnGetCurrentInstanceKey(ani_env *env, ani_object aniObj)
@@ -715,7 +715,7 @@ void EtsApplicationContextUtils::SetSupportedProcessCacheSync(ani_env *env, ani_
     etsContext->OnSetSupportedProcessCacheSync(env, aniObj, value);
 }
 
-ani_double EtsApplicationContextUtils::NativeOnEnvironmentSync(ani_env *env, ani_object aniObj, ani_object envCallback)
+ani_int EtsApplicationContextUtils::NativeOnEnvironmentSync(ani_env *env, ani_object aniObj, ani_object envCallback)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "NativeOnEnvironmentSync Call");
     auto etsContext = GeApplicationContext(env, aniObj);
@@ -727,7 +727,7 @@ ani_double EtsApplicationContextUtils::NativeOnEnvironmentSync(ani_env *env, ani
 }
 
 void EtsApplicationContextUtils::NativeOffEnvironmentSync(ani_env *env, ani_object aniObj,
-    ani_double callbackId, ani_object callback)
+    ani_int callbackId, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "NativeOffEnvironmentSync Call");
     auto etsContext = GeApplicationContext(env, aniObj);
@@ -784,7 +784,7 @@ ani_string EtsApplicationContextUtils::GetCurrentInstanceKey(ani_env *env, ani_o
     return etsContext->OnGetCurrentInstanceKey(env, aniObj);
 }
 
-ani_double EtsApplicationContextUtils::GetCurrentAppCloneIndex(ani_env *env, ani_object aniObj)
+ani_int EtsApplicationContextUtils::GetCurrentAppCloneIndex(ani_env *env, ani_object aniObj)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "GetCurrentAppCloneIndex Call");
     auto etsContext = GeApplicationContext(env, aniObj);
@@ -906,9 +906,9 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env* aniEnv)
             ani_native_function {"nativerestartApp", "L@ohos/app/ability/Want/Want;:V",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::RestartApp)},
             ani_native_function {"nativeOnEnvironmentSync",
-                "L@ohos/app/ability/EnvironmentCallback/EnvironmentCallback;:D",
+                "L@ohos/app/ability/EnvironmentCallback/EnvironmentCallback;:I",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOnEnvironmentSync)},
-            ani_native_function {"nativeOffEnvironmentSync", "DLutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            ani_native_function {"nativeOffEnvironmentSync", "ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOffEnvironmentSync)},
             ani_native_function {"nativeOnApplicationStateChangeSync",
                 "L@ohos/app/ability/ApplicationStateChangeCallback/ApplicationStateChangeCallback;:V",
@@ -920,7 +920,7 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env* aniEnv)
                 reinterpret_cast<void *>(EtsApplicationContextUtils::GetAllRunningInstanceKeys)},
             ani_native_function{"nativegetCurrentInstanceKey", ":Lstd/core/String;",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::GetCurrentInstanceKey)},
-            ani_native_function {"nativegetCurrentAppCloneIndex", ":D",
+            ani_native_function {"nativegetCurrentAppCloneIndex", ":I",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::GetCurrentAppCloneIndex)},
         };
         if ((status = aniEnv->Class_BindNativeMethods(contextClass, applicationContextFunctions.data(),
