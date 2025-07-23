@@ -294,6 +294,7 @@ ohos_shared_library("ability_manager_c") {
     "image_framework:image_native",
     "ipc:ipc_core",
     "ipc:ipc_napi",
+    "ipc:ipc_single",
   ]
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
