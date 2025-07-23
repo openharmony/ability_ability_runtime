@@ -41,6 +41,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 namespace {
+constexpr const int ANI_ALREADY_BINDED = 8;
 constexpr const char *CLASSNAME_SERVICE_ABILITY = "L@ohos/app/ability/ServiceExtensionAbility/ServiceExtensionAbility;";
 constexpr const char *SERVICE_EXTENSION_CONTEXT_CLASS_NAME =
     "Lapplication/ServiceExtensionContext/ServiceExtensionContext;";
@@ -166,7 +167,8 @@ void EtsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status: %{public}d", status);
         return;
     }
-    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
+    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK
+        && status != ANI_ALREADY_BINDED) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Class_BindNativeMethods is fail %{public}d", status);
         return;
     }
