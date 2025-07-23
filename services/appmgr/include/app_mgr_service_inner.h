@@ -348,10 +348,9 @@ public:
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid,
         const std::string& reason = "KillApplicationByUid");
     
-    virtual int32_t NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
-        const bool isUpgrade);
+    virtual int32_t NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade);
     
-    virtual void NotifyUninstallOrUpgradeAppEnd(const int32_t uid);
+    virtual void NotifyUninstallOrUpgradeAppEnd(int32_t uid);
 
     /**
      * KillApplicationSelf, this allows app to terminate itself.

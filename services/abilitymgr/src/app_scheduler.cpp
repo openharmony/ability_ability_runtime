@@ -315,9 +315,8 @@ int AppScheduler::KillApplicationByUid(const std::string &bundleName, int32_t ui
 }
 
 int AppScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid,
-    const bool isUpgrade)
+    bool isUpgrade)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s] enter", __FUNCTION__);
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     int ret = (int)appMgrClient_->NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
     if (ret != ERR_OK) {

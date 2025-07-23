@@ -186,10 +186,9 @@ public:
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid,
         const std::string& reason = "KillApplicationByUid") override;
 
-    virtual int32_t NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
-        const bool isUpgrade) override;
+    virtual int32_t NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade) override;
     
-    virtual void NotifyUninstallOrUpgradeAppEnd(const int32_t uid) override;
+    virtual void NotifyUninstallOrUpgradeAppEnd(int32_t uid) override;
 
     virtual int KillApplicationSelf(const bool clearPageStack = false,
         const std::string& reason = "KillApplicationSelf") override;
