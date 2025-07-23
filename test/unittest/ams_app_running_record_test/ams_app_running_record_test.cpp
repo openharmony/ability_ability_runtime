@@ -445,9 +445,9 @@ HWTEST_F(AmsAppRunningRecordTest, GetRenderRecordByPid_002, TestSize.Level1)
         std::make_shared<AppRunningRecord>(appInfo, AppRecordId::Create(), GetTestProcessName());
     pid_t hostPid = 1;
     std::string renderParam = "test_render_param";
-    int32_t ipcFd = 1;
-    int32_t sharedFd = 1;
-    int32_t crashFd = 1;
+    int32_t ipcFd = -1;
+    int32_t sharedFd = -1;
+    int32_t crashFd = -1;
     std::shared_ptr<AppRunningRecord> host;
     std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
         FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), host);
@@ -1923,9 +1923,9 @@ HWTEST_F(AmsAppRunningRecordTest, NewRenderRecord_001, TestSize.Level1)
 {
     pid_t hostPid = 0;
     std::string renderParam = "test_render_param";
-    int32_t ipcFd = 0;
-    int32_t sharedFd = 0;
-    int32_t crashFd = 0;
+    int32_t ipcFd = -1;
+    int32_t sharedFd = -1;
+    int32_t crashFd = -1;
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord *renderRecord =
         new RenderRecord(hostPid, renderParam, FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), host);
@@ -1947,11 +1947,11 @@ HWTEST_F(AmsAppRunningRecordTest, CreateRenderRecord_001, TestSize.Level1)
     pid_t hostPid1 = 1;
     std::string renderParam = "";
     std::string renderParam1 = "test_render_param";
-    int32_t ipcFd = 0;
-    int32_t ipcFd1 = 1;
-    int32_t sharedFd = 0;
-    int32_t sharedFd1 = 1;
-    int32_t crashFd = 0;
+    int32_t ipcFd = -1;
+    int32_t ipcFd1 = -1;
+    int32_t sharedFd = -1;
+    int32_t sharedFd1 = -1;
+    int32_t crashFd = -1;
     std::shared_ptr<AppRunningRecord> host;
 
     auto appInfo = std::make_shared<ApplicationInfo>();
@@ -1982,7 +1982,7 @@ HWTEST_F(AmsAppRunningRecordTest, SetPid_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0), host);
+        new RenderRecord(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1), host);
     EXPECT_NE(renderRecord, nullptr);
     pid_t pid = 0;
     renderRecord->SetPid(pid);
@@ -2003,7 +2003,7 @@ HWTEST_F(AmsAppRunningRecordTest, GetHostPid_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, FdGuard(1), FdGuard(0), FdGuard(0), host);
+        new RenderRecord(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1), host);
     EXPECT_NE(renderRecord, nullptr);
     EXPECT_EQ(renderRecord->GetHostPid(), hostPid);
 }
@@ -2022,7 +2022,7 @@ HWTEST_F(AmsAppRunningRecordTest, SetUid_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0), host);
+        new RenderRecord(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1), host);
     EXPECT_NE(renderRecord, nullptr);
     int32_t uid = 1;
     renderRecord->SetUid(uid);
@@ -2043,7 +2043,7 @@ HWTEST_F(AmsAppRunningRecordTest, SetHostUid_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0), host);
+        new RenderRecord(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1), host);
     EXPECT_NE(renderRecord, nullptr);
     int32_t uid = 1;
     renderRecord->SetHostUid(uid);
@@ -2064,7 +2064,7 @@ HWTEST_F(AmsAppRunningRecordTest, SetHostBundleName_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0), host);
+        new RenderRecord(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1), host);
     EXPECT_NE(renderRecord, nullptr);
     std::string hostBundleName = "testhostBundleName";
     renderRecord->SetHostBundleName(hostBundleName);
@@ -2085,7 +2085,7 @@ HWTEST_F(AmsAppRunningRecordTest, SetProcessName_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0), host);
+        new RenderRecord(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1), host);
     EXPECT_NE(renderRecord, nullptr);
     std::string hostProcessName = "testhostProcessName";
     renderRecord->SetProcessName(hostProcessName);
@@ -2106,7 +2106,7 @@ HWTEST_F(AmsAppRunningRecordTest, GetRenderParam_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0), host);
+        new RenderRecord(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1), host);
     EXPECT_NE(renderRecord, nullptr);
     EXPECT_EQ(renderRecord->GetRenderParam(), renderParam);
 }
@@ -2125,9 +2125,9 @@ HWTEST_F(AmsAppRunningRecordTest, GetIpcFd_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, FdGuard(1), FdGuard(0), FdGuard(0), host);
+        new RenderRecord(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1), host);
     EXPECT_NE(renderRecord, nullptr);
-    EXPECT_EQ(renderRecord->GetIpcFd(), 1);
+    EXPECT_EQ(renderRecord->GetIpcFd(), -1);
 }
 
 /*
@@ -2144,9 +2144,9 @@ HWTEST_F(AmsAppRunningRecordTest, GetSharedFd_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, FdGuard(0), FdGuard(1), FdGuard(0), host);
+        new RenderRecord(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1), host);
     EXPECT_NE(renderRecord, nullptr);
-    EXPECT_EQ(renderRecord->GetSharedFd(), 1);
+    EXPECT_EQ(renderRecord->GetSharedFd(), -1);
 }
 
 /*
@@ -2163,7 +2163,7 @@ HWTEST_F(AmsAppRunningRecordTest, GetHostRecord_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, FdGuard(0), FdGuard(1), FdGuard(0), host);
+        new RenderRecord(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1), host);
     EXPECT_NE(renderRecord, nullptr);
     EXPECT_EQ(renderRecord->GetHostRecord(), host);
 }
@@ -2182,7 +2182,7 @@ HWTEST_F(AmsAppRunningRecordTest, SetScheduler_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0), host);
+        new RenderRecord(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1), host);
     EXPECT_NE(renderRecord, nullptr);
     sptr<IRenderScheduler> scheduler;
     renderRecord->SetScheduler(scheduler);
@@ -2203,7 +2203,7 @@ HWTEST_F(AmsAppRunningRecordTest, SetDeathRecipient_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0), host);
+        new RenderRecord(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1), host);
     EXPECT_NE(renderRecord, nullptr);
     sptr<AppDeathRecipient> recipient;
     renderRecord->SetDeathRecipient(recipient);
@@ -2224,7 +2224,7 @@ HWTEST_F(AmsAppRunningRecordTest, RegisterDeathRecipient_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0), host);
+        new RenderRecord(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1), host);
     EXPECT_NE(renderRecord, nullptr);
     renderRecord->RegisterDeathRecipient();
 

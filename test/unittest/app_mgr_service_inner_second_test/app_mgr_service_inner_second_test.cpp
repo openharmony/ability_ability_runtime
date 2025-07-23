@@ -2334,14 +2334,14 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillRenderPr
     hostRecord->priorityObject_->SetPid(hostPid);
     hostRecord->SetUid(100);
     std::string renderParam = "test_render_param";
-    int32_t ipcFd = 1;
-    int32_t sharedFd = 1;
-    int32_t crashFd = 1;
+    int32_t ipcFd = -1;
+    int32_t sharedFd = -1;
+    int32_t crashFd = -1;
 
     auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, TEST_PROCESS_NAME);
     EXPECT_NE(appRunningRecord, nullptr);
 
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), hostRecord);
     EXPECT_NE(renderRecord, nullptr);
 

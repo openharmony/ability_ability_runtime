@@ -168,9 +168,9 @@ HWTEST_F(AppMgrServiceInnerFourthTest, WrapAppProcessData_0100, TestSize.Level1)
 
     pid_t hostPid = 0;
     std::string renderParam = "test_render_param";
-    int32_t ipcFd = 1;
-    int32_t sharedFd = 1;
-    int32_t crashFd = 1;
+    int32_t ipcFd = -1;
+    int32_t sharedFd = -1;
+    int32_t crashFd = -1;
     auto hostRecord = std::make_shared<AppRunningRecord>(applicationInfo_, APP_DEBUG_INFO_UID, "PROCESS_NAME");
     std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), hostRecord);
