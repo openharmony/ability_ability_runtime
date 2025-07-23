@@ -55,11 +55,11 @@ HWTEST_F(DynamicLoaderOhosTest, DynamicLoaderOhosTestInitNamespace_0100, TestSiz
     const char* name = "test_namespace";
 
     // Test success
-    DynamicInitNamespace(&ns, nullptr, "test_entries", name);
+    DynamicInitNamespace(&ns, "test_entries", name);
     EXPECT_STREQ(DynamicGetError(), "");
 
     // Test duplicate init
-    DynamicInitNamespace(&ns, nullptr, "test_entries", name);
+    DynamicInitNamespace(&ns, "test_entries", name);
     EXPECT_STREQ(DynamicGetError(), "");
 }
 
