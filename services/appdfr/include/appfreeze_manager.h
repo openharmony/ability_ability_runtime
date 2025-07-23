@@ -124,6 +124,7 @@ private:
         std::map<uint32_t, uint32_t>& asyncBinderMap,
         std::vector<std::pair<uint32_t, uint64_t>>& freeAsyncSpacePairs) const;
     std::vector<std::string> GetFileToList(std::string line) const;
+    std::string StrSplit(const std::string& str, uint16_t index) const;
     void ParseBinderPids(const std::map<int, std::list<AppfreezeManager::PeerBinderInfo>>& binderInfos,
         std::set<int>& pids, AppfreezeManager::ParseBinderParam params, bool getTerminal,
         AppfreezeManager::TerminalBinder& terminalBinder) const;
