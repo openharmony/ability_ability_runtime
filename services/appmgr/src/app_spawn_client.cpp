@@ -70,6 +70,8 @@ AppSpawnClient::AppSpawnClient(const char* serviceName)
         serviceName_ = NWEBSPAWN_SERVER_NAME;
     } else if (serviceName__ == NATIVESPAWN_SERVER_NAME) {
         serviceName_ = NATIVESPAWN_SERVER_NAME;
+    } else if (serviceName__ == HYBRIDSPAWN_SERVER_NAME) {
+        serviceName_ = HYBRIDSPAWN_SERVER_NAME;
     } else {
         TAG_LOGE(AAFwkTag::APPMGR, "unknown service name");
         serviceName_ = NWEBSPAWN_SERVER_NAME;
