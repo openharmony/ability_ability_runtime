@@ -19,7 +19,7 @@ import rpc from '@ohos.rpc';
 export interface ConnectOptions {
     onConnect(elementName: ElementName, remote: rpc.IRemoteObject): void;
     onDisconnect(elementName: ElementName): void;
-    onFailed(code: number): void;
+    onFailed(code: int): void;
 }
 
 class ConnectOptionsInner implements ConnectOptions {
@@ -29,7 +29,7 @@ class ConnectOptionsInner implements ConnectOptions {
     onDisconnect(elementName: ElementName): void {
         console.log('onDisconnect');
     }
-    onFailed(code: number): void {
+    onFailed(code: int): void {
         console.log('onFailed');
     }
-}
+}

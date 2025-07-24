@@ -652,7 +652,7 @@ void EtsUIExtensionConnection::CallEtsFailed(int32_t errorCode)
         return;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "onFailed", "D:V", &method))) {
+    if ((status = env->Class_FindMethod(cls, "onFailed", "I:V", &method))) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to find onFailed method, status: %{public}d", status);
         return;
     }
@@ -661,7 +661,7 @@ void EtsUIExtensionConnection::CallEtsFailed(int32_t errorCode)
         return;
     }
     status = env->Object_CallMethod_Void(
-        reinterpret_cast<ani_object>(stsConnectionRef_), method, static_cast<double>(errorCode));
+        reinterpret_cast<ani_object>(stsConnectionRef_), method, errorCode);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Object_CallMethod_Void status: %{public}d", status);
     }

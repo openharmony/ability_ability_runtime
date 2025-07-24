@@ -309,8 +309,8 @@ bool UnwrapAtomicServiceOptions(ani_env *env, ani_object optionsObj, AAFwk::Want
             TAG_LOGE(AAFwkTag::ANI, "UnwrapWantParams failed");
         }
     }
-    double flags = 0.0;
-    if (GetDoublePropertyObject(env, optionsObj, "flags", flags)) {
+    int32_t flags = 0;
+    if (GetIntPropertyObject(env, optionsObj, "flags", flags)) {
         want.SetFlags(flags);
     }
     return true;
