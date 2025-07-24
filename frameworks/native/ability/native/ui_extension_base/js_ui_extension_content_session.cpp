@@ -51,6 +51,8 @@ constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_THREE = 3;
 constexpr const char* PERMISSION_PRIVACY_WINDOW = "ohos.permission.PRIVACY_WINDOW";
+const std::string UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
+const std::string FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
 } // namespace
 
 #define CHECK_IS_SYSTEM_APP                                                             \
@@ -898,35 +900,47 @@ napi_value JsUIExtensionContentSession::OnStartAbilityByType(napi_env env, NapiC
         TAG_LOGE(AAFwkTag::UI_EXT, "check startAbilityByCall param failed");
         return CreateJsUndefined(env);
     }
-    std::shared_ptr<JsUIExtensionCallback> callback = std::make_shared<JsUIExtensionCallback>(env);
-    callback->SetJsCallbackObject(info.argv[INDEX_TWO]);
-    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    NapiAsyncTask::ExecuteCallback execute =
-        [weak = context_, type, wantParam, callback, innerErrCode]() mutable {
-            auto context = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(weak.lock());
-            if (!context) {
-                TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+    wantParam.SetParam(UIEXTENSION_TARGET_TYPE_KEY, AAFwk::String::Box(type));
+    AAFwk::Want want;
+    want.SetParams(wantParam);
+    if (wantParam.HasParam(FLAG_AUTH_READ_URI_PERMISSION)) {
+        want.SetFlags(wantParam.GetIntParam(FLAG_AUTH_READ_URI_PERMISSION, 0));
+        wantParam.Remove(FLAG_AUTH_READ_URI_PERMISSION);
+    }
+#ifdef SUPPORT_SCREEN
+    InitDisplayId(want);
+#endif
+    std::shared_ptr<JsUIExtensionCallback> uiExtensionCallback = std::make_shared<JsUIExtensionCallback>(env);
+    uiExtensionCallback->SetJsCallbackObject(info.argv[INDEX_TWO]);
+    NapiAsyncTask::CompleteCallback complete = [uiWindow = uiWindow_, type, want, uiExtensionCallback]
+        (napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (uiWindow == nullptr || uiWindow->GetUIContent() == nullptr) {
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                 return;
             }
 #ifdef SUPPORT_SCREEN
-            *innerErrCode = context->StartAbilityByType(type, wantParam, callback);
-#endif
-        };
-    NapiAsyncTask::CompleteCallback complete =
-        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-            if (*innerErrCode == ERR_OK) {
-                task.ResolveWithNoError(env, CreateJsUndefined(env));
-            } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
-                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+            Ace::ModalUIExtensionCallbacks callback;
+            callback.onError = [uiExtensionCallback](int arg, const std::string &str1, const std::string &str2) {
+                uiExtensionCallback->OnError(arg);
+            };
+            callback.onRelease = [uiExtensionCallback](const auto &arg) {
+                uiExtensionCallback->OnRelease(arg);
+            };
+            Ace::ModalUIExtensionConfig config;
+            int32_t sessionId = uiWindow->GetUIContent()->CreateModalUIExtension(want, callback, config);
+            if (sessionId == 0) {
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
             } else {
-                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+                uiExtensionCallback->SetUIContent(uiWindow->GetUIContent());
+                uiExtensionCallback->SetSessionId(sessionId);
+                task.ResolveWithNoError(env, CreateJsUndefined(env));
             }
+#endif // SUPPORT_SCREEN
         };
-
     napi_value lastParam = (info.argc > ARGC_THREE) ? info.argv[INDEX_THREE] : nullptr;
     napi_value result = nullptr;
     NapiAsyncTask::ScheduleHighQos("JsUIExtensionContentSession::OnStartAbilityByType",
-        env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+        env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
 
