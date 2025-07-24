@@ -4210,6 +4210,8 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
         SendCreateAtomicServiceProcessEvent(appRecord, bundleType, moduleName, abilityName);
         errCode = remoteClientManager_->GetCJSpawnClient()->StartProcess(startMsg, pid);
     } else if (appInfo->arkTSMode == CODE_LANGUAGE_ARKTS_1_2 || appInfo->arkTSMode == CODE_LANGUAGE_ARKTS_HYBRID) {
+        SendCreateAtomicServiceProcessEvent(appRecord, bundleType, moduleName, abilityName);
+        startMsg.gids.push_back(SHADER_CACHE_GROUPID);
         errCode = remoteClientManager_->GetHybridSpawnClient()->StartProcess(startMsg, pid);
     } else {
         SendCreateAtomicServiceProcessEvent(appRecord, bundleType, moduleName, abilityName);
