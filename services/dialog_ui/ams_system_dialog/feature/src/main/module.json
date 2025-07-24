@@ -21,9 +21,6 @@
         "name" : "ohos.permission.START_INVISIBLE_ABILITY"
       },
       {
-        "name" : "ohos.permission.INTERNET"
-      },
-      {
         "name" : "ohos.permission.REQUIRE_FORM"
       }
     ],
