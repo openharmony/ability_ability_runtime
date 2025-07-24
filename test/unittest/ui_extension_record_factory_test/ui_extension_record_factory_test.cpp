@@ -359,5 +359,24 @@ HWTEST_F(UIExtensionRecordFactoryTest, CreateDebugRecord_0200, TestSize.Level1)
     abilityRequest.callerToken = token;
     EXPECT_NO_THROW(info.CreateDebugRecord(abilityRequest, abilityRecord));
 }
+
+/**
+ * @tc.number: CreateDebugRecord_0300
+ * @tc.name: UIExtensionRecordFactoryTest
+ * @tc.desc: Call function CreateDebugRecord
+ */
+HWTEST_F(UIExtensionRecordFactoryTest, CreateDebugRecord_0300, TestSize.Level1)
+{
+    AbilityRuntime::UIExtensionRecordFactory info;
+    AAFwk::AbilityRequest abilityRequest;
+    std::string deviceName = "device";
+    std::string abilityName = "ServiceAbility";
+    std::string appName = "hiservcie";
+    std::string bundleName = "com.ix.hiservcie";
+    std::string moduleName = "entry";
+    abilityRequest = GenerateAbilityRequest(deviceName, abilityName, appName, bundleName, moduleName);
+    auto abilityRecord = AAFwk::AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NO_THROW(info.CreateDebugRecord(abilityRequest, abilityRecord));
+}
 }
 }

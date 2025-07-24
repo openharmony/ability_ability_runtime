@@ -730,13 +730,14 @@ void AbilityDelegator::RegisterClearFunc(ClearFunc func)
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid func");
         return;
     }
-
+    std::lock_guard<std::mutex> lck(mutexClearMonitor_);
     clearFunc_ = func;
 }
 
 inline void AbilityDelegator::CallClearFunc(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
+    std::lock_guard<std::mutex> lck(mutexClearMonitor_);
     if (clearFunc_) {
         clearFunc_(ability);
     }
