@@ -1731,7 +1731,7 @@ void AppMgrService::SetAppAssertionPauseState(bool flag)
 }
 
 #ifdef SUPPORT_CHILD_PROCESS
-int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+int32_t AppMgrService::CreateNativeChildProcess(const std::string &libName, int32_t childProcessCount,
     const sptr<IRemoteObject> &callback, const std::string &customProcessName)
 {
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
@@ -1741,7 +1741,7 @@ int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32
         return ERR_INVALID_OPERATION;
     }
 
-    return appMgrServiceInner_->StartNativeChildProcess(
+    return appMgrServiceInner_->CreateNativeChildProcess(
         IPCSkeleton::GetCallingPid(), libName, childProcessCount, callback, customProcessName);
 }
 #endif // SUPPORT_CHILD_PROCESS

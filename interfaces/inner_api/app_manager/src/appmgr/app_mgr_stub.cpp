@@ -357,8 +357,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_APP_ASSERT_PAUSE_STATE_SELF):
             return HandleSetAppAssertionPauseState(data, reply);
     #ifdef SUPPORT_CHILD_PROCESS
-        case static_cast<uint32_t>(AppMgrInterfaceCode::START_NATIVE_CHILD_PROCESS):
-            return HandleStartNativeChildProcess(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::CREATE_NATIVE_CHILD_PROCESS):
+            return HandleCreateNativeChildProcess(data, reply);
     #endif // SUPPORT_CHILD_PROCESS
         case static_cast<uint32_t>(AppMgrInterfaceCode::SAVE_BROWSER_CHANNEL):
             return HandleSaveBrowserChannel(data, reply);
@@ -1838,14 +1838,14 @@ int32_t AppMgrStub::HandleCheckCallingIsUserTestMode(MessageParcel &data, Messag
 }
 
 #ifdef SUPPORT_CHILD_PROCESS
-int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply)
+int32_t AppMgrStub::HandleCreateNativeChildProcess(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::string libName = data.ReadString();
     int32_t childCount = data.ReadInt32();
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     std::string customProcessName = data.ReadString();
-    int32_t result = StartNativeChildProcess(libName, childCount, callback, customProcessName);
+    int32_t result = CreateNativeChildProcess(libName, childCount, callback, customProcessName);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
