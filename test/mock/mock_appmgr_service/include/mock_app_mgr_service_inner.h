@@ -70,7 +70,7 @@ public:
 #endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD4(PreloadApplication, int32_t(const std::string&, int32_t, AppExecFwk::PreloadMode, int32_t));
 #ifdef SUPPORT_CHILD_PROCESS
-    MOCK_METHOD5(StartNativeChildProcess, int32_t(const pid_t hostPid, const std::string &libName,
+    MOCK_METHOD5(CreateNativeChildProcess, int32_t(const pid_t hostPid, const std::string &libName,
         int32_t childProcessCount, const sptr<IRemoteObject> &callback, const std::string &customProcessName));
 #endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD1(DumpIpcAllStart, int(std::string& result));

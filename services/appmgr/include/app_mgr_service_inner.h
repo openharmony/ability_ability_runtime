@@ -1313,7 +1313,7 @@ public:
      * @param callback callback for notify start result
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t StartNativeChildProcess(const pid_t hostPid, const std::string &libName, int32_t childProcessCount,
+    virtual int32_t CreateNativeChildProcess(const pid_t hostPid, const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback, const std::string &customProcessName);
 #endif // SUPPORT_CHILD_PROCESS
 
