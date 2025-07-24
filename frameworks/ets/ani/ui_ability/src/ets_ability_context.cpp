@@ -1496,8 +1496,8 @@ void ETSAbilityConnection::CallEtsFailed(int32_t errorCode)
         TAG_LOGE(AAFwkTag::CONTEXT, "Failed to get env, status: %{public}d", status);
         return;
     }
-    status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onFailed", "D:V",
-        static_cast<double>(errorCode));
+    status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onFailed", "I:V",
+        errorCode);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "Failed to call onFailed, status: %{public}d", status);
     }
