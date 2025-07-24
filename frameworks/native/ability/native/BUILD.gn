@@ -401,11 +401,13 @@ ohos_shared_library("abilitykit_native") {
   }
 
   public_external_deps = [
+    "ability_base:configuration",
     "ability_base:session_info",
     "accessibility:accessibility_common",
     "bundle_framework:appexecfwk_core",
     "libuv:uv",
     "napi:ace_napi",
+    "window_manager:sms",
   ]
 
   defines = []
