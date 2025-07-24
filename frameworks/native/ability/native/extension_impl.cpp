@@ -471,14 +471,14 @@ void ExtensionImpl::SetLaunchParam(const AAFwk::LaunchParam &launchParam)
 }
 
 void ExtensionImpl::ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::EXT, "ScheduleAbilityRequestFailure called");
     if (extension_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null extension_");
         return;
     }
-    extension_->OnExtensionAbilityRequestFailure(requestId, element, message);
+    extension_->OnExtensionAbilityRequestFailure(requestId, element, message, resultCode);
 }
 
 void ExtensionImpl::ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)

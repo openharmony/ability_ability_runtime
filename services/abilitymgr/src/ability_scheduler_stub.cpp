@@ -766,7 +766,8 @@ int AbilitySchedulerStub::ScheduleAbilityRequestFailureInner(MessageParcel &data
         return ERR_INVALID_VALUE;
     }
     std::string message = data.ReadString();
-    ScheduleAbilityRequestFailure(requestId, *element, message);
+    int32_t resultCode = data.ReadInt32();
+    ScheduleAbilityRequestFailure(requestId, *element, message, resultCode);
     return NO_ERROR;
 }
 

@@ -174,14 +174,14 @@ public:
     ErrCode OpenLink(const AAFwk::Want& want, int reuqestCode);
     ErrCode OpenAtomicService(const AAFwk::Want &want, const AAFwk::StartOptions &options);
 
-    ErrCode AddCompletionHandler(const std::string &requestId, OnRequestResult onRequestSucc,
-        OnRequestResult onRequestFail) override;
+    ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId, OnAtomicRequestSuccess onRequestSucc,
+        OnAtomicRequestFailure onRequestFail, const std::string &appId) override;
     
     void OnRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message) override;
 
     void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message) override;
+        const std::string &message, int32_t resultCode = 0) override;
 
 protected:
     bool IsContext(size_t contextTypeId) override
@@ -200,8 +200,11 @@ private:
      */
     OHOS::AppExecFwk::AbilityType GetAbilityInfoType() const;
 
+    void GetFailureInfoByMessage(const std::string &message, int32_t &failureCode,
+        std::string &failureMessage, int32_t resultCode);
+
     std::mutex onRequestResultMutex_;
-    std::vector<std::shared_ptr<OnRequestResultElement>> onRequestResults_;
+    std::vector<std::shared_ptr<OnAtomicRequestResult>> onAtomicRequestResults_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

@@ -53,8 +53,8 @@ public:
      * @param onRequestFail, the callback ot be called upon request failure.
      * @return ERR_OK on success, otherwise failure.
      */
-    virtual ErrCode AddCompletionHandler(const std::string &requestId, OnRequestResult onRequestSucc,
-        OnRequestResult onRequestFail);
+    virtual ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId,
+        OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId);
 
     /**
      * @brief Callback on request success.
@@ -74,7 +74,7 @@ public:
      * @param message, the message returned to the callback.
      */
     virtual void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message);
+        const std::string &message, int32_t resultCode = 0);
 
     using SelfType = ExtensionContext;
     static const size_t CONTEXT_TYPE_ID;

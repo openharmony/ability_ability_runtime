@@ -938,14 +938,14 @@ void UIAbilityImpl::ScheduleCollaborate(const Want &want)
 }
 
 void UIAbilityImpl::ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "ScheduleAbilityRequestFailure called");
     if (ability_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
         return;
     }
-    ability_->OnAbilityRequestFailure(requestId, element, message);
+    ability_->OnAbilityRequestFailure(requestId, element, message, resultCode);
 }
 
 void UIAbilityImpl::ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)

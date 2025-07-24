@@ -345,7 +345,7 @@ void FreeInstallManager::HandleOnFreeInstallFail(int32_t recordId, FreeInstallIn
             return;
         }
         abilityRecord->NotifyAbilityRequestFailure(freeInstallInfo.startOptions->requestId_,
-            freeInstallInfo.want.GetElement(), "Free installation failed");
+            freeInstallInfo.want.GetElement(), "Free installation failed", resultCode);
     }
 
     if (isAsync) {
