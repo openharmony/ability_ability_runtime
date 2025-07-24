@@ -655,13 +655,19 @@ int32_t JsAbilityStage::RegisterAppStartupTask(const std::shared_ptr<AppExecFwk:
 
     const std::vector<StartupTaskInfo> startupTaskInfos = startupManager->GetStartupTaskInfos(hapModuleInfo->name);
     for (const auto& item : startupTaskInfos) {
-        std::unique_ptr<NativeReference> startupJsRef = LoadJsOhmUrl(
-            item.srcEntry, item.ohmUrl, item.moduleName, item.hapPath, item.esModule);
-        if (startupJsRef == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "load js appStartup tasks failed.");
-            continue;
+        std::shared_ptr<JsStartupTask> jsStartupTask;
+        if (startupManager->EnableLazyLoadingAppStartupTasks()) {
+            jsStartupTask = std::make_shared<JsStartupTask>(item.name, jsRuntime_, item, shellContextRef_);
+        } else {
+            std::unique_ptr<NativeReference> startupJsRef = LoadJsOhmUrl(
+                item.srcEntry, item.ohmUrl, item.moduleName, item.hapPath, item.esModule);
+            if (startupJsRef == nullptr) {
+                TAG_LOGE(AAFwkTag::APPKIT, "load js appStartup tasks failed.");
+                continue;
+            }
+            jsStartupTask = std::make_shared<JsStartupTask>(item.name, jsRuntime_, startupJsRef, shellContextRef_);
         }
-        auto jsStartupTask = std::make_shared<JsStartupTask>(item.name, jsRuntime_, startupJsRef, shellContextRef_);
+
         jsStartupTask->SetDependencies(item.dependencies);
         jsStartupTask->SetIsExcludeFromAutoStart(item.excludeFromAutoStart);
         jsStartupTask->SetCallCreateOnMainThread(item.callCreateOnMainThread);

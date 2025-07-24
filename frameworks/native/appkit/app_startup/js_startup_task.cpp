@@ -80,6 +80,14 @@ std::map<std::string, std::weak_ptr<JsStartupTask>> AsyncTaskCallBack::jsStartup
 
 const std::string JsStartupTask::TASK_TYPE = "Js";
 
+JsStartupTask::JsStartupTask(const std::string &name, JsRuntime &jsRuntime, const StartupTaskInfo &info,
+    const std::shared_ptr<NativeReference> &contextJsRef)
+    : AppStartupTask(name), jsRuntime_(jsRuntime), startupJsRef_(nullptr), contextJsRef_(contextJsRef),
+      srcEntry_(info.srcEntry), ohmUrl_(info.ohmUrl), hapPath_(info.hapPath), esModule_(info.esModule)
+{
+    SetModuleName(info.moduleName);
+}
+
 JsStartupTask::JsStartupTask(const std::string& name, JsRuntime& jsRuntime,
     std::unique_ptr<NativeReference>& startupJsRef, std::shared_ptr<NativeReference>& contextJsRef)
     : AppStartupTask(name), jsRuntime_(jsRuntime), startupJsRef_(std::move(startupJsRef)), contextJsRef_(contextJsRef)
@@ -96,6 +104,12 @@ const std::string &JsStartupTask::GetType() const
 int32_t JsStartupTask::RunTaskInit(std::unique_ptr<StartupTaskResultCallback> callback)
 {
     TAG_LOGI(AAFwkTag::STARTUP, "task: %{public}s init", GetName().c_str());
+    if (startupJsRef_ == nullptr) {
+        int32_t result = LoadJsOhmUrl();
+        if (result != ERR_OK) {
+            return result;
+        }
+    }
     if (callCreateOnMainThread_) {
         return JsStartupTaskExecutor::RunOnMainThread(jsRuntime_, startupJsRef_, contextJsRef_, std::move(callback));
     }
@@ -119,6 +133,31 @@ int32_t JsStartupTask::RunTaskInit(std::unique_ptr<StartupTaskResultCallback> ca
             std::static_pointer_cast<JsStartupTask>(shared_from_this()));
     }
     return result;
+}
+
+int32_t JsStartupTask::LoadJsOhmUrl()
+{
+    TAG_LOGD(AAFwkTag::STARTUP, "call");
+    if (srcEntry_.empty() && ohmUrl_.empty()) {
+        TAG_LOGE(AAFwkTag::STARTUP, "srcEntry and ohmUrl empty");
+        return ERR_STARTUP_INTERNAL_ERROR;
+    }
+
+    std::string moduleNameWithStartupTask = moduleName_ + "::startupTask";
+    std::string srcPath(moduleName_ + "/" + srcEntry_);
+    auto pos = srcPath.rfind('.');
+    if (pos == std::string::npos) {
+        TAG_LOGE(AAFwkTag::STARTUP, "invalid srcEntry");
+        return ERR_STARTUP_INTERNAL_ERROR;
+    }
+    srcPath.erase(pos);
+    srcPath.append(".abc");
+    startupJsRef_ = jsRuntime_.LoadModule(moduleNameWithStartupTask, srcPath, hapPath_, esModule_, false, ohmUrl_);
+    if (startupJsRef_ == nullptr) {
+        TAG_LOGE(AAFwkTag::STARTUP, "startup task null");
+        return ERR_STARTUP_INTERNAL_ERROR;
+    }
+    return ERR_OK;
 }
 
 int32_t JsStartupTask::LoadJsAsyncTaskExecutor()
@@ -183,8 +222,10 @@ int32_t JsStartupTask::RunTaskOnDependencyCompleted(const std::string &dependenc
     auto env = jsRuntime_.GetNapiEnv();
 
     if (startupJsRef_ == nullptr) {
-        TAG_LOGE(AAFwkTag::STARTUP, "null ref_:%{public}s", name_.c_str());
-        return ERR_STARTUP_INTERNAL_ERROR;
+        int32_t result = LoadJsOhmUrl();
+        if (result != ERR_OK) {
+            return result;
+        }
     }
     napi_value startupValue = startupJsRef_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, startupValue, napi_object)) {

@@ -27,8 +27,11 @@ class JsStartupTask : public AppStartupTask {
 public:
     static const std::string TASK_TYPE;
 
+    JsStartupTask(const std::string &name, JsRuntime &jsRuntime, const StartupTaskInfo &info,
+        const std::shared_ptr<NativeReference> &contextJsRef);
+
     JsStartupTask(const std::string &name, JsRuntime &jsRuntime,
-        std::unique_ptr<NativeReference> &startupJsRef, std::shared_ptr<NativeReference> &contextJsRef_);
+        std::unique_ptr<NativeReference> &startupJsRef, std::shared_ptr<NativeReference> &contextJsRef);
 
     ~JsStartupTask() override;
 
@@ -50,9 +53,15 @@ private:
     std::unique_ptr<NativeReference> AsyncTaskExecutorJsRef_;
     std::unique_ptr<NativeReference> AsyncTaskExecutorCallbackJsRef_;
     std::unique_ptr<StartupTaskResultCallback> startupTaskResultCallback_;
+    std::string srcEntry_;
+    std::string ohmUrl_;
+    std::string hapPath_;
+    bool esModule_ = true;
 
     static napi_value GetDependencyResult(napi_env env, const std::string &dependencyName,
         const std::shared_ptr<StartupTaskResult> &result);
+
+    int32_t LoadJsOhmUrl();
 
     int32_t LoadJsAsyncTaskExecutor();
 
