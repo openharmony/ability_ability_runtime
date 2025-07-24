@@ -91,7 +91,7 @@ public:
     void SetExtensionCommon(const std::shared_ptr<ExtensionCommon> &common);
 
     void OnExtensionAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message) override;
+        const std::string &message, int32_t resultCode = 0) override;
 
     void OnExtensionAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message) override;

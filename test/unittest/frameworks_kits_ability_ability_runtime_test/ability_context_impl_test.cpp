@@ -49,6 +49,7 @@ const std::string FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermis
 const int DISPLAY_ID = 1001;
 const int32_t COLOR_MODE1 = -2;
 const int32_t COLOR_MODE2 = 2;
+const int32_t USER_CANCEL = -7;
 }
 
 class MyAbilityCallback : public IAbilityCallback {
@@ -2394,6 +2395,145 @@ HWTEST_F(AbilityContextImplTest, ConnectAppServiceExtensionAbility_0200, Functio
     sptr<AbilityConnectCallback> connectCallback;
     bool ret = context_->ConnectAppServiceExtensionAbility(want, connectCallback);
     EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.number: AddCompletionHandlerForAtomicService_0100
+ * @tc.name: AddCompletionHandlerForAtomicService
+ * @tc.desc: Verify that function AddCompletionHandlerForAtomicService.
+ */
+HWTEST_F(AbilityContextImplTest, AddCompletionHandlerForAtomicService_100, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = nullptr;
+    OnAtomicRequestFailure onRequestFail = nullptr;
+    auto result = context_->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(context_->onAtomicRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: AddCompletionHandlerForAtomicService_0200
+ * @tc.name: AddCompletionHandlerForAtomicService
+ * @tc.desc: Verify that function AddCompletionHandlerForAtomicService.
+ */
+HWTEST_F(AbilityContextImplTest, AddCompletionHandlerForAtomicService_0200, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = [](const std::string&) {};
+    OnAtomicRequestFailure onRequestFail = nullptr;
+    auto result = context_->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(context_->onAtomicRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: AddCompletionHandlerForAtomicService_0300
+ * @tc.name: AddCompletionHandlerForAtomicService
+ * @tc.desc: Verify that function AddCompletionHandlerForAtomicService.
+ */
+HWTEST_F(AbilityContextImplTest, AddCompletionHandlerForAtomicService_0300, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = [](const std::string&) {};
+    OnAtomicRequestFailure onRequestFail = [](const std::string&, int32_t, const std::string&) {};
+    auto result = context_->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context_->onAtomicRequestResults_.empty(), false);
+    context_->onAtomicRequestResults_.clear();
+}
+
+/**
+ * @tc.number: AddCompletionHandler_0400
+ * @tc.name: AddCompletionHandlerForAtomicService
+ * @tc.desc: Verify that function AddCompletionHandlerForAtomicService.
+ */
+HWTEST_F(AbilityContextImplTest, AddCompletionHandler_0400, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = [](const std::string&) {};
+    OnAtomicRequestFailure onRequestFail = [](const std::string&, int32_t, const std::string&) {};
+    context_->onAtomicRequestResults_.emplace_back(
+        std::make_shared<OnAtomicRequestResult>(requestId, appId, onRequestSucc, onRequestFail));
+    auto result = context_->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
+    EXPECT_EQ(result, ERR_OK);
+    std::string norequestId = "test";
+    result = context_->AddCompletionHandlerForAtomicService(norequestId, onRequestSucc, onRequestFail, appId);
+    EXPECT_EQ(context_->onAtomicRequestResults_.size(), 2);
+    context_->onAtomicRequestResults_.clear();
+}
+
+/**
+ * @tc.number: OnRequestSuccess_0300
+ * @tc.name: OnRequestSuccess
+ * @tc.desc: Verify that function OnRequestSuccess.
+ */
+HWTEST_F(AbilityContextImplTest, OnRequestSuccess_0300, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = [](const std::string&) {};
+    OnAtomicRequestFailure onRequestFail = [](const std::string&, int32_t, const std::string&) {};
+    auto result = context_->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context_->onAtomicRequestResults_.empty(), false);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string norequestId = "test";
+    context_->OnRequestSuccess(norequestId, element, "success");
+    EXPECT_EQ(context_->onAtomicRequestResults_.empty(), false);
+    context_->OnRequestSuccess(requestId, element, "success");
+    EXPECT_EQ(context_->onAtomicRequestResults_.empty(), true);
+}
+
+/**
+ * @tc.number: OnRequestFailure_0300
+ * @tc.name: OnRequestFailure
+ * @tc.desc: Verify that function OnRequestFailure.
+ */
+HWTEST_F(AbilityContextImplTest, OnRequestFailure_0300, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = [](const std::string&) {};
+    OnAtomicRequestFailure onRequestFail = [](const std::string&, int32_t, const std::string&) {};
+    auto result = context_->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context_->onAtomicRequestResults_.empty(), false);
+    AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
+    std::string norequestId = "test";
+    context_->OnRequestFailure(norequestId, element, "failure");
+    EXPECT_EQ(context_->onAtomicRequestResults_.empty(), false);
+    context_->OnRequestFailure(requestId, element, "failure");
+    EXPECT_EQ(context_->onAtomicRequestResults_.empty(), true);
+    context_->onAtomicRequestResults_.clear();
+}
+
+/**
+ * @tc.number: GetFailureInfoByMessage_0100
+ * @tc.name: GetFailureInfoByMessage
+ * @tc.desc: Verify that function GetFailureInfoByMessage.
+ */
+HWTEST_F(AbilityContextImplTest, GetFailureInfoByMessage_0100, Function | MediumTest | Level1)
+{
+    std::string message = "User refused redirection";
+    int32_t faileCode = 0;
+    std::string failReason;
+    int32_t resultCode = USER_CANCEL;
+    context_->GetFailureInfoByMessage(message, faileCode, failReason, resultCode);
+    EXPECT_EQ(faileCode, 1);
+    EXPECT_EQ(failReason, "User cancelled redirection");
+    resultCode = 0;
+    context_->GetFailureInfoByMessage(message, faileCode, failReason, resultCode);
+    EXPECT_EQ(faileCode, 2);
+    EXPECT_EQ(failReason, "User refused redirection");
+    message = "test";
+    context_->GetFailureInfoByMessage(message, faileCode, failReason, resultCode);
+    EXPECT_EQ(faileCode, 0);
+    EXPECT_EQ(failReason, "failed to open atomicservice");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

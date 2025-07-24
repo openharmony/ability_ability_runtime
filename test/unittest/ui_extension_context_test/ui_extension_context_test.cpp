@@ -839,76 +839,81 @@ HWTEST_F(UIExtensionContextTest, IsTerminating_0100, TestSize.Level1)
 }
 
 /**
- * @tc.number: AddCompletionHandler_0100
- * @tc.name: AddCompletionHandler
- * @tc.desc: Verify that function AddCompletionHandler.
+ * @tc.number: AddCompletionHandlerForAtomicService_0100
+ * @tc.name: AddCompletionHandlerForAtomicService
+ * @tc.desc: Verify that function AddCompletionHandlerForAtomicService.
  */
-HWTEST_F(UIExtensionContextTest, AddCompletionHandler_100, Function | MediumTest | Level1)
+HWTEST_F(UIExtensionContextTest, AddCompletionHandlerForAtomicService_100, Function | MediumTest | Level1)
 {
     std::string requestId = "1234567890";
-    OnRequestResult onRequestSucc = nullptr;
-    OnRequestResult onRequestFail = nullptr;
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = nullptr;
+    OnAtomicRequestFailure onRequestFail = nullptr;
     auto context = std::make_shared<UIExtensionContext>();
     ASSERT_NE(context, nullptr);
-    auto result = context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    auto result = context->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
-    EXPECT_EQ(context->onRequestResults_.empty(), true);
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), true);
 }
 
 /**
- * @tc.number: AddCompletionHandler_0200
- * @tc.name: AddCompletionHandler
- * @tc.desc: Verify that function AddCompletionHandler.
+ * @tc.number: AddCompletionHandlerForAtomicService_0200
+ * @tc.name: AddCompletionHandlerForAtomicService
+ * @tc.desc: Verify that function AddCompletionHandlerForAtomicService.
  */
-HWTEST_F(UIExtensionContextTest, AddCompletionHandler_0200, Function | MediumTest | Level1)
+HWTEST_F(UIExtensionContextTest, AddCompletionHandlerForAtomicService_0200, Function | MediumTest | Level1)
 {
     std::string requestId = "1234567890";
-    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    OnRequestResult onRequestFail = nullptr;
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = [](const std::string&) {};
+    OnAtomicRequestFailure onRequestFail = nullptr;
     auto context = std::make_shared<UIExtensionContext>();
     ASSERT_NE(context, nullptr);
-    auto result = context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    auto result = context->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
-    EXPECT_EQ(context->onRequestResults_.empty(), true);
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), true);
 }
 
 /**
- * @tc.number: AddCompletionHandler_0300
- * @tc.name: AddCompletionHandler
- * @tc.desc: Verify that function AddCompletionHandler.
+ * @tc.number: AddCompletionHandlerForAtomicService_0300
+ * @tc.name: AddCompletionHandlerForAtomicService
+ * @tc.desc: Verify that function AddCompletionHandlerForAtomicService.
  */
-HWTEST_F(UIExtensionContextTest, AddCompletionHandler_0300, Function | MediumTest | Level1)
+HWTEST_F(UIExtensionContextTest, AddCompletionHandlerForAtomicService_0300, Function | MediumTest | Level1)
 {
     std::string requestId = "1234567890";
-    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = [](const std::string&) {};
+    OnAtomicRequestFailure onRequestFail = [](const std::string&, int32_t, const std::string&) {};
     auto context = std::make_shared<UIExtensionContext>();
     ASSERT_NE(context, nullptr);
-    auto result = context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    auto result = context->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
     EXPECT_EQ(result, ERR_OK);
-    EXPECT_EQ(context->onRequestResults_.empty(), false);
-    context->onRequestResults_.clear();
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), false);
+    context->onAtomicRequestResults_.clear();
 }
 
 /**
  * @tc.number: AddCompletionHandler_0400
- * @tc.name: AddCompletionHandler
- * @tc.desc: Verify that function AddCompletionHandler.
+ * @tc.name: AddCompletionHandlerForAtomicService
+ * @tc.desc: Verify that function AddCompletionHandlerForAtomicService.
  */
 HWTEST_F(UIExtensionContextTest, AddCompletionHandler_0400, Function | MediumTest | Level1)
 {
     std::string requestId = "1234567890";
-    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = [](const std::string&) {};
+    OnAtomicRequestFailure onRequestFail = [](const std::string&, int32_t, const std::string&) {};
     auto context = std::make_shared<UIExtensionContext>();
     ASSERT_NE(context, nullptr);
-    context->onRequestResults_.emplace_back(requestId, onRequestSucc, onRequestFail);
-    auto result = context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    context->onAtomicRequestResults_.emplace_back(
+        std::make_shared<OnAtomicRequestResult>(requestId, appId, onRequestSucc, onRequestFail));
+    auto result = context->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
     EXPECT_EQ(result, ERR_OK);
     std::string norequestId = "test";
-    result = context->AddCompletionHandler(norequestId, onRequestSucc, onRequestFail);
-    EXPECT_EQ(context->onRequestResults_.size(), 2);
-    context->onRequestResults_.clear();
+    result = context->AddCompletionHandlerForAtomicService(norequestId, onRequestSucc, onRequestFail, appId);
+    EXPECT_EQ(context->onAtomicRequestResults_.size(), 2);
+    context->onAtomicRequestResults_.clear();
 }
 
 /**
@@ -919,16 +924,17 @@ HWTEST_F(UIExtensionContextTest, AddCompletionHandler_0400, Function | MediumTes
 HWTEST_F(UIExtensionContextTest, OnRequestSuccess_0100, Function | MediumTest | Level1)
 {
     std::string requestId = "1234567890";
-    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = [](const std::string&) {};
+    OnAtomicRequestFailure onRequestFail = [](const std::string&, int32_t, const std::string&) {};
     auto context = std::make_shared<UIExtensionContext>();
     ASSERT_NE(context, nullptr);
-    auto result = context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    auto result = context->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
     EXPECT_EQ(result, ERR_OK);
-    EXPECT_EQ(context->onRequestResults_.empty(), false);
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), false);
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
     context->OnRequestSuccess(requestId, element, "success");
-    EXPECT_EQ(context->onRequestResults_.empty(), true);
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), true);
 }
 
 /**
@@ -941,10 +947,10 @@ HWTEST_F(UIExtensionContextTest, OnRequestSuccess_0200, Function | MediumTest | 
     std::string requestId = "1234567890";
     auto context = std::make_shared<UIExtensionContext>();
     ASSERT_NE(context, nullptr);
-    EXPECT_EQ(context->onRequestResults_.empty(), true);
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), true);
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
     context->OnRequestSuccess(requestId, element, "success");
-    EXPECT_EQ(context->onRequestResults_.empty(), true);
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), true);
 }
 
 /**
@@ -955,18 +961,19 @@ HWTEST_F(UIExtensionContextTest, OnRequestSuccess_0200, Function | MediumTest | 
 HWTEST_F(UIExtensionContextTest, OnRequestSuccess_0300, Function | MediumTest | Level1)
 {
     std::string requestId = "1234567890";
-    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = [](const std::string&) {};
+    OnAtomicRequestFailure onRequestFail = [](const std::string&, int32_t, const std::string&) {};
     auto context = std::make_shared<UIExtensionContext>();
     ASSERT_NE(context, nullptr);
-    auto result = context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    auto result = context->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
     EXPECT_EQ(result, ERR_OK);
-    EXPECT_EQ(context->onRequestResults_.empty(), false);
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), false);
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
     std::string norequestId = "test";
     context->OnRequestSuccess(norequestId, element, "success");
-    EXPECT_EQ(context->onRequestResults_.empty(), false);
-    context->onRequestResults_.clear();
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), false);
+    context->onAtomicRequestResults_.clear();
 }
 
 /**
@@ -977,17 +984,18 @@ HWTEST_F(UIExtensionContextTest, OnRequestSuccess_0300, Function | MediumTest | 
 HWTEST_F(UIExtensionContextTest, OnRequestFailure_0100, Function | MediumTest | Level1)
 {
     std::string requestId = "1234567890";
-    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = [](const std::string&) {};
+    OnAtomicRequestFailure onRequestFail = [](const std::string&, int32_t, const std::string&) {};
     auto context = std::make_shared<UIExtensionContext>();
     ASSERT_NE(context, nullptr);
-    auto result = context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    auto result = context->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
     EXPECT_EQ(result, ERR_OK);
-    EXPECT_EQ(context->onRequestResults_.empty(), false);
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), false);
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
     context->OnRequestFailure(requestId, element, "failure");
-    EXPECT_EQ(context->onRequestResults_.empty(), true);
-    context->onRequestResults_.clear();
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), true);
+    context->onAtomicRequestResults_.clear();
 }
 
 /**
@@ -1000,10 +1008,10 @@ HWTEST_F(UIExtensionContextTest, OnRequestFailure_0200, Function | MediumTest | 
     std::string requestId = "1234567890";
     auto context = std::make_shared<UIExtensionContext>();
     ASSERT_NE(context, nullptr);
-    EXPECT_EQ(context->onRequestResults_.empty(), true);
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), true);
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
     context->OnRequestFailure(requestId, element, "failure");
-    EXPECT_EQ(context->onRequestResults_.empty(), true);
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), true);
 }
 
 /**
@@ -1014,18 +1022,45 @@ HWTEST_F(UIExtensionContextTest, OnRequestFailure_0200, Function | MediumTest | 
 HWTEST_F(UIExtensionContextTest, OnRequestFailure_0300, Function | MediumTest | Level1)
 {
     std::string requestId = "1234567890";
-    OnRequestResult onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
-    OnRequestResult onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    std::string appId = "atomic";
+    OnAtomicRequestSuccess onRequestSucc = [](const std::string&) {};
+    OnAtomicRequestFailure onRequestFail = [](const std::string&, int32_t, const std::string&) {};
     auto context = std::make_shared<UIExtensionContext>();
     ASSERT_NE(context, nullptr);
-    auto result = context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail);
+    auto result = context->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId);
     EXPECT_EQ(result, ERR_OK);
-    EXPECT_EQ(context->onRequestResults_.empty(), false);
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), false);
     AppExecFwk::ElementName element("", "com.example.com", "MainAbility");
     std::string norequestId = "test";
     context->OnRequestFailure(norequestId, element, "failure");
-    EXPECT_EQ(context->onRequestResults_.empty(), false);
-    context->onRequestResults_.clear();
+    EXPECT_EQ(context->onAtomicRequestResults_.empty(), false);
+    context->onAtomicRequestResults_.clear();
+}
+
+/**
+ * @tc.number: GetFailureInfoByMessage_0100
+ * @tc.name: GetFailureInfoByMessage
+ * @tc.desc: Verify that function GetFailureInfoByMessage.
+ */
+HWTEST_F(UIExtensionContextTest, GetFailureInfoByMessage_0100, Function | MediumTest | Level1)
+{
+    std::string message = "User refused redirection";
+    int32_t faileCode = 0;
+    std::string failReason;
+    int32_t resultCode = USER_CANCEL;
+    auto context = std::make_shared<UIExtensionContext>();
+    ASSERT_NE(context, nullptr);
+    context->GetFailureInfoByMessage(message, faileCode, failReason, resultCode);
+    EXPECT_EQ(faileCode, 1);
+    EXPECT_EQ(failReason, "User cancelled redirection");
+    resultCode = 0;
+    context->GetFailureInfoByMessage(message, faileCode, failReason, resultCode);
+    EXPECT_EQ(faileCode, 2);
+    EXPECT_EQ(failReason, "User refused redirection");
+    message = "test";
+    context->GetFailureInfoByMessage(message, faileCode, failReason, resultCode);
+    EXPECT_EQ(faileCode, 0);
+    EXPECT_EQ(failReason, "failed to open atomicservice");
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

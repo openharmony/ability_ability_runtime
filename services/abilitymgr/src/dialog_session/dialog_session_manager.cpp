@@ -234,28 +234,6 @@ void DialogSessionManager::GenerateDialogCallerInfo(AbilityRequest &abilityReque
     dialogCallerInfo->needGrantUriPermission = needGrantUriPermission;
 }
 
-AppExecFwk::ElementName DialogSessionManager::GetWantElement(const Want &want)
-{
-    auto bms = AbilityUtil::GetBundleManagerHelper();
-    auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
-    if (bms == nullptr || abilityMgr == nullptr) {
-        return want.GetElement();
-    }
-    AppExecFwk::BundleInfo bundleInfo;
-    if (!IN_PROCESS_CALL(bms->GetBundleInfo(want.GetBundle(),
-        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
-        bundleInfo, abilityMgr->GetUserId()))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetBundleInfo failed");
-        return want.GetElement();
-    }
-    if (bundleInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
-        AppExecFwk::ElementName element;
-        element.SetBundleName(want.GetElement().GetBundleName());
-        return element;
-    }
-    return want.GetElement();
-}
-
 void DialogSessionManager::NotifyAbilityRequestFailure(const std::string &dialogSessionId, const Want &want)
 {
     auto callerInfo = GetDialogCallerInfo(dialogSessionId);
@@ -276,7 +254,7 @@ void DialogSessionManager::NotifyAbilityRequestFailure(const std::string &dialog
     } else if (callerInfo->type == SelectorType::INTERCEPTOR_SELECTOR) {
         message = "User closed the interceptor picker";
     }
-    abilityRecord->NotifyAbilityRequestFailure(requestId, GetWantElement(want), message);
+    abilityRecord->NotifyAbilityRequestFailure(requestId, want.GetElement(), message);
 }
 
 int DialogSessionManager::SendDialogResult(const Want &want, const std::string &dialogSessionId, bool isAllowed)

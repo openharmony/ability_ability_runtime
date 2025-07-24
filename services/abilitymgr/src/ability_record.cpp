@@ -3881,13 +3881,13 @@ void AbilityRecord::ScheduleCollaborate(const Want &want)
 }
 
 void AbilityRecord::NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
     CHECK_POINTER(lifecycleDeal_);
     nlohmann::json jsonObject = nlohmann::json {
         { JSON_KEY_ERR_MSG, message },
     };
-    lifecycleDeal_->NotifyAbilityRequestFailure(requestId, element, jsonObject.dump());
+    lifecycleDeal_->NotifyAbilityRequestFailure(requestId, element, jsonObject.dump(), resultCode);
 }
 
 void AbilityRecord::NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)

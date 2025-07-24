@@ -28,7 +28,10 @@ struct WindowCreateParams;
 }
 
 namespace AbilityRuntime {
+constexpr int32_t USER_CANCEL = -7;
 using OnRequestResult = std::function<void(const AppExecFwk::ElementName&, const std::string&)>;
+using OnAtomicRequestSuccess = std::function<void(const std::string&)>;
+using OnAtomicRequestFailure = std::function<void(const std::string&, int32_t, const std::string&)>;
 struct OnRequestResultElement {
     std::string requestId_;
     OnRequestResult onRequestSuccess_;
@@ -38,6 +41,22 @@ struct OnRequestResultElement {
         OnRequestResult onRequestFail) : requestId_(requestId), onRequestSuccess_(onRequestSucc),
         onRequestFailure_(onRequestFail)
     {}
+};
+struct OnAtomicRequestResult {
+    std::string requestId_;
+    std::string appId_;
+    OnAtomicRequestSuccess onRequestSuccess_;
+    OnAtomicRequestFailure onRequestFailure_;
+
+    OnAtomicRequestResult(const std::string &requestId, std::string appId, OnAtomicRequestSuccess onRequestSucc,
+        OnAtomicRequestFailure onRequestFail) : requestId_(requestId), appId_(appId), onRequestSuccess_(onRequestSucc),
+        onRequestFailure_(onRequestFail)
+    {}
+};
+enum class FailureCode {
+    FAILURE_CODE_SYSTEM_MALFUNCTION = 0,
+    FAILURE_CODE_USER_CANCEL = 1,
+    FAILURE_CODE_USER_REFUSE = 2,
 };
 }
 
