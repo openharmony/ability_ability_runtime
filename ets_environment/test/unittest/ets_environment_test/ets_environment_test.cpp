@@ -251,7 +251,7 @@ HWTEST_F(EtsEnvironmentTest, Initialize_0100, TestSize.Level0)
 {
     auto etsEnv = std::make_shared<ETSEnvironment>();
     ASSERT_NE(etsEnv, nullptr);
-    bool result = etsEnv->Initialize();
+    bool result = etsEnv->Initialize(nullptr, false);
     EXPECT_FALSE(result);
 }
 
@@ -310,6 +310,19 @@ HWTEST_F(EtsEnvironmentTest, LoadModule_0100, TestSize.Level0)
     void *ref = nullptr;
     bool result = etsEnv->LoadModule("testModule", "testModule", cls, obj, ref);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetDebuggerPostTask_0100
+ * @tc.desc: Sts environment GetDebuggerPostTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, GetDebuggerPostTask_0100, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    auto task = etsEnv->GetDebuggerPostTask();
+    ASSERT_NE(task, nullptr);
 }
 } // namespace StsEnv
 } // namespace OHOS

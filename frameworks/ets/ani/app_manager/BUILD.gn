@@ -39,8 +39,11 @@ ohos_shared_library("app_manager_ani") {
   public_configs = []
 
   sources = [
+    "./src/ets_ability_first_frame_state_observer.cpp",
+    "./src/ets_app_foreground_state_observer.cpp",
     "./src/ets_app_manager.cpp",
     "./src/ets_app_manager_utils.cpp",
+    "./src/ets_app_state_observer.cpp",
   ]
 
   cflags = []

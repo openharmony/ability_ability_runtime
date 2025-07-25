@@ -433,6 +433,7 @@ ohos_shared_library("app_context") {
   branch_protector_ret = "pac_ret"
 
   include_dirs = [
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
@@ -450,6 +451,7 @@ ohos_shared_library("app_context") {
     "${ability_runtime_native_path}/appkit/ability_runtime/context/bindable_sub_thread.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/context_impl.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/environment_callback.cpp",
+    "${ability_runtime_native_path}/appkit/ability_runtime/context/ets_ability_lifecycle_callback.cpp",
     "${ability_runtime_native_path}/appkit/app/overlay_event_subscriber.cpp",
     "${ability_runtime_native_path}/appkit/app/sys_mgr_client.cpp",
   ]
@@ -477,6 +479,7 @@ ohos_shared_library("app_context") {
     "ipc:ipc_napi",
     "napi:ace_napi",
     "resource_management:global_resmgr",
+    "runtime_core:ani",
     "samgr:samgr_proxy",
   ]
   public_external_deps = [

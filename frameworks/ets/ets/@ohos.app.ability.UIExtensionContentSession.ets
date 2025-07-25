@@ -125,7 +125,11 @@ export default class UIExtensionContentSession {
     });
     p1.then((e: NullishType) => {
       let retError = e as BusinessError<void>;
-      callback(retError, undefined);
+      if (retError.code === 0) {
+        callback(null, undefined);
+      } else {
+        callback(retError, undefined);
+      }      
     }, (err: Error): void => {
       callback(err as BusinessError, undefined);
     });

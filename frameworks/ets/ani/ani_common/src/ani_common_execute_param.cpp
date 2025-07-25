@@ -85,11 +85,11 @@ bool UnwrapExecuteParam(ani_env *env, ani_object param, AppExecFwk::InsightInten
         static_cast<ani_enum_item>(executeModeRef), executeMode);
     executeParam.executeMode_ = executeMode;
 
-    double displayIdD = 0.0;
+    ani_long displayIdD = 0;
     int32_t displayId = INVALID_DISPLAY_ID;
     if (executeMode == ExecuteMode::UI_ABILITY_FOREGROUND &&
         IsExistsProperty(env, param, "displayId")) {
-        if (GetDoublePropertyObject(env, param, "displayId", displayIdD)) {
+        if (GetLongPropertyObject(env, param, "displayId", displayIdD)) {
             displayId = static_cast<int32_t>(displayIdD);
             if (displayId < 0) {
                 TAG_LOGE(AAFwkTag::INTENT, "invalid displayId");
@@ -108,12 +108,12 @@ bool UnwrapExecuteParam(ani_env *env, ani_object param, AppExecFwk::InsightInten
         executeParam.uris_ = uris;
     }
     if (IsExistsProperty(env, param, "flags")) {
-        double flags = 0.0;
-        if (!GetDoublePropertyObject(env, param, "flags", flags)) {
+        ani_int flags = 0;
+        if (!GetIntPropertyObject(env, param, "flags", flags)) {
             TAG_LOGE(AAFwkTag::INTENT, "Wrong argument flags fail");
             return false;
         }
-        executeParam.flags_ = static_cast<int32_t>(flags);
+        executeParam.flags_ = flags;
     }
 
     return true;

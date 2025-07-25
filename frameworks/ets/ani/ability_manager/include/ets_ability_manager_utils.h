@@ -17,11 +17,15 @@
 #define OHOS_ABILITY_RUNTIME_ETS_ABILITY_MANAGER_UTILS_H
 
 #include "ability_running_info.h"
-#include "extension_running_info.h"
+#include "ability_state_data.h"
 #include "ani.h"
+#include "extension_running_info.h"
 
 namespace OHOS {
 namespace AbilityManagerEts {
+using OHOS::AppExecFwk::AbilityStateData;
+ani_object WrapAbilityStateData(ani_env *env, const AbilityStateData &abilityStateData);
+bool SetAbilityStateData(ani_env *env, ani_object object, const AbilityStateData &abilityStateData);
 bool WrapAbilityRunningInfo(ani_env *env, ani_object &infoObj, const AAFwk::AbilityRunningInfo &info);
 bool WrapAbilityRunningInfoArray(
     ani_env *env, ani_object &arrayObj, const std::vector<AAFwk::AbilityRunningInfo> &infos);

@@ -27,6 +27,7 @@ import OpenLinkOptions from '@ohos.app.ability.OpenLinkOptions';
 import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 import AbilityStartCallback from 'application.AbilityStartCallback';
+import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
 
 class Cleaner {
   public ptr: long = 0;
@@ -46,6 +47,9 @@ let destroyRegister = new FinalizationRegistry<Cleaner>(callback);
 let unregisterToken = new object();
 
 export default class UIAbilityContext extends Context {
+  static {
+    loadLibrary("ability_context_ani_kit.z");
+  }
 
   private cleaner: Cleaner | null = null;
   etsAbilityContextPtr: long = 0;
@@ -70,10 +74,19 @@ export default class UIAbilityContext extends Context {
     destroyRegister.unregister(unregisterToken);
   }
 
-  private static native nativeTransferStatic(input: ESValue): Object;
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
   private static native nativeTransferDynamic(input: Object): ESValue;
+  private static contextType: string = 'UIAbilityContext';
+
   static transferStatic(input: Any): Object {
-    return UIAbilityContext.nativeTransferStatic(ESValue.wrap(input));
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    console.log('transferStatic type: ' + type);
+    return UIAbilityContext.nativeTransferStatic(ESValue.wrap(input), type);
   }
   static transferDynamic(input: Object): Any {
     return UIAbilityContext.nativeTransferDynamic(input).unwrap();
@@ -108,15 +121,16 @@ export default class UIAbilityContext extends Context {
 
   private native nativeSetMissionLabel(label: string, callback: AsyncCallbackWrapper<void>): void;
 
-  private native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): double;
+  private native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): long;
 
-  private native nativeDisconnectServiceExtensionAbility(connection: double, callback: AsyncCallbackWrapper<void>): void;
+  private native nativeDisconnectServiceExtensionAbility(connection: long, callback: AsyncCallbackWrapper<void>): void;
 
   private native nativeSetColorMode(colorMode: ConfigurationConstant.ColorMode): void;
 
   private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>,
     startCallback: AbilityStartCallback): BusinessError;
 
+  private native nativeOpenAtomicService(appId: string, callback: AsyncCallbackWrapper<AbilityResult>, options?: AtomicServiceOptions): void;
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
@@ -383,18 +397,18 @@ export default class UIAbilityContext extends Context {
     });
   }
 
-  connectServiceExtensionAbility(want: Want, options: ConnectOptions): number {
+  connectServiceExtensionAbility(want: Want, options: ConnectOptions): long {
     return this.nativeConnectServiceExtensionAbility(want, options);
   }
 
-  disconnectServiceExtensionAbility(connection: number, callback: AsyncCallback<void>): void {
+  disconnectServiceExtensionAbility(connection: long, callback: AsyncCallback<void>): void {
     let syncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeDisconnectServiceExtensionAbility(connection, syncCall);
     });
   }
 
-  disconnectServiceExtensionAbility(connection: number): Promise<void> {
+  disconnectServiceExtensionAbility(connection: long): Promise<void> {
     return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
       let callback = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
         if (err == null || err.code == 0) {
@@ -420,7 +434,11 @@ export default class UIAbilityContext extends Context {
     });
     p1.then((e: NullishType) => {
       let retError = e as BusinessError;
-      callback(retError, undefined);
+      if (retError.code === 0) {
+        callback(null, undefined);
+      } else {
+        callback(retError, undefined);
+      }    
     }, (err: Error): void => {
       callback(err as BusinessError, undefined);
     });
@@ -444,5 +462,20 @@ export default class UIAbilityContext extends Context {
       });
     });
     return p;
+  }
+
+  openAtomicService(appId: string, options?: AtomicServiceOptions): Promise<AbilityResult> {
+    return new Promise<AbilityResult>((resolve: (data: AbilityResult) => void, reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError | null, data: AbilityResult | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as AbilityResult);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute(() => {
+        this.nativeOpenAtomicService(appId, asyncCall, options);
+      });
+    });
   }
 }

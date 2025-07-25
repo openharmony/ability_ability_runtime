@@ -59,6 +59,7 @@ private:
         const std::shared_ptr<AbilityDelegatorArgs> &args, const AppExecFwk::BundleInfo &bundleInfo);
     void CallOnPrepareMethod(ani_env* aniEnv);
     void CallOnRunMethod(ani_env* aniEnv);
+    std::string GetTestRunnerPath(const std::shared_ptr<AbilityDelegatorArgs> &args);
 
     ETSRuntime &etsRuntime_;
     std::unique_ptr<AppExecFwk::ETSNativeReference> etsTestRunnerObj_;

@@ -81,6 +81,12 @@ void UnwrapWantAgent(ani_env *env, ani_object agent, void** result)
         TAG_LOGE(AAFwkTag::WANTAGENT, "FindClass status: %{public}d, or null cls", status);
         return;
     }
+    ani_boolean isWantAgentCls = ANI_FALSE;
+    if ((status = env->Object_InstanceOf(agent, cls, &isWantAgentCls)) != ANI_OK || !isWantAgentCls) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Object_InstanceOf failed: status=%{public}d, isWantAgentCls=%{public}d", status,
+            isWantAgentCls);
+        return;
+    }
     ani_field wantAgentPtrField = nullptr;
     if ((status = env->Class_FindField(cls, "wantAgentPtr", &wantAgentPtrField)) != ANI_OK ||
         wantAgentPtrField == nullptr) {

@@ -160,14 +160,14 @@ ani_object EtsAbilityDelegator::WrapShellCmdResult(ani_env *env, std::unique_ptr
         TAG_LOGE(AAFwkTag::DELEGATOR, "set strResult failed status: %{public}d", status);
     }
     int32_t exitCode = result->GetExitCode();
-    status = env->Object_SetPropertyByName_Double(object, "exitCode", exitCode);
+    status = env->Object_SetPropertyByName_Int(object, "exitCode", exitCode);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "set exitCode failed status: %{public}d", status);
     }
     return object;
 }
 
-ani_object EtsAbilityDelegator::GetAppContext(ani_env *env, ani_class clss)
+ani_object EtsAbilityDelegator::GetAppContext(ani_env *env, [[maybe_unused]]ani_object object, ani_class clss)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "GetAppContext call");
     if (env == nullptr) {
@@ -200,7 +200,8 @@ ani_object EtsAbilityDelegator::GetAppContext(ani_env *env, ani_class clss)
     return contextObj;
 }
 
-void EtsAbilityDelegator::ExecuteShellCommand(ani_env *env, ani_string cmd, ani_double timeoutSecs, ani_object callback)
+void EtsAbilityDelegator::ExecuteShellCommand(ani_env *env, [[maybe_unused]]ani_object object,
+    ani_string cmd, ani_long timeoutSecs, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "ExecuteShellCommand called");
     if (env == nullptr) {
@@ -244,7 +245,8 @@ void EtsAbilityDelegator::ExecuteShellCommand(ani_env *env, ani_string cmd, ani_
     return;
 }
 
-void EtsAbilityDelegator::FinishTest(ani_env *env, ani_string msg, ani_double code, ani_object callback)
+void EtsAbilityDelegator::FinishTest(ani_env *env, [[maybe_unused]]ani_object object,
+    ani_string msg, ani_long code, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "called");
     if (env == nullptr) {
@@ -271,7 +273,7 @@ void EtsAbilityDelegator::FinishTest(ani_env *env, ani_string msg, ani_double co
     return;
 }
 
-void EtsAbilityDelegator::PrintSync(ani_env *env, ani_string msg)
+void EtsAbilityDelegator::PrintSync(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_string msg)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "PrintSync");
     if (env == nullptr) {
@@ -315,7 +317,8 @@ void EtsAbilityDelegator::RetrieveStringFromAni(ani_env *env, ani_string str, st
     res.resize(sz);
 }
 
-void EtsAbilityDelegator::AddAbilityMonitor(ani_env *env, ani_object monitorObj, ani_object callback)
+void EtsAbilityDelegator::AddAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
+    ani_object monitorObj, ani_object callback)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env is nullptr");
@@ -340,7 +343,8 @@ void EtsAbilityDelegator::AddAbilityMonitor(ani_env *env, ani_object monitorObj,
     return;
 }
 
-void EtsAbilityDelegator::AddAbilityMonitorSync(ani_env *env, ani_object monitorObj)
+void EtsAbilityDelegator::AddAbilityMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass,
+    ani_object monitorObj)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "AddAbilityMonitorSync");
     if (env == nullptr) {
@@ -364,7 +368,8 @@ void EtsAbilityDelegator::AddAbilityMonitorSync(ani_env *env, ani_object monitor
     }
     return;
 }
-void EtsAbilityDelegator::StartAbility(ani_env *env, ani_object wantObj, ani_object callback)
+void EtsAbilityDelegator::StartAbility(ani_env *env, [[maybe_unused]]ani_object object,
+    ani_object wantObj, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "StartAbility");
     if (env == nullptr) {
@@ -396,7 +401,8 @@ void EtsAbilityDelegator::StartAbility(ani_env *env, ani_object wantObj, ani_obj
     return;
 }
 
-ani_ref EtsAbilityDelegator::GetCurrentTopAbility(ani_env* env, ani_object callback)
+ani_ref EtsAbilityDelegator::GetCurrentTopAbility(ani_env* env, [[maybe_unused]]ani_class aniClass,
+    ani_object callback)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "called");
     ani_object objValue = nullptr;
@@ -438,7 +444,8 @@ ani_ref EtsAbilityDelegator::GetCurrentTopAbility(ani_env* env, ani_object callb
     return objValue;
 }
 
-void EtsAbilityDelegator::RemoveAbilityMonitor(ani_env *env, ani_object monitorObj, ani_object callback)
+void EtsAbilityDelegator::RemoveAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
+    ani_object monitorObj, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "RemoveAbilityMonitor called");
     if (env == nullptr) {
@@ -467,7 +474,8 @@ void EtsAbilityDelegator::RemoveAbilityMonitor(ani_env *env, ani_object monitorO
     return;
 }
 
-void EtsAbilityDelegator::RemoveAbilityMonitorSync(ani_env *env, ani_object monitorObj)
+void EtsAbilityDelegator::RemoveAbilityMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass,
+    ani_object monitorObj)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "RemoveAbilityMonitorSync called");
     if (env == nullptr) {
@@ -493,8 +501,8 @@ void EtsAbilityDelegator::RemoveAbilityMonitorSync(ani_env *env, ani_object moni
     return;
 }
 
-void EtsAbilityDelegator::WaitAbilityMonitor(ani_env *env, ani_object monitorObj, ani_double timeout,
-    ani_object callback)
+void EtsAbilityDelegator::WaitAbilityMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
+    ani_object monitorObj, ani_long timeout, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "WaitAbilityMonitor called");
     if (env == nullptr) {
@@ -534,7 +542,8 @@ void EtsAbilityDelegator::WaitAbilityMonitor(ani_env *env, ani_object monitorObj
     return;
 }
 
-void EtsAbilityDelegator::AddAbilityStageMonitor(ani_env *env, ani_object stageMonitorObj, ani_object callback)
+void EtsAbilityDelegator::AddAbilityStageMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
+    ani_object stageMonitorObj, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "AddAbilityStageMonitor called");
     if (env == nullptr) {
@@ -566,7 +575,8 @@ void EtsAbilityDelegator::AddAbilityStageMonitor(ani_env *env, ani_object stageM
     return;
 }
 
-void EtsAbilityDelegator::AddAbilityStageMonitorSync(ani_env *env, ani_object stageMonitorObj)
+void EtsAbilityDelegator::AddAbilityStageMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass,
+    ani_object stageMonitorObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "AddAbilityStageMonitorSync called");
     if (env == nullptr) {
@@ -595,7 +605,8 @@ void EtsAbilityDelegator::AddAbilityStageMonitorSync(ani_env *env, ani_object st
     return;
 }
 
-void EtsAbilityDelegator::RemoveAbilityStageMonitor(ani_env *env, ani_object stageMonitorObj, ani_object callback)
+void EtsAbilityDelegator::RemoveAbilityStageMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
+    ani_object stageMonitorObj, ani_object callback)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "RemoveAbilityStageMonitor called");
     if (env == nullptr) {
@@ -627,7 +638,8 @@ void EtsAbilityDelegator::RemoveAbilityStageMonitor(ani_env *env, ani_object sta
     return;
 }
 
-void EtsAbilityDelegator::RemoveAbilityStageMonitorSync(ani_env *env, ani_object stageMonitorObj)
+void EtsAbilityDelegator::RemoveAbilityStageMonitorSync(ani_env *env, [[maybe_unused]]ani_class aniClass,
+    ani_object stageMonitorObj)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "RemoveAbilityStageMonitorSync called");
     if (env == nullptr) {
@@ -657,8 +669,8 @@ void EtsAbilityDelegator::RemoveAbilityStageMonitorSync(ani_env *env, ani_object
     return;
 }
 
-void EtsAbilityDelegator::WaitAbilityStageMonitor(ani_env *env, ani_object stageMonitorObj, ani_double timeout,
-    ani_object callback)
+void EtsAbilityDelegator::WaitAbilityStageMonitor(ani_env *env, [[maybe_unused]]ani_class aniClass,
+    ani_object stageMonitorObj, ani_long timeout, ani_object callback)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "WaitAbilityStageMonitor called");
     if (env == nullptr) {
@@ -694,7 +706,8 @@ void EtsAbilityDelegator::WaitAbilityStageMonitor(ani_env *env, ani_object stage
     return;
 }
 
-void EtsAbilityDelegator::DoAbilityForeground(ani_env *env, ani_object abilityObj, ani_object callback)
+void EtsAbilityDelegator::DoAbilityForeground(ani_env *env, [[maybe_unused]]ani_object object,
+    ani_object abilityObj, ani_object callback)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "DoAbilityForeground called");
     if (env == nullptr) {
@@ -724,7 +737,8 @@ void EtsAbilityDelegator::DoAbilityForeground(ani_env *env, ani_object abilityOb
     return;
 }
 
-void EtsAbilityDelegator::DoAbilityBackground(ani_env *env, ani_object abilityObj, ani_object callback)
+void EtsAbilityDelegator::DoAbilityBackground(ani_env *env, [[maybe_unused]]ani_object object,
+    ani_object abilityObj, ani_object callback)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "DoAbilityBackground called");
     if (env == nullptr) {
@@ -754,7 +768,8 @@ void EtsAbilityDelegator::DoAbilityBackground(ani_env *env, ani_object abilityOb
     return;
 }
 
-void EtsAbilityDelegator::Print(ani_env *env, ani_string msg, ani_object callback)
+void EtsAbilityDelegator::Print(ani_env *env, [[maybe_unused]]ani_object object,
+    ani_string msg, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "Print called");
     if (env == nullptr) {
@@ -782,7 +797,7 @@ void EtsAbilityDelegator::Print(ani_env *env, ani_string msg, ani_object callbac
     return;
 }
 
-ani_double EtsAbilityDelegator::GetAbilityState(ani_env *env, ani_object abilityObj)
+ani_int EtsAbilityDelegator::GetAbilityState(ani_env *env, [[maybe_unused]]ani_object object, ani_object abilityObj)
 {
     TAG_LOGD(AAFwkTag::DELEGATOR, "GetAbilityState called");
     if (env == nullptr) {
@@ -803,7 +818,7 @@ ani_double EtsAbilityDelegator::GetAbilityState(ani_env *env, ani_object ability
     AbilityDelegator::AbilityState lifeState = delegator->GetAbilityState(remoteObject);
     AbilityLifecycleState abilityLifeState = AbilityLifecycleState::UNINITIALIZED;
     AbilityLifecycleStateToEts(lifeState, abilityLifeState);
-    return static_cast<ani_double>(abilityLifeState);
+    return static_cast<ani_int>(abilityLifeState);
 }
 
 void EtsAbilityDelegator::AbilityLifecycleStateToEts(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -704,7 +704,7 @@ void UIAbility::BindHybridContext(const std::shared_ptr<AppExecFwk::OHOSApplicat
         TAG_LOGE(AAFwkTag::UIABILITY, "null appInfo");
         return;
     }
-    if (appInfo->codeLanguage != AppExecFwk::Constants::CODE_LANGUAGE_HYBRID) {
+    if (appInfo->arkTSMode != AppExecFwk::Constants::ARKTS_MODE_HYBRID) {
         TAG_LOGD(AAFwkTag::UIABILITY, "not hybrid app, no need to create hybrid context");
         return;
     }
@@ -714,12 +714,12 @@ void UIAbility::BindHybridContext(const std::shared_ptr<AppExecFwk::OHOSApplicat
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo");
         return;
     }
-    if (abilityInfo->codeLanguage == AppExecFwk::Constants::CODE_LANGUAGE_1_1) {
+    if (abilityInfo->arkTSMode == AppExecFwk::Constants::ARKTS_MODE_DYNAMIC) {
         BindEtsContext(application, record);
-    } else if (abilityInfo->codeLanguage == AppExecFwk::Constants::CODE_LANGUAGE_1_2) {
+    } else if (abilityInfo->arkTSMode == AppExecFwk::Constants::ARKTS_MODE_STATIC) {
         BindJsContext(application, record);
     } else {
-        TAG_LOGE(AAFwkTag::UIABILITY, "unknown codeLanguage");
+        TAG_LOGE(AAFwkTag::UIABILITY, "unknown arkTSMode");
     }
 }
 

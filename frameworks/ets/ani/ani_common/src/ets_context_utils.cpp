@@ -232,6 +232,20 @@ void BindParentProperty(ani_env *aniEnv, ani_class contextClass, ani_object cont
     BindApplicationInfo(aniEnv, contextClass, contextObj, context);
     BindResourceManager(aniEnv, contextClass, contextObj, context);
     BindContextDir(aniEnv, contextObj, context);
+    ani_status status = ANI_ERROR;
+    ani_field processNameField;
+    if ((status = aniEnv->Class_FindField(contextClass, "processName", &processNameField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "find processName failed status: %{public}d", status);
+        return;
+    }
+    auto processName = context->GetProcessName();
+    ani_string processNameString = nullptr;
+    aniEnv->String_NewUTF8(processName.c_str(), processName.size(), &processNameString);
+    if ((status = aniEnv->Object_SetField_Ref(contextObj, processNameField,
+        reinterpret_cast<ani_ref>(processNameString))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Ref failed, status: %{public}d", status);
+        return;
+    }
 }
 
 void BindNativeFunction(ani_env *aniEnv)
@@ -259,7 +273,7 @@ void BindNativeFunction(ani_env *aniEnv)
                 reinterpret_cast<void *>(ContextUtil::CreateModuleResourceManagerSync)},
             ani_native_function {"nativeGetGroupDir", nullptr,
                 reinterpret_cast<void *>(ContextUtil::NativeGetGroupDir)},
-            ani_native_function {"nativeCreateDisplayContext", "D:Lapplication/Context/Context;",
+            ani_native_function {"nativeCreateDisplayContext", "J:Lapplication/Context/Context;",
                 reinterpret_cast<void *>(ContextUtil::NativeCreateDisplayContext)},
             ani_native_function {"nativeCreateAreaModeContext",
                 "L@ohos/app/ability/contextConstant/contextConstant/AreaMode;:Lapplication/Context/Context;",
@@ -424,7 +438,7 @@ void NativeGetGroupDir([[maybe_unused]]ani_env *env, [[maybe_unused]]ani_object 
     AppExecFwk::AsyncCallback(env, callBackObj, errorObject, aniPath);
 }
 
-ani_object NativeCreateDisplayContext(ani_env *env, ani_object aniObj, ani_double displayId)
+ani_object NativeCreateDisplayContext(ani_env *env, ani_object aniObj, ani_long displayId)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "NativeCreateDisplayContext");
     if (env == nullptr) {
