@@ -8195,7 +8195,7 @@ void AbilityManagerService::RemoveUnauthorizedLaunchReasonMessage(const Want &wa
     std::string value = want.GetStringParam(Want::PARM_LAUNCH_REASON_MESSAGE);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "launchReasonMessage:%{public}s", value.c_str());
     if (!AppUtils::GetInstance().IsSystemReasonMessage(value)) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "not in allowlist, remove");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "not allow, remove");
         (const_cast<Want &>(want)).RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
         abilityRequest.want.RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
         return;
