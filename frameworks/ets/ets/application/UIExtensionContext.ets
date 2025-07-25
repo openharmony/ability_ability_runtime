@@ -55,8 +55,8 @@ export default class UIExtensionContext extends ExtensionContext {
   native terminateSelfWithResultSync(parameter: AbilityResult, callback: AsyncCallbackWrapper<void>): void;
   native nativeStartAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
   native nativeStartAbility(want: Want, options: StartOptions, callback:AsyncCallbackWrapper<void>): void;
-  private native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): double;
-  private native nativeDisconnectServiceExtensionAbilitySync(connection: double, callback: AsyncCallbackWrapper<void>): void;
+  private native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): long;
+  private native nativeDisconnectServiceExtensionAbilitySync(connection: long, callback: AsyncCallbackWrapper<void>): void;
   private native nativeStartAbilityForResultAsCaller(want: Want, callback: AsyncCallbackWrapper<void>, options?: StartOptions): void;
   private native nativeStartAbilityForResult(want: Want, callback:AsyncCallbackWrapper<AbilityResult>): void;
   private native nativeStartAbilityForResult(want: Want, startOptions: StartOptions,
@@ -137,18 +137,18 @@ export default class UIExtensionContext extends ExtensionContext {
     });
   }
 
-  connectServiceExtensionAbility(want: Want, options: ConnectOptions): number {
+  connectServiceExtensionAbility(want: Want, options: ConnectOptions): long {
     return this.nativeConnectServiceExtensionAbility(want, options);
   }
 
-  disconnectServiceExtensionAbility(connection: number, callback: AsyncCallback<void>): void {
+  disconnectServiceExtensionAbility(connection: long, callback: AsyncCallback<void>): void {
     let syncCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeDisconnectServiceExtensionAbilitySync(connection, syncCall);
     });
   }
 
-  disconnectServiceExtensionAbility(connection: number): Promise<void> {
+  disconnectServiceExtensionAbility(connection: long): Promise<void> {
     return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
       let syncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
         if (err == null || err.code == 0) {

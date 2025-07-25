@@ -26,17 +26,17 @@ namespace insightIntent {
   }
 
   export interface ExecuteResult {
-    code: number;
+    code: int;
     result?: Record<string, Object>;
     uris?: Array<string>;
-    flags?: number;
+    flags?: int;
   }
 
   export class ExecuteResultInner implements ExecuteResult{
-    code: number;
+    code: int;
     result?: Record<string, Object>;
     uris?: Array<string>;
-    flags?: number;
+    flags?: int;
   }
 }
 

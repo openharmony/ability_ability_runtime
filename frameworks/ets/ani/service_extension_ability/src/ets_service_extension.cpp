@@ -41,17 +41,17 @@ namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 namespace {
+constexpr const int ANI_ALREADY_BINDED = 8;
 constexpr const char *CLASSNAME_SERVICE_ABILITY = "L@ohos/app/ability/ServiceExtensionAbility/ServiceExtensionAbility;";
 constexpr const char *SERVICE_EXTENSION_CONTEXT_CLASS_NAME =
     "Lapplication/ServiceExtensionContext/ServiceExtensionContext;";
 constexpr const char *NATIVE_ONCONNECT_CALLBACK_SIGNATURE = "L@ohos/rpc/rpc/RemoteObject;:Z";
 constexpr const char *ON_CREATE_SIGNATURE = "L@ohos/app/ability/Want/Want;:V";
 constexpr const char *VOID_SIGNATURE = ":V";
-constexpr const char *ON_CONNECT_SIGNATURE = "L@ohos/app/ability/Want/Want;:Lstd/core/Object;";
 constexpr const char *CHECK_PROMISE_SIGNATURE = "Lstd/core/Object;:Z";
 constexpr const char *CALL_PROMISE_SIGNATURE = "Lstd/core/Promise;:Z";
 constexpr const char *ON_DISCONNECT_SIGNATURE = "L@ohos/app/ability/Want/Want;:V";
-constexpr const char *ON_REQUEST_SIGNATURE = "L@ohos/app/ability/Want/Want;D:V";
+constexpr const char *ON_REQUEST_SIGNATURE = "L@ohos/app/ability/Want/Want;I:V";
 constexpr const char *ON_CONFIGURATION_UPDATE_SIGNATURE = "L@ohos/app/ability/Configuration/Configuration;:V";
 constexpr const char *ON_DUMP_SIGNATURE = "Lescompat/Array;:Lescompat/Array;";
 
@@ -167,7 +167,8 @@ void EtsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status: %{public}d", status);
         return;
     }
-    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
+    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK
+        && status != ANI_ALREADY_BINDED) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Class_BindNativeMethods is fail %{public}d", status);
         return;
     }
@@ -217,7 +218,7 @@ sptr<IRemoteObject> EtsServiceExtension::OnConnect(const AAFwk::Want &want)
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null wantRef");
         return nullptr;
     }
-    ani_ref result = CallObjectMethod(true, "onConnect", ON_CONNECT_SIGNATURE, wantRef);
+    ani_ref result = CallObjectMethod(true, "onConnect", nullptr, wantRef);
     auto obj = reinterpret_cast<ani_object>(result);
     auto remoteObj = AniGetNativeRemoteObject(env, obj);
     if (remoteObj == nullptr) {
@@ -255,7 +256,7 @@ sptr<IRemoteObject> EtsServiceExtension::OnConnect(const AAFwk::Want &want,
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
         return nullptr;
     }
-    ani_ref aniRemoteRef = CallObjectMethod(true, "onConnect", ON_CONNECT_SIGNATURE, wantRef);
+    ani_ref aniRemoteRef = CallObjectMethod(true, "onConnect", nullptr, wantRef);
     auto aniRemoteobj = reinterpret_cast<ani_object>(aniRemoteRef);
     ani_method method {};
     if ((status = env->Class_FindMethod(etsObj_->aniCls, "checkPromise", CHECK_PROMISE_SIGNATURE, &method)) != ANI_OK) {

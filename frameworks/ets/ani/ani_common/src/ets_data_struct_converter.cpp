@@ -71,14 +71,14 @@ ani_object CreateEtsLastExitDetailInfo(ani_env* env, const AAFwk::LastExitDetail
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "null object");
         return nullptr;
     }
-    env->Object_SetPropertyByName_Double(object, "pid", lastExitDetailInfo.pid);
+    env->Object_SetPropertyByName_Int(object, "pid", lastExitDetailInfo.pid);
     env->Object_SetPropertyByName_Ref(object, "processName", GetAniString(env, lastExitDetailInfo.processName));
-    env->Object_SetPropertyByName_Double(object, "uid", lastExitDetailInfo.uid);
-    env->Object_SetPropertyByName_Double(object, "exitSubReason", lastExitDetailInfo.exitSubReason);
+    env->Object_SetPropertyByName_Int(object, "uid", lastExitDetailInfo.uid);
+    env->Object_SetPropertyByName_Int(object, "exitSubReason", lastExitDetailInfo.exitSubReason);
     env->Object_SetPropertyByName_Ref(object, "exitMsg", GetAniString(env, lastExitDetailInfo.exitMsg));
-    env->Object_SetPropertyByName_Double(object, "rss", lastExitDetailInfo.rss);
-    env->Object_SetPropertyByName_Double(object, "pss", lastExitDetailInfo.pss);
-    env->Object_SetPropertyByName_Double(object, "timestamp", lastExitDetailInfo.timestamp);
+    env->Object_SetPropertyByName_Int(object, "rss", lastExitDetailInfo.rss);
+    env->Object_SetPropertyByName_Int(object, "pss", lastExitDetailInfo.pss);
+    env->Object_SetPropertyByName_Long(object, "timestamp", lastExitDetailInfo.timestamp);
 
     return object;
 }

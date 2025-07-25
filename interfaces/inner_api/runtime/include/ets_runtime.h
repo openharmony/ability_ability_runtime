@@ -54,7 +54,7 @@ public:
         return Language::ETS;
     }
 
-    void StartDebugMode(const DebugOption debugOption) override {}
+    void StartDebugMode(const DebugOption debugOption) override;
     void DumpHeapSnapshot(bool isPrivate) override {}
     void NotifyApplicationState(bool isBackground) override {}
     bool SuspendVM(uint32_t tid) override { return false; }
@@ -90,6 +90,10 @@ public:
     const std::unique_ptr<AbilityRuntime::Runtime> &GetJsRuntime() const;
     std::unique_ptr<AbilityRuntime::Runtime> MoveJsRuntime();
     static std::unique_ptr<ETSRuntime> PreFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
+    void PreloadSystemClass(const char *className) override;
+    void DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug);
+    void StopDebugMode();
+    uint32_t instanceId_ = 0;
 
 private:
     bool Initialize(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
@@ -98,10 +102,13 @@ private:
     std::unique_ptr<AppExecFwk::ETSNativeReference> LoadEtsModule(const std::string &moduleName,
         const std::string &fileName, const std::string &hapPath, const std::string &srcEntrance);
     void PostFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
+    std::string HandleOhmUrlSrcEntry(const std::string &srcEntry);
+    void HandleOhmUrlFileName(std::string &fileName);
     int32_t apiTargetVersion_ = 0;
     std::string codePath_;
     std::string moduleName_;
     std::unique_ptr<AbilityRuntime::Runtime> jsRuntime_ = nullptr;
+    bool debugMode_ = false;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
