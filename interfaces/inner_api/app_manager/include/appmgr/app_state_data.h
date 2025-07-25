@@ -71,6 +71,7 @@ struct AppStateData : public Parcelable {
     std::vector<int32_t> renderPids;
     std::string bundleName;
     std::string callerBundleName;
+    bool isFromWindowFocusChanged = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
