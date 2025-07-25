@@ -1852,6 +1852,7 @@ int32_t UIAbilityLifecycleManager::BackToCallerAbilityWithResultLocked(sptr<Sess
     auto currentSession = iface_cast<Rosen::ISession>(currentSessionInfo->sessionToken);
     callerSessionInfo->isBackTransition = true;
     callerSessionInfo->scenarios = ServerConstant::SCENARIO_BACK_TO_CALLER_ABILITY_WITH_RESULT;
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, BackToCaller Pending");
     auto ret = static_cast<int>(currentSession->PendingSessionActivation(callerSessionInfo));
     callerSessionInfo->isBackTransition = false;
     return ret;
