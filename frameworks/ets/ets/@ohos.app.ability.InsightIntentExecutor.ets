@@ -30,118 +30,89 @@ export default class InsightIntentExecutor {
 
   public callOnExecuteInUIAbilityForegroundMode(name: string, param: Record<string, Object>,
     pageLoader: window.WindowStage): insightIntent.ExecuteResult {
-    let p = this.onExecuteInUIAbilityForegroundModeAsync(name, param, pageLoader);
-    if (this.isOnExecuteInUIAbilityForegroundModeAsync) {
+    let p = this.onExecuteInUIAbilityForegroundMode(name, param, pageLoader);
+    if (p instanceof Promise) {
+      this.isOnExecuteInUIAbilityForegroundModeAsync = true;
       p.then((result: insightIntent.ExecuteResult): void => {
         this.nativeOnExecuteResult(result);
       });
       let ret: insightIntent.ExecuteResult = {};
       return ret;
     } else {
-      return this.onExecuteInUIAbilityForegroundMode(name, param, pageLoader);
+      this.isOnExecuteInUIAbilityForegroundModeAsync = false;
+      return p;
     }
   }
 
   public callOnExecuteInUIAbilityBackgroundMode(name: string, param: Record<string, Object>):
     insightIntent.ExecuteResult {
-    let p = this.onExecuteInUIAbilityBackgroundModeAsync(name, param);
-    if (this.isOnExecuteInUIAbilityBackgroundModeAsync) {
-      p.then<insightIntent.ExecuteResult>((result: insightIntent.ExecuteResult): void => {
+    let p = this.onExecuteInUIAbilityBackgroundMode(name, param);
+    if (p instanceof Promise) {
+      this.isOnExecuteInUIAbilityBackgroundModeAsync = true;
+      p.then<void>((result: insightIntent.ExecuteResult): void => {
         this.nativeOnExecuteResult(result);
       });
       let ret: insightIntent.ExecuteResult = {};
       return ret;
     } else {
-      return this.onExecuteInUIAbilityBackgroundMode(name, param);
+      this.isOnExecuteInUIAbilityBackgroundModeAsync = false;
+      return p;
     }
   }
 
   public callOnExecuteInUIExtensionAbility(name: string, param: Record<string, Object>,
     pageLoader: UIExtensionContentSession): insightIntent.ExecuteResult {
-    let p = this.onExecuteInUIExtensionAbilityAsync(name, param, pageLoader);
-    if (this.isOnExecuteInUIExtensionAbilityAsync) {
-      p.then<insightIntent.ExecuteResult>((result: insightIntent.ExecuteResult): void => {
+    let p = this.onExecuteInUIExtensionAbility(name, param, pageLoader);
+    if (p instanceof Promise) {
+      this.isOnExecuteInUIExtensionAbilityAsync = true;
+      p.then<void>((result: insightIntent.ExecuteResult): void => {
         this.nativeOnExecuteResult(result);
       });
       let ret: insightIntent.ExecuteResult = {};
       return ret;
     } else {
-      return this.onExecuteInUIExtensionAbility(name, param, pageLoader);
+      this.isOnExecuteInUIExtensionAbilityAsync = false;
+      return p;
     }
   }
 
   public callOnExecuteInServiceExtensionAbility(name: string, param: Record<string, Object>):
     insightIntent.ExecuteResult {
-    let p = this.onExecuteInServiceExtensionAbilityAsync(name, param);
-    if (this.isOnExecuteInServiceExtensionAbilityAsync) {
-      p.then<insightIntent.ExecuteResult>((result: insightIntent.ExecuteResult): void => {
+    let p = this.onExecuteInServiceExtensionAbility(name, param);
+    if (p instanceof Promise) {
+      this.isOnExecuteInServiceExtensionAbilityAsync = true;
+      p.then<void>((result: insightIntent.ExecuteResult): void => {
         this.nativeOnExecuteResult(result);
       });
       let ret: insightIntent.ExecuteResult = {};
       return ret;
     } else {
-      return this.onExecuteInServiceExtensionAbility(name, param);
+      this.isOnExecuteInServiceExtensionAbilityAsync = false;
+      return p;
     }
   }
 
   onExecuteInUIAbilityForegroundMode(name: string, param: Record<string, Object>, pageLoader: window.WindowStage):
-    insightIntent.ExecuteResult {
+    insightIntent.ExecuteResult | Promise<insightIntent.ExecuteResult> {
     let ret: insightIntent.ExecuteResult = {};
     return ret;
-  }
-
-  onExecuteInUIAbilityForegroundModeAsync(name: string, param: Record<string, Object>, pageLoader: window.WindowStage):
-    Promise<insightIntent.ExecuteResult> {
-    this.isOnExecuteInUIAbilityForegroundModeAsync = false;
-    return new Promise<insightIntent.ExecuteResult>((
-      resolve: (a: insightIntent.ExecuteResult) => void,
-      reject: (err: Error) => void): void => {
-    });
   }
 
   onExecuteInUIAbilityBackgroundMode(name: string, param: Record<string, Object>):
-    insightIntent.ExecuteResult {
+    insightIntent.ExecuteResult | Promise<insightIntent.ExecuteResult> {
     let ret: insightIntent.ExecuteResult = {};
     return ret;
-  }
-
-  onExecuteInUIAbilityBackgroundModeAsync(name: string, param: Record<string, Object>):
-    Promise<insightIntent.ExecuteResult> {
-    this.isOnExecuteInUIAbilityBackgroundModeAsync = false;
-    return new Promise<insightIntent.ExecuteResult>((
-      resolve: (a: insightIntent.ExecuteResult) => void,
-      reject: (err: Error) => void): void => {
-    });
   }
 
   onExecuteInUIExtensionAbility(name: string, param: Record<string, Object>, pageLoader: UIExtensionContentSession):
-    insightIntent.ExecuteResult {
+    insightIntent.ExecuteResult | Promise<insightIntent.ExecuteResult> {
     let ret: insightIntent.ExecuteResult = {};
     return ret;
-  }
-
-  onExecuteInUIExtensionAbilityAsync(name: string, param: Record<string, Object>,
-    pageLoader: UIExtensionContentSession):
-    Promise<insightIntent.ExecuteResult> {
-    this.isOnExecuteInUIExtensionAbilityAsync = false;
-    return new Promise<insightIntent.ExecuteResult>((
-      resolve: (a: insightIntent.ExecuteResult) => void,
-      reject: (err: Error) => void): void => {
-    });
   }
 
   onExecuteInServiceExtensionAbility(name: string, param: Record<string, Object>):
-    insightIntent.ExecuteResult {
+    insightIntent.ExecuteResult | Promise<insightIntent.ExecuteResult> {
     let ret: insightIntent.ExecuteResult = {};
     return ret;
-  }
-
-  onExecuteInServiceExtensionAbilityAsync(name: string, param: Record<string, Object>):
-    Promise<insightIntent.ExecuteResult> {
-    this.isOnExecuteInServiceExtensionAbilityAsync = false;
-    return new Promise<insightIntent.ExecuteResult>((
-      resolve: (a: insightIntent.ExecuteResult) => void,
-      reject: (err: Error) => void): void => {
-    });
   }
 }
