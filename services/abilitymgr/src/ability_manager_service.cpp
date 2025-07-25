@@ -95,6 +95,7 @@
 #include "startup_util.h"
 #include "status_bar_delegate_interface.h"
 #include "string_wrapper.h"
+#include "time_util.h"
 #include "ui_extension_utils.h"
 #include "ui_service_extension_connection_constants.h"
 #include "unlock_screen_manager.h"
@@ -7114,8 +7115,12 @@ int AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBo
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ExtensionAbilityInfo extensionAbilityInfo;
     int attemptNums = 0;
+    int64_t startTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
+    int64_t bmsCntTime = 0;
+    int64_t queryTime = 0;
     while (true) {
         bms->PreConnect();
+        bmsCntTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
         if (IN_PROCESS_CALL(bms->ImplicitQueryInfoByPriority(want,
             AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT, userId,
             abilityInfo, extensionAbilityInfo))) {
@@ -7130,6 +7135,7 @@ int AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBo
         AbilityRequest abilityRequest;
         usleep(REPOLL_TIME_MICRO_SECONDS);
     }
+    queryTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
 
     if (abilityInfo.name.empty() && extensionAbilityInfo.name.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "query highest priority ability failed");
@@ -7145,8 +7151,10 @@ int AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBo
     } else {
         /* highest priority extension ability */
         TAG_LOGI(AAFwkTag::ABILITYMGR,
-            "start highest priority extension ability bundleName:%{public}s, ability:%{public}s",
-            extensionAbilityInfo.bundleName.c_str(), extensionAbilityInfo.name.c_str());
+            "start highest priority extension ability bundleName:%{public}s, ability:%{public}s,"
+            "BMScntTime:%{public}" PRId64 " ms, queryTime:%{public}" PRId64 " ms",
+            extensionAbilityInfo.bundleName.c_str(), extensionAbilityInfo.name.c_str(), 
+            bmsCntTime - startTime, queryTime - bmsCntTime);
         abilityWant.SetElementName(extensionAbilityInfo.bundleName, extensionAbilityInfo.name);
     }
 
