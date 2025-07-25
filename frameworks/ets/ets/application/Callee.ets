@@ -36,7 +36,7 @@ const ERROR_MSG_INVALID_PARAM = 'Invalid input parameter.';
 const ERROR_MSG_FUNC_REGISTERED = 'Method registered. The method has registered.';
 const ERROR_MSG_FUNC_NOT_EXIST = 'The method has not been registered.';
 const ERROR_MSG_INNER_ERROR = 'Inner Error.';
-const ERROR_MSG_TRANSFER_CLASS_NOT_FOUND = "Unable to find the class for transferring.";
+const ERROR_MSG_TRANSFER_CLASS_NOT_FOUND = 'Unable to find the class for transferring.';
 
 let errMap = new Map<int, string>();
 errMap.set(ERROR_CODE_INVALID_PARAM, ERROR_MSG_INVALID_PARAM);
@@ -60,14 +60,14 @@ class CalleeFromJs implements Callee {
   }
   on(method: string, callback: CalleeCallback): void {
     if (CoroutineExtras.isMainWorker()) {
-      ESValue.wrap(this.jsObj).invokeMethod("on", method, (seq: Any): rpc.Parcelable => {
+      ESValue.wrap(this.jsObj).invokeMethod('on', method, (seq: Any): rpc.Parcelable => {
         let data = transfer.transferStatic(seq, 'rpc.MessageSequence') as rpc.MessageSequence;
         return callback(data);
       });
       return;
     }
     EAWorker.postToMain<void>((): void => {
-      ESValue.wrap(this.jsObj).invokeMethod("on", method, (seq: Any): rpc.Parcelable => {
+      ESValue.wrap(this.jsObj).invokeMethod('on', method, (seq: Any): rpc.Parcelable => {
         let data = transfer.transferStatic(seq, 'rpc.MessageSequence') as rpc.MessageSequence;
         return callback(data);
       });
@@ -75,7 +75,7 @@ class CalleeFromJs implements Callee {
   }
 
   off(method: string): void {
-    ESValue.wrap(this.jsObj).invokeMethod("off", method);
+    ESValue.wrap(this.jsObj).invokeMethod('off', method);
   }
 }
 
@@ -85,12 +85,12 @@ class JsParcelable implements rpc.Parcelable {
     this.jsObj = jsObj;
   }
   marshalling(dataOut: rpc.MessageSequence): boolean {
-    let ret = ESValue.wrap(this.jsObj).invokeMethod("marshalling",
+    let ret = ESValue.wrap(this.jsObj).invokeMethod('marshalling',
       ESValue.wrap(transfer.transferDynamic(dataOut, 'rpc.MessageSequence')));
     return ret.toBoolean();
   }
   unmarshalling(dataIn: rpc.MessageSequence): boolean {
-    let ret = ESValue.wrap(this.jsObj).invokeMethod("unmarshalling",
+    let ret = ESValue.wrap(this.jsObj).invokeMethod('unmarshalling',
       ESValue.wrap(transfer.transferDynamic(dataIn, 'rpc.MessageSequence')));
     return ret.toBoolean();
   }

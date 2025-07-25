@@ -191,7 +191,7 @@ ani_object EtsCallerComplex::NativeTransferStatic(ani_env *env, ani_object, ani_
             if (callback != nullptr) {
                 callback->InvokeOnRelease("release");
             }
-            return ERR_OK; 
+            return ERR_OK;
             }, remoteObj, std::make_shared<CallerCallBack>());
     } while (false);
 
