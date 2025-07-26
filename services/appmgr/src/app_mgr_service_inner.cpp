@@ -19,6 +19,7 @@
 #include <cinttypes>
 #include <csignal>
 #include <cstdint>
+#include <cerrno>
 #include <mutex>
 #include <queue>
 #include <securec.h>
@@ -2988,6 +2989,10 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
             return AAFwk::ERR_KILL_FOUNDATION_UID;
         }
         ret = kill(pid, SIGNAL_KILL);
+        if (ret == -1 && errno == ESRCH) {
+            TAG_LOGW(AAFwkTag::APPMGR, "kill process not exist, pid=%{public}d", pid);
+            return AAFwk::ERR_KILL_PROCESS_NOT_EXIST;
+        }
         if (reason == "OnRemoteDied") {
             TAG_LOGW(AAFwkTag::APPMGR, "application is dead, double check, pid=%{public}d", pid);
         } else {
@@ -2995,10 +3000,8 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
                 pid, ret, killReason.c_str());
         }
     }
+    CHECK_POINTER_AND_RETURN_VALUE(appRecord, ret);
     AAFwk::EventInfo eventInfo;
-    if (!appRecord) {
-        return ret;
-    }
     appRecord->SetKillReason(reason);
     auto applicationInfo = appRecord->GetApplicationInfo();
     if (!applicationInfo) {
@@ -3009,10 +3012,7 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
         eventInfo.versionCode = applicationInfo->versionCode;
     }
     if (ret >= 0) {
-        std::lock_guard lock(killedProcessMapLock_);
-        int64_t killTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
-            system_clock::now().time_since_epoch()).count();
-        killedProcessMap_.emplace(killTime, appRecord->GetProcessName());
+        AddToKillProcessMap(appRecord->GetProcessName());
     }
     DelayedSingleton<CacheProcessManager>::GetInstance()->OnProcessKilled(appRecord);
     eventInfo.pid = appRecord->GetPid();
@@ -3029,6 +3029,14 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
         "%{public}d, processName=%{public}s, msg=%{public}s, FOREGROUND=%{public}d, ret=%{public}d",
         result, pid, eventInfo.processName.c_str(), newReason.c_str(), foreground, ret);
     return ret;
+}
+
+void AppMgrServiceInner::AddToKillProcessMap(const std::string &processName)
+{
+    std::lock_guard lock(killedProcessMapLock_);
+    int64_t killTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count();
+    killedProcessMap_.emplace(killTime, processName);
 }
 
 bool AppMgrServiceInner::CheckIsThreadInFoundation(pid_t pid)
