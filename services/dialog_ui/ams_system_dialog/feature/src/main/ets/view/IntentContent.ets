@@ -177,7 +177,7 @@ export struct IntentContent {
         return pixelMap;
       }
     } else {
-      return icon;
+      return '';
     }
     return pixelMap;
   }
