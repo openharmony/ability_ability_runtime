@@ -26,14 +26,15 @@
 #include "ani_remote_object.h"
 #include "app_utils.h"
 #include "common_fun_ani.h"
-#include "hilog_tag_wrapper.h"
-#include "hitrace_meter.h"
 #include "interop_js/arkts_esvalue.h"
 #include "interop_js/hybridgref_ani.h"
 #include "interop_js/hybridgref_napi.h"
+#include "ets_caller_complex.h"
 #include "ets_context_utils.h"
 #include "ets_error_utils.h"
 #include "ets_ui_extension_callback.h"
+#include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "want.h"
 
 namespace OHOS {
@@ -541,6 +542,54 @@ void EtsAbilityContext::OnStartAbilityForResult(
     }
     TAG_LOGE(AAFwkTag::CONTEXT, "displayId:%{public}d", startOptions.GetDisplayID());
     StartAbilityForResultInner(env, startOptions, want, context, startOptionsObj, callback);
+}
+
+ani_object EtsAbilityContext::StartAbilityByCall(ani_env *env, ani_object aniObj, ani_object wantObj)
+{
+    TAG_LOGI(AAFwkTag::UIABILITY, "StartAbilityByCall");
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    auto context = etsContext ? etsContext->context_.lock() : nullptr;
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "GetAbilityContext is nullptr");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return nullptr;
+    }
+
+    AAFwk::Want want;
+    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "parse want failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
+        return nullptr;
+    }
+    auto callData = std::make_shared<StartAbilityByCallData>();
+    auto callerCallBack = std::make_shared<CallerCallBack>();
+    CallUtil::GenerateCallerCallBack(callData, callerCallBack);
+    auto ret = context->StartAbilityByCall(want, callerCallBack, -1);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "startAbility failed");
+        EtsErrorUtil::ThrowErrorByNativeErr(env, ret);
+        return nullptr;
+    }
+    CallUtil::WaitForCalleeObj(callData);
+
+    if (callData->remoteCallee == nullptr) {
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return nullptr;
+    }
+
+    std::weak_ptr<AbilityContext> abilityContext(context);
+    auto releaseCallFunc = [abilityContext] (std::shared_ptr<CallerCallBack> callback) -> ErrCode {
+        auto contextForRelease = abilityContext.lock();
+        if (contextForRelease == nullptr) {
+            return -1;
+        }
+        return contextForRelease->ReleaseCall(callback);
+    };
+    auto caller = EtsCallerComplex::CreateEtsCaller(env, releaseCallFunc, callData->remoteCallee, callerCallBack);
+    if (caller == nullptr) {
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+    }
+    return caller;
 }
 
 void EtsAbilityContext::StartAbilityForResultInner(ani_env *env, const AAFwk::StartOptions &startOptions,
@@ -1354,6 +1403,9 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             ani_native_function { "nativeTerminateSelfWithResult",
                 "Lability/abilityResult/AbilityResult;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsAbilityContext::TerminateSelfWithResult) },
+            ani_native_function { "nativeStartAbilityByCallSync",
+                "L@ohos/app/ability/Want/Want;:L@ohos/app/ability/UIAbility/Caller;",
+                reinterpret_cast<void*>(EtsAbilityContext::StartAbilityByCall) },
             ani_native_function { "nativeReportDrawnCompletedSync", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<ani_int *>(EtsAbilityContext::ReportDrawnCompleted) },
             ani_native_function { "nativeStartServiceExtensionAbility",
