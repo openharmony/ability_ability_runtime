@@ -1228,7 +1228,7 @@ void StartupManager::InitPreloadSystemSoAllowlist()
     }
 
     if (!ParsePreloadSystemSoAllowlist(parseResult, preloadSystemSoAllowlist_)) {
-        TAG_LOGw(AAFwkTag::STARTUP, "parsing failed. Clear the blank list of names.");
+        TAG_LOGW(AAFwkTag::STARTUP, "parsing failed. Clear the blank list of names.");
         preloadSystemSoAllowlist_.clear();
     }
 }
