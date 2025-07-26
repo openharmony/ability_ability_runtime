@@ -41,14 +41,14 @@ namespace OHOS {
 namespace AbilityRuntime {
 EtsCallerComplex* EtsCallerComplex::GetComplexPtrFrom(ani_env *env, ani_object aniObj)
 {
-    ani_long nativeCaller;
-    ani_status status = ANI_ERROR;
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env or aniObj");
         return nullptr;
     }
+    ani_long nativeCaller;
+    ani_status status = ANI_ERROR;
     if ((status = env->Object_GetFieldByName_Long(aniObj, "nativeCaller", &nativeCaller)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::UIABILITY, "get nativeCaller status : %{public}d", status);
         return nullptr;
     }
     return reinterpret_cast<EtsCallerComplex*>(nativeCaller);
@@ -56,14 +56,14 @@ EtsCallerComplex* EtsCallerComplex::GetComplexPtrFrom(ani_env *env, ani_object a
 
 ani_ref EtsCallerComplex::GetEtsRemoteObj(ani_env *env, ani_object aniObj)
 {
-    ani_ref etsRemoteObj = nullptr;
-    ani_status status = ANI_ERROR;
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env or aniObj");
         return nullptr;
     }
+    ani_ref etsRemoteObj = nullptr;
+    ani_status status = ANI_ERROR;
     if ((status = env->Object_GetFieldByName_Ref(aniObj, "callee", &etsRemoteObj)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::UIABILITY, "get callee status : %{public}d", status);
         return nullptr;
     }
     return etsRemoteObj;
@@ -86,8 +86,8 @@ void EtsCallerComplex::ReleaseCall(ani_env *env, ani_object aniObj)
 
 void EtsCallerComplex::ReleaseCallInner(ani_env *env)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "called");
-    if (callerCallBack_ == nullptr) {
+    TAG_LOGD(AAFwkTag::UIABILITY, "ReleaseCallInner");
+    if (callerCallback_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null CallBacker");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return;
@@ -99,8 +99,8 @@ void EtsCallerComplex::ReleaseCallInner(ani_env *env)
         return;
     }
 
-    callerCallBack_->SetCallBack(nullptr);
-    int32_t innerErrorCode = releaseCallFunc_(callerCallBack_);
+    callerCallback_->SetCallBack(nullptr);
+    int32_t innerErrorCode = releaseCallFunc_(callerCallback_);
     if (innerErrorCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "ReleaseAbility failed %{public}d", static_cast<int>(innerErrorCode));
         EtsErrorUtil::ThrowError(env, innerErrorCode);
