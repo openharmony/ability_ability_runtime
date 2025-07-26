@@ -2412,11 +2412,7 @@ void AbilityConnectManager::OnTimeOut(uint32_t msgId, int64_t abilityRecordId, b
     auto abilityRecord = GetExtensionByIdFromServiceMap(abilityRecordId);
     if (abilityRecord == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null abilityRecord");
-        abilityRecord = GetExtensionByIdFromTerminatingMap(abilityRecordId);
-        if (!IsUIExtensionAbility(abilityRecord)) {
-            TAG_LOGW(AAFwkTag::UI_EXT, "null terminatingRecord or not uea");
-            return;
-        }
+        return;
     }
     PrintTimeOutLog(abilityRecord, msgId, isHalf);
     if (isHalf) {
