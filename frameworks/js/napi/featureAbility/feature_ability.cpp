@@ -267,7 +267,7 @@ Ability* JsFeatureAbility::GetAbility(napi_env env)
     ret = napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability));
     if (ret != napi_ok) {
         napi_get_last_error_info(env, &errorInfo);
-        TAG_LOGW(AAFwkTag::FA, "get_value_external=%{public}d err:%{public}s", ret, errorInfo->error_message);
+        TAG_LOGD(AAFwkTag::FA, "get_value_external=%{public}d err:%{public}s", ret, errorInfo->error_message);
         return nullptr;
     }
 
