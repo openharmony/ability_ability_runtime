@@ -84,14 +84,6 @@ public:
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex) override;
 
     /**
-     * Launch Application Finished
-     * @param recordId id of the app record
-     */
-    virtual void PreloadModuleFinished(const int32_t recordId) override;
-
-    // notify the ams update the state of an app, when it entered foreground.
-
-    /**
      * ApplicationForegrounded, call ApplicationForegrounded() through proxy object,
      * set the application to Foreground State.
      *
@@ -1039,6 +1031,12 @@ private:
      */
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName,
         std::vector<int32_t> &pidList) override;
+
+    /**
+     * Launch Application Finished
+     * @param recordId id of the app record
+     */
+    virtual void PreloadModuleFinished(const int32_t recordId) override;
 
     enum DumpIpcKey {
         KEY_DUMP_IPC_START = 0,
