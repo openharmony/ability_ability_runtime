@@ -445,7 +445,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             stageContext->SetResourceManager(rm);
         }
 
-        auto &runtimeStage = GetSpecifiedRuntime(hapModuleInfo->moduleArkTSMode);
+        auto &runtimeStage = GetSpecifiedRuntime(hapModuleInfo->arkTSMode);
         abilityStage = AbilityRuntime::AbilityStage::Create(runtimeStage, *hapModuleInfo);
         if (abilityStage == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null abilityStage");
@@ -654,7 +654,7 @@ bool OHOSApplication::AddAbilityStage(
         stageContext->SetResourceManager(rm);
     }
 
-    auto &runtime = GetSpecifiedRuntime(moduleInfo->moduleArkTSMode);
+    auto &runtime = GetSpecifiedRuntime(moduleInfo->arkTSMode);
     auto abilityStage = AbilityRuntime::AbilityStage::Create(runtime, *moduleInfo);
     if (abilityStage == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null abilityStage");
