@@ -1197,6 +1197,42 @@ HWTEST_F(AppMgrServiceInnerTest, KillProcessByPid_002, TestSize.Level2)
 }
 
 /**
+ * @tc.name: KillProcessByPidInner_001
+ * @tc.desc: kill process by pid.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, KillProcessByPidInner_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillProcessByPidInner_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    pid_t pid = 99999999;
+    auto ret = appMgrServiceInner->KillProcessByPidInner(pid, "ReasonTdd", "KillReasonTdd", nullptr);
+    EXPECT_EQ(ret, AAFwk::ERR_KILL_PROCESS_NOT_EXIST);
+    TAG_LOGI(AAFwkTag::TEST, "KillProcessByPidInner_001 end");
+}
+
+/**
+ * @tc.name: AddToKillProcessMap_001
+ * @tc.desc: add to kill process map.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, AddToKillProcessMap_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AddToKillProcessMap_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    appMgrServiceInner->killedProcessMap_.clear();
+    appMgrServiceInner->AddToKillProcessMap("com.test.demo");
+    EXPECT_EQ(appMgrServiceInner->killedProcessMap_.size(), 1);
+    TAG_LOGI(AAFwkTag::TEST, "AddToKillProcessMap_001 end");
+}
+
+/**
  * @tc.name: ProcessExist_001
  * @tc.desc: process exist.
  * @tc.type: FUNC
