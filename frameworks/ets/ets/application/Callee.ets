@@ -53,6 +53,21 @@ function buildError(code: int): BusinessError {
   return new BusinessError(code, new Error(msg));
 }
 
+class EstParcelable {
+  private etsObj: rpc.Parcelable;
+  constructor(etsObj: rpc.Parcelable) {
+    this.etsObj = etsObj;
+  }
+  marshalling(dataOut: rpc.MessageSequence): boolean {
+    let data = transfer.transferStatic(dataOut, 'rpc.MessageSequence') as rpc.MessageSequence;
+    return this.etsObj.marshalling(data);
+  }
+  unmarshalling(dataIn: rpc.MessageSequence): boolean {
+    let data = transfer.transferStatic(dataIn, 'rpc.MessageSequence') as rpc.MessageSequence;
+    return this.etsObj.unmarshalling(data);
+  }
+}
+
 class CalleeFromJs implements Callee {
   jsObj: Any;
   constructor(jsObj: Any) {
@@ -60,16 +75,16 @@ class CalleeFromJs implements Callee {
   }
   on(method: string, callback: CalleeCallback): void {
     if (CoroutineExtras.isMainWorker()) {
-      ESValue.wrap(this.jsObj).invokeMethod('on', method, (seq: Any): rpc.Parcelable => {
+      ESValue.wrap(this.jsObj).invokeMethod('on', method, (seq: Any): EstParcelable => {
         let data = transfer.transferStatic(seq, 'rpc.MessageSequence') as rpc.MessageSequence;
-        return callback(data);
+        return new EstParcelable(callback(data));
       });
       return;
     }
     EAWorker.postToMain<void>((): void => {
-      ESValue.wrap(this.jsObj).invokeMethod('on', method, (seq: Any): rpc.Parcelable => {
+      ESValue.wrap(this.jsObj).invokeMethod('on', method, (seq: Any): EstParcelable => {
         let data = transfer.transferStatic(seq, 'rpc.MessageSequence') as rpc.MessageSequence;
-        return callback(data);
+        return new EstParcelable(callback(data));
       });
     });
   }
@@ -80,7 +95,7 @@ class CalleeFromJs implements Callee {
 }
 
 class JsParcelable implements rpc.Parcelable {
-  jsObj: Any;
+  private jsObj: Any;
   constructor(jsObj: Any) {
     this.jsObj = jsObj;
   }

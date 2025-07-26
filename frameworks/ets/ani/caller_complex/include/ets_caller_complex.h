@@ -27,7 +27,7 @@ namespace AbilityRuntime {
 class EtsCallerComplex {
 public:
     EtsCallerComplex(ReleaseCallFunc releaseCallFunc, std::shared_ptr<CallerCallBack> callerCallBack,
-        sptr<IRemoteObject> callee) : releaseCallFunc_(releaseCallFunc), callerCallBack_(callerCallBack),
+        sptr<IRemoteObject> callee) : releaseCallFunc_(releaseCallFunc), callerCallback_(callerCallBack),
         remoteObj_(callee) {}
     ~EtsCallerComplex() = default;
 
@@ -47,7 +47,7 @@ protected:
     void ReleaseCallInner(ani_env *env);
 private:
     ReleaseCallFunc releaseCallFunc_;
-    std::shared_ptr<CallerCallBack> callerCallBack_;
+    std::shared_ptr<CallerCallBack> callerCallback_;
     wptr<IRemoteObject> remoteObj_;
 };
 
