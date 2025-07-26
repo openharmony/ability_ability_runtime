@@ -4335,10 +4335,14 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
         return ERR_INVALID_VALUE;
     }
-
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
+        return ERR_INVALID_VALUE;
+    }
     auto ret = PreCheckStartProcess(bundleName, uid, want);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "precheck failed");
+        appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
         return ret;
     }
     bool isCJApp = IsCjApplication(bundleInfo);
