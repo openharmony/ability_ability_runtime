@@ -24,8 +24,6 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-using ReleaseCallFunc = std::function<ErrCode(std::shared_ptr<CallerCallBack>&)>;
-
 int32_t CreateCjCallerComplex(
     ReleaseCallFunc releaseCallFunc, sptr<IRemoteObject> callee,
     std::shared_ptr<CallerCallBack> callerCallBack, int64_t* callerId, int64_t* remoteId);

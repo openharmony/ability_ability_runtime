@@ -16,6 +16,7 @@
 import { AbilityInfo } from 'bundleManager.AbilityInfo';
 import Want from '@ohos.app.ability.Want';
 import StartOptions from '@ohos.app.ability.StartOptions';
+import { Caller } from '@ohos.app.ability.UIAbility';
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import { AbilityResult } from 'ability.abilityResult';
 import { Configuration } from '@ohos.app.ability.Configuration';
@@ -111,6 +112,8 @@ export default class UIAbilityContext extends Context {
 
   private native nativeStartAbilityForResult(want: Want, startOptions: StartOptions,
     callback: AsyncCallbackWrapper<AbilityResult>): void;
+
+  private native nativeStartAbilityByCallSync(want: Want): Caller;
 
   private native nativeTerminateSelfSync(callback: AsyncCallbackWrapper<void>): void;
 
@@ -236,6 +239,12 @@ export default class UIAbilityContext extends Context {
       });
     });
     return p;
+  }
+
+  startAbilityByCall(want: Want): Promise<Caller> {
+    return taskpool.execute((): Caller => {
+      return this.nativeStartAbilityByCallSync(want);
+    }) as Promise<Caller>;
   }
 
   terminateSelf(callback: AsyncCallback<void>): void {
