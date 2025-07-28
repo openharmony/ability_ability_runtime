@@ -113,7 +113,7 @@ void ApplicationCleaner::ClearTempData()
 
         for (const auto &temp : temps) {
             if (sharedThis->RemoveDir(temp) == false) {
-                TAG_LOGE(AAFwkTag::APPKIT, "path: %{private}s", temp.c_str());
+                TAG_LOGW(AAFwkTag::APPKIT, "path: %{private}s", temp.c_str());
             }
         }
     };
@@ -243,7 +243,7 @@ bool ApplicationCleaner::RemoveDir(const std::string &tempPath)
     }
     struct stat buf = {};
     if (stat(tempPath.c_str(), &buf) != 0) {
-        TAG_LOGE(AAFwkTag::APPKIT, "obtain file properties failed");
+        TAG_LOGW(AAFwkTag::APPKIT, "obtain file properties failed");
         return false;
     }
 

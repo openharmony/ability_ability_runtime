@@ -55,7 +55,7 @@ void HdcRegister::StartHdcRegister(const std::string& bundleName, const std::str
             startRegister(processName, bundleName, debugApp, callback);
         }
     } else {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null registerLocalHandler_");
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "null registerLocalHandler_");
     }
     if (registerHdcHandler_ != nullptr) {
         auto startRegister = reinterpret_cast<StartRegister>(dlsym(registerHdcHandler_, "StartConnect"));
@@ -63,7 +63,7 @@ void HdcRegister::StartHdcRegister(const std::string& bundleName, const std::str
             startRegister(processName, bundleName, debugApp, callback);
         }
     } else {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "null registerHdcHandler_");
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "null registerHdcHandler_");
     }
 }
 
