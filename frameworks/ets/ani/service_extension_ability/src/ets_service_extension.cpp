@@ -51,7 +51,7 @@ constexpr const char *VOID_SIGNATURE = ":V";
 constexpr const char *ON_CONNECT_SIGNATURE = "L@ohos/app/ability/Want/Want;:Lstd/core/Object;";
 constexpr const char *CHECK_PROMISE_SIGNATURE = "Lstd/core/Object;:Z";
 constexpr const char *CALL_PROMISE_SIGNATURE = "Lstd/core/Promise;:Z";
-constexpr const char *ON_DISCONNECT_SIGNATURE = "L@ohos/app/ability/Want/Want;:V";
+constexpr const char *ON_DISCONNECT_SIGNATURE = "L@ohos/app/ability/Want/Want;:Z";
 constexpr const char *ON_REQUEST_SIGNATURE = "L@ohos/app/ability/Want/Want;D:V";
 constexpr const char *ON_CONFIGURATION_UPDATE_SIGNATURE = "L@ohos/app/ability/Configuration/Configuration;:V";
 constexpr const char *ON_DUMP_SIGNATURE = "Lescompat/Array;:Lescompat/Array;";
@@ -321,7 +321,7 @@ void EtsServiceExtension::OnDisconnect(
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "OnDisconnect");
     auto env = etsRuntime_.GetAniEnv();
-    if (env) {
+    if (env == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
         return;
     }
@@ -351,8 +351,17 @@ void EtsServiceExtension::OnDisconnect(
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
         return;
     }
+    ani_method method {};
+    if ((status = env->Class_FindMethod(etsObj_->aniCls, "callOnDisconnect", ON_DISCONNECT_SIGNATURE, &method))
+        != ANI_OK || method == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
+        return;
+    }
     ani_boolean callResult = ANI_FALSE;
-    CallObjectMethod(true, "callOnDisconnect", ON_DISCONNECT_SIGNATURE, &callResult, wantRef);
+    if ((status = env->Object_CallMethod_Boolean(etsObj_->aniObj, method, &callResult, wantRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "status : %{public}d", status);
+        return;
+    }
     isAsyncCallback = callResult;
 }
 
