@@ -4540,7 +4540,7 @@ int AbilityManagerService::StartRemoteAbility(const Want &want, int requestCode,
     const sptr<IRemoteObject> &callerToken)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
     Want remoteWant = want;
     UpdateCallerInfoUtil::GetInstance().UpdateDmsCallerInfo(remoteWant, callerToken);
     if (AddStartControlParam(remoteWant, callerToken) != ERR_OK) {
@@ -5401,7 +5401,7 @@ int AbilityManagerService::StartContinuation(const Want &want, const sptr<IRemot
 void AbilityManagerService::NotifyCompleteContinuation(const std::string &deviceId,
     int32_t sessionId, bool isSuccess)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "NotifyCompleteContinuation");
     AAFWK::ContinueRadar::GetInstance().ClickIconRecvOver("NotifyCompleteContinuation");
     sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
@@ -8263,7 +8263,7 @@ void AbilityManagerService::RemoveUnauthorizedLaunchReasonMessage(const Want &wa
     std::string value = want.GetStringParam(Want::PARM_LAUNCH_REASON_MESSAGE);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "launchReasonMessage:%{public}s", value.c_str());
     if (!AppUtils::GetInstance().IsSystemReasonMessage(value)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not in whitelist, remove");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "not allow, remove");
         (const_cast<Want &>(want)).RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
         abilityRequest.want.RemoveParam(Want::PARM_LAUNCH_REASON_MESSAGE);
         return;
@@ -14246,7 +14246,7 @@ void AbilityManagerService::SetAbilityRequestSessionInfo(AbilityRequest &ability
 int32_t AbilityManagerService::TerminateMission(int32_t missionId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "TerminateMission");
     auto missionListManager = GetCurrentMissionListManager();
     CHECK_POINTER_AND_RETURN(missionListManager, ERR_NO_INIT);
     CHECK_CALLER_IS_SYSTEM_APP;
@@ -14460,7 +14460,7 @@ int AbilityManagerService::StartSelfUIAbility(const Want &want)
 int AbilityManagerService::StartSelfUIAbilityWithStartOptions(const Want &want, const StartOptions &options)
 {
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSelfUIAbility with startOptions");
 
     if(options.processOptions != nullptr) {
        options.processOptions->isStartFromNDK = true;
@@ -14795,7 +14795,7 @@ bool AbilityManagerService::IsCrossUserCall(int32_t userId) const
 
 int32_t AbilityManagerService::RestartSelfAtomicService(sptr<IRemoteObject> callerToken)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "RestartSelfAtomicService");
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
 

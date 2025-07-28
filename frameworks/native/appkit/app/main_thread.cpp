@@ -516,7 +516,7 @@ bool MainThread::ScheduleForegroundApplication()
  */
 void MainThread::ScheduleBackgroundApplication()
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "called");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     wptr<MainThread> weak = this;
     auto task = [weak]() {

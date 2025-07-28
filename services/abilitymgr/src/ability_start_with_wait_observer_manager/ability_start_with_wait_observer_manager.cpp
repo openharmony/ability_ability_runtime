@@ -190,7 +190,7 @@ void AbilityStartWithWaitObserverManager::SetColdStartForShellCall(std::shared_p
     }
     auto observerId = abilityRecord->GetWant().GetIntParam(Want::START_ABILITY_WITH_WAIT_OBSERVER_ID_KEY, -1);
     if (observerId == -1) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "invaid observerId");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "invaid observerId");
         return;
     }
     std::lock_guard<std::mutex> guard(oberverMutex_);
