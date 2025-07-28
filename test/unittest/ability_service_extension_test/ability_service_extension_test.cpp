@@ -155,6 +155,10 @@ HWTEST_F(AbilityServiceExtensionTest, OnConfigurationUpdated_0100, TestSize.Leve
 
     AppExecFwk::Configuration configuration;
     serviceExtension->OnConfigurationUpdated(configuration);
+    
+    uint64_t intentId = 0;
+    AppExecFwk::InsightIntentExecuteResult result;
+    serviceExtension->OnInsightIntentExecuteDone(intentId, result);
 
     GTEST_LOG_(INFO) << "service extension Init end";
 }
