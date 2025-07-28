@@ -42,7 +42,6 @@ ohos_shared_library("event_hub_ani_kit") {
  
   deps = [
     "${ability_runtime_innerkits_path}/runtime:runtime",
-    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
   ]
  

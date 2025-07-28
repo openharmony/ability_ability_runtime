@@ -24,6 +24,7 @@
 #include "ets_application_context_utils.h"
 #include "ets_error_utils.h"
 #include "ets_native_reference.h"
+#include "event_hub.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
 #include "resourceManager.h"
