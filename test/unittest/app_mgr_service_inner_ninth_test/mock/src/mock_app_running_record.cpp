@@ -175,8 +175,7 @@ const std::string &AppRunningRecord::GetAppIdentifier() const
 const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> AppRunningRecord::GetAbilities()
 {
     AAFwk::MyStatus::GetInstance().getAbilitiesCalled_ = true;
-    std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> abilitiesMap;
-    return abilitiesMap;
+    return AAFwk::MyStatus::GetInstance().abilitiesMap_;
 }
 
 sptr<IAppScheduler> AppRunningRecord::GetApplicationClient() const
@@ -502,6 +501,16 @@ void AppRunningRecord::SetKeepAliveDkv(bool isKeepAliveDkv)
 {
     AAFwk::MyStatus::GetInstance().setKeepAliveDkvCalled_ = true;
     isKeepAliveDkv_ = isKeepAliveDkv;
+}
+
+void AppRunningRecord::SetMainElementRunning(bool isMainElementRunning)
+{
+    isMainElementRunning_ = isMainElementRunning;
+}
+
+bool AppRunningRecord::IsMainElementRunning() const
+{
+    return isMainElementRunning_;
 }
 
 void AppRunningRecord::SetKeepAliveBundle(bool isKeepAliveBundle)
@@ -1342,6 +1351,16 @@ bool AppRunningRecord::IsKeepAliveAppService() const
 void AppRunningRecord::SetKeepAliveAppService(bool isKeepAliveAppService)
 {
     isKeepAliveAppService_ = isKeepAliveAppService;
+}
+
+void AppRunningRecord::SetPreForeground(bool isPreForeground)
+{
+    isPreForeground_.store(isPreForeground);
+}
+
+bool AppRunningRecord::IsPreForeground() const
+{
+    return isPreForeground_.load();
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -1335,7 +1335,7 @@ HWTEST_F(AppMgrServiceInnerTest, KillSubProcessBypid_002, TestSize.Level1)
     std::map<int32_t, std::shared_ptr<RenderRecord>> renderRecordMap;
     int32_t uid = 1;
     std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(
-        pid, "param", FdGuard(0), FdGuard(0), FdGuard(0), appRecord);
+        pid, "param", FdGuard(-1), FdGuard(-1), FdGuard(-1), appRecord);
     renderRecord->SetPid(pid);
     renderRecordMap.emplace(uid, renderRecord);
     appRecord->renderRecordMap_ = renderRecordMap;

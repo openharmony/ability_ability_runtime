@@ -310,13 +310,9 @@ void KeepAliveProcessManager::OnAppStateChanged(const AppInfo &info)
         return;
     }
 
-    bool localEnable = IsKeepAliveBundle(bundleName, -1);
     bool localEnableForAppservice = IsKeepAliveBundle(bundleName, U1_USER_ID);
-    if (localEnable) {
-        IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveDkv(bundleName, localEnable, uid));
-    }
     if (localEnableForAppservice) {
-        IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveAppService(bundleName, localEnable, uid));
+        IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveAppService(bundleName, localEnableForAppservice, uid));
     }
 }
 
@@ -456,7 +452,6 @@ void KeepAliveProcessManager::StartKeepAliveAppServiceExtensionPerBundle(const A
         }
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::KEEP_ALIVE, "reach max retry, failed:%{public}d, unsetting keep-alive", ret);
-            KeepAliveProcessManager::GetInstance().SetAppServiceExtensionKeepAlive(bundleName, false, true, false);
             return;
         }
     });

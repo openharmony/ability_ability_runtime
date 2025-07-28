@@ -267,7 +267,7 @@ Ability* JsFeatureAbility::GetAbility(napi_env env)
     ret = napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability));
     if (ret != napi_ok) {
         napi_get_last_error_info(env, &errorInfo);
-        TAG_LOGE(AAFwkTag::FA, "get_value_external=%{public}d err:%{public}s", ret, errorInfo->error_message);
+        TAG_LOGD(AAFwkTag::FA, "get_value_external=%{public}d err:%{public}s", ret, errorInfo->error_message);
         return nullptr;
     }
 
@@ -685,11 +685,9 @@ void CallOnAbilityResult(int requestCode, int resultCode, const Want &resultData
         return;
     }
 
-    auto work = new uv_work_t;
     auto onAbilityCB = new (std::nothrow) OnAbilityCallback;
     if (onAbilityCB == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "Failed to allocate OnAbilityCallback");
-        delete work;
         return;
     }
 
@@ -698,8 +696,10 @@ void CallOnAbilityResult(int requestCode, int resultCode, const Want &resultData
     onAbilityCB->resultData = resultData;
     onAbilityCB->cb = callbackInfo;
 
+    auto work = new (std::nothrow) uv_work_t;
     if (work == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "null work");
+        delete onAbilityCB;
         return;
     }
     work->data = static_cast<void *>(onAbilityCB);

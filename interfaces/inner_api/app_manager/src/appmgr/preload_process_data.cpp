@@ -21,25 +21,25 @@ namespace OHOS {
 namespace AppExecFwk {
 bool PreloadProcessData::ReadFromParcel(Parcel &parcel)
 {
+    isPreForeground = parcel.ReadBool();
     pid = parcel.ReadInt32();
     uid = parcel.ReadInt32();
-    state = parcel.ReadInt32();
     bundleName = parcel.ReadString();
     return true;
 }
 
 bool PreloadProcessData::Marshalling(Parcel &parcel) const
 {
+    if (!parcel.WriteBool(isPreForeground)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write isPreForeground failed.");
+        return false;
+    }
     if (!parcel.WriteInt32(pid)) {
         TAG_LOGE(AAFwkTag::APPMGR, "write pid failed.");
         return false;
     }
     if (!parcel.WriteInt32(uid)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "write pid failed.");
-        return false;
-    }
-    if (!parcel.WriteInt32(state)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "write state failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "write uid failed.");
         return false;
     }
     if (!parcel.WriteString(bundleName)) {

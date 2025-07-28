@@ -18,6 +18,7 @@
 
 #include <mutex>
 #include <string>
+#include <atomic>
 #include <sys/types.h>
 
 #include "app_mgr_interface.h"
@@ -83,8 +84,7 @@ private:
 
     static bool signalRegistered_;
     bool isChildProcessBySelfFork_ = false;
-    int32_t childProcessCount_ = 0;
-    std::mutex childProcessCountLock_;
+    std::atomic<int32_t> childProcessCount_ = 0;
 
     DISALLOW_COPY_AND_MOVE(ChildProcessManager);
 };

@@ -180,12 +180,6 @@ private:
 
     void ListenWMS();
 
-    bool GetInsightIntentExecutorInfo(const Want &want,
-        const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &executeParam,
-        InsightIntentExecutorInfo &executorInfo);
-
-    bool OnInsightIntentExecuteDone(uint64_t intentId, const AppExecFwk::InsightIntentExecuteResult &result) override;
-
     void AddLifecycleEventForJSCall(const std::string &eventStr);
 
     JsRuntime& jsRuntime_;

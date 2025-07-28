@@ -440,17 +440,17 @@ void ApplicationStateObserverProxy::OnKeepAliveStateChanged(const ProcessData &p
     }
 }
 
-void ApplicationStateObserverProxy::OnPreloadProcessStateChanged(const PreloadProcessData &preloadProcessData)
+void ApplicationStateObserverProxy::OnProcessPreForegroundChanged(const PreloadProcessData &preloadProcessData)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "OnPreloadProcessStateChanged, WriteInterfaceToken failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "OnProcessPreForegroundChanged, WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteParcelable(&preloadProcessData)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "OnPreloadProcessStateChanged write preloadProcessData failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "OnProcessPreForegroundChanged write preloadProcessData failed");
         return;
     }
     int32_t ret = SendTransactCmd(
@@ -458,7 +458,7 @@ void ApplicationStateObserverProxy::OnPreloadProcessStateChanged(const PreloadPr
         data, reply, option);
     if (ret != NO_ERROR && ret != ERR_INVALID_STUB) {
         TAG_LOGW(AAFwkTag::APPMGR,
-            "OnPreloadProcessStateChanged ssendRequest is wrong, error code: %{public}d, pid:%{public}d.",
+            "OnProcessPreForegroundChanged ssendRequest is wrong, error code: %{public}d, pid:%{public}d.",
             ret, preloadProcessData.pid);
     }
 }

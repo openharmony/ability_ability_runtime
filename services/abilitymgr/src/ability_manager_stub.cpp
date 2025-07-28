@@ -25,6 +25,9 @@
 #include "mission_listener_interface.h"
 #include "mission_snapshot.h"
 #include "snapshot.h"
+#ifdef SUPPORT_SCREEN
+#include "pixel_map.h"
+#endif //SUPPORT_SCREEN
 
 namespace OHOS {
 namespace AAFwk {
@@ -4546,6 +4549,7 @@ int32_t AbilityManagerStub::StartSelfUIAbilityInner(MessageParcel &data, Message
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
         return INNER_ERR;
     }
+    want->CloseAllFd();
     return NO_ERROR;
 }
 
@@ -4566,6 +4570,7 @@ int32_t AbilityManagerStub::StartSelfUIAbilityWithStartOptionsInner(MessageParce
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write StartSelfUIAbilityWithStartOptions result fail");
         return ERR_WRITE_START_SELF_UI_ABILITY_RESULT;
     }
+    want->CloseAllFd();
     return NO_ERROR;
 }
 

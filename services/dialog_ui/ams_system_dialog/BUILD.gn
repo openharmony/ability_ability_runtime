@@ -13,22 +13,6 @@
 
 import("//build/ohos.gni")
 
-ohos_hap("ams_system_dialog_hap") {
-  hap_profile = "entry/src/main/module.json"
-
-  deps = [
-    ":ams_system_dialog_js_assets",
-    ":ams_system_dialog_resources",
-  ]
-
-  certificate_profile = "signature/openharmony_sx.p7b"
-  hap_name = "ams_system_dialog"
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-  module_install_dir = "app/com.ohos.amsdialog"
-  publicity_file = "publicity.xml"
-}
-
 ohos_js_assets("ams_system_dialog_js_assets") {
   hap_profile = "entry/src/main/module.json"
   ets2abc = true
@@ -46,19 +30,24 @@ ohos_resources("ams_system_dialog_resources") {
   hap_profile = "entry/src/main/module.json"
 }
 
-ohos_hap("intent_debug_app_hap") {
-  hap_profile = "feature/src/main/module.json"
-  deps = [
-    ":intent_debug_app_products_js_assets",
-    ":intent_debug_app_products_resources"
-  ]
-
-  certificate_profile = "signature/openharmony_sx.p7b"
-  hap_name = "intent_debug_app"
+ohos_app("ams_system_dialog_hap") {
+  hap_name = "ams_system_dialog"
   subsystem_name = "ability"
   part_name = "ability_runtime"
+  deps = [
+    ":intent_debug_app_products_js_assets",
+    ":intent_debug_app_products_resources",
+    ":ams_system_dialog_js_assets",
+    ":ams_system_dialog_resources"
+  ]
   module_install_dir = "app/com.ohos.amsdialog"
   publicity_file = "publicity.xml"
+  certificate_profile = "signature/openharmony_sx.p7b"
+  hap_list = [
+    "ams_system_dialog-default-default-unsigned:intent_debug_app",
+    "ams_system_dialog-entry-default-unsigned:ams_system_dialog"
+  ]
+  module_install_dir = "app/com.ohos.amsdialog"
 }
 
 ohos_js_assets("intent_debug_app_products_js_assets") {
@@ -74,7 +63,6 @@ ohos_resources("intent_debug_app_products_resources") {
 }
 
 group("dialog_hap") {
-  deps = [ ":ams_system_dialog_hap" ,
-  ":intent_debug_app_hap"
+  deps = [ ":ams_system_dialog_hap"
   ]
 }

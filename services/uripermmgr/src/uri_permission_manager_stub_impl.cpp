@@ -778,7 +778,7 @@ ErrCode UriPermissionManagerStubImpl::CheckUriAuthorization(const std::vector<st
         tokenId, flag, uriStrVec.size());
     funcResult = std::vector<bool>(uriStrVec.size(), false);
     if (uriStrVec.size() == 0 || uriStrVec.size() > MAX_URI_COUNT) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d uriStrVec size: %{public}d",
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec empty or exceed maxSize %{public}d uriStrVec size: %{public}zu",
             MAX_URI_COUNT, uriStrVec.size());
         return ERR_URI_LIST_OUT_OF_RANGE;
     }

@@ -2106,7 +2106,7 @@ void AppMgrProxy::SetAppAssertionPauseState(bool flag)
 }
 
 #ifdef SUPPORT_CHILD_PROCESS
-int32_t AppMgrProxy::StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+int32_t AppMgrProxy::CreateNativeChildProcess(const std::string &libName, int32_t childProcessCount,
     const sptr<IRemoteObject> &callback, const std::string &customProcessName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -2127,7 +2127,7 @@ int32_t AppMgrProxy::StartNativeChildProcess(const std::string &libName, int32_t
     PARCEL_UTIL_WRITE_RET_INT(data, RemoteObject, callback);
     PARCEL_UTIL_WRITE_RET_INT(data, String, customProcessName);
 
-    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::START_NATIVE_CHILD_PROCESS, data, reply, option);
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::CREATE_NATIVE_CHILD_PROCESS, data, reply, option);
     return reply.ReadInt32();
 }
 #endif // SUPPORT_CHILD_PROCESS
@@ -2450,5 +2450,40 @@ int32_t AppMgrProxy::DemoteCurrentFromCandidateMasterProcess()
     return reply.ReadInt32();
 }
 
+int32_t AppMgrProxy::QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return AAFwk::ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+
+    PARCEL_UTIL_WRITE_RET_INT(data, Int32, pid);
+    int32_t ret = SendRequest(AppMgrInterfaceCode::QUERY_RUNNING_SHARED_BUNDLES, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request failed, error code: %{public}d", ret);
+        return ret;
+    }
+
+    int32_t result = reply.ReadInt32();
+    if (result != ERR_OK) {
+        return result;
+    }
+    int32_t size = reply.ReadInt32();
+    if (size > CYCLE_LIMIT) {
+        TAG_LOGE(AAFwkTag::APPMGR, "sharedBundles size too large: %{public}d", size);
+        return ERR_INVALID_VALUE;
+    }
+    sharedBundles.clear();
+    for (int32_t i = 0; i < size; i++) {
+        std::string bundleName = reply.ReadString();
+        uint32_t versionCode = reply.ReadUint32();
+        sharedBundles.emplace(bundleName, versionCode);
+    }
+    return ERR_OK;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -849,6 +849,8 @@ enum {
 
     ERR_UPMS_KEY_IS_NOT_CREATE_BY_CALLER = 2097348,
 
+    ERR_UPMS_SERVICE_NOT_START = 2097349,
+
     /**
      * Result (2097351) target not in whitelist.
      */
@@ -966,6 +968,15 @@ enum {
     START_UI_ABILITIES_SPECIFIED_FAILED_ERROR = 2097382,
     
     ERR_PRELOAD_APP_RECORD_ALREADY_EXIST = 2097383,
+    
+    ERR_NOTIFY_PRELOAD_ABILITY_NO_CHANGE = 2097384,
+
+    ERR_NOTIFY_PRELOAD_ABILITY_HAS_OTHER = 2097385,
+
+    /**
+     * Result (2097386) for the PID of the process created by APPSPAWN is invalid.
+     */
+    ERR_PROCESS_START_INVALID_PID = 2097386,
 
     /**
      * Native error(3000000) for target bundle not exist.

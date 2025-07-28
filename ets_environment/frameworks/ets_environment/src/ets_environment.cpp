@@ -55,6 +55,9 @@ using ANIGetCreatedVMsType = ani_status (*)(ani_vm **vms_buffer, ani_size vms_bu
 
 const char ETS_SDK_NSNAME[] = "ets_sdk";
 const char ETS_SYS_NSNAME[] = "ets_system";
+
+constexpr const char* CLASSNAME_STRING = "Lstd/core/String;";
+constexpr const char* CLASSNAME_LINKER = "Lstd/core/AbcRuntimeLinker;";
 } // namespace
 
 ETSRuntimeAPI ETSEnvironment::lazyApis_ {};
@@ -76,7 +79,7 @@ bool ETSEnvironment::LoadBootPathFile(std::string &bootfiles)
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "read json error");
         return false;
     }
-    nlohmann::json jsonObject = nlohmann::json::parse(inFile);
+    nlohmann::json jsonObject = nlohmann::json::parse(inFile, nullptr, false);
     if (jsonObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "json discarded error");
         inFile.close();
@@ -227,11 +230,8 @@ bool ETSEnvironment::Initialize()
     // Create boot-panda-files options
     std::string bootString = "--ext:--boot-panda-files=" + bootfiles;
     options.push_back(ani_option { bootString.data(), nullptr });
-    options.push_back(ani_option { "--ext:--coroutine-enable-external-scheduling=true", nullptr });
     options.push_back(ani_option { "--ext:--compiler-enable-jit=false", nullptr });
     options.push_back(ani_option { "--ext:--log-level=info", nullptr });
-    options.push_back(ani_option { "--ext:--verification-enabled=true", nullptr });
-    options.push_back(ani_option { "--ext:--verification-mode=on-the-fly", nullptr });
     ani_options optionsPtr = { options.size(), options.data() };
     ani_status status = ANI_ERROR;
     if ((status = lazyApis_.ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vmEntry_.aniVm_)) != ANI_OK) {
@@ -247,7 +247,14 @@ bool ETSEnvironment::Initialize()
 
 ani_env *ETSEnvironment::GetAniEnv()
 {
-    return vmEntry_.aniEnv_;
+    if (vmEntry_.aniVm_ == nullptr) {
+        return nullptr;
+    }
+    ani_env* env = nullptr;
+    if (vmEntry_.aniVm_->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
+        return nullptr;
+    }
+    return env;
 }
 
 bool ETSEnvironment::HandleUncaughtError()
@@ -383,7 +390,7 @@ bool ETSEnvironment::LoadAbcLinker(ani_env *env, const std::string &modulePath, 
     }
     ani_status status = ANI_ERROR;
     ani_class stringCls = nullptr;
-    if ((status = env->FindClass("Lstd/core/String;", &stringCls)) != ANI_OK) {
+    if ((status = env->FindClass(CLASSNAME_STRING, &stringCls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "FindClass failed, status: %{public}d", status);
         return false;
     }
@@ -406,7 +413,7 @@ bool ETSEnvironment::LoadAbcLinker(ani_env *env, const std::string &modulePath, 
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_Set_Ref failed, status: %{public}d", status);
         return false;
     }
-    if ((status = env->FindClass("Lstd/core/AbcRuntimeLinker;", &abcCls)) != ANI_OK) {
+    if ((status = env->FindClass(CLASSNAME_LINKER, &abcCls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "FindClass failed, status: %{public}d", status);
         return false;
     }

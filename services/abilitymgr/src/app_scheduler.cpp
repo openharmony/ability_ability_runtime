@@ -315,9 +315,8 @@ int AppScheduler::KillApplicationByUid(const std::string &bundleName, int32_t ui
 }
 
 int AppScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid,
-    const bool isUpgrade)
+    bool isUpgrade)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s] enter", __FUNCTION__);
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     int ret = (int)appMgrClient_->NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
     if (ret != ERR_OK) {
@@ -750,14 +749,14 @@ int32_t AppScheduler::PreloadApplicationByPhase(const std::string &bundleName, i
     return IN_PROCESS_CALL(appMgrClient_->PreloadApplicationByPhase(bundleName, userId, appIndex, preloadPhase));
 }
 
-int32_t AppScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+int32_t AppScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (appMgrClient_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
         return INNER_ERR;
     }
-    return IN_PROCESS_CALL(appMgrClient_->NotifyPreloadAbilityStateChanged(token));
+    return IN_PROCESS_CALL(appMgrClient_->NotifyPreloadAbilityStateChanged(token, isPreForeground));
 }
 
 int32_t AppScheduler::CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,

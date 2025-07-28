@@ -348,7 +348,7 @@ bool UIAbility::IsRestoredInContinuation() const
 bool UIAbility::ShouldRecoverState(const AAFwk::Want &want)
 {
     if (!want.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "appRecovery not recovery restart");
+        TAG_LOGD(AAFwkTag::UIABILITY, "appRecovery not recovery restart");
         return false;
     }
 
@@ -633,7 +633,7 @@ void UIAbility::DispatchLifecycleOnForeground(const AAFwk::Want &want)
 void UIAbility::HandleCreateAsRecovery(const AAFwk::Want &want)
 {
     if (!want.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "appRecovery not recovery restart");
+        TAG_LOGD(AAFwkTag::UIABILITY, "appRecovery not recovery restart");
         return;
     }
 

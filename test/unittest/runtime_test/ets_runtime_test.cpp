@@ -152,6 +152,7 @@ HWTEST_F(EtsRuntimeTest, LoadModule_0100, TestSize.Level1)
     std::string modulePath = "dir.test.module";
     std::string hapPath = "/some/hap";
     std::string srcEntrance = "main.ets";
+    etsRuntime->PreloadModule(moduleName, hapPath, false, false);
     auto result = etsRuntime->LoadModule(moduleName, modulePath, hapPath, false, false, srcEntrance);
     EXPECT_EQ(result, nullptr);
 }

@@ -24,7 +24,8 @@ namespace {
 constexpr const char *CLASSNAME_LAUNCHPARAM = "L@ohos/app/ability/AbilityConstant/LaunchParamImpl;";
 constexpr const char *CLASSNAME_LAUNCHREASON = "L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchReason;";
 constexpr const char *CLASSNAME_LAST_EXITREASION = "L@ohos/app/ability/AbilityConstant/AbilityConstant/LastExitReason;";
-
+constexpr const char* LAST_EXIT_DETAIL_INFO_IMPL_CLASS_NAME =
+    "L@ohos/app/ability/AbilityConstant/LastExitDetailInfoImpl;";
 ani_string GetAniString(ani_env *env, const std::string &str)
 {
     if (env == nullptr) {
@@ -34,16 +35,58 @@ ani_string GetAniString(ani_env *env, const std::string &str)
     ani_string aniStr = nullptr;
     ani_status status = env->String_NewUTF8(str.c_str(), str.size(), &aniStr);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to getAniString, status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to getAniString, status: %{public}d", status);
         return nullptr;
     }
     return aniStr;
 }
 
+ani_object CreateEtsLastExitDetailInfo(ani_env* env, const AAFwk::LastExitDetailInfo& lastExitDetailInfo)
+{
+    ani_status status = ANI_ERROR;
+    ani_class cls = nullptr;
+    if ((status = env->FindClass(LAST_EXIT_DETAIL_INFO_IMPL_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "status: %{public}d", status);
+        return nullptr;
+    }
+    if (cls == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null cls");
+        return nullptr;
+    }
+    ani_method method = nullptr;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "status: %{public}d", status);
+        return nullptr;
+    }
+    if (method == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null method");
+        return nullptr;
+    }
+    ani_object object = nullptr;
+    if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "status: %{public}d", status);
+        return nullptr;
+    }
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null object");
+        return nullptr;
+    }
+    env->Object_SetPropertyByName_Double(object, "pid", lastExitDetailInfo.pid);
+    env->Object_SetPropertyByName_Ref(object, "processName", GetAniString(env, lastExitDetailInfo.processName));
+    env->Object_SetPropertyByName_Double(object, "uid", lastExitDetailInfo.uid);
+    env->Object_SetPropertyByName_Double(object, "exitSubReason", lastExitDetailInfo.exitSubReason);
+    env->Object_SetPropertyByName_Ref(object, "exitMsg", GetAniString(env, lastExitDetailInfo.exitMsg));
+    env->Object_SetPropertyByName_Double(object, "rss", lastExitDetailInfo.rss);
+    env->Object_SetPropertyByName_Double(object, "pss", lastExitDetailInfo.pss);
+    env->Object_SetPropertyByName_Double(object, "timestamp", lastExitDetailInfo.timestamp);
+
+    return object;
+}
+
 bool WrapLaunchParamInner(ani_env *env, const AAFwk::LaunchParam &launchParam, ani_object &object)
 {
     ani_status status = ANI_ERROR;
-    ani_enum_item launchReasonItem {};
+    ani_enum_item launchReasonItem = nullptr;
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(
         env, CLASSNAME_LAUNCHREASON, launchParam.launchReason, launchReasonItem);
     if ((status = env->Object_SetPropertyByName_Ref(object, "launchReason", launchReasonItem)) != ANI_OK) {
@@ -51,11 +94,16 @@ bool WrapLaunchParamInner(ani_env *env, const AAFwk::LaunchParam &launchParam, a
         return false;
     }
 
-    ani_enum_item lastExitReasonItem {};
+    ani_enum_item lastExitReasonItem = nullptr;
     OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(
         env, CLASSNAME_LAST_EXITREASION, launchParam.lastExitReason, lastExitReasonItem);
     if ((status = env->Object_SetPropertyByName_Ref(object, "lastExitReason", lastExitReasonItem)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to set lastExitReason");
+        return false;
+    }
+    if ((status = env->Object_SetPropertyByName_Ref(object, "lastExitDetailInfo",
+        CreateEtsLastExitDetailInfo(env, launchParam.lastExitDetailInfo))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to set lastExitDetailInfo");
         return false;
     }
     return true;
@@ -72,7 +120,7 @@ bool WrapLaunchParam(ani_env *env, const AAFwk::LaunchParam &launchParam, ani_ob
         return false;
     }
     if ((status = env->FindClass(CLASSNAME_LAUNCHPARAM, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to find lanchParam Class, status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to find lanchParam Class, status: %{public}d", status);
         return false;
     }
     if (cls == nullptr) {
@@ -80,7 +128,7 @@ bool WrapLaunchParam(ani_env *env, const AAFwk::LaunchParam &launchParam, ani_ob
         return false;
     }
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to find method, status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to find method, status: %{public}d", status);
         return false;
     }
     if (method == nullptr) {
@@ -88,7 +136,7 @@ bool WrapLaunchParam(ani_env *env, const AAFwk::LaunchParam &launchParam, ani_ob
         return false;
     }
     if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to create object, status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to create object, status: %{public}d", status);
         return false;
     }
     if (object == nullptr) {

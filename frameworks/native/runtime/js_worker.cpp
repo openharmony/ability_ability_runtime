@@ -270,7 +270,7 @@ void AssetHelper::operator()(const std::string& uri, uint8_t** buff, size_t* buf
                 TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by ami failed");
             }
         } else if (!ReadFilePathData(filePath, buff, buffSize, content, useSecureMem, isRestricted, mapper)) {
-            TAG_LOGE(AAFwkTag::JSRUNTIME, "Get buffer by filepath failed");
+            TAG_LOGD(AAFwkTag::JSRUNTIME, "Get buffer by filepath failed");
         }
     }
 }

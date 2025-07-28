@@ -196,16 +196,12 @@ public:
     virtual int KillApplicationByUid(const std::string &bundleName, const int uid,
         const std::string& reason = "KillApplicationByUid") = 0;
     
-    virtual int NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
-        const bool isUpgrade)
+    virtual int NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade)
     {
         return ERR_OK;
     }
     
-    virtual void NotifyUninstallOrUpgradeAppEnd(const int32_t uid)
-    {
-        return;
-    }
+    virtual void NotifyUninstallOrUpgradeAppEnd(int32_t uid) {}
 
     /**
      * Kill the application self.
@@ -512,7 +508,7 @@ public:
         return ERR_OK;
     }
 
-    virtual int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+    virtual int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground)
     {
         return ERR_OK;
     }

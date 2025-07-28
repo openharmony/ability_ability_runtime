@@ -465,7 +465,7 @@ ErrCode AmsMgrStub::HandleNotifyUninstallOrUpgradeApp(MessageParcel &data, Messa
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
-    int uid = data.ReadInt32();
+    int32_t uid = data.ReadInt32();
     bool isUpgrade = data.ReadBool();
     TAG_LOGW(AAFwkTag::APPMGR, "NotifyUninstallOrUpgradeApp, callingPid=%{public}d", IPCSkeleton::GetCallingPid());
     int32_t result = NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
@@ -479,7 +479,7 @@ ErrCode AmsMgrStub::HandleNotifyUninstallOrUpgradeApp(MessageParcel &data, Messa
 ErrCode AmsMgrStub::HandleNotifyUninstallOrUpgradeAppEnd(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
-    int uid = data.ReadInt32();
+    int32_t uid = data.ReadInt32();
     TAG_LOGW(AAFwkTag::APPMGR, "NotifyUninstallOrUpgradeAppEnd, callingPid=%{public}d", IPCSkeleton::GetCallingPid());
     NotifyUninstallOrUpgradeAppEnd(uid);
     return NO_ERROR;
@@ -987,7 +987,12 @@ int32_t AmsMgrStub::HandlePreloadApplicationByPhase(MessageParcel &data, Message
     auto userId = data.ReadInt32();
     auto appIndex = data.ReadInt32();
     auto preloadPhase = data.ReadInt32();
-    PreloadApplicationByPhase(bundleName, userId, appIndex, static_cast<AppExecFwk::PreloadPhase>(preloadPhase));
+    auto ret = PreloadApplicationByPhase(bundleName, userId, appIndex,
+        static_cast<AppExecFwk::PreloadPhase>(preloadPhase));
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write ret");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
+    }
     return NO_ERROR;
 }
 
@@ -995,11 +1000,12 @@ int32_t AmsMgrStub::HandleNotifyPreloadAbilityStateChanged(MessageParcel &data, 
 {
     HITRACE_METER(HITRACE_TAG_APP);
     sptr<IRemoteObject> token = data.ReadRemoteObject();
+    bool isPreForeground = data.ReadBool();
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null token");
         return AAFwk::INVALID_CALLER_TOKEN;
     }
-    auto ret = NotifyPreloadAbilityStateChanged(token);
+    auto ret = NotifyPreloadAbilityStateChanged(token, isPreForeground);
     if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write ret");
         return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;

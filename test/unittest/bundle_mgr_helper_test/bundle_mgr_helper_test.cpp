@@ -29,6 +29,7 @@ const int32_t ABILITY_INFO_FLAG = 4;
 const int32_t DEFAULT_USERID = 100;
 const int32_t FIRST_APP_INDEX = 1000;
 const int32_t SECOND_APP_INDEX = 2000;
+const int32_t CALLER_UID = 100;
 #ifdef WITH_DLP
 const int32_t ERR_COD1 = 8519801;
 #endif // WITH_DLP
@@ -249,7 +250,7 @@ HWTEST_F(BundleMgrHelperTest, BundleMgrHelperTest_CleanBundleDataFiles_001, Test
 {
     std::string bundleName;
     int32_t userId = DEFAULT_USERID;
-    auto ret = bundleMgrHelper->CleanBundleDataFiles(bundleName, userId, 0);
+    auto ret = bundleMgrHelper->CleanBundleDataFiles(bundleName, userId, 0, CALLER_UID);
     EXPECT_EQ(ret, false);
 }
 

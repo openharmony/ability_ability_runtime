@@ -134,7 +134,7 @@ std::shared_ptr<BaseDelegatorAbilityProperty> AbilityDelegator::WaitAbilityMonit
     return obtainedAbility;
 }
 
-std::shared_ptr<DelegatorAbilityStageProperty> AbilityDelegator::WaitAbilityStageMonitor(
+std::shared_ptr<BaseDelegatorAbilityStageProperty> AbilityDelegator::WaitAbilityStageMonitor(
     const std::shared_ptr<IAbilityStageMonitor> &monitor)
 {
     if (!monitor) {
@@ -170,7 +170,7 @@ std::shared_ptr<BaseDelegatorAbilityProperty> AbilityDelegator::WaitAbilityMonit
     return obtainedAbility;
 }
 
-std::shared_ptr<DelegatorAbilityStageProperty> AbilityDelegator::WaitAbilityStageMonitor(
+std::shared_ptr<BaseDelegatorAbilityStageProperty> AbilityDelegator::WaitAbilityStageMonitor(
     const std::shared_ptr<IAbilityStageMonitor> &monitor, const int64_t timeoutMs)
 {
     if (!monitor) {
@@ -394,7 +394,7 @@ void AbilityDelegator::PostPerformStart(const std::shared_ptr<BaseDelegatorAbili
     }
 }
 
-void AbilityDelegator::PostPerformStageStart(const std::shared_ptr<DelegatorAbilityStageProperty> &abilityStage)
+void AbilityDelegator::PostPerformStageStart(const std::shared_ptr<BaseDelegatorAbilityStageProperty> &abilityStage)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "called");
     if (!abilityStage) {
@@ -730,13 +730,14 @@ void AbilityDelegator::RegisterClearFunc(ClearFunc func)
         TAG_LOGE(AAFwkTag::DELEGATOR, "invalid func");
         return;
     }
-
+    std::lock_guard<std::mutex> lck(mutexClearMonitor_);
     clearFunc_ = func;
 }
 
 inline void AbilityDelegator::CallClearFunc(const std::shared_ptr<BaseDelegatorAbilityProperty> &ability)
 {
     TAG_LOGI(AAFwkTag::DELEGATOR, "Enter");
+    std::lock_guard<std::mutex> lck(mutexClearMonitor_);
     if (clearFunc_) {
         clearFunc_(ability);
     }

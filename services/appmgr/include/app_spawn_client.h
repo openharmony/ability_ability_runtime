@@ -24,7 +24,6 @@
 #include <unistd.h>
 #include <vector>
 
-#include "appexecfwk_errors.h"
 #include "appspawn.h"
 #include "bundle_info.h"
 #ifdef SUPPORT_CHILD_PROCESS

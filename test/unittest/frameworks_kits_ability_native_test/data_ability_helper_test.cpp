@@ -210,7 +210,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_OpenFile_0100
     std::string mode("modetest");
     // Test to AbilityThread interface
     auto returnOpenFile = [&](const Uri &uri, const std::string &mode) {
-        int fd = 1234;
+        int fd = -1;
         return fd;
     };
     EXPECT_CALL(*mockTools->GetMockAbilityScheduler(), OpenFile(testing::_, testing::_))
@@ -240,7 +240,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_OpenFile_0200
     std::string mode("modetest");
     // Test to AbilityThread interface
     auto returnOpenFile = [&](const Uri &uri, const std::string &mode) {
-        int fd = 1234;
+        int fd = -1;
         return fd;
     };
     EXPECT_CALL(*mockTools->GetMockAbilityScheduler(), OpenFile(testing::_, testing::_))
@@ -274,7 +274,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_OpenFile_0300
     dataAbilityHelper->callFromJs_ = true;
     // Test to AbilityThread interface
     auto returnOpenFile = [&](const Uri &uri, const std::string &mode) {
-        int fd = 1234;
+        int fd = -1;
         return fd;
     };
     EXPECT_CALL(*mockTools->GetMockAbilityScheduler(), OpenFile(testing::_, testing::_))
@@ -308,7 +308,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_OpenFile_0400
     dataAbilityHelper->callFromJs_ = false;
     // Test to AbilityThread interface
     auto returnOpenFile = [&](const Uri &uri, const std::string &mode) {
-        int fd = 1234;
+        int fd = -1;
         return fd;
     };
     EXPECT_CALL(*mockTools->GetMockAbilityScheduler(), OpenFile(testing::_, testing::_))
@@ -988,7 +988,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_OpenRawFile_0
     // Test to AbilityThread interface
     std::string mode("modetest");
     auto returnOpenRawFile = [&](const Uri &uri, const std::string &mode) {
-        int fd = 1234;
+        int fd = -1;
         return fd;
     };
     EXPECT_CALL(*mockTools->GetMockAbilityScheduler(), OpenRawFile(testing::_, testing::_))
@@ -1018,7 +1018,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_OpenRawFile_0
     // Test to AbilityThread interface
     std::string mode("modetest");
     auto returnOpenRawFile = [&](const Uri &uri, const std::string &mode) {
-        int fd = 1234;
+        int fd = -1;
         return fd;
     };
     EXPECT_CALL(*mockTools->GetMockAbilityScheduler(), OpenRawFile(testing::_, testing::_))
@@ -1051,7 +1051,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_OpenRawFile_0
     // Test to AbilityThread interface
     std::string mode("modetest");
     auto returnOpenRawFile = [&](const Uri &uri, const std::string &mode) {
-        int fd = 1234;
+        int fd = -1;
         return fd;
     };
     EXPECT_CALL(*mockTools->GetMockAbilityScheduler(), OpenRawFile(testing::_, testing::_))

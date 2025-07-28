@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "ability_manager_service.h"
 #include "ability_util.h"
+#include "keep_alive_process_manager.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -61,6 +62,46 @@ void MainElementUtils::UpdateMainElement(const std::string &bundleName, const st
         TAG_LOGE(AAFwkTag::ABILITYMGR,
             "update keepAlive fail,bundle:%{public}s,mainElement:%{public}s,enable:%{public}d,userId:%{public}d",
             bundleName.c_str(), mainElement.c_str(), updateEnable, userId);
+    }
+}
+
+bool MainElementUtils::IsMainUIAbility(const std::string &bundleName,
+    const std::string &abilityName, int32_t userId)
+{
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN_LOG(bms, false, "bms nullptr");
+    AppExecFwk::BundleInfo bundleInfo;
+    if (IN_PROCESS_CALL(bms->GetBundleInfoV9(bundleName,
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE),
+        bundleInfo, userId)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "IsMainUIAbility get bundleInfo failed");
+        return false;
+    }
+    std::string mainElementName;
+    if (CheckMainUIAbility(bundleInfo, mainElementName)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "IsMainUIAbility %{public}s::%{public}s",
+            abilityName.c_str(), mainElementName.c_str());
+        return abilityName == mainElementName;
+    }
+    return false;
+}
+
+
+void MainElementUtils::SetMainUIAbilityKeepAliveFlag(bool isMainUIAbility,
+    const std::string &bundleName, AbilityRuntime::LoadParam &loadParam)
+{
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "bundleName is empty");
+        return;
+    }
+    if (!isMainUIAbility) {
+        return;
+    }
+    loadParam.isMainElementRunning = true;
+    if (KeepAliveProcessManager::GetInstance().IsKeepAliveBundle(bundleName, DEFAULT_INVAL_VALUE)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Set KeepAlive for main UIAbility");
+        loadParam.isKeepAlive = true;
     }
 }
 

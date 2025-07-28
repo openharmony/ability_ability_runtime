@@ -52,6 +52,8 @@ public:
     MOCK_METHOD(void, OnWindowHidden, (const ProcessData &processData), (override));
     MOCK_METHOD(void, OnWindowShow, (const ProcessData &processData), (override));
     MOCK_METHOD(void, OnKeepAliveStateChanged, (const ProcessData &processData), (override));
+    MOCK_METHOD(void, OnProcessPreForegroundChanged, (const PreloadProcessData &preloadProcessData), (override));
+
     sptr<IRemoteObject> AsObject() override
     {
         return {};
@@ -667,6 +669,222 @@ HWTEST_F(AppStateObserverManagerTestSecond, HandleOnKeepAliveStateChanged_002, T
 
     EXPECT_CALL(*mockObserver, OnKeepAliveStateChanged(_)).Times(0);
     manager->HandleOnKeepAliveStateChanged(nullptr);
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: OnProcessPreForegroundChanged_001
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager OnProcessPreForegroundChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify OnProcessPreForegroundChanged
+ */
+HWTEST_F(AppStateObserverManagerTestSecond, OnProcessPreForegroundChanged_001, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "OnProcessPreForegroundChanged_001 start";
+    auto manager = std::make_shared<AppStateObserverManager>();
+    manager->handler_ = nullptr;
+
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->mainBundleName_ = "com.ohos.unittest";
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, {"com.ohos.unittest"}});
+
+    EXPECT_CALL(*mockObserver, OnProcessPreForegroundChanged(_)).Times(0);
+    manager->OnProcessPreForegroundChanged(appRecord);
+    GTEST_LOG_(INFO) << "OnProcessPreForegroundChanged_001 end";
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: OnProcessPreForegroundChanged_002
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager OnProcessPreForegroundChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify OnProcessPreForegroundChanged
+ */
+HWTEST_F(AppStateObserverManagerTestSecond, OnProcessPreForegroundChanged_002, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "OnProcessPreForegroundChanged_002 start";
+    auto manager = std::make_shared<AppStateObserverManager>();
+    auto mockHandler = std::make_shared<MockTaskHandlerWrap>();
+    manager->handler_ = mockHandler;
+
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+
+    EXPECT_CALL(*mockObserver, OnProcessPreForegroundChanged(_)).Times(0);
+    manager->OnProcessPreForegroundChanged(nullptr);
+    GTEST_LOG_(INFO) << "OnProcessPreForegroundChanged_002 end";
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: OnProcessPreForegroundChanged_003
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager OnProcessPreForegroundChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify OnProcessPreForegroundChanged
+ */
+HWTEST_F(AppStateObserverManagerTestSecond, OnProcessPreForegroundChanged_003, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "OnProcessPreForegroundChanged_003 start";
+    auto manager = std::make_shared<AppStateObserverManager>();
+    auto mockHandler = std::make_shared<MockTaskHandlerWrap>();
+    manager->handler_ = mockHandler;
+
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->mainBundleName_ = "com.ohos.unittest";
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, {"com.ohos.unittest"}});
+
+    EXPECT_CALL(*mockObserver, OnProcessPreForegroundChanged(_)).Times(1);
+    manager->OnProcessPreForegroundChanged(appRecord);
+    GTEST_LOG_(INFO) << "OnProcessPreForegroundChanged_003 end";
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnProcessPreForegroundChanged_001
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnProcessPreForegroundChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnProcessPreForegroundChanged
+ */
+HWTEST_F(AppStateObserverManagerTestSecond, HandleOnProcessPreForegroundChanged_001, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "HandleOnProcessPreForegroundChanged_001 start";
+    auto manager = std::make_shared<AppStateObserverManager>();
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->mainBundleName_ = "com.ohos.unittest";
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, {}});
+
+    EXPECT_CALL(*mockObserver, OnProcessPreForegroundChanged(_)).Times(1);
+    manager->HandleOnProcessPreForegroundChanged(appRecord);
+    GTEST_LOG_(INFO) << "HandleOnProcessPreForegroundChanged_001 end";
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnProcessPreForegroundChanged_002
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnProcessPreForegroundChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnProcessPreForegroundChanged
+ */
+HWTEST_F(AppStateObserverManagerTestSecond, HandleOnProcessPreForegroundChanged_002, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "HandleOnProcessPreForegroundChanged_002 start";
+    auto manager = std::make_shared<AppStateObserverManager>();
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->mainBundleName_ = "com.ohos.unittest";
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, {"com.ohos.nonexist"}});
+
+    EXPECT_CALL(*mockObserver, OnProcessPreForegroundChanged(_)).Times(0);
+    manager->HandleOnProcessPreForegroundChanged(appRecord);
+    GTEST_LOG_(INFO) << "HandleOnProcessPreForegroundChanged_002 end";
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnProcessPreForegroundChanged_003
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnProcessPreForegroundChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnProcessPreForegroundChanged
+ */
+HWTEST_F(AppStateObserverManagerTestSecond, HandleOnProcessPreForegroundChanged_003, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "HandleOnProcessPreForegroundChanged_003 start";
+    auto manager = std::make_shared<AppStateObserverManager>();
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->mainBundleName_ = "com.ohos.unittest";
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, {"com.ohos.unittest"}});
+
+    EXPECT_CALL(*mockObserver, OnProcessPreForegroundChanged(_)).Times(0);
+    manager->HandleOnProcessPreForegroundChanged(appRecord);
+    GTEST_LOG_(INFO) << "HandleOnProcessPreForegroundChanged_003 end";
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnProcessPreForegroundChanged_004
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnProcessPreForegroundChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnProcessPreForegroundChanged
+ */
+HWTEST_F(AppStateObserverManagerTestSecond, HandleOnProcessPreForegroundChanged_004, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "HandleOnProcessPreForegroundChanged_004 start";
+    auto manager = std::make_shared<AppStateObserverManager>();
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->mainBundleName_ = "com.ohos.unittest";
+    manager->appStateObserverMap_.emplace(nullptr, AppStateObserverInfo{0, {}});
+
+    EXPECT_CALL(*mockObserver, OnProcessPreForegroundChanged(_)).Times(0);
+    manager->HandleOnProcessPreForegroundChanged(appRecord);
+    GTEST_LOG_(INFO) << "HandleOnProcessPreForegroundChanged_004 end";
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnProcessPreForegroundChanged_005
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnProcessPreForegroundChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnProcessPreForegroundChanged
+ */
+HWTEST_F(AppStateObserverManagerTestSecond, HandleOnProcessPreForegroundChanged_005, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "HandleOnProcessPreForegroundChanged_005 start";
+    auto manager = std::make_shared<AppStateObserverManager>();
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, {"com.ohos.unittest"}});
+    EXPECT_CALL(*mockObserver, OnProcessPreForegroundChanged(_)).Times(0);
+
+    manager->HandleOnProcessPreForegroundChanged(nullptr);
+    GTEST_LOG_(INFO) << "HandleOnProcessPreForegroundChanged_005 end";
+}
+
+/*
+ * Feature: AppStateObserverManager
+ * Function: HandleOnProcessPreForegroundChanged_006
+ * SubFunction: NA
+ * FunctionPoints: AppStateObserverManager HandleOnProcessPreForegroundChanged
+ * EnvConditions: NA
+ * CaseDescription: Verify HandleOnProcessPreForegroundChanged
+ */
+HWTEST_F(AppStateObserverManagerTestSecond, HandleOnProcessPreForegroundChanged_006, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "HandleOnProcessPreForegroundChanged_006 start";
+    auto manager = std::make_shared<AppStateObserverManager>();
+    auto mockObserver = new MockApplicationStateObserver();
+    sptr<IApplicationStateObserver> observer(mockObserver);
+
+    std::shared_ptr<AppRunningRecord> appRecord = MockAppRecord();
+    appRecord->mainBundleName_ = "com.ohos.unittest";
+    manager->appStateObserverMap_.emplace(observer, AppStateObserverInfo{0, {"com.ohos.unittest"}});
+
+    EXPECT_CALL(*mockObserver, OnProcessPreForegroundChanged(_)).Times(1);
+    manager->HandleOnProcessPreForegroundChanged(appRecord);
+    GTEST_LOG_(INFO) << "HandleOnProcessPreForegroundChanged_006 end";
 }
 } // namespace AppExecFwk
 } // namespace OHOS

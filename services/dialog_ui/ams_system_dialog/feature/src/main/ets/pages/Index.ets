@@ -15,12 +15,18 @@
 
 import { IntentContent, IntentInfo } from '../view/IntentContent'
 import { IntentDetailPage } from '../view/IntentDetailPage'
+import common from '@ohos.app.ability.common';
 
 @Entry
 @Component
 struct Index {
   @Provide('articlePathStack') articlePathStack: NavPathStack = new NavPathStack();
   scroller: Scroller = new Scroller();
+
+  onBackPress() {
+      let context = AppStorage.get('context') as common.UIAbilityContext;
+      context.terminateSelf();
+  }
 
   @Builder
   intentRouter(name: string, param?: IntentInfo) {
@@ -38,5 +44,6 @@ struct Index {
       .navDestination(this.intentRouter)
       .hideTitleBar(true)
       .mode(NavigationMode.Stack)
+
   }
 }

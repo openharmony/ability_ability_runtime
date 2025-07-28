@@ -126,11 +126,11 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, NapiUncaughtExceptionCallbackTest_01
     // Test with invalid object
     napi_value object = nullptr;
     napi_create_object(env, &object);
-    napi_value valueUint32 = nullptr;
-    napi_create_uint32(env, 0x11, &valueUint32);
-    napi_set_named_property(env, object, "key", valueUint32);
+    napi_value valueInt64 = nullptr;
+    napi_create_int64(env, 401, &valueInt64);
+    napi_set_named_property(env, object, "key", valueInt64);
     NapiUncaughtExceptionCallback callback(task, nullptr, env);
-    ASSERT_EQ(callback.GetNativeStrFromJsTaggedObj(object, "key"), "");
+    ASSERT_EQ(callback.GetNativeStrFromJsTaggedObj(object, "key"), "401");
 }
 
 /**

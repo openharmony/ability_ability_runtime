@@ -1676,7 +1676,7 @@ HWTEST_F(ApplicationContextTest, GetMainNapiEnv_0200, TestSize.Level1)
     GTEST_LOG_(INFO) << "GetMainNapiEnv_0200 start";
     AppGetSpecifiedRuntimeCallback appGetSpecifiedRuntimeCallback =
         [](const std::string &codeLanguage)-> const std::unique_ptr<AbilityRuntime::Runtime>& {
-        EXPECT_EQ(codeLanguage, AppExecFwk::Constants::CODE_LANGUAGE_1_1);
+        EXPECT_EQ(codeLanguage, AppExecFwk::Constants::ARKTS_MODE_DYNAMIC);
         static std::unique_ptr<Runtime> runtime = nullptr;
         return runtime;
     };
@@ -1698,7 +1698,7 @@ HWTEST_F(ApplicationContextTest, GetMainNapiEnv_0300, TestSize.Level1)
     std::unique_ptr<Runtime> runtime = std::move(mockRuntime);
     AppGetSpecifiedRuntimeCallback appGetSpecifiedRuntimeCallback =
         [&runtime](const std::string &codeLanguage)-> const std::unique_ptr<AbilityRuntime::Runtime>& {
-        EXPECT_EQ(codeLanguage, AppExecFwk::Constants::CODE_LANGUAGE_1_1);
+        EXPECT_EQ(codeLanguage, AppExecFwk::Constants::ARKTS_MODE_DYNAMIC);
         return runtime;
     };
     context_->RegisterAppGetSpecifiedRuntime(appGetSpecifiedRuntimeCallback);
@@ -1719,7 +1719,7 @@ HWTEST_F(ApplicationContextTest, GetMainNapiEnv_0400, TestSize.Level1)
     std::unique_ptr<Runtime> runtime = std::move(mockRuntime);
     AppGetSpecifiedRuntimeCallback appGetSpecifiedRuntimeCallback =
         [&runtime](const std::string &codeLanguage)-> const std::unique_ptr<AbilityRuntime::Runtime>& {
-            EXPECT_EQ(codeLanguage, AppExecFwk::Constants::CODE_LANGUAGE_1_1);
+            EXPECT_EQ(codeLanguage, AppExecFwk::Constants::ARKTS_MODE_DYNAMIC);
             return runtime;
     };
     context_->RegisterAppGetSpecifiedRuntime(appGetSpecifiedRuntimeCallback);

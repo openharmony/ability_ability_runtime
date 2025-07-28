@@ -202,6 +202,23 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_StartAbilityWith
  * Feature: ServiceExtensionContext
  * Function: startAbility
  * SubFunction: NA
+ * FunctionPoints: ServiceExtensionContextTest StartUIAbilities
+ * EnvConditions: NA
+ * CaseDescription: Verify StartUIAbilities
+ */
+HWTEST_F(ServiceExtensionContextTest, service_extension_context_StartUIAbilities_001, TestSize.Level1)
+{
+    ServiceExtensionContext serviceExtensionContextTest;
+    std::vector<AAFwk::Want> wantList(5);
+    std::string requestKey = "123";
+    ErrCode result = serviceExtensionContextTest.StartUIAbilities(wantList, requestKey);
+    EXPECT_NE(result, ERR_OK);
+}
+
+/*
+ * Feature: ServiceExtensionContext
+ * Function: startAbility
+ * SubFunction: NA
  * FunctionPoints: ServiceExtensionContextTest StartServiceExtensionAbility
  * EnvConditions: NA
  * CaseDescription: Verify startAbility

@@ -161,7 +161,7 @@ public:
      *
      * @param preloadProcessData Preload process data.
      */
-    virtual void OnPreloadProcessStateChanged(const PreloadProcessData &preloadProcessData) override;
+    virtual void OnProcessPreForegroundChanged(const PreloadProcessData &preloadProcessData) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

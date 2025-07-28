@@ -122,7 +122,7 @@ public:
     MOCK_METHOD2(SetProcessCacheEnable, int32_t(int32_t pid, bool enable));
     MOCK_METHOD2(SetSupportedProcessCache, int32_t(int32_t pid, bool isSupport));
 #ifdef SUPPORT_CHILD_PROCESS
-    MOCK_METHOD4(StartNativeChildProcess, int32_t(const std::string &libName, int32_t childProcessCount,
+    MOCK_METHOD4(CreateNativeChildProcess, int32_t(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback, const std::string &customProcessName));
 #endif // SUPPORT_CHILD_PROCESS
     MOCK_METHOD2(GetSupportedProcessCachePids, int32_t(const std::string &bundleName,
@@ -130,6 +130,7 @@ public:
 
     MOCK_METHOD1(RegisterKiaInterceptor, int32_t(const sptr<IKiaInterceptor> &interceptor));
     MOCK_METHOD2(CheckIsKiaProcess, int32_t(pid_t pid, bool &isKia));
+    MOCK_METHOD2(QueryRunningSharedBundles, int32_t(pid_t pid, std::map<std::string, uint32_t> &sharedBundles));
     virtual int StartUserTestProcess(
         const AAFwk::Want &want, const sptr<IRemoteObject> &observer, const BundleInfo &bundleInfo, int32_t userId)
     {

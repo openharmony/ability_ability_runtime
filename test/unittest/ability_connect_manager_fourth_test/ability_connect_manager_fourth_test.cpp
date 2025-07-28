@@ -1050,5 +1050,6 @@ HWTEST_F(AbilityConnectManagerFourthTest, AAFWK_Kit_ResumeExtensionAbilityLocked
     auto result3 = ConnectManager()->ResumeExtensionAbilityLocked(callbackA_);
     EXPECT_EQ(result3, OHOS::ERR_OK);
 }
+
 }  // namespace AAFwk
 }  // namespace OHOS

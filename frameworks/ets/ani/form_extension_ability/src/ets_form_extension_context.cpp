@@ -45,18 +45,23 @@ ani_object ETSFormExtensionContext::SetFormExtensionContext(
 
     if ((status = env->FindClass(FORM_EXTENSION_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        return nullptr;
     }
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        return nullptr;
     }
     if ((status = env->Object_New(cls, method, &contextObj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        return nullptr;
     }
     if ((status = env->Class_FindField(cls, "nativeContext", &field)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        return nullptr;
     }
     if ((status = env->Object_SetField_Long(contextObj, field, nativeContextLong)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "status : %{public}d", status);
+        return nullptr;
     }
     TAG_LOGI(AAFwkTag::FORM_EXT, "SetFormExtensionContext end");
     return contextObj;

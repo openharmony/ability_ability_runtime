@@ -16,14 +16,13 @@
 #ifndef MOCK_OHOS_ROSEN_WINDOW_SCENE_SCENE_BOARD_JUDGEMENT_H
 #define MOCK_OHOS_ROSEN_WINDOW_SCENE_SCENE_BOARD_JUDGEMENT_H
 
+#include "oh_mock_utils.h"
+
 namespace OHOS {
 namespace Rosen {
 class SceneBoardJudgement final {
 public:
-    static bool IsSceneBoardEnabled()
-    {
-        return false;
-    }
+    OH_MOCK_METHOD_WITH_DECORATOR(static, bool, SceneBoardJudgement, IsSceneBoardEnabled);
 };
 } // namespace Rosen
 } // namespace OHOS

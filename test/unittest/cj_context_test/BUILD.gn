@@ -1,0 +1,58 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//build/test.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
+
+ohos_unittest("cj_context_test") {
+  module_out_path = "ability_runtime/ability_runtime/cj_context_test"
+  include_dirs = [ "${ability_runtime_path}/frameworks/cj/ffi" ]
+
+  sources = [
+    "${ability_runtime_path}/frameworks/cj/ffi/context/cj_context.cpp",
+    "cj_context_test.cpp",
+  ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+
+  deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:app_context_utils",
+    "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
+    "${ability_runtime_path}/frameworks/cj/ffi/context:cj_context_ffi",
+  ]
+
+  external_deps = [
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:cj_bundle_manager_ffi",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "napi:ace_napi",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
+  ]
+}
+
+group("unittest") {
+  testonly = true
+  deps = [ ":cj_context_test" ]
+}

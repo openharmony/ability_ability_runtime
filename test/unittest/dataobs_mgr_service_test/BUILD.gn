@@ -31,7 +31,11 @@ ohos_unittest("dataobs_mgr_service_test") {
   sources = [ "dataobs_mgr_service_test.cpp" ]
 
   configs = [ "${ability_runtime_services_path}/dataobsmgr:dataobsms_config" ]
-  cflags = []
+  cflags = [
+    "-fvisibility=hidden",
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
@@ -45,6 +49,7 @@ ohos_unittest("dataobs_mgr_service_test") {
     "ability_base:want",
     "ability_base:zuri",
     "access_token:libtoken_setproc",
+    "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "ffrt:libffrt",
     "googletest:gmock_main",

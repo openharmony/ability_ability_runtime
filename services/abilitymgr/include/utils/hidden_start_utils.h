@@ -31,10 +31,6 @@ public:
     static bool IsHiddenStart(const StartOptions &options);
 
     static int32_t CheckHiddenStartSupported(const StartOptions &options);
-
-    static bool IsPreloadStart(const StartOptions &options);
-
-    static int32_t CheckPreloadStartSupported();
 };
 }
 }

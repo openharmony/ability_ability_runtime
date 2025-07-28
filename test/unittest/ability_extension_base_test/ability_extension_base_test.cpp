@@ -242,5 +242,97 @@ HWTEST_F(AbilityExtensionBaseTest, SetExtensionCommon_0100, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "SetExtensionCommon end");
 }
 
+/**
+ * @tc.name: OnExtensionAbilityRequestFailure_0100
+ * @tc.desc: Verify OnExtensionAbilityRequestFailure
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityExtensionBaseTest, OnExtensionAbilityRequestFailure_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnExtensionAbilityRequestFailure start");
+
+    ExtensionBase<ExtensionContext> extensionBase;
+    std::string requestId = "test_request_id";
+    AppExecFwk::ElementName element;
+    element.SetBundleName("com.example.test");
+    element.SetAbilityName("TestAbility");
+    std::string message = "test error message";
+
+    // 使用派生类测试虚方法
+    class TestExtensionBase : public ExtensionBase<ExtensionContext> {
+    public:
+        void OnExtensionAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+            const std::string &message) override
+        {
+            lastRequestId_ = requestId;
+            lastElement_ = element;
+            lastMessage_ = message;
+            called_ = true;
+        }
+
+        std::string lastRequestId_;
+        AppExecFwk::ElementName lastElement_;
+        std::string lastMessage_;
+        bool called_ = false;
+    };
+
+    TestExtensionBase testExtension;
+    testExtension.OnExtensionAbilityRequestFailure(requestId, element, message);
+
+    EXPECT_TRUE(testExtension.called_);
+    EXPECT_EQ(testExtension.lastRequestId_, requestId);
+    EXPECT_EQ(testExtension.lastElement_.GetBundleName(), element.GetBundleName());
+    EXPECT_EQ(testExtension.lastElement_.GetAbilityName(), element.GetAbilityName());
+    EXPECT_EQ(testExtension.lastMessage_, message);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnExtensionAbilityRequestFailure end");
+}
+
+/**
+ * @tc.name: OnExtensionAbilityRequestSuccess_0100
+ * @tc.desc: Verify OnExtensionAbilityRequestSuccess
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityExtensionBaseTest, OnExtensionAbilityRequestSuccess_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "OnExtensionAbilityRequestSuccess start");
+
+    ExtensionBase<ExtensionContext> extensionBase;
+    std::string requestId = "test_request_id";
+    AppExecFwk::ElementName element;
+    element.SetBundleName("com.example.test");
+    element.SetAbilityName("TestAbility");
+    std::string message = "test success message";
+
+    // 使用派生类测试虚方法
+    class TestExtensionBase : public ExtensionBase<ExtensionContext> {
+    public:
+        void OnExtensionAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+            const std::string &message) override
+        {
+            lastRequestId_ = requestId;
+            lastElement_ = element;
+            lastMessage_ = message;
+            called_ = true;
+        }
+
+        std::string lastRequestId_;
+        AppExecFwk::ElementName lastElement_;
+        std::string lastMessage_;
+        bool called_ = false;
+    };
+
+    TestExtensionBase testExtension;
+    testExtension.OnExtensionAbilityRequestSuccess(requestId, element, message);
+
+    EXPECT_TRUE(testExtension.called_);
+    EXPECT_EQ(testExtension.lastRequestId_, requestId);
+    EXPECT_EQ(testExtension.lastElement_.GetBundleName(), element.GetBundleName());
+    EXPECT_EQ(testExtension.lastElement_.GetAbilityName(), element.GetAbilityName());
+    EXPECT_EQ(testExtension.lastMessage_, message);
+
+    TAG_LOGI(AAFwkTag::TEST, "OnExtensionAbilityRequestSuccess end");
+}
+
 }  // namespace AbilityRuntime
 }  // namespace OHOS

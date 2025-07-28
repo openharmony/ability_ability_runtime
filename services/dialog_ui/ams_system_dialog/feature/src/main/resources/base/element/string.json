@@ -18,39 +18,39 @@
     },
     {
       "name": "Cont_title_syyt",
-      "value": "syyt"
+      "value": "All Intentions"
     },
     {
       "name": "Detail_title_ytts",
-      "value": "ytts"
+      "value": "Intention Debugging"
     },
     {
       "name": "Detail_subtitle_ytxx",
-      "value": "ytxx"
+      "value": "Intention Details"
     },
     {
       "name": "Detail_subtitle_ytcs",
-      "value": "ytcs"
+      "value": "Intention Parameter"
     },
     {
       "name": "Detail_btn_zxyt",
-      "value": "zxyt"
+      "value": "Implementation Intention"
     },
     {
       "name": "Detail_stitle_zxjg",
-      "value": "zxjg"
+      "value": "Results of Execution"
     },
     {
-      "name": "Detail_yybm",
-      "value": "yybm"
+      "name": "Detail_ytbm",
+      "value": "Intention Bundle Name"
     },
     {
       "name": "Detail_ytmc",
-      "value": "ytmc"
+      "value": "Intention Name"
     },
     {
       "name": "Detail_zxms",
-      "value": "zxms"
+      "value": "Execution Mode"
     },
     {
       "name": "Tips_bt",
@@ -58,7 +58,7 @@
     },
     {
       "name": "Btn_qr",
-      "value": "sure"
+      "value": "confirm"
     },
     {
       "name": "Btn_tj",
@@ -67,6 +67,10 @@
     {
       "name": "Btn_sc",
       "value": "delete"
+    },
+    {
+      "name": "tips_qsbtzd",
+      "value": "Missing required fields"
     }
   ]
 }

@@ -575,8 +575,7 @@ int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const i
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
-    const bool isUpgrade)
+int32_t AmsMgrProxy::NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -606,7 +605,7 @@ int32_t AmsMgrProxy::NotifyUninstallOrUpgradeApp(const std::string &bundleName, 
     return reply.ReadInt32();
 }
 
-void AmsMgrProxy::NotifyUninstallOrUpgradeAppEnd(const int32_t uid)
+void AmsMgrProxy::NotifyUninstallOrUpgradeAppEnd(int32_t uid)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -1588,7 +1587,7 @@ int32_t AmsMgrProxy::PreloadApplicationByPhase(const std::string &bundleName, in
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+int32_t AmsMgrProxy::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground)
 {
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "token null.");
@@ -1596,7 +1595,7 @@ int32_t AmsMgrProxy::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
     }
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
         return AAFwk::ERR_WRITE_INTERFACE_TOKEN_FAILED;
@@ -1605,6 +1604,7 @@ int32_t AmsMgrProxy::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
         TAG_LOGE(AAFwkTag::APPMGR, "Write token failed.");
         return AAFwk::ERR_WRITE_CALLER_TOKEN_FAILED;
     }
+    PARCEL_UTIL_WRITE_RET_INT(data, Bool, isPreForeground);
 
     auto ret = SendTransactCmd(
         static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_PRELOAD_ABILITY_STATE_CHANGED), data, reply, option);
@@ -1612,7 +1612,7 @@ int32_t AmsMgrProxy::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
         TAG_LOGE(AAFwkTag::APPMGR, "Send request failed, err: %{public}d.", ret);
         return ret;
     }
-    return NO_ERROR;
+    return reply.ReadInt32();
 }
 
 int32_t AmsMgrProxy::CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,

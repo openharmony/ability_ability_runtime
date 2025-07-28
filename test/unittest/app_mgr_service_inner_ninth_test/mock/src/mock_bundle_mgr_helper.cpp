@@ -261,7 +261,8 @@ bool BundleMgrHelper::ImplicitQueryInfos(const Want& want, int32_t flags, int32_
     return false;
 }
 
-bool BundleMgrHelper::CleanBundleDataFiles(const std::string& bundleName, int32_t userId, int32_t appCloneIndex)
+bool BundleMgrHelper::CleanBundleDataFiles(
+    const std::string& bundleName, int32_t userId, int32_t appCloneIndex, int32_t callerUid)
 {
     return AAFwk::MyStatus::GetInstance().cleanBundleDataFiles_;
 }

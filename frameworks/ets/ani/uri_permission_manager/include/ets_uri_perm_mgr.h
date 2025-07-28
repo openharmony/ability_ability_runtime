@@ -31,6 +31,6 @@ ani_object WrapBusinessError(ani_env *env, ani_int code);
 ani_object WrapError(ani_env *env, const std::string &msg);
 ani_string GetAniString(ani_env *env, const std::string &str);
 std::string GetErrMsg(int32_t err, const std::string &permission = "");
-}  // namespace AbilityRuntime
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_ETS_URI_PERM_MGR_H
+} // namespace AbilityRuntime
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_ETS_URI_PERM_MGR_H

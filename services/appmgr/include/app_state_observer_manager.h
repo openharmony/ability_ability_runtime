@@ -71,7 +71,8 @@ public:
     void OnAppStarted(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnAppStopped(const std::shared_ptr<AppRunningRecord> &appRecord);
     void OnProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload);
-    void OnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void OnProcessStateChanged(
+        const std::shared_ptr<AppRunningRecord> &appRecord, bool isFromWindowFocusChanged = false);
     void OnProcessBindingRelationChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
                                          const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation);
     void OnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord);
@@ -90,7 +91,7 @@ public:
     void OnPageHide(const PageStateData pageStateData);
     void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
     void OnKeepAliveStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
-    void OnPreloadProcessStateChanged(std::shared_ptr<AppRunningRecord> appRecord, ApplicationState state);
+    void OnProcessPreForegroundChanged(std::shared_ptr<AppRunningRecord> appRecord);
 
 private:
     void HandleOnWindowShow(const std::shared_ptr<AppRunningRecord> &appRecord);
@@ -119,7 +120,8 @@ private:
     AppStateObserverMap GetAppStateObserverMapCopy();
     AppForegroundStateObserverMap GetAppForegroundStateObserverMapCopy();
     AbilityForegroundObserverMap GetAbilityForegroundObserverMapCopy();
-    ProcessData WrapProcessData(const std::shared_ptr<AppRunningRecord> &appRecord);
+    ProcessData WrapProcessData(
+        const std::shared_ptr<AppRunningRecord> &appRecord, bool isFromWindowFocusChanged = false);
     ProcessData WrapRenderProcessData(const std::shared_ptr<RenderRecord> &renderRecord);
     ProcessBindData WrapProcessBindData(const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation);
 #ifdef SUPPORT_CHILD_PROCESS
@@ -127,9 +129,10 @@ private:
 #endif // SUPPORT_CHILD_PROCESS
     void OnObserverDied(const wptr<IRemoteObject> &remote, const ObserverType &type);
     AppStateData WrapAppStateData(const std::shared_ptr<AppRunningRecord> &appRecord,
-    const ApplicationState state);
+        const ApplicationState state, bool isFromWindowFocusChanged = false);
     void HandleOnProcessCreated(const ProcessData &data);
-    void HandleOnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void HandleOnProcessStateChanged(
+        const std::shared_ptr<AppRunningRecord> &appRecordm, bool isFromWindowFocusChanged = false);
     void HandleOnProcessDied(const ProcessData &data);
     void HandleOnProcessResued(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnPageShow(const PageStateData pageStateData);
@@ -140,7 +143,7 @@ private:
     void HandleOnProcessBindingRelationChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
         const UIExtensionProcessBindInfo &bindInfo, int32_t bindingRelation);
     void HandleOnKeepAliveStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
-    void HandleOnPreloadProcessStateChanged(std::shared_ptr<AppRunningRecord> appRecord, ApplicationState state);
+    void HandleOnProcessPreForegroundChanged(std::shared_ptr<AppRunningRecord> appRecord);
 
 private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> handler_;
