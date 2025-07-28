@@ -31,6 +31,9 @@ void AbilityEventUtil::HandleModuleInfoUpdated(const std::string &bundleName, co
 void AbilityEventUtil::SendStartAbilityErrorEvent(EventInfo &eventInfo, int32_t errCode, const std::string errMsg,
     bool isSystemError)
 {
+    if (errCode == ERR_OK) {
+        return;
+    }
     EventName name = isSystemError ? EventName::START_ABILITY_SYSTEM_ERROR : EventName::START_ABILITY_ERROR;
     eventInfo.errCode = errCode;
     eventInfo.errMsg = errMsg;

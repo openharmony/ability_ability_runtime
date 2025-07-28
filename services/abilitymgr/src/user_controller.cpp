@@ -90,13 +90,17 @@ int UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, bool
 
     if (userId < 0 || userId == USER_ID_NO_HEAD) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUserId invalid:%{public}d", userId);
-        callback->OnStartUserDone(userId, INVALID_USERID_VALUE);
+        if (callback != nullptr) {
+            callback->OnStartUserDone(userId, INVALID_USERID_VALUE);
+        }
         return INVALID_USERID_VALUE;
     }
 
     if (IsCurrentUser(userId)) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "StartUser current:%{public}d", userId);
-        callback->OnStartUserDone(userId, ERR_OK);
+        if (callback != nullptr) {
+            callback->OnStartUserDone(userId, ERR_OK);
+        }
         return ERR_OK;
     }
 
@@ -109,7 +113,9 @@ int UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, bool
 
     if (!IsExistOsAccount(userId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null StartUser account:%{public}d", userId);
-        callback->OnStartUserDone(userId, INVALID_USERID_VALUE);
+        if (callback != nullptr) {
+            callback->OnStartUserDone(userId, INVALID_USERID_VALUE);
+        }
         return INVALID_USERID_VALUE;
     }
 
@@ -124,7 +130,9 @@ int UserController::StartUser(int32_t userId, sptr<IUserCallback> callback, bool
     auto state = userItem->GetState();
     if (state == STATE_STOPPING || state == STATE_SHUTDOWN) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUser user stop, userId:%{public}d", userId);
-        callback->OnStartUserDone(userId, ERR_DEAD_OBJECT);
+        if (callback != nullptr) {
+            callback->OnStartUserDone(userId, ERR_DEAD_OBJECT);
+        }
         return ERR_DEAD_OBJECT;
     }
 
@@ -330,6 +338,7 @@ int UserController::MoveUserToForeground(int32_t oldUserId, int32_t newUserId, s
 void UserController::UserBootDone(std::shared_ptr<UserItem> &item)
 {
     if (!item) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null item");
         return;
     }
     int32_t userId = item->GetUserId();
@@ -337,10 +346,12 @@ void UserController::UserBootDone(std::shared_ptr<UserItem> &item)
     std::lock_guard<ffrt::mutex> guard(userLock_);
     auto it = userItems_.find(userId);
     if (it == userItems_.end()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid userId");
         return;
     }
 
     if (item != it->second) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid item");
         return;
     }
     item->SetState(UserState::STATE_STARTED);
@@ -353,32 +364,36 @@ void UserController::UserBootDone(std::shared_ptr<UserItem> &item)
 
 void UserController::BroadcastUserBackground(int32_t userId)
 {
-    // broadcast event user switch to bg.
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "user background");
 }
 
 void UserController::BroadcastUserForeground(int32_t userId)
 {
-    // broadcast event user switch to fg.
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "user foreground");
 }
 
 void UserController::BroadcastUserStopping(int32_t userId)
 {
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "user stopping");
 }
 
 void UserController::BroadcastUserStopped(int32_t userId)
 {
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "user stopped");
 }
 
 void UserController::SendSystemUserStart(int32_t userId)
 {
     auto handler = eventHandler_;
     if (!handler) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null handler");
         return;
     }
 
     auto eventData = std::make_shared<UserEvent>();
     eventData->newUserId = userId;
     handler->SendEvent(EventWrap(UserEventHandler::EVENT_SYSTEM_USER_START, eventData));
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "SendEvent(EVENT_SYSTEM_USER_START)");
 }
 
 void UserController::ProcessEvent(const EventWrap &event)
@@ -427,6 +442,7 @@ void UserController::SendSystemUserCurrent(int32_t oldUserId, int32_t newUserId)
 {
     auto handler = eventHandler_;
     if (!handler) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null handler");
         return;
     }
 
@@ -434,6 +450,7 @@ void UserController::SendSystemUserCurrent(int32_t oldUserId, int32_t newUserId)
     eventData->oldUserId = oldUserId;
     eventData->newUserId = newUserId;
     handler->SendEvent(EventWrap(UserEventHandler::EVENT_SYSTEM_USER_CURRENT, eventData));
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "SendEvent(EVENT_SYSTEM_USER_CURRENT)");
 }
 
 void UserController::SendReportUserSwitch(int32_t oldUserId, int32_t newUserId,
@@ -441,6 +458,7 @@ void UserController::SendReportUserSwitch(int32_t oldUserId, int32_t newUserId,
 {
     auto handler = eventHandler_;
     if (!handler) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null handler");
         return;
     }
 
@@ -449,6 +467,7 @@ void UserController::SendReportUserSwitch(int32_t oldUserId, int32_t newUserId,
     eventData->newUserId = newUserId;
     eventData->userItem = usrItem;
     handler->SendEvent(EventWrap(UserEventHandler::EVENT_REPORT_USER_SWITCH, eventData));
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "SendEvent(EVENT_REPORT_USER_SWITCH)");
 }
 
 void UserController::SendUserSwitchTimeout(int32_t oldUserId, int32_t newUserId,
@@ -456,6 +475,7 @@ void UserController::SendUserSwitchTimeout(int32_t oldUserId, int32_t newUserId,
 {
     auto handler = eventHandler_;
     if (!handler) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null handler");
         return;
     }
 
@@ -465,6 +485,7 @@ void UserController::SendUserSwitchTimeout(int32_t oldUserId, int32_t newUserId,
     eventData->userItem = usrItem;
     handler->SendEvent(EventWrap(UserEventHandler::EVENT_USER_SWITCH_TIMEOUT,
         eventData), USER_SWITCH_TIMEOUT);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "SendEvent(EVENT_USER_SWITCH_TIMEOUT)");
 }
 
 void UserController::SendContinueUserSwitch(int32_t oldUserId, int32_t newUserId,
@@ -472,6 +493,7 @@ void UserController::SendContinueUserSwitch(int32_t oldUserId, int32_t newUserId
 {
     auto handler = eventHandler_;
     if (!handler) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null handler");
         return;
     }
 
@@ -480,12 +502,14 @@ void UserController::SendContinueUserSwitch(int32_t oldUserId, int32_t newUserId
     eventData->newUserId = newUserId;
     eventData->userItem = usrItem;
     handler->SendEvent(EventWrap(UserEventHandler::EVENT_CONTINUE_USER_SWITCH, eventData));
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "SendEvent(EVENT_CONTINUE_USER_SWITCH)");
 }
 
 void UserController::SendUserSwitchDone(int32_t userId)
 {
     auto handler = eventHandler_;
     if (!handler) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null handler");
         return;
     }
 
@@ -493,28 +517,28 @@ void UserController::SendUserSwitchDone(int32_t userId)
     eventData->newUserId = userId;
     handler->SendEvent(EventWrap(UserEventHandler::EVENT_REPORT_USER_SWITCH_DONE,
         eventData));
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "SendEvent(EVENT_REPORT_USER_SWITCH_DONE)");
 }
 
 void UserController::HandleSystemUserStart(int32_t userId)
 {
-    // notify system mgr user start.
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "notify system user start.");
 }
 
 void UserController::HandleSystemUserCurrent(int32_t oldUserId, int32_t newUserId)
 {
-    // notify system mgr user switch to new.
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "notify system user current.");
 }
 
 void UserController::HandleReportUserSwitch(int32_t oldUserId, int32_t newUserId,
     std::shared_ptr<UserItem> &usrItem)
 {
-    // notify user switch observers, not support yet.
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "notify report user switch.");
 }
 
 void UserController::HandleUserSwitchTimeout(int32_t oldUserId, int32_t newUserId,
     std::shared_ptr<UserItem> &usrItem)
 {
-    // other observers
     SendContinueUserSwitch(oldUserId, newUserId, usrItem);
 }
 
@@ -530,8 +554,7 @@ void UserController::HandleContinueUserSwitch(int32_t oldUserId, int32_t newUser
 
 void UserController::HandleUserSwitchDone(int32_t userId)
 {
-    // notify wms switching done.
-    // notify user switch observers.
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "handle user switch done.");
 }
 
 int32_t UserController::GetFreezingNewUserId() const

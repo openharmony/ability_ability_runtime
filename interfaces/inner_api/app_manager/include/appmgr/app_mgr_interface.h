@@ -905,7 +905,7 @@ public:
      * @param callback callback for notify start result
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+    virtual int32_t CreateNativeChildProcess(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback, const std::string &customProcessName) = 0;
 #endif // SUPPORT_CHILD_PROCESS
 
@@ -1004,6 +1004,18 @@ public:
     }
     
     virtual int32_t DemoteCurrentFromCandidateMasterProcess()
+    {
+        return 0;
+    }
+    
+    /**
+     * Query running shared bundle infos.
+     *
+     * @param pid process id.
+     * @param sharedBundles shared bundle infos.
+     * @return Returns ERR_OK if success, AAFwk::ERR_NO_APP_RECORD if app record not exist.
+     */
+    virtual int32_t QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles)
     {
         return 0;
     }

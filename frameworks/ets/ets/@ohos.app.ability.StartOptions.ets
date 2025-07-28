@@ -13,6 +13,26 @@
  * limitations under the License.
  */
 
+import contextConstant from '@ohos.app.ability.contextConstant';
+import image from '@ohos.multimedia.image';
+import bundleManager from '@ohos.bundle.bundleManager';
+
 export default class StartOptions {
+  windowMode?: number;
   displayId?: number;
+  withAnimation?: boolean;
+  windowLeft?: number;
+  windowTop?: number;
+  windowWidth?: number;
+  windowHeight?: number;
+  windowFocused?: boolean;
+  processMode?: contextConstant.ProcessMode;
+  startupVisibility?: contextConstant.StartupVisibility;
+  startWindowBackgroundColor?: string;
+  startWindowIcon?: image.PixelMap;
+  supportWindowModes?: Array<bundleManager.SupportWindowMode>;
+  minWindowWidth?: number;
+  minWindowHeight?: number;
+  maxWindowWidth?: number;
+  maxWindowHeight?: number;
 }

@@ -1286,5 +1286,26 @@ HWTEST_F(AppRunningRecordTest, AppRunningRecord_OnWindowVisibilityChangedWithPen
     EXPECT_EQ(appRunningRecord->pendingState_, ApplicationPendingState::READY);
     EXPECT_EQ(appRunningRecord->watchdogVisibilityState_, WatchdogVisibilityState::WATCHDOG_STATE_UNVISIBILITY);
 }
+
+/**
+ * @tc.name: AppRunningRecord_SetPreForeground_0100
+ * @tc.desc: Test SetPreForeground works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningRecordTest, AppRunningRecord_SetPreForeground_0100, TestSize.Level1)
+{
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    ASSERT_NE(appInfo, nullptr);
+    int32_t recordId = RECORD_ID;
+    std::string processName;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    ASSERT_NE(appRunningRecord, nullptr);
+
+    appRunningRecord->SetPreForeground(true);
+    EXPECT_EQ(appRunningRecord->IsPreForeground(), true);
+
+    appRunningRecord->SetPreForeground(false);
+    EXPECT_EQ(appRunningRecord->IsPreForeground(), false);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

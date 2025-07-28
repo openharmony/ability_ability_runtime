@@ -67,7 +67,7 @@
 #include "hilog_tag_wrapper.h"
 #include "resource_config_helper.h"
 #ifdef SUPPORT_SCREEN
-#include "locale_config.h"
+#include "locale_config_ext.h"
 #include "ace_forward_compatibility.h"
 #include "form_constants.h"
 #include "cache.h"
@@ -1138,7 +1138,7 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
 #if defined(SUPPORT_GRAPHICS) && defined(SUPPORT_APP_PREFERRED_LANGUAGE)
-    icu::Locale systemLocale = Global::I18n::LocaleConfig::GetIcuLocale(
+    icu::Locale systemLocale = Global::I18n::LocaleConfigExt::GetIcuLocale(
         config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
 
     resConfig->SetLocaleInfo(systemLocale);
@@ -1845,7 +1845,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         if (!isCJApp) {
 #endif
             if (application_ != nullptr) {
-                TAG_LOGD(AAFwkTag::APPKIT, "LoadAllExtensions lan:%{public}s", appInfo.codeLanguage.c_str());
+                TAG_LOGD(AAFwkTag::APPKIT, "LoadAllExtensions lan:%{public}s", appInfo.arkTSMode.c_str());
                 LoadAllExtensions();
             }
             if (!IsEtsAPP(appInfo)) {
@@ -1866,7 +1866,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     auto usertestInfo = appLaunchData.GetUserTestInfo();
     if (usertestInfo) {
         if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo, bundleInfo.targetVersion,
-            appInfo.codeLanguage)) {
+            appInfo.arkTSMode)) {
             TAG_LOGE(AAFwkTag::APPKIT, "PrepareAbilityDelegator failed");
             return;
         }
@@ -1957,8 +1957,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         HandleNWebPreload();
     }
 #endif
-    if (appLaunchData.IsNeedPreloadModule() ||
-        appLaunchData.GetAppPreloadMode() == AppExecFwk::PreloadMode::PRELOAD_MODULE) {
+    if (!IsEtsAPP(appInfo) &&
+        (appLaunchData.IsNeedPreloadModule() ||
+        appLaunchData.GetAppPreloadMode() == AppExecFwk::PreloadMode::PRELOAD_MODULE)) {
         PreloadModule(entryHapModuleInfo, application_->GetRuntime());
         if (appMgr_ == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null appMgr");
@@ -3999,7 +4000,7 @@ void MainThread::ParseAppConfigurationParams(const std::string configuration, Co
     TAG_LOGD(AAFwkTag::APPKIT, "start");
     appConfig.AddItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE, DEFAULT_APP_FONT_SIZE_SCALE);
     if (configuration.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "empty config");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "empty config");
         return;
     }
     TAG_LOGI(AAFwkTag::APPKIT, "ParseAppConfigurationParams config:%{public}s", appConfig.GetName().c_str());
@@ -4057,8 +4058,8 @@ void MainThread::HandleCacheProcess()
 
 void MainThread::SetRuntimeLang(ApplicationInfo &appInfo, AbilityRuntime::Runtime::Options &options)
 {
-    if (appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
-        appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
+    if (appInfo.arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
+        appInfo.arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
         options.lang = AbilityRuntime::Runtime::Language::ETS;
     } else {
         options.lang = AbilityRuntime::Runtime::Language::JS;
@@ -4067,8 +4068,8 @@ void MainThread::SetRuntimeLang(ApplicationInfo &appInfo, AbilityRuntime::Runtim
 
 bool MainThread::IsEtsAPP(const ApplicationInfo &appInfo)
 {
-    return appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
-        appInfo.codeLanguage == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID;
+    return appInfo.arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2 ||
+        appInfo.arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID;
 }
 
 void MainThread::HandleConfigByPlugin(Configuration &config, BundleInfo &bundleInfo)

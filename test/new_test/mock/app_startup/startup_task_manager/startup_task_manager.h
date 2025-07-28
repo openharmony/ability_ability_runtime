@@ -19,6 +19,8 @@
 #include <memory>
 #include <gmock/gmock.h>
 
+#include "startup_task_result.h"
+
 namespace OHOS {
 namespace AbilityRuntime {
 class StartupTaskManager : public std::enable_shared_from_this<StartupTaskManager> {

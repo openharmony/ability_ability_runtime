@@ -76,7 +76,6 @@ ani_object ETSAbilityStageContext::CreateEtsAbilityStageContext(ani_env *env, st
     }
 
     ContextUtil::CreateEtsBaseContext(env, abilityStageCtxCls, obj, context);
-    // set Config class
     SetConfiguration(env, abilityStageCtxCls, obj, context);
     return obj;
 }

@@ -114,7 +114,7 @@ HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreateHspResourceManager_0
     if (ret == 0) {
         EXPECT_NE(resourceManager2, nullptr);
     }
-    
+
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager3 = nullptr;
     ret = contextImpl_->CreateHspModuleResourceManager("com.example.myapplication", "", resourceManager3);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
@@ -268,7 +268,7 @@ HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_IsModuleExist_002, Functio
     GTEST_LOG_(INFO) << "AppExecFwk_AppContext_IsModuleExist_002 start";
 
     auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
-    
+
     contextImpl->applicationInfo_ = std::make_shared<AppExecFwk::ApplicationInfo>();
     std::string moduleName = "HeavenlyMeModule";
     std::string moduleSourceDir = "HeavenlyMeModuleSource";
@@ -525,6 +525,56 @@ HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_WrapContext_001, Function 
 
 
     GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreatePluginContext_001 end";
+}
+
+/**
+ * @tc.number: AppExecFwk_AppContext_CreatePluginContext_002
+ * @tc.name: WrapContext
+ * @tc.desc: Test WrapContext.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ContextImplSecondTest, AppExecFwk_AppContext_CreatePluginContext_002, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreatePluginContext_002 start";
+
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+
+    std::string hostBundName = "com.example.hostBundleName";
+    std::string pluginBundleName = "com.example.pluginBundleName";
+    std::string moduleName = "moduleName";
+    std::shared_ptr<AbilityRuntime::ContextImpl> inputContext = std::make_shared<AbilityRuntime::ContextImpl>();
+    std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
+    inputContext->applicationInfo_ = applicationInfo;
+    applicationInfo->bundleName = "testname";
+
+    AppExecFwk::PluginBundleInfo pluginBundleInfo;
+    std::vector<PluginModuleInfo> pluginModuleInfos;
+    PluginModuleInfo p1;
+    p1.hapPath = "";
+    pluginModuleInfos.emplace_back(p1);
+    PluginModuleInfo p2;
+    p2.hapPath = "test";
+    p2.moduleName = "test";
+    pluginModuleInfos.emplace_back(p2);
+    PluginModuleInfo p3;
+    p3.moduleName = "moduleName";
+    p3.hapPath = "file://";
+    pluginModuleInfos.emplace_back(p3);
+
+    pluginBundleInfo.pluginModuleInfos = pluginModuleInfos;
+
+    auto ret0 = contextImpl->WrapContext(pluginBundleName, moduleName, inputContext, pluginBundleInfo,
+        hostBundName);
+
+    applicationInfo->bundleName = "com.example.hostBundleName";
+    auto ret1 = contextImpl->WrapContext(pluginBundleName, moduleName, inputContext, pluginBundleInfo,
+        hostBundName);
+
+    EXPECT_EQ(ret1, nullptr);
+
+
+    GTEST_LOG_(INFO) << "AppExecFwk_AppContext_CreatePluginContext_002 end";
 }
 }  // namespace AppExecFwk
 }

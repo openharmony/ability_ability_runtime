@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -609,6 +609,10 @@ public:
      */
     void SetKeepAliveDkv(bool isKeepAliveDkv);
 
+    void SetMainElementRunning(bool isMainElementRunning);
+
+    bool IsMainElementRunning() const;
+
     void SetKeepAliveAppService(bool isKeepAliveAppService);
 
     /**
@@ -735,6 +739,8 @@ public:
     void SendAppStartupTypeEvent(const std::shared_ptr<AbilityRunningRecord> &ability, const AppStartType startType);
     void SetKilling();
     bool IsKilling() const;
+    void SetPreForeground(bool isPreForeground);
+    bool IsPreForeground() const;
     void SetAppIndex(const int32_t appIndex);
     int32_t GetAppIndex() const;
     void SetInstanceKey(const std::string& instanceKey);
@@ -1170,6 +1176,7 @@ private:
     bool isKeepAliveBundle_ = false;
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
     bool isKeepAliveDkv_ = false; // Only non-resident keep-alive processes can be set to true, please choose carefully
+    bool isMainElementRunning_ = false;
     bool isKeepAliveAppService_ = false;
     bool isMainProcess_ = true; // Only MainProcess can be keepalive
     bool isSingleton_ = false;
@@ -1216,6 +1223,7 @@ private:
     bool isExtensionSandBox_ = false;
     std::atomic<bool> isKilling_ = false;
     std::atomic_bool isSpawned_ = false;
+    std::atomic<bool> isPreForeground_ = false;
 
     int32_t appRecordId_ = 0;
     int32_t mainUid_;

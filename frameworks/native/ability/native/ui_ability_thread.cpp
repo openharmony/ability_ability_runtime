@@ -132,7 +132,7 @@ void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
 
     // 2.new ability
     auto ability = AppExecFwk::AbilityLoader::GetInstance().GetUIAbilityByName(
-        abilityName, abilityRecord->GetAbilityInfo()->codeLanguage);
+        abilityName, abilityRecord->GetAbilityInfo()->arkTSMode);
     if (ability == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
         return;
@@ -205,7 +205,7 @@ void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
 
     // 2.new ability
     auto ability = AppExecFwk::AbilityLoader::GetInstance().GetUIAbilityByName(
-        abilityName, abilityRecord->GetAbilityInfo()->codeLanguage);
+        abilityName, abilityRecord->GetAbilityInfo()->arkTSMode);
     if (ability == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
         return;
@@ -431,7 +431,7 @@ void UIAbilityThread::SendResult(int requestCode, int resultCode, const Want &wa
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (abilityHandler_ == nullptr || requestCode == -1) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityHandler_ or requestCode is -1");
+        TAG_LOGW(AAFwkTag::UIABILITY, "null abilityHandler_ or requestCode is -1");
         return;
     }
 

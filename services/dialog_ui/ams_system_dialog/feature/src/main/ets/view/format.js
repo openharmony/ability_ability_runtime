@@ -14,41 +14,52 @@
  */
 
 export function format(obj) {
-    const nestedObj = {};
+    let nestedObj = {};
     for (const key in obj) {
         if (key.includes('.')) {
+            const parts = key.split('.');
             if (key.includes('.array')) {
-                const parts = key.split('.');
-                let current = nestedObj;
-                const index = parseInt(parts[1].substring(5));
-                for (let i = 0; i < parts.length - 2; i++) {
-                    const part = parts[i];
-                    if (!current[part] || !Array.isArray(current[part])) {
-                        current[part] = [];
-                    }
-                    current = current[part];
-                }
-                if (!current[index] || typeof current[index] !== 'object') {
-                    current[index] = {};
-                }
-                current[index][parts[parts.length - 1]] = obj[key];
+                processArrayKey(nestedObj, parts, obj[key]);
             } else {
-                const parts = key.split('.');
-                let current = nestedObj;
-                for (let i = 0; i < parts.length - 1; i++) {
-                    const part = parts[i];
-                    if (!current[part] || typeof current[part] !== 'object') {
-                        current[part] = {};
-                    }
-                    current = current[part];
-                }
-                current[parts[parts.length - 1]] = obj[key];
-
+                processObjectKey(nestedObj, parts, obj[key]);
             }
         } else {
             nestedObj[key] = obj[key];
         }
     }
+    nestedObj = formatFilterArrNull(nestedObj);
+    return nestedObj;
+}
+
+function processObjectKey(nestedObj, parts, value) {
+    let current = nestedObj;
+    for (let i = 0; i < parts.length - 1; i++) {
+        const part = parts[i];
+        if (!current[part] || typeof current[part] !== 'object') {
+            current[part] = {};
+        }
+        current = current[part];
+    }
+    current[parts[parts.length - 1]] = value;
+}
+
+function processArrayKey(nestedObj, parts, value) {
+    const index = parseInt(parts[1].substring(5));
+    let current = nestedObj;
+    for (let i = 0; i < parts.length - 2; i++) {
+        const part = parts[i];
+        if (!current[part] || !Array.isArray(current[part])) {
+            current[part] = [];
+        }
+        current = current[part];
+    }
+    if (!current[index] || typeof current[index] !== 'object') {
+        current[index] = {};
+    }
+    current[index][parts[parts.length - 1]] = value;
+}
+
+function formatFilterArrNull(nestedObj) {
     Object.keys(nestedObj).forEach((key) => {
         if (Array.isArray(nestedObj[key])) {
             nestedObj[key] = nestedObj[key].filter(item => item !== null);

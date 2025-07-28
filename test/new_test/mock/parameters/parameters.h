@@ -21,15 +21,8 @@
 
 namespace OHOS {
 namespace system {
-std::string GetParameter(const std::string& key, const std::string& def)
-{
-    return "";
-}
-
-bool GetBoolParameter(const std::string& key, bool def)
-{
-    return false;
-}
+std::string GetParameter(const std::string& key, const std::string& def);
+bool GetBoolParameter(const std::string& key, bool def);
 
 template<typename T>
 T GetIntParameter(const std::string& key, T def, T min = std::numeric_limits<T>::min(),
@@ -44,15 +37,8 @@ T GetUintParameter(const std::string& key, T def, T max = std::numeric_limits<T>
     return 0;
 }
 
-bool SetParameter(const std::string& key, const std::string& value)
-{
-    return false;
-}
-
-std::string GetDeviceType(void)
-{
-    return "";
-}
+bool SetParameter(const std::string& key, const std::string& value);
+std::string GetDeviceType();
 } // namespace system
 } // namespace OHOS
 #endif // MOCK_SYSTEM_PARAMETERS_H

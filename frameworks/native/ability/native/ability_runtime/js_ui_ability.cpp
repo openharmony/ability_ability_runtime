@@ -813,6 +813,9 @@ void JsUIAbility::OnWillBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::UIABILITY, "ability: %{public}s", GetAbilityName().c_str());
+    if (scene_ != nullptr) {
+        scene_->GoPause();
+    }
     UIAbility::OnWillBackground();
 
     std::string methodName = "OnWillBackground";
@@ -1831,7 +1834,7 @@ napi_value JsUIAbility::CallObjectMethod(const char *name, napi_value const *arg
     int64_t timeStart = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
     napi_status status = napi_call_function(env, obj, methodOnCreate, argc, argv, nullptr);
     if (status != napi_ok) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "JsUIAbility call js, failed: %{public}d", status);
+        TAG_LOGE(AAFwkTag::UIABILITY, "napi err: %{public}d", status);
     }
     int64_t timeEnd = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
     if (tryCatch.HasCaught()) {

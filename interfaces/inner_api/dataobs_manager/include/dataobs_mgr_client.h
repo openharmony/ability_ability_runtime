@@ -46,7 +46,8 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1,
+    ErrCode RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+        int32_t userId = IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER,
         DataObsOption opt = DataObsOption());
 
     /**
@@ -57,8 +58,8 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1,
-        DataObsOption opt = DataObsOption());
+    ErrCode UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+        int32_t userId = IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, DataObsOption opt = DataObsOption());
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uri.
@@ -67,7 +68,8 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode NotifyChange(const Uri &uri, int32_t userId = -1, DataObsOption opt = DataObsOption());
+    ErrCode NotifyChange(const Uri &uri, int32_t userId = IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER,
+        DataObsOption opt = DataObsOption());
 
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.

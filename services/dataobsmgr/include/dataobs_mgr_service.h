@@ -50,12 +50,15 @@ public:
     DataObsServiceRunningState QueryServiceState() const;
 
     std::pair<bool, struct ObserverNode> ConstructObserverNode(sptr<IDataAbilityObserver> dataObserver,
-        int32_t userId = -1);
+        int32_t userId, uint32_t tokenId);
     virtual int RegisterObserver(const Uri &uri,
-        sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1, DataObsOption opt = DataObsOption()) override;
+        sptr<IDataAbilityObserver> dataObserver, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
+        DataObsOption opt = DataObsOption()) override;
     virtual int UnregisterObserver(const Uri &uri,
-        sptr<IDataAbilityObserver> dataObserver, int32_t userId = -1, DataObsOption opt = DataObsOption()) override;
-    virtual int NotifyChange(const Uri &uri, int32_t userId = -1, DataObsOption opt = DataObsOption()) override;
+        sptr<IDataAbilityObserver> dataObserver, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
+        DataObsOption opt = DataObsOption()) override;
+    virtual int NotifyChange(const Uri &uri, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
+        DataObsOption opt = DataObsOption()) override;
     virtual Status RegisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
         bool isDescendants, DataObsOption opt = DataObsOption()) override;
     virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
@@ -81,8 +84,12 @@ private:
     Status DeepCopyChangeInfo(const ChangeInfo &src, ChangeInfo &dst) const;
     void GetFocusedAppInfo(int32_t &windowId, sptr<IRemoteObject> &abilityToken) const;
     sptr<IRemoteObject> GetAbilityManagerService() const;
-    static int32_t GetCallingUserId();
-    static bool CheckSystemCallingPermission(DataObsOption &opt, int32_t userId = -1, int32_t callingUserId = -1);
+    static int32_t GetCallingUserId(uint32_t tokenId);
+    static bool IsSystemApp(uint32_t tokenId, uint64_t fullTokenId);
+    static bool IsCallingPermissionValid(DataObsOption &opt, int32_t userId, int32_t callingUserId);
+    static bool IsCallingPermissionValid(DataObsOption &opt);
+    static int32_t GetDataMgrServiceUid();
+    static bool IsDataMgrService(uint32_t tokenId, int32_t uid);
 private:
     static constexpr std::uint32_t TASK_COUNT_MAX = 50;
     ffrt::mutex taskCountMutex_;

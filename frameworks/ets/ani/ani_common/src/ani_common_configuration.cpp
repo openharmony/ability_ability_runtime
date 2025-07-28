@@ -76,12 +76,22 @@ void SetAdditionalConfiguration(ani_env *env, ani_object object, const AppExecFw
     env->Object_SetPropertyByName_Ref(object, "fontId", GetAniString(env, str));
 
     std::string fontSizeScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-    env->Object_SetPropertyByName_Ref(
-        object, "fontSizeScale", CreateDouble(env, fontSizeScale != "" ? std::stod(fontSizeScale) : 1.0));
+    try {
+        env->Object_SetPropertyByName_Ref(
+            object, "fontSizeScale", CreateDouble(env, fontSizeScale != "" ? std::stod(fontSizeScale) : 1.0));
+    } catch (...) {
+        TAG_LOGE(AAFwkTag::ANI, "stod(%{public}s) failed", fontSizeScale.c_str());
+        return;
+    }
 
     std::string fontWeightScale = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
-    env->Object_SetPropertyByName_Ref(
-        object, "fontWeightScale", CreateDouble(env, fontWeightScale != "" ? std::stod(fontWeightScale) : 1.0));
+    try {
+        env->Object_SetPropertyByName_Ref(
+            object, "fontWeightScale", CreateDouble(env, fontWeightScale != "" ? std::stod(fontWeightScale) : 1.0));
+    } catch (...) {
+        TAG_LOGE(AAFwkTag::ANI, "stod(%{public}s) failed", fontWeightScale.c_str());
+        return;
+    }
 
     str = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
     env->Object_SetPropertyByName_Ref(object, "mcc", GetAniString(env, str));

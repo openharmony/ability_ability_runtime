@@ -314,9 +314,9 @@ HWTEST_F(RenderStateObserverManagerTest, HandleOnRenderStateChanged_0200, TestSi
     sptr<MockRenderStateObserver> observer = new MockRenderStateObserver();
     pid_t hostPid = 1234;
     std::string renderParam = "test_render_param";
-    int32_t ipcFd = 1;
-    int32_t sharedFd = 1;
-    int32_t crashFd = 1;
+    int32_t ipcFd = -1;
+    int32_t sharedFd = -1;
+    int32_t crashFd = -1;
     std::shared_ptr<AppRunningRecord> host = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(
         hostPid, renderParam, FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), host);

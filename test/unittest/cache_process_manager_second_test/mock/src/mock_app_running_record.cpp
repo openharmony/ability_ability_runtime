@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -461,6 +461,16 @@ void AppRunningRecord::SetKeepAliveEnableState(bool isKeepAliveEnable)
 void AppRunningRecord::SetKeepAliveDkv(bool isKeepAliveDkv)
 {
     isKeepAliveDkv_ = isKeepAliveDkv;
+}
+
+void AppRunningRecord::SetMainElementRunning(bool isMainElementRunning)
+{
+    isMainElementRunning_ = isMainElementRunning;
+}
+
+bool AppRunningRecord::IsMainElementRunning() const
+{
+    return isMainElementRunning_;
 }
 
 void AppRunningRecord::SetKeepAliveBundle(bool isKeepAliveBundle)
@@ -1276,6 +1286,16 @@ bool AppRunningRecord::IsKeepAliveAppService() const
 void AppRunningRecord::SetKeepAliveAppService(bool isKeepAliveAppService)
 {
     isKeepAliveAppService_ = isKeepAliveAppService;
+}
+
+void AppRunningRecord::SetPreForeground(bool isPreForeground)
+{
+    isPreForeground_.store(isPreForeground);
+}
+
+bool AppRunningRecord::IsPreForeground() const
+{
+    return isPreForeground_.load();
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

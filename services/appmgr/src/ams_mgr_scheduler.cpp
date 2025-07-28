@@ -387,8 +387,7 @@ int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, con
     return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid, reason);
 }
 
-int32_t AmsMgrScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int uid,
-    const bool isUpgrade)
+int32_t AmsMgrScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, uid = %{public}d", bundleName.c_str(), uid);
     if (!IsReady()) {
@@ -405,7 +404,7 @@ int32_t AmsMgrScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleNa
     return amsMgrServiceInner_->NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
 }
 
-void AmsMgrScheduler::NotifyUninstallOrUpgradeAppEnd(const int uid)
+void AmsMgrScheduler::NotifyUninstallOrUpgradeAppEnd(int32_t uid)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "uid = %{public}d", uid);
     if (!IsReady()) {
@@ -851,7 +850,7 @@ int32_t AmsMgrScheduler::PreloadApplicationByPhase(const std::string &bundleName
     return amsMgrServiceInner_->PreloadApplicationByPhase(bundleName, userId, appIndex, preloadPhase);
 }
 
-int32_t AmsMgrScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+int32_t AmsMgrScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner is not ready.");
@@ -861,7 +860,7 @@ int32_t AmsMgrScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> to
         TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
         return ERR_PERMISSION_DENIED;
     }
-    return amsMgrServiceInner_->NotifyPreloadAbilityStateChanged(token);
+    return amsMgrServiceInner_->NotifyPreloadAbilityStateChanged(token, isPreForeground);
 }
 
 int32_t AmsMgrScheduler::CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,

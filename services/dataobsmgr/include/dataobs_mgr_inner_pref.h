@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,9 @@
 #include <list>
 #include <map>
 #include <memory>
-#include <mutex>
 #include <string>
 
+#include "cpp/mutex.h"
 #include "data_ability_observer_interface.h"
 #include "dataobs_mgr_inner_common.h"
 
@@ -49,7 +49,7 @@ private:
 
     static constexpr uint32_t OBS_NUM_MAX = 50;
     static constexpr uint32_t OBS_ALL_NUM_MAX = OBS_NUM_MAX * OBS_NUM_MAX;
-    std::mutex preferenceMutex_;
+    ffrt::mutex preferenceMutex_;
     ObsMapType observers_;
     ObsRecipientMapType obsRecipient_;
 };

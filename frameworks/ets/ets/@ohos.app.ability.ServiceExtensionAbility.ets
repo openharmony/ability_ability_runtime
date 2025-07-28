@@ -24,15 +24,6 @@ class MyService extends rpc.RemoteObject {
   constructor(descriptor: string) {
     super(descriptor);
   }
-
-  public onRemoteMessageRequest(
-    code: number,
-    data: rpc.MessageSequence,
-    reply: rpc.MessageSequence,
-    options: rpc.MessageOption
-  ): boolean | Promise<boolean> {
-    return false;
-  }
 }
 
 export default class ServiceExtensionAbility {
@@ -99,5 +90,13 @@ export default class ServiceExtensionAbility {
 
   onDisconnectAsync(want: Want): Promise<void> {
     return new Promise<void>((resolve: (a: undefined) => void, reject: (err: Error) => void): void => {});
+  }
+
+  onConfigurationUpdate(newConfig: Configuration): void {
+  }
+
+  onDump(params: Array<string>): Array<string> {
+    console.log("onDump");
+    return ['params'];
   }
 }

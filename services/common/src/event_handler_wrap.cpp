@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,25 @@
  */
 
 #include "event_handler_wrap.h"
-#include "hilog_tag_wrapper.h"
 
+#include <cinttypes>
+#include <chrono>
 #include <mutex>
 #include "cpp/mutex.h"
 
+#include "hilog_tag_wrapper.h"
+
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr int64_t EVENT_TIME_DIFF = 200;  // ms
+constexpr int64_t EVENT_TIME_CANCEL = 3000; // ms
+inline int64_t GetCurrentTimeMillis()
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+}
 EventHandlerWrap::EventHandlerWrap() : taskHandler_(TaskHandlerWrap::GetFfrtHandler())
 {
     eventMutex_ = std::make_unique<ffrt::mutex>();
@@ -64,7 +76,14 @@ bool EventHandlerWrap::SendEvent(EventWrap event, int64_t delayMillis, bool forc
         return false;
     }
 
+    event.SetTimeout(delayMillis);
+    event.SetCreateTime(GetCurrentTimeMillis());
     event.SetEventTask(taskHandler_->SubmitTaskJust([wthis = weak_from_this(), event]() {
+        auto timeCost = GetCurrentTimeMillis() - event.GetCreateTime();
+        if (timeCost - event.GetTimeout() > EVENT_TIME_DIFF) {
+            TAG_LOGW(AAFwkTag::DEFAULT, "createtime: %{public}" PRId64 ", timeout: %{public}" PRId64,
+                event.GetCreateTime(), event.GetTimeout());
+        }
         auto pthis = wthis.lock();
         if (pthis) {
             pthis->ProcessEvent(event);
@@ -96,10 +115,16 @@ bool EventHandlerWrap::RemoveEvent(EventWrap event, bool force)
     std::lock_guard<ffrt::mutex> guard(*eventMutex_);
     auto it = eventMap_.find(event.GetEventString());
     if (it == eventMap_.end()) {
-        TAG_LOGD(AAFwkTag::DEFAULT, "can't find event: %{public}s ", event.GetEventString().c_str());
+        TAG_LOGW(AAFwkTag::DEFAULT, "can't find event: %{public}s ", event.GetEventString().c_str());
         return false;
     }
     auto isSame = it->second.IsSame(event);
+    const auto &origin = it->second;
+    auto timeCost = GetCurrentTimeMillis() - origin.GetCreateTime();
+    if (force && timeCost > EVENT_TIME_CANCEL) {
+        TAG_LOGW(AAFwkTag::DEFAULT, "event: %{public}s, timecost: %{public}" PRId64", delay: %{public}" PRId64,
+            origin.GetEventString().c_str(), timeCost, origin.GetTimeout());
+    }
     if (force || isSame) {
         auto result = it->second.GetEventTask().Cancel();
         if (!result) {

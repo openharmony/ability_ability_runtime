@@ -1468,6 +1468,7 @@ HWTEST_F(JsRuntimeTest, SetDebugOption_0100, TestSize.Level1)
     Runtime::DebugOption debugOption;
     std::string bundleName = "com.ohos.example.bundleName";
     debugOption.bundleName = bundleName;
+    debugOption.processName = "com.ohos.example.bundleName";
     auto jsRuntime = std::make_unique<JsRuntime>();
     jsRuntime->SetDebugOption(debugOption);
     EXPECT_EQ(jsRuntime->debugOption_.bundleName, bundleName);

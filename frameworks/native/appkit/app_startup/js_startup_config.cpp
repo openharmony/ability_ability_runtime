@@ -168,7 +168,7 @@ void JsStartupConfig::InitCustomization(napi_env env, napi_value configEntry, st
     bool isCallable = false;
     napi_is_callable(env, method, &isCallable);
     if (!isCallable) {
-        TAG_LOGE(AAFwkTag::STARTUP, "onRequestCustomMatchRule not callable");
+        TAG_LOGI(AAFwkTag::STARTUP, "onRequestCustomMatchRule not callable");
         return;
     }
 

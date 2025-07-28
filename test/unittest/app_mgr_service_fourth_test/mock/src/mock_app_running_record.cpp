@@ -449,6 +449,16 @@ void AppRunningRecord::SetKeepAliveDkv(bool isKeepAliveDkv)
     isKeepAliveDkv_ = isKeepAliveDkv;
 }
 
+void AppRunningRecord::SetMainElementRunning(bool isMainElementRunning)
+{
+    isMainElementRunning_ = isMainElementRunning;
+}
+
+bool AppRunningRecord::IsMainElementRunning() const
+{
+    return isMainElementRunning_;
+}
+
 void AppRunningRecord::SetKeepAliveBundle(bool isKeepAliveBundle)
 {
     isKeepAliveBundle_ = isKeepAliveBundle;
@@ -1239,6 +1249,16 @@ int32_t AppRunningRecord::GetAddStageTimeout() const
 void AppRunningRecord::SetDebugFromLocal(bool isDebugFromLocal)
 {
     isDebugFromLocal_ = isDebugFromLocal;
+}
+
+void AppRunningRecord::SetPreForeground(bool isPreForeground)
+{
+    isPreForeground_.store(isPreForeground);
+}
+
+bool AppRunningRecord::IsPreForeground() const
+{
+    return isPreForeground_.load();
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

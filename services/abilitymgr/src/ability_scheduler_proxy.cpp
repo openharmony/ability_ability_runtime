@@ -70,12 +70,11 @@ bool AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const L
             AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey, "write sessionInfo failed");
             return false;
         }
-    } else {
-        if (!data.WriteBool(false)) {
-            return false;
-        }
+    } else if (!data.WriteBool(false)) {
+        return false;
     }
     int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITY_TRANSACTION, data, reply, option);
+    const_cast<Want &>(want).CloseAllFd();
     if (err != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, err: %{public}d", err);
         AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey,

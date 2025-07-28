@@ -33,8 +33,8 @@
 #include "hitrace_meter.h"
 #include "image_source.h"
 #include "json_utils.h"
-#include "keep_alive_process_manager.h"
 #include "last_exit_detail_info.h"
+#include "main_element_utils.h"
 #include "multi_instance_utils.h"
 #include "os_account_manager_wrapper.h"
 #include "ui_service_extension_connection_constants.h"
@@ -375,11 +375,11 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     loadParam.instanceKey = instanceKey_;
     loadParam.isCallerSetProcess = IsCallerSetProcess();
     loadParam.customProcessFlag = customProcessFlag_;
-    want_.RemoveParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED);
-    if (KeepAliveProcessManager::GetInstance().IsKeepAliveBundle(abilityInfo_.applicationInfo.bundleName, -1)) {
-        want_.SetParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED, true);
-        loadParam.isKeepAlive = true;
-    }
+    auto userId = abilityInfo_.applicationInfo.uid / BASE_USER_RANGE;
+    bool isMainUIAbility =
+        MainElementUtils::IsMainUIAbility(abilityInfo_.applicationInfo.bundleName, abilityInfo_.name, userId);
+    MainElementUtils::SetMainUIAbilityKeepAliveFlag(isMainUIAbility,
+        abilityInfo_.applicationInfo.bundleName, loadParam);
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
         loadParam, abilityInfo_, abilityInfo_.applicationInfo, want_);
     want_.RemoveParam(IS_HOOK);
@@ -502,6 +502,12 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
         PostForegroundTimeoutTask();
         if (IsAbilityState(AbilityState::FOREGROUND)) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
+            if (IsFrozenByPreload()) {
+                SetFrozenByPreload(false);
+                auto ret =
+                    DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(token_, false);
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "NotifyPreloadAbilityStateChanged by start, ret: %{public}d", ret);
+            }
             ForegroundAbility(sceneFlag);
         } else {
             // background to active state

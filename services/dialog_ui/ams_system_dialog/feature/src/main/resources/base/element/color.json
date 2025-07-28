@@ -21,12 +21,40 @@
       "value": "#FFF"
     },
     {
+      "name": "bg_color_black_01",
+      "value": "#1A000000"
+    },
+    {
       "name": "btn_background",
       "value": "#0A59F7"
     },
     {
+      "name": "btn_bg_005",
+      "value": "#0D000000"
+    },
+    {
+      "name": "border_color_02",
+      "value": "#33000000"
+    },
+    {
       "name": "error_color",
       "value": "#E84026"
+    },
+    {
+      "name": "font_color_04",
+      "value": "#66000000"
+    },
+    {
+      "name": "font_color_06",
+      "value": "#99000000"
+    },
+    {
+      "name": "font_color_09",
+      "value": "#E6000000"
+    },
+    {
+      "name": "font_color_black",
+      "value": "#000000"
     }
   ]
 }

@@ -189,6 +189,16 @@ CJ_EXPORT int32_t FfiContextGetArea(int64_t id, int32_t type)
     return nativeContext->GetArea();
 }
 
+CJ_EXPORT void FfiContextSwitchArea(int64_t id, int32_t mode)
+{
+    std::shared_ptr<AbilityRuntime::Context> nativeContext = GetContextFromCJ(id);
+    if (nativeContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return;
+    }
+    return nativeContext->SwitchArea(mode);
+}
+
 CJ_EXPORT int64_t FfiContextGetApplicationContext()
 {
     auto appContext = ApplicationContextCJ::CJApplicationContext::GetCJApplicationContext(

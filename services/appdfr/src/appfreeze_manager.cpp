@@ -82,6 +82,7 @@ constexpr uint64_t SEC_TO_MILLISEC = 1000;
 constexpr uint32_t BUFFER_SIZE = 1024;
 const std::string LOG_FILE_PATH = "data/log/eventlog";
 static bool g_betaVersion = OHOS::system::GetParameter("const.logsystem.versiontype", "unknown") == "beta";
+static bool g_overseaVersion = OHOS::system::GetParameter("const.global.region", "CN") != "CN";
 static bool g_developMode = (OHOS::system::GetParameter("persist.hiview.leak_detector", "unknown") == "enable") ||
                             (OHOS::system::GetParameter("persist.hiview.leak_detector", "unknown") == "true");
 }
@@ -474,24 +475,25 @@ std::map<int, std::list<AppfreezeManager::PeerBinderInfo>> AppfreezeManager::Bin
     std::map<int, std::list<AppfreezeManager::PeerBinderInfo>> binderInfos = BinderLineParser(fin, stack,
         asyncBinderMap, freeAsyncSpacePairs);
 
-    std::sort(freeAsyncSpacePairs.begin(), freeAsyncSpacePairs.end(),
-        [] (const auto& pairOne, const auto& pairTwo) { return pairOne.second < pairTwo.second; });
-    std::vector<std::pair<uint32_t, uint32_t>> asyncBinderPairs(asyncBinderMap.begin(), asyncBinderMap.end());
-    std::sort(asyncBinderPairs.begin(), asyncBinderPairs.end(),
-        [] (const auto& pairOne, const auto& pairTwo) { return pairOne.second > pairTwo.second; });
+    if (!g_overseaVersion) {
+        std::sort(freeAsyncSpacePairs.begin(), freeAsyncSpacePairs.end(),
+            [] (const auto& pairOne, const auto& pairTwo) { return pairOne.second < pairTwo.second; });
+        std::vector<std::pair<uint32_t, uint32_t>> asyncBinderPairs(asyncBinderMap.begin(), asyncBinderMap.end());
+        std::sort(asyncBinderPairs.begin(), asyncBinderPairs.end(),
+            [] (const auto& pairOne, const auto& pairTwo) { return pairOne.second > pairTwo.second; });
 
-    size_t freeAsyncSpaceSize = freeAsyncSpacePairs.size();
-    size_t asyncBinderSize = asyncBinderPairs.size();
-    size_t individualMaxSize = 2;
-    for (size_t i = 0; i < individualMaxSize; i++) {
-        if (i < freeAsyncSpaceSize) {
-            asyncPids.insert(freeAsyncSpacePairs[i].first);
-        }
-        if (i < asyncBinderSize) {
-            asyncPids.insert(asyncBinderPairs[i].first);
+        size_t freeAsyncSpaceSize = freeAsyncSpacePairs.size();
+        size_t asyncBinderSize = asyncBinderPairs.size();
+        size_t individualMaxSize = 2;
+        for (size_t i = 0; i < individualMaxSize; i++) {
+            if (i < freeAsyncSpaceSize) {
+                asyncPids.insert(freeAsyncSpacePairs[i].first);
+            }
+            if (i < asyncBinderSize) {
+                asyncPids.insert(asyncBinderPairs[i].first);
+            }
         }
     }
-
     return binderInfos;
 }
 
@@ -509,35 +511,33 @@ std::map<int, std::list<AppfreezeManager::PeerBinderInfo>> AppfreezeManager::Bin
         isBinderMatchup = (!isBinderMatchup && line.find("free_async_space") != line.npos) ? true : isBinderMatchup;
         std::vector<std::string> strList = GetFileToList(line);
 
-        auto strSplit = [](const std::string& str, uint16_t index) -> std::string {
-            std::vector<std::string> strings;
-            SplitStr(str, ":", strings);
-            return index < strings.size() ? strings[index] : "";
-        };
-
         if (isBinderMatchup) {
-            if (line.find("free_async_space") == line.npos && strList.size() == ARR_SIZE &&
+            if (g_overseaVersion) {
+                break;
+            } else if (line.find("free_async_space") == line.npos && strList.size() == ARR_SIZE &&
                 std::atoll(strList[FREE_ASYNC_INDEX].c_str()) < FREE_ASYNC_MAX) {
-                freeAsyncSpacePairs.emplace_back(
-                    std::atoi(strList[0].c_str()),
+                freeAsyncSpacePairs.emplace_back(std::atoi(strList[0].c_str()),
                     std::atoll(strList[FREE_ASYNC_INDEX].c_str()));
             }
         } else if (line.find("async\t") != std::string::npos && strList.size() > ARR_SIZE) {
-            std::string serverPid = strSplit(strList[3], 0);
-            std::string serverTid = strSplit(strList[3], 1);
+            if (g_overseaVersion) {
+                continue;
+            }
+            std::string serverPid = StrSplit(strList[3], 0);
+            std::string serverTid = StrSplit(strList[3], 1);
             if (serverPid != "" && serverTid != "" && std::atoi(serverTid.c_str()) == 0) {
                 asyncBinderMap[std::atoi(serverPid.c_str())]++;
             }
         } else if (strList.size() >= ARR_SIZE) { // 7: valid array size
             AppfreezeManager::PeerBinderInfo info = {0};
             // 0: local id,
-            std::string clientPid = strSplit(strList[0], 0);
-            std::string clientTid = strSplit(strList[0], 1);
+            std::string clientPid = StrSplit(strList[0], 0);
+            std::string clientTid = StrSplit(strList[0], 1);
             // 2: peer id,
-            std::string serverPid = strSplit(strList[2], 0);
-            std::string serverTid = strSplit(strList[2], 1);
+            std::string serverPid = StrSplit(strList[2], 0);
+            std::string serverTid = StrSplit(strList[2], 1);
              // 5: wait time, s
-            std::string wait = strSplit(strList[5], 1);
+            std::string wait = StrSplit(strList[5], 1);
             if (clientPid == "" || clientTid == "" || serverPid == "" || serverTid == "" || wait == "") {
                 continue;
             }
@@ -563,6 +563,13 @@ std::vector<std::string> AppfreezeManager::GetFileToList(std::string line) const
     }
     TAG_LOGD(AAFwkTag::APPDFR, "strList size: %{public}zu", strList.size());
     return strList;
+}
+
+std::string AppfreezeManager::StrSplit(const std::string& str, uint16_t index) const
+{
+    std::vector<std::string> strings;
+    SplitStr(str, ":", strings);
+    return index < strings.size() ? strings[index] : "";
 }
 
 std::set<int> AppfreezeManager::GetBinderPeerPids(std::string& stack, AppfreezeManager::ParseBinderParam params,

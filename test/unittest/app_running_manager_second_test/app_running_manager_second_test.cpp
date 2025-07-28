@@ -1570,6 +1570,7 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_SignRestartAppFlag_0200,
     appInfo_->bundleName = BUNDLE_NAME;
     std::shared_ptr<AppRunningRecord> record =
         appRunningManager->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    record->mainUid_ = 0;
 
     /**
      * @tc.steps: step2. Initialize AppRunningManager instance

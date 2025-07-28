@@ -49,19 +49,24 @@ std::string NapiUncaughtExceptionCallback::GetNativeStrFromJsTaggedObj(napi_valu
     napi_get_named_property(env_, obj, key, &valueStr);
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env_, valueStr, &valueType);
-    if (valueType != napi_string) {
-        TAG_LOGD(AAFwkTag::JSENV, "Failed to convert value from key");
-        return "";
+    if (valueType == napi_string) {
+        size_t valueStrBufLength = 0;
+        napi_get_value_string_utf8(env_, valueStr, nullptr, 0, &valueStrBufLength);
+        auto valueCStr = std::make_unique<char[]>(valueStrBufLength + 1);
+        size_t valueStrLength = 0;
+        napi_get_value_string_utf8(env_, valueStr, valueCStr.get(), valueStrBufLength + 1, &valueStrLength);
+        std::string ret(valueCStr.get(), valueStrLength);
+        TAG_LOGD(AAFwkTag::JSENV, "GetNativeStrFromJsTaggedObj Success as string");
+        return ret;
     }
-
-    size_t valueStrBufLength = 0;
-    napi_get_value_string_utf8(env_, valueStr, nullptr, 0, &valueStrBufLength);
-    auto valueCStr = std::make_unique<char[]>(valueStrBufLength + 1);
-    size_t valueStrLength = 0;
-    napi_get_value_string_utf8(env_, valueStr, valueCStr.get(), valueStrBufLength + 1, &valueStrLength);
-    std::string ret(valueCStr.get(), valueStrLength);
-    TAG_LOGD(AAFwkTag::JSENV, "GetNativeStrFromJsTaggedObj Success");
-    return ret;
+    if (valueType == napi_number) {
+        int64_t valueInt;
+        napi_get_value_int64(env_, valueStr, &valueInt);
+        TAG_LOGD(AAFwkTag::JSENV, "GetNativeStrFromJsTaggedObj Success as int");
+        return std::to_string(valueInt);
+    }
+    TAG_LOGD(AAFwkTag::JSENV, "Failed to convert value from key");
+    return "";
 }
 
 void NapiUncaughtExceptionCallback::operator()(napi_value obj)

@@ -729,13 +729,11 @@ HWTEST_F(MissionManagerClientTest, SetMissionContinueState_0100, TestSize.Level1
 {
     GTEST_LOG_(INFO) << "SetMissionContinueState_0100 start";
     EXPECT_NE(client_, nullptr);
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        sptr<IRemoteObject> token = nullptr;
-        sptr<IRemoteObject> sessionToken = nullptr;
-        AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
-        auto result = client_->SetMissionContinueState(token, state, sessionToken);
-        EXPECT_EQ(INVALID_PARAMETERS_ERR, result);
-    }
+    sptr<IRemoteObject> token = nullptr;
+    sptr<IRemoteObject> sessionToken = nullptr;
+    AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
+    auto result = client_->SetMissionContinueState(token, state, sessionToken);
+    EXPECT_EQ(INVALID_PARAMETERS_ERR, result);
     GTEST_LOG_(INFO) << "SetMissionContinueState_0100 end";
 }
 
@@ -748,13 +746,11 @@ HWTEST_F(MissionManagerClientTest, SetMissionContinueState_0200, TestSize.Level1
 {
     GTEST_LOG_(INFO) << "SetMissionContinueState_0200 start";
     EXPECT_NE(client_, nullptr);
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        sptr<IRemoteObject> token = nullptr;
-        sptr<IRemoteObject> sessionToken = nullptr;
-        AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
-        auto result = client_->SetMissionContinueState(token, state, sessionToken);
-        EXPECT_EQ(INVALID_PARAMETERS_ERR, result);
-    }
+    sptr<IRemoteObject> token = nullptr;
+    sptr<IRemoteObject> sessionToken = nullptr;
+    AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
+    auto result = client_->SetMissionContinueState(token, state, sessionToken);
+    EXPECT_EQ(INVALID_PARAMETERS_ERR, result);
     GTEST_LOG_(INFO) << "SetMissionContinueState_0200 end";
 }
 
@@ -791,9 +787,7 @@ HWTEST_F(MissionManagerClientTest, MissionManagerClient_SetMissionIcon_0100, Tes
     auto result = client_->SetMissionIcon(abilityToken, icon);
     EXPECT_NE(result, ERR_OK);
 }
-#endif
 
-#ifdef WITH_DLP
 /**
  * @tc.number: UpdateMissionSnapShot_0100
  * @tc.name: UpdateMissionSnapShot
@@ -806,7 +800,7 @@ HWTEST_F(MissionManagerClientTest, UpdateMissionSnapShot_0100, TestSize.Level1)
     client_->UpdateMissionSnapShot(token, pixelMap);
     EXPECT_TRUE(client_ != nullptr);
 }
-#endif // WITH_DLP
+#endif
 
 /**
  * @tc.name: MissionManagerClient_IsValidMissionIds_0100
