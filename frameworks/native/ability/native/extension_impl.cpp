@@ -31,7 +31,7 @@ namespace AbilityRuntime {
 const std::string JSON_KEY_ERR_MSG = "errMsg";
 ExtensionImpl::~ExtensionImpl()
 {
-    TAG_LOGI(AAFwkTag::EXT, "~ExtensionImpl");
+    TAG_LOGD(AAFwkTag::EXT, "~ExtensionImpl");
 }
 
 void ExtensionImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
