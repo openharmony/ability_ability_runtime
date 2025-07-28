@@ -1228,7 +1228,7 @@ void StartupManager::InitPreloadSystemSoAllowlist()
     }
 
     if (!ParsePreloadSystemSoAllowlist(parseResult, preloadSystemSoAllowlist_)) {
-        TAG_LOGE(AAFwkTag::STARTUP, "parsing failed. Clear the blank list of names.");
+        TAG_LOGW(AAFwkTag::STARTUP, "parsing failed. Clear the blank list of names.");
         preloadSystemSoAllowlist_.clear();
     }
 }
@@ -1274,7 +1274,7 @@ bool StartupManager::ParsePreloadSystemSoAllowlist(
     const nlohmann::json &jsonStr, std::unordered_set<std::string> &allowlist)
 {
     if (jsonStr.is_discarded() || !jsonStr.is_object()) {
-        TAG_LOGE(AAFwkTag::STARTUP, "failed to parse JSON string for allowlist.");
+        TAG_LOGW(AAFwkTag::STARTUP, "failed to parse JSON string for allowlist.");
         return false;
     }
     if (!jsonStr.contains(SYSTEM_PRELOAD_SO_ALLOW_LIST) || !jsonStr[SYSTEM_PRELOAD_SO_ALLOW_LIST].is_array()) {

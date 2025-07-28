@@ -241,7 +241,7 @@ int32_t JsStartupTask::RunTaskOnDependencyCompleted(const std::string &dependenc
     bool isCallable = false;
     napi_is_callable(env, startupOnDepCompleted, &isCallable);
     if (!isCallable) {
-        TAG_LOGE(AAFwkTag::STARTUP, "onDependencyCompleted not callable:%{public}s", name_.c_str());
+        TAG_LOGW(AAFwkTag::STARTUP, "onDependencyCompleted not callable:%{public}s", name_.c_str());
         return ERR_STARTUP_FAILED_TO_EXECUTE_STARTUP;
     }
 

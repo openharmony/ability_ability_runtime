@@ -431,7 +431,7 @@ void UIAbilityThread::SendResult(int requestCode, int resultCode, const Want &wa
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (abilityHandler_ == nullptr || requestCode == -1) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityHandler_ or requestCode is -1");
+        TAG_LOGW(AAFwkTag::UIABILITY, "null abilityHandler_ or requestCode is -1");
         return;
     }
 

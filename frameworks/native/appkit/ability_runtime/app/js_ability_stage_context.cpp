@@ -50,7 +50,7 @@ void JsAbilityStageContext::ConfigurationUpdated(napi_env env, std::shared_ptr<N
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!jsContext || !config) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null jsContext or config");
+        TAG_LOGD(AAFwkTag::APPKIT, "null jsContext or config");
         return;
     }
 
