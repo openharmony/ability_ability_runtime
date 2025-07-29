@@ -7233,6 +7233,15 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
             return ERR_OK;
         }
     }
+
+    if (appRunningManager_ && eventName.find("THREAD_BLOCK_") != std::string::npos) {
+        std::string appRunningUniqueId;
+        int32_t ret = appRunningManager_->GetAppRunningUniqueIdByPid(pid, appRunningUniqueId);
+        TAG_LOGI(AAFwkTag::APPDFR, "ret=%{public}d, appRunningUniqueId=%{public}s", ret, appRunningUniqueId.c_str());
+        FaultData& nonConstFaultData = const_cast<FaultData&>(faultData);
+        nonConstFaultData.appRunningUniqueId = appRunningUniqueId;
+    }
+
     if (SubmitDfxFaultTask(faultData, bundleName, appRecord, pid) != ERR_OK) {
         return ERR_INVALID_VALUE;
     }
@@ -7428,6 +7437,13 @@ FaultData AppMgrServiceInner::ConvertDataTypes(const AppFaultDataBySA &faultData
     newfaultData.eventId = faultData.eventId;
     newfaultData.needKillProcess = faultData.needKillProcess;
     newfaultData.appfreezeInfo = faultData.appfreezeInfo;
+    newfaultData.procStatm = faultData.procStatm;
+    if (appRunningManager_) {
+        std::string appRunningUniqueId;
+        int32_t ret = appRunningManager_->GetAppRunningUniqueIdByPid(faultData.pid, appRunningUniqueId);
+        TAG_LOGI(AAFwkTag::APPDFR, "ret=%{public}d, appRunningUniqueId=%{public}s", ret, appRunningUniqueId.c_str());
+        newfaultData.appRunningUniqueId = appRunningUniqueId;
+    }
     return newfaultData;
 }
 

@@ -256,5 +256,20 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_AppfreezeHandleOverReportCount_001, 
     appfreezeInner->AppfreezeHandleOverReportCount(isSixSecondEvent);
     EXPECT_TRUE(!isSixSecondEvent);
 }
+
+/**
+ * @tc.number: AppfreezeInner_GetProcStatm_001
+ * @tc.name: GetProcStatm
+ * @tc.desc: Verify that function GetProcStatm.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_GetProcStatm_001, TestSize.Level1)
+{
+    int32_t pid = static_cast<int32_t>(getpid());
+    std::string procStatm = appfreezeInner->GetProcStatm(pid);
+    EXPECT_TRUE(!procStatm.empty());
+    pid = -1;
+    procStatm = appfreezeInner->GetProcStatm(pid);
+    EXPECT_TRUE(procStatm.empty());
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
