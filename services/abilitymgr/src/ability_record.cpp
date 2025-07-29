@@ -1862,7 +1862,7 @@ void AbilityRecord::DisconnectAbilityWithWant(const Want &want)
 
 void AbilityRecord::CommandAbility()
 {
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "startId_:%{public}d.", startId_);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "startId_:%{public}d.", startId_);
     Want want = GetWant();
     UpdateDmsCallerInfo(want);
     CHECK_POINTER(lifecycleDeal_);

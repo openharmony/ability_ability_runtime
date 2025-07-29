@@ -341,7 +341,7 @@ void JsServiceExtension::OnStop()
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "service extension connection not disconnected");
     }
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "UnregisterDisplayInfoChangedListener");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "UnregisterDisplayInfoChangedListener");
     auto context = GetContext();
     if (context == nullptr || context->GetToken() == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
@@ -567,7 +567,7 @@ napi_value JsServiceExtension::CallObjectMethod(const char* name, napi_value con
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "get '%{public}s' from ServiceExtension obj failed", name);
         return nullptr;
     }
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "CallFunction(%{public}s) ok", name);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "CallFunc(%{public}s)", name);
     napi_value result = nullptr;
     napi_status status = napi_call_function(env, obj, method, argc, argv, &result);
     if (status != napi_ok) {

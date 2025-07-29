@@ -5077,7 +5077,7 @@ EventInfo AbilityManagerService::BuildEventInfoByAbilityRecord(const std::shared
 int AbilityManagerService::DisconnectAbility(sptr<IAbilityConnection> connect)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Disconnect begin.");
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Disconnect");
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     int err = DisconnectLocalAbility(connect);
     if (err == ERR_OK) {
