@@ -131,7 +131,7 @@ bool AppfreezeCpuFreqManager::InitCpuDataProcessor(const std::string &eventType,
     std::vector<std::vector<CpuFreqData>> cpuData;
     std::vector<TotalTime> totalTimeList;
     ParseCpuData(cpuData, totalTimeList);
-    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath);
+    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath, pid);
     {
         std::lock_guard<ffrt::mutex> lock(freezeInfoMutex_);
         cpuInfoMap_[key] = data;
@@ -152,7 +152,7 @@ void AppfreezeCpuFreqManager::ParseCpuData(std::vector<std::vector<CpuFreqData>>
     TAG_LOGW(AAFwkTag::APPDFR, "ParseCpuData called, %{public}s", tmp.c_str());
     for (int32_t i = 0; i < cpuCount_; ++i) {
         std::vector<CpuFreqData> parseDatas;
-        TotalTime totalTime;
+        TotalTime totalTime{};
         if (ReadCpuDataByNum(i, parseDatas, totalTime)) {
             datas.push_back(parseDatas);
             totalTimeLists.push_back(totalTime);
@@ -189,7 +189,7 @@ bool AppfreezeCpuFreqManager::ReadCpuDataByNum(int32_t num, std::vector<CpuFreqD
         if (tokens.size() != CPU_FREQ_AND_TIME_NUM) {
             continue;
         }
-        CpuFreqData cpuFreqData;
+        CpuFreqData cpuFreqData{};
         cpuFreqData.frequency = static_cast<uint64_t>(strtoull(tokens[TIME_IN_STATE_FIRST_INDEX].c_str(),
             nullptr, CPU_FREQ_DECIMAL_BASE));
         cpuFreqData.runningTime = static_cast<uint64_t>(strtoull(tokens[TIME_IN_STATE_SECOND_INDEX].c_str(),
@@ -269,7 +269,7 @@ std::string AppfreezeCpuFreqManager::GetCpuInfoContent(
                 "blockData:%{public}zu", halfData.size(), blockData.size());
             return "";
         }
-        TotalTime totalTime;
+        TotalTime totalTime{};
         if (!GetCpuTotalValue(i, totalTimeList, blockTotalTimeList, totalTime)) {
             return "";
         }
@@ -277,7 +277,7 @@ std::string AppfreezeCpuFreqManager::GetCpuInfoContent(
             static_cast<float>(totalTime.totalCpuTime)) * CPU_PERCENTAGE;;
         std::vector<FrequencyPair> freqPairs;
         for (size_t j = 0; j < halfData.size(); ++j) {
-            FrequencyPair pair;
+            FrequencyPair pair{};
             uint64_t runningTime = halfData[j].runningTime > blockData[j].runningTime ?
                 (halfData[j].runningTime - blockData[j].runningTime) :
                 (blockData[j].runningTime - halfData[j].runningTime);
@@ -484,15 +484,28 @@ void AppfreezeCpuFreqManager::WriteDfxLogToFile(const std::string &filePath, con
     OHOS::SaveStringToFile(filePath, ss.str());
 }
 
-bool AppfreezeCpuFreqManager::IsContainHalfData(const std::string &key, CpuDataProcessor &cpuData)
+bool AppfreezeCpuFreqManager::IsContainHalfData(const std::string &key, CpuDataProcessor &cpuData, int32_t pid)
 {
     std::lock_guard<ffrt::mutex> lock(freezeInfoMutex_);
     auto it = cpuInfoMap_.find(key);
-    if (it != cpuInfoMap_.end()) {
-        cpuData = it->second;
-        return true;
+    if (it == cpuInfoMap_.end()) {
+        TAG_LOGI(AAFwkTag::APPDFR, "Not find warning fault, pid: %{public}d", pid);
+        return false;
     }
-    return false;
+    int warningPid = it->second.GetPid();
+    if (warningPid != pid) {
+        TAG_LOGI(AAFwkTag::APPDFR, "Not find current pid:%{public}d, warning pid:%{public}d", pid, warningPid);
+        return false;
+    }
+    auto diff = AppfreezeUtil::GetMilliseconds() - it->second.GetCpuStartTime().halfStartTime;
+    if (diff > TIME_LIMIT) {
+        it = cpuInfoMap_.erase(it);
+        TAG_LOGI(AAFwkTag::APPDFR, "The last fault occurred more than 6 seconds ago, "
+            "diff: %{public}" PRIu64", pid: %{public}d.", diff, pid);
+        return false;
+    }
+    cpuData = it->second;
+    return true;
 }
 
 std::string AppfreezeCpuFreqManager::WriteCpuInfoToFile(const std::string &eventType,
@@ -500,8 +513,7 @@ std::string AppfreezeCpuFreqManager::WriteCpuInfoToFile(const std::string &event
 {
     std::string key = eventType + std::to_string(uid);
     CpuDataProcessor cpuData;
-    if (!IsContainHalfData(key, cpuData)) {
-        TAG_LOGI(AAFwkTag::APPDFR, "Not find half cpuInfo, pid: %{public}d", pid);
+    if (!IsContainHalfData(key, cpuData, pid)) {
         return "";
     }
 

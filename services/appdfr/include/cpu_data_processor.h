@@ -27,19 +27,21 @@ public:
     CpuDataProcessor() {};
     CpuDataProcessor(const std::vector<std::vector<CpuFreqData>> &cpuData,
         const std::vector<TotalTime> &totalTimeList, CpuStartTime cpuStartTime,
-        const std::string &stackPath);
+        const std::string &stackPath, int32_t pid);
     ~CpuDataProcessor() = default;
 
     std::vector<std::vector<CpuFreqData>> GetHandlingHalfCpuData() const;
     std::vector<TotalTime> GetTotalTimeList() const;
     CpuStartTime GetCpuStartTime() const;
     std::string GetStackPath() const;
+    int32_t GetPid() const;
 
 private:
     std::vector<std::vector<CpuFreqData>> handlingHalfCpuData_;
     std::vector<TotalTime> totalTimeList_;
-    CpuStartTime cpuStartTime_;
+    CpuStartTime cpuStartTime_ {};
     std::string stackPath_;
+    int32_t pid_ = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
