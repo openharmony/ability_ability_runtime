@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,8 @@ constexpr uint32_t LESS_TIME_OUT_SECONDS = 10;
 constexpr uint32_t DEFAULT_TIME_OUT_SECONDS = 30;
 class AbilityManagerXCollie {
 public:
-    AbilityManagerXCollie(const std::string &tag, uint32_t timeoutSeconds = DEFAULT_TIME_OUT_SECONDS);
+    AbilityManagerXCollie(const std::string &tag, uint32_t timeoutSeconds = DEFAULT_TIME_OUT_SECONDS,
+        bool ignore = false);
 
     ~AbilityManagerXCollie();
 
@@ -37,8 +38,10 @@ private:
 }
 }
 
-#define XCOLLIE_TIMER_DEFAULT(TAG) AbilityRuntime::AbilityManagerXCollie XCOLLIETIMER1(TAG)
+#define XCOLLIE_TIMER_DEFAULT(TAG) AbilityRuntime::AbilityManagerXCollie XCOLLIETIMER(TAG)
 #define XCOLLIE_TIMER_LESS(TAG) \
-    AbilityRuntime::AbilityManagerXCollie XCOLLIETIMER2(TAG, AbilityRuntime::LESS_TIME_OUT_SECONDS)
+    AbilityRuntime::AbilityManagerXCollie XCOLLIETIMER(TAG, AbilityRuntime::LESS_TIME_OUT_SECONDS)
+#define XCOLLIE_TIMER_LESS_IGNORE(TAG, IGNORE) \
+    AbilityRuntime::AbilityManagerXCollie XCOLLIETIMER(TAG, AbilityRuntime::LESS_TIME_OUT_SECONDS, IGNORE)
 
 #endif //OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_XCOLLIE_H

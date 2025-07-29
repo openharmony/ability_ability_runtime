@@ -2982,6 +2982,7 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string&
 int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::string& reason,
     const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     int32_t ret = -1;
     if (pid > 0) {
         if (CheckIsThreadInFoundation(pid)) {
@@ -3560,6 +3561,7 @@ int32_t AppMgrServiceInner::KillSubProcessBypid(const pid_t pid, const std::stri
 int32_t AppMgrServiceInner::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason,
     bool subProcess)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     int32_t ret = ERR_OK;
     for (const auto& pid: pids) {
         auto appRecord = GetAppRunningRecordByPid(pid);
