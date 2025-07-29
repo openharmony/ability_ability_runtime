@@ -986,7 +986,7 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
     }
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     std::string element = abilityRecord->GetURI();
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "ability:%{public}s", element.c_str());
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "ability:%{public}s", element.c_str());
     abilityRecord->RemoveLoadTimeoutTask();
     AbilityRuntime::FreezeUtil::GetInstance().DeleteLifecycleEvent(token);
     abilityRecord->SetScheduler(scheduler);
