@@ -11832,6 +11832,7 @@ int32_t AbilityManagerService::KillProcessWithPrepareTerminate(const std::vector
 
 bool AbilityManagerService::ProcessLowMemoryKill(int32_t pid, const ExitReason &reason)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (reason.reason != Reason::REASON_RESOURCE_CONTROL || reason.exitMsg != GlobalConstant::LOW_MEMORY_KILL) {
         return false;
     }
