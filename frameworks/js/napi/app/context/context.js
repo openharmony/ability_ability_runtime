@@ -22,6 +22,10 @@ class EventHub {
     this.emitter = undefined;
   }
 
+  setNativeEventHubRef(ref) {
+    this.nativeEventHubRef = ref;
+  }
+
   onEmitterFunction(eventData = {'data':{}}) {
     let eventName = eventData.data[`arg${0}`];
     let arrays = Object.keys(eventData.data);
