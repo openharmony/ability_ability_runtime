@@ -770,8 +770,6 @@ HWTEST_F(ContextDealTest, AppExecFwk_ContextDeal_HapModuleInfoRequestInit_0100, 
 {
     EXPECT_TRUE(context_ != nullptr);
     EXPECT_FALSE(context_->HapModuleInfoRequestInit());
-
-    tesing::Mock::AllowLeak(mockBundleMgr);
 }
 }   // namespace AppExecFwk
 }   // OHOS
