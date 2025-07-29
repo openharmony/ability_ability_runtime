@@ -346,7 +346,7 @@ void CreateEtsBaseContext(ani_env *aniEnv, ani_class contextClass, ani_object co
     // set eventHub context
     ani_ref eventHubRef = nullptr;
     ani_status status = ANI_OK;
-    if ((status = aniEnv->Object_GetFieldByName_Ref(contextObj, "eventHUb", &eventHubRef)) != ANI_OK) {
+    if ((status = aniEnv->Object_GetFieldByName_Ref(contextObj, "eventHub", &eventHubRef)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_GetFieldByName_Ref failed status: %{public}d", status);
         return;
     }
