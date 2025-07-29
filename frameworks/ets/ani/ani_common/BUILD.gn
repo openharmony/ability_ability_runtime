@@ -96,6 +96,7 @@ ohos_shared_library("ani_common") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image_ani",
+    "ipc:rpc_ani",
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "ipc:rpc_ani",
