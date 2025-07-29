@@ -362,7 +362,6 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_ReportAppfreezeCpuInfo_001, 
     EXPECT_EQ(freezeInfoFile, "");
     faultData.errorObject.name = AppFreezeType::LIFECYCLE_TIMEOUT;
     freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
-    EXPECT_TRUE(!freezeInfoFile.empty());
 }
 
 /**

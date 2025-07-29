@@ -64,7 +64,8 @@ HWTEST_F(CpuDataProcessorTest, GetHandlingHalfCpuData_Test_001, TestSize.Level1)
     std::vector<TotalTime> totalTimeList;
     CpuStartTime cpuStartTime;
     std::string stackPath = "GetHandlingHalfCpuData_Test_001";
-    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath);
+    int pid = getpid();
+    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath, pid);
     EXPECT_TRUE(data.GetHandlingHalfCpuData().size() == 0);
 }
 
@@ -79,7 +80,8 @@ HWTEST_F(CpuDataProcessorTest, GetTotalTimeList_Test_001, TestSize.Level1)
     std::vector<TotalTime> totalTimeList;
     CpuStartTime cpuStartTime;
     std::string stackPath = "GetTotalTimeList_Test_001";
-    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath);
+    int pid = getpid();
+    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath, pid);
     EXPECT_TRUE(data.GetTotalTimeList().size() == 0);
 }
 
@@ -97,7 +99,8 @@ HWTEST_F(CpuDataProcessorTest, GetCpuStartTime_Test_001, TestSize.Level1)
         .optimalCpuStartTime = 1234,
     };
     std::string stackPath = "GetCpuStartTime_Test_001";
-    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath);
+    int pid = getpid();
+    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath, pid);
     EXPECT_EQ(data.GetCpuStartTime().halfStartTime, 1234);
     EXPECT_EQ(data.GetCpuStartTime().optimalCpuStartTime, 1234);
 }
@@ -116,7 +119,8 @@ HWTEST_F(CpuDataProcessorTest, GetStackPath_Test_001, TestSize.Level1)
         .optimalCpuStartTime = 1234,
     };
     std::string stackPath = "GetStackPath_Test_001";
-    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath);
+    int pid = getpid();
+    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath, pid);
     EXPECT_EQ(data.GetStackPath(), stackPath);
 }
 }  // namespace AppExecFwk

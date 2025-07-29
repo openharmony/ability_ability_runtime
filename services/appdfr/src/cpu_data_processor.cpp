@@ -18,8 +18,9 @@ namespace OHOS {
 namespace AppExecFwk {
 CpuDataProcessor::CpuDataProcessor(const std::vector<std::vector<CpuFreqData>> &cpuData,
     const std::vector<TotalTime> &totalTimeList, CpuStartTime cpuStartTime,
-    const std::string &stackPath)
-    : handlingHalfCpuData_(cpuData), totalTimeList_(totalTimeList), cpuStartTime_(cpuStartTime), stackPath_(stackPath)
+    const std::string &stackPath, int32_t pid)
+    : handlingHalfCpuData_(cpuData), totalTimeList_(totalTimeList), cpuStartTime_(cpuStartTime), stackPath_(stackPath),
+    pid_(pid)
 {
 }
 
@@ -41,6 +42,11 @@ CpuStartTime CpuDataProcessor::GetCpuStartTime() const
 std::string CpuDataProcessor::GetStackPath() const
 {
     return stackPath_;
+}
+
+int32_t CpuDataProcessor::GetPid() const
+{
+    return pid_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
