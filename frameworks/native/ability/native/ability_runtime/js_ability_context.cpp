@@ -1432,14 +1432,7 @@ napi_value JsAbilityContext::StartExtensionAbilityCommon(napi_env env, NapiCallb
                 *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
-            if (extensionType == AppExecFwk::ExtensionAbilityType::SERVICE) {
-                *innerErrCode = context->StartServiceExtensionAbility(want);
-            } else if (extensionType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
-                *innerErrCode = context->StartAppServiceExtensionAbility(want);
-            } else {
-                TAG_LOGE(AAFwkTag::CONTEXT, "extensionType error, type: %{public}d",
-                    static_cast<int32_t>(extensionType));
-            }
+            *innerErrCode = context->StartExtensionAbilityWithExtensionType(want, extensionType);
     };
 
     NapiAsyncTask::CompleteCallback complete =
@@ -1536,14 +1529,7 @@ napi_value JsAbilityContext::StopExtensionAbilityCommon(napi_env env, NapiCallba
                 *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
-            if (extensionType == AppExecFwk::ExtensionAbilityType::SERVICE) {
-                *innerErrCode = context->StopServiceExtensionAbility(want);
-            } else if (extensionType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
-                *innerErrCode = context->StopAppServiceExtensionAbility(want);
-            } else {
-                TAG_LOGE(AAFwkTag::CONTEXT, "extensionType error, type: %{public}d",
-                    static_cast<int32_t>(extensionType));
-            }
+            *innerErrCode = context->StopExtensionAbilityWithExtensionType(want, extensionType);
     };
     NapiAsyncTask::CompleteCallback complete =
         [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -1759,14 +1745,7 @@ napi_value JsAbilityContext::ConnectExtensionAbilityCommon(napi_env env, NapiCal
             }
             TAG_LOGD(AAFwkTag::CONTEXT, "connectAbility: %{public}d, extensionType: type: %{public}d",
                 static_cast<int32_t>(connectId), static_cast<int32_t>(extensionType));
-            if (extensionType == AppExecFwk::ExtensionAbilityType::SERVICE) {
-                *innerErrCode = context->ConnectAbility(want, connection);
-            } else if (extensionType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
-                *innerErrCode = context->ConnectAppServiceExtensionAbility(want, connection);
-            } else {
-                TAG_LOGE(AAFwkTag::CONTEXT, "extensionType error, type: %{public}d",
-                    static_cast<int32_t>(extensionType));
-            }
+            *innerErrCode = context->ConnectExtensionAbilityWithExtensionType(want, connection, extensionType);
     };
     NapiAsyncTask::CompleteCallback complete =
         [connection, connectId, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
