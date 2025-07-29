@@ -291,7 +291,7 @@ void EtsUIExtensionContext::OnStartAbilityForResult(ani_env *env, ani_object ani
     if (startOptionsObj) {
         OHOS::AppExecFwk::UnwrapStartOptions(env, startOptionsObj, startOptions);
     }
-    
+
     ani_ref callbackRef = nullptr;
     env->GlobalReference_Create(callback, &callbackRef);
     ani_vm *etsVm = nullptr;
@@ -309,7 +309,7 @@ void EtsUIExtensionContext::OnStartAbilityForResult(ani_env *env, ani_object ani
             TAG_LOGE(AAFwkTag::UI_EXT, "GetEnv failed, status: %{public}d", status);
             return;
         }
-        
+
         ani_object abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
         if (abilityResult == nullptr) {
             TAG_LOGW(AAFwkTag::UI_EXT, "null abilityResult");
@@ -569,12 +569,20 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return nullptr;
     }
-    if ((status = env->Object_SetFieldByName_Long(contextObj, "nativeContext", (ani_long)context.get())) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
+    auto workContext = new (std::nothrow)
+        std::weak_ptr<AbilityRuntime::UIExtensionContext>(context);
+    if (workContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null workContext");
+        return nullptr;
+    }
+    if (!ContextUtil::SetNativeContextLong(env, contextObj, (ani_long)workContext)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "SetNativeContextLong failed");
+        delete workContext;
         return nullptr;
     }
     if (!EtsUIExtensionContext::BindNativePtrCleaner(env)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
+        delete workContext;
         return nullptr;
     }
     OHOS::AbilityRuntime::ContextUtil::CreateEtsBaseContext(env, cls, contextObj, context);
