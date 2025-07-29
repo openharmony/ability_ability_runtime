@@ -55,11 +55,11 @@ ErrCode ConnectionManager::ConnectUIServiceExtensionAbility(const sptr<IRemoteOb
         AppExecFwk::ExtensionAbilityType::UI_SERVICE);
 }
 
-ErrCode ConnectionManager::ConnectAppServiceExtensionAbility(const sptr<IRemoteObject>& connectCaller,
-    const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback)
+ErrCode ConnectionManager::ConnectExtensionAbilityWithExtensionType(const sptr<IRemoteObject>& connectCaller,
+    const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback,
+    AppExecFwk::ExtensionAbilityType extensionType)
 {
-    return ConnectAbilityInner(connectCaller, want, AAFwk::DEFAULT_INVAL_VALUE, connectCallback,
-        AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+    return ConnectAbilityInner(connectCaller, want, AAFwk::DEFAULT_INVAL_VALUE, connectCallback, extensionType);
 }
 
 ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connectCaller, const AAFwk::Want& want,
