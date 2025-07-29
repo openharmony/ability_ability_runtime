@@ -253,14 +253,14 @@ ani_object EtsApplication::GetApplicationContext(ani_env *env)
     }
     auto etsReference =
         AbilityRuntime::ApplicationContextManager::GetApplicationContextManager().GetEtsGlobalObject();
-    if (etsReference == nullptr || etsReference->aniObj == nullptr) {
+    if (etsReference == nullptr || etsReference->aniRef == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null applicationContextObject");
         AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
         ani_ref result = nullptr;
         env->GetNull(&result);
         return static_cast<ani_object>(result);
     }
-    return etsReference->aniObj;
+    return reinterpret_cast<ani_object>(etsReference->aniRef);
 }
 
 void ApplicationInit(ani_env *env)

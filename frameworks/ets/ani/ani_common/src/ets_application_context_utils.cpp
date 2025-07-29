@@ -961,6 +961,7 @@ ani_object EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniE
     }
     auto etsReference = std::make_shared<AppExecFwk::ETSNativeReference>();
     etsReference->aniObj = applicationContextObject;
+    etsReference->aniRef = applicationContextObjectRef;
     ApplicationContextManager::GetApplicationContextManager().SetEtsGlobalObject(etsReference);
     BindApplicationContextFunc(aniEnv);
     ani_class applicationContextClass = nullptr;
