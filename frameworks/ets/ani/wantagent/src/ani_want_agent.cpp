@@ -373,7 +373,7 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         TAG_LOGE(AAFwkTag::WANTAGENT, "wants GetProperty status: %{public}d, or null wantsRef", status);
         return PARAMETER_ERROR;
     }
-    ani_array_ref wantsArr = reinterpret_cast<ani_array_ref>(wantsRef);
+    ani_array wantsArr = reinterpret_cast<ani_array>(wantsRef);
     ani_size length = 0;
     if ((status = env->Array_GetLength(wantsArr, &length)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "wants Array_GetLength failed status: %{public}d", status);
@@ -381,8 +381,8 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
     }
     for (size_t i = 0; i < length; i++) {
         ani_ref wantRef = nullptr;
-        if ((status = env->Array_Get_Ref(wantsArr, i, &wantRef)) != ANI_OK || wantRef == nullptr) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "Array_Get_Ref failed status: %{public}d, or null wantRef", status);
+        if ((status = env->Array_Get(wantsArr, i, &wantRef)) != ANI_OK || wantRef == nullptr) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "Array_Get failed status: %{public}d, or null wantRef", status);
             return PARAMETER_ERROR;
         }
         std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
@@ -395,8 +395,8 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
 
     ani_boolean isUndefined = true;
     ani_ref actionTypeRef = nullptr;
-    if (!GetPropertyRef(env, info, "actionType", actionTypeRef, isUndefined) || actionTypeRef == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed, or null actionTypeRef");
+    if (!GetPropertyRef(env, info, "actionType", actionTypeRef, isUndefined)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "actionType GetPropertyRef failed");
         return PARAMETER_ERROR;
     }
     if (!isUndefined) {
@@ -406,18 +406,18 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
 
     ani_double dRequestCode = 0.0;
     if ((status = env->Object_GetPropertyByName_Double(info, "requestCode", &dRequestCode)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Object_GetPropertyByName_Double failed status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "requestCode GetProperty failed status: %{public}d", status);
         return PARAMETER_ERROR;
     }
     params.requestCode = dRequestCode;
 
     ani_ref actionFlagsRef = nullptr;
-    if (!GetPropertyRef(env, info, "actionFlags", actionFlagsRef, isUndefined) || actionFlagsRef == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed, or null actionFlagsRef");
+    if (!GetPropertyRef(env, info, "actionFlags", actionFlagsRef, isUndefined)) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "actionFlags GetPropertyRef failed");
         return PARAMETER_ERROR;
     }
-    ani_array_ref actionFlagsArr = reinterpret_cast<ani_array_ref>(actionFlagsRef);
     if (!isUndefined) {
+        ani_array actionFlagsArr = reinterpret_cast<ani_array>(actionFlagsRef);
         ani_size actionFlagsLen = 0;
         if ((status = env->Array_GetLength(actionFlagsArr, &actionFlagsLen)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "Array_GetLength failed status: %{public}d", status);
@@ -425,9 +425,9 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
         }
         for (size_t i = 0; i < actionFlagsLen; i++) {
             ani_ref actionFlagRef = nullptr;
-            if ((status = env->Array_Get_Ref(actionFlagsArr, i, &actionFlagRef)) != ANI_OK ||
+            if ((status = env->Array_Get(actionFlagsArr, i, &actionFlagRef)) != ANI_OK ||
                 actionFlagRef == nullptr) {
-                TAG_LOGE(AAFwkTag::WANTAGENT, "Array_Get_Ref failed status: %{public}d, or null actionFlagRef", status);
+                TAG_LOGE(AAFwkTag::WANTAGENT, "Array_Get failed status: %{public}d, or null actionFlagRef", status);
                 return PARAMETER_ERROR;
             }
             int32_t actionFlag = 0;
@@ -439,12 +439,12 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
 
     ani_ref extraInfoRef = nullptr;
     if (!GetPropertyRef(env, info, "extraInfos", extraInfoRef, isUndefined)) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
+        TAG_LOGE(AAFwkTag::WANTAGENT, "extraInfos GetPropertyRef failed");
         return PARAMETER_ERROR;
     }
     if (isUndefined) {
         if (!GetPropertyRef(env, info, "extraInfo", extraInfoRef, isUndefined)) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "GetPropertyRef failed");
+            TAG_LOGE(AAFwkTag::WANTAGENT, "extraInfo GetPropertyRef failed");
             return PARAMETER_ERROR;
         }
     }
