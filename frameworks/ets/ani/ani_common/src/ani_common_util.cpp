@@ -859,9 +859,9 @@ bool SetProcessInformation(ani_env *env, ani_object object, const AppExecFwk::Ru
         TAG_LOGE(AAFwkTag::ANI, "bundleType failed status:%{public}d", status);
         return false;
     }
-    status = env->Object_SetPropertyByName_Ref(object, "appCloneIndex",
-        CreateInt(env, processInfo.appCloneIndex));
-    if (status != ANI_OK) {
+    if (processInfo.appCloneIndex != -1 &&
+        (status = env->Object_SetPropertyByName_Ref(
+            object, "appCloneIndex", CreateInt(env, processInfo.appCloneIndex))) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "appCloneIndex failed status:%{public}d", status);
         return false;
     }
