@@ -1894,9 +1894,11 @@ void MissionListManager::CompleteTerminate(const std::shared_ptr<AbilityRecord> 
     abilityRecord->RemoveAbilityDeathRecipient();
 
     // notify AppMS terminate
-    if (abilityRecord->TerminateAbility() != ERR_OK) {
+    auto ret = abilityRecord->TerminateAbility();
+    if (ret != ERR_OK) {
         // Don't return here
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "AppMS fail to terminate ability");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "AppMS fail to terminate ability:%{public}d", ret);
+        abilityRecord->SendTerminateAbilityErrorEvent(ret);
     }
 
     auto&& preAbilityRecord = abilityRecord->GetPreAbilityRecord();

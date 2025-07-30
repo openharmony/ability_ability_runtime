@@ -330,7 +330,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifySCBToStartUIAbility_003, Test
 
     auto ret = mgr->NotifySCBToStartUIAbility(abilityRequest);
 
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_FREQ_START_ABILITY);
 }
 
 /**
