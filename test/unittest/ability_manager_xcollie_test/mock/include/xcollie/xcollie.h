@@ -22,7 +22,6 @@
 #include <gmock/gmock.h>
 
 namespace HiviewDFX {
-constexpr int32_t XCOLLIE_FLAG_LOG = 0;
 class XCollie {
 public:
     static XCollie &GetInstance();

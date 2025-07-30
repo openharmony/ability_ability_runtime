@@ -15,4 +15,10 @@
 
 #ifndef OHOS_ABILITY_RUNTIME_XCOLLIE_DEFINE_H
 #define OHOS_ABILITY_RUNTIME_XCOLLIE_DEFINE_H
+
+#include <cinttypes>
+
+namespace HiviewDFX {
+constexpr int32_t XCOLLIE_FLAG_LOG = 0;
+} // namespace HiviewDFX
 #endif // OHOS_ABILITY_RUNTIME_XCOLLIE_DEFINE_H
