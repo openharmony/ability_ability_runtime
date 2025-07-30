@@ -27,6 +27,7 @@
 #include "ets_application_context_utils.h"
 #include "ets_context_utils.h"
 #include "ets_error_utils.h"
+#include "event_hub.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "interop_js/arkts_esvalue.h"
@@ -408,6 +409,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     EtsContextModuleInit(aniEnv);
+    AbilityRuntime::EventHub::InitAniEventHub(aniEnv);
     *result = ANI_VERSION_1;
     TAG_LOGD(AAFwkTag::CONTEXT, "ANI_Constructor finish");
     return ANI_OK;

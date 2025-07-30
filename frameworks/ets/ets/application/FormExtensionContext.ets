@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import ExtensionContext from './ExtensionContext';
+import ExtensionContext from 'application.ExtensionContext';
 
 export default class FormExtensionContext extends ExtensionContext {
 
