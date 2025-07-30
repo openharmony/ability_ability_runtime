@@ -35,8 +35,8 @@ std::shared_ptr<AppExecFwk::AbilityInfo> ExtensionContext::GetAbilityInfo() cons
     return abilityInfo_;
 }
 
-ErrCode ExtensionContext::AddCompletionHandler(const std::string &requestId, OnRequestResult onRequestSucc,
-    OnRequestResult onRequestFail)
+ErrCode ExtensionContext::AddCompletionHandlerForAtomicService(const std::string &requestId,
+    OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId)
 {
     return ERR_OK;
 }
@@ -47,7 +47,7 @@ void ExtensionContext::OnRequestSuccess(const std::string &requestId, const AppE
 }
 
 void ExtensionContext::OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
 }
 }  // namespace AbilityRuntime

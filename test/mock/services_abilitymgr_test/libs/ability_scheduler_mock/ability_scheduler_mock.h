@@ -177,7 +177,7 @@ public:
     }
 
     virtual void ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message) override
+        const std::string &message, int32_t resultCode) override
     {}
 
     virtual void ScheduleAbilityRequestSuccess(const std::string &requestId,

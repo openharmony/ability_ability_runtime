@@ -262,7 +262,7 @@ HWTEST_F(AbilityExtensionBaseTest, OnExtensionAbilityRequestFailure_0100, TestSi
     class TestExtensionBase : public ExtensionBase<ExtensionContext> {
     public:
         void OnExtensionAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-            const std::string &message) override
+            const std::string &message, int32_t resultCode = 0) override
         {
             lastRequestId_ = requestId;
             lastElement_ = element;

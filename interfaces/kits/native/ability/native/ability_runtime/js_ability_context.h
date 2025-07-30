@@ -177,6 +177,8 @@ private:
         int32_t &userId, napi_value &lastParam);
     napi_value SyncSetMissionContinueState(napi_env env, NapiCallbackInfo& info, const AAFwk::ContinueState& state);
     static int32_t GenerateRequestCode();
+    void UnWrapCompletionHandlerForAtomicService(
+        napi_env env, napi_value param, AAFwk::StartOptions &options, const std::string &appId);
     static int32_t curRequestCode_;
     static std::mutex requestCodeMutex_;
 
