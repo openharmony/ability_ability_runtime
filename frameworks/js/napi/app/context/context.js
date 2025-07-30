@@ -16,9 +16,14 @@
 class EventHub {
   constructor() {
     this.eventMap = {};
+    this.nativeEventHubRef = null;
     this.contextIndex = -1;
     this.emitMultiThreadingEnabled = false;
     this.emitter = undefined;
+  }
+
+  setNativeEventHubRef(ref) {
+    this.nativeEventHubRef = ref;
   }
 
   onEmitterFunction(eventData = {'data':{}}) {
@@ -91,6 +96,26 @@ class EventHub {
     }
   }
 
+  offByNativeContext(event, callback) {
+    if (typeof (event) !== 'string') {
+      return;
+    }
+    if (this.eventMap[event]) {
+      if (callback) {
+        let cbArray = this.eventMap[event];
+        let index = cbArray.indexOf(callback);
+        if (index > -1) {
+          for (; index + 1 < cbArray.length; index++) {
+            cbArray[index] = cbArray[index + 1];
+          }
+          cbArray.pop();
+        }
+      } else {
+        delete this.eventMap[event];
+      }
+    }
+  }
+
   off(event, callback) {
     if (typeof (event) !== 'string') {
       return;
@@ -107,6 +132,14 @@ class EventHub {
         }
       } else {
         delete this.eventMap[event];
+      }
+    }
+    if (this.nativeEventHubRef != null) {
+      // call native eventHub off
+      if (callback) {
+        this.nativeEventHubRef.offByDynamicContext(event, callback);
+      } else {
+        this.nativeEventHubRef.offByDynamicContext(event);
       }
     }
     if (this.emitMultiThreadingEnabled === true && this.emitter !== undefined) {
@@ -129,6 +162,22 @@ class EventHub {
   }
 
   emitInner(event, ...args) {
+    if (typeof (event) !== 'string') {
+      return;
+    }
+    if (this.eventMap[event]) {
+      const cloneArray = [...this.eventMap[event]];
+      const len = cloneArray.length;
+      for (let i = 0; i < len; ++i) {
+        cloneArray[i].apply(this, args);
+      }
+    }
+    if (this.nativeEventHubRef != null) {
+      this.nativeEventHubRef.emitByDynamicContext(event, ...args);
+    }
+  }
+
+  emitByNativeContext(event, ...args) {
     if (typeof (event) !== 'string') {
       return;
     }
