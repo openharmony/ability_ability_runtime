@@ -400,7 +400,6 @@ void EtsUIExtensionContext::OnDisconnectServiceExtensionAbility(ani_env *env, an
             g_connects.erase(item);
         } else {
             TAG_LOGI(AAFwkTag::UI_EXT, "Failed to found connection");
-            return;
         }
     }
     if (!connection) {
