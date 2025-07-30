@@ -928,6 +928,8 @@ ohos_shared_library("ui_ability_ani") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "image_framework:image",
+    "image_framework:image_taihe",
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "ipc:rpc_ani",
