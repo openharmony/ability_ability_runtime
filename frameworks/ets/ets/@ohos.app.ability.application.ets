@@ -26,6 +26,9 @@ export default namespace application {
   export native function nativeCreateBundleContext(context: Context, bundleName: string,
     callback: AsyncCallbackWrapper<Context>): void;
 
+  export native function nativeCreatePluginModuleContext(context: Context, pluginBundleName: string,
+    pluginModuleName: string, callback: AsyncCallbackWrapper<Context>): void;
+
   export native function nativeGetApplicationContext(): ApplicationContext;
 
   export function createModuleContext(context: Context, moduleName: string): Promise<Context> {
@@ -74,6 +77,24 @@ export default namespace application {
         });
         taskpool.execute((): void => {
           application.nativeCreateBundleContext(context, bundleName, myCall);
+        });
+      });
+    return p;
+  }
+
+    export function createPluginModuleContext(context: Context, pluginBundleName: string,
+    pluginModuleName: string): Promise<Context> {
+    let p =
+      new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError) => void): void => {
+        let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError | null, data: Context | undefined) => {
+          if (err == null || err.code == 0) {
+            resolve(data as Context);
+          } else {
+            reject(err);
+          }
+        });
+        taskpool.execute((): void => {
+          application.nativeCreatePluginModuleContext(context, pluginBundleName, pluginModuleName, myCall);
         });
       });
     return p;

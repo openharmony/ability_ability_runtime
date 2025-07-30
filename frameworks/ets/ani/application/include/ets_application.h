@@ -26,6 +26,8 @@ public:
         ani_object contextObj, ani_string bundleName, ani_string moduleName, ani_object callback);
     static void CreateBundleContext(ani_env *env,
         ani_object contextObj, ani_string bundleName, ani_object callback);
+    static void CreatePluginModuleContext(ani_env *env,
+        ani_object contextObj, ani_string pluginBundleName, ani_string pluginModuleName, ani_object callback);
     static ani_object GetApplicationContext(ani_env *env);
 };
 void ApplicationInit(ani_env *env);
