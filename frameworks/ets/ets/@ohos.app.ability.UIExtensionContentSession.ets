@@ -61,6 +61,7 @@ export default class UIExtensionContentSession {
   native terminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
   native terminateSelfWithResultSync(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
   private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): BusinessError<void>;
+  native nativeSetWindowPrivacyMode(isPrivacyMode: boolean, callback:AsyncCallbackWrapper<void>): void;
 
   sendData(data: Record<string, Object>): void {
     this.nativeSendData(data);
@@ -155,5 +156,27 @@ export default class UIExtensionContentSession {
       });
     });
     return p;
+  }
+
+  setWindowPrivacyMode(isPrivacyMode: boolean): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject:(err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeSetWindowPrivacyMode(isPrivacyMode, asyncCall);
+      });
+    });
+  }
+
+  setWindowPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback<void>): void {
+    let asyncCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeSetWindowPrivacyMode(isPrivacyMode, asyncCall);
+    });
   }
 }

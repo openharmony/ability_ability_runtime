@@ -338,8 +338,8 @@ void EtsAbilityContext::OpenLink(ani_env *env, ani_object aniObj, ani_string ani
     if ((status = env->Reference_IsUndefined(callbackobj, &isCallbackUndefined)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
     }
-    etsContext->OnOpenLink(env, aniObj, aniLink, myCallbackobj, optionsObj, callbackobj, isOptionsUndefined,
-        isCallbackUndefined);
+    etsContext->OnOpenLink(env, aniObj, aniLink, myCallbackobj, optionsObj, callbackobj, !isOptionsUndefined,
+        !isCallbackUndefined);
 }
 
 bool EtsAbilityContext::IsTerminating(ani_env *env, ani_object aniObj)
@@ -927,6 +927,18 @@ void EtsAbilityContext::OnStopServiceExtensionAbility(ani_env *env, ani_object a
     AppExecFwk::AsyncCallback(env, callbackobj, aniObject, nullptr);
 }
 
+static bool CheckUrl(std::string &urlValue)
+{
+    if (urlValue.empty()) {
+        return false;
+    }
+    Uri uri = Uri(urlValue);
+    if (uri.GetScheme().empty() || uri.GetHost().empty()) {
+        return false;
+    }
+    return true;
+}
+
 void EtsAbilityContext::OnOpenLink(ani_env *env, ani_object aniObj, ani_string aniLink, ani_object myCallbackobj,
     ani_object optionsObj, ani_object callbackobj, bool haveOptionsParm, bool haveCallBackParm)
 {
@@ -935,7 +947,7 @@ void EtsAbilityContext::OnOpenLink(ani_env *env, ani_object aniObj, ani_string a
     AAFwk::OpenLinkOptions openLinkOptions;
     AAFwk::Want want;
     want.SetParam(APP_LINKING_ONLY, false);
-    if (!AppExecFwk::GetStdString(env, aniLink, link)) {
+    if (!AppExecFwk::GetStdString(env, aniLink, link) || !CheckUrl(link)) {
         TAG_LOGE(AAFwkTag::CONTEXT, "parse link failed");
         aniObject = EtsErrorUtil::CreateInvalidParamError(env, "Parse param link failed, link must be string.");
         AppExecFwk::AsyncCallback(env, myCallbackobj, aniObject, nullptr);
@@ -943,7 +955,7 @@ void EtsAbilityContext::OnOpenLink(ani_env *env, ani_object aniObj, ani_string a
     }
     if (haveOptionsParm) {
         TAG_LOGD(AAFwkTag::CONTEXT, "OpenLink Have option");
-        EtsAbilityContext::UnWrapOpenLinkOptions(env, optionsObj, openLinkOptions, want);
+        AppExecFwk::UnWrapOpenLinkOptions(env, optionsObj, openLinkOptions, want);
     }
     want.SetUri(link);
     std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
@@ -1430,31 +1442,6 @@ void EtsAbilityContext::AddFreeInstallObserver(ani_env *env, const AAFwk::Want &
     std::string bundleName = want.GetElement().GetBundleName();
     std::string abilityName = want.GetElement().GetAbilityName();
     freeInstallObserver_->AddEtsObserverObject(env, bundleName, abilityName, startTime, callback, isAbilityResult);
-}
-
-void EtsAbilityContext::UnWrapOpenLinkOptions(ani_env *env, ani_object optionsObj,
-    AAFwk::OpenLinkOptions &openLinkOptions, AAFwk::Want &want)
-{
-    TAG_LOGD(AAFwkTag::CONTEXT, "UnWrapOpenLinkOptions");
-    ani_status status = ANI_ERROR;
-    ani_ref ParamRef = nullptr;
-    if ((status = env->Object_GetPropertyByName_Ref(optionsObj, "parameters", &ParamRef)) == ANI_OK) {
-        AAFwk::WantParams wantParam;
-        if (AppExecFwk::UnwrapWantParams(env, ParamRef, wantParam)) {
-            want.SetParams(wantParam);
-        } else {
-            TAG_LOGE(AAFwkTag::CONTEXT, "UnwrapWantParams failed");
-        }
-    }
-    if ((status = env->Object_GetPropertyByName_Ref(optionsObj, APP_LINKING_ONLY.c_str(), &ParamRef)) == ANI_OK) {
-        bool appLinkingOnly = false;
-        AppExecFwk::GetFieldBoolByName(env, optionsObj, "appLinkingOnly", appLinkingOnly);
-        openLinkOptions.SetAppLinkingOnly(appLinkingOnly);
-        want.SetParam(APP_LINKING_ONLY, appLinkingOnly);
-    }
-    if (!want.HasParameter(APP_LINKING_ONLY)) {
-        want.SetParam(APP_LINKING_ONLY, false);
-    }
 }
 
 void EtsAbilityContext::CreateOpenLinkTask(ani_env *env, const ani_object callbackobj,
