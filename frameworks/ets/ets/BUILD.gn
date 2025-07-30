@@ -1242,6 +1242,7 @@ group("ets_packages") {
     ":ability_runtime_want_constant_abc_etc",
     ":atomic_service_options_abc_etc",
     ":application_state_observer_abc_etc",
+    ":app_foreground_state_observer_abc_etc",
     ":form_extension_ability_etc",
     ":service_extension_ability_abc_etc",
     ":ui_extension_ability_ani_etc",
