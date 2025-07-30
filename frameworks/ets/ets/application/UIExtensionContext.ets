@@ -18,7 +18,9 @@ import { AsyncCallback } from '@ohos.base';
 import { BusinessError } from '@ohos.base';
 import { ConnectOptions } from 'ability.connectOptions';
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
+import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
 import ExtensionContext from 'application.ExtensionContext';
+import OpenLinkOptions from '@ohos.app.ability.OpenLinkOptions';
 import StartOptions from '@ohos.app.ability.StartOptions';
 import Want from '@ohos.app.ability.Want';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
@@ -69,6 +71,10 @@ export default class UIExtensionContext extends ExtensionContext {
   private native nativeSetHostPageOverlayForbidden(isForbidden: boolean): void;
   native setColorMode(colorMode: ConfigurationConstant.ColorMode): void;
   native nativeReportDrawnCompleted(callback:AsyncCallbackWrapper<void>): void;
+  private native nativeOpenLinkSync(link: string, syncCallback:AsyncCallbackWrapper<void>,
+    options?: OpenLinkOptions, callback?: AsyncCallbackWrapper<AbilityResult>): void;
+  private native nativeOpenAtomicService(appId: string, syncCallback: AsyncCallbackWrapper<AbilityResult>,
+    options?: AtomicServiceOptions): void;
 
   terminateSelf(callback:AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
@@ -279,5 +285,47 @@ export default class UIExtensionContext extends ExtensionContext {
 
   setHostPageOverlayForbidden(isForbidden: boolean) : void {
     this.nativeSetHostPageOverlayForbidden(isForbidden);
+  }
+
+  openLink(link: string, options?: OpenLinkOptions, callback?: AsyncCallback<AbilityResult, void>): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let finalOptions: OpenLinkOptions | undefined = undefined;
+      if (options) {
+        finalOptions = options;
+      }
+      let callParam: AsyncCallbackWrapper<AbilityResult> | undefined = undefined;
+      if (callback) {
+        callParam = new AsyncCallbackWrapper<AbilityResult>(callback);
+      }
+      let syncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute(() => {
+        this.nativeOpenLinkSync(link, syncCall, finalOptions, callParam);
+      });
+    });
+  }
+
+  openAtomicService(appId: string, options?: AtomicServiceOptions): Promise<AbilityResult> {
+    return new Promise<AbilityResult>((resolve: (data: AbilityResult) => void, reject: (err: BusinessError) => void): void => {
+      let syncCall = new AsyncCallbackWrapper<AbilityResult>((err: BusinessError | null, data: AbilityResult | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as AbilityResult);
+        } else {
+          reject(err);
+        }
+      });
+      let finalOptions: AtomicServiceOptions | undefined = undefined;
+      if (options) {
+        finalOptions = options;
+      }
+      taskpool.execute(() => {
+        this.nativeOpenAtomicService(appId, syncCall, finalOptions);
+      });
+    });
   }
 }

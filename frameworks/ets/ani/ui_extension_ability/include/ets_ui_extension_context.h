@@ -25,6 +25,7 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "ohos_application.h"
+#include "open_link_options.h"
 #include "ui_extension_context.h"
 
 namespace OHOS {
@@ -80,6 +81,10 @@ public:
     static void SetHostPageOverlayForbidden(ani_env *env, ani_object aniObj, ani_boolean aniIsForbidden);
     static void SetColorMode(ani_env *env, ani_object aniObj, ani_enum_item aniColorMode);
     static void ReportDrawnCompleted(ani_env *env,  ani_object aniObj, ani_object callback);
+    static void OpenLink(ani_env *env, ani_object aniObj, ani_string aniLink, ani_object myCallbackobj,
+        ani_object optionsObj, ani_object callbackobj);
+    static void OpenAtomicService(ani_env *env, ani_object aniObj, ani_string aniAppId,
+        ani_object callbackobj, ani_object optionsObj);
 
     static bool BindNativePtrCleaner(ani_env *env);
     static void Clean(ani_env *env, ani_object object);
@@ -90,8 +95,8 @@ private:
     void OnStartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call);
     void OnStartAbilityForResult(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptinsObj,
         ani_object callback);
-    void AddFreeInstallObserver(
-        ani_env *env, const AAFwk::Want &want, ani_object callbackObj, std::shared_ptr<UIExtensionContext> context);
+    void AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want, ani_object callbackObj,
+        std::shared_ptr<UIExtensionContext> context, bool isAbilityResult = false, bool isOpenLink = false);
     ani_long OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object connectOptionsObj);
     void OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
@@ -104,10 +109,21 @@ private:
         ani_object wantObj, ani_object callbackObj);
     void OnSetHostPageOverlayForbidden(ani_env *env, ani_object aniObj, ani_boolean aniIsForbidden);
     RuntimeTask CreateRuntimeTask(ani_vm *etsVm, ani_ref callbackRef);
+    void OnOpenLink(ani_env *env, ani_object aniObj, ani_string aniLink, ani_object myCallbackobj,
+        ani_object optionsObj, ani_object callbackobj);
+    void OnOpenAtomicService(ani_env *env, ani_object aniObj, ani_string aniAppId,
+        ani_object callbackobj, ani_object optionsObj);
+
     static bool CheckConnectionParam(ani_env *env, ani_object connectOptionsObj,
         sptr<EtsUIExtensionConnection>& connection, AAFwk::Want& want);
     void OnSetColorMode(ani_env *env, ani_object aniCls, ani_enum_item aniColorMode);
     void OnReportDrawnCompleted(ani_env *env,  ani_object aniCls, ani_object callback);
+    void OpenLinkInner(ani_env *env, ani_object aniObj, ani_string aniLink, ani_object myCallbackobj,
+        ani_object optionsObj, ani_object callbackobj, bool haveOptionsParm, bool haveCallBackParm);
+    void CreateOpenLinkTask(ani_env *env, const ani_object callbackobj,
+        std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context, AAFwk::Want &want, int &requestCode);
+    void OpenAtomicServiceInner(ani_env *env, ani_object aniObj, AAFwk::Want &want, AAFwk::StartOptions &options,
+        std::string appId, ani_object callbackobj);
 
 #ifdef SUPPORT_SCREEN
     void InitDisplayId(AAFwk::Want &want);
