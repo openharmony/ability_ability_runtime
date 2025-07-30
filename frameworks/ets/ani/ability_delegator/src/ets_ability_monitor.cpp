@@ -154,7 +154,13 @@ void EtsAbilityMonitor::CallLifecycleCBFunction(const std::string &functionName,
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_GetField_Ref failed status: %{public}d", status);
         return;
     }
-
+    ani_boolean isValue = false;
+    ani_boolean isUndefined = false;
+    env->Reference_IsNullishValue(funRef, &isValue);
+    env->Reference_IsUndefined(funRef, &isUndefined);
+    if (isUndefined || isValue) {
+        return;
+    }
     ani_fn_object onFn = reinterpret_cast<ani_fn_object>(funRef);
     ani_ref resutlt;
     std::vector<ani_ref> argv = { abilityObj->aniRef };
