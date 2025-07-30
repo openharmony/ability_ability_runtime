@@ -6826,32 +6826,5 @@ HWTEST_F(UIAbilityLifecycleManagerTest, EnableListForSCBRecovery_001, TestSize.L
     EXPECT_TRUE(mgr->isSCBRecovery_);
     EXPECT_TRUE(mgr->coldStartInSCBRecovery_.empty());
 }
-
-
-/**
- * @tc.name: UIAbilityLifecycleManager_GetWantElement_0100
- * @tc.desc: GetWantElement
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, GetWantElement_0100, TestSize.Level1)
-{
-    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
-    Want want;
-    AppExecFwk::ElementName element("", "com.test.demo", "MainAbility");
-    want.SetElement(element);
-    AbilityRequest abilityRequest;
-    abilityRequest.want = want;
-    sptr<SessionInfo> sessionInfo = nullptr;
-    AppExecFwk::ElementName result = mgr->GetWantElement(sessionInfo, abilityRequest);
-    EXPECT_EQ(result.GetAbilityName(), "MainAbility");
-    sessionInfo = new SessionInfo();
-    ASSERT_NE(sessionInfo, nullptr);
-    sessionInfo->isAtomicService = false;
-    result = mgr->GetWantElement(sessionInfo, abilityRequest);
-    EXPECT_EQ(result.GetAbilityName(), "MainAbility");
-    sessionInfo->isAtomicService = true;
-    result = mgr->GetWantElement(sessionInfo, abilityRequest);
-    EXPECT_TRUE(result.GetAbilityName().empty());
-}
 }  // namespace AAFwk
 }  // namespace OHOS

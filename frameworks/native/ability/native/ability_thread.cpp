@@ -292,7 +292,7 @@ void AbilityThread::ScheduleCollaborate(const Want &want)
 }
 
 void AbilityThread::ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
 }

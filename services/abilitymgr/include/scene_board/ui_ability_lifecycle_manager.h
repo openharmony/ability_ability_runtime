@@ -460,7 +460,6 @@ private:
 
     void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void SetReceiverInfo(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord) const;
-    AppExecFwk::ElementName GetWantElement(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest);
 
     /**
      * @brief Execute PrepareTerminateApp when it is implemented

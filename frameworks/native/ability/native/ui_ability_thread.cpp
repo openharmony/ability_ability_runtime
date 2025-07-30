@@ -705,7 +705,7 @@ void UIAbilityThread::ScheduleCollaborate(const Want &want)
 }
 
 void UIAbilityThread::ScheduleAbilityRequestFailure(const std::string &requestId,
-    const AppExecFwk::ElementName &element, const std::string &message)
+    const AppExecFwk::ElementName &element, const std::string &message, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "ScheduleAbilityRequestFailure called");
     if (abilityImpl_ == nullptr) {
@@ -713,14 +713,14 @@ void UIAbilityThread::ScheduleAbilityRequestFailure(const std::string &requestId
         return;
     }
     wptr<UIAbilityThread> weak = this;
-    auto task = [weak, requestId, element, message]() {
+    auto task = [weak, requestId, element, message, resultCode]() {
         auto abilityThread = weak.promote();
         if (abilityThread == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null abilityThread");
             return;
         }
         if (abilityThread->abilityImpl_ != nullptr) {
-            abilityThread->abilityImpl_->ScheduleAbilityRequestFailure(requestId, element, message);
+            abilityThread->abilityImpl_->ScheduleAbilityRequestFailure(requestId, element, message, resultCode);
             return;
         }
     };

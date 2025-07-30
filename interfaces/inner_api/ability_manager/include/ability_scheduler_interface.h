@@ -307,7 +307,7 @@ public:
     virtual void ScheduleCollaborate(const Want &want) = 0;
 
     virtual void ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message) = 0;
+        const std::string &message, int32_t resultCode = 0) = 0;
 
     virtual void ScheduleAbilityRequestSuccess(const std::string &requestId,
         const AppExecFwk::ElementName &element) = 0;
