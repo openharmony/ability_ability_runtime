@@ -20,6 +20,7 @@
 #include "app_mgr_util.h"
 #include "bundle_mgr_helper.h"
 #include "exit_info_data_manager.h"
+#include "hitrace_meter.h"
 #include "os_account_manager_wrapper.h"
 #include "scene_board_judgement.h"
 
@@ -84,6 +85,7 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
 int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const ExitReason &exitReason,
     bool fromKillWithReason)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     AppExecFwk::ApplicationInfo application;
     bool debug = false;
     auto ret = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->GetApplicationInfoByProcessID(pid,
@@ -142,6 +144,7 @@ int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const st
     const int32_t uid, const uint32_t accessTokenId, const ExitReason &exitReason,
     const AppExecFwk::RunningProcessInfo &processInfo, bool fromKillWithReason)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!IsExitReasonValid(exitReason)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reason invalid");
         return ERR_INVALID_VALUE;
@@ -180,6 +183,7 @@ int32_t AppExitReasonHelper::RecordProcessExtensionExitReason(
     const int32_t pid, const std::string &bundleName, const ExitReason &exitReason,
     const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     CHECK_POINTER_AND_RETURN(subManagersHelper_, ERR_NULL_OBJECT);
     auto connectManager = subManagersHelper_->GetCurrentConnectManager();
