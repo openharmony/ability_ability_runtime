@@ -20,6 +20,7 @@
 #include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "exit_info_data_manager.h"
+#include "hitrace_meter.h"
 #include "os_account_manager_wrapper.h"
 
 namespace OHOS {
@@ -79,6 +80,7 @@ DistributedKv::Status AppExitReasonDataManager::GetKvStore()
 
 bool AppExitReasonDataManager::CheckKvStore()
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AppExitReasonDataManager::CheckKvStore start");
     if (kvStorePtr_ != nullptr) {
         return true;
@@ -100,6 +102,7 @@ int32_t AppExitReasonDataManager::SetAppExitReason(const std::string &bundleName
     const std::vector<std::string> &abilityList, const AAFwk::ExitReason &exitReason,
     const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (bundleName.empty() || accessTokenId == Security::AccessToken::INVALID_TOKENID) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid value");
         return ERR_INVALID_VALUE;
@@ -118,6 +121,7 @@ int32_t AppExitReasonDataManager::SetAppExitReason(const std::string &bundleName
     DistributedKv::Value value = ConvertAppExitReasonInfoToValue(abilityList, exitReason, processInfo, withKillMsg);
     DistributedKv::Status status;
     {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "kvStorePtr_->Put");
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         status = kvStorePtr_->Put(key, value);
     }
@@ -676,6 +680,7 @@ int32_t AppExitReasonDataManager::SetUIExtensionAbilityExitReason(
     const std::string &bundleName, const std::vector<std::string> &extensionList, const AAFwk::ExitReason &exitReason,
     const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (bundleName.empty()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid bundle name");
@@ -697,6 +702,7 @@ int32_t AppExitReasonDataManager::SetUIExtensionAbilityExitReason(
             processInfo, withKillMsg);
         DistributedKv::Status status;
         {
+            HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "kvStorePtr_->Put");
             std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
             status = kvStorePtr_->Put(key, value);
         }

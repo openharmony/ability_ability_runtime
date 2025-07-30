@@ -2965,6 +2965,7 @@ void AppMgrServiceInner::GetChildrenProcesses(const std::shared_ptr<AppRunningRe
 
 int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string& reason)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!ProcessUtil::ProcessExist(pid)) {
         TAG_LOGI(AAFwkTag::APPMGR, "null killProcessByPid, pid: %{public}d", pid);
         return AAFwk::ERR_KILL_PROCESS_NOT_EXIST;
@@ -2982,6 +2983,7 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string&
 int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::string& reason,
     const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     int32_t ret = -1;
     if (pid > 0) {
         if (CheckIsThreadInFoundation(pid)) {
@@ -3477,6 +3479,7 @@ int32_t AppMgrServiceInner::KillProcessesInBatch(const std::vector<int32_t> &pid
 int32_t AppMgrServiceInner::KillSubProcessBypidInner(const pid_t pid, const std::string &reason,
     AAFwk::EventInfo &eventInfo)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     int32_t ret = -1;
     if (!ProcessUtil::ProcessExist(pid) || pid <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid pid: %{public}d", pid);
@@ -3504,6 +3507,7 @@ int32_t AppMgrServiceInner::KillSubProcessBypidInner(const pid_t pid, const std:
 
 int32_t AppMgrServiceInner::KillSubProcessBypid(const pid_t pid, const std::string &reason)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     int32_t ret = ERR_OK;
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
@@ -3560,6 +3564,7 @@ int32_t AppMgrServiceInner::KillSubProcessBypid(const pid_t pid, const std::stri
 int32_t AppMgrServiceInner::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason,
     bool subProcess)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     int32_t ret = ERR_OK;
     for (const auto& pid: pids) {
         auto appRecord = GetAppRunningRecordByPid(pid);
@@ -4983,6 +4988,7 @@ void AppMgrServiceInner::GetRunningProcessInfoByToken(
 int32_t AppMgrServiceInner::GetRunningProcessInfoByPid(const pid_t pid,
     OHOS::AppExecFwk::RunningProcessInfo &info) const
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!CheckGetRunningInfoPermission()) {
         return ERR_PERMISSION_DENIED;
