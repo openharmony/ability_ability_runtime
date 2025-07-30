@@ -87,13 +87,13 @@ int AppScheduler::TerminateAbility(const sptr<IRemoteObject> &token, bool clearM
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Terminate ability.");
-    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    CHECK_POINTER_AND_RETURN(appMgrClient_, ERR_NULL_APP_MGR_CLIENT);
     /* because the errcode type of AppMgr Client API will be changed to int,
      * so must to covert the return result  */
     int ret = static_cast<int>(IN_PROCESS_CALL(appMgrClient_->TerminateAbility(token, clearMissionFlag)));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "AppScheduler fail to TerminateAbility. ret %d", ret);
-        return INNER_ERR;
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "AppScheduler fail to TerminateAbility. ret %{public}d", ret);
+        return ERR_APP_MGR_TERMINATTE_ABILITY_FAILED;
     }
     return ERR_OK;
 }

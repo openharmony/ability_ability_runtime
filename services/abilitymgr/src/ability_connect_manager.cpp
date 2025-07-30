@@ -136,7 +136,7 @@ int AbilityConnectManager::TerminateAbilityInner(const sptr<IRemoteObject> &toke
     if (abilityRecord == nullptr) {
         abilityRecord = AbilityCacheManager::GetInstance().FindRecordByToken(token);
     }
-    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_CONNECT_MANAGER_NULL_ABILITY_RECORD);
     std::string element = abilityRecord->GetURI();
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "terminate ability, ability is %{public}s", element.c_str());
     if (IsUIExtensionAbility(abilityRecord)) {
@@ -349,7 +349,7 @@ int AbilityConnectManager::TerminateAbilityLocked(const sptr<IRemoteObject> &tok
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
     auto abilityRecord = GetExtensionByTokenFromTerminatingMap(token);
-    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_CONNECT_MANAGER_NULL_ABILITY_RECORD);
 
     if (abilityRecord->IsTerminating()) {
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "Ability is on terminating.");

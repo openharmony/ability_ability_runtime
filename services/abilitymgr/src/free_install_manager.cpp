@@ -694,7 +694,7 @@ int FreeInstallManager::SetAppRunningState(Want &want)
     auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "null appMgr");
-        return ERR_INVALID_VALUE;
+        return ERR_NULL_APP_MGR_CLIENT;
     }
 
     bool isAppRunning = appMgr->GetAppRunningStateByBundleName(want.GetElement().GetBundleName());
