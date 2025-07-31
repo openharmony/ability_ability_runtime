@@ -96,6 +96,9 @@ public:
     static ani_object NativeTransferStatic(ani_env *env, ani_object aniObj, ani_object input);
     static ani_object NativeTransferDynamic(ani_env *env, ani_object aniObj, ani_object input);
     static bool IsInstanceOf(ani_env *env, ani_object aniObj);
+    static void NativeChangeAbilityVisibility(ani_env *env, ani_object aniObj, ani_boolean isShow,
+        ani_object callbackObj);
+
 #ifdef SUPPORT_GRAPHICS
 public:
     static void SetAbilityInstanceInfo(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object iconObj,
