@@ -24,6 +24,7 @@
 #include "ets_application_context_utils.h"
 #include "ets_error_utils.h"
 #include "ets_native_reference.h"
+#include "event_hub.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
 #include "resourceManager.h"
@@ -140,7 +141,7 @@ void Clean(ani_env *env, ani_object object)
         return;
     }
     if (ptr != 0) {
-        delete reinterpret_cast<Context *>(ptr);
+        delete reinterpret_cast<std::weak_ptr<Context> *>(ptr);
     }
 }
 
@@ -342,6 +343,21 @@ void CreateEtsBaseContext(ani_env *aniEnv, ani_class contextClass, ani_object co
     }
     BindParentProperty(aniEnv, contextClass, contextObj, context);
     BindNativeFunction(aniEnv);
+    // set eventHub context
+    ani_ref eventHubRef = nullptr;
+    ani_status status = ANI_OK;
+    if ((status = aniEnv->Object_GetFieldByName_Ref(contextObj, "eventHub", &eventHubRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_GetFieldByName_Ref failed status: %{public}d", status);
+        return;
+    }
+
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::Context>(context);
+    if (workContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "workContext null");
+        return;
+    }
+    ani_long nativeContextLong = (ani_long)workContext;
+    AbilityRuntime::EventHub::SetEventHubContext(aniEnv, eventHubRef, nativeContextLong);
 }
 
 std::shared_ptr<Context> GetBaseContext(ani_env *env, ani_object aniObj)
@@ -646,9 +662,9 @@ ani_object GetApplicationContextSync(ani_env *env, ani_object aniObj)
     }
     if (!applicationContext->GetApplicationInfoUpdateFlag()) {
         auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetEtsGlobalObject();
-        if (appContextObj != nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appContextObj is not nullptr");
-            return appContextObj->aniObj;
+        if (appContextObj != nullptr && appContextObj->aniRef != nullptr) {
+            TAG_LOGD(AAFwkTag::APPKIT, "appContextObj is not nullptr");
+            return reinterpret_cast<ani_object>(appContextObj->aniRef);
         }
     }
     return GetApplicationContext(env, applicationContext);

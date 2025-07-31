@@ -731,6 +731,15 @@
               "header_files": []
             },
             "name": "//foundation/ability/ability_runtime/frameworks/native/appkit:appkit_delegator"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/kits/native/ability/native/ability_business_error",
+              "header_files": [
+                "ability_business_error.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native:ability_business_error"
           }
         ],
         "test": [

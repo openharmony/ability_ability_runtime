@@ -26,15 +26,19 @@
 #include "ani_remote_object.h"
 #include "app_utils.h"
 #include "common_fun_ani.h"
-#include "hilog_tag_wrapper.h"
-#include "hitrace_meter.h"
 #include "interop_js/arkts_esvalue.h"
 #include "interop_js/hybridgref_ani.h"
 #include "interop_js/hybridgref_napi.h"
+#include "ets_caller_complex.h"
 #include "ets_context_utils.h"
 #include "ets_error_utils.h"
 #include "ets_ui_extension_callback.h"
+#include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "want.h"
+#ifdef SUPPORT_GRAPHICS
+#include "pixel_map_taihe_ani.h"
+#endif
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -447,6 +451,20 @@ void EtsAbilityContext::OpenAtomicService(
     etsContext->OnOpenAtomicService(env, aniObj, aniAppId, callbackObj, optionsObj);
 }
 
+#ifdef SUPPORT_SCREEN
+void EtsAbilityContext::SetAbilityInstanceInfo(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object iconObj,
+    ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "SetAbilityInstanceInfo called");
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
+        return;
+    }
+    etsContext->OnSetAbilityInstanceInfo(env, aniObj, labelObj, iconObj, callback);
+}
+#endif
+
 int32_t EtsAbilityContext::GenerateRequestCode()
 {
     static int32_t curRequestCode_ = 0;
@@ -541,6 +559,54 @@ void EtsAbilityContext::OnStartAbilityForResult(
     }
     TAG_LOGE(AAFwkTag::CONTEXT, "displayId:%{public}d", startOptions.GetDisplayID());
     StartAbilityForResultInner(env, startOptions, want, context, startOptionsObj, callback);
+}
+
+ani_object EtsAbilityContext::StartAbilityByCall(ani_env *env, ani_object aniObj, ani_object wantObj)
+{
+    TAG_LOGI(AAFwkTag::UIABILITY, "StartAbilityByCall");
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    auto context = etsContext ? etsContext->context_.lock() : nullptr;
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "GetAbilityContext is nullptr");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return nullptr;
+    }
+
+    AAFwk::Want want;
+    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "parse want failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
+        return nullptr;
+    }
+    auto callData = std::make_shared<StartAbilityByCallData>();
+    auto callerCallBack = std::make_shared<CallerCallBack>();
+    CallUtil::GenerateCallerCallBack(callData, callerCallBack);
+    auto ret = context->StartAbilityByCall(want, callerCallBack, -1);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "startAbility failed");
+        EtsErrorUtil::ThrowErrorByNativeErr(env, ret);
+        return nullptr;
+    }
+    CallUtil::WaitForCalleeObj(callData);
+
+    if (callData->remoteCallee == nullptr) {
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return nullptr;
+    }
+
+    std::weak_ptr<AbilityContext> abilityContext(context);
+    auto releaseCallFunc = [abilityContext] (std::shared_ptr<CallerCallBack> callback) -> ErrCode {
+        auto contextForRelease = abilityContext.lock();
+        if (contextForRelease == nullptr) {
+            return -1;
+        }
+        return contextForRelease->ReleaseCall(callback);
+    };
+    auto caller = EtsCallerComplex::CreateEtsCaller(env, releaseCallFunc, callData->remoteCallee, callerCallBack);
+    if (caller == nullptr) {
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+    }
+    return caller;
 }
 
 void EtsAbilityContext::StartAbilityForResultInner(ani_env *env, const AAFwk::StartOptions &startOptions,
@@ -1294,7 +1360,7 @@ void EtsAbilityContext::NativeOnSetRestoreEnabled(ani_env *env, ani_object aniOb
     EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
     return;
 }
-context->SetRestoreEnabled(enabled);
+    context->SetRestoreEnabled(enabled);
 }
 
 void EtsAbilityContext::OpenAtomicServiceInner(ani_env *env, ani_object aniObj, AAFwk::Want &want,
@@ -1350,6 +1416,49 @@ void EtsAbilityContext::OpenAtomicServiceInner(ani_env *env, ani_object aniObj, 
     }
 }
 
+
+#ifdef SUPPORT_SCREEN
+void EtsAbilityContext::OnSetAbilityInstanceInfo(ani_env *env, ani_object aniObj, ani_string labelObj,
+    ani_object iconObj, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnSetAbilityInstanceInfo called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env");
+        return;
+    }
+
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        EtsErrorUtil::ThrowErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        return;
+    }
+
+    std::string label;
+    if (!AppExecFwk::GetStdString(env, labelObj, label)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Failed to parse label");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param label failed");
+        return;
+    }
+
+    auto icon = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, iconObj);
+    if (icon == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Failed to unwrap PixelMap");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param icon failed");
+        return;
+    }
+
+    ErrCode ret = context->SetAbilityInstanceInfo(label, icon);
+    ani_object errorObj = nullptr;
+    if (ret == ERR_OK) {
+        errorObj = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
+    } else {
+        errorObj = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
+    }
+    AppExecFwk::AsyncCallback(env, callback, errorObj, nullptr);
+}
+#endif
+
 namespace {
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
@@ -1379,6 +1488,9 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             ani_native_function { "nativeTerminateSelfWithResult",
                 "Lability/abilityResult/AbilityResult;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsAbilityContext::TerminateSelfWithResult) },
+            ani_native_function { "nativeStartAbilityByCallSync",
+                "L@ohos/app/ability/Want/Want;:L@ohos/app/ability/UIAbility/Caller;",
+                reinterpret_cast<void*>(EtsAbilityContext::StartAbilityByCall) },
             ani_native_function { "nativeReportDrawnCompletedSync", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<ani_int *>(EtsAbilityContext::ReportDrawnCompleted) },
             ani_native_function { "nativeStartServiceExtensionAbility",
@@ -1412,6 +1524,11 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void *>(EtsAbilityContext::OpenAtomicService) },
             ani_native_function { "nativeOnSetRestoreEnabled", "Z:V",
                 reinterpret_cast<void*>(EtsAbilityContext::NativeOnSetRestoreEnabled) },
+#ifdef SUPPORT_GRAPHICS
+            ani_native_function { "nativeSetAbilityInstanceInfo",
+                "Lstd/core/String;L@ohos/multimedia/image/image/PixelMap;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+                reinterpret_cast<void*>(EtsAbilityContext::SetAbilityInstanceInfo) },
+#endif
         };
         if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
             TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);
@@ -1523,8 +1640,8 @@ void ETSAbilityConnection::CallEtsFailed(int32_t errorCode)
         TAG_LOGE(AAFwkTag::CONTEXT, "Failed to get env, status: %{public}d", status);
         return;
     }
-    status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onFailed", "D:V",
-        static_cast<double>(errorCode));
+    status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onFailed", "I:V",
+        errorCode);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "Failed to call onFailed, status: %{public}d", status);
     }

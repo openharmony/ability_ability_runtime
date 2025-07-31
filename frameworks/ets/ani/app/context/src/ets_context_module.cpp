@@ -27,6 +27,7 @@
 #include "ets_application_context_utils.h"
 #include "ets_context_utils.h"
 #include "ets_error_utils.h"
+#include "event_hub.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "interop_js/arkts_esvalue.h"
@@ -361,9 +362,9 @@ void EtsContextModuleInit(ani_env *aniEnv)
         ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",
             reinterpret_cast<void*>(EtsContextModule::NativeTransferDynamic) },
     };
-    status = aniEnv->Class_BindNativeMethods(contextCls, nativeFuncs.data(), nativeFuncs.size());
+    status = aniEnv->Class_BindStaticNativeMethods(contextCls, nativeFuncs.data(), nativeFuncs.size());
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindStaticNativeMethods failed status: %{public}d", status);
         return;
     }
 
@@ -408,6 +409,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     EtsContextModuleInit(aniEnv);
+    AbilityRuntime::EventHub::InitAniEventHub(aniEnv);
     *result = ANI_VERSION_1;
     TAG_LOGD(AAFwkTag::CONTEXT, "ANI_Constructor finish");
     return ANI_OK;

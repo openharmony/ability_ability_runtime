@@ -291,7 +291,7 @@ void EtsUIExtensionContext::OnStartAbilityForResult(ani_env *env, ani_object ani
     if (startOptionsObj) {
         OHOS::AppExecFwk::UnwrapStartOptions(env, startOptionsObj, startOptions);
     }
-    
+
     ani_ref callbackRef = nullptr;
     env->GlobalReference_Create(callback, &callbackRef);
     ani_vm *etsVm = nullptr;
@@ -309,7 +309,7 @@ void EtsUIExtensionContext::OnStartAbilityForResult(ani_env *env, ani_object ani
             TAG_LOGE(AAFwkTag::UI_EXT, "GetEnv failed, status: %{public}d", status);
             return;
         }
-        
+
         ani_object abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
         if (abilityResult == nullptr) {
             TAG_LOGW(AAFwkTag::UI_EXT, "null abilityResult");
@@ -400,7 +400,6 @@ void EtsUIExtensionContext::OnDisconnectServiceExtensionAbility(ani_env *env, an
             g_connects.erase(item);
         } else {
             TAG_LOGI(AAFwkTag::UI_EXT, "Failed to found connection");
-            return;
         }
     }
     if (!connection) {
@@ -569,12 +568,20 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return nullptr;
     }
-    if ((status = env->Object_SetFieldByName_Long(contextObj, "nativeContext", (ani_long)context.get())) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
+    auto workContext = new (std::nothrow)
+        std::weak_ptr<AbilityRuntime::UIExtensionContext>(context);
+    if (workContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null workContext");
+        return nullptr;
+    }
+    if (!ContextUtil::SetNativeContextLong(env, contextObj, (ani_long)workContext)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "SetNativeContextLong failed");
+        delete workContext;
         return nullptr;
     }
     if (!EtsUIExtensionContext::BindNativePtrCleaner(env)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
+        delete workContext;
         return nullptr;
     }
     OHOS::AbilityRuntime::ContextUtil::CreateEtsBaseContext(env, cls, contextObj, context);
@@ -652,7 +659,7 @@ void EtsUIExtensionConnection::CallEtsFailed(int32_t errorCode)
         return;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "onFailed", "D:V", &method))) {
+    if ((status = env->Class_FindMethod(cls, "onFailed", "I:V", &method))) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to find onFailed method, status: %{public}d", status);
         return;
     }
@@ -661,7 +668,7 @@ void EtsUIExtensionConnection::CallEtsFailed(int32_t errorCode)
         return;
     }
     status = env->Object_CallMethod_Void(
-        reinterpret_cast<ani_object>(stsConnectionRef_), method, static_cast<double>(errorCode));
+        reinterpret_cast<ani_object>(stsConnectionRef_), method, errorCode);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Object_CallMethod_Void status: %{public}d", status);
     }
