@@ -357,7 +357,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::FindRecordFromTmpMap(
     int32_t appIndex = 0;
     (void)AbilityRuntime::StartupUtil::GetAppIndex(abilityRequest.want, appIndex);
     auto instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
-    for (const auto &[recordId, abilityRecord] : tmpAbilityMap_) {
+    for (const auto &[requestId, abilityRecord] : tmpAbilityMap_) {
         if (abilityRecord) {
             const auto &info = abilityRecord->GetAbilityInfo();
             if (info.name == abilityRequest.abilityInfo.name &&
@@ -1455,7 +1455,24 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Notify scb's abilityId is %{public}" PRIu64 ".", sessionInfo->uiAbilityId);
     tmpAbilityMap_.emplace(sessionInfo->requestId, uiAbilityRecord);
+    PostCallTimeoutTask(sessionInfo->requestId);
     return NotifySCBPendingActivation(sessionInfo, abilityRequest, errMsg);
+}
+
+void UIAbilityLifecycleManager::PostCallTimeoutTask(int32_t requestId)
+{
+    auto timeoutTask = [wThis = weak_from_this(), requestId]() {
+        auto pThis = wThis.lock();
+        if (pThis != nullptr) {
+            std::string reason = "Timeout cleanup";
+            pThis->NotifyStartupExceptionBySCB(requestId, reason);
+        }
+    };
+
+    int timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
+        GlobalConstant::COLDSTART_TIMEOUT_MULTIPLE * GlobalConstant::TIMEOUT_UNIT_TIME;
+    ffrt::submit(std::move(timeoutTask), ffrt::task_attr().delay(timeout)
+        .timeout(GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 }
 
 void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)
@@ -4037,7 +4054,7 @@ int32_t UIAbilityLifecycleManager::RevokeDelegator(sptr<IRemoteObject> token)
     }
 }
 
-int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId)
+int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId, const std::string &reason)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "scb notify exception:%{public}d", requestId);
     std::lock_guard guard(sessionLock_);
@@ -4046,7 +4063,7 @@ int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId
             auto abilityRecord = it->second;
             if (abilityRecord != nullptr) {
                 TAG_LOGW(AAFwkTag::ABILITYMGR, "startup exception: %{public}s", abilityRecord->GetURI().c_str());
-                SendAbilityEvent(abilityRecord->GetAbilityInfo());
+                SendAbilityEvent(abilityRecord->GetAbilityInfo(), reason);
             }
             tmpAbilityMap_.erase(it);
             callRequestCache_.erase(abilityRecord);
@@ -4056,7 +4073,8 @@ int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId
 
     auto request = GetSpecifiedRequest(requestId);
     if (request != nullptr) {
-        SendAbilityEvent(request->abilityRequest.abilityInfo);
+        std::string reasonFromSCB = "SCB intercepted this startup attempt";
+        SendAbilityEvent(request->abilityRequest.abilityInfo, reasonFromSCB);
     }
 
     auto nextRequest = PopAndGetNextSpecified(requestId);
@@ -4069,7 +4087,8 @@ int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId
     return ERR_OK;
 }
 
-void UIAbilityLifecycleManager::SendAbilityEvent(const AppExecFwk::AbilityInfo &abilityInfo) const
+void UIAbilityLifecycleManager::SendAbilityEvent(const AppExecFwk::AbilityInfo &abilityInfo,
+    const std::string &reason) const
 {
     EventInfo eventInfo;
     eventInfo.userId = userId_;
@@ -4077,7 +4096,7 @@ void UIAbilityLifecycleManager::SendAbilityEvent(const AppExecFwk::AbilityInfo &
     eventInfo.bundleName = abilityInfo.bundleName;
     eventInfo.moduleName = abilityInfo.moduleName;
     eventInfo.errCode = ERR_SCB_INTERCEPTION;
-    eventInfo.errMsg = "SCB intercepted this startup attempt";
+    eventInfo.errMsg = reason;
     ffrt::submit([eventInfo]() {
         EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         }, ffrt::task_attr().timeout(AbilityRuntime::GlobalConstant::FFRT_TASK_TIMEOUT));
