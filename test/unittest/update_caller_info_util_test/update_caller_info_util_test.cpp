@@ -161,6 +161,21 @@ HWTEST_F(UpdateCallerInfoUtilTest, ClearProtectedWantParam_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateCallerInfoUtilTest_ClearProtectedWantParam_003
+ * @tc.desc: The caller is system app, do not remove udKey.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UpdateCallerInfoUtilTest, ClearProtectedWantParam_003, TestSize.Level1)
+{
+    std::shared_ptr<UpdateCallerInfoUtil> updateCallerUtil = std::make_shared<UpdateCallerInfoUtil>();
+    Want want;
+    std::string key = "test";
+    want.SetParam(Want::PARAM_RESV_CALLER_NATIVE_NAME, key);
+    updateCallerUtil->ClearProtectedWantParam(want);
+    EXPECT_EQ(want.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME), "");
+}
+
+/**
  * @tc.name: UpdateCallerInfoUtilTest_UpdateAsCallerInfoFromCallerRecord_0002
  * @tc.desc: Test the state of QueryAllAutoStartupApplications
  * @tc.type: FUNC

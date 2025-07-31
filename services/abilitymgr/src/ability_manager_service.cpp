@@ -2636,12 +2636,11 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bo
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call, sceneFlag:%{public}u", sceneFlag);
-    EventInfo eventInfo = BuildEventInfo(sessionInfo->want, -1);
     if (sessionInfo == nullptr || sessionInfo->sessionToken == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo null");
-        eventHelper_.SendStartAbilityErrorEvent(eventInfo, ERR_INVALID_VALUE, "sessionInfo null", true);
         return ERR_INVALID_VALUE;
     }
+    EventInfo eventInfo = BuildEventInfo(sessionInfo->want, -1);
 #ifdef MEMMGR_OVERRIDE_ENABLE
     WantParams wantParams = (sessionInfo->want).GetParams();
     std::string bundleName = (sessionInfo->want).GetElement().GetBundleName();
