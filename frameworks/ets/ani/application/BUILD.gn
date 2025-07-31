@@ -49,6 +49,7 @@ ohos_shared_library("application_ani") {
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
