@@ -71,6 +71,8 @@ public:
     static void StartAbilityForResult(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callback);
     static void StartAbilityForResultWithOptions(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object startOptionsObj, ani_object callback);
+    static void SetColorMode(ani_env *env, ani_object aniObj, ani_enum_item aniColorMode);
+    static void ReportDrawnCompleted(ani_env *env,  ani_object aniObj, ani_object callback);
 
     static bool BindNativePtrCleaner(ani_env *env);
     static void Clean(ani_env *env, ani_object object);
@@ -89,6 +91,8 @@ private:
         ani_object callback);
     static bool CheckConnectionParam(ani_env *env, ani_object connectOptionsObj,
         sptr<EtsUIExtensionConnection>& connection, AAFwk::Want& want);
+    void OnSetColorMode(ani_env *env, ani_object aniCls, ani_enum_item aniColorMode);
+    void OnReportDrawnCompleted(ani_env *env,  ani_object aniCls, ani_object callback);
 
 protected:
     std::weak_ptr<OHOS::AbilityRuntime::UIExtensionContext> context_;
