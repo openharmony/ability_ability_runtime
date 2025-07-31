@@ -14,6 +14,7 @@
  */
 
 import BaseContext from 'application.BaseContext'
+import EventHub from 'application.EventHub';
 import ApplicationContext from 'application.ApplicationContext'
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
 import { AsyncCallback } from '@ohos.base';
@@ -37,7 +38,6 @@ let unregisterToken = new object();
 
 export class Context extends BaseContext {
   static {
-    loadLibrary("context_ani");
     loadLibrary("context_ani_kit.z");
   }
 
@@ -52,15 +52,16 @@ export class Context extends BaseContext {
   distributedFilesDir: string = "";
   bundleCodeDir: string = "";
   resourceDir: string = "";
-  applicationInfo: ApplicationInfo;
-  resourceManager: resmgr.ResourceManager;
   processName: string = "";
-  native constructor();
-  constructor(applicationInfo: ApplicationInfo, resourceManager: resmgr.ResourceManager) {
-      super();
-      this.applicationInfo = applicationInfo;
-      this.resourceManager = resourceManager;
+  applicationInfo!: ApplicationInfo;
+  resourceManager!: resmgr.ResourceManager;
+  eventHub: EventHub = new EventHub();
+  constructor() {
+    if (this.eventHub == null) {
+      this.eventHub = new EventHub();
+    }
   }
+
   private setEtsContextPtr(ptr: long) {
     if (this.etsContextPtr == 0) {
       this.etsContextPtr = ptr;

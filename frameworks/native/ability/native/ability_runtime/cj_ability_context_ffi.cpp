@@ -109,7 +109,7 @@ int32_t StartAbilityByCallComplete(std::shared_ptr<AbilityContext> abilityContex
         TAG_LOGD(AAFwkTag::CONTEXT, "callComplete end");
         return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
     }
-    auto releaseCallAbilityFunc = [abilityContext] (const std::shared_ptr<CallerCallBack> &callback) -> ErrCode {
+    auto releaseCallAbilityFunc = [abilityContext] (std::shared_ptr<CallerCallBack> callback) -> ErrCode {
         auto contextForRelease = abilityContext;
         if (contextForRelease == nullptr) {
             TAG_LOGE(AAFwkTag::CONTEXT, "null releaseCallAbilityFunction");

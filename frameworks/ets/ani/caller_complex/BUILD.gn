@@ -13,63 +13,49 @@
 
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-import("../../ets_environment.gni")
 
-config("public_ets_environment_config") {
-  include_dirs = [
-    "include",
-  ]
+config("caller_complex_ani_public_config") {
+  visibility = [ ":*" ]
+  include_dirs = [ "include" ]
 }
 
-ohos_shared_library("ets_environment") {
+ohos_shared_library("caller_complex_ani") {
   branch_protector_ret = "pac_ret"
-
-  public_configs = [ ":public_ets_environment_config" ]
-
   sanitize = {
     cfi = true
     cfi_cross_dso = true
+    cfi_vcall_icall_only = true
     debug = false
   }
 
   include_dirs = [
-    "${ability_runtime_path}/ets_environment/interfaces/inner_api",
-    "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
-    "${ability_runtime_path}/interfaces/inner_api",
-    "${ability_runtime_services_path}/common/include", 
+    "./include",
+    "${ability_runtime_services_path}/common/include",
   ]
 
-  sources = [
-    "src/dynamic_loader.cpp",
-    "src/ets_environment.cpp",
-  ]
+  public_configs = [ ":caller_complex_ani_public_config" ]
 
-  defines = []
+  sources = [ "./src/ets_caller_complex.cpp" ]
 
   deps = [
-    "${ability_runtime_innerkits_path}/connect_server_manager:connect_server_manager",
     "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
   ]
 
   external_deps = [
-    "ability_base:string_utils",
-    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "eventhandler:libeventhandler",
-    "faultloggerd:libunwinder",
     "hilog:libhilog",
-    "json:nlohmann_json_static",
+    "ipc:ipc_single",
+    "ipc:rpc_ani",
     "napi:ace_napi",
     "runtime_core:ani",
-    "runtime_core:libarkruntime",
+    "runtime_core:ani_helpers",
   ]
 
-  if (ability_runtime_graphics) {
-    defines = [ "SUPPORT_GRAPHICS" ]
-    external_deps += [ "ace_engine:ace_uicontent" ]
-  }
-
   subsystem_name = "ability"
-  innerapi_tags = [ "platformsdk" ]
   part_name = "ability_runtime"
+  output_extension = "so"
 }
