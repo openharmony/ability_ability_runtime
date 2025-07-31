@@ -1305,7 +1305,7 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
             AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "don't terminate uiservice");
         } else {
-            TAG_LOGI(AAFwkTag::SERVICE_EXT, "need terminate or cache");
+            TAG_LOGI(AAFwkTag::SERVICE_EXT, "terminate or cache");
             TerminateOrCacheAbility(abilityRecord);
         }
     }
@@ -2285,7 +2285,7 @@ void AbilityConnectManager::AddConnectDeathRecipient(sptr<IRemoteObject> connect
             }
         });
     if (!connectObject->AddDeathRecipient(deathRecipient)) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "AddDeathRecipient fail");
+        TAG_LOGW(AAFwkTag::SERVICE_EXT, "AddDeathRecipient fail");
         return;
     }
     std::lock_guard guard(recipientMapMutex_);
