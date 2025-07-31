@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,18 +29,6 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace { // nameless
-static std::map<NativeValueType, std::string> logcast = {
-    { NATIVE_UNDEFINED, std::string("NATIVE_UNDEFINED") },
-    { NATIVE_NULL, std::string("NATIVE_NULL") },
-    { NATIVE_BOOLEAN, std::string("NATIVE_BOOLEAN") },
-    { NATIVE_NUMBER, std::string("NATIVE_NUMBER") },
-    { NATIVE_STRING, std::string("NATIVE_STRING") },
-    { NATIVE_SYMBOL, std::string("NATIVE_SYMBOL") },
-    { NATIVE_OBJECT, std::string("NATIVE_OBJECT") },
-    { NATIVE_FUNCTION, std::string("NATIVE_FUNCTION") },
-    { NATIVE_EXTERNAL, std::string("NATIVE_EXTERNAL") },
-    { NATIVE_BIGINT, std::string("NATIVE_BIGINT") },
-};
 
 class JsCallerComplex {
 public:
@@ -529,6 +517,15 @@ napi_value CreateJsCalleeRemoteObject(napi_env env, sptr<IRemoteObject> callee)
         TAG_LOGE(AAFwkTag::DEFAULT, "null remoteObj");
     }
     return napiRemoteObject;
+}
+
+sptr<IRemoteObject> GetJsCallerRemoteObj(uintptr_t jsCallerComplex)
+{
+    auto callerPtr = reinterpret_cast<JsCallerComplex*>(jsCallerComplex);
+    if (callerPtr == nullptr) {
+        return nullptr;
+    }
+    return callerPtr->GetRemoteObject();
 }
 } // AbilityRuntime
 } // OHOS

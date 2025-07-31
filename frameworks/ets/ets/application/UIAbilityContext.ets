@@ -16,6 +16,7 @@
 import { AbilityInfo } from 'bundleManager.AbilityInfo';
 import Want from '@ohos.app.ability.Want';
 import StartOptions from '@ohos.app.ability.StartOptions';
+import { Caller } from '@ohos.app.ability.UIAbility';
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import { AbilityResult } from 'ability.abilityResult';
 import { Configuration } from '@ohos.app.ability.Configuration';
@@ -28,6 +29,7 @@ import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 import AbilityStartCallback from 'application.AbilityStartCallback';
 import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
+import image from '@ohos.multimedia.image';
 
 class Cleaner {
   public ptr: long = 0;
@@ -48,26 +50,15 @@ let unregisterToken = new object();
 
 export default class UIAbilityContext extends Context {
   static {
-    loadLibrary("context_ani");
     loadLibrary("ability_context_ani_kit.z");
   }
 
   private cleaner: Cleaner | null = null;
   etsAbilityContextPtr: long = 0;
-  config: Configuration;
-  abilityInfo: AbilityInfo;
-  windowStage: window.WindowStage;
-  currentHapModuleInfo: HapModuleInfo;
-
-  native constructor();
-
-  constructor(config: Configuration, abilityInfo: AbilityInfo, windowStage: window.WindowStage, currentHapModuleInfo: HapModuleInfo) {
-    super();
-    this.config = config;
-    this.abilityInfo = abilityInfo;
-    this.windowStage = windowStage;
-    this.currentHapModuleInfo = currentHapModuleInfo;
-  }
+  config!: Configuration;
+  abilityInfo!: AbilityInfo;
+  windowStage!: window.WindowStage;
+  currentHapModuleInfo!: HapModuleInfo;
 
   private setEtsAbilityContextPtr(ptr: long) {
     if (this.etsAbilityContextPtr == 0) {
@@ -112,6 +103,8 @@ export default class UIAbilityContext extends Context {
   private native nativeStartAbilityForResult(want: Want, startOptions: StartOptions,
     callback: AsyncCallbackWrapper<AbilityResult>): void;
 
+  private native nativeStartAbilityByCallSync(want: Want): Caller;
+
   private native nativeTerminateSelfSync(callback: AsyncCallbackWrapper<void>): void;
 
   private native nativeTerminateSelfWithResult(parameter: AbilityResult, callback: AsyncCallbackWrapper<void>): void;
@@ -142,6 +135,8 @@ export default class UIAbilityContext extends Context {
 
   private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>,
     startCallback: AbilityStartCallback): BusinessError;
+
+  private native nativeSetAbilityInstanceInfo(label: string, icon: image.PixelMap, callback: AsyncCallbackWrapper<void>): void;
 
   private native nativeOpenAtomicService(appId: string, callback: AsyncCallbackWrapper<AbilityResult>, options?: AtomicServiceOptions): void;
   startAbility(want: Want, callback: AsyncCallback<void>): void {
@@ -238,6 +233,12 @@ export default class UIAbilityContext extends Context {
       });
     });
     return p;
+  }
+
+  startAbilityByCall(want: Want): Promise<Caller> {
+    return taskpool.execute((): Caller => {
+      return this.nativeStartAbilityByCallSync(want);
+    }) as Promise<Caller>;
   }
 
   terminateSelf(callback: AsyncCallback<void>): void {
@@ -524,5 +525,22 @@ hideAbility(): Promise<void> {
         this.nativeOpenAtomicService(appId, asyncCall, options);
       });
     });
+  }
+
+
+  setAbilityInstanceInfo(label: string, icon: image.PixelMap): Promise<void> {
+    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject: (err: BusinessError)=>void):void => {
+      let syncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeSetAbilityInstanceInfo(label, icon, syncCall);
+      });
+    });
+    return p;
   }
 }
