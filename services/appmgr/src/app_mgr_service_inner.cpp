@@ -4808,7 +4808,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     auto appInfo = appRecord->GetApplicationInfo();
     if (appInfo != nullptr && !appRunningManager_->IsAppExist(appInfo->accessTokenId)) {
         appRecord->UnSetPolicy();
-        TAG_LOGW(AAFwkTag::APPMGR, "before OnAppStopped");
+        TAG_LOGD(AAFwkTag::APPMGR, "before OnAppStopped");
         OnAppStopped(appRecord);
     }
 
