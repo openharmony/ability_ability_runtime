@@ -19,7 +19,7 @@ import AsyncCallbackWrapper from './utils/AbilityUtils';
 export default namespace missionManager {
   loadLibrary("missionmanager_ani.z")
   export native function nativeClearAllMissions(callback: AsyncCallbackWrapper<void>): void;
-  export native function nativeGetMissionInfo(deviceId: string, missionId: number,
+  export native function nativeGetMissionInfo(deviceId: string, missionId: int,
     callback: AsyncCallbackWrapper<MissionInfo>): void;
 
   export function clearAllMissions(callback: AsyncCallback<void>): void {
@@ -46,14 +46,14 @@ export default namespace missionManager {
     return p;
   }
 
-  export function getMissionInfo(deviceId: string, missionId: number, callback: AsyncCallback<MissionInfo>): void {
+  export function getMissionInfo(deviceId: string, missionId: int, callback: AsyncCallback<MissionInfo>): void {
     let myCall = new AsyncCallbackWrapper<MissionInfo>(callback);
     taskpool.execute((): void => {
       missionManager.nativeGetMissionInfo(deviceId, missionId, myCall);
     });
   }
 
-  export function getMissionInfo(deviceId: string, missionId: number): Promise<MissionInfo> {
+  export function getMissionInfo(deviceId: string, missionId: int): Promise<MissionInfo> {
     let p =
       new Promise<MissionInfo>((resolve: (data: MissionInfo) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<MissionInfo>((err: BusinessError | null, data: MissionInfo | undefined) => {

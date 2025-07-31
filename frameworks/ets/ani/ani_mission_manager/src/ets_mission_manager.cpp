@@ -46,7 +46,7 @@ public:
         instance.OnClearAllMissions(env, callback);
     }
 
-    static void GetMissionInfo(ani_env* env, ani_string deviceId, ani_double missionId, ani_object callback)
+    static void GetMissionInfo(ani_env* env, ani_string deviceId, ani_int missionId, ani_object callback)
     {
         instance.OnGetMissionInfo(env, deviceId, missionId, callback);
     }
@@ -73,7 +73,7 @@ private:
         AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
     }
 
-    void OnGetMissionInfo(ani_env* env, ani_string deviceId, ani_double missionId, ani_object callback)
+    void OnGetMissionInfo(ani_env* env, ani_string deviceId, ani_int missionId, ani_object callback)
     {
         TAG_LOGD(AAFwkTag::MISSION, "OnGetMissionInfo Call");
         if (env == nullptr) {
@@ -90,7 +90,7 @@ private:
         }
         AAFwk::MissionInfo missionInfo;
         auto ret = AbilityManagerClient::GetInstance()->GetMissionInfo(stdDeviceId,
-            static_cast<int32_t>(missionId), missionInfo);
+            missionId, missionInfo);
         if (ret != 0) {
             TAG_LOGE(AAFwkTag::MISSION, "GetMissionInfo is failed. ret = %{public}d.", ret);
             AsyncCallback(env, callback, EtsErrorUtil::CreateErrorByNativeErr(env,
@@ -152,7 +152,7 @@ void EtsMissionManagerInit(ani_env* env)
         },
         ani_native_function {
             "nativeGetMissionInfo",
-            "Lstd/core/String;DLutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "Lstd/core/String;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsMissionManager::GetMissionInfo)
         },
     };

@@ -80,7 +80,8 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
     std::array CleanerMethods = {
         ani_native_function { "clean", nullptr, reinterpret_cast<void *>(EtsServiceExtensionContext::Finalizer) },
     };
-    if ((status = env->Class_BindNativeMethods(cleanerCls, CleanerMethods.data(), CleanerMethods.size())) != ANI_OK) {
+    if ((status = env->Class_BindNativeMethods(cleanerCls, CleanerMethods.data(), CleanerMethods.size())) != ANI_OK
+        && status != ANI_ALREADY_BINDED) {
         TAG_LOGE(AAFwkTag::UI_EXT, "bind method status : %{public}d", status);
         return false;
     }
@@ -602,7 +603,7 @@ void ETSServiceExtensionConnection::CallEtsFailed(int32_t errorCode)
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to get env, status: %{public}d", status);
         return;
     }
-    status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onFailed", "D:V",
+    status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onFailed", "I:V",
         static_cast<double>(errorCode));
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to call onFailed, status: %{public}d", status);
