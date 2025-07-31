@@ -240,6 +240,7 @@ static std::string GetContent(napi_env env, napi_value exception, const std::str
     if (napi_get_value_string_utf8(env, tempContent, nullptr, 0, &length) != napi_ok) {
         TAG_LOGW(AAFwkTag::JSNAPI, "Get Content Failed");
     }
+    content.reserve(length + 1);
     content.resize(length);
     if (napi_get_value_string_utf8(env, tempContent, content.data(), content.size() + 1, &length) != napi_ok) {
         TAG_LOGW(AAFwkTag::JSNAPI, "Copy Content Failed");
