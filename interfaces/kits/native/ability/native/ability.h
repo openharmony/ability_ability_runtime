@@ -43,7 +43,6 @@
 #ifdef SUPPORT_SCREEN
 #include "ability_window.h"
 #include "display_manager.h"
-#include "form_provider_info.h"
 #include "form_state_info.h"
 #include "session_info.h"
 #include "window_option.h"
@@ -79,6 +78,7 @@ class OHOSApplication;
 class AbilityHandler;
 #ifdef SUPPORT_SCREEN
 class AbilityWindow;
+class FormProviderInfo;
 #endif
 class ILifeCycle;
 class ContinuationManager;
