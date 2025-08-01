@@ -2340,11 +2340,9 @@ void UIAbilityLifecycleManager::HandleLegacyAcceptWantDone(SpecifiedRequest &spe
             CHECK_POINTER_LOG(abilityRecord, "OnAcceptWantResponse abilityRecord null");
             UpdateAbilityRecordLaunchReason(abilityRequest, abilityRecord);
             MoveAbilityToFront(specifiedRequest, abilityRecord, callerAbility);
-            NotifyRestartSpecifiedAbility(abilityRequest, abilityRecord->GetToken());
             return;
         }
     }
-    NotifyStartSpecifiedAbility(abilityRequest, want);
     StartAbilityBySpecifed(specifiedRequest, callerAbility);
 }
 
@@ -2516,47 +2514,6 @@ int32_t UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(AbilityRequest &ab
     }
     AddSpecifiedRequest(std::make_shared<SpecifiedRequest>(RequestIdUtil::GetRequestId(), abilityRequest));
     return ERR_OK;
-}
-
-void UIAbilityLifecycleManager::NotifyRestartSpecifiedAbility(const AbilityRequest &request,
-    const sptr<IRemoteObject> &token)
-{
-    if (request.abilityInfoCallback == nullptr) {
-        return;
-    }
-    sptr<AppExecFwk::IAbilityInfoCallback> abilityInfoCallback
-        = iface_cast<AppExecFwk::IAbilityInfoCallback> (request.abilityInfoCallback);
-    if (abilityInfoCallback != nullptr) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-        abilityInfoCallback->NotifyRestartSpecifiedAbility(token);
-    }
-}
-
-void UIAbilityLifecycleManager::NotifyStartSpecifiedAbility(AbilityRequest &abilityRequest, const AAFwk::Want &want)
-{
-    if (abilityRequest.abilityInfoCallback == nullptr) {
-        return;
-    }
-
-    sptr<AppExecFwk::IAbilityInfoCallback> abilityInfoCallback
-        = iface_cast<AppExecFwk::IAbilityInfoCallback> (abilityRequest.abilityInfoCallback);
-    if (abilityInfoCallback != nullptr) {
-        Want newWant = want;
-        int32_t type = static_cast<int32_t>(abilityRequest.abilityInfo.type);
-        newWant.SetParam("abilityType", type);
-        sptr<Want> extraParam = new (std::nothrow) Want();
-        CHECK_POINTER(extraParam);
-        abilityInfoCallback->NotifyStartSpecifiedAbility(abilityRequest.callerToken, newWant,
-            abilityRequest.requestCode, extraParam);
-        int32_t procCode = extraParam->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0);
-        if (procCode != 0) {
-            abilityRequest.want.SetParam(Want::PARAM_RESV_REQUEST_PROC_CODE, procCode);
-        }
-        int32_t tokenCode = extraParam->GetIntParam(Want::PARAM_RESV_REQUEST_TOKEN_CODE, 0);
-        if (tokenCode != 0) {
-            abilityRequest.want.SetParam(Want::PARAM_RESV_REQUEST_TOKEN_CODE, tokenCode);
-        }
-    }
 }
 
 int32_t UIAbilityLifecycleManager::MoveAbilityToFront(const SpecifiedRequest &specifiedRequest,
