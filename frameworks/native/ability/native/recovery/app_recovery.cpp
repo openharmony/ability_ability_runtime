@@ -79,7 +79,7 @@ static bool BlockMainThreadLocked()
     }
 
     if (syscall(SYS_tgkill, getpid(), getpid(), SIGQUIT) != 0) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "send SIGQUIT failed, errno(%d)", errno);
+        TAG_LOGE(AAFwkTag::RECOVERY, "send SIGQUIT failed, errno(%{public}d)", errno);
         return false;
     }
     int left = 1000000; // 1s

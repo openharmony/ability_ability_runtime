@@ -228,7 +228,7 @@ int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const
     faultNotifyData.tid = faultData.tid;
     faultNotifyData.appfreezeInfo = faultData.appfreezeInfo;
 
-    HITRACE_METER_FMT(HITRACE_TAG_APP, "AppfreezeHandleWithStack pid:%d-name:%s",
+    HITRACE_METER_FMT(HITRACE_TAG_APP, "AppfreezeHandleWithStack pid:%{public}d-name:%{public}s",
         appInfo.pid, faultData.errorObject.name.c_str());
     return MergeNotifyInfo(faultNotifyData, appInfo);
 }
@@ -650,7 +650,7 @@ void AppfreezeManager::FindStackByPid(std::string& msg, int pid) const
 std::string AppfreezeManager::CatchJsonStacktrace(int pid, const std::string& faultType,
     const std::string& stack) const
 {
-    HITRACE_METER_FMT(HITRACE_TAG_APP, "CatchJsonStacktrace pid:%d", pid);
+    HITRACE_METER_FMT(HITRACE_TAG_APP, "CatchJsonStacktrace pid:%{public}d", pid);
     HiviewDFX::DfxDumpCatcher dumplog;
     std::string msg;
     int timeout = 3000;
@@ -678,7 +678,7 @@ std::string AppfreezeManager::CatchJsonStacktrace(int pid, const std::string& fa
 
 std::string AppfreezeManager::CatcherStacktrace(int pid, const std::string& stack) const
 {
-    HITRACE_METER_FMT(HITRACE_TAG_APP, "CatcherStacktrace pid:%d", pid);
+    HITRACE_METER_FMT(HITRACE_TAG_APP, "CatcherStacktrace pid:%{public}d", pid);
     HiviewDFX::DfxDumpCatcher dumplog;
     std::string msg;
     std::pair<int, std::string> dumpResult = dumplog.DumpCatchWithTimeout(pid, msg);

@@ -144,7 +144,7 @@ int MissionManagerProxy::LockMissionForCleanup(int32_t missionId)
 
     error = SendRequest(AbilityManagerInterfaceCode::LOCK_MISSION_FOR_CLEANUP, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::MISSION, "send error:%d", error);
+        TAG_LOGE(AAFwkTag::MISSION, "send error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -167,7 +167,7 @@ int MissionManagerProxy::UnlockMissionForCleanup(int32_t missionId)
     }
     error = SendRequest(AbilityManagerInterfaceCode::UNLOCK_MISSION_FOR_CLEANUP, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::MISSION, "unlock mission,error:%d", error);
+        TAG_LOGE(AAFwkTag::MISSION, "unlock mission,error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -422,7 +422,7 @@ int MissionManagerProxy::CleanMission(int32_t missionId)
     }
     error = SendRequest(AbilityManagerInterfaceCode::CLEAN_MISSION, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::MISSION, "clean mission, error: %d", error);
+        TAG_LOGE(AAFwkTag::MISSION, "clean mission, error: %{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -441,7 +441,7 @@ int MissionManagerProxy::CleanAllMissions()
     }
     error = SendRequest(AbilityManagerInterfaceCode::CLEAN_ALL_MISSIONS, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::MISSION, "request error:%d", error);
+        TAG_LOGE(AAFwkTag::MISSION, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -464,7 +464,7 @@ int MissionManagerProxy::MoveMissionToFront(int32_t missionId)
     }
     error = SendRequest(AbilityManagerInterfaceCode::MOVE_MISSION_TO_FRONT, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::MISSION, "request error:%d", error);
+        TAG_LOGE(AAFwkTag::MISSION, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -491,7 +491,7 @@ int MissionManagerProxy::MoveMissionToFront(int32_t missionId, const StartOption
     }
     error = SendRequest(AbilityManagerInterfaceCode::MOVE_MISSION_TO_FRONT_BY_OPTIONS, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::MISSION, "request error:%d", error);
+        TAG_LOGE(AAFwkTag::MISSION, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
