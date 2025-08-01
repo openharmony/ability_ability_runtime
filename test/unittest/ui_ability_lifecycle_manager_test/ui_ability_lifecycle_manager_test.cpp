@@ -2606,39 +2606,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsStartSpecifiedProcessRequest_007, Test
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_NotifyRestartSpecifiedAbility_0100
- * @tc.desc: NotifyRestartSpecifiedAbility
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, NotifyRestartSpecifiedAbility_001, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest request;
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
-    sptr<IRemoteObject> token = abilityRecord->GetToken();
-    request.abilityInfoCallback = new MockAbilityInfoCallbackStub();
-    uiAbilityLifecycleManager->NotifyRestartSpecifiedAbility(request, token);
-    uiAbilityLifecycleManager.reset();
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_NotifyStartSpecifiedAbility_0100
- * @tc.desc: NotifyStartSpecifiedAbility
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, NotifyStartSpecifiedAbility_001, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest request;
-    Want want;
-    request.abilityInfoCallback = new MockAbilityInfoCallbackStub();
-    uiAbilityLifecycleManager->NotifyStartSpecifiedAbility(request, want);
-    uiAbilityLifecycleManager.reset();
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_MoveAbilityToFront_0100
  * @tc.desc: MoveAbilityToFront
  * @tc.type: FUNC

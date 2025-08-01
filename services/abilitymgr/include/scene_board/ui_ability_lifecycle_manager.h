@@ -450,8 +450,6 @@ private:
     void HandleForegroundCollaborate(const AbilityRequest &abilityRequest,
         std::shared_ptr<AbilityRecord> abilityRecord);
 
-    void NotifyStartSpecifiedAbility(AbilityRequest &request, const AAFwk::Want &want);
-    void NotifyRestartSpecifiedAbility(const AbilityRequest &request, const sptr<IRemoteObject> &token);
     int32_t MoveAbilityToFront(const SpecifiedRequest &specifiedRequest,
         const std::shared_ptr<AbilityRecord> abilityRecord, std::shared_ptr<AbilityRecord> callerAbility);
     int SendSessionInfoToSCB(std::shared_ptr<AbilityRecord> &callerAbility, sptr<SessionInfo> &sessionInfo);
