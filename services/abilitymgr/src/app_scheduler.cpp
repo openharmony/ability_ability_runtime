@@ -77,7 +77,7 @@ int AppScheduler::LoadAbility(const AbilityRuntime::LoadParam &loadParam, const 
     int ret = static_cast<int>(IN_PROCESS_CALL(
         appMgrClient_->LoadAbility(abilityInfo, applicationInfo, want, loadParam)));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "AppScheduler fail to LoadAbility. ret %d", ret);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "AppScheduler fail to LoadAbility. ret %{public}d", ret);
         return INNER_ERR;
     }
     return ERR_OK;
