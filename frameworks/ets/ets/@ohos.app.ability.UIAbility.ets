@@ -177,4 +177,7 @@ export default class UIAbility extends Ability {
       reject: (err: Error) => void): boolean => {
     });
   }
+
+  onShare(wantParam: Record<string, Object>): void {
+  }
 }
