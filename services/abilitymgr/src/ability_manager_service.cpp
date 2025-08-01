@@ -15053,7 +15053,8 @@ int32_t AbilityManagerService::NotifyStartupExceptionBySCB(int32_t requestId)
     }
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN_LOG(uiAbilityManager, ERR_NULL_OBJECT, "uiAbilityLifecycleManager nullptr");
-    return uiAbilityManager->NotifyStartupExceptionBySCB(requestId);
+    std::string reason = "SCB intercepted this startup attempt";
+    return uiAbilityManager->NotifyStartupExceptionBySCB(requestId, reason);
 }
 
 int32_t AbilityManagerService::PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex)
