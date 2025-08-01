@@ -768,7 +768,7 @@ int32_t UIAbilityLifecycleManager::RevokeDelegator(sptr<IRemoteObject> token)
     return ERR_OK;
 }
 
-int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId)
+int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId, const std::string &reason)
 {
     return ERR_OK;
 }
