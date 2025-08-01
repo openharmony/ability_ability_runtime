@@ -43,9 +43,8 @@
 
 namespace {
 const std::string SANDBOX_LIB_PATH = "/data/storage/el1/bundle/libs/" APP_LIB_NAME;
-const std::string CJ_RT_PATH = SANDBOX_LIB_PATH + "/runtime";
-const std::string CJ_LIB_PATH = SANDBOX_LIB_PATH + "/ohos";
-const std::string CJ_SYSLIB_PATH = "/system/lib64:/system/lib64/platformsdk";
+const std::string CJ_COMPATIBILITY_PATH = SANDBOX_LIB_PATH + "/runtime";
+const std::string CJ_MOCK_PATH = SANDBOX_LIB_PATH + "/ohos";
 const std::string CJ_CHIPSDK_PATH = "/system/lib64/chipset-pub-sdk:/system/lib64/chipset-sdk";
 const std::string CJ_SDK_PATH = "/system/lib64/platformsdk/cjsdk";
 const std::string CJ_RUNTIME_PATH = "/system/lib64/platformsdk/cjsdk/runtime";
@@ -237,6 +236,7 @@ const char *CJEnvironment::cjRomSDKNSName = "cj_rom_sdk";
 const char *CJEnvironment::cjSysNSName = "default";
 const char *CJEnvironment::cjCompatibilitySDKNSName = "cj_compatibility_sdk";
 const char *CJEnvironment::cjRuntimeNSName = "cj_runtime";
+const char *CJEnvironment::cjMockNSName = "cj_mock_sdk";
 std::string CJEnvironment::appVersion = "5.1.0.0";
 const uint32_t CJEnvironment::majorVersion = 5;
 const uint32_t CJEnvironment::minorVersion = 1;
@@ -338,14 +338,8 @@ bool CJEnvironment::RegisterCangjieCallback()
 
 void* CJEnvironment::LoadRuntimeLib(const char* runtimeLibName) {
     Dl_namespace compatibilitySDK;
-    Dl_namespace romSDK;
     dlns_get(cjCompatibilitySDKNSName, &compatibilitySDK);
-    dlns_get(cjRomSDKNSName, &romSDK);
     auto dso = DynamicLoadLibrary(&compatibilitySDK, runtimeLibName, 1);
-    if (!dso) {
-        LOGI("Try to load %{public}s in rom.", runtimeLibName);
-        dso = DynamicLoadLibrary(&romSDK, runtimeLibName, 1);
-    }
     return dso;
 }
 
@@ -544,6 +538,7 @@ void CJEnvironment::InitCJAppNS(const std::string& path)
     Dl_namespace ns;
     DynamicInitNamespace(&ns, path.c_str(), CJEnvironment::cjAppNSName);
     DynamicInherit(&ns, CJEnvironment::cjCompatibilitySDKNSName, "allow_all_shared_libs");
+    DynamicInherit(&ns, CJEnvironment::cjMockNSName, "allow_all_shared_libs");
     DynamicInherit(&ns, CJEnvironment::cjRomSDKNSName, "allow_all_shared_libs");
     DynamicInherit(&ns, CJEnvironment::cjRuntimeNSName, "allow_all_shared_libs");
     if (nsMode_ == NSMode::APP) {
@@ -568,8 +563,11 @@ void CJEnvironment::InitCJCompatibilitySDKNS(const std::string& path)
     LOGI("InitCJCompatibilitySDKNS: %{public}s", path.c_str());
     Dl_namespace ns;
     DynamicInitNamespace(&ns, path.c_str(), CJEnvironment::cjCompatibilitySDKNSName);
+    DynamicInherit(&ns, CJEnvironment::cjMockNSName, "allow_all_shared_libs");
     DynamicInherit(&ns, CJEnvironment::cjRomSDKNSName, "allow_all_shared_libs");
     DynamicInherit(&ns, CJEnvironment::cjRuntimeNSName, "allow_all_shared_libs");
+    DynamicInheritByName(CJEnvironment::cjMockNSName,
+                         CJEnvironment::cjCompatibilitySDKNSName, "allow_all_shared_libs");
 #endif
 }
 
@@ -579,6 +577,15 @@ void CJEnvironment::InitCJRuntimeNS(const std::string& path)
     LOGI("InitCJRuntimeNS: %{public}s", path.c_str());
     Dl_namespace ns;
     DynamicInitNamespace(&ns, path.c_str(), CJEnvironment::cjRuntimeNSName);
+#endif
+}
+
+void CJEnvironment::InitCJMockNS(const std::string& path)
+{
+#ifdef __OHOS__
+    LOGI("InitCJMockNS: %{public}s", path.c_str());
+    Dl_namespace ns;
+    DynamicInitNamespace(&ns, path.c_str(), CJEnvironment::cjMockNSName);
 #endif
 }
 
@@ -677,7 +684,6 @@ void* CJEnvironment::LoadCJLibrary(OHOS::CJEnvironment::LibraryKind kind, const 
 {
 #ifdef __OHOS__
     Dl_namespace ns;
-    Dl_namespace sdk;
     switch (kind) {
         case APP:
             dlns_get(CJEnvironment::cjAppNSName, &ns);
@@ -687,14 +693,9 @@ void* CJEnvironment::LoadCJLibrary(OHOS::CJEnvironment::LibraryKind kind, const 
             break;
         case SDK:
             dlns_get(CJEnvironment::cjCompatibilitySDKNSName, &ns);
-            dlns_get(CJEnvironment::cjRomSDKNSName, &sdk);
             break;
     }
     auto handle = DynamicLoadLibrary(&ns, dlName, 0);
-    if (!handle && kind == SDK) {
-        LOGI("Try to load %{public}s in rom.", dlName);
-        handle = DynamicLoadLibrary(&sdk, dlName, 0);
-    }
 #else
     auto handle = DynamicLoadLibrary(dlName, 1);
 #endif
@@ -792,8 +793,9 @@ void CJEnvironment::InitRuntimeNS()
     if (nsMode_ == NSMode::APP) {
         InitCJChipSDKNS(CJ_CHIPSDK_PATH);
     }
+    InitCJMockNS(CJ_MOCK_PATH);
     InitCJRomSDKNS(CJ_SDK_PATH);
-    InitCJCompatibilitySDKNS(CJ_RT_PATH + ":" + CJ_LIB_PATH);
+    InitCJCompatibilitySDKNS(CJ_COMPATIBILITY_PATH);
 #endif
 }
 
