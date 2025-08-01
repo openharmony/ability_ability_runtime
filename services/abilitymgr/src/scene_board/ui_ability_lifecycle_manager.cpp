@@ -2507,7 +2507,7 @@ int32_t UIAbilityLifecycleManager::StartSpecifiedProcessRequest(const AbilityReq
 int32_t UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(AbilityRequest &abilityRequest)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "StartSpecifiedAbilityBySCB");
     abilityRequest.isFromIcon = true;
     std::lock_guard guard(sessionLock_);
     // support specified process mode
