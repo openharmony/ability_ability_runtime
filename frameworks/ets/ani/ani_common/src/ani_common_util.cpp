@@ -245,18 +245,8 @@ bool SetFieldIntByName(ani_env *env, ani_class cls, ani_object object, const cha
         return false;
     }
     ani_status status = ANI_ERROR;
-    ani_field field = nullptr;
-    if ((status = env->Class_FindField(cls, name, &field)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
-        return false;
-    }
-    ani_object obj = CreateInt(env, value);
-    if (obj == nullptr) {
-        TAG_LOGE(AAFwkTag::ANI, "obj is null");
-        return false;
-    }
-    if ((status = env->Object_SetField_Ref(object, field, reinterpret_cast<ani_ref>(obj))) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+    if ((status = env->Object_SetFieldByName_Int(object, name, value)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "Object_SetFieldByName_Int status: %{public}d", status);
         return false;
     }
     return true;
@@ -869,9 +859,9 @@ bool SetProcessInformation(ani_env *env, ani_object object, const AppExecFwk::Ru
         TAG_LOGE(AAFwkTag::ANI, "bundleType failed status:%{public}d", status);
         return false;
     }
-    status = env->Object_SetPropertyByName_Ref(object, "appCloneIndex",
-        CreateInt(env, processInfo.appCloneIndex));
-    if (status != ANI_OK) {
+    if (processInfo.appCloneIndex != -1 &&
+        (status = env->Object_SetPropertyByName_Ref(
+            object, "appCloneIndex", CreateInt(env, processInfo.appCloneIndex))) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "appCloneIndex failed status:%{public}d", status);
         return false;
     }
