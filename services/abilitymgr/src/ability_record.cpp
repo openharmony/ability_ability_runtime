@@ -502,41 +502,32 @@ void AbilityRecord::ProcessForegroundAbility(
         GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, tokenId);
     }
 #endif // SUPPORT_UPMS
-
-    if (isReady_) {
-        PostForegroundTimeoutTask();
-        if (IsAbilityState(AbilityState::FOREGROUND)) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
-            if (IsFrozenByPreload()) {
-                SetFrozenByPreload(false);
-                auto ret =
-                    DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(token_, false);
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "NotifyPreloadAbilityStateChanged by start, ret: %{public}d", ret);
-            }
-            ForegroundAbility(sceneFlag);
-        } else {
-            // background to active state
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "MoveToForeground, %{public}s", element.c_str());
-            lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-            std::string bundleName = GetAbilityInfo().bundleName;
-            int32_t uid = GetUid();
-            auto pid = GetPid();
-            if (pid > 0) {
-                auto callerPid = GetCallerRecord() ? GetCallerRecord()->GetPid() : -1;
-                TAG_LOGD(AAFwkTag::ABILITYMGR,
-                    "ReportEventToRSS---%{public}d_%{public}s_%{public}d callerPid=%{public}d",
-                    uid, bundleName.c_str(), pid, callerPid);
-                ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, "THAW_BY_FOREGROUND_ABILITY", pid,
-                    callerPid);
-            }
-            SendAppStartupTypeEvent(AppExecFwk::AppStartType::HOT);
-            SetAbilityStateInner(AbilityState::FOREGROUNDING);
-            DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
-        }
-    } else {
+    if (!isReady_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "To load ability.");
         lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
         LoadAbility(isShellCall, isStartupHide);
+        return;
+    }
+
+    PostForegroundTimeoutTask();
+    if (IsAbilityState(AbilityState::FOREGROUND)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
+        if (IsFrozenByPreload()) {
+            SetFrozenByPreload(false);
+            auto ret =
+                DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(token_, false);
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "NotifyPreloadAbilityStateChanged by start, ret: %{public}d", ret);
+        }
+        ForegroundAbility(sceneFlag);
+    } else {
+        // background to active state
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "MoveToForeground, %{public}s", element.c_str());
+        lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
+        ResSchedUtil::GetInstance().ReportEventToRSS(GetUid(), GetAbilityInfo().bundleName,
+            "THAW_BY_FOREGROUND_ABILITY", GetPid(), GetCallerRecord() ? GetCallerRecord()->GetPid() : -1);
+        SendAppStartupTypeEvent(AppExecFwk::AppStartType::HOT);
+        SetAbilityStateInner(AbilityState::FOREGROUNDING);
+        DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
     }
 }
 

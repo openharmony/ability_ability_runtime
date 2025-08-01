@@ -2943,10 +2943,7 @@ bool AbilityManagerService::IsCallerSceneBoard()
     auto connectManager = GetConnectManagerByUserId(userId);
     CHECK_POINTER_AND_RETURN(connectManager, false);
     auto sceneBoardTokenId = connectManager->GetSceneBoardTokenId();
-    if (sceneBoardTokenId != 0 && IPCSkeleton::GetCallingTokenID() == sceneBoardTokenId) {
-        return true;
-    }
-    return false;
+    return sceneBoardTokenId != 0 && IPCSkeleton::GetCallingTokenID() == sceneBoardTokenId;
 }
 
 bool AbilityManagerService::IsBackgroundTaskUid(const int uid)
