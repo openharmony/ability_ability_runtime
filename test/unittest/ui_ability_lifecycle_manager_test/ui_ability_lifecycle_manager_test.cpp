@@ -5370,7 +5370,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, NotifySCBToStartUIAbility_0001, TestSize
         mgr->AddStartCallerTimestamp(12345);
     }
     int ret = mgr->NotifySCBToStartUIAbility(request);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_FREQ_START_ABILITY);
 }
 
 /**
@@ -6794,7 +6794,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CleanUIAbility_0001, TestSize.Level1)
 {
     auto mgr = std::make_shared<UIAbilityLifecycleManager>();
     int ret = mgr->CleanUIAbility(nullptr);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_UI_ABILITY_MANAGER_NULL_ABILITY_RECORD);
 }
 
 /**

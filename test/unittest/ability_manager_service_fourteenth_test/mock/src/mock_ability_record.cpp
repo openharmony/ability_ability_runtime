@@ -1984,5 +1984,9 @@ void AbilityRecord::NotifyAbilityRequestFailure(const std::string &requestId, co
 void AbilityRecord::UpdateUIExtensionBindInfo(const WantParams &wantParams)
 {
 }
+
+void AbilityRecord::SendTerminateAbilityErrorEvent(int32_t errCode)
+{
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -103,7 +103,7 @@ int ImplicitStartProcessor::CheckImplicitCallPermission(const AbilityRequest& ab
     CHECK_POINTER_AND_RETURN(abilityMgr, ERR_INVALID_VALUE);
     bool isBackgroundCall = true;
     if (abilityMgr->IsCallFromBackground(abilityRequest, isBackgroundCall) != ERR_OK) {
-        return ERR_INVALID_VALUE;
+        return ERR_CHECK_CALL_FROM_BACKGROUND_FAILED;
     }
     if (!isBackgroundCall) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "hap not background");
@@ -124,7 +124,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     TAG_LOGI(AAFwkTag::ABILITYMGR, "implicit start ability by type: %{public}d", request.callType);
     bool isNfcCalling = (IPCSkeleton::GetCallingUid() == NFC_CALLER_UID);
     auto sysDialogScheduler = DelayedSingleton<SystemDialogScheduler>::GetInstance();
-    CHECK_POINTER_AND_RETURN(sysDialogScheduler, ERR_INVALID_VALUE);
+    CHECK_POINTER_AND_RETURN(sysDialogScheduler, ERR_NULL_SYS_DIALOG_SCHEDULER);
 
     auto result = CheckImplicitCallPermission(request);
     if (ERR_OK != result) {
@@ -613,7 +613,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAppIndexes(int32_t userId, A
     auto appIndexes = StartAbilityUtils::GetCloneAppIndexes(request.want.GetBundle(), userId);
     if (appIndexes.size() > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "too large appIndexes");
-        return ERR_INVALID_VALUE;
+        return ERR_TOO_LARGE_APPINDEXES;
     }
     auto bms = GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
@@ -808,8 +808,9 @@ int ImplicitStartProcessor::CallStartAbilityInner(int32_t userId,
 
     auto ret = callBack();
     if (ret != ERR_OK) {
-        eventInfo.errCode = ret;
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "CallStartAbilityInner failed: %{public}d", ret);
         if (callType == AbilityCallType::INVALID_TYPE) {
+            eventInfo.errCode = ERR_DO_CLOSURE_CALLBACK_FAILED;
             SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         }
     }
