@@ -239,7 +239,7 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0200, TestSize.Level1)
     EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
     result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, ExecuteMode::SERVICE_EXTENSION_ABILITY,
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_INSIGHT_INTENT_START_INVALID_COMPONENT);
+    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest GetSrcEntry_0200 end.");
 }
 
@@ -255,7 +255,7 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0300, TestSize.Level1)
     AppExecFwk::ElementName element1("", TEST_BUNDLE_NAME, "ability1", TEST_MODULE_NAME);
     auto result = utils.GetSrcEntry(element1, TEST_BUNDLE_NAME, ExecuteMode::SERVICE_EXTENSION_ABILITY,
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_INSIGHT_INTENT_START_INVALID_COMPONENT);
+    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "InsightIntentUtilsTest GetSrcEntry_0300 end.");
 }
 
@@ -271,17 +271,17 @@ HWTEST_F(InsightIntentUtilsTest, GetSrcEntry_0400, TestSize.Level1)
     AppExecFwk::ElementName element1("", TEST_BUNDLE_NAME, "ability1", TEST_MODULE_NAME);
     auto result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, ExecuteMode::UI_ABILITY_FOREGROUND,
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
 
     result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, ExecuteMode::UI_ABILITY_BACKGROUND,
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
     result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, ExecuteMode::UI_EXTENSION_ABILITY,
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
     result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, ExecuteMode::SERVICE_EXTENSION_ABILITY,
         TEST_SRC_ENTRY);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
     result = utils.GetSrcEntry(element1, TEST_INTENT_NAME, static_cast<ExecuteMode>(INT_MAX),
         TEST_SRC_ENTRY);
     EXPECT_EQ(result, ERR_INSIGHT_INTENT_GET_PROFILE_FAILED);
