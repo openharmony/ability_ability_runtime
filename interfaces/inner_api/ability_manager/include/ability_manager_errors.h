@@ -985,6 +985,11 @@ enum {
     ERR_PRELOAD_APP_DATA_ABILITIES_FAILED = 2097399,
 
     /**
+     * Result (2097387) for not expected caller native name.
+     */
+    ERR_NOT_EXPECTED_NATIVE_CALLER_NAME = 2097387,
+
+    /**
      * Native error(3000000) for target bundle not exist.
      */
     ERR_CODE_NOT_EXIST = 3000000,
