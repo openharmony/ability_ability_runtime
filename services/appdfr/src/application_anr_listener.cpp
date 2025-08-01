@@ -16,6 +16,7 @@
 #include "application_anr_listener.h"
 
 #include <sys/time.h>
+#include <fstream>
 #include "singleton.h"
 
 #include "app_mgr_client.h"
@@ -34,12 +35,19 @@ ApplicationAnrListener::~ApplicationAnrListener() {}
 void ApplicationAnrListener::OnAnr(int32_t pid, int32_t eventId) const
 {
     AppExecFwk::AppFaultDataBySA faultData;
+    std::ifstream statmStream("/proc/" + std::to_string(pid) + "/statm");
+    if (statmStream) {
+        std::string procStatm;
+        std::getline(statmStream, procStatm);
+        statmStream.close();
+        faultData.procStatm = procStatm;
+    }
     faultData.faultType = AppExecFwk::FaultDataType::APP_FREEZE;
     faultData.pid = pid;
     faultData.errorObject.message = "User input does not respond!";
     faultData.errorObject.stack =  "\nDump tid stack start time: " +
         AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
-    std::string stack = "";
+    std::string stack;
     if (!HiviewDFX::GetBacktraceStringByTidWithMix(stack, pid, 0, true)) {
         stack = "Failed to dump stacktrace for " + std::to_string(pid) + "\n" + stack;
     }
