@@ -147,13 +147,8 @@ void ResSchedUtil::ReportAbilityIntentExemptionInfoToRSS(int32_t callerUid, int3
 void ResSchedUtil::ReportEventToRSS(const int32_t uid, const std::string &bundleName, const std::string &reason,
     const int32_t pid, const int32_t callerPid)
 {
-    
     TAG_LOGD(AAFwkTag::DEFAULT, "ReportEventToRSS---%{public}d_%{public}s_%{public}d callerPid=%{public}d",
         uid, bundleName.c_str(), pid, callerPid);
-    if (pid < 0) {
-        TAG_LOGW(AAFwkTag::DEFAULT, "invalid pid: %{public}s_%{public}d", bundleName.c_str(), pid);
-        return;
-    }
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     uint32_t resType = ResourceSchedule::ResType::SYNC_RES_TYPE_THAW_ONE_APP;
     nlohmann::json payload;
