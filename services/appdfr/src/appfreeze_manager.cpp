@@ -227,6 +227,8 @@ int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const
     faultNotifyData.eventId = faultData.eventId;
     faultNotifyData.tid = faultData.tid;
     faultNotifyData.appfreezeInfo = faultData.appfreezeInfo;
+    faultNotifyData.appRunningUniqueId = faultData.appRunningUniqueId;
+    faultNotifyData.procStatm = faultData.procStatm;
 
     HITRACE_METER_FMT(HITRACE_TAG_APP, "AppfreezeHandleWithStack pid:%d-name:%s",
         appInfo.pid, faultData.errorObject.name.c_str());
@@ -263,36 +265,40 @@ std::string AppfreezeManager::WriteToFile(const std::string& fileName, std::stri
 
 int AppfreezeManager::LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::LifecycleFlow flow)
 {
-    if (info.typeId != AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT) {
+    if (info.typeId != AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT || !IsHandleAppfreeze(info.bundleName)) {
         return -1;
     }
-    if (!IsHandleAppfreeze(info.bundleName)) {
+    if (info.eventName != AppFreezeType::LIFECYCLE_TIMEOUT && info.eventName != AppFreezeType::LIFECYCLE_HALF_TIMEOUT
+        && info.eventName != AppFreezeType::LIFECYCLE_TIMEOUT_WARNING
+        && info.eventName != AppFreezeType::LIFECYCLE_HALF_TIMEOUT_WARNING) {
         return -1;
     }
-    if (info.eventName != AppFreezeType::LIFECYCLE_TIMEOUT &&
-        info.eventName != AppFreezeType::LIFECYCLE_TIMEOUT_WARNING &&
-        info.eventName != AppFreezeType::LIFECYCLE_HALF_TIMEOUT &&
-        info.eventName != AppFreezeType::LIFECYCLE_HALF_TIMEOUT_WARNING) {
-        return -1;
-    }
-    TAG_LOGD(AAFwkTag::APPDFR, "called %{public}s, name_ %{public}s", info.bundleName.c_str(),
-        name_.c_str());
+    TAG_LOGD(AAFwkTag::APPDFR, "called %{public}s, name_ %{public}s", info.bundleName.c_str(), name_.c_str());
     HITRACE_METER_FMT(HITRACE_TAG_APP, "LifecycleTimeoutHandle:%{public}s bundleName:%{public}s",
         info.eventName.c_str(), info.bundleName.c_str());
+
     AppFaultDataBySA faultDataSA;
+    if (info.eventName.find("HALF") == std::string::npos) {
+        std::ifstream statmStream("/proc/" + std::to_string(info.pid) + "/statm");
+        if (statmStream) {
+            std::string procStatm;
+            std::getline(statmStream, procStatm);
+            statmStream.close();
+            faultDataSA.procStatm = procStatm;
+        }
+    }
     faultDataSA.errorObject.name = info.eventName;
     faultDataSA.errorObject.message = info.msg;
     faultDataSA.errorObject.stack = "\nDump tid stack start time:" +
         AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
-    std::string stack = "";
+    std::string stack;
     if (!HiviewDFX::GetBacktraceStringByTidWithMix(stack, info.pid, 0, true)) {
         stack = "Failed to dump stacktrace for " + stack;
     }
     faultDataSA.errorObject.stack += stack + "\nDump tid stack end time:" +
         AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
     faultDataSA.faultType = FaultDataType::APP_FREEZE;
-    faultDataSA.timeoutMarkers = "notifyFault" +
-                                 std::to_string(info.pid) +
+    faultDataSA.timeoutMarkers = "notifyFault" + std::to_string(info.pid) +
                                  "-" + std::to_string(AbilityRuntime::TimeUtil::CurrentTimeMillis());
     faultDataSA.pid = info.pid;
     faultDataSA.needKillProcess = info.needKillProcess;
@@ -314,6 +320,8 @@ FaultData AppfreezeManager::GetFaultNotifyData(const FaultData& faultData, int p
     faultNotifyData.eventId = faultData.eventId;
     faultNotifyData.tid = (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) ? pid : faultData.tid;
     faultNotifyData.appfreezeInfo = faultData.appfreezeInfo;
+    faultNotifyData.appRunningUniqueId = faultData.appRunningUniqueId;
+    faultNotifyData.procStatm = faultData.procStatm;
     return faultNotifyData;
 }
 
@@ -419,9 +427,7 @@ std::string AppfreezeManager::ReportAppfreezeCpuInfo(const FaultData& faultData,
 int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo,
     const std::string& binderInfo, const std::string& memoryContent)
 {
-    std::string appRunningUniqueId = "";
-    DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetAppRunningUniqueIdByPid(appInfo.pid,
-        appRunningUniqueId);
+    std::string appRunningUniqueId = faultData.appRunningUniqueId;
     int ret = 0;
     this->PerfStart(faultData.errorObject.name);
     int64_t startTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
@@ -431,7 +437,7 @@ int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManag
             EVENT_PACKAGE_NAME, appInfo.bundleName, EVENT_PROCESS_NAME, appInfo.processName, EVENT_MESSAGE,
             faultData.errorObject.message, EVENT_STACK, faultData.errorObject.stack, BINDER_INFO, binderInfo,
             APP_RUNNING_UNIQUE_ID, appRunningUniqueId, EVENT_INPUT_ID, faultData.eventId,
-            FREEZE_MEMORY, memoryContent);
+            FREEZE_MEMORY, memoryContent + "\n" + faultData.procStatm);
     } else if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S) {
         HitraceInfo info;
         bool hitraceIsValid = GetHitraceId(info);
@@ -440,7 +446,7 @@ int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManag
             EVENT_TID, faultData.tid,
             EVENT_PACKAGE_NAME, appInfo.bundleName, EVENT_PROCESS_NAME, appInfo.processName, EVENT_MESSAGE,
             faultData.errorObject.message, EVENT_STACK, faultData.errorObject.stack, BINDER_INFO, binderInfo,
-            APP_RUNNING_UNIQUE_ID, appRunningUniqueId, FREEZE_MEMORY, memoryContent,
+            APP_RUNNING_UNIQUE_ID, appRunningUniqueId, FREEZE_MEMORY, memoryContent + "\n" + faultData.procStatm,
             EVENT_TRACE_ID, hitraceIsValid ? info.hiTraceChainId : "",
             EVENT_SPAN_ID, hitraceIsValid ? info.spanId : "",
             EVENT_PARENT_SPAN_ID, hitraceIsValid ? info.pspanId : "",
@@ -452,7 +458,7 @@ int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManag
             EVENT_TID, faultData.tid > 0 ? faultData.tid : appInfo.pid,
             EVENT_PACKAGE_NAME, appInfo.bundleName, EVENT_PROCESS_NAME, appInfo.processName, EVENT_MESSAGE,
             faultData.errorObject.message, EVENT_STACK, faultData.errorObject.stack, BINDER_INFO, binderInfo,
-            APP_RUNNING_UNIQUE_ID, appRunningUniqueId, FREEZE_MEMORY, memoryContent,
+            APP_RUNNING_UNIQUE_ID, appRunningUniqueId, FREEZE_MEMORY, memoryContent + "\n" + faultData.procStatm,
             FREEZE_INFO_PATH, ReportAppfreezeCpuInfo(faultData, appInfo));
     }
     TAG_LOGW(AAFwkTag::APPDFR,
