@@ -1035,7 +1035,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, PreStartFreeInstall_001, TestSize.Leve
     bool isStartAsCaller{true};
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     auto ret = abilityMs_->PreStartFreeInstall(want, callerToken, specifyTokenId, isStartAsCaller, localWant);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_NULL_FREE_INSTALL_MANAGER);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest PreStartFreeInstall_001 end");
 }
 
@@ -1055,7 +1055,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityByConnectManager_001, Test
     auto callerToken = MockToken(AbilityType::PAGE);
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     auto ret = abilityMs_->StartAbilityByConnectManager(want, abilityRequest, abilityInfo, validUserId, callerToken);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, CONNECT_MAMAGER_NOT_FIND_BY_USERID);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartAbilityByConnectManager_001 end");
 }
 

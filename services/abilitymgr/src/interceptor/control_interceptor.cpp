@@ -56,7 +56,7 @@ ErrCode ControlInterceptor::DoProcess(AbilityInterceptorParam param)
         int ret = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartAbility(*controlRule.controlWant,
             param.requestCode, param.userId));
         if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "start failed");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "ControlInterceptor start failed:%{public}d", ret);
             return ret;
         }
 #endif

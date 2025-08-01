@@ -510,7 +510,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartRemoteAbility_001, TestSize.Level1
     Want want;
     // AddStartControlParam
     sptr<IRemoteObject> callerToken = MockToken(AbilityType::PAGE);
-    EXPECT_EQ(abilityMs_->StartRemoteAbility(want, 1, 1, callerToken), ERR_INVALID_VALUE);
+    EXPECT_EQ(abilityMs_->StartRemoteAbility(want, 1, 1, callerToken), ERR_ADD_START_CONTROL_PARAM_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartRemoteAbility_001 end");
 }
 
@@ -528,7 +528,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartRemoteAbility_002, TestSize.Level1
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = std::make_shared<UIAbilityLifecycleManager>();
     Want want;
     // AddStartControlParam
-    EXPECT_EQ(abilityMs_->StartRemoteAbility(want, 1, 1, nullptr), ERR_INVALID_VALUE);
+    EXPECT_EQ(abilityMs_->StartRemoteAbility(want, 1, 1, nullptr), ERR_ADD_START_CONTROL_PARAM_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartRemoteAbility_002 end");
 }
 
@@ -550,7 +550,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartRemoteAbility_003, TestSize.Level1
     want.SetFlags(flag);
     auto temp = abilityMs_->freeInstallManager_;
     abilityMs_->freeInstallManager_.reset();
-    EXPECT_EQ(abilityMs_->StartRemoteAbility(want, 1, 1, nullptr), ERR_INVALID_VALUE);
+    EXPECT_EQ(abilityMs_->StartRemoteAbility(want, 1, 1, nullptr), ERR_NULL_FREE_INSTALL_MANAGER);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartRemoteAbility_003 end");
 }
 
@@ -569,7 +569,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, StartRemoteAbility_004, TestSize.Level1
     Want want;
     want.SetFlags(0);
     want.SetParam("ohos.aafwk.param.startAbilityForResult", true);
-    EXPECT_EQ(abilityMs_->StartRemoteAbility(want, 1, 1, nullptr), ERR_INVALID_VALUE);
+    EXPECT_EQ(abilityMs_->StartRemoteAbility(want, 1, 1, nullptr), ERR_INVALID_MISSION_ID);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest StartRemoteAbility_004 end");
 }
 

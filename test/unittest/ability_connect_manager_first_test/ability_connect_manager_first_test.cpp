@@ -604,7 +604,7 @@ HWTEST_F(AbilityConnectManagerTest, TerminateAbilityInner_001, TestSize.Level1)
     auto abilityInfo = abilityRecord->GetAbilityInfo();
     abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI;
     auto result = ConnectManager()->TerminateAbilityInner(abilityRecord->GetToken());
-    EXPECT_EQ(OHOS::ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_CONNECT_MANAGER_NULL_ABILITY_RECORD, result);
     TAG_LOGI(AAFwkTag::TEST, "TerminateAbilityInner_001 end");
 }
 
@@ -629,7 +629,7 @@ HWTEST_F(AbilityConnectManagerTest, TerminateAbilityInner_002, TestSize.Level1)
     abilityRecord->currentState_ = AbilityState::FOREGROUND;
     abilityRecord->connRecordList_.push_back(connectionRe);
     auto result = connectManager->TerminateAbilityInner(abilityRecord->GetToken());
-    EXPECT_EQ(OHOS::ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_CONNECT_MANAGER_NULL_ABILITY_RECORD, result);
     TAG_LOGI(AAFwkTag::TEST, "TerminateAbilityInner_002 end");
 }
 
@@ -648,7 +648,7 @@ HWTEST_F(AbilityConnectManagerTest, TerminateAbilityInner_003, TestSize.Level1)
     abilityRecord->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI;
     abilityRecord->connRecordList_.clear();
     auto result = connectManager->TerminateAbilityInner(abilityRecord->GetToken());
-    EXPECT_EQ(OHOS::ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_CONNECT_MANAGER_NULL_ABILITY_RECORD, result);
     TAG_LOGI(AAFwkTag::TEST, "TerminateAbilityInner_003 end");
 }
 
