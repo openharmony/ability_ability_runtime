@@ -363,10 +363,13 @@ public:
      */
     void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message) override;
-
-    ErrCode StopAppServiceExtensionAbility(const Want& want) override;
-    ErrCode ConnectAppServiceExtensionAbility(const AAFwk::Want& want,
-        const sptr<AbilityConnectCallback>& connectCallback) override;
+    
+    ErrCode StartExtensionAbilityWithExtensionType(const AAFwk::Want &want,
+        AppExecFwk::ExtensionAbilityType extensionType) override;
+    ErrCode StopExtensionAbilityWithExtensionType(const AAFwk::Want& want,
+        AppExecFwk::ExtensionAbilityType extensionType) override;
+    ErrCode ConnectExtensionAbilityWithExtensionType(const AAFwk::Want& want,
+        const sptr<AbilityConnectCallback>& connectCallback, AppExecFwk::ExtensionAbilityType extensionType);
     ErrCode SetOnNewWantSkipScenarios(int32_t scenarios) override;
 
 private:
