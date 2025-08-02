@@ -16,6 +16,7 @@
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "record_cost_time_util.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -81,6 +82,7 @@ constexpr const int32_t DEFAULT_EXTENSION_TYPE = -1;
 void EventReport::SendAppEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    RecordCostTimeUtil timeRecord("SendAppEvent");
     std::string name = ConvertEventName(eventName);
     if (name == INVALID_EVENT_NAME) {
         TAG_LOGE(AAFwkTag::DEFAULT, "invalid eventName");

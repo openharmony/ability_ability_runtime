@@ -24,6 +24,7 @@
 #include "tokenid_kit.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
+#include "record_cost_time_util.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -54,6 +55,7 @@ bool PermissionVerification::VerifyCallingPermission(
     const std::string &permissionName, const uint32_t specifyTokenId) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    RecordCostTimeUtil timeRecord("VerifyCallingPermission");
     TAG_LOGD(AAFwkTag::DEFAULT, "permission %{public}s, specifyTokenId: %{public}u",
         permissionName.c_str(), specifyTokenId);
     auto callerToken = specifyTokenId == 0 ? GetCallingTokenID() : specifyTokenId;

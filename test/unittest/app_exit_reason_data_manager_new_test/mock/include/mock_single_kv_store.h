@@ -143,6 +143,7 @@ public:
 
     DistributedKv::Status Put(const DistributedKv::Key &key, const DistributedKv::Value &value) override
     {
+        putCallTimes_++;
         return Put_;
     };
 
@@ -206,6 +207,7 @@ public:
     DistributedKv::Status GetEntries_ = DistributedKv::Status::SUCCESS;
     DistributedKv::Status Delete_ = DistributedKv::Status::SUCCESS;
     DistributedKv::Status Put_ = DistributedKv::Status::SUCCESS;
+    int32_t putCallTimes_ = 0;
     DistributedKv::Status Get_ = DistributedKv::Status::SUCCESS;
 };
 }

@@ -77,6 +77,7 @@
 #include "perf_profile.h"
 #include "permission_constants.h"
 #include "permission_verification.h"
+#include "record_cost_time_util.h"
 #include "render_state_observer_manager.h"
 #include "res_sched_util.h"
 #include "startup_util.h"
@@ -2984,6 +2985,7 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
     const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    AAFwk::RecordCostTimeUtil timeRecord("KillProcessByPidInner");
     int32_t ret = -1;
     if (pid > 0) {
         if (CheckIsThreadInFoundation(pid)) {
@@ -3004,21 +3006,12 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
     }
     CHECK_POINTER_AND_RETURN_VALUE(appRecord, ret);
     AAFwk::EventInfo eventInfo;
+    SetKilledEventInfo(appRecord, eventInfo);
     appRecord->SetKillReason(reason);
-    auto applicationInfo = appRecord->GetApplicationInfo();
-    if (!applicationInfo) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appInfo null");
-    } else {
-        eventInfo.bundleName = applicationInfo->name;
-        eventInfo.versionName = applicationInfo->versionName;
-        eventInfo.versionCode = applicationInfo->versionCode;
-    }
     if (ret >= 0) {
         AddToKillProcessMap(appRecord->GetProcessName());
     }
     DelayedSingleton<CacheProcessManager>::GetInstance()->OnProcessKilled(appRecord);
-    eventInfo.pid = appRecord->GetPid();
-    eventInfo.processName = appRecord->GetProcessName();
     std::string newReason = appRecord->GetKillReason().empty() ? killReason : appRecord->GetKillReason();
     bool foreground = appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND ||
         appRecord->GetState() == ApplicationState::APP_STATE_FOCUS;
@@ -3031,6 +3024,21 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
         "%{public}d, processName=%{public}s, msg=%{public}s, FOREGROUND=%{public}d, ret=%{public}d",
         result, pid, eventInfo.processName.c_str(), newReason.c_str(), foreground, ret);
     return ret;
+}
+
+void AppMgrServiceInner::SetKilledEventInfo(std::shared_ptr<AppRunningRecord> appRecord, AAFwk::EventInfo &eventInfo)
+{
+    CHECK_POINTER_AND_RETURN_LOG(appRecord, "appRecord is null");
+    auto applicationInfo = appRecord->GetApplicationInfo();
+    if (!applicationInfo) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appInfo null");
+    } else {
+        eventInfo.bundleName = applicationInfo->name;
+        eventInfo.versionName = applicationInfo->versionName;
+        eventInfo.versionCode = applicationInfo->versionCode;
+    }
+    eventInfo.pid = appRecord->GetPid();
+    eventInfo.processName = appRecord->GetProcessName();
 }
 
 void AppMgrServiceInner::AddToKillProcessMap(const std::string &processName)
