@@ -149,7 +149,6 @@ bool ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(
     int32_t posY = 0;
     int32_t width = 10;
     int32_t height  = 10;
-    bool infoReady = false;
     int32_t focusPid = -1;
     for (const auto &info : infos) {
         if (info != nullptr) {
@@ -158,17 +157,12 @@ bool ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(
                 posY = info->rect_.posY_;
                 width = info->rect_.width_;
                 height = info->rect_.height_;
-                infoReady = true;
                 focusPid = info->pid_;
                 break;
             }
         }
     }
-    if (!infoReady) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "No fucused window!");
-        return false;
-    }
-    if (std::to_string(focusPid) != pid) {
+    if ((focusPid == -1) || (std::to_string(focusPid) != pid)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fucused window pid is %{public}d, not freeze pid!", focusPid);
         return false;
     }
