@@ -369,7 +369,7 @@ public:
     ErrCode StopExtensionAbilityWithExtensionType(const AAFwk::Want& want,
         AppExecFwk::ExtensionAbilityType extensionType) override;
     ErrCode ConnectExtensionAbilityWithExtensionType(const AAFwk::Want& want,
-        const sptr<AbilityConnectCallback>& connectCallback, AppExecFwk::ExtensionAbilityType extensionType);
+        const sptr<AbilityConnectCallback>& connectCallback, AppExecFwk::ExtensionAbilityType extensionType) override;
     ErrCode SetOnNewWantSkipScenarios(int32_t scenarios) override;
 
     ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId, OnAtomicRequestSuccess onRequestSucc,

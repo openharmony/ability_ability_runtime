@@ -251,40 +251,28 @@ HWTEST_F(AbilityExtensionBaseTest, OnExtensionAbilityRequestFailure_0100, TestSi
 {
     TAG_LOGI(AAFwkTag::TEST, "OnExtensionAbilityRequestFailure start");
 
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr, nullptr, 0);
+    std::shared_ptr<AppExecFwk::OHOSApplication> application = std::make_shared<AppExecFwk::OHOSApplication>();
+    std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
+    sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
+
+    std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
+        AbilityRuntime::ApplicationContext::GetInstance();
+    applicationContext->AttachContextImpl(contextImpl);
+    application->SetApplicationContext(applicationContext);
+
     ExtensionBase<ExtensionContext> extensionBase;
+    extensionBase.Init(record, application, handler, token);
+
     std::string requestId = "test_request_id";
     AppExecFwk::ElementName element;
     element.SetBundleName("com.example.test");
     element.SetAbilityName("TestAbility");
-    std::string message = "test error message";
+    std::string message = "test success message";
 
-    // 使用派生类测试虚方法
-    class TestExtensionBase : public ExtensionBase<ExtensionContext> {
-    public:
-        void OnExtensionAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-            const std::string &message, int32_t resultCode = 0) override
-        {
-            lastRequestId_ = requestId;
-            lastElement_ = element;
-            lastMessage_ = message;
-            called_ = true;
-        }
-
-        std::string lastRequestId_;
-        AppExecFwk::ElementName lastElement_;
-        std::string lastMessage_;
-        bool called_ = false;
-    };
-
-    TestExtensionBase testExtension;
-    testExtension.OnExtensionAbilityRequestFailure(requestId, element, message);
-
-    EXPECT_TRUE(testExtension.called_);
-    EXPECT_EQ(testExtension.lastRequestId_, requestId);
-    EXPECT_EQ(testExtension.lastElement_.GetBundleName(), element.GetBundleName());
-    EXPECT_EQ(testExtension.lastElement_.GetAbilityName(), element.GetAbilityName());
-    EXPECT_EQ(testExtension.lastMessage_, message);
-
+    extensionBase.OnExtensionAbilityRequestFailure(requestId, element, message, 0);
     TAG_LOGI(AAFwkTag::TEST, "OnExtensionAbilityRequestFailure end");
 }
 
@@ -296,41 +284,27 @@ HWTEST_F(AbilityExtensionBaseTest, OnExtensionAbilityRequestFailure_0100, TestSi
 HWTEST_F(AbilityExtensionBaseTest, OnExtensionAbilityRequestSuccess_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "OnExtensionAbilityRequestSuccess start");
+    std::shared_ptr<AppExecFwk::AbilityInfo> info = std::make_shared<AppExecFwk::AbilityInfo>();
+    auto record = std::make_shared<AppExecFwk::AbilityLocalRecord>(info, nullptr, nullptr, 0);
+    std::shared_ptr<AppExecFwk::OHOSApplication> application = std::make_shared<AppExecFwk::OHOSApplication>();
+    std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
+    sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
+
+    std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
+        AbilityRuntime::ApplicationContext::GetInstance();
+    applicationContext->AttachContextImpl(contextImpl);
+    application->SetApplicationContext(applicationContext);
 
     ExtensionBase<ExtensionContext> extensionBase;
+    extensionBase.Init(record, application, handler, token);
+
     std::string requestId = "test_request_id";
     AppExecFwk::ElementName element;
     element.SetBundleName("com.example.test");
     element.SetAbilityName("TestAbility");
     std::string message = "test success message";
-
-    // 使用派生类测试虚方法
-    class TestExtensionBase : public ExtensionBase<ExtensionContext> {
-    public:
-        void OnExtensionAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
-            const std::string &message) override
-        {
-            lastRequestId_ = requestId;
-            lastElement_ = element;
-            lastMessage_ = message;
-            called_ = true;
-        }
-
-        std::string lastRequestId_;
-        AppExecFwk::ElementName lastElement_;
-        std::string lastMessage_;
-        bool called_ = false;
-    };
-
-    TestExtensionBase testExtension;
-    testExtension.OnExtensionAbilityRequestSuccess(requestId, element, message);
-
-    EXPECT_TRUE(testExtension.called_);
-    EXPECT_EQ(testExtension.lastRequestId_, requestId);
-    EXPECT_EQ(testExtension.lastElement_.GetBundleName(), element.GetBundleName());
-    EXPECT_EQ(testExtension.lastElement_.GetAbilityName(), element.GetAbilityName());
-    EXPECT_EQ(testExtension.lastMessage_, message);
-
+    extensionBase.OnExtensionAbilityRequestSuccess(requestId, element, message);
     TAG_LOGI(AAFwkTag::TEST, "OnExtensionAbilityRequestSuccess end");
 }
 

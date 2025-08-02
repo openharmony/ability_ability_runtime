@@ -152,10 +152,12 @@ public:
      * @param connectCaller The connection caller.
      * @param connectReceiver The connection receiver.
      * @param connectCallback The connection callback.
+     * @param extensiontype The type of the extension ability.
      * @return Returns the result of connecting appService ability connection.
      */
-    ErrCode ConnectAppServiceExtensionAbility(const sptr<IRemoteObject>& connectCaller,
-        const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback);
+    ErrCode ConnectExtensionAbilityWithExtensionType(const sptr<IRemoteObject>& connectCaller,
+        const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback,
+        AppExecFwk::ExtensionAbilityType extensiontype);
     
     /**
      * @brief disconnect ability connection.
