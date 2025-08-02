@@ -83,6 +83,7 @@
 #include "cj_runtime.h"
 #endif
 #include "native_lib_util.h"
+#include "ets_native_lib_util.h"
 #include "native_startup_task.h"
 #include "nlohmann/json.hpp"
 #include "ohos_application.h"
@@ -1655,7 +1656,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     } else {
 #endif
         if (IsEtsAPP(appInfo)) {
-            AbilityRuntime::ETSRuntime::SetAppLibPath(appLibPaths);
+            AppLibPathMap etsAppLibPaths {};
+            std::map<std::string, std::string> abcPathsToBundleModuleNameMap {};
+            GetEtsNativeLibPath(bundleInfo, hspList, etsAppLibPaths, abcPathsToBundleModuleNameMap);
+            AbilityRuntime::ETSRuntime::SetAppLibPath(etsAppLibPaths, abcPathsToBundleModuleNameMap, isSystemApp);
         } else {
             AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, isSystemApp);
         }

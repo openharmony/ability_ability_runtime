@@ -24,6 +24,8 @@
 #include <thread>
 #include <vector>
 
+#include "static_core/plugins/ets/runtime/ets_namespace_manager.h"
+
 #include "ets_ani_expo.h"
 #ifdef LIKELY
 #undef LIKELY
@@ -539,6 +541,10 @@ ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
         .LoadModule = [](const std::string &modulePath, const std::string &srcEntrance, void *&cls,
              void *&obj,  void *&ref) {
             return ETSEnvironment::GetInstance()->LoadModule(modulePath, srcEntrance, cls, obj, ref);
+        },
+        .SetAppLibPath = [](const std::map<std::string, std::string> &abcPathsToBundleModuleNameMap,
+            std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)> &cb) {
+            ark::ets::EtsNamespaceManager::SetAppLibPaths(abcPathsToBundleModuleNameMap, cb);
         },
         .FinishPreload = []() {
             ETSEnvironment::GetInstance()->FinishPreload();
