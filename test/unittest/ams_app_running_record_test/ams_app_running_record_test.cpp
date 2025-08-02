@@ -1595,6 +1595,74 @@ HWTEST_F(AmsAppRunningRecordTest, GetAbilities_002, TestSize.Level1)
 
 /*
  * Feature: AMS
+ * Function: IsAlreadyHaveAbility
+ * SubFunction: IsAlreadyHaveAbility
+ * FunctionPoints: check params
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Get IsAlreadyHaveAbility true
+ */
+
+HWTEST_F(AmsAppRunningRecordTest, IsAlreadyHaveAbility_001, TestSize.Level1)
+{
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    abilityInfo->name = GetTestAbilityName();
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->name = GetTestAppName();
+
+    BundleInfo bundleInfo;
+    bundleInfo.appId = "com.ohos.test.helloworld_code123";
+    HapModuleInfo hapModuleInfo;
+    hapModuleInfo.moduleName = "module789";
+    EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
+    auto record = service_->CreateAppRunningRecord(
+        loadParam, appInfo, abilityInfo, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
+    EXPECT_TRUE(record != nullptr);
+
+    auto abilityInfo2 = std::make_shared<AbilityInfo>();
+    abilityInfo2->name = GetTestAbilityName() + "_1";
+    abilityInfo2->applicationName = GetTestAppName();
+    HapModuleInfo hapModuleInfo1;
+    hapModuleInfo1.moduleName = "module123";
+    sptr<IRemoteObject> token2 = new (std::nothrow) MockAbilityToken();
+    record->AddModule(appInfo, abilityInfo2, token2, hapModuleInfo1, nullptr, 0);
+
+    bool ret = record->IsAlreadyHaveAbility();
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * Feature: AMS
+ * Function: IsAlreadyHaveAbility
+ * SubFunction: IsAlreadyHaveAbility
+ * FunctionPoints: check params
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Get IsAlreadyHaveAbility false
+ */
+
+HWTEST_F(AmsAppRunningRecordTest, IsAlreadyHaveAbility_002, TestSize.Level1)
+{
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->name = GetTestAppName();
+    BundleInfo bundleInfo;
+    bundleInfo.appId = "com.ohos.test.helloworld_code123";
+    HapModuleInfo hapModuleInfo;
+    hapModuleInfo.moduleName = "module789";
+
+    EXPECT_TRUE(service_ != nullptr);
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    loadParam->token = GetMockToken();
+    auto record = service_->CreateAppRunningRecord(
+        loadParam, appInfo, nullptr, GetTestProcessName(), bundleInfo, hapModuleInfo, nullptr);
+    EXPECT_TRUE(record != nullptr);
+
+    bool ret = record->IsAlreadyHaveAbility();
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * Feature: AMS
  * Function: RemoveModuleRecord
  * SubFunction: RemoveModuleRecord
  * FunctionPoints: check params

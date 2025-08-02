@@ -63,6 +63,9 @@ bool LoadParam::Marshalling(Parcel &parcel) const
     if (!parcel.WriteParcelable(&extensionLoadParam)) {
         return false;
     }
+    if (!parcel.WriteBool(isStartupHide)) {
+        return false;
+    }
     return MarshallingTwo(parcel);
 }
 
@@ -99,6 +102,7 @@ bool LoadParam::ReadFromParcel(Parcel &parcel)
         return false;
     }
     extensionLoadParam = *extensionParamRead;
+    isStartupHide = parcel.ReadBool();
     isMainElementRunning = parcel.ReadBool();
     return true;
 }

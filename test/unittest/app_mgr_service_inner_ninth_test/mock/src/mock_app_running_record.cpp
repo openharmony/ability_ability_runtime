@@ -178,6 +178,14 @@ const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>>
     return AAFwk::MyStatus::GetInstance().abilitiesMap_;
 }
 
+bool AppRunningRecord::IsAlreadyHaveAbility()
+{
+    if (AAFwk::MyStatus::GetInstance().abilitiesMap_.empty()) {
+        return false;
+    }
+    return true;
+}
+
 sptr<IAppScheduler> AppRunningRecord::GetApplicationClient() const
 {
     return nullptr;
@@ -1038,6 +1046,16 @@ std::string AppRunningRecord::GetPreloadModuleName() const
 void AppRunningRecord::SetPreloadState(PreloadState state)
 {
     preloadState_ = state;
+}
+
+void AppRunningRecord::SetPreloadPhase(PreloadPhase phase)
+{
+    preloadPhase_ = phase;
+}
+
+PreloadPhase AppRunningRecord::GetPreloadPhase()
+{
+    return preloadPhase_;
 }
 
 bool AppRunningRecord::IsPreloading() const

@@ -268,6 +268,9 @@ public:
      * @return Returns the abilities info for the application record.
      */
     const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> GetAbilities();
+
+    bool IsAlreadyHaveAbility();
+
     // Update appThread with appThread
 
     /**
@@ -866,6 +869,10 @@ public:
 
     void SetPreloadState(PreloadState state);
 
+    void SetPreloadPhase(PreloadPhase phase);
+
+    PreloadPhase GetPreloadPhase();
+
     bool IsPreloading() const;
 
     bool IsPreloaded() const;
@@ -1240,6 +1247,7 @@ private:
     ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
     PreloadState preloadState_ = PreloadState::NONE;
     PreloadMode preloadMode_ = PreloadMode::PRELOAD_NONE;
+    PreloadPhase preloadPhase_ = PreloadPhase::UNSPECIFIED;
     SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
     int64_t startTimeMillis_ = 0;   // The time of app start(CLOCK_MONOTONIC)
     int64_t restartTimeMillis_ = 0; // The time of last trying app restart
