@@ -362,9 +362,9 @@ void EtsContextModuleInit(ani_env *aniEnv)
         ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",
             reinterpret_cast<void*>(EtsContextModule::NativeTransferDynamic) },
     };
-    status = aniEnv->Class_BindNativeMethods(contextCls, nativeFuncs.data(), nativeFuncs.size());
+    status = aniEnv->Class_BindStaticNativeMethods(contextCls, nativeFuncs.data(), nativeFuncs.size());
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindStaticNativeMethods failed status: %{public}d", status);
         return;
     }
 

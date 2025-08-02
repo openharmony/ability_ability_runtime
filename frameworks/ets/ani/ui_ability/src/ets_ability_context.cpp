@@ -36,6 +36,9 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "want.h"
+#ifdef SUPPORT_GRAPHICS
+#include "pixel_map_taihe_ani.h"
+#endif
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -447,6 +450,20 @@ void EtsAbilityContext::OpenAtomicService(
     }
     etsContext->OnOpenAtomicService(env, aniObj, aniAppId, callbackObj, optionsObj);
 }
+
+#ifdef SUPPORT_SCREEN
+void EtsAbilityContext::SetAbilityInstanceInfo(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object iconObj,
+    ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "SetAbilityInstanceInfo called");
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
+        return;
+    }
+    etsContext->OnSetAbilityInstanceInfo(env, aniObj, labelObj, iconObj, callback);
+}
+#endif
 
 int32_t EtsAbilityContext::GenerateRequestCode()
 {
@@ -1321,6 +1338,38 @@ bool EtsAbilityContext::IsInstanceOf(ani_env *env, ani_object aniObj)
     return isInstanceOf;
 }
 
+void EtsAbilityContext::NativeChangeAbilityVisibility(ani_env *env, ani_object aniObj,
+    ani_boolean isShow, ani_object callbackObj)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "ChangeAbilityVisibility");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env");
+        return;
+    }
+    auto etsContext = EtsAbilityContext::GetEtsAbilityContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT), nullptr);
+        return;
+    }
+    auto context = etsContext->context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT), nullptr);
+        return;
+    }
+    bool showFlag = static_cast<bool>(isShow);
+    ErrCode errCode = context->ChangeAbilityVisibility(showFlag);
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "failed, errCode: %{public}d", errCode);
+        AppExecFwk::AsyncCallback(env, callbackObj, EtsErrorUtil::CreateErrorByNativeErr(env, errCode), nullptr);
+        return;
+    }
+    AppExecFwk::AsyncCallback(env, callbackObj, EtsErrorUtil::CreateErrorByNativeErr(env, ERR_OK), nullptr);
+}
+
 void EtsAbilityContext::OpenAtomicServiceInner(ani_env *env, ani_object aniObj, AAFwk::Want &want,
     AAFwk::StartOptions &options, std::string appId, ani_object callbackObj)
 {
@@ -1373,6 +1422,49 @@ void EtsAbilityContext::OpenAtomicServiceInner(ani_env *env, ani_object aniObj, 
         TAG_LOGE(AAFwkTag::CONTEXT, "OpenAtomicService failed, ErrCode: %{public}d", ErrCode);
     }
 }
+
+
+#ifdef SUPPORT_SCREEN
+void EtsAbilityContext::OnSetAbilityInstanceInfo(ani_env *env, ani_object aniObj, ani_string labelObj,
+    ani_object iconObj, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnSetAbilityInstanceInfo called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env");
+        return;
+    }
+
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        EtsErrorUtil::ThrowErrorByNativeErr(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        return;
+    }
+
+    std::string label;
+    if (!AppExecFwk::GetStdString(env, labelObj, label)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Failed to parse label");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param label failed");
+        return;
+    }
+
+    auto icon = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, iconObj);
+    if (icon == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "Failed to unwrap PixelMap");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param icon failed");
+        return;
+    }
+
+    ErrCode ret = context->SetAbilityInstanceInfo(label, icon);
+    ani_object errorObj = nullptr;
+    if (ret == ERR_OK) {
+        errorObj = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
+    } else {
+        errorObj = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
+    }
+    AppExecFwk::AsyncCallback(env, callback, errorObj, nullptr);
+}
+#endif
 
 namespace {
 bool BindNativeMethods(ani_env *env, ani_class &cls)
@@ -1437,6 +1529,13 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void*>(EtsAbilityContext::StartAbilityByType) },
             ani_native_function { "nativeOpenAtomicService", SIGNATURE_OPEN_ATOMIC_SERVICE,
                 reinterpret_cast<void *>(EtsAbilityContext::OpenAtomicService) },
+            ani_native_function { "nativeChangeAbilityVisibility", "ZLutils/AbilityUtils/AsyncCallbackWrapper;:V",
+                reinterpret_cast<void*>(EtsAbilityContext::NativeChangeAbilityVisibility) },
+#ifdef SUPPORT_GRAPHICS
+            ani_native_function { "nativeSetAbilityInstanceInfo",
+                "Lstd/core/String;L@ohos/multimedia/image/image/PixelMap;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+                reinterpret_cast<void*>(EtsAbilityContext::SetAbilityInstanceInfo) },
+#endif
         };
         if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
             TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);

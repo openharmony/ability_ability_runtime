@@ -1192,6 +1192,22 @@ ohos_prebuilt_etc("ability_runtime_event_hub_abc_etc") {
   deps = [ ":ability_runtime_event_hub_abc" ]
 }
 
+generate_static_abc("ability_runtime_share_extension_ability_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.ShareExtensionAbility.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_runtime_share_extension_ability_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_share_extension_ability_abc_etc") {
+  source = "$target_out_dir/ability_runtime_share_extension_ability_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_share_extension_ability_abc" ]
+}
 
 group("ets_packages") {
   deps = [
@@ -1244,6 +1260,7 @@ group("ets_packages") {
     ":ability_runtime_insight_intent_executor_abc_etc",
     ":ability_runtime_mission_info_abc_etc",
     ":ability_runtime_openLink_options_abc_etc",
+    ":ability_runtime_share_extension_ability_abc_etc",
     ":ability_runtime_shell_cmd_result_abc_etc",
     ":ability_runtime_start_options_abc_etc",
     ":ability_runtime_trigger_info_abc_etc",
@@ -1260,6 +1277,7 @@ group("ets_packages") {
     ":ability_runtime_want_constant_abc_etc",
     ":atomic_service_options_abc_etc",
     ":application_state_observer_abc_etc",
+    ":app_foreground_state_observer_abc_etc",
     ":form_extension_ability_etc",
     ":service_extension_ability_abc_etc",
     ":ui_extension_ability_ani_etc",

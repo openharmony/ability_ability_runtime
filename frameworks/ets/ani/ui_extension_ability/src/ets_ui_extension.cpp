@@ -198,18 +198,18 @@ void EtsUIExtension::BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want
     ani_field contextField = nullptr;
     auto status = env->Class_FindField(etsObj_->aniCls, "context", &contextField);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return;
     }
 
     ani_ref contextRef = nullptr;
     if ((status = env->GlobalReference_Create(contextObj, &contextRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return;
     }
 
     if ((status = env->Object_SetField_Ref(etsObj_->aniObj, contextField, contextRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
     }
     shellContextRef_ = std::make_shared<AppExecFwk::ETSNativeReference>();
     shellContextRef_->aniObj = contextObj;

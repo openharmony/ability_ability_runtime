@@ -16,6 +16,7 @@ import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("application_ani") {
+  shlib_type = "ani"
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
@@ -49,6 +50,7 @@ ohos_shared_library("application_ani") {
   external_deps = [
     "ability_base:configuration",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "hilog:libhilog",
     "json:nlohmann_json_static",
     "ipc:ipc_core",
