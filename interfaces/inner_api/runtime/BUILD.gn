@@ -61,6 +61,7 @@ ohos_shared_library("runtime") {
 
   sources = [
     "${ability_runtime_native_path}/appkit/ability_bundle_manager_helper/bundle_mgr_helper.cpp",
+    "${ability_runtime_native_path}/runtime/ets_native_lib_util.cpp",
     "${ability_runtime_native_path}/runtime/ets_runtime.cpp",
     "${ability_runtime_native_path}/runtime/hdc_register.cpp",
     "${ability_runtime_native_path}/runtime/hybrid_js_module_reader.cpp",

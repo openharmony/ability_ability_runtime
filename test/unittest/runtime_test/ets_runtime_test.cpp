@@ -100,8 +100,9 @@ HWTEST_F(EtsRuntimeTest, SetAppLibPath_100, TestSize.Level1)
     std::map<std::string, std::vector<std::string>> testPathMap;
     testPathMap["com.example.app"] = { "/data/abc", "/data/def" };
     testPathMap["com.example.demo"] = { "/data/demo/es", "/data/demo/ts" };
+    std::map<std::string, std::string> abcPathsToBundleModuleNameMap;
     std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
-    etsRuntime->SetAppLibPath(testPathMap);
+    etsRuntime->SetAppLibPath(testPathMap, abcPathsToBundleModuleNameMap, false);
     EXPECT_NE(testPathMap.size(), 0);
 }
 
