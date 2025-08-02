@@ -487,19 +487,19 @@ ErrCode AbilityManagerClient::GetMissionIdByToken(sptr<IRemoteObject> token, int
     return MyFlag::GetInstance()->GetMissionIdByToken();
 }
 
-ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect)
+ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect, bool isSilent)
 {
     return ERR_OK;
 }
 
 ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect,
-    sptr<IRemoteObject> callToken, int32_t accountId)
+    sptr<IRemoteObject> callToken, int32_t accountId, bool isSilent)
 {
     return ERR_OK;
 }
 
 ErrCode AbilityManagerClient::StartAbilityByCallWithErrMsg(const Want &want, sptr<IAbilityConnection> connect,
-    sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg)
+    sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent)
 {
     return ERR_OK;
 }

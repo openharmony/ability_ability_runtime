@@ -2483,8 +2483,9 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
     }
 
     int32_t accountId = data.ReadInt32();
+    bool isSilent = data.ReadBool();
     std::string errMsg = "";
-    int32_t result = StartAbilityByCallWithErrMsg(*want, callback, callerToken, accountId, errMsg);
+    int32_t result = StartAbilityByCallWithErrMsg(*want, callback, callerToken, accountId, errMsg, isSilent);
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "resolve call ability ret = %d", result);
     reply.WriteString(errMsg);
