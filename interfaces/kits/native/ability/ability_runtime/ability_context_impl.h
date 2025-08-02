@@ -363,7 +363,7 @@ public:
      */
     void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message, int32_t resultCode = 0) override;
-    
+
     ErrCode StartExtensionAbilityWithExtensionType(const AAFwk::Want &want,
         AppExecFwk::ExtensionAbilityType extensionType) override;
     ErrCode StopExtensionAbilityWithExtensionType(const AAFwk::Want& want,
