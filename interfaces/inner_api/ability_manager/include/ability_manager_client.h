@@ -924,9 +924,10 @@ public:
      *
      * @param want, Special want for service type's ability.
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param isSilent, whether show window when start fail.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect);
+    ErrCode StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect, bool isSilent = false);
 
     /**
      * Start Ability, connect session with common ability.
@@ -934,13 +935,14 @@ public:
      * @param want, Special want for service type's ability.
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @param accountId Indicates the account to start.
+     * @param isSilent, whether show window when start fail.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect,
-        sptr<IRemoteObject> callToken, int32_t accountId = DEFAULT_INVAL_VALUE);
+        sptr<IRemoteObject> callToken, int32_t accountId = DEFAULT_INVAL_VALUE, bool isSilent = false);
 
     int32_t StartAbilityByCallWithErrMsg(const Want &want, sptr<IAbilityConnection> connect,
-        sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg);
+        sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent = false);
 
     /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.

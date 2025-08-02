@@ -1015,19 +1015,14 @@ public:
     virtual int GetAppMemorySize() override;
 
     virtual bool IsRamConstrainedDevice() override;
-    /**
-     * Start Ability, connect session with common ability.
-     *
-     * @param want, Special want for service type's ability.
-     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
-     * @param accountId Indicates the account to start.
-     * @return Returns ERR_OK on success, others on failure.
-     */
+
     virtual int StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
-        const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE) override;
+        const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE,
+        bool isSilent = false) override;
 
     virtual int StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
-        const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg) override;
+        const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg,
+        bool isSilent = false) override;
 
     /**
      * As abilityRequest is prepared, just execute starting ability procedure.
