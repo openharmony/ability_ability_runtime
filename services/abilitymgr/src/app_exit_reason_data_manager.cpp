@@ -20,8 +20,10 @@
 #include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "exit_info_data_manager.h"
+#include "ffrt.h"
 #include "hitrace_meter.h"
 #include "os_account_manager_wrapper.h"
+#include "record_cost_time_util.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -81,6 +83,7 @@ DistributedKv::Status AppExitReasonDataManager::GetKvStore()
 bool AppExitReasonDataManager::CheckKvStore()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    AAFwk::RecordCostTimeUtil timeRecord("CheckKvStore");
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AppExitReasonDataManager::CheckKvStore start");
     if (kvStorePtr_ != nullptr) {
         return true;
@@ -91,7 +94,7 @@ bool AppExitReasonDataManager::CheckKvStore()
         if (status == DistributedKv::Status::SUCCESS && kvStorePtr_ != nullptr) {
             return true;
         }
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "try times: %{public}d", tryTimes);
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "try times: %{public}d", tryTimes);
         usleep(CHECK_INTERVAL);
         tryTimes--;
     }
@@ -103,6 +106,7 @@ int32_t AppExitReasonDataManager::SetAppExitReason(const std::string &bundleName
     const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    AAFwk::RecordCostTimeUtil timeRecord("SetAppExitReason");
     if (bundleName.empty() || accessTokenId == Security::AccessToken::INVALID_TOKENID) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid value");
         return ERR_INVALID_VALUE;
@@ -119,17 +123,7 @@ int32_t AppExitReasonDataManager::SetAppExitReason(const std::string &bundleName
 
     DistributedKv::Key key(keyStr);
     DistributedKv::Value value = ConvertAppExitReasonInfoToValue(abilityList, exitReason, processInfo, withKillMsg);
-    DistributedKv::Status status;
-    {
-        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "kvStorePtr_->Put");
-        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-        status = kvStorePtr_->Put(key, value);
-    }
-
-    if (status != DistributedKv::Status::SUCCESS) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "insert data err: %{public}d", status);
-        return ERR_INVALID_OPERATION;
-    }
+    PutAsync(key, value);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "set reason info: %{public}s", value.ToString().c_str());
     return ERR_OK;
 }
@@ -681,6 +675,7 @@ int32_t AppExitReasonDataManager::SetUIExtensionAbilityExitReason(
     const AppExecFwk::RunningProcessInfo &processInfo, bool withKillMsg)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    AAFwk::RecordCostTimeUtil timeRecord("SetUIExtensionAbilityExitReason");
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (bundleName.empty()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid bundle name");
@@ -700,16 +695,7 @@ int32_t AppExitReasonDataManager::SetUIExtensionAbilityExitReason(
         DistributedKv::Key key(keyEx);
         DistributedKv::Value value = ConvertAppExitReasonInfoToValueOfExtensionName(extension, exitReason,
             processInfo, withKillMsg);
-        DistributedKv::Status status;
-        {
-            HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "kvStorePtr_->Put");
-            std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-            status = kvStorePtr_->Put(key, value);
-        }
-
-        if (status != DistributedKv::Status::SUCCESS) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "error: %{public}d", status);
-        }
+        PutAsync(key, value);
     }
 
     return ERR_OK;
@@ -1001,6 +987,21 @@ int32_t AppExitReasonDataManager::GetRecordAppAbilityNames(const uint32_t access
     }
 
     return ERR_OK;
+}
+
+void AppExitReasonDataManager::PutAsync(const DistributedKv::Key &key, const DistributedKv::Value &value)
+{
+    auto taskName = "kvStorePtr_->Put";
+    ffrt::submit([key, value, taskName]() {
+        auto pThis = DelayedSingleton<AppExitReasonDataManager>::GetInstance();
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, taskName);
+        AAFwk::RecordCostTimeUtil timeRecord(taskName);
+        std::lock_guard lock(pThis->kvStorePtrMutex_);
+        auto status = pThis->kvStorePtr_->Put(key, value);
+        if (status != DistributedKv::Status::SUCCESS) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "insert error: %{public}d", status);
+        }
+    },  ffrt::task_attr().name(taskName));
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

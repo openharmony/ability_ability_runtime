@@ -43,7 +43,9 @@ ohos_unittest("app_mgr_service_inner_mock_test") {
     "src/window_manager.cpp",
   ]
 
-  deps = []
+  deps = [
+    "${ability_runtime_services_path}/common:record_cost_time_util",
+  ]
 
   external_deps = [
     "ability_base:want",

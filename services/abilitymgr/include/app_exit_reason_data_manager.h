@@ -104,6 +104,7 @@ private:
     DistributedKv::Key GetSessionIdKey(const int32_t sessionId);
     DistributedKv::Value ConvertAccessTokenIdToValue(uint32_t accessTokenId);
     DistributedKv::Status RestoreKvStore(DistributedKv::Status status);
+    static void PutAsync(const DistributedKv::Key &key, const DistributedKv::Value &value);
 
     const DistributedKv::AppId appId_ { "app_exit_reason_storage" };
     const DistributedKv::StoreId storeId_ { "app_exit_reason_infos" };

@@ -11856,6 +11856,7 @@ int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReas
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "KillProcessWithReason: %{public}s", reason.exitMsg.c_str());
     EventInfo eventInfo;
     eventInfo.callerPid = IPCSkeleton::GetCallingPid();
     eventInfo.pid = pid;

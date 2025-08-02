@@ -39,7 +39,10 @@ ohos_fuzztest("AbilityAppMgrEventFuzzTest") {
 
   configs = [ "${ability_runtime_services_path}/appmgr:appmgr_config" ]
 
-  deps = [ "${ability_runtime_services_path}/appmgr:libappms" ]
+  deps = [
+    "${ability_runtime_services_path}/appmgr:libappms",
+    "${ability_runtime_services_path}/common:record_cost_time_util",
+  ]
 
   external_deps = [
     "ability_base:configuration",
