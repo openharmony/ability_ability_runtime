@@ -633,7 +633,7 @@ public:
      * @param message, the message to be returned to the calling app.
      */
     virtual void OnAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message);
+        const std::string &message, int32_t resultCode = 0);
 
     /**
      * @brief Called when startAbility request succeeded.

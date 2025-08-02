@@ -345,7 +345,7 @@ void FreeInstallManager::HandleOnFreeInstallFail(int32_t recordId, FreeInstallIn
             return;
         }
         abilityRecord->NotifyAbilityRequestFailure(freeInstallInfo.startOptions->requestId_,
-            freeInstallInfo.want.GetElement(), "Free installation failed");
+            freeInstallInfo.want.GetElement(), "Free installation failed", resultCode);
     }
 
     if (isAsync) {
@@ -694,7 +694,7 @@ int FreeInstallManager::SetAppRunningState(Want &want)
     auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
         TAG_LOGE(AAFwkTag::FREE_INSTALL, "null appMgr");
-        return ERR_INVALID_VALUE;
+        return ERR_NULL_APP_MGR_CLIENT;
     }
 
     bool isAppRunning = appMgr->GetAppRunningStateByBundleName(want.GetElement().GetBundleName());

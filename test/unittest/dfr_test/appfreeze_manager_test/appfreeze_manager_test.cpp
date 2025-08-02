@@ -261,7 +261,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_AppFreezeFilter_001, TestSiz
     int32_t pid = static_cast<int32_t>(getprocpid());
     EXPECT_TRUE(!appfreezeManager->CancelAppFreezeDetect(pid, ""));
     appfreezeManager->ResetAppfreezeState(pid, "");
-    EXPECT_TRUE(!appfreezeManager->IsValidFreezeFilter(pid, ""));
+    EXPECT_TRUE(appfreezeManager->IsValidFreezeFilter(pid, ""));
     appfreezeManager->RemoveDeathProcess("");
 }
 

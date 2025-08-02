@@ -506,6 +506,11 @@ public:
     {
         return;
     }
+    virtual ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId,
+        OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId)
+    {
+        return ERR_OK;
+    }
 
     /**
      * @brief Add CompletioHandler.
@@ -542,7 +547,7 @@ public:
      * @param message, the message returned to the callback.
      */
     virtual void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message)
+        const std::string &message, int32_t resultCode)
     {
         return;
     }

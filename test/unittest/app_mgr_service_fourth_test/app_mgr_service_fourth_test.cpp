@@ -76,24 +76,19 @@ public:
     void SetUp() override;
     void TearDown() override;
     static std::shared_ptr<InnerTaskHandle> IgnoreTask(std::function<void()> task, const TaskAttribute& attr);
-    static std::shared_ptr<AppMgrService> appMgrService_;
-    static std::shared_ptr<MockAppMgrServiceInner> mockAppMgrServiceInner_;
-    static std::shared_ptr<AMSEventHandler> eventHandler_;
-    static std::shared_ptr<MockTaskHandlerWrap> mockTaskHandler_;
-    static std::shared_ptr<AppRunningManager> appRunningManager_;
+    inline static std::shared_ptr<AppMgrService> appMgrService_{ nullptr };
+    inline static std::shared_ptr<MockAppMgrServiceInner> mockAppMgrServiceInner_{ nullptr };
+    inline static std::shared_ptr<AMSEventHandler> eventHandler_{ nullptr };
+    inline static std::shared_ptr<MockTaskHandlerWrap> mockTaskHandler_{ nullptr };
+    inline static std::shared_ptr<AppRunningManager> appRunningManager_{ nullptr };
 };
-
-std::shared_ptr<AppMgrService> AppMgrServiceFourthTest::appMgrService_ = nullptr;
-std::shared_ptr<MockAppMgrServiceInner> AppMgrServiceFourthTest::mockAppMgrServiceInner_ = nullptr;
-std::shared_ptr<AMSEventHandler> AppMgrServiceFourthTest::eventHandler_ = nullptr;
-std::shared_ptr<MockTaskHandlerWrap> AppMgrServiceFourthTest::mockTaskHandler_ = nullptr;
-std::shared_ptr<AppRunningManager> AppMgrServiceFourthTest::appRunningManager_ = nullptr;
 
 void AppMgrServiceFourthTest::SetUpTestCase(void)
 {
     appMgrService_ = std::make_shared<AppMgrService>();
     mockAppMgrServiceInner_ = std::make_shared<MockAppMgrServiceInner>();
     appMgrService_->appMgrServiceInner_ = mockAppMgrServiceInner_;
+    appMgrService_->OnStart();
     mockTaskHandler_ = MockTaskHandlerWrap::CreateQueueHandler(Constants::APP_MGR_SERVICE_NAME);
     appMgrService_->taskHandler_ = mockTaskHandler_;
     eventHandler_= std::make_shared<AMSEventHandler>(appMgrService_->taskHandler_,
@@ -107,15 +102,49 @@ void AppMgrServiceFourthTest::SetUpTestCase(void)
     appMgrService_->appMgrServiceInner_->appRunningManager_->appRunningRecordMap_.emplace(0, appRecord);
 }
 
-void AppMgrServiceFourthTest::TearDownTestCase(void) {}
-
-void AppMgrServiceFourthTest::SetUp()
+void AppMgrServiceFourthTest::TearDownTestCase(void)
 {
-    appMgrService_->appMgrServiceInner_ = mockAppMgrServiceInner_;
-    appMgrService_->taskHandler_ = mockTaskHandler_;
-    appMgrService_->eventHandler_ = eventHandler_;
-    appMgrService_->appMgrServiceInner_->appRunningManager_ = appRunningManager_;
+    if (appRunningManager_) {
+        appRunningManager_.reset();
+    }
+
+    if (mockAppMgrServiceInner_) {
+        mockAppMgrServiceInner_.reset();
+    }
+
+    if (mockTaskHandler_) {
+        mockTaskHandler_.reset();
+    }
+
+    if (eventHandler_) {
+        eventHandler_.reset();
+    }
+
+    if (appMgrService_) {
+        appMgrService_->OnStop();
+        int sleepTime = 1;
+        sleep(sleepTime);
+
+        if (appMgrService_->appMgrServiceInner_->appRunningManager_) {
+            appMgrService_->appMgrServiceInner_->appRunningManager_.reset();
+        }
+
+        if (appMgrService_->appMgrServiceInner_) {
+            appMgrService_->appMgrServiceInner_.reset();
+        }
+
+        if (appMgrService_->taskHandler_) {
+            appMgrService_->taskHandler_.reset();
+        }
+
+        if (appMgrService_->eventHandler_) {
+            appMgrService_->eventHandler_.reset();
+        }
+        appMgrService_.reset();
+    }
 }
+
+void AppMgrServiceFourthTest::SetUp() {}
 
 void AppMgrServiceFourthTest::TearDown() {}
 

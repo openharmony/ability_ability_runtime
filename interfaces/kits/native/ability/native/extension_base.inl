@@ -122,15 +122,15 @@ void ExtensionBase<C>::SetExtensionCommon(const std::shared_ptr<ExtensionCommon>
 }
 
 template<class C>
-void ExtensionBase<C>::OnExtensionAbilityRequestFailure(
-    const std::string &requestId, const AppExecFwk::ElementName &element, const std::string &message)
+void ExtensionBase<C>::OnExtensionAbilityRequestFailure(const std::string &requestId,
+    const AppExecFwk::ElementName &element, const std::string &message, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::EXT, "OnAbilityRequestFailure called");
     if (context_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null context_");
         return;
     }
-    context_->OnRequestFailure(requestId, element, message);
+    context_->OnRequestFailure(requestId, element, message, resultCode);
 }
 
 template<class C>

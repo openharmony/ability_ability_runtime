@@ -322,4 +322,17 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJNS_0100, TestSize.Level2)
     cJEnvironment.InitCJNS(appPath);
     EXPECT_EQ(CJEnvironment::GetInstance(), nullptr);
 }
+
+/**
+ * @tc.name: InitCJMockNS_0100
+ * @tc.desc: Test InitCJMockNS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJMockNS_0100, TestSize.Level2)
+{
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    std::string appPath = "com/ohos/unittest/test/";
+    cJEnvironment.InitCJMockNS(appPath);
+    EXPECT_EQ(CJEnvironment::GetInstance(), nullptr);
+}
 } // namespace OHOS

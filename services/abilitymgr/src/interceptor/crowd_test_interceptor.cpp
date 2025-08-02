@@ -36,7 +36,7 @@ ErrCode CrowdTestInterceptor::DoProcess(AbilityInterceptorParam param)
             int ret = IN_PROCESS_CALL(AbilityUtil::StartAppgallery(param.want.GetBundle(), param.requestCode,
                 param.userId, ACTION_MARKET_CROWDTEST));
             if (ret != ERR_OK) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "start appGallery failed");
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "start appGallery failed:%{public}d", ret);
                 return ret;
             }
         }

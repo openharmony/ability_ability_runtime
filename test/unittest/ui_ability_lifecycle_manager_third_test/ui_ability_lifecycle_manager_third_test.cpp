@@ -330,7 +330,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifySCBToStartUIAbility_003, Test
 
     auto ret = mgr->NotifySCBToStartUIAbility(abilityRequest);
 
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_FREQ_START_ABILITY);
 }
 
 /**
@@ -347,6 +347,19 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifySCBToStartUIAbility_004, Test
     auto ret = mgr->NotifySCBToStartUIAbility(abilityRequest);
 
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_PostCallTimeoutTask_001
+ * @tc.desc: PostCallTimeoutTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, PostCallTimeoutTask_001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    int32_t requestId = 1;
+    mgr->PostCallTimeoutTask(requestId);
+    EXPECT_NE(mgr, nullptr);
 }
 
 /**
@@ -1524,7 +1537,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifyStartupExceptionBySCB_001, Te
     int32_t requestId = 1;
     mgr->tmpAbilityMap_ = {{requestId, callerAbilityRecord}};
 
-    auto ret = mgr->NotifyStartupExceptionBySCB(requestId);
+    std::string reason = "SCB intercepted this startup attempt";
+    auto ret = mgr->NotifyStartupExceptionBySCB(requestId, reason);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(mgr->tmpAbilityMap_.size(), 0);
 }
@@ -1555,7 +1569,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifyStartupExceptionBySCB_002, Te
         {"NewKawasaki", {specifiedRequestPtr, specifiedRequest2Ptr}}
     };
     int32_t requestId = 1;
-    auto ret = uiAbilityLifecycleManager->NotifyStartupExceptionBySCB(requestId);
+    std::string reason = "SCB intercepted this startup attempt";
+    auto ret = uiAbilityLifecycleManager->NotifyStartupExceptionBySCB(requestId, reason);
     EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace AAFwk

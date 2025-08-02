@@ -834,7 +834,7 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, CleanUIAbility_001, TestSize.Level
     auto mgr = std::make_shared<UIAbilityLifecycleManager>();
 
     auto ret = mgr->CleanUIAbility(nullptr);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_UI_ABILITY_MANAGER_NULL_ABILITY_RECORD);
 }
 
 /**

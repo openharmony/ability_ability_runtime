@@ -22,6 +22,7 @@
 #include "runner_runtime/ets_test_runner_instance.h"
 #include "runner_runtime/js_test_runner.h"
 #include "runtime.h"
+#include "ets_runtime.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 
@@ -60,13 +61,25 @@ std::unique_ptr<TestRunner> TestRunner::Create(const std::unique_ptr<AbilityRunt
 
     switch (runtime->GetLanguage()) {
         case AbilityRuntime::Runtime::Language::JS:
+            TAG_LOGD(AAFwkTag::DELEGATOR, "js test runner");
             return RunnerRuntime::JsTestRunner::Create(runtime, args, bundleInfo, isFaJsModel);
 #ifdef CJ_FRONTEND
         case AbilityRuntime::Runtime::Language::CJ:
             return RunnerRuntime::CJTestRunner::Create(runtime, args, bundleInfo);
 #endif
         case AbilityRuntime::Runtime::Language::ETS:
-            return std::unique_ptr<TestRunner>(RunnerRuntime::CreateETSTestRunner(runtime, args, bundleInfo));
+            TAG_LOGD(AAFwkTag::DELEGATOR, "est mode is %{public}s", args->GetTestRunnerMode().c_str());
+            if (args->GetTestRunnerMode() == OHOS::AbilityRuntime::CODE_LANGUAGE_ARKTS_1_2) {
+                return std::unique_ptr<TestRunner>(RunnerRuntime::CreateETSTestRunner(runtime, args, bundleInfo));
+            } else {
+                auto &etsRuntime = (static_cast<AbilityRuntime::ETSRuntime &>(*runtime));
+                auto &jsRuntime = etsRuntime.GetJsRuntime();
+                if (jsRuntime != nullptr) {
+                    return RunnerRuntime::JsTestRunner::Create(jsRuntime, args, bundleInfo, isFaJsModel);
+                } else {
+                    TAG_LOGE(AAFwkTag::DELEGATOR, "get jsruntime failed in stsruntime");
+                }
+            }
         default:
             return std::make_unique<TestRunner>();
     }

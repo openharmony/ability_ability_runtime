@@ -2280,7 +2280,7 @@ bool AbilityManagerShellCommand::IsTestCommandIntegrity(const std::map<std::stri
 {
     TAG_LOGD(AAFwkTag::AA_TOOL, "enter");
 
-    std::vector<std::string> opts = { "-b", "-s unittest" };
+    std::vector<std::string> opts = { "-b" };
     for (auto opt : opts) {
         auto it = params.find(opt);
         if (it == params.end()) {

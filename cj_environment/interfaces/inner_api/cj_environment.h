@@ -96,6 +96,7 @@ public:
     void InitCJCompatibilitySDKNS(const std::string& path);
     void InitCJChipSDKNS(const std::string& path);
     void InitCJRuntimeNS(const std::string& path);
+    void InitCJMockNS(const std::string& path);
     void InitRuntimeNS();
     void* InitUIScheduler();
     int FiniCJRuntime();
@@ -114,6 +115,7 @@ public:
     static const char *cjSysNSName;
     static const char *cjCompatibilitySDKNSName;
     static const char *cjRuntimeNSName;
+    static const char *cjMockNSName;
     static std::string appVersion;
     static const uint32_t majorVersion;
     static const uint32_t minorVersion;

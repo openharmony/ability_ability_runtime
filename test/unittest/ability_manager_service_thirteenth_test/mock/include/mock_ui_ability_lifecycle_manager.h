@@ -393,7 +393,7 @@ public:
 
     void RecordPidKilling(pid_t pid, const std::string &reason);
 
-    int32_t NotifyStartupExceptionBySCB(int32_t requestId);
+    int32_t NotifyStartupExceptionBySCB(int32_t requestId, const std::string &reason);
 
 private:
     void AddStartingPid(pid_t pid);

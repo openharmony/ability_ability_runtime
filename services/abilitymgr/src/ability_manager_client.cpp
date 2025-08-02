@@ -648,7 +648,7 @@ ErrCode AbilityManagerClient::DisconnectAbility(sptr<IAbilityConnection> connect
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "DisconnectAbility call");
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "DisconnectAbility");
     return abms->DisconnectAbility(connect);
 }
 

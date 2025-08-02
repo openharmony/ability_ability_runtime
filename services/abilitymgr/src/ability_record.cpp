@@ -1423,9 +1423,7 @@ int AbilityRecord::TerminateAbility()
     HandleDlpClosed();
 #endif // WITH_DLP
     AAFwk::EventInfo eventInfo;
-    eventInfo.bundleName = GetAbilityInfo().bundleName;
-    eventInfo.abilityName = GetAbilityInfo().name;
-    eventInfo.appIndex = abilityInfo_.applicationInfo.appIndex;
+    BuildTerminateAbilityEventInfo(eventInfo, 0);
     if (clearMissionFlag_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "deleteAbilityRecoverInfo before clearMission");
         (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
@@ -1435,13 +1433,26 @@ int AbilityRecord::TerminateAbility()
     ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::DESTROY_END, GetPid(), GetUid(),
         0, GetRecordId());
     AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::TERMINATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
-    eventInfo.errCode = DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token_, clearMissionFlag_);
-    if (eventInfo.errCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "terminate ability failed: %{public}d", eventInfo.errCode);
-        AAFwk::EventReport::SendAbilityEvent(
-            AAFwk::EventName::TERMINATE_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+    auto ret = DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token_, clearMissionFlag_);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "terminate ability failed: %{public}d", ret);
     }
-    return eventInfo.errCode;
+    return ret;
+}
+
+void AbilityRecord::BuildTerminateAbilityEventInfo(EventInfo &eventInfo, int32_t errCode)
+{
+    eventInfo.bundleName = GetAbilityInfo().bundleName;
+    eventInfo.abilityName = GetAbilityInfo().name;
+    eventInfo.appIndex = abilityInfo_.applicationInfo.appIndex;
+    eventInfo.errCode = errCode;
+}
+
+void AbilityRecord::SendTerminateAbilityErrorEvent(int32_t errCode)
+{
+    EventInfo eventInfo;
+    BuildTerminateAbilityEventInfo(eventInfo, errCode);
+    EventReport::SendAbilityEvent(EventName::TERMINATE_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
 }
 
 const AppExecFwk::AbilityInfo &AbilityRecord::GetAbilityInfo() const
@@ -1862,7 +1873,7 @@ void AbilityRecord::DisconnectAbilityWithWant(const Want &want)
 
 void AbilityRecord::CommandAbility()
 {
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "startId_:%{public}d.", startId_);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "startId_:%{public}d.", startId_);
     Want want = GetWant();
     UpdateDmsCallerInfo(want);
     CHECK_POINTER(lifecycleDeal_);
@@ -3881,13 +3892,13 @@ void AbilityRecord::ScheduleCollaborate(const Want &want)
 }
 
 void AbilityRecord::NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
     CHECK_POINTER(lifecycleDeal_);
     nlohmann::json jsonObject = nlohmann::json {
         { JSON_KEY_ERR_MSG, message },
     };
-    lifecycleDeal_->NotifyAbilityRequestFailure(requestId, element, jsonObject.dump());
+    lifecycleDeal_->NotifyAbilityRequestFailure(requestId, element, jsonObject.dump(), resultCode);
 }
 
 void AbilityRecord::NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)
