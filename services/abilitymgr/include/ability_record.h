@@ -408,7 +408,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    int LoadAbility(bool isShellCall = false);
+    int LoadAbility(bool isShellCall = false, bool isStartupHide = false);
 
     /**
      * foreground the ability.
@@ -421,7 +421,8 @@ public:
      * process request of foregrounding the ability.
      *
      */
-    void ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag = 0, bool isShellCall = false);
+    void ProcessForegroundAbility(
+        uint32_t tokenId, uint32_t sceneFlag = 0, bool isShellCall = false, bool isStartupHide = false);
 
      /**
      * post foreground timeout task for ui ability.
@@ -1379,7 +1380,7 @@ private:
     void GetColdStartingWindowResource(std::shared_ptr<Media::PixelMap> &bg, uint32_t &bgColor);
     void SetAbilityStateInner(AbilityState state);
 #endif
-
+    void SendAppStartupTypeEvent(const AppExecFwk::AppStartType startType);
     std::atomic<bool> isPreloadStart_ = false;           // is ability started via preload
 
     static std::atomic<int64_t> abilityRecordId;

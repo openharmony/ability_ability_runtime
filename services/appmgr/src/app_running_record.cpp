@@ -273,6 +273,21 @@ const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>>
     return abilitiesMap;
 }
 
+bool AppRunningRecord::IsAlreadyHaveAbility()
+{
+    auto moduleRecordList = GetAllModuleRecord();
+    for (const auto &moduleRecord : moduleRecordList) {
+        if (!moduleRecord) {
+            continue;
+        }
+        auto abilities = moduleRecord->GetAbilities();
+        if (!abilities.empty()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 sptr<IAppScheduler> AppRunningRecord::GetApplicationClient() const
 {
     return (appLifeCycleDeal_ ? appLifeCycleDeal_->GetApplicationClient() : nullptr);
@@ -916,9 +931,6 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
         foregroundingAbilityTokens_.insert(ability->GetToken());
         TAG_LOGD(AAFwkTag::APPMGR, "foregroundingAbility size: %{public}d",
             static_cast<int32_t>(foregroundingAbilityTokens_.size()));
-        if (curState_ == ApplicationState::APP_STATE_BACKGROUND) {
-            SendAppStartupTypeEvent(ability, AppStartType::HOT);
-        }
     } else {
         TAG_LOGW(AAFwkTag::APPMGR, "wrong state");
     }
@@ -2330,6 +2342,16 @@ std::string AppRunningRecord::GetPreloadModuleName() const
 void AppRunningRecord::SetPreloadState(PreloadState state)
 {
     preloadState_ = state;
+}
+
+void AppRunningRecord::SetPreloadPhase(PreloadPhase phase)
+{
+    preloadPhase_ = phase;
+}
+
+PreloadPhase AppRunningRecord::GetPreloadPhase()
+{
+    return preloadPhase_;
 }
 
 bool AppRunningRecord::IsPreloading() const

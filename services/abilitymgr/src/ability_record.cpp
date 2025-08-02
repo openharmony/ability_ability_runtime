@@ -340,7 +340,7 @@ void AbilityRecord::LoadUIAbility()
     g_addLifecycleEventTask(token_, methodName);
 }
 
-int AbilityRecord::LoadAbility(bool isShellCall)
+int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "LoadLifecycle: abilityName:%{public}s", abilityInfo_.name.c_str());
@@ -375,6 +375,7 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     loadParam.instanceKey = instanceKey_;
     loadParam.isCallerSetProcess = IsCallerSetProcess();
     loadParam.customProcessFlag = customProcessFlag_;
+    loadParam.isStartupHide = isStartupHide;
     auto userId = abilityInfo_.uid / BASE_USER_RANGE;
     bool isMainUIAbility =
         MainElementUtils::IsMainUIAbility(abilityInfo_.bundleName, abilityInfo_.name, userId);
@@ -470,6 +471,9 @@ void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ForegroundUIExtensionAbility:%{public}s", GetURI().c_str());
     CHECK_POINTER(lifecycleDeal_);
 
+    if (IsAbilityState(AbilityState::BACKGROUND)) {
+        SendAppStartupTypeEvent(AppExecFwk::AppStartType::HOT);
+    }
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
 #ifdef SUPPORT_SCREEN
@@ -486,7 +490,8 @@ void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
     }
 }
 
-void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag, bool isShellCall)
+void AbilityRecord::ProcessForegroundAbility(
+    uint32_t tokenId, uint32_t sceneFlag, bool isShellCall, bool isStartupHide)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetElementName().GetURI();
@@ -524,13 +529,14 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
                 ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, "THAW_BY_FOREGROUND_ABILITY", pid,
                     callerPid);
             }
+            SendAppStartupTypeEvent(AppExecFwk::AppStartType::HOT);
             SetAbilityStateInner(AbilityState::FOREGROUNDING);
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
         }
     } else {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "To load ability.");
         lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-        LoadAbility(isShellCall);
+        LoadAbility(isShellCall, isStartupHide);
     }
 }
 
@@ -3945,6 +3951,20 @@ void AbilityRecord::UpdateUIExtensionBindInfo(const WantParams &wantParams)
         want_.RemoveParam(UIEXTENSION_HOST_BUNDLENAME);
     }
     want_.SetParam(UIEXTENSION_HOST_BUNDLENAME, wantParams.GetStringParam(UIEXTENSION_HOST_BUNDLENAME));
+}
+
+void AbilityRecord::SendAppStartupTypeEvent(const AppExecFwk::AppStartType startType)
+{
+    AAFwk::EventInfo eventInfo;
+    auto abilityInfo = GetAbilityInfo();
+    eventInfo.abilityName = abilityInfo.name;
+    auto applicationInfo = GetApplicationInfo();
+    eventInfo.bundleName = applicationInfo.name;
+    eventInfo.versionName = applicationInfo.versionName;
+    eventInfo.versionCode = applicationInfo.versionCode;
+    eventInfo.pid = static_cast<int32_t>(GetPid());
+    eventInfo.startType = static_cast<int32_t>(startType);
+    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_STARTUP_TYPE, HiSysEventType::BEHAVIOR, eventInfo);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
