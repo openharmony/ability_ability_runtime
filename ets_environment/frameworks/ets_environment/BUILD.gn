@@ -48,9 +48,12 @@ ohos_shared_library("ets_environment") {
 
   deps = [
     "${ability_runtime_innerkits_path}/connect_server_manager:connect_server_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
   ]
 
   external_deps = [
+    "ability_base:string_utils",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "faultloggerd:libunwinder",

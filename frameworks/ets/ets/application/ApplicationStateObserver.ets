@@ -16,7 +16,7 @@ import AppStateData from 'application.AppStateData';
 import AbilityStateData from 'application.AbilityStateData';
 import processData from 'application.ProcessData';
 
-interface ApplicationStateObserver {
+export interface ApplicationStateObserver {
 
   onForegroundApplicationChanged(appStateData: AppStateData): void;
 
@@ -33,7 +33,7 @@ interface ApplicationStateObserver {
   onAppStopped(appStateData: AppStateData): void;
 }
 
-class ApplicationStateObserverImpl implements ApplicationStateObserver {
+export default class ApplicationStateObserverImpl implements ApplicationStateObserver {
   onForegroundApplicationChanged(appStateData: AppStateData): void {}
 
   onAbilityStateChanged(abilityStateData: AbilityStateData): void {}
@@ -50,5 +50,3 @@ class ApplicationStateObserverImpl implements ApplicationStateObserver {
 }
 
 export type ProcessData = processData;
-
-export default ApplicationStateObserver;

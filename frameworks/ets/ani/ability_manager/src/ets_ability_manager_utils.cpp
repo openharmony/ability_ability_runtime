@@ -38,7 +38,7 @@ bool WrapAbilityRunningInfoArray(
         return false;
     }
     ani_class arrayCls = nullptr;
-    ani_method arrayCtor;
+    ani_method arrayCtor = nullptr;
     ani_status status = ANI_ERROR;
     if ((status = env->FindClass(CLASSNAME_ARRAY, &arrayCls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "status : %{public}d", status);

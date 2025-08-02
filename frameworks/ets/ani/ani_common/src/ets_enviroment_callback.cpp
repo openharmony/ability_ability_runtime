@@ -32,14 +32,28 @@ constexpr const char* APPLICATION_MEMORYLEVEL_ENUM =
 constexpr const char* APPLICATION_CONFIGURATION =
     "L@ohos/app/ability/Configuration/Configuration;:V";
 }
-EtsEnviromentCallback::EtsEnviromentCallback(ani_env *env)
-    : env_(env) {}
+EtsEnviromentCallback::EtsEnviromentCallback(ani_vm *etsVm) : etsVm_(etsVm) {}
+
+EtsEnviromentCallback::~EtsEnviromentCallback()
+{
+    ani_env *env = AttachCurrentThread();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GetEnv failed");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    std::lock_guard<std::mutex> lock(Mutex_);
+    for (auto it = enviromentAniCallbacks_.begin(); it != enviromentAniCallbacks_.end();) {
+        if ((status = env->GlobalReference_Delete(it->second)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPKIT, "GlobalReference_Delete status: %{public}d", status);
+        }
+        it++;
+    }
+    DetachCurrentThread();
+};
 
 int32_t EtsEnviromentCallback::Register(ani_object aniCallback)
 {
-    if (env_ == nullptr) {
-        return -1;
-    }
     int32_t callbackId = serialNumber_;
     if (serialNumber_ < INT32_MAX) {
         serialNumber_++;
@@ -47,10 +61,20 @@ int32_t EtsEnviromentCallback::Register(ani_object aniCallback)
         serialNumber_ = 0;
     }
     ani_ref aniCallbackRef = nullptr;
-    env_->GlobalReference_Create(aniCallback, &aniCallbackRef);
-
+    ani_env *env = AttachCurrentThread();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GetEnv failed");
+        return -1;
+    }
+    ani_status status = ANI_ERROR;
+    if ((status = env->GlobalReference_Create(aniCallback, &aniCallbackRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GlobalReference_Create status: %{public}d", status);
+        DetachCurrentThread();
+        return -1;
+    }
     std::lock_guard lock(Mutex_);
     enviromentAniCallbacks_.emplace(callbackId, aniCallbackRef);
+    DetachCurrentThread();
     return callbackId;
 }
 
@@ -62,33 +86,53 @@ bool EtsEnviromentCallback::UnRegister(int32_t callbackId)
         TAG_LOGE(AAFwkTag::APPKIT, "callbackId: %{public}d not in callbacks_", callbackId);
         return false;
     }
+    ani_env *env = AttachCurrentThread();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GetEnv failed");
+        return false;
+    }
     TAG_LOGD(AAFwkTag::APPKIT, "callbacks_.callbackId: %{public}d", it->first);
+    ani_status status = ANI_ERROR;
+    if ((status = env->GlobalReference_Delete(it->second)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GlobalReference_Delete status: %{public}d", status);
+        DetachCurrentThread();
+        return false;
+    }
+    DetachCurrentThread();
     return enviromentAniCallbacks_.erase(callbackId) == 1;
 }
 
 void EtsEnviromentCallback::OnMemoryLevel(const int level)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "OnMemoryLevel Call");
-    if (env_ == nullptr || enviromentAniCallbacks_.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null aniEnv");
+    if (enviromentAniCallbacks_.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null enviromentAniCallbacks_");
+        return;
+    }
+    ani_env *env = AttachCurrentThread();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GetEnv failed");
         return;
     }
     ani_class cls {};
-    ani_status status = env_->FindClass(APPLICATION_ENVIROMENT_CALLBACK, &cls);
+    ani_status status = env->FindClass(APPLICATION_ENVIROMENT_CALLBACK, &cls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "FindClass status: %{public}d", status);
+        DetachCurrentThread();
         return;
     }
     ani_method method {};
-    if ((status = env_->Class_FindMethod(cls, "onMemoryLevel", APPLICATION_MEMORYLEVEL, &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "onMemoryLevel", APPLICATION_MEMORYLEVEL, &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod status: %{public}d", status);
+        DetachCurrentThread();
         return;
     }
     ani_enum_item memoryLevel {};
-    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(env_,
+    OHOS::AAFwk::AniEnumConvertUtil::EnumConvert_NativeToEts(env,
         APPLICATION_MEMORYLEVEL_ENUM, (AppExecFwk::MemoryLevel)level, memoryLevel);
     if (memoryLevel == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "create memoryLevel failed");
+        DetachCurrentThread();
         return;
     }
     std::lock_guard lock(Mutex_);
@@ -96,37 +140,47 @@ void EtsEnviromentCallback::OnMemoryLevel(const int level)
         ani_status status = ANI_ERROR;
         if (!callback.second) {
             TAG_LOGE(AAFwkTag::APPKIT, "callback object is null");
+            DetachCurrentThread();
             return;
         }
         ani_object envCallback = reinterpret_cast<ani_object>(callback.second);
-        if ((status = env_->Object_CallMethod_Void(envCallback, method, memoryLevel)) != ANI_OK) {
+        if ((status = env->Object_CallMethod_Void(envCallback, method, memoryLevel)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPKIT, "Object_CallMethod_Void status: %{public}d", status);
         }
     }
+    DetachCurrentThread();
 }
 
 void EtsEnviromentCallback::OnConfigurationUpdated(const AppExecFwk::Configuration &config)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "OnConfigurationUpdated Call");
-    if (env_ == nullptr || enviromentAniCallbacks_.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null aniEnv");
+    if (enviromentAniCallbacks_.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null enviromentAniCallbacks_");
+        return;
+    }
+    ani_env *env = AttachCurrentThread();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "GetEnv failed");
         return;
     }
     ani_class cls {};
-    ani_status status = env_->FindClass(APPLICATION_ENVIROMENT_CALLBACK, &cls);
+    ani_status status = env->FindClass(APPLICATION_ENVIROMENT_CALLBACK, &cls);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "FindClass status: %{public}d", status);
+        DetachCurrentThread();
         return;
     }
     ani_method method {};
-    if ((status = env_->Class_FindMethod(cls, "onConfigurationUpdated",
+    if ((status = env->Class_FindMethod(cls, "onConfigurationUpdated",
         APPLICATION_CONFIGURATION, &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod status: %{public}d", status);
+        DetachCurrentThread();
         return;
     }
-    ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env_, config);
+    ani_object configObj = OHOS::AppExecFwk::WrapConfiguration(env, config);
     if (configObj == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "create configObj failed");
+        DetachCurrentThread();
         return;
     }
     std::lock_guard lock(Mutex_);
@@ -134,12 +188,39 @@ void EtsEnviromentCallback::OnConfigurationUpdated(const AppExecFwk::Configurati
         ani_status status = ANI_ERROR;
         if (!callback.second) {
             TAG_LOGE(AAFwkTag::APPKIT, "callback object is null");
+            DetachCurrentThread();
             return;
         }
         ani_object envCallback = reinterpret_cast<ani_object>(callback.second);
-        if ((status = env_->Object_CallMethod_Void(envCallback, method, configObj)) != ANI_OK) {
+        if ((status = env->Object_CallMethod_Void(envCallback, method, configObj)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPKIT, "Object_CallMethod_Void status: %{public}d", status);
         }
+    }
+    DetachCurrentThread();
+}
+
+ani_env *EtsEnviromentCallback::AttachCurrentThread()
+{
+    ani_env *env = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = etsVm_->GetEnv(ANI_VERSION_1, &env)) == ANI_OK) {
+        return env;
+    }
+    ani_option interopEnabled { "--interop=disable", nullptr };
+    ani_options aniArgs { 1, &interopEnabled };
+    if ((status = etsVm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
+        return nullptr;
+    }
+    isAttachThread_ = true;
+    return env;
+}
+
+void EtsEnviromentCallback::DetachCurrentThread()
+{
+    if (isAttachThread_) {
+        etsVm_->DetachCurrentThread();
+        isAttachThread_ = false;
     }
 }
 } // namespace AbilityRuntime
