@@ -138,19 +138,19 @@ bool ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(
         return false;
     }
     want.SetParam(APP_FREEZE_TOKEN, token);
-
-    int32_t focusPid = -1;
-    int32_t posX = 0;
-    int32_t posY = 0;
-    int32_t width = 10;
-    int32_t height  = 10;
     std::vector<sptr<Rosen::WindowVisibilityInfo>> infos;
     ret = static_cast<int>(sceneSessionManager->GetVisibilityWindowInfo(infos));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Get visibility window info err: %{public}d", ret);
         return false;
     }
+
+    int32_t posX = 0;
+    int32_t posY = 0;
+    int32_t width = 10;
+    int32_t height  = 10;
     bool infoReady = false;
+    int32_t focusPid = -1;
     for (const auto &info : infos) {
         if (info != nullptr) {
             if (info->IsFocused()) {
