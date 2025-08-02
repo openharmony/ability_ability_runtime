@@ -254,7 +254,7 @@ void JsServiceExtension::SystemAbilityStatusChangeListener::OnAddSystemAbility(i
 {
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "systemAbilityId: %{public}d add", systemAbilityId);
     if (systemAbilityId == WINDOW_MANAGER_SERVICE_ID) {
-        TAG_LOGI(AAFwkTag::SERVICE_EXT, "RegisterDisplayInfoChangedListener");
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "RegisterDisplayInfoChangedListener");
         Rosen::WindowManager::GetInstance().RegisterDisplayInfoChangedListener(token_, tmpDisplayListener_);
     }
 }
@@ -303,7 +303,7 @@ void JsServiceExtension::OnStart(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     Extension::OnStart(want);
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "call");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
 
     auto context = GetContext();
     if (context != nullptr) {
@@ -341,7 +341,7 @@ void JsServiceExtension::OnStop()
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "service extension connection not disconnected");
     }
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "UnregisterDisplayInfoChangedListener");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "UnregisterDisplayInfoChangedListener");
     auto context = GetContext();
     if (context == nullptr || context->GetToken() == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
@@ -567,7 +567,7 @@ napi_value JsServiceExtension::CallObjectMethod(const char* name, napi_value con
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "get '%{public}s' from ServiceExtension obj failed", name);
         return nullptr;
     }
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "CallFunction(%{public}s) ok", name);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "CallFunc(%{public}s)", name);
     napi_value result = nullptr;
     napi_status status = napi_call_function(env, obj, method, argc, argv, &result);
     if (status != napi_ok) {

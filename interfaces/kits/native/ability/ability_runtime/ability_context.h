@@ -488,7 +488,10 @@ public:
      * @param message, the message returned to the callback.
      */
     virtual void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message) = 0;
+        const std::string &message, int32_t resultCode = 0) = 0;
+    
+    virtual ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId,
+        OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId) = 0;
 
 protected:
     bool IsContext(size_t contextTypeId) override

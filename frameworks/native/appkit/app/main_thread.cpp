@@ -1865,8 +1865,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
     auto usertestInfo = appLaunchData.GetUserTestInfo();
     if (usertestInfo) {
-        if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo, bundleInfo.targetVersion,
-            appInfo.arkTSMode)) {
+        if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo, bundleInfo.targetVersion)) {
             TAG_LOGE(AAFwkTag::APPKIT, "PrepareAbilityDelegator failed");
             return;
         }
@@ -2446,8 +2445,7 @@ void MainThread::LoadAllExtensions()
 }
 
 bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
-    const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion,
-    const std::string &applicationCodeLanguage)
+    const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "enter, isStageBased = %{public}d", isStageBased);
     if (!record) {
@@ -2457,6 +2455,15 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
     auto args = std::make_shared<AbilityDelegatorArgs>(record->want);
     if (isStageBased) { // Stage model
         TAG_LOGD(AAFwkTag::APPKIT, "Stage model");
+        if (args == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "test args is null");
+            return false;
+        }
+        AppExecFwk::ModuleTestRunner tsTestRunner;
+        if (!GetTestRunnerTypeAndPath(args->GetTestBundleName(), args->GetTestModuleName(), tsTestRunner)) {
+            TAG_LOGE(AAFwkTag::APPKIT, "query testrunner failed");
+        }
+        args->SetTestRunnerModeAndPath(tsTestRunner.arkTSMode, tsTestRunner.srcPath);
         auto testRunner = TestRunner::Create(application_->GetRuntime(), args, false);
         auto delegator = IAbilityDelegator::Create(application_->GetRuntime(), application_->GetAppContext(),
             std::move(testRunner), record->observer);
@@ -4162,6 +4169,23 @@ void MainThread::RunNativeStartupTask(const BundleInfo &bundleInfo, const AppLau
         TAG_LOGE(AAFwkTag::APPKIT, "null extStartupTask");
     }
     AbilityRuntime::ExtNativeStartupManager::RunNativeStartupTask(nativeStartupTask);
+}
+
+bool MainThread::GetTestRunnerTypeAndPath(const std::string bundleName, const std::string moduleName,
+    AppExecFwk::ModuleTestRunner &tsTestRunner)
+{
+    auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null bundleMgrHelper");
+        return false;
+    }
+    ErrCode ret = bundleMgrHelper->GetTestRunnerTypeAndPath(bundleName, moduleName,
+        tsTestRunner);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "get testrunner failed: %{public}d", ret);
+        return false;
+    }
+    return true;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

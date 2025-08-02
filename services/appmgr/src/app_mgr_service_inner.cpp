@@ -2965,6 +2965,7 @@ void AppMgrServiceInner::GetChildrenProcesses(const std::shared_ptr<AppRunningRe
 
 int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string& reason)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!ProcessUtil::ProcessExist(pid)) {
         TAG_LOGI(AAFwkTag::APPMGR, "null killProcessByPid, pid: %{public}d", pid);
         return AAFwk::ERR_KILL_PROCESS_NOT_EXIST;
@@ -2982,6 +2983,7 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string&
 int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::string& reason,
     const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     int32_t ret = -1;
     if (pid > 0) {
         if (CheckIsThreadInFoundation(pid)) {
@@ -3477,6 +3479,7 @@ int32_t AppMgrServiceInner::KillProcessesInBatch(const std::vector<int32_t> &pid
 int32_t AppMgrServiceInner::KillSubProcessBypidInner(const pid_t pid, const std::string &reason,
     AAFwk::EventInfo &eventInfo)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     int32_t ret = -1;
     if (!ProcessUtil::ProcessExist(pid) || pid <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid pid: %{public}d", pid);
@@ -3504,6 +3507,7 @@ int32_t AppMgrServiceInner::KillSubProcessBypidInner(const pid_t pid, const std:
 
 int32_t AppMgrServiceInner::KillSubProcessBypid(const pid_t pid, const std::string &reason)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     int32_t ret = ERR_OK;
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
@@ -3560,6 +3564,7 @@ int32_t AppMgrServiceInner::KillSubProcessBypid(const pid_t pid, const std::stri
 int32_t AppMgrServiceInner::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason,
     bool subProcess)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     int32_t ret = ERR_OK;
     for (const auto& pid: pids) {
         auto appRecord = GetAppRunningRecordByPid(pid);
@@ -4803,7 +4808,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     auto appInfo = appRecord->GetApplicationInfo();
     if (appInfo != nullptr && !appRunningManager_->IsAppExist(appInfo->accessTokenId)) {
         appRecord->UnSetPolicy();
-        TAG_LOGW(AAFwkTag::APPMGR, "before OnAppStopped");
+        TAG_LOGD(AAFwkTag::APPMGR, "before OnAppStopped");
         OnAppStopped(appRecord);
     }
 
@@ -4983,6 +4988,7 @@ void AppMgrServiceInner::GetRunningProcessInfoByToken(
 int32_t AppMgrServiceInner::GetRunningProcessInfoByPid(const pid_t pid,
     OHOS::AppExecFwk::RunningProcessInfo &info) const
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!CheckGetRunningInfoPermission()) {
         return ERR_PERMISSION_DENIED;
@@ -7233,6 +7239,15 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
             return ERR_OK;
         }
     }
+
+    if (appRunningManager_ && eventName.find("THREAD_BLOCK_") != std::string::npos) {
+        std::string appRunningUniqueId;
+        int32_t ret = appRunningManager_->GetAppRunningUniqueIdByPid(pid, appRunningUniqueId);
+        TAG_LOGI(AAFwkTag::APPDFR, "ret=%{public}d, appRunningUniqueId=%{public}s", ret, appRunningUniqueId.c_str());
+        FaultData& nonConstFaultData = const_cast<FaultData&>(faultData);
+        nonConstFaultData.appRunningUniqueId = appRunningUniqueId;
+    }
+
     if (SubmitDfxFaultTask(faultData, bundleName, appRecord, pid) != ERR_OK) {
         return ERR_INVALID_VALUE;
     }
@@ -7428,6 +7443,13 @@ FaultData AppMgrServiceInner::ConvertDataTypes(const AppFaultDataBySA &faultData
     newfaultData.eventId = faultData.eventId;
     newfaultData.needKillProcess = faultData.needKillProcess;
     newfaultData.appfreezeInfo = faultData.appfreezeInfo;
+    newfaultData.procStatm = faultData.procStatm;
+    if (appRunningManager_) {
+        std::string appRunningUniqueId;
+        int32_t ret = appRunningManager_->GetAppRunningUniqueIdByPid(faultData.pid, appRunningUniqueId);
+        TAG_LOGI(AAFwkTag::APPDFR, "ret=%{public}d, appRunningUniqueId=%{public}s", ret, appRunningUniqueId.c_str());
+        newfaultData.appRunningUniqueId = appRunningUniqueId;
+    }
     return newfaultData;
 }
 

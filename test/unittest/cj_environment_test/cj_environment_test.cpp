@@ -296,6 +296,7 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestDynamicInherit_001, TestSize.Level2
     Dl_namespace ns;
     dlns_get("cj_test_namespace", &ns);
     DynamicInherit(&ns, "cj_test_namespace_2", "allow_all_shared_libs");
+    DynamicInheritByName("cj_test_namespace", "cj_test_namespace_2", "allow_all_shared_libs");
     EXPECT_EQ(CJEnvironment::GetInstance(), nullptr);
 }
 
@@ -309,6 +310,8 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestDynamicInherit_002, TestSize.Level2
     Dl_namespace ns;
     dlns_get("cj_test_namespace", &ns);
     DynamicInherit(&ns, "default", "allow_all_shared_libs");
+    DynamicInheritByName("cj_test_namespace", "default", "allow_all_shared_libs");
+    DynamicInheritByName("default", "cj_test_namespace", "allow_all_shared_libs");
     EXPECT_EQ(CJEnvironment::GetInstance(), nullptr);
 }
 
@@ -322,6 +325,9 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestDynamicInherit_003, TestSize.Level2
     Dl_namespace ns;
     dlns_get("cj_test_namespace", &ns);
     DynamicInherit(&ns, nullptr, nullptr);
+    DynamicInheritByName(nullptr, nullptr, nullptr);
+    DynamicInheritByName("cj_test_namespace", nullptr, nullptr);
+    DynamicInheritByName("cj_test_namespace", "cj_test_namespace", nullptr);
     EXPECT_EQ(CJEnvironment::GetInstance(), nullptr);
 }
 

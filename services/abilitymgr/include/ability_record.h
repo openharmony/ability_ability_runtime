@@ -1179,7 +1179,7 @@ public:
     }
 
     void NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message);
+        const std::string &message, int32_t resultCode = 0);
 
     void NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element);
     void NotifyAbilitiesRequestDone(const std::string &requestKey, int32_t resultCode);
@@ -1280,6 +1280,8 @@ public:
         const std::string &taskName = "");
 
     void UpdateUIExtensionBindInfo(const WantParams &wantParams);
+
+    void SendTerminateAbilityErrorEvent(int32_t errCode);
 protected:
 
     sptr<Token> token_ = {};                               // used to interact with kit and wms
@@ -1333,6 +1335,8 @@ private:
     void AfterLoaded();
 
     void CancelPrepareTerminate();
+
+    void BuildTerminateAbilityEventInfo(EventInfo &eventInfo, int32_t errCode);
 
 #ifdef SUPPORT_SCREEN
     std::shared_ptr<Want> GetWantFromMission() const;

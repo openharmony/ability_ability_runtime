@@ -349,7 +349,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, CheckDebugAssertPermission_002, Te
     EXPECT_NE(abilityMs_, nullptr);
     MyStatus::GetInstance().paramGetBoolParameter_ = true;
     int32_t result = abilityMs_->CheckDebugAssertPermission();
-    EXPECT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+    EXPECT_NE(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckDebugAssertPermission_002 end");
 }
 

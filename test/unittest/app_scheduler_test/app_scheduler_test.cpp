@@ -280,7 +280,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_TerminateAbility_001, TestSize.Level1)
     bool clearMissionFlag = true;
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
     int res = DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token, clearMissionFlag);
-    EXPECT_EQ(res, INNER_ERR);
+    EXPECT_EQ(res, ERR_APP_MGR_TERMINATTE_ABILITY_FAILED);
 }
 
 /*

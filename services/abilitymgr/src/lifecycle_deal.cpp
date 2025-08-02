@@ -202,11 +202,11 @@ void LifecycleDeal::ScheduleCollaborate(const Want &want)
 }
 
 void LifecycleDeal::NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
     auto abilityScheduler = GetScheduler();
     CHECK_POINTER(abilityScheduler);
-    abilityScheduler->ScheduleAbilityRequestFailure(requestId, element, message);
+    abilityScheduler->ScheduleAbilityRequestFailure(requestId, element, message, resultCode);
 }
 
 void LifecycleDeal::NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)

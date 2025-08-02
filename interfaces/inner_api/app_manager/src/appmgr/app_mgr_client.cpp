@@ -84,7 +84,7 @@ private:
         if (remote_) {
             return AppMgrResultCode::RESULT_OK;
         }
-        TAG_LOGI(AAFwkTag::APPMGR, "get AppMgrRemote object");
+        TAG_LOGD(AAFwkTag::APPMGR, "get AppMgrRemote object");
         remote_ = serviceManager_->GetAppMgrService();
         if (!remote_) {
             return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
@@ -106,7 +106,7 @@ private:
 
     void RemoveDeathRecipient()
     {
-        TAG_LOGI(AAFwkTag::APPMGR, "RemoveDeathRecipient");
+        TAG_LOGD(AAFwkTag::APPMGR, "RemoveDeathRecipient");
         std::lock_guard<std::mutex> lock(mutex_);
         if (remote_ == nullptr) {
             TAG_LOGI(AAFwkTag::APPMGR, "null remote_");
@@ -123,7 +123,7 @@ private:
         }
         remote_ = nullptr;
         deathRecipient_ = nullptr;
-        TAG_LOGI(AAFwkTag::APPMGR, "RemoveDeathRecipient success");
+        TAG_LOGD(AAFwkTag::APPMGR, "RemoveDeathRecipient success");
     }
 
     class AppMgrDeathRecipient : public IRemoteObject::DeathRecipient {

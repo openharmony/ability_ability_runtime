@@ -393,7 +393,7 @@ public:
 
     void RecordPidKilling(pid_t pid, const std::string &reason);
 
-    int32_t NotifyStartupExceptionBySCB(int32_t requestId);
+    int32_t NotifyStartupExceptionBySCB(int32_t requestId, const std::string &reason);
 
 private:
     void AddStartingPid(pid_t pid);
@@ -460,7 +460,6 @@ private:
 
     void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void SetReceiverInfo(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord) const;
-    AppExecFwk::ElementName GetWantElement(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest);
 
     /**
      * @brief Execute PrepareTerminateApp when it is implemented
@@ -473,7 +472,7 @@ private:
         int32_t pid, const std::vector<sptr<IRemoteObject>> &tokens);
 
     bool GetContentAndTypeId(uint32_t msgId, std::string &msgContent, int &typeId) const;
-    void SendAbilityEvent(const AppExecFwk::AbilityInfo &abilityInfo) const;
+    void SendAbilityEvent(const AppExecFwk::AbilityInfo &abilityInfo, const std::string &reason) const;
 
     bool CheckSessionInfo(sptr<SessionInfo> sessionInfo) const;
     std::shared_ptr<AbilityRecord> CreateAbilityRecord(AbilityRequest &abilityRequest,
@@ -493,6 +492,7 @@ private:
     std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         bool &isColdStart);
     std::shared_ptr<AbilityRecord> FindRecordFromTmpMap(const AbilityRequest &abilityRequest);
+    void PostCallTimeoutTask(int32_t requestId);
     bool AddStartCallerTimestamp(int32_t callerUid);
     std::shared_ptr<AbilityRecord> FindRecordFromSessionMap(const AbilityRequest &abilityRequest);
     void AddSpecifiedRequest(std::shared_ptr<SpecifiedRequest> request);
@@ -528,7 +528,7 @@ private:
     mutable ffrt::mutex sessionLock_;
     std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> sessionAbilityMap_;
     std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> lowMemKillAbilityMap_;
-    std::unordered_map<int64_t, std::shared_ptr<AbilityRecord>> tmpAbilityMap_;
+    std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> tmpAbilityMap_;
     std::unordered_map<std::shared_ptr<AbilityRecord>, std::list<AbilityRequest>> callRequestCache_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
     sptr<IRemoteObject> rootSceneSession_;

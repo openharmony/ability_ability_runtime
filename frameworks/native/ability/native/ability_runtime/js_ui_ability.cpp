@@ -1392,16 +1392,16 @@ void JsUIAbility::HandleCollaboration(const Want &want)
 #endif
 
 void JsUIAbility::OnAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "OnAbilityRequestFailure called");
-    UIAbility::OnAbilityRequestFailure(requestId, element, message);
+    UIAbility::OnAbilityRequestFailure(requestId, element, message, resultCode);
     auto abilityContext = GetAbilityContext();
     if (abilityContext == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
         return;
     }
-    abilityContext->OnRequestFailure(requestId, element, message);
+    abilityContext->OnRequestFailure(requestId, element, message, resultCode);
 }
 
 void JsUIAbility::OnAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,

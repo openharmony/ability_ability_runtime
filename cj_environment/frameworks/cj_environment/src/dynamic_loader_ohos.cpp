@@ -215,12 +215,45 @@ void DynamicInherit(Dl_namespace* child, const char* parent, const char* shared)
     Dl_namespace parentNamespace;
     int res = dlns_get(parent, &parentNamespace);
     if (res != 0) {
-        LOGE("Fail to get ns %{public}s'.", parent);
+        LOGE("Fail to get ns %{public}s.", parent);
         return;
     }
     res = dlns_inherit(child, &parentNamespace, shared);
     if (res != 0) {
         LOGE("Failed to inherit ns %{public}s.", parent);
+        return;
+    }
+}
+
+void DynamicInheritByName(const char* child, const char* parent, const char* shared)
+{
+    if (child == nullptr) {
+        LOGE("child namespace is null.");
+        return;
+    }
+    if (parent == nullptr) {
+        LOGE("parent namespace name is null.");
+        return;
+    }
+    if (shared == nullptr) {
+        LOGE("shared libs is null.");
+        return;
+    }
+    Dl_namespace childNamespace;
+    Dl_namespace parentNamespace;
+    int res = dlns_get(child, &childNamespace);
+    if (res != 0) {
+        LOGE("Fail to get ns %{public}s.", child);
+        return;
+    }
+    res = dlns_get(parent, &parentNamespace);
+    if (res != 0) {
+        LOGE("Fail to get ns %{public}s.", parent);
+        return;
+    }
+    res = dlns_inherit(&childNamespace, &parentNamespace, shared);
+    if (res != 0) {
+        LOGE("ns %{public}s failed to inherit ns %{public}s.", child, parent);
         return;
     }
 }

@@ -59,8 +59,9 @@ public:
  */
 struct FaultData : public Parcelable {
     bool ReadFromParcel(Parcel &parcel);
-    bool WriteContent(Parcel &parcel) const;
+    bool ReadContent(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
+    bool WriteContent(Parcel &parcel) const;
     static FaultData *Unmarshalling(Parcel &parcel);
     // error object
     ErrorObject errorObject;
@@ -76,6 +77,8 @@ struct FaultData : public Parcelable {
     uint32_t stuckTimeout = 0;
     sptr<IRemoteObject> token = nullptr;
     std::string appfreezeInfo;
+    std::string appRunningUniqueId;
+    std::string procStatm;
 };
 
 /**
@@ -84,14 +87,15 @@ struct FaultData : public Parcelable {
  */
 struct AppFaultDataBySA : public Parcelable {
     bool ReadFromParcel(Parcel &parcel);
+    bool ReadContent(Parcel &parcel);
+    virtual bool Marshalling(Parcel &parcel) const override;
+    bool WriteErrorObject(Parcel &parcel) const;
     bool WriteContent(Parcel &parcel) const;
+    static AppFaultDataBySA *Unmarshalling(Parcel &parcel);
     bool waitSaveState = false;
     bool notifyApp = false;
     bool forceExit = false;
     bool needKillProcess = true;
-    bool WriteErrorObject(Parcel &parcel) const;
-    virtual bool Marshalling(Parcel &parcel) const override;
-    static AppFaultDataBySA *Unmarshalling(Parcel &parcel);
     // error object
     ErrorObject errorObject;
     FaultDataType faultType = FaultDataType::UNKNOWN;
@@ -101,6 +105,8 @@ struct AppFaultDataBySA : public Parcelable {
     sptr<IRemoteObject> token = nullptr;
     std::string timeoutMarkers;
     std::string appfreezeInfo;
+    std::string appRunningUniqueId;
+    std::string procStatm;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -205,7 +205,7 @@ bool Extension::OnInsightIntentExecuteDone(uint64_t intentId, const AppExecFwk::
 }
 
 void Extension::OnExtensionAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
 }
 
