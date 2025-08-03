@@ -27,6 +27,14 @@ export default class EntryAbility extends UIAbility {
     this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     AppStorage.setAndLink('context', this.context);
     hilog.info(DOMAIN, 'InsightIntents', '%{public}s', 'Ability onCreate');
+    const callerBundleName: string | undefined = want.parameters?.['ohos.aafwk.param.callerBundleName']?.toString();
+    if (callerBundleName === undefined || callerBundleName !== 'com.huawei.hmos.aidataservice') {
+      try {
+        this.context.terminateSelf();
+      } catch (err) {
+        hilog.error(DOMAIN, 'InsightIntents', 'Failed to context.terminateSelf. Cause: %{public}s', JSON.stringify(err));
+      } 
+    }
   }
 
   onDestroy(): void {
