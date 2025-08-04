@@ -1115,32 +1115,33 @@ ErrCode AbilityManagerClient::GetMissionIdByToken(sptr<IRemoteObject> token, int
     return ERR_OK;
 }
 
-ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect)
+ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect, bool isSilent)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s", want.GetElement().GetURI().c_str());
-    return abms->StartAbilityByCall(want, connect, nullptr, DEFAULT_INVAL_VALUE);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s, isSilent::%{public}d",
+        want.GetElement().GetURI().c_str(), isSilent);
+    return abms->StartAbilityByCall(want, connect, nullptr, DEFAULT_INVAL_VALUE, isSilent);
 }
 
 ErrCode AbilityManagerClient::StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect,
-    sptr<IRemoteObject> callToken, int32_t accountId)
+    sptr<IRemoteObject> callToken, int32_t accountId, bool isSilent)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s, userId:%{public}d",
-        want.GetElement().GetURI().c_str(), accountId);
-    return abms->StartAbilityByCall(want, connect, callToken, accountId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s, userId:%{public}d, isSilent::%{public}d",
+        want.GetElement().GetURI().c_str(), accountId, isSilent);
+    return abms->StartAbilityByCall(want, connect, callToken, accountId, isSilent);
 }
 
 ErrCode AbilityManagerClient::StartAbilityByCallWithErrMsg(const Want &want, sptr<IAbilityConnection> connect,
-    sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg)
+    sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s, userId:%{public}d",
-        want.GetElement().GetURI().c_str(), accountId);
-    return abms->StartAbilityByCallWithErrMsg(want, connect, callToken, accountId, errMsg);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, ability:%{public}s, userId:%{public}d, isSilent::%{public}d",
+        want.GetElement().GetURI().c_str(), accountId, isSilent);
+    return abms->StartAbilityByCallWithErrMsg(want, connect, callToken, accountId, errMsg, isSilent);
 }
 
 void AbilityManagerClient::CallRequestDone(sptr<IRemoteObject> token, sptr<IRemoteObject> callStub)
