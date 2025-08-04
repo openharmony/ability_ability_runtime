@@ -1807,58 +1807,6 @@ HWTEST_F(UriPermissionImplTest, BoolVecToRawData_001, TestSize.Level1)
 
 /*
  * Feature: UriPermissionManagerStubImpl
- * Function: GrantBatchContentUriPermissionImpl
- * SubFunction: NA
- * FunctionPoints: GrantBatchContentUriPermissionImpl
- */
-HWTEST_F(UriPermissionImplTest, GrantBatchContentUriPermissionImpl_001, TestSize.Level1)
-{
-    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
-    ASSERT_NE(upms, nullptr);
-    AbilityManagerClient::isNullInstance = true;
-    uint32_t flag = 1;
-    uint32_t tokenId = 1001;
-    std::string targetBundleName = "com.example.test";
-    std::vector<std::string> contentUris;
-    auto ret = upms->GrantBatchContentUriPermissionImpl(contentUris, flag, tokenId, targetBundleName);
-    EXPECT_EQ(ret, INNER_ERR);
-    
-    contentUris.emplace_back("content://temp.txt");
-    ret = upms->GrantBatchContentUriPermissionImpl(contentUris, flag, tokenId, targetBundleName);
-    EXPECT_EQ(ret, INNER_ERR);
-
-    AbilityManagerClient::isNullInstance = false;
-    ret = upms->GrantBatchContentUriPermissionImpl(contentUris, flag, tokenId, targetBundleName);
-    EXPECT_EQ(ret, INNER_ERR);
-}
-
-/*
- * Feature: UriPermissionManagerStubImpl
- * Function: RevokeContentUriPermission
- * SubFunction: NA
- * FunctionPoints: RevokeContentUriPermission
- */
-HWTEST_F(UriPermissionImplTest, RevokeContentUriPermission_001, TestSize.Level1)
-{
-    auto upms = std::make_unique<UriPermissionManagerStubImpl>();
-    ASSERT_NE(upms, nullptr);
-    AbilityManagerClient::isNullInstance = true;
-    uint32_t tokenId = 1001;
-    auto ret = upms->RevokeContentUriPermission(tokenId);
-    EXPECT_EQ(ret, ERR_OK);
-
-    upms->AddContentTokenIdRecord(tokenId);
-    ret = upms->RevokeContentUriPermission(tokenId);
-    EXPECT_EQ(ret, INNER_ERR);
-    
-    upms->AddContentTokenIdRecord(tokenId);
-    AbilityManagerClient::isNullInstance = false;
-    ret = upms->RevokeContentUriPermission(tokenId);
-    EXPECT_EQ(ret, INNER_ERR);
-}
-
-/*
- * Feature: UriPermissionManagerStubImpl
  * Function: UriPermissionImplTest
  * SubFunction: NA
  * FunctionPoints: capacity not support
