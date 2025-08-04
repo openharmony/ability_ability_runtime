@@ -164,12 +164,13 @@ void UIAbilityLifecycleManager::RemoveStartingPid(pid_t pid)
     TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}d not found", pid);
 }
 
-void UIAbilityLifecycleManager::RecordPidKilling(pid_t pid, const std::string &reason)
+void UIAbilityLifecycleManager::RecordPidKilling(pid_t pid, const std::string &reason, bool isKillPrecedeStart)
 {
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     for (const auto& [first, second] : sessionAbilityMap_) {
         if (second && pid == second->GetPid()) {
             second->SetKillReason(reason);
+            second->SetIsKillPrecedeStart(isKillPrecedeStart);
         }
     }
 }
@@ -277,7 +278,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
     std::shared_ptr<AbilityRecord> uiAbilityRecord = nullptr;
     auto iter = sessionAbilityMap_.find(sessionInfo->persistentId);
     bool isLowMemKill = (iter != sessionAbilityMap_.end()) &&
-        (iter->second != nullptr) && (iter->second->GetKillReason() == GlobalConstant::LOW_MEMORY_KILL);
+        (iter->second != nullptr) && (iter->second->IsKillPrecedeStart());
     if (iter == sessionAbilityMap_.end() || isLowMemKill) {
         uiAbilityRecord = FindRecordFromTmpMap(abilityRequest);
         auto abilityInfo = abilityRequest.abilityInfo;
@@ -2191,6 +2192,7 @@ void UIAbilityLifecycleManager::NotifySCBToHandleException(const std::shared_ptr
     sptr<SessionInfo> info = abilityRecord->GetSessionInfo();
     info->errorCode = errorCode;
     info->errorReason = errorReason;
+    info->shouldSkipKillInStartup = abilityRecord->IsKillPrecedeStart();
     Rosen::ExceptionInfo exceptionInfo;
     exceptionInfo.needClearCallerLink = needClearCallerLink;
     session->NotifySessionException(info, exceptionInfo);
@@ -2273,11 +2275,12 @@ void UIAbilityLifecycleManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abi
         NotifySCBToHandleException(abilityRecord,
             static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_PERMISSION_UPDATE),
             "kill process for permission update", needClearCallerLink);
-    } else if (abilityRecord->GetKillReason() == GlobalConstant::LOW_MEMORY_KILL) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "kill by low memory");
-        NotifySCBToHandleException(abilityRecord,
-            static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_LOW_MEMORY_KILL),
-            abilityRecord->GetKillReason());
+    } else if (abilityRecord->IsKillPrecedeStart()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Killing processes before application startup");
+        auto errCode = abilityRecord->GetKillReason() == GlobalConstant::LOW_MEMORY_KILL ?
+            static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_LOW_MEMORY_KILL) :
+            static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_SKIP_KILL_IN_STARTUP);
+        NotifySCBToHandleException(abilityRecord, errCode, abilityRecord->GetKillReason());
     } else if (!abilityRecord->GetRestartAppFlag()) {
         NotifySCBToHandleException(abilityRecord, static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_DIED),
             "onAbilityDied");

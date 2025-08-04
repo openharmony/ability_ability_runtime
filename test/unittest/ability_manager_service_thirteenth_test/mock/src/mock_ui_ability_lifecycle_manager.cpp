@@ -44,7 +44,7 @@ void UIAbilityLifecycleManager::RemoveStartingPid(pid_t pid)
 {
 }
 
-void UIAbilityLifecycleManager::RecordPidKilling(pid_t pid, const std::string &reason)
+void UIAbilityLifecycleManager::RecordPidKilling(pid_t pid, const std::string &reason, bool isKillPrecedeStart)
 {
 }
 

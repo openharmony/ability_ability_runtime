@@ -69,7 +69,8 @@ public:
     MOCK_METHOD1(IsWaitingDebugApp, bool(const std::string &bundleName));
     MOCK_METHOD0(ClearNonPersistWaitingDebugFlag, void());
     MOCK_METHOD0(IsMemorySizeSufficent, bool());
-    MOCK_METHOD3(KillProcessesByPids, int32_t(const std::vector<int32_t> &, const std::string &, bool subProcess));
+    MOCK_METHOD4(KillProcessesByPids, int32_t(const std::vector<int32_t> &pids, const std::string &reason,
+        bool subProcess, bool isKillPrecedeStart));
 
     MockAmsMgrScheduler() : AmsMgrStub() {};
     virtual ~MockAmsMgrScheduler() {};

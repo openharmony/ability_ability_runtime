@@ -1054,6 +1054,16 @@ public:
         return killReason_;
     }
 
+    inline void SetIsKillPrecedeStart(bool isKillPrecedeStart)
+    {
+        isKillPrecedeStart_.store(isKillPrecedeStart);
+    }
+
+    inline bool IsKillPrecedeStart() const
+    {
+        return isKillPrecedeStart_.load();
+    }
+
     void AddAppLifecycleEvent(const std::string &msg);
 
     void SetNWebPreload(const bool isAllowedNWebPreload);
@@ -1297,6 +1307,7 @@ private:
     sptr<IRemoteObject> browserHost_;
     std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
     std::string killReason_ = "";
+    std::atomic_bool isKillPrecedeStart_ = false;
     int32_t rssValue_ = 0;
     int32_t pssValue_ = 0;
     bool reasonExist_ = false;

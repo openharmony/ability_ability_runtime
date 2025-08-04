@@ -262,13 +262,13 @@ AppMgrResultCode AppMgrClient::KillProcessesByUserId(int32_t userId, bool isNeed
 }
 
 AppMgrResultCode AppMgrClient::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason,
-    bool subProcess)
+    bool subProcess, bool isKillPrecedeStart)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            int32_t ret = amsService->KillProcessesByPids(pids, reason, subProcess);
+            int32_t ret = amsService->KillProcessesByPids(pids, reason, subProcess, isKillPrecedeStart);
             if (ret == ERR_OK) {
                 return AppMgrResultCode::RESULT_OK;
             }
