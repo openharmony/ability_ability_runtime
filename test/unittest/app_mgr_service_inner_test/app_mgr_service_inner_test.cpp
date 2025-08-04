@@ -1209,7 +1209,7 @@ HWTEST_F(AppMgrServiceInnerTest, KillProcessByPidInner_001, TestSize.Level2)
     ASSERT_NE(appMgrServiceInner, nullptr);
 
     pid_t pid = 99999999;
-    auto ret = appMgrServiceInner->KillProcessByPidInner(pid, "ReasonTdd", "KillReasonTdd", nullptr);
+    auto ret = appMgrServiceInner->KillProcessByPidInner(pid, "ReasonTdd", "KillReasonTdd", nullptr, false);
     EXPECT_EQ(ret, AAFwk::ERR_KILL_PROCESS_NOT_EXIST);
     TAG_LOGI(AAFwkTag::TEST, "KillProcessByPidInner_001 end");
 }

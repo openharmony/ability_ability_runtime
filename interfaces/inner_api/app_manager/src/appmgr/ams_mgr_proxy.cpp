@@ -276,7 +276,7 @@ void AmsMgrProxy::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnM
 }
 
 int32_t AmsMgrProxy::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason,
-    bool subProcess)
+    bool subProcess, bool isKillPrecedeStart)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -303,6 +303,10 @@ int32_t AmsMgrProxy::KillProcessesByPids(const std::vector<int32_t> &pids, const
     }
     if (!data.WriteBool(subProcess)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write subProcess failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isKillPrecedeStart)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write isKillPrecedeStart failed");
         return ERR_FLATTEN_OBJECT;
     }
     int32_t ret =
