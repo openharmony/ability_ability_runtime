@@ -11856,14 +11856,14 @@ int32_t AbilityManagerService::KillProcessWithReason(int32_t pid, const ExitReas
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "KillProcessWithReason: %{public}s", reason.exitMsg.c_str());
     EventInfo eventInfo;
     eventInfo.callerPid = IPCSkeleton::GetCallingPid();
     eventInfo.pid = pid;
     eventInfo.exitMsg = reason.exitMsg;
     eventInfo.shouldKillForeground = reason.shouldKillForeground;
     auto ret = KillProcessWithReasonInner(pid, reason);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "KillProcessWithReason ret: %{public}d", ret);
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "KillProcessWithReason ret: %{public}d, reason: %{public}s", ret,
+        reason.exitMsg.c_str());
     if (reason.reason == Reason::REASON_RESOURCE_CONTROL && reason.exitMsg == GlobalConstant::LOW_MEMORY_KILL) {
         eventHelper_.SendKillProcessWithReasonEvent(ret, "KillProcessWithReason", eventInfo);
     }

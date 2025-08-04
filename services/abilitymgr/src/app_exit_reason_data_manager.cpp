@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,7 @@ const std::string JSON_KEY_PROCESS_NAME = "process_name";
 const std::string JSON_KEY_PSS_VALUE = "pss_value";
 const std::string JSON_KEY_RSS_VALUE = "rss_value";
 const std::string JSON_KEY_PROSESS_STATE = "process_state";
+constexpr const char* PUT_TASK_NAME = "kvStorePtr_->Put";
 } // namespace
 AppExitReasonDataManager::AppExitReasonDataManager() {}
 
@@ -991,17 +992,16 @@ int32_t AppExitReasonDataManager::GetRecordAppAbilityNames(const uint32_t access
 
 void AppExitReasonDataManager::PutAsync(const DistributedKv::Key &key, const DistributedKv::Value &value)
 {
-    auto taskName = "kvStorePtr_->Put";
-    ffrt::submit([key, value, taskName]() {
+    ffrt::submit([key, value]() {
         auto pThis = DelayedSingleton<AppExitReasonDataManager>::GetInstance();
-        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, taskName);
-        AAFwk::RecordCostTimeUtil timeRecord(taskName);
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, PUT_TASK_NAME);
+        AAFwk::RecordCostTimeUtil timeRecord(PUT_TASK_NAME);
         std::lock_guard lock(pThis->kvStorePtrMutex_);
         auto status = pThis->kvStorePtr_->Put(key, value);
         if (status != DistributedKv::Status::SUCCESS) {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "insert error: %{public}d", status);
         }
-    },  ffrt::task_attr().name(taskName));
+        }, ffrt::task_attr().name(PUT_TASK_NAME));
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
