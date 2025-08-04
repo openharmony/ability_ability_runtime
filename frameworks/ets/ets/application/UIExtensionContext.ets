@@ -58,10 +58,15 @@ export default class UIExtensionContext extends ExtensionContext {
   native nativeStartAbility(want: Want, options: StartOptions, callback:AsyncCallbackWrapper<void>): void;
   private native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): long;
   private native nativeDisconnectServiceExtensionAbilitySync(connection: long, callback: AsyncCallbackWrapper<void>): void;
-  private native nativeStartAbilityForResultAsCaller(want: Want, callback: AsyncCallbackWrapper<void>, options?: StartOptions): void;
   private native nativeStartAbilityForResult(want: Want, callback:AsyncCallbackWrapper<AbilityResult>): void;
   private native nativeStartAbilityForResult(want: Want, startOptions: StartOptions,
     callback:AsyncCallbackWrapper<AbilityResult>): void;
+  private native nativeStartServiceExtensionAbilityWithAccount(want: Want, accountId: int,
+    callback: AsyncCallbackWrapper<void>): void;
+  private native nativeStartAbilityForResultAsCaller(want: Want,
+    callback: AsyncCallbackWrapper<AbilityResult>, options?: StartOptions): void;
+  private native nativeStartServiceExtensionAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
+  private native nativeSetHostPageOverlayForbidden(isForbidden: boolean): void;
   native setColorMode(colorMode: ConfigurationConstant.ColorMode): void;
   native nativeReportDrawnCompleted(callback:AsyncCallbackWrapper<void>): void;
 
@@ -214,5 +219,65 @@ export default class UIExtensionContext extends ExtensionContext {
     taskpool.execute((): void => {
       this.nativeReportDrawnCompleted(myCall);
     });
+  }
+
+  startServiceExtensionAbilityWithAccount(want: Want, accountId: int): Promise<void> {
+    let p = new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeStartServiceExtensionAbilityWithAccount(want, accountId, myCall);
+      }).catch((err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
+    return p;
+  }
+
+  startAbilityForResultAsCaller(want: Want, options?: StartOptions): Promise<AbilityResult> {
+    let p = new Promise<AbilityResult>((resolve: (data: AbilityResult) => void,
+      reject: (err: BusinessError) => void): void => {
+      let myCall =
+        new AsyncCallbackWrapper<AbilityResult>((err: BusinessError | null, data: AbilityResult | undefined) => {
+          if (err == null || err.code == 0) {
+            resolve(data as AbilityResult);
+          } else {
+            reject(err);
+          }
+        });
+      taskpool.execute((): void => {
+        this.nativeStartAbilityForResultAsCaller(want, myCall, options);
+      }).catch((err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
+    return p;
+  }
+
+  startServiceExtensionAbility(want: Want): Promise<void> {
+    let p = new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeStartServiceExtensionAbility(want, myCall);
+      }).catch((err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
+    return p;
+  }
+
+  setHostPageOverlayForbidden(isForbidden: boolean) : void {
+    this.nativeSetHostPageOverlayForbidden(isForbidden);
   }
 }
