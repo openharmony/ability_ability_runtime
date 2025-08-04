@@ -87,7 +87,6 @@ bool MainElementUtils::IsMainUIAbility(const std::string &bundleName,
     return false;
 }
 
-
 void MainElementUtils::SetMainUIAbilityKeepAliveFlag(bool isMainUIAbility,
     const std::string &bundleName, AbilityRuntime::LoadParam &loadParam)
 {
