@@ -1340,7 +1340,7 @@ int AbilityManagerStub::ReleaseDataAbilityInner(MessageParcel &data, MessageParc
     }
     auto callerToken = data.ReadRemoteObject();
     int32_t result = ReleaseDataAbility(scheduler, callerToken);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "release data ability ret = %d", result);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "release data ability ret = %{public}d", result);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -1823,7 +1823,7 @@ int AbilityManagerStub::DisconnectAbilityInner(MessageParcel &data, MessageParce
         return ERR_INVALID_VALUE;
     }
     int32_t result = DisconnectAbility(callback);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "disconnect ability ret = %d", result);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "disconnect ability ret = %{public}d", result);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -2487,7 +2487,7 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
     std::string errMsg = "";
     int32_t result = StartAbilityByCallWithErrMsg(*want, callback, callerToken, accountId, errMsg, isSilent);
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "resolve call ability ret = %d", result);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "resolve call ability ret = %{public}d", result);
     reply.WriteString(errMsg);
     reply.WriteInt32(result);
 
@@ -2533,7 +2533,7 @@ int AbilityManagerStub::ReleaseCallInner(MessageParcel &data, MessageParcel &rep
     }
     int32_t result = ReleaseCall(callback, *element);
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "release call ability ret = %d", result);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "release call ability ret = %{public}d", result);
 
     reply.WriteInt32(result);
 
@@ -4768,7 +4768,7 @@ int32_t AbilityManagerStub::SuspendExtensionAbilityInner(MessageParcel &data, Me
         return ERR_INVALID_VALUE;
     }
     int32_t result = SuspendExtensionAbility(callback);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "suspend extension ability ret = %d", result);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "suspend extension ability ret = %{public}d", result);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -4781,7 +4781,7 @@ int32_t AbilityManagerStub::ResumeExtensionAbilityInner(MessageParcel &data, Mes
         return ERR_INVALID_VALUE;
     }
     int32_t result = ResumeExtensionAbility(callback);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "resume extension ability ret = %d", result);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "resume extension ability ret = %{public}d", result);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

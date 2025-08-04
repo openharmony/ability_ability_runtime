@@ -122,7 +122,7 @@ bool AbilityJumpInterceptor::CheckControl(std::shared_ptr<AppExecFwk::BundleMgrH
         TAG_LOGI(AAFwkTag::ABILITYMGR, "no jump rule");
         return true;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Get appJumpControlRule, jumpMode:%d.", controlRule.jumpMode);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Get appJumpControlRule, jumpMode:%{public}d.", controlRule.jumpMode);
     return controlRule.jumpMode != AppExecFwk::AbilityJumpMode::DIRECT;
 }
 

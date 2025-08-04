@@ -84,7 +84,7 @@ void AbilityConnectionProxy::OnAbilityDisconnectDone(const AppExecFwk::ElementNa
 
     error = SendTransactCmd(IAbilityConnection::ON_ABILITY_DISCONNECT_DONE, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Disconnect done fail, error: %d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Disconnect done fail, error: %{public}d", error);
         return;
     }
 }
