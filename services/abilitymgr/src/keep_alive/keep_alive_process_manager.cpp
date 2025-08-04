@@ -354,6 +354,28 @@ bool KeepAliveProcessManager::GetKeepAliveBundleInfosForUser(std::vector<AppExec
     return !bundleInfos.empty();
 }
 
+void KeepAliveProcessManager::FilterNeedRestartKeepAliveBundleInfos(
+    std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+{
+    std::lock_guard<ffrt::mutex> lock(needRestartKeepAliveUidSetLock_);
+    for (auto it = bundleInfos.begin(); it != bundleInfos.end();) {
+        auto uidIter = needRestartKeepAliveUidSet_.find(it->uid);
+        if (uidIter == needRestartKeepAliveUidSet_.end()) {
+            TAG_LOGD(AAFwkTag::KEEP_ALIVE, "bundle no need to restart: %{public}s", it->name.c_str());
+            it = bundleInfos.erase(it);
+            continue;
+        }
+        needRestartKeepAliveUidSet_.erase(uidIter);
+        ++it;
+    }
+}
+
+void KeepAliveProcessManager::AddNeedRestartKeepAliveUid(int32_t uid)
+{
+    std::lock_guard<ffrt::mutex> lock(needRestartKeepAliveUidSetLock_);
+    needRestartKeepAliveUidSet_.emplace(uid);
+}
+
 int32_t KeepAliveProcessManager::QueryKeepAliveApplications(int32_t appType, int32_t userId,
     std::vector<KeepAliveInfo> &infoList, bool isByEDM)
 {

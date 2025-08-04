@@ -55,12 +55,12 @@ public:
         const std::string &mainElement, bool updateEnable, int32_t userId);
 
     /**
-     * IsMainUIAbility, Verify IsMainUIAbility.
+     * IsMainUIAbility, verify whether or not the ability is main UIAbility.
      *
      * @param bundleName The bundle name.
      * @param abilityName The ability name.
      * @param userId User id.
-     * @return Whether or not the ability is main ability.
+     * @return Whether or not the ability is main UIAbility.
      */
     static bool IsMainUIAbility(const std::string &bundleName, const std::string &abilityName, int32_t userId);
 
