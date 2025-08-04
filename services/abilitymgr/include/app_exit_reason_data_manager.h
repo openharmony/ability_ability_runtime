@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,6 +104,7 @@ private:
     DistributedKv::Key GetSessionIdKey(const int32_t sessionId);
     DistributedKv::Value ConvertAccessTokenIdToValue(uint32_t accessTokenId);
     DistributedKv::Status RestoreKvStore(DistributedKv::Status status);
+    static void PutAsync(const DistributedKv::Key &key, const DistributedKv::Value &value);
 
     const DistributedKv::AppId appId_ { "app_exit_reason_storage" };
     const DistributedKv::StoreId storeId_ { "app_exit_reason_infos" };

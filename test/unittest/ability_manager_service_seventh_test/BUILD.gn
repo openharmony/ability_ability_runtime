@@ -40,7 +40,10 @@ ohos_unittest("ability_manager_service_seventh_test") {
     "src/permission_verification.cpp",
   ]
 
-  deps = [ "${ability_runtime_innerkits_path}/ability_manager:process_options" ]
+  deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:process_options",
+    "${ability_runtime_services_path}/common:record_cost_time_util",
+  ]
 
   external_deps = [
     "ability_base:session_info",
