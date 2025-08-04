@@ -25,6 +25,8 @@
 #include "ets_context_utils.h"
 #include "ets_error_utils.h"
 #include "ets_extension_context.h"
+#include "ipc_skeleton.h"
+#include "tokenid_kit.h"
 #include "ui_extension_context.h"
 
 
@@ -160,6 +162,69 @@ void EtsUIExtensionContext::StartAbilityForResultWithOptions(ani_env *env, ani_o
         return;
     }
     etsUiExtensionContext->OnStartAbilityForResult(env, aniObj, wantObj, startOptionsObj, callback);
+}
+
+void EtsUIExtensionContext::StartServiceExtensionAbilityWithAccount(ani_env *env, ani_object aniObj,
+    ani_object wantObj, ani_int aniAccountId, ani_object callbackObj)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "StartServiceExtensionAbilityWithAccount called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    auto etsUiExtensionContext = GetEtsUIExtensionContext(env, aniObj);
+    if (etsUiExtensionContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsUiExtensionContext");
+        return;
+    }
+    etsUiExtensionContext->OnStartServiceExtensionAbilityWithAccount(env, aniObj, wantObj, aniAccountId, callbackObj);
+}
+
+void EtsUIExtensionContext::StartAbilityForResultAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_object callbackObj, ani_object optionsObj)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "StartAbilityForResultAsCaller called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    auto etsUiExtensionContext = GetEtsUIExtensionContext(env, aniObj);
+    if (etsUiExtensionContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsUiExtensionContext");
+        return;
+    }
+    etsUiExtensionContext->OnStartAbilityForResultAsCaller(env, aniObj, wantObj, callbackObj, optionsObj);
+}
+
+void EtsUIExtensionContext::StartServiceExtensionAbility(ani_env *env, ani_object aniObj,
+    ani_object wantObj, ani_object callbackObj)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "StartServiceExtensionAbility called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    auto etsUiExtensionContext = GetEtsUIExtensionContext(env, aniObj);
+    if (etsUiExtensionContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsUiExtensionContext");
+        return;
+    }
+    etsUiExtensionContext->OnStartServiceExtensionAbility(env, aniObj, wantObj, callbackObj);
+}
+
+void EtsUIExtensionContext::SetHostPageOverlayForbidden(ani_env *env, ani_object aniObj, ani_boolean aniIsForbidden)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "SetHostPageOverlayForbidden called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    auto etsUiExtensionContext = GetEtsUIExtensionContext(env, aniObj);
+    if (etsUiExtensionContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsUiExtensionContext");
+        return;
+    }
+    etsUiExtensionContext->OnSetHostPageOverlayForbidden(env, aniObj, aniIsForbidden);
 }
 
 void EtsUIExtensionContext::OnTerminateSelf(ani_env *env, ani_object obj, ani_object callback)
@@ -486,6 +551,150 @@ bool EtsUIExtensionContext::CheckConnectionParam(ani_env *env, ani_object connec
     return true;
 }
 
+void EtsUIExtensionContext::OnStartServiceExtensionAbilityWithAccount(ani_env *env, ani_object aniObj,
+    ani_object wantObj, ani_int aniAccountId, ani_object callbackObj)
+{
+    AAFwk::Want want;
+    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to UnwrapWant");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateInvalidParamError(env, "Failed to UnwrapWant"), nullptr);
+        return;
+    }
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "context is nullptr");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT), nullptr);
+        return;
+    }
+
+    auto errCode = context->StartServiceExtensionAbility(want, aniAccountId);
+    AppExecFwk::AsyncCallback(env, callbackObj,
+        EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(errCode)), nullptr);
+}
+
+RuntimeTask EtsUIExtensionContext::CreateRuntimeTask(ani_vm *etsVm, ani_ref callbackRef)
+{
+    return [etsVm, callbackRef] (int resultCode, const AAFwk::Want &want, bool isInner) {
+        ani_env* env = nullptr;
+        if (etsVm->GetEnv(ANI_VERSION_1, &env) != ANI_OK || env == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "GetEnv failed in callback");
+            return;
+        }
+
+        ani_object abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
+        if (abilityResult == nullptr) {
+            TAG_LOGW(AAFwkTag::UI_EXT, "null abilityResult");
+            AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
+                EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INNER), nullptr);
+            env->GlobalReference_Delete(callbackRef);
+            return;
+        }
+
+        int errCode = isInner ? resultCode : 0;
+        AppExecFwk::AsyncCallback(env, reinterpret_cast<ani_object>(callbackRef),
+            EtsErrorUtil::CreateErrorByNativeErr(env, errCode), abilityResult);
+        env->GlobalReference_Delete(callbackRef);
+    };
+}
+
+void EtsUIExtensionContext::OnStartAbilityForResultAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_object callbackObj, ani_object optionsObj)
+{
+    AAFwk::Want want;
+    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to UnwrapWant");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateInvalidParamError(env, "Failed to UnwrapWant"), nullptr);
+        return;
+    }
+    if (!want.HasParameter(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK)) {
+        want.SetParam(AAFwk::Want::PARAM_BACK_TO_OTHER_MISSION_STACK, true);
+    }
+    ani_boolean isUndefined = false;
+    ani_status status = ANI_OK;
+    if ((status = env->Reference_IsUndefined(optionsObj, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Reference_IsUndefined status: %{public}d", status);
+        return;
+    }
+    AAFwk::StartOptions startOptions;
+    if (!isUndefined) {
+        if (!AppExecFwk::UnwrapStartOptions(env, optionsObj, startOptions)) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "UnwrapStartOptions filed");
+            AppExecFwk::AsyncCallback(env, callbackObj,
+                EtsErrorUtil::CreateInvalidParamError(env, "startOptions filed"), nullptr);
+            return;
+        }
+    }
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "context is nullptr");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT), nullptr);
+        return;
+    }
+#ifdef SUPPORT_SCREEN
+    (isUndefined) ? InitDisplayId(want) : InitDisplayId(want, startOptions, env, optionsObj);
+#endif
+    ani_vm *etsVm = nullptr;
+    if ((status = env->GetVM(&etsVm)) != ANI_OK || etsVm == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "GetVM failed, status: %{public}d", status);
+        return;
+    }
+    ani_ref callbackRef = nullptr;
+    env->GlobalReference_Create(callbackObj, &callbackRef);
+    RuntimeTask task = CreateRuntimeTask(etsVm, callbackRef);
+    want.SetParam(AAFwk::Want::PARAM_RESV_FOR_RESULT, true);
+    int curRequestCode = context->GenerateCurRequestCode();
+    (isUndefined) ?
+        context->StartAbilityForResultAsCaller(want, curRequestCode, std::move(task)) :
+        context->StartAbilityForResultAsCaller(want, startOptions, curRequestCode, std::move(task));
+}
+
+void EtsUIExtensionContext::OnStartServiceExtensionAbility(ani_env *env, ani_object aniObj,
+    ani_object wantObj, ani_object callbackObj)
+{
+    AAFwk::Want want;
+    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to UnwrapWant");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateInvalidParamError(env, "Failed to UnwrapWant"), nullptr);
+        return;
+    }
+
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "context is nullptr");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT), nullptr);
+        return;
+    }
+    auto errCode = context->StartServiceExtensionAbility(want);
+    AppExecFwk::AsyncCallback(env, callbackObj,
+        EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(errCode)), nullptr);
+}
+
+void EtsUIExtensionContext::OnSetHostPageOverlayForbidden(ani_env *env, ani_object aniObj, ani_boolean aniIsForbidden)
+{
+    bool isNotAllow = static_cast<bool>(aniIsForbidden);
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "context is nullptr");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
+    }
+
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return;
+    }
+
+    context->isNotAllow = isNotAllow ? 1 : 0;
+    TAG_LOGD(AAFwkTag::UI_EXT, "SetHostPageOverlayForbidden ok, isNotAllow: %{public}d", isNotAllow);
+}
+
 void EtsUIExtensionContext::Clean(ani_env *env, ani_object object)
 {
     ani_long ptr = 0;
@@ -586,6 +795,51 @@ bool EtsUIExtensionContext::BindNativePtrCleaner(ani_env *env)
     return true;
 }
 
+#ifdef SUPPORT_SCREEN
+void EtsUIExtensionContext::InitDisplayId(AAFwk::Want &want)
+{
+    auto context = context_.lock();
+    if (!context) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        return;
+    }
+
+    auto window = context->GetWindow();
+    if (window == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null window");
+        return;
+    }
+
+    TAG_LOGI(AAFwkTag::UI_EXT, "window displayId %{public}" PRIu64, window->GetDisplayId());
+    want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, static_cast<int32_t>(window->GetDisplayId()));
+}
+
+void EtsUIExtensionContext::InitDisplayId(AAFwk::Want &want, AAFwk::StartOptions &startOptions,
+    ani_env *env, ani_object optionsObj)
+{
+    auto context = context_.lock();
+    if (!context) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        return;
+    }
+
+    auto window = context->GetWindow();
+    if (window == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null window");
+        return;
+    }
+
+    ani_double displayId = 0.0;
+    if (AppExecFwk::GetFieldDoubleByName(env, optionsObj, "displayId", displayId)) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "startOption displayId %{public}d", startOptions.GetDisplayID());
+        return;
+    }
+
+    TAG_LOGI(AAFwkTag::UI_EXT, "window displayId %{public}" PRIu64, window->GetDisplayId());
+    startOptions.SetDisplayID(window->GetDisplayId());
+}
+#endif
+
 ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
@@ -629,6 +883,18 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
             "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/"
             "AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(EtsUIExtensionContext::StartAbilityForResultWithOptions) },
+        ani_native_function { "nativeStartServiceExtensionAbilityWithAccount",
+            "L@ohos/app/ability/Want/Want;ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void*>(EtsUIExtensionContext::StartServiceExtensionAbilityWithAccount) },
+        ani_native_function { "nativeStartAbilityForResultAsCaller",
+            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;L@ohos/app/"
+            "ability/StartOptions/StartOptions;:V",
+            reinterpret_cast<void*>(EtsUIExtensionContext::StartAbilityForResultAsCaller) },
+        ani_native_function { "nativeStartServiceExtensionAbility",
+            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void*>(EtsUIExtensionContext::StartServiceExtensionAbility) },
+        ani_native_function { "nativeSetHostPageOverlayForbidden", "Z:V",
+            reinterpret_cast<void*>(EtsUIExtensionContext::SetHostPageOverlayForbidden) },
         ani_native_function{"setColorMode",
             "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ColorMode;:V",
             reinterpret_cast<void *>(EtsUIExtensionContext::SetColorMode)},
