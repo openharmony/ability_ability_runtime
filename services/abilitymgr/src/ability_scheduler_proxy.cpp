@@ -74,7 +74,6 @@ bool AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const L
         return false;
     }
     int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITY_TRANSACTION, data, reply, option);
-    const_cast<Want &>(want).CloseAllFd();
     if (err != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail, err: %{public}d", err);
         AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey,
