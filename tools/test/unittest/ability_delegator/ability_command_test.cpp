@@ -226,8 +226,6 @@ HWTEST_F(AbilityCommandTest, Ability_Command_Test_0800, Function | MediumTest | 
     char* argv[] = {
         (char*)TOOL_NAME.c_str(),
         (char*)cmd_.c_str(),
-        (char*)"-b",
-        (char*)STRING_BUNDLE_NAME.c_str(),
         (char*)"-l",
     };
     int argc = sizeof(argv) / sizeof(argv[0]) - 1;
