@@ -2721,7 +2721,7 @@ int AbilityManagerProxy::LockMissionForCleanup(int32_t missionId)
 
     error = SendRequest(AbilityManagerInterfaceCode::LOCK_MISSION_FOR_CLEANUP, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "send error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "send error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -2744,7 +2744,7 @@ int AbilityManagerProxy::UnlockMissionForCleanup(int32_t missionId)
     }
     error = SendRequest(AbilityManagerInterfaceCode::UNLOCK_MISSION_FOR_CLEANUP, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "unlock mission,error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "unlock mission,error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -2772,7 +2772,7 @@ void AbilityManagerProxy::SetLockedState(int32_t sessionId, bool lockedState)
     MessageOption option(MessageOption::TF_ASYNC);
     auto error = SendRequest(AbilityManagerInterfaceCode::SET_SESSION_LOCKED_STATE, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "error: %d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "error: %{public}d", error);
         return;
     }
     return;
@@ -3018,7 +3018,7 @@ int AbilityManagerProxy::CleanMission(int32_t missionId)
     }
     error = SendRequest(AbilityManagerInterfaceCode::CLEAN_MISSION, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "clean mission, error: %d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "clean mission, error: %{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -3038,7 +3038,7 @@ int AbilityManagerProxy::CleanAllMissions()
     }
     error = SendRequest(AbilityManagerInterfaceCode::CLEAN_ALL_MISSIONS, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -3061,7 +3061,7 @@ int AbilityManagerProxy::MoveMissionToFront(int32_t missionId)
     }
     error = SendRequest(AbilityManagerInterfaceCode::MOVE_MISSION_TO_FRONT, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -3088,7 +3088,7 @@ int AbilityManagerProxy::MoveMissionToFront(int32_t missionId, const StartOption
     }
     error = SendRequest(AbilityManagerInterfaceCode::MOVE_MISSION_TO_FRONT_BY_OPTIONS, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -3177,7 +3177,7 @@ int AbilityManagerProxy::StartUser(int userId, sptr<IUserCallback> callback, boo
     MessageOption option(MessageOption::TF_ASYNC);
     auto error = SendRequest(AbilityManagerInterfaceCode::START_USER, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -3232,7 +3232,7 @@ int AbilityManagerProxy::StopUser(int userId, const sptr<IUserCallback> &callbac
     MessageOption option(MessageOption::TF_ASYNC);
     auto error = SendRequest(AbilityManagerInterfaceCode::STOP_USER, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();

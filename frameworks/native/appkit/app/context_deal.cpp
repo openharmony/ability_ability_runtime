@@ -261,7 +261,8 @@ void ContextDeal::SetPattern(int patternId)
         }
         OHOS::Global::Resource::RState errval = resourceManager_->GetPatternById(patternId, pattern_);
         if (errval != OHOS::Global::Resource::RState::SUCCESS) {
-            TAG_LOGE(AAFwkTag::APPKIT, "SetPattern GetPatternById(patternId:%d) retval: %u", patternId, errval);
+            TAG_LOGE(AAFwkTag::APPKIT, "SetPattern GetPatternById(patternId:%{public}d) retval: %{public}u",
+                     patternId, errval);
         }
     } else {
         TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager_");
@@ -298,7 +299,7 @@ std::string ContextDeal::GetString(int resId)
     if (errval == OHOS::Global::Resource::RState::SUCCESS) {
         return ret;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetStringById(resId:%d) retval: %u", resId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "GetStringById(resId:%{public}d) retval: %{public}u", resId, errval);
         return "";
     }
 }
@@ -315,7 +316,7 @@ std::vector<std::string> ContextDeal::GetStringArray(int resId)
     if (errval == OHOS::Global::Resource::RState::SUCCESS) {
         return retv;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetStringArrayById(resId:%d) retval: %u", resId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "GetStringArrayById(resId:%{public}d) retval: %{public}u", resId, errval);
         return std::vector<std::string>();
     }
 }
@@ -332,7 +333,7 @@ std::vector<int> ContextDeal::GetIntArray(int resId)
     if (errval == OHOS::Global::Resource::RState::SUCCESS) {
         return retv;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetIntArrayById(resId:%d) retval: %u", resId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "GetIntArrayById(resId:%{public}d) retval: %{public}u", resId, errval);
         return std::vector<int>();
     }
 }
@@ -363,7 +364,7 @@ void ContextDeal::SetTheme(int themeId)
     }
     OHOS::Global::Resource::RState errval = resourceManager_->GetThemeById(themeId, theme_);
     if (errval != OHOS::Global::Resource::RState::SUCCESS) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetThemeById(themeId:%d) retval: %u", themeId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "GetThemeById(themeId:%{public}d) retval: %{public}u", themeId, errval);
     }
 }
 
@@ -389,7 +390,7 @@ int ContextDeal::GetColor(int resId)
     if (errval == OHOS::Global::Resource::RState::SUCCESS) {
         return ret;
     } else {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetColorById(resId:%d) retval: %u", resId, errval);
+        TAG_LOGE(AAFwkTag::APPKIT, "GetColorById(resId:%{public}d) retval: %{public}u", resId, errval);
         return INVALID_RESOURCE_VALUE;
     }
 }

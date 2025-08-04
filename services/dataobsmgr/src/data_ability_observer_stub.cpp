@@ -49,7 +49,7 @@ int DataAbilityObserverStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     }
 
     if (code < TRANS_HEAD || code >= TRANS_BUTT || HANDLES[code] == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "invalid code:%u, BUTT:%d", code, TRANS_BUTT);
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "invalid code:%{public}u, BUTT:%{public}d", code, TRANS_BUTT);
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     return (this->*HANDLES[code])(data, reply);

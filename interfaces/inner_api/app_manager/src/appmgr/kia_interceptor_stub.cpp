@@ -25,7 +25,7 @@ KiaInterceptorStub::~KiaInterceptorStub() {}
 
 int KiaInterceptorStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "cmd=%d,flags=%d", code, option.GetFlags());
+    TAG_LOGD(AAFwkTag::APPMGR, "cmd=%{public}d,flags=%{public}d", code, option.GetFlags());
     std::u16string descriptor = KiaInterceptorStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
