@@ -138,6 +138,11 @@ typedef enum {
      * @since 17
      */
     ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED = 16000079,
+    /**
+     * @error The application info does not exist.
+     * @since 17
+     */
+    ABILITY_RUNTIME_ERROR_CODE_APP_INFO_NOT_EXIST = 16000080,
 } AbilityRuntime_ErrorCode;
 
 #ifdef __cplusplus
