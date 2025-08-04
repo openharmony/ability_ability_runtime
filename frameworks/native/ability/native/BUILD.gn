@@ -118,6 +118,7 @@ config("ability_public_config") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native/recovery/",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_innerkits_path}/ability_manager/include/continuation",
+    "${ability_runtime_innerkits_path}/runtime/include",
     "${ability_runtime_services_path}/common/include",
   ]
 
@@ -336,6 +337,7 @@ ohos_shared_library("abilitykit_native") {
   ]
 
   deps = [
+    ":abilitykit_utils",
     ":configuration_helper",
     ":continuation_ipc",
     ":extension_blocklist_config",
@@ -378,6 +380,7 @@ ohos_shared_library("abilitykit_native") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "graphic_2d:2d_graphics",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
@@ -498,6 +501,7 @@ ohos_shared_library("cj_abilitykit_native_ffi") {
   deps = [
     ":abilitykit_native",
     ":continuation_ipc",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_path}/frameworks/cj/ffi/context:cj_context_ffi",
@@ -505,6 +509,7 @@ ohos_shared_library("cj_abilitykit_native_ffi") {
   external_deps = [
     "ace_engine:ace_uicontent",
     "eventhandler:libeventhandler",
+    "form_fwk:form_manager",
     "ipc:cj_ipc_ffi",
     "ipc:ipc_core",
     "ipc:ipc_napi",
@@ -512,6 +517,7 @@ ohos_shared_library("cj_abilitykit_native_ffi") {
     "napi:ace_napi",
     "napi:cj_bind_ffi",
     "napi:cj_bind_native",
+    "window_manager:libwm",
   ]
 
   if (!(host_os == "linux" && host_cpu == "arm64")) {
@@ -563,6 +569,7 @@ ohos_shared_library("extensionkit_native") {
   ]
 
   sources = [
+    "${ability_runtime_native_path}/ability/native/ability_local_record.cpp",
     "${ability_runtime_native_path}/ability/native/app_module_checker.cpp",
     "${ability_runtime_native_path}/ability/native/extension.cpp",
     "${ability_runtime_native_path}/ability/native/extension_config_mgr.cpp",
@@ -894,6 +901,7 @@ ohos_shared_library("ui_ability_ani") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":configuration_helper",
     ":continuation_ipc",
     ":extensionkit_native",
@@ -993,6 +1001,7 @@ ohos_shared_library("uiabilitykit_native") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":configuration_helper",
     ":continuation_ipc",
     ":extensionkit_native",
@@ -1106,6 +1115,7 @@ ohos_shared_library("ability_thread") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":extensionkit_native",
     ":uiabilitykit_native",
     "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
@@ -1242,6 +1252,7 @@ ohos_shared_library("form_extension") {
 
     deps = [
       ":abilitykit_native",
+      ":abilitykit_utils",
       ":extensionkit_native",
       "${ability_runtime_innerkits_path}/runtime:runtime",
       "${ability_runtime_napi_path}/inner/napi_common:napi_common",
@@ -1304,6 +1315,7 @@ ohos_shared_library("cj_form_extension") {
 
     deps = [
       ":abilitykit_native",
+      ":abilitykit_utils",
       ":cj_extensionkit_native",
       ":extensionkit_native",
       ":form_extension",
@@ -1407,6 +1419,7 @@ ohos_shared_library("service_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":extensionkit_native",
     "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
@@ -1477,6 +1490,7 @@ ohos_shared_library("service_extension_ani") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":extensionkit_native",
     ":service_extension",
     "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
@@ -1605,6 +1619,7 @@ ohos_shared_library("ui_service_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":extensionkit_native",
     ":ui_service_extension_connection",
     "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
@@ -1703,7 +1718,10 @@ ohos_shared_library("ui_service_extension_module") {
   sources = [ "${ability_runtime_native_path}/ability/native/ui_service_extension_ability/ui_service_extension_module_loader.cpp" ]
 
   configs = [ ":ability_config" ]
-  deps = [ ":ui_service_extension" ]
+  deps = [
+    ":ui_service_extension",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+  ]
 
   external_deps = [
     "ability_base:configuration",
@@ -2045,6 +2063,7 @@ ohos_shared_library("ui_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":extensionkit_native",
     ":ui_service_extension_connection",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
@@ -2123,6 +2142,7 @@ ohos_shared_library("ui_extension_ani") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":extensionkit_native",
     ":ui_extension",
     ":ui_service_extension_connection",
@@ -2200,6 +2220,7 @@ ohos_shared_library("cj_ui_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":cj_extensionkit_native",
     ":extensionkit_native",
     ":ui_extension",
@@ -2310,6 +2331,7 @@ ohos_shared_library("share_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":extensionkit_native",
     ":ui_extension",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
@@ -2359,6 +2381,7 @@ ohos_shared_library("cj_share_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":cj_ui_extension",
     ":extensionkit_native",
     ":share_extension",
@@ -2413,6 +2436,7 @@ ohos_shared_library("action_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":extensionkit_native",
     ":ui_extension",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
@@ -2462,6 +2486,7 @@ ohos_shared_library("cj_action_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":action_extension",
     ":cj_ui_extension",
     ":extensionkit_native",
@@ -2682,6 +2707,7 @@ ohos_shared_library("embedded_ui_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":extensionkit_native",
     ":ui_extension",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
@@ -2691,6 +2717,7 @@ ohos_shared_library("embedded_ui_extension") {
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/frameworks/native/ability/native:cj_form_extension",
   ]
 
   external_deps = [
@@ -2734,6 +2761,7 @@ ohos_shared_library("cj_embedded_ui_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":cj_ui_extension",
     ":embedded_ui_extension",
     ":extensionkit_native",
@@ -2746,6 +2774,7 @@ ohos_shared_library("cj_embedded_ui_extension") {
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_path}/frameworks/cj/ffi:cj_ability_ffi",
+    "${ability_runtime_path}/frameworks/native/ability/native:cj_form_extension",
   ]
 
   external_deps = [
@@ -2831,6 +2860,7 @@ ohos_shared_library("auto_fill_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":extensionkit_native",
     ":insight_intent_executor",
     ":ui_extension",
@@ -2841,6 +2871,7 @@ ohos_shared_library("auto_fill_extension") {
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/frameworks/native/ability/native:cj_form_extension",
   ]
 
   external_deps = [
@@ -2953,6 +2984,7 @@ ohos_shared_library("photo_editor_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":extensionkit_native",
     ":ui_extension",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
@@ -3010,6 +3042,7 @@ ohos_shared_library("cj_photo_editor_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":cj_extensionkit_native",
     ":cj_ui_extension",
     ":extensionkit_native",
@@ -3121,6 +3154,7 @@ ohos_shared_library("app_service_extension") {
 
   deps = [
     ":abilitykit_native",
+    ":abilitykit_utils",
     ":extensionkit_native",
     ":service_extension",
     "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
