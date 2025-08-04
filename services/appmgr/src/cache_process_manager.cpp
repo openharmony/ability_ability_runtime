@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "app_utils.h"
 #include "cache_process_manager.h"
 #include "hisysevent.h"
+#include "record_cost_time_util.h"
 #include "res_sched_util.h"
 #include "ui_extension_utils.h"
 
@@ -208,6 +209,7 @@ bool CacheProcessManager::IsCachedProcess(const std::shared_ptr<AppRunningRecord
 void CacheProcessManager::OnProcessKilled(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    AAFwk::RecordCostTimeUtil timeRecord("OnProcessKilled");
     if (!QueryEnableProcessCache()) {
         return;
     }
