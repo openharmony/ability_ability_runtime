@@ -34,6 +34,7 @@ ohos_unittest("state_utils_test") {
   deps = []
 
   external_deps = [
+    "ability_base:configuration",
     "ability_runtime:abilitykit_native",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
