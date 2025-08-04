@@ -171,7 +171,6 @@ void Watchdog::AllowReportEvent()
     std::unique_lock<std::mutex> lock(cvMutex_);
     needReport_.store(true);
     isSixSecondEvent_.store(false);
-    backgroundReportCount_.store(0);
     watchdogReportCount_.store(0);
 }
 
@@ -267,14 +266,12 @@ void Watchdog::ReportEvent()
         return;
     }
 
-    if (isInBackground_ && backgroundReportCount_.load() < BACKGROUND_REPORT_COUNT_MAX) {
+    if (isInBackground_) {
         TAG_LOGI(AAFwkTag::APPDFR, "In Background, thread may be blocked in, not report time"
             "currTime: %{public}" PRIu64 ", lastTime: %{public}" PRIu64 "",
             static_cast<uint64_t>(now), static_cast<uint64_t>(lastWatchTime_));
-        backgroundReportCount_++;
         return;
     }
-    backgroundReportCount_++;
 
     if (!needReport_) {
         return;
