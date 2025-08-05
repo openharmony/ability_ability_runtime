@@ -59,6 +59,7 @@ ohos_unittest("dump_utils_test") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
+    "init:libbeget_proxy",
     "init:libbegetutil",
     "json:nlohmann_json_static",
     "window_manager:libdm",
