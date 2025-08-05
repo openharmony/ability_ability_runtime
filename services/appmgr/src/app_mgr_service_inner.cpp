@@ -863,6 +863,10 @@ void AppMgrServiceInner::ReportEventToRSS(const AppExecFwk::AbilityInfo &ability
 void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
     std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "forbid start: %{public}s", abilityInfo ? abilityInfo->bundleName.c_str() : "");
+        return;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (loadParam == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null loadParam");
@@ -4349,6 +4353,10 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
     AppExecFwk::PreloadMode preloadMode, const std::string &moduleName, const std::string &abilityName,
     sptr<IRemoteObject> token, std::shared_ptr<AAFwk::Want> want, ExtensionAbilityType extensionAbilityType)
 {
+    if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::APPMGR, "forbid start: %{public}s", processName.c_str());
+        return AAFwk::INNER_ERR;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     std::shared_lock lock(startProcessLock_);
     TAG_LOGD(AAFwkTag::APPMGR, "bundleName: %{public}s, isPreload: %{public}d", bundleName.c_str(), isPreload);

@@ -17,6 +17,7 @@
 
 #include "ability_manager_service.h"
 #include "ability_util.h"
+#include "app_utils.h"
 #include "hitrace_meter.h"
 #include "param.h"
 #include "utils/state_utils.h"
@@ -69,6 +70,10 @@ bool AppScheduler::Init(const std::weak_ptr<AppStateCallback> &callback)
 int AppScheduler::LoadAbility(const AbilityRuntime::LoadParam &loadParam, const AppExecFwk::AbilityInfo &abilityInfo,
     const AppExecFwk::ApplicationInfo &applicationInfo, const Want &want)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", abilityInfo.bundleName.c_str());
+        return INNER_ERR;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
@@ -139,6 +144,10 @@ void AppScheduler::UpdateAbilityState(const sptr<IRemoteObject> &token, const Ap
 
 void AppScheduler::UpdateExtensionState(const sptr<IRemoteObject> &token, const AppExecFwk::ExtensionState state)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start UpdateExtensionState");
+        return;
+    }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "UpdateExtensionState.");
     CHECK_POINTER(appMgrClient_);
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->UpdateExtensionState(token, state));
