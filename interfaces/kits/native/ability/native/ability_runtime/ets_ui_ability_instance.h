@@ -21,9 +21,12 @@
 namespace OHOS {
 namespace AbilityRuntime {
 class UIAbility;
+class AbilityContext;
 class Runtime;
 
 UIAbility *CreateETSUIAbility(const std::unique_ptr<Runtime> &runtime);
+void CreateAndBindETSUIAbilityContext(const std::shared_ptr<AbilityContext> &abilityContext,
+    const std::unique_ptr<Runtime> &runtime);
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ETS_UI_ABILITY_INSTANCE_H

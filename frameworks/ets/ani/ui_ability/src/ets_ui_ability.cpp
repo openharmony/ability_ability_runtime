@@ -33,6 +33,7 @@
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "insight_intent_execute_param.h"
+#include "ohos_application.h"
 #include "string_wrapper.h"
 
 #ifdef WINDOWS_PLATFORM
@@ -95,6 +96,9 @@ EtsUIAbility::EtsUIAbility(ETSRuntime &etsRuntime) : etsRuntime_(etsRuntime)
 EtsUIAbility::~EtsUIAbility()
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "~EtsUIAbility called");
+    if (abilityContext_ != nullptr) {
+        abilityContext_->Unbind<ani_ref>();
+    }
     auto env = etsRuntime_.GetAniEnv();
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null env");
@@ -189,6 +193,43 @@ void EtsUIAbility::UpdateAbilityObj(
     }
 }
 
+void EtsUIAbility::CreateAndBindContext(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
+    const std::unique_ptr<Runtime>& runtime)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+        return;
+    }
+    if (runtime == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null runtime");
+        return;
+    }
+    if (runtime->GetLanguage() != Runtime::Language::ETS) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "wrong runtime language");
+        return;
+    }
+    auto& etsRuntime = static_cast<ETSRuntime&>(*runtime);
+    auto env = etsRuntime.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+
+    int32_t screenMode = abilityContext->GetScreenMode();
+    if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
+        ani_ref contextObj = CreateEtsAbilityContext(env, abilityContext);
+        ani_ref* contextGlobalRef = new ani_ref;
+        ani_status status = ANI_ERROR;
+        if ((status = env->GlobalReference_Create(contextObj, contextGlobalRef)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
+            return;
+        }
+        abilityContext->Bind(etsRuntime, contextGlobalRef);
+    }
+    // no CreateAniEmbeddableUIAbilityContext
+}
+
 void EtsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<Want> want,
     const std::string &moduleName, const std::string &srcPath)
 {
@@ -199,6 +240,7 @@ void EtsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, s
         return;
     }
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::ScreenMode::IDLE_SCREEN_MODE);
+    abilityContext_->SetScreenMode(screenMode);
     CreateEtsContext(screenMode);
 }
 
@@ -225,6 +267,7 @@ void EtsUIAbility::CreateEtsContext(int32_t screenMode)
         shellContextRef_ = std::make_shared<AppExecFwk::ETSNativeReference>();
         shellContextRef_->aniObj = contextObj;
         shellContextRef_->aniRef = contextGlobalRef;
+        abilityContext_->Bind(etsRuntime_, &(shellContextRef_->aniRef));
     }
     // to be done: CreateAniEmbeddableUIAbilityContext
 }
@@ -971,4 +1014,11 @@ ETS_EXPORT extern "C" OHOS::AbilityRuntime::UIAbility *OHOS_ETS_Ability_Create(
     const std::unique_ptr<OHOS::AbilityRuntime::Runtime> &runtime)
 {
     return OHOS::AbilityRuntime::EtsUIAbility::Create(runtime);
+}
+
+ETS_EXPORT extern "C" void OHOS_CreateAndBindETSUIAbilityContext(
+    const std::shared_ptr<OHOS::AbilityRuntime::AbilityContext> &abilityContext,
+    const std::unique_ptr<OHOS::AbilityRuntime::Runtime> &runtime)
+{
+    OHOS::AbilityRuntime::EtsUIAbility::CreateAndBindContext(abilityContext, runtime);
 }
