@@ -164,7 +164,6 @@ constexpr const char* IS_DELEGATOR_CALL = "isDelegatorCall";
 
 // Startup rule switch
 constexpr const char* COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
-constexpr const char* NEW_RULES_EXCEPT_LAUNCHER_SYSTEMUI = "component.startup.newRules.except.LauncherSystemUI";
 constexpr const char* BACKGROUND_JUDGE_FLAG = "component.startup.backgroundJudge.flag";
 constexpr const char* WHITE_LIST_ASS_WAKEUP_FLAG = "component.startup.whitelist.associatedWakeUp";
 
@@ -294,6 +293,7 @@ constexpr int32_t SIZE_10 = 10;
 constexpr int32_t HIDUMPER_SERVICE_UID = 1212;
 constexpr int32_t ACCOUNT_MGR_SERVICE_UID = 3058;
 constexpr int32_t DMS_UID = 5522;
+constexpr int32_t SAMGR_UID = 5555;
 constexpr int32_t BOOTEVENT_COMPLETED_DELAY_TIME = 1000;
 constexpr int32_t BOOTEVENT_BOOT_ANIMATION_READY_SIZE = 6;
 constexpr const char* BUNDLE_NAME_KEY = "bundleName";
@@ -517,7 +517,6 @@ void AbilityManagerService::InitPushTask()
 void AbilityManagerService::InitStartupFlag()
 {
     startUpNewRule_ = CheckNewRuleSwitchState(COMPONENT_STARTUP_NEW_RULES);
-    newRuleExceptLauncherSystemUI_ = CheckNewRuleSwitchState(NEW_RULES_EXCEPT_LAUNCHER_SYSTEMUI);
     backgroundJudgeFlag_ = CheckNewRuleSwitchState(BACKGROUND_JUDGE_FLAG);
     whiteListassociatedWakeUpFlag_ = CheckNewRuleSwitchState(WHITE_LIST_ASS_WAKEUP_FLAG);
 }
@@ -9001,10 +9000,10 @@ void AbilityManagerService::DisconnectBeforeCleanupByUserId(int32_t userId) {
 
 int AbilityManagerService::RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler)
 {
-    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s:permission verification failed", __func__);
-        return 0;
+    if (IPCSkeleton::GetCallingUid() != SAMGR_UID) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "register snapshot handler permission fail:%{public}d",
+            IPCSkeleton::GetCallingUid());
+        return CHECK_PERMISSION_FAILED;
     }
 
     auto missionListManager = GetCurrentMissionListManager();
@@ -10448,14 +10447,13 @@ int AbilityManagerService::SetMissionIcon(const sptr<IRemoteObject> &token,
 int AbilityManagerService::RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler> &handler,
     bool animationEnabled)
 {
-    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "permission verify failed");
+    if (IPCSkeleton::GetCallingUid() != SAMGR_UID) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "register wms handler permission fail:%{public}d", IPCSkeleton::GetCallingUid());
         return CHECK_PERMISSION_FAILED;
     }
     wmsHandler_ = handler;
     isAnimationEnabled_ = animationEnabled;
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s: WMS handler registered successfully.", __func__);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "WMS handler registered successfully.");
     return ERR_OK;
 }
 
