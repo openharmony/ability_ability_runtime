@@ -8084,6 +8084,7 @@ void AbilityManagerService::StartKeepAliveApps(int32_t userId)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "get keep-alive bundle info failed");
         return;
     }
+    KeepAliveProcessManager::GetInstance().FilterNeedRestartKeepAliveBundleInfos(bundleInfos);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartKeepAliveApps getBundleInfos size:%{public}zu", bundleInfos.size());
 
     KeepAliveProcessManager::GetInstance().StartKeepAliveProcessWithMainElement(bundleInfos, userId);
@@ -12521,6 +12522,9 @@ void AbilityManagerService::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::
             bundleInfosForU1.push_back(item);
         } else if (item.uid / BASE_USER_RANGE == userId) {
             bundleInfosForCurrentUser.push_back(item);
+        } else {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "keepAlive not U1 or current user.");
+            KeepAliveProcessManager::GetInstance().AddNeedRestartKeepAliveUid(item.uid);
         }
     }
 

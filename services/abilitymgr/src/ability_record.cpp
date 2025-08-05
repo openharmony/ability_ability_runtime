@@ -375,11 +375,11 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     loadParam.instanceKey = instanceKey_;
     loadParam.isCallerSetProcess = IsCallerSetProcess();
     loadParam.customProcessFlag = customProcessFlag_;
-    auto userId = abilityInfo_.applicationInfo.uid / BASE_USER_RANGE;
+    auto userId = abilityInfo_.uid / BASE_USER_RANGE;
     bool isMainUIAbility =
-        MainElementUtils::IsMainUIAbility(abilityInfo_.applicationInfo.bundleName, abilityInfo_.name, userId);
+        MainElementUtils::IsMainUIAbility(abilityInfo_.bundleName, abilityInfo_.name, userId);
     MainElementUtils::SetMainUIAbilityKeepAliveFlag(isMainUIAbility,
-        abilityInfo_.applicationInfo.bundleName, loadParam);
+        abilityInfo_.bundleName, loadParam);
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
         loadParam, abilityInfo_, abilityInfo_.applicationInfo, want_);
     want_.RemoveParam(IS_HOOK);
