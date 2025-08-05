@@ -62,6 +62,8 @@ AutoStartupStatus AbilityAutoStartupDataManager::QueryAutoStartupData(const Auto
         startupStatus.code = ERR_OK;
     } else if (info.bundleName == BUNDLENAME_FONUD && info.abilityName == ABILITYNAME_AUTO_START) {
         startupStatus.isAutoStartup = true;
+        startupStatus.setterUserId = DEFAULT_USERID;
+        startupStatus.setterType = AutoStartupSetterType::USER;
         startupStatus.code = ERR_OK;
     } else if (info.bundleName == BUNDLENAME_FONUD && info.abilityName == ABILITYNAME_NOT_AUTO_START) {
         startupStatus.isAutoStartup = false;

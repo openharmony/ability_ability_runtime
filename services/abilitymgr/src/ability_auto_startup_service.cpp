@@ -197,7 +197,9 @@ int32_t AbilityAutoStartupService::InnerCancelApplicationAutoStartup(const AutoS
     }
 
     if (status.isAutoStartup) {
-        if (status.setterUserId != info.setterUserId && status.setterType != AutoStartupSetterType::SYSTEM) {
+        if (status.setterUserId != -1 &&
+            status.setterUserId != info.setterUserId &&
+            status.setterType == AutoStartupSetterType::USER) {
             TAG_LOGE(AAFwkTag::AUTO_STARTUP, "setter id is different, cannot cancel");
             return ERR_INVALID_OPERATION;
         }
