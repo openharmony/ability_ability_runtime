@@ -786,6 +786,69 @@ HWTEST_F(KeepAliveProcessManagerTest, SetApplicationKeepAlive_023, TestSize.Leve
 }
 
 /*
+ * Feature: KeepAliveProcessManager
+ * Function: FilterNeedRestartKeepAliveBundleInfos
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager FilterNeedRestartKeepAliveBundleInfos
+ * EnvConditions: NA
+ * CaseDescription: uid not found in needRestartKeepAliveUidSet_
+ */
+HWTEST_F(KeepAliveProcessManagerTest, FilterNeedRestartKeepAliveBundleInfos_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest FilterNeedRestartKeepAliveBundleInfos_001 start";
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    AppExecFwk::BundleInfo bundleInfo;
+    bundleInfo.uid = 12345;
+    bundleInfos.emplace_back(bundleInfo);
+    KeepAliveProcessManager::GetInstance().needRestartKeepAliveUidSet_.clear();
+    KeepAliveProcessManager::GetInstance().FilterNeedRestartKeepAliveBundleInfos(bundleInfos);
+    EXPECT_EQ(bundleInfos.empty(), true);
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest FilterNeedRestartKeepAliveBundleInfos_001 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: FilterNeedRestartKeepAliveBundleInfos
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager FilterNeedRestartKeepAliveBundleInfos
+ * EnvConditions: NA
+ * CaseDescription: uid found in needRestartKeepAliveUidSet_
+ */
+HWTEST_F(KeepAliveProcessManagerTest, FilterNeedRestartKeepAliveBundleInfos_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest FilterNeedRestartKeepAliveBundleInfos_002 start";
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    AppExecFwk::BundleInfo bundleInfo;
+    bundleInfo.uid = 12345;
+    bundleInfos.emplace_back(bundleInfo);
+    KeepAliveProcessManager::GetInstance().needRestartKeepAliveUidSet_.emplace(12345);
+    KeepAliveProcessManager::GetInstance().FilterNeedRestartKeepAliveBundleInfos(bundleInfos);
+    EXPECT_EQ(bundleInfos.empty(), false);
+    EXPECT_EQ(KeepAliveProcessManager::GetInstance().needRestartKeepAliveUidSet_.empty(), true);
+    KeepAliveProcessManager::GetInstance().needRestartKeepAliveUidSet_.clear();
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest FilterNeedRestartKeepAliveBundleInfos_002 end";
+}
+
+/*
+ * Feature: KeepAliveProcessManager
+ * Function: AddNeedRestartKeepAliveUid
+ * SubFunction: NA
+ * FunctionPoints:KeepAliveProcessManager AddNeedRestartKeepAliveUid
+ * EnvConditions: NA
+ * CaseDescription: AddNeedRestartKeepAliveUid
+ */
+HWTEST_F(KeepAliveProcessManagerTest, AddNeedRestartKeepAliveUid_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest AddNeedRestartKeepAliveUid_001 start";
+    int32_t uid = 12345;
+    KeepAliveProcessManager::GetInstance().needRestartKeepAliveUidSet_.clear();
+    KeepAliveProcessManager::GetInstance().AddNeedRestartKeepAliveUid(uid);
+    EXPECT_EQ(KeepAliveProcessManager::GetInstance().needRestartKeepAliveUidSet_.empty(), false);
+    KeepAliveProcessManager::GetInstance().needRestartKeepAliveUidSet_.clear();
+    GTEST_LOG_(INFO) << "KeepAliveProcessManagerTest AddNeedRestartKeepAliveUid_001 end";
+}
+
+/*
  * Feature: CheckStatusBarTask
  * Function: Cancel
  * SubFunction: NA
