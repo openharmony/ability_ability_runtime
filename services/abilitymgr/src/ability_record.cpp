@@ -246,16 +246,17 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     abilityRecord->SetAppIndex(appIndex);
     abilityRecord->SetSecurityFlag(abilityRequest.want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false));
     abilityRecord->SetCallerAccessTokenId(abilityRequest.callerAccessTokenId);
-    if (abilityRequest.processOptions != nullptr && abilityRequest.processOptions->isPreloadStart) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "start by preload");
-        abilityRecord->SetPreloadStart(true);
+    if (abilityRequest.processOptions != nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "isPreloadStart:%{public}d,shouldReturnPid:%{public}d",
+            abilityRequest.processOptions->isPreloadStart, abilityRequest.processOptions->shouldReturnPid);
+        abilityRecord->SetPreloadStart(abilityRequest.processOptions->isPreloadStart);
+        abilityRecord->SetShouldReturnPid(abilityRequest.processOptions->shouldReturnPid);
     }
     abilityRecord->sessionInfo_ = abilityRequest.sessionInfo;
     if (AppUtils::GetInstance().IsMultiProcessModel() && abilityRequest.abilityInfo.isStageBasedModel &&
-        abilityRequest.abilityInfo.type == AppExecFwk::AbilityType::PAGE &&
-        !abilityRequest.customProcess.empty()) {
-            abilityRecord->SetCustomProcessFlag(abilityRequest.customProcess);
-        }
+        abilityRequest.abilityInfo.type == AppExecFwk::AbilityType::PAGE && !abilityRequest.customProcess.empty()) {
+        abilityRecord->SetCustomProcessFlag(abilityRequest.customProcess);
+    }
     if (abilityRequest.sessionInfo != nullptr) {
         abilityRecord->instanceKey_ = abilityRequest.sessionInfo->instanceKey;
     }
@@ -278,8 +279,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     abilityRecord->missionAffinity_ = abilityRequest.want.GetStringParam(PARAM_MISSION_AFFINITY_KEY);
 
     auto userId = abilityRequest.appInfo.uid / BASE_USER_RANGE;
-    if ((userId == 0 ||
-        AppUtils::GetInstance().InResidentWhiteList(abilityRequest.abilityInfo.bundleName)) &&
+    if ((userId == 0 || AppUtils::GetInstance().InResidentWhiteList(abilityRequest.abilityInfo.bundleName)) &&
         DelayedSingleton<ResidentProcessManager>::GetInstance()->IsResidentAbility(
             abilityRequest.abilityInfo.bundleName, abilityRequest.abilityInfo.name, userId)) {
         abilityRecord->keepAliveBundle_ = true;
@@ -340,7 +340,7 @@ void AbilityRecord::LoadUIAbility()
     g_addLifecycleEventTask(token_, methodName);
 }
 
-int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide)
+int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, sptr<AppExecFwk::ILoadAbilityCallback> callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "LoadLifecycle: abilityName:%{public}s", abilityInfo_.name.c_str());
@@ -382,7 +382,7 @@ int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide)
     MainElementUtils::SetMainUIAbilityKeepAliveFlag(isMainUIAbility,
         abilityInfo_.bundleName, loadParam);
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        loadParam, abilityInfo_, abilityInfo_.applicationInfo, want_);
+        loadParam, abilityInfo_, abilityInfo_.applicationInfo, want_, callback);
     want_.RemoveParam(IS_HOOK);
     want_.RemoveParam(ABILITY_OWNER_USERID);
     want_.RemoveParam(Want::PARAMS_REAL_CALLER_KEY);
@@ -491,7 +491,8 @@ void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
 }
 
 void AbilityRecord::ProcessForegroundAbility(
-    uint32_t tokenId, uint32_t sceneFlag, bool isShellCall, bool isStartupHide)
+    uint32_t tokenId, uint32_t sceneFlag, bool isShellCall, bool isStartupHide,
+    sptr<AppExecFwk::ILoadAbilityCallback> callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetElementName().GetURI();
@@ -505,7 +506,7 @@ void AbilityRecord::ProcessForegroundAbility(
     if (!isReady_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "To load ability.");
         lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-        LoadAbility(isShellCall, isStartupHide);
+        LoadAbility(isShellCall, isStartupHide, callback);
         return;
     }
 

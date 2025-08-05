@@ -264,8 +264,13 @@ ErrCode AmsMgrStub::HandleLoadAbility(MessageParcel &data, MessageParcel &reply)
         TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable loadParam failed");
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
+    sptr<ILoadAbilityCallback> callback = nullptr;
+    if (data.ReadBool()) {
+        sptr<IRemoteObject> obj = data.ReadRemoteObject();
+        callback = iface_cast<ILoadAbilityCallback>(obj);
+    }
 
-    LoadAbility(abilityInfo, appInfo, want, loadParam);
+    LoadAbility(abilityInfo, appInfo, want, loadParam, callback);
     return NO_ERROR;
 }
 

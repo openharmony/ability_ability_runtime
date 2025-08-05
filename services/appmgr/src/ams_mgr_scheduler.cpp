@@ -68,7 +68,8 @@ AmsMgrScheduler::~AmsMgrScheduler()
 
 void AmsMgrScheduler::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInfo,
     const std::shared_ptr<ApplicationInfo> &appInfo,
-    const std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam)
+    const std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
+    sptr<ILoadAbilityCallback> callback)
 {
     if (!abilityInfo || !appInfo) {
         TAG_LOGE(AAFwkTag::APPMGR, "param error");
@@ -87,8 +88,8 @@ void AmsMgrScheduler::LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInf
     TAG_LOGI(AAFwkTag::APPMGR, "SubmitLoadTask: %{public}s-%{public}s", abilityInfo->bundleName.c_str(),
         abilityInfo->name.c_str());
     std::function<void()> loadAbilityFunc = [amsMgrServiceInner = amsMgrServiceInner_,
-        abilityInfo, appInfo, want, loadParam]() {
-        amsMgrServiceInner->LoadAbility(abilityInfo, appInfo, want, loadParam);
+        abilityInfo, appInfo, want, loadParam, callback]() {
+        amsMgrServiceInner->LoadAbility(abilityInfo, appInfo, want, loadParam, callback);
     };
 
     // cache other application load ability task before scene board attach

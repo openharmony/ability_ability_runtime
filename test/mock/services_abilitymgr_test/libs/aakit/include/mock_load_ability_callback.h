@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef ABILITY_RUNTIME_ABILITY_BUSINESS_ERROR_UTILS_H
-#define ABILITY_RUNTIME_ABILITY_BUSINESS_ERROR_UTILS_H
+#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_LOAD_ABILITY_CALLBACK_H
+#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_LOAD_ABILITY_CALLBACK_H
 
-#include <stdint.h>
+#include "load_ability_callback_stub.h"
 
-#include "ability_runtime_common.h"
+namespace OHOS {
+namespace AbilityRuntime {
+class MockLoadAbilityCallback : public AppExecFwk::LoadAbilityCallbackStub {
+public:
+    MockLoadAbilityCallback() {};
+    virtual ~MockLoadAbilityCallback() {};
+    virtual void OnFinish(int32_t pid) override;
+};
+}  // namespace AAFwk
+}  // namespace OHOS
 
-AbilityRuntime_ErrorCode ConvertToCommonBusinessErrorCode(int32_t abilityManagerErrorCode);
-
-AbilityRuntime_ErrorCode ConvertToAPI17BusinessErrorCode(int32_t abilityManagerErrorCode);
-
-AbilityRuntime_ErrorCode ConvertToAPI21BusinessErrorCode(int32_t abilityManagerErrorCode);
-
-#endif // ABILITY_RUNTIME_ABILITY_BUSINESS_ERROR_UTILS_H
+#endif  // MOCK_OHOS_ABILITY_RUNTIME_MOCK_LOAD_ABILITY_CALLBACK_H

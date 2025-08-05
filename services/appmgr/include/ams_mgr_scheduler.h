@@ -49,10 +49,12 @@ public:
      * @param abilityInfo, the ability information.
      * @param appInfo, the app information.
      * @param want, the starting information.
+     * @param callback, the callback to get process id.
      */
     virtual void LoadAbility(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const std::shared_ptr<ApplicationInfo> &appInfo,
-        const std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam) override;
+        const std::shared_ptr<AAFwk::Want> &want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
+        sptr<ILoadAbilityCallback> callback = nullptr) override;
 
     /**
      * TerminateAbility, call TerminateAbility() through the proxy object, terminate the token ability.

@@ -245,6 +245,31 @@ HWTEST_F(StartOptionsUtilsTest, CheckStartSelfUIAbilityStartOptions_006, TestSiz
 
 /*
  * Feature: StartOptionsUtils
+ * Function: CheckStartSelfUIAbilityStartOptions
+ * SubFunction: NA
+ * FunctionPoints: StartOptionsUtils CheckStartSelfUIAbilityStartOptions
+ */
+HWTEST_F(StartOptionsUtilsTest, CheckStartSelfUIAbilityStartOptions_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckStartSelfUIAbilityStartOptions_007 start");
+
+    MyFlag::GetInstance().isScbEnabled_ = true;
+    MyFlag::GetInstance().isStartOptionsWithProcessOptions_ = true;
+    MyFlag::GetInstance().uiManager_ = nullptr;
+
+    Want want;
+    StartOptions startOptions;
+    startOptions.processOptions = std::make_shared<ProcessOptions>();
+    startOptions.processOptions->startupVisibility = StartupVisibility::UNSPECIFIED;
+    startOptions.processOptions->shouldReturnPid = true;
+    auto ret = StartOptionsUtils::CheckStartSelfUIAbilityStartOptions(want, startOptions);
+    EXPECT_EQ(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartOptionsUtilsTest CheckStartSelfUIAbilityStartOptions_007 end");
+}
+
+/*
+ * Feature: StartOptionsUtils
  * Name: CheckProcessOptionsInner_001
  * Function: CheckProcessOptionsInner
  * SubFunction: NA

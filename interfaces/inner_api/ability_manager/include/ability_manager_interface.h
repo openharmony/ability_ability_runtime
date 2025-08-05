@@ -38,6 +38,7 @@
 #include "iability_controller.h"
 #include "iability_manager_collaborator.h"
 #include "iacquire_share_data_callback_interface.h"
+#include "iload_ability_callback.h"
 #include "insight_intent/insight_intent_execute_param.h"
 #include "insight_intent/insight_intent_execute_result.h"
 #include "insight_intent/insight_intent_info_for_query.h"
@@ -127,6 +128,20 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartSelfUIAbilityWithStartOptions(const Want &want, const StartOptions &options)
+    {
+        return 0;
+    }
+
+    /**
+     * Starts self UIAbility with start options and receives the process ID. Supported only on 2-in-1 devices.
+     *
+     * @param want, the want of the ability to start.
+     * @param options, the startOptions of the ability to start.
+     * @param callback, the callback to get target process id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options,
+        sptr<AppExecFwk::ILoadAbilityCallback> callback)
     {
         return 0;
     }

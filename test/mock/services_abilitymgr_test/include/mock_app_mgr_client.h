@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ public:
     virtual ~MockAppMgrClient() {};
 
     virtual AppMgrResultCode LoadAbility(const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo,
-        const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam)
+        const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam, sptr<AppExecFwk::ILoadAbilityCallback> callback)
     {
         TAG_LOGI(AAFwkTag::TEST, "MockAppMgrClient LoadAbility enter.");
         token_ = loadParam.token;

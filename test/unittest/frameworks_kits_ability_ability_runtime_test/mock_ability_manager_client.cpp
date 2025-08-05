@@ -1043,6 +1043,12 @@ ErrCode AbilityManagerClient::StartSelfUIAbilityWithStartOptions(const Want &wan
     return ERR_OK;
 }
 
+int AbilityManagerClient::StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options,
+    sptr<AppExecFwk::ILoadAbilityCallback> callback)
+{
+    return ERR_OK;
+}
+
 void AbilityManagerClient::PrepareTerminateAbilityDone(sptr<IRemoteObject> token, bool isTerminate)
 {}
 

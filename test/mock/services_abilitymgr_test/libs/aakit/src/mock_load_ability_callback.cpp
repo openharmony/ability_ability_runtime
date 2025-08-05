@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef ABILITY_RUNTIME_ABILITY_BUSINESS_ERROR_UTILS_H
-#define ABILITY_RUNTIME_ABILITY_BUSINESS_ERROR_UTILS_H
+#include "mock_load_ability_callback.h"
+#include "hilog_tag_wrapper.h"
 
-#include <stdint.h>
-
-#include "ability_runtime_common.h"
-
-AbilityRuntime_ErrorCode ConvertToCommonBusinessErrorCode(int32_t abilityManagerErrorCode);
-
-AbilityRuntime_ErrorCode ConvertToAPI17BusinessErrorCode(int32_t abilityManagerErrorCode);
-
-AbilityRuntime_ErrorCode ConvertToAPI21BusinessErrorCode(int32_t abilityManagerErrorCode);
-
-#endif // ABILITY_RUNTIME_ABILITY_BUSINESS_ERROR_UTILS_H
+namespace OHOS {
+namespace AbilityRuntime {
+void MockLoadAbilityCallback::OnFinish(int32_t __attribute__((unused)) pid)
+{
+    TAG_LOGD(AAFwkTag::TEST, "mock MockLoadAbilityCallback::OnFinish");
+}
+}  // namespace AAFwk
+}  // namespace OHOS

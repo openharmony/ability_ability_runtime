@@ -52,6 +52,7 @@ StartOptions::StartOptions(const StartOptions &other)
     supportWindowModes_ = other.supportWindowModes_;
     requestId_ = other.requestId_;
     windowCreateParams_ = other.windowCreateParams_;
+    loadAbilityCallback_ = other.loadAbilityCallback_;
 }
 
 StartOptions &StartOptions::operator=(const StartOptions &other)
@@ -83,6 +84,7 @@ StartOptions &StartOptions::operator=(const StartOptions &other)
         supportWindowModes_ = other.supportWindowModes_;
         requestId_ = other.requestId_;
         windowCreateParams_ = other.windowCreateParams_;
+        loadAbilityCallback_ = other.loadAbilityCallback_;
     }
     return *this;
 }

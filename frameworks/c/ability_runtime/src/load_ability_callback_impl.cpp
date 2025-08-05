@@ -13,17 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef ABILITY_RUNTIME_ABILITY_BUSINESS_ERROR_UTILS_H
-#define ABILITY_RUNTIME_ABILITY_BUSINESS_ERROR_UTILS_H
+#include "load_ability_callback_impl.h"
 
-#include <stdint.h>
+#include "hilog_tag_wrapper.h"
 
-#include "ability_runtime_common.h"
+namespace OHOS {
+namespace AbilityRuntime {
+void LoadAbilityCallbackImpl::OnFinish(int32_t pid)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call OnFinish");
+    std::unique_lock<ffrt::mutex> lock(taskMutex_);
+    if (task_) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "pid:%{public}d", pid);
+        task_(pid);
+    }
+}
 
-AbilityRuntime_ErrorCode ConvertToCommonBusinessErrorCode(int32_t abilityManagerErrorCode);
-
-AbilityRuntime_ErrorCode ConvertToAPI17BusinessErrorCode(int32_t abilityManagerErrorCode);
-
-AbilityRuntime_ErrorCode ConvertToAPI21BusinessErrorCode(int32_t abilityManagerErrorCode);
-
-#endif // ABILITY_RUNTIME_ABILITY_BUSINESS_ERROR_UTILS_H
+void LoadAbilityCallbackImpl::Cancel()
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call Cancel");
+    std::unique_lock<ffrt::mutex> lock(taskMutex_);
+    task_ = nullptr;
+}
+} // namespace AbilityRuntime
+} // namespace OHOS
