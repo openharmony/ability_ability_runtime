@@ -1052,7 +1052,7 @@ HWTEST_F(UIExtensionContextTest, GetFailureInfoByMessage_0100, Function | Medium
     ASSERT_NE(context, nullptr);
     context->GetFailureInfoByMessage(message, faileCode, failReason, resultCode);
     EXPECT_EQ(faileCode, 1);
-    EXPECT_EQ(failReason, "User cancelled redirection");
+    EXPECT_EQ(failReason, "The user canceled this startup");
     resultCode = 0;
     context->GetFailureInfoByMessage(message, faileCode, failReason, resultCode);
     EXPECT_EQ(faileCode, 2);
@@ -1060,7 +1060,7 @@ HWTEST_F(UIExtensionContextTest, GetFailureInfoByMessage_0100, Function | Medium
     message = "test";
     context->GetFailureInfoByMessage(message, faileCode, failReason, resultCode);
     EXPECT_EQ(faileCode, 0);
-    EXPECT_EQ(failReason, "failed to open atomicservice");
+    EXPECT_EQ(failReason, "A system error occurred");
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

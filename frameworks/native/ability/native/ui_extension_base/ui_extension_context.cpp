@@ -542,13 +542,13 @@ void UIExtensionContext::GetFailureInfoByMessage(
 {
     if (resultCode == USER_CANCEL) {
         failureCode = static_cast<int32_t>(FailureCode::FAILURE_CODE_USER_CANCEL);
-        failureMessage = "User cancelled redirection";
+        failureMessage = "The user canceled this startup";
     } else if (message.find("User refused redirection") != std::string::npos) {
         failureCode = static_cast<int32_t>(FailureCode::FAILURE_CODE_USER_REFUSE);
         failureMessage = "User refused redirection";
     } else {
         failureCode = static_cast<int32_t>(FailureCode::FAILURE_CODE_SYSTEM_MALFUNCTION);
-        failureMessage = "failed to open atomicservice";
+        failureMessage = "A system error occurred";
     }
 }
 
