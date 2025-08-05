@@ -32,6 +32,7 @@ struct ExitReason : public Parcelable {
     int32_t subReason = -1;
     std::string exitMsg = "";
     bool shouldKillForeground = true;
+    bool shouldSkipKillInStartup = false; // set true in low-memory, return ERR_KILL_APP_WHILE_STARTING and do not kill
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

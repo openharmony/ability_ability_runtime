@@ -2702,7 +2702,7 @@ private:
 
     void StartKeepAliveAppsInner(int32_t userId);
 
-    bool ProcessLowMemoryKill(int32_t pid, const ExitReason &reason);
+    bool ProcessLowMemoryKill(int32_t pid, const ExitReason &reason, bool isKillPrecedeStart);
 
     struct StartSelfUIAbilityParam {
         Want want;
@@ -2812,7 +2812,7 @@ private:
 
     int32_t OpenLinkInner(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId, int requestCode,
         bool removeInsightIntentFlag);
-    int32_t KillProcessWithReasonInner(int32_t pid, const ExitReason &reason);
+    int32_t KillProcessWithReasonInner(int32_t pid, const ExitReason &reason, bool isKillPrecedeStart);
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif

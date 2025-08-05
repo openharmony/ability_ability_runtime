@@ -139,7 +139,7 @@ public:
      * @param subProcess, kill SubProcess or not.
      */
     virtual AppMgrResultCode KillProcessesByPids(const std::vector<int32_t> &pids,
-        const std::string &reason = "KillProcessesByPids", bool subProcess = false);
+        const std::string &reason = "KillProcessesByPids", bool subProcess = false, bool isKillPrecedeStart = false);
 
     /**
      * Set child and parent relationship

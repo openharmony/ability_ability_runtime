@@ -2964,7 +2964,7 @@ void AppMgrServiceInner::GetChildrenProcesses(const std::shared_ptr<AppRunningRe
 }
 #endif // SUPPORT_CHILD_PROCESS
 
-int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string& reason)
+int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string& reason, bool isKillPrecedeStart)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!ProcessUtil::ProcessExist(pid)) {
@@ -2978,11 +2978,11 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string&
         appRecord->SetExitMsg(killReason);
     }
     TAG_LOGI(AAFwkTag::APPMGR, "kill reason=%{public}s, pid=%{public}d", reason.c_str(), pid);
-    return KillProcessByPidInner(pid, reason, killReason, appRecord);
+    return KillProcessByPidInner(pid, reason, killReason, appRecord, isKillPrecedeStart);
 }
 
 int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::string& reason,
-    const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord)
+    const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord, bool isKillPrecedeStart)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     AAFwk::RecordCostTimeUtil timeRecord("KillProcessByPidInner");
@@ -3008,6 +3008,7 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
     AAFwk::EventInfo eventInfo;
     SetKilledEventInfo(appRecord, eventInfo);
     appRecord->SetKillReason(reason);
+    appRecord->SetIsKillPrecedeStart(isKillPrecedeStart);
     if (ret >= 0) {
         AddToKillProcessMap(appRecord->GetProcessName());
     }
@@ -3570,14 +3571,14 @@ int32_t AppMgrServiceInner::KillSubProcessBypid(const pid_t pid, const std::stri
 }
 
 int32_t AppMgrServiceInner::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason,
-    bool subProcess)
+    bool subProcess, bool isKillPrecedeStart)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     int32_t ret = ERR_OK;
     for (const auto& pid: pids) {
         auto appRecord = GetAppRunningRecordByPid(pid);
         if (appRecord != nullptr) {
-            ret = KillProcessByPid(pid, reason);
+            ret = KillProcessByPid(pid, reason, isKillPrecedeStart);
             if (ret != ERR_OK) {
                 TAG_LOGW(AAFwkTag::APPMGR, "fail, pid:%{public}d", pid);
                 return ret;

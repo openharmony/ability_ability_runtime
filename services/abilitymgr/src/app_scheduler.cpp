@@ -160,11 +160,12 @@ void AppScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawn
     appMgrClient_->KillProcessesByUserId(userId, isNeedSendAppSpawnMsg, callback);
 }
 
-int32_t AppScheduler::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason, bool subProcess)
+int32_t AppScheduler::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason, bool subProcess,
+    bool isKillPrecedeStart)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
-    int32_t ret = appMgrClient_->KillProcessesByPids(pids, reason, subProcess);
+    int32_t ret = appMgrClient_->KillProcessesByPids(pids, reason, subProcess, isKillPrecedeStart);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to KillProcessesByPids");
         return ret;
