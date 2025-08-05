@@ -91,6 +91,7 @@ ohos_unittest("extension_record_manager_test") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",

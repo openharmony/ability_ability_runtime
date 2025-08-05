@@ -84,6 +84,7 @@ ohos_fuzztest("ExtensionRecordManagerFuzzTest") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "init:libbeget_proxy",
     "ipc:ipc_core",
     "napi:ace_napi",
     "safwk:system_ability_fwk",
