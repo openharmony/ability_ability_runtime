@@ -20,6 +20,7 @@ import uiExtensionHost from '@ohos.uiExtensionHost';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
 import AbilityStartCallback from 'application.AbilityStartCallback';
+import uiExtension from '@ohos.arkui.uiExtension';
 
 class Cleaner {
   static callback(cleaner: Cleaner): void {
@@ -54,6 +55,7 @@ export default class UIExtensionContentSession {
   native loadContent(path: string, storage?: LocalStorage): void;
   native setWindowBackgroundColor(color: string): void;
   native getUIExtensionHostWindowProxy(): uiExtensionHost.UIExtensionHostWindowProxy;
+  native getUIExtensionWindowProxy(): uiExtension.WindowProxy;
   native nativeSetReceiveDataCallback(callback: (data: Record<string, Object>) => void): void;
   native nativeSetReceiveDataForResultCallback(callback: (data: Record<string, Object>) => Record<string, Object>): void;
   native terminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
