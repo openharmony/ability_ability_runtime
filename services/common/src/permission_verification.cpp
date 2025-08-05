@@ -426,7 +426,7 @@ int PermissionVerification::JudgeInvisibleAndBackground(const VerificationInfo &
     TAG_LOGD(AAFwkTag::DEFAULT, "specifyTokenId: %{public}u, isCallByShortcut %{public}d",
         specifyTokenId, isCallByShortcut);
     if (specifyTokenId == 0 &&
-        SupportSystemAbilityPermission::IsSupportSaCallPermission() && IsSACall()) {
+        SupportSystemAbilityPermission::IsSupportSaCallPermission()) {
         TAG_LOGD(AAFwkTag::DEFAULT, "Support SA call");
         return ERR_OK;
     }

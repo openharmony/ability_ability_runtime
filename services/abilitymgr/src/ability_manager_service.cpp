@@ -96,6 +96,7 @@
 #include "startup_util.h"
 #include "status_bar_delegate_interface.h"
 #include "string_wrapper.h"
+#include "support_system_ability_permission.h"
 #include "time_util.h"
 #include "ui_extension_utils.h"
 #include "ui_service_extension_connection_constants.h"
@@ -11141,7 +11142,7 @@ int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityReq
         return ERR_OK;
     }
 
-    if (!isData && (AAFwk::PermissionVerification::GetInstance()->IsSACall() ||
+    if (!isData && (SupportSystemAbilityPermission::IsSupportSaCallPermission() ||
         AbilityUtil::IsStartFreeInstall(abilityRequest.want))) {
         isBackgroundCall = false;
         return ERR_OK;
