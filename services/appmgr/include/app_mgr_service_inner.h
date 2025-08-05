@@ -210,7 +210,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillProcessesByPids(const std::vector<int32_t> &pids,
-        const std::string &reason = "KillProcessesByPids", bool subProcess = false);
+        const std::string &reason = "KillProcessesByPids", bool subProcess = false, bool isKillPrecedeStart = false);
 
     /**
      * KillProcessesInBatch, kill processes in batch;
@@ -982,7 +982,8 @@ public:
     int32_t NotifyAppStatusByCommonEventName(const std::string &bundleName, const std::string &eventName,
         const Want &want);
 
-    int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation");
+    int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation",
+        bool isKillPrecedeStart = false);
 
     int32_t KillSubProcessBypidInner(const pid_t pid, const std::string &reason,
         AAFwk::EventInfo &eventInfo);
@@ -2074,7 +2075,7 @@ private:
     int32_t GetAllRunningInstanceKeysByBundleNameInner(const std::string &bundleName,
         std::vector<std::string> &instanceKeys, int32_t userId);
     int32_t KillProcessByPidInner(const pid_t pid, const std::string& reason,
-        const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord);
+        const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord, bool isKillPrecedeStart);
     void SetKilledEventInfo(std::shared_ptr<AppRunningRecord> appRecord, AAFwk::EventInfo &eventInfo);
     void AddToKillProcessMap(const std::string &processName);
     bool IsAllowedNWebPreload(const std::string &processName);

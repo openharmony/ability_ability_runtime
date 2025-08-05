@@ -118,7 +118,8 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillProcessesByPids(const std::vector<int32_t> &pids,
-        const std::string &reason = "KillProcessesByPids", bool subProcess = false) = 0;
+        const std::string &reason = "KillProcessesByPids", bool subProcess = false,
+        bool isKillPrecedeStart = false) = 0;
 
     /**
      * Set child and parent relationship

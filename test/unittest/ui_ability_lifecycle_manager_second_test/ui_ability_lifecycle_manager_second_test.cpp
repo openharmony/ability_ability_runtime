@@ -1109,9 +1109,11 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, RecordPidKilling_001, TestSize.Lev
     mgr->sessionAbilityMap_ = sessionAbilityMap;
     pid_t pid = 1;
     std::string reason = "HelloWorld";
-
-    mgr->RecordPidKilling(pid, reason);
+    bool isKillPrecedeStart = true;
+    
+    mgr->RecordPidKilling(pid, reason, isKillPrecedeStart);
     EXPECT_EQ(mgr->sessionAbilityMap_[1]->killReason_, "HelloWorld");
+    EXPECT_EQ(mgr->sessionAbilityMap_[1]->isKillPrecedeStart_, true);
 }
 
 /**
