@@ -394,6 +394,15 @@ public:
     virtual void SetHookOff(bool hookOff) = 0;
     virtual ErrCode RevokeDelegator() = 0;
     virtual ErrCode SetOnNewWantSkipScenarios(int32_t scenarios) = 0;
+    void SetScreenMode(int32_t screenMode)
+    {
+        screenMode_ = screenMode;
+    }
+
+    int32_t GetScreenMode() const
+    {
+        return screenMode_;
+    }
 
     virtual std::shared_ptr<AAFwk::Want> GetWant() = 0;
 
@@ -487,7 +496,7 @@ public:
      */
     virtual void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message, int32_t resultCode = 0) = 0;
-    
+
     virtual ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId,
         OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId) = 0;
 
@@ -496,6 +505,9 @@ protected:
     {
         return contextTypeId == CONTEXT_TYPE_ID || Context::IsContext(contextTypeId);
     }
+
+private:
+    int32_t screenMode_ = AAFwk::ScreenMode::IDLE_SCREEN_MODE;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
