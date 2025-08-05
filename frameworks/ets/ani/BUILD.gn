@@ -21,6 +21,7 @@ group("ani_packages") {
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
     "${ability_runtime_path}/frameworks/ets/ani/ani_mission_manager:missionmanager_ani",
     "${ability_runtime_path}/frameworks/ets/ani/ani_wantagent_common:ani_wantagent_common",
+    "${ability_runtime_path}/frameworks/ets/ani/app/ability_context:ability_context_ani_kit",
     "${ability_runtime_path}/frameworks/ets/ani/app_manager:app_manager_ani",
     "${ability_runtime_path}/frameworks/ets/ani/application:application_ani",
     "${ability_runtime_path}/frameworks/ets/ani/apprecovery:appRecovery_ani",
