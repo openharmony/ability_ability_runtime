@@ -283,12 +283,10 @@ std::string AppfreezeCpuFreqManager::GetCpuInfoContent(
                 (blockData[j].runningTime - halfData[j].runningTime);
             pair.percentage = (static_cast<float>(runningTime) /
                 static_cast<float>(totalTime.totalCpuTime)) * CPU_PERCENTAGE;
-            if (pair.percentage < 1) {
+            if (pair.percentage < 1 || halfData[j].frequency != blockData[j].frequency) {
                 continue;
             }
-            pair.frequency = (halfData[j].frequency > blockData[j].frequency ?
-                (halfData[j].frequency - blockData[j].frequency) :
-                (blockData[j].frequency - halfData[j].frequency)) / HZ_TO_MHZ;
+            pair.frequency = halfData[j].frequency / HZ_TO_MHZ;
             freqPairs.push_back(pair);
         }
         ss << GetCpuStr(i, freqPairs, percentage);
