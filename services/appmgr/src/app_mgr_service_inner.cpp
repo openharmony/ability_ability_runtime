@@ -871,9 +871,25 @@ void AppMgrServiceInner::ReportEventToRSS(const AppExecFwk::AbilityInfo &ability
     });
 }
 
-void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
-    std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam)
+LoadAbilityCallbackGuard::~LoadAbilityCallbackGuard()
 {
+    if (callback_ == nullptr) {
+        return;
+    }
+    if (appRecord_ == nullptr || appRecord_->GetPriorityObject() == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "loadability failed");
+        callback_->OnFinish(-1);
+        return;
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "loadability callback, pid:%{public}d", appRecord_->GetPriorityObject()->GetPid());
+    callback_->OnFinish(appRecord_->GetPriorityObject()->GetPid());
+}
+
+void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
+    std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
+    sptr<ILoadAbilityCallback> callback)
+{
+    LoadAbilityCallbackGuard guard(callback);
     if (AAFwk::AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::APPMGR, "forbid start: %{public}s", abilityInfo ? abilityInfo->bundleName.c_str() : "");
         return;
@@ -1054,6 +1070,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         }
         want->RemoveParam(UIEXTENSION_BIND_ABILITY_ID);
     }
+    guard.appRecord_ = appRecord;
     AfterLoadAbility(appRecord, abilityInfo, loadParam);
 }
 

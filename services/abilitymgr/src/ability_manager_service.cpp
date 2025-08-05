@@ -6503,7 +6503,7 @@ int AbilityManagerService::AttachAbilityThread(
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "AttachAbilityThread called");
     CHECK_POINTER_AND_RETURN(scheduler, ERR_INVALID_VALUE);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && !VerificationAllToken(token)) {
         return ERR_INVALID_VALUE;
@@ -14768,6 +14768,26 @@ int AbilityManagerService::StartSelfUIAbilityWithStartOptions(const Want &want, 
 
     StartSelfUIAbilityParam param = { want, options, true };
     return StartSelfUIAbilityInner(param);
+}
+
+int AbilityManagerService::StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options,
+    sptr<AppExecFwk::ILoadAbilityCallback> callback)
+{
+    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSelfUIAbilityWithPidResult");
+    CHECK_POINTER_AND_RETURN(callback, ERR_INVALID_VALUE);
+
+    if (options.processOptions == nullptr) {
+        options.processOptions = std::make_shared<ProcessOptions>();
+    }
+    options.processOptions->shouldReturnPid = true;
+    options.loadAbilityCallback_ = callback->AsObject();
+    auto ret = StartSelfUIAbilityWithStartOptions(want, options);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartSelfUIAbilityWithStartOptions failed:%{public}d", ret);
+        return ret;
+    }
+    return ERR_OK;
 }
 
 bool AbilityManagerService::CheckCrossUser(const int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)

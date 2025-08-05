@@ -52,6 +52,9 @@
 #endif
 
 namespace OHOS {
+namespace AppExecFwk {
+class ILoadAbilityCallback;
+}
 namespace AAFwk {
 using Closure = std::function<void()>;
 
@@ -411,7 +414,8 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    int LoadAbility(bool isShellCall = false, bool isStartupHide = false);
+    int LoadAbility(bool isShellCall = false, bool isStartupHide = false,
+        sptr<AppExecFwk::ILoadAbilityCallback> callback = nullptr);
 
     /**
      * foreground the ability.
@@ -425,7 +429,8 @@ public:
      *
      */
     void ProcessForegroundAbility(
-        uint32_t tokenId, uint32_t sceneFlag = 0, bool isShellCall = false, bool isStartupHide = false);
+        uint32_t tokenId, uint32_t sceneFlag = 0, bool isShellCall = false, bool isStartupHide = false,
+        sptr<AppExecFwk::ILoadAbilityCallback> callback = nullptr);
 
      /**
      * post foreground timeout task for ui ability.
@@ -1270,6 +1275,16 @@ public:
         return isPreloadStart_.load();
     }
 
+    inline void SetShouldReturnPid(bool shouldReturnPid)
+    {
+        shouldReturnPid_.store(shouldReturnPid);
+    }
+
+    inline bool ShouldReturnPid() const
+    {
+        return shouldReturnPid_.load();
+    }
+
     inline void SetPreloaded()
     {
         isPreloaded_.store(true);
@@ -1395,6 +1410,7 @@ private:
 #endif
     void SendAppStartupTypeEvent(const AppExecFwk::AppStartType startType);
     std::atomic<bool> isPreloadStart_ = false;           // is ability started via preload
+    std::atomic<bool> shouldReturnPid_ = false;
 
     static std::atomic<int64_t> abilityRecordId;
     bool isReady_ = false;                            // is ability thread attached?

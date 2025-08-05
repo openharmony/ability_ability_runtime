@@ -160,7 +160,7 @@ AppMgrClient::~AppMgrClient()
 {}
 
 AppMgrResultCode AppMgrClient::LoadAbility(const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo,
-    const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam)
+    const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam, sptr<ILoadAbilityCallback> callback)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
@@ -171,7 +171,7 @@ AppMgrResultCode AppMgrClient::LoadAbility(const AbilityInfo &abilityInfo, const
             std::shared_ptr<ApplicationInfo> appInfoPtr = std::make_shared<ApplicationInfo>(appInfo);
             std::shared_ptr<AAFwk::Want> wantPtr = std::make_shared<AAFwk::Want>(want);
             auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
-            amsService->LoadAbility(abilityInfoPtr, appInfoPtr, wantPtr, loadParamPtr);
+            amsService->LoadAbility(abilityInfoPtr, appInfoPtr, wantPtr, loadParamPtr, callback);
             return AppMgrResultCode::RESULT_OK;
         }
     }

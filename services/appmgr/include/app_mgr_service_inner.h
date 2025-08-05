@@ -61,6 +61,7 @@
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
+#include "iload_ability_callback.h"
 #include "iremote_object.h"
 #include "irender_state_observer.h"
 #include "istart_specified_ability_response.h"
@@ -101,6 +102,14 @@ class WindowPidVisibilityChangedListener;
 using LoadAbilityTaskFunc = std::function<void()>;
 constexpr int32_t BASE_USER_RANGE = 200000;
 
+struct LoadAbilityCallbackGuard {
+    sptr<ILoadAbilityCallback> callback_ = nullptr;
+    std::shared_ptr<AppRunningRecord> appRecord_ = nullptr;
+
+    LoadAbilityCallbackGuard(sptr<ILoadAbilityCallback> callback) : callback_(callback) {}
+    ~LoadAbilityCallbackGuard();
+};
+
 class AppMgrServiceInner : public std::enable_shared_from_this<AppMgrServiceInner> {
 public:
     struct ConfigurationObserverWithUserId {
@@ -127,11 +136,13 @@ public:
      * @param abilityInfo, the ability information.
      * @param appInfo, the app information.
      * @param want the ability want.
+     * @param callback, the callback to get process id.
      *
      * @return
      */
     virtual void LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
-        std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam);
+        std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
+        sptr<ILoadAbilityCallback> callback = nullptr);
 
     /**
      * TerminateAbility, terminate the token ability.
