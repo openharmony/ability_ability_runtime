@@ -43,11 +43,14 @@ export interface Callee {
 export default class UIAbility extends Ability {
   private destroyCallbackPoint: long;
   private saveStateCallbackPoint: long;
+  private prepareToTerminateCallbackPointer: long;
 
   private native nativeOnDestroyCallback(): void;
 
   private native nativeOnSaveStateCallback(wantParam: Record<string, Object>, saveResult: AbilityConstant.OnSaveResult,
     stateReason: int): void;
+
+  private native nativeOnPrepareToTerminateCallback(prepareTermination: boolean): void;
 
   private callOnDestroy(): boolean {
     const derivedClassType = AbilityUtils.getClassType(this);
@@ -82,6 +85,23 @@ export default class UIAbility extends Ability {
       this.onSaveStateAsync(stateType, wantParam)
         .then((saveResult: AbilityConstant.OnSaveResult) => this.nativeOnSaveStateCallback(wantParam, saveResult,
           stateReason));
+      return true;
+    }
+    return false;
+  }
+
+  private callOnPrepareToTerminateAsync(): boolean {
+    const derivedClassType = AbilityUtils.getClassType(this);
+    if (derivedClassType === undefined) {
+      return false;
+    }
+    const uiAbilityClassType = AbilityUtils.getClassType(new UIAbility());
+    if (uiAbilityClassType === undefined) {
+      return false;
+    }
+    if (AbilityUtils.isOverride(derivedClassType, "onPrepareToTerminateAsync", uiAbilityClassType)) {
+      this.onPrepareToTerminateAsync()
+        .then((prepareTermination: boolean) => this.nativeOnPrepareToTerminateCallback(prepareTermination));
       return true;
     }
     return false;
@@ -145,6 +165,16 @@ export default class UIAbility extends Ability {
     wantParam: Record<string, Object>): Promise<AbilityConstant.OnSaveResult> {
     return new Promise<AbilityConstant.OnSaveResult>((resolve: (saveResult: AbilityConstant.OnSaveResult) => void,
       reject: (err: Error) => void): void => {
+    });
+  }
+
+  onPrepareToTerminate(): boolean {
+    return false;
+  }
+
+  onPrepareToTerminateAsync(): Promise<boolean> {
+    return new Promise<boolean>((resolve: (a: boolean) => void,
+      reject: (err: Error) => void): boolean => {
     });
   }
 }
