@@ -165,6 +165,10 @@ int AbilityConnectManager::StopServiceAbility(const AbilityRequest &abilityReque
 
 int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityRequest)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::EXT, "forbid start: %{public}s", abilityRequest.want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::EXT, "ability_name:%{public}s", abilityRequest.want.GetElement().GetURI().c_str());
 
