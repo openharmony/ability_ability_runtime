@@ -95,6 +95,40 @@ void OnDestroyPromiseCallback(ani_env *env, ani_object aniObj)
     }
     callbackInfo->Call();
     AppExecFwk::AbilityTransactionCallbackInfo<>::Destroy(callbackInfo);
+    if ((status = env->Object_SetFieldByName_Long(aniObj, "destroyCallbackPoint", 0)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "Object_SetFieldByName_Long status: %{public}d", status);
+        return;
+    }
+}
+
+void OnPrepareTerminatePromiseCallback(ani_env *env, ani_object aniObj, ani_boolean aniPrepareTermination)
+{
+    TAG_LOGI(AAFwkTag::UIABILITY, "OnPrepareTerminatePromiseCallback begin");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    ani_long prepareToTerminateCallbackPointer = 0;
+    ani_status status = env->Object_GetFieldByName_Long(
+        aniObj, "prepareToTerminateCallbackPointer", &prepareToTerminateCallbackPointer);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "prepareToTerminateCallbackPointer GetField status: %{public}d", status);
+        return;
+    }
+    auto *callbackInfo =
+        reinterpret_cast<AppExecFwk::AbilityTransactionCallbackInfo<bool> *>(prepareToTerminateCallbackPointer);
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null callbackInfo");
+        return;
+    }
+    bool prepareTermination = aniPrepareTermination;
+    callbackInfo->Call(prepareTermination);
+    AppExecFwk::AbilityTransactionCallbackInfo<bool>::Destroy(callbackInfo);
+    if ((status = env->Object_SetFieldByName_Long(aniObj, "prepareToTerminateCallbackPointer", 0)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "prepareToTerminateCallbackPointer SetField status: %{public}d", status);
+        return;
+    }
+    TAG_LOGI(AAFwkTag::UIABILITY, "OnPrepareTerminatePromiseCallback end");
 }
 
 void OnSaveStateCallback(
@@ -227,6 +261,8 @@ bool EtsUIAbility::BindNativeMethods()
             ani_native_function { "nativeOnDestroyCallback", ":V", reinterpret_cast<void *>(OnDestroyPromiseCallback) },
             ani_native_function { "nativeOnSaveStateCallback", ON_SAVE_STATE_CALLBACK,
                 reinterpret_cast<void *>(OnSaveStateCallback) },
+            ani_native_function { "nativeOnPrepareToTerminateCallback", "Z:V",
+                reinterpret_cast<void *>(OnPrepareTerminatePromiseCallback) },
         };
         status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
     });
@@ -654,6 +690,52 @@ bool EtsUIAbility::OnBackPress()
     bool ret = CallObjectMethod(true, "onBackPressed", nullptr);
     TAG_LOGD(AAFwkTag::UIABILITY, "ret: %{public}d", ret);
     return ret;
+}
+
+void EtsUIAbility::OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo, bool &isAsync)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnPrepareTerminate ability: %{public}s", GetAbilityName().c_str());
+    UIAbility::OnPrepareTerminate(callbackInfo, isAsync);
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr || etsAbilityObj_ == nullptr || callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env or etsAbilityObj_ or callbackInfo");
+        return;
+    }
+    ani_long prepareToTerminateCallbackPointer = (ani_long)callbackInfo;
+    ani_status status = env->Object_SetFieldByName_Long(
+        etsAbilityObj_->aniObj, "prepareToTerminateCallbackPointer", prepareToTerminateCallbackPointer);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "prepareToTerminateCallbackPointer SetField status: %{public}d", status);
+        return;
+    }
+    if (CallObjectMethod(true, "callOnPrepareToTerminateAsync", nullptr)) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "async call");
+        isAsync = true;
+        return;
+    }
+    TAG_LOGI(AAFwkTag::UIABILITY, "onPrepareToTerminateAsync not implemented, call onPrepareToTerminate");
+    ani_method method = nullptr;
+    if (etsAbilityObj_->aniCls == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null uiability ani class");
+        return;
+    }
+    if ((status = env->Class_FindMethod(etsAbilityObj_->aniCls, "onPrepareToTerminate", nullptr, &method)) != ANI_OK ||
+        method == nullptr) {
+        if (status != ANI_PENDING_ERROR) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "onPrepareToTerminate FindMethod status: %{public}d, or null method", status);
+        }
+        TAG_LOGW(AAFwkTag::UIABILITY, "neither is implemented");
+        env->ResetError();
+        return;
+    }
+    ani_boolean isTerminateAni = false;
+    if ((status = env->Object_CallMethod_Boolean(etsAbilityObj_->aniObj, method, &isTerminateAni)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "onPrepareToTerminate CallMethod status: %{public}d", status);
+        return;
+    }
+    bool isTerminate = isTerminateAni;
+    callbackInfo->Call(isTerminate);
 }
 
 ani_object EtsUIAbility::CreateAppWindowStage()
