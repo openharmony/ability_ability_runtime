@@ -1417,8 +1417,8 @@ HWTEST_F(JsRuntimeTest, JsRuntimePreloadModuleandDoCleanWorkAfterStageCleaned_01
     bool isEsMode = true;
     bool useCommonTrunk = true;
     jsRuntime->PreloadModule(moduleName, srcPath, hapPath, isEsMode, useCommonTrunk);
-    EXPECT_EQ(jsRuntime->preloadList_.size(), 1);
     jsRuntime->PreloadModule(moduleName, hapPath, isEsMode, useCommonTrunk);
+    EXPECT_EQ(jsRuntime->preloadList_.size(), 1);
     jsRuntime.reset();
     TAG_LOGI(AAFwkTag::TEST, "PreloadModule_0100 end");
 }
