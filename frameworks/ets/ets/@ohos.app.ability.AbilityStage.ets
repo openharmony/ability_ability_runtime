@@ -17,9 +17,28 @@ import { Configuration } from '@ohos.app.ability.Configuration'
 import AbilityStageContext from 'application.AbilityStageContext'
 import Want from '@ohos.app.ability.Want';
 import { AbilityUtils } from './utils/AbilityUtils';
+import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 
 export default class AbilityStage {
     context: AbilityStageContext = new AbilityStageContext();
+
+    private prepareTerminationCallbackPoint: long;
+    private native nativeOnPrepareTerminatePromiseCallback(): void;
+    private callOnPrepareTermination(): boolean {
+      const derivedClassType = AbilityUtils.getClassType(this);
+      if (derivedClassType === undefined) {
+          return false;
+      }
+      const classType = AbilityUtils.getClassType(new AbilityStage());
+      if (classType === undefined) {
+          return false;
+      }
+      if (AbilityUtils.isOverride(derivedClassType, "onPrepareTerminationAsync", classType)) {
+          this.onPrepareTerminationAsync().then((data:AbilityConstant.PrepareTermination) => this.nativeOnPrepareTerminatePromiseCallback());
+          return true;
+      }
+      return false;
+    }
 
     onConfigurationUpdate(newConfig: Configuration): void {
     }
@@ -76,5 +95,12 @@ export default class AbilityStage {
   }
   async onNewProcessRequestAsync(want: Want): Promise<string> {
     return '';
+  }
+  onPrepareTermination(): AbilityConstant.PrepareTermination {
+    return AbilityConstant.PrepareTermination.CANCEL;
+  }
+
+  async onPrepareTerminationAsync(): Promise<AbilityConstant.PrepareTermination> {
+    return AbilityConstant.PrepareTermination.CANCEL;
   }
 }
