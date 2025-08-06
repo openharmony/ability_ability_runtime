@@ -2525,7 +2525,7 @@ HWTEST_F(AbilityContextImplTest, GetFailureInfoByMessage_0100, Function | Medium
     int32_t resultCode = USER_CANCEL;
     context_->GetFailureInfoByMessage(message, faileCode, failReason, resultCode);
     EXPECT_EQ(faileCode, 1);
-    EXPECT_EQ(failReason, "User cancelled redirection");
+    EXPECT_EQ(failReason, "The user canceled this startup");
     resultCode = 0;
     context_->GetFailureInfoByMessage(message, faileCode, failReason, resultCode);
     EXPECT_EQ(faileCode, 2);
@@ -2533,7 +2533,7 @@ HWTEST_F(AbilityContextImplTest, GetFailureInfoByMessage_0100, Function | Medium
     message = "test";
     context_->GetFailureInfoByMessage(message, faileCode, failReason, resultCode);
     EXPECT_EQ(faileCode, 0);
-    EXPECT_EQ(failReason, "failed to open atomicservice");
+    EXPECT_EQ(failReason, "A system error occurred");
 }
 } // namespace AppExecFwk
 } // namespace OHOS
