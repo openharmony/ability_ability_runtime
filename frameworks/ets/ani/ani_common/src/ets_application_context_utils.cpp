@@ -96,7 +96,7 @@ void EtsApplicationContextUtils::OnSetFont(ani_env *env, ani_object aniObj, ani_
         return;
     }
     std::string stdFont = "";
-    if (!AppExecFwk::GetStdString(env, font, stdFont)) {
+    if (!AppExecFwk::GetStdString(env, font, stdFont) || stdFont.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "Parse font failed");
         EtsErrorUtil::ThrowInvalidParamError(env, "Parse param font failed, font must be string.");
         return;
@@ -138,7 +138,7 @@ void EtsApplicationContextUtils::OnSetLanguage(ani_env *env, ani_object aniObj, 
         return;
     }
     std::string stdLanguage = "";
-    if (!AppExecFwk::GetStdString(env, language, stdLanguage)) {
+    if (!AppExecFwk::GetStdString(env, language, stdLanguage) || stdLanguage.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "Parse language failed");
         EtsErrorUtil::ThrowInvalidParamError(env, "Parse param language failed, language must be string.");
         return;
