@@ -336,8 +336,8 @@ HWTEST_F(AbilityAutoStartupServiceThirdTest, InnerCancelApplicationAutoStartup_0
     info.bundleName = BUNDLENAME_FONUD;
     info.abilityName = ABILITYNAME_AUTO_START;
     info.accessTokenId = "123";
-    info.setterUserId = 100;
-    info.userId = 100;
+    info.setterUserId = 101;
+    info.userId = 101;
     info.setterType = AutoStartupSetterType::USER;
     info.canUserModify = AUTO_STARTUP_SERVICE_TRUE;
     auto result = abilityAutoStartupService->InnerCancelApplicationAutoStartup(info);
