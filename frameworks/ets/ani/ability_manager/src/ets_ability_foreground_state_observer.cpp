@@ -117,13 +117,18 @@ void ETSAbilityForegroundStateObserver::HandleOnAbilityStateChanged(const Abilit
     ani_status status = ANI_ERROR;
     if (!AttachAniEnv(env)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "status : %{public}d", status);
+        return;
+    }
+    auto abilityStateDataObj = AbilityManagerEts::WrapAbilityStateData(env, abilityStateData);
+    if (abilityStateDataObj == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "WrapAbilityStateData failed");
         DetachAniEnv();
         return;
     }
+    std::lock_guard<std::mutex> lock(mutexlock_);
     for (auto &item : etsObserverObjects_) {
-        auto abilityStateDataObj = AbilityManagerEts::WrapAbilityStateData(env, abilityStateData);
-        if (abilityStateDataObj != nullptr && item.aniObj != nullptr) {
-            CallEtsFunction(env, reinterpret_cast<ani_object>(item.aniRef),
+        if (item != nullptr) {
+            CallEtsFunction(env, reinterpret_cast<ani_object>(item),
                 "onAbilityStateChanged", SIGNATURE_ABILITY_STATE_DATA, abilityStateDataObj);
         }
     }
@@ -138,7 +143,7 @@ void ETSAbilityForegroundStateObserver::AddEtsObserverObject(ani_env *env, ani_o
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null observer");
         return;
     }
-    if (GetObserverObject(etsObserverObject).aniObj != nullptr) {
+    if (GetObserverObject(etsObserverObject) != nullptr) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "observer exist");
         return;
     }
@@ -148,24 +153,23 @@ void ETSAbilityForegroundStateObserver::AddEtsObserverObject(ani_env *env, ani_o
         TAG_LOGE(AAFwkTag::ABILITYMGR, "status : %{public}d", status);
         return;
     }
-    AppExecFwk::ETSNativeReference stRef;
-    stRef.aniObj = etsObserverObject;
-    stRef.aniRef = global;
-    etsObserverObjects_.emplace_back(stRef);
+    std::lock_guard<std::mutex> lock(mutexlock_);
+    etsObserverObjects_.emplace_back(global);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AddEtsObserverObject end");
 }
 
-AppExecFwk::ETSNativeReference ETSAbilityForegroundStateObserver::GetObserverObject(const ani_object &observerObject)
+ani_ref ETSAbilityForegroundStateObserver::GetObserverObject(const ani_object &observerObject)
 {
     if (observerObject == nullptr) {
-        return AppExecFwk::ETSNativeReference();
+        return nullptr;
     }
+    std::lock_guard<std::mutex> lock(mutexlock_);
     for (const auto& observer : etsObserverObjects_) {
-        if (observer.aniObj == observerObject) {
+        if (IsStrictEquals(observer, observerObject)) {
             return observer;
         }
     }
-    return AppExecFwk::ETSNativeReference();
+    return nullptr;
 }
 
 bool ETSAbilityForegroundStateObserver::AttachAniEnv(ani_env *&env)
@@ -223,12 +227,18 @@ bool ETSAbilityForegroundStateObserver::RemoveEtsObserverObject(const ani_object
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null observer");
         return false;
     }
+    std::lock_guard<std::mutex> lock(mutexlock_);
+    wptr<ETSAbilityForegroundStateObserver> weakPtr = this;
     auto it = std::find_if(etsObserverObjects_.begin(), etsObserverObjects_.end(),
-        [&observerObj](const AppExecFwk::ETSNativeReference &item) {
-            return item.aniObj == observerObj;
+        [weakPtr, &observerObj](ani_ref item) {
+            auto abilityForegroundStateObserver = weakPtr.promote();
+            if (abilityForegroundStateObserver == nullptr) {
+                return false;
+            }
+            return abilityForegroundStateObserver->IsStrictEquals(item, observerObj);
         });
-    if (it == etsObserverObjects_.end()) {
-        ReleaseObjectReference(it->aniRef);
+    if (it != etsObserverObjects_.end() && *it != nullptr) {
+        ReleaseObjectReference(*it);
         etsObserverObjects_.erase(it);
     }
     return true;
@@ -236,8 +246,9 @@ bool ETSAbilityForegroundStateObserver::RemoveEtsObserverObject(const ani_object
 
 void ETSAbilityForegroundStateObserver::RemoveAllEtsObserverObject()
 {
+    std::lock_guard<std::mutex> lock(mutexlock_);
     for (auto &item : etsObserverObjects_) {
-        ReleaseObjectReference(item.aniRef);
+        ReleaseObjectReference(item);
     }
     etsObserverObjects_.clear();
 }
@@ -250,6 +261,26 @@ void ETSAbilityForegroundStateObserver::SetValid(const bool valid)
 bool ETSAbilityForegroundStateObserver::IsEmpty()
 {
     return etsObserverObjects_.empty();
+}
+
+bool ETSAbilityForegroundStateObserver::IsStrictEquals(ani_ref observerRef, const ani_object &etsObserverObject)
+{
+    if (observerRef == nullptr || etsObserverObject == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "etsObserverObject or observerRef null");
+        return false;
+    }
+    ani_env *env = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = etsVm_->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetEnv failed status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isEquals = ANI_FALSE;
+    if ((status = env->Reference_StrictEquals(observerRef, etsObserverObject, &isEquals)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Reference_StrictEquals failed status: %{public}d", status);
+        return false;
+    }
+    return isEquals == ANI_TRUE;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

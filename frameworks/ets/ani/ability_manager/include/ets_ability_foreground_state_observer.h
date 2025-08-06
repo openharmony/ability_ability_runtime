@@ -23,7 +23,6 @@
 #include "ani_common_util.h"
 #include "ets_runtime.h"
 #include "event_handler.h"
-#include "ets_native_reference.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -38,7 +37,7 @@ public:
     void HandleOnAbilityStateChanged(const AbilityStateData &abilityStateData);
     void AddEtsObserverObject(ani_env *env, ani_object etsObserverObject);
     bool RemoveEtsObserverObject(const ani_object &observerObj);
-    AppExecFwk::ETSNativeReference GetObserverObject(const ani_object &observerObject);
+    ani_ref GetObserverObject(const ani_object &observerObject);
     void RemoveAllEtsObserverObject();
     bool IsEmpty();
     void SetValid(bool valid);
@@ -50,10 +49,12 @@ private:
     ani_status AniSendEvent(const std::function<void()> task);
     bool AttachAniEnv(ani_env *&env);
     void DetachAniEnv();
+    bool IsStrictEquals(ani_ref observerRef, const ani_object &etsObserverObject);
 
     ani_vm *etsVm_;
     volatile bool valid_ = true;
-    std::vector<AppExecFwk::ETSNativeReference> etsObserverObjects_;
+    std::mutex mutexlock_;
+    std::vector<ani_ref> etsObserverObjects_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_ = nullptr;
 };
 } // namespace AbilityRuntime
