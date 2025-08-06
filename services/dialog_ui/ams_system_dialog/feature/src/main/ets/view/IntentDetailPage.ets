@@ -848,7 +848,6 @@ export struct IntentDetailPage {
     .hideTitleBar(true)
     .width('100%')
     .height('100%')
-    .padding({ top: 36, bottom: 36 })
     .backgroundColor($r('app.color.background_cont'))
     .clip(true)
   }

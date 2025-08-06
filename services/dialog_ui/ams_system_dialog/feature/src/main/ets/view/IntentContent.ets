@@ -302,7 +302,7 @@ export struct IntentContent {
     }
     .width('100%')
     .height('100%')
-    .padding({top:36})
+    .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
     .backgroundColor($r('app.color.background_cont'))
   }
 }
