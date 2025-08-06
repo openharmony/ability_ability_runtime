@@ -148,6 +148,11 @@ bool WrapLaunchParam(ani_env *env, const AAFwk::LaunchParam &launchParam, ani_ob
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to set lastExitMessage");
         return false;
     }
+    if ((status = env->Object_SetPropertyByName_Ref(
+        object, "launchReasonMessage", GetAniString(env, launchParam.launchReasonMessage))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to set launchReasonMessage");
+        return false;
+    }
     return WrapLaunchParamInner(env, launchParam, object);
 }
 } // namespace AbilityRuntime
