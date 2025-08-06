@@ -2373,27 +2373,29 @@ HWTEST_F(AbilityContextImplTest, SetOnNewWantSkipScenariose_0100, Function | Med
 }
 
 /**
- * @tc.number: Ability_Context_Impl_ConnectAppServiceExtensionAbility_0100
- * @tc.name: ConnectAppServiceExtensionAbility
- * @tc.desc: Verify that function ConnectAppServiceExtensionAbility.
+ * @tc.number: Ability_Context_Impl_ConnectExtensionAbilityWithExtensionType_0100
+ * @tc.name: ConnectExtensionAbilityWithExtensionType
+ * @tc.desc: Verify that function ConnectExtensionAbilityWithExtensionType.
  */
-HWTEST_F(AbilityContextImplTest, ConnectAppServiceExtensionAbility_0100, Function | MediumTest | Level1)
+HWTEST_F(AbilityContextImplTest, ConnectExtensionAbilityWithExtensionType_0100, Function | MediumTest | Level1)
 {
     AAFwk::Want want;
-    bool ret = context_->ConnectAppServiceExtensionAbility(want, nullptr);
-    EXPECT_NE(ret, ERR_OK);
+    auto result = context_->ConnectExtensionAbilityWithExtensionType(want, nullptr,
+        AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+    EXPECT_NE(result, ERR_OK);
 }
 
 /**
- * @tc.number: Ability_Context_Impl_ConnectAppServiceExtensionAbility_0100
- * @tc.name: ConnectAppServiceExtensionAbility
- * @tc.desc: Verify that function ConnectAppServiceExtensionAbility.
+ * @tc.number: Ability_Context_Impl_ConnectExtensionAbilityWithExtensionType_0100
+ * @tc.name: ConnectExtensionAbilityWithExtensionType
+ * @tc.desc: Verify that function ConnectExtensionAbilityWithExtensionType.
  */
-HWTEST_F(AbilityContextImplTest, ConnectAppServiceExtensionAbility_0200, Function | MediumTest | Level1)
+HWTEST_F(AbilityContextImplTest, ConnectExtensionAbilityWithExtensionType_0200, Function | MediumTest | Level1)
 {
     AAFwk::Want want;
     sptr<AbilityConnectCallback> connectCallback;
-    bool ret = context_->ConnectAppServiceExtensionAbility(want, connectCallback);
+    auto ret = context_->ConnectExtensionAbilityWithExtensionType(want, connectCallback,
+        AppExecFwk::ExtensionAbilityType::SERVICE);
     EXPECT_NE(ret, ERR_OK);
 }
 

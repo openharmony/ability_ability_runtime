@@ -309,16 +309,18 @@ public:
     {
         return ERR_OK;
     }
-    virtual ErrCode StartAppServiceExtensionAbility(const AAFwk::Want &want)
+    virtual ErrCode StartExtensionAbilityWithExtensionType(const AAFwk::Want &want,
+        AppExecFwk::ExtensionAbilityType extensionType)
     {
         return ERR_OK;
     }
-    virtual ErrCode StopAppServiceExtensionAbility(const AAFwk::Want& want)
+    virtual ErrCode StopExtensionAbilityWithExtensionType(const AAFwk::Want& want,
+        AppExecFwk::ExtensionAbilityType extensionType)
     {
         return ERR_OK;
     }
-    virtual ErrCode ConnectAppServiceExtensionAbility(const AAFwk::Want& want,
-        const sptr<AbilityConnectCallback>& connectCallback)
+    virtual ErrCode ConnectExtensionAbilityWithExtensionType(const AAFwk::Want& want,
+        const sptr<AbilityConnectCallback>& connectCallback, AppExecFwk::ExtensionAbilityType extensionType)
     {
         return ERR_OK;
     }
