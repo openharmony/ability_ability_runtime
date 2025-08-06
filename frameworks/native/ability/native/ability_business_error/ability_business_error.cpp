@@ -106,8 +106,9 @@ constexpr const char* ERROR_MSG_EXTENSION_START_ABILITY_CONTROLLED =
 constexpr const char* ERROR_MSG_NOT_HOOK = "Only DelegatorAbility is allowed to call this API, and only once.";
 constexpr const char* ERROR_MSG_FROM_WINDOW =
     "An error occurred during the interaction between the ability and window.";
-constexpr const char* ERROR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST = "The target not in app identifier allow list.";
-constexpr const char* ERROR_TARGET_NOT_STARTED = "The target has not been started yet.";
+constexpr const char* ERROR_TARGET_NOT_IN_APP_IDENTIFIER_ALLOW_LIST =
+    "The caller is not in the appIdentifierAllowList of the target appliaction.";
+constexpr const char* ERROR_TARGET_NOT_STARTED = "The target service has not been started yet.";
 constexpr const char* ERROR_MSG_CALLER_NOT_ATOMIC_SERVICE =
     "The caller is not an atomic service.";
 constexpr const char* ERROR_MSG_NOT_UI_ABILITY_CONTEXT =

@@ -10782,6 +10782,10 @@ AAFwk::PermissionVerification::VerificationInfo AbilityManagerService::CreateVer
 int32_t AbilityManagerService::CheckCallAppServiceExtensionPermission(const AbilityRequest &abilityRequest,
     std::shared_ptr<AbilityRecord> targetService, bool isFromConnect)
 {
+    int32_t result = CheckCallServiceExtensionPermission(abilityRequest);
+    if (result != ERR_OK) {
+        return result;
+    }
     if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         return ERR_OK;
     }
