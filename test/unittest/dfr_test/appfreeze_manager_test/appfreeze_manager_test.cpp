@@ -379,5 +379,17 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFaultNotifyData_001, Test
     faultNotifyData = appfreezeManager->GetFaultNotifyData(faultData, pid);
     EXPECT_EQ(faultNotifyData.eventId, 10);
 }
+
+/**
+ * @tc.number: AppfreezeManagerTest_GetFirstLine_001
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFirstLine_001, TestSize.Level1)
+{
+    std::string ret = appfreezeManager->GetFirstLine("../111");
+    EXPECT_EQ(ret, "");
+    appfreezeManager->GetFirstLine("/data/log/test");
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
