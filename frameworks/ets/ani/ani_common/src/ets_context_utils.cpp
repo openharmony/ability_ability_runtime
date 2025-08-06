@@ -141,7 +141,7 @@ void Clean(ani_env *env, ani_object object)
         return;
     }
     if (ptr != 0) {
-        delete reinterpret_cast<Context *>(ptr);
+        delete reinterpret_cast<std::weak_ptr<Context> *>(ptr);
     }
 }
 
