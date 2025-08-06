@@ -71,8 +71,12 @@ ani_int EtsApplicationContextUtils::OnNativeOnEnvironmentSync(ani_env *env, ani_
     if (etsEnviromentCallback_ != nullptr) {
         return etsEnviromentCallback_->Register(envCallback);
     }
-
-    etsEnviromentCallback_ = std::make_shared<EtsEnviromentCallback>(env);
+    ani_vm *aniVM = nullptr;
+    if (env->GetVM(&aniVM) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "get aniVM failed");
+        return ANI_ERROR;
+    }
+    etsEnviromentCallback_ = std::make_shared<EtsEnviromentCallback>(aniVM);
     int32_t callbackId = etsEnviromentCallback_->Register(envCallback);
     applicationContext->RegisterEnvironmentCallback(etsEnviromentCallback_);
 
@@ -128,7 +132,12 @@ void EtsApplicationContextUtils::OnNativeOnApplicationStateChangeSync(ani_env *e
         applicationStateCallback_->Register(callback);
         return;
     }
-    applicationStateCallback_ = std::make_shared<EtsApplicationStateChangeCallback>(env);
+    ani_vm *aniVM = nullptr;
+    if (env->GetVM(&aniVM) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "get aniVM failed");
+        return;
+    }
+    applicationStateCallback_ = std::make_shared<EtsApplicationStateChangeCallback>(aniVM);
     applicationStateCallback_->Register(callback);
     applicationContext->RegisterApplicationStateChangeCallback(applicationStateCallback_);
 }
@@ -285,7 +294,7 @@ void EtsApplicationContextUtils::OnSetFont(ani_env *env, ani_object aniObj, ani_
         return;
     }
     std::string stdFont = "";
-    if (!AppExecFwk::GetStdString(env, font, stdFont)) {
+    if (!AppExecFwk::GetStdString(env, font, stdFont) || stdFont.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "Parse font failed");
         EtsErrorUtil::ThrowInvalidParamError(env, "Parse param font failed, font must be string.");
         return;
@@ -327,7 +336,7 @@ void EtsApplicationContextUtils::OnSetLanguage(ani_env *env, ani_object aniObj, 
         return;
     }
     std::string stdLanguage = "";
-    if (!AppExecFwk::GetStdString(env, language, stdLanguage)) {
+    if (!AppExecFwk::GetStdString(env, language, stdLanguage) || stdLanguage.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "Parse language failed");
         EtsErrorUtil::ThrowInvalidParamError(env, "Parse param language failed, language must be string.");
         return;
@@ -961,6 +970,7 @@ ani_object EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniE
     }
     auto etsReference = std::make_shared<AppExecFwk::ETSNativeReference>();
     etsReference->aniObj = applicationContextObject;
+    etsReference->aniRef = applicationContextObjectRef;
     ApplicationContextManager::GetApplicationContextManager().SetEtsGlobalObject(etsReference);
     BindApplicationContextFunc(aniEnv);
     ani_class applicationContextClass = nullptr;
