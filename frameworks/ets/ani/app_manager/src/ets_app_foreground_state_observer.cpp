@@ -85,15 +85,18 @@ void ETSAppForegroundStateObserver::HandleOnAppStateChanged(const AppStateData &
     ani_env *env = nullptr;
     if (!AppManagerEts::AttachAniEnv(etsVm_, env)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to AttachAniEnv");
+        return;
+    }
+    auto appStateDataObj = AppManagerEts::WrapAppStateData(env, appStateData);
+    if (appStateDataObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "WrapAppStateData failed");
         AppManagerEts::DetachAniEnv(etsVm_);
         return;
     }
     std::lock_guard<std::mutex> lock(etsObserverObjectSetLock_);
     for (auto &item : etsObserverObjects_) {
-        auto appStateDataObj = AppManagerEts::WrapAppStateData(env, appStateData);
-        if (appStateDataObj != nullptr) {
-            ani_object etsObserverObject = reinterpret_cast<ani_object>(item.aniRef);
-            CallEtsFunction(env, etsObserverObject, "onAppStateChanged", nullptr, appStateDataObj);
+        if (item != nullptr) {
+            CallEtsFunction(env, reinterpret_cast<ani_object>(item), "onAppStateChanged", nullptr, appStateDataObj);
         }
     }
     AppManagerEts::DetachAniEnv(etsVm_);
@@ -142,18 +145,14 @@ void ETSAppForegroundStateObserver::AddEtsObserverObject(const ani_object &obser
         TAG_LOGE(AAFwkTag::APPMGR, "GetEnv failed status: %{public}d", status);
         return;
     }
-    if (GetObserverObject(observerObj).aniObj == nullptr) {
+    if (GetObserverObject(observerObj) == nullptr) {
         std::lock_guard<std::mutex> lock(etsObserverObjectSetLock_);
         ani_ref global = nullptr;
         if ((status = env->GlobalReference_Create(observerObj, &global)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
-            AppManagerEts::DetachAniEnv(etsVm_);
             return;
         }
-        AppExecFwk::ETSNativeReference stRef;
-        stRef.aniObj = observerObj;
-        stRef.aniRef = global;
-        etsObserverObjects_.emplace_back(stRef);
+        etsObserverObjects_.emplace_back(global);
     } else {
         TAG_LOGD(AAFwkTag::APPMGR, "observer exist");
     }
@@ -167,10 +166,10 @@ void ETSAppForegroundStateObserver::RemoveAllEtsObserverObjects()
         return;
     }
     for (const auto &item : etsObserverObjects_) {
-        if (item.aniObj == nullptr) {
+        if (item == nullptr) {
             continue;
         }
-        AppManagerEts::ReleaseObjectReference(etsVm_, item.aniRef);
+        AppManagerEts::ReleaseObjectReference(etsVm_, item);
     }
     etsObserverObjects_.clear();
 }
@@ -181,28 +180,36 @@ void ETSAppForegroundStateObserver::RemoveEtsObserverObject(const ani_object &ob
         TAG_LOGE(AAFwkTag::APPMGR, "null observer");
         return;
     }
+    wptr<ETSAppForegroundStateObserver> weakPtr = this;
     auto it = find_if(etsObserverObjects_.begin(),
         etsObserverObjects_.end(),
-        [&observerObj](const AppExecFwk::ETSNativeReference &item) { return item.aniObj == observerObj; });
+        [weakPtr, &observerObj](ani_ref item) {
+            auto appForegroundStateObserver = weakPtr.promote();
+            if (appForegroundStateObserver == nullptr) {
+                TAG_LOGE(AAFwkTag::APPMGR, "null appForegroundStateObserver");
+                return false;
+            }
+            return appForegroundStateObserver->IsStrictEquals(item, observerObj);
+        });
     if (it != etsObserverObjects_.end()) {
         std::lock_guard<std::mutex> lock(etsObserverObjectSetLock_);
-        AppManagerEts::ReleaseObjectReference(etsVm_, it->aniRef);
+        AppManagerEts::ReleaseObjectReference(etsVm_, *it);
         etsObserverObjects_.erase(it);
     }
 }
 
-AppExecFwk::ETSNativeReference ETSAppForegroundStateObserver::GetObserverObject(const ani_object &observerObject)
+ani_ref ETSAppForegroundStateObserver::GetObserverObject(const ani_object &observerObject)
 {
     if (observerObject == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null observer");
-        return AppExecFwk::ETSNativeReference();
+        return nullptr;
     }
     for (auto& item : etsObserverObjects_) {
-        if (item.aniObj == observerObject) {
+        if (IsStrictEquals(item, observerObject)) {
             return item;
         }
     }
-    return AppExecFwk::ETSNativeReference();
+    return nullptr;
 }
 
 void ETSAppForegroundStateObserver::SetValid(bool valid)
@@ -214,6 +221,26 @@ bool ETSAppForegroundStateObserver::IsEmpty()
 {
     std::lock_guard<std::mutex> lock(etsObserverObjectSetLock_);
     return etsObserverObjects_.empty();
+}
+
+bool ETSAppForegroundStateObserver::IsStrictEquals(ani_ref observerRef, const ani_object &etsObserverObject)
+{
+    if (etsVm_ == nullptr || observerRef == nullptr || etsObserverObject == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "etsVm_ or etsObserverObject or observerRef null");
+        return false;
+    }
+    ani_env *env = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = etsVm_->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetEnv failed status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isEquals = ANI_FALSE;
+    if ((status = env->Reference_StrictEquals(observerRef, etsObserverObject, &isEquals)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Reference_StrictEquals failed status: %{public}d", status);
+        return false;
+    }
+    return isEquals == ANI_TRUE;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
