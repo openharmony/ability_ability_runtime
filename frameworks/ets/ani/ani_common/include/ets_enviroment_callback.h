@@ -25,17 +25,20 @@ namespace AbilityRuntime {
 class EtsEnviromentCallback : public EnvironmentCallback,
     public std::enable_shared_from_this<EtsEnviromentCallback> {
 public:
-    explicit EtsEnviromentCallback(ani_env *env);
+    explicit EtsEnviromentCallback(ani_vm *etsVm);
+    ~EtsEnviromentCallback() override;
     void OnConfigurationUpdated(const AppExecFwk::Configuration &config) override;
     void OnMemoryLevel(const int level) override;
     int32_t Register(ani_object aniCallback);
     bool UnRegister(int32_t callbackId);
-
+    ani_env *AttachCurrentThread();
+    void DetachCurrentThread();
 private:
-    ani_env *env_ = nullptr;
+    ani_vm *etsVm_ = nullptr;
     std::map<int32_t, ani_ref> enviromentAniCallbacks_;
     int32_t serialNumber_ = 0;
     std::mutex Mutex_;
+    std::atomic<bool> isAttachThread_ = false;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
