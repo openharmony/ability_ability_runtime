@@ -19,9 +19,12 @@
 #define private public
 #define protected public
 #include "insight_intent_executor.h"
+#include "insight_intent_executor_mgr.h"
+#include "ets_insight_intent_executor_instance.h"
 #undef private
 #undef protected
 #include "mock_runtime.h"
+#include "want_params.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -65,6 +68,26 @@ void InsightIntentExecutorTest::SetUp()
 {}
 
 void InsightIntentExecutorTest::TearDown()
+{}
+
+class InsightIntentExecutorMgrTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp() override;
+    void TearDown() override;
+};
+
+void InsightIntentExecutorMgrTest::SetUpTestCase(void)
+{}
+
+void InsightIntentExecutorMgrTest::TearDownTestCase(void)
+{}
+
+void InsightIntentExecutorMgrTest::SetUp()
+{}
+
+void InsightIntentExecutorMgrTest::TearDown()
 {}
 
 /*
@@ -152,6 +175,80 @@ HWTEST_F(InsightIntentExecutorTest, JsInsightIntentPageInit_001, TestSize.Level1
     info.executeParam = std::make_shared<AppExecFwk::InsightIntentExecuteParam>();
     auto res = insightIntentExecutor->Init(info);
     EXPECT_TRUE(res);
+}
+
+/*
+* Feature: JsInsightIntentFunc
+* Function: CreateETSInsightIntentExecutor
+* SubFunction: NA
+*/
+HWTEST_F(InsightIntentExecutorTest, JsInsightIntentPageCreateETSInsightIntentExecutor_001, TestSize.Level1)
+{
+    auto runtime = std::make_shared<MockRuntime>();
+    auto res = CreateETSInsightIntentExecutor(*runtime);
+    EXPECT_NE(res, nullptr);
+}
+
+/*
+* Feature: JsInsightIntentFunc
+* Function: ExecuteInsightIntent
+* SubFunction: NA
+*/
+HWTEST_F(InsightIntentExecutorTest, JsInsightIntentPageExecuteInsightIntent_001, TestSize.Level1)
+{
+    auto runtime = std::make_shared<MockRuntime>();
+    auto callback = std::make_unique<InsightIntentExecutorAsyncCallback>();
+    EXPECT_NE(callback, nullptr);
+    auto mgr = std::make_shared<InsightIntentExecutorMgr>();
+    InsightIntentExecutorInfo info;
+    info.executeParam = std::make_shared<AppExecFwk::InsightIntentExecuteParam>();
+    EXPECT_NE(info.executeParam, nullptr);
+    info.executeParam->insightIntentParam_ = std::make_shared<AAFwk::WantParams>();
+    EXPECT_NE(info.executeParam->insightIntentParam_, nullptr);
+    auto res = mgr->ExecuteInsightIntent(*runtime, info, std::move(callback));
+    EXPECT_FALSE(res);
+}
+
+/*
+* Feature: JsInsightIntentFunc
+* Function: AddInsightIntentExecutor
+* SubFunction: NA
+*/
+HWTEST_F(InsightIntentExecutorTest, JsInsightIntentPageAddInsightIntentExecutor_001, TestSize.Level1)
+{
+    uint64_t intentId = 0;
+    auto mgr = std::make_shared<InsightIntentExecutorMgr>();
+    auto executor = std::make_shared<MockInsightIntentExecutor>();
+    mgr->AddInsightIntentExecutor(intentId, executor);
+    EXPECT_FALSE(mgr->insightIntentExecutors_.empty());
+}
+
+/*
+* Feature: JsInsightIntentFunc
+* Function: RemoveInsightIntentExecutor
+* SubFunction: NA
+*/
+HWTEST_F(InsightIntentExecutorTest, JsInsightIntentPageRemoveInsightIntentExecutor_001, TestSize.Level1)
+{
+    uint64_t intentId = 0;
+    auto mgr = std::make_shared<InsightIntentExecutorMgr>();
+    mgr->RemoveInsightIntentExecutor(intentId);
+    EXPECT_TRUE(mgr->insightIntentExecutors_.empty());
+}
+
+/*
+* Feature: JsInsightIntentFunc
+* Function: TriggerCallbackInner
+* SubFunction: NA
+*/
+HWTEST_F(InsightIntentExecutorTest, JsInsightIntentPageTriggerCallbackInner_001, TestSize.Level1)
+{
+    auto callback = std::make_unique<InsightIntentExecutorAsyncCallback>();
+    EXPECT_NE(callback, nullptr);
+    int32_t errCode = 0;
+    auto mgr = std::make_shared<InsightIntentExecutorMgr>();
+    mgr->TriggerCallbackInner(std::move(callback), errCode);
+    EXPECT_EQ(callback, nullptr);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
