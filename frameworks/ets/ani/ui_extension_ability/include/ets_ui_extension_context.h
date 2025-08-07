@@ -124,6 +124,9 @@ private:
         std::shared_ptr<OHOS::AbilityRuntime::UIExtensionContext> context, AAFwk::Want &want, int &requestCode);
     void OpenAtomicServiceInner(ani_env *env, ani_object aniObj, AAFwk::Want &want, AAFwk::StartOptions &options,
         std::string appId, ani_object callbackobj);
+    void UnwrapCompletionHandlerInStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &options);
+    void CreateOnRequestResultCallback(ani_env *env, ani_ref refCompletionHandler,
+        OnRequestResult &onRequestCallback, const char *callbackName);
 
 #ifdef SUPPORT_SCREEN
     void InitDisplayId(AAFwk::Want &want);

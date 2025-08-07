@@ -198,6 +198,9 @@ private:
         ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object aniOpt, ani_object call);
     void OnStartAbilityAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj,
         ani_object callbackObj);
+    void UnwrapCompletionHandlerInStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &options);
+    void CreateOnRequestResultCallback(ani_env *env, ani_ref refCompletionHandler,
+        OnRequestResult &onRequestCallback, const char *callbackName);
 
     ani_env *env_ = nullptr;
     std::weak_ptr<AbilityContext> context_;
