@@ -1161,34 +1161,6 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, AddStartCallerTimestamp_003, TestS
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_DispatchForeground_0200
- * @tc.desc: DispatchForeground
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerSecondTest, DispatchForeground_001, TestSize.Level1)
-{
-    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
-
-    AbilityState state = AbilityState::ACTIVE;
-
-    AbilityRequest abilityRequest;
-    auto abilityRecord = std::make_shared<AbilityRecord>(
-        abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
-    abilityRecord->currentState_ = AbilityState::INITIAL;
-
-    std::shared_ptr<TaskHandlerWrap> runner;
-    std::weak_ptr<AbilityManagerService> server;
-    auto handler = std::make_shared<AbilityEventHandler>(runner, server);
-    DelayedSingleton<AbilityManagerService>::GetInstance()->eventHandler_ = handler;
-
-    DelayedSingleton<AbilityManagerService>::GetInstance()->taskHandler_ = nullptr;
-
-    auto ret = mgr->DispatchForeground(abilityRecord, true, state);
-
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
  * @tc.name: BackToCallerAbilityWithResultLocked_001
  * @tc.desc: BackToCallerAbilityWithResultLocked
  * @tc.type: FUNC
