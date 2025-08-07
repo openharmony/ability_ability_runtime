@@ -20,6 +20,7 @@
 #include "configuration_convertor.h"
 #include "display_util.h"
 #include "display_info.h"
+#include "ets_runtime.h"
 #include "ets_ui_ability_instance.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
@@ -689,6 +690,88 @@ void UIAbility::EnableAbilityRecovery(const std::shared_ptr<AppExecFwk::AbilityR
 int32_t UIAbility::OnShare(AAFwk::WantParams &wantParams)
 {
     return ERR_OK;
+}
+
+void UIAbility::BindHybridContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record)
+{
+    if (application == nullptr || record == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application or record");
+        return;
+    }
+    auto appInfo = application->GetApplicationInfo();
+    if (appInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null appInfo");
+        return;
+    }
+    if (appInfo->arkTSMode != AppExecFwk::Constants::ARKTS_MODE_HYBRID) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "not hybrid app, no need to create hybrid context");
+        return;
+    }
+
+    auto abilityInfo = record->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo");
+        return;
+    }
+    if (abilityInfo->arkTSMode == AppExecFwk::Constants::ARKTS_MODE_DYNAMIC) {
+        BindEtsContext(application, record);
+    } else if (abilityInfo->arkTSMode == AppExecFwk::Constants::ARKTS_MODE_STATIC) {
+        BindJsContext(application, record);
+    } else {
+        TAG_LOGE(AAFwkTag::UIABILITY, "unknown arkTSMode");
+    }
+}
+
+void UIAbility::BindEtsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record)
+{
+    if (abilityContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
+        return;
+    }
+    auto& bindingObject = abilityContext_->GetBindingObject();
+    if (bindingObject == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObject");
+        return;
+    }
+
+    auto* ptr = bindingObject->Get<ani_ref>();
+    if (ptr != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "ets context already binded");
+        return;
+    }
+    CreateAndBindETSUIAbilityContext(abilityContext_, application->GetRuntime());
+}
+
+void UIAbility::BindJsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record)
+{
+    if (abilityContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
+        return;
+    }
+    auto& bindingObject = abilityContext_->GetBindingObject();
+    if (bindingObject == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObject");
+        return;
+    }
+
+    auto* ptr = bindingObject->Get<NativeReference>();
+    if (ptr != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "ets context already binded");
+        return;
+    }
+    auto &runtime = application->GetRuntime();
+    if (runtime == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null runtime");
+        return;
+    }
+    if (runtime->GetLanguage() == Runtime::Language::ETS) {
+        JsUIAbility::CreateAndBindContext(abilityContext_, static_cast<ETSRuntime&>(*runtime).GetJsRuntime());
+    } else if (runtime->GetLanguage() == Runtime::Language::JS) {
+        JsUIAbility::CreateAndBindContext(abilityContext_, runtime);
+    }
 }
 
 bool UIAbility::CheckIsSilentForeground() const

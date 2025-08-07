@@ -30,7 +30,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 class AbilityContextImpl : public AbilityContext {
 public:
-    AbilityContextImpl() = default;
+    AbilityContextImpl();
     virtual ~AbilityContextImpl() = default;
 
     Global::Resource::DeviceType GetDeviceType() const override;
