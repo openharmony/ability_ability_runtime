@@ -649,6 +649,24 @@ HWTEST_F(AppSchedulerTest, AppScheduler_KillApplication_002, TestSize.Level1)
 
 /*
  * Feature: AppScheduler
+ * Function: VerifyKillProcessPermission
+ * SubFunction: NA
+ * FunctionPoints: AppScheduler VerifyKillProcessPermission
+ * EnvConditions: NA
+ * CaseDescription: Verify VerifyKillProcessPermission
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_VerifyKillProcessPermission_001, TestSize.Level1)
+{
+    std::string bundleName = "test";
+    auto res = DelayedSingleton<AppScheduler>::GetInstance()->VerifyKillProcessPermission(bundleName);
+    EXPECT_EQ(res, ERR_OK);
+    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
+    res = DelayedSingleton<AppScheduler>::GetInstance()->VerifyKillProcessPermission(bundleName);
+    EXPECT_EQ(res, INNER_ERR);
+}
+
+/*
+ * Feature: AppScheduler
  * Function: KillApplicationByUid
  * SubFunction: NA
  * FunctionPoints: AppScheduler KillApplicationByUid

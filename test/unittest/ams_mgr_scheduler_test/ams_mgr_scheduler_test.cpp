@@ -748,6 +748,26 @@ HWTEST_F(AmsMgrSchedulerTest, IsMemorySizeSufficent_001, TestSize.Level2)
 
 /*
  * Feature: AmsMgrScheduler
+ * Function: VerifyKillProcessPermission
+ * SubFunction: NA
+ * FunctionPoints: AmsMgrScheduler VerifyKillProcessPermission
+ * EnvConditions: NA
+ * CaseDescription: Verify VerifyKillProcessPermission
+ */
+HWTEST_F(AmsMgrSchedulerTest, VerifyKillProcessPermission_001, TestSize.Level2)
+{
+    auto amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
+    ASSERT_NE(amsMgrScheduler, nullptr);
+    auto res = amsMgrScheduler->VerifyKillProcessPermission("test");
+    EXPECT_NE(res, ERR_OK);
+    amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
+    amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
+    res = amsMgrScheduler->VerifyKillProcessPermission("test");
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * Feature: AmsMgrScheduler
  * Function: StartSpecifiedAbility
  * SubFunction: NA
  * FunctionPoints: AmsMgrScheduler StartSpecifiedAbility

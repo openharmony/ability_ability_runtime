@@ -1016,6 +1016,8 @@ public:
 
     int32_t QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles);
 
+    int32_t VerifyKillProcessPermission(const std::string &bundleName) const;
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

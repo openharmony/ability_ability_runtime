@@ -1574,6 +1574,11 @@ public:
 
     virtual int32_t QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles);
 
+    /**
+     * Verify whether the caller has the permission to kill processes of a bundleName.
+     */
+    int VerifyKillProcessPermission(const std::string &bundleName) const;
+
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);
@@ -1791,11 +1796,6 @@ private:
     void RegisterFocusListener();
 
     static void PointerDeviceEventCallback(const char *key, const char *value, void *context);
-
-    /**
-     * Verify whether the caller has the permission to kill processes of a bundleName.
-     */
-    int VerifyKillProcessPermission(const std::string &bundleName) const;
 
     int32_t VerifyKillProcessPermissionCommon() const;
 

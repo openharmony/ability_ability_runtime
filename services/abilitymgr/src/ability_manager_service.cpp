@@ -7608,10 +7608,31 @@ void AbilityManagerService::ReleaseAbilityTokenMap(const sptr<IRemoteObject> &to
     }
 }
 
+bool AbilityManagerService::CheckPermissionForKillCollaborator()
+{
+    // check permission first
+    auto isSaCall = PermissionVerification::GetInstance()->IsSACall();
+    auto isShellCall = PermissionVerification::GetInstance()->IsShellCall();
+    auto isCallingPerm = PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_KILL_APP_PROCESSES);
+    if (!isSaCall && !isShellCall && !isCallingPerm) {
+        return false;
+    }
+    return true;
+}
+
 int AbilityManagerService::KillProcess(const std::string &bundleName, bool clearPageStack, int32_t appIndex)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Kill process, bundleName: %{public}s, clearPageStack: %{public}d",
         bundleName.c_str(), clearPageStack);
+    // check permission first
+    auto isAllowKillProcessForCollaborator = CheckPermissionForKillCollaborator();
+    if (!isAllowKillProcessForCollaborator &&
+        DelayedSingleton<AppScheduler>::GetInstance()->VerifyKillProcessPermission(bundleName) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "KillProcess permission verification fail");
+        return ERR_PERMISSION_DENIED;
+    }
+
     auto bms = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bms, KILL_PROCESS_FAILED);
     int32_t userId = GetUserId();
@@ -7625,6 +7646,10 @@ int AbilityManagerService::KillProcess(const std::string &bundleName, bool clear
 
     int32_t collaboratorType = GetCollaboratorType(bundleInfo.applicationInfo.codePath);
     if (CheckCollaboratorType(collaboratorType)) {
+        if (!isAllowKillProcessForCollaborator) {
+            TAG_LOGE(AAFwkTag::APPMGR, "KillProcess permission verification fail");
+            return ERR_PERMISSION_DENIED;
+        }
         return KillProcessForCollaborator(collaboratorType, bundleName, userId);
     }
 
@@ -7647,14 +7672,6 @@ int32_t AbilityManagerService::KillProcessForCollaborator(int32_t collaboratorTy
     if (collaborator == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Collaborator null");
         return KILL_PROCESS_FAILED;
-    }
-    auto isSaCall = PermissionVerification::GetInstance()->IsSACall();
-    auto isShellCall = PermissionVerification::GetInstance()->IsShellCall();
-    auto isCallingPerm = PermissionVerification::GetInstance()->VerifyCallingPermission(
-        PermissionConstants::PERMISSION_KILL_APP_PROCESSES);
-    if (!isCallingPerm && !isSaCall && !isShellCall) {
-        TAG_LOGE(AAFwkTag::APPMGR, "KillProcess permission verification fail");
-        return ERR_PERMISSION_DENIED;
     }
     if (collaborator->NotifyKillProcesses(bundleName, userId) != ERR_OK) {
         return KILL_PROCESS_FAILED;

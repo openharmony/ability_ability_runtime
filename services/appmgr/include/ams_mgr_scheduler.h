@@ -469,6 +469,8 @@ public:
     virtual int32_t CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,
         bool &isExist) override;
 
+    virtual int32_t VerifyKillProcessPermission(const std::string &bundleName) override;
+
 private:
     /**
      * @brief Judge whether the application service is ready.

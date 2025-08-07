@@ -619,6 +619,7 @@ public:
 
     int32_t CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex, bool &isExist);
 
+    int32_t VerifyKillProcessPermission(const std::string &bundleName) const;
 protected:
     /**
      * OnAbilityRequestDone, app manager service call this interface after ability request done.
