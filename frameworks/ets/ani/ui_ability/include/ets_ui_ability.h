@@ -227,6 +227,13 @@ public:
     bool OnBackPress() override;
 
     /**
+     * @brief Called when ability prepare terminate.
+     * @param callbackInfo The callbackInfo is used when onPrepareToTerminateAsync is implemented.
+     * @param isAsync The returned flag indicates if onPrepareToTerminateAsync is implemented.
+     */
+    void OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo, bool &isAsync) override;
+
+    /**
      * @brief Execute insight intent when an ability is in foreground, schedule it to foreground repeatly.
      *
      * @param want Want.
