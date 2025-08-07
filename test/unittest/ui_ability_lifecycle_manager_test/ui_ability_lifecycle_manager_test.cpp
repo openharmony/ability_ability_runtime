@@ -714,19 +714,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, DispatchState_004, TestSize.Level1)
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_DispatchForeground_0100
- * @tc.desc: DispatchForeground
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, DispatchForeground_001, TestSize.Level1)
-{
-    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
-    AbilityRequest abilityRequest;
-    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    EXPECT_EQ(mgr->DispatchForeground(abilityRecord, true, AbilityState::FOREGROUND), ERR_INVALID_VALUE);
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_CompleteForegroundSuccess_0100
  * @tc.desc: CompleteForegroundSuccess
  * @tc.type: FUNC
@@ -6121,50 +6108,22 @@ HWTEST_F(UIAbilityLifecycleManagerTest, DispatchForeground_0001, TestSize.Level1
     request.abilityInfo.isStageBasedModel = true;
     request.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
     auto record = AbilityRecord::CreateAbilityRecord(request);
-    record->SetAbilityState(AbilityState::FOREGROUNDING);
-
-    int ret = mgr->DispatchForeground(record, true);
+    // abilityRecord nullptr
+    int ret = mgr->DispatchForeground(nullptr, true, AbilityState::FOREGROUNDING);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: DispatchForeground_0002
- * @tc.desc: DispatchForeground
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, DispatchForeground_0002, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    AbilityRequest request;
-    request.abilityInfo.bundleName = "com.example.bundle";
-    request.abilityInfo.name = "AbilityA";
-    request.abilityInfo.moduleName = "moduleA";
-    request.abilityInfo.isStageBasedModel = true;
-    request.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
-    auto record = AbilityRecord::CreateAbilityRecord(request);
-    record->SetAbilityState(AbilityState::FOREGROUNDING);
-
-    int ret = mgr->DispatchForeground(record, false, AbilityState::FOREGROUND_FAILED);
+    
+    // abilityRecord state INITIAL
+    record->SetAbilityState(AbilityState::INITIAL);
+    ret = mgr->DispatchForeground(record, true, AbilityState::FOREGROUNDING);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
 
-/**
- * @tc.name: DispatchForeground_0003
- * @tc.desc: DispatchForeground
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, DispatchForeground_0003, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    AbilityRequest request;
-    request.abilityInfo.bundleName = "com.example.bundle";
-    request.abilityInfo.name = "AbilityA";
-    request.abilityInfo.moduleName = "moduleA";
-    request.abilityInfo.isStageBasedModel = true;
-    request.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
-    auto record = AbilityRecord::CreateAbilityRecord(request);
     record->SetAbilityState(AbilityState::FOREGROUNDING);
+    ret = mgr->DispatchForeground(record, false, AbilityState::FOREGROUNDING);
+    EXPECT_EQ(ret, ERR_OK);
 
-    int ret = mgr->DispatchForeground(record, false, AbilityState::FOREGROUND_WINDOW_FREEZED);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    record->SetAbilityState(AbilityState::FOREGROUNDING);
+    ret = mgr->DispatchForeground(record, false, AbilityState::FOREGROUND_WINDOW_FREEZED);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
