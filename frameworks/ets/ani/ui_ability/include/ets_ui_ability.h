@@ -110,6 +110,16 @@ public:
     void OnNewWant(const Want &want) override;
 
     /**
+     * @brief Prepare user data of local Ability.
+     * @param reason the reason why framework invoke this function
+     * @param wantParams Indicates the user data to be saved.
+     * @return result code defined in abilityConstants
+     */
+    int32_t OnSaveState(int32_t reason, WantParams &wantParams,
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult> *callbackInfo,
+        bool &isAsync, AppExecFwk::StateReason stateReason) override;
+
+    /**
      * @brief Called when startAbilityForResult(ohos.aafwk.content.Want,int) is called to start an ability and the
      * result is returned. This method is called only on Page abilities. You can start a new ability to perform some
      * calculations and use setResult (int,ohos.aafwk.content.Want) to return the calculation result. Then the system
@@ -278,6 +288,8 @@ private:
         const std::string &moduleName, const std::string &srcPath);
     void CreateEtsContext(int32_t screenMode);
     bool BindNativeMethods();
+    int32_t CallSaveState(ani_value args[], WantParams &wantParams, AppExecFwk::StateReason stateReason,
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult> *callbackInfo);
 
     ETSRuntime &etsRuntime_;
     std::shared_ptr<AppExecFwk::ETSNativeReference> shellContextRef_;

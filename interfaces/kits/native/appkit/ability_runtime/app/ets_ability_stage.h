@@ -48,15 +48,34 @@ public:
 
     std::string OnNewProcessRequest(const AAFwk::Want &want) override;
 
+    std::string OnAcceptWant(const AAFwk::Want &want,
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsync) override;
+
+    std::string OnNewProcessRequest(const AAFwk::Want &want,
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsync) override;
+
+    static void OnAcceptWantCallback(ani_env *env, ani_object aniObj, ani_string aniResult);
+
+    static void OnNewProcessRequestCallback(ani_env *env, ani_object aniObj, ani_string aniResult);
+
     void OnConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
 
     void OnMemoryLevel(int32_t level) override;
 private:
     bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...) const;
 
+    ani_object CallObjectMethod(const char *name, const char *signature, ...) const;
+
     std::shared_ptr<AppExecFwk::EtsDelegatorAbilityStageProperty> CreateStageProperty() const;
 
     std::string GetHapModuleProp(const std::string &propName) const;
+
+    bool CallAcceptOrRequestSync(ani_env *env, const AAFwk::Want &want, std::string &methodName,
+        AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo) const;
+
+    bool CallAcceptOrRequestAsync(ani_env *env, const AAFwk::Want &want, std::string &methodName, bool &isAsync) const;
+
+    bool BindNativeMethods();
 
     void SetEtsAbilityStage(const std::shared_ptr<Context> &context);
 
