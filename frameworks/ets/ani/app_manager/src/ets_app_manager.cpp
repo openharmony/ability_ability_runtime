@@ -1127,13 +1127,13 @@ void EtsAppManager::OnOnAbilityFirstFrameState(
 {
 #ifdef SUPPORT_SCREEN
     TAG_LOGD(AAFwkTag::APPMGR, "OnOnAbilityFirstFrameState called %{public}p", aniObserver);
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
+        return;
+    }
     if (!CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Non-system app");
         AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
-        return;
-    }
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
         return;
     }
     std::string strType;
@@ -1215,13 +1215,13 @@ void EtsAppManager::OnOffAbilityFirstFrameState(ani_env *env, ani_string type, a
 {
 #ifdef SUPPORT_SCREEN
     TAG_LOGD(AAFwkTag::APPMGR, "OnOffAbilityFirstFrameState called %{public}p", aniObserver);
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
+        return;
+    }
     if (!CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Non-system app");
         AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
-        return;
-    }
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
         return;
     }
     ani_vm *aniVM = nullptr;

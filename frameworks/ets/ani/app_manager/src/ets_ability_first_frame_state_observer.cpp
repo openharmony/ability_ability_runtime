@@ -80,12 +80,11 @@ void ETSAbilityFirstFrameStateObserver::HandleOnAbilityFirstFrameState(
     ani_env *env = nullptr;
     if (!AppManagerEts::AttachAniEnv(etsVm_, env)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Failed to AttachAniEnv");
-        AppManagerEts::DetachAniEnv(etsVm_);
         return;
     }
     auto paramObj = AppManagerEts::WrapAbilityFirstFrameStateData(env, abilityFirstFrameStateData);
     if (paramObj != nullptr && etsObserverObject_ != nullptr) {
-        CallEtsFunction(env, reinterpret_cast<ani_object>(etsObserverObject_->aniRef), "onAbilityFirstFrameDrawn",
+        CallEtsFunction(env, reinterpret_cast<ani_object>(etsObserverObject_), "onAbilityFirstFrameDrawn",
             nullptr, paramObj);
     }
     AppManagerEts::DetachAniEnv(etsVm_);
@@ -139,17 +138,13 @@ void ETSAbilityFirstFrameStateObserver::SetEtsObserverObject(const ani_object &e
         TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
         return;
     }
-    AppExecFwk::ETSNativeReference stRef;
-    stRef.aniObj = etsObserverObject;
-    stRef.aniRef = observerRef;
-    etsObserverObject_ = std::make_shared<AppExecFwk::ETSNativeReference>(stRef);
+    etsObserverObject_ = observerRef;
 }
 
 void ETSAbilityFirstFrameStateObserver::ResetEtsObserverObject()
 {
     if (etsObserverObject_) {
-        AppManagerEts::ReleaseObjectReference(etsVm_, etsObserverObject_->aniRef);
-        etsObserverObject_.reset();
+        AppManagerEts::ReleaseObjectReference(etsVm_, etsObserverObject_);
     }
 }
 
@@ -193,6 +188,25 @@ void ETSAbilityFirstFrameStateObserverManager::RemoveAllEtsObserverObjects(
     etsAbilityFirstFrameStateObserverList_.clear();
 }
 
+bool ETSAbilityFirstFrameStateObserver::IsStrictEquals(const ani_object &etsObserverObject)
+{
+    if (etsObserverObject == nullptr) {
+        return false;
+    }
+    ani_env *env = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = etsVm_->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetEnv failed status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isEquals = ANI_FALSE;
+    if ((status = env->Reference_StrictEquals(etsObserverObject_, etsObserverObject, &isEquals)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Reference_StrictEquals failed status: %{public}d", status);
+        return false;
+    }
+    return isEquals == ANI_TRUE;
+}
+
 void ETSAbilityFirstFrameStateObserverManager::RemoveEtsObserverObject(
     sptr<OHOS::AAFwk::IAbilityManager> &abilityManager, const ani_object &etsObserverObject)
 {
@@ -211,12 +225,11 @@ void ETSAbilityFirstFrameStateObserverManager::RemoveEtsObserverObject(
         if (*it == nullptr) {
             continue;
         }
-        auto tmpObject = (*it)->GetAniObserver();
-        if (tmpObject == nullptr) {
+        if ((*it)->GetAniObserver() == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null value");
             continue;
         }
-        if (tmpObject->aniObj == etsObserverObject) {
+        if ((*it)->IsStrictEquals(etsObserverObject)) {
             abilityManager->UnregisterAbilityFirstFrameStateObserver(*it);
             (*it)->ResetEtsObserverObject();
             etsAbilityFirstFrameStateObserverList_.erase(it);
@@ -225,8 +238,7 @@ void ETSAbilityFirstFrameStateObserverManager::RemoveEtsObserverObject(
     }
 }
 
-std::shared_ptr<AppExecFwk::ETSNativeReference> ETSAbilityFirstFrameStateObserverManager::GetObserverObject(
-    const ani_object &etsObserverObject)
+ani_ref ETSAbilityFirstFrameStateObserverManager::GetObserverObject(const ani_object &etsObserverObject)
 {
     if (etsObserverObject == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null observer");
@@ -236,8 +248,10 @@ std::shared_ptr<AppExecFwk::ETSNativeReference> ETSAbilityFirstFrameStateObserve
     auto it = find_if(etsAbilityFirstFrameStateObserverList_.begin(),
         etsAbilityFirstFrameStateObserverList_.end(),
         [&etsObserverObject](const sptr<ETSAbilityFirstFrameStateObserver> &observer) {
-            return observer != nullptr && observer->GetAniObserver() &&
-                   observer->GetAniObserver()->aniObj == etsObserverObject;
+            if (observer == nullptr || observer->GetAniObserver() == nullptr) {
+                return false;
+            }
+            return observer->IsStrictEquals(etsObserverObject);
         });
     if (it != etsAbilityFirstFrameStateObserverList_.end() && *it != nullptr) {
         return (*it)->GetAniObserver();
