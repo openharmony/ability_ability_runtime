@@ -43,6 +43,7 @@ constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityU
 const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
+const std::string JSON_KEY_ERR_MSG = "errMsg";
 
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
@@ -530,6 +531,9 @@ void EtsServiceExtensionContext::OnOpenAtomicService(
         AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
         return;
     }
+    if (!isOptionsUndefined) {
+        UnwrapCompletionHandlerInStartOptions(env, optionsObj, startOptions);
+    }
     OpenAtomicServiceInner(env, aniObj, want, startOptions, appId, callbackObj);
 }
 
@@ -562,8 +566,13 @@ void EtsServiceExtensionContext::OpenAtomicServiceInner(ani_env *env, ani_object
         std::string abilityName = want.GetElement().GetAbilityName();
         freeInstallObserver_->OnInstallFinished(bundleName, abilityName, startTime, ErrCode);
     } else {
-        TAG_LOGI(AAFwkTag::SERVICE_EXT, "OpenAtomicService success");
         AppExecFwk::AsyncCallback(env, callbackObj, EtsErrorUtil::CreateErrorByNativeErr(env, ErrCode), nullptr);
+    }
+    if (!options.requestId_.empty()) {
+        nlohmann::json jsonObject = nlohmann::json {
+            { JSON_KEY_ERR_MSG, "failed to call openAtomicService" }
+        };
+        context->OnRequestFailure(options.requestId_, want.GetElement(), jsonObject.dump());
     }
 }
 
@@ -837,6 +846,101 @@ void ETSServiceExtensionConnection::DetachCurrentThread()
         etsVm_->DetachCurrentThread();
         isAttachThread_ = false;
     }
+}
+
+void EtsServiceExtensionContext::UnwrapCompletionHandlerInStartOptions(ani_env *env, ani_object param,
+    AAFwk::StartOptions &options)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "UnwrapCompletionHandlerInStartOptions called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "env null");
+        return;
+    }
+    auto context = context_.lock();
+    if (!context) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
+        return;
+    }
+    ani_ref completionHandler;
+    if (!AppExecFwk::GetFieldRefByName(env, param, "completionHandler", completionHandler) ||
+        !completionHandler) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null completionHandler");
+        return;
+    }
+    ani_ref refCompletionHandler = nullptr;
+    if (env->GlobalReference_Create(completionHandler, &refCompletionHandler) != ANI_OK ||
+        !refCompletionHandler) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to create global ref for completionHandler");
+        return;
+    }
+    OnRequestResult onRequestSucc;
+    OnRequestResult onRequestFail;
+    CreateOnRequestResultCallback(env, refCompletionHandler, onRequestSucc, "onRequestSuccess");
+    CreateOnRequestResultCallback(env, refCompletionHandler, onRequestFail, "onRequestFailure");
+    uint64_t time = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count());
+    std::string requestId = std::to_string(time);
+    if (context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "add completionHandler failed");
+        env->GlobalReference_Delete(refCompletionHandler);
+        return;
+    }
+    options.requestId_ = requestId;
+}
+
+void EtsServiceExtensionContext::CreateOnRequestResultCallback(ani_env *env, ani_ref refCompletionHandler,
+    OnRequestResult &onRequestCallback, const char *callbackName)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "CreateOnRequestResultCallback called");
+    ani_vm *etsVm = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->GetVM(&etsVm)) != ANI_OK || etsVm == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "GetVM failed, status: %{public}d", status);
+        env->GlobalReference_Delete(refCompletionHandler);
+        return;
+    }
+    onRequestCallback = [etsVm, refCompletionHandler, callbackName](const AppExecFwk::ElementName &element,
+        const std::string &message) {
+        ani_status status = ANI_ERROR;
+        ani_env *env = nullptr;
+        if ((status = etsVm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "GetEnv failed or env is null");
+            return;
+        }
+        ani_object elementObj = WrapElementName(env, element);
+        if (!elementObj) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "WrapElementName failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        ani_string messageStr = nullptr;
+        if (env->String_NewUTF8(message.c_str(), message.size(), &messageStr) != ANI_OK || !messageStr) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "String_NewUTF8 for message failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        ani_ref funRef;
+        if ((status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(refCompletionHandler),
+            callbackName, &funRef)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Object_GetFieldByName_Ref failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        if (!AppExecFwk::IsValidProperty(env, funRef)) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "IsValidProperty failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        ani_ref result = nullptr;
+        std::vector<ani_ref> argv = { elementObj, messageStr};
+        if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_TWO, argv.data(),
+            &result)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "FunctionalObject_Call failed");
+            env->GlobalReference_Delete(refCompletionHandler);
+            return;
+        }
+        env->GlobalReference_Delete(refCompletionHandler);
+    };
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
