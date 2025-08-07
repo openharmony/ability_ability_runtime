@@ -32,7 +32,7 @@ int32_t InsightRdbStorageMgr::LoadInsightIntentInfos(const int32_t userId,
 {
     TAG_LOGD(AAFwkTag::INTENT, "InsightRdbStorageMgr load all intent total infos");
     std::unordered_map<std::string, std::string> value;
-    std::string key = std::to_string(userId);
+    std::string key = std::to_string(userId).append("/");
     bool result = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->QueryDataBeginWithKey(key, value);
     if (!result) {
         TAG_LOGE(AAFwkTag::INTENT, "get entries error");
@@ -47,7 +47,7 @@ int32_t InsightRdbStorageMgr::LoadInsightIntentInfoByName(const std::string &bun
 {
     TAG_LOGD(AAFwkTag::INTENT, "load intent total infos by bundleName, %{public}s", bundleName.c_str());
     std::unordered_map<std::string, std::string> value;
-    std::string key = std::to_string(userId).append("/").append(bundleName);
+    std::string key = std::to_string(userId).append("/").append(bundleName).append("/");
     bool result = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->QueryDataBeginWithKey(key, value);
     if (!result) {
         TAG_LOGE(AAFwkTag::INTENT, "get entries error");
@@ -126,7 +126,7 @@ int32_t InsightRdbStorageMgr::DeleteStorageInsightIntentByUserId(const int32_t u
     bool result;
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
-        std::string key = std::to_string(userId);
+        std::string key = std::to_string(userId).append("/");
         result = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->DeleteDataBeginWithKey(key);
     }
     if (!result) {
@@ -142,7 +142,8 @@ int32_t InsightRdbStorageMgr::DeleteStorageInsightIntentData(const std::string &
     bool result;
     {
         std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
-        std::string key = std::to_string(userId).append("/").append(bundleName).append("/").append(moduleName);
+        std::string key = std::to_string(userId).append("/")
+            .append(bundleName).append("/").append(moduleName).append("/");
         result = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->DeleteDataBeginWithKey(key);
     }
     if (!result) {
