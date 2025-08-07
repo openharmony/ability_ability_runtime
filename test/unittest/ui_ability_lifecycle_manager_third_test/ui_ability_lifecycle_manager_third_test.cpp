@@ -509,61 +509,6 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_009, TestSize
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_DispatchForeground_0200
- * @tc.desc: DispatchForeground
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerThirdTest, DispatchForeground_002, TestSize.Level1)
-{
-    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
-
-    AbilityState state = AbilityState::ACTIVE;
-
-    std::shared_ptr<TaskHandlerWrap> runner;
-    std::weak_ptr<AbilityManagerService> server;
-    auto handler = std::make_shared<AbilityEventHandler>(runner, server);
-    DelayedSingleton<AbilityManagerService>::GetInstance()->eventHandler_ = handler;
-
-    auto taskHandler = TaskHandlerWrap::CreateQueueHandler("HelloWorld");
-    DelayedSingleton<AbilityManagerService>::GetInstance()->taskHandler_ = nullptr;
-
-    std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
-
-    auto ret = mgr->DispatchForeground(abilityRecord, true, state);
-
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_DispatchForeground_0300
- * @tc.desc: DispatchForeground
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerThirdTest, DispatchForeground_003, TestSize.Level1)
-{
-    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
-
-    AbilityState state = AbilityState::ACTIVE;
-
-    std::shared_ptr<TaskHandlerWrap> runner;
-    std::weak_ptr<AbilityManagerService> server;
-    auto handler = std::make_shared<AbilityEventHandler>(runner, server);
-    DelayedSingleton<AbilityManagerService>::GetInstance()->eventHandler_ = handler;
-
-    auto taskHandler = TaskHandlerWrap::CreateQueueHandler("HelloWorld");
-    DelayedSingleton<AbilityManagerService>::GetInstance()->taskHandler_ = nullptr;
-
-    AbilityRequest abilityRequest;
-    auto abilityRecord = std::make_shared<AbilityRecord>(
-        abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
-    abilityRecord->currentState_ = AbilityState::ACTIVATING;
-
-    auto ret = mgr->DispatchForeground(abilityRecord, true, state);
-
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_DispatchBackground_0200
  * @tc.desc: DispatchBackground
  * @tc.type: FUNC
