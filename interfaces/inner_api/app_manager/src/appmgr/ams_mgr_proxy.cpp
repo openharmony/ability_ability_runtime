@@ -1646,5 +1646,30 @@ int32_t AmsMgrProxy::CheckPreloadAppRecordExist(const std::string &bundleName, i
     isExist = reply.ReadBool();
     return NO_ERROR;
 }
+
+int32_t AmsMgrProxy::VerifyKillProcessPermission(const std::string &bundleName)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write token failed");
+        return ERR_INVALID_DATA;
+    }
+
+    if (bundleName.empty() || !data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write bundleName failed");
+        return ERR_INVALID_DATA;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::VERIFY_KILL_PROCESS_PERMISSION),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request err: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
 } // namespace AppExecFwk
 } // namespace OHOS

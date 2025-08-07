@@ -105,6 +105,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     amsMgrScheduler->AbilityAttachTimeOut(token);
     amsMgrScheduler->PrepareTerminate(token);
     amsMgrScheduler->KillApplication(bundleName);
+    amsMgrScheduler->VerifyKillProcessPermission(bundleName);
     int uid = static_cast<int>(GetU32Data(data));
     amsMgrScheduler->KillApplicationByUid(bundleName, uid);
     amsMgrScheduler->KillApplicationSelf();
