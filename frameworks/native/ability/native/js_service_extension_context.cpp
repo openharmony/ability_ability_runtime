@@ -48,8 +48,6 @@ constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t INDEX_TWO = 2;
 constexpr int32_t INDEX_THREE = 3;
 constexpr int32_t INDEX_FOUR = 4;
-constexpr int32_t ERROR_CODE_ONE = 1;
-constexpr int32_t ERROR_CODE_TWO = 2;
 constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
@@ -929,7 +927,7 @@ private:
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::SERVICE_EXT, "context released");
-                *innerErrCode = static_cast<int32_t>(ERROR_CODE_ONE);
+                *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
             *innerErrCode = context->TerminateAbility();
@@ -938,7 +936,7 @@ private:
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
-                } else if (*innerErrCode == ERROR_CODE_ONE) {
+                } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
                     task.Reject(env, CreateJsError(env, *innerErrCode, "context is released"));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
@@ -1015,7 +1013,7 @@ private:
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGE(AAFwkTag::SERVICE_EXT, "context released");
-                *innerErrCode = static_cast<int>(ERROR_CODE_ONE);
+                *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
             TAG_LOGD(AAFwkTag::SERVICE_EXT, "connection:%{public}d", static_cast<int32_t>(connectId));
@@ -1023,7 +1021,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [connection, connectId, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-                if (*innerErrCode == ERROR_CODE_ONE) {
+                if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode, "Context is released"));
                     RemoveConnection(connectId);
                 } else {
@@ -1091,12 +1089,12 @@ private:
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::SERVICE_EXT, "context released");
-                *innerErrCode = static_cast<int32_t>(ERROR_CODE_ONE);
+                *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
             if (!connection) {
                 TAG_LOGW(AAFwkTag::SERVICE_EXT, "null connection");
-                *innerErrCode = static_cast<int32_t>(ERROR_CODE_TWO);
+                *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
                 return;
             }
             TAG_LOGD(AAFwkTag::SERVICE_EXT, "context->DisconnectAbility");
@@ -1106,9 +1104,9 @@ private:
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
-                } else if (*innerErrCode == ERROR_CODE_ONE) {
+                } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
                     task.Reject(env, CreateJsError(env, *innerErrCode, "Context is released"));
-                } else if (*innerErrCode == ERROR_CODE_TWO) {
+                } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER)) {
                     task.Reject(env, CreateJsError(env, *innerErrCode, "not found connection"));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
