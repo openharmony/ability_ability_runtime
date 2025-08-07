@@ -182,10 +182,10 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_001, TestSiz
     EXPECT_TRUE(abilityMs_->startUpNewRule_);
     abilityMs_->startUpNewRule_ = false;
     abilityRequest.abilityInfo.visible = true;
-    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest), ABILITY_VISIBLE_FALSE_DENY_REQUEST);
+    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest), CHECK_PERMISSION_FAILED);
 
     abilityMs_->startUpNewRule_ = true;
-    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest), ABILITY_VISIBLE_FALSE_DENY_REQUEST);
+    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest), CHECK_PERMISSION_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_001 end");
 }
 
@@ -313,11 +313,11 @@ HWTEST_F(AbilityManagerServiceFirstTest, RegisterSnapshotHandler_001, TestSize.L
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest RegisterSnapshotHandler_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    EXPECT_EQ(abilityMs_->RegisterSnapshotHandler(nullptr), 0);
+    EXPECT_EQ(abilityMs_->RegisterSnapshotHandler(nullptr), CHECK_PERMISSION_FAILED);
 
     auto temp = abilityMs_->subManagersHelper_->currentMissionListManager_;
     abilityMs_->subManagersHelper_->currentMissionListManager_.reset();
-    EXPECT_EQ(abilityMs_->RegisterSnapshotHandler(nullptr), ERR_OK);
+    EXPECT_EQ(abilityMs_->RegisterSnapshotHandler(nullptr), CHECK_PERMISSION_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest RegisterSnapshotHandler_001 end");
 }
 
@@ -962,15 +962,15 @@ HWTEST_F(AbilityManagerServiceFirstTest, IsCallFromBackground_001, TestSize.Leve
     MyFlag::flag_ = 0;
     abilityRequest.callerToken = nullptr;
     abilityRequest.want.SetFlags(0);
-    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_OK);
+    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_INVALID_VALUE);
 
     abilityRequest.callerToken = MockToken(AbilityType::PAGE);
     abilityRequest.want.SetParam("isDelegatorCall", true);
-    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_OK);
+    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_INVALID_VALUE);
 
     abilityRequest.callerToken = nullptr;
     abilityRequest.want.SetParam("isDelegatorCall", true);
-    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_OK);
+    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest IsCallFromBackground_001 end");
 }
 
