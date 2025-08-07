@@ -76,7 +76,7 @@ int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> 
     if (IsInKioskModeInner()) {
         auto it = std::find(appList.begin(), appList.end(), kioskStatus_.kioskBundleName_);
         if (it == appList.end()) {
-            auto ret = ExitKioskModeInner(kioskStatus_.kioskBundleName_, nullptr);
+            auto ret = ExitKioskModeInner(kioskStatus_.kioskBundleName_, kioskStatus_.kioskToken_);
             if (ret != ERR_OK) {
                 return ret;
             }
