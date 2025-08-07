@@ -651,7 +651,12 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     auto connectObject = connect->AsObject();
 #ifdef SUPPORT_UPMS
     // grant uri to service extension by connect, must call out of serialMutex_
-    UriUtils::GetInstance().GrantUriPermissionForServiceExtension(abilityRequest);
+    if (userId_ == U0_USER_ID ||
+        userId_ == DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId()) {
+        UriUtils::GetInstance().GrantUriPermissionForServiceExtension(abilityRequest);
+    } else {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "cross user, without grantUriPermission");
+    }
 #endif // SUPPORT_UPMS
     std::lock_guard guard(serialMutex_);
 
