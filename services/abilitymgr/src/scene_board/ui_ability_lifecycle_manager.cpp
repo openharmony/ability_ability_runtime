@@ -924,12 +924,7 @@ int UIAbilityLifecycleManager::DispatchState(const std::shared_ptr<AbilityRecord
 int UIAbilityLifecycleManager::DispatchForeground(const std::shared_ptr<AbilityRecord> &abilityRecord, bool success,
     AbilityState state)
 {
-    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
-    CHECK_POINTER_AND_RETURN_LOG(handler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
-    auto taskHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
-    CHECK_POINTER_AND_RETURN_LOG(taskHandler, ERR_INVALID_VALUE, "Fail to get AbilityTaskHandler.");
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-
     RemoveStartingPid(abilityRecord->GetPid());
 
     if (!abilityRecord->IsAbilityState(AbilityState::FOREGROUNDING)) {
@@ -943,37 +938,20 @@ int UIAbilityLifecycleManager::DispatchForeground(const std::shared_ptr<AbilityR
     abilityRecord->RemoveForegroundTimeoutTask();
     g_deleteLifecycleEventTask(abilityRecord->GetToken());
     FreezeUtil::GetInstance().DeleteAppLifecycleEvent(abilityRecord->GetPid());
-    auto self(weak_from_this());
     if (success) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "foreground succeeded.");
-        auto task = [self, abilityRecord]() {
-            auto selfObj = self.lock();
-            if (!selfObj) {
-                TAG_LOGW(AAFwkTag::ABILITYMGR, "mgr invalid");
-                return;
-            }
-            selfObj->CompleteForegroundSuccess(abilityRecord);
-        };
-        taskHandler->SubmitTask(task, TaskQoS::USER_INTERACTIVE);
-    } else {
-        auto task = [self, abilityRecord, state]() {
-            auto selfObj = self.lock();
-            if (!selfObj) {
-                TAG_LOGW(AAFwkTag::ABILITYMGR, "mission list mgr invalid");
-                return;
-            }
-            if (state == AbilityState::FOREGROUND_WINDOW_FREEZED) {
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "window freezed");
-                if (abilityRecord != nullptr) {
-                    abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
-                    DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
-                }
-                return;
-            }
-            selfObj->HandleForegroundFailed(abilityRecord, state);
-        };
-        taskHandler->SubmitTask(task, TaskQoS::USER_INTERACTIVE);
+        // do not submitTask, for grant uri permission in terminateSelfWithResult
+        CompleteForegroundSuccess(abilityRecord);
+        return ERR_OK;
     }
+    // do not submitTask, for grant uri permission in terminateSelfWithResult
+    if (state == AbilityState::FOREGROUND_WINDOW_FREEZED) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "window freezed");
+        abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
+        DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
+        return ERR_OK;
+    }
+    HandleForegroundFailed(abilityRecord, state);
     return ERR_OK;
 }
 
@@ -1024,8 +1002,7 @@ int UIAbilityLifecycleManager::DispatchTerminate(const std::shared_ptr<AbilityRe
 void UIAbilityLifecycleManager::CompleteForegroundSuccess(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<ffrt::mutex> guard(sessionLock_);
-
+    // do not add sessionLock_, for grant uri permission in terminateSelfWithResult
     CHECK_POINTER(abilityRecord);
     // ability do not save window mode
     abilityRecord->RemoveWindowMode();
@@ -1063,7 +1040,7 @@ void UIAbilityLifecycleManager::HandleForegroundFailed(const std::shared_ptr<Abi
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "state: %{public}d.", static_cast<int32_t>(state));
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<ffrt::mutex> guard(sessionLock_);
+    // do not add sessionLock_, for grant uri permission in terminateSelfWithResult
     if (ability == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null ability record");
         return;
