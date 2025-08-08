@@ -58,7 +58,6 @@ constexpr char COMPONENT_STARTUP_NEW_RULES[] = "component.startup.newRules";
 #ifdef SUPPORT_SCREEN
 constexpr int32_t ERR_INVALID_VALUE = -1;
 #endif
-constexpr const char* USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
 }
 UIAbility *UIAbility::Create(const std::unique_ptr<Runtime> &runtime)
 {
@@ -1412,22 +1411,25 @@ int UIAbility::CreateModalUIExtension(const AAFwk::Want &want)
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
         return ERR_INVALID_VALUE;
     }
-    int result;
-    if (want.HasParameter(USE_GLOBAL_UICONTENT) && want.GetBoolParam(USE_GLOBAL_UICONTENT, false) && handler_) {
-        std::weak_ptr<AbilityRuntime::AbilityContext> abilityContextImplWptr = abilityContextImpl;
-        auto task = [abilityContextImplWptr, want, &result]() {
-            std::shared_ptr<AbilityRuntime::AbilityContext> abilityContextImplSptr = abilityContextImplWptr.lock();
-            if (abilityContextImplSptr == nullptr) {
-                TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContextImpl");
-                return;
-            }
-            result = abilityContextImplSptr->CreateModalUIExtensionWithApp(want);
-        };
-        handler_->PostTask(task);
-    } else {
-        result = abilityContextImpl->CreateModalUIExtensionWithApp(want);
+    if (!handler_) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null handler_");
+        return ERR_INVALID_VALUE;
     }
-    return result;
+    std::weak_ptr<AbilityRuntime::AbilityContext> abilityContextImplWptr = abilityContextImpl;
+    auto task = [abilityContextImplWptr, want]() {
+        std::shared_ptr<AbilityRuntime::AbilityContext> abilityContextImplSptr = abilityContextImplWptr.lock();
+        if (abilityContextImplSptr == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContextImpl");
+            return;
+        }
+        (void)abilityContextImplSptr->CreateModalUIExtensionWithApp(want);
+    };
+    if (!handler_->PostTask(task)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "PostTask failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    return ERR_OK;
 }
 
 void UIAbility::SetSessionToken(sptr<IRemoteObject> sessionToken)
