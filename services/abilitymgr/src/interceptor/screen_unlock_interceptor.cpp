@@ -27,17 +27,8 @@
 
 namespace OHOS {
 namespace AAFwk {
-namespace {
-constexpr const char* SUPPORT_SCREEN_UNLOCK_STARTUP = "persist.sys.ability.support.screen_unlock_startup";
-}
 ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
 {
-    // xts reboot can still run
-    std::string supportStart = OHOS::system::GetParameter(SUPPORT_SCREEN_UNLOCK_STARTUP, "false");
-    if (supportStart == "true") {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Abilityms support screen unlock startup.");
-        return ERR_OK;
-    }
     // get target application info
     AppExecFwk::AbilityInfo targetAbilityInfo;
     if (StartAbilityUtils::startAbilityInfo != nullptr) {
