@@ -894,7 +894,13 @@ void AppfreezeManager::PerfStart(std::string eventName)
 }
 std::string AppfreezeManager::GetFirstLine(const std::string &path)
 {
-    std::ifstream inFile(path.c_str());
+    std::string realPath;
+    if (!OHOS::PathToRealPath(path, realPath)) {
+        TAG_LOGE(AAFwkTag::APPDFR, "realpath failed, path:%{public}s errno:%{public}d",
+            path.c_str(), errno);
+        return "";
+    }
+    std::ifstream inFile(realPath.c_str());
     if (!inFile) {
         return "";
     }
