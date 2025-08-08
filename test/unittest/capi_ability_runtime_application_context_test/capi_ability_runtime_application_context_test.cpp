@@ -2635,7 +2635,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetVersionCode_001, TestSize.
     auto contextImpl = InitApplicationContextImpl(TEST_BUNDLE_NAME);
     auto applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
     applicationInfo->versionCode = 111;
-    ContextImpl->SetApplicationInfo(&applicationInfo);
+    contextImpl->SetApplicationInfo(&applicationInfo);
 
     int64_t* versionCode;
     AbilityRuntime_ErrorCode code = OH_AbilityRuntime_ApplicationContextGetVersionCode(NULL);
