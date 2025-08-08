@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,6 +81,7 @@ void AbilityContext::SetOptions(const Options &options)
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "targetVersion:%{public}d", options.targetVersion);
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "releaseType:%{public}s", options.releaseType.c_str());
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "enablePartialUpdate:%{public}d", options.enablePartialUpdate);
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "isComponentMode:%{public}d", options.isComponentMode);
 }
 
 std::string AbilityContext::GetBundleName() const
