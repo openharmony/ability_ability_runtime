@@ -19,9 +19,8 @@
 #include <mutex>
 #include <vector>
 
+#include "ani.h"
 #include "interop_ability_lifecycle_callback.h"
-
-typedef class __ani_error *ani_error;
 
 namespace OHOS {
 namespace EtsEnv {
@@ -50,10 +49,11 @@ public:
 private:
     ani_env *GetAniEnv();
     void CallObjectMethod(const char *methodName, const char *signature,
-        std::shared_ptr<InteropObject> ability);
-    void CallObjectMethod(const char *methodName, const char *signature,
-        std::shared_ptr<InteropObject> ability, std::shared_ptr<InteropObject> windowStage);
+        std::shared_ptr<InteropObject> ability, std::shared_ptr<InteropObject> windowStage = nullptr);
+    void CallObjectMethodInner(ani_env *aniEnv, ani_value aniAbility, ani_value aniWindowStage,
+        bool hasWindowStage, ani_function callbackInnerFn);
     EtsEnv::ETSErrorObject GetETSErrorObject();
+    bool GetAniValueFromInteropObject(ani_env *env, std::shared_ptr<InteropObject> interopObject, ani_value &aniValue);
     std::string GetErrorProperty(ani_error aniError, const char *propertyName);
 
 private:
