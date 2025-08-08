@@ -1848,7 +1848,7 @@ int32_t UIAbilityLifecycleManager::BackToCallerAbilityWithResultLocked(sptr<Sess
 
     std::string callerBundleName = currentSessionInfo->want.GetBundle();
     std::string currentName = callerAbilityRecord->GetApplicationInfo().bundleName;
-    EventInfo eventInfo = { .callerBundleName = callerBundleName, .bundleName = currentName, .uri = "backToCaller"};
+    EventInfo eventInfo = { .bundleName = currentName, .callerBundleName = callerBundleName, .uri = "backToCaller"};
     EventReport::SendGrantUriPermissionEvent(EventName::GRANT_URI_PERMISSION, eventInfo);
 
     auto currentSession = iface_cast<Rosen::ISession>(currentSessionInfo->sessionToken);
