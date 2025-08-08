@@ -90,6 +90,7 @@ public:
     const std::unique_ptr<AbilityRuntime::Runtime> &GetJsRuntime() const;
     std::unique_ptr<AbilityRuntime::Runtime> MoveJsRuntime();
     static std::unique_ptr<ETSRuntime> PreFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
+    bool PreloadSystemClass(const char *className) override;
 
 private:
     bool Initialize(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
@@ -97,7 +98,7 @@ private:
     bool CreateEtsEnv(const Options &options);
     std::unique_ptr<AppExecFwk::ETSNativeReference> LoadEtsModule(const std::string &moduleName,
         const std::string &fileName, const std::string &hapPath, const std::string &srcEntrance);
-    void PostFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
+    bool PostFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
     std::string HandleOhmUrlSrcEntry(const std::string &srcEntry);
     void HandleOhmUrlFileName(std::string &fileName);
     int32_t apiTargetVersion_ = 0;

@@ -311,5 +311,47 @@ HWTEST_F(EtsEnvironmentTest, LoadModule_0100, TestSize.Level0)
     bool result = etsEnv->LoadModule("testModule", "testModule", cls, obj, ref);
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: FinishPreload_0100
+ * @tc.desc: Sts environment FinishPreload.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, FinishPreload_0100, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    auto result = etsEnv->FinishPreload();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostFork_0100
+ * @tc.desc: Sts environment PostFork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, PostFork_0100, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    void *napiEnv = nullptr;
+    std::string aotPath = "aotPath";
+    auto result = etsEnv->PostFork(napiEnv, aotPath);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PreloadSystemClass_0100
+ * @tc.desc: Sts environment PreloadSystemClass.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsEnvironmentTest, PreloadSystemClass_0100, TestSize.Level0)
+{
+    auto etsEnv = std::make_shared<ETSEnvironment>();
+    ASSERT_NE(etsEnv, nullptr);
+    std::string className = "className";
+    auto result = etsEnv->PreloadSystemClass(className.c_str());
+    EXPECT_FALSE(result);
+}
 } // namespace StsEnv
 } // namespace OHOS
