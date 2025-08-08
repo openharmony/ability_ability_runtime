@@ -58,14 +58,7 @@ void EtsAutoFillManager::OnRequestAutoSave(ani_env *env, ani_object autoSaveCall
         AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(env, "get vm failed.");
         return;
     }
-    auto autoSaveMangerFunc = [weak = weak_from_this()](const int32_t arg) {
-        auto autoSaveManger = weak.lock();
-        if (autoSaveManger == nullptr) {
-            TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null autoSaveManger");
-            return;
-        }
-        autoSaveManger->OnRequestAutoSaveDone(arg);
-    };
+    auto autoSaveMangerFunc = [](const int32_t arg) { EtsAutoFillManager::GetInstance().OnRequestAutoSaveDone(arg); };
     saveCallback = std::make_shared<EtsAutoSaveRequestCallback>(vm, instanceId, autoSaveMangerFunc);
     if (saveCallback == nullptr) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "null saveCallback");
