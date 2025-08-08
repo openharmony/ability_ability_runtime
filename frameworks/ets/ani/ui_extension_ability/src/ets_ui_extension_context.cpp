@@ -36,12 +36,11 @@ static std::map<EtsUIExtensionConnectionKey, sptr<EtsUIExtensionConnection>, Ets
 const char *UI_EXTENSION_CONTEXT_CLASS_NAME = "Lapplication/UIExtensionContext/UIExtensionContext;";
 const char *UI_EXTENSION_CONTEXT_CLEANER_CLASS_NAME = "Lapplication/UIExtensionContext/Cleaner;";
 constexpr const int FAILED_CODE = -1;
-constexpr const char *CONNECT_OPTIONS_CLASS_NAME = "Lability/connectOptions/ConnectOptionsInner;";
-constexpr const char *SIGNATURE_ONCONNECT = "LbundleManager/ElementName/ElementName;L@ohos/rpc/rpc/IRemoteObject;:V";
-constexpr const char *SIGNATURE_ONDISCONNECT = "LbundleManager/ElementName/ElementName;:V";
 constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
     "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
 constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr int32_t ARGC_ONE = 1;
+constexpr int32_t ARGC_TWO = 2;
 
 void EtsUIExtensionContext::TerminateSelfSync(ani_env *env, ani_object obj, ani_object callback)
 {
@@ -721,28 +720,26 @@ void EtsUIExtensionConnection::CallEtsFailed(int32_t errorCode)
         TAG_LOGE(AAFwkTag::UI_EXT, "null stsConnectionRef_");
         return;
     }
-    ani_class cls = nullptr;
-    if ((status = env->FindClass(CONNECT_OPTIONS_CLASS_NAME, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to find connectOptions calss, status: %{public}d", status);
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onFailed", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "get onFailed failed status : %{public}d", status);
         return;
     }
-    if (cls == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null class");
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "invalid onFailed property");
         return;
     }
-    ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "onFailed", "I:V", &method))) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to find onFailed method, status: %{public}d", status);
+    ani_object errorCodeObj = AppExecFwk::CreateInt(env, errorCode);
+    if (errorCodeObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null errorCodeObj");
         return;
     }
-    if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null method");
-        return;
-    }
-    status = env->Object_CallMethod_Void(
-        reinterpret_cast<ani_object>(stsConnectionRef_), method, errorCode);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Object_CallMethod_Void status: %{public}d", status);
+    ani_ref result;
+    std::vector<ani_ref> argv = { errorCodeObj };
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ONE, argv.data(),
+        &result)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call onFailed, status: %{public}d", status);
     }
 }
 
@@ -785,7 +782,7 @@ void EtsUIExtensionConnection::OnAbilityConnectDone(const AppExecFwk::ElementNam
         return;
     }
     if (remoteObject == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null remoteObject");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null remoteObject");
         DetachCurrentThread();
         return;
     }
@@ -796,8 +793,20 @@ void EtsUIExtensionConnection::OnAbilityConnectDone(const AppExecFwk::ElementNam
         return;
     }
     ani_status status = ANI_ERROR;
-    if ((status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onConnect",
-        SIGNATURE_ONCONNECT, refElement, refRemoteObject)) != ANI_OK) {
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onConnect", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "get onConnect failed status : %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "invalid onConnect property");
+        return;
+    }
+    ani_ref result;
+    std::vector<ani_ref> argv = { refElement, refRemoteObject};
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_TWO, argv.data(),
+        &result)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call onConnect, status: %{public}d", status);
     }
     DetachCurrentThread();
@@ -822,8 +831,20 @@ void EtsUIExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::Element
         return;
     }
     ani_status status = ANI_ERROR;
-    if ((status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onDisconnect",
-        SIGNATURE_ONDISCONNECT, refElement)) != ANI_OK) {
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onDisconnect", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "get onDisconnect failed status : %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "invalid onDisconnect property");
+        return;
+    }
+    ani_ref result;
+    std::vector<ani_ref> argv = { refElement };
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ONE, argv.data(),
+        &result)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call onDisconnect, status: %{public}d", status);
     }
     DetachCurrentThread();
