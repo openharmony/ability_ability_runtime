@@ -16,12 +16,15 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import(
     "//foundation/ability/ability_runtime/services/abilitymgr/abilitymgr.gni")
 
-group("abilityms_target") {
+ohos_shared_headers("abilityms_target") {
+  include_dirs = [ "include/" ]
   deps = [
     ":abilityms",
     ":ams_service_config",
     ":mission_list",
   ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
 }
 
 config("abilityms_exception_config") {
