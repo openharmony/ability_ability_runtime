@@ -2632,7 +2632,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToAPI18BusinessErrorCo
  */
 HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetVersionCode_001, TestSize.Level2)
 {
-    auto contextImpl = InitApplicationContextImpl();
+    auto contextImpl = InitApplicationContextImpl(TEST_BUNDLE_NAME);
     auto applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
     applicationInfo->versionCode = 111;
     ContextImpl->SetApplicationInfo(&applicationInfo);
