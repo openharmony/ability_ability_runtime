@@ -40,6 +40,7 @@ struct ETSEnvFuncs {
         std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)> &cb) = nullptr;
     void (*FinishPreload)() = nullptr;
     void (*PostFork)(void *napiEnv, const std::string &aotPath) = nullptr;
+    void (*PreloadSystemClass)(const char *className) = nullptr;
 };
 }
 #endif // OHOS_ABILITY_RUNTIME_ETS_INTERFACE_H
