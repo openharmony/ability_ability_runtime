@@ -129,7 +129,7 @@ std::unique_ptr<ETSRuntime> ETSRuntime::PreFork(const Options &options, std::uni
     return instance;
 }
 
-void ETSRuntime::PostFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime)
+bool ETSRuntime::PostFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime)
 {
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "PostFork begin");
     codePath_ = options.codePath;
@@ -137,7 +137,7 @@ void ETSRuntime::PostFork(const Options &options, std::unique_ptr<JsRuntime> &js
     if (g_etsEnvFuncs == nullptr ||
         g_etsEnvFuncs->PostFork == nullptr) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or PostFork");
-        return;
+        return false;
     }
 
     if (jsRuntime != nullptr) {
@@ -155,6 +155,7 @@ void ETSRuntime::PostFork(const Options &options, std::unique_ptr<JsRuntime> &js
     }
     napi_env napiEnv = static_cast<AbilityRuntime::JsRuntime *>(jsRuntime_.get())->GetNapiEnv();
     g_etsEnvFuncs->PostFork(reinterpret_cast<void *>(napiEnv), aotFilePath);
+    return true;
 }
  
 std::unique_ptr<ETSRuntime> ETSRuntime::Create(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime)
@@ -447,6 +448,18 @@ void ETSRuntime::HandleOhmUrlFileName(std::string &fileName)
         // <fileName>  =>  <fileName>/<fileName>
         fileName = fileName + "/" + fileName;
     }
+}
+
+bool ETSRuntime::PreloadSystemClass(const char *className)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "PreloadSystemClass called");
+    if (g_etsEnvFuncs == nullptr ||
+        g_etsEnvFuncs->PreloadSystemClass == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or PreloadSystemClass");
+        return false;
+    }
+    g_etsEnvFuncs->PreloadSystemClass(className);
+    return true;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

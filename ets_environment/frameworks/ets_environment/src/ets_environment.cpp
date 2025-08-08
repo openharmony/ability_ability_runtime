@@ -487,16 +487,17 @@ bool ETSEnvironment::LoadModule(const std::string &modulePath, const std::string
     return true;
 }
 
-void ETSEnvironment::FinishPreload() {
+bool ETSEnvironment::FinishPreload() {
     ani_env *env = GetAniEnv();
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed: ANI env nullptr");
-        return;
+        return false;
     }
     ark::ets::ETSAni::Prefork(env);
+    return true;
 }
 
-void ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath)
+bool ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath)
 {
     std::vector<ani_option> options;
     std::string aotPathString = "";
@@ -512,9 +513,26 @@ void ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath)
     ani_env *env = GetAniEnv();
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed: ANI env nullptr");
-        return;
+        return false;
     }
     ark::ets::ETSAni::Postfork(env, options);
+    return true;
+}
+
+bool ETSEnvironment::PreloadSystemClass(const char *className)
+{
+    ani_env* env = GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "GetAniEnv failed");
+        return false;
+    }
+
+    ani_class cls = nullptr;
+    if (env->FindClass(className, &cls) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Find preload class failed");
+        return false;
+    }
+    return true;
 }
 
 ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
@@ -551,6 +569,9 @@ ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
         },
         .PostFork = [](void *napiEnv, const std::string &aotPath) {
             ETSEnvironment::GetInstance()->PostFork(napiEnv, aotPath);
+        },
+        .PreloadSystemClass = [](const char *className) {
+            ETSEnvironment::GetInstance()->PreloadSystemClass(className);
         }
     };
     return &funcs;
