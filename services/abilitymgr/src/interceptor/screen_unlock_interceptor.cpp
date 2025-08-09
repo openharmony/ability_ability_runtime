@@ -16,9 +16,11 @@
 #include "interceptor/screen_unlock_interceptor.h"
 
 #include "ability_util.h"
+#include "extension_config.h"
 #include "event_report.h"
 #include "parameters.h"
 #include "start_ability_utils.h"
+#include "startup_util.h"
 #ifdef SUPPORT_SCREEN
 #ifdef ABILITY_RUNTIME_SCREENLOCK_ENABLE
 #include "screenlock_manager.h"
@@ -43,13 +45,7 @@ ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
     if (StartAbilityUtils::startAbilityInfo != nullptr) {
         targetAbilityInfo = StartAbilityUtils::startAbilityInfo->abilityInfo;
     } else {
-        auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
-        if (bundleMgrHelper == nullptr) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "The bundleMgrHelper is nullptr.");
-            return ERR_OK;
-        }
-        IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->QueryAbilityInfo(param.want,
-            AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, param.userId, targetAbilityInfo));
+        QueryTargetAbilityInfo(param, targetAbilityInfo);
         if (targetAbilityInfo.applicationInfo.name.empty() ||
             targetAbilityInfo.applicationInfo.bundleName.empty()) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Cannot find targetAbilityInfo, element uri: %{public}s",
@@ -57,11 +53,9 @@ ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
             return ERR_OK;
         }
     }
-
     if (targetAbilityInfo.applicationInfo.allowAppRunWhenDeviceFirstLocked) {
         return ERR_OK;
     }
-
 #ifdef SUPPORT_SCREEN
 #ifdef ABILITY_RUNTIME_SCREENLOCK_ENABLE
     if (!OHOS::ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked()) {
@@ -69,16 +63,45 @@ ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
     }
 #endif // ABILITY_RUNTIME_SCREENLOCK_ENABLE
 #endif
-
-    if (targetAbilityInfo.applicationInfo.isSystemApp) {
+    if (targetAbilityInfo.applicationInfo.isSystemApp &&
+        targetAbilityInfo.type != AppExecFwk::AbilityType::EXTENSION) {
         EventInfo eventInfo;
         eventInfo.bundleName = targetAbilityInfo.applicationInfo.bundleName;
         eventInfo.moduleName = "StartScreenUnlock";
         EventReport::SendStartAbilityOtherExtensionEvent(EventName::START_ABILITY_OTHER_EXTENSION, eventInfo);
         return ERR_OK;
     }
+    if (targetAbilityInfo.type == AppExecFwk::AbilityType::EXTENSION &&
+        !DelayedSingleton<ExtensionConfig>::GetInstance()->IsScreenUnlockIntercept(
+            targetAbilityInfo.extensionTypeName)) {
+        return ERR_OK;
+    }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "no startup before device first unlock");
     return ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
+}
+
+void ScreenUnlockInterceptor::QueryTargetAbilityInfo(const AbilityInterceptorParam &param,
+    AppExecFwk::AbilityInfo &targetAbilityInfo)
+{
+    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "The bundleMgrHelper is nullptr.");
+        return;
+    }
+    IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->QueryAbilityInfo(param.want,
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, param.userId, targetAbilityInfo));
+    if (!targetAbilityInfo.applicationInfo.name.empty() && !targetAbilityInfo.applicationInfo.bundleName.empty()) {
+        return;
+    }
+
+    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
+    IN_PROCESS_CALL(bundleMgrHelper->QueryExtensionAbilityInfos(param.want,
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, param.userId, extensionInfos));
+    if (extensionInfos.size() <= 0) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "extensionInfo empty");
+        return;
+    }
+    AbilityRuntime::StartupUtil::InitAbilityInfoFromExtension(extensionInfos.front(), targetAbilityInfo);
 }
 } // namespace AAFwk
 } // namespace OHOS

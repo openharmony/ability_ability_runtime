@@ -51,6 +51,7 @@ struct ExtensionConfigItem {
     std::unordered_set<std::string> serviceBlockedList;
     AbilityAccessItem abilityAccess;
     bool hasAbilityAccess = false;
+    bool screenUnlockIntercept = false;
 };
 
 class ExtensionConfig : public DelayedSingleton<ExtensionConfig> {
@@ -70,6 +71,7 @@ public:
     bool IsExtensionStartDefaultEnable(const std::string &extensionTypeName, const std::string &targetUri);
     bool IsExtensionNetworkEnable(const std::string &extensionTypeName);
     bool IsExtensionSAEnable(const std::string &extensionTypeName);
+    bool IsScreenUnlockIntercept(const std::string &extensionTypeName);
 private:
     void LoadExtensionConfig(const nlohmann::json &object);
     bool ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf);
@@ -83,6 +85,7 @@ private:
     bool LoadExtensionAbilityAccess(const nlohmann::json &object, const std::string &extensionTypeName);
     void LoadExtensionAllowOrBlockedList(const nlohmann::json &object, const std::string &key,
         std::unordered_set<std::string> &list);
+    void LoadScreenUnlockIntercept(const nlohmann::json &object, const std::string &extensionTypeName);
 
     std::optional<bool> GetSingleAccessFlag(const std::string &extensionTypeName,
         std::function<std::optional<bool>(const AbilityAccessItem&)> getAccessFlag);
