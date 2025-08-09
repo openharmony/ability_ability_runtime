@@ -140,6 +140,13 @@ public:
      */
     void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
 
+    /**
+     * @brief Callback when the ability is shared.You can override this function to implement your own sharing logic.
+     * @param wantParams Indicates the user data to be saved.
+     * @return the result of OnShare
+     */
+    int32_t OnShare(WantParams &wantParams) override;
+
     sptr<IRemoteObject> CallRequest() override;
 
     static void CreateAndBindContext(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,

@@ -70,6 +70,7 @@ constexpr const char *ON_SAVE_STATE =
     ":L@ohos/app/ability/AbilityConstant/AbilityConstant/OnSaveResult;";
 constexpr const int32_t CALL_BACK_ERROR = -1;
 constexpr size_t INDEX_ONE = 1;
+constexpr const char *ON_SHARE_SIGNATURE = "Lescompat/Record;:V";
 
 void OnDestroyPromiseCallback(ani_env *env, ani_object aniObj)
 {
@@ -425,6 +426,24 @@ void EtsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInf
         applicationContext->DispatchOnAbilityCreate(interopObject);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "OnStart end");
+}
+
+int32_t EtsUIAbility::OnShare(WantParams &wantParam)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnShare called");
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return ERR_INVALID_VALUE;
+    }
+    ani_ref wantParamRef = AppExecFwk::WrapWantParams(env, wantParam);
+    if (wantParamRef == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null wantParamRef");
+        return ERR_INVALID_VALUE;
+    }
+    CallObjectMethod(false, "onShare", ON_SHARE_SIGNATURE, wantParamRef);
+    AppExecFwk::UnwrapWantParams(env, wantParamRef, wantParam);
+    return ERR_OK;
 }
 
 void EtsUIAbility::OnStop()
