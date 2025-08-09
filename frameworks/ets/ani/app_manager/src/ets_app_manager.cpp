@@ -107,9 +107,6 @@ public:
 private:
     static sptr<AppExecFwk::IAppMgr> GetAppManagerInstance();
     static sptr<AAFwk::IAbilityManager> GetAbilityManagerInstance();
-#ifdef SUPPORT_SCREEN
-    static bool CheckCallerIsSystemApp();
-#endif
     static bool CheckOnOnApplicationStateInnerParam(ani_env *env, ani_string type, ani_object observer,
         ani_object etsBundleNameList, std::vector<std::string> &bundleNameList);
     static ani_int OnOnApplicationStateInner(
@@ -145,14 +142,6 @@ sptr<AAFwk::IAbilityManager> EtsAppManager::GetAbilityManagerInstance()
         systemAbilityManager->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
     return iface_cast<AAFwk::IAbilityManager>(abilityObject);
 }
-
-#ifdef SUPPORT_SCREEN
-bool EtsAppManager::CheckCallerIsSystemApp()
-{
-    auto selfToken = IPCSkeleton::GetSelfTokenID();
-    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken);
-}
-#endif
 
 void EtsAppManager::PreloadApplication(ani_env *env, ani_object callback, ani_string aniBundleName,
     ani_int aniUserId, ani_enum_item aniMode, ani_object aniAppIndex)
@@ -296,7 +285,7 @@ void EtsAppManager::GetRunningMultiAppInfo(ani_env *env, ani_string aniBundleNam
     }
     ani_object emptyMultiAppInfo = CreateEmptyMultiAppInfo(env);
 #ifdef SUPPORT_SCREEN
-    if (!CheckCallerIsSystemApp()) {
+    if (!AppExecFwk::CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Non-system app");
         AppExecFwk::AsyncCallback(env, callback,
             AbilityRuntime::EtsErrorUtil::CreateError(
@@ -1131,7 +1120,7 @@ void EtsAppManager::OnOnAbilityFirstFrameState(
         TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
         return;
     }
-    if (!CheckCallerIsSystemApp()) {
+    if (!AppExecFwk::CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Non-system app");
         AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
         return;
@@ -1219,7 +1208,7 @@ void EtsAppManager::OnOffAbilityFirstFrameState(ani_env *env, ani_string type, a
         TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
         return;
     }
-    if (!CheckCallerIsSystemApp()) {
+    if (!AppExecFwk::CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Non-system app");
         AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
         return;
