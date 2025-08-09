@@ -37,11 +37,11 @@ constexpr const char *CLEANER_CLASS_NAME =
     "Lapplication/ServiceExtensionContext/Cleaner;";
 constexpr const int ANI_ALREADY_BINDED = 8;
 constexpr const int FAILED_CODE = -1;
-constexpr const char *SIGNATURE_ONCONNECT = "LbundleManager/ElementName/ElementName;L@ohos/rpc/rpc/IRemoteObject;:V";
-constexpr const char *SIGNATURE_ONDISCONNECT = "LbundleManager/ElementName/ElementName;:V";
 constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
     "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
 constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr int32_t ARGC_ONE = 1;
+constexpr int32_t ARGC_TWO = 2;
 
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
@@ -603,9 +603,25 @@ void ETSServiceExtensionConnection::CallEtsFailed(int32_t errorCode)
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to get env, status: %{public}d", status);
         return;
     }
-    status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onFailed", "I:V",
-        static_cast<double>(errorCode));
-    if (status != ANI_OK) {
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onFailed", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "get onFailed failed status : %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "invalid onFailed property");
+        return;
+    }
+    ani_object errorCodeObj = AppExecFwk::CreateInt(env, errorCode);
+    if (errorCodeObj == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null errorCodeObj");
+        return;
+    }
+    ani_ref result;
+    std::vector<ani_ref> argv = { errorCodeObj };
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ONE, argv.data(),
+        &result)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to call onFailed, status: %{public}d", status);
     }
 }
@@ -658,8 +674,20 @@ void ETSServiceExtensionConnection::OnAbilityConnectDone(
         return;
     }
     ani_status status = ANI_ERROR;
-    if ((status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onConnect",
-        SIGNATURE_ONCONNECT, refElement, refRemoteObject)) != ANI_OK) {
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onConnect", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "get onConnect failed status : %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "invalid onConnect property");
+        return;
+    }
+    ani_ref result;
+    std::vector<ani_ref> argv = { refElement, refRemoteObject};
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_TWO, argv.data(),
+        &result)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to call onConnect, status: %{public}d", status);
     }
     DetachCurrentThread();
@@ -684,8 +712,20 @@ void ETSServiceExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::El
         return;
     }
     ani_status status = ANI_ERROR;
-    if ((status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onDisconnect",
-        SIGNATURE_ONDISCONNECT, refElement)) != ANI_OK) {
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onDisconnect", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "get onDisconnect failed status : %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "invalid onDisconnect property");
+        return;
+    }
+    ani_ref result;
+    std::vector<ani_ref> argv = { refElement };
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ONE, argv.data(),
+        &result)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to call onDisconnect, status: %{public}d", status);
     }
     DetachCurrentThread();
