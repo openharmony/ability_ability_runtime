@@ -2636,18 +2636,15 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetVersionCode_001, TestSize.
     ASSERT_NE(contextImpl, nullptr);
 
     auto applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
-    applicationInfo ->versionCode = 111;
-    contextImpl->SetApplicationInfo(&applicationInfo);
+    applicationInfo->versionCode = 111;
+    contextImpl->SetApplicationInfo(applicationInfo);
 
-    int64_t* versionCode;
-    AbilityRuntime_ErrorCode code = OH_AbilityRuntime_ApplicationContextGetVersionCode(NULL);
+    int64_t versionCode;
+    AbilityRuntime_ErrorCode code = OH_AbilityRuntime_ApplicationContextGetVersionCode(nullptr);
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
 
-    code = OH_AbilityRuntime_ApplicationContextGetVersionCode(nullptr);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-
-    code = OH_AbilityRuntime_ApplicationContextGetVersionCode(versionCode);
+    code = OH_AbilityRuntime_ApplicationContextGetVersionCode(&versionCode);
     ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    ASSERT_EQ(*versionCode, 111);
+    ASSERT_EQ(versionCode, 111);
 }
 } // namespace OHOS::AbilityRuntime
