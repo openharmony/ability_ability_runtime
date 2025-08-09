@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
+export type OnPrepareFn = () => void;
+export type OnRunFn = () => void;
+
 export default interface TestRunner {
-    onPrepare(): void;
-    onRun(): void;
+    onPrepare: OnPrepareFn;
+    onRun: OnRunFn;
 }

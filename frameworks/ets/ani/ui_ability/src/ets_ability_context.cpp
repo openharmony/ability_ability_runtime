@@ -55,8 +55,6 @@ constexpr const char* CLEANER_CLASS = "Lapplication/UIAbilityContext/Cleaner;";
 const std::string APP_LINKING_ONLY = "appLinkingOnly";
 constexpr const char* SIGNATURE_OPEN_LINK = "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;"
     "L@ohos/app/ability/OpenLinkOptions/OpenLinkOptions;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
-constexpr const char *SIGNATURE_ONCONNECT = "LbundleManager/ElementName/ElementName;L@ohos/rpc/rpc/IRemoteObject;:V";
-constexpr const char *SIGNATURE_ONDISCONNECT = "LbundleManager/ElementName/ElementName;:V";
 constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
     "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
 constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
@@ -66,6 +64,8 @@ const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE =
     "Lstd/core/String;Lescompat/Record;Lapplication/AbilityStartCallback/AbilityStartCallback;:L@ohos/base/"
     "BusinessError;";
+constexpr int32_t ARGC_ONE = 1;
+constexpr int32_t ARGC_TWO = 2;
 
 int64_t RequestCodeFromStringToInt64(const std::string &requestCode)
 {
@@ -1548,9 +1548,25 @@ void ETSAbilityConnection::CallEtsFailed(int32_t errorCode)
         TAG_LOGE(AAFwkTag::CONTEXT, "Failed to get env, status: %{public}d", status);
         return;
     }
-    status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onFailed", "I:V",
-        errorCode);
-    if (status != ANI_OK) {
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onFailed", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "get onFailed failed status : %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::CONTEXT, "invalid onFailed property");
+        return;
+    }
+    ani_object errorCodeObj = AppExecFwk::CreateInt(env, errorCode);
+    if (errorCodeObj == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null errorCodeObj");
+        return;
+    }
+    ani_ref result;
+    std::vector<ani_ref> argv = { errorCodeObj };
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ONE, argv.data(),
+        &result)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "Failed to call onFailed, status: %{public}d", status);
     }
 }
@@ -1603,8 +1619,20 @@ void ETSAbilityConnection::OnAbilityConnectDone(
         return;
     }
     ani_status status = ANI_ERROR;
-    if ((status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onConnect",
-        SIGNATURE_ONCONNECT, refElement, refRemoteObject)) != ANI_OK) {
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onConnect", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "get onConnect failed status : %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::CONTEXT, "invalid onConnect property");
+        return;
+    }
+    ani_ref result;
+    std::vector<ani_ref> argv = { refElement, refRemoteObject};
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_TWO, argv.data(),
+        &result)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "Failed to call onConnect, status: %{public}d", status);
     }
     DetachCurrentThread();
@@ -1628,8 +1656,20 @@ void ETSAbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName
         return;
     }
     ani_status status = ANI_ERROR;
-    if ((status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onDisconnect",
-        SIGNATURE_ONDISCONNECT, refElement)) != ANI_OK) {
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onDisconnect", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "get onDisconnect failed status : %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::CONTEXT, "invalid onDisconnect property");
+        return;
+    }
+    ani_ref result;
+    std::vector<ani_ref> argv = { refElement };
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ONE, argv.data(),
+        &result)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "Failed to call onDisconnect, status: %{public}d", status);
     }
     DetachCurrentThread();
