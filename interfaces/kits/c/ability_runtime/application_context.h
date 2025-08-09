@@ -292,7 +292,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions(Ab
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the application context does not exist.
- * @since 18
+ * @since 20
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetResourceDir(const char* moduleName,
     char* buffer, const int32_t bufferSize, int32_t* writeLength);
@@ -306,7 +306,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetResourceDir(cons
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the versionCode is null.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the application context does not exist.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_APP_INFO_NOT_EXIST} if the application info does not exist.
- * @since 18
+ * @since 20
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetVersionCode(int64_t* versionCode);
 
