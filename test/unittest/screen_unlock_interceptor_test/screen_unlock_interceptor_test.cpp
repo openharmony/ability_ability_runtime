@@ -149,5 +149,33 @@ HWTEST_F(ScreenUnlockInterceptorTest, DoProcess_004, TestSize.Level1)
     auto ret = screenUnlockInterceptor.DoProcess(param);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: ScreenUnlockInterceptorTest_DoProcess_005
+ * @tc.desc: DoProcess
+ * @tc.type: FUNC
+ * @tc.require: issueI5I0DY
+ */
+HWTEST_F(ScreenUnlockInterceptorTest, DoProcess_005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DoProcess_005 start";
+    ScreenUnlockInterceptor screenUnlockInterceptor;
+    Want want;
+    int requestCode = 123;
+    int32_t userId = 1001;
+    bool isWithUI = true;
+    sptr<IRemoteObject> callerToken;
+    std::function<bool(void)> shouldBlockAllAppStartFunc = []() -> bool {
+        return false;
+    };
+    StartAbilityUtils::startAbilityInfo = std::make_shared<StartAbilityInfo>();
+    AppExecFwk::AbilityInfo targetAbilityInfo;
+    targetAbilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    StartAbilityUtils::startAbilityInfo->abilityInfo = targetAbilityInfo;
+    AbilityInterceptorParam param(want, requestCode, userId, isWithUI, callerToken, shouldBlockAllAppStartFunc);
+    auto ret = screenUnlockInterceptor.DoProcess(param);
+    EXPECT_EQ(ret, ERR_OK);
+    GTEST_LOG_(INFO) << "DoProcess_005 end";
+}
 } // namespace AAFwk
 } // namespace OHOS
