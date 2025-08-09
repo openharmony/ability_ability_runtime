@@ -32,6 +32,8 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want);
 ani_ref WrapWantParams(ani_env *env, const AAFwk::WantParams &wantParams);
 bool UnwrapWantParams(ani_env *env, ani_ref param, AAFwk::WantParams &wantParams);
 
+ani_ref WrapWantParamsFD(ani_env *env, const AAFwk::WantParams &wantParams);
+
 bool UnWrapAbilityResult(ani_env *env, ani_object param, int &resultCode, AAFwk::Want &want);
 
 ani_object WrapElementName(ani_env *env, const AppExecFwk::ElementName &elementNameParam);
