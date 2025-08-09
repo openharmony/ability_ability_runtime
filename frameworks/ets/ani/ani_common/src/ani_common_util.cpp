@@ -19,7 +19,9 @@
 #include "ani_enum_convert.h"
 #include "running_process_info.h"
 #include "hilog_tag_wrapper.h"
+#include "ipc_skeleton.h"
 #include "securec.h"
+#include "tokenid_kit.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -245,8 +247,18 @@ bool SetFieldIntByName(ani_env *env, ani_class cls, ani_object object, const cha
         return false;
     }
     ani_status status = ANI_ERROR;
-    if ((status = env->Object_SetFieldByName_Int(object, name, value)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Object_SetFieldByName_Int status: %{public}d", status);
+    ani_field field = nullptr;
+    if ((status = env->Class_FindField(cls, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_object obj = CreateInt(env, value);
+    if (obj == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "CreateInt failed");
+        return false;
+    }
+    if ((status = env->Object_SetField_Ref(object, field, reinterpret_cast<ani_ref>(obj))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
     return true;
@@ -859,9 +871,9 @@ bool SetProcessInformation(ani_env *env, ani_object object, const AppExecFwk::Ru
         TAG_LOGE(AAFwkTag::ANI, "bundleType failed status:%{public}d", status);
         return false;
     }
-    status = env->Object_SetPropertyByName_Ref(object, "appCloneIndex",
-        CreateInt(env, processInfo.appCloneIndex));
-    if (status != ANI_OK) {
+    if (processInfo.appCloneIndex != -1 &&
+        (status = env->Object_SetPropertyByName_Ref(
+            object, "appCloneIndex", CreateInt(env, processInfo.appCloneIndex))) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "appCloneIndex failed status:%{public}d", status);
         return false;
     }
@@ -1375,6 +1387,39 @@ bool GetStaticFieldString(ani_env *env, ani_class classObj, const char *fieldNam
 
     if (!AppExecFwk::GetStdString(env, reinterpret_cast<ani_string>(obj), value)) {
         TAG_LOGE(AAFwkTag::JSNAPI, "GetStdString failed");
+        return false;
+    }
+    return true;
+}
+
+bool IsValidProperty(ani_env *env, ani_ref param)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_boolean isNull = false;
+    if ((status = env->Reference_IsNullishValue(param, &isNull)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isUndefined = false;
+    if ((status = env->Reference_IsUndefined(param, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if (isUndefined || isNull) {
+        return false;
+    }
+    return true;
+}
+
+bool CheckCallerIsSystemApp()
+{
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGE(AAFwkTag::ANI, "Non-system app forbidden to call");
         return false;
     }
     return true;

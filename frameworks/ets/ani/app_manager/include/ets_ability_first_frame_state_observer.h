@@ -25,7 +25,6 @@
 #include "ability_manager_interface.h"
 #include "ani.h"
 #include "ani_common_util.h"
-#include "ets_native_reference.h"
 #include "event_handler.h"
 #include "singleton.h"
 
@@ -43,11 +42,12 @@ public:
         ani_env *env, ani_object etsObserverObject, const char *methodName, const char *signature, ...);
     void SetEtsObserverObject(const ani_object &etsObserverObject);
     void ResetEtsObserverObject();
-    std::shared_ptr<AppExecFwk::ETSNativeReference> GetAniObserver() { return etsObserverObject_; }
+    bool IsStrictEquals(const ani_object &etsObserverObject);
+    ani_ref GetAniObserver() { return etsObserverObject_; }
 private:
     ani_status AniSendEvent(const std::function<void()> task);
     ani_vm *etsVm_;
-    std::shared_ptr<AppExecFwk::ETSNativeReference> etsObserverObject_;
+    ani_ref etsObserverObject_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_ = nullptr;
 };
 
@@ -67,7 +67,7 @@ public:
 private:
     ETSAbilityFirstFrameStateObserverManager() = default;
     DISALLOW_COPY_AND_MOVE(ETSAbilityFirstFrameStateObserverManager);
-    std::shared_ptr<AppExecFwk::ETSNativeReference> GetObserverObject(const ani_object &etsObserverObject);
+    ani_ref GetObserverObject(const ani_object &etsObserverObject);
 
 private:
     std::mutex observerListLock_;

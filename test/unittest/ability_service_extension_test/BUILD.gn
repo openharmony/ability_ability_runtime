@@ -25,6 +25,7 @@ ohos_unittest("ability_service_extension_test") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/app_startup",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_native_path}/runtime",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/insight_intent_executor",
   ]
 
   sources = [

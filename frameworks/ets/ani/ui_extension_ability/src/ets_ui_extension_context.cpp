@@ -19,6 +19,7 @@
 #include "ani_common_start_options.h"
 #include "ani_common_remote.h"
 #include "ani_common_want.h"
+#include "ani_enum_convert.h"
 #include "ani_remote_object.h"
 #include "common_fun_ani.h"
 #include "ets_context_utils.h"
@@ -35,12 +36,11 @@ static std::map<EtsUIExtensionConnectionKey, sptr<EtsUIExtensionConnection>, Ets
 const char *UI_EXTENSION_CONTEXT_CLASS_NAME = "Lapplication/UIExtensionContext/UIExtensionContext;";
 const char *UI_EXTENSION_CONTEXT_CLEANER_CLASS_NAME = "Lapplication/UIExtensionContext/Cleaner;";
 constexpr const int FAILED_CODE = -1;
-constexpr const char *CONNECT_OPTIONS_CLASS_NAME = "Lability/connectOptions/ConnectOptionsInner;";
-constexpr const char *SIGNATURE_ONCONNECT = "LbundleManager/ElementName/ElementName;L@ohos/rpc/rpc/IRemoteObject;:V";
-constexpr const char *SIGNATURE_ONDISCONNECT = "LbundleManager/ElementName/ElementName;:V";
 constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
     "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
 constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr int32_t ARGC_ONE = 1;
+constexpr int32_t ARGC_TWO = 2;
 
 void EtsUIExtensionContext::TerminateSelfSync(ani_env *env, ani_object obj, ani_object callback)
 {
@@ -498,6 +498,71 @@ void EtsUIExtensionContext::Clean(ani_env *env, ani_object object)
     }
 }
 
+void EtsUIExtensionContext::SetColorMode(ani_env *env, ani_object aniObj, ani_enum_item aniColorMode)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "SetColorMode called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    auto etsUiExtensionContext = GetEtsUIExtensionContext(env, aniObj);
+    if (etsUiExtensionContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsUiExtensionContext");
+        return;
+    }
+    etsUiExtensionContext->OnSetColorMode(env, aniObj, aniColorMode);
+}
+
+void EtsUIExtensionContext::ReportDrawnCompleted(ani_env *env,  ani_object aniObj, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "ReportDrawnCompleted called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    auto etsUiExtensionContext = GetEtsUIExtensionContext(env, aniObj);
+    if (etsUiExtensionContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsUiExtensionContext");
+        return;
+    }
+    etsUiExtensionContext->OnReportDrawnCompleted(env, aniObj, callback);
+}
+
+void EtsUIExtensionContext::OnSetColorMode(ani_env *env, ani_object aniContext, ani_enum_item aniColorMode)
+{
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        EtsErrorUtil::ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        return;
+    }
+    ani_int colorMode = 0;
+    if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, aniColorMode, colorMode)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "param aniColorMode err");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param colorMode failed, colorMode must be number.");
+        return;
+    }
+    context->SetAbilityColorMode(colorMode);
+    TAG_LOGD(AAFwkTag::UI_EXT, "NativeSetColorMode end");
+}
+
+void EtsUIExtensionContext::OnReportDrawnCompleted(ani_env* env, ani_object aniCls, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnReportDrawnCompleted called");
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        AppExecFwk::AsyncCallback(env, callback,
+            AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)), nullptr);
+        return;
+    }
+    int32_t innerErrorCode = context->ReportDrawnCompleted();
+    AppExecFwk::AsyncCallback(env, callback, AbilityRuntime::EtsErrorUtil::CreateErrorByNativeErr(env,
+        static_cast<int32_t>(innerErrorCode)), nullptr);
+    TAG_LOGD(AAFwkTag::UI_EXT, "NativeReportDrawnCompleted end");
+}
+
 bool EtsUIExtensionContext::BindNativePtrCleaner(ani_env *env)
 {
     if (env == nullptr) {
@@ -563,6 +628,12 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
             "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/"
             "AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(EtsUIExtensionContext::StartAbilityForResultWithOptions) },
+        ani_native_function{"setColorMode",
+            "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ColorMode;:V",
+            reinterpret_cast<void *>(EtsUIExtensionContext::SetColorMode)},
+        ani_native_function{"nativeReportDrawnCompleted",
+            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void*>(EtsUIExtensionContext::ReportDrawnCompleted)}
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
@@ -649,28 +720,26 @@ void EtsUIExtensionConnection::CallEtsFailed(int32_t errorCode)
         TAG_LOGE(AAFwkTag::UI_EXT, "null stsConnectionRef_");
         return;
     }
-    ani_class cls = nullptr;
-    if ((status = env->FindClass(CONNECT_OPTIONS_CLASS_NAME, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to find connectOptions calss, status: %{public}d", status);
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onFailed", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "get onFailed failed status : %{public}d", status);
         return;
     }
-    if (cls == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null class");
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "invalid onFailed property");
         return;
     }
-    ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "onFailed", "I:V", &method))) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to find onFailed method, status: %{public}d", status);
+    ani_object errorCodeObj = AppExecFwk::CreateInt(env, errorCode);
+    if (errorCodeObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null errorCodeObj");
         return;
     }
-    if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null method");
-        return;
-    }
-    status = env->Object_CallMethod_Void(
-        reinterpret_cast<ani_object>(stsConnectionRef_), method, errorCode);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "Object_CallMethod_Void status: %{public}d", status);
+    ani_ref result;
+    std::vector<ani_ref> argv = { errorCodeObj };
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ONE, argv.data(),
+        &result)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call onFailed, status: %{public}d", status);
     }
 }
 
@@ -713,7 +782,7 @@ void EtsUIExtensionConnection::OnAbilityConnectDone(const AppExecFwk::ElementNam
         return;
     }
     if (remoteObject == nullptr) {
-        TAG_LOGE(AAFwkTag::CONTEXT, "null remoteObject");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null remoteObject");
         DetachCurrentThread();
         return;
     }
@@ -724,8 +793,20 @@ void EtsUIExtensionConnection::OnAbilityConnectDone(const AppExecFwk::ElementNam
         return;
     }
     ani_status status = ANI_ERROR;
-    if ((status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onConnect",
-        SIGNATURE_ONCONNECT, refElement, refRemoteObject)) != ANI_OK) {
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onConnect", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "get onConnect failed status : %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "invalid onConnect property");
+        return;
+    }
+    ani_ref result;
+    std::vector<ani_ref> argv = { refElement, refRemoteObject};
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_TWO, argv.data(),
+        &result)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call onConnect, status: %{public}d", status);
     }
     DetachCurrentThread();
@@ -750,8 +831,20 @@ void EtsUIExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::Element
         return;
     }
     ani_status status = ANI_ERROR;
-    if ((status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(stsConnectionRef_), "onDisconnect",
-        SIGNATURE_ONDISCONNECT, refElement)) != ANI_OK) {
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onDisconnect", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "get onDisconnect failed status : %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "invalid onDisconnect property");
+        return;
+    }
+    ani_ref result;
+    std::vector<ani_ref> argv = { refElement };
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ONE, argv.data(),
+        &result)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to call onDisconnect, status: %{public}d", status);
     }
     DetachCurrentThread();

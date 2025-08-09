@@ -22,7 +22,6 @@
 #include "ani.h"
 #include "ani_common_util.h"
 #include "app_foreground_state_observer_stub.h"
-#include "ets_native_reference.h"
 #include "event_handler.h"
 
 namespace OHOS {
@@ -38,17 +37,17 @@ explicit ETSAppForegroundStateObserver(ani_vm *etsVm);
     void AddEtsObserverObject(const ani_object &observerObj);
     void RemoveEtsObserverObject(const ani_object &observerObj);
     void RemoveAllEtsObserverObjects();
-    AppExecFwk::ETSNativeReference GetObserverObject(const ani_object &observerObject);
+    ani_ref GetObserverObject(const ani_object &observerObject);
     void CallEtsFunction(ani_env* env, ani_object etsObserverObject,
         const char *methodName, const char *signature, ...);
     bool IsEmpty();
     void SetValid(bool valid);
-
 private:
+    bool IsStrictEquals(ani_ref observerRef, const ani_object &etsObserverObject);
     ani_status AniSendEvent(const std::function<void()> task);
     ani_vm *etsVm_ = nullptr;
     volatile bool valid_ = true;
-    std::vector<AppExecFwk::ETSNativeReference> etsObserverObjects_;
+    std::vector<ani_ref> etsObserverObjects_;
     std::mutex etsObserverObjectSetLock_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_ = nullptr;
 };

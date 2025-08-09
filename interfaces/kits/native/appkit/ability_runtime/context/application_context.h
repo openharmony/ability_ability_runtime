@@ -24,6 +24,8 @@
 #include "context.h"
 #include "context_impl.h"
 #include "environment_callback.h"
+#include "interop_ability_lifecycle_callback.h"
+
 namespace OHOS {
 namespace AAFwk {
 class Want;
@@ -38,6 +40,8 @@ public:
     ~ApplicationContext() = default;
     void RegisterAbilityLifecycleCallback(const std::shared_ptr<AbilityLifecycleCallback> &abilityLifecycleCallback);
     void UnregisterAbilityLifecycleCallback(const std::shared_ptr<AbilityLifecycleCallback> &abilityLifecycleCallback);
+    void RegisterInteropAbilityLifecycleCallback(std::shared_ptr<InteropAbilityLifecycleCallback> callback);
+    void UnregisterInteropAbilityLifecycleCallback(std::shared_ptr<InteropAbilityLifecycleCallback> callback);
     bool IsAbilityLifecycleCallbackEmpty();
     void RegisterEnvironmentCallback(const std::shared_ptr<EnvironmentCallback> &environmentCallback);
     void UnregisterEnvironmentCallback(const std::shared_ptr<EnvironmentCallback> &environmentCallback);
@@ -45,24 +49,32 @@ public:
         const std::weak_ptr<ApplicationStateChangeCallback> &applicationStateChangeCallback);
     void DispatchOnAbilityCreate(std::shared_ptr<NativeReference> ability);
     void DispatchOnAbilityCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability);
+    void DispatchOnAbilityCreate(std::shared_ptr<InteropObject> ability);
     void DispatchOnWindowStageCreate(std::shared_ptr<NativeReference> ability,
         std::shared_ptr<NativeReference> windowStage);
     void DispatchOnWindowStageCreate(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
         std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage);
+    void DispatchOnWindowStageCreate(std::shared_ptr<InteropObject> ability,
+        std::shared_ptr<InteropObject> windowStage);
     void DispatchOnWindowStageDestroy(std::shared_ptr<NativeReference> ability,
         std::shared_ptr<NativeReference> windowStage);
     void DispatchOnWindowStageDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability,
         std::shared_ptr<AppExecFwk::ETSNativeReference> windowStage);
+    void DispatchOnWindowStageDestroy(std::shared_ptr<InteropObject> ability,
+        std::shared_ptr<InteropObject> windowStage);
     void DispatchWindowStageFocus(const std::shared_ptr<NativeReference> &ability,
         const std::shared_ptr<NativeReference> &windowStage);
     void DispatchWindowStageUnfocus(const std::shared_ptr<NativeReference> &ability,
         const std::shared_ptr<NativeReference> &windowStage);
     void DispatchOnAbilityDestroy(std::shared_ptr<NativeReference> ability);
     void DispatchOnAbilityDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability);
+    void DispatchOnAbilityDestroy(std::shared_ptr<InteropObject> ability);
     void DispatchOnAbilityForeground(std::shared_ptr<NativeReference> ability);
     void DispatchOnAbilityForeground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability);
+    void DispatchOnAbilityForeground(std::shared_ptr<InteropObject> ability);
     void DispatchOnAbilityBackground(std::shared_ptr<NativeReference> ability);
     void DispatchOnAbilityBackground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability);
+    void DispatchOnAbilityBackground(std::shared_ptr<InteropObject> ability);
     void DispatchOnAbilityContinue(const std::shared_ptr<NativeReference> &ability);
     void DispatchOnAbilityWillContinue(const std::shared_ptr<NativeReference> &ability);
     void DispatchOnWindowStageWillRestore(const std::shared_ptr<NativeReference> &ability,
@@ -180,9 +192,11 @@ protected:
 private:
     std::shared_ptr<ContextImpl> contextImpl_;
     static std::vector<std::shared_ptr<AbilityLifecycleCallback>> callbacks_;
+    static std::vector<std::shared_ptr<InteropAbilityLifecycleCallback>> interopCallbacks_;
     static std::vector<std::shared_ptr<EnvironmentCallback>> envCallbacks_;
     static std::vector<std::weak_ptr<ApplicationStateChangeCallback>> applicationStateCallback_;
     std::recursive_mutex callbackLock_;
+    std::mutex interopCallbackLock_;
     std::recursive_mutex envCallbacksLock_;
     std::recursive_mutex applicationStateCallbackLock_;
     bool applicationInfoUpdateFlag_ = false;
