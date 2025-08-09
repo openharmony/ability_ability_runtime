@@ -110,6 +110,16 @@ public:
     void OnNewWant(const Want &want) override;
 
     /**
+     * @brief Prepare user data of local Ability.
+     * @param reason the reason why framework invoke this function
+     * @param wantParams Indicates the user data to be saved.
+     * @return result code defined in abilityConstants
+     */
+    int32_t OnSaveState(int32_t reason, WantParams &wantParams,
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult> *callbackInfo,
+        bool &isAsync, AppExecFwk::StateReason stateReason) override;
+
+    /**
      * @brief Called when startAbilityForResult(ohos.aafwk.content.Want,int) is called to start an ability and the
      * result is returned. This method is called only on Page abilities. You can start a new ability to perform some
      * calculations and use setResult (int,ohos.aafwk.content.Want) to return the calculation result. Then the system
@@ -129,6 +139,13 @@ public:
      * @param info dump ability info
      */
     void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
+
+    /**
+     * @brief Callback when the ability is shared.You can override this function to implement your own sharing logic.
+     * @param wantParams Indicates the user data to be saved.
+     * @return the result of OnShare
+     */
+    int32_t OnShare(WantParams &wantParams) override;
 
     sptr<IRemoteObject> CallRequest() override;
 
@@ -217,6 +234,13 @@ public:
     bool OnBackPress() override;
 
     /**
+     * @brief Called when ability prepare terminate.
+     * @param callbackInfo The callbackInfo is used when onPrepareToTerminateAsync is implemented.
+     * @param isAsync The returned flag indicates if onPrepareToTerminateAsync is implemented.
+     */
+    void OnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<bool> *callbackInfo, bool &isAsync) override;
+
+    /**
      * @brief Execute insight intent when an ability is in foreground, schedule it to foreground repeatly.
      *
      * @param want Want.
@@ -278,6 +302,8 @@ private:
         const std::string &moduleName, const std::string &srcPath);
     void CreateEtsContext(int32_t screenMode);
     bool BindNativeMethods();
+    int32_t CallSaveState(ani_value args[], WantParams &wantParams, AppExecFwk::StateReason stateReason,
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnSaveStateResult> *callbackInfo);
 
     ETSRuntime &etsRuntime_;
     std::shared_ptr<AppExecFwk::ETSNativeReference> shellContextRef_;

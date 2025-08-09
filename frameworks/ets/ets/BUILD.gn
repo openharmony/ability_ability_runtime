@@ -246,6 +246,26 @@ ohos_prebuilt_etc("ability_runtime_data_uri_utils_abc_etc") {
   deps = [ ":ability_runtime_data_uri_utils_abc" ]
 }
 
+generate_static_abc("ability_runtime_dialog_session_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.dialogSession.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_runtime_dialog_session_abc.abc"
+  external_dependencies = [
+    "bundle_framework:copy_bundleManager_ets",
+    "resource_management:copy_resourceManager_ets",
+  ]
+}
+
+ohos_prebuilt_etc("ability_runtime_dialog_session_abc_etc") {
+  source = "$target_out_dir/ability_runtime_dialog_session_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_dialog_session_abc" ]
+}
+
 generate_static_abc("ability_runtime_ability_result_abc") {
   base_url = "./"
   files = [ "./ability/abilityResult.ets" ]
@@ -393,6 +413,22 @@ ohos_prebuilt_etc("ability_runtime_app_manager_abc_etc") {
   subsystem_name = "ability"
   part_name = "ability_runtime"
   deps = [ ":ability_runtime_app_manager_abc" ]
+}
+
+generate_static_abc("ability_runtime_auto_fill_manager_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.autoFillManager.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ability_runtime_auto_fill_manager_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_auto_fill_manager_abc_etc") {
+  source = "$target_out_dir/ability_runtime_auto_fill_manager_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_auto_fill_manager_abc" ]
 }
 
 generate_static_abc("ui_extension_ability_ani_abc") {
@@ -889,6 +925,23 @@ ohos_prebuilt_etc("ability_runtime_ability_lifecycle_callback_abc_etc") {
   deps = [ ":ability_runtime_ability_lifecycle_callback_abc" ]
 }
 
+generate_static_abc("ability_runtime_interop_ability_lifecycle_callback_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.InteropAbilityLifecycleCallback.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_runtime_interop_ability_lifecycle_callback_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_interop_ability_lifecycle_callback_abc_etc") {
+  source = "$target_out_dir/ability_runtime_interop_ability_lifecycle_callback_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_interop_ability_lifecycle_callback_abc" ]
+}
+
 generate_static_abc("ability_runtime_connect_options_abc") {
   base_url = "./"
   files = [ "./ability/connectOptions.ets" ]
@@ -1192,6 +1245,22 @@ ohos_prebuilt_etc("ability_runtime_event_hub_abc_etc") {
   deps = [ ":ability_runtime_event_hub_abc" ]
 }
 
+generate_static_abc("ability_runtime_share_extension_ability_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.ShareExtensionAbility.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_runtime_share_extension_ability_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_share_extension_ability_abc_etc") {
+  source = "$target_out_dir/ability_runtime_share_extension_ability_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_share_extension_ability_abc" ]
+}
 
 group("ets_packages") {
   deps = [
@@ -1221,6 +1290,7 @@ group("ets_packages") {
     ":ability_runtime_app_manager_abc_etc",
     ":ability_runtime_app_state_data_abc_etc",
     ":ability_runtime_application_context_abc_etc",
+    ":ability_runtime_auto_fill_manager_abc_etc",
     ":ability_runtime_auto_fill_type_abc_etc",
     ":ability_runtime_application_state_change_callback_abc_etc",
     ":ability_runtime_base_context_abc_etc",
@@ -1232,6 +1302,7 @@ group("ets_packages") {
     ":ability_runtime_custom_data_abc_etc",
     ":ability_runtime_data_ability_helper_abc_etc",
     ":ability_runtime_data_uri_utils_abc_etc",
+    ":ability_runtime_dialog_session_abc_etc",
     ":ability_runtime_environment_callback_abc_etc",
     ":ability_runtime_error_code_abc_etc",
     ":ability_runtime_event_hub_abc_etc",
@@ -1242,8 +1313,10 @@ group("ets_packages") {
     ":ability_runtime_insight_intent_context_abc_etc",
     ":ability_runtime_insight_intent_driver_abc_etc",
     ":ability_runtime_insight_intent_executor_abc_etc",
+    ":ability_runtime_interop_ability_lifecycle_callback_abc_etc",
     ":ability_runtime_mission_info_abc_etc",
     ":ability_runtime_openLink_options_abc_etc",
+    ":ability_runtime_share_extension_ability_abc_etc",
     ":ability_runtime_shell_cmd_result_abc_etc",
     ":ability_runtime_start_options_abc_etc",
     ":ability_runtime_trigger_info_abc_etc",

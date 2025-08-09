@@ -14,6 +14,7 @@
  */
 
 import hilog from '@ohos.hilog'
+import rpc from '@ohos.rpc';
 
 type valueType = NullishType;
 const DOMAIN_ID = 0xD001300;
@@ -154,7 +155,7 @@ class RecordWriter {
 export class RecordSerializeTool {
   public static stringifyNoThrow(obj: Record<string, Object>): String {
     try {
-      return RecordSerializeTool.stringify(obj as Object as Record<string, NullishType>);
+      return JSON.stringify(obj as Object as Record<string, NullishType>);
     } catch (err) {
       hilog.error(DOMAIN_ID, TAG, `RecordSerializeTool.stringify error: ${err}`);
       return '';
@@ -215,6 +216,177 @@ export class RecordSerializeTool {
     } else {
       throw new TypeError('unknown JSONValue');
     }
+  }
+}
+
+class NativeWantParamsCleaner {
+  public nativeWantParams: long = 0;
+
+  constructor(nativeWantParams: long) {
+    this.nativeWantParams = nativeWantParams;
+  }
+
+  private static native nativeDestroy(nativeWantParams: long): void;
+
+  public clean(): void {
+    NativeWantParamsCleaner.nativeDestroy(this.nativeWantParams);
+    this.nativeWantParams = 0;
+  }
+}
+
+function nativeWantParamsCleanerCallback(cleaner: NativeWantParamsCleaner): void {
+  cleaner.clean();
+}
+
+let destroyRegister = new FinalizationRegistry<NativeWantParamsCleaner>(nativeWantParamsCleanerCallback);
+
+class NativeWantParams {
+  static {
+    loadLibrary("want_ani_kit.z");
+  }
+
+  private nativeWantParams: long = 0;
+  private cleaner: NativeWantParamsCleaner | null = null;
+
+  constructor(wantParams?: long) {
+    if (wantParams === undefined) {
+      this.nativeWantParams = NativeWantParams.nativeCreate();
+      this.registerCleaner(this.nativeWantParams)
+      return;
+    }
+    this.nativeWantParams = wantParams;
+  }
+
+  private static native nativeCreate(): long;
+
+  private static native nativeSetStringParam(nativeWantParams: long, key: string, value: string): boolean;
+  private static native nativeSetDoubleParam(nativeWantParams: long, key: string, value: double): boolean;
+  private static native nativeSetIntParam(nativeWantParams: long, key: string, value: int): boolean;
+  private static native nativeSetLongParam(nativeWantParams: long, key: string, value: long): boolean;
+  private static native nativeSetBooleanParam(nativeWantParams: long, key: string, value: boolean): boolean;
+  private static native nativeSetWantParams(nativeWantParams: long, key: string, value: long): boolean;
+
+  private static native nativeSetArrayStringParam(nativeWantParams: long, key: string, value: Array<string>): boolean;
+  private static native nativeSetArrayDoubleParam(nativeWantParams: long, key: string, value: Array<double>): boolean;
+  private static native nativeSetArrayIntParam(nativeWantParams: long, key: string, value: Array<int>): boolean;
+  private static native nativeSetArrayLongParam(nativeWantParams: long, key: string, value: Array<long>): boolean;
+  private static native nativeSetArrayBooleanParam(nativeWantParams: long, key: string, value: Array<boolean>): boolean;
+  private static native nativeSetArrayWantParams(nativeWantParams: long, key: string, value: Array<long>): boolean;
+
+  private static native nativeSetRemoteObjectParam(
+    nativeWantParams: long, key: string, value: rpc.RemoteObject): boolean;
+
+  private registerCleaner(nativeWantParams: long): void {
+    this.cleaner = new NativeWantParamsCleaner(nativeWantParams);
+    destroyRegister.register(this, this.cleaner!, this);
+  }
+
+  public setParam(key: string, value: string): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetStringParam(this.nativeWantParams, key, value);
+  }
+
+  public setParam(key: string, value: double): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetDoubleParam(this.nativeWantParams, key, value);
+  }
+
+  public setParam(key: string, value: int): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetIntParam(this.nativeWantParams, key, value);
+  }
+
+  public setParam(key: string, value: long): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetLongParam(this.nativeWantParams, key, value);
+  }
+
+  public setParam(key: string, value: boolean): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetBooleanParam(this.nativeWantParams, key, value);
+  }
+
+  public setParam(key: string, value: NativeWantParams): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetWantParams(this.nativeWantParams, key, value.nativeWantParams);
+  }
+
+  public SetArrayStringParam(key: string, value: Array<string>): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetArrayStringParam(this.nativeWantParams, key, value);
+  }
+
+  public SetArrayDoubleParam(key: string, value: Array<double>): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetArrayDoubleParam(this.nativeWantParams, key, value);
+  }
+
+  public SetArrayIntParam(key: string, value: Array<int>): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetArrayIntParam(this.nativeWantParams, key, value);
+  }
+
+  public SetArrayLongParam(key: string, value: Array<long>): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetArrayLongParam(this.nativeWantParams, key, value);
+  }
+
+  public SetArrayBooleanParam(key: string, value: Array<boolean>): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetArrayBooleanParam(this.nativeWantParams, key, value);
+  }
+
+  public SetArrayWantParams(key: string, value: Array<NativeWantParams>): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    let nativeWantParams: Array<long> = new Array<long>();
+    for (let item of value) {
+      nativeWantParams.push(item.nativeWantParams);
+    }
+    return NativeWantParams.nativeSetArrayWantParams(this.nativeWantParams, key, nativeWantParams);
+  }
+
+  public setParam(key: string, value: rpc.RemoteObject): boolean {
+    if (this.nativeWantParams == 0) {
+      hilog.error(DOMAIN_ID, TAG, `nativeWantParams null`);
+      return false;
+    }
+    return NativeWantParams.nativeSetRemoteObjectParam(this.nativeWantParams, key, value);
   }
 }
 

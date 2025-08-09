@@ -47,6 +47,10 @@ const std::string FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermis
 constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE =
     "Lstd/core/String;Lescompat/Record;Lapplication/AbilityStartCallback/AbilityStartCallback;:L@ohos/base/"
     "BusinessError;";
+constexpr const char *SIGNATURE_GET_UI_EXTENSION_HOST_WINDOW_PROXY =
+    ":L@ohos/uiExtensionHost/uiExtensionHost/UIExtensionHostWindowProxy;";
+constexpr const char *SIGNATURE_GET_UI_EXTENSION_WINDOW_PROXY =
+    ":L@ohos/arkui/uiExtension/uiExtension/WindowProxy;";
 } // namespace
 
 EtsUIExtensionContentSession* EtsUIExtensionContentSession::GetEtsContentSession(ani_env *env, ani_object obj)
@@ -170,22 +174,32 @@ void EtsUIExtensionContentSession::NativeSetWindowBackgroundColor(ani_env *env, 
 ani_object EtsUIExtensionContentSession::NativeGetUIExtensionHostWindowProxy(ani_env *env, ani_object obj)
 {
     auto etsContentSession = EtsUIExtensionContentSession::GetEtsContentSession(env, obj);
-    ani_object object = nullptr;
-    if (etsContentSession != nullptr) {
-        object = etsContentSession->GetUIExtensionHostWindowProxy(env, obj);
+    if (etsContentSession == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsContentSession");
+        return nullptr;
     }
-    return object;
+    return etsContentSession->GetUIExtensionHostWindowProxy(env, obj);
+}
+
+ani_object EtsUIExtensionContentSession::NativeGetUIExtensionWindowProxy(ani_env *env, ani_object obj)
+{
+    auto etsContentSession = EtsUIExtensionContentSession::GetEtsContentSession(env, obj);
+    if (etsContentSession == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsContentSession");
+        return nullptr;
+    }
+    return etsContentSession->GetUIExtensionWindowProxy(env, obj);
 }
 
 ani_object EtsUIExtensionContentSession::NativeStartAbilityByTypeSync(
     ani_env *env, ani_object obj, ani_string type, ani_ref wantParam, ani_object startCallback)
 {
     auto etsContentSession = EtsUIExtensionContentSession::GetEtsContentSession(env, obj);
-    ani_object object = nullptr;
-    if (etsContentSession != nullptr) {
-        object = etsContentSession->StartAbilityByTypeSync(env, type, wantParam, startCallback);
+    if (etsContentSession == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsContentSession");
+        return nullptr;
     }
-    return object;
+    return etsContentSession->StartAbilityByTypeSync(env, type, wantParam, startCallback);
 }
 
 EtsUIExtensionContentSession::EtsUIExtensionContentSession(
@@ -277,8 +291,10 @@ ani_object EtsUIExtensionContentSession::CreateEtsUIExtensionContentSession(ani_
             reinterpret_cast<void *>(EtsUIExtensionContentSession::NativeTerminateSelfWithResult)},
         ani_native_function {"setWindowBackgroundColor", nullptr,
             reinterpret_cast<void *>(EtsUIExtensionContentSession::NativeSetWindowBackgroundColor)},
-        ani_native_function {"getUIExtensionHostWindowProxy", nullptr,
+        ani_native_function {"getUIExtensionHostWindowProxy", SIGNATURE_GET_UI_EXTENSION_HOST_WINDOW_PROXY,
             reinterpret_cast<void *>(EtsUIExtensionContentSession::NativeGetUIExtensionHostWindowProxy)},
+        ani_native_function {"getUIExtensionWindowProxy", SIGNATURE_GET_UI_EXTENSION_WINDOW_PROXY,
+            reinterpret_cast<void *>(EtsUIExtensionContentSession::NativeGetUIExtensionWindowProxy)},
         ani_native_function {"nativeSetReceiveDataCallback", nullptr,
             reinterpret_cast<void *>(EtsUIExtensionContentSession::NativeSetReceiveDataCallback)},
         ani_native_function {"nativeSetReceiveDataForResultCallback", nullptr,
@@ -387,25 +403,43 @@ void EtsUIExtensionContentSession::SetWindowBackgroundColor(ani_env *env, ani_st
 
 ani_object EtsUIExtensionContentSession::GetUIExtensionHostWindowProxy(ani_env *env, ani_object object)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "called");
+    TAG_LOGD(AAFwkTag::UI_EXT, "GetUIExtensionHostWindowProxy called");
+    if (!AppExecFwk::CheckCallerIsSystemApp()) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "This application is not system-app, can not use system-api");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return nullptr;
+    }
     if (sessionInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null sessionInfo_");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return nullptr;
     }
-    ani_object etsExtensionWindow = nullptr;
-    etsExtensionWindow =
+    ani_object etsExtensionWindow =
         Rosen::AniExtensionWindow::CreateAniExtensionWindow(env, uiWindow_, sessionInfo_->hostWindowId);
     if (etsExtensionWindow == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsExtensionWindow");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return nullptr;
     }
-    ani_ref resultRef = nullptr;
-    ani_status status = ANI_ERROR;
-    if ((status = env->GlobalReference_Create(etsExtensionWindow, &resultRef)) != ANI_OK) {
+    return etsExtensionWindow;
+}
+
+ani_object EtsUIExtensionContentSession::GetUIExtensionWindowProxy(ani_env *env, ani_object object)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "GetUIExtensionWindowProxy called");
+    if (sessionInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null sessionInfo_");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return nullptr;
     }
-    return reinterpret_cast<ani_object>(resultRef);
+    ani_object etsExtensionWindow =
+        Rosen::AniExtensionWindow::CreateAniExtensionWindow(env, uiWindow_, sessionInfo_->hostWindowId);
+    if (etsExtensionWindow == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsExtensionWindow");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return nullptr;
+    }
+    return etsExtensionWindow;
 }
 
 void EtsUIExtensionContentSession::SetReceiveDataCallback(ani_env *env, ani_object functionObj)

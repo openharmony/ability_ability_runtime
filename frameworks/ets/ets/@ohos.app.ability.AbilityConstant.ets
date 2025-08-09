@@ -43,6 +43,7 @@ namespace AbilityConstant {
     AUTO_STARTUP = 8,
     INSIGHT_INTENT = 9,
     PREPARE_CONTINUATION = 10,
+    PRELOAD = 11,
   }
 
   export enum LastExitReason {
