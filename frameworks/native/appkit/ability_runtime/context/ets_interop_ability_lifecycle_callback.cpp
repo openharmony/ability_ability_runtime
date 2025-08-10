@@ -17,7 +17,6 @@
 
 #include <sstream>
 
-#include "ani.h"
 #include "ets_exception_callback.h"
 #include "ets_runtime.h"
 #include "hilog_tag_wrapper.h"
@@ -70,8 +69,24 @@ bool EtsInteropAbilityLifecycleCallback::Empty()
     return callbacks_.empty();
 }
 
-void EtsInteropAbilityLifecycleCallback::CallObjectMethod(const char *methodName,
-    const char *signature, std::shared_ptr<InteropObject> ability)
+bool EtsInteropAbilityLifecycleCallback::GetAniValueFromInteropObject(ani_env *env,
+    std::shared_ptr<InteropObject> interopObject, ani_value &aniValue)
+{
+    if (env == nullptr || interopObject == nullptr) {
+        TAG_LOGI(AAFwkTag::APPKIT, "null env or interop object");
+        return false;
+    }
+    ani_ref esValue = interopObject->GetAniValue(env);
+    if (esValue == nullptr) {
+        TAG_LOGI(AAFwkTag::APPKIT, "null esvalue");
+        return false;
+    }
+    aniValue.r = reinterpret_cast<ani_ref>(esValue);
+    return true;
+}
+
+void EtsInteropAbilityLifecycleCallback::CallObjectMethod(const char *methodName, const char *signature,
+    std::shared_ptr<InteropObject> ability, std::shared_ptr<InteropObject> windowStage)
 {
     ani_env *aniEnv = GetAniEnv();
     if (aniEnv == nullptr || ability == nullptr) {
@@ -80,64 +95,6 @@ void EtsInteropAbilityLifecycleCallback::CallObjectMethod(const char *methodName
     }
     if (!ability->IsFromNapi()) {
         TAG_LOGI(AAFwkTag::APPKIT, "not from js");
-        return;
-    }
-    ani_ref abilityEsValue = ability->GetAniValue(aniEnv);
-    if (abilityEsValue == nullptr) {
-        TAG_LOGI(AAFwkTag::APPKIT, "null esvalue");
-        return;
-    }
-
-    ani_status status = ANI_ERROR;
-    ani_namespace ns;
-    if ((status = aniEnv->FindNamespace(SIGNATURE_NAMESPACE_INTEROP_ABILITY_LIFECYCLE, &ns)) != ANI_OK ||
-        ns == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed to find namespace, status=%{public}d", status);
-        return;
-    }
-
-    ani_function callbackInnerFn = nullptr;
-    if ((status = aniEnv->Namespace_FindFunction(ns, methodName, signature, &callbackInnerFn)) != ANI_OK ||
-        callbackInnerFn == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed to find function %{public}s, status=%{public}d", methodName, status);
-        return;
-    }
-
-    ani_value aniAbility {};
-    aniAbility.r = reinterpret_cast<ani_ref>(abilityEsValue);
-    std::lock_guard<std::mutex> lock(callbacksLock_);
-    for (const auto &callback : callbacks_) {
-        if (callback == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null callback");
-            return;
-        }
-        if ((status = aniEnv->Function_Call_Void(callbackInnerFn,
-            aniAbility, reinterpret_cast<ani_object>(callback))) != ANI_OK) {
-            const EtsEnv::ETSErrorObject errorObj = GetETSErrorObject();
-            TAG_LOGE(AAFwkTag::APPKIT, "failed to call function %{public}s,status=%{public}d\nname=%{public}s\n"
-                "message=%{public}s\nstack=%{public}s", methodName, status, errorObj.name.c_str(),
-                errorObj.message.c_str(), errorObj.stack.c_str());
-            return;
-        }
-    }
-}
-
-void EtsInteropAbilityLifecycleCallback::CallObjectMethod(const char *methodName, const char *signature,
-    std::shared_ptr<InteropObject> ability, std::shared_ptr<InteropObject> windowStage)
-{
-    ani_env *aniEnv = GetAniEnv();
-    if (aniEnv == nullptr || ability == nullptr || windowStage == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null aniEnv or ability or windowStage");
-        return;
-    }
-    if (!ability->IsFromNapi()) {
-        TAG_LOGI(AAFwkTag::APPKIT, "not from js");
-        return;
-    }
-    ani_ref abilityEsValue = ability->GetAniValue(aniEnv);
-    ani_ref windowStageEsValue = windowStage->GetAniValue(aniEnv);
-    if (abilityEsValue == nullptr || windowStageEsValue == nullptr) {
-        TAG_LOGI(AAFwkTag::APPKIT, "null esvalue");
         return;
     }
 
@@ -156,23 +113,43 @@ void EtsInteropAbilityLifecycleCallback::CallObjectMethod(const char *methodName
         return;
     }
 
-    ani_value aniAbility {};
-    aniAbility.r = reinterpret_cast<ani_ref>(abilityEsValue);
-    ani_value aniWindowStage {};
-    aniWindowStage.r = reinterpret_cast<ani_ref>(windowStageEsValue);
+    ani_value aniAbility;
+    if (!GetAniValueFromInteropObject(aniEnv, ability, aniAbility)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "failed to get ability ani value");
+        return;
+    }
+    ani_value aniWindowStage;
+    bool hasWindowStage = windowStage != nullptr;
+    if (hasWindowStage && !GetAniValueFromInteropObject(aniEnv, windowStage, aniWindowStage)) {
+        TAG_LOGI(AAFwkTag::APPKIT, "failed to get window stage ani value");
+        return;
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "call method %{public}s", methodName);
+    CallObjectMethodInner(aniEnv, aniAbility, aniWindowStage, hasWindowStage, callbackInnerFn);
+}
+
+void EtsInteropAbilityLifecycleCallback::CallObjectMethodInner(ani_env *aniEnv, ani_value aniAbility,
+    ani_value aniWindowStage, bool hasWindowStage, ani_function callbackInnerFn)
+{
+    ani_status status = ANI_ERROR;
     std::lock_guard<std::mutex> lock(callbacksLock_);
     for (const auto &callback : callbacks_) {
         if (callback == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null callback");
-            return;
+            continue;
         }
-        if ((status = aniEnv->Function_Call_Void(callbackInnerFn,
-            aniAbility, aniWindowStage, reinterpret_cast<ani_object>(callback))) != ANI_OK) {
+        if (hasWindowStage) {
+            status = aniEnv->Function_Call_Void(callbackInnerFn, aniAbility, aniWindowStage,
+                reinterpret_cast<ani_object>(callback));
+        } else {
+            status = aniEnv->Function_Call_Void(callbackInnerFn, aniAbility, reinterpret_cast<ani_object>(callback));
+        }
+        if (status != ANI_OK) {
             const EtsEnv::ETSErrorObject errorObj = GetETSErrorObject();
-            TAG_LOGE(AAFwkTag::APPKIT, "failed to call function %{public}s,status=%{public}d\nname=%{public}s\n"
-                "message=%{public}s\nstack=%{public}s", methodName, status, errorObj.name.c_str(),
+            TAG_LOGE(AAFwkTag::APPKIT, "failed to call function,status=%{public}d\nname=%{public}s\n"
+                "message=%{public}s\nstack=%{public}s", status, errorObj.name.c_str(),
                 errorObj.message.c_str(), errorObj.stack.c_str());
-            return;
+            continue;
         }
     }
 }
@@ -186,7 +163,7 @@ int32_t EtsInteropAbilityLifecycleCallback::Register(ani_object callback)
         return ERROR_CODE_NULL_ENV;
     }
     if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null aniEnv");
+        TAG_LOGE(AAFwkTag::APPKIT, "null callback");
         return ERROR_CODE_NULL_CALLBACK;
     }
     ani_ref ref = nullptr;
@@ -254,17 +231,18 @@ std::string EtsInteropAbilityLifecycleCallback::GetErrorProperty(ani_error aniEr
         return propertyValue;
     }
     ani_method getterMethod = nullptr;
-    if ((status = aniEnv->Class_FindGetter(static_cast<ani_class>(errorType), property, &getterMethod)) != ANI_OK) {
+    if ((status = aniEnv->Class_FindGetter(static_cast<ani_class>(errorType), property, &getterMethod)) != ANI_OK ||
+        getterMethod == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindGetter failed, status : %{public}d", status);
         return propertyValue;
     }
     ani_ref aniRef = nullptr;
-    if ((status = aniEnv->Object_CallMethod_Ref(aniError, getterMethod, &aniRef)) != ANI_OK) {
+    if ((status = aniEnv->Object_CallMethod_Ref(aniError, getterMethod, &aniRef)) != ANI_OK || aniRef == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Object_CallMethod_Ref failed, status : %{public}d", status);
         return propertyValue;
     }
     ani_string aniString = reinterpret_cast<ani_string>(aniRef);
-    ani_size sz {};
+    ani_size sz;
     if ((status = aniEnv->String_GetUTF8Size(aniString, &sz)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "String_GetUTF8Size failed, status : %{public}d", status);
         return propertyValue;

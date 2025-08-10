@@ -1055,10 +1055,12 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env* aniEnv)
             ani_native_function {"nativegetCurrentAppCloneIndex", ":I",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::GetCurrentAppCloneIndex)},
             ani_native_function {"nativeOnInteropLifecycleCallbackSync",
-                "Lstd/core/String;Lstd/core/Object;:V",
+                "Lstd/core/String;L@ohos/app/ability/InteropAbilityLifecycleCallback/"
+                "InteropAbilityLifecycleCallback;:V",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOnInteropLifecycleCallbackSync)},
             ani_native_function {"nativeOffInteropLifecycleCallbackSync",
-                "Lstd/core/String;Lstd/core/Object;:V",
+                "Lstd/core/String;L@ohos/app/ability/InteropAbilityLifecycleCallback/"
+                "InteropAbilityLifecycleCallback;:V",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOffInteropLifecycleCallbackSync)},
         };
         if ((status = aniEnv->Class_BindNativeMethods(contextClass, applicationContextFunctions.data(),
