@@ -2373,6 +2373,32 @@ HWTEST_F(AbilityContextImplTest, SetOnNewWantSkipScenariose_0100, Function | Med
 }
 
 /**
+ * @tc.number: Ability_Context_Impl_StartExtensionAbilityWithExtensionType_0100
+ * @tc.name: StartExtensionAbilityWithExtensionType
+ * @tc.desc: Verify that function StartExtensionAbilityWithExtensionType.
+ */
+HWTEST_F(AbilityContextImplTest, StartExtensionAbilityWithExtensionType_0100, Function | MediumTest | Level1)
+{
+    AAFwk::Want want;
+    auto result = context_->AbilityContext::StartExtensionAbilityWithExtensionType(want,
+        AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_StopExtensionAbilityWithExtensionType_0100
+ * @tc.name: StopExtensionAbilityWithExtensionType
+ * @tc.desc: Verify that function StopExtensionAbilityWithExtensionType.
+ */
+HWTEST_F(AbilityContextImplTest, StopExtensionAbilityWithExtensionType_0100, Function | MediumTest | Level1)
+{
+    AAFwk::Want want;
+    auto result = context_->AbilityContext::StopExtensionAbilityWithExtensionType(want,
+        AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
  * @tc.number: Ability_Context_Impl_ConnectExtensionAbilityWithExtensionType_0100
  * @tc.name: ConnectExtensionAbilityWithExtensionType
  * @tc.desc: Verify that function ConnectExtensionAbilityWithExtensionType.
@@ -2380,9 +2406,9 @@ HWTEST_F(AbilityContextImplTest, SetOnNewWantSkipScenariose_0100, Function | Med
 HWTEST_F(AbilityContextImplTest, ConnectExtensionAbilityWithExtensionType_0100, Function | MediumTest | Level1)
 {
     AAFwk::Want want;
-    auto result = context_->ConnectExtensionAbilityWithExtensionType(want, nullptr,
+    auto result = context_->AbilityContext::ConnectExtensionAbilityWithExtensionType(want, nullptr,
         AppExecFwk::ExtensionAbilityType::APP_SERVICE);
-    EXPECT_NE(result, ERR_OK);
+    EXPECT_EQ(result, ERR_OK);
 }
 
 /**
@@ -2394,9 +2420,9 @@ HWTEST_F(AbilityContextImplTest, ConnectExtensionAbilityWithExtensionType_0200, 
 {
     AAFwk::Want want;
     sptr<AbilityConnectCallback> connectCallback;
-    auto ret = context_->ConnectExtensionAbilityWithExtensionType(want, connectCallback,
+    auto ret = context_->AbilityContext::ConnectExtensionAbilityWithExtensionType(want, connectCallback,
         AppExecFwk::ExtensionAbilityType::SERVICE);
-    EXPECT_NE(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
