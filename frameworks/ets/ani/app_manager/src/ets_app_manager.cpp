@@ -1115,7 +1115,7 @@ void EtsAppManager::OnOnAbilityFirstFrameState(
     ani_env *env, ani_string type, ani_object aniObserver, ani_object aniBundleName)
 {
 #ifdef SUPPORT_SCREEN
-    TAG_LOGD(AAFwkTag::APPMGR, "OnOnAbilityFirstFrameState called %{public}p", aniObserver);
+    TAG_LOGD(AAFwkTag::APPMGR, "OnOnAbilityFirstFrameState called");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
         return;
@@ -1203,7 +1203,7 @@ void EtsAppManager::OnOnAppForegroundState(ani_env *env, ani_string type, ani_ob
 void EtsAppManager::OnOffAbilityFirstFrameState(ani_env *env, ani_string type, ani_object aniObserver)
 {
 #ifdef SUPPORT_SCREEN
-    TAG_LOGD(AAFwkTag::APPMGR, "OnOffAbilityFirstFrameState called %{public}p", aniObserver);
+    TAG_LOGD(AAFwkTag::APPMGR, "OnOffAbilityFirstFrameState called");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "env null ptr");
         return;
