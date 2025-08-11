@@ -145,6 +145,22 @@ void EventReport::LogErrorEvent(const std::string &name, HiSysEventType type, co
         EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg);
 }
 
+void EventReport::LogStartErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
+{
+    HiSysEventWrite(
+        HiSysEvent::Domain::AAFWK,
+        name,
+        type,
+        EVENT_KEY_USERID, eventInfo.userId,
+        EVENT_KEY_APP_INDEX, eventInfo.appIndex,
+        EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
+        EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
+        EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
+        EVENT_KEY_ERROR_CODE, eventInfo.errCode,
+        EVENT_KEY_ERROR_MESSAGE, eventInfo.errMsg,
+        EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.callerBundleName);
+}
+
 void EventReport::LogSystemErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
 {
     HiSysEventWrite(
@@ -331,6 +347,8 @@ void EventReport::SendAbilityEvent(const EventName &eventName, HiSysEventType ty
     }
     switch (eventName) {
         case EventName::START_ABILITY_ERROR:
+            LogStartErrorEvent(name, type, eventInfo);
+            break;
         case EventName::TERMINATE_ABILITY_ERROR:
             LogErrorEvent(name, type, eventInfo);
             break;
