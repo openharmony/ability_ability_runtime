@@ -401,5 +401,5 @@ export default class Want {
   parameters?: Record<string, Object>;
   entities?: Array<string>;
   moduleName?: string;
-  readonly fds?: Record<string, number>;
+  readonly fds?: Record<string, int>;
 }
