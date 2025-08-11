@@ -183,7 +183,7 @@ void EtsAbilityManager::IsEmbeddedOpenAllowed(ani_env *env, ani_object contextOb
 
 void EtsAbilityManager::NativeOn(ani_env *env, ani_string aniType, ani_object aniObserver)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "nativeOn called %{public}p", aniObserver);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "nativeOn called");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "env null ptr");
         return;
@@ -229,7 +229,7 @@ void EtsAbilityManager::NativeOn(ani_env *env, ani_string aniType, ani_object an
 
 void EtsAbilityManager::NativeOff(ani_env *env, ani_string aniType, ani_object aniObserver)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "nativeOff called %{public}p", aniObserver);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "nativeOff called");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "env null ptr");
         return;
