@@ -92,6 +92,7 @@ public:
     void SetLazyApis(CJRuntimeAPI* apis) { lazyApis_ = apis; }
 
     void InitCJAppNS(const std::string& path);
+    void InitCJAppSDKNS(const std::string& path);
     void InitCJRomSDKNS(const std::string& path);
     void InitCJCompatibilitySDKNS(const std::string& path);
     void InitCJChipSDKNS(const std::string& path);
@@ -116,9 +117,9 @@ public:
     static const char *cjCompatibilitySDKNSName;
     static const char *cjRuntimeNSName;
     static const char *cjMockNSName;
+    static const char *cjAppSDKNSName;
     static std::string appVersion;
-    static const uint32_t majorVersion;
-    static const uint32_t minorVersion;
+    static const std::string checkVersion;
     static SanitizerKind sanitizerKind;
 
 private:
