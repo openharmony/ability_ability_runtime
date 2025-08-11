@@ -185,7 +185,6 @@ void DeepLinkReserveConfig::LoadReservedUrilItem(const nlohmann::json &jsonUriOb
     if (jsonUriObject.contains(HOST_NAME) && jsonUriObject.at(HOST_NAME).is_string()) {
         std::string hostName = jsonUriObject.at(HOST_NAME).get<std::string>();
         reserveUri.host = hostName;
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "host:%{public}s", reserveUri.host.c_str());
     }
     if (jsonUriObject.contains(PORT_NAME) && jsonUriObject.at(PORT_NAME).is_string()) {
         std::string portName = jsonUriObject.at(PORT_NAME).get<std::string>();
