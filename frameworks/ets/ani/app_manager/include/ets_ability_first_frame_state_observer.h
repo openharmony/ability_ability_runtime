@@ -46,8 +46,8 @@ public:
     ani_ref GetAniObserver() { return etsObserverObject_; }
 private:
     ani_status AniSendEvent(const std::function<void()> task);
-    ani_vm *etsVm_;
-    ani_ref etsObserverObject_;
+    ani_vm *etsVm_ = nullptr;
+    ani_ref etsObserverObject_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_ = nullptr;
 };
 
