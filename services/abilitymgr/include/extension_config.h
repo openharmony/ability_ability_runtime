@@ -52,6 +52,7 @@ struct ExtensionConfigItem {
     AbilityAccessItem abilityAccess;
     bool hasAbilityAccess = false;
     bool screenUnlockIntercept = false;
+    bool screenUnlockInterceptExcludeSystemApp = false;
 };
 
 class ExtensionConfig : public DelayedSingleton<ExtensionConfig> {
@@ -71,7 +72,7 @@ public:
     bool IsExtensionStartDefaultEnable(const std::string &extensionTypeName, const std::string &targetUri);
     bool IsExtensionNetworkEnable(const std::string &extensionTypeName);
     bool IsExtensionSAEnable(const std::string &extensionTypeName);
-    bool IsScreenUnlockIntercept(const std::string &extensionTypeName);
+    bool IsScreenUnlockIntercept(const std::string &extensionTypeName, bool isSystemApp);
 private:
     void LoadExtensionConfig(const nlohmann::json &object);
     bool ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf);
