@@ -135,5 +135,15 @@ HWTEST_F(CjRuntimeTest, CjRuntimeStartDebuggerMode_001, TestSize.Level2)
     EXPECT_TRUE(debugOption.isDebugApp);
 }
 
+/**
+ * @tc.name: CjRuntimeRegisterCangjieCallback_001
+ * @tc.desc: CjRuntime test for RegisterCangjieCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CjRuntimeTest, CjRuntimeRegisterCangjieCallback_001, TestSize.Level2)
+{
+    bool ret = CJRuntime::RegisterCangjieCallback();
+    EXPECT_FALSE(ret);
+}
 }  // namespace Runtime
 }  // namespace OHOS
