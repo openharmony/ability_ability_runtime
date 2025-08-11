@@ -43,9 +43,8 @@ public:
     bool Empty();
 
 private:
-    void CallObjectMethod(const char *methodName, std::shared_ptr<InteropObject> ability);
     void CallObjectMethod(const char *methodName, std::shared_ptr<InteropObject> ability,
-        std::shared_ptr<InteropObject> windowStage);
+        std::shared_ptr<InteropObject> windowStage = nullptr);
 
 private:
     napi_env env_ = nullptr;

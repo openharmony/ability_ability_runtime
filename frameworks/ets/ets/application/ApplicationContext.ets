@@ -308,8 +308,8 @@ export default class ApplicationContext extends Context {
     return this.nativeOnLifecycleCallbackSync(type, callback);
   }
 
-  public native nativeOnInteropLifecycleCallbackSync(type: string, callback: Object): void;
-  public native nativeOffInteropLifecycleCallbackSync(type: string, callback?: Object): void;
+  public native nativeOnInteropLifecycleCallbackSync(type: string, callback: InteropAbilityLifecycleCallback): void;
+  public native nativeOffInteropLifecycleCallbackSync(type: string, callback?: InteropAbilityLifecycleCallback): void;
   on(type: 'interopAbilityLifecycle', callback: InteropAbilityLifecycleCallback): void {
     this.nativeOnInteropLifecycleCallbackSync(type, callback);
   }
