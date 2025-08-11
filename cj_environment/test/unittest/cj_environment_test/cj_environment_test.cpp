@@ -306,7 +306,29 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitSpawnEnv_001, TestSize.Level2)
  */
 HWTEST_F(CjEnvironmentTest, CjEnvironmentTestDetectAppNSMode_0100, TestSize.Level2)
 {
+    std::string testVersion = "5.1";
+    CJEnvironment::SetAppVersion(testVersion);
     auto test = CJEnvironment::DetectAppNSMode();
+    EXPECT_EQ(test, CJEnvironment::NSMode::SINK);
+
+    testVersion = "5.1.0.0";
+    CJEnvironment::SetAppVersion(testVersion);
+    test = CJEnvironment::DetectAppNSMode();
+    EXPECT_EQ(test, CJEnvironment::NSMode::APP);
+
+    testVersion = "5.1.1.1";
+    CJEnvironment::SetAppVersion(testVersion);
+    test = CJEnvironment::DetectAppNSMode();
+    EXPECT_EQ(test, CJEnvironment::NSMode::SINK);
+
+    testVersion = "6.0.0.0";
+    CJEnvironment::SetAppVersion(testVersion);
+    test = CJEnvironment::DetectAppNSMode();
+    EXPECT_EQ(test, CJEnvironment::NSMode::SINK);
+
+    testVersion = "5.1.1.0";
+    CJEnvironment::SetAppVersion(testVersion);
+    test = CJEnvironment::DetectAppNSMode();
     EXPECT_EQ(test, CJEnvironment::NSMode::SINK);
 }
 
@@ -333,6 +355,19 @@ HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJMockNS_0100, TestSize.Level2)
     CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
     std::string appPath = "com/ohos/unittest/test/";
     cJEnvironment.InitCJMockNS(appPath);
+    EXPECT_EQ(CJEnvironment::GetInstance(), nullptr);
+}
+
+/**
+ * @tc.name: InitCJAppSDKNS_0100
+ * @tc.desc: Test InitCJAppSDKNS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CjEnvironmentTest, CjEnvironmentTestInitCJAppSDKNS_0100, TestSize.Level2)
+{
+    CJEnvironment cJEnvironment(CJEnvironment::NSMode::APP);
+    std::string appPath = "com/ohos/unittest/test/";
+    cJEnvironment.InitCJAppSDKNS(appPath);
     EXPECT_EQ(CJEnvironment::GetInstance(), nullptr);
 }
 } // namespace OHOS

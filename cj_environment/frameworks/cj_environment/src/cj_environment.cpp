@@ -237,9 +237,10 @@ const char *CJEnvironment::cjSysNSName = "default";
 const char *CJEnvironment::cjCompatibilitySDKNSName = "cj_compatibility_sdk";
 const char *CJEnvironment::cjRuntimeNSName = "cj_runtime";
 const char *CJEnvironment::cjMockNSName = "cj_mock_sdk";
-std::string CJEnvironment::appVersion = "5.1.0.0";
-const uint32_t CJEnvironment::majorVersion = 5;
-const uint32_t CJEnvironment::minorVersion = 1;
+const char *CJEnvironment::cjAppSDKNSName = "cj_app_sdk";
+// use app sdk when version is less than 5.1.1.0
+const std::string CJEnvironment::checkVersion = "5.1.1.0";
+std::string CJEnvironment::appVersion = CJEnvironment::checkVersion;
 SanitizerKind CJEnvironment::sanitizerKind = SanitizerKind::NONE;
 
 #ifdef WITH_EVENT_HANDLER
@@ -337,9 +338,9 @@ bool CJEnvironment::RegisterCangjieCallback()
 }
 
 void* CJEnvironment::LoadRuntimeLib(const char* runtimeLibName) {
-    Dl_namespace compatibilitySDK;
-    dlns_get(cjCompatibilitySDKNSName, &compatibilitySDK);
-    auto dso = DynamicLoadLibrary(&compatibilitySDK, runtimeLibName, 1);
+    Dl_namespace sdk;
+    dlns_get(nsMode_ == NSMode::APP ? cjAppSDKNSName : cjCompatibilitySDKNSName, &sdk);
+    auto dso = DynamicLoadLibrary(&sdk, runtimeLibName, 1);
     return dso;
 }
 
@@ -537,13 +538,24 @@ void CJEnvironment::InitCJAppNS(const std::string& path)
     LOGI("InitCJAppNS: %{public}s", path.c_str());
     Dl_namespace ns;
     DynamicInitNamespace(&ns, path.c_str(), CJEnvironment::cjAppNSName);
-    DynamicInherit(&ns, CJEnvironment::cjCompatibilitySDKNSName, "allow_all_shared_libs");
-    DynamicInherit(&ns, CJEnvironment::cjMockNSName, "allow_all_shared_libs");
-    DynamicInherit(&ns, CJEnvironment::cjRomSDKNSName, "allow_all_shared_libs");
-    DynamicInherit(&ns, CJEnvironment::cjRuntimeNSName, "allow_all_shared_libs");
     if (nsMode_ == NSMode::APP) {
         DynamicInherit(&ns, CJEnvironment::cjChipSDKNSName, "libssl_openssl.z.so");
+        DynamicInherit(&ns, CJEnvironment::cjAppSDKNSName, "allow_all_shared_libs");
+    } else {
+        DynamicInherit(&ns, CJEnvironment::cjCompatibilitySDKNSName, "allow_all_shared_libs");
+        DynamicInherit(&ns, CJEnvironment::cjMockNSName, "allow_all_shared_libs");
+        DynamicInherit(&ns, CJEnvironment::cjRomSDKNSName, "allow_all_shared_libs");
+        DynamicInherit(&ns, CJEnvironment::cjRuntimeNSName, "allow_all_shared_libs");
     }
+#endif
+}
+
+void CJEnvironment::InitCJAppSDKNS(const std::string& path)
+{
+#ifdef __OHOS__
+    LOGI("InitCJAppSDKNS: %{public}s", path.c_str());
+    Dl_namespace ns;
+    DynamicInitNamespace(&ns, path.c_str(), CJEnvironment::cjAppSDKNSName);
 #endif
 }
 
@@ -692,7 +704,8 @@ void* CJEnvironment::LoadCJLibrary(OHOS::CJEnvironment::LibraryKind kind, const 
             dlns_get(CJEnvironment::cjSysNSName, &ns);
             break;
         case SDK:
-            dlns_get(CJEnvironment::cjCompatibilitySDKNSName, &ns);
+            dlns_get(nsMode_ == NSMode::APP ? CJEnvironment::cjAppSDKNSName : CJEnvironment::cjCompatibilitySDKNSName,
+                     &ns);
             break;
     }
     auto handle = DynamicLoadLibrary(&ns, dlName, 0);
@@ -747,7 +760,7 @@ bool CJEnvironment::StartDebugger()
     return true;
 }
 
-std::vector<uint32_t> SplitVersion(std::string& version, char separator)
+std::vector<uint32_t> SplitVersion(const std::string& version, char separator)
 {
     std::vector<uint32_t> result;
     std::stringstream ss(version);
@@ -769,33 +782,39 @@ CJEnvironment::NSMode CJEnvironment::DetectAppNSMode()
 {
     LOGI("App compileSDKVersion is %{public}s", CJEnvironment::appVersion.c_str());
     std::vector<uint32_t> tokens = SplitVersion(CJEnvironment::appVersion, '.');
-    if (tokens.size() <= 1) {
+    std::vector<uint32_t> checkTokens = SplitVersion(CJEnvironment::checkVersion, '.');
+    if (tokens.size() != checkTokens.size()) {
         return NSMode::SINK;
     }
-    if (tokens[0] > CJEnvironment::majorVersion ||
-        (tokens[0] == CJEnvironment::majorVersion && tokens[1] >= CJEnvironment::minorVersion)) {
-        return NSMode::SINK;
-    } else {
-        return NSMode::APP;
+    for (size_t i = 0; i < checkTokens.size(); i++) {
+        if (tokens[i] > checkTokens[i]) {
+            return NSMode::SINK;
+        }
+        if (tokens[i] < checkTokens[i]) {
+            return NSMode::APP;
+        }
     }
+    return NSMode::SINK;
 }
 
 void CJEnvironment::InitRuntimeNS()
 {
 #ifdef __OHOS__
-    switch (CJEnvironment::sanitizerKind) {
-        case SanitizerKind::ASAN:
-            InitCJRuntimeNS(CJ_ASAN_PATH);
-            break;
-        default:
-            InitCJRuntimeNS(CJ_RUNTIME_PATH);
-    }
     if (nsMode_ == NSMode::APP) {
         InitCJChipSDKNS(CJ_CHIPSDK_PATH);
+        InitCJAppSDKNS(CJ_COMPATIBILITY_PATH + ":" + CJ_MOCK_PATH);
+    } else {
+        switch (CJEnvironment::sanitizerKind) {
+            case SanitizerKind::ASAN:
+                InitCJRuntimeNS(CJ_ASAN_PATH);
+                break;
+            default:
+                InitCJRuntimeNS(CJ_RUNTIME_PATH);
+        }
+        InitCJMockNS(CJ_MOCK_PATH);
+        InitCJRomSDKNS(CJ_SDK_PATH);
+        InitCJCompatibilitySDKNS(CJ_COMPATIBILITY_PATH);
     }
-    InitCJMockNS(CJ_MOCK_PATH);
-    InitCJRomSDKNS(CJ_SDK_PATH);
-    InitCJCompatibilitySDKNS(CJ_COMPATIBILITY_PATH);
 #endif
 }
 
