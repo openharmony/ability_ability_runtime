@@ -307,5 +307,21 @@ HWTEST_F(EtsRuntimeTest, PreloadSystemClass_100, TestSize.Level1)
     auto result = etsRuntime->PreloadSystemClass(className.c_str());
     EXPECT_EQ(result, true);
 }
+
+/**
+ * @tc.name: SetModuleLoadChecker_100
+ * @tc.desc: EtsRuntime test for SetModuleLoadChecker.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, SetModuleLoadChecker_100, TestSize.Level1)
+{
+    std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
+    std::string className = "className";
+    etsRuntime->SetModuleLoadChecker(nullptr);
+    EXPECT_EQ(etsRuntime->GetJsRuntime(), nullptr);
+    etsRuntime->jsRuntime_ = std::make_unique<JsRuntime>();
+    etsRuntime->SetModuleLoadChecker(nullptr);
+    EXPECT_NE(etsRuntime->GetJsRuntime(), nullptr);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

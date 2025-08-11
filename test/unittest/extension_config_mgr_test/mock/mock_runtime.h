@@ -16,11 +16,11 @@
 #ifndef MOCK_RUNTIME_H
 #define MOCK_RUNTIME_H
 
-#include "mock_my_flag.h"
 #include "runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
+using ExtensionApiCheckCallback = std::function<bool(const std::string &classNam, const std::string &fileName)>;
 class MockRuntime : public Runtime {
 public:
     MockRuntime() {}
@@ -56,12 +56,30 @@ public:
     bool UnLoadRepairPatch(const std::string& patchFile) override { return false; }
     void RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath) override {}
     void StartProfiler(const DebugOption debugOption) override {}
-    void SetExtensionApiCheckCallback(
-        const std::function<bool(const std::string &className, const std::string &fileName)> &cb) override {}
     void SetDeviceDisconnectCallback(const std::function<bool()> &cb) override {}
-    void SetLanguage(const Runtime::Language& language) { language_ = language; }
+    void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const override
+    {
+        loadCheckerFlag_ = true;
+    }
+    void SetExtensionApiCheckCallback(
+        const std::function<bool(const std::string &className, const std::string &fileName)> &cb) override
+    {
+        extensionApiCheckerFlag_ = true;
+        checkLibraryPermissionCallback_ = cb;
+    }
+    void SetLanguage(Language language)
+    {
+        language_ = language;
+    }
+    ExtensionApiCheckCallback GetExtensionApiCheckCallback() const
+    {
+        return checkLibraryPermissionCallback_;
+    }
 private:
-    Runtime::Language language_ = Runtime::Language::JS;
+    Runtime::Language language_ = Runtime::Language::ETS;
+    ExtensionApiCheckCallback checkLibraryPermissionCallback_ {nullptr};
+    mutable bool loadCheckerFlag_ = false;
+    bool extensionApiCheckerFlag_ = false;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
