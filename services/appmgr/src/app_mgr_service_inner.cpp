@@ -688,6 +688,7 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     if (appRecord != nullptr) {
         appRecord->SetPreloadState(PreloadState::PRELOADING);
         appRecord->SetPreloadMode(request.preloadMode);
+        appRecord->SetPreloadPhase(request.preloadPhase);
         appRecord->SetNeedPreloadModule(request.preloadMode == AppExecFwk::PreloadMode::PRELOAD_MODULE ||
             request.preloadPhase == AppExecFwk::PreloadPhase::ABILITY_STAGE_CREATED);
         appRecord->SetNeedLimitPrio(request.preloadMode != PreloadMode::PRESS_DOWN);
@@ -997,7 +998,7 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         }
         LoadAbilityNoAppRecord(appRecord, loadParam->isShellCall, appInfo, abilityInfo, processName,
             specifiedProcessFlag, bundleInfo, hapModuleInfo, want, appExistFlag, false,
-            AppExecFwk::PreloadMode::PRESS_DOWN, loadParam->token, customProcessFlag);
+            AppExecFwk::PreloadMode::PRESS_DOWN, loadParam->token, customProcessFlag, loadParam->isStartupHide);
         if (ProcessKia(isKia, appRecord, watermarkBusinessName, isWatermarkEnabled) != ERR_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "ProcessKia failed");
             return;
@@ -1015,10 +1016,8 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
         ReportEventToRSS(*abilityInfo, appRecord);
         appRunningManager_->UpdateConfigurationDelayed(appRecord);
         if (!isProcCache) {
-            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::MULTI_INSTANCE, AppStartReason::NONE);
             SendPreloadAppStartupTypeEvent(appRecord, abilityInfo);
         } else {
-            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::PROCESS_CACHE_LAUNCH, AppStartReason::NONE);
             SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::SUGGEST_CACHE);
         }
         if (appRecord->IsPreloaded()) {
@@ -1258,7 +1257,7 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
     std::shared_ptr<AbilityInfo> abilityInfo, const std::string &processName,
     const std::string &specifiedProcessFlag, const BundleInfo &bundleInfo, const HapModuleInfo &hapModuleInfo,
     std::shared_ptr<AAFwk::Want> want, bool appExistFlag, bool isPreload, AppExecFwk::PreloadMode preloadMode,
-    sptr<IRemoteObject> token, const std::string &customProcessFlag)
+    sptr<IRemoteObject> token, const std::string &customProcessFlag, bool isStartupHide)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::APPMGR, "processName:%{public}s, isPreload:%{public}d",
@@ -1289,11 +1288,14 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
         NotifyStartProcessFailed(token);
     }
 
-    ffrt::submit([appRecord, abilityInfo, innerServiceWeak = weak_from_this()]() {
+    ffrt::submit([appRecord, abilityInfo, innerServiceWeak = weak_from_this(), isStartupHide]() {
         auto innerService = innerServiceWeak.lock();
         CHECK_POINTER_AND_RETURN_LOG(innerService, "get appMgrServiceInner fail");
         innerService->OnAppStateChanged(appRecord, ApplicationState::APP_STATE_SET_COLD_START, false, false);
-        innerService->SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::COLD, AppStartReason::NONE);
+        if (appRecord && appRecord->IsAlreadyHaveAbility()) {
+            AppStartReason startReason = isStartupHide ? AppStartReason::STARTUP_HIDE : AppStartReason::NONE;
+            innerService->SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::COLD, startReason);
+        }
         }, ffrt::task_attr().name("AppStateChangedNotify")
         .timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 
@@ -4638,14 +4640,28 @@ void AppMgrServiceInner::SendPreloadAppStartupTypeEvent(const std::shared_ptr<Ap
     }
 
     PreloadMode preloadMode = appRecord->GetPreloadMode();
-    if (!appRecord->IsPreloaded()) {
+    PreloadPhase preloadPhase = appRecord->GetPreloadPhase();
+    if (!appRecord->IsPreloading() && !appRecord->IsPreloaded()) {
         TAG_LOGD(AAFwkTag::APPMGR, "not preload app start");
+        if (appRecord->IsAlreadyHaveAbility()) {
+            SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::NONE);
+        }
         return;
     }
     if (preloadMode == PreloadMode::PRE_MAKE) {
         SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::PRE_MAKE);
     } else if (preloadMode == PreloadMode::PRELOAD_MODULE) {
         SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::PRELOAD_MODULE);
+    } else if (preloadMode == PreloadMode::PRESS_DOWN) {
+        SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::PRESS_DOWN);
+    } else if (preloadMode == PreloadMode::PRELOAD_BY_PHASE) {
+        if (preloadPhase == PreloadPhase::PROCESS_CREATED) {
+            SendAppStartupTypeEvent(appRecord,
+                abilityInfo, AppStartType::WARM, AppStartReason::PRELOAD_BY_PHASE_PROCESS_CREATED);
+        } else if (preloadPhase == PreloadPhase::ABILITY_STAGE_CREATED) {
+            SendAppStartupTypeEvent(appRecord,
+                abilityInfo, AppStartType::WARM, AppStartReason::PRELOAD_BY_PHASE_ABILITY_STAGE_CREATED);
+        }
     } else {
         TAG_LOGD(AAFwkTag::APPMGR, "app preload mode: %{public}d", static_cast<int32_t>(preloadMode));
     }
@@ -4658,6 +4674,12 @@ void AppMgrServiceInner::SendAppStartupTypeEvent(const std::shared_ptr<AppRunnin
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord null");
         return;
     }
+
+    if (abilityInfo && abilityInfo->type != AppExecFwk::AbilityType::PAGE &&
+        !AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
+        return;
+    }
+
     AAFwk::EventInfo eventInfo;
     auto applicationInfo = appRecord->GetApplicationInfo();
     if (!applicationInfo) {
