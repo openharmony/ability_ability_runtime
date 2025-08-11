@@ -555,6 +555,7 @@ HWTEST_F(JsRuntimeTest, JsRuntimeStartDebugModeTest_0100, TestSize.Level2)
     debugOption.isDebugApp = true;
     debugOption.isStartWithNative = false;
     debugOption.isDeveloperMode = true;
+    debugOption.arkTSMode = "static";
     jsRuntime->StartDebugMode(debugOption);
     EXPECT_TRUE(jsRuntime != nullptr);
 

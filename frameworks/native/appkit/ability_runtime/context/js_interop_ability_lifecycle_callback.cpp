@@ -23,6 +23,7 @@ namespace AbilityRuntime {
 namespace {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
+constexpr size_t INDEX_ONE = 1;
 constexpr const int32_t ERROR_CODE_NULL_ENV = -1;
 constexpr const int32_t ERROR_CODE_NULL_CALLBACK = -2;
 }
@@ -35,10 +36,10 @@ bool JsInteropAbilityLifecycleCallback::Empty()
 }
 
 void JsInteropAbilityLifecycleCallback::CallObjectMethod(const char *methodName,
-    std::shared_ptr<InteropObject> ability)
+    std::shared_ptr<InteropObject> ability, std::shared_ptr<InteropObject> windowStage)
 {
     if (env_ == nullptr || ability == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null env_ or ability");
+        TAG_LOGE(AAFwkTag::APPKIT, "null env_ or ability or windowStage");
         return;
     }
     if (!ability->IsFromAni()) {
@@ -51,65 +52,38 @@ void JsInteropAbilityLifecycleCallback::CallObjectMethod(const char *methodName,
         return;
     }
 
-    napi_value argv[] = { jsAbility };
+    size_t args = ARGC_ONE;
+    napi_value argv[ARGC_TWO] = { jsAbility };
+    if (windowStage != nullptr) {
+        napi_value jsWindowStage = windowStage->GetNapiValue(env_);
+        if (jsAbility == nullptr || jsWindowStage == nullptr) {
+            TAG_LOGI(AAFwkTag::APPKIT, "null napi windowStage");
+            return;
+        }
+        argv[INDEX_ONE] = jsWindowStage;
+        args = ARGC_TWO;
+    }
     for (const auto &callback : callbacks_) {
         if (callback == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null callback");
-            return;
+            continue;
         }
         auto obj = callback->GetNapiValue();
         if (!CheckTypeForNapiValue(env_, obj, napi_object)) {
             TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
-            return;
+            continue;
         }
 
         napi_value method = nullptr;
         napi_get_named_property(env_, obj, methodName, &method);
         if (method == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null method %{public}s", methodName);
-            return;
+            continue;
         }
-        napi_call_function(env_, obj, method, ARGC_ONE, argv, nullptr);
-    }
-}
-
-void JsInteropAbilityLifecycleCallback::CallObjectMethod(const char *methodName,
-    std::shared_ptr<InteropObject> ability, std::shared_ptr<InteropObject> windowStage)
-{
-    if (env_ == nullptr || ability == nullptr || windowStage == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null env_ or ability or windowStage");
-        return;
-    }
-    if (!ability->IsFromAni()) {
-        TAG_LOGI(AAFwkTag::APPKIT, "not from ets");
-        return;
-    }
-    napi_value jsAbility = ability->GetNapiValue(env_);
-    napi_value jsWindowStage = windowStage->GetNapiValue(env_);
-    if (jsAbility == nullptr || jsWindowStage == nullptr) {
-        TAG_LOGI(AAFwkTag::APPKIT, "null napi ability or windowStage");
-        return;
-    }
-
-    napi_value argv[] = { jsAbility, jsWindowStage };
-    for (const auto &callback : callbacks_) {
-        if (callback == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null callback");
-            return;
+        napi_status status = napi_call_function(env_, obj, method, args, argv, nullptr);
+        if (status != napi_ok) {
+            TAG_LOGE(AAFwkTag::APPKIT, "call method failed %{public}d", status);
         }
-        auto obj = callback->GetNapiValue();
-        if (!CheckTypeForNapiValue(env_, obj, napi_object)) {
-            TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
-            return;
-        }
-
-        napi_value method = nullptr;
-        napi_get_named_property(env_, obj, methodName, &method);
-        if (method == nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "null method %{public}s", methodName);
-            return;
-        }
-        napi_call_function(env_, obj, method, ARGC_TWO, argv, nullptr);
     }
 }
 
@@ -121,7 +95,7 @@ int32_t JsInteropAbilityLifecycleCallback::Register(napi_value callback)
         return ERROR_CODE_NULL_ENV;
     }
     if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null env_");
+        TAG_LOGE(AAFwkTag::APPKIT, "null callback");
         return ERROR_CODE_NULL_CALLBACK;
     }
     napi_ref ref = nullptr;

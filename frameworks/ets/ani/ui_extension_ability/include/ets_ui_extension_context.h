@@ -71,6 +71,13 @@ public:
     static void StartAbilityForResult(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callback);
     static void StartAbilityForResultWithOptions(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object startOptionsObj, ani_object callback);
+    static void StartServiceExtensionAbilityWithAccount(ani_env *env, ani_object aniObj,
+        ani_object wantObj, ani_int aniAccountId, ani_object callbackObj);
+    static void StartAbilityForResultAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_object callbackObj, ani_object optionsObj);
+    static void StartServiceExtensionAbility(ani_env *env, ani_object aniObj,
+        ani_object wantObj, ani_object callbackObj);
+    static void SetHostPageOverlayForbidden(ani_env *env, ani_object aniObj, ani_boolean aniIsForbidden);
     static void SetColorMode(ani_env *env, ani_object aniObj, ani_enum_item aniColorMode);
     static void ReportDrawnCompleted(ani_env *env,  ani_object aniObj, ani_object callback);
 
@@ -89,10 +96,23 @@ private:
         ani_object connectOptionsObj);
     void OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
         ani_object callback);
+    void OnStartServiceExtensionAbilityWithAccount(ani_env *env, ani_object aniObj,
+        ani_object wantObj, ani_int aniAccountId, ani_object callbackObj);
+    void OnStartAbilityForResultAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_object callbackObj, ani_object optionsObj);
+    void OnStartServiceExtensionAbility(ani_env *env, ani_object aniObj,
+        ani_object wantObj, ani_object callbackObj);
+    void OnSetHostPageOverlayForbidden(ani_env *env, ani_object aniObj, ani_boolean aniIsForbidden);
+    RuntimeTask CreateRuntimeTask(ani_vm *etsVm, ani_ref callbackRef);
     static bool CheckConnectionParam(ani_env *env, ani_object connectOptionsObj,
         sptr<EtsUIExtensionConnection>& connection, AAFwk::Want& want);
     void OnSetColorMode(ani_env *env, ani_object aniCls, ani_enum_item aniColorMode);
     void OnReportDrawnCompleted(ani_env *env,  ani_object aniCls, ani_object callback);
+
+#ifdef SUPPORT_SCREEN
+    void InitDisplayId(AAFwk::Want &want);
+    void InitDisplayId(AAFwk::Want &want, AAFwk::StartOptions &startOptions, ani_env *env, ani_object optionsObj);
+#endif
 
 protected:
     std::weak_ptr<OHOS::AbilityRuntime::UIExtensionContext> context_;
