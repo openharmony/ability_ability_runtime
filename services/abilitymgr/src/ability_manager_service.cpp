@@ -2808,6 +2808,7 @@ int AbilityManagerService::StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionI
     }
     StartAbilityInfoWrap threadLocalInfo(sessionInfo->want, currentUserId, appIndex, sessionInfo->callerToken);
     AbilityRequest abilityRequest;
+    abilityRequest.processOptions = sessionInfo->processOptions;
     auto result = GenerateAbilityRequest(sessionInfo->want, requestCode, abilityRequest,
         sessionInfo->callerToken, currentUserId);
     if (result != ERR_OK) {

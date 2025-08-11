@@ -53,6 +53,7 @@ struct LoadParam : public Parcelable {
     std::string customProcessFlag = "";
     uint32_t extensionProcessMode = 0;
     ExtensionLoadParam extensionLoadParam;
+    bool isStartupHide = false;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
