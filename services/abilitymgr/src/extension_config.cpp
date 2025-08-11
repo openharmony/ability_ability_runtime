@@ -46,6 +46,7 @@ constexpr const char* ALLOW_LIST = "allowlist";
 constexpr const char* NETWORK_ACCESS_ENABLE_FLAG = "network_access_enable_flag";
 constexpr const char* SA_ACCESS_ENABLE_FLAG = "sa_access_enable_flag";
 constexpr const char* SCREEN_UNLOCK_INTERCEPT = "screen_unlock_intercept";
+constexpr const char* SCREEN_UNLOCK_INTERCEPT_EXCLUDE_SYSTEM_APP = "screen_unlock_intercept_exclude_system_app";
 }
 
 std::string ExtensionConfig::GetExtensionConfigPath() const
@@ -289,12 +290,23 @@ void ExtensionConfig::LoadScreenUnlockIntercept(const nlohmann::json &object,
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "LoadScreenUnlockIntercept call");
     if (!object.contains(SCREEN_UNLOCK_INTERCEPT) || !object.at(SCREEN_UNLOCK_INTERCEPT).is_boolean()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "screen_unlock_intercept null");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "screen_unlock_intercept null");
         return;
     }
     bool flag = object.at(SCREEN_UNLOCK_INTERCEPT).get<bool>();
     configMap_[extensionTypeName].screenUnlockIntercept = flag;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "The %{public}s extension's screen_unlock_intercept is %{public}d",
+        extensionTypeName.c_str(), flag);
+
+    if (!object.contains(SCREEN_UNLOCK_INTERCEPT_EXCLUDE_SYSTEM_APP) ||
+        !object.at(SCREEN_UNLOCK_INTERCEPT_EXCLUDE_SYSTEM_APP).is_boolean()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "screen_unlock_intercept_exclude_system_app null");
+        return;
+    }
+    flag = object.at(SCREEN_UNLOCK_INTERCEPT_EXCLUDE_SYSTEM_APP).get<bool>();
+    configMap_[extensionTypeName].screenUnlockInterceptExcludeSystemApp = flag;
+    TAG_LOGD(AAFwkTag::ABILITYMGR,
+        "The %{public}s extension's screen_unlock_intercept_exclude_system_app is %{public}d",
         extensionTypeName.c_str(), flag);
 }
 
@@ -424,13 +436,21 @@ bool ExtensionConfig::IsExtensionSAEnable(const std::string &extensionTypeName)
     return EXTENSION_SA_ENABLE_FLAG_DEFAULT;
 }
 
-bool ExtensionConfig::IsScreenUnlockIntercept(const std::string &extensionTypeName)
+bool ExtensionConfig::IsScreenUnlockIntercept(const std::string &extensionTypeName, bool isSystemApp)
 {
     std::lock_guard lock(configMapMutex_);
-    if (configMap_.find(extensionTypeName) != configMap_.end()) {
-        return configMap_[extensionTypeName].screenUnlockIntercept;
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end()) {
+        return false;
     }
-    return false;
+    const auto &config = iter->second;
+    if (!config.screenUnlockIntercept) {
+        return false;
+    }
+    if (!isSystemApp) {
+        return true;
+    }
+    return !config.screenUnlockInterceptExcludeSystemApp;
 }
 
 bool ExtensionConfig::ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf)
