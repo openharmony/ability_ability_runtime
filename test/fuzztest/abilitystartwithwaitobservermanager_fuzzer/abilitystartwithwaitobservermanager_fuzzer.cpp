@@ -25,6 +25,7 @@
 #undef protected
 #undef private
 #include "securec.h"
+#include "ability_fuzz_util.h"
 #include "ability_record.h"
 
 using namespace OHOS::AAFwk;
@@ -35,13 +36,16 @@ namespace {
 constexpr size_t U32_AT_SIZE = 4;
 }
 
-bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     Want want;
+    AbilityRequest info;
     sptr<IAbilityStartWithWaitObserver> observer = nullptr;
-    std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
+    FuzzedDataProvider fdp(data, size);
+    AbilityFuzzUtil::GetRandomAbilityRequestInfo(fdp, info);
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(info);
     std::shared_ptr<AbilityStartWithWaitObserverManager> infos =
-    std::make_shared<AbilityStartWithWaitObserverManager>();
+        std::make_shared<AbilityStartWithWaitObserverManager>();
     infos->RegisterObserver(want, observer);
     infos->UnregisterObserver(observer);
     infos->NotifyAATerminateWait(want);
@@ -55,33 +59,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    if (data == nullptr) {
-        std::cout << "invalid data" << std::endl;
-        return 0;
-    }
-
-    /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE) {
-        return 0;
-    }
-
-    char* ch = static_cast<char*>(malloc(size + 1));
-    if (ch == nullptr) {
-        std::cout << "malloc failed." << std::endl;
-        return 0;
-    }
-
-    (void)memset_s(ch, size + 1, 0x00, size + 1);
-    if (memcpy_s(ch, size + 1, data, size) != EOK) {
-        std::cout << "copy failed." << std::endl;
-        free(ch);
-        ch = nullptr;
-        return 0;
-    }
-
-    OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-    free(ch);
-    ch = nullptr;
+    // Run your code on data.
+    OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }

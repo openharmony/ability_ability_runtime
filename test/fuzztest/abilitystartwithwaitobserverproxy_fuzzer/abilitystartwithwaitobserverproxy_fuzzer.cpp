@@ -41,6 +41,7 @@ constexpr size_t OFFSET_ZERO = 24;
 constexpr size_t OFFSET_ONE = 16;
 constexpr size_t OFFSET_TWO = 8;
 constexpr uint8_t ENABLE = 2;
+constexpr size_t STRING_MAX_LENGTH = 128;
 }
 uint32_t GetU32Data(const char* ptr)
 {
@@ -63,7 +64,7 @@ sptr<Token> GetFuzzAbilityToken()
     return token;
 }
 
-bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     sptr<IRemoteObject> impl;
     std::shared_ptr<AbilityStartWithWaitObserverProxy> infos =
@@ -72,6 +73,9 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
         return false;
     }
     MessageParcel parcel;
+    FuzzedDataProvider fdp(data, size);
+    parcel.WriteString(fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
+    parcel.WriteInt32(fdp.ConsumeIntegral<int32_t>());
     infos->WriteInterfaceToken(parcel);
     AbilityStartWithWaitObserverData abilityStartWithWaitObserverData;
     infos->NotifyAATerminateWait(abilityStartWithWaitObserverData);
@@ -82,33 +86,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    if (data == nullptr) {
-        std::cout << "invalid data" << std::endl;
-        return 0;
-    }
-
-    /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE) {
-        return 0;
-    }
-
-    char* ch = static_cast<char*>(malloc(size + 1));
-    if (ch == nullptr) {
-        std::cout << "malloc failed." << std::endl;
-        return 0;
-    }
-
-    (void)memset_s(ch, size + 1, 0x00, size + 1);
-    if (memcpy_s(ch, size + 1, data, size) != EOK) {
-        std::cout << "copy failed." << std::endl;
-        free(ch);
-        ch = nullptr;
-        return 0;
-    }
-
-    OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-    free(ch);
-    ch = nullptr;
+    // Run your code on data.
+    OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
