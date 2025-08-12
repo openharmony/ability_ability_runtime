@@ -343,3 +343,24 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions(Ab
     return ConvertToAPI18BusinessErrorCode(AbilityManagerClient::GetInstance()->StartSelfUIAbilityWithStartOptions(
         abilityWant, startOptions));
 }
+
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetVersionCode(int64_t* versionCode)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "getVersionCode called");
+    if (versionCode == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "versionCode is null");
+        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto appContext = Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    const auto appApplicationInfo = appContext->GetApplicationInfo();
+    if (appApplicationInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationInfo is null");
+        return ABILITY_RUNTIME_ERROR_CODE_GET_APPLICATION_INFO_FAILED;
+    }
+    *versionCode = static_cast<int64_t>(appApplicationInfo->versionCode);
+    return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+}
