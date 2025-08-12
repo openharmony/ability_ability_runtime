@@ -104,6 +104,7 @@ START_ABILITY_ERROR:
   MODULE_NAME: {type: STRING, desc: module name}
   ABILITY_NAME: {type: STRING, desc: ability name}
   ERROR_MESSAGE: {type: STRING, desc: start ability error message}
+  CALLER_BUNDLE_NAME: {type: STRING, desc: caller bundle name}
 
 TERMINATE_ABILITY_ERROR:
   __BASE: {type: FAULT, level: MINOR, tag: ability, desc: terminate ability error}
