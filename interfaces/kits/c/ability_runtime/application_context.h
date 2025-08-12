@@ -306,7 +306,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetResourceDir(cons
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the versionCode is null.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the application context does not exist.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_APP_INFO_NOT_EXIST} if the application info does not exist.
- * @since 20
+ * @since 21
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetVersionCode(int64_t* versionCode);
 
