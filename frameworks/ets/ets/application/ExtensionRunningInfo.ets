@@ -27,7 +27,7 @@ export interface ExtensionRunningInfo {
 }
 
 class ExtensionRunningInfoInner implements ExtensionRunningInfo {
-  extension: ElementName = {};
+  extension: ElementName = {abilityName: 'undefined', bundleName: 'undefined'};
   pid: int;
   uid: int;
   processName: string = '';
