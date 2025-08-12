@@ -18,68 +18,69 @@ import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 import UIAbility from '@ohos.app.ability.UIAbility';
 import hilog from '@ohos.hilog';
+import { BusinessError } from '@kit.BasicServicesKit';
 import window from '@ohos.window';
 
 const DOMAIN = 0x1323;
+const TAG = 'InsightIntents';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     AppStorage.setAndLink('context', this.context);
-    hilog.info(DOMAIN, 'InsightIntents', '%{public}s', 'Ability onCreate');
+    hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onCreate');
     const callerBundleName: string | undefined = want.parameters?.['ohos.aafwk.param.callerBundleName']?.toString();
     if (callerBundleName === undefined || callerBundleName !== 'com.huawei.hmos.aidataservice') {
       try {
         this.context.terminateSelf();
       } catch (err) {
-        hilog.error(DOMAIN, 'InsightIntents', 'Failed to context.terminateSelf. Cause: %{public}s', JSON.stringify(err));
+        hilog.error(DOMAIN, TAG, 'Failed to context.terminateSelf. Cause: %{public}s', JSON.stringify(err));
       } 
     }
   }
 
   onDestroy(): void {
-    hilog.info(DOMAIN, 'InsightIntents', '%{public}s', 'Ability onDestroy');
+    hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onDestroy');
   }
 
   onWindowStageCreate(windowStage: window.WindowStage): void {
-
-    let windowClass: window.Window;
-    windowStage.getMainWindow((err, data) => {
-      windowClass = data;
-      windowClass.setWindowLayoutFullScreen(true).then(() => {
-        hilog.info(DOMAIN, 'InsightIntents', 'Set Window Layout Full Screen.');
-      })
-
-      try {
-        const top = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM).topRect
-        let navigationHeight = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM).bottomRect.height
-        PersistentStorage.PersistProps([{
-          key: 'navigationHeight', defaultValue: navigationHeight
-        }])
-      } catch (err){
-        hilog.error(DOMAIN, 'InsightIntents', 'Failed to getWindowAvoidArea.', JSON.stringify(err));
+    windowStage.loadContent('pages/Index', (err) => {
+      if (err.code) {
+        hilog.error(DOMAIN, TAG, 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
+        return;
       }
-
-
-      windowStage.loadContent('pages/Index', (err) => {
-        if (err.code) {
-          hilog.error(DOMAIN, 'InsightIntents', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
-          return;
-        }
-        hilog.info(DOMAIN, 'InsightIntents', 'Succeeded in loading the content.');
-      });
+      hilog.info(DOMAIN, TAG, 'Succeeded in loading the content.');
+      try {
+        windowStage.getMainWindow((err, data) => {
+          data.setWindowLayoutFullScreen(true).then(() => {
+            hilog.info(DOMAIN, TAG, 'Succeeded in setting the window layout to full-screen mode.');
+          }).catch((err:BusinessError) => {
+            hilog.error(DOMAIN, TAG, 'Failed to set the window layout to full-screen mode. Cause: %{public}s', JSON.stringify(err));
+          })
+          data.setWindowSystemBarProperties({
+            navigationBarColor: '#F1F3F5',
+            statusBarColor: '#F1F3F5'
+          }).then(() => {
+            hilog.info(DOMAIN, TAG, 'Succeeded in setting the system bar properties.');
+          }).catch((err: BusinessError) => {
+            hilog.error(DOMAIN, TAG, 'Failed to set the system bar properties. Cause: %{public}s', JSON.stringify(err));
+          })
+        });
+      } catch (err) {
+        hilog.error(DOMAIN, TAG, 'Failed to getMainWindow. Cause: %{public}s', JSON.stringify(err));
+      }
     });
   }
 
   onWindowStageDestroy(): void {
-    hilog.info(DOMAIN, 'InsightIntents', '%{public}s', 'Ability onWindowStageDestroy');
+    hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onWindowStageDestroy');
   }
 
   onForeground(): void {
-    hilog.info(DOMAIN, 'InsightIntents', '%{public}s', 'Ability onForeground');
+    hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onForeground');
   }
 
   onBackground(): void {
-    hilog.info(DOMAIN, 'InsightIntents', '%{public}s', 'Ability onBackground');
+    hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onBackground');
   }
 }
