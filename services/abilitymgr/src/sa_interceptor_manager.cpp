@@ -85,6 +85,7 @@ int32_t SAInterceptorManager::ExecuteSAInterceptor(const std::string &params, Ru
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         auto result = interceptor->OnCheckStarting(params, rule);
         if (result != ERR_OK || rule.type != RuleType::ALLOW) {
+            TAG_LOGW(AAFwkTag::SA_INTERCEPTOR, "OnCheckStarting error: %{public}d", result);
             return result;
         }
     }
