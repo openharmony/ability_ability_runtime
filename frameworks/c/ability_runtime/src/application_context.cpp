@@ -359,7 +359,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetVersionCode(int6
     const auto appApplicationInfo = appContext->GetApplicationInfo();
     if (appApplicationInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "applicationInfo is null");
-        return ABILITY_RUNTIME_ERROR_CODE_APP_INFO_NOT_EXIST;
+        return ABILITY_RUNTIME_ERROR_CODE_GET_APPLICATION_INFO_FAILED;
     }
     *versionCode = static_cast<int64_t>(appApplicationInfo->versionCode);
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
