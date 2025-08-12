@@ -26,7 +26,7 @@ export interface AbilityRunningInfo {
 }
 
 class AbilityRunningInfoImpl implements AbilityRunningInfo {
-    ability: ElementName = {};
+    ability: ElementName = {abilityName: 'undefined', bundleName: 'undefined'};
     pid: int;
     uid: int;
     processName: string = '';

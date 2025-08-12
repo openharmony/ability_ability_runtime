@@ -36,7 +36,7 @@ export default class InsightIntentExecutor {
       p.then((result: insightIntent.ExecuteResult): void => {
         this.nativeOnExecuteResult(result);
       });
-      let ret: insightIntent.ExecuteResult = {};
+      let ret: insightIntent.ExecuteResult = {code: 0};
       return ret;
     } else {
       this.isOnExecuteInUIAbilityForegroundModeAsync = false;
@@ -52,7 +52,7 @@ export default class InsightIntentExecutor {
       p.then<void>((result: insightIntent.ExecuteResult): void => {
         this.nativeOnExecuteResult(result);
       });
-      let ret: insightIntent.ExecuteResult = {};
+      let ret: insightIntent.ExecuteResult = {code: 0};
       return ret;
     } else {
       this.isOnExecuteInUIAbilityBackgroundModeAsync = false;
@@ -68,7 +68,7 @@ export default class InsightIntentExecutor {
       p.then<void>((result: insightIntent.ExecuteResult): void => {
         this.nativeOnExecuteResult(result);
       });
-      let ret: insightIntent.ExecuteResult = {};
+      let ret: insightIntent.ExecuteResult = {code: 0};
       return ret;
     } else {
       this.isOnExecuteInUIExtensionAbilityAsync = false;
@@ -84,7 +84,7 @@ export default class InsightIntentExecutor {
       p.then<void>((result: insightIntent.ExecuteResult): void => {
         this.nativeOnExecuteResult(result);
       });
-      let ret: insightIntent.ExecuteResult = {};
+      let ret: insightIntent.ExecuteResult = {code: 0};
       return ret;
     } else {
       this.isOnExecuteInServiceExtensionAbilityAsync = false;
@@ -94,25 +94,25 @@ export default class InsightIntentExecutor {
 
   onExecuteInUIAbilityForegroundMode(name: string, param: Record<string, Object>, pageLoader: window.WindowStage):
     insightIntent.ExecuteResult | Promise<insightIntent.ExecuteResult> {
-    let ret: insightIntent.ExecuteResult = {};
+    let ret: insightIntent.ExecuteResult = {code: 0};
     return ret;
   }
 
   onExecuteInUIAbilityBackgroundMode(name: string, param: Record<string, Object>):
     insightIntent.ExecuteResult | Promise<insightIntent.ExecuteResult> {
-    let ret: insightIntent.ExecuteResult = {};
+    let ret: insightIntent.ExecuteResult = {code: 0};
     return ret;
   }
 
   onExecuteInUIExtensionAbility(name: string, param: Record<string, Object>, pageLoader: UIExtensionContentSession):
     insightIntent.ExecuteResult | Promise<insightIntent.ExecuteResult> {
-    let ret: insightIntent.ExecuteResult = {};
+    let ret: insightIntent.ExecuteResult = {code: 0};
     return ret;
   }
 
   onExecuteInServiceExtensionAbility(name: string, param: Record<string, Object>):
     insightIntent.ExecuteResult | Promise<insightIntent.ExecuteResult> {
-    let ret: insightIntent.ExecuteResult = {};
+    let ret: insightIntent.ExecuteResult = {code: 0};
     return ret;
   }
 }
