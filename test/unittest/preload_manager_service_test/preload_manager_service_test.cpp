@@ -52,18 +52,16 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_001 start");
     
-    auto abilityMs_ = std::make_shared<PreloadManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
     MyStatus::GetInstance().isPreloadApplicationEnabled_ = false;
     std::string bundleName = "bundleName";
     int32_t userId = -1;
     int32_t appIndex = 0;
-    auto result = abilityMs_->PreloadApplication(bundleName, userId, appIndex);
+    auto result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
     EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
 
     MyStatus::GetInstance().isPreloadApplicationEnabled_ = true;
     appIndex = -1;
-    result = abilityMs_->PreloadApplication(bundleName, userId, appIndex);
+    result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
     EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
 
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_001 end");
@@ -80,14 +78,12 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_002, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_002 start");
     
-    auto abilityMs_ = std::make_shared<PreloadManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
     MyStatus::GetInstance().isPreloadApplicationEnabled_ = true;
     MyStatus::GetInstance().retVerifyPreloadApplicationPermission_ = false;
     std::string bundleName = "bundleName";
     int32_t userId = -1;
     int32_t appIndex = 0;
-    auto result = abilityMs_->PreloadApplication(bundleName, userId, appIndex);
+    auto result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
     EXPECT_EQ(result, ERR_PERMISSION_DENIED);
 
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_002 end");
@@ -104,15 +100,13 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_003, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_003 start");
     
-    auto abilityMs_ = std::make_shared<PreloadManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
     MyStatus::GetInstance().isPreloadApplicationEnabled_ = true;
     MyStatus::GetInstance().retVerifyPreloadApplicationPermission_ = true;
     MyStatus::GetInstance().isMultiUserConcurrency_ = false;
     std::string bundleName = "bundleName";
     int32_t userId = 102;
     int32_t appIndex = 0;
-    auto result = abilityMs_->PreloadApplication(bundleName, userId, appIndex);
+    auto result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
     EXPECT_EQ(result, ERR_CROSS_USER);
 
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_003 end");
@@ -129,8 +123,6 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_004, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_004 start");
     
-    auto abilityMs_ = std::make_shared<PreloadManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
     MyStatus::GetInstance().isPreloadApplicationEnabled_ = true;
     MyStatus::GetInstance().retVerifyPreloadApplicationPermission_ = true;
     MyStatus::GetInstance().isMultiUserConcurrency_ = true;
@@ -138,12 +130,12 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_004, TestSize.Level1)
     std::string bundleName = "bundleName";
     int32_t userId = -1;
     int32_t appIndex = 0;
-    auto result = abilityMs_->PreloadApplication(bundleName, userId, appIndex);
+    auto result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
     EXPECT_EQ(result, -1);
 
     MyStatus::GetInstance().retCheckPreloadAppRecordExist_ = ERR_OK;
     MyStatus::GetInstance().isPreloadApplicationRecordExist_ = true;
-    result = abilityMs_->PreloadApplication(bundleName, userId, appIndex);
+    result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
     EXPECT_EQ(result, ERR_PRELOAD_APP_RECORD_ALREADY_EXIST);
 
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_004 end");
@@ -160,8 +152,6 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_005, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_005 start");
     
-    auto abilityMs_ = std::make_shared<PreloadManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
     MyStatus::GetInstance().isPreloadApplicationEnabled_ = true;
     MyStatus::GetInstance().retVerifyPreloadApplicationPermission_ = true;
     MyStatus::GetInstance().isMultiUserConcurrency_ = true;
@@ -171,7 +161,7 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_005, TestSize.Level1)
     std::string bundleName = "bundleName";
     int32_t userId = -1;
     int32_t appIndex = 0;
-    auto result = abilityMs_->PreloadApplication(bundleName, userId, appIndex);
+    auto result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
     EXPECT_EQ(result, INNER_ERR);
 
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_005 end");
@@ -188,8 +178,6 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_006, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_006 start");
     
-    auto abilityMs_ = std::make_shared<PreloadManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
     MyStatus::GetInstance().isPreloadApplicationEnabled_ = true;
     MyStatus::GetInstance().retVerifyPreloadApplicationPermission_ = true;
     MyStatus::GetInstance().isMultiUserConcurrency_ = true;
@@ -200,7 +188,7 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_006, TestSize.Level1)
     std::string bundleName = "bundleName";
     int32_t userId = -1;
     int32_t appIndex = 0;
-    auto result = abilityMs_->PreloadApplication(bundleName, userId, appIndex);
+    auto result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
     EXPECT_EQ(result, -1);
 
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_006 end");
@@ -217,8 +205,6 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_007, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_007 start");
     
-    auto abilityMs_ = std::make_shared<PreloadManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
     MyStatus::GetInstance().isPreloadApplicationEnabled_ = true;
     MyStatus::GetInstance().retVerifyPreloadApplicationPermission_ = true;
     MyStatus::GetInstance().isMultiUserConcurrency_ = true;
@@ -230,7 +216,7 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_007, TestSize.Level1)
     std::string bundleName = "bundleName";
     int32_t userId = -1;
     int32_t appIndex = 0;
-    auto result = abilityMs_->PreloadApplication(bundleName, userId, appIndex);
+    auto result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
     EXPECT_EQ(result, RESOLVE_ABILITY_ERR);
 
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_007 end");
@@ -247,8 +233,6 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_008, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_008 start");
     
-    auto abilityMs_ = std::make_shared<PreloadManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
     MyStatus::GetInstance().isPreloadApplicationEnabled_ = true;
     MyStatus::GetInstance().retVerifyPreloadApplicationPermission_ = true;
     MyStatus::GetInstance().isMultiUserConcurrency_ = true;
@@ -263,7 +247,7 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_008, TestSize.Level1)
     std::string bundleName = "bundleName";
     int32_t userId = -1;
     int32_t appIndex = 0;
-    auto result = abilityMs_->PreloadApplication(bundleName, userId, appIndex);
+    auto result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
     EXPECT_EQ(result, 100);
 
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_008 end");
@@ -280,8 +264,6 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_009, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_009 start");
     
-    auto abilityMs_ = std::make_shared<PreloadManagerService>();
-    EXPECT_NE(abilityMs_, nullptr);
     MyStatus::GetInstance().isPreloadApplicationEnabled_ = true;
     MyStatus::GetInstance().retVerifyPreloadApplicationPermission_ = true;
     MyStatus::GetInstance().isMultiUserConcurrency_ = true;
@@ -296,10 +278,40 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_009, TestSize.Level1)
     std::string bundleName = "bundleName";
     int32_t userId = -1;
     int32_t appIndex = 0;
-    auto result = abilityMs_->PreloadApplication(bundleName, userId, appIndex);
+    auto result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
     EXPECT_EQ(result, 100);
 
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_009 end");
+}
+
+/*
+ * Feature: PreloadManagerService
+ * Name: PreloadApplication_010
+ * Function: PreloadApplication
+ * SubFunction: NA
+ * FunctionPoints: PreloadManagerService PreloadApplication
+ */
+HWTEST_F(PreloadManagerServiceTest, PreloadApplication_010, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_010 start");
+    
+    MyStatus::GetInstance().isPreloadApplicationEnabled_ = true;
+    MyStatus::GetInstance().retVerifyPreloadApplicationPermission_ = true;
+    MyStatus::GetInstance().isMultiUserConcurrency_ = true;
+    MyStatus::GetInstance().retCheckPreloadAppRecordExist_ = ERR_OK;
+    MyStatus::GetInstance().isPreloadApplicationRecordExist_ = false;
+    MyStatus::GetInstance().bundleMgrHelper_ = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    MyStatus::GetInstance().retGetLaunchWantForBundle_ = 0;
+    MyStatus::GetInstance().retQueryAbilityInfo_ = true;
+    MyStatus::GetInstance().queryAbilityInfo_.applicationInfo.appPreloadPhase =
+        AppExecFwk::AppPreloadPhase::DEFAULT;
+    std::string bundleName = "bundleName";
+    int32_t userId = -1;
+    int32_t appIndex = 0;
+    auto result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
+    EXPECT_EQ(result, ERR_APP_PRELOAD_PHASE_UNSET);
+
+    TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_010 end");
 }
 } // namespace AAFwk
 } // namespace OHOS
