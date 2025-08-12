@@ -87,8 +87,6 @@ public:
     static ani_ref GetCurrentTopAbility(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object callback);
 
 private:
-    static void RetrieveStringFromAni(ani_env *env, ani_string string, std::string &resString);
-
     static ani_object WrapShellCmdResult(ani_env *env, std::unique_ptr<AppExecFwk::ShellCmdResult> result);
 
     static bool ParseMonitorPara(ani_env *env, ani_object monitorObj,
