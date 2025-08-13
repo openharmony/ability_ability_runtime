@@ -182,6 +182,10 @@ export default class UIAbilityContext extends Context {
 
   private native nativeRestoreWindowStage(localStorage: LocalStorage): void;
 
+  private native nativeStartAbilityAsCaller(want: Want, callback: AsyncCallbackWrapper<void>, options?: StartOptions): void;
+
+  private native nativeStartRecentAbility(want: Want, callback: AsyncCallbackWrapper<void>, options?: StartOptions): void;
+
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
@@ -824,5 +828,75 @@ hideAbility(): Promise<void> {
 
   restoreWindowStage(localStorage: LocalStorage): void {
     this.nativeRestoreWindowStage(localStorage);
+  }
+
+  startAbilityAsCaller(want: Want, callback: AsyncCallback<void>): void {
+    let asyncCallback = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeStartAbilityAsCaller(want, asyncCallback, undefined);
+    }).catch((err: BusinessError): void => {
+      callback(err, undefined);
+    });
+  }
+
+  startAbilityAsCaller(want: Want, options: StartOptions, callback: AsyncCallback<void>): void {
+    let asyncCallback = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeStartAbilityAsCaller(want, asyncCallback, options);
+    }).catch((err: BusinessError): void => {
+      callback(err, undefined);
+    });
+  }
+
+  startAbilityAsCaller(want: Want, options?: StartOptions): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let asyncCallback = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeStartAbilityAsCaller(want, asyncCallback, options);
+      }).catch((err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
+  }
+
+  startRecentAbility(want: Want, callback: AsyncCallback<void>): void {
+    let asyncCallback = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeStartRecentAbility(want, asyncCallback, undefined);
+    }).catch((err: BusinessError): void => {
+      callback(err, undefined);
+    });
+  }
+
+  startRecentAbility(want: Want, options: StartOptions, callback: AsyncCallback<void>): void {
+    let asyncCallback = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeStartRecentAbility(want, asyncCallback, options);
+    }).catch((err: BusinessError): void => {
+      callback(err, undefined);
+    });
+  }
+
+  startRecentAbility(want: Want, options?: StartOptions): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let asyncCallback = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeStartRecentAbility(want, asyncCallback, options);
+      }).catch((err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
   }
 }
