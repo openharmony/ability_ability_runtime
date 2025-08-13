@@ -140,6 +140,8 @@ export default class UIAbilityContext extends Context {
 
   private native nativeOpenAtomicService(appId: string, callback: AsyncCallbackWrapper<AbilityResult>, options?: AtomicServiceOptions): void;
 
+  private native nativeOnSetRestoreEnabled(enabled: boolean): void;
+  
   private native nativeConnectServiceExtensionAbilityWithAccount(want: Want, accountId: int,
     options: ConnectOptions): long;
 
@@ -509,6 +511,10 @@ hideAbility(): Promise<void> {
       });
     });
     return p;
+  }
+
+  setRestoreEnabled(enabled: boolean): void {
+    return this.nativeOnSetRestoreEnabled(enabled);
   }
 
   openAtomicService(appId: string, options?: AtomicServiceOptions): Promise<AbilityResult> {
