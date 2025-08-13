@@ -37,7 +37,6 @@ ohos_fuzztest("AbilityAutoStartupClientSecondFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
-    "${ability_runtime_services_path}/abilitymgr/src/ability_auto_startup_client.cpp",
     "${ability_runtime_services_path}/common/src/app_utils.cpp",
     "${ability_runtime_services_path}/common/src/json_utils.cpp",
     "abilityautostartupclientsecond_fuzzer.cpp",
