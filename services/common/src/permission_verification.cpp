@@ -62,7 +62,7 @@ bool PermissionVerification::VerifyCallingPermission(
     TAG_LOGD(AAFwkTag::DEFAULT, "Token: %{public}u", callerToken);
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName, false);
     if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "%{public}s: PERMISSION_DENIED", permissionName.c_str());
+        TAG_LOGW(AAFwkTag::DEFAULT, "%{public}s: PERMISSION_DENIED", permissionName.c_str());
         return false;
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "verify Token success");
