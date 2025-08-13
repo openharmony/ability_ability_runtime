@@ -1424,5 +1424,46 @@ bool CheckCallerIsSystemApp()
     }
     return true;
 }
+
+ani_object WrapLocale(ani_env *env, const std::string &locale)
+{
+    TAG_LOGD(AAFwkTag::ANI, "WrapLocale called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "env is nullptr");
+        return nullptr;
+    }
+    if (locale.empty()) {
+        TAG_LOGE(AAFwkTag::ANI, "Locale string is empty");
+        return nullptr;
+    }
+    ani_class localClass = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass("Lstd/core/Intl/Locale;", &localClass)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "Find class failed, status: %{public}d", status);
+        return nullptr;
+    }
+    ani_method localCtor = nullptr;
+    if ((status = env->Class_FindMethod(localClass, "<ctor>",
+        "X{C{std.core.Intl.Locale}C{std.core.String}}C{std.core.Intl.LocaleOptions}:", &localCtor)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "Find Locale constructor failed, status: %{public}d", status);
+        return nullptr;
+    }
+    ani_ref undefinedRef;
+    if ((status = env->GetUndefined(&undefinedRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "GetUndefined failed, status: %{public}d", status);
+        return nullptr;
+    }
+    ani_object localStrObj = GetAniString(env, locale);
+    if (localStrObj == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "Get ani string failed");
+        return nullptr;
+    }
+    ani_object localeObj = nullptr;
+    if ((status = env->Object_New(localClass, localCtor, &localeObj, localStrObj, undefinedRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "Object_New failed, status: %{public}d", status);
+        return nullptr;
+    }
+    return localeObj;
+}
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -27,6 +27,7 @@ export interface Configuration {
   fontWeightScale?: double;
   mcc?: string;
   mnc?: string;
+  locale?: Intl.Locale;
 }
 
 class ConfigurationImpl implements Configuration {
@@ -41,4 +42,5 @@ class ConfigurationImpl implements Configuration {
   fontWeightScale?: double;
   mcc?: string;
   mnc?: string;
+  locale?: Intl.Locale;
 }
