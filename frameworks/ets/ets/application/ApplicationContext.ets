@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import AbilityLifecycleCallback from '@ohos.app.ability.AbilityLifecycleCallback';
+import AbilityLifecycleCallback from '../@ohos.app.ability.AbilityLifecycleCallback';
 import InteropAbilityLifecycleCallback from '../@ohos.app.ability.InteropAbilityLifecycleCallback';
 import Context from 'application.Context'
 import { BusinessError, AsyncCallback } from '@ohos.base'

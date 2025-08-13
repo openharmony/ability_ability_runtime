@@ -585,13 +585,12 @@ ani_int EtsApplicationContextUtils::NativeOnLifecycleCallbackSync(ani_env *env,
     TAG_LOGD(AAFwkTag::APPKIT, "NativeOnLifecycleCallbackSync Call");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
-        EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return ani_int(ERROR_CODE_NULL_ENV);
     }
     auto etsContext = GeApplicationContext(env, aniObj);
     if (etsContext == nullptr) {
         EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-        return ani_int(ERROR_CODE_INVALID_PARAM);
+        return ani_int(ERROR_CODE_NULL_CONTEXT);
     }
     std::string stdType;
     if (!AppExecFwk::GetStdString(env, type, stdType)) {
