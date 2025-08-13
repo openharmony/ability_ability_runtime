@@ -75,6 +75,10 @@ int32_t PreloadManagerService::PreloadApplication(const std::string &bundleName,
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, abilityInfo)),
         RESOLVE_ABILITY_ERR, "failed to get abilityInfo");
     AppExecFwk::AppPreloadPhase appPreloadPhase = abilityInfo.applicationInfo.appPreloadPhase;
+    if (appPreloadPhase == AppExecFwk::AppPreloadPhase::DEFAULT) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "preload phase not set");
+        return ERR_APP_PRELOAD_PHASE_UNSET;
+    }
     if (appPreloadPhase <= AppExecFwk::AppPreloadPhase::ABILITY_STAGE_CREATED) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "preload to phase:%{public}d", static_cast<int32_t>(appPreloadPhase));
         AppExecFwk::PreloadPhase preloadPhase = static_cast<AppExecFwk::PreloadPhase>(appPreloadPhase);
