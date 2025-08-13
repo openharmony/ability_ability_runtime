@@ -41,6 +41,7 @@ struct StartupTaskInfo {
     bool callCreateOnMainThread = true;
     bool waitOnMainThread = true;
     bool esModule = true;
+    AppExecFwk::ModuleType moduleType = AppExecFwk::ModuleType::UNKNOWN;
     StartupTaskMatchRules matchRules;
 };
 
@@ -72,7 +73,7 @@ public:
 
     AppExecFwk::ModuleType GetModuleType() const;
 
-protected:
+private:
     bool isExcludeFromAutoStart_ = false;
     std::string moduleName_;
     AppExecFwk::ModuleType moduleType_ = AppExecFwk::ModuleType::UNKNOWN;

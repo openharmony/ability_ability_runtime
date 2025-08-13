@@ -672,8 +672,8 @@ int32_t JsAbilityStage::RegisterAppStartupTask(const std::shared_ptr<AppExecFwk:
         jsStartupTask->SetIsExcludeFromAutoStart(item.excludeFromAutoStart);
         jsStartupTask->SetCallCreateOnMainThread(item.callCreateOnMainThread);
         jsStartupTask->SetWaitOnMainThread(item.waitOnMainThread);
-        jsStartupTask->SetModuleName(hapModuleInfo->moduleName);
-        jsStartupTask->SetModuleType(hapModuleInfo->moduleType);
+        jsStartupTask->SetModuleName(item.moduleName);
+        jsStartupTask->SetModuleType(item.moduleType);
         jsStartupTask->SetMatchRules(std::move(item.matchRules));
         startupManager->RegisterAppStartupTask(item.name, jsStartupTask);
     }
