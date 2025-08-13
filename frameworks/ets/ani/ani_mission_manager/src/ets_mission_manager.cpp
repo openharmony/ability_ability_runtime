@@ -82,7 +82,7 @@ private:
         }
         auto emptyObject = GetEmptyMissionInfo(env);
         std::string stdDeviceId = "";
-        if (!GetStdString(env, deviceId, stdDeviceId) || stdDeviceId.empty()) {
+        if (!GetStdString(env, deviceId, stdDeviceId)) {
             TAG_LOGE(AAFwkTag::MISSION, "GetStdString failed");
             AsyncCallback(env, callback, EtsErrorUtil::CreateInvalidParamError(env,
                 "Parse param deviceId failed, must be a string."), emptyObject);
