@@ -92,7 +92,8 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     }
     if (appCloneIndex < 0) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "appCloneIndex invalid");
-        AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM,
+        AsyncCallback(env, callback, EtsErrorUtil::CreateError(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
             "Param appCloneIndex is invalid, the value less than 0."),
             CreateDouble(env, ERR_FAILURE));
         return;
@@ -133,7 +134,8 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     }
     if (appCloneIndex < 0) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "appCloneIndex invalid");
-        AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM,
+        AsyncCallback(env, callback, EtsErrorUtil::CreateError(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
             "Param appCloneIndex is invalid, the value less than 0."),
             CreateDouble(env, ERR_FAILURE));
         return;
