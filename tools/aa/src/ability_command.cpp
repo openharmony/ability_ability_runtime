@@ -1384,18 +1384,6 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
-                case 0: {
-                    // 'aa process' with an unknown option: aa process --x
-                    // 'aa process' with an unknown option: aa process --xxx
-                    std::string unknownOption = "";
-                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' opt unknown", cmd_.c_str());
-
-                    resultReceiver_.append(unknownOptionMsg);
-                    result = OHOS::ERR_INVALID_VALUE;
-                    break;
-                }
                 default: {
                     // 'aa process' with an unknown option: aa process -x
                     // 'aa process' with an unknown option: aa process -xxx
@@ -1459,9 +1447,6 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                 // 'aa process -S'
                 // enter sandbox to perform app
                 isSandboxApp = true;
-                break;
-            }
-            case 0: {
                 break;
             }
             default: {
