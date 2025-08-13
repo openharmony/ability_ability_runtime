@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import AbilityLifecycleCallback from '../@ohos.app.ability.AbilityLifecycleCallback';
+import AbilityLifecycleCallback from '@ohos.app.ability.AbilityLifecycleCallback';
 import InteropAbilityLifecycleCallback from '../@ohos.app.ability.InteropAbilityLifecycleCallback';
 import Context from 'application.Context'
 import { BusinessError, AsyncCallback } from '@ohos.base'
@@ -65,7 +65,7 @@ export default class ApplicationContext extends Context {
     destroyRegister.unregister(unregisterToken);
   }
 
-  public native nativeOnLifecycleCallbackSync(type: string, callback: Object): int;
+  public native nativeOnLifecycleCallbackSync(type: string, callback: AbilityLifecycleCallback): int;
   public native nativeOffLifecycleCallbackSync(type: string, callbackId: int,
     callback: AsyncCallbackWrapper<void>): void;
   public native nativekillAllProcessesSync(clearPageStack: boolean, callback: AsyncCallbackWrapper<void>): void;
