@@ -181,7 +181,7 @@ enum class AbilityErrorCode {
     ERROR_CODE_CREATE_NEW_INSTANCE_NOT_SUPPORT = 16000080,
 
     // Target application not found.
-    ERROR_CODE_GET_BUNFLE_INFO_FAILED = 16000081,
+    ERROR_CODE_GET_APPLICATION_INFO_FAILED = 16000081,
 
     // UIAbility is in starting state.
     ERROR_CODE_UI_ABILITY_IS_STARTING = 16000082,
