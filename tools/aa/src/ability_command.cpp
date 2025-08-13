@@ -66,7 +66,7 @@ constexpr int64_t MAX_WAIT_TIME = 15 * 1000 * 1000; // us
 
 const std::string DEVELOPERMODE_STATE = "const.security.developermode.state";
 
-const std::string SHORT_OPTIONS = "ch:d:a:b:e:t:p:s:m:A:U:CDESNR";
+const std::string SHORT_OPTIONS = "h:d:a:b:e:t:p:m:A:U:CDESNR";
 const std::string RESOLVE_ABILITY_ERR_SOLUTION_ONE =
     "Check if the parameter abilityName of aa -a and the parameter bundleName of -b are correct";
 const std::string RESOLVE_ABILITY_ERR_SOLUTION_TWO =
@@ -445,7 +445,7 @@ ErrCode AbilityManagerShellCommand::RunAsStartAbility()
     std::string windowMode;
     ErrCode result = MakeWantFromCmd(want, windowMode);
     if (result == OHOS::ERR_OK) {
-        int windowModeKey = std::atoi(windowMode.c_str());
+        int windowModeKey = windowMode.empty() ? 0 : std::atoi(windowMode.c_str());
         if (windowModeKey > 0) {
             auto setting = AbilityStartSetting::GetEmptySetting();
             if (setting != nullptr) {
@@ -1715,18 +1715,6 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
-                case 's': {
-                    // 'aa start -s' with no argument
-                    // 'aa stop-service -s' with no argument
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -s' no arg", cmd_.c_str());
-
-                    resultReceiver_.append("error: option ");
-                    resultReceiver_.append(argv_[optind - 1]);
-                    resultReceiver_.append("' requires a value.\n");
-
-                    result = OHOS::ERR_INVALID_VALUE;
-                    break;
-                }
                 case 'm': {
                     // 'aa start -m' with no argument
                     // 'aa stop-service -m' with no argument
@@ -1946,12 +1934,6 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 typeVal = optarg;
                 break;
             }
-            case 's': {
-                // 'aa start -s xxx'
-                // save windowMode
-                windowMode = optarg;
-                break;
-            }
             case 'm': {
                 // 'aa start -m xxx'
                 // 'aa stop-service -m xxx'
@@ -2118,12 +2100,6 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 // 'aa start -b <bundleName> -a <abilityName> -p <perf-cmd> -S'
                 // enter sandbox to perform app
                 isSandboxApp = true;
-                break;
-            }
-            case 'c': {
-                // 'aa start -c'
-                // set ability launch reason = continuation
-                isContinuation = true;
                 break;
             }
             case 'N': {
