@@ -119,9 +119,7 @@ void EtsAbilityManager::GetTopAbility(ani_env *env, ani_object callback)
     auto selfToken = IPCSkeleton::GetSelfTokenID();
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
-        AppExecFwk::AsyncCallback(env, callback,
-            EtsErrorUtil::CreateErrorByNativeErr(env,
-            static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP)), nullptr);
+        AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
         return;
     }
     AppExecFwk::ElementName elementName = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility();
