@@ -24,6 +24,9 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+const std::string APP_LINKING_ONLY = "appLinkingOnly";
+}
 
 bool UnwrapStartOptionsWithProcessOption(ani_env* env, ani_object param, AAFwk::StartOptions &startOptions)
 {
@@ -314,6 +317,33 @@ bool UnwrapAtomicServiceOptions(ani_env *env, ani_object optionsObj, AAFwk::Want
         want.SetFlags(flags);
     }
     return true;
+}
+
+void UnWrapOpenLinkOptions(
+    ani_env *env, ani_object optionsObj, AAFwk::OpenLinkOptions &openLinkOptions, AAFwk::Want &want)
+{
+    TAG_LOGD(AAFwkTag::ANI, "UnWrapOpenLinkOptions");
+    ani_status status = ANI_ERROR;
+    ani_ref ParamRef = nullptr;
+    if ((status = env->Object_GetPropertyByName_Ref(optionsObj, "parameters", &ParamRef))  == ANI_OK) {
+        AAFwk::WantParams wantParam;
+        if (AppExecFwk::UnwrapWantParams(env, ParamRef, wantParam)) {
+            want.SetParams(wantParam);
+        } else {
+            TAG_LOGE(AAFwkTag::ANI, "UnwrapWantParams failed");
+        }
+    }
+    ani_boolean aniAppLinkingOnly = ANI_FALSE;
+    if ((status = env->Object_GetPropertyByName_Boolean(optionsObj, APP_LINKING_ONLY.c_str(),
+        &aniAppLinkingOnly)) == ANI_OK) {
+        bool appLinkingOnly = aniAppLinkingOnly;
+        AppExecFwk::GetFieldBoolByName(env, optionsObj, "appLinkingOnly", appLinkingOnly);
+        openLinkOptions.SetAppLinkingOnly(appLinkingOnly);
+        want.SetParam(APP_LINKING_ONLY, appLinkingOnly);
+    }
+    if (!want.HasParameter(APP_LINKING_ONLY)) {
+        want.SetParam(APP_LINKING_ONLY, false);
+    }
 }
 } // namespace AppExecFwk
 } // namespace OHOS
