@@ -90,6 +90,13 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         TAG_LOGE(AAFwkTag::URIPERMMGR, "env null");
         return;
     }
+    if (appCloneIndex < 0) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "appCloneIndex invalid");
+        AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM,
+            "Param appCloneIndex is invalid, the value less than 0."),
+            CreateDouble(env, ERR_FAILURE));
+        return;
+    }
     auto selfToken = IPCSkeleton::GetSelfTokenID();
     ani_object etsErrCode = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
@@ -122,6 +129,13 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     TAG_LOGI(AAFwkTag::URIPERMMGR, "revokeUriPermissionCallbackSync run");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "env null");
+        return;
+    }
+    if (appCloneIndex < 0) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "appCloneIndex invalid");
+        AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM,
+            "Param appCloneIndex is invalid, the value less than 0."),
+            CreateDouble(env, ERR_FAILURE));
         return;
     }
     auto selfToken = IPCSkeleton::GetSelfTokenID();
