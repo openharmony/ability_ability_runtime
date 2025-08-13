@@ -139,7 +139,7 @@ typedef enum {
      */
     ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED = 16000079,
     /**
-     * @error Failed to obtain the target application infomation.
+     * @error Failed to obtain the target application information.
      * @since 21
      */
     ABILITY_RUNTIME_ERROR_CODE_GET_APPLICATION_INFO_FAILED = 16000081,
