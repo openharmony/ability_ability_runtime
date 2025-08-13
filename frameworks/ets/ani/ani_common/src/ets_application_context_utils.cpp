@@ -586,25 +586,25 @@ ani_int EtsApplicationContextUtils::NativeOnLifecycleCallbackSync(ani_env *env,
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "env is nullptr");
         EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-        return ANI_ERROR;
+        return ani_int(ERROR_CODE_NULL_ENV);
     }
     auto etsContext = GeApplicationContext(env, aniObj);
     if (etsContext == nullptr) {
         EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-        return ANI_ERROR;
+        return ani_int(ERROR_CODE_INVALID_PARAM);
     }
     std::string stdType;
     if (!AppExecFwk::GetStdString(env, type, stdType)) {
         TAG_LOGE(AAFwkTag::APPKIT, "parse type failed");
         EtsErrorUtil::ThrowInvalidParamError(env, "Failed to parse param type. Type must be a string.");
-        return ANI_ERROR;
+        return ani_int(ERROR_CODE_INVALID_PARAM);
     }
     TAG_LOGD(AAFwkTag::APPKIT, "type=%{public}s", stdType.c_str());
     if (stdType == TYPE_ABILITY_LIFECYCLE) {
         return etsContext->RegisterAbilityLifecycleCallback(env, callback);
     }
     EtsErrorUtil::ThrowInvalidParamError(env, "Unknown type.");
-    return ANI_ERROR;
+    return ani_int(ERROR_CODE_INVALID_PARAM);
 }
 
 void EtsApplicationContextUtils::NativeOnInteropLifecycleCallbackSync(ani_env *env,
@@ -641,7 +641,7 @@ ani_int EtsApplicationContextUtils::RegisterAbilityLifecycleCallback(ani_env *en
     if (applicationContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is null");
         EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-        return ANI_ERROR;
+        return ani_int(ERROR_CODE_NULL_CONTEXT);
     }
     std::lock_guard<std::mutex> lock(g_abilityLifecycleCallbackLock);
     if (abilityLifecycleCallback_ != nullptr) {
@@ -649,7 +649,7 @@ ani_int EtsApplicationContextUtils::RegisterAbilityLifecycleCallback(ani_env *en
         if (result < 0) {
             TAG_LOGE(AAFwkTag::APPKIT, "register failed: %{public}d", result);
             EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-            return ANI_ERROR;
+            return ani_int(ERROR_CODE_INVALID_PARAM);
         }
         return ani_int(result);
     }
@@ -663,11 +663,11 @@ ani_int EtsApplicationContextUtils::RegisterAbilityLifecycleCallback(ani_env *en
     if (callbackId == static_cast<int32_t>(ERROR_CODE_NULL_ENV) ||
         callbackId == static_cast<int32_t>(ERROR_CODE_NULL_CALLBACK)) {
         EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-        return ANI_ERROR;
+        return ani_int(ERROR_CODE_INVALID_PARAM);
     }
 
     EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-    return ANI_ERROR;
+    return ani_int(ERROR_CODE_INVALID_PARAM);
 }
 
 void EtsApplicationContextUtils::RegisterInteropAbilityLifecycleCallback(ani_env *env, ani_object callback)
