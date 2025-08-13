@@ -38,7 +38,7 @@
 #include "app_state_observer_manager.h"
 #include "app_utils.h"
 #include "appfreeze_manager.h"
-#include "application_state_observer_stub..h"
+#include "application_state_observer_stub.h"
 #include "appspawn_util.h"
 #include "bundle_constants.h"
 #include "bundle_mgr_helper.h"
