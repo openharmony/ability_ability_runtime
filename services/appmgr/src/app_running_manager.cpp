@@ -1026,7 +1026,7 @@ int32_t AppRunningManager::AssignRunningProcessInfoByAppRecord(
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null");
+        TAG_LOGW(AAFwkTag::APPMGR, "null");
         return ERR_INVALID_OPERATION;
     }
 

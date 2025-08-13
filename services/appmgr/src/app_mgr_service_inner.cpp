@@ -38,7 +38,7 @@
 #include "app_state_observer_manager.h"
 #include "app_utils.h"
 #include "appfreeze_manager.h"
-#include "application_state_observer_stub.h"
+#include "application_state_observer_stub..h"
 #include "appspawn_util.h"
 #include "bundle_constants.h"
 #include "bundle_mgr_helper.h"
@@ -1423,7 +1423,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
 
 void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppScheduler> &appScheduler)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s called", __func__);
+    TAG_LOGD(AAFwkTag::APPMGR, "%{public}s called", __func__);
     if (pid <= 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid pid:%{public}d", pid);
         return;
@@ -1698,7 +1698,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     if (callerRecord != nullptr) {
         eventInfo.callerBundleName = callerRecord->GetBundleName();
     } else {
-        TAG_LOGE(AAFwkTag::APPMGR, "callerRecord null");
+        TAG_LOGD(AAFwkTag::APPMGR, "callerRecord null");
     }
     AAFwk::EventReport::SendAppForegroundEvent(AAFwk::EventName::APP_FOREGROUND, eventInfo);
 }

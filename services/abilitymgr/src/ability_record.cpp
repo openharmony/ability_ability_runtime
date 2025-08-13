@@ -3655,7 +3655,7 @@ bool AbilityRecord::IsAbilityWindowReady()
 void AbilityRecord::SetAbilityWindowState(const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd, bool isFinished)
 {
     if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null sessionInfo");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "null sessionInfo");
         return;
     }
     if (isFinished) {

@@ -472,7 +472,7 @@ std::shared_ptr<Context> ContextImpl::CreateModuleContext(
             [&moduleName](
                 const AppExecFwk::HapModuleInfo &hapModuleInfo) { return hapModuleInfo.moduleName == moduleName; });
         if (info == bundleInfo.hapModuleInfos.end()) {
-            TAG_LOGE(AAFwkTag::ABILITY_SIM, "moduleName error");
+            TAG_LOGE(AAFwkTag::ABILITY_SIM, "moduleName %{public}s error", moduleName.c_str());
             return nullptr;
         }
         appContext->InitHapModuleInfo(*info);
