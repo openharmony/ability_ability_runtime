@@ -18,6 +18,7 @@
 #include "ability_business_error.h"
 #include "ability_manager_errors.h"
 #include "ability_runtime_error_util.h"
+#include "ani_common_util.h"
 #include "ani_enum_convert.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
@@ -33,10 +34,6 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char* WRAPPER_CLASS_NAME = "Lutils/AbilityUtils/AsyncCallbackWrapper;";
-constexpr const char* ERROR_CLASS_NAME = "Lescompat/Error;";
-constexpr const char* BUSINESS_ERROR_CLASS_NAME = "L@ohos/base/BusinessError;";
-constexpr const char *INVOKE_METHOD_NAME = "invoke";
 constexpr const int32_t ERR_OK = 0;
 constexpr const int32_t ERR_FAILURE = -1;
 constexpr const char* NOT_SYSTEM_APP = "The application is not system-app, can not use system-api.";
@@ -92,7 +89,7 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     }
     if (appCloneIndex < 0) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "appCloneIndex invalid");
-        AsyncCallback(env, callback, EtsErrorUtil::CreateError(env,
+        AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateError(env,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
             "Param appCloneIndex is invalid, the value less than 0."),
             CreateDouble(env, ERR_FAILURE));
@@ -104,7 +101,7 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
         etsErrCode = EtsErrorUtil::CreateError(env,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), NOT_SYSTEM_APP);
-        AsyncCallback(env, callback, etsErrCode, CreateDouble(env, ERR_FAILURE));
+        AppExecFwk::AsyncCallback(env, callback, etsErrCode, CreateDouble(env, ERR_FAILURE));
         return;
     }
     std::string uriStr = GetStdString(env, uri);
@@ -121,7 +118,7 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         etsErrCode = EtsErrorUtil::CreateErrorByNativeErr(env, errCode);
     }
     
-    AsyncCallback(env, callback, etsErrCode, CreateDouble(env, result));
+    AppExecFwk::AsyncCallback(env, callback, etsErrCode, CreateDouble(env, result));
 }
 
 static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
@@ -134,7 +131,7 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     }
     if (appCloneIndex < 0) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "appCloneIndex invalid");
-        AsyncCallback(env, callback, EtsErrorUtil::CreateError(env,
+        AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateError(env,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
             "Param appCloneIndex is invalid, the value less than 0."),
             CreateDouble(env, ERR_FAILURE));
@@ -146,7 +143,7 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
         etsErrCode = EtsErrorUtil::CreateError(env,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), NOT_SYSTEM_APP);
-        AsyncCallback(env, callback, etsErrCode, CreateDouble(env, ERR_FAILURE));
+        AppExecFwk::AsyncCallback(env, callback, etsErrCode, CreateDouble(env, ERR_FAILURE));
         return;
     }
     std::string uriStr = GetStdString(env, uri);
@@ -159,7 +156,7 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         result = ERR_FAILURE;
         etsErrCode = EtsErrorUtil::CreateErrorByNativeErr(env, errCode);
     }
-    AsyncCallback(env, callback, etsErrCode, CreateDouble(env, result));
+    AppExecFwk::AsyncCallback(env, callback, etsErrCode, CreateDouble(env, result));
 }
 
 void EtsUriPermissionManagerInit(ani_env *env)
@@ -225,122 +222,5 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     return ANI_OK;
 }
 }
-
-bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result)
-{
-    ani_status status = ANI_ERROR;
-    ani_class clsCall {};
-
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "env null");
-        return false;
-    }
-
-    if ((status = env->FindClass(WRAPPER_CLASS_NAME, &clsCall)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "status: %{public}d", status);
-        return false;
-    }
-    ani_method method = {};
-    if ((status = env->Class_FindMethod(
-        clsCall, INVOKE_METHOD_NAME, "L@ohos/base/BusinessError;Lstd/core/Object;:V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "status: %{public}d", status);
-        return false;
-    }
-    if (method == nullptr) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "method null");
-        return false;
-    }
-    if (result == nullptr) {
-        ani_ref nullRef = nullptr;
-        env->GetNull(&nullRef);
-        result = reinterpret_cast<ani_object>(nullRef);
-    }
-    if ((status = env->Object_CallMethod_Void(call, method, error, result)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "status: %{public}d", status);
-        return false;
-    }
-    return true;
-}
-
-ani_object WrapError(ani_env *env, const std::string &msg)
-{
-    ani_class cls {};
-    ani_method method {};
-    ani_object obj = nullptr;
-    ani_status status = ANI_ERROR;
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "null env");
-        return nullptr;
-    }
-    ani_string aniMsg = GetAniString(env, msg);
-    ani_ref undefRef;
-    env->GetUndefined(&undefRef);
-    if ((status = env->FindClass(ERROR_CLASS_NAME, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "statys: %{public}d", status);
-        return nullptr;
-    }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &method)) !=
-        ANI_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "status: %{public}d", status);
-        return nullptr;
-    }
-    if ((status = env->Object_New(cls, method, &obj, aniMsg, undefRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "status: %{public}d", status);
-        return nullptr;
-    }
-    return obj;
-}
-
-ani_string GetAniString(ani_env *env, const std::string &str)
-{
-    ani_string aniStr = nullptr;
-    ani_status status = env->String_NewUTF8(str.c_str(), str.size(), &aniStr);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "status : %{public}d", status);
-        return nullptr;
-    }
-    return aniStr;
-}
-
-ani_object WrapBusinessError(ani_env *env, int32_t code)
-{
-    ani_class cls {};
-    ani_method method {};
-    ani_object obj = nullptr;
-    ani_status status = ANI_ERROR;
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
-        return nullptr;
-    }
-    if ((status = env->FindClass(BUSINESS_ERROR_CLASS_NAME, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return nullptr;
-    }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "DLescompat/Error;:V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return nullptr;
-    }
-    ani_object error = WrapError(env, GetErrMsg(code));
-    if (error == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "error nulll");
-        return nullptr;
-    }
-    ani_double dCode(code);
-    if ((status = env->Object_New(cls, method, &obj, dCode, error)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
-        return nullptr;
-    }
-    return obj;
-}
-
-std::string GetErrMsg(int32_t err, const std::string &permission)
-{
-    auto errCode = GetJsErrorCodeByNativeError(err);
-    auto errMsg = (errCode == AbilityErrorCode::ERROR_CODE_PERMISSION_DENIED && !permission.empty())
-                      ? GetNoPermissionErrorMsg(permission)
-                      : GetErrorMsg(errCode);
-    return errMsg;
-}
-
 } // namespace AbilityRuntime
 } // namespace OHOS
