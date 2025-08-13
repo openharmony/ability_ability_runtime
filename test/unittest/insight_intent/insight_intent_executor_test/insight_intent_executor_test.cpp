@@ -201,10 +201,7 @@ HWTEST_F(InsightIntentExecutorTest, JsInsightIntentPageExecuteInsightIntent_001,
     EXPECT_NE(callback, nullptr);
     auto mgr = std::make_shared<InsightIntentExecutorMgr>();
     InsightIntentExecutorInfo info;
-    info.executeParam = std::make_shared<AppExecFwk::InsightIntentExecuteParam>();
-    EXPECT_NE(info.executeParam, nullptr);
-    info.executeParam->insightIntentParam_ = std::make_shared<AAFwk::WantParams>();
-    EXPECT_NE(info.executeParam->insightIntentParam_, nullptr);
+    info.executeParam = nullptr;
     auto res = mgr->ExecuteInsightIntent(*runtime, info, std::move(callback));
     EXPECT_FALSE(res);
 }
