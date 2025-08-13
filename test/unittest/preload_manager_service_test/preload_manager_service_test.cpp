@@ -309,7 +309,11 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_010, TestSize.Level1)
     int32_t userId = -1;
     int32_t appIndex = 0;
     auto result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
-    EXPECT_EQ(result, ERR_APP_PRELOAD_PHASE_UNSET);
+    EXPECT_EQ(result, ERR_INVALID_APP_PRELOAD_PHASE);
+
+    MyStatus::GetInstance().queryAbilityInfo_.applicationInfo.appPreloadPhase = AppExecFwk::AppPreloadPhase(100);
+    result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
+    EXPECT_EQ(result, ERR_INVALID_APP_PRELOAD_PHASE);
 
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_010 end");
 }
