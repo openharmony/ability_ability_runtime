@@ -978,16 +978,21 @@ enum {
      */
     ERR_PROCESS_START_INVALID_PID = 2097386,
 
+    /**
+     * Result (2097387) for not expected caller native name.
+     */
+    ERR_NOT_EXPECTED_NATIVE_CALLER_NAME = 2097387,
+
+    /**
+     * Result (2097388) for app not configured preload phase.
+     */
+    ERR_APP_PRELOAD_PHASE_UNSET = 2097388,
+
     ERR_DO_CLOSURE_CALLBACK_FAILED = 2097397,
 
     ERR_DMS_START_REMOTE_FAILED = 2097398,
 
     ERR_PRELOAD_APP_DATA_ABILITIES_FAILED = 2097399,
-
-    /**
-     * Result (2097387) for not expected caller native name.
-     */
-    ERR_NOT_EXPECTED_NATIVE_CALLER_NAME = 2097387,
 
     /**
      * Native error(3000000) for target bundle not exist.
