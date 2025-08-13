@@ -66,7 +66,7 @@ constexpr int64_t MAX_WAIT_TIME = 15 * 1000 * 1000; // us
 
 const std::string DEVELOPERMODE_STATE = "const.security.developermode.state";
 
-const std::string SHORT_OPTIONS = "h:d:a:b:e:t:p:m:A:U:CDESNR";
+const std::string SHORT_OPTIONS = "ch:d:a:b:e:t:p:m:A:U:CDESNR";
 const std::string RESOLVE_ABILITY_ERR_SOLUTION_ONE =
     "Check if the parameter abilityName of aa -a and the parameter bundleName of -b are correct";
 const std::string RESOLVE_ABILITY_ERR_SOLUTION_TWO =
@@ -2100,6 +2100,12 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 // 'aa start -b <bundleName> -a <abilityName> -p <perf-cmd> -S'
                 // enter sandbox to perform app
                 isSandboxApp = true;
+                break;
+            }
+            case 'c': {
+                // 'aa start -c' for xts use
+                // set ability launch reason = continuation
+                isContinuation = true;
                 break;
             }
             case 'N': {
