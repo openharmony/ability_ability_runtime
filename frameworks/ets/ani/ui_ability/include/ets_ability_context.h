@@ -111,6 +111,7 @@ public:
     static ani_object SetEtsAbilityContext(ani_env *env, std::shared_ptr<AbilityContext> context);
     static EtsAbilityContext *GetEtsAbilityContext(ani_env *env, ani_object aniObj);
     static bool IsInstanceOf(ani_env *env, ani_object aniObj);
+    static void NativeOnSetRestoreEnabled(ani_env *env, ani_object aniObj, ani_boolean aniEnabled);
     static void NativeChangeAbilityVisibility(ani_env *env, ani_object aniObj, ani_boolean isShow,
         ani_object callbackObj);
 
