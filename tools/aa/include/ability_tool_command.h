@@ -43,6 +43,7 @@ private:
     ErrCode ParseStopServiceArgsFromCmd(Want& want);
     ErrCode ParseTestArgsFromCmd(std::map<std::string, std::string>& params);
     bool GetKeyAndValueByOpt(int optind, std::string& key, std::string& value);
+    int32_t ConvertInteger(const std::string &str);
 
     std::shared_ptr<AbilityManagerShellCommand> aaShellCmd_;
 };
