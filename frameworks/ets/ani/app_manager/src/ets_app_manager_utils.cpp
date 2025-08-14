@@ -804,7 +804,7 @@ bool SetKeepAliveInfo(ani_env *env, ani_object object, const AbilityRuntime::Kee
         return false;
     }
     ani_status status = ANI_OK;
-    if ((env->Object_SetFieldByName_Ref(object, "bundleName",
+    if ((status = env->Object_SetPropertyByName_Ref(object, "bundleName",
         OHOS::AppExecFwk::GetAniString(env, keepInfo.bundleName))) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "bundleName failed status:%{public}d", status);
         return false;
