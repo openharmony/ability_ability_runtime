@@ -492,8 +492,7 @@ ErrCode AbilityManagerShellCommand::RunAsStopService()
     ErrCode result = OHOS::ERR_OK;
 
     Want want;
-    std::string windowMode;
-    result = MakeWantFromCmd(want, windowMode);
+    result = MakeWantFromCmdForStopService(want);
     if (result == OHOS::ERR_OK) {
         result = AbilityManagerClient::GetInstance()->StopServiceAbility(want);
         if (result == OHOS::ERR_OK) {
@@ -2205,6 +2204,180 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
             if (hasWindowWidth) {
                 want.SetParam(Want::PARAM_RESV_WINDOW_WIDTH, windowWidth);
             }
+        }
+    }
+
+    return result;
+}
+
+ErrCode AbilityManagerShellCommand::MakeWantFromCmdForStopService(Want& want)
+{
+    int result = OHOS::ERR_OK;
+    int option = -1;
+    int counter = 0;
+    std::string deviceId = "";
+    std::string bundleName = "";
+    std::string abilityName = "";
+    std::string moduleName;
+
+    while (true) {
+        counter++;
+
+        option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
+
+        TAG_LOGI(
+            AAFwkTag::AA_TOOL, "option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+
+        if (option == -1) {
+            // When scanning the first argument
+            if (counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                // 'aa stop-service' with no option: aa stop-service
+                // 'aa stop-service' with a wrong argument: aa stop-service xxx
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' %{public}s", HELP_MSG_NO_OPTION.c_str(), cmd_.c_str());
+
+                resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+                result = OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+
+        if (option == '?') {
+            switch (optopt) {
+                case 'h': {
+                    // 'aa stop-service -h'
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'd': {
+                    // 'aa stop-service -d' with no argument
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -d' no arg", cmd_.c_str());
+
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'a': {
+                    // 'aa stop-service -a' with no argument
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -a' no arg", cmd_.c_str());
+
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'b': {
+                    // 'aa stop-service -b' with no argument
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -b' no arg", cmd_.c_str());
+
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'm': {
+                    // 'aa stop-service -m' with no argument
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -m' no arg", cmd_.c_str());
+
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 0: {
+                    // 'aa stop-service' with an unknown option: aa stop-service --x
+                    // 'aa stop-service' with an unknown option: aa stop-service --xxx
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' opt unknown", cmd_.c_str());
+
+                    resultReceiver_.append(unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                default: {
+                    // 'aa stop-service' with an unknown option: aa stop-service -x
+                    // 'aa stop-service' with an unknown option: aa stop-service -xxx
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' opt unknown", cmd_.c_str());
+
+                    resultReceiver_.append(unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                // 'aa stop-service -h'
+                // 'aa stop-service --help'
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'd': {
+                // 'aa stop-service -d xxx'
+
+                // save device ID
+                if (optarg != nullptr) {
+                    deviceId = optarg;
+                }
+                break;
+            }
+            case 'a': {
+                // 'aa stop-service -a xxx'
+
+                // save ability name
+                abilityName = optarg;
+                break;
+            }
+            case 'b': {
+                // 'aa stop-service -b xxx'
+
+                // save bundle name
+                bundleName = optarg;
+                break;
+            }
+            case 'm': {
+                // 'aa stop-service -m xxx'
+
+                // save module name
+                moduleName = optarg;
+                break;
+            }
+            case 0: {
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
+    if (result == OHOS::ERR_OK) {
+        if (!abilityName.empty() && bundleName.empty()) {
+            // explicitly start ability must have both ability and bundle names
+
+            // 'aa stop-service [-d <device-id>] -a <ability-name> -b <bundle-name>'
+            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' without enough options", cmd_.c_str());
+
+            resultReceiver_.append(HELP_MSG_NO_BUNDLE_NAME_OPTION + "\n");
+            result = OHOS::ERR_INVALID_VALUE;
+        } else {
+            ElementName element(deviceId, bundleName, abilityName, moduleName);
+            want.SetElement(element);
         }
     }
 
