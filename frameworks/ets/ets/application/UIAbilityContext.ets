@@ -173,6 +173,12 @@ export default class UIAbilityContext extends Context {
   private native nativeStartAbilityForResultWithAccountResult(want: Want, accountId: int, options: StartOptions,
     callback: AsyncCallbackWrapper<AbilityResult>): void;
 
+  private native nativeStartAbilityWithAccountSync(want: Want, accountId: int,
+    callback: AsyncCallbackWrapper<void>): void;
+
+  private native nativeStartAbilityWithAccountSync(want: Want, accountId: int, options: StartOptions,
+    callback: AsyncCallbackWrapper<void>): void;
+
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
@@ -773,5 +779,44 @@ hideAbility(): Promise<void> {
       });
     });
     return p;
+  }
+
+  startAbilityWithAccount(want: Want, accountId: int, callback: AsyncCallback<void>): void {
+    let asyncCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeStartAbilityWithAccountSync(want, accountId, asyncCall);
+    }).catch((err: BusinessError): void => {
+      callback(err, undefined);
+    });
+  }
+
+  startAbilityWithAccount(want: Want, accountId: int, options: StartOptions, callback: AsyncCallback<void>): void {
+    let asyncCall = new AsyncCallbackWrapper<void>(callback);
+    taskpool.execute((): void => {
+      this.nativeStartAbilityWithAccountSync(want, accountId, options, asyncCall);
+    }).catch((err: BusinessError): void => {
+      callback(err, undefined);
+    });
+  }
+
+  startAbilityWithAccount(want: Want, accountId: int, options?: StartOptions): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        if (options == null) {
+          this.nativeStartAbilityWithAccountSync(want, accountId, asyncCall);
+        } else {
+          this.nativeStartAbilityWithAccountSync(want, accountId, options as StartOptions, asyncCall);
+        }
+      }).catch((err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
   }
 }
