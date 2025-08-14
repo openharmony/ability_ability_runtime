@@ -64,7 +64,7 @@ export default class ApplicationContext extends Context {
     destroyRegister.unregister(unregisterToken);
   }
 
-  public native nativeOnLifecycleCallbackSync(type: string, callback: Object): int;
+  public native nativeOnLifecycleCallbackSync(type: string, callback: AbilityLifecycleCallback): int;
   public native nativeOffLifecycleCallbackSync(type: string, callbackId: int,
     callback: AsyncCallbackWrapper<void>): void;
   public native nativekillAllProcessesSync(clearPageStack: boolean, callback: AsyncCallbackWrapper<void>): void;
