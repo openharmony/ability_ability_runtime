@@ -2799,6 +2799,18 @@ HWTEST_F(AbilityManagerProxyTest, QueryAllAutoStartupApplications_0100, TestSize
 }
 
 /**
+ * @tc.name: AbilityManagerProxyTest_GetAutoStartupStatusForSelf_0100
+ * @tc.desc: Test the state of GetAutoStartupStatusForSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxyTest, GetAutoStartupStatusForSelf_0100, TestSize.Level1)
+{
+    bool isAutoStartEnabled = false;
+    auto res = proxy_->GetAutoStartupStatusForSelf(isAutoStartEnabled);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
  * @tc.name: AbilityManagerProxy_SetResidentProcessEnable_0100
  * @tc.desc: RestartApp
  * @tc.type: FUNC

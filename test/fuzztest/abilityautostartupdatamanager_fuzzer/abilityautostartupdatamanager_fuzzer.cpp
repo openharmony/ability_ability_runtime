@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,11 +77,13 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::string keys(data, size);
     std::string values(data, size);
     bool checkEmpty = *data % ENABLE;
+    bool isAutoStartEnabled = false;
     abilityAutoStartupDataManager->IsEqual(key, info);
     abilityAutoStartupDataManager->IsEqual(key, strParam);
     abilityAutoStartupDataManager->IsEqual(key, in32Param);
     abilityAutoStartupDataManager->DeleteAutoStartupData(info);
     abilityAutoStartupDataManager->DeleteAutoStartupData(strParam, in32Param);
+    abilityAutoStartupDataManager->GetAutoStartupStatusForSelf(in32Param, isAutoStartEnabled);
 
     return true;
 }
