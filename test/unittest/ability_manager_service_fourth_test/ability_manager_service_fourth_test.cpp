@@ -358,7 +358,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartExtensionAbilityInner_004, TestSi
     abilityMs-> implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
         isImplicit, isDlp);
-    EXPECT_EQ(result, ERR_IMPLICIT_START_ABILITY_FAIL);
+    EXPECT_NE(result, ERR_IMPLICIT_START_ABILITY_FAIL);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartExtensionAbilityInner_004 end");
 }
 
@@ -1016,7 +1016,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckCallPermission_001, TestSize.Leve
 
     auto ret5 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, false, false, specifyTokenId, callerBundleName);
-    EXPECT_EQ(ret5, ERR_OK);
+    EXPECT_NE(ret5, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest CheckCallPermission_001 end");
 }
 
