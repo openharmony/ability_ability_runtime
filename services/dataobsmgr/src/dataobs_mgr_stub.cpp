@@ -38,12 +38,24 @@ const DataObsManagerStub::RequestFuncType DataObsManagerStub::HANDLES[TRANS_BUTT
     &DataObsManagerStub::UnregisterObserverExtInner,
     &DataObsManagerStub::UnregisterObserverExtALLInner,
     &DataObsManagerStub::NotifyChangeExtInner,
-    &DataObsManagerStub::NotifyProcessObserverInner
+    &DataObsManagerStub::NotifyProcessObserverInner,
+    &DataObsManagerStub::RegisterObserverFromExtensionInner,
+    &DataObsManagerStub::NotifyChangeFromExtensionInner,
+    &DataObsManagerStub::VerifyWhiteListInner
 };
 
 DataObsManagerStub::DataObsManagerStub() {}
 
 DataObsManagerStub::~DataObsManagerStub() {}
+
+DataObsOption ReadObsOpt(MessageParcel &data)
+{
+    bool isSystem = data.ReadBool();
+    uint32_t token = data.ReadUint32();
+    DataObsOption opt(isSystem);
+    opt.SetFirstCallerTokenID(token);
+    return opt;
+}
 
 int DataObsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
@@ -83,6 +95,23 @@ int DataObsManagerStub::RegisterObserverInner(MessageParcel &data, MessageParcel
     return NO_ERROR;
 }
 
+int DataObsManagerStub::RegisterObserverFromExtensionInner(MessageParcel &data, MessageParcel &reply)
+{
+    Uri uri(data.ReadString());
+    if (uri.ToString().empty()) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "invalid uri");
+        return IPC_STUB_INVALID_DATA_ERR;
+    }
+
+    auto remote = data.ReadRemoteObject();
+    auto observer = remote == nullptr ? nullptr : iface_cast<IDataAbilityObserver>(remote);
+    int32_t userId = data.ReadInt32();
+    DataObsOption opt = ReadObsOpt(data);
+    int32_t result = RegisterObserverFromExtension(uri, observer, userId, opt);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
 int DataObsManagerStub::UnregisterObserverInner(MessageParcel &data, MessageParcel &reply)
 {
     Uri uri(data.ReadString());
@@ -110,6 +139,29 @@ int DataObsManagerStub::NotifyChangeInner(MessageParcel &data, MessageParcel &re
     int32_t userId = data.ReadInt32();
     DataObsOption opt = DataObsOption(data.ReadBool());
     int32_t result = NotifyChange(uri, userId, opt);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int DataObsManagerStub::NotifyChangeFromExtensionInner(MessageParcel &data, MessageParcel &reply)
+{
+    Uri uri(data.ReadString());
+    if (uri.ToString().empty()) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "invalid uri");
+        return IPC_STUB_INVALID_DATA_ERR;
+    }
+    int32_t userId = data.ReadInt32();
+    DataObsOption opt = ReadObsOpt(data);
+    int32_t result = NotifyChangeFromExtension(uri, userId, opt);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int DataObsManagerStub::VerifyWhiteListInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t consumerToken = data.ReadInt32();
+    int32_t providerToken = data.ReadInt32();
+    int32_t result = CheckTrusts(consumerToken, providerToken);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

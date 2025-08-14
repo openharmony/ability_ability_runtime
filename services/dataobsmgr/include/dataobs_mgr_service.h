@@ -23,6 +23,7 @@
 #include "cpp/mutex.h"
 
 #include "dataobs_mgr_inner.h"
+#include "dataobs_mgr_inner_common.h"
 #include "dataobs_mgr_inner_ext.h"
 #include "dataobs_mgr_inner_pref.h"
 #include "dataobs_mgr_stub.h"
@@ -54,11 +55,17 @@ public:
     virtual int RegisterObserver(const Uri &uri,
         sptr<IDataAbilityObserver> dataObserver, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
         DataObsOption opt = DataObsOption()) override;
+    virtual int RegisterObserverFromExtension(const Uri &uri,
+        sptr<IDataAbilityObserver> dataObserver, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
+        DataObsOption opt = DataObsOption()) override;
     virtual int UnregisterObserver(const Uri &uri,
         sptr<IDataAbilityObserver> dataObserver, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
         DataObsOption opt = DataObsOption()) override;
     virtual int NotifyChange(const Uri &uri, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
         DataObsOption opt = DataObsOption()) override;
+    virtual int NotifyChangeFromExtension(const Uri &uri, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
+        DataObsOption opt = DataObsOption()) override;
+    virtual int CheckTrusts(uint32_t consumerToken, uint32_t providerToken) override;
     virtual Status RegisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
         bool isDescendants, DataObsOption opt = DataObsOption()) override;
     virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
@@ -90,6 +97,12 @@ private:
     static bool IsCallingPermissionValid(DataObsOption &opt);
     static int32_t GetDataMgrServiceUid();
     static bool IsDataMgrService(uint32_t tokenId, int32_t uid);
+    int32_t RegisterObserverInner(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId,
+        DataObsOption opt, bool isExtension);
+    int32_t VerifyDataSharePermission(Uri &uri, bool isRead, ObserverInfo &info);
+    int32_t VerifyDataSharePermissionInner(Uri &uri, bool isRead, ObserverInfo &info);
+    int32_t NotifyChangeInner(Uri &uri, int32_t userId,
+        DataObsOption opt, bool isExtension);
 private:
     static constexpr std::uint32_t TASK_COUNT_MAX = 50;
     ffrt::mutex taskCountMutex_;

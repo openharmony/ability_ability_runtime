@@ -44,7 +44,10 @@ public:
      */
 
     virtual int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
-        int32_t userId = -1, DataObsOption opt = DataObsOption()) override;
+        int32_t userId = DATAOBS_DEFAULT_CURRENT_USER, DataObsOption opt = DataObsOption()) override;
+
+    virtual int RegisterObserverFromExtension(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+        int32_t userId = DATAOBS_DEFAULT_CURRENT_USER, DataObsOption opt = DataObsOption()) override;
 
     /**
      * Deregisters an observer used for DataObsMgr specified by the given Uri.
@@ -55,7 +58,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
-        int32_t userId = -1, DataObsOption opt = DataObsOption()) override;
+        int32_t userId = DATAOBS_DEFAULT_CURRENT_USER, DataObsOption opt = DataObsOption()) override;
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uri.
@@ -64,7 +67,20 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int NotifyChange(const Uri &uri, int32_t userId = -1, DataObsOption opt = DataObsOption()) override;
+    virtual int NotifyChange(const Uri &uri, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
+        DataObsOption opt = DataObsOption()) override;
+
+    /**
+     * Notifies the registered observers of a change to the data resource specified by Uri.
+     *
+     * @param uri, Indicates the path of the data to operate.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int NotifyChangeFromExtension(const Uri &uri, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
+        DataObsOption opt = DataObsOption()) override;
+
+    virtual int CheckTrusts(uint32_t consumerToken, uint32_t providerToken) override;
 
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.

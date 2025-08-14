@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "dataobs_mgr_service.h"
 
 #include <functional>
@@ -25,12 +24,16 @@
 #include "ability_manager_proxy.h"
 #include "accesstoken_kit.h"
 #include "dataobs_mgr_errors.h"
+#include "data_share_permission.h"
+#include "datashare_log.h"
+#include "dataobs_mgr_inner_common.h"
+#include "datashare_errno.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
-#include "system_ability.h"
+#include "os_account_manager.h"
 #include "system_ability_definition.h"
 #include "tokenid_kit.h"
 #include "common_utils.h"
@@ -43,9 +46,11 @@
 
 namespace OHOS {
 namespace AAFwk {
+using namespace DataShare;
 static constexpr const char *DIALOG_APP = "com.ohos.pasteboarddialog";
 static constexpr const char *PROGRESS_ABILITY = "PasteboardProgressAbility";
 static constexpr const char *PROMPT_TEXT = "PromptText_PasteBoard_Local";
+static constexpr const char *NO_PERMISSION = "noPermission";
 
 const bool REGISTER_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<DataObsMgrService>::GetInstance().get());
@@ -225,8 +230,78 @@ bool DataObsMgrService::IsCallingPermissionValid(DataObsOption &opt, int32_t use
     return true;
 }
 
-int DataObsMgrService::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+std::string FormatUri(const std::string &uri)
+{
+    auto pos = uri.find_last_of('?');
+    if (pos == std::string::npos) {
+        return uri;
+    }
+
+    return uri.substr(0, pos);
+}
+
+int32_t DataObsMgrService::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
     int32_t userId, DataObsOption opt)
+{
+    return RegisterObserverInner(uri, dataObserver, userId, opt, false);
+}
+
+int32_t DataObsMgrService::RegisterObserverFromExtension(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+    int32_t userId, DataObsOption opt)
+{
+    return RegisterObserverInner(uri, dataObserver, userId, opt, true);
+}
+
+// just hisysevent now
+int32_t DataObsMgrService::VerifyDataSharePermission(Uri &uri, bool isRead, ObserverInfo &info)
+{
+    std::string uriStr = uri.ToString();
+    uint32_t tokenId = info.tokenId;
+    uint64_t fullTokenId = info.fullTokenId;
+    int ret;
+    bool isExtension = info.isExtension;
+    if (isExtension) {
+        ret = DataShare::DataSharePermission::IsExtensionValid(tokenId, fullTokenId, info.callingUserId);
+        if (ret != DataShare::E_OK) {
+            info.errMsg.append(std::to_string(info.isExtension) + "_IsExtensionValid");
+            TAG_LOGE(AAFwkTag::DBOBSMGR, "IsExtensionValid failed, uri:%{public}s, ret %{public}d,"
+                "fullToken %{public}" PRId64 " msg %{public}s", uriStr.c_str(), ret, fullTokenId, info.errMsg.c_str());
+            DataShare::DataSharePermission::ReportExtensionFault(ret, tokenId, uriStr, info.errMsg);
+            return ret;
+        }
+    }
+    return VerifyDataSharePermissionInner(uri, isRead, info);
+}
+
+int32_t DataObsMgrService::VerifyDataSharePermissionInner(Uri &uri, bool isRead, ObserverInfo &info)
+{
+    std::string uriStr = uri.ToString();
+    uint32_t tokenId = info.tokenId;
+    uint64_t fullTokenId = info.fullTokenId;
+    int ret;
+    bool isExtension = info.isExtension;
+    std::tie(ret, info.permission) = DataShare::DataSharePermission::GetUriPermission(uri,
+        info.userId, isRead, isExtension);
+    if (ret != DataShare::E_OK) {
+        info.errMsg.append(std::to_string(info.isExtension) + "_GetUriPermission");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "GetUriPermission failed, uri:%{public}s, isExtension %{public}d,"
+            "token %{public}d", uriStr.c_str(), isExtension, tokenId);
+        DataShare::DataSharePermission::ReportExtensionFault(ret, tokenId, uriStr, info.errMsg);
+        return ret;
+    }
+    uint32_t verifyToken = isExtension ? info.firstCallerTokenId : tokenId;
+    if (!DataShare::DataSharePermission::VerifyPermission(uri, verifyToken, info.permission, isExtension)) {
+        info.errMsg.append(std::to_string(info.isExtension) + "_VerifyPermission");
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "VerifyPermission failed, uri:%{public}s, isExtension %{public}d,"
+            "token %{public}d", uriStr.c_str(), isExtension, tokenId);
+        DataShare::DataSharePermission::ReportExtensionFault(ret, tokenId, uriStr, info.errMsg);
+        return DataShare::E_DATASHARE_PERMISSION_DENIED;
+    }
+    return 0;
+}
+
+int32_t DataObsMgrService::RegisterObserverInner(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+    int32_t userId, DataObsOption opt, bool isExtension)
 {
     if (dataObserver == nullptr) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "null dataObserver, uri:%{public}s",
@@ -241,11 +316,11 @@ int DataObsMgrService::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserve
     }
 
     uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
+    uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
     int32_t callingUserId = GetCallingUserId(tokenId);
     if (callingUserId < 0) {
         return DATAOBS_INVALID_USERID;
     }
-
     if (!IsCallingPermissionValid(opt, userId, callingUserId)) {
         return DATAOBS_NOT_SYSTEM_APP;
     }
@@ -253,6 +328,11 @@ int DataObsMgrService::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserve
     if (userId == -1) {
         userId = callingUserId;
     }
+    Uri uriTemp = uri;
+    ObserverInfo info(tokenId, fullTokenId, opt.FirstCallerTokenID(), userId, isExtension);
+    info.callingUserId = callingUserId;
+    info.errMsg = __FUNCTION__;
+    VerifyDataSharePermission(uriTemp, true, info);
 
     auto [success, observerNode] = ConstructObserverNode(dataObserver, userId, tokenId);
     if (!success) {
@@ -260,6 +340,7 @@ int DataObsMgrService::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserve
             CommonUtils::Anonymous(uri.ToString()).c_str(), userId);
         return DATAOBS_INVALID_USERID;
     }
+    observerNode.permission_ = info.permission;
     int status;
     if (const_cast<Uri &>(uri).GetScheme() == SHARE_PREFERENCES) {
         status = dataObsMgrInnerPref_->HandleRegisterObserver(uri, observerNode);
@@ -317,19 +398,40 @@ int DataObsMgrService::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObser
 
 int DataObsMgrService::NotifyChange(const Uri &uri, int32_t userId, DataObsOption opt)
 {
+    Uri innerUri = uri;
+    return NotifyChangeInner(innerUri, userId, opt, false);
+}
+
+int DataObsMgrService::NotifyChangeFromExtension(const Uri &uri, int32_t userId, DataObsOption opt)
+{
+    Uri innerUri = uri;
+    return NotifyChangeInner(innerUri, userId, opt, true);
+}
+
+int32_t DataObsMgrService::CheckTrusts(uint32_t consumerToken, uint32_t providerToken)
+{
+    uint32_t token = IPCSkeleton::GetCallingTokenID();
+    uint64_t fullToken = IPCSkeleton::GetCallingFullTokenID();
+    if (!IsSystemApp(token, fullToken)) {
+        return DATAOBS_NOT_SYSTEM_APP;
+    }
+    int ret = DataShare::DataSharePermission::CheckExtensionTrusts(consumerToken, providerToken);
+    return ret;
+}
+
+int32_t DataObsMgrService::NotifyChangeInner(Uri &uri, int32_t userId, DataObsOption opt, bool isExtension)
+{
     if (handler_ == nullptr) {
-        TAG_LOGE(
-            AAFwkTag::DBOBSMGR, "null handler, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "null handler, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_HANDLER_IS_NULL;
     }
-
     if (dataObsMgrInner_ == nullptr || dataObsMgrInnerExt_ == nullptr || dataObsMgrInnerPref_ == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "null dataObsMgr, uri:%{public}s",
-            CommonUtils::Anonymous(uri.ToString()).c_str());
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "null dataObsMgr,uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_INNER_IS_NULL;
     }
-
+    int32_t uid  = IPCSkeleton::GetCallingUid();
     uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
+    uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
     int32_t callingUserId = GetCallingUserId(tokenId);
     if (callingUserId < 0) {
         return DATAOBS_INVALID_USERID;
@@ -341,7 +443,12 @@ int DataObsMgrService::NotifyChange(const Uri &uri, int32_t userId, DataObsOptio
     if (userId == -1) {
         userId = callingUserId;
     }
-
+    if (uid != GetDataMgrServiceUid()) {
+        ObserverInfo info(tokenId, fullTokenId, opt.FirstCallerTokenID(), userId, isExtension);
+        info.callingUserId = callingUserId;
+        info.errMsg = __FUNCTION__;
+        VerifyDataSharePermission(uri, false, info);
+    }
     {
         std::lock_guard<ffrt::mutex> lck(taskCountMutex_);
         if (taskCount_ >= TASK_COUNT_MAX) {
@@ -351,7 +458,6 @@ int DataObsMgrService::NotifyChange(const Uri &uri, int32_t userId, DataObsOptio
         }
         ++taskCount_;
     }
-
     ChangeInfo changeInfo = { ChangeInfo::ChangeType::OTHER, { uri } };
     handler_->SubmitTask([this, uri, changeInfo, userId]() {
         if (const_cast<Uri &>(uri).GetScheme() == SHARE_PREFERENCES) {
@@ -363,7 +469,6 @@ int DataObsMgrService::NotifyChange(const Uri &uri, int32_t userId, DataObsOptio
         std::lock_guard<ffrt::mutex> lck(taskCountMutex_);
         --taskCount_;
     });
-
     return NO_ERROR;
 }
 
@@ -392,9 +497,13 @@ Status DataObsMgrService::RegisterObserverExt(const Uri &uri, sptr<IDataAbilityO
             CommonUtils::Anonymous(uri.ToString()).c_str(), userId);
         return DATAOBS_INVALID_USERID;
     }
+    Uri uriTemp = uri;
+    ObserverInfo info(tokenId, 0, 0, userId, false);
+    info.errMsg = __FUNCTION__;
+    VerifyDataSharePermissionInner(uriTemp, true, info);
 
     auto innerUri = uri;
-    return dataObsMgrInnerExt_->HandleRegisterObserver(innerUri, dataObserver, userId, tokenId, isDescendants);
+    return dataObsMgrInnerExt_->HandleRegisterObserver(innerUri, dataObserver, info, isDescendants);
 }
 
 Status DataObsMgrService::UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
@@ -463,48 +572,42 @@ Status DataObsMgrService::NotifyChangeExt(const ChangeInfo &changeInfo, DataObsO
         TAG_LOGE(AAFwkTag::DBOBSMGR, "null handler");
         return DATAOBS_SERVICE_HANDLER_IS_NULL;
     }
-
     if (dataObsMgrInner_ == nullptr || dataObsMgrInnerExt_ == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "dataObsMgrInner_:%{public}d or null dataObsMgrInnerExt",
-            dataObsMgrInner_ == nullptr);
+        LOG_ERROR("dataObsMgrInner_:%{public}d or null dataObsMgrInnerExt", dataObsMgrInner_ == nullptr);
         return DATAOBS_SERVICE_INNER_IS_NULL;
     }
     if (!IsCallingPermissionValid(opt)) {
         return DATAOBS_NOT_SYSTEM_APP;
     }
-
-    int userId = GetCallingUserId(IPCSkeleton::GetCallingTokenID());
+    auto tokenId = IPCSkeleton::GetCallingTokenID();
+    int userId = GetCallingUserId(tokenId);
     if (userId == -1) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "GetCallingUserId fail, type:%{public}d, userId:%{public}d",
-            changeInfo.changeType_, userId);
+        LOG_ERROR("GetCallingUserId fail, type:%{public}d, userId:%{public}d", changeInfo.changeType_, userId);
         return DATAOBS_INVALID_USERID;
     }
-
     ChangeInfo changes;
     Status result = DeepCopyChangeInfo(changeInfo, changes);
     if (result != SUCCESS) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR,
-            "copy data failed, changeType:%{public}ud,uris num:%{public}zu, "
-            "null data:%{public}d, size:%{public}ud",
+        LOG_ERROR("copy data failed,changeType:%{public}ud,uris num:%{public}zu,null data:%{public}d,size:%{public}ud",
             changeInfo.changeType_, changeInfo.uris_.size(), changeInfo.data_ == nullptr, changeInfo.size_);
         return result;
     }
-
     {
         std::lock_guard<ffrt::mutex> lck(taskCountMutex_);
         if (taskCount_ >= TASK_COUNT_MAX) {
-            TAG_LOGE(AAFwkTag::DBOBSMGR,
-                "task num maxed, changeType:%{public}ud,"
+            TAG_LOGE(AAFwkTag::DBOBSMGR, "task num maxed, changeType:%{public}ud,"
                 "uris num:%{public}zu, null data:%{public}d, size:%{public}ud",
                 changeInfo.changeType_, changeInfo.uris_.size(), changeInfo.data_ == nullptr, changeInfo.size_);
             return DATAOBS_SERVICE_TASK_LIMMIT;
         }
         ++taskCount_;
     }
-
-    handler_->SubmitTask([this, changes, userId]() {
+    handler_->SubmitTask([this, changes, userId, tokenId]() {
         dataObsMgrInnerExt_->HandleNotifyChange(changes, userId);
         for (auto &uri : changes.uris_) {
+            ObserverInfo info(tokenId, 0, 0, userId, false);
+            info.errMsg = "NotifyChangeExt";
+            VerifyDataSharePermissionInner(uri, false, info);
             dataObsMgrInner_->HandleNotifyChange(uri, userId);
         }
         delete [] static_cast<uint8_t *>(changes.data_);
