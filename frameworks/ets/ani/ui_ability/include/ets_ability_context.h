@@ -53,8 +53,9 @@ protected:
 
 class EtsAbilityContext final {
 public:
-    explicit EtsAbilityContext(std::shared_ptr<AbilityContext> context) : context_(std::move(context)) {}
-    ~EtsAbilityContext() = default;
+    explicit EtsAbilityContext(ani_env *env,
+        std::shared_ptr<AbilityContext> context) : env_(env), context_(std::move(context)) {}
+    ~EtsAbilityContext();
 
     static void StartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object call);
     static void StartAbilityWithOptions(
@@ -116,6 +117,7 @@ public:
         ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object call);
     static void StartAbilityWithAccountAndOptions(
         ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object aniOpt, ani_object call);
+    static void RestoreWindowStage(ani_env *env, ani_object aniObj, ani_object localStorageObj);
 
     static void Clean(ani_env *env, ani_object object);
     static ani_object SetEtsAbilityContext(ani_env *env, std::shared_ptr<AbilityContext> context);
@@ -180,6 +182,7 @@ private:
         ani_int etsAccountId, ani_object startOptionsObj, ani_object callback);
     void OnStartAbilityForResultWithAccountInner(ani_env *env, const AAFwk::StartOptions &startOptions,
         AAFwk::Want &want, const int accountId, ani_object startOptionsObj, ani_object callback);
+    void OnRestoreWindowStage(ani_env *env, ani_object aniObj, ani_object localStorageObj);
 
     void CreateOpenLinkTask(ani_env *env, const ani_object callbackobj,
         std::shared_ptr<AbilityContext> context, AAFwk::Want &want, int &requestCode);
@@ -189,9 +192,11 @@ private:
     void OnStartAbilityWithAccount(
         ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object aniOpt, ani_object call);
 
+    ani_env *env_ = nullptr;
     std::weak_ptr<AbilityContext> context_;
     static std::mutex requestCodeMutex_;
     sptr<EtsFreeInstallObserver> freeInstallObserver_ = nullptr;
+    ani_ref localStorageRef_ = nullptr;
 };
 
 struct EtsConnectionKey {

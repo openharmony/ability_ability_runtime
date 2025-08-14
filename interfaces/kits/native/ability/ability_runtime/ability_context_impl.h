@@ -120,6 +120,8 @@ public:
 
     ErrCode RestoreWindowStage(napi_env env, napi_value contentStorage) override;
 
+    ErrCode RestoreWindowStage(void *contentStorage) override;
+
     void SetStageContext(const std::shared_ptr<AbilityRuntime::Context> &stageContext);
 
     /**
@@ -147,6 +149,16 @@ public:
     std::unique_ptr<NativeReference>& GetContentStorage() override
     {
         return contentStorage_;
+    }
+
+    /**
+     * @brief Get ContentStorage.
+     *
+     * @return Returns the ContentStorage.
+     */
+    void *GetEtsContentStorage() override
+    {
+        return etsContentStorage_;
     }
 
     /**
@@ -375,6 +387,7 @@ private:
     std::shared_ptr<AbilityRuntime::Context> stageContext_ = nullptr;
     std::map<int, RuntimeTask> resultCallbacks_;
     std::unique_ptr<NativeReference> contentStorage_ = nullptr;
+    void *etsContentStorage_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> config_ = nullptr;
     std::shared_ptr<LocalCallContainer> localCallContainer_ = nullptr;
     std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback_;
@@ -399,6 +412,7 @@ private:
 
     std::mutex onRequestResultMutex_;
     std::vector<std::shared_ptr<OnRequestResultElement>> onRequestResults_;
+    std::mutex contentStorageMutex_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
