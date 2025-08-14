@@ -986,7 +986,7 @@ enum {
     /**
      * Result (2097388) for app not configured preload phase.
      */
-    ERR_APP_PRELOAD_PHASE_UNSET = 2097388,
+    ERR_INVALID_APP_PRELOAD_PHASE = 2097388,
 
     ERR_DO_CLOSURE_CALLBACK_FAILED = 2097397,
 
