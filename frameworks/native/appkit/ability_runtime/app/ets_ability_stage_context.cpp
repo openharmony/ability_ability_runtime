@@ -73,6 +73,10 @@ ani_object ETSAbilityStageContext::CreateEtsAbilityStageContext(ani_env *env, st
     ContextUtil::CreateEtsBaseContext(env, abilityStageCtxCls, obj, context);
     SetConfiguration(env, abilityStageCtxCls, obj, context);
     ani_ref* contextGlobalRef = new (std::nothrow) ani_ref;
+    if (contextGlobalRef == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "new ani_ref failed");
+        return nullptr;
+    }
     if ((status = env->GlobalReference_Create(obj, contextGlobalRef)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "GlobalReference_Create failed status: %{public}d", status);
         delete contextGlobalRef;
