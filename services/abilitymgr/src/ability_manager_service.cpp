@@ -12033,6 +12033,16 @@ int32_t AbilityManagerService::QueryAllAutoStartupApplications(std::vector<AutoS
     return abilityAutoStartupService_->QueryAllAutoStartupApplications(infoList, GetUserId());
 }
 
+int32_t AbilityManagerService::GetAutoStartupStatusForSelf(bool &isAutoStartEnabled)
+{
+    if (abilityAutoStartupService_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityAutoStartupService_ null");
+        return ERR_NO_INIT;
+    }
+    return abilityAutoStartupService_->GetAutoStartupStatusForSelf(IPCSkeleton::GetCallingTokenID(),
+        isAutoStartEnabled);
+}
+
 int AbilityManagerService::PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isTerminate)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
