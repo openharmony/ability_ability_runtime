@@ -14,6 +14,7 @@
  */
 #include "ability_tool_command.h"
 
+#include <charconv>
 #include <cstdio>
 #include <cstring>
 #include <getopt.h>
@@ -99,6 +100,16 @@ const struct option LONG_OPTIONS_FOR_TEST[] = {
 
 const int32_t ARG_LIST_INDEX_OFFSET = 2;
 } // namespace
+
+int32_t AbilityToolCommand::ConvertInteger(const std::string& str)
+{
+    int32_t number = 0;
+    auto res = std::from_chars(str.c_str(), str.c_str() + str.size(), number);
+    if (res.ec != std::errc()) {
+        TAG_LOGE(AAFwkTag::AA_TOOL, "number stoi(%{public}s) failed", str.c_str());
+    }
+    return number;
+}
 
 AbilityToolCommand::AbilityToolCommand(int argc, char* argv[]) : ShellCommand(argc, argv, ABILITY_TOOL_NAME)
 {
@@ -293,13 +304,13 @@ ErrCode AbilityToolCommand::ParseStartAbilityArgsFromCmd(Want& want, StartOption
                     paramValue.c_str());
                 if (paramName == "windowMode" &&
                     std::regex_match(paramValue, sm, std::regex(STRING_TEST_REGEX_INTEGER_NUMBERS))) {
-                    windowMode = std::stoi(paramValue);
+                    windowMode = ConvertInteger(paramValue);
                 }
                 break;
             case 'f':
                 paramValue = optarg;
                 if (std::regex_match(paramValue, sm, std::regex(STRING_TEST_REGEX_INTEGER_NUMBERS))) {
-                    flags = std::stoi(paramValue);
+                    flags = ConvertInteger(paramValue);
                 }
                 break;
             case 'C':
