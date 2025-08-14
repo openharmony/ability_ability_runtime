@@ -64,7 +64,7 @@ const std::string HELP_MSG_START =
     "options list:\n"
     "  -h, --help                                                   list available commands\n"
     "  [-d <device-id>] [-a <ability-name> -b <bundle-name>] [-m <module-name>] [-p <perf-cmd>] [-D] [-E] [-S] [-N]"
-    "  [-R] [-c] [--ps <key> <string-value>] "
+    "  [-R] [-c] [-s <window-mode only for FA mode> ] [--ps <key> <string-value>] "
     "  [--pi <key> <integer-value>] "
     "  [--pb <key> <boolean-value>] "
     "  [--psn <key>] "
