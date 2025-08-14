@@ -15,12 +15,14 @@
 #ifndef OHOS_ABILITY_RUNTIME_DUMP_PROCESS_HELPER_H
 #define OHOS_ABILITY_RUNTIME_DUMP_PROCESS_HELPER_H
 
+#include <string>
 #include <sys/types.h>
 
 namespace OHOS {
 namespace AppExecFwk {
 namespace DumpProcessHelper {
 uint64_t GetProcRssMemInfo();
+std::string GetThreadName();
 }  // namespace DumpProcessHelper
 }  // namespace AppExecFwk
 }  // namespace OHOS
