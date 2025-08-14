@@ -33,12 +33,21 @@ constexpr const char* DATAOBS_MANAGER_SERVICE_NAME = "DataObsMgrService";
 struct DataObsOption {
 private:
     bool isSystem = false;
+    uint32_t firstCallerTokenID = 0;
 public:
     DataObsOption() {}
     DataObsOption(bool isSystem):isSystem(isSystem) {}
     bool IsSystem()
     {
         return isSystem;
+    }
+    uint32_t FirstCallerTokenID()
+    {
+        return firstCallerTokenID;
+    }
+    void SetFirstCallerTokenID(uint32_t token)
+    {
+        firstCallerTokenID = token;
     }
 };
 
@@ -60,6 +69,9 @@ public:
         UNREGISTER_OBSERVER_ALL_EXT,
         NOTIFY_CHANGE_EXT,
         NOTIFY_PROCESS,
+        REGISTER_OBSERVER_FROM_EXTENSION,
+        NOTIFY_CHANGE_FROM_EXTENSION,
+        CHECK_TRUSTS,
         TRANS_BUTT,
     };
 
@@ -76,6 +88,17 @@ public:
     virtual int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
         int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
         DataObsOption opt = DataObsOption()) = 0;
+
+    /**
+     * Registers an observer to DataObsMgr specified by the given Uri.
+     *
+     * @param uri, Indicates the path of the data to operate.
+     * @param dataObserver, Indicates the IDataAbilityObserver object.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int RegisterObserverFromExtension(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+        int32_t userId = DATAOBS_DEFAULT_CURRENT_USER, DataObsOption opt = DataObsOption()) = 0;
 
     /**
      * Deregisters an observer used for DataObsMgr specified by the given Uri.
@@ -98,6 +121,18 @@ public:
      */
     virtual int NotifyChange(const Uri &uri, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
         DataObsOption opt = DataObsOption()) = 0;
+
+    /**
+     * Notifies the registered observers of a change to the data resource specified by Uri.
+     *
+     * @param uri, Indicates the path of the data to operate.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int NotifyChangeFromExtension(const Uri &uri, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
+        DataObsOption opt = DataObsOption()) = 0;
+
+    virtual ErrCode CheckTrusts(uint32_t consumerToken, uint32_t providerToken) = 0;
 
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.
