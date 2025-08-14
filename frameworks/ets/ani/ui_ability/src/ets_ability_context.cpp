@@ -76,6 +76,7 @@ constexpr const char *SIGNATURE_START_ABILITY_WITH_ACCOUNT_OPTIONS =
     "Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
+constexpr const char* SIGNATURE_RESTORE_WINDOW_STAGE = "Larkui/stateManagement/storage/localStorage/LocalStorage;:V";
 
 int64_t RequestCodeFromStringToInt64(const std::string &requestCode)
 {
@@ -135,6 +136,18 @@ void RemoveConnection(int32_t connectId)
 }
 } // namespace
 
+EtsAbilityContext::~EtsAbilityContext()
+{
+    if (env_ == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env");
+        return;
+    }
+    if (localStorageRef_ != nullptr) {
+        env_->GlobalReference_Delete(localStorageRef_);
+        localStorageRef_ = nullptr;
+    }
+}
+
 void EtsAbilityContext::Clean(ani_env *env, ani_object object)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "Clean called");
@@ -182,7 +195,7 @@ ani_object EtsAbilityContext::SetEtsAbilityContext(ani_env *env, std::shared_ptr
         TAG_LOGE(AAFwkTag::CONTEXT, "setEtsAbilityContextPtr FindMethod status: %{public}d, or null method", status);
         return nullptr;
     }
-    std::unique_ptr<EtsAbilityContext> etsContext = std::make_unique<EtsAbilityContext>(context);
+    std::unique_ptr<EtsAbilityContext> etsContext = std::make_unique<EtsAbilityContext>(env, context);
     if (etsContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
         return nullptr;
@@ -616,6 +629,18 @@ void EtsAbilityContext::SetMissionIcon(ani_env *env, ani_object aniObj, ani_obje
     etsContext->OnSetMissionIcon(env, aniObj, pixelMapObj, callbackObj);
 }
 #endif
+
+void EtsAbilityContext::RestoreWindowStage(
+    ani_env *env, ani_object aniObj, ani_object localStorageObj)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "RestoreWindowStage called");
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
+        return;
+    }
+    etsContext->OnRestoreWindowStage(env, aniObj, localStorageObj);
+}
 
 int32_t EtsAbilityContext::GenerateRequestCode()
 {
@@ -1517,6 +1542,35 @@ void EtsAbilityContext::OnStartAbilityForResultWithAccountInner(ani_env *env, co
             std::move(task));
 }
 
+void EtsAbilityContext::OnRestoreWindowStage(
+    ani_env *env, ani_object aniObj, ani_object localStorageObj)
+{
+    auto context = context_.lock();
+    if (!context) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    if (localStorageRef_ != nullptr) {
+        env->GlobalReference_Delete(localStorageRef_);
+        localStorageRef_ = nullptr;
+    }
+    if ((status = env->GlobalReference_Create(localStorageObj, &localStorageRef_)) != ANI_OK ||
+        localStorageRef_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return;
+    }
+    auto errCode = context->RestoreWindowStage(reinterpret_cast<void *>(localStorageRef_));
+    if (errCode != 0) {
+        env->GlobalReference_Delete(localStorageRef_);
+        localStorageRef_ = nullptr;
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return;
+    }
+}
+
 void EtsAbilityContext::AddFreeInstallObserver(
     ani_env *env, const AAFwk::Want &want, ani_object callback, bool isAbilityResult, bool isOpenLink)
 {
@@ -2009,6 +2063,8 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 "L@ohos/app/ability/Want/Want;IL@ohos/app/ability/StartOptions/StartOptions;"
                 "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void*>(EtsAbilityContext::StartAbilityForResultWithAccountResult) },
+            ani_native_function { "nativeRestoreWindowStage", SIGNATURE_RESTORE_WINDOW_STAGE,
+                reinterpret_cast<void *>(EtsAbilityContext::RestoreWindowStage) },
         };
         if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
             TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);
