@@ -106,6 +106,12 @@ public:
         ani_object callbackobj);
     static void StopAppServiceExtensionAbility(
         ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callbackobj);
+    static void StartAbilityForResultWithAccount(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int etsAccountId, ani_object callback);
+    static void StartAbilityForResultWithAccountVoid(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int etsAccountId, ani_object startOptionsObj, ani_object callback);
+    static void StartAbilityForResultWithAccountResult(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int etsAccountId, ani_object startOptionsObj, ani_object callback);
 
     static void Clean(ani_env *env, ani_object object);
     static ani_object SetEtsAbilityContext(ani_env *env, std::shared_ptr<AbilityContext> context);
@@ -165,6 +171,10 @@ private:
     void OnStartServiceExtensionAbilityWithAccount(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_int aniAccountId, ani_object callbackObj);
     void OnRevokeDelegator(ani_env *env, ani_object aniObj, ani_object callback);
+    void OnStartAbilityForResultWithAccount(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_int etsAccountId, ani_object startOptionsObj, ani_object callback);
+    void OnStartAbilityForResultWithAccountInner(ani_env *env, const AAFwk::StartOptions &startOptions,
+        AAFwk::Want &want, const int accountId, ani_object startOptionsObj, ani_object callback);
 
     void UnWrapOpenLinkOptions(ani_env *env, ani_object optionsObj, AAFwk::OpenLinkOptions &openLinkOptions,
         AAFwk::Want &want);
