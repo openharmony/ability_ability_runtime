@@ -439,7 +439,7 @@ private:
 
     // byCall
     int CallAbilityLocked(const AbilityRequest &abilityRequest, std::string &errMsg);
-    sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
+    sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest, int32_t requestId) const;
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo,
         const AbilityRequest &abilityRequest, std::string &errMsg);
     bool IsHookModule(const AbilityRequest &abilityRequest) const;

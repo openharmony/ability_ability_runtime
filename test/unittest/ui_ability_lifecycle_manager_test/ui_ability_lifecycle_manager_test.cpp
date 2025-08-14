@@ -352,7 +352,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CreateSessionInfo_001, TestSize.Level1)
     EXPECT_NE(mgr, nullptr);
     AbilityRequest abilityRequest;
     abilityRequest.startSetting = std::make_shared<AbilityStartSetting>();
-    EXPECT_NE(mgr->CreateSessionInfo(abilityRequest), nullptr);
+    int32_t requestId = 10000;
+    EXPECT_NE(mgr->CreateSessionInfo(abilityRequest, requestId), nullptr);
 }
 
 /**
