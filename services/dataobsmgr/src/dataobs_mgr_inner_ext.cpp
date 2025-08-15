@@ -15,6 +15,8 @@
 #include "dataobs_mgr_inner_ext.h"
 
 #include "data_ability_observer_stub.h"
+#include "data_share_permission.h"
+#include "datashare_errno.h"
 #include "dataobs_mgr_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "common_utils.h"
@@ -27,7 +29,7 @@ DataObsMgrInnerExt::DataObsMgrInnerExt() : root_(std::make_shared<Node>("root"))
 DataObsMgrInnerExt::~DataObsMgrInnerExt() {}
 
 Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver,
-    int32_t userId, uint32_t tokenId, bool isDescendants)
+    ObserverInfo &info, bool isDescendants)
 {
     if (dataObserver->AsObject() == nullptr) {
         return DATA_OBSERVER_IS_NULL;
@@ -40,8 +42,8 @@ Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObs
 
     std::vector<std::string> path = { uri.GetScheme(), uri.GetAuthority() };
     uri.GetPathSegments(path);
-    if (root_ != nullptr && !root_->AddObserver(path, 0, Entry(dataObserver, userId, tokenId,
-        deathRecipientRef, isDescendants))) {
+    Entry entry = Entry(dataObserver, info.userId, info.tokenId, deathRecipientRef, isDescendants);
+    if (root_ != nullptr && !root_->AddObserver(path, 0, entry)) {
         TAG_LOGE(AAFwkTag::DBOBSMGR,
             "subscribers:%{public}s num maxed",
             CommonUtils::Anonymous(uri.ToString()).c_str());
@@ -104,10 +106,23 @@ Status DataObsMgrInnerExt::HandleNotifyChange(const ChangeInfo &changeInfo, int3
         return NO_OBS_FOR_URI;
     }
     for (const auto &[obs, value] : changeRes) {
-        if (obs != nullptr && !value.empty()) {
-            obs->OnChangeExt(
-                { changeInfo.changeType_, move(value), changeInfo.data_, changeInfo.size_, changeInfo.valueBuckets_ });
+        if (obs == nullptr || value.uriList.empty()) {
+            continue;
         }
+        std::string permission = value.permission;
+        if (!permission.empty() &&
+            !DataShare::DataSharePermission::VerifyPermission(value.tokenId, permission)) {
+            std::string uriStr = value.uriList.front().ToString();
+            TAG_LOGW(AAFwkTag::DBOBSMGR, "permission deny, uri:%{public}s, token %{public}d permission %{public}s",
+                CommonUtils::Anonymous(uriStr).c_str(), value.tokenId, permission.c_str());
+            // just hisysevent now
+            std::string msg = __FUNCTION__;
+            DataShare::DataSharePermission::ReportExtensionFault(DataShare::E_DATASHARE_PERMISSION_DENIED,
+                value.tokenId, uriStr, msg);
+        }
+        obs->OnChangeExt(
+            { changeInfo.changeType_, move(value.uriList),
+            changeInfo.data_, changeInfo.size_, changeInfo.valueBuckets_ });
     }
 
     return SUCCESS;
@@ -181,7 +196,10 @@ void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint
                     "%{public}d", CommonUtils::Anonymous(uri.ToString()).c_str(), userId, entry.userId);
                 continue;
             }
-            obsRes.try_emplace(entry.observer, std::list<Uri>()).first->second.push_back(uri);
+            ObsNotifyInfo &notifyInfo = obsRes.try_emplace(entry.observer, ObsNotifyInfo()).first->second;
+            notifyInfo.uriList.push_back(uri);
+            notifyInfo.tokenId = entry.tokenId;
+            notifyInfo.permission = entry.permission;
         }
         return;
     }
@@ -193,7 +211,10 @@ void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint
                     "%{public}d", CommonUtils::Anonymous(uri.ToString()).c_str(), userId, entry.userId);
                 continue;
             }
-            obsRes.try_emplace(entry.observer, std::list<Uri>()).first->second.push_back(uri);
+            ObsNotifyInfo &notifyInfo = obsRes.try_emplace(entry.observer, ObsNotifyInfo()).first->second;
+            notifyInfo.uriList.push_back(uri);
+            notifyInfo.tokenId = entry.tokenId;
+            notifyInfo.permission = entry.permission;
         }
     }
 
