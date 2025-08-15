@@ -56,7 +56,7 @@ void ApplicationContext::RegisterAbilityLifecycleCallback(
     if (abilityLifecycleCallback == nullptr) {
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     callbacks_.push_back(abilityLifecycleCallback);
 }
 
@@ -64,7 +64,7 @@ void ApplicationContext::UnregisterAbilityLifecycleCallback(
     const std::shared_ptr<AbilityLifecycleCallback> &abilityLifecycleCallback)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     auto it = std::find(callbacks_.begin(), callbacks_.end(), abilityLifecycleCallback);
     if (it != callbacks_.end()) {
         callbacks_.erase(it);
@@ -95,7 +95,7 @@ void ApplicationContext::UnregisterInteropAbilityLifecycleCallback(
 
 bool ApplicationContext::IsAbilityLifecycleCallbackEmpty()
 {
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     return callbacks_.empty();
 }
 
@@ -134,7 +134,7 @@ void ApplicationContext::DispatchOnAbilityCreate(std::shared_ptr<NativeReference
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityCreate(ability);
@@ -148,7 +148,7 @@ void ApplicationContext::DispatchOnAbilityCreate(std::shared_ptr<AppExecFwk::ETS
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityCreate(ability);
@@ -179,7 +179,7 @@ void ApplicationContext::DispatchOnWindowStageCreate(std::shared_ptr<NativeRefer
         TAG_LOGE(AAFwkTag::APPKIT, "null ability or windowStage");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnWindowStageCreate(ability, windowStage);
@@ -194,7 +194,7 @@ void ApplicationContext::DispatchOnWindowStageCreate(std::shared_ptr<AppExecFwk:
         TAG_LOGE(AAFwkTag::APPKIT, "null ability or windowStage");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnWindowStageCreate(ability, windowStage);
@@ -226,7 +226,7 @@ void ApplicationContext::DispatchOnWindowStageDestroy(std::shared_ptr<NativeRefe
         TAG_LOGE(AAFwkTag::APPKIT, "null ability or windowStage");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnWindowStageDestroy(ability, windowStage);
@@ -241,7 +241,7 @@ void ApplicationContext::DispatchOnWindowStageDestroy(std::shared_ptr<AppExecFwk
         TAG_LOGE(AAFwkTag::APPKIT, "null env or ability or windowStage");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnWindowStageDestroy(ability, windowStage);
@@ -274,7 +274,7 @@ void ApplicationContext::DispatchWindowStageFocus(const std::shared_ptr<NativeRe
         TAG_LOGE(AAFwkTag::APPKIT, "null ability or windowStage");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnWindowStageActive(ability, windowStage);
@@ -290,7 +290,7 @@ void ApplicationContext::DispatchWindowStageUnfocus(const std::shared_ptr<Native
         TAG_LOGE(AAFwkTag::APPKIT, "null ability or windowStage");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnWindowStageInactive(ability, windowStage);
@@ -304,7 +304,7 @@ void ApplicationContext::DispatchOnAbilityDestroy(std::shared_ptr<NativeReferenc
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityDestroy(ability);
@@ -318,7 +318,7 @@ void ApplicationContext::DispatchOnAbilityDestroy(std::shared_ptr<AppExecFwk::ET
         TAG_LOGE(AAFwkTag::APPKIT, "null env or ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityDestroy(ability);
@@ -348,7 +348,7 @@ void ApplicationContext::DispatchOnAbilityForeground(std::shared_ptr<NativeRefer
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityForeground(ability);
@@ -362,7 +362,7 @@ void ApplicationContext::DispatchOnAbilityForeground(std::shared_ptr<AppExecFwk:
         TAG_LOGE(AAFwkTag::APPKIT, "null env or ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityForeground(ability);
@@ -392,7 +392,7 @@ void ApplicationContext::DispatchOnAbilityBackground(std::shared_ptr<NativeRefer
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityBackground(ability);
@@ -406,7 +406,7 @@ void ApplicationContext::DispatchOnAbilityBackground(std::shared_ptr<AppExecFwk:
         TAG_LOGE(AAFwkTag::APPKIT, "null env or ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityBackground(ability);
@@ -436,7 +436,7 @@ void ApplicationContext::DispatchOnAbilityContinue(const std::shared_ptr<NativeR
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityContinue(ability);
@@ -452,7 +452,7 @@ void ApplicationContext::DispatchOnAbilityWillContinue(const std::shared_ptr<Nat
         return;
     }
 
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityWillContinue(ability);
@@ -469,7 +469,7 @@ void ApplicationContext::DispatchOnWindowStageWillRestore(const std::shared_ptr<
         return;
     }
 
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnWindowStageWillRestore(ability, windowStage);
@@ -486,7 +486,7 @@ void ApplicationContext::DispatchOnWindowStageRestore(const std::shared_ptr<Nati
         return;
     }
 
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnWindowStageRestore(ability, windowStage);
@@ -502,7 +502,7 @@ void ApplicationContext::DispatchOnAbilityWillSaveState(const std::shared_ptr<Na
         return;
     }
 
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityWillSaveState(ability);
@@ -518,7 +518,7 @@ void ApplicationContext::DispatchOnAbilitySaveState(const std::shared_ptr<Native
         return;
     }
 
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilitySaveState(ability);
@@ -574,7 +574,7 @@ void ApplicationContext::DispatchOnWillNewWant(const std::shared_ptr<NativeRefer
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnWillNewWant(ability);
@@ -588,7 +588,7 @@ void ApplicationContext::DispatchOnNewWant(const std::shared_ptr<NativeReference
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnNewWant(ability);
@@ -603,7 +603,7 @@ void ApplicationContext::DispatchOnAbilityWillCreate(const std::shared_ptr<Nativ
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityWillCreate(ability);
@@ -619,7 +619,7 @@ void ApplicationContext::DispatchOnWindowStageWillCreate(const std::shared_ptr<N
         TAG_LOGE(AAFwkTag::APPKIT, "null ability or windowStage");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnWindowStageWillCreate(ability, windowStage);
@@ -635,7 +635,7 @@ void ApplicationContext::DispatchOnWindowStageWillDestroy(const std::shared_ptr<
         TAG_LOGE(AAFwkTag::APPKIT, "null ability or windowStage");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnWindowStageWillDestroy(ability, windowStage);
@@ -650,7 +650,7 @@ void ApplicationContext::DispatchOnAbilityWillDestroy(const std::shared_ptr<Nati
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityWillDestroy(ability);
@@ -665,7 +665,7 @@ void ApplicationContext::DispatchOnAbilityWillForeground(const std::shared_ptr<N
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityWillForeground(ability);
@@ -680,7 +680,7 @@ void ApplicationContext::DispatchOnAbilityWillBackground(const std::shared_ptr<N
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(callbackLock_);
+    std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityWillBackground(ability);
