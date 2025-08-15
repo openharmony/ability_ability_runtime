@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "extension_config_mgr.h"
+#include "mock/mock_runtime.h"
 #undef private
 #undef protected
 
@@ -39,6 +40,7 @@ namespace {
     constexpr int32_t EXTENSION_TYPE_WINDOW = 10;
     constexpr int32_t EXTENSION_TYPE_ENTERPRISE_ADMIN = 11;
     constexpr int32_t EXTENSION_TYPE_FILE_ACCESS = 12;
+    constexpr int32_t EXTENSION_TYPE_DRIVER = 18;
     constexpr char BLOCK_LIST_ITEM_SERVICE_EXTENSION[] = "ServiceExtension";
     constexpr char BLOCK_LIST_ITEM_FORM_EXTENSION[] = "FormExtension";
     constexpr char BLOCK_LIST_ITEM_FILE_ACCESS_EXTENSION[] = "FileAccessExtension";
@@ -51,6 +53,7 @@ namespace {
     constexpr char BLOCK_LIST_ITEM_INPUT_METHOD_EXTENSION_ABILITY[] = "InputMethodExtensionAbility";
     constexpr char BLOCK_LIST_ITEM_WORK_SCHEDULER_EXTENSION[] = "WorkSchedulerExtension";
     constexpr char BLOCK_LIST_ITEM_DATA_SHARE_EXTENSION[] = "DataShareExtension";
+    constexpr char BLOCK_LIST_ITEM_DRIVER_EXTENSION[] = "DriverExtension";
     constexpr char INVAILD_BLOCK_LIST_ITEM[] = "InvaildExtension";
 }
 
@@ -173,6 +176,300 @@ HWTEST_F(ExtensionConfigMgrTest, AddBlockListItem_0200, TestSize.Level1)
     mgr.AddBlockListItem(INVAILD_BLOCK_LIST_ITEM, EXTENSION_TYPE_FORM);
     bool result = (mgr.extensionBlocklist_.find(EXTENSION_TYPE_FORM) != mgr.extensionBlocklist_.end());
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GenerateExtensionEtsBlocklists_0100
+ * @tc.desc: Generate Extension ets block list Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, GenerateExtensionEtsBlocklists_0100, TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    std::unordered_set<std::string> set1 = { "111", "222", "333" };
+    mgr.extensionBlocklist_.clear();
+    mgr.extensionEtsBlocklist_.clear();
+    mgr.extensionBlocklist_.emplace(EXTENSION_TYPE_FORM, set1);
+    mgr.extensionType_ = EXTENSION_TYPE_WORK_SCHEDULER;
+    mgr.GenerateExtensionEtsBlocklists();
+    EXPECT_TRUE(mgr.extensionEtsBlocklist_.empty());
+
+    std::unordered_set<std::string> set2;
+    mgr.extensionBlocklist_.clear();
+    mgr.extensionEtsBlocklist_.clear();
+    mgr.extensionBlocklist_.emplace(EXTENSION_TYPE_FORM, set2);
+    mgr.extensionType_ = EXTENSION_TYPE_FORM;
+    mgr.GenerateExtensionEtsBlocklists();
+    EXPECT_TRUE(mgr.extensionEtsBlocklist_.empty());
+
+    mgr.extensionBlocklist_.clear();
+    mgr.extensionEtsBlocklist_.clear();
+    mgr.extensionBlocklist_.emplace(EXTENSION_TYPE_FORM, set1);
+    mgr.extensionType_ = EXTENSION_TYPE_FORM;
+    mgr.GenerateExtensionEtsBlocklists();
+    EXPECT_FALSE(mgr.extensionEtsBlocklist_.empty());
+    for (const auto& ele: set1) {
+        EXPECT_TRUE(mgr.extensionEtsBlocklist_.find(ele) != mgr.extensionEtsBlocklist_.end());
+    }
+}
+
+/**
+ * @tc.name: GenerateExtensionEtsBlocklists_ShouldDoNothing_WhenExtensionEtsBlocklistIsNotEmpty
+ * @tc.desc: func should do nothing when extensionEtsBlocklist is not empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, GenerateExtensionEtsBlocklists_ShouldDoNothing_WhenExtensionEtsBlocklistIsNotEmpty,
+    TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    mgr.extensionEtsBlocklist_ = { "module1", "module2" };
+    mgr.GenerateExtensionEtsBlocklists();
+
+    EXPECT_EQ(mgr.extensionEtsBlocklist_.size(), 2);
+    EXPECT_NE(mgr.extensionEtsBlocklist_.find("module1"), mgr.extensionEtsBlocklist_.end());
+    EXPECT_NE(mgr.extensionEtsBlocklist_.find("module2"), mgr.extensionEtsBlocklist_.end());
+}
+
+/**
+ * @tc.name: GetStringAfterRemovePreFix_ShouldRemoveOHOSPrefix_WhenNameStartsWithOHOS
+ * @tc.desc: func should remove prefix when input name startswith @ohos.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, GetStringAfterRemovePreFix_ShouldRemoveOHOSPrefix_WhenNameStartsWithOHOS,
+    TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    std::string input = "@ohos.example";
+    std::string expectOutput = "example";
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix(input), expectOutput);
+}
+
+/**
+ * @tc.name: GetStringAfterRemovePreFix_ShouldRemoveOtherPrefix_WhenNameStartsWithOther
+ * @tc.desc: func should remove prefix when input name startswith @xxx.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, GetStringAfterRemovePreFix_ShouldRemoveOtherPrefix_WhenNameStartsWithOther,
+    TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    std::string input = "@xxx.example";
+    std::string expectOutput = "example";
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix(input), expectOutput);
+
+    input = "@xx.example";
+    expectOutput = "example";
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix(input), expectOutput);
+}
+
+/**
+ * @tc.name: GetStringAfterRemovePreFix_ShouldNotRemovePrefix_WhenNameDoesNotStartsWithPrefix
+ * @tc.desc: func should not remove prefix when input name does not startswith any prefix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, GetStringAfterRemovePreFix_ShouldNotRemovePrefix_WhenNameDoesNotStartsWithPrefix,
+    TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    std::string input = "example";
+    std::string expectOutput = "example";
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix(input), expectOutput);
+}
+
+/**
+ * @tc.name: GetStringAfterRemovePreFix_ShouldHandleEmptyInput_WhenNameIsEmpty
+ * @tc.desc: func should handle empty input when input name is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, GetStringAfterRemovePreFix_ShouldHandleEmptyInput_WhenNameIsEmpty, TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    std::string input = "";
+    std::string expectOutput = "";
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix(input), expectOutput);
+}
+
+/**
+ * @tc.name: GetStringAfterRemovePreFix_ShouldHandleShortInput_WhenNameIsShorterThanPrefix
+ * @tc.desc: func should handle short input when input name is shorter than prefix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, GetStringAfterRemovePreFix_ShouldHandleShortInput_WhenNameIsShorterThanPrefix,
+    TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    std::string input = "11";
+    std::string expectOutput = "11";
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix(input), expectOutput);
+}
+
+/**
+ * @tc.name: GetStringAfterRemovePreFix_0100
+ * @tc.desc: GetStringAfterRemovePreFix Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, GetStringAfterRemovePreFix_0100, TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix("@ohos.aaa.bbb"), "aaa.bbb");
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix("aaaaaa"), "aaaaaa");
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix("aaa"), "aaa");
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix("@ohos."), "");
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix("@xxx."), "");
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix("@xxx.aaa"), "aaa");
+    EXPECT_EQ(mgr.GetStringAfterRemovePreFix("@xxx"), "@xxx");
+}
+
+/**
+ * @tc.name: CheckEtsModuleLoadable_ShouldReturnTrue_WhenFileNameIsPrefixAndNotInBlocklist
+ * @tc.desc: func should return true when file is prefix and not in blocklist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, CheckEtsModuleLoadable_ShouldReturnTrue_WhenFileNameIsPrefixAndNotInBlocklist,
+    TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    std::string className = "file.class";
+    std::string fileName = "file";
+    EXPECT_TRUE(mgr.CheckEtsModuleLoadable(className, fileName));
+}
+
+/**
+ * @tc.name: CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameIsNotPrefix
+ * @tc.desc: func should return false when file is not prefix.(note: class name should be "std::string(filename) + '.'")
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameIsNotPrefix, TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    std::string className = "file.class";
+    std::string fileName = "fileName";
+    EXPECT_FALSE(mgr.CheckEtsModuleLoadable(className, fileName));
+    EXPECT_FALSE(mgr.CheckEtsModuleLoadable("bundle.bundleApplication", "bundle.bundleApp"));
+}
+
+/**
+ * @tc.name: CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameIsLongerThanClassName
+ * @tc.desc: func should return false when file name is longer than class name.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameIsLongerThanClassName,
+    TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    std::string className = "file";
+    std::string fileName = "fileName";
+    EXPECT_FALSE(mgr.CheckEtsModuleLoadable(className, fileName));
+    EXPECT_FALSE(mgr.CheckEtsModuleLoadable("bundle.bundle", "bundle.bundle"));
+}
+
+/**
+ * @tc.name: CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameInBlockListAndStartsWithOHOS
+ * @tc.desc: func should return false when file name in blocklist and startswith ohos.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameInBlockListAndStartsWithOHOS,
+    TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    mgr.Init();
+    mgr.AddBlockListItem(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
+    mgr.extensionType_ = EXTENSION_TYPE_DRIVER;
+    mgr.GenerateExtensionEtsBlocklists();
+    EXPECT_FALSE(mgr.CheckEtsModuleLoadable("@ohos.abilityAccessCtrl.abilityAccessCtrl", "@ohos.abilityAccessCtrl"));
+}
+
+/**
+ * @tc.name: CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameInBlockListAndStartsWithXXX
+ * @tc.desc: func should return false when file name in blocklist and startswith xxx.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameInBlockListAndStartsWithXXX,
+    TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    mgr.Init();
+    mgr.AddBlockListItem(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
+    mgr.extensionType_ = EXTENSION_TYPE_DRIVER;
+    mgr.GenerateExtensionEtsBlocklists();
+    EXPECT_FALSE(mgr.CheckEtsModuleLoadable("@xxx.app.ability.appManager", "@xxx.app.ability.appManager"));
+}
+
+/**
+ * @tc.name: CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameInBlockListAndNotStartsWithPrefix
+ * @tc.desc: func should return false when file name in blocklist and not startswith prefix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest,
+    CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameInBlockListAndNotStartsWithPrefix, TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    mgr.Init();
+    mgr.AddBlockListItem(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
+    mgr.extensionType_ = EXTENSION_TYPE_DRIVER;
+    mgr.GenerateExtensionEtsBlocklists();
+
+    EXPECT_FALSE(mgr.CheckEtsModuleLoadable("abilityAccessCtrl.XXX", "abilityAccessCtrl"));
+    EXPECT_FALSE(mgr.CheckEtsModuleLoadable("bundle.bundle", "bundle"));
+    EXPECT_FALSE(mgr.CheckEtsModuleLoadable("bundle.bundleManager.bundleManager", "bundle.bundleManager"));
+}
+
+/**
+ * @tc.name: CheckEtsModuleLoadable_ShouldReturnTrue_WhenFileNameNotInBlockListAndStartsWithPrefix
+ * @tc.desc: func should return true when file name not in blocklist and startswith prefix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest,
+    CheckEtsModuleLoadable_ShouldReturnTrue_WhenFileNameNotInBlockListAndStartsWithPrefix, TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    mgr.Init();
+    mgr.AddBlockListItem(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
+    mgr.extensionType_ = EXTENSION_TYPE_DRIVER;
+    mgr.GenerateExtensionEtsBlocklists();
+
+    EXPECT_TRUE(mgr.CheckEtsModuleLoadable("@xxx.app.app.appManager.appManager", "@xxx.app.app.appManager"));
+    EXPECT_TRUE(mgr.CheckEtsModuleLoadable("@ohos.app.app.appManager.appManager", "@ohos.app.app.appManager"));
+}
+
+/**
+ * @tc.name: UpdateRuntimeModuleChecker_ShouldHandleEtsRuntime_WhenLanguageIsEts
+ * @tc.desc: func should handle ets runtime when language is EtsRuntime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, UpdateRuntimeModuleChecker_ShouldHandleEtsRuntime_WhenLanguageIsEts, TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    mgr.UpdateRuntimeModuleChecker(nullptr);
+    auto mockRuntimePtr = std::make_unique<MockRuntime>();
+    EXPECT_NE(mockRuntimePtr, nullptr);
+    std::unique_ptr<Runtime> runtime = std::move(mockRuntimePtr);
+    mgr.UpdateRuntimeModuleChecker(runtime);
+    MockRuntime &mockRuntime = static_cast<MockRuntime&>(*runtime);
+    EXPECT_TRUE(mockRuntime.extensionApiCheckerFlag_);
+    EXPECT_TRUE(mockRuntime.loadCheckerFlag_);
+    auto checkFunc = mockRuntime.GetExtensionApiCheckCallback();
+    EXPECT_NE(checkFunc, nullptr);
+    EXPECT_FALSE(checkFunc("111", "222"));
+}
+
+/**
+ * @tc.name: UpdateRuntimeModuleChecker_ShouldHandleNotEtsRuntime_WhenLanguageIsJs
+ * @tc.desc: func should handle not ets runtime when language is JsRuntime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, UpdateRuntimeModuleChecker_ShouldHandleNotEtsRuntime_WhenLanguageIsJs,
+    TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    auto mockRuntimePtr = std::make_unique<MockRuntime>();
+    EXPECT_NE(mockRuntimePtr, nullptr);
+    mockRuntimePtr->SetLanguage(Runtime::Language::JS);
+    std::unique_ptr<Runtime> runtime = std::move(mockRuntimePtr);
+    mgr.UpdateRuntimeModuleChecker(runtime);
+    MockRuntime &mockRuntime = static_cast<MockRuntime&>(*runtime);
+    EXPECT_TRUE(mockRuntime.loadCheckerFlag_);
+    EXPECT_FALSE(mockRuntime.extensionApiCheckerFlag_);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
