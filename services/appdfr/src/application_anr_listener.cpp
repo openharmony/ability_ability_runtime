@@ -25,15 +25,25 @@
 #include "hilog_tag_wrapper.h"
 #include "hisysevent.h"
 #include "time_util.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+const bool BETA_VERSION = OHOS::system::GetParameter("const.logsystem.versiontype", "unknown") == "beta";
+}
 ApplicationAnrListener::ApplicationAnrListener() {}
 
 ApplicationAnrListener::~ApplicationAnrListener() {}
 
 void ApplicationAnrListener::OnAnr(int32_t pid, int32_t eventId) const
 {
+    if (!BETA_VERSION) {
+        int32_t ret = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AAFWK, "HIVIEW_HALF_FREEZE_LOG",
+            HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PACKAGE_NAME", "");
+        TAG_LOGW(AAFwkTag::APPDFR, "hisysevent write HIVIEW_HALF_FREEZE_LOG, pid:%{public}d, packageName:,"
+            " ret:%{public}d", pid, ret);
+    }
     AppExecFwk::AppFaultDataBySA faultData;
     std::ifstream statmStream("/proc/" + std::to_string(pid) + "/statm");
     if (statmStream) {
