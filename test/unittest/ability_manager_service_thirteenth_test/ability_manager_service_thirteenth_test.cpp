@@ -39,6 +39,7 @@ constexpr int32_t FOUNDATION_UID = 5523;
 constexpr int32_t DMS_UID = 5522;
 constexpr int32_t LOW_MEMORY_KILL_WHILE_STARTING = 1111;
 constexpr int32_t DEFAULT_INVAL_VALUE = -1;
+constexpr int32_t PENG_LAI_UID = 7655;
 
 namespace OHOS {
 namespace AAFwk {
@@ -50,6 +51,15 @@ public:
     void TearDown();
     std::shared_ptr<AbilityRecord> MockAbilityRecord(AbilityType);
     sptr<Token> MockToken(AbilityType);
+};
+
+class MockISAInterceptor : public AbilityRuntime::ISAInterceptor {
+public:
+    int32_t OnCheckStarting(const std::string& params, Rule& rule) override { return 0; };
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
 };
 
 void AbilityManagerServiceThirteenthTest::SetUpTestCase() {}
@@ -2650,6 +2660,37 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, OnStartTest_002, TestSize.Level1)
     EXPECT_EQ(abilityManagerService->QueryServiceState(), ServiceRunningState::STATE_RUNNING);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest OnStartTest_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RegisterSAInterceptor
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterSAInterceptor
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, RegisterSAInterceptor_001, TestSize.Level1) {
+    sptr<AbilityRuntime::ISAInterceptor> interceptor = new (std::nothrow) MockISAInterceptor();
+    ASSERT_NE(interceptor, nullptr);
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityManagerService, nullptr);
+    auto result = abilityManagerService->RegisterSAInterceptor(interceptor);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RegisterSAInterceptor
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterSAInterceptor
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, RegisterSAInterceptor_002, TestSize.Level1) {
+    sptr<AbilityRuntime::ISAInterceptor> interceptor = new (std::nothrow) MockISAInterceptor();
+    ASSERT_NE(interceptor, nullptr);
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityManagerService, nullptr);
+    MyStatus::GetInstance().ipcGetCallingUid_ = PENG_LAI_UID;
+    auto result = abilityManagerService->RegisterSAInterceptor(interceptor);
+    EXPECT_EQ(result, ERR_OK);
 }
 } // namespace AAFwk
 } // namespace OHOS
