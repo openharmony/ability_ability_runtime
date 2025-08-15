@@ -132,6 +132,12 @@ void EtsUIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
         return;
     }
     UIAbility::Init(record, application, handler, token);
+#ifdef SUPPORT_GRAPHICS
+    if (abilityContext_ != nullptr) {
+        AppExecFwk::AppRecovery::GetInstance().AddAbility(
+            shared_from_this(), abilityContext_->GetAbilityInfo(), abilityContext_->GetToken());
+    }
+#endif
     std::string srcPath(abilityInfo->package);
     if (!abilityInfo->isModuleJson) {
         srcPath.append("/assets/js/");
