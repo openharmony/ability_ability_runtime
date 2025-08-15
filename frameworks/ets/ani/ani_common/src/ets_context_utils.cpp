@@ -465,12 +465,12 @@ ani_object NativeCreateDisplayContext(ani_env *env, ani_object aniObj, ani_long 
     auto context = GetBaseContext(env, aniObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null context");
-        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        EtsErrorUtil::ThrowRuntimeError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return reinterpret_cast<ani_object>(undefRef);
     }
     if (displayId < 0) {
         TAG_LOGE(AAFwkTag::APPKIT, "displayId is invalid, less than 0");
-        EtsErrorUtil::ThrowError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        EtsErrorUtil::ThrowRuntimeError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return reinterpret_cast<ani_object>(undefRef);
     }
     uint64_t validDisplayId = static_cast<uint64_t>(displayId);
