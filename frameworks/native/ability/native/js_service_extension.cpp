@@ -299,6 +299,18 @@ void JsServiceExtension::BindContext(napi_env env, napi_value obj)
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "end");
 }
 
+bool JsServiceExtension::HasScreenDensityBeenSet(std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
+{
+    TAG_LOGD(AAFwkTag::ABILITY, "call HasScreenDensityBeenSet");
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    if (resConfig == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null resConfig");
+        return false;
+    }
+    resourceManager->GetResConfig(*resConfig);
+    return resConfig->GetScreenDensityDpi() != Global::Resource::ScreenDensity::SCREEN_DENSITY_NOT_SET;
+}
+
 void JsServiceExtension::OnStart(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -312,7 +324,10 @@ void JsServiceExtension::OnStart(const AAFwk::Want &want)
         displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, displayId);
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "displayId %{public}d", displayId);
         auto configUtils = std::make_shared<ConfigurationUtils>();
-        configUtils->InitDisplayConfig(displayId, context->GetConfiguration(), context->GetResourceManager());
+        if (!HasScreenDensityBeenSet(context->GetResourceManager())) {
+            TAG_LOGD(AAFwkTag::ABILITY, "call InitDisplayConfig");
+            configUtils->InitDisplayConfig(displayId, context->GetConfiguration(), context->GetResourceManager());
+        }
 #endif //SUPPORT_GRAPHICS
     }
 
