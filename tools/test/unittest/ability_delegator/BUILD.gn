@@ -207,8 +207,6 @@ if (accessibility_enable) {
   ohos_unittest("accessibility_ability_command_test") {
     module_out_path = module_output_path
 
-    symlink_target_name = [ "ability_tool" ]
-
     include_dirs = []
 
     configs = [ ":tools_ability_delegator_config" ]
