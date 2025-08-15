@@ -92,7 +92,7 @@
 #include "softbus_bus_center.h"
 #include "start_ability_handler/start_ability_sandbox_savefile.h"
 #include "start_ability_utils.h"
-#include "hidden_start_utils.h"
+#include "start_options_utils.h"
 #include "startup_util.h"
 #include "status_bar_delegate_interface.h"
 #include "string_wrapper.h"
@@ -1872,18 +1872,8 @@ int AbilityManagerService::StartUIAbilityForOptionWrap(const Want &want, const S
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     int32_t ret = ERR_OK;
-
-    if (HiddenStartUtils::IsHiddenStart(options)) {
-        ret = HiddenStartUtils::CheckHiddenStartSupported(options);
-    } else if (AbilityPermissionUtil::GetInstance().IsStartSelfUIAbility() &&
-               options.processOptions != nullptr &&
-               options.processOptions->isStartFromNDK) {
-        ret = CheckStartSelfUIAbilityStartOptions(want, options);
-    } else {
-        ret = CheckProcessOptions(want, options, userId);
-    }
-
-    if (ret != ERR_OK) {
+    if ((ret = StartOptionsUtils::CheckProcessOptions(want, options, userId)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "check process oprions failed: %{public}d", ret);
         return ret;
     }
     return StartAbilityForOptionWrap(want, options, callerToken, isPendingWantCaller, userId, requestCode, false,
@@ -12069,78 +12059,6 @@ int AbilityManagerService::RegisterSessionHandler(const sptr<IRemoteObject> &obj
     return ERR_OK;
 }
 
-int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const StartOptions &startOptions, int32_t userId)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (startOptions.processOptions == nullptr ||
-        (!ProcessOptions::IsValidProcessMode(startOptions.processOptions->processMode) &&
-        !startOptions.processOptions->isRestartKeepAlive)) {
-        return ERR_OK;
-    }
-
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "start ability with process options");
-    bool isEnable = AppUtils::GetInstance().IsStartOptionsWithProcessOptions();
-    CHECK_TRUE_RETURN_RET(!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() || !isEnable,
-        ERR_CAPABILITY_NOT_SUPPORT, "not support process options");
-
-    auto element = want.GetElement();
-    CHECK_TRUE_RETURN_RET(element.GetAbilityName().empty() || want.GetAction().compare(ACTION_CHOOSE) == 0,
-        ERR_NOT_ALLOW_IMPLICIT_START, "not allow implicit start");
-
-    if (PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS_NAME)
-        && startOptions.processOptions->isRestartKeepAlive) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "restart keep-alive app.");
-        return ERR_OK;
-    }
-
-    int32_t appIndex = 0;
-    appIndex = !AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex) ? 0 : appIndex;
-    CHECK_TRUE_RETURN_RET(!CheckCallingTokenId(element.GetBundleName(), userId, appIndex),
-        ERR_NOT_SELF_APPLICATION, "not self application");
-
-    auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
-    CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-
-    auto callerPid = IPCSkeleton::GetCallingPid();
-    AppExecFwk::RunningProcessInfo processInfo;
-    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
-    CHECK_TRUE_RETURN_RET((ProcessOptions::IsAttachToStatusBarMode(startOptions.processOptions->processMode) &&
-        !uiAbilityManager->IsCallerInStatusBar(processInfo.instanceKey)), ERR_START_OPTIONS_CHECK_FAILED,
-        "not in status bar");
-
-    auto abilityRecords = uiAbilityManager->GetAbilityRecordsByName(element);
-    CHECK_TRUE_RETURN_RET(!abilityRecords.empty() && abilityRecords[0] &&
-        abilityRecords[0]->GetAbilityInfo().launchMode != AppExecFwk::LaunchMode::STANDARD &&
-        abilityRecords[0]->GetAbilityInfo().launchMode != AppExecFwk::LaunchMode::SPECIFIED,
-        ERR_ABILITY_ALREADY_RUNNING, "if not STANDARD or SPECIFIED mode, repeated starts not allowed");
-
-    return ERR_OK;
-}
-
-int32_t AbilityManagerService::CheckStartSelfUIAbilityStartOptions(const Want &want, const StartOptions &startOptions)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (startOptions.processOptions == nullptr) {
-        return ERR_OK;
-    }
-
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "start ability with process options");
-    bool isEnable = AppUtils::GetInstance().IsStartOptionsWithProcessOptions();
-    CHECK_TRUE_RETURN_RET(!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() || !isEnable,
-        ERR_CAPABILITY_NOT_SUPPORT, "not support process options");
-
-    auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
-    CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-
-    auto callerPid = IPCSkeleton::GetCallingPid();
-    AppExecFwk::RunningProcessInfo processInfo;
-    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByChildProcessPid(callerPid, processInfo);
-    CHECK_TRUE_RETURN_RET(!uiAbilityManager->IsCallerInStatusBar(processInfo.instanceKey), ERR_START_OPTIONS_CHECK_FAILED,
-        "not in status bar");
-
-    return ERR_OK;
-}
-
 int32_t AbilityManagerService::RegisterAppDebugListener(sptr<AppExecFwk::IAppDebugListener> listener)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
@@ -14507,7 +14425,7 @@ int AbilityManagerService::StartSelfUIAbilityInner(StartSelfUIAbilityParam param
     AppExecFwk::AbilityInfo abilityInfo;
     CHECK_TRUE_RETURN_RET(!IN_PROCESS_CALL(bundleMgrHelper->QueryAbilityInfo(param.want,
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, GetUserId(), abilityInfo)),
-        ERR_NOT_ALLOW_IMPLICIT_START, "bundle or ability not exist");
+        TARGET_BUNDLE_NOT_EXIST, "bundle or ability not exist");
 
     CHECK_TRUE_RETURN_RET(abilityInfo.type != AppExecFwk::AbilityType::PAGE,
         RESOLVE_CALL_ABILITY_TYPE_ERR, "not UIAbility");
@@ -14557,7 +14475,6 @@ int AbilityManagerService::StartSelfUIAbility(const Want &want)
         return INNER_ERR;
     }
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "called");
 
     StartSelfUIAbilityParam param;
     param.want = want;
