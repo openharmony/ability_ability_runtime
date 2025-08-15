@@ -69,6 +69,11 @@ const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE =
     "Lstd/core/String;Lescompat/Record;Lapplication/AbilityStartCallback/AbilityStartCallback;:L@ohos/base/"
     "BusinessError;";
+constexpr const char *SIGNATURE_START_ABILITY_WITH_ACCOUNT =
+    "L@ohos/app/ability/Want/Want;ILutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char *SIGNATURE_START_ABILITY_WITH_ACCOUNT_OPTIONS =
+    "L@ohos/app/ability/Want/Want;IL@ohos/app/ability/StartOptions/StartOptions;"
+    "Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
 
@@ -561,6 +566,31 @@ void EtsAbilityContext::StopAppServiceExtensionAbility(ani_env *env, ani_object 
         AppExecFwk::ExtensionAbilityType::APP_SERVICE);
 }
 
+void EtsAbilityContext::StartAbilityWithAccount(
+    ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object call)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::CONTEXT, "StartAbilityWithAccount called");
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
+        return;
+    }
+    etsContext->OnStartAbilityWithAccount(env, aniObj, aniWant, aniAccountId, nullptr, call);
+}
+
+void EtsAbilityContext::StartAbilityWithAccountAndOptions(
+    ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object aniOpt, ani_object call)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::CONTEXT, "StartAbilityWithAccountAndOptions called");
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
+        return;
+    }
+    etsContext->OnStartAbilityWithAccount(env, aniObj, aniWant, aniAccountId, aniOpt, call);
+}
 #ifdef SUPPORT_SCREEN
 void EtsAbilityContext::SetAbilityInstanceInfo(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object iconObj,
     ani_object callback)
@@ -595,7 +625,7 @@ int32_t EtsAbilityContext::GenerateRequestCode()
     return curRequestCode_;
 }
 
-void EtsAbilityContext::InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want)
+void EtsAbilityContext::InheritWindowMode(AAFwk::Want &want)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "InheritWindowMode");
 #ifdef SUPPORT_SCREEN
@@ -624,7 +654,7 @@ void EtsAbilityContext::OnStartAbility(
         EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, must be a Want");
         return;
     }
-    InheritWindowMode(env, aniObj, want);
+    InheritWindowMode(want);
     auto context = context_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
@@ -636,7 +666,7 @@ void EtsAbilityContext::OnStartAbility(
             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
                 .count());
         want.SetParam(AAFwk::Want::PARAM_RESV_START_TIME, startTime);
-        AddFreeInstallObserver(env, want, call, context);
+        AddFreeInstallObserver(env, want, call);
     }
     ErrCode innerErrCode = ERR_OK;
     if (opt != nullptr) {
@@ -750,7 +780,7 @@ void EtsAbilityContext::StartAbilityForResultInner(ani_env *env, const AAFwk::St
     }
     if ((want.GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
         want.SetParam(AAFwk::Want::PARAM_RESV_START_TIME, startTime);
-        AddFreeInstallObserver(env, want, callback, context, true);
+        AddFreeInstallObserver(env, want, callback, true);
     }
     RuntimeTask task = [etsVm, callbackRef, element = want.GetElement(), flags = want.GetFlags(), startTime,
         observer = freeInstallObserver_](int resultCode, const AAFwk::Want &want, bool isInner) {
@@ -971,7 +1001,7 @@ void EtsAbilityContext::OnOpenLink(ani_env *env, ani_object aniObj, ani_string a
         AppExecFwk::AsyncCallback(env, myCallbackobj, aniObject, nullptr);
         return;
     }
-    AddFreeInstallObserver(env, want, myCallbackobj, context, false, true);
+    AddFreeInstallObserver(env, want, myCallbackobj, false, true);
     if (haveCallBackParm) {
         TAG_LOGD(AAFwkTag::CONTEXT, "OpenLink Have Callback");
         CreateOpenLinkTask(env, callbackobj, context, want, requestCode);
@@ -1421,7 +1451,7 @@ void EtsAbilityContext::OnStartAbilityForResultWithAccount(ani_env *env, ani_obj
         EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
         return;
     }
-    InheritWindowMode(env, aniObj, want);
+    InheritWindowMode(want);
     int32_t accountId = static_cast<int32_t>(etsAccountId);
     AAFwk::StartOptions startOptions;
     if (startOptionsObj) {
@@ -1452,7 +1482,7 @@ void EtsAbilityContext::OnStartAbilityForResultWithAccountInner(ani_env *env, co
     }
     if ((want.GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
         want.SetParam(AAFwk::Want::PARAM_RESV_START_TIME, startTime);
-        AddFreeInstallObserver(env, want, callback, context, true);
+        AddFreeInstallObserver(env, want, callback, true);
     }
     RuntimeTask task = [etsVm, callbackRef, element = want.GetElement(), flags = want.GetFlags(), startTime,
         observer = freeInstallObserver_](int resultCode, const AAFwk::Want &want, bool isInner) {
@@ -1487,15 +1517,16 @@ void EtsAbilityContext::OnStartAbilityForResultWithAccountInner(ani_env *env, co
             std::move(task));
 }
 
-void EtsAbilityContext::AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want, ani_object callback,
-    const std::shared_ptr<AbilityContext> &context, bool isAbilityResult, bool isOpenLink)
+void EtsAbilityContext::AddFreeInstallObserver(
+    ani_env *env, const AAFwk::Want &want, ani_object callback, bool isAbilityResult, bool isOpenLink)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "AddFreeInstallObserver");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null env");
         return;
     }
-    if (context == nullptr) {
+    auto context = context_.lock();
+    if (!context) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
         return;
     }
@@ -1673,7 +1704,7 @@ void EtsAbilityContext::OpenAtomicServiceInner(ani_env *env, ani_object aniObj, 
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
         return;
     }
-    AddFreeInstallObserver(env, want, callbackObj, context, true);
+    AddFreeInstallObserver(env, want, callbackObj, true);
     ani_vm *etsVm = nullptr;
     ani_status status = ANI_ERROR;
     if ((status = env->GetVM(&etsVm)) != ANI_OK || etsVm == nullptr) {
@@ -1821,6 +1852,49 @@ void EtsAbilityContext::StartAbilityForResultWithAccountResult(ani_env *env, ani
     etsContext->OnStartAbilityForResultWithAccount(env, aniObj, wantObj, etsAccountId, startOptionsObj, callback);
 }
 
+void EtsAbilityContext::OnStartAbilityWithAccount(
+    ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object aniOpt, ani_object call)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    AAFwk::Want want;
+    AppExecFwk::UnwrapWant(env, aniWant, want);
+    InheritWindowMode(want);
+    TAG_LOGI(AAFwkTag::CONTEXT, "ability:%{public}s", want.GetElement().GetAbilityName().c_str());
+    ErrCode innerErrCode = ERR_OK;
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "context null");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
+    }
+    if ((want.GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
+        std::string startTime = std::to_string(
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+                .count());
+        want.SetParam(AAFwk::Want::PARAM_RESV_START_TIME, startTime);
+        AddFreeInstallObserver(env, want, call);
+    }
+    if (aniOpt != nullptr) {
+        AAFwk::StartOptions startOptions;
+        TAG_LOGD(AAFwkTag::CONTEXT, "start options is used");
+        AppExecFwk::UnwrapStartOptions(env, aniOpt, startOptions);
+        innerErrCode = context->StartAbilityWithAccount(want, aniAccountId, startOptions, -1);
+    } else {
+        innerErrCode = context->StartAbilityWithAccount(want, aniAccountId, -1);
+    }
+    ani_object aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, innerErrCode);
+    if ((want.GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
+        if (innerErrCode != ERR_OK && freeInstallObserver_ != nullptr) {
+            std::string bundleName = want.GetElement().GetBundleName();
+            std::string abilityName = want.GetElement().GetAbilityName();
+            std::string startTime = want.GetStringParam(AAFwk::Want::PARAM_RESV_START_TIME);
+            freeInstallObserver_->OnInstallFinished(bundleName, abilityName, startTime, innerErrCode);
+        }
+        return;
+    }
+    AppExecFwk::AsyncCallback(env, call, aniObject, nullptr);
+}
+
 namespace {
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
@@ -1910,6 +1984,10 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             ani_native_function { "nativeStopAppServiceExtensionAbility",
                 "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsAbilityContext::StopAppServiceExtensionAbility) },
+            ani_native_function { "nativeStartAbilityWithAccountSync", SIGNATURE_START_ABILITY_WITH_ACCOUNT,
+                reinterpret_cast<void*>(EtsAbilityContext::StartAbilityWithAccount) },
+            ani_native_function { "nativeStartAbilityWithAccountSync", SIGNATURE_START_ABILITY_WITH_ACCOUNT_OPTIONS,
+                reinterpret_cast<void*>(EtsAbilityContext::StartAbilityWithAccountAndOptions) },
 #ifdef SUPPORT_GRAPHICS
             ani_native_function { "nativeSetAbilityInstanceInfo",
                 "Lstd/core/String;L@ohos/multimedia/image/image/PixelMap;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
