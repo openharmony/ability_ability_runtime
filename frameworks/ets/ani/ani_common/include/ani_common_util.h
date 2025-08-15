@@ -75,6 +75,7 @@ bool GetLongPropertyObject(ani_env *env, ani_object param, const char *name, ani
 bool GetDoublePropertyValue(ani_env *env, ani_object param, const char *name, double &value);
 bool GetIntPropertyValue(ani_env *env, ani_object param, const char *name, int32_t &value);
 bool GetRefProperty(ani_env *env, ani_object param, const char *name, ani_ref &value);
+bool GetBooleanPropertyObject(ani_env *env, ani_object param, const char *name, bool &value);
 
 bool SetDoublePropertyObject(ani_env *env, ani_object param, const char *name, double value);
 bool SetDoublePropertyValue(ani_env *env, ani_object param, const char *name, double value);
