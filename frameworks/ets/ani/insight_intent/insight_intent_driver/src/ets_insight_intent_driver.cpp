@@ -34,7 +34,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 namespace {
-constexpr const char *DRIVER_CLASS_NAME = "L@ohos/app/ability/insightIntentDriver/insightIntentDriver;";
+constexpr const char *DRIVER_CLASS_NAME = "@ohos.app.ability.insightIntentDriver.insightIntentDriver";
 }
 class EtsInsightIntentExecuteCallbackClient : public InsightIntentExecuteCallbackInterface,
     public std::enable_shared_from_this<EtsInsightIntentExecuteCallbackClient> {

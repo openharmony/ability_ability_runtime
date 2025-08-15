@@ -20,7 +20,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-constexpr const char* WANT_AGENT_CLASS = "L@ohos/app/ability/wantAgent/wantAgent/WantAgentCls;";
+constexpr const char* WANT_AGENT_CLASS = "@ohos.app.ability.wantAgent.wantAgent.WantAgentCls";
 
 ani_object CreateWantAgent(ani_env *env, ani_long ptr)
 {
