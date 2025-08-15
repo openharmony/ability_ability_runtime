@@ -82,7 +82,7 @@ public:
     };
 };
 
-class MockAbilityManagerCollaborator : public IAbilityManagernotifysCollaborator {
+class MockAbilityManagerCollaborator : public IAbilityManagerCollaborator {
 public:
     MOCK_METHOD5(NotifyStartAbility, int32_t(const AppExecFwk::AbilityInfo &abilityInfo,
         int32_t userId, Want &want, uint64_t accessTokenIDEx, int32_t windowMode));
