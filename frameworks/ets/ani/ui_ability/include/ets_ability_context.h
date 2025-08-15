@@ -112,6 +112,10 @@ public:
         ani_int etsAccountId, ani_object startOptionsObj, ani_object callback);
     static void StartAbilityForResultWithAccountResult(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_int etsAccountId, ani_object startOptionsObj, ani_object callback);
+    static void StartAbilityWithAccount(
+        ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object call);
+    static void StartAbilityWithAccountAndOptions(
+        ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object aniOpt, ani_object call);
 
     static void Clean(ani_env *env, ani_object object);
     static ani_object SetEtsAbilityContext(ani_env *env, std::shared_ptr<AbilityContext> context);
@@ -132,7 +136,7 @@ private:
     void OnSetMissionIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj, ani_object callbackObj);
 #endif
 private:
-    void InheritWindowMode(ani_env *env, ani_object aniObj, AAFwk::Want &want);
+    void InheritWindowMode(AAFwk::Want &want);
     void OnStartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call);
     void OnStartAbilityForResult(
         ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj, ani_object callback);
@@ -140,7 +144,7 @@ private:
     void OnTerminateSelfWithResult(ani_env *env, ani_object aniObj, ani_object abilityResult, ani_object callback);
     void OnReportDrawnCompleted(ani_env *env, ani_object aniObj, ani_object call);
     void AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want, ani_object callback,
-        const std::shared_ptr<AbilityContext> &context, bool isAbilityResult = false, bool isOpenLink = false);
+        bool isAbilityResult = false, bool isOpenLink = false);
     void StartAbilityForResultInner(ani_env *env, const AAFwk::StartOptions &startOptions, AAFwk::Want &want,
         std::shared_ptr<AbilityContext> context, ani_object startOptionsObj, ani_object callback);
     void OnStartServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
@@ -182,6 +186,8 @@ private:
     int32_t GenerateRequestCode();
     void OpenAtomicServiceInner(ani_env *env, ani_object aniObj, AAFwk::Want &want,
         AAFwk::StartOptions &options, std::string appId, ani_object callbackObj);
+    void OnStartAbilityWithAccount(
+        ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object aniOpt, ani_object call);
 
     std::weak_ptr<AbilityContext> context_;
     static std::mutex requestCodeMutex_;
