@@ -584,6 +584,9 @@ ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
         .GetAniEnv = []() {
             return ETSEnvironment::GetInstance()->GetAniEnv();
         },
+        .HandleUncaughtError = []() {
+            ETSEnvironment::GetInstance()->HandleUncaughtError();
+        },
         .PreloadModule = [](const std::string &modulePath) {
             return ETSEnvironment::GetInstance()->PreloadModule(modulePath);
         },
