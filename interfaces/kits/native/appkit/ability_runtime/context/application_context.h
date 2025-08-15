@@ -190,6 +190,9 @@ protected:
     }
 
 private:
+    std::vector<std::shared_ptr<InteropAbilityLifecycleCallback>> GetInteropCallbacks();
+
+private:
     std::shared_ptr<ContextImpl> contextImpl_;
     static std::vector<std::shared_ptr<AbilityLifecycleCallback>> callbacks_;
     static std::vector<std::shared_ptr<InteropAbilityLifecycleCallback>> interopCallbacks_;
