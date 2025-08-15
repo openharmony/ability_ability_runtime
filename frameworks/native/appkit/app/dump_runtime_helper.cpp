@@ -15,6 +15,10 @@
 
 #include "dump_runtime_helper.h"
 
+#include <dfx_signal_handler.h>
+#include <sys/statvfs.h>
+#include <sys/stat.h>
+#include <sys/xattr.h>
 #include "app_mgr_client.h"
 #include "faultloggerd_client.h"
 #include "hilog_tag_wrapper.h"
@@ -22,9 +26,6 @@
 #include "js_runtime_utils.h"
 #include "singleton.h"
 #include "dfx_jsnapi.h"
-#include <sys/statvfs.h>
-#include <sys/stat.h>
-#include <sys/xattr.h>
 #include "parameters.h"
 #include "ffrt.h"
 #include "directory_ex.h"
@@ -46,6 +47,8 @@ static constexpr const char* const OOM_QUOTA_XATTR_NAME = "user.oomdump.quota";
 static constexpr const char* const PROPERTY2C = "user.oomdumptelemetry.quota";
 static constexpr const char* const HIAPPEVENT_PATH = "/data/storage/el2/base/cache/hiappevent";
 static constexpr const char* const OOM_QUOTA_PATH = "/data/storage/el2/base/cache/rawheap";
+static constexpr const char* const JS_HEAP_LOGTYPE = "user.event_config.js_heap_logtype";
+static constexpr const char* const EVENT_RAWHEAP = "event_rawheap";
 static constexpr uint64_t OOM_DUMP_INTERVAL = 7 * 24 * 60 * 60;
 static constexpr uint64_t OOM_DUMP_SPACE_LIMIT = 30ull * 1024 * 1024 * 1024;
 static constexpr uint32_t EVENT_RESOURCE_OVERLIMIT_MASK = 6;
@@ -92,7 +95,9 @@ void DumpRuntimeHelper::SetAppFreezeFilterCallback()
         TAG_LOGE(AAFwkTag::APPKIT, "null runtime");
         return;
     }
-    auto appfreezeFilterCallback = [this] (const int32_t pid, const bool needDecreaseQuota) -> bool {
+    auto appfreezeFilterCallback =
+        [this] (const int32_t pid, const bool needDecreaseQuota, std::string &eventConfig) -> bool {
+        eventConfig = GetEventConfig(JS_HEAP_LOGTYPE);
         auto client = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
         if (client == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null client");
@@ -109,13 +114,15 @@ void DumpRuntimeHelper::SetAppFreezeFilterCallback()
             client->SetAppFreezeFilter(pid);
             return true;
         }
+        bool ret2custom = (eventConfig == EVENT_RAWHEAP);
         bool ret2D = Check2DQuota(needDecreaseQuota);
         bool ret2C = Check2CQuota();
-        if (!ret2D && !ret2C) {
-            TAG_LOGI(AAFwkTag::APPKIT, "check 2C 2D quota both failed, no dump.");
+        if (!ret2custom && !ret2D && !ret2C) {
+            TAG_LOGI(AAFwkTag::APPKIT, "check custom|2C|2D quota both failed, no dump.");
             return false;
         }
-        TAG_LOGI(AAFwkTag::APPKIT, "check success, will dump. 2C: %{public}d, 2D: %{public}d", ret2C, ret2D);
+        TAG_LOGI(AAFwkTag::APPKIT, "check success, will dump. custom: %{public}d 2C: %{public}d, 2D: %{public}d",
+                 ret2custom, ret2C, ret2D);
         client->SetAppFreezeFilter(pid);
         return true;
     };
@@ -135,7 +142,7 @@ bool DumpRuntimeHelper::Check2CQuota()
 {
     std::vector<int64_t> quota2C;
     if (!GetQuota(OOM_QUOTA_PATH, PROPERTY2C, quota2C, PROPERTY2C_SIZE)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed to GetQuota, PROPERTY2C: %{public}s", PROPERTY2C);
+        TAG_LOGE(AAFwkTag::APPKIT, "failed to GetQuota for PROPERTY2C");
         return false;
     }
 
@@ -392,7 +399,6 @@ bool DumpRuntimeHelper::CreateDir(const std::string &path)
         TAG_LOGE(AAFwkTag::APPKIT, "Failed to create dir: %{public}s", path.c_str());
         return false;
     }
-    TAG_LOGI(AAFwkTag::APPKIT, "success to CreateDir. dir: %{public}s", path.c_str());
     return true;
 }
 
@@ -438,8 +444,7 @@ bool DumpRuntimeHelper::GetQuota(const std::string &path, const std::string &pro
 {
     std::string value;
     if (!GetDirXattr(path, property, value)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get xattr. path: %{public}s, preperty: %{public}s",
-            path.c_str(), property.c_str());
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get xattr. preperty: %{public}s", property.c_str());
         return false;
     }
     size_t commaCount = static_cast<size_t>(std::count(value.begin(), value.end(), ','));
@@ -579,8 +584,8 @@ bool DumpRuntimeHelper::GetDirXattr(const std::string &path, const std::string &
 {
     char buf[BUF_SIZE_256] = {0};
     if (getxattr(path.c_str(), name.c_str(), buf, sizeof(buf) - 1) == -1) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed getxattr, path: %{public}s, name: %{public}s, err: %{public}d:%{public}s",
-            path.c_str(), name.c_str(), errno, strerror(errno));
+        TAG_LOGE(AAFwkTag::APPKIT, "failed getxattr, name: %{public}s, err: %{public}d:%{public}s",
+                 name.c_str(), errno, strerror(errno));
         return false;
     }
     value = buf;
@@ -637,6 +642,47 @@ int DumpRuntimeHelper::GetCompressQuota(const std::vector<int64_t> &quotas)
     }
 
     return ret;
+}
+
+bool DumpRuntimeHelper::SplitPropertyByComma(const std::string &property, std::string &runningId, std::string &value)
+{
+    size_t commaPos = property.find(',');
+    if (commaPos == std::string::npos) {
+        TAG_LOGE(AAFwkTag::APPKIT, "no comma in property");
+        return false;
+    }
+
+    runningId = property.substr(0, commaPos);
+    value = property.substr(commaPos + 1);
+    return true;
+}
+
+std::string DumpRuntimeHelper::GetEventConfig(const std::string &key)
+{
+    std::string property;
+    if (!GetDirXattr(OOM_QUOTA_PATH, key, property)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "failed to GetDirXattr, key: %{public}s", key.c_str());
+        return "";
+    }
+    std::string customRunningId;
+    std::string value;
+    if (!SplitPropertyByComma(property, customRunningId, value)) {
+        TAG_LOGW(AAFwkTag::APPKIT, "failed to SplitPropertyByComma, property: %{public}s", property.c_str());
+        return "";
+    }
+    std::string curRunningId = DFX_GetAppRunningUniqueId();
+    if (curRunningId.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "curRunningId is empty");
+        return "";
+    }
+    if (customRunningId != curRunningId) {
+        TAG_LOGW(AAFwkTag::APPKIT, "runningId not match, customRunningId: %{public}s, curRunningId: %{public}s",
+            customRunningId.c_str(), curRunningId.c_str());
+        return "";
+    }
+
+    TAG_LOGI(AAFwkTag::APPKIT, "succeed to getEventConfig, value: %{public}s", value.c_str());
+    return value;
 }
 } // namespace AppExecFwk
 } // namespace OHOS
