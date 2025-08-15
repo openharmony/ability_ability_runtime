@@ -1734,6 +1734,20 @@ HWTEST_F(AbilityManagerServiceSecondTest, KillProcess_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
+ * Function: CheckPermissionForKillCollaborator
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckPermissionForKillCollaborator
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, CheckPermissionForKillCollaborator_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckPermissionForKillCollaborator_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_EQ(abilityMs_->CheckPermissionForKillCollaborator(), true);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckPermissionForKillCollaborator_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: PreLoadAppDataAbilities
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService PreLoadAppDataAbilities

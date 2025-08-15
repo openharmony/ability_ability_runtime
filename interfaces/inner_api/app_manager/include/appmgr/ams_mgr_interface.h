@@ -520,6 +520,11 @@ public:
         return ERR_OK;
     }
 
+    virtual int32_t VerifyKillProcessPermission(const std::string &bundleName)
+    {
+        return ERR_OK;
+    }
+
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -583,6 +588,7 @@ public:
         PRELOAD_APPLICATION_BY_PHASE,
         NOTIFY_PRELOAD_ABILITY_STATE_CHANGED,
         CHECK_PRELOAD_APP_RECORD_EXIST,
+        VERIFY_KILL_PROCESS_PERMISSION,
         // Add enumeration values above
         END
     };

@@ -226,7 +226,7 @@ HWTEST_F(UserControllerTest, LogoutUserTest_0300, TestSize.Level1)
     UserController userController;
     userController.GetOrCreateUserItem(1000);
     auto result = userController.LogoutUser(1000, nullptr);
-    EXPECT_TRUE(result = 1000);
+    EXPECT_TRUE(result != 0);
 }
 
 /**

@@ -877,5 +877,14 @@ int32_t AmsMgrScheduler::CheckPreloadAppRecordExist(const std::string &bundleNam
     isExist = amsMgrServiceInner_->CheckPreloadAppRecordExist(bundleName, userId, appIndex);
     return ERR_OK;
 }
+
+int32_t AmsMgrScheduler::VerifyKillProcessPermission(const std::string &bundleName)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return AAFwk::ERR_APP_MGR_SERVICE_NOT_READY;
+    }
+    return static_cast<int32_t>(amsMgrServiceInner_->VerifyKillProcessPermission(bundleName));
+}
 } // namespace AppExecFwk
 }  // namespace OHOS
