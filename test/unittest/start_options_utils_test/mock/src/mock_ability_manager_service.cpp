@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_HIDDEN_START_UTILS_H
-#define OHOS_ABILITY_RUNTIME_HIDDEN_START_UTILS_H
+#include "ability_manager_service.h"
 
-#include "start_options.h"
+#include "mock_my_flag.h"
 
 namespace OHOS {
 namespace AAFwk {
-/**
-* @class HiddenStartUtils
-* provides hidden start utilities.
-*/
+AbilityManagerService::AbilityManagerService() {}
 
-class HiddenStartUtils final {
-public:
-    static bool IsHiddenStart(const StartOptions &options);
+AbilityManagerService::~AbilityManagerService() {}
 
-    static int32_t CheckHiddenStartSupported(const StartOptions &options);
-};
+bool AbilityManagerService::CheckCallingTokenId(const std::string &bundleName, int32_t userId, int32_t appIndex)
+{
+    return MyFlag::GetInstance().retCheckCallingTokenId_;
 }
+
+std::shared_ptr<UIAbilityLifecycleManager> AbilityManagerService::GetUIAbilityManagerByUid(int32_t uid)
+{
+    return MyFlag::GetInstance().uiManager_;
 }
-#endif //OHOS_ABILITY_RUNTIME_HIDDEN_START_UTILS_H
+}  // namespace AAFwk
+}  // namespace OHOS

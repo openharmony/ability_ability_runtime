@@ -1870,7 +1870,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, ShouldPreventStartAbility_001, TestSiz
 /*
  * Feature: AbilityManagerService
  * Name: UpdateKeepAliveEnableState_001
- * Function: CheckProcessOptions
+ * Function: UpdateKeepAliveEnableState
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService UpdateKeepAliveEnableState
  */

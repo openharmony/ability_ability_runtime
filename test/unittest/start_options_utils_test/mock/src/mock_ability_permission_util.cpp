@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_HIDDEN_START_UTILS_H
-#define OHOS_ABILITY_RUNTIME_HIDDEN_START_UTILS_H
+#include "ability_permission_util.h"
 
-#include "start_options.h"
+#include "mock_my_flag.h"
 
 namespace OHOS {
 namespace AAFwk {
-/**
-* @class HiddenStartUtils
-* provides hidden start utilities.
-*/
-
-class HiddenStartUtils final {
-public:
-    static bool IsHiddenStart(const StartOptions &options);
-
-    static int32_t CheckHiddenStartSupported(const StartOptions &options);
-};
+AbilityPermissionUtil &AbilityPermissionUtil::GetInstance()
+{
+    static AbilityPermissionUtil instance;
+    return instance;
 }
+
+bool AbilityPermissionUtil::IsStartSelfUIAbility()
+{
+    return MyFlag::GetInstance().isStartSelfUIAbility_;
 }
-#endif //OHOS_ABILITY_RUNTIME_HIDDEN_START_UTILS_H
+}  // namespace AAFwk
+}  // namespace OHOS
