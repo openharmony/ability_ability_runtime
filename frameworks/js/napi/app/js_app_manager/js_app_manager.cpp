@@ -1068,7 +1068,7 @@ private:
                 return;
             }
             bool ret = appManager->IsSharedBundleRunning(bundleName, versionCode);
-            TAG_LOGI(AAFwkTag::APPMGR, "result:%{public}d", ret);
+            TAG_LOGD(AAFwkTag::APPMGR, "result:%{public}d", ret);
             task->ResolveWithNoError(env, CreateJsValue(env, ret));
             delete task;
         };

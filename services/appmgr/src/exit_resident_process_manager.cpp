@@ -73,7 +73,7 @@ bool ExitResidentProcessManager::RecordExitResidentBundleNameOnRequireBigMemory(
 void ExitResidentProcessManager::RecordExitResidentBundleDependedOnWeb(const std::string &bundleName, int32_t uid)
 {
     std::lock_guard<ffrt::mutex> lock(webMutexLock_);
-    TAG_LOGE(AAFwkTag::APPMGR, "call");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     exitResidentBundlesDependedOnWeb_.emplace_back(bundleName, uid);
 }
 
@@ -116,7 +116,7 @@ void ExitResidentProcessManager::HandleExitResidentBundleDependedOnWeb(
     std::vector<ExitResidentProcessInfo> &bundleNames)
 {
     std::lock_guard<ffrt::mutex> lock(webMutexLock_);
-    TAG_LOGE(AAFwkTag::APPMGR, "call");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     bundleNames = std::move(exitResidentBundlesDependedOnWeb_);
 }
 
@@ -175,7 +175,7 @@ void ExitResidentProcessManager::QueryExitBundleInfos(const std::vector<ExitResi
 
 bool ExitResidentProcessManager::IsKilledForUpgradeWeb(const std::string &bundleName) const
 {
-    TAG_LOGE(AAFwkTag::APPMGR, "call");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     std::vector<ExitResidentProcessInfo> bundleNames;
     {
         std::lock_guard<ffrt::mutex> lock(webMutexLock_);
