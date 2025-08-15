@@ -779,5 +779,14 @@ int32_t AppScheduler::CheckPreloadAppRecordExist(const std::string &bundleName, 
     }
     return IN_PROCESS_CALL(appMgrClient_->CheckPreloadAppRecordExist(bundleName, userId, appIndex, isExist));
 }
+
+int32_t AppScheduler::VerifyKillProcessPermission(const std::string &bundleName) const
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
+        return INNER_ERR;
+    }
+    return appMgrClient_->VerifyKillProcessPermission(bundleName);
+}
 } // namespace AAFwk
 }  // namespace OHOS

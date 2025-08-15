@@ -235,6 +235,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleNotifyPreloadAbilityStateChanged(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::CHECK_PRELOAD_APP_RECORD_EXIST):
             return HandleCheckPreloadAppRecordExist(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::VERIFY_KILL_PROCESS_PERMISSION):
+            return HandleVerifyKillProcessPermission(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -1029,6 +1031,23 @@ int32_t AmsMgrStub::HandleCheckPreloadAppRecordExist(MessageParcel &data, Messag
     if (ret == NO_ERROR && !reply.WriteBool(isExist)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write isExist");
         return AAFwk::ERR_WRITE_BOOL_FAILED;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleVerifyKillProcessPermission(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    auto bundleName = data.ReadString();
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Bundle name is empty.");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto result = VerifyKillProcessPermission(bundleName);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }

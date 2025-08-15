@@ -1717,5 +1717,24 @@ int32_t AppMgrClient::QueryRunningSharedBundles(pid_t pid, std::map<std::string,
     }
     return service->QueryRunningSharedBundles(pid, sharedBundles);
 }
+
+int32_t AppMgrClient::VerifyKillProcessPermission(const std::string &bundleName) const
+{
+    if (mgrHolder_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "mgrHolder is nullptr.");
+        return ERROR_SERVICE_NOT_CONNECTED;
+    }
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return ERROR_SERVICE_NOT_CONNECTED;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "amsService is nullptr.");
+        return ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return amsService->VerifyKillProcessPermission(bundleName);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
