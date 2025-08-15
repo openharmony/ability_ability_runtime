@@ -29,6 +29,7 @@
 #include "hilog_tag_wrapper.h"
 #include "hybrid_js_module_reader.h"
 #include "nocopyable.h"
+#include "static_core/plugins/ets/runtime/ets_namespace_manager.h"
 
 #ifdef SUPPORT_SCREEN
 #include "ace_forward_compatibility.h"
@@ -238,6 +239,13 @@ void ETSRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths,
     g_etsEnvFuncs->SetAppLibPath(abcPathsToBundleModuleNameMap, cb);
 }
 
+void ETSRuntime::SetExtensionApiCheckCallback(
+    const std::function<bool(const std::string &className, const std::string &fileName)> &cb)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "called");
+    ark::ets::EtsNamespaceManager::SetExtensionApiCheckCallback(std::move(cb));
+}
+
 bool ETSRuntime::Initialize(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime)
 {
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "Initialize called");
@@ -420,6 +428,13 @@ void ETSRuntime::PreloadSystemModule(const std::string &moduleName)
 {
     if (jsRuntime_ != nullptr) {
         jsRuntime_->PreloadSystemModule(moduleName);
+    }
+}
+
+void ETSRuntime::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const
+{
+    if (jsRuntime_ != nullptr) {
+        jsRuntime_->SetModuleLoadChecker(moduleCheckerDelegate);
     }
 }
 
