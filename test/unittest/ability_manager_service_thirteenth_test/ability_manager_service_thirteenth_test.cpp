@@ -1244,6 +1244,27 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, KillProcessWithReason_002, TestSiz
 
 /*
  * Feature: AbilityManagerService
+ * Name: KillProcessWithReason_003
+ * Function: InitFocusListener
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService KillProcessWithReason
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, KillProcessWithReason_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest KillProcessWithReason_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    int32_t pid = 1;
+    ExitReason exitReason;
+    exitReason.reason = Reason::REASON_RESOURCE_CONTROL;
+    exitReason.shouldKillForeground = false;
+    auto result = abilityMs_->KillProcessWithReason(pid, exitReason);
+    EXPECT_EQ(result, ERR_KILL_APP_WHILE_FOREGROUND);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest KillProcessWithReason_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Name: StartUIAbilities_001
  * Function: StartUIAbilities
  * SubFunction: NA
