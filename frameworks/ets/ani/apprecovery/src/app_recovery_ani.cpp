@@ -69,9 +69,9 @@ bool CheckParamsValid(const uint16_t params[])
 
 static bool ParseParamToEnum(ani_env *env, ani_enum_item flagObj, uint16_t &flag)
 {
-    if (IsRefUndefined(env, flagObj)) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "IsRefUndefined is true");
-        return false;
+    if (IsNull(env, flagObj) || IsRefUndefined(env, flagObj)) {
+        TAG_LOGI(AAFwkTag::RECOVERY, "param is undefined or null.");
+        return true;
     }
     ani_int flagValue = 0;
     if (ANI_OK != env->EnumItem_GetValue_Int(flagObj, &flagValue)) {
@@ -97,6 +97,7 @@ static ani_object EnableAppRecovery(ani_env *env, ani_enum_item restart, ani_enu
         TAG_LOGE(AAFwkTag::RECOVERY, "parse params to int failed.");
         return resultsObj;
     }
+
     if (!CheckParamsValid(flags)) {
         return resultsObj;
     }
