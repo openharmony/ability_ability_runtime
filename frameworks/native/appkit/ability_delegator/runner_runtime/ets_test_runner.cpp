@@ -16,6 +16,7 @@
 #include <regex>
 
 #include "ability_delegator_registry.h"
+#include "ani_common_util.h"
 #include "hilog_tag_wrapper.h"
 #include "runner_runtime/ets_test_runner.h"
 
@@ -27,6 +28,9 @@
 
 namespace OHOS {
 namespace RunnerRuntime {
+namespace {
+    constexpr int32_t ARGC_ZERO = 0;
+}
 
 TestRunner *ETSTestRunner::Create(const std::unique_ptr<Runtime> &runtime,
     const std::shared_ptr<AbilityDelegatorArgs> &args, const AppExecFwk::BundleInfo &bundleInfo)
@@ -134,17 +138,21 @@ void ETSTestRunner::Prepare()
         if (env->ResetError() != ANI_OK) {
             TAG_LOGE(AAFwkTag::ETSRUNTIME, "ResetError failed");
         }
-        ani_method method;
+        ani_ref funRef;
         ani_status status = ANI_ERROR;
-        status = env->Class_FindMethod(etsTestRunnerObj_->aniCls, "onPrepare", ":V", &method);
+        status = env->Object_GetPropertyByName_Ref(etsTestRunnerObj_->aniObj, "onPrepare", &funRef);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "get onPrepare failed status : %{public}d", status);
             return;
         }
         TAG_LOGI(AAFwkTag::DELEGATOR, "get onPrepare success");
+        if (!IsValidProperty(env, funRef)) {
+            TAG_LOGI(AAFwkTag::DELEGATOR, "invalid onPrepare property");
+            return;
+        }
 
-        ani_int result;
-        status = env->Object_CallMethod_Void(etsTestRunnerObj_->aniObj, method, &result);
+        ani_ref result;
+        status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ZERO, nullptr, &result);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "Object_CallMethod_Void onPrepare failed status : %{public}d", status);
         } else {
@@ -166,17 +174,21 @@ void ETSTestRunner::Run()
         if (env->ResetError() != ANI_OK) {
             TAG_LOGE(AAFwkTag::ETSRUNTIME, "ResetError failed");
         }
-        ani_method method;
+        ani_ref funRef;
         ani_status status = ANI_ERROR;
-        status = env->Class_FindMethod(etsTestRunnerObj_->aniCls, "onRun", ":V", &method);
+        status = env->Object_GetPropertyByName_Ref(etsTestRunnerObj_->aniObj, "onRun", &funRef);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "get onRun failed status : %{public}d", status);
             return;
         }
         TAG_LOGI(AAFwkTag::DELEGATOR, "get onRun success");
+        if (!IsValidProperty(env, funRef)) {
+            TAG_LOGI(AAFwkTag::DELEGATOR, "invalid onRun property");
+            return;
+        }
 
-        ani_int result;
-        status = env->Object_CallMethod_Void(etsTestRunnerObj_->aniObj, method, &result);
+        ani_ref result;
+        status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ZERO, nullptr, &result);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "Object_CallMethod_Void onRun failed status : %{public}d", status);
         } else {
