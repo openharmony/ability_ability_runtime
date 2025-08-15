@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -257,7 +257,6 @@ private:
     void SetParams(const ParametersInteger& pi, Want& want);
     void SetParams(const ParametersString& ps, Want& want);
     void SetParams(const ParametersBool& pb, Want& want);
-    Reason CovertExitReason(std::string& reasonStr);
     pid_t ConvertPid(std::string& inputPid);
 
 #ifdef ABILITY_COMMAND_FOR_TEST

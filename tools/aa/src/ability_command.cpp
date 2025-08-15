@@ -23,6 +23,7 @@
 #include "ability_manager_client.h"
 #include "ability_start_with_wait_observer.h"
 #include "ability_start_with_wait_observer_utils.h"
+#include "ability_tool_convert_util.h"
 #include "app_mgr_client.h"
 #include "hilog_tag_wrapper.h"
 #include "iservice_registry.h"
@@ -772,7 +773,7 @@ ErrCode AbilityManagerShellCommand::RunAsForceStop()
             if (index <= argc_) {
                 TAG_LOGD(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s", index, argv_[index]);
                 std::string inputReason = argv_[index];
-                killReason = CovertExitReason(inputReason);
+                killReason = AbilityToolConvertUtil::CovertExitReason(inputReason);
             }
         }
     }
@@ -797,33 +798,6 @@ ErrCode AbilityManagerShellCommand::RunAsForceStop()
         resultReceiver_.append(GetMessageFromCode(result));
     }
     return result;
-}
-
-Reason AbilityManagerShellCommand::CovertExitReason(std::string& reasonStr)
-{
-    if (reasonStr.empty()) {
-        return Reason::REASON_UNKNOWN;
-    }
-
-    if (reasonStr.compare("UNKNOWN") == 0) {
-        return Reason::REASON_UNKNOWN;
-    } else if (reasonStr.compare("NORMAL") == 0) {
-        return Reason::REASON_NORMAL;
-    } else if (reasonStr.compare("CPP_CRASH") == 0) {
-        return Reason::REASON_CPP_CRASH;
-    } else if (reasonStr.compare("JS_ERROR") == 0) {
-        return Reason::REASON_JS_ERROR;
-    } else if (reasonStr.compare("APP_FREEZE") == 0) {
-        return Reason::REASON_APP_FREEZE;
-    } else if (reasonStr.compare("PERFORMANCE_CONTROL") == 0) {
-        return Reason::REASON_PERFORMANCE_CONTROL;
-    } else if (reasonStr.compare("RESOURCE_CONTROL") == 0) {
-        return Reason::REASON_RESOURCE_CONTROL;
-    } else if (reasonStr.compare("UPGRADE") == 0) {
-        return Reason::REASON_UPGRADE;
-    }
-
-    return Reason::REASON_UNKNOWN;
 }
 
 pid_t AbilityManagerShellCommand::ConvertPid(std::string& inputPid)
@@ -2655,34 +2629,6 @@ ErrCode AbilityManagerShellCommand::RunAsSendAppNotRespondingWithOption(int32_t 
 }
 #endif
 #ifdef ABILITY_FAULT_AND_EXIT_TEST
-Reason CovertExitReason(std::string &cmd)
-{
-    if (cmd.empty()) {
-        return Reason::REASON_UNKNOWN;
-    }
-
-    if (cmd.compare("UNKNOWN") == 0) {
-        return Reason::REASON_UNKNOWN;
-    } else if (cmd.compare("NORMAL") == 0) {
-        return Reason::REASON_NORMAL;
-    } else if (cmd.compare("CPP_CRASH") == 0) {
-        return Reason::REASON_CPP_CRASH;
-    } else if (cmd.compare("JS_ERROR") == 0) {
-        return Reason::REASON_JS_ERROR;
-    } else if (cmd.compare("ABILITY_NOT_RESPONDING") == 0) {
-        return Reason::REASON_APP_FREEZE;
-    } else if (cmd.compare("APP_FREEZE") == 0) {
-        return Reason::REASON_APP_FREEZE;
-    } else if (cmd.compare("PERFORMANCE_CONTROL") == 0) {
-        return Reason::REASON_PERFORMANCE_CONTROL;
-    } else if (cmd.compare("RESOURCE_CONTROL") == 0) {
-        return Reason::REASON_RESOURCE_CONTROL;
-    } else if (cmd.compare("UPGRADE") == 0) {
-        return Reason::REASON_UPGRADE;
-    }
-
-    return Reason::REASON_UNKNOWN;
-}
 
 ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
 {
@@ -2752,7 +2698,7 @@ ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
         result = OHOS::ERR_INVALID_VALUE;
     }
 
-    ExitReason exitReason = { CovertExitReason(reason), "Force exit app by aa." };
+    ExitReason exitReason = { AbilityToolConvertUtil::CovertExitReason(reason), "Force exit app by aa." };
     result = AbilityManagerClient::GetInstance()->ForceExitApp(ConvertPid(pid), exitReason);
     if (result == OHOS::ERR_OK) {
         resultReceiver_ = STRING_BLOCK_AMS_SERVICE_OK + "\n";

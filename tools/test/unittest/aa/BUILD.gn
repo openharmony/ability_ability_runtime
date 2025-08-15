@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -326,6 +326,28 @@ ohos_unittest("aa_command_send_memory_level_test") {
   ]
 }
 
+ohos_unittest("ability_tool_convert_util_test") {
+  module_out_path = module_output_path
+
+  sources = [ "ability_tool_convert_util_test.cpp" ]
+
+  configs = [ ":tools_aa_config_mock" ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+
+  deps = [ "${ability_runtime_path}/tools/aa:tools_aa_source_set" ]
+
+  external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+  ]
+}
+
 print("accessibility_enable = ", accessibility_enable)
 if (accessibility_enable) {
   ohos_unittest("accessibility_ability_utils_test") {
@@ -371,6 +393,7 @@ group("unittest") {
     ":aa_command_test",
     ":aa_command_test_test",
     ":aa_command_send_memory_level_test",
+    ":ability_tool_convert_util_test",
   ]
   if (accessibility_enable) {
     deps += [ ":accessibility_ability_utils_test" ]
