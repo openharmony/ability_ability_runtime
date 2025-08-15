@@ -46,6 +46,10 @@ public:
     MOCK_METHOD2(UnregisterObserverExt, Status(sptr<IDataAbilityObserver>, DataObsOption));
     MOCK_METHOD2(NotifyChangeExt, Status(const ChangeInfo&, DataObsOption));
     MOCK_METHOD3(NotifyProcessObserver, Status(const std::string&, const sptr<IRemoteObject>&, DataObsOption));
+    MOCK_METHOD4(RegisterObserverFromExtension, int(const Uri&, sptr<IDataAbilityObserver>,
+        int32_t userId, DataObsOption opt));
+    MOCK_METHOD3(NotifyChangeFromExtension, int(const Uri&, int32_t userId, DataObsOption opt));
+    MOCK_METHOD2(CheckTrusts, int(uint32_t consumerToken, uint32_t providerToken));
 };
 
 class MockDataAbilityObserverStub : public AAFwk::DataAbilityObserverStub {
