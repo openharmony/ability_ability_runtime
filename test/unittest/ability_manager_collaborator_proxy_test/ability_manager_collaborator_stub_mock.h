@@ -32,7 +32,7 @@ public:
     {}
 
     int32_t NotifyStartAbility(const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t userId, Want &want, uint64_t accessTokenIDEx) override
+        int32_t userId, Want &want, uint64_t accessTokenIDEx, int32_t windowMode) override
     {
         return 0;
     }
