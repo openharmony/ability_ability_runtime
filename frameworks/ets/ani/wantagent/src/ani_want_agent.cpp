@@ -128,6 +128,10 @@ void TriggerCompleteCallBack::OnSendFinished(
     dataWorker->call = triggerCompleteInfo_.call;
     if (triggerCompleteInfo_.wantAgent != nullptr) {
         dataWorker->wantAgent = new (std::nothrow) WantAgent(triggerCompleteInfo_.wantAgent->GetPendingWant());
+        if (dataWorker->wantAgent == nullptr) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "new WantAgent(triggerCompleteInfo_.wantAgent->GetPendingWant()) failed");
+            return;
+        }
     }
     OnSendFinishedCallback(dataWorker);
     if (dataWorker != nullptr) {
