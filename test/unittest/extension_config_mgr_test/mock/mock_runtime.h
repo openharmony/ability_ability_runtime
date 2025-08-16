@@ -62,7 +62,7 @@ public:
         loadCheckerFlag_ = true;
     }
     void SetExtensionApiCheckCallback(
-        const std::function<bool(const std::string &className, const std::string &fileName)> &cb) override
+        std::function<bool(const std::string &className, const std::string &fileName)> &cb) override
     {
         extensionApiCheckerFlag_ = true;
         checkLibraryPermissionCallback_ = cb;
