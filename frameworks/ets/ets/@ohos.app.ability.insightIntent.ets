@@ -15,6 +15,7 @@
 
 import Want from '@ohos.app.ability.Want';
 import wantConstant from '@ohos.app.ability.wantConstant';
+import { RecordData } from '@ohos.base';
 
 namespace insightIntent {
 
@@ -27,14 +28,14 @@ namespace insightIntent {
 
   export interface ExecuteResult {
     code: int;
-    result?: Record<string, Object>;
+    result?: RecordData;
     uris?: Array<string>;
     flags?: int;
   }
 
   export class ExecuteResultInner implements ExecuteResult{
     code: int;
-    result?: Record<string, Object>;
+    result?: RecordData;
     uris?: Array<string>;
     flags?: int;
   }

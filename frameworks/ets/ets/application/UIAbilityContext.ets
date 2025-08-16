@@ -17,7 +17,7 @@ import { AbilityInfo } from 'bundleManager.AbilityInfo';
 import Want from '@ohos.app.ability.Want';
 import StartOptions from '@ohos.app.ability.StartOptions';
 import { Caller } from '@ohos.app.ability.UIAbility';
-import { BusinessError, AsyncCallback } from '@ohos.base';
+import { BusinessError, AsyncCallback, RecordData } from '@ohos.base';
 import { AbilityResult } from 'ability.abilityResult';
 import { Configuration } from '@ohos.app.ability.Configuration';
 import { ConnectOptions } from 'ability.connectOptions';
@@ -457,10 +457,10 @@ export default class UIAbilityContext extends Context {
     this.nativeSetColorMode(colorMode);
   }
 
-  startAbilityByType(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback,
+  startAbilityByType(type: string, wantParam: RecordData, startCallback: AbilityStartCallback,
     callback: AsyncCallback<void>): void {
     let p1 = taskpool.execute((): BusinessError => {
-      return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
+      return this.nativeStartAbilityByTypeSync(type, wantParam as Record<string, Object>, startCallback);
     });
     p1.then((e: NullishType) => {
       let retError = e as BusinessError;
@@ -508,11 +508,11 @@ hideAbility(): Promise<void> {
   return p;
 }
 
-  startAbilityByType(type: string, wantParam: Record<string, Object>,
+  startAbilityByType(type: string, wantParam: RecordData,
     startCallback: AbilityStartCallback): Promise<void> {
     let p = new Promise<void>((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
       let p1 = taskpool.execute((): BusinessError => {
-        return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
+        return this.nativeStartAbilityByTypeSync(type, wantParam as Record<string, Object>, startCallback);
       });
       p1.then((e: NullishType) => {
         let retError = e as BusinessError;

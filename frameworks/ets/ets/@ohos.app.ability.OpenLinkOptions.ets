@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
+import { RecordData } from '@ohos.base';
+
 export default interface OpenLinkOptions {
     appLinkingOnly?: boolean;
-    parameters?: Record<string, Object>;
+    parameters?: RecordData;
 }
 
 class OpenLinkOptionsImpl implements OpenLinkOptions {
     appLinkingOnly?: boolean|undefined;
-    parameters?: Record<string, Object>|undefined;
-}
+    parameters?: RecordData|undefined;
+}
