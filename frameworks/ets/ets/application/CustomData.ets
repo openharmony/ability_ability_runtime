@@ -12,11 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { RecordData } from '@ohos.base';
 
 export default interface CustomData {
-  data: Record<string, Object>;
+  data: RecordData;
 }
 
 class CustomDataInner implements CustomData {
-  public data: Record<string, Object> = {};
+  public data: RecordData = {};
 }

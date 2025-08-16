@@ -15,7 +15,7 @@
 
 import { AbilityResult } from 'ability.abilityResult';
 import { AsyncCallback } from '@ohos.base';
-import { BusinessError } from '@ohos.base';
+import { BusinessError, RecordData } from '@ohos.base';
 import uiExtensionHost from '@ohos.uiExtensionHost';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
@@ -63,8 +63,8 @@ export default class UIExtensionContentSession {
   private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback): BusinessError<void>;
   native nativeSetWindowPrivacyMode(isPrivacyMode: boolean, callback:AsyncCallbackWrapper<void>): void;
 
-  sendData(data: Record<string, Object>): void {
-    this.nativeSendData(data);
+  sendData(data: RecordData): void {
+    this.nativeSendData(data as Record<string, Object>);
   }
 
   setReceiveDataCallback(callback: (data: Record<string, Object>) => void): void {
@@ -121,10 +121,10 @@ export default class UIExtensionContentSession {
     return p;
   }
 
-  startAbilityByType(type: string, wantParam: Record<string, Object>, startCallback: AbilityStartCallback,
+  startAbilityByType(type: string, wantParam: RecordData, startCallback: AbilityStartCallback,
     callback: AsyncCallback<void>): void {
     let p1 = taskpool.execute((): BusinessError<void> => {
-      return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
+      return this.nativeStartAbilityByTypeSync(type, wantParam as Record<string, Object>, startCallback);
     });
     p1.then((e: NullishType) => {
       let retError = e as BusinessError<void>;
@@ -138,11 +138,11 @@ export default class UIExtensionContentSession {
     });
   }
 
-  startAbilityByType(type: string, wantParam: Record<string, Object>,
+  startAbilityByType(type: string, wantParam: RecordData,
     startCallback: AbilityStartCallback): Promise<void> {
     let p = new Promise<void>((resolve: (v: undefined) => void, reject: (error: BusinessError<void>) => void): void => {
       let p1 = taskpool.execute((): BusinessError<void> => {
-        return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
+        return this.nativeStartAbilityByTypeSync(type, wantParam as Record<string, Object>, startCallback);
       });
       p1.then((e: NullishType) => {
         let retError = e as BusinessError<void>;
