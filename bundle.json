@@ -131,6 +131,7 @@
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:service_extension_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:ui_ability_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:ui_extension_ani",
+          "//foundation/ability/ability_runtime/frameworks/native/ability/native:photo_editor_extension_ani",
           "//foundation/ability/ability_runtime/frameworks/native/appkit:ability_stage_ani",
           "//foundation/ability/ability_runtime/frameworks/native/appkit:test_runner_ani",
           "//foundation/ability/ability_runtime/frameworks/native/child_process:child_process",
