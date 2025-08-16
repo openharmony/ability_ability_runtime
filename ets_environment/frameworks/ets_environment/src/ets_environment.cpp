@@ -572,6 +572,10 @@ ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
         },
         .PreloadSystemClass = [](const char *className) {
             ETSEnvironment::GetInstance()->PreloadSystemClass(className);
+        },
+        .SetExtensionApiCheckCallback = [](
+            std::function<bool(const std::string &className, const std::string &fileName)> &cb) {
+            ark::ets::EtsNamespaceManager::SetExtensionApiCheckCallback(cb);
         }
     };
     return &funcs;

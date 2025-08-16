@@ -136,7 +136,7 @@ public:
     void FreeNativeReference(std::shared_ptr<NativeReference>&& reference);
     void StartProfiler(const DebugOption debugOption) override;
     void SetExtensionApiCheckCallback(
-        const std::function<bool(const std::string &className, const std::string &fileName)> &cb) override {}
+        std::function<bool(const std::string &className, const std::string &fileName)> &cb) override {}
     void DebuggerConnectionManager(bool isDebugApp, bool isStartWithDebug, const DebugOption dOption);
 
     void ReloadFormComponent(); // Reload ArkTS-Card component
