@@ -71,6 +71,12 @@ void ApplicationContext::UnregisterAbilityLifecycleCallback(
     }
 }
 
+std::vector<std::shared_ptr<InteropAbilityLifecycleCallback>> ApplicationContext::GetInteropCallbacks()
+{
+    std::lock_guard<std::mutex> lock(interopCallbackLock_);
+    return interopCallbacks_;
+}
+
 void ApplicationContext::RegisterInteropAbilityLifecycleCallback(
     std::shared_ptr<InteropAbilityLifecycleCallback> callback)
 {
@@ -163,8 +169,8 @@ void ApplicationContext::DispatchOnAbilityCreate(std::shared_ptr<InteropObject> 
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(interopCallbackLock_);
-    for (auto callback : interopCallbacks_) {
+    auto callbacksCopy = GetInteropCallbacks();
+    for (auto callback : callbacksCopy) {
         if (callback != nullptr) {
             TAG_LOGD(AAFwkTag::APPKIT, "call interop onAbilityCreate");
             callback->OnAbilityCreate(ability);
@@ -210,8 +216,8 @@ void ApplicationContext::DispatchOnWindowStageCreate(std::shared_ptr<InteropObje
         TAG_LOGE(AAFwkTag::APPKIT, "null ability or windowStage");
         return;
     }
-    std::lock_guard<std::mutex> lock(interopCallbackLock_);
-    for (auto callback : interopCallbacks_) {
+    auto callbacksCopy = GetInteropCallbacks();
+    for (auto callback : callbacksCopy) {
         if (callback != nullptr) {
             TAG_LOGD(AAFwkTag::APPKIT, "call interop OnWindowStageCreate");
             callback->OnWindowStageCreate(ability, windowStage);
@@ -257,8 +263,8 @@ void ApplicationContext::DispatchOnWindowStageDestroy(std::shared_ptr<InteropObj
         TAG_LOGE(AAFwkTag::APPKIT, "null ability or windowStage");
         return;
     }
-    std::lock_guard<std::mutex> lock(interopCallbackLock_);
-    for (auto callback : interopCallbacks_) {
+    auto callbacksCopy = GetInteropCallbacks();
+    for (auto callback : callbacksCopy) {
         if (callback != nullptr) {
             TAG_LOGD(AAFwkTag::APPKIT, "call interop OnWindowStageDestroy");
             callback->OnWindowStageDestroy(ability, windowStage);
@@ -333,8 +339,8 @@ void ApplicationContext::DispatchOnAbilityDestroy(std::shared_ptr<InteropObject>
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(interopCallbackLock_);
-    for (auto callback : interopCallbacks_) {
+    auto callbacksCopy = GetInteropCallbacks();
+    for (auto callback : callbacksCopy) {
         if (callback != nullptr) {
             TAG_LOGD(AAFwkTag::APPKIT, "call interop OnAbilityDestroy");
             callback->OnAbilityDestroy(ability);
@@ -377,8 +383,8 @@ void ApplicationContext::DispatchOnAbilityForeground(std::shared_ptr<InteropObje
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(interopCallbackLock_);
-    for (auto callback : interopCallbacks_) {
+    auto callbacksCopy = GetInteropCallbacks();
+    for (auto callback : callbacksCopy) {
         if (callback != nullptr) {
             TAG_LOGD(AAFwkTag::APPKIT, "call interop OnAbilityForeground");
             callback->OnAbilityForeground(ability);
@@ -421,8 +427,8 @@ void ApplicationContext::DispatchOnAbilityBackground(std::shared_ptr<InteropObje
         TAG_LOGE(AAFwkTag::APPKIT, "null ability");
         return;
     }
-    std::lock_guard<std::mutex> lock(interopCallbackLock_);
-    for (auto callback : interopCallbacks_) {
+    auto callbacksCopy = GetInteropCallbacks();
+    for (auto callback : callbacksCopy) {
         if (callback != nullptr) {
             TAG_LOGD(AAFwkTag::APPKIT, "call interop OnAbilityBackground");
             callback->OnAbilityBackground(ability);
