@@ -957,6 +957,7 @@ ohos_unittest("dump_runtime_helper_test") {
   external_deps = [
     "ability_runtime:runtime",
     "c_utils:utils",
+    "faultloggerd:dfx_signalhandler",
     "faultloggerd:libfaultloggerd",
     "googletest:gtest_main",
     "hilog:libhilog",
@@ -1055,6 +1056,7 @@ ohos_unittest("dump_runtime_helper_second_test") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
+    "faultloggerd:dfx_signalhandler",
     "faultloggerd:libfaultloggerd",
     "googletest:gtest_main",
     "hilog:libhilog",
