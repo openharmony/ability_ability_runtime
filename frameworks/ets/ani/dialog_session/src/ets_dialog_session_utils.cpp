@@ -36,30 +36,26 @@ ani_object WrapArrayDialogAbilityInfoToEts(ani_env *env, const std::vector<Dialo
 {
     ani_object etsValue = nullptr;
     ani_status status = ANI_ERROR;
-    ani_class intCls = nullptr;
     ani_ref undefinedRef = nullptr;
-    ani_array_ref refArray = nullptr;
+    ani_array refArray = nullptr;
 
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "null env");
         return refArray;
     }
-    if ((status = env->FindClass(CLASSNAME_INT, &intCls)) != ANI_OK || intCls == nullptr) {
-        TAG_LOGE(AAFwkTag::DIALOG, "FindClass failed, status: %{public}d or null intCls", status);
-        return refArray;
-    }
+
     if ((status = env->GetUndefined(&undefinedRef)) != ANI_OK || undefinedRef == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "GetUndefined failed, status: %{public}d or null undefinedRef", status);
         return refArray;
     }
-    if ((status = env->Array_New_Ref(intCls, value.size(), undefinedRef, &refArray)) != ANI_OK
+    if ((status = env->Array_New(value.size(), undefinedRef, &refArray)) != ANI_OK
         || refArray == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "Array_New_Ref failed, status: %{public}d or null refArray", status);
         return refArray;
     }
     for (uint32_t i = 0; i < value.size(); i++) {
         etsValue = WrapDialogAbilityInfo(env, value[i]);
-        if ((status = env->Array_Set_Ref(refArray, i, etsValue)) != ANI_OK) {
+        if ((status = env->Array_Set(refArray, i, etsValue)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::DIALOG, "Array_Set_Ref failed, status: %{public}d", status);
             return refArray;
         }
