@@ -200,6 +200,9 @@ public:
 
         auto ret = ptr->ChangeCurrentState(state);
         TAG_LOGD(AAFwkTag::DEFAULT, "ChangeCurrentState ret:%{public}s", ret ? "true" : "false");
+        if (finalizeCallback_) {
+            finalizeCallback_(reinterpret_cast<uintptr_t>(ptr));
+        }
 
         return ret;
     }
@@ -449,7 +452,8 @@ private:
         TAG_LOGD(AAFwkTag::DEFAULT, "end");
         return CreateJsUndefined(env);
     }
-
+public:
+    static std::function<void(uintptr_t)> finalizeCallback_;
 private:
     ReleaseCallFunc releaseCallFunc_;
     sptr<IRemoteObject> callee_;
@@ -470,6 +474,7 @@ private:
 
 std::set<JsCallerComplex*> JsCallerComplex::jsCallerComplexManagerList;
 std::mutex JsCallerComplex::jsCallerComplexMutex;
+std::function<void(uintptr_t)> JsCallerComplex::finalizeCallback_;
 } // nameless
 
 napi_value CreateJsCallerComplex(
@@ -526,6 +531,11 @@ sptr<IRemoteObject> GetJsCallerRemoteObj(uintptr_t jsCallerComplex)
         return nullptr;
     }
     return callerPtr->GetRemoteObject();
+}
+
+void SetFinalizeCallback(std::function<void(uintptr_t)> finalizeCallback)
+{
+    JsCallerComplex::finalizeCallback_ = finalizeCallback;
 }
 } // AbilityRuntime
 } // OHOS
