@@ -666,7 +666,7 @@ int32_t AppSpawnClient::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
 
 int32_t AppSpawnClient::GetRenderProcessTerminationStatus(const AppSpawnStartMsg &startMsg, int &status)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     int32_t ret = 0;
     AppSpawnReqMsgHandle reqHandle = nullptr;
 
@@ -686,7 +686,7 @@ int32_t AppSpawnClient::GetRenderProcessTerminationStatus(const AppSpawnStartMsg
         return ret;
     }
 
-    TAG_LOGI(AAFwkTag::APPMGR, "AppspawnSendMsg");
+    TAG_LOGD(AAFwkTag::APPMGR, "AppspawnSendMsg");
     AppSpawnResult result = {0};
     ret = AppSpawnClientSendMsg(handle_, reqHandle, &result);
     status = result.result;
