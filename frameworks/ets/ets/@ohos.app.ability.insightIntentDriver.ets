@@ -21,7 +21,7 @@ import AsyncCallbackWrapper from './utils/AbilityUtils';
 
 export default namespace insightIntentDriver {
 
-  loadLibrary("insight_intent_driver_ani_kit.z")
+  loadLibraryWithPermissionCheck("insight_intent_driver_ani_kit.z", "@ohos.app.ability.insightIntentDriver")
 
   export interface ExecuteParam {
     bundleName: string;
