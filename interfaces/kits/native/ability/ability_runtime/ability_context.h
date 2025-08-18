@@ -173,6 +173,8 @@ public:
 
     virtual ErrCode RestoreWindowStage(napi_env env, napi_value contentStorage) = 0;
 
+    virtual ErrCode RestoreWindowStage(void *contentStorage) = 0;
+
     virtual void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData) = 0;
 
     virtual ErrCode RequestModalUIExtension(const AAFwk::Want& want) = 0;
@@ -282,6 +284,13 @@ public:
      * @return Returns the ContentStorage.
      */
     virtual std::unique_ptr<NativeReference>& GetContentStorage() = 0;
+
+    /**
+     * @brief Get EtsContentStorage.
+     *
+     * @return Returns the ContentStorage.
+     */
+    virtual void *GetEtsContentStorage() = 0;
 
     /**
      * call function by callback object

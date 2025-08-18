@@ -825,11 +825,36 @@ bool EtsUIAbility::IsRestorePageStack(const Want &want)
 
 void EtsUIAbility::RestorePageStack(const Want &want)
 {
-    if (IsRestorePageStack(want)) {
-        std::string pageStack;
-        GetPageStackFromWant(want, pageStack);
-        // to be done: AniSetUIContent
+    if (!IsRestorePageStack(want)) {
+        return;
     }
+    std::string pageStack;
+    GetPageStackFromWant(want, pageStack);
+    if (scene_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null scene_");
+        return;
+    }
+    auto window = scene_->GetMainWindow();
+    if (window == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null window");
+        return;
+    }
+    if (abilityContext_->GetEtsContentStorage() == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null etsContentStorage");
+        return;
+    }
+    auto localStorageRef = reinterpret_cast<ani_ref>(abilityContext_->GetEtsContentStorage());
+    if (localStorageRef == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null localStorageRef");
+        return;
+    }
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    window->NapiSetUIContent(pageStack, env, reinterpret_cast<ani_object>(localStorageRef),
+        Rosen::BackupAndRestoreType::CONTINUATION);
 }
 
 void EtsUIAbility::AbilityContinuationOrRecover(const Want &want)
