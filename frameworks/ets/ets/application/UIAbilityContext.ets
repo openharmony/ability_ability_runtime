@@ -44,7 +44,7 @@ let unregisterToken = new object();
 
 export default class UIAbilityContext extends Context {
   static {
-    loadLibrary("context_ani");
+    loadLibraryWithPermissionCheck("context_ani", "application.UIAbilityContext");
   }
 
   private cleaner: Cleaner | null = null;

@@ -20,7 +20,7 @@ import { AbilityStageMonitor as _AbilityStageMonitor } from 'application.Ability
 import { ShellCmdResult as _ShellCmdResult } from 'application.shellCmdResult';
 
 export default namespace abilityDelegatorRegistry {
-  loadLibrary("ability_delegator_registry_ani_kit.z")
+  loadLibraryWithPermissionCheck("ability_delegator_registry_ani_kit.z", "@ohos.app.ability.abilityDelegatorRegistry")
 
   export native function getAbilityDelegator(): AbilityDelegator;
 

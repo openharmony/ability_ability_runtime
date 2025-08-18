@@ -20,7 +20,7 @@ import { TriggerInfo as _TriggerInfo } from 'wantAgent.triggerInfo';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
 
 namespace wantAgent {
-  loadLibrary("aniwantagent.z");
+  loadLibraryWithPermissionCheck("aniwantagent.z", "@ohos.app.ability.wantAgent");
 
   class Cleaner {
     public ptr: long = 0;

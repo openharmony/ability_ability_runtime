@@ -20,7 +20,7 @@ import { BusinessError, AsyncCallback } from '@ohos.base';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
 
 export default namespace appManager {
-loadLibrary("app_manager_ani.z")
+loadLibraryWithPermissionCheck("app_manager_ani.z", "@ohos.app.ability.appManager")
 
 export type ProcessInformation = _ProcessInformation;
 export type AppStateData = _AppStateData;
