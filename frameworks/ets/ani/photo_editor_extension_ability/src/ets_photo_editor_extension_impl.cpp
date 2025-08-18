@@ -25,8 +25,6 @@
 #include "context.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
-#include "insight_intent_executor_info.h"
-#include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
 #include "ani_common_want.h"
 #include "ui_extension_window_command.h"
@@ -108,7 +106,7 @@ void EtsPhotoEditorExtensionImpl::OnForeground(const Want &want, sptr<AAFwk::Ses
 }
 
 void EtsPhotoEditorExtensionImpl::OnStartContentEditing(const AAFwk::Want &want,
-                                                       const sptr<AAFwk::SessionInfo> &sessionInfo)
+    const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "EtPhotoEditorExtension want: (%{public}s), begin", want.ToUri().c_str());
 

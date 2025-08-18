@@ -29,12 +29,12 @@ export default class PhotoEditorExtensionAbility extends UIExtensionContext {
       this.onDestroy();
       return false;
     }
-    const PhotoEditorExtensionAbilityClassType = AbilityUtils.getClassType(new PhotoEditorExtensionAbility());
-    if (PhotoEditorExtensionAbilityClassType === undefined) {
+    const photoEditorExtensionAbilityClassType = AbilityUtils.getClassType(new PhotoEditorExtensionAbility());
+    if (photoEditorExtensionAbilityClassType === undefined) {
       this.onDestroy();
       return false;
     }
-    if (AbilityUtils.isOverride(derivedClassType, "onDestroyAsync", PhotoEditorExtensionAbilityClassType)) {
+    if (AbilityUtils.isOverride(derivedClassType, "onDestroyAsync", photoEditorExtensionAbilityClassType)) {
       this.onDestroyAsync();
       return true;
     }
