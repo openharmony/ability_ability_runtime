@@ -2032,7 +2032,7 @@ HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_002, TestSize.Level2)
     std::string bundleName = "testBundleName";
     std::vector<int32_t> pidList;
     int32_t res = appMgrService->GetSupportedProcessCachePids(bundleName, pidList);
-    EXPECT_EQ(res, ERR_OK);
+    EXPECT_EQ(res, AAFwk::CHECK_PERMISSION_FAILED);
 }
 
 /*

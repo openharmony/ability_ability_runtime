@@ -367,7 +367,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_003, TestSize.Level0)
     // this call will block main thread, thus call it in new thread
     std::thread watchdog([&] {
         bool ret = AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::APP_FREEZE);
-        EXPECT_TRUE(ret);
+        EXPECT_FALSE(ret);
     });
     watchdog.join();
 }

@@ -1012,7 +1012,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckCallPermission_001, TestSize.Leve
     auto ret4 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, isForegroundToRestartApp, isSendDialogResult, specifyTokenId,
         callerBundleName);
-    EXPECT_EQ(ret4, ERR_OK);
+    EXPECT_EQ(ret4, CHECK_PERMISSION_FAILED);
 
     auto ret5 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, false, false, specifyTokenId, callerBundleName);
