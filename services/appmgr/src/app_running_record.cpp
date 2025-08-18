@@ -1248,7 +1248,6 @@ void AppRunningRecord::SendEvent(uint32_t msg, int64_t timeOut)
     appEventId_++;
     auto param = appEventId_;
 
-    TAG_LOGI(AAFwkTag::APPMGR, "eventId %{public}d", static_cast<int>(param));
     eventHandler_->SendEvent(AAFwk::EventWrap(msg, param), timeOut, false);
     AppEventUtil::GetInstance().AddEvent(shared_from_this(), msg, param);
 }

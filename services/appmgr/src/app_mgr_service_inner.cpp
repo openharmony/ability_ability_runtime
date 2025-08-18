@@ -8204,7 +8204,7 @@ bool AppMgrServiceInner::IsAttachDebug(const std::string &bundleName)
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     if (!isSaCall) {
-        TAG_LOGE(AAFwkTag::APPMGR, "caller token not SA");
+        TAG_LOGW(AAFwkTag::APPMGR, "caller token not SA");
         return false;
     }
     if (appRunningManager_ == nullptr || bundleName.empty()) {
@@ -9465,7 +9465,7 @@ bool AppMgrServiceInner::GetKeepAliveState(const std::shared_ptr<AppRunningRecor
 
 int32_t AppMgrServiceInner::SetSupportedProcessCacheSelf(bool isSupport)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
@@ -10505,7 +10505,7 @@ int32_t AppMgrServiceInner:: PreCheckStartProcess(const std::string &bundleName,
 
 int32_t AppMgrServiceInner::QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "QueryRunningSharedBundles call, pid:%{public}d", pid);
+    TAG_LOGD(AAFwkTag::APPMGR, "QueryRunningSharedBundles call, pid:%{public}d", pid);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto appRecord = GetAppRunningRecordByPid(pid);
     if (!appRecord) {
