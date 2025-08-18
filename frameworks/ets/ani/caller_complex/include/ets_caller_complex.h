@@ -43,12 +43,16 @@ public:
     static ani_object NativeTransferDynamic(ani_env *env, ani_object, ani_object input);
     static bool IsInstanceOf(ani_env *env, ani_object aniObj);
     static ani_object CreateDynamicCaller(ani_env *env, sptr<IRemoteObject> remoteObj);
+    static void TransferFinalizeCallback(uintptr_t jsPtr);
 protected:
     void ReleaseCallInner(ani_env *env);
 private:
     ReleaseCallFunc releaseCallFunc_;
     std::shared_ptr<CallerCallBack> callerCallback_;
     wptr<IRemoteObject> remoteObj_;
+
+    static std::mutex staticTransferRecordMutex_;
+    static std::unordered_map<uintptr_t, ani_object> staticTransferRecord_;
 };
 
 struct CallbackWrap {
