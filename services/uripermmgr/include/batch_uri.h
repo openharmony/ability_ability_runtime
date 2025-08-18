@@ -40,10 +40,12 @@ public:
     BatchUri() {}
 
     int32_t Init(const std::vector<std::string> &uriVec, uint32_t mode = 0,
-        const std::string &callerAlterBundleName = "", const std::string &targetAlterBundleName = "");
+        const std::string &callerAlterBundleName = "", const std::string &targetAlterBundleName = "",
+        bool haveSandboxAccessPermission = false);
 
     void InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mode = 0,
-        const std::string &callerBundleName = "", const std::string &targetBundleName = "");
+        const std::string &callerBundleName = "", const std::string &targetBundleName = "",
+        bool haveSandboxAccessPermission = false);
 
     void SetMediaUriCheckResult(const std::vector<bool> &mediaUriResult);
 
