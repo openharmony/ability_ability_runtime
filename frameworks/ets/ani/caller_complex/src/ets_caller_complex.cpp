@@ -39,6 +39,9 @@ void ReleaseNativeRemote(ani_env *env, ani_ref aniObj)
 
 namespace OHOS {
 namespace AbilityRuntime {
+std::mutex EtsCallerComplex::staticTransferRecordMutex_;
+std::unordered_map<uintptr_t, std::shared_ptr<EtsRefWrap>> EtsCallerComplex::staticTransferRecords_;
+
 EtsCallerComplex* EtsCallerComplex::GetComplexPtrFrom(ani_env *env, ani_object aniObj)
 {
     if (env == nullptr || aniObj == nullptr) {
@@ -170,7 +173,9 @@ void EtsCallerComplex::SetCallerCallback(std::shared_ptr<CallerCallBack> callbac
 ani_object EtsCallerComplex::NativeTransferStatic(ani_env *env, ani_object, ani_object input)
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "transfer static caller");
+    std::lock_guard lock(staticTransferRecordMutex_);
     ani_object output = nullptr;
+    uintptr_t srcPtr = 0;
     do {
         void *unwrapResult = nullptr;
         bool success = arkts_esvalue_unwrap(env, input, &unwrapResult);
@@ -182,7 +187,12 @@ ani_object EtsCallerComplex::NativeTransferStatic(ani_env *env, ani_object, ani_
             TAG_LOGE(AAFwkTag::UIABILITY, "null unwrapResult");
             break;
         }
-        auto remoteObj = GetJsCallerRemoteObj(reinterpret_cast<uintptr_t>(unwrapResult));
+        srcPtr = reinterpret_cast<uintptr_t>(unwrapResult);
+        auto recordItr = staticTransferRecords_.find(srcPtr);
+        if (recordItr != staticTransferRecords_.end()) {
+            return reinterpret_cast<ani_object>(recordItr->second->objectRef);
+        }
+        auto remoteObj = GetJsCallerRemoteObj(srcPtr);
         if (remoteObj == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null remoteObj");
         }
@@ -198,6 +208,8 @@ ani_object EtsCallerComplex::NativeTransferStatic(ani_env *env, ani_object, ani_
     if (output == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "failed to create");
         EtsErrorUtil::ThrowEtsTransferClassError(env);
+    } else {
+        staticTransferRecords_.emplace(srcPtr, std::make_shared<EtsRefWrap>(env, output));
     }
     return output;
 }
@@ -291,7 +303,13 @@ ani_object EtsCallerComplex::CreateDynamicCaller(ani_env *env, sptr<IRemoteObjec
     return result;
 }
 
-CallbackWrap::CallbackWrap(ani_env *env, ani_object callerObj, const std::string &callbackName)
+void EtsCallerComplex::TransferFinalizeCallback(uintptr_t jsPtr)
+{
+    std::lock_guard lock(staticTransferRecordMutex_);
+    staticTransferRecords_.erase(jsPtr);
+}
+
+EtsRefWrap::EtsRefWrap(ani_env *env, ani_object srcObj)
 {
     if (env->GetVM(&aniVM) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "get aniVM failed");
@@ -299,16 +317,14 @@ CallbackWrap::CallbackWrap(ani_env *env, ani_object callerObj, const std::string
     }
 
     ani_status status = ANI_ERROR;
-    if ((status = env->GlobalReference_Create(callerObj, &callbackRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "callbackRef: %{public}d", status);
-        return;
+    if ((status = env->GlobalReference_Create(srcObj, &objectRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "create ref: %{public}d", status);
     }
-    name = callbackName;
 }
 
-CallbackWrap::~CallbackWrap()
+EtsRefWrap::~EtsRefWrap()
 {
-    if (callbackRef == nullptr) {
+    if (objectRef == nullptr) {
         return;
     }
     ani_status status = ANI_ERROR;
@@ -317,14 +333,17 @@ CallbackWrap::~CallbackWrap()
         TAG_LOGE(AAFwkTag::UIABILITY, "GetEnv failed, status : %{public}d", status);
         return;
     }
-    aniEnv->GlobalReference_Delete(callbackRef);
-    callbackRef = nullptr;
+    aniEnv->GlobalReference_Delete(objectRef);
+    objectRef = nullptr;
 }
+
+CallbackWrap::CallbackWrap(ani_env *env, ani_object callerObj, const std::string &callbackName)
+    : EtsRefWrap(env, callerObj), name(callbackName) {}
 
 void CallbackWrap::Invoke(const std::string &msg) const
 {
-    if (callbackRef == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "callbackRef null");
+    if (objectRef == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "objectRef null");
         return;
     }
     ani_string aniMsg = nullptr;
@@ -338,7 +357,7 @@ void CallbackWrap::Invoke(const std::string &msg) const
         TAG_LOGE(AAFwkTag::UIABILITY, "String_NewUTF8 failed %{public}d", status);
         return;
     }
-    status = aniEnv->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(callbackRef), name.c_str(),
+    status = aniEnv->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(objectRef), name.c_str(),
         "Lstd/core/String;:V", aniMsg);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "%{public}s failed %{public}d", name.c_str(), status);
@@ -378,6 +397,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TAG_LOGE(AAFwkTag::UIABILITY, "bind methods status: %{public}d", status);
         return status;
     }
+
+    SetFinalizeCallback(EtsCallerComplex::TransferFinalizeCallback);
 
     *result = ANI_VERSION_1;
     return ANI_OK;
