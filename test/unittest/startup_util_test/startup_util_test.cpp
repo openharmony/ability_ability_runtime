@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "ability_info.h"
 #include "extension_ability_info.h"
 #include "startup_util.h"
 #include "want.h"
@@ -164,6 +165,31 @@ HWTEST_F(StartupUtilTest, ParseFullRequestCode_001, TestSize.Level1)
     EXPECT_EQ(requestInfo.requestCode, 1);
     EXPECT_EQ(requestInfo.pid, 1);
     EXPECT_EQ(requestInfo.backFlag, false);
+}
+
+/**
+ * @tc.name: InitAbilityInfoFromExtension_001
+ * @tc.desc: test class StartupUtil number function
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupUtilTest, InitAbilityInfoFromExtension_001, TestSize.Level1)
+{
+    AppExecFwk::ExtensionAbilityInfo extensionInfo;
+    AppExecFwk::AbilityInfo abilityInfo;
+    extensionInfo.uid = 1000;
+    extensionInfo.bundleName = "test";
+    extensionInfo.moduleName = "moduleName";
+    extensionInfo.name = "name";
+    extensionInfo.extensionTypeName = "extensionTypeName";
+    StartupUtil::InitAbilityInfoFromExtension(extensionInfo, abilityInfo);
+    EXPECT_EQ(abilityInfo.bundleName, extensionInfo.bundleName);
+    EXPECT_EQ(abilityInfo.package, extensionInfo.moduleName);
+    EXPECT_EQ(abilityInfo.moduleName, extensionInfo.moduleName);
+    EXPECT_EQ(abilityInfo.name, extensionInfo.name);
+    EXPECT_TRUE(abilityInfo.isModuleJson);
+    EXPECT_TRUE(abilityInfo.isStageBasedModel);
+    EXPECT_EQ(abilityInfo.extensionTypeName, extensionInfo.extensionTypeName);
+    EXPECT_EQ(abilityInfo.uid, extensionInfo.uid);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
