@@ -184,19 +184,6 @@ bool SetFieldStringByName(ani_env *env, ani_class cls, ani_object object, const 
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
-
-    if (value.empty()) {
-        ani_ref nullRef = nullptr;
-        if ((status = env->GetNull(&nullRef)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
-            return false;
-        }
-        if ((status = env->Object_SetField_Ref(object, field, nullRef)) != ANI_OK) {
-            TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
-            return false;
-        }
-        return true;
-    }
     ani_string aniStr = nullptr;
     if ((status = env->String_NewUTF8(value.c_str(), value.size(), &aniStr)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
