@@ -179,6 +179,7 @@ private:
     static int32_t GenerateRequestCode();
     void UnWrapCompletionHandlerForAtomicService(
         napi_env env, napi_value param, AAFwk::StartOptions &options, const std::string &appId);
+    void UnwrapCompletionHandlerForOpenLink(napi_env env, napi_value param, AAFwk::Want& want);
     static int32_t curRequestCode_;
     static std::mutex requestCodeMutex_;
 

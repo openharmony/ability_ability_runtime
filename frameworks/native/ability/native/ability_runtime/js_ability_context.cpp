@@ -66,6 +66,7 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr int32_t TRACE_ATOMIC_SERVICE_ID = 201;
+const std::string KEY_REQUEST_ID = "com.ohos.param.requestId";
 const std::string TRACE_ATOMIC_SERVICE = "StartAtomicService";
 constexpr int32_t CALLER_TIME_OUT = 10; // 10s
 const std::string JSON_KEY_ERR_MSG = "errMsg";
@@ -575,6 +576,56 @@ void JsAbilityContext::UnWrapCompletionHandlerForAtomicService(
     options.requestId_ = requestId;
 }
 
+void JsAbilityContext::UnwrapCompletionHandlerForOpenLink(
+    napi_env env, napi_value param, AAFwk::Want& want)
+{
+    napi_value completionHandlerForOpenLink = AppExecFwk::GetPropertyValueByPropertyName(env, param,
+        "completionHandler", napi_object);
+    if (completionHandlerForOpenLink == nullptr) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "null completionHandlerForOpenLink");
+        return;
+    }
+    napi_value onRequestSuccFunc = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandlerForOpenLink,
+        "onRequestSuccess", napi_function);
+    napi_value onRequestFailFunc = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandlerForOpenLink,
+        "onRequestFailure", napi_function);
+    if (onRequestSuccFunc == nullptr || onRequestFailFunc == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null onRequestSuccFunc or onRequestFailFunc");
+        return;
+    }
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [env, completionHandlerForOpenLink, onRequestSuccFunc](
+        const AppExecFwk::ElementName &element, const std::string &message) {
+        napi_value argv[ARGC_TWO] = { AppExecFwk::WrapElementName(env, element), CreateJsValue(env, message) };
+        napi_status status = napi_call_function(
+            env, completionHandlerForOpenLink, onRequestSuccFunc, ARGC_TWO, argv, nullptr);
+        if (status != napi_ok) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "call onRequestSuccess, failed: %{public}d", status);
+        }
+    };
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [env, completionHandlerForOpenLink, onRequestFailFunc](
+        const AppExecFwk::ElementName &element, const std::string &message) {
+        napi_value argv[ARGC_TWO] = { AppExecFwk::WrapElementName(env, element), CreateJsValue(env, message) };
+        napi_status status = napi_call_function(
+            env, completionHandlerForOpenLink, onRequestFailFunc, ARGC_TWO, argv, nullptr);
+        if (status != napi_ok) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "call onRequestFailure, failed: %{public}d", status);
+        }
+    };
+    auto context = context_.lock();
+    if (!context) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        return;
+    }
+    std::string requestId = std::to_string(static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count()));
+    if (context->AddCompletionHandlerForOpenLink(requestId, onRequestSucc, onRequestFail) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "add completionHandler failed");
+        return;
+    }
+    want.RemoveParam(KEY_REQUEST_ID);
+    want.SetParam(KEY_REQUEST_ID, requestId);
+}
+
 napi_value JsAbilityContext::OnStartAbility(napi_env env, NapiCallbackInfo& info, bool isStartRecent)
 {
     StartAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, TRACE_ATOMIC_SERVICE, TRACE_ATOMIC_SERVICE_ID);
@@ -972,6 +1023,9 @@ napi_value JsAbilityContext::OnOpenLink(napi_env env, NapiCallbackInfo& info)
             "Parse param link or openLinkOptions failed, link must be string, openLinkOptions must be options.");
         return CreateJsUndefined(env);
     }
+    if (CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
+        UnwrapCompletionHandlerForOpenLink(env, info.argv[INDEX_ONE], want);
+    }
 
     want.SetUri(linkValue);
     std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
@@ -980,7 +1034,7 @@ napi_value JsAbilityContext::OnOpenLink(napi_env env, NapiCallbackInfo& info)
 
     int requestCode = -1;
     if (CheckTypeForNapiValue(env, info.argv[INDEX_TWO], napi_function)) {
-        TAG_LOGD(AAFwkTag::CONTEXT, "completionHandler is used");
+        TAG_LOGD(AAFwkTag::CONTEXT, "async callback is used");
         CreateOpenLinkTask(env, info.argv[INDEX_TWO], want, requestCode);
     }
     return OnOpenLinkInner(env, want, requestCode, startTime, linkValue);
@@ -1001,7 +1055,7 @@ napi_value JsAbilityContext::OnOpenLinkInner(napi_env env, const AAFwk::Want& wa
     };
     napi_value result = nullptr;
     AddFreeInstallObserver(env, want, nullptr, &result, false, true);
-    NapiAsyncTask::CompleteCallback complete = [innerErrCode, requestCode, startTime, url, weak = context_,
+    NapiAsyncTask::CompleteCallback complete = [want, innerErrCode, requestCode, startTime, url, weak = context_,
         observer = freeInstallObserver_](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*innerErrCode == 0) {
             TAG_LOGI(AAFwkTag::CONTEXT, "openLink succeeded");
@@ -1019,6 +1073,11 @@ napi_value JsAbilityContext::OnOpenLinkInner(napi_env env, const AAFwk::Want& wa
                 return;
             }
             observer->OnInstallFinishedByUrl(startTime, url, *innerErrCode);
+            nlohmann::json jsonObject = nlohmann::json {
+                { JSON_KEY_ERR_MSG, "Failed to call openLink" },
+            };
+            std::string requestId = want.GetStringParam(KEY_REQUEST_ID);
+            context->OnOpenLinkRequestFailure(requestId, want.GetElement(), jsonObject.dump());
         }
         context->RemoveResultCallbackTask(requestCode);
     };

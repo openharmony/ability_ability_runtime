@@ -526,6 +526,12 @@ public:
         return 0;
     }
 
+    virtual ErrCode AddCompletionHandlerForOpenLink(const std::string &requestId,
+        AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail)
+    {
+        return 0;
+    }
+
     /**
      * @brief Callback on request success.
      *
@@ -548,6 +554,18 @@ public:
      */
     virtual void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message, int32_t resultCode)
+    {
+        return;
+    }
+
+    virtual void OnOpenLinkRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message)
+    {
+        return;
+    }
+
+    virtual void OnOpenLinkRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message)
     {
         return;
     }
