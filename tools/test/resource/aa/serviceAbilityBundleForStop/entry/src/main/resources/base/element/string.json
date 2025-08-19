@@ -1,8 +1,8 @@
 {
   "string": [
     {
-      "name": "entry_desc",
-      "value": "description"
+      "name": "module_desc",
+      "value": "module description"
     },
     {
       "name": "MainAbility_desc",
@@ -14,7 +14,15 @@
     },
     {
       "name": "ServiceAbility_desc",
-      "value": "hap sample empty service"
+      "value": "description"
+    },
+    {
+      "name": "ServiceAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "app_name",
+      "value": "label"
     }
   ]
 }
