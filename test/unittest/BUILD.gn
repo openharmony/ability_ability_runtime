@@ -389,6 +389,7 @@ group("unittest") {
       "js_ui_extension_content_session_test:unittest",
       "js_ui_extension_context_test:unittest",
       "js_uiservice_uiext_connection_test:unittest",
+      "json_utils_test:unittest",
       "keep_alive_process_manager_test:unittest",
       "keep_alive_utils_test:unittest",
       "killing_process_manager_test:unittest",
