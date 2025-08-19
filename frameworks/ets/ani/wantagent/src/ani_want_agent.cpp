@@ -134,6 +134,10 @@ void TriggerCompleteCallBack::OnSendFinished(
         dataWorker->wantAgent = new (std::nothrow) WantAgent(triggerCompleteInfo_.wantAgent->GetPendingWant());
     }
     OnSendFinishedCallback(dataWorker);
+    if (dataWorker->wantAgent != nullptr) {
+        delete dataWorker->wantAgent;
+        dataWorker->wantAgent = nullptr;
+    }
     if (dataWorker != nullptr) {
         delete dataWorker;
         dataWorker = nullptr;

@@ -46,8 +46,8 @@ public:
     std::shared_ptr<AppExecFwk::ETSNativeReference> GetAniObserver() { return etsObserverObject_; }
 private:
     ani_status AniSendEvent(const std::function<void()> task);
-    ani_vm *etsVm_;
-    std::shared_ptr<AppExecFwk::ETSNativeReference> etsObserverObject_;
+    ani_vm *etsVm_ = nullptr;
+    std::shared_ptr<AppExecFwk::ETSNativeReference> etsObserverObject_ = nullptr;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_ = nullptr;
 };
 
