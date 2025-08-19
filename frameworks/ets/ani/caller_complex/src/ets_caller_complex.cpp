@@ -40,7 +40,7 @@ void ReleaseNativeRemote(ani_env *env, ani_ref aniObj)
 namespace OHOS {
 namespace AbilityRuntime {
 std::mutex EtsCallerComplex::staticTransferRecordMutex_;
-std::unordered_map<uintptr_t, ani_object> EtsCallerComplex::staticTransferRecord_;
+std::unordered_map<uintptr_t, std::shared_ptr<EtsRefWrap>> EtsCallerComplex::staticTransferRecords_;
 
 EtsCallerComplex* EtsCallerComplex::GetComplexPtrFrom(ani_env *env, ani_object aniObj)
 {
@@ -188,9 +188,9 @@ ani_object EtsCallerComplex::NativeTransferStatic(ani_env *env, ani_object, ani_
             break;
         }
         srcPtr = reinterpret_cast<uintptr_t>(unwrapResult);
-        auto recordItr = staticTransferRecord_.find(srcPtr);
-        if (recordItr != staticTransferRecord_.end()) {
-            return recordItr->second;
+        auto recordItr = staticTransferRecords_.find(srcPtr);
+        if (recordItr != staticTransferRecords_.end()) {
+            return reinterpret_cast<ani_object>(recordItr->second->objectRef);
         }
         auto remoteObj = GetJsCallerRemoteObj(srcPtr);
         if (remoteObj == nullptr) {
@@ -209,7 +209,7 @@ ani_object EtsCallerComplex::NativeTransferStatic(ani_env *env, ani_object, ani_
         TAG_LOGE(AAFwkTag::UIABILITY, "failed to create");
         EtsErrorUtil::ThrowEtsTransferClassError(env);
     } else {
-        staticTransferRecord_.emplace(srcPtr, output);
+        staticTransferRecords_.emplace(srcPtr, std::make_shared<EtsRefWrap>(env, output));
     }
     return output;
 }
@@ -306,10 +306,10 @@ ani_object EtsCallerComplex::CreateDynamicCaller(ani_env *env, sptr<IRemoteObjec
 void EtsCallerComplex::TransferFinalizeCallback(uintptr_t jsPtr)
 {
     std::lock_guard lock(staticTransferRecordMutex_);
-    staticTransferRecord_.erase(jsPtr);
+    staticTransferRecords_.erase(jsPtr);
 }
 
-CallbackWrap::CallbackWrap(ani_env *env, ani_object callerObj, const std::string &callbackName)
+EtsRefWrap::EtsRefWrap(ani_env *env, ani_object srcObj)
 {
     if (env->GetVM(&aniVM) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "get aniVM failed");
@@ -317,16 +317,14 @@ CallbackWrap::CallbackWrap(ani_env *env, ani_object callerObj, const std::string
     }
 
     ani_status status = ANI_ERROR;
-    if ((status = env->GlobalReference_Create(callerObj, &callbackRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "callbackRef: %{public}d", status);
-        return;
+    if ((status = env->GlobalReference_Create(srcObj, &objectRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "create ref: %{public}d", status);
     }
-    name = callbackName;
 }
 
-CallbackWrap::~CallbackWrap()
+EtsRefWrap::~EtsRefWrap()
 {
-    if (callbackRef == nullptr) {
+    if (objectRef == nullptr) {
         return;
     }
     ani_status status = ANI_ERROR;
@@ -335,14 +333,17 @@ CallbackWrap::~CallbackWrap()
         TAG_LOGE(AAFwkTag::UIABILITY, "GetEnv failed, status : %{public}d", status);
         return;
     }
-    aniEnv->GlobalReference_Delete(callbackRef);
-    callbackRef = nullptr;
+    aniEnv->GlobalReference_Delete(objectRef);
+    objectRef = nullptr;
 }
+
+CallbackWrap::CallbackWrap(ani_env *env, ani_object callerObj, const std::string &callbackName)
+    : EtsRefWrap(env, callerObj), name(callbackName) {}
 
 void CallbackWrap::Invoke(const std::string &msg) const
 {
-    if (callbackRef == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "callbackRef null");
+    if (objectRef == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "objectRef null");
         return;
     }
     ani_string aniMsg = nullptr;
@@ -356,7 +357,7 @@ void CallbackWrap::Invoke(const std::string &msg) const
         TAG_LOGE(AAFwkTag::UIABILITY, "String_NewUTF8 failed %{public}d", status);
         return;
     }
-    status = aniEnv->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(callbackRef), name.c_str(),
+    status = aniEnv->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(objectRef), name.c_str(),
         "Lstd/core/String;:V", aniMsg);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "%{public}s failed %{public}d", name.c_str(), status);
