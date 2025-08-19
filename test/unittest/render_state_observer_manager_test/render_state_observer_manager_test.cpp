@@ -318,7 +318,7 @@ HWTEST_F(RenderStateObserverManagerTest, HandleOnRenderStateChanged_0200, TestSi
     int32_t sharedFd = -1;
     int32_t crashFd = -1;
     std::shared_ptr<AppRunningRecord> host = std::make_shared<AppRunningRecord>(nullptr, 0, "");
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(
         hostPid, renderParam, FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), host);
 
     int32_t state = 1;

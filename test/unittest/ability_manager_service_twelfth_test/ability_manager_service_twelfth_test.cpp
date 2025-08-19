@@ -701,11 +701,11 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, OnStartSpecifiedAbilityTimeoutRespons
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest OnStartSpecifiedAbilityTimeoutResponse_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     int32_t requestId = 101;
-    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    std::shared_ptr<TaskHandlerWrap> taskHandler =
+        TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
+    std::shared_ptr<AbilityEventHandler> eventHandler = std::make_shared<AbilityEventHandler>(taskHandler, abilityMs);
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler, eventHandler);
     EXPECT_NE(abilityMs->subManagersHelper_, nullptr);
-    EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
-        .Times(AnyNumber())
-        .WillRepeatedly(Return(true));
     abilityMs->OnStartSpecifiedAbilityTimeoutResponse(requestId);
     auto manager = abilityMs->GetCurrentUIAbilityManager();
     EXPECT_EQ(manager, nullptr);
