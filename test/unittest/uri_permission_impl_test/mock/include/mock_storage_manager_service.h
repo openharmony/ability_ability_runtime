@@ -211,11 +211,6 @@ public:
         return E_OK;
     }
 
-    virtual int32_t GenerateUserKeys(uint32_t userId, uint32_t flags) override
-    {
-        return E_OK;
-    }
-
     virtual int32_t DeleteUserKeys(uint32_t userId) override
     {
         return E_OK;
