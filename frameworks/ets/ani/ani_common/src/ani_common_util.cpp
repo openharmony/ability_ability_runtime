@@ -1203,6 +1203,29 @@ bool GetRefProperty(ani_env *env, ani_object param, const char *name, ani_ref &v
     return !isUndefined;
 }
 
+bool GetBooleanPropertyObject(ani_env *env, ani_object param, const char *name, bool &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+
+    ani_ref obj = nullptr;
+    ani_status status = ANI_ERROR;
+    if (!GetRefProperty(env, param, name, obj)) {
+        TAG_LOGW(AAFwkTag::ANI, "%{public}s : undefined", name);
+        return false;
+    }
+    ani_boolean aniValue = ANI_FALSE;
+    if ((status = env->Object_CallMethodByName_Boolean(
+        reinterpret_cast<ani_object>(obj), "unboxed", nullptr, &aniValue)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    value = aniValue;
+    return true;
+}
+
 bool SetDoublePropertyObject(ani_env *env, ani_object param, const char *name, double value)
 {
     if (env == nullptr) {

@@ -15,6 +15,7 @@
 
 #include "ets_error_utils.h"
 
+#include "ability_runtime_error_util.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -55,6 +56,19 @@ void EtsErrorUtil::ThrowError(ani_env *env, const AbilityErrorCode &err)
         return;
     }
     EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(env, static_cast<int32_t>(err), GetErrorMsg(err)));
+}
+
+void EtsErrorUtil::ThrowRuntimeError(ani_env *env, int32_t errCode, const std::string &errMessage)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return;
+    }
+    std::string eMes = errMessage;
+    if (eMes.empty()) {
+        eMes = AbilityRuntimeErrorUtil::GetErrMessage(errCode);
+    }
+    EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(env, errCode, eMes));
 }
 
 void EtsErrorUtil::ThrowInvalidCallerError(ani_env *env)
