@@ -234,6 +234,7 @@ bool ETSEnvironment::Initialize()
     options.push_back(ani_option { bootString.data(), nullptr });
     options.push_back(ani_option { "--ext:--compiler-enable-jit=false", nullptr });
     options.push_back(ani_option { "--ext:--log-level=info", nullptr });
+    options.push_back(ani_option { "--ext:taskpool-support-interop=true", nullptr });
     ani_options optionsPtr = { options.size(), options.data() };
     ani_status status = ANI_ERROR;
     if ((status = lazyApis_.ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vmEntry_.aniVm_)) != ANI_OK) {
