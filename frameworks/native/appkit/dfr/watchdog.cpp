@@ -52,6 +52,10 @@ std::shared_ptr<EventHandler> Watchdog::appMainHandler_ = nullptr;
 OHOS::HiviewDFX::HiTraceId* Watchdog::hitraceId_ = nullptr;
 #endif
 
+static constexpr const char* const CHECK_BACKGROUND_THREAD[] = {
+    "com.ohos.sceneboard"
+};
+
 Watchdog::Watchdog()
 {}
 
@@ -157,6 +161,10 @@ void Watchdog::SetBundleInfo(const std::string& bundleName, const std::string& b
         ChangeTimeOut(bundleName);
     }
 #endif
+    {
+        std::unique_lock<std::mutex> lock(cvMutex_);
+        bundleName_ = bundleName;
+    }
 }
 
 void Watchdog::SetBackgroundStatus(const bool isInBackground)
@@ -171,6 +179,7 @@ void Watchdog::AllowReportEvent()
     std::unique_lock<std::mutex> lock(cvMutex_);
     needReport_.store(true);
     isSixSecondEvent_.store(false);
+    backgroundReportCount_.store(0);
     watchdogReportCount_.store(0);
 }
 
@@ -266,10 +275,15 @@ void Watchdog::ReportEvent()
         return;
     }
 
-    if (isInBackground_) {
+    if (isInBackground_ && backgroundReportCount_.load() < BACKGROUND_REPORT_COUNT_MAX) {
+        bool enableCheck = std::find(std::begin(CHECK_BACKGROUND_THREAD), std::end(CHECK_BACKGROUND_THREAD),
+            bundleName_) != std::end(CHECK_BACKGROUND_THREAD);
+        if (enableCheck) {
+            backgroundReportCount_++;
+        }
         TAG_LOGI(AAFwkTag::APPDFR, "In Background, thread may be blocked in, not report time"
-            "currTime: %{public}" PRIu64 ", lastTime: %{public}" PRIu64 "",
-            static_cast<uint64_t>(now), static_cast<uint64_t>(lastWatchTime_));
+            "currTime: %{public}" PRIu64 ", lastTime: %{public}" PRIu64 ", enableCheck: %{public}d",
+            static_cast<uint64_t>(now), static_cast<uint64_t>(lastWatchTime_), enableCheck);
         return;
     }
 
