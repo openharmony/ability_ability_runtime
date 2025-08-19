@@ -23,7 +23,7 @@
 namespace OHOS {
 namespace AAFwk {
 namespace AbilityToolConvertUtil {
-static Reason CovertExitReason(const std::string& reasonStr)
+static Reason ConvertExitReason(const std::string& reasonStr)
 {
     if (reasonStr.empty()) {
         return Reason::REASON_UNKNOWN;
@@ -67,7 +67,7 @@ static Reason CovertExitReason(const std::string& reasonStr)
 
     return Reason::REASON_UNKNOWN;
 }
-}  // namespace AbilityUtil
+}  // namespace AbilityToolConvertUtil
 }  // namespace AAFwk
 }  // namespace OHOS
 
