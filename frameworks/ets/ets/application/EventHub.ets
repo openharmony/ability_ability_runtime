@@ -71,7 +71,10 @@ export default class EventHub {
     if (!this.dynamicContextEventHub) {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
-    this.dynamicContextEventHub!.getProperty("eventHub").invokeMethod("offByNativeContext", ESValue.wrap(event), ESValue.wrap(callback));
+    const eventHub = this.dynamicContextEventHub?.getProperty("eventHub");
+    if (eventHub) {
+      eventHub.invokeMethod("offByNativeContext", ESValue.wrap(event));
+    }
   }
 
   offByDynamicContext(event: string, callback: Function): void {
@@ -83,7 +86,10 @@ export default class EventHub {
     if (!this.dynamicContextEventHub) {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
-    this.dynamicContextEventHub!.getProperty("eventHub").invokeMethod("offByNativeContext", ESValue.wrap(event));
+    const eventHub = this.dynamicContextEventHub?.getProperty("eventHub");
+    if (eventHub) {
+      eventHub.invokeMethod("offByNativeContext", ESValue.wrap(event));
+    }
   }
 
   offByDynamicContext(event: string): void {
@@ -113,12 +119,15 @@ export default class EventHub {
     if (!this.dynamicContextEventHub) {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
-    let params: FixedArray<ESValueArgs> = new ESValueArgs[args.length + 1];
-    params[0] = ESValue.wrap(event);
-    for (let i = 0; i < args.length; i++) {
-      params[i + 1] = ESValue.wrap(args[i]);
+    const eventHub = this.dynamicContextEventHub?.getProperty("eventHub");
+    if (eventHub) {
+      let params: FixedArray<ESValueArgs> = new ESValueArgs[args.length + 1];
+      params[0] = ESValue.wrap(event);
+      for (let i = 0; i < args.length; i++) {
+        params[i + 1] = ESValue.wrap(args[i]);
+      }
+      eventHub.invokeMethod("emitByNativeContext", ...params);
     }
-    this.dynamicContextEventHub!.getProperty("eventHub").invokeMethod("emitByNativeContext", ...params);
   }
 
   emitByDynamicContext(event: string, ...args: FixedArray<(Object|null|undefined)>): void {
