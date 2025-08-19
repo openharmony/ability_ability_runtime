@@ -995,6 +995,16 @@ enum {
     ERR_PRELOAD_APP_DATA_ABILITIES_FAILED = 2097399,
 
     /**
+     * Result (2097400) The current process is not a master process.
+     */
+    ERR_NOT_MASTER_PROCESS = 2097400,
+
+    /**
+     * Result (2097401) There is an unfinished onNewProcessRequest.
+     */
+    ERR_NOT_ON_NEW_PROCESS_REQUEST_DONE = 2097401,
+
+    /**
      * Result (2098000-2098049) Error code refinement INVALID_VALUE.
      */
     ERR_REFINEMENT_INVALID_VALUE_BEGIN = 2098000,

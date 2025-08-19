@@ -1007,6 +1007,11 @@ public:
     {
         return 0;
     }
+
+    virtual int32_t ExitMasterProcessRole()
+    {
+        return 0;
+    }
     
     /**
      * Query running shared bundle infos.
