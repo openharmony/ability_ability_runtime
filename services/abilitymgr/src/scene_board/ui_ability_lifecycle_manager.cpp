@@ -179,7 +179,7 @@ void UIAbilityLifecycleManager::MarkStartingFlag(const AbilityRequest &abilityRe
 {
     for (auto iter = sessionAbilityMap_.begin(); iter != sessionAbilityMap_.end(); iter++) {
         if (iter->second == nullptr || iter->second->GetPid() <= 0 ||
-            iter->second->GetAbilityInfo().bundleName != abilityRequest.abilityInfo.bundleName) {
+            iter->second->GetApplicationInfo().uid != abilityRequest.appInfo.uid) {
             continue;
         }
         AddStartingPid(iter->second->GetPid());
