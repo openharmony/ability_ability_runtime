@@ -122,5 +122,32 @@ std::optional<bool> JsonUtils::JsonToOptionalBool(const nlohmann::json &jsonObje
     }
     return std::nullopt;
 }
+
+bool JsonUtils::JsonToBool(const nlohmann::json &jsonObject, const std::string &key, bool defaultValue)
+{
+    if (jsonObject.contains(key) && jsonObject[key].is_boolean()) {
+        return jsonObject[key].get<bool>();
+    }
+    return defaultValue;
+}
+
+void JsonUtils::JsonToUnorderedStrSet(const nlohmann::json &jsonObject, const std::string &key,
+    std::unordered_set<std::string> &set)
+{
+    if (!jsonObject.contains(key) || !jsonObject.at(key).is_array()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s config null", key.c_str());
+        return;
+    }
+    set.clear();
+    const auto &jsonArray = jsonObject.at(key);
+    for (auto &item : jsonArray.items()) {
+        const nlohmann::json &itemJson = item.value();
+        if (!itemJson.is_string()) {
+            continue;
+        }
+        auto str = itemJson.get<std::string>();
+        set.emplace(str);
+    }
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -19,6 +19,7 @@
 #include <string>
 #include <map>
 #include <optional>
+#include <unordered_set>
 
 #include "nlohmann/json.hpp"
 #include "singleton.h"
@@ -88,6 +89,25 @@ public:
      * @return optional boolean value.
      */
     std::optional<bool> JsonToOptionalBool(const nlohmann::json &jsonObject, const std::string &key);
+
+    /**
+     * parse json to bool.
+     *
+     * @param jsonObject The json object.
+     * @param key The key.
+     * @return boolean value.
+     */
+    bool JsonToBool(const nlohmann::json &jsonObject, const std::string &key, bool defaultValue);
+
+    /**
+     * parse json to unordered string set.
+     *
+     * @param jsonObject The json object.
+     * @param key The key.
+     * @param set The input set.
+     */
+    void JsonToUnorderedStrSet(const nlohmann::json &jsonObject, const std::string &key,
+        std::unordered_set<std::string> &set);
 
 private:
     std::string GetConfigPath(const std::string& path, const std::string& defaultPath);
