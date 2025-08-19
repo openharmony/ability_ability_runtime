@@ -507,7 +507,7 @@ void UIExtensionContext::OnRequestSuccess(const std::string &requestId, const Ap
         return;
     }
 
-    TAG_LOGE(AAFwkTag::UI_EXT, "requestId=%{public}s not exist", requestId.c_str());
+    OnOpenLinkRequestSuccess(requestId, element, message);
 }
 
 void UIExtensionContext::OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
@@ -531,6 +531,74 @@ void UIExtensionContext::OnRequestFailure(const std::string &requestId, const Ap
         std::string failureMessage;
         GetFailureInfoByMessage(message, failureCode, failureMessage, resultCode);
         atomicResult->onRequestFailure_(atomicResult->appId_, failureCode, failureMessage);
+        return;
+    }
+
+    OnOpenLinkRequestFailure(requestId, element, message);
+}
+
+ErrCode UIExtensionContext::AddCompletionHandlerForOpenLink(const std::string &requestId,
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail)
+{
+    if (onRequestSucc == nullptr || onRequestFail == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "either func is null");
+        return ERR_INVALID_VALUE;
+    }
+    std::lock_guard lock(onOpenLinkRequestResultMutex_);
+    for (auto iter = onOpenLinkRequestResults_.begin(); iter != onOpenLinkRequestResults_.end(); iter++) {
+        if ((*iter)->requestId_ == requestId) {
+            TAG_LOGI(AAFwkTag::UI_EXT, "requestId=%{public}s already exists", requestId.c_str());
+            return ERR_OK;
+        }
+    }
+    onOpenLinkRequestResults_.emplace_back(std::make_shared<AAFwk::OnOpenLinkRequestResult>(
+        requestId, onRequestSucc, onRequestFail));
+    return ERR_OK;
+}
+
+void UIExtensionContext::OnOpenLinkRequestSuccess(const std::string &requestId,
+    const AppExecFwk::ElementName &element, const std::string &message)
+{
+    std::shared_ptr<AAFwk::OnOpenLinkRequestResult> openLinkResult = nullptr;
+    {
+        std::lock_guard lock(onOpenLinkRequestResultMutex_);
+        for (auto iter = onOpenLinkRequestResults_.begin(); iter != onOpenLinkRequestResults_.end(); iter++) {
+            if ((*iter)->requestId_ == requestId) {
+                openLinkResult = *iter;
+                onOpenLinkRequestResults_.erase(iter);
+                break;
+            }
+        }
+    }
+    if (openLinkResult != nullptr) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "requestId=%{public}s, call onRequestSuccess", requestId.c_str());
+        openLinkResult->onRequestSuccess_(element, message);
+        return;
+    }
+
+    TAG_LOGE(AAFwkTag::UI_EXT, "requestId=%{public}s not exist", requestId.c_str());
+}
+
+void UIExtensionContext::OnOpenLinkRequestFailure(const std::string &requestId,
+    const AppExecFwk::ElementName &element, const std::string &message)
+{
+    if (requestId.empty()) {
+        return;
+    }
+    std::shared_ptr<AAFwk::OnOpenLinkRequestResult> openLinkResult = nullptr;
+    {
+        std::lock_guard lock(onOpenLinkRequestResultMutex_);
+        for (auto iter = onOpenLinkRequestResults_.begin(); iter != onOpenLinkRequestResults_.end(); iter++) {
+            if ((*iter)->requestId_ == requestId) {
+                openLinkResult = *iter;
+                onOpenLinkRequestResults_.erase(iter);
+                break;
+            }
+        }
+    }
+    if (openLinkResult != nullptr) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "requestId=%{public}s, call onRequestFailure", requestId.c_str());
+        openLinkResult->onRequestFailure_(element, message);
         return;
     }
 

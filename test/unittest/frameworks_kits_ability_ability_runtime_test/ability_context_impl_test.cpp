@@ -2515,6 +2515,190 @@ HWTEST_F(AbilityContextImplTest, OnRequestFailure_0300, Function | MediumTest | 
 }
 
 /**
+ * @tc.number: OnOpenLinkRequestSuccess_0001
+ * @tc.name: OnOpenLinkRequestSuccess
+ * @tc.desc: OpenLinkRequest not exist.
+ */
+HWTEST_F(AbilityContextImplTest, OnOpenLinkRequestSuccess_0001, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = context_->AddCompletionHandlerForOpenLink(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context_->onOpenLinkRequestResults_.empty(), false);
+    std::string norequestId = "test";
+
+    context_->OnOpenLinkRequestSuccess(norequestId, want.GetElement(), message);
+    EXPECT_EQ(context_->onOpenLinkRequestResults_.empty(), false);
+    context_->onOpenLinkRequestResults_.clear();
+}
+
+/**
+ * @tc.number: OnOpenLinkRequestSuccess_0002
+ * @tc.name: OnOpenLinkRequestSuccess
+ * @tc.desc: OpenLinkRequest exist.
+ */
+HWTEST_F(AbilityContextImplTest, OnOpenLinkRequestSuccess_0002, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = context_->AddCompletionHandlerForOpenLink(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context_->onOpenLinkRequestResults_.empty(), false);
+
+    context_->OnOpenLinkRequestSuccess(requestId, want.GetElement(), message);
+    EXPECT_EQ(context_->onOpenLinkRequestResults_.empty(), true);
+    context_->onOpenLinkRequestResults_.clear();
+}
+
+/**
+ * @tc.number: OnOpenLinkRequestFailure_0001
+ * @tc.name: OnOpenLinkRequestFailure
+ * @tc.desc: OpenLinkRequest not exist.
+ */
+HWTEST_F(AbilityContextImplTest, OnOpenLinkRequestFailure_0001, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = context_->AddCompletionHandlerForOpenLink(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context_->onOpenLinkRequestResults_.empty(), false);
+    std::string norequestId = "test";
+    context_->OnOpenLinkRequestFailure(norequestId, want.GetElement(), message);
+    EXPECT_EQ(context_->onOpenLinkRequestResults_.empty(), false);
+    context_->onOpenLinkRequestResults_.clear();
+}
+
+/**
+ * @tc.number: OnOpenLinkRequestFailure_0002
+ * @tc.name: OnOpenLinkRequestFailure
+ * @tc.desc: OpenLinkRequest exist.
+ */
+HWTEST_F(AbilityContextImplTest, OnOpenLinkRequestFailure_0002, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = context_->AddCompletionHandlerForOpenLink(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context_->onOpenLinkRequestResults_.empty(), false);
+
+    context_->OnOpenLinkRequestFailure(requestId, want.GetElement(), message);
+    EXPECT_EQ(context_->onOpenLinkRequestResults_.empty(), true);
+    context_->onOpenLinkRequestResults_.clear();
+}
+
+/**
+ * @tc.number: OnOpenLinkRequestFailure_0003
+ * @tc.name: OnOpenLinkRequestFailure
+ * @tc.desc: requestId empty.
+ */
+HWTEST_F(AbilityContextImplTest, OnOpenLinkRequestFailure_0003, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = context_->AddCompletionHandlerForOpenLink(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context_->onOpenLinkRequestResults_.empty(), false);
+    std::string norequestId = "";
+    context_->OnOpenLinkRequestFailure(norequestId, want.GetElement(), message);
+    EXPECT_EQ(context_->onOpenLinkRequestResults_.empty(), false);
+    context_->onOpenLinkRequestResults_.clear();
+}
+
+/**
+ * @tc.number: AddCompletionHandlerForOpenLink_0001
+ * @tc.name: AddCompletionHandlerForOpenLink
+ * @tc.desc: param onRequestSucc error
+ */
+HWTEST_F(AbilityContextImplTest, AddCompletionHandlerForOpenLink_0001, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = context_->AddCompletionHandlerForOpenLink(requestId, nullptr, onRequestFail);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    context_->onOpenLinkRequestResults_.clear();
+}
+
+/**
+ * @tc.number: AddCompletionHandlerForOpenLink_0002
+ * @tc.name: AddCompletionHandlerForOpenLink
+ * @tc.desc: param onRequestFail error
+ */
+HWTEST_F(AbilityContextImplTest, AddCompletionHandlerForOpenLink_0002, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = context_->AddCompletionHandlerForOpenLink(requestId, onRequestSucc, nullptr);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    context_->onOpenLinkRequestResults_.clear();
+}
+
+/**
+ * @tc.number: AddCompletionHandlerForOpenLink_0003
+ * @tc.name: AddCompletionHandlerForOpenLink
+ * @tc.desc: param onRequestSucc onRequestFail error
+ */
+HWTEST_F(AbilityContextImplTest, AddCompletionHandlerForOpenLink_0003, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = context_->AddCompletionHandlerForOpenLink(requestId, nullptr, nullptr);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    context_->onOpenLinkRequestResults_.clear();
+}
+
+/**
+ * @tc.number: AddCompletionHandlerForOpenLink_0004
+ * @tc.name: AddCompletionHandlerForOpenLink
+ * @tc.desc: insert success.
+ */
+HWTEST_F(AbilityContextImplTest, AddCompletionHandlerForOpenLink_0004, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = context_->AddCompletionHandlerForOpenLink(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    context_->onOpenLinkRequestResults_.clear();
+}
+
+/**
+ * @tc.number: AddCompletionHandlerForOpenLink_0005
+ * @tc.name: AddCompletionHandlerForOpenLink
+ * @tc.desc: already exists.
+ */
+HWTEST_F(AbilityContextImplTest, AddCompletionHandlerForOpenLink_0005, Function | MediumTest | Level1)
+{
+    std::string requestId = "1234567890";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = context_->AddCompletionHandlerForOpenLink(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    result = context_->AddCompletionHandlerForOpenLink(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(context_->onOpenLinkRequestResults_.size(), 1);
+    context_->onOpenLinkRequestResults_.clear();
+}
+
+/**
  * @tc.number: GetFailureInfoByMessage_0100
  * @tc.name: GetFailureInfoByMessage
  * @tc.desc: Verify that function GetFailureInfoByMessage.

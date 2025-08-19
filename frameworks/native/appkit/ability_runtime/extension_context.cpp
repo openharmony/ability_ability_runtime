@@ -41,6 +41,12 @@ ErrCode ExtensionContext::AddCompletionHandlerForAtomicService(const std::string
     return ERR_OK;
 }
 
+ErrCode ExtensionContext::AddCompletionHandlerForOpenLink(const std::string &requestId,
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail)
+{
+    return ERR_OK;
+}
+
 void ExtensionContext::OnRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
     const std::string &message)
 {
@@ -48,6 +54,16 @@ void ExtensionContext::OnRequestSuccess(const std::string &requestId, const AppE
 
 void ExtensionContext::OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
     const std::string &message, int32_t resultCode)
+{
+}
+
+void ExtensionContext::OnOpenLinkRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+}
+
+void ExtensionContext::OnOpenLinkRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
 {
 }
 }  // namespace AbilityRuntime
