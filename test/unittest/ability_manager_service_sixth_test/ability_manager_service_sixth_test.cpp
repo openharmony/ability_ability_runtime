@@ -2019,10 +2019,11 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartExtensionAbilityInner_001, TestSiz
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    abilityMs->implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
+    abilityMs->implicitStartProcessor_ = nullptr;
     result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
         isImplicit, isDlp);
     EXPECT_EQ(result, ERR_IMPLICIT_START_ABILITY_FAIL);
+    abilityMs->implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     callerToken = sptr<MockAbilityToken>::MakeSptr();
     result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
         isImplicit, isDlp);
