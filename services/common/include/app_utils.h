@@ -355,6 +355,8 @@ public:
 
     bool IsForbidStart();
 
+    bool IsSupportRestartAppWithWindow();
+
 private:
     /**
      * LoadResidentProcessInExtremeMemory, load resident process in extreme low memory.
@@ -440,6 +442,7 @@ private:
     volatile DeviceConfiguration<bool> isSupportStartAbilities_ = {false, false};
     volatile DeviceConfiguration<bool> isPreloadApplicationEnabled_ = {false, false};
     volatile DeviceConfiguration<bool> isForbidStart_ = {true, false};
+    volatile DeviceConfiguration<bool> isSupportRestartAppWithWindow_ = {false, false};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         residentProcessInExtremeMemory_ = {false, {}};
     std::mutex residentProcessInExtremeMemoryMutex_;
