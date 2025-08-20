@@ -134,7 +134,7 @@ bool ExtensionConfigMgr::CheckEtsModuleLoadable(const std::string &className, co
         extensionType_, className.c_str(), fileName.c_str());
     if (fileName.size() >= className.size() ||
         className.compare(0, fileName.size(), fileName) != 0 ||
-        ((className.compare(0, fileName.size(), fileName) == 0) && className[fileName.size()] != '.')) {
+        (fileName.size() < className.size() && className[fileName.size()] != '.')) {
         TAG_LOGE(AAFwkTag::EXT, "The fileName:%{public}s and className:%{public}s do not match.",
             fileName.c_str(), className.c_str());
         return false;
@@ -153,7 +153,8 @@ bool ExtensionConfigMgr::CheckEtsModuleLoadable(const std::string &className, co
 
 void ExtensionConfigMgr::SetExtensionEtsCheckCallback(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
 {
-    auto callback = [extensionConfigMgrWeak = weak_from_this()](const std::string &className,
+    std::function<bool(const std::string &clsName, const std::string &fName)> callback =
+        [extensionConfigMgrWeak = weak_from_this()](const std::string &className,
         const std::string &fileName) -> bool {
         auto extensionConfigMgr = extensionConfigMgrWeak.lock();
         if (extensionConfigMgr == nullptr) {
