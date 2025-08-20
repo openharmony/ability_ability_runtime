@@ -22,6 +22,7 @@
 #include "context/application_context.h"
 #include "securec.h"
 #include "start_options_impl.h"
+#include "string_wrapper.h"
 #include "want_manager.h"
 #include "want_utils.h"
 
@@ -2391,6 +2392,148 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
 
     // Assert
     EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID, result);
+}
+
+/**
+ * @tc.number: OH_AbilityRuntime_ApplicationContextGetLaunchParameter_001
+ * @tc.desc: Function test with buffer is nullptr and applicationContext is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_ApplicationContextGetLaunchParameter_001,
+    TestSize.Level2)
+{
+    char buffer[BUFFER_SIZE] = { 0 };
+    int32_t writeLength = 0;
+
+    AbilityRuntime_ErrorCode code =
+        OH_AbilityRuntime_ApplicationContextGetLaunchParameter(NULL, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetLaunchParameter(buffer, BUFFER_SIZE, NULL);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextGetLaunchParameter(buffer, BUFFER_SIZE, nullptr);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextGetLaunchParameter(buffer, -1, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetLaunchParameter(buffer, 0, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetLaunchParameter(buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(writeLength, 0);
+}
+
+/**
+ * @tc.number: OH_AbilityRuntime_ApplicationContextGetLaunchParameter_002
+ * @tc.desc: Function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_ApplicationContextGetLaunchParameter_002,
+    TestSize.Level2)
+{
+    char buffer[BUFFER_SIZE] = { 0 };
+    int32_t writeLength = 0;
+    OHOS::AAFwk::Want want;
+    std::string abilityName = "testAbility";
+    std::string deviceId = "testDeviceId";
+    std::string bundleName = "testBundleName";
+    want.SetElementName(deviceId, bundleName, abilityName);
+    OHOS::AAFwk::WantParams wantParams;
+    wantParams.SetParam("key1", AAFwk::String::Box("value1"));
+    wantParams.SetParam("key2", AAFwk::String::Box("value2"));
+    want.SetParams(wantParams);
+    auto applicationContext = ApplicationContext::GetInstance();
+    ASSERT_NE(applicationContext, nullptr);
+    auto contextImpl = std::make_shared<TestContextImpl>(TEST_BUNDLE_NAME);
+    ASSERT_NE(contextImpl, nullptr);
+    AbilityRuntime_ErrorCode code =
+        OH_AbilityRuntime_ApplicationContextGetLaunchParameter(buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+
+    applicationContext->AttachContextImpl(contextImpl);
+    applicationContext->SetLaunchParameter(want);
+    code = OH_AbilityRuntime_ApplicationContextGetLaunchParameter(buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(wantParams.ToString(), buffer);
+    ASSERT_GT(writeLength, 0);
+    ASSERT_LT(writeLength, BUFFER_SIZE);
+}
+
+/**
+ * @tc.number: OH_AbilityRuntime_ApplicationContextGetLatestParameter_001
+ * @tc.desc: Function test with buffer is nullptr and applicationContext is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_ApplicationContextGetLatestParameter_001,
+    TestSize.Level2)
+{
+    char buffer[BUFFER_SIZE] = { 0 };
+    int32_t writeLength = 0;
+
+    AbilityRuntime_ErrorCode code =
+        OH_AbilityRuntime_ApplicationContextGetLatestParameter(NULL, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetLatestParameter(buffer, BUFFER_SIZE, NULL);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextGetLatestParameter(buffer, BUFFER_SIZE, nullptr);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
+
+    code = OH_AbilityRuntime_ApplicationContextGetLatestParameter(buffer, -1, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetLatestParameter(buffer, 0, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(writeLength, 0);
+
+    code = OH_AbilityRuntime_ApplicationContextGetLatestParameter(buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(writeLength, 0);
+}
+
+/**
+ * @tc.number: OH_AbilityRuntime_ApplicationContextGetLatestParameter_002
+ * @tc.desc: Function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_ApplicationContextGetLatestParameter_002,
+    TestSize.Level2)
+{
+    char buffer[BUFFER_SIZE] = { 0 };
+    int32_t writeLength = 0;
+    OHOS::AAFwk::Want want;
+    std::string abilityName = "testAbility";
+    std::string deviceId = "testDeviceId";
+    std::string bundleName = "testBundleName";
+    want.SetElementName(deviceId, bundleName, abilityName);
+    OHOS::AAFwk::WantParams wantParams;
+    wantParams.SetParam("key1", AAFwk::String::Box("value1"));
+    wantParams.SetParam("key2", AAFwk::String::Box("value2"));
+    want.SetParams(wantParams);
+    auto applicationContext = ApplicationContext::GetInstance();
+    ASSERT_NE(applicationContext, nullptr);
+    auto contextImpl = std::make_shared<TestContextImpl>(TEST_BUNDLE_NAME);
+    ASSERT_NE(contextImpl, nullptr);
+    AbilityRuntime_ErrorCode code =
+        OH_AbilityRuntime_ApplicationContextGetLatestParameter(buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+
+    applicationContext->AttachContextImpl(contextImpl);
+    applicationContext->SetLatestParameter(want);
+    code = OH_AbilityRuntime_ApplicationContextGetLatestParameter(buffer, BUFFER_SIZE, &writeLength);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(wantParams.ToString(), buffer);
+    ASSERT_GT(writeLength, 0);
+    ASSERT_LT(writeLength, BUFFER_SIZE);
 }
 
 /**

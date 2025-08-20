@@ -423,6 +423,14 @@ public:
      */
     std::shared_ptr<Context> CreateAreaModeContext(int areaMode) override;
 
+    void SetLaunchParameter(const AAFwk::Want& want);
+
+    std::string GetLaunchParameter() const;
+
+    void SetLatestParameter(const AAFwk::Want& want);
+
+    std::string GetLatestParameter() const;
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * @brief Create a context by displayId. This Context updates the density and direction properties
@@ -559,6 +567,9 @@ private:
     std::mutex overlaySubscriberMutex_;
     std::shared_ptr<AppExecFwk::OverlayEventSubscriber> overlaySubscriber_;
     std::string processName_;
+    std::shared_ptr<AAFwk::Want> launchParameter_ = nullptr;
+    std::shared_ptr<AAFwk::Want> latestParameter_ = nullptr;
+
 #ifdef SUPPORT_GRAPHICS
     static std::mutex getDisplayConfigCallbackMutex_;
     static GetDisplayConfigCallback getDisplayConfigCallback_;
