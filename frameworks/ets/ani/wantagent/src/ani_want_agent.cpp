@@ -64,43 +64,48 @@ void TriggerCompleteCallBack::SetWantAgentInstance(std::shared_ptr<WantAgent> wa
     triggerCompleteInfo_.wantAgent = wantAgent;
 }
 
-void OnSendFinishedCallback(TriggerReceiveDataWorker *dataWorker)
+bool OnSendFinishedCallback(TriggerReceiveDataWorker *dataWorker)
 {
     if (dataWorker == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "null dataWorker");
-        return;
+        return false;
     }
     if (dataWorker->resultData == "canceled") {
         TAG_LOGI(AAFwkTag::WANTAGENT, "canceled");
-        return;
+        return false;
     }
     ani_vm *etsVm = dataWorker->vm;
     if (etsVm == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "null etsVm");
-        return;
+        return false;
     }
     ani_env *env = nullptr;
     ani_status status = etsVm->GetEnv(ANI_VERSION_1, &env);
     if (status != ANI_OK || env == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "GetEnv failed status: %{public}d, or null env", status);
-        return;
+        return false;
     }
     ani_class cls = nullptr;
     if ((status = env->FindClass(COMPLETE_DATA_IMPL_CLASS_NAME, &cls)) != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "FindClass failed status: %{public}d, or null class", status);
-        return;
+        return false;
     }
     ani_method method = nullptr;
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Class_FindMethod failed status: %{public}d, or null method", status);
-        return;
+        return false;
     }
     ani_object object = nullptr;
     if ((status = env->Object_New(cls, method, &object)) != ANI_OK || object == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Object_New failed status: %{public}d, or null object", status);
-        return;
+        return false;
     }
-    env->Object_SetPropertyByName_Ref(object, "info", WrapWantAgent(env, dataWorker->wantAgent));
+    ani_object retObj = WrapWantAgent(env, dataWorker->wantAgent);
+    if (retObj == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "WrapWantAgent failed");
+        return false;
+    }
+    env->Object_SetPropertyByName_Ref(object, "info", retObj);
     env->Object_SetPropertyByName_Ref(object, "want", WrapWant(env, dataWorker->want));
     env->Object_SetPropertyByName_Double(object, "finalCode", static_cast<ani_double>(dataWorker->resultCode));
     env->Object_SetPropertyByName_Ref(object, "finalData", GetAniString(env, dataWorker->resultData));
@@ -109,6 +114,7 @@ void OnSendFinishedCallback(TriggerReceiveDataWorker *dataWorker)
     ani_object error = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
     AsyncCallback(env, reinterpret_cast<ani_object>(dataWorker->call), error, object);
     env->GlobalReference_Delete(dataWorker->call);
+    return true;
 }
 
 void TriggerCompleteCallBack::OnSendFinished(
@@ -132,12 +138,13 @@ void TriggerCompleteCallBack::OnSendFinished(
     dataWorker->call = triggerCompleteInfo_.call;
     if (triggerCompleteInfo_.wantAgent != nullptr) {
         dataWorker->wantAgent = new (std::nothrow) WantAgent(triggerCompleteInfo_.wantAgent->GetPendingWant());
-        if (dataWorker->wantAgent == nullptr) {
-            TAG_LOGE(AAFwkTag::WANTAGENT, "new WantAgent(triggerCompleteInfo_.wantAgent->GetPendingWant()) failed");
-            return;
+    }
+    if (!OnSendFinishedCallback(dataWorker)) {
+        if (dataWorker->wantAgent != nullptr) {
+            delete dataWorker->wantAgent;
+            dataWorker->wantAgent = nullptr;
         }
     }
-    OnSendFinishedCallback(dataWorker);
     if (dataWorker != nullptr) {
         delete dataWorker;
         dataWorker = nullptr;
