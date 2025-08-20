@@ -20,6 +20,7 @@
 namespace OHOS {
 namespace AAFwk {
 bool AppUtils::isSupportGrantUriPermission_ = true;
+bool AppUtils::isGrantPersistUriPermission_ = false;
 
 AppUtils::~AppUtils() {}
 
@@ -34,12 +35,18 @@ AppUtils &AppUtils::GetInstance()
 void AppUtils::Init()
 {
     isSupportGrantUriPermission_ = true;
+    isGrantPersistUriPermission_ = false;
 }
 
 bool AppUtils::IsSupportGrantUriPermission()
 {
     TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isSupportGrantUriPermission_);
     return isSupportGrantUriPermission_;
+}
+
+bool AppUtils::IsGrantPersistUriPermission()
+{
+    return isGrantPersistUriPermission_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

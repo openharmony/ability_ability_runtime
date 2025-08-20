@@ -49,6 +49,11 @@ ohos_unittest("uri_permission_manager_test") {
     "hilog:libhilog",
     "storage_service:storage_manager_sa_proxy",
   ]
+
+  if (ability_runtime_feature_sandboxmanager) {
+    external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
+    defines = [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
+  }
 }
 
 group("unittest") {

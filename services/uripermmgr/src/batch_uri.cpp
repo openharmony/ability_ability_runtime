@@ -18,7 +18,7 @@
 #include "file_permission_manager.h"
 #include "hilog_tag_wrapper.h"
 #include "uri_permission_utils.h"
-
+#include "fud_constants.h"
 namespace OHOS {
 namespace AAFwk {
 
@@ -35,15 +35,13 @@ int32_t BatchUri::Init(const std::vector<std::string> &uriVec, uint32_t mode,
     checkResult = std::vector<bool>(totalUriCount, false);
     isDocsUriVec = std::vector<bool>(totalUriCount, false);
     isTargetBundleUri = std::vector<bool>(totalUriCount, false);
-    bool isPrintAuthority = true;
     for (size_t index = 0; index < uriVec.size(); index++) {
         Uri uriInner = Uri(uriVec[index]);
         auto &&scheme = uriInner.GetScheme();
-        if (isPrintAuthority) {
+        if (index == 0) {
             TAG_LOGI(AAFwkTag::URIPERMMGR, "uri type: %{public}s.", uriInner.GetAuthority().c_str());
-            isPrintAuthority = false;
         }
-        if (scheme != "file") {
+        if (scheme != FUDConstants::FILE_SCHEME) {
             TAG_LOGW(AAFwkTag::URIPERMMGR, "uri is invalid: %{private}s.", uriInner.ToString().c_str());
             continue;
         }
@@ -62,13 +60,13 @@ void BatchUri::InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mod
 {
     auto &&authority = uriInner.GetAuthority();
     // media uri
-    if (authority == "media") {
+    if (authority == FUDConstants::MEDIA_AUTHORITY) {
         mediaUris.emplace_back(uriInner.ToString());
         mediaIndexes.emplace_back(index);
         return;
     }
     // docs uri
-    if (authority == "docs") {
+    if (authority == FUDConstants::DOCS_AUTHORITY) {
         isDocsUriVec[index] = true;
         // need to check uri permission
         otherUris.emplace_back(uriInner);

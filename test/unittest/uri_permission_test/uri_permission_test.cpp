@@ -30,7 +30,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace AAFwk {
 namespace {
-constexpr const int32_t CHECK_PERMISSION_FAILED = 2097177;
+constexpr const int32_t ERR_NOT_SYSTEM_APP = 2097209;
 }
 class UriPermissionTest : public testing::Test {
 public:
@@ -64,7 +64,7 @@ HWTEST_F(UriPermissionTest, Upms_GrantUriPermission_001, TestSize.Level1)
     std::string targetBundleName = "name2";
     int32_t funcResult = -1;
     upms->GrantUriPermission(uri, flag, targetBundleName, 0, 0, funcResult);
-    EXPECT_EQ(funcResult, CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(funcResult, ERR_NOT_SYSTEM_APP);
 }
 
 /*

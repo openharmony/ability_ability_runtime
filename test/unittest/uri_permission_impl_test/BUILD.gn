@@ -27,12 +27,17 @@ ohos_unittest("uri_permission_impl_test") {
   branch_protector_ret = "pac_ret"
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
+    "${ability_runtime_path}/services/uripermmgr/include",
     "${ability_runtime_test_path}/mock/common/include",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include/",
     "mock/include",
   ]
 
   sources = [
+    "${ability_runtime_path}/services/uripermmgr/src/batch_uri.cpp",
+    "${ability_runtime_path}/services/uripermmgr/src/file_permission_manager.cpp",
+    "${ability_runtime_path}/services/uripermmgr/src/tokenid_permission.cpp",
+    "${ability_runtime_path}/services/uripermmgr/src/uri_permission_manager_stub_impl.cpp",
     "${ability_runtime_test_path}/mock/common/src/mock_native_token.cpp",
     "mock/src/mock_ability_manager_client.cpp",
     "mock/src/mock_accesstoken_kit.cpp",
@@ -57,9 +62,7 @@ ohos_unittest("uri_permission_impl_test") {
   deps = [
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
-    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_services_path}/common:event_report",
-    "${ability_runtime_services_path}/uripermmgr:libupms_static",
   ]
 
   external_deps = [
@@ -77,14 +80,21 @@ ohos_unittest("uri_permission_impl_test") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "init:libbegetutil",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "selinux_adapter:librestorecon",
     "storage_service:storage_manager_sa_proxy",
   ]
   if (ability_runtime_feature_sandboxmanager) {
     external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
     defines = [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
+  }
+  if (ability_runtime_udmf_enable) {
+    defines += [ "ABILITY_RUNTIME_UDMF_ENABLE" ]
   }
   cflags_cc = []
   if (os_dlp_part_enabled) {
@@ -171,6 +181,9 @@ ohos_unittest("uri_permission_manager_stub_impl_test") {
     external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
     defines = [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
   }
+  if (ability_runtime_udmf_enable) {
+    defines += [ "ABILITY_RUNTIME_UDMF_ENABLE" ]
+  }
   cflags_cc = []
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]
@@ -225,8 +238,8 @@ group("unittest") {
   testonly = true
 
   deps = [
+    ":upms_udmf_utils_test",
     ":uri_permission_impl_test",
     ":uri_permission_manager_stub_impl_test",
-    ":upms_udmf_utils_test",
   ]
 }
