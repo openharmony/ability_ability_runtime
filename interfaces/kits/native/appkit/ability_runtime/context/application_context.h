@@ -165,6 +165,10 @@ public:
     using SelfType = ApplicationContext;
     static const size_t CONTEXT_TYPE_ID;
     std::string GetDataDir();
+    void SetLaunchParameter(const AAFwk::Want &want);
+    void SetLatestParameter(const AAFwk::Want &want);
+    std::string GetLaunchParameter();
+    std::string GetLatestParameter();
 
 protected:
     bool IsContext(size_t contextTypeId) override

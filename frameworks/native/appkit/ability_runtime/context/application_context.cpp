@@ -670,6 +670,34 @@ std::string ApplicationContext::GetCloudFileDir()
     return (contextImpl_ != nullptr) ? contextImpl_->GetCloudFileDir() : "";
 }
 
+std::string ApplicationContext::GetLaunchParameter()
+{
+    return (contextImpl_ != nullptr) ? contextImpl_->GetLaunchParameter() : "";
+}
+
+void ApplicationContext::SetLaunchParameter(const AAFwk::Want &want)
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl_");
+        return;
+    }
+    contextImpl_->SetLaunchParameter(want);
+}
+
+std::string ApplicationContext::GetLatestParameter()
+{
+    return (contextImpl_ != nullptr) ? contextImpl_->GetLatestParameter() : "";
+}
+
+void ApplicationContext::SetLatestParameter(const AAFwk::Want &want)
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl_");
+        return;
+    }
+    contextImpl_->SetLatestParameter(want);
+}
+
 sptr<IRemoteObject> ApplicationContext::GetToken()
 {
     return (contextImpl_ != nullptr) ? contextImpl_->GetToken() : nullptr;
