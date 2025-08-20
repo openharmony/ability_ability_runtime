@@ -53,7 +53,10 @@
 #include "free_install_manager.h"
 #include "iacquire_share_data_callback_interface.h"
 #include "interceptor/ability_interceptor_executer.h"
+#include "insight_intent_event_mgr.h"
+#include "intent_exemption_info.h"
 #include "iremote_object.h"
+#include "kiosk_manager.h"
 #include "mission_list_manager_interface.h"
 #include "parameter.h"
 #include "pending_want_manager.h"
@@ -66,13 +69,10 @@
 #include "task_handler_wrap.h"
 #include "uri.h"
 #include "user_controller.h"
-#include "intent_exemption_info.h"
 #ifdef SUPPORT_GRAPHICS
 #include "implicit_start_processor.h"
 #include "system_dialog_scheduler.h"
 #endif
-#include "insight_intent_event_mgr.h"
-#include "kiosk_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {

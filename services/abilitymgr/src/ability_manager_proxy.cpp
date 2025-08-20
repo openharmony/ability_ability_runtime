@@ -820,7 +820,7 @@ int AbilityManagerProxy::RequestModalUIExtension(const Want &want)
     int error;
     MessageParcel reply;
     MessageOption option;
-    error = SendRequest(AbilityManagerInterfaceCode::REQUESET_MODAL_UIEXTENSION, data, reply, option);
+    error = SendRequest(AbilityManagerInterfaceCode::REQUEST_MODAL_UIEXTENSION, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
