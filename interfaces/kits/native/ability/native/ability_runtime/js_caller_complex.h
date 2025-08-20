@@ -30,6 +30,7 @@ napi_value CreateJsCallerComplex(
 
 napi_value CreateJsCalleeRemoteObject(napi_env env, sptr<IRemoteObject> callee);
 sptr<IRemoteObject> GetJsCallerRemoteObj(uintptr_t jsCallerComplex);
+void SetFinalizeCallback(std::function<void(uintptr_t)> finalizeCallback);
 } // AbilityRuntime
 } // OHOS
 #endif  // OHOS_ABILITY_RUNTIME_JS_CALLER_COMPLEX_H

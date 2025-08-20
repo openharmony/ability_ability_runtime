@@ -24,6 +24,16 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+struct EtsRefWrap {
+    EtsRefWrap(ani_env *env, ani_object srcObj);
+    EtsRefWrap(EtsRefWrap &) = delete;
+    void operator=(EtsRefWrap &) = delete;
+    ~EtsRefWrap();
+
+    ani_vm *aniVM = nullptr;
+    ani_ref objectRef = nullptr;
+};
+
 class EtsCallerComplex {
 public:
     EtsCallerComplex(ReleaseCallFunc releaseCallFunc, std::shared_ptr<CallerCallBack> callerCallBack,
@@ -43,23 +53,23 @@ public:
     static ani_object NativeTransferDynamic(ani_env *env, ani_object, ani_object input);
     static bool IsInstanceOf(ani_env *env, ani_object aniObj);
     static ani_object CreateDynamicCaller(ani_env *env, sptr<IRemoteObject> remoteObj);
+    static void TransferFinalizeCallback(uintptr_t jsPtr);
 protected:
     void ReleaseCallInner(ani_env *env);
 private:
     ReleaseCallFunc releaseCallFunc_;
     std::shared_ptr<CallerCallBack> callerCallback_;
     wptr<IRemoteObject> remoteObj_;
+
+    static std::mutex staticTransferRecordMutex_;
+    static std::unordered_map<uintptr_t, std::shared_ptr<EtsRefWrap>> staticTransferRecords_;
 };
 
-struct CallbackWrap {
+struct CallbackWrap: public EtsRefWrap {
     CallbackWrap(ani_env *env, ani_object callerObj, const std::string &callbackName);
-    CallbackWrap(CallbackWrap &) = delete;
-    void operator=(CallbackWrap &) = delete;
-    ~CallbackWrap();
+    ~CallbackWrap() = default;
     void Invoke(const std::string &msg) const;
 private:
-    ani_vm *aniVM = nullptr;
-    ani_ref callbackRef = nullptr;
     std::string name;
 };
 } // namespace AbilityRuntime
