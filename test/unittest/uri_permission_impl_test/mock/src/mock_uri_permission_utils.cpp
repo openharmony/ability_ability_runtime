@@ -102,5 +102,12 @@ bool UPMSUtils::IsDocsCloudUri(Uri &uri)
 {
     return MyFlag::isDocsCloudUri_;
 }
+
+bool UPMSUtils::GenerateFUDAppInfo(FUDAppInfo &info)
+{
+    info.alterBundleName = MyFlag::upmsUtilsAlterBundleName_;
+    info.bundleName = MyFlag::upmsUtilsBundleName_;
+    return MyFlag::fudUtilsGenerateFUDAppInfoRet_;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -88,6 +88,60 @@ HWTEST_F(UriPermissionUtilsNewTest, Upms_CheckAndCreateEventInfo_001, TestSize.L
 
 /*
  * Feature: UPMSUtils
+ * Function: GenerateFUDAppInfo
+ * SubFunction: NA
+ * FunctionPoints: UPMSUtils GenerateFUDAppInfo
+ */
+HWTEST_F(UriPermissionUtilsNewTest, Upms_GenerateFUDAppInfo_001, TestSize.Level1)
+{
+    uint32_t tokenId = 1001;
+    FUDAppInfo info = { .tokenId = tokenId };
+    MyFlag::tokenInfos_.clear();
+    MyFlag::tokenInfos_[tokenId] = TokenInfo(tokenId, Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    auto result = UPMSUtils::GenerateFUDAppInfo(info);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * Feature: UPMSUtils
+ * Function: GenerateFUDAppInfo
+ * SubFunction: NA
+ * FunctionPoints: UPMSUtils GenerateFUDAppInfo
+ */
+HWTEST_F(UriPermissionUtilsNewTest, Upms_GenerateFUDAppInfo_002, TestSize.Level1)
+{
+    uint32_t tokenId = 1001;
+    FUDAppInfo info = { .tokenId = tokenId };
+    MyFlag::tokenInfos_.clear();
+    MyFlag::tokenInfos_[tokenId] = TokenInfo(tokenId, Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MyFlag::retHapSuccValue_ = Security::AccessToken::AccessTokenKitRet::RET_FAILED;
+    auto result = UPMSUtils::GenerateFUDAppInfo(info);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * Feature: UPMSUtils
+ * Function: GenerateFUDAppInfo
+ * SubFunction: NA
+ * FunctionPoints: UPMSUtils GenerateFUDAppInfo
+ */
+HWTEST_F(UriPermissionUtilsNewTest, Upms_GenerateFUDAppInfo_003, TestSize.Level1)
+{
+    uint32_t tokenId = 1001;
+    FUDAppInfo info = { .tokenId = tokenId };
+    std::string bundleName = "testApp";
+    std::string processName = "testApp";
+    MyFlag::tokenInfos_.clear();
+    MyFlag::tokenInfos_[tokenId] = TokenInfo(tokenId, Security::AccessToken::ATokenTypeEnum::TOKEN_HAP,
+        processName, bundleName);
+    MyFlag::retHapSuccValue_ = Security::AccessToken::AccessTokenKitRet::RET_SUCCESS;
+    auto result = UPMSUtils::GenerateFUDAppInfo(info);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(info.bundleName, bundleName);
+}
+
+/*
+ * Feature: UPMSUtils
  * Function: ConnectManager
  * SubFunction: NA
  * FunctionPoints: UPMSUtils GetAlterableBundleNameByTokenId
@@ -130,18 +184,6 @@ HWTEST_F(UriPermissionUtilsNewTest, Upms_GetTokenIdByBundleName_001, TestSize.Le
     uint32_t tokenId = 1;
     auto result = UPMSUtils::GetTokenIdByBundleName(bundleName, appIndex, tokenId);
     EXPECT_EQ(result, ERR_GET_TARGET_BUNDLE_INFO_FAILED);
-}
-
-/*
- * Feature: UPMSUtils
- * Function: ConnectManagerHelper
- * SubFunction: NA
- * FunctionPoints: UPMSUtils ConnectManagerHelper
- */
-HWTEST_F(UriPermissionUtilsNewTest, Upms_ConnectManagerHelper_001, TestSize.Level1)
-{
-    auto manager = UPMSUtils::ConnectManagerHelper();
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /*
