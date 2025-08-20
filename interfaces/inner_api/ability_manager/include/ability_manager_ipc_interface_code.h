@@ -375,7 +375,7 @@ enum class AbilityManagerInterfaceCode {
     SEND_DIALOG_RESULT = 1055,
 
     // request modal UIExtension by want
-    REQUESET_MODAL_UIEXTENSION = 1056,
+    REQUEST_MODAL_UIEXTENSION = 1056,
 
     // get root host info of uiextension
     GET_UI_EXTENSION_ROOT_HOST_INFO = 1057,

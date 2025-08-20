@@ -565,7 +565,7 @@ int AbilityManagerStub::OnRemoteRequestInnerFourteenth(uint32_t code, MessagePar
     if (interfaceCode == AbilityManagerInterfaceCode::PREPARE_TERMINATE_ABILITY_BY_SCB) {
         return PrepareTerminateAbilityBySCBInner(data, reply);
     }
-    if (interfaceCode == AbilityManagerInterfaceCode::REQUESET_MODAL_UIEXTENSION) {
+    if (interfaceCode == AbilityManagerInterfaceCode::REQUEST_MODAL_UIEXTENSION) {
         return RequestModalUIExtensionInner(data, reply);
     }
     if (interfaceCode == AbilityManagerInterfaceCode::GET_UI_EXTENSION_ROOT_HOST_INFO) {

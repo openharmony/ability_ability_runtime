@@ -555,7 +555,7 @@ HWTEST_F(AbilityManagerStubSecondTest, OnRemoteRequestInnerFourteenth_0100, Test
     uint32_t code[] = {
         static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_MISSION_CONTINUE_STATE),
         static_cast<uint32_t>(AbilityManagerInterfaceCode::PREPARE_TERMINATE_ABILITY_BY_SCB),
-        static_cast<uint32_t>(AbilityManagerInterfaceCode::REQUESET_MODAL_UIEXTENSION),
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::REQUEST_MODAL_UIEXTENSION),
         static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_UI_EXTENSION_ROOT_HOST_INFO),
         static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_UI_EXTENSION_SESSION_INFO),
         static_cast<uint32_t>(AbilityManagerInterfaceCode::PRELOAD_UIEXTENSION_ABILITY),
