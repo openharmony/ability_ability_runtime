@@ -2347,16 +2347,15 @@ void MissionListManager::OnTimeOut(uint32_t msgId, int64_t abilityRecordId, bool
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ability timeout, name:%{public}s", abilityRecord->GetAbilityInfo().name.c_str());
 
+    PrintTimeOutLog(abilityRecord, msgId, isHalf);
+    if (isHalf) {
+        return;
+    }
 #ifdef SUPPORT_SCREEN
     if (abilityRecord->IsStartingWindow()) {
         PostCancelStartingWindowTask(abilityRecord);
     }
 #endif
-
-    PrintTimeOutLog(abilityRecord, msgId, isHalf);
-    if (isHalf) {
-        return;
-    }
     switch (msgId) {
         case AbilityManagerService::LOAD_TIMEOUT_MSG:
             abilityRecord->SetLoading(false);
