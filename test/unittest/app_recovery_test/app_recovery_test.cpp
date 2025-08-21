@@ -368,6 +368,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_003, TestSize.Level0)
     std::thread watchdog([&] {
         bool ret = AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::APP_FREEZE);
         EXPECT_FALSE(ret);
+        printf("ret = %d\n", ret);
     });
     watchdog.join();
 }

@@ -58,6 +58,36 @@ HWTEST_F(FilePermissionManagerTest, CheckUriPersistentPermission_001, TestSize.L
 }
 
 /*
+ * Feature: CheckUriPersistentPermission
+ * Function: CheckUriPersistentPermission
+ * SubFunction: NA
+ * FunctionPoints: UPMSUtils CheckUriPersistentPermission
+ */
+HWTEST_F(FilePermissionManagerTest, CheckUriPersistentPermission_002, TestSize.Level1)
+{
+    std::vector<Uri> uriVec;
+    Uri uri = Uri("file://docs/storage/Users/currentUser/appdata/el2/base/demo");
+    Uri uri1 = Uri("file://docs/storage/Users/currentUser/Download");
+    Uri uri2 = Uri("file://docs/storage/Users/currentUser");
+    Uri uri3 = Uri("file://docs/storage/Users");
+    Uri uri4 = Uri("file://docs/storage");
+    uriVec.emplace_back(uri);
+    uriVec.emplace_back(uri1);
+    uriVec.emplace_back(uri2);
+    uriVec.emplace_back(uri3);
+    uriVec.emplace_back(uri4);
+    uint32_t callerTokenId = 0;
+    uint32_t flag = 0;
+    std::vector<PolicyInfo> pathPolicies;
+    auto ret = FilePermissionManager::CheckUriPersistentPermission(uriVec, callerTokenId, flag, pathPolicies, "");
+    bool res = false;
+    if (!ret.empty()) {
+        res = true;
+    }
+    EXPECT_EQ(res, true);
+}
+
+/*
  * Feature: GetPathPolicyInfoFromUri
  * Function: GetPathPolicyInfoFromUri
  * SubFunction: NA

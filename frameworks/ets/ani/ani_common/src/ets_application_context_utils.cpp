@@ -560,9 +560,9 @@ ani_object EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniE
         return nullptr;
     }
     ContextUtil::CreateEtsBaseContext(aniEnv, applicationContextClass, applicationContextObject, applicationContext);
-    ani_ref* contextGlobalRef = new (std::nothrow) ani_ref;
+    ani_ref *contextGlobalRef = new (std::nothrow) ani_ref;
     if (contextGlobalRef == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITY, "new ani_ref failed");
+        TAG_LOGE(AAFwkTag::ABILITY, "null contextGlobalRef");
         return nullptr;
     }
     if ((status = aniEnv->GlobalReference_Create(applicationContextObject, contextGlobalRef)) != ANI_OK) {

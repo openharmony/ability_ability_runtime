@@ -1668,7 +1668,7 @@ int32_t AppMgrService::NotifyMemorySizeStateChanged(int32_t memorySizeState)
 
 int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
@@ -1678,7 +1678,7 @@ int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
 
 int32_t AppMgrService::SetSupportedProcessCache(int32_t pid, bool isSupport)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_OPERATION;

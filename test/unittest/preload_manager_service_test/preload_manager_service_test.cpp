@@ -317,5 +317,36 @@ HWTEST_F(PreloadManagerServiceTest, PreloadApplication_010, TestSize.Level1)
 
     TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_010 end");
 }
+
+/*
+ * Feature: PreloadManagerService
+ * Name: PreloadApplication_011
+ * Function: PreloadApplication
+ * SubFunction: NA
+ * FunctionPoints: PreloadManagerService PreloadApplication
+ */
+HWTEST_F(PreloadManagerServiceTest, PreloadApplication_011, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_011 start");
+    
+    MyStatus::GetInstance().isPreloadApplicationEnabled_ = true;
+    MyStatus::GetInstance().retVerifyPreloadApplicationPermission_ = true;
+    MyStatus::GetInstance().isMultiUserConcurrency_ = true;
+    MyStatus::GetInstance().retCheckPreloadAppRecordExist_ = ERR_OK;
+    MyStatus::GetInstance().isPreloadApplicationRecordExist_ = false;
+    MyStatus::GetInstance().bundleMgrHelper_ = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    MyStatus::GetInstance().retGetLaunchWantForBundle_ = 0;
+    MyStatus::GetInstance().retQueryAbilityInfo_ = true;
+    MyStatus::GetInstance().queryAbilityInfo_.applicationInfo.appPreloadPhase =
+        AppExecFwk::AppPreloadPhase::WINDOW_STAGE_CREATED;
+    MyStatus::GetInstance().queryAbilityInfo_.launchMode = AppExecFwk::LaunchMode::STANDARD;
+    std::string bundleName = "bundleName";
+    int32_t userId = -1;
+    int32_t appIndex = 0;
+    auto result = PreloadManagerService::GetInstance().PreloadApplication(bundleName, userId, appIndex);
+    EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+
+    TAG_LOGI(AAFwkTag::TEST, "PreloadManagerServiceTest PreloadApplication_011 end");
+}
 } // namespace AAFwk
 } // namespace OHOS

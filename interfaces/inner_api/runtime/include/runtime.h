@@ -127,7 +127,7 @@ public:
     virtual void RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath) = 0;
     virtual void StartProfiler(const DebugOption debugOption) = 0;
     virtual void SetExtensionApiCheckCallback(
-        const std::function<bool(const std::string &className, const std::string &fileName)> &cb) {}
+        std::function<bool(const std::string &className, const std::string &fileName)> &cb) {}
     virtual void DoCleanWorkAfterStageCleaned() {}
     virtual void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const {}
     virtual void SetDeviceDisconnectCallback(const std::function<bool()> &cb) = 0;
