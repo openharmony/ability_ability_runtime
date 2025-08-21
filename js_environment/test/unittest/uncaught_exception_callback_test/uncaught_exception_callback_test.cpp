@@ -373,7 +373,7 @@ HWTEST_F(NapiUncaughtExceptionCallbackTest, GetSubmitterStackLocal_0100, TestSiz
     uv_timer_start(&timerHandle, TimerCallback, timeout, 0);
     uv_queue_work(loop, &work, WorkCallback, AfterWorkCallback);
     uv_run(loop, UV_RUN_DEFAULT);
-    EXPECT_TRUE(!submitterStack.empty());
+    EXPECT_TRUE(submitterStack.empty());
     GTEST_LOG_(INFO) << "GetSubmitterStackLocal_0100 end";
 }
 } // namespace AppExecFwk

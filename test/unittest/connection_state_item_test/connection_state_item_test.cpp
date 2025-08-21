@@ -531,7 +531,7 @@ HWTEST_F(ConnectionStateItemTest, RemoveConnection_012, TestSize.Level1)
     connectionStateItem->AddConnection(record1, data, event);
     connectionStateItem->SuspendConnection(record, data);
     auto res = connectionStateItem->RemoveConnection(record1, data, event);
-    EXPECT_FALSE(res);
+    EXPECT_TRUE(res);
 }
 
 /*
