@@ -773,7 +773,7 @@ ErrCode AbilityManagerShellCommand::RunAsForceStop()
             if (index <= argc_) {
                 TAG_LOGD(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s", index, argv_[index]);
                 std::string inputReason = argv_[index];
-                killReason = AbilityToolConvertUtil::CovertExitReason(inputReason);
+                killReason = AbilityToolConvertUtil::ConvertExitReason(inputReason);
             }
         }
     }
@@ -2579,55 +2579,6 @@ bool AbilityManagerShellCommand::IsImplicitStartAction(const Want& want)
 
     return false;
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-ErrCode AbilityManagerShellCommand::RunAsSendAppNotRespondingWithUnknownOption()
-{
-    switch (optopt) {
-        case 'h': {
-            break;
-        }
-        case 'p': {
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa ApplicationNotResponding -p' no arg");
-            resultReceiver_.append("error: option -p ");
-            resultReceiver_.append("' requires a value.\n");
-            break;
-        }
-        default: {
-            std::string unknownOption;
-            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa ApplicationNotResponding' opt unknown");
-            resultReceiver_.append(unknownOptionMsg);
-            break;
-        }
-    }
-    return OHOS::ERR_INVALID_VALUE;
-}
-
-ErrCode AbilityManagerShellCommand::RunAsSendAppNotRespondingWithOption(int32_t option, std::string& pid)
-{
-    ErrCode result = ERR_OK;
-    switch (option) {
-        case 'h': {
-            result = OHOS::ERR_INVALID_VALUE;
-            break;
-        }
-        case 'p': {
-            TAG_LOGI(AAFwkTag::AA_TOOL, "aa ApplicationNotResponding 'aa %{public}s'  -p process", cmd_.c_str());
-            TAG_LOGI(AAFwkTag::AA_TOOL, "aa ApplicationNotResponding 'aa optarg:  %{public}s'", optarg);
-            pid = optarg;
-            TAG_LOGI(AAFwkTag::AA_TOOL, "aa ApplicationNotResponding 'aa pid:  %{public}s'", pid.c_str());
-            break;
-        }
-        default: {
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' option unknown", cmd_.c_str());
-            result = OHOS::ERR_INVALID_VALUE;
-            break;
-        }
-    }
-    return result;
-}
-#endif
 #ifdef ABILITY_FAULT_AND_EXIT_TEST
 
 ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
@@ -2698,7 +2649,7 @@ ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
         result = OHOS::ERR_INVALID_VALUE;
     }
 
-    ExitReason exitReason = { AbilityToolConvertUtil::CovertExitReason(reason), "Force exit app by aa." };
+    ExitReason exitReason = { AbilityToolConvertUtil::ConvertExitReason(reason), "Force exit app by aa." };
     result = AbilityManagerClient::GetInstance()->ForceExitApp(ConvertPid(pid), exitReason);
     if (result == OHOS::ERR_OK) {
         resultReceiver_ = STRING_BLOCK_AMS_SERVICE_OK + "\n";

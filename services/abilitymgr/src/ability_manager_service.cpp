@@ -7602,11 +7602,10 @@ void AbilityManagerService::ReleaseAbilityTokenMap(const sptr<IRemoteObject> &to
 bool AbilityManagerService::CheckPermissionForKillCollaborator()
 {
     // check permission first
-    auto isSaCall = PermissionVerification::GetInstance()->IsSACall();
     auto isShellCall = PermissionVerification::GetInstance()->IsShellCall();
     auto isCallingPerm = PermissionVerification::GetInstance()->VerifyCallingPermission(
         PermissionConstants::PERMISSION_KILL_APP_PROCESSES);
-    if (!isSaCall && !isShellCall && !isCallingPerm) {
+    if (!isShellCall && !isCallingPerm) {
         return false;
     }
     return true;

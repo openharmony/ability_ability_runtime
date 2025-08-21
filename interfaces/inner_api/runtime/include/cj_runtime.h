@@ -65,7 +65,7 @@ public:
     void RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath) override {};
     void StartProfiler(const DebugOption dOption) override;
     void SetExtensionApiCheckCallback(
-        const std::function<bool(const std::string &className, const std::string &fileName)> &cb) override {}
+        std::function<bool(const std::string &className, const std::string &fileName)> &cb) override {}
     void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const override {}
     void SetDeviceDisconnectCallback(const std::function<bool()> &cb) override {};
     bool IsAppLibLoaded() const { return appLibLoaded_; }

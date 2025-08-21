@@ -23,7 +23,8 @@ namespace OHOS {
 namespace AAFwk {
 
 int32_t BatchUri::Init(const std::vector<std::string> &uriVec, uint32_t mode,
-    const std::string &callerAlterBundleName, const std::string &targetAlterBundleName)
+    const std::string &callerAlterBundleName, const std::string &targetAlterBundleName,
+    bool haveSandboxAccessPermission)
 {
     if (uriVec.empty()) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "uriVec is empty.");
@@ -47,7 +48,8 @@ int32_t BatchUri::Init(const std::vector<std::string> &uriVec, uint32_t mode,
             continue;
         }
         validUriCount++;
-        InitFileUriInfo(uriInner, index, mode, callerAlterBundleName, targetAlterBundleName);
+        InitFileUriInfo(uriInner, index, mode, callerAlterBundleName, targetAlterBundleName,
+            haveSandboxAccessPermission);
     }
     TAG_LOGI(AAFwkTag::URIPERMMGR, "count of uri is %{public}d, count of valid uri is %{public}d.",
         totalUriCount, validUriCount);
@@ -55,7 +57,8 @@ int32_t BatchUri::Init(const std::vector<std::string> &uriVec, uint32_t mode,
 }
 
 void BatchUri::InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mode,
-    const std::string &callerAlterBundleName, const std::string &targetAlterBundleName)
+    const std::string &callerAlterBundleName, const std::string &targetAlterBundleName,
+    bool haveSandboxAccessPermission)
 {
     auto &&authority = uriInner.GetAuthority();
     // media uri
@@ -64,9 +67,17 @@ void BatchUri::InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mod
         mediaIndexes.emplace_back(index);
         return;
     }
+    // docs uri
+    if (authority == "docs") {
+        isDocsUriVec[index] = true;
+        // need to check uri permission
+        otherUris.emplace_back(uriInner);
+        otherIndexes.emplace_back(index);
+        return;
+    }
     // bundle uri
     isTargetBundleUri[index] = (!targetAlterBundleName.empty() && authority == targetAlterBundleName);
-    if (!callerAlterBundleName.empty() && authority == callerAlterBundleName) {
+    if (!authority.empty() && (haveSandboxAccessPermission || authority == callerAlterBundleName)) {
         checkResult[index] = true;
         if (isTargetBundleUri[index]) {
             TAG_LOGI(AAFwkTag::URIPERMMGR, "uri belong to targetBundle.");
@@ -80,10 +91,7 @@ void BatchUri::InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mod
         }
         return;
     }
-    if (authority == "docs") {
-        isDocsUriVec[index] = true;
-    }
-    // docs and bundle uri, need to check uri pemission
+    // bundle uri, need to check uri permission
     otherUris.emplace_back(uriInner);
     otherIndexes.emplace_back(index);
 }
