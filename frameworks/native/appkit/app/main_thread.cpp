@@ -167,6 +167,7 @@ constexpr char EVENT_KEY_JSVM[] = "JSVM";
 constexpr char EVENT_KEY_CANGJIE[] = "CANGJIE";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
 constexpr char EVENT_KEY_PNAME[] = "PNAME";
+constexpr char EVENT_KEY_THREAD_NAME[] = "THREAD_NAME";
 constexpr char EVENT_KEY_APP_RUNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
 constexpr char EVENT_KEY_PROCESS_RSS_MEMINFO[] = "PROCESS_RSS_MEMINFO";
 constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
@@ -1371,8 +1372,9 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
 {
     CJUncaughtExceptionInfo uncaughtExceptionInfo;
     wptr<MainThread> weak_this = this;
+    std::string processName = processInfo_ != nullptr ? processInfo_->GetProcessName() : "unknown";
     uncaughtExceptionInfo.hapPath = hapPath.c_str();
-    uncaughtExceptionInfo.uncaughtTask = [weak_this, bundleName, versionCode]
+    uncaughtExceptionInfo.uncaughtTask = [weak_this, bundleName, versionCode, processName]
         (std::string summary, const CJErrorObject errorObj) {
             auto appThread = weak_this.promote();
             if (appThread == nullptr) {
@@ -1387,13 +1389,10 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
             std::string errSummary = summary + "\nException info: " + errMsg + "\n" + "Stacktrace:\n" + errStack;
             HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::CJ_RUNTIME, "CJ_ERROR",
                 OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-                EVENT_KEY_PACKAGE_NAME, bundleName,
-                EVENT_KEY_VERSION, std::to_string(versionCode),
-                EVENT_KEY_TYPE, CJERROR_TYPE,
-                EVENT_KEY_HAPPEN_TIME, timet,
-                EVENT_KEY_REASON, errName,
-                EVENT_KEY_JSVM, JSVM_TYPE,
-                EVENT_KEY_SUMMARY, errSummary,
+                EVENT_KEY_PACKAGE_NAME, bundleName, EVENT_KEY_VERSION, std::to_string(versionCode),
+                EVENT_KEY_TYPE, CJERROR_TYPE, EVENT_KEY_HAPPEN_TIME, timet,
+                EVENT_KEY_REASON, errName, EVENT_KEY_JSVM, JSVM_TYPE, EVENT_KEY_SUMMARY, errSummary,
+                EVENT_KEY_PNAME, processName, EVENT_KEY_THREAD_NAME, DumpProcessHelper::GetThreadName(),
                 EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
             ErrorObject appExecErrorObj = {
                 .name = errName,
@@ -1436,10 +1435,12 @@ EtsEnv::ETSUncaughtExceptionInfo MainThread::CreateEtsExceptionInfo(const std::s
         time_t timet;
         time(&timet);
         HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "JS_ERROR",
-            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, bundleName, EVENT_KEY_VERSION,
-            std::to_string(versionCode), EVENT_KEY_TYPE, JSCRASH_TYPE, EVENT_KEY_HAPPEN_TIME, timet, EVENT_KEY_REASON,
-            errorObj.name, EVENT_KEY_JSVM, JSVM_TYPE, EVENT_KEY_SUMMARY, summary, EVENT_KEY_PNAME, processName,
-            EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId);
+            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, bundleName,
+            EVENT_KEY_VERSION, std::to_string(versionCode), EVENT_KEY_TYPE, JSCRASH_TYPE, EVENT_KEY_HAPPEN_TIME, timet,
+            EVENT_KEY_REASON, errorObj.name, EVENT_KEY_JSVM, JSVM_TYPE, EVENT_KEY_SUMMARY, summary,
+            EVENT_KEY_PNAME, processName, EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId,
+            EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()),
+            EVENT_KEY_THREAD_NAME, DumpProcessHelper::GetThreadName());
         ErrorObject appExecErrorObj = { .name = errorObj.name, .message = errorObj.message, .stack = errorObj.stack };
         FaultData faultData;
         faultData.faultType = FaultDataType::JS_ERROR;
@@ -1449,10 +1450,8 @@ EtsEnv::ETSUncaughtExceptionInfo MainThread::CreateEtsExceptionInfo(const std::s
             ApplicationDataManager::GetInstance().NotifyETSExceptionObject(appExecErrorObj)) {
             return;
         }
-        TAG_LOGE(AAFwkTag::APPKIT,
-            "\n%{public}s is about to exit due to RuntimeError\nError "
-            "type:%{public}s\n%{public}s",
-            bundleName.c_str(), errorObj.name.c_str(), summary.c_str());
+        TAG_LOGE(AAFwkTag::APPKIT, "\n%{public}s is about to exit due to RuntimeError\nError "
+            "type:%{public}s\n%{public}s", bundleName.c_str(), errorObj.name.c_str(), summary.c_str());
         bool foreground = false;
         if (appThread->applicationImpl_ &&
             appThread->applicationImpl_->GetState() == ApplicationImpl::APP_STATE_FOREGROUND) {
@@ -1461,8 +1460,7 @@ EtsEnv::ETSUncaughtExceptionInfo MainThread::CreateEtsExceptionInfo(const std::s
         int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
             HiviewDFX::HiSysEvent::EventType::FAULT, "PID", pid, "PROCESS_NAME", processName, "MSG", KILL_REASON,
             "FOREGROUND", foreground);
-        TAG_LOGW(AAFwkTag::APPKIT,
-            "hisysevent write result=%{public}d, send event "
+        TAG_LOGW(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event "
             "[FRAMEWORK,PROCESS_KILL],"
             " pid=%{public}d, processName=%{public}s, msg=%{public}s, "
             "foreground=%{public}d",
@@ -2001,7 +1999,8 @@ void MainThread::InitUncatchableTask(JsEnv::UncatchableTask &uncatchableTask, co
             EVENT_KEY_VERSION, std::to_string(versionCode), EVENT_KEY_TYPE, JSCRASH_TYPE, EVENT_KEY_HAPPEN_TIME, timet,
             EVENT_KEY_REASON, errorObject.name, EVENT_KEY_JSVM, JSVM_TYPE, EVENT_KEY_SUMMARY, summary,
             EVENT_KEY_PNAME, processName, EVENT_KEY_APP_RUNING_UNIQUE_ID, appRunningId,
-            EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()));
+            EVENT_KEY_PROCESS_RSS_MEMINFO, std::to_string(DumpProcessHelper::GetProcRssMemInfo()),
+            EVENT_KEY_THREAD_NAME, DumpProcessHelper::GetThreadName());
 
         ErrorObject appExecErrorObj = { errorObject.name, errorObject.message, errorObject.stack};
         auto napiEnv = (static_cast<AbilityRuntime::JsRuntime&>(*appThread->application_->GetRuntime())).GetNapiEnv();
