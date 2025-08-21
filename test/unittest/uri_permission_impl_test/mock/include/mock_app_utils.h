@@ -24,9 +24,11 @@ class AppUtils {
 public:
     static AppUtils &GetInstance();
     static bool isSupportGrantUriPermission_;
+    static bool isGrantPersistUriPermission_;
 
     ~AppUtils();
     bool IsSupportGrantUriPermission();
+    bool IsGrantPersistUriPermission();
     static void Init();
 
 private:
