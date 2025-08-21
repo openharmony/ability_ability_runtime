@@ -35,4 +35,5 @@ export default class StartOptions {
   minWindowHeight?: int;
   maxWindowWidth?: int;
   maxWindowHeight?: int;
+  hideStartWindow?: boolean;
 }

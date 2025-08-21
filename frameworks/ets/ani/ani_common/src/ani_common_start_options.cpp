@@ -168,6 +168,12 @@ bool UnwrapStartOptions(ani_env *env, ani_object param, AAFwk::StartOptions &sta
         startOptions.SetWindowFocused(windowFocused);
     }
 
+    bool hideStartWindow = true;
+    if (GetFieldBoolByName(env, param, "hideStartWindow", hideStartWindow)) {
+        TAG_LOGD(AAFwkTag::ANI, "hideStartWindow:%{public}d", hideStartWindow);
+        startOptions.SetHideStartWindow(hideStartWindow);
+    }
+
     if (!SetSupportWindowModes(env, param, startOptions)) {
         TAG_LOGE(AAFwkTag::ANI, "SetSupportWindowModes failed");
         return false;
