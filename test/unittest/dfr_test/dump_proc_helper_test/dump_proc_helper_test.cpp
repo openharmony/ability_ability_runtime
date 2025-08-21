@@ -59,5 +59,17 @@ HWTEST_F(DumpProcHelperTest, DumpProcHelperTest001, TestSize.Level1)
     EXPECT_TRUE(DumpProcessHelper::GetProcRssMemInfo() != 0);
     GTEST_LOG_(INFO) << "DumpProcHelperTest001 end";
 }
+
+/**
+ * @tc.number: DumpProcHelperTest002
+ * @tc.name: DumpProcHelperTest002
+ * @tc.desc: test GetProcRssMemInfo.
+ */
+HWTEST_F(DumpProcHelperTest, DumpProcHelperTest002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DumpProcHelperTest002 start";
+    EXPECT_TRUE(!DumpProcessHelper::GetThreadName().empty());
+    GTEST_LOG_(INFO) << "DumpProcHelperTest002 end";
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
