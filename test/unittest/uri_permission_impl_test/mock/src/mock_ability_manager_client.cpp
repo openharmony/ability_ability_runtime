@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "mock_ability_manager_client.h"
+#include "ability_manager_client.h"
 
 namespace OHOS {
 namespace AAFwk {

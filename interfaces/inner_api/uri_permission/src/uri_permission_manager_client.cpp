@@ -48,17 +48,18 @@ int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int 
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "targetBundleName:%{public}s", targetBundleName.c_str());
     auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        int32_t funcResult = -1;
-        auto res = uriPermMgr->GrantUriPermission(uri, flag, targetBundleName, appIndex,
-            initiatorTokenId, funcResult);
-        if (res != ERR_OK) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
-            return INNER_ERR;
-        }
-        return funcResult;
+    if (uriPermMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
+        return INNER_ERR;
     }
-    return INNER_ERR;
+    int32_t funcResult = INNER_ERR;
+    auto res = uriPermMgr->GrantUriPermission(uri, flag, targetBundleName, appIndex,
+        initiatorTokenId, funcResult);
+    if (res != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
+        return INNER_ERR;
+    }
+    return funcResult;
 }
 
 int UriPermissionManagerClient::GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag,
@@ -81,8 +82,8 @@ int UriPermissionManagerClient::GrantUriPermission(const std::vector<Uri> &uriVe
         uriStrVec.emplace_back(uri.ToString());
     }
     bool isWriteUriByRawData = CheckUseRawData(uriStrVec);
-    ErrCode res = -1;
-    int32_t funcResult = -1;
+    ErrCode res = INNER_ERR;
+    int32_t funcResult = INNER_ERR;
     if (isWriteUriByRawData) {
         UriPermissionRawData rawData;
         StringVecToRawData(uriStrVec, rawData);
@@ -92,14 +93,14 @@ int UriPermissionManagerClient::GrantUriPermission(const std::vector<Uri> &uriVe
         }
         res = uriPermMgr->GrantUriPermission(rawData, flag, targetBundleName, appIndex, initiatorTokenId, funcResult);
         if (res != ERR_OK) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
             return INNER_ERR;
         }
         return funcResult;
     }
     res = uriPermMgr->GrantUriPermission(uriStrVec, flag, targetBundleName, appIndex, initiatorTokenId, funcResult);
     if (res != ERR_OK) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
         return INNER_ERR;
     }
     return funcResult;
@@ -125,8 +126,8 @@ int32_t UriPermissionManagerClient::GrantUriPermissionPrivileged(const std::vect
         uriStrVec.emplace_back(uri.ToString());
     }
     bool isWriteUriByRawData = CheckUseRawData(uriStrVec);
-    ErrCode res = -1;
-    int32_t funcResult = -1;
+    ErrCode res = INNER_ERR;
+    int32_t funcResult = INNER_ERR;
     if (isWriteUriByRawData) {
         UriPermissionRawData rawData;
         StringVecToRawData(uriStrVec, rawData);
@@ -137,7 +138,7 @@ int32_t UriPermissionManagerClient::GrantUriPermissionPrivileged(const std::vect
         res = uriPermMgr->GrantUriPermissionPrivileged(rawData, flag, targetBundleName, appIndex,
             initiatorTokenId, hideSensitiveType, funcResult);
         if (res != ERR_OK) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
             return INNER_ERR;
         }
         return funcResult;
@@ -156,16 +157,17 @@ int32_t UriPermissionManagerClient::GrantUriPermissionByKey(const std::string &k
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "GrantUriPermissionByKey call");
     auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        int32_t funcResult = INNER_ERR;
-        auto ret = uriPermMgr->GrantUriPermissionByKey(key, flag, targetTokenId, funcResult);
-        if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", ret);
-            return INNER_ERR;
-        }
-        return funcResult;
+    if (uriPermMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
+        return INNER_ERR;
     }
-    return INNER_ERR;
+    int32_t funcResult = INNER_ERR;
+    auto ret = uriPermMgr->GrantUriPermissionByKey(key, flag, targetTokenId, funcResult);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", ret);
+        return INNER_ERR;
+    }
+    return funcResult;
 }
 
 int32_t UriPermissionManagerClient::GrantUriPermissionByKeyAsCaller(const std::string &key, uint32_t flag,
@@ -173,32 +175,34 @@ int32_t UriPermissionManagerClient::GrantUriPermissionByKeyAsCaller(const std::s
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "GrantUriPermissionByKeyAsCaller call");
     auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        int32_t funcResult = INNER_ERR;
-        auto ret = uriPermMgr->GrantUriPermissionByKeyAsCaller(key, flag, callerTokenId, targetTokenId, funcResult);
-        if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", ret);
-            return INNER_ERR;
-        }
-        return funcResult;
+    if (uriPermMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
+        return INNER_ERR;
     }
-    return INNER_ERR;
+    int32_t funcResult = INNER_ERR;
+    auto ret = uriPermMgr->GrantUriPermissionByKeyAsCaller(key, flag, callerTokenId, targetTokenId, funcResult);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", ret);
+        return INNER_ERR;
+    }
+    return funcResult;
 }
 
 int UriPermissionManagerClient::RevokeAllUriPermissions(const uint32_t tokenId)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
     auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        int32_t funcResult = -1;
-        auto res = uriPermMgr->RevokeAllUriPermissions(tokenId, funcResult);
-        if (res != ERR_OK) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
-            return INNER_ERR;
-        }
-        return funcResult;
+    if (uriPermMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
+        return INNER_ERR;
     }
-    return INNER_ERR;
+    int32_t funcResult = INNER_ERR;
+    auto res = uriPermMgr->RevokeAllUriPermissions(tokenId, funcResult);
+    if (res != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
+        return INNER_ERR;
+    }
+    return funcResult;
 }
 
 int UriPermissionManagerClient::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName,
@@ -206,30 +210,33 @@ int UriPermissionManagerClient::RevokeUriPermissionManually(const Uri &uri, cons
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "call");
     auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        int32_t funcResult = -1;
-        auto res = uriPermMgr->RevokeUriPermissionManually(uri, bundleName, appIndex, funcResult);
-        if (res != ERR_OK) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", INNER_ERR);
-            return INNER_ERR;
-        }
-        return funcResult;
+    if (uriPermMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
+        return INNER_ERR;
     }
-    return INNER_ERR;
+    int32_t funcResult = INNER_ERR;
+    auto res = uriPermMgr->RevokeUriPermissionManually(uri, bundleName, appIndex, funcResult);
+    if (res != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
+        return INNER_ERR;
+    }
+    return funcResult;
 }
 
 bool UriPermissionManagerClient::VerifyUriPermission(const Uri& uri, uint32_t flag, uint32_t tokenId)
 {
     auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        bool funcResult = false;
-        auto res = uriPermMgr->VerifyUriPermission(uri, flag, tokenId, funcResult);
-        if (res != ERR_OK) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC fail, error:%{public}d", res);
-        }
-        return funcResult;
+    if (uriPermMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
+        return false;
     }
-    return false;
+    bool funcResult = false;
+    auto res = uriPermMgr->VerifyUriPermission(uri, flag, tokenId, funcResult);
+    if (res != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC fail, error:%{public}d", res);
+        return false;
+    }
+    return funcResult;
 }
 
 std::vector<bool> UriPermissionManagerClient::CheckUriAuthorization(const std::vector<std::string> &uriVec,
@@ -393,24 +400,24 @@ bool UriPermissionManagerClient::IsUriPermServiceStarted()
     return isUriPermServiceStarted_.load();
 }
 
-int32_t UriPermissionManagerClient::ClearPermissionTokenByMap(const uint32_t tokenId)
+int32_t UriPermissionManagerClient::ClearPermissionTokenByMap(uint32_t tokenId)
 {
     if (!IsUriPermServiceStarted()) {
         TAG_LOGD(AAFwkTag::URIPERMMGR, "upms is not started");
         return ERR_UPMS_SERVICE_NOT_START;
     }
     auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        int32_t funcResult = -1;
-        auto res = uriPermMgr->ClearPermissionTokenByMap(tokenId, funcResult);
-        if (res != ERR_OK) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
-            return INNER_ERR;
-        }
-        return funcResult;
+    if (uriPermMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
+        return INNER_ERR;
     }
-    TAG_LOGE(AAFwkTag::URIPERMMGR, "uriPermMgr nullptr");
-    return INNER_ERR;
+    int32_t funcResult = INNER_ERR;
+    auto res = uriPermMgr->ClearPermissionTokenByMap(tokenId, funcResult);
+    if (res != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
+        return INNER_ERR;
+    }
+    return funcResult;
 }
 
 bool UriPermissionManagerClient::RawDataToBoolVec(const UriPermissionRawData& rawData, std::vector<bool>& boolVec)
@@ -465,22 +472,23 @@ int32_t UriPermissionManagerClient::Active(const std::vector<PolicyInfo> &policy
         return ERR_URI_LIST_OUT_OF_RANGE;
     }
     auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        UriPermissionRawData policyRawData;
-        PolicyInfoToRawData(policy, policyRawData);
-        if (policyRawData.size > MAX_IPC_RAW_DATA_SIZE) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "rawData is too large");
-            return INNER_ERR;
-        }
-        int32_t funcResult = -1;
-        auto res = uriPermMgr->Active(policyRawData, result, funcResult);
-        if (res != ERR_OK) {
-            TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
-            return INNER_ERR;
-        }
-        return funcResult;
+    if (uriPermMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "null uriPermMgr");
+        return INNER_ERR;
     }
-    return INNER_ERR;
+    UriPermissionRawData policyRawData;
+    PolicyInfoToRawData(policy, policyRawData);
+    if (policyRawData.size > MAX_IPC_RAW_DATA_SIZE) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "rawData is too large");
+        return INNER_ERR;
+    }
+    int32_t funcResult = INNER_ERR;
+    auto res = uriPermMgr->Active(policyRawData, result, funcResult);
+    if (res != ERR_OK) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "IPC failed, error:%{public}d", res);
+        return INNER_ERR;
+    }
+    return funcResult;
 }
 
 void UriPermissionManagerClient::PolicyInfoToRawData(const std::vector<PolicyInfo>& policy,
