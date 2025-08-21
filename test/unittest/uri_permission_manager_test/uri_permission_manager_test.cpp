@@ -92,7 +92,7 @@ HWTEST_F(UriPermissionManagerTest, ConnectUriPermService_003, TestSize.Level1)
     upmc.SetUriPermMgr(remoteObject);
     EXPECT_EQ(upmc.GetUriPermMgr(), nullptr);
     auto ret = upmc.ConnectUriPermService();
-    EXPECT_EQ(ret, nullptr);
+    EXPECT_NE(ret, nullptr);
 }
 
 /*

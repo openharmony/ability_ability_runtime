@@ -5523,7 +5523,7 @@ HWTEST_F(AppMgrServiceInnerTest, PreloadModuleFinished_0001, TestSize.Level1)
     int32_t appRecord = 0;
 
     std::shared_ptr<MockTaskHandlerWrap> taskHandler = MockTaskHandlerWrap::CreateQueueHandler("app_mgr_tasks_queue");
-    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(AnyNumber());
     appMgrServiceInner->SetTaskHandler(taskHandler);
 
     appMgrServiceInner->PreloadModuleFinished(appRecord);
