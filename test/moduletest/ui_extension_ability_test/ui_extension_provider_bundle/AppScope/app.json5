@@ -13,7 +13,13 @@
  * limitations under the License.
  */
 
-interface OHOS.IIdlServiceExt {
-    int ProcessData([in] int data);
-    void InsertDataToMap([in] String key, [in] int val);
+{
+  "app": {
+    "bundleName": "com.ohos.uiextensionprovider",
+    "vendor": "example",
+    "versionCode": 1000000,
+    "versionName": "1.0.0",
+    "icon": "$media:app_icon",
+    "label": "$string:app_name"
+  }
 }
