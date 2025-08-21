@@ -338,9 +338,9 @@ EtsEnv::ETSErrorObject ETSEnvironment::GetETSErrorObject()
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "ResetError failed, status : %{public}d", status);
         return EtsEnv::ETSErrorObject();
     }
-    std::string errorMsg = GetErrorProperty(aniError, "message");
-    std::string errorName = GetErrorProperty(aniError, "name");
-    std::string errorStack = GetErrorProperty(aniError, "stack");
+    std::string errorMsg = GetErrorProperty(aniError, "<get>message");
+    std::string errorName = GetErrorProperty(aniError, "<get>name");
+    std::string errorStack = GetErrorProperty(aniError, "<get>stack");
     const EtsEnv::ETSErrorObject errorObj = {
         .name = errorName,
         .message = errorMsg,
@@ -364,9 +364,10 @@ std::string ETSEnvironment::GetErrorProperty(ani_error aniError, const char *pro
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Object_GetType failed, status : %{public}d", status);
         return propertyValue;
     }
+    auto errorClass = static_cast<ani_class>(errorType);
     ani_method getterMethod = nullptr;
-    if ((status = aniEnv->Class_FindGetter(static_cast<ani_class>(errorType), property, &getterMethod)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindGetter failed, status : %{public}d", status);
+    if ((status = aniEnv->Class_FindMethod(errorClass, property, nullptr, &getterMethod)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod failed, status : %{public}d", status);
         return propertyValue;
     }
     ani_ref aniRef = nullptr;
