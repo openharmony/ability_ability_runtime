@@ -132,7 +132,7 @@ void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
 
     // 2.new ability
     auto ability = AppExecFwk::AbilityLoader::GetInstance().GetUIAbilityByName(
-        abilityName, abilityRecord->GetAbilityInfo()->codeLanguage);
+        abilityName, abilityRecord->GetAbilityInfo()->arkTSMode);
     if (ability == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
         return;
@@ -205,7 +205,7 @@ void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
 
     // 2.new ability
     auto ability = AppExecFwk::AbilityLoader::GetInstance().GetUIAbilityByName(
-        abilityName, abilityRecord->GetAbilityInfo()->codeLanguage);
+        abilityName, abilityRecord->GetAbilityInfo()->arkTSMode);
     if (ability == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null ability");
         return;
@@ -431,7 +431,7 @@ void UIAbilityThread::SendResult(int requestCode, int resultCode, const Want &wa
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (abilityHandler_ == nullptr || requestCode == -1) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityHandler_ or requestCode is -1");
+        TAG_LOGW(AAFwkTag::UIABILITY, "null abilityHandler_ or requestCode is -1");
         return;
     }
 
@@ -705,7 +705,7 @@ void UIAbilityThread::ScheduleCollaborate(const Want &want)
 }
 
 void UIAbilityThread::ScheduleAbilityRequestFailure(const std::string &requestId,
-    const AppExecFwk::ElementName &element, const std::string &message)
+    const AppExecFwk::ElementName &element, const std::string &message, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "ScheduleAbilityRequestFailure called");
     if (abilityImpl_ == nullptr) {
@@ -713,14 +713,14 @@ void UIAbilityThread::ScheduleAbilityRequestFailure(const std::string &requestId
         return;
     }
     wptr<UIAbilityThread> weak = this;
-    auto task = [weak, requestId, element, message]() {
+    auto task = [weak, requestId, element, message, resultCode]() {
         auto abilityThread = weak.promote();
         if (abilityThread == nullptr) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null abilityThread");
             return;
         }
         if (abilityThread->abilityImpl_ != nullptr) {
-            abilityThread->abilityImpl_->ScheduleAbilityRequestFailure(requestId, element, message);
+            abilityThread->abilityImpl_->ScheduleAbilityRequestFailure(requestId, element, message, resultCode);
             return;
         }
     };

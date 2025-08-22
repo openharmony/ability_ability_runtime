@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -271,6 +271,21 @@ const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>>
         abilitiesMap.insert(abilities.begin(), abilities.end());
     }
     return abilitiesMap;
+}
+
+bool AppRunningRecord::IsAlreadyHaveAbility()
+{
+    auto moduleRecordList = GetAllModuleRecord();
+    for (const auto &moduleRecord : moduleRecordList) {
+        if (!moduleRecord) {
+            continue;
+        }
+        auto abilities = moduleRecord->GetAbilities();
+        if (!abilities.empty()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 sptr<IAppScheduler> AppRunningRecord::GetApplicationClient() const
@@ -916,9 +931,6 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
         foregroundingAbilityTokens_.insert(ability->GetToken());
         TAG_LOGD(AAFwkTag::APPMGR, "foregroundingAbility size: %{public}d",
             static_cast<int32_t>(foregroundingAbilityTokens_.size()));
-        if (curState_ == ApplicationState::APP_STATE_BACKGROUND) {
-            SendAppStartupTypeEvent(ability, AppStartType::HOT);
-        }
     } else {
         TAG_LOGW(AAFwkTag::APPMGR, "wrong state");
     }
@@ -1162,7 +1174,7 @@ void AppRunningRecord::SetAppMgrServiceInner(const std::weak_ptr<AppMgrServiceIn
 
     auto moduleRecordList = GetAllModuleRecord();
     if (moduleRecordList.empty()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "empty moduleRecordList");
+        TAG_LOGW(AAFwkTag::APPMGR, "empty moduleRecordList");
         return;
     }
 
@@ -1236,7 +1248,6 @@ void AppRunningRecord::SendEvent(uint32_t msg, int64_t timeOut)
     appEventId_++;
     auto param = appEventId_;
 
-    TAG_LOGI(AAFwkTag::APPMGR, "eventId %{public}d", static_cast<int>(param));
     eventHandler_->SendEvent(AAFwk::EventWrap(msg, param), timeOut, false);
     AppEventUtil::GetInstance().AddEvent(shared_from_this(), msg, param);
 }
@@ -1366,6 +1377,16 @@ void AppRunningRecord::SetKeepAliveEnableState(bool isKeepAliveEnable)
 void AppRunningRecord::SetKeepAliveDkv(bool isKeepAliveDkv)
 {
     isKeepAliveDkv_ = isKeepAliveDkv;
+}
+
+void AppRunningRecord::SetMainElementRunning(bool isMainElementRunning)
+{
+    isMainElementRunning_ = isMainElementRunning;
+}
+
+bool AppRunningRecord::IsMainElementRunning() const
+{
+    return isMainElementRunning_;
 }
 
 void AppRunningRecord::SetKeepAliveAppService(bool isKeepAliveAppService)
@@ -1891,6 +1912,16 @@ bool AppRunningRecord::IsKilling() const
     return isKilling_.load();
 }
 
+void AppRunningRecord::SetPreForeground(bool isPreForeground)
+{
+    isPreForeground_.store(isPreForeground);
+}
+
+bool AppRunningRecord::IsPreForeground() const
+{
+    return isPreForeground_.load();
+}
+
 bool AppRunningRecord::NeedUpdateConfigurationBackground()
 {
     bool needUpdate = false;
@@ -2312,6 +2343,16 @@ void AppRunningRecord::SetPreloadState(PreloadState state)
     preloadState_ = state;
 }
 
+void AppRunningRecord::SetPreloadPhase(PreloadPhase phase)
+{
+    preloadPhase_ = phase;
+}
+
+PreloadPhase AppRunningRecord::GetPreloadPhase()
+{
+    return preloadPhase_;
+}
+
 bool AppRunningRecord::IsPreloading() const
 {
     return preloadState_ == PreloadState::PRELOADING;
@@ -2447,14 +2488,14 @@ void AppRunningRecord::SetWatchdogBackgroundStatusRunning(bool status)
 
 bool AppRunningRecord::SetSupportedProcessCache(bool isSupport)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     procCacheSupportState_ = isSupport ? SupportProcessCacheState::SUPPORT : SupportProcessCacheState::NOT_SUPPORT;
     return true;
 }
 
 bool AppRunningRecord::SetEnableProcessCache(bool enable)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     enableProcessCache_ = enable;
     return true;
 }

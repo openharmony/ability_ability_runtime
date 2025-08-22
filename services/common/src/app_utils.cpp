@@ -82,6 +82,8 @@ constexpr const char* MIGRATE_CLIENT_BUNDLE_NAME = "const.sys.abilityms.migrate_
 constexpr const char* CONNECT_SUPPORT_CROSS_USER = "const.abilityms.connect_support_cross_user";
 constexpr const char* SUPPORT_APP_SERVICE_EXTENSION = "const.abilityms.support_app_service";
 constexpr const char* PRODUCT_PRELOAD_APPLICATION_SETTING_ENABLED = "const.product.preload_application.setting.enabled";
+constexpr const char* FORBID_START = "persist.sys.abilityms.forbid_start";
+constexpr const char* RESTART_APP_WITH_WINDOW = "persist.sys.abilityms.restart_app_with_window";
 // Support prepare terminate
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
@@ -98,17 +100,32 @@ AppUtils::~AppUtils() {}
 
 AppUtils::AppUtils()
 {
-    #ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_GRAPHICS
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         isSceneBoard_ = true;
     }
-    #endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_GRAPHICS
+#ifndef ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
+    if (WatchParameter(FORBID_START, AppUtils::ForbidStartCallback, nullptr) != 0) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "want param failed: %{public}s", FORBID_START);
+        isForbidStart_.isLoaded = false;
+    }
+#endif
 }
 
 AppUtils &AppUtils::GetInstance()
 {
     static AppUtils utils;
     return utils;
+}
+
+void AppUtils::ForbidStartCallback(const char *key, const char *, void *)
+{
+    if (strcmp(key, FORBID_START) == 0) {
+        GetInstance().isForbidStart_.value = system::GetBoolParameter(FORBID_START, false);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "param %{public}s changed: %{public}d", FORBID_START,
+            GetInstance().isForbidStart_.value);
+    }
 }
 
 bool AppUtils::IsLauncher(const std::string &bundleName) const
@@ -816,6 +833,28 @@ bool AppUtils::IsPreloadApplicationEnabled()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "called %{public}d", isPreloadApplicationEnabled_.value);
     return isPreloadApplicationEnabled_.value;
+}
+
+bool AppUtils::IsForbidStart()
+{
+#ifdef ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE
+    return false;
+#else
+    if (!isForbidStart_.isLoaded) {
+        isForbidStart_.value = system::GetBoolParameter(FORBID_START, false);
+    }
+    return isForbidStart_.value;
+#endif
+}
+
+bool AppUtils::IsSupportRestartAppWithWindow()
+{
+    if (!isSupportRestartAppWithWindow_.isLoaded) {
+        isSupportRestartAppWithWindow_.value = system::GetBoolParameter(RESTART_APP_WITH_WINDOW, false);
+        isSupportRestartAppWithWindow_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "restartApp: %{public}d", isSupportRestartAppWithWindow_.value);
+    return isSupportRestartAppWithWindow_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

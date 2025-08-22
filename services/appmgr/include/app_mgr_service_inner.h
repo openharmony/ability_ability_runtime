@@ -210,7 +210,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillProcessesByPids(const std::vector<int32_t> &pids,
-        const std::string &reason = "KillProcessesByPids", bool subProcess = false);
+        const std::string &reason = "KillProcessesByPids", bool subProcess = false, bool isKillPrecedeStart = false);
 
     /**
      * KillProcessesInBatch, kill processes in batch;
@@ -255,7 +255,7 @@ public:
     virtual int32_t PreloadApplication(const std::string &bundleName, int32_t userId,
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex);
 
-    virtual int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token);
+    virtual int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground);
 
     /**
      * Launch Application Finished
@@ -348,10 +348,9 @@ public:
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid,
         const std::string& reason = "KillApplicationByUid");
     
-    virtual int32_t NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
-        const bool isUpgrade);
+    virtual int32_t NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade);
     
-    virtual void NotifyUninstallOrUpgradeAppEnd(const int32_t uid);
+    virtual void NotifyUninstallOrUpgradeAppEnd(int32_t uid);
 
     /**
      * KillApplicationSelf, this allows app to terminate itself.
@@ -983,7 +982,8 @@ public:
     int32_t NotifyAppStatusByCommonEventName(const std::string &bundleName, const std::string &eventName,
         const Want &want);
 
-    int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation");
+    int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation",
+        bool isKillPrecedeStart = false);
 
     int32_t KillSubProcessBypidInner(const pid_t pid, const std::string &reason,
         AAFwk::EventInfo &eventInfo);
@@ -1314,7 +1314,7 @@ public:
      * @param callback callback for notify start result
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t StartNativeChildProcess(const pid_t hostPid, const std::string &libName, int32_t childProcessCount,
+    virtual int32_t CreateNativeChildProcess(const pid_t hostPid, const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback, const std::string &customProcessName);
 #endif // SUPPORT_CHILD_PROCESS
 
@@ -1572,6 +1572,13 @@ public:
 
     int32_t LaunchAbility(sptr<IRemoteObject> token);
 
+    virtual int32_t QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles);
+
+    /**
+     * Verify whether the caller has the permission to kill processes of a bundleName.
+     */
+    int VerifyKillProcessPermission(const std::string &bundleName) const;
+
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);
@@ -1731,7 +1738,7 @@ private:
     bool GetBundleAndHapInfo(const AbilityInfo &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo,
         BundleInfo &bundleInfo, HapModuleInfo &hapModuleInfo, int32_t appIndex = 0) const;
     AppProcessData WrapAppProcessData(const std::shared_ptr<AppRunningRecord> &appRecord,
-        const ApplicationState state);
+        const ApplicationState state, bool isFromWindowFocusChanged = false);
 
     int UserTestAbnormalFinish(const sptr<IRemoteObject> &observer, const std::string &msg);
     int GetHapModuleInfoForTestRunner(const AAFwk::Want &want, const sptr<IRemoteObject> &observer,
@@ -1789,11 +1796,6 @@ private:
     void RegisterFocusListener();
 
     static void PointerDeviceEventCallback(const char *key, const char *value, void *context);
-
-    /**
-     * Verify whether the caller has the permission to kill processes of a bundleName.
-     */
-    int VerifyKillProcessPermission(const std::string &bundleName) const;
 
     int32_t VerifyKillProcessPermissionCommon() const;
 
@@ -1966,7 +1968,8 @@ private:
         const std::string &specifiedProcessFlag, const BundleInfo &bundleInfo,
         const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want,
         bool appExistFlag, bool isPreload, AppExecFwk::PreloadMode preloadMode,
-        sptr<IRemoteObject> token = nullptr, const std::string &customProcessFlag = "");
+        sptr<IRemoteObject> token = nullptr, const std::string &customProcessFlag = "",
+        bool isStartupHide = false);
 
     int32_t CreatNewStartMsg(const Want &want, const AbilityInfo &abilityInfo,
         const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName,
@@ -2073,7 +2076,9 @@ private:
     int32_t GetAllRunningInstanceKeysByBundleNameInner(const std::string &bundleName,
         std::vector<std::string> &instanceKeys, int32_t userId);
     int32_t KillProcessByPidInner(const pid_t pid, const std::string& reason,
-        const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord);
+        const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord, bool isKillPrecedeStart);
+    void SetKilledEventInfo(std::shared_ptr<AppRunningRecord> appRecord, AAFwk::EventInfo &eventInfo);
+    void AddToKillProcessMap(const std::string &processName);
     bool IsAllowedNWebPreload(const std::string &processName);
     void ParseInfoToAppfreeze(const FaultData &faultData, int32_t pid, int32_t uid, const std::string &bundleName,
         const std::string &processName, const bool isOccurException = false);

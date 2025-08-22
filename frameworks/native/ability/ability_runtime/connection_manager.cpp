@@ -55,11 +55,11 @@ ErrCode ConnectionManager::ConnectUIServiceExtensionAbility(const sptr<IRemoteOb
         AppExecFwk::ExtensionAbilityType::UI_SERVICE);
 }
 
-ErrCode ConnectionManager::ConnectAppServiceExtensionAbility(const sptr<IRemoteObject>& connectCaller,
-    const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback)
+ErrCode ConnectionManager::ConnectExtensionAbilityWithExtensionType(const sptr<IRemoteObject>& connectCaller,
+    const AAFwk::Want& want, const sptr<AbilityConnectCallback>& connectCallback,
+    AppExecFwk::ExtensionAbilityType extensionType)
 {
-    return ConnectAbilityInner(connectCaller, want, AAFwk::DEFAULT_INVAL_VALUE, connectCallback,
-        AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+    return ConnectAbilityInner(connectCaller, want, AAFwk::DEFAULT_INVAL_VALUE, connectCallback, extensionType);
 }
 
 ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connectCaller, const AAFwk::Want& want,
@@ -197,6 +197,9 @@ ErrCode ConnectionManager::DisconnectAbility(const sptr<IRemoteObject>& connectC
     std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
     bool found = false;
     auto item = abilityConnections_.begin();
+    if (!abilityConnections_.empty()) {
+        TAG_LOGI(AAFwkTag::CONNECTION, "Connection size:%{public}zu", abilityConnections_.size());
+    }
     while (item != abilityConnections_.end()) {
         if (!MatchConnection(connectCaller, connectReceiver, accountId, *item) ||
             std::find(item->second.begin(), item->second.end(), connectCallback) == item->second.end()) {
@@ -204,8 +207,7 @@ ErrCode ConnectionManager::DisconnectAbility(const sptr<IRemoteObject>& connectC
             continue;
         }
         found = true;
-        TAG_LOGI(AAFwkTag::CONNECTION, "Connection size:%{public}zu, callback size: %{public}zu",
-            abilityConnections_.size(), item->second.size());
+        TAG_LOGD(AAFwkTag::CONNECTION, "callback size: %{public}zu", item->second.size());
         auto iter = item->second.begin();
         while (iter != item->second.end()) {
             if (*iter == connectCallback) {

@@ -129,6 +129,23 @@ HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermission_001, 
 /*
  * Feature: UriPermissionManagerClient
  * Function: GrantUriPermission
+ * SubFunction: SingleGrantUriPermission
+ * FunctionPoints: NA.
+ * CaseDescription: Verify UriPermissionManagerClient GrantUriPermission
+ */
+HWTEST_F(UriPermissionManagerTest, UriPermissionManager_GrantUriPermission_002, TestSize.Level1)
+{
+    auto& upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    auto uri = Uri("invalidScheme://temp.txt");
+    std::string bundleName = "com.example.test1001";
+    uint32_t flag = Want::FLAG_AUTH_READ_URI_PERMISSION;
+    auto ret = upmc.GrantUriPermission(uri, flag, bundleName, 0, 0);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/*
+ * Feature: UriPermissionManagerClient
+ * Function: GrantUriPermission
  * SubFunction: BatchGrantUriPermission
  * FunctionPoints: Size of uris is 0
  * CaseDescription: Verify UriPermissionManagerClient GrantUriPermission
@@ -525,5 +542,60 @@ HWTEST_F(UriPermissionManagerTest, UriPermissionManager_ClearPermissionTokenByMa
     res = upmc.ClearPermissionTokenByMap(tokenId);
     EXPECT_NE(res, ERR_UPMS_SERVICE_NOT_START);
 }
+
+#ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
+/*
+ * Feature: UriPermissionManagerClient
+ * Function: Active
+ * SubFunction: Active
+ * FunctionPoints: Params is invalid.
+ */
+HWTEST_F(UriPermissionManagerTest, UriPermissionManager_Active_001, TestSize.Level1)
+{
+    auto &upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::vector<AccessControl::SandboxManager::PolicyInfo> policies;
+    std::vector<uint32_t> result;
+    auto res = upmc.Active(policies, result);
+    EXPECT_EQ(res, ERR_URI_LIST_OUT_OF_RANGE);
+
+    AccessControl::SandboxManager::PolicyInfo policy;
+    policies = std::vector<AccessControl::SandboxManager::PolicyInfo>(MAX_URI_COUNT + 1, policy);
+    res = upmc.Active(policies, result);
+    EXPECT_EQ(res, ERR_URI_LIST_OUT_OF_RANGE);
+}
+
+/*
+ * Feature: UriPermissionManagerClient
+ * Function: Active
+ * SubFunction: Active
+ * FunctionPoints: Data of policies is too large.
+ */
+HWTEST_F(UriPermissionManagerTest, UriPermissionManager_Active_002, TestSize.Level1)
+{
+    auto &upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    std::string path = std::string(1000, 'a');
+    AccessControl::SandboxManager::PolicyInfo policy = { .path = path };
+    std::vector<AccessControl::SandboxManager::PolicyInfo> policies(MAX_URI_COUNT, policy);
+    std::vector<uint32_t> result;
+    auto res = upmc.Active(policies, result);
+    EXPECT_EQ(res, INNER_ERR);
+}
+
+/*
+ * Feature: UriPermissionManagerClient
+ * Function: Active
+ * SubFunction: Active
+ * FunctionPoints: Failed to call Active.
+ */
+HWTEST_F(UriPermissionManagerTest, UriPermissionManager_Active_003, TestSize.Level1)
+{
+    auto &upmc = AAFwk::UriPermissionManagerClient::GetInstance();
+    AccessControl::SandboxManager::PolicyInfo policy = { .path = "/data/path/test.txt" };
+    std::vector<AccessControl::SandboxManager::PolicyInfo> policies(1, policy);
+    std::vector<uint32_t> result;
+    auto res = upmc.Active(policies, result);
+    EXPECT_NE(res, ERR_OK);
+}
+#endif // ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -75,31 +75,6 @@ HWTEST_F(PreloadUIextStateObserverTest, OnProcessDied_001, Function | MediumTest
     GTEST_LOG_(INFO) << "OnProcessDied_001 end";
 }
 
-/**
- * @tc.number: OnProcessDied_002
- * @tc.name: OnProcessDied
- * @tc.desc: Test whether OnProcessDied is called normally.
- * @tc.type: FUNC
- */
-HWTEST_F(PreloadUIextStateObserverTest, OnProcessDied_002, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "OnProcessDied_002 start";
-    Want want;
-    AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::ApplicationInfo applicationInfo;
-    std::shared_ptr<AAFwk::AbilityRecord> abilityRecord =
-        std::make_shared<AAFwk::AbilityRecord>(want, abilityInfo, applicationInfo);
-    auto extensionRecordSharedPtr = std::make_shared<AbilityRuntime::ExtensionRecord>(abilityRecord);
-    std::weak_ptr<AbilityRuntime::ExtensionRecord> extensionRecord = extensionRecordSharedPtr;
-    PreLoadUIExtStateObserver preLoadUIExtStateObserver(extensionRecord);
-    AppExecFwk::ProcessData processData;
-    int32_t diedPid = processData.pid;
-    preLoadUIExtStateObserver.OnProcessDied(processData);
-    auto record = preLoadUIExtStateObserver.extensionRecord_.lock();
-    EXPECT_TRUE(record != nullptr);
-    EXPECT_TRUE(record->hostPid_ == diedPid);
-    GTEST_LOG_(INFO) << "OnProcessDied_002 end";
-}
 
 /**
  * @tc.number: OnProcessDied_003

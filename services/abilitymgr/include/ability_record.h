@@ -408,7 +408,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    int LoadAbility(bool isShellCall = false);
+    int LoadAbility(bool isShellCall = false, bool isStartupHide = false);
 
     /**
      * foreground the ability.
@@ -421,7 +421,8 @@ public:
      * process request of foregrounding the ability.
      *
      */
-    void ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag = 0, bool isShellCall = false);
+    void ProcessForegroundAbility(
+        uint32_t tokenId, uint32_t sceneFlag = 0, bool isShellCall = false, bool isStartupHide = false);
 
      /**
      * post foreground timeout task for ui ability.
@@ -596,6 +597,16 @@ public:
     inline std::string GetKillReason()
     {
         return killReason_;
+    }
+
+    inline void SetIsKillPrecedeStart(bool isKillPrecedeStart)
+    {
+        isKillPrecedeStart_.store(isKillPrecedeStart);
+    }
+
+    inline bool IsKillPrecedeStart()
+    {
+        return isKillPrecedeStart_.load();
     }
 
     void PostCancelStartingWindowHotTask();
@@ -1179,7 +1190,7 @@ public:
     }
 
     void NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message);
+        const std::string &message, int32_t resultCode = 0);
 
     void NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element);
     void NotifyAbilitiesRequestDone(const std::string &requestKey, int32_t resultCode);
@@ -1266,10 +1277,22 @@ public:
         return isPreloaded_.load();
     }
 
+    inline void SetFrozenByPreload(bool isFrozenByPreload)
+    {
+        isFrozenByPreload_.store(isFrozenByPreload);
+    }
+
+    inline bool IsFrozenByPreload() const
+    {
+        return isFrozenByPreload_.load();
+    }
+
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1, bool isExtension = false,
         const std::string &taskName = "");
 
     void UpdateUIExtensionBindInfo(const WantParams &wantParams);
+
+    void SendTerminateAbilityErrorEvent(int32_t errCode);
 protected:
 
     sptr<Token> token_ = {};                               // used to interact with kit and wms
@@ -1324,6 +1347,8 @@ private:
 
     void CancelPrepareTerminate();
 
+    void BuildTerminateAbilityEventInfo(EventInfo &eventInfo, int32_t errCode);
+
 #ifdef SUPPORT_SCREEN
     std::shared_ptr<Want> GetWantFromMission() const;
     void SetShowWhenLocked(const AppExecFwk::AbilityInfo &abilityInfo, sptr<AbilityTransitionInfo> &info) const;
@@ -1365,7 +1390,7 @@ private:
     void GetColdStartingWindowResource(std::shared_ptr<Media::PixelMap> &bg, uint32_t &bgColor);
     void SetAbilityStateInner(AbilityState state);
 #endif
-
+    void SendAppStartupTypeEvent(const AppExecFwk::AppStartType startType);
     std::atomic<bool> isPreloadStart_ = false;           // is ability started via preload
 
     static std::atomic<int64_t> abilityRecordId;
@@ -1503,11 +1528,13 @@ private:
     bool isPrepareTerminate_ = false;
 
     std::string killReason_ = "";
+    std::atomic_bool isKillPrecedeStart_ = false;
     std::shared_ptr<Want> launchWant_ = nullptr;
     std::shared_ptr<Want> lastWant_ = nullptr;
     std::atomic_bool isLastWantBackgroundDriven_ = false;
     std::atomic<int32_t> scenarios_ = 0;
     std::atomic<bool> isPreloaded_ = false;
+    std::atomic<bool> isFrozenByPreload_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

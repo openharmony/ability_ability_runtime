@@ -120,7 +120,8 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillProcessesByPids(const std::vector<int32_t> &pids,
-        const std::string &reason = "KillProcessesByPids", bool subProcess = false) override;
+        const std::string &reason = "KillProcessesByPids", bool subProcess = false,
+        bool isKillPrecedeStart = false) override;
 
     /**
      * Set child and parent relationship
@@ -199,10 +200,9 @@ public:
     virtual int KillApplicationByUid(const std::string &bundleName, const int uid,
         const std::string& reason = "KillApplicationByUid") override;
 
-    virtual int32_t NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
-        const bool isUpgrade) override;
+    virtual int32_t NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade) override;
     
-    virtual void NotifyUninstallOrUpgradeAppEnd(const int32_t uid) override;
+    virtual void NotifyUninstallOrUpgradeAppEnd(int32_t uid) override;
 
     /**
      * KillApplicationSelf, this allows app to terminate itself.
@@ -464,10 +464,12 @@ public:
     virtual int32_t PreloadApplicationByPhase(const std::string &bundleName, int32_t userId, int32_t appIndex,
         AppExecFwk::PreloadPhase preloadPhase) override;
 
-    virtual int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token) override;
+    virtual int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground) override;
 
     virtual int32_t CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,
         bool &isExist) override;
+
+    virtual int32_t VerifyKillProcessPermission(const std::string &bundleName) override;
 
 private:
     /**

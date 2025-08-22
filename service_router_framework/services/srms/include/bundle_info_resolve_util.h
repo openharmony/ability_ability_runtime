@@ -99,7 +99,6 @@ private:
     static void ConvertAbilityToPurposes(const AbilityInfo &abilityInfo, std::vector<PurposeInfo> &purposeInfos,
         const AppInfo &appInfo)
     {
-        TAG_LOGI(AAFwkTag::SER_ROUTER, "Called");
         std::string supportPurpose = GetAbilityMetadataValue(abilityInfo, SrConstants::METADATA_SUPPORT_PURPOSE_KEY);
         if (supportPurpose.empty()) {
             return;
@@ -124,7 +123,6 @@ private:
     static void ConvertExtAbilityToPurposes(const ExtensionAbilityInfo &extAbilityInfo,
         std::vector<PurposeInfo> &purposeInfos, const AppInfo &appInfo)
     {
-        TAG_LOGI(AAFwkTag::SER_ROUTER, "Called");
         if (extAbilityInfo.type != ExtensionAbilityType::FORM && extAbilityInfo.type != ExtensionAbilityType::UI) {
             return;
         }

@@ -58,6 +58,7 @@ ohos_fuzztest("AbilityManagerServiceBFuzzTest") {
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hisysevent:libhisysevent",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",

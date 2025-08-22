@@ -23,8 +23,8 @@ namespace OHOS {
 namespace AAFwk {
 class MockAbilityManagerCollaborator : public IAbilityManagerCollaborator {
 public:
-    MOCK_METHOD4(NotifyStartAbility, int32_t(const AppExecFwk::AbilityInfo &abilityInfo,
-        int32_t userId, Want &want, uint64_t accessTokenIDEx));
+    MOCK_METHOD5(NotifyStartAbility, int32_t(const AppExecFwk::AbilityInfo &abilityInfo,
+        int32_t userId, Want &want, uint64_t accessTokenIDEx, int32_t windowMode));
     MOCK_METHOD1(NotifyPreloadAbility, int32_t(const std::string &bundleName));
     MOCK_METHOD2(NotifyMissionCreated, int32_t(int32_t missionId, const Want &want));
     MOCK_METHOD1(NotifyMissionCreated, int32_t(const sptr<SessionInfo> &sessionInfo));

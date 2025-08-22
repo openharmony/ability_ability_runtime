@@ -70,10 +70,8 @@ bool AbilitySchedulerProxy::ScheduleAbilityTransaction(const Want &want, const L
             AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey, "write sessionInfo failed");
             return false;
         }
-    } else {
-        if (!data.WriteBool(false)) {
-            return false;
-        }
+    } else if (!data.WriteBool(false)) {
+        return false;
     }
     int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITY_TRANSACTION, data, reply, option);
     if (err != NO_ERROR) {
@@ -1233,7 +1231,7 @@ void AbilitySchedulerProxy::ScheduleCollaborate(const Want &want)
 }
 
 void AbilitySchedulerProxy::ScheduleAbilityRequestFailure(const std::string &requestId,
-    const AppExecFwk::ElementName &element, const std::string &message)
+    const AppExecFwk::ElementName &element, const std::string &message, int32_t resultCode)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1257,6 +1255,11 @@ void AbilitySchedulerProxy::ScheduleAbilityRequestFailure(const std::string &req
     if (!data.WriteString(message)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write message failed");
         AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey, "write message failed");
+        return;
+    }
+    if (!data.WriteInt32(resultCode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write resultCode failed");
+        AbilityRuntime::ErrorMgsUtil::GetInstance().UpdateErrorMsg(msgKey, "write resultCode failed");
         return;
     }
     int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITY_REQUEST_FAILURE, data, reply, option);

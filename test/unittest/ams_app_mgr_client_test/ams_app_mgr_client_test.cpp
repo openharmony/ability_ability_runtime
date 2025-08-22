@@ -638,7 +638,7 @@ HWTEST_F(AmsAppMgrClientTest, NotifyPreloadAbilityStateChanged_001, TestSize.Lev
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_001 start");
     client_->mgrHolder_ = nullptr;
 
-    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_);
+    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_, true);
     EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_001 end");
 }
@@ -656,7 +656,7 @@ HWTEST_F(AmsAppMgrClientTest, NotifyPreloadAbilityStateChanged_002, TestSize.Lev
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_002 start");
     client_->SetServiceManager(nullptr);
 
-    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_);
+    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_, true);
     EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_002 end");
 }
@@ -680,7 +680,7 @@ HWTEST_F(AmsAppMgrClientTest, NotifyPreloadAbilityStateChanged_003, TestSize.Lev
         .Times(1)
         .WillOnce(Return(amsMgrScheduler));
 
-    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_);
+    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_, true);
     EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_003 end");
 }
@@ -704,11 +704,11 @@ HWTEST_F(AmsAppMgrClientTest, NotifyPreloadAbilityStateChanged_004, TestSize.Lev
         .Times(1)
         .WillOnce(Return(mockAmsMgrScheduler));
     
-    EXPECT_CALL(*mockAmsMgrScheduler, NotifyPreloadAbilityStateChanged(_))
+    EXPECT_CALL(*mockAmsMgrScheduler, NotifyPreloadAbilityStateChanged(_, _))
         .Times(1)
         .WillOnce(Return(AppMgrResultCode::RESULT_OK));
 
-    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_);
+    int32_t result = client_->NotifyPreloadAbilityStateChanged(token_, true);
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "NotifyPreloadAbilityStateChanged_004 end");
 }
@@ -787,6 +787,71 @@ HWTEST_F(AmsAppMgrClientTest, CheckPreloadAppRecordExist_004, TestSize.Level1)
     int32_t result = client_->CheckPreloadAppRecordExist(bundleName, userId, appIndex, isExist);
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "CheckPreloadAppRecordExist_004 end");
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: AppMgrClient::QueryRunningSharedBundles
+ * SubFunction: QueryRunningSharedBundles
+ * FunctionPoints: AppMgrClient QueryRunningSharedBundles interface
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Test QueryRunningSharedBundles with valid parameters.
+ */
+HWTEST_F(AmsAppMgrClientTest, QueryRunningSharedBundles_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_001 start");
+    client_->mgrHolder_ = nullptr;
+
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    int32_t result = client_->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_001 end");
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: AppMgrClient::QueryRunningSharedBundles
+ * SubFunction: QueryRunningSharedBundles
+ * FunctionPoints: AppMgrClient QueryRunningSharedBundles interface
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Test QueryRunningSharedBundles with valid parameters.
+ */
+HWTEST_F(AmsAppMgrClientTest, QueryRunningSharedBundles_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_002 start");
+    client_->SetServiceManager(nullptr);
+
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    int32_t result = client_->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(result, AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED);
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_002 end");
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: AppMgrClient::QueryRunningSharedBundles
+ * SubFunction: QueryRunningSharedBundles
+ * FunctionPoints: AppMgrClient QueryRunningSharedBundles interface
+ * EnvConditions: Mobile that can run ohos test framework
+ * CaseDescription: Test QueryRunningSharedBundles with valid parameters.
+ */
+HWTEST_F(AmsAppMgrClientTest, QueryRunningSharedBundles_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_003 start");
+    EXPECT_EQ(AppMgrResultCode::RESULT_OK, client_->ConnectAppMgrService());
+
+    EXPECT_CALL(*(static_cast<MockAppMgrService*>((iface_cast<IAppMgr>(client_->GetRemoteObject())).GetRefPtr())),
+        QueryRunningSharedBundles(_, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    int32_t result = client_->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_003 end");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

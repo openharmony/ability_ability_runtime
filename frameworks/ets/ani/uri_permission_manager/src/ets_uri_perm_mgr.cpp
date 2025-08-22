@@ -41,7 +41,7 @@ constexpr const int32_t ERR_OK = 0;
 constexpr const int32_t ERR_FAILURE = -1;
 constexpr const char* NOT_SYSTEM_APP = "The application is not system-app, can not use system-api.";
 
-ani_object createDouble(ani_env *env, int32_t res)
+ani_object CreateDouble(ani_env *env, int32_t res)
 {
     if (env == nullptr) {
         return nullptr;
@@ -96,7 +96,7 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
         etsErrCode = EtsErrorUtil::CreateError(env,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), NOT_SYSTEM_APP);
-        AsyncCallback(env, callback, etsErrCode, createDouble(env, ERR_FAILURE));
+        AsyncCallback(env, callback, etsErrCode, CreateDouble(env, ERR_FAILURE));
         return;
     }
     std::string uriStr = GetStdString(env, uri);
@@ -114,7 +114,7 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         etsErrCode = EtsErrorUtil::CreateErrorByNativeErr(env, errCode);
     }
     
-    AsyncCallback(env, callback, etsErrCode, createDouble(env, result));
+    AsyncCallback(env, callback, etsErrCode, CreateDouble(env, result));
 }
 
 static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
@@ -131,7 +131,7 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
         etsErrCode = EtsErrorUtil::CreateError(env,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), NOT_SYSTEM_APP);
-        AsyncCallback(env, callback, etsErrCode, createDouble(env, ERR_FAILURE));
+        AsyncCallback(env, callback, etsErrCode, CreateDouble(env, ERR_FAILURE));
         return;
     }
     std::string uriStr = GetStdString(env, uri);
@@ -144,7 +144,7 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         result = ERR_FAILURE;
         etsErrCode = EtsErrorUtil::CreateErrorByNativeErr(env, errCode);
     }
-    AsyncCallback(env, callback, etsErrCode, createDouble(env, result));
+    AsyncCallback(env, callback, etsErrCode, CreateDouble(env, result));
 }
 
 void EtsUriPermissionManagerInit(ani_env *env)
@@ -327,5 +327,5 @@ std::string GetErrMsg(int32_t err, const std::string &permission)
     return errMsg;
 }
 
-}  // namespace AbilityRuntime
-}  // namespace OHOS
+} // namespace AbilityRuntime
+} // namespace OHOS

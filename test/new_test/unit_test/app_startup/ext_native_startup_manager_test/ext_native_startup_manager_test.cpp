@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <future>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -131,6 +132,7 @@ HWTEST_F(ExtNativeStartupManagerTest, RunNativeStartupTask_001, TestSize.Level1)
     EXPECT_CALL(*taskManager, Prepare()).Times(1).WillOnce(Return(ERR_STARTUP_DEPENDENCY_NOT_FOUND));
     int32_t res = ExtNativeStartupManager::RunNativeStartupTask(nativeStartupTask);
     EXPECT_EQ(res, ERR_STARTUP_DEPENDENCY_NOT_FOUND);
+    DelayedSingleton<StartupManager>::DestroyInstance();
 }
 
 /**
@@ -156,6 +158,30 @@ HWTEST_F(ExtNativeStartupManagerTest, RunNativeStartupTask_002, TestSize.Level1)
     EXPECT_CALL(*taskManager, Run(_)).Times(1).WillOnce(Return(ERR_OK));
     int32_t res = ExtNativeStartupManager::RunNativeStartupTask(nativeStartupTask);
     EXPECT_EQ(res, ERR_OK);
+    DelayedSingleton<StartupManager>::DestroyInstance();
+}
+
+/**
+ * @tc.name: RunNativeStartupTask_003
+ * @tc.desc: Verify RunNativeStartupTask call.
+ *           Branch BuildStartupTaskManager failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtNativeStartupManagerTest, RunNativeStartupTask_003, TestSize.Level1)
+{
+    std::map<std::string, std::shared_ptr<StartupTask>> nativeStartupTask;
+    auto check = [nativeStartupTask](
+        const StartupTaskMap &input, std::shared_ptr<StartupTaskManager> &startupTaskManager) {
+        EXPECT_EQ(input, nativeStartupTask);
+        startupTaskManager = nullptr;
+        return ERR_STARTUP_INTERNAL_ERROR;
+    };
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    ASSERT_NE(startupManager, nullptr);
+    EXPECT_CALL(*startupManager, BuildStartupTaskManager(_, _)).Times(1).WillOnce(Invoke(check));
+    int32_t res = ExtNativeStartupManager::RunNativeStartupTask(nativeStartupTask);
+    EXPECT_EQ(res, ERR_STARTUP_INTERNAL_ERROR);
+    DelayedSingleton<StartupManager>::DestroyInstance();
 }
 
 /**
@@ -273,8 +299,19 @@ HWTEST_F(ExtNativeStartupManagerTest, RunPhaseTasks_004, TestSize.Level1)
     EXPECT_CALL(*startupManager, BuildStartupTaskManager(_, _)).Times(1).WillOnce(Invoke(check2));
 
     EXPECT_CALL(*taskManager, Prepare()).Times(1).WillOnce(Return(ERR_OK));
-    EXPECT_CALL(*taskManager, Run(_)).Times(1).WillOnce(Return(ERR_OK));
+    std::shared_ptr<std::promise<int32_t>> promise = std::make_shared<std::promise<int32_t>>();
+    auto future = promise->get_future();
+    auto wait = [promise](const std::shared_ptr<OnCompletedCallback> &callback) {
+        EXPECT_EQ(callback, nullptr);
+        promise->set_value(ERR_OK);
+        return ERR_OK;
+    };
+    EXPECT_CALL(*taskManager, Run(_)).Times(1).WillOnce(Invoke(wait));
     int32_t res = ExtNativeStartupManager::GetInstance().RunPhaseTasks(SchedulerPhase::PostLaunchApplication);
     EXPECT_EQ(res, ERR_OK);
+
+    int32_t result = future.get();
+    EXPECT_EQ(result, ERR_OK);
+    DelayedSingleton<StartupManager>::DestroyInstance();
 }
 } // namespace OHOS::AbilityRuntime

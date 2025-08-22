@@ -338,6 +338,9 @@ public:
      */
     virtual int32_t OnShare(AAFwk::WantParams &wantParams);
 
+    void BindHybridContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+        const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record);
+
     bool CheckIsSilentForeground() const;
 
     void SetIsSilentForeground(bool isSilentForeground);
@@ -368,6 +371,10 @@ private:
     void SetLaunchParam(const AAFwk::LaunchParam &launchParam);
     void InitConfigurationProperties(const AppExecFwk::Configuration &changeConfiguration,
         ResourceConfigHelper &resourceConfig);
+    void BindEtsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+        const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record);
+    void BindJsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+        const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record);
 
     std::shared_ptr<AppExecFwk::ContinuationHandlerStage> continuationHandler_ = nullptr;
     std::shared_ptr<AppExecFwk::ContinuationManagerStage> continuationManager_ = nullptr;
@@ -633,7 +640,7 @@ public:
      * @param message, the message to be returned to the calling app.
      */
     virtual void OnAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message);
+        const std::string &message, int32_t resultCode = 0);
 
     /**
      * @brief Called when startAbility request succeeded.

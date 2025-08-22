@@ -52,6 +52,7 @@ void UIAbilityImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &app
         new (std::nothrow) WindowLifeCycleImpl(token_, shared_from_this())));
 #endif
     ability_->Init(record, application, handler, token);
+    ability_->BindHybridContext(application, record);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
@@ -938,14 +939,14 @@ void UIAbilityImpl::ScheduleCollaborate(const Want &want)
 }
 
 void UIAbilityImpl::ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "ScheduleAbilityRequestFailure called");
     if (ability_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null ability_");
         return;
     }
-    ability_->OnAbilityRequestFailure(requestId, element, message);
+    ability_->OnAbilityRequestFailure(requestId, element, message, resultCode);
 }
 
 void UIAbilityImpl::ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)

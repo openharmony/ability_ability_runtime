@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,8 @@ struct LoadParam : public Parcelable {
      */
     virtual bool Marshalling(Parcel &parcel) const override;
 
+    bool MarshallingTwo(Parcel &parcel) const;
+
     /**
      * @brief Unmarshals this object from a Parcel.
      *
@@ -45,11 +47,13 @@ struct LoadParam : public Parcelable {
     sptr<IRemoteObject> preToken = nullptr;
     std::string instanceKey = "";
     bool isKeepAlive = false;
+    bool isMainElementRunning = false;
     bool isKeepAliveAppService = false;
     bool isCallerSetProcess = false;
     std::string customProcessFlag = "";
     uint32_t extensionProcessMode = 0;
     ExtensionLoadParam extensionLoadParam;
+    bool isStartupHide = false;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

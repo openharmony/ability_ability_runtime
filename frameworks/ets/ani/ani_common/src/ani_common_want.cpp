@@ -37,6 +37,11 @@ namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime;
 namespace {
+constexpr const char* ABILITY_WANT_CLASS_NAME = "L@ohos/app/ability/Want/Want;";
+constexpr const char* TOOL_CLASS_NAME = "L@ohos/app/ability/Want/RecordSerializeTool;";
+constexpr const char* INNER_CLASS_NAME = "Lability/abilityResult/AbilityResultInner;";
+constexpr const char* ELEMENTNAME_CLASS_NAME = "LbundleManager/ElementNameInner/ElementNameInner;";
+
 bool InnerWrapWantParams(ani_env* env, ani_class wantCls, ani_object wantObject, const AAFwk::WantParams& wantParams)
 {
     ani_ref wantParamRef = WrapWantParams(env, wantParams);
@@ -69,8 +74,8 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
     ani_status status = ANI_ERROR;
     ani_method method = nullptr;
     ani_object object = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/Want/Want;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "status : %{public}d", status);
+    if ((status = env->FindClass(ABILITY_WANT_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return nullptr;
     }
     if (cls == nullptr) {
@@ -78,11 +83,11 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
         return nullptr;
     }
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return nullptr;
     }
     if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return nullptr;
     }
     if (object == nullptr) {
@@ -113,8 +118,8 @@ ani_ref WrapWantParams(ani_env *env, const AAFwk::WantParams &wantParams)
     }
     ani_status status = ANI_ERROR;
     ani_class cls = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/Want/RecordSerializeTool;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass RecordSerializeTool failed, status : %{public}d", status);
+    if ((status = env->FindClass(TOOL_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "FindClass RecordSerializeTool failed, status: %{public}d", status);
         return nullptr;
     }
     if (cls == nullptr) {
@@ -124,7 +129,7 @@ ani_ref WrapWantParams(ani_env *env, const AAFwk::WantParams &wantParams)
     ani_static_method parseNoThrowMethod = nullptr;
     status = env->Class_FindStaticMethod(cls, "parseNoThrow", nullptr, &parseNoThrowMethod);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "failed to get parseNoThrow method, status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::ANI, "failed to get parseNoThrow method, status: %{public}d", status);
         return nullptr;
     }
 
@@ -133,14 +138,14 @@ ani_ref WrapWantParams(ani_env *env, const AAFwk::WantParams &wantParams)
     ani_string wantParamsAniString;
     status = env->String_NewUTF8(wantParamsString.c_str(), wantParamsString.length(), &wantParamsAniString);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "String_NewUTF8 wantParamsString failed, status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::ANI, "String_NewUTF8 wantParamsString failed, status: %{public}d", status);
         return nullptr;
     }
 
     ani_ref wantParamsRef = nullptr;
     status = env->Class_CallStaticMethod_Ref(cls, parseNoThrowMethod, &wantParamsRef, wantParamsAniString);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "failed to call parseNoThrow method, status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::ANI, "failed to call parseNoThrow method, status: %{public}d", status);
         return nullptr;
     }
     return wantParamsRef;
@@ -248,8 +253,8 @@ bool UnwrapWantParams(ani_env *env, ani_ref param, AAFwk::WantParams &wantParams
     }
     ani_status status = ANI_ERROR;
     ani_class cls = nullptr;
-    if ((status = env->FindClass("L@ohos/app/ability/Want/RecordSerializeTool;", &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass RecordSerializeTool failed, status : %{public}d", status);
+    if ((status = env->FindClass(TOOL_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "FindClass RecordSerializeTool failed, status: %{public}d", status);
         return false;
     }
     if (cls == nullptr) {
@@ -259,13 +264,13 @@ bool UnwrapWantParams(ani_env *env, ani_ref param, AAFwk::WantParams &wantParams
     ani_static_method stringifyMethod = nullptr;
     status = env->Class_FindStaticMethod(cls, "stringifyNoThrow", nullptr, &stringifyMethod);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "failed to get stringifyNoThrow method, status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::ANI, "failed to get stringifyNoThrow method, status: %{public}d", status);
         return false;
     }
     ani_ref wantParamsAniString;
     status = env->Class_CallStaticMethod_Ref(cls, stringifyMethod, &wantParamsAniString, param);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "failed to call stringifyNoThrow method, status : %{public}d", status);
+        TAG_LOGE(AAFwkTag::ANI, "failed to call stringifyNoThrow method, status: %{public}d", status);
         return false;
     }
     std::string wantParamsString;
@@ -288,7 +293,7 @@ bool UnwrapWantParams(ani_env *env, ani_ref param, AAFwk::WantParams &wantParams
 
 bool GetAbilityResultClass(ani_env *env, ani_class &cls)
 {
-    ani_status status = env->FindClass("Lability/abilityResult/AbilityResultInner;", &cls);
+    ani_status status = env->FindClass(INNER_CLASS_NAME, &cls);
     if (status != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
@@ -356,5 +361,63 @@ bool UnWrapAbilityResult(ani_env *env, ani_object param, int &resultCode, AAFwk:
     }
     return UnwrapWant(env, reinterpret_cast<ani_object>(wantRef), want);
 }
+
+ani_object WrapElementName(ani_env *env, const AppExecFwk::ElementName &elementNameParam)
+{
+    TAG_LOGD(AAFwkTag::ANI, "WrapElementName");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return nullptr;
+    }
+    ani_class elementNameObj = nullptr;
+    ani_status status = ANI_ERROR;
+    ani_method method = nullptr;
+    ani_object object = nullptr;
+    if ((status = env->FindClass(ELEMENTNAME_CLASS_NAME, &elementNameObj)) != ANI_OK || elementNameObj == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "FindClass status: %{public}d or null elementNameObj", status);
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(elementNameObj, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod status: %{public}d or null method", status);
+        return nullptr;
+    }
+    if ((status = env->Object_New(elementNameObj, method, &object)) != ANI_OK || object == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "Object_New status: %{public}d or null object", status);
+        return nullptr;
+    }
+    return WrapElementNameInner(env, elementNameObj, object, elementNameParam);
+}
+
+ani_object WrapElementNameInner(ani_env *env, ani_class elementNameObj, ani_object object,
+    const AppExecFwk::ElementName &elementNameParam)
+{
+    TAG_LOGD(AAFwkTag::ANI, "WrapElementNameInner");
+    if (env == nullptr || elementNameObj == nullptr || object == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "invalid args");
+        return nullptr;
+    }
+    if (!SetFieldStringByName(env, elementNameObj, object, "bundleName", elementNameParam.GetBundleName())) {
+        TAG_LOGE(AAFwkTag::ANI, "set bundleName failed");
+        return nullptr;
+    }
+    if (!SetFieldStringByName(env, elementNameObj, object, "abilityName", elementNameParam.GetAbilityName())) {
+        TAG_LOGE(AAFwkTag::ANI, "set abilityName failed");
+        return nullptr;
+    }
+    if (!SetFieldStringByName(env, elementNameObj, object, "deviceId", elementNameParam.GetDeviceID())) {
+        TAG_LOGE(AAFwkTag::ANI, "set deviceId failed");
+    }
+    if (!SetFieldStringByName(env, elementNameObj, object, "moduleName", elementNameParam.GetModuleName())) {
+        TAG_LOGE(AAFwkTag::ANI, "set moduleName failed");
+    }
+    if (!SetFieldStringByName(env, elementNameObj, object, "uri", elementNameParam.GetURI())) {
+        TAG_LOGE(AAFwkTag::ANI, "set uri failed");
+    }
+    if (!SetFieldStringByName(env, elementNameObj, object, "shortName", elementNameParam.GetURI())) {
+        TAG_LOGE(AAFwkTag::ANI, "set shortName failed");
+    }
+    return object;
+}
+
 } // namespace AppExecFwk
 } // namespace OHOS

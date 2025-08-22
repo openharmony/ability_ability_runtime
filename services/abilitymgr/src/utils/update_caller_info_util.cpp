@@ -15,6 +15,7 @@
 
 #include "utils/update_caller_info_util.h"
 
+#include "ability_event_util.h"
 #include "ability_util.h"
 #include "ability_record.h"
 #include "accesstoken_kit.h"
@@ -335,6 +336,22 @@ void UpdateCallerInfoUtil::UpdateCallerAppCloneIndex(Want& want, int32_t appInde
 
 void UpdateCallerInfoUtil::ClearProtectedWantParam(Want &want)
 {
+    if (want.HasParameter(Want::PARAM_RESV_CALLER_NATIVE_NAME)) {
+        EventInfo eventInfo;
+        eventInfo.bundleName = want.GetElement().GetBundleName();
+        eventInfo.moduleName = want.GetElement().GetModuleName();
+        eventInfo.abilityName = want.GetElement().GetAbilityName();
+        int32_t callerUid = IPCSkeleton::GetCallingUid();
+        std::string callerBundleName;
+        auto bundleMgr = AbilityUtil::GetBundleManagerHelper();
+        if (bundleMgr != nullptr) {
+            IN_PROCESS_CALL(bundleMgr->GetNameForUid(callerUid, callerBundleName));
+        }
+        eventInfo.callerBundleName = callerBundleName.empty() ? std::to_string(callerUid) : callerBundleName;
+        AbilityEventUtil eventUtil;
+        eventUtil.SendStartAbilityErrorEvent(eventInfo, AAFwk::ERR_NOT_EXPECTED_NATIVE_CALLER_NAME,
+            std::string("no expected caller native name: ") + want.GetStringParam(Want::PARAM_RESV_CALLER_NATIVE_NAME));
+    }
     want.RemoveParam(Want::PARAM_RESV_CALLER_NATIVE_NAME);
     want.RemoveParam(COMPONENT_STARTUP_NEW_RULES);
     if (!PermissionVerification::GetInstance()->IsSystemAppCall()) {

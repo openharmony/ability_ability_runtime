@@ -1749,6 +1749,46 @@ HWTEST_F(AppMgrServiceInnerSecondTest, UpdateAbilityState_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateAbilityState_002
+ * @tc.desc: update ability state.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerSecondTest, UpdateAbilityState_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UpdateAbilityState_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+
+    BundleInfo bundleInfo;
+    HapModuleInfo hapModuleInfo;
+    std::shared_ptr<AAFwk::Want> want;
+    std::string processName = "test_processName";
+    auto loadParam = std::make_shared<AbilityRuntime::LoadParam>();
+    OHOS::sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    loadParam->token = token;
+    std::shared_ptr<AppRunningRecord> appRecord = appMgrServiceInner->CreateAppRunningRecord(loadParam,
+        applicationInfo_, nullptr, processName, bundleInfo, hapModuleInfo, want);
+    ASSERT_NE(appRecord, nullptr);
+    appRecord->AddModule(applicationInfo_, abilityInfo_, token, hapModuleInfo, nullptr, 0);
+
+    appRecord->SetPreForeground(false);
+    appMgrServiceInner->UpdateAbilityState(token, AbilityState::ABILITY_STATE_FOREGROUND);
+    EXPECT_EQ(appRecord->IsPreForeground(), false);
+
+    appRecord->SetPreForeground(true);
+    appMgrServiceInner->UpdateAbilityState(token, AbilityState::ABILITY_STATE_CREATE);
+    EXPECT_EQ(appRecord->IsPreForeground(), true);
+
+    appRecord->SetPreForeground(true);
+    appMgrServiceInner->UpdateAbilityState(token, AbilityState::ABILITY_STATE_FOREGROUND);
+    EXPECT_EQ(appRecord->IsPreForeground(), false);
+
+    TAG_LOGI(AAFwkTag::TEST, "UpdateAbilityState_002 end");
+}
+
+/**
  * @tc.name: KillProcessByAbilityToken_001
  * @tc.desc: kill process by ability token.
  * @tc.type: FUNC
@@ -2294,14 +2334,14 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_KillRenderPr
     hostRecord->priorityObject_->SetPid(hostPid);
     hostRecord->SetUid(100);
     std::string renderParam = "test_render_param";
-    int32_t ipcFd = 1;
-    int32_t sharedFd = 1;
-    int32_t crashFd = 1;
+    int32_t ipcFd = -1;
+    int32_t sharedFd = -1;
+    int32_t crashFd = -1;
 
     auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, TEST_PROCESS_NAME);
     EXPECT_NE(appRunningRecord, nullptr);
 
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), hostRecord);
     EXPECT_NE(renderRecord, nullptr);
 
@@ -2435,8 +2475,14 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_SetKeepAlive
     appMgrServiceInner->SetKeepAliveDkv("InvalidBundleName", true, 0);
     EXPECT_FALSE(appRecord->isKeepAliveDkv_);
 
-    // case 5, set success.
+    // case 5, not mainElement running.
     appRecord->extensionType_ = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    appMgrServiceInner->SetKeepAliveDkv(TEST_BUNDLE_NAME, true, 0);
+    EXPECT_FALSE(appRecord->isKeepAliveDkv_);
+
+    // case 6, set success.
+    appRecord->extensionType_ = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
+    appRecord->isMainElementRunning_ = true;
     appMgrServiceInner->SetKeepAliveDkv(TEST_BUNDLE_NAME, true, 0);
     EXPECT_TRUE(appRecord->isKeepAliveDkv_);
 

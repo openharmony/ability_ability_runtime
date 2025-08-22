@@ -223,6 +223,37 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_1000, Function | MediumTest | Level1)
 }
 
 /**
+ * @tc.number: JsEnv_SourceMap_1100
+ * @tc.name: Find
+ * @tc.desc: Verifying Find succeeded.
+ * @tc.require: #I6T4K1
+ */
+HWTEST_F(SourceMapTest, JsEnv_SourceMap_1100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_1100 start";
+    auto modSourceMap = std::make_shared<SourceMap>();
+    int32_t row = 2;
+    int32_t col = 3;
+    SourceMapData targetMap;
+    targetMap.sources_ = "       entry/src/main/ets/pages/Index.ets\"";
+    for (int32_t i = 0; i < 10; i++) {
+        for (int32_t j = 0; j < 5; j++) {
+            SourceMapInfo mapInfo;
+            mapInfo.beforeRow = 3;
+            mapInfo.beforeColumn = 2;
+            mapInfo.afterRow = i;
+            mapInfo.afterColumn = j;
+            targetMap.afterPos_.emplace_back(mapInfo);
+        }
+    }
+    auto info = modSourceMap->Find(row, col, targetMap, "test.js");
+    EXPECT_STREQ(info.sources.c_str(), "entry/src/main/ets/pages/Index.ets");
+    EXPECT_EQ(info.row, 2);
+    EXPECT_EQ(info.col, 3);
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_1100 end";
+}
+
+/**
  * @tc.number: JsEnv_SourceMap_1300
  * @tc.name: GetPosInfo
  * @tc.desc: Verifying GetPosInfo succeeded.

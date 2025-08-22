@@ -287,7 +287,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Connect_Service_002, TestSize.Level1)
 
     OHOS::sptr<OHOS::IRemoteObject> nullToken = nullptr;
     auto result1 = ConnectManager()->TerminateAbility(nullToken);
-    EXPECT_EQ(OHOS::ERR_INVALID_VALUE, result1);
+    EXPECT_EQ(ERR_CONNECT_MANAGER_NULL_ABILITY_RECORD, result1);
 
     auto elementName = abilityRequest_.want.GetElement().GetURI();
     auto service = ConnectManager()->GetServiceRecordByElementName(elementName);
@@ -3469,7 +3469,7 @@ HWTEST_F(AbilityConnectManagerTest, UnloadUIExtensionAbility_0100, TestSize.Leve
     std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     std::string hostBundleName = "com.ohos.uiextensionuser";
     auto ret = connectManager->UnloadUIExtensionAbility(abilityRecord, hostBundleName);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_CONNECT_MANAGER_NULL_ABILITY_RECORD);
 }
 
 /**

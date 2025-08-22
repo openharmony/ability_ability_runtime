@@ -1668,7 +1668,7 @@ int32_t AppMgrService::NotifyMemorySizeStateChanged(int32_t memorySizeState)
 
 int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
@@ -1678,7 +1678,7 @@ int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
 
 int32_t AppMgrService::SetSupportedProcessCache(int32_t pid, bool isSupport)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_OPERATION;
@@ -1731,7 +1731,7 @@ void AppMgrService::SetAppAssertionPauseState(bool flag)
 }
 
 #ifdef SUPPORT_CHILD_PROCESS
-int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+int32_t AppMgrService::CreateNativeChildProcess(const std::string &libName, int32_t childProcessCount,
     const sptr<IRemoteObject> &callback, const std::string &customProcessName)
 {
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
@@ -1741,7 +1741,7 @@ int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32
         return ERR_INVALID_OPERATION;
     }
 
-    return appMgrServiceInner_->StartNativeChildProcess(
+    return appMgrServiceInner_->CreateNativeChildProcess(
         IPCSkeleton::GetCallingPid(), libName, childProcessCount, callback, customProcessName);
 }
 #endif // SUPPORT_CHILD_PROCESS
@@ -1927,6 +1927,20 @@ int32_t AppMgrService::DemoteCurrentFromCandidateMasterProcess()
         return AAFwk::ERR_NULL_APP_MGR_SERVICE_INNER;
     }
     return appMgrServiceInner_->DemoteCurrentFromCandidateMasterProcess();
+}
+
+int32_t AppMgrService::QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service not ready");
+        return AAFwk::ERR_APP_MGR_SERVICE_NOT_READY;
+    }
+    if (!appMgrServiceInner_->IsFoundationCall()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
+        return ERR_PERMISSION_DENIED;
+    }
+    return appMgrServiceInner_->QueryRunningSharedBundles(pid, sharedBundles);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

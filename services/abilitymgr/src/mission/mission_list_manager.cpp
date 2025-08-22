@@ -375,7 +375,8 @@ void MissionListManager::AddRecord(const AbilityRequest &abilityRequest,
     if (abilityRequest.want.GetBoolParam(Want::PARAM_RESV_FOR_RESULT, false)) {
         std::string srcDeviceId = abilityRequest.want.GetStringParam(DMS_SRC_NETWORK_ID);
         int missionId = abilityRequest.want.GetIntParam(DMS_MISSION_ID, DEFAULT_DMS_MISSION_ID);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Get srcNetWorkId = %s, missionId = %d", srcDeviceId.c_str(), missionId);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Get srcNetWorkId = %{public}s, missionId = %{public}d",
+            srcDeviceId.c_str(), missionId);
         Want* newWant = const_cast<Want*>(&abilityRequest.want);
         newWant->RemoveParam(DMS_SRC_NETWORK_ID);
         newWant->RemoveParam(DMS_MISSION_ID);
@@ -1894,9 +1895,11 @@ void MissionListManager::CompleteTerminate(const std::shared_ptr<AbilityRecord> 
     abilityRecord->RemoveAbilityDeathRecipient();
 
     // notify AppMS terminate
-    if (abilityRecord->TerminateAbility() != ERR_OK) {
+    auto ret = abilityRecord->TerminateAbility();
+    if (ret != ERR_OK) {
         // Don't return here
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "AppMS fail to terminate ability");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "AppMS fail to terminate ability:%{public}d", ret);
+        abilityRecord->SendTerminateAbilityErrorEvent(ret);
     }
 
     auto&& preAbilityRecord = abilityRecord->GetPreAbilityRecord();

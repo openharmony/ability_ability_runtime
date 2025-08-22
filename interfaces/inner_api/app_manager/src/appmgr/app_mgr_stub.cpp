@@ -357,8 +357,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &da
         case static_cast<uint32_t>(AppMgrInterfaceCode::SET_APP_ASSERT_PAUSE_STATE_SELF):
             return HandleSetAppAssertionPauseState(data, reply);
     #ifdef SUPPORT_CHILD_PROCESS
-        case static_cast<uint32_t>(AppMgrInterfaceCode::START_NATIVE_CHILD_PROCESS):
-            return HandleStartNativeChildProcess(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::CREATE_NATIVE_CHILD_PROCESS):
+            return HandleCreateNativeChildProcess(data, reply);
     #endif // SUPPORT_CHILD_PROCESS
         case static_cast<uint32_t>(AppMgrInterfaceCode::SAVE_BROWSER_CHANNEL):
             return HandleSaveBrowserChannel(data, reply);
@@ -404,6 +404,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandlePromoteCurrentToCandidateMasterProcess(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::DEMOTE_CURRENT_FROM_CANDIDATE_MASTER_PROCESS):
             return HandleDemoteCurrentFromCandidateMasterProcess(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::QUERY_RUNNING_SHARED_BUNDLES):
+            return HandleQueryRunningSharedBundles(data, reply);
     }
     return INVALID_FD;
 }
@@ -872,12 +874,12 @@ int32_t AppMgrStub::HandleStartUserTestProcess(MessageParcel &data, MessageParce
         TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
         return ERR_INVALID_VALUE;
     }
+    auto observer = data.ReadRemoteObject();
     std::unique_ptr<BundleInfo> bundleInfo(data.ReadParcelable<BundleInfo>());
     if (bundleInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
         return ERR_INVALID_VALUE;
     }
-    auto observer = data.ReadRemoteObject();
     int32_t userId = data.ReadInt32();
     int32_t result = StartUserTestProcess(*want, observer, *bundleInfo, userId);
     reply.WriteInt32(result);
@@ -1836,14 +1838,14 @@ int32_t AppMgrStub::HandleCheckCallingIsUserTestMode(MessageParcel &data, Messag
 }
 
 #ifdef SUPPORT_CHILD_PROCESS
-int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply)
+int32_t AppMgrStub::HandleCreateNativeChildProcess(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::string libName = data.ReadString();
     int32_t childCount = data.ReadInt32();
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
     std::string customProcessName = data.ReadString();
-    int32_t result = StartNativeChildProcess(libName, childCount, callback, customProcessName);
+    int32_t result = CreateNativeChildProcess(libName, childCount, callback, customProcessName);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;
@@ -2039,5 +2041,32 @@ int32_t AppMgrStub::HandleDemoteCurrentFromCandidateMasterProcess(MessageParcel 
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleQueryRunningSharedBundles(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleQueryRunningSharedBundles call");
+    pid_t pid = data.ReadInt32();
+    std::map<std::string, uint32_t> sharedBundles;
+
+    int32_t result = QueryRunningSharedBundles(pid, sharedBundles);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write result fail");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
+    }
+    if (result != ERR_OK) {
+        return NO_ERROR;
+    }
+
+    if (!reply.WriteInt32(static_cast<int32_t>(sharedBundles.size()))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write size fail");
+        return IPC_STUB_ERR;
+    }
+    for (const auto &item : sharedBundles) {
+        if (!reply.WriteString(item.first) || !reply.WriteUint32(item.second)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "write item fail");
+            return IPC_STUB_ERR;
+        }
+    }
+    return NO_ERROR;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

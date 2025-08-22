@@ -72,6 +72,7 @@ struct ProcessData : public Parcelable {
     int32_t callerPid = -1;
     int32_t callerUid = -1;
     std::string killReason;
+    bool isFromWindowFocusChanged = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -1942,13 +1942,13 @@ HWTEST_F(AppMgrServiceTest, GetAllRunningInstanceKeysByBundleName_003, TestSize.
 
 #ifdef SUPPORT_CHILD_PROCESS
 /**
- * @tc.name: StartNativeChildProcess_0100
+ * @tc.name: CreateNativeChildProcess_0100
  * @tc.desc: Start native child process.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceTest, StartNativeChildProcess_0100, TestSize.Level1)
+HWTEST_F(AppMgrServiceTest, CreateNativeChildProcess_0100, TestSize.Level1)
 {
-    TAG_LOGD(AAFwkTag::TEST, "StartNativeChildProcess_0100 called.");
+    TAG_LOGD(AAFwkTag::TEST, "CreateNativeChildProcess_0100 called.");
     sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
     ASSERT_NE(appMgrService, nullptr);
 
@@ -1956,24 +1956,24 @@ HWTEST_F(AppMgrServiceTest, StartNativeChildProcess_0100, TestSize.Level1)
     appMgrService->taskHandler_ = taskHandler_;
     appMgrService->eventHandler_ = eventHandler_;
 
-    EXPECT_CALL(*mockAppMgrServiceInner_, StartNativeChildProcess(_, _, _, _, _))
+    EXPECT_CALL(*mockAppMgrServiceInner_, CreateNativeChildProcess(_, _, _, _, _))
         .Times(1)
         .WillOnce(Return(ERR_OK));
 
     pid_t pid = 0;
     sptr<IRemoteObject> callback;
-    int32_t res = appMgrService->StartNativeChildProcess("test.so", 1, callback, "");
+    int32_t res = appMgrService->CreateNativeChildProcess("test.so", 1, callback, "");
     EXPECT_EQ(res, ERR_OK);
 }
 
 /**
- * @tc.name: StartNativeChildProcess_0200
+ * @tc.name: CreateNativeChildProcess_0200
  * @tc.desc: Start native child process.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceTest, StartNativeChildProcess_0200, TestSize.Level1)
+HWTEST_F(AppMgrServiceTest, CreateNativeChildProcess_0200, TestSize.Level1)
 {
-    TAG_LOGD(AAFwkTag::TEST, "StartNativeChildProcess_0200 called.");
+    TAG_LOGD(AAFwkTag::TEST, "CreateNativeChildProcess_0200 called.");
     sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
     ASSERT_NE(appMgrService, nullptr);
 
@@ -1981,13 +1981,13 @@ HWTEST_F(AppMgrServiceTest, StartNativeChildProcess_0200, TestSize.Level1)
     appMgrService->taskHandler_ = taskHandler_;
     appMgrService->eventHandler_ = eventHandler_;
 
-    EXPECT_CALL(*mockAppMgrServiceInner_, StartNativeChildProcess(_, _, _, _, _))
+    EXPECT_CALL(*mockAppMgrServiceInner_, CreateNativeChildProcess(_, _, _, _, _))
         .Times(1)
         .WillOnce(Return(ERR_OK));
 
     pid_t pid = 0;
     sptr<IRemoteObject> callback;
-    int32_t res = appMgrService->StartNativeChildProcess("test.so", 1, callback, "abc_123");
+    int32_t res = appMgrService->CreateNativeChildProcess("test.so", 1, callback, "abc_123");
     EXPECT_EQ(res, ERR_OK);
 }
 #endif // SUPPORT_CHILD_PROCESS
@@ -2032,7 +2032,7 @@ HWTEST_F(AppMgrServiceTest, GetSupportedProcessCachePids_002, TestSize.Level2)
     std::string bundleName = "testBundleName";
     std::vector<int32_t> pidList;
     int32_t res = appMgrService->GetSupportedProcessCachePids(bundleName, pidList);
-    EXPECT_EQ(res, AAFwk::CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(res, ERR_OK);
 }
 
 /*
@@ -2293,6 +2293,80 @@ HWTEST_F(AppMgrServiceTest, SetProcessCacheEnable_0100, TestSize.Level1)
     bool enable = false;
     auto ret = appMgrService->SetProcessCacheEnable(pid, enable);
     EXPECT_EQ(ret, AAFwk::ERR_NO_PERMISSION_CALLER);
+}
+
+/**
+ * @tc.name: QueryRunningSharedBundles_001
+ * @tc.desc: verify QueryRunningSharedBundles works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, QueryRunningSharedBundles_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_001 start.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+    appMgrService->SetInnerService(nullptr);
+
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    int32_t result = appMgrService->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(result, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_001 end.");
+}
+
+/**
+ * @tc.name: QueryRunningSharedBundles_002
+ * @tc.desc: verify QueryRunningSharedBundles works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, QueryRunningSharedBundles_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_002 start.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, IsFoundationCall())
+        .Times(1)
+        .WillOnce(Return(false));
+
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    int32_t result = appMgrService->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_002 end.");
+}
+
+/**
+ * @tc.name: QueryRunningSharedBundles_003
+ * @tc.desc: verify QueryRunningSharedBundles works.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, QueryRunningSharedBundles_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_003 start.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
+    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = eventHandler_;
+
+    EXPECT_CALL(*mockAppMgrServiceInner_, IsFoundationCall())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*mockAppMgrServiceInner_, QueryRunningSharedBundles(_, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    pid_t pid = 1;
+    std::map<std::string, uint32_t> sharedBundles;
+    int32_t result = appMgrService->QueryRunningSharedBundles(pid, sharedBundles);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_003 end.");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

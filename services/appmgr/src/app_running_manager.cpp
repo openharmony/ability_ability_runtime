@@ -141,7 +141,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
             AppRunningManager::CheckAppProcessNameIsSame(pair.second, processName) &&
             (pair.second->GetJointUserId() == jointUserId) && !(pair.second->IsTerminating()) &&
             !(pair.second->IsKilling()) && !(pair.second->GetRestartAppFlag()) &&
-            (pair.second->GetKillReason() != AbilityRuntime::GlobalConstant::LOW_MEMORY_KILL);
+            !(pair.second->IsKillPrecedeStart());
     };
     auto appRunningMap = GetAppRunningRecordMap();
     if (!jointUserId.empty()) {
@@ -157,7 +157,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
             !(appRecord->IsTerminating()) && !(appRecord->IsKilling()) && !(appRecord->GetRestartAppFlag()) &&
             !(appRecord->IsUserRequestCleaning()) &&
             !(appRecord->IsCaching() && appRecord->GetProcessCacheBlocked()) &&
-            appRecord->GetKillReason() != AbilityRuntime::GlobalConstant::LOW_MEMORY_KILL) {
+            !(appRecord->IsKillPrecedeStart())) {
             auto appInfoList = appRecord->GetAppInfoList();
             TAG_LOGD(AAFwkTag::APPMGR,
                 "appInfoList: %{public}zu, processName: %{public}s, specifiedProcessFlag: %{public}s, \
@@ -204,7 +204,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordForSpe
             !(appRecord->IsTerminating()) && !(appRecord->IsKilling()) && !(appRecord->GetRestartAppFlag()) &&
             !(appRecord->IsUserRequestCleaning()) &&
             !(appRecord->IsCaching() && appRecord->GetProcessCacheBlocked()) &&
-            appRecord->GetKillReason() != AbilityRuntime::GlobalConstant::LOW_MEMORY_KILL) {
+            !(appRecord->IsKillPrecedeStart())) {
             return appRecord;
         }
     }
@@ -704,10 +704,10 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
         }
         appRecord->RemoveAppDeathRecipient();
         appRecord->SetApplicationClient(nullptr);
-        TAG_LOGI(AAFwkTag::APPMGR, "pname: %{public}s", appRecord->GetProcessName().c_str());
         auto priorityObject = appRecord->GetPriorityObject();
         if (priorityObject != nullptr) {
-            TAG_LOGI(AAFwkTag::APPMGR, "pid: %{public}d", priorityObject->GetPid());
+            TAG_LOGI(AAFwkTag::APPMGR, "pname: %{public}s, pid: %{public}d", appRecord->GetProcessName().c_str(),
+                priorityObject->GetPid());
             if (appMgrServiceInner != nullptr) {
                 appMgrServiceInner->KillProcessByPid(priorityObject->GetPid(), "OnRemoteDied");
             }
@@ -1026,7 +1026,7 @@ int32_t AppRunningManager::AssignRunningProcessInfoByAppRecord(
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null");
+        TAG_LOGW(AAFwkTag::APPMGR, "null");
         return ERR_INVALID_OPERATION;
     }
 
@@ -1796,7 +1796,7 @@ void AppRunningManager::HandleChildRelation(
 
 std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    TAG_LOGE(AAFwkTag::APPMGR, "On child process remote died");
+    TAG_LOGD(AAFwkTag::APPMGR, "On child process remote died");
     if (remote == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null remote");
         return nullptr;

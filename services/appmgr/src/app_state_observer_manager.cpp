@@ -70,7 +70,7 @@ int32_t AppStateObserverManager::RegisterApplicationStateObserver(
         return ERR_INVALID_VALUE;
     }
     if (ObserverExist(observer)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "observer exist");
+        TAG_LOGW(AAFwkTag::APPMGR, "observer exist");
         return ERR_INVALID_VALUE;
     }
     std::lock_guard lockRegister(observerLock_);
@@ -123,7 +123,7 @@ int32_t AppStateObserverManager::RegisterAppForegroundStateObserver(const sptr<I
         return ERR_PERMISSION_DENIED;
     }
     if (IsAppForegroundObserverExist(observer)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "observer exist");
+        TAG_LOGW(AAFwkTag::APPMGR, "observer exist");
         return ERR_INVALID_VALUE;
     }
 
@@ -337,21 +337,22 @@ void AppStateObserverManager::OnChildProcessDied(std::shared_ptr<ChildProcessRec
 }
 #endif // SUPPORT_CHILD_PROCESS
 
-void AppStateObserverManager::OnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord)
+void AppStateObserverManager::OnProcessStateChanged(
+    const std::shared_ptr<AppRunningRecord> &appRecord, bool isFromWindowFocusChanged)
 {
     if (handler_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
-    auto task = [weak = weak_from_this(), appRecord]() {
+    auto task = [weak = weak_from_this(), appRecord, isFromWindowFocusChanged]() {
         auto self = weak.lock();
         if (self == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "OnProcessStateChanged come.");
-        self->HandleOnProcessStateChanged(appRecord);
+        self->HandleOnProcessStateChanged(appRecord, isFromWindowFocusChanged);
     };
     handler_->SubmitTask(task);
 }
@@ -544,7 +545,7 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
     }
     if (state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_BACKGROUND) {
         if (needNotifyApp && !isFromWindowFocusChanged) {
-            AppStateData data = WrapAppStateData(appRecord, state);
+            AppStateData data = WrapAppStateData(appRecord, state, isFromWindowFocusChanged);
             appRecord->GetSplitModeAndFloatingMode(data.isSplitScreenMode, data.isFloatingWindowMode);
             auto appForegroundStateObserverMap = GetAppForegroundStateObserverMapCopy();
             for (const auto &[observer, uid] : appForegroundStateObserverMap) {
@@ -555,7 +556,7 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
         }
         if (!AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType()) &&
             !AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())) {
-            AppStateData data = WrapAppStateData(appRecord, state);
+            AppStateData data = WrapAppStateData(appRecord, state, isFromWindowFocusChanged);
             TAG_LOGD(AAFwkTag::APPMGR, "name:%{public}s, uid:%{public}d, state:%{public}d, notify:%{public}d",
                 data.bundleName.c_str(), data.uid, data.state, needNotifyApp);
             auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
@@ -573,7 +574,7 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
         }
     }
     if (state == ApplicationState::APP_STATE_CREATE || state == ApplicationState::APP_STATE_TERMINATED) {
-        AppStateData data = WrapAppStateData(appRecord, state);
+        AppStateData data = WrapAppStateData(appRecord, state, isFromWindowFocusChanged);
         TAG_LOGD(AAFwkTag::APPMGR, "OnApplicationStateChanged, name:%{public}s, uid:%{public}d, state:%{public}d",
             data.bundleName.c_str(), data.uid, data.state);
         auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
@@ -720,14 +721,15 @@ void AppStateObserverManager::HandleOnProcessCreated(const ProcessData &data)
     }
 }
 
-void AppStateObserverManager::HandleOnProcessStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord)
+void AppStateObserverManager::HandleOnProcessStateChanged(
+    const std::shared_ptr<AppRunningRecord> &appRecord, bool isFromWindowFocusChanged)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
     }
-    ProcessData data = WrapProcessData(appRecord);
+    ProcessData data = WrapProcessData(appRecord, isFromWindowFocusChanged);
     if (data.bundleName == XIAOYI_BUNDLE_NAME && data.extensionType == ExtensionAbilityType::SERVICE) {
         TAG_LOGI(AAFwkTag::APPMGR, "change processType to NORMAL");
         data.processType = ProcessType::NORMAL;
@@ -851,7 +853,8 @@ void AppStateObserverManager::HandleOnProcessDied(const ProcessData &data)
     }
 }
 
-ProcessData AppStateObserverManager::WrapProcessData(const std::shared_ptr<AppRunningRecord> &appRecord)
+ProcessData AppStateObserverManager::WrapProcessData(
+    const std::shared_ptr<AppRunningRecord> &appRecord, bool isFromWindowFocusChanged)
 {
     ProcessData processData;
     processData.bundleName = appRecord->GetBundleName();
@@ -879,6 +882,7 @@ ProcessData AppStateObserverManager::WrapProcessData(const std::shared_ptr<AppRu
     processData.callerPid = appRecord->GetCallerPid();
     processData.callerUid = appRecord->GetCallerUid();
     processData.killReason = appRecord->GetKillReason();
+    processData.isFromWindowFocusChanged = isFromWindowFocusChanged;
     return processData;
 }
 
@@ -1102,7 +1106,7 @@ void AppStateObserverManager::OnObserverDied(const wptr<IRemoteObject> &remote, 
 }
 
 AppStateData AppStateObserverManager::WrapAppStateData(const std::shared_ptr<AppRunningRecord> &appRecord,
-    const ApplicationState state)
+    const ApplicationState state, bool isFromWindowFocusChanged)
 {
     AppStateData appStateData;
     appStateData.pid = appRecord->GetPid();
@@ -1112,6 +1116,7 @@ AppStateData AppStateObserverManager::WrapAppStateData(const std::shared_ptr<App
     appStateData.extensionType = appRecord->GetExtensionType();
     appStateData.isPreloadModule = appRecord->GetPreloadMode() != PreloadMode::PRESS_DOWN;
     appStateData.callerUid = appRecord->GetCallerUid();
+    appStateData.isFromWindowFocusChanged = isFromWindowFocusChanged;
     if (appRecord->GetApplicationInfo() != nullptr) {
         appStateData.accessTokenId = static_cast<uint32_t>(appRecord->GetApplicationInfo()->accessTokenId);
     }
@@ -1364,11 +1369,10 @@ void AppStateObserverManager::HandleOnKeepAliveStateChanged(const std::shared_pt
     }
 }
 
-void AppStateObserverManager::OnPreloadProcessStateChanged(std::shared_ptr<AppRunningRecord> appRecord,
-    ApplicationState state)
+void AppStateObserverManager::OnProcessPreForegroundChanged(std::shared_ptr<AppRunningRecord> appRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::APPMGR, "OnPreloadProcessStateChanged");
+    TAG_LOGI(AAFwkTag::APPMGR, "OnProcessPreForegroundChanged");
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "null appRecord");
         return;
@@ -1378,20 +1382,19 @@ void AppStateObserverManager::OnPreloadProcessStateChanged(std::shared_ptr<AppRu
         return;
     }
 
-    auto task = [weak = weak_from_this(), appRecord, state]() {
+    auto task = [weak = weak_from_this(), appRecord]() {
         auto self = weak.lock();
         if (self == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
-        TAG_LOGD(AAFwkTag::APPMGR, "OnPreloadProcessStateChanged task.");
-        self->HandleOnPreloadProcessStateChanged(appRecord, state);
+        TAG_LOGD(AAFwkTag::APPMGR, "OnProcessPreForegroundChanged task.");
+        self->HandleOnProcessPreForegroundChanged(appRecord);
     };
     handler_->SubmitTask(task);
 }
 
-void AppStateObserverManager::HandleOnPreloadProcessStateChanged(
-    std::shared_ptr<AppRunningRecord> appRecord, ApplicationState state)
+void AppStateObserverManager::HandleOnProcessPreForegroundChanged(std::shared_ptr<AppRunningRecord> appRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (appRecord == nullptr) {
@@ -1401,20 +1404,20 @@ void AppStateObserverManager::HandleOnPreloadProcessStateChanged(
 
     auto bundleName = appRecord->GetBundleName();
     PreloadProcessData preloadProcessData;
+    preloadProcessData.isPreForeground = appRecord->IsPreForeground();
     preloadProcessData.pid = appRecord->GetPid();
     preloadProcessData.uid = appRecord->GetUid();
-    preloadProcessData.state = static_cast<int32_t>(state);
     preloadProcessData.bundleName = bundleName;
 
     TAG_LOGI(AAFwkTag::APPMGR,
-        "HandleOnPreloadProcessStateChanged, pid:%{public}d, bundle:%{public}s, uid:%{public}d, state:%{public}d",
-        preloadProcessData.pid, bundleName.c_str(), preloadProcessData.uid, preloadProcessData.state);
+        "HandleOnProcessPreForegroundChanged, pid:%{public}d, bundle:%{public}s, uid:%{public}d, isPreFore:%{public}d",
+        preloadProcessData.pid, bundleName.c_str(), preloadProcessData.uid, preloadProcessData.isPreForeground);
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), bundleName);
         if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
-            it->first->OnPreloadProcessStateChanged(preloadProcessData);
+            it->first->OnProcessPreForegroundChanged(preloadProcessData);
         }
     }
 }

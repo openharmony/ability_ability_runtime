@@ -46,20 +46,6 @@ struct ModuleStartupConfigInfo {
         const AppExecFwk::ModuleType& moduleType, bool esModule);
 };
 
-struct StartupTaskInfo {
-    std::string name;
-    std::string srcEntry;
-    std::string ohmUrl;
-    std::string moduleName;
-    std::string hapPath;
-    std::vector<std::string> dependencies;
-    bool excludeFromAutoStart = false;
-    bool callCreateOnMainThread = true;
-    bool waitOnMainThread = true;
-    bool esModule = true;
-    StartupTaskMatchRules matchRules;
-};
-
 class StartupManager : public std::enable_shared_from_this<StartupManager> {
 DECLARE_DELAYED_SINGLETON(StartupManager)
 
@@ -114,6 +100,8 @@ public:
     int32_t BuildStartupTaskManager(const std::map<std::string, std::shared_ptr<StartupTask>> &tasks,
         std::shared_ptr<StartupTaskManager> &startupTaskManager);
 
+    bool EnableLazyLoadingAppStartupTasks() const;
+
 private:
     // read only after initialization
     std::vector<ModuleStartupConfigInfo> moduleStartupConfigInfos_;
@@ -139,6 +127,7 @@ private:
     std::weak_ptr<StartupTaskManager> autoPreloadSoTaskManager_;
     std::weak_ptr<StartupTaskManager> autoPreloadSystemSoTaskManager_;
     bool autoPreloadSoStopped_ = false;
+    bool enableLazyLoadingAppStartupTasks_ = false;
 
     std::shared_ptr<StartupConfig> defaultConfig_;
     std::map<std::string, std::shared_ptr<StartupConfig>> moduleConfigs_;
@@ -182,11 +171,11 @@ private:
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks,
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSystemSoStartupTasks,
         std::vector<StartupTaskInfo>& pendingStartupTaskInfos, std::string& pendingConfigEntry);
-    static bool AnalyzeAppStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
+    bool AnalyzeAppStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
         std::vector<StartupTaskInfo>& pendingStartupTaskInfos);
     bool AnalyzePreloadSoStartupTask(const ModuleStartupConfigInfo& info, nlohmann::json &startupConfigJson,
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks);
-    static bool AnalyzeAppStartupTaskInner(const ModuleStartupConfigInfo& info,
+    bool AnalyzeAppStartupTaskInner(const ModuleStartupConfigInfo& info,
         const nlohmann::json &startupTaskJson,
         std::vector<StartupTaskInfo>& pendingStartupTaskInfos);
     bool AnalyzePreloadSoStartupTaskInner(const ModuleStartupConfigInfo& info,
@@ -196,11 +185,11 @@ private:
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks);
     void AnalyzePreloadSystemSoStartupTaskInner(const nlohmann::json &preloadStartupTaskJson,
         std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks);
-    static void SetOptionalParameters(const nlohmann::json& module, AppExecFwk::ModuleType moduleType,
+    void SetOptionalParameters(const nlohmann::json& module, AppExecFwk::ModuleType moduleType,
         StartupTaskInfo& startupTaskInfo);
-    static void SetOptionalParameters(const nlohmann::json &module, AppExecFwk::ModuleType moduleType,
+    void SetOptionalParameters(const nlohmann::json &module, AppExecFwk::ModuleType moduleType,
         std::shared_ptr<PreloadSoStartupTask> &task);
-    static void SetMatchRules(const nlohmann::json &module, StartupTaskMatchRules &matchRules);
+    void SetMatchRules(const nlohmann::json &module, StartupTaskMatchRules &matchRules, bool isPreloadSoStartupTask);
     static bool ParseJsonStringArray(const nlohmann::json &json, const std::string &key, std::vector<std::string> &arr);
 };
 } // namespace AbilityRuntime

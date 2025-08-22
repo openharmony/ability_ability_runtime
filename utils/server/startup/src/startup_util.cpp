@@ -93,10 +93,11 @@ void StartupUtil::InitAbilityInfoFromExtension(AppExecFwk::ExtensionAbilityInfo 
     abilityInfo.process = extensionInfo.process;
     abilityInfo.metadata = extensionInfo.metadata;
     abilityInfo.compileMode = extensionInfo.compileMode;
-    abilityInfo.codeLanguage = extensionInfo.codeLanguage;
+    abilityInfo.arkTSMode = extensionInfo.arkTSMode;
     abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
     abilityInfo.extensionTypeName = extensionInfo.extensionTypeName;
     abilityInfo.isolationProcess = extensionInfo.isolationProcess;
+    abilityInfo.uid = extensionInfo.uid;
     if (!extensionInfo.hapPath.empty()) {
         abilityInfo.hapPath = extensionInfo.hapPath;
     }

@@ -20,7 +20,12 @@
 
 namespace OHOS {
 namespace AAFwk {
-
+struct FUDAppInfo {
+    uint32_t tokenId = 0;
+    std::string bundleName;
+    std::string alterBundleName;
+    int32_t userId = 0;
+};
 class UPMSUtils {
 public:
     static bool SendShareUnPrivilegeUriEvent(uint32_t callTokenId, uint32_t targetTokenId);
@@ -39,6 +44,7 @@ public:
     static bool CheckUriTypeIsValid(Uri &uri);
     static bool GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion);
     static bool IsDocsCloudUri(Uri &uri);
+    static bool GenerateFUDAppInfo(FUDAppInfo &info);
 };
 } // OHOS
 } // AAFwk

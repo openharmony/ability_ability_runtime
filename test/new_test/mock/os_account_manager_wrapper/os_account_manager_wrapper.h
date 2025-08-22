@@ -18,6 +18,7 @@
 
 #include "errors.h"
 #include "singleton.h"
+#include "oh_mock_utils.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -28,10 +29,8 @@ public:
         return 0;
     }
 
-    ErrCode IsOsAccountExists(const int id, bool &isOsAccountExists)
-    {
-        return 0;
-    }
+    OH_MOCK_METHOD_WITH_OUTPUT_1(ErrCode, isOsAccountExists, OsAccountManagerWrapper,
+        IsOsAccountExists, const int, bool& isOsAccountExists);
 };
 } // namespace AppExecFwk
 } // namespace OHOS

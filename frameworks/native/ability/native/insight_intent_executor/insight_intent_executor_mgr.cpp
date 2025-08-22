@@ -75,7 +75,13 @@ bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const Insi
 
     TAG_LOGI(AAFwkTag::INTENT, "execute insight intent, type: %{public}hhu", type);
     bool isAsync = false;
-    auto ret = intentExecutor->HandleExecuteIntent(executeParam, executeInfo.pageLoader, std::move(callback), isAsync);
+    bool ret = false;
+    if (runtime.GetLanguage() == AbilityRuntime::Runtime::Language::ETS) {
+        ret = intentExecutor->HandleExecuteIntent(executeParam, executeInfo.etsPageLoader,
+            std::move(callback), isAsync);
+    } else {
+        ret = intentExecutor->HandleExecuteIntent(executeParam, executeInfo.pageLoader, std::move(callback), isAsync);
+    }
     if (!ret) {
         TAG_LOGE(AAFwkTag::INTENT, "Handle Execute intent failed");
         // callback has removed, if execute insight intent failed, call in sub function.

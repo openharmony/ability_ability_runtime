@@ -119,8 +119,7 @@ int OH_Ability_CreateNativeChildProcess(const char* libName, OH_Ability_OnNative
         return NCP_ERR_INTERNAL;
     }
 
-    ChildProcessManager &mgr = ChildProcessManager::GetInstance();
-    auto cpmErr = mgr.StartNativeChildProcessByAppSpawnFork(strLibName, callbackStub);
+    auto cpmErr = ChildProcessManager::GetInstance().StartNativeChildProcessByAppSpawnFork(strLibName, callbackStub);
     if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
         return ChildProcessManagerErrorUtil::CvtChildProcessManagerErrCode(cpmErr);
     }
@@ -149,8 +148,8 @@ Ability_NativeChildProcess_ErrCode OH_Ability_CreateNativeChildProcessWithConfig
         return NCP_ERR_INTERNAL;
     }
 
-    ChildProcessManager &mgr = ChildProcessManager::GetInstance();
-    auto cpmErr = mgr.StartNativeChildProcessByAppSpawnFork(strLibName, callbackStub, configs->processName);
+    auto cpmErr = ChildProcessManager::GetInstance().StartNativeChildProcessByAppSpawnFork(strLibName,
+        callbackStub, configs->processName);
     if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
         return ChildProcessManagerErrorUtil::CvtChildProcessManagerErrCode(cpmErr);
     }
@@ -215,8 +214,8 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcess(const char
     childProcessOptions.isolationMode = options.isolationMode == NCP_ISOLATION_MODE_ISOLATED;
     int32_t childProcessType = AppExecFwk::CHILD_PROCESS_TYPE_NATIVE_ARGS;
 
-    ChildProcessManager &mgr = ChildProcessManager::GetInstance();
-    auto cpmErr = mgr.StartChildProcessWithArgs(entryName, *pid, childProcessType, childArgs, childProcessOptions);
+    auto cpmErr = ChildProcessManager::GetInstance().StartChildProcessWithArgs(entryName,
+        *pid, childProcessType, childArgs, childProcessOptions);
     if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
         return ChildProcessManagerErrorUtil::CvtChildProcessManagerErrCode(cpmErr);
     }
@@ -250,8 +249,8 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcessWithConfigs
     childProcessOptions.customProcessName = configs->processName;
     int32_t childProcessType = AppExecFwk::CHILD_PROCESS_TYPE_NATIVE_ARGS;
 
-    ChildProcessManager &mgr = ChildProcessManager::GetInstance();
-    auto cpmErr = mgr.StartChildProcessWithArgs(entryName, *pid, childProcessType, childArgs, childProcessOptions);
+    auto cpmErr = ChildProcessManager::GetInstance().StartChildProcessWithArgs(entryName,
+        *pid, childProcessType, childArgs, childProcessOptions);
     if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
         return ChildProcessManagerErrorUtil::CvtChildProcessManagerErrCode(cpmErr);
     }

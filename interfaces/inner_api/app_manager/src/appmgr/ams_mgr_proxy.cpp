@@ -276,7 +276,7 @@ void AmsMgrProxy::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnM
 }
 
 int32_t AmsMgrProxy::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason,
-    bool subProcess)
+    bool subProcess, bool isKillPrecedeStart)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -303,6 +303,10 @@ int32_t AmsMgrProxy::KillProcessesByPids(const std::vector<int32_t> &pids, const
     }
     if (!data.WriteBool(subProcess)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write subProcess failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isKillPrecedeStart)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write isKillPrecedeStart failed");
         return ERR_FLATTEN_OBJECT;
     }
     int32_t ret =
@@ -575,8 +579,7 @@ int32_t AmsMgrProxy::KillApplicationByUid(const std::string &bundleName, const i
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int32_t uid,
-    const bool isUpgrade)
+int32_t AmsMgrProxy::NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -606,7 +609,7 @@ int32_t AmsMgrProxy::NotifyUninstallOrUpgradeApp(const std::string &bundleName, 
     return reply.ReadInt32();
 }
 
-void AmsMgrProxy::NotifyUninstallOrUpgradeAppEnd(const int32_t uid)
+void AmsMgrProxy::NotifyUninstallOrUpgradeAppEnd(int32_t uid)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "start");
     MessageParcel data;
@@ -1588,7 +1591,7 @@ int32_t AmsMgrProxy::PreloadApplicationByPhase(const std::string &bundleName, in
     return reply.ReadInt32();
 }
 
-int32_t AmsMgrProxy::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+int32_t AmsMgrProxy::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground)
 {
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "token null.");
@@ -1596,7 +1599,7 @@ int32_t AmsMgrProxy::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
     }
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
         return AAFwk::ERR_WRITE_INTERFACE_TOKEN_FAILED;
@@ -1605,6 +1608,7 @@ int32_t AmsMgrProxy::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
         TAG_LOGE(AAFwkTag::APPMGR, "Write token failed.");
         return AAFwk::ERR_WRITE_CALLER_TOKEN_FAILED;
     }
+    PARCEL_UTIL_WRITE_RET_INT(data, Bool, isPreForeground);
 
     auto ret = SendTransactCmd(
         static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_PRELOAD_ABILITY_STATE_CHANGED), data, reply, option);
@@ -1612,7 +1616,7 @@ int32_t AmsMgrProxy::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
         TAG_LOGE(AAFwkTag::APPMGR, "Send request failed, err: %{public}d.", ret);
         return ret;
     }
-    return NO_ERROR;
+    return reply.ReadInt32();
 }
 
 int32_t AmsMgrProxy::CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,
@@ -1641,6 +1645,31 @@ int32_t AmsMgrProxy::CheckPreloadAppRecordExist(const std::string &bundleName, i
     }
     isExist = reply.ReadBool();
     return NO_ERROR;
+}
+
+int32_t AmsMgrProxy::VerifyKillProcessPermission(const std::string &bundleName)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write token failed");
+        return ERR_INVALID_DATA;
+    }
+
+    if (bundleName.empty() || !data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write bundleName failed");
+        return ERR_INVALID_DATA;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::VERIFY_KILL_PROCESS_PERMISSION),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request err: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
 }
 } // namespace AppExecFwk
 } // namespace OHOS

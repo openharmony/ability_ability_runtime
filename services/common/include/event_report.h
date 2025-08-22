@@ -164,6 +164,7 @@ public:
 private:
     static std::string ConvertEventName(const EventName &eventName);
     static void LogErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
+    static void LogStartErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogStartAbilityEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogTerminateAbilityEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogAbilityOnForegroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);

@@ -280,7 +280,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_TerminateAbility_001, TestSize.Level1)
     bool clearMissionFlag = true;
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
     int res = DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token, clearMissionFlag);
-    EXPECT_EQ(res, INNER_ERR);
+    EXPECT_EQ(res, ERR_APP_MGR_TERMINATTE_ABILITY_FAILED);
 }
 
 /*
@@ -645,6 +645,24 @@ HWTEST_F(AppSchedulerTest, AppScheduler_KillApplication_002, TestSize.Level1)
     std::string bundleName = "bundleName";
     int res = DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName);
     EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * Feature: AppScheduler
+ * Function: VerifyKillProcessPermission
+ * SubFunction: NA
+ * FunctionPoints: AppScheduler VerifyKillProcessPermission
+ * EnvConditions: NA
+ * CaseDescription: Verify VerifyKillProcessPermission
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_VerifyKillProcessPermission_001, TestSize.Level1)
+{
+    std::string bundleName = "test";
+    auto res = DelayedSingleton<AppScheduler>::GetInstance()->VerifyKillProcessPermission(bundleName);
+    EXPECT_EQ(res, ERR_OK);
+    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
+    res = DelayedSingleton<AppScheduler>::GetInstance()->VerifyKillProcessPermission(bundleName);
+    EXPECT_EQ(res, INNER_ERR);
 }
 
 /*
@@ -1166,7 +1184,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_PreloadApplicationByPhase_0100, TestSize
 HWTEST_F(AppSchedulerTest, AppScheduler_NotifyPreloadAbilityStateChanged_0100, TestSize.Level1)
 {
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
-    auto result = DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(nullptr);
+    auto result = DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(nullptr, true);
     EXPECT_EQ(result, INNER_ERR);
 }
 

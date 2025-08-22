@@ -126,6 +126,10 @@ enum class AppStartReason {
     PRE_MAKE = 1,
     PRELOAD_MODULE = 2,
     SUGGEST_CACHE = 3,
+    PRESS_DOWN = 4,
+    PRELOAD_BY_PHASE_PROCESS_CREATED = 5,
+    PRELOAD_BY_PHASE_ABILITY_STAGE_CREATED = 6,
+    STARTUP_HIDE = 7,
 };
 
 enum class PreloadState {

@@ -16,6 +16,7 @@
 
 #include <unordered_set>
 
+#include "ability_manager_errors.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
 #include "nlohmann/json.hpp"
@@ -69,6 +70,8 @@ AppSpawnClient::AppSpawnClient(const char* serviceName)
         serviceName_ = NWEBSPAWN_SERVER_NAME;
     } else if (serviceName__ == NATIVESPAWN_SERVER_NAME) {
         serviceName_ = NATIVESPAWN_SERVER_NAME;
+    } else if (serviceName__ == HYBRIDSPAWN_SERVER_NAME) {
+        serviceName_ = HYBRIDSPAWN_SERVER_NAME;
     } else {
         TAG_LOGE(AAFwkTag::APPMGR, "unknown service name");
         serviceName_ = NWEBSPAWN_SERVER_NAME;
@@ -365,7 +368,10 @@ int32_t AppSpawnClient::AppspawnSetExtMsg(const AppSpawnStartMsg &startMsg, AppS
     }
 
     if (!startMsg.appEnv.empty()) {
-        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_APP_ENV, DumpAppEnvToJson(startMsg.appEnv).c_str());
+        std::string appEnv = DumpAppEnvToJson(startMsg.appEnv);
+        TAG_LOGD(AAFwkTag::APPMGR, "bundleName: %{public}s, appEnv: %{public}s",
+            startMsg.bundleName.c_str(), appEnv.c_str());
+        ret = AppSpawnReqMsgAddStringInfo(reqHandle, MSG_EXT_NAME_APP_ENV, appEnv.c_str());
         if (ret) {
             TAG_LOGE(AAFwkTag::APPMGR, "fail, ret: %{public}d", ret);
             return ret;
@@ -590,6 +596,7 @@ int32_t AppSpawnClient::StartProcess(const AppSpawnStartMsg &startMsg, pid_t &pi
 
     ret = OpenConnection();
     if (ret != 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "OpenConnection fail");
         return ret;
     }
 
@@ -601,6 +608,7 @@ int32_t AppSpawnClient::StartProcess(const AppSpawnStartMsg &startMsg, pid_t &pi
 
     ret = AppspawnCreateDefaultMsg(startMsg, reqHandle);
     if (ret != 0) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppspawnCreateDefaultMsg fail");
         return ret; // create msg failed
     }
 
@@ -617,8 +625,8 @@ int32_t AppSpawnClient::StartProcess(const AppSpawnStartMsg &startMsg, pid_t &pi
         return ret;
     }
     if (result.pid <= 0) {
-        TAG_LOGE(AAFwkTag::APPMGR, "pid invalid");
-        return ERR_APPEXECFWK_INVALID_PID;
+        TAG_LOGE(AAFwkTag::APPMGR, "pid invalid, result is %{public}d", result.result);
+        return AAFwk::ERR_PROCESS_START_INVALID_PID;
     } else {
         pid = result.pid;
     }
@@ -658,7 +666,7 @@ int32_t AppSpawnClient::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
 
 int32_t AppSpawnClient::GetRenderProcessTerminationStatus(const AppSpawnStartMsg &startMsg, int &status)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "call");
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
     int32_t ret = 0;
     AppSpawnReqMsgHandle reqHandle = nullptr;
 
@@ -678,7 +686,7 @@ int32_t AppSpawnClient::GetRenderProcessTerminationStatus(const AppSpawnStartMsg
         return ret;
     }
 
-    TAG_LOGI(AAFwkTag::APPMGR, "AppspawnSendMsg");
+    TAG_LOGD(AAFwkTag::APPMGR, "AppspawnSendMsg");
     AppSpawnResult result = {0};
     ret = AppSpawnClientSendMsg(handle_, reqHandle, &result);
     status = result.result;

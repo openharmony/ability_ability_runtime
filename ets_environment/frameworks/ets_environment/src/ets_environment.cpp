@@ -24,6 +24,8 @@
 #include <thread>
 #include <vector>
 
+#include "static_core/plugins/ets/runtime/ets_namespace_manager.h"
+
 #include "ets_ani_expo.h"
 #ifdef LIKELY
 #undef LIKELY
@@ -55,6 +57,9 @@ using ANIGetCreatedVMsType = ani_status (*)(ani_vm **vms_buffer, ani_size vms_bu
 
 const char ETS_SDK_NSNAME[] = "ets_sdk";
 const char ETS_SYS_NSNAME[] = "ets_system";
+
+constexpr const char* CLASSNAME_STRING = "Lstd/core/String;";
+constexpr const char* CLASSNAME_LINKER = "Lstd/core/AbcRuntimeLinker;";
 } // namespace
 
 ETSRuntimeAPI ETSEnvironment::lazyApis_ {};
@@ -227,11 +232,9 @@ bool ETSEnvironment::Initialize()
     // Create boot-panda-files options
     std::string bootString = "--ext:--boot-panda-files=" + bootfiles;
     options.push_back(ani_option { bootString.data(), nullptr });
-    options.push_back(ani_option { "--ext:--coroutine-enable-external-scheduling=true", nullptr });
     options.push_back(ani_option { "--ext:--compiler-enable-jit=false", nullptr });
     options.push_back(ani_option { "--ext:--log-level=info", nullptr });
-    options.push_back(ani_option { "--ext:--verification-enabled=true", nullptr });
-    options.push_back(ani_option { "--ext:--verification-mode=on-the-fly", nullptr });
+    options.push_back(ani_option { "--ext:taskpool-support-interop=true", nullptr });
     ani_options optionsPtr = { options.size(), options.data() };
     ani_status status = ANI_ERROR;
     if ((status = lazyApis_.ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vmEntry_.aniVm_)) != ANI_OK) {
@@ -247,7 +250,14 @@ bool ETSEnvironment::Initialize()
 
 ani_env *ETSEnvironment::GetAniEnv()
 {
-    return vmEntry_.aniEnv_;
+    if (vmEntry_.aniVm_ == nullptr) {
+        return nullptr;
+    }
+    ani_env* env = nullptr;
+    if (vmEntry_.aniVm_->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
+        return nullptr;
+    }
+    return env;
 }
 
 bool ETSEnvironment::HandleUncaughtError()
@@ -383,7 +393,7 @@ bool ETSEnvironment::LoadAbcLinker(ani_env *env, const std::string &modulePath, 
     }
     ani_status status = ANI_ERROR;
     ani_class stringCls = nullptr;
-    if ((status = env->FindClass("Lstd/core/String;", &stringCls)) != ANI_OK) {
+    if ((status = env->FindClass(CLASSNAME_STRING, &stringCls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "FindClass failed, status: %{public}d", status);
         return false;
     }
@@ -406,7 +416,7 @@ bool ETSEnvironment::LoadAbcLinker(ani_env *env, const std::string &modulePath, 
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_Set_Ref failed, status: %{public}d", status);
         return false;
     }
-    if ((status = env->FindClass("Lstd/core/AbcRuntimeLinker;", &abcCls)) != ANI_OK) {
+    if ((status = env->FindClass(CLASSNAME_LINKER, &abcCls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "FindClass failed, status: %{public}d", status);
         return false;
     }
@@ -478,16 +488,17 @@ bool ETSEnvironment::LoadModule(const std::string &modulePath, const std::string
     return true;
 }
 
-void ETSEnvironment::FinishPreload() {
+bool ETSEnvironment::FinishPreload() {
     ani_env *env = GetAniEnv();
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed: ANI env nullptr");
-        return;
+        return false;
     }
     ark::ets::ETSAni::Prefork(env);
+    return true;
 }
 
-void ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath)
+bool ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath)
 {
     std::vector<ani_option> options;
     std::string aotPathString = "";
@@ -503,9 +514,26 @@ void ETSEnvironment::PostFork(void *napiEnv, const std::string &aotPath)
     ani_env *env = GetAniEnv();
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed: ANI env nullptr");
-        return;
+        return false;
     }
     ark::ets::ETSAni::Postfork(env, options);
+    return true;
+}
+
+bool ETSEnvironment::PreloadSystemClass(const char *className)
+{
+    ani_env* env = GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "GetAniEnv failed");
+        return false;
+    }
+
+    ani_class cls = nullptr;
+    if (env->FindClass(className, &cls) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Find preload class failed");
+        return false;
+    }
+    return true;
 }
 
 ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
@@ -526,6 +554,9 @@ ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
         .GetAniEnv = []() {
             return ETSEnvironment::GetInstance()->GetAniEnv();
         },
+        .HandleUncaughtError = []() {
+            ETSEnvironment::GetInstance()->HandleUncaughtError();
+        },
         .PreloadModule = [](const std::string &modulePath) {
             return ETSEnvironment::GetInstance()->PreloadModule(modulePath);
         },
@@ -533,11 +564,22 @@ ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
              void *&obj,  void *&ref) {
             return ETSEnvironment::GetInstance()->LoadModule(modulePath, srcEntrance, cls, obj, ref);
         },
+        .SetAppLibPath = [](const std::map<std::string, std::string> &abcPathsToBundleModuleNameMap,
+            std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)> &cb) {
+            ark::ets::EtsNamespaceManager::SetAppLibPaths(abcPathsToBundleModuleNameMap, cb);
+        },
         .FinishPreload = []() {
             ETSEnvironment::GetInstance()->FinishPreload();
         },
         .PostFork = [](void *napiEnv, const std::string &aotPath) {
             ETSEnvironment::GetInstance()->PostFork(napiEnv, aotPath);
+        },
+        .PreloadSystemClass = [](const char *className) {
+            ETSEnvironment::GetInstance()->PreloadSystemClass(className);
+        },
+        .SetExtensionApiCheckCallback = [](
+            std::function<bool(const std::string &className, const std::string &fileName)> &cb) {
+            ark::ets::EtsNamespaceManager::SetExtensionApiCheckCallback(cb);
         }
     };
     return &funcs;

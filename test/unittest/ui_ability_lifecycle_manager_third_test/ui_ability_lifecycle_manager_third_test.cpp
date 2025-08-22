@@ -79,10 +79,10 @@ void UIAbilityLifecycleManagerThirdTest::SetUp() {}
 
 void UIAbilityLifecycleManagerThirdTest::TearDown() {}
 
-class UIAbilityLifcecycleManagerThirdTestStub : public IRemoteStub<IAbilityConnection> {
+class UIAbilityLifecycleManagerThirdTestStub : public IRemoteStub<IAbilityConnection> {
 public:
-    UIAbilityLifcecycleManagerThirdTestStub() {};
-    virtual ~UIAbilityLifcecycleManagerThirdTestStub() {};
+    UIAbilityLifecycleManagerThirdTestStub() {};
+    virtual ~UIAbilityLifecycleManagerThirdTestStub() {};
 
     virtual int OnRemoteRequest(
         uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
@@ -330,7 +330,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifySCBToStartUIAbility_003, Test
 
     auto ret = mgr->NotifySCBToStartUIAbility(abilityRequest);
 
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_FREQ_START_ABILITY);
 }
 
 /**
@@ -347,6 +347,19 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifySCBToStartUIAbility_004, Test
     auto ret = mgr->NotifySCBToStartUIAbility(abilityRequest);
 
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_PostCallTimeoutTask_001
+ * @tc.desc: PostCallTimeoutTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, PostCallTimeoutTask_001, TestSize.Level1)
+{
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    int32_t requestId = 1;
+    mgr->PostCallTimeoutTask(requestId);
+    EXPECT_NE(mgr, nullptr);
 }
 
 /**
@@ -493,61 +506,6 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_009, TestSize
     usleep(TIMEOUT_VALUE);
     EXPECT_TRUE(specifiedRequest.isCold);
     AppMgrUtil::appMgr_ = originAppMgr;
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_DispatchForeground_0200
- * @tc.desc: DispatchForeground
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerThirdTest, DispatchForeground_002, TestSize.Level1)
-{
-    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
-
-    AbilityState state = AbilityState::ACTIVE;
-
-    std::shared_ptr<TaskHandlerWrap> runner;
-    std::weak_ptr<AbilityManagerService> server;
-    auto handler = std::make_shared<AbilityEventHandler>(runner, server);
-    DelayedSingleton<AbilityManagerService>::GetInstance()->eventHandler_ = handler;
-
-    auto taskHandler = TaskHandlerWrap::CreateQueueHandler("HelloWorld");
-    DelayedSingleton<AbilityManagerService>::GetInstance()->taskHandler_ = nullptr;
-
-    std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
-
-    auto ret = mgr->DispatchForeground(abilityRecord, true, state);
-
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_DispatchForeground_0300
- * @tc.desc: DispatchForeground
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerThirdTest, DispatchForeground_003, TestSize.Level1)
-{
-    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
-
-    AbilityState state = AbilityState::ACTIVE;
-
-    std::shared_ptr<TaskHandlerWrap> runner;
-    std::weak_ptr<AbilityManagerService> server;
-    auto handler = std::make_shared<AbilityEventHandler>(runner, server);
-    DelayedSingleton<AbilityManagerService>::GetInstance()->eventHandler_ = handler;
-
-    auto taskHandler = TaskHandlerWrap::CreateQueueHandler("HelloWorld");
-    DelayedSingleton<AbilityManagerService>::GetInstance()->taskHandler_ = nullptr;
-
-    AbilityRequest abilityRequest;
-    auto abilityRecord = std::make_shared<AbilityRecord>(
-        abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
-    abilityRecord->currentState_ = AbilityState::ACTIVATING;
-
-    auto ret = mgr->DispatchForeground(abilityRecord, true, state);
-
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /**
@@ -1524,7 +1482,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifyStartupExceptionBySCB_001, Te
     int32_t requestId = 1;
     mgr->tmpAbilityMap_ = {{requestId, callerAbilityRecord}};
 
-    auto ret = mgr->NotifyStartupExceptionBySCB(requestId);
+    std::string reason = "SCB intercepted this startup attempt";
+    auto ret = mgr->NotifyStartupExceptionBySCB(requestId, reason);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(mgr->tmpAbilityMap_.size(), 0);
 }
@@ -1555,7 +1514,8 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifyStartupExceptionBySCB_002, Te
         {"NewKawasaki", {specifiedRequestPtr, specifiedRequest2Ptr}}
     };
     int32_t requestId = 1;
-    auto ret = uiAbilityLifecycleManager->NotifyStartupExceptionBySCB(requestId);
+    std::string reason = "SCB intercepted this startup attempt";
+    auto ret = uiAbilityLifecycleManager->NotifyStartupExceptionBySCB(requestId, reason);
     EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace AAFwk

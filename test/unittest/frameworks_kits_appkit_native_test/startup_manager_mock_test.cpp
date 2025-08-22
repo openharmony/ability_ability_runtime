@@ -91,6 +91,84 @@ HWTEST_F(StartupManagerMockTest, JsStartupTask_0100, Function | MediumTest | Lev
 }
 
 /**
+ * @tc.name: JsStartupTask_0200
+ * @tc.type: FUNC
+ * @tc.Function: RunTaskInit
+ */
+HWTEST_F(StartupManagerMockTest, JsStartupTask_0200, Function | MediumTest | Level1)
+{
+    std::string name = "test_name";
+    JsRuntime jsRuntime;
+    StartupTaskInfo info;
+    info.ohmUrl = "ohmurl";
+    std::shared_ptr<NativeReference> contextJsRef = nullptr;
+    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(
+        name, jsRuntime, info, contextJsRef);
+    startupTask->callCreateOnMainThread_ = false;
+    auto ret = startupTask->RunTaskInit(nullptr);
+    EXPECT_EQ(ret, ERR_STARTUP_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: JsStartupTask_0300
+ * @tc.type: FUNC
+ * @tc.Function: RunTaskOnDependencyCompleted
+ */
+HWTEST_F(StartupManagerMockTest, JsStartupTask_0300, Function | MediumTest | Level1)
+{
+    std::string name = "test_name";
+    JsRuntime jsRuntime;
+    StartupTaskInfo info;
+    info.srcEntry = "startup_task.ets";
+    std::shared_ptr<NativeReference> contextJsRef = nullptr;
+    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(
+        name, jsRuntime, info, contextJsRef);
+    startupTask->callCreateOnMainThread_ = false;
+    auto ret = startupTask->RunTaskOnDependencyCompleted("", nullptr);
+    EXPECT_EQ(ret, ERR_STARTUP_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: JsStartupTask_0400
+ * @tc.type: FUNC
+ * @tc.Function: RunTaskOnDependencyCompleted
+ */
+HWTEST_F(StartupManagerMockTest, JsStartupTask_0400, Function | MediumTest | Level1)
+{
+    std::string name = "test_name";
+    JsRuntime jsRuntime;
+    StartupTaskInfo info;
+    info.ohmUrl = "ohmurl";
+    info.srcEntry = "startup_task";
+    std::shared_ptr<NativeReference> contextJsRef = nullptr;
+    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(
+        name, jsRuntime, info, contextJsRef);
+    startupTask->callCreateOnMainThread_ = false;
+    auto ret = startupTask->RunTaskOnDependencyCompleted("", nullptr);
+    EXPECT_EQ(ret, ERR_STARTUP_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: JsStartupTask_0500
+ * @tc.type: FUNC
+ * @tc.Function: RunTaskOnDependencyCompleted
+ */
+HWTEST_F(StartupManagerMockTest, JsStartupTask_0500, Function | MediumTest | Level1)
+{
+    std::string name = "test_name";
+    JsRuntime jsRuntime;
+    StartupTaskInfo info;
+    info.ohmUrl = "ohmurl";
+    info.srcEntry = "startup_task.ets";
+    std::shared_ptr<NativeReference> contextJsRef = nullptr;
+    std::shared_ptr<JsStartupTask> startupTask = std::make_shared<JsStartupTask>(
+        name, jsRuntime, info, contextJsRef);
+    startupTask->callCreateOnMainThread_ = false;
+    auto ret = startupTask->RunTaskOnDependencyCompleted("", nullptr);
+    EXPECT_EQ(ret, ERR_STARTUP_INTERNAL_ERROR);
+}
+
+/**
  * @tc.name: js_insight_intent_executor_0100
  * @tc.type: FUNC
  * @tc.Function: RunTaskInit

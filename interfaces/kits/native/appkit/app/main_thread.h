@@ -76,6 +76,7 @@ struct UncatchableTaskInfo {
     std::string processName;
 };
 class ContextDeal;
+struct ModuleTestRunner;
 // class Global::Resource::ResourceManager;
 class AppMgrDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
@@ -627,8 +628,7 @@ private:
      *
      */
     bool PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
-        const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion,
-		const std::string &applicationCodeLanguage);
+        const AppExecFwk::HapModuleInfo &entryHapModuleInfo, uint32_t targetVersion);
 
     /**
      * @brief Set current process extension type
@@ -730,7 +730,7 @@ private:
     static std::shared_ptr<MainHandler> mainHandler_;
     std::shared_ptr<AbilityRecordMgr> abilityRecordMgr_ = nullptr;
     std::shared_ptr<Watchdog> watchdog_ = nullptr;
-    std::unique_ptr<AbilityRuntime::ExtensionConfigMgr> extensionConfigMgr_ = nullptr;
+    std::shared_ptr<AbilityRuntime::ExtensionConfigMgr> extensionConfigMgr_ = nullptr;
     MainThreadState mainThreadState_ = MainThreadState::INIT;
     sptr<IAppMgr> appMgr_ = nullptr;  // appMgrService Handler
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;
@@ -809,6 +809,8 @@ private:
         const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
     void PreloadAppStartup(const BundleInfo &bundleInfo, const AppLaunchData &appLaunchData) const;
     void RunNativeStartupTask(const BundleInfo &bundleInfo, const AppLaunchData &appLaunchData);
+    bool GetTestRunnerTypeAndPath(const std::string bundleName, const std::string moduleName,
+        AppExecFwk::ModuleTestRunner &tsTestRunner);
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;

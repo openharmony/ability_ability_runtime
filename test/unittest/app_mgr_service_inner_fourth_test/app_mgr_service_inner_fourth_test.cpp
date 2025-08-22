@@ -168,9 +168,9 @@ HWTEST_F(AppMgrServiceInnerFourthTest, WrapAppProcessData_0100, TestSize.Level1)
 
     pid_t hostPid = 0;
     std::string renderParam = "test_render_param";
-    int32_t ipcFd = 1;
-    int32_t sharedFd = 1;
-    int32_t crashFd = 1;
+    int32_t ipcFd = -1;
+    int32_t sharedFd = -1;
+    int32_t crashFd = -1;
     auto hostRecord = std::make_shared<AppRunningRecord>(applicationInfo_, APP_DEBUG_INFO_UID, "PROCESS_NAME");
     std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         FdGuard(ipcFd), FdGuard(sharedFd), FdGuard(crashFd), hostRecord);
@@ -536,6 +536,55 @@ HWTEST_F(AppMgrServiceInnerFourthTest, CreateAppRunningRecord_002, TestSize.Leve
     auto record = appMgrServiceInner->CreateAppRunningRecord(appInfo, processName, bundleInfo);
     EXPECT_NE(record, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "CreateAppRunningRecord_002 end");
+}
+
+/**
+ * @tc.name: SetKilledEventInfo_001
+ * @tc.Function: SetKilledEventInfo
+ */
+HWTEST_F(AppMgrServiceInnerFourthTest, SetKilledEventInfo_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetKilledEventInfo_001 start");
+    AAFwk::EventInfo eventInfo;
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->SetKilledEventInfo(nullptr, eventInfo);
+    EXPECT_EQ(eventInfo.pid, -1);
+    TAG_LOGI(AAFwkTag::TEST, "SetKilledEventInfo_001 end");
+}
+
+/**
+ * @tc.name: SetKilledEventInfo_002
+ * @tc.Function: SetKilledEventInfo
+ */
+HWTEST_F(AppMgrServiceInnerFourthTest, SetKilledEventInfo_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetKilledEventInfo_002 start");
+    AAFwk::EventInfo eventInfo;
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    
+    auto appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "process_name");
+    appMgrServiceInner->SetKilledEventInfo(appRecord, eventInfo);
+    EXPECT_EQ(eventInfo.processName, "process_name");
+    EXPECT_TRUE(eventInfo.bundleName.empty());
+    TAG_LOGI(AAFwkTag::TEST, "SetKilledEventInfo_002 end");
+}
+
+/**
+ * @tc.name: SetKilledEventInfo_003
+ * @tc.Function: SetKilledEventInfo
+ */
+HWTEST_F(AppMgrServiceInnerFourthTest, SetKilledEventInfo_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SetKilledEventInfo_003 start");
+    AAFwk::EventInfo eventInfo;
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    auto appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->name = "bundle_name";
+    auto appRecord = std::make_shared<AppRunningRecord>(appInfo, 0, "process_name");
+    appMgrServiceInner->SetKilledEventInfo(appRecord, eventInfo);
+    EXPECT_EQ(eventInfo.processName, "process_name");
+    EXPECT_EQ(eventInfo.bundleName, "bundle_name");
+    TAG_LOGI(AAFwkTag::TEST, "SetKilledEventInfo_003 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

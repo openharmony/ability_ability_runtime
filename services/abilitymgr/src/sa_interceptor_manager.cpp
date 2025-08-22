@@ -85,6 +85,7 @@ int32_t SAInterceptorManager::ExecuteSAInterceptor(const std::string &params, Ru
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         auto result = interceptor->OnCheckStarting(params, rule);
         if (result != ERR_OK || rule.type != RuleType::ALLOW) {
+            TAG_LOGW(AAFwkTag::SA_INTERCEPTOR, "OnCheckStarting error: %{public}d", result);
             return result;
         }
     }
@@ -148,6 +149,7 @@ std::string SAInterceptorManager::GenerateSAInterceptorParams(const AAFwk::Want 
     jsonObj["targetUid"] = abilityInfo.applicationInfo.uid;
     jsonObj["targetAbilityType"] = abilityInfo.type;
     jsonObj["targetAppIndex"] = abilityInfo.appIndex;
+    jsonObj["targetExtensionAbilityType"] = abilityInfo.extensionAbilityType;
     jsonObj["linking"] = want.GetUriString();
     jsonObj["dialogSessionId"] = dialogSessionId;
     return jsonObj.dump();

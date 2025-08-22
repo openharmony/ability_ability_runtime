@@ -163,7 +163,12 @@ void ExtNativeStartupManager::LoadExtStartupTask()
     ScanExtStartupTask(files);
     for (auto& file : files) {
         TAG_LOGD(AAFwkTag::STARTUP, "load file: %{public}s", file.c_str());
-        void* handle = dlopen(file.c_str(), RTLD_LAZY);
+        char resolvedFile[PATH_MAX] = {0};
+        if (realpath(file.c_str(), resolvedFile) == nullptr) {
+            TAG_LOGE(AAFwkTag::STARTUP, "invalid file path: %{public}s", file.c_str());
+            continue;
+        }
+        void* handle = dlopen(resolvedFile, RTLD_LAZY);
         if (handle == nullptr) {
             TAG_LOGE(AAFwkTag::STARTUP, "open %{public}s failed, reason: %{public}s", file.c_str(), dlerror());
             continue;

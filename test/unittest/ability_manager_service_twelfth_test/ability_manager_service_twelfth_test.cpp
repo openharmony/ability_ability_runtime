@@ -30,6 +30,7 @@
 #include "system_ability_definition.h"
 #include "ability_util.h"
 #include "connection_data.h"
+#include "mock_parameters.h"
 #include "mock_scene_board_judgement.h"
 #include "mock_test_object.h"
 
@@ -43,6 +44,7 @@ constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 constexpr char KIOSK_MODE_ENABLED[] = "const.product.kioskmode.enabled";
 constexpr const char* DEBUG_APP = "debugApp";
 constexpr const char* START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
+constexpr char PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED[] = "const.product.enterprisefeature.setting.enabled";
 constexpr int32_t ONE = 1;
 constexpr int32_t TWO = 2;
 constexpr int32_t FOUNDATION_UID = 5523;
@@ -1204,6 +1206,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, SetAppServiceExtensionKeepAlive_001, 
     auto abilityMs = std::make_shared<AbilityManagerService>();
     std::string bundleName = "bundleName";
     bool flag = true;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false);
     int32_t result = abilityMs->SetAppServiceExtensionKeepAlive(bundleName, flag);
     ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest SetAppServiceExtensionKeepAlive_001 end");
@@ -1220,6 +1223,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, QueryKeepAliveAppServiceExtensions_00
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest QueryKeepAliveAppServiceExtensions_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     std::vector<AbilityRuntime::KeepAliveInfo> list;
+    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, false);
     int32_t result = abilityMs->QueryKeepAliveAppServiceExtensions(list);
     ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest QueryKeepAliveAppServiceExtensions_001 end");

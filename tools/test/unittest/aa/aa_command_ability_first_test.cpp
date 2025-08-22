@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -273,167 +273,6 @@ HWTEST_F(AaCommandFirstTest, Aa_Command_1009, Function | MediumTest | Level1)
     Want want;
     std::string windowMode;
     EXPECT_EQ(cmd.MakeWantFromCmd(want, windowMode), OHOS::ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.number: Aa_Command_Ability_CovertExitReason_0001
- * @tc.name: CovertExitReason
- * @tc.desc: Verify the CovertExitReason function.
- */
-HWTEST_F(AaCommandFirstTest, Aa_Command_Ability_CovertExitReason_0001,
-         Function | MediumTest | Level1) {
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0001 is called");
-    char* argv[] = {(char*)TOOL_NAME.c_str()};
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    auto cmd = std::make_shared<AbilityManagerShellCommand>(argc, argv);
-    std::string reasonStr = "";
-    EXPECT_EQ(cmd->CovertExitReason(reasonStr), Reason::REASON_UNKNOWN);
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0001 is end");
-}
-
-/**
- * @tc.number: Aa_Command_Ability_CovertExitReason_0002
- * @tc.name: CovertExitReason
- * @tc.desc: Verify the CovertExitReason function.
- */
-HWTEST_F(AaCommandFirstTest, Aa_Command_Ability_CovertExitReason_0002,
-         Function | MediumTest | Level1) {
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0002 is called");
-    char* argv[] = {(char*)TOOL_NAME.c_str()};
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    auto cmd = std::make_shared<AbilityManagerShellCommand>(argc, argv);
-    std::string reasonStr = "UNKNOWN";
-    EXPECT_EQ(cmd->CovertExitReason(reasonStr), Reason::REASON_UNKNOWN);
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0002 is end");
-}
-
-/**
- * @tc.number: Aa_Command_Ability_CovertExitReason_0003
- * @tc.name: CovertExitReason
- * @tc.desc: Verify the CovertExitReason function.
- */
-HWTEST_F(AaCommandFirstTest, Aa_Command_Ability_CovertExitReason_0003,
-         Function | MediumTest | Level1) {
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0002 is called");
-    char* argv[] = {(char*)TOOL_NAME.c_str()};
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    auto cmd = std::make_shared<AbilityManagerShellCommand>(argc, argv);
-    std::string reasonStr = "NORMAL";
-    EXPECT_EQ(cmd->CovertExitReason(reasonStr), Reason::REASON_NORMAL);
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0003 is end");
-}
-
-/**
- * @tc.number: Aa_Command_Ability_CovertExitReason_0004
- * @tc.name: CovertExitReason
- * @tc.desc: Verify the CovertExitReason function.
- */
-HWTEST_F(AaCommandFirstTest, Aa_Command_Ability_CovertExitReason_0004,
-         Function | MediumTest | Level1) {
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0004 is called");
-    char* argv[] = {(char*)TOOL_NAME.c_str()};
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    auto cmd = std::make_shared<AbilityManagerShellCommand>(argc, argv);
-    std::string reasonStr = "CPP_CRASH";
-    EXPECT_EQ(cmd->CovertExitReason(reasonStr), Reason::REASON_CPP_CRASH);
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0004 is end");
-}
-
-/**
- * @tc.number: Aa_Command_Ability_CovertExitReason_0005
- * @tc.name: CovertExitReason
- * @tc.desc: Verify the CovertExitReason function.
- */
-HWTEST_F(AaCommandFirstTest, Aa_Command_Ability_CovertExitReason_0005,
-         Function | MediumTest | Level1) {
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0004 is called");
-    char* argv[] = {(char*)TOOL_NAME.c_str()};
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    auto cmd = std::make_shared<AbilityManagerShellCommand>(argc, argv);
-    std::string reasonStr = "JS_ERROR";
-    EXPECT_EQ(cmd->CovertExitReason(reasonStr), Reason::REASON_JS_ERROR);
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0005 is end");
-}
-
-/**
- * @tc.number: Aa_Command_Ability_CovertExitReason_0006
- * @tc.name: CovertExitReason
- * @tc.desc: Verify the CovertExitReason function.
- */
-HWTEST_F(AaCommandFirstTest, Aa_Command_Ability_CovertExitReason_0006,
-         Function | MediumTest | Level1) {
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0006 is called");
-    char* argv[] = {(char*)TOOL_NAME.c_str()};
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    auto cmd = std::make_shared<AbilityManagerShellCommand>(argc, argv);
-    std::string reasonStr = "APP_FREEZE";
-    EXPECT_EQ(cmd->CovertExitReason(reasonStr), Reason::REASON_APP_FREEZE);
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0006 is end");
-}
-
-/**
- * @tc.number: Aa_Command_Ability_CovertExitReason_0007
- * @tc.name: CovertExitReason
- * @tc.desc: Verify the CovertExitReason function.
- */
-HWTEST_F(AaCommandFirstTest, Aa_Command_Ability_CovertExitReason_0007,
-         Function | MediumTest | Level1) {
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0007 is called");
-    char* argv[] = {(char*)TOOL_NAME.c_str()};
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    auto cmd = std::make_shared<AbilityManagerShellCommand>(argc, argv);
-    std::string reasonStr = "PERFORMANCE_CONTROL";
-    EXPECT_EQ(cmd->CovertExitReason(reasonStr),
-            Reason::REASON_PERFORMANCE_CONTROL);
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0007 is end");
-}
-
-/**
- * @tc.number: Aa_Command_Ability_CovertExitReason
- * @tc.name: CovertExitReason
- * @tc.desc: Verify the CovertExitReason function.
- */
-HWTEST_F(AaCommandFirstTest, Aa_Command_Ability_CovertExitReason_0008,
-         Function | MediumTest | Level1) {
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0008 is called");
-    char* argv[] = {(char*)TOOL_NAME.c_str()};
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    auto cmd = std::make_shared<AbilityManagerShellCommand>(argc, argv);
-    std::string reasonStr = "RESOURCE_CONTROL";
-    EXPECT_EQ(cmd->CovertExitReason(reasonStr), Reason::REASON_RESOURCE_CONTROL);
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0008 is end");
-}
-
-/**
- * @tc.number: Aa_Command_Ability_CovertExitReason_0009
- * @tc.name: CovertExitReason
- * @tc.desc: Verify the CovertExitReason function.
- */
-HWTEST_F(AaCommandFirstTest, Aa_Command_Ability_CovertExitReason_0009,
-         Function | MediumTest | Level1) {
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0009 is called");
-    char* argv[] = {(char*)TOOL_NAME.c_str()};
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    auto cmd = std::make_shared<AbilityManagerShellCommand>(argc, argv);
-    std::string reasonStr = "UPGRADE";
-    EXPECT_EQ(cmd->CovertExitReason(reasonStr), Reason::REASON_UPGRADE);
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0009 is end");
-}
-
-/**
- * @tc.number: Aa_Command_Ability_CovertExitReason_0010
- * @tc.name: CovertExitReason
- * @tc.desc: Verify the CovertExitReason function.
- */
-HWTEST_F(AaCommandFirstTest, Aa_Command_Ability_CovertExitReason_0010,
-         Function | MediumTest | Level1) {
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0010 is called");
-    char* argv[] = {(char*)TOOL_NAME.c_str()};
-    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    auto cmd = std::make_shared<AbilityManagerShellCommand>(argc, argv);
-    std::string reasonStr = "null";
-    EXPECT_EQ(cmd->CovertExitReason(reasonStr), Reason::REASON_UNKNOWN);
-    TAG_LOGI(AAFwkTag::TEST, "CovertExitReason_0010 is end");
 }
 
 /**
@@ -865,19 +704,104 @@ HWTEST_F(AaCommandFirstTest, Aa_Command_Ability_MakeWantForProcess_0019,
 }
 
 /**
- * @tc.number: Aa_Command_Ability_First_0001
+ * @tc.number: AaCommandAbility_ConvertPid_001
  * @tc.name: ConvertPid
  * @tc.desc: Verify ConvertPid Function.
  */
-HWTEST_F(AaCommandFirstTest, AaCommandAbility_ConvertPid_0001, Function | MediumTest | Level1)
+HWTEST_F(AaCommandFirstTest, AaCommandAbility_ConvertPid_001, Function | MediumTest | Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AaCommandAbility_ConvertPid_0001 is called");
+    TAG_LOGI(AAFwkTag::TEST, "AaCommandAbility_ConvertPid_001 is called");
     char* argv[] = { (char*)TOOL_NAME.c_str() };
     int argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
     AbilityManagerShellCommand cmd(argc, argv);
     std::string inputPid;
     pid_t pid = 0;
+    EXPECT_EQ(cmd.ConvertPid(inputPid), pid);
+}
+
+/**
+ * @tc.number: AaCommandAbility_ConvertPid_002
+ * @tc.name: ConvertPid
+ * @tc.desc: Verify ConvertPid Function.
+ */
+HWTEST_F(AaCommandFirstTest, AaCommandAbility_ConvertPid_002, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AaCommandAbility_ConvertPid_002 is called");
+    char* argv[] = { (char*)TOOL_NAME.c_str() };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string inputPid = "1";
+    pid_t pid = 1;
+    EXPECT_EQ(cmd.ConvertPid(inputPid), pid);
+}
+
+/**
+ * @tc.number: AaCommandAbility_ConvertPid_002
+ * @tc.name: ConvertPid
+ * @tc.desc: Verify ConvertPid Function.
+ */
+HWTEST_F(AaCommandFirstTest, AaCommandAbility_ConvertPid_003, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AaCommandAbility_ConvertPid_003 is called");
+    char* argv[] = { (char*)TOOL_NAME.c_str() };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string inputPid = "-1";
+    pid_t pid = -1;
+    EXPECT_EQ(cmd.ConvertPid(inputPid), pid);
+}
+
+/**
+ * @tc.number: AaCommandAbility_ConvertPid_004
+ * @tc.name: ConvertPid
+ * @tc.desc: Verify ConvertPid Function.
+ */
+HWTEST_F(AaCommandFirstTest, AaCommandAbility_ConvertPid_004, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AaCommandAbility_ConvertPid_004 is called");
+    char* argv[] = { (char*)TOOL_NAME.c_str() };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string inputPid = "a";
+    pid_t pid = 0;
+    EXPECT_EQ(cmd.ConvertPid(inputPid), pid);
+}
+
+/**
+ * @tc.number: AaCommandAbility_ConvertPid_005
+ * @tc.name: ConvertPid
+ * @tc.desc: Verify ConvertPid Function.
+ */
+HWTEST_F(AaCommandFirstTest, AaCommandAbility_ConvertPid_005, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AaCommandAbility_ConvertPid_005 is called");
+    char* argv[] = { (char*)TOOL_NAME.c_str() };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string inputPid = "0";
+    pid_t pid = 0;
+    EXPECT_EQ(cmd.ConvertPid(inputPid), pid);
+}
+
+/**
+ * @tc.number: AaCommandAbility_ConvertPid_006
+ * @tc.name: ConvertPid
+ * @tc.desc: Verify ConvertPid Function.
+ */
+HWTEST_F(AaCommandFirstTest, AaCommandAbility_ConvertPid_006, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AaCommandAbility_ConvertPid_006 is called");
+    char* argv[] = { (char*)TOOL_NAME.c_str() };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string inputPid = "6.0";
+    pid_t pid = 6;
     EXPECT_EQ(cmd.ConvertPid(inputPid), pid);
 }
 

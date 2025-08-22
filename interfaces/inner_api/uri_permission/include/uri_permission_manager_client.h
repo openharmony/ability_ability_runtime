@@ -102,7 +102,7 @@ public:
      */
     std::vector<bool> CheckUriAuthorization(const std::vector<std::string> &uriVec, uint32_t flag, uint32_t tokenId);
 
-    int32_t ClearPermissionTokenByMap(const uint32_t tokenId);
+    int32_t ClearPermissionTokenByMap(uint32_t tokenId);
 
     int32_t GrantUriPermissionByKey(const std::string &key, uint32_t flag, uint32_t targetTokenId);
 

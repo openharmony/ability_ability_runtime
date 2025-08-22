@@ -174,14 +174,17 @@ public:
      *
      * @param runtime
      */
-    const std::unique_ptr<AbilityRuntime::Runtime> &GetRuntime() const;
+    const std::unique_ptr<AbilityRuntime::Runtime> &GetRuntime() const
+    {
+        return runtime_;
+    }
 
     /**
      * @brief return the specified runtime
      *
      * @param runtime
      */
-    const std::unique_ptr<AbilityRuntime::Runtime> &GetSpecifiedRuntime(const std::string &codeLanguage) const;
+    const std::unique_ptr<AbilityRuntime::Runtime> &GetSpecifiedRuntime(const std::string &arkTSMode) const;
 
     /*
      *

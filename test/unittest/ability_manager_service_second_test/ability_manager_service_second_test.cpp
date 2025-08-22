@@ -31,6 +31,7 @@
 #include "hilog_tag_wrapper.h"
 #include "session/host/include/session.h"
 #include "scene_board_judgement.h"
+#include "mock_my_status.h"
 #include "mock_sa_call.h"
 #include "unlock_screen_manager.h"
 
@@ -1734,6 +1735,36 @@ HWTEST_F(AbilityManagerServiceSecondTest, KillProcess_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
+ * Function: CheckPermissionForKillCollaborator
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckPermissionForKillCollaborator
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, CheckPermissionForKillCollaborator_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckPermissionForKillCollaborator_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    MyStatus::GetInstance().permPermission_ = 0;
+    EXPECT_EQ(abilityMs_->CheckPermissionForKillCollaborator(), false);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckPermissionForKillCollaborator_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckPermissionForKillCollaborator
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckPermissionForKillCollaborator
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, CheckPermissionForKillCollaborator_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckPermissionForKillCollaborator_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    MyStatus::GetInstance().permPermission_ = 1;
+    EXPECT_EQ(abilityMs_->CheckPermissionForKillCollaborator(), true);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckPermissionForKillCollaborator_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: PreLoadAppDataAbilities
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService PreLoadAppDataAbilities
@@ -1870,7 +1901,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, ShouldPreventStartAbility_001, TestSiz
 /*
  * Feature: AbilityManagerService
  * Name: UpdateKeepAliveEnableState_001
- * Function: CheckProcessOptions
+ * Function: UpdateKeepAliveEnableState
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService UpdateKeepAliveEnableState
  */

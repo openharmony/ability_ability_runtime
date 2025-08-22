@@ -87,7 +87,7 @@ HWTEST_F(AppCapturePerfTest, AppCapturePerfTest002, TestSize.Level0)
     faultData.errorObject.stack = "123,,1478";
     faultData.timeoutMarkers = "123456";
     int32_t ret = AppCapturePerf::GetInstance().CapturePerf(faultData);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
 }
 
 /**

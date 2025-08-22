@@ -2308,32 +2308,32 @@ HWTEST_F(AppMgrServiceInnerEighthTest, IsSceneBoardCall_002, TestSize.Level1)
 }
 
 /**
- * @tc.name: StartNativeChildProcess_001
- * @tc.desc: test StartNativeChildProcess_001
+ * @tc.name: CreateNativeChildProcess_001
+ * @tc.desc: test CreateNativeChildProcess_001
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerEighthTest, StartNativeChildProcess_001, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerEighthTest, CreateNativeChildProcess_001, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "StartNativeChildProcess_001 start");
+    TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
 
     pid_t hostPid = 0;
     std::string libName = "111";
     int32_t childProcessCount = 0;
     sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
-    auto ret = appMgrServiceInner->StartNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
+    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    TAG_LOGI(AAFwkTag::TEST, "StartNativeChildProcess_001 end");
+    TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_001 end");
 }
 
 /**
- * @tc.name: StartNativeChildProcess_002
- * @tc.desc: test StartNativeChildProcess_002
+ * @tc.name: CreateNativeChildProcess_002
+ * @tc.desc: test CreateNativeChildProcess_002
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerEighthTest, StartNativeChildProcess_002, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerEighthTest, CreateNativeChildProcess_002, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "StartNativeChildProcess_002 start");
+    TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_002 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getAppRunningProcessPid_ = nullptr;
     std::shared_ptr<ApplicationInfo> info1 = std::make_shared<ApplicationInfo>();
@@ -2345,19 +2345,19 @@ HWTEST_F(AppMgrServiceInnerEighthTest, StartNativeChildProcess_002, TestSize.Lev
     std::string libName = "111";
     int32_t childProcessCount = 0;
     sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
-    auto ret = appMgrServiceInner->StartNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
+    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
     EXPECT_EQ(ret, AAFwk::ERR_CHILD_PROCESS_REACH_LIMIT);
-    TAG_LOGI(AAFwkTag::TEST, "StartNativeChildProcess_002 end");
+    TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_002 end");
 }
 
 /**
- * @tc.name: StartNativeChildProcess_003
- * @tc.desc: test StartNativeChildProcess_003
+ * @tc.name: CreateNativeChildProcess_003
+ * @tc.desc: test CreateNativeChildProcess_003
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerEighthTest, StartNativeChildProcess_003, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerEighthTest, CreateNativeChildProcess_003, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "StartNativeChildProcess_003 start");
+    TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_003 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getAppRunningProcessPid_ = nullptr;
     std::shared_ptr<ApplicationInfo> info1 = std::make_shared<ApplicationInfo>();
@@ -2370,9 +2370,9 @@ HWTEST_F(AppMgrServiceInnerEighthTest, StartNativeChildProcess_003, TestSize.Lev
     std::string libName = "111";
     int32_t childProcessCount = 0;
     sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
-    auto ret = appMgrServiceInner->StartNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
+    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
-    TAG_LOGI(AAFwkTag::TEST, "StartNativeChildProcess_003 end");
+    TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_003 end");
 }
 
 /**

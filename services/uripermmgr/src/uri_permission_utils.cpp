@@ -25,6 +25,7 @@
 #include "os_account_manager_wrapper.h"
 #include "permission_verification.h"
 #include "tokenid_kit.h"
+#include "fud_constants.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -33,14 +34,6 @@ constexpr int32_t DEFAULT_USER_ID = 0;
 constexpr int32_t API_VERSION_MOD = 100;
 constexpr int32_t FOUNDATION_UID = 5523;
 constexpr const char* NET_WORK_ID_MARK = "?networkid=";
-}
-
-std::shared_ptr<AppExecFwk::BundleMgrHelper> UPMSUtils::ConnectManagerHelper()
-{
-    if (bundleMgrHelper_ == nullptr) {
-        bundleMgrHelper_ = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
-    }
-    return bundleMgrHelper_;
 }
 
 bool UPMSUtils::SendShareUnPrivilegeUriEvent(uint32_t callerTokenId, uint32_t targetTokenId)
@@ -71,12 +64,14 @@ bool UPMSUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uin
     }
     for (size_t i = 0; i < resVec.size(); i++) {
         if (resVec[i]) {
-            eventInfo.uri = uriVec[i];
+            Uri uri(uriVec[i]);
+            eventInfo.uri = uri.GetScheme() + ":" + uri.GetAuthority();
             EventReport::SendGrantUriPermissionEvent(EventName::GRANT_URI_PERMISSION, eventInfo);
+            return true;
         }
     }
     TAG_LOGD(AAFwkTag::URIPERMMGR, "send grant uri permission event end.");
-    return true;
+    return false;
 }
 
 bool UPMSUtils::CheckAndCreateEventInfo(uint32_t callerTokenId, uint32_t targetTokenId,
@@ -140,7 +135,7 @@ bool UPMSUtils::IsSystemAppCall()
 
 bool UPMSUtils::CheckIsSystemAppByBundleName(std::string &bundleName)
 {
-    auto bundleMgrHelper = ConnectManagerHelper();
+    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
         TAG_LOGW(AAFwkTag::URIPERMMGR, "bundleMgrHelper null");
         return false;
@@ -159,7 +154,7 @@ bool UPMSUtils::CheckIsSystemAppByBundleName(std::string &bundleName)
 
 bool UPMSUtils::GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion)
 {
-    auto bundleMgrHelper = ConnectManagerHelper();
+    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
         TAG_LOGW(AAFwkTag::URIPERMMGR, "The bundleMgrHelper is nullptr.");
         return false;
@@ -185,6 +180,8 @@ bool UPMSUtils::CheckIsSystemAppByTokenId(uint32_t tokenId)
 
 bool UPMSUtils::GetDirByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex, std::string &dirName)
 {
+    // if get dir name failed, set dirName as bundleName
+    dirName = bundleName;
     auto bmsClient = DelayedSingleton<AppExecFwk::BundleMgrClient>::GetInstance();
     if (bmsClient == nullptr) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "bundleMgrClient is nullptr.");
@@ -232,7 +229,7 @@ bool UPMSUtils::GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName
 int32_t UPMSUtils::GetAppIdByBundleName(const std::string &bundleName, std::string &appId)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "BundleName is %{public}s.", bundleName.c_str());
-    auto bms = ConnectManagerHelper();
+    auto bms = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bms == nullptr) {
         TAG_LOGW(AAFwkTag::URIPERMMGR, "The bundleMgrHelper is nullptr.");
         return GET_BUNDLE_MANAGER_SERVICE_FAILED;
@@ -249,7 +246,7 @@ int32_t UPMSUtils::GetAppIdByBundleName(const std::string &bundleName, std::stri
 int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t appIndex, uint32_t &tokenId)
 {
     TAG_LOGD(AAFwkTag::URIPERMMGR, "BundleName:%{public}s, appIndex:%{public}d", bundleName.c_str(), appIndex);
-    auto bms = ConnectManagerHelper();
+    auto bms = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bms == nullptr) {
         TAG_LOGW(AAFwkTag::URIPERMMGR, "null bms");
         return GET_BUNDLE_MANAGER_SERVICE_FAILED;
@@ -282,10 +279,27 @@ int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t
     return ERR_OK;
 }
 
+bool UPMSUtils::GenerateFUDAppInfo(FUDAppInfo &info)
+{
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(info.tokenId);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        Security::AccessToken::HapTokenInfo hapInfo;
+        auto ret = Security::AccessToken::AccessTokenKit::GetHapTokenInfo(info.tokenId, hapInfo);
+        if (ret != Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "GetHapTokenInfo failed, ret:%{public}d", ret);
+            return false;
+        }
+        info.userId = hapInfo.userID;
+        info.bundleName = hapInfo.bundleName;
+        return GetDirByBundleNameAndAppIndex(hapInfo.bundleName, hapInfo.instIndex, info.alterBundleName);
+    }
+    return false;
+}
+
 bool UPMSUtils::CheckUriTypeIsValid(Uri &uri)
 {
     auto &&scheme = uri.GetScheme();
-    if (scheme != "file" && scheme != "content") {
+    if (scheme != FUDConstants::FILE_SCHEME && scheme != FUDConstants::CONTENT_SCHEME) {
         TAG_LOGW(AAFwkTag::URIPERMMGR, "uri invalid: %{public}s-%{private}s", scheme.c_str(), uri.ToString().c_str());
         return false;
     }
@@ -294,7 +308,8 @@ bool UPMSUtils::CheckUriTypeIsValid(Uri &uri)
 
 bool UPMSUtils::IsDocsCloudUri(Uri &uri)
 {
-    return (uri.GetAuthority() == "docs" && uri.ToString().find(NET_WORK_ID_MARK) != std::string::npos);
+    return (uri.GetAuthority() == FUDConstants::DOCS_AUTHORITY &&
+        uri.ToString().find(NET_WORK_ID_MARK) != std::string::npos);
 }
 
 std::shared_ptr<AppExecFwk::BundleMgrHelper> UPMSUtils::bundleMgrHelper_ = nullptr;

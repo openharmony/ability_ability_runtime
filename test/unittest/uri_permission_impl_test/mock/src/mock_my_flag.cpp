@@ -33,6 +33,7 @@ bool MyFlag::permissionReadWriteDocuments_ = false;
 bool MyFlag::IsSystempAppCall_ = false;
 bool MyFlag::permissionFileAccessPersist_ = false;
 bool MyFlag::permissionGrantUriPermissionAsCaller_ = false;
+bool MyFlag::permissionSandboxAccessManager_ = false;
 bool MyFlag::isSAOrSystemAppCall_ = false;
 bool MyFlag::isSystemAppCall_ = false;
 bool MyFlag::isUriTypeValid_ = false;
@@ -51,6 +52,8 @@ std::string MyFlag::upmsUtilsAppId_ = "";
 int32_t MyFlag::upmsUtilsGetAppIdByBundleNameRet_ = 0;
 bool MyFlag::upmsUtilsIsFoundationCallRet_;
 uint32_t MyFlag::upmsUtilsTokenId_ = 0;
+bool MyFlag::fudUtilsGenerateFUDAppInfoRet_ = true;
+std::string MyFlag::bundleName_ = "";
 TokenInfoMap MyFlag::tokenInfos = {};
 } // namespace AAFwk
 } // namespace OHOS

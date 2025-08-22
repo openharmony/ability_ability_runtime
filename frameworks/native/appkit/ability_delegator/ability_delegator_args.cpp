@@ -87,5 +87,21 @@ std::string AbilityDelegatorArgs::GetParamValue(const std::string &key) const
     auto target = params_.find(key);
     return (target != params_.end()) ? target->second : std::string();
 }
+
+void AbilityDelegatorArgs::SetTestRunnerModeAndPath(const std::string arktsMode, const std::string testRunnerSrcPath)
+{
+    arktsMode_ = arktsMode;
+    testRunnerSrcPath_ = testRunnerSrcPath;
+}
+
+std::string AbilityDelegatorArgs::GetTestRunnerMode() const
+{
+    return arktsMode_;
+}
+
+std::string AbilityDelegatorArgs::GetTestRunnerPath() const
+{
+    return testRunnerSrcPath_;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

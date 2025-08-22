@@ -69,7 +69,8 @@ public:
     MOCK_METHOD1(IsWaitingDebugApp, bool(const std::string &bundleName));
     MOCK_METHOD0(ClearNonPersistWaitingDebugFlag, void());
     MOCK_METHOD0(IsMemorySizeSufficent, bool());
-    MOCK_METHOD3(KillProcessesByPids, int32_t(const std::vector<int32_t> &, const std::string &, bool subProcess));
+    MOCK_METHOD4(KillProcessesByPids, int32_t(const std::vector<int32_t> &pids, const std::string &reason,
+        bool subProcess, bool isKillPrecedeStart));
 
     MockAmsMgrScheduler() : AmsMgrStub() {};
     virtual ~MockAmsMgrScheduler() {};
@@ -84,7 +85,7 @@ public:
 
     MOCK_METHOD4(SendRequest, int(uint32_t, MessageParcel&, MessageParcel&, MessageOption&));
     MOCK_METHOD4(PreloadApplicationByPhase, int32_t(const std::string&, int32_t, int32_t, AppExecFwk::PreloadPhase));
-    MOCK_METHOD1(NotifyPreloadAbilityStateChanged, int32_t(sptr<IRemoteObject>));
+    MOCK_METHOD2(NotifyPreloadAbilityStateChanged, int32_t(sptr<IRemoteObject>, bool));
     MOCK_METHOD4(CheckPreloadAppRecordExist, int32_t(const std::string&, int32_t, int32_t, bool &));
 
     int InvokeSendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)

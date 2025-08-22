@@ -17,6 +17,7 @@
 
 #include "ability_manager_service.h"
 #include "ability_util.h"
+#include "app_utils.h"
 #include "hitrace_meter.h"
 #include "param.h"
 #include "utils/state_utils.h"
@@ -69,6 +70,10 @@ bool AppScheduler::Init(const std::weak_ptr<AppStateCallback> &callback)
 int AppScheduler::LoadAbility(const AbilityRuntime::LoadParam &loadParam, const AppExecFwk::AbilityInfo &abilityInfo,
     const AppExecFwk::ApplicationInfo &applicationInfo, const Want &want)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", abilityInfo.bundleName.c_str());
+        return INNER_ERR;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
@@ -77,7 +82,7 @@ int AppScheduler::LoadAbility(const AbilityRuntime::LoadParam &loadParam, const 
     int ret = static_cast<int>(IN_PROCESS_CALL(
         appMgrClient_->LoadAbility(abilityInfo, applicationInfo, want, loadParam)));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "AppScheduler fail to LoadAbility. ret %d", ret);
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "AppScheduler fail to LoadAbility. ret %{public}d", ret);
         return INNER_ERR;
     }
     return ERR_OK;
@@ -87,13 +92,13 @@ int AppScheduler::TerminateAbility(const sptr<IRemoteObject> &token, bool clearM
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Terminate ability.");
-    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    CHECK_POINTER_AND_RETURN(appMgrClient_, ERR_NULL_APP_MGR_CLIENT);
     /* because the errcode type of AppMgr Client API will be changed to int,
      * so must to covert the return result  */
     int ret = static_cast<int>(IN_PROCESS_CALL(appMgrClient_->TerminateAbility(token, clearMissionFlag)));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "AppScheduler fail to TerminateAbility. ret %d", ret);
-        return INNER_ERR;
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "AppScheduler fail to TerminateAbility. ret %{public}d", ret);
+        return ERR_APP_MGR_TERMINATTE_ABILITY_FAILED;
     }
     return ERR_OK;
 }
@@ -139,6 +144,10 @@ void AppScheduler::UpdateAbilityState(const sptr<IRemoteObject> &token, const Ap
 
 void AppScheduler::UpdateExtensionState(const sptr<IRemoteObject> &token, const AppExecFwk::ExtensionState state)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start UpdateExtensionState");
+        return;
+    }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "UpdateExtensionState.");
     CHECK_POINTER(appMgrClient_);
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->UpdateExtensionState(token, state));
@@ -160,11 +169,12 @@ void AppScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawn
     appMgrClient_->KillProcessesByUserId(userId, isNeedSendAppSpawnMsg, callback);
 }
 
-int32_t AppScheduler::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason, bool subProcess)
+int32_t AppScheduler::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason, bool subProcess,
+    bool isKillPrecedeStart)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
-    int32_t ret = appMgrClient_->KillProcessesByPids(pids, reason, subProcess);
+    int32_t ret = appMgrClient_->KillProcessesByPids(pids, reason, subProcess, isKillPrecedeStart);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail to KillProcessesByPids");
         return ret;
@@ -315,9 +325,8 @@ int AppScheduler::KillApplicationByUid(const std::string &bundleName, int32_t ui
 }
 
 int AppScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid,
-    const bool isUpgrade)
+    bool isUpgrade)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "[%{public}s] enter", __FUNCTION__);
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     int ret = (int)appMgrClient_->NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
     if (ret != ERR_OK) {
@@ -750,14 +759,14 @@ int32_t AppScheduler::PreloadApplicationByPhase(const std::string &bundleName, i
     return IN_PROCESS_CALL(appMgrClient_->PreloadApplicationByPhase(bundleName, userId, appIndex, preloadPhase));
 }
 
-int32_t AppScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+int32_t AppScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (appMgrClient_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
         return INNER_ERR;
     }
-    return IN_PROCESS_CALL(appMgrClient_->NotifyPreloadAbilityStateChanged(token));
+    return IN_PROCESS_CALL(appMgrClient_->NotifyPreloadAbilityStateChanged(token, isPreForeground));
 }
 
 int32_t AppScheduler::CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,
@@ -769,6 +778,15 @@ int32_t AppScheduler::CheckPreloadAppRecordExist(const std::string &bundleName, 
         return INNER_ERR;
     }
     return IN_PROCESS_CALL(appMgrClient_->CheckPreloadAppRecordExist(bundleName, userId, appIndex, isExist));
+}
+
+int32_t AppScheduler::VerifyKillProcessPermission(const std::string &bundleName) const
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
+        return INNER_ERR;
+    }
+    return appMgrClient_->VerifyKillProcessPermission(bundleName);
 }
 } // namespace AAFwk
 }  // namespace OHOS

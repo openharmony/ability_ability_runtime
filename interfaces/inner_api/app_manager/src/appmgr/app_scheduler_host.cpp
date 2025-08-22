@@ -32,7 +32,7 @@ void AppSchedulerHost::InitMemberFuncMap() {}
 
 AppSchedulerHost::~AppSchedulerHost()
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "AppSchedulerHost destruction");
+    TAG_LOGD(AAFwkTag::APPMGR, "AppSchedulerHost destruction");
 }
 
 int AppSchedulerHost::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)

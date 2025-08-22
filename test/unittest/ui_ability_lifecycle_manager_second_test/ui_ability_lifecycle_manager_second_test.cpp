@@ -71,10 +71,10 @@ void UIAbilityLifecycleManagerSecondTest::SetUp() {}
 
 void UIAbilityLifecycleManagerSecondTest::TearDown() {}
 
-class UIAbilityLifcecycleManagerSecondTestStub : public IRemoteStub<IAbilityConnection> {
+class UIAbilityLifecycleManagerSecondTestStub : public IRemoteStub<IAbilityConnection> {
 public:
-    UIAbilityLifcecycleManagerSecondTestStub() {};
-    virtual ~UIAbilityLifcecycleManagerSecondTestStub() {};
+    UIAbilityLifecycleManagerSecondTestStub() {};
+    virtual ~UIAbilityLifecycleManagerSecondTestStub() {};
 
     virtual int OnRemoteRequest(
         uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
@@ -834,7 +834,7 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, CleanUIAbility_001, TestSize.Level
     auto mgr = std::make_shared<UIAbilityLifecycleManager>();
 
     auto ret = mgr->CleanUIAbility(nullptr);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_UI_ABILITY_MANAGER_NULL_ABILITY_RECORD);
 }
 
 /**
@@ -1109,9 +1109,11 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, RecordPidKilling_001, TestSize.Lev
     mgr->sessionAbilityMap_ = sessionAbilityMap;
     pid_t pid = 1;
     std::string reason = "HelloWorld";
-
-    mgr->RecordPidKilling(pid, reason);
+    bool isKillPrecedeStart = true;
+    
+    mgr->RecordPidKilling(pid, reason, isKillPrecedeStart);
     EXPECT_EQ(mgr->sessionAbilityMap_[1]->killReason_, "HelloWorld");
+    EXPECT_EQ(mgr->sessionAbilityMap_[1]->isKillPrecedeStart_, true);
 }
 
 /**
@@ -1156,34 +1158,6 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, AddStartCallerTimestamp_003, TestS
     auto ret = mgr->AddStartCallerTimestamp(1);
 
     EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_DispatchForeground_0200
- * @tc.desc: DispatchForeground
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerSecondTest, DispatchForeground_001, TestSize.Level1)
-{
-    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
-
-    AbilityState state = AbilityState::ACTIVE;
-
-    AbilityRequest abilityRequest;
-    auto abilityRecord = std::make_shared<AbilityRecord>(
-        abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
-    abilityRecord->currentState_ = AbilityState::INITIAL;
-
-    std::shared_ptr<TaskHandlerWrap> runner;
-    std::weak_ptr<AbilityManagerService> server;
-    auto handler = std::make_shared<AbilityEventHandler>(runner, server);
-    DelayedSingleton<AbilityManagerService>::GetInstance()->eventHandler_ = handler;
-
-    DelayedSingleton<AbilityManagerService>::GetInstance()->taskHandler_ = nullptr;
-
-    auto ret = mgr->DispatchForeground(abilityRecord, true, state);
-
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /**

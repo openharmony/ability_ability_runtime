@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -268,6 +268,9 @@ public:
      * @return Returns the abilities info for the application record.
      */
     const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> GetAbilities();
+
+    bool IsAlreadyHaveAbility();
+
     // Update appThread with appThread
 
     /**
@@ -609,6 +612,10 @@ public:
      */
     void SetKeepAliveDkv(bool isKeepAliveDkv);
 
+    void SetMainElementRunning(bool isMainElementRunning);
+
+    bool IsMainElementRunning() const;
+
     void SetKeepAliveAppService(bool isKeepAliveAppService);
 
     /**
@@ -735,6 +742,8 @@ public:
     void SendAppStartupTypeEvent(const std::shared_ptr<AbilityRunningRecord> &ability, const AppStartType startType);
     void SetKilling();
     bool IsKilling() const;
+    void SetPreForeground(bool isPreForeground);
+    bool IsPreForeground() const;
     void SetAppIndex(const int32_t appIndex);
     int32_t GetAppIndex() const;
     void SetInstanceKey(const std::string& instanceKey);
@@ -859,6 +868,10 @@ public:
 #endif //SUPPORT_CHILD_PROCESS
 
     void SetPreloadState(PreloadState state);
+
+    void SetPreloadPhase(PreloadPhase phase);
+
+    PreloadPhase GetPreloadPhase();
 
     bool IsPreloading() const;
 
@@ -1048,6 +1061,16 @@ public:
         return killReason_;
     }
 
+    inline void SetIsKillPrecedeStart(bool isKillPrecedeStart)
+    {
+        isKillPrecedeStart_.store(isKillPrecedeStart);
+    }
+
+    inline bool IsKillPrecedeStart() const
+    {
+        return isKillPrecedeStart_.load();
+    }
+
     void AddAppLifecycleEvent(const std::string &msg);
 
     void SetNWebPreload(const bool isAllowedNWebPreload);
@@ -1170,6 +1193,7 @@ private:
     bool isKeepAliveBundle_ = false;
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
     bool isKeepAliveDkv_ = false; // Only non-resident keep-alive processes can be set to true, please choose carefully
+    bool isMainElementRunning_ = false;
     bool isKeepAliveAppService_ = false;
     bool isMainProcess_ = true; // Only MainProcess can be keepalive
     bool isSingleton_ = false;
@@ -1216,6 +1240,7 @@ private:
     bool isExtensionSandBox_ = false;
     std::atomic<bool> isKilling_ = false;
     std::atomic_bool isSpawned_ = false;
+    std::atomic<bool> isPreForeground_ = false;
 
     int32_t appRecordId_ = 0;
     int32_t mainUid_;
@@ -1232,6 +1257,7 @@ private:
     ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
     PreloadState preloadState_ = PreloadState::NONE;
     PreloadMode preloadMode_ = PreloadMode::PRELOAD_NONE;
+    PreloadPhase preloadPhase_ = PreloadPhase::UNSPECIFIED;
     SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
     int64_t startTimeMillis_ = 0;   // The time of app start(CLOCK_MONOTONIC)
     int64_t restartTimeMillis_ = 0; // The time of last trying app restart
@@ -1289,6 +1315,7 @@ private:
     sptr<IRemoteObject> browserHost_;
     std::shared_ptr<Configuration> delayConfiguration_ = std::make_shared<Configuration>();
     std::string killReason_ = "";
+    std::atomic_bool isKillPrecedeStart_ = false;
     int32_t rssValue_ = 0;
     int32_t pssValue_ = 0;
     bool reasonExist_ = false;

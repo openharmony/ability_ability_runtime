@@ -111,21 +111,21 @@ DmsSystemAbilityStatusChange::~DmsSystemAbilityStatusChange()
 
 void DmsSystemAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    TAG_LOGI(AAFwkTag::MISSION, "called, systemAbilityId: %d", systemAbilityId);
+    TAG_LOGI(AAFwkTag::MISSION, "called, systemAbilityId: %{public}d", systemAbilityId);
     if (systemAbilityId != DISTRIBUTED_SCHED_SA_ID) {
-        TAG_LOGE(AAFwkTag::MISSION, "SystemAbilityId: %d, need DISTRIBUTED_SCHED_SA_ID", systemAbilityId);
+        TAG_LOGE(AAFwkTag::MISSION, "SystemAbilityId: %{public}d, need DISTRIBUTED_SCHED_SA_ID", systemAbilityId);
         return;
     }
 
     DmsSaClient::GetInstance().OnAddSystemAbility(systemAbilityId, deviceId);
-    TAG_LOGI(AAFwkTag::MISSION, "called end, systemAbilityId: %d", systemAbilityId);
+    TAG_LOGI(AAFwkTag::MISSION, "called end, systemAbilityId: %{public}d", systemAbilityId);
 }
 
 void DmsSystemAbilityStatusChange::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    TAG_LOGI(AAFwkTag::MISSION, "called, systemAbilityId: %d", systemAbilityId);
+    TAG_LOGI(AAFwkTag::MISSION, "called, systemAbilityId: %{public}d", systemAbilityId);
     if (systemAbilityId != DISTRIBUTED_SCHED_SA_ID) {
-        TAG_LOGE(AAFwkTag::MISSION, "SystemAbilityId: %d, need DISTRIBUTED_SCHED_SA_ID", systemAbilityId);
+        TAG_LOGE(AAFwkTag::MISSION, "SystemAbilityId: %{public}d, need DISTRIBUTED_SCHED_SA_ID", systemAbilityId);
         return;
     }
 }

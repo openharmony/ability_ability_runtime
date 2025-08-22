@@ -128,6 +128,7 @@ public:
     MOCK_METHOD(WMError, TransferSessionToTargetScreen, (const TransferSessionInfo& info), (override));
     MOCK_METHOD(WMError, GetRouterStackInfo, (int32_t persistentId,
         const sptr<ISessionRouterStackListener>& listener), (override));
+    MOCK_METHOD(WSError, IsFocusWindowParent, (const sptr<IRemoteObject>& token, bool& isParent), (override));
 };
 } // namespace OHOS::Rosen
 #endif // MOCK_SCENE_SESSION_MANAGER_LITE_H

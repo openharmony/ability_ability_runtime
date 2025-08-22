@@ -20,8 +20,12 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-AbilityManagerXCollie::AbilityManagerXCollie(const std::string &tag, uint32_t timeoutSeconds)
+AbilityManagerXCollie::AbilityManagerXCollie(const std::string &tag, uint32_t timeoutSeconds, bool ignore)
 {
+    if (ignore) {
+        isCanceled_ = true;
+        return;
+    }
     id_ = HiviewDFX::XCollie::GetInstance().SetTimer(tag, timeoutSeconds, nullptr, nullptr,
         HiviewDFX::XCOLLIE_FLAG_LOG);
 }

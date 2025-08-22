@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,7 @@ public:
     {
         eventTask_ = eventTask;
     }
-    std::string GetEventString()
+    std::string GetEventString() const
     {
         if (taskName_.empty()) {
             return std::to_string(eventId_) + "_" + std::to_string(param_);
@@ -88,19 +88,19 @@ public:
     {
         return eventData_ == other.eventData_;
     }
-    void SetRunCount(int runCount)
+    void SetCreateTime(int64_t createTime)
     {
-        runCount_ = runCount;
+        createTime_ = createTime;
     }
-    int GetRunCount() const
+    int64_t GetCreateTime() const
     {
-        return runCount_;
+        return createTime_;
     }
-    void SetTimeout(uint32_t timeout)
+    void SetTimeout(int64_t timeout)
     {
         timeout_ = timeout;
     }
-    uint32_t GetTimeout() const
+    int64_t GetTimeout() const
     {
         return timeout_;
     }
@@ -111,8 +111,8 @@ public:
 private:
     bool isExtension_ = false;
     uint32_t eventId_ = 0;
-    uint32_t timeout_ = 0;
-    int runCount_ = 0;
+    int64_t timeout_ = 0;
+    int64_t createTime_ = 0;
     int64_t param_ = 0;
     std::shared_ptr<EventDataBase> eventData_;
     TaskHandle eventTask_;

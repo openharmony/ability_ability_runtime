@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,7 +135,8 @@ public:
     int UnRegisterMissionListener(const std::string& deviceId,
         const sptr<IRemoteMissionListener>& listener) override;
     int StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
-        const sptr<IRemoteObject>& callerToken, int32_t accountId = DEFAULT_INVAL_VALUE) override;
+        const sptr<IRemoteObject>& callerToken, int32_t accountId = DEFAULT_INVAL_VALUE,
+        bool isSilent = false) override;
     void CallRequestDone(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& callStub) override;
     int ReleaseCall(const sptr<IAbilityConnection>& connect,
         const AppExecFwk::ElementName& element) override;
@@ -315,7 +316,8 @@ public:
     int UnRegisterMissionListener(const std::string& deviceId,
         const sptr<IRemoteMissionListener>& listener) override;
     int StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
-        const sptr<IRemoteObject>& callerToken, int32_t accountId = DEFAULT_INVAL_VALUE) override;
+        const sptr<IRemoteObject>& callerToken, int32_t accountId = DEFAULT_INVAL_VALUE,
+        bool isSilent = false) override;
     void CallRequestDone(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& callStub) override;
     virtual int32_t GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list)
     {

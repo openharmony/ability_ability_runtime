@@ -62,6 +62,7 @@ inline void *DetachCallbackFunc(napi_env env, void *value, void *)
 
 class JsRuntime : public Runtime {
 public:
+    using Runtime::PreloadModule;
     static std::unique_ptr<JsRuntime> Create(const Options& options);
 
     static void SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSystemApp = false);
@@ -103,8 +104,6 @@ public:
         const std::string& hapPath,  bool isEsMode, const std::string& srcEntrance) override;
     void PreloadModule(const std::string& moduleName, const std::string& srcPath,
         const std::string& hapPath, bool isEsMode, bool useCommonTrunk) override;
-    void PreloadModule(const std::string &moduleName, const std::string &hapPath,
-        bool isEsMode, bool useCommonTrunk) override {}
     bool PopPreloadObj(const std::string& key, std::unique_ptr<NativeReference>& obj);
     void StartDebugMode(const DebugOption debugOption) override;
     void SetDebugOption(const DebugOption debugOption) override;
@@ -136,6 +135,8 @@ public:
     void FreeNativeReference(std::unique_ptr<NativeReference> reference);
     void FreeNativeReference(std::shared_ptr<NativeReference>&& reference);
     void StartProfiler(const DebugOption debugOption) override;
+    void SetExtensionApiCheckCallback(
+        std::function<bool(const std::string &className, const std::string &fileName)> &cb) override {}
     void DebuggerConnectionManager(bool isDebugApp, bool isStartWithDebug, const DebugOption dOption);
 
     void ReloadFormComponent(); // Reload ArkTS-Card component

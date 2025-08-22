@@ -15,6 +15,7 @@
 
 #include "extension_config_mgr.h"
 
+#include <cctype>
 #include <fstream>
 #include <nlohmann/json.hpp>
 
@@ -34,6 +35,7 @@ void ExtensionConfigMgr::Init()
     // clear cached data
     blocklistConfig_.clear();
     extensionBlocklist_.clear();
+    extensionEtsBlocklist_.clear();
 
     // read blocklist from extension_blocklist_config.json
     std::ifstream inFile;
@@ -88,8 +90,79 @@ void ExtensionConfigMgr::UpdateRuntimeModuleChecker(const std::unique_ptr<Abilit
         return;
     }
     TAG_LOGD(AAFwkTag::EXT, "extensionType_: %{public}d", extensionType_);
+    if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::ETS) {
+        TAG_LOGD(AAFwkTag::EXT, "ets runtime");
+        GenerateExtensionEtsBlocklists();
+        SetExtensionEtsCheckCallback(runtime);
+    }
+
     auto moduleChecker = std::make_shared<AppModuleChecker>(extensionType_, extensionBlocklist_);
     runtime->SetModuleLoadChecker(moduleChecker);
     extensionBlocklist_.clear();
+}
+
+void ExtensionConfigMgr::GenerateExtensionEtsBlocklists()
+{
+    if (!extensionEtsBlocklist_.empty()) {
+        TAG_LOGD(AAFwkTag::EXT, "extension ets block list not empty.");
+        return;
+    }
+    auto iter = extensionBlocklist_.find(extensionType_);
+    if (iter == extensionBlocklist_.end()) {
+        TAG_LOGD(AAFwkTag::EXT, "null extension block, extensionType: %{public}d.", extensionType_);
+        return;
+    }
+    for (const auto& module: iter->second) {
+        extensionEtsBlocklist_.emplace(module);
+    }
+}
+
+std::string ExtensionConfigMgr::GetStringAfterRemovePreFix(const std::string &name)
+{
+    if (!name.empty() && name[0] == '@') {
+        size_t dotPos = name.find('.');
+        if (dotPos != std::string::npos) {
+            return name.substr(dotPos + 1);
+        }
+    }
+    return name;
+}
+
+bool ExtensionConfigMgr::CheckEtsModuleLoadable(const std::string &className, const std::string &fileName)
+{
+    TAG_LOGD(AAFwkTag::EXT, "extensionType: %{public}d, className is %{public}s, fileName is %{public}s",
+        extensionType_, className.c_str(), fileName.c_str());
+    if (fileName.size() >= className.size() ||
+        className.compare(0, fileName.size(), fileName) != 0 ||
+        (fileName.size() < className.size() && className[fileName.size()] != '.')) {
+        TAG_LOGE(AAFwkTag::EXT, "The fileName:%{public}s and className:%{public}s do not match.",
+            fileName.c_str(), className.c_str());
+        return false;
+    }
+
+    std::string fileNameRemovePrefix = GetStringAfterRemovePreFix(fileName);
+    for (const auto &blockModuleName: extensionEtsBlocklist_) {
+        if (blockModuleName == fileNameRemovePrefix) {
+            TAG_LOGE(AAFwkTag::EXT, "%{public}s is in blocklist.", fileName.c_str());
+            return false;
+        }
+    }
+    TAG_LOGD(AAFwkTag::EXT, "not in blocklist.");
+    return true;
+}
+
+void ExtensionConfigMgr::SetExtensionEtsCheckCallback(const std::unique_ptr<AbilityRuntime::Runtime> &runtime)
+{
+    std::function<bool(const std::string &clsName, const std::string &fName)> callback =
+        [extensionConfigMgrWeak = weak_from_this()](const std::string &className,
+        const std::string &fileName) -> bool {
+        auto extensionConfigMgr = extensionConfigMgrWeak.lock();
+        if (extensionConfigMgr == nullptr) {
+            TAG_LOGE(AAFwkTag::EXT, "null extensionConfigMgr");
+            return false;
+        }
+        return extensionConfigMgr->CheckEtsModuleLoadable(className, fileName);
+    };
+    runtime->SetExtensionApiCheckCallback(callback);
 }
 }

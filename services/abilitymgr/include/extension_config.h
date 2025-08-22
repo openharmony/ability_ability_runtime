@@ -42,6 +42,12 @@ struct AbilityAccessItem {
     std::unordered_set<std::string> allowList;
 };
 
+struct ScreenUnlockAccessItem {
+    bool intercept = false;
+    bool interceptExcludeSystemApp = false;
+    std::unordered_set<std::string> blockList;
+};
+
 struct ExtensionConfigItem {
     bool networkEnableFlag = EXTENSION_NETWORK_ENABLE_FLAG_DEFAULT;
     bool saEnableFlag = EXTENSION_SA_ENABLE_FLAG_DEFAULT;
@@ -49,6 +55,7 @@ struct ExtensionConfigItem {
     bool serviceEnableFlag = EXTENSION_START_SERVICE_ENABLE_FLAG_DEFAULT;
     int32_t extensionAutoDisconnectTime = DEFAULT_EXTENSION_AUTO_DISCONNECT_TIME;
     std::unordered_set<std::string> serviceBlockedList;
+    ScreenUnlockAccessItem screenUnlockAccess;
     AbilityAccessItem abilityAccess;
     bool hasAbilityAccess = false;
 };
@@ -70,6 +77,8 @@ public:
     bool IsExtensionStartDefaultEnable(const std::string &extensionTypeName, const std::string &targetUri);
     bool IsExtensionNetworkEnable(const std::string &extensionTypeName);
     bool IsExtensionSAEnable(const std::string &extensionTypeName);
+    bool IsScreenUnlockIntercept(const std::string &extensionTypeName, bool isSystemApp,
+        const std::string &bundleName);
 private:
     void LoadExtensionConfig(const nlohmann::json &object);
     bool ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf);
@@ -83,6 +92,7 @@ private:
     bool LoadExtensionAbilityAccess(const nlohmann::json &object, const std::string &extensionTypeName);
     void LoadExtensionAllowOrBlockedList(const nlohmann::json &object, const std::string &key,
         std::unordered_set<std::string> &list);
+    void LoadScreenUnlockAccess(const nlohmann::json &object, const std::string &extensionTypeName);
 
     std::optional<bool> GetSingleAccessFlag(const std::string &extensionTypeName,
         std::function<std::optional<bool>(const AbilityAccessItem&)> getAccessFlag);

@@ -295,7 +295,7 @@ void AbilityRecord::LoadUIAbility()
     g_addLifecycleEventTask(token_, methodName);
 }
 
-int AbilityRecord::LoadAbility(bool isShellCall)
+int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "LoadLifecycle: abilityName:%{public}s", abilityInfo_.name.c_str());
@@ -330,6 +330,7 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     loadParam.instanceKey = instanceKey_;
     loadParam.isCallerSetProcess = IsCallerSetProcess();
     loadParam.customProcessFlag = customProcessFlag_;
+    loadParam.isStartupHide = isStartupHide;
     want_.RemoveParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED);
     if (KeepAliveProcessManager::GetInstance().IsKeepAliveBundle(abilityInfo_.applicationInfo.bundleName, -1)) {
         want_.SetParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED, true);
@@ -365,7 +366,8 @@ void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
 {
 }
 
-void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag, bool isShellCall)
+void AbilityRecord::ProcessForegroundAbility(
+    uint32_t tokenId, uint32_t sceneFlag, bool isShellCall, bool isStartupHide)
 {
 }
 
@@ -1982,6 +1984,10 @@ void AbilityRecord::NotifyAbilityRequestFailure(const std::string &requestId, co
 }
 
 void AbilityRecord::UpdateUIExtensionBindInfo(const WantParams &wantParams)
+{
+}
+
+void AbilityRecord::SendTerminateAbilityErrorEvent(int32_t errCode)
 {
 }
 }  // namespace AAFwk

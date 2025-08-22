@@ -36,21 +36,18 @@ ani_object ETSAbilityStageContext::CreateEtsAbilityStageContext(ani_env *env, st
 
     ani_status status = ANI_OK;
     ani_class abilityStageCtxCls;
-    status = env->FindClass(ETS_ABILITY_STAGE_CONTEXT_CLASS_NAME, &abilityStageCtxCls);
-    if (status != ANI_OK) {
+    if ((status = env->FindClass(ETS_ABILITY_STAGE_CONTEXT_CLASS_NAME, &abilityStageCtxCls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "call FindClass LAbilityStageContext failed, status:%{public}d", status);
         return nullptr;
     }
 
     ani_method method = nullptr;
-    status = env->Class_FindMethod(abilityStageCtxCls, "<ctor>", ":V", &method);
-    if (status != ANI_OK) {
+    if ((status = env->Class_FindMethod(abilityStageCtxCls, "<ctor>", ":V", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "call Class_FindMethod ctor failed");
         return nullptr;
     }
     ani_object obj = nullptr;
-    status = env->Object_New(abilityStageCtxCls, method, &obj);
-    if (status != ANI_OK) {
+    if ((status = env->Object_New(abilityStageCtxCls, method, &obj)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "call Object_New abilityStageCtxCls failed");
         return nullptr;
     }
@@ -62,22 +59,28 @@ ani_object ETSAbilityStageContext::CreateEtsAbilityStageContext(ani_env *env, st
         TAG_LOGE(AAFwkTag::ABILITY, "workContext nullptr");
         return nullptr;
     }
-    ani_field contextField;
-    status = env->Class_FindField(abilityStageCtxCls, "nativeContext", &contextField);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "call Class_FindField nativeContext failed");
-    }
     ani_long nativeContextLong = (ani_long)workContext;
-    status = env->Object_SetField_Long(obj, contextField, nativeContextLong);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ABILITY, "call Object_SetField_Long contextField failed");
+    if ((status = env->Object_SetFieldByName_Long(obj, "nativeContext", nativeContextLong)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "SetField_Long nativeContext failed, status: %{public}d", status);
         delete workContext;
         return nullptr;
     }
 
     ContextUtil::CreateEtsBaseContext(env, abilityStageCtxCls, obj, context);
-    // set Config class
     SetConfiguration(env, abilityStageCtxCls, obj, context);
+    ani_ref *contextGlobalRef = new (std::nothrow) ani_ref;
+    if (contextGlobalRef == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "new contextGlobalRef failed");
+        delete workContext;
+        return nullptr;
+    }
+    if ((status = env->GlobalReference_Create(obj, contextGlobalRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITY, "GlobalReference_Create failed status: %{public}d", status);
+        delete contextGlobalRef;
+        delete workContext;
+        return nullptr;
+    }
+    context->Bind(contextGlobalRef);
     return obj;
 }
 

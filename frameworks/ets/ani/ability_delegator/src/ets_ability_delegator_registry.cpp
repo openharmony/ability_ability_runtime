@@ -28,7 +28,14 @@ namespace AbilityDelegatorEts {
 std::unique_ptr<AppExecFwk::ETSNativeReference> etsReference;
 std::mutex etsReferenceMutex;
 
-static ani_object GetAbilityDelegator(ani_env *env, [[maybe_unused]]ani_class aniClass)
+namespace {
+constexpr const char* ETS_DELEGATOR_REGISTRY_NAMESPACE =
+    "L@ohos/app/ability/abilityDelegatorRegistry/abilityDelegatorRegistry;";
+constexpr const char* ETS_DELEGATOR_REGISTRY_SIGNATURE_DELEAGTOR = ":Lapplication/AbilityDelegator/AbilityDelegator;";
+constexpr const char* ETS_DELEGATOR_REGISTRY_SIGNATURE_ATGS =
+    ":Lapplication/abilityDelegatorArgs/AbilityDelegatorArgs;";;
+}
+static ani_object GetAbilityDelegator(ani_env *env)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
@@ -68,7 +75,7 @@ static ani_object GetAbilityDelegator(ani_env *env, [[maybe_unused]]ani_class an
     }
 }
 
-static ani_object GetArguments(ani_env *env, [[maybe_unused]]ani_class aniClass)
+static ani_object GetArguments(ani_env *env)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
@@ -97,17 +104,16 @@ void EtsAbilityDelegatorRegistryInit(ani_env *env)
     }
 
     ani_namespace ns = nullptr;
-    status = env->FindNamespace("L@ohos/app/ability/abilityDelegatorRegistry/abilityDelegatorRegistry;", &ns);
+    status = env->FindNamespace(ETS_DELEGATOR_REGISTRY_NAMESPACE, &ns);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "FindNamespace abilityDelegatorRegistry failed status: %{public}d", status);
         return;
     }
 
     std::array kitFunctions = {
-        ani_native_function {"getAbilityDelegator",
-            ":Lapplication/AbilityDelegator/AbilityDelegator;",
+        ani_native_function {"getAbilityDelegator", ETS_DELEGATOR_REGISTRY_SIGNATURE_DELEAGTOR,
             reinterpret_cast<void *>(GetAbilityDelegator)},
-        ani_native_function {"getArguments", ":Lapplication/abilityDelegatorArgs/AbilityDelegatorArgs;",
+        ani_native_function {"getArguments", ETS_DELEGATOR_REGISTRY_SIGNATURE_ATGS,
             reinterpret_cast<void *>(GetArguments)},
     };
 

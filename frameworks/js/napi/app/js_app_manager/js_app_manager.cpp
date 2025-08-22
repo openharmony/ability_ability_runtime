@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,7 @@ public:
 
     static void Finalizer(napi_env env, void* data, void* hint)
     {
-        TAG_LOGI(AAFwkTag::APPMGR, "finalizer called");
+        TAG_LOGD(AAFwkTag::APPMGR, "finalizer called");
         std::unique_ptr<JsAppManager>(static_cast<JsAppManager*>(data));
     }
 
@@ -1068,7 +1068,7 @@ private:
                 return;
             }
             bool ret = appManager->IsSharedBundleRunning(bundleName, versionCode);
-            TAG_LOGI(AAFwkTag::APPMGR, "result:%{public}d", ret);
+            TAG_LOGD(AAFwkTag::APPMGR, "result:%{public}d", ret);
             task->ResolveWithNoError(env, CreateJsValue(env, ret));
             delete task;
         };
@@ -1194,7 +1194,7 @@ private:
                 return;
             }
             int32_t memorySize = abilityManager->GetAppMemorySize();
-            TAG_LOGI(AAFwkTag::APPMGR, "memorySize:%{public}d", memorySize);
+            TAG_LOGD(AAFwkTag::APPMGR, "memorySize:%{public}d", memorySize);
             task->ResolveWithNoError(env, CreateJsValue(env, memorySize));
             delete task;
         };

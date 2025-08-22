@@ -100,8 +100,9 @@ HWTEST_F(EtsRuntimeTest, SetAppLibPath_100, TestSize.Level1)
     std::map<std::string, std::vector<std::string>> testPathMap;
     testPathMap["com.example.app"] = { "/data/abc", "/data/def" };
     testPathMap["com.example.demo"] = { "/data/demo/es", "/data/demo/ts" };
+    std::map<std::string, std::string> abcPathsToBundleModuleNameMap;
     std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
-    etsRuntime->SetAppLibPath(testPathMap);
+    etsRuntime->SetAppLibPath(testPathMap, abcPathsToBundleModuleNameMap, false);
     EXPECT_NE(testPathMap.size(), 0);
 }
 
@@ -252,6 +253,90 @@ HWTEST_F(EtsRuntimeTest, GetLanguage_100, TestSize.Level1)
     std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
     auto language = etsRuntime->GetLanguage();
     EXPECT_EQ(language, Runtime::Language::ETS);
+}
+
+/**
+ * @tc.name: PreFork_100
+ * @tc.desc: EtsRuntime test for PreFork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, PreFork_100, TestSize.Level1)
+{
+    Runtime::Options options;
+    options.lang = Runtime::Language::JS;
+    options.preload = true;
+    options.isStageModel = false;
+    std::unique_ptr<JsRuntime> jsRuntime = nullptr;
+    std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
+    auto instance = etsRuntime->PreFork(options, jsRuntime);
+    EXPECT_EQ(instance, nullptr);
+}
+
+/**
+ * @tc.name: PostFork_100
+ * @tc.desc: EtsRuntime test for PostFork.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, PostFork_100, TestSize.Level1)
+{
+    Runtime::Options jsOptions;
+    jsOptions.lang = Runtime::Language::JS;
+    jsOptions.preload = true;
+    jsOptions.isStageModel = false;
+    std::unique_ptr<JsRuntime> jsRuntime = JsRuntime::Create(jsOptions);;
+    ASSERT_NE(jsRuntime, nullptr);
+
+    Runtime::Options etsOptions;
+    etsOptions.lang = Runtime::Language::ETS;
+    etsOptions.preload = false;
+    etsOptions.isStageModel = true;
+    std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
+    auto result = etsRuntime->PostFork(etsOptions, jsRuntime);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: PreloadSystemClass_100
+ * @tc.desc: EtsRuntime test for PreloadSystemClass.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, PreloadSystemClass_100, TestSize.Level1)
+{
+    std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
+    std::string className = "className";
+    auto result = etsRuntime->PreloadSystemClass(className.c_str());
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: SetModuleLoadChecker_100
+ * @tc.desc: EtsRuntime test for SetModuleLoadChecker.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, SetModuleLoadChecker_100, TestSize.Level1)
+{
+    std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
+    etsRuntime->SetModuleLoadChecker(nullptr);
+    EXPECT_EQ(etsRuntime->GetJsRuntime(), nullptr);
+    etsRuntime->jsRuntime_ = std::make_unique<JsRuntime>();
+    etsRuntime->SetModuleLoadChecker(nullptr);
+    EXPECT_NE(etsRuntime->GetJsRuntime(), nullptr);
+}
+
+/**
+ * @tc.name: SetExtensionApiCheckCallback_100
+ * @tc.desc: EtsRuntime test for SetExtensionApiCheckCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EtsRuntimeTest, SetExtensionApiCheckCallback_100, TestSize.Level1)
+{
+    std::unique_ptr<ETSRuntime> etsRuntime = std::make_unique<ETSRuntime>();
+    std::function<bool(const std::string &clsName, const std::string &fName)> callback =
+        [](const std::string &className, const std::string &fileName) -> bool {
+        return false;
+    };
+    etsRuntime->SetExtensionApiCheckCallback(callback);
+    EXPECT_EQ(etsRuntime->GetJsRuntime(), nullptr);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

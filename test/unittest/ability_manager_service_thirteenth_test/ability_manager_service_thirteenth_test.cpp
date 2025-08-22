@@ -39,6 +39,7 @@ constexpr int32_t FOUNDATION_UID = 5523;
 constexpr int32_t DMS_UID = 5522;
 constexpr int32_t LOW_MEMORY_KILL_WHILE_STARTING = 1111;
 constexpr int32_t DEFAULT_INVAL_VALUE = -1;
+constexpr int32_t PENG_LAI_UID = 7655;
 
 namespace OHOS {
 namespace AAFwk {
@@ -50,6 +51,15 @@ public:
     void TearDown();
     std::shared_ptr<AbilityRecord> MockAbilityRecord(AbilityType);
     sptr<Token> MockToken(AbilityType);
+};
+
+class MockISAInterceptor : public AbilityRuntime::ISAInterceptor {
+public:
+    int32_t OnCheckStarting(const std::string& params, Rule& rule) override { return 0; };
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
 };
 
 void AbilityManagerServiceThirteenthTest::SetUpTestCase() {}
@@ -349,7 +359,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, CheckDebugAssertPermission_002, Te
     EXPECT_NE(abilityMs_, nullptr);
     MyStatus::GetInstance().paramGetBoolParameter_ = true;
     int32_t result = abilityMs_->CheckDebugAssertPermission();
-    EXPECT_EQ(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
+    EXPECT_NE(result, ERR_NOT_SUPPORTED_PRODUCT_TYPE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckDebugAssertPermission_002 end");
 }
 
@@ -1230,6 +1240,27 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, KillProcessWithReason_002, TestSiz
     EXPECT_EQ(abilityMs_->KillProcessWithReason(pid, reason), ERR_KILL_APP_WHILE_STARTING);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest KillProcessWithReason_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: KillProcessWithReason_003
+ * Function: InitFocusListener
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService KillProcessWithReason
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, KillProcessWithReason_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest KillProcessWithReason_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    int32_t pid = 1;
+    ExitReason exitReason;
+    exitReason.reason = Reason::REASON_RESOURCE_CONTROL;
+    exitReason.shouldKillForeground = false;
+    auto result = abilityMs_->KillProcessWithReason(pid, exitReason);
+    EXPECT_EQ(result, ERR_KILL_APP_WHILE_FOREGROUND);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest KillProcessWithReason_003 end");
 }
 
 /*
@@ -2610,6 +2641,77 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, AbilityManagerServiceTest_IntentOp
     auto paramPtr = std::make_shared<InsightIntentExecuteParam>(param);
     int res = abilityMs->IntentOpenLinkInner(paramPtr, info, -1);
     EXPECT_NE(res, ERR_OK);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnStartTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnStartTest
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, OnStartTest_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest OnStartTest_001 start");
+
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityManagerService, nullptr);
+    abilityManagerService->OnStart();
+    EXPECT_EQ(abilityManagerService->QueryServiceState(), ServiceRunningState::STATE_RUNNING);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest OnStartTest_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnStartTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService OnStartTest
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, OnStartTest_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest OnStartTest_002 start");
+
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityManagerService, nullptr);
+    auto taskHandler = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
+    auto eventHandler = std::make_shared<AbilityEventHandler>(taskHandler, abilityManagerService);
+    abilityManagerService->subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler, eventHandler);
+    EXPECT_NE(abilityManagerService->subManagersHelper_, nullptr);
+    abilityManagerService->OnStart();
+    EXPECT_EQ(abilityManagerService->QueryServiceState(), ServiceRunningState::STATE_RUNNING);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest OnStartTest_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RegisterSAInterceptor
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterSAInterceptor
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, RegisterSAInterceptor_001, TestSize.Level1) {
+    sptr<AbilityRuntime::ISAInterceptor> interceptor = new (std::nothrow) MockISAInterceptor();
+    ASSERT_NE(interceptor, nullptr);
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityManagerService, nullptr);
+    auto result = abilityManagerService->RegisterSAInterceptor(interceptor);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RegisterSAInterceptor
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterSAInterceptor
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, RegisterSAInterceptor_002, TestSize.Level1) {
+    sptr<AbilityRuntime::ISAInterceptor> interceptor = new (std::nothrow) MockISAInterceptor();
+    ASSERT_NE(interceptor, nullptr);
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityManagerService, nullptr);
+    MyStatus::GetInstance().ipcGetCallingUid_ = PENG_LAI_UID;
+    auto result = abilityManagerService->RegisterSAInterceptor(interceptor);
+    EXPECT_EQ(result, ERR_OK);
 }
 } // namespace AAFwk
 } // namespace OHOS

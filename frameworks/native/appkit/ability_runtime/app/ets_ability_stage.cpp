@@ -79,6 +79,15 @@ ETSAbilityStage::ETSAbilityStage(
     : etsRuntime_(etsRuntime), etsAbilityStageObj_(std::move(etsAbilityStageObj))
 {}
 
+ETSAbilityStage::~ETSAbilityStage()
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "destructor");
+    auto context = GetContext();
+    if (context != nullptr) {
+        context->Unbind();
+    }
+}
+
 void ETSAbilityStage::Init(const std::shared_ptr<Context> &context,
     const std::weak_ptr<AppExecFwk::OHOSApplication> application)
 {
@@ -187,9 +196,9 @@ bool ETSAbilityStage::CallObjectMethod(bool withResult, const char *name, const 
     return false;
 }
 
-std::shared_ptr<AppExecFwk::DelegatorAbilityStageProperty> ETSAbilityStage::CreateStageProperty() const
+std::shared_ptr<AppExecFwk::EtsDelegatorAbilityStageProperty> ETSAbilityStage::CreateStageProperty() const
 {
-    auto property = std::make_shared<AppExecFwk::DelegatorAbilityStageProperty>();
+    auto property = std::make_shared<AppExecFwk::EtsDelegatorAbilityStageProperty>();
     property->moduleName_ = GetHapModuleProp("name");
     property->srcEntrance_ = GetHapModuleProp("srcEntrance");
     return property;
