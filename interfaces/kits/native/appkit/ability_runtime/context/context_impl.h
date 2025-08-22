@@ -550,6 +550,8 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_ = nullptr;
     std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfo_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> config_ = nullptr;
+    std::shared_ptr<AAFwk::WantParams> launchParameter_ = nullptr;
+    std::shared_ptr<AAFwk::WantParams> latestParameter_ = nullptr;
     std::string currArea_ = "el2";
     std::vector<AppExecFwk::OverlayModuleInfo> overlayModuleInfos_;
     std::set<std::string> checkedDirSet_;
@@ -567,8 +569,6 @@ private:
     std::mutex overlaySubscriberMutex_;
     std::shared_ptr<AppExecFwk::OverlayEventSubscriber> overlaySubscriber_;
     std::string processName_;
-    std::shared_ptr<AAFwk::Want> launchParameter_ = nullptr;
-    std::shared_ptr<AAFwk::Want> latestParameter_ = nullptr;
 
 #ifdef SUPPORT_GRAPHICS
     static std::mutex getDisplayConfigCallbackMutex_;

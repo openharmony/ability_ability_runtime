@@ -1766,7 +1766,10 @@ bool ContextImpl::UpdateDisplayConfiguration(std::shared_ptr<ContextImpl> &conte
 
 void ContextImpl::SetLaunchParameter(const AAFwk::Want& want)
 {
-    launchParameter_ = std::make_shared<AAFwk::Want>(want);
+    // only cold-start need save parameter
+    if (!launchParameter_) {
+        launchParameter_ = std::make_shared<AAFwk::WantParams>(want.GetParams());
+    }
 }
 
 std::string ContextImpl::GetLaunchParameter() const
@@ -1780,7 +1783,11 @@ std::string ContextImpl::GetLaunchParameter() const
 
 void ContextImpl::SetLatestParameter(const AAFwk::Want& want)
 {
-    latestParameter_ = std::make_shared<AAFwk::Want>(want);
+    if (!latestParameter_) {
+        latestParameter_ = std::make_shared<AAFwk::WantParams>(want.GetParams());
+    } else {
+        *latestParameter_ = want.GetParams();
+    }
 }
 
 std::string ContextImpl::GetLatestParameter() const
