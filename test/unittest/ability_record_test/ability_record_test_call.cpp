@@ -189,17 +189,8 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_Resolve_004, TestSize.Level1)
     callRecord->SetCallState(CallState::REQUESTING);
     abilityRecord_->callContainer_ = std::make_shared<CallContainer>();
     abilityRecord_->callContainer_->AddCallRecord(abilityRequest.connect, callRecord);
-    class AbilitySchedulerMockFunction : public AbilitySchedulerMock
-    {
-        public:
-            sptr<IRemoteObject> CallRequestModify()
-            {
-                return sptr<IRemoteObject>(this);
-            }
-    };
-
-    OHOS::sptr<AbilitySchedulerMockFunction> scheduler = new AbilitySchedulerMockFunction();
-    sptr<IRemoteObject> object = scheduler->CallRequestModify();
+    OHOS::sptr<AbilitySchedulerMock> scheduler = new AbilitySchedulerMock();
+    sptr<IRemoteObject> object = nullptr;
     abilityRecord_->callContainer_->CallRequestDone(object);
     callRecord->SetCallState(CallState::REQUESTED);
     EXPECT_NE(abilityRecord_->Resolve(abilityRequest), ResolveResultType::OK_HAS_REMOTE_OBJ);
@@ -296,15 +287,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_SetStartedByCall_001, TestSize.Level
  */
 HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_CallRequest_001, TestSize.Level1)
 {
-    class AbilitySchedulerMockFunction : public AbilitySchedulerMock
-    {
-        void CallRequest() override
-        {
-            return;
-        }
-    };
-
-    OHOS::sptr<AbilitySchedulerMockFunction> scheduler = new AbilitySchedulerMockFunction();
+    OHOS::sptr<AbilitySchedulerMock> scheduler = new AbilitySchedulerMock();
     abilityRecord_->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
     EXPECT_EQ(false, abilityRecord_->IsReady());
     abilityRecord_->SetScheduler(scheduler);
@@ -458,15 +441,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_Result, TestSize.Level1)
  */
 HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_SendResult, TestSize.Level1)
 {
-    class AbilitySchedulerMockFunction : public AbilitySchedulerMock
-    {
-        void CallRequest() override
-        {
-            return;
-        }
-    };
-
-    OHOS::sptr<AbilitySchedulerMockFunction> scheduler = new AbilitySchedulerMockFunction();
+    OHOS::sptr<AbilitySchedulerMock> scheduler = new AbilitySchedulerMock();
     abilityRecord_->SetScheduler(scheduler);
     abilityRecord_->SetResult(abilityResult_);
     abilityRecord_->SendResult(0, 0);
@@ -544,15 +519,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_Terminate, TestSize.Level1)
  */
 HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_SetScheduler, TestSize.Level1)
 {
-    class AbilitySchedulerMockFunction : public AbilitySchedulerMock
-    {
-        void CallRequest() override
-        {
-            return;
-        }
-    };
-
-    OHOS::sptr<AbilitySchedulerMockFunction> scheduler = new AbilitySchedulerMockFunction();
+    OHOS::sptr<AbilitySchedulerMock> scheduler = new AbilitySchedulerMock();
     abilityRecord_->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
     EXPECT_EQ(false, abilityRecord_->IsReady());
     abilityRecord_->SetScheduler(scheduler);
