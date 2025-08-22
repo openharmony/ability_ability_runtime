@@ -745,7 +745,8 @@ HWTEST_F(UriUtilsTest, GrantUriPermissionForServiceExtension_001, TestSize.Level
 
     abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
     UriUtils::GetInstance().GrantUriPermissionForServiceExtension(abilityRequest);
-    EXPECT_EQ(abilityRequest.abilityInfo.extensionAbilityType, AppExecFwk::ExtensionAbilityType::SERVICE);
+    std::string bundleName = AppUtils::GetInstance().GetBrokerDelegateBundleName();
+    EXPECT_EQ(bundleName.empty(), true);
 }
 
 /*
@@ -762,7 +763,8 @@ HWTEST_F(UriUtilsTest, GrantUriPermissionForUIOrServiceExtension_001, TestSize.L
 
     abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
     UriUtils::GetInstance().GrantUriPermissionForUIOrServiceExtension(abilityRequest);
-    EXPECT_EQ(abilityRequest.abilityInfo.extensionAbilityType, AppExecFwk::ExtensionAbilityType::SERVICE);
+    std::string bundleName = AppUtils::GetInstance().GetBrokerDelegateBundleName();
+    EXPECT_EQ(bundleName.empty(), true);
 }
 
 /*
