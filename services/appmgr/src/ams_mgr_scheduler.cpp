@@ -243,7 +243,7 @@ void AmsMgrScheduler::KillProcessesByUserId(int32_t userId, bool isNeedSendAppSp
 }
 
 int32_t AmsMgrScheduler::KillProcessesByPids(const std::vector<int32_t> &pids, const std::string &reason,
-    bool subProcess)
+    bool subProcess, bool isKillPrecedeStart)
 {
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
@@ -256,7 +256,7 @@ int32_t AmsMgrScheduler::KillProcessesByPids(const std::vector<int32_t> &pids, c
         return ERR_PERMISSION_DENIED;
     }
 
-    return amsMgrServiceInner_->KillProcessesByPids(pids, reason, subProcess);
+    return amsMgrServiceInner_->KillProcessesByPids(pids, reason, subProcess, isKillPrecedeStart);
 }
 
 void AmsMgrScheduler::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callerToken)
@@ -387,8 +387,7 @@ int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, con
     return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid, reason);
 }
 
-int32_t AmsMgrScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleName, const int uid,
-    const bool isUpgrade)
+int32_t AmsMgrScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, uid = %{public}d", bundleName.c_str(), uid);
     if (!IsReady()) {
@@ -405,7 +404,7 @@ int32_t AmsMgrScheduler::NotifyUninstallOrUpgradeApp(const std::string &bundleNa
     return amsMgrServiceInner_->NotifyUninstallOrUpgradeApp(bundleName, uid, isUpgrade);
 }
 
-void AmsMgrScheduler::NotifyUninstallOrUpgradeAppEnd(const int uid)
+void AmsMgrScheduler::NotifyUninstallOrUpgradeAppEnd(int32_t uid)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "uid = %{public}d", uid);
     if (!IsReady()) {
@@ -851,7 +850,7 @@ int32_t AmsMgrScheduler::PreloadApplicationByPhase(const std::string &bundleName
     return amsMgrServiceInner_->PreloadApplicationByPhase(bundleName, userId, appIndex, preloadPhase);
 }
 
-int32_t AmsMgrScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token)
+int32_t AmsMgrScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "appMgrServiceInner is not ready.");
@@ -861,7 +860,7 @@ int32_t AmsMgrScheduler::NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> to
         TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
         return ERR_PERMISSION_DENIED;
     }
-    return amsMgrServiceInner_->NotifyPreloadAbilityStateChanged(token);
+    return amsMgrServiceInner_->NotifyPreloadAbilityStateChanged(token, isPreForeground);
 }
 
 int32_t AmsMgrScheduler::CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,
@@ -877,6 +876,15 @@ int32_t AmsMgrScheduler::CheckPreloadAppRecordExist(const std::string &bundleNam
     }
     isExist = amsMgrServiceInner_->CheckPreloadAppRecordExist(bundleName, userId, appIndex);
     return ERR_OK;
+}
+
+int32_t AmsMgrScheduler::VerifyKillProcessPermission(const std::string &bundleName)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return AAFwk::ERR_APP_MGR_SERVICE_NOT_READY;
+    }
+    return static_cast<int32_t>(amsMgrServiceInner_->VerifyKillProcessPermission(bundleName));
 }
 } // namespace AppExecFwk
 }  // namespace OHOS

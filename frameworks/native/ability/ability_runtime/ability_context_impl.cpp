@@ -18,11 +18,14 @@
 #include <native_engine/native_engine.h>
 
 #include "ability_manager_client.h"
-#include "hitrace_meter.h"
+#include "application_configuration_manager.h"
+#include "configuration_convertor.h"
+#include "bindable_sub_thread.h"
 #include "connection_manager.h"
 #include "dialog_request_callback_impl.h"
 #include "dialog_ui_extension_callback.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "json_utils.h"
 #include "remote_object_wrapper.h"
 #include "request_constants.h"
@@ -34,8 +37,6 @@
 #include "ui_content.h"
 #endif // SUPPORT_SCREEN
 #include "want_params_wrapper.h"
-#include "configuration_convertor.h"
-#include "application_configuration_manager.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -54,6 +55,11 @@ struct RequestResult {
     AAFwk::Want resultWant;
     RequestDialogResultTask task;
 };
+
+AbilityContextImpl::AbilityContextImpl()
+{
+    subThreadObject_ = std::make_unique<BindableSubThread>();
+}
 
 Global::Resource::DeviceType AbilityContextImpl::GetDeviceType() const
 {
@@ -1330,10 +1336,25 @@ void AbilityContextImpl::OnRequestSuccess(const std::string &requestId, const Ap
             }
         }
     }
-
     if (result != nullptr) {
         TAG_LOGI(AAFwkTag::CONTEXT, "requestId=%{public}s, call onRequestSuccess", requestId.c_str());
         result->onRequestSuccess_(element, message);
+        return;
+    }
+    std::shared_ptr<OnAtomicRequestResult> atomicResult = nullptr;
+    {
+        std::lock_guard lock(onAtomicRequestResultMutex_);
+        for (auto iter = onAtomicRequestResults_.begin(); iter != onAtomicRequestResults_.end(); iter++) {
+            if ((*iter)->requestId_ == requestId) {
+                atomicResult = *iter;
+                onAtomicRequestResults_.erase(iter);
+                break;
+            }
+        }
+    }
+    if (atomicResult != nullptr) {
+        TAG_LOGI(AAFwkTag::CONTEXT, "requestId=%{public}s, call onRequestSuccess", requestId.c_str());
+        atomicResult->onRequestSuccess_(atomicResult->appId_);
         return;
     }
 
@@ -1341,7 +1362,7 @@ void AbilityContextImpl::OnRequestSuccess(const std::string &requestId, const Ap
 }
 
 void AbilityContextImpl::OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
     std::shared_ptr<OnRequestResultElement> result = nullptr;
     {
@@ -1354,48 +1375,69 @@ void AbilityContextImpl::OnRequestFailure(const std::string &requestId, const Ap
             }
         }
     }
-
     if (result != nullptr) {
         TAG_LOGI(AAFwkTag::CONTEXT, "requestId=%{public}s, call onRequestFailure", requestId.c_str());
         result->onRequestFailure_(element, message);
+        return;
+    }
+    std::shared_ptr<OnAtomicRequestResult> atomicResult = nullptr;
+    {
+        std::lock_guard lock(onAtomicRequestResultMutex_);
+        for (auto iter = onAtomicRequestResults_.begin(); iter != onAtomicRequestResults_.end(); iter++) {
+            if ((*iter)->requestId_ == requestId) {
+                atomicResult = *iter;
+                onAtomicRequestResults_.erase(iter);
+                break;
+            }
+        }
+    }
+    if (atomicResult != nullptr) {
+        TAG_LOGI(AAFwkTag::CONTEXT, "requestId=%{public}s, call onRequestFailure", requestId.c_str());
+        int32_t failureCode = 0;
+        std::string failureMessage;
+        GetFailureInfoByMessage(message, failureCode, failureMessage, resultCode);
+        atomicResult->onRequestFailure_(atomicResult->appId_, failureCode, failureMessage);
         return;
     }
 
     TAG_LOGE(AAFwkTag::CONTEXT, "requestId=%{public}s not exist", requestId.c_str());
 }
 
-
-ErrCode AbilityContextImpl::StartAppServiceExtensionAbility(const AAFwk::Want& want)
+ErrCode AbilityContextImpl::StartExtensionAbilityWithExtensionType(const AAFwk::Want &want,
+    AppExecFwk::ExtensionAbilityType extensionType)
 {
-    TAG_LOGI(AAFwkTag::CONTEXT, "StartAppServiceExtensionAbility, name:%{public}s %{public}s",
+    TAG_LOGI(AAFwkTag::CONTEXT, "StartExtensionAbilityWithExtensionType, name:%{public}s %{public}s",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(
-        want, token_, DEFAULT_INVAL_VALUE, AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+        want, token_, DEFAULT_INVAL_VALUE, extensionType);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "failed:%{public}d", err);
     }
     return err;
 }
 
-ErrCode AbilityContextImpl::StopAppServiceExtensionAbility(const AAFwk::Want& want)
+
+ErrCode AbilityContextImpl::StopExtensionAbilityWithExtensionType(const AAFwk::Want& want,
+    AppExecFwk::ExtensionAbilityType extensionType)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "StopAppServiceExtensionAbility, name:%{public}s %{public}s",
+    TAG_LOGD(AAFwkTag::CONTEXT, "StopExtensionAbilityWithExtensionType, name:%{public}s %{public}s",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StopExtensionAbility(
-        want, token_, DEFAULT_INVAL_VALUE, AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+        want, token_, DEFAULT_INVAL_VALUE, extensionType);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "failed %{public}d", err);
     }
     return err;
 }
 
-ErrCode AbilityContextImpl::ConnectAppServiceExtensionAbility(const AAFwk::Want& want,
-    const sptr<AbilityConnectCallback>& connectCallback)
+ErrCode AbilityContextImpl::ConnectExtensionAbilityWithExtensionType(const AAFwk::Want& want,
+    const sptr<AbilityConnectCallback>& connectCallback, AppExecFwk::ExtensionAbilityType extensionType)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::CONTEXT, "ConnectAppServiceExtensionAbility, caller:%{public}s, target:%{public}s",
+    TAG_LOGI(AAFwkTag::CONTEXT, "ConnectExtensionAbilityWithExtensionType, caller:%{public}s, target:%{public}s",
         abilityInfo_ == nullptr ? "" : abilityInfo_->name.c_str(), want.GetElement().GetAbilityName().c_str());
-    ErrCode ret = ConnectionManager::GetInstance().ConnectAppServiceExtensionAbility(token_, want, connectCallback);
+    ErrCode ret = ConnectionManager::GetInstance()
+        .ConnectExtensionAbilityWithExtensionType(token_, want, connectCallback, extensionType);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "failed %{public}d", ret);
     }
@@ -1406,6 +1448,40 @@ ErrCode AbilityContextImpl::SetOnNewWantSkipScenarios(int32_t scenarios)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return AAFwk::AbilityManagerClient::GetInstance()->SetOnNewWantSkipScenarios(token_, scenarios);
+}
+
+ErrCode AbilityContextImpl::AddCompletionHandlerForAtomicService(const std::string &requestId,
+    OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId)
+{
+    if (onRequestSucc == nullptr || onRequestFail == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "either func is null");
+        return ERR_INVALID_VALUE;
+    }
+    std::lock_guard lock(onAtomicRequestResultMutex_);
+    for (auto iter = onAtomicRequestResults_.begin(); iter != onAtomicRequestResults_.end(); iter++) {
+        if ((*iter)->requestId_ == requestId) {
+            TAG_LOGI(AAFwkTag::CONTEXT, "requestId=%{public}s already exists", requestId.c_str());
+            return ERR_OK;
+        }
+    }
+    onAtomicRequestResults_.emplace_back(std::make_shared<OnAtomicRequestResult>(
+        requestId, appId, onRequestSucc, onRequestFail));
+    return ERR_OK;
+}
+
+void AbilityContextImpl::GetFailureInfoByMessage(
+    const std::string &message, int32_t &failureCode, std::string &failureMessage, int32_t resultCode)
+{
+    if (resultCode == USER_CANCEL) {
+        failureCode = static_cast<int32_t>(FailureCode::FAILURE_CODE_USER_CANCEL);
+        failureMessage = "The user canceled this startup";
+    } else if (message.find("User refused redirection") != std::string::npos) {
+        failureCode = static_cast<int32_t>(FailureCode::FAILURE_CODE_USER_REFUSE);
+        failureMessage = "User refused redirection";
+    } else {
+        failureCode = static_cast<int32_t>(FailureCode::FAILURE_CODE_SYSTEM_MALFUNCTION);
+        failureMessage = "A system error occurred";
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

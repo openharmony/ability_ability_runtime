@@ -76,6 +76,7 @@ ohos_unittest("ui_extension_session_info_test") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
+    "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",

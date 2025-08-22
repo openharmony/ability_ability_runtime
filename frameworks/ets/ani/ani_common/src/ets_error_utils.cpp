@@ -25,6 +25,9 @@ constexpr const char *ERR_MSG_NOT_MAINTHREAD = "Caller error. Caller from non-ma
 constexpr const char *ERR_MSG_INVALID_NUM_PARAMS = "Parameter error. The number of parameters is invalid.";
 constexpr const char *NOT_SYSTEM_APP = "The application is not system-app, can not use system-api.";
 constexpr const char *BUSINESS_ERROR_CLASS = "L@ohos/base/BusinessError;";
+constexpr const char *ERROR_CLASS_NAME = "Lescompat/Error;";
+constexpr const char* ERROR_MSG_TRANSFER_CLASS_NOT_FOUND = "Unable to find the class for transferring.";
+constexpr int32_t ERROR_CODE_TRANSFER_CLASS_NOT_FOUND = 10200067;
 } // namespace
 
 void EtsErrorUtil::ThrowError(ani_env *env, ani_object err)
@@ -105,6 +108,12 @@ void EtsErrorUtil::ThrowNotSystemAppError(ani_env *env)
         env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), NOT_SYSTEM_APP));
 }
 
+void EtsErrorUtil::ThrowEtsTransferClassError(ani_env *env)
+{
+    EtsErrorUtil::ThrowError(env, EtsErrorUtil::CreateError(
+        env, static_cast<int32_t>(ERROR_CODE_TRANSFER_CLASS_NOT_FOUND), ERROR_MSG_TRANSFER_CLASS_NOT_FOUND));
+}
+
 void EtsErrorUtil::ThrowInvalidParamError(ani_env *env, const std::string &message)
 {
     if (env == nullptr) {
@@ -182,7 +191,7 @@ ani_object EtsErrorUtil::WrapError(ani_env *env, const std::string &msg)
         return nullptr;
     }
     ani_class cls = nullptr;
-    if ((status = env->FindClass("Lescompat/Error;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass(ERROR_CLASS_NAME, &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "FindClass failed %{public}d", status);
         return nullptr;
     }

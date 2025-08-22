@@ -30,8 +30,9 @@ void* DynamicFindSymbol(void* so, const char* symbol);
 const char* DynamicGetError();
 void DynamicFreeLibrary(void* so);
 #ifdef __OHOS__
-void DynamicInitNamespace(Dl_namespace* ns, void* parent, const char* entries, const char* name);
-void DynamicInitNewNamespace(Dl_namespace* ns, const char* entries, const char* name);
+void DynamicInitNamespace(Dl_namespace* ns, const char* entries, const char* name);
+void DynamicInherit(Dl_namespace* child, const char* parent, const char* shared);
+void DynamicInheritByName(const char* child, const char* parent, const char* shared);
 #endif
 };
 

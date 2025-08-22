@@ -232,7 +232,7 @@ HWTEST_F(AmsMgrProxyTest, NotifyPreloadAbilityStateChanged_0100, TestSize.Level1
     GTEST_LOG_(INFO) << "NotifyPreloadAbilityStateChanged_0100 start";
     ASSERT_NE(amsMgrProxy_, nullptr);
 
-    auto result = amsMgrProxy_->NotifyPreloadAbilityStateChanged(nullptr);
+    auto result = amsMgrProxy_->NotifyPreloadAbilityStateChanged(nullptr, true);
     EXPECT_EQ(result, AAFwk::INVALID_CALLER_TOKEN);
     GTEST_LOG_(INFO) << "NotifyPreloadAbilityStateChanged_0100 end";
 }
@@ -252,7 +252,7 @@ HWTEST_F(AmsMgrProxyTest, NotifyPreloadAbilityStateChanged_0200, TestSize.Level1
         .WillOnce(Return(ERR_NULL_OBJECT));
 
     sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
-    auto result = amsMgrProxy_->NotifyPreloadAbilityStateChanged(token);
+    auto result = amsMgrProxy_->NotifyPreloadAbilityStateChanged(token, true);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     GTEST_LOG_(INFO) << "NotifyPreloadAbilityStateChanged_0200 end";
 }
@@ -272,7 +272,7 @@ HWTEST_F(AmsMgrProxyTest, NotifyPreloadAbilityStateChanged_0300, TestSize.Level1
         .WillOnce(Return(ERR_OK));
 
     sptr<IRemoteObject> token = new (std::nothrow) MockAbilityToken();
-    auto result = amsMgrProxy_->NotifyPreloadAbilityStateChanged(token);
+    auto result = amsMgrProxy_->NotifyPreloadAbilityStateChanged(token, true);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "NotifyPreloadAbilityStateChanged_0300 end";
 }

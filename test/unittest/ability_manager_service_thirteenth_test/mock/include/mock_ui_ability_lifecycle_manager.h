@@ -391,9 +391,9 @@ public:
 
     bool IsBundleStarting(pid_t pid);
 
-    void RecordPidKilling(pid_t pid, const std::string &reason);
+    void RecordPidKilling(pid_t pid, const std::string &reason, bool isKillPrecedeStart);
 
-    int32_t NotifyStartupExceptionBySCB(int32_t requestId);
+    int32_t NotifyStartupExceptionBySCB(int32_t requestId, const std::string &reason);
 
 private:
     void AddStartingPid(pid_t pid);
@@ -439,7 +439,7 @@ private:
 
     // byCall
     int CallAbilityLocked(const AbilityRequest &abilityRequest, std::string &errMsg);
-    sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
+    sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest, int32_t requestId) const;
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo,
         const AbilityRequest &abilityRequest, std::string &errMsg);
     bool IsHookModule(const AbilityRequest &abilityRequest) const;

@@ -19,10 +19,25 @@ import contextConstant from '@ohos.app.ability.contextConstant'
 import { ApplicationInfo } from 'bundleManager.ApplicationInfo'
 import resmgr from '@ohos.resourceManager'
 
+class Cleaner {
+  public ptr: long = 0;
+  constructor(ptr: long) {
+    this.ptr = ptr;
+  }
+  native clean(): void;
+}
+export function callback(cleaner: Cleaner): void {
+  cleaner.clean();
+}
+let destroyRegister = new FinalizationRegistry<Cleaner>(callback);
+let unregisterToken = new object();
+
 export class Context extends BaseContext {
   static {
     loadLibrary("context_ani");
   }
+  etsContextPtr: long = 0;
+  private cleaner: Cleaner | null = null;
   filesDir: string = "";
   tempDir: string = "";
   preferencesDir: string = "";
@@ -36,12 +51,30 @@ export class Context extends BaseContext {
       this.applicationInfo = applicationInfo;
       this.resourceManager = resourceManager;
   }
+  private setEtsContextPtr(ptr: long) {
+    if (this.etsContextPtr == 0) {
+      this.etsContextPtr = ptr;
+    }
+    this.registerCleaner(this.etsContextPtr);
+  }
+  registerCleaner(ptr: long): void {
+    this.cleaner = new Cleaner(ptr);
+    destroyRegister.register(this, this.cleaner!, unregisterToken);
+  }
+  unregisterCleaner(): void {
+    destroyRegister.unregister(unregisterToken);
+  }
   public native getApplicationContextSync(): ApplicationContext;
+  public native createModuleResourceManagerSync(bundleName: string, moduleName: string): resmgr.ResourceManager;
   private native switchArea(mode: contextConstant.AreaMode): void;
   private native getArea(): contextConstant.AreaMode;
 
   getApplicationContext(): ApplicationContext {
     return this.getApplicationContextSync();
+  }
+
+  createModuleResourceManager(bundleName: string, moduleName: string): resmgr.ResourceManager {
+    return this.createModuleResourceManagerSync(bundleName, moduleName);
   }
 
   set area(mode: contextConstant.AreaMode) {

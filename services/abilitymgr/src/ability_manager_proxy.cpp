@@ -17,6 +17,7 @@
 
 #include "ability_scheduler_stub.h"
 #include "ability_util.h"
+#include "app_utils.h"
 #include "freeze_util.h"
 #include "hitrace_chain_utils.h"
 #include "hitrace_meter.h"
@@ -71,6 +72,10 @@ bool AbilityManagerProxy::ExtendMaxIpcCapacityForWant(const Want &want, MessageP
 
 int AbilityManagerProxy::StartAbility(const Want &want, int32_t userId, int requestCode)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbility", HITRACE_FLAG_INCLUDE_ASYNC);
     int error;
     MessageParcel data;
@@ -162,6 +167,10 @@ AppExecFwk::ElementName AbilityManagerProxy::GetElementNameByToken(sptr<IRemoteO
 int AbilityManagerProxy::StartAbility(const Want &want, const AbilityStartSetting &abilityStartSetting,
     const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbility", HITRACE_FLAG_INCLUDE_ASYNC);
     int error;
     MessageParcel data;
@@ -208,6 +217,10 @@ int AbilityManagerProxy::StartAbility(const Want &want, const AbilityStartSettin
 int AbilityManagerProxy::StartAbility(
     const Want &want, const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbility", HITRACE_FLAG_INCLUDE_ASYNC);
     int error;
     MessageParcel data;
@@ -251,6 +264,10 @@ int AbilityManagerProxy::StartAbility(
 int AbilityManagerProxy::StartAbilityWithSpecifyTokenId(
     const Want &want, const sptr<IRemoteObject> &callerToken, uint32_t specifyTokenId, int32_t userId, int requestCode)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     int error;
     MessageParcel data;
     MessageParcel reply;
@@ -297,6 +314,10 @@ int AbilityManagerProxy::StartAbilityWithSpecifyTokenId(
 int32_t AbilityManagerProxy::StartAbilityByInsightIntent(const Want &want, const sptr<IRemoteObject> &callerToken,
     uint64_t intentId, int32_t userId)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbilityByInsightIntent", HITRACE_FLAG_INCLUDE_ASYNC);
     MessageParcel data;
     if (callerToken == nullptr) {
@@ -342,6 +363,10 @@ int32_t AbilityManagerProxy::StartAbilityByInsightIntent(const Want &want, const
 int AbilityManagerProxy::StartAbility(const Want &want, const StartOptions &startOptions,
     const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbility", HITRACE_FLAG_INCLUDE_ASYNC);
     int error;
     MessageParcel data;
@@ -388,6 +413,10 @@ int AbilityManagerProxy::StartAbility(const Want &want, const StartOptions &star
 int AbilityManagerProxy::StartAbilityAsCaller(const Want &want, const sptr<IRemoteObject> &callerToken,
     sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbilityAsCaller", HITRACE_FLAG_INCLUDE_ASYNC);
     MessageParcel data;
     MessageParcel reply;
@@ -422,6 +451,10 @@ int AbilityManagerProxy::StartAbilityAsCaller(const Want &want, const StartOptio
     const sptr<IRemoteObject> &callerToken, sptr<IRemoteObject> asCallerSourceToken,
     int32_t userId, int requestCode)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbilityAsCaller", HITRACE_FLAG_INCLUDE_ASYNC);
     int error;
     MessageParcel data;
@@ -458,6 +491,10 @@ int AbilityManagerProxy::StartAbilityAsCaller(const Want &want, const StartOptio
 int AbilityManagerProxy::StartAbilityForResultAsCaller(
     const Want &want, const sptr<IRemoteObject> &callerToken, int requestCode, int32_t userId)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbilityForResultAsCaller", HITRACE_FLAG_INCLUDE_ASYNC);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -486,6 +523,10 @@ int AbilityManagerProxy::StartAbilityForResultAsCaller(
 int AbilityManagerProxy::StartAbilityForResultAsCaller(const Want &want, const StartOptions &startOptions,
     const sptr<IRemoteObject> &callerToken, int requestCode, int32_t userId)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbilityForResultAsCaller", HITRACE_FLAG_INCLUDE_ASYNC);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -516,6 +557,10 @@ int AbilityManagerProxy::StartAbilityForResultAsCaller(const Want &want, const S
 ErrCode AbilityManagerProxy::StartUIAbilities(const std::vector<AAFwk::Want> &wantList,
     const std::string &requestKey, sptr<IRemoteObject> callerToken)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start abilities");
+        return INNER_ERR;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -605,6 +650,10 @@ int AbilityManagerProxy::StartAbilityByUIContentSession(const Want &want,
     const sptr<IRemoteObject> &callerToken, const sptr<SessionInfo> &sessionInfo,
     int32_t userId, int requestCode)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbilityByUIContentSession", HITRACE_FLAG_INCLUDE_ASYNC);
     int error;
     MessageParcel data;
@@ -632,6 +681,10 @@ int AbilityManagerProxy::StartAbilityByUIContentSession(const Want &want, const 
     const sptr<IRemoteObject> &callerToken, const sptr<SessionInfo> &sessionInfo,
     int32_t userId, int requestCode)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbilityByUIContentSession", HITRACE_FLAG_INCLUDE_ASYNC);
     int error;
     MessageParcel data;
@@ -662,6 +715,10 @@ int AbilityManagerProxy::StartAbilityByUIContentSession(const Want &want, const 
 int AbilityManagerProxy::StartAbilityOnlyUIAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
     uint32_t specifyTokenId)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     MessageParcel data;
     if (callerToken == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid callertoken");
@@ -701,6 +758,10 @@ int AbilityManagerProxy::StartAbilityOnlyUIAbility(const Want &want, const sptr<
 int32_t AbilityManagerProxy::StartExtensionAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
     int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartExtensionAbility", HITRACE_FLAG_INCLUDE_ASYNC);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     int error;
@@ -743,6 +804,10 @@ int32_t AbilityManagerProxy::StartExtensionAbility(const Want &want, const sptr<
 
 int AbilityManagerProxy::RequestModalUIExtension(const Want &want)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
@@ -766,6 +831,10 @@ int AbilityManagerProxy::RequestModalUIExtension(const Want &want)
 int AbilityManagerProxy::PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
     int32_t userId, int32_t hostPid)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
@@ -841,6 +910,10 @@ int AbilityManagerProxy::ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessio
 
 int AbilityManagerProxy::StartUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo, int32_t userId)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start uiext");
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartUIExtensionAbility", HITRACE_FLAG_INCLUDE_ASYNC);
     int error;
     MessageParcel data;
@@ -888,6 +961,10 @@ int AbilityManagerProxy::StartUIExtensionAbility(const sptr<SessionInfo> &extens
 
 int AbilityManagerProxy::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart, uint32_t sceneFlag)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start by scb");
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("StartUIAbilityBySCB", HITRACE_FLAG_INCLUDE_ASYNC);
     MessageParcel data;
     MessageParcel reply;
@@ -923,6 +1000,10 @@ int AbilityManagerProxy::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool
 int AbilityManagerProxy::StopExtensionAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
     int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     int error;
     MessageParcel data;
     MessageParcel reply;
@@ -1277,6 +1358,10 @@ int AbilityManagerProxy::ConnectAbilityCommon(
     const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
     AppExecFwk::ExtensionAbilityType extensionType, int32_t userId, bool isQueryExtensionOnly)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("ConnectAbilityCommon", HITRACE_FLAG_INCLUDE_ASYNC);
     MessageParcel data;
     MessageParcel reply;
@@ -1312,6 +1397,10 @@ int AbilityManagerProxy::ConnectAbilityCommon(
 int AbilityManagerProxy::ConnectUIExtensionAbility(const Want &want, const sptr<IAbilityConnection> &connect,
     const sptr<SessionInfo> &sessionInfo, int32_t userId, sptr<UIExtensionAbilityConnectInfo> connectInfo)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1387,6 +1476,10 @@ int AbilityManagerProxy::DisconnectAbility(sptr<IAbilityConnection> connect)
 sptr<IAbilityScheduler> AbilityManagerProxy::AcquireDataAbility(
     const Uri &uri, bool tryBind, const sptr<IRemoteObject> &callerToken)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start acquire data");
+        return nullptr;
+    }
     int error;
     MessageParcel data;
     MessageParcel reply;
@@ -2721,7 +2814,7 @@ int AbilityManagerProxy::LockMissionForCleanup(int32_t missionId)
 
     error = SendRequest(AbilityManagerInterfaceCode::LOCK_MISSION_FOR_CLEANUP, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "send error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "send error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -2744,7 +2837,7 @@ int AbilityManagerProxy::UnlockMissionForCleanup(int32_t missionId)
     }
     error = SendRequest(AbilityManagerInterfaceCode::UNLOCK_MISSION_FOR_CLEANUP, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "unlock mission,error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "unlock mission,error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -2772,7 +2865,7 @@ void AbilityManagerProxy::SetLockedState(int32_t sessionId, bool lockedState)
     MessageOption option(MessageOption::TF_ASYNC);
     auto error = SendRequest(AbilityManagerInterfaceCode::SET_SESSION_LOCKED_STATE, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "error: %d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "error: %{public}d", error);
         return;
     }
     return;
@@ -3018,7 +3111,7 @@ int AbilityManagerProxy::CleanMission(int32_t missionId)
     }
     error = SendRequest(AbilityManagerInterfaceCode::CLEAN_MISSION, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "clean mission, error: %d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "clean mission, error: %{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -3038,7 +3131,7 @@ int AbilityManagerProxy::CleanAllMissions()
     }
     error = SendRequest(AbilityManagerInterfaceCode::CLEAN_ALL_MISSIONS, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -3061,7 +3154,7 @@ int AbilityManagerProxy::MoveMissionToFront(int32_t missionId)
     }
     error = SendRequest(AbilityManagerInterfaceCode::MOVE_MISSION_TO_FRONT, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -3088,7 +3181,7 @@ int AbilityManagerProxy::MoveMissionToFront(int32_t missionId, const StartOption
     }
     error = SendRequest(AbilityManagerInterfaceCode::MOVE_MISSION_TO_FRONT_BY_OPTIONS, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -3177,7 +3270,7 @@ int AbilityManagerProxy::StartUser(int userId, sptr<IUserCallback> callback, boo
     MessageOption option(MessageOption::TF_ASYNC);
     auto error = SendRequest(AbilityManagerInterfaceCode::START_USER, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -3232,7 +3325,7 @@ int AbilityManagerProxy::StopUser(int userId, const sptr<IUserCallback> &callbac
     MessageOption option(MessageOption::TF_ASYNC);
     auto error = SendRequest(AbilityManagerInterfaceCode::STOP_USER, data, reply, option);
     if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%d", error);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -3727,15 +3820,19 @@ int AbilityManagerProxy::UnRegisterMissionListener(const std::string &deviceId,
 }
 
 int AbilityManagerProxy::StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
-    const sptr<IRemoteObject> &callerToken, int32_t accountId)
+    const sptr<IRemoteObject> &callerToken, int32_t accountId, bool isSilent)
 {
     std::string errMsg;
-    return StartAbilityByCallWithErrMsg(want, connect, callerToken, accountId, errMsg);
+    return StartAbilityByCallWithErrMsg(want, connect, callerToken, accountId, errMsg, isSilent);
 }
 
 int AbilityManagerProxy::StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
-    const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg)
+    const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg, bool isSilent)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerProxy::StartAbilityByCall begin.");
     int error;
     MessageParcel data;
@@ -3780,7 +3877,12 @@ int AbilityManagerProxy::StartAbilityByCallWithErrMsg(const Want &want, const sp
         return ERR_INVALID_VALUE;
     }
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerProxy::StartAbilityByCall SendRequest Call.");
+    if (!data.WriteBool(isSilent)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "isSilent write fail");
+        errMsg = "isSilent write fail";
+        return ERR_INVALID_VALUE;
+    }
+
     error = SendRequest(AbilityManagerInterfaceCode::START_CALL_ABILITY, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
@@ -4665,6 +4767,10 @@ void AbilityManagerProxy::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInf
 
 int32_t AbilityManagerProxy::StartSpecifiedAbilityBySCB(const Want &want)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
@@ -5709,6 +5815,10 @@ bool AbilityManagerProxy::IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToken,
 
 int32_t AbilityManagerProxy::StartShortcut(const Want &want, const StartOptions &startOptions)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -5885,6 +5995,10 @@ int32_t AbilityManagerProxy::PreStartMission(const std::string& bundleName, cons
 ErrCode AbilityManagerProxy::OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
     int32_t userId, int requestCode)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     Ability_MANAGER_HITRACE_CHAIN_NAME("OpenLink", HITRACE_FLAG_INCLUDE_ASYNC);
     if (callerToken == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
@@ -6273,6 +6387,10 @@ int32_t AbilityManagerProxy::QueryAtomicServiceStartupRule(sptr<IRemoteObject> c
 
 int32_t AbilityManagerProxy::StartSelfUIAbility(const Want &want)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -6297,6 +6415,10 @@ int32_t AbilityManagerProxy::StartSelfUIAbility(const Want &want)
 
 int32_t AbilityManagerProxy::StartSelfUIAbilityWithStartOptions(const Want &want, const StartOptions &options)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -6541,6 +6663,10 @@ int32_t AbilityManagerProxy::RevokeDelegator(sptr<IRemoteObject> token)
 
 int32_t AbilityManagerProxy::StartAbilityWithWait(Want &want, sptr<IAbilityStartWithWaitObserver> &observer)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
+        return INNER_ERR;
+    }
     CHECK_POINTER_AND_RETURN_LOG(observer, ERR_NULL_OBJECT, "null observer");
 
     MessageParcel data;
@@ -7017,6 +7143,10 @@ int32_t AbilityManagerProxy::NotifyStartupExceptionBySCB(int32_t requestId)
 
 int32_t AbilityManagerProxy::PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex)
 {
+    if (AppUtils::GetInstance().IsForbidStart()) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", bundleName.c_str());
+        return INNER_ERR;
+    }
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "writeInterfaceToken fail");

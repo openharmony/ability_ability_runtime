@@ -254,7 +254,7 @@ void JsServiceExtension::SystemAbilityStatusChangeListener::OnAddSystemAbility(i
 {
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "systemAbilityId: %{public}d add", systemAbilityId);
     if (systemAbilityId == WINDOW_MANAGER_SERVICE_ID) {
-        TAG_LOGI(AAFwkTag::SERVICE_EXT, "RegisterDisplayInfoChangedListener");
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "RegisterDisplayInfoChangedListener");
         Rosen::WindowManager::GetInstance().RegisterDisplayInfoChangedListener(token_, tmpDisplayListener_);
     }
 }
@@ -303,7 +303,7 @@ void JsServiceExtension::OnStart(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     Extension::OnStart(want);
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "call");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
 
     auto context = GetContext();
     if (context != nullptr) {
@@ -341,7 +341,7 @@ void JsServiceExtension::OnStop()
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "service extension connection not disconnected");
     }
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "UnregisterDisplayInfoChangedListener");
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "UnregisterDisplayInfoChangedListener");
     auto context = GetContext();
     if (context == nullptr || context->GetToken() == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
@@ -542,48 +542,6 @@ bool JsServiceExtension::HandleInsightIntent(const AAFwk::Want &want)
     return true;
 }
 
-bool JsServiceExtension::GetInsightIntentExecutorInfo(const Want &want,
-    const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &executeParam,
-    InsightIntentExecutorInfo &executorInfo)
-{
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
-    auto context = GetContext();
-    if (executeParam == nullptr || context == nullptr || abilityInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Param invalid");
-        return false;
-    }
-
-    const WantParams &wantParams = want.GetParams();
-    executorInfo.srcEntry = wantParams.GetStringParam(AppExecFwk::INSIGHT_INTENT_SRC_ENTRY);
-    executorInfo.hapPath = abilityInfo_->hapPath;
-    executorInfo.esmodule = abilityInfo_->compileMode == AppExecFwk::CompileMode::ES_MODULE;
-    executorInfo.token = context->GetToken();
-    executorInfo.executeParam = executeParam;
-    return true;
-}
-
-bool JsServiceExtension::OnInsightIntentExecuteDone(uint64_t intentId,
-    const AppExecFwk::InsightIntentExecuteResult &result)
-{
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "Notify execute done, intentId %{public}" PRIu64"", intentId);
-    auto context = GetContext();
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
-        return false;
-    }
-    auto token = context->GetToken();
-    if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null token");
-        return false;
-    }
-    auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token, intentId, result);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Notify execute done failed");
-        return false;
-    }
-    return true;
-}
-
 napi_value JsServiceExtension::CallObjectMethod(const char* name, napi_value const* argv, size_t argc)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, std::string("CallObjectMethod:") + name);
@@ -609,7 +567,7 @@ napi_value JsServiceExtension::CallObjectMethod(const char* name, napi_value con
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "get '%{public}s' from ServiceExtension obj failed", name);
         return nullptr;
     }
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "CallFunction(%{public}s) ok", name);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "CallFunc(%{public}s)", name);
     napi_value result = nullptr;
     napi_status status = napi_call_function(env, obj, method, argc, argv, &result);
     if (status != napi_ok) {
@@ -769,22 +727,6 @@ void JsServiceExtension::OnConfigurationUpdated(const AppExecFwk::Configuration&
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     ServiceExtension::OnConfigurationUpdated(configuration);
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "call");
-    auto context = GetContext();
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
-        return;
-    }
-
-    auto contextConfig = context->GetConfiguration();
-    if (contextConfig != nullptr) {
-        TAG_LOGD(AAFwkTag::SERVICE_EXT, "Config dump: %{public}s", contextConfig->GetName().c_str());
-        std::vector<std::string> changeKeyV;
-        contextConfig->CompareDifferent(changeKeyV, configuration);
-        if (!changeKeyV.empty()) {
-            contextConfig->Merge(changeKeyV, configuration);
-        }
-        TAG_LOGD(AAFwkTag::SERVICE_EXT, "Config dump after merge: %{public}s", contextConfig->GetName().c_str());
-    }
     ConfigurationUpdated();
 }
 

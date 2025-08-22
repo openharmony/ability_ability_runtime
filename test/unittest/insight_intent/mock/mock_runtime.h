@@ -56,6 +56,8 @@ public:
     bool UnLoadRepairPatch(const std::string& patchFile) override { return false; }
     void RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath) override {}
     void StartProfiler(const DebugOption debugOption) override {}
+    void SetExtensionApiCheckCallback(
+        std::function<bool(const std::string &className, const std::string &fileName)> &cb) override {}
     void SetDeviceDisconnectCallback(const std::function<bool()> &cb) override {}
     void SetLanguage(const Runtime::Language& language) { language_ = language; }
 private:

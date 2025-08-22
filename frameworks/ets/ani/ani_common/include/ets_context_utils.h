@@ -29,8 +29,13 @@ void BindResourceManager(ani_env *aniEnv, ani_class contextClass, ani_object con
 void CreateEtsBaseContext(ani_env *aniEnv, ani_class contextClass, ani_object contextObj,
     std::shared_ptr<Context> context);
 ani_object GetApplicationContextSync(ani_env *env, ani_object aniObj);
+std::shared_ptr<Context> GetBaseContext(ani_env *env, ani_object aniObj);
 void SwitchArea(ani_env *env, ani_object obj, ani_enum_item areaModeItem);
 ani_enum_item GetArea(ani_env *env, ani_object obj);
+ani_object CreateModuleResourceManagerSync(ani_env *env, ani_object aniObj,
+    ani_string bundleName, ani_string moduleName);
+void Clean(ani_env *env, ani_object object);
+bool SetNativeContextLong(ani_env *env, ani_object aniObj, ani_long nativeContextLong);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

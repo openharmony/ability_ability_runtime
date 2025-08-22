@@ -30,7 +30,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 class AbilityContextImpl : public AbilityContext {
 public:
-    AbilityContextImpl() = default;
+    AbilityContextImpl();
     virtual ~AbilityContextImpl() = default;
 
     Global::Resource::DeviceType GetDeviceType() const override;
@@ -362,13 +362,18 @@ public:
      * @param message, the message returned to the callback.
      */
     void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message) override;
+        const std::string &message, int32_t resultCode = 0) override;
 
-    ErrCode StartAppServiceExtensionAbility(const Want &want) override;
-    ErrCode StopAppServiceExtensionAbility(const Want& want) override;
-    ErrCode ConnectAppServiceExtensionAbility(const AAFwk::Want& want,
-        const sptr<AbilityConnectCallback>& connectCallback) override;
+    ErrCode StartExtensionAbilityWithExtensionType(const AAFwk::Want &want,
+        AppExecFwk::ExtensionAbilityType extensionType) override;
+    ErrCode StopExtensionAbilityWithExtensionType(const AAFwk::Want& want,
+        AppExecFwk::ExtensionAbilityType extensionType) override;
+    ErrCode ConnectExtensionAbilityWithExtensionType(const AAFwk::Want& want,
+        const sptr<AbilityConnectCallback>& connectCallback, AppExecFwk::ExtensionAbilityType extensionType) override;
     ErrCode SetOnNewWantSkipScenarios(int32_t scenarios) override;
+
+    ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId, OnAtomicRequestSuccess onRequestSucc,
+        OnAtomicRequestFailure onRequestFail, const std::string &appId) override;
 
 private:
     sptr<IRemoteObject> token_ = nullptr;
@@ -397,9 +402,13 @@ private:
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);
     sptr<IRemoteObject> GetSessionToken();
     void SetWindowRectangleParams(AAFwk::Want &want);
+    void GetFailureInfoByMessage(const std::string &message, int32_t &failureCode,
+        std::string &failureMessage, int32_t resultCode);
 
     std::mutex onRequestResultMutex_;
+    std::mutex onAtomicRequestResultMutex_;
     std::vector<std::shared_ptr<OnRequestResultElement>> onRequestResults_;
+    std::vector<std::shared_ptr<OnAtomicRequestResult>> onAtomicRequestResults_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

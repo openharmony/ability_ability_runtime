@@ -792,7 +792,7 @@ public:
      * @param callback callback for notify start result
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+    int32_t CreateNativeChildProcess(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback, const std::string &customProcessName) override;
 #endif // SUPPORT_CHILD_PROCESS
 
@@ -852,6 +852,8 @@ public:
      * @return Return ERR_OK if success, others fail.
      */
     int32_t PromoteCurrentToCandidateMasterProcess(bool isInsertToHead) override;
+
+    virtual int32_t QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles) override;
     
     /**
      * Revoke current process as a candidate master process.

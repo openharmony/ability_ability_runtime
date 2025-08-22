@@ -327,3 +327,90 @@ HWTEST_F(JsTestRunnerTest, Js_Test_Runner_Test_0600, Function | MediumTest | Lev
 
     EXPECT_TRUE(iface_cast<MockTestObserverStub>(shobserver)->testStatusFlag);
 }
+
+/**
+ * @tc.number: Js_GetTestRunnerPath_0100
+ * @tc.name: ReportStatus
+ * @tc.desc: gettestrunner path
+ */
+HWTEST_F(JsTestRunnerTest, Js_GetTestRunnerPath_0100, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Js_GetTestRunnerPath_0100 is called");
+
+    MockAbilityDelegatorStub::finishFlag_ = false;
+    std::map<std::string, std::string> paras;
+    paras.emplace(KEY_TEST_BUNDLE_NAME, VALUE_TEST_BUNDLE_NAME);
+    paras.emplace(KEY_TEST_RUNNER_CLASS, VALUE_TEST_RUNNER_CLASS);
+    paras.emplace(KEY_TEST_CASE, VALUE_TEST_CASE);
+    paras.emplace(KEY_TEST_WAIT_TIMEOUT, VALUE_TEST_WAIT_TIMEOUT);
+
+    Want want;
+    for (auto para : paras) {
+        want.SetParam(para.first, para.second);
+    }
+
+    std::shared_ptr<AbilityDelegatorArgs> abilityArgs = std::make_shared<AbilityDelegatorArgs>(want);
+
+    std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
+    std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        abilityArgs,
+        true);
+    sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub);
+    std::shared_ptr<AbilityDelegator> abilityDelegator =
+        std::make_shared<AbilityDelegator>(context, std::move(testRunner), iRemoteObj);
+    AbilityDelegatorRegistry::RegisterInstance(abilityDelegator, abilityArgs,
+        OHOS::AbilityRuntime::Runtime::Language::JS);
+
+    sptr<IRemoteObject> shobserver = sptr<IRemoteObject>(new MockTestObserverStub);
+    abilityDelegator->observer_ = shobserver;
+
+    JsTestRunner* pTestRunner = static_cast<JsTestRunner*>(static_cast<void*>((testRunner.get())));
+    std::string path = pTestRunner->GetTestRunnerPath(abilityArgs);
+    TAG_LOGI(AAFwkTag::TEST, "Js_GetTestRunnerPath_0100 GetTestRunnerPath is called: %{public}s ", path.c_str());
+    EXPECT_EQ(path, "ets/testrunner/JSUserTestRunnerjs");
+}
+
+/**
+ * @tc.number: Js_GetTestRunnerPath_0200
+ * @tc.name: ReportStatus
+ * @tc.desc: gettestrunner path
+ */
+HWTEST_F(JsTestRunnerTest, Js_GetTestRunnerPath_0200, Function | MediumTest | Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "Js_GetTestRunnerPath_0200 is called");
+
+    MockAbilityDelegatorStub::finishFlag_ = false;
+    std::map<std::string, std::string> paras;
+    paras.emplace(KEY_TEST_BUNDLE_NAME, VALUE_TEST_BUNDLE_NAME);
+    paras.emplace(KEY_TEST_RUNNER_CLASS, VALUE_TEST_RUNNER_CLASS);
+    paras.emplace(KEY_TEST_CASE, VALUE_TEST_CASE);
+    paras.emplace(KEY_TEST_WAIT_TIMEOUT, VALUE_TEST_WAIT_TIMEOUT);
+
+    Want want;
+    for (auto para : paras) {
+        want.SetParam(para.first, para.second);
+    }
+
+    std::shared_ptr<AbilityDelegatorArgs> abilityArgs = std::make_shared<AbilityDelegatorArgs>(want);
+    abilityArgs->SetTestRunnerModeAndPath("static", "mypatch.ets");
+
+    std::shared_ptr<OHOS::AbilityRuntime::Context> context = std::make_shared<OHOS::AbilityRuntime::ContextImpl>();
+    std::unique_ptr<TestRunner> testRunner = TestRunner::Create(
+        std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName())->GetRuntime(),
+        abilityArgs,
+        true);
+    sptr<IRemoteObject> iRemoteObj = sptr<IRemoteObject>(new MockAbilityDelegatorStub);
+    std::shared_ptr<AbilityDelegator> abilityDelegator =
+        std::make_shared<AbilityDelegator>(context, std::move(testRunner), iRemoteObj);
+    AbilityDelegatorRegistry::RegisterInstance(abilityDelegator, abilityArgs,
+        OHOS::AbilityRuntime::Runtime::Language::JS);
+
+    sptr<IRemoteObject> shobserver = sptr<IRemoteObject>(new MockTestObserverStub);
+    abilityDelegator->observer_ = shobserver;
+
+    JsTestRunner* pTestRunner = static_cast<JsTestRunner*>(static_cast<void*>((testRunner.get())));
+    std::string path = pTestRunner->GetTestRunnerPath(abilityArgs);
+    TAG_LOGI(AAFwkTag::TEST, "Js_GetTestRunnerPath_0200 GetTestRunnerPath is called: %{public}s ", path.c_str());
+    EXPECT_EQ(path, "/mypatch");
+}

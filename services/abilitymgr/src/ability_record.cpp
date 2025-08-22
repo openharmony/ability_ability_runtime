@@ -33,8 +33,8 @@
 #include "hitrace_meter.h"
 #include "image_source.h"
 #include "json_utils.h"
-#include "keep_alive_process_manager.h"
 #include "last_exit_detail_info.h"
+#include "main_element_utils.h"
 #include "multi_instance_utils.h"
 #include "os_account_manager_wrapper.h"
 #include "ui_service_extension_connection_constants.h"
@@ -340,7 +340,7 @@ void AbilityRecord::LoadUIAbility()
     g_addLifecycleEventTask(token_, methodName);
 }
 
-int AbilityRecord::LoadAbility(bool isShellCall)
+int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "LoadLifecycle: abilityName:%{public}s", abilityInfo_.name.c_str());
@@ -375,11 +375,12 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     loadParam.instanceKey = instanceKey_;
     loadParam.isCallerSetProcess = IsCallerSetProcess();
     loadParam.customProcessFlag = customProcessFlag_;
-    want_.RemoveParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED);
-    if (KeepAliveProcessManager::GetInstance().IsKeepAliveBundle(abilityInfo_.applicationInfo.bundleName, -1)) {
-        want_.SetParam(Want::PARAM_APP_KEEP_ALIVE_ENABLED, true);
-        loadParam.isKeepAlive = true;
-    }
+    loadParam.isStartupHide = isStartupHide;
+    auto userId = abilityInfo_.uid / BASE_USER_RANGE;
+    bool isMainUIAbility =
+        MainElementUtils::IsMainUIAbility(abilityInfo_.bundleName, abilityInfo_.name, userId);
+    MainElementUtils::SetMainUIAbilityKeepAliveFlag(isMainUIAbility,
+        abilityInfo_.bundleName, loadParam);
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
         loadParam, abilityInfo_, abilityInfo_.applicationInfo, want_);
     want_.RemoveParam(IS_HOOK);
@@ -470,6 +471,9 @@ void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ForegroundUIExtensionAbility:%{public}s", GetURI().c_str());
     CHECK_POINTER(lifecycleDeal_);
 
+    if (IsAbilityState(AbilityState::BACKGROUND)) {
+        SendAppStartupTypeEvent(AppExecFwk::AppStartType::HOT);
+    }
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
 #ifdef SUPPORT_SCREEN
@@ -486,7 +490,8 @@ void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
     }
 }
 
-void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag, bool isShellCall)
+void AbilityRecord::ProcessForegroundAbility(
+    uint32_t tokenId, uint32_t sceneFlag, bool isShellCall, bool isStartupHide)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetElementName().GetURI();
@@ -497,35 +502,33 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
         GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, tokenId);
     }
 #endif // SUPPORT_UPMS
-
-    if (isReady_) {
-        PostForegroundTimeoutTask();
-        if (IsAbilityState(AbilityState::FOREGROUND)) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
-            ForegroundAbility(sceneFlag);
-        } else {
-            // background to active state
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "MoveToForeground, %{public}s", element.c_str());
-            lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-            std::string bundleName = GetAbilityInfo().bundleName;
-            int32_t uid = GetUid();
-            auto pid = GetPid();
-            if (pid > 0) {
-                auto callerPid = GetCallerRecord() ? GetCallerRecord()->GetPid() : -1;
-                TAG_LOGD(AAFwkTag::ABILITYMGR,
-                    "ReportEventToRSS---%{public}d_%{public}s_%{public}d callerPid=%{public}d",
-                    uid, bundleName.c_str(), pid, callerPid);
-                ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, "THAW_BY_FOREGROUND_ABILITY", pid,
-                    callerPid);
-            }
-            SetAbilityStateInner(AbilityState::FOREGROUNDING);
-            DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
-        }
-    } else {
+    if (!isReady_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "To load ability.");
         lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-        LoadAbility(isShellCall);
+        LoadAbility(isShellCall, isStartupHide);
+        return;
     }
+
+    PostForegroundTimeoutTask();
+    if (IsAbilityState(AbilityState::FOREGROUND)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
+        if (IsFrozenByPreload()) {
+            SetFrozenByPreload(false);
+            auto ret =
+                DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(token_, false);
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "NotifyPreloadAbilityStateChanged by start, ret: %{public}d", ret);
+        }
+        ForegroundAbility(sceneFlag);
+        return;
+    }
+    // background to active state
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "MoveToForeground, %{public}s", element.c_str());
+    lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
+    ResSchedUtil::GetInstance().ReportEventToRSS(GetUid(), GetAbilityInfo().bundleName,
+        "THAW_BY_FOREGROUND_ABILITY", GetPid(), GetCallerRecord() ? GetCallerRecord()->GetPid() : -1);
+    SendAppStartupTypeEvent(AppExecFwk::AppStartType::HOT);
+    SetAbilityStateInner(AbilityState::FOREGROUNDING);
+    DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
 }
 
 void AbilityRecord::PostForegroundTimeoutTask()
@@ -1417,9 +1420,7 @@ int AbilityRecord::TerminateAbility()
     HandleDlpClosed();
 #endif // WITH_DLP
     AAFwk::EventInfo eventInfo;
-    eventInfo.bundleName = GetAbilityInfo().bundleName;
-    eventInfo.abilityName = GetAbilityInfo().name;
-    eventInfo.appIndex = abilityInfo_.applicationInfo.appIndex;
+    BuildTerminateAbilityEventInfo(eventInfo, 0);
     if (clearMissionFlag_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "deleteAbilityRecoverInfo before clearMission");
         (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
@@ -1429,13 +1430,26 @@ int AbilityRecord::TerminateAbility()
     ResSchedUtil::GetInstance().ReportLoadingEventToRss(LoadingStage::DESTROY_END, GetPid(), GetUid(),
         0, GetRecordId());
     AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::TERMINATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
-    eventInfo.errCode = DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token_, clearMissionFlag_);
-    if (eventInfo.errCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "terminate ability failed: %{public}d", eventInfo.errCode);
-        AAFwk::EventReport::SendAbilityEvent(
-            AAFwk::EventName::TERMINATE_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+    auto ret = DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token_, clearMissionFlag_);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "terminate ability failed: %{public}d", ret);
     }
-    return eventInfo.errCode;
+    return ret;
+}
+
+void AbilityRecord::BuildTerminateAbilityEventInfo(EventInfo &eventInfo, int32_t errCode)
+{
+    eventInfo.bundleName = GetAbilityInfo().bundleName;
+    eventInfo.abilityName = GetAbilityInfo().name;
+    eventInfo.appIndex = abilityInfo_.applicationInfo.appIndex;
+    eventInfo.errCode = errCode;
+}
+
+void AbilityRecord::SendTerminateAbilityErrorEvent(int32_t errCode)
+{
+    EventInfo eventInfo;
+    BuildTerminateAbilityEventInfo(eventInfo, errCode);
+    EventReport::SendAbilityEvent(EventName::TERMINATE_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
 }
 
 const AppExecFwk::AbilityInfo &AbilityRecord::GetAbilityInfo() const
@@ -1856,7 +1870,7 @@ void AbilityRecord::DisconnectAbilityWithWant(const Want &want)
 
 void AbilityRecord::CommandAbility()
 {
-    TAG_LOGI(AAFwkTag::SERVICE_EXT, "startId_:%{public}d.", startId_);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "startId_:%{public}d.", startId_);
     Want want = GetWant();
     UpdateDmsCallerInfo(want);
     CHECK_POINTER(lifecycleDeal_);
@@ -3641,7 +3655,7 @@ bool AbilityRecord::IsAbilityWindowReady()
 void AbilityRecord::SetAbilityWindowState(const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd, bool isFinished)
 {
     if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null sessionInfo");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "null sessionInfo");
         return;
     }
     if (isFinished) {
@@ -3875,13 +3889,13 @@ void AbilityRecord::ScheduleCollaborate(const Want &want)
 }
 
 void AbilityRecord::NotifyAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
     CHECK_POINTER(lifecycleDeal_);
     nlohmann::json jsonObject = nlohmann::json {
         { JSON_KEY_ERR_MSG, message },
     };
-    lifecycleDeal_->NotifyAbilityRequestFailure(requestId, element, jsonObject.dump());
+    lifecycleDeal_->NotifyAbilityRequestFailure(requestId, element, jsonObject.dump(), resultCode);
 }
 
 void AbilityRecord::NotifyAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element)
@@ -3928,6 +3942,20 @@ void AbilityRecord::UpdateUIExtensionBindInfo(const WantParams &wantParams)
         want_.RemoveParam(UIEXTENSION_HOST_BUNDLENAME);
     }
     want_.SetParam(UIEXTENSION_HOST_BUNDLENAME, wantParams.GetStringParam(UIEXTENSION_HOST_BUNDLENAME));
+}
+
+void AbilityRecord::SendAppStartupTypeEvent(const AppExecFwk::AppStartType startType)
+{
+    AAFwk::EventInfo eventInfo;
+    auto abilityInfo = GetAbilityInfo();
+    eventInfo.abilityName = abilityInfo.name;
+    auto applicationInfo = GetApplicationInfo();
+    eventInfo.bundleName = applicationInfo.name;
+    eventInfo.versionName = applicationInfo.versionName;
+    eventInfo.versionCode = applicationInfo.versionCode;
+    eventInfo.pid = static_cast<int32_t>(GetPid());
+    eventInfo.startType = static_cast<int32_t>(startType);
+    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_STARTUP_TYPE, HiSysEventType::BEHAVIOR, eventInfo);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

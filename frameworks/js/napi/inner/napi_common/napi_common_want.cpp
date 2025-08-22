@@ -1138,7 +1138,7 @@ napi_value WrapWantParamsFD(napi_env env, const AAFwk::WantParams &wantParams)
     WantParams fds;
     for (auto it = paramList.begin(); it != paramList.end(); it++) {
         if (AAFwk::IWantParams::Query(it->second) == nullptr) {
-            TAG_LOGW(AAFwkTag::JSNAPI, "not wantpram");
+            TAG_LOGD(AAFwkTag::JSNAPI, "not wantpram");
             continue;
         }
         auto value = wantParams.GetParam(it->first);

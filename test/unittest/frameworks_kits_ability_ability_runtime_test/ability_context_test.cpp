@@ -309,16 +309,18 @@ public:
     {
         return ERR_OK;
     }
-    virtual ErrCode StartAppServiceExtensionAbility(const AAFwk::Want &want)
+    virtual ErrCode StartExtensionAbilityWithExtensionType(const AAFwk::Want &want,
+        AppExecFwk::ExtensionAbilityType extensionType)
     {
         return ERR_OK;
     }
-    virtual ErrCode StopAppServiceExtensionAbility(const AAFwk::Want& want)
+    virtual ErrCode StopExtensionAbilityWithExtensionType(const AAFwk::Want& want,
+        AppExecFwk::ExtensionAbilityType extensionType)
     {
         return ERR_OK;
     }
-    virtual ErrCode ConnectAppServiceExtensionAbility(const AAFwk::Want& want,
-        const sptr<AbilityConnectCallback>& connectCallback)
+    virtual ErrCode ConnectExtensionAbilityWithExtensionType(const AAFwk::Want& want,
+        const sptr<AbilityConnectCallback>& connectCallback, AppExecFwk::ExtensionAbilityType extensionType)
     {
         return ERR_OK;
     }
@@ -504,6 +506,11 @@ public:
     {
         return;
     }
+    virtual ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId,
+        OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId)
+    {
+        return ERR_OK;
+    }
 
     /**
      * @brief Add CompletioHandler.
@@ -540,7 +547,7 @@ public:
      * @param message, the message returned to the callback.
      */
     virtual void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message)
+        const std::string &message, int32_t resultCode)
     {
         return;
     }

@@ -19,13 +19,42 @@ import { BusinessError } from '@ohos.base';
 import uiExtensionHost from '@ohos.uiExtensionHost';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
+
+class Cleaner {
+  static callback(cleaner: Cleaner): void {
+      cleaner.clean()
+  }
+  constructor(targetPtr: long) {
+      this.targetPtr = targetPtr
+  }
+  native clean(): void
+  private targetPtr: long = 0
+}
+let destroyRegister = new FinalizationRegistry<Cleaner>(Cleaner.callback)
+let unregisterToken = new object()
+
 export default class UIExtensionContentSession {
   nativeContextSession:long = 0;
+  private cleaner: Cleaner | null = null;
+  registerCleaner(ptr: long): void {
+      this.cleaner = new Cleaner(ptr)
+      destroyRegister.register(this, this.cleaner!, unregisterToken);
+  }
+  unregisterCleaner(): void {
+      destroyRegister.unregister(unregisterToken);
+  }
+  constructor(contextSession:long) {
+    if(this.nativeContextSession == 0){
+          this.nativeContextSession = contextSession;
+    }
+    this.registerCleaner(this.nativeContextSession)
+  }
   native nativeSendData(data: Record<string, Object>): void;
   native loadContent(path: string, storage?: LocalStorage): void;
   native setWindowBackgroundColor(color: string): void;
   native getUIExtensionHostWindowProxy(): uiExtensionHost.UIExtensionHostWindowProxy;
   native nativeSetReceiveDataCallback(callback: (data: Record<string, Object>) => void): void;
+  native nativeSetReceiveDataForResultCallback(callback: (data: Record<string, Object>) => Record<string, Object>): void;
   native terminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
   native terminateSelfWithResultSync(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
 
@@ -35,6 +64,10 @@ export default class UIExtensionContentSession {
 
   setReceiveDataCallback(callback: (data: Record<string, Object>) => void): void {
     this.nativeSetReceiveDataCallback(callback);
+  }
+
+  setReceiveDataForResultCallback(callback: (data: Record<string, Object>) => Record<string, Object>): void {
+    this.nativeSetReceiveDataForResultCallback(callback);
   }
 
   terminateSelf(callback:AsyncCallback<void>): void {

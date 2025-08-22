@@ -275,6 +275,16 @@ MappingInfo SourceMap::Find(int32_t row, int32_t col, const SourceMapData& targe
     if (row < 1 || col < 1 || targetMap.afterPos_.empty() || targetMap.sources_.empty()) {
         return MappingInfo {row, col, key};
     }
+    size_t realSourceIndex = std::min(REAL_SOURCE_INDEX, targetMap.sources_.size());
+    std::string sources = targetMap.sources_.substr(realSourceIndex,
+                                                    targetMap.sources_.size() - realSourceIndex - 1);
+    if (key.rfind(".js") != std::string::npos) {
+        return MappingInfo {
+            .row = row,
+            .col = col,
+            .sources = sources,
+        };
+    }
     row--;
     col--;
     // binary search
@@ -294,8 +304,6 @@ MappingInfo SourceMap::Find(int32_t row, int32_t col, const SourceMapData& targe
             left = mid + 1;
         }
     }
-    std::string sources = targetMap.sources_.substr(REAL_SOURCE_INDEX,
-                                                    targetMap.sources_.size() - REAL_SOURCE_INDEX - 1);
     auto pos = sources.find(WEBPACK);
     if (pos != std::string::npos) {
         sources.replace(pos, sizeof(WEBPACK) - 1, "");

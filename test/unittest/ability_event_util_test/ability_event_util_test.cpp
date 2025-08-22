@@ -80,6 +80,24 @@ HWTEST_F(AbilityEventUtilTest, AbilityEventUtil_SendStartAbilityError_0200, Test
 }
 
 /**
+ * @tc.name: AbilityEventUtil_SendStartAbilityError_0300
+ * @tc.desc: SendKillProcessWithReasonEvent
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityEventUtilTest, AbilityEventUtil_SendStartAbilityError_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityEventUtil_SendStartAbilityError_0300 start");
+    std::shared_ptr<AbilityEventUtil> eventUtil = std::make_shared<AbilityEventUtil>();
+    EventInfo eventInfo = {};
+    int32_t errCode = 0;
+    std::string errMsg = "test event";
+    eventUtil->SendStartAbilityErrorEvent(eventInfo, errCode, errMsg);
+    EXPECT_EQ(eventInfo.userId, -1);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityEventUtil_SendStartAbilityError_0300 end");
+}
+
+/**
  * @tc.name: AbilityEventUtil_SendKillProcessWithReasonEvent_0100
  * @tc.desc: SendKillProcessWithReasonEvent
  * @tc.type: FUNC

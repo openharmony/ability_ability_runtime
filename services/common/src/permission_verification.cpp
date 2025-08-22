@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "tokenid_kit.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
+#include "record_cost_time_util.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -54,13 +55,14 @@ bool PermissionVerification::VerifyCallingPermission(
     const std::string &permissionName, const uint32_t specifyTokenId) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    RecordCostTimeUtil timeRecord("VerifyCallingPermission");
     TAG_LOGD(AAFwkTag::DEFAULT, "permission %{public}s, specifyTokenId: %{public}u",
         permissionName.c_str(), specifyTokenId);
     auto callerToken = specifyTokenId == 0 ? GetCallingTokenID() : specifyTokenId;
     TAG_LOGD(AAFwkTag::DEFAULT, "Token: %{public}u", callerToken);
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName, false);
     if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "%{public}s: PERMISSION_DENIED", permissionName.c_str());
+        TAG_LOGW(AAFwkTag::DEFAULT, "%{public}s: PERMISSION_DENIED", permissionName.c_str());
         return false;
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "verify Token success");
@@ -151,7 +153,6 @@ bool PermissionVerification::VerifyRunningInfoPerm() const
         TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
         return true;
     }
-    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
     return false;
 }
 
@@ -161,7 +162,6 @@ bool PermissionVerification::VerifyCustomSandbox(uint32_t accessTokenId) const
         TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
         return true;
     }
-    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
     return false;
 }
 
@@ -171,7 +171,6 @@ bool PermissionVerification::VerifyControllerPerm() const
         TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
         return true;
     }
-    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
     return false;
 }
 
@@ -185,7 +184,6 @@ bool PermissionVerification::VerifyDlpPermission(Want &want) const
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_ACCESS_DLP)) {
         return true;
     }
-    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
     return false;
 }
 
@@ -194,7 +192,6 @@ int PermissionVerification::VerifyAccountPermission() const
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS)) {
         return ERR_OK;
     }
-    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
     return CHECK_PERMISSION_FAILED;
 }
 
@@ -205,7 +202,6 @@ bool PermissionVerification::VerifyMissionPermission() const
         TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
         return true;
     }
-    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
     return false;
 }
 
@@ -215,7 +211,6 @@ int PermissionVerification::VerifyAppStateObserverPermission() const
         TAG_LOGD(AAFwkTag::DEFAULT, "Permission granted");
         return ERR_OK;
     }
-    TAG_LOGE(AAFwkTag::DEFAULT, "Permission denied");
     return ERR_PERMISSION_DENIED;
 }
 
@@ -226,8 +221,6 @@ int32_t PermissionVerification::VerifyUpdateConfigurationPerm() const
             "Permission %{public}s granted", PermissionConstants::PERMISSION_UPDATE_CONFIGURATION);
         return ERR_OK;
     }
-    TAG_LOGE(AAFwkTag::DEFAULT,
-        "Permission %{public}s denied", PermissionConstants::PERMISSION_UPDATE_CONFIGURATION);
     return ERR_PERMISSION_DENIED;
 }
 
@@ -238,8 +231,6 @@ int32_t PermissionVerification::VerifyUpdateAPPConfigurationPerm() const
             "Permission %{public}s granted", PermissionConstants::PERMISSION_UPDATE_APP_CONFIGURATION);
         return ERR_OK;
     }
-    TAG_LOGE(AAFwkTag::DEFAULT,
-        "Permission %{public}s denied", PermissionConstants::PERMISSION_UPDATE_APP_CONFIGURATION);
     return ERR_PERMISSION_DENIED;
 }
 
@@ -250,8 +241,6 @@ bool PermissionVerification::VerifyInstallBundlePermission() const
             "Permission %{public}s granted", PermissionConstants::PERMISSION_INSTALL_BUNDLE);
         return true;
     }
-
-    TAG_LOGE(AAFwkTag::DEFAULT, "Permission %{public}s denied", PermissionConstants::PERMISSION_INSTALL_BUNDLE);
     return false;
 }
 
@@ -262,9 +251,6 @@ bool PermissionVerification::VerifyGetBundleInfoPrivilegedPermission() const
             "Permission %{public}s granted", PermissionConstants::PERMISSION_GET_BUNDLE_INFO_PRIVILEGED);
         return true;
     }
-
-    TAG_LOGE(AAFwkTag::DEFAULT,
-        "Permission %{public}s denied", PermissionConstants::PERMISSION_GET_BUNDLE_INFO_PRIVILEGED);
     return false;
 }
 
@@ -424,7 +410,7 @@ int PermissionVerification::JudgeInvisibleAndBackground(const VerificationInfo &
     TAG_LOGD(AAFwkTag::DEFAULT, "specifyTokenId: %{public}u, isCallByShortcut %{public}d",
         specifyTokenId, isCallByShortcut);
     if (specifyTokenId == 0 &&
-        SupportSystemAbilityPermission::IsSupportSaCallPermission() && IsSACall()) {
+        SupportSystemAbilityPermission::IsSupportSaCallPermission()) {
         TAG_LOGD(AAFwkTag::DEFAULT, "Support SA call");
         return ERR_OK;
     }

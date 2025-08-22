@@ -22,6 +22,7 @@
 #include <functional>
 
 #include "task_handler_wrap.h"
+#include "oh_mock_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -31,27 +32,21 @@ public:
 };
 class EventWrap {
 public:
-    EventWrap(uint32_t eventId) : EventWrap(eventId, 0) {}
+    explicit EventWrap(uint32_t eventId) : EventWrap(eventId, 0) {}
     EventWrap(uint32_t eventId, int64_t param) {}
     EventWrap(uint32_t eventId, int64_t param, bool isExtension) {}
     EventWrap(uint32_t eventId, int64_t param, bool isExtension, const std::string &taskName) {}
     EventWrap(uint32_t eventId, const std::string &taskName) {}
     EventWrap(uint32_t eventId, std::shared_ptr<EventDataBase> data) {}
 
-    uint32_t GetEventId() const
-    {
-        return 0;
-    }
+    OH_MOCK_METHOD_WITH_PREFIX_AMD_SUFFIX(, const, uint32_t, EventWrap, GetEventId);
 
     int64_t GetParam() const
     {
         return 0;
     }
 
-    std::shared_ptr<EventDataBase> GetEventData() const
-    {
-        return nullptr;
-    }
+    OH_MOCK_METHOD_WITH_PREFIX_AMD_SUFFIX(, const, std::shared_ptr<EventDataBase>, EventWrap, GetEventData);
 
     TaskHandle GetEventTask() const
     {
@@ -70,16 +65,16 @@ public:
         return false;
     }
 
-    void SetRunCount(int runCount) {}
+    void SetCreateTime(int64_t) {}
 
-    int GetRunCount() const
+    int64_t GetCreateTime() const
     {
         return 0;
     }
 
-    void SetTimeout(uint32_t timeout) {}
+    void SetTimeout(int64_t) {}
 
-    uint32_t GetTimeout() const
+    int64_t GetTimeout() const
     {
         return 0;
     }

@@ -1012,11 +1012,11 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, GetRenderProcesses_001, TestSize.Level1)
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(info1, 0, temp);
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
 
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         std::move(ipcFd), std::move(sharedFd), std::move(crashFd), appRecord);
     renderRecord->SetPid(1);
     appRecord->renderRecordMap_.insert(std::pair<int32_t, std::shared_ptr<RenderRecord>>(1, renderRecord));
@@ -2214,14 +2214,14 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcess_001, TestSize.Level1)
 
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
     pid_t renderPid = 1;
     bool isGPU = false;
     auto ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd),
         std::move(sharedFd), std::move(crashFd), renderPid, isGPU);
-    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_001 end");
 }
 
@@ -2239,9 +2239,9 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcess_002, TestSize.Level1)
 
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
     pid_t renderPid = 1;
     bool isGPU = true;
     auto ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd),
@@ -2265,9 +2265,9 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcess_003, TestSize.Level1)
 
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
     pid_t renderPid = 1;
     bool isGPU = true;
     auto ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd),
@@ -2294,9 +2294,9 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcess_004, TestSize.Level1)
 
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
     pid_t renderPid = 1;
     bool isGPU = false;
     auto ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, std::move(ipcFd),
@@ -2320,12 +2320,12 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcess_005, TestSize.Level1)
 
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
     pid_t renderPid = 1;
     bool isGPU = false;
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         std::move(ipcFd), std::move(sharedFd), std::move(crashFd),
         AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_);
     AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->renderRecordMap_.insert(std::pair<const int32_t,
@@ -2351,12 +2351,12 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcess_006, TestSize.Level1)
 
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
     pid_t renderPid = 1;
     bool isGPU = false;
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         std::move(ipcFd), std::move(sharedFd), std::move(crashFd),
         AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_);
     AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->renderRecordMap_.insert(std::pair<const int32_t,
@@ -2386,13 +2386,13 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcess_007, TestSize.Level1)
 
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
     pid_t renderPid = 1;
     bool isGPU = false;
     sptr<IRenderScheduler> renderScheduler = new MyRenderScheduler();
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         std::move(ipcFd), std::move(sharedFd), std::move(crashFd),
         AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_);
     renderRecord->renderScheduler_ = renderScheduler;
@@ -2497,10 +2497,10 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, AttachRenderProcess_005, TestSize.Level1
         std::make_shared<AppRunningRecord>(nullptr, 0, "");
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         std::move(ipcFd), std::move(sharedFd), std::move(crashFd),
         AAFwk::MyStatus::GetInstance().getAppRunningRecordByRenderPid_);
     AAFwk::MyStatus::GetInstance().getAppRunningRecordByRenderPid_->SetBrowserHost(MyRemoteObject::GetInstance());
@@ -2528,10 +2528,10 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, AttachRenderProcess_006, TestSize.Level1
         std::make_shared<AppRunningRecord>(nullptr, 0, "");
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         std::move(ipcFd), std::move(sharedFd), std::move(crashFd),
         AAFwk::MyStatus::GetInstance().getAppRunningRecordByRenderPid_);
     AAFwk::MyStatus::GetInstance().getAppRunningRecordByRenderPid_->SetBrowserHost(nullptr);
@@ -2653,10 +2653,10 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcessImpl_001, TestSize.Lev
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         std::move(ipcFd), std::move(sharedFd), std::move(crashFd), appRecord);
     pid_t pid = 1;
     auto ret = appMgrServiceInner->StartRenderProcessImpl(renderRecord, appRecord, pid, false);
@@ -2683,10 +2683,10 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcessImpl_002, TestSize.Lev
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         std::move(ipcFd), std::move(sharedFd), std::move(crashFd), appRecord);
     pid_t pid = 1;
     auto ret = appMgrServiceInner->StartRenderProcessImpl(renderRecord, appRecord, pid, false);
@@ -2711,10 +2711,10 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcessImpl_003, TestSize.Lev
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         std::move(ipcFd), std::move(sharedFd), std::move(crashFd), appRecord);
     pid_t pid = 1;
     auto ret = appMgrServiceInner->StartRenderProcessImpl(renderRecord, appRecord, pid, false);
@@ -2739,10 +2739,10 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, StartRenderProcessImpl_004, TestSize.Lev
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         std::move(ipcFd), std::move(sharedFd), std::move(crashFd), appRecord);
     pid_t pid = 1;
     auto ret = appMgrServiceInner->StartRenderProcessImpl(renderRecord, appRecord, pid, true);
@@ -2769,10 +2769,10 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, SetRenderStartMsg_001, TestSize.Level1)
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         std::move(ipcFd), std::move(sharedFd), std::move(crashFd), appRecord);
     int32_t renderUid = 1;
     bool isGPU = true;
@@ -2800,10 +2800,10 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, SetRenderStartMsg_002, TestSize.Level1)
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     pid_t hostPid = 1;
     std::string renderParam = "111";
-    FdGuard ipcFd(1);
-    FdGuard sharedFd(1);
-    FdGuard crashFd(1);
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam,
+    FdGuard ipcFd(-1);
+    FdGuard sharedFd(-1);
+    FdGuard crashFd(-1);
+    std::shared_ptr<RenderRecord> renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam,
         std::move(ipcFd), std::move(sharedFd), std::move(crashFd), appRecord);
     int32_t renderUid = 1;
     bool isGPU = true;

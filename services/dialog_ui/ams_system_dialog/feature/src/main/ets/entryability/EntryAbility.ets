@@ -99,8 +99,7 @@ export default class EntryAbility extends UIAbility {
   onWindowStageCreate(windowStage: window.WindowStage): void {
     windowStage.loadContent('pages/Index', (err) => {
       if (err.code) {
-        hilog.error(DOMAIN, TAG, 'Failed to load the content. Cause: %{public}s',
-          JSON.stringify(err));
+        hilog.error(DOMAIN, TAG, 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
         return;
       }
       hilog.info(DOMAIN, TAG, 'Succeeded in loading the content.');
@@ -121,7 +120,7 @@ export default class EntryAbility extends UIAbility {
           })
         });
       } catch (err) {
-        hilog.info(DOMAIN, TAG, 'Failed to getMainWindow.');
+        hilog.error(DOMAIN, TAG, 'Failed to getMainWindow. Cause: %{public}s', JSON.stringify(err));
       }
     });
   }

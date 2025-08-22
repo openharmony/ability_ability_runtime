@@ -30,6 +30,7 @@
 #include "refbase.h"
 #include "running_process_info.h"
 #include "singleton.h"
+#include "user_callback.h"
 #include "want.h"
 
 namespace OHOS {

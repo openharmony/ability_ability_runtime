@@ -262,7 +262,7 @@ public:
     virtual bool OnInsightIntentExecuteDone(uint64_t intentId, const AppExecFwk::InsightIntentExecuteResult &result);
 
     virtual void OnExtensionAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message);
+        const std::string &message, int32_t resultCode = 0);
 
     virtual void OnExtensionAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message);

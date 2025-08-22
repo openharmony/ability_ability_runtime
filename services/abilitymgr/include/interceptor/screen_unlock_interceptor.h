@@ -29,6 +29,8 @@ public:
     {
         return;
     };
+private:
+    void QueryTargetAbilityInfo(const AbilityInterceptorParam &param, AppExecFwk::AbilityInfo &targetAbilityInfo);
 };
 } // namespace AAFwk
 } // namespace OHOS

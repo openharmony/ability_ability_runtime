@@ -57,8 +57,9 @@ public:
     bool PreloadModule(const std::string &modulePath);
     bool LoadModule(const std::string &modulePath, const std::string &srcEntrance, void *&cls,
         void *&obj, void *&ref);
-    void FinishPreload();
-    void PostFork(void *napiEnv, const std::string &aotPath);
+    bool FinishPreload();
+    bool PostFork(void *napiEnv, const std::string &aotPath);
+    bool PreloadSystemClass(const char *className);
 
     struct VMEntry {
         ani_vm *aniVm_;

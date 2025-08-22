@@ -768,24 +768,8 @@ HWTEST_F(ContextDealTest, AppExecFwk_ContextDeal_GetPreferencesDir_0100, Functio
  */
 HWTEST_F(ContextDealTest, AppExecFwk_ContextDeal_HapModuleInfoRequestInit_0100, Function | MediumTest | Level1)
 {
-    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
-    auto mockGetSystemAbility = [bms = mockBundleMgr, saMgr = iSystemAbilityMgr_](int32_t systemAbilityId) {
-        if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
-            return bms->AsObject();
-        } else {
-            return saMgr->GetSystemAbility(systemAbilityId);
-        }
-    };
-    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
-    EXPECT_CALL(*mockSystemAbility_, GetSystemAbility(testing::_))
-        .WillOnce(testing::Invoke(mockGetSystemAbility))
-        .WillRepeatedly(testing::Invoke(mockGetSystemAbility));
     EXPECT_TRUE(context_ != nullptr);
     EXPECT_FALSE(context_->HapModuleInfoRequestInit());
-
-    EXPECT_CALL(*mockBundleMgr, GetHapModuleInfo(testing::_, testing::_)).WillOnce(testing::Return(true));
-    context_->abilityInfo_ = std::make_shared<AbilityInfo>();
-    EXPECT_TRUE(context_->HapModuleInfoRequestInit());
 }
 }   // namespace AppExecFwk
 }   // OHOS

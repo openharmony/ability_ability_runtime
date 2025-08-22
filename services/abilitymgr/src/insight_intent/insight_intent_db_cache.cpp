@@ -78,6 +78,7 @@ int32_t InsightIntentDbCache::SaveInsightIntentTotalInfo(const std::string &bund
         moduleName, userId);
     if (res != ERR_OK) {
         TAG_LOGW(AAFwkTag::INTENT, "Save before delete key error");
+        return res;
     }
     return DelayedSingleton<InsightRdbStorageMgr>::GetInstance()
             ->SaveStorageInsightIntentData(bundleName, moduleName, userId, profileInfos);

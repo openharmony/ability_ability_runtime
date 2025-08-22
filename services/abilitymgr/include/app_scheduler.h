@@ -241,7 +241,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     int32_t KillProcessesByPids(const std::vector<int32_t> &pids,
-        const std::string &reason = "KillProcessesByPids", bool subProcess = false);
+        const std::string &reason = "KillProcessesByPids", bool subProcess = false, bool isKillPrecedeStart = false);
 
     /**
      * Set child and parent relationship
@@ -301,8 +301,7 @@ public:
     int KillApplicationByUid(const std::string &bundleName, int32_t uid,
         const std::string& reason = "KillApplicationByUid");
 
-    int NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid,
-        const bool isUpgrade);
+    int NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade);
 
     /**
      * update the application info after new module installed.
@@ -616,10 +615,11 @@ public:
     int32_t PreloadApplicationByPhase(const std::string &bundleName, int32_t userId, int32_t appIndex,
         AppExecFwk::PreloadPhase preloadPhase);
 
-    int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token);
+    int32_t NotifyPreloadAbilityStateChanged(sptr<IRemoteObject> token, bool isPreForeground);
 
     int32_t CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex, bool &isExist);
 
+    int32_t VerifyKillProcessPermission(const std::string &bundleName) const;
 protected:
     /**
      * OnAbilityRequestDone, app manager service call this interface after ability request done.

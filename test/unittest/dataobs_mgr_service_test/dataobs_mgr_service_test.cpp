@@ -18,7 +18,9 @@
 #include "gmock/gmock.h"
 
 #include "access_token.h"
+#include "accesstoken_kit.h"
 #include "dataobs_mgr_interface.h"
+#include "datashare_errno.h"
 #include "mock_data_ability_observer_stub.h"
 #include "token_setproc.h"
 #define private public
@@ -28,6 +30,7 @@
 namespace OHOS {
 namespace AAFwk {
 using namespace testing::ext;
+static int USER_100 = 100;
 class DataObsMgrServiceTest : public testing::Test {
 public:
     DataObsMgrServiceTest() = default;
@@ -770,6 +773,18 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_IsSystemApp_0100, Te
     ret = dataObsMgrServer->IsSystemApp(tokenID, fullTokenId);
     EXPECT_EQ(ret, false);
     TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_IsSystemApp_0100 end");
+}
+
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_VerifyDataSharePermission_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_VerifyDataSharePermission_0100 start");
+    auto dataObsMgrServer = std::make_shared<DataObsMgrService>();
+    std::string proxyUriOk = "datashareproxy://com.acts.datasharetest/test";
+    Uri uri(proxyUriOk);
+    ObserverInfo info(0, 0, 0, 0, true);
+    int32_t ret = dataObsMgrServer->VerifyDataSharePermission(uri, true, info);
+    EXPECT_EQ(ret, DataShare::E_NOT_HAP);
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_VerifyDataSharePermission_0100 end");
 }
 
 }  // namespace AAFwk

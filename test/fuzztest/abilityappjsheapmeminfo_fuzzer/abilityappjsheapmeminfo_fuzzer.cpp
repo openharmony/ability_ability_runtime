@@ -33,8 +33,13 @@ namespace OHOS {
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
 {
     JsHeapDumpInfo js;
+    js.needGc = fdp->ConsumeBool();
+    js.needSnapshot = fdp->ConsumeBool();
+    js.needLeakobj = fdp->ConsumeBool();
+    js.needBinary = fdp->ConsumeBool();
+    js.pid = fdp->ConsumeIntegral<int32_t>()
+    js.tid = fdp->ConsumeIntegral<int32_t>()
     Parcel parcel;
-    parcel.WriteString(fdp->ConsumeRandomLengthString());
     js.Marshalling(parcel);
     return true;
 }

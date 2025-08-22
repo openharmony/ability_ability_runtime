@@ -50,7 +50,7 @@ void JsAbilityStageContext::ConfigurationUpdated(napi_env env, std::shared_ptr<N
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!jsContext || !config) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null jsContext or config");
+        TAG_LOGD(AAFwkTag::APPKIT, "null jsContext or config");
         return;
     }
 
@@ -84,6 +84,10 @@ napi_value CreateJsAbilityStageContext(napi_env env, std::shared_ptr<AbilityRunt
     if (configuration != nullptr && CheckTypeForNapiValue(env, objValue, napi_object)) {
         napi_set_named_property(env, objValue, "config", CreateJsConfiguration(env, *configuration));
     }
+
+    std::string type = "AbilityStageContext";
+    napi_set_named_property(env, objValue, "contextType", CreateJsValue(env, type));
+
     return objValue;
 }
 

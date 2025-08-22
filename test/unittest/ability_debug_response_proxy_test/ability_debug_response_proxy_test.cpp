@@ -71,7 +71,7 @@ HWTEST_F(AbilityDebugResponseProxyTest, OnAbilitysDebugStarted_0100, TestSize.Le
     EXPECT_CALL(*mockStub, OnAbilitysDebugStarted(_)).Times(1);
     proxy->OnAbilitysDebugStarted(tokens);
     testing::Mock::AllowLeak(mockStub);
-    
+
     GTEST_LOG_(INFO) << "OnAbilitysDebugStarted_0100 end";
 }
 
@@ -94,6 +94,7 @@ HWTEST_F(AbilityDebugResponseProxyTest, OnAbilitysDebugStoped_0100, TestSize.Lev
 
     EXPECT_CALL(*mockStub, OnAbilitysDebugStoped(_)).Times(1);
     proxy->OnAbilitysDebugStarted(tokens);
+    testing::Mock::AllowLeak(mockStub);
     GTEST_LOG_(INFO) << "OnAbilitysDebugStoped_0100 end";
 }
 }  // namespace AppExecFwk

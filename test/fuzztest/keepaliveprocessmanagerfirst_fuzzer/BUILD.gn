@@ -66,6 +66,7 @@ ohos_fuzztest("KeepAliveProcessManagerFirstFuzzTest") {
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_path}/utils/server/startup:startup_util",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/common:record_cost_time_util",
   ]
 
   external_deps = [

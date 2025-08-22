@@ -72,7 +72,7 @@ int32_t StartupTaskManager::Prepare()
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     if (tasks_.empty()) {
-        TAG_LOGE(AAFwkTag::STARTUP, "no tasks");
+        TAG_LOGW(AAFwkTag::STARTUP, "no tasks");
         return ERR_STARTUP_INTERNAL_ERROR;
     }
     dispatcher_ = std::make_shared<StartupTaskDispatcher>(tasks_, startupSortResult);

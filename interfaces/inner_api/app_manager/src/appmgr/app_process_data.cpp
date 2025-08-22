@@ -65,6 +65,7 @@ bool AppProcessData::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, appIndex);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(instanceKey));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(bundleName));
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isFromWindowFocusChanged);
 
     return true;
 }
@@ -84,7 +85,7 @@ bool AppProcessData::ReadFromParcel(Parcel &parcel)
     appIndex = parcel.ReadInt32();
     instanceKey = Str16ToStr8(parcel.ReadString16());
     bundleName = Str16ToStr8(parcel.ReadString16());
-
+    isFromWindowFocusChanged = parcel.ReadBool();
     return true;
 }
 

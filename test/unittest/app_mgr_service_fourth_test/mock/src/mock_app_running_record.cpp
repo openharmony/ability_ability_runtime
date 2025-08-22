@@ -172,6 +172,11 @@ const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>>
     return abilitiesMap;
 }
 
+bool AppRunningRecord::IsAlreadyHaveAbility()
+{
+    return true;
+}
+
 sptr<IAppScheduler> AppRunningRecord::GetApplicationClient() const
 {
     return nullptr;
@@ -447,6 +452,16 @@ void AppRunningRecord::SetKeepAliveEnableState(bool isKeepAliveEnable)
 void AppRunningRecord::SetKeepAliveDkv(bool isKeepAliveDkv)
 {
     isKeepAliveDkv_ = isKeepAliveDkv;
+}
+
+void AppRunningRecord::SetMainElementRunning(bool isMainElementRunning)
+{
+    isMainElementRunning_ = isMainElementRunning;
+}
+
+bool AppRunningRecord::IsMainElementRunning() const
+{
+    return isMainElementRunning_;
 }
 
 void AppRunningRecord::SetKeepAliveBundle(bool isKeepAliveBundle)
@@ -960,6 +975,16 @@ void AppRunningRecord::SetPreloadState(PreloadState state)
     preloadState_ = state;
 }
 
+void AppRunningRecord::SetPreloadPhase(PreloadPhase phase)
+{
+    preloadPhase_ = phase;
+}
+
+PreloadPhase AppRunningRecord::GetPreloadPhase()
+{
+    return preloadPhase_;
+}
+
 bool AppRunningRecord::IsPreloading() const
 {
     return preloadState_ == PreloadState::PRELOADING;
@@ -1239,6 +1264,16 @@ int32_t AppRunningRecord::GetAddStageTimeout() const
 void AppRunningRecord::SetDebugFromLocal(bool isDebugFromLocal)
 {
     isDebugFromLocal_ = isDebugFromLocal;
+}
+
+void AppRunningRecord::SetPreForeground(bool isPreForeground)
+{
+    isPreForeground_.store(isPreForeground);
+}
+
+bool AppRunningRecord::IsPreForeground() const
+{
+    return isPreForeground_.load();
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -1132,5 +1132,18 @@ ErrCode BundleMgrHelper::GetPluginInfoForTarget(const std::string &hostBundleNam
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetPluginInfo(hostBundleName, pluginBundleName, userId, pluginBundleInfo);
 }
+
+ErrCode BundleMgrHelper::GetTestRunnerTypeAndPath(const std::string &bundleName, const std::string &moduleName,
+    ModuleTestRunner &testRunner)
+{
+    TAG_LOGD(AAFwkTag::BUNDLEMGRHELPER, "called");
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null bundleMgr");
+        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
+    }
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    return bundleMgr->GetTestRunner(bundleName, moduleName, testRunner);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

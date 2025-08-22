@@ -20,6 +20,7 @@
 #include "configuration_convertor.h"
 #include "display_util.h"
 #include "display_info.h"
+#include "ets_runtime.h"
 #include "ets_ui_ability_instance.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
@@ -57,7 +58,6 @@ constexpr char COMPONENT_STARTUP_NEW_RULES[] = "component.startup.newRules";
 #ifdef SUPPORT_SCREEN
 constexpr int32_t ERR_INVALID_VALUE = -1;
 #endif
-constexpr const char* USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
 }
 UIAbility *UIAbility::Create(const std::unique_ptr<Runtime> &runtime)
 {
@@ -348,7 +348,7 @@ bool UIAbility::IsRestoredInContinuation() const
 bool UIAbility::ShouldRecoverState(const AAFwk::Want &want)
 {
     if (!want.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "appRecovery not recovery restart");
+        TAG_LOGD(AAFwkTag::UIABILITY, "appRecovery not recovery restart");
         return false;
     }
 
@@ -633,7 +633,7 @@ void UIAbility::DispatchLifecycleOnForeground(const AAFwk::Want &want)
 void UIAbility::HandleCreateAsRecovery(const AAFwk::Want &want)
 {
     if (!want.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "appRecovery not recovery restart");
+        TAG_LOGD(AAFwkTag::UIABILITY, "appRecovery not recovery restart");
         return;
     }
 
@@ -689,6 +689,88 @@ void UIAbility::EnableAbilityRecovery(const std::shared_ptr<AppExecFwk::AbilityR
 int32_t UIAbility::OnShare(AAFwk::WantParams &wantParams)
 {
     return ERR_OK;
+}
+
+void UIAbility::BindHybridContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record)
+{
+    if (application == nullptr || record == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null application or record");
+        return;
+    }
+    auto appInfo = application->GetApplicationInfo();
+    if (appInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null appInfo");
+        return;
+    }
+    if (appInfo->arkTSMode != AppExecFwk::Constants::ARKTS_MODE_HYBRID) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "not hybrid app, no need to create hybrid context");
+        return;
+    }
+
+    auto abilityInfo = record->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityInfo");
+        return;
+    }
+    if (abilityInfo->arkTSMode == AppExecFwk::Constants::ARKTS_MODE_DYNAMIC) {
+        BindEtsContext(application, record);
+    } else if (abilityInfo->arkTSMode == AppExecFwk::Constants::ARKTS_MODE_STATIC) {
+        BindJsContext(application, record);
+    } else {
+        TAG_LOGE(AAFwkTag::UIABILITY, "unknown arkTSMode");
+    }
+}
+
+void UIAbility::BindEtsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record)
+{
+    if (abilityContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
+        return;
+    }
+    auto& bindingObject = abilityContext_->GetBindingObject();
+    if (bindingObject == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObject");
+        return;
+    }
+
+    auto* ptr = bindingObject->Get<ani_ref>();
+    if (ptr != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "ets context already binded");
+        return;
+    }
+    CreateAndBindETSUIAbilityContext(abilityContext_, application->GetRuntime());
+}
+
+void UIAbility::BindJsContext(const std::shared_ptr<AppExecFwk::OHOSApplication> application,
+    const std::shared_ptr<AppExecFwk::AbilityLocalRecord> record)
+{
+    if (abilityContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
+        return;
+    }
+    auto& bindingObject = abilityContext_->GetBindingObject();
+    if (bindingObject == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null bindingObject");
+        return;
+    }
+
+    auto* ptr = bindingObject->Get<NativeReference>();
+    if (ptr != nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "ets context already binded");
+        return;
+    }
+    auto &runtime = application->GetRuntime();
+    if (runtime == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null runtime");
+        return;
+    }
+    if (runtime->GetLanguage() == Runtime::Language::ETS) {
+        JsUIAbility::CreateAndBindContext(abilityContext_, static_cast<ETSRuntime&>(*runtime).GetJsRuntime());
+    } else if (runtime->GetLanguage() == Runtime::Language::JS) {
+        JsUIAbility::CreateAndBindContext(abilityContext_, runtime);
+    }
 }
 
 bool UIAbility::CheckIsSilentForeground() const
@@ -844,7 +926,7 @@ void UIAbility::HandleCollaboration(const AAFwk::Want &want)
 }
 
 void UIAbility::OnAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "called");
 }
@@ -1329,22 +1411,25 @@ int UIAbility::CreateModalUIExtension(const AAFwk::Want &want)
         TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
         return ERR_INVALID_VALUE;
     }
-    int result;
-    if (want.HasParameter(USE_GLOBAL_UICONTENT) && want.GetBoolParam(USE_GLOBAL_UICONTENT, false) && handler_) {
-        std::weak_ptr<AbilityRuntime::AbilityContext> abilityContextImplWptr = abilityContextImpl;
-        auto task = [abilityContextImplWptr, want, &result]() {
-            std::shared_ptr<AbilityRuntime::AbilityContext> abilityContextImplSptr = abilityContextImplWptr.lock();
-            if (abilityContextImplSptr == nullptr) {
-                TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContextImpl");
-                return;
-            }
-            result = abilityContextImplSptr->CreateModalUIExtensionWithApp(want);
-        };
-        handler_->PostTask(task);
-    } else {
-        result = abilityContextImpl->CreateModalUIExtensionWithApp(want);
+    if (!handler_) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null handler_");
+        return ERR_INVALID_VALUE;
     }
-    return result;
+    std::weak_ptr<AbilityRuntime::AbilityContext> abilityContextImplWptr = abilityContextImpl;
+    auto task = [abilityContextImplWptr, want]() {
+        std::shared_ptr<AbilityRuntime::AbilityContext> abilityContextImplSptr = abilityContextImplWptr.lock();
+        if (abilityContextImplSptr == nullptr) {
+            TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContextImpl");
+            return;
+        }
+        (void)abilityContextImplSptr->CreateModalUIExtensionWithApp(want);
+    };
+    if (!handler_->PostTask(task)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "PostTask failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    return ERR_OK;
 }
 
 void UIAbility::SetSessionToken(sptr<IRemoteObject> sessionToken)

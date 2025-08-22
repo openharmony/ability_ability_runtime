@@ -252,7 +252,7 @@ void ExtensionAbilityThread::HandleAttach(const std::shared_ptr<AppExecFwk::OHOS
         return;
     }
     auto extension = AppExecFwk::AbilityLoader::GetInstance().GetExtensionByName(abilityName,
-        abilityInfo->codeLanguage);
+        abilityInfo->arkTSMode);
     if (extension == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "null extension");
         return;
@@ -638,7 +638,7 @@ void ExtensionAbilityThread::DumpAbilityInfo(const std::vector<std::string> &par
 }
 
 void ExtensionAbilityThread::ScheduleAbilityRequestFailure(const std::string &requestId,
-    const AppExecFwk::ElementName &element, const std::string &message)
+    const AppExecFwk::ElementName &element, const std::string &message, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::EXT, "ExtensionAbilityThread::ScheduleAbilityRequestFailure called");
     if (extensionImpl_ == nullptr) {
@@ -646,14 +646,15 @@ void ExtensionAbilityThread::ScheduleAbilityRequestFailure(const std::string &re
         return;
     }
     wptr<ExtensionAbilityThread> weak = this;
-    auto task = [weak, requestId, element, message]() {
+    auto task = [weak, requestId, element, message, resultCode]() {
         auto extensionAbilityThread = weak.promote();
         if (extensionAbilityThread == nullptr) {
             TAG_LOGE(AAFwkTag::EXT, "null extensionAbilityThread");
             return;
         }
         if (extensionAbilityThread->extensionImpl_ != nullptr) {
-            extensionAbilityThread->extensionImpl_->ScheduleAbilityRequestFailure(requestId, element, message);
+            extensionAbilityThread->extensionImpl_->ScheduleAbilityRequestFailure(
+                requestId, element, message, resultCode);
             return;
         }
     };

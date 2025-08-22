@@ -22,7 +22,7 @@
 namespace OHOS {
 class IRemoteBroker : public virtual RefBase {
 public:
-    OH_MOCK_VIRTUAL_METHOD(sptr<IRemoteObject>, IRemoteBroker, AsObject);
+    OH_MOCK_METHOD_WITH_DECORATOR(virtual, sptr<IRemoteObject>, IRemoteBroker, AsObject);
 };
 
 #define DECLARE_INTERFACE_DESCRIPTOR(DESCRIPTOR)                         \

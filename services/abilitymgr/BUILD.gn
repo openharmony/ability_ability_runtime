@@ -16,12 +16,15 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import(
     "//foundation/ability/ability_runtime/services/abilitymgr/abilitymgr.gni")
 
-group("abilityms_target") {
+ohos_shared_headers("abilityms_target") {
+  include_dirs = [ "include/" ]
   deps = [
     ":abilityms",
     ":ams_service_config",
     ":mission_list",
   ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
 }
 
 config("abilityms_exception_config") {
@@ -125,6 +128,7 @@ ohos_shared_library("abilityms") {
   include_dirs = [
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection",
+    "${ability_runtime_path}/utils/global/time/include",
     "${ability_runtime_services_path}/abilitymgr/include/mission",
   ]
   deps = [
@@ -140,6 +144,7 @@ ohos_shared_library("abilityms") {
     "${ability_runtime_innerkits_path}/connectionobs_manager:connection_obs_manager",
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_innerkits_path}/session_handler:session_handler",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:auto_startup_callback",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",

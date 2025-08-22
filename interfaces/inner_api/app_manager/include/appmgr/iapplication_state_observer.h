@@ -164,7 +164,7 @@ public:
      *
      * @param preloadProcessData Preload process data.
      */
-    virtual void OnPreloadProcessStateChanged(const PreloadProcessData &preloadProcessData) {};
+    virtual void OnProcessPreForegroundChanged(const PreloadProcessData &preloadProcessData) {};
 
     enum class Message {
         TRANSACT_ON_FOREGROUND_APPLICATION_CHANGED = 0,

@@ -84,14 +84,6 @@ public:
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex) override;
 
     /**
-     * Launch Application Finished
-     * @param recordId id of the app record
-     */
-    virtual void PreloadModuleFinished(const int32_t recordId) override;
-
-    // notify the ams update the state of an app, when it entered foreground.
-
-    /**
      * ApplicationForegrounded, call ApplicationForegrounded() through proxy object,
      * set the application to Foreground State.
      *
@@ -833,7 +825,7 @@ public:
      * @param callback callback for notify start result
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+    int32_t CreateNativeChildProcess(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback, const std::string &customProcessName) override;
 #endif // SUPPORT_CHILD_PROCESS
 
@@ -889,6 +881,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t LaunchAbility(sptr<IRemoteObject> token) override;
+    
+    virtual int32_t QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles) override;
 private:
     /**
      * Init, Initialize application services.
@@ -1037,6 +1031,12 @@ private:
      */
     virtual int32_t GetSupportedProcessCachePids(const std::string &bundleName,
         std::vector<int32_t> &pidList) override;
+
+    /**
+     * Launch Application Finished
+     * @param recordId id of the app record
+     */
+    virtual void PreloadModuleFinished(const int32_t recordId) override;
 
     enum DumpIpcKey {
         KEY_DUMP_IPC_START = 0,

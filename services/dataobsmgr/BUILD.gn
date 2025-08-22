@@ -52,14 +52,20 @@ ohos_shared_library("dataobsms") {
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "cJSON:cjson",
+    "data_share:datashare_permission",
     "ffrt:libffrt",
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
+    "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "os_account:os_account_innerkits"
   ]
 
   defines = []
@@ -95,14 +101,20 @@ ohos_static_library("dataobsms_static") {
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "cJSON:cjson",
+    "data_share:datashare_permission",
     "ffrt:libffrt",
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
+    "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "os_account:os_account_innerkits"
   ]
 
   defines = []

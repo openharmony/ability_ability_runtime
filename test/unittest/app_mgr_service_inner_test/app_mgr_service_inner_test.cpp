@@ -1197,6 +1197,42 @@ HWTEST_F(AppMgrServiceInnerTest, KillProcessByPid_002, TestSize.Level2)
 }
 
 /**
+ * @tc.name: KillProcessByPidInner_001
+ * @tc.desc: kill process by pid.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, KillProcessByPidInner_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "KillProcessByPidInner_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    pid_t pid = 99999999;
+    auto ret = appMgrServiceInner->KillProcessByPidInner(pid, "ReasonTdd", "KillReasonTdd", nullptr, false);
+    EXPECT_EQ(ret, AAFwk::ERR_KILL_PROCESS_NOT_EXIST);
+    TAG_LOGI(AAFwkTag::TEST, "KillProcessByPidInner_001 end");
+}
+
+/**
+ * @tc.name: AddToKillProcessMap_001
+ * @tc.desc: add to kill process map.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, AddToKillProcessMap_001, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AddToKillProcessMap_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    appMgrServiceInner->killedProcessMap_.clear();
+    appMgrServiceInner->AddToKillProcessMap("com.test.demo");
+    EXPECT_EQ(appMgrServiceInner->killedProcessMap_.size(), 1);
+    TAG_LOGI(AAFwkTag::TEST, "AddToKillProcessMap_001 end");
+}
+
+/**
  * @tc.name: ProcessExist_001
  * @tc.desc: process exist.
  * @tc.type: FUNC
@@ -1870,6 +1906,33 @@ HWTEST_F(AppMgrServiceInnerTest, StartProcess_001, TestSize.Level1)
     appMgrServiceInner->StartProcess(appName, processName, 0, appRecord, 0, bundleInfo, bundleName, 0);
 
     TAG_LOGI(AAFwkTag::TEST, "StartProcess_001 end");
+}
+
+/**
+ * @tc.name: StartProcess_null_spawnclient_001
+ * @tc.desc: start process.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, StartProcess_null_spawnclient_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartProcess_null_spawnclient_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string appName = "test_appName";
+    std::string processName = "test_processName";
+    std::string bundleName = "test_bundleName";
+    sptr<IRemoteObject> token = new MockAbilityToken();
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo, "");
+    EXPECT_NE(appRecord, nullptr);
+    appMgrServiceInner->remoteClientManager_ = nullptr;
+    appMgrServiceInner->StartProcess(appName, processName, 0, nullptr, 0, bundleInfo, bundleName, 0);
+    uint32_t ret = appMgrServiceInner->StartProcess(appName, processName, 0, appRecord, 0, bundleInfo, bundleName, 0);
+    EXPECT_EQ(ret, AAFwk::ERR_GET_SPAWN_CLIENT_FAILED);
+    TAG_LOGI(AAFwkTag::TEST, "StartProcess_null_spawnclient_001 end");
 }
 
 /**
@@ -3083,7 +3146,7 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_001, TestSize.Level2)
     pid_t hostPid = 0;
     std::string renderParam = "";
     pid_t renderPid = 0;
-    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(0), FdGuard(0), FdGuard(0),
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, FdGuard(-1), FdGuard(-1), FdGuard(-1),
         renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "StartRenderProcess_001 end");

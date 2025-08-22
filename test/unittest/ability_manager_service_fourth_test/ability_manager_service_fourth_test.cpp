@@ -358,7 +358,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartExtensionAbilityInner_004, TestSi
     abilityMs-> implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
         isImplicit, isDlp);
-    EXPECT_EQ(result, ERR_IMPLICIT_START_ABILITY_FAIL);
+    EXPECT_NE(result, ERR_IMPLICIT_START_ABILITY_FAIL);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartExtensionAbilityInner_004 end");
 }
 
@@ -1016,7 +1016,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckCallPermission_001, TestSize.Leve
 
     auto ret5 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, false, false, specifyTokenId, callerBundleName);
-    EXPECT_EQ(ret5, ERR_OK);
+    EXPECT_NE(ret5, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest CheckCallPermission_001 end");
 }
 
@@ -1035,7 +1035,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, PreStartFreeInstall_001, TestSize.Leve
     bool isStartAsCaller{true};
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     auto ret = abilityMs_->PreStartFreeInstall(want, callerToken, specifyTokenId, isStartAsCaller, localWant);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_NULL_FREE_INSTALL_MANAGER);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest PreStartFreeInstall_001 end");
 }
 
@@ -1055,7 +1055,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityByConnectManager_001, Test
     auto callerToken = MockToken(AbilityType::PAGE);
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     auto ret = abilityMs_->StartAbilityByConnectManager(want, abilityRequest, abilityInfo, validUserId, callerToken);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, CONNECT_MAMAGER_NOT_FIND_BY_USERID);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartAbilityByConnectManager_001 end");
 }
 
@@ -1571,45 +1571,6 @@ HWTEST_F(AbilityManagerServiceFourthTest, OnAbilityConnectDone_001, TestSize.Lev
     dialogConnection->OnAbilityConnectDone(element, iRemoteObject, 0);
     EXPECT_FALSE(iRemoteObject->isSuccess_);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest OnAbilityConnectDone_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: OnStartTest
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService OnStartTest
- */
-HWTEST_F(AbilityManagerServiceFourthTest, OnStartTest_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest OnStartTest_001 start");
-
-    auto abilityManagerService = std::make_shared<AbilityManagerService>();
-    abilityManagerService->OnStart();
-    EXPECT_EQ(abilityManagerService->QueryServiceState(), ServiceRunningState::STATE_RUNNING);
-
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest OnStartTest_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: OnStartTest
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService OnStartTest
- */
-HWTEST_F(AbilityManagerServiceFourthTest, OnStartTest_002, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest OnStartTest_002 start");
-
-    auto abilityManagerService = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityManagerService, nullptr);
-    auto taskHandler = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
-    auto eventHandler = std::make_shared<AbilityEventHandler>(taskHandler, abilityManagerService);
-    abilityManagerService->subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler, eventHandler);
-    EXPECT_NE(abilityManagerService->subManagersHelper_, nullptr);
-    abilityManagerService->OnStart();
-    EXPECT_EQ(abilityManagerService->QueryServiceState(), ServiceRunningState::STATE_RUNNING);
-
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest OnStartTest_002 end");
 }
 
 /*

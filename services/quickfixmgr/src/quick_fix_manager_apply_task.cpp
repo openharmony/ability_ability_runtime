@@ -411,7 +411,7 @@ void QuickFixManagerApplyTask::PostDeployQuickFixTask(const std::vector<std::str
             return;
         }
 
-        TAG_LOGD(AAFwkTag::QUICKFIX, "isDebug is %d isReplace is %d", isDebug, isReplace);
+        TAG_LOGD(AAFwkTag::QUICKFIX, "isDebug is %{public}d isReplace is %{public}d", isDebug, isReplace);
         auto ret = applyTask->bundleQfMgr_->DeployQuickFix(quickFixFiles, callback, isDebug, "", isReplace);
         if (ret != 0) {
             TAG_LOGE(AAFwkTag::QUICKFIX, "failed: %{public}d", ret);

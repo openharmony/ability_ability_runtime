@@ -219,6 +219,7 @@ public:
     int getCallingPid_ = 0;
     bool setAssertionPauseFlagCalled_ = false;
     bool getAbilitiesCalled_ = false;
+    std::map<const sptr<IRemoteObject>, std::shared_ptr<AppExecFwk::AbilityRunningRecord>> abilitiesMap_;
     bool notifyAppPreCacheCalled_ = false;
     bool notifyStartResidentProcessCalled_ = false;
     bool notifyStartKeepAliveProcessCalled_ = false;
@@ -286,6 +287,7 @@ public:
         resetRunningRecordFunctionFlagExtend();
         setAssertionPauseFlagCalled_ = false;
         getAbilitiesCalled_ = false;
+        abilitiesMap_.clear();
         notifyAppPreCacheCalled_ = false;
         notifyStartResidentProcessCalled_ = false;
         notifyStartKeepAliveProcessCalled_ = false;

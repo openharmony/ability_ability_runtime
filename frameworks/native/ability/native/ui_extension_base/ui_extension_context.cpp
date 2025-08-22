@@ -467,54 +467,89 @@ void UIExtensionContext::RequestComponentTerminate()
     }
 }
 
-ErrCode UIExtensionContext::AddCompletionHandler(const std::string &requestId, OnRequestResult onRequestSucc,
-    OnRequestResult onRequestFail)
+ErrCode UIExtensionContext::AddCompletionHandlerForAtomicService(const std::string &requestId,
+    OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId)
 {
     if (onRequestSucc == nullptr || onRequestFail == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "either func is null");
         return ERR_INVALID_VALUE;
     }
     std::lock_guard lock(onRequestResultMutex_);
-    for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
-        if (iter->requestId_ == requestId) {
+    for (auto iter = onAtomicRequestResults_.begin(); iter != onAtomicRequestResults_.end(); iter++) {
+        if ((*iter)->requestId_ == requestId) {
             TAG_LOGI(AAFwkTag::UI_EXT, "requestId=%{public}s already exists", requestId.c_str());
             return ERR_OK;
         }
     }
-    onRequestResults_.emplace_back(requestId, onRequestSucc, onRequestFail);
+    onAtomicRequestResults_.emplace_back(std::make_shared<OnAtomicRequestResult>(
+        requestId, appId, onRequestSucc, onRequestFail));
     return ERR_OK;
 }
 
 void UIExtensionContext::OnRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
     const std::string &message)
 {
-    std::lock_guard<std::mutex> lock(onRequestResultMutex_);
-    for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
-        if (iter->requestId_ == requestId) {
-            TAG_LOGI(AAFwkTag::UI_EXT, "requestId=%{public}s, call onRequestSuccess", requestId.c_str());
-            iter->onRequestSuccess_(element, message);
-            onRequestResults_.erase(iter);
-            return;
+    std::shared_ptr<OnAtomicRequestResult> atomicResult = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(onRequestResultMutex_);
+        for (auto iter = onAtomicRequestResults_.begin(); iter != onAtomicRequestResults_.end(); iter++) {
+            if ((*iter)->requestId_ == requestId) {
+                atomicResult = *iter;
+                onAtomicRequestResults_.erase(iter);
+                break;
+            }
         }
+    }
+
+    if (atomicResult != nullptr) {
+        TAG_LOGI(AAFwkTag::CONTEXT, "requestId=%{public}s, call onRequestSuccess", requestId.c_str());
+        atomicResult->onRequestSuccess_(atomicResult->appId_);
+        return;
     }
 
     TAG_LOGE(AAFwkTag::UI_EXT, "requestId=%{public}s not exist", requestId.c_str());
 }
 
 void UIExtensionContext::OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-    const std::string &message)
+    const std::string &message, int32_t resultCode)
 {
-    std::lock_guard<std::mutex> lock(onRequestResultMutex_);
-    for (auto iter = onRequestResults_.begin(); iter != onRequestResults_.end(); iter++) {
-        if (iter->requestId_ == requestId) {
-            TAG_LOGI(AAFwkTag::UI_EXT, "requestId=%{public}s, call onRequestFailure", requestId.c_str());
-            iter->onRequestFailure_(element, message);
-            onRequestResults_.erase(iter);
-            return;
+    std::shared_ptr<OnAtomicRequestResult> atomicResult = nullptr;
+    {
+        std::lock_guard lock(onRequestResultMutex_);
+        for (auto iter = onAtomicRequestResults_.begin(); iter != onAtomicRequestResults_.end(); iter++) {
+            if ((*iter)->requestId_ == requestId) {
+                atomicResult = *iter;
+                onAtomicRequestResults_.erase(iter);
+                break;
+            }
         }
     }
 
+    if (atomicResult != nullptr) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "requestId=%{public}s, call onRequestFailure", requestId.c_str());
+        int32_t failureCode = 0;
+        std::string failureMessage;
+        GetFailureInfoByMessage(message, failureCode, failureMessage, resultCode);
+        atomicResult->onRequestFailure_(atomicResult->appId_, failureCode, failureMessage);
+        return;
+    }
+
     TAG_LOGE(AAFwkTag::UI_EXT, "requestId=%{public}s not exist", requestId.c_str());
+}
+
+void UIExtensionContext::GetFailureInfoByMessage(
+    const std::string &message, int32_t &failureCode, std::string &failureMessage, int32_t resultCode)
+{
+    if (resultCode == USER_CANCEL) {
+        failureCode = static_cast<int32_t>(FailureCode::FAILURE_CODE_USER_CANCEL);
+        failureMessage = "The user canceled this startup";
+    } else if (message.find("User refused redirection") != std::string::npos) {
+        failureCode = static_cast<int32_t>(FailureCode::FAILURE_CODE_USER_REFUSE);
+        failureMessage = "User refused redirection";
+    } else {
+        failureCode = static_cast<int32_t>(FailureCode::FAILURE_CODE_SYSTEM_MALFUNCTION);
+        failureMessage = "A system error occurred";
+    }
 }
 
 int32_t UIExtensionContext::curRequestCode_ = 0;

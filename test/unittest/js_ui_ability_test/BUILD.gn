@@ -42,6 +42,7 @@ ohos_unittest("js_ui_ability_test") {
   configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
@@ -50,6 +51,7 @@ ohos_unittest("js_ui_ability_test") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_path}/frameworks/native/ability/native:continuation_ipc",
+    "${ability_runtime_path}/services/abilitymgr:abilityms_target",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:event_report",
   ]

@@ -138,18 +138,18 @@ bool ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(
         return false;
     }
     want.SetParam(APP_FREEZE_TOKEN, token);
-
-    int32_t posX = 0;
-    int32_t posY = 0;
-    int32_t width = 10;
-    int32_t height  = 10;
     std::vector<sptr<Rosen::WindowVisibilityInfo>> infos;
     ret = static_cast<int>(sceneSessionManager->GetVisibilityWindowInfo(infos));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Get visibility window info err: %{public}d", ret);
         return false;
     }
-    bool infoReady = false;
+
+    int32_t posX = 0;
+    int32_t posY = 0;
+    int32_t width = 10;
+    int32_t height  = 10;
+    int32_t focusPid = -1;
     for (const auto &info : infos) {
         if (info != nullptr) {
             if (info->IsFocused()) {
@@ -157,20 +157,19 @@ bool ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(
                 posY = info->rect_.posY_;
                 width = info->rect_.width_;
                 height = info->rect_.height_;
-                infoReady = true;
+                focusPid = info->pid_;
                 break;
             }
         }
     }
-    if (!infoReady) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "No fucused window!");
+    if ((focusPid == -1) || (std::to_string(focusPid) != pid)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fucused window pid is %{public}d, not freeze pid!", focusPid);
         return false;
     }
     want.SetParam(FREEZE_WINDOW_POSX, std::to_string(posX));
     want.SetParam(FREEZE_WINDOW_POSY, std::to_string(posY));
     want.SetParam(FREEZE_WINDOW_WIDTH, std::to_string(width));
     want.SetParam(FREEZE_WINDOW_HEIGHT, std::to_string(height));
-
     return true;
 }
 

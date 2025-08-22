@@ -44,7 +44,7 @@ void UIAbilityLifecycleManager::RemoveStartingPid(pid_t pid)
 {
 }
 
-void UIAbilityLifecycleManager::RecordPidKilling(pid_t pid, const std::string &reason)
+void UIAbilityLifecycleManager::RecordPidKilling(pid_t pid, const std::string &reason, bool isKillPrecedeStart)
 {
 }
 
@@ -255,7 +255,8 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
 {
 }
 
-sptr<SessionInfo> UIAbilityLifecycleManager::CreateSessionInfo(const AbilityRequest &abilityRequest) const
+sptr<SessionInfo> UIAbilityLifecycleManager::CreateSessionInfo(const AbilityRequest &abilityRequest,
+    int32_t requestId) const
 {
     return nullptr;
 }
@@ -425,15 +426,6 @@ void UIAbilityLifecycleManager::OnStartSpecifiedProcessTimeoutResponse(int32_t r
 int32_t UIAbilityLifecycleManager::StartSpecifiedAbilityBySCB(AbilityRequest &abilityRequest)
 {
     return 0;
-}
-
-void UIAbilityLifecycleManager::NotifyRestartSpecifiedAbility(const AbilityRequest &request,
-    const sptr<IRemoteObject> &token)
-{
-}
-
-void UIAbilityLifecycleManager::NotifyStartSpecifiedAbility(AbilityRequest &abilityRequest, const AAFwk::Want &want)
-{
 }
 
 int UIAbilityLifecycleManager::MoveAbilityToFront(const SpecifiedRequest &specifiedRequest,
@@ -768,7 +760,7 @@ int32_t UIAbilityLifecycleManager::RevokeDelegator(sptr<IRemoteObject> token)
     return ERR_OK;
 }
 
-int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId)
+int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId, const std::string &reason)
 {
     return ERR_OK;
 }

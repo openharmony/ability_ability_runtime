@@ -71,6 +71,22 @@ bool FaultData::ReadFromParcel(Parcel &parcel)
         return false;
     }
     appfreezeInfo = strValue;
+    return ReadContent(parcel);
+}
+
+bool FaultData::ReadContent(Parcel &parcel)
+{
+    std::string strValue;
+    if (!parcel.ReadString(strValue)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppRunningUniqueId read string failed.");
+        return false;
+    }
+    appRunningUniqueId = strValue;
+    if (!parcel.ReadString(strValue)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "ProcStatm read string failed.");
+        return false;
+    }
+    procStatm = strValue;
     return true;
 }
 
@@ -105,6 +121,16 @@ bool FaultData::WriteContent(Parcel &parcel) const
 
     if (!parcel.WriteString(appfreezeInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "AppfreezeInfo [%{public}s] write string failed.", appfreezeInfo.c_str());
+        return false;
+    }
+
+    if (!parcel.WriteString(appRunningUniqueId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppRunningUniqueId [%{public}s] write string failed.", appRunningUniqueId.c_str());
+        return false;
+    }
+
+    if (!parcel.WriteString(procStatm)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "ProcStatm [%{public}s] write string failed.", procStatm.c_str());
         return false;
     }
     return true;
@@ -230,6 +256,23 @@ bool AppFaultDataBySA::ReadFromParcel(Parcel &parcel)
         return false;
     }
     appfreezeInfo = strValue;
+    return ReadContent(parcel);
+}
+
+bool AppFaultDataBySA::ReadContent(Parcel &parcel)
+{
+    std::string strValue;
+    if (!parcel.ReadString(strValue)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppRunningUniqueId read string failed.");
+        return false;
+    }
+    appRunningUniqueId = strValue;
+
+    if (!parcel.ReadString(strValue)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "ProcStatm read string failed.");
+        return false;
+    }
+    procStatm = strValue;
     return true;
 }
 
@@ -259,6 +302,16 @@ bool AppFaultDataBySA::WriteContent(Parcel &parcel) const
 
     if (!parcel.WriteString(appfreezeInfo)) {
         TAG_LOGE(AAFwkTag::APPMGR, "AppfreezeInfo [%{public}s] write string failed.", appfreezeInfo.c_str());
+        return false;
+    }
+
+    if (!parcel.WriteString(appRunningUniqueId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppRunningUniqueId [%{public}s] write string failed.", appRunningUniqueId.c_str());
+        return false;
+    }
+
+    if (!parcel.WriteString(procStatm)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "ProcStatm [%{public}s] write string failed.", procStatm.c_str());
         return false;
     }
     return true;

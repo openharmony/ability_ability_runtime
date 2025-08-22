@@ -36,6 +36,7 @@ constexpr size_t STRING_MAX_LENGTH = 128;
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     struct AmsRdbConfig amsRdbConfig;
+    amsRdbConfig.tableName = "resident_process_list";
     AmsResidentProcessRdbCallBack amsCallback(amsRdbConfig);
     std::unique_ptr<RdbDataManager> rdbMgr =
         std::make_unique<RdbDataManager>(amsRdbConfig);

@@ -48,8 +48,6 @@ constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t INDEX_TWO = 2;
 constexpr int32_t INDEX_THREE = 3;
 constexpr int32_t INDEX_FOUR = 4;
-constexpr int32_t ERROR_CODE_ONE = 1;
-constexpr int32_t ERROR_CODE_TWO = 2;
 constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
@@ -398,38 +396,39 @@ private:
         return result;
     }
 
-    void UnwrapCompletionHandlerInStartOptions(napi_env env, napi_value param,
-        AAFwk::StartOptions &options)
+    void UnWrapCompletionHandlerForAtomicService(
+        napi_env env, napi_value param, AAFwk::StartOptions &options, const std::string &appId)
     {
-        napi_value completionHandler = AppExecFwk::GetPropertyValueByPropertyName(env, param,
-            "completionHandler", napi_object);
-        if (completionHandler == nullptr) {
-            TAG_LOGD(AAFwkTag::SERVICE_EXT, "null completionHandler");
+        napi_value completionHandlerForAtomicService = AppExecFwk::GetPropertyValueByPropertyName(env, param,
+            "completionHandlerForAtomicService", napi_object);
+        if (completionHandlerForAtomicService == nullptr) {
+            TAG_LOGD(AAFwkTag::SERVICE_EXT, "null completionHandlerForAtomicService");
             return;
         }
-        TAG_LOGI(AAFwkTag::SERVICE_EXT, "completionHandler exists");
-        napi_value onRequestSuccObj = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandler,
-            "onRequestSuccess", napi_function);
-        napi_value onRequestFailObj = AppExecFwk::GetPropertyValueByPropertyName(env, completionHandler,
-            "onRequestFailure", napi_function);
-        if (onRequestSuccObj == nullptr || onRequestFailObj == nullptr) {
-            TAG_LOGE(AAFwkTag::SERVICE_EXT, "null onRequestSuccObj or onRequestFailObj");
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "completionHandlerForAtomicService exists");
+        napi_value onRequestSuccFunc = AppExecFwk::GetPropertyValueByPropertyName(env,
+            completionHandlerForAtomicService, "onAtomicServiceRequestSuccess", napi_function);
+        napi_value onRequestFailFunc = AppExecFwk::GetPropertyValueByPropertyName(env,
+            completionHandlerForAtomicService, "onAtomicServiceRequestFailure", napi_function);
+        if (onRequestSuccFunc == nullptr || onRequestFailFunc == nullptr) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "null onRequestSuccFunc or onRequestFailFunc");
             return;
         }
-        OnRequestResult onRequestSucc = [env, completionHandler, onRequestSuccObj](
-            const AppExecFwk::ElementName &element, const std::string &message) {
-            size_t argc = ARGC_TWO;
-            napi_value argv[ARGC_TWO] = { AppExecFwk::WrapElementName(env, element), CreateJsValue(env, message) };
-            napi_status status = napi_call_function(env, completionHandler, onRequestSuccObj, argc, argv, nullptr);
+        OnAtomicRequestSuccess onRequestSucc = [env, completionHandlerForAtomicService, onRequestSuccFunc](
+            const std::string &appId) {
+            napi_value argv[ARGC_ONE] = { CreateJsValue(env, appId) };
+            napi_status status = napi_call_function(
+                env, completionHandlerForAtomicService, onRequestSuccFunc, ARGC_ONE, argv, nullptr);
             if (status != napi_ok) {
                 TAG_LOGE(AAFwkTag::SERVICE_EXT, "call onRequestSuccess, failed: %{public}d", status);
             }
         };
-        OnRequestResult onRequestFail = [env, completionHandler, onRequestFailObj](
-            const AppExecFwk::ElementName &element, const std::string &message) {
-            size_t argc = ARGC_TWO;
-            napi_value argv[ARGC_TWO] = { AppExecFwk::WrapElementName(env, element), CreateJsValue(env, message) };
-            napi_status status = napi_call_function(env, completionHandler, onRequestFailObj, argc, argv, nullptr);
+        OnAtomicRequestFailure onRequestFail = [env, completionHandlerForAtomicService, onRequestFailFunc](
+            const std::string &appId, int32_t failureCode, const std::string &message) {
+            napi_value argv[ARGC_THREE] = { CreateJsValue(env, appId), CreateJsValue(env, failureCode),
+                CreateJsValue(env, message) };
+            napi_status status = napi_call_function(
+                env, completionHandlerForAtomicService, onRequestFailFunc, ARGC_THREE, argv, nullptr);
             if (status != napi_ok) {
                 TAG_LOGE(AAFwkTag::SERVICE_EXT, "call onRequestFailure, failed: %{public}d", status);
             }
@@ -439,10 +438,10 @@ private:
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
             return;
         }
-        auto time = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::high_resolution_clock::now().time_since_epoch()).count());
-        std::string requestId = std::to_string(time);
-        if (context->AddCompletionHandler(requestId, onRequestSucc, onRequestFail) != ERR_OK) {
+        std::string requestId = std::to_string(
+            static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::high_resolution_clock::now().time_since_epoch()).count()));
+        if (context->AddCompletionHandlerForAtomicService(requestId, onRequestSucc, onRequestFail, appId) != ERR_OK) {
             TAG_LOGE(AAFwkTag::SERVICE_EXT, "add completionHandler failed");
             return;
         }
@@ -473,7 +472,7 @@ private:
                 ThrowInvalidParamError(env, "Parse param startOptions failed, startOptions must be StartOption.");
                 return CreateJsUndefined(env);
             }
-            UnwrapCompletionHandlerInStartOptions(env, info.argv[INDEX_ONE], startOptions);
+            UnWrapCompletionHandlerForAtomicService(env, info.argv[INDEX_ONE], startOptions, appId);
         }
 
         std::string bundleName = ATOMIC_SERVICE_PREFIX + appId;
@@ -929,7 +928,7 @@ private:
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::SERVICE_EXT, "context released");
-                *innerErrCode = static_cast<int32_t>(ERROR_CODE_ONE);
+                *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
             *innerErrCode = context->TerminateAbility();
@@ -938,7 +937,7 @@ private:
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
-                } else if (*innerErrCode == ERROR_CODE_ONE) {
+                } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
                     task.Reject(env, CreateJsError(env, *innerErrCode, "context is released"));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
@@ -1015,7 +1014,7 @@ private:
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGE(AAFwkTag::SERVICE_EXT, "context released");
-                *innerErrCode = static_cast<int>(ERROR_CODE_ONE);
+                *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
             TAG_LOGD(AAFwkTag::SERVICE_EXT, "connection:%{public}d", static_cast<int32_t>(connectId));
@@ -1023,7 +1022,7 @@ private:
         };
         NapiAsyncTask::CompleteCallback complete =
             [connection, connectId, innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-                if (*innerErrCode == ERROR_CODE_ONE) {
+                if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode, "Context is released"));
                     RemoveConnection(connectId);
                 } else {
@@ -1091,12 +1090,12 @@ private:
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::SERVICE_EXT, "context released");
-                *innerErrCode = static_cast<int32_t>(ERROR_CODE_ONE);
+                *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
             if (!connection) {
                 TAG_LOGW(AAFwkTag::SERVICE_EXT, "null connection");
-                *innerErrCode = static_cast<int32_t>(ERROR_CODE_TWO);
+                *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
                 return;
             }
             TAG_LOGD(AAFwkTag::SERVICE_EXT, "context->DisconnectAbility");
@@ -1106,9 +1105,9 @@ private:
             [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
                 if (*innerErrCode == ERR_OK) {
                     task.Resolve(env, CreateJsUndefined(env));
-                } else if (*innerErrCode == ERROR_CODE_ONE) {
+                } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
                     task.Reject(env, CreateJsError(env, *innerErrCode, "Context is released"));
-                } else if (*innerErrCode == ERROR_CODE_TWO) {
+                } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER)) {
                     task.Reject(env, CreateJsError(env, *innerErrCode, "not found connection"));
                 } else {
                     task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));

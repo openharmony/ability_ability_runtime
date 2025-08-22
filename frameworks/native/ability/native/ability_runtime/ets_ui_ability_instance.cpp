@@ -29,6 +29,10 @@ const char *ETS_ANI_LIBNAME = "libui_ability_ani.z.so";
 const char *ETS_ANI_Create_FUNC = "OHOS_ETS_Ability_Create";
 using CreateETSUIAbilityFunc = UIAbility*(*)(const std::unique_ptr<Runtime>&);
 CreateETSUIAbilityFunc g_etsCreateFunc = nullptr;
+const char *CREATE_AND_BIND_ETS_UI_ABILITY_CONTEXT_FUNC = "OHOS_CreateAndBindETSUIAbilityContext";
+using CreateAndBindETSUIAbilityContextFunc = void(*)(const std::shared_ptr<AbilityContext> &abilityContext,
+    const std::unique_ptr<Runtime> &runtime);
+CreateAndBindETSUIAbilityContextFunc g_createAndBindETSUIAbilityContextFunc = nullptr;
 }
 
 UIAbility *CreateETSUIAbility(const std::unique_ptr<Runtime> &runtime)
@@ -49,6 +53,27 @@ UIAbility *CreateETSUIAbility(const std::unique_ptr<Runtime> &runtime)
     }
     g_etsCreateFunc = reinterpret_cast<CreateETSUIAbilityFunc>(symbol);
     return g_etsCreateFunc(runtime);
+}
+
+void CreateAndBindETSUIAbilityContext(const std::shared_ptr<AbilityContext> &abilityContext,
+    const std::unique_ptr<Runtime> &runtime)
+{
+    if (g_createAndBindETSUIAbilityContextFunc != nullptr) {
+        return g_createAndBindETSUIAbilityContextFunc(abilityContext, runtime);
+    }
+    auto handle = dlopen(ETS_ANI_LIBNAME, RTLD_LAZY);
+    if (handle == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "dlopen failed %{public}s, %{public}s", ETS_ANI_LIBNAME, dlerror());
+        return;
+    }
+    auto symbol = dlsym(handle, CREATE_AND_BIND_ETS_UI_ABILITY_CONTEXT_FUNC);
+    if (symbol == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "dlsym failed %{public}s, %{public}s", ETS_ANI_Create_FUNC, dlerror());
+        dlclose(handle);
+        return;
+    }
+    g_createAndBindETSUIAbilityContextFunc = reinterpret_cast<CreateAndBindETSUIAbilityContextFunc>(symbol);
+    return g_createAndBindETSUIAbilityContextFunc(abilityContext, runtime);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

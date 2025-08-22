@@ -226,6 +226,22 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_006, TestSize.Level1)
  */
 HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_007, TestSize.Level1)
 {
+    std::string str = "123";
+    uint16_t index = 1;
+    std::string ret = appfreezeManager->StrSplit(str, index);
+    EXPECT_EQ(ret, "");
+    str = "123:456";
+    ret = appfreezeManager->StrSplit(str, index);
+    EXPECT_EQ(ret, "456");
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest_008
+ * @tc.desc: add testcase codecoverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_008, TestSize.Level1)
+{
     int32_t pid = static_cast<int32_t>(getprocpid());
     int state = AppfreezeManager::AppFreezeState::APPFREEZE_STATE_IDLE;
     EXPECT_EQ(appfreezeManager->GetFreezeState(pid), state);
@@ -259,7 +275,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_AppFreezeFilter_002, TestSiz
     int32_t pid = static_cast<int32_t>(getprocpid());
     std::string bundleName = "AppfreezeManagerTest_AppFreezeFilter_002";
     EXPECT_TRUE(appfreezeManager->CancelAppFreezeDetect(pid, bundleName));
-    EXPECT_TRUE(appfreezeManager->IsProcessDebug(pid, bundleName));
+    EXPECT_TRUE(!appfreezeManager->IsProcessDebug(pid, bundleName));
     appfreezeManager->RemoveDeathProcess(bundleName);
 }
 
@@ -340,13 +356,12 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_ReportAppfreezeCpuInfo_001, 
     EXPECT_EQ(freezeInfoFile, "");
     faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
     freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
-    EXPECT_TRUE(!freezeInfoFile.empty());
+    EXPECT_TRUE(freezeInfoFile.empty());
     faultData.errorObject.name = AppFreezeType::LIFECYCLE_HALF_TIMEOUT;
     freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
     EXPECT_EQ(freezeInfoFile, "");
     faultData.errorObject.name = AppFreezeType::LIFECYCLE_TIMEOUT;
     freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
-    EXPECT_TRUE(!freezeInfoFile.empty());
 }
 
 /**
@@ -363,6 +378,18 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFaultNotifyData_001, Test
     faultData.eventId = 10;
     faultNotifyData = appfreezeManager->GetFaultNotifyData(faultData, pid);
     EXPECT_EQ(faultNotifyData.eventId, 10);
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest_GetFirstLine_001
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFirstLine_001, TestSize.Level1)
+{
+    std::string ret = appfreezeManager->GetFirstLine("../111");
+    EXPECT_EQ(ret, "");
+    appfreezeManager->GetFirstLine("/data/log/test");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

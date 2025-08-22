@@ -22,6 +22,10 @@
 #include "int_wrapper.h"
 #include "modal_system_ui_extension.h"
 #include "query_erms_manager.h"
+#ifdef SUPPORT_SCREEN
+#include "scene_board_judgement.h"
+#include "session_manager_lite.h"
+#endif
 #include "start_ability_utils.h"
 #include "string_wrapper.h"
 #include "want.h"
@@ -234,28 +238,6 @@ void DialogSessionManager::GenerateDialogCallerInfo(AbilityRequest &abilityReque
     dialogCallerInfo->needGrantUriPermission = needGrantUriPermission;
 }
 
-AppExecFwk::ElementName DialogSessionManager::GetWantElement(const Want &want)
-{
-    auto bms = AbilityUtil::GetBundleManagerHelper();
-    auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
-    if (bms == nullptr || abilityMgr == nullptr) {
-        return want.GetElement();
-    }
-    AppExecFwk::BundleInfo bundleInfo;
-    if (!IN_PROCESS_CALL(bms->GetBundleInfo(want.GetBundle(),
-        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
-        bundleInfo, abilityMgr->GetUserId()))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetBundleInfo failed");
-        return want.GetElement();
-    }
-    if (bundleInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
-        AppExecFwk::ElementName element;
-        element.SetBundleName(want.GetElement().GetBundleName());
-        return element;
-    }
-    return want.GetElement();
-}
-
 void DialogSessionManager::NotifyAbilityRequestFailure(const std::string &dialogSessionId, const Want &want)
 {
     auto callerInfo = GetDialogCallerInfo(dialogSessionId);
@@ -276,7 +258,7 @@ void DialogSessionManager::NotifyAbilityRequestFailure(const std::string &dialog
     } else if (callerInfo->type == SelectorType::INTERCEPTOR_SELECTOR) {
         message = "User closed the interceptor picker";
     }
-    abilityRecord->NotifyAbilityRequestFailure(requestId, GetWantElement(want), message);
+    abilityRecord->NotifyAbilityRequestFailure(requestId, want.GetElement(), message);
 }
 
 int DialogSessionManager::SendDialogResult(const Want &want, const std::string &dialogSessionId, bool isAllowed)
@@ -476,23 +458,33 @@ int DialogSessionManager::CreateModalDialogCommon(const Want &replaceWant, sptr<
     }
 
     sptr<IRemoteObject> token;
-    auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
-    if (!abilityMgr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityMgr null");
-        return INNER_ERR;
+    bool isParent = false;
+    int32_t ret = ERR_INVALID_VALUE;
+#ifdef SUPPORT_SCREEN
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto sceneSessionManager = Rosen::SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+        if (sceneSessionManager == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "sceneSessionManager null");
+            return ERR_INVALID_VALUE;
+        }
+        ret = static_cast<int32_t>(sceneSessionManager->IsFocusWindowParent(callerToken, isParent));
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "isParent = %{pubilc}d, ret = %{pubilc}d", isParent, ret);
+    } else {
+        auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
+        if (!abilityMgr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityMgr null");
+            return INNER_ERR;
+        }
+        ret = IN_PROCESS_CALL(abilityMgr->GetTopAbility(token));
     }
-    int ret = IN_PROCESS_CALL(abilityMgr->GetTopAbility(token));
-    if (ret != ERR_OK || token == nullptr) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "create modal ui extension for system");
-        (const_cast<Want &>(replaceWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
-        (const_cast<Want &>(replaceWant)).SetParam(SUPPORT_CLOSE_ON_BLUR, true);
-        return IN_PROCESS_CALL(connection->CreateModalUIExtension(replaceWant)) ? ERR_OK : INNER_ERR;
-    }
+#endif
 
-    if (callerRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE && token == callerToken) {
+    if (ret == ERR_OK && callerRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE &&
+        (isParent || token == callerToken)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "create modal ui extension for application");
         return callerRecord->CreateModalUIExtension(replaceWant);
     }
+
     TAG_LOGD(AAFwkTag::ABILITYMGR, "create modal ui extension for system");
     (const_cast<Want &>(replaceWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
     (const_cast<Want &>(replaceWant)).SetParam(SUPPORT_CLOSE_ON_BLUR, true);

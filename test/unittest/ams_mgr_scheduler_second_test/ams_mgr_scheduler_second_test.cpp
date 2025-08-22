@@ -2358,7 +2358,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, NotifyPreloadAbilityStateChanged_001, TestSi
     std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
         std::make_shared<AmsMgrScheduler>(nullptr, nullptr);
 
-    int32_t ret = amsMgrScheduler->NotifyPreloadAbilityStateChanged(nullptr);
+    int32_t ret = amsMgrScheduler->NotifyPreloadAbilityStateChanged(nullptr, true);
     EXPECT_EQ(ret, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_NotifyPreloadAbilityStateChanged_001 end");
 }
@@ -2376,7 +2376,7 @@ HWTEST_F(AmsMgrSchedulerSecondTest, NotifyPreloadAbilityStateChanged_002, TestSi
 
     std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
         std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
-    int32_t ret = amsMgrScheduler->NotifyPreloadAbilityStateChanged(nullptr);
+    int32_t ret = amsMgrScheduler->NotifyPreloadAbilityStateChanged(nullptr, true);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_NotifyPreloadAbilityStateChanged_002 end");
 }
@@ -2391,11 +2391,11 @@ HWTEST_F(AmsMgrSchedulerSecondTest, NotifyPreloadAbilityStateChanged_003, TestSi
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_NotifyPreloadAbilityStateChanged_003 start");
     auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
     EXPECT_CALL(*appMgrServiceInner, IsFoundationCall()).WillOnce(Return(true));
-    EXPECT_CALL(*appMgrServiceInner, NotifyPreloadAbilityStateChanged(_)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*appMgrServiceInner, NotifyPreloadAbilityStateChanged(_, _)).WillOnce(Return(ERR_OK));
 
     std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
         std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
-    int32_t ret = amsMgrScheduler->NotifyPreloadAbilityStateChanged(nullptr);
+    int32_t ret = amsMgrScheduler->NotifyPreloadAbilityStateChanged(nullptr, true);
     EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_NotifyPreloadAbilityStateChanged_003 end");
 }

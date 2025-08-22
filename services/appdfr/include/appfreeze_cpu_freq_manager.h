@@ -55,7 +55,7 @@ private:
     std::string GetStaticInfo(int32_t pid, CpuStartTime cpuStartTime);
     std::string GetCpuInfoContent(const std::vector<std::vector<CpuFreqData>> &handlingHalfCpuData,
         const std::vector<TotalTime> &totalTimeList);
-    bool IsContainHalfData(const std::string &key, CpuDataProcessor &cpuData);
+    bool IsContainHalfData(const std::string &key, CpuDataProcessor &cpuData, int32_t pid);
     void WriteDfxLogToFile(const std::string &filePath, const std::string &bundleName);
 
     static std::shared_ptr<AppfreezeCpuFreqManager> instance_;

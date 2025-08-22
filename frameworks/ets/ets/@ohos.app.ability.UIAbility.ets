@@ -54,7 +54,13 @@ export default class UIAbility {
   onWindowStageCreate(windowStage: window.WindowStage): void {
   }
 
+  onWindowStageWillDestroy(windowStage: window.WindowStage): void {
+  }
+
   onWindowStageDestroy(): void {
+  }
+
+  onWindowStageRestore(windowStage: window.WindowStage): void {
   }
 
   onDestroy(): void {

@@ -91,7 +91,7 @@ HWTEST_F(AbilityAutoStartupClientTest, Connect_002, TestSize.Level1)
     EXPECT_NE(AAFwk::AbilityAutoStartupClient::instance_, nullptr);
     //mock GetSystemAbilityManager return nullptr
     sptr<ISystemAbilityManager> mgr = nullptr;
-    OH_MOCK_METHOD_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
+    OH_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
     EXPECT_EQ(instance->Connect(), AAFwk::GET_ABILITY_SERVICE_FAILED);
 }
 
@@ -107,9 +107,9 @@ HWTEST_F(AbilityAutoStartupClientTest, Connect_003, TestSize.Level1)
     EXPECT_NE(AAFwk::AbilityAutoStartupClient::instance_, nullptr);
     //mock GetSystemAbilityManager return valid value
     sptr<ISystemAbilityManager> mgr = sptr<ISystemAbilityManager>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
+    OH_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
     sptr<IRemoteObject> obj = nullptr;
-    OH_MOCK_METHOD_EXPECT_RET({obj}, ISystemAbilityManager, GetSystemAbility, int32_t);
+    OH_EXPECT_RET({obj}, ISystemAbilityManager, GetSystemAbility, int32_t);
     EXPECT_EQ(instance->Connect(), AAFwk::GET_ABILITY_SERVICE_FAILED);
 }
 
@@ -125,14 +125,14 @@ HWTEST_F(AbilityAutoStartupClientTest, Connect_004, TestSize.Level1)
     EXPECT_NE(AAFwk::AbilityAutoStartupClient::instance_, nullptr);
     //mock GetSystemAbilityManager return valid value
     sptr<ISystemAbilityManager> mgr = sptr<ISystemAbilityManager>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
+    OH_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
     // mock GetSystemAbility return valid value
     sptr<IRemoteObject> obj = sptr<IRemoteObject>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({obj}, ISystemAbilityManager, GetSystemAbility, int32_t);
+    OH_EXPECT_RET({obj}, ISystemAbilityManager, GetSystemAbility, int32_t);
     // mock IsProxyObject return false
-    OH_MOCK_METHOD_EXPECT_RET({false}, IRemoteObject, IsProxyObject);
+    OH_EXPECT_RET({false}, IRemoteObject, IsProxyObject);
     // mock AddDeathRecipient return false
-    OH_MOCK_METHOD_EXPECT_RET({true}, IRemoteObject, AddDeathRecipient, const sptr<DeathRecipient> &);
+    OH_EXPECT_RET({true}, IRemoteObject, AddDeathRecipient, const sptr<DeathRecipient> &);
     EXPECT_EQ(instance->Connect(), ERR_OK);
 }
 
@@ -148,14 +148,14 @@ HWTEST_F(AbilityAutoStartupClientTest, Connect_005, TestSize.Level1)
     EXPECT_NE(AAFwk::AbilityAutoStartupClient::instance_, nullptr);
     //mock GetSystemAbilityManager return valid value
     sptr<ISystemAbilityManager> mgr = sptr<ISystemAbilityManager>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
+    OH_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
     // mock GetSystemAbility return valid value
     sptr<IRemoteObject> obj = sptr<IRemoteObject>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({obj}, ISystemAbilityManager, GetSystemAbility, int32_t);
+    OH_EXPECT_RET({obj}, ISystemAbilityManager, GetSystemAbility, int32_t);
     // mock IsProxyObject return false
-    OH_MOCK_METHOD_EXPECT_RET({false}, IRemoteObject, IsProxyObject);
+    OH_EXPECT_RET({false}, IRemoteObject, IsProxyObject);
     // mock AddDeathRecipient return false
-    OH_MOCK_METHOD_EXPECT_RET({false}, IRemoteObject, AddDeathRecipient, const sptr<DeathRecipient> &);
+    OH_EXPECT_RET({false}, IRemoteObject, AddDeathRecipient, const sptr<DeathRecipient> &);
     EXPECT_EQ(instance->Connect(), ERR_OK);
 }
 
@@ -171,14 +171,14 @@ HWTEST_F(AbilityAutoStartupClientTest, Connect_006, TestSize.Level1)
     EXPECT_NE(AAFwk::AbilityAutoStartupClient::instance_, nullptr);
     //mock GetSystemAbilityManager return valid value
     sptr<ISystemAbilityManager> mgr = sptr<ISystemAbilityManager>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
+    OH_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
     // mock GetSystemAbility return valid value
     sptr<IRemoteObject> obj = sptr<IRemoteObject>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({obj}, ISystemAbilityManager, GetSystemAbility, int32_t);
+    OH_EXPECT_RET({obj}, ISystemAbilityManager, GetSystemAbility, int32_t);
     // mock IsProxyObject return true
-    OH_MOCK_METHOD_EXPECT_RET({true}, IRemoteObject, IsProxyObject);
+    OH_EXPECT_RET({true}, IRemoteObject, IsProxyObject);
     // mock AddDeathRecipient return false
-    OH_MOCK_METHOD_EXPECT_RET({false}, IRemoteObject, AddDeathRecipient, const sptr<DeathRecipient> &);
+    OH_EXPECT_RET({false}, IRemoteObject, AddDeathRecipient, const sptr<DeathRecipient> &);
     EXPECT_EQ(instance->Connect(), AAFwk::GET_ABILITY_SERVICE_FAILED);
 }
 
@@ -194,14 +194,14 @@ HWTEST_F(AbilityAutoStartupClientTest, Connect_007, TestSize.Level1)
     EXPECT_NE(AAFwk::AbilityAutoStartupClient::instance_, nullptr);
     //mock GetSystemAbilityManager return valid value
     sptr<ISystemAbilityManager> mgr = sptr<ISystemAbilityManager>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
+    OH_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
     // mock GetSystemAbility return valid value
     sptr<IRemoteObject> obj = sptr<IRemoteObject>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({obj}, ISystemAbilityManager, GetSystemAbility, int32_t);
+    OH_EXPECT_RET({obj}, ISystemAbilityManager, GetSystemAbility, int32_t);
     // mock IsProxyObject return false
-    OH_MOCK_METHOD_EXPECT_RET({true}, IRemoteObject, IsProxyObject);
+    OH_EXPECT_RET({true}, IRemoteObject, IsProxyObject);
     // mock AddDeathRecipient return false
-    OH_MOCK_METHOD_EXPECT_RET({true}, IRemoteObject, AddDeathRecipient, const sptr<DeathRecipient> &);
+    OH_EXPECT_RET({true}, IRemoteObject, AddDeathRecipient, const sptr<DeathRecipient> &);
     EXPECT_EQ(instance->Connect(), ERR_OK);
 }
 
@@ -216,7 +216,7 @@ HWTEST_F(AbilityAutoStartupClientTest, SetApplicationAutoStartupByEDM_001, TestS
     std::shared_ptr<AAFwk::AbilityAutoStartupClient> instance = AAFwk::AbilityAutoStartupClient::GetInstance();
     EXPECT_NE(AAFwk::AbilityAutoStartupClient::instance_, nullptr);
     instance->proxy_ = sptr<AAFwk::IAbilityManager>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({0}, IAbilityManager, SetApplicationAutoStartupByEDM,
+    OH_EXPECT_RET({0}, IAbilityManager, SetApplicationAutoStartupByEDM,
         const AbilityRuntime::AutoStartupInfo &, bool);
     AbilityRuntime::AutoStartupInfo info;
     bool flag = false;
@@ -250,7 +250,7 @@ HWTEST_F(AbilityAutoStartupClientTest, CancelApplicationAutoStartupByEDM_001, Te
     std::shared_ptr<AAFwk::AbilityAutoStartupClient> instance = AAFwk::AbilityAutoStartupClient::GetInstance();
     EXPECT_NE(AAFwk::AbilityAutoStartupClient::instance_, nullptr);
     instance->proxy_ = sptr<AAFwk::IAbilityManager>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({0}, IAbilityManager, CancelApplicationAutoStartupByEDM,
+    OH_EXPECT_RET({0}, IAbilityManager, CancelApplicationAutoStartupByEDM,
         const AbilityRuntime::AutoStartupInfo &, bool);
     AbilityRuntime::AutoStartupInfo info;
     bool flag = false;
@@ -284,7 +284,7 @@ HWTEST_F(AbilityAutoStartupClientTest, QueryAllAutoStartupApplications_001, Test
     std::shared_ptr<AAFwk::AbilityAutoStartupClient> instance = AAFwk::AbilityAutoStartupClient::GetInstance();
     EXPECT_NE(AAFwk::AbilityAutoStartupClient::instance_, nullptr);
     instance->proxy_ = sptr<AAFwk::IAbilityManager>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({0}, IAbilityManager, QueryAllAutoStartupApplications,
+    OH_EXPECT_RET({0}, IAbilityManager, QueryAllAutoStartupApplications,
         const AbilityRuntime::AutoStartupInfo &, bool);
     std::vector<AbilityRuntime::AutoStartupInfo> infoList;
     EXPECT_EQ(instance->QueryAllAutoStartupApplications(infoList), ERR_OK);
@@ -320,17 +320,17 @@ HWTEST_F(AbilityAutoStartupClientTest, GetAbilityManager_001, TestSize.Level1)
     // mock connect return valid proxy
     // mock GetSystemAbilityManager return valid value
     sptr<ISystemAbilityManager> mgr = sptr<ISystemAbilityManager>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
+    OH_EXPECT_RET({mgr}, SystemAbilityManagerClient, GetSystemAbilityManager);
     // mock GetSystemAbility return valid value
     sptr<IRemoteObject> obj = sptr<IRemoteObject>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({obj}, ISystemAbilityManager, GetSystemAbility, int32_t);
+    OH_EXPECT_RET({obj}, ISystemAbilityManager, GetSystemAbility, int32_t);
     // mock IsProxyObject return false
-    OH_MOCK_METHOD_EXPECT_RET({true}, IRemoteObject, IsProxyObject);
+    OH_EXPECT_RET({true}, IRemoteObject, IsProxyObject);
     // mock AddDeathRecipient return false
-    OH_MOCK_METHOD_EXPECT_RET({true}, IRemoteObject, AddDeathRecipient, const sptr<DeathRecipient> &);
+    OH_EXPECT_RET({true}, IRemoteObject, AddDeathRecipient, const sptr<DeathRecipient> &);
     // mock iface_cast return nullptr
     sptr<AAFwk::IAbilityManager> obj1 = sptr<AAFwk::IAbilityManager>::MakeSptr();
-    OH_MOCK_GLOBAL_METHOD_EXPECT_RET({obj1}, iface_cast, const sptr<IRemoteObject> &);
+    OH_GLOBAL_EXPECT_RET({obj1}, iface_cast, const sptr<IRemoteObject> &);
     EXPECT_EQ(instance->Connect(), ERR_OK);
 
     EXPECT_EQ(instance->GetAbilityManager(), obj1);
@@ -378,7 +378,7 @@ HWTEST_F(AbilityAutoStartupClientTest, ResetProxy_002, TestSize.Level1)
     instance->proxy_ = sptr<AAFwk::IAbilityManager>::MakeSptr();
     EXPECT_NE(instance->proxy_, nullptr);
     sptr<IRemoteObject> obj = nullptr;
-    OH_MOCK_METHOD_EXPECT_RET({obj}, IRemoteBroker, AsObject);
+    OH_EXPECT_RET({obj}, IRemoteBroker, AsObject);
     instance->ResetProxy(nullptr);
     EXPECT_NE(instance->proxy_, nullptr);
 }
@@ -396,7 +396,7 @@ HWTEST_F(AbilityAutoStartupClientTest, ResetProxy_003, TestSize.Level1)
     instance->proxy_ = sptr<AAFwk::IAbilityManager>::MakeSptr();
     EXPECT_NE(instance->proxy_, nullptr);
     sptr<IRemoteObject> obj = sptr<IRemoteObject>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({obj}, IRemoteBroker, AsObject);
+    OH_EXPECT_RET({obj}, IRemoteBroker, AsObject);
     instance->ResetProxy(nullptr);
     EXPECT_NE(instance->proxy_, nullptr);
 }
@@ -414,7 +414,7 @@ HWTEST_F(AbilityAutoStartupClientTest, ResetProxy_004, TestSize.Level1)
     instance->proxy_ = sptr<AAFwk::IAbilityManager>::MakeSptr();
     EXPECT_NE(instance->proxy_, nullptr);
     sptr<IRemoteObject> obj = nullptr;
-    OH_MOCK_METHOD_EXPECT_RET({obj}, IRemoteBroker, AsObject);
+    OH_EXPECT_RET({obj}, IRemoteBroker, AsObject);
     sptr<IRemoteObject> obj1 = sptr<IRemoteObject>::MakeSptr();
     wptr<IRemoteObject> remote = obj1;
     instance->ResetProxy(remote);
@@ -434,7 +434,7 @@ HWTEST_F(AbilityAutoStartupClientTest, ResetProxy_005, TestSize.Level1)
     instance->proxy_ = sptr<AAFwk::IAbilityManager>::MakeSptr();
     EXPECT_NE(instance->proxy_, nullptr);
     sptr<IRemoteObject> obj = sptr<IRemoteObject>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({obj}, IRemoteBroker, AsObject);
+    OH_EXPECT_RET({obj}, IRemoteBroker, AsObject);
     sptr<IRemoteObject> obj1 = sptr<IRemoteObject>();
     wptr<IRemoteObject> remote = obj1;
     instance->ResetProxy(remote);
@@ -454,7 +454,7 @@ HWTEST_F(AbilityAutoStartupClientTest, ResetProxy_006, TestSize.Level1)
     instance->proxy_ = sptr<AAFwk::IAbilityManager>::MakeSptr();
     EXPECT_NE(instance->proxy_, nullptr);
     sptr<IRemoteObject> obj = sptr<IRemoteObject>::MakeSptr();
-    OH_MOCK_METHOD_EXPECT_RET({obj}, IRemoteBroker, AsObject);
+    OH_EXPECT_RET({obj}, IRemoteBroker, AsObject);
     wptr<IRemoteObject> wObj = obj;
     instance->ResetProxy(wObj);
     EXPECT_EQ(instance->proxy_, nullptr);

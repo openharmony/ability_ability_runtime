@@ -97,6 +97,7 @@ struct StartAbilityInfo;
 class WindowFocusChangedListener;
 class WindowVisibilityChangedListener;
 class PreloadManagerService;
+class StartOptionsUtils;
 
 /**
  * @class AbilityManagerService
@@ -110,6 +111,7 @@ class AbilityManagerService : public SystemAbility,
     DECLEAR_SYSTEM_ABILITY(AbilityManagerService)
 public:
     friend class PreloadManagerService;
+    friend class StartOptionsUtils;
     static std::shared_ptr<AbilityManagerService> GetPubInstance();
 
     void OnStart() override;
@@ -1015,19 +1017,14 @@ public:
     virtual int GetAppMemorySize() override;
 
     virtual bool IsRamConstrainedDevice() override;
-    /**
-     * Start Ability, connect session with common ability.
-     *
-     * @param want, Special want for service type's ability.
-     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
-     * @param accountId Indicates the account to start.
-     * @return Returns ERR_OK on success, others on failure.
-     */
+
     virtual int StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
-        const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE) override;
+        const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE,
+        bool isSilent = false) override;
 
     virtual int StartAbilityByCallWithErrMsg(const Want &want, const sptr<IAbilityConnection> &connect,
-        const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg) override;
+        const sptr<IRemoteObject> &callerToken, int32_t accountId, std::string &errMsg,
+        bool isSilent = false) override;
 
     /**
      * As abilityRequest is prepared, just execute starting ability procedure.
@@ -2397,6 +2394,8 @@ private:
     int CheckPermissionForUIService(AppExecFwk::ExtensionAbilityType extensionType,
         const Want &want, const AbilityRequest &abilityRequest);
 
+    bool CheckPermissionForKillCollaborator();
+
     bool GetValidDataAbilityUri(const std::string &abilityInfoUri, std::string &adjustUri);
 
     int GenerateExtensionAbilityRequest(const Want &want, AbilityRequest &request,
@@ -2557,10 +2556,6 @@ private:
 
     bool CheckUserIdActive(int32_t userId);
 
-    int32_t CheckProcessOptions(const Want &want, const StartOptions &startOptions, int32_t userId);
-
-    int32_t CheckStartSelfUIAbilityStartOptions(const Want &want, const StartOptions &startOptions);
-
     void GetConnectManagerAndUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo,
         std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility,
         bool needCheck = false);
@@ -2707,7 +2702,7 @@ private:
 
     void StartKeepAliveAppsInner(int32_t userId);
 
-    bool ProcessLowMemoryKill(int32_t pid, const ExitReason &reason);
+    bool ProcessLowMemoryKill(int32_t pid, const ExitReason &reason, bool isKillPrecedeStart);
 
     struct StartSelfUIAbilityParam {
         Want want;
@@ -2723,11 +2718,6 @@ private:
     bool isParamStartAbilityEnable_ = false;
     // Component StartUp rule switch
     bool startUpNewRule_ = true;
-    /** It only takes effect when startUpNewRule_ is TRUE
-     *  TRUE: When Caller-Application is Launcher or SystemUI, use old rule.
-     *  FALSE: Apply new rule to all application
-     */
-    bool newRuleExceptLauncherSystemUI_ = true;
     /** Indicates the criteria for judging whether the Caller-Application is in the background
      *  TRUE: Determine the state by AAFwk::AppState::FOREGROUND.
      *  FALSE: Determine the state by AppExecFwk::AppProcessState::APP_STATE_FOCUS.
@@ -2817,7 +2807,7 @@ private:
 
     int32_t OpenLinkInner(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId, int requestCode,
         bool removeInsightIntentFlag);
-    int32_t KillProcessWithReasonInner(int32_t pid, const ExitReason &reason);
+    int32_t KillProcessWithReasonInner(int32_t pid, const ExitReason &reason, bool isKillPrecedeStart);
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif
@@ -2857,7 +2847,7 @@ private:
 
     std::mutex prepareTermiationCallbackMutex_;
     std::map<std::string, sptr<IPrepareTerminateCallback>> prepareTermiationCallbacks_;
-    AbilityEventUtil abilityEventHelper_;
+    AbilityEventUtil eventHelper_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

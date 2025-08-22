@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -184,10 +184,10 @@ HWTEST_F(AbilityEventHandlerTest, event_wrap_006, TestSize.Level1)
 HWTEST_F(AbilityEventHandlerTest, event_wrap_007, TestSize.Level1)
 {
     auto event = EventWrap(10, "connectTimeout_101");
-    event.SetRunCount(6);
+    event.SetCreateTime(6);
     EXPECT_TRUE(event.GetEventId() == 10);
     EXPECT_TRUE(event.GetEventString() == "10_connectTimeout_101");
-    EXPECT_TRUE(event.GetRunCount() == 6);
+    EXPECT_TRUE(event.GetCreateTime() == 6);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
-}

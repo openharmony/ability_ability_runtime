@@ -159,7 +159,7 @@ public:
     {}
 
     void ScheduleAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message) override
+        const std::string &message, int32_t resultCode) override
     {}
 
     void ScheduleAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element) override

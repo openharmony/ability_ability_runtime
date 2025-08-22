@@ -47,6 +47,8 @@ public:
      */
     static AppUtils &GetInstance();
 
+    static void ForbidStartCallback(const char *key, const char *, void *);
+
     /**
      * AppUtils, destructor.
      *
@@ -351,6 +353,10 @@ public:
 
     bool IsPreloadApplicationEnabled();
 
+    bool IsForbidStart();
+
+    bool IsSupportRestartAppWithWindow();
+
 private:
     /**
      * LoadResidentProcessInExtremeMemory, load resident process in extreme low memory.
@@ -435,6 +441,8 @@ private:
     volatile DeviceConfiguration<bool> isGrantTempUriPermission_ = {false, true};
     volatile DeviceConfiguration<bool> isSupportStartAbilities_ = {false, false};
     volatile DeviceConfiguration<bool> isPreloadApplicationEnabled_ = {false, false};
+    volatile DeviceConfiguration<bool> isForbidStart_ = {true, false};
+    volatile DeviceConfiguration<bool> isSupportRestartAppWithWindow_ = {false, false};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         residentProcessInExtremeMemory_ = {false, {}};
     std::mutex residentProcessInExtremeMemoryMutex_;

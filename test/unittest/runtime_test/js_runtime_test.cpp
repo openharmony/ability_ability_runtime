@@ -1417,6 +1417,7 @@ HWTEST_F(JsRuntimeTest, JsRuntimePreloadModuleandDoCleanWorkAfterStageCleaned_01
     bool isEsMode = true;
     bool useCommonTrunk = true;
     jsRuntime->PreloadModule(moduleName, srcPath, hapPath, isEsMode, useCommonTrunk);
+    jsRuntime->PreloadModule(moduleName, hapPath, isEsMode, useCommonTrunk);
     EXPECT_EQ(jsRuntime->preloadList_.size(), 1);
     jsRuntime.reset();
     TAG_LOGI(AAFwkTag::TEST, "PreloadModule_0100 end");
@@ -1468,6 +1469,7 @@ HWTEST_F(JsRuntimeTest, SetDebugOption_0100, TestSize.Level1)
     Runtime::DebugOption debugOption;
     std::string bundleName = "com.ohos.example.bundleName";
     debugOption.bundleName = bundleName;
+    debugOption.processName = "com.ohos.example.bundleName";
     auto jsRuntime = std::make_unique<JsRuntime>();
     jsRuntime->SetDebugOption(debugOption);
     EXPECT_EQ(jsRuntime->debugOption_.bundleName, bundleName);

@@ -22,10 +22,6 @@
 
 namespace OHOS {
 namespace RunnerRuntime {
-namespace {
-const std::string CAPITALTESTRUNNER = "/ets/TestRunner/";
-const std::string LOWERCASETESTRUNNER = "/ets/testrunner/";
-}  // namespace
 
 std::unique_ptr<TestRunner> JsTestRunner::Create(const std::unique_ptr<Runtime> &runtime,
     const std::shared_ptr<AbilityDelegatorArgs> &args, const AppExecFwk::BundleInfo &bundleInfo, bool isFaJsModel)
@@ -59,21 +55,18 @@ JsTestRunner::JsTestRunner(
     if (args) {
         std::string srcPath;
         if (bundleInfo.hapModuleInfos.back().isModuleJson) {
-            srcPath.append(args->GetTestModuleName());
-            if (args->GetTestRunnerClassName().find("/") == std::string::npos) {
-                srcPath.append(LOWERCASETESTRUNNER);
-            }
+            srcPath.append(GetTestRunnerPath(args));
             moduleName = args->GetTestModuleName();
         } else {
             srcPath.append(args->GetTestPackageName());
             srcPath.append("/assets/js/TestRunner/");
             moduleName = args->GetTestPackageName();
+            srcPath.append(args->GetTestRunnerClassName());
         }
-        srcPath.append(args->GetTestRunnerClassName());
         srcPath.append(".abc");
         srcPath_ = srcPath;
     }
-    TAG_LOGD(AAFwkTag::DELEGATOR, "srcPath: %{public}s", srcPath_.c_str());
+    TAG_LOGI(AAFwkTag::DELEGATOR, "srcPath: %{public}s", srcPath_.c_str());
 
     if (!moduleName.empty()) {
         for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
@@ -95,10 +88,12 @@ JsTestRunner::JsTestRunner(
     moduleName.append("::").append("TestRunner");
     jsTestRunnerObj_ = jsRuntime_.LoadModule(moduleName, srcPath_, hapPath_,
         bundleInfo.hapModuleInfos.back().compileMode == AppExecFwk::CompileMode::ES_MODULE);
-    if (!jsTestRunnerObj_ && srcPath_.find(LOWERCASETESTRUNNER) != std::string::npos) {
+    if (!jsTestRunnerObj_ &&
+        srcPath_.find(AbilityRuntime::LOWERCASETESTRUNNER) != std::string::npos &&
+        !args->GetTestRunnerClassName().empty()) {
         TAG_LOGI(AAFwkTag::DELEGATOR, "not found %{public}s , retry load capital address", srcPath_.c_str());
-        std::regex src_pattern(LOWERCASETESTRUNNER);
-        srcPath_ = std::regex_replace(srcPath_, src_pattern, CAPITALTESTRUNNER);
+        std::regex src_pattern(AbilityRuntime::LOWERCASETESTRUNNER);
+        srcPath_ = std::regex_replace(srcPath_, src_pattern, AbilityRuntime::CAPITALTESTRUNNER);
         TAG_LOGD(AAFwkTag::DELEGATOR, "capital address is %{public}s", srcPath_.c_str());
         jsTestRunnerObj_ = jsRuntime_.LoadModule(moduleName, srcPath_, hapPath_,
             bundleInfo.hapModuleInfos.back().compileMode == AppExecFwk::CompileMode::ES_MODULE);
@@ -240,6 +235,23 @@ void JsTestRunner::ReportStatus(const std::string &msg)
     }
 
     delegator->Print(msg);
+}
+
+std::string JsTestRunner::GetTestRunnerPath(const std::shared_ptr<AbilityDelegatorArgs> &args)
+{
+    std::string result;
+    result.append(args->GetTestModuleName());
+    if (!args->GetTestRunnerClassName().empty()) {
+        if (args->GetTestRunnerClassName().find("/") == std::string::npos) {
+            result.append(LOWERCASETESTRUNNER);
+        }
+        result.append(args->GetTestRunnerClassName());
+    } else {
+        result.append("/");
+        result.append(args->GetTestRunnerPath());
+        result.erase(result.rfind("."));
+    }
+    return result;
 }
 }  // namespace RunnerRuntime
 }  // namespace OHOS

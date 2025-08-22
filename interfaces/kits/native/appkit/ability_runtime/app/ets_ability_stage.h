@@ -35,7 +35,7 @@ public:
         const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo);
 
     ETSAbilityStage(ETSRuntime &etsRuntime, std::unique_ptr<AppExecFwk::ETSNativeReference> &&ETSAbilityStageObj);
-    ~ETSAbilityStage() override {}
+    ~ETSAbilityStage() override;
 
     void Init(const std::shared_ptr<Context> &context,
         const std::weak_ptr<AppExecFwk::OHOSApplication> application) override;
@@ -49,7 +49,7 @@ public:
 private:
     bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...) const;
 
-    std::shared_ptr<AppExecFwk::DelegatorAbilityStageProperty> CreateStageProperty() const;
+    std::shared_ptr<AppExecFwk::EtsDelegatorAbilityStageProperty> CreateStageProperty() const;
 
     std::string GetHapModuleProp(const std::string &propName) const;
 

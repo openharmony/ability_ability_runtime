@@ -72,6 +72,9 @@ public:
         const std::shared_ptr<OHOSApplication> application,
         std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token) override;
 
+    static void CreateAndBindContext(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
+        const std::unique_ptr<Runtime>& runtime);
+
     /**
      * @brief OnStart,Start JsUIability
      * @param want Indicates the {@link Want} structure containing startup information about the ability
@@ -368,7 +371,7 @@ public:
      * @param message, the message to be returned to the calling app.
      */
     void OnAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
-        const std::string &message) override;
+        const std::string &message, int32_t resultCode = 0) override;
 
     /**
      * @brief Called when startAbility request succeeded.
@@ -431,7 +434,6 @@ private:
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;
     std::shared_ptr<NativeReference> jsAbilityObj_;
-    std::shared_ptr<int32_t> screenModePtr_;
     sptr<IRemoteObject> remoteCallee_;
     bool reusingWindow_ = false;
 };

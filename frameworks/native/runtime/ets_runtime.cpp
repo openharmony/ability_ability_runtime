@@ -28,6 +28,7 @@
 #include "file_path_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "hybrid_js_module_reader.h"
+#include "nocopyable.h"
 
 #ifdef SUPPORT_SCREEN
 #include "ace_forward_compatibility.h"
@@ -55,124 +56,6 @@ const std::string ETS_SYSLIB_PATH =
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
 constexpr char SANDBOX_ARK_CACHE_PATH[] = "/data/storage/ark-cache/";
 constexpr char MERGE_ABC_PATH[] = "/ets/modules_static.abc";
-constexpr char ENTRY_PATH_MAP_FILE[] = "/system/framework/entrypath.json"; // will deprecated
-constexpr char ENTRY_PATH_MAP_KEY[] = "entryPath"; // will deprecated
-constexpr char DEFAULT_ENTRY_ABILITY_CLASS[] = "entry/src/main/ets/entryability/EntryAbility/EntryAbility";
-constexpr int32_t DOT_START_LEN = 2;
-
-class EntryPathManager {
-public:
-    static EntryPathManager &GetInstance()
-    {
-        static EntryPathManager instance;
-        return instance;
-    }
-
-    bool Init()
-    {
-        std::ifstream inFile;
-        inFile.open(ENTRY_PATH_MAP_FILE, std::ios::in);
-        if (!inFile.is_open()) {
-            TAG_LOGD(AAFwkTag::ETSRUNTIME, "no entrypath file");
-            return false;
-        }
-        nlohmann::json filePathsJson;
-        inFile >> filePathsJson;
-        if (filePathsJson.is_discarded()) {
-            TAG_LOGE(AAFwkTag::ETSRUNTIME, "json discarded error");
-            inFile.close();
-            return false;
-        }
-
-        if (filePathsJson.is_null() || filePathsJson.empty()) {
-            TAG_LOGE(AAFwkTag::ETSRUNTIME, "invalid json");
-            inFile.close();
-            return false;
-        }
-
-        if (!filePathsJson.contains(ENTRY_PATH_MAP_KEY)) {
-            TAG_LOGD(AAFwkTag::ETSRUNTIME, "no entrypath key");
-            return false;
-        }
-        const auto &entryPathMap = filePathsJson[ENTRY_PATH_MAP_KEY];
-        if (!entryPathMap.is_object()) {
-            TAG_LOGE(AAFwkTag::ETSRUNTIME, "entrypath is not object");
-            return false;
-        }
-
-        for (const auto &entryPath : entryPathMap.items()) {
-            std::string key = entryPath.key();
-            if (!entryPath.value().is_string()) {
-                TAG_LOGE(AAFwkTag::ETSRUNTIME, "val is not string, key: %{public}s", key.c_str());
-                continue;
-            }
-            std::string val = entryPath.value();
-            TAG_LOGD(AAFwkTag::ETSRUNTIME, "key: %{public}s, value: %{public}s", key.c_str(), val.c_str());
-            entryPathMap_.emplace(key, val);
-        }
-        inFile.close();
-        return true;
-    }
-
-    std::string GetEntryPath(const std::string &srcEntry)
-    {
-        auto const &iter = entryPathMap_.find(srcEntry);
-        if (iter == entryPathMap_.end()) {
-            if (StartsWithDotSlash(srcEntry)) {
-                TAG_LOGD(AAFwkTag::ETSRUNTIME, "not found srcEntry: %{public}s", srcEntry.c_str());
-                return DEFAULT_ENTRY_ABILITY_CLASS;
-            }
-            TAG_LOGD(AAFwkTag::ETSRUNTIME, "srcEntry as class: %{public}s", srcEntry.c_str());
-            return HandleOhmUrlSrcEntry(srcEntry);
-        }
-        TAG_LOGD(AAFwkTag::ETSRUNTIME, "found srcEntry: %{public}s, output: %{public}s",
-                 srcEntry.c_str(), iter->second.c_str());
-        return iter->second;
-    }
-
-private:
-    EntryPathManager() = default;
-
-    ~EntryPathManager() = default;
-
-    static bool StartsWithDotSlash(const std::string &str)
-    {
-        if (str.length() < DOT_START_LEN) {
-            return false;
-        }
-        std::string prefix = str.substr(0, DOT_START_LEN);
-        return prefix == "./";
-    }
-
-    static std::string HandleOhmUrlSrcEntry(const std::string &srcEntry)
-    {
-        size_t lastSlashPos = srcEntry.rfind('/');
-        if (lastSlashPos == std::string::npos) {
-            std::string fileName = srcEntry;
-            // If there is no slash, the entire string is processed directly.
-            HandleOhmUrlFileName(fileName);
-            return fileName;
-        }
-        std::string base = srcEntry.substr(0, lastSlashPos + 1);
-        std::string fileName = srcEntry.substr(lastSlashPos + 1);
-        HandleOhmUrlFileName(fileName);
-        return base + fileName;
-    }
-
-    static void HandleOhmUrlFileName(std::string &fileName)
-    {
-        size_t colonPos = fileName.rfind(':');
-        if (colonPos != std::string::npos) {
-            // <fileName>:<className>  =>  <fileName>/<className>
-            fileName.replace(colonPos, 1, "/");
-        } else {
-            // <fileName>  =>  <fileName>/<fileName>
-            fileName = fileName + "/" + fileName;
-        }
-    }
-
-    std::map<std::string, std::string> entryPathMap_ {};
-};
 
 const char *ETS_ENV_LIBNAME = "libets_environment.z.so";
 const char *ETS_ENV_REGISTER_FUNCS = "OHOS_ETS_ENV_RegisterFuncs";
@@ -198,6 +81,41 @@ bool RegisterETSEnvFuncs()
     g_etsEnvFuncs = func();
     return true;
 }
+
+class EtsAppLibNamespaceMgr : public std::enable_shared_from_this<EtsAppLibNamespaceMgr>, public NoCopyable {
+public:
+    EtsAppLibNamespaceMgr(const AppLibPathMap& appLibPaths, bool isSystemApp)
+        : isSystemApp_(isSystemApp), appLibPathMap_(appLibPaths)
+    {
+    }
+
+    bool CreateNamespace(const std::string& bundleModuleName, std::string &nsName)
+    {
+        TAG_LOGD(AAFwkTag::ETSRUNTIME, "Create app ns: %{public}s", bundleModuleName.c_str());
+        if (bundleModuleName.empty()) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "empty bundleModuleName");
+            return false;
+        }
+        auto appLibPath = appLibPathMap_.find(bundleModuleName);
+        if (appLibPath == appLibPathMap_.end()) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "not found app lib path: %{public}s", bundleModuleName.c_str());
+            return false;
+        }
+
+        auto moduleManager = NativeModuleManager::GetInstance();
+        if (moduleManager == nullptr) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "null moduleManager");
+            return false;
+        }
+        moduleManager->SetAppLibPath(appLibPath->first, appLibPath->second, isSystemApp_);
+        return moduleManager->GetLdNamespaceName(appLibPath->first, nsName);
+    }
+
+private:
+    bool isSystemApp_ = false;
+    AppLibPathMap appLibPathMap_;
+};
+std::shared_ptr<EtsAppLibNamespaceMgr> g_etsAppLibNamespaceMgr;
 } // namespace
 
 std::unique_ptr<ETSRuntime> ETSRuntime::PreFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime)
@@ -208,11 +126,10 @@ std::unique_ptr<ETSRuntime> ETSRuntime::PreFork(const Options &options, std::uni
     if (!instance->Initialize(options, jsRuntime)) {
         return std::unique_ptr<ETSRuntime>();
     }
-    EntryPathManager::GetInstance().Init();
     return instance;
 }
 
-void ETSRuntime::PostFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime)
+bool ETSRuntime::PostFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime)
 {
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "PostFork begin");
     codePath_ = options.codePath;
@@ -220,7 +137,7 @@ void ETSRuntime::PostFork(const Options &options, std::unique_ptr<JsRuntime> &js
     if (g_etsEnvFuncs == nullptr ||
         g_etsEnvFuncs->PostFork == nullptr) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or PostFork");
-        return;
+        return false;
     }
 
     if (jsRuntime != nullptr) {
@@ -238,6 +155,7 @@ void ETSRuntime::PostFork(const Options &options, std::unique_ptr<JsRuntime> &js
     }
     napi_env napiEnv = static_cast<AbilityRuntime::JsRuntime *>(jsRuntime_.get())->GetNapiEnv();
     g_etsEnvFuncs->PostFork(reinterpret_cast<void *>(napiEnv), aotFilePath);
+    return true;
 }
  
 std::unique_ptr<ETSRuntime> ETSRuntime::Create(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime)
@@ -277,7 +195,8 @@ std::unique_ptr<ETSRuntime> ETSRuntime::Create(const Options &options, std::uniq
     return instance;
 }
 
-void ETSRuntime::SetAppLibPath(const AppLibPathMap &appLibPaths)
+void ETSRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths,
+    const std::map<std::string, std::string>& abcPathsToBundleModuleNameMap, bool isSystemApp)
 {
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "SetAppLibPath called");
     if (!RegisterETSEnvFuncs()) {
@@ -301,6 +220,43 @@ void ETSRuntime::SetAppLibPath(const AppLibPathMap &appLibPaths)
         return;
     }
     g_etsEnvFuncs->InitETSSysNS(ETS_SYSLIB_PATH);
+    
+    if (g_etsEnvFuncs->SetAppLibPath == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null SetAppLibPath");
+        return;
+    }
+    g_etsAppLibNamespaceMgr = std::make_shared<EtsAppLibNamespaceMgr>(appLibPaths, isSystemApp);
+    std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)> cb =
+        [weak = std::weak_ptr(g_etsAppLibNamespaceMgr)](const std::string &bundleModuleName, std::string &nsName) {
+        auto appLibNamespaceMgr = weak.lock();
+        if (appLibNamespaceMgr == nullptr) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "null appLibNamespaceMgr");
+            return false;
+        }
+        return appLibNamespaceMgr->CreateNamespace(bundleModuleName, nsName);
+    };
+    g_etsEnvFuncs->SetAppLibPath(abcPathsToBundleModuleNameMap, cb);
+}
+
+void ETSRuntime::SetExtensionApiCheckCallback(
+    std::function<bool(const std::string &className, const std::string &fileName)> &cb)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "SetExtensionApiCheckCallback called");
+    if (!RegisterETSEnvFuncs()) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "RegisterETSEnvFuncs failed");
+        return;
+    }
+
+    if (g_etsEnvFuncs == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs");
+        return;
+    }
+
+    if (g_etsEnvFuncs->SetExtensionApiCheckCallback == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null SetExtensionApiCheckCallback");
+        return;
+    }
+    g_etsEnvFuncs->SetExtensionApiCheckCallback(cb);
 }
 
 bool ETSRuntime::Initialize(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime)
@@ -444,7 +400,7 @@ std::unique_ptr<AppExecFwk::ETSNativeReference> ETSRuntime::LoadEtsModule(const 
     }
 
     std::string modulePath = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
-    std::string entryPath = EntryPathManager::GetInstance().GetEntryPath(srcEntrance);
+    std::string entryPath = HandleOhmUrlSrcEntry(srcEntrance);
     void *cls = nullptr;
     void *obj = nullptr;
     void *ref = nullptr;
@@ -486,6 +442,52 @@ void ETSRuntime::PreloadSystemModule(const std::string &moduleName)
     if (jsRuntime_ != nullptr) {
         jsRuntime_->PreloadSystemModule(moduleName);
     }
+}
+
+void ETSRuntime::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const
+{
+    if (jsRuntime_ != nullptr) {
+        jsRuntime_->SetModuleLoadChecker(moduleCheckerDelegate);
+    }
+}
+
+std::string ETSRuntime::HandleOhmUrlSrcEntry(const std::string &srcEntry)
+{
+    size_t lastSlashPos = srcEntry.rfind('/');
+    if (lastSlashPos == std::string::npos) {
+        std::string fileName = srcEntry;
+        // If there is no slash, the entire string is processed directly.
+        HandleOhmUrlFileName(fileName);
+        return fileName;
+    }
+    std::string base = srcEntry.substr(0, lastSlashPos + 1);
+    std::string fileName = srcEntry.substr(lastSlashPos + 1);
+    HandleOhmUrlFileName(fileName);
+    return base + fileName;
+}
+
+void ETSRuntime::HandleOhmUrlFileName(std::string &fileName)
+{
+    size_t colonPos = fileName.rfind(':');
+    if (colonPos != std::string::npos) {
+        // <fileName>:<className>  =>  <fileName>/<className>
+        fileName.replace(colonPos, 1, "/");
+    } else {
+        // <fileName>  =>  <fileName>/<fileName>
+        fileName = fileName + "/" + fileName;
+    }
+}
+
+bool ETSRuntime::PreloadSystemClass(const char *className)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "PreloadSystemClass called");
+    if (g_etsEnvFuncs == nullptr ||
+        g_etsEnvFuncs->PreloadSystemClass == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or PreloadSystemClass");
+        return false;
+    }
+    g_etsEnvFuncs->PreloadSystemClass(className);
+    return true;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -46,7 +46,8 @@ namespace AbilityRuntime {
 class ETSRuntime : public Runtime {
 public:
     static std::unique_ptr<ETSRuntime> Create(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
-    static void SetAppLibPath(const AppLibPathMap &appLibPaths);
+    static void SetAppLibPath(const AppLibPathMap& appLibPaths,
+        const std::map<std::string, std::string>& abcPathsToBundleModuleNameMap, bool isSystemApp);
     ~ETSRuntime() override;
     Language GetLanguage() const override
     {
@@ -71,7 +72,9 @@ public:
     bool UnLoadRepairPatch(const std::string &patchFile) override { return false; }
     void RegisterQuickFixQueryFunc(const std::map<std::string, std::string> &moduleAndPath) override {};
     void StartProfiler(const DebugOption debugOption) override {};
-    void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const override {}
+    void SetExtensionApiCheckCallback(
+        std::function<bool(const std::string &className, const std::string &fileName)> &cb) override;
+    void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const override;
     void SetDeviceDisconnectCallback(const std::function<bool()> &cb) override {};
     void DestroyHeapProfiler() override {};
     void ForceFullGC() override {};
@@ -89,6 +92,7 @@ public:
     const std::unique_ptr<AbilityRuntime::Runtime> &GetJsRuntime() const;
     std::unique_ptr<AbilityRuntime::Runtime> MoveJsRuntime();
     static std::unique_ptr<ETSRuntime> PreFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
+    bool PreloadSystemClass(const char *className) override;
 
 private:
     bool Initialize(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
@@ -96,7 +100,9 @@ private:
     bool CreateEtsEnv(const Options &options);
     std::unique_ptr<AppExecFwk::ETSNativeReference> LoadEtsModule(const std::string &moduleName,
         const std::string &fileName, const std::string &hapPath, const std::string &srcEntrance);
-    void PostFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
+    bool PostFork(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
+    std::string HandleOhmUrlSrcEntry(const std::string &srcEntry);
+    void HandleOhmUrlFileName(std::string &fileName);
     int32_t apiTargetVersion_ = 0;
     std::string codePath_;
     std::string moduleName_;
