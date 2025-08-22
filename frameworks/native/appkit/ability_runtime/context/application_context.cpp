@@ -670,7 +670,7 @@ std::string ApplicationContext::GetCloudFileDir()
     return (contextImpl_ != nullptr) ? contextImpl_->GetCloudFileDir() : "";
 }
 
-std::string ApplicationContext::GetLaunchParameter()
+std::string ApplicationContext::GetLaunchParameter() const
 {
     return (contextImpl_ != nullptr) ? contextImpl_->GetLaunchParameter() : "";
 }
@@ -682,9 +682,10 @@ void ApplicationContext::SetLaunchParameter(const AAFwk::Want &want)
         return;
     }
     contextImpl_->SetLaunchParameter(want);
+    contextImpl_->SetLatestParameter(want);
 }
 
-std::string ApplicationContext::GetLatestParameter()
+std::string ApplicationContext::GetLatestParameter() const
 {
     return (contextImpl_ != nullptr) ? contextImpl_->GetLatestParameter() : "";
 }

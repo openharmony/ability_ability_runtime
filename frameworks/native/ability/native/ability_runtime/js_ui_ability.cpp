@@ -452,7 +452,6 @@ void JsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
         applicationContext->SetLaunchParameter(want);
-        applicationContext->SetLatestParameter(want);
         applicationContext->DispatchOnAbilityWillCreate(jsAbilityObj_);
     }
 

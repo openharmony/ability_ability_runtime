@@ -167,8 +167,8 @@ public:
     std::string GetDataDir();
     void SetLaunchParameter(const AAFwk::Want &want);
     void SetLatestParameter(const AAFwk::Want &want);
-    std::string GetLaunchParameter();
-    std::string GetLatestParameter();
+    std::string GetLaunchParameter() const;
+    std::string GetLatestParameter() const;
 
 protected:
     bool IsContext(size_t contextTypeId) override
