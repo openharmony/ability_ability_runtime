@@ -117,8 +117,7 @@ void KeepAliveProcessManager::StartKeepAliveProcessWithMainElementPerBundle(cons
             TAG_LOGI(AAFwkTag::KEEP_ALIVE, "retry result:%{public}d", ret);
         }
         if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::KEEP_ALIVE, "reach max retry, failed:%{public}d, unsetting keep-alive", ret);
-            KeepAliveProcessManager::GetInstance().SetApplicationKeepAlive(bundleName, userId, false, true, true);
+            TAG_LOGW(AAFwkTag::KEEP_ALIVE, "reach max retry, failed:%{public}d", ret);
             return;
         }
         KeepAliveProcessManager::GetInstance().AfterStartKeepAliveApp(bundleName, accessTokenId, uid, userId,
