@@ -56,10 +56,16 @@ uint64_t GetProcRssMemInfo()
 
 std::string GetThreadName()
 {
-    std::string path = "/proc/" + std::to_string(static_cast<pid_t>(syscall(SYS_gettid))) + "/comm";
+    pid_t tid = static_cast<pid_t>(syscall(SYS_gettid));
+    pid_t pid = getpid();
+    std::string path = "/proc/" + std::to_string(pid) + "/task/" + std::to_string(tid) + "/comm";
     std::string name;
     if (!LoadStringFromFile(path, name)) {
         return "unknown";
+    }
+
+    if (!name.empty() && name.back() == '\n') {
+        name.pop_back();
     }
     return name;
 }
