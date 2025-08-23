@@ -8500,9 +8500,10 @@ int32_t AppMgrServiceInner::StartChildProcess(const pid_t callingPid, pid_t &chi
     auto &options = request.options;
     childProcessRecord->SetEntryParams(args.entryParams);
     TAG_LOGI(AAFwkTag::APPMGR, "srcEntry:%{private}s, args.entryParams size:%{public}zu,"
-        " processName:%{public}s, args.fds size:%{public}zu, options.isolationMode:%{public}d",
+        " processName:%{public}s, args.fds size:%{public}zu, options.isolationMode:%{public}d,"
+        "option.isolationUid: %{public}d",
         request.srcEntry.c_str(), args.entryParams.length(), childProcessRecord->GetProcessName().c_str(),
-        args.fds.size(), options.isolationMode);
+        args.fds.size(), options.isolationMode, options.isolationUid);
     return StartChildProcessImpl(childProcessRecord, appRecord, childPid, args, options);
 }
 
@@ -8615,6 +8616,17 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
     startMsg.fds = args.fds;
     startMsg.isolationMode = options.isolationMode;
     pid_t pid = 0;
+    if (options.isolationMode && options.isolationUid) {
+        int32_t renderUid = Constants::INVALID_UID;
+        if (!GenerateRenderUid(renderUid)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "generate renderUid fail");
+            AppMgrEventUtil::SendChildProcessStartFailedEvent(childProcessRecord,
+                ProcessStartFailedReason::GENERATE_RENDER_UID_FAILED, ERR_INVALID_OPERATION);
+            return ERR_INVALID_OPERATION;
+        }
+        startMsg.uid = renderUid;
+        TAG_LOGI(AAFwkTag::APPMGR, "generate uid: %{public}d", renderUid);
+    }
     {
         std::lock_guard<ffrt::mutex> lock(startChildProcessLock_);
         ErrCode errCode = spawnClient->StartProcess(startMsg, pid);
@@ -8694,6 +8706,31 @@ int32_t AppMgrServiceInner::GetChildProcessInfo(const std::shared_ptr<ChildProce
     info.hostUid = appRecord->GetUid();
     info.bundleName = appRecord->GetBundleName();
     info.processName = childProcessRecord->GetProcessName();
+
+    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper null");
+        return ERR_NO_INIT;
+    }
+    BundleInfo bundleInfo;
+    if (IN_PROCESS_CALL(bundleMgrHelper->GetCloneBundleInfo(appRecord->GetBundleName(),
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA),
+        appRecord->GetAppIndex(), bundleInfo, userId))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetCloneBundleInfo fail");
+        return ERR_INVALID_VALUE;
+    }
+    info.bundleInfo = bundleInfo;
+
+    HspList hspList;
+    if (IN_PROCESS_CALL(bundleMgrHelper->GetBaseSharedBundleInfos(bundleInfo.name, hspList,
+        AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO))) {
+            TAG_LOGE(AAFwkTag::APPMGR, "GetBaseSharedBundleInfos fail");
+        return ERR_INVALID_VALUE;
+    }
+    info.hspList = hspList;
+    
     if (!isCallFromGetChildrenProcesses) {
         info.childProcessType = childProcessRecord->GetChildProcessType();
         info.srcEntry = childProcessRecord->GetSrcEntry();
@@ -9630,6 +9667,62 @@ void AppMgrServiceInner::OnAppCacheStateChanged(const std::shared_ptr<AppRunning
 }
 
 #ifdef SUPPORT_CHILD_PROCESS
+int32_t AppMgrServiceInner::CreateNativeChildProcessWithRequest(const pid_t hostPid, const std::string &libName,
+    const sptr<IRemoteObject> &callback, const ChildProcessRequest &request)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "CreateNativeChildProcessWithRequest hostPid:%{public}d", hostPid);
+    if (hostPid <= 0 || libName.empty() || !callback) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid param: hostPid:%{public}d libName:%{private}s",
+            hostPid, libName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!CheckCustomProcessName(request.options.customProcessName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid custom process name");
+        return ERR_INVALID_VALUE;
+    }
+
+    int32_t errCode = StartChildProcessPreCheck(hostPid, CHILD_PROCESS_TYPE_NATIVE);
+    if (errCode != ERR_OK) {
+        return errCode;
+    }
+
+    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(IPCSkeleton::GetCallingUid()))) {
+        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
+        return ERR_INVALID_OPERATION;
+    }
+
+    auto appRecord = GetAppRunningRecordByPid(hostPid);
+    if (!appRecord) {
+        TAG_LOGI(AAFwkTag::APPMGR, "get record(hostPid:%{public}d) fail", hostPid);
+        return ERR_INVALID_OPERATION;
+    }
+
+    if (!AAFwk::AppUtils::GetInstance().IsSupportNativeChildProcess() &&
+        !AllowNativeChildProcess(CHILD_PROCESS_TYPE_NATIVE, appRecord->GetAppIdentifier()) &&
+        !AllowChildProcessInMultiProcessFeatureApp(appRecord)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "unSupport native child process");
+        return AAFwk::ERR_NOT_SUPPORT_NATIVE_CHILD_PROCESS;
+    }
+
+    std::lock_guard<std::mutex> lock(childProcessRecordMapMutex_);
+    auto childRecordMap = appRecord->GetChildProcessRecordMap();
+    auto count = count_if(childRecordMap.begin(), childRecordMap.end(), [] (const auto &pair) -> bool {
+        return pair.second->GetChildProcessType() == CHILD_PROCESS_TYPE_NATIVE;
+    });
+
+    if (count >= PC_MAX_CHILD_PROCESS_NUM) {
+        TAG_LOGI(AAFwkTag::APPMGR, "The number of native child process reached the limit (hostPid:%{public}d)",
+            hostPid);
+        return ERR_OVERFLOW;
+    }
+
+    pid_t dummyChildPid = 0;
+    auto nativeChildRecord = ChildProcessRecord::CreateNativeChildProcessRecord(
+        hostPid, libName, appRecord, callback, request.childProcessCount, false, request.options.customProcessName);
+    return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid, request.args, request.options);
+}
+
 int32_t AppMgrServiceInner::CreateNativeChildProcess(const pid_t hostPid, const std::string &libName,
     int32_t childProcessCount, const sptr<IRemoteObject> &callback, const std::string &customProcessName)
 {

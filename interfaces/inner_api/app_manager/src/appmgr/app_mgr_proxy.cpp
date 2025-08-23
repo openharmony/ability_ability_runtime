@@ -2130,6 +2130,31 @@ int32_t AppMgrProxy::CreateNativeChildProcess(const std::string &libName, int32_
     PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::CREATE_NATIVE_CHILD_PROCESS, data, reply, option);
     return reply.ReadInt32();
 }
+
+int32_t AppMgrProxy::CreateNativeChildProcessWithRequest(const std::string &libName,
+    const sptr<IRemoteObject> &callback, const ChildProcessRequest &request)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (libName.empty() || !callback) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid params, libName:%{private}s", libName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return IPC_PROXY_ERR;
+    }
+    PARCEL_UTIL_WRITE_RET_INT(data, String, libName);
+    PARCEL_UTIL_WRITE_RET_INT(data, RemoteObject, callback);
+    if (!data.WriteParcelable(&request)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write request failed.");
+        return IPC_PROXY_ERR;
+    }
+    PARCEL_UTIL_SENDREQ_RET_INT(AppMgrInterfaceCode::CREATE_NATIVE_CHILD_PROCESS_WITH_REQUEST, data, reply, option);
+    return reply.ReadInt32();
+}
 #endif // SUPPORT_CHILD_PROCESS
 
 int AppMgrProxy::RegisterNativeChildExitNotify(const sptr<INativeChildNotify> notify)

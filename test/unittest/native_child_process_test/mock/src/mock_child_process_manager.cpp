@@ -67,6 +67,13 @@ ChildProcessManagerErrorCode ChildProcessManager::StartNativeChildProcessByAppSp
     return ChildProcessManagerErrorCode::ERR_OK;
 }
 
+ChildProcessManageErrorCode ChildProcessManager::CreateNativeChildProcessWithOptionsByAppSpawnFork(
+    const std::string &libName, const sptr<IRemoteObject> &callbackStub,
+    AppExecFwk::ChildProcessOptions &options)
+{
+    return ChildProcessManagerErrorCode::ERR_OK;
+}
+
 void ChildProcessManager::RegisterSignal()
 {
 }

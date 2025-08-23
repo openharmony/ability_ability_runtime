@@ -827,6 +827,16 @@ public:
      */
     int32_t CreateNativeChildProcess(const std::string &libName, int32_t childProcessCount,
         const sptr<IRemoteObject> &callback, const std::string &customProcessName) override;
+
+    /**
+     * Start native child process, callde by ChildProcessManager.
+     * @param libName lib file name to be load in child process
+     * @param callback callback for notify start result
+     * @param request, the request of child process
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t CreateNativeChildProcessWithRequest(const std::string &libName,
+        const sptr<IRemoteObject> &callback, const ChildProcessRequest &request) override;
 #endif // SUPPORT_CHILD_PROCESS
 
     /**

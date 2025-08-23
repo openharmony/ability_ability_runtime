@@ -148,8 +148,12 @@ Ability_NativeChildProcess_ErrCode OH_Ability_CreateNativeChildProcessWithConfig
         return NCP_ERR_INTERNAL;
     }
 
-    auto cpmErr = ChildProcessManager::GetInstance().StartNativeChildProcessByAppSpawnFork(strLibName,
-        callbackStub, configs->processName);
+    AppExecFwk::ChildProcessOptions childProcessOptions;
+    childProcessOptions.isolationMode = configs->isolationMode == NCP_ISOLATION_MODE_NORMAL;
+    childProcessOptions.customProcessName = configs->processName;
+    childProcessOptions.isolationUid = configs->isolationUid;
+    auto cpmErr = ChildProcessManager::GetInstance().CreateNativeChildProcessWithOptionsByAppSpawnFork(strLibName,
+        callbackStub, childProcessOptions);
     if (cpmErr != ChildProcessManagerErrorCode::ERR_OK) {
         return ChildProcessManagerErrorUtil::CvtChildProcessManagerErrCode(cpmErr);
     }
@@ -246,6 +250,7 @@ Ability_NativeChildProcess_ErrCode OH_Ability_StartNativeChildProcessWithConfigs
     }
     AppExecFwk::ChildProcessOptions childProcessOptions;
     childProcessOptions.isolationMode = configs->isolationMode == NCP_ISOLATION_MODE_ISOLATED;
+    childProcessOptions.isolationUid = configs->isolationUid;
     childProcessOptions.customProcessName = configs->processName;
     int32_t childProcessType = AppExecFwk::CHILD_PROCESS_TYPE_NATIVE_ARGS;
 
@@ -340,5 +345,16 @@ Ability_NativeChildProcess_ErrCode OH_Ability_UnregisterNativeChildProcessExitCa
         SetGlobalNativeChildCallbackStub(nullptr);
     }
 
+    return NCP_NO_ERROR;
+}
+
+Ability_NativeChildProcess_ErrCode OH_Ability_ChildProcessConfigs_SetIsolationUid(
+    Ability_ChildProcessConfigs* configs, bool enableIsolationUid)
+{
+    if (configs == nullptr) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "null Ability_ChildProcessConfigs");
+        return NCP_ERR_INVALID_PARAM;
+    }
+    configs->isolationUid = enableIsolationUid;
     return NCP_NO_ERROR;
 }
