@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -606,7 +606,7 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_SchedulePrepareTerminateAbilit
 
     abilitythread->abilityImpl_ = nullptr;
     bool ret = abilitythread->SchedulePrepareTerminateAbility();
-    abilitythread->HandlePrepareTermianteAbility();
+    abilitythread->HandlePrepareTerminateAbility();
     EXPECT_EQ(ret, false);
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_SchedulePrepareTerminateAbility_0100 end";
 }
@@ -646,7 +646,7 @@ HWTEST_F(FaAbilityThreadTest, AaFwk_AbilityThread_SchedulePrepareTerminateAbilit
     EXPECT_NE(abilitythread->abilityImpl_, nullptr);
     abilitythread->abilityHandler_ = nullptr;
     bool ret = abilitythread->SchedulePrepareTerminateAbility();
-    abilitythread->HandlePrepareTermianteAbility();
+    abilitythread->HandlePrepareTerminateAbility();
     EXPECT_EQ(ret, false);
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_SchedulePrepareTerminateAbility_0300 end";
 }
