@@ -11186,7 +11186,8 @@ int AbilityManagerService::CheckCallAbilityPermission(const AbilityRequest &abil
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallAbilityPermission(
         verificationInfo, isCallByShortcut);
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "without start pageAbility(FA) or ability(Stage) permission");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "without start pageAbility(FA) or ability(Stage) permission, caller:%{public}s",
+            callerAbilityRecord ? callerAbilityRecord->GetAbilityInfo().name.c_str() : "null record");
     }
     return result;
 }
