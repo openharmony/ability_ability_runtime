@@ -338,6 +338,15 @@ HWTEST_F(ChildProcessManagerTest, StartNativeChildProcessByAppSpawnFork_0200, Te
     EXPECT_NE(ret, ChildProcessManagerErrorCode::ERR_FORK_FAILED);
 }
 
+HWTEST_F(ChildProcessManagerTest, CreateNativeChildProcessWithOptionsByAppSpawnFork_0100, TestSize.Level2)
+{
+    TAG_LOGD(AAFwkTag::TEST, "CreateNativeChildProcessWithOptionsByAppSpawnFork_0100 called.");
+    sptr<IRemoteObject> callback;
+    AppExecFwk::ChildProcessOptions options;
+    auto ret = ChildProcessManager::GetInstance().CreateNativeChildProcessWithOptionsByAppSpawnFork("test.so", callback, options);
+    EXPECT_NE(ret, ChildProcessManagerErrorCode::ERR_FORK_FAILED);
+}
+
 /**
  * @tc.number: GetModuleNameFromSrcEntry_0100
  * @tc.desc: Test GetModuleNameFromSrcEntry works.

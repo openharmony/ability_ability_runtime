@@ -19,6 +19,8 @@
 #include <string>
 
 #include "parcel.h"
+#include "bundle_info.h"
+#include "shared/base_shared_bundle_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -45,6 +47,8 @@ struct ChildProcessInfo : public Parcelable {
     std::string srcEntry;
     std::string entryFunc;
     std::string entryParams;
+    BundleInfo bundleInfo;
+    std::vector<BaseSharedBundleInfo> hspList;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

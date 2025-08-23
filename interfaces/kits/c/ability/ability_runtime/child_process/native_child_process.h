@@ -176,6 +176,19 @@ Ability_NativeChildProcess_ErrCode OH_Ability_ChildProcessConfigs_SetIsolationMo
     Ability_ChildProcessConfigs* configs, NativeChildProcess_IsolationMode isolationMode);
 
 /**
+ * @brief Sets whether to enable the isolation UID for the specified child process configs.
+ * The isolationUid only takes effect in {@link OH_Ability_StartNativeChildProcessWithConfigs}.
+ * 
+ * @param configs Pointer to the child process configs object. Must not be nullptr.
+ * @param enableIsolationUid Whether to enable the isolation UID.
+ * @return Returns {@link NCP_NO_ERROR} if the isolation UID is set successful.
+ *         Returns {@link NCP_NO_ERR_INVALID_PARAM} if the input parameters are invalid.
+ * @since 20
+ */
+Ability_NativeChildProcess_ErrCode OH_Ability_ChildProcessConfigs_SetIsolationUid(
+    Ability_ChildProcessConfigs* configs, bool enableIsolationUid);
+
+/**
  * @brief Sets the process name for the specified child process configs.
  *
  * @param configs Pointer to the child process configs object. Must not be nullptr.

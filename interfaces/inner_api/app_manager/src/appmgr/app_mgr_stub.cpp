@@ -406,6 +406,10 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleDemoteCurrentFromCandidateMasterProcess(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::QUERY_RUNNING_SHARED_BUNDLES):
             return HandleQueryRunningSharedBundles(data, reply);
+    #ifdef SUPPORT_CHILD_PROCESS
+        case static_cast<uint32_t>(AppMgrInterfaceCode::CREATE_NATIVE_CHILD_PROCESS_WITH_REQUEST):
+            return HandleCreateNativeChildProcessWithRequest(data, reply);
+    #endif // SUPPORT_CHILD_PROCESS
     }
     return INVALID_FD;
 }
@@ -2068,5 +2072,25 @@ int32_t AppMgrStub::HandleQueryRunningSharedBundles(MessageParcel &data, Message
     }
     return NO_ERROR;
 }
+
+#ifdef SUPPORT_CHILD_PROCESS
+int32_t AppMgrStub::HandleCreateNativeChildProcessWithRequest(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleCreateNativeChildProcessWithRequest called");
+    std::string libName = data.ReadString();
+    sptr<IRemoteObject> callback = data.ReadRemoteObject();
+    std::unique_ptr<ChildProcessRequest> request(data.ReadParcelable<ChildProcessRequest>());
+    if (!request) {
+        return IPC_STUB_ERR;
+    }
+
+    auto result = CreateNativeChildProcessWithRequest(libName, callback, *request);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write result failed.");
+        return IPC_STUB_ERR;
+    }
+    return NO_ERROR;
+}
+#endif // SUPPORT_CHILD_PROCESS
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -24,6 +24,7 @@ namespace AppExecFwk {
 bool ChildProcessOptions::ReadFromParcel(Parcel &parcel)
 {
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isolationMode);
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isolationUid);
     customProcessName = Str16ToStr8(parcel.ReadString16());
     return true;
 }
@@ -42,6 +43,7 @@ ChildProcessOptions *ChildProcessOptions::Unmarshalling(Parcel &parcel)
 bool ChildProcessOptions::Marshalling(Parcel &parcel) const
 {
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isolationMode);
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isolationUid);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(customProcessName));
     return true;
 }
