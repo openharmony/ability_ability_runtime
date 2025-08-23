@@ -486,6 +486,42 @@ bool SetRunningMultiInstanceInfo(
         TAG_LOGE(AAFwkTag::APPMGR, "failed status:%{public}d", status);
         return false;
     }
+    if ((status = env->Object_SetPropertyByName_Int(object, "uid", instanceInfo.uid)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "uid failed status:%{public}d", status);
+        return false;
+    }
+    ani_class arrayCls = nullptr;
+    status = env->FindClass(CLASSNAME_ARRAY, &arrayCls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "find class failed status : %{public}d", status);
+        return false;
+    }
+    ani_method arrayCtor;
+    status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "find ctor failed status : %{public}d", status);
+        return false;
+    }
+    ani_object arrayObj;
+    status = env->Object_New(arrayCls, arrayCtor, &arrayObj, instanceInfo.pids.size());
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Object_New array failed status : %{public}d", status);
+        return false;
+    }
+    ani_size index = 0;
+    for (auto &pid : instanceInfo.pids) {
+        ani_object aniPid = AppExecFwk::CreateInt(env, pid);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, aniPid);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "set failed status : %{public}d", status);
+            return false;
+        }
+        index++;
+    }
+    if ((status = env->Object_SetPropertyByName_Ref(object, "pids", arrayObj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "pids failed status:%{public}d", status);
+        return false;
+    }
     return true;
 }
 
