@@ -2606,16 +2606,10 @@ int32_t UIAbilityLifecycleManager::StartAbilityBySpecifed(const SpecifiedRequest
     std::shared_ptr<AbilityRecord> callerAbility)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
-    sptr<SessionInfo> sessionInfo = new SessionInfo();
     const auto &abilityRequest = specifiedRequest.abilityRequest;
-    sessionInfo->callerToken = abilityRequest.callerToken;
-    sessionInfo->want = abilityRequest.want;
+    auto sessionInfo = CreateSessionInfo(abilityRequest, specifiedRequest.requestId);
     sessionInfo->requestCode = abilityRequest.requestCode;
-    sessionInfo->processOptions = abilityRequest.processOptions;
-    sessionInfo->startWindowOption = abilityRequest.startWindowOption;
-    sessionInfo->instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
     sessionInfo->isFromIcon = abilityRequest.isFromIcon;
-    sessionInfo->requestId = specifiedRequest.requestId;
     sessionInfo->specifiedFlag = abilityRequest.specifiedFlag;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "specified flag:%{public}s", abilityRequest.specifiedFlag.c_str());
     if (specifiedRequest.requestListId != REQUEST_LIST_ID_INIT) {
