@@ -22,25 +22,24 @@
 #include "ability_connect_manager.h"
 #include "ability_errors_util.h"
 #include "ability_manager_radar.h"
+#include "ability_manager_xcollie.h"
 #include "ability_start_by_call_helper.h"
 #include "ability_start_with_wait_observer_utils.h"
 #include "ability_start_with_wait_observer_manager.h"
 #include "accesstoken_kit.h"
-#include "ability_manager_xcollie.h"
 #include "app_utils.h"
 #include "app_exit_reason_data_manager.h"
-#include "application_util.h"
 #include "app_mgr_constants.h"
 #include "app_mgr_util.h"
-#include "recovery_info_timer.h"
+#include "application_util.h"
 #include "assert_fault_callback_death_mgr.h"
 #include "concurrent_task_client.h"
+#include "config_policy_utils.h"
 #include "connection_state_manager.h"
 #include "c/executor_task.h"
 #include "display_manager.h"
 #include "display_util.h"
 #include "distributed_client.h"
-#include "ipc_skeleton.h"
 #ifdef WITH_DLP
 #include "dlp_utils.h"
 #endif // WITH_DLP
@@ -49,6 +48,7 @@
 #include "ffrt_inner.h"
 #include "freeze_util.h"
 #include "global_constant.h"
+#include "hidden_start_observer_manager.h"
 #include "hitrace_meter.h"
 #include "insight_intent_execute_manager.h"
 #include "insight_intent_db_cache.h"
@@ -60,9 +60,9 @@
 #include "interceptor/disposed_rule_interceptor.h"
 #include "interceptor/ecological_rule_interceptor.h"
 #include "interceptor/extension_control_interceptor.h"
+#include "interceptor/kiosk_interceptor.h"
 #include "interceptor/screen_unlock_interceptor.h"
 #include "interceptor/start_other_app_interceptor.h"
-#include "interceptor/kiosk_interceptor.h"
 #include "int_wrapper.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -82,13 +82,14 @@
 #include "preload_manager_service.h"
 #include "process_options.h"
 #include "rate_limiter.h"
+#include "recovery_info_timer.h"
 #include "recovery_param.h"
 #include "report_data_partition_usage_manager.h"
 #include "res_sched_util.h"
 #include "restart_app_manager.h"
+#include "sa_interceptor_manager.h"
 #include "scene_board_judgement.h"
 #include "server_constant.h"
-#include "session_manager_lite.h"
 #include "softbus_bus_center.h"
 #include "start_ability_handler/start_ability_sandbox_savefile.h"
 #include "start_ability_utils.h"
@@ -105,10 +106,6 @@
 #include "uri_permission_manager_client.h"
 #endif // SUPPORT_UPMS
 #include "uri_utils.h"
-#include "view_data.h"
-#include "xcollie/watchdog.h"
-#include "config_policy_utils.h"
-#include "uri_utils.h"
 #include "utils/ability_permission_util.h"
 #include "utils/dump_utils.h"
 #include "utils/extension_permissions_util.h"
@@ -116,12 +113,12 @@
 #include "utils/update_caller_info_util.h"
 #include "utils/want_utils.h"
 #include "utils/window_options_utils.h"
-#include "insight_intent_execute_manager.h"
+#include "view_data.h"
 #ifdef SUPPORT_GRAPHICS
-#include "dialog_session_manager.h"
-#include "application_anr_listener.h"
-#include "input_manager.h"
 #include "ability_first_frame_state_observer_manager.h"
+#include "application_anr_listener.h"
+#include "dialog_session_manager.h"
+#include "input_manager.h"
 #include "session_manager_lite.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "window_focus_changed_listener.h"
@@ -132,9 +129,7 @@
 #ifdef SUPPORT_SCREEN
 #include "utils/dms_util.h"
 #endif
-#include "hidden_start_observer_manager.h"
-#include "insight_intent_db_cache.h"
-#include "sa_interceptor_manager.h"
+#include "xcollie/watchdog.h"
 
 using OHOS::AppExecFwk::ElementName;
 using OHOS::Security::AccessToken::AccessTokenKit;
@@ -10574,7 +10569,7 @@ int AbilityManagerService::PrepareTerminateAbility(const sptr<IRemoteObject> &to
         }
     };
     if (taskHandler_) {
-        taskHandler_->SubmitTask(timeoutTask, "PrepareTermiante_" + abilityRecordId,
+        taskHandler_->SubmitTask(timeoutTask, "PrepareTerminate_" + abilityRecordId,
             GlobalConstant::PREPARE_TERMINATE_TIMEOUT_TIME);
     }
     return ERR_OK;
@@ -10609,7 +10604,7 @@ void AbilityManagerService::PrepareTerminateAbilityDone(const sptr<IRemoteObject
     }
     prepareTermiationCallbacks_.erase(iter);
     if (taskHandler_) {
-        taskHandler_->CancelTask("PrepareTermiante_" + abilityRecordId);
+        taskHandler_->CancelTask("PrepareTerminate_" + abilityRecordId);
     }
 }
 

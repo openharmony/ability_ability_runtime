@@ -17,6 +17,7 @@
 
 #include "ability_manager_service.h"
 #include "ability_permission_util.h"
+#include "ability_stage_constant.h"
 #include "ability_start_with_wait_observer_manager.h"
 #include "ability_start_with_wait_observer_utils.h"
 #include "appfreeze_manager.h"
@@ -26,23 +27,22 @@
 #include "display_util.h"
 #include "ffrt.h"
 #include "global_constant.h"
+#include "hidden_start_observer_manager.h"
 #include "hitrace_meter.h"
 #include "permission_constants.h"
 #include "process_options.h"
-#include "server_constant.h"
-#include "start_window_option.h"
+#include "request_id_util.h"
 #include "scene_board/status_bar_delegate_manager.h"
+#include "server_constant.h"
 #include "session_manager_lite.h"
 #include "session/host/include/zidl/session_interface.h"
+#include "start_window_option.h"
 #include "startup_util.h"
 #include "timeout_state_utils.h"
 #include "ui_extension_utils.h"
-#include "ability_stage_constant.h"
 #ifdef SUPPORT_GRAPHICS
 #include "ability_first_frame_state_observer_manager.h"
 #endif
-#include "hidden_start_observer_manager.h"
-#include "request_id_util.h"
 
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;

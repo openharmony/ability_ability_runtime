@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,8 @@
 #include "ui_ability_thread.h"
 #undef private
 #undef protected
-#include "ability_handler.h"
 #include "ability_context.h"
+#include "ability_handler.h"
 #include "ability_local_record.h"
 #include "mock_ability_token.h"
 #include "ohos_application.h"
@@ -1236,34 +1236,34 @@ HWTEST_F(UIAbilityThreadTest, AbilityRuntime_OnExecuteIntent_0400, Function | Me
 }
 
 /**
- * @tc.number: AbilityRuntime_HandlePrepareTermianteAbility_0100
- * @tc.name: HandlePrepareTermianteAbility
- * @tc.desc: Test HandlePrepareTermianteAbility function
+ * @tc.number: AbilityRuntime_HandlePrepareTerminateAbility_0100
+ * @tc.name: HandlePrepareTerminateAbility
+ * @tc.desc: Test HandlePrepareTerminateAbility function
  */
-HWTEST_F(UIAbilityThreadTest, AbilityRuntime_HandlePrepareTermianteAbility_0100, Function | MediumTest | Level1)
+HWTEST_F(UIAbilityThreadTest, AbilityRuntime_HandlePrepareTerminateAbility_0100, Function | MediumTest | Level1)
 {
-    GTEST_LOG_(INFO) << "AbilityRuntime_HandlePrepareTermianteAbility_0100 start";
+    GTEST_LOG_(INFO) << "AbilityRuntime_HandlePrepareTerminateAbility_0100 start";
     AbilityRuntime::UIAbilityThread *abilitythread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
     EXPECT_NE(abilitythread, nullptr);
     EXPECT_EQ(abilitythread->abilityImpl_, nullptr);
-    abilitythread->HandlePrepareTermianteAbility();
-    GTEST_LOG_(INFO) << "AbilityRuntime_HandlePrepareTermianteAbility_0100 end";
+    abilitythread->HandlePrepareTerminateAbility();
+    GTEST_LOG_(INFO) << "AbilityRuntime_HandlePrepareTerminateAbility_0100 end";
 }
 
 /**
- * @tc.number: AbilityRuntime_HandlePrepareTermianteAbility_0200
- * @tc.name: HandlePrepareTermianteAbility
- * @tc.desc: Test HandlePrepareTermianteAbility function
+ * @tc.number: AbilityRuntime_HandlePrepareTerminateAbility_0200
+ * @tc.name: HandlePrepareTerminateAbility
+ * @tc.desc: Test HandlePrepareTerminateAbility function
  */
-HWTEST_F(UIAbilityThreadTest, AbilityRuntime_HandlePrepareTermianteAbility_0200, Function | MediumTest | Level1)
+HWTEST_F(UIAbilityThreadTest, AbilityRuntime_HandlePrepareTerminateAbility_0200, Function | MediumTest | Level1)
 {
-    GTEST_LOG_(INFO) << "AbilityRuntime_HandlePrepareTermianteAbility_0200 start";
+    GTEST_LOG_(INFO) << "AbilityRuntime_HandlePrepareTerminateAbility_0200 start";
     AbilityRuntime::UIAbilityThread *abilitythread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
     EXPECT_NE(abilitythread, nullptr);
     abilitythread->abilityImpl_ = std::make_shared<AbilityRuntime::UIAbilityImpl>();
     EXPECT_NE(abilitythread->abilityImpl_, nullptr);
-    abilitythread->HandlePrepareTermianteAbility();
-    GTEST_LOG_(INFO) << "AbilityRuntime_HandlePrepareTermianteAbility_0200 end";
+    abilitythread->HandlePrepareTerminateAbility();
+    GTEST_LOG_(INFO) << "AbilityRuntime_HandlePrepareTerminateAbility_0200 end";
 }
 
 /**
