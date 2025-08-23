@@ -102,6 +102,8 @@ public:
     bool CheckAppRunningRecordIsExist(const std::string &bundleName, const std::string &abilityName);
 #endif
 
+    bool IsAppRunningRecordValid(const std::shared_ptr<AppRunningRecord> &appRecord);
+
     /**
      * CheckMasterProcessAppRunningRecordIsExist, Get master process record by application name and ability information.
      *
