@@ -142,8 +142,10 @@ HWTEST_F(CjRuntimeTest, CjRuntimeStartDebuggerMode_001, TestSize.Level2)
  */
 HWTEST_F(CjRuntimeTest, CjRuntimeRegisterCangjieCallback_001, TestSize.Level2)
 {
+    AppLibPathMap path {};
+    CJRuntime::SetAppLibPath(path);
     bool ret = CJRuntime::RegisterCangjieCallback();
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 }
 }  // namespace Runtime
 }  // namespace OHOS
