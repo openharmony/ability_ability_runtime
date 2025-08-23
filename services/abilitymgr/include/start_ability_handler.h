@@ -67,24 +67,6 @@ private:
     std::optional<int32_t> callerAppIndex;
     std::optional<std::shared_ptr<AbilityRecord>> callerRecord;
 };
-
-class StartAbilityHandler {
-public:
-    StartAbilityHandler() = default;
-    StartAbilityHandler(StartAbilityHandler &) = delete;
-    void operator=(StartAbilityHandler &) = delete;
-    virtual ~StartAbilityHandler() = default;
-    virtual bool MatchStartRequest(StartAbilityParams &params);
-    virtual int HandleStartRequest(StartAbilityParams &params);
-    virtual int GetPriority()
-    {
-        return 0;
-    }
-    virtual std::string GetHandlerName()
-    {
-        return "";
-    }
-};
 } // namespace AAFwk
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_START_ABILITY_HANDLER_H

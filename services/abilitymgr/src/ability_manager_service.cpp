@@ -427,7 +427,6 @@ bool AbilityManagerService::Init()
     DelayedSingleton<ConnectionStateManager>::GetInstance()->Init(taskHandler_);
 
     InitInterceptor();
-    InitStartAbilityChain();
     InitDeepLinkReserve();
 
     abilityAutoStartupService_ = std::make_shared<AbilityRuntime::AbilityAutoStartupService>();
@@ -521,12 +520,6 @@ void AbilityManagerService::InitStartupFlag()
     startUpNewRule_ = CheckNewRuleSwitchState(COMPONENT_STARTUP_NEW_RULES);
     backgroundJudgeFlag_ = CheckNewRuleSwitchState(BACKGROUND_JUDGE_FLAG);
     whiteListassociatedWakeUpFlag_ = CheckNewRuleSwitchState(WHITE_LIST_ASS_WAKEUP_FLAG);
-}
-
-void AbilityManagerService::InitStartAbilityChain()
-{
-    auto startSandboxSaveFile = std::make_shared<StartAbilitySandboxSavefile>();
-    startAbilityChain_.emplace(startSandboxSaveFile->GetPriority(), startSandboxSaveFile);
 }
 
 void AbilityManagerService::OnStop()
@@ -986,15 +979,7 @@ int AbilityManagerService::StartAbilityPrechainInterceptor(StartAbilityParams &p
 bool AbilityManagerService::StartAbilityInChain(StartAbilityParams &params, int &result)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::shared_ptr<StartAbilityHandler> reqHandler;
-    for (const auto &item : startAbilityChain_) {
-        if (item.second != nullptr && item.second->MatchStartRequest(params)) {
-            reqHandler = item.second;
-            break;
-        }
-    }
-
-    if (!reqHandler) {
+    if (!StartAbilitySandboxSavefile::GetInstance().MatchStartRequest(params)) {
         return false;
     }
 
@@ -1006,7 +991,7 @@ bool AbilityManagerService::StartAbilityInChain(StartAbilityParams &params, int 
     if (result != ERR_OK) {
         return true;
     }
-    result = reqHandler->HandleStartRequest(params);
+    result = StartAbilitySandboxSavefile::GetInstance().HandleStartRequest(params);
     return true;
 }
 
@@ -11696,14 +11681,8 @@ int32_t AbilityManagerService::NotifySaveAsResult(const Want &want, int resultCo
     if (checkResult != ERR_OK) {
         return checkResult;
     }
-    for (const auto &item : startAbilityChain_) {
-        if (item.second && item.second->GetHandlerName() == StartAbilitySandboxSavefile::handlerName_) {
-            auto savefileHandler = (StartAbilitySandboxSavefile*)(item.second.get());
-            CHECK_POINTER_AND_RETURN(savefileHandler, ERR_INVALID_VALUE);
-            savefileHandler->HandleResult(want, resultCode, requestCode);
-            break;
-        }
-    }
+
+    StartAbilitySandboxSavefile::GetInstance().HandleResult(want, resultCode, requestCode);
     return ERR_OK;
 }
 
