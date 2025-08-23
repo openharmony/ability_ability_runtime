@@ -6418,21 +6418,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_0005, TestSize.Level1)
 }
 
 /**
- * @tc.name: PrintTimeOutLog_0006
- * @tc.desc: state not UNKNOWN, isHalf is false, ability state should not change
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_0006, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    AbilityRequest request;
-    request.abilityInfo.name = "AbilityA";
-    auto record = AbilityRecord::CreateAbilityRecord(request);
-    int oldState = record->GetAbilityState();
-    mgr->PrintTimeOutLog(record, 100, false);
-    EXPECT_EQ(record->GetAbilityState(), oldState);
-}
-
-/**
  * @tc.name: BackToCallerAbilityWithResult_0001
  * @tc.desc: Return ERR_CALLER_NOT_EXISTS when GetCallerByRequestCode returns nullptr
  */

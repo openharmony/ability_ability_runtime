@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,10 +60,7 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_OnRemoteRequest_01
     MessageParcel reply;
     MessageOption option;
 
-    if (!data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor())) {
-        GTEST_LOG_(ERROR) << "---------- WriteInterfaceToken(data) retval is false end";
-        return;
-    }
+    ASSERT_TRUE(data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor()));
 
     const int retval = dataobs->OnRemoteRequest(code, data, reply, option);
 
@@ -92,22 +89,10 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_RegisterObserver_0
     MessageParcel reply;
     MessageOption option;
 
-    if (!data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor())) {
-        GTEST_LOG_(ERROR) << "---------- WriteInterfaceToken(data) retval is false end";
-        return;
-    }
-    if (!data.WriteString(uri.ToString())) {
-        GTEST_LOG_(ERROR) << "---------- data.WriteParcelable(uri) retval is false end";
-        return;
-    }
-    if (dataObserver == nullptr) {
-        return;
-    }
-
-    if (!data.WriteParcelable(dataObserver->AsObject())) {
-        GTEST_LOG_(ERROR) << "---------- data.WriteParcelable(dataObserver->AsObject()) retval is false end";
-        return;
-    }
+    ASSERT_TRUE(data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor()));
+    ASSERT_TRUE(data.WriteString(uri.ToString()));
+    ASSERT_TRUE(dataObserver != nullptr);
+    ASSERT_TRUE(data.WriteParcelable(dataObserver->AsObject()));
 
     EXPECT_CALL(*dataobs, RegisterObserver(testing::_, testing::_, testing::_, testing::_)).Times(1)
         .WillOnce(testing::Return(testVal2));
@@ -142,22 +127,10 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_UnregisterObserver
     MessageParcel reply;
     MessageOption option;
 
-    if (!data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor())) {
-        GTEST_LOG_(ERROR) << "---------- WriteInterfaceToken(data) retval is false end";
-        return;
-    }
-    if (!data.WriteString(uri.ToString())) {
-        GTEST_LOG_(ERROR) << "---------- data.WriteParcelable(uri) retval is false end";
-        return;
-    }
-    if (dataObserver == nullptr) {
-        return;
-    }
-
-    if (!data.WriteParcelable(dataObserver->AsObject())) {
-        GTEST_LOG_(ERROR) << "---------- data.WriteParcelable(dataObserver->AsObject()) retval is false end";
-        return;
-    }
+    ASSERT_TRUE(data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor()));
+    ASSERT_TRUE(data.WriteString(uri.ToString()));
+    ASSERT_TRUE(dataObserver != nullptr);
+    ASSERT_TRUE(data.WriteParcelable(dataObserver->AsObject()));
 
     EXPECT_CALL(*dataobs, UnregisterObserver(testing::_, testing::_, testing::_, testing::_))
         .Times(1).WillOnce(testing::Return(testVal2));
@@ -190,14 +163,8 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_NotifyChange_0100,
     MessageParcel reply;
     MessageOption option;
 
-    if (!data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor())) {
-        GTEST_LOG_(ERROR) << "---------- WriteInterfaceToken(data) retval is false end";
-        return;
-    }
-    if (!data.WriteString(uri.ToString())) {
-        GTEST_LOG_(ERROR) << "---------- data.WriteParcelable(uri) retval is false end";
-        return;
-    }
+    ASSERT_TRUE(data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor()));
+    ASSERT_TRUE(data.WriteString(uri.ToString()));
 
     EXPECT_CALL(*dataobs, NotifyChange(testing::_, testing::_, testing::_)).Times(1).
         WillOnce(testing::Return(testVal2));
@@ -230,14 +197,8 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_RegisterObserverEx
     MessageParcel reply;
     MessageOption option;
 
-    if (!data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor())) {
-        GTEST_LOG_(ERROR) << "---------- WriteInterfaceToken(data) retval is false end";
-        return;
-    }
-    if (!data.WriteString(uri.ToString())) {
-        GTEST_LOG_(ERROR) << "---------- data.WriteParcelable(uri) retval is false end";
-        return;
-    }
+    ASSERT_TRUE(data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor()));
+    ASSERT_TRUE(data.WriteString(uri.ToString()));
 
     EXPECT_CALL(*dataobs, RegisterObserverExt(testing::_, testing::_, testing::_, testing::_)).Times(1)
         .WillOnce(testing::Return(testVal2));
@@ -270,14 +231,8 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_UnregisterObserver
     MessageParcel reply;
     MessageOption option;
 
-    if (!data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor())) {
-        GTEST_LOG_(ERROR) << "---------- WriteInterfaceToken(data) retval is false end";
-        return;
-    }
-    if (!data.WriteString(uri.ToString())) {
-        GTEST_LOG_(ERROR) << "---------- data.WriteParcelable(uri) retval is false end";
-        return;
-    }
+    ASSERT_TRUE(data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor()));
+    ASSERT_TRUE(data.WriteString(uri.ToString()));
 
     EXPECT_CALL(*dataobs, UnregisterObserverExt(testing::_, testing::_, testing::_)).Times(1)
         .WillOnce(testing::Return(testVal2));
@@ -310,15 +265,9 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_UnregisterObserver
     MessageParcel reply;
     MessageOption option;
 
-    if (!data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor())) {
-        GTEST_LOG_(ERROR) << "---------- WriteInterfaceToken(data) retval is false end";
-        return;
-    }
-    if (!data.WriteString(uri.ToString())) {
-        GTEST_LOG_(ERROR) << "---------- data.WriteParcelable(uri) retval is false end";
-        return;
-    }
-
+    ASSERT_TRUE(data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor()));
+    ASSERT_TRUE(data.WriteString(uri.ToString()));
+    
     EXPECT_CALL(*dataobs, UnregisterObserverExt(testing::_, testing::_)).Times(1).WillOnce(testing::Return(testVal2));
 
     const int retval1 = dataobs->OnRemoteRequest(code, data, reply, option);
