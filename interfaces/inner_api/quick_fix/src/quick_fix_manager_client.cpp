@@ -31,20 +31,10 @@ namespace AAFwk {
 namespace {
 const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
 } // namespace
-
-std::shared_ptr<QuickFixManagerClient> QuickFixManagerClient::instance_ = nullptr;
-std::mutex instanceMutex;
-
 std::shared_ptr<QuickFixManagerClient> QuickFixManagerClient::GetInstance()
 {
     TAG_LOGD(AAFwkTag::QUICKFIX, "GetInstance called");
-    if (instance_ == nullptr) {
-        std::lock_guard<std::mutex> lock(instanceMutex);
-        if (instance_ == nullptr) {
-            instance_ = std::make_shared<QuickFixManagerClient>();
-        }
-    }
-
+    static std::shared_ptr<QuickFixManagerClient> instance_ = std::make_shared<QuickFixManagerClient>();
     return instance_;
 }
 
