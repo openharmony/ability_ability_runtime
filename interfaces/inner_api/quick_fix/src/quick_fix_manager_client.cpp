@@ -32,6 +32,22 @@ namespace {
 const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
 } // namespace
 
+std::shared_ptr<QuickFixManagerClient> QuickFixManagerClient::instance_ = nullptr;
+std::mutex QuickFixManagerClient::mutex1_;
+
+std::shared_ptr<QuickFixManagerClient> QuickFixManagerClient::GetInstance()
+{
+    TAG_LOGD(AAFwkTag::QUICKFIX, "GetInstance called");
+    if (instance_ == nullptr) {
+        std::lock_guard<std::mutex> lock(mutex1_);
+        if (instance_ == nullptr) {
+            instance_ = std::make_shared<QuickFixManagerClient>();
+        }
+    }
+
+    return instance_;
+}
+
 int32_t QuickFixManagerClient::ApplyQuickFix(const std::vector<std::string> &quickFixFiles, bool isDebug,
     bool isReplace)
 {
