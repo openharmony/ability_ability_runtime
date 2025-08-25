@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,7 +16,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 module_output_path = "ability_runtime/ability_runtime/abilitymgr"
 
-ohos_unittest("uri_permission_utils_test") {
+ohos_unittest("file_uri_distribution_utils_test") {
   module_out_path = module_output_path
   sanitize = {
     cfi = true
@@ -26,7 +26,7 @@ ohos_unittest("uri_permission_utils_test") {
   }
   branch_protector_ret = "pac_ret"
   include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper" ]
-  sources = [ "uri_permission_utils_test.cpp" ]
+  sources = [ "file_uri_distribution_utils_test.cpp" ]
 
   configs = [
     "${ability_runtime_innerkits_path}/app_manager:appmgr_sdk_config",
@@ -55,7 +55,7 @@ ohos_unittest("uri_permission_utils_test") {
   ]
 }
 
-ohos_unittest("uri_permission_utils_new_test") {
+ohos_unittest("file_uri_distribution_utils_new_test") {
   module_out_path = module_output_path
   sanitize = {
     cfi = true
@@ -71,7 +71,7 @@ ohos_unittest("uri_permission_utils_new_test") {
   sources = [
     "mock/src/mock_accesstoken_kit.cpp",
     "mock/src/mock_my_flag.cpp",
-    "uri_permission_utils_new_test.cpp",
+    "file_uri_distribution_utils_new_test.cpp",
   ]
 
   configs = [
@@ -131,7 +131,7 @@ group("unittest") {
   testonly = true
 
   deps = [
-    ":uri_permission_utils_new_test",
-    ":uri_permission_utils_test",
+    ":file_uri_distribution_utils_new_test",
+    ":file_uri_distribution_utils_test",
   ]
 }
