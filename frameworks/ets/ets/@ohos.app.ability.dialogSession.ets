@@ -22,7 +22,7 @@ import Want from '@ohos.app.ability.Want';
 export default namespace dialogSession {
   loadLibrary("dialog_session_ani_kit.z")
 
-  export native function getDialogSessionInfo(dialogSessionId: string): DialogSessionInfo;
+  export native function getDialogSessionInfo(dialogSessionId: string): DialogSessionInfo | null;
   export native function nativeSendDialogResult(dialogSessionId: string, targetWant: Want, isAllowed: boolean, callback: AsyncCallbackWrapper<void>): void;
 
   export interface DialogAbilityInfo {
