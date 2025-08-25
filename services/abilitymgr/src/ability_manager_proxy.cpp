@@ -417,7 +417,6 @@ int AbilityManagerProxy::StartAbilityAsCaller(const Want &want, const sptr<IRemo
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
         return INNER_ERR;
     }
-    Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbilityAsCaller", HITRACE_FLAG_INCLUDE_ASYNC);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -455,7 +454,6 @@ int AbilityManagerProxy::StartAbilityAsCaller(const Want &want, const StartOptio
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
         return INNER_ERR;
     }
-    Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbilityAsCaller", HITRACE_FLAG_INCLUDE_ASYNC);
     int error;
     MessageParcel data;
     MessageParcel reply;
@@ -495,7 +493,6 @@ int AbilityManagerProxy::StartAbilityForResultAsCaller(
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
         return INNER_ERR;
     }
-    Ability_MANAGER_HITRACE_CHAIN_NAME("StartAbilityForResultAsCaller", HITRACE_FLAG_INCLUDE_ASYNC);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write token failed");
@@ -1050,7 +1047,6 @@ int AbilityManagerProxy::TerminateAbility(const sptr<IRemoteObject> &token, int 
 int AbilityManagerProxy::TerminateAbility(const sptr<IRemoteObject> &token,
     int resultCode, const Want *resultWant, bool flag)
 {
-    Ability_MANAGER_HITRACE_CHAIN_NAME("TerminateAbility", HITRACE_FLAG_INCLUDE_ASYNC);
     int error;
     MessageParcel data;
     MessageParcel reply;
@@ -1295,7 +1291,6 @@ int AbilityManagerProxy::SendResultToAbility(int32_t requestCode, int32_t result
 
 int AbilityManagerProxy::MoveAbilityToBackground(const sptr<IRemoteObject> &token)
 {
-    Ability_MANAGER_HITRACE_CHAIN_NAME("MoveAbilityToBackground", HITRACE_FLAG_INCLUDE_ASYNC);
     int error;
     MessageParcel data;
     MessageParcel reply;
@@ -3119,7 +3114,6 @@ int AbilityManagerProxy::CleanMission(int32_t missionId)
 
 int AbilityManagerProxy::CleanAllMissions()
 {
-    Ability_MANAGER_HITRACE_CHAIN_NAME("CleanAllMissions", HITRACE_FLAG_INCLUDE_ASYNC);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     int error;
     MessageParcel data;
@@ -3244,7 +3238,6 @@ int AbilityManagerProxy::MoveMissionsToBackground(const std::vector<int32_t>& mi
 
 int AbilityManagerProxy::StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery)
 {
-    Ability_MANAGER_HITRACE_CHAIN_NAME("StartUser", HITRACE_FLAG_INCLUDE_ASYNC);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
@@ -3302,7 +3295,6 @@ int AbilityManagerProxy::SetMissionContinueState(const sptr<IRemoteObject> &toke
 
 int AbilityManagerProxy::StopUser(int userId, const sptr<IUserCallback> &callback)
 {
-    Ability_MANAGER_HITRACE_CHAIN_NAME("StopUser", HITRACE_FLAG_INCLUDE_ASYNC);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
@@ -3333,7 +3325,6 @@ int AbilityManagerProxy::StopUser(int userId, const sptr<IUserCallback> &callbac
 
 int AbilityManagerProxy::LogoutUser(int32_t userId, sptr<IUserCallback> callback)
 {
-    Ability_MANAGER_HITRACE_CHAIN_NAME("LogoutUser", HITRACE_FLAG_INCLUDE_ASYNC);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -4518,7 +4509,6 @@ int32_t AbilityManagerProxy::RequestDialogService(const Want &want, const sptr<I
 
 int32_t AbilityManagerProxy::ReportDrawnCompleted(const sptr<IRemoteObject> &callerToken)
 {
-    Ability_MANAGER_HITRACE_CHAIN_NAME("ReportDrawnCompleted", HITRACE_FLAG_INCLUDE_ASYNC);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (callerToken == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
@@ -5710,7 +5700,6 @@ int32_t AbilityManagerProxy::GetUIExtensionSessionInfo(const sptr<IRemoteObject>
 int32_t AbilityManagerProxy::OpenAtomicService(Want& want, const StartOptions &options,
     sptr<IRemoteObject> callerToken, int32_t requestCode, int32_t userId)
 {
-    Ability_MANAGER_HITRACE_CHAIN_NAME("OpenAtomicService", HITRACE_FLAG_INCLUDE_ASYNC);
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
@@ -5999,7 +5988,6 @@ ErrCode AbilityManagerProxy::OpenLink(const Want& want, sptr<IRemoteObject> call
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
         return INNER_ERR;
     }
-    Ability_MANAGER_HITRACE_CHAIN_NAME("OpenLink", HITRACE_FLAG_INCLUDE_ASYNC);
     if (callerToken == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
         return INNER_ERR;

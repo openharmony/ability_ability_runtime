@@ -2240,7 +2240,11 @@ void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int 
         AddSystemAbilityCallerRecord(callerToken, requestCode, srcAbilityId);
         return;
     }
-    CHECK_POINTER(abilityRecord);
+
+    if (!abilityRecord) {                                             \
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "nullptr"); \
+        return;                                                \
+    }
 
     auto isExist = [&abilityRecord](const std::shared_ptr<CallerRecord> &callerRecord) {
         return (callerRecord->GetCaller() == abilityRecord);
@@ -3536,7 +3540,7 @@ void AbilityRecord::NotifyMissionBindPid()
     }
     auto sessionInfo = GetSessionInfo();
     if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null sessionInfo");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "null sessionInfo");
         return;
     }
     int32_t persistentId = sessionInfo->persistentId;
