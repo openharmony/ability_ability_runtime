@@ -41,7 +41,7 @@ export default namespace abilityManager {
     return p;
   }
 
-  export function getForegroundUIAbilities(callback: AsyncCallback<Array<AbilityStateData>, void>): void {
+  export function getForegroundUIAbilities(callback: AsyncCallback<Array<AbilityStateData>>): void {
       let myCall = new AsyncCallbackWrapper<Array<AbilityStateData>>(callback);
       taskpool.execute((): void => {
         abilityManager.getForegroundUIAbilitiesCallback(myCall);
