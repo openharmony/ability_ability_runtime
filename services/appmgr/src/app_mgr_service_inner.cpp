@@ -664,7 +664,7 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     std::string processName;
     std::string specifiedProcessFlag;
     if (CheckAppRecordExistByPreloadRequest(request, processName, specifiedProcessFlag)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord already exists when preload application");
+        TAG_LOGW(AAFwkTag::APPMGR, "appRecord already exists when preload application");
         return;
     }
 
