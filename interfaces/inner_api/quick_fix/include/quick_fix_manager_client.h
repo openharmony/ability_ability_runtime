@@ -21,15 +21,13 @@
 #include <vector>
 
 #include "iquick_fix_manager.h"
-#include "singleton.h"
 #include "quick_fix_info.h"
 
 namespace OHOS {
 namespace AAFwk {
 using ClearProxyCallback = std::function<void(const wptr<IRemoteObject>&)>;
 
-class QuickFixManagerClient : public DelayedSingleton<QuickFixManagerClient>,
-                              public std::enable_shared_from_this<QuickFixManagerClient> {
+class QuickFixManagerClient : public std::enable_shared_from_this<QuickFixManagerClient> {
 public:
     QuickFixManagerClient() = default;
     virtual ~QuickFixManagerClient() = default;
@@ -89,9 +87,6 @@ private:
     std::mutex mutex_;
     sptr<IQuickFixManager> quickFixMgr_ = nullptr;
     static std::shared_ptr<QuickFixManagerClient> instance_;
-    static std::mutex mutex1_;
-
-    DISALLOW_COPY_AND_MOVE(QuickFixManagerClient);
 };
 } // namespace AAFwk
 } // namespace OHOS
