@@ -47,6 +47,7 @@ constexpr int32_t ERR_FAILURE = -1;
 class EtsAbilityManager final {
 public:
     static ani_object GetForegroundUIAbilities(ani_env *env);
+    static void GetForegroundUIAbilitiesCallBack(ani_env *env, ani_object callbackObj);
     static void GetTopAbility(ani_env *env, ani_object callback);
     static void GetAbilityRunningInfos(ani_env *env, ani_object callback);
     static void IsEmbeddedOpenAllowed(ani_env *env, ani_object contextObj, ani_string aniAppId, ani_object callbackObj);
@@ -107,6 +108,40 @@ ani_object EtsAbilityManager::GetForegroundUIAbilities(ani_env *env)
         return nullptr;
     }
     return aniArray;
+}
+
+void EtsAbilityManager::GetForegroundUIAbilitiesCallBack(ani_env *env, ani_object callbackObj)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call GetForegroundUIAbilitiesCallBack");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return;
+    }
+
+    sptr<AppExecFwk::IAbilityManager> abilityManager = GetAbilityManagerInstance();
+    if (abilityManager == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityManager is null");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER), nullptr);
+        return;
+    }
+    std::vector<AppExecFwk::AbilityStateData> list;
+    int32_t ret = abilityManager->GetForegroundUIAbilities(list);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed: ret=%{public}d", ret);
+        AbilityRuntime::AbilityErrorCode code = AbilityRuntime::GetJsErrorCodeByNativeError(ret);
+        AppExecFwk::AsyncCallback(env, callbackObj, EtsErrorUtil::CreateError(env, code), nullptr);
+        return;
+    }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "GetForegroundUIAbilities succeeds, list.size=%{public}zu", list.size());
+    ani_object aniArray = AppExecFwk::CreateAniAbilityStateDataArray(env, list);
+    if (aniArray == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null aniArray");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER), nullptr);
+        return;
+    }
+    AppExecFwk::AsyncCallback(env, callbackObj, EtsErrorUtil::CreateErrorByNativeErr(env, ERR_OK), aniArray);
 }
 
 void EtsAbilityManager::GetTopAbility(ani_env *env, ani_object callback)
@@ -292,6 +327,10 @@ void EtsAbilityManagerRegistryInit(ani_env *env)
         ani_native_function {
             "nativeGetForegroundUIAbilities", ETS_ABILITY_MANAGER_SIGNATURE_ARRAY,
             reinterpret_cast<void *>(EtsAbilityManager::GetForegroundUIAbilities)
+        },
+        ani_native_function {
+            "getForegroundUIAbilitiesCallback", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsAbilityManager::GetForegroundUIAbilitiesCallBack)
         },
         ani_native_function {"nativeGetTopAbility", ETS_ABILITY_MANAGER_SIGNATURE_CALLBACK,
             reinterpret_cast<void *>(EtsAbilityManager::GetTopAbility)},
