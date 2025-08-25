@@ -161,7 +161,7 @@ bool ETSRuntime::PostFork(const Options &options, std::unique_ptr<JsRuntime> &js
     napi_env napiEnv = static_cast<AbilityRuntime::JsRuntime *>(jsRuntime_.get())->GetNapiEnv();
 
     g_etsEnvFuncs->PostFork(reinterpret_cast<void *>(napiEnv), aotFilePath, options.appInnerHspPathList,
-        options.commonHspBundleInfos);
+        options.commonHspBundleInfos, options.eventRunner);
     return true;
 }
  

@@ -338,7 +338,8 @@ HWTEST_F(EtsEnvironmentTest, PostFork_0100, TestSize.Level0)
     std::string aotPath = "aotPath";
     std::vector<std::string> appInnerHspPathList;
     std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> commonHspBundleInfos;
-    auto result = etsEnv->PostFork(napiEnv, aotPath, appInnerHspPathList, commonHspBundleInfos);
+    std::shared_ptr<OHOS::AppExecFwk::EventRunner> eventRunner;
+    auto result = etsEnv->PostFork(napiEnv, aotPath, appInnerHspPathList, commonHspBundleInfos, eventRunner);
     EXPECT_FALSE(result);
 }
 
