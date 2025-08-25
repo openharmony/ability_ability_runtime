@@ -50,7 +50,8 @@ struct ETSEnvFuncs {
     void (*FinishPreload)() = nullptr;
     void (*PostFork)(void *napiEnv, const std::string &aotPath,
         const std::vector<std::string> &appInnerHspPathList,
-        const std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> &commonHspBundleInfos) = nullptr;
+        const std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> &commonHspBundleInfos,
+        const std::shared_ptr<OHOS::AppExecFwk::EventRunner> &eventRunner) = nullptr;
     void (*PreloadSystemClass)(const char *className) = nullptr;
     void (*RemoveInstance)(uint32_t instanceId) = nullptr;
     void (*StopDebugMode)(void *jsVm) = nullptr;
