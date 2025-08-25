@@ -3014,7 +3014,12 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
                 pid, ret, killReason.c_str());
         }
     }
-    CHECK_POINTER_AND_RETURN_VALUE(appRecord, ret);
+
+    if (!appRecord) {
+        TAG_LOGW(AAFwkTag::APPMGR, "nullptr appRecord");
+        return ret;
+    }
+
     AAFwk::EventInfo eventInfo;
     SetKilledEventInfo(appRecord, eventInfo);
     appRecord->SetKillReason(reason);
@@ -10258,7 +10263,7 @@ void AppMgrServiceInner::RemoveUIExtensionBindItem(
     }
 
     if (!AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "not uiextension");
+        TAG_LOGW(AAFwkTag::APPMGR, "not uiextension");
         return;
     }
 

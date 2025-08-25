@@ -3306,7 +3306,10 @@ void AbilityManagerService::ReportAbilityStartInfoToRSS(const AppExecFwk::Abilit
 void AbilityManagerService::ReportAbilityAssociatedStartInfoToRSS(
     const AppExecFwk::AbilityInfo &abilityInfo, int64_t type, const sptr<IRemoteObject> &callerToken)
 {
-    CHECK_POINTER_LOG(callerToken, "null callerToken");
+    if (!callerToken) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "null callerToken");
+        return;
+    }
     auto callerAbility = Token::GetAbilityRecordByToken(callerToken);
     CHECK_POINTER_LOG(callerAbility, "null callerAbility");
     int32_t callerUid = callerAbility->GetUid();

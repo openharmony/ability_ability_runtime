@@ -18,11 +18,12 @@
 
 #include <cinttypes>
 #include <map>
+#include <string>
 
 #include "hilog/log.h"
 
 #ifndef AAFWK_FUNC_FMT
-#define AAFWK_FUNC_FMT "[%{public}s:%{public}d]"
+#define AAFWK_FUNC_FMT "[%{public}s]"
 #endif
 
 #ifndef AAFWK_FILE_NAME
@@ -30,8 +31,14 @@
     (__builtin_strrchr(__FILE_NAME__, '/') ? __builtin_strrchr(__FILE_NAME__, '/') + 1 : __FILE_NAME__)
 #endif
 
+#ifndef AAFWK_FILE_BASE_NAME
+#define AAFWK_FILE_BASE_NAME \
+    (std::string(AAFWK_FILE_NAME).find_last_of('.') != std::string::npos ? \
+    std::string(AAFWK_FILE_NAME).substr(0, std::string(AAFWK_FILE_NAME).find_last_of('.')).c_str() : AAFWK_FILE_NAME)
+#endif
+
 #ifndef AAFWK_FUNC_INFO
-#define AAFWK_FUNC_INFO AAFWK_FILE_NAME, __LINE__
+#define AAFWK_FUNC_INFO  AAFWK_FILE_BASE_NAME
 #endif
 
 
