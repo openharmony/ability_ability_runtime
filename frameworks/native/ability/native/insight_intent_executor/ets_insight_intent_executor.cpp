@@ -204,15 +204,7 @@ std::unique_ptr<AppExecFwk::ETSNativeReference> EtsInsightIntentExecutor::LoadEt
     }
 
     std::string moduleName(executeParam->moduleName_);
-    std::string srcPath(executeParam->moduleName_ + "/" + info.srcEntry);
-
-    auto pos = srcPath.rfind('.');
-    if (pos == std::string::npos) {
-        return std::unique_ptr<AppExecFwk::ETSNativeReference>();
-    }
-    srcPath.erase(pos);
-    srcPath.append(".abc");
-
+    std::string srcPath(executeParam->moduleName_);
     std::unique_ptr<AppExecFwk::ETSNativeReference> etsObj =
         runtime.LoadModule(moduleName, srcPath, info.hapPath, info.esmodule, false, info.srcEntry);
     return etsObj;
