@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,12 @@ struct Index {
           })
           .offset({ x: 0, y: 30 })
           .size({ width: 300, height: 300 })
-          .border({ width: 5, color: 0x317AF7, radius: 10, style: BorderStyle.Dotted })
+          .border({
+            width: 5,
+            color: 0x317AF7,
+            radius: 10,
+            style: BorderStyle.Dotted
+          })
 
         Button("sendData")
           .type(ButtonType.Capsule)
