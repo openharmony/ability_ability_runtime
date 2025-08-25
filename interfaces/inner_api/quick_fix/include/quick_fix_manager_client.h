@@ -33,6 +33,7 @@ class QuickFixManagerClient : public DelayedSingleton<QuickFixManagerClient>,
 public:
     QuickFixManagerClient() = default;
     virtual ~QuickFixManagerClient() = default;
+    static std::shared_ptr<QuickFixManagerClient> GetInstance();
 
     /**
      * @brief Apply quick fix.
@@ -87,6 +88,8 @@ private:
     bool loadSaFinished_;
     std::mutex mutex_;
     sptr<IQuickFixManager> quickFixMgr_ = nullptr;
+    static std::shared_ptr<QuickFixManagerClient> instance_;
+    static std::mutex mutex1_;
 
     DISALLOW_COPY_AND_MOVE(QuickFixManagerClient);
 };
