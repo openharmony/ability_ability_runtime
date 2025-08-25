@@ -24,21 +24,10 @@ import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSessi
 export default class PhotoEditorExtensionAbility extends UIExtensionContext {
   // 异步回调相关
   private callOnDestroy(): boolean {
-    const derivedClassType = AbilityUtils.getClassType(this);
-    if (derivedClassType === undefined) {
-      this.onDestroy();
-      return false;
-    }
-    const photoEditorExtensionAbilityClassType = AbilityUtils.getClassType(new PhotoEditorExtensionAbility());
-    if (photoEditorExtensionAbilityClassType === undefined) {
-      this.onDestroy();
-      return false;
-    }
-    if (AbilityUtils.isOverride(derivedClassType, "onDestroyAsync", photoEditorExtensionAbilityClassType)) {
-      this.onDestroyAsync();
+    let p = this.onDestroy();
+    if (p instanceof Promise) {
       return true;
     }
-    this.onDestroy();
     return false;
   }
 
@@ -50,10 +39,8 @@ export default class PhotoEditorExtensionAbility extends UIExtensionContext {
 
   onBackground(): void {}
 
-  onDestroy(): void {}
-
-  onDestroyAsync(): Promise<void> {
-    return new Promise<void>((resolve: (a: undefined)=>void, reject: (err: Error)=>void): void => {});
+  onDestroy(): Promise<void> | undefined {
+    return undefined;
   }
 
   onStartContentEditing(uri: string, want: Want, session: UIExtensionContentSession): void {}
