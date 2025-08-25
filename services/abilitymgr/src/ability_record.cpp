@@ -2241,9 +2241,9 @@ void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int 
         return;
     }
 
-    if (!abilityRecord) {                                             \
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "nullptr"); \
-        return;                                                \
+    if (!abilityRecord) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "nullptr");
+        return;
     }
 
     auto isExist = [&abilityRecord](const std::shared_ptr<CallerRecord> &callerRecord) {
