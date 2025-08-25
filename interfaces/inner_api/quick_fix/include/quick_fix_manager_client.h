@@ -86,7 +86,6 @@ private:
     bool loadSaFinished_;
     std::mutex mutex_;
     sptr<IQuickFixManager> quickFixMgr_ = nullptr;
-    static std::shared_ptr<QuickFixManagerClient> instance_;
 };
 } // namespace AAFwk
 } // namespace OHOS
