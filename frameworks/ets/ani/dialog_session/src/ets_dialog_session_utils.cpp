@@ -190,15 +190,15 @@ ani_object WrapDialogSessionInfo(ani_env *env, const AAFwk::DialogSessionInfo &d
     }
     if ((status = env->FindClass(CLASSNAME_DIALOG_SESSION_INFO, &cls)) != ANI_OK || cls == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "FindClass status : %{public}d or null cls", status);
-        return nullptr;
+        return AppExecFwk::CreateEtsNull(env);
     }
     if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "Class_FindMethod status : %{public}d or null method", status);
-        return nullptr;
+        return AppExecFwk::CreateEtsNull(env);
     }
     if ((status = env->Object_New(cls, method, &etsObject)) != ANI_OK || etsObject == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "Object_New status : %{public}d or null etsObject", status);
-        return nullptr;
+        return AppExecFwk::CreateEtsNull(env);
     }
 
     status = env->Object_SetPropertyByName_Ref(

@@ -527,6 +527,17 @@ ani_object CreateBoolean(ani_env *env, ani_boolean value)
     return obj;
 }
 
+ani_object CreateEtsNull(ani_env *env)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return nullptr;
+    }
+    ani_ref ref = nullptr;
+    env->GetNull(&ref);
+    return reinterpret_cast<ani_object>(ref);
+}
+
 ani_object CreateLong(ani_env *env, ani_long value)
 {
     if (env == nullptr) {
