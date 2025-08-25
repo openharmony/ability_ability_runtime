@@ -176,5 +176,20 @@ HWTEST_F(QuickFixManagerClientTest, RevokeQuickFix_0200, TestSize.Level1)
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end", __func__);
 }
+
+/**
+ * @tc.name: GetInstance_0100
+ * @tc.desc: GetInstance
+ * @tc.type: FUNC
+ */
+HWTEST_F(QuickFixManagerClientTest, GetInstance_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start", __func__);
+
+    auto instance_ = AAFwk::QuickFixManagerClient::GetInstance();
+    EXPECT_NE(instance_, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end", __func__);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
