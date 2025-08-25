@@ -56,6 +56,7 @@
 #include "scene_board_judgement.h"
 #include "key_event.h"
 #include "form_constants.h"
+#include "form_provider_info.h"
 #include "pointer_event.h"
 #endif
 
