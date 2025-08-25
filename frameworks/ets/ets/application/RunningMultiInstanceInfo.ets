@@ -14,8 +14,12 @@
  */
 export interface RunningMultiInstanceInfo {
     instanceKey: string;
+    uid: int;
+    pids: Array<int>;
 }
 
-class RunningMultiInstanceInfoInner implements RunningMultiInstanceInfo {
+export class RunningMultiInstanceInfoInner implements RunningMultiInstanceInfo {
   instanceKey: string = '';
+  uid: int;
+  pids: Array<int> = [];
 }
