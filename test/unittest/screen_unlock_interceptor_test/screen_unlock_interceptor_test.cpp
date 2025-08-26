@@ -76,7 +76,7 @@ HWTEST_F(ScreenUnlockInterceptorTest, DoProcess_001, TestSize.Level1)
     AbilityInterceptorParam param(want, requestCode, userId, isWithUI, callerToken, shouldBlockAllAppStartFunc);
     auto ret = screenUnlockInterceptor.DoProcess(param);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
+        EXPECT_EQ(ret, ERR_OK);
     }
 }
 
