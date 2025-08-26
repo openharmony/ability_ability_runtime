@@ -2835,9 +2835,13 @@ napi_value JsAbilityContext::OnStartAbilityByType(napi_env env, NapiCallbackInfo
         ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
         return CreateJsUndefined(env);
     }
-
     std::shared_ptr<JsUIExtensionCallback> callback = std::make_shared<JsUIExtensionCallback>(env);
     callback->SetJsCallbackObject(info.argv[INDEX_TWO]);
+    napi_value completionHandler = AppExecFwk::GetPropertyValueByPropertyName(
+        env, info.argv[INDEX_TWO], "completionHandler", napi_object);
+    if (completionHandler != nullptr) {
+        callback->SetCompletionHandler(env, completionHandler);
+    }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
         [weak = context_, type, wantParam, callback, innerErrCode]() mutable {
