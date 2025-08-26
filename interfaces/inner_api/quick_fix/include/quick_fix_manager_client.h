@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,18 +21,17 @@
 #include <vector>
 
 #include "iquick_fix_manager.h"
-#include "singleton.h"
 #include "quick_fix_info.h"
 
 namespace OHOS {
 namespace AAFwk {
 using ClearProxyCallback = std::function<void(const wptr<IRemoteObject>&)>;
 
-class QuickFixManagerClient : public DelayedSingleton<QuickFixManagerClient>,
-                              public std::enable_shared_from_this<QuickFixManagerClient> {
+class QuickFixManagerClient : public std::enable_shared_from_this<QuickFixManagerClient> {
 public:
     QuickFixManagerClient() = default;
     virtual ~QuickFixManagerClient() = default;
+    static std::shared_ptr<QuickFixManagerClient> GetInstance();
 
     /**
      * @brief Apply quick fix.
@@ -87,8 +86,6 @@ private:
     bool loadSaFinished_;
     std::mutex mutex_;
     sptr<IQuickFixManager> quickFixMgr_ = nullptr;
-
-    DISALLOW_COPY_AND_MOVE(QuickFixManagerClient);
 };
 } // namespace AAFwk
 } // namespace OHOS

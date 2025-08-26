@@ -92,7 +92,7 @@ private:
 
         auto complete = [bundleName](napi_env env, NapiAsyncTask &task, int32_t status) {
             AppExecFwk::ApplicationQuickFixInfo quickFixInfo;
-            auto errCode = DelayedSingleton<AAFwk::QuickFixManagerClient>::GetInstance()->GetApplyedQuickFixInfo(
+            auto errCode = AAFwk::QuickFixManagerClient::GetInstance()->GetApplyedQuickFixInfo(
                 bundleName, quickFixInfo);
             if (errCode == 0) {
                 task.ResolveWithNoError(env, CreateJsApplicationQuickFixInfo(env, quickFixInfo));
@@ -125,7 +125,7 @@ private:
         }
 
         auto complete = [hapQuickFixFiles](napi_env env, NapiAsyncTask &task, int32_t status) {
-            auto errcode = DelayedSingleton<AAFwk::QuickFixManagerClient>::GetInstance()->ApplyQuickFix(
+            auto errcode = AAFwk::QuickFixManagerClient::GetInstance()->ApplyQuickFix(
                 hapQuickFixFiles);
             if (errcode == 0) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
@@ -159,7 +159,7 @@ private:
 
         std::shared_ptr<int32_t> errCode = std::make_shared<int32_t>(AAFwk::ERR_OK);
         auto execute = [retval = errCode, bundleName] () {
-            auto quickFixMgr = DelayedSingleton<AAFwk::QuickFixManagerClient>::GetInstance();
+            auto quickFixMgr = AAFwk::QuickFixManagerClient::GetInstance();
             if (quickFixMgr == nullptr) {
                 *retval = AAFwk::ERR_QUICKFIX_INTERNAL_ERROR;
                 TAG_LOGE(AAFwkTag::QUICKFIX, "null quickFixMgr");
