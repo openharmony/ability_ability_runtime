@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,12 @@ namespace AAFwk {
 namespace {
 const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
 } // namespace
+std::shared_ptr<QuickFixManagerClient> QuickFixManagerClient::GetInstance()
+{
+    TAG_LOGD(AAFwkTag::QUICKFIX, "GetInstance called");
+    static std::shared_ptr<QuickFixManagerClient> instance = std::make_shared<QuickFixManagerClient>();
+    return instance;
+}
 
 int32_t QuickFixManagerClient::ApplyQuickFix(const std::vector<std::string> &quickFixFiles, bool isDebug,
     bool isReplace)

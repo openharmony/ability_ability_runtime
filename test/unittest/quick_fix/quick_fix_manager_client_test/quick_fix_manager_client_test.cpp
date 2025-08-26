@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -173,6 +173,21 @@ HWTEST_F(QuickFixManagerClientTest, RevokeQuickFix_0200, TestSize.Level1)
     quickFixClient_->quickFixMgr_ = nullptr;
     auto ret = quickFixClient_->RevokeQuickFix(bundleName);
     EXPECT_EQ(ret, QUICK_FIX_CONNECT_FAILED);
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end", __func__);
+}
+
+/**
+ * @tc.name: GetInstance_0100
+ * @tc.desc: GetInstance
+ * @tc.type: FUNC
+ */
+HWTEST_F(QuickFixManagerClientTest, GetInstance_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start", __func__);
+
+    auto instance_ = AAFwk::QuickFixManagerClient::GetInstance();
+    EXPECT_NE(instance_, nullptr);
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end", __func__);
 }
