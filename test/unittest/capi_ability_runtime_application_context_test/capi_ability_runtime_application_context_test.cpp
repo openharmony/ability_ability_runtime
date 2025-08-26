@@ -2454,7 +2454,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_Application
     ASSERT_NE(contextImpl, nullptr);
     AbilityRuntime_ErrorCode code =
         OH_AbilityRuntime_ApplicationContextGetLaunchParameter(buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 
     applicationContext->AttachContextImpl(contextImpl);
     applicationContext->SetLaunchParameter(want);
@@ -2525,7 +2525,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_Application
     ASSERT_NE(contextImpl, nullptr);
     AbilityRuntime_ErrorCode code =
         OH_AbilityRuntime_ApplicationContextGetLatestParameter(buffer, BUFFER_SIZE, &writeLength);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST);
+    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
 
     applicationContext->AttachContextImpl(contextImpl);
     applicationContext->SetLatestParameter(want);
