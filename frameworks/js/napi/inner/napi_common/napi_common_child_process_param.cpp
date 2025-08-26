@@ -109,7 +109,7 @@ bool UnwrapChildProcessOptions(napi_env env, napi_value jsValue, AppExecFwk::Chi
         TAG_LOGE(AAFwkTag::PROCESSMGR, "parameter error");
         errorMsg = "Parameter error. The type of options.isolationUid must be boolean.";
         return false;
-        }
+    }
     return true;
 }
 

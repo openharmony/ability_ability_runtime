@@ -26,8 +26,8 @@ struct Ability_ChildProcessConfigs {
     /** the isolation modes used by the native child process module */
     NativeChildProcess_IsolationMode isolationMode = NCP_ISOLATION_MODE_NORMAL;
 
-    /** the isolation uid modes */
-    bool isolationUid = false;
+    /** the isIsolationUid uid modes */
+    bool isIsolationUid = false;
 };
 
 #endif // ABILITY_RUNTIME_CHILD_PROCESS_CONFIGS_H

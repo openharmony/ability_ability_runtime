@@ -2321,7 +2321,15 @@ HWTEST_F(AppMgrServiceInnerEighthTest, CreateNativeChildProcess_001, TestSize.Le
     std::string libName = "111";
     int32_t childProcessCount = 0;
     sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
-    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
+    ChildProcessOptions options;
+    options.isolationMode = false;
+    options.customProcessName = "";
+    options.isolationUid = false;
+    ChildProcessRequest request;
+    request.childProcessType = CHILD_PROCESS_TYPE_NATIVE;
+    request.childProcessCount = childProcessCount;
+    request.options = options;
+    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, callback, request);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_001 end");
 }
@@ -2345,7 +2353,15 @@ HWTEST_F(AppMgrServiceInnerEighthTest, CreateNativeChildProcess_002, TestSize.Le
     std::string libName = "111";
     int32_t childProcessCount = 0;
     sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
-    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
+    ChildProcessOptions options;
+    options.isolationMode = false;
+    options.customProcessName = "";
+    options.isolationUid = false;
+    ChildProcessRequest request;
+    request.childProcessType = CHILD_PROCESS_TYPE_NATIVE;
+    request.childProcessCount = childProcessCount;
+    request.options = options;
+    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, callback, request);
     EXPECT_EQ(ret, AAFwk::ERR_CHILD_PROCESS_REACH_LIMIT);
     TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_002 end");
 }
@@ -2370,7 +2386,15 @@ HWTEST_F(AppMgrServiceInnerEighthTest, CreateNativeChildProcess_003, TestSize.Le
     std::string libName = "111";
     int32_t childProcessCount = 0;
     sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
-    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
+    ChildProcessOptions options;
+    options.isolationMode = false;
+    options.customProcessName = "";
+    options.isolationUid = false;
+    ChildProcessRequest request;
+    request.childProcessType = CHILD_PROCESS_TYPE_NATIVE;
+    request.childProcessCount = childProcessCount;
+    request.options = options;
+    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, callback, request);
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
     TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_003 end");
 }
