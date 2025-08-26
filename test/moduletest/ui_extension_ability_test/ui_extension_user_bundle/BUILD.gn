@@ -26,7 +26,7 @@ ohos_hap("ui_extension_user_hap") {
   hap_name = "ui_extension_user"
   subsystem_name = "ability"
   part_name = "ability_runtime"
-  final_hap_path = "$root_out_dir/tests/moduletest/ability_runtime/ui_extension/resource/${hap_name}.hap"
+  final_hap_path = "$root_out_dir/tests/moduletest/ability_runtime/ability_runtime/ui_extension/resource/${hap_name}.hap"
 }
 
 ohos_js_assets("ui_extension_user_js_assets") {
