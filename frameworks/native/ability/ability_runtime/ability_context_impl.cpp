@@ -1088,7 +1088,23 @@ ErrCode AbilityContextImpl::StartAbilityByType(const std::string &type,
     callback.onResult = [uiExtensionCallbacks](int32_t arg1, const OHOS::AAFwk::Want arg2) {
         uiExtensionCallbacks->OnResult(arg1, arg2);
     };
-
+    callback.onReceive = [uiExtensionCallbacks](const AAFwk::WantParams& data) {
+        if (data.HasParam("onRequestSuccess")) {
+            auto successParam = data.GetWantParams("onRequestSuccess");
+            auto elementName = successParam.GetStringParam("name");
+            uiExtensionCallbacks->OnRequestSuccess(elementName);
+        } else if (data.HasParam("onRequestFailure")) {
+            auto failureParam = data.GetWantParams("onRequestFailure");
+            auto elementName = failureParam.GetStringParam("name");
+            int32_t failureCode = failureParam.GetIntParam("failureCode", 0);
+            if (failureCode != 0 && failureCode != 1) {
+                TAG_LOGE(AAFwkTag::CONTEXT, "Invalid failureCode: %{public}d", failureCode);
+                return;
+            }
+            std::string failureMsg = failureParam.GetStringParam("failureMessage");
+            uiExtensionCallbacks->OnRequestFailure(elementName, failureCode, failureMsg);
+        }
+    };
     Ace::ModalUIExtensionConfig config;
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {
