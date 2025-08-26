@@ -13,34 +13,87 @@
  * limitations under the License.
  */
 
-import Want from '@ohos.app.ability.Want';
-import AbilityConstant from '@ohos.app.ability.AbilityConstant';
-import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
-import UIAbility from '@ohos.app.ability.UIAbility';
-import hilog from '@ohos.hilog';
+import { AbilityConstant, common, application, ConfigurationConstant, errorManager, UIAbility, Want } from '@kit.AbilityKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
-import window from '@ohos.window';
+import { TAG, DOMAIN} from '../pages/Index'
 
-const DOMAIN = 0x1323;
-const TAG = 'InsightIntents';
+function errorHandlerFunc(observer: errorManager.GlobalError) {
+  hilog.error(DOMAIN, TAG, 'result name: %{public}s', observer.name);
+  hilog.error(DOMAIN, TAG, 'result message: %{public}s', observer.message);
+  hilog.error(DOMAIN, TAG, 'result stack: %{public}s', observer.stack);
+  hilog.error(DOMAIN, TAG, 'result instanceName: %{public}s', observer.instanceName);
+  hilog.error(DOMAIN, TAG, 'result instanceType: %{public}s', observer.instanceType);
+  restartApp()
+}
+
+function unhandledRejectionHandleFunc(observer: errorManager.GlobalError) {
+  hilog.error(DOMAIN, TAG, 'result name: %{public}s', observer.name);
+  hilog.error(DOMAIN, TAG, 'result message: %{public}s', observer.message);
+  hilog.error(DOMAIN, TAG, 'result stack: %{public}s', observer.stack);
+  hilog.error(DOMAIN, TAG, 'result instanceName: %{public}s', observer.instanceName);
+  hilog.error(DOMAIN, TAG, 'result instanceType: %{public}s', observer.instanceType);
+  restartApp()
+}
+
+let errorObserver: errorManager.ErrorObserver = {
+  onUnhandledException(errorMsg) {
+    hilog.error(DOMAIN, TAG, 'onUnhandledException, errorMsg: %{public}s', errorMsg);
+    restartApp()
+  },
+  onException(errorObj) {
+    hilog.error(DOMAIN, TAG, 'result name: %{public}s', errorObj.name);
+    hilog.error(DOMAIN, TAG, 'result message: %{public}s', errorObj.message);
+    if (typeof (errorObj.stack) === 'string') {
+      hilog.error(DOMAIN, TAG, 'result stack: %{public}s', errorObj.stack);
+    }
+    restartApp()
+  }
+};
+
+let observerId = -1;
+let restartWant: Want | undefined = undefined;
+function restartApp() {
+  try {
+    application.getApplicationContext().restartApp(restartWant);
+    hilog.info(DOMAIN, TAG, 'restartApp success');
+  } catch (err) {
+    hilog.error(DOMAIN, TAG, 'Failed to restartApp. Cause: %{public}s', JSON.stringify(err));
+  }
+}
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
-    AppStorage.setAndLink('context', this.context);
     hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onCreate');
+    restartWant = want;
     const callerBundleName: string | undefined = want.parameters?.['ohos.aafwk.param.callerBundleName']?.toString();
     if (callerBundleName === undefined || callerBundleName !== 'com.huawei.hmos.aidataservice') {
       try {
         this.context.terminateSelf();
       } catch (err) {
         hilog.error(DOMAIN, TAG, 'Failed to context.terminateSelf. Cause: %{public}s', JSON.stringify(err));
-      } 
+      }
+    }
+    try {
+      observerId = errorManager.on('error', errorObserver);
+      errorManager.on('globalErrorOccurred', errorHandlerFunc);
+      errorManager.on('globalUnhandledRejectionDetected', unhandledRejectionHandleFunc);
+    } catch (error) {
+      hilog.error(DOMAIN, TAG, 'registerErrorManager failed, Cause: %{public}s', JSON.stringify(error));
     }
   }
 
   onDestroy(): void {
     hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onDestroy');
+    try {
+      errorManager.off('error', observerId);
+      errorManager.off('globalErrorOccurred', errorHandlerFunc);
+      errorManager.off('globalUnhandledRejectionDetected', unhandledRejectionHandleFunc);
+    } catch (error) {
+      hilog.error(DOMAIN, TAG, 'cancelErrorManager failed, Cause: %{public}s', JSON.stringify(error));
+    }
   }
 
   onWindowStageCreate(windowStage: window.WindowStage): void {
