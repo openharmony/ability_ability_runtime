@@ -16,8 +16,8 @@
 #include "batch_uri.h"
 
 #include "file_permission_manager.h"
+#include "file_uri_distribution_utils.h"
 #include "hilog_tag_wrapper.h"
-#include "uri_permission_utils.h"
 #include "fud_constants.h"
 namespace OHOS {
 namespace AAFwk {
