@@ -20,7 +20,6 @@
 #include "array_wrapper.h"
 #include "configuration_utils.h"
 #include "connection_manager.h"
-#include "ets_ui_extension.h"
 #include "ets_ui_extension_instance.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
