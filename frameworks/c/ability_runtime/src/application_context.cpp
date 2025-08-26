@@ -311,13 +311,13 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetLaunchParameter(
     if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
         return ret;
     }
-    const auto appContext = Context::GetApplicationContext();
+    auto appContext = Context::GetApplicationContext();
     if (appContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
 
-    const std::string launchParameter = appContext->GetLaunchParameter();
+    std::string launchParameter = appContext->GetLaunchParameter();
     return WriteStringToBuffer(launchParameter, buffer, bufferSize, writeLength);
 }
 
@@ -329,13 +329,13 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetLatestParameter(
     if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
         return ret;
     }
-    const auto appContext = Context::GetApplicationContext();
+    auto appContext = Context::GetApplicationContext();
     if (appContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
         return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
     }
 
-    const std::string latestParameter = appContext->GetLatestParameter();
+    std::string latestParameter = appContext->GetLatestParameter();
     return WriteStringToBuffer(latestParameter, buffer, bufferSize, writeLength);
 }
 
