@@ -32,9 +32,9 @@
 #include "system_ability_definition.h"
 #include "tokenid_kit.h"
 #define private public
+#include "file_uri_distribution_utils.h"
 #include "uri_permission_manager_client.h"
 #include "uri_permission_manager_stub_impl.h"
-#include "uri_permission_utils.h"
 #undef private
 
 using namespace testing;
