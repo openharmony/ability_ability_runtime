@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "uri_permission_utils.h"
+#include "file_uri_distribution_utils.h"
 
 #include "ability_manager_errors.h"
 #include "mock_my_flag.h"
@@ -22,88 +22,88 @@ namespace OHOS {
 namespace AAFwk {
 using MyFlag = OHOS::AAFwk::MyFlag;
 
-bool UPMSUtils::SendShareUnPrivilegeUriEvent(uint32_t callerTokenId, uint32_t targetTokenId)
+bool FUDUtils::SendShareUnPrivilegeUriEvent(uint32_t callerTokenId, uint32_t targetTokenId)
 {
     return true;
 }
 
-bool UPMSUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint32_t targetTokenId,
+bool FUDUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint32_t targetTokenId,
     const std::vector<std::string> &uriVec, const std::vector<bool> &resVec)
 {
     return true;
 }
 
-int32_t UPMSUtils::GetCurrentAccountId()
+int32_t FUDUtils::GetCurrentAccountId()
 {
     return 1;
 }
 
-bool UPMSUtils::IsFoundationCall()
+bool FUDUtils::IsFoundationCall()
 {
     return MyFlag::upmsUtilsIsFoundationCallRet_;
 }
 
-bool UPMSUtils::IsSAOrSystemAppCall()
+bool FUDUtils::IsSAOrSystemAppCall()
 {
     return MyFlag::isSAOrSystemAppCall_ || (MyFlag::IS_SA_CALL & MyFlag::flag_) != 0;
 }
 
-bool UPMSUtils::IsSystemAppCall()
+bool FUDUtils::IsSystemAppCall()
 {
     return MyFlag::isSystemAppCall_;
 }
 
-bool UPMSUtils::GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion)
+bool FUDUtils::GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion)
 {
     return true;
 }
 
-bool UPMSUtils::CheckIsSystemAppByTokenId(uint32_t tokenId)
+bool FUDUtils::CheckIsSystemAppByTokenId(uint32_t tokenId)
 {
     return MyFlag::upmsUtilsCheckIsSystemAppByTokenIdRet_;
 }
 
-bool UPMSUtils::GetDirByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex, std::string &dirName)
+bool FUDUtils::GetDirByBundleNameAndAppIndex(const std::string &bundleName, int32_t appIndex, std::string &dirName)
 {
     dirName = MyFlag::upmsUtilsAlterBundleName_;
     return MyFlag::upmsUtilsGetDirByBundleNameAndAppIndexRet_;
 }
 
-bool UPMSUtils::GetAlterableBundleNameByTokenId(uint32_t tokenId, std::string &bundleName)
+bool FUDUtils::GetAlterableBundleNameByTokenId(uint32_t tokenId, std::string &bundleName)
 {
     bundleName = MyFlag::upmsUtilsAlterBundleName_;
     return MyFlag::upmsUtilsGetAlterBundleNameByTokenIdRet_;
 }
 
-bool UPMSUtils::GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName)
+bool FUDUtils::GetBundleNameByTokenId(uint32_t tokenId, std::string &bundleName)
 {
     bundleName = MyFlag::upmsUtilsBundleName_;
     return MyFlag::upmsUtilsGetBundleNameByTokenIdRet_;
 }
 
-int32_t UPMSUtils::GetAppIdByBundleName(const std::string &bundleName, std::string &appId)
+int32_t FUDUtils::GetAppIdByBundleName(const std::string &bundleName, std::string &appId)
 {
     appId = MyFlag::upmsUtilsAppId_;
     return MyFlag::upmsUtilsGetAppIdByBundleNameRet_;
 }
 
-int32_t UPMSUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t appIndex, uint32_t &tokenId)
+int32_t FUDUtils::GetTokenIdByBundleName(const std::string &bundleName, int32_t appIndex, uint32_t &tokenId)
 {
     tokenId = MyFlag::upmsUtilsTokenId_;
     return MyFlag::getTokenIdByBundleNameStatus_;
 }
 
-bool UPMSUtils::CheckUriTypeIsValid(Uri &uri)
+bool FUDUtils::CheckUriTypeIsValid(Uri &uri)
 {
     return MyFlag::isUriTypeValid_;
 }
 
-bool UPMSUtils::IsDocsCloudUri(Uri &uri)
+bool FUDUtils::IsDocsCloudUri(Uri &uri)
 {
     return MyFlag::isDocsCloudUri_;
 }
 
-bool UPMSUtils::GenerateFUDAppInfo(FUDAppInfo &info)
+bool FUDUtils::GenerateFUDAppInfo(FUDAppInfo &info)
 {
     info.alterBundleName = MyFlag::upmsUtilsAlterBundleName_;
     info.bundleName = MyFlag::upmsUtilsBundleName_;

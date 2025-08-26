@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_URI_PERMISSION_UTILS_H
-#define OHOS_ABILITY_RUNTIME_URI_PERMISSION_UTILS_H
+#ifndef OHOS_ABILITY_RUNTIME_FILE_URI_DISTRIBUTION_UTILS_H
+#define OHOS_ABILITY_RUNTIME_FILE_URI_DISTRIBUTION_UTILS_H
 
+#include "event_report.h"
 #include "uri.h"
 
 namespace OHOS {
@@ -26,7 +27,7 @@ struct FUDAppInfo {
     std::string alterBundleName;
     int32_t userId = 0;
 };
-class UPMSUtils {
+class FUDUtils {
 public:
     static bool SendShareUnPrivilegeUriEvent(uint32_t callTokenId, uint32_t targetTokenId);
     static bool SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint32_t targetTokenId,
@@ -45,7 +46,11 @@ public:
     static bool GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion);
     static bool IsDocsCloudUri(Uri &uri);
     static bool GenerateFUDAppInfo(FUDAppInfo &info);
+
+private:
+    static bool CheckAndCreateEventInfo(uint32_t callerTokenId, uint32_t targetTokenId, EventInfo &eventInfo);
+    static bool CheckIsSystemAppByBundleName(std::string &bundleName);
 };
 } // OHOS
 } // AAFwk
-#endif  // OHOS_ABILITY_RUNTIME_URI_PERMISSION_UTILS_H
+#endif  // OHOS_ABILITY_RUNTIME_FILE_URI_DISTRIBUTION_UTILS_H
