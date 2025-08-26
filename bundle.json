@@ -20,7 +20,8 @@
         "SystemCapability.Ability.AbilityRuntime.QuickFix",
         "SystemCapability.Ability.AbilityTools.AbilityAssistant",
         "SystemCapability.Ability.AppStartup",
-        "SystemCapability.Ability.AppExtension.PhotoEditorExtension"
+        "SystemCapability.Ability.AppExtension.PhotoEditorExtension",
+        "SystemCapability.Ability.AppExtension.VerticalPanel"
       ],
       "features": [
         "ability_runtime_auto_fill_ability",
