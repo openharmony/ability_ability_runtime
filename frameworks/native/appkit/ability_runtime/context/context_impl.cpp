@@ -1767,13 +1767,15 @@ bool ContextImpl::UpdateDisplayConfiguration(std::shared_ptr<ContextImpl> &conte
 void ContextImpl::SetLaunchParameter(const AAFwk::Want& want)
 {
     // only cold-start need save parameter
+    std::lock_guard<std::mutex> lock(launchParameterMutex_);
     if (!launchParameter_) {
         launchParameter_ = std::make_shared<AAFwk::WantParams>(want.GetParams());
     }
 }
 
-std::string ContextImpl::GetLaunchParameter() const
+std::string ContextImpl::GetLaunchParameter()
 {
+    std::lock_guard<std::mutex> lock(launchParameterMutex_);
     if (launchParameter_ != nullptr) {
         return launchParameter_->ToString();
     }
@@ -1783,6 +1785,7 @@ std::string ContextImpl::GetLaunchParameter() const
 
 void ContextImpl::SetLatestParameter(const AAFwk::Want& want)
 {
+    std::lock_guard<std::mutex> lock(latestParameterMutex_);
     if (!latestParameter_) {
         latestParameter_ = std::make_shared<AAFwk::WantParams>(want.GetParams());
     } else {
@@ -1790,8 +1793,9 @@ void ContextImpl::SetLatestParameter(const AAFwk::Want& want)
     }
 }
 
-std::string ContextImpl::GetLatestParameter() const
+std::string ContextImpl::GetLatestParameter()
 {
+    std::lock_guard<std::mutex> lock(latestParameterMutex_);
     if (latestParameter_ != nullptr) {
         return latestParameter_->ToString();
     }

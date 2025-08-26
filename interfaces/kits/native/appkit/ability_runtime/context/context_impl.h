@@ -425,11 +425,11 @@ public:
 
     void SetLaunchParameter(const AAFwk::Want& want);
 
-    std::string GetLaunchParameter() const;
+    std::string GetLaunchParameter();
 
     void SetLatestParameter(const AAFwk::Want& want);
 
-    std::string GetLatestParameter() const;
+    std::string GetLatestParameter();
 
 #ifdef SUPPORT_GRAPHICS
     /**
@@ -550,8 +550,6 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager_ = nullptr;
     std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfo_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> config_ = nullptr;
-    std::shared_ptr<AAFwk::WantParams> launchParameter_ = nullptr;
-    std::shared_ptr<AAFwk::WantParams> latestParameter_ = nullptr;
     std::string currArea_ = "el2";
     std::vector<AppExecFwk::OverlayModuleInfo> overlayModuleInfos_;
     std::set<std::string> checkedDirSet_;
@@ -569,6 +567,10 @@ private:
     std::mutex overlaySubscriberMutex_;
     std::shared_ptr<AppExecFwk::OverlayEventSubscriber> overlaySubscriber_;
     std::string processName_;
+    std::mutex launchParameterMutex_;
+    std::shared_ptr<AAFwk::WantParams> launchParameter_ = nullptr;
+    std::mutex latestParameterMutex_;
+    std::shared_ptr<AAFwk::WantParams> latestParameter_ = nullptr;
 
 #ifdef SUPPORT_GRAPHICS
     static std::mutex getDisplayConfigCallbackMutex_;

@@ -318,11 +318,6 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetLaunchParameter(
     }
 
     const std::string launchParameter = appContext->GetLaunchParameter();
-    if (launchParameter.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "launchParameter is empty");
-        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
-    }
-
     return WriteStringToBuffer(launchParameter, buffer, bufferSize, writeLength);
 }
 
@@ -341,11 +336,6 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetLatestParameter(
     }
 
     const std::string latestParameter = appContext->GetLatestParameter();
-    if (latestParameter.empty()) {
-        TAG_LOGE(AAFwkTag::APPKIT, "latestParameter is empty");
-        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
-    }
-
     return WriteStringToBuffer(latestParameter, buffer, bufferSize, writeLength);
 }
 
