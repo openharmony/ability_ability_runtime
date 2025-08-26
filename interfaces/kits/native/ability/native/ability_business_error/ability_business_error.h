@@ -282,6 +282,8 @@ enum class AbilityErrorCode {
 
     ERROR_CODE_NOT_SUPPORT_START_DLP_FILES = 16000126,
 
+    ERROR_CODE_MAIN_WINDOW_NOT_EXIST = 16000135,
+
     // target bundle is not in u1
     ERROR_CODE_NO_U1 = 16000204,
 
