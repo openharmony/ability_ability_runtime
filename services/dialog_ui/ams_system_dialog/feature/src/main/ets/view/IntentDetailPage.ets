@@ -12,40 +12,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 import { IntentInfo } from './IntentContent';
 import { DetailItem } from './DetailItem';
-import insightIntentDriver from '@ohos.app.ability.insightIntentDriver';
-import insightIntent from '@ohos.app.ability.insightIntent';
-import { format, jsClone, addArrayParams, removeArrayParams, romoveFormData } from './format';
-import common from '@ohos.app.ability.common';
+import { common, insightIntent, insightIntentDriver } from '@kit.AbilityKit';
+import { format, jsClone, addArrayParams, removeArrayParams, removeFormData } from './format';
 
 interface propertiesInfo {
-  name: string
-  type: string
-  description?: string
-  enum?: Array<string | number>
-  subItem?: propertiesInfo
-  maxLength?: number
-  default?: number | Resource
-  required?: boolean
+  name: string;
+  type: string;
+  description?: string;
+  enum?: Array<string | number>;
+  subItem?: propertiesInfo;
+  maxLength?: number;
+  default?: number | Resource;
+  required?: boolean;
 }
 
 interface FormField {
-  key: string
-  fatherKey?: string
-  name: string
-  type: string
-  fatherType?: string
-  inputType: string
-  description?: string
-  options?: Array<string | number>
-  subProperties?: FormField[] | FormField[][]
-  maxLength?: number
-  default?: number | Resource
-  value?: string | number
-  index?: number
-  required?: boolean
+  key: string;
+  fatherKey?: string;
+  name: string;
+  type: string;
+  fatherType?: string;
+  inputType: string;
+  description?: string;
+  options?: Array<string | number>;
+  subProperties?: FormField[] | FormField[][];
+  maxLength?: number;
+  default?: number | Resource;
+  value?: string | number;
+  index?: number;
+  required?: boolean;
 }
 
 type ObjVal = string | number | null;
@@ -66,18 +64,6 @@ function extStyle() {
     offsetY: 10
   })
   .clip(true)
-  .onReceive((data) => {
-    console.info(`onReceive, data:${JSON.stringify(data)}`);
-  })
-  .onTerminated((info) => {
-    console.info(`onTerminated, info:${JSON.stringify(info)}`);
-  })
-  .onRemoteReady((proxy) => {
-    console.info(`onRemoteReady, info:${JSON.stringify(proxy)}`);
-  })
-  .onError((data) => {
-    console.info(`onError, data:${JSON.stringify(data)}`);
-  })
 }
 
 @Component
@@ -174,14 +160,14 @@ export struct IntentDetailPage {
       const inputType = obj.enum ? 'select' : this.inputType[type];
       let subItem: FormField[] | FormField[][] = [];
       if (type === 'object' && Object.keys(obj).includes('properties')) {
-        const subPropties = this.findProperties(obj);
-        subItem = this.changeProperties(subPropties, propKey) as FormField[];
+        const subProperties = this.findProperties(obj);
+        subItem = this.changeProperties(subProperties, propKey) as FormField[];
       } else if (type === 'array' && Object.keys(obj).includes('items')) {
         if (index === 0) {
           this.countArr = [0];
         }
-        const subPropties = this.findProperties(obj);
-        subItem = [this.changeProperties(subPropties, propKey, 'array')] as FormField[][];
+        const subProperties = this.findProperties(obj);
+        subItem = [this.changeProperties(subProperties, propKey, 'array')] as FormField[][];
       }
       const description = obj.description;
       const formObj: FormField = {
@@ -281,12 +267,12 @@ export struct IntentDetailPage {
     } else {
       try {
         let resultData: insightIntent.ExecuteResult = await insightIntentDriver.execute(param);
-        this.result = JSON.stringify(resultData, null, 2);
+        this.result = 'code: ' + resultData.code + '\n' + 'result: ' + JSON.stringify(resultData?.result, null, 2);
         if (this.result != '') {
           this.isShow = true;
         }
       } catch (error) {
-        this.result = JSON.stringify(error, null, 2) + '\n' + JSON.stringify(param, null, 2);
+        this.result = 'code: ' + JSON.stringify(error.code) + '\n' + JSON.stringify(param, null, 2);
         if (this.result != '') {
           this.isShow = true;
         }
@@ -295,17 +281,17 @@ export struct IntentDetailPage {
   }
 
   submitForm() {
-    const excuteParam = format(this.formData);
+    const executeParam = format(this.formData);
     let validate: boolean = true;
     this.required?.forEach((key: string) => {
-      if (!excuteParam[key]) {
+      if (executeParam[key] === undefined || executeParam[key] === null) {
         if (validate) {
           validate = false;
         }
       }
     })
     if (validate) {
-      this.executeLinkIntent(excuteParam as Record<string, Object>);
+      this.executeLinkIntent(executeParam as Record<string, Object>);
     }
   }
 
@@ -327,7 +313,6 @@ export struct IntentDetailPage {
         })
       } else if (this.isShowForm) {
         Column() {
-
           FormComponent({
             id: '0',
             name: this.formName,
@@ -347,7 +332,7 @@ export struct IntentDetailPage {
             .clip(true)
         }
         .padding({
-          top: 14,
+          top: 28,
           left: 22,
           right: 22,
           bottom: 48
@@ -389,7 +374,7 @@ export struct IntentDetailPage {
         .maxLines(1)
       Column() {
         TextInput({
-          placeholder: `${field.type} ${field.description ? '，' + field.description : ''}`,
+          placeholder: `${field.type} ${field && field.description ? '，' + field.description : ''}`,
           text: `${this.formData[field.key] ?? ''}`
         })
           .maxLength(field.maxLength)
@@ -436,7 +421,7 @@ export struct IntentDetailPage {
         .maxLines(1)
       Column() {
         TextInput({
-          placeholder: `${field.type} ${field.description ? '，' + field.description : ''}`,
+          placeholder: `${field.type} ${field && field.description ? '，' + field.description : ''}`,
           text: `${this.formData[field.key] ?? ''}`
         })
           .maxLength(field.maxLength)
@@ -485,8 +470,8 @@ export struct IntentDetailPage {
         .maxLines(1)
       Column() {
         Select(field.options?.map(option => {
-          const opt: SelectOption = { value: option.toString() }
-          return opt
+          const opt: SelectOption = { value: option.toString() };
+          return opt;
         }))
           .width('100%')
           .height(40)
@@ -608,7 +593,7 @@ export struct IntentDetailPage {
                     .fontWeight(500)
                     .lineHeight(19)
                     .onClick(() => {
-                      const newFormData: FormDataType = romoveFormData(this.formData, field.name, fieldItem[0].index);
+                      const newFormData: FormDataType = removeFormData(this.formData, field.name, fieldItem[0].index);
                       this.formData = newFormData;
                       const arrItem: FormField[][] = removeArrayParams(field.subProperties, field.name, arrIndex);
                       let fieldArr = jsClone(this.formFields) as FormField[];
@@ -665,7 +650,7 @@ export struct IntentDetailPage {
       .position({ top: 0, left: 0 })
       .zIndex(100)
       .onClick(() => {
-        this.articlePathStack.pop()
+        this.articlePathStack.pop();
       })
 
       Scroll(this.scroller) {
@@ -775,7 +760,7 @@ export struct IntentDetailPage {
                             .lineHeight(19)
                             .onClick(() => {
                               const newFormData: FormDataType =
-                                romoveFormData(this.formData, field.name, fieldItem[0].index);
+                                removeFormData(this.formData, field.name, fieldItem[0].index);
                               this.formData = newFormData;
                               const arrItem: FormField[][] =
                                 removeArrayParams(field.subProperties, field.name, arrIndex);
@@ -826,7 +811,7 @@ export struct IntentDetailPage {
           .borderRadius(20)
           .height(40)
           .onClick(() => {
-            this.submitForm()
+            this.submitForm();
           })
           .bindSheet($$this.isShow, this.resultModule(), {
             height: SheetSize.MEDIUM,
