@@ -298,6 +298,19 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetResourceDir(cons
     char* buffer, const int32_t bufferSize, int32_t* writeLength);
 
 /**
+ * @brief Obtain the version code of the application.
+ *
+ * @param versionCode The version code of the application.
+ * @return The error code.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the versionCode is null.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the application context does not exist.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_GET_APPLICATION_INFO_FAILED} if the application info does not exist.
+ * @since 21
+ */
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetVersionCode(int64_t* versionCode);
+
+/**
  * @brief Obtain the launch parameter of starting UIAbility.
  *
  * @param buffer A pointer to a buffer that receives the launch parameter of starting UIAbility.
@@ -309,7 +322,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetResourceDir(cons
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the application context does not exist.
- * @since 20
+ * @since 21
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetLaunchParameter(
     char* buffer, const int32_t bufferSize, int32_t* writeLength);
@@ -326,23 +339,10 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetLaunchParameter(
  *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
  *         or the buffer size is less than the minimum buffer size.
  *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the application context does not exist.
- * @since 20
+ * @since 21
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetLatestParameter(
     char* buffer, const int32_t bufferSize, int32_t* writeLength);
-
-/**
- * @brief Obtain the version code of the application.
- *
- * @param versionCode The version code of the application.
- * @return The error code.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the versionCode is null.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the application context does not exist.
- *         {@link ABILITY_RUNTIME_ERROR_CODE_GET_APPLICATION_INFO_FAILED} if the application info does not exist.
- * @since 21
- */
-AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetVersionCode(int64_t* versionCode);
 #ifdef __cplusplus
 } // extern "C"
 #endif
