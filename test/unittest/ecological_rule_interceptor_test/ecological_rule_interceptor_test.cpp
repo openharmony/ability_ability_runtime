@@ -1358,7 +1358,7 @@ HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_004, TestSize.Le
     sptr<IRemoteObject> callerToken = nullptr;
     int userId = 100;
     interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
-    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_ATOM_SERVICE);
+    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_APP_SERVICE);
 }
 
 /**
@@ -1378,7 +1378,7 @@ HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_005, TestSize.Le
     sptr<IRemoteObject> callerToken = nullptr;
     int userId = 100;
     interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
-    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_HARMONY_APP);
+    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_APP_SERVICE);
 }
 
 /**
@@ -1421,7 +1421,7 @@ HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_007, TestSize.Le
     sptr<IRemoteObject> callerToken = nullptr;
     int userId = 100;
     interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
-    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_HARMONY_APP);
+    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_APP_SERVICE);
     EXPECT_NE(callerInfo.packageName, BUNDLE_NAME_SCENEBOARD);
 }
 
@@ -1444,7 +1444,7 @@ HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_008, TestSize.Le
     sptr<IRemoteObject> callerToken = nullptr;
     int userId = 100;
     interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
-    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_HARMONY_APP);
+    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_APP_SERVICE);
     EXPECT_EQ(callerInfo.packageName, BUNDLE_NAME_SCENEBOARD);
 }
 
@@ -1467,7 +1467,7 @@ HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_009, TestSize.Le
     sptr<IRemoteObject> callerToken = nullptr;
     int userId = 100;
     interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
-    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_HARMONY_APP);
+    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_APP_SERVICE);
     EXPECT_NE(callerInfo.packageName, BUNDLE_NAME_SCENEBOARD);
 }
 
@@ -1490,7 +1490,7 @@ HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_010, TestSize.Le
     sptr<IRemoteObject> callerToken = nullptr;
     int userId = 100;
     interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
-    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_HARMONY_APP);
+    EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_APP_SERVICE);
     EXPECT_NE(callerInfo.packageName, BUNDLE_NAME_SCENEBOARD);
 }
 } // namespace AAFwk
