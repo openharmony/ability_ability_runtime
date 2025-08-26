@@ -34,8 +34,8 @@ const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
 std::shared_ptr<QuickFixManagerClient> QuickFixManagerClient::GetInstance()
 {
     TAG_LOGD(AAFwkTag::QUICKFIX, "GetInstance called");
-    static std::shared_ptr<QuickFixManagerClient> instance_ = std::make_shared<QuickFixManagerClient>();
-    return instance_;
+    static std::shared_ptr<QuickFixManagerClient> instance = std::make_shared<QuickFixManagerClient>();
+    return instance;
 }
 
 int32_t QuickFixManagerClient::ApplyQuickFix(const std::vector<std::string> &quickFixFiles, bool isDebug,
