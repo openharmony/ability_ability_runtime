@@ -263,6 +263,14 @@ public:
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback) override;
 
+    /**
+     * @brief Callback for collaboration event.
+     *
+     * @param wantParams Parameters for the collaboration event.
+     * @return int32_t Returns the result code of the collaboration handling.
+     */
+    int32_t OnCollaborate(WantParams &wantParams) override;
+
 protected:
     void DoOnForeground(const Want &want) override;
     void ContinuationRestore(const Want &want) override;
