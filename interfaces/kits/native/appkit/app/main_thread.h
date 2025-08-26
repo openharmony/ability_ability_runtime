@@ -459,7 +459,7 @@ private:
      * @param appInfo The latest application info obtained from bms for update abilityRuntimeContext.
      *
      */
-    void HandleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleName);
+    void HandleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleNames);
 
     /**
      *
