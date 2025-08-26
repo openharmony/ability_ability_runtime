@@ -8625,7 +8625,8 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
             return ERR_INVALID_OPERATION;
         }
         startMsg.uid = renderUid;
-        TAG_LOGI(AAFwkTag::APPMGR, "generate uid: %{public}d", renderUid);
+        startMsg.gid = renderUid;
+        TAG_LOGI(AAFwkTag::APPMGR, "generate uid and gid: %{public}d", renderUid);
     }
     {
         std::lock_guard<ffrt::mutex> lock(startChildProcessLock_);
@@ -9667,10 +9668,10 @@ void AppMgrServiceInner::OnAppCacheStateChanged(const std::shared_ptr<AppRunning
 }
 
 #ifdef SUPPORT_CHILD_PROCESS
-int32_t AppMgrServiceInner::CreateNativeChildProcessWithRequest(const pid_t hostPid, const std::string &libName,
+int32_t AppMgrServiceInner::CreateNativeChildProcess(const pid_t hostPid, const std::string &libName,
     const sptr<IRemoteObject> &callback, const ChildProcessRequest &request)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "CreateNativeChildProcessWithRequest hostPid:%{public}d", hostPid);
+    TAG_LOGI(AAFwkTag::APPMGR, "CreateNativeChildProcess hostPid:%{public}d", hostPid);
     if (hostPid <= 0 || libName.empty() || !callback) {
         TAG_LOGE(AAFwkTag::APPMGR, "invalid param: hostPid:%{public}d libName:%{private}s",
             hostPid, libName.c_str());
@@ -9721,64 +9722,6 @@ int32_t AppMgrServiceInner::CreateNativeChildProcessWithRequest(const pid_t host
     auto nativeChildRecord = ChildProcessRecord::CreateNativeChildProcessRecord(
         hostPid, libName, appRecord, callback, request.childProcessCount, false, request.options.customProcessName);
     return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid, request.args, request.options);
-}
-
-int32_t AppMgrServiceInner::CreateNativeChildProcess(const pid_t hostPid, const std::string &libName,
-    int32_t childProcessCount, const sptr<IRemoteObject> &callback, const std::string &customProcessName)
-{
-    TAG_LOGI(AAFwkTag::APPMGR, "hostPid:%{public}d", hostPid);
-    if (hostPid <= 0 || libName.empty() || !callback) {
-        TAG_LOGE(AAFwkTag::APPMGR, "invalid param: hostPid:%{public}d libName:%{private}s",
-            hostPid, libName.c_str());
-        return ERR_INVALID_VALUE;
-    }
-
-    if (!CheckCustomProcessName(customProcessName)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "invalid custom process name");
-        return ERR_INVALID_VALUE;
-    }
-
-    int32_t errCode = StartChildProcessPreCheck(hostPid, CHILD_PROCESS_TYPE_NATIVE);
-    if (errCode != ERR_OK) {
-        return errCode;
-    }
-
-    if (UserRecordManager::GetInstance().IsLogoutUser(GetUserIdByUid(IPCSkeleton::GetCallingUid()))) {
-        TAG_LOGE(AAFwkTag::APPMGR, "disable start process in logout user");
-        return ERR_INVALID_OPERATION;
-    }
-
-    auto appRecord = GetAppRunningRecordByPid(hostPid);
-    if (!appRecord) {
-        TAG_LOGI(AAFwkTag::APPMGR, "get record(hostPid:%{public}d) fail", hostPid);
-        return ERR_INVALID_OPERATION;
-    }
-
-    if (!AAFwk::AppUtils::GetInstance().IsSupportNativeChildProcess() &&
-        !AllowNativeChildProcess(CHILD_PROCESS_TYPE_NATIVE, appRecord->GetAppIdentifier()) &&
-        !AllowChildProcessInMultiProcessFeatureApp(appRecord)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "unSupport native child process");
-        return AAFwk::ERR_NOT_SUPPORT_NATIVE_CHILD_PROCESS;
-    }
-
-    std::lock_guard<std::mutex> lock(childProcessRecordMapMutex_);
-    auto childRecordMap = appRecord->GetChildProcessRecordMap();
-    auto count = count_if(childRecordMap.begin(), childRecordMap.end(), [] (const auto &pair) -> bool {
-        return pair.second->GetChildProcessType() == CHILD_PROCESS_TYPE_NATIVE;
-    });
-
-    if (count >= PC_MAX_CHILD_PROCESS_NUM) {
-        TAG_LOGI(AAFwkTag::APPMGR, "The number of native child process reached the limit (hostPid:%{public}d)",
-            hostPid);
-        return ERR_OVERFLOW;
-    }
-
-    pid_t dummyChildPid = 0;
-    auto nativeChildRecord = ChildProcessRecord::CreateNativeChildProcessRecord(
-        hostPid, libName, appRecord, callback, childProcessCount, false, customProcessName);
-    ChildProcessArgs args;
-    ChildProcessOptions options;
-    return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid, args, options);
 }
 
 bool AppMgrServiceInner::CheckCustomProcessName(const std::string &customProcessName)

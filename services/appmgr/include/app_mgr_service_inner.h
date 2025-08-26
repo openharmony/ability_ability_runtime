@@ -1309,23 +1309,12 @@ public:
     /**
      * Start native child process, callde by ChildProcessManager.
      * @param hostPid Host process pid.
-     * @param childProcessCount current started child process count
-     * @param libName lib file name to be load in child process
-     * @param callback callback for notify start result
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int32_t CreateNativeChildProcess(const pid_t hostPid, const std::string &libName, int32_t childProcessCount,
-        const sptr<IRemoteObject> &callback, const std::string &customProcessName);
-
-    /**
-     * Start native child process, callde by ChildProcessManager.
-     * @param hostPid Host process pid.
      * @param libName lib file name to be load in child process
      * @param callback callback for notify start result
      * @param request Child process start request params.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t CreateNativeChildProcessWithRequest(const pid_t hostPid, const std::string &libName,
+    virtual int32_t CreateNativeChildProcess(const pid_t hostPid, const std::string &libName,
         const sptr<IRemoteObject> &callback, const ChildProcessRequest &request);
 #endif // SUPPORT_CHILD_PROCESS
 

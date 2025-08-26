@@ -46,11 +46,9 @@ public:
     ChildProcessManagerErrorCode StartChildProcessWithArgs(const std::string &srcEntry, pid_t &pid,
         int32_t childProcessType, const AppExecFwk::ChildProcessArgs &args,
         const AppExecFwk::ChildProcessOptions &options);
-    ChildProcessManagerErrorCode StartNativeChildProcessByAppSpawnFork(
-        const std::string &libName, const sptr<IRemoteObject> &callbackStub, const std::string &customProcessName = "");
-    ChildProcessManagerErrorCode CreateNativeChildProcessWithOptionsByAppSpawnFork(
-        const std::string &libName, const sptr<IRemoteObject> &callbackStub,
-        const AppExecFwk::ChildProcessOptions &options);
+    ChildProcessManagerErrorCode CreateNativeChildProcessByAppSpawnFork(
+        const std::string &libName, const sptr<IRemoteObject> &callbackStub, const std::string &customProcessName = "",
+        const bool isolationMode = false, const bool isolationUid = false);
     bool GetBundleInfo(AppExecFwk::BundleInfo &bundleInfo);
     bool GetEntryHapModuleInfo(const AppExecFwk::BundleInfo &bundleInfo, AppExecFwk::HapModuleInfo &hapModuleInfo);
     bool GetHapModuleInfo(const AppExecFwk::BundleInfo &bundleInfo, const std::string &moduleName,

@@ -1956,13 +1956,21 @@ HWTEST_F(AppMgrServiceTest, CreateNativeChildProcess_0100, TestSize.Level1)
     appMgrService->taskHandler_ = taskHandler_;
     appMgrService->eventHandler_ = eventHandler_;
 
-    EXPECT_CALL(*mockAppMgrServiceInner_, CreateNativeChildProcess(_, _, _, _, _))
+    EXPECT_CALL(*mockAppMgrServiceInner_, CreateNativeChildProcess(_, _, _, _))
         .Times(1)
         .WillOnce(Return(ERR_OK));
 
     pid_t pid = 0;
     sptr<IRemoteObject> callback;
-    int32_t res = appMgrService->CreateNativeChildProcess("test.so", 1, callback, "");
+    ChildProcessOptions options;
+    options.isolationMode = false;
+    options.customProcessName = "";
+    options.isolationUid = false;
+    ChildProcessRequest request;
+    request.childProcessType = CHILD_PROCESS_TYPE_NATIVE;
+    request.childProcessCount = 1;
+    request.options = options;
+    int32_t res = appMgrService->CreateNativeChildProcess("test.so", callback, request);
     EXPECT_EQ(res, ERR_OK);
 }
 
@@ -1981,13 +1989,21 @@ HWTEST_F(AppMgrServiceTest, CreateNativeChildProcess_0200, TestSize.Level1)
     appMgrService->taskHandler_ = taskHandler_;
     appMgrService->eventHandler_ = eventHandler_;
 
-    EXPECT_CALL(*mockAppMgrServiceInner_, CreateNativeChildProcess(_, _, _, _, _))
+    EXPECT_CALL(*mockAppMgrServiceInner_, CreateNativeChildProcess(_, _, _, _))
         .Times(1)
         .WillOnce(Return(ERR_OK));
 
     pid_t pid = 0;
     sptr<IRemoteObject> callback;
-    int32_t res = appMgrService->CreateNativeChildProcess("test.so", 1, callback, "abc_123");
+    ChildProcessOptions options;
+    options.isolationMode = false;
+    options.customProcessName = "abc_123";
+    options.isolationUid = false;
+    ChildProcessRequest request;
+    request.childProcessType = CHILD_PROCESS_TYPE_NATIVE;
+    request.childProcessCount = 1;
+    request.options = options;
+    int32_t res = appMgrService->CreateNativeChildProcess("test.so", callback, request);
     EXPECT_EQ(res, ERR_OK);
 }
 #endif // SUPPORT_CHILD_PROCESS
