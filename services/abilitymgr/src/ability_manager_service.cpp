@@ -238,12 +238,13 @@ constexpr const char* LIFE_CYCLE_STATE_FOREGROUND_DONE = "foreground done";
 constexpr const char* LIFE_CYCLE_STATE_BACKGROUND_DONE = "background done";
 
 const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
-    "share", "action"
+    "share", "action", "navigation", "mail", "finance", "flight", "express", "photoEditor"
 };
 std::atomic<bool> g_isDmsAlive = false;
 constexpr int32_t PIPE_MSG_READ_BUFFER = 1024;
 constexpr const char* APPSPAWN_STARTED = "startup.service.ctl.appspawn.pid";
 constexpr const char* APP_LINKING_ONLY = "appLinkingOnly";
+constexpr const char* SCREENCONFIG_SCREENMODE = "ohos.verticalpanel.screenconfig.screenmode";
 
 void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo)
 {
@@ -3751,7 +3752,21 @@ int32_t AbilityManagerService::StartExtensionAbilityInner(const Want &want, cons
     return eventInfo.errCode;
 }
 
-void AbilityManagerService::SetPickerElementName(const sptr<SessionInfo> &extensionSessionInfo, int32_t userId)
+bool AbilityManagerService::JudgeSystemParamsForPicker(const WantParams &parameters)
+{
+    auto systemParamsForPickerMap = parameters.GetParams();
+    if (systemParamsForPickerMap.find(SCREENCONFIG_SCREENMODE) == systemParamsForPickerMap.end()) {
+        return true;
+    }
+
+    if (AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
+        return true;
+    }
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "caller no system-app, can not use system-api");
+    return false;
+}
+
+void AbilityManagerService::SetPickerElementNameAndParams(const sptr<SessionInfo> &extensionSessionInfo, int32_t userId)
 {
     CHECK_POINTER_IS_NULLPTR(extensionSessionInfo);
     std::string targetType = extensionSessionInfo->want.GetStringParam(UIEXTENSION_TARGET_TYPE_KEY);
@@ -3764,6 +3779,10 @@ void AbilityManagerService::SetPickerElementName(const sptr<SessionInfo> &extens
         extensionSessionInfo->want.SetElementName(bundleName, abilityName);
         WantParams &parameters = const_cast<WantParams &>(extensionSessionInfo->want.GetParams());
         parameters.SetParam(UIEXTENSION_TYPE_KEY, AAFwk::String::Box("sys/commonUI"));
+        if (!JudgeSystemParamsForPicker(parameters)) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "parames include systemApi but not a systemAPP");
+            extensionSessionInfo->want.RemoveParam(SCREENCONFIG_SCREENMODE);
+        }
         extensionSessionInfo->want.SetParams(parameters);
         return;
     }
@@ -3802,6 +3821,11 @@ void AbilityManagerService::SetPickerElementName(const sptr<SessionInfo> &extens
         extensionSessionInfo->want.SetElementName(bundleName, abilityName);
         WantParams &parameters = const_cast<WantParams &>(extensionSessionInfo->want.GetParams());
         parameters.SetParam(UIEXTENSION_TYPE_KEY, AAFwk::String::Box(pickerType));
+
+        if (!JudgeSystemParamsForPicker(parameters)) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "parames include systemApi but not a systemAPP");
+            extensionSessionInfo->want.RemoveParam(SCREENCONFIG_SCREENMODE);
+        }
         extensionSessionInfo->want.SetParams(parameters);
     }
 }
@@ -3870,7 +3894,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     TAG_LOGD(AAFwkTag::UI_EXT, "StartUIExtensionAbility begin");
     CheckExtensionRateLimit();
     CHECK_POINTER_AND_RETURN(extensionSessionInfo, ERR_INVALID_VALUE);
-    SetPickerElementName(extensionSessionInfo, userId);
+    SetPickerElementNameAndParams(extensionSessionInfo, userId);
     SetAutoFillElementName(extensionSessionInfo);
     EventInfo eventInfo = BuildEventInfo(extensionSessionInfo->want, userId);
     eventInfo.persistentId = extensionSessionInfo->persistentId;

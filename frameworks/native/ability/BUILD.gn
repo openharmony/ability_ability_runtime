@@ -55,6 +55,7 @@ ohos_shared_library("ability_context_native") {
   sources = [
     "ability_runtime/ability_connection.cpp",
     "ability_runtime/ability_context_impl.cpp",
+    "ability_runtime/start_vertical_panel.cpp",
     "ability_runtime/authorization_result.cpp",
     "ability_runtime/connection_manager.cpp",
     "ability_runtime/dialog_request_callback_impl.cpp",
@@ -63,6 +64,7 @@ ohos_shared_library("ability_context_native") {
     "ability_runtime/local_call_container.cpp",
     "ability_runtime/local_call_record.cpp",
     "native/js_ui_extension_callback.cpp",
+    "native/panel_start_callback.cpp",
   ]
 
   deps = [
