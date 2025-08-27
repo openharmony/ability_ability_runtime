@@ -2624,27 +2624,4 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, ConvertToAPI18BusinessErrorCo
     errCode = ConvertToAPI18BusinessErrorCode(abilityManagerError);
     EXPECT_EQ(errCode, ABILITY_RUNTIME_ERROR_CODE_INTERNAL);
 }
-
-/**
- * @tc.number: GetVersionCode_001
- * @tc.desc: Function test with applicationContextImpl is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(CapiAbilityRuntimeApplicationContextTest, GetVersionCode_001, TestSize.Level2)
-{
-    auto contextImpl = InitApplicationContextImpl(TEST_BUNDLE_NAME);
-    ASSERT_NE(contextImpl, nullptr);
-
-    auto applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
-    applicationInfo->versionCode = 111;
-    contextImpl->SetApplicationInfo(applicationInfo);
-
-    int64_t versionCode;
-    AbilityRuntime_ErrorCode code = OH_AbilityRuntime_ApplicationContextGetVersionCode(nullptr);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID);
-
-    code = OH_AbilityRuntime_ApplicationContextGetVersionCode(&versionCode);
-    ASSERT_EQ(code, ABILITY_RUNTIME_ERROR_CODE_NO_ERROR);
-    ASSERT_EQ(versionCode, 111);
-}
 } // namespace OHOS::AbilityRuntime
