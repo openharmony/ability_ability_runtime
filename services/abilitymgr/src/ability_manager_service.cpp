@@ -14050,6 +14050,9 @@ ErrCode AbilityManagerService::IntentOpenLinkInner(const std::shared_ptr<AppExec
     }
     want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_PARAM_NAME, param->insightIntentName_);
     want.SetParam(AppExecFwk::INSIGHT_INTENT_EXECUTE_OPENLINK_FLAG, 1);
+    if (!want.HasParameter(Want::PARAM_APP_CLONE_INDEX_KEY)) {
+        want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, 0);
+    }
 
     auto resultCode = OpenLinkInner(want, nullptr, userId, DEFAULT_INVAL_VALUE, false);
     if (resultCode == ERR_OK || resultCode == ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
