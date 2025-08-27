@@ -85,6 +85,11 @@ public:
     void OnStopCallback() override;
 
     /**
+     * @brief Update Contextconfiguration
+     */
+    void UpdateContextConfiguration() override;
+
+    /**
      * @brief Called when the launch mode of an ability is set to singleInstance. This happens when you re-launch an
      * ability that has been at the top of the ability stack.
      * @param want Indicates the new Want containing information about the ability.
