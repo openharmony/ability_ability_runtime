@@ -2290,7 +2290,7 @@ void MainThread::HandleUpdatePluginInfoInstalled(const ApplicationInfo &pluginAp
     }
 }
 
-void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo& appInfo, const std::string& moduleName)
+void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleNames)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!application_) {
@@ -2312,19 +2312,23 @@ void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo& app
             return;
         }
 
-        AbilityInfo abilityInfo;
-        abilityInfo.bundleName = appInfo.bundleName;
-        abilityInfo.package = moduleName;
-        HapModuleInfo hapModuleInfo;
-        if (bundleMgrHelper->GetHapModuleInfo(abilityInfo, hapModuleInfo) == false) {
-            TAG_LOGE(AAFwkTag::APPKIT, "GetHapModuleInfo failed");
-            return;
+        std::vector<std::string> moduleNameList;
+        AbilityBase::SplitString(moduleNames, moduleNameList, 0, ",");
+        for (const auto &moduleName : moduleNameList) {
+            AbilityInfo abilityInfo;
+            abilityInfo.bundleName = appInfo.bundleName;
+            abilityInfo.package = moduleName;
+            HapModuleInfo hapModuleInfo;
+            if (bundleMgrHelper->GetHapModuleInfo(abilityInfo, hapModuleInfo) == false) {
+                TAG_LOGE(AAFwkTag::APPKIT, "GetHapModuleInfo failed");
+                return;
+            }
+            static_cast<AbilityRuntime::JsRuntime&>(*runtime).UpdatePkgContextInfoJson(hapModuleInfo.moduleName,
+                hapModuleInfo.hapPath, hapModuleInfo.packageName);
+            TAG_LOGI(AAFwkTag::APPKIT,
+                "UpdatePkgContextInfoJson moduleName: %{public}s, hapPath: %{public}s, packageName: %{public}s",
+                hapModuleInfo.moduleName.c_str(), hapModuleInfo.hapPath.c_str(), hapModuleInfo.packageName.c_str());
         }
-        static_cast<AbilityRuntime::JsRuntime&>(*runtime).UpdatePkgContextInfoJson(hapModuleInfo.moduleName,
-            hapModuleInfo.hapPath, hapModuleInfo.packageName);
-        TAG_LOGI(AAFwkTag::APPKIT,
-            "UpdatePkgContextInfoJson moduleName: %{public}s, hapPath: %{public}s, packageName: %{public}s",
-            hapModuleInfo.moduleName.c_str(), hapModuleInfo.hapPath.c_str(), hapModuleInfo.packageName.c_str());
     }
 }
 
