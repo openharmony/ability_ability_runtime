@@ -65,9 +65,7 @@ void AbilityStartSettingTest::TearDown(void)
  */
 HWTEST_F(AbilityStartSettingTest, AppExecFwk_IsEmpty_0100, Function | MediumTest | Level1)
 {
-    if (abilityStartSetting_ == nullptr) {
-        return;
-    }
+    EXPECT_NE(nullptr, abilityStartSetting_);
     EXPECT_EQ(true, abilityStartSetting_->IsEmpty());
     abilityStartSetting_->AddProperty(AbilityStartSetting::BOUNDS_KEY, std::string("system_bounds_test"));
     abilityStartSetting_->AddProperty(
