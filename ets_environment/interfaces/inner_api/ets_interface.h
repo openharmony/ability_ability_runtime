@@ -23,12 +23,18 @@
 #include "ets_native_reference.h"
 #include "napi/native_api.h"
 
+namespace OHOS {
+namespace AppExecFwk {
+    class EventRunner;
+}
+}
+
 extern "C" {
 struct ETSEnvFuncs {
     void (*InitETSSDKNS)(const std::string &path) = nullptr;
     void (*InitETSSysNS)(const std::string &path) = nullptr;
 
-    bool (*Initialize)() = nullptr;
+    bool (*Initialize)(const std::shared_ptr<OHOS::AppExecFwk::EventRunner> eventRunner, bool isDebug) = nullptr;
     void (*RegisterUncaughtExceptionHandler)(
         const OHOS::EtsEnv::ETSUncaughtExceptionInfo &uncaughtExceptionInfo) = nullptr;
     ani_env *(*GetAniEnv)() = nullptr;
@@ -43,6 +49,12 @@ struct ETSEnvFuncs {
     void (*PreloadSystemClass)(const char *className) = nullptr;
     void (*SetExtensionApiCheckCallback)(
         std::function<bool(const std::string &className, const std::string &fileName)> &cb) = nullptr;
+    void (*RemoveInstance)(uint32_t instanceId) = nullptr;
+    void (*StopDebugMode)(void *jsVm) = nullptr;
+    void (*StartDebuggerForSocketPair)(std::string &option, int32_t socketFd) = nullptr;
+    void (*NotifyDebugMode)(uint32_t tid, uint32_t instanceId, bool isStartWithDebug,
+        void *jsVm) = nullptr;
+    void (*BroadcastAndConnect)(const std::string& bundleName, int socketFd) = nullptr;
 };
 }
 #endif // OHOS_ABILITY_RUNTIME_ETS_INTERFACE_H

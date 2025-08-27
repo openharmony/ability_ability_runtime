@@ -52,6 +52,7 @@ public:
     void SetConnectedCallback();
     bool SendInstanceMessage(int32_t tid, int32_t instanceId, const std::string& instanceName);
     void SendDebuggerInfo(bool needBreakPoint, bool isDebugApp);
+    void SendInstanceMessageAll(std::function<void(int32_t, const DebuggerPostTask&)> callback);
     void LoadConnectServerDebuggerSo();
     bool SetRecordCallback(const std::function<void(void)> &startRecordFunc,
         const std::function<void(void)> &stopRecordFunc);
