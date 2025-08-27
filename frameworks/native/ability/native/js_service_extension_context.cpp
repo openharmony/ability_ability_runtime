@@ -351,21 +351,21 @@ private:
             system_clock::now().time_since_epoch()).count());
         want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
 
-        return OnOpenLinkInner(env, want, startTime, linkValue);
+        return OnOpenLinkInner(env, want, startTime, linkValue, openLinkOptions.GetHideFailureTipDialog());
     }
 
     napi_value OnOpenLinkInner(napi_env env, const AAFwk::Want& want,
-        const std::string& startTime, const std::string& url)
+        const std::string &startTime, const std::string &url, bool hideFailureTipDialog)
     {
         auto innerErrorCode = std::make_shared<int>(ERR_OK);
-        NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, innerErrorCode]() {
+        NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, innerErrorCode, hideFailureTipDialog]() {
             auto context = weak.lock();
             if (!context) {
                 TAG_LOGW(AAFwkTag::SERVICE_EXT, "context released");
                 *innerErrorCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
-            *innerErrorCode = context->OpenLink(want, -1);
+            *innerErrorCode = context->OpenLink(want, -1, hideFailureTipDialog);
         };
 
         NapiAsyncTask::CompleteCallback complete = [innerErrorCode, startTime, url,

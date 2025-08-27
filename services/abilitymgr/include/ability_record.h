@@ -285,6 +285,7 @@ struct AbilityRequest {
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo appInfo;
     StartOptions startOptions;
+    bool hideFailureTipDialog = false;
     std::pair<bool, LaunchReason> IsContinuation() const
     {
         auto flags = want.GetFlags();
