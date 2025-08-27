@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,36 +13,20 @@
 
 import("//build/ohos.gni")
 
-ohos_hap("ui_extension_user_hap") {
-  hap_profile = "entry/src/main/module.json"
-
-  deps = [
-    ":ui_extension_user_js_assets",
-    ":ui_extension_user_resources",
-  ]
-
-  ets2abc = true
+ohos_app("ui_extension_user_hap") {
   certificate_profile = "signature/openharmony_sx.p7b"
   hap_name = "ui_extension_user"
+  hap_out_dir = "$root_out_dir/ability/ability_runtime/ability_runtime/test/moduletest/ui_extension_ability_test"
+
   subsystem_name = "ability"
   part_name = "ability_runtime"
-  final_hap_path = "$root_out_dir/tests/moduletest/ability_runtime/ability_runtime/ui_extension/resource/${hap_name}.hap"
-}
 
-ohos_js_assets("ui_extension_user_js_assets") {
-  hap_profile = "entry/src/main/module.json"
-  source_dir = "entry/src/main/ets"
-}
-
-ohos_app_scope("ui_extension_user_app_profile") {
-  app_profile = "AppScope/app.json"
-  sources = [ "AppScope/resources" ]
-}
-
-ohos_resources("ui_extension_user_resources") {
-  sources = [ "entry/src/main/resources" ]
-  deps = [ ":ui_extension_user_app_profile" ]
-  hap_profile = "entry/src/main/module.json"
+  js_build_mode = "release"
+  sdk_home = "//prebuilts/ohos-sdk/linux"
+  sdk_type_name = [ "sdk.dir" ]
+  assemble_type = "assembleHap"
+  build_level = "module"
+  build_modules = [ "entry" ]
 }
 
 group("assisthap") {

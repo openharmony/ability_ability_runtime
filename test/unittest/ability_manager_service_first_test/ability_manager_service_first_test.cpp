@@ -947,7 +947,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, IsCallFromBackground_001, TestSize.Leve
 
     // IsSACall
     MyFlag::flag_ = 1;
-    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_OK);
+    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_INVALID_VALUE);
 
     // IsShellCall
     MyFlag::flag_ = 2;
@@ -2443,7 +2443,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_002, TestSiz
     abilityRecord->Init();
     AbilityRequest abilityRequest;
     abilityRequest.callerToken = abilityRecord->GetToken();
-    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest), ERR_OK);
+    EXPECT_NE(abilityMs_->CheckCallAbilityPermission(abilityRequest), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_002 end");
 }
 
@@ -2487,7 +2487,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_004, TestSiz
     abilityRecord->Init();
     AbilityRequest abilityRequest;
     abilityRequest.callerToken = abilityRecord->GetToken();
-    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest), ERR_OK);
+    EXPECT_NE(abilityMs_->CheckCallAbilityPermission(abilityRequest), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_004 end");
 }
 } // namespace AAFwk

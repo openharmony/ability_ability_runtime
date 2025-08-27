@@ -1678,6 +1678,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.uid = bundleInfo.applicationInfo.uid;
         options.apiTargetVersion = appInfo.apiTargetVersion;
         options.pkgContextInfoJsonStringMap = pkgContextInfoJsonStringMap;
+        options.isStartWithDebug = appLaunchData.GetDebugApp();
         options.allowArkTsLargeHeap = appInfo.allowArkTsLargeHeap;
         options.versionCode = appInfo.versionCode;
 #ifdef CJ_FRONTEND
@@ -1759,6 +1760,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 ResHelper::ReportLoadAbcCompletedInfoToRss(uid, currentPid, bundleName);
             });
         AbilityRuntime::Runtime::DebugOption debugOption;
+        debugOption.arkTSMode = appInfo.arkTSMode;
         debugOption.isStartWithDebug = appLaunchData.GetDebugApp();
         debugOption.processName = processName;
         debugOption.isDebugApp = appInfo.debug;
@@ -1767,6 +1769,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         debugOption.isDebugFromLocal = appLaunchData.GetDebugFromLocal();
         debugOption.perfCmd = perfCmd;
         debugOption.isDeveloperMode = isDeveloperMode_;
+        debugOption.bundleName = appInfo.bundleName;
         runtime->SetDebugOption(debugOption);
         if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
             perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos) {
@@ -2287,7 +2290,7 @@ void MainThread::HandleUpdatePluginInfoInstalled(const ApplicationInfo &pluginAp
     }
 }
 
-void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo& appInfo, const std::string& moduleName)
+void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleNames)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!application_) {
@@ -2309,19 +2312,23 @@ void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo& app
             return;
         }
 
-        AbilityInfo abilityInfo;
-        abilityInfo.bundleName = appInfo.bundleName;
-        abilityInfo.package = moduleName;
-        HapModuleInfo hapModuleInfo;
-        if (bundleMgrHelper->GetHapModuleInfo(abilityInfo, hapModuleInfo) == false) {
-            TAG_LOGE(AAFwkTag::APPKIT, "GetHapModuleInfo failed");
-            return;
+        std::vector<std::string> moduleNameList;
+        AbilityBase::SplitString(moduleNames, moduleNameList, 0, ",");
+        for (const auto &moduleName : moduleNameList) {
+            AbilityInfo abilityInfo;
+            abilityInfo.bundleName = appInfo.bundleName;
+            abilityInfo.package = moduleName;
+            HapModuleInfo hapModuleInfo;
+            if (bundleMgrHelper->GetHapModuleInfo(abilityInfo, hapModuleInfo) == false) {
+                TAG_LOGE(AAFwkTag::APPKIT, "GetHapModuleInfo failed");
+                return;
+            }
+            static_cast<AbilityRuntime::JsRuntime&>(*runtime).UpdatePkgContextInfoJson(hapModuleInfo.moduleName,
+                hapModuleInfo.hapPath, hapModuleInfo.packageName);
+            TAG_LOGI(AAFwkTag::APPKIT,
+                "UpdatePkgContextInfoJson moduleName: %{public}s, hapPath: %{public}s, packageName: %{public}s",
+                hapModuleInfo.moduleName.c_str(), hapModuleInfo.hapPath.c_str(), hapModuleInfo.packageName.c_str());
         }
-        static_cast<AbilityRuntime::JsRuntime&>(*runtime).UpdatePkgContextInfoJson(hapModuleInfo.moduleName,
-            hapModuleInfo.hapPath, hapModuleInfo.packageName);
-        TAG_LOGI(AAFwkTag::APPKIT,
-            "UpdatePkgContextInfoJson moduleName: %{public}s, hapPath: %{public}s, packageName: %{public}s",
-            hapModuleInfo.moduleName.c_str(), hapModuleInfo.hapPath.c_str(), hapModuleInfo.packageName.c_str());
     }
 }
 

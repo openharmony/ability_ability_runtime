@@ -537,8 +537,43 @@ HWTEST_F(KioskManagerTest, ExitKioskModeInner_002, TestSize.Level1) {
     appInfo.bundleName = bundleName;
     appInfo.state = AppState::BEGIN;
     KioskManager::GetInstance().OnAppStop(appInfo);
+    MyStatus::GetInstance().ipcGetCallingUid_ = KioskManager::GetInstance().kioskStatus_.kioskBundleUid_;
     auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken);
     EXPECT_EQ(result, INNER_ERR);
+}
+
+/*
+ * Feature: KioskManager
+ * Function: ExitKioskMode
+ * SubFunction: NA
+ * FunctionPoints: KioskManager ExitKioskModeInner
+ */
+HWTEST_F(KioskManagerTest, ExitKioskModeInner_003, TestSize.Level1) {
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = true;
+    auto callerToken = MockToken(AbilityType::PAGE);
+    std::string bundleName = "com.test.demo";
+    KioskManager::GetInstance().whitelist_.emplace(bundleName);
+    KioskManager::GetInstance().kioskStatus_.kioskBundleName_ = bundleName;
+    MyStatus::GetInstance().ipcGetCallingUid_ = KioskManager::GetInstance().kioskStatus_.kioskBundleUid_ + 1;
+    auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken);
+    EXPECT_EQ(result, ERR_NOT_IN_KIOSK_MODE);
+}
+
+/*
+ * Feature: KioskManager
+ * Function: ExitKioskMode
+ * SubFunction: NA
+ * FunctionPoints: KioskManager ExitKioskModeInner
+ */
+HWTEST_F(KioskManagerTest, ExitKioskModeInner_004, TestSize.Level1) {
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = true;
+    auto callerToken = MockToken(AbilityType::PAGE);
+    std::string bundleName = "com.test.demo";
+    KioskManager::GetInstance().whitelist_.emplace(bundleName);
+    KioskManager::GetInstance().kioskStatus_.kioskBundleName_ = bundleName;
+    MyStatus::GetInstance().ipcGetCallingUid_ = KioskManager::GetInstance().kioskStatus_.kioskBundleUid_;
+    auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken);
+    EXPECT_NE(result, ERR_NOT_IN_KIOSK_MODE);
 }
 } // namespace AAFwk
 } // namespace OHOS

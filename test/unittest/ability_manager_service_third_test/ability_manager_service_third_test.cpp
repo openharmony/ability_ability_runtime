@@ -998,39 +998,39 @@ HWTEST_F(AbilityManagerServiceThirdTest, RegisterSessionHandler_002, TestSize.Le
 
 /*
  * Feature: AbilityManagerService
- * Function: SetPickerElementName
+ * Function: SetPickerElementNameAndParams
  * SubFunction: NA
- * FunctionPoints: AbilityManagerService SetPickerElementName
+ * FunctionPoints: AbilityManagerService SetPickerElementNameAndParams
  */
-HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_001, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementNameAndParams_001, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
-    abilityMs_->SetPickerElementName(nullptr, USER_ID_U100);
+    abilityMs_->SetPickerElementNameAndParams(nullptr, USER_ID_U100);
 }
 
 /*
  * Feature: AbilityManagerService
- * Function: SetPickerElementName
+ * Function: SetPickerElementNameAndParams
  * SubFunction: NA
- * FunctionPoints: AbilityManagerService SetPickerElementName
+ * FunctionPoints: AbilityManagerService SetPickerElementNameAndParams
  */
-HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_002, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementNameAndParams_002, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
     sptr<SessionInfo> sessionInfo = new SessionInfo();
     const sptr<SessionInfo> extensionSessionInfo = sessionInfo;
-    abilityMs_->SetPickerElementName(extensionSessionInfo, USER_ID_U100);
+    abilityMs_->SetPickerElementNameAndParams(extensionSessionInfo, USER_ID_U100);
 }
 
 /*
  * Feature: AbilityManagerService
- * Function: SetPickerElementName
+ * Function: SetPickerElementNameAndParams
  * SubFunction: NA
- * FunctionPoints: AbilityManagerService SetPickerElementName
+ * FunctionPoints: AbilityManagerService SetPickerElementNameAndParams
  */
-HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_003, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementNameAndParams_003, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
@@ -1040,16 +1040,16 @@ HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_003, TestSize.Leve
     want.SetParam("ability.want.params.uiExtensionTargetType", type);
     sessionInfo->want = want;
     const sptr<SessionInfo> extensionSessionInfo = sessionInfo;
-    abilityMs_->SetPickerElementName(extensionSessionInfo, USER_ID_U100);
+    abilityMs_->SetPickerElementNameAndParams(extensionSessionInfo, USER_ID_U100);
 }
 
 /*
  * Feature: AbilityManagerService
- * Function: SetPickerElementName
+ * Function: SetPickerElementNameAndParams
  * SubFunction: NA
- * FunctionPoints: AbilityManagerService SetPickerElementName
+ * FunctionPoints: AbilityManagerService SetPickerElementNameAndParams
  */
-HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_004, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementNameAndParams_004, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
@@ -1058,7 +1058,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_004, TestSize.Leve
     want.SetElementName("com.example.share", "ShareUIExtensionAbility");
     sessionInfo->want = want;
     const sptr<SessionInfo> extensionSessionInfo = sessionInfo;
-    abilityMs_->SetPickerElementName(extensionSessionInfo, USER_ID_U100);
+    abilityMs_->SetPickerElementNameAndParams(extensionSessionInfo, USER_ID_U100);
 }
 
 /*
@@ -2924,6 +2924,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, AbilityManagerServiceTest_OpenLink_001,
  */
 HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionCallerPidByHostWindowId_001, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest CheckUIExtensionCallerPidByHostWindowId_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
     AbilityRequest abilityRequest = GenerateAbilityRequest("0", "abilityName", "appName", "bundleName", "moduleName");
@@ -2935,6 +2936,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionCallerPidByHostWindowId
     sessionInfo->hostWindowId = 1;
     abilityRequest.sessionInfo = sessionInfo;
     abilityMs->CheckUIExtensionCallerPidByHostWindowId(abilityRequest);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest CheckUIExtensionCallerPidByHostWindowId_001 end");
 }
 
 /*
@@ -2944,6 +2946,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionCallerPidByHostWindowId
  */
 HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionCallerPidByHostWindowId_002, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest CheckUIExtensionCallerPidByHostWindowId_002 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
     AbilityRequest callerRequest = GenerateAbilityRequest("0", "abilityName", "appName", "bundleName", "moduleName");
@@ -2958,6 +2961,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionCallerPidByHostWindowId
     sessionInfo->hostWindowId = 1;
     abilityRequest.sessionInfo = sessionInfo;
     abilityMs->CheckUIExtensionCallerPidByHostWindowId(abilityRequest);
+    sleep(1);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest CheckUIExtensionCallerPidByHostWindowId_002 end");
 }
 
 /*

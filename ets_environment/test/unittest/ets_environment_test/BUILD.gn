@@ -32,7 +32,9 @@ template("ets_environment_test_template") {
 
     configs = []
 
-    deps = []
+    deps = [
+      "${ability_runtime_innerkits_path}/connect_server_manager:connect_server_manager",
+    ]
 
     external_deps = [
       "ability_runtime:runtime",

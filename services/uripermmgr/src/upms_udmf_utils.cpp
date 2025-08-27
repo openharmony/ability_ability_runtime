@@ -16,11 +16,11 @@
 #include "upms_udmf_utils.h"
 
 #include "ability_manager_errors.h"
+#include "file_uri_distribution_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "udmf_client.h"
-#include "uri_permission_utils.h"
 #include "uri.h"
 
 namespace OHOS {
@@ -91,7 +91,7 @@ bool UDMFUtils::IsUdKeyCreateByCaller(uint32_t callerTokenId, const std::string 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto keyAuthority =  IN_PROCESS_CALL(UDMF::UdmfClient::GetInstance().GetBundleNameByUdKey(key));
     std::string callerAuthority;
-    UPMSUtils::GetAlterableBundleNameByTokenId(callerTokenId, callerAuthority);
+    FUDUtils::GetAlterableBundleNameByTokenId(callerTokenId, callerAuthority);
     if (callerAuthority != keyAuthority) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "Authority: %{public}s-%{public}s",
             keyAuthority.c_str(), callerAuthority.c_str());

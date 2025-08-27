@@ -17,11 +17,11 @@
 
 #include "ability_manager_errors.h"
 #include "event_report.h"
+#define private public
+#include "file_uri_distribution_utils.h"
+#undef private
 #include "system_ability_definition.h"
 #include "tokenid_kit.h"
-#define private public
-#include "uri_permission_utils.h"
-#undef private
 #include "mock_my_flag.h"
 #include "accesstoken_kit.h"
 #include "uri.h"
@@ -48,10 +48,10 @@ void FileUriDistributionUtilsNewTest::SetUp() {}
 void FileUriDistributionUtilsNewTest::TearDown() {}
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: ConnectManager
  * SubFunction: NA
- * FunctionPoints: UPMSUtils SendShareUnPrivilegeUriEvent
+ * FunctionPoints: FUDUtils SendShareUnPrivilegeUriEvent
  */
 HWTEST_F(FileUriDistributionUtilsNewTest, SendShareUnPrivilegeUriEvent_001, TestSize.Level1)
 {
@@ -62,15 +62,15 @@ HWTEST_F(FileUriDistributionUtilsNewTest, SendShareUnPrivilegeUriEvent_001, Test
         "com.test.test", "com.test.test");
     MyFlag::tokenInfos_[targetTokenId] = TokenInfo(targetTokenId, Security::AccessToken::ATokenTypeEnum::TOKEN_HAP,
         "com.test.test", "com.test.test");
-    auto result = UPMSUtils::SendShareUnPrivilegeUriEvent(callerTokenId, targetTokenId);
+    auto result = FUDUtils::SendShareUnPrivilegeUriEvent(callerTokenId, targetTokenId);
     EXPECT_TRUE(result);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: ConnectManager
  * SubFunction: NA
- * FunctionPoints: UPMSUtils CheckAndCreateEventInfo
+ * FunctionPoints: FUDUtils CheckAndCreateEventInfo
  */
 HWTEST_F(FileUriDistributionUtilsNewTest, CheckAndCreateEventInfo_001, TestSize.Level1)
 {
@@ -82,15 +82,15 @@ HWTEST_F(FileUriDistributionUtilsNewTest, CheckAndCreateEventInfo_001, TestSize.
         "com.test.ohos", "com.test.ohos");
     MyFlag::tokenInfos_[targetTokenId] = TokenInfo(targetTokenId, Security::AccessToken::ATokenTypeEnum::TOKEN_HAP,
         "com.test.ohos", "com.test.ohos");
-    auto result = UPMSUtils::CheckAndCreateEventInfo(callerTokenId, targetTokenId, eventInfo);
+    auto result = FUDUtils::CheckAndCreateEventInfo(callerTokenId, targetTokenId, eventInfo);
     EXPECT_FALSE(result);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: GenerateFUDAppInfo
  * SubFunction: NA
- * FunctionPoints: UPMSUtils GenerateFUDAppInfo
+ * FunctionPoints: FUDUtils GenerateFUDAppInfo
  */
 HWTEST_F(FileUriDistributionUtilsNewTest, GenerateFUDAppInfo_001, TestSize.Level1)
 {
@@ -98,15 +98,15 @@ HWTEST_F(FileUriDistributionUtilsNewTest, GenerateFUDAppInfo_001, TestSize.Level
     FUDAppInfo info = { .tokenId = tokenId };
     MyFlag::tokenInfos_.clear();
     MyFlag::tokenInfos_[tokenId] = TokenInfo(tokenId, Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
-    auto result = UPMSUtils::GenerateFUDAppInfo(info);
+    auto result = FUDUtils::GenerateFUDAppInfo(info);
     EXPECT_FALSE(result);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: GenerateFUDAppInfo
  * SubFunction: NA
- * FunctionPoints: UPMSUtils GenerateFUDAppInfo
+ * FunctionPoints: FUDUtils GenerateFUDAppInfo
  */
 HWTEST_F(FileUriDistributionUtilsNewTest, GenerateFUDAppInfo_002, TestSize.Level1)
 {
@@ -115,15 +115,15 @@ HWTEST_F(FileUriDistributionUtilsNewTest, GenerateFUDAppInfo_002, TestSize.Level
     MyFlag::tokenInfos_.clear();
     MyFlag::tokenInfos_[tokenId] = TokenInfo(tokenId, Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MyFlag::retHapSuccValue_ = Security::AccessToken::AccessTokenKitRet::RET_FAILED;
-    auto result = UPMSUtils::GenerateFUDAppInfo(info);
+    auto result = FUDUtils::GenerateFUDAppInfo(info);
     EXPECT_FALSE(result);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: GenerateFUDAppInfo
  * SubFunction: NA
- * FunctionPoints: UPMSUtils GenerateFUDAppInfo
+ * FunctionPoints: FUDUtils GenerateFUDAppInfo
  */
 HWTEST_F(FileUriDistributionUtilsNewTest, GenerateFUDAppInfo_003, TestSize.Level1)
 {
@@ -135,16 +135,16 @@ HWTEST_F(FileUriDistributionUtilsNewTest, GenerateFUDAppInfo_003, TestSize.Level
     MyFlag::tokenInfos_[tokenId] = TokenInfo(tokenId, Security::AccessToken::ATokenTypeEnum::TOKEN_HAP,
         processName, bundleName);
     MyFlag::retHapSuccValue_ = Security::AccessToken::AccessTokenKitRet::RET_SUCCESS;
-    auto result = UPMSUtils::GenerateFUDAppInfo(info);
+    auto result = FUDUtils::GenerateFUDAppInfo(info);
     EXPECT_TRUE(result);
     EXPECT_EQ(info.bundleName, bundleName);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: ConnectManager
  * SubFunction: NA
- * FunctionPoints: UPMSUtils GetAlterableBundleNameByTokenId
+ * FunctionPoints: FUDUtils GetAlterableBundleNameByTokenId
  */
 HWTEST_F(FileUriDistributionUtilsNewTest, GetAlterableBundleNameByTokenId_001, TestSize.Level1)
 {
@@ -153,99 +153,99 @@ HWTEST_F(FileUriDistributionUtilsNewTest, GetAlterableBundleNameByTokenId_001, T
     MyFlag::tokenInfos_.clear();
     MyFlag::tokenInfos_[tokenId] = TokenInfo(tokenId, Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MyFlag::retHapSuccValue_ = Security::AccessToken::AccessTokenKitRet::RET_FAILED;
-    auto result = UPMSUtils::GetAlterableBundleNameByTokenId(tokenId, bundleName);
+    auto result = FUDUtils::GetAlterableBundleNameByTokenId(tokenId, bundleName);
     EXPECT_FALSE(result);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: ConnectManager
  * SubFunction: NA
- * FunctionPoints: UPMSUtils GetAppIdByBundleName
+ * FunctionPoints: FUDUtils GetAppIdByBundleName
  */
 HWTEST_F(FileUriDistributionUtilsNewTest, GetAppIdByBundleName_001, TestSize.Level1)
 {
     std::string bundleName = "";
     std::string appId = "";
-    auto result = UPMSUtils::GetAppIdByBundleName(bundleName, appId);
+    auto result = FUDUtils::GetAppIdByBundleName(bundleName, appId);
     EXPECT_EQ(result, INNER_ERR);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: ConnectManager
  * SubFunction: NA
- * FunctionPoints: UPMSUtils GetTokenIdByBundleName
+ * FunctionPoints: FUDUtils GetTokenIdByBundleName
  */
 HWTEST_F(FileUriDistributionUtilsNewTest, GetTokenIdByBundleName_001, TestSize.Level1)
 {
     std::string bundleName = "";
     int32_t appIndex = 1001;
     uint32_t tokenId = 1;
-    auto result = UPMSUtils::GetTokenIdByBundleName(bundleName, appIndex, tokenId);
+    auto result = FUDUtils::GetTokenIdByBundleName(bundleName, appIndex, tokenId);
     EXPECT_EQ(result, ERR_GET_TARGET_BUNDLE_INFO_FAILED);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: IsDocsCloudUri
  * SubFunction: NA
- * FunctionPoints: UPMSUtils IsDocsCloudUri
+ * FunctionPoints: FUDUtils IsDocsCloudUri
  */
 HWTEST_F(FileUriDistributionUtilsNewTest, IsDocsCloudUri_001, TestSize.Level1)
 {
     Uri uri("ccc");
-    EXPECT_FALSE(UPMSUtils::IsDocsCloudUri(uri));
+    EXPECT_FALSE(FUDUtils::IsDocsCloudUri(uri));
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: CheckUriTypeIsValid
  * SubFunction: NA
- * FunctionPoints: UPMSUtils CheckUriTypeIsValid
+ * FunctionPoints: FUDUtils CheckUriTypeIsValid
  */
 HWTEST_F(FileUriDistributionUtilsNewTest, CheckUriTypeIsValid_001, TestSize.Level1)
 {
     Uri uri("ccc");
-    EXPECT_FALSE(UPMSUtils::CheckUriTypeIsValid(uri));
+    EXPECT_FALSE(FUDUtils::CheckUriTypeIsValid(uri));
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: CheckUriTypeIsValid
  * SubFunction: NA
- * FunctionPoints: UPMSUtils CheckUriTypeIsValid
+ * FunctionPoints: FUDUtils CheckUriTypeIsValid
  */
 HWTEST_F(FileUriDistributionUtilsNewTest, CheckUriTypeIsValid_002, TestSize.Level1)
 {
     Uri uri("file:///path/to/file");
-    EXPECT_TRUE(UPMSUtils::CheckUriTypeIsValid(uri));
+    EXPECT_TRUE(FUDUtils::CheckUriTypeIsValid(uri));
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: GetBundleApiTargetVersion
  * SubFunction: NA
- * FunctionPoints: UPMSUtils GetBundleApiTargetVersion
+ * FunctionPoints: FUDUtils GetBundleApiTargetVersion
  */
 HWTEST_F(FileUriDistributionUtilsNewTest, GetBundleApiTargetVersion_001, TestSize.Level1)
 {
     std::string bundleName = "ohos.bundle.test";
     int32_t targetApiVersion = 0;
-    EXPECT_FALSE(UPMSUtils::GetBundleApiTargetVersion(bundleName, targetApiVersion));
+    EXPECT_FALSE(FUDUtils::GetBundleApiTargetVersion(bundleName, targetApiVersion));
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: GetDirByBundleNameAndAppIndex
  * SubFunction: NA
- * FunctionPoints: UPMSUtils GetDirByBundleNameAndAppIndex
+ * FunctionPoints: FUDUtils GetDirByBundleNameAndAppIndex
  */
 HWTEST_F(FileUriDistributionUtilsNewTest, GetDirByBundleNameAndAppIndex_001, TestSize.Level1)
 {
     std::string bundleName = "ohos.bundle.test";
     std::string dirName = "/Data";
-    EXPECT_TRUE(UPMSUtils::GetDirByBundleNameAndAppIndex(bundleName, 0, dirName));
+    EXPECT_TRUE(FUDUtils::GetDirByBundleNameAndAppIndex(bundleName, 0, dirName));
 }
 }  // namespace AAFwk
 }  // namespace OHOS

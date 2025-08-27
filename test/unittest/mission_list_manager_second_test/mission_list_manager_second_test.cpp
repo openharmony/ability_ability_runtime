@@ -169,12 +169,12 @@ HWTEST_F(MissionListManagerSecondTest, SignRestartAppFlag_001, TestSize.Level1)
     missionListManager->defaultStandardList_ = missionList;
     missionListManager->SignRestartAppFlag(uid, "");
     result = missionListManager->defaultStandardList_->missions_.size();
-    EXPECT_EQ(0, result);
+    EXPECT_EQ(1, result);
 
     missionListManager->defaultSingleList_ = missionList;
     missionListManager->SignRestartAppFlag(uid, "");
     result = missionListManager->defaultSingleList_->missions_.size();
-    EXPECT_EQ(0, result);
+    EXPECT_EQ(1, result);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

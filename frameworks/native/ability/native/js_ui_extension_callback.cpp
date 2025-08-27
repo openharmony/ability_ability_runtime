@@ -227,5 +227,73 @@ void JsUIExtensionCallback::CallJsError(int32_t number)
     napi_call_function(env_, obj, method, ArraySize(argv), argv, nullptr);
     TAG_LOGI(AAFwkTag::UI_EXT, "end");
 }
+
+void JsUIExtensionCallback::SetCompletionHandler(napi_env env, napi_value completionHandler)
+{
+    TAG_LOGI(AAFwkTag::UI_EXT, "call");
+    if (env == nullptr || completionHandler == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "invalid parameters");
+        return;
+    }
+    napi_value onSuccess = AppExecFwk::GetPropertyValueByPropertyName(
+        env, completionHandler, "onRequestSuccess", napi_function);
+    if (onSuccess != nullptr) {
+        napi_status status = napi_create_reference(env, onSuccess, 1, &onRequestSuccess_);
+        if (status != napi_ok) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "create onRequestSuccess, failed: %{public}d", status);
+        }
+    }
+    napi_value onFailure = AppExecFwk::GetPropertyValueByPropertyName(
+        env, completionHandler, "onRequestFailure", napi_function);
+    if (onFailure != nullptr) {
+        napi_status status = napi_create_reference(env, onFailure, 1, &onRequestFailure_);
+        if (status != napi_ok) {
+            TAG_LOGE(AAFwkTag::CONTEXT, "create onRequestFailure, failed: %{public}d", status);
+        }
+    }
+}
+
+void JsUIExtensionCallback::OnRequestSuccess(const std::string& name)
+{
+    TAG_LOGI(AAFwkTag::UI_EXT, "call");
+    if (onRequestSuccess_ == nullptr || env_ == nullptr) {
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, onRequestSuccess_, &callback);
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "invalid callback");
+        return;
+    }
+    napi_value argv[] = { CreateJsValue(env_, name) };
+    napi_status status = napi_call_function(env_, nullptr, callback, ArraySize(argv), argv, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "call OnRequestSuccess, failed: %{public}d", status);
+    }
+}
+
+void JsUIExtensionCallback::OnRequestFailure(const std::string& name,
+    int32_t failureCode, const std::string& failureMessage)
+{
+    TAG_LOGI(AAFwkTag::UI_EXT, "call");
+    if (onRequestFailure_ == nullptr || env_ == nullptr) {
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, onRequestFailure_, &callback);
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "invalid callback");
+        return;
+    }
+    napi_value argv[] = {
+        CreateJsValue(env_, name),
+        CreateJsValue(env_, failureCode),
+        CreateJsValue(env_, failureMessage)
+    };
+    napi_status status = napi_call_function(env_, nullptr, callback, ArraySize(argv), argv, nullptr);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "call onRequestFailure, failed: %{public}d", status);
+    }
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
