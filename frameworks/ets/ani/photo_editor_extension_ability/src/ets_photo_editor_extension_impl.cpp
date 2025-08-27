@@ -37,17 +37,12 @@ namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 
-
-namespace {
-
-} // namespace
-
 EtsPhotoEditorExtensionImpl::EtsPhotoEditorExtensionImpl(const std::unique_ptr<Runtime> &etsRuntime)
     : EtsUIExtensionBase(etsRuntime)
 {
 }
 
-ani_object EtsPhotoEditorExtensionImpl::CreateETSContext(ani_env* env,
+ani_object EtsPhotoEditorExtensionImpl::CreateEtsContext(ani_env* env,
     std::shared_ptr<PhotoEditorExtensionContext> context)
 {
     ani_object obj = CreateEtsPhotoEditorExtensionContext(env, context);
@@ -56,7 +51,7 @@ ani_object EtsPhotoEditorExtensionImpl::CreateETSContext(ani_env* env,
 
 void EtsPhotoEditorExtensionImpl::BindContext()
 {
-    auto env = etsRuntime_.GetAniEnv(); // 使用base基类的etsRuntime_
+    auto env = etsRuntime_.GetAniEnv(); // etsRuntime_ using the base class
    
     if (context_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null Context");
@@ -64,9 +59,9 @@ void EtsPhotoEditorExtensionImpl::BindContext()
     }
 
     TAG_LOGD(AAFwkTag::UI_EXT, "BindContext CreateJsPhotoEditorExtensionContext");
-    ani_object contextObj = CreateETSContext(env, context_);
+    ani_object contextObj = CreateEtsContext(env, context_);
     if (contextObj == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null contextObj");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context Obj");
         return;
     }
 
@@ -89,8 +84,8 @@ void EtsPhotoEditorExtensionImpl::BindContext()
     shellContextRef_ = std::make_shared<AppExecFwk::ETSNativeReference>();
     shellContextRef_->aniObj = contextObj;
     shellContextRef_->aniRef = contextRef;
-    context_->Bind(etsRuntime_, &(shellContextRef_->aniRef)); // 绑定aniRef指针，否则前端获取不到abilityContext
-    TAG_LOGD(AAFwkTag::UI_EXT, "EtsUIExtensionBase bind etsRuntime_");
+    context_->Bind(etsRuntime_, &(shellContextRef_->aniRef));
+    // Bind the aniRef pointer. Otherwise, the frontend cannot obtain the abilityContext.
 
     TAG_LOGD(AAFwkTag::UI_EXT, "EtsPhotoEditorExtensionImpl::BindContext end");
 }
@@ -112,7 +107,7 @@ void EtsPhotoEditorExtensionImpl::OnStartContentEditing(const AAFwk::Want &want,
 
     std::string imageUri = want.GetStringParam("ability.params.stream");
     if (imageUri.empty()) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "empty imageUri");
+        TAG_LOGE(AAFwkTag::UI_EXT, "empty image Uri");
         return;
     }
 
@@ -138,10 +133,10 @@ void EtsPhotoEditorExtensionImpl::OnStartContentEditing(const AAFwk::Want &want,
     env->String_NewUTF8(imageUri.c_str(), imageUri.size(), &aniImageUri);
     ani_ref sessionObj = contentSessions_[sessionInfo->uiExtensionComponentId];
     if (sessionObj == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null sessionObj");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null session Obj");
         return;
     }
-    // c++调js,元能力封装
+
     CallObjectMethod(false, "onStartContentEditing", nullptr, aniImageUri, wantRef, sessionObj);
 
     TAG_LOGD(AAFwkTag::UI_EXT, "OnStartContentEditing End");

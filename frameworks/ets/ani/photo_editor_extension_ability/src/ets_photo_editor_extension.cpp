@@ -75,7 +75,7 @@ void EtsPhotoEditorExtension::Init(const std::shared_ptr<AppExecFwk::AbilityLoca
 
     Extension::Init(record, application, handler, token);
     impl_->SetContext(context);
-    // 此处调用extensionBase基类
+    // invoke the extensionBase base class here
     impl_->SetAbilityInfo(Extension::abilityInfo_);
     auto extensionCommon = impl_->Init(record, application, handler, token);
     ExtensionBase<PhotoEditorExtensionContext>::SetExtensionCommon(extensionCommon);
