@@ -77,7 +77,7 @@ void EtsPhotoEditorExtensionContext::Finalizer(ani_env *env, ani_object obj)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelf");
     if (env == nullptr) {
-        TAG_LOGD(AAFwkTag::UI_EXT, "null env");
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
         return;
     }
     ani_long nativeEtsContextPtr;
@@ -88,6 +88,7 @@ void EtsPhotoEditorExtensionContext::Finalizer(ani_env *env, ani_object obj)
     if (nativeEtsContextPtr != 0) {
         delete reinterpret_cast<EtsPhotoEditorExtensionContext *>(nativeEtsContextPtr);
     }
+    TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelf end");
 }
 
 ani_object CreateEtsPhotoEditorExtensionContext(
@@ -217,6 +218,7 @@ void EtsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(ani_env* aniEnv,
 
     std::string uriStr {""};
     if (!AppExecFwk::GetStdString(aniEnv, uri, uriStr)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "get string error");
         aniObject = EtsErrorUtil::CreateError(aniEnv, (ani_int)PhotoEditorErrorCode::ERROR_CODE_PARAM_ERROR,
             ERR_MSG_PARAMS_ERROR);
         AppExecFwk::AsyncCallback(aniEnv, callback, aniObject, nullptr);
@@ -234,7 +236,7 @@ void EtsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(ani_env* aniEnv,
         AppExecFwk::AsyncCallback(aniEnv, callback, aniObject, nullptr);
         return;
     }
-    // 传参ret的确认
+
     aniObject = EtsErrorUtil::CreateErrorByNativeErr(aniEnv, static_cast<int32_t>(errCode));
     AppExecFwk::AsyncCallback(aniEnv, callback, aniObject, abilityResult);
 }
@@ -285,7 +287,7 @@ void EtsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(ani_env* aniEn
         return;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "SaveEditedContent end");
-    // 传参ret的确认
+
     aniObject = EtsErrorUtil::CreateErrorByNativeErr(aniEnv, static_cast<int32_t>(errCode));
     AppExecFwk::AsyncCallback(aniEnv, callback, aniObject, abilityResult);
     TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithImage called");
@@ -294,13 +296,13 @@ void EtsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(ani_env* aniEn
 bool EtsPhotoEditorExtensionContext::UnwrapPackOption(ani_env* aniEnv, ani_object optionObj,
     Media::PackOption &packOption)
 {
-    // 传递对应的option参数
     std::string format {""};
     if (!AppExecFwk::GetStringProperty(aniEnv, optionObj, "format", format)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Wrong argument type format");
         return false;
     }
     if (format == "") {
+        TAG_LOGE(AAFwkTag::UI_EXT, "fromat is empty");
         EtsErrorUtil::ThrowError(aniEnv, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_PARAM_ERROR),
             ERR_MSG_PARAMS_ERROR);
         return false;

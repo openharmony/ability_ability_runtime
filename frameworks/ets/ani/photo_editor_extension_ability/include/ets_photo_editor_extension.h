@@ -44,14 +44,14 @@ public:
      * @param token the remote token.
      */
     virtual void Init(const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &record,
-        const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
-        std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token) override;
+                      const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
+                      std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token) override;
 
     /**
-     * @brief Create JsPhotoEditorExtension.
+     * @brief Create EtsPhotoEditorExtension.
      *
      * @param runtime The runtime.
-     * @return The JsPhotoEditorExtension instance.
+     * @return The EtsPhotoEditorExtension instance.
      */
     static EtsPhotoEditorExtension *Create(const std::unique_ptr<Runtime> &runtime);
 

@@ -46,7 +46,7 @@ protected:
 
 private:
     void OnStartContentEditing(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
-    ani_object CreateETSContext(ani_env *env, std::shared_ptr<PhotoEditorExtensionContext> context);
+    ani_object CreateEtsContext(ani_env *env, std::shared_ptr<PhotoEditorExtensionContext> context);
 protected:
     std::shared_ptr<PhotoEditorExtensionContext> context_ = nullptr;
     std::set<uint64_t> uiExtensionComponentIdSet_;
