@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@ namespace AAFwk {
 OpenLinkOptions::OpenLinkOptions(const OpenLinkOptions &other)
 {
     appLinkingOnly_ = other.appLinkingOnly_;
+    hideFailureTipDialog_ = other.hideFailureTipDialog_;
     parameters_ = other.parameters_;
 }
 
@@ -27,6 +28,7 @@ OpenLinkOptions &OpenLinkOptions::operator=(const OpenLinkOptions &other)
 {
     if (this != &other) {
         appLinkingOnly_ = other.appLinkingOnly_;
+        hideFailureTipDialog_ = other.hideFailureTipDialog_;
         parameters_ = other.parameters_;
     }
     return *this;
@@ -59,7 +61,12 @@ bool OpenLinkOptions::ReadFromParcel(Parcel &parcel)
     if (!parcel.ReadBool(appLinkingOnly)) {
         return false;
     }
+    bool hideFailureTipDialog;
+    if (!parcel.ReadBool(hideFailureTipDialog)) {
+        return false;
+    }
     SetAppLinkingOnly(appLinkingOnly);
+    SetHideFailureTipDialog(hideFailureTipDialog);
 
     if (!ReadParameters(parcel)) {
         return false;
@@ -107,6 +114,10 @@ bool OpenLinkOptions::Marshalling(Parcel &parcel) const
     if (!parcel.WriteBool(GetAppLinkingOnly())) {
         return false;
     }
+    // write GetHideFailureTipDialog
+    if (!parcel.WriteBool(GetHideFailureTipDialog())) {
+        return false;
+    }
     // write parameters
     if (!WriteParameters(GetParameters(), parcel)) {
         return false;
@@ -123,6 +134,16 @@ void OpenLinkOptions::SetAppLinkingOnly(bool appLinkingOnly)
 bool OpenLinkOptions::GetAppLinkingOnly() const
 {
     return appLinkingOnly_;
+}
+
+void OpenLinkOptions::SetHideFailureTipDialog(bool hideFailureTipDialog)
+{
+    hideFailureTipDialog_ = hideFailureTipDialog;
+}
+
+bool OpenLinkOptions::GetHideFailureTipDialog() const
+{
+    return hideFailureTipDialog_;
 }
 
 void OpenLinkOptions::SetParameters(WantParams parameters)
