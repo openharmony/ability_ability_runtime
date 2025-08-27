@@ -1684,6 +1684,16 @@ public:
     }
 
     /**
+     * @brief Retrieves the auto startup status of the current application.
+     * @param isAutoStartEnabled Indicates whether auto startup is enabled for the current application.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetAutoStartupStatusForSelf(bool &isAutoStartEnabled)
+    {
+        return 0;
+    }
+
+    /**
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
      *
      * @param sessionInfo the session info of the ability to start.

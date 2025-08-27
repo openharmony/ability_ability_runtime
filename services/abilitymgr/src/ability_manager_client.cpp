@@ -1867,6 +1867,14 @@ ErrCode AbilityManagerClient::QueryAllAutoStartupApplications(std::vector<AutoSt
     return abms->QueryAllAutoStartupApplications(infoList);
 }
 
+ErrCode AbilityManagerClient::GetAutoStartupStatusForSelf(bool &isAutoStartEnabled)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "GetAutoStartupStatusForSelf called");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetAutoStartupStatusForSelf(isAutoStartEnabled);
+}
+
 ErrCode AbilityManagerClient::PrepareTerminateAbilityBySCB(sptr<SessionInfo> sessionInfo,
     bool &isPrepareTerminate)
 {
