@@ -664,7 +664,7 @@ void AppMgrServiceInner::HandlePreloadApplication(const PreloadRequest &request)
     std::string processName;
     std::string specifiedProcessFlag;
     if (CheckAppRecordExistByPreloadRequest(request, processName, specifiedProcessFlag)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "appRecord already exists when preload application");
+        TAG_LOGW(AAFwkTag::APPMGR, "appRecord already exists when preload application");
         return;
     }
 
@@ -3027,7 +3027,11 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
                 pid, ret, killReason.c_str());
         }
     }
-    CHECK_POINTER_AND_RETURN_VALUE(appRecord, ret);
+    if (!appRecord) {
+        TAG_LOGW(AAFwkTag::APPMGR, "nullptr");
+        return ret;
+    }
+
     appRecord->SetKillReason(reason);
     appRecord->SetIsKillPrecedeStart(isKillPrecedeStart);
     if (ret >= 0) {
@@ -10259,7 +10263,7 @@ void AppMgrServiceInner::RemoveUIExtensionBindItem(
     }
 
     if (!AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "not uiextension");
+        TAG_LOGW(AAFwkTag::APPMGR, "not uiextension");
         return;
     }
 
