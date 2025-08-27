@@ -340,6 +340,16 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE) override;
 
     /**
+     * Start ui session ability with windowId and want.
+     *
+     * @param primaryWindowId the id of window.
+     * @param secondaryWant the want of the ability to start.
+     * @param callerToken current caller ability token.
+     * @return Returns ERR_OK if success.
+     */
+    ErrCode StartUIAbilitiesInSplitWindowMode(int32_t primaryWindowId, const AAFwk::Want &secondaryWant,
+        sptr<IRemoteObject> callerToken) override;
+    /**
      * Start UI abilities simultaneously.
      *
      * @param wantList a list of want to start UI abilities.
@@ -2561,7 +2571,13 @@ private:
         bool needCheck = false);
 
     virtual int RegisterSessionHandler(const sptr<IRemoteObject> &object) override;
-
+    int32_t CheckWantForSplitMode(const AAFwk::Want &secondaryWant, sptr<IRemoteObject> callerToken,
+        int32_t validUserId, int32_t appIndex);
+    int32_t StartUIAbilitiesInSplitWindowModeHandleWant(const AAFwk::Want &secondaryWant,
+        sptr<IRemoteObject> callerToken, AbilityRequest &abilityRequest);
+    int32_t GenerateAbilityForSplitMode(const AAFwk::Want &secondaryWant, AbilityRequest &abilityRequest,
+        sptr<IRemoteObject> callerToken, int32_t requestCode, int32_t specifyTokenId, int32_t appIndex,
+        int32_t validUserId);
     int32_t StartUIAbilitiesHandleWant(const Want &want, sptr<IRemoteObject> callerToken,
         std::vector<AbilityRequest> &abilityRequestList);
     int32_t StartUIAbilitiesCheckDlp(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId);

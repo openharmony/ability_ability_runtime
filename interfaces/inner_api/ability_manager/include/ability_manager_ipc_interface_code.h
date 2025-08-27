@@ -425,6 +425,8 @@ enum class AbilityManagerInterfaceCode {
     // ipc id for start UI abilities
     START_UI_ABILITIES = 1073,
 
+    START_UI_ABILITIES_IN_SPLIT_WINDOW_MODE = 1074,
+
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 
