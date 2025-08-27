@@ -153,6 +153,11 @@ int32_t KioskManager::ExitKioskModeInner(const std::string &bundleName, sptr<IRe
     if (!IsInKioskModeInner()) {
         return ERR_NOT_IN_KIOSK_MODE;
     }
+
+    if (kioskStatus_.kioskBundleUid_ != IPCSkeleton::GetCallingUid()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "bundleName %{public}s is not the currently kiosk app", bundleName.c_str());
+        return ERR_NOT_IN_KIOSK_MODE;
+    }
     GetExitKioskModeCallback()();
     NotifyKioskModeChanged(false);
     kioskStatus_.Clear();
