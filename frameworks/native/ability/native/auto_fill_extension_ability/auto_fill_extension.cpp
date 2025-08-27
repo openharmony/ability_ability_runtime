@@ -16,6 +16,7 @@
 #include "auto_fill_extension.h"
 
 #include "auto_fill_extension_context.h"
+#include "ets_auto_fill_extension_instance.h"
 #include "hilog_tag_wrapper.h"
 #include "js_auto_fill_extension.h"
 #include "runtime.h"
@@ -31,6 +32,8 @@ AutoFillExtension *AutoFillExtension::Create(const std::unique_ptr<Runtime> &run
     switch (runtime->GetLanguage()) {
         case Runtime::Language::JS:
             return JsAutoFillExtension::Create(runtime);
+        case Runtime::Language::ETS:
+            return CreateETSAutoFillExtension(runtime);
         default:
             return new AutoFillExtension();
     }
