@@ -229,6 +229,17 @@ int32_t AbilityAutoStartupService::QueryAllAutoStartupApplications(std::vector<A
         userId, isCalledByEDM);
 }
 
+int32_t AbilityAutoStartupService::GetAutoStartupStatusForSelf(uint32_t callerTokenId, bool &isAutoStartEnabled)
+{
+    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Disabled config");
+        return ERR_CAPABILITY_NOT_SUPPORT;
+    }
+
+    return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->GetAutoStartupStatusForSelf(callerTokenId,
+        isAutoStartEnabled);
+}
+
 int32_t AbilityAutoStartupService::QueryAllAutoStartupApplicationsWithoutPermission(
     std::vector<AutoStartupInfo> &infoList, int32_t userId)
 {

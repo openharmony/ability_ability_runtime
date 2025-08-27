@@ -1269,5 +1269,25 @@ HWTEST_F(AbilityAutoStartupServiceSecondTest, QueryAllAutoStartupApplications_00
     system::SetBoolParameter("", false);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceSecondTest QueryAllAutoStartupApplications_003 end";
 }
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: GetAutoStartupStatusForSelfTest
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService CheckPermissionForSystem
+ */
+HWTEST_F(AbilityAutoStartupServiceSecondTest, GetAutoStartupStatusForSelf_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetAutoStartupStatusForSelf_001 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    MyFlag::flag_ = 0;
+    system::SetBoolParameter("", true);
+    uint32_t callerTokenId = 1;
+    bool isAutoStartEnabled = false;
+    auto result = abilityAutoStartupService->GetAutoStartupStatusForSelf(callerTokenId, isAutoStartEnabled);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "GetAutoStartupStatusForSelf_001 end";
+}
 } // namespace AAFwk
 } // namespace OHOS

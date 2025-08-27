@@ -99,6 +99,8 @@ public:
     int32_t GetCurrentAppAutoStartupData(const std::string &bundleName,
         std::vector<AutoStartupInfo> &infoList, const std::string &accessTokenId);
 
+    int32_t GetAutoStartupStatusForSelf(uint32_t callerTokenId, bool &isAutoStartEnabled);
+
 private:
     /**
      * @brief Restores the key-value store using the provided status.

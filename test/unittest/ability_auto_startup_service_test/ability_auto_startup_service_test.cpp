@@ -1093,5 +1093,23 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetValidUserId_004, TestSize.Level1)
     abilityAutoStartupService->GetValidUserId(userId);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetValidUserId_004 end";
 }
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: GetAutoStartupStatusForSelf
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService GetAutoStartupStatusForSelf
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, GetAutoStartupStatusForSelf_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetAutoStartupStatusForSelf_001 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    uint32_t callerTokenId = 1;
+    bool isAutoStartEnabled = false;
+    auto result = abilityAutoStartupService->GetAutoStartupStatusForSelf(callerTokenId, isAutoStartEnabled);
+    EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetAutoStartupStatusForSelf_001 end";
+}
 } // namespace AAFwk
 } // namespace OHOS
