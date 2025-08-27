@@ -998,7 +998,7 @@ ErrCode AbilityManagerClient::PreStartMission(const std::string& bundleName, con
 }
 
 ErrCode AbilityManagerClient::OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
-    int32_t userId, int requestCode)
+    int32_t userId, int requestCode, bool hideFailureTipDialog)
 {
     return ERR_OK;
 }
