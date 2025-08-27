@@ -118,6 +118,8 @@ private:
         std::shared_ptr<AppExecFwk::EtsDelegatorAbilityStageProperty> etsProperty);
 
     static void CleanAndFindMonitorRecord(ani_env *env, ani_object monitorObj);
+
+    static bool CheckMonitorPara(ani_env *env, ani_object monitorObj);
 };
 } // namespace AbilityDelegatorEts
 } // namespace OHOS
