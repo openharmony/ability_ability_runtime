@@ -15,11 +15,13 @@
 
 #include "ets_auto_save_request_callback.h"
 
+#include "ani_common_util.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AutoFillManagerEts {
 namespace {
+constexpr int32_t ARGC_ZERO = 0;
 const std::string METHOD_ON_SAVE_REQUEST_SUCCESS = "onSuccess";
 const std::string METHOD_ON_SAVE_REQUEST_FAILED = "onFailure";
 } // namespace
@@ -95,11 +97,22 @@ void EtsAutoSaveRequestCallback::ETSCallFunction(const std::string &methodName)
         return;
     }
 
-    ani_status status = ANI_OK;
-    status = env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(callback_->aniRef), methodName.c_str(),
-        nullptr);
+    ani_status status = ANI_ERROR;
+    ani_ref funRef;
+    status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(callback_->aniRef), methodName.c_str(),
+        &funRef);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Object_CallMethodByName_Void failed, status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Object_GetPropertyByName_Ref failed, status: %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::AUTOFILLMGR, "invalid property");
+        return;
+    }
+    ani_ref result;
+    status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ZERO, nullptr, &result);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "FunctionalObject_Call failed, status: %{public}d", status);
     }
 }
 

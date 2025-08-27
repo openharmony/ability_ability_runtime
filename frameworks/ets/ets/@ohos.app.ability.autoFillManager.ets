@@ -14,18 +14,33 @@
  */
 
 import { UIContext } from '@ohos.arkui.UIContext';
+import _ViewData from 'application.ViewData';
+import _PageNodeInfo from 'application.PageNodeInfo';
+import { FillRequest as _FillRequest, SaveRequest as _SaveRequest} from 'application.AutoFillRequest';
+import { UpdateRequest as _UpdateRequest, FillResponse as _FillResponse} from 'application.AutoFillRequest';
+import { FillRequestCallback as _FillRequestCallback } from 'application.AutoFillRequest';
+import { SaveRequestCallback as _SaveRequestCallback } from 'application.AutoFillRequest';
+import _CustomData from 'application.CustomData';
+import _AutoFillRect from 'application.AutoFillRect';
+import _AutoFillPopupConfig from 'application.AutoFillPopupConfig';
+import { PopupSize as _PopupSize } from 'application.AutoFillPopupConfig';
+import { AutoFillType as _AutoFillType } from 'application.AutoFillType';
+import { PopupPlacement as _PopupPlacement } from 'application.AutoFillPopupConfig';
 
 namespace autoFillManager {
+  export type OnSuccessFn = () => void;
+  export type OnFailureFn = () => void;
+
   loadLibrary("ability_auto_fill_manager_ani_kit.z");
 
   export interface AutoSaveCallback {
-    onSuccess(): void;
-    onFailure(): void;
+    onSuccess: OnSuccessFn;
+    onFailure: OnFailureFn;
   }
 
   class AutoSaveCallbackInner implements AutoSaveCallback {
-    public onSuccess() {};
-    public onFailure() {};
+    onSuccess: OnSuccessFn = () => {};
+    onFailure: OnFailureFn = () => {};
   }
 
   export native function requestAutoSaveWithScope(callback?: AutoSaveCallback): void;
@@ -34,6 +49,21 @@ namespace autoFillManager {
       requestAutoSaveWithScope(callback);
     });
   }
+
+  export type ViewData = _ViewData;
+  export type PageNodeInfo = _PageNodeInfo;
+  export type AutoFillType = _AutoFillType;
+  export type FillRequest = _FillRequest;
+  export type SaveRequest = _SaveRequest;
+  export type UpdateRequest = _UpdateRequest;
+  export type FillResponse = _FillResponse;
+  export type FillRequestCallback = _FillRequestCallback;
+  export type SaveRequestCallback = _SaveRequestCallback;
+  export type CustomData = _CustomData;
+  export type AutoFillRect = _AutoFillRect;
+  export type AutoFillPopupConfig = _AutoFillPopupConfig;
+  export type PopupSize = _PopupSize;
+  export type PopupPlacement = _PopupPlacement;
 }
 
 export default autoFillManager;
