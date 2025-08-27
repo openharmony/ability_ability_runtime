@@ -1428,6 +1428,31 @@ HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_FindMasterProcessAppRunn
     EXPECT_EQ(ret, nullptr);
 }
 
+/**
+ * @tc.name: AppRunningManager_IsAppRunningRecordValid_0100
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_IsAppRunningRecordValid_0100, TestSize.Level1)
+{
+    BundleInfo bundleInfo;
+    std::shared_ptr<AppRunningRecord> recordOne =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    ASSERT_NE(recordOne, nullptr);
+    auto ret = appRunningManager_->IsAppRunningRecordValid(recordOne);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: AppRunningManager_IsAppRunningRecordValid_0200
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_IsAppRunningRecordValid_0200, TestSize.Level1)
+{
+    auto ret = appRunningManager_->IsAppRunningRecordValid(nullptr);
+    EXPECT_EQ(ret, false);
+}
 
 /**
  * @tc.name: CheckAppRunningRecordForSpecifiedProcess_0100
