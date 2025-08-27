@@ -27,7 +27,6 @@ class StartOptions;
 * @class StartOptionsUtils
 * provides start options utilities.
 */
-
 class StartOptionsUtils final {
 public:
     StartOptionsUtils() = default;

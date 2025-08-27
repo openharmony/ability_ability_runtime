@@ -958,7 +958,6 @@ int AppMgrProxy::GetRenderProcessTerminationStatus(pid_t renderPid, int &status)
 
 int32_t AppMgrProxy::UpdateConfiguration(const Configuration &config, const int32_t userId)
 {
-    Ability_MANAGER_HITRACE_CHAIN_NAME("UpdateConfiguration", HITRACE_FLAG_INCLUDE_ASYNC);
     TAG_LOGI(AAFwkTag::APPMGR, "AppMgrProxy UpdateConfiguration");
     MessageParcel data;
     MessageParcel reply;
@@ -1026,7 +1025,6 @@ int32_t AppMgrProxy::UpdateConfigurationForBackgroundApp(const std::vector<Backg
 int32_t AppMgrProxy::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
     int32_t appIndex)
 {
-    Ability_MANAGER_HITRACE_CHAIN_NAME("UpdateConfigurationByBundleName", HITRACE_FLAG_INCLUDE_ASYNC);
     TAG_LOGD(AAFwkTag::APPMGR, "AppMgrProxy UpdateConfigurationByBundleName");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {

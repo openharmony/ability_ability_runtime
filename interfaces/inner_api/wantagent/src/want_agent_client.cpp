@@ -46,7 +46,6 @@ ErrCode WantAgentClient::GetWantSender(
     const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken, sptr<IWantSender> &wantSender,
     int32_t uid)
 {
-    Ability_MANAGER_HITRACE_CHAIN_NAME("GetWantSender", HITRACE_FLAG_INCLUDE_ASYNC);
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY);
     MessageParcel data;

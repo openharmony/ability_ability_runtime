@@ -17,11 +17,11 @@
 
 #include "ability_manager_errors.h"
 #include "event_report.h"
+#define private public
+#include "file_uri_distribution_utils.h"
+#undef private
 #include "system_ability_definition.h"
 #include "tokenid_kit.h"
-#define private public
-#include "uri_permission_utils.h"
-#undef private
 
 using namespace testing;
 using namespace testing::ext;
@@ -45,131 +45,131 @@ void FileUriDistributionUtilsTest::SetUp() {}
 void FileUriDistributionUtilsTest::TearDown() {}
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: ConnectManager
  * SubFunction: NA
- * FunctionPoints: UPMSUtils SendSystemAppGrantUriPermissionEvent
+ * FunctionPoints: FUDUtils SendSystemAppGrantUriPermissionEvent
  */
 HWTEST_F(FileUriDistributionUtilsTest, SendSystemAppGrantUriPermissionEvent_001, TestSize.Level1)
 {
     std::vector<std::string> uriVec = { "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt" };
     const std::vector<bool> resVec = { true };
-    auto ret = UPMSUtils::SendSystemAppGrantUriPermissionEvent(1001, 1002, uriVec, resVec);
+    auto ret = FUDUtils::SendSystemAppGrantUriPermissionEvent(1001, 1002, uriVec, resVec);
     ASSERT_EQ(ret, false);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: SendShareUnPrivilegeUriEvent
  * SubFunction: NA
  * FunctionPoints: URIPermissionManagerService SendShareUnPrivilegeUriEvent
  */
 HWTEST_F(FileUriDistributionUtilsTest, SendShareUnPrivilegeUriEvent_001, TestSize.Level1)
 {
-    auto ret = UPMSUtils::SendShareUnPrivilegeUriEvent(1001, 1002);
+    auto ret = FUDUtils::SendShareUnPrivilegeUriEvent(1001, 1002);
     EXPECT_EQ(ret, false);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: GetCurrentAccountId
  * SubFunction: NA
- * FunctionPoints: UPMSUtils GetCurrentAccountId
+ * FunctionPoints: FUDUtils GetCurrentAccountId
  */
 HWTEST_F(FileUriDistributionUtilsTest, GetCurrentAccountId_001, TestSize.Level1)
 {
-    auto testCurrentAccountId = UPMSUtils::GetCurrentAccountId();
+    auto testCurrentAccountId = FUDUtils::GetCurrentAccountId();
     EXPECT_EQ(testCurrentAccountId, 100);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: IsFoundationCall
  * SubFunction: NA
- * FunctionPoints: UPMSUtils IsFoundationCall
+ * FunctionPoints: FUDUtils IsFoundationCall
  */
 HWTEST_F(FileUriDistributionUtilsTest, IsFoundationCall_001, TestSize.Level1)
 {
-    auto testIsFoundationCall = UPMSUtils::IsFoundationCall();
+    auto testIsFoundationCall = FUDUtils::IsFoundationCall();
     EXPECT_EQ(testIsFoundationCall, false);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: IsSAOrSystemAppCall
  * SubFunction: NA
- * FunctionPoints: UPMSUtils IsSAOrSystemAppCall
+ * FunctionPoints: FUDUtils IsSAOrSystemAppCall
  */
 HWTEST_F(FileUriDistributionUtilsTest, IsSAOrSystemAppCall_001, TestSize.Level1)
 {
-    auto testIsSAOrSystemAppCall = UPMSUtils::IsSAOrSystemAppCall();
+    auto testIsSAOrSystemAppCall = FUDUtils::IsSAOrSystemAppCall();
     EXPECT_EQ(testIsSAOrSystemAppCall, false);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: IsSystemAppCall
  * SubFunction: NA
- * FunctionPoints: UPMSUtils IsSystemAppCall
+ * FunctionPoints: FUDUtils IsSystemAppCall
  */
 HWTEST_F(FileUriDistributionUtilsTest, IsSystemAppCall_001, TestSize.Level1)
 {
-    auto testIsSystemAppCall = UPMSUtils::IsSystemAppCall();
+    auto testIsSystemAppCall = FUDUtils::IsSystemAppCall();
     EXPECT_EQ(testIsSystemAppCall, false);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: CheckIsSystemAppByBundleName
  * SubFunction: NA
- * FunctionPoints: UPMSUtils CheckIsSystemAppByBundleName
+ * FunctionPoints: FUDUtils CheckIsSystemAppByBundleName
  */
 HWTEST_F(FileUriDistributionUtilsTest, CheckIsSystemAppByBundleName_001, TestSize.Level1)
 {
     std::string bundleName = "";
-    auto testIsSystemApp = UPMSUtils::CheckIsSystemAppByBundleName(bundleName);
+    auto testIsSystemApp = FUDUtils::CheckIsSystemAppByBundleName(bundleName);
     EXPECT_EQ(testIsSystemApp, false);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: CheckIsSystemAppByTokenId
  * SubFunction: NA
- * FunctionPoints: UPMSUtils CheckIsSystemAppByTokenId
+ * FunctionPoints: FUDUtils CheckIsSystemAppByTokenId
  */
 HWTEST_F(FileUriDistributionUtilsTest, CheckIsSystemAppByTokenId_001, TestSize.Level1)
 {
     uint32_t tokenId = 1001;
-    auto testIsSystemApp = UPMSUtils::CheckIsSystemAppByTokenId(tokenId);
+    auto testIsSystemApp = FUDUtils::CheckIsSystemAppByTokenId(tokenId);
     EXPECT_EQ(testIsSystemApp, false);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: GetBundleNameByTokenId
  * SubFunction: NA
- * FunctionPoints: UPMSUtils GetBundleNameByTokenId
+ * FunctionPoints: FUDUtils GetBundleNameByTokenId
  */
 HWTEST_F(FileUriDistributionUtilsTest, GetBundleNameByTokenId_001, TestSize.Level1)
 {
     uint32_t tokenId = 1001;
     std::string bundleName = "";
-    auto testGetBundleNameByTokenIdFlag = UPMSUtils::GetBundleNameByTokenId(tokenId, bundleName);
+    auto testGetBundleNameByTokenIdFlag = FUDUtils::GetBundleNameByTokenId(tokenId, bundleName);
     EXPECT_EQ (testGetBundleNameByTokenIdFlag, false);
 }
 
 /*
- * Feature: UPMSUtils
+ * Feature: FUDUtils
  * Function: GetTokenIdByBundleName
  * SubFunction: NA
- * FunctionPoints: UPMSUtils GetTokenIdByBundleName
+ * FunctionPoints: FUDUtils GetTokenIdByBundleName
  */
 HWTEST_F(FileUriDistributionUtilsTest, GetTokenIdByBundleName_001, TestSize.Level1)
 {
     std::string bundleName = "com.example.test";
     int32_t appIndex = 10;
     uint32_t tokenId;
-    auto testTokenId = UPMSUtils::GetTokenIdByBundleName(bundleName, appIndex, tokenId);
+    auto testTokenId = FUDUtils::GetTokenIdByBundleName(bundleName, appIndex, tokenId);
     EXPECT_EQ(testTokenId, ERR_GET_TARGET_BUNDLE_INFO_FAILED);
 }
 }  // namespace AAFwk

@@ -266,7 +266,7 @@ void ResidentProcessManager::OnAppStateChanged(const AppInfo &info)
     bool localEnable = false;
     auto rdbResult = AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleName, localEnable);
     if (rdbResult != Rdb_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "rdbResult: %{public}d", rdbResult);
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "rdbResult: %{public}d", rdbResult);
         return;
     }
 
