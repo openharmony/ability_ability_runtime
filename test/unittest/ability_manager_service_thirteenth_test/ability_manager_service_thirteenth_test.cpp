@@ -434,7 +434,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_003, TestSiz
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
@@ -656,7 +656,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_009, TestSiz
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
@@ -887,7 +887,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_007,
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
@@ -933,7 +933,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_008,
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
@@ -979,7 +979,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_009,
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
@@ -1026,7 +1026,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_010,
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
@@ -1072,7 +1072,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_011,
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
