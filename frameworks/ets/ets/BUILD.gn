@@ -431,6 +431,28 @@ ohos_prebuilt_etc("ability_runtime_auto_fill_manager_abc_etc") {
   deps = [ ":ability_runtime_auto_fill_manager_abc" ]
 }
 
+generate_static_abc("photo_editor_extension_ability_ani_abc") {
+  base_url = "./"
+  files = [
+    "./application/PhotoEditorExtensionContext.ets",
+    "./@ohos.app.ability.PhotoEditorExtensionAbility.ets",
+  ]
+
+  dst_file = "$target_out_dir/photo_editor_extension_ability_ani.abc"
+  out_puts = [ "$target_out_dir/photo_editor_extension_ability_ani.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/photo_editor_extension_ability_ani.abc"
+}
+
+ohos_prebuilt_etc("photo_editor_extension_ability_etc") {
+  source = "$target_out_dir/photo_editor_extension_ability_ani.abc"
+  deps = [ ":photo_editor_extension_ability_ani_abc" ]
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
 generate_static_abc("ui_extension_ability_ani_abc") {
   base_url = "./"
 
@@ -1355,6 +1377,7 @@ group("ets_packages") {
     ":form_extension_ability_etc",
     ":service_extension_ability_abc_etc",
     ":ui_extension_ability_ani_etc",
+    ":photo_editor_extension_ability_etc",
     ":uri_permission_manager_abc_etc",
     ":form_extension_ability_etc",
     ":appRecovery_abc_etc",
