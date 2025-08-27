@@ -443,7 +443,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, PreStartFreeInstall_001, TestSize.Level
     bool isStartAsCaller { false };
     auto callerToken = sptr<MockAbilityToken>::MakeSptr();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     auto ret = abilityMs_->PreStartFreeInstall(want, callerToken, specifyTokenId, isStartAsCaller, localWant);
     EXPECT_EQ(ret, ERR_OK);
 
@@ -807,7 +807,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, SetMinimizedDuringFreeInstall_001, Test
     sessionInfo->want.SetParam(KEY_SESSION_ID, sessionId);
     abilityMs->SetMinimizedDuringFreeInstall(sessionInfo);
 
-    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     FreeInstallInfo info;
     info.want = sessionInfo->want;
     abilityMs->freeInstallManager_->freeInstallList_.push_back(info);
@@ -902,7 +902,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_002, TestSize.Leve
     ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::SERVICE,
         -1, false);
     want.SetUri("file://kia-file-uri");
-    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     ret = abilityMs->ConnectAbilityCommon(want, impl, nullptr, ExtensionAbilityType::SERVICE,
         -1, false);
     Mock::VerifyAndClear(mockBundleMgr);
@@ -1957,7 +1957,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_004, TestSize.Leve
     ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::UI_SERVICE,
         -1, false);
     want.SetUri("file://kia-file-uri");
-    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     ret = abilityMs->ConnectAbilityCommon(want, impl, nullptr, ExtensionAbilityType::UI_SERVICE,
         -1, false);
     Mock::VerifyAndClear(mockBundleMgr);

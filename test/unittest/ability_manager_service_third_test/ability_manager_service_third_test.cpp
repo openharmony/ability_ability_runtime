@@ -2456,7 +2456,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_002, T
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_002 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
     AAFwk::Want want;
     AAFwk::Want convertedWant;
@@ -2478,7 +2478,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_003, T
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_003 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
     AAFwk::Want want;
     AAFwk::Want convertedWant;
@@ -2500,7 +2500,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_004, T
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_004 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
     AAFwk::Want want;
     AAFwk::Want convertedWant;
