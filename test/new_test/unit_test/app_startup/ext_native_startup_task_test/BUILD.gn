@@ -17,30 +17,20 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 module_output_path = "ability_runtime/app_startup"
 
 copy("ext_native_startup_task_copy") {
-    sources = [
-      "${ability_runtime_path}/interfaces/kits/native/appkit/app_startup/ext_native_startup_task.h",
-      "${ability_runtime_path}/frameworks/native/appkit/app_startup/ext_native_startup_task.cpp",
-    ]
-    outputs = [ "${target_gen_dir}/frameworks/native/appkit/app_startup/ext_native_startup_task/{{source_file_part}}" ]
+  sources = [ "${ability_runtime_path}/interfaces/kits/native/appkit/app_startup/ext_native_startup_task.h" ]
+  outputs = [ "${target_gen_dir}/frameworks/native/appkit/app_startup/ext_native_startup_task/{{source_file_part}}" ]
 }
 
 ohos_unittest("ext_native_startup_task_test") {
   module_out_path = module_output_path
 
-  include_dirs = [ 
-    "${target_gen_dir}/frameworks/native/appkit/app_startup/ext_native_startup_task/",
-  ]
+  include_dirs = [ "${target_gen_dir}/frameworks/native/appkit/app_startup/ext_native_startup_task/" ]
 
-  sources =
-      [ "${target_gen_dir}/frameworks/native/appkit/app_startup/ext_native_startup_task/ext_native_startup_task.cpp" ]
+  sources = [ "${ability_runtime_path}/frameworks/native/appkit/app_startup/ext_native_startup_task.cpp" ]
 
-  sources += [
-    "ext_native_startup_task_test.cpp",
-  ]
+  sources += [ "ext_native_startup_task_test.cpp" ]
 
-  deps = [
-    ":ext_native_startup_task_copy",
-  ]
+  deps = [ ":ext_native_startup_task_copy" ]
 
   cflags = [ "-fno-access-control" ]
 
@@ -50,7 +40,7 @@ ohos_unittest("ext_native_startup_task_test") {
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
-    "json:nlohmann_json_static"
+    "json:nlohmann_json_static",
   ]
 }
 

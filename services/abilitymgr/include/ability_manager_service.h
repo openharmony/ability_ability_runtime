@@ -2591,7 +2591,13 @@ private:
      */
     void StopSwitchUserDialogInner(const Want &want, const int32_t stopUserId);
 
-    void SetPickerElementName(const sptr<SessionInfo> &extensionSessionInfo, int32_t userId);
+    /**
+     * judge system params for picker
+     * @param WantParams, The wantparams of the want.
+     */
+    bool JudgeSystemParamsForPicker(const WantParams &parameters);
+
+    void SetPickerElementNameAndParams(const sptr<SessionInfo> &extensionSessionInfo, int32_t userId);
 
     void SetAutoFillElementName(const sptr<SessionInfo> &extensionSessionInfo);
 

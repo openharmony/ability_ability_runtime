@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,9 +63,7 @@ static constexpr int64_t USER_TEST = 100;
  */
 HWTEST_F(DataObsMgrInnerPrefTest, DataObsMgrInnerPref_HandleRegisterObserver_0100, TestSize.Level1)
 {
-    if (dataObsMgrInnerPref_ == nullptr) {
-        return;
-    }
+    ASSERT_TRUE(dataObsMgrInnerPref_ != nullptr);
 
     Uri uri("sharepreferences://data/preferences/preferences_test");
     sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
@@ -264,9 +262,7 @@ HWTEST_F(DataObsMgrInnerPrefTest, DataObsMgrInnerPref_HandleUnregisterObserver_0
  */
 HWTEST_F(DataObsMgrInnerPrefTest, DataObsMgrInnerPref_HandleNotifyChange_0100, TestSize.Level1)
 {
-    if (dataObsMgrInnerPref_ == nullptr) {
-        return;
-    }
+    ASSERT_TRUE(dataObsMgrInnerPref_ != nullptr);
     Uri uri("sharepreferences://data/preferences/preferences_test");
     sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub(new (std::nothrow) MockDataAbilityObserverStub());
 
@@ -323,9 +319,7 @@ HWTEST_F(DataObsMgrInnerPrefTest, DataObsMgrInnerPref_HandleNotifyChange_0300, T
  */
 HWTEST_F(DataObsMgrInnerPrefTest, DataObsMgrInnerPref_RemoveObs_HaveRegistered_0100, TestSize.Level1)
 {
-    if (dataObsMgrInnerPref_ == nullptr) {
-        return;
-    }
+    ASSERT_TRUE(dataObsMgrInnerPref_ != nullptr);
     Uri uri("sharepreferences://data/preferences/preferences_test");
     sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub(new (std::nothrow) MockDataAbilityObserverStub());
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub));
@@ -364,9 +358,7 @@ HWTEST_F(DataObsMgrInnerPrefTest, DataObsMgrInnerPref_RemoveObs_HaveRegistered_0
  */
 HWTEST_F(DataObsMgrInnerPrefTest, DataObsMgrInnerPref_AddRemove_ObsDeathRecipient_0100, TestSize.Level1)
 {
-    if (dataObsMgrInnerPref_ == nullptr) {
-        return;
-    }
+    ASSERT_TRUE(dataObsMgrInnerPref_ != nullptr);
 
     sptr<IRemoteObject> observer(new (std::nothrow) MockDataAbilityObserverStub());
     sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(observer));

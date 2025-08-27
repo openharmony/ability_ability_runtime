@@ -1061,6 +1061,11 @@ enum {
     ERR_REFINEMENT_INVALID_CALLER_END = 2099199,
 
     /**
+     * Result (2099200) for main window of this ability does not exist.
+     */
+    ERR_MAIN_WINDOW_NOT_EXIST = 2099200,
+
+    /**
      * Native error(3000000) for target bundle not exist.
      */
     ERR_CODE_NOT_EXIST = 3000000,

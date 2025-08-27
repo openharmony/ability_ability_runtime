@@ -1046,6 +1046,7 @@ bool StartupManager::AnalyzeAppStartupTaskInner(const ModuleStartupConfigInfo& i
     startupTaskInfo.moduleName = info.name_;
     startupTaskInfo.hapPath = info.hapPath_;
     startupTaskInfo.esModule = info.esModule_;
+    startupTaskInfo.moduleType = info.moduleType_;
 
     startupTaskInfo.name = startupTaskJson.at(NAME).get<std::string>();
     startupTaskInfo.srcEntry = startupTaskJson.at(SRC_ENTRY).get<std::string>();

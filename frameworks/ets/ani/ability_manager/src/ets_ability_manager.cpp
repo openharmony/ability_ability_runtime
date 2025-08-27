@@ -79,6 +79,40 @@ static ani_object GetForegroundUIAbilities(ani_env *env)
     return aniArray;
 }
 
+void GetForegroundUIAbilitiesCallBack(ani_env *env, ani_object callbackObj)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call GetForegroundUIAbilitiesCallBack");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return;
+    }
+
+    sptr<AppExecFwk::IAbilityManager> abilityManager = GetAbilityManagerInstance();
+    if (abilityManager == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityManager is null");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER), nullptr);
+        return;
+    }
+    std::vector<AppExecFwk::AbilityStateData> list;
+    int32_t ret = abilityManager->GetForegroundUIAbilities(list);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed: ret=%{public}d", ret);
+        AbilityRuntime::AbilityErrorCode code = AbilityRuntime::GetJsErrorCodeByNativeError(ret);
+        AppExecFwk::AsyncCallback(env, callbackObj, EtsErrorUtil::CreateError(env, code), nullptr);
+        return;
+    }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "GetForegroundUIAbilities succeeds, list.size=%{public}zu", list.size());
+    ani_object aniArray = AppExecFwk::CreateAniAbilityStateDataArray(env, list);
+    if (aniArray == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null aniArray");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER), nullptr);
+        return;
+    }
+    AppExecFwk::AsyncCallback(env, callbackObj, EtsErrorUtil::CreateErrorByNativeErr(env, ERR_OK), aniArray);
+}
+
 static void GetTopAbility(ani_env *env, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call GetTopAbility");
@@ -126,6 +160,10 @@ void EtsAbilityManagerRegistryInit(ani_env *env)
         ani_native_function {
             "nativeGetForegroundUIAbilities", ETS_ABILITY_MANAGER_SIGNATURE_ARRAY,
             reinterpret_cast<void *>(GetForegroundUIAbilities)
+        },
+        ani_native_function {
+            "getForegroundUIAbilitiesCallback", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(GetForegroundUIAbilitiesCallBack)
         },
         ani_native_function {"nativeGetTopAbility", ETS_ABILITY_MANAGER_SIGNATURE_CALLBACK,
             reinterpret_cast<void *>(GetTopAbility)},

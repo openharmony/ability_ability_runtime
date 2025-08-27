@@ -284,7 +284,9 @@ ohos_unittest("ets_runtime_test") {
   ]
 
   configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
-  deps = []
+  deps = [
+    "${ability_runtime_innerkits_path}/connect_server_manager:connect_server_manager",
+  ]
 
   external_deps = [
     "ability_runtime:runtime",

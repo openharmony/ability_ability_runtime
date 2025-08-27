@@ -19,6 +19,7 @@
 #define private public
 #include "app_mgr_proxy.h"
 #include "app_mgr_stub.h"
+#include "file_path_utils.h"
 #include "main_thread.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
@@ -2617,5 +2618,71 @@ HWTEST_F(MainThreadTest, IsEtsAPP_0100, TestSize.Level1)
     auto result = mainThread_->IsEtsAPP(appInfo);
     EXPECT_EQ(result, true);
 }
+
+/**
+ * @tc.name: SplitString_0100
+ * @tc.desc: SplitString Test
+ * @tc.type: FUNC
+ * @tc.require: issueI581SE
+ */
+HWTEST_F(MainThreadTest, SplitString_0100, TestSize.Level1)
+{
+    std::string moduleNames = "name1,name2,name3,name4";
+    std::vector<std::string> moduleNameList;
+    AbilityBase::SplitString(moduleNames, moduleNameList, 0, ",");
+    EXPECT_TRUE(moduleNameList.size() == 4);
+    EXPECT_TRUE(moduleNameList[0] == "name1");
+    EXPECT_TRUE(moduleNameList[1] == "name2");
+    EXPECT_TRUE(moduleNameList[2] == "name3");
+    EXPECT_TRUE(moduleNameList[3] == "name4");
+}
+
+/**
+ * @tc.name: SplitString_0200
+ * @tc.desc: SplitString Test
+ * @tc.type: FUNC
+ * @tc.require: issueI581SE
+ */
+HWTEST_F(MainThreadTest, SplitString_0200, TestSize.Level1)
+{
+    std::string moduleNames = "name1";
+    std::vector<std::string> moduleNameList;
+    AbilityBase::SplitString(moduleNames, moduleNameList, 0, ",");
+    EXPECT_TRUE(moduleNameList.size() == 1);
+    EXPECT_TRUE(moduleNameList[0] == "name1");
+}
+
+/**
+ * @tc.name: SplitString_0300
+ * @tc.desc: SplitString Test
+ * @tc.type: FUNC
+ * @tc.require: issueI581SE
+ */
+HWTEST_F(MainThreadTest, SplitString_0300, TestSize.Level1)
+{
+    std::string moduleNames = "";
+    std::vector<std::string> moduleNameList;
+    AbilityBase::SplitString(moduleNames, moduleNameList, 0, ",");
+    EXPECT_TRUE(moduleNameList.size() == 0);
+}
+
+/**
+ * @tc.name: SplitString_0400
+ * @tc.desc: SplitString Test
+ * @tc.type: FUNC
+ * @tc.require: issueI581SE
+ */
+HWTEST_F(MainThreadTest, SplitString_0400, TestSize.Level1)
+{
+    std::string moduleNames = ",name1,name2,name3,name4,";
+    std::vector<std::string> moduleNameList;
+    AbilityBase::SplitString(moduleNames, moduleNameList, 0, ",");
+    EXPECT_TRUE(moduleNameList.size() == 4);
+    EXPECT_TRUE(moduleNameList[0] == "name1");
+    EXPECT_TRUE(moduleNameList[1] == "name2");
+    EXPECT_TRUE(moduleNameList[2] == "name3");
+    EXPECT_TRUE(moduleNameList[3] == "name4");
+}
+
 } // namespace AppExecFwk
 } // namespace OHOS

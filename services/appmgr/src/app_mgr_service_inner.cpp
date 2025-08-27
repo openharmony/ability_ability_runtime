@@ -1810,16 +1810,7 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     ApplicationTerminatedSendProcessEvent(appRecord);
     taskHandler_->CancelTask("DELAY_KILL_PROCESS_" + std::to_string(recordId));
     auto uid = appRecord->GetUid();
-    bool foreground = appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND ||
-        appRecord->GetState() == ApplicationState::APP_STATE_FOCUS;
-    std::string killReason = appRecord->GetKillReason().empty() ? "Kill Reason:app exit" : appRecord->GetKillReason();
-    auto result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_PID, std::to_string(eventInfo.pid), EVENT_KEY_PROCESS_NAME, eventInfo.processName,
-        EVENT_KEY_MESSAGE, killReason, EVENT_KEY_FOREGROUND, foreground);
-    TAG_LOGW(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send [FRAMEWORK,PROCESS_KILL], pid=%{public}d,"
-        " processName=%{public}s, msg=%{public}s, FOREGROUND = %{public}d",
-        result, eventInfo.pid, eventInfo.processName.c_str(), killReason.c_str(), foreground);
+    SendProcessKillEvent(appRecord, "Kill Reason:app exit");
     NotifyAppRunningStatusEvent(appRecord->GetBundleName(), uid, AbilityRuntime::RunningStatus::APP_RUNNING_STOP);
 }
 
@@ -2991,6 +2982,28 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string&
     return KillProcessByPidInner(pid, reason, killReason, appRecord, isKillPrecedeStart);
 }
 
+void AppMgrServiceInner::SendProcessKillEvent(std::shared_ptr<AppRunningRecord> appRecord,
+    const std::string &defaultReason)
+{
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no appRecord");
+        return;
+    }
+    AAFwk::EventInfo eventInfo;
+    SetKilledEventInfo(appRecord, eventInfo);
+    std::string newReason = appRecord->GetKillReason().empty() ? defaultReason : appRecord->GetKillReason();
+    bool foreground = appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND ||
+        appRecord->GetState() == ApplicationState::APP_STATE_FOCUS;
+    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
+    int result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PID, std::to_string(eventInfo.pid),
+        EVENT_KEY_PROCESS_NAME, eventInfo.processName, EVENT_KEY_MESSAGE, newReason,
+        EVENT_KEY_FOREGROUND, foreground);
+    TAG_LOGW(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
+        "%{public}d, processName=%{public}s, msg=%{public}s, FOREGROUND=%{public}d",
+        result, eventInfo.pid, eventInfo.processName.c_str(), newReason.c_str(), foreground);
+}
+
 int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::string& reason,
     const std::string& killReason, std::shared_ptr<AppRunningRecord> appRecord, bool isKillPrecedeStart)
 {
@@ -3014,31 +3027,17 @@ int32_t AppMgrServiceInner::KillProcessByPidInner(const pid_t pid, const std::st
                 pid, ret, killReason.c_str());
         }
     }
-
     if (!appRecord) {
-        TAG_LOGW(AAFwkTag::APPMGR, "nullptr appRecord");
+        TAG_LOGW(AAFwkTag::APPMGR, "nullptr");
         return ret;
     }
 
-    AAFwk::EventInfo eventInfo;
-    SetKilledEventInfo(appRecord, eventInfo);
     appRecord->SetKillReason(reason);
     appRecord->SetIsKillPrecedeStart(isKillPrecedeStart);
     if (ret >= 0) {
         AddToKillProcessMap(appRecord->GetProcessName());
     }
     DelayedSingleton<CacheProcessManager>::GetInstance()->OnProcessKilled(appRecord);
-    std::string newReason = appRecord->GetKillReason().empty() ? killReason : appRecord->GetKillReason();
-    bool foreground = appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND ||
-        appRecord->GetState() == ApplicationState::APP_STATE_FOCUS;
-    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
-    int result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PID, std::to_string(eventInfo.pid),
-        EVENT_KEY_PROCESS_NAME, eventInfo.processName, EVENT_KEY_MESSAGE, newReason,
-        EVENT_KEY_FOREGROUND, foreground);
-    TAG_LOGW(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
-        "%{public}d, processName=%{public}s, msg=%{public}s, FOREGROUND=%{public}d, ret=%{public}d",
-        result, pid, eventInfo.processName.c_str(), newReason.c_str(), foreground, ret);
     return ret;
 }
 
@@ -4973,6 +4972,7 @@ void AppMgrServiceInner::TerminateApplication(const std::shared_ptr<AppRunningRe
             CHECK_POINTER_AND_RETURN_LOG(innerService, "get appMgrServiceInner fail");
             TAG_LOGI(AAFwkTag::APPMGR, "killProcessByPid %{public}d, uid: %{public}d", pid, uid);
             int32_t result = innerService->KillProcessByPid(pid, "TerminateApplication");
+            innerService->SendProcessKillEvent(appRecord, "TerminateApplication");
             innerService->SendProcessExitEvent(appRecord);
             if (result < 0) {
                 TAG_LOGE(AAFwkTag::APPMGR, "killProcessByPid kill process fail");

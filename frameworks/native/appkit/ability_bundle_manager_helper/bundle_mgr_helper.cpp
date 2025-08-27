@@ -258,7 +258,7 @@ sptr<IBundleMgr> BundleMgrHelper::Connect(bool checkBmsReady)
             return nullptr;
         }
 
-        sptr<IRemoteObject> remoteObject_ = systemAbilityManager->CheckSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+        sptr<IRemoteObject> remoteObject_ = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
         if (remoteObject_ == nullptr || (bundleMgr_ = iface_cast<IBundleMgr>(remoteObject_)) == nullptr) {
             TAG_LOGE(AAFwkTag::BUNDLEMGRHELPER, "null remoteObject_ or bundleMgr_");
             return nullptr;

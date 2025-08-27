@@ -23,12 +23,12 @@
 #include <sstream>
 #include "app_mgr_interface.h"
 #include "batch_uri.h"
+#include "file_uri_distribution_utils.h"
 #include "istorage_manager.h"
 #include "tokenid_permission.h"
 #include "uri.h"
 #include "uri_permission_manager_stub.h"
 #include "uri_permission_raw_data.h"
-#include "uri_permission_utils.h"
 #include "access_token.h"
 
 #ifdef ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER
