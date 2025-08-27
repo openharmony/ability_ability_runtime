@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,19 +98,10 @@ HWTEST_F(UIServiceHostStubTest, OnRemoteRequest_0200, TestSize.Level1)
     data.WriteInterfaceToken(UIServiceHostProxy::GetDescriptor());
     data.WriteParcelable(&want);
 
-    if (!data.WriteString(name)) {
-        return;
-    }
-
-    if (!data.WriteString(jsonPath)) {
-        return;
-    }
-    if (!data.WriteString(dataStr)) {
-        return;
-    }
-    if (!data.WriteString(extraData)) {
-        return;
-    }
+    ASSERT_TRUE(data.WriteString(name));
+    ASSERT_TRUE(data.WriteString(jsonPath));
+    ASSERT_TRUE(data.WriteString(dataStr));
+    ASSERT_TRUE(data.WriteString(extraData));
     
     auto result = stub->OnRemoteRequest(IUIServiceHost::SEND_DATA, data, reply, option);
     EXPECT_EQ(result, NO_ERROR);

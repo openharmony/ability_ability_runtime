@@ -23,12 +23,16 @@
 #include <regex>
 #include <unistd.h>
 
+#include "bundle_constants.h"
 #include "constants.h"
 #include "ets_interface.h"
 #include "file_path_utils.h"
 #include "hilog_tag_wrapper.h"
+#include "hdc_register.h"
 #include "hybrid_js_module_reader.h"
 #include "nocopyable.h"
+#include "parameters.h"
+#include "static_core/plugins/ets/runtime/ets_namespace_manager.h"
 
 #ifdef SUPPORT_SCREEN
 #include "ace_forward_compatibility.h"
@@ -308,6 +312,7 @@ ETSRuntime::~ETSRuntime()
 {
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "~ETSRuntime called");
     Deinitialize();
+    StopDebugMode();
 }
 
 void ETSRuntime::Deinitialize()
@@ -324,7 +329,7 @@ bool ETSRuntime::CreateEtsEnv(const Options &options)
         return false;
     }
 
-    if (!g_etsEnvFuncs->Initialize()) {
+    if (!g_etsEnvFuncs->Initialize(options.eventRunner, options.isStartWithDebug)) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Initialize failed");
         return false;
     }
@@ -488,6 +493,111 @@ bool ETSRuntime::PreloadSystemClass(const char *className)
     }
     g_etsEnvFuncs->PreloadSystemClass(className);
     return true;
+}
+
+void ETSRuntime::StartDebugMode(const DebugOption dOption)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "localDebug %{public}d", dOption.isDebugFromLocal);
+    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "developer Mode false");
+        return;
+    }
+    // Set instance id to tid after the first instance.
+    instanceId_ = static_cast<uint32_t>(getproctid());
+
+    bool isStartWithDebug = dOption.isStartWithDebug;
+    bool isDebugApp = dOption.isDebugApp;
+    std::string appProvisionType = dOption.appProvisionType;
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "Ark VM is starting debug mode [%{public}s]", isStartWithDebug ? "break" : "normal");
+    const std::string bundleName = dOption.bundleName;
+    uint32_t instanceId = instanceId_;
+    std::string inputProcessName = bundleName != dOption.processName ? dOption.processName : "";
+    HdcRegister::DebugRegisterMode debugMode = HdcRegister::DebugRegisterMode::HDC_DEBUG_REG;
+    HdcRegister::Get().StartHdcRegister(bundleName, inputProcessName, isDebugApp, debugMode,
+        [bundleName, isStartWithDebug, instanceId, isDebugApp, appProvisionType]
+        (int socketFd, std::string option) {
+        TAG_LOGI(AAFwkTag::ETSRUNTIME, "HdcRegister msg, fd= %{public}d, option= %{public}s", socketFd, option.c_str());
+        // system is debuggable when const.secure is false and const.debuggable is true
+        bool isSystemDebuggable = system::GetBoolParameter("const.secure", true) == false &&
+            system::GetBoolParameter("const.debuggable", false) == true;
+        // Don't start any server if (system not in debuggable mode) and app is release version
+        // Starting ConnectServer in release app on debuggable system is only for debug mode, not for profiling mode.
+        if ((!isSystemDebuggable) && appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "not support release app");
+            return;
+        }
+        if (option.find(DEBUGGER) == std::string::npos) {
+            // if has old connect server, stop it
+            if (g_etsEnvFuncs == nullptr || g_etsEnvFuncs->BroadcastAndConnect == nullptr) {
+                TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or BroadcastAndConnect");
+                return;
+            }
+            g_etsEnvFuncs->BroadcastAndConnect(bundleName, socketFd);
+        } else {
+            if (appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE) {
+                TAG_LOGE(AAFwkTag::ETSRUNTIME, "not support release app");
+                return;
+            }
+            if (g_etsEnvFuncs == nullptr || g_etsEnvFuncs->StartDebuggerForSocketPair == nullptr) {
+                TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or StartDebuggerForSocketPair");
+                return;
+            }
+            g_etsEnvFuncs->StartDebuggerForSocketPair(option, socketFd);
+        }
+    });
+    DebuggerConnectionHandler(isDebugApp, isStartWithDebug);
+}
+
+void ETSRuntime::DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug)
+{
+    auto dTask = nullptr;
+    if (jsRuntime_ == nullptr) {
+        TAG_LOGD(AAFwkTag::ETSRUNTIME, "jsRuntime_ is nullptr");
+        return;
+    }
+    if (g_etsEnvFuncs == nullptr || g_etsEnvFuncs->NotifyDebugMode == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs or NotifyDebugMode");
+        return;
+    }
+    if (jsRuntime_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null js runtime");
+        return;
+    }
+    auto &jsRuntimePoint = (static_cast<AbilityRuntime::JsRuntime &>(*jsRuntime_));
+    auto vm = jsRuntimePoint.GetEcmaVm();
+    if (vm == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null js vm");
+        return;
+    }
+    g_etsEnvFuncs->NotifyDebugMode(getproctid(), instanceId_, isStartWithDebug, vm);
+}
+
+void ETSRuntime::StopDebugMode()
+{
+    if (g_etsEnvFuncs == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null g_etsEnvFuncs");
+        return;
+    }
+    if (g_etsEnvFuncs->RemoveInstance == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null RemoveInstance");
+        return;
+    }
+    g_etsEnvFuncs->RemoveInstance(instanceId_);
+    if (g_etsEnvFuncs->StopDebugMode == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null StopDebugMode");
+        return;
+    }
+    if (jsRuntime_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null js runtime");
+        return;
+    }
+    auto &jsRuntimePoint = (static_cast<AbilityRuntime::JsRuntime &>(*jsRuntime_));
+    auto vm = jsRuntimePoint.GetEcmaVm();
+    if (vm == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null js vm");
+        return;
+    }
+    g_etsEnvFuncs->StopDebugMode(vm);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

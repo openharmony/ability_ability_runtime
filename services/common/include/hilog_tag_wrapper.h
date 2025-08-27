@@ -18,12 +18,11 @@
 
 #include <cinttypes>
 #include <map>
-#include <string>
 
 #include "hilog/log.h"
 
 #ifndef AAFWK_FUNC_FMT
-#define AAFWK_FUNC_FMT "[%{public}s]"
+#define AAFWK_FUNC_FMT "[%{public}s:%{public}d]"
 #endif
 
 #ifndef AAFWK_FILE_NAME
@@ -31,14 +30,8 @@
     (__builtin_strrchr(__FILE_NAME__, '/') ? __builtin_strrchr(__FILE_NAME__, '/') + 1 : __FILE_NAME__)
 #endif
 
-#ifndef AAFWK_FILE_BASE_NAME
-#define AAFWK_FILE_BASE_NAME \
-    (std::string(AAFWK_FILE_NAME).find_last_of('.') != std::string::npos ? \
-    std::string(AAFWK_FILE_NAME).substr(0, std::string(AAFWK_FILE_NAME).find_last_of('.')).c_str() : AAFWK_FILE_NAME)
-#endif
-
 #ifndef AAFWK_FUNC_INFO
-#define AAFWK_FUNC_INFO  AAFWK_FILE_BASE_NAME
+#define AAFWK_FUNC_INFO AAFWK_FILE_NAME, __LINE__
 #endif
 
 
@@ -105,8 +98,8 @@ enum class AAFwkLogTag : uint32_t {
 
     LOCAL_CALL = DEFAULT + 0x60, // 0xD001360
     SA_INTERCEPTOR,
-
-    APP_SERVICE_EXT = DEFAULT + 0x70, // 0xD001370
+    APP_SERVICE_EXT,
+    VERTICAL_PANEL,
 
     END = 256,               // N.B. never use it
 };
@@ -184,7 +177,7 @@ inline const char* GetDomainName5(AAFwkLogTag tag)
 
 inline const char* GetDomainName6(AAFwkLogTag tag)
 {
-    const char* tagNames[] = { "LocalCall" };
+    const char* tagNames[] = { "LocalCall", "SaInterceptor", "AppServiceExt", "VerticalPanel" };
     uint32_t offset = GetOffset(tag, AAFwkLogTag::LOCAL_CALL);
     if (offset >= sizeof(tagNames) / sizeof(const char*)) {
         return "UN";

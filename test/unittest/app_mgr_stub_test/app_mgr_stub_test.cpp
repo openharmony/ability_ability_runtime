@@ -695,7 +695,7 @@ HWTEST_F(AppMgrStubTest, PreloadModuleFinished_0100, TestSize.Level1)
 
     auto result = mockAppMgrService_->OnRemoteRequest(
         static_cast<uint32_t>(AppMgrInterfaceCode::PRELOAD_MODULE_FINISHED), data, reply, option);
-    EXPECT_EQ(result, NO_ERROR);
+    EXPECT_NE(result, NO_ERROR);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 

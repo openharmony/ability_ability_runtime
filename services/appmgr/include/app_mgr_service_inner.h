@@ -1579,6 +1579,8 @@ public:
      */
     int VerifyKillProcessPermission(const std::string &bundleName) const;
 
+    void SendProcessKillEvent(std::shared_ptr<AppRunningRecord> appRecord, const std::string &defaultReason);
+
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);

@@ -826,6 +826,43 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessExitEvent_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SendProcessKillEvent_001
+ * @tc.desc: Verify that the SendProcessKillEvent interface calls normally
+ * @tc.type: FUNC
+ * @tc.Function: SendProcessKillEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessKillEvent_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessKillEvent_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->Init();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    appMgrServiceInner->SendProcessKillEvent(appRecord, "OnRemoteDied");
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessKillEvent_001 end");
+}
+
+/**
+ * @tc.name: SendProcessKillEvent_002
+ * @tc.desc: Verify that the SendProcessKillEvent interface calls normally
+ * @tc.type: FUNC
+ * @tc.Function: SendProcessKillEvent
+ * @tc.SubFunction: NA
+ * @tc.EnvConditions: NA
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessKillEvent_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessKillEvent_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    appMgrServiceInner->Init();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    appMgrServiceInner->SendProcessKillEvent(nullptr, "OnRemoteDied");
+    TAG_LOGI(AAFwkTag::TEST, "SendProcessKillEvent_002 end");
+}
+
+/**
  * @tc.name: CheckIsolationMode_001
  * @tc.desc: CheckIsolationMode
  * @tc.type: FUNC

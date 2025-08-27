@@ -144,6 +144,7 @@ HWTEST_F(StartupManagerTest, LoadAppStartupTaskConfig_0100, Function | MediumTes
     EXPECT_EQ(ret, ERR_OK);
     StartupTaskInfo startupTaskInfo;
     startupTaskInfo.name = "test_name";
+    startupTaskInfo.moduleType = AppExecFwk::ModuleType::ENTRY;
     startupManager->pendingStartupTaskInfos_.emplace_back(startupTaskInfo);
     ret = startupManager->LoadAppStartupTaskConfig(needRunAutoStartupTask);
     EXPECT_EQ(ret, ERR_OK);
@@ -952,6 +953,36 @@ HWTEST_F(StartupManagerTest, AnalyzeAppStartupTaskInner_0200, Function | MediumT
     ret = startupManager->AnalyzeAppStartupTaskInner(info, appStartupTaskInnerJson3, pendingStartupTaskInfos);
     EXPECT_EQ(ret, false);
     GTEST_LOG_(INFO) << "StartupManagerTest AnalyzeAppStartupTaskInner_0200 end";
+}
+
+/**
+ * @tc.name: AnalyzeAppStartupTaskInner_0300
+ * @tc.type: FUNC
+ * @tc.Function: AnalyzeAppStartupTaskInner
+ */
+HWTEST_F(StartupManagerTest, AnalyzeAppStartupTaskInner_0300, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "StartupManagerTest AnalyzeAppStartupTaskInner_0300 start";
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    EXPECT_TRUE(startupManager != nullptr);
+    std::string name = "test_name";
+    ModuleStartupConfigInfo info(name, "", "", AppExecFwk::ModuleType::ENTRY, false);
+    std::vector<StartupTaskInfo> pendingStartupTaskInfos;
+    nlohmann::json appStartupTaskInnerJson = R"(
+        {
+            "srcEntry": "test_entry",
+            "name": "test_name"
+        }
+    )"_json;
+    bool ret = startupManager->AnalyzeAppStartupTaskInner(info, appStartupTaskInnerJson, pendingStartupTaskInfos);
+    EXPECT_EQ(ret, true);
+    ASSERT_EQ(pendingStartupTaskInfos.size(), 1);
+    EXPECT_EQ(pendingStartupTaskInfos[0].moduleName, name);
+    EXPECT_EQ(pendingStartupTaskInfos[0].moduleType, AppExecFwk::ModuleType::ENTRY);
+    EXPECT_EQ(pendingStartupTaskInfos[0].moduleType, AppExecFwk::ModuleType::ENTRY);
+    EXPECT_EQ(pendingStartupTaskInfos[0].srcEntry, "test_entry");
+    EXPECT_EQ(pendingStartupTaskInfos[0].name, "test_name");
+    GTEST_LOG_(INFO) << "StartupManagerTest AnalyzeAppStartupTaskInner_0300 end";
 }
 
 /**

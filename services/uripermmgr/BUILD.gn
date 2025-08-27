@@ -30,10 +30,10 @@ config("upms_config") {
 libupms_sources = [
   "src/batch_uri.cpp",
   "src/file_permission_manager.cpp",
+  "src/file_uri_distribution_utils.cpp",
   "src/tokenid_permission.cpp",
   "src/uri_permission_manager_service.cpp",
   "src/uri_permission_manager_stub_impl.cpp",
-  "src/uri_permission_utils.cpp",
 ]
 
 #build so

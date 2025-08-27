@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { IntentInfo } from './IntentContent'
+import { IntentInfo } from './IntentContent';
 
 @Component
 export struct DetailItem {
@@ -20,7 +20,6 @@ export struct DetailItem {
 
   build() {
     Column() {
-
       Text($r('app.string.Detail_subtitle_ytxx'))
         .fontFamily('HarmonyHeiTi-Medium')
         .fontSize(14)

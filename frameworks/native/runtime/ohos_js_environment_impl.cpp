@@ -97,9 +97,11 @@ OHOSJsEnvironmentImpl::~OHOSJsEnvironmentImpl()
 void OHOSJsEnvironmentImpl::PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime)
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
-    if (eventHandler_ != nullptr) {
-        eventHandler_->PostTask(task, name, delayTime);
+    if (eventHandler_ == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null eventHandler_");
+        return;
     }
+    eventHandler_->PostTask(task, name, delayTime);
 }
 
 void OHOSJsEnvironmentImpl::PostSyncTask(const std::function<void()>& task, const std::string& name)
