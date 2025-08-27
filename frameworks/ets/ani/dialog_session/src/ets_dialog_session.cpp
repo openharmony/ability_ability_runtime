@@ -67,11 +67,15 @@ static void SendDialogResult(
 static ani_object GetDialogSessionInfo(ani_env *env, ani_string etsDialogSessionId)
 {
     TAG_LOGD(AAFwkTag::DIALOG, "call GetDialogSessionInfo");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "null env");
+        return nullptr;
+    }
     std::string dialogSessionId = "";
     if (!AppExecFwk::GetStdString(env, etsDialogSessionId, dialogSessionId)) {
         TAG_LOGE(AAFwkTag::DIALOG, "Failed unwrap dialogSessionId");
         EtsErrorUtil::ThrowInvalidParamError(env, "Parameter error: dialogSessionId must be a valid string.");
-        return nullptr;
+        return AppExecFwk::CreateEtsNull(env);
     }
 
     sptr<AAFwk::DialogSessionInfo> dialogSessionInfo;
@@ -81,7 +85,7 @@ static ani_object GetDialogSessionInfo(ani_env *env, ani_string etsDialogSession
     if (errCode != ERR_OK || dialogSessionInfo == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG,
             "GetDialogSessionInfo failed with incorrect return value or empty dialogSessionInfo");
-        return nullptr;
+        return AppExecFwk::CreateEtsNull(env);
     }
 #endif // SUPPORT_SCREEN
     return AppExecFwk::WrapDialogSessionInfo(env, *dialogSessionInfo);
