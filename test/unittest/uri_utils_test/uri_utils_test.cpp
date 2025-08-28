@@ -741,11 +741,12 @@ HWTEST_F(UriUtilsTest, GrantUriPermissionForServiceExtension_001, TestSize.Level
 {
     AbilityRequest abilityRequest;
     abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::FORM;
-    UriUtils::GetInstance().GrantUriPermissionForServiceExtension(abilityRequest);
+    auto ret = UriUtils::GetInstance().GrantUriPermissionForServiceExtension(abilityRequest);
+    EXPECT_EQ(ret, false);
 
     abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
-    UriUtils::GetInstance().GrantUriPermissionForServiceExtension(abilityRequest);
-    EXPECT_EQ(abilityRequest.abilityInfo.extensionAbilityType, AppExecFwk::ExtensionAbilityType::SERVICE);
+    ret = UriUtils::GetInstance().GrantUriPermissionForServiceExtension(abilityRequest);
+    EXPECT_EQ(ret, true);
 }
 
 /*
@@ -758,11 +759,12 @@ HWTEST_F(UriUtilsTest, GrantUriPermissionForUIOrServiceExtension_001, TestSize.L
 {
     AbilityRequest abilityRequest;
     abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::FORM;
-    UriUtils::GetInstance().GrantUriPermissionForUIOrServiceExtension(abilityRequest);
+    auto ret = UriUtils::GetInstance().GrantUriPermissionForUIOrServiceExtension(abilityRequest);
+    EXPECT_EQ(ret, false);
 
     abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SERVICE;
-    UriUtils::GetInstance().GrantUriPermissionForUIOrServiceExtension(abilityRequest);
-    EXPECT_EQ(abilityRequest.abilityInfo.extensionAbilityType, AppExecFwk::ExtensionAbilityType::SERVICE);
+    ret = UriUtils::GetInstance().GrantUriPermissionForUIOrServiceExtension(abilityRequest);
+    EXPECT_EQ(ret, true);
 }
 
 /*

@@ -45,9 +45,9 @@ public:
 #ifdef SUPPORT_UPMS
     void GrantDmsUriPermission(Want &want, uint32_t callerTokenId, std::string targetBundleName, int32_t appIndex);
 
-    void GrantUriPermissionForServiceExtension(const AbilityRequest &abilityRequest);
+    bool GrantUriPermissionForServiceExtension(const AbilityRequest &abilityRequest);
 
-    void GrantUriPermissionForUIOrServiceExtension(const AbilityRequest &abilityRequest);
+    bool GrantUriPermissionForUIOrServiceExtension(const AbilityRequest &abilityRequest);
 
     void GrantUriPermission(Want &want, std::string targetBundleName, int32_t appIndex,
         bool isSandboxApp, uint32_t callerTokenId, int32_t collaboratorType);
