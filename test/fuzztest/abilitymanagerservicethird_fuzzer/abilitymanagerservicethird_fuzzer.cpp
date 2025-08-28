@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,7 +68,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     int32_t int32Param = static_cast<int32_t>(GetU32Data(data));
     int64_t int64Param = static_cast<int64_t>(GetU32Data(data));
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
-    bool isAutoStartEnabled = false;
 
     // fuzz for AbilityManagerService
     auto abilityms = std::make_shared<AbilityManagerService>();
@@ -84,7 +83,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityms->GetConnectManagerByUserId(int32Param);
     abilityms->GetDataAbilityManagerByUserId(int32Param);
     abilityms->GetConnectManagerByToken(token);
-    abilityms->GetAutoStartupStatusForSelf(isAutoStartEnabled);
 
     return true;
 }

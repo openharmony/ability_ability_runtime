@@ -722,9 +722,6 @@ int AbilityManagerStub::OnRemoteRequestInnerSeventeenth(uint32_t code, MessagePa
     if (interfaceCode == AbilityManagerInterfaceCode::QUERY_ALL_AUTO_STARTUP_APPLICATION) {
         return QueryAllAutoStartupApplicationsInner(data, reply);
     }
-    if (interfaceCode == AbilityManagerInterfaceCode::GET_AUTO_STARTUP_STATUS_FOR_SELF) {
-        return GetAutoStartupStatusForSelfInner(data, reply);
-    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -3750,19 +3747,6 @@ int32_t AbilityManagerStub::QueryAllAutoStartupApplicationsInner(MessageParcel &
         }
     }
     return NO_ERROR;
-}
-
-int32_t AbilityManagerStub::GetAutoStartupStatusForSelfInner(MessageParcel &data, MessageParcel &reply)
-{
-    bool isAutoStartEnabled = false;
-    int32_t result = GetAutoStartupStatusForSelf(isAutoStartEnabled);
-    if (result == ERR_OK) {
-        if (!reply.WriteBool(isAutoStartEnabled)) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write fail");
-            return ERR_INVALID_VALUE;
-        }
-    }
-    return result;
 }
 
 int AbilityManagerStub::RegisterSessionHandlerInner(MessageParcel &data, MessageParcel &reply)

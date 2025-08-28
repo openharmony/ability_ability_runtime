@@ -87,13 +87,11 @@ void AbilityStartupServiceFuzztest(bool boolParam, std::string &stringParam, int
 
     std::vector<AutoStartupInfo> vecs;
     vecs.emplace_back(info);
-    bool isAutoStartEnabled = false;
     service->QueryAllAutoStartupApplications(vecs, int32Param);
     service->QueryAllAutoStartupApplicationsWithoutPermission(vecs, int32Param);
     service->DeleteAutoStartupData(stringParam, int32Param);
     service->CheckAutoStartupData(stringParam, int32Param);
     service->ExecuteCallbacks(boolParam, info);
-    service->GetAutoStartupStatusForSelf(int32Param, isAutoStartEnabled);
 }
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)

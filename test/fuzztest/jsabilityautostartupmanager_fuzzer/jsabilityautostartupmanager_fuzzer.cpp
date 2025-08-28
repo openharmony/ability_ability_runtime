@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,6 @@ void JsAbilityAutostartupManagerFuzztest1(bool boolParam, std::string &stringPar
     mgr->SetApplicationAutoStartup(env, info); // branch
     mgr->CancelApplicationAutoStartup(env, info); // branch
     mgr->QueryAllAutoStartupApplications(env, info); // branch
-    mgr->GetAutoStartupStatusForSelf(env, info);
 }
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)

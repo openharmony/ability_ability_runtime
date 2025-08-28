@@ -3636,33 +3636,6 @@ HWTEST_F(AbilityManagerStubTest, QueryAllAutoStartupApplicationsInner_0100, Test
 }
 
 /**
- * @tc.name: AbilityManagerStubTest_GetAutoStartupStatusForSelfInner_0100
- * @tc.desc: Test the state of GetAutoStartupStatusForSelfInner
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerStubTest, GetAutoStartupStatusForSelfInner_0100, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    auto result = stub_->GetAutoStartupStatusForSelfInner(data, reply);
-    EXPECT_EQ(result, NO_ERROR);
-}
-
-/**
- * @tc.name: AbilityManagerStubTest_GetAutoStartupStatusForSelfInner_0200
- * @tc.desc: Test the state of GetAutoStartupStatusForSelfInner
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerStubTest, GetAutoStartupStatusForSelfInner_0200, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    EXPECT_CALL(*stub_, GetAutoStartupStatusForSelf(_)).WillOnce(Return(ERR_INVALID_VALUE));
-    auto result = stub_->GetAutoStartupStatusForSelfInner(data, reply);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
-}
-
-/**
  * @tc.name: GetUIExtensionRootHostInfo_0100
  * @tc.desc: GetUIExtensionRootHostInfo
  * @tc.type: FUNC
