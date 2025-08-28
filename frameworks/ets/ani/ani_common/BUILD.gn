@@ -44,6 +44,7 @@ ohos_shared_library("ani_common") {
   sources = [
     "src/ani_common_ability_result.cpp",
     "src/ani_common_ability_state_data.cpp",
+    "src/ani_common_cache_mgr.cpp",
     "src/ani_common_configuration.cpp",
     "src/ani_common_execute_param.cpp",
     "src/ani_common_execute_result.cpp",
