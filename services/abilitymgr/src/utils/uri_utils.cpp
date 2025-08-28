@@ -492,7 +492,7 @@ void UriUtils::PublishFileOpenEvent(const Want &want)
 }
 
 #ifdef SUPPORT_UPMS
-void UriUtils::GrantUriPermissionForServiceExtension(const AbilityRequest &abilityRequest)
+bool UriUtils::GrantUriPermissionForServiceExtension(const AbilityRequest &abilityRequest)
 {
     if (IsServiceExtensionType(abilityRequest.abilityInfo.extensionAbilityType)) {
         auto &abilityInfo = abilityRequest.abilityInfo;
@@ -501,10 +501,12 @@ void UriUtils::GrantUriPermissionForServiceExtension(const AbilityRequest &abili
             static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));
         GrantUriPermission(want, abilityInfo.bundleName, abilityInfo.applicationInfo.appIndex, false, callerTokenId,
             abilityRequest.collaboratorType);
+        return true;
     }
+    return false;
 }
 
-void UriUtils::GrantUriPermissionForUIOrServiceExtension(const AbilityRequest &abilityRequest)
+bool UriUtils::GrantUriPermissionForUIOrServiceExtension(const AbilityRequest &abilityRequest)
 {
     auto extensionType = abilityRequest.abilityInfo.extensionAbilityType;
     if (UIExtensionUtils::IsUIExtension(extensionType) || IsServiceExtensionType(extensionType)) {
@@ -514,7 +516,9 @@ void UriUtils::GrantUriPermissionForUIOrServiceExtension(const AbilityRequest &a
             static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));
         GrantUriPermission(want, abilityInfo.bundleName, abilityInfo.applicationInfo.appIndex, false, callerTokenId,
             abilityRequest.collaboratorType);
+        return true;
     }
+    return false;
 }
 #endif // SUPPORT_UPMS
 
