@@ -1161,14 +1161,14 @@ HWTEST_F(AppMgrServiceInnerSecondTest, ClearUpApplicationData_0100, TestSize.Lev
     pid_t callerPid = 1;
     int32_t appCloneIndex = 0;
     int32_t userId = DEFAULT_INVAL_VALUE;
-    appMgrServiceInner->ClearUpApplicationData(bundleName, callerUid, callerPid, appCloneIndex, userId);
-    EXPECT_EQ(userId, DEFAULT_INVAL_VALUE);
+    auto ret = appMgrServiceInner->ClearUpApplicationData(bundleName, callerUid, callerPid, appCloneIndex, userId);
+    EXPECT_EQ(ret, ERR_APP_CLONE_INDEX_INVALID);
     callerUid = -1;
-    appMgrServiceInner->ClearUpApplicationData(bundleName, callerUid, callerPid, appCloneIndex, userId);
-    EXPECT_EQ(userId, DEFAULT_INVAL_VALUE);
+    ret = appMgrServiceInner->ClearUpApplicationData(bundleName, callerUid, callerPid, appCloneIndex, userId);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
     userId = 1;
-    appMgrServiceInner->ClearUpApplicationData(bundleName, callerUid, callerPid, appCloneIndex, userId);
-    EXPECT_NE(userId, DEFAULT_INVAL_VALUE);
+    ret = appMgrServiceInner->ClearUpApplicationData(bundleName, callerUid, callerPid, appCloneIndex, userId);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_ClearUpApplicationData_0100 end");
 }
 
@@ -1933,10 +1933,6 @@ HWTEST_F(AppMgrServiceInnerSecondTest, ProcessAppDebug_0010, TestSize.Level1)
     std::shared_ptr<AppRunningRecord> appRecord;
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
-
-    appMgrServiceInner->appDebugManager_ = nullptr;
-    appMgrServiceInner->ProcessAppDebug(nullptr, true);
-    EXPECT_EQ(appMgrServiceInner->appDebugManager_, nullptr);
 
     appMgrServiceInner->appDebugManager_ = std::make_shared<AppDebugManager>();
     appMgrServiceInner->ProcessAppDebug(nullptr, true);

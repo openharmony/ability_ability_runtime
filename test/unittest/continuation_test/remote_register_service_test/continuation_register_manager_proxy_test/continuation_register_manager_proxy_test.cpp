@@ -628,9 +628,7 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRegisterManagerProxy_
     std::shared_ptr<MoclRequest> request = std::make_shared<MoclRequest>();
     auto continuationRegisterManagerProxy = std::make_shared<ContinuationRegisterManagerProxy>(context);
     continuationRegisterManagerProxy->continuatinConnector_ = nullptr;
-    EXPECT_TRUE(continuationRegisterManagerProxy->continuatinConnector_ == nullptr);
     continuationRegisterManagerProxy->SendRequest(context, request);
-
     EXPECT_TRUE(continuationRegisterManagerProxy->continuatinConnector_ != nullptr);
 }
 
