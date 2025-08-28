@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <filesystem>
 #include "cj_runtime.h"
 #include "runtime.h"
 #include "cj_mock_runtime.h"
@@ -144,8 +145,10 @@ HWTEST_F(CjRuntimeTest, CjRuntimeRegisterCangjieCallback_001, TestSize.Level2)
 {
     AppLibPathMap path {};
     CJRuntime::SetAppLibPath(path);
+    const std::string runtimePath = "/system/lib64/platformsdk/cjsdk/runtime/libcangjie-runtime.so";
+    bool fileExists = std::filesystem::exists(runtimePath);
     bool ret = CJRuntime::RegisterCangjieCallback();
-    EXPECT_TRUE(ret);
+    EXPECT_TRUE(ret == fileExists);
 }
 }  // namespace Runtime
 }  // namespace OHOS
