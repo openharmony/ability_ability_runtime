@@ -62,7 +62,7 @@ bool ChildProcessInfo::ReadFromParcel(Parcel &parcel)
     }
     bundleInfo = *info;
 
-    int32_t hspListSize;
+    int32_t hspListSize = 0;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, hspListSize);
     CONTAINER_SECURITY_VERIFY(parcel, hspListSize, &hspList);
     for (auto i = 0; i < hspListSize; i++) {
