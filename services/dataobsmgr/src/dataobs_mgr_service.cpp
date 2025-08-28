@@ -62,6 +62,7 @@ DataObsMgrService::DataObsMgrService()
     dataObsMgrInner_ = std::make_shared<DataObsMgrInner>();
     dataObsMgrInnerExt_ = std::make_shared<DataObsMgrInnerExt>();
     dataObsMgrInnerPref_ = std::make_shared<DataObsMgrInnerPref>();
+    permission_ = std::make_shared<DataShare::DataSharePermission>();
 }
 
 DataObsMgrService::~DataObsMgrService()
@@ -91,7 +92,21 @@ void DataObsMgrService::OnStart()
 bool DataObsMgrService::Init()
 {
     handler_ = TaskHandlerWrap::GetFfrtHandler();
+    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
     return true;
+}
+
+void DataObsMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+{
+    LOG_INFO("add system abilityid:%{public}d", systemAbilityId);
+    (void)deviceId;
+    if (permission_ == nullptr) {
+        return;
+    }
+    if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
+        permission_->SubscribeCommonEvent();
+    }
+    return;
 }
 
 void DataObsMgrService::OnStop()
@@ -280,7 +295,11 @@ int32_t DataObsMgrService::VerifyDataSharePermissionInner(Uri &uri, bool isRead,
     uint64_t fullTokenId = info.fullTokenId;
     int ret;
     bool isExtension = info.isExtension;
-    std::tie(ret, info.permission) = DataShare::DataSharePermission::GetUriPermission(uri,
+    if (permission_ == nullptr) {
+        LOG_ERROR("permission_ nullptr");
+        return COMMON_ERROR;
+    }
+    std::tie(ret, info.permission) = permission_->GetUriPermission(uri,
         info.userId, isRead, isExtension);
     if (ret != DataShare::E_OK) {
         info.errMsg.append(std::to_string(info.isExtension) + "_GetUriPermission");
