@@ -158,48 +158,11 @@ std::shared_ptr<AbilityStage> JsAbilityStage::Create(
     }
     FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "JsAbilityStage::Create");
     auto& jsRuntime = static_cast<JsRuntime&>(*runtime);
-    std::string srcPath(hapModuleInfo.name);
-    std::string moduleName(hapModuleInfo.moduleName);
-    moduleName.append("::").append("AbilityStage");
-    bool commonChunkFlag = UseCommonChunk(hapModuleInfo);
     RegisterStopPreloadSoCallback(jsRuntime);
-    /* temporary compatibility api8 + config.json */
-    if (!hapModuleInfo.isModuleJson) {
-        srcPath.append("/assets/js/");
-        if (hapModuleInfo.srcPath.empty()) {
-            srcPath.append("AbilityStage.abc");
-        } else {
-            srcPath.append(hapModuleInfo.srcPath);
-            srcPath.append("/AbilityStage.abc");
-        }
-        std::string key(moduleName);
-        key.append("::");
-        key.append(srcPath);
-        std::unique_ptr<NativeReference> moduleObj = nullptr;
-        if (jsRuntime.PopPreloadObj(key, moduleObj)) {
-            return std::make_shared<JsAbilityStage>(jsRuntime, std::move(moduleObj));
-        } else {
-            auto moduleObj = jsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
-                hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag);
-            return std::make_shared<JsAbilityStage>(jsRuntime, std::move(moduleObj));
-        }
-    }
-
-    std::unique_ptr<NativeReference> moduleObj;
-    srcPath.append("/");
-    if (!hapModuleInfo.srcEntrance.empty()) {
-        srcPath.append(hapModuleInfo.srcEntrance);
-        srcPath.erase(srcPath.rfind("."));
-        srcPath.append(".abc");
-        moduleObj = jsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
-            hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag);
-        TAG_LOGD(AAFwkTag::APPKIT, "srcPath is %{public}s", srcPath.c_str());
-    }
-    return std::make_shared<JsAbilityStage>(jsRuntime, std::move(moduleObj));
+    return std::make_shared<JsAbilityStage>(jsRuntime);
 }
 
-JsAbilityStage::JsAbilityStage(JsRuntime& jsRuntime, std::unique_ptr<NativeReference>&& jsAbilityStageObj)
-    : jsRuntime_(jsRuntime), jsAbilityStageObj_(std::move(jsAbilityStageObj))
+JsAbilityStage::JsAbilityStage(JsRuntime& jsRuntime) : jsRuntime_(jsRuntime)
 {}
 
 JsAbilityStage::~JsAbilityStage()
@@ -217,18 +180,48 @@ void JsAbilityStage::Init(const std::shared_ptr<Context> &context,
     const std::weak_ptr<AppExecFwk::OHOSApplication> application)
 {
     AbilityStage::Init(context, application);
+    SetShellContextRef(context);
+}
 
-    if (!context) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null context");
-        return;
+void JsAbilityStage::LoadModule(const AppExecFwk::HapModuleInfo &hapModuleInfo)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::APPKIT, "AbilityStage::LoadModule");
+    std::string srcPath(hapModuleInfo.name);
+    std::string moduleName(hapModuleInfo.moduleName);
+    moduleName.append("::").append("AbilityStage");
+    bool commonChunkFlag = UseCommonChunk(hapModuleInfo);
+    /* temporary compatibility api8 + config.json */
+    if (!hapModuleInfo.isModuleJson) {
+        srcPath.append("/assets/js/");
+        if (hapModuleInfo.srcPath.empty()) {
+            srcPath.append("AbilityStage.abc");
+        } else {
+            srcPath.append(hapModuleInfo.srcPath);
+            srcPath.append("/AbilityStage.abc");
+        }
+        std::string key(moduleName);
+        key.append("::");
+        key.append(srcPath);
+        std::unique_ptr<NativeReference> moduleObj = nullptr;
+        if (jsRuntime_.PopPreloadObj(key, moduleObj)) {
+            jsAbilityStageObj_ = std::move(moduleObj);
+        } else {
+            auto moduleObj = jsRuntime_.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
+                hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag);
+            jsAbilityStageObj_ = std::move(moduleObj);
+        }
+    } else if (!hapModuleInfo.srcEntrance.empty()) {
+        srcPath.append("/");
+        srcPath.append(hapModuleInfo.srcEntrance);
+        srcPath.erase(srcPath.rfind("."));
+        srcPath.append(".abc");
+        std::unique_ptr<NativeReference> moduleObj = jsRuntime_.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
+            hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag);
+        TAG_LOGD(AAFwkTag::APPKIT, "srcPath is %{public}s", srcPath.c_str());
+        jsAbilityStageObj_ = std::move(moduleObj);
     }
-
-    if (!jsAbilityStageObj_) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null stage");
-        return;
-    }
-
-    SetJsAbilityStage(context);
+    SetJsAbilityStage();
 }
 
 void JsAbilityStage::OnCreate(const AAFwk::Want &want) const
@@ -592,9 +585,9 @@ void JsAbilityStage::OnMemoryLevel(int32_t level)
 }
 
 int32_t JsAbilityStage::RunAutoStartupTask(const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
-    bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext)
+    bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext, bool preAbilityStageLoad)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    TAG_LOGD(AAFwkTag::APPKIT, "RunAutoStartupTask, pre:%{public}d", preAbilityStageLoad);
     isAsyncCallback = false;
     auto context = GetContext();
     if (!context) {
@@ -616,18 +609,23 @@ int32_t JsAbilityStage::RunAutoStartupTask(const std::function<void()> &callback
         return ERR_INVALID_VALUE;
     }
     if (!shellContextRef_) {
-        SetJsAbilityStage(stageContext);
+        SetShellContextRef(stageContext);
     }
     int32_t result = RegisterAppStartupTask(hapModuleInfo, want);
     if (result != ERR_OK) {
         return result;
     }
-    return RunAutoStartupTaskInner(callback, want, isAsyncCallback, hapModuleInfo->name);
+    return RunAutoStartupTaskInner(callback, want, isAsyncCallback, hapModuleInfo->name, preAbilityStageLoad);
 }
 
 int32_t JsAbilityStage::RegisterAppStartupTask(const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo,
     std::shared_ptr<AAFwk::Want> want)
 {
+    if (isStartupTaskRegistered_) {
+        TAG_LOGD(AAFwkTag::APPKIT, "app startup task already registered");
+        return ERR_OK;
+    }
+    isStartupTaskRegistered_ = true;
     std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
     if (startupManager == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null startupManager");
@@ -652,7 +650,20 @@ int32_t JsAbilityStage::RegisterAppStartupTask(const std::shared_ptr<AppExecFwk:
         TAG_LOGE(AAFwkTag::APPKIT, "load js appStartup config failed.");
         return ERR_INVALID_VALUE;
     }
+    return RegisterJsStartupTask(hapModuleInfo);
+}
 
+int32_t JsAbilityStage::RegisterJsStartupTask(std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfo)
+{
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    if (startupManager == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null startupManager");
+        return ERR_INVALID_VALUE;
+    }
+    if (hapModuleInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null hapModuleInfo");
+        return ERR_INVALID_VALUE;
+    }
     const std::vector<StartupTaskInfo> startupTaskInfos = startupManager->GetStartupTaskInfos(hapModuleInfo->name);
     for (const auto& item : startupTaskInfos) {
         std::shared_ptr<JsStartupTask> jsStartupTask;
@@ -675,13 +686,14 @@ int32_t JsAbilityStage::RegisterAppStartupTask(const std::shared_ptr<AppExecFwk:
         jsStartupTask->SetModuleName(item.moduleName);
         jsStartupTask->SetModuleType(item.moduleType);
         jsStartupTask->SetMatchRules(std::move(item.matchRules));
+        jsStartupTask->SetPreAbilityStageLoad(item.preAbilityStageLoad);
         startupManager->RegisterAppStartupTask(item.name, jsStartupTask);
     }
     return ERR_OK;
 }
 
 int32_t JsAbilityStage::RunAutoStartupTaskInner(const std::function<void()> &callback,
-    std::shared_ptr<AAFwk::Want> want, bool &isAsyncCallback, const std::string &moduleName)
+    std::shared_ptr<AAFwk::Want> want, bool &isAsyncCallback, const std::string &moduleName, bool preAbilityStageLoad)
 {
     std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
     if (startupManager == nullptr) {
@@ -689,7 +701,8 @@ int32_t JsAbilityStage::RunAutoStartupTaskInner(const std::function<void()> &cal
         return ERR_INVALID_VALUE;
     }
     std::shared_ptr<StartupTaskManager> startupTaskManager = nullptr;
-    int32_t result = startupManager->BuildAutoAppStartupTaskManager(want, startupTaskManager, moduleName);
+    int32_t result = startupManager->BuildAutoAppStartupTaskManager(want, startupTaskManager, moduleName,
+        preAbilityStageLoad);
     if (result != ERR_OK) {
         return result;
     }
@@ -704,7 +717,7 @@ int32_t JsAbilityStage::RunAutoStartupTaskInner(const std::function<void()> &cal
     }
     auto runAutoStartupCallback = std::make_shared<OnCompletedCallback>(
         [callback](const std::shared_ptr<StartupTaskResult> &) {
-            TAG_LOGI(AAFwkTag::APPKIT, "RunAutoStartupCallback");
+            TAG_LOGI(AAFwkTag::APPKIT, "OnCompletedCallback");
             callback();
         });
     result = startupTaskManager->Run(runAutoStartupCallback);
@@ -869,7 +882,7 @@ std::string JsAbilityStage::GetHapModuleProp(const std::string &propName) const
     return std::string();
 }
 
-void JsAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context)
+void JsAbilityStage::SetShellContextRef(std::shared_ptr<Context> context)
 {
     if (!context) {
         TAG_LOGE(AAFwkTag::APPKIT, "null context");
@@ -879,14 +892,6 @@ void JsAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context)
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
 
-    napi_value obj = nullptr;
-    if (jsAbilityStageObj_) {
-        obj = jsAbilityStageObj_->GetNapiValue();
-        if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-            TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
-            return;
-        }
-    }
     napi_value contextObj = CreateJsAbilityStageContext(env, context);
     shellContextRef_ = JsRuntime::LoadSystemModuleByEngine(env, "application.AbilityStageContext", &contextObj, 1);
     if (shellContextRef_ == nullptr) {
@@ -909,9 +914,6 @@ void JsAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context)
     napi_add_detached_finalizer(env, contextObj, DetachFinalizeBaseContext, nullptr);
     context->Bind(jsRuntime_, shellContextRef_.get());
 
-    if (obj != nullptr) {
-        napi_set_named_property(env, obj, "context", contextObj);
-    }
     napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void* data, void*) {
             TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr ability stage context is called");
@@ -922,6 +924,32 @@ void JsAbilityStage::SetJsAbilityStage(const std::shared_ptr<Context> &context)
         delete workContext;
         return;
     }
+}
+
+void JsAbilityStage::SetJsAbilityStage()
+{
+    if (!jsAbilityStageObj_) {
+        TAG_LOGW(AAFwkTag::APPKIT, "null stage");
+        return;
+    }
+    if (shellContextRef_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null shellContextRef_");
+        return;
+    }
+    HandleScope handleScope(jsRuntime_);
+    auto env = jsRuntime_.GetNapiEnv();
+
+    napi_value obj = jsAbilityStageObj_->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, obj, napi_object)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "get object failed");
+        return;
+    }
+    if (obj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "obj is nullptr");
+        return;
+    }
+    napi_value contextObj = shellContextRef_->GetNapiValue();
+    napi_set_named_property(env, obj, "context", contextObj);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

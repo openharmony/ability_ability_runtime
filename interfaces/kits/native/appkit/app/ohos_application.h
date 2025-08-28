@@ -264,6 +264,27 @@ private:
     bool IsMainProcess(const std::string &bundleName, const std::string &process);
     void PreloadHybridModule(const HapModuleInfo &hapModuleInfo) const;
 
+    const std::function<void()> CreateFirstStartupCallbackForRecord(
+        std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+        std::shared_ptr<AbilityLocalRecord> abilityRecord,
+        const AppExecFwk::HapModuleInfo &hapModuleInfo,
+        const std::function<void(std::shared_ptr<AbilityRuntime::Context>)> &callback);
+
+    const std::function<void()> CreateSecondStartupCallbackForRecord(
+        std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+        std::shared_ptr<AbilityLocalRecord> abilityRecord,
+        const std::function<void(std::shared_ptr<AbilityRuntime::Context>)> &callback);
+
+    const std::function<void()> CreateFirstStartupCallbackForHap(
+        std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+        const AppExecFwk::HapModuleInfo &hapModuleInfo,
+        const std::function<void()> &callback);
+
+    const std::function<void()> CreateSecondStartupCallbackForHap(
+        std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+        const AppExecFwk::HapModuleInfo &hapModuleInfo,
+        const std::function<void()> &callback);
+
 private:
     std::shared_ptr<AbilityRecordMgr> abilityRecordMgr_ = nullptr;
     std::shared_ptr<AbilityRuntime::ApplicationContext> abilityRuntimeContext_ = nullptr;

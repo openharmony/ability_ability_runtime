@@ -66,7 +66,8 @@ public:
         const std::string &name, const std::shared_ptr<AppStartupTask> &startupTask);
 
     int32_t BuildAutoAppStartupTaskManager(std::shared_ptr<AAFwk::Want> want,
-        std::shared_ptr<StartupTaskManager> &startupTaskManager, const std::string &moduleName);
+        std::shared_ptr<StartupTaskManager> &startupTaskManager, const std::string &moduleName,
+        bool preAbilityStageLoad);
 
     int32_t BuildAppStartupTaskManager(const std::vector<std::string> &inputDependencies,
         std::shared_ptr<StartupTaskManager> &startupTaskManager, bool supportFeatureModule);
@@ -142,7 +143,7 @@ private:
     bool FilterMatchedStartupTask(const AppStartupTaskMatcher &taskMatcher,
         const std::map<std::string, std::shared_ptr<AppStartupTask>> &inTasks,
         std::map<std::string, std::shared_ptr<StartupTask>> &outTasks,
-        std::set<std::string> &dependenciesSet);
+        std::shared_ptr<std::set<std::string>> dependenciesSet);
     int32_t AddAppPreloadSoTask(const std::vector<std::string> &preloadSoList,
         std::map<std::string, std::shared_ptr<StartupTask>> &currentStartupTasks);
     std::shared_ptr<NativeStartupTask> CreateAppPreloadSoTask(
@@ -190,6 +191,7 @@ private:
     void SetOptionalParameters(const nlohmann::json &module, AppExecFwk::ModuleType moduleType,
         std::shared_ptr<PreloadSoStartupTask> &task);
     void SetMatchRules(const nlohmann::json &module, StartupTaskMatchRules &matchRules, bool isPreloadSoStartupTask);
+    void SetSchedulerPhase(const nlohmann::json &module, StartupTaskInfo &startupTaskInfo);
     static bool ParseJsonStringArray(const nlohmann::json &json, const std::string &key, std::vector<std::string> &arr);
 };
 } // namespace AbilityRuntime
