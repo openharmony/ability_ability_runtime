@@ -20,6 +20,7 @@
 
 #include "bundle_info.h"
 #include "startup_task.h"
+#include "startup_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -41,6 +42,7 @@ struct StartupTaskInfo {
     bool callCreateOnMainThread = true;
     bool waitOnMainThread = true;
     bool esModule = true;
+    bool preAbilityStageLoad = false;
     AppExecFwk::ModuleType moduleType = AppExecFwk::ModuleType::UNKNOWN;
     StartupTaskMatchRules matchRules;
 };
@@ -73,8 +75,13 @@ public:
 
     AppExecFwk::ModuleType GetModuleType() const;
 
+    bool IsPreAbilityStageLoad() const;
+
+    void SetPreAbilityStageLoad(bool preAbilityStageLoad);
+
 private:
     bool isExcludeFromAutoStart_ = false;
+    bool preAbilityStageLoad_ = false;
     std::string moduleName_;
     AppExecFwk::ModuleType moduleType_ = AppExecFwk::ModuleType::UNKNOWN;
     StartupTaskMatchRules matchRules_;

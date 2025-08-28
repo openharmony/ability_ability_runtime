@@ -38,11 +38,13 @@ public:
     static std::shared_ptr<AbilityStage> Create(
         const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo);
 
-    JsAbilityStage(JsRuntime& jsRuntime, std::unique_ptr<NativeReference>&& jsAbilityStageObj);
+    JsAbilityStage(JsRuntime& jsRuntime);
     ~JsAbilityStage() override;
 
     void Init(const std::shared_ptr<Context> &context,
         const std::weak_ptr<AppExecFwk::OHOSApplication> application) override;
+
+    void LoadModule(const AppExecFwk::HapModuleInfo &hapModuleInfo) override;
 
     void OnCreate(const AAFwk::Want &want) const override;
 
@@ -63,7 +65,7 @@ public:
     void OnMemoryLevel(int32_t level) override;
 
     int32_t RunAutoStartupTask(const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
-        bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext) override;
+        bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext, bool preAbilityStageLoad) override;
 
 private:
     napi_value CallObjectMethod(
@@ -99,12 +101,17 @@ private:
 
     int32_t RegisterAppStartupTask(const std::shared_ptr<AppExecFwk::HapModuleInfo>& hapModuleInfo,
         std::shared_ptr<AAFwk::Want> want);
+    
+    int32_t RegisterJsStartupTask(std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfo);
 
     int32_t RunAutoStartupTaskInner(const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
-        bool &isAsyncCallback, const std::string &moduleName);
+        bool &isAsyncCallback, const std::string &moduleName, bool preAbilityStageLoad);
     
-    void SetJsAbilityStage(const std::shared_ptr<Context> &context);
+    void SetShellContextRef(std::shared_ptr<Context> context);
 
+    void SetJsAbilityStage();
+
+    bool isStartupTaskRegistered_ = false;
     JsRuntime& jsRuntime_;
     std::shared_ptr<NativeReference> jsAbilityStageObj_;
     std::shared_ptr<NativeReference> shellContextRef_;
