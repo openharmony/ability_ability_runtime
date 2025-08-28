@@ -8713,24 +8713,20 @@ int32_t AppMgrServiceInner::GetChildProcessInfo(const std::shared_ptr<ChildProce
         TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper null");
         return ERR_NO_INIT;
     }
-    BundleInfo bundleInfo;
     auto bundleFlag = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA);
     if (IN_PROCESS_CALL(bundleMgrHelper->GetCloneBundleInfo(appRecord->GetBundleName(),
-        bundleFlag, appRecord->GetAppIndex(), bundleInfo, userId))) {
+        bundleFlag, appRecord->GetAppIndex(), info.bundleInfo, userId))) {
         TAG_LOGE(AAFwkTag::APPMGR, "GetCloneBundleInfo fail");
         return ERR_INVALID_VALUE;
     }
-    info.bundleInfo = bundleInfo;
 
-    HspList hspList;
-    if (IN_PROCESS_CALL(bundleMgrHelper->GetBaseSharedBundleInfos(bundleInfo.name, hspList,
+    if (IN_PROCESS_CALL(bundleMgrHelper->GetBaseSharedBundleInfos(bundleInfo.name, info.hspList,
         AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO))) {
             TAG_LOGE(AAFwkTag::APPMGR, "GetBaseSharedBundleInfos fail");
         return ERR_INVALID_VALUE;
     }
-    info.hspList = hspList;
     
     if (!isCallFromGetChildrenProcesses) {
         info.childProcessType = childProcessRecord->GetChildProcessType();
