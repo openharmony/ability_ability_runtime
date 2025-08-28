@@ -37,6 +37,7 @@ public:
     static napi_value CreatePluginModuleContext(napi_env env, napi_callback_info info);
     static napi_value PromoteCurrentToCandidateMasterProcess(napi_env env, napi_callback_info info);
     static napi_value DemoteCurrentFromCandidateMasterProcess(napi_env env, napi_callback_info info);
+    static napi_value ExitMasterProcessRole(napi_env env, napi_callback_info info);
     static napi_value CreatePluginModuleContextForBundle(napi_env env, napi_callback_info info);
 
 private:
@@ -52,6 +53,7 @@ private:
     napi_value OnGetApplicationContext(napi_env env, NapiCallbackInfo &info);
     napi_value OnPromoteCurrentToCandidateMasterProcess(napi_env env, NapiCallbackInfo& info);
     napi_value OnDemoteCurrentFromCandidateMasterProcess(napi_env env, NapiCallbackInfo& info);
+    napi_value OnExitMasterProcessRole(napi_env env, NapiCallbackInfo& info);
     bool VerifyCreatePluginContextParams(napi_env env, NapiCallbackInfo &info, std::string &moduleName,
         std::string &pluginBundleName, std::string &hostBundleName);
 };

@@ -1338,6 +1338,13 @@ public:
     int32_t DemoteCurrentFromCandidateMasterProcess();
 
     /**
+     * Exit from the master process role of the current process.
+     *
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t ExitMasterProcessRole();
+
+    /**
      * To clear the process by ability token.
      *
      * @param token the unique identification to the ability.
@@ -2180,6 +2187,7 @@ private:
     std::shared_mutex startProcessLock_;
     ffrt::mutex uninstallOrUpgradeUidSetLock_;
     std::unordered_set<int32_t> uninstallOrUpgradeUidSet_ {};
+    ffrt::mutex exitMasterProcessRoleLock_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

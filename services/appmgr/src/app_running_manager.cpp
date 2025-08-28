@@ -285,7 +285,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::FindMasterProcessAppRunning
         if (!(appRecord && appRecord->GetUid() == uid)) {
             continue;
         }
-        if (appRecord->GetIsMasterProcess() && IsSameAbilityType(appRecord, abilityInfo)) {
+        if (appRecord->IsMasterProcess() && IsSameAbilityType(appRecord, abilityInfo)) {
             resMasterRecord = appRecord;
             break;
         }
@@ -321,7 +321,7 @@ bool AppRunningManager::CheckMasterProcessAppRunningRecordIsExist(
     bool isUIExtension = (abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI);
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
-        if (appRecord && appRecord->GetUid() == uid && appRecord->GetIsMasterProcess() &&
+        if (appRecord && appRecord->GetUid() == uid && appRecord->IsMasterProcess() &&
             IsSameAbilityType(appRecord, abilityInfo)) {
             return true;
         }
