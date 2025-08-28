@@ -5985,8 +5985,8 @@ int32_t AbilityManagerProxy::PreStartMission(const std::string& bundleName, cons
     return reply.ReadInt32();
 }
 
-ErrCode AbilityManagerProxy::OpenLink(const Want &want, sptr<IRemoteObject> callerToken,
-    int32_t userId, int requestCode, bool hideFailureTipDialog)
+ErrCode AbilityManagerProxy::OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
+    int32_t userId, int requestCode)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -6016,10 +6016,6 @@ ErrCode AbilityManagerProxy::OpenLink(const Want &want, sptr<IRemoteObject> call
     }
     if (!data.WriteInt32(requestCode)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "requestCode write fail");
-        return INNER_ERR;
-    }
-    if (!data.WriteBool(hideFailureTipDialog)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "hideFailureTipDialog write failed.");
         return INNER_ERR;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::OPEN_LINK, data, reply, option);

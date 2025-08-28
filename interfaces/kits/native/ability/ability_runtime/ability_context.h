@@ -177,7 +177,7 @@ public:
 
     virtual ErrCode RequestModalUIExtension(const AAFwk::Want& want) = 0;
 
-    virtual ErrCode OpenLink(const AAFwk::Want &want, int requestCode, bool hideFailureTipDialog = false) = 0;
+    virtual ErrCode OpenLink(const AAFwk::Want& want, int requestCode) = 0;
 
     virtual ErrCode OpenAtomicService(AAFwk::Want& want, const AAFwk::StartOptions &options, int requestCode,
         RuntimeTask &&task) = 0;

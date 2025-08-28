@@ -171,7 +171,7 @@ public:
     using SelfType = ServiceExtensionContext;
     static const size_t CONTEXT_TYPE_ID;
 
-    ErrCode OpenLink(const AAFwk::Want &want, int reuqestCode, bool hideFailureTipDialog = false);
+    ErrCode OpenLink(const AAFwk::Want& want, int reuqestCode);
     ErrCode OpenAtomicService(const AAFwk::Want &want, const AAFwk::StartOptions &options);
 
     ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId, OnAtomicRequestSuccess onRequestSucc,

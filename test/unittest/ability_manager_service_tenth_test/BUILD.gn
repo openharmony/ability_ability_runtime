@@ -40,7 +40,6 @@ ohos_unittest("ability_manager_service_tenth_test") {
     "${ability_runtime_path}/services/abilitymgr/src/ability_auto_startup_service.cpp",
     "${ability_runtime_path}/services/abilitymgr/src/auto_startup_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_connect_callback_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/open_link/open_link_options.cpp",
     "${ability_runtime_test_path}/mock/task_handler_wrap_mock/src/mock_task_handler_wrap.cpp",
     "ability_manager_service_tenth_test.cpp",
   ]

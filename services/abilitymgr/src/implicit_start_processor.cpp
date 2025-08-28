@@ -185,12 +185,8 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         if (want.GetBoolParam("isCreateAppGallerySelector", false)) {
             want.RemoveParam("isCreateAppGallerySelector");
             bool needGrantUriPermission = true;
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "openLinkOptions hideFailureTipDialog: %{public}d",
-                request.hideFailureTipDialog);
-            if (!request.hideFailureTipDialog) {
-                DialogSessionManager::GetInstance().CreateImplicitSelectorModalDialog(request, want, userId,
-                    dialogAppInfos, needGrantUriPermission);
-            }
+            DialogSessionManager::GetInstance().CreateImplicitSelectorModalDialog(request, want, userId,
+                dialogAppInfos, needGrantUriPermission);
             return ERR_IMPLICIT_START_ABILITY_FAIL;
         }
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, show tips dialog");
@@ -786,9 +782,8 @@ int32_t ImplicitStartProcessor::ImplicitStartAbilityInner(const Want &targetWant
                 targetWant, request.callerToken, userId, request.extensionType);
             break;
         default:
-            StartAbilityWrapParam startAbilityWrapParam = {
-                targetWant, request.callerToken, request.requestCode, false, userId, false, 0, false, true };
-            result = abilityMgr->StartAbilityWrap(startAbilityWrapParam);
+            result = abilityMgr->StartAbilityWrap(
+                targetWant, request.callerToken, request.requestCode, false, userId, false, 0, false, true);
             break;
     }
 

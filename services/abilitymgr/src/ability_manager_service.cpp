@@ -618,8 +618,7 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
 #ifdef SUPPORT_SCREEN
     DmsUtil::GetInstance().UpdateFlagForCollaboration(want);
 #endif
-    StartAbilityWrapParam startAbilityWrapParam = { want, nullptr, requestCode, false, userId };
-    int32_t ret = StartAbilityWrap(startAbilityWrapParam);
+    int32_t ret = StartAbilityWrap(want, nullptr, requestCode, false, userId);
     AAFWK::ContinueRadar::GetInstance().ClickIconStartAbility("StartAbilityWrap", want.GetFlags(), ret);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbilityError:%{public}d", eventInfo.errCode);
@@ -634,7 +633,7 @@ int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObje
 }
 
 int AbilityManagerService::StartAbilityWithRemoveIntentFlag(const Want &want, const sptr<IRemoteObject> &callerToken,
-    int32_t userId, int requestCode, bool removeInsightIntentFlag, bool hideFailureTipDialog)
+    int32_t userId, int requestCode, bool removeInsightIntentFlag)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -651,11 +650,11 @@ int AbilityManagerService::StartAbilityWithRemoveIntentFlag(const Want &want, co
 #ifdef SUPPORT_SCREEN
     DmsUtil::GetInstance().UpdateFlagForCollaboration(want);
 #endif
-    return StartAbilityByFreeInstall(want, callerToken, userId, requestCode, hideFailureTipDialog);
+    return StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
 }
 
 int32_t AbilityManagerService::StartAbilityByFreeInstall(const Want &want, sptr<IRemoteObject> callerToken,
-    int32_t userId, int32_t requestCode, bool hideFailureTipDialog)
+    int32_t userId, int32_t requestCode)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     bool startWithAccount = want.GetBoolParam(START_ABILITY_TYPE, false);
@@ -676,9 +675,8 @@ int32_t AbilityManagerService::StartAbilityByFreeInstall(const Want &want, sptr<
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Start ability come, ability is %{public}s, userId is %{public}d",
         want.GetElement().GetAbilityName().c_str(), userId);
-    StartAbilityWrapParam startAbilityWrapParam = {
-        want, callerToken, requestCode, false, userId, false, 0, false, false, false, hideFailureTipDialog };
-    int32_t ret = StartAbilityWrap(startAbilityWrapParam);
+
+    int32_t ret = StartAbilityWrap(want, callerToken, requestCode, false, userId);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbilityByFreeInstall error:%{public}d", ret);
     }
@@ -720,9 +718,7 @@ int AbilityManagerService::StartAbilityWithSpecifyTokenIdInner(const Want &want,
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "start ability come, ability:%{public}s, userId:%{public}d, specifyTokenId:%{public}u",
         want.GetElement().GetAbilityName().c_str(), userId, specifyTokenId);
-    StartAbilityWrapParam startAbilityWrapParam = {
-        want, callerToken, requestCode, isPendingWantCaller, userId, false, specifyTokenId };
-    int32_t ret = StartAbilityWrap(startAbilityWrapParam);
+    int32_t ret = StartAbilityWrap(want, callerToken, requestCode, isPendingWantCaller, userId, false, specifyTokenId);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startAbility with specified token error:%{public}d", ret);
     }
@@ -877,9 +873,8 @@ int AbilityManagerService::StartAbilityOnlyUIAbility(const Want &want, const spt
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "start, ability: %{public}s, userId: %{public}d, specifyTokenId: %{public}u",
         want.GetElement().GetAbilityName().c_str(), DEFAULT_INVAL_VALUE, specifyTokenId);
-    StartAbilityWrapParam startAbilityWrapParam = {
-        want, callerToken, DEFAULT_INVAL_VALUE, false, DEFAULT_INVAL_VALUE, false, specifyTokenId, false, false, true };
-    int32_t ret = StartAbilityWrap(startAbilityWrapParam);
+
+    int32_t ret = StartAbilityWrap(want, callerToken, DEFAULT_INVAL_VALUE, false, DEFAULT_INVAL_VALUE, false, specifyTokenId, false, false, true);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbilityOnlyUIAbility error:%{public}d", ret);
     }
@@ -937,9 +932,8 @@ int AbilityManagerService::StartAbilityAsCallerDetails(const Want &want, const s
             callerPkg.c_str(), targetPkg.c_str());
         AbilityUtil::AddAbilityJumpRuleToBms(callerPkg, targetPkg, GetUserId());
     }
-    StartAbilityWrapParam startAbilityWrapParam = {
-        newWant, callerToken, requestCode, false, userId, true, 0, false, isImplicit, false };
-    int32_t ret = StartAbilityWrap(startAbilityWrapParam);
+    int32_t ret = StartAbilityWrap(newWant, callerToken, requestCode, false, userId, true,
+        0, false, isImplicit, false);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "start ability as caller failed:%{public}d", ret);
     }
@@ -1012,26 +1006,25 @@ bool AbilityManagerService::StartAbilityInChain(StartAbilityParams &params, int 
     return true;
 }
 
-int AbilityManagerService::StartAbilityWrap(const StartAbilityWrapParam &startAbilityWrapParam)
+int AbilityManagerService::StartAbilityWrap(const Want &want, const sptr<IRemoteObject> &callerToken,
+    int requestCode, bool isPendingWantCaller, int32_t userId, bool isStartAsCaller, uint32_t specifyToken,
+    bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    StartAbilityParams startParams(const_cast<Want &>(startAbilityWrapParam.want));
-    startParams.callerToken = startAbilityWrapParam.callerToken;
-    startParams.userId = startAbilityWrapParam.userId;
-    startParams.requestCode = startAbilityWrapParam.requestCode;
-    startParams.isStartAsCaller = startAbilityWrapParam.isStartAsCaller;
-    startParams.SetValidUserId(GetValidUserId(startAbilityWrapParam.userId));
+    StartAbilityParams startParams(const_cast<Want &>(want));
+    startParams.callerToken = callerToken;
+    startParams.userId = userId;
+    startParams.requestCode = requestCode;
+    startParams.isStartAsCaller = isStartAsCaller;
+    startParams.SetValidUserId(GetValidUserId(userId));
 
     int result = ERR_OK;
     if (StartAbilityInChain(startParams, result)) {
         return result;
     }
 
-    return StartAbilityInner(startAbilityWrapParam.want, startAbilityWrapParam.callerToken,
-        startAbilityWrapParam.requestCode, startAbilityWrapParam.isPendingWantCaller, startAbilityWrapParam.userId,
-        startAbilityWrapParam.isStartAsCaller, startAbilityWrapParam.specifyTokenId,
-        startAbilityWrapParam.isForegroundToRestartApp, startAbilityWrapParam.isImplicit,
-        startAbilityWrapParam.isUIAbilityOnly, startAbilityWrapParam.hideFailureTipDialog);
+    return StartAbilityInner(want, callerToken, requestCode, isPendingWantCaller, userId, isStartAsCaller, specifyToken,
+        isForegroundToRestartApp, isImplicit, isUIAbilityOnly);
 }
 
 void AbilityManagerService::SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest)
@@ -1172,7 +1165,7 @@ void AbilityManagerService::CheckExtensionRateLimit()
 
 int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemoteObject> &callerToken,
     int requestCode, bool isPendingWantCaller, int32_t userId, bool isStartAsCaller, uint32_t specifyTokenId,
-    bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly, bool hideFailureTipDialog)
+    bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!isStartAsCaller || isImplicit) {
@@ -1285,7 +1278,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     }
 
     AbilityRequest abilityRequest;
-    abilityRequest.hideFailureTipDialog = hideFailureTipDialog;
 #ifdef SUPPORT_SCREEN
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "is implicit start action");
@@ -1920,8 +1912,7 @@ int AbilityManagerService::StartAbilityForResultAsCaller(
     CHECK_POINTER_AND_RETURN(connectManager, ERR_NO_INIT);
     auto asCallerSourceToken = connectManager->GetUIExtensionSourceToken(callerToken);
     UpdateCallerInfoUtil::GetInstance().UpdateAsCallerSourceInfo(newWant, asCallerSourceToken, callerToken);
-    StartAbilityWrapParam startAbilityWrapParam = { newWant, callerToken, requestCode, false, userId, true };
-    return StartAbilityWrap(startAbilityWrapParam);
+    return StartAbilityWrap(newWant, callerToken, requestCode, false, userId, true);
 }
 
 int AbilityManagerService::StartAbilityForResultAsCaller(const Want &want, const StartOptions &startOptions,
@@ -12351,8 +12342,7 @@ int32_t AbilityManagerService::StartAbilityWithInsightIntent(const Want &want, i
     AbilityUtil::RemoveInstanceKey(const_cast<Want &>(want));
     EventInfo eventInfo = BuildEventInfo(want, userId);
     SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
-    StartAbilityWrapParam startAbilityWrapParam = { want, nullptr, requestCode, false, userId };
-    int32_t ret = StartAbilityWrap(startAbilityWrapParam);
+    int32_t ret = StartAbilityWrap(want, nullptr, requestCode, false, userId);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbilityError:%{public}d", ret);
     }
@@ -13111,9 +13101,7 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
     (const_cast<Want &>(want)).SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, processInfo.appCloneIndex);
     (const_cast<Want &>(want)).SetParam(AAFwk::Want::APP_INSTANCE_KEY, processInfo.instanceKey);
     (const_cast<Want &>(want)).RemoveParam(Want::CREATE_APP_INSTANCE_KEY);
-    StartAbilityWrapParam startAbilityWrapParam = {
-        want, nullptr, DEFAULT_INVAL_VALUE, false, DEFAULT_INVAL_VALUE, false, 0, true };
-    result = StartAbilityWrap(startAbilityWrapParam);
+    result = StartAbilityWrap(want, nullptr, DEFAULT_INVAL_VALUE, false, DEFAULT_INVAL_VALUE, false, 0, true);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startAbility error");
         return result;
@@ -14093,13 +14081,13 @@ ErrCode AbilityManagerService::IntentOpenLinkInner(const std::shared_ptr<AppExec
 }
 
 ErrCode AbilityManagerService::OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
-    int32_t userId, int32_t requestCode, bool hideFailureTipDialog)
+    int32_t userId, int32_t requestCode)
 {
-    return OpenLinkInner(want, callerToken, userId, requestCode, true, hideFailureTipDialog);
+    return OpenLinkInner(want, callerToken, userId, requestCode, true);
 }
 
 ErrCode AbilityManagerService::OpenLinkInner(const Want& want, sptr<IRemoteObject> callerToken,
-    int32_t userId, int32_t requestCode, bool removeInsightIntentFlag, bool hideFailureTipDialog)
+    int32_t userId, int32_t requestCode, bool removeInsightIntentFlag)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -14111,33 +14099,33 @@ ErrCode AbilityManagerService::OpenLinkInner(const Want& want, sptr<IRemoteObjec
     AbilityUtil::RemoveInstanceKey(const_cast<Want &>(want));
     std::string callerBundleName;
     Want convertedWant = want;
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "hideFailureTipDialog: %{public}d", hideFailureTipDialog);
-    if (!WantUtils::IsShortUrl(want) || WantUtils::GetCallerBundleName(callerBundleName) != ERR_OK) {
+    if (!WantUtils::IsShortUrl(want) ||
+        WantUtils::GetCallerBundleName(callerBundleName) != ERR_OK) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "start ability by default");
-        int retCode = StartAbilityWithRemoveIntentFlag(
-            want, callerToken, userId, requestCode, removeInsightIntentFlag, hideFailureTipDialog);
+        int retCode = StartAbilityWithRemoveIntentFlag(want, callerToken, userId, requestCode, removeInsightIntentFlag);
         CHECK_RET_RETURN_RET(retCode, "startAbility failed");
         return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
     }
+
     TAG_LOGI(AAFwkTag::ABILITYMGR, "callerBundleName=%{public}s", callerBundleName.c_str());
     convertedWant.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
     uint32_t targetType = TARGET_TYPE_INIT;
     if (WantUtils::ConvertToExplicitWant(convertedWant, targetType) != ERR_OK) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "ConvertToExplicitWant fail. start ability by default");
-        int retCode = StartAbilityWithRemoveIntentFlag(want, callerToken, userId, requestCode,
-            removeInsightIntentFlag, hideFailureTipDialog);
+        int retCode = StartAbilityWithRemoveIntentFlag(want, callerToken, userId, requestCode, removeInsightIntentFlag);
         CHECK_RET_RETURN_RET(retCode, "startAbility failed");
         return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
     }
+
     if (WantUtils::IsNormalApp(targetType)) {
         int retCode = StartAbilityWithRemoveIntentFlag(convertedWant, callerToken, userId, requestCode,
-            removeInsightIntentFlag, hideFailureTipDialog);
+            removeInsightIntentFlag);
         CHECK_RET_RETURN_RET(retCode, "startAbility failed");
         return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
     }
     if (WantUtils::IsAtomicService(targetType)) {
         return OpenLinkFreeInstallAtomicService(convertedWant, want, callerToken, userId, requestCode,
-            removeInsightIntentFlag, hideFailureTipDialog);
+            removeInsightIntentFlag);
     }
     bool curAppLinkingOnlyFlag = convertedWant.GetBoolParam(APP_LINKING_ONLY, false);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "openLink not specific app or atomicService. AppLinkingOnly: %{public}d",
@@ -14146,19 +14134,19 @@ ErrCode AbilityManagerService::OpenLinkInner(const Want& want, sptr<IRemoteObjec
         return RESOLVE_ABILITY_ERR;
     }
     int retCode = StartAbilityWithRemoveIntentFlag(convertedWant, callerToken, userId, requestCode,
-        removeInsightIntentFlag, hideFailureTipDialog);
+        removeInsightIntentFlag);
     CHECK_RET_RETURN_RET(retCode, "startAbility failed");
     return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
 }
 
 int32_t AbilityManagerService::OpenLinkFreeInstallAtomicService(Want &convertedWant,
     const Want &originalWant, sptr<IRemoteObject> callerToken, int32_t userId, int32_t requestCode,
-    bool removeInsightIntentFlag, bool hideFailureTipDialog)
+    bool removeInsightIntentFlag)
 {
     if (freeInstallManager_ == nullptr) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "freeInstallManager_ nullptr. start ability by default");
         auto retCode = StartAbilityWithRemoveIntentFlag(originalWant, callerToken, userId, requestCode,
-            removeInsightIntentFlag, hideFailureTipDialog);
+            removeInsightIntentFlag);
         CHECK_RET_RETURN_RET(retCode, "startAbility failed");
         return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
     }
@@ -14177,7 +14165,7 @@ int32_t AbilityManagerService::OpenLinkFreeInstallAtomicService(Want &convertedW
         }
         TAG_LOGI(AAFwkTag::ABILITYMGR, "start ability by default");
         retCode = StartAbilityWithRemoveIntentFlag(originalWant, callerToken, userId, requestCode,
-            removeInsightIntentFlag, hideFailureTipDialog);
+            removeInsightIntentFlag);
         CHECK_RET_RETURN_RET(retCode, "StartAbility failed");
         return ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK;
     }

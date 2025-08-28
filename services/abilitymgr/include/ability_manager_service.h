@@ -94,7 +94,6 @@ constexpr const char* KEY_SESSION_ID = "com.ohos.param.sessionId";
 constexpr const char* KEY_REQUEST_ID = "com.ohos.param.requestId";
 using OHOS::AppExecFwk::IAbilityController;
 struct StartAbilityInfo;
-struct StartAbilityWrapParam;
 class WindowFocusChangedListener;
 class WindowVisibilityChangedListener;
 class PreloadManagerService;
@@ -409,8 +408,8 @@ public:
      * @param requestCode Ability request code.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t OpenLink(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId = DEFAULT_INVAL_VALUE,
-        int32_t requestCode = DEFAULT_INVAL_VALUE, bool hideFailureTipDialog = false) override;
+    virtual int32_t OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE, int32_t requestCode = DEFAULT_INVAL_VALUE) override;
 
     /**
      * Pop-up launch of full-screen atomic service.
@@ -1067,9 +1066,19 @@ public:
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam);
 
     int32_t StartAbilityByFreeInstall(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId,
-        int32_t requestCode, bool hideFailureTipDialog = false);
+        int32_t requestCode);
 
-    int StartAbilityWrap(const StartAbilityWrapParam &startAbilityWrapParam);
+    int StartAbilityWrap(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken,
+        int requestCode,
+        bool isPendingWantCaller,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        bool isStartAsCaller = false,
+        uint32_t specifyTokenId = 0,
+        bool isForegroundToRestartApp = false,
+        bool isImplicit = false,
+        bool isUIAbilityOnly = false);
 
     int StartAbilityInner(
         const Want &want,
@@ -1081,8 +1090,7 @@ public:
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
         bool isImplicit = false,
-        bool isUIAbilityOnly = false,
-        bool hideFailureTipDialog = false);
+        bool isUIAbilityOnly = false);
 
     int32_t StartExtensionAbilityInner(
         const Want &want,
@@ -2788,8 +2796,7 @@ private:
     void CloseAssertDialog(const std::string &assertSessionId);
 
     int32_t OpenLinkFreeInstallAtomicService(Want &convertedWant, const Want &originalWant,
-        sptr<IRemoteObject> callerToken, int32_t userId, int32_t requestCode, bool removeInsightIntentFlag,
-        bool hideFailureTipDialog = false);
+        sptr<IRemoteObject> callerToken, int32_t userId, int32_t requestCode, bool removeInsightIntentFlag);
 
     void ReportPreventStartAbilityResult(const AppExecFwk::AbilityInfo &callerAbilityInfo,
         const AppExecFwk::AbilityInfo &abilityInfo);
@@ -2809,10 +2816,10 @@ private:
         const std::vector<AbilityRuntime::LinkIntentParamMapping> &paramMappings, std::string &uri, AAFwk::Want &want);
 
     int StartAbilityWithRemoveIntentFlag(const Want &want, const sptr<IRemoteObject> &callerToken,
-        int32_t userId, int requestCode, bool removeInsightIntentFlag, bool hideFailureTipDialog = false);
+        int32_t userId, int requestCode, bool removeInsightIntentFlag);
 
     int32_t OpenLinkInner(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId, int requestCode,
-        bool removeInsightIntentFlag, bool hideFailureTipDialog = false);
+        bool removeInsightIntentFlag);
     int32_t KillProcessWithReasonInner(int32_t pid, const ExitReason &reason, bool isKillPrecedeStart);
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
