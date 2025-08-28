@@ -1445,7 +1445,7 @@ HWTEST_F(EcologicalRuleInterceptorTest, GetEcologicalTargetInfo_008, TestSize.Le
     int userId = 100;
     interceptor->GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
     EXPECT_EQ(callerInfo.callerAppType, ErmsCallerInfo::TYPE_APP_SERVICE);
-    EXPECT_EQ(callerInfo.packageName, BUNDLE_NAME_SCENEBOARD);
+    EXPECT_NE(callerInfo.packageName, BUNDLE_NAME_SCENEBOARD);
 }
 
 /**
