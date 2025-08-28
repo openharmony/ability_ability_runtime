@@ -195,12 +195,27 @@ void MatchRulesStartupTaskMatcher::SetCustomizationMatcher(std::shared_ptr<Custo
     customizationMatcher_ = matcher;
 }
 
-DefaultStartupTaskMatcher::DefaultStartupTaskMatcher(const std::string &moduleName) : moduleMatcher_(moduleName)
+SchedulerPhaseTaskMatcher::SchedulerPhaseTaskMatcher(bool preAbilityStageLoad)
+    : preAbilityStageLoad_(preAbilityStageLoad)
+{}
+
+bool SchedulerPhaseTaskMatcher::Match(const AppStartupTask &task) const
+{
+    TAG_LOGD(AAFwkTag::STARTUP, "task:%{public}s, taskPre:%{public}d, pre:%{public}d", task.GetName().c_str(),
+        task.IsPreAbilityStageLoad(), preAbilityStageLoad_);
+    return task.IsPreAbilityStageLoad() == preAbilityStageLoad_;
+}
+
+DefaultStartupTaskMatcher::DefaultStartupTaskMatcher(const std::string &moduleName, bool preAbilityStageLoad)
+    : moduleMatcher_(moduleName), schedulerPhaseMatcher_(preAbilityStageLoad)
 {}
 
 bool DefaultStartupTaskMatcher::Match(const AppStartupTask &task) const
 {
     if (!moduleMatcher_.Match(task)) {
+        return false;
+    }
+    if (!schedulerPhaseMatcher_.Match(task)) {
         return false;
     }
     return excludeMatcher_.Match(task);
