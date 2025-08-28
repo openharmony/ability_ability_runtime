@@ -427,39 +427,6 @@ int32_t AbilityAutoStartupDataManager::GetCurrentAppAutoStartupData(
     return ERR_OK;
 }
 
-int32_t AbilityAutoStartupDataManager::GetAutoStartupStatusForSelf(uint32_t callerTokenId, bool &isAutoStartEnabled)
-{
-    auto callerTokenIdStr = std::to_string(callerTokenId);
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "callerTokenIdStr: %{public}s", callerTokenIdStr.c_str());
-    std::vector<DistributedKv::Entry> allEntries;
-    DistributedKv::Status status = DistributedKv::Status::SUCCESS;
-    {
-        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-        if (!CheckKvStore()) {
-            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null kvStore");
-            return ERR_NO_INIT;
-        }
-        status = kvStorePtr_->GetEntries(nullptr, allEntries);
-        if (status != DistributedKv::Status::SUCCESS) {
-            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "GetEntries error: %{public}d", status);
-            status = RestoreKvStore(status);
-            return ERR_INVALID_OPERATION;
-        }
-    }
-
-    for (const auto &item : allEntries) {
-        if (IsEqual(item.key, callerTokenIdStr)) {
-            AutoStartupStatus startupStatus;
-            ConvertAutoStartupStatusFromValue(item.value, startupStatus);
-            if (startupStatus.isAutoStartup) {
-                isAutoStartEnabled = true;
-                break;
-            }
-        }
-    }
-    return ERR_OK;
-}
-
 DistributedKv::Value AbilityAutoStartupDataManager::ConvertAutoStartupStatusToValue(
     const AutoStartupInfo &info, bool isAutoStartup, bool isEdmForce)
 {

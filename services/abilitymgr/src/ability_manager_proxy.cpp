@@ -5117,24 +5117,6 @@ int32_t AbilityManagerProxy::QueryAllAutoStartupApplications(std::vector<AutoSta
     return ERR_OK;
 }
 
-int32_t AbilityManagerProxy::GetAutoStartupStatusForSelf(bool &isAutoStartEnabled)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
-        return INNER_ERR;
-    }
-    auto ret = SendRequest(AbilityManagerInterfaceCode::GET_AUTO_STARTUP_STATUS_FOR_SELF, data, reply, option);
-    if (ret != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "send request error:%{public}d", ret);
-        return ret;
-    }
-    isAutoStartEnabled = reply.ReadBool();
-    return NO_ERROR;
-}
-
 int AbilityManagerProxy::PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isPrepareTerminate)
 {
     MessageParcel data;

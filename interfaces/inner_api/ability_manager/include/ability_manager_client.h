@@ -1100,13 +1100,6 @@ public:
     ErrCode QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList);
 
     /**
-     * @brief Retrieves the auto startup status of the current application.
-     * @param isAutoStartEnabled Indicates whether auto startup is enabled for the current application.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetAutoStartupStatusForSelf(bool &isAutoStartEnabled);
-
-    /**
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
      *
      * @param sessionInfo the session info of the ability to terminate.
