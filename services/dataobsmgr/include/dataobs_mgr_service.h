@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include "cpp/mutex.h"
 
+#include "data_share_permission.h"
 #include "dataobs_mgr_inner.h"
 #include "dataobs_mgr_inner_common.h"
 #include "dataobs_mgr_inner_ext.h"
@@ -103,11 +104,13 @@ private:
     int32_t VerifyDataSharePermissionInner(Uri &uri, bool isRead, ObserverInfo &info);
     int32_t NotifyChangeInner(Uri &uri, int32_t userId,
         DataObsOption opt, bool isExtension);
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
 private:
     static constexpr std::uint32_t TASK_COUNT_MAX = 50;
     ffrt::mutex taskCountMutex_;
     std::uint32_t taskCount_ = 0;
     std::shared_ptr<TaskHandlerWrap> handler_;
+    std::shared_ptr<DataShare::DataSharePermission> permission_;
 
     DataObsServiceRunningState state_;
 
