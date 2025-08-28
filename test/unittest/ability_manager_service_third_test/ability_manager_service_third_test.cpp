@@ -22,7 +22,6 @@
 #include "ability_connection.h"
 #include "ability_start_setting.h"
 #include "recovery_param.h"
-#include "start_ability_utils.h"
 #undef private
 #undef protected
 
@@ -1642,9 +1641,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityWrap_001, TestSize.Level1)
     uint32_t specifyToken = 0;
     bool isForegroundToRestartApp = true;
     bool isImplicit = true;
-    StartAbilityWrapParam startAbilityWrapParam = { want, callerToken, requestCode, false, userId, isStartAsCaller,
-        specifyToken, isForegroundToRestartApp, isImplicit };
-    auto result = abilityMs->StartAbilityWrap(startAbilityWrapParam);
+    auto result = abilityMs->StartAbilityWrap(want, callerToken, requestCode, false, userId, isStartAsCaller,
+        specifyToken, isForegroundToRestartApp, isImplicit);
     EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 

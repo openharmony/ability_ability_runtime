@@ -365,23 +365,22 @@ napi_value JsUIExtensionContext::OnOpenLink(napi_env env, NapiCallbackInfo& info
 #ifdef SUPPORT_SCREEN
     InitDisplayId(want);
 #endif
-    return OnOpenLinkInner(env, want, requestCode, startTime, linkValue, openLinkOptions.GetHideFailureTipDialog());
+    return OnOpenLinkInner(env, want, requestCode, startTime, linkValue);
 }
 
 napi_value JsUIExtensionContext::OnOpenLinkInner(napi_env env, const AAFwk::Want& want,
-    int requestCode, const std::string &startTime, const std::string &url, bool hideFailureTipDialog)
+    int requestCode, const std::string& startTime, const std::string& url)
 {
     auto innerErrorCode = std::make_shared<int>(ERR_OK);
-    NapiAsyncTask::ExecuteCallback execute =
-        [weak = context_, want, innerErrorCode, requestCode, hideFailureTipDialog]() {
-            auto context = weak.lock();
-            if (!context) {
-                TAG_LOGW(AAFwkTag::UI_EXT, "null context");
-                *innerErrorCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
-                return;
-            }
-            *innerErrorCode = context->OpenLink(want, requestCode, hideFailureTipDialog);
-        };
+    NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, innerErrorCode, requestCode]() {
+        auto context = weak.lock();
+        if (!context) {
+            TAG_LOGW(AAFwkTag::UI_EXT, "null context");
+            *innerErrorCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            return;
+        }
+        *innerErrorCode = context->OpenLink(want, requestCode);
+    };
 
     napi_value result = nullptr;
     AddFreeInstallObserver(env, want, nullptr, &result, false, true);

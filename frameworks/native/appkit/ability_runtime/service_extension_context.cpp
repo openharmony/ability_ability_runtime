@@ -269,10 +269,10 @@ ErrCode ServiceExtensionContext::PreStartMission(const std::string& bundleName, 
     return err;
 }
 
-ErrCode ServiceExtensionContext::OpenLink(const AAFwk::Want &want, int requestCode, bool hideFailureTipDialog)
+ErrCode ServiceExtensionContext::OpenLink(const AAFwk::Want& want, int requestCode)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "called");
-    return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode, hideFailureTipDialog);
+    return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode);
 }
 
 ErrCode ServiceExtensionContext::OpenAtomicService(const AAFwk::Want &want, const AAFwk::StartOptions &options)
