@@ -78,6 +78,9 @@ HWTEST_F(AssertFaultTaskThreadTest, InitAssertFaultTask_0100, Function | MediumT
     GTEST_LOG_(INFO) << "InitAssertFaultTask_0100 start";
     auto assertThread = std::make_shared<AssertFaultTaskThread>();
     assertThread->InitAssertFaultTask(nullptr, true);
+    auto result = assertThread->RequestAssertResult("exprStr");
+    const AAFwk::UserStatus ASSERT_FAULT_DEFAULT_VALUE = AAFwk::UserStatus::ASSERT_TERMINATE;
+    EXPECT_EQ(result, ASSERT_FAULT_DEFAULT_VALUE);
 
     GTEST_LOG_(INFO) << "InitAssertFaultTask_0100 end";
 }
