@@ -80,20 +80,6 @@ struct StartAbilityInfoWrap {
     ~StartAbilityInfoWrap();
     void SetStartAbilityInfo(const AppExecFwk::AbilityInfo& abilityInfo);
 };
-
-struct StartAbilityWrapParam {
-    Want want;
-    sptr<IRemoteObject> callerToken;
-    int requestCode;
-    bool isPendingWantCaller;
-    int32_t userId = -1;
-    bool isStartAsCaller = false;
-    uint32_t specifyTokenId = 0;
-    bool isForegroundToRestartApp = false;
-    bool isImplicit = false;
-    bool isUIAbilityOnly = false;
-    bool hideFailureTipDialog = false;
-};
 }
 }
 #endif // OHOS_ABILITY_RUNTIME_START_ABILITY_UTILS_H

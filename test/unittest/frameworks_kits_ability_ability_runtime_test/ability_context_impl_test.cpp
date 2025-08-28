@@ -30,7 +30,6 @@
 #include "mock_context.h"
 #include "mock_lifecycle_observer.h"
 #include "mock_serviceability_manager_service.h"
-#include "open_link_options.h"
 #include "scene_board_judgement.h"
 #include "session/host/include/session.h"
 #include "sys_mgr_client.h"
@@ -1849,23 +1848,6 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_OpenLink_0100, Function | 
     context_->OpenLink(want, requestCode);
     context_->SetRestoreEnabled(true);
     EXPECT_EQ(context_->GetRestoreEnabled(), true);
-}
-
-/**
- * @tc.number: Ability_Context_Impl_OpenLink_0200
- * @tc.name: OpenLink
- * @tc.desc: OpenLink OpenLinkOptions
- */
-HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_OpenLink_0200, Function | MediumTest | Level1)
-{
-    AAFwk::Want want;
-    int requestCode = 0;
-    AAFwk::OpenLinkOptions openLinkOptions;
-    bool hideFailureTipDialog = true;
-    EXPECT_FALSE(openLinkOptions.GetHideFailureTipDialog());
-    openLinkOptions.SetHideFailureTipDialog(hideFailureTipDialog);
-    context_->OpenLink(want, requestCode, hideFailureTipDialog);
-    EXPECT_EQ(openLinkOptions.GetHideFailureTipDialog(), hideFailureTipDialog);
 }
 
 /**
