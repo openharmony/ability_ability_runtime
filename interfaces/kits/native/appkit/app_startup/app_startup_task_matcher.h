@@ -104,16 +104,28 @@ private:
     std::shared_ptr<CustomizationStartupTaskMatcher> customizationMatcher_ = nullptr;
 };
 
+class SchedulerPhaseTaskMatcher : public AppStartupTaskMatcher {
+public:
+    SchedulerPhaseTaskMatcher(bool preAbilityStageLoad);
+
+    bool Match(const AppStartupTask &task) const override;
+
+private:
+    bool preAbilityStageLoad_;
+};
+
 class DefaultStartupTaskMatcher : public AppStartupTaskMatcher {
 public:
-    DefaultStartupTaskMatcher(const std::string &moduleName);
+    DefaultStartupTaskMatcher(const std::string &moduleName, bool preAbilityStageLoad);
 
     bool Match(const AppStartupTask &task) const override;
 
 private:
     ModuleStartStartupTaskMatcher moduleMatcher_;
+    SchedulerPhaseTaskMatcher schedulerPhaseMatcher_;
     ExcludeFromAutoStartStartupTaskMatcher excludeMatcher_;
 };
+
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_APP_STARTUP_TASK_MATCHER_H

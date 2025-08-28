@@ -62,6 +62,7 @@ public:
         AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsyn);
     virtual void Init(const std::shared_ptr<Context> &context,
         const std::weak_ptr<AppExecFwk::OHOSApplication> application);
+    virtual void LoadModule(const AppExecFwk::HapModuleInfo &hapModuleInfo);
     std::shared_ptr<Context> GetContext() const;
     void AddAbility(const sptr<IRemoteObject> &token,
         const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord);
@@ -70,7 +71,7 @@ public:
     virtual void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration);
     virtual void OnMemoryLevel(int level);
     virtual int32_t RunAutoStartupTask(const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
-        bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext);
+        bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext, bool preAbilityStageLoad);
 
 private:
     friend class JsAbilityStage;
