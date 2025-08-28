@@ -1038,5 +1038,33 @@ HWTEST_F(AppUtilsTest, IsSupportRestartAppWithWindow_0200, TestSize.Level2)
     appUtils.isSupportRestartAppWithWindow_.value = true;
     EXPECT_TRUE(appUtils.IsSupportRestartAppWithWindow());
 }
+
+/**
+ * @tc.number: IsSupportAllowDebugPermission_0100
+ * @tc.desc: Test IsSupportAllowDebugPermission works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsSupportAllowDebugPermission_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsSupportAllowDebugPermission_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportAllowDebugPermission_.isLoaded = false;
+    EXPECT_FALSE(appUtils.IsSupportAllowDebugPermission());
+    EXPECT_TRUE(appUtils.isSupportAllowDebugPermission_.isLoaded);
+}
+
+/**
+ * @tc.number: IsSupportAllowDebugPermission_0200
+ * @tc.desc: Test IsSupportAllowDebugPermission works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsSupportAllowDebugPermission_0200, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsSupportAllowDebugPermission_0200 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportAllowDebugPermission_.isLoaded = true;
+    appUtils.isSupportAllowDebugPermission_.value = true;
+    EXPECT_TRUE(appUtils.IsSupportAllowDebugPermission());
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
