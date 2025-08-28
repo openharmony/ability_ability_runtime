@@ -15,9 +15,9 @@
 import { RecordData } from '@ohos.base';
 
 export default interface CustomData {
-  data: RecordData;
+  data: Record<string, RecordData>;
 }
 
 class CustomDataInner implements CustomData {
-  public data: RecordData = {};
+  public data: Record<string, RecordData> = {};
 }
