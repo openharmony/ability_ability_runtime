@@ -14,6 +14,7 @@
  */
 
 #include "ani_common_want.h"
+#include "ani_common_cache_mgr.h"
 #include "ani_common_util.h"
 #include "ani_remote_object.h"
 #include "array_wrapper.h"
@@ -38,11 +39,10 @@ namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime;
 namespace {
-constexpr const char* ABILITY_WANT_CLASS_NAME = "L@ohos/app/ability/Want/Want;";
-constexpr const char* TOOL_CLASS_NAME = "L@ohos/app/ability/Want/RecordSerializeTool;";
-constexpr const char* INNER_CLASS_NAME = "Lability/abilityResult/AbilityResultInner;";
-constexpr const char* ELEMENTNAME_CLASS_NAME = "LbundleManager/ElementNameInner/ElementNameInner;";
-constexpr const char *RECORD_CLASS_NAME = "Lescompat/Record;";
+constexpr const char *ABILITY_WANT_CLASS_NAME = "L@ohos/app/ability/Want/Want;";
+constexpr const char *TOOL_CLASS_NAME = "L@ohos/app/ability/Want/RecordSerializeTool;";
+constexpr const char *INNER_CLASS_NAME = "Lability/abilityResult/AbilityResultInner;";
+constexpr const char *ELEMENTNAME_CLASS_NAME = "LbundleManager/ElementNameInner/ElementNameInner;";
 constexpr const char *RECORD_SET_NAME =
     "X{C{std.core.Numeric}C{std.core.String}C{std.core.BaseEnum}}C{std.core.Object}:";
 const int PROPERTIES_SIZE = 2;
@@ -81,17 +81,12 @@ bool InnerCreateRecordObject(ani_env *env, ani_object &recordObject)
 {
     ani_class recordCls = nullptr;
     ani_method recordCtorMethod = nullptr;
-    ani_status status = env->FindClass(RECORD_CLASS_NAME, &recordCls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass failed status: %{public}d", status);
+    AniCommonMethodCacheKey recordCtor = std::make_pair("<ctor>", ":V");
+    if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_RECORD, recordCtor,
+        recordCls, recordCtorMethod)) {
         return false;
     }
-    status = env->Class_FindMethod(recordCls, "<ctor>", ":V", &recordCtorMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod constructor failed: %{public}d", status);
-        return false;
-    }
-    status = env->Object_New(recordCls, recordCtorMethod, &recordObject);
+    ani_status status = env->Object_New(recordCls, recordCtorMethod, &recordObject);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Object_New failed: %{public}d", status);
         return false;
@@ -103,18 +98,13 @@ bool InnerSetRecord(ani_env *env, ani_object recordObject, ani_string key, ani_o
 {
     ani_class recordCls = nullptr;
     ani_method recordSetMethod = nullptr;
-    ani_status status = env->FindClass(RECORD_CLASS_NAME, &recordCls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass failed status: %{public}d", status);
-        return false;
-    }
-    status = env->Class_FindMethod(recordCls, "$_set", RECORD_SET_NAME, &recordSetMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod set failed: %{public}d", status);
+    AniCommonMethodCacheKey recordSet = std::make_pair("$_set", RECORD_SET_NAME);
+    if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_RECORD, recordSet,
+        recordCls, recordSetMethod)) {
         return false;
     }
 
-    status = env->Object_CallMethod_Void(recordObject, recordSetMethod, key, value);
+    ani_status status = env->Object_CallMethod_Void(recordObject, recordSetMethod, key, value);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Object_CallMethod_Void failed status: %{public}d", status);
         return false;
@@ -149,17 +139,12 @@ bool InnerCreateBooleanObject(ani_env *env, ani_boolean value, ani_object &objec
 {
     ani_class cls = nullptr;
     ani_method ctorMethod = nullptr;
-    ani_status status = env->FindClass("Lstd/core/Boolean;", &cls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass failed status: %{public}d", status);
+    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "Z:V");
+    if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_BOOLEAN, ctorKey,
+        cls, ctorMethod)) {
         return false;
     }
-    status = env->Class_FindMethod(cls, "<ctor>", "Z:V", &ctorMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod constructor failed: %{public}d", status);
-        return false;
-    }
-    status = env->Object_New(cls, ctorMethod, &object, value);
+    ani_status status = env->Object_New(cls, ctorMethod, &object, value);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Object_New failed: %{public}d", status);
         return false;
@@ -194,17 +179,12 @@ bool InnerCreateShortObject(ani_env *env, ani_short value, ani_object &object)
 {
     ani_class cls = nullptr;
     ani_method ctorMethod = nullptr;
-    ani_status status = env->FindClass("Lstd/core/Short;", &cls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass failed status: %{public}d", status);
+    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "S:V");
+    if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_SHORT, ctorKey,
+        cls, ctorMethod)) {
         return false;
     }
-    status = env->Class_FindMethod(cls, "<ctor>", "S:V", &ctorMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod constructor failed: %{public}d", status);
-        return false;
-    }
-    status = env->Object_New(cls, ctorMethod, &object, value);
+    ani_status status = env->Object_New(cls, ctorMethod, &object, value);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Object_New failed: %{public}d", status);
         return false;
@@ -239,17 +219,12 @@ bool InnerCreateIntObject(ani_env *env, ani_int value, ani_object &object)
 {
     ani_class cls = nullptr;
     ani_method ctorMethod = nullptr;
-    ani_status status = env->FindClass("Lstd/core/Int;", &cls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass failed status: %{public}d", status);
+    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "I:V");
+    if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_INT, ctorKey,
+        cls, ctorMethod)) {
         return false;
     }
-    status = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctorMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod constructor failed: %{public}d", status);
-        return false;
-    }
-    status = env->Object_New(cls, ctorMethod, &object, value);
+    ani_status status = env->Object_New(cls, ctorMethod, &object, value);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Object_New failed: %{public}d", status);
         return false;
@@ -284,17 +259,12 @@ bool InnerCreateLongObject(ani_env *env, ani_long value, ani_object &object)
 {
     ani_class cls = nullptr;
     ani_method ctorMethod = nullptr;
-    ani_status status = env->FindClass("Lstd/core/Long;", &cls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass failed status: %{public}d", status);
+    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "J:V");
+    if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_LONG, ctorKey,
+        cls, ctorMethod)) {
         return false;
     }
-    status = env->Class_FindMethod(cls, "<ctor>", "J:V", &ctorMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod constructor failed: %{public}d", status);
-        return false;
-    }
-    status = env->Object_New(cls, ctorMethod, &object, value);
+    ani_status status = env->Object_New(cls, ctorMethod, &object, value);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Object_New failed: %{public}d", status);
         return false;
@@ -329,17 +299,12 @@ bool InnerCreateFloatObject(ani_env *env, ani_float value, ani_object &object)
 {
     ani_class cls = nullptr;
     ani_method ctorMethod = nullptr;
-    ani_status status = env->FindClass("Lstd/core/Float;", &cls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass failed status: %{public}d", status);
+    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "F:V");
+    if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_FLOAT, ctorKey,
+        cls, ctorMethod)) {
         return false;
     }
-    status = env->Class_FindMethod(cls, "<ctor>", "F:V", &ctorMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod constructor failed: %{public}d", status);
-        return false;
-    }
-    status = env->Object_New(cls, ctorMethod, &object, value);
+    ani_status status = env->Object_New(cls, ctorMethod, &object, value);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Object_New failed: %{public}d", status);
         return false;
@@ -374,17 +339,12 @@ bool InnerCreateDoubleObject(ani_env *env, ani_double value, ani_object &object)
 {
     ani_class cls = nullptr;
     ani_method ctorMethod = nullptr;
-    ani_status status = env->FindClass("Lstd/core/Double;", &cls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass failed status: %{public}d", status);
+    AniCommonMethodCacheKey ctorKey = std::make_pair("<ctor>", "D:V");
+    if (!AniCommonCacheMgr::GetCachedClassAndMethod(env, CLASSNAME_DOUBLE, ctorKey,
+        cls, ctorMethod)) {
         return false;
     }
-    status = env->Class_FindMethod(cls, "<ctor>", "D:V", &ctorMethod);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod constructor failed: %{public}d", status);
-        return false;
-    }
-    status = env->Object_New(cls, ctorMethod, &object, value);
+    ani_status status = env->Object_New(cls, ctorMethod, &object, value);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Object_New failed: %{public}d", status);
         return false;
@@ -511,13 +471,12 @@ bool InnerSetArrayString(ani_env *env, ani_object recordObject, ani_string aniKe
     const std::vector<std::string> &natArray)
 {
     ani_class stringCls = nullptr;
-    ani_status status = env->FindClass("Lstd/core/String;", &stringCls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass failed, status: %{public}d", status);
+    bool res = AniCommonCacheMgr::GetCachedClass(env, CLASSNAME_STRING, stringCls);
+    if (!res) {
         return false;
     }
     ani_ref undefinedRef = nullptr;
-    status = env->GetUndefined(&undefinedRef);
+    ani_status status = env->GetUndefined(&undefinedRef);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "GetUndefined failed, status: %{public}d", status);
         return false;
@@ -915,13 +874,12 @@ bool InnerSetArrayObject(ani_env *env, ani_object recordObject, ani_string aniKe
     const std::vector<AAFwk::WantParams> &natArray)
 {
     ani_class recordCls = nullptr;
-    ani_status status = env->FindClass(RECORD_CLASS_NAME, &recordCls);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "FindClass failed, status: %{public}d", status);
+    bool res = AniCommonCacheMgr::GetCachedClass(env, CLASSNAME_RECORD, recordCls);
+    if (!res) {
         return false;
     }
     ani_ref undefinedRef = nullptr;
-    status = env->GetUndefined(&undefinedRef);
+    ani_status status = env->GetUndefined(&undefinedRef);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "GetUndefined failed, status: %{public}d", status);
         return false;
