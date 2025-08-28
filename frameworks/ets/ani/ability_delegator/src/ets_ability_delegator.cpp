@@ -511,6 +511,13 @@ void EtsAbilityDelegator::WaitAbilityMonitor(ani_env *env, [[maybe_unused]]ani_c
         return;
     }
     std::unique_lock<std::mutex> lck(g_mutexAbilityRecord);
+    if (etsbaseProperty->object_.lock() == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "etsbaseProperty->object_ is null");
+        AppExecFwk::AsyncCallback(env, callback, AbilityRuntime::EtsErrorUtil::CreateError(env, COMMON_FAILED,
+            "Calling WaitAbilityMonitor failed."),
+            resultAniOj);
+        return;
+    }
     g_abilityRecord.emplace(etsbaseProperty->object_, etsbaseProperty->token_);
     resultAniOj = etsbaseProperty->object_.lock()->aniObj;
     AppExecFwk::AsyncCallback(env, callback, AbilityRuntime::EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK),
@@ -805,6 +812,7 @@ ani_int EtsAbilityDelegator::GetAbilityState(ani_env *env, [[maybe_unused]]ani_o
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::ETS);
     if (!delegator) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
+        AbilityRuntime::EtsErrorUtil::ThrowError(env, COMMON_FAILED);
         return INVALID_LIFECYCLE_STATE;
     }
     AbilityDelegator::AbilityState lifeState = delegator->GetAbilityState(remoteObject);
@@ -836,10 +844,34 @@ void EtsAbilityDelegator::AbilityLifecycleStateToEts(
     }
 }
 
+bool EtsAbilityDelegator::CheckMonitorPara(ani_env *env, ani_object monitorObj)
+{
+    if (env == nullptr || monitorObj == nullptr) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "env or monitorObj is nullptr");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_boolean isUndefined = true;
+    if ((status = env->Reference_IsUndefined(reinterpret_cast<ani_ref>(monitorObj), &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_IsUndefined status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isNull = true;
+    if ((status = env->Reference_IsNullishValue(reinterpret_cast<ani_ref>(monitorObj), &isNull)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_IsNullishValue status: %{public}d", status);
+        return false;
+    }
+    if (isUndefined || isNull) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "monitorObj is undefined or null");
+        return false;
+    }
+    return true;
+}
+
 bool EtsAbilityDelegator::ParseMonitorPara(ani_env *env, ani_object monitorObj,
     std::shared_ptr<EtsAbilityMonitor> &monitorImpl)
 {
-    if (env == nullptr || monitorObj == nullptr) {
+    if (env == nullptr || monitorObj == nullptr || !CheckMonitorPara(env, monitorObj)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env or monitorObj is nullptr");
         return false;
     }
@@ -860,7 +892,7 @@ bool EtsAbilityDelegator::ParseMonitorPara(ani_env *env, ani_object monitorObj,
             }
             ani_boolean result = false;
             ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(monitorObj),
-                reinterpret_cast<ani_ref>(etsMonitor->aniObj), &result);
+                etsMonitor->aniRef, &result);
             if (status != ANI_OK) {
                 TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_StrictEquals failed status: %{public}d", status);
             }
@@ -901,8 +933,15 @@ bool EtsAbilityDelegator::ParseMonitorParaInner(ani_env *env, ani_object monitor
     }
     abilityMonitor->SetEtsAbilityMonitor(env, monitorObj);
     monitorImpl = abilityMonitor;
+    ani_status status = ANI_ERROR;
+    ani_ref monitorRef = nullptr;
+    if ((status = env->GlobalReference_Create(monitorObj, &monitorRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "GlobalReference_Create failed, status: %{public}d", status);
+        return false;
+    }
     std::shared_ptr<ETSNativeReference> reference = std::make_shared<ETSNativeReference>();
     if (reference != nullptr) {
+        reference->aniRef = monitorRef;
         reference->aniObj = monitorObj;
     }
     std::unique_lock<std::mutex> lck(g_mtxMonitorRecord);
@@ -913,7 +952,7 @@ bool EtsAbilityDelegator::ParseMonitorParaInner(ani_env *env, ani_object monitor
 bool EtsAbilityDelegator::ParseStageMonitorPara(ani_env *env, ani_object stageMonitorObj,
     std::shared_ptr<EtsAbilityStageMonitor> &stageMonitor, bool &isExisted)
 {
-    if (env == nullptr || stageMonitorObj == nullptr) {
+    if (env == nullptr || stageMonitorObj == nullptr || !CheckMonitorPara(env, stageMonitorObj)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "env or stageMonitorObj is nullptr");
         return false;
     }
@@ -935,7 +974,7 @@ bool EtsAbilityDelegator::ParseStageMonitorPara(ani_env *env, ani_object stageMo
             }
             ani_boolean result = false;
             ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(stageMonitorObj),
-                reinterpret_cast<ani_ref>(etsMonitor->aniObj), &result);
+                etsMonitor->aniRef, &result);
             if (status != ANI_OK) {
                 TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_StrictEquals failed status: %{public}d", status);
             }
@@ -989,8 +1028,15 @@ void EtsAbilityDelegator::AddStageMonitorRecord(ani_env *env, ani_object stageMo
         TAG_LOGE(AAFwkTag::DELEGATOR, "null delegator");
         return;
     }
+    ani_status status = ANI_ERROR;
+    ani_ref stageMonitorRef = nullptr;
+    if ((status = env->GlobalReference_Create(stageMonitorObj, &stageMonitorRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "GlobalReference_Create failed, status: %{public}d", status);
+        return;
+    }
     std::shared_ptr<ETSNativeReference> reference = std::make_shared<ETSNativeReference>();
     reference->aniObj = stageMonitorObj;
+    reference->aniRef = stageMonitorRef;
     {
         std::unique_lock<std::mutex> lck(g_mtxStageMonitorRecord);
         g_stageMonitorRecord.emplace(reference, stageMonitor);
@@ -1023,11 +1069,15 @@ void EtsAbilityDelegator::RemoveStageMonitorRecord(ani_env *env, ani_object stag
         }
         ani_boolean result = false;
         ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(stageMonitorObj),
-        reinterpret_cast<ani_ref>(etsMonitor->aniObj), &result);
+            etsMonitor->aniRef, &result);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_StrictEquals failed status: %{public}d", status);
         }
         if (result) {
+            status = env->GlobalReference_Delete(etsMonitor->aniRef);
+            if (status != ANI_OK) {
+                TAG_LOGE(AAFwkTag::DELEGATOR, "GlobalReference_Delete failed status: %{public}d", status);
+            }
             g_stageMonitorRecord.erase(iter);
             TAG_LOGI(AAFwkTag::DELEGATOR, "end, size: %{public}zu", g_stageMonitorRecord.size());
             break;
@@ -1077,8 +1127,8 @@ bool EtsAbilityDelegator::ParseAbilityCommonPara(ani_env *env, ani_object abilit
             continue;
         }
         ani_boolean result = false;
-        ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(etsMonitor->aniObj),
-        reinterpret_cast<ani_ref>(abilityObj), &result);
+        ani_status status = env->Reference_StrictEquals(etsMonitor->aniRef,
+            reinterpret_cast<ani_ref>(abilityObj), &result);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_StrictEquals failed status: %{public}d", status);
         }
@@ -1143,11 +1193,15 @@ void EtsAbilityDelegator::CleanAndFindMonitorRecord(ani_env *env, ani_object mon
         }
         ani_boolean result = false;
         ani_status status = env->Reference_StrictEquals(reinterpret_cast<ani_ref>(monitorObj),
-        reinterpret_cast<ani_ref>(etsMonitor->aniObj), &result);
+            etsMonitor->aniRef, &result);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::DELEGATOR, "Reference_StrictEquals failed status: %{public}d", status);
         }
         if (result) {
+            status = env->GlobalReference_Delete(etsMonitor->aniRef);
+            if (status != ANI_OK) {
+                TAG_LOGE(AAFwkTag::DELEGATOR, "GlobalReference_Delete failed status: %{public}d", status);
+            }
             g_monitorRecord.erase(iter);
             break;
         }
