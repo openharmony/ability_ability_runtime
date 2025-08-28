@@ -13,25 +13,19 @@
  * limitations under the License.
  */
 
-import { AbilityConstant, common, application, ConfigurationConstant, errorManager, UIAbility, Want } from '@kit.AbilityKit';
+import { AbilityConstant, application, ConfigurationConstant, errorManager, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { TAG, DOMAIN} from '../pages/Index'
+import { settings } from '@kit.BasicServicesKit';
 
 function errorHandlerFunc(observer: errorManager.GlobalError) {
   hilog.error(DOMAIN, TAG, 'result name: %{public}s', observer.name);
   hilog.error(DOMAIN, TAG, 'result message: %{public}s', observer.message);
-  hilog.error(DOMAIN, TAG, 'result stack: %{public}s', observer.stack);
-  hilog.error(DOMAIN, TAG, 'result instanceName: %{public}s', observer.instanceName);
-  hilog.error(DOMAIN, TAG, 'result instanceType: %{public}s', observer.instanceType);
-  restartApp()
-}
-
-function unhandledRejectionHandleFunc(observer: errorManager.GlobalError) {
-  hilog.error(DOMAIN, TAG, 'result name: %{public}s', observer.name);
-  hilog.error(DOMAIN, TAG, 'result message: %{public}s', observer.message);
-  hilog.error(DOMAIN, TAG, 'result stack: %{public}s', observer.stack);
+  if (typeof (observer.stack) === 'string') {
+      hilog.error(DOMAIN, TAG, 'result stack: %{public}s', observer.stack);
+  }
   hilog.error(DOMAIN, TAG, 'result instanceName: %{public}s', observer.instanceName);
   hilog.error(DOMAIN, TAG, 'result instanceType: %{public}s', observer.instanceType);
   restartApp()
@@ -52,7 +46,8 @@ let errorObserver: errorManager.ErrorObserver = {
   }
 };
 
-let observerId = -1;
+const DEFAULT_OBSERVER_ID = -1;
+let observerId = DEFAULT_OBSERVER_ID;
 let restartWant: Want | undefined = undefined;
 function restartApp() {
   try {
@@ -68,8 +63,9 @@ export default class EntryAbility extends UIAbility {
     this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onCreate');
     restartWant = want;
-    const callerBundleName: string | undefined = want.parameters?.['ohos.aafwk.param.callerBundleName']?.toString();
-    if (callerBundleName === undefined || callerBundleName !== 'com.huawei.hmos.aidataservice') {
+    const INSIGHT_INTENT_DEBUG = 'ai_insightintent_debug'
+    const settingStatus: string = settings.getValueSync(this.context, INSIGHT_INTENT_DEBUG, 'default', settings.domainName.USER_SECURITY);
+    if (settingStatus !== 'true') {
       try {
         this.context.terminateSelf();
       } catch (err) {
@@ -79,7 +75,6 @@ export default class EntryAbility extends UIAbility {
     try {
       observerId = errorManager.on('error', errorObserver);
       errorManager.on('globalErrorOccurred', errorHandlerFunc);
-      errorManager.on('globalUnhandledRejectionDetected', unhandledRejectionHandleFunc);
     } catch (error) {
       hilog.error(DOMAIN, TAG, 'registerErrorManager failed, Cause: %{public}s', JSON.stringify(error));
     }
@@ -88,9 +83,10 @@ export default class EntryAbility extends UIAbility {
   onDestroy(): void {
     hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onDestroy');
     try {
-      errorManager.off('error', observerId);
+      if (observerId != DEFAULT_OBSERVER_ID) {
+        errorManager.off('error', observerId);
+      }
       errorManager.off('globalErrorOccurred', errorHandlerFunc);
-      errorManager.off('globalUnhandledRejectionDetected', unhandledRejectionHandleFunc);
     } catch (error) {
       hilog.error(DOMAIN, TAG, 'cancelErrorManager failed, Cause: %{public}s', JSON.stringify(error));
     }
