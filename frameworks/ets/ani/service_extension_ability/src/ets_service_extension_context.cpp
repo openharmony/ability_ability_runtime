@@ -40,6 +40,7 @@ constexpr const int FAILED_CODE = -1;
 constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
     "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
 constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
 
@@ -65,6 +66,8 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             reinterpret_cast<void *>(EtsServiceExtensionContext::ConnectServiceExtensionAbility) },
         ani_native_function { "nativeDisconnectServiceExtensionAbility", SIGNATURE_DISCONNECT_SERVICE_EXTENSION,
             reinterpret_cast<void *>(EtsServiceExtensionContext::DisconnectServiceExtensionAbility) },
+        ani_native_function { "nativeOpenAtomicService", SIGNATURE_DISCONNECT_SERVICE_EXTENSION,
+            reinterpret_cast<void *>(EtsServiceExtensionContext::OpenAtomicService) },
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK
         && status != ANI_ALREADY_BINDED) {
@@ -253,6 +256,18 @@ void EtsServiceExtensionContext::DisconnectServiceExtensionAbility(ani_env *env,
         return;
     }
     etsServiceExtensionContext->OnDisconnectServiceExtensionAbility(env, aniObj, connectId, callback);
+}
+
+void EtsServiceExtensionContext::OpenAtomicService(
+    ani_env *env, ani_object aniObj, ani_string aniAppId, ani_object callbackObj, ani_object optionsObj)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "OpenAtomicService called");
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null etsContext");
+        return;
+    }
+    etsContext->OnOpenAtomicService(env, aniObj, aniAppId, callbackObj, optionsObj);
 }
 
 EtsServiceExtensionContext *EtsServiceExtensionContext::GetEtsAbilityContext(
@@ -486,6 +501,70 @@ void EtsServiceExtensionContext::OnDisconnectServiceExtensionAbility(ani_env *en
     }
     context->DisconnectAbility(want, connection, accountId);
     AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+}
+
+
+void EtsServiceExtensionContext::OnOpenAtomicService(
+    ani_env *env, ani_object aniObj, ani_string aniAppId, ani_object callbackObj, ani_object optionsObj)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "OnOpenAtomicService");
+    ani_status status = ANI_ERROR;
+    ani_boolean isOptionsUndefined = true;
+    ani_object errorObject = nullptr;
+    if ((status = env->Reference_IsUndefined(optionsObj, &isOptionsUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "status: %{public}d", status);
+        return;
+    }
+    std::string appId;
+    if (!AppExecFwk::GetStdString(env, aniAppId, appId)) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "parse appId failed");
+        errorObject = EtsErrorUtil::CreateInvalidParamError(env, "Parse param appId failed, appId must be string.");
+        AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
+        return;
+    }
+    AAFwk::Want want;
+    AAFwk::StartOptions startOptions;
+    if (!isOptionsUndefined && !AppExecFwk::UnwrapAtomicServiceOptions(env, optionsObj, want, startOptions)) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "UnwrapAtomicServiceOptions failed");
+        errorObject = EtsErrorUtil::CreateInvalidParamError(env, "UnwrapAtomicServiceOptions failed.");
+        AppExecFwk::AsyncCallback(env, callbackObj, errorObject, nullptr);
+        return;
+    }
+    OpenAtomicServiceInner(env, aniObj, want, startOptions, appId, callbackObj);
+}
+
+void EtsServiceExtensionContext::OpenAtomicServiceInner(ani_env *env, ani_object aniObj, AAFwk::Want &want,
+    AAFwk::StartOptions &options, std::string appId, ani_object callbackObj)
+{
+    std::string bundleName = ATOMIC_SERVICE_PREFIX + appId;
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "bundleName: %{public}s", bundleName.c_str());
+    want.SetBundle(bundleName);
+    want.AddFlags(AAFwk::Want::FLAG_INSTALL_ON_DEMAND);
+    std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>
+        (std::chrono::system_clock::now().time_since_epoch()).count());
+    want.SetParam(AAFwk::Want::PARAM_RESV_START_TIME, startTime);
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
+    }
+    AddFreeInstallObserver(env, want, callbackObj, context);
+    want.SetParam(AAFwk::Want::PARAM_RESV_FOR_RESULT, true);
+    int32_t ErrCode = context->OpenAtomicService(want, options);
+    if (ErrCode == ERR_OK) {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "OpenAtomicService success");
+        return;
+    }
+    TAG_LOGE(AAFwkTag::SERVICE_EXT, "OpenAtomicService failed");
+    if (freeInstallObserver_ != nullptr) {
+        std::string bundleName = want.GetElement().GetBundleName();
+        std::string abilityName = want.GetElement().GetAbilityName();
+        freeInstallObserver_->OnInstallFinished(bundleName, abilityName, startTime, ErrCode);
+    } else {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "OpenAtomicService success");
+        AppExecFwk::AsyncCallback(env, callbackObj, EtsErrorUtil::CreateErrorByNativeErr(env, ErrCode), nullptr);
+    }
 }
 
 void EtsServiceExtensionContext::AddFreeInstallObserver(
