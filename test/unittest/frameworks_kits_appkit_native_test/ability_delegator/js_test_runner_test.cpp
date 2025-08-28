@@ -368,7 +368,7 @@ HWTEST_F(JsTestRunnerTest, Js_GetTestRunnerPath_0100, Function | MediumTest | Le
     JsTestRunner* pTestRunner = static_cast<JsTestRunner*>(static_cast<void*>((testRunner.get())));
     std::string path = pTestRunner->GetTestRunnerPath(abilityArgs);
     TAG_LOGI(AAFwkTag::TEST, "Js_GetTestRunnerPath_0100 GetTestRunnerPath is called: %{public}s ", path.c_str());
-    EXPECT_EQ(path, "ets/testrunner/JSUserTestRunnerjs");
+    EXPECT_EQ(path, "/ets/testrunner/JSUserTestRunnerjs");
 }
 
 /**
@@ -383,7 +383,6 @@ HWTEST_F(JsTestRunnerTest, Js_GetTestRunnerPath_0200, Function | MediumTest | Le
     MockAbilityDelegatorStub::finishFlag_ = false;
     std::map<std::string, std::string> paras;
     paras.emplace(KEY_TEST_BUNDLE_NAME, VALUE_TEST_BUNDLE_NAME);
-    paras.emplace(KEY_TEST_RUNNER_CLASS, VALUE_TEST_RUNNER_CLASS);
     paras.emplace(KEY_TEST_CASE, VALUE_TEST_CASE);
     paras.emplace(KEY_TEST_WAIT_TIMEOUT, VALUE_TEST_WAIT_TIMEOUT);
 
