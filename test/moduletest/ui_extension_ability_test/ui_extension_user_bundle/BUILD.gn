@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 ohos_app("ui_extension_user_hap") {
   certificate_profile = "signature/openharmony_sx.p7b"
   hap_name = "ui_extension_user"
-  hap_out_dir = "$root_out_dir/ability/ability_runtime/test/moduletest/ui_extension_ability_test"
+  hap_out_dir = "$root_out_dir/ability/ability_runtime/ability_runtime/test/moduletest/ui_extension_ability_test"
 
   subsystem_name = "ability"
   part_name = "ability_runtime"
