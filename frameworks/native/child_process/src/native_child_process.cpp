@@ -346,12 +346,12 @@ Ability_NativeChildProcess_ErrCode OH_Ability_UnregisterNativeChildProcessExitCa
 }
 
 Ability_NativeChildProcess_ErrCode OH_Ability_ChildProcessConfigs_SetIsolationUid(
-    Ability_ChildProcessConfigs* configs, bool enableIsolationUid)
+    Ability_ChildProcessConfigs* configs, bool isolationUid)
 {
     if (configs == nullptr) {
         TAG_LOGE(AAFwkTag::PROCESSMGR, "null Ability_ChildProcessConfigs");
         return NCP_ERR_INVALID_PARAM;
     }
-    configs->isIsolationUid = enableIsolationUid;
+    configs->isIsolationUid = isolationUid;
     return NCP_NO_ERROR;
 }

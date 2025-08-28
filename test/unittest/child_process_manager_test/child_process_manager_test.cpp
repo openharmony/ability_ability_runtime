@@ -334,7 +334,8 @@ HWTEST_F(ChildProcessManagerTest, CreateNativeChildProcessByAppSpawnFork_0200, T
 {
     TAG_LOGD(AAFwkTag::TEST, "CreateNativeChildProcessByAppSpawnFork_0200 called.");
     sptr<IRemoteObject> callback;
-    auto ret = ChildProcessManager::GetInstance().CreateNativeChildProcessByAppSpawnFork("test.so", callback, "abc_123");
+    auto ret = ChildProcessManager::GetInstance().CreateNativeChildProcessByAppSpawnFork("test.so", callback,
+        "abc_123");
     EXPECT_NE(ret, ChildProcessManagerErrorCode::ERR_FORK_FAILED);
 }
 
