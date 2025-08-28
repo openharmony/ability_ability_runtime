@@ -176,17 +176,20 @@ Ability_NativeChildProcess_ErrCode OH_Ability_ChildProcessConfigs_SetIsolationMo
     Ability_ChildProcessConfigs* configs, NativeChildProcess_IsolationMode isolationMode);
 
 /**
- * @brief Sets whether to enable the isolation UID for the specified child process configs.
- * The isolationUid only takes effect in {@link OH_Ability_StartNativeChildProcessWithConfigs}.
- * 
+ * @brief Sets the UID isolation flag for the specified child process configs.
+ * The isolationUid only takes effect when {@link OH_Ability_ChildProcessConfigs_SetIsolationMode}
+ * is set to {@link NCP_ISOLATION_MODE_ISOLATED}.
+ *
  * @param configs Pointer to the child process configs object. Must not be nullptr.
- * @param enableIsolationUid Whether to enable the isolation UID.
- * @return Returns {@link NCP_NO_ERROR} if the isolation UID is set successful.
- *         Returns {@link NCP_NO_ERR_INVALID_PARAM} if the input parameters are invalid.
- * @since 20
+ * @param isolationUid The UID isolation setting to apply.
+ *        - true: uses independent UID
+ *        - false: uses parent process's UID
+ * @return Returns {@link NCP_NO_ERROR} if the UID isolation flag is set successfully.
+ *         Returns {@link NCP_ERR_INVALID_PARAM} if the input parameters are invalid.
+ * @since 21
  */
 Ability_NativeChildProcess_ErrCode OH_Ability_ChildProcessConfigs_SetIsolationUid(
-    Ability_ChildProcessConfigs* configs, bool enableIsolationUid);
+    Ability_ChildProcessConfigs* configs, bool isolationUid);
 
 /**
  * @brief Sets the process name for the specified child process configs.

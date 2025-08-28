@@ -45,7 +45,7 @@ public:
     ChildProcessManagerErrorCode StartChildProcessWithArgs(const std::string &srcEntry, pid_t &pid,
         int32_t childProcessType, const AppExecFwk::ChildProcessArgs &args,
         const AppExecFwk::ChildProcessOptions &options);
-    ChildProcessManagerErrorCode CreateChildProcessByAppSpawnFork(
+    ChildProcessManagerErrorCode CreateNativeChildProcessByAppSpawnFork(
         const std::string &libName, const sptr<IRemoteObject> &callbackStub, const std::string &customProcessName = "",
         const bool isolationMode = false, const bool isIsolationUid = false);
     bool GetBundleInfo(AppExecFwk::BundleInfo &bundleInfo);

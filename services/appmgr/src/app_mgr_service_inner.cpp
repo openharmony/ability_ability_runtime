@@ -8500,10 +8500,9 @@ int32_t AppMgrServiceInner::StartChildProcess(const pid_t callingPid, pid_t &chi
     auto &options = request.options;
     childProcessRecord->SetEntryParams(args.entryParams);
     TAG_LOGI(AAFwkTag::APPMGR, "srcEntry:%{private}s, args.entryParams size:%{public}zu,"
-        " processName:%{public}s, args.fds size:%{public}zu, options.isolationMode:%{public}d,"
-        "option.isolationUid: %{public}d",
+        " processName:%{public}s, args.fds size:%{public}zu, options.isolationMode:%{public}d,",
         request.srcEntry.c_str(), args.entryParams.length(), childProcessRecord->GetProcessName().c_str(),
-        args.fds.size(), options.isolationMode, options.isolationUid);
+        args.fds.size(), options.isolationMode);
     return StartChildProcessImpl(childProcessRecord, appRecord, childPid, args, options);
 }
 
@@ -8722,7 +8721,7 @@ int32_t AppMgrServiceInner::GetChildProcessInfo(const std::shared_ptr<ChildProce
         return ERR_INVALID_VALUE;
     }
 
-    if (IN_PROCESS_CALL(bundleMgrHelper->GetBaseSharedBundleInfos(bundleInfo.name, info.hspList,
+    if (IN_PROCESS_CALL(bundleMgrHelper->GetBaseSharedBundleInfos(appRecord->GetBundleName(), info.hspList,
         AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO))) {
             TAG_LOGE(AAFwkTag::APPMGR, "GetBaseSharedBundleInfos fail");
         return ERR_INVALID_VALUE;
