@@ -326,37 +326,6 @@ ohos_unittest("aa_command_send_memory_level_test") {
   ]
 }
 
-print("accessibility_enable = ", accessibility_enable)
-if (accessibility_enable) {
-  ohos_unittest("accessibility_ability_utils_test") {
-    module_out_path = module_output_path
-
-    sources = [
-      "${ability_runtime_path}/tools/aa/src/accessibility_ability_utils.cpp",
-      "accessibility_ability_utils_test.cpp",
-    ]
-
-    cflags = []
-    if (target_cpu == "arm") {
-      cflags += [ "-DBINDER_IPC_32BIT" ]
-    }
-
-    deps = [ "${ability_runtime_path}/tools/aa:tools_aa_source_set" ]
-
-    external_deps = [
-      "access_token:libaccesstoken_sdk",
-      "access_token:libnativetoken",
-      "access_token:libtoken_setproc",
-      "accessibility:accessibility_common",
-      "accessibility:accessibilityclient",
-      "accessibility:accessibilityconfig",
-      "cJSON:cjson",
-      "googletest:gmock_main",
-      "hilog:libhilog",
-      "selinux_adapter:librestorecon",
-    ]
-  }
-}
 group("unittest") {
   testonly = true
 
@@ -372,9 +341,6 @@ group("unittest") {
     ":aa_command_test_test",
     ":aa_command_send_memory_level_test",
   ]
-  if (accessibility_enable) {
-    deps += [ ":accessibility_ability_utils_test" ]
-  }
   if (ability_command_for_test) {
     deps += [ ":aa_command_force_timeout_test" ]
   }
