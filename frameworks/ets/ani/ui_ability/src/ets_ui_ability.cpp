@@ -906,6 +906,21 @@ bool EtsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
 }
 #endif
 
+void EtsUIAbility::UpdateContextConfiguration()
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "UpdateContextConfiguration called");
+    if (abilityContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
+        return;
+    }
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    EtsAbilityContext::ConfigurationUpdated(env, shellContextRef_, abilityContext_->GetConfiguration());
+}
+
 void EtsUIAbility::OnNewWant(const Want &want)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "OnNewWant called");
