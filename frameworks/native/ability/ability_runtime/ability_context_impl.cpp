@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1235,10 +1235,10 @@ bool AbilityContextImpl::GetRestoreEnabled()
     return restoreEnabled_.load();
 }
 
-ErrCode AbilityContextImpl::OpenLink(const AAFwk::Want &want, int requestCode, bool hideFailureTipDialog)
+ErrCode AbilityContextImpl::OpenLink(const AAFwk::Want& want, int requestCode)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called");
-    return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode, hideFailureTipDialog);
+    return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode);
 }
 
 std::shared_ptr<AAFwk::Want> AbilityContextImpl::GetWant()
