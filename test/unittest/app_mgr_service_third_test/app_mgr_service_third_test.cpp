@@ -403,5 +403,53 @@ HWTEST_F(AppMgrServiceThirdTest, OnAddSystemAbility_0100, TestSize.Level2)
     appMgrService->OnAddSystemAbility(serviceId, deviceId);
     EXPECT_FALSE(AAFwk::UriPermissionManagerClient::GetInstance().IsUriPermServiceStarted());
 }
+
+/*
+ * Feature: AppMgrService
+ * Function: PromoteCurrentToCandidateMasterProcess
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService PromoteCurrentToCandidateMasterProcess
+ * EnvConditions: NA
+ * CaseDescription: Verify PromoteCurrentToCandidateMasterProcess
+ */
+HWTEST_F(AppMgrServiceThirdTest, PromoteCurrentToCandidateMasterProcess_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    appMgrService->SetInnerService(nullptr);
+    int32_t res = appMgrService->PromoteCurrentToCandidateMasterProcess(true);
+    EXPECT_EQ(res, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: DemoteCurrentFromCandidateMasterProcess
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService DemoteCurrentFromCandidateMasterProcess
+ * EnvConditions: NA
+ * CaseDescription: Verify DemoteCurrentFromCandidateMasterProcess
+ */
+HWTEST_F(AppMgrServiceThirdTest, DemoteCurrentFromCandidateMasterProcess_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    appMgrService->SetInnerService(nullptr);
+    int32_t res = appMgrService->DemoteCurrentFromCandidateMasterProcess();
+    EXPECT_EQ(res, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
+}
+
+/*
+ * Feature: AppMgrService
+ * Function: ExitMasterProcessRole
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService ExitMasterProcessRole
+ * EnvConditions: NA
+ * CaseDescription: Verify ExitMasterProcessRole
+ */
+HWTEST_F(AppMgrServiceThirdTest, ExitMasterProcessRole_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    appMgrService->SetInnerService(nullptr);
+    int32_t res = appMgrService->ExitMasterProcessRole();
+    EXPECT_EQ(res, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

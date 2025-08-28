@@ -1126,7 +1126,7 @@ public:
         isMasterProcess_ = isMasterProcess;
     }
 
-    inline bool GetIsMasterProcess() const
+    inline bool IsMasterProcess() const
     {
         return isMasterProcess_;
     }

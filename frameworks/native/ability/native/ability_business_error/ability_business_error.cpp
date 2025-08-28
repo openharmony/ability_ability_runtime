@@ -147,6 +147,10 @@ constexpr const char* ERROR_MSG_NOT_SUPPORT_START_DLP_FILES =
     "Starting DLP files is not supported.";
 constexpr const char* ERROR_MSG_MAIN_WINDOW_NOT_EXIST =
     "The main window of this ability does not exist.";
+constexpr const char* ERROR_MSG_NOT_MASTER_PROCESS =
+    "Not a master process.";
+constexpr const char* ERROR_MSG_NOT_ON_NEW_PROCESS_REQUEST_DONE =
+    "Cannot exit because there is an unfinished onNewProcessRequest.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
@@ -249,6 +253,8 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_START_PLUGIN_UI_ABILITY, ERROR_MSG_NOT_SUPPORT_START_PLUGIN_UI_ABILITY },
     { AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_START_DLP_FILES, ERROR_MSG_NOT_SUPPORT_START_DLP_FILES },
     { AbilityErrorCode::ERROR_CODE_MAIN_WINDOW_NOT_EXIST, ERROR_MSG_MAIN_WINDOW_NOT_EXIST },
+    { AbilityErrorCode::ERROR_CODE_NOT_MASTER_PROCESS, ERROR_MSG_NOT_MASTER_PROCESS },
+    { AbilityErrorCode::ERROR_CODE_NOT_ON_NEW_PROCESS_REQUEST_DONE, ERROR_MSG_NOT_ON_NEW_PROCESS_REQUEST_DONE },
 };
 
 static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP {
@@ -356,6 +362,8 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {START_UI_ABILITIES_NOT_SUPPORT_START_PLUGIN, AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_START_PLUGIN_UI_ABILITY },
     {START_UI_ABILITIES_NOT_SUPPORT_DLP, AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_START_DLP_FILES },
     {ERR_MAIN_WINDOW_NOT_EXIST, AbilityErrorCode::ERROR_CODE_MAIN_WINDOW_NOT_EXIST },
+    {ERR_NOT_MASTER_PROCESS, AbilityErrorCode::ERROR_CODE_NOT_MASTER_PROCESS },
+    {ERR_NOT_ON_NEW_PROCESS_REQUEST_DONE, AbilityErrorCode::ERROR_CODE_NOT_ON_NEW_PROCESS_REQUEST_DONE },
 };
 }
 

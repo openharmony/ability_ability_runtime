@@ -577,7 +577,7 @@ void AppRunningRecord::SetScheduleNewProcessRequestState(int32_t requestId,
 
 bool AppRunningRecord::IsNewProcessRequest() const
 {
-    return false;
+    return AAFwk::MyStatus::GetInstance().specifiedProcessRequest_ != nullptr;
 }
 
 bool AppRunningRecord::IsStartSpecifiedAbility() const

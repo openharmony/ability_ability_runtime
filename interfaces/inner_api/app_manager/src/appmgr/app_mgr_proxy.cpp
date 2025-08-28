@@ -2448,6 +2448,22 @@ int32_t AppMgrProxy::DemoteCurrentFromCandidateMasterProcess()
     return reply.ReadInt32();
 }
 
+
+int32_t AppMgrProxy::ExitMasterProcessRole()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::EXIT_MASTER_PROCESS_ROLE, data, reply, option);
+    return reply.ReadInt32();
+}
+
 int32_t AppMgrProxy::QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles)
 {
     MessageParcel data;

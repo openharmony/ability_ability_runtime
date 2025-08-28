@@ -478,6 +478,7 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
     MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, "", processName, false);
     TAG_LOGD(AAFwkTag::APPMGR, "processName = %{public}s", processName.c_str());
     auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
+    std::lock_guard guard(exitMasterProcessRoleLock_);
     auto masterAppRecord = appRunningManager_->FindMasterProcessAppRunningRecord(appInfo->name, abilityInfo,
         appInfo->uid);
     std::string customProcessFlag = "";
@@ -10388,7 +10389,7 @@ int32_t AppMgrServiceInner::PromoteCurrentToCandidateMasterProcess(bool isInsert
     }
     
     if (appRecord->GetSpecifiedProcessFlag() == "" &&
-        !appRecord->GetIsMasterProcess()) {
+        !appRecord->IsMasterProcess()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Current process is not running a component "
                                     "configured with \"isolationProcess\".");
         return AAFwk::ERR_NOT_ISOLATION_PROCESS; 
@@ -10406,6 +10407,7 @@ int32_t AppMgrServiceInner::PromoteCurrentToCandidateMasterProcess(bool isInsert
 int32_t AppMgrServiceInner::DemoteCurrentFromCandidateMasterProcess()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call");
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     int32_t pid = IPCSkeleton::GetCallingPid();
     auto appRecord = GetAppRunningRecordByPid(pid);
     if (appRecord == nullptr) {
@@ -10418,7 +10420,7 @@ int32_t AppMgrServiceInner::DemoteCurrentFromCandidateMasterProcess()
         return AAFwk::ERR_CAPABILITY_NOT_SUPPORT; 
     }
 
-    if (appRecord->GetIsMasterProcess()) {
+    if (appRecord->IsMasterProcess()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Current process is already a master process");
         return AAFwk::ERR_ALREADY_MASTER_PROCESS;
     }
@@ -10428,6 +10430,39 @@ int32_t AppMgrServiceInner::DemoteCurrentFromCandidateMasterProcess()
         return AAFwk::ERR_NOT_CANDIDATE_MASTER_PROCESS;    
     }
 
+    appRecord->SetTimeStamp(0);
+
+    return ERR_OK;
+}
+
+int32_t AppMgrServiceInner::ExitMasterProcessRole()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    std::lock_guard guard(exitMasterProcessRoleLock_);
+    if (!AAFwk::AppUtils::GetInstance().IsStartSpecifiedProcess()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Capability not support");
+        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT; 
+    }
+
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no appRecord");
+        return AAFwk::ERR_NOT_MASTER_PROCESS;
+    }
+
+    if (!appRecord->IsMasterProcess()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not a master process");
+        return AAFwk::ERR_NOT_MASTER_PROCESS;
+    }
+    
+    if (appRecord->IsNewProcessRequest()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "There is an unfinished onNewProcessRequest");
+        return AAFwk::ERR_NOT_ON_NEW_PROCESS_REQUEST_DONE;    
+    }
+
+    appRecord->SetMasterProcess(false);
     appRecord->SetTimeStamp(0);
 
     return ERR_OK;
