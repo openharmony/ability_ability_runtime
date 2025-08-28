@@ -1156,6 +1156,10 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_5500, Function | MediumTest | Leve
     WantAgentHelper::Cancel(wantAgent, FLAG_ONE_SHOT);
     type = WantAgentHelper::GetType(wantAgent);
     EXPECT_EQ(type, WantAgentConstant::OperationType::UNKNOWN_TYPE);
+
+    WantAgentHelper::Cancel(wantAgent);
+    type = WantAgentHelper::GetType(wantAgent);
+    EXPECT_EQ(type, WantAgentConstant::OperationType::UNKNOWN_TYPE);
 }
 
 /*

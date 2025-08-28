@@ -1982,6 +1982,7 @@ int AbilityManagerStub::SendWantSenderInner(MessageParcel &data, MessageParcel &
         TAG_LOGE(AAFwkTag::ABILITYMGR, "completedData write fail");
     }
     reply.WriteInt32(result);
+    senderInfo->want.CloseAllFd();
     return NO_ERROR;
 }
 
@@ -1994,6 +1995,7 @@ int AbilityManagerStub::SendLocalWantSenderInner(MessageParcel &data, MessagePar
     }
     int32_t result = SendLocalWantSender(*senderInfo);
     reply.WriteInt32(result);
+    senderInfo->want.CloseAllFd();
     return NO_ERROR;
 }
 
