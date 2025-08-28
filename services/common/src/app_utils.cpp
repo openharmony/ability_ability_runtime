@@ -84,6 +84,7 @@ constexpr const char* SUPPORT_APP_SERVICE_EXTENSION = "const.abilityms.support_a
 constexpr const char* PRODUCT_PRELOAD_APPLICATION_SETTING_ENABLED = "const.product.preload_application.setting.enabled";
 constexpr const char* FORBID_START = "persist.sys.abilityms.forbid_start";
 constexpr const char* RESTART_APP_WITH_WINDOW = "persist.sys.abilityms.restart_app_with_window";
+constexpr const char* ALLOW_DEBUG_PERMISSION = "persist.sys.abilityms.allow_debug_permission";
 // Support prepare terminate
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
@@ -855,6 +856,16 @@ bool AppUtils::IsSupportRestartAppWithWindow()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "restartApp: %{public}d", isSupportRestartAppWithWindow_.value);
     return isSupportRestartAppWithWindow_.value;
+}
+
+bool AppUtils::IsSupportAllowDebugPermission()
+{
+    if (!isSupportAllowDebugPermission_.isLoaded) {
+        isSupportAllowDebugPermission_.value = system::GetBoolParameter(ALLOW_DEBUG_PERMISSION, false);
+        isSupportAllowDebugPermission_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "restartApp: %{public}d", isSupportAllowDebugPermission_.value);
+    return isSupportAllowDebugPermission_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
