@@ -390,6 +390,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFirstLine_001, TestSize.L
     std::string ret = appfreezeManager->GetFirstLine("../111");
     EXPECT_EQ(ret, "");
     appfreezeManager->GetFirstLine("/data/log/test");
+    EXPECT_TRUE(appfreezeManager != nullptr);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

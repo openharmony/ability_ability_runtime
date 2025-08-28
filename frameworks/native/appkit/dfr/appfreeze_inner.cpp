@@ -36,12 +36,6 @@ namespace OHOS {
 using AbilityRuntime::FreezeUtil;
 namespace AppExecFwk {
 namespace {
-constexpr char EVENT_UID[] = "UID";
-constexpr char EVENT_PID[] = "PID";
-constexpr char EVENT_MESSAGE[] = "MSG";
-constexpr char EVENT_PACKAGE_NAME[] = "PACKAGE_NAME";
-constexpr char EVENT_PROCESS_NAME[] = "PROCESS_NAME";
-constexpr char EVENT_STACK[] = "STACK";
 constexpr int32_t HALF_DURATION = 3000;
 constexpr int32_t HALF_INTERVAL = 300;
 const bool BETA_VERSION = OHOS::system::GetParameter("const.logsystem.versiontype", "unknown") == "beta";
