@@ -282,7 +282,7 @@ public:
     {
         return ERR_OK;
     }
-    virtual ErrCode OpenLink(const AAFwk::Want& want, int requestCode)
+    virtual ErrCode OpenLink(const AAFwk::Want& want, int requestCode, bool hideFailureTipDialog = false)
     {
         return ERR_OK;
     }
