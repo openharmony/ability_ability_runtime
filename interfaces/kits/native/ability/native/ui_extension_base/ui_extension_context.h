@@ -176,7 +176,7 @@ public:
     Ace::UIContent* GetUIContent() override;
 #endif // SUPPORT_SCREEN
 
-    ErrCode OpenLink(const AAFwk::Want& want, int reuqestCode);
+    ErrCode OpenLink(const AAFwk::Want &want, int reuqestCode, bool hideFailureTipDialog = false);
 
     ErrCode OpenAtomicService(AAFwk::Want& want, const AAFwk::StartOptions &options, int requestCode,
         RuntimeTask &&task);
