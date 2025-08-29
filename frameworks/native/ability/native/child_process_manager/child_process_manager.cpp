@@ -137,9 +137,10 @@ ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessWithArgs(
 {
     TAG_LOGI(AAFwkTag::PROCESSMGR, "StartChildProcessWithArgs, childProcessType:%{public}d, startWitDebug: %{public}d,"
         "processName:%{public}s, native:%{public}d, entryParams size:%{public}zu, fdsSize:%{public}zu, "
-        "options.isolationMode:%{public}d, options.customProcessName:%{public}s", childProcessType,
-        g_debugOption.isStartWithDebug, g_debugOption.processName.c_str(), g_debugOption.isStartWithNative,
-        args.entryParams.length(), args.fds.size(), options.isolationMode, options.customProcessName.c_str());
+        "options.isolationMode:%{public}d, options.isolationUid: %{public}d, options.customProcessName:%{public}s",
+        childProcessType, g_debugOption.isStartWithDebug, g_debugOption.processName.c_str(),
+        g_debugOption.isStartWithNative, args.entryParams.length(), args.fds.size(), options.isolationMode,
+        options.isolationUid, options.customProcessName.c_str());
     ChildProcessManagerErrorCode errorCode = PreCheck(childProcessType);
     if (errorCode != ChildProcessManagerErrorCode::ERR_OK) {
         return errorCode;
@@ -173,8 +174,9 @@ ChildProcessManagerErrorCode ChildProcessManager::GetErrorCodeCompat(int32_t ret
     return ChildProcessManagerErrorUtil::GetChildProcessManagerErrorCode(ret);
 }
 
-ChildProcessManagerErrorCode ChildProcessManager::StartNativeChildProcessByAppSpawnFork(
-    const std::string &libName, const sptr<IRemoteObject> &callbackStub, const std::string &customProcessName)
+ChildProcessManagerErrorCode ChildProcessManager::CreateNativeChildProcessByAppSpawnFork(
+    const std::string &libName, const sptr<IRemoteObject> &callbackStub, const std::string &customProcessName,
+    const bool isolationMode, const bool isolationUid)
 {
     TAG_LOGI(AAFwkTag::PROCESSMGR, "libName:%{private}s", libName.c_str());
     ChildProcessManagerErrorCode errorCode = PreCheck(AppExecFwk::CHILD_PROCESS_TYPE_NATIVE);
@@ -188,8 +190,15 @@ ChildProcessManagerErrorCode ChildProcessManager::StartNativeChildProcessByAppSp
         return ChildProcessManagerErrorCode::ERR_GET_APP_MGR_FAILED;
     }
 
-    int32_t childProcessCount = childProcessCount_.fetch_add(1);
-    auto ret = appMgr->CreateNativeChildProcess(libName, childProcessCount, callbackStub, customProcessName);
+    AppExecFwk::ChildProcessOptions options;
+    options.isolationMode = isolationMode;
+    options.customProcessName = customProcessName;
+    options.isolationUid = isolationUid;
+    AppExecFwk::ChildProcessRequest request;
+    request.childProcessType = AppExecFwk::CHILD_PROCESS_TYPE_NATIVE;
+    request.childProcessCount = childProcessCount_.fetch_add(1);
+    request.options = options;
+    auto ret = appMgr->CreateNativeChildProcess(libName, callbackStub, request);
     TAG_LOGD(AAFwkTag::PROCESSMGR, "CreateNativeChildProcess ret:%{public}d", ret);
 
     if (ret != ERR_OK) {

@@ -313,28 +313,29 @@ HWTEST_F(ChildProcessManagerTest, SetForkProcessDebugOption_0100, TestSize.Level
 }
 
 /**
- * @tc.number: StartNativeChildProcessByAppSpawnFork_0100
- * @tc.desc: Test StartNativeChildProcessByAppSpawnFork works.
+ * @tc.number: CreateNativeChildProcessByAppSpawnFork_0100
+ * @tc.desc: Test CreateNativeChildProcessByAppSpawnFork works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, StartNativeChildProcessByAppSpawnFork_0100, TestSize.Level2)
+HWTEST_F(ChildProcessManagerTest, CreateNativeChildProcessByAppSpawnFork_0100, TestSize.Level2)
 {
-    TAG_LOGD(AAFwkTag::TEST, "StartNativeChildProcessByAppSpawnFork_0100 called.");
+    TAG_LOGD(AAFwkTag::TEST, "CreateNativeChildProcessByAppSpawnFork_0100 called.");
     sptr<IRemoteObject> callback;
-    auto ret = ChildProcessManager::GetInstance().StartNativeChildProcessByAppSpawnFork("test.so", callback);
+    auto ret = ChildProcessManager::GetInstance().CreateNativeChildProcessByAppSpawnFork("test.so", callback);
     EXPECT_NE(ret, ChildProcessManagerErrorCode::ERR_FORK_FAILED);
 }
 
 /**
- * @tc.number: StartNativeChildProcessByAppSpawnFork_0200
- * @tc.desc: Test StartNativeChildProcessByAppSpawnFork works.
+ * @tc.number: CreateNativeChildProcessByAppSpawnFork_0200
+ * @tc.desc: Test CreateNativeChildProcessByAppSpawnFork works.
  * @tc.type: FUNC
  */
-HWTEST_F(ChildProcessManagerTest, StartNativeChildProcessByAppSpawnFork_0200, TestSize.Level2)
+HWTEST_F(ChildProcessManagerTest, CreateNativeChildProcessByAppSpawnFork_0200, TestSize.Level2)
 {
-    TAG_LOGD(AAFwkTag::TEST, "StartNativeChildProcessByAppSpawnFork_0200 called.");
+    TAG_LOGD(AAFwkTag::TEST, "CreateNativeChildProcessByAppSpawnFork_0200 called.");
     sptr<IRemoteObject> callback;
-    auto ret = ChildProcessManager::GetInstance().StartNativeChildProcessByAppSpawnFork("test.so", callback, "abc_123");
+    auto ret = ChildProcessManager::GetInstance().CreateNativeChildProcessByAppSpawnFork("test.so", callback,
+        "abc_123");
     EXPECT_NE(ret, ChildProcessManagerErrorCode::ERR_FORK_FAILED);
 }
 
