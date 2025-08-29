@@ -104,7 +104,7 @@ private:
         AAFwk::Want &want, int &requestCode);
     napi_value OnOpenLink(napi_env env, NapiCallbackInfo& info);
     napi_value OnOpenLinkInner(napi_env env, const AAFwk::Want& want,
-        int requestCode, const std::string& startTime, const std::string& url);
+        int requestCode, const std::string &startTime, const std::string &url, bool hideFailureTipDialog = false);
     void UnWrapCompletionHandlerForAtomicService(
         napi_env env, napi_value param, AAFwk::StartOptions &options, const std::string &appId);
 #ifdef SUPPORT_SCREEN

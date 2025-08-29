@@ -4394,8 +4394,8 @@ int32_t AbilityManagerStub::OpenLinkInner(MessageParcel &data, MessageParcel &re
     sptr<IRemoteObject> callerToken = data.ReadRemoteObject();
     int32_t userId = data.ReadInt32();
     int requestCode = data.ReadInt32();
-
-    int32_t result = OpenLink(*want, callerToken, userId, requestCode);
+    bool hideFailureTipDialog = data.ReadBool();
+    int32_t result = OpenLink(*want, callerToken, userId, requestCode, hideFailureTipDialog);
     if (result != NO_ERROR && result != ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "openLink fail");
     }

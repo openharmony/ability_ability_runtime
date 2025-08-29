@@ -2117,12 +2117,12 @@ ErrCode AbilityManagerClient::PreStartMission(const std::string& bundleName, con
     return abms->PreStartMission(bundleName, moduleName, abilityName, startTime);
 }
 
-ErrCode AbilityManagerClient::OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
-    int32_t userId, int requestCode)
+ErrCode AbilityManagerClient::OpenLink(const Want &want, sptr<IRemoteObject> callerToken,
+    int32_t userId, int requestCode, bool hideFailureTipDialog)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_INVALID_VALUE(abms);
-    return abms->OpenLink(want, callerToken, userId, requestCode);
+    return abms->OpenLink(want, callerToken, userId, requestCode, hideFailureTipDialog);
 }
 
 ErrCode AbilityManagerClient::TerminateMission(int32_t missionId)

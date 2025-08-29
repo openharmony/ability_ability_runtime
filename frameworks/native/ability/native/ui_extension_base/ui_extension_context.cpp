@@ -345,10 +345,9 @@ ErrCode UIExtensionContext::AddFreeInstallObserver(const sptr<IFreeInstallObserv
     return ret;
 }
 
-ErrCode UIExtensionContext::OpenLink(const AAFwk::Want& want, int requestCode)
+ErrCode UIExtensionContext::OpenLink(const AAFwk::Want &want, int requestCode, bool hideFailureTipDialog)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "called");
-    return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode);
+    return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode, hideFailureTipDialog);
 }
 
 std::shared_ptr<Global::Resource::ResourceManager> UIExtensionContext::GetResourceManager() const
