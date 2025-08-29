@@ -18,17 +18,17 @@ module_output_path = "ability_runtime/user_controller"
 
 copy("user_controller_copy") {
     sources = [
-      "${ability_runtime_path}/services/abilitymgr/include/user_controller.h",
-      "${ability_runtime_path}/services/abilitymgr/src/user_controller.cpp",
+      "${ability_runtime_path}/services/common/include/user_controller/user_controller.h",
+      "${ability_runtime_path}/services/common/src/user_controller/user_controller.cpp",
     ]
-    outputs = [ "${target_gen_dir}/services/abilitymgr/src/user_controller/{{source_file_part}}" ]
+    outputs = [ "${target_gen_dir}/services/common/src/user_controller/{{source_file_part}}" ]
 }
 
 ohos_unittest("user_controller_unit_test") {
   module_out_path = module_output_path
 
   include_dirs = [ 
-    "${target_gen_dir}/services/abilitymgr/src/user_controller",
+    "${target_gen_dir}/services/common/src/user_controller",
     "../../mock_utils",
     "../../mock/ability_info",
     "../../mock/ability_manager_errors",
@@ -40,10 +40,12 @@ ohos_unittest("user_controller_unit_test") {
     "../../mock/application_info",
     "../../mock/bundle_info",
     "../../mock/configuration",
+    "../../mock/dispaly_util",
     "../../mock/element_name",
     "../../mock/event_handler_wrap",
     "../../mock/extension_ability_info",
     "../../mock/hilog_tag_wrapper",
+    "../../mock/ipc_skeleton",
     "../../mock/iremote_broker",
     "../../mock/iremote_object",
     "../../mock/last_exit_detail_info",
@@ -59,14 +61,13 @@ ohos_unittest("user_controller_unit_test") {
     "../../mock/task_handler_wrap",
     "../../mock/task_utils_wrap",
     "../../mock/uri",
-    "../../mock/user_event_handler",
     "../../mock/user_callback",
     "../../mock/want",
     "../../mock/want_params",
   ]
 
   sources =
-      [ "${target_gen_dir}/services/abilitymgr/src/user_controller/user_controller.cpp" ]
+      [ "${target_gen_dir}/services/common/src/user_controller/user_controller.cpp" ]
 
   sources += [
     "user_controller_unit_test.cpp",

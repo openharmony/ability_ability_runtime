@@ -138,17 +138,10 @@ void AbilityTimeoutModuleTest::MockOnStart()
     abilityMs_->taskHandler_ = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
     EXPECT_TRUE(abilityMs_->taskHandler_);
 
-    // init user controller.
-    abilityMs_->userController_ = std::make_shared<UserController>();
-    EXPECT_TRUE(abilityMs_->userController_);
-    abilityMs_->userController_->Init();
-
     AmsConfigurationParameter::GetInstance().Parse();
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     abilityMs_->subManagersHelper_->InitSubManagers(MOCK_MAIN_USER_ID, true);
     abilityMs_->SwitchManagers(MOCK_U0_USER_ID, false);
-
-    abilityMs_->userController_->SetCurrentUserId(MOCK_MAIN_USER_ID);
 
     abilityMs_->state_ = ServiceRunningState::STATE_RUNNING;
     abilityMs_->iBundleManager_ = new BundleMgrService();
@@ -174,7 +167,6 @@ void AbilityTimeoutModuleTest::MockOnStop()
     abilityMs_->subManagersHelper_->currentPendingWantManager_.reset();
     abilityMs_->subManagersHelper_->missionListManagers_.clear();
     abilityMs_->subManagersHelper_->currentMissionListManager_.reset();
-    abilityMs_->userController_.reset();
     abilityMs_->abilityController_.clear();
     abilityMs_->OnStop();
 }
@@ -320,7 +312,6 @@ HWTEST_F(AbilityTimeoutModuleTest, OnAbilityDied_001, TestSize.Level1)
     EXPECT_EQ(rootLauncher, ability);
     EXPECT_TRUE(rootLauncher->IsLauncherRoot());
 
-    GTEST_LOG_(INFO) << "userId:" << abilityMs_->GetUserId();
     GTEST_LOG_(INFO) << "currentmanager userId" << curListManager->userId_;
 
     // died rootlauncher ability

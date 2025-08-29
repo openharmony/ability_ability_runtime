@@ -1246,13 +1246,14 @@ ErrCode AbilityManagerClient::StopSyncRemoteMissions(const std::string &devId)
     return abms->StopSyncRemoteMissions(devId);
 }
 
-ErrCode AbilityManagerClient::StartUser(int accountId, sptr<IUserCallback> callback, bool isAppRecovery)
+ErrCode AbilityManagerClient::StartUser(int accountId, uint64_t displayId, sptr<IUserCallback> callback,
+    bool isAppRecovery)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "accountId:%{public}d, isAppRecovery:%{public}d",
         accountId, isAppRecovery);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->StartUser(accountId, callback, isAppRecovery);
+    return abms->StartUser(accountId, displayId, callback, isAppRecovery);
 }
 
 ErrCode AbilityManagerClient::StopUser(int accountId, sptr<IUserCallback> callback)

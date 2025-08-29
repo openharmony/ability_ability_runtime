@@ -21,7 +21,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 AbilityManagerEventSubscriber::AbilityManagerEventSubscriber(
-    const EventFwk::CommonEventSubscribeInfo &subscribeInfo, const std::function<void()> &screenUnlockCallback,
+    const EventFwk::CommonEventSubscribeInfo &subscribeInfo, const std::function<void(int32_t)> &screenUnlockCallback,
     const std::function<void()> &userScreenUnlockCallback)
     : EventFwk::CommonEventSubscriber(subscribeInfo), screenUnlockCallback_(screenUnlockCallback),
     userScreenUnlockCallback_(userScreenUnlockCallback)
@@ -39,7 +39,9 @@ void AbilityManagerEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventDa
     std::lock_guard<std::mutex> lock(mutex_);
     auto handleEvent = [&](const std::string &event) {
         if (eventSet_.find(event) != eventSet_.end()) {
-            screenUnlockCallback_();
+            int32_t userId = want.GetIntParam("userId", -1);
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "The userId: %{public}d.", userId);
+            screenUnlockCallback_(userId);
             eventSet_.clear();
         } else {
             eventSet_.insert(action);

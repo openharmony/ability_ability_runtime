@@ -1581,7 +1581,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, VerifyAccountPermission_001, TestSize.L
     EXPECT_EQ(ret, ERR_OK);
     userId = USER_ID_U100;
     ret = abilityMs->VerifyAccountPermission(userId);
-    abilityMs->userController_ = std::make_shared<UserController>();
     ret = abilityMs->VerifyAccountPermission(userId);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest VerifyAccountPermission_001 end");
 }

@@ -2546,6 +2546,7 @@ int AbilityManagerStub::ReleaseCallInner(MessageParcel &data, MessageParcel &rep
 int AbilityManagerStub::StartUserInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t userId = data.ReadInt32();
+    auto displayId = data.ReadUint64();
     sptr<IUserCallback> callback = nullptr;
     if (data.ReadBool()) {
         callback = iface_cast<IUserCallback>(data.ReadRemoteObject());
@@ -2554,7 +2555,7 @@ int AbilityManagerStub::StartUserInner(MessageParcel &data, MessageParcel &reply
         return ERR_INVALID_VALUE;
     }
     bool isAppRecovery = data.ReadBool();
-    int result = StartUser(userId, callback, isAppRecovery);
+    int result = StartUser(userId, displayId, callback, isAppRecovery);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startUser fail");
         return ERR_INVALID_VALUE;

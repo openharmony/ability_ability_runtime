@@ -46,7 +46,7 @@ void AbilityManagerEventSubscriberTest::SetUp() {}
 HWTEST_F(AbilityManagerEventSubscriberTest, OnReceiveEvent_0001, TestSize.Level1)
 {
     EventFwk::CommonEventSubscribeInfo subscribeInfo;
-    std::function<void()> callback = []() {};
+    std::function<void(int32_t)> callback = [](int32_t) {};
     std::function<void()> userScreenUnlockCallback = []() {};
     EXPECT_NE(callback, nullptr);
     EXPECT_NE(userScreenUnlockCallback, nullptr);

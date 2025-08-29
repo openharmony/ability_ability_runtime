@@ -1025,11 +1025,12 @@ public:
     /**
      * @brief start user.
      * @param accountId accountId.
+     * @param displayId logical screen id.
      * @param accountId is appRecovery or not.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartUser(int accountId, sptr<IUserCallback> callback, bool isAppRecovery = false);
+    ErrCode StartUser(int accountId, uint64_t displayId, sptr<IUserCallback> callback, bool isAppRecovery = false);
 
     /**
      * @brief stop user.

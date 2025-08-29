@@ -1024,19 +1024,6 @@ sptr<IRemoteObject> AppMgrClient::GetRemoteObject()
     return mgrHolder_->GetRemoteObject();
 }
 
-void AppMgrClient::SetCurrentUserId(const int32_t userId)
-{
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        return;
-    }
-    sptr<IAmsMgr> amsService = service->GetAmsMgr();
-    if (amsService == nullptr) {
-        return;
-    }
-    amsService->SetCurrentUserId(userId);
-}
-
 void AppMgrClient::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());

@@ -100,10 +100,6 @@ abilityms_files = [
   "src/connection_state_manager.cpp",
   "src/dlp_state_item.cpp",
 
-  #multi user
-  "src/user_controller.cpp",
-  "src/user_event_handler.cpp",
-
   #free_install
   "src/atomic_service_status_callback_proxy.cpp",
   "src/atomic_service_status_callback_stub.cpp",

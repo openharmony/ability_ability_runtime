@@ -648,23 +648,6 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_StartRenderProcess_001, TestSize.Level2)
 }
 
 /**
- * @tc.name: AppMgrClient_SetCurrentUserId_001
- * @tc.desc: set current userId.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, AppMgrClient_SetCurrentUserId_001, TestSize.Level2)
-{
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    EXPECT_NE(appMgrClient, nullptr);
-
-    auto result = appMgrClient->ConnectAppMgrService();
-    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
-
-    int32_t userId = 0;
-    appMgrClient->SetCurrentUserId(userId);
-}
-
-/**
  * @tc.name: AppMgrClient_UpdateApplicationInfoInstalled_001
  * @tc.desc: UpdateApplicationInfoInstalled.
  * @tc.type: FUNC

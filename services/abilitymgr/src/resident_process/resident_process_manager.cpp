@@ -22,6 +22,7 @@
 #include "ffrt.h"
 #include "keep_alive_utils.h"
 #include "main_element_utils.h"
+#include "user_controller/user_controller.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -188,7 +189,6 @@ int32_t ResidentProcessManager::SetResidentProcessEnabled(
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Set keep alive enable state.");
         IN_PROCESS_CALL_WITHOUT_RET(appMgrClient->SetKeepAliveEnableState(bundleName, updateEnable, 0));
     }
-
     ffrt::submit([self = shared_from_this(), bundleName, localEnable, updateEnable]() {
         self->UpdateResidentProcessesStatus(bundleName, localEnable, updateEnable);
     });
@@ -210,9 +210,14 @@ void ResidentProcessManager::UpdateResidentProcessesStatus(
         return;
     }
 
+    std::vector<int32_t> userIds;
+    AbilityRuntime::UserController::GetInstance().GetAllForegroundUserId(userIds);
+    std::set<int32_t> users{0};
+    auto iter = userIds.begin();
+    while (iter != userIds.end()) {
+        users.emplace(*iter);
+    }
     AppExecFwk::BundleInfo bundleInfo;
-    auto currentUser = DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId();
-    std::set<int32_t> users{0, currentUser};
 
     for (const auto &userId: users) {
         if (!IN_PROCESS_CALL(bms->GetBundleInfo(

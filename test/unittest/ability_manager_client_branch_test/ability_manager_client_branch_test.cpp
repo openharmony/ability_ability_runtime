@@ -959,8 +959,9 @@ HWTEST_F(AbilityManagerClientBranchTest, StopSyncRemoteMissions_0100, TestSize.L
 HWTEST_F(AbilityManagerClientBranchTest, StartUser_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StartUser_0100 start";
-    int userId = 1;
-    auto result = client_->StartUser(userId, nullptr);
+    int userId = 200;
+    uint64_t displayId = 0;
+    auto result = client_->StartUser(userId, displayId, nullptr);
 
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "StartUser_0100 end";
