@@ -175,6 +175,14 @@ inline bool IsWindowExtension(const AppExecFwk::ExtensionAbilityType type)
 {
     return type == AppExecFwk::ExtensionAbilityType::WINDOW;
 }
+
+inline bool IsProcessUdkeyExtension(const AppExecFwk::ExtensionAbilityType type)
+{
+    const std::unordered_set<AppExecFwk::ExtensionAbilityType> processUdkeyExtensionSet = {
+        AppExecFwk::ExtensionAbilityType::SYSPICKER_FILEPICKER
+    };
+    return processUdkeyExtensionSet.find(type) != processUdkeyExtensionSet.end();
+}
 } // namespace UIExtensionUtils
 } // namespace AAFwk
 } // namespace OHOS

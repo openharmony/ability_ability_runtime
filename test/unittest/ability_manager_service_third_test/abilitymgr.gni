@@ -170,7 +170,8 @@ abilityms_files = [
   "${ability_runtime_services_path}/abilitymgr/src/utils/window_options_utils.cpp",
   "${ability_runtime_services_path}/abilitymgr/src/utils/timeout_state_utils.cpp",
   "${ability_runtime_services_path}/abilitymgr/src/kiosk_status.cpp",
-  "${ability_runtime_services_path}/abilitymgr/src/kiosk_manager.cpp"
+  "${ability_runtime_services_path}/abilitymgr/src/kiosk_manager.cpp",
+  "../ability_manager_service_mock_test/mock/src/mock_udmf_utils.cpp",
 ]
 
 if (ability_runtime_graphics) {
