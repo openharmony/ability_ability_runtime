@@ -70,6 +70,11 @@ class UIExtensionContext extends ExtensionContext {
     hilog.sLogI(domainID, TAG, 'startAbilityForResultAsCaller');
     return this.__context_impl__.startAbilityForResultAsCaller(want, options, callback);
   }
+  
+  startUIAbilitiesInSplitWindowMode(primaryWindowId, secondaryWant) {
+    hilog.sLogI(domainID, TAG, 'startUIAbilitiesInSplitWindowMode');
+    return this.__context_impl__.startUIAbilitiesInSplitWindowMode(primaryWindowId, secondaryWant);
+  }
 
   startUIAbilities(wantList) {
     hilog.sLogI(domainID, TAG, 'startUIAbilities');

@@ -244,6 +244,7 @@ enum CollaboratorType {
 };
 
 struct AbilityRequest {
+    bool isStartInSplitMode = false;
     bool restart = false;
     bool startRecent = false;
     bool uriReservedFlag = false;
@@ -254,6 +255,7 @@ struct AbilityRequest {
     bool isEmbeddedAllowed = false;
     bool callSpecifiedFlagTimeout = false;
     bool hideStartWindow = false;
+    int32_t primaryWindowId = -1;
     int32_t restartCount = -1;
     int32_t uid = 0;
     int32_t collaboratorType = CollaboratorType::DEFAULT_TYPE;

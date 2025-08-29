@@ -147,6 +147,11 @@ napi_value JsUIExtensionContext::StartAbilityForResultAsCaller(napi_env env, nap
     GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContext, OnStartAbilityForResultAsCaller);
 }
 
+napi_value JsUIExtensionContext::StartUIAbilitiesInSplitWindowMode(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContext, OnStartUIAbilitiesInSplitWindowMode);
+}
+
 napi_value JsUIExtensionContext::StartUIAbilities(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsUIExtensionContext, OnStartUIAbilities);
@@ -572,6 +577,49 @@ napi_value JsUIExtensionContext::OnStartAbilityForResultAsCaller(napi_env env, N
     return result;
 }
 
+napi_value JsUIExtensionContext::OnStartUIAbilitiesInSplitWindowMode(napi_env env, NapiCallbackInfo& info)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (info.argc < ARGC_TWO) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Too few parameters.");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+    int32_t primaryWindowId = 0;
+    AAFwk::Want secondaryWant;
+    if (!CheckStartUIAbilitiesInSplitWindowModeInputParam(env, info, primaryWindowId, secondaryWant)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Failed, input param type invalid");
+        ThrowInvalidParamError(env, "Parse param want failed, want must be Want");
+        return CreateJsUndefined(env);
+    }
+
+    auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
+    NapiAsyncTask::ExecuteCallback execute = [weak = context_, primaryWindowId, secondaryWant, innerErrCode]() {
+        auto context = weak.lock();
+        TAG_LOGD(AAFwkTag::UI_EXT, "startAbility begin");
+        if (!context) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "context is released");
+            *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            return;
+        }
+        *innerErrCode = context->StartUIAbilitiesInSplitWindowMode(primaryWindowId, secondaryWant);
+    };
+    NapiAsyncTask::CompleteCallback complete =
+        [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (*innerErrCode == ERR_OK) {
+                task.ResolveWithNoError(env, CreateJsUndefined(env));
+            } else if (*innerErrCode == static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT)) {
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+            } else {
+                task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
+            }
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JSUIExtensionContext OnStartUIAbilitiesInSplitWindowMode",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 napi_value JsUIExtensionContext::OnStartUIAbilities(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "call OnStartUIAbilities");
@@ -618,6 +666,25 @@ napi_value JsUIExtensionContext::OnStartUIAbilities(napi_env env, NapiCallbackIn
     NapiAsyncTask::ScheduleHighQos("JSUIExtensionConnection::OnStartUIAbilities", env,
         CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), nullptr));
     return callback.result;
+}
+
+bool JsUIExtensionContext::CheckStartUIAbilitiesInSplitWindowModeInputParam(napi_env env,
+    NapiCallbackInfo &info, int32_t &primaryWindowId, AAFwk::Want &want)
+{
+    if (info.argc < ARGC_TWO) {
+        return false;
+    }
+    if (!want.HasParameter(Want::PARAM_BACK_TO_OTHER_MISSION_STACK)) {
+        want.SetParam(Want::PARAM_BACK_TO_OTHER_MISSION_STACK, true);
+    }
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], primaryWindowId) || primaryWindowId <= 0) {
+        return false;
+    }
+    // Check input want
+    if (!AppExecFwk::UnwrapWant(env, info.argv[INDEX_ONE], want)) {
+        return false;
+    }
+    return true;
 }
 
 bool JsUIExtensionContext::UnwrapWantList(napi_env env, NapiCallbackInfo &info, std::vector<AAFwk::Want> &wantList)
@@ -1417,6 +1484,8 @@ napi_value JsUIExtensionContext::CreateJsUIExtensionContext(napi_env env,
     BindNativeFunction(env, objValue, "startAbilityForResult", moduleName, StartAbilityForResult);
     BindNativeFunction(env, objValue, "terminateSelfWithResult", moduleName, TerminateSelfWithResult);
     BindNativeFunction(env, objValue, "startAbilityForResultAsCaller", moduleName, StartAbilityForResultAsCaller);
+    BindNativeFunction(env, objValue, "startUIAbilitiesInSplitWindowMode", moduleName,
+        StartUIAbilitiesInSplitWindowMode);
     BindNativeFunction(env, objValue, "startUIAbilities", moduleName, StartUIAbilities);
     BindNativeFunction(env, objValue, "connectServiceExtensionAbility", moduleName, ConnectAbility);
     BindNativeFunction(env, objValue, "disconnectServiceExtensionAbility", moduleName, DisconnectAbility);

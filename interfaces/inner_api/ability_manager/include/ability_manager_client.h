@@ -285,6 +285,19 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
+     * Start ui session ability with windowId and want, send windowId and want to ability manager service.
+     *
+     * @param primaryWindowId the id of window.
+     * @param secondaryWant the want of the ability to start.
+     * @param callerToken current caller ability token.
+     * @return Returns ERR_OK if success.
+     */
+    ErrCode StartUIAbilitiesInSplitWindowMode(
+        int32_t primaryWindowId,
+        const AAFwk::Want &secondaryWant,
+        sptr<IRemoteObject> callerToken);
+
+    /**
      * Start UI abilities simultaneously.
      *
      * @param wantList a list of want to start UI abilities.
