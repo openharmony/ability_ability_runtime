@@ -507,21 +507,6 @@ HWTEST_F(AbilityManagerServiceFourthTest, InitStartupFlag_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
- * Function: InitStartAbilityChain
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService InitStartAbilityChain
- */
-HWTEST_F(AbilityManagerServiceFourthTest, InitStartAbilityChain_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest InitStartAbilityChain_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    abilityMs_->InitStartAbilityChain();
-    EXPECT_TRUE(abilityMs_ != nullptr);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest InitStartAbilityChain_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: QueryServiceState
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService QueryServiceState

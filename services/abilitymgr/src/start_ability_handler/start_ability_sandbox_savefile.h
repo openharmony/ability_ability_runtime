@@ -28,13 +28,15 @@ struct SaveFileRecord {
     std::weak_ptr<AbilityRecord> caller;
 };
 
-class StartAbilitySandboxSavefile : public StartAbilityHandler,
-                                    public std::enable_shared_from_this<StartAbilitySandboxSavefile> {
+class StartAbilitySandboxSavefile {
 public:
-    static const std::string handlerName_;
-    bool MatchStartRequest(StartAbilityParams &params) override;
-    int HandleStartRequest(StartAbilityParams &params) override;
-    std::string GetHandlerName() override;
+    static StartAbilitySandboxSavefile& GetInstance();
+    StartAbilitySandboxSavefile() = default;
+    StartAbilitySandboxSavefile(StartAbilitySandboxSavefile &) = delete;
+    void operator=(StartAbilitySandboxSavefile &) = delete;
+
+    bool MatchStartRequest(StartAbilityParams &params);
+    int HandleStartRequest(StartAbilityParams &params);
 
     void HandleResult(const Want &want, int resultCode, int requestCode);
 protected:

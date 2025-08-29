@@ -42,7 +42,12 @@ public:
     }
 };
 }
-const std::string StartAbilitySandboxSavefile::handlerName_ = "start_ability_snadbox_savefile";
+
+StartAbilitySandboxSavefile &StartAbilitySandboxSavefile::GetInstance()
+{
+    static StartAbilitySandboxSavefile instance;
+    return instance;
+}
 
 bool StartAbilitySandboxSavefile::MatchStartRequest(StartAbilityParams &params)
 {
@@ -119,11 +124,6 @@ int StartAbilitySandboxSavefile::StartAbility(StartAbilityParams &params, int re
     }
 
     return abilityMs->StartAbilityJust(abilityRequest, params.GetValidUserId());
-}
-
-std::string StartAbilitySandboxSavefile::GetHandlerName()
-{
-    return StartAbilitySandboxSavefile::handlerName_;
 }
 
 int StartAbilitySandboxSavefile::PushRecord(int reqCode, const std::shared_ptr<AbilityRecord> &caller)
