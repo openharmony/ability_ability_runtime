@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,6 +165,10 @@ public:
     using SelfType = ApplicationContext;
     static const size_t CONTEXT_TYPE_ID;
     std::string GetDataDir();
+    void SetLaunchParameter(const AAFwk::Want &want);
+    void SetLatestParameter(const AAFwk::Want &want);
+    std::string GetLaunchParameter() const;
+    std::string GetLatestParameter() const;
 
 protected:
     bool IsContext(size_t contextTypeId) override

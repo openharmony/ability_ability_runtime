@@ -1742,6 +1742,7 @@ int32_t ContextImpl::CreateHspModuleResourceManager(const std::string &bundleNam
     UpdateResConfig(GetResourceManager(), resourceManager);
     return ERR_OK;
 }
+
 bool ContextImpl::UpdateDisplayConfiguration(std::shared_ptr<ContextImpl> &contextImpl, uint64_t displayId,
     float density, std::string direction)
 {
@@ -1785,6 +1786,45 @@ bool ContextImpl::UpdateDisplayConfiguration(std::shared_ptr<ContextImpl> &conte
     }
     contextImpl->resourceManager_->UpdateResConfig(*resConfig);
     return true;
+}
+
+void ContextImpl::SetLaunchParameter(const AAFwk::Want& want)
+{
+    // only cold-start need save parameter
+    std::lock_guard<std::mutex> lock(launchParameterMutex_);
+    if (!launchParameter_) {
+        launchParameter_ = std::make_shared<AAFwk::WantParams>(want.GetParams());
+    }
+}
+
+std::string ContextImpl::GetLaunchParameter()
+{
+    std::lock_guard<std::mutex> lock(launchParameterMutex_);
+    if (launchParameter_ != nullptr) {
+        return launchParameter_->ToString();
+    }
+    TAG_LOGW(AAFwkTag::APPKIT, "launchParameter_ is null");
+    return "";
+}
+
+void ContextImpl::SetLatestParameter(const AAFwk::Want& want)
+{
+    std::lock_guard<std::mutex> lock(latestParameterMutex_);
+    if (!latestParameter_) {
+        latestParameter_ = std::make_shared<AAFwk::WantParams>(want.GetParams());
+    } else {
+        *latestParameter_ = want.GetParams();
+    }
+}
+
+std::string ContextImpl::GetLatestParameter()
+{
+    std::lock_guard<std::mutex> lock(latestParameterMutex_);
+    if (latestParameter_ != nullptr) {
+        return latestParameter_->ToString();
+    }
+    TAG_LOGW(AAFwkTag::APPKIT, "latestParameter_ is null");
+    return "";
 }
 
 #ifdef SUPPORT_GRAPHICS

@@ -310,6 +310,39 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetResourceDir(cons
  */
 AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetVersionCode(int64_t* versionCode);
 
+/**
+ * @brief Obtain the launch parameter of starting UIAbility.
+ *
+ * @param buffer A pointer to a buffer that receives the launch parameter of starting UIAbility.
+ * @param bufferSize The length of the buffer.
+ * @param writeLength The string length actually written to the buffer,
+ *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
+ * @return The error code.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
+ *         or the buffer size is less than the minimum buffer size.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the application context does not exist.
+ * @since 21
+ */
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetLaunchParameter(
+    char* buffer, const int32_t bufferSize, int32_t* writeLength);
+
+/**
+ * @brief Obtain the latest parameter of starting UIAbility.
+ *
+ * @param buffer A pointer to a buffer that receives the latest parameter of starting UIAbility.
+ * @param bufferSize The length of the buffer.
+ * @param writeLength The string length actually written to the buffer,
+ *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
+ * @return The error code.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
+ *         or the buffer size is less than the minimum buffer size.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the application context does not exist.
+ * @since 21
+ */
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetLatestParameter(
+    char* buffer, const int32_t bufferSize, int32_t* writeLength);
 #ifdef __cplusplus
 } // extern "C"
 #endif
