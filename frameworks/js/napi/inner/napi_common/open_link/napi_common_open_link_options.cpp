@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+const std::string HIDE_FAILURE_TIP_DIALOG = "hideFailureTipDialog";
 
 bool UnwrapOpenLinkOptions(napi_env env, napi_value param, AAFwk::OpenLinkOptions &openLinkOptions, AAFwk::Want &want)
 {
@@ -47,6 +48,11 @@ bool UnwrapOpenLinkOptions(napi_env env, napi_value param, AAFwk::OpenLinkOption
     }
     if (!want.HasParameter(APP_LINKING_ONLY)) {
         want.SetParam(APP_LINKING_ONLY, false);
+    }
+
+    bool hideFailureTipDialog = false;
+    if (UnwrapBooleanByPropertyName(env, param, HIDE_FAILURE_TIP_DIALOG.c_str(), hideFailureTipDialog)) {
+        openLinkOptions.SetHideFailureTipDialog(hideFailureTipDialog);
     }
 
     return true;
