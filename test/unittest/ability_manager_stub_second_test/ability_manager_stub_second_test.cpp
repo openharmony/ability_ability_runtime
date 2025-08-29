@@ -674,7 +674,8 @@ HWTEST_F(AbilityManagerStubSecondTest, OnRemoteRequestInnerSeventeenth_0100, Tes
         static_cast<uint32_t>(AbilityManagerInterfaceCode::UNREGISTER_AUTO_STARTUP_SYSTEM_CALLBACK),
         static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_APPLICATION_AUTO_STARTUP),
         static_cast<uint32_t>(AbilityManagerInterfaceCode::CANCEL_APPLICATION_AUTO_STARTUP),
-        static_cast<uint32_t>(AbilityManagerInterfaceCode::QUERY_ALL_AUTO_STARTUP_APPLICATION)
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::QUERY_ALL_AUTO_STARTUP_APPLICATION),
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_AUTO_STARTUP_STATUS_FOR_SELF)
     };
 
     int i = 0;
