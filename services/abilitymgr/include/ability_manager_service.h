@@ -2213,7 +2213,6 @@ private:
      *
      */
     void InitU0User();
-    void InitStartAbilityChain();
 #ifndef DISABLE_LAUNCHER
     /**
      * start highest priority ability.
@@ -2845,7 +2844,6 @@ private:
     std::shared_ptr<AbilityInterceptorExecuter> afterCheckExecuter_;
 
     std::unordered_map<int32_t, int64_t> appRecoveryHistory_; // uid:time
-    std::multimap<int, std::shared_ptr<StartAbilityHandler>, std::greater<int>> startAbilityChain_;
     std::unordered_map<int32_t, sptr<IAbilityManagerCollaborator>> collaboratorMap_;
 
     std::shared_ptr<AbilityDebugDeal> abilityDebugDeal_;

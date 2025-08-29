@@ -292,7 +292,6 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartAbilityInChainTest_001, TestSize.
     sptr<IRemoteObject> callerToken = nullptr;
     StartAbilityParams params(want);
     params.callerToken = callerToken;
-    abilityMs_->InitStartAbilityChain();
     ret = abilityMs_->StartAbilityInChain(params, result);
     EXPECT_FALSE(ret);
     want.SetAction(TEST_CREATE_FILE);

@@ -1234,18 +1234,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, InitStartupFlag_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
- * Function: InitStartAbilityChain
- * FunctionPoints: AbilityManagerService InitStartAbilityChain
- */
-HWTEST_F(AbilityManagerServiceThirdTest, InitStartAbilityChain_001, TestSize.Level1)
-{
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    abilityMs->InitStartAbilityChain();
-    EXPECT_NE(abilityMs, nullptr);
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: QueryServiceState
  * FunctionPoints: AbilityManagerService QueryServiceState
  */
