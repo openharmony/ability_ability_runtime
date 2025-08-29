@@ -53,6 +53,26 @@ namespace AppExecFwk {
 namespace {
     constexpr const char* PERSIST_DARKMODE_KEY = "persist.ace.darkmode";
 }
+void OHOSApplication::LoadDeduplicatedHarResource(
+    const std::shared_ptr<AbilityRuntime::AbilityStageContext> &stageContext)
+{
+    if (!stageContext) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null argv");
+        return;
+    }
+    auto resourceManager = stageContext->GetResourceManager();
+    if (!resourceManager) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager");
+        return;
+    }
+    auto hasDeduplicateHar = GetDeduplicateHar();
+    auto loadPath = GetEntryLoadPath();
+    if (!loadPath.empty() && hasDeduplicateHar) {
+        if (!resourceManager->AddResource(loadPath.c_str())) {
+            TAG_LOGE(AAFwkTag::APPKIT, "AddResource failed");
+        }
+    }
+}
 REGISTER_APPLICATION(OHOSApplication, OHOSApplication)
 constexpr int32_t APP_ENVIRONMENT_OVERWRITE = 1;
 using ApplicationConfigurationManager = AbilityRuntime::ApplicationConfigurationManager;
@@ -433,6 +453,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         } else {
             stageContext->InitHapModuleInfo(abilityInfo);
             stageContext->SetParentContext(abilityRuntimeContext_);
+            LoadDeduplicatedHarResource(stageContext);
         }
 
         stageContext->SetConfiguration(GetConfiguration());
@@ -755,7 +776,7 @@ bool OHOSApplication::AddAbilityStage(
         auto rm = stageContext->CreateModuleContext(hapModuleInfo.moduleName)->GetResourceManager();
         stageContext->SetResourceManager(rm);
     }
-
+    LoadDeduplicatedHarResource(stageContext);
     auto &runtime = GetSpecifiedRuntime(moduleInfo->arkTSMode);
     auto abilityStage = AbilityRuntime::AbilityStage::Create(runtime, *moduleInfo);
     if (abilityStage == nullptr) {
@@ -1202,6 +1223,20 @@ bool OHOSApplication::IsMainProcess(const std::string &bundleName, const std::st
     }
     TAG_LOGD(AAFwkTag::APPKIT, "not main process");
     return false;
+}
+
+void OHOSApplication::SetEntryLoadPath(const std::string &path)
+{
+    if (path.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "empty path");
+        return;
+    }
+    entryLoadPath_ = path;
+}
+
+void OHOSApplication::SetDeduplicateHar(const bool deduplicate)
+{
+    deduplicate_ = deduplicate;
 }
 
 #ifdef SUPPORT_GRAPHICS
