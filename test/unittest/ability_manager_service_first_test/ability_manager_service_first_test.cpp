@@ -1687,6 +1687,35 @@ HWTEST_F(AbilityManagerServiceFirstTest, QueryAllAutoStartupApplications_0200, T
     EXPECT_NE(result, ERR_NO_INIT);
 }
 
+/**
+ * @tc.name: AbilityManagerServiceFirstTest_GetAutoStartupStatusForSelf_0100
+ * @tc.desc: Test the state of GetAutoStartupStatusForSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, GetAutoStartupStatusForSelf_0100, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->abilityAutoStartupService_ = nullptr;
+    bool isAutoStartEnabled = false;
+    auto result = abilityMs_->GetAutoStartupStatusForSelf(isAutoStartEnabled);
+    EXPECT_EQ(result, ERR_NO_INIT);
+}
+
+/**
+ * @tc.name: AbilityManagerServiceFirstTest_GetAutoStartupStatusForSelf_0200
+ * @tc.desc: Test the state of GetAutoStartupStatusForSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, GetAutoStartupStatusForSelf_0200, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->abilityAutoStartupService_ = std::make_shared<AbilityRuntime::AbilityAutoStartupService>();
+    EXPECT_NE(abilityMs_->abilityAutoStartupService_, nullptr);
+    bool isAutoStartEnabled = false;
+    auto result = abilityMs_->GetAutoStartupStatusForSelf(isAutoStartEnabled);
+    EXPECT_NE(result, ERR_NO_INIT);
+}
+
 /*
  * Feature: AbilityManagerService
  * Function: GenerateEmbeddableUIAbilityRequest
