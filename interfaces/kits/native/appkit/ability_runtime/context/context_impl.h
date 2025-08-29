@@ -509,7 +509,7 @@ private:
         const AppExecFwk::BundleInfo &bundleInfo, bool currentBundle, const std::string& moduleName);
     std::shared_ptr<Global::Resource::ResourceManager> InitResourceManagerInner(
         const AppExecFwk::BundleInfo &bundleInfo, bool currentBundle, const std::string& moduleName,
-        std::shared_ptr<Context> inputContext = nullptr);
+        std::shared_ptr<Context> inputContext = nullptr, bool* deduplicate = nullptr);
     void GetOverlayPath(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
         const std::string &bundleName, const std::string &moduleName, std::string &loadPath, bool currentBundle,
         std::shared_ptr<Context> inputContext = nullptr);

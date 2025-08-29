@@ -962,11 +962,32 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
         return;
     }
 
+    bool hasDeduplicateHar = false;
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager = InitResourceManagerInner(
-        bundleInfo, currentBundle, moduleName, inputContext);
+        bundleInfo, currentBundle, moduleName, inputContext, &hasDeduplicateHar);
     if (resourceManager == nullptr) {
         return;
     }
+    if (hasDeduplicateHar) {
+        TAG_LOGD(AAFwkTag::APPKIT, "has deduplicateHar");
+        std::string loadPath = "";
+        for (const auto& info : bundleInfo.hapModuleInfos) {
+            if (info.moduleType == AppExecFwk::ModuleType::ENTRY) {
+                loadPath = info.hapPath.empty() ? info.resourcePath : info.hapPath;
+                if (loadPath.empty()) {
+                    TAG_LOGE(AAFwkTag::APPKIT, "empty loadPath");
+                    break;
+                }
+                std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleInfo.name);
+                loadPath = std::regex_replace(loadPath, pattern, std::string(LOCAL_CODE_PATH));
+                if (!resourceManager->AddResource(loadPath.c_str())) {
+                    TAG_LOGE(AAFwkTag::APPKIT, "AddResource failed");
+                }
+                break;
+            }
+        }
+    }
+
     std::shared_ptr<Global::Resource::ResourceManager> src = nullptr;
     if (inputContext) {
         src = inputContext->GetResourceManager();
@@ -1001,7 +1022,7 @@ std::shared_ptr<Global::Resource::ResourceManager> ContextImpl::InitOthersResour
 
 std::shared_ptr<Global::Resource::ResourceManager> ContextImpl::InitResourceManagerInner(
     const AppExecFwk::BundleInfo &bundleInfo, bool currentBundle, const std::string& moduleName,
-    std::shared_ptr<Context> inputContext)
+    std::shared_ptr<Context> inputContext, bool* deduplicate)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager = InitOthersResourceManagerInner(
@@ -1030,6 +1051,9 @@ std::shared_ptr<Global::Resource::ResourceManager> ContextImpl::InitResourceMana
                 if (loadPath.empty()) {
                     TAG_LOGD(AAFwkTag::APPKIT, "loadPath is empty");
                     continue;
+                }
+                if (deduplicate != nullptr) {
+                    *deduplicate = hapModuleInfo.deduplicateHar;
                 }
                 if (currentBundle) {
                     loadPath = std::regex_replace(loadPath, inner_pattern, LOCAL_CODE_PATH);
