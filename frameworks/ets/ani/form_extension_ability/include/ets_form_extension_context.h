@@ -17,18 +17,83 @@
 #define OHOS_ABILITY_RUNTIME_ETS_FORM_EXTENSION_CONTEXT_H
 
 #include "ani.h"
+#include "ability_connect_callback.h"
+#include "event_handler.h"
 #include "form_extension_context.h"
+#include "ipc_skeleton.h"
+#include "tokenid_kit.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-ani_ref CreateEtsFormExtensionContext(ani_env *env, std::shared_ptr<FormExtensionContext> &context);
+class ETSFormExtensionConnection : public AbilityConnectCallback {
+public:
+    explicit ETSFormExtensionConnection(ani_vm *etsVm);
+    ~ETSFormExtensionConnection();
+    void OnAbilityConnectDone(
+        const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int32_t resultCode) override;
+    void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t resultCode) override;
+    void CallEtsFailed(int32_t errorCode);
+    void SetConnectionId(int32_t id);
+    int32_t GetConnectionId() { return connectionId_; }
+    void SetConnectionRef(ani_object connectOptionsObj);
+    void RemoveConnectionObject();
+    ani_env *AttachCurrentThread();
+    void DetachCurrentThread();
+protected:
+    ani_vm *etsVm_ = nullptr;
+    int32_t connectionId_ = -1;
+    ani_ref stsConnectionRef_ = nullptr;
+    bool isAttachThread_ = false;
+};
+
+ani_object CreateEtsFormExtensionContext(ani_env *env, std::shared_ptr<FormExtensionContext> &context);
 
 class ETSFormExtensionContext {
 public:
-    static ani_ref CreateEtsExtensionContext(ani_env *env, const std::shared_ptr<FormExtensionContext> &context,
-        std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> &abilityInfo);
+    explicit ETSFormExtensionContext(std::shared_ptr<FormExtensionContext> context)
+        : context_(std::move(context)) {}
+    ~ETSFormExtensionContext() = default;
+    static void Finalizer(ani_env *env, ani_object obj);
+    static ETSFormExtensionContext *GetEtsAbilityContext(ani_env *env, ani_object obj);
+    static void StartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object call);
+    static ani_long ConnectAbility(ani_env *env, ani_object aniObj,
+        ani_object wantObj, ani_object connectOptionsObj);
+    static void DisconnectAbility(ani_env *env, ani_object aniObj, ani_long connectId,
+        ani_object callback);
+    static void CheckWant(ani_env *env, ani_object aniObj, ani_object wantObj);
+    static void CheckConnectionAbility(ani_env *env, ani_object aniObj);
+    std::weak_ptr<FormExtensionContext> GetAbilityContext()
+    {
+        return context_;
+    }
+private:
+    bool CheckCallerIsSystemApp() const
+    {
+        auto selfToken = IPCSkeleton::GetSelfTokenID();
+        return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken);
+    }
+    void OnStartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object call);
+        std::weak_ptr<FormExtensionContext> context_;
+    ani_long OnConnectAbility(ani_env *env, ani_object aniObj,
+        ani_object wantObj, ani_object connectOptionsObj);
+    void OnDisconnectAbility(ani_env *env, ani_object aniObj, ani_long connectId,
+        ani_object callback);
+    void OnCheckConnectionAbility(ani_env *env, ani_object aniObj);
+};
 
-    static ani_object SetFormExtensionContext(ani_env *env, const std::shared_ptr<FormExtensionContext> &context);
+struct ConnectionKey {
+    AAFwk::Want want;
+    int64_t id;
+};
+
+struct key_compare {
+    bool operator()(const ConnectionKey &key1, const ConnectionKey &key2) const
+    {
+        if (key1.id < key2.id) {
+            return true;
+        }
+        return false;
+    }
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
