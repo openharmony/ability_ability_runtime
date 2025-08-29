@@ -98,7 +98,6 @@
       *SenderInfo*;
       *ExtensionRunningInfo*;
       *UserCallbackStub*;
-      *UserItem*;
       *WantReceiverStub*;
       *WantReceiverProxy*;
       *WantSenderProxy*;

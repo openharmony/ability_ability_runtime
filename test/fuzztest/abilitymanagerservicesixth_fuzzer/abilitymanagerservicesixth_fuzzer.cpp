@@ -79,7 +79,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     // fuzz for AbilityManagerService
     auto abilityms = std::make_shared<AbilityManagerService>();
     abilityms->GetEventHandler();
-    abilityms->GetUserId();
     AbilityRequest request;
     abilityms->GenerateAbilityRequest(*want, intParam, request, token, int32Param);
     abilityms->GenerateExtensionAbilityRequest(*want, request, token, int32Param);

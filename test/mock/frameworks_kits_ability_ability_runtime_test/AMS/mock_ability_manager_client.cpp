@@ -326,14 +326,15 @@ ErrCode AbilityManagerClient::StopSyncRemoteMissions(const std::string& devId)
     return abms->StopSyncRemoteMissions(devId);
 }
 
-ErrCode AbilityManagerClient::StartUser(int accountId, sptr<IUserCallback> callback, bool isAppRecovery)
+ErrCode AbilityManagerClient::StartUser(int accountId, uint64_t displayId, sptr<IUserCallback> callback,
+    bool isAppRecovery)
 {
     if (g_remoteObject == nullptr) {
         return ABILITY_SERVICE_NOT_CONNECTED;
     }
 
     sptr<IAbilityManager> abms = iface_cast<IAbilityManager>(g_remoteObject);
-    return abms->StartUser(accountId, callback);
+    return abms->StartUser(accountId, displayId, callback);
 }
 
 ErrCode AbilityManagerClient::StopUser(int accountId, sptr<IUserCallback> callback)

@@ -28,6 +28,7 @@ using namespace std::placeholders;
 namespace {
 constexpr bool DEBUG_ENABLED = false;
 constexpr system_clock::duration DATA_ABILITY_LOAD_TIMEOUT = 11000ms;
+constexpr int32_t USER_ID_NO_HEAD = 0;
 }  // namespace
 
 DataAbilityManager::DataAbilityManager()

@@ -474,7 +474,8 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_010
     EXPECT_NE(appMgrServiceInner, nullptr);
     std::string bundleName = "testBundleName";
     std::vector<std::string> instanceKeys;
-    auto ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    int32_t userId = 100;
+    auto ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
     EXPECT_NE(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_0100 end");
 }
@@ -1229,14 +1230,15 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_100
     std::string bundleName = "";
     std::vector<std::string> instanceKeys;
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    auto res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    int32_t userId = 100;
+    auto res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
     EXPECT_EQ(res, AAFwk::INVALID_PARAMETERS_ERR);
     bundleName = TEST_BUNDLE_NAME;
     appMgrServiceInner->remoteClientManager_ = nullptr;
-    res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
     appMgrServiceInner->remoteClientManager_ = std::make_shared<RemoteClientManager>();
-    res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAllRunningInstanceKeysByBundleName_1000 end");
 }
 
@@ -1602,7 +1604,6 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ClearAppRunn
     appRecord->SetUid(uid);
     appMgrServiceInner->ClearAppRunningDataForKeepAlive(appRecord);
 
-    appMgrServiceInner->currentUserId_ = 1;
     appMgrServiceInner->ClearAppRunningDataForKeepAlive(appRecord);
 
     appMgrServiceInner->taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("AppMgrServiceInnerSecondTest");

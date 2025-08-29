@@ -56,11 +56,6 @@ bool AbilityManagerService::IsSceneBoardReady(int32_t userId)
     return isSceneBoardReadyResult;
 }
 
-int32_t AbilityManagerService::GetUserId() const
-{
-    return userId_;
-}
-
 int32_t AbilityManagerService::StartAbility(const Want &want, const StartOptions &startOptions,
     const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)
 {

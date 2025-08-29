@@ -100,6 +100,7 @@ enum class AAFwkLogTag : uint32_t {
     SA_INTERCEPTOR,
     APP_SERVICE_EXT,
     VERTICAL_PANEL,
+    USER_CONTROLLER,
 
     END = 256,               // N.B. never use it
 };

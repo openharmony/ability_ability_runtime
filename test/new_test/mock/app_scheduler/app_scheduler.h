@@ -125,12 +125,8 @@ public:
         return false;
     }
 
-    void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess) {}
-
     void KillProcessesByUserId(int32_t userId, bool isNeedSendAppSpawnMsg = false,
         sptr<AAFwk::IUserCallback> callback = nullptr) {}
-
-    void SetCurrentUserId(int32_t userId) {}
 };
 }  // namespace AAFwk
 }  // namespace OHOS

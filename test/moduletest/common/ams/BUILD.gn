@@ -65,6 +65,7 @@ ohos_source_set("appmgr_mst_source") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "json:nlohmann_json_static",
+    "window_manager:libwsutils",
   ]
 
   public_external_deps = [

@@ -851,34 +851,6 @@ HWTEST_F(AmsMgrSchedulerTest, NotifyAppMgrRecordExitReason_001, TestSize.Level2)
 }
 
 /**
- * @tc.name: SetCurrentUserId_002
- * @tc.desc: set current userId.
- * @tc.type: FUNC
- */
-HWTEST_F(AmsMgrSchedulerTest, SetCurrentUserId_002, TestSize.Level2)
-{
-    auto amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
-    amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
-    amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
-    ASSERT_NE(amsMgrScheduler, nullptr);
-    int userId = 1;
-    amsMgrScheduler->SetCurrentUserId(userId);
-}
-
-/**
- * @tc.name: SetCurrentUserId_001
- * @tc.desc: set current userId.
- * @tc.type: FUNC
- */
-HWTEST_F(AmsMgrSchedulerTest, SetCurrentUserId_001, TestSize.Level2)
-{
-    auto amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
-    ASSERT_NE(amsMgrScheduler, nullptr);
-    int userId = 1;
-    amsMgrScheduler->SetCurrentUserId(userId);
-}
-
-/**
  * @tc.name: RegisterAppDebugListener_001
  * @tc.desc: Test the state of RegisterAppDebugListener
  * @tc.type: FUNC

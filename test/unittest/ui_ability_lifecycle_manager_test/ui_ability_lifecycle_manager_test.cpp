@@ -36,6 +36,7 @@
 #include "ability_scheduler_mock.h"
 #include "ipc_skeleton.h"
 #include "status_bar_delegate_interface.h"
+#include "user_controller/user_controller.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -3162,7 +3163,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GetActiveAbilityList_002, TestSize.Level
     abilityRequest.abilityInfo.bundleName = "com.example.unittest";
     abilityRequest.abilityInfo.applicationInfo.uid = TEST_UID;
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    abilityRecord->SetOwnerMissionUserId(DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId());
+    abilityRecord->SetOwnerMissionUserId(AbilityRuntime::UserController::GetInstance().GetCallerUserId());
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
     std::vector<std::string> abilityList;
     int32_t pid = 100;

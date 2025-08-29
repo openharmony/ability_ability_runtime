@@ -532,12 +532,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, GetExtensionRunningInfos_001, TestSize.
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     std::vector<AAFwk::ExtensionRunningInfo> extensionRunningInfo;
-    EXPECT_NE(abilityMs_->GetExtensionRunningInfos(10, extensionRunningInfo), ERR_OK);
-
-    auto temp = abilityMs_->subManagersHelper_->currentConnectManager_;
-    abilityMs_->subManagersHelper_->currentConnectManager_.reset();
-    EXPECT_EQ(abilityMs_->GetExtensionRunningInfos(10, extensionRunningInfo), ERR_INVALID_VALUE);
-    abilityMs_->subManagersHelper_->currentConnectManager_ = temp;
+    EXPECT_EQ(abilityMs_->GetExtensionRunningInfos(10, extensionRunningInfo), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest GetExtensionRunningInfos_001 end");
 }
 
@@ -735,10 +730,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, JudgeMultiUserConcurrency_001, TestSize
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_TRUE(abilityMs_->JudgeMultiUserConcurrency(0));
 
-    auto temp = abilityMs_->userController_;
-    abilityMs_->userController_ = nullptr;
     EXPECT_FALSE(abilityMs_->JudgeMultiUserConcurrency(100));
-    abilityMs_->userController_ = temp;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest JudgeMultiUserConcurrency_001 end");
 }
 
@@ -854,7 +846,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StopUser_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest StopUser_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_EQ(abilityMs_->StopUser(USER_ID_U100, nullptr), CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(abilityMs_->StopUser(USER_ID_U100, nullptr), INVALID_PARAMETERS_ERR);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest StopUser_001 end");
 }
 

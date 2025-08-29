@@ -18,6 +18,7 @@
 #include "ability_keep_alive_data_manager.h"
 #include "ability_manager_service.h"
 #include "hilog_tag_wrapper.h"
+#include "user_controller/user_controller.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -104,14 +105,9 @@ void AbilityKeepAliveService::GetValidUserId(int32_t &userId)
     if (userId >= 0) {
         return;
     }
-    auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
-    if (abilityMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::KEEP_ALIVE, "null abilityMgr");
-        return;
-    }
 
     if (userId < 0) {
-        userId = abilityMgr->GetUserId();
+        userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
     }
 }
 
