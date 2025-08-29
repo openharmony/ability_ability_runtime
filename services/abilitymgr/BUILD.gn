@@ -202,6 +202,7 @@ ohos_shared_library("abilityms") {
     "window_manager:scene_session",
     "window_manager:session_manager_lite",
     "window_manager:sms",
+    "udmf:udmf_client",
   ]
   public_external_deps = [ "background_task_mgr:bgtaskmgr_innerkits" ]
 
