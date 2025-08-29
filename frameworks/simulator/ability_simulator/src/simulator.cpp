@@ -825,6 +825,10 @@ bool SimulatorImpl::OnInit()
         return false;
     }
 
+#if defined(PREVIEW)
+    ArkNativeEngine::SetCurrentPreviewenv(options_.enableFileOperation);
+#endif
+
     if (!LoadRuntimeEnv(env, globalObj)) {
         delete nativeEngine;
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "Load runtime env failed");
