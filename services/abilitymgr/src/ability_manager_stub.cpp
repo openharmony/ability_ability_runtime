@@ -586,6 +586,9 @@ int AbilityManagerStub::OnRemoteRequestInnerFourteenth(uint32_t code, MessagePar
     if (interfaceCode == AbilityManagerInterfaceCode::START_UI_ABILITIES) {
         return StartUIAbilitiesInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::START_UI_ABILITIES_IN_SPLIT_WINDOW_MODE) {
+        return StartUIAbilitiesInSplitWindowModeInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -3876,6 +3879,25 @@ int AbilityManagerStub::StartAbilityForResultAsCallerInner(MessageParcel &data, 
     int32_t requestCode = data.ReadInt32();
     int32_t userId = data.ReadInt32();
     int32_t result = StartAbilityForResultAsCaller(*want, callerToken, requestCode, userId);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::StartUIAbilitiesInSplitWindowModeInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call StartUIAbilitiesInSplitWindowModeInner");
+    int32_t sourceWindowId = data.ReadInt32();
+    std::unique_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IRemoteObject> callerToken = data.ReadRemoteObject();
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callerToken");
+        return INVALID_CALLER_TOKEN;
+    }
+    int32_t result = StartUIAbilitiesInSplitWindowMode(sourceWindowId, *want, callerToken);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

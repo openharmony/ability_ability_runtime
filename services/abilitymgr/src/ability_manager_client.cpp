@@ -261,6 +261,16 @@ ErrCode AbilityManagerClient::StartAbilityForResultAsCaller(const Want &want, co
     return abms->StartAbilityForResultAsCaller(want, startOptions, callerToken, requestCode, userId);
 }
 
+ErrCode AbilityManagerClient::StartUIAbilitiesInSplitWindowMode(int32_t primaryWindowId,
+    const AAFwk::Want &secondaryWant, sptr<IRemoteObject> callerToken)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    HandleDlpApp(const_cast<Want &>(secondaryWant));
+    return abms->StartUIAbilitiesInSplitWindowMode(primaryWindowId, secondaryWant, callerToken);
+}
+
 ErrCode AbilityManagerClient::StartUIAbilities(const std::vector<AAFwk::Want> &wantList,
     const std::string &requestKey, sptr<IRemoteObject> callerToken)
 {
