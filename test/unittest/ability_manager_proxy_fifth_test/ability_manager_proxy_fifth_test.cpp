@@ -693,6 +693,23 @@ HWTEST_F(AbilityManagerProxyFifthTest, QueryAllAutoStartupApplications_0100, Tes
 }
 
 /**
+ * @tc.name: GetAutoStartupStatusForSelf_0100
+ * @tc.desc: Test the GetAutoStartupStatusForSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxyFifthTest, GetAutoStartupStatusForSelf_0100, TestSize.Level1)
+{
+    bool isAutoStartEnabled = false;
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    auto res1 = proxy_->GetAutoStartupStatusForSelf(isAutoStartEnabled);
+    EXPECT_EQ(res1, INVALID_PARAMETERS_ERR);
+
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(NO_ERROR));
+    auto res2 = proxy_->GetAutoStartupStatusForSelf(isAutoStartEnabled);
+    EXPECT_EQ(res2, ZERO);
+}
+
+/**
  * @tc.name: RegisterSessionHandler_0100
  * @tc.desc: Test the RegisterSessionHandler
  * @tc.type: FUNC

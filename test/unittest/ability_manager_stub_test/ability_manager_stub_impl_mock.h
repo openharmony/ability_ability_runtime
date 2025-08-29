@@ -472,6 +472,7 @@ public:
         const InsightIntentExecuteResult &result));
     MOCK_METHOD3(GetUIExtensionRootHostInfo, int32_t(const sptr<IRemoteObject> token, UIExtensionHostInfo &hostInfo,
         int32_t userId));
+    MOCK_METHOD1(GetAutoStartupStatusForSelf, int32_t(bool &isAutoStartEnabled));
 };
 }  // namespace AAFwk
 }  // namespace OHOS

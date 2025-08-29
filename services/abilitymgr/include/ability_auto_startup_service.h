@@ -75,6 +75,14 @@ public:
     int32_t QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList, int32_t userId);
 
     /**
+     * @brief Retrieves the auto startup status of the current application.
+     * @param callerTokenId the tokenId of caller application.
+     * @param isAutoStartEnabled Indicates whether auto startup is enabled for the current application.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetAutoStartupStatusForSelf(uint32_t callerTokenId, bool &isAutoStartEnabled);
+
+    /**
      * @brief Query auto startup state all application without permission.
      * @param infoList Output parameters, return auto startup info list.
      * @param infoList Input parameters, return userid.
