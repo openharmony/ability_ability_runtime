@@ -1035,7 +1035,8 @@ void AbilityConnectManager::OnAppStateChanged(const AppInfo &info)
     auto serviceMap = GetServiceMap();
     std::for_each(serviceMap.begin(), serviceMap.end(), [&info](ServiceMapType::reference service) {
         if (service.second && info.bundleName == service.second->GetApplicationInfo().bundleName &&
-            info.appIndex == service.second->GetAppIndex() && info.instanceKey == service.second->GetInstanceKey()) {
+            info.appIndex == service.second->GetAppIndex() && info.instanceKey == service.second->GetInstanceKey() &&
+            info.pid == service.second->GetPid()) {
             auto appName = service.second->GetApplicationInfo().name;
             auto uid = service.second->GetAbilityInfo().applicationInfo.uid;
             auto isExist = [&appName, &uid](
