@@ -60,7 +60,8 @@ void MockAbilityDelegatorStub::DumpState(const std::string& args, std::vector<st
     return;
 }
 
-int MockAbilityDelegatorStub::StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery)
+int MockAbilityDelegatorStub::StartUser(int userId, uint64_t displayId, sptr<IUserCallback> callback,
+    bool isAppRecovery)
 {
     return 0;
 }
@@ -253,7 +254,8 @@ int MockAbilityDelegatorStub2::StopServiceAbility(const Want& want, int32_t user
     return 0;
 }
 
-int MockAbilityDelegatorStub2::StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery)
+int MockAbilityDelegatorStub2::StartUser(int userId, uint64_t displayId, sptr<IUserCallback> callback,
+    bool isAppRecovery)
 {
     return 0;
 }

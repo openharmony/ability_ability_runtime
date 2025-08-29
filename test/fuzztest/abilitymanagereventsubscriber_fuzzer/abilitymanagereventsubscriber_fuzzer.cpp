@@ -36,7 +36,7 @@ bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     sptr<EventFwk::CommonEventData> eventData = EventFwk::CommonEventData::Unmarshalling(parcel);
 
     EventFwk::CommonEventSubscribeInfo subscribeInfo;
-    std::function<void()> callback;
+    std::function<void(int32_t)> callback;
     std::function<void()> userScreenUnlockCallback;
     auto abilityManagerEventSubscriber = std::make_shared<AbilityRuntime::AbilityManagerEventSubscriber>
         (subscribeInfo, callback, userScreenUnlockCallback);

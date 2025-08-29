@@ -146,7 +146,7 @@ public:
         return 0;
     }
 
-    int StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery) override
+    int StartUser(int userId, uint64_t displayId, sptr<IUserCallback> callback, bool isAppRecovery) override
     {
         return 0;
     }

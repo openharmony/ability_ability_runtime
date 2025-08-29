@@ -1109,10 +1109,11 @@ public:
     /**
      * @brief start user.
      * @param accountId accountId.
+     * @param displayId logical screen id.
      * @param isAppRecovery is appRecovery or not.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery = false) = 0;
+    virtual int StartUser(int userId, uint64_t displayId, sptr<IUserCallback> callback, bool isAppRecovery = false) = 0;
 
     /**
      * @brief stop user.

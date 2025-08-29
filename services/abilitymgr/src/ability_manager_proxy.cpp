@@ -3262,7 +3262,7 @@ int AbilityManagerProxy::MoveMissionsToBackground(const std::vector<int32_t>& mi
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery)
+int AbilityManagerProxy::StartUser(int userId, uint64_t displayId, sptr<IUserCallback> callback, bool isAppRecovery)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -3271,6 +3271,10 @@ int AbilityManagerProxy::StartUser(int userId, sptr<IUserCallback> callback, boo
     if (!data.WriteInt32(userId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "fail");
         return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteUint64(displayId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write displayId failed");
+        return IPC_PROXY_ERR;
     }
     if (!callback) {
         data.WriteBool(false);

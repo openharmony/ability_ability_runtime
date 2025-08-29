@@ -21,7 +21,6 @@
 #undef private
 #undef protected
 #include "ability_manager_service.h"
-#include "user_controller.h"
 #include "ability_resident_process_rdb.h"
 
 using namespace testing;

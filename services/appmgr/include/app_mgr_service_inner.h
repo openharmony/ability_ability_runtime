@@ -1025,14 +1025,6 @@ public:
      */
     void HandleWindowPidVisibilityChanged(const sptr<OHOS::Rosen::WindowPidVisibilityInfo>& windowPidVisibilityInfo);
 #endif //SUPPORT_SCREEN
-    /**
-     * Set the current userId, only used by abilityMgr.
-     *
-     * @param userId the user id.
-     *
-     * @return
-     */
-    void SetCurrentUserId(const int32_t userId);
 
     /**
      * Set enable start process flag by userId
@@ -2044,7 +2036,6 @@ private:
     void SendHiSysEvent(int32_t innerEventId, std::shared_ptr<AppRunningRecord> appRecord);
     int FinishUserTestLocked(
         const std::string &msg, const int64_t &resultCode, const std::shared_ptr<AppRunningRecord> &appRecord);
-    int32_t GetCurrentAccountId() const;
     void SendReStartProcessEvent(AAFwk::EventInfo &eventInfo, int32_t appUid);
     void SendAppLaunchEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void InitAppWaitingDebugList();
@@ -2126,7 +2117,6 @@ private:
     bool isInitAppWaitingDebugListExecuted_ = false;
     std::atomic<bool> sceneBoardAttachFlag_ = true;
     std::atomic<int32_t> willKillPidsNum_ = 0;
-    int32_t currentUserId_ = 0;
     int32_t lastRenderUid_ = Constants::START_UID_FOR_RENDER_PROCESS;
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<AppStateCallbackWithUserId> appStateCallbacks_;

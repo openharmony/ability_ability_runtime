@@ -68,7 +68,6 @@
 #include "system_ability.h"
 #include "task_handler_wrap.h"
 #include "uri.h"
-#include "user_controller.h"
 #ifdef SUPPORT_GRAPHICS
 #include "implicit_start_processor.h"
 #include "system_dialog_scheduler.h"
@@ -1222,7 +1221,8 @@ public:
      */
     sptr<IRemoteObject> GetAbilityTokenByMissionId(int32_t missionId);
 
-    virtual int StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery = false) override;
+    virtual int StartUser(int userId, uint64_t displayId, sptr<IUserCallback> callback,
+        bool isAppRecovery = false) override;
 
     virtual int StopUser(int userId, const sptr<IUserCallback> &callback) override;
 
@@ -1590,12 +1590,6 @@ public:
      * @return nullptr or IAbilityManagerCollaborator stpr.
     */
     sptr<IAbilityManagerCollaborator> GetCollaborator(int32_t type);
-
-    /**
-     * get the user id.
-     *
-     */
-    int32_t GetUserId() const;
 
     virtual int32_t RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate) override;
 
@@ -2162,8 +2156,6 @@ public:
         TERMINATE_ABILITY_CODE
     };
 
-    friend class UserController;
-
 protected:
     void OnAbilityRequestDone(const sptr<IRemoteObject> &token, const int32_t state) override;
     int GetUidByBundleName(std::string bundleName);
@@ -2227,7 +2219,7 @@ private:
      * start highest priority ability.
      *
      */
-    int StartHighestPriorityAbility(int32_t userId, bool isBoot, bool isAppRecovery = false);
+    int StartHighestPriorityAbility(int32_t userId, uint64_t displayId, bool isBoot, bool isAppRecovery = false);
 #endif
     /**
      * connect bms.
@@ -2299,7 +2291,7 @@ private:
     void DumpMissionListInner(const std::string &args, std::vector<std::string> &info);
     void DumpMissionInfosInner(const std::string &args, std::vector<std::string> &info);
 
-    bool JudgeMultiUserConcurrency(const int32_t userId);
+    bool JudgeMultiUserConcurrency(int32_t userId);
     bool CheckCrossUser(const int32_t userId, AppExecFwk::ExtensionAbilityType extensionType);
     void SendExtensionReport(EventInfo &eventInfo, int32_t errCode, bool isService = false);
     void SendIntentReport(EventInfo &eventInfo, int32_t errCode, const std::string &intentName);
@@ -2336,7 +2328,7 @@ private:
     void StartFreezingScreen();
     void StopFreezingScreen();
     void UserStarted(int32_t userId);
-    int SwitchToUser(int32_t oldUserId, int32_t userId, sptr<IUserCallback> callback,
+    int SwitchToUser(int32_t oldUserId, int32_t userId, uint64_t displayId, sptr<IUserCallback> callback,
         bool isAppRecovery = false);
     void SwitchManagers(int32_t userId, bool switchUser = true);
     void StartUserApps();
@@ -2368,7 +2360,7 @@ private:
     bool JudgeSelfCalled(const std::shared_ptr<AbilityRecord> &abilityRecord);
     bool IsAppSelfCalled(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
-    int32_t GetValidUserId(const int32_t userId);
+    int32_t GetValidUserId(int32_t userId);
 
     int DelegatorMoveMissionToFront(int32_t missionId);
 
@@ -2378,10 +2370,10 @@ private:
 
     void StartKeepAliveApps(int32_t userId);
 
-    void StartAutoStartupApps();
+    void StartAutoStartupApps(int32_t userId);
     void StartAutoStartupApps(std::queue<AutoStartupInfo> infoList);
     void SubscribeScreenUnlockedEvent();
-    std::function<void()> GetScreenUnlockCallback();
+    std::function<void(int32_t)> GetScreenUnlockCallback();
     std::function<void()> GetUserScreenUnlockCallback();
     void UnSubscribeScreenUnlockedEvent();
     void RetrySubscribeScreenUnlockedEvent(int32_t retryCount);
@@ -2581,7 +2573,7 @@ private:
         std::vector<AbilityRequest> &abilityRequestList);
     int32_t StartUIAbilitiesCheckDlp(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId);
     int32_t StartUIAbilitiesInterceptorCheck(const Want &want, AbilityRequest &abilityRequest,
-        sptr<IRemoteObject> callerToken,  int32_t appIndex);
+        sptr<IRemoteObject> callerToken, int32_t appIndex, int32_t userId);
     /**
      * Start switch user dialog Extension ability.
      */
@@ -2761,7 +2753,6 @@ private:
 
     std::shared_ptr<FreeInstallManager> freeInstallManager_;
     std::shared_ptr<SubManagersHelper> subManagersHelper_;
-    std::shared_ptr<UserController> userController_;
     sptr<AppExecFwk::IAbilityController> abilityController_ = nullptr;
 
     std::multimap<std::string, std::string> timeoutMap_;
@@ -2801,7 +2792,7 @@ private:
     bool ParseJsonFromBoot(const std::string &relativePath);
 
     void SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest);
-    void CloseAssertDialog(const std::string &assertSessionId);
+    void CloseAssertDialog(const std::string &assertSessionId, int32_t userId);
 
     int32_t OpenLinkFreeInstallAtomicService(Want &convertedWant, const Want &originalWant,
         sptr<IRemoteObject> callerToken, int32_t userId, int32_t requestCode, bool removeInsightIntentFlag,
@@ -2826,6 +2817,8 @@ private:
 
     int StartAbilityWithRemoveIntentFlag(const Want &want, const sptr<IRemoteObject> &callerToken,
         int32_t userId, int requestCode, bool removeInsightIntentFlag, bool hideFailureTipDialog = false);
+
+    int32_t UpdateApplicationKeepAlive(int32_t userId) const;
 
     int32_t OpenLinkInner(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId, int requestCode,
         bool removeInsightIntentFlag, bool hideFailureTipDialog = false);
