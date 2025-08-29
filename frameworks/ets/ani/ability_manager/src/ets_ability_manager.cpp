@@ -20,9 +20,12 @@
 #include "ability_manager_client.h"
 #include "ability_manager_errors.h"
 #include "ability_manager_interface.h"
+#include "acquire_share_data_callback_stub.h"
 #include "ani_base_context.h"
 #include "ani_common_ability_state_data.h"
+#include "ani_common_configuration.h"
 #include "ani_common_want.h"
+#include "ani_enum_convert.h"
 #include "app_mgr_interface.h"
 #include "ets_ability_foreground_state_observer.h"
 #include "ets_ability_manager_utils.h"
@@ -42,6 +45,51 @@ constexpr const char* ETS_ABILITY_MANAGER_SIGNATURE_ARRAY = ":Lescompat/Array;";
 constexpr const char* ETS_ABILITY_MANAGER_SIGNATURE_CALLBACK = "Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char *ON_OFF_TYPE_ABILITY_FOREGROUND_STATE = "abilityForegroundState";
 constexpr int32_t ERR_FAILURE = -1;
+
+sptr<AAFwk::AcquireShareDataCallbackStub> CreateShareDataCallbackStub(
+    ani_env *env, ani_ref callbackRef)
+{
+    ani_vm *aniVM = nullptr;
+    if (env->GetVM(&aniVM) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::DELEGATOR, "GetVM failed");
+        return nullptr;
+    }
+    auto shareDataCallbackStub = new (std::nothrow) AAFwk::AcquireShareDataCallbackStub();
+    if (shareDataCallbackStub == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null shareDataCallbackStub");
+        return nullptr;
+    }
+    auto handler = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+    shareDataCallbackStub->SetHandler(handler);
+    AAFwk::ShareRuntimeTask task =
+        [aniVM, callbackRef](int32_t resultCode, const AAFwk::WantParams &wantParam) {
+            ani_env *env = nullptr;
+            ani_status status = aniVM->GetEnv(ANI_VERSION_1, &env);
+            if (status != ANI_OK || env == nullptr) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+                return;
+            }
+            if (resultCode != 0) {
+                AppExecFwk::AsyncCallback(env, static_cast<ani_object>(callbackRef),
+                    EtsErrorUtil::CreateErrorByNativeErr(env, resultCode), nullptr);
+                env->GlobalReference_Delete(callbackRef);
+                return;
+            }
+            ani_ref wantParamRef = AppExecFwk::WrapWantParams(env, wantParam);
+            if (wantParamRef == nullptr) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "null wantParamRef");
+                AppExecFwk::AsyncCallback(env, static_cast<ani_object>(callbackRef),
+                    EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INNER), nullptr);
+                env->GlobalReference_Delete(callbackRef);
+                return;
+            }
+            AppExecFwk::AsyncCallback(env, static_cast<ani_object>(callbackRef),
+                EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), static_cast<ani_object>(wantParamRef));
+            env->GlobalReference_Delete(callbackRef);
+        };
+    shareDataCallbackStub->SetShareRuntimeTask(task);
+    return shareDataCallbackStub;
+}
 }
 
 class EtsAbilityManager final {
@@ -53,6 +101,15 @@ public:
     static void IsEmbeddedOpenAllowed(ani_env *env, ani_object contextObj, ani_string aniAppId, ani_object callbackObj);
     static void NativeOn(ani_env *env, ani_string aniType, ani_object aniObserver);
     static void NativeOff(ani_env *env, ani_string aniType, ani_object aniObserver);
+    static void NativeNotifyDebugAssertResult(ani_env *env, ani_string aniSessionId, ani_object userStatusObj,
+        ani_object callbackObj);
+    static void NativeNotifyDebugAssertResultCheck(ani_env *env, ani_string aniSessionId, ani_object userStatusObj);
+    static void NativeSetResidentProcessEnabled(ani_env *env, ani_string aniBundleName, ani_boolean enabled,
+        ani_object callbackObj);
+    static void NativeSetResidentProcessEnabledCheck(ani_env *env, ani_string aniBundleName);
+    static void NativeAcquireShareData(ani_env *env, ani_int aniMissionId, ani_object callbackObj);
+    static void NativeUpdateConfiguration(ani_env *env, ani_object configObj, ani_object callbackObj);
+
 private:
     static sptr<AppExecFwk::IAbilityManager> GetAbilityManagerInstance();
     static sptr<AppExecFwk::IAppMgr> GetAppManagerInstance();
@@ -306,6 +363,193 @@ void EtsAbilityManager::NativeOff(ani_env *env, ani_string aniType, ani_object a
     TAG_LOGD(AAFwkTag::ABILITYMGR, "nativeOff end");
 }
 
+void EtsAbilityManager::NativeNotifyDebugAssertResultCheck(ani_env *env, ani_string aniSessionId,
+    ani_object userStatusObj)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "NativeNotifyDebugAssertResultCheck called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "env null ptr");
+        return;
+    }
+    std::string sessionId;
+    if (!AppExecFwk::GetStdString(env, aniSessionId, sessionId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "convert sessionId failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param sessionId failed, must be a string.");
+        return;
+    }
+
+    uint64_t assertSessionId = std::stoull(sessionId);
+    if (assertSessionId == 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "convert sessionId failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param sessionId failed, value must not be equal to zero.");
+        return;
+    }
+    int32_t userStatus;
+    if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, userStatusObj, userStatus)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "convert status failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param status failed, must be a UserStatus.");
+        return;
+    }
+}
+
+void EtsAbilityManager::NativeNotifyDebugAssertResult(ani_env *env, ani_string aniSessionId,
+    ani_object userStatusObj, ani_object callbackObj)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "NativeNotifyDebugAssertResult called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "env null ptr");
+        return;
+    }
+    std::string sessionId;
+    if (!AppExecFwk::GetStdString(env, aniSessionId, sessionId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "convert sessionId failed");
+        return;
+    }
+
+    uint64_t assertSessionId = std::stoull(sessionId);
+    if (assertSessionId == 0) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "convert sessionId failed");
+        return;
+    }
+    int32_t userStatus;
+    if (!AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, userStatusObj, userStatus)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "convert status failed");
+        return;
+    }
+    auto amsClient = AAFwk::AbilityManagerClient::GetInstance();
+    if (amsClient == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null amsClient");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateErrorByNativeErr(env, AAFwk::INNER_ERR), nullptr);
+        return;
+    }
+    auto ret = amsClient->NotifyDebugAssertResult(assertSessionId, static_cast<AAFwk::UserStatus>(userStatus));
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed %{public}d", ret);
+    }
+    AppExecFwk::AsyncCallback(env, callbackObj, EtsErrorUtil::CreateErrorByNativeErr(env, ret), nullptr);
+}
+
+void EtsAbilityManager::NativeSetResidentProcessEnabledCheck(ani_env *env, ani_string aniBundleName)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "NativeSetResidentProcessEnabledCheck called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "env null ptr");
+        return;
+    }
+
+    std::string bundleName;
+    if (!AppExecFwk::GetStdString(env, aniBundleName, bundleName) || bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "parse bundleName failed, not string");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string.");
+        return;
+    }
+}
+
+void EtsAbilityManager::NativeSetResidentProcessEnabled(ani_env *env, ani_string aniBundleName,
+    ani_boolean enabled, ani_object callbackObj)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "NativeSetResidentProcessEnabled called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "env null ptr");
+        return;
+    }
+
+    std::string bundleName;
+    if (!AppExecFwk::GetStdString(env, aniBundleName, bundleName) || bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "parse bundleName failed, not string");
+        return;
+    }
+    bool enableState = (enabled != 0);
+    auto amsClient = AAFwk::AbilityManagerClient::GetInstance();
+    int32_t ret = ERR_OK;
+    if (amsClient == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null amsClient");
+        ret = static_cast<int32_t>(AAFwk::INNER_ERR);
+    } else {
+        ret = amsClient->SetResidentProcessEnabled(bundleName, enableState);
+    }
+
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "error: %{public}d", ret);
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateErrorByNativeErr(env, ret), nullptr);
+        return;
+    }
+    AppExecFwk::AsyncCallback(env, callbackObj,
+        EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+}
+
+void EtsAbilityManager::NativeAcquireShareData(ani_env *env, ani_int aniMissionId, ani_object callbackObj)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "NativeAcquireShareData called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "env null ptr");
+        return;
+    }
+    int32_t missionId = aniMissionId;
+    ani_ref callbackRef = nullptr;
+    env->GlobalReference_Create(callbackObj, &callbackRef);
+
+    auto shareDataCallbackStub = CreateShareDataCallbackStub(env, callbackRef);
+    if (shareDataCallbackStub == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null shareDataCallbackStub");
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateErrorByNativeErr(env, AAFwk::INNER_ERR), nullptr);
+        env->GlobalReference_Delete(callbackRef);
+        return;
+    }
+
+    auto amsClient = AAFwk::AbilityManagerClient::GetInstance();
+    int32_t err = ERR_OK;
+    if (amsClient == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null amsClient");
+        err = static_cast<int32_t>(AAFwk::INNER_ERR);
+    } else {
+        err = amsClient->AcquireShareData(missionId, shareDataCallbackStub);
+    }
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "error: %{public}d", err);
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateErrorByNativeErr(env, err), nullptr);
+        env->GlobalReference_Delete(callbackRef);
+    }
+}
+
+void EtsAbilityManager::NativeUpdateConfiguration(ani_env *env, ani_object configObj, ani_object callbackObj)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "NativeUpdateConfiguration called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "env null ptr");
+        return;
+    }
+
+    AppExecFwk::Configuration changeConfig;
+    if (!AppExecFwk::UnwrapConfiguration(env, configObj, changeConfig)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "UnwrapConfiguration failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param config failed, must be a Configuration.");
+        return;
+    }
+
+    auto appManager = GetAppManagerInstance();
+    int32_t errcode = ERR_OK;
+    if (appManager == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appManager is null");
+        errcode = static_cast<int32_t>(AAFwk::INNER_ERR);
+    } else {
+        errcode = appManager->UpdateConfiguration(changeConfig);
+    }
+
+    if (errcode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "UpdateConfiguration failed: %{public}d", errcode);
+        AppExecFwk::AsyncCallback(env, callbackObj,
+            EtsErrorUtil::CreateErrorByNativeErr(env, errcode), nullptr);
+        return;
+    }
+    AppExecFwk::AsyncCallback(env, callbackObj,
+        EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+}
+
 void EtsAbilityManagerRegistryInit(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call EtsAbilityManagerRegistryInit");
@@ -340,7 +584,19 @@ void EtsAbilityManagerRegistryInit(ani_env *env)
             "Lapplication/Context/Context;Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsAbilityManager::IsEmbeddedOpenAllowed) },
         ani_native_function { "nativeOn", nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeOn) },
-        ani_native_function { "nativeOff", nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeOff) }
+        ani_native_function { "nativeOff", nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeOff) },
+        ani_native_function { "nativeNotifyDebugAssertResult",
+            nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeNotifyDebugAssertResult) },
+        ani_native_function { "nativeNotifyDebugAssertResultCheck",
+            nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeNotifyDebugAssertResultCheck) },
+        ani_native_function { "nativeSetResidentProcessEnabled",
+            nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeSetResidentProcessEnabled) },
+        ani_native_function { "nativeSetResidentProcessEnabledCheck",
+            nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeSetResidentProcessEnabledCheck) },
+        ani_native_function { "nativeAcquireShareData",
+            nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeAcquireShareData) },
+        ani_native_function { "nativeUpdateConfiguration",
+            nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeUpdateConfiguration) }
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
     if (status != ANI_OK) {
