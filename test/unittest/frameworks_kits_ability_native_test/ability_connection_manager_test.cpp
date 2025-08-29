@@ -583,7 +583,7 @@ HWTEST_F(ConnectionManagerTest, CreateConnection_0100, TestSize.Level1)
     int32_t accountId = 0;
     sptr<AbilityConnectCallback> connectCallback = new (std::nothrow) MockAbilityConnectCallback();
     auto result = mgr->CreateConnection(connectCallernew, want, accountId, connectCallback);
-    EXPECT_EQ(result, AAFwk::CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(result, AAFwk::RESOLVE_ABILITY_ERR);
     GTEST_LOG_(INFO) << "ConnectionManagerTest CreateConnection_0100 end";
 }
 

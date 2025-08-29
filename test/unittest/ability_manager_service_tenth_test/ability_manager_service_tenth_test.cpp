@@ -405,13 +405,13 @@ HWTEST_F(AbilityManagerServiceTenhtTest, GetScreenUnlockCallback_001, TestSize.L
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest GetScreenUnlockCallback_001 start");
     std::shared_ptr<AbilityManagerService> abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
-    abilityMs_->StartAutoStartupApps();
-    abilityMs_->abilityAutoStartupService_ = std::make_shared<AbilityAutoStartupService>();
-    abilityMs_->StartAutoStartupApps();
     int32_t userId = 100;
+    abilityMs_->StartAutoStartupApps(userId);
+    abilityMs_->abilityAutoStartupService_ = std::make_shared<AbilityAutoStartupService>();
+    abilityMs_->StartAutoStartupApps(userId);
     abilityMs_->StartKeepAliveApps(userId);
     auto screenUnlockCallback = abilityMs_->GetScreenUnlockCallback();
-    screenUnlockCallback();
+    screenUnlockCallback(userId);
     EXPECT_NE(screenUnlockCallback, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest GetScreenUnlockCallback_001 end");
 }
@@ -592,7 +592,7 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartHighestPriorityAbility_001, TestSi
     int32_t userId = 1;
     bool isBoot = false;
     bool isAppRecovery = true;
-    auto ret = abilityMs_->StartHighestPriorityAbility(userId, isBoot, isAppRecovery);
+    auto ret = abilityMs_->StartHighestPriorityAbility(userId, 0, isBoot, isAppRecovery);
     EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartHighestPriorityAbility_001 end");
 }

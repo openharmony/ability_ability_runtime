@@ -137,7 +137,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbility_001, TestSize.Le
 {
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbility_001 start";
     sptr<IUserCallback> callback = new MockIUserCallback();
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     auto topAbility = GetMissionListTopAbility(abilityMs_->GetMissionListManagerByUserId(USER_ID_U100));
     if (topAbility) {
         topAbility->SetAbilityState(AAFwk::AbilityState::FOREGROUND);
@@ -149,7 +149,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbility_001, TestSize.Le
     WaitUntilTaskFinished();
     EXPECT_EQ(OHOS::ERR_OK, result);
 
-    abilityMs_->StartUser(newUserId, callback);
+    abilityMs_->StartUser(newUserId, 0, callback);
     topAbility = GetMissionListTopAbility(abilityMs_->GetMissionListManagerByUserId(newUserId));
     if (topAbility) {
         topAbility->SetAbilityState(AAFwk::AbilityState::FOREGROUND);
@@ -158,7 +158,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbility_001, TestSize.Le
     result = abilityMs_->StartAbility(want, newUserId);
     WaitUntilTaskFinished();
     EXPECT_EQ(OHOS::ERR_OK, result);
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbility_001 end";
 }
 
@@ -224,7 +224,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbility_003, TestSize.Le
     EXPECT_EQ(OHOS::ERR_OK, result);
 
     sptr<IUserCallback> callback = new MockIUserCallback();
-    abilityMs_->StartUser(newUserId, callback);
+    abilityMs_->StartUser(newUserId, 0, callback);
     topAbility = GetMissionListTopAbility(abilityMs_->GetMissionListManagerByUserId(newUserId));
     if (topAbility) {
         topAbility->SetAbilityState(AAFwk::AbilityState::FOREGROUND);
@@ -232,7 +232,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbility_003, TestSize.Le
     result = abilityMs_->StartAbility(want, abilityStartSetting, nullptr, newUserId, -1);
     WaitUntilTaskFinished();
     EXPECT_EQ(OHOS::ERR_OK, result);
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbility_003 end";
 }
 
@@ -261,7 +261,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbility_004, TestSize.Le
     EXPECT_EQ(OHOS::ERR_OK, result);
 
     sptr<IUserCallback> callback = new MockIUserCallback();
-    abilityMs_->StartUser(newUserId, callback);
+    abilityMs_->StartUser(newUserId, 0, callback);
     topAbility = GetMissionListTopAbility(abilityMs_->GetMissionListManagerByUserId(newUserId));
     if (topAbility) {
         topAbility->SetAbilityState(AAFwk::AbilityState::FOREGROUND);
@@ -269,7 +269,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbility_004, TestSize.Le
     result = abilityMs_->StartAbility(want, abilityStartOptions, nullptr, newUserId, -1);
     WaitUntilTaskFinished();
     EXPECT_EQ(OHOS::ERR_OK, result);
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbility_004 end";
 }
 
@@ -328,7 +328,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbility_007, TestSize.Le
 {
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbility_007 start";
     sptr<IUserCallback> callback = new MockIUserCallback();
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     Want want;
     ElementName element("", "com.ix.hiSingleMusicInfo", "SingleMusicAbility");
     want.SetElement(element);
@@ -351,7 +351,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbility_008, TestSize.Le
 {
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbility_008 start";
     sptr<IUserCallback> callback = new MockIUserCallback();
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     Want want;
     ElementName element("", "com.ix.hiBackgroundMusic", "hiBackgroundMusic");
     want.SetElement(element);
@@ -416,7 +416,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbility_011, TestSize.Le
 {
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbility_011 start";
     sptr<IUserCallback> callback = new MockIUserCallback();
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     auto topAbility = GetMissionListTopAbility(abilityMs_->GetMissionListManagerByUserId(USER_ID_U100));
     if (topAbility) {
         topAbility->SetAbilityState(AAFwk::AbilityState::FOREGROUND);
@@ -634,7 +634,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ConnectAbility_002, TestSize.
 {
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_ConnectAbility_002 start";
     sptr<IUserCallback> callback = new MockIUserCallback();
-    abilityMs_->StartUser(newUserId, callback);
+    abilityMs_->StartUser(newUserId, 0, callback);
     Want want;
     ElementName element("", "com.ix.musicService", "MusicService");
     want.SetElement(element);
@@ -650,7 +650,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ConnectAbility_002, TestSize.
 
     auto result2 = abilityMs_->ConnectAbility(want, callback, nullptr, newUserId);
     EXPECT_EQ(result2, ERR_OK);
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_ConnectAbility_002 end";
 }
 
@@ -832,7 +832,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleConnectAbilityDone_00
 {
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_ScheduleConnectAbilityDone_003 start";
     sptr<IUserCallback> callback = new MockIUserCallback();
-    abilityMs_->StartUser(newUserId, callback);
+    abilityMs_->StartUser(newUserId, 0, callback);
     Want want;
     ElementName element("", "com.ix.musicService", "MusicService");
     want.SetElement(element);
@@ -858,7 +858,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleConnectAbilityDone_00
     auto result3 = abilityMs_->ScheduleConnectAbilityDone(service->GetToken(), callback->AsObject());
     WaitUntilTaskFinished();
     EXPECT_EQ(result3, ERR_OK);
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_ScheduleConnectAbilityDone_003 end";
 }
 
@@ -876,7 +876,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleConnectAbilityDone_00
 {
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_ScheduleConnectAbilityDone_004 start";
     sptr<IUserCallback> callback = new MockIUserCallback();
-    abilityMs_->StartUser(newUserId, callback);
+    abilityMs_->StartUser(newUserId, 0, callback);
     auto topAbility = GetMissionListTopAbility(abilityMs_->GetMissionListManagerByUserId(newUserId));
     if (topAbility) {
         topAbility->SetAbilityState(AAFwk::AbilityState::FOREGROUND);
@@ -898,7 +898,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleConnectAbilityDone_00
     auto result1 = abilityMs_->ScheduleConnectAbilityDone(token, callback->AsObject());
     WaitUntilTaskFinished();
     EXPECT_EQ(result1, TARGET_ABILITY_NOT_SERVICE);
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_ScheduleConnectAbilityDone_004 end";
 }
 
@@ -995,7 +995,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleDisconnectAbilityDone
 {
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_ScheduleDisconnectAbilityDone_003 start";
     sptr<IUserCallback> callback = new MockIUserCallback();
-    abilityMs_->StartUser(newUserId, callback);
+    abilityMs_->StartUser(newUserId, 0, callback);
     auto topAbility = GetMissionListTopAbility(abilityMs_->GetMissionListManagerByUserId(newUserId));
     if (topAbility) {
         topAbility->SetAbilityState(AAFwk::AbilityState::FOREGROUND);
@@ -1017,7 +1017,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleDisconnectAbilityDone
     auto result1 = abilityMs_->ScheduleDisconnectAbilityDone(token);
     WaitUntilTaskFinished();
     EXPECT_EQ(result1, TARGET_ABILITY_NOT_SERVICE);
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_ScheduleDisconnectAbilityDone_003 end";
 }
 
@@ -1115,7 +1115,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleCommandAbilityDone_00
 {
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_ScheduleCommandAbilityDone_003 start";
     sptr<IUserCallback> callback = new MockIUserCallback();
-    abilityMs_->StartUser(newUserId, callback);
+    abilityMs_->StartUser(newUserId, 0, callback);
     Want want;
     ElementName element("", "com.ix.musicService", "MusicService");
     want.SetElement(element);
@@ -1141,7 +1141,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleCommandAbilityDone_00
     auto result3 = abilityMs_->ScheduleCommandAbilityDone(service->GetToken());
     WaitUntilTaskFinished();
     EXPECT_EQ(result3, ERR_OK);
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_ScheduleCommandAbilityDone_003 end";
 }
 
@@ -1159,7 +1159,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleCommandAbilityDone_00
 {
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_ScheduleCommandAbilityDone_004 start";
     sptr<IUserCallback> callback = new MockIUserCallback();
-    abilityMs_->StartUser(newUserId, callback);
+    abilityMs_->StartUser(newUserId, 0, callback);
     auto topAbility = GetMissionListTopAbility(abilityMs_->GetMissionListManagerByUserId(newUserId));
     if (topAbility) {
         topAbility->SetAbilityState(AAFwk::AbilityState::FOREGROUND);
@@ -1181,7 +1181,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_ScheduleCommandAbilityDone_00
     auto result1 = abilityMs_->ScheduleCommandAbilityDone(token);
     WaitUntilTaskFinished();
     EXPECT_EQ(result1, TARGET_ABILITY_NOT_SERVICE);
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_ScheduleCommandAbilityDone_004 end";
 }
 
@@ -1235,7 +1235,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StopServiceAbility_002, TestS
 {
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StopServiceAbility_002 start";
     sptr<IUserCallback> callback = new MockIUserCallback();
-    abilityMs_->StartUser(newUserId, callback);
+    abilityMs_->StartUser(newUserId, 0, callback);
     Want want;
     ElementName element("", "com.ix.musicService", "MusicService");
     want.SetElement(element);
@@ -1260,7 +1260,7 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StopServiceAbility_002, TestS
     auto result2 = abilityMs_->StopServiceAbility(want, newUserId);
     WaitUntilTaskFinished();
     EXPECT_EQ(CHECK_PERMISSION_FAILED, result2);
-    abilityMs_->StartUser(USER_ID_U100, callback);
+    abilityMs_->StartUser(USER_ID_U100, 0, callback);
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StopServiceAbility_002 end";
 }
 

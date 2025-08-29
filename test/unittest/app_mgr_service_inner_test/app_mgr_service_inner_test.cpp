@@ -4255,24 +4255,6 @@ HWTEST_F(AppMgrServiceInnerTest, NotifyUnLoadRepairPatch_001, TestSize.Level2)
 }
 
 /**
- * @tc.name: SetCurrentUserId_001
- * @tc.desc: set current userId.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerTest, SetCurrentUserId_001, TestSize.Level2)
-{
-    TAG_LOGI(AAFwkTag::TEST, "SetCurrentUserId_001 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    EXPECT_NE(appMgrServiceInner, nullptr);
-
-    int userId = 0;
-    appMgrServiceInner->SetCurrentUserId(userId);
-    EXPECT_EQ(appMgrServiceInner->currentUserId_, userId);
-
-    TAG_LOGI(AAFwkTag::TEST, "SetCurrentUserId_001 end");
-}
-
-/**
  * @tc.name: GetProcessMemoryByPid_001
  * @tc.desc: Get memorySize by pid.
  * @tc.type: FUNC
@@ -5666,7 +5648,8 @@ HWTEST_F(AppMgrServiceInnerTest, GetAllRunningInstanceKeysByBundleName_001, Test
 
     std::string bundleName = "testBundleName";
     std::vector<std::string> instanceKeys;
-    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    int32_t userId = 100;
+    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
     EXPECT_NE(ret, ERR_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_001 end");

@@ -1680,8 +1680,9 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUser_001, TestSize.Le
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
-    int userId = 1;
-    auto res = proxy_->StartUser(userId, nullptr);
+    int userId = 200;
+    uint64_t displayId = 0;
+    auto res = proxy_->StartUser(userId, displayId, nullptr);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_USER), mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
 }

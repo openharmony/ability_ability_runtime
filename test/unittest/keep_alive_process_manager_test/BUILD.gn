@@ -47,7 +47,10 @@ ohos_unittest("keep_alive_process_manager_test") {
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-  deps = [ "${ability_runtime_services_path}/abilitymgr:abilityms" ]
+  deps = [
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/common:user_controller",
+  ]
 
   external_deps = [
     "ability_base:base",

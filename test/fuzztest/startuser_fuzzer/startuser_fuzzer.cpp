@@ -42,7 +42,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 
     int accountId = static_cast<int>(GetU32Data(data));
     sptr<IUserCallback> callback;
-    abilitymgr->StartUser(accountId, callback);
+    abilitymgr->StartUser(accountId, 0, callback);
 
     return true;
 }

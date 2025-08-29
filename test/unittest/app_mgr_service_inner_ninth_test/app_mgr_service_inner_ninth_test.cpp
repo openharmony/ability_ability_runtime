@@ -196,7 +196,6 @@ HWTEST_F(AppMgrServiceInnerNinthTest, PreloadApplication_003, TestSize.Level1)
     AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = true;
     AAFwk::MyStatus::GetInstance().isSACall_ = true;
     appMgrServiceInner->appPreloader_ = nullptr;
-    appMgrServiceInner->currentUserId_ = 200;
 
     std::string bundleName = "com.test.preload";
     int32_t userId = -2; // CURRENT_USER_ID

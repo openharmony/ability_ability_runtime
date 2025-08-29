@@ -1019,7 +1019,8 @@ HWTEST_F(AbilityManagerProxyTest, StartUser_3000, TestSize.Level1)
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
-    int32_t result = proxy_->StartUser(1, callback, false);
+    int32_t userId = 10000;
+    int32_t result = proxy_->StartUser(userId, 0, callback, false);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_USER), mock_->code_);
     EXPECT_NE(result, NO_ERROR);
 
@@ -1029,7 +1030,7 @@ HWTEST_F(AbilityManagerProxyTest, StartUser_3000, TestSize.Level1)
     sptr<MockIUserCallback> mockIUserCallback = new MockIUserCallback();
     mockIUserCallback->iremoteObject_ = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     callback = mockIUserCallback;
-    result = proxy_->StartUser(1, callback, false);
+    result = proxy_->StartUser(userId, 0, callback, false);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_USER), mock_->code_);
     EXPECT_EQ(result, NO_ERROR);
 
@@ -1049,7 +1050,8 @@ HWTEST_F(AbilityManagerProxyTest, StopUser_3100, TestSize.Level1)
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
-    int32_t result = proxy_->StopUser(1, callback);
+    int32_t userId = 10000;
+    int32_t result = proxy_->StopUser(userId, callback);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::STOP_USER), mock_->code_);
     EXPECT_NE(result, NO_ERROR);
 
@@ -1059,7 +1061,7 @@ HWTEST_F(AbilityManagerProxyTest, StopUser_3100, TestSize.Level1)
     sptr<MockIUserCallback> mockIUserCallback = new MockIUserCallback();
     mockIUserCallback->iremoteObject_ = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     callback = mockIUserCallback;
-    result = proxy_->StopUser(1, callback);
+    result = proxy_->StopUser(userId, callback);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::STOP_USER), mock_->code_);
     EXPECT_EQ(result, NO_ERROR);
 
@@ -1079,7 +1081,8 @@ HWTEST_F(AbilityManagerProxyTest, LogoutUser_3200, TestSize.Level1)
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
-    int32_t result = proxy_->LogoutUser(1, callback);
+    int32_t userId = 10000;
+    int32_t result = proxy_->LogoutUser(userId, callback);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::LOGOUT_USER), mock_->code_);
     EXPECT_NE(result, NO_ERROR);
 
@@ -1089,7 +1092,7 @@ HWTEST_F(AbilityManagerProxyTest, LogoutUser_3200, TestSize.Level1)
     sptr<MockIUserCallback> mockIUserCallback = new MockIUserCallback();
     mockIUserCallback->iremoteObject_ = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
     callback = mockIUserCallback;
-    result = proxy_->LogoutUser(1, callback);
+    result = proxy_->LogoutUser(userId, callback);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::LOGOUT_USER), mock_->code_);
     EXPECT_EQ(result, NO_ERROR);
 
