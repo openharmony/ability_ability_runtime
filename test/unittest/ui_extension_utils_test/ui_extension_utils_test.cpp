@@ -103,5 +103,21 @@ HWTEST_F(UIExtensionUtilsTest, IsSystemUIExtension_0100, TestSize.Level0)
     bool result = UIExtensionUtils::IsUIExtension(extensionAbilityType);
     EXPECT_TRUE(result);
 }
+
+/**
+ * @tc.name: IsProcessUdkeyExtension_0100
+ * @tc.desc: IsProcessUdkeyExtension Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionUtilsTest, IsProcessUdkeyExtension_0100, TestSize.Level0)
+{
+    AppExecFwk::ExtensionAbilityType extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON;
+    bool result = UIExtensionUtils::IsProcessUdkeyExtension(extensionAbilityType);
+    EXPECT_FALSE(result);
+
+    extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYSPICKER_FILEPICKER;
+    result = UIExtensionUtils::IsProcessUdkeyExtension(extensionAbilityType);
+    EXPECT_TRUE(result);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

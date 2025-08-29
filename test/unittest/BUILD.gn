@@ -478,6 +478,7 @@ group("unittest") {
       "ui_extension_record_test:unittest",
       "ui_extension_utils_test:unittest",
       "update_caller_info_util_test:unittest",
+      "udmf_utils_test:unittest",
       "uri_utils_second_test",
       "uri_utils_test:unittest",
       "user_controller_test:unittest",

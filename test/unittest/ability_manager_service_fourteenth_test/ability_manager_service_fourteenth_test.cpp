@@ -1397,5 +1397,79 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, NotifyStartupExceptionBySCB_002, T
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest NotifyStartupExceptionBySCB_002 end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ProcessUdmfKey
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ProcessUdmfKey
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, ProcessUdmfKey_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest ProcessUdmfKey_001 start");
+    Want want;
+    want.SetParam("ability.want.params.udkey", std::string("udkey"));
+    uint32_t targetTokenId = 1000001;
+    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::SYSPICKER_FILEPICKER;
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t result = abilityMs->ProcessUdmfKey(want, targetTokenId, extensionType);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest ProcessUdmfKey_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ProcessUdmfKey
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ProcessUdmfKey
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, ProcessUdmfKey_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest ProcessUdmfKey_002 start");
+    Want want;
+    want.SetParam("ability.want.params.udkey", std::string("udkey"));
+    uint32_t targetTokenId = 1000001;
+    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::EMBEDDED_UI;
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t result = abilityMs->ProcessUdmfKey(want, targetTokenId, extensionType);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest ProcessUdmfKey_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ProcessUdmfKey
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ProcessUdmfKey
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, ProcessUdmfKey_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest ProcessUdmfKey_003 start");
+    Want want;
+    uint32_t targetTokenId = 1000001;
+    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::SYSPICKER_FILEPICKER;
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t result = abilityMs->ProcessUdmfKey(want, targetTokenId, extensionType);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest ProcessUdmfKey_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ProcessUdmfKey
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ProcessUdmfKey
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, ProcessUdmfKey_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest ProcessUdmfKey_004 start");
+    Want want;
+    uint32_t targetTokenId = 1000001;
+    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::EMBEDDED_UI;
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    int32_t result = abilityMs->ProcessUdmfKey(want, targetTokenId, extensionType);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest ProcessUdmfKey_004 end");
+}
 } // namespace AAFwk
 } // namespace OHOS
