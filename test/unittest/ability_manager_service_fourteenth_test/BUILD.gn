@@ -233,6 +233,7 @@ ohos_unittest("ability_manager_service_fourteenth_test") {
     "${ability_runtime_services_path}/abilitymgr/src/kiosk_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/interceptor/kiosk_interceptor.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/preload_manager_service.cpp",
+    "../ability_manager_service_mock_test/mock/src/mock_udmf_utils.cpp",
   ]
 
   deps = [

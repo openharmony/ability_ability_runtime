@@ -234,6 +234,7 @@ ohos_unittest("ability_manager_service_second_test") {
     "../ability_manager_service_thirteenth_test/mock/src/mock_scene_board_judgement.cpp",
     "../ability_manager_service_thirteenth_test/mock/src/mock_sub_managers_helper.cpp",
     "../ability_manager_service_thirteenth_test/mock/src/mock_ui_ability_lifecycle_manager.cpp",
+    "../ability_manager_service_mock_test/mock/src/mock_udmf_utils.cpp",
   ]
 
   deps = [
