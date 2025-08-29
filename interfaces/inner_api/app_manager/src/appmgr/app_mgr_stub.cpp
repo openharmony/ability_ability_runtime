@@ -1844,15 +1844,17 @@ int32_t AppMgrStub::HandleCreateNativeChildProcess(MessageParcel &data, MessageP
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::string libName = data.ReadString();
-    int32_t childCount = data.ReadInt32();
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
-    std::string customProcessName = data.ReadString();
-    int32_t result = CreateNativeChildProcess(libName, childCount, callback, customProcessName);
-    if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+    std::unique_ptr<ChildProcessRequest> request(data.ReadParcelable<ChildProcessRequest>());
+    if (!request) {
         return IPC_STUB_ERR;
     }
 
+    auto result = CreateNativeChildProcess(libName, callback, *request);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write result failed.");
+        return IPC_STUB_ERR;
+    }
     return NO_ERROR;
 }
 #endif // SUPPORT_CHILD_PROCESS

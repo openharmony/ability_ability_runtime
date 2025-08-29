@@ -103,6 +103,13 @@ bool UnwrapChildProcessOptions(napi_env env, napi_value jsValue, AppExecFwk::Chi
         errorMsg = "Parameter error. The type of options.isolationMode must be boolean.";
         return false;
     }
+
+    if (IsExistsByPropertyName(env, jsValue, "isolationUid") &&
+        !UnwrapBooleanByPropertyName(env, jsValue, "isolationUid", options.isolationUid)) {
+        TAG_LOGE(AAFwkTag::PROCESSMGR, "parameter error");
+        errorMsg = "Parameter error. The type of options.isolationUid must be boolean.";
+        return false;
+    }
     return true;
 }
 

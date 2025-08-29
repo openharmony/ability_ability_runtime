@@ -185,6 +185,24 @@ HWTEST_F(ChildProcessCapiTest, OH_Ability_ChildProcessConfigs_SetIsolationMode_0
 }
 
 /**
+ * @tc.number: OH_Ability_Ability_ChildProcessConfigs_002
+ * @tc.desc: Test API OH_Ability_Ability_ChildProcessConfigs_002 works
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChildProcessCapiTest, OH_Ability_ChildProcessConfigs_SetIsolationUid_001, TestSize.Level2)
+{
+    GTEST_LOG_(INFO) << "OH_Ability_Ability_ChildProcessConfigs_002 begin";
+    auto configs = OH_Ability_CreateChildProcessConfigs();
+    auto ret = OH_Ability_ChildProcessConfigs_SetIsolationUid(configs, true);
+    EXPECT_EQ(ret, NCP_NO_ERROR);
+    ret = OH_Ability_ChildProcessConfigs_SetIsolationUid(nullptr, false);
+    EXPECT_EQ(ret, NCP_ERR_INVALID_PARAM);
+    ret = OH_Ability_DestroyChildProcessConfigs(configs);
+    EXPECT_EQ(ret, NCP_NO_ERROR);
+    GTEST_LOG_(INFO) << "OH_Ability_Ability_ChildProcessConfigs_002 begin";
+}
+
+/**
  * @tc.number: OH_Ability_ChildProcessConfigs_SetProcessName_001
  * @tc.desc: Test API OH_Ability_ChildProcessConfigs_SetProcessName_001 works
  * @tc.type: FUNC

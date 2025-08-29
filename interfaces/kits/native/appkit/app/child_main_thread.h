@@ -53,7 +53,7 @@ private:
     void HandleLoadJs();
     void HandleLoadArkTs();
     void HandleLoadNative();
-    void InitNativeLib(const BundleInfo &bundleInfo);
+    void InitNativeLib(const BundleInfo &bundleInfo, const HspList hspList);
     void HandleExitProcessSafely();
     void ExitProcessSafely();
     void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths);

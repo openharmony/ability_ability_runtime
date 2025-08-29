@@ -123,13 +123,8 @@ bool ChildMainThread::Init(const std::shared_ptr<EventRunner> &runner, const Chi
     processInfo_ = std::make_shared<ChildProcessInfo>(processInfo);
     processArgs_->entryParams = processInfo.entryParams;
     mainHandler_ = std::make_shared<EventHandler>(runner);
-    BundleInfo bundleInfo;
-    if (!ChildProcessManager::GetInstance().GetBundleInfo(bundleInfo)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "GetBundleInfo failed");
-        return false;
-    }
-    bundleInfo_ = std::make_shared<BundleInfo>(bundleInfo);
-    InitNativeLib(bundleInfo);
+    bundleInfo_ = std::make_shared<BundleInfo>(processInfo.bundleInfo);
+    InitNativeLib(processInfo.bundleInfo, processInfo.hspList);
     return true;
 }
 
@@ -278,15 +273,8 @@ void ChildMainThread::HandleLoadNative()
     ExitProcessSafely();
 }
 
-void ChildMainThread::InitNativeLib(const BundleInfo &bundleInfo)
+void ChildMainThread::InitNativeLib(const BundleInfo &bundleInfo, const HspList hspList)
 {
-    HspList hspList;
-    ErrCode ret = DelayedSingleton<BundleMgrHelper>::GetInstance()->GetBaseSharedBundleInfos(bundleInfo.name, hspList,
-        AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Get base shared bundle infos failed: %{public}d", ret);
-    }
-
     AppLibPathMap appLibPaths {};
     GetNativeLibPath(bundleInfo, hspList, appLibPaths);
     bool isSystemApp = bundleInfo.applicationInfo.isSystemApp;
