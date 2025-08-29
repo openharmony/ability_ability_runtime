@@ -1633,6 +1633,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
     for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         pkgContextInfoJsonStringMap[hapModuleInfo.moduleName] = hapModuleInfo.hapPath;
+        if (hapModuleInfo.deduplicateHar) {
+            application_->SetDeduplicateHar(hapModuleInfo.deduplicateHar);
+        }
     }
 
     GetNativeLibPath(bundleInfo, hspList, appLibPaths);
@@ -1876,6 +1879,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         entryHapModuleInfo.hapPath.empty() ? entryHapModuleInfo.resourcePath : entryHapModuleInfo.hapPath;
     std::regex inner_pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleInfo.name);
     loadPath = std::regex_replace(loadPath, inner_pattern, LOCAL_CODE_PATH);
+    application_->SetEntryLoadPath(loadPath);
     auto res = GetOverlayModuleInfos(bundleInfo.name, moduleName, overlayModuleInfos_);
     std::vector<std::string> overlayPaths;
     if (res == ERR_OK) {
