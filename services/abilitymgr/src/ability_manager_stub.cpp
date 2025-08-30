@@ -4898,7 +4898,6 @@ int32_t AbilityManagerStub::GetKioskStatusInner(MessageParcel &data, MessageParc
 
 int32_t AbilityManagerStub::RegisterSAInterceptorInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call RegisterSaInterceptorInner");
     auto interceptor = iface_cast<AbilityRuntime::ISAInterceptor>(data.ReadRemoteObject());
     if (interceptor == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptor is null.");
@@ -4921,7 +4920,7 @@ int AbilityManagerStub::SetAppServiceExtensionKeepAliveInner(MessageParcel &data
     if (!reply.WriteInt32(result)) {
         return ERR_INVALID_VALUE;
     }
-    return result;
+    return NO_ERROR;
 }
 
 int AbilityManagerStub::QueryKeepAliveAppServiceExtensionsInner(MessageParcel &data, MessageParcel &reply)
@@ -4938,7 +4937,7 @@ int AbilityManagerStub::QueryKeepAliveAppServiceExtensionsInner(MessageParcel &d
     if (!reply.WriteInt32(result)) {
         return ERR_INVALID_VALUE;
     }
-    return result;
+    return NO_ERROR;
 }
 
 int32_t AbilityManagerStub::SetOnNewWantSkipScenariosInner(MessageParcel &data, MessageParcel &reply)

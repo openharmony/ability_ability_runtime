@@ -3270,19 +3270,13 @@ int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityReq
         abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE ||
         abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         result = CheckCallServiceExtensionPermission(abilityRequest);
-        if (result != ERR_OK) {
-            return result;
-        }
     } else if (abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
         result = CheckCallAppServiceExtensionPermission(abilityRequest, nullptr, false);
-        if (result != ERR_OK) {
-            return result;
-        }
     } else {
         result = CheckCallOtherExtensionPermission(abilityRequest);
-        if (result != ERR_OK) {
-            return result;
-        }
+    }
+    if (result != ERR_OK) {
+        return result;
     }
     if (!isStartAsCaller) {
         UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(abilityRequest.want, abilityRequest.callerToken);
@@ -11006,12 +11000,12 @@ int32_t AbilityManagerService::CheckCallAppServiceExtensionPermission(const Abil
     if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         return ERR_OK;
     }
+    if (!AppUtils::GetInstance().IsSupportAppServiceExtension()) {
+        return ERR_CAPABILITY_NOT_SUPPORT;
+    }
     bool isVerifyAppIdentifierAllowList = true;
     if (targetService != nullptr && targetService->IsAbilityState(AbilityState::ACTIVE)) {
         isVerifyAppIdentifierAllowList = false;
-    }
-    if (!AppUtils::GetInstance().IsSupportAppServiceExtension()) {
-        return ERR_CAPABILITY_NOT_SUPPORT;
     }
     if (isVerifyAppIdentifierAllowList && !VerifySameAppOrAppIdentifierAllowListPermission(abilityRequest)) {
         if (isFromConnect) {
@@ -15198,7 +15192,7 @@ std::shared_ptr<AbilityInterceptorExecuter> AbilityManagerService::GetAbilityInt
 
 int32_t AbilityManagerService::RegisterSAInterceptor(sptr<AbilityRuntime::ISAInterceptor> interceptor)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call RegisterSaInterceptor");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call RegisterSaInterceptor, callingPid:%{public}d", IPCSkeleton::GetCallingPid());
     if (IPCSkeleton::GetCallingUid() != PENG_LAI_UID) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no permission call");
         return CHECK_PERMISSION_FAILED;

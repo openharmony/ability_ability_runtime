@@ -60,8 +60,6 @@ public:
 
     const std::string &GetPendingConfigEntry() const;
 
-    void ClearAppStartupTask();
-
     int32_t RegisterAppStartupTask(
         const std::string &name, const std::shared_ptr<AppStartupTask> &startupTask);
 
@@ -149,7 +147,7 @@ private:
     std::shared_ptr<NativeStartupTask> CreateAppPreloadSoTask(
         const std::map<std::string, std::shared_ptr<StartupTask>> &currentPreloadSoTasks);
 
-    void InitPreloadSystemSoAllowlist();
+    void InitPreloadSystemSoAllowlist(std::unordered_set<std::string> &preloadSystemSoAllowlist);
     bool ReadPreloadSystemSoAllowlistFile(nlohmann::json &jsonStr);
     bool ParsePreloadSystemSoAllowlist(const nlohmann::json &jsonStr, std::unordered_set<std::string> &allowlist);
 
