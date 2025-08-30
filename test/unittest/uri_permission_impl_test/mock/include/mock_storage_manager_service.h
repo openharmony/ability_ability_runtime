@@ -82,6 +82,12 @@ public:
         return E_OK;
     }
 
+    virtual int32_t SetDirEncryptionPolicy(uint32_t userId,
+        const std::string &dirPath, uint32_t level) override
+    {
+        return E_OK;
+    }
+
     virtual int32_t GetBundleStats(const std::string &pkgName, BundleStats &bundleStats,
         int32_t index, uint32_t statFlag) override
     {
