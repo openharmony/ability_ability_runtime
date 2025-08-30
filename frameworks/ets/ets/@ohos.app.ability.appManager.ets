@@ -225,7 +225,9 @@ export function on(type: 'applicationState', observer: ApplicationStateObserver,
 }
 
 export native function nativeOff(type:string, observerId: int, callback: AsyncCallbackWrapper<void>) : void;
+export native function nativeOffApplicationStateCheck(observerId: int): void;
 export function off(type: 'applicationState', observerId: int, callback: AsyncCallback<void>): void {
+    nativeOffApplicationStateCheck(observerId);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       appManager.nativeOff(type, observerId, myCall);
@@ -233,6 +235,7 @@ export function off(type: 'applicationState', observerId: int, callback: AsyncCa
 }
 
 export function off(type: 'applicationState', observerId: int): Promise<void> {
+    nativeOffApplicationStateCheck(observerId);
     let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError | null)=>void):void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
         if (err == null || err.code == 0) {
