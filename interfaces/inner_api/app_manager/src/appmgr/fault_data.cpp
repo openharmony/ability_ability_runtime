@@ -87,6 +87,9 @@ bool FaultData::ReadContent(Parcel &parcel)
         return false;
     }
     procStatm = strValue;
+
+    isInForeground = parcel.ReadBool();
+    isEnableMainThreadSample = parcel.ReadBool();
     return true;
 }
 
@@ -133,6 +136,18 @@ bool FaultData::WriteContent(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::APPMGR, "ProcStatm [%{public}s] write string failed.", procStatm.c_str());
         return false;
     }
+
+    if (!parcel.WriteBool(isInForeground)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "InForeground [%{public}d] write bool failed.", isInForeground);
+        return false;
+    }
+
+    if (!parcel.WriteBool(isEnableMainThreadSample)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "isEnableMainThreadSample [%{public}d] write bool failed.",
+            isEnableMainThreadSample);
+        return false;
+    }
+
     return true;
 }
 
@@ -273,6 +288,8 @@ bool AppFaultDataBySA::ReadContent(Parcel &parcel)
         return false;
     }
     procStatm = strValue;
+    isInForeground = parcel.ReadBool();
+    isEnableMainThreadSample = parcel.ReadBool();
     return true;
 }
 
@@ -314,6 +331,18 @@ bool AppFaultDataBySA::WriteContent(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::APPMGR, "ProcStatm [%{public}s] write string failed.", procStatm.c_str());
         return false;
     }
+
+    if (!parcel.WriteBool(isInForeground)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "InForeground [%{public}d] write bool failed.", isInForeground);
+        return false;
+    }
+
+    if (!parcel.WriteBool(isEnableMainThreadSample)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "isEnableMainThreadSample [%{public}d] write bool failed.",
+            isEnableMainThreadSample);
+        return false;
+    }
+
     return true;
 }
 
