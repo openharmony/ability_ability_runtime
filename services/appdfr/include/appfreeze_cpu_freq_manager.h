@@ -17,8 +17,8 @@
 
 #include <vector>
 #include <mutex>
+#include <map>
 
-#include "appfreeze_data.h"
 #include "cpu_data_processor.h"
 #include "ffrt.h"
 #include "singleton.h"
@@ -33,32 +33,33 @@ public:
     ~AppfreezeCpuFreqManager();
     
     static AppfreezeCpuFreqManager &GetInstance();
-    bool InitCpuDataProcessor(const std::string &eventType, int32_t pid, int32_t uid,
-        const std::string &stackPath);
-    std::string WriteCpuInfoToFile(const std::string &eventType, const std::string &bundleName,
-        int32_t uid, int32_t pid, const std::string &eventName);
+    bool InsertCpuDetailInfo(const std::string &type, int32_t pid);
+    std::string GetCpuInfoPath(const std::string &type, const std::string &bundleName,
+        int32_t uid, int32_t pid);
 
 private:
-    void ClearOldCpuData(uint64_t curTime);
-    bool IsSkipTask(uint64_t curTime, const std::string &key, int32_t pid);
-    bool ReadCpuDataByNum(int32_t num, std::vector<CpuFreqData>& parseDatas, TotalTime& totalTime);
+    bool RemoveOldInfo();
+    CpuDataProcessor GetCpuDetailInfo(int32_t pid);
+    bool GetInfoByCpuCount(int32_t num, std::vector<CpuFreqData>& parseDatas, TotalTime& totalTime);
     void ParseCpuData(std::vector<std::vector<CpuFreqData>>& datas, std::vector<TotalTime>& totalTimeLists);
     std::string GetCpuStr(int code, std::vector<FrequencyPair>& freqPairs, float percentage);
-    bool GetCpuTotalValue(size_t i, std::vector<TotalTime> totalTimeList,
-        std::vector<TotalTime> blockTotalTimeList, TotalTime& totalTime);
+    bool GetCpuTotalValue(size_t i, const std::vector<TotalTime>& totalTimeList,
+        const std::vector<TotalTime>& blockTotalTimeList, TotalTime& totalTime);
     uint64_t GetProcessCpuTime(int32_t pid);
     uint64_t GetDeviceRuntime();
-    std::string GetStartTime(uint64_t start);
     uint64_t GetAppCpuTime(int32_t pid);
     double GetOptimalCpuTime(int32_t pid);
+    std::string GetTimeStampStr(uint64_t start);
     std::string GetStaticInfoHead();
-    std::string GetStaticInfo(int32_t pid, CpuStartTime cpuStartTime);
-    std::string GetCpuInfoContent(const std::vector<std::vector<CpuFreqData>> &handlingHalfCpuData,
-        const std::vector<TotalTime> &totalTimeList);
+    std::string GetConsumeTimeInfo(int32_t pid, CpuConsumeTime warnTimes, CpuConsumeTime blockTimes);
+    std::string GetCpuInfoContent(const std::vector<TotalTime> &warnTotalTimeList,
+        const std::vector<std::vector<CpuFreqData>> &warnCpuDetailInfo,
+        const std::vector<TotalTime> &blockTotalTimeList,
+        const std::vector<std::vector<CpuFreqData>> &blockCpuDetailInfo);
     bool IsContainHalfData(const std::string &key, CpuDataProcessor &cpuData, int32_t pid);
-    void WriteDfxLogToFile(const std::string &filePath, const std::string &bundleName);
+    std::string GetFreezeLogHead(const std::string &bundleName);
+    uint64_t GetInterval(uint64_t warnTime, uint64_t blockTime);
 
-    static std::shared_ptr<AppfreezeCpuFreqManager> instance_;
     static ffrt::mutex freezeInfoMutex_;
     static int cpuCount_;
     static std::map<std::string, CpuDataProcessor> cpuInfoMap_;

@@ -66,7 +66,6 @@ Watchdog::~Watchdog()
         OHOS::HiviewDFX::Watchdog::GetInstance().StopWatchdog();
     }
 }
-
 void Watchdog::Init(const std::shared_ptr<EventHandler> mainHandler)
 {
     std::unique_lock<std::mutex> lock(cvMutex_);
@@ -87,6 +86,17 @@ void Watchdog::Init(const std::shared_ptr<EventHandler> mainHandler)
     OHOS::HiviewDFX::Watchdog::GetInstance().RunPeriodicalTask("AppkitWatchdog", watchdogTask,
         CHECK_INTERVAL_TIME, INI_TIMER_FIRST_SECOND);
 #endif
+    SetMainThreadSample();
+}
+
+void Watchdog::SetMainThreadSample()
+{
+    char* env = getenv("DFX_APPFREEZE_LOG_OPTIONS");
+    if (env == nullptr) {
+        return;
+    }
+    AppExecFwk::AppfreezeInner::GetInstance()->SetMainThreadSample(
+        strstr(env, "mainthread_sampling:enable") != nullptr);
 }
 
 void Watchdog::Stop()
@@ -172,6 +182,7 @@ void Watchdog::SetBackgroundStatus(const bool isInBackground)
     std::unique_lock<std::mutex> lock(cvMutex_);
     isInBackground_.store(isInBackground);
     OHOS::HiviewDFX::Watchdog::GetInstance().SetForeground(!isInBackground);
+    AppExecFwk::AppfreezeInner::GetInstance()->SetAppInForeground(!isInBackground);
 }
 
 void Watchdog::AllowReportEvent()

@@ -41,29 +41,13 @@
 #include "hitrace/hitracechain.h"
 #endif
 #include "appfreeze_cpu_freq_manager.h"
+#include "appfreeze_event_report.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
 constexpr char EVENT_UID[] = "UID";
-constexpr char EVENT_PID[] = "PID";
-constexpr char EVENT_TID[] = "TID";
-constexpr char EVENT_INPUT_ID[] = "INPUT_ID";
-constexpr char EVENT_MESSAGE[] = "MSG";
-constexpr char EVENT_PACKAGE_NAME[] = "PACKAGE_NAME";
-constexpr char EVENT_PROCESS_NAME[] = "PROCESS_NAME";
-constexpr char EVENT_STACK[] = "STACK";
-constexpr char BINDER_INFO[] = "BINDER_INFO";
-constexpr char APP_RUNNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
-constexpr char FREEZE_MEMORY[] = "FREEZE_MEMORY";
-constexpr char FREEZE_INFO_PATH[] = "FREEZE_INFO_PATH";
 #ifdef ABILITY_RUNTIME_HITRACE_ENABLE
-constexpr char EVENT_TRACE_ID[] = "HITRACE_ID";
-constexpr char EVENT_SPAN_ID[] = "SPAN_ID";
-constexpr char EVENT_PARENT_SPAN_ID[] = "PARENT_SPAN_ID";
-constexpr char EVENT_TRACE_FLAG[] = "TRACE_FLAG";
-constexpr char EVENT_APPFREEZE_TYPE[] = "appfreeze";
-constexpr char EVENT_SYSFREEZE_TYPE[] = "sysfreeze";
 constexpr int32_t CHARACTER_WIDTH = 2;
 #endif
 
@@ -83,6 +67,11 @@ static bool g_betaVersion = OHOS::system::GetParameter("const.logsystem.versiont
 static bool g_overseaVersion = OHOS::system::GetParameter("const.global.region", "CN") != "CN";
 static bool g_developMode = (OHOS::system::GetParameter("persist.hiview.leak_detector", "unknown") == "enable") ||
                             (OHOS::system::GetParameter("persist.hiview.leak_detector", "unknown") == "true");
+
+static constexpr const char *const HITRACE_ID = "hitrace_id: ";
+static constexpr const char *const SPAN_ID = "span_id: ";
+static constexpr const char *const PARENT_SPAN_ID = "parent_span_id: ";
+static constexpr const char *const TRACE_FLAG = "trace_flag: ";
 }
 static constexpr const char *const TWELVE_BIG_CPU_CUR_FREQ = "/sys/devices/system/cpu/cpufreq/policy2/scaling_cur_freq";
 static constexpr const char *const TWELVE_BIG_CPU_MAX_FREQ = "/sys/devices/system/cpu/cpufreq/policy2/scaling_max_freq";
@@ -225,7 +214,8 @@ int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const
     faultNotifyData.appfreezeInfo = faultData.appfreezeInfo;
     faultNotifyData.appRunningUniqueId = faultData.appRunningUniqueId;
     faultNotifyData.procStatm = faultData.procStatm;
-
+    faultNotifyData.isInForeground = faultData.isInForeground;
+    faultNotifyData.isEnableMainThreadSample = faultData.isEnableMainThreadSample;
     HITRACE_METER_FMT(HITRACE_TAG_APP, "AppfreezeHandleWithStack pid:%{public}d-name:%{public}s",
         appInfo.pid, faultData.errorObject.name.c_str());
     return MergeNotifyInfo(faultNotifyData, appInfo);
@@ -385,94 +375,95 @@ std::string AppfreezeManager::ParseDecToHex(uint64_t id)
     return ss.str();
 }
 
-bool AppfreezeManager::GetHitraceId(HitraceInfo& info)
+std::string AppfreezeManager::GetHitraceInfo()
 {
 #ifdef ABILITY_RUNTIME_HITRACE_ENABLE
     OHOS::HiviewDFX::HiTraceId hitraceId = OHOS::HiviewDFX::HiTraceChain::GetId();
     if (hitraceId.IsValid() == 0) {
         TAG_LOGW(AAFwkTag::APPDFR, "get hitrace id is invalid.");
-        return false;
+        return "";
     }
-    info.hiTraceChainId = ParseDecToHex(hitraceId.GetChainId());
-    info.spanId = ParseDecToHex(hitraceId.GetSpanId());
-    info.pspanId = ParseDecToHex(hitraceId.GetParentSpanId());
-    info.traceFlag = ParseDecToHex(hitraceId.GetFlags());
-    TAG_LOGW(AAFwkTag::APPDFR,
-        "hiTraceChainId:%{public}s, spanId:%{public}s, pspanId:%{public}s, traceFlag:%{public}s",
-        info.hiTraceChainId.c_str(), info.spanId.c_str(), info.pspanId.c_str(), info.traceFlag.c_str());
-    return true;
+    std::ostringstream hitraceIdStr;
+    hitraceIdStr << HITRACE_ID << ParseDecToHex(hitraceId.GetChainId()) <<
+        SPAN_ID << ParseDecToHex(hitraceId.GetSpanId()) <<
+        PARENT_SPAN_ID << ParseDecToHex(hitraceId.GetSpanId()) <<
+        TRACE_FLAG << ParseDecToHex(hitraceId.GetParentSpanId());
+    TAG_LOGW(AAFwkTag::APPDFR, "hitraceIdStr:%{public}s", hitraceIdStr.str().c_str());
+    return hitraceIdStr.str();
 #endif
-    return false;
+    return "";
 }
 
-std::string AppfreezeManager::ReportAppfreezeCpuInfo(const FaultData& faultData,
+void AppfreezeManager::InitWarningCpuInfo(const FaultData& faultData,
     const AppfreezeManager::AppInfo& appInfo)
 {
-    std::string filePath;
-    if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_3S) {
-        AppExecFwk::AppfreezeCpuFreqManager::GetInstance().InitCpuDataProcessor(
-            EVENT_APPFREEZE_TYPE, appInfo.pid, appInfo.uid, faultData.appfreezeInfo);
-    } else if (faultData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
-        AppExecFwk::AppfreezeCpuFreqManager::GetInstance().InitCpuDataProcessor(
-            EVENT_SYSFREEZE_TYPE, appInfo.pid, appInfo.uid, faultData.appfreezeInfo);
-    } else if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S) {
-        filePath = AppExecFwk::AppfreezeCpuFreqManager::GetInstance().WriteCpuInfoToFile(
-            EVENT_APPFREEZE_TYPE, appInfo.bundleName, appInfo.uid, appInfo.pid, faultData.errorObject.name);
-    } else if (faultData.errorObject.name == AppFreezeType::LIFECYCLE_TIMEOUT) {
-        filePath = AppExecFwk::AppfreezeCpuFreqManager::GetInstance().WriteCpuInfoToFile(
-            EVENT_SYSFREEZE_TYPE, appInfo.bundleName, appInfo.uid, appInfo.pid, faultData.errorObject.name);
+    std::string eventName = faultData.errorObject.name;
+    if (eventName != AppFreezeType::THREAD_BLOCK_3S &&
+        eventName != AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
+        return;
     }
-    TAG_LOGI(AAFwkTag::APPDFR, "report appfreeze name:%{public}s, appfreezeInfo:%{public}s, path:%{public}s",
-        faultData.errorObject.name.c_str(), faultData.appfreezeInfo.c_str(), filePath.c_str());
-    return filePath;
+    std::string type = std::to_string(appInfo.pid) + "-" + std::to_string(appInfo.uid) + "-" +
+        appInfo.bundleName;
+    bool ret = AppExecFwk::AppfreezeCpuFreqManager::GetInstance().InsertCpuDetailInfo(type, appInfo.pid);
+    TAG_LOGI(AAFwkTag::APPDFR, "Insert cpuInfo ret:%{public}d, pid:%{public}d, name:%{public}s, "
+        "appfreezeInfo:%{public}s, type:%{public}s", ret, appInfo.pid,
+        eventName.c_str(), faultData.appfreezeInfo.c_str(), type.c_str());
+}
+
+std::string AppfreezeManager::GetAppfreezeInfoPath(const FaultData& faultData,
+    const AppfreezeManager::AppInfo& appInfo)
+{
+    std::string eventName = faultData.errorObject.name;
+    std::string cpuInfoFile = faultData.appfreezeInfo;
+    if (eventName == AppFreezeType::THREAD_BLOCK_6S || eventName == AppFreezeType::LIFECYCLE_TIMEOUT ||
+        eventName == AppFreezeType::APP_INPUT_BLOCK) {
+        std::string type = std::to_string(appInfo.pid) + "-" + std::to_string(appInfo.uid) + "-" +
+            appInfo.bundleName;
+        cpuInfoFile += "," + AppExecFwk::AppfreezeCpuFreqManager::GetInstance().GetCpuInfoPath(
+            type, appInfo.bundleName, appInfo.uid, appInfo.pid);
+        TAG_LOGI(AAFwkTag::APPDFR, "name:%{public}s, cpuInfoFile:%{public}s, type:%{public}s",
+            faultData.errorObject.name.c_str(), cpuInfoFile.c_str(), type.c_str());
+    }
+    return cpuInfoFile;
 }
 
 int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo,
     const std::string& binderInfo, const std::string& memoryContent)
 {
-    std::string appRunningUniqueId = faultData.appRunningUniqueId;
-    int ret = 0;
-    this->PerfStart(faultData.errorObject.name);
+    std::string eventName = faultData.errorObject.name;
+    this->PerfStart(eventName);
     int64_t startTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
-    if (faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK) {
-        ret = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, faultData.errorObject.name,
-            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_UID, appInfo.uid, EVENT_PID, appInfo.pid,
-            EVENT_PACKAGE_NAME, appInfo.bundleName, EVENT_PROCESS_NAME, appInfo.processName, EVENT_MESSAGE,
-            faultData.errorObject.message, EVENT_STACK, faultData.errorObject.stack, BINDER_INFO, binderInfo,
-            APP_RUNNING_UNIQUE_ID, appRunningUniqueId, EVENT_INPUT_ID, faultData.eventId,
-            FREEZE_MEMORY, memoryContent + "\n" + faultData.procStatm);
-    } else if (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S) {
-        HitraceInfo info;
-        bool hitraceIsValid = GetHitraceId(info);
-        ret = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, faultData.errorObject.name,
-            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_UID, appInfo.uid, EVENT_PID, appInfo.pid,
-            EVENT_TID, faultData.tid,
-            EVENT_PACKAGE_NAME, appInfo.bundleName, EVENT_PROCESS_NAME, appInfo.processName, EVENT_MESSAGE,
-            faultData.errorObject.message, EVENT_STACK, faultData.errorObject.stack, BINDER_INFO, binderInfo,
-            APP_RUNNING_UNIQUE_ID, appRunningUniqueId, FREEZE_MEMORY, memoryContent + "\n" + faultData.procStatm,
-            EVENT_TRACE_ID, hitraceIsValid ? info.hiTraceChainId : "",
-            EVENT_SPAN_ID, hitraceIsValid ? info.spanId : "",
-            EVENT_PARENT_SPAN_ID, hitraceIsValid ? info.pspanId : "",
-            EVENT_TRACE_FLAG, hitraceIsValid ? info.traceFlag : "",
-            FREEZE_INFO_PATH, ReportAppfreezeCpuInfo(faultData, appInfo));
-    } else {
-        ret = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, faultData.errorObject.name,
-            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_UID, appInfo.uid, EVENT_PID, appInfo.pid,
-            EVENT_TID, faultData.tid > 0 ? faultData.tid : appInfo.pid,
-            EVENT_PACKAGE_NAME, appInfo.bundleName, EVENT_PROCESS_NAME, appInfo.processName, EVENT_MESSAGE,
-            faultData.errorObject.message, EVENT_STACK, faultData.errorObject.stack, BINDER_INFO, binderInfo,
-            APP_RUNNING_UNIQUE_ID, appRunningUniqueId, FREEZE_MEMORY, memoryContent + "\n" + faultData.procStatm,
-            FREEZE_INFO_PATH, ReportAppfreezeCpuInfo(faultData, appInfo));
-    }
-    TAG_LOGW(AAFwkTag::APPDFR,
-        "reportEvent:%{public}s, pid:%{public}d, tid:%{public}d, bundleName:%{public}s, appRunningUniqueId:%{public}s"
-        ", endTime:%{public}s, interval:%{public}" PRId64 " ms, eventId:%{public}d hisysevent write ret: %{public}d",
+    int tid = faultData.tid;
+    std::string appRunningUniqueId = faultData.appRunningUniqueId;
+    AppfreezeEventInfo eventInfo;
+    eventInfo.tid = tid > 0 ? tid : 0;
+    eventInfo.pid = appInfo.pid;
+    eventInfo.uid = appInfo.uid;
+    eventInfo.eventId = faultData.eventId;
+    eventInfo.bundleName = appInfo.bundleName;
+    eventInfo.processName = appInfo.processName;
+    eventInfo.binderInfo = binderInfo;
+    eventInfo.freezeMemory = memoryContent + "\n" + faultData.procStatm;
+    eventInfo.appRunningUniqueId = appRunningUniqueId;
+    eventInfo.errorStack = faultData.errorObject.stack;
+    eventInfo.errorName = eventName;
+    eventInfo.errorMessage = faultData.errorObject.message;
+    eventInfo.freezeInfoFile = GetAppfreezeInfoPath(faultData, appInfo);
+    eventInfo.hitraceInfo = GetHitraceInfo();
+    eventInfo.foregroundState = faultData.isInForeground;
+    eventInfo.enableFreeze = faultData.isEnableMainThreadSample;
+
+    int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
+    TAG_LOGW(AAFwkTag::APPDFR, "reportEvent:%{public}s, pid:%{public}d, tid:%{public}d, bundleName:%{public}s, "
+        "appRunningUniqueId:%{public}s, endTime:%{public}s, interval:%{public}" PRId64 " ms, "
+        "eventId:%{public}d freezeInfoFile:%{public}s foreground:%{public}d enableFreeze:%{public}d,"
+        "hisysevent write ret: %{public}d",
         faultData.errorObject.name.c_str(), appInfo.pid, faultData.tid, appInfo.bundleName.c_str(),
         appRunningUniqueId.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
-        AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime, faultData.eventId, ret);
-#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
+        AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime, faultData.eventId,
+        eventInfo.freezeInfoFile.c_str(), eventInfo.foregroundState, eventInfo.enableFreeze, ret);
     OHOS::HiviewDFX::HiTraceChain::ClearId();
-#endif
     return 0;
 }
 

@@ -29,6 +29,7 @@
 #include "app_mgr_interface.h"
 #include "application_impl.h"
 #include "fault_data.h"
+#include "task_handler_wrap.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -47,6 +48,9 @@ public:
     int AppfreezeHandle(const FaultData& faultInfo, bool onlyMainThread);
     int AcquireStack(const FaultData& faultInfo, bool onlyMainThread);
     void SetAppDebug(bool isAppDebug);
+    void SetAppInForeground(bool isInForeground);
+    void SetMainThreadSample(bool isEnableMainThreadSample);
+
 private:
     static std::weak_ptr<EventHandler> appMainHandler_;
     std::weak_ptr<ApplicationInfo> applicationInfo_;
@@ -55,12 +59,18 @@ private:
     bool IsExitApp(const std::string& name);
     bool IsHandleAppfreeze();
     std::string GetProcStatm(int32_t pid);
+    bool GetAppInForeground();
+    bool GetMainThreadSample();
+    void EnableFreezeSample(FaultData& newFaultData);
 
     static std::mutex singletonMutex_;
     static std::shared_ptr<AppfreezeInner> instance_;
     bool isAppDebug_ = false;
+    bool isInForeground_ = true;
+    bool isEnableMainThreadSample_ = false;
     std::mutex handlingMutex_;
     std::list<FaultData> handlinglist_;
+    std::shared_ptr<AAFwk::TaskHandlerWrap> appfreezeInnerTaskHandler_;
 };
 
 class MainHandlerDumper : public Dumper {

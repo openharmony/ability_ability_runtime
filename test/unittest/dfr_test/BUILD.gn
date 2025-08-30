@@ -23,5 +23,7 @@ group("unittest") {
     "cpu_data_processor_test:unittest",
     "dump_proc_helper_test:unittest",
     "watchdog_test:unittest",
+    "cpu_sys_config_test:unittest",
+    "appfreeze_event_report_test:unittest",
   ]
 }
