@@ -59,13 +59,16 @@ static std::set<GlobalObserverItem> globalObserverList;
 static std::set<GlobalObserverItem> globalPromiseList;
 static std::map<napi_env, std::vector<std::pair<int32_t, std::shared_ptr<NativeReference>>>> observerList;
 static GlobalObserverItem freezeObserver;
+static GlobalObserverItem defaultHandler;
+static std::mutex defaultHandlerMtx;
 static std::mutex globalErrorMtx;
 static std::mutex globalPromiseMtx;
 static std::recursive_mutex errorMtx;
 static std::mutex freezeMtx;
-static std::shared_ptr<JsLoopObserver> loopObserver_;
 static std::once_flag registerCallbackFlag;
+static std::shared_ptr<JsLoopObserver> loopObserver_;
 static bool freezeCallbackRegistered = false;
+static bool isSetHandler = false;
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t INDEX_TWO = 2;
@@ -215,7 +218,7 @@ static bool IsGlobalObserverListNotEmpty()
 
 static bool IsErrorObserverListNotEmpty()
 {
-    return IsobserverListNotEmpty() || IsGlobalObserverListNotEmpty();
+    return IsobserverListNotEmpty() || IsGlobalObserverListNotEmpty() || isSetHandler;
 }
 
 static bool IsGlobalPromiseListNotEmpty()
@@ -454,6 +457,35 @@ static bool ErrorManagerWorkerCallback(napi_env env, napi_value exception, std::
     return true;
 }
 
+static void DoErrorHandlerCallback(napi_env env, std::string name, std::string message, std::string stack)
+{
+    std::lock_guard<std::mutex> lock(defaultHandlerMtx);
+    if (!defaultHandler.ref) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "not register defaultHandler callback");
+        return;
+    }
+    napi_value global = nullptr;
+    if (napi_get_global(defaultHandler.env, &global) != napi_ok) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Get Global Failed");
+        return;
+    }
+
+    size_t argc = ARGC_ONE;
+    napi_value args[] = {CreateJsErrorObject(env, name, message, stack)};
+
+    napi_value function = nullptr;
+    if (napi_get_reference_value(defaultHandler.env, defaultHandler.ref, &function) != napi_ok) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Get Callback Failed");
+        return;
+    }
+
+    napi_value result = nullptr;
+    if (napi_call_function(defaultHandler.env, global, function, argc, args, &result) != napi_ok) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Do Callback Failed");
+        return;
+    }
+}
+
 static void FreezeCallback()
 {
     std::lock_guard<std::mutex> lock(freezeMtx);
@@ -488,6 +520,7 @@ static bool ErrorManagerMainWorkerCallback(
 {
     DoMainThreadOnUnhandleException(env, summary);
     DoMainThreadOnException(env, name, message, stack);
+    DoErrorHandlerCallback(env, name, message, stack);
     WorkItem item;
     item.name = name;
     item.message = message;
@@ -565,6 +598,11 @@ public:
     {
         GET_CB_INFO_AND_CALL(env, info, JsErrorManager, OnOn);
     }
+ 
+    static napi_value Set(napi_env env, napi_callback_info info)
+    {
+        GET_CB_INFO_AND_CALL(env, info, JsErrorManager, OnSet);
+    }
 
     static napi_value Off(napi_env env, napi_callback_info info)
     {
@@ -629,6 +667,53 @@ private:
             return CreateJsUndefined(env);
         }
         return OnOnFreeze(env, argv[INDEX_ONE]);
+    }
+
+    napi_value OnOnSet(napi_env env, napi_value function)
+    {
+        if (!AppExecFwk::EventRunner::IsAppMainThread()) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "not mainThread");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_MAIN_THREAD);
+            return CreateJsUndefined(env);
+        }
+        if (CheckTypeForNapiValue(env, function, napi_null) ||CheckTypeForNapiValue(env, function, napi_undefined)) {
+            ThrowInvalidNumParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        std::lock_guard<std::mutex> lock(defaultHandlerMtx);
+        napi_value object = nullptr;
+        if (defaultHandler.ref == nullptr) {
+            object = nullptr;
+        } else if (napi_get_reference_value(env, defaultHandler.ref, &object) != napi_ok) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "Get defaultHandler Failed");
+        }
+        if (defaultHandler.ref) {
+            napi_delete_reference(env, defaultHandler.ref);
+            defaultHandler.ref = nullptr;
+        }
+        if (function) {
+            NAPI_CALL(env, napi_create_reference(env, function, INITITAL_REFCOUNT_ONE, &defaultHandler.ref));
+        } else {
+            defaultHandler.ref = nullptr;
+        }
+        defaultHandler.env = env;
+        if (!isSetHandler) {
+            isSetHandler = true;
+            TAG_LOGI(AAFwkTag::JSNAPI, "change isSetHandler state successfully");
+        }
+        return object;
+    }
+
+    napi_value OnSet(napi_env env, const size_t argc, napi_value *argv)
+    {
+        TAG_LOGD(AAFwkTag::JSNAPI, "called");
+        std::string type = ParseParamType(env, argc, argv);
+        if (argc != ARGC_ZERO && argc != ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
+            ThrowInvalidNumParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        return argc == ARGC_ONE ? OnOnSet(env, argv[INDEX_ZERO]) : OnOnSet(env, nullptr);
     }
 
     napi_value OnOn(napi_env env, const size_t argc, napi_value* argv)
@@ -1251,6 +1336,7 @@ napi_value JsErrorManagerInit(napi_env env, napi_value exportObj)
     const char *moduleName = "JsErrorManager";
     BindNativeFunction(env, exportObj, "on", moduleName, JsErrorManager::On);
     BindNativeFunction(env, exportObj, "off", moduleName, JsErrorManager::Off);
+    BindNativeFunction(env, exportObj, "setDefaultErrorHandler", moduleName, JsErrorManager::Set);
     return CreateJsUndefined(env);
 }
 }  // namespace AbilityRuntime
