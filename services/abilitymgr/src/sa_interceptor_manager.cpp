@@ -52,15 +52,14 @@ int32_t SAInterceptorManager::AddSAInterceptor(sptr<ISAInterceptor> interceptor)
     {
         std::lock_guard<std::mutex> lock(saInterceptorLock_);
         saInterceptors_.emplace_back(interceptor);
+        if (!deathRecipient_) {
+            // add death recipient
+            deathRecipient_ = new SAInterceptorRecipient([](const wptr<IRemoteObject> &remote) {
+                SAInterceptorManager::GetInstance().OnObserverDied(remote);
+            });
+        }
     }
 
-    if (!deathRecipient_) {
-        // add death recipient
-        deathRecipient_ = new SAInterceptorRecipient([](const wptr<IRemoteObject> &remote) {
-            SAInterceptorManager::GetInstance().OnObserverDied(remote);
-        });
-    }
-    
     auto observerObj = interceptor->AsObject();
     if (!observerObj || !observerObj->AddDeathRecipient(deathRecipient_)) {
         TAG_LOGE(AAFwkTag::SA_INTERCEPTOR, "AddDeathRecipient failed");
@@ -71,14 +70,19 @@ int32_t SAInterceptorManager::AddSAInterceptor(sptr<ISAInterceptor> interceptor)
 
 bool SAInterceptorManager::SAInterceptorListIsEmpty()
 {
+    std::lock_guard<std::mutex> lock(saInterceptorLock_);
     return saInterceptors_.empty();
 }
 
 int32_t SAInterceptorManager::ExecuteSAInterceptor(const std::string &params, Rule &rule)
 {
     TAG_LOGI(AAFwkTag::SA_INTERCEPTOR, "call ExecuteSAInterceptor");
-    std::lock_guard<std::mutex> lock(saInterceptorLock_);
-    for (auto &interceptor : saInterceptors_) {
+    std::vector<sptr<ISAInterceptor>> tempSaInterceptors;
+    {
+        std::lock_guard<std::mutex> lock(saInterceptorLock_);
+        tempSaInterceptors = saInterceptors_;
+    }
+    for (auto &interceptor : tempSaInterceptors) {
         if (interceptor == nullptr) {
             continue;
         }

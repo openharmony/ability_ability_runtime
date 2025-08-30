@@ -1331,10 +1331,9 @@ HWTEST_F(StartupManagerTest, InitPreloadSystemSoAllowlist_0100, Function | Mediu
         preloadSystemSoAllowlist.clear();
         GTEST_LOG_(INFO) << "ParsePreloadSystemSoAllowlist failed, using default preloadSystemSoAllowlist";
     }
-
-    startupManager->InitPreloadSystemSoAllowlist();
-    EXPECT_EQ(preloadSystemSoAllowlist.size(), startupManager->preloadSystemSoAllowlist_.size());
-    startupManager->preloadSystemSoAllowlist_.clear();
+    std::unordered_set<std::string> tempList;
+    startupManager->InitPreloadSystemSoAllowlist(tempList);
+    EXPECT_EQ(preloadSystemSoAllowlist.size(), tempList.size());
 }
 
 /**

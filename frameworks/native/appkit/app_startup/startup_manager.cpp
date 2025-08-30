@@ -484,11 +484,6 @@ int32_t StartupManager::RegisterPreloadSoStartupTask(
     return ERR_OK;
 }
 
-void StartupManager::ClearAppStartupTask()
-{
-    appStartupTasks_.clear();
-}
-
 int32_t StartupManager::RegisterAppStartupTask(
     const std::string &name, const std::shared_ptr<AppStartupTask> &startupTask)
 {
@@ -700,7 +695,13 @@ int32_t StartupManager::RunLoadAppStartupConfigTask()
     }
 
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    InitPreloadSystemSoAllowlist();
+    
+    std::unordered_set<std::string> preloadSystemSoAllowlist;
+    InitPreloadSystemSoAllowlist(preloadSystemSoAllowlist);
+    {
+        std::lock_guard<std::mutex> lock(appStartupConfigInitializationMutex_);
+        preloadSystemSoAllowlist_ = preloadSystemSoAllowlist;
+    }
     std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSoStartupTasks;
     std::map<std::string, std::shared_ptr<AppStartupTask>> preloadSystemSoStartupTasks;
     std::vector<StartupTaskInfo> pendingStartupTaskInfos;
@@ -1119,7 +1120,7 @@ void StartupManager::AnalyzePreloadSystemSoStartupTask(nlohmann::json &startupCo
 
 void StartupManager::AnalyzePreloadSystemSoStartupTaskInner(
     const nlohmann::json &preloadStartupTaskJson,
-    std::map<std::string, std::shared_ptr<AppStartupTask>>& preloadSoStartupTasks)
+    std::map<std::string, std::shared_ptr<AppStartupTask>> &preloadSoStartupTasks)
 {
     if (!preloadStartupTaskJson.is_object() ||
         !preloadStartupTaskJson.contains(NAME) || !preloadStartupTaskJson[NAME].is_string() ||
@@ -1252,18 +1253,16 @@ void StartupManager::SetSchedulerPhase(const nlohmann::json &module, StartupTask
     }
 }
 
-void StartupManager::InitPreloadSystemSoAllowlist()
+void StartupManager::InitPreloadSystemSoAllowlist(std::unordered_set<std::string> &preloadSystemSoAllowlist)
 {
     nlohmann::json parseResult;
     if (!ReadPreloadSystemSoAllowlistFile(parseResult)) {
         TAG_LOGE(AAFwkTag::STARTUP, "failed to parse preload system so allowlist file");
-        preloadSystemSoAllowlist_.clear();
         return;
     }
 
-    if (!ParsePreloadSystemSoAllowlist(parseResult, preloadSystemSoAllowlist_)) {
+    if (!ParsePreloadSystemSoAllowlist(parseResult, preloadSystemSoAllowlist)) {
         TAG_LOGW(AAFwkTag::STARTUP, "parsing failed. Clear the blank list of names.");
-        preloadSystemSoAllowlist_.clear();
     }
 }
 
