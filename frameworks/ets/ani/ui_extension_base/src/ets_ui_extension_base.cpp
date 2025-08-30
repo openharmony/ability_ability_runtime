@@ -50,6 +50,9 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char* UIEXTENSION_CLASS_NAME = "L@ohos/app/ability/UIExtensionAbility/UIExtensionAbility;";
+constexpr const char *UIEXT_ONCREATE_SIGNATURE = "C{@ohos.app.ability.AbilityConstant.AbilityConstant.LaunchParam}:";
+constexpr const char *UIEXT_ONSESSIONDESTROY_SIGNATURE =
+    "C{@ohos.app.ability.UIExtensionContentSession.UIExtensionContentSession}:";
 
 void OnDestroyPromiseCallback(ani_env* env, ani_object aniObj)
 {
@@ -102,6 +105,9 @@ EtsUIExtensionBase::~EtsUIExtensionBase()
         }
     }
     contentSessions_.clear();
+    if (shellContextRef_ && shellContextRef_->aniRef) {
+        env->GlobalReference_Delete(shellContextRef_->aniRef);
+    }
 }
 
 std::shared_ptr<ExtensionCommon> EtsUIExtensionBase::Init(const std::shared_ptr<AbilityLocalRecord> &record,
@@ -219,7 +225,8 @@ bool EtsUIExtensionBase::BindNativeMethods()
         TAG_LOGE(AAFwkTag::UI_EXT, "FindClass failed status: %{public}d", status);
         return false;
     }
-    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
+    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK
+        && status != ANI_ALREADY_BINDED) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Class_BindNativeMethods status: %{public}d", status);
         return false;
     }
@@ -295,7 +302,7 @@ void EtsUIExtensionBase::OnStart(
         TAG_LOGE(AAFwkTag::UI_EXT, "null wantObj");
         return;
     }
-    CallObjectMethod(false, "onCreate", nullptr, launchParamObj, wantObj);
+    CallObjectMethod(false, "onCreate", UIEXT_ONCREATE_SIGNATURE, launchParamObj, wantObj);
 }
 
 void EtsUIExtensionBase::OnStop()
@@ -325,7 +332,7 @@ void EtsUIExtensionBase::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *ca
         return;
     }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnStop begin");
     if (context_) {
         TAG_LOGD(AAFwkTag::UI_EXT, "set terminating true");
         context_->SetTerminating(true);
@@ -341,17 +348,14 @@ void EtsUIExtensionBase::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *ca
     callbackInfo->Push(asyncCallback);
     ani_long destroyCallbackPoint = (ani_long)callbackInfo;
     ani_status status = ANI_ERROR;
-    ani_field field = nullptr;
     auto env = etsRuntime_.GetAniEnv();
     if (env == nullptr || etsObj_ == nullptr) {
         isAsyncCallback = false;
         OnStop();
         return;
     }
-    if ((status = env->Class_FindField(etsObj_->aniCls, "destroyCallbackPoint", &field)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
-    }
-    if ((status = env->Object_SetField_Long(etsObj_->aniObj, field, destroyCallbackPoint)) != ANI_OK) {
+    if ((status = env->Object_SetFieldByName_Long(etsObj_->aniObj, "destroyCallbackPoint",
+        destroyCallbackPoint)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
     }
     isAsyncCallback = CallObjectMethod(true, "callOnDestroy", ":Z");
@@ -796,7 +800,7 @@ void EtsUIExtensionBase::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionIn
             TAG_LOGE(AAFwkTag::UI_EXT, "contentSessionObj null ptr");
             return;
         }
-        CallObjectMethod(false, "onSessionDestroy", nullptr, contentSessionObj);
+        CallObjectMethod(false, "onSessionDestroy", UIEXT_ONSESSIONDESTROY_SIGNATURE, contentSessionObj);
     }
     auto &uiWindow = uiWindowMap_[componentId];
     if (uiWindow) {
@@ -818,20 +822,14 @@ bool EtsUIExtensionBase::CallObjectMethod(bool withResult, const char *name, con
         TAG_LOGE(AAFwkTag::UI_EXT, "etsObj_ nullptr");
         return false;
     }
-
     auto env = etsRuntime_.GetAniEnv();
     ani_status status = ANI_OK;
-    ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(etsObj_->aniCls, name, signature, &method)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
-        return false;
-    }
     env->ResetError();
     if (withResult) {
         ani_boolean res = ANI_FALSE;
         va_list args;
         va_start(args, signature);
-        if ((status = env->Object_CallMethod_Boolean(etsObj_->aniObj, method, &res, args)) != ANI_OK) {
+        if ((status = env->Object_CallMethodByName_Boolean(etsObj_->aniObj, name, signature, &res, args)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
             etsRuntime_.HandleUncaughtError();
         }
@@ -840,7 +838,7 @@ bool EtsUIExtensionBase::CallObjectMethod(bool withResult, const char *name, con
     }
     va_list args;
     va_start(args, signature);
-    if ((status = env->Object_CallMethod_Void_V(etsObj_->aniObj, method, args)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Void_V(etsObj_->aniObj, name, signature, args)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         etsRuntime_.HandleUncaughtError();
         return false;

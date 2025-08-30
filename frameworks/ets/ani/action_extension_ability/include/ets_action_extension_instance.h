@@ -12,12 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { RecordData } from '@ohos.base';
 
-export default interface CustomData {
-  data: RecordData;
-}
+#ifndef OHOS_ABILITY_RUNTIME_ETS_ACTION_EXTENSION_INSTANCE_H
+#define OHOS_ABILITY_RUNTIME_ETS_ACTION_EXTENSION_INSTANCE_H
 
-class CustomDataInner implements CustomData {
-  public data: RecordData = {};
-}
+#include "action_extension.h"
+
+namespace OHOS {
+namespace AbilityRuntime {
+class ActionExtension;
+class Runtime;
+
+ActionExtension *CreateETSActionExtension(const std::unique_ptr<Runtime> &runtime);
+} // namespace AbilityRuntime
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_ETS_ACTION_EXTENSION_INSTANCE_H

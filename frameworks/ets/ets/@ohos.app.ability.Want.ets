@@ -399,7 +399,7 @@ export default class Want {
   type?: string;
   flags?: int;
   action?: string;
-  parameters?: Record<string, RecordData>;
+  parameters?: RecordData;
   entities?: Array<string>;
   moduleName?: string;
   readonly fds?: Record<string, int>;
