@@ -323,7 +323,7 @@ namespace wantAgent {
     want: Want;
     finalCode: int;
     finalData: string;
-    extraInfo?: Record<string, RecordData>;
+    extraInfo?: RecordData;
   }
 
   class CompleteDataImpl implements CompleteData {
@@ -331,7 +331,7 @@ namespace wantAgent {
     public want: Want;
     public finalCode: int;
     public finalData: string;
-    public extraInfo?: Record<string, RecordData>;
+    public extraInfo?: RecordData;
   }
 
   export type TriggerInfo = _TriggerInfo;
