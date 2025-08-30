@@ -35,6 +35,7 @@ persist.sys.abilityms.move_ui_ability_to_background_api_enable = true
 persist.sys.abilityms.prevent_startability = true
 persist.sys.abilityms.forbid_start = false
 persist.sys.abilityms.restart_app_with_window = false
+persist.sys.abilityms.allow_debug_permission = false
 const.abilityms.launch_embeded_ui_ability = false
 const.sys.abilityms.limit_maximum_extensions_of_per_process = 10
 const.sys.abilityms.limit_maximum_extensions_of_per_device = 100
