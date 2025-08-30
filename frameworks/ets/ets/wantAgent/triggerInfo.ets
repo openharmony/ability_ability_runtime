@@ -21,8 +21,8 @@ export interface TriggerInfo {
   code: number;
   want?: Want;
   permission?: string;
-  extraInfo?: Record<string, RecordData>;
-  extraInfos?: Record<string, RecordData>;
+  extraInfo?: RecordData;
+  extraInfos?: RecordData;
   startOptions?: StartOptions;
 }
 
@@ -30,7 +30,7 @@ class TriggerInfoImpl implements TriggerInfo {
   public code: number;
   public want?: Want;
   public permission?: string;
-  public extraInfo?: Record<string, RecordData>;
-  public extraInfos?: Record<string, RecordData>;
+  public extraInfo?: RecordData;
+  public extraInfos?: RecordData;
   public startOptions?: StartOptions;
 }

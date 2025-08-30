@@ -23,8 +23,8 @@ export interface WantAgentInfo {
   actionType?: abilityWantAgent.OperationType;
   requestCode: number;
   actionFlags?: Array<abilityWantAgent.WantAgentFlags>;
-  extraInfo?: Record<string, RecordData>;
-  extraInfos?: Record<string, RecordData>;
+  extraInfo?: RecordData;
+  extraInfos?: RecordData;
 }
 
 class WantAgentInfoImpl implements WantAgentInfo {
@@ -32,8 +32,8 @@ class WantAgentInfoImpl implements WantAgentInfo {
   public actionType?: abilityWantAgent.OperationType;
   public requestCode: number;
   public actionFlags?: Array<abilityWantAgent.WantAgentFlags>;
-  public extraInfo?: Record<string, RecordData>;
-  public extraInfos?: Record<string, RecordData>;
+  public extraInfo?: RecordData;
+  public extraInfos?: RecordData;
 
   constructor(wants: Array<Want>) {
     this.wants = wants;

@@ -18,6 +18,8 @@ group("ani_packages") {
   deps = [
     "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_registry_ani_kit",
     "${ability_runtime_path}/frameworks/ets/ani/ability_manager:ability_manager_ani_kit",
+    "${ability_runtime_path}/frameworks/ets/ani/action_extension_ability:action_extension_ani",
+    "${ability_runtime_path}/frameworks/ets/ani/share_extension_ability:share_extension_ani",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
     "${ability_runtime_path}/frameworks/ets/ani/ani_mission_manager:missionmanager_ani",
     "${ability_runtime_path}/frameworks/ets/ani/ani_wantagent_common:ani_wantagent_common",
