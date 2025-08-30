@@ -18,5 +18,5 @@ import { RecordData } from '@ohos.base';
 
 export default class AtomicServiceOptions extends StartOptions {
   flags?: int;
-  parameters?: Record<string, RecordData>;
+  parameters?: RecordData;
 }
