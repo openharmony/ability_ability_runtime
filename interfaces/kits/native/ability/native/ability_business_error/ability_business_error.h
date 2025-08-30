@@ -218,6 +218,9 @@ enum class AbilityErrorCode {
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 
+    // The caller is not main thread
+    ERROR_CODE_MAIN_THREAD = 16000205,
+
     // Setting permissions for resident processes
     ERROR_CODE_NO_RESIDENT_PERMISSION = 16200006,
 
