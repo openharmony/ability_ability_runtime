@@ -198,10 +198,9 @@ public:
 private:
     std::vector<FreeInstallInfo> freeInstallList_;
     std::vector<FreeInstallInfo> dmsFreeInstallCbs_;
-    std::map<std::string, std::time_t> timeStampMap_;
+    std::map<std::string, std::time_t> timestampMap_;
     ffrt::mutex distributedFreeInstallLock_;
     ffrt::mutex freeInstallListLock_;
-    ffrt::mutex freeInstallObserverLock_;
 
     int SetAppRunningState(Want &want);
 
@@ -226,8 +225,6 @@ private:
         const std::string &startTime);
 
     void PostUpgradeAtomicServiceTask(int resultCode, const Want &want, int32_t userId);
-
-    void RemoveTimeoutTask(const std::string &bundleName, const std::string &abilityName, const std::string &startTime);
 
     void StartAbilityByFreeInstall(FreeInstallInfo &info, std::string &bundleName, std::string &abilityName,
         std::string &startTime);
