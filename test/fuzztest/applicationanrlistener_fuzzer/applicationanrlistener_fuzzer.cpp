@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,8 +119,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 
     // fuzz for FreeInstallManager
     auto abilityms = std::make_shared<AbilityManagerService>();
-    std::weak_ptr<AbilityManagerService> amsWeakPtr{ abilityms };
-    auto freeInstallManager = std::make_shared<FreeInstallManager>(amsWeakPtr);
+    auto freeInstallManager = std::make_shared<FreeInstallManager>();
     freeInstallManager->IsTopAbility(token);
     freeInstallManager->StartFreeInstall(*want, int32Param, intParam, token);
     freeInstallManager->RemoteFreeInstall(*want, int32Param, intParam, token);
@@ -130,7 +129,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     freeInstallManager->NotifyFreeInstallResult(*want, intParam);
     freeInstallManager->FreeInstallAbilityFromRemote(*want, token, int32Param, intParam);
     freeInstallManager->ConnectFreeInstall(*want, int32Param, token, stringParam);
-    freeInstallManager->GetTimeStamp();
     freeInstallManager->OnInstallFinished(intParam, *want, int32Param, int64Param);
     freeInstallManager->OnRemoteInstallFinished(intParam, *want, int32Param);
 

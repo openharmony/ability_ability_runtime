@@ -171,7 +171,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, AddFreeInstallObserver_001, TestSize.L
     sptr<AbilityRuntime::IFreeInstallObserver> observer;
     EXPECT_EQ(abilityMs_->AddFreeInstallObserver(nullptr, observer), ERR_INVALID_VALUE);
 
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     EXPECT_EQ(abilityMs_->AddFreeInstallObserver(nullptr, observer), ERR_INVALID_VALUE);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest AddFreeInstallObserver_001 end");

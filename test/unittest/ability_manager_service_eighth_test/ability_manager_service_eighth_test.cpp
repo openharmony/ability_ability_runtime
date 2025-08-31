@@ -352,7 +352,7 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartUIAbilityBySCB_001, TestSize.Leve
     sessionInfo->want.SetParam(KEY_SESSION_ID, TEST_STRING_VALUE_1);
     ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
     EXPECT_NE(ret, ERR_OK);
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
     EXPECT_NE(ret, ERR_OK);
     auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
@@ -398,7 +398,7 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartUIAbilityBySCB_001_002, TestSize.
     sessionInfo->want.SetParam(KEY_SESSION_ID, TEST_STRING_VALUE_1);
     FreeInstallInfo freeInstallInfo;
     freeInstallInfo.want.SetParam(KEY_SESSION_ID, TEST_STRING_VALUE_1);
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     abilityMs_->freeInstallManager_->freeInstallList_.push_back(freeInstallInfo);
     ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
     EXPECT_EQ(ret, ERR_OK);
