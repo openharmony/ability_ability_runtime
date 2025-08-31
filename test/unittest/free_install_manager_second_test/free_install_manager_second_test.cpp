@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,8 +76,7 @@ sptr<Token> FreeInstallManagerSecondTest::MockToken()
  */
 HWTEST_F(FreeInstallManagerSecondTest, GetFreeInstallTaskInfo_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     const std::string bundleName("com.test.demo");
     std::string abilityName("MainAbility");
     const std::string startTime = "startTime";
@@ -108,8 +107,7 @@ HWTEST_F(FreeInstallManagerSecondTest, GetFreeInstallTaskInfo_001, TestSize.Leve
  */
 HWTEST_F(FreeInstallManagerSecondTest, SetSCBCallStatus_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     const std::string bundleName("com.test.demo");
     std::string abilityName("MainAbility");
     const std::string startTime = "startTime";
@@ -144,8 +142,7 @@ HWTEST_F(FreeInstallManagerSecondTest, SetSCBCallStatus_001, TestSize.Level1)
  */
 HWTEST_F(FreeInstallManagerSecondTest, NotifyInsightIntentFreeInstallResult_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     Want want;
     int32_t resultCode = ERR_OK + 1;
     //resultCode != ERR_OK and freeInstallList_ is NULL

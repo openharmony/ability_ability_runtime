@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,44 +18,42 @@
 
 namespace OHOS {
 namespace AAFwk {
-FreeInstallManager::FreeInstallManager(const std::weak_ptr<AbilityManagerService> &server)
-    : server_(server)
+FreeInstallManager::FreeInstallManager()
 {
 }
 
-bool FreeInstallManager::IsTopAbility(const sptr<IRemoteObject> &callerToken)
+bool FreeInstallManager::IsTopAbility(sptr<IRemoteObject> callerToken)
 {
     return true;
 }
 
 int FreeInstallManager::StartFreeInstall(const Want &want, int32_t userId, int requestCode,
-    const sptr<IRemoteObject> &callerToken, std::shared_ptr<FreeInstallParams> param)
+    sptr<IRemoteObject> callerToken, std::shared_ptr<FreeInstallParams> param)
 {
     return MyStatus::GetInstance().fimStartFreeInstall_;
 }
 
 int FreeInstallManager::RemoteFreeInstall(const Want &want, int32_t userId, int requestCode,
-    const sptr<IRemoteObject> &callerToken)
+    sptr<IRemoteObject> callerToken)
 {
     return NOT_TOP_ABILITY;
 }
 
 FreeInstallInfo FreeInstallManager::BuildFreeInstallInfo(const Want &want, int32_t userId, int requestCode,
-    const sptr<IRemoteObject> &callerToken, std::shared_ptr<FreeInstallParams> param)
+    sptr<IRemoteObject> callerToken, std::shared_ptr<FreeInstallParams> param)
 {
     FreeInstallInfo info = {};
     return info;
 }
 
-int FreeInstallManager::StartRemoteFreeInstall(const Want &want, int requestCode, int32_t validUserId,
-    const sptr<IRemoteObject> &callerToken)
+int FreeInstallManager::StartRemoteFreeInstall(Want &want, int requestCode, int32_t validUserId,
+    sptr<IRemoteObject> callerToken)
 {
     return 0;
 }
 
-int FreeInstallManager::NotifyDmsCallback(const Want &want, int resultCode)
+void FreeInstallManager::NotifyDmsCallback(const Want &want, int resultCode)
 {
-    return ERR_OK;
 }
 
 void FreeInstallManager::NotifyFreeInstallResult(int32_t recordId, const Want &want, int resultCode, bool isAsync)
@@ -99,24 +97,16 @@ int32_t FreeInstallManager::UpdateElementName(Want &want, int32_t userId) const
     return ERR_OK;
 }
 
-int FreeInstallManager::FreeInstallAbilityFromRemote(const Want &want, const sptr<IRemoteObject> &callback,
+int FreeInstallManager::FreeInstallAbilityFromRemote(const Want &want, sptr<IRemoteObject> callback,
     int32_t userId, int requestCode)
 {
     return ERR_OK;
 }
 
 int FreeInstallManager::ConnectFreeInstall(const Want &want, int32_t userId,
-    const sptr<IRemoteObject> &callerToken, const std::string& localDeviceId)
+    sptr<IRemoteObject> callerToken, const std::string &localDeviceId)
 {
     return ERR_OK;
-}
-
-std::time_t FreeInstallManager::GetTimeStamp()
-{
-    std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tp =
-        std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
-    std::time_t timestamp = tp.time_since_epoch().count();
-    return timestamp;
 }
 
 void FreeInstallManager::OnInstallFinished(int32_t recordId, int resultCode, const Want &want,
@@ -132,8 +122,8 @@ void FreeInstallManager::OnRemoteInstallFinished(int32_t recordId, int resultCod
 {
 }
 
-int FreeInstallManager::AddFreeInstallObserver(const sptr<IRemoteObject> &callerToken,
-    const sptr<AbilityRuntime::IFreeInstallObserver> &observer)
+int FreeInstallManager::AddFreeInstallObserver(sptr<IRemoteObject> callerToken,
+    sptr<AbilityRuntime::IFreeInstallObserver> observer)
 {
     return CHECK_PERMISSION_FAILED;
 }
@@ -143,12 +133,12 @@ void FreeInstallManager::RemoveFreeInstallInfo(const std::string &bundleName, co
 {
 }
 
-bool FreeInstallManager::VerifyStartFreeInstallPermission(const sptr<IRemoteObject> &callerToken)
+bool FreeInstallManager::VerifyStartFreeInstallPermission(sptr<IRemoteObject> callerToken)
 {
     return true;
 }
 
-int32_t FreeInstallManager::GetRecordIdByToken(const sptr<IRemoteObject> &callerToken)
+int32_t FreeInstallManager::GetRecordIdByToken(sptr<IRemoteObject> callerToken)
 {
     return 0;
 }

@@ -406,7 +406,7 @@ bool AbilityManagerService::Init()
     HiviewDFX::Watchdog::GetInstance().InitFfrtWatchdog(); // For ffrt watchdog available in foundation
     taskHandler_ = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
     eventHandler_ = std::make_shared<AbilityEventHandler>(taskHandler_, weak_from_this());
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(weak_from_this());
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     CHECK_POINTER_RETURN_BOOL(freeInstallManager_);
 
     AmsConfigurationParameter::GetInstance().Parse();
