@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,6 @@ namespace AAFwk {
 class AbilityManagerService : public std::enable_shared_from_this<AbilityManagerService> {
 public:
     int32_t BlockAllAppStart(bool flag);
-    int32_t CheckProcessOptions(const Want &want, const StartOptions &startOptions, int32_t userId);
     bool ShouldBlockAllAppStart();
 
 public:

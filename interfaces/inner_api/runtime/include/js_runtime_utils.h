@@ -214,6 +214,8 @@ void* GetNamedNativePointer(napi_env env, napi_value object, const char* name);
 
 bool CheckTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType);
 
+void ReleaseNativeReference(napi_env env, NativeReference* ref);
+
 template<class T>
 T* CheckParamsAndGetThis(napi_env env, napi_callback_info info, const char* name = nullptr)
 {

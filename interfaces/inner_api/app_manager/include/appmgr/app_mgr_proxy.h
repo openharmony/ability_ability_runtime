@@ -788,12 +788,12 @@ public:
     /**
      * Start native child process, callde by ChildProcessManager.
      * @param libName lib file name to be load in child process
-     * @param childProcessCount current started child process count
      * @param callback callback for notify start result
+     * @param request, the request of child process.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t CreateNativeChildProcess(const std::string &libName, int32_t childProcessCount,
-        const sptr<IRemoteObject> &callback, const std::string &customProcessName) override;
+    int32_t CreateNativeChildProcess(const std::string &libName,
+        const sptr<IRemoteObject> &callback, const ChildProcessRequest &request) override;
 #endif // SUPPORT_CHILD_PROCESS
 
     /**
@@ -861,6 +861,13 @@ public:
      * @return Return ERR_OK if success, others fail.
      */
     int32_t DemoteCurrentFromCandidateMasterProcess() override;
+
+    /**
+     * Exit from the master process role of the current process.
+     *
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t ExitMasterProcessRole() override;
 
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);

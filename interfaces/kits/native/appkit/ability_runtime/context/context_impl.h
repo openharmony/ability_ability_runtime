@@ -423,6 +423,14 @@ public:
      */
     std::shared_ptr<Context> CreateAreaModeContext(int areaMode) override;
 
+    void SetLaunchParameter(const AAFwk::Want& want);
+
+    std::string GetLaunchParameter();
+
+    void SetLatestParameter(const AAFwk::Want& want);
+
+    std::string GetLatestParameter();
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * @brief Create a context by displayId. This Context updates the density and direction properties
@@ -509,7 +517,7 @@ private:
         const AppExecFwk::BundleInfo &bundleInfo, bool currentBundle, const std::string& moduleName);
     std::shared_ptr<Global::Resource::ResourceManager> InitResourceManagerInner(
         const AppExecFwk::BundleInfo &bundleInfo, bool currentBundle, const std::string& moduleName,
-        std::shared_ptr<Context> inputContext = nullptr);
+        std::shared_ptr<Context> inputContext = nullptr, bool* deduplicate = nullptr);
     void GetOverlayPath(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
         const std::string &bundleName, const std::string &moduleName, std::string &loadPath, bool currentBundle,
         std::shared_ptr<Context> inputContext = nullptr);
@@ -559,6 +567,11 @@ private:
     std::mutex overlaySubscriberMutex_;
     std::shared_ptr<AppExecFwk::OverlayEventSubscriber> overlaySubscriber_;
     std::string processName_;
+    std::mutex launchParameterMutex_;
+    std::shared_ptr<AAFwk::WantParams> launchParameter_ = nullptr;
+    std::mutex latestParameterMutex_;
+    std::shared_ptr<AAFwk::WantParams> latestParameter_ = nullptr;
+
 #ifdef SUPPORT_GRAPHICS
     static std::mutex getDisplayConfigCallbackMutex_;
     static GetDisplayConfigCallback getDisplayConfigCallback_;

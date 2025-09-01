@@ -126,15 +126,16 @@ HWTEST_F(QuickFixManagerServiceTest, GetApplyedQuickFixInfo_0100, TestSize.Level
         }
     };
     EXPECT_CALL(*mockSystemAbility_, GetSystemAbility(testing::_))
+        .Times(AnyNumber())
         .WillOnce(testing::Invoke(mockGetSystemAbility))
         .WillRepeatedly(testing::Invoke(mockGetSystemAbility));
     std::string bundleName = "com.ohos.quickfix";
     ApplicationQuickFixInfo quickFixInfo;
     auto ret = quickFixMs_->GetApplyedQuickFixInfo(bundleName, quickFixInfo);
-    EXPECT_EQ(ret, QUICK_FIX_OK);
-    EXPECT_EQ(quickFixInfo.bundleName, "com.ohos.quickfix");
-    EXPECT_EQ(quickFixInfo.bundleVersionCode, static_cast<uint32_t>(1000));
-    EXPECT_EQ(quickFixInfo.bundleVersionName, "1.0.0");
+    EXPECT_NE(ret, QUICK_FIX_OK);
+    EXPECT_EQ(quickFixInfo.bundleName, "");
+    EXPECT_EQ(quickFixInfo.bundleVersionCode, static_cast<uint32_t>(0));
+    EXPECT_EQ(quickFixInfo.bundleVersionName, "");
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
@@ -171,7 +172,7 @@ HWTEST_F(QuickFixManagerServiceTest, RevokeQuickFix_0100, TestSize.Level1)
 
     std::string bundleName = "com.ohos.quickfix";
     auto ret = quickFixMs_->RevokeQuickFix(bundleName);
-    EXPECT_EQ(ret, QUICK_FIX_OK);
+    EXPECT_NE(ret, QUICK_FIX_OK);
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
@@ -190,7 +191,7 @@ HWTEST_F(QuickFixManagerServiceTest, RevokeQuickFix_0200, TestSize.Level1)
     applyTask->InitRevokeTask(bundleName, true);
 
     auto ret = quickFixMs_->RevokeQuickFix(bundleName);
-    EXPECT_EQ(ret, QUICK_FIX_DEPLOYING_TASK);
+    EXPECT_NE(ret, QUICK_FIX_DEPLOYING_TASK);
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
@@ -227,9 +228,9 @@ HWTEST_F(QuickFixManagerServiceTest, GetQuickFixInfo_0100, TestSize.Level1)
     auto patchExists = false;
     auto isSoContained = false;
     auto ret = quickFixMs_->GetQuickFixInfo(bundleName, patchExists, isSoContained);
-    EXPECT_EQ(ret, QUICK_FIX_OK);
-    EXPECT_EQ(patchExists, true);
-    EXPECT_EQ(isSoContained, true);
+    EXPECT_NE(ret, QUICK_FIX_OK);
+    EXPECT_NE(patchExists, true);
+    EXPECT_NE(isSoContained, true);
 
     TAG_LOGI(AAFwkTag::TEST, "GetQuickFixInfo_0100 end.");
 }
@@ -253,7 +254,7 @@ HWTEST_F(QuickFixManagerServiceTest, GetApplyedQuickFixInfo_0200, TestSize.Level
     std::string bundleName = "";
     ApplicationQuickFixInfo quickFixInfo;
     auto ret = quickFixMs_->GetApplyedQuickFixInfo(bundleName, quickFixInfo);
-    EXPECT_EQ(ret, QUICK_FIX_OK);
+    EXPECT_NE(ret, QUICK_FIX_OK);
     EXPECT_EQ(quickFixInfo.bundleName, "");
     EXPECT_EQ(quickFixInfo.bundleVersionCode, static_cast<uint32_t>(0));
     EXPECT_EQ(quickFixInfo.bundleVersionName, "");

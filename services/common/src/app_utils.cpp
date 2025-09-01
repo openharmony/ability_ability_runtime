@@ -83,6 +83,8 @@ constexpr const char* CONNECT_SUPPORT_CROSS_USER = "const.abilityms.connect_supp
 constexpr const char* SUPPORT_APP_SERVICE_EXTENSION = "const.abilityms.support_app_service";
 constexpr const char* PRODUCT_PRELOAD_APPLICATION_SETTING_ENABLED = "const.product.preload_application.setting.enabled";
 constexpr const char* FORBID_START = "persist.sys.abilityms.forbid_start";
+constexpr const char* RESTART_APP_WITH_WINDOW = "persist.sys.abilityms.restart_app_with_window";
+constexpr const char* ALLOW_DEBUG_PERMISSION = "persist.sys.abilityms.allow_debug_permission";
 // Support prepare terminate
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
@@ -666,6 +668,7 @@ bool AppUtils::IsSystemReasonMessage(const std::string &reasonMessage)
     const std::unordered_set<std::string> systemReasonMessagesSet = {
         "ReasonMessage_SystemShare",
         "ReasonMessage_DesktopShortcut",
+        "ReasonMessage_Notification",
     };
     return systemReasonMessagesSet.find(reasonMessage) != systemReasonMessagesSet.end();
 }
@@ -844,6 +847,26 @@ bool AppUtils::IsForbidStart()
     }
     return isForbidStart_.value;
 #endif
+}
+
+bool AppUtils::IsSupportRestartAppWithWindow()
+{
+    if (!isSupportRestartAppWithWindow_.isLoaded) {
+        isSupportRestartAppWithWindow_.value = system::GetBoolParameter(RESTART_APP_WITH_WINDOW, false);
+        isSupportRestartAppWithWindow_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "restartApp: %{public}d", isSupportRestartAppWithWindow_.value);
+    return isSupportRestartAppWithWindow_.value;
+}
+
+bool AppUtils::IsSupportAllowDebugPermission()
+{
+    if (!isSupportAllowDebugPermission_.isLoaded) {
+        isSupportAllowDebugPermission_.value = system::GetBoolParameter(ALLOW_DEBUG_PERMISSION, false);
+        isSupportAllowDebugPermission_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "restartApp: %{public}d", isSupportAllowDebugPermission_.value);
+    return isSupportAllowDebugPermission_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

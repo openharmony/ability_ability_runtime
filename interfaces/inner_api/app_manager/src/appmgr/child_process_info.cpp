@@ -17,7 +17,7 @@
 
 #include "hilog_tag_wrapper.h"
 #include "nlohmann/json.hpp"
-#include "parcel_macro_base.h"
+#include "parcel_macro.h"
 #include "string_ex.h"
 
 namespace OHOS {
@@ -55,6 +55,24 @@ bool ChildProcessInfo::ReadFromParcel(Parcel &parcel)
     isDebugApp = parcel.ReadBool();
     isStartWithDebug = parcel.ReadBool();
     isStartWithNative = parcel.ReadBool();
+    std::unique_ptr<BundleInfo> info(parcel.ReadParcelable<BundleInfo>());
+    if (!info) {
+        TAG_LOGE(AAFwkTag::APPMGR, "read bundle info failed");
+        return false;
+    }
+    bundleInfo = *info;
+
+    int32_t hspListSize = 0;
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, hspListSize);
+    CONTAINER_SECURITY_VERIFY(parcel, hspListSize, &hspList);
+    for (auto i = 0; i < hspListSize; i++) {
+        std::unique_ptr<BaseSharedBundleInfo> baseShareBundleInfo(parcel.ReadParcelable<BaseSharedBundleInfo>());
+        if (!baseShareBundleInfo) {
+            TAG_LOGE(AAFwkTag::APPMGR, "read base shared bundle info failed");
+            return false;
+        }
+        hspList.emplace_back(*baseShareBundleInfo);
+    }
 
     return true;
 }
@@ -87,6 +105,11 @@ bool ChildProcessInfo::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isDebugApp);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isStartWithDebug);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isStartWithNative);
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Parcelable, parcel, &bundleInfo);
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, hspList.size());
+    for (auto &baseSharedBundleInfo : hspList) {
+        WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Parcelable, parcel, &baseSharedBundleInfo);
+    }
     return true;
 }
 }  // namespace AppExecFwk

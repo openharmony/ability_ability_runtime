@@ -70,8 +70,10 @@ public:
     MOCK_METHOD1(SetWatchdogBackgroundStatus, void(bool status));
     MOCK_METHOD0(ScheduleClearPageStack, void());
     MOCK_METHOD0(IsMemorySizeSufficent, bool());
+    MOCK_METHOD1(VerifyKillProcessPermission, int32_t(const std::string &bundleName));
     MOCK_METHOD0(ScheduleCacheProcess, void());
     MOCK_METHOD1(ScheduleCjHeapMemory, void(OHOS::AppExecFwk::CjHeapDumpInfo &info));
+
     bool AddDeathRecipient(const sptr<DeathRecipient> &recipient) override
     {
         return AAFwk::MyStatus::GetInstance().addDeathRecipientReturn_;

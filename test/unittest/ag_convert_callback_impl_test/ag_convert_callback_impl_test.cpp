@@ -48,7 +48,7 @@ HWTEST_F(AgConvertCallbackImplTest, OnConvert_0001, TestSize.Level1)
     auto callbackImpl = std::make_shared<ConvertCallbackImpl>(std::move(task));
     int resultCode = 1;
     AppDomainVerify::TargetInfo targetInfo;
-    callbackImpl->task_ = nullptr;
+    callbackImpl->Cancel();
     callbackImpl->OnConvert(resultCode, targetInfo);
     EXPECT_EQ(callbackImpl->task_, nullptr);
 }

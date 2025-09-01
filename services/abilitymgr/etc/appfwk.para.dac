@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -35,6 +35,8 @@ persist.sys.abilityms.move_ui_ability_to_background_api_enable = foundation:foun
 persist.sys.abilityms.prevent_startability = foundation:foundation:0755
 persist.sys.abilityms.cache_ability_enable = foundation:foundation:0755
 persist.sys.abilityms.forbid_start = foundation:foundation:0755
+persist.sys.abilityms.restart_app_with_window = foundation:foundation:0755
+persist.sys.abilityms.allow_debug_permission = foundation:foundation:0755
 const.abilityms.launch_embeded_ui_ability = foundation:foundation:0755
 const.sys.abilityms.limit_maximum_extensions_of_per_process = foundation:foundation:0755
 const.sys.abilityms.limit_maximum_extensions_of_per_device = foundation:foundation:0755

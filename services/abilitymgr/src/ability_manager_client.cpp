@@ -261,6 +261,16 @@ ErrCode AbilityManagerClient::StartAbilityForResultAsCaller(const Want &want, co
     return abms->StartAbilityForResultAsCaller(want, startOptions, callerToken, requestCode, userId);
 }
 
+ErrCode AbilityManagerClient::StartUIAbilitiesInSplitWindowMode(int32_t primaryWindowId,
+    const AAFwk::Want &secondaryWant, sptr<IRemoteObject> callerToken)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    HandleDlpApp(const_cast<Want &>(secondaryWant));
+    return abms->StartUIAbilitiesInSplitWindowMode(primaryWindowId, secondaryWant, callerToken);
+}
+
 ErrCode AbilityManagerClient::StartUIAbilities(const std::vector<AAFwk::Want> &wantList,
     const std::string &requestKey, sptr<IRemoteObject> callerToken)
 {
@@ -1236,13 +1246,14 @@ ErrCode AbilityManagerClient::StopSyncRemoteMissions(const std::string &devId)
     return abms->StopSyncRemoteMissions(devId);
 }
 
-ErrCode AbilityManagerClient::StartUser(int accountId, sptr<IUserCallback> callback, bool isAppRecovery)
+ErrCode AbilityManagerClient::StartUser(int accountId, uint64_t displayId, sptr<IUserCallback> callback,
+    bool isAppRecovery)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "accountId:%{public}d, isAppRecovery:%{public}d",
         accountId, isAppRecovery);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->StartUser(accountId, callback, isAppRecovery);
+    return abms->StartUser(accountId, displayId, callback, isAppRecovery);
 }
 
 ErrCode AbilityManagerClient::StopUser(int accountId, sptr<IUserCallback> callback)
@@ -1600,7 +1611,7 @@ AppExecFwk::ElementName AbilityManagerClient::GetTopAbility(bool isNeedLocalDevi
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "get sceneSessionManager failed");
                 return elementName;
             }
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "call GetTopAbility");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "GetTopAbility");
             (void)sceneSessionManager->GetFocusSessionElement(elementName);
             return elementName;
         }
@@ -1648,7 +1659,7 @@ ErrCode AbilityManagerClient::AddFreeInstallObserver(const sptr<IRemoteObject> c
 int32_t AbilityManagerClient::IsValidMissionIds(
     const std::vector<int32_t> &missionIds, std::vector<MissionValidResult> &results)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
 #ifdef SUPPORT_SCREEN
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
@@ -1865,6 +1876,14 @@ ErrCode AbilityManagerClient::QueryAllAutoStartupApplications(std::vector<AutoSt
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->QueryAllAutoStartupApplications(infoList);
+}
+
+ErrCode AbilityManagerClient::GetAutoStartupStatusForSelf(bool &isAutoStartEnabled)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "GetAutoStartupStatusForSelf called");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetAutoStartupStatusForSelf(isAutoStartEnabled);
 }
 
 ErrCode AbilityManagerClient::PrepareTerminateAbilityBySCB(sptr<SessionInfo> sessionInfo,
@@ -2099,12 +2118,12 @@ ErrCode AbilityManagerClient::PreStartMission(const std::string& bundleName, con
     return abms->PreStartMission(bundleName, moduleName, abilityName, startTime);
 }
 
-ErrCode AbilityManagerClient::OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
-    int32_t userId, int requestCode)
+ErrCode AbilityManagerClient::OpenLink(const Want &want, sptr<IRemoteObject> callerToken,
+    int32_t userId, int requestCode, bool hideFailureTipDialog)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_INVALID_VALUE(abms);
-    return abms->OpenLink(want, callerToken, userId, requestCode);
+    return abms->OpenLink(want, callerToken, userId, requestCode, hideFailureTipDialog);
 }
 
 ErrCode AbilityManagerClient::TerminateMission(int32_t missionId)

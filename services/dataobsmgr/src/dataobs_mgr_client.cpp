@@ -17,6 +17,7 @@
 #include "dataobs_mgr_client.h"
 
 #include "common_utils.h"
+#include "dataobs_mgr_interface.h"
 #include "datashare_log.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
@@ -119,6 +120,29 @@ ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, sptr<IDataAbilityObse
     return status;
 }
 
+ErrCode DataObsMgrClient::RegisterObserverFromExtension(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+    int userId, DataObsOption opt)
+{
+    auto [errCode, dataObsManger] = GetObsMgr();
+    if (errCode != SUCCESS) {
+        LOG_ERROR("Failed to get ObsMgr, errCode: %{public}d.", errCode);
+        return DATAOBS_SERVICE_NOT_CONNECTED;
+    }
+    auto status = dataObsManger->RegisterObserverFromExtension(uri, dataObserver, userId, opt);
+    if (status != NO_ERROR) {
+        return status;
+    }
+    uint32_t firstCallerTokenID = opt.FirstCallerTokenID();
+    observers_.Compute(dataObserver, [&uri, userId, firstCallerTokenID](const auto &key, auto &value) {
+        ObserverInfo info(uri, userId);
+        info.isExtension = true;
+        info.firstCallerTokenID = firstCallerTokenID;
+        value.emplace_back(uri, userId);
+        return true;
+    });
+    return status;
+}
+
 /**
  * Deregisters an observer used for DataObsMgr specified by the given Uri.
  *
@@ -161,6 +185,31 @@ ErrCode DataObsMgrClient::NotifyChange(const Uri &uri, int userId, DataObsOption
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
     return dataObsManger->NotifyChange(uri, userId, opt);
+}
+
+/**
+ * Notifies the registered observers of a change to the data resource specified by Uri.
+ *
+ * @param uri, Indicates the path of the data to operate.
+ *
+ * @return Returns ERR_OK on success, others on failure.
+ */
+ErrCode DataObsMgrClient::NotifyChangeFromExtension(const Uri &uri, int userId, DataObsOption opt)
+{
+    auto [errCode, dataObsManger] = GetObsMgr();
+    if (errCode != SUCCESS) {
+        return DATAOBS_SERVICE_NOT_CONNECTED;
+    }
+    return dataObsManger->NotifyChangeFromExtension(uri, userId, opt);
+}
+
+ErrCode DataObsMgrClient::CheckTrusts(uint32_t consumerToken, uint32_t providerToken)
+{
+    auto [errCode, dataObsManger] = GetObsMgr();
+    if (errCode != SUCCESS) {
+        return DATAOBS_SERVICE_NOT_CONNECTED;
+    }
+    return dataObsManger->CheckTrusts(consumerToken, providerToken);
 }
 
 /**
@@ -304,10 +353,17 @@ void DataObsMgrClient::ReRegister()
     observers_.Clear();
     observers.ForEach([this](const auto &key, const auto &value) {
         for (const auto &val : value) {
-            auto ret = RegisterObserver(val.uri, key, val.userId);
+            int32_t ret;
+            if (val.isExtension) {
+                DataObsOption opt;
+                opt.SetFirstCallerTokenID(val.firstCallerTokenID);
+                ret = RegisterObserverFromExtension(val.uri, key, val.userId, opt);
+            } else {
+                ret = RegisterObserver(val.uri, key, val.userId);
+            }
             if (ret != SUCCESS) {
-                LOG_ERROR("RegisterObserver failed, uri:%{public}s, ret:%{public}d",
-                    CommonUtils::Anonymous(val.uri.ToString()).c_str(), ret);
+                LOG_ERROR("RegisterObserver failed, uri:%{public}s, ret:%{public}d, isExtension %{public}d",
+                    CommonUtils::Anonymous(val.uri.ToString()).c_str(), ret, val.isExtension);
             }
         }
         return false;

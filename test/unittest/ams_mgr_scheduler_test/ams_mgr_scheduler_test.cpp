@@ -748,6 +748,26 @@ HWTEST_F(AmsMgrSchedulerTest, IsMemorySizeSufficent_001, TestSize.Level2)
 
 /*
  * Feature: AmsMgrScheduler
+ * Function: VerifyKillProcessPermission
+ * SubFunction: NA
+ * FunctionPoints: AmsMgrScheduler VerifyKillProcessPermission
+ * EnvConditions: NA
+ * CaseDescription: Verify VerifyKillProcessPermission
+ */
+HWTEST_F(AmsMgrSchedulerTest, VerifyKillProcessPermission_001, TestSize.Level2)
+{
+    auto amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
+    ASSERT_NE(amsMgrScheduler, nullptr);
+    auto res = amsMgrScheduler->VerifyKillProcessPermission("test");
+    EXPECT_NE(res, ERR_OK);
+    amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
+    amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
+    res = amsMgrScheduler->VerifyKillProcessPermission("test");
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * Feature: AmsMgrScheduler
  * Function: StartSpecifiedAbility
  * SubFunction: NA
  * FunctionPoints: AmsMgrScheduler StartSpecifiedAbility
@@ -828,34 +848,6 @@ HWTEST_F(AmsMgrSchedulerTest, NotifyAppMgrRecordExitReason_001, TestSize.Level2)
     amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
     int res2 = amsMgrScheduler->NotifyAppMgrRecordExitReason(pid, reason, exitMsg);
     EXPECT_NE(res2, ERR_INVALID_OPERATION);
-}
-
-/**
- * @tc.name: SetCurrentUserId_002
- * @tc.desc: set current userId.
- * @tc.type: FUNC
- */
-HWTEST_F(AmsMgrSchedulerTest, SetCurrentUserId_002, TestSize.Level2)
-{
-    auto amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
-    amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
-    amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
-    ASSERT_NE(amsMgrScheduler, nullptr);
-    int userId = 1;
-    amsMgrScheduler->SetCurrentUserId(userId);
-}
-
-/**
- * @tc.name: SetCurrentUserId_001
- * @tc.desc: set current userId.
- * @tc.type: FUNC
- */
-HWTEST_F(AmsMgrSchedulerTest, SetCurrentUserId_001, TestSize.Level2)
-{
-    auto amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
-    ASSERT_NE(amsMgrScheduler, nullptr);
-    int userId = 1;
-    amsMgrScheduler->SetCurrentUserId(userId);
 }
 
 /**

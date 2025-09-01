@@ -959,8 +959,9 @@ HWTEST_F(AbilityManagerClientBranchTest, StopSyncRemoteMissions_0100, TestSize.L
 HWTEST_F(AbilityManagerClientBranchTest, StartUser_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "StartUser_0100 start";
-    int userId = 1;
-    auto result = client_->StartUser(userId, nullptr);
+    int userId = 200;
+    uint64_t displayId = 0;
+    auto result = client_->StartUser(userId, displayId, nullptr);
 
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "StartUser_0100 end";
@@ -1869,6 +1870,18 @@ HWTEST_F(AbilityManagerClientBranchTest, QueryAllAutoStartupApplications_0100, T
 {
     std::vector<AutoStartupInfo> infoList;
     auto result = client_->QueryAllAutoStartupApplications(infoList);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AbilityManagerClient_GetAutoStartupStatusForSelf_0100
+ * @tc.desc: GetAutoStartupStatusForSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, GetAutoStartupStatusForSelf_0100, TestSize.Level1)
+{
+    bool isAutoStartEnabled = false;
+    auto result = client_->GetAutoStartupStatusForSelf(isAutoStartEnabled);
     EXPECT_EQ(result, ERR_OK);
 }
 

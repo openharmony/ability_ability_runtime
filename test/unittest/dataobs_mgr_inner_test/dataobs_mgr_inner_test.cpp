@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,9 +62,7 @@ static constexpr int64_t USER_TEST = 100;
  */
 HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0100, TestSize.Level1)
 {
-    if (dataObsMgrInner_ == nullptr) {
-        return;
-    }
+    ASSERT_TRUE(dataObsMgrInner_ != nullptr);
 
     Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
     sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
@@ -259,9 +257,8 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserver_0300, Tes
  */
 HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_0100, TestSize.Level1)
 {
-    if (dataObsMgrInner_ == nullptr) {
-        return;
-    }
+    ASSERT_TRUE(dataObsMgrInner_ != nullptr);
+
     Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
     sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub(new (std::nothrow) MockDataAbilityObserverStub());
 
@@ -318,9 +315,8 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_0300, TestSize.
  */
 HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_RemoveObs_HaveRegistered_0100, TestSize.Level1)
 {
-    if (dataObsMgrInner_ == nullptr) {
-        return;
-    }
+    ASSERT_TRUE(dataObsMgrInner_ != nullptr);
+    
     Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
     sptr<MockDataAbilityObserverStub> mockDataAbilityObserverStub(new (std::nothrow) MockDataAbilityObserverStub());
     const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub));
@@ -359,9 +355,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_RemoveObs_HaveRegistered_0100, Tes
  */
 HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_AddRemove_ObsDeathRecipient_0100, TestSize.Level1)
 {
-    if (dataObsMgrInner_ == nullptr) {
-        return;
-    }
+    ASSERT_TRUE(dataObsMgrInner_ != nullptr);
 
     sptr<IRemoteObject> observer(new (std::nothrow) MockDataAbilityObserverStub());
     sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(observer));

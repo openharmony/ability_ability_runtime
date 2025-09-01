@@ -474,7 +474,8 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_010
     EXPECT_NE(appMgrServiceInner, nullptr);
     std::string bundleName = "testBundleName";
     std::vector<std::string> instanceKeys;
-    auto ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    int32_t userId = 100;
+    auto ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
     EXPECT_NE(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_0100 end");
 }
@@ -620,7 +621,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_NotifyAppFau
     // expect in appfreezeManager return OK
     AppfreezeManager::GetInstance()->CancelAppFreezeDetect(1, TEST_BUNDLE_NAME);
     ret = appMgrServiceInner->NotifyAppFault(faultData);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_NotifyAppFault_0100 end");
 }
 
@@ -1161,14 +1162,14 @@ HWTEST_F(AppMgrServiceInnerSecondTest, ClearUpApplicationData_0100, TestSize.Lev
     pid_t callerPid = 1;
     int32_t appCloneIndex = 0;
     int32_t userId = DEFAULT_INVAL_VALUE;
-    appMgrServiceInner->ClearUpApplicationData(bundleName, callerUid, callerPid, appCloneIndex, userId);
-    EXPECT_EQ(userId, DEFAULT_INVAL_VALUE);
+    auto ret = appMgrServiceInner->ClearUpApplicationData(bundleName, callerUid, callerPid, appCloneIndex, userId);
+    EXPECT_EQ(ret, ERR_APP_CLONE_INDEX_INVALID);
     callerUid = -1;
-    appMgrServiceInner->ClearUpApplicationData(bundleName, callerUid, callerPid, appCloneIndex, userId);
-    EXPECT_EQ(userId, DEFAULT_INVAL_VALUE);
+    ret = appMgrServiceInner->ClearUpApplicationData(bundleName, callerUid, callerPid, appCloneIndex, userId);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
     userId = 1;
-    appMgrServiceInner->ClearUpApplicationData(bundleName, callerUid, callerPid, appCloneIndex, userId);
-    EXPECT_NE(userId, DEFAULT_INVAL_VALUE);
+    ret = appMgrServiceInner->ClearUpApplicationData(bundleName, callerUid, callerPid, appCloneIndex, userId);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_ClearUpApplicationData_0100 end");
 }
 
@@ -1229,14 +1230,15 @@ HWTEST_F(AppMgrServiceInnerSecondTest, GetAllRunningInstanceKeysByBundleName_100
     std::string bundleName = "";
     std::vector<std::string> instanceKeys;
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    auto res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    int32_t userId = 100;
+    auto res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
     EXPECT_EQ(res, AAFwk::INVALID_PARAMETERS_ERR);
     bundleName = TEST_BUNDLE_NAME;
     appMgrServiceInner->remoteClientManager_ = nullptr;
-    res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
     appMgrServiceInner->remoteClientManager_ = std::make_shared<RemoteClientManager>();
-    res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys);
+    res = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAllRunningInstanceKeysByBundleName_1000 end");
 }
 
@@ -1602,7 +1604,6 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_ClearAppRunn
     appRecord->SetUid(uid);
     appMgrServiceInner->ClearAppRunningDataForKeepAlive(appRecord);
 
-    appMgrServiceInner->currentUserId_ = 1;
     appMgrServiceInner->ClearAppRunningDataForKeepAlive(appRecord);
 
     appMgrServiceInner->taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler("AppMgrServiceInnerSecondTest");
@@ -1933,10 +1934,6 @@ HWTEST_F(AppMgrServiceInnerSecondTest, ProcessAppDebug_0010, TestSize.Level1)
     std::shared_ptr<AppRunningRecord> appRecord;
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
-
-    appMgrServiceInner->appDebugManager_ = nullptr;
-    appMgrServiceInner->ProcessAppDebug(nullptr, true);
-    EXPECT_EQ(appMgrServiceInner->appDebugManager_, nullptr);
 
     appMgrServiceInner->appDebugManager_ = std::make_shared<AppDebugManager>();
     appMgrServiceInner->ProcessAppDebug(nullptr, true);

@@ -64,7 +64,8 @@ ErrCode ScreenUnlockInterceptor::DoProcess(AbilityInterceptorParam param)
     }
     if (targetAbilityInfo.type == AppExecFwk::AbilityType::EXTENSION &&
         !DelayedSingleton<ExtensionConfig>::GetInstance()->IsScreenUnlockIntercept(
-            targetAbilityInfo.extensionTypeName)) {
+            targetAbilityInfo.extensionTypeName, targetAbilityInfo.applicationInfo.isSystemApp,
+            targetAbilityInfo.applicationInfo.bundleName)) {
         return ERR_OK;
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "no startup before device first unlock");

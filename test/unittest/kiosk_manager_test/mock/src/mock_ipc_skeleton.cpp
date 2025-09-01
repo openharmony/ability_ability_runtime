@@ -14,6 +14,7 @@
  */
 
 #include "mock_ipc_skeleton.h"
+#include "mock_my_status.h"
 
 namespace OHOS {
 #ifdef CONFIG_IPC_SINGLE
@@ -25,7 +26,7 @@ pid_t tokenId_ = 0;
 
 pid_t IPCSkeleton::GetCallingUid()
 {
-    return uid_;
+    return static_cast<pid_t>(AAFwk::MyStatus::GetInstance().ipcGetCallingUid_);
 }
 
 pid_t IPCSkeleton::GetCallingPid()

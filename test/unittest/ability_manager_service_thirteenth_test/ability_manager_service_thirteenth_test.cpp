@@ -39,6 +39,7 @@ constexpr int32_t FOUNDATION_UID = 5523;
 constexpr int32_t DMS_UID = 5522;
 constexpr int32_t LOW_MEMORY_KILL_WHILE_STARTING = 1111;
 constexpr int32_t DEFAULT_INVAL_VALUE = -1;
+constexpr int32_t PENG_LAI_UID = 7655;
 
 namespace OHOS {
 namespace AAFwk {
@@ -50,6 +51,15 @@ public:
     void TearDown();
     std::shared_ptr<AbilityRecord> MockAbilityRecord(AbilityType);
     sptr<Token> MockToken(AbilityType);
+};
+
+class MockISAInterceptor : public AbilityRuntime::ISAInterceptor {
+public:
+    int32_t OnCheckStarting(const std::string& params, Rule& rule) override { return 0; };
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
 };
 
 void AbilityManagerServiceThirteenthTest::SetUpTestCase() {}
@@ -424,7 +434,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_003, TestSiz
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
@@ -646,7 +656,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, IsEmbeddedOpenAllowed_009, TestSiz
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
@@ -877,7 +887,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_007,
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
@@ -923,7 +933,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_008,
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
@@ -969,7 +979,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_009,
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
@@ -1016,7 +1026,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_010,
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
@@ -1062,7 +1072,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, QueryAtomicServiceStartupRule_011,
     EXPECT_NE(mockSubManagersHelper, nullptr);
     auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
     EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
-    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>(abilityMs_);
+    auto mockFreeInstallManager = std::make_shared<FreeInstallManager>();
     EXPECT_NE(mockFreeInstallManager, nullptr);
     abilityMs_->subManagersHelper_ = mockSubManagersHelper;
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
@@ -1230,6 +1240,27 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, KillProcessWithReason_002, TestSiz
     EXPECT_EQ(abilityMs_->KillProcessWithReason(pid, reason), ERR_KILL_APP_WHILE_STARTING);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest KillProcessWithReason_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: KillProcessWithReason_003
+ * Function: InitFocusListener
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService KillProcessWithReason
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, KillProcessWithReason_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest KillProcessWithReason_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    int32_t pid = 1;
+    ExitReason exitReason;
+    exitReason.reason = Reason::REASON_RESOURCE_CONTROL;
+    exitReason.shouldKillForeground = false;
+    auto result = abilityMs_->KillProcessWithReason(pid, exitReason);
+    EXPECT_EQ(result, ERR_KILL_APP_WHILE_FOREGROUND);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest KillProcessWithReason_003 end");
 }
 
 /*
@@ -1927,7 +1958,7 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesInterceptorCheck_0
     MyStatus::GetInstance().permPermission_ = true;
     want.SetElementName("com.ohos.test", "MainAbility");
 
-    EXPECT_EQ(abilityMs_->StartUIAbilitiesInterceptorCheck(want, abilityRequest, callerToken, appIndex),
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesInterceptorCheck(want, abilityRequest, callerToken, appIndex, userId),
         START_UI_ABILITIES_INTERCEPTOR_CHECK_FAILED);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInterceptorCheck_001 end");
@@ -2650,6 +2681,37 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, OnStartTest_002, TestSize.Level1)
     EXPECT_EQ(abilityManagerService->QueryServiceState(), ServiceRunningState::STATE_RUNNING);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest OnStartTest_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RegisterSAInterceptor
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterSAInterceptor
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, RegisterSAInterceptor_001, TestSize.Level1) {
+    sptr<AbilityRuntime::ISAInterceptor> interceptor = new (std::nothrow) MockISAInterceptor();
+    ASSERT_NE(interceptor, nullptr);
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityManagerService, nullptr);
+    auto result = abilityManagerService->RegisterSAInterceptor(interceptor);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RegisterSAInterceptor
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterSAInterceptor
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, RegisterSAInterceptor_002, TestSize.Level1) {
+    sptr<AbilityRuntime::ISAInterceptor> interceptor = new (std::nothrow) MockISAInterceptor();
+    ASSERT_NE(interceptor, nullptr);
+    auto abilityManagerService = std::make_shared<AbilityManagerService>();
+    ASSERT_NE(abilityManagerService, nullptr);
+    MyStatus::GetInstance().ipcGetCallingUid_ = PENG_LAI_UID;
+    auto result = abilityManagerService->RegisterSAInterceptor(interceptor);
+    EXPECT_EQ(result, ERR_OK);
 }
 } // namespace AAFwk
 } // namespace OHOS

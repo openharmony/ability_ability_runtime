@@ -389,6 +389,7 @@ group("unittest") {
       "js_ui_extension_content_session_test:unittest",
       "js_ui_extension_context_test:unittest",
       "js_uiservice_uiext_connection_test:unittest",
+      "json_utils_test:unittest",
       "keep_alive_process_manager_test:unittest",
       "keep_alive_utils_test:unittest",
       "killing_process_manager_test:unittest",
@@ -455,6 +456,7 @@ group("unittest") {
       "start_ability_utils_test:unittest",
       "start_options_impl_test:unittest",
       "start_options_test:unittest",
+      "start_options_utils_test:unittest",
       "start_other_app_interceptor_test:unittest",
       "startup_util_test:unittest",
       "state_utils_test:unittest",
@@ -476,11 +478,9 @@ group("unittest") {
       "ui_extension_record_test:unittest",
       "ui_extension_utils_test:unittest",
       "update_caller_info_util_test:unittest",
+      "udmf_utils_test:unittest",
       "uri_utils_second_test",
       "uri_utils_test:unittest",
-      "user_controller_test:unittest",
-      "user_event_handler_test:unittest",
-      "user_record_manager_test:unittest",
       "want_agent_helper_test:unittest",
       "want_agent_info_test:unittest",
       "want_agent_test:unittest",
@@ -577,10 +577,10 @@ group("unittest") {
     if (ability_runtime_upms) {
       deps += [
         "file_permission_manager_test:unittest",
+        "file_uri_distribution_utils_test:unittest",
         "uri_perm_mgr_test:unittest",
         "uri_permission_manager_test:unittest",
         "uri_permission_test:unittest",
-        "uri_permission_utils_test:unittest",
       ]
     }
 

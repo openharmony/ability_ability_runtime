@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -30,11 +30,10 @@ config("upms_config") {
 libupms_sources = [
   "src/batch_uri.cpp",
   "src/file_permission_manager.cpp",
+  "src/file_uri_distribution_utils.cpp",
   "src/tokenid_permission.cpp",
   "src/uri_permission_manager_service.cpp",
   "src/uri_permission_manager_stub_impl.cpp",
-  "src/uri_permission_utils.cpp",
-  "src/upms_udmf_utils.cpp",
 ]
 
 #build so
@@ -94,7 +93,6 @@ ohos_shared_library("libupms") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "storage_service:storage_manager_sa_proxy",
-    "udmf:udmf_client",
   ]
 
   defines = []
@@ -110,6 +108,12 @@ ohos_shared_library("libupms") {
     sources += [ "src/media_permission_manager.cpp" ]
     external_deps += [ "media_library:media_library_extend_manager" ]
     defines += [ "ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE" ]
+  }
+
+  if (ability_runtime_udmf_enable) {
+    sources += [ "src/upms_udmf_utils.cpp" ]
+    external_deps += [ "udmf:udmf_client" ]
+    defines += [ "ABILITY_RUNTIME_UDMF_ENABLE" ]
   }
 
   subsystem_name = "ability"
@@ -163,7 +167,6 @@ ohos_static_library("libupms_static") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "storage_service:storage_manager_sa_proxy",
-    "udmf:udmf_client",
   ]
   if (ability_runtime_upms) {
     deps += [
@@ -182,6 +185,12 @@ ohos_static_library("libupms_static") {
     sources += [ "src/media_permission_manager.cpp" ]
     external_deps += [ "media_library:media_library_extend_manager" ]
     defines += [ "ABILITY_RUNTIME_MEDIA_LIBRARY_ENABLE" ]
+  }
+
+  if (ability_runtime_udmf_enable) {
+    sources += [ "src/upms_udmf_utils.cpp" ]
+    external_deps += [ "udmf:udmf_client" ]
+    defines += [ "ABILITY_RUNTIME_UDMF_ENABLE" ]
   }
 
   subsystem_name = "ability"

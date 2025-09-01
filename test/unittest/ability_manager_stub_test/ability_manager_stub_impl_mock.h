@@ -283,7 +283,7 @@ public:
     {
         return 0;
     }
-    int StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery) override
+    int StartUser(int userId, uint64_t displayId, sptr<IUserCallback> callback, bool isAppRecovery) override
     {
         return 0;
     }
@@ -472,6 +472,7 @@ public:
         const InsightIntentExecuteResult &result));
     MOCK_METHOD3(GetUIExtensionRootHostInfo, int32_t(const sptr<IRemoteObject> token, UIExtensionHostInfo &hostInfo,
         int32_t userId));
+    MOCK_METHOD1(GetAutoStartupStatusForSelf, int32_t(bool &isAutoStartEnabled));
 };
 }  // namespace AAFwk
 }  // namespace OHOS

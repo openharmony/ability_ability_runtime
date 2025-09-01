@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,8 +78,7 @@ sptr<Token> FreeInstallTest::MockToken()
  */
 HWTEST_F(FreeInstallTest, FreeInstall_StartFreeInstall_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility");
     want.SetElement(element);
@@ -113,8 +112,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_StartFreeInstall_001, TestSize.Level1)
  */
 HWTEST_F(FreeInstallTest, FreeInstall_StartFreeInstall_002, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility");
     want.SetElement(element);
@@ -134,8 +132,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_StartFreeInstall_002, TestSize.Level1)
  */
 HWTEST_F(FreeInstallTest, FreeInstall_StartFreeInstall_003, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility");
     want.SetElement(element);
@@ -168,8 +165,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_StartFreeInstall_003, TestSize.Level1)
  */
 HWTEST_F(FreeInstallTest, FreeInstall_OnInstallFinished_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility");
     want.SetElement(element);
@@ -202,8 +198,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_OnInstallFinished_001, TestSize.Level1)
  */
 HWTEST_F(FreeInstallTest, FreeInstall_OnInstallFinished_002, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility");
     want.SetElement(element);
@@ -236,8 +231,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_OnInstallFinished_002, TestSize.Level1)
  */
 HWTEST_F(FreeInstallTest, FreeInstall_OnInstallFinished_003, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility");
     want.SetElement(element);
@@ -263,8 +257,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_OnInstallFinished_003, TestSize.Level1)
  */
 HWTEST_F(FreeInstallTest, FreeInstall_FreeInstallAbilityFromRemote_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility");
     want.SetElement(element);
@@ -282,8 +275,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_FreeInstallAbilityFromRemote_001, TestSize
  */
 HWTEST_F(FreeInstallTest, FreeInstall_OnRemoteInstallFinished_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility");
     want.SetElement(element);
@@ -316,8 +308,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_OnRemoteInstallFinished_001, TestSize.Leve
  */
 HWTEST_F(FreeInstallTest, FreeInstall_ConnectFreeInstall_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility");
     want.SetElement(element);
@@ -327,23 +318,6 @@ HWTEST_F(FreeInstallTest, FreeInstall_ConnectFreeInstall_001, TestSize.Level1)
     EXPECT_NE(res, 0);
 }
 
-
-/**
- * @tc.number: FreeInstall_UpdateElementName_001
- * @tc.name: UpdateElementName
- * @tc.desc: Test UpdateElementName.
- */
-HWTEST_F(FreeInstallTest, FreeInstall_UpdateElementName_001, TestSize.Level1)
-{
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
-    Want want;
-    const int32_t userId = 1;
-    freeInstallManager_->UpdateElementName(want, userId);
-    freeInstallManager_->GetTimeStamp();
-    EXPECT_TRUE(freeInstallManager_ != nullptr);
-}
-
 /**
  * @tc.number: FreeInstall_AddFreeInstallObserver_001
  * @tc.name: AddFreeInstallObserver
@@ -351,8 +325,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_UpdateElementName_001, TestSize.Level1)
  */
 HWTEST_F(FreeInstallTest, FreeInstall_AddFreeInstallObserver_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
 
     auto ret = freeInstallManager_->AddFreeInstallObserver(nullptr, nullptr);
     EXPECT_EQ(CHECK_PERMISSION_FAILED, ret);
@@ -365,8 +338,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_AddFreeInstallObserver_001, TestSize.Level
  */
 HWTEST_F(FreeInstallTest, FreeInstall_SetSCBCallStatus_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
 
     freeInstallManager_->SetSCBCallStatus("com.ix.hiservcie", "ServiceAbility", "2024-7-17 00:00:00", false);
     FreeInstallInfo freeInstallInfo;
@@ -382,8 +354,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_SetSCBCallStatus_001, TestSize.Level1)
  */
 HWTEST_F(FreeInstallTest, FreeInstall_SetPreStartMissionCallStatus_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
 
     freeInstallManager_->SetPreStartMissionCallStatus("com.ix.hiservcie", "ServiceAbility",
         "2024-7-17 00:00:00", false);
@@ -400,8 +371,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_SetPreStartMissionCallStatus_001, TestSize
  */
 HWTEST_F(FreeInstallTest, FreeInstall_SetFreeInstallTaskSessionId_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
 
     Want want;
     ElementName element("", "com.ix.hiservcie", "ServiceAbility");
@@ -439,8 +409,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_SetFreeInstallTaskSessionId_001, TestSize.
  */
 HWTEST_F(FreeInstallTest, FreeInstall_VerifyStartFreeInstallPermission_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
 
     const sptr<IRemoteObject> callerToken = MockToken();
     freeInstallManager_->VerifyStartFreeInstallPermission(callerToken);
@@ -455,8 +424,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_VerifyStartFreeInstallPermission_001, Test
  */
 HWTEST_F(FreeInstallTest, FreeInstall_SetAppRunningState_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
 
     Want want;
     freeInstallManager_->SetAppRunningState(want);
@@ -470,8 +438,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_SetAppRunningState_001, TestSize.Level1)
  */
 HWTEST_F(FreeInstallTest, FreeInstall_PostUpgradeAtomicServiceTask_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
 
     Want want;
     ElementName element("", "com.test.demo", "MainAbility");
@@ -489,8 +456,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_PostUpgradeAtomicServiceTask_001, TestSize
  */
 HWTEST_F(FreeInstallTest, FreeInstall_StartAbilityByOriginalWant_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
 
     FreeInstallInfo freeInstallInfo;
     freeInstallManager_->StartAbilityByOriginalWant(freeInstallInfo, "2024-07-17 00:00:00");
@@ -504,8 +470,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_StartAbilityByOriginalWant_001, TestSize.L
  */
 HWTEST_F(FreeInstallTest, FreeInstall_StartAbilityByConvertedWant_001, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
 
     FreeInstallInfo freeInstallInfo;
     freeInstallManager_->StartAbilityByConvertedWant(freeInstallInfo, "2024-07-17 00:00:00");
@@ -519,8 +484,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_StartAbilityByConvertedWant_001, TestSize.
  */
 HWTEST_F(FreeInstallTest, FreeInstall_IsTopAbility_001, TestSize.Level1)
 {
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     EXPECT_NE(freeInstallManager_, nullptr);
     sptr<IRemoteObject> callerToken = nullptr;
     bool result = freeInstallManager_->IsTopAbility(callerToken);
@@ -534,8 +498,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_IsTopAbility_001, TestSize.Level1)
  */
 HWTEST_F(FreeInstallTest, FreeInstall_StartRemoteFreeInstall_001, TestSize.Level1)
 {
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     Want want;
     want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
     AbilityRequest abilityRequest;
@@ -556,8 +519,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_StartRemoteFreeInstall_001, TestSize.Level
  */
 HWTEST_F(FreeInstallTest, FreeInstall_AddFreeInstallObserver_002, TestSize.Level1)
 {
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     AbilityRequest abilityRequest;
     abilityRequest.appInfo.bundleName = "com.test.demo";
     abilityRequest.abilityInfo.name = "MainAbility";
@@ -576,8 +538,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_AddFreeInstallObserver_002, TestSize.Level
  */
 HWTEST_F(FreeInstallTest, FreeInstall_GetRecordIdByToken_001, TestSize.Level1)
 {
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     EXPECT_NE(freeInstallManager_, nullptr);
     AbilityRequest abilityRequest;
     abilityRequest.appInfo.bundleName = "com.test.demo";
@@ -597,8 +558,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_GetRecordIdByToken_001, TestSize.Level1)
  */
 HWTEST_F(FreeInstallTest, FreeInstall_GetRecordIdByToken_002, TestSize.Level1)
 {
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     EXPECT_NE(freeInstallManager_, nullptr);
     sptr<IRemoteObject> callerToken = nullptr;
     int32_t result = freeInstallManager_->GetRecordIdByToken(callerToken);
@@ -612,8 +572,7 @@ HWTEST_F(FreeInstallTest, FreeInstall_GetRecordIdByToken_002, TestSize.Level1)
  */
 HWTEST_F(FreeInstallTest, FreeInstall_BuildFreeInstallInfo_002, TestSize.Level1)
 {
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    freeInstallManager_ = std::make_shared<FreeInstallManager>();
     Want want;
     ElementName element("", "com.test.demo", "MainAbility");
     want.SetElement(element);

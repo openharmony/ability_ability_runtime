@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -983,22 +983,23 @@ napi_value JsAbilityContext::OnOpenLink(napi_env env, NapiCallbackInfo& info)
         TAG_LOGD(AAFwkTag::CONTEXT, "completionHandler is used");
         CreateOpenLinkTask(env, info.argv[INDEX_TWO], want, requestCode);
     }
-    return OnOpenLinkInner(env, want, requestCode, startTime, linkValue);
+    return OnOpenLinkInner(env, want, requestCode, startTime, linkValue, openLinkOptions.GetHideFailureTipDialog());
 }
 
-napi_value JsAbilityContext::OnOpenLinkInner(napi_env env, const AAFwk::Want& want,
-    int requestCode, const std::string& startTime, const std::string& url)
+napi_value JsAbilityContext::OnOpenLinkInner(napi_env env, const AAFwk::Want &want, int requestCode,
+    const std::string &startTime, const std::string &url, bool hideFailureTipDialog)
 {
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, innerErrCode, requestCode]() {
-        auto context = weak.lock();
-        if (!context) {
-            TAG_LOGW(AAFwkTag::CONTEXT, "null context");
-            *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
-            return;
-        }
-        *innerErrCode = context->OpenLink(want, requestCode);
-    };
+    NapiAsyncTask::ExecuteCallback execute =
+        [weak = context_, want, innerErrCode, requestCode, hideFailureTipDialog]() {
+            auto context = weak.lock();
+            if (!context) {
+                TAG_LOGW(AAFwkTag::CONTEXT, "null context");
+                *innerErrCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+                return;
+            }
+            *innerErrCode = context->OpenLink(want, requestCode, hideFailureTipDialog);
+        };
     napi_value result = nullptr;
     AddFreeInstallObserver(env, want, nullptr, &result, false, true);
     NapiAsyncTask::CompleteCallback complete = [innerErrCode, requestCode, startTime, url, weak = context_,
@@ -2835,9 +2836,13 @@ napi_value JsAbilityContext::OnStartAbilityByType(napi_env env, NapiCallbackInfo
         ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
         return CreateJsUndefined(env);
     }
-
     std::shared_ptr<JsUIExtensionCallback> callback = std::make_shared<JsUIExtensionCallback>(env);
     callback->SetJsCallbackObject(info.argv[INDEX_TWO]);
+    napi_value completionHandler = AppExecFwk::GetPropertyValueByPropertyName(
+        env, info.argv[INDEX_TWO], "completionHandler", napi_object);
+    if (completionHandler != nullptr) {
+        callback->SetCompletionHandler(env, completionHandler);
+    }
     auto innerErrCode = std::make_shared<ErrCode>(ERR_OK);
     NapiAsyncTask::ExecuteCallback execute =
         [weak = context_, type, wantParam, callback, innerErrCode]() mutable {

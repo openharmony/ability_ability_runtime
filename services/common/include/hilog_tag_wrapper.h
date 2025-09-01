@@ -98,8 +98,9 @@ enum class AAFwkLogTag : uint32_t {
 
     LOCAL_CALL = DEFAULT + 0x60, // 0xD001360
     SA_INTERCEPTOR,
-
-    APP_SERVICE_EXT = DEFAULT + 0x70, // 0xD001370
+    APP_SERVICE_EXT,
+    VERTICAL_PANEL,
+    USER_CONTROLLER,
 
     END = 256,               // N.B. never use it
 };
@@ -177,7 +178,7 @@ inline const char* GetDomainName5(AAFwkLogTag tag)
 
 inline const char* GetDomainName6(AAFwkLogTag tag)
 {
-    const char* tagNames[] = { "LocalCall" };
+    const char* tagNames[] = { "LocalCall", "SaInterceptor", "AppServiceExt", "VerticalPanel" };
     uint32_t offset = GetOffset(tag, AAFwkLogTag::LOCAL_CALL);
     if (offset >= sizeof(tagNames) / sizeof(const char*)) {
         return "UN";

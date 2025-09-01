@@ -1485,5 +1485,49 @@ HWTEST_F(AbilityAutoStartupDataManagerTest, ConvertAutoStartupInfoFromValue_200,
     EXPECT_EQ(info1.canUserModify, false);
     GTEST_LOG_(INFO) << "ConvertAutoStartupInfoFromValue_200 end";
 }
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: GetAutoStartupStatusForSelf
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager GetAutoStartupStatusForSelf
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, GetAutoStartupStatusForSelf_100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetAutoStartupStatusForSelf_100 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    std::shared_ptr<DistributedKv::SingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    abilityAutoStartupDataManager.kvStorePtr_ = kvStorePtr;
+    EXPECT_EQ(true, abilityAutoStartupDataManager.CheckKvStore());
+
+    uint32_t callerTokenId = 1;
+    bool isAutoStartEnabled = false;
+    auto result = abilityAutoStartupDataManager.GetAutoStartupStatusForSelf(callerTokenId, isAutoStartEnabled);
+    EXPECT_EQ(result, ERR_OK);
+    GTEST_LOG_(INFO) << "GetAutoStartupStatusForSelf_100 end";
+}
+
+/**
+ * Feature: AbilityAutoStartupDataManager
+ * Function: GetAutoStartupStatusForSelf
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupDataManager GetAutoStartupStatusForSelf
+ */
+HWTEST_F(AbilityAutoStartupDataManagerTest, GetAutoStartupStatusForSelf_200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetAutoStartupStatusForSelf_200 start";
+    AbilityAutoStartupDataManager abilityAutoStartupDataManager;
+    std::shared_ptr<MockSingleKvStore> kvStorePtr = std::make_shared<MockSingleKvStore>();
+    abilityAutoStartupDataManager.kvStorePtr_ = kvStorePtr;
+    EXPECT_EQ(true, abilityAutoStartupDataManager.CheckKvStore());
+    kvStorePtr->GetEntries_ = DistributedKv::Status::INVALID_FORMAT;
+
+    uint32_t callerTokenId = 1;
+    bool isAutoStartEnabled = false;
+    auto result = abilityAutoStartupDataManager.GetAutoStartupStatusForSelf(callerTokenId, isAutoStartEnabled);
+    EXPECT_EQ(result, ERR_INVALID_OPERATION);
+    kvStorePtr->GetEntries_ = DistributedKv::Status::SUCCESS;
+    GTEST_LOG_(INFO) << "GetAutoStartupStatusForSelf_200 end";
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -68,6 +68,7 @@ public:
         permissionReadWriteDownload_ = false;
         permissionReadWriteDesktop_ = false;
         permissionReadWriteDocuments_ = false;
+        permissionSandboxAccessManager_ = false;
         IsSystempAppCall_ = false;
         getTokenIdByBundleNameStatus_ = 0;
         isSAOrSystemAppCall_ = false;
@@ -88,6 +89,7 @@ public:
         upmsUtilsGetAppIdByBundleNameRet_ = 0;
         upmsUtilsTokenId_ = 0;
         upmsUtilsIsFoundationCallRet_ = false;
+        fudUtilsGenerateFUDAppInfoRet_ = true;
         tokenInfos = {};
     }
 
@@ -104,6 +106,7 @@ public:
     static bool permissionReadWriteDownload_;
     static bool permissionReadWriteDesktop_;
     static bool permissionReadWriteDocuments_;
+    static bool permissionSandboxAccessManager_;
     static bool IsSystempAppCall_;
     static bool permissionFileAccessPersist_;
     static bool permissionGrantUriPermissionAsCaller_;
@@ -125,6 +128,8 @@ public:
     static int32_t upmsUtilsGetAppIdByBundleNameRet_;
     static uint32_t upmsUtilsTokenId_;
     static bool upmsUtilsIsFoundationCallRet_;
+    static bool fudUtilsGenerateFUDAppInfoRet_;
+    static std::string bundleName_;
     static TokenInfoMap tokenInfos;
 };
 }  // namespace AAFwk

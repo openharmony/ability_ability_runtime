@@ -66,7 +66,8 @@ HWTEST_F(AbilityManagerCollaboratorProxyTest, NotifyStartAbility_0100, TestSize.
     Want want;
     int32_t userId = 0;
     uint64_t accessTokenIDEx = 0;
-    int32_t res = proxy_->NotifyStartAbility(info, userId, want, accessTokenIDEx);
+    int32_t windowMode = 0;
+    int32_t res = proxy_->NotifyStartAbility(info, userId, want, accessTokenIDEx, windowMode);
     EXPECT_EQ(res, ERR_INVALID_OPERATION);
     EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::NOTIFY_START_ABILITY), mock_->GetCode());
 }

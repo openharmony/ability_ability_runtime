@@ -143,8 +143,8 @@ int32_t JsStartupTask::LoadJsOhmUrl()
         return ERR_STARTUP_INTERNAL_ERROR;
     }
 
-    std::string moduleNameWithStartupTask = moduleName_ + "::startupTask";
-    std::string srcPath(moduleName_ + "/" + srcEntry_);
+    std::string moduleNameWithStartupTask = GetModuleName() + "::startupTask";
+    std::string srcPath(GetModuleName() + "/" + srcEntry_);
     auto pos = srcPath.rfind('.');
     if (pos == std::string::npos) {
         TAG_LOGE(AAFwkTag::STARTUP, "invalid srcEntry");
@@ -152,6 +152,7 @@ int32_t JsStartupTask::LoadJsOhmUrl()
     }
     srcPath.erase(pos);
     srcPath.append(".abc");
+    jsRuntime_.UpdateModuleNameAndAssetPath(GetModuleName());
     startupJsRef_ = jsRuntime_.LoadModule(moduleNameWithStartupTask, srcPath, hapPath_, esModule_, false, ohmUrl_);
     if (startupJsRef_ == nullptr) {
         TAG_LOGE(AAFwkTag::STARTUP, "startup task null");

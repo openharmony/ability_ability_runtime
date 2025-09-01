@@ -240,14 +240,16 @@ void JsTestRunner::ReportStatus(const std::string &msg)
 std::string JsTestRunner::GetTestRunnerPath(const std::shared_ptr<AbilityDelegatorArgs> &args)
 {
     std::string result;
+    result.append(args->GetTestModuleName());
     if (!args->GetTestRunnerClassName().empty()) {
-        result.append(args->GetTestModuleName());
         if (args->GetTestRunnerClassName().find("/") == std::string::npos) {
             result.append(LOWERCASETESTRUNNER);
         }
         result.append(args->GetTestRunnerClassName());
     } else {
+        result.append("/");
         result.append(args->GetTestRunnerPath());
+        result.erase(result.rfind("."));
     }
     return result;
 }

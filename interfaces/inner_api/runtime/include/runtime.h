@@ -31,6 +31,7 @@ namespace {
 const std::string CODE_LANGUAGE_ARKTS_1_0 = "dynamic";
 const std::string CODE_LANGUAGE_ARKTS_1_2 = "static";
 const std::string CODE_LANGUAGE_ARKTS_HYBRID = "hybrid";
+const std::string DEBUGGER = "@Debugger";
 } // namespace
 
 class Runtime {
@@ -74,6 +75,7 @@ public:
         std::map<std::string, std::string> pkgContextInfoJsonStringMap;
         std::map<std::string, std::string> packageNameList;
         std::map<std::string, int32_t> aotCompileStatusMap;
+        bool isStartWithDebug = false;
         uint32_t versionCode = 0;
         bool enableWarmStartupSmartGC = false;
     };
@@ -88,6 +90,7 @@ public:
         bool isStartWithNative = false;
         bool isDebugFromLocal = false;
         bool isDeveloperMode;
+        std::string arkTSMode = CODE_LANGUAGE_ARKTS_1_2;
     };
 
     static std::unique_ptr<Runtime> Create(Options &options);
@@ -126,6 +129,8 @@ public:
     virtual bool UnLoadRepairPatch(const std::string& patchFile) = 0;
     virtual void RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath) = 0;
     virtual void StartProfiler(const DebugOption debugOption) = 0;
+    virtual void SetExtensionApiCheckCallback(
+        std::function<bool(const std::string &className, const std::string &fileName)> &cb) {}
     virtual void DoCleanWorkAfterStageCleaned() {}
     virtual void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const {}
     virtual void SetDeviceDisconnectCallback(const std::function<bool()> &cb) = 0;

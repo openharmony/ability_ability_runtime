@@ -638,6 +638,7 @@ void EtsUIAbility::AbilityContinuationOrRecover(const Want &want)
 void EtsUIAbility::DoOnForeground(const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::UIABILITY, "DoOnForeground begin");
     if (scene_ == nullptr) {
         if ((abilityContext_ == nullptr) || (sceneListener_ == nullptr)) {
             TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext or sceneListener_");
@@ -673,6 +674,7 @@ void EtsUIAbility::DoOnForeground(const Want &want)
 
 void EtsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
 {
+    TAG_LOGD(AAFwkTag::UIABILITY, "DoOnForegroundForSceneIsNull begin");
     scene_ = std::make_shared<Rosen::WindowScene>();
     int32_t displayId = AAFwk::DisplayUtil::GetDefaultDisplayId();
     if (setting_ != nullptr) {
@@ -714,6 +716,7 @@ void EtsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
         }
         window->RegisterDisplayMoveListener(abilityDisplayMoveListener_);
     }
+    TAG_LOGD(AAFwkTag::UIABILITY, "DoOnForegroundForSceneIsNull end");
 }
 
 void EtsUIAbility::ContinuationRestore(const Want &want)
@@ -905,6 +908,21 @@ bool EtsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
     return true;
 }
 #endif
+
+void EtsUIAbility::UpdateContextConfiguration()
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "UpdateContextConfiguration called");
+    if (abilityContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
+        return;
+    }
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return;
+    }
+    EtsAbilityContext::ConfigurationUpdated(env, shellContextRef_, abilityContext_->GetConfiguration());
+}
 
 void EtsUIAbility::OnNewWant(const Want &want)
 {

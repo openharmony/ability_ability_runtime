@@ -15,8 +15,8 @@
 
 #include <gtest/gtest.h>
 
+#include "ability_manager_client.h"
 #include "mock_my_flag.h"
-#include "mock_ability_manager_client.h"
 
 #define private public
 #define protected public
@@ -363,7 +363,7 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_GrantUriPermissionPrivilegedInn
     MyFlag::isUriTypeValid_ = true;
     MyFlag::isDocsCloudUri_ = true;
     std::string bundleName = "bundleName";
-    UPMSAppInfo targetAppInfo = { targetTokenId, bundleName, targetAlterBundleName };
+    FUDAppInfo targetAppInfo = { targetTokenId, bundleName, targetAlterBundleName };
     auto result = upmsi->GrantUriPermissionPrivilegedInner(uriVec, flag, callerTokenId, targetAppInfo,
         hideSensitiveType);
     EXPECT_EQ(result, INNER_ERR);
@@ -389,7 +389,7 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_GrantUriPermissionPrivilegedInn
     MyFlag::isUriTypeValid_ = true;
     MyFlag::isDocsCloudUri_ = false;
     std::string bundleName = "bundleName";
-    UPMSAppInfo targetAppInfo = { targetTokenId, bundleName, targetAlterBundleName };
+    FUDAppInfo targetAppInfo = { targetTokenId, bundleName, targetAlterBundleName };
     auto result = upmsi->GrantUriPermissionPrivilegedInner(uriVec, flag, callerTokenId, targetAppInfo,
         hideSensitiveType);
     EXPECT_EQ(result, ERR_OK);
@@ -415,7 +415,7 @@ HWTEST_F(UriPermissionManagerStubImplTest, Upmsi_GrantUriPermissionPrivilegedInn
     MyFlag::isUriTypeValid_ = true;
     MyFlag::isDocsCloudUri_ = false;
     std::string bundleName = "bundleName";
-    UPMSAppInfo targetAppInfo = { targetTokenId, bundleName, targetAlterBundleName };
+    FUDAppInfo targetAppInfo = { targetTokenId, bundleName, targetAlterBundleName };
     auto result = upmsi->GrantUriPermissionPrivilegedInner(uriVec, flag, callerTokenId, targetAppInfo,
         hideSensitiveType);
     EXPECT_EQ(result, INNER_ERR);

@@ -247,6 +247,18 @@ public:
     void PreloadAppStartup(const BundleInfo &bundleInfo, const std::string &preloadModuleName,
         std::shared_ptr<AppExecFwk::StartupTaskData> startupTaskData);
 
+    void SetEntryLoadPath(const std::string &path);
+    const std::string &GetEntryLoadPath() const
+    {
+        return entryLoadPath_;
+    }
+
+    void SetDeduplicateHar(bool deduplicate);
+    bool GetDeduplicateHar() const
+    {
+        return deduplicate_;
+    }
+
 private:
     void UpdateAppContextResMgr(const Configuration &config);
     bool IsUpdateColorNeeded(Configuration &config, AbilityRuntime::SetLevel level);
@@ -263,6 +275,29 @@ private:
         const std::function<void()>& callback);
     bool IsMainProcess(const std::string &bundleName, const std::string &process);
     void PreloadHybridModule(const HapModuleInfo &hapModuleInfo) const;
+    void LoadDeduplicatedHarResource(
+        const std::shared_ptr<AbilityRuntime::AbilityStageContext> &stageContext);
+
+    const std::function<void()> CreateFirstStartupCallbackForRecord(
+        std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+        std::shared_ptr<AbilityLocalRecord> abilityRecord,
+        const AppExecFwk::HapModuleInfo &hapModuleInfo,
+        const std::function<void(std::shared_ptr<AbilityRuntime::Context>)> &callback);
+
+    const std::function<void()> CreateSecondStartupCallbackForRecord(
+        std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+        std::shared_ptr<AbilityLocalRecord> abilityRecord,
+        const std::function<void(std::shared_ptr<AbilityRuntime::Context>)> &callback);
+
+    const std::function<void()> CreateFirstStartupCallbackForHap(
+        std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+        const AppExecFwk::HapModuleInfo &hapModuleInfo,
+        const std::function<void()> &callback);
+
+    const std::function<void()> CreateSecondStartupCallbackForHap(
+        std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+        const AppExecFwk::HapModuleInfo &hapModuleInfo,
+        const std::function<void()> &callback);
 
 private:
     std::shared_ptr<AbilityRecordMgr> abilityRecordMgr_ = nullptr;
@@ -271,6 +306,8 @@ private:
     std::unique_ptr<AbilityRuntime::Runtime> runtime_ = nullptr;
     std::shared_ptr<Configuration> configuration_ = nullptr;
     std::map<int32_t, std::string> extensionTypeMap_;
+    std::string entryLoadPath_ = "";
+    bool deduplicate_ = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

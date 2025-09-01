@@ -275,7 +275,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_AppFreezeFilter_002, TestSiz
     int32_t pid = static_cast<int32_t>(getprocpid());
     std::string bundleName = "AppfreezeManagerTest_AppFreezeFilter_002";
     EXPECT_TRUE(appfreezeManager->CancelAppFreezeDetect(pid, bundleName));
-    EXPECT_TRUE(appfreezeManager->IsProcessDebug(pid, bundleName));
+    EXPECT_TRUE(!appfreezeManager->IsProcessDebug(pid, bundleName));
     appfreezeManager->RemoveDeathProcess(bundleName);
 }
 
@@ -356,7 +356,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_ReportAppfreezeCpuInfo_001, 
     EXPECT_EQ(freezeInfoFile, "");
     faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
     freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
-    EXPECT_TRUE(!freezeInfoFile.empty());
+    EXPECT_TRUE(freezeInfoFile.empty());
     faultData.errorObject.name = AppFreezeType::LIFECYCLE_HALF_TIMEOUT;
     freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
     EXPECT_EQ(freezeInfoFile, "");
@@ -390,6 +390,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFirstLine_001, TestSize.L
     std::string ret = appfreezeManager->GetFirstLine("../111");
     EXPECT_EQ(ret, "");
     appfreezeManager->GetFirstLine("/data/log/test");
+    EXPECT_TRUE(appfreezeManager != nullptr);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

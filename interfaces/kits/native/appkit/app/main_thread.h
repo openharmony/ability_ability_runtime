@@ -459,7 +459,7 @@ private:
      * @param appInfo The latest application info obtained from bms for update abilityRuntimeContext.
      *
      */
-    void HandleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleName);
+    void HandleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo, const std::string &moduleNames);
 
     /**
      *
@@ -730,7 +730,7 @@ private:
     static std::shared_ptr<MainHandler> mainHandler_;
     std::shared_ptr<AbilityRecordMgr> abilityRecordMgr_ = nullptr;
     std::shared_ptr<Watchdog> watchdog_ = nullptr;
-    std::unique_ptr<AbilityRuntime::ExtensionConfigMgr> extensionConfigMgr_ = nullptr;
+    std::shared_ptr<AbilityRuntime::ExtensionConfigMgr> extensionConfigMgr_ = nullptr;
     MainThreadState mainThreadState_ = MainThreadState::INIT;
     sptr<IAppMgr> appMgr_ = nullptr;  // appMgrService Handler
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;

@@ -64,6 +64,7 @@ ohos_unittest("ability_manager_service_mock_test") {
     "ability_manager_service_mock_test.cpp",
     "mock/src/insight_intent_execute_manager_mock.cpp",
     "mock/src/mock_bundle_mgr_helper.cpp",
+    "mock/src/mock_udmf_utils.cpp",
   ]
 
   configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]

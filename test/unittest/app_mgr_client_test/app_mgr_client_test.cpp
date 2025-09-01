@@ -202,6 +202,26 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_IsMemorySizeSufficent_001, TestSize.Leve
 }
 
 /**
+ * @tc.name: AppMgrClient_VerifyKillProcessPermission_001
+ * @tc.desc: verify kill process permission
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_VerifyKillProcessPermission_001, TestSize.Level2)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+
+    int32_t ret = appMgrClient->VerifyKillProcessPermission("test");
+    EXPECT_EQ(ret, ERR_OK);
+
+    ret = appMgrClient->VerifyKillProcessPermission("");
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: AppMgrClient_GetRunningProcessInfoByPid_001
  * @tc.desc: can not get the not running process info by AccessTokenID.
  * @tc.type: FUNC
@@ -625,23 +645,6 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_StartRenderProcess_001, TestSize.Level2)
 
     int ret = appMgrClient->StartRenderProcess(renderParam, INIT_VALUE, ERROR_PID, INIT_VALUE, renderPid);
     EXPECT_EQ(ret, ERROR_STATE);
-}
-
-/**
- * @tc.name: AppMgrClient_SetCurrentUserId_001
- * @tc.desc: set current userId.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, AppMgrClient_SetCurrentUserId_001, TestSize.Level2)
-{
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    EXPECT_NE(appMgrClient, nullptr);
-
-    auto result = appMgrClient->ConnectAppMgrService();
-    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
-
-    int32_t userId = 0;
-    appMgrClient->SetCurrentUserId(userId);
 }
 
 /**

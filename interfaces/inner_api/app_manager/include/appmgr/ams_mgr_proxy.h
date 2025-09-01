@@ -280,8 +280,6 @@ public:
     virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
         int32_t requestId = 0, const std::string &customProcess = "") override;
 
-    virtual void SetCurrentUserId(const int32_t userId) override;
-
     virtual void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess) override;
 
     virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid) override;
@@ -453,6 +451,8 @@ public:
 
     virtual int32_t CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,
         bool &isExist) override;
+
+    virtual int32_t VerifyKillProcessPermission(const std::string &bundleName) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

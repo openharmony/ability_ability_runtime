@@ -69,8 +69,8 @@ bool JsModuleReader::operator()(const std::string& inputPath, uint8_t **buff,
             TAG_LOGE(AAFwkTag::JSRUNTIME, "empty realHapPath");
             return false;
         }
-        needFindPluginHsp_ = true;
     }
+    needFindPluginHsp_ = true;
 
     bool newCreate = false;
     std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(realHapPath, newCreate);

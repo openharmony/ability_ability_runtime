@@ -45,39 +45,6 @@ void AbilityEventHandlerTest::TearDown()
 
 /*
  * Feature: Ability Event Handler
- * Function: ProcessEvent
- * SubFunction: NA
- * FunctionPoints: Ability Event Handler ProcessEvent
- * EnvConditions: NA
- * CaseDescription: Verify ProcessEvent
- */
-HWTEST_F(AbilityEventHandlerTest, ability_event_handler_001, TestSize.Level1)
-{
-    std::shared_ptr<TaskHandlerWrap> runner;
-    std::weak_ptr<AbilityManagerService> server;
-    std::shared_ptr<UserEvent> eventData = std::make_shared<UserEvent>();
-    auto event = EventWrap(UserEventHandler::EVENT_SYSTEM_USER_START, eventData);
-    auto handler = std::make_shared<AbilityEventHandler>(runner, server);
-    SetParameter("libc.hook_mode", "startup:");
-    handler->ProcessEvent(event);
-    SetParameter("libc.hook_mode", "test_parameter");
-    handler->ProcessEvent(event);
-    auto event2 = EventWrap(AbilityManagerService::LOAD_TIMEOUT_MSG, event.GetParam());
-    std::string str = std::to_string(event.GetEventId());
-    handler->ProcessEvent(event2);
-    event2 = EventWrap(AbilityManagerService::ACTIVE_TIMEOUT_MSG, event.GetParam());
-    handler->ProcessEvent(event2);
-    event2 = EventWrap(AbilityManagerService::INACTIVE_TIMEOUT_MSG, event.GetParam());
-    handler->ProcessEvent(event2);
-    event2 = EventWrap(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, event.GetParam());
-    handler->ProcessEvent(event2);
-    event2 = EventWrap(AbilityManagerService::BACKGROUND_TIMEOUT_MSG, event.GetParam());
-    handler->ProcessEvent(event2);
-    EXPECT_TRUE(handler != nullptr);
-}  // namespace AppExecFwk
-
-/*
- * Feature: Ability Event Handler
  * Function: EventWrap
  * SubFunction: NA
  * FunctionPoints: EventWrap

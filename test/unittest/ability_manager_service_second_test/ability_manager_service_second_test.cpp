@@ -31,6 +31,7 @@
 #include "hilog_tag_wrapper.h"
 #include "session/host/include/session.h"
 #include "scene_board_judgement.h"
+#include "mock_my_status.h"
 #include "mock_sa_call.h"
 #include "unlock_screen_manager.h"
 
@@ -125,9 +126,6 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartSwitchUserDialog_001, TestSize.Le
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
     abilityMs_->StartSwitchUserDialog();
-
-    abilityMs_->userController_ = nullptr;
-    abilityMs_->StartSwitchUserDialog();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StartSwitchUserDialog_001 end");
 }
 
@@ -158,9 +156,6 @@ HWTEST_F(AbilityManagerServiceSecondTest, StopSwitchUserDialog_001, TestSize.Lev
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StopSwitchUserDialog_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
-    abilityMs_->StopSwitchUserDialog();
-
-    abilityMs_->userController_ = nullptr;
     abilityMs_->StopSwitchUserDialog();
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest StopSwitchUserDialog_001 end");
 }
@@ -1674,20 +1669,6 @@ HWTEST_F(AbilityManagerServiceSecondTest, GetEventHandler_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
- * Function: GetUserId
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService GetUserId
- */
-HWTEST_F(AbilityManagerServiceSecondTest, GetUserId_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GetUserId_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_NE(abilityMs_->GetUserId(), 100);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GetUserId_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: GenerateAbilityRequest
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService GenerateAbilityRequest
@@ -1730,6 +1711,36 @@ HWTEST_F(AbilityManagerServiceSecondTest, KillProcess_001, TestSize.Level1)
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_EQ(abilityMs_->KillProcess("test"), GET_BUNDLE_INFO_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest KillProcess_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckPermissionForKillCollaborator
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckPermissionForKillCollaborator
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, CheckPermissionForKillCollaborator_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckPermissionForKillCollaborator_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    MyStatus::GetInstance().permPermission_ = 0;
+    EXPECT_EQ(abilityMs_->CheckPermissionForKillCollaborator(), false);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckPermissionForKillCollaborator_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckPermissionForKillCollaborator
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckPermissionForKillCollaborator
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, CheckPermissionForKillCollaborator_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckPermissionForKillCollaborator_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    MyStatus::GetInstance().permPermission_ = 1;
+    EXPECT_EQ(abilityMs_->CheckPermissionForKillCollaborator(), true);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest CheckPermissionForKillCollaborator_002 end");
 }
 
 /*
@@ -1870,7 +1881,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, ShouldPreventStartAbility_001, TestSiz
 /*
  * Feature: AbilityManagerService
  * Name: UpdateKeepAliveEnableState_001
- * Function: CheckProcessOptions
+ * Function: UpdateKeepAliveEnableState
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService UpdateKeepAliveEnableState
  */

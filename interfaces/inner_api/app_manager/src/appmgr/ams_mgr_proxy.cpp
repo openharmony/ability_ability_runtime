@@ -930,28 +930,6 @@ int32_t AmsMgrProxy::NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, c
     return reply.ReadInt32();
 }
 
-void AmsMgrProxy::SetCurrentUserId(const int32_t userId)
-{
-    TAG_LOGD(AAFwkTag::APPMGR, "start");
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!WriteInterfaceToken(data)) {
-        return;
-    }
-    if (!data.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write userId");
-        return;
-    }
-    int32_t ret =
-        SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::SET_CURRENT_USER_ID),
-            data, reply, option);
-    if (ret != NO_ERROR) {
-        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest err: %{public}d", ret);
-    }
-    TAG_LOGD(AAFwkTag::APPMGR, "end");
-}
-
 void AmsMgrProxy::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -1645,6 +1623,31 @@ int32_t AmsMgrProxy::CheckPreloadAppRecordExist(const std::string &bundleName, i
     }
     isExist = reply.ReadBool();
     return NO_ERROR;
+}
+
+int32_t AmsMgrProxy::VerifyKillProcessPermission(const std::string &bundleName)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write token failed");
+        return ERR_INVALID_DATA;
+    }
+
+    if (bundleName.empty() || !data.WriteString(bundleName)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write bundleName failed");
+        return ERR_INVALID_DATA;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::VERIFY_KILL_PROCESS_PERMISSION),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request err: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
 }
 } // namespace AppExecFwk
 } // namespace OHOS

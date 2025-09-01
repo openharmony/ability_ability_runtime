@@ -31,11 +31,6 @@
 
 using namespace OHOS::AbilityRuntime;
 
-
-namespace {
-const std::string DEBUGGER = "@Debugger";
-} // namespace
-
 #define LIB_NAME "libcj_environment.z.so"
 #define GET_ENV_INS_NAME "OHOS_GetCJEnvInstance"
 
@@ -186,6 +181,10 @@ void CJRuntime::SetSanitizerVersion(SanitizerKind kind)
 bool CJRuntime::RegisterCangjieCallback()
 {
     auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "null cjEnv");
+        return false;
+    }
     constexpr char CANGJIE_DEBUGGER_LIB_PATH[] = "libark_connect_inspector.z.so";
     #define LIBARARYKIND_SYS 0
     auto handlerConnectServerSo = cjEnv->loadLibrary(LIBARARYKIND_SYS, CANGJIE_DEBUGGER_LIB_PATH);

@@ -36,6 +36,7 @@
 #include "ability_scheduler_mock.h"
 #include "ipc_skeleton.h"
 #include "status_bar_delegate_interface.h"
+#include "user_controller/user_controller.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -87,10 +88,10 @@ public:
     }
 };
 
-class UIAbilityLifcecycleManagerTestStub : public IRemoteStub<IAbilityConnection> {
+class UIAbilityLifecycleManagerTestStub : public IRemoteStub<IAbilityConnection> {
 public:
-    UIAbilityLifcecycleManagerTestStub() {};
-    virtual ~UIAbilityLifcecycleManagerTestStub() {};
+    UIAbilityLifecycleManagerTestStub() {};
+    virtual ~UIAbilityLifecycleManagerTestStub() {};
 
     virtual int OnRemoteRequest(
         uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
@@ -352,7 +353,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CreateSessionInfo_001, TestSize.Level1)
     EXPECT_NE(mgr, nullptr);
     AbilityRequest abilityRequest;
     abilityRequest.startSetting = std::make_shared<AbilityStartSetting>();
-    EXPECT_NE(mgr->CreateSessionInfo(abilityRequest), nullptr);
+    int32_t requestId = 10000;
+    EXPECT_NE(mgr->CreateSessionInfo(abilityRequest, requestId), nullptr);
 }
 
 /**
@@ -2262,7 +2264,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ReleaseCallLocked_001, TestSize.Level1)
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    sptr<IAbilityConnection> connect = new UIAbilityLifcecycleManagerTestStub();
+    sptr<IAbilityConnection> connect = new UIAbilityLifecycleManagerTestStub();
     AppExecFwk::ElementName element;
     auto ret = uiAbilityLifecycleManager->ReleaseCallLocked(connect, element);
     EXPECT_EQ(ret, RELEASE_CALL_ABILITY_INNER_ERR);
@@ -2279,7 +2281,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ReleaseCallLocked_002, TestSize.Level1)
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     auto abilityRecord = InitAbilityRecord();
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
-    sptr<IAbilityConnection> connect = new UIAbilityLifcecycleManagerTestStub();
+    sptr<IAbilityConnection> connect = new UIAbilityLifecycleManagerTestStub();
     AppExecFwk::ElementName element("", "com.example.unittest", "MainAbility");
     auto ret = uiAbilityLifecycleManager->ReleaseCallLocked(connect, element);
     EXPECT_EQ(ret, RELEASE_CALL_ABILITY_INNER_ERR);
@@ -2603,39 +2605,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, IsStartSpecifiedProcessRequest_007, Test
     AppUtils::GetInstance().isStartSpecifiedProcess_.isLoaded = false;
     AppUtils::GetInstance().isStartSpecifiedProcess_.value = false;
     EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_NotifyRestartSpecifiedAbility_0100
- * @tc.desc: NotifyRestartSpecifiedAbility
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, NotifyRestartSpecifiedAbility_001, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest request;
-    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
-    sptr<IRemoteObject> token = abilityRecord->GetToken();
-    request.abilityInfoCallback = new MockAbilityInfoCallbackStub();
-    uiAbilityLifecycleManager->NotifyRestartSpecifiedAbility(request, token);
-    uiAbilityLifecycleManager.reset();
-}
-
-/**
- * @tc.name: UIAbilityLifecycleManager_NotifyStartSpecifiedAbility_0100
- * @tc.desc: NotifyStartSpecifiedAbility
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, NotifyStartSpecifiedAbility_001, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
-    EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    AbilityRequest request;
-    Want want;
-    request.abilityInfoCallback = new MockAbilityInfoCallbackStub();
-    uiAbilityLifecycleManager->NotifyStartSpecifiedAbility(request, want);
-    uiAbilityLifecycleManager.reset();
 }
 
 /**
@@ -3194,7 +3163,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, GetActiveAbilityList_002, TestSize.Level
     abilityRequest.abilityInfo.bundleName = "com.example.unittest";
     abilityRequest.abilityInfo.applicationInfo.uid = TEST_UID;
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    abilityRecord->SetOwnerMissionUserId(DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId());
+    abilityRecord->SetOwnerMissionUserId(AbilityRuntime::UserController::GetInstance().GetCallerUserId());
     uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
     std::vector<std::string> abilityList;
     int32_t pid = 100;
@@ -4306,7 +4275,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ResolveAbility_003, TestSize.Level1)
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     AbilityRequest abilityRequest;
-    abilityRequest.connect = new UIAbilityLifcecycleManagerTestStub();
+    abilityRequest.connect = new UIAbilityLifecycleManagerTestStub();
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     auto targetAbility = AbilityRecord::CreateAbilityRecord(abilityRequest);
     targetAbility->callContainer_ = std::make_shared<CallContainer>();
@@ -4324,7 +4293,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, ResolveAbility_004, TestSize.Level1)
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
     AbilityRequest abilityRequest;
-    abilityRequest.connect = new UIAbilityLifcecycleManagerTestStub();
+    abilityRequest.connect = new UIAbilityLifecycleManagerTestStub();
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     auto targetAbility = AbilityRecord::CreateAbilityRecord(abilityRequest);
     targetAbility->isReady_ = true;
@@ -6446,21 +6415,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_0005, TestSize.Level1)
     auto record = AbilityRecord::CreateAbilityRecord(request);
     int oldState = record->GetAbilityState();
     mgr->PrintTimeOutLog(record, 100, true);
-    EXPECT_EQ(record->GetAbilityState(), oldState);
-}
-
-/**
- * @tc.name: PrintTimeOutLog_0006
- * @tc.desc: state not UNKNOWN, isHalf is false, ability state should not change
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_0006, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    AbilityRequest request;
-    request.abilityInfo.name = "AbilityA";
-    auto record = AbilityRecord::CreateAbilityRecord(request);
-    int oldState = record->GetAbilityState();
-    mgr->PrintTimeOutLog(record, 100, false);
     EXPECT_EQ(record->GetAbilityState(), oldState);
 }
 

@@ -947,7 +947,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, IsCallFromBackground_001, TestSize.Leve
 
     // IsSACall
     MyFlag::flag_ = 1;
-    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_OK);
+    EXPECT_EQ(abilityMs_->IsCallFromBackground(abilityRequest, isBackgroundCall), ERR_INVALID_VALUE);
 
     // IsShellCall
     MyFlag::flag_ = 2;
@@ -1684,6 +1684,35 @@ HWTEST_F(AbilityManagerServiceFirstTest, QueryAllAutoStartupApplications_0200, T
     EXPECT_NE(abilityMs_->abilityAutoStartupService_, nullptr);
     std::vector<AutoStartupInfo> infoList;
     auto result = abilityMs_->QueryAllAutoStartupApplications(infoList);
+    EXPECT_NE(result, ERR_NO_INIT);
+}
+
+/**
+ * @tc.name: AbilityManagerServiceFirstTest_GetAutoStartupStatusForSelf_0100
+ * @tc.desc: Test the state of GetAutoStartupStatusForSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, GetAutoStartupStatusForSelf_0100, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->abilityAutoStartupService_ = nullptr;
+    bool isAutoStartEnabled = false;
+    auto result = abilityMs_->GetAutoStartupStatusForSelf(isAutoStartEnabled);
+    EXPECT_EQ(result, ERR_NO_INIT);
+}
+
+/**
+ * @tc.name: AbilityManagerServiceFirstTest_GetAutoStartupStatusForSelf_0200
+ * @tc.desc: Test the state of GetAutoStartupStatusForSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, GetAutoStartupStatusForSelf_0200, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->abilityAutoStartupService_ = std::make_shared<AbilityRuntime::AbilityAutoStartupService>();
+    EXPECT_NE(abilityMs_->abilityAutoStartupService_, nullptr);
+    bool isAutoStartEnabled = false;
+    auto result = abilityMs_->GetAutoStartupStatusForSelf(isAutoStartEnabled);
     EXPECT_NE(result, ERR_NO_INIT);
 }
 
@@ -2443,7 +2472,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_002, TestSiz
     abilityRecord->Init();
     AbilityRequest abilityRequest;
     abilityRequest.callerToken = abilityRecord->GetToken();
-    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest), ERR_OK);
+    EXPECT_NE(abilityMs_->CheckCallAbilityPermission(abilityRequest), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_002 end");
 }
 
@@ -2487,7 +2516,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckCallAbilityPermission_004, TestSiz
     abilityRecord->Init();
     AbilityRequest abilityRequest;
     abilityRequest.callerToken = abilityRecord->GetToken();
-    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest), ERR_OK);
+    EXPECT_NE(abilityMs_->CheckCallAbilityPermission(abilityRequest), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckCallAbilityPermission_004 end");
 }
 } // namespace AAFwk

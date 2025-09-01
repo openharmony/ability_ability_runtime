@@ -13,73 +13,127 @@
  * limitations under the License.
  */
 
-import Want from '@ohos.app.ability.Want';
-import AbilityConstant from '@ohos.app.ability.AbilityConstant';
-import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
-import UIAbility from '@ohos.app.ability.UIAbility';
-import hilog from '@ohos.hilog';
-import window from '@ohos.window';
+import { AbilityConstant, common, application, ConfigurationConstant, errorManager, UIAbility, Want } from '@kit.AbilityKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+import { window } from '@kit.ArkUI';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { TAG, DOMAIN} from '../pages/Index'
 
-const DOMAIN = 0x1323;
+function errorHandlerFunc(observer: errorManager.GlobalError) {
+  hilog.error(DOMAIN, TAG, 'result name: %{public}s', observer.name);
+  hilog.error(DOMAIN, TAG, 'result message: %{public}s', observer.message);
+  hilog.error(DOMAIN, TAG, 'result stack: %{public}s', observer.stack);
+  hilog.error(DOMAIN, TAG, 'result instanceName: %{public}s', observer.instanceName);
+  hilog.error(DOMAIN, TAG, 'result instanceType: %{public}s', observer.instanceType);
+  restartApp()
+}
+
+function unhandledRejectionHandleFunc(observer: errorManager.GlobalError) {
+  hilog.error(DOMAIN, TAG, 'result name: %{public}s', observer.name);
+  hilog.error(DOMAIN, TAG, 'result message: %{public}s', observer.message);
+  hilog.error(DOMAIN, TAG, 'result stack: %{public}s', observer.stack);
+  hilog.error(DOMAIN, TAG, 'result instanceName: %{public}s', observer.instanceName);
+  hilog.error(DOMAIN, TAG, 'result instanceType: %{public}s', observer.instanceType);
+  restartApp()
+}
+
+let errorObserver: errorManager.ErrorObserver = {
+  onUnhandledException(errorMsg) {
+    hilog.error(DOMAIN, TAG, 'onUnhandledException, errorMsg: %{public}s', errorMsg);
+    restartApp()
+  },
+  onException(errorObj) {
+    hilog.error(DOMAIN, TAG, 'result name: %{public}s', errorObj.name);
+    hilog.error(DOMAIN, TAG, 'result message: %{public}s', errorObj.message);
+    if (typeof (errorObj.stack) === 'string') {
+      hilog.error(DOMAIN, TAG, 'result stack: %{public}s', errorObj.stack);
+    }
+    restartApp()
+  }
+};
+
+let observerId = -1;
+let restartWant: Want | undefined = undefined;
+function restartApp() {
+  try {
+    application.getApplicationContext().restartApp(restartWant);
+    hilog.info(DOMAIN, TAG, 'restartApp success');
+  } catch (err) {
+    hilog.error(DOMAIN, TAG, 'Failed to restartApp. Cause: %{public}s', JSON.stringify(err));
+  }
+}
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
-    AppStorage.setAndLink('context', this.context);
-    hilog.info(DOMAIN, 'InsightIntents', '%{public}s', 'Ability onCreate');
+    hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onCreate');
+    restartWant = want;
     const callerBundleName: string | undefined = want.parameters?.['ohos.aafwk.param.callerBundleName']?.toString();
     if (callerBundleName === undefined || callerBundleName !== 'com.huawei.hmos.aidataservice') {
       try {
         this.context.terminateSelf();
       } catch (err) {
-        hilog.error(DOMAIN, 'InsightIntents', 'Failed to context.terminateSelf. Cause: %{public}s', JSON.stringify(err));
-      } 
+        hilog.error(DOMAIN, TAG, 'Failed to context.terminateSelf. Cause: %{public}s', JSON.stringify(err));
+      }
+    }
+    try {
+      observerId = errorManager.on('error', errorObserver);
+      errorManager.on('globalErrorOccurred', errorHandlerFunc);
+      errorManager.on('globalUnhandledRejectionDetected', unhandledRejectionHandleFunc);
+    } catch (error) {
+      hilog.error(DOMAIN, TAG, 'registerErrorManager failed, Cause: %{public}s', JSON.stringify(error));
     }
   }
 
   onDestroy(): void {
-    hilog.info(DOMAIN, 'InsightIntents', '%{public}s', 'Ability onDestroy');
+    hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onDestroy');
+    try {
+      errorManager.off('error', observerId);
+      errorManager.off('globalErrorOccurred', errorHandlerFunc);
+      errorManager.off('globalUnhandledRejectionDetected', unhandledRejectionHandleFunc);
+    } catch (error) {
+      hilog.error(DOMAIN, TAG, 'cancelErrorManager failed, Cause: %{public}s', JSON.stringify(error));
+    }
   }
 
   onWindowStageCreate(windowStage: window.WindowStage): void {
-
-    let windowClass: window.Window;
-    windowStage.getMainWindow((err, data) => {
-      windowClass = data;
-      windowClass.setWindowLayoutFullScreen(true).then(() => {
-        hilog.info(DOMAIN, 'InsightIntents', 'Set Window Layout Full Screen.');
-      })
-
-      try {
-        const top = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM).topRect
-        let navigationHeight = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM).bottomRect.height
-        PersistentStorage.PersistProps([{
-          key: 'navigationHeight', defaultValue: navigationHeight
-        }])
-      } catch (err){
-        hilog.error(DOMAIN, 'InsightIntents', 'Failed to getWindowAvoidArea.', JSON.stringify(err));
+    windowStage.loadContent('pages/Index', (err) => {
+      if (err.code) {
+        hilog.error(DOMAIN, TAG, 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
+        return;
       }
-
-
-      windowStage.loadContent('pages/Index', (err) => {
-        if (err.code) {
-          hilog.error(DOMAIN, 'InsightIntents', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
-          return;
-        }
-        hilog.info(DOMAIN, 'InsightIntents', 'Succeeded in loading the content.');
-      });
+      hilog.info(DOMAIN, TAG, 'Succeeded in loading the content.');
+      try {
+        windowStage.getMainWindow((err, data) => {
+          data.setWindowLayoutFullScreen(true).then(() => {
+            hilog.info(DOMAIN, TAG, 'Succeeded in setting the window layout to full-screen mode.');
+          }).catch((err:BusinessError) => {
+            hilog.error(DOMAIN, TAG, 'Failed to set the window layout to full-screen mode. Cause: %{public}s', JSON.stringify(err));
+          })
+          data.setWindowSystemBarProperties({
+            navigationBarColor: '#F1F3F5',
+            statusBarColor: '#F1F3F5'
+          }).then(() => {
+            hilog.info(DOMAIN, TAG, 'Succeeded in setting the system bar properties.');
+          }).catch((err: BusinessError) => {
+            hilog.error(DOMAIN, TAG, 'Failed to set the system bar properties. Cause: %{public}s', JSON.stringify(err));
+          })
+        });
+      } catch (err) {
+        hilog.error(DOMAIN, TAG, 'Failed to getMainWindow. Cause: %{public}s', JSON.stringify(err));
+      }
     });
   }
 
   onWindowStageDestroy(): void {
-    hilog.info(DOMAIN, 'InsightIntents', '%{public}s', 'Ability onWindowStageDestroy');
+    hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onWindowStageDestroy');
   }
 
   onForeground(): void {
-    hilog.info(DOMAIN, 'InsightIntents', '%{public}s', 'Ability onForeground');
+    hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onForeground');
   }
 
   onBackground(): void {
-    hilog.info(DOMAIN, 'InsightIntents', '%{public}s', 'Ability onBackground');
+    hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onBackground');
   }
 }

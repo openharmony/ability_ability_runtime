@@ -40,6 +40,7 @@ public:
     static napi_value CreateJsUIExtensionContext(napi_env env, std::shared_ptr<UIExtensionContext> context);
     static napi_value StartAbilityForResult(napi_env env, napi_callback_info info);
     static napi_value StartAbilityForResultAsCaller(napi_env env, napi_callback_info info);
+    static napi_value StartUIAbilitiesInSplitWindowMode(napi_env env, napi_callback_info info);
     static napi_value StartUIAbilities(napi_env env, napi_callback_info info);
     static napi_value ConnectAbility(napi_env env, napi_callback_info info);
     static napi_value DisconnectAbility(napi_env env, napi_callback_info info);
@@ -61,6 +62,7 @@ protected:
     virtual napi_value OnTerminateSelfWithResult(napi_env env, NapiCallbackInfo& info);
     virtual napi_value OnStartAbilityForResult(napi_env env, NapiCallbackInfo& info);
     virtual napi_value OnStartAbilityForResultAsCaller(napi_env env, NapiCallbackInfo &info);
+    virtual napi_value OnStartUIAbilitiesInSplitWindowMode(napi_env env, NapiCallbackInfo& info);
     virtual napi_value OnStartUIAbilities(napi_env env, NapiCallbackInfo& info);
     virtual napi_value OnConnectAbility(napi_env env, NapiCallbackInfo& info);
     virtual napi_value OnDisconnectAbility(napi_env env, NapiCallbackInfo& info);
@@ -91,6 +93,8 @@ private:
 
     bool CheckStartAbilityInputParam(napi_env env, NapiCallbackInfo& info, AAFwk::Want& want,
         AAFwk::StartOptions& startOptions, size_t& unwrapArgc) const;
+    bool CheckStartUIAbilitiesInSplitWindowModeInputParam(napi_env env, NapiCallbackInfo &info,
+        int32_t &primaryWindowId, AAFwk::Want &secondaryWant);
     napi_value OpenAtomicServiceInner(napi_env env, NapiCallbackInfo& info, AAFwk::Want &want,
         const AAFwk::StartOptions &options, size_t unwrapArgc);
     void AddFreeInstallObserver(napi_env env, const AAFwk::Want &want, napi_value callback, napi_value* result,
@@ -100,7 +104,7 @@ private:
         AAFwk::Want &want, int &requestCode);
     napi_value OnOpenLink(napi_env env, NapiCallbackInfo& info);
     napi_value OnOpenLinkInner(napi_env env, const AAFwk::Want& want,
-        int requestCode, const std::string& startTime, const std::string& url);
+        int requestCode, const std::string &startTime, const std::string &url, bool hideFailureTipDialog = false);
     void UnWrapCompletionHandlerForAtomicService(
         napi_env env, napi_value param, AAFwk::StartOptions &options, const std::string &appId);
 #ifdef SUPPORT_SCREEN

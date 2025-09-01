@@ -30,6 +30,7 @@ constexpr const char* PERMISSION_READ_WRITE_DESKTON = "ohos.permission.READ_WRIT
 constexpr const char* PERMISSION_READ_WRITE_DOCUMENTS = "ohos.permission.READ_WRITE_DOCUMENTS_DIRECTORY";
 constexpr const char* PERMISSION_FILE_ACCESS_PERSIST = "ohos.permission.FILE_ACCESS_PERSIST";
 constexpr const char* PERMISSION_GRANT_URI_PERMISSION_AS_CALLER = "ohos.permission.GRANT_URI_PERMISSION_AS_CALLER";
+constexpr const char* PERMISSION_SANDBOX_ACCESS_MANAGER = "ohos.permission.SANDBOX_ACCESS_MANAGER";
 } // namespace
 
 bool PermissionVerification::VerifyPermissionByTokenId(const int &tokenId, const std::string &permissionName) const
@@ -72,6 +73,9 @@ bool PermissionVerification::VerifyPermissionByTokenId(const int &tokenId, const
     }
     if (permissionName == PERMISSION_GRANT_URI_PERMISSION_AS_CALLER) {
         return MyFlag::permissionGrantUriPermissionAsCaller_;
+    }
+    if (permissionName == PERMISSION_SANDBOX_ACCESS_MANAGER) {
+        return MyFlag::permissionSandboxAccessManager_;
     }
     return false;
 }

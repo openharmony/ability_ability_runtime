@@ -28,6 +28,9 @@
 #include "isession_handler_interface.h"
 
 namespace OHOS {
+namespace Rosen {
+struct PendingSessionActivationConfig;
+}
 namespace AAFwk {
 class SessionInfo;
 class StatusBarDelegateManager;
@@ -439,9 +442,12 @@ private:
 
     // byCall
     int CallAbilityLocked(const AbilityRequest &abilityRequest, std::string &errMsg);
-    sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
+    sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest, int32_t requestId) const;
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo,
         const AbilityRequest &abilityRequest, std::string &errMsg);
+    std::pair<std::vector<sptr<SessionInfo>>, std::vector<Rosen::PendingSessionActivationConfig>>
+        CreateSessionConfigurations(int primaryWindowId, sptr<SessionInfo> sessionInfo);
+    int NotifySCBPendingActivationInSplitMode(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest);
     int32_t BatchNotifySCBPendingActivations(const AbilitiesRequest &abilitiesRequest);
     void HandleAbilitiesRequestDone(int32_t requestId, int32_t requestListId, sptr<SessionInfo> sessionInfo);
     bool IsHookModule(const AbilityRequest &abilityRequest) const;
@@ -450,10 +456,10 @@ private:
     void HandleForegroundCollaborate(const AbilityRequest &abilityRequest,
         std::shared_ptr<AbilityRecord> abilityRecord);
 
-    void NotifyStartSpecifiedAbility(AbilityRequest &request, const AAFwk::Want &want);
-    void NotifyRestartSpecifiedAbility(const AbilityRequest &request, const sptr<IRemoteObject> &token);
     int32_t MoveAbilityToFront(const SpecifiedRequest &specifiedRequest,
         const std::shared_ptr<AbilityRecord> abilityRecord, std::shared_ptr<AbilityRecord> callerAbility);
+    int SendSessionInfoToSCBInSplitMode(int primaryWindowId, std::shared_ptr<AbilityRecord> callerAbility,
+        sptr<SessionInfo> sessionInfo);
     int SendSessionInfoToSCB(std::shared_ptr<AbilityRecord> &callerAbility, sptr<SessionInfo> &sessionInfo);
     int32_t StartAbilityBySpecifed(const SpecifiedRequest &specifiedRequest,
         std::shared_ptr<AbilityRecord> callerAbility);

@@ -70,7 +70,6 @@ private:
     int32_t HandleGetApplicationInfoByProcessID(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyAppMgrRecordExitReason(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateApplicationInfoInstalled(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleSetCurrentUserId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetEnableStartProcessFlagByUserId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetBundleNameByPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterAppDebugListener(MessageParcel &data, MessageParcel &reply);
@@ -112,6 +111,7 @@ private:
     int32_t HandlePreloadApplicationByPhase(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyPreloadAbilityStateChanged(MessageParcel &data, MessageParcel &reply);
     int32_t HandleCheckPreloadAppRecordExist(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleVerifyKillProcessPermission(MessageParcel &data, MessageParcel &reply);
     DISALLOW_COPY_AND_MOVE(AmsMgrStub);
 };
 }  // namespace AppExecFwk

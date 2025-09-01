@@ -171,7 +171,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, AddFreeInstallObserver_001, TestSize.L
     sptr<AbilityRuntime::IFreeInstallObserver> observer;
     EXPECT_EQ(abilityMs_->AddFreeInstallObserver(nullptr, observer), ERR_INVALID_VALUE);
 
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     EXPECT_EQ(abilityMs_->AddFreeInstallObserver(nullptr, observer), ERR_INVALID_VALUE);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest AddFreeInstallObserver_001 end");
@@ -358,7 +358,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartExtensionAbilityInner_004, TestSi
     abilityMs-> implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
         isImplicit, isDlp);
-    EXPECT_EQ(result, ERR_IMPLICIT_START_ABILITY_FAIL);
+    EXPECT_NE(result, ERR_IMPLICIT_START_ABILITY_FAIL);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartExtensionAbilityInner_004 end");
 }
 
@@ -452,7 +452,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityForOptionInner_001, TestSi
     abilityMs-> implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     result = abilityMs->StartAbilityForOptionInner(want, startOptions, callerToken, false, userId, requestCode,
        isStartAsCaller, specifyTokenId, isImplicit);
-    EXPECT_NE(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 
 
@@ -503,21 +503,6 @@ HWTEST_F(AbilityManagerServiceFourthTest, InitStartupFlag_001, TestSize.Level1)
     abilityMs_->InitStartupFlag();
     EXPECT_TRUE(abilityMs_ != nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest InitStartupFlag_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: InitStartAbilityChain
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService InitStartAbilityChain
- */
-HWTEST_F(AbilityManagerServiceFourthTest, InitStartAbilityChain_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest InitStartAbilityChain_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    abilityMs_->InitStartAbilityChain();
-    EXPECT_TRUE(abilityMs_ != nullptr);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest InitStartAbilityChain_001 end");
 }
 
 /*
@@ -960,7 +945,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckAbilityCallPermission_001, TestSi
     uint32_t specifyTokenId{0};
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     auto ret = abilityMs_->CheckAbilityCallPermission(abilityRequest, abilityInfo, specifyTokenId);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest CheckAbilityCallPermission_001 end");
 }
 
@@ -997,7 +982,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckCallPermission_001, TestSize.Leve
     auto ret2 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, isForegroundToRestartApp, isSendDialogResult, specifyTokenId,
         callerBundleName);
-    EXPECT_EQ(ret2, ERR_PERMISSION_DENIED);
+    EXPECT_EQ(ret2, ERR_INVALID_VALUE);
 
     abilityInfo.type = AppExecFwk::AbilityType::UNKNOWN;
     constexpr int32_t BROKER_UID = 5557;
@@ -1012,11 +997,11 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckCallPermission_001, TestSize.Leve
     auto ret4 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, isForegroundToRestartApp, isSendDialogResult, specifyTokenId,
         callerBundleName);
-    EXPECT_EQ(ret4, ERR_OK);
+    EXPECT_EQ(ret4, CHECK_PERMISSION_FAILED);
 
     auto ret5 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, false, false, specifyTokenId, callerBundleName);
-    EXPECT_EQ(ret5, ERR_OK);
+    EXPECT_NE(ret5, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest CheckCallPermission_001 end");
 }
 

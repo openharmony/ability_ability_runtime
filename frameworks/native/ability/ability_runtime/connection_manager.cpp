@@ -197,6 +197,9 @@ ErrCode ConnectionManager::DisconnectAbility(const sptr<IRemoteObject>& connectC
     std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
     bool found = false;
     auto item = abilityConnections_.begin();
+    if (!abilityConnections_.empty()) {
+        TAG_LOGI(AAFwkTag::CONNECTION, "Connection size:%{public}zu", abilityConnections_.size());
+    }
     while (item != abilityConnections_.end()) {
         if (!MatchConnection(connectCaller, connectReceiver, accountId, *item) ||
             std::find(item->second.begin(), item->second.end(), connectCallback) == item->second.end()) {
@@ -204,8 +207,7 @@ ErrCode ConnectionManager::DisconnectAbility(const sptr<IRemoteObject>& connectC
             continue;
         }
         found = true;
-        TAG_LOGI(AAFwkTag::CONNECTION, "Connection size:%{public}zu, callback size: %{public}zu",
-            abilityConnections_.size(), item->second.size());
+        TAG_LOGD(AAFwkTag::CONNECTION, "callback size: %{public}zu", item->second.size());
         auto iter = item->second.begin();
         while (iter != item->second.end()) {
             if (*iter == connectCallback) {

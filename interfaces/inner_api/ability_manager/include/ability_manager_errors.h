@@ -28,7 +28,7 @@ enum {
      */
     ABILITY_MODULE_TYPE_SERVICE = 0,
     /**
-     *  Module type: ABility Kit side
+     *  Module type: Ability Kit side
      */
     ABILITY_MODULE_TYPE_KIT = 1,
     /**
@@ -51,7 +51,7 @@ enum {
      */
     GET_ABILITY_SERVICE_FAILED,
     /**
-     * Result(2097154) for Connect State: An error of the the ability service not connect.
+     * Result(2097154) for Connect State: An error of the ability service not connect.
      */
     ABILITY_SERVICE_NOT_CONNECTED,
     /**
@@ -355,7 +355,7 @@ enum {
     ERR_COLLABORATOR_NOTIFY_FAILED,
 
     /**
-     * Result(2097219) for prouct application boot setting.
+     * Result(2097219) for product application boot setting.
      */
     ERR_NOT_SUPPORTED_PRODUCT_TYPE,
 
@@ -978,6 +978,16 @@ enum {
      */
     ERR_PROCESS_START_INVALID_PID = 2097386,
 
+    /**
+     * Result (2097387) for not expected caller native name.
+     */
+    ERR_NOT_EXPECTED_NATIVE_CALLER_NAME = 2097387,
+
+    /**
+     * Result (2097388) for app not configured preload phase.
+     */
+    ERR_INVALID_APP_PRELOAD_PHASE = 2097388,
+
     ERR_DO_CLOSURE_CALLBACK_FAILED = 2097397,
 
     ERR_DMS_START_REMOTE_FAILED = 2097398,
@@ -985,9 +995,85 @@ enum {
     ERR_PRELOAD_APP_DATA_ABILITIES_FAILED = 2097399,
 
     /**
-     * Result (2097387) for not expected caller native name.
+     * Result (2097400) The current process is not a master process.
      */
-    ERR_NOT_EXPECTED_NATIVE_CALLER_NAME = 2097387,
+    ERR_NOT_MASTER_PROCESS = 2097400,
+
+    /**
+     * Result (2097401) There is an unfinished onNewProcessRequest.
+     */
+    ERR_NOT_ON_NEW_PROCESS_REQUEST_DONE = 2097401,
+
+    /**
+     * Result (2098000-2098049) Error code refinement INVALID_VALUE.
+     */
+    ERR_REFINEMENT_INVALID_VALUE_BEGIN = 2098000,
+
+    ERR_CONNECT_MANAGER_NULL_ABILITY_RECORD = 2098001,
+
+    ERR_UI_ABILITY_MANAGER_NULL_ABILITY_RECORD = 2098002,
+
+    ERR_NULL_APP_MGR_CLIENT = 2098004,
+
+    ERR_ADD_START_CONTROL_PARAM_FAILED = 2098005,
+
+    ERR_NULL_FREE_INSTALL_MANAGER = 2098006,
+
+    ERR_GET_MISSION_ID_BY_ABILITY_TOKEN_FAILED = 2098007,
+
+    ERR_INVALID_MISSION_ID = 2098008,
+    
+    ERR_NULL_SYS_DIALOG_SCHEDULER = 2098009,
+    
+    ERR_CHECK_CALL_FROM_BACKGROUND_FAILED = 2098010,
+    
+    ERR_TOO_LARGE_APPINDEXES = 2098011,
+
+    ERR_FREQ_START_ABILITY = 2098012,
+
+    ERR_CALLER_IS_KILLING = 2098013,
+    
+    ERR_NOTIFY_SCB_PENDING_ACTIVATION_FAILED = 2098014,
+
+    ERR_FREE_INSTALL_REMOTE_WANT = 2098015,
+
+    ERR_REFINEMENT_INVALID_VALUE_END = 2098049,
+
+    /**
+     * Result (2098050-2098099) Error code refinement INNERR_ERROR.
+     */
+    ERR_REFINEMENT_INNER_ERROR_BEGIN = 2098050,
+
+    ERR_APP_MGR_TERMINATTE_ABILITY_FAILED = 2098051,
+
+    ERR_REFINEMENT_INNER_ERROR_END = 2098099,
+
+    /**
+     * Result (2099100-2099149) Error code refinement RESOLVE_ABILITY_ERR.
+     */
+    ERR_REFINEMENT_RESOLVE_ABILITY_BEGIN = 2099100,
+
+    ERR_CHECK_PLUGIN_NULL_RECORD = 2099101,
+
+    ERR_CALLER_IS_PLUGIN_ABILITY = 2099102,
+
+    ERR_CHECK_PLUGIN_INVALID_TYPE = 2099103,
+
+    ERR_REFINEMENT_RESOLVE_ABILITY_END = 2099149,
+
+    /**
+     * Result (2099150-2099199) Error code refinement ERR_INVALID_CALLER.
+     */
+    ERR_REFINEMENT_INVALID_CALLER_BEGIN = 2099150,
+
+    ERR_IS_NOT_SPECIFIED_SA = 2099151,
+
+    ERR_REFINEMENT_INVALID_CALLER_END = 2099199,
+
+    /**
+     * Result (2099200) for main window of this ability does not exist.
+     */
+    ERR_MAIN_WINDOW_NOT_EXIST = 2099200,
 
     /**
      * Native error(3000000) for target bundle not exist.
@@ -1235,80 +1321,6 @@ enum NativeFreeInstallError {
      * Undefine error code.
      */
     UNDEFINE_ERROR_CODE = 3,
-};
-
-enum {
-    /**
-     * Result (2098000-2098049) Error code refinement INVALID_VALUE.
-     */
-    ERR_REFINEMENT_INVALID_VALUE_BEGIN = 2098000,
-
-    ERR_CONNECT_MANAGER_NULL_ABILITY_RECORD = 2098001,
-
-    ERR_UI_ABILITY_MANAGER_NULL_ABILITY_RECORD = 2098002,
-
-    ERR_NULL_APP_MGR_CLIENT = 2098004,
-
-    ERR_ADD_START_CONTROL_PARAM_FAILED = 2098005,
-
-    ERR_NULL_FREE_INSTALL_MANAGER = 2098006,
-
-    ERR_GET_MISSION_ID_BY_ABILITY_TOKEN_FAILED = 2098007,
-
-    ERR_INVALID_MISSION_ID = 2098008,
-    
-    ERR_NULL_SYS_DIALOG_SCHEDULER = 2098009,
-    
-    ERR_CHECK_CALL_FROM_BACKGROUND_FAILED = 2098010,
-    
-    ERR_TOO_LARGE_APPINDEXES = 2098011,
-
-    ERR_FREQ_START_ABILITY = 2098012,
-
-    ERR_CALLER_IS_KILLING = 2098013,
-    
-    ERR_NOTIFY_SCB_PENDING_ACTIVATION_FAILED = 2098014,
-
-    ERR_FREE_INSTALL_REMOTE_WANT = 2098015,
-
-    ERR_REFINEMENT_INVALID_VALUE_END = 2098049
-};
-
-enum {
-    /**
-     * Result (2098050-2098099) Error code refinement INNERR_ERROR.
-     */
-    ERR_REFINEMENT_INNER_ERROR_BEGIN = 2098050,
-
-    ERR_APP_MGR_TERMINATTE_ABILITY_FAILED = 2098051,
-
-    ERR_REFINEMENT_INNER_ERROR_END = 2098099
-};
-
-enum {
-    /**
-     * Result (2099100-2099149) Error code refinement RESOLVE_ABILITY_ERR.
-     */
-    ERR_REFINEMENT_RESOLVE_ABILITY_BEGIN = 2099100,
-
-    ERR_CHECK_PLUGIN_NULL_RECORD = 2099101,
-
-    ERR_CALLER_IS_PLUGIN_ABILITY = 2099102,
-
-    ERR_CHECK_PLUGIN_INVALID_TYPE = 2099103,
-
-    ERR_REFINEMENT_RESOLVE_ABILITY_END = 2099149
-};
-
-enum {
-    /**
-     * Result (2099150-2099199) Error code refinement ERR_INVALID_CALLER.
-     */
-    ERR_REFINEMENT_INVALID_CALLER_BEGIN = 2099150,
-
-    ERR_IS_NOT_SPECIFIED_SA = 2099151,
-
-    ERR_REFINEMENT_INVALID_CALLER_END = 2099199
 };
 }  // namespace AAFwk
 }  // namespace OHOS

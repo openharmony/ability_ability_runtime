@@ -19,10 +19,12 @@
 #include "ability_manager_service.h"
 #include "auto_startup_callback_proxy.h"
 #include "auto_startup_interface.h"
+#include "display_util.h"
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "in_process_call_wrapper.h"
 #include "permission_constants.h"
+#include "user_controller/user_controller.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -229,6 +231,17 @@ int32_t AbilityAutoStartupService::QueryAllAutoStartupApplications(std::vector<A
         userId, isCalledByEDM);
 }
 
+int32_t AbilityAutoStartupService::GetAutoStartupStatusForSelf(uint32_t callerTokenId, bool &isAutoStartEnabled)
+{
+    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Disabled config");
+        return ERR_CAPABILITY_NOT_SUPPORT;
+    }
+
+    return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->GetAutoStartupStatusForSelf(callerTokenId,
+        isAutoStartEnabled);
+}
+
 int32_t AbilityAutoStartupService::QueryAllAutoStartupApplicationsWithoutPermission(
     std::vector<AutoStartupInfo> &infoList, int32_t userId)
 {
@@ -300,8 +313,7 @@ void AbilityAutoStartupService::ExecuteCallbacks(bool isCallOn, const AutoStartu
         " accessTokenId: %{public}s, setterUserId: %{public}d, userId: %{public}d",
         info.bundleName.c_str(), info.moduleName.c_str(),
         info.abilityName.c_str(), info.accessTokenId.c_str(), info.setterUserId, info.userId);
-    int32_t currentUserId = DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId();
-    bool isUserIdMatch = (info.userId == currentUserId);
+    bool isUserIdMatch = UserController::GetInstance().IsForegroundUser(info.userId);
     bool isUserIdU0OrU1 = (U0_USER_ID == info.userId) || (U1_USER_ID == info.userId);
     if (!isUserIdMatch && !isUserIdU0OrU1) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Condition not satisfied");
@@ -417,7 +429,7 @@ int32_t AbilityAutoStartupService::GetValidUserId(int32_t userId)
         validUserId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
     }
     if (validUserId == U0_USER_ID || validUserId == U1_USER_ID) {
-        validUserId = DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId();
+        validUserId = UserController::GetInstance().GetForegroundUserId(AAFwk::DisplayUtil::ObtainDefaultDisplayId());
     }
     return validUserId;
 }

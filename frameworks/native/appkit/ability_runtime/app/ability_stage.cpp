@@ -74,6 +74,9 @@ void AbilityStage::Init(const std::shared_ptr<Context>& context,
     application_ = application;
 }
 
+void AbilityStage::LoadModule(const AppExecFwk::HapModuleInfo &hapModuleInfo)
+{}
+
 void AbilityStage::AddAbility(const sptr<IRemoteObject> &token,
     const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord)
 {
@@ -133,7 +136,7 @@ void AbilityStage::OnMemoryLevel(int level)
 {}
 
 int32_t AbilityStage::RunAutoStartupTask(const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
-    bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext)
+    bool &isAsyncCallback, const std::shared_ptr<Context> &stageContext, bool preAbilityStageLoad)
 {
     isAsyncCallback = false;
     return ERR_OK;

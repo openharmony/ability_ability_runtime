@@ -22,6 +22,7 @@
 #include "ability_connection.h"
 #include "ability_start_setting.h"
 #include "recovery_param.h"
+#include "start_ability_utils.h"
 #undef private
 #undef protected
 
@@ -532,12 +533,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, GetExtensionRunningInfos_001, TestSize.
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     std::vector<AAFwk::ExtensionRunningInfo> extensionRunningInfo;
-    EXPECT_NE(abilityMs_->GetExtensionRunningInfos(10, extensionRunningInfo), ERR_OK);
-
-    auto temp = abilityMs_->subManagersHelper_->currentConnectManager_;
-    abilityMs_->subManagersHelper_->currentConnectManager_.reset();
-    EXPECT_EQ(abilityMs_->GetExtensionRunningInfos(10, extensionRunningInfo), ERR_INVALID_VALUE);
-    abilityMs_->subManagersHelper_->currentConnectManager_ = temp;
+    EXPECT_EQ(abilityMs_->GetExtensionRunningInfos(10, extensionRunningInfo), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest GetExtensionRunningInfos_001 end");
 }
 
@@ -735,10 +731,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, JudgeMultiUserConcurrency_001, TestSize
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_TRUE(abilityMs_->JudgeMultiUserConcurrency(0));
 
-    auto temp = abilityMs_->userController_;
-    abilityMs_->userController_ = nullptr;
     EXPECT_FALSE(abilityMs_->JudgeMultiUserConcurrency(100));
-    abilityMs_->userController_ = temp;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest JudgeMultiUserConcurrency_001 end");
 }
 
@@ -854,7 +847,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, StopUser_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest StopUser_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_EQ(abilityMs_->StopUser(USER_ID_U100, nullptr), CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(abilityMs_->StopUser(USER_ID_U100, nullptr), INVALID_PARAMETERS_ERR);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest StopUser_001 end");
 }
 
@@ -998,39 +991,39 @@ HWTEST_F(AbilityManagerServiceThirdTest, RegisterSessionHandler_002, TestSize.Le
 
 /*
  * Feature: AbilityManagerService
- * Function: SetPickerElementName
+ * Function: SetPickerElementNameAndParams
  * SubFunction: NA
- * FunctionPoints: AbilityManagerService SetPickerElementName
+ * FunctionPoints: AbilityManagerService SetPickerElementNameAndParams
  */
-HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_001, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementNameAndParams_001, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
-    abilityMs_->SetPickerElementName(nullptr, USER_ID_U100);
+    abilityMs_->SetPickerElementNameAndParams(nullptr, USER_ID_U100);
 }
 
 /*
  * Feature: AbilityManagerService
- * Function: SetPickerElementName
+ * Function: SetPickerElementNameAndParams
  * SubFunction: NA
- * FunctionPoints: AbilityManagerService SetPickerElementName
+ * FunctionPoints: AbilityManagerService SetPickerElementNameAndParams
  */
-HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_002, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementNameAndParams_002, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
     sptr<SessionInfo> sessionInfo = new SessionInfo();
     const sptr<SessionInfo> extensionSessionInfo = sessionInfo;
-    abilityMs_->SetPickerElementName(extensionSessionInfo, USER_ID_U100);
+    abilityMs_->SetPickerElementNameAndParams(extensionSessionInfo, USER_ID_U100);
 }
 
 /*
  * Feature: AbilityManagerService
- * Function: SetPickerElementName
+ * Function: SetPickerElementNameAndParams
  * SubFunction: NA
- * FunctionPoints: AbilityManagerService SetPickerElementName
+ * FunctionPoints: AbilityManagerService SetPickerElementNameAndParams
  */
-HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_003, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementNameAndParams_003, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
@@ -1040,16 +1033,16 @@ HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_003, TestSize.Leve
     want.SetParam("ability.want.params.uiExtensionTargetType", type);
     sessionInfo->want = want;
     const sptr<SessionInfo> extensionSessionInfo = sessionInfo;
-    abilityMs_->SetPickerElementName(extensionSessionInfo, USER_ID_U100);
+    abilityMs_->SetPickerElementNameAndParams(extensionSessionInfo, USER_ID_U100);
 }
 
 /*
  * Feature: AbilityManagerService
- * Function: SetPickerElementName
+ * Function: SetPickerElementNameAndParams
  * SubFunction: NA
- * FunctionPoints: AbilityManagerService SetPickerElementName
+ * FunctionPoints: AbilityManagerService SetPickerElementNameAndParams
  */
-HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_004, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementNameAndParams_004, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
@@ -1058,7 +1051,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_004, TestSize.Leve
     want.SetElementName("com.example.share", "ShareUIExtensionAbility");
     sessionInfo->want = want;
     const sptr<SessionInfo> extensionSessionInfo = sessionInfo;
-    abilityMs_->SetPickerElementName(extensionSessionInfo, USER_ID_U100);
+    abilityMs_->SetPickerElementNameAndParams(extensionSessionInfo, USER_ID_U100);
 }
 
 /*
@@ -1236,18 +1229,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, InitStartupFlag_001, TestSize.Level1)
 {
     auto abilityMs = std::make_shared<AbilityManagerService>();
     abilityMs->InitStartupFlag();
-    EXPECT_NE(abilityMs, nullptr);
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: InitStartAbilityChain
- * FunctionPoints: AbilityManagerService InitStartAbilityChain
- */
-HWTEST_F(AbilityManagerServiceThirdTest, InitStartAbilityChain_001, TestSize.Level1)
-{
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-    abilityMs->InitStartAbilityChain();
     EXPECT_NE(abilityMs, nullptr);
 }
 
@@ -1641,8 +1622,9 @@ HWTEST_F(AbilityManagerServiceThirdTest, StartAbilityWrap_001, TestSize.Level1)
     uint32_t specifyToken = 0;
     bool isForegroundToRestartApp = true;
     bool isImplicit = true;
-    auto result = abilityMs->StartAbilityWrap(want, callerToken, requestCode, false, userId, isStartAsCaller,
-        specifyToken, isForegroundToRestartApp, isImplicit);
+    StartAbilityWrapParam startAbilityWrapParam = { want, callerToken, requestCode, false, userId, isStartAsCaller,
+        specifyToken, isForegroundToRestartApp, isImplicit };
+    auto result = abilityMs->StartAbilityWrap(startAbilityWrapParam);
     EXPECT_EQ(result, ERR_NULL_INTERCEPTOR_EXECUTER);
 }
 
@@ -2456,7 +2438,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_002, T
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_002 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
     AAFwk::Want want;
     AAFwk::Want convertedWant;
@@ -2478,7 +2460,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_003, T
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_003 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
     AAFwk::Want want;
     AAFwk::Want convertedWant;
@@ -2500,7 +2482,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, OpenLinkFreeInstallAtomicService_004, T
     TAG_LOGI(AAFwkTag::TEST, "OpenLinkFreeInstallAtomicService_004 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     sptr<IRemoteObject> token = MockToken(AbilityType::PAGE);
     AAFwk::Want want;
     AAFwk::Want convertedWant;
@@ -2924,6 +2906,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, AbilityManagerServiceTest_OpenLink_001,
  */
 HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionCallerPidByHostWindowId_001, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest CheckUIExtensionCallerPidByHostWindowId_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
     AbilityRequest abilityRequest = GenerateAbilityRequest("0", "abilityName", "appName", "bundleName", "moduleName");
@@ -2935,6 +2918,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionCallerPidByHostWindowId
     sessionInfo->hostWindowId = 1;
     abilityRequest.sessionInfo = sessionInfo;
     abilityMs->CheckUIExtensionCallerPidByHostWindowId(abilityRequest);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest CheckUIExtensionCallerPidByHostWindowId_001 end");
 }
 
 /*
@@ -2944,6 +2928,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionCallerPidByHostWindowId
  */
 HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionCallerPidByHostWindowId_002, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest CheckUIExtensionCallerPidByHostWindowId_002 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
     AbilityRequest callerRequest = GenerateAbilityRequest("0", "abilityName", "appName", "bundleName", "moduleName");
@@ -2958,6 +2943,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, CheckUIExtensionCallerPidByHostWindowId
     sessionInfo->hostWindowId = 1;
     abilityRequest.sessionInfo = sessionInfo;
     abilityMs->CheckUIExtensionCallerPidByHostWindowId(abilityRequest);
+    sleep(1);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest CheckUIExtensionCallerPidByHostWindowId_002 end");
 }
 
 /*

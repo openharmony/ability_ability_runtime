@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,8 +63,9 @@ const std::string HELP_MSG_START =
     "usage: aa start <options>\n"
     "options list:\n"
     "  -h, --help                                                   list available commands\n"
-    "  [-d <device-id>] [-a <ability-name> -b <bundle-name>] [-m <module-name>] [-p <perf-cmd>] [-D] [-E] [-S] [-N]"
-    "  [-R] [--ps <key> <string-value>] "
+    "  [-d <device-id>] [-a <ability-name> -b <bundle-name>] [-m <module-name>] [-p <perf-cmd>] "
+    "  [-C] [-D] [-E] [-S] [-N] "
+    "  [-R] [-c] [--ps <key> <string-value>] "
     "  [--pi <key> <integer-value>] "
     "  [--pb <key> <boolean-value>] "
     "  [--psn <key>] "
@@ -256,14 +257,10 @@ private:
     void SetParams(const ParametersInteger& pi, Want& want);
     void SetParams(const ParametersString& ps, Want& want);
     void SetParams(const ParametersBool& pb, Want& want);
-    Reason CovertExitReason(std::string& reasonStr);
     pid_t ConvertPid(std::string& inputPid);
 
 #ifdef ABILITY_COMMAND_FOR_TEST
     ErrCode RunForceTimeoutForTest();
-    ErrCode RunAsSendAppNotRespondingProcessID();
-    ErrCode RunAsSendAppNotRespondingWithUnknownOption();
-    ErrCode RunAsSendAppNotRespondingWithOption(int32_t option, std::string& pid);
 #endif
 #ifdef ABILITY_FAULT_AND_EXIT_TEST
     ErrCode RunAsForceExitAppCommand();
@@ -272,6 +269,7 @@ private:
     sptr<IAbilityManager> GetAbilityManagerService();
 
     ErrCode MakeWantFromCmd(Want& want, std::string& windowMode);
+    ErrCode MakeWantFromCmdForStopService(Want& want);
     ErrCode MakeWantForProcess(Want& want);
     ErrCode RunAsTestCommand();
     ErrCode TestCommandError(const std::string& info);

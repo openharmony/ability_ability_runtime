@@ -60,6 +60,8 @@ private:
     static bool Check2DQuota(bool needDecreaseQuota);
     static bool SafeStoll(const std::string &str, long long &value);
     static int GetCompressQuota (const std::vector<int64_t> &quotas);
+    static bool SplitPropertyByComma(const std::string &property, std::string &runningId, std::string &value);
+    static std::string GetEventConfig(const std::string &key);
 };
 } // namespace AppExecFwk
 } // namespace OHOS
