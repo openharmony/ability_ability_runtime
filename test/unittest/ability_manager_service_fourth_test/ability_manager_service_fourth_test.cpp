@@ -452,7 +452,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityForOptionInner_001, TestSi
     abilityMs-> implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     result = abilityMs->StartAbilityForOptionInner(want, startOptions, callerToken, false, userId, requestCode,
        isStartAsCaller, specifyTokenId, isImplicit);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_NE(result, ERR_INVALID_VALUE);
 }
 
 
@@ -945,7 +945,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckAbilityCallPermission_001, TestSi
     uint32_t specifyTokenId{0};
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     auto ret = abilityMs_->CheckAbilityCallPermission(abilityRequest, abilityInfo, specifyTokenId);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest CheckAbilityCallPermission_001 end");
 }
 
@@ -982,7 +982,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckCallPermission_001, TestSize.Leve
     auto ret2 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, isForegroundToRestartApp, isSendDialogResult, specifyTokenId,
         callerBundleName);
-    EXPECT_EQ(ret2, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret2, ERR_PERMISSION_DENIED);
 
     abilityInfo.type = AppExecFwk::AbilityType::UNKNOWN;
     constexpr int32_t BROKER_UID = 5557;

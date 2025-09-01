@@ -24,7 +24,6 @@
 #include "insight_intent_utils.h"
 #include "ipc_capacity_wrap.h"
 #include "permission_constants.h"
-#include "support_system_ability_permission.h"
 #include "utils/app_mgr_util.h"
 #include "uri_utils.h"
 
@@ -166,7 +165,8 @@ int FreeInstallManager::RemoteFreeInstall(const Want &want, int32_t userId, int 
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     bool isFromRemote = want.GetBoolParam(FROM_REMOTE_KEY, false);
-    if (!SupportSystemAbilityPermission::IsSupportSaCallPermission() && !isFromRemote && !IsTopAbility(callerToken)) {
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (!isSaCall && !isFromRemote && !IsTopAbility(callerToken)) {
         return NOT_TOP_ABILITY;
     }
     FreeInstallInfo info = BuildFreeInstallInfo(want, userId, requestCode, callerToken);
@@ -660,7 +660,8 @@ void FreeInstallManager::RemoveFreeInstallInfo(const std::string &bundleName, co
 
 bool FreeInstallManager::VerifyStartFreeInstallPermission(sptr<IRemoteObject> callerToken)
 {
-    if (SupportSystemAbilityPermission::IsSupportSaCallPermission() || IsTopAbility(callerToken)) {
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (isSaCall || IsTopAbility(callerToken)) {
         return true;
     }
 
