@@ -8348,6 +8348,7 @@ void AbilityManagerService::StartAutoStartupApps(int32_t userId)
         return;
     }
     std::vector<AutoStartupInfo> infoList;
+    userId = AbilityRuntime::UserController::GetInstance().GetForegroundUserId(DisplayUtil::ObtainDefaultDisplayId());
     int32_t result = abilityAutoStartupService_->QueryAllAutoStartupApplicationsWithoutPermission(infoList, userId);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed query data");
