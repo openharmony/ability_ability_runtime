@@ -82,6 +82,7 @@ void AbilityContext::SetOptions(const Options &options)
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "releaseType:%{public}s", options.releaseType.c_str());
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "enablePartialUpdate:%{public}d", options.enablePartialUpdate);
     TAG_LOGD(AAFwkTag::ABILITY_SIM, "isComponentMode:%{public}d", options.isComponentMode);
+    TAG_LOGD(AAFwkTag::ABILITY_SIM, "enableFileOperation:%{public}d", options.enableFileOperation);
 }
 
 std::string AbilityContext::GetBundleName() const
