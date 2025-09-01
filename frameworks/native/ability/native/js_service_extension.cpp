@@ -307,6 +307,10 @@ bool JsServiceExtension::HasScreenDensityBeenSet(std::shared_ptr<Global::Resourc
         TAG_LOGE(AAFwkTag::ABILITY, "null resConfig");
         return false;
     }
+    if (resourceManager == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null resourceManager");
+        return false;
+    }
     resourceManager->GetResConfig(*resConfig);
     return resConfig->GetScreenDensityDpi() != Global::Resource::ScreenDensity::SCREEN_DENSITY_NOT_SET;
 }
