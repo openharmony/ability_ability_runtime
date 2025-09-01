@@ -41,7 +41,7 @@ UserController& UserController::GetInstance()
 void UserController::ClearUserId(int32_t userId)
 {
     std::lock_guard<ffrt::mutex> guard(userLock_);
-    for (auto iter = displayIdMap_.begin(); iter != displayIdMap_.end();) {
+    for (auto iter = displayIdMap_.begin(); iter != displayIdMap_.end(); iter++) {
         if (iter->second == userId) {
             displayIdMap_.erase(iter);
             break;
