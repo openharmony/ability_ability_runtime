@@ -132,7 +132,8 @@ HWTEST_F(AbilityManagerCollaboratorProxyTest, NotifyMoveMissionToBackground_0100
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerCollaboratorStubMock::InvokeSendRequest));
     int32_t missionId = 0;
-    int32_t res = proxy_->NotifyMoveMissionToBackground(missionId);
+    int32_t userId = 100;
+    int32_t res = proxy_->NotifyMoveMissionToBackground(missionId, userId);
     EXPECT_EQ(res, NO_ERROR);
     EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::NOTIFY_MOVE_MISSION_TO_BACKGROUND), mock_->GetCode());
 }
@@ -148,7 +149,8 @@ HWTEST_F(AbilityManagerCollaboratorProxyTest, NotifyMoveMissionToForeground_0100
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerCollaboratorStubMock::InvokeSendRequest));
     int32_t missionId = 0;
-    int32_t res = proxy_->NotifyMoveMissionToForeground(missionId);
+    int32_t userId = 100;
+    int32_t res = proxy_->NotifyMoveMissionToForeground(missionId, userId);
     EXPECT_EQ(res, NO_ERROR);
     EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::NOTIFY_MOVE_MISSION_TO_FOREGROUND), mock_->GetCode());
 }
@@ -164,7 +166,8 @@ HWTEST_F(AbilityManagerCollaboratorProxyTest, NotifyTerminateMission_0100, TestS
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerCollaboratorStubMock::InvokeSendRequest));
     int32_t missionId = 0;
-    int32_t res = proxy_->NotifyTerminateMission(missionId);
+    int32_t userId = 100;
+    int32_t res = proxy_->NotifyTerminateMission(missionId, userId);
     EXPECT_EQ(res, NO_ERROR);
     EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::NOTIFY_TERMINATE_MISSION), mock_->GetCode());
 }
@@ -180,7 +183,8 @@ HWTEST_F(AbilityManagerCollaboratorProxyTest, NotifyClearMission_0100, TestSize.
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerCollaboratorStubMock::InvokeSendRequest));
     int32_t missionId = 0;
-    int32_t res = proxy_->NotifyClearMission(missionId);
+    int32_t userId = 100;
+    int32_t res = proxy_->NotifyClearMission(missionId, userId);
     EXPECT_EQ(res, NO_ERROR);
     EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::NOTIFY_CLEAR_MISSION), mock_->GetCode());
 }
@@ -281,7 +285,8 @@ HWTEST_F(AbilityManagerCollaboratorProxyTest, NotifyMissionBindPid_0100, TestSiz
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerCollaboratorStubMock::InvokeSendRequest));
     int32_t missionId = 0;
     int32_t pid = 0;
-    proxy_->NotifyMissionBindPid(missionId, pid);
+    int32_t userId = 100;
+    proxy_->NotifyMissionBindPid(missionId, pid, userId);
     EXPECT_EQ(static_cast<uint32_t>(IAbilityManagerCollaborator::NOTIFY_MISSION_BIND_PID), mock_->GetCode());
 }
 
