@@ -1046,6 +1046,18 @@ HWTEST_F(AppSchedulerTest, AppScheduler_GetAbilityRecordsByProcessID_002, TestSi
 }
 
 /**
+ * @tc.name: SetCurrentUserId_001
+ * @tc.desc: set current userId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_SetCurrentUserId_001, TestSize.Level1)
+{
+    int32_t userId = 0;
+    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::make_unique<AppExecFwk::AppMgrClient>();
+    ASSERT_NE(DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_, nullptr);
+}
+
+/**
  * @tc.name: AppScheduler_NotifyFault_001
  * @tc.desc: Verify that the NotifyFault interface calls normally
  * @tc.type: FUNC

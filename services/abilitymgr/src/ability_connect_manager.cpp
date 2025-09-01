@@ -2531,14 +2531,15 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
     if ((IsLauncher(abilityRecord) || abilityRecord->IsSceneBoard()) && token != nullptr) {
         IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->ClearProcessByToken(
             token->AsObject()));
-        if (abilityRecord->IsSceneBoard() && currentUserId != userId_) {
+        if (abilityRecord->IsSceneBoard() && !AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId_)) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "not current user's SCB, clear user and not restart");
             KillProcessesByUserId();
             return;
         }
     }
 
-    if (userId_ != U0_USER_ID && userId_ != U1_USER_ID && userId_ != currentUserId) {
+    if (userId_ != U0_USER_ID && userId_ != U1_USER_ID &&
+        !AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId_)) {
         TAG_LOGI(AAFwkTag::EXT, "Not current user's ability");
         return;
     }

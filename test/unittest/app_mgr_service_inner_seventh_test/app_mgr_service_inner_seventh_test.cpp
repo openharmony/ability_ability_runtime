@@ -539,24 +539,43 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleName_00
     TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = false;
+
+    std::string bundleName = "";
+    std::vector<std::string> instanceKeys;
+    int32_t userId = 0;
+    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_001 end");
+}
+
+/**
+* @tc.name: GetAllRunningInstanceKeysByBundleNameInner_001
+* @tc.desc: test GetAllRunningInstanceKeysByBundleNameInner_001
+* @tc.type: FUNC
+*/
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleNameInner_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleNameInner_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = false;
     AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = nullptr;
 
     std::string bundleName = "111";
     std::vector<std::string> instanceKeys;
     int32_t userId = 0;
-    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
+    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys, userId);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_001 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleNameInner_001 end");
 }
 
 /**
-* @tc.name: GetAllRunningInstanceKeysByBundleName_002
-* @tc.desc: test GetAllRunningInstanceKeysByBundleName_002
+* @tc.name: GetAllRunningInstanceKeysByBundleNameInner_002
+* @tc.desc: test GetAllRunningInstanceKeysByBundleNameInner_002
 * @tc.type: FUNC
 */
-HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleName_002, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleNameInner_002, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_002 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleNameInner_002 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     appMgrServiceInner->appRunningManager_ = nullptr;
     AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
@@ -569,19 +588,19 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleName_00
     std::string bundleName = "111";
     std::vector<std::string> instanceKeys;
     int32_t userId = 0;
-    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
+    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys, userId);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_002 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleNameInner_002 end");
 }
 
 /**
-* @tc.name: GetAllRunningInstanceKeysByBundleName_003
-* @tc.desc: test GetAllRunningInstanceKeysByBundleName_003
+* @tc.name: GetAllRunningInstanceKeysByBundleNameInner_003
+* @tc.desc: test GetAllRunningInstanceKeysByBundleNameInner_003
 * @tc.type: FUNC
 */
-HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleName_003, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleNameInner_003, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_003 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleNameInner_003 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = false;
     AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
@@ -592,19 +611,19 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleName_00
     std::string bundleName = "111";
     std::vector<std::string> instanceKeys;
     int32_t userId = 0;
-    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
+    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys, userId);
     EXPECT_EQ(ret, ERR_MULTI_INSTANCE_NOT_SUPPORTED);
-    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_003 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleNameInner_003 end");
 }
 
 /**
-* @tc.name: GetAllRunningInstanceKeysByBundleName_004
-* @tc.desc: test GetAllRunningInstanceKeysByBundleName_004
+* @tc.name: GetAllRunningInstanceKeysByBundleNameInner_004
+* @tc.desc: test GetAllRunningInstanceKeysByBundleNameInner_004
 * @tc.type: FUNC
 */
-HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleName_004, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleNameInner_004, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_004 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleNameInner_004 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = false;
     AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
@@ -618,19 +637,19 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleName_00
     std::string bundleName = "111";
     std::vector<std::string> instanceKeys;
     int32_t userId = 0;
-    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
+    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys, userId);
     EXPECT_EQ(ret, ERR_OK);
-    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_004 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleNameInner_004 end");
 }
 
 /**
-* @tc.name: GetAllRunningInstanceKeysByBundleName_005
-* @tc.desc: test GetAllRunningInstanceKeysByBundleName_005
+* @tc.name: GetAllRunningInstanceKeysByBundleNameInner_005
+* @tc.desc: test GetAllRunningInstanceKeysByBundleNameInner_005
 * @tc.type: FUNC
 */
-HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleName_005, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleNameInner_005, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_005 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleNameInner_005 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = false;
     AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
@@ -648,19 +667,19 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleName_00
     std::string bundleName = "111";
     std::vector<std::string> instanceKeys;
     int32_t userId = 0;
-    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
+    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys, userId);
     EXPECT_EQ(ret, ERR_OK);
-    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_005 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleNameInner_005 end");
 }
 
 /**
-* @tc.name: GetAllRunningInstanceKeysByBundleName_006
-* @tc.desc: test GetAllRunningInstanceKeysByBundleName_006
+* @tc.name: GetAllRunningInstanceKeysByBundleNameInner_006
+* @tc.desc: test GetAllRunningInstanceKeysByBundleNameInner_006
 * @tc.type: FUNC
 */
-HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleName_006, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleNameInner_006, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_006 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleNameInner_006 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().verifyCallingPermission_ = false;
     AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
@@ -678,9 +697,9 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, GetAllRunningInstanceKeysByBundleName_00
     std::string bundleName = "111";
     std::vector<std::string> instanceKeys;
     int32_t userId = 100;
-    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleName(bundleName, instanceKeys, userId);
+    int32_t ret = appMgrServiceInner->GetAllRunningInstanceKeysByBundleNameInner(bundleName, instanceKeys, userId);
     EXPECT_EQ(ret, ERR_OK);
-    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleName_006 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningInstanceKeysByBundleNameInner_006 end");
 }
 
 /**
