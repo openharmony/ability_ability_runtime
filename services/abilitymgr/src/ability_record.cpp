@@ -1528,11 +1528,11 @@ void AbilityRecord::SetAbilityStateInner(AbilityState state)
             int32_t persistentId = sessionInfo->persistentId;
             switch (state) {
                 case AbilityState::BACKGROUNDING: {
-                    ret = collaborator->NotifyMoveMissionToBackground(persistentId);
+                    ret = collaborator->NotifyMoveMissionToBackground(persistentId, GetOwnerMissionUserId());
                     break;
                 }
                 case AbilityState::TERMINATING: {
-                    ret = collaborator->NotifyTerminateMission(persistentId);
+                    ret = collaborator->NotifyTerminateMission(persistentId, GetOwnerMissionUserId());
                     break;
                 }
                 default:
@@ -1545,15 +1545,15 @@ void AbilityRecord::SetAbilityStateInner(AbilityState state)
         }
         switch (state) {
             case AbilityState::FOREGROUNDING: {
-                ret = collaborator->NotifyMoveMissionToForeground(missionId_);
+                ret = collaborator->NotifyMoveMissionToForeground(missionId_, GetOwnerMissionUserId());
                 break;
             }
             case AbilityState::BACKGROUNDING: {
-                ret = collaborator->NotifyMoveMissionToBackground(missionId_);
+                ret = collaborator->NotifyMoveMissionToBackground(missionId_, GetOwnerMissionUserId());
                 break;
             }
             case AbilityState::TERMINATING: {
-                ret = collaborator->NotifyTerminateMission(missionId_);
+                ret = collaborator->NotifyTerminateMission(missionId_, GetOwnerMissionUserId());
                 break;
             }
             default:
@@ -3551,7 +3551,7 @@ void AbilityRecord::NotifyMissionBindPid()
             TAG_LOGE(AAFwkTag::ABILITYMGR, "null collaborator");
             return;
         }
-        collaborator->NotifyMissionBindPid(persistentId, pid_);
+        collaborator->NotifyMissionBindPid(persistentId, pid_, GetOwnerMissionUserId());
     }
 }
 
