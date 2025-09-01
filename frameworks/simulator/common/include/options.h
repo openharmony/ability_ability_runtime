@@ -105,6 +105,7 @@ struct Options {
     std::string releaseType;
     bool enablePartialUpdate;
     std::string previewPath;
+    bool enableFileOperation = false;
     AppExecFwk::ApplicationInfo applicationInfo;
     AppExecFwk::HapModuleInfo hapModuleInfo;
     AppExecFwk::AbilityInfo abilityInfo;
