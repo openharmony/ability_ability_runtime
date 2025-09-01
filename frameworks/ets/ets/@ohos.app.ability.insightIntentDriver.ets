@@ -28,7 +28,7 @@ export default namespace insightIntentDriver {
     moduleName: string;
     abilityName: string;
     insightIntentName: string;
-    insightIntentParam: RecordData;
+    insightIntentParam: Record<string, RecordData>;
     executeMode: insightIntent.ExecuteMode;
     displayId?: long;
     uris?: Array<string>;
