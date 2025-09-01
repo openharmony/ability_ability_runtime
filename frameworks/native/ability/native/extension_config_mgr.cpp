@@ -132,7 +132,7 @@ bool ExtensionConfigMgr::CheckEtsModuleLoadable(const std::string &className, co
 {
     TAG_LOGD(AAFwkTag::EXT, "extensionType: %{public}d, className is %{public}s, fileName is %{public}s",
         extensionType_, className.c_str(), fileName.c_str());
-    if (fileName.size() >= className.size() ||
+    if (fileName.size() > className.size() ||
         className.compare(0, fileName.size(), fileName) != 0 ||
         (fileName.size() < className.size() && className[fileName.size()] != '.')) {
         TAG_LOGE(AAFwkTag::EXT, "The fileName:%{public}s and className:%{public}s do not match.",
