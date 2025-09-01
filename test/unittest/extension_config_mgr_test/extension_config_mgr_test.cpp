@@ -360,7 +360,6 @@ HWTEST_F(ExtensionConfigMgrTest, CheckEtsModuleLoadable_ShouldReturnFalse_WhenFi
     std::string className = "file";
     std::string fileName = "fileName";
     EXPECT_FALSE(mgr.CheckEtsModuleLoadable(className, fileName));
-    EXPECT_FALSE(mgr.CheckEtsModuleLoadable("bundle.bundle", "bundle.bundle"));
 }
 
 /**
@@ -412,6 +411,57 @@ HWTEST_F(ExtensionConfigMgrTest,
     EXPECT_FALSE(mgr.CheckEtsModuleLoadable("abilityAccessCtrl.XXX", "abilityAccessCtrl"));
     EXPECT_FALSE(mgr.CheckEtsModuleLoadable("bundle.bundle", "bundle"));
     EXPECT_FALSE(mgr.CheckEtsModuleLoadable("bundle.bundleManager.bundleManager", "bundle.bundleManager"));
+}
+
+/**
+ * @tc.name: CheckEtsModuleLoadable_ShouldReturnTrue_WhenFileNameNotInBlockListAndFileNameLengthIsSameWithClassName
+ * @tc.desc: func should return true when file name is not in blocklist and its length is same with class name.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest,
+    CheckEtsModuleLoadable_ShouldReturnTrue_WhenFileNameNotInBlockListAndFileNameLengthIsSameWithClassName,
+    TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    mgr.Init();
+    mgr.AddBlockListItem(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
+    mgr.extensionType_ = EXTENSION_TYPE_DRIVER;
+    mgr.GenerateExtensionEtsBlocklists();
+
+    EXPECT_TRUE(mgr.CheckEtsModuleLoadable("@xxx.111.111", "@xxx.111.111"));
+    EXPECT_TRUE(mgr.CheckEtsModuleLoadable("111.111", "111.111"));
+}
+
+/**
+ * @tc.name: CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameInBlockListAndFileNameLengthIsSameWithClassName
+ * @tc.desc: func should return false when file name is in blocklist and its length is same with class name.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest,
+    CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameInBlockListAndFileNameLengthIsSameWithClassName,
+    TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    mgr.Init();
+    mgr.AddBlockListItem(BLOCK_LIST_ITEM_DRIVER_EXTENSION, EXTENSION_TYPE_DRIVER);
+    mgr.extensionType_ = EXTENSION_TYPE_DRIVER;
+    mgr.GenerateExtensionEtsBlocklists();
+
+    EXPECT_FALSE(mgr.CheckEtsModuleLoadable("bundle.appControl", "bundle.appControl"));
+}
+
+/**
+ * @tc.name: CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameIsNotEqualWithClassNameButLengthIsSame
+ * @tc.desc: func should return false when file name is in blocklist and the length is same.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest,
+    CheckEtsModuleLoadable_ShouldReturnFalse_WhenFileNameIsNotEqualWithClassNameButLengthIsSame, TestSize.Level1)
+{
+    ExtensionConfigMgr mgr;
+    mgr.GenerateExtensionEtsBlocklists();
+
+    EXPECT_FALSE(mgr.CheckEtsModuleLoadable("appControl", "appContron"));
 }
 
 /**
