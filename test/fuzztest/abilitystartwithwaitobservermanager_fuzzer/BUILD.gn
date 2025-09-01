@@ -25,6 +25,7 @@ ohos_fuzztest("AbilityStartWithWaitObserverManagerFuzzTest") {
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
+    "${ability_runtime_test_path}/fuzztest",
   ]
 
   cflags = [
@@ -53,11 +54,14 @@ ohos_fuzztest("AbilityStartWithWaitObserverManagerFuzzTest") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libwm",
   ]

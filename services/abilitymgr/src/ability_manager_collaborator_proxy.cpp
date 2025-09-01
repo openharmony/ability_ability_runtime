@@ -22,7 +22,8 @@
 namespace OHOS {
 namespace AAFwk {
 int32_t AbilityManagerCollaboratorProxy::NotifyStartAbility(
-    const AppExecFwk::AbilityInfo &abilityInfo, int32_t userId, Want &want, uint64_t accessTokenIDEx)
+    const AppExecFwk::AbilityInfo &abilityInfo, int32_t userId, Want &want,
+    uint64_t accessTokenIDEx, int32_t windowMode)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -47,6 +48,10 @@ int32_t AbilityManagerCollaboratorProxy::NotifyStartAbility(
     }
     if (!data.WriteUint64(accessTokenIDEx)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "accessTokenIDEx write fail");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteInt32(windowMode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "windowMode write fail");
         return ERR_INVALID_OPERATION;
     }
     int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::NOTIFY_START_ABILITY, data, reply, option);

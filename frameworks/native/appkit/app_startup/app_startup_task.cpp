@@ -77,5 +77,15 @@ const std::vector<std::string> &AppStartupTask::GetCustomizationMatchRules() con
 {
     return matchRules_.customization;
 }
+
+bool AppStartupTask::IsPreAbilityStageLoad() const
+{
+    return preAbilityStageLoad_;
+}
+
+void AppStartupTask::SetPreAbilityStageLoad(bool preAbilityStageLoad)
+{
+    preAbilityStageLoad_ = preAbilityStageLoad;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -116,13 +116,6 @@ void RunningInfosModuleTest::OnStartAms()
         abilityMgrServ_->taskHandler_ = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
         EXPECT_TRUE(abilityMgrServ_->taskHandler_);
 
-        // init user controller.
-        abilityMgrServ_->userController_ = std::make_shared<UserController>();
-        EXPECT_TRUE(abilityMgrServ_->userController_);
-        abilityMgrServ_->userController_->Init();
-        int userId = MOCK_MAIN_USER_ID;
-        abilityMgrServ_->userController_->SetCurrentUserId(userId);
-
         AmsConfigurationParameter::GetInstance().Parse();
 
         abilityMgrServ_->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();

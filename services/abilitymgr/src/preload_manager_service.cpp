@@ -40,19 +40,13 @@ PreloadManagerService::~PreloadManagerService() {}
 
 int32_t PreloadManagerService::PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex)
 {
-    if (!AppUtils::GetInstance().IsPreloadApplicationEnabled() || appIndex != 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "preload application not supported");
-        return ERR_CAPABILITY_NOT_SUPPORT;
-    }
-    if (!PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "no preload permission");
-        return ERR_PERMISSION_DENIED;
-    }
+    CHECK_TRUE_RETURN_RET(!AppUtils::GetInstance().IsPreloadApplicationEnabled() || appIndex != 0,
+        ERR_CAPABILITY_NOT_SUPPORT, "preload application not supported");
+    CHECK_TRUE_RETURN_RET(!PermissionVerification::GetInstance()->VerifyPreloadApplicationPermission(),
+        ERR_PERMISSION_DENIED, "no preload permission");
     userId = DelayedSingleton<AbilityManagerService>::GetInstance()->GetValidUserId(userId);
-    if (!DelayedSingleton<AbilityManagerService>::GetInstance()->JudgeMultiUserConcurrency(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "multi-user non-concurrent unsatisfied:%{public}d", ERR_CROSS_USER);
-        return ERR_CROSS_USER;
-    }
+    CHECK_TRUE_RETURN_RET(!DelayedSingleton<AbilityManagerService>::GetInstance()->JudgeMultiUserConcurrency(userId),
+        ERR_CROSS_USER, "multi-user non-concurrent unsatisfied");
 
     bool isExist = false;
     int32_t ret = ERR_OK;
@@ -69,12 +63,17 @@ int32_t PreloadManagerService::PreloadApplication(const std::string &bundleName,
         TAG_LOGE(AAFwkTag::ABILITYMGR, "getLaunchWantForBundle returns %{public}d", errCode);
         return errCode;
     }
-
     AppExecFwk::AbilityInfo abilityInfo;
     CHECK_TRUE_RETURN_RET(!IN_PROCESS_CALL(bundleMgrHelper->QueryAbilityInfo(launchWant,
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, abilityInfo)),
         RESOLVE_ABILITY_ERR, "failed to get abilityInfo");
     AppExecFwk::AppPreloadPhase appPreloadPhase = abilityInfo.applicationInfo.appPreloadPhase;
+    if (appPreloadPhase <= AppExecFwk::AppPreloadPhase::DEFAULT ||
+        appPreloadPhase > AppExecFwk::AppPreloadPhase::WINDOW_STAGE_CREATED) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid preload phase:%{public}d", static_cast<int32_t>(appPreloadPhase));
+        return ERR_INVALID_APP_PRELOAD_PHASE;
+    }
+
     if (appPreloadPhase <= AppExecFwk::AppPreloadPhase::ABILITY_STAGE_CREATED) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "preload to phase:%{public}d", static_cast<int32_t>(appPreloadPhase));
         AppExecFwk::PreloadPhase preloadPhase = static_cast<AppExecFwk::PreloadPhase>(appPreloadPhase);
@@ -82,6 +81,8 @@ int32_t PreloadManagerService::PreloadApplication(const std::string &bundleName,
             bundleName, userId, appIndex, preloadPhase);
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "preload to window stage create");
+    CHECK_TRUE_RETURN_RET(abilityInfo.launchMode == AppExecFwk::LaunchMode::STANDARD, ERR_CAPABILITY_NOT_SUPPORT,
+        "not support multiton");
     StartOptions options;
     options.processOptions = std::make_shared<ProcessOptions>();
     options.processOptions->startupVisibility = StartupVisibility::STARTUP_HIDE;

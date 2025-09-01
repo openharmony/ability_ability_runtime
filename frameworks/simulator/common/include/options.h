@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,6 +76,7 @@ using SendCurrentRouterCallback = bool (*)(const std::string currentRouterPath);
 using CallbackTypePostTask = std::function<void(const std::function<void()>&, int64_t)>;
 
 struct Options {
+    bool isComponentMode = false;
     std::string bundleName;
     std::string moduleName;
     std::string modulePath;
@@ -104,6 +105,7 @@ struct Options {
     std::string releaseType;
     bool enablePartialUpdate;
     std::string previewPath;
+    bool enableFileOperation = false;
     AppExecFwk::ApplicationInfo applicationInfo;
     AppExecFwk::HapModuleInfo hapModuleInfo;
     AppExecFwk::AbilityInfo abilityInfo;

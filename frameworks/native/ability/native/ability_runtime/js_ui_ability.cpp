@@ -451,6 +451,7 @@ void JsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
+        applicationContext->SetLaunchParameter(want);
         applicationContext->DispatchOnAbilityWillCreate(jsAbilityObj_);
     }
 
@@ -1766,6 +1767,7 @@ void JsUIAbility::OnNewWant(const Want &want)
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
+        applicationContext->SetLatestParameter(want);
         applicationContext->DispatchOnWillNewWant(jsAbilityObj_);
     }
 
@@ -1885,7 +1887,7 @@ napi_value JsUIAbility::CallObjectMethod(const char *name, napi_value const *arg
     }
     int64_t timeStart = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
     napi_status status = napi_call_function(env, obj, methodOnCreate, argc, argv, nullptr);
-    if (status != napi_ok) {
+    if (status != napi_ok && status != napi_function_expected) {
         TAG_LOGE(AAFwkTag::UIABILITY, "napi err: %{public}d", status);
     }
     int64_t timeEnd = AbilityRuntime::TimeUtil::SystemTimeMillisecond();
@@ -2233,7 +2235,7 @@ void JsUIAbility::OnAfterFocusedCommon(bool isFocused)
 void JsUIAbility::SetContinueState(int32_t state)
 {
     if (scene_ == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "windowScene is nullptr.");
+        TAG_LOGW(AAFwkTag::UIABILITY, "windowScene is nullptr.");
         return;
     }
     auto window = scene_->GetMainWindow();

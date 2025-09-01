@@ -305,6 +305,20 @@ public:
     }
 
     /**
+     * Start ui session ability with sourceWindowId and want.
+     *
+     * @param primaryWindowId the id of sourceWindow.
+     * @param secondaryWant the want of the ability to start.
+     * @param callerToken current caller ability token.
+     * @return Returns ERR_OK if success.
+     */
+    virtual ErrCode StartUIAbilitiesInSplitWindowMode(int32_t primaryWindowId, const AAFwk::Want &secondaryWant,
+        sptr<IRemoteObject> callerToken)
+    {
+        return 0;
+    }
+
+    /**
      * Start UI abilities simultaneously.
      *
      * @param wantList a list of want to start UI abilities.
@@ -1095,10 +1109,11 @@ public:
     /**
      * @brief start user.
      * @param accountId accountId.
+     * @param displayId logical screen id.
      * @param isAppRecovery is appRecovery or not.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery = false) = 0;
+    virtual int StartUser(int userId, uint64_t displayId, sptr<IUserCallback> callback, bool isAppRecovery = false) = 0;
 
     /**
      * @brief stop user.
@@ -1684,6 +1699,16 @@ public:
     }
 
     /**
+     * @brief Retrieves the auto startup status of the current application.
+     * @param isAutoStartEnabled Indicates whether auto startup is enabled for the current application.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetAutoStartupStatusForSelf(bool &isAutoStartEnabled)
+    {
+        return 0;
+    }
+
+    /**
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
      *
      * @param sessionInfo the session info of the ability to start.
@@ -1846,8 +1871,8 @@ public:
      * @param requestCode Ability request code.
      * @return Returns ERR_OK on success, others on failure.
     */
-    virtual int32_t OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
-        int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = DEFAULT_INVAL_VALUE)
+    virtual int32_t OpenLink(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId = DEFAULT_INVAL_VALUE,
+        int requestCode = DEFAULT_INVAL_VALUE, bool hideFailureTipDialog = false)
     {
         return 0;
     }

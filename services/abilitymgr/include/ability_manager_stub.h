@@ -274,6 +274,7 @@ private:
     int32_t SetApplicationAutoStartupInner(MessageParcel &data, MessageParcel &reply);
     int32_t CancelApplicationAutoStartupInner(MessageParcel &data, MessageParcel &reply);
     int32_t QueryAllAutoStartupApplicationsInner(MessageParcel &data, MessageParcel &reply);
+    int32_t GetAutoStartupStatusForSelfInner(MessageParcel &data, MessageParcel &reply);
 
     int PrepareTerminateAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int RegisterSessionHandlerInner(MessageParcel &data, MessageParcel &reply);
@@ -296,6 +297,7 @@ private:
 
     int StartAbilityForResultAsCallerInner(MessageParcel &data, MessageParcel &reply);
     int StartAbilityForResultAsCallerForOptionsInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StartUIAbilitiesInSplitWindowModeInner(MessageParcel &data, MessageParcel &reply);
     int32_t StartUIAbilitiesInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t StartAbilityOnlyUIAbilityInner(MessageParcel &data, MessageParcel &reply);

@@ -588,54 +588,6 @@ HWTEST_F(AppMgrServiceInnerEighthTest, StartNativeProcessForDebugger_006, TestSi
 }
 
 /**
- * @tc.name: GetCurrentAccountId_001
- * @tc.desc: test GetCurrentAccountId_001
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerEighthTest, GetCurrentAccountId_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "GetCurrentAccountId_001 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    AAFwk::MyStatus::GetInstance().queryActiveOsAccountIds_ = ERR_NO_INIT;
-
-    auto ret = appMgrServiceInner->GetCurrentAccountId();
-    EXPECT_EQ(ret, DEFAULT_USER_ID);
-    TAG_LOGI(AAFwkTag::TEST, "GetCurrentAccountId_001 end");
-}
-
-/**
- * @tc.name: GetCurrentAccountId_002
- * @tc.desc: test GetCurrentAccountId_002
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerEighthTest, GetCurrentAccountId_002, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "GetCurrentAccountId_002 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    AAFwk::MyStatus::GetInstance().queryActiveOsAccountIds_ = ERR_OK;
-    
-    auto ret = appMgrServiceInner->GetCurrentAccountId();
-    EXPECT_EQ(ret, DEFAULT_USER_ID);
-    TAG_LOGI(AAFwkTag::TEST, "GetCurrentAccountId_002 end");
-}
-
-/**
- * @tc.name: SetCurrentUserId_001
- * @tc.desc: test SetCurrentUserId_001
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrServiceInnerEighthTest, SetCurrentUserId_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "SetCurrentUserId_001 start");
-    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
-    AAFwk::MyStatus::GetInstance().getCallingUid_ = FOUNDATION_UID;
-    
-    appMgrServiceInner->SetCurrentUserId(2);
-    EXPECT_EQ(appMgrServiceInner->currentUserId_, 2);
-    TAG_LOGI(AAFwkTag::TEST, "SetCurrentUserId_001 end");
-}
-
-/**
  * @tc.name: GetRunningProcessInformation_001
  * @tc.desc: test GetRunningProcessInformation_001
  * @tc.type: FUNC
@@ -1534,6 +1486,79 @@ HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetChildProcessInfo_004
+ * @tc.desc: test GetChildProcessInfo_004
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_004 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getOsAccountLocalIdFromUid_ = ERR_OK;
+    
+    ChildProcessRequest request;
+    std::shared_ptr<ChildProcessRecord> childProcessRecord =
+        std::make_shared<ChildProcessRecord>(0, request, nullptr);
+    std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    ChildProcessInfo info;
+    bool isCallFromGetChildren = false;
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = nullptr;
+    auto ret = appMgrServiceInner->GetChildProcessInfo(childProcessRecord, appRecord, info, isCallFromGetChildren);
+    EXPECT_EQ(ret, ERR_NO_INIT);
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_004 end");
+}
+
+/**
+ * @tc.name: GetChildProcessInfo_005
+ * @tc.desc: test GetChildProcessInfo_005
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_005 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getOsAccountLocalIdFromUid_ = ERR_OK;
+    
+    ChildProcessRequest request;
+    std::shared_ptr<ChildProcessRecord> childProcessRecord =
+        std::make_shared<ChildProcessRecord>(0, request, nullptr);
+    std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    ChildProcessInfo info;
+    bool isCallFromGetChildren = false;
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
+    AAFwk::MyStatus::GetInstance().getCloneBundleInfo_ = ERR_INVALID_VALUE;
+    auto ret = appMgrServiceInner->GetChildProcessInfo(childProcessRecord, appRecord, info, isCallFromGetChildren);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_005 end");
+}
+
+
+/**
+ * @tc.name: GetChildProcessInfo_006
+ * @tc.desc: test GetChildProcessInfo_006
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_006 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getOsAccountLocalIdFromUid_ = ERR_OK;
+    
+    ChildProcessRequest request;
+    std::shared_ptr<ChildProcessRecord> childProcessRecord =
+        std::make_shared<ChildProcessRecord>(0, request, nullptr);
+    std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    ChildProcessInfo info;
+    bool isCallFromGetChildren = false;
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
+    AAFwk::MyStatus::GetInstance().getCloneBundleInfo_ = ERR_OK;
+    AAFwk::MyStatus::GetInstance().getBaseSharedBundleInfos_ = ERR_INVALID_VALUE;
+    auto ret = appMgrServiceInner->GetChildProcessInfo(childProcessRecord, appRecord, info, isCallFromGetChildren);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_006 end");
+}
+
+/**
  * @tc.name: AttachChildProcess_001
  * @tc.desc: test AttachChildProcess_001
  * @tc.type: FUNC
@@ -2321,7 +2346,15 @@ HWTEST_F(AppMgrServiceInnerEighthTest, CreateNativeChildProcess_001, TestSize.Le
     std::string libName = "111";
     int32_t childProcessCount = 0;
     sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
-    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
+    ChildProcessOptions options;
+    options.isolationMode = false;
+    options.customProcessName = "";
+    options.isolationUid = false;
+    ChildProcessRequest request;
+    request.childProcessType = CHILD_PROCESS_TYPE_NATIVE;
+    request.childProcessCount = childProcessCount;
+    request.options = options;
+    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, callback, request);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_001 end");
 }
@@ -2345,7 +2378,15 @@ HWTEST_F(AppMgrServiceInnerEighthTest, CreateNativeChildProcess_002, TestSize.Le
     std::string libName = "111";
     int32_t childProcessCount = 0;
     sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
-    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
+    ChildProcessOptions options;
+    options.isolationMode = false;
+    options.customProcessName = "";
+    options.isolationUid = false;
+    ChildProcessRequest request;
+    request.childProcessType = CHILD_PROCESS_TYPE_NATIVE;
+    request.childProcessCount = childProcessCount;
+    request.options = options;
+    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, callback, request);
     EXPECT_EQ(ret, AAFwk::ERR_CHILD_PROCESS_REACH_LIMIT);
     TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_002 end");
 }
@@ -2370,9 +2411,116 @@ HWTEST_F(AppMgrServiceInnerEighthTest, CreateNativeChildProcess_003, TestSize.Le
     std::string libName = "111";
     int32_t childProcessCount = 0;
     sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
-    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, childProcessCount, callback, "");
+    ChildProcessOptions options;
+    options.isolationMode = false;
+    options.customProcessName = "";
+    options.isolationUid = false;
+    ChildProcessRequest request;
+    request.childProcessType = CHILD_PROCESS_TYPE_NATIVE;
+    request.childProcessCount = childProcessCount;
+    request.options = options;
+    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, callback, request);
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
     TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_003 end");
+}
+
+/**
+ * @tc.name: CreateNativeChildProcess_004
+ * @tc.desc: test CreateNativeChildProcess_004
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, CreateNativeChildProcess_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_004 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getAppRunningProcessPid_ = nullptr;
+    std::shared_ptr<ApplicationInfo> info1 = std::make_shared<ApplicationInfo>();
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    OHOS::AAFwk::MyStatus::GetInstance().getBoolParameter_ = true;
+    AAFwk::MyStatus::GetInstance().isChildProcessReachLimit_ = false;
+    AAFwk::MyStatus::GetInstance().isLogoutUser_ = false;
+
+    pid_t hostPid = 1;
+    std::string libName = "111";
+    int32_t childProcessCount = 0;
+    sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
+    ChildProcessOptions options;
+    options.isolationMode = true;
+    options.customProcessName = "";
+    options.isolationUid = true;
+    ChildProcessRequest request;
+    request.childProcessType = CHILD_PROCESS_TYPE_NATIVE;
+    request.childProcessCount = childProcessCount;
+    request.options = options;
+    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, callback, request);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_004 end");
+}
+
+/**
+ * @tc.name: CreateNativeChildProcess_005
+ * @tc.desc: test CreateNativeChildProcess_005
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, CreateNativeChildProcess_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_005 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getAppRunningProcessPid_ = nullptr;
+    std::shared_ptr<ApplicationInfo> info1 = std::make_shared<ApplicationInfo>();
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    OHOS::AAFwk::MyStatus::GetInstance().getBoolParameter_ = true;
+    AAFwk::MyStatus::GetInstance().isChildProcessReachLimit_ = false;
+    AAFwk::MyStatus::GetInstance().isLogoutUser_ = false;
+
+    pid_t hostPid = 1;
+    std::string libName = "111";
+    int32_t childProcessCount = 0;
+    sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
+    ChildProcessOptions options;
+    options.isolationMode = true;
+    options.customProcessName = "";
+    options.isolationUid = false;
+    ChildProcessRequest request;
+    request.childProcessType = CHILD_PROCESS_TYPE_NATIVE;
+    request.childProcessCount = childProcessCount;
+    request.options = options;
+    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, callback, request);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_005 end");
+}
+
+/**
+ * @tc.name: CreateNativeChildProcess_006
+ * @tc.desc: test CreateNativeChildProcess_006
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, CreateNativeChildProcess_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_006 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getAppRunningProcessPid_ = nullptr;
+    std::shared_ptr<ApplicationInfo> info1 = std::make_shared<ApplicationInfo>();
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    OHOS::AAFwk::MyStatus::GetInstance().getBoolParameter_ = true;
+    AAFwk::MyStatus::GetInstance().isChildProcessReachLimit_ = false;
+    AAFwk::MyStatus::GetInstance().isLogoutUser_ = false;
+
+    pid_t hostPid = 1;
+    std::string libName = "111";
+    int32_t childProcessCount = 0;
+    sptr<IRemoteObject> callback = MyRemoteObject::GetInstance();
+    ChildProcessOptions options;
+    options.isolationMode = false;
+    options.customProcessName = "";
+    options.isolationUid = true;
+    ChildProcessRequest request;
+    request.childProcessType = CHILD_PROCESS_TYPE_NATIVE;
+    request.childProcessCount = childProcessCount;
+    request.options = options;
+    auto ret = appMgrServiceInner->CreateNativeChildProcess(hostPid, libName, callback, request);
+    EXPECT_EQ(ret, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "CreateNativeChildProcess_006 end");
 }
 
 /**
@@ -2765,6 +2913,89 @@ HWTEST_F(AppMgrServiceInnerEighthTest, DemoteCurrentFromCandidateMasterProcess_0
     int32_t res = appMgrServiceInner->DemoteCurrentFromCandidateMasterProcess();
     EXPECT_EQ(res, AAFwk::ERR_NOT_CANDIDATE_MASTER_PROCESS);
     TAG_LOGI(AAFwkTag::TEST, "DemoteCurrentFromCandidateMasterProcess_0400 end");
+}
+
+/**
+ * @tc.name: ExitMasterProcessRole_0100
+ * @tc.desc: test ExitMasterProcessRole
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, ExitMasterProcessRole_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ExitMasterProcessRole_0100 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    AAFwk::MyStatus::GetInstance().isStartSpecifiedProcess_ = false;
+    std::shared_ptr<ApplicationInfo> info1 = nullptr;
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetMasterProcess(false);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetTimeStamp(0);
+    int32_t res = appMgrServiceInner->ExitMasterProcessRole();
+    EXPECT_EQ(res, AAFwk::ERR_CAPABILITY_NOT_SUPPORT);
+    TAG_LOGI(AAFwkTag::TEST, "ExitMasterProcessRole_0100 end");
+}
+
+/**
+ * @tc.name: ExitMasterProcessRole_0200
+ * @tc.desc: test ExitMasterProcessRole
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, ExitMasterProcessRole_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ExitMasterProcessRole_0200 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    AAFwk::MyStatus::GetInstance().isStartSpecifiedProcess_ = true;
+    AAFwk::MyStatus::GetInstance().specifiedProcessRequest_ = nullptr;
+    std::shared_ptr<ApplicationInfo> info1 = nullptr;
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetMasterProcess(false);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetTimeStamp(0);
+    int32_t res = appMgrServiceInner->ExitMasterProcessRole();
+    EXPECT_EQ(res, AAFwk::ERR_NOT_MASTER_PROCESS);
+    TAG_LOGI(AAFwkTag::TEST, "ExitMasterProcessRole_0200 end");
+}
+
+/**
+ * @tc.name: ExitMasterProcessRole_0300
+ * @tc.desc: test ExitMasterProcessRole
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, ExitMasterProcessRole_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ExitMasterProcessRole_0300 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    AAFwk::MyStatus::GetInstance().isStartSpecifiedProcess_ = true;
+    AAFwk::MyStatus::GetInstance().specifiedProcessRequest_ = std::make_shared<AppExecFwk::SpecifiedRequest>();
+    std::shared_ptr<ApplicationInfo> info1 = nullptr;
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetMasterProcess(true);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetTimeStamp(0);
+    int32_t res = appMgrServiceInner->ExitMasterProcessRole();
+    EXPECT_EQ(res, AAFwk::ERR_NOT_ON_NEW_PROCESS_REQUEST_DONE);
+    TAG_LOGI(AAFwkTag::TEST, "ExitMasterProcessRole_0300 end");
+}
+
+/**
+ * @tc.name: ExitMasterProcessRole_0400
+ * @tc.desc: test ExitMasterProcessRole
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, ExitMasterProcessRole_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ExitMasterProcessRole_0400 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+    AAFwk::MyStatus::GetInstance().isStartSpecifiedProcess_ = true;
+    AAFwk::MyStatus::GetInstance().specifiedProcessRequest_ = nullptr;
+    std::shared_ptr<ApplicationInfo> info1 = nullptr;
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(info1, 0, "");
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetMasterProcess(true);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_->SetTimeStamp(0);
+    int32_t res = appMgrServiceInner->ExitMasterProcessRole();
+    EXPECT_EQ(res, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "ExitMasterProcessRole_0400 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

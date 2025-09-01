@@ -100,10 +100,6 @@ abilityms_files = [
   "src/connection_state_manager.cpp",
   "src/dlp_state_item.cpp",
 
-  #multi user
-  "src/user_controller.cpp",
-  "src/user_event_handler.cpp",
-
   #free_install
   "src/atomic_service_status_callback_proxy.cpp",
   "src/atomic_service_status_callback_stub.cpp",
@@ -172,6 +168,7 @@ abilityms_files = [
   "src/utils/multi_instance_utils.cpp",
   "src/utils/start_ability_utils.cpp",
   "src/utils/hidden_start_utils.cpp",
+  "src/utils/start_options_utils.cpp",
   "src/utils/state_utils.cpp",
   "src/utils/update_caller_info_util.cpp",
   "src/utils/uri_utils.cpp",
@@ -179,7 +176,8 @@ abilityms_files = [
   "src/utils/window_options_utils.cpp",
   "src/utils/timeout_state_utils.cpp",
   "src/kiosk_status.cpp",
-  "src/kiosk_manager.cpp"
+  "src/kiosk_manager.cpp",
+  "src/utils/udmf_utils.cpp",
 ]
 
 if (ability_runtime_graphics) {

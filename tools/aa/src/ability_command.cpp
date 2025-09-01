@@ -23,6 +23,7 @@
 #include "ability_manager_client.h"
 #include "ability_start_with_wait_observer.h"
 #include "ability_start_with_wait_observer_utils.h"
+#include "ability_tool_convert_util.h"
 #include "app_mgr_client.h"
 #include "hilog_tag_wrapper.h"
 #include "iservice_registry.h"
@@ -492,8 +493,7 @@ ErrCode AbilityManagerShellCommand::RunAsStopService()
     ErrCode result = OHOS::ERR_OK;
 
     Want want;
-    std::string windowMode;
-    result = MakeWantFromCmd(want, windowMode);
+    result = MakeWantFromCmdForStopService(want);
     if (result == OHOS::ERR_OK) {
         result = AbilityManagerClient::GetInstance()->StopServiceAbility(want);
         if (result == OHOS::ERR_OK) {
@@ -773,7 +773,7 @@ ErrCode AbilityManagerShellCommand::RunAsForceStop()
             if (index <= argc_) {
                 TAG_LOGD(AAFwkTag::AA_TOOL, "argv_[%{public}d]: %{public}s", index, argv_[index]);
                 std::string inputReason = argv_[index];
-                killReason = CovertExitReason(inputReason);
+                killReason = AbilityToolConvertUtil::ConvertExitReason(inputReason);
             }
         }
     }
@@ -798,33 +798,6 @@ ErrCode AbilityManagerShellCommand::RunAsForceStop()
         resultReceiver_.append(GetMessageFromCode(result));
     }
     return result;
-}
-
-Reason AbilityManagerShellCommand::CovertExitReason(std::string& reasonStr)
-{
-    if (reasonStr.empty()) {
-        return Reason::REASON_UNKNOWN;
-    }
-
-    if (reasonStr.compare("UNKNOWN") == 0) {
-        return Reason::REASON_UNKNOWN;
-    } else if (reasonStr.compare("NORMAL") == 0) {
-        return Reason::REASON_NORMAL;
-    } else if (reasonStr.compare("CPP_CRASH") == 0) {
-        return Reason::REASON_CPP_CRASH;
-    } else if (reasonStr.compare("JS_ERROR") == 0) {
-        return Reason::REASON_JS_ERROR;
-    } else if (reasonStr.compare("APP_FREEZE") == 0) {
-        return Reason::REASON_APP_FREEZE;
-    } else if (reasonStr.compare("PERFORMANCE_CONTROL") == 0) {
-        return Reason::REASON_PERFORMANCE_CONTROL;
-    } else if (reasonStr.compare("RESOURCE_CONTROL") == 0) {
-        return Reason::REASON_RESOURCE_CONTROL;
-    } else if (reasonStr.compare("UPGRADE") == 0) {
-        return Reason::REASON_UPGRADE;
-    }
-
-    return Reason::REASON_UNKNOWN;
 }
 
 pid_t AbilityManagerShellCommand::ConvertPid(std::string& inputPid)
@@ -1384,18 +1357,6 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
-                case 0: {
-                    // 'aa process' with an unknown option: aa process --x
-                    // 'aa process' with an unknown option: aa process --xxx
-                    std::string unknownOption = "";
-                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-
-                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' opt unknown", cmd_.c_str());
-
-                    resultReceiver_.append(unknownOptionMsg);
-                    result = OHOS::ERR_INVALID_VALUE;
-                    break;
-                }
                 default: {
                     // 'aa process' with an unknown option: aa process -x
                     // 'aa process' with an unknown option: aa process -xxx
@@ -1459,9 +1420,6 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                 // 'aa process -S'
                 // enter sandbox to perform app
                 isSandboxApp = true;
-                break;
-            }
-            case 0: {
                 break;
             }
             default: {
@@ -1721,7 +1679,6 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                     TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -s' no arg", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
-                    resultReceiver_.append(argv_[optind - 1]);
                     resultReceiver_.append("' requires a value.\n");
 
                     result = OHOS::ERR_INVALID_VALUE;
@@ -2121,7 +2078,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 break;
             }
             case 'c': {
-                // 'aa start -c'
+                // 'aa start -c' for xts use
                 // set ability launch reason = continuation
                 isContinuation = true;
                 break;
@@ -2221,6 +2178,180 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
             if (hasWindowWidth) {
                 want.SetParam(Want::PARAM_RESV_WINDOW_WIDTH, windowWidth);
             }
+        }
+    }
+
+    return result;
+}
+
+ErrCode AbilityManagerShellCommand::MakeWantFromCmdForStopService(Want& want)
+{
+    int result = OHOS::ERR_OK;
+    int option = -1;
+    int counter = 0;
+    std::string deviceId = "";
+    std::string bundleName = "";
+    std::string abilityName = "";
+    std::string moduleName;
+
+    while (true) {
+        counter++;
+
+        option = getopt_long(argc_, argv_, SHORT_OPTIONS.c_str(), LONG_OPTIONS, nullptr);
+
+        TAG_LOGI(
+            AAFwkTag::AA_TOOL, "option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+
+        if (option == -1) {
+            // When scanning the first argument
+            if (counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                // 'aa stop-service' with no option: aa stop-service
+                // 'aa stop-service' with a wrong argument: aa stop-service xxx
+                TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' %{public}s", HELP_MSG_NO_OPTION.c_str(), cmd_.c_str());
+
+                resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+                result = OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+
+        if (option == '?') {
+            switch (optopt) {
+                case 'h': {
+                    // 'aa stop-service -h'
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'd': {
+                    // 'aa stop-service -d' with no argument
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -d' no arg", cmd_.c_str());
+
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'a': {
+                    // 'aa stop-service -a' with no argument
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -a' no arg", cmd_.c_str());
+
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'b': {
+                    // 'aa stop-service -b' with no argument
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -b' no arg", cmd_.c_str());
+
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'm': {
+                    // 'aa stop-service -m' with no argument
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s -m' no arg", cmd_.c_str());
+
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 0: {
+                    // 'aa stop-service' with an unknown option: aa stop-service --x
+                    // 'aa stop-service' with an unknown option: aa stop-service --xxx
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' opt unknown", cmd_.c_str());
+
+                    resultReceiver_.append(unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                default: {
+                    // 'aa stop-service' with an unknown option: aa stop-service -x
+                    // 'aa stop-service' with an unknown option: aa stop-service -xxx
+                    std::string unknownOption = "";
+                    std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+
+                    TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' opt unknown", cmd_.c_str());
+
+                    resultReceiver_.append(unknownOptionMsg);
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                // 'aa stop-service -h'
+                // 'aa stop-service --help'
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'd': {
+                // 'aa stop-service -d xxx'
+
+                // save device ID
+                if (optarg != nullptr) {
+                    deviceId = optarg;
+                }
+                break;
+            }
+            case 'a': {
+                // 'aa stop-service -a xxx'
+
+                // save ability name
+                abilityName = optarg;
+                break;
+            }
+            case 'b': {
+                // 'aa stop-service -b xxx'
+
+                // save bundle name
+                bundleName = optarg;
+                break;
+            }
+            case 'm': {
+                // 'aa stop-service -m xxx'
+
+                // save module name
+                moduleName = optarg;
+                break;
+            }
+            case 0: {
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
+    if (result == OHOS::ERR_OK) {
+        if (!abilityName.empty() && bundleName.empty()) {
+            // explicitly start ability must have both ability and bundle names
+
+            // 'aa stop-service [-d <device-id>] -a <ability-name> -b <bundle-name>'
+            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' without enough options", cmd_.c_str());
+
+            resultReceiver_.append(HELP_MSG_NO_BUNDLE_NAME_OPTION + "\n");
+            result = OHOS::ERR_INVALID_VALUE;
+        } else {
+            ElementName element(deviceId, bundleName, abilityName, moduleName);
+            want.SetElement(element);
         }
     }
 
@@ -2448,84 +2579,7 @@ bool AbilityManagerShellCommand::IsImplicitStartAction(const Want& want)
 
     return false;
 }
-
-#ifdef ABILITY_COMMAND_FOR_TEST
-ErrCode AbilityManagerShellCommand::RunAsSendAppNotRespondingWithUnknownOption()
-{
-    switch (optopt) {
-        case 'h': {
-            break;
-        }
-        case 'p': {
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa ApplicationNotResponding -p' no arg");
-            resultReceiver_.append("error: option -p ");
-            resultReceiver_.append("' requires a value.\n");
-            break;
-        }
-        default: {
-            std::string unknownOption;
-            std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa ApplicationNotResponding' opt unknown");
-            resultReceiver_.append(unknownOptionMsg);
-            break;
-        }
-    }
-    return OHOS::ERR_INVALID_VALUE;
-}
-
-ErrCode AbilityManagerShellCommand::RunAsSendAppNotRespondingWithOption(int32_t option, std::string& pid)
-{
-    ErrCode result = ERR_OK;
-    switch (option) {
-        case 'h': {
-            result = OHOS::ERR_INVALID_VALUE;
-            break;
-        }
-        case 'p': {
-            TAG_LOGI(AAFwkTag::AA_TOOL, "aa ApplicationNotResponding 'aa %{public}s'  -p process", cmd_.c_str());
-            TAG_LOGI(AAFwkTag::AA_TOOL, "aa ApplicationNotResponding 'aa optarg:  %{public}s'", optarg);
-            pid = optarg;
-            TAG_LOGI(AAFwkTag::AA_TOOL, "aa ApplicationNotResponding 'aa pid:  %{public}s'", pid.c_str());
-            break;
-        }
-        default: {
-            TAG_LOGI(AAFwkTag::AA_TOOL, "'aa %{public}s' option unknown", cmd_.c_str());
-            result = OHOS::ERR_INVALID_VALUE;
-            break;
-        }
-    }
-    return result;
-}
-#endif
 #ifdef ABILITY_FAULT_AND_EXIT_TEST
-Reason CovertExitReason(std::string &cmd)
-{
-    if (cmd.empty()) {
-        return Reason::REASON_UNKNOWN;
-    }
-
-    if (cmd.compare("UNKNOWN") == 0) {
-        return Reason::REASON_UNKNOWN;
-    } else if (cmd.compare("NORMAL") == 0) {
-        return Reason::REASON_NORMAL;
-    } else if (cmd.compare("CPP_CRASH") == 0) {
-        return Reason::REASON_CPP_CRASH;
-    } else if (cmd.compare("JS_ERROR") == 0) {
-        return Reason::REASON_JS_ERROR;
-    } else if (cmd.compare("ABILITY_NOT_RESPONDING") == 0) {
-        return Reason::REASON_APP_FREEZE;
-    } else if (cmd.compare("APP_FREEZE") == 0) {
-        return Reason::REASON_APP_FREEZE;
-    } else if (cmd.compare("PERFORMANCE_CONTROL") == 0) {
-        return Reason::REASON_PERFORMANCE_CONTROL;
-    } else if (cmd.compare("RESOURCE_CONTROL") == 0) {
-        return Reason::REASON_RESOURCE_CONTROL;
-    } else if (cmd.compare("UPGRADE") == 0) {
-        return Reason::REASON_UPGRADE;
-    }
-
-    return Reason::REASON_UNKNOWN;
-}
 
 ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
 {
@@ -2595,7 +2649,7 @@ ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
         result = OHOS::ERR_INVALID_VALUE;
     }
 
-    ExitReason exitReason = { CovertExitReason(reason), "Force exit app by aa." };
+    ExitReason exitReason = { AbilityToolConvertUtil::ConvertExitReason(reason), "Force exit app by aa." };
     result = AbilityManagerClient::GetInstance()->ForceExitApp(ConvertPid(pid), exitReason);
     if (result == OHOS::ERR_OK) {
         resultReceiver_ = STRING_BLOCK_AMS_SERVICE_OK + "\n";

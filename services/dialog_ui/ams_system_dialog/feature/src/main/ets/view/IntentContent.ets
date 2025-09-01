@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-import insightIntentDriver from '@ohos.app.ability.insightIntentDriver';
-import base from '@ohos.base'
-import hilog from '@ohos.hilog';
-import application from '@ohos.app.ability.application';
+import { application, common, insightIntentDriver } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+import { image } from '@kit.ImageKit';
 import { jsClone } from './format';
-import bundle from '@ohos.bundle.bundleManager'
-import image from '@ohos.multimedia.image';
-import common from '@ohos.app.ability.common';
+import { TAG, DOMAIN} from '../pages/Index'
+import bundle from '@ohos.bundle.bundleManager';
+
 
 export interface ItemInfo {
   title: string,
@@ -40,19 +40,27 @@ export interface IntentGrout {
 export struct IntentContent {
   @Consume('articlePathStack') articlePathStack: NavPathStack;
   scroller: Scroller = new Scroller();
-  @State listMaterial: IntentInfo[] | null = null
-  @State groupMaterial1: Record<string, IntentInfo[]> = {}
-  @State groupMaterial: Record<string, IntentInfo[]> = {}
+  @State listMaterial: IntentInfo[] | null = null;
+  @State intermediateGroupMaterial: Record<string, IntentInfo[]> = {};
+  @State groupMaterial: Record<string, IntentInfo[]> = {};
   context = this.getUIContext().getHostContext();
   @State pixelMap: image.PixelMap | ResourceStr | DrawableDescriptor | undefined = undefined;
 
   aboutToAppear() {
-    this.getInfos()
+    this.getInfos();
   }
 
   onBackPress() {
-    let context = AppStorage.get('context') as common.UIAbilityContext;
-    context.terminateSelf();
+    this.terminateSelf();
+  }
+
+  terminateSelf() {
+    try {
+      let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      context.terminateSelf();
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'Failed to context.terminateSelf. Cause: %{public}s', JSON.stringify(err));
+    }
   }
 
   async getInfos() {
@@ -60,7 +68,7 @@ export struct IntentContent {
       insightIntentDriver.getAllInsightIntentInfo(insightIntentDriver.GetInsightIntentFlag.GET_FULL_INSIGHT_INTENT)
         .then((data) => {
           this.listMaterial = data as IntentInfo[];
-          this.groupMaterial1 = this.listMaterial.reduce((acc, item) => {
+          this.intermediateGroupMaterial = this.listMaterial.reduce((acc, item) => {
             const bundleName: string = item.bundleName;
             if (!acc[bundleName]) {
               acc[bundleName] = [];
@@ -69,32 +77,33 @@ export struct IntentContent {
             return acc;
           }, {} as Record<string, IntentInfo[]>)
 
-          Object.keys(this.groupMaterial1).forEach((bundleName: string, index: number) => {
+          Object.keys(this.intermediateGroupMaterial).forEach((bundleName: string, index: number) => {
 
-            bundle.getApplicationInfo(bundleName, 0).then((resault) => {
-              if (resault.debug) {
-                Object.keys(this.groupMaterial1[bundleName]).forEach((key: string, index: number) => {
-                  this.getAllIntentIcon(this.groupMaterial1[bundleName][key]['icon'], bundleName).then((value) => {
-                    this.groupMaterial1[bundleName][key]['iconImg'] = value;
-                    this.setAppName(this.groupMaterial1[bundleName][0]).then((value) => {
-                      this.groupMaterial[value] = this.groupMaterial1[bundleName]
+            bundle.getApplicationInfo(bundleName, 0).then((result) => {
+              if (result.debug) {
+                Object.keys(this.intermediateGroupMaterial[bundleName]).forEach((key: string, index: number) => {
+                  this.getAllIntentIcon(this.intermediateGroupMaterial[bundleName][key]['icon'], bundleName).then((value) => {
+                    this.intermediateGroupMaterial[bundleName][key]['iconImg'] = value;
+                    this.setAppName(this.intermediateGroupMaterial[bundleName][0]).then((value) => {
+                      this.groupMaterial[value] = this.intermediateGroupMaterial[bundleName];
                     })
                   })
                 })
               }
-            })
+            }).catch((err: BusinessError) => {
+              hilog.error(DOMAIN, TAG, 'getApplicationInfo failed. Cause: %{public}s', JSON.stringify(err));
+            });
 
-            if (index === Object.keys(this.groupMaterial1).length - 1) {
+            if (index === Object.keys(this.intermediateGroupMaterial).length - 1) {
               this.groupMaterial = jsClone(this.groupMaterial);
             }
           })
-        })
-        .catch((err: base.BusinessError) => {
-          hilog.info(0x0000, 'testTag', 'getAllInsightIntentInfo errCode: %{public}d', err.code);
-          hilog.info(0x0000, 'testTag', 'getAllInsightIntentInfo errMessage: %{public}s', err.message);
+        }).catch((err: BusinessError) => {
+          hilog.error(DOMAIN, TAG, 'getAllInsightIntentInfo errCode: %{public}d', err.code);
+          hilog.error(DOMAIN, TAG, 'getAllInsightIntentInfo errMessage: %{public}s', err.message);
         });
     } catch (error) {
-      hilog.error(0x0000, 'testTag', 'getAllInsightIntentInfo error caught %{public}s', JSON.stringify(error));
+      hilog.error(DOMAIN, TAG, 'getAllInsightIntentInfo error caught %{public}s', JSON.stringify(error));
     }
   }
 
@@ -102,9 +111,13 @@ export struct IntentContent {
     let bundleName: string = intentDetail.bundleName;
     let moduleName: string = intentDetail.moduleName;
     let context = this.getUIContext().getHostContext();
-
-    const bundleContext: Context = await application.createModuleContext(context, bundleName, moduleName);
-    const bundleNameCN: string = bundleContext.resourceManager.getStringSync(bundleContext.applicationInfo.labelId);
+    let bundleNameCN: string = '';
+    try {
+      const bundleContext: Context = await application.createModuleContext(context, bundleName, moduleName);
+      bundleNameCN = bundleContext.resourceManager.getStringSync(bundleContext.applicationInfo.labelId);
+    } catch (error) {
+      hilog.error(DOMAIN, TAG, 'createBundleContext failed. Cause: %{public}s', JSON.stringify(error));
+    }
     return bundleNameCN;
   }
 
@@ -123,12 +136,12 @@ export struct IntentContent {
       List({ space: 12 }) {
         ForEach(material, (item: IntentInfo, index: number) => {
           ListItem() {
-            this.IntentBlockLine(item)
+            this.IntentBlockLine(item);
           }
           .onClick(() => {
             this.articlePathStack.replacePath({ name: 'intentDetail', param: item });
           })
-        }, (item: IntentInfo, index: number) => item.intentName)
+        }, (item: IntentInfo, index: number) => item.intentName);
       }
       .backgroundColor($r('app.color.background_list'))
       .borderRadius(16)
@@ -154,7 +167,6 @@ export struct IntentContent {
   async getAllIntentIcon(icon: string,
     bundleName: string): Promise<PixelMap | ResourceStr | DrawableDescriptor | undefined> {
     let pixelMap: image.PixelMap | ResourceStr | DrawableDescriptor | undefined = undefined;
-    let resourceName2:string='';
     if (icon.startsWith('$r')) {
       try {
         let resourceStr: string | undefined = icon.match(/['"](.+)['"]/)?.[1];
@@ -162,18 +174,25 @@ export struct IntentContent {
           return icon;
         }
         let resourceName: string | undefined = resourceStr.split('.').pop();
-        resourceName2 = resourceName as string;
         if (!resourceStr) {
           return icon;
         }
         let context = this.getUIContext().getHostContext();
 
-        const bundleContext = await application.createBundleContext(context, bundleName);
+        const bundleContextPromise: Promise<Context> = application.createBundleContext(context, bundleName);
+        bundleContextPromise.catch((error: BusinessError) => {
+          hilog.error(DOMAIN, TAG, 'createBundleContext failed. Cause: %{public}s', JSON.stringify(error));
+        })
+        const bundleContext = await bundleContextPromise;
         const valuePromise: Promise<Uint8Array> = bundleContext.resourceManager.getMediaByName(resourceName);
+        valuePromise.catch((error: BusinessError) => {
+          hilog.error(DOMAIN, TAG, 'callback getMediaByName failed. Cause: %{public}s', JSON.stringify(error));
+        })
         const value: Uint8Array = await valuePromise;
-        pixelMap = await this.uint8ArrayToImage(value);
+        pixelMap = await this.uint8ArrayToImage(value) ?? undefined;
 
       } catch (err) {
+        hilog.error(DOMAIN, TAG, 'Failed to getAllIntentIcon', JSON.stringify(err));
         return pixelMap;
       }
     } else {
@@ -182,24 +201,35 @@ export struct IntentContent {
     return pixelMap;
   }
 
-  async uint8ArrayToImage(buffer: Uint8Array): Promise<PixelMap> {
-    const imageSource = image.createImageSource(buffer.buffer);
-    const imgIcon = await this.getUint8Array(imageSource);
-    imageSource.release();
+  async uint8ArrayToImage(buffer: Uint8Array): Promise<PixelMap | null> {
+    let imgIcon: image.PixelMap | null = null;
+    try {
+      const imageSource = image.createImageSource(buffer.buffer);
+      imgIcon = await this.getUint8Array(imageSource);
+      imageSource.release();
+      return imgIcon;
+    } catch (error) {
+      hilog.error(DOMAIN, TAG, 'Error in uint8ArrayToImage', JSON.stringify(error));
+    }
     return imgIcon;
   }
 
-  async getUint8Array(imageSource: image.ImageSource): Promise<PixelMap> {
-    const imageIcon = await imageSource.createPixelMap({
-      desiredSize: { width: 24, height: 24 }
-    });
+  async getUint8Array(imageSource: image.ImageSource): Promise<PixelMap | null> {
+    let imageIcon: image.PixelMap | null = null;
+    try {
+      imageIcon = await imageSource.createPixelMap({
+        desiredSize: { width: 24, height: 24 }
+      });
+      return imageIcon;
+    } catch (error) {
+      hilog.error(DOMAIN, TAG, 'Error in getUint8Array', JSON.stringify(error));
+    }
     return imageIcon;
   }
 
   @Builder
   IntentBlockLine(intentDetail: IntentInfo) {
     Row() {
-
       Image(intentDetail.iconImg ?? $r('app.media.defaultIcon'))
         .width(24)
         .height(24)
@@ -248,6 +278,9 @@ export struct IntentContent {
         .borderRadius(20)
         .backgroundColor($r('app.color.btn_bg_005'))
         .justifyContent(FlexAlign.Center)
+        .onClick(() => {
+          this.terminateSelf();
+        })
 
         Text($r('app.string.Cont_title_syyt'))
           .margin({ left: 8 })
@@ -268,14 +301,9 @@ export struct IntentContent {
       .position({ top: 0, left: 0 })
       .zIndex(100)
       .backgroundColor($r('app.color.background_cont'))
-      .onClick(() => {
-        let context = AppStorage.get('context') as common.UIAbilityContext;
-        context.terminateSelf();
-      })
 
       Scroll(this.scroller) {
         Column() {
-
           ForEach(Object.keys(this.groupMaterial), (bundleNameCN: string) => {
             Text(JSON.stringify(this.groupMaterial.bundleNameCN))
             this.IntentBlock(bundleNameCN, this.groupMaterial[bundleNameCN])
@@ -302,8 +330,7 @@ export struct IntentContent {
     }
     .width('100%')
     .height('100%')
-    .padding({top:36})
+    .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
     .backgroundColor($r('app.color.background_cont'))
   }
 }
-

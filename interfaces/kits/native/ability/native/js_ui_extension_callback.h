@@ -37,11 +37,16 @@ public:
     void CallJsError(int32_t number);
     void SetSessionId(int32_t sessionId);
     void SetUIContent(Ace::UIContent* uiContent);
+    void SetCompletionHandler(napi_env env, napi_value completionHandler);
+    void OnRequestSuccess(const std::string& name);
+    void OnRequestFailure(const std::string& name, int32_t failureCode, const std::string& failureMessage);
 private:
     napi_env env_ = nullptr;
     std::unique_ptr<NativeReference> jsCallbackObject_ = nullptr;
     int32_t sessionId_ = 0;
     Ace::UIContent* uiContent_ = nullptr;
+    napi_ref onRequestSuccess_ = nullptr;
+    napi_ref onRequestFailure_ = nullptr;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -36,6 +36,7 @@ const std::string AUTO_STARTUP_SERVICE_ABILITYNAME = "abilityName";
 const bool AUTO_STARTUP_SERVICE_TRUE = true;
 const bool AUTO_STARTUP_SERVICE_FALSE = false;
 const int32_t MAX_APP_CLONE_INDEX_NUM = 10000;
+constexpr char PRODUCT_APPBOOT_SETTING_ENABLED[] = "const.product.appboot.setting.enabled";
 } // namespace
 
 using namespace testing;
@@ -1092,6 +1093,28 @@ HWTEST_F(AbilityAutoStartupServiceTest, GetValidUserId_004, TestSize.Level1)
     int32_t userId = 1;
     abilityAutoStartupService->GetValidUserId(userId);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetValidUserId_004 end";
+}
+
+/*
+ * Feature: AbilityAutoStartupService
+ * Function: GetAutoStartupStatusForSelf
+ * SubFunction: NA
+ * FunctionPoints: AbilityAutoStartupService GetAutoStartupStatusForSelf
+ */
+HWTEST_F(AbilityAutoStartupServiceTest, GetAutoStartupStatusForSelf_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetAutoStartupStatusForSelf_001 start";
+    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
+    EXPECT_NE(abilityAutoStartupService, nullptr);
+    uint32_t callerTokenId = 1;
+    bool isAutoStartEnabled = false;
+    auto result = abilityAutoStartupService->GetAutoStartupStatusForSelf(callerTokenId, isAutoStartEnabled);
+    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+        EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
+    } else {
+        EXPECT_EQ(result, ERR_OK);
+    }
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest GetAutoStartupStatusForSelf_001 end";
 }
 } // namespace AAFwk
 } // namespace OHOS

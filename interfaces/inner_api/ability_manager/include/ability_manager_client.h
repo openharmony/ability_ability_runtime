@@ -285,6 +285,19 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
+     * Start ui session ability with windowId and want, send windowId and want to ability manager service.
+     *
+     * @param primaryWindowId the id of window.
+     * @param secondaryWant the want of the ability to start.
+     * @param callerToken current caller ability token.
+     * @return Returns ERR_OK if success.
+     */
+    ErrCode StartUIAbilitiesInSplitWindowMode(
+        int32_t primaryWindowId,
+        const AAFwk::Want &secondaryWant,
+        sptr<IRemoteObject> callerToken);
+
+    /**
      * Start UI abilities simultaneously.
      *
      * @param wantList a list of want to start UI abilities.
@@ -1012,11 +1025,12 @@ public:
     /**
      * @brief start user.
      * @param accountId accountId.
+     * @param displayId logical screen id.
      * @param accountId is appRecovery or not.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartUser(int accountId, sptr<IUserCallback> callback, bool isAppRecovery = false);
+    ErrCode StartUser(int accountId, uint64_t displayId, sptr<IUserCallback> callback, bool isAppRecovery = false);
 
     /**
      * @brief stop user.
@@ -1098,6 +1112,13 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList);
+
+    /**
+     * @brief Retrieves the auto startup status of the current application.
+     * @param isAutoStartEnabled Indicates whether auto startup is enabled for the current application.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetAutoStartupStatusForSelf(bool &isAutoStartEnabled);
 
     /**
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
@@ -1678,7 +1699,8 @@ public:
      * @param requestCode Ability request code.
      * @return Returns ERR_OK on success, others on failure.
     */
-    int32_t OpenLink(const Want& want, sptr<IRemoteObject> callerToken, int32_t userId, int requestCode);
+    int32_t OpenLink(const Want &want, sptr<IRemoteObject> callerToken, int32_t userId, int requestCode,
+        bool hideFailureTipDialog = false);
 
     /**
      * Terminate process by bundleName.

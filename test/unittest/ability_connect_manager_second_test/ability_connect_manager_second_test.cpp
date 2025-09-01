@@ -387,8 +387,8 @@ HWTEST_F(AbilityConnectManagerSecondTest, GenerateBundleName_001, TestSize.Level
     abilityRequest.abilityInfo.bundleName = "com.example.unittest";
     abilityRequest.appInfo.multiAppMode.multiAppModeType = AppExecFwk::MultiAppModeType::UNSPECIFIED;
     abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SHARE;
-    connectManager->GenerateBundleName(abilityRequest);
-    ASSERT_EQ(abilityRequest.abilityInfo.bundleName, "com.example.unittest");
+    auto bundleName = connectManager->GenerateBundleName(abilityRequest);
+    ASSERT_EQ(bundleName, "com.example.unittest");
     TAG_LOGI(AAFwkTag::TEST, "GenerateBundleName_001 end");
 }
 

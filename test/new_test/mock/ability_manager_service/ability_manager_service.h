@@ -45,7 +45,7 @@ public:
     void StopFreezingScreen() {}
     void UserStarted(int32_t userId) {}
 
-    OH_MOCK_METHOD(int, AbilityManagerService, SwitchToUser, int32_t, int32_t,
+    OH_MOCK_METHOD(int, AbilityManagerService, SwitchToUser, int32_t, int32_t, uint64_t,
         sptr<AAFwk::IUserCallback>, bool isAppRecovery = false);
     void ClearUserData(int32_t userId) {}
 };

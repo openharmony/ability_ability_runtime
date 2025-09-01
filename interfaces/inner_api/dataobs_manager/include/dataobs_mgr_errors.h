@@ -53,6 +53,9 @@ enum Status : int32_t {
     GET_TOKENINFO_ERR,
     DATAOBS_INVALID_USERID,
     DATAOBS_NOT_SYSTEM_APP,
+    BMS_NOT_READY,
+    COMMON_ERROR,
+    URI_NOT_EXIST
 };
 }  // namespace AAFwk
 }  // namespace OHOS

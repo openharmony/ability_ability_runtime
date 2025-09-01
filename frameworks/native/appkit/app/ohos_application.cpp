@@ -53,6 +53,26 @@ namespace AppExecFwk {
 namespace {
     constexpr const char* PERSIST_DARKMODE_KEY = "persist.ace.darkmode";
 }
+void OHOSApplication::LoadDeduplicatedHarResource(
+    const std::shared_ptr<AbilityRuntime::AbilityStageContext> &stageContext)
+{
+    if (!stageContext) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null argv");
+        return;
+    }
+    auto resourceManager = stageContext->GetResourceManager();
+    if (!resourceManager) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null resourceManager");
+        return;
+    }
+    auto hasDeduplicateHar = GetDeduplicateHar();
+    auto loadPath = GetEntryLoadPath();
+    if (!loadPath.empty() && hasDeduplicateHar) {
+        if (!resourceManager->AddResource(loadPath.c_str())) {
+            TAG_LOGE(AAFwkTag::APPKIT, "AddResource failed");
+        }
+    }
+}
 REGISTER_APPLICATION(OHOSApplication, OHOSApplication)
 constexpr int32_t APP_ENVIRONMENT_OVERWRITE = 1;
 using ApplicationConfigurationManager = AbilityRuntime::ApplicationConfigurationManager;
@@ -433,6 +453,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         } else {
             stageContext->InitHapModuleInfo(abilityInfo);
             stageContext->SetParentContext(abilityRuntimeContext_);
+            LoadDeduplicatedHarResource(stageContext);
         }
 
         stageContext->SetConfiguration(GetConfiguration());
@@ -464,15 +485,30 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
         std::weak_ptr<OHOSApplication> weak = application;
         abilityStage->Init(stageContext, weak);
-        auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, abilityRecord, callback);
-        if (autoStartupCallback != nullptr) {
-            abilityStage->RunAutoStartupTask(autoStartupCallback, abilityRecord->GetWant(), isAsyncCallback,
-                stageContext);
+        auto firstCallback = CreateFirstStartupCallbackForRecord(abilityStage, abilityRecord, *hapModuleInfo,
+            callback);
+        if (firstCallback != nullptr) {
+            abilityStage->RunAutoStartupTask(firstCallback, abilityRecord->GetWant(), isAsyncCallback,
+                stageContext, true);
             if (isAsyncCallback) {
-                TAG_LOGI(AAFwkTag::APPKIT, "wait startup");
+                TAG_LOGI(AAFwkTag::APPKIT, "wait startup first");
                 return nullptr;
             }
         }
+
+        TAG_LOGD(AAFwkTag::APPKIT, "no wait startup first");
+        abilityStage->LoadModule(*hapModuleInfo);
+        auto secondCallback = CreateSecondStartupCallbackForRecord(abilityStage, abilityRecord, callback);
+        if (firstCallback != nullptr) {
+            abilityStage->RunAutoStartupTask(secondCallback, abilityRecord->GetWant(), isAsyncCallback,
+                abilityStage->GetContext(), false);
+            if (isAsyncCallback) {
+                TAG_LOGI(AAFwkTag::APPKIT, "wait startup second");
+                return nullptr;
+            }
+        }
+
+        TAG_LOGD(AAFwkTag::APPKIT, "no wait startup second");
         Want want;
         if (abilityRecord->GetWant()) {
             TAG_LOGD(AAFwkTag::APPKIT, "want is ok, transport to abilityStage");
@@ -492,12 +528,17 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
     return abilityStage->GetContext();
 }
 
-const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
-    const std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
-    const std::shared_ptr<AbilityLocalRecord> abilityRecord,
-    const std::function<void(const std::shared_ptr<AbilityRuntime::Context>&)>& callback)
+const std::function<void()> OHOSApplication::CreateFirstStartupCallbackForRecord(
+    std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+    std::shared_ptr<AbilityLocalRecord> abilityRecord,
+    const AppExecFwk::HapModuleInfo &hapModuleInfo,
+    const std::function<void(std::shared_ptr<AbilityRuntime::Context>)> &callback)
 {
-    const std::shared_ptr<AbilityInfo> &abilityInfo = abilityRecord->GetAbilityInfo();
+    if (abilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecord");
+        return nullptr;
+    }
+    std::shared_ptr<AbilityInfo> abilityInfo = abilityRecord->GetAbilityInfo();
     if (abilityInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
         return nullptr;
@@ -507,8 +548,43 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
     }
     auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
     std::weak_ptr<OHOSApplication> weak = application;
+    
+    return [weak, abilityStage, abilityRecord, hapModuleInfo, callback]() {
+        TAG_LOGD(AAFwkTag::APPKIT, "Enter FirstStartupCallbackForRecord");
+        auto ohosApplication = weak.lock();
+        if (ohosApplication == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "ohosApplication null");
+            return;
+        }
+        if (abilityStage == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "abilityStage null");
+            return;
+        }
+
+        abilityStage->LoadModule(hapModuleInfo);
+        auto secondCallback = ohosApplication->CreateSecondStartupCallbackForRecord(
+            abilityStage, abilityRecord, callback);
+        bool isAsyncCallback = false;
+        abilityStage->RunAutoStartupTask(secondCallback, abilityRecord->GetWant(), isAsyncCallback,
+            abilityStage->GetContext(), false);
+        if (isAsyncCallback) {
+            TAG_LOGI(AAFwkTag::APPKIT, "wait startup second");
+            return;
+        }
+        secondCallback();
+    };
+}
+
+const std::function<void()> OHOSApplication::CreateSecondStartupCallbackForRecord(
+    std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+    std::shared_ptr<AbilityLocalRecord> abilityRecord,
+    const std::function<void(std::shared_ptr<AbilityRuntime::Context>)> &callback)
+{
+    auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
+    std::weak_ptr<OHOSApplication> weak = application;
 
     auto autoStartupCallback = [weak, abilityStage, abilityRecord, callback]() {
+        TAG_LOGD(AAFwkTag::APPKIT, "Enter SecondStartupCallbackForRecord");
         auto ohosApplication = weak.lock();
         if (ohosApplication == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null ohosApplication");
@@ -518,7 +594,6 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
             TAG_LOGE(AAFwkTag::APPKIT, "null abilityRecord");
             return;
         }
-
         auto abilityInfo = abilityRecord->GetAbilityInfo();
         if (abilityInfo == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null abilityInfo");
@@ -533,15 +608,18 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
         }
         callback(abilityStage->GetContext());
     };
-
     return autoStartupCallback;
 }
 
-const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
-    const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage,
+const std::function<void()> OHOSApplication::CreateFirstStartupCallbackForHap(
+    std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
     const AppExecFwk::HapModuleInfo &hapModuleInfo,
-    const std::function<void()>& callback)
+    const std::function<void()> &callback)
 {
+    if (abilityRuntimeContext_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null abilityRuntimeContext_");
+        return nullptr;
+    }
     auto applicationInfo = abilityRuntimeContext_->GetApplicationInfo();
     if (applicationInfo == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null applicationInfo");
@@ -554,6 +632,41 @@ const std::function<void()> OHOSApplication::CreateAutoStartupCallback(
     std::weak_ptr<OHOSApplication> weak = application;
 
     auto autoStartupCallback = [weak, abilityStage, hapModuleInfo, callback]() {
+        TAG_LOGD(AAFwkTag::APPKIT, "Enter FirstStartupCallbackForHap");
+        auto ohosApplication = weak.lock();
+        if (ohosApplication == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null ohosApplication");
+            return;
+        }
+        if (abilityStage == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "abilityStage null");
+            return;
+        }
+
+        abilityStage->LoadModule(hapModuleInfo);
+        auto secondCallback = ohosApplication->CreateSecondStartupCallbackForHap(abilityStage, hapModuleInfo, callback);
+        bool isAsyncCallback = false;
+        abilityStage->RunAutoStartupTask(secondCallback, nullptr, isAsyncCallback, abilityStage->GetContext(), false);
+        if (isAsyncCallback) {
+            TAG_LOGI(AAFwkTag::APPKIT, "wait startup second");
+            return;
+        }
+        secondCallback();
+    };
+
+    return autoStartupCallback;
+}
+
+const std::function<void()> OHOSApplication::CreateSecondStartupCallbackForHap(
+    std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage,
+    const AppExecFwk::HapModuleInfo &hapModuleInfo,
+    const std::function<void()> &callback)
+{
+    auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
+    std::weak_ptr<OHOSApplication> weak = application;
+
+    auto autoStartupCallback = [weak, abilityStage, hapModuleInfo, callback]() {
+        TAG_LOGD(AAFwkTag::APPKIT, "Enter SecondStartupCallbackForHap");
         auto ohosApplication = weak.lock();
         if (ohosApplication == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "null ohosApplication");
@@ -663,7 +776,7 @@ bool OHOSApplication::AddAbilityStage(
         auto rm = stageContext->CreateModuleContext(hapModuleInfo.moduleName)->GetResourceManager();
         stageContext->SetResourceManager(rm);
     }
-
+    LoadDeduplicatedHarResource(stageContext);
     auto &runtime = GetSpecifiedRuntime(moduleInfo->arkTSMode);
     auto abilityStage = AbilityRuntime::AbilityStage::Create(runtime, *moduleInfo);
     if (abilityStage == nullptr) {
@@ -673,14 +786,26 @@ bool OHOSApplication::AddAbilityStage(
     auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
     std::weak_ptr<OHOSApplication> weak = application;
     abilityStage->Init(stageContext, weak);
-    auto autoStartupCallback = CreateAutoStartupCallback(abilityStage, hapModuleInfo, callback);
-    if (autoStartupCallback != nullptr) {
-        abilityStage->RunAutoStartupTask(autoStartupCallback, nullptr, isAsyncCallback, stageContext);
+    auto firstCallback = CreateFirstStartupCallbackForHap(abilityStage, hapModuleInfo, callback);
+    if (firstCallback != nullptr) {
+        abilityStage->RunAutoStartupTask(firstCallback, nullptr, isAsyncCallback, stageContext, true);
         if (isAsyncCallback) {
-            TAG_LOGI(AAFwkTag::APPKIT, "wait startup");
+            TAG_LOGI(AAFwkTag::APPKIT, "wait startup first");
             return false;
         }
     }
+    TAG_LOGD(AAFwkTag::APPKIT, "no wait startup first");
+    abilityStage->LoadModule(hapModuleInfo);
+    auto secondCallback = CreateSecondStartupCallbackForHap(abilityStage, hapModuleInfo, callback);
+    if (firstCallback != nullptr) {
+        abilityStage->RunAutoStartupTask(secondCallback, nullptr, isAsyncCallback, stageContext, false);
+        if (isAsyncCallback) {
+            TAG_LOGI(AAFwkTag::APPKIT, "wait startup second");
+            return false;
+        }
+    }
+
+    TAG_LOGD(AAFwkTag::APPKIT, "no wait startup second");
     Want want;
     abilityStage->OnCreate(want);
     abilityStages_[hapModuleInfo.moduleName] = abilityStage;
@@ -1098,6 +1223,20 @@ bool OHOSApplication::IsMainProcess(const std::string &bundleName, const std::st
     }
     TAG_LOGD(AAFwkTag::APPKIT, "not main process");
     return false;
+}
+
+void OHOSApplication::SetEntryLoadPath(const std::string &path)
+{
+    if (path.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "empty path");
+        return;
+    }
+    entryLoadPath_ = path;
+}
+
+void OHOSApplication::SetDeduplicateHar(const bool deduplicate)
+{
+    deduplicate_ = deduplicate;
 }
 
 #ifdef SUPPORT_GRAPHICS

@@ -61,8 +61,9 @@ ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessWithArgs(
     return startErrorCode_;
 }
 
-ChildProcessManagerErrorCode ChildProcessManager::StartNativeChildProcessByAppSpawnFork(
-    const std::string &libName, const sptr<IRemoteObject> &callbackStub, const std::string &customProcessName)
+ChildProcessManagerErrorCode ChildProcessManager::CreateNativeChildProcessByAppSpawnFork(
+    const std::string &libName, const sptr<IRemoteObject> &callbackStub, const std::string &customProcessName,
+    const bool isolationMode, const bool isIsolationUid)
 {
     return ChildProcessManagerErrorCode::ERR_OK;
 }

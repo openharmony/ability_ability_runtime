@@ -71,10 +71,10 @@ void UIAbilityLifecycleManagerSecondTest::SetUp() {}
 
 void UIAbilityLifecycleManagerSecondTest::TearDown() {}
 
-class UIAbilityLifcecycleManagerSecondTestStub : public IRemoteStub<IAbilityConnection> {
+class UIAbilityLifecycleManagerSecondTestStub : public IRemoteStub<IAbilityConnection> {
 public:
-    UIAbilityLifcecycleManagerSecondTestStub() {};
-    virtual ~UIAbilityLifcecycleManagerSecondTestStub() {};
+    UIAbilityLifecycleManagerSecondTestStub() {};
+    virtual ~UIAbilityLifecycleManagerSecondTestStub() {};
 
     virtual int OnRemoteRequest(
         uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)

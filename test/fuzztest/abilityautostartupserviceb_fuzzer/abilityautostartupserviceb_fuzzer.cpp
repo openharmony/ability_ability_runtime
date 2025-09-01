@@ -85,7 +85,6 @@ void AbilityStartupServiceFuzztest1(bool boolParam, std::string &stringParam, in
 
     service->GetSelfApplicationBundleName();
     service->CheckSelfApplication(stringParam);
-    service->GetValidUserId(int32Param);
     AppExecFwk::BundleInfo bundleInfo;
     service->GetBundleInfo(stringParam, int32Param, int32Param, bundleInfo); // branch
     AutoStartupInfo info;

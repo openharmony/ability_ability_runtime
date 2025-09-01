@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -378,7 +378,7 @@ bool UIAbilityThread::SchedulePrepareTerminateAbility()
     }
     if (getpid() == gettid()) {
         TAG_LOGE(AAFwkTag::UIABILITY, "in app main thread");
-        return HandlePrepareTermianteAbility();
+        return HandlePrepareTerminateAbility();
     }
     wptr<UIAbilityThread> weak = this;
     auto task = [weak]() {
@@ -388,7 +388,7 @@ bool UIAbilityThread::SchedulePrepareTerminateAbility()
             TAG_LOGE(AAFwkTag::UIABILITY, "null abilityThread");
             return;
         }
-        abilityThread->HandlePrepareTermianteAbility();
+        abilityThread->HandlePrepareTerminateAbility();
     };
     bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:PrepareTerminateAbility");
     if (!ret) {
@@ -398,7 +398,7 @@ bool UIAbilityThread::SchedulePrepareTerminateAbility()
     return true;
 }
 
-bool UIAbilityThread::HandlePrepareTermianteAbility()
+bool UIAbilityThread::HandlePrepareTerminateAbility()
 {
     wptr<UIAbilityThread> weak = this;
     auto callback = [weak, token = token_] (bool prepareTermination) {

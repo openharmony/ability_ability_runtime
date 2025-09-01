@@ -340,7 +340,7 @@ void AbilityRecord::LoadUIAbility()
     g_addLifecycleEventTask(token_, methodName);
 }
 
-int AbilityRecord::LoadAbility(bool isShellCall)
+int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "LoadLifecycle: abilityName:%{public}s", abilityInfo_.name.c_str());
@@ -375,6 +375,7 @@ int AbilityRecord::LoadAbility(bool isShellCall)
     loadParam.instanceKey = instanceKey_;
     loadParam.isCallerSetProcess = IsCallerSetProcess();
     loadParam.customProcessFlag = customProcessFlag_;
+    loadParam.isStartupHide = isStartupHide;
     auto userId = abilityInfo_.uid / BASE_USER_RANGE;
     bool isMainUIAbility =
         MainElementUtils::IsMainUIAbility(abilityInfo_.bundleName, abilityInfo_.name, userId);
@@ -470,6 +471,9 @@ void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ForegroundUIExtensionAbility:%{public}s", GetURI().c_str());
     CHECK_POINTER(lifecycleDeal_);
 
+    if (IsAbilityState(AbilityState::BACKGROUND)) {
+        SendAppStartupTypeEvent(AppExecFwk::AppStartType::HOT);
+    }
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
 #ifdef SUPPORT_SCREEN
@@ -486,7 +490,8 @@ void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
     }
 }
 
-void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag, bool isShellCall)
+void AbilityRecord::ProcessForegroundAbility(
+    uint32_t tokenId, uint32_t sceneFlag, bool isShellCall, bool isStartupHide)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetElementName().GetURI();
@@ -497,41 +502,33 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
         GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, tokenId);
     }
 #endif // SUPPORT_UPMS
-
-    if (isReady_) {
-        PostForegroundTimeoutTask();
-        if (IsAbilityState(AbilityState::FOREGROUND)) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
-            if (IsFrozenByPreload()) {
-                SetFrozenByPreload(false);
-                auto ret =
-                    DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(token_, false);
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "NotifyPreloadAbilityStateChanged by start, ret: %{public}d", ret);
-            }
-            ForegroundAbility(sceneFlag);
-        } else {
-            // background to active state
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "MoveToForeground, %{public}s", element.c_str());
-            lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-            std::string bundleName = GetAbilityInfo().bundleName;
-            int32_t uid = GetUid();
-            auto pid = GetPid();
-            if (pid > 0) {
-                auto callerPid = GetCallerRecord() ? GetCallerRecord()->GetPid() : -1;
-                TAG_LOGD(AAFwkTag::ABILITYMGR,
-                    "ReportEventToRSS---%{public}d_%{public}s_%{public}d callerPid=%{public}d",
-                    uid, bundleName.c_str(), pid, callerPid);
-                ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, "THAW_BY_FOREGROUND_ABILITY", pid,
-                    callerPid);
-            }
-            SetAbilityStateInner(AbilityState::FOREGROUNDING);
-            DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
-        }
-    } else {
+    if (!isReady_) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "To load ability.");
         lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-        LoadAbility(isShellCall);
+        LoadAbility(isShellCall, isStartupHide);
+        return;
     }
+
+    PostForegroundTimeoutTask();
+    if (IsAbilityState(AbilityState::FOREGROUND)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
+        if (IsFrozenByPreload()) {
+            SetFrozenByPreload(false);
+            auto ret =
+                DelayedSingleton<AppScheduler>::GetInstance()->NotifyPreloadAbilityStateChanged(token_, false);
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "NotifyPreloadAbilityStateChanged by start, ret: %{public}d", ret);
+        }
+        ForegroundAbility(sceneFlag);
+        return;
+    }
+    // background to active state
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "MoveToForeground, %{public}s", element.c_str());
+    lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
+    ResSchedUtil::GetInstance().ReportEventToRSS(GetUid(), GetAbilityInfo().bundleName,
+        "THAW_BY_FOREGROUND_ABILITY", GetPid(), GetCallerRecord() ? GetCallerRecord()->GetPid() : -1);
+    SendAppStartupTypeEvent(AppExecFwk::AppStartType::HOT);
+    SetAbilityStateInner(AbilityState::FOREGROUNDING);
+    DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
 }
 
 void AbilityRecord::PostForegroundTimeoutTask()
@@ -2243,7 +2240,11 @@ void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int 
         AddSystemAbilityCallerRecord(callerToken, requestCode, srcAbilityId);
         return;
     }
-    CHECK_POINTER(abilityRecord);
+
+    if (!abilityRecord) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "nullptr");
+        return;
+    }
 
     auto isExist = [&abilityRecord](const std::shared_ptr<CallerRecord> &callerRecord) {
         return (callerRecord->GetCaller() == abilityRecord);
@@ -3539,7 +3540,7 @@ void AbilityRecord::NotifyMissionBindPid()
     }
     auto sessionInfo = GetSessionInfo();
     if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null sessionInfo");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "null sessionInfo");
         return;
     }
     int32_t persistentId = sessionInfo->persistentId;
@@ -3658,7 +3659,7 @@ bool AbilityRecord::IsAbilityWindowReady()
 void AbilityRecord::SetAbilityWindowState(const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd, bool isFinished)
 {
     if (sessionInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null sessionInfo");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "null sessionInfo");
         return;
     }
     if (isFinished) {
@@ -3945,6 +3946,20 @@ void AbilityRecord::UpdateUIExtensionBindInfo(const WantParams &wantParams)
         want_.RemoveParam(UIEXTENSION_HOST_BUNDLENAME);
     }
     want_.SetParam(UIEXTENSION_HOST_BUNDLENAME, wantParams.GetStringParam(UIEXTENSION_HOST_BUNDLENAME));
+}
+
+void AbilityRecord::SendAppStartupTypeEvent(const AppExecFwk::AppStartType startType)
+{
+    AAFwk::EventInfo eventInfo;
+    auto abilityInfo = GetAbilityInfo();
+    eventInfo.abilityName = abilityInfo.name;
+    auto applicationInfo = GetApplicationInfo();
+    eventInfo.bundleName = applicationInfo.name;
+    eventInfo.versionName = applicationInfo.versionName;
+    eventInfo.versionCode = applicationInfo.versionCode;
+    eventInfo.pid = static_cast<int32_t>(GetPid());
+    eventInfo.startType = static_cast<int32_t>(startType);
+    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_STARTUP_TYPE, HiSysEventType::BEHAVIOR, eventInfo);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

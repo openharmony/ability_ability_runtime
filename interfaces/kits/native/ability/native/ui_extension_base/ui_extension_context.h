@@ -56,6 +56,7 @@ public:
     virtual ErrCode StartAbility(const AAFwk::Want &want) const;
     virtual ErrCode StartAbility(const AAFwk::Want &want, const AAFwk::StartOptions &startOptions) const;
     virtual ErrCode StartAbility(const AAFwk::Want &want, int requestCode) const;
+    virtual ErrCode StartUIAbilitiesInSplitWindowMode(int32_t primaryWindowId, const AAFwk::Want &secondaryWant) const;
     virtual ErrCode StartUIServiceExtension(const AAFwk::Want& want, int32_t accountId = -1) const;
     /**
      * @brief Destroys the current ui extension ability.
@@ -176,7 +177,7 @@ public:
     Ace::UIContent* GetUIContent() override;
 #endif // SUPPORT_SCREEN
 
-    ErrCode OpenLink(const AAFwk::Want& want, int reuqestCode);
+    ErrCode OpenLink(const AAFwk::Want &want, int reuqestCode, bool hideFailureTipDialog = false);
 
     ErrCode OpenAtomicService(AAFwk::Want& want, const AAFwk::StartOptions &options, int requestCode,
         RuntimeTask &&task);

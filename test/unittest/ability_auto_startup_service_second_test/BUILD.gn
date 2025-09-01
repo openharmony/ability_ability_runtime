@@ -52,6 +52,7 @@ ohos_unittest("ability_auto_startup_service_second_test") {
     "${ability_runtime_native_path}/ability/native:auto_startup_callback",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:app_util",
+    "${ability_runtime_services_path}/common:user_controller",
   ]
 
   external_deps = [
@@ -77,6 +78,8 @@ ohos_unittest("ability_auto_startup_service_second_test") {
     "kv_store:distributeddata_inner",
     "safwk:api_cache_manager",
     "selinux_adapter:librestorecon",
+    "window_manager:libdm",
+    "window_manager:libwsutils",
   ]
 
   cflags_cc = []

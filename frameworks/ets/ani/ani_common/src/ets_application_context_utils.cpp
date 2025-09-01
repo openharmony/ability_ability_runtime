@@ -551,6 +551,7 @@ ani_object EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniE
     }
     auto etsReference = std::make_shared<AppExecFwk::ETSNativeReference>();
     etsReference->aniObj = applicationContextObject;
+    etsReference->aniRef = applicationContextObjectRef;
     ApplicationContextManager::GetApplicationContextManager().SetEtsGlobalObject(etsReference);
     BindApplicationContextFunc(aniEnv);
     ani_class applicationContextClass = nullptr;
@@ -559,7 +560,11 @@ ani_object EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniE
         return nullptr;
     }
     ContextUtil::CreateEtsBaseContext(aniEnv, applicationContextClass, applicationContextObject, applicationContext);
-    ani_ref* contextGlobalRef = new (std::nothrow) ani_ref;
+    ani_ref *contextGlobalRef = new (std::nothrow) ani_ref;
+    if (contextGlobalRef == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null contextGlobalRef");
+        return nullptr;
+    }
     if ((status = aniEnv->GlobalReference_Create(applicationContextObject, contextGlobalRef)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "GlobalReference_Create failed status: %{public}d", status);
         delete contextGlobalRef;

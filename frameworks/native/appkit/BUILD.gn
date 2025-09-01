@@ -195,6 +195,7 @@ ohos_shared_library("appkit_native") {
     "config_policy:configpolicy_util",
     "ets_runtime:libark_jsruntime",
     "eventhandler:libeventhandler",
+    "faultloggerd:dfx_signalhandler",
     "faultloggerd:libbacktrace_local",
     "faultloggerd:libdfx_procinfo",
     "faultloggerd:libfaultloggerd",

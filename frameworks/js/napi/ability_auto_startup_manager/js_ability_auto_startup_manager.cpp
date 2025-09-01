@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,6 +67,11 @@ napi_value JsAbilityAutoStartupManager::CancelApplicationAutoStartup(napi_env en
 napi_value JsAbilityAutoStartupManager::QueryAllAutoStartupApplications(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsAbilityAutoStartupManager, OnQueryAllAutoStartupApplications);
+}
+
+napi_value JsAbilityAutoStartupManager::GetAutoStartupStatusForSelf(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityAutoStartupManager, OnGetAutoStartupStatusForSelf);
 }
 
 bool JsAbilityAutoStartupManager::CheckCallerIsSystemApp()
@@ -313,6 +318,44 @@ napi_value JsAbilityAutoStartupManager::OnQueryAllAutoStartupApplications(napi_e
     return result;
 }
 
+napi_value JsAbilityAutoStartupManager::OnGetAutoStartupStatusForSelf(napi_env env, const NapiCallbackInfo &info)
+{
+    auto retVal = std::make_shared<ErrCode>(ERR_OK);
+    auto isAutoStartEnabled = std::make_shared<bool>(false);
+    NapiAsyncTask::ExecuteCallback execute = [ret = retVal, isAutoStartEnabled]() {
+        if (ret == nullptr || isAutoStartEnabled == nullptr) {
+            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null ret or isAutoStartEnabled");
+            return;
+        }
+        *ret = AbilityManagerClient::GetInstance()->GetAutoStartupStatusForSelf(*isAutoStartEnabled);
+    };
+
+    NapiAsyncTask::CompleteCallback complete = [ret = retVal, isAutoStartEnabled](
+        napi_env env, NapiAsyncTask &task, int32_t status) {
+        if (ret == nullptr || isAutoStartEnabled == nullptr) {
+            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "null ret or isAutoStartEnabled");
+            task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(INNER_ERR)));
+            return;
+        }
+        if (*ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "error:%{public}d", *ret);
+            AbilityErrorCode errCode = GetJsErrorCodeByNativeError(*ret);
+            if (errCode == AbilityErrorCode::ERROR_CODE_CAPABILITY_NOT_SUPPORT) {
+                task.Reject(env, CreateJsError(env, errCode));
+            } else {
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+            }
+            return;
+        }
+        task.ResolveWithNoError(env, CreateJsValue(env, *isAutoStartEnabled));
+    };
+
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsAbilityAutoStartupManager::OnGetAutoStartupStatusForSelf", env,
+        CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
 napi_value JsAbilityAutoStartupManagerInit(napi_env env, napi_value exportObj)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
@@ -334,6 +377,8 @@ napi_value JsAbilityAutoStartupManagerInit(napi_env env, napi_value exportObj)
         JsAbilityAutoStartupManager::CancelApplicationAutoStartup);
     BindNativeFunction(env, exportObj, "queryAllAutoStartupApplications", moduleName,
         JsAbilityAutoStartupManager::QueryAllAutoStartupApplications);
+    BindNativeFunction(env, exportObj, "getAutoStartupStatusForSelf", moduleName,
+        JsAbilityAutoStartupManager::GetAutoStartupStatusForSelf);
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "end");
     return CreateJsUndefined(env);
 }

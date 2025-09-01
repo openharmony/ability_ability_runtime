@@ -13,26 +13,18 @@
 
 import("//build/ohos.gni")
 
-ohos_hap("serviceAbilityBundleForStop") {
-  hap_profile = "./src/main/config.json"
+ohos_app("serviceAbilityBundleForStop") {
+  certificate_profile = "signature/openharmony_sx.p7b"
   hap_name = "serviceAbilityBundleForStop"
+  hap_out_dir = "$root_out_dir/tests/ability/ability_runtime/tools/test/resource/aa/serviceAbilityBundleForStop_test"
+
   subsystem_name = "ability"
   part_name = "ability_runtime"
-  final_hap_path = "$root_out_dir/tests/systemtest/ability_tools/tools/resource/aa/${hap_name}.hap"
-  testonly = true
-  deps = [
-    ":serviceAbilityBundleForStop_ets_assets",
-    ":serviceAbilityBundleForStop_ets_resources",
-  ]
-  ets2abc = true
-  certificate_profile = "./signature/openharmony_sx.p7b"
-}
-ohos_js_assets("serviceAbilityBundleForStop_ets_assets") {
-  source_dir = "./src/main/ets"
-  hap_profile = "./src/main/config.json"
-  ets2abc = true
-}
-ohos_resources("serviceAbilityBundleForStop_ets_resources") {
-  sources = [ "./src/main/resources" ]
-  hap_profile = "./src/main/config.json"
+  
+  js_build_mode = "release"
+  sdk_home = "//prebuilts/ohos-sdk/linux"
+  sdk_type_name = [ "sdk.dir" ]
+  assemble_type = "assembleHap"
+  build_level = "module"
+  build_modules = [ "entry" ]
 }

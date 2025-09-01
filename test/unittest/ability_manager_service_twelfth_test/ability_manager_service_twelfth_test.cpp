@@ -545,8 +545,8 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, StartUser_001, TestSize.Level1)
     int userId = 0;
     sptr<IUserCallback> callback = new MockIUserCallback();
     bool isAppRecovery = false;
-    auto retCode = abilityMs_->StartUser(userId, callback, isAppRecovery);
-    EXPECT_EQ(retCode, CHECK_PERMISSION_FAILED);
+    auto retCode = abilityMs_->StartUser(userId, 0, callback, isAppRecovery);
+    EXPECT_EQ(retCode, INVALID_USERID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartUser_001 end");
 }
 
@@ -622,8 +622,6 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, IsSceneBoardReady_001, TestSize.Level
     int32_t userId = -1;
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs, nullptr);
-    abilityMs->userController_ = std::make_shared<UserController>();
-    EXPECT_NE(abilityMs->userController_, nullptr);
     abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     EXPECT_NE(abilityMs->subManagersHelper_, nullptr);
     bool result = abilityMs->IsSceneBoardReady(userId);
@@ -644,7 +642,6 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, IsSceneBoardReady_002, TestSize.Level
     int32_t userId = 100;
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs, nullptr);
-    abilityMs->userController_ = nullptr;
     abilityMs->subManagersHelper_ = nullptr;
     bool result = abilityMs->IsSceneBoardReady(userId);
     EXPECT_FALSE(result);
@@ -701,11 +698,11 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, OnStartSpecifiedAbilityTimeoutRespons
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest OnStartSpecifiedAbilityTimeoutResponse_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     int32_t requestId = 101;
-    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    std::shared_ptr<TaskHandlerWrap> taskHandler =
+        TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
+    std::shared_ptr<AbilityEventHandler> eventHandler = std::make_shared<AbilityEventHandler>(taskHandler, abilityMs);
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler, eventHandler);
     EXPECT_NE(abilityMs->subManagersHelper_, nullptr);
-    EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
-        .Times(AnyNumber())
-        .WillRepeatedly(Return(true));
     abilityMs->OnStartSpecifiedAbilityTimeoutResponse(requestId);
     auto manager = abilityMs->GetCurrentUIAbilityManager();
     EXPECT_EQ(manager, nullptr);

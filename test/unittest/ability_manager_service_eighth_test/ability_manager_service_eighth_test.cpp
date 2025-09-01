@@ -151,11 +151,10 @@ HWTEST_F(AbilityManagerServiceEighthTest, StopUser_001, TestSize.Level1)
     EXPECT_EQ(abilityMs->StopUser(userId, callback), CHECK_PERMISSION_FAILED);
     IPCSkeleton::SetCallingUid(ACCOUNT_MGR_SERVICE_UID);
     sptr<IUserCallback> callback1 = nullptr;
-    EXPECT_EQ(abilityMs->StopUser(userId, callback1), 0);
-    abilityMs->userController_ = std::make_shared<UserController>();
-    EXPECT_EQ(abilityMs->StopUser(userId, callback), 0);
+    EXPECT_EQ(abilityMs->StopUser(userId, callback1), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(abilityMs->StopUser(userId, callback), INVALID_USERID_VALUE);
     system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
-    EXPECT_EQ(abilityMs->StopUser(userId, callback), 0);
+    EXPECT_EQ(abilityMs->StopUser(userId, callback), INVALID_USERID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceEighthTest StopUser_001 end");
 }
 
@@ -172,12 +171,11 @@ HWTEST_F(AbilityManagerServiceEighthTest, LogoutUser_001, TestSize.Level1)
     int userId = 10;
     IPCSkeleton::SetCallingUid(TEST_UID);
     sptr<IUserCallback> callback = nullptr;
-    EXPECT_EQ(abilityMs->LogoutUser(userId, callback), CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(abilityMs->LogoutUser(userId, callback), INVALID_PARAMETERS_ERR);
     sptr<IUserCallback> callback1 = new MockIUserCallback();
     EXPECT_EQ(abilityMs->LogoutUser(userId, callback1), CHECK_PERMISSION_FAILED);
     IPCSkeleton::SetCallingUid(ACCOUNT_MGR_SERVICE_UID);
-    EXPECT_EQ(abilityMs->LogoutUser(userId, callback1), ERR_OK);
-    abilityMs->userController_ = std::make_shared<UserController>();
+    EXPECT_EQ(abilityMs->LogoutUser(userId, callback1), INVALID_USERID_VALUE);
     system::SetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, true);
     EXPECT_NE(abilityMs->LogoutUser(userId, callback1), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceEighthTest LogoutUser_001 end");
@@ -218,17 +216,17 @@ HWTEST_F(AbilityManagerServiceEighthTest, SwitchToUser_001, TestSize.Level1)
     sptr<IUserCallback> callback1 = new MockIUserCallback();
     EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
         .WillRepeatedly(Return(false));
-    EXPECT_NE(abilityMs->SwitchToUser(oldUserId, userId, callback), ERR_OK);
+    EXPECT_NE(abilityMs->SwitchToUser(oldUserId, userId, 0, callback), ERR_OK);
     abilityMs->taskHandler_ = TaskHandlerWrap::CreateQueueHandler("SetTaskHandler");
-    EXPECT_NE(abilityMs->SwitchToUser(oldUserId, userId, callback1), ERR_OK);
+    EXPECT_NE(abilityMs->SwitchToUser(oldUserId, userId, 0, callback1), ERR_OK);
     EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
         .WillRepeatedly(Return(true));
-    EXPECT_NE(abilityMs->SwitchToUser(oldUserId, userId, callback1), ERR_OK);
+    EXPECT_NE(abilityMs->SwitchToUser(oldUserId, userId, 0, callback1), ERR_OK);
     AmsConfigurationParameter::GetInstance().multiUserType_ = 1; // multiUserType_ = 1
-    EXPECT_NE(abilityMs->SwitchToUser(oldUserId, userId, callback1), ERR_OK);
+    EXPECT_NE(abilityMs->SwitchToUser(oldUserId, userId, 0, callback1), ERR_OK);
     EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled())
         .WillRepeatedly(Return(false));
-    EXPECT_NE(abilityMs->SwitchToUser(oldUserId, userId, callback1), ERR_OK);
+    EXPECT_NE(abilityMs->SwitchToUser(oldUserId, userId, 0, callback1), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceEighthTest SwitchToUser_001 end");
 }
 
@@ -294,7 +292,6 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartAbilityInChainTest_001, TestSize.
     sptr<IRemoteObject> callerToken = nullptr;
     StartAbilityParams params(want);
     params.callerToken = callerToken;
-    abilityMs_->InitStartAbilityChain();
     ret = abilityMs_->StartAbilityInChain(params, result);
     EXPECT_FALSE(ret);
     want.SetAction(TEST_CREATE_FILE);
@@ -355,7 +352,7 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartUIAbilityBySCB_001, TestSize.Leve
     sessionInfo->want.SetParam(KEY_SESSION_ID, TEST_STRING_VALUE_1);
     ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
     EXPECT_NE(ret, ERR_OK);
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
     EXPECT_NE(ret, ERR_OK);
     auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
@@ -401,7 +398,7 @@ HWTEST_F(AbilityManagerServiceEighthTest, StartUIAbilityBySCB_001_002, TestSize.
     sessionInfo->want.SetParam(KEY_SESSION_ID, TEST_STRING_VALUE_1);
     FreeInstallInfo freeInstallInfo;
     freeInstallInfo.want.SetParam(KEY_SESSION_ID, TEST_STRING_VALUE_1);
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     abilityMs_->freeInstallManager_->freeInstallList_.push_back(freeInstallInfo);
     ret = abilityMs_->StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
     EXPECT_EQ(ret, ERR_OK);

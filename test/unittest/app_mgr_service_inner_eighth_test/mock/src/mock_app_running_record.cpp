@@ -181,6 +181,11 @@ const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>>
     return abilitiesMap;
 }
 
+bool AppRunningRecord::IsAlreadyHaveAbility()
+{
+    return true;
+}
+
 sptr<IAppScheduler> AppRunningRecord::GetApplicationClient() const
 {
     return nullptr;
@@ -572,7 +577,7 @@ void AppRunningRecord::SetScheduleNewProcessRequestState(int32_t requestId,
 
 bool AppRunningRecord::IsNewProcessRequest() const
 {
-    return false;
+    return AAFwk::MyStatus::GetInstance().specifiedProcessRequest_ != nullptr;
 }
 
 bool AppRunningRecord::IsStartSpecifiedAbility() const
@@ -987,6 +992,16 @@ std::string AppRunningRecord::GetPreloadModuleName() const
 void AppRunningRecord::SetPreloadState(PreloadState state)
 {
     preloadState_ = state;
+}
+
+void AppRunningRecord::SetPreloadPhase(PreloadPhase phase)
+{
+    preloadPhase_ = phase;
+}
+
+PreloadPhase AppRunningRecord::GetPreloadPhase()
+{
+    return preloadPhase_;
 }
 
 bool AppRunningRecord::IsPreloading() const

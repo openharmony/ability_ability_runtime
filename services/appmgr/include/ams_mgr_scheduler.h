@@ -293,13 +293,6 @@ public:
     virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
         int32_t requestId = 0, const std::string &customProcess = "") override;
 
-    /**
-     * SetCurrentUserId, set the userid to app mgr by ability mgr when switching to another user.
-     *
-     * @param userId the new user.
-     */
-    virtual void SetCurrentUserId(const int32_t userId) override;
-
     virtual void SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess) override;
 
     /**
@@ -468,6 +461,8 @@ public:
 
     virtual int32_t CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex,
         bool &isExist) override;
+
+    virtual int32_t VerifyKillProcessPermission(const std::string &bundleName) override;
 
 private:
     /**

@@ -61,7 +61,7 @@ bool ApplicationImpl::PerformAppReady()
         curState_ = APP_STATE_READY;
         return true;
     }
-    TAG_LOGE(AAFwkTag::APPKIT, "curState: %{public}d", curState_);
+    TAG_LOGW(AAFwkTag::APPKIT, "curState: %{public}d", curState_);
     return false;
 }
 
@@ -80,7 +80,7 @@ bool ApplicationImpl::PerformForeground()
         curState_ = APP_STATE_FOREGROUND;
         return true;
     }
-    TAG_LOGE(AAFwkTag::APPKIT, "curState: %{public}d", curState_);
+    TAG_LOGW(AAFwkTag::APPKIT, "curState: %{public}d", curState_);
     return false;
 }
 
@@ -98,7 +98,7 @@ bool ApplicationImpl::PerformBackground()
         curState_ = APP_STATE_BACKGROUND;
         return true;
     }
-    TAG_LOGE(AAFwkTag::APPKIT, "curState: %{public}d", curState_);
+    TAG_LOGW(AAFwkTag::APPKIT, "curState: %{public}d", curState_);
     return false;
 }
 
@@ -124,7 +124,7 @@ bool ApplicationImpl::PerformTerminate(bool isLastProcess)
         curState_ = APP_STATE_TERMINATED;
         return true;
     }
-    TAG_LOGE(AAFwkTag::APPKIT, "curState: %{public}d", curState_);
+    TAG_LOGW(AAFwkTag::APPKIT, "curState: %{public}d", curState_);
     return false;
 }
 

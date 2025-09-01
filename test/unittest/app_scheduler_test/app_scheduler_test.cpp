@@ -649,6 +649,24 @@ HWTEST_F(AppSchedulerTest, AppScheduler_KillApplication_002, TestSize.Level1)
 
 /*
  * Feature: AppScheduler
+ * Function: VerifyKillProcessPermission
+ * SubFunction: NA
+ * FunctionPoints: AppScheduler VerifyKillProcessPermission
+ * EnvConditions: NA
+ * CaseDescription: Verify VerifyKillProcessPermission
+ */
+HWTEST_F(AppSchedulerTest, AppScheduler_VerifyKillProcessPermission_001, TestSize.Level1)
+{
+    std::string bundleName = "test";
+    auto res = DelayedSingleton<AppScheduler>::GetInstance()->VerifyKillProcessPermission(bundleName);
+    EXPECT_EQ(res, ERR_OK);
+    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
+    res = DelayedSingleton<AppScheduler>::GetInstance()->VerifyKillProcessPermission(bundleName);
+    EXPECT_EQ(res, INNER_ERR);
+}
+
+/*
+ * Feature: AppScheduler
  * Function: KillApplicationByUid
  * SubFunction: NA
  * FunctionPoints: AppScheduler KillApplicationByUid
@@ -1025,19 +1043,6 @@ HWTEST_F(AppSchedulerTest, AppScheduler_GetAbilityRecordsByProcessID_002, TestSi
     EXPECT_EQ(res, INNER_ERR);
     clientMock_.reset();
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_.reset();
-}
-
-/**
- * @tc.name: SetCurrentUserId_001
- * @tc.desc: set current userId.
- * @tc.type: FUNC
- */
-HWTEST_F(AppSchedulerTest, AppScheduler_SetCurrentUserId_001, TestSize.Level1)
-{
-    int32_t userId = 0;
-    DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::make_unique<AppExecFwk::AppMgrClient>();
-    ASSERT_NE(DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_, nullptr);
-    DelayedSingleton<AppScheduler>::GetInstance()->SetCurrentUserId(userId);
 }
 
 /**

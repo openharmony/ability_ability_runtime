@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@
 #include "runtime.h"
 #include "ui_ability.h"
 #undef private
+#include "mock_ability_stage.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -995,6 +996,366 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_ScheduleNewProcessR
     EXPECT_FALSE(isAsync);
     ohosApplication_->ScheduleNewProcessRequest(want, moduleName, callback, isAsync);
     EXPECT_FALSE(isAsync);
+}
+
+/*
+* @tc.number: CreateFirstStartupCallbackForRecord_0100
+* @tc.name: CreateFirstStartupCallbackForRecord
+* @tc.desc: Verify function CreateFirstStartupCallbackForRecord
+*/
+HWTEST_F(OHOSApplicationTest, CreateFirstStartupCallbackForRecord_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForRecord_0100 start.";
+    ASSERT_NE(ohosApplication_, nullptr);
+    HapModuleInfo hapModuleInfo;
+    auto firstCallback = ohosApplication_->CreateFirstStartupCallbackForRecord(nullptr, nullptr, hapModuleInfo,
+        nullptr);
+    EXPECT_EQ(firstCallback, nullptr);
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForRecord_0100 end.";
+}
+
+/*
+* @tc.number: CreateFirstStartupCallbackForRecord_0200
+* @tc.name: CreateFirstStartupCallbackForRecord
+* @tc.desc: Verify function CreateFirstStartupCallbackForRecord
+*/
+HWTEST_F(OHOSApplicationTest, CreateFirstStartupCallbackForRecord_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForRecord_0200 start.";
+    ASSERT_NE(ohosApplication_, nullptr);
+    auto abilityStage = std::make_shared<AbilityRuntime::MockAbilityStage>();
+    HapModuleInfo hapModuleInfo;
+    sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
+    std::shared_ptr<AbilityInfo> info = nullptr;
+    auto want = std::make_shared<Want>();
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, want, 0);
+
+    auto firstCallback = ohosApplication_->CreateFirstStartupCallbackForRecord(abilityStage, abilityRecord,
+        hapModuleInfo, nullptr);
+    EXPECT_EQ(firstCallback, nullptr);
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForRecord_0200 end.";
+}
+
+/*
+* @tc.number: CreateFirstStartupCallbackForRecord_0300
+* @tc.name: CreateFirstStartupCallbackForRecord
+* @tc.desc: Verify function CreateFirstStartupCallbackForRecord
+*/
+HWTEST_F(OHOSApplicationTest, CreateFirstStartupCallbackForRecord_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForRecord_0300 start.";
+    ASSERT_NE(ohosApplication_, nullptr);
+    auto abilityStage = std::make_shared<AbilityRuntime::MockAbilityStage>();
+    HapModuleInfo hapModuleInfo;
+    sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
+    std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
+    auto want = std::make_shared<Want>();
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, want, 0);
+
+    auto processInfo = std::make_shared<ProcessInfo>();
+    processInfo->SetProcessType(ProcessType::NORMAL);
+    ohosApplication_->SetProcessInfo(processInfo);
+    
+    auto firstCallback = ohosApplication_->CreateFirstStartupCallbackForRecord(abilityStage, abilityRecord,
+        hapModuleInfo, nullptr);
+    EXPECT_NE(firstCallback, nullptr);
+
+    ohosApplication_ = nullptr;
+    EXPECT_CALL(*abilityStage, RunAutoStartupTask(_, _, _, _, _))
+        .Times(0);
+    firstCallback();
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForRecord_0300 end.";
+}
+
+/*
+* @tc.number: CreateFirstStartupCallbackForRecord_0400
+* @tc.name: CreateFirstStartupCallbackForRecord
+* @tc.desc: Verify function CreateFirstStartupCallbackForRecord
+*/
+HWTEST_F(OHOSApplicationTest, CreateFirstStartupCallbackForRecord_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForRecord_0400 start.";
+    ASSERT_NE(ohosApplication_, nullptr);
+    auto abilityStage = std::make_shared<AbilityRuntime::MockAbilityStage>();
+    HapModuleInfo hapModuleInfo;
+    sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
+    std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
+    auto want = std::make_shared<Want>();
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, want, 0);
+
+    auto processInfo = std::make_shared<ProcessInfo>();
+    processInfo->SetProcessType(ProcessType::NORMAL);
+    ohosApplication_->SetProcessInfo(processInfo);
+    
+    auto firstCallback = ohosApplication_->CreateFirstStartupCallbackForRecord(nullptr, abilityRecord,
+        hapModuleInfo, nullptr);
+    EXPECT_NE(firstCallback, nullptr);
+
+    EXPECT_CALL(*abilityStage, RunAutoStartupTask(_, _, _, _, _))
+        .Times(0);
+    firstCallback();
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForRecord_0400 end.";
+}
+
+/*
+* @tc.number: CreateFirstStartupCallbackForRecord_0500
+* @tc.name: CreateFirstStartupCallbackForRecord
+* @tc.desc: Verify function CreateFirstStartupCallbackForRecord
+*/
+HWTEST_F(OHOSApplicationTest, CreateFirstStartupCallbackForRecord_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForRecord_0500 start.";
+    ASSERT_NE(ohosApplication_, nullptr);
+    auto abilityStage = std::make_shared<AbilityRuntime::MockAbilityStage>();
+    HapModuleInfo hapModuleInfo;
+    sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
+    std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
+    auto want = std::make_shared<Want>();
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, want, 0);
+
+    auto processInfo = std::make_shared<ProcessInfo>();
+    processInfo->SetProcessType(ProcessType::NORMAL);
+    ohosApplication_->SetProcessInfo(processInfo);
+    
+    auto firstCallback = ohosApplication_->CreateFirstStartupCallbackForRecord(abilityStage, abilityRecord,
+        hapModuleInfo, nullptr);
+    ASSERT_NE(firstCallback, nullptr);
+
+    bool asyncCallback = true;
+    auto mockHandler = [&asyncCallback](const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
+        bool &isAsyncCallback, const std::shared_ptr<AbilityRuntime::Context> &stageContext, bool preAbilityStageLoad) {
+        isAsyncCallback = false;
+        asyncCallback = isAsyncCallback;
+        return ERR_OK;
+    };
+    EXPECT_CALL(*abilityStage, RunAutoStartupTask(_, _, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mockHandler));
+    firstCallback();
+    EXPECT_EQ(asyncCallback, false);
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForRecord_0500 end.";
+}
+
+/*
+* @tc.number: CreateFirstStartupCallbackForRecord_0600
+* @tc.name: CreateFirstStartupCallbackForRecord
+* @tc.desc: Verify function CreateFirstStartupCallbackForRecord
+*/
+HWTEST_F(OHOSApplicationTest, CreateFirstStartupCallbackForRecord_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForRecord_0600 start.";
+    ASSERT_NE(ohosApplication_, nullptr);
+    auto abilityStage = std::make_shared<AbilityRuntime::MockAbilityStage>();
+    HapModuleInfo hapModuleInfo;
+    sptr<Notification::MockIRemoteObject> token = new (std::nothrow) Notification::MockIRemoteObject();
+    std::shared_ptr<AbilityInfo> info = std::make_shared<AbilityInfo>();
+    auto want = std::make_shared<Want>();
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(info, token, want, 0);
+
+    auto processInfo = std::make_shared<ProcessInfo>();
+    processInfo->SetProcessType(ProcessType::NORMAL);
+    ohosApplication_->SetProcessInfo(processInfo);
+    
+    auto firstCallback = ohosApplication_->CreateFirstStartupCallbackForRecord(abilityStage, abilityRecord,
+        hapModuleInfo, nullptr);
+    ASSERT_NE(firstCallback, nullptr);
+
+    bool asyncCallback = false;
+    auto mockHandler = [&asyncCallback](const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
+        bool &isAsyncCallback, const std::shared_ptr<AbilityRuntime::Context> &stageContext, bool preAbilityStageLoad) {
+        isAsyncCallback = true;
+        asyncCallback = isAsyncCallback;
+        return ERR_OK;
+    };
+    EXPECT_CALL(*abilityStage, RunAutoStartupTask(_, _, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mockHandler));
+    firstCallback();
+    EXPECT_EQ(asyncCallback, true);
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForRecord_0600 end.";
+}
+
+/*
+* @tc.number: CreateFirstStartupCallbackForHap_0100
+* @tc.name: CreateFirstStartupCallbackForHap
+* @tc.desc: Verify function CreateFirstStartupCallbackForRecord
+*/
+HWTEST_F(OHOSApplicationTest, CreateFirstStartupCallbackForHap_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForHap_0100 start.";
+    ASSERT_NE(ohosApplication_, nullptr);
+    ohosApplication_->SetApplicationContext(nullptr);
+    HapModuleInfo hapModuleInfo;
+    auto firstCallback = ohosApplication_->CreateFirstStartupCallbackForHap(nullptr, hapModuleInfo, nullptr);
+    EXPECT_EQ(firstCallback, nullptr);
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForHap_0100 end.";
+}
+
+/*
+* @tc.number: CreateFirstStartupCallbackForHap_0200
+* @tc.name: CreateFirstStartupCallbackForHap
+* @tc.desc: Verify function CreateFirstStartupCallbackForRecord
+*/
+HWTEST_F(OHOSApplicationTest, CreateFirstStartupCallbackForHap_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForHap_0200 start.";
+    ASSERT_NE(ohosApplication_, nullptr);
+    auto applicationContext = std::make_shared<AbilityRuntime::ApplicationContext>();
+    applicationContext->SetApplicationInfo(nullptr);
+    ohosApplication_->SetApplicationContext(applicationContext);
+
+    auto processInfo = std::make_shared<ProcessInfo>();
+    processInfo->SetProcessType(ProcessType::NORMAL);
+    ohosApplication_->SetProcessInfo(processInfo);
+
+    auto abilityStage = std::make_shared<AbilityRuntime::MockAbilityStage>();
+    HapModuleInfo hapModuleInfo;
+    auto firstCallback = ohosApplication_->CreateFirstStartupCallbackForHap(abilityStage, hapModuleInfo, nullptr);
+    EXPECT_EQ(firstCallback, nullptr);
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForHap_0200 end.";
+}
+
+/*
+* @tc.number: CreateFirstStartupCallbackForHap_0300
+* @tc.name: CreateFirstStartupCallbackForHap
+* @tc.desc: Verify function CreateFirstStartupCallbackForRecord
+*/
+HWTEST_F(OHOSApplicationTest, CreateFirstStartupCallbackForHap_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForHap_0300 start.";
+    ASSERT_NE(ohosApplication_, nullptr);
+    auto applicationContext = std::make_shared<AbilityRuntime::ApplicationContext>();
+    auto applicationInfo = std::make_shared<ApplicationInfo>();
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    applicationContext->AttachContextImpl(contextImpl);
+    applicationContext->SetApplicationInfo(applicationInfo);
+    ohosApplication_->SetApplicationContext(applicationContext);
+
+    auto processInfo = std::make_shared<ProcessInfo>();
+    processInfo->SetProcessType(ProcessType::NORMAL);
+    ohosApplication_->SetProcessInfo(processInfo);
+    
+    auto abilityStage = std::make_shared<AbilityRuntime::MockAbilityStage>();
+    HapModuleInfo hapModuleInfo;
+    auto firstCallback = ohosApplication_->CreateFirstStartupCallbackForHap(abilityStage, hapModuleInfo, nullptr);
+    EXPECT_NE(firstCallback, nullptr);
+
+    ohosApplication_ = nullptr;
+    EXPECT_CALL(*abilityStage, RunAutoStartupTask(_, _, _, _, _))
+        .Times(0);
+    firstCallback();
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForHap_0300 end.";
+}
+
+/*
+* @tc.number: CreateFirstStartupCallbackForHap_0400
+* @tc.name: CreateFirstStartupCallbackForHap
+* @tc.desc: Verify function CreateFirstStartupCallbackForRecord
+*/
+HWTEST_F(OHOSApplicationTest, CreateFirstStartupCallbackForHap_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForHap_0400 start.";
+    ASSERT_NE(ohosApplication_, nullptr);
+    auto applicationContext = std::make_shared<AbilityRuntime::ApplicationContext>();
+    auto applicationInfo = std::make_shared<ApplicationInfo>();
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    applicationContext->AttachContextImpl(contextImpl);
+    applicationContext->SetApplicationInfo(applicationInfo);
+    ohosApplication_->SetApplicationContext(applicationContext);
+
+    auto processInfo = std::make_shared<ProcessInfo>();
+    processInfo->SetProcessType(ProcessType::NORMAL);
+    ohosApplication_->SetProcessInfo(processInfo);
+    
+    auto abilityStage = std::make_shared<AbilityRuntime::MockAbilityStage>();
+    HapModuleInfo hapModuleInfo;
+    auto firstCallback = ohosApplication_->CreateFirstStartupCallbackForHap(nullptr, hapModuleInfo, nullptr);
+    EXPECT_NE(firstCallback, nullptr);
+
+    EXPECT_CALL(*abilityStage, RunAutoStartupTask(_, _, _, _, _))
+        .Times(0);
+    firstCallback();
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForHap_0400 end.";
+}
+
+/*
+* @tc.number: CreateFirstStartupCallbackForHap_0500
+* @tc.name: CreateFirstStartupCallbackForHap
+* @tc.desc: Verify function CreateFirstStartupCallbackForRecord
+*/
+HWTEST_F(OHOSApplicationTest, CreateFirstStartupCallbackForHap_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForHap_0500 start.";
+    ASSERT_NE(ohosApplication_, nullptr);
+    auto applicationContext = std::make_shared<AbilityRuntime::ApplicationContext>();
+    auto applicationInfo = std::make_shared<ApplicationInfo>();
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    applicationContext->AttachContextImpl(contextImpl);
+    applicationContext->SetApplicationInfo(applicationInfo);
+    ohosApplication_->SetApplicationContext(applicationContext);
+
+    auto processInfo = std::make_shared<ProcessInfo>();
+    processInfo->SetProcessType(ProcessType::NORMAL);
+    ohosApplication_->SetProcessInfo(processInfo);
+    
+    auto abilityStage = std::make_shared<AbilityRuntime::MockAbilityStage>();
+    HapModuleInfo hapModuleInfo;
+    auto firstCallback = ohosApplication_->CreateFirstStartupCallbackForHap(abilityStage, hapModuleInfo, nullptr);
+    ASSERT_NE(firstCallback, nullptr);
+
+    bool asyncCallback = false;
+    auto mockHandler = [&asyncCallback](const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
+        bool &isAsyncCallback, const std::shared_ptr<AbilityRuntime::Context> &stageContext, bool preAbilityStageLoad) {
+        isAsyncCallback = true;
+        asyncCallback = isAsyncCallback;
+        return ERR_OK;
+    };
+    EXPECT_CALL(*abilityStage, RunAutoStartupTask(_, _, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mockHandler));
+    firstCallback();
+    EXPECT_EQ(asyncCallback, true);
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForHap_0500 end.";
+}
+
+/*
+* @tc.number: CreateFirstStartupCallbackForHap_0600
+* @tc.name: CreateFirstStartupCallbackForHap
+* @tc.desc: Verify function CreateFirstStartupCallbackForRecord
+*/
+HWTEST_F(OHOSApplicationTest, CreateFirstStartupCallbackForHap_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForHap_0600 start.";
+    ASSERT_NE(ohosApplication_, nullptr);
+    auto applicationContext = std::make_shared<AbilityRuntime::ApplicationContext>();
+    auto applicationInfo = std::make_shared<ApplicationInfo>();
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    applicationContext->AttachContextImpl(contextImpl);
+    applicationContext->SetApplicationInfo(applicationInfo);
+    ohosApplication_->SetApplicationContext(applicationContext);
+
+    auto processInfo = std::make_shared<ProcessInfo>();
+    processInfo->SetProcessType(ProcessType::NORMAL);
+    ohosApplication_->SetProcessInfo(processInfo);
+    
+    auto abilityStage = std::make_shared<AbilityRuntime::MockAbilityStage>();
+    HapModuleInfo hapModuleInfo;
+    auto firstCallback = ohosApplication_->CreateFirstStartupCallbackForHap(abilityStage, hapModuleInfo, nullptr);
+    ASSERT_NE(firstCallback, nullptr);
+
+    bool asyncCallback = true;
+    auto mockHandler = [&asyncCallback](const std::function<void()> &callback, std::shared_ptr<AAFwk::Want> want,
+        bool &isAsyncCallback, const std::shared_ptr<AbilityRuntime::Context> &stageContext, bool preAbilityStageLoad) {
+        isAsyncCallback = false;
+        asyncCallback = isAsyncCallback;
+        return ERR_OK;
+    };
+    EXPECT_CALL(*abilityStage, RunAutoStartupTask(_, _, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mockHandler));
+    firstCallback();
+    EXPECT_EQ(asyncCallback, false);
+    GTEST_LOG_(INFO) << "CreateFirstStartupCallbackForHap_0600 end.";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

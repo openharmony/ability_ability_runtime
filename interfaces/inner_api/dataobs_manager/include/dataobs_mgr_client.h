@@ -51,6 +51,17 @@ public:
         DataObsOption opt = DataObsOption());
 
     /**
+     * Registers an observer to DataObsMgr specified by the given Uri.
+     *
+     * @param uri, Indicates the path of the data to operate.
+     * @param dataObserver, Indicates the IDataAbilityObserver object.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RegisterObserverFromExtension(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+        int32_t userId = IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, DataObsOption opt = DataObsOption());
+
+    /**
      * Deregisters an observer used for DataObsMgr specified by the given Uri.
      *
      * @param uri, Indicates the path of the data to operate.
@@ -70,6 +81,18 @@ public:
      */
     ErrCode NotifyChange(const Uri &uri, int32_t userId = IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER,
         DataObsOption opt = DataObsOption());
+
+    /**
+     * Notifies the registered observers of a change to the data resource specified by Uri.
+     *
+     * @param uri, Indicates the path of the data to operate.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode NotifyChangeFromExtension(const Uri &uri, int32_t userId = IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER,
+        DataObsOption opt = DataObsOption());
+
+    ErrCode CheckTrusts(uint32_t consumerToken, uint32_t providerToken);
 
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.
@@ -158,6 +181,8 @@ private:
     struct ObserverInfo {
         Uri uri;
         int32_t userId;
+        bool isExtension = false;
+        uint32_t firstCallerTokenID;
         ObserverInfo(Uri uri, int32_t userId) : uri(uri), userId(userId) {};
     };
     ConcurrentMap<sptr<IDataAbilityObserver>, std::list<struct ObserverInfo>> observers_;

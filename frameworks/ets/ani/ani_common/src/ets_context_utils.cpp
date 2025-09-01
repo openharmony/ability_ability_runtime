@@ -100,7 +100,7 @@ void Clean(ani_env *env, ani_object object)
         return;
     }
     if (ptr != 0) {
-        delete reinterpret_cast<Context *>(ptr);
+        delete reinterpret_cast<std::weak_ptr<Context> *>(ptr);
     }
 }
 
@@ -378,9 +378,9 @@ ani_object GetApplicationContextSync(ani_env *env, ani_object aniObj)
     }
     if (!applicationContext->GetApplicationInfoUpdateFlag()) {
         auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetEtsGlobalObject();
-        if (appContextObj != nullptr) {
-            TAG_LOGE(AAFwkTag::APPKIT, "appContextObj is not nullptr");
-            return appContextObj->aniObj;
+        if (appContextObj != nullptr && appContextObj->aniRef != nullptr) {
+            TAG_LOGD(AAFwkTag::APPKIT, "appContextObj is not nullptr");
+            return reinterpret_cast<ani_object>(appContextObj->aniRef);
         }
     }
     return GetApplicationContext(env, applicationContext);

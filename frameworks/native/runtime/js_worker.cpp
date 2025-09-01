@@ -295,7 +295,7 @@ bool AssetHelper::GetSafeData(const std::string& ami, uint8_t** buff, size_t* bu
     if (fstat(fd, &statbuf) < 0) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Get fstat of file %{private}s caught error: %{public}d", resolvedPath.c_str(),
             errno);
-        close(fd);
+        fclose(fileF);
         return false;
     }
 

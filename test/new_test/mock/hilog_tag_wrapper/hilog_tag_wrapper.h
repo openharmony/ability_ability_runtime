@@ -95,6 +95,7 @@ enum class AAFwkLogTag : uint32_t {
     QUERY_ERMS,
 
     LOCAL_CALL = DEFAULT + 0x60, // 0xD001360
+    USER_CONTROLLER,
 
     END = 256,               // N.B. never use it
 };

@@ -726,10 +726,10 @@ HWTEST_F(AppMgrServiceInnerTest, SendPreloadAppStartupTypeEvent_001, TestSize.Le
     appMgrServiceInner->SendPreloadAppStartupTypeEvent(appRecord, abilityInfo);
 
     appRecord = std::make_shared<AppExecFwk::AppRunningRecord>(nullptr, 0, "");
-    appRecord->SetPreloadState(PreloadState::PRELOADED);
+    appRecord->SetPreloadState(PreloadState::NONE);
     appMgrServiceInner->SendPreloadAppStartupTypeEvent(appRecord, abilityInfo);
 
-    appRecord->SetPreloadState(PreloadState::NONE);
+    appRecord->SetPreloadState(PreloadState::PRELOADED);
     appRecord->SetPreloadMode(PreloadMode::PRE_MAKE);
     appMgrServiceInner->SendPreloadAppStartupTypeEvent(appRecord, abilityInfo);
 
@@ -737,6 +737,14 @@ HWTEST_F(AppMgrServiceInnerTest, SendPreloadAppStartupTypeEvent_001, TestSize.Le
     appMgrServiceInner->SendPreloadAppStartupTypeEvent(appRecord, abilityInfo);
 
     appRecord->SetPreloadMode(PreloadMode::PRESS_DOWN);
+    appMgrServiceInner->SendPreloadAppStartupTypeEvent(appRecord, abilityInfo);
+
+    appRecord->SetPreloadMode(PreloadMode::PRELOAD_BY_PHASE);
+    appRecord->SetPreloadPhase(PreloadPhase::PROCESS_CREATED);
+    appMgrServiceInner->SendPreloadAppStartupTypeEvent(appRecord, abilityInfo);
+
+    appRecord->SetPreloadMode(PreloadMode::PRELOAD_BY_PHASE);
+    appRecord->SetPreloadPhase(PreloadPhase::ABILITY_STAGE_CREATED);
     appMgrServiceInner->SendPreloadAppStartupTypeEvent(appRecord, abilityInfo);
     EXPECT_NE(appMgrServiceInner, nullptr);
 }
@@ -768,7 +776,14 @@ HWTEST_F(AppMgrServiceInnerTest, SendAppStartupTypeEvent_001, TestSize.Level2)
     appRecord->priorityObject_->SetPid(9999);
     abilityInfo1 = std::make_shared<AppExecFwk::AbilityInfo>();
     abilityInfo1->name = "name";
+    abilityInfo1->type = AppExecFwk::AbilityType::UNKNOWN;
+    appMgrServiceInner->SendAppStartupTypeEvent(appRecord, abilityInfo1, startType, reason);
 
+    abilityInfo1->type = AppExecFwk::AbilityType::PAGE;
+    appMgrServiceInner->SendAppStartupTypeEvent(appRecord, abilityInfo1, startType, reason);
+
+    abilityInfo1->type = AppExecFwk::AbilityType::UNKNOWN;
+    abilityInfo1->extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI;
     appMgrServiceInner->SendAppStartupTypeEvent(appRecord, abilityInfo1, startType, reason);
     EXPECT_NE(appMgrServiceInner, nullptr);
 }

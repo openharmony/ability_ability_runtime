@@ -404,6 +404,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandlePromoteCurrentToCandidateMasterProcess(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::DEMOTE_CURRENT_FROM_CANDIDATE_MASTER_PROCESS):
             return HandleDemoteCurrentFromCandidateMasterProcess(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::EXIT_MASTER_PROCESS_ROLE):
+            return HandleExitMasterProcessRole(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::QUERY_RUNNING_SHARED_BUNDLES):
             return HandleQueryRunningSharedBundles(data, reply);
     }
@@ -1842,15 +1844,17 @@ int32_t AppMgrStub::HandleCreateNativeChildProcess(MessageParcel &data, MessageP
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::string libName = data.ReadString();
-    int32_t childCount = data.ReadInt32();
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
-    std::string customProcessName = data.ReadString();
-    int32_t result = CreateNativeChildProcess(libName, childCount, callback, customProcessName);
-    if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+    std::unique_ptr<ChildProcessRequest> request(data.ReadParcelable<ChildProcessRequest>());
+    if (!request) {
         return IPC_STUB_ERR;
     }
 
+    auto result = CreateNativeChildProcess(libName, callback, *request);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write result failed.");
+        return IPC_STUB_ERR;
+    }
     return NO_ERROR;
 }
 #endif // SUPPORT_CHILD_PROCESS
@@ -2033,6 +2037,18 @@ int32_t AppMgrStub::HandleDemoteCurrentFromCandidateMasterProcess(MessageParcel 
 {
     TAG_LOGD(AAFwkTag::APPMGR, "call");
     int32_t ret = DemoteCurrentFromCandidateMasterProcess();
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
+
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleExitMasterProcessRole(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    int32_t ret = ExitMasterProcessRole();
     if (!reply.WriteInt32(ret)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
         return IPC_STUB_ERR;

@@ -430,59 +430,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, CheckUIExtensionUsage_001, TestSize.Lev
 
 /*
  * Feature: AbilityManagerService
- * Function: CheckProcessOptions
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService CheckProcessOptions
- */
-HWTEST_F(AbilityManagerServiceSixthTest, CheckProcessOptions_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckProcessOptions_001 start");
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-
-    Want want;
-    StartOptions startOptions;
-    auto ret = abilityMs->CheckProcessOptions(want, startOptions, -1);
-    EXPECT_EQ(ret, ERR_OK);
-
-    startOptions.processOptions = std::make_shared<ProcessOptions>();
-    ret = abilityMs->CheckProcessOptions(want, startOptions, -1);
-    EXPECT_EQ(ret, ERR_OK);
-
-    startOptions.processOptions->processMode = ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT;
-    ret = abilityMs->CheckProcessOptions(want, startOptions, -1);
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, ERR_CAPABILITY_NOT_SUPPORT);
-    }
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckProcessOptions_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: CheckStartSelfUIAbilityStartOptions
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService CheckStartSelfUIAbilityStartOptions
- */
-HWTEST_F(AbilityManagerServiceSixthTest, CheckStartSelfUIAbilityStartOptions_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckStartSelfUIAbilityStartOptions_001 start");
-    auto abilityMs = std::make_shared<AbilityManagerService>();
-
-    Want want;
-    StartOptions startOptions;
-    auto ret = abilityMs->CheckStartSelfUIAbilityStartOptions(want, startOptions);
-    EXPECT_EQ(ret, ERR_OK);
-
-    startOptions.processOptions = std::make_shared<ProcessOptions>();
-    startOptions.processOptions->isStartFromNDK = true;
-    ret = abilityMs->CheckStartSelfUIAbilityStartOptions(want, startOptions);
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        EXPECT_EQ(ret, ERR_CAPABILITY_NOT_SUPPORT);
-    }
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckStartSelfUIAbilityStartOptions_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: PreStartFreeInstall
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService PreStartFreeInstall
@@ -496,7 +443,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, PreStartFreeInstall_001, TestSize.Level
     bool isStartAsCaller { false };
     auto callerToken = sptr<MockAbilityToken>::MakeSptr();
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs_);
+    abilityMs_->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     auto ret = abilityMs_->PreStartFreeInstall(want, callerToken, specifyTokenId, isStartAsCaller, localWant);
     EXPECT_EQ(ret, ERR_OK);
 
@@ -860,7 +807,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, SetMinimizedDuringFreeInstall_001, Test
     sessionInfo->want.SetParam(KEY_SESSION_ID, sessionId);
     abilityMs->SetMinimizedDuringFreeInstall(sessionInfo);
 
-    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     FreeInstallInfo info;
     info.want = sessionInfo->want;
     abilityMs->freeInstallManager_->freeInstallList_.push_back(info);
@@ -955,7 +902,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_002, TestSize.Leve
     ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::SERVICE,
         -1, false);
     want.SetUri("file://kia-file-uri");
-    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     ret = abilityMs->ConnectAbilityCommon(want, impl, nullptr, ExtensionAbilityType::SERVICE,
         -1, false);
     Mock::VerifyAndClear(mockBundleMgr);
@@ -1634,7 +1581,6 @@ HWTEST_F(AbilityManagerServiceSixthTest, VerifyAccountPermission_001, TestSize.L
     EXPECT_EQ(ret, ERR_OK);
     userId = USER_ID_U100;
     ret = abilityMs->VerifyAccountPermission(userId);
-    abilityMs->userController_ = std::make_shared<UserController>();
     ret = abilityMs->VerifyAccountPermission(userId);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest VerifyAccountPermission_001 end");
 }
@@ -2010,7 +1956,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectAbilityCommon_004, TestSize.Leve
     ret = abilityMs->ConnectAbilityCommon(want, impl, token, ExtensionAbilityType::UI_SERVICE,
         -1, false);
     want.SetUri("file://kia-file-uri");
-    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>(abilityMs);
+    abilityMs->freeInstallManager_ = std::make_shared<FreeInstallManager>();
     ret = abilityMs->ConnectAbilityCommon(want, impl, nullptr, ExtensionAbilityType::UI_SERVICE,
         -1, false);
     Mock::VerifyAndClear(mockBundleMgr);
@@ -2072,10 +2018,11 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartExtensionAbilityInner_001, TestSiz
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    abilityMs->implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
+    abilityMs->implicitStartProcessor_ = nullptr;
     result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
         isImplicit, isDlp);
     EXPECT_EQ(result, ERR_IMPLICIT_START_ABILITY_FAIL);
+    abilityMs->implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     callerToken = sptr<MockAbilityToken>::MakeSptr();
     result = abilityMs->StartExtensionAbilityInner(want, callerToken, userId, extensionType, checkSystemCaller,
         isImplicit, isDlp);

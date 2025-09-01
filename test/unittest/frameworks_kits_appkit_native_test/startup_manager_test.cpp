@@ -22,6 +22,7 @@
 #include "preload_system_so_startup_task.h"
 #undef private
 #undef protected
+#include "js_startup_task.h"
 
 using namespace testing::ext;
 using namespace OHOS::AbilityRuntime;
@@ -50,7 +51,9 @@ void StartupManagerTest::SetUp(void)
 {}
 
 void StartupManagerTest::TearDown(void)
-{}
+{
+    DelayedSingleton<StartupManager>::GetInstance()->appStartupTasks_.clear();
+}
 
 /**
  * @tc.name: PreloadAppHintStartup_0100
@@ -113,7 +116,7 @@ HWTEST_F(StartupManagerTest, BuildAutoAppStartupTaskManager_0100, Function | Med
         std::make_shared<StartupTaskManager>(startupTaskManagerId, autoStartupTasks);
     EXPECT_TRUE(startupTaskManager != nullptr);
     startupManager->appStartupTasks_.emplace(name, nullptr);
-    int32_t ret = startupManager->BuildAutoAppStartupTaskManager(nullptr, startupTaskManager, "");
+    int32_t ret = startupManager->BuildAutoAppStartupTaskManager(nullptr, startupTaskManager, "", false);
     EXPECT_EQ(ret, ERR_OK);
     startupManager->appStartupTasks_.clear();
     startupManager->appStartupTasks_.emplace(name, startupTask);
@@ -121,9 +124,43 @@ HWTEST_F(StartupManagerTest, BuildAutoAppStartupTaskManager_0100, Function | Med
     dependencies.emplace_back(name1);
     startupTask1->SetDependencies(dependencies);
     startupManager->appStartupTasks_.emplace(name1, startupTask1);
-    ret = startupManager->BuildAutoAppStartupTaskManager(nullptr, startupTaskManager, "");
+    ret = startupManager->BuildAutoAppStartupTaskManager(nullptr, startupTaskManager, "", false);
     EXPECT_EQ(ret, ERR_OK);
     GTEST_LOG_(INFO) << "StartupManagerTest BuildAutoAppStartupTaskManager_0100 end";
+}
+
+/**
+ * @tc.name: BuildAutoAppStartupTaskManager_0200
+ * @tc.type: FUNC
+ * @tc.Function: BuildAutoAppStartupTaskManager
+ */
+HWTEST_F(StartupManagerTest, BuildAutoAppStartupTaskManager_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "StartupManagerTest BuildAutoAppStartupTaskManager_0200 start";
+    std::unique_ptr<NativeReference> startupJsRef = nullptr;
+    std::shared_ptr<NativeReference> contextJsRef = nullptr;
+    JsRuntime jsRuntime;
+    const std::string taskName = "task1";
+    auto task = std::make_shared<JsStartupTask>(taskName, jsRuntime, startupJsRef, contextJsRef);
+    StartupTaskMatchRules matchRules;
+    std::string action = "com.example.test.action1";
+    matchRules.actions.emplace_back(action);
+    task->SetModuleName("entry");
+    task->SetMatchRules(matchRules);
+    
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    ASSERT_NE(startupManager, nullptr);
+    startupManager->appStartupTasks_.clear();
+    startupManager->appStartupTasks_.emplace(taskName, task);
+    auto want = std::make_shared<AAFwk::Want>();
+    want->SetAction(action);
+
+    std::shared_ptr<StartupTaskManager> startupTaskManager = nullptr;
+    auto ret = startupManager->BuildAutoAppStartupTaskManager(want, startupTaskManager, "entry", false);
+    EXPECT_EQ(ret, ERR_OK);
+    ASSERT_NE(startupTaskManager, nullptr);
+    EXPECT_EQ(startupTaskManager->GetStartupTaskCount(), 1);
+    GTEST_LOG_(INFO) << "StartupManagerTest BuildAutoAppStartupTaskManager_0200 end";
 }
 
 /**
@@ -144,6 +181,7 @@ HWTEST_F(StartupManagerTest, LoadAppStartupTaskConfig_0100, Function | MediumTes
     EXPECT_EQ(ret, ERR_OK);
     StartupTaskInfo startupTaskInfo;
     startupTaskInfo.name = "test_name";
+    startupTaskInfo.moduleType = AppExecFwk::ModuleType::ENTRY;
     startupManager->pendingStartupTaskInfos_.emplace_back(startupTaskInfo);
     ret = startupManager->LoadAppStartupTaskConfig(needRunAutoStartupTask);
     EXPECT_EQ(ret, ERR_OK);
@@ -553,6 +591,37 @@ HWTEST_F(StartupManagerTest, GetAppAutoPreloadSoTasks_0100, Function | MediumTes
 }
 
 /**
+ * @tc.name: GetAppAutoPreloadSoTasks_0200
+ * @tc.type: FUNC
+ * @tc.Function: GetAppAutoPreloadSoTasks
+ */
+HWTEST_F(StartupManagerTest, GetAppAutoPreloadSoTasks_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "StartupManagerTest GetAppAutoPreloadSoTasks_0200 start";
+    const std::string taskName = "task1";
+    auto task = std::make_shared<PreloadSoStartupTask>(taskName, "url", "path");
+    StartupTaskMatchRules matchRules;
+    std::string action = "com.example.test.action1";
+    matchRules.actions.emplace_back(action);
+    task->SetModuleName("entry");
+    task->SetMatchRules(matchRules);
+    
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    ASSERT_NE(startupManager, nullptr);
+    startupManager->appStartupTasks_.clear();
+    startupManager->appStartupTasks_.emplace(taskName, task);
+    auto startupTaskData = std::make_shared<AppExecFwk::StartupTaskData>();
+    startupTaskData->action = action;
+
+    std::map<std::string, std::shared_ptr<StartupTask>> appAutoPreloadSoTasks;
+    auto ret = startupManager->GetAppAutoPreloadSoTasks(appAutoPreloadSoTasks, startupTaskData);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(appAutoPreloadSoTasks.size(), 1);
+
+    GTEST_LOG_(INFO) << "StartupManagerTest GetAppAutoPreloadSoTasks_0200 end";
+}
+
+/**
  * @tc.name: RunAppPreloadSoTaskMainThread_0100
  * @tc.type: FUNC
  * @tc.Function: RunAppPreloadSoTaskMainThread
@@ -955,6 +1024,36 @@ HWTEST_F(StartupManagerTest, AnalyzeAppStartupTaskInner_0200, Function | MediumT
 }
 
 /**
+ * @tc.name: AnalyzeAppStartupTaskInner_0300
+ * @tc.type: FUNC
+ * @tc.Function: AnalyzeAppStartupTaskInner
+ */
+HWTEST_F(StartupManagerTest, AnalyzeAppStartupTaskInner_0300, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "StartupManagerTest AnalyzeAppStartupTaskInner_0300 start";
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    EXPECT_TRUE(startupManager != nullptr);
+    std::string name = "test_name";
+    ModuleStartupConfigInfo info(name, "", "", AppExecFwk::ModuleType::ENTRY, false);
+    std::vector<StartupTaskInfo> pendingStartupTaskInfos;
+    nlohmann::json appStartupTaskInnerJson = R"(
+        {
+            "srcEntry": "test_entry",
+            "name": "test_name"
+        }
+    )"_json;
+    bool ret = startupManager->AnalyzeAppStartupTaskInner(info, appStartupTaskInnerJson, pendingStartupTaskInfos);
+    EXPECT_EQ(ret, true);
+    ASSERT_EQ(pendingStartupTaskInfos.size(), 1);
+    EXPECT_EQ(pendingStartupTaskInfos[0].moduleName, name);
+    EXPECT_EQ(pendingStartupTaskInfos[0].moduleType, AppExecFwk::ModuleType::ENTRY);
+    EXPECT_EQ(pendingStartupTaskInfos[0].moduleType, AppExecFwk::ModuleType::ENTRY);
+    EXPECT_EQ(pendingStartupTaskInfos[0].srcEntry, "test_entry");
+    EXPECT_EQ(pendingStartupTaskInfos[0].name, "test_name");
+    GTEST_LOG_(INFO) << "StartupManagerTest AnalyzeAppStartupTaskInner_0300 end";
+}
+
+/**
  * @tc.name: AnalyzePreloadSoStartupTaskInner_0100
  * @tc.type: FUNC
  * @tc.Function: AnalyzePreloadSoStartupTaskInner
@@ -1348,6 +1447,97 @@ HWTEST_F(StartupManagerTest, EnableLazyLoadingAppStartupTasks_001, Function | Me
     ASSERT_NE(startupManager, nullptr);
     EXPECT_EQ(startupManager->EnableLazyLoadingAppStartupTasks(), startupManager->enableLazyLoadingAppStartupTasks_);
     GTEST_LOG_(INFO) << "EnableLazyLoadingAppStartupTasks_001 end";
+}
+
+/**
+ * @tc.name: SetSchedulerPhase_0100
+ * @tc.desc: test SetSchedulerPhase
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupManagerTest, SetSchedulerPhase_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "SetSchedulerPhase_0100 start";
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    ASSERT_NE(startupManager, nullptr);
+
+    nlohmann::json json = R"(
+        {}
+    )"_json;
+    StartupTaskInfo startupTaskInfo;
+    startupManager->SetSchedulerPhase(json, startupTaskInfo);
+
+    EXPECT_EQ(startupTaskInfo.preAbilityStageLoad, false);
+    GTEST_LOG_(INFO) << "SetSchedulerPhase_0100 end";
+}
+
+/**
+ * @tc.name: SetSchedulerPhase_0200
+ * @tc.desc: test SetSchedulerPhase
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupManagerTest, SetSchedulerPhase_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "SetSchedulerPhase_0200 start";
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    ASSERT_NE(startupManager, nullptr);
+
+    nlohmann::json json = R"(
+        {
+            "schedulerPhase": 111
+        }
+    )"_json;
+    StartupTaskInfo startupTaskInfo;
+    startupManager->SetSchedulerPhase(json, startupTaskInfo);
+
+    EXPECT_EQ(startupTaskInfo.preAbilityStageLoad, false);
+    GTEST_LOG_(INFO) << "SetSchedulerPhase_0200 end";
+}
+
+/**
+ * @tc.name: SetSchedulerPhase_0300
+ * @tc.desc: test SetSchedulerPhase
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupManagerTest, SetSchedulerPhase_0300, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "SetSchedulerPhase_0300 start";
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    ASSERT_NE(startupManager, nullptr);
+
+    nlohmann::json json = R"(
+        {
+            "schedulerPhase": "postAbilityStageLoad"
+        }
+    )"_json;
+    StartupTaskInfo startupTaskInfo;
+    startupManager->SetSchedulerPhase(json, startupTaskInfo);
+
+    EXPECT_EQ(startupTaskInfo.preAbilityStageLoad, false);
+    GTEST_LOG_(INFO) << "SetSchedulerPhase_0300 end";
+}
+
+/**
+ * @tc.name: SetSchedulerPhase_0400
+ * @tc.desc: test SetSchedulerPhase
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupManagerTest, SetSchedulerPhase_0400, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "SetSchedulerPhase_0400 start";
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    ASSERT_NE(startupManager, nullptr);
+
+    nlohmann::json json = R"(
+        {
+            "schedulerPhase": "preAbilityStageLoad"
+        }
+    )"_json;
+    StartupTaskInfo startupTaskInfo;
+    startupManager->SetSchedulerPhase(json, startupTaskInfo);
+
+    EXPECT_EQ(startupTaskInfo.preAbilityStageLoad, true);
+    EXPECT_EQ(startupManager->EnableLazyLoadingAppStartupTasks(), true);
+    GTEST_LOG_(INFO) << "SetSchedulerPhase_0400 end";
 }
 }
 }

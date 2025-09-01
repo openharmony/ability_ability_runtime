@@ -139,8 +139,6 @@ int32_t AmsMgrStub::OnRemoteRequestInnerSecond(uint32_t code, MessageParcel &dat
             return HandleNotifyAppMgrRecordExitReason(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::UPDATE_APPLICATION_INFO_INSTALLED):
             return HandleUpdateApplicationInfoInstalled(data, reply);
-        case static_cast<uint32_t>(IAmsMgr::Message::SET_CURRENT_USER_ID):
-            return HandleSetCurrentUserId(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::ENABLE_START_PROCESS_FLAG_BY_USER_ID):
             return HandleSetEnableStartProcessFlagByUserId(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::Get_BUNDLE_NAME_BY_PID):
@@ -235,6 +233,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleNotifyPreloadAbilityStateChanged(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::CHECK_PRELOAD_APP_RECORD_EXIST):
             return HandleCheckPreloadAppRecordExist(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::VERIFY_KILL_PROCESS_PERMISSION):
+            return HandleVerifyKillProcessPermission(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -620,13 +620,6 @@ int32_t AmsMgrStub::HandleUpdateApplicationInfoInstalled(MessageParcel &data, Me
     std::string moduleName = data.ReadString();
     int32_t result = UpdateApplicationInfoInstalled(bundleName, uid, moduleName, data.ReadBool());
     reply.WriteInt32(result);
-    return NO_ERROR;
-}
-
-int32_t AmsMgrStub::HandleSetCurrentUserId(MessageParcel &data, MessageParcel &reply)
-{
-    int32_t userId = data.ReadInt32();
-    SetCurrentUserId(userId);
     return NO_ERROR;
 }
 
@@ -1029,6 +1022,23 @@ int32_t AmsMgrStub::HandleCheckPreloadAppRecordExist(MessageParcel &data, Messag
     if (ret == NO_ERROR && !reply.WriteBool(isExist)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write isExist");
         return AAFwk::ERR_WRITE_BOOL_FAILED;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleVerifyKillProcessPermission(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    auto bundleName = data.ReadString();
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Bundle name is empty.");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto result = VerifyKillProcessPermission(bundleName);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return AAFwk::ERR_WRITE_RESULT_CODE_FAILED;
     }
     return NO_ERROR;
 }

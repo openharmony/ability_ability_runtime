@@ -125,7 +125,7 @@ public:
     MOCK_METHOD4(ShareDataDone, int32_t(const sptr<IRemoteObject> &token,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam));
     MOCK_METHOD2(SetMissionContinueState, int(const sptr<IRemoteObject>& token, const AAFwk::ContinueState& state));
-    int StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery) override;
+    int StartUser(int userId, uint64_t displayId, sptr<IUserCallback> callback, bool isAppRecovery) override;
     int StopUser(int userId, const sptr<IUserCallback>& callback) override;
     int LogoutUser(int32_t userId, sptr<IUserCallback> callback = nullptr) override;
     int StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
@@ -306,7 +306,7 @@ public:
     MOCK_METHOD4(ShareDataDone, int32_t(const sptr<IRemoteObject> &token,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam));
     MOCK_METHOD2(SetMissionContinueState, int(const sptr<IRemoteObject>& token, const AAFwk::ContinueState& state));
-    int StartUser(int userId, sptr<IUserCallback> callback, bool isAppRecovery) override;
+    int StartUser(int userId, uint64_t displayId, sptr<IUserCallback> callback, bool isAppRecovery) override;
     int StopUser(int userId, const sptr<IUserCallback>& callback) override;
     int LogoutUser(int32_t userId, sptr<IUserCallback> callback = nullptr) override;
     int StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;

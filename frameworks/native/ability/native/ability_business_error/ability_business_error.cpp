@@ -55,7 +55,7 @@ constexpr const char* ERROR_MSG_FREE_INSTALL_CROSS_DEVICE = "Cross-device instal
 constexpr const char* ERROR_MSG_INVALID_URI_FLAG = "Invalid URI flag.";
 constexpr const char* ERROR_MSG_INVALID_URI_TYPE = "Invalid URI type.";
 constexpr const char* ERROR_MSG_GRANT_URI_PERMISSION = "A sandbox application cannot grant URI permission.";
-constexpr const char* ERROR_MSG_GET_BUNDLE_INFO_FAILED = "Failed to obtain the target application information.";
+constexpr const char* ERROR_MSG_GET_APPLICATION_INFO_FAILED = "Failed to obtain the target application information.";
 constexpr const char* ERROR_MSG_OPERATION_NOT_SUPPORTED = "Operation not supported.";
 constexpr const char* ERROR_MSG_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND =
     "The number of child processes exceeds the upper limit.";
@@ -145,6 +145,12 @@ constexpr const char* ERROR_MSG_NOT_SUPPORT_START_PLUGIN_UI_ABILITY =
     "Starting a plugin UIAbility is not supported.";
 constexpr const char* ERROR_MSG_NOT_SUPPORT_START_DLP_FILES =
     "Starting DLP files is not supported.";
+constexpr const char* ERROR_MSG_MAIN_WINDOW_NOT_EXIST =
+    "The main window of this ability does not exist.";
+constexpr const char* ERROR_MSG_NOT_MASTER_PROCESS =
+    "Not a master process.";
+constexpr const char* ERROR_MSG_NOT_ON_NEW_PROCESS_REQUEST_DONE =
+    "Cannot exit because there is an unfinished onNewProcessRequest.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
@@ -179,7 +185,7 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_INVALID_URI_FLAG, ERROR_MSG_INVALID_URI_FLAG },
     { AbilityErrorCode::ERROR_CODE_INVALID_URI_TYPE, ERROR_MSG_INVALID_URI_TYPE },
     { AbilityErrorCode::ERROR_CODE_GRANT_URI_PERMISSION, ERROR_MSG_GRANT_URI_PERMISSION },
-    { AbilityErrorCode::ERROR_CODE_GET_BUNFLE_INFO_FAILED, ERROR_MSG_GET_BUNDLE_INFO_FAILED},
+    { AbilityErrorCode::ERROR_CODE_GET_APPLICATION_INFO_FAILED, ERROR_MSG_GET_APPLICATION_INFO_FAILED},
     { AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED, ERROR_MSG_OPERATION_NOT_SUPPORTED },
     { AbilityErrorCode::ERROR_CODE_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND,
         ERROR_MSG_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND },
@@ -246,6 +252,9 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_START_REMOTE_UI_ABILITY, ERROR_MSG_NOT_SUPPORT_START_REMOTE_UI_ABILITY },
     { AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_START_PLUGIN_UI_ABILITY, ERROR_MSG_NOT_SUPPORT_START_PLUGIN_UI_ABILITY },
     { AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_START_DLP_FILES, ERROR_MSG_NOT_SUPPORT_START_DLP_FILES },
+    { AbilityErrorCode::ERROR_CODE_MAIN_WINDOW_NOT_EXIST, ERROR_MSG_MAIN_WINDOW_NOT_EXIST },
+    { AbilityErrorCode::ERROR_CODE_NOT_MASTER_PROCESS, ERROR_MSG_NOT_MASTER_PROCESS },
+    { AbilityErrorCode::ERROR_CODE_NOT_ON_NEW_PROCESS_REQUEST_DONE, ERROR_MSG_NOT_ON_NEW_PROCESS_REQUEST_DONE },
 };
 
 static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP {
@@ -268,7 +277,7 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {ERR_CODE_INVALID_URI_FLAG, AbilityErrorCode::ERROR_CODE_INVALID_URI_FLAG},
     {ERR_CODE_INVALID_URI_TYPE, AbilityErrorCode::ERROR_CODE_INVALID_URI_TYPE},
     {ERR_CODE_GRANT_URI_PERMISSION, AbilityErrorCode::ERROR_CODE_GRANT_URI_PERMISSION},
-    {ERR_GET_TARGET_BUNDLE_INFO_FAILED, AbilityErrorCode::ERROR_CODE_GET_BUNFLE_INFO_FAILED},
+    {ERR_GET_TARGET_BUNDLE_INFO_FAILED, AbilityErrorCode::ERROR_CODE_GET_APPLICATION_INFO_FAILED},
     {ERR_NOT_SELF_APPLICATION, AbilityErrorCode::ERROR_NOT_SELF_APPLICATION},
     // Installation-free error code transfer
     {HAP_PACKAGE_DOWNLOAD_TIMED_OUT, AbilityErrorCode::ERROR_CODE_NETWORK_ABNORMAL},
@@ -352,6 +361,9 @@ static std::unordered_map<int32_t, AbilityErrorCode> INNER_TO_JS_ERROR_CODE_MAP 
     {START_UI_ABILITIES_NOT_SUPPORT_OPERATE_REMOTE, AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_START_REMOTE_UI_ABILITY },
     {START_UI_ABILITIES_NOT_SUPPORT_START_PLUGIN, AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_START_PLUGIN_UI_ABILITY },
     {START_UI_ABILITIES_NOT_SUPPORT_DLP, AbilityErrorCode::ERROR_CODE_NOT_SUPPORT_START_DLP_FILES },
+    {ERR_MAIN_WINDOW_NOT_EXIST, AbilityErrorCode::ERROR_CODE_MAIN_WINDOW_NOT_EXIST },
+    {ERR_NOT_MASTER_PROCESS, AbilityErrorCode::ERROR_CODE_NOT_MASTER_PROCESS },
+    {ERR_NOT_ON_NEW_PROCESS_REQUEST_DONE, AbilityErrorCode::ERROR_CODE_NOT_ON_NEW_PROCESS_REQUEST_DONE },
 };
 }
 

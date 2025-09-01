@@ -267,7 +267,7 @@ bool AutoFillManager::ConvertAutoFillWindowType(const AutoFill::AutoFillRequest 
 
 void AutoFillManager::RemoveTask(uint32_t eventId)
 {
-    std::lock_guard<std::mutex> lock(taskHandlesMutex_);
+    std::lock_guard<ffrt::mutex> lock(taskHandlesMutex_);
     taskHandles_.erase(eventId);
 }
 
@@ -294,7 +294,7 @@ void AutoFillManager::SetTimeOutEvent(uint32_t eventId)
     }
     std::shared_ptr<ffrt::task_handle> taskHandle = std::make_shared<ffrt::task_handle>(
         std::move(ffrtTaskHandle));
-    std::lock_guard<std::mutex> lock(taskHandlesMutex_);
+    std::lock_guard<ffrt::mutex> lock(taskHandlesMutex_);
     taskHandles_.emplace(eventId, taskHandle);
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "%{public}s done", __func__);
 }
@@ -302,7 +302,7 @@ void AutoFillManager::SetTimeOutEvent(uint32_t eventId)
 void AutoFillManager::RemoveEvent(uint32_t eventId)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "%{public}s called", __func__);
-    std::lock_guard<std::mutex> lock(taskHandlesMutex_);
+    std::lock_guard<ffrt::mutex> lock(taskHandlesMutex_);
     auto iter = taskHandles_.find(eventId);
     if (iter == taskHandles_.end()) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "not find, eventId: %{public}d", eventId);

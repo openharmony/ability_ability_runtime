@@ -23,6 +23,7 @@
 #include <sstream>
 #include "app_mgr_interface.h"
 #include "batch_uri.h"
+#include "file_uri_distribution_utils.h"
 #include "istorage_manager.h"
 #include "tokenid_permission.h"
 #include "uri.h"
@@ -47,23 +48,17 @@ using namespace AccessControl::SandboxManager;
 
 struct GrantInfo {
     unsigned int flag;
-    const uint32_t fromTokenId;
-    const uint32_t targetTokenId;
+    uint32_t fromTokenId;
+    uint32_t targetTokenId;
 };
 
 struct GrantPolicyInfo {
-    const uint32_t callerTokenId;
-    const uint32_t targetTokenId;
+    uint32_t callerTokenId;
+    uint32_t targetTokenId;
     bool Equal(uint32_t cTokenId, uint32_t tTokenId)
     {
         return callerTokenId == cTokenId && targetTokenId == tTokenId;
     }
-};
-
-struct UPMSAppInfo {
-    uint32_t tokenId;
-    std::string bundleName;
-    std::string alterBundleName;
 };
 
 class UriPermissionManagerStubImpl : public UriPermissionManagerStub,
@@ -146,10 +141,10 @@ private:
         uint32_t callerTokenId, uint32_t targetTokenId, const std::string &targetBundleName);
 
     int32_t GrantUriPermissionPrivilegedInner(const std::vector<Uri> &uriVec, uint32_t flag, uint32_t callerTokenId,
-       UPMSAppInfo &targetAppInfo, int32_t hideSensitiveType);
+       FUDAppInfo &targetAppInfo, int32_t hideSensitiveType);
     
     int32_t GrantUriPermissionPrivilegedImpl(BatchStringUri &batchUris, uint32_t flag,
-        uint32_t callerTokenId, UPMSAppInfo &targetAppInfo, int32_t hideSensitiveType);
+        uint32_t callerTokenId, FUDAppInfo &targetAppInfo, int32_t hideSensitiveType);
 
     int32_t GrantBatchContentUriPermissionImpl(const std::vector<std::string> &contentUris,
         uint32_t flag, uint32_t targetTokenId, const std::string &targetBundleName);
@@ -192,7 +187,7 @@ private:
 
     bool IsDistributedSubDirUri(const std::string &inputUri, const std::string &cachedUri);
 
-    ErrCode ClearPermissionTokenByMap(const uint32_t tokenId, int32_t& funcResult) override;
+    ErrCode ClearPermissionTokenByMap(uint32_t tokenId, int32_t& funcResult) override;
 
     void BoolVecToCharVec(const std::vector<bool>& boolVector, std::vector<char>& charVector);
 
@@ -201,8 +196,9 @@ private:
 
     ErrCode RawDataToStringVec(const UriPermissionRawData& rawData, std::vector<std::string>& stringVec);
 
-    ErrCode CheckGrantUriPermissionPrivileged(uint32_t callerTokenId, uint32_t flag, int32_t& funcResult);
+    ErrCode CheckGrantUriPermissionPrivileged(uint32_t callerTokenId, uint32_t flag);
 
+#ifdef ABILITY_RUNTIME_UDMF_ENABLE
     int32_t GrantUriPermissionByKeyInner(const std::string &key, uint32_t flag,
         uint32_t callerTokenId, uint32_t targetTokenId);
 
@@ -211,7 +207,8 @@ private:
     int32_t CheckGrantUriPermissionByKey();
 
     int32_t CheckGrantUriPermissionByKeyParams(const std::string &key, uint32_t flag,
-        UPMSAppInfo &callerAppInfo, UPMSAppInfo &targetAppInfo, std::vector<std::string> &uris);
+        FUDAppInfo &callerAppInfo, FUDAppInfo &targetAppInfo, std::vector<std::string> &uris);
+#endif // ABILITY_RUNTIME_UDMF_ENABLE
 
     inline int32_t WrapErrorCode(int32_t errorCode, int32_t &funcRet);
 

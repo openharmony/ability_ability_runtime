@@ -76,7 +76,7 @@ int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> 
     if (IsInKioskModeInner()) {
         auto it = std::find(appList.begin(), appList.end(), kioskStatus_.kioskBundleName_);
         if (it == appList.end()) {
-            auto ret = ExitKioskModeInner(kioskStatus_.kioskBundleName_, nullptr);
+            auto ret = ExitKioskModeInner(kioskStatus_.kioskBundleName_, kioskStatus_.kioskToken_);
             if (ret != ERR_OK) {
                 return ret;
             }
@@ -151,6 +151,11 @@ int32_t KioskManager::ExitKioskModeInner(const std::string &bundleName, sptr<IRe
     }
 
     if (!IsInKioskModeInner()) {
+        return ERR_NOT_IN_KIOSK_MODE;
+    }
+
+    if (kioskStatus_.kioskBundleUid_ != IPCSkeleton::GetCallingUid()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "bundleName %{public}s is not the currently kiosk app", bundleName.c_str());
         return ERR_NOT_IN_KIOSK_MODE;
     }
     GetExitKioskModeCallback()();

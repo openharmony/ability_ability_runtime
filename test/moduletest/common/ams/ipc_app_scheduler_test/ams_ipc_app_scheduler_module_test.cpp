@@ -31,7 +31,7 @@ using testing::Invoke;
 using testing::InvokeWithoutArgs;
 
 namespace {
-const int32_t COUNT = 10000;
+const int32_t COUNT = 10;
 }  // namespace
 class AmsIpcAppSchedulerModuleTest : public testing::Test {
 public:

@@ -564,12 +564,6 @@ int32_t AppScheduler::GetBundleNameByPid(const int pid, std::string &bundleName,
     return ERR_OK;
 }
 
-void AppScheduler::SetCurrentUserId(const int32_t userId)
-{
-    CHECK_POINTER(appMgrClient_);
-    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->SetCurrentUserId(userId));
-}
-
 void AppScheduler::SetEnableStartProcessFlagByUserId(int32_t userId, bool enableStartProcess)
 {
     CHECK_POINTER(appMgrClient_);
@@ -778,6 +772,15 @@ int32_t AppScheduler::CheckPreloadAppRecordExist(const std::string &bundleName, 
         return INNER_ERR;
     }
     return IN_PROCESS_CALL(appMgrClient_->CheckPreloadAppRecordExist(bundleName, userId, appIndex, isExist));
+}
+
+int32_t AppScheduler::VerifyKillProcessPermission(const std::string &bundleName) const
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
+        return INNER_ERR;
+    }
+    return appMgrClient_->VerifyKillProcessPermission(bundleName);
 }
 } // namespace AAFwk
 }  // namespace OHOS

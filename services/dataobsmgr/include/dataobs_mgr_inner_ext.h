@@ -29,6 +29,7 @@
 #include "dataobs_mgr_inner_common.h"
 #include "iremote_object.h"
 #include "refbase.h"
+#include "uri.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -38,8 +39,8 @@ public:
     DataObsMgrInnerExt();
     virtual ~DataObsMgrInnerExt();
 
-    Status HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId,
-        uint32_t tokenId, bool isDescendants = false);
+    Status HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver, ObserverInfo &info,
+        bool isDescendants = false);
     Status HandleUnregisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver);
     Status HandleUnregisterObserver(sptr<IDataAbilityObserver> dataObserver);
     Status HandleNotifyChange(const ChangeInfo &changeInfo, int32_t userId);
@@ -63,9 +64,22 @@ private:
         uint32_t tokenId = 0;
         std::shared_ptr<DeathRecipientRef> deathRecipientRef;
         bool isDescendants;
+        std::string permission;
     };
 
-    using ObsMap = std::map<sptr<IDataAbilityObserver>, std::list<Uri>>;
+    struct ObsNotifyInfo {
+        ObsNotifyInfo()
+        {
+            tokenId = 0;
+            permission = "";
+            uriList = std::list<Uri>();
+        }
+        uint32_t tokenId;
+        std::string permission;
+        std::list<Uri> uriList;
+    };
+
+    using ObsMap = std::map<sptr<IDataAbilityObserver>, ObsNotifyInfo>;
     using EntryList = std::list<Entry>;
 
     class Node {

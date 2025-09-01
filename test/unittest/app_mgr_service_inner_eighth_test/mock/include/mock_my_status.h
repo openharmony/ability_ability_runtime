@@ -92,7 +92,7 @@ public:
     AppExecFwk::ApplicationInfo applicationInfo_;
     int getOverlayCall_ = 0;
     sptr<AppExecFwk::IOverlayManager> getOverlay_ = nullptr;
-    int getBaseSharedBundleInfos_ = 0;
+    ErrCode getBaseSharedBundleInfos_ = ERR_OK;
     std::vector<AppExecFwk::BaseSharedBundleInfo> baseSharedBundleInfos_;
     bool queryDataGroupInfos_ = false;
     std::vector<AppExecFwk::DataGroupInfo> queryData_;
@@ -137,6 +137,7 @@ public:
     ErrCode handleRequireBigMemoryOptimization_ = ERR_OK;
     ErrCode handleNoRequireBigMemoryOptimization_ = ERR_OK;
     bool isStartSpecifiedProcess_ = true;
+    std::shared_ptr<AppExecFwk::SpecifiedRequest> specifiedProcessRequest_ = nullptr;
 private:
     MyStatus() = default;
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2347,16 +2347,15 @@ void MissionListManager::OnTimeOut(uint32_t msgId, int64_t abilityRecordId, bool
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ability timeout, name:%{public}s", abilityRecord->GetAbilityInfo().name.c_str());
 
+    PrintTimeOutLog(abilityRecord, msgId, isHalf);
+    if (isHalf) {
+        return;
+    }
 #ifdef SUPPORT_SCREEN
     if (abilityRecord->IsStartingWindow()) {
         PostCancelStartingWindowTask(abilityRecord);
     }
 #endif
-
-    PrintTimeOutLog(abilityRecord, msgId, isHalf);
-    if (isHalf) {
-        return;
-    }
     switch (msgId) {
         case AbilityManagerService::LOAD_TIMEOUT_MSG:
             abilityRecord->SetLoading(false);
@@ -4252,17 +4251,17 @@ int MissionListManager::PrepareClearMissionLocked(int missionId, const std::shar
     int prepareTerminateTimeout =
         AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * PREPARE_TERMINATE_TIMEOUT_MULTIPLE;
     if (handler) {
-        handler->SubmitTask(terminateTask, "PrepareTermiante_" + std::to_string(abilityRecord->GetAbilityRecordId()),
+        handler->SubmitTask(terminateTask, "PrepareTerminate_" + std::to_string(abilityRecord->GetAbilityRecordId()),
             prepareTerminateTimeout);
     }
 
     bool res = abilityRecord->PrepareTerminateAbility(false);
     if (res) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "stop terminating");
-        handler->CancelTask("PrepareTermiante_" + std::to_string(abilityRecord->GetAbilityRecordId()));
+        handler->CancelTask("PrepareTerminate_" + std::to_string(abilityRecord->GetAbilityRecordId()));
         return ERR_OK;
     }
-    handler->CancelTask("PrepareTermiante_" + std::to_string(abilityRecord->GetAbilityRecordId()));
+    handler->CancelTask("PrepareTerminate_" + std::to_string(abilityRecord->GetAbilityRecordId()));
     return ClearMissionLocked(missionId, mission);
 }
 

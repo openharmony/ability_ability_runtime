@@ -303,10 +303,10 @@ HWTEST_F(MainThreadTest, AssertFaultResumeMainThreadDetection_0100, TestSize.Lev
 HWTEST_F(MainThreadTest, SetAppDebug_0100, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
-    int32_t modeFlag = 0;
+    int32_t modeFlag = -1;
     bool isDebug = false;
     mainThread_->SetAppDebug(modeFlag, isDebug);
-    EXPECT_EQ(isDebug, false);
+    EXPECT_EQ(AppfreezeInner::GetInstance()->IsHandleAppfreeze(), true);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
@@ -321,10 +321,10 @@ HWTEST_F(MainThreadTest, SetAppDebug_0100, TestSize.Level1)
 HWTEST_F(MainThreadTest, SetAppDebug_0200, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
-    int32_t modeFlag = 0;
+    int32_t modeFlag = 1;
     bool isDebug = true;
     mainThread_->SetAppDebug(modeFlag, isDebug);
-    EXPECT_EQ(isDebug, true);
+    EXPECT_EQ(AppfreezeInner::GetInstance()->IsHandleAppfreeze(), false);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 

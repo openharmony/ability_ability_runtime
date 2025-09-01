@@ -477,15 +477,6 @@ public:
     virtual int32_t NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, const std::string &exitMsg);
 
     /**
-     * Set the current userId of appMgr, only used by abilityMgr.
-     *
-     * @param userId the user id.
-     *
-     * @return
-     */
-    void SetCurrentUserId(int32_t userId);
-
-    /**
      * Set enable start process flag by userId
      * @param userId the user id.
      * @param enableStartProcess enable start process.
@@ -619,6 +610,7 @@ public:
 
     int32_t CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex, bool &isExist);
 
+    int32_t VerifyKillProcessPermission(const std::string &bundleName) const;
 protected:
     /**
      * OnAbilityRequestDone, app manager service call this interface after ability request done.

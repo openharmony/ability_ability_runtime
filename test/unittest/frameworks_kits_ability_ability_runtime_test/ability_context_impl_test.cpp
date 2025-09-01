@@ -30,6 +30,7 @@
 #include "mock_context.h"
 #include "mock_lifecycle_observer.h"
 #include "mock_serviceability_manager_service.h"
+#include "open_link_options.h"
 #include "scene_board_judgement.h"
 #include "session/host/include/session.h"
 #include "sys_mgr_client.h"
@@ -1851,6 +1852,23 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_OpenLink_0100, Function | 
 }
 
 /**
+ * @tc.number: Ability_Context_Impl_OpenLink_0200
+ * @tc.name: OpenLink
+ * @tc.desc: OpenLink OpenLinkOptions
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_OpenLink_0200, Function | MediumTest | Level1)
+{
+    AAFwk::Want want;
+    int requestCode = 0;
+    AAFwk::OpenLinkOptions openLinkOptions;
+    bool hideFailureTipDialog = true;
+    EXPECT_FALSE(openLinkOptions.GetHideFailureTipDialog());
+    openLinkOptions.SetHideFailureTipDialog(hideFailureTipDialog);
+    context_->OpenLink(want, requestCode, hideFailureTipDialog);
+    EXPECT_EQ(openLinkOptions.GetHideFailureTipDialog(), hideFailureTipDialog);
+}
+
+/**
  * @tc.number: Ability_Context_Impl_StartUIServiceExtensionAbility_0100
  * @tc.name: StartUIServiceExtensionAbility
  * @tc.desc: Start Ability For Result With Account
@@ -2373,6 +2391,32 @@ HWTEST_F(AbilityContextImplTest, SetOnNewWantSkipScenariose_0100, Function | Med
 }
 
 /**
+ * @tc.number: Ability_Context_Impl_StartExtensionAbilityWithExtensionType_0100
+ * @tc.name: StartExtensionAbilityWithExtensionType
+ * @tc.desc: Verify that function StartExtensionAbilityWithExtensionType.
+ */
+HWTEST_F(AbilityContextImplTest, StartExtensionAbilityWithExtensionType_0100, Function | MediumTest | Level1)
+{
+    AAFwk::Want want;
+    auto result = context_->AbilityContext::StartExtensionAbilityWithExtensionType(want,
+        AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_StopExtensionAbilityWithExtensionType_0100
+ * @tc.name: StopExtensionAbilityWithExtensionType
+ * @tc.desc: Verify that function StopExtensionAbilityWithExtensionType.
+ */
+HWTEST_F(AbilityContextImplTest, StopExtensionAbilityWithExtensionType_0100, Function | MediumTest | Level1)
+{
+    AAFwk::Want want;
+    auto result = context_->AbilityContext::StopExtensionAbilityWithExtensionType(want,
+        AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
  * @tc.number: Ability_Context_Impl_ConnectExtensionAbilityWithExtensionType_0100
  * @tc.name: ConnectExtensionAbilityWithExtensionType
  * @tc.desc: Verify that function ConnectExtensionAbilityWithExtensionType.
@@ -2380,9 +2424,9 @@ HWTEST_F(AbilityContextImplTest, SetOnNewWantSkipScenariose_0100, Function | Med
 HWTEST_F(AbilityContextImplTest, ConnectExtensionAbilityWithExtensionType_0100, Function | MediumTest | Level1)
 {
     AAFwk::Want want;
-    auto result = context_->ConnectExtensionAbilityWithExtensionType(want, nullptr,
+    auto result = context_->AbilityContext::ConnectExtensionAbilityWithExtensionType(want, nullptr,
         AppExecFwk::ExtensionAbilityType::APP_SERVICE);
-    EXPECT_NE(result, ERR_OK);
+    EXPECT_EQ(result, ERR_OK);
 }
 
 /**
@@ -2394,9 +2438,9 @@ HWTEST_F(AbilityContextImplTest, ConnectExtensionAbilityWithExtensionType_0200, 
 {
     AAFwk::Want want;
     sptr<AbilityConnectCallback> connectCallback;
-    auto ret = context_->ConnectExtensionAbilityWithExtensionType(want, connectCallback,
+    auto ret = context_->AbilityContext::ConnectExtensionAbilityWithExtensionType(want, connectCallback,
         AppExecFwk::ExtensionAbilityType::SERVICE);
-    EXPECT_NE(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**

@@ -24,7 +24,6 @@ const std::string INTENT_KEY = "INTENT_KEY";
 const std::string INTENT_VALUE = "INTENT_VALUE";
 const int32_t INTENT_KEY_INDEX = 0;
 const int32_t INTENT_VALUE_INDEX = 1;
-constexpr int8_t CLOSE_TIME = 20; // delay 20s stop rdbStore
 constexpr int32_t RETRY_TIMES = 3;
 constexpr int32_t RETRY_INTERVAL = 500; // 500ms
 constexpr int16_t WRITE_TIMEOUT = 300; // 300s
@@ -73,10 +72,6 @@ std::shared_ptr<NativeRdb::RdbStore> InsightIntentRdbDataMgr::GetRdbStore()
             TAG_LOGE(AAFwkTag::INTENT, "rdb restore failed ret:%{public}d", restoreRet);
         }
     }
-
-    if (rdbStore_ != nullptr) {
-        DelayCloseRdbStore();
-    }
     return rdbStore_;
 }
 
@@ -97,22 +92,6 @@ bool InsightIntentRdbDataMgr::IsIntentRdbLoaded()
     }
     HmfsUtils::AddDeleteDfx(intentRdbConfig_.dbPath);
     return true;
-}
-
-void InsightIntentRdbDataMgr::DelayCloseRdbStore()
-{
-    std::weak_ptr<InsightIntentRdbDataMgr> weakPtr = shared_from_this();
-    auto task = [weakPtr]() {
-        std::this_thread::sleep_for(std::chrono::seconds(CLOSE_TIME));
-        auto sharedPtr = weakPtr.lock();
-        if (sharedPtr == nullptr) {
-            return;
-        }
-        std::lock_guard<std::mutex> lock(sharedPtr->rdbStoreMutex_);
-        sharedPtr->rdbStore_ = nullptr;
-    };
-    std::thread closeRdbStoreThread(task);
-    closeRdbStoreThread.detach();
 }
 
 bool InsightIntentRdbDataMgr::InsertData(const std::string &key, const std::string &value)

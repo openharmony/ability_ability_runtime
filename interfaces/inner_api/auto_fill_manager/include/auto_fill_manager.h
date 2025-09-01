@@ -20,6 +20,7 @@
 
 #include "auto_fill_custom_config.h"
 #include "auto_fill_extension_callback.h"
+#include "ffrt.h"
 #include "fill_request_callback_interface.h"
 #include "nocopyable.h"
 #include "save_request_callback_interface.h"
@@ -81,7 +82,7 @@ private:
     std::mutex extensionCallbacksMutex_;
     std::map<uint32_t, std::shared_ptr<AutoFillExtensionCallback>> extensionCallbacks_;
 
-    std::mutex taskHandlesMutex_;
+    ffrt::mutex taskHandlesMutex_;
     std::map<uint32_t, std::shared_ptr<ffrt::task_handle>> taskHandles_;
 };
 #endif // SUPPORT_GRAPHICS

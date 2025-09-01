@@ -1068,7 +1068,7 @@ private:
                 return;
             }
             bool ret = appManager->IsSharedBundleRunning(bundleName, versionCode);
-            TAG_LOGI(AAFwkTag::APPMGR, "result:%{public}d", ret);
+            TAG_LOGD(AAFwkTag::APPMGR, "result:%{public}d", ret);
             task->ResolveWithNoError(env, CreateJsValue(env, ret));
             delete task;
         };
@@ -1194,7 +1194,7 @@ private:
                 return;
             }
             int32_t memorySize = abilityManager->GetAppMemorySize();
-            TAG_LOGI(AAFwkTag::APPMGR, "memorySize:%{public}d", memorySize);
+            TAG_LOGD(AAFwkTag::APPMGR, "memorySize:%{public}d", memorySize);
             task->ResolveWithNoError(env, CreateJsValue(env, memorySize));
             delete task;
         };

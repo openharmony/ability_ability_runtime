@@ -45,7 +45,9 @@ constexpr const char* BLOCK_LIST = "blocklist";
 constexpr const char* ALLOW_LIST = "allowlist";
 constexpr const char* NETWORK_ACCESS_ENABLE_FLAG = "network_access_enable_flag";
 constexpr const char* SA_ACCESS_ENABLE_FLAG = "sa_access_enable_flag";
-constexpr const char* SCREEN_UNLOCK_INTERCEPT = "screen_unlock_intercept";
+constexpr const char* SCREEN_UNLOCK_ACCESS = "screen_unlock_access";
+constexpr const char* INTERCEPT = "intercept";
+constexpr const char* INTERCEPT_EXCLUDE_SYSTEM_APP = "intercept_exclude_system_app";
 }
 
 std::string ExtensionConfig::GetExtensionConfigPath() const
@@ -133,7 +135,7 @@ void ExtensionConfig::LoadExtensionConfig(const nlohmann::json &object)
         }
         LoadExtensionNetworkEnable(jsonObject, extensionTypeName);
         LoadExtensionSAEnable(jsonObject, extensionTypeName);
-        LoadScreenUnlockIntercept(jsonObject, extensionTypeName);
+        LoadScreenUnlockAccess(jsonObject, extensionTypeName);
     }
 }
 
@@ -284,18 +286,23 @@ void ExtensionConfig::LoadExtensionSAEnable(const nlohmann::json &object,
         extensionTypeName.c_str(), flag);
 }
 
-void ExtensionConfig::LoadScreenUnlockIntercept(const nlohmann::json &object,
+void ExtensionConfig::LoadScreenUnlockAccess(const nlohmann::json &object,
     const std::string &extensionTypeName)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "LoadScreenUnlockIntercept call");
-    if (!object.contains(SCREEN_UNLOCK_INTERCEPT) || !object.at(SCREEN_UNLOCK_INTERCEPT).is_boolean()) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "screen_unlock_intercept null");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "LoadScreenUnLockAccess call");
+    if (!object.contains(SCREEN_UNLOCK_ACCESS) || !object.at(SCREEN_UNLOCK_ACCESS).is_object()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "parse screen_unlock_access failed");
         return;
     }
-    bool flag = object.at(SCREEN_UNLOCK_INTERCEPT).get<bool>();
-    configMap_[extensionTypeName].screenUnlockIntercept = flag;
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "The %{public}s extension's screen_unlock_intercept is %{public}d",
-        extensionTypeName.c_str(), flag);
+    const nlohmann::json &accessJson = object.at(SCREEN_UNLOCK_ACCESS);
+    auto &screenUnlockAccess = configMap_[extensionTypeName].screenUnlockAccess;
+    screenUnlockAccess.intercept = JsonUtils::GetInstance().JsonToBool(accessJson, INTERCEPT, false);
+    screenUnlockAccess.interceptExcludeSystemApp =
+        JsonUtils::GetInstance().JsonToBool(accessJson, INTERCEPT_EXCLUDE_SYSTEM_APP, false);
+    JsonUtils::GetInstance().JsonToUnorderedStrSet(accessJson, BLOCK_LIST, screenUnlockAccess.blockList);
+    TAG_LOGD(AAFwkTag::ABILITYMGR,
+        "The %{public}s extension's screen_unlock_access, intercept:%{public}d, excludeSystemApp:%{public}d",
+        extensionTypeName.c_str(), screenUnlockAccess.intercept, screenUnlockAccess.interceptExcludeSystemApp);
 }
 
 bool ExtensionConfig::HasAbilityAccess(const std::string &extensionTypeName)
@@ -424,13 +431,25 @@ bool ExtensionConfig::IsExtensionSAEnable(const std::string &extensionTypeName)
     return EXTENSION_SA_ENABLE_FLAG_DEFAULT;
 }
 
-bool ExtensionConfig::IsScreenUnlockIntercept(const std::string &extensionTypeName)
+bool ExtensionConfig::IsScreenUnlockIntercept(const std::string &extensionTypeName, bool isSystemApp,
+    const std::string &bundleName)
 {
     std::lock_guard lock(configMapMutex_);
-    if (configMap_.find(extensionTypeName) != configMap_.end()) {
-        return configMap_[extensionTypeName].screenUnlockIntercept;
+    auto iter = configMap_.find(extensionTypeName);
+    if (iter == configMap_.end()) {
+        return false;
     }
-    return false;
+    const auto &screenUnlockAccess = iter->second.screenUnlockAccess;
+    if (!screenUnlockAccess.blockList.empty()) {
+        return screenUnlockAccess.blockList.find(bundleName) != screenUnlockAccess.blockList.end();
+    }
+    if (!screenUnlockAccess.intercept) {
+        return false;
+    }
+    if (!isSystemApp) {
+        return true;
+    }
+    return !screenUnlockAccess.interceptExcludeSystemApp;
 }
 
 bool ExtensionConfig::ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf)

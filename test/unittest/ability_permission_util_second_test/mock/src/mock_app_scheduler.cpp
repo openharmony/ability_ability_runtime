@@ -195,6 +195,12 @@ bool AppScheduler::IsMemorySizeSufficent() const
     return true;
 }
 
+int32_t AppScheduler::VerifyKillProcessPermission(const std::string &bundleName) const
+{
+    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::VerifyKillProcessPermission()");
+    return ERR_OK;
+}
+
 void AppScheduler::StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t) {}
 
 int AppScheduler::StartUserTest(

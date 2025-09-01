@@ -149,14 +149,37 @@ HWTEST_F(AppStartupTaskMatcherTest, DefaultStartupTaskMatcher_0100, Function | M
     task.SetModuleName("entry");
     task.SetIsExcludeFromAutoStart(false);
 
-    DefaultStartupTaskMatcher taskMatcher("feature");
+    DefaultStartupTaskMatcher taskMatcher("feature", false);
     auto ret = taskMatcher.Match(task);
     EXPECT_EQ(ret, false);
 
-    DefaultStartupTaskMatcher taskMatcher2("entry");
+    DefaultStartupTaskMatcher taskMatcher2("entry", false);
     ret = taskMatcher2.Match(task);
     EXPECT_EQ(ret, true);
     GTEST_LOG_(INFO) << "DefaultStartupTaskMatcher_0100 end";
+}
+
+/**
+ * @tc.name: DefaultStartupTaskMatcher_0200
+ * @tc.type: FUNC
+ * @tc.Function: DefaultStartupTaskMatcher
+ */
+HWTEST_F(AppStartupTaskMatcherTest, DefaultStartupTaskMatcher_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "DefaultStartupTaskMatcher_0200 start";
+    PreloadSoStartupTask task("task1", "url", "path");
+    task.SetModuleName("entry");
+    task.SetIsExcludeFromAutoStart(false);
+    task.SetPreAbilityStageLoad(false);
+
+    DefaultStartupTaskMatcher taskMatcher("entry", true);
+    auto ret = taskMatcher.Match(task);
+    EXPECT_EQ(ret, false);
+
+    DefaultStartupTaskMatcher taskMatcher2("entry", false);
+    ret = taskMatcher2.Match(task);
+    EXPECT_EQ(ret, true);
+    GTEST_LOG_(INFO) << "DefaultStartupTaskMatcher_0200 end";
 }
 
 /**
@@ -324,6 +347,27 @@ HWTEST_F(AppStartupTaskMatcherTest, CustomizationStartupTaskMatcher_0100, Functi
     ret = matcher2.Match(task);
     EXPECT_EQ(ret, true);
     GTEST_LOG_(INFO) << "CustomizationStartupTaskMatcher_0100 end";
+}
+
+/**
+ * @tc.name: SchedulerPhaseTaskMatcher_0100
+ * @tc.type: FUNC
+ * @tc.Function: SchedulerPhaseTaskMatcher
+ */
+HWTEST_F(AppStartupTaskMatcherTest, SchedulerPhaseTaskMatcher_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "SchedulerPhaseTaskMatcher_0100 start";
+    PreloadSoStartupTask task("task1", "url", "path");
+    task.SetPreAbilityStageLoad(true);
+
+    SchedulerPhaseTaskMatcher matcher(false);
+    auto ret = matcher.Match(task);
+    EXPECT_EQ(ret, false);
+
+    task.SetPreAbilityStageLoad(false);
+    ret = matcher.Match(task);
+    EXPECT_EQ(ret, true);
+    GTEST_LOG_(INFO) << "SchedulerPhaseTaskMatcher_0100 end";
 }
 }
 }

@@ -70,7 +70,7 @@ int32_t AppStateObserverManager::RegisterApplicationStateObserver(
         return ERR_INVALID_VALUE;
     }
     if (ObserverExist(observer)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "observer exist");
+        TAG_LOGW(AAFwkTag::APPMGR, "observer exist");
         return ERR_INVALID_VALUE;
     }
     std::lock_guard lockRegister(observerLock_);
@@ -123,7 +123,7 @@ int32_t AppStateObserverManager::RegisterAppForegroundStateObserver(const sptr<I
         return ERR_PERMISSION_DENIED;
     }
     if (IsAppForegroundObserverExist(observer)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "observer exist");
+        TAG_LOGW(AAFwkTag::APPMGR, "observer exist");
         return ERR_INVALID_VALUE;
     }
 
