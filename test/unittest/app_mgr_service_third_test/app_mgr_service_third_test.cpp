@@ -451,5 +451,29 @@ HWTEST_F(AppMgrServiceThirdTest, ExitMasterProcessRole_001, TestSize.Level1)
     int32_t res = appMgrService->ExitMasterProcessRole();
     EXPECT_EQ(res, AAFwk::ERR_APP_MGR_SERVICE_NOT_READY);
 }
+
+/*
+ * Feature: AppMgrService
+ * Function: ShowHelp
+ * SubFunction: NA
+ * FunctionPoints: AppMgrService ShowHelp
+ * EnvConditions: NA
+ * CaseDescription: test ShowHelp information
+ */
+HWTEST_F(AppMgrServiceThirdTest, ShowHelp_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    std::vector<std::u16string> dummyArgs;
+    std::string resultBuffer;
+    const std::string expectedOutput =
+        "Usage:\n"
+        "-h                          help text for the tool\n"
+        "--ffrt pid1[,pid2,pid3]     dump ffrt info\n"
+        "--ipc pid ARG               ipc load statistic; pid must be specified or set to -a dump all processes. "
+        "ARG must be one of --start-stat | --stop-stat | --stat\n";
+    int res = appMgrService->ShowHelp(dummyArgs, resultBuffer);
+    EXPECT_EQ(resultBuffer, expectedOutput);
+    EXPECT_EQ(res, ERR_OK);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

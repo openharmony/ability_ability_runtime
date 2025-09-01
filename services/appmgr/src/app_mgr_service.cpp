@@ -779,7 +779,10 @@ int AppMgrService::ShowHelp(const std::vector<std::u16string>& args, std::string
         .append("-h                          ")
         .append("help text for the tool\n")
         .append("--ffrt pid1[,pid2,pid3]     ")
-        .append("dump ffrt info\n");
+        .append("dump ffrt info\n")
+        .append("--ipc pid ARG               ")
+        .append("ipc load statistic; pid must be specified or set to -a dump all processes. ARG must be one of "
+            "--start-stat | --stop-stat | --stat\n");
 
     return ERR_OK;
 }
