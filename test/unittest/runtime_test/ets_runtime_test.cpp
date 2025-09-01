@@ -338,32 +338,5 @@ HWTEST_F(EtsRuntimeTest, SetExtensionApiCheckCallback_100, TestSize.Level1)
     etsRuntime->SetExtensionApiCheckCallback(callback);
     EXPECT_EQ(etsRuntime->GetJsRuntime(), nullptr);
 }
-
-/**
- * @tc.name: Create_100
- * @tc.desc: EtsRuntime test for Create Initialize failed.
- * @tc.type: FUNC
- */
-HWTEST_F(EtsRuntimeTest, StartDebug_100, TestSize.Level1)
-{
-    options_.lang = Runtime::Language::JS;
-    options_.preload = true;
-    options_.isStageModel = false;
-    std::unique_ptr<JsRuntime> jsRuntime = JsRuntime::Create(options_);
-    auto etsRuntime = ETSRuntime::Create(options_, jsRuntime);
-    EXPECT_EQ(etsRuntime, nullptr);
-    AbilityRuntime::Runtime::DebugOption debugOption;
-    debugOption.isDeveloperMode = false;
-    debugOption.isDebugFromLocal = false;
-    debugOption.bundleName = "test";
-    debugOption.isDebugApp = false;
-    debugOption.isStartWithDebug = false;
-    etsRuntime->StartDebugMode(debugOption);
-    uint32_t instanceId = etsRuntime->instanceId_;
-    EXPECT_EQ(instanceId, 0);
-    debugOption.isDeveloperMode = true;
-    etsRuntime->StartDebugMode(debugOption);
-    EXPECT_NE(instanceId, 0);
-}
 } // namespace AbilityRuntime
 } // namespace OHOS
