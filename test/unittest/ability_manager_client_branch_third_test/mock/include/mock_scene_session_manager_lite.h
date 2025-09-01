@@ -39,7 +39,8 @@ using SessionInfoBean = AAFwk::MissionInfo;
 using SessionSnapshot = AAFwk::MissionSnapshot;
 class MockSceneSessionManagerLite : public OHOS::Rosen::ISceneSessionManagerLite {
 public:
-    MOCK_METHOD(WSError, PendingSessionToForeground, (const sptr<IRemoteObject>& token), (override));
+    MOCK_METHOD(WSError, PendingSessionToForeground,
+        (const sptr<IRemoteObject>& token, int32_t windowMode), (override));
     MOCK_METHOD(WSError, PendingSessionToBackgroundForDelegator,
         (const sptr<IRemoteObject>& token, bool shouldBackToCaller), (override));
     MOCK_METHOD(WSError, MoveSessionsToForeground,
