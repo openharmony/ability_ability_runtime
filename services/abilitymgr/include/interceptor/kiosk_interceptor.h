@@ -15,6 +15,7 @@
 
 #ifndef OHOS_KIOSK_INTERCEPTOR_H
 #define OHOS_KIOSK_INTERCEPTOR_H
+
 #include "ability_interceptor_interface.h"
 
 namespace OHOS {

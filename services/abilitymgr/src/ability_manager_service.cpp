@@ -7712,7 +7712,7 @@ void AbilityManagerService::OnAbilityDied(std::shared_ptr<AbilityRecord> ability
         FreezeUtil::GetInstance().DeleteLifecycleEvent(abilityRecord->GetToken()->AsObject());
         if (KioskManager::GetInstance().IsInKioskMode() &&
             KioskManager::GetInstance().IsInWhiteList(abilityRecord->GetAbilityInfo().bundleName)) {
-            KioskManager::GetInstance().ExitKioskMode(abilityRecord->GetToken()->AsObject());
+            KioskManager::GetInstance().ExitKioskMode(abilityRecord->GetToken()->AsObject(), true);
         }
     }
     FreezeUtil::GetInstance().DeleteAppLifecycleEvent(abilityRecord->GetPid());
@@ -15185,7 +15185,7 @@ int32_t AbilityManagerService::ExitKioskMode(sptr<IRemoteObject> callerToken)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not self call");
         return CHECK_PERMISSION_FAILED;
     }
-    return KioskManager::GetInstance().ExitKioskMode(callerToken);
+    return KioskManager::GetInstance().ExitKioskMode(callerToken, false);
 }
 
 int32_t AbilityManagerService::GetKioskStatus(KioskStatus &kioskStatus)

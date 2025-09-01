@@ -499,6 +499,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId, Abili
         "ImplicitQueryInfos, abilityInfo size : %{public}zu, extensionInfos size: %{public}zu", abilityInfos.size(),
         extensionInfos.size());
 
+    KioskManager::GetInstance().FilterAbilityInfos(abilityInfos);
     if (appLinkingOnly && abilityInfos.size() == 0) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not match app");
         return ERR_IMPLICIT_START_ABILITY_FAIL;
@@ -607,6 +608,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId, Abili
         dialogAppInfo.multiAppMode = info.applicationInfo.multiAppMode;
         dialogAppInfos.emplace_back(dialogAppInfo);
     }
+    KioskManager::GetInstance().FilterDialogAppInfos(dialogAppInfos);
 
     return ERR_OK;
 }
