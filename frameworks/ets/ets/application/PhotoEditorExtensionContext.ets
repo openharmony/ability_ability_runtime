@@ -61,8 +61,11 @@ export default class PhotoEditorExtensionContext extends ExtensionContext {
   private native nativeSaveEditedContentWithUri(uri: string, callback: AsyncCallbackWrapper<AbilityResult>): void;
   private native nativeSaveEditedContentWithImage(image: image.PixelMap, options: image.PackingOption,
     callback: AsyncCallbackWrapper<AbilityResult>): void;
+  private native nativeSaveWithUriCheck(uri: string): void;
+  private native nativeSaveWithImageCheck(image: image.PixelMap, options: image.PackingOption): void;
 
   saveEditedContentWithUri(uri: string): Promise<AbilityResult> {
+    this.nativeSaveWithUriCheck(uri);
     let p = new Promise<AbilityResult>((resolve: (data: AbilityResult) => void,
     reject: (err: BusinessError) => void): void => {
       let myCall =
@@ -81,6 +84,7 @@ export default class PhotoEditorExtensionContext extends ExtensionContext {
   }
 
   saveEditedContentWithImage(image: image.PixelMap, options: image.PackingOption): Promise<AbilityResult> {
+    this.nativeSaveWithImageCheck(image, options);
     let p = new Promise<AbilityResult>((resolve: (data: AbilityResult) => void,
     reject: (err: BusinessError) => void): void => {
       let myCall =

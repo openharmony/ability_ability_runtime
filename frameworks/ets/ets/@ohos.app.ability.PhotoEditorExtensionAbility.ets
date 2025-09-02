@@ -15,21 +15,13 @@
 
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import Want from '@ohos.app.ability.Want';
-import UIExtensionContext from 'application.UIExtensionContext';
+import UIExtensionAbility from '@ohos.app.ability.UIExtensionAbility';
 import { AbilityUtils } from './utils/AbilityUtils';
 import PhotoEditorExtensionContext from 'application.PhotoEditorExtensionContext';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
 
 
-export default class PhotoEditorExtensionAbility extends UIExtensionContext {
-  // 异步回调相关
-  private callOnDestroy(): boolean {
-    let p = this.onDestroy();
-    if (p instanceof Promise) {
-      return true;
-    }
-    return false;
-  }
+export default class PhotoEditorExtensionAbility extends UIExtensionAbility {
 
   context: PhotoEditorExtensionContext = {};
 
