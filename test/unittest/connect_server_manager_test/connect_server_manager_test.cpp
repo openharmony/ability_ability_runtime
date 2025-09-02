@@ -207,6 +207,7 @@ HWTEST_F(ConnectServerManagerTest, SendInstanceMessageTest_0100, TestSize.Level1
     connectServerManager.SetConnectedCallback();
     bool result = connectServerManager.SendInstanceMessage(tid, instanceId, instanceName);
     EXPECT_EQ(result, true);
+    connectServerManager.SendInstanceMessageAll(nullptr);
     TAG_LOGI(AAFwkTag::TEST, "SendInstanceMessageTest_0100 is end");
 }
 
