@@ -39,7 +39,7 @@ public:
     void RequestPermissionsFromUser(Ability *ability, CallAbilityPermissionParam &param, CallbackInfo callbackInfo);
 
 private:
-    bool CaullFunc(int requestCode, const std::vector<std::string> &permissions,
+    bool CallFunc(int requestCode, const std::vector<std::string> &permissions,
         const std::vector<int> &permissionsState, CallbackInfo &callbackInfo);
 
 private:

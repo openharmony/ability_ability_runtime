@@ -327,8 +327,8 @@ HWTEST_F(AbilityProcessTest, AaFwk_AbilityProcess_1500, Function | MediumTest | 
 
 /**
  * @tc.number: AaFwk_AbilityProcess_1600
- * @tc.name: CaullFunc
- * @tc.desc: Successful case of verifying CaullFunc.
+ * @tc.name: CallFunc
+ * @tc.desc: Successful case of verifying CallFunc.
  */
 HWTEST_F(AbilityProcessTest, AaFwk_AbilityProcess_1600, Function | MediumTest | Level1)
 {
@@ -337,7 +337,7 @@ HWTEST_F(AbilityProcessTest, AaFwk_AbilityProcess_1600, Function | MediumTest | 
     std::vector<std::string> permissions;
     std::vector<int> permissionsState;
     CallbackInfo callback;
-    auto result = process_->CaullFunc(requestCode, permissions, permissionsState, callback);
+    auto result = process_->CallFunc(requestCode, permissions, permissionsState, callback);
     EXPECT_TRUE(result);
     GTEST_LOG_(INFO) << "AaFwk_AbilityProcess_1600 end";
 }

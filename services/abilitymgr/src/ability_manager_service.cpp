@@ -1705,7 +1705,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     }
 
     if (!JudgeMultiUserConcurrency(validUserId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "multi-user non-concurrent unsatisfied:%{publid}d", ERR_CROSS_USER);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "multi-user non-concurrent unsatisfied:%{public}d", ERR_CROSS_USER);
         eventHelper_.SendStartAbilityErrorEvent(eventInfo, ERR_CROSS_USER, "multi-user non-concurrent unsatisfied");
         return ERR_CROSS_USER;
     }
@@ -2052,7 +2052,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return AbilityErrorUtil::ConvertToOriginErrorCode(result);
     }
     if (!JudgeMultiUserConcurrency(validUserId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "multi-user non-concurrent unsatisfied:%{publid}d", ERR_CROSS_USER);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "multi-user non-concurrent unsatisfied:%{public}d", ERR_CROSS_USER);
         eventHelper_.SendStartAbilityErrorEvent(eventInfo, ERR_CROSS_USER, "multi-user non-concurrent unsatisfied");
         return ERR_CROSS_USER;
     }
