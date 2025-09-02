@@ -1781,5 +1781,47 @@ HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_NeedNotifyAppStateChange
     EXPECT_TRUE(ret);
     TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_NeedNotifyAppStateChangeWhenProcessDied_0600 end");
 }
+
+/**
+ * @tc.name: AppRunningManager_GetMasterProcess_0100
+ * @tc.desc: Test GetMasterProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerSecondTest, AppRunningManager_GetMasterProcess_0100,
+    TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_GetMasterProcess_0100 start");
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    std::string bundleName = BUNDLE_NAME;
+    int32_t appIndex = 1;
+    std::string instanceKey = "testInstanceKey";
+    auto result = appRunningManager->GetMasterProcess(bundleName, appIndex, instanceKey);
+    EXPECT_EQ(result, nullptr);
+
+    auto currentRecord = std::make_shared<AppRunningRecord>(appInfo_, 1, PROCESS_NAME);
+    currentRecord->mainBundleName_.clear();
+    appRunningManager->appRunningRecordMap_.emplace(0, nullptr);
+    appRunningManager->appRunningRecordMap_.emplace(1, currentRecord);
+    result = appRunningManager->GetMasterProcess(bundleName, appIndex, instanceKey);
+    EXPECT_EQ(result, nullptr);
+
+    currentRecord->mainBundleName_ = bundleName;
+    result = appRunningManager->GetMasterProcess(bundleName, appIndex, instanceKey);
+    EXPECT_EQ(result, nullptr);
+
+    currentRecord->isMasterProcess_ = true;
+    result = appRunningManager->GetMasterProcess(bundleName, appIndex, instanceKey);
+    EXPECT_EQ(result, nullptr);
+
+    currentRecord->appIndex_ = appIndex;
+    result = appRunningManager->GetMasterProcess(bundleName, appIndex, instanceKey);
+    EXPECT_EQ(result, nullptr);
+
+    currentRecord->instanceKey_ = instanceKey;
+    result = appRunningManager->GetMasterProcess(bundleName, appIndex, instanceKey);
+    EXPECT_NE(result, nullptr);
+
+    TAG_LOGI(AAFwkTag::TEST, "AppRunningManager_GetMasterProcess_0100 end");
+}
 } // namespace AppExecFwk
 } // namespace OHOS
