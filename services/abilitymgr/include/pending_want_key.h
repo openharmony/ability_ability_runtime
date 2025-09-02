@@ -57,6 +57,7 @@ public:
     bool IsEqualsRequestWant(const Want &otherWant);
     int32_t GetAppIndex();
     void GetAllBundleNames(std::vector<std::string> &bundleNames);
+    void ClearAllWantsInfosFd();
 
 private:
     int32_t type_ = {};
