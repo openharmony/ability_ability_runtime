@@ -16,6 +16,8 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 group("ani_packages") {
   deps = [
+    "${ability_runtime_path}/frameworks/ets/ani/ability_auto_startup_callback:autostartupcallback_ani",
+    "${ability_runtime_path}/frameworks/ets/ani/ability_auto_startup_manager:auto_startup_manager",
     "${ability_runtime_path}/frameworks/ets/ani/ability_delegator:ability_delegator_registry_ani_kit",
     "${ability_runtime_path}/frameworks/ets/ani/ability_manager:ability_manager_ani_kit",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
