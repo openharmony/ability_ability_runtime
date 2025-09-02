@@ -203,8 +203,10 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         return ERR_OK;
     }
 
-    if (preloadStartCheck) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, preload start");
+    bool shouldReturnPid = sessionInfo->processOptions != nullptr && sessionInfo->processOptions->shouldReturnPid;
+    if (preloadStartCheck || shouldReturnPid) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, preloadStartCheck=%{public}d,shouldReturnPid=%{public}d",
+            preloadStartCheck, shouldReturnPid);
         abilityRequest.processOptions = sessionInfo->processOptions;
     }
     auto isCallBySCB = sessionInfo->want.GetBoolParam(ServerConstant::IS_CALL_BY_SCB, true);
@@ -267,7 +269,8 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     if (abilityRequest.processOptions) {
         isStartupHide = abilityRequest.processOptions->startupVisibility == StartupVisibility::STARTUP_HIDE;
     }
-    uiAbilityRecord->ProcessForegroundAbility(callerTokenId, sceneFlag, isShellCall, isStartupHide);
+    sptr<AppExecFwk::ILoadAbilityCallback> callback = GetLoadAbilityCallback(sessionInfo->requestId);
+    uiAbilityRecord->ProcessForegroundAbility(callerTokenId, sceneFlag, isShellCall, isStartupHide, callback);
     if (uiAbilityRecord->GetSpecifiedFlag().empty() && !sessionInfo->specifiedFlag.empty()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "update specified: %{public}d--%{public}s", sessionInfo->requestId,
             sessionInfo->specifiedFlag.c_str());
@@ -275,6 +278,18 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     }
     SendKeyEvent(abilityRequest);
     return ERR_OK;
+}
+
+sptr<AppExecFwk::ILoadAbilityCallback> UIAbilityLifecycleManager::GetLoadAbilityCallback(int32_t requestId)
+{
+    sptr<AppExecFwk::ILoadAbilityCallback> callback = nullptr;
+    auto iter = loadAbilityCallbackMap_.find(requestId);
+    if (iter != loadAbilityCallbackMap_.end()) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "find loadability callback, requestId: %{public}d", requestId);
+        callback = iter->second;
+        loadAbilityCallbackMap_.erase(iter);
+    }
+    return callback;
 }
 
 std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(AbilityRequest &abilityRequest,
@@ -1415,7 +1430,8 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
                 return NotifySCBPendingActivation(sessionInfo, abilityRequest, errMsg);
             }
             uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
-            uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId);
+            sptr<AppExecFwk::ILoadAbilityCallback> callback = GetLoadAbilityCallback(requestId);
+            uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId, 0, false, false, callback);
             return NotifySCBPendingActivation(sessionInfo, abilityRequest, errMsg);
         } else {
             if ((persistentId != 0) && abilityRequest.want.GetBoolParam(IS_CALLING_FROM_DMS, false)) {
@@ -1513,7 +1529,7 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
 }
 
 sptr<SessionInfo> UIAbilityLifecycleManager::CreateSessionInfo(const AbilityRequest &abilityRequest,
-    int32_t requestId) const
+    int32_t requestId)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Create session.");
     sptr<SessionInfo> sessionInfo = new SessionInfo();
@@ -1530,6 +1546,12 @@ sptr<SessionInfo> UIAbilityLifecycleManager::CreateSessionInfo(const AbilityRequ
     sessionInfo->callingTokenId = static_cast<uint32_t>(abilityRequest.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
         IPCSkeleton::GetCallingTokenID()));
     sessionInfo->instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
+    if (abilityRequest.startOptions.loadAbilityCallback_ != nullptr) {
+        auto callback = iface_cast<AppExecFwk::ILoadAbilityCallback>(abilityRequest.startOptions.loadAbilityCallback_);
+        if (callback != nullptr) {
+            loadAbilityCallbackMap_.emplace(requestId, callback);
+        }
+    }
     return sessionInfo;
 }
 
@@ -3963,8 +3985,9 @@ bool UIAbilityLifecycleManager::HandleColdAcceptWantDone(const AAFwk::Want &want
     UpdateSpecifiedFlag(uiAbilityRecord, flag);
     uiAbilityRecord->SetSpecifiedFlag(flag);
     auto isShellCall = specifiedRequest.abilityRequest.want.GetBoolParam(IS_SHELL_CALL, false);
+    sptr<AppExecFwk::ILoadAbilityCallback> callback = GetLoadAbilityCallback(specifiedRequest.requestId);
     uiAbilityRecord->ProcessForegroundAbility(specifiedRequest.callingTokenId,
-        specifiedRequest.sceneFlag, isShellCall);
+        specifiedRequest.sceneFlag, isShellCall, callback);
     SendKeyEvent(specifiedRequest.abilityRequest);
     return true;
 }

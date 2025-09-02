@@ -1317,6 +1317,11 @@ enum NativeFreeInstallError {
      */
     ERR_WRITE_INT_FAILED = 29360221,
 
+    /*
+     * Result(29360222) for attaching ability failed.
+     */
+    ERR_ATTACH_ABILITY_THREAD_FAILED = 29360222,
+
     /**
      * Undefine error code.
      */

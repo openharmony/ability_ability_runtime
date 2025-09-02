@@ -442,7 +442,7 @@ private:
 
     // byCall
     int CallAbilityLocked(const AbilityRequest &abilityRequest, std::string &errMsg);
-    sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest, int32_t requestId) const;
+    sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest, int32_t requestId);
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo,
         const AbilityRequest &abilityRequest, std::string &errMsg);
     std::pair<std::vector<sptr<SessionInfo>>, std::vector<Rosen::PendingSessionActivationConfig>>
@@ -529,6 +529,7 @@ private:
     void HandleAbilitiesNormalSessionInfo(AbilityRequest &abilityRequest,
         std::shared_ptr<AbilitiesRequest> abilitiesRequest, int32_t requestId);
     void RemoveInstanceKey(const AbilityRequest &abilityRequest) const;
+    sptr<AppExecFwk::ILoadAbilityCallback> GetLoadAbilityCallback(int32_t requestId);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
@@ -536,6 +537,7 @@ private:
     std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> lowMemKillAbilityMap_;
     std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> tmpAbilityMap_;
     std::unordered_map<std::shared_ptr<AbilityRecord>, std::list<AbilityRequest>> callRequestCache_;
+    std::map<int32_t, sptr<AppExecFwk::ILoadAbilityCallback>> loadAbilityCallbackMap_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
     sptr<IRemoteObject> rootSceneSession_;
     sptr<ISessionHandler> handler_;
