@@ -24,6 +24,7 @@ export default namespace abilityManager {
   export native function nativeGetForegroundUIAbilities(): Array<AbilityStateData>;
   export native function getForegroundUIAbilitiesCallback(callback:AsyncCallbackWrapper<Array<AbilityStateData>>) : void;
   export native function nativeGetTopAbility(callback:AsyncCallbackWrapper<ElementName>) : void;
+  export native function nativeCheckSystemApp() : void;
 
   export function getForegroundUIAbilities():Promise<Array<AbilityStateData>> {
     let p = new Promise<Array<AbilityStateData>>((resolve: (data: Array<AbilityStateData>) => void, reject: (error: Error) => void): void => {
@@ -48,6 +49,7 @@ export default namespace abilityManager {
       })
   }
   export function getTopAbility():Promise<ElementName> {
+    abilityManager.nativeCheckSystemApp();
     let p = new Promise<ElementName>((resolve: (data: ElementName)=>void, reject:(err: BusinessError)=>void):void => {
       let myCall = new AsyncCallbackWrapper<ElementName>((err: BusinessError | null, data: ElementName | undefined)=>{
         if (err == null || err.code == 0) {
@@ -64,6 +66,7 @@ export default namespace abilityManager {
 }
 
 export function getTopAbility(callback: AsyncCallback<ElementName, void>): void {
+    abilityManager.nativeCheckSystemApp();
     let myCall = new AsyncCallbackWrapper<ElementName>(callback);
     taskpool.execute( (): void => {
         abilityManager.nativeGetTopAbility(myCall);
