@@ -1272,8 +1272,10 @@ HWTEST_F(PendingWantManagerTest, PendingWantManagerTest_5200, TestSize.Level1)
     pendingManager_->wantRecords_.emplace(pendingKey, pendingRecord);
     sptr<IWantSender> sender = sptr<PendingWantRecord>::MakeSptr();
 
-    pendingManager_->CancelWantSender(true, sender);
     auto wantRcdSize = pendingManager_->wantRecords_.size();
+    EXPECT_EQ(wantRcdSize, 1);
+    pendingManager_->CancelWantSender(true, sender);
+    wantRcdSize = pendingManager_->wantRecords_.size();
     EXPECT_EQ(wantRcdSize, 1);
 }
 

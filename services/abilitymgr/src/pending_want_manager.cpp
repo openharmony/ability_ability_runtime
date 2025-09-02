@@ -145,12 +145,11 @@ void PendingWantManager::MakeWantSenderCanceledLocked(PendingWantRecord &record)
     TAG_LOGI(AAFwkTag::WANTAGENT, "cancel");
 
     record.SetCanceled();
-    auto wantsInfo = record.GetKey()->GetAllWantsInfos();
-    for (auto &wantInfo : wantsInfo) {
-        wantInfo.want.CloseAllFd();
-    }
     for (auto &callback : record.GetCancelCallbacks()) {
         callback->Send(record.GetKey()->GetRequestCode());
+    }
+    if (record.GetKey() != nullptr && record.GetKey()->GetCode() > 0) {
+        record.GetKey()->ClearAllWantsInfosFd();
     }
 }
 
