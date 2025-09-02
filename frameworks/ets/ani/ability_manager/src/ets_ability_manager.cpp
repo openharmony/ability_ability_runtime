@@ -35,6 +35,7 @@ namespace {
 constexpr const char* ETS_ABILITY_MANAGER_NAMESPACE = "L@ohos/app/ability/abilityManager/abilityManager;";
 constexpr const char* ETS_ABILITY_MANAGER_SIGNATURE_ARRAY = ":Lescompat/Array;";
 constexpr const char* ETS_ABILITY_MANAGER_SIGNATURE_CALLBACK = "Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char* ETS_ABILITY_MANAGER_SIGNATURE_VOID = ":V";
 constexpr int32_t ERR_FAILURE = -1;
 }
 
@@ -123,8 +124,7 @@ static void GetTopAbility(ani_env *env, ani_object callback)
     auto selfToken = IPCSkeleton::GetSelfTokenID();
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
-        AppExecFwk::AsyncCallback(env, callback,
-            EtsErrorUtil::CreateError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), nullptr);
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
         return;
     }
     AppExecFwk::ElementName elementName = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility();
@@ -137,6 +137,20 @@ static void GetTopAbility(ani_env *env, ani_object callback)
     AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateErrorByNativeErr(env, resultCode),
         elementNameobj);
     return;
+}
+
+static void CheckSystemApp(ani_env *env)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return;
+    }
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not system app");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return;
+    }
 }
 
 void EtsAbilityManagerRegistryInit(ani_env *env)
@@ -167,6 +181,8 @@ void EtsAbilityManagerRegistryInit(ani_env *env)
         },
         ani_native_function {"nativeGetTopAbility", ETS_ABILITY_MANAGER_SIGNATURE_CALLBACK,
             reinterpret_cast<void *>(GetTopAbility)},
+        ani_native_function {"nativeCheckSystemApp", ETS_ABILITY_MANAGER_SIGNATURE_VOID,
+            reinterpret_cast<void *>(CheckSystemApp)},
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
     if (status != ANI_OK) {
