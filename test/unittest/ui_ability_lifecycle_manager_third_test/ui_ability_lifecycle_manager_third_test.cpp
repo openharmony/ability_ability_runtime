@@ -400,7 +400,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_003, TestSize
     SpecifiedRequest specifiedRequest(0, AbilityRequest());
     specifiedRequest.specifiedProcessState = SpecifiedProcessState::STATE_ABILITY;
     mgr->StartSpecifiedRequest(specifiedRequest);
-    EXPECT_FALSE(specifiedRequest.isCold);
+    EXPECT_TRUE(specifiedRequest.isCold);
 }
 
 /**
@@ -430,7 +430,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_005, TestSize
     auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
     AppMgrUtil::appMgr_ = appmgr;
     EXPECT_CALL(*appmgr, IsSpecifiedModuleLoaded)
-        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result, bool &) {
+        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool, bool &result, bool &) {
             result = true;
             return 0;
         });
@@ -497,7 +497,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_009, TestSize
     auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
     AppMgrUtil::appMgr_ = appmgr;
     EXPECT_CALL(*appmgr, IsSpecifiedModuleLoaded)
-        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result, bool &isDebug) {
+        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool, bool &result, bool &isDebug) {
             result = false;
             isDebug = true;
             return 0;
@@ -1256,7 +1256,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, IsSpecifiedModuleLoaded_001, TestSi
     AppMgrUtil::appMgr_ = nullptr;
     SysMrgClient::instance_ = nullptr;
     bool isDebug = false;
-    auto ret = uiAbilityLifecycleManager->IsSpecifiedModuleLoaded(abilityRequest, isDebug);
+    auto ret = uiAbilityLifecycleManager->IsSpecifiedModuleLoaded(abilityRequest, false, isDebug);
 
     EXPECT_EQ(ret, false);
 }

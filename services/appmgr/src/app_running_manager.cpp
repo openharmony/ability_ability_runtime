@@ -1873,7 +1873,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetMasterProcess(
             appRecord->GetAppIndex() == appIndex && appRecord->GetInstanceKey() == instanceKey) {
             return appRecord;
         }
-    }  
+    }
     return nullptr;
 }
 
