@@ -150,5 +150,13 @@ void PendingWantKey::GetAllBundleNames(std::vector<std::string> &bundleNames)
         bundleNames.emplace_back(wantInfo.want.GetBundle());
     }
 }
+
+void PendingWantKey::ClearAllWantsInfosFd()
+{
+    std::lock_guard<std::mutex> lock(wantsInfosMutex_);
+    for (auto &wantInfo : allWantsInfos_) {
+        wantInfo.want.CloseAllFd();
+    }
+}
 }  // namespace AAFwk
 }  // namespace OHOS
