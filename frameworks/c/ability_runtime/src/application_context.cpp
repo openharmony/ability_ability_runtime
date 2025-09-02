@@ -41,6 +41,7 @@ using namespace OHOS;
 
 namespace {
 constexpr int32_t ATTACH_ABILITY_THREAD_TIMEOUT_TIME = 100 * 1000; // attach ability thread timeout, 100s
+std::mutex g_appMgrMutex;
 sptr<AppExecFwk::IAppMgr> g_appMgr = nullptr;
 
 AbilityRuntime_ErrorCode WriteStringToBuffer(
@@ -72,6 +73,7 @@ AbilityRuntime_ErrorCode CheckParameters(char* buffer, int32_t* writeLength)
 
 sptr<AppExecFwk::IAppMgr> GetAppMgr()
 {
+    std::unique_lock<std::mutex> lock(g_appMgrMutex);
     if (g_appMgr) {
         return g_appMgr;
     }
@@ -450,7 +452,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetVersionCode(int6
 }
 
 AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(AbilityBase_Want *want,
-    AbilityRuntime_StartOptions *options, int32_t &targetPid)
+    AbilityRuntime_StartOptions *options, int32_t *targetPid)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "StartSelfUIAbilityWithPidResult called");
     auto ret = CheckAppMainThread();
@@ -463,8 +465,8 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(Abili
         TAG_LOGE(AAFwkTag::APPKIT, "CheckWant failed: %{public}d", ret);
         return ret;
     }
-    if (options == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null options");
+    if (options == nullptr || targetPid == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null options or targetPid");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
     Want abilityWant;
@@ -476,8 +478,8 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(Abili
     StartOptions startOptions = options->GetInnerStartOptions();
     ffrt::condition_variable callbackDoneCv;
     std::atomic_bool done = false;
-    auto task = [&targetPid, &callbackDoneCv, &done](int32_t pidResult) {
-        targetPid = pidResult;
+    auto task = [targetPid, &callbackDoneCv, &done](int32_t pidResult) {
+        *targetPid = pidResult;
         done.store(true);
         callbackDoneCv.notify_all();
     };
@@ -494,7 +496,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(Abili
     ffrt::mutex callbackDoneMutex;
     std::unique_lock<ffrt::mutex> lock(callbackDoneMutex);
     if (!callbackDoneCv.wait_for(lock, std::chrono::milliseconds(ATTACH_ABILITY_THREAD_TIMEOUT_TIME), condition) ||
-        targetPid < 0) {
+        *targetPid < 0) {
         callback->Cancel();
         return ABILITY_RUNTIME_ERROR_CODE_START_TIMEOUT;
     }

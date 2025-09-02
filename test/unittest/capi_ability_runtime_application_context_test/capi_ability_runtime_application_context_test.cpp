@@ -2832,7 +2832,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
 {
     // Act
     int32_t pid = -1;
-    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(nullptr, nullptr, pid);
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(nullptr, nullptr, &pid);
 
     // Assert
     EXPECT_EQ(ABILITY_RUNTIME_ERROR_CODE_MAIN_THREAD_NOT_SUPPORTED, result);
@@ -2862,7 +2862,7 @@ HWTEST_F(CapiAbilityRuntimeApplicationContextTest, OH_AbilityRuntime_StartSelfUI
 
     // Act
     int32_t pid = -1;
-    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(&want, options, pid);
+    AbilityRuntime_ErrorCode result = OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(&want, options, &pid);
 
     // Assert
     EXPECT_NE(ABILITY_RUNTIME_ERROR_CODE_NO_ERROR, result);
