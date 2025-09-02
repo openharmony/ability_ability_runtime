@@ -176,7 +176,7 @@ EtsPhotoEditorExtensionContext* EtsPhotoEditorExtensionContext::GetEtsPhotoEdito
 
 void EtsPhotoEditorExtensionContext::SaveWithUriCheck(ani_env* aniEnv, ani_object obj, ani_string uri)
 {
-    TAG_LOGE(AAFwkTag::UI_EXT, "SaveWithUriCheck called");
+    TAG_LOGD(AAFwkTag::UI_EXT, "SaveWithUriCheck called");
     if (aniEnv == nullptr || obj == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null env or aniObj");
         return;
@@ -235,14 +235,14 @@ void EtsPhotoEditorExtensionContext::SaveWithImageCheck(ani_env* aniEnv, ani_obj
             static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_PARAM_ERROR), ERR_MSG_PARAMS_ERROR);
         return;
     }
-    TAG_LOGE(AAFwkTag::UI_EXT, "SaveWithImageCheck get image");
+
     std::string format {""};
     if (!AppExecFwk::GetStringProperty(aniEnv, optionObj, "format", format)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Wrong argument type format");
         AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(aniEnv, ERR_MSG_PARAMS_ERROR);
         return;
     }
-    TAG_LOGE(AAFwkTag::UI_EXT, "SaveWithImageCheck get format");
+
     if (format == "") {
         TAG_LOGE(AAFwkTag::UI_EXT, "fromat is empty");
         AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(aniEnv, ERR_MSG_PARAMS_ERROR);
