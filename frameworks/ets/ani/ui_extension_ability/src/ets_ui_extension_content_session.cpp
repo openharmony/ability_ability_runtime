@@ -262,7 +262,8 @@ bool EtsUIExtensionContentSession::BindNativePtrCleaner(ani_env *env)
     std::array methods = {
         ani_native_function { "clean", nullptr, reinterpret_cast<void *>(EtsUIExtensionContentSession::Clean) },
     };
-    if (ANI_OK != env->Class_BindNativeMethods(cleanerCls, methods.data(), methods.size())) {
+    if (ANI_OK != (status = env->Class_BindNativeMethods(cleanerCls, methods.data(), methods.size()))
+        && status != ANI_ALREADY_BINDED) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return false;
     };
@@ -296,7 +297,8 @@ ani_status EtsUIExtensionContentSession::BindNativeMethod(ani_env *env, ani_clas
             reinterpret_cast<void *>(EtsUIExtensionContentSession::NativeSetWindowPrivacyMode)}
     };
     ani_status status = ANI_ERROR;
-    if ((status = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK) {
+    if ((status = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK
+        && status != ANI_ALREADY_BINDED) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return status;
     }
