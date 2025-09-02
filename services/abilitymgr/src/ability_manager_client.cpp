@@ -20,6 +20,7 @@
 #endif // WITH_DLP
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "iload_ability_callback.h"
 #include "iservice_registry.h"
 #ifdef SUPPORT_SCREEN
 #include "scene_board_judgement.h"
@@ -2192,7 +2193,7 @@ ErrCode AbilityManagerClient::QueryAtomicServiceStartupRule(sptr<IRemoteObject> 
 
 ErrCode AbilityManagerClient::StartSelfUIAbility(const Want &want)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call StartSelfUIAbilityWithStartOptions");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->StartSelfUIAbility(want);
@@ -2201,10 +2202,19 @@ ErrCode AbilityManagerClient::StartSelfUIAbility(const Want &want)
 ErrCode AbilityManagerClient::StartSelfUIAbilityWithStartOptions(const Want &want,
     const StartOptions &options)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call StartSelfUIAbilityWithStartOptions");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->StartSelfUIAbilityWithStartOptions(want, options);
+}
+
+ErrCode AbilityManagerClient::StartSelfUIAbilityWithPidResult(const Want &want,
+    StartOptions &options, sptr<AppExecFwk::ILoadAbilityCallback> callback)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call StartSelfUIAbilityWithPidResult");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->StartSelfUIAbilityWithPidResult(want, options, callback);
 }
 
 void AbilityManagerClient::PrepareTerminateAbilityDone(sptr<IRemoteObject> token, bool isTerminate)

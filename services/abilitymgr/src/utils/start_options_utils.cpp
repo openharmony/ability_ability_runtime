@@ -112,6 +112,11 @@ int32_t StartOptionsUtils::CheckStartSelfUIAbilityStartOptions(const Want &want,
     CHECK_TRUE_RETURN_RET(!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() || !isEnable,
         ERR_CAPABILITY_NOT_SUPPORT, "not support process options");
 
+    if (options.processOptions->startupVisibility == StartupVisibility::UNSPECIFIED &&
+        options.processOptions->shouldReturnPid) {
+        return ERR_OK;
+    }
+
     auto uiAbilityManager = DelayedSingleton<AbilityManagerService>::GetInstance()->GetUIAbilityManagerByUid(
         IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);

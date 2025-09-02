@@ -13,14 +13,25 @@
  * limitations under the License.
  */
 
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <unistd.h>
+#include "cpp/condition_variable.h"
+
 #include "application_context.h"
 
 #include "ability_business_error_utils.h"
 #include "ability_manager_client.h"
+#include "app_mgr_interface.h"
 #include "context.h"
 #include "context/application_context.h"
+#include "ffrt.h"
 #include "hilog_tag_wrapper.h"
+#include "load_ability_callback_impl.h"
 #include "start_options_impl.h"
+#include "sys_mgr_client.h"
+#include "system_ability_definition.h"
 #include "want_manager.h"
 #include "want_utils.h"
 
@@ -29,6 +40,9 @@ using namespace OHOS::AAFwk;
 using namespace OHOS;
 
 namespace {
+constexpr int32_t ATTACH_ABILITY_THREAD_TIMEOUT_TIME = 100 * 1000; // attach ability thread timeout, 100s
+sptr<AppExecFwk::IAppMgr> g_appMgr = nullptr;
+
 AbilityRuntime_ErrorCode WriteStringToBuffer(
     const std::string &src, char* buffer, const int32_t bufferSize, int32_t* writeLength)
 {
@@ -52,6 +66,40 @@ AbilityRuntime_ErrorCode CheckParameters(char* buffer, int32_t* writeLength)
     if (writeLength == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "writeLength is null");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+    }
+    return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+}
+
+sptr<AppExecFwk::IAppMgr> GetAppMgr()
+{
+    if (g_appMgr) {
+        return g_appMgr;
+    }
+
+    auto sysMgrClient = DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance();
+    if (sysMgrClient == nullptr) {
+        return nullptr;
+    }
+    auto object = sysMgrClient->GetSystemAbility(APP_MGR_SERVICE_ID);
+    if (object == nullptr) {
+        return nullptr;
+    }
+    g_appMgr = OHOS::iface_cast<OHOS::AppExecFwk::IAppMgr>(object);
+    return g_appMgr;
+}
+
+AbilityRuntime_ErrorCode CheckAppMainThread()
+{
+    auto appMgrClient = GetAppMgr();
+    if (appMgrClient == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null appMgr");
+        return ABILITY_RUNTIME_ERROR_CODE_INTERNAL;
+    }
+    AppExecFwk::ChildProcessInfo childProcessInfo;
+    auto ret = appMgrClient->GetChildProcessInfoForSelf(childProcessInfo);
+    if (ret != ERR_OK && getpid() == gettid()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "calling in app's main thread is not supported");
+        return ABILITY_RUNTIME_ERROR_CODE_MAIN_THREAD_NOT_SUPPORTED;
     }
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
@@ -376,7 +424,7 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithStartOptions(Ab
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
     }
     OHOS::AAFwk::StartOptions startOptions = options->GetInnerStartOptions();
-    return ConvertToAPI18BusinessErrorCode(AbilityManagerClient::GetInstance()->StartSelfUIAbilityWithStartOptions(
+    return ConvertToAPI17BusinessErrorCode(AbilityManagerClient::GetInstance()->StartSelfUIAbilityWithStartOptions(
         abilityWant, startOptions));
 }
 
@@ -398,5 +446,57 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetVersionCode(int6
         return ABILITY_RUNTIME_ERROR_CODE_GET_APPLICATION_INFO_FAILED;
     }
     *versionCode = static_cast<int64_t>(appApplicationInfo->versionCode);
+    return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+}
+
+AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(AbilityBase_Want *want,
+    AbilityRuntime_StartOptions *options, int32_t &targetPid)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "StartSelfUIAbilityWithPidResult called");
+    auto ret = CheckAppMainThread();
+    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPKIT, "CheckAppMainThread failed, ret=%{public}d", ret);
+        return ret;
+    }
+    ret = CheckWant(want);
+    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPKIT, "CheckWant failed: %{public}d", ret);
+        return ret;
+    }
+    if (options == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null options");
+        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+    }
+    Want abilityWant;
+    AbilityBase_ErrorCode errCode = CWantManager::TransformToWant(*want, false, abilityWant);
+    if (errCode != ABILITY_BASE_ERROR_CODE_NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPKIT, "transform error:%{public}d", errCode);
+        return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+    }
+    StartOptions startOptions = options->GetInnerStartOptions();
+    ffrt::condition_variable callbackDoneCv;
+    std::atomic_bool done = false;
+    auto task = [&targetPid, &callbackDoneCv, &done](int32_t pidResult) {
+        targetPid = pidResult;
+        done.store(true);
+        callbackDoneCv.notify_all();
+    };
+    sptr<LoadAbilityCallbackImpl> callback = sptr<LoadAbilityCallbackImpl>::MakeSptr(std::move(task));
+    auto result = AbilityManagerClient::GetInstance()->StartSelfUIAbilityWithPidResult(
+        abilityWant, startOptions, callback);
+    if (result != ERR_OK) {
+        callback->Cancel();
+        return ConvertToAPI21BusinessErrorCode(result);
+    }
+    auto condition = [&done] {
+        return done.load();
+    };
+    ffrt::mutex callbackDoneMutex;
+    std::unique_lock<ffrt::mutex> lock(callbackDoneMutex);
+    if (!callbackDoneCv.wait_for(lock, std::chrono::milliseconds(ATTACH_ABILITY_THREAD_TIMEOUT_TIME), condition) ||
+        targetPid < 0) {
+        callback->Cancel();
+        return ABILITY_RUNTIME_ERROR_CODE_START_TIMEOUT;
+    }
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }

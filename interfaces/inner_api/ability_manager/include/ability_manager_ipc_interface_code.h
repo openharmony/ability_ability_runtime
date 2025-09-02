@@ -674,6 +674,9 @@ enum class AbilityManagerInterfaceCode {
 
     // preload application
     PRELOAD_APPLICATION = 6151,
+
+    // start self uiability with startOptions and receives the pid
+    START_SELF_UI_ABILITY_WITH_PID_RESULT = 6152,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

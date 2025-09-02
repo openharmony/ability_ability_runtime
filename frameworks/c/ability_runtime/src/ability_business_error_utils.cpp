@@ -42,11 +42,15 @@ std::unordered_map<int32_t, AbilityRuntime_ErrorCode> g_innerToBusinessErrorComm
     { OHOS::AAFwk::ERR_APP_INSTANCE_KEY_NOT_SUPPORT, ABILITY_RUNTIME_ERROR_CODE_APP_INSTANCE_KEY_NOT_SUPPORTED },
     { OHOS::AAFwk::ERR_NOT_SELF_APPLICATION, ABILITY_RUNTIME_ERROR_CODE_CROSS_APP },
     };
-    
-std::unordered_map<int32_t, AbilityRuntime_ErrorCode> g_innerToBusinessErrorApi18Map {
+
+std::unordered_map<int32_t, AbilityRuntime_ErrorCode> g_innerToBusinessErrorApi17Map {
 { OHOS::AAFwk::ERR_MULTI_APP_NOT_SUPPORTED, ABILITY_RUNTIME_ERROR_CODE_MULTI_APP_NOT_SUPPORTED },
 { OHOS::AAFwk::ERR_INVALID_APP_INSTANCE_KEY, ABILITY_RUNTIME_ERROR_CODE_INVALID_APP_INSTANCE_KEY },
 { OHOS::AAFwk::ERR_MULTI_INSTANCE_NOT_SUPPORTED, ABILITY_RUNTIME_ERROR_MULTI_INSTANCE_NOT_SUPPORTED },
+};
+
+std::unordered_map<int32_t, AbilityRuntime_ErrorCode> g_innerToBusinessErrorApi21Map {
+{ OHOS::AAFwk::ERR_ATTACH_ABILITY_THREAD_FAILED, ABILITY_RUNTIME_ERROR_CODE_START_TIMEOUT },
 };
 
 AbilityRuntime_ErrorCode ConvertToCommonBusinessErrorCode(int32_t abilityManagerErrorCode)
@@ -60,7 +64,7 @@ AbilityRuntime_ErrorCode ConvertToCommonBusinessErrorCode(int32_t abilityManager
     return ABILITY_RUNTIME_ERROR_CODE_INTERNAL;
 }
 
-AbilityRuntime_ErrorCode ConvertToAPI18BusinessErrorCode(int32_t abilityManagerErrorCode)
+AbilityRuntime_ErrorCode ConvertToAPI17BusinessErrorCode(int32_t abilityManagerErrorCode)
 {
     TAG_LOGI(AAFwkTag::APPKIT, "ability errCode:%{public}d", abilityManagerErrorCode);
     auto errCode = ConvertToCommonBusinessErrorCode(abilityManagerErrorCode);
@@ -68,8 +72,24 @@ AbilityRuntime_ErrorCode ConvertToAPI18BusinessErrorCode(int32_t abilityManagerE
         return errCode;
     }
 
-    auto it = g_innerToBusinessErrorApi18Map.find(abilityManagerErrorCode);
-    if (it != g_innerToBusinessErrorApi18Map.end()) {
+    auto it = g_innerToBusinessErrorApi17Map.find(abilityManagerErrorCode);
+    if (it != g_innerToBusinessErrorApi17Map.end()) {
+        return it->second;
+    }
+
+    return ABILITY_RUNTIME_ERROR_CODE_INTERNAL;
+}
+
+AbilityRuntime_ErrorCode ConvertToAPI21BusinessErrorCode(int32_t abilityManagerErrorCode)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "ability errCode:%{public}d", abilityManagerErrorCode);
+    auto errCode = ConvertToAPI17BusinessErrorCode(abilityManagerErrorCode);
+    if (errCode != ABILITY_RUNTIME_ERROR_CODE_INTERNAL) {
+        return errCode;
+    }
+
+    auto it = g_innerToBusinessErrorApi21Map.find(abilityManagerErrorCode);
+    if (it != g_innerToBusinessErrorApi21Map.end()) {
         return it->second;
     }
 
