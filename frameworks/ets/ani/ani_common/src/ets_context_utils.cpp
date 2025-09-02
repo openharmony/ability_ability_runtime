@@ -645,16 +645,7 @@ ani_object GetApplicationContext(ani_env *env, const std::shared_ptr<Application
 
 ani_object GetApplicationContextSync(ani_env *env, ani_object aniObj)
 {
-    if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null env");
-    }
-    auto context = GetBaseContext(env, aniObj);
-    if (!context) {
-        TAG_LOGW(AAFwkTag::APPKIT, "null context");
-        EtsErrorUtil::ThrowError(env, (int32_t)AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-        return {};
-    }
-    auto applicationContext = context->GetApplicationContext();
+    auto applicationContext = Context::GetApplicationContext();
     if (applicationContext == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null applicationContext");
         EtsErrorUtil::ThrowError(env, (int32_t)AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
