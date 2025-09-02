@@ -42,6 +42,10 @@ public:
     static void SaveEditedContentWithImage(ani_env* aniEnv, ani_object obj, ani_object imageObj,
         ani_object optionObj, ani_object callback);
 
+    static void SaveWithUriCheck(ani_env* aniEnv, ani_object obj, ani_string uri);
+
+    static void SaveWithImageCheck(ani_env* aniEnv, ani_object obj, ani_object imageObj, ani_object optionObj);
+
     std::weak_ptr<PhotoEditorExtensionContext> GetAbilityContext()
     {
         return context_;

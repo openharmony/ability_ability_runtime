@@ -44,14 +44,20 @@ constexpr const char* CLEANER_CLASS_NAME =  "Lapplication/PhotoEditorExtensionCo
 
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
+    TAG_LOGD(AAFwkTag::UI_EXT, "photo BindNativeMethods call");
     ani_status status = ANI_ERROR;
     std::array functions = {
         ani_native_function { "nativeSaveEditedContentWithUri", nullptr,
             reinterpret_cast<void*>(EtsPhotoEditorExtensionContext::SaveEditedContentWithUri) },
         ani_native_function { "nativeSaveEditedContentWithImage", nullptr,
             reinterpret_cast<void*>(EtsPhotoEditorExtensionContext::SaveEditedContentWithImage) },
+        ani_native_function { "nativeSaveWithUriCheck", nullptr,
+            reinterpret_cast<void*>(EtsPhotoEditorExtensionContext::SaveWithUriCheck) },
+        ani_native_function { "nativeSaveWithImageCheck", nullptr,
+            reinterpret_cast<void*>(EtsPhotoEditorExtensionContext::SaveWithImageCheck) },
     };
-    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
+    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK
+        && status != ANI_ALREADY_BINDED) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to bindNativeMethods status: %{public}d", status);
         return false;
     }
@@ -65,7 +71,8 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
     std::array CleanerMethods = {
         ani_native_function { "clean", nullptr, reinterpret_cast<void *>(EtsPhotoEditorExtensionContext::Finalizer) },
     };
-    if ((status = env->Class_BindNativeMethods(cleanerCls, CleanerMethods.data(), CleanerMethods.size())) != ANI_OK) {
+    if ((status = env->Class_BindNativeMethods(cleanerCls, CleanerMethods.data(), CleanerMethods.size())) != ANI_OK
+        && status != ANI_ALREADY_BINDED) {
         TAG_LOGE(AAFwkTag::UI_EXT, "bind method status : %{public}d", status);
         return false;
     }
@@ -167,6 +174,84 @@ EtsPhotoEditorExtensionContext* EtsPhotoEditorExtensionContext::GetEtsPhotoEdito
     return etsContext;
 }
 
+void EtsPhotoEditorExtensionContext::SaveWithUriCheck(ani_env* aniEnv, ani_object obj, ani_string uri)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "SaveWithUriCheck called");
+    if (aniEnv == nullptr || obj == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env or aniObj");
+        return;
+    }
+    auto etsContext = GetEtsPhotoEditorExtensionContext(aniEnv, obj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsContext");
+        AbilityRuntime::EtsErrorUtil::ThrowError(aniEnv,
+            static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR), ERR_MSG_INTERNAL_ERROR);
+        return;
+    }
+
+    if (etsContext->context_.lock() == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null Context");
+        AbilityRuntime::EtsErrorUtil::ThrowError(aniEnv,
+            static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR), ERR_MSG_INTERNAL_ERROR);
+        return;
+    }
+    std::string uriStr {""};
+    if (!AppExecFwk::GetStdString(aniEnv, uri, uriStr)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "get string error");
+        AbilityRuntime::EtsErrorUtil::ThrowError(aniEnv,
+            static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_PARAM_ERROR), ERR_MSG_PARAMS_ERROR);
+        return;
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "SaveWithUriCheck end");
+}
+
+void EtsPhotoEditorExtensionContext::SaveWithImageCheck(ani_env* aniEnv, ani_object obj, ani_object imageObj,
+    ani_object optionObj)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "SaveWithImageCheck called");
+    if (aniEnv == nullptr || obj == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+
+    auto etsContext = GetEtsPhotoEditorExtensionContext(aniEnv, obj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsContext");
+        AbilityRuntime::EtsErrorUtil::ThrowError(aniEnv,
+            static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR), ERR_MSG_INTERNAL_ERROR);
+        return;
+    }
+
+    if (etsContext->context_.lock() == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null Context");
+        AbilityRuntime::EtsErrorUtil::ThrowError(aniEnv,
+            static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR), ERR_MSG_INTERNAL_ERROR);
+        return;
+    }
+
+    auto image = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(aniEnv, imageObj);
+    if (!image) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Get edited image fail");
+        AbilityRuntime::EtsErrorUtil::ThrowError(aniEnv,
+            static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_PARAM_ERROR), ERR_MSG_PARAMS_ERROR);
+        return;
+    }
+
+    std::string format {""};
+    if (!AppExecFwk::GetStringProperty(aniEnv, optionObj, "format", format)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Wrong argument type format");
+        AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(aniEnv, ERR_MSG_PARAMS_ERROR);
+        return;
+    }
+
+    if (format == "") {
+        TAG_LOGE(AAFwkTag::UI_EXT, "fromat is empty");
+        AbilityRuntime::EtsErrorUtil::ThrowInvalidParamError(aniEnv, ERR_MSG_PARAMS_ERROR);
+        return;
+    }
+    TAG_LOGD(AAFwkTag::UI_EXT, "SaveWithImageCheck end");
+}
+
 void EtsPhotoEditorExtensionContext::SaveEditedContentWithUri(ani_env* aniEnv, ani_object obj, ani_string uri,
     ani_object callback)
 {
@@ -210,18 +295,12 @@ void EtsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(ani_env* aniEnv,
     auto context = context_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "context is nullptr");
-        aniObject = EtsErrorUtil::CreateError(aniEnv, (ani_int)PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR,
-            ERR_MSG_INTERNAL_ERROR);
-        AppExecFwk::AsyncCallback(aniEnv, callback, aniObject, nullptr);
         return;
     }
 
     std::string uriStr {""};
     if (!AppExecFwk::GetStdString(aniEnv, uri, uriStr)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "get string error");
-        aniObject = EtsErrorUtil::CreateError(aniEnv, (ani_int)PhotoEditorErrorCode::ERROR_CODE_PARAM_ERROR,
-            ERR_MSG_PARAMS_ERROR);
-        AppExecFwk::AsyncCallback(aniEnv, callback, aniObject, nullptr);
         return;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "Uri:%{public}s", uriStr.c_str());
@@ -251,18 +330,12 @@ void EtsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(ani_env* aniEn
     auto context = context_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "context is nullptr");
-        ret = (ani_int)PhotoEditorErrorCode::ERROR_CODE_INTERNAL_ERROR;
-        aniObject = EtsErrorUtil::CreateError(aniEnv, ret, ERR_MSG_INTERNAL_ERROR);
-        AppExecFwk::AsyncCallback(aniEnv, callback, aniObject, nullptr);
         return;
     }
 
     auto image = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(aniEnv, imageObj);
     if (!image) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Get edited image fail");
-        ret = (ani_int)PhotoEditorErrorCode::ERROR_CODE_PARAM_ERROR;
-        aniObject = EtsErrorUtil::CreateError(aniEnv, ret, ERR_MSG_PARAMS_ERROR);
-        AppExecFwk::AsyncCallback(aniEnv, callback, aniObject, nullptr);
         return;
     }
 
@@ -303,8 +376,6 @@ bool EtsPhotoEditorExtensionContext::UnwrapPackOption(ani_env* aniEnv, ani_objec
     }
     if (format == "") {
         TAG_LOGE(AAFwkTag::UI_EXT, "fromat is empty");
-        EtsErrorUtil::ThrowError(aniEnv, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_PARAM_ERROR),
-            ERR_MSG_PARAMS_ERROR);
         return false;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "Unwrap pack option result, format=%{public}s", format.c_str());
