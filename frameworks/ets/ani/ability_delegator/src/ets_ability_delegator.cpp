@@ -408,7 +408,7 @@ ani_ref EtsAbilityDelegator::GetCurrentTopAbility(ani_env* env, [[maybe_unused]]
     ani_ref callbackRef = nullptr;
     auto status = env->GlobalReference_Create(callback, &callbackRef);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "Create Gloabl ref for delegator failed %{public}d", status);
+        TAG_LOGE(AAFwkTag::DELEGATOR, "Create Global ref for delegator failed %{public}d", status);
         AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER);
         return objValue;
     }

@@ -220,7 +220,7 @@ void AbilityProcess::RequestPermissionsFromUser(
     auto requestCode = param.requestCode;
     if (ret != TypePermissionOper::DYNAMIC_OPER) {
         TAG_LOGD(AAFwkTag::ABILITY, "need not dynamic popup");
-        (void)CaullFunc(requestCode, param.permission_list, permissionsState, callbackInfo);
+        (void)CallFunc(requestCode, param.permission_list, permissionsState, callbackInfo);
         return;
     }
 
@@ -230,7 +230,7 @@ void AbilityProcess::RequestPermissionsFromUser(
             TAG_LOGE(AAFwkTag::ABILITY, "null self");
             return;
         }
-        if (!self->CaullFunc(requestCode, permissions, grantResults, callbackInfo)) {
+        if (!self->CallFunc(requestCode, permissions, grantResults, callbackInfo)) {
             TAG_LOGE(AAFwkTag::ABILITY, "call function failed");
             return;
         }
@@ -239,7 +239,7 @@ void AbilityProcess::RequestPermissionsFromUser(
     ability->RequestPermissionsFromUser(param.permission_list, permissionsState, std::move(task));
 }
 
-bool AbilityProcess::CaullFunc(int requestCode, const std::vector<std::string> &permissions,
+bool AbilityProcess::CallFunc(int requestCode, const std::vector<std::string> &permissions,
     const std::vector<int> &permissionsState, CallbackInfo &callbackInfo)
 {
 #ifdef SUPPORT_GRAPHICS
