@@ -360,11 +360,11 @@ void ContextImpl::GetAllTempDir(std::vector<std::string> &tempPaths)
     } else {
         baseDir = CONTEXT_DATA_STORAGE + currArea_ + CONTEXT_FILE_SEPARATOR + CONTEXT_BASE;
     }
-    for (const auto &moudleItem: applicationInfo_->moduleInfos) {
-        auto moudleTemp = baseDir + CONTEXT_HAPS + CONTEXT_FILE_SEPARATOR + moudleItem.moduleName + CONTEXT_TEMP;
+    for (const auto &moduleItem: applicationInfo_->moduleInfos) {
+        auto moudleTemp = baseDir + CONTEXT_HAPS + CONTEXT_FILE_SEPARATOR + moduleItem.moduleName + CONTEXT_TEMP;
         if (!OHOS::FileExists(moudleTemp)) {
             TAG_LOGW(AAFwkTag::APPKIT, "module [%{public}s] temp path not exist,path: %{public}s",
-                moudleItem.moduleName.c_str(), moudleTemp.c_str());
+                moduleItem.moduleName.c_str(), moudleTemp.c_str());
             continue;
         }
         tempPaths.push_back(moudleTemp);

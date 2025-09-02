@@ -305,7 +305,7 @@ void SetTestRunnerClassName(ani_env *aniEnv, ani_class arguments, ani_object arg
 ani_object CreateEtsAbilityDelegatorArguments(
     ani_env *aniEnv, const std::shared_ptr<AppExecFwk::AbilityDelegatorArgs> abilityDelegatorArgs)
 {
-    TAG_LOGD(AAFwkTag::DELEGATOR, "CreateJsAbilityDelegatorArguments");
+    TAG_LOGD(AAFwkTag::DELEGATOR, "CreateEtsAbilityDelegatorArguments");
     if (aniEnv == nullptr || abilityDelegatorArgs == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null aniEnv or abilityDelegatorArgs");
         return {};

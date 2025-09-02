@@ -59,13 +59,10 @@ int UserCallbackStub::OnRemoteRequest(
         switch (code) {
             case UserCallbackCmd::ON_STOP_USER_DONE:
                 return OnStopUserDoneInner(data, reply);
-                break;
             case UserCallbackCmd::ON_START_USER_DONE:
                 return OnStartUserDoneInner(data, reply);
-                break;
             case UserCallbackCmd::ON_LOGOUT_USER_DONE:
                 return OnLogoutUserDoneInner(data, reply);
-                break;
         }
     }
 

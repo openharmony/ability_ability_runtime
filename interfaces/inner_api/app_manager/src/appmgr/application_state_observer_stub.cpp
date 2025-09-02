@@ -323,7 +323,7 @@ int32_t ApplicationStateObserverStub::HandleOnPageShow(MessageParcel &data, Mess
 {
     std::unique_ptr<PageStateData> pageStateData(data.ReadParcelable<PageStateData>());
     if (!pageStateData) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable<pageStateData> failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable<PageStateData> failed");
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
@@ -335,7 +335,7 @@ int32_t ApplicationStateObserverStub::HandleOnPageHide(MessageParcel &data, Mess
 {
     std::unique_ptr<PageStateData> pageStateData(data.ReadParcelable<PageStateData>());
     if (!pageStateData) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable<pageStateData> failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable<PageStateData> failed");
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
 
