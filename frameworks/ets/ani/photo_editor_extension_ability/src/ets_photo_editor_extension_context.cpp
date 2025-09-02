@@ -205,10 +205,11 @@ void EtsPhotoEditorExtensionContext::SaveWithUriCheck(ani_env* aniEnv, ani_objec
     TAG_LOGD(AAFwkTag::UI_EXT, "SaveWithUriCheck end");
 }
 
-void EtsPhotoEditorExtensionContext::SaveWithImageCheck(ani_env* aniEnv, ani_object obj, ani_object imageObj, ani_object optionObj)
+void EtsPhotoEditorExtensionContext::SaveWithImageCheck(ani_env* aniEnv, ani_object obj, ani_object imageObj,
+    ani_object optionObj)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "SaveWithImageCheck called");
-    if (aniEnv == nullptr || obj == nullptr || imageObj == nullptr) {
+    if (aniEnv == nullptr || obj == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null env");
         return;
     }
