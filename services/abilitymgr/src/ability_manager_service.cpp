@@ -8987,6 +8987,7 @@ int AbilityManagerService::StopUser(int userId, const sptr<IUserCallback> &callb
         missionListWrap->RemoveUserDir(userId);
     }
     ClearUserData(userId);
+    AbilityRuntime::UserController::GetInstance().ClearUserId(userId);
     callback->OnStopUserDone(userId, ERR_OK);
     UpdateApplicationKeepAlive(userId);
     return ERR_OK;
@@ -9038,9 +9039,7 @@ int AbilityManagerService::LogoutUser(int32_t userId, sptr<IUserCallback> callba
     RemoveLauncherDeathRecipient(userId);
     ClearUserData(userId);
     DelayedSingleton<AppScheduler>::GetInstance()->SetEnableStartProcessFlagByUserId(userId, false);
-    if (AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId)) {
-        AbilityRuntime::UserController::GetInstance().ClearUserId(userId);
-    }
+    AbilityRuntime::UserController::GetInstance().ClearUserId(userId);
     DelayedSingleton<AppScheduler>::GetInstance()->KillProcessesByUserId(userId,
         system::GetBoolParameter(DEVELOPER_MODE_STATE, false), callback);
     return ERR_OK;
