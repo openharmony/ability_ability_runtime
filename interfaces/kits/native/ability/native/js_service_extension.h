@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_JS_SERVICE_EXTENSION_H
 
 #include "configuration.h"
+#include "configuration_utils.h"
 #include "insight_intent_execute_param.h"
 #include "insight_intent_execute_result.h"
 #include "insight_intent_executor_info.h"
@@ -181,6 +182,8 @@ private:
     void ListenWMS();
 
     void AddLifecycleEventForJSCall(const std::string &eventStr);
+
+    bool HasScreenDensityBeenSet(std::shared_ptr<Global::Resource::ResourceManager> resourceManager);
 
     JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
