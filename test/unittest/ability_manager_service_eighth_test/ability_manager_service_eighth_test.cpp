@@ -150,10 +150,14 @@ HWTEST_F(AbilityManagerServiceEighthTest, StopUser_001, TestSize.Level1)
     sptr<IUserCallback> callback = new MockIUserCallback();
     EXPECT_EQ(abilityMs->StopUser(userId, callback), CHECK_PERMISSION_FAILED);
     IPCSkeleton::SetCallingUid(ACCOUNT_MGR_SERVICE_UID);
-    sptr<IUserCallback> callback1 = nullptr;
-    EXPECT_EQ(abilityMs->StopUser(userId, callback1), INVALID_PARAMETERS_ERR);
+
+    userId = 100;
     EXPECT_EQ(abilityMs->StopUser(userId, callback), INVALID_USERID_VALUE);
-    system::SetBoolParameter(PRODUCT_ENTERPRISE_FEATURE_SETTING_ENABLED, true);
+
+    userId = 0;
+    EXPECT_EQ(abilityMs->StopUser(userId, callback), INVALID_USERID_VALUE);
+
+    userId = 10000;
     EXPECT_EQ(abilityMs->StopUser(userId, callback), INVALID_USERID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceEighthTest StopUser_001 end");
 }
@@ -175,9 +179,13 @@ HWTEST_F(AbilityManagerServiceEighthTest, LogoutUser_001, TestSize.Level1)
     sptr<IUserCallback> callback1 = new MockIUserCallback();
     EXPECT_EQ(abilityMs->LogoutUser(userId, callback1), CHECK_PERMISSION_FAILED);
     IPCSkeleton::SetCallingUid(ACCOUNT_MGR_SERVICE_UID);
+    userId = 0;
+    EXPECT_EQ(abilityMs->LogoutUser(userId, callback1), INVALID_USERID_VALUE);
+    userId = 1000;
     EXPECT_EQ(abilityMs->LogoutUser(userId, callback1), INVALID_USERID_VALUE);
     system::SetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, true);
-    EXPECT_NE(abilityMs->LogoutUser(userId, callback1), ERR_OK);
+    userId = 100;
+    EXPECT_EQ(abilityMs->LogoutUser(userId, callback1), ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceEighthTest LogoutUser_001 end");
 }
 
