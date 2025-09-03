@@ -40,20 +40,20 @@ ohos_shared_library("verticalpanelmanager_napi") {
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
   deps = [
-    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_innerkits_path}/napi_base_context:napi_base_context",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
-    "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
   ]
 
   external_deps = [
     "ability_base:base",
     "ability_base:want",
+    "access_token:libtokenid_sdk",
+    "ace_engine:ace_uicontent",
     "c_utils:utils",
     "hilog:libhilog",
-    "ace_engine:ace_uicontent",
-    "access_token:libtokenid_sdk",
     "ipc:ipc_core",
   ]
   cflags_cc = []
