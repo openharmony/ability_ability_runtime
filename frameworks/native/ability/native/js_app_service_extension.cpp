@@ -261,7 +261,6 @@ void JsAppServiceExtension::OnStart(const AAFwk::Want &want)
     if (context != nullptr) {
 #ifdef SUPPORT_GRAPHICS
         int32_t displayId = AAFwk::DisplayUtil::GetDefaultDisplayId();
-        displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, displayId);
         TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "displayId %{public}d", displayId);
         auto configUtils = std::make_shared<ConfigurationUtils>();
         configUtils->InitDisplayConfig(displayId, context->GetConfiguration(), context->GetResourceManager());
@@ -293,13 +292,13 @@ void JsAppServiceExtension::OnStop()
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
         TAG_LOGD(AAFwkTag::APP_SERVICE_EXT, "app service extension connection not disconnected");
     }
+#ifdef SUPPORT_GRAPHICS
     TAG_LOGI(AAFwkTag::APP_SERVICE_EXT, "UnregisterDisplayInfoChangedListener");
     auto context = GetContext();
     if (context == nullptr || context->GetToken() == nullptr) {
         TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "null context");
         return;
     }
-#ifdef SUPPORT_GRAPHICS
     Rosen::WindowManager::GetInstance()
         .UnregisterDisplayInfoChangedListener(context->GetToken(), displayListener_);
     if (saStatusChangeListener_) {

@@ -168,7 +168,7 @@ int32_t AbilityKeepAliveService::SetAppServiceExtensionKeepAlive(KeepAliveInfo &
         return ERR_OK;
     }
 
-    (void)AbilityKeepAliveDataManager::GetInstance().DeleteKeepAliveData(info);
+    AbilityKeepAliveDataManager::GetInstance().DeleteKeepAliveData(info);
     return AbilityKeepAliveDataManager::GetInstance().InsertKeepAliveData(info);
 }
 
