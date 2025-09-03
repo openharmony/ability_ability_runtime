@@ -123,6 +123,30 @@ HWTEST_F(UserControllerTest, SetCurrentUserId_001, TestSize.Level1)
     userId = 101;
     AbilityRuntime::UserController::GetInstance().SetForegroundUserId(userId, displayId);
     EXPECT_EQ(AbilityRuntime::UserController::GetInstance().GetForegroundUserId(displayId), 101);
+    uint64_t displayId1 = 1;
+    EXPECT_EQ(AbilityRuntime::UserController::GetInstance().GetForegroundUserId(displayId1), 0);
+
+    uint64_t displayId2 = 0;
+    EXPECT_TRUE(AbilityRuntime::UserController::GetInstance().GetDisplayIdByForegroundUserId(userId, displayId2));
+    int32_t userId2 = 102;
+    EXPECT_FALSE(AbilityRuntime::UserController::GetInstance().GetDisplayIdByForegroundUserId(userId2, displayId2));
+
+    EXPECT_TRUE(AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId));
+    EXPECT_FALSE(AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId2));
+
+    EXPECT_TRUE(AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId, displayId));
+    EXPECT_FALSE(AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId2, displayId));
+
+    std::vector<int32_t> userIds;
+    AbilityRuntime::UserController::GetInstance().GetAllForegroundUserId(userIds);
+    EXPECT_EQ(static_cast<int32_t>(userIds.size()), 1);
+
+    EXPECT_EQ(AbilityRuntime::UserController::GetInstance().GetCallerUserId(), userId);
+
+    AbilityRuntime::UserController::GetInstance().ClearUserId(userId2);
+    EXPECT_TRUE(AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId));
+    AbilityRuntime::UserController::GetInstance().ClearUserId(userId);
+    EXPECT_FALSE(AbilityRuntime::UserController::GetInstance().IsForegroundUser(userId));
 }
 
 /**
