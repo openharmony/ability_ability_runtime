@@ -14,6 +14,7 @@
 */
 
 #include "ani_base_context.h"
+#include "hilog_tag_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
