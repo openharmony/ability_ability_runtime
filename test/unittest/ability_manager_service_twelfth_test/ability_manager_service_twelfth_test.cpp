@@ -54,6 +54,9 @@ constexpr int32_t UPDATE_CONFIG_FLAG_APPEND = 2;
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr int32_t ACCOUNT_MGR_SERVICE_UID = 3058;
+} // namespace
 class AbilityManagerServiceTwelfthTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -542,11 +545,29 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, StartUser_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartUser_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    int userId = 0;
-    sptr<IUserCallback> callback = new MockIUserCallback();
+    int32_t userId = 0;
+    uint64_t displayId = 0;
+    sptr<IUserCallback> callback = nullptr;
+    auto retCode = abilityMs_->StartUser(userId, displayId, callback);
+    EXPECT_EQ(retCode, INVALID_PARAMETERS_ERR);
+
+    callback = new MockIUserCallback();
     bool isAppRecovery = false;
-    auto retCode = abilityMs_->StartUser(userId, 0, callback, isAppRecovery);
+    retCode = abilityMs_->StartUser(userId, displayId, callback, isAppRecovery);
     EXPECT_EQ(retCode, INVALID_USERID_VALUE);
+
+    userId = 100;
+    retCode = abilityMs_->StartUser(userId, displayId, callback, isAppRecovery);
+    EXPECT_EQ(retCode, CHECK_PERMISSION_FAILED);
+
+    IPCSkeleton::SetCallingUid(ACCOUNT_MGR_SERVICE_UID);
+    userId =  10000;
+    retCode = abilityMs_->StartUser(userId, displayId, callback, isAppRecovery);
+    EXPECT_EQ(retCode, INVALID_USERID_VALUE);
+
+    userId =  100;
+    retCode = abilityMs_->StartUser(userId, displayId, callback, isAppRecovery);
+    EXPECT_EQ(retCode, ERR_INVALID_CALLER);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartUser_001 end");
 }
 
@@ -566,6 +587,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, StartAbilityByCallWithErrMsg_001, Tes
     auto retCode = abilityMs_->StartAbilityByCallWithErrMsg(want, nullptr, nullptr, accountId, errMsg);
     EXPECT_EQ(retCode, ERR_INVALID_VALUE);
     sptr<IAbilityConnection> connect = new MockIAbilityConnection();
+    accountId = 0;
     retCode = abilityMs_->StartAbilityByCallWithErrMsg(want, connect, nullptr, accountId, errMsg);
     EXPECT_EQ(retCode, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTwelfthTest StartAbilityByCallWithErrMsg_001 end");

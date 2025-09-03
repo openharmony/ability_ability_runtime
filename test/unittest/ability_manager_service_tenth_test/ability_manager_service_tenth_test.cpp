@@ -432,6 +432,7 @@ HWTEST_F(AbilityManagerServiceTenhtTest, SubscribeScreenUnlockedEvent_001, TestS
     std::queue<AutoStartupInfo> infoQueue;
     abilityMs_->StartAutoStartupApps(infoQueue);
     AutoStartupInfo autoStartupInfo;
+    autoStartupInfo.userId = userId;
     infoQueue.push(autoStartupInfo);
     abilityMs_->StartAutoStartupApps(infoQueue);
     abilityMs_->SubscribeScreenUnlockedEvent();
