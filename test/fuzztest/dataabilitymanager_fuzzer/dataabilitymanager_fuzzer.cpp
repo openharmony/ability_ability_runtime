@@ -17,6 +17,10 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
+#include <cstring>
+#include <string>
+#include <vector>
 #include <fuzzer/FuzzedDataProvider.h>
 
 #define private public
@@ -112,10 +116,14 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     dataAbilityManager->GetAbilityRecordById(int64Param);
     dataAbilityManager->GetAbilityRecordByToken(token);
     dataAbilityManager->GetAbilityRecordByScheduler(scheduler);
-    char *func = new char[stringParam.length() + 1];
-    dataAbilityManager->Dump(func, intParam);
+    auto func = std::make_unique<char[]>(stringParam.length() + 1);
+    if (memcpy_s(func.get(), stringParam.length() + 1, stringParam.data(), stringParam.length()) != EOK) {
+        return false;
+    }
+    func[stringParam.length()] = '\0';
+    dataAbilityManager->Dump(static_cast<const char*>(func.get()), intParam);
     dataAbilityManager->LoadLocked(stringParam, abilityRequest);
-    dataAbilityManager->DumpLocked(func, intParam);
+    dataAbilityManager->DumpLocked(static_cast<const char*>(func.get()), intParam);
     dataAbilityManager->DumpState(info, stringParam);
     std::shared_ptr<DataAbilityRecord> record;
     dataAbilityManager->DumpClientInfo(info, isClient, record);
