@@ -2499,5 +2499,45 @@ int32_t AppMgrProxy::QueryRunningSharedBundles(pid_t pid, std::map<std::string, 
     }
     return ERR_OK;
 }
+
+int32_t AppMgrProxy::RegisterApplicationStateObserverWithFilter(sptr<IApplicationStateObserver> observer,
+    const std::vector<std::string> &bundleNameList, const AppStateFilter &appStateFilter, bool isUsingFilter)
+{
+    if (!observer) {
+        TAG_LOGE(AAFwkTag::APPMGR, "observer null");
+        return ERR_INVALID_VALUE;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "RegisterApplicationStateObserverWithFilter start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return AAFwk::ERR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteRemoteObject(observer->AsObject())) {
+        TAG_LOGE(AAFwkTag::APPMGR, "observer write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteStringVector(bundleNameList)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundleNameList write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteParcelable(&appStateFilter)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appStateFilter write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(isUsingFilter)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "isUsingFilter write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    auto error = SendRequest(AppMgrInterfaceCode::REGISTER_APPLICATION_STATE_OBSERVER_WITH_FILTER,
+        data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

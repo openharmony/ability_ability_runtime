@@ -1320,5 +1320,24 @@ bool UnwrapLocaleFromJS(napi_env env, napi_value jsValue, std::string &value)
 
     return UnwrapStringFromJS2(env, locale, value);
 }
+
+/**
+ * @brief Get the native number(uint32) from the JSObject of the given property name.
+ *
+ * @param env The environment that the Node-API call is invoked under.
+ * @param jsObject Indicates object passed by JS.
+ * @param propertyName Indicates the name of the property.
+ * @param value Indicates the returned native value.
+ *
+ * @return Return true if successful, else return false.
+ */
+bool UnwrapUint32ByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, uint32_t &value)
+{
+    napi_value jsValue = GetPropertyValueByPropertyName(env, jsObject, propertyName, napi_number);
+    if (jsValue != nullptr) {
+        return napi_get_value_uint32(env, jsValue, &value) == napi_ok;
+    }
+    return false;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

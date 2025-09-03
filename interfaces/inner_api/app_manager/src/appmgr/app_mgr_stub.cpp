@@ -138,6 +138,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data
             return HandleUnregisterApplicationStateObserver(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::PRELOAD_MODULE_FINISHED):
             return HandlePreloadModuleFinished(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_APPLICATION_STATE_OBSERVER_WITH_FILTER):
+            return HandleRegisterApplicationStateObserverWithFilter(data, reply);
     }
     return INVALID_FD;
 }
@@ -2082,6 +2084,27 @@ int32_t AppMgrStub::HandleQueryRunningSharedBundles(MessageParcel &data, Message
             return IPC_STUB_ERR;
         }
     }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleRegisterApplicationStateObserverWithFilter(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<std::string> bundleNameList;
+    auto callback = iface_cast<IApplicationStateObserver>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    data.ReadStringVector(&bundleNameList);
+    std::unique_ptr<AppStateFilter> appStateFilter(data.ReadParcelable<AppStateFilter>());
+    if (appStateFilter == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appStateFilter is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    bool isUsingFilter = data.ReadBool();
+    int32_t result = RegisterApplicationStateObserverWithFilter(callback,
+        bundleNameList, *appStateFilter, isUsingFilter);
+    reply.WriteInt32(result);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

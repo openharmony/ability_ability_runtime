@@ -25,6 +25,7 @@
 #include "app_mgr_interface.h"
 #include "app_running_status_listener_interface.h"
 #include "application_info.h"
+#include "application_state_filter.h"
 #include "bundle_info.h"
 #include "fault_data.h"
 #include "iapplication_state_observer.h"
@@ -1015,6 +1016,15 @@ public:
     int32_t QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles);
 
     int32_t VerifyKillProcessPermission(const std::string &bundleName) const;
+    
+    /**
+     * Register application, process or ability state observer.
+     * @param observer, bundleNameList, appStateFilter.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RegisterApplicationStateObserverWithFilter(sptr<IApplicationStateObserver> observer,
+        const std::vector<std::string> &bundleNameList = {}, const AppStateFilter &appStateFilter = AppStateFilter(),
+        bool isUsingFilter = false);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

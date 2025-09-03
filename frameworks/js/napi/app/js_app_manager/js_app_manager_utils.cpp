@@ -17,6 +17,7 @@
 
 #include <cstdint>
 
+#include "application_state_filter.h"
 #include "hilog_tag_wrapper.h"
 #include "iapplication_state_observer.h"
 #include "js_app_process_state.h"
@@ -399,6 +400,148 @@ napi_value CreateJsKeepAliveBundleInfoArray(napi_env env, const std::vector<Keep
         napi_set_element(env, arrayValue, index++, CreateJsKeepAliveBundleInfo(env, item));
     }
     return arrayValue;
+}
+
+napi_value FilterBundleTypeInit(napi_env env)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null env");
+        return nullptr;
+    }
+
+    napi_value object = nullptr;
+    napi_create_object(env, &object);
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null obj");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, object, "APP",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterBundleType::APP)));
+    napi_set_named_property(env, object, "ATOMIC_SERVICE",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterBundleType::ATOMIC_SERVICE)));
+
+    return object;
+}
+
+napi_value FilterAppStateTypeInit(napi_env env)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null env");
+        return nullptr;
+    }
+
+    napi_value object = nullptr;
+    napi_create_object(env, &object);
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null obj");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, object, "CREATE",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterAppStateType::CREATE)));
+    napi_set_named_property(env, object, "FOREGROUND",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterAppStateType::FOREGROUND)));
+    napi_set_named_property(env, object, "BACKGROUND",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterAppStateType::BACKGROUND)));
+    napi_set_named_property(env, object, "DESTROY",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterAppStateType::DESTROY)));
+
+    return object;
+}
+
+napi_value FilterProcessStateTypeInit(napi_env env)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null env");
+        return nullptr;
+    }
+
+    napi_value object = nullptr;
+    napi_create_object(env, &object);
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null obj");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, object, "CREATE",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterProcessStateType::CREATE)));
+    napi_set_named_property(env, object, "FOREGROUND",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterProcessStateType::FOREGROUND)));
+    napi_set_named_property(env, object, "BACKGROUND",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterProcessStateType::BACKGROUND)));
+    napi_set_named_property(env, object, "DESTROY",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterProcessStateType::DESTROY)));
+
+    return object;
+}
+
+napi_value FilterAbilityStateTypeInit(napi_env env)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null env");
+        return nullptr;
+    }
+
+    napi_value object = nullptr;
+    napi_create_object(env, &object);
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null obj");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, object, "CREATE",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterAbilityStateType::CREATE)));
+    napi_set_named_property(env, object, "FOREGROUND",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterAbilityStateType::FOREGROUND)));
+    napi_set_named_property(env, object, "BACKGROUND",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterAbilityStateType::BACKGROUND)));
+    napi_set_named_property(env, object, "DESTROY",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterAbilityStateType::DESTROY)));
+
+    return object;
+}
+
+napi_value FilterCallbackInit(napi_env env)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null env");
+        return nullptr;
+    }
+
+    napi_value object = nullptr;
+    napi_create_object(env, &object);
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "null obj");
+        return nullptr;
+    }
+
+    napi_set_named_property(env, object, "ON_FOREGROUND_APPLICATION_CHANGED",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterCallback::ON_FOREGROUND_APPLICATION_CHANGED)));
+    napi_set_named_property(env, object, "ON_ABILITY_STATE_CHANGED",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterCallback::ON_ABILITY_STATE_CHANGED)));
+    napi_set_named_property(env, object, "ON_PROCESS_CREATED",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterCallback::ON_PROCESS_CREATED)));
+    napi_set_named_property(env, object, "ON_PROCESS_DIED",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterCallback::ON_PROCESS_DIED)));
+    napi_set_named_property(env, object, "ON_PROCESS_STATE_CHANGED",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterCallback::ON_PROCESS_STATE_CHANGED)));
+    napi_set_named_property(env, object, "ON_APP_STARTED",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterCallback::ON_APP_STARTED)));
+    napi_set_named_property(env, object, "ON_APP_STOPPED",
+        CreateJsValue(env, static_cast<uint32_t>(AppExecFwk::FilterCallback::ON_APP_STOPPED)));
+
+    return object;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

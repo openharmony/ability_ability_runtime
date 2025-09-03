@@ -25,6 +25,7 @@
 #include "app_foreground_state_observer_interface.h"
 #include "app_running_record.h"
 #include "app_state_data.h"
+#include "application_state_filter.h"
 #include "cpp/mutex.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
@@ -42,6 +43,7 @@ namespace AppExecFwk {
 struct AppStateObserverInfo {
     int32_t uid = 0;
     std::vector<std::string> bundleNames;
+    AppStateFilter appStateFilter;
 };
 
 using AppStateObserverMap = std::map<sptr<IApplicationStateObserver>, AppStateObserverInfo>;
@@ -58,14 +60,14 @@ class AppStateObserverManager : public std::enable_shared_from_this<AppStateObse
 public:
     void Init();
     int32_t RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer,
-        const std::vector<std::string> &bundleNameList = {});
+        const std::vector<std::string> &bundleNameList = {}, const AppStateFilter &appStateFilter = AppStateFilter());
     int32_t UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer);
     int32_t RegisterAppForegroundStateObserver(const sptr<IAppForegroundStateObserver> &observer);
     int32_t UnregisterAppForegroundStateObserver(const sptr<IAppForegroundStateObserver> &observer);
     int32_t RegisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer);
     int32_t UnregisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer);
-    void StateChangedNotifyObserver(
-        const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged);
+    void StateChangedNotifyObserver(const AbilityStateData abilityStateData, bool isAbility,
+        bool isFromWindowFocusChanged, BundleType bundleType = BundleType::APP);
     void OnAppStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, const ApplicationState state,
         bool needNotifyApp, bool isFromWindowFocusChanged);
     void OnAppStarted(const std::shared_ptr<AppRunningRecord> &appRecord);
@@ -100,8 +102,8 @@ private:
         bool needNotifyApp, bool isFromWindowFocusChanged);
     void HandleOnAppStarted(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnAppStopped(const std::shared_ptr<AppRunningRecord> &appRecord);
-    void HandleStateChangedNotifyObserver(
-        const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged);
+    void HandleStateChangedNotifyObserver(const AbilityStateData abilityStateData, bool isAbility,
+        bool isFromWindowFocusChanged, BundleType bundleType = BundleType::APP);
     void HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord, bool isPreload);
     void HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &RenderRecord, const bool isPreload);
 #ifdef SUPPORT_CHILD_PROCESS
@@ -130,10 +132,10 @@ private:
     void OnObserverDied(const wptr<IRemoteObject> &remote, const ObserverType &type);
     AppStateData WrapAppStateData(const std::shared_ptr<AppRunningRecord> &appRecord,
         const ApplicationState state, bool isFromWindowFocusChanged = false);
-    void HandleOnProcessCreated(const ProcessData &data);
+    void HandleOnProcessCreated(const ProcessData &data, BundleType bundleType = BundleType::APP);
     void HandleOnProcessStateChanged(
         const std::shared_ptr<AppRunningRecord> &appRecordm, bool isFromWindowFocusChanged = false);
-    void HandleOnProcessDied(const ProcessData &data);
+    void HandleOnProcessDied(const ProcessData &data, BundleType bundleType = BundleType::APP);
     void HandleOnProcessResued(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnPageShow(const PageStateData pageStateData);
     void HandleOnPageHide(const PageStateData pageStateData);

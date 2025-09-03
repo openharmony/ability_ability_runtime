@@ -869,6 +869,16 @@ public:
      */
     int32_t ExitMasterProcessRole() override;
 
+    /**
+     * Register application, process or ability state observer.
+     * @param observer, AppStateFilter.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RegisterApplicationStateObserverWithFilter(sptr<IApplicationStateObserver> observer,
+        const std::vector<std::string> &bundleNameList = {},
+        const AppStateFilter &appStateFilter = AppStateFilter(),
+        bool isUsingFilter = false) override;
+
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);
