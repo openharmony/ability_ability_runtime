@@ -323,7 +323,6 @@ void ApplicationStateObserverProxy::OnPageShow(const PageStateData &pageStateDat
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteParcelable(&pageStateData)) {
@@ -345,7 +344,6 @@ void ApplicationStateObserverProxy::OnPageHide(const PageStateData &pageStateDat
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "WriteInterfaceToken failed");
         return;
     }
     if (!data.WriteParcelable(&pageStateData)) {
