@@ -15,7 +15,6 @@ import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("verticalpanelmanager_napi") {
-
   sanitize = {
     integer_overflow = true
     ubsan = true
