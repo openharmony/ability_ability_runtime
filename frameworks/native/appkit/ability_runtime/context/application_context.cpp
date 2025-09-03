@@ -113,7 +113,7 @@ void ApplicationContext::DispatchOnAbilityCreate(const std::shared_ptr<NativeRef
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
-    for (auto callback : callbacks_) {
+    for (const auto& callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityCreate(ability);
         }
@@ -128,7 +128,7 @@ void ApplicationContext::DispatchOnWindowStageCreate(const std::shared_ptr<Nativ
         return;
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
-    for (auto callback : callbacks_) {
+    for (const auto& callback : callbacks_) {
         if (callback != nullptr) {
             callback->OnWindowStageCreate(ability, windowStage);
         }
