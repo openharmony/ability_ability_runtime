@@ -34,6 +34,7 @@
 #include "app_scheduler_proxy.h"
 #include "appexecfwk_errors.h"
 #include "application_info.h"
+#include "application_state_filter.h"
 #include "if_system_ability_manager.h"
 #include "nocopyable.h"
 #include "system_ability.h"
@@ -890,6 +891,17 @@ public:
     int32_t LaunchAbility(sptr<IRemoteObject> token) override;
     
     virtual int32_t QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles) override;
+
+    /**
+     * Register application/process/ability state observer.
+     * @param observer, bundleNameList, appStateFilter.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RegisterApplicationStateObserverWithFilter(sptr<IApplicationStateObserver> observer,
+        const std::vector<std::string> &bundleNameList = {},
+        const AppStateFilter &appStateFilter = AppStateFilter(),
+        bool isUsingFilter = false) override;
+
 private:
     /**
      * Init, Initialize application services.

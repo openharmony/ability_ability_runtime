@@ -273,6 +273,18 @@ napi_value WrapLocaleToJS(napi_env env, const std::string &locale);
 bool UnwrapLocaleByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, std::string &value);
 
 bool UnwrapLocaleFromJS(napi_env env, napi_value jsValue, std::string &value);
+
+/**
+ * @brief Get the native number(uint32) from the JSObject of the given property name.
+ *
+ * @param env The environment that the Node-API call is invoked under.
+ * @param jsObject Indicates object passed by JS.
+ * @param propertyName Indicates the name of the property.
+ * @param value Indicates the returned native value.
+ *
+ * @return Return true if successful, else return false.
+ */
+bool UnwrapUint32ByPropertyName(napi_env env, napi_value jsObject, const char *propertyName, uint32_t &value);
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_NAPI_COMMON_UTIL_H
