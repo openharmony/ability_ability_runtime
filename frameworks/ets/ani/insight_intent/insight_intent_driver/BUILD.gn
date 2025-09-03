@@ -57,6 +57,7 @@ ohos_shared_library("insight_intent_driver_ani_kit") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
     "runtime_core:ani",
   ]
