@@ -15,6 +15,7 @@
 
 #include "ets_runtime.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <dlfcn.h>
 #include <filesystem>
@@ -65,6 +66,12 @@ constexpr char ENTRY_PATH_MAP_FILE[] = "/system/framework/entrypath.json"; // wi
 constexpr char ENTRY_PATH_MAP_KEY[] = "entryPath"; // will deprecated
 constexpr char DEFAULT_ENTRY_ABILITY_CLASS[] = "entry/src/main/ets/entryability/EntryAbility/EntryAbility";
 constexpr int32_t DOT_START_LEN = 2;
+
+static void HandleOhmUrlBase(std::string &base)
+{
+    // <dir1>/<dir2>/  =>  <dir1>.<dir2>.
+    std::replace(base.begin(), base.end(), '/', '.');
+}
 
 class EntryPathManager {
 public:
@@ -160,6 +167,7 @@ private:
             return fileName;
         }
         std::string base = srcEntry.substr(0, lastSlashPos + 1);
+        HandleOhmUrlBase(base);
         std::string fileName = srcEntry.substr(lastSlashPos + 1);
         HandleOhmUrlFileName(fileName);
         return base + fileName;
@@ -169,11 +177,11 @@ private:
     {
         size_t colonPos = fileName.rfind(':');
         if (colonPos != std::string::npos) {
-            // <fileName>:<className>  =>  <fileName>/<className>
-            fileName.replace(colonPos, 1, "/");
+            // <fileName>:<className>  =>  <fileName>.<className>
+            fileName.replace(colonPos, 1, ".");
         } else {
-            // <fileName>  =>  <fileName>/<fileName>
-            fileName = fileName + "/" + fileName;
+            // <fileName>  =>  <fileName>.<fileName>
+            fileName = fileName + "." + fileName;
         }
     }
 
@@ -578,6 +586,7 @@ std::string ETSRuntime::HandleOhmUrlSrcEntry(const std::string &srcEntry)
         return fileName;
     }
     std::string base = srcEntry.substr(0, lastSlashPos + 1);
+    HandleOhmUrlBase(base);
     std::string fileName = srcEntry.substr(lastSlashPos + 1);
     HandleOhmUrlFileName(fileName);
     return base + fileName;
@@ -587,11 +596,11 @@ void ETSRuntime::HandleOhmUrlFileName(std::string &fileName)
 {
     size_t colonPos = fileName.rfind(':');
     if (colonPos != std::string::npos) {
-        // <fileName>:<className>  =>  <fileName>/<className>
-        fileName.replace(colonPos, 1, "/");
+        // <fileName>:<className>  =>  <fileName>.<className>
+        fileName.replace(colonPos, 1, ".");
     } else {
-        // <fileName>  =>  <fileName>/<fileName>
-        fileName = fileName + "/" + fileName;
+        // <fileName>  =>  <fileName>.<fileName>
+        fileName = fileName + "." + fileName;
     }
 }
 
