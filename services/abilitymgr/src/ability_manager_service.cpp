@@ -12366,9 +12366,15 @@ int32_t AbilityManagerService::AttachAppDebug(const std::string &bundleName, boo
 
     int32_t err = ERR_OK;
     int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
-    if ((err = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId)) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckAppProvisionMode returns errcode=%{public}d", err);
-        return err;
+    AppExecFwk::ApplicationInfo appInfo;
+    if (!StartAbilityUtils::GetApplicationInfo(bundleName, userId, appInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get application info failed: %{public}s", bundleName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!IsAllowAttachOrDetachAppDebug(appInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "release application or check permission error");
+        return ERR_NOT_IN_APP_PROVISION_MODE;
     }
 
     ConnectInitAbilityDebugDeal();
@@ -12395,12 +12401,31 @@ int32_t AbilityManagerService::DetachAppDebug(const std::string &bundleName, boo
 
     int32_t err = ERR_OK;
     int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
-    if ((err = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId)) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckAppProvisionMode returns errcode=%{public}d", err);
-        return err;
+    AppExecFwk::ApplicationInfo appInfo;
+    if (!StartAbilityUtils::GetApplicationInfo(bundleName, userId, appInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get application info failed: %{public}s", bundleName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!IsAllowAttachOrDetachAppDebug(appInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "release application or check permission error");
+        return ERR_NOT_IN_APP_PROVISION_MODE;
     }
 
     return IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->DetachAppDebug(bundleName));
+}
+
+bool AbilityManagerService::IsAllowAttachOrDetachAppDebug(AppExecFwk::ApplicationInfo &appInfo)
+{
+    if (appInfo.appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
+        return true;
+    }
+    bool isDebugEnabled = AppUtils::GetInstance().IsSupportAllowDebugPermission();
+    if (isDebugEnabled && AccessTokenKit::VerifyAccessToken(appInfo.accessTokenId,
+        PermissionConstants::PERMISSION_ALL_DEBUG , false) == AppExecFwk::Constants::PERMISSION_GRANTED) {
+        return true;
+    }
+    return false;
 }
 
 std::string AbilityManagerService::InsightIntentGetcallerBundleName()
