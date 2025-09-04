@@ -1151,13 +1151,14 @@ int32_t AppMgrService::UpdateConfigurationByBundleName(const Configuration& conf
     return appMgrServiceInner_->UpdateConfigurationByBundleName(config, name, appIndex);
 }
 
-int32_t AppMgrService::RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer)
+int32_t AppMgrService::RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer,
+    const int32_t userId)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "not ready");
         return ERR_INVALID_OPERATION;
     }
-    return appMgrServiceInner_->RegisterConfigurationObserver(observer);
+    return appMgrServiceInner_->RegisterConfigurationObserver(observer, userId);
 }
 
 int32_t AppMgrService::UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer)

@@ -1946,7 +1946,7 @@ HWTEST_F(AppMgrServiceInnerSeventhTest, RegisterConfigurationObserver_001, TestS
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().isSACall_ = false;
 
-    auto ret = appMgrServiceInner->RegisterConfigurationObserver(nullptr);
+    auto ret = appMgrServiceInner->RegisterConfigurationObserver(nullptr, -1);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "RegisterConfigurationObserver_001 end");
 }

@@ -969,7 +969,7 @@ HWTEST_F(AppMgrServiceTest, RegisterConfigurationObserver_001, TestSize.Level2)
     auto appMgrService = std::make_shared<AppMgrService>();
     sptr<IConfigurationObserver> observer = nullptr;
     appMgrService->SetInnerService(nullptr);
-    int32_t res = appMgrService->RegisterConfigurationObserver(observer);
+    int32_t res = appMgrService->RegisterConfigurationObserver(observer, -1);
     EXPECT_EQ(res, ERR_INVALID_OPERATION);
 }
 
@@ -988,7 +988,7 @@ HWTEST_F(AppMgrServiceTest, RegisterConfigurationObserver_002, TestSize.Level2)
     appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
     appMgrService->taskHandler_ = taskHandler_;
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
-    int32_t res = appMgrService->RegisterConfigurationObserver(observer);
+    int32_t res = appMgrService->RegisterConfigurationObserver(observer, -1);
     EXPECT_NE(res, ERR_INVALID_OPERATION);
 }
 

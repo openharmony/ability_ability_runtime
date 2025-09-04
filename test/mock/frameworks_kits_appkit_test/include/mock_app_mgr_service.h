@@ -60,7 +60,8 @@ public:
     MOCK_METHOD2(GetRenderProcessTerminationStatus, int(pid_t renderPid, int& status));
     MOCK_METHOD1(GetConfiguration, int32_t(Configuration& config));
     MOCK_METHOD2(UpdateConfiguration, int32_t(const Configuration& config, const int32_t userId));
-    MOCK_METHOD1(RegisterConfigurationObserver, int32_t(const sptr<IConfigurationObserver>& observer));
+    MOCK_METHOD2(RegisterConfigurationObserver,
+        int32_t(const sptr<IConfigurationObserver>& observer, const int32_t userId));
     MOCK_METHOD1(UnregisterConfigurationObserver, int32_t(const sptr<IConfigurationObserver>& observer));
     MOCK_METHOD1(GetAppRunningStateByBundleName, bool(const std::string& bundleName));
     MOCK_METHOD2(NotifyLoadRepairPatch, int32_t(const std::string& bundleName,
