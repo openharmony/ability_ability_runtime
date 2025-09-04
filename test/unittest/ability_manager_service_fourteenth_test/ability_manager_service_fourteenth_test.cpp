@@ -1471,5 +1471,74 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, ProcessUdmfKey_004, TestSize.Level
     EXPECT_EQ(result, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest ProcessUdmfKey_004 end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: JudgeSystemParamsForPicker
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService JudgeSystemParamsForPicker
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, JudgeSystemParamsForPicker_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest JudgeSystemParamsForPicker_001 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    // 创建空的WantParams参数
+    WantParams parameters;
+
+    // 测试场景：参数中不包含SCREENCONFIG_SCREENMODE时，应返回true
+    EXPECT_TRUE(abilityMs->JudgeSystemParamsForPicker(parameters));
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest JudgeSystemParamsForPicker_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: JudgeSystemParamsForPicker
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService JudgeSystemParamsForPicker
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, JudgeSystemParamsForPicker_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest JudgeSystemParamsForPicker_002 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+
+    WantParams parameters;
+
+    // 模拟参数中包含SCREENCONFIG_SCREENMODE
+    parameters.SetParam("ohos.verticalpanel.screenconfig.screenmode", nullptr);
+
+    // Mock场景：模拟JudgeCallerIsAllowedToUseSystemAPI返回true
+    // 测试场景：当调用者有权限使用系统API时，应返回true
+    MyStatus::GetInstance().perJudgeCallerIsAllowedToUseSystemAPI_ = true;
+    EXPECT_TRUE(abilityMs->JudgeSystemParamsForPicker(parameters));
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest JudgeSystemParamsForPicker_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: JudgeSystemParamsForPicker
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService JudgeSystemParamsForPicker
+ */
+HWTEST_F(AbilityManagerServiceFourteenthTest, JudgeSystemParamsForPicker_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest JudgeSystemParamsForPicker_003 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+
+    WantParams parameters;
+
+    // 模拟参数中包含SCREENCONFIG_SCREENMODE
+    parameters.SetParam("ohos.verticalpanel.screenconfig.screenmode", nullptr);
+
+    // Mock场景：模拟JudgeCallerIsAllowedToUseSystemAPI返回false
+    // 测试场景：当调用者没有权限使用系统API时，应返回false
+    MyStatus::GetInstance().perJudgeCallerIsAllowedToUseSystemAPI_ = false;
+    EXPECT_FALSE(abilityMs->JudgeSystemParamsForPicker(parameters));
+    MyStatus::GetInstance().perJudgeCallerIsAllowedToUseSystemAPI_ = true;
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest JudgeSystemParamsForPicker_003 end");
+}
+
 } // namespace AAFwk
 } // namespace OHOS

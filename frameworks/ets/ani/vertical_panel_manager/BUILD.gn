@@ -1,0 +1,68 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
+
+ohos_shared_library("vertical_panel_manager_ani_kit") {
+  shlib_type = "ani"
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  include_dirs = [
+    "include",
+    "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
+  ]
+  configs = []
+
+  public_configs = []
+
+  sources = [
+    "./src/ets_panel_start_callback.cpp",
+    "./src/ets_vertical_panel_manager.cpp",
+  ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+
+  deps = [
+    "${ability_runtime_innerkits_path}/ani_base_context:ani_base_context",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "access_token:libtokenid_sdk",
+    "ace_engine:ace_uicontent",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "runtime_core:ani",
+    "window_manager:session_manager_lite",
+  ]
+
+  innerapi_tags = [ "platformsdk" ]
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
