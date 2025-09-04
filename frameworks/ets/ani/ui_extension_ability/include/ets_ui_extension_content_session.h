@@ -76,6 +76,7 @@ public:
 
     static void NativeSendData(ani_env *env, ani_object obj, ani_object data);
     static void NativeLoadContent(ani_env *env, ani_object obj, ani_string path, ani_object storage);
+    static void NativeLoadContentByName(ani_env *env, ani_object obj, ani_string path, ani_object storage);
     static void NativeTerminateSelf(ani_env *env, ani_object obj, ani_object callback);
     static void NativeSetWindowBackgroundColor(ani_env *env, ani_object obj, ani_string color);
     static int NativeTerminateSelfWithResult(
@@ -115,6 +116,7 @@ private:
     ani_object GetUIExtensionWindowProxy(ani_env *env, ani_object object);
     void SetWindowPrivacyModeInner(ani_env *env, ani_boolean isPrivacyMode, ani_object callbackObj,
         ani_vm *etsVm, ani_ref callbackRef);
+    void LoadContentByName(ani_env *env, ani_object object, ani_string path, ani_object storage);
     static ani_status BindNativeMethod(ani_env *env, ani_class cls);
 
     sptr<AAFwk::SessionInfo> sessionInfo_;
