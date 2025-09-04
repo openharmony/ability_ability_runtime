@@ -193,7 +193,7 @@ HWTEST_F(KioskManagerTest, IsInWhiteList_002, TestSize.Level1) {
 HWTEST_F(KioskManagerTest, ExitKioskMode_001, TestSize.Level1) {
     MyStatus::GetInstance().paramGetBoolParameter_ = false;
     auto callerToken = MockToken(AbilityType::PAGE);
-    auto result = KioskManager::GetInstance().ExitKioskMode(callerToken);
+    auto result = KioskManager::GetInstance().ExitKioskMode(callerToken, false);
     EXPECT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
 }
 
@@ -205,8 +205,116 @@ HWTEST_F(KioskManagerTest, ExitKioskMode_001, TestSize.Level1) {
  */
 HWTEST_F(KioskManagerTest, ExitKioskMode_002, TestSize.Level1) {
     MyStatus::GetInstance().paramGetBoolParameter_ = true;
-    auto result = KioskManager::GetInstance().ExitKioskMode(nullptr);
+    auto result = KioskManager::GetInstance().ExitKioskMode(nullptr, false);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+}
+
+/*
+ * Feature: KioskManager
+ * Function: ExitKioskMode
+ * SubFunction: NA
+ * FunctionPoints: KioskManager ExitKioskMode
+ */
+HWTEST_F(KioskManagerTest, ExitKioskMode_003, TestSize.Level1) {
+    MyStatus::GetInstance().paramGetBoolParameter_ = true;
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = true;
+    auto callerToken = MockToken(AbilityType::PAGE);
+    MyStatus::GetInstance().ipcGetCallingUid_ = KioskManager::GetInstance().kioskStatus_.kioskBundleUid_;
+    auto result = KioskManager::GetInstance().ExitKioskMode(callerToken, false);
+    EXPECT_EQ(result, ERR_KIOSK_MODE_NOT_IN_WHITELIST);
+}
+
+/*
+ * Feature: KioskManager
+ * Function: ExitKioskMode
+ * SubFunction: NA
+ * FunctionPoints: KioskManager ExitKioskMode
+ */
+HWTEST_F(KioskManagerTest, ExitKioskMode_004, TestSize.Level1) {
+    MyStatus::GetInstance().paramGetBoolParameter_ = true;
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = true;
+    auto callerToken = MockToken(AbilityType::PAGE);
+    MyStatus::GetInstance().ipcGetCallingUid_ = KioskManager::GetInstance().kioskStatus_.kioskBundleUid_;
+    auto result = KioskManager::GetInstance().ExitKioskMode(callerToken, true);
+    EXPECT_EQ(result, ERR_KIOSK_MODE_NOT_IN_WHITELIST);
+}
+
+/*
+ * Feature: KioskManager
+ * Function: FilterDialogAppInfos
+ * SubFunction: NA
+ * FunctionPoints: KioskManager FilterDialogAppInfos
+ */
+HWTEST_F(KioskManagerTest, FilterDialogAppInfos_001, TestSize.Level1) {
+    MyStatus::GetInstance().paramGetBoolParameter_ = true;
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = false;
+    std::string bundleName = "com.test.demo";
+    KioskManager::GetInstance().whitelist_.emplace(bundleName);
+    std::vector<DialogAppInfo> dialogAppInfos;
+    DialogAppInfo dialogAppInfo;
+    dialogAppInfo.bundleName = bundleName;
+    dialogAppInfos.emplace_back(dialogAppInfo);
+    uint32_t size = dialogAppInfos.size();
+    KioskManager::GetInstance().FilterDialogAppInfos(dialogAppInfos);
+    EXPECT_EQ(dialogAppInfos.size(), size);
+}
+
+/*
+ * Feature: KioskManager
+ * Function: FilterDialogAppInfos
+ * SubFunction: NA
+ * FunctionPoints: KioskManager FilterDialogAppInfos
+ */
+HWTEST_F(KioskManagerTest, FilterDialogAppInfos_002, TestSize.Level1) {
+    MyStatus::GetInstance().paramGetBoolParameter_ = true;
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = true;
+    std::string bundleName = "com.test.demo";
+    KioskManager::GetInstance().whitelist_.clear();
+    std::vector<DialogAppInfo> dialogAppInfos;
+    DialogAppInfo dialogAppInfo;
+    dialogAppInfo.bundleName = bundleName;
+    dialogAppInfos.emplace_back(dialogAppInfo);
+    KioskManager::GetInstance().FilterDialogAppInfos(dialogAppInfos);
+    EXPECT_TRUE(dialogAppInfos.empty());
+}
+
+/*
+ * Feature: KioskManager
+ * Function: FilterAbilityInfos
+ * SubFunction: NA
+ * FunctionPoints: KioskManager FilterAbilityInfos
+ */
+HWTEST_F(KioskManagerTest, FilterAbilityInfos_001, TestSize.Level1) {
+    MyStatus::GetInstance().paramGetBoolParameter_ = true;
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = false;
+    std::string bundleName = "com.test.demo";
+    KioskManager::GetInstance().whitelist_.emplace(bundleName);
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.bundleName = bundleName;
+    abilityInfos.emplace_back(abilityInfo);
+    uint32_t size = abilityInfos.size();
+    KioskManager::GetInstance().FilterAbilityInfos(abilityInfos);
+    EXPECT_EQ(abilityInfos.size(), size);
+}
+
+/*
+ * Feature: KioskManager
+ * Function: FilterAbilityInfos
+ * SubFunction: NA
+ * FunctionPoints: KioskManager FilterAbilityInfos
+ */
+HWTEST_F(KioskManagerTest, FilterAbilityInfos_002, TestSize.Level1) {
+    MyStatus::GetInstance().paramGetBoolParameter_ = true;
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = true;
+    std::string bundleName = "com.test.demo";
+    KioskManager::GetInstance().whitelist_.clear();
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.bundleName = bundleName;
+    abilityInfos.emplace_back(abilityInfo);
+    KioskManager::GetInstance().FilterAbilityInfos(abilityInfos);
+    EXPECT_TRUE(abilityInfos.empty());
 }
 
 /*
@@ -219,7 +327,8 @@ HWTEST_F(KioskManagerTest, ExitKioskModeInner_001, TestSize.Level1) {
     KioskManager::GetInstance().kioskStatus_.isKioskMode_ = false;
     auto callerToken = MockToken(AbilityType::PAGE);
     std::string bundleName = "com.test.example";
-    auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken);
+    KioskManager::GetInstance().whitelist_.emplace(bundleName);
+    auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken, false);
     EXPECT_EQ(result, ERR_NOT_IN_KIOSK_MODE);
 }
 
@@ -369,6 +478,9 @@ HWTEST_F(KioskManagerTest, KioskInterceptor_001, TestSize.Level1)
 {
     auto kioskInterceptor = std::make_shared<KioskInterceptor>();
     Want want;
+    want.SetElementName("com.example.test", "MainAbility");
+    want.SetParam(AAFwk::SCREEN_MODE_KEY, ScreenMode::IDLE_SCREEN_MODE);
+    want.SetAction("com.example.myapplication");
     auto shouldBlockFunc = []() { return false; };
     AbilityInterceptorParam param = AbilityInterceptorParam(want, 0, 0, false, nullptr,
         shouldBlockFunc);
@@ -387,6 +499,9 @@ HWTEST_F(KioskManagerTest, KioskInterceptor_002, TestSize.Level1)
 {
     auto kioskInterceptor = std::make_shared<KioskInterceptor>();
     Want want;
+    want.SetElementName("com.example.test", "MainAbility");
+    want.SetParam(AAFwk::SCREEN_MODE_KEY, ScreenMode::IDLE_SCREEN_MODE);
+    want.SetAction("com.example.myapplication");
     auto shouldBlockFunc = []() { return false; };
     AbilityInterceptorParam param = AbilityInterceptorParam(want, 0, 0, false, nullptr,
         shouldBlockFunc);
@@ -407,12 +522,54 @@ HWTEST_F(KioskManagerTest, KioskInterceptor_003, TestSize.Level1)
     auto kioskInterceptor = std::make_shared<KioskInterceptor>();
     Want want;
     std::string bundleName = "com.test.example";
-    want.SetElementName(bundleName, "");
+    want.SetElementName(bundleName, "MainAbility");
+    want.SetParam(AAFwk::SCREEN_MODE_KEY, ScreenMode::IDLE_SCREEN_MODE);
+    want.SetAction("com.example.myapplication");
     auto shouldBlockFunc = []() { return false; };
     AbilityInterceptorParam param = AbilityInterceptorParam(want, 0, 0, false, nullptr,
         shouldBlockFunc);
     KioskManager::GetInstance().kioskStatus_.isKioskMode_ = true;
     KioskManager::GetInstance().whitelist_.emplace(bundleName);
+    int32_t result = kioskInterceptor->DoProcess(param);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/*
+ * Feature: KioskManager
+ * Function: KioskInterceptor
+ * SubFunction: NA
+ * FunctionPoints: KioskInterceptor DoProcess
+ */
+HWTEST_F(KioskManagerTest, KioskInterceptor_004, TestSize.Level1)
+{
+    auto kioskInterceptor = std::make_shared<KioskInterceptor>();
+    Want want;
+    std::string bundleName = "";
+    want.SetElementName(bundleName, "MainAbility");
+    want.SetParam(AAFwk::SCREEN_MODE_KEY, ScreenMode::IDLE_SCREEN_MODE);
+    want.SetAction("com.example.myapplication");
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param = AbilityInterceptorParam(want, 0, 0, false, nullptr,
+        shouldBlockFunc);
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = true;
+    int32_t result = kioskInterceptor->DoProcess(param);
+    EXPECT_EQ(result, ERR_KIOSK_MODE_NOT_IN_WHITELIST);
+}
+
+/*
+ * Feature: KioskManager
+ * Function: KioskInterceptor
+ * SubFunction: NA
+ * FunctionPoints: KioskInterceptor DoProcess
+ */
+HWTEST_F(KioskManagerTest, KioskInterceptor_005, TestSize.Level1)
+{
+    auto kioskInterceptor = std::make_shared<KioskInterceptor>();
+    Want want;
+    std::string bundleName = "com.test.example";
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param = AbilityInterceptorParam(want, 0, 0, false, nullptr,
+        shouldBlockFunc);
     int32_t result = kioskInterceptor->DoProcess(param);
     EXPECT_EQ(result, ERR_OK);
 }
@@ -538,7 +695,7 @@ HWTEST_F(KioskManagerTest, ExitKioskModeInner_002, TestSize.Level1) {
     appInfo.state = AppState::BEGIN;
     KioskManager::GetInstance().OnAppStop(appInfo);
     MyStatus::GetInstance().ipcGetCallingUid_ = KioskManager::GetInstance().kioskStatus_.kioskBundleUid_;
-    auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken);
+    auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken, false);
     EXPECT_EQ(result, INNER_ERR);
 }
 
@@ -555,7 +712,7 @@ HWTEST_F(KioskManagerTest, ExitKioskModeInner_003, TestSize.Level1) {
     KioskManager::GetInstance().whitelist_.emplace(bundleName);
     KioskManager::GetInstance().kioskStatus_.kioskBundleName_ = bundleName;
     MyStatus::GetInstance().ipcGetCallingUid_ = KioskManager::GetInstance().kioskStatus_.kioskBundleUid_ + 1;
-    auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken);
+    auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken, false);
     EXPECT_EQ(result, ERR_NOT_IN_KIOSK_MODE);
 }
 
@@ -572,7 +729,41 @@ HWTEST_F(KioskManagerTest, ExitKioskModeInner_004, TestSize.Level1) {
     KioskManager::GetInstance().whitelist_.emplace(bundleName);
     KioskManager::GetInstance().kioskStatus_.kioskBundleName_ = bundleName;
     MyStatus::GetInstance().ipcGetCallingUid_ = KioskManager::GetInstance().kioskStatus_.kioskBundleUid_;
-    auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken);
+    auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken, false);
+    EXPECT_NE(result, ERR_NOT_IN_KIOSK_MODE);
+}
+
+/*
+ * Feature: KioskManager
+ * Function: ExitKioskMode
+ * SubFunction: NA
+ * FunctionPoints: KioskManager ExitKioskModeInner
+ */
+HWTEST_F(KioskManagerTest, ExitKioskModeInner_005, TestSize.Level1) {
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = true;
+    auto callerToken = MockToken(AbilityType::PAGE);
+    std::string bundleName = "com.test.demo";
+    KioskManager::GetInstance().whitelist_.emplace(bundleName);
+    KioskManager::GetInstance().kioskStatus_.kioskBundleName_ = bundleName;
+    MyStatus::GetInstance().ipcGetCallingUid_ = KioskManager::GetInstance().kioskStatus_.kioskBundleUid_ + 1;
+    auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken, true);
+    EXPECT_NE(result, ERR_NOT_IN_KIOSK_MODE);
+}
+
+/*
+ * Feature: KioskManager
+ * Function: ExitKioskMode
+ * SubFunction: NA
+ * FunctionPoints: KioskManager ExitKioskModeInner
+ */
+HWTEST_F(KioskManagerTest, ExitKioskModeInner_006, TestSize.Level1) {
+    KioskManager::GetInstance().kioskStatus_.isKioskMode_ = true;
+    auto callerToken = MockToken(AbilityType::PAGE);
+    std::string bundleName = "com.test.demo";
+    KioskManager::GetInstance().whitelist_.emplace(bundleName);
+    KioskManager::GetInstance().kioskStatus_.kioskBundleName_ = bundleName;
+    MyStatus::GetInstance().ipcGetCallingUid_ = KioskManager::GetInstance().kioskStatus_.kioskBundleUid_;
+    auto result = KioskManager::GetInstance().ExitKioskModeInner(bundleName, callerToken, true);
     EXPECT_NE(result, ERR_NOT_IN_KIOSK_MODE);
 }
 } // namespace AAFwk
