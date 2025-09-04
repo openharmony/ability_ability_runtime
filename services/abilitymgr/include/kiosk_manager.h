@@ -25,6 +25,7 @@
 #include "interceptor/ability_interceptor_executer.h"
 #include "kiosk_status.h"
 #include "nocopyable.h"
+#include "system_dialog_scheduler.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -33,16 +34,19 @@ public:
     static KioskManager &GetInstance();
     int32_t UpdateKioskApplicationList(const std::vector<std::string> &appList);
     int32_t EnterKioskMode(sptr<IRemoteObject> callerToken);
-    int32_t ExitKioskMode(sptr<IRemoteObject> callerToken);
+    int32_t ExitKioskMode(sptr<IRemoteObject> callerToken, bool isFoundation);
     int32_t GetKioskStatus(KioskStatus &kioskStatus);
     bool IsInKioskMode();
     bool IsInWhiteList(const std::string &bundleName);
     void OnAppStop(const AppInfo &info);
+    void FilterDialogAppInfos(std::vector<DialogAppInfo> &dialogAppInfos);
+    void FilterAbilityInfos(std::vector<AppExecFwk::AbilityInfo> &abilityInfos);
 
 private:
     KioskManager() = default;
     DISALLOW_COPY_AND_MOVE(KioskManager);
-    int32_t ExitKioskModeInner(const std::string &bundleName, sptr<IRemoteObject> callerToken);
+    int32_t ExitKioskModeInner(const std::string &bundleName, sptr<IRemoteObject> callerToken,
+        bool isFoundation);
     bool IsInKioskModeInner();
     void NotifyKioskModeChanged(bool isInKioskMode);
     bool IsInWhiteListInner(const std::string &bundleName);
