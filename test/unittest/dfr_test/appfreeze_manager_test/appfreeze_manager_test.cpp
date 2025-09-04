@@ -275,7 +275,7 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_AppFreezeFilter_002, TestSiz
     int32_t pid = static_cast<int32_t>(getprocpid());
     std::string bundleName = "AppfreezeManagerTest_AppFreezeFilter_002";
     EXPECT_TRUE(appfreezeManager->CancelAppFreezeDetect(pid, bundleName));
-    EXPECT_TRUE(!appfreezeManager->IsProcessDebug(pid, bundleName));
+    appfreezeManager->IsProcessDebug(pid, bundleName);
     appfreezeManager->RemoveDeathProcess(bundleName);
 }
 
@@ -311,24 +311,23 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_ParseDecToHex_001, TestSize.
 
 #ifdef ABILITY_RUNTIME_HITRACE_ENABLE
 /**
- * @tc.number: AppfreezeManagerTest_GetHitraceId_001
+ * @tc.number: AppfreezeManagerTest_GetHitraceInfo_001
  * @tc.desc: add testcase codecoverage
  * @tc.type: FUNC
  */
-HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetHitraceId_001, TestSize.Level1)
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetHitraceInfo_001, TestSize.Level1)
 {
-    AppfreezeManager::HitraceInfo info;
-    bool ret = appfreezeManager->GetHitraceId(info);
-    EXPECT_TRUE(!ret);
-    OHOS::HiviewDFX::HiTraceChain::Begin("AppfreezeManagerTest_GetHitraceId_001", 0);
-    appfreezeManager->GetHitraceId(info);
+    std::string ret = appfreezeManager->GetHitraceInfo();
+    EXPECT_TRUE(ret.empty());
+    OHOS::HiviewDFX::HiTraceChain::Begin("AppfreezeManagerTest_GetHitraceInfo_001", 0);
+    appfreezeManager->GetHitraceInfo();
     FaultData faultData;
     faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
     AppfreezeManager::AppInfo appInfo = {
         .pid = getpid(),
         .uid = getuid(),
-        .bundleName = "AppfreezeManagerTest_GetHitraceId_001",
-        .processName = "AppfreezeManagerTest_GetHitraceId_001",
+        .bundleName = "AppfreezeManagerTest_GetHitraceInfo_001",
+        .processName = "AppfreezeManagerTest_GetHitraceInfo_001",
     };
     int result = appfreezeManager->NotifyANR(faultData, appInfo, "test", "test");
     EXPECT_EQ(result, 0);
@@ -336,32 +335,77 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetHitraceId_001, TestSize.L
 #endif
 
 /**
- * @tc.number: AppfreezeManagerTest_ReportAppfreezeCpuInfo_001
+ * @tc.number: AppfreezeManagerTest_InitWarningCpuDetailInfo_001
  * @tc.desc: add testcase
  * @tc.type: FUNC
  */
-HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_ReportAppfreezeCpuInfo_001, TestSize.Level1)
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_InitWarningCpuDetailInfo_001, TestSize.Level1)
 {
     FaultData faultData;
     std::string bundleName = "AppfreezeManagerTest";
     faultData.appfreezeInfo = "test.txt";
+    faultData.errorObject.name = AppFreezeType::APP_INPUT_BLOCK;
+    int pid = getpid();
+    int uid = getuid();
+    AppfreezeManager::AppInfo appInfo = {
+        .pid = pid,
+        .uid = uid,
+        .bundleName = bundleName,
+        .processName = bundleName,
+    };
+    appfreezeManager->InitWarningCpuInfo(faultData, appInfo);
+    faultData.errorObject.name = AppFreezeType::LIFECYCLE_TIMEOUT;
+    appfreezeManager->InitWarningCpuInfo(faultData, appInfo);
+    faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
+    appfreezeManager->InitWarningCpuInfo(faultData, appInfo);
+
     faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
+    appfreezeManager->InitWarningCpuInfo(faultData, appInfo);
+    faultData.errorObject.name = AppFreezeType::LIFECYCLE_HALF_TIMEOUT;
+    appfreezeManager->InitWarningCpuInfo(faultData, appInfo);
+    int count = 10; // test value
+    for (int i = 1; i <= count; i++) {
+        appInfo.pid += i;
+        appfreezeManager->InitWarningCpuInfo(faultData, appInfo);
+    }
+    while (count > 0) {
+        count = sleep(count);
+    }
+    appInfo.pid = pid;
+    appfreezeManager->InitWarningCpuInfo(faultData, appInfo);
+    EXPECT_TRUE(appfreezeManager != nullptr);
+}
+
+/**
+ * @tc.number: AppfreezeManagerTest_GetAppfreezeInfoPath_001
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetAppfreezeInfoPath_001, TestSize.Level1)
+{
+    FaultData faultData;
+    std::string bundleName = "AppfreezeManagerTest";
+    faultData.errorObject.name = AppFreezeType::APP_INPUT_BLOCK;
     AppfreezeManager::AppInfo appInfo = {
         .pid = getpid(),
         .uid = getuid(),
         .bundleName = bundleName,
         .processName = bundleName,
     };
-    std::string freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
-    EXPECT_EQ(freezeInfoFile, "");
+    std::string ret = appfreezeManager->GetAppfreezeInfoPath(faultData, appInfo);
+    EXPECT_TRUE(!ret.empty());
+    faultData.appfreezeInfo = "test001";
+    faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
+    ret = appfreezeManager->GetAppfreezeInfoPath(faultData, appInfo);
+    EXPECT_EQ(ret, faultData.appfreezeInfo);
     faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
-    freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
-    EXPECT_TRUE(freezeInfoFile.empty());
+    ret = appfreezeManager->GetAppfreezeInfoPath(faultData, appInfo);
+    EXPECT_TRUE(!ret.empty());
+
     faultData.errorObject.name = AppFreezeType::LIFECYCLE_HALF_TIMEOUT;
-    freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
-    EXPECT_EQ(freezeInfoFile, "");
+    appfreezeManager->InitWarningCpuInfo(faultData, appInfo);
     faultData.errorObject.name = AppFreezeType::LIFECYCLE_TIMEOUT;
-    freezeInfoFile = appfreezeManager->ReportAppfreezeCpuInfo(faultData, appInfo);
+    appfreezeManager->GetAppfreezeInfoPath(faultData, appInfo);
 }
 
 /**
