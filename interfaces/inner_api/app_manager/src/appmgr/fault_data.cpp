@@ -61,6 +61,13 @@ bool FaultData::ReadFromParcel(Parcel &parcel)
     needKillProcess = parcel.ReadBool();
     state = parcel.ReadUint32();
     eventId = parcel.ReadInt32();
+    schedTime = parcel.ReadUint64();
+    detectTime = parcel.ReadUint64();
+    appStatus = parcel.ReadInt32();
+    samplerStartTime = parcel.ReadUint64();
+    samplerFinishTime = parcel.ReadUint64();
+    samplerCount = parcel.ReadInt32();
+    pid = parcel.ReadInt32();
     tid = parcel.ReadInt32();
     stuckTimeout = parcel.ReadUint32();
     if (parcel.ReadBool()) {
@@ -194,6 +201,41 @@ bool FaultData::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteUint64(schedTime)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SchedTime [%{public}" PRIu64 "] write uint64 failed.", schedTime);
+        return false;
+    }
+
+    if (!parcel.WriteUint64(detectTime)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "DetectTime [%{public}" PRIu64 "] write uint64 failed.", detectTime);
+        return false;
+    }
+
+    if (!parcel.WriteInt32(appStatus)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppStatus [%{public}d] write int32 failed.", appStatus);
+        return false;
+    }
+
+    if (!parcel.WriteUint64(samplerStartTime)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SamplerStartTime [%{public}" PRIu64 "] write uint64 failed.", samplerStartTime);
+        return false;
+    }
+
+    if (!parcel.WriteUint64(samplerFinishTime)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SamplerFinishTime [%{public}" PRIu64"] write uint64 failed.", samplerFinishTime);
+        return false;
+    }
+
+    if (!parcel.WriteInt32(samplerCount)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SamplerCount [%{public}d] write int32 failed.", samplerCount);
+        return false;
+    }
+
+    if (!parcel.WriteInt32(pid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Pid [%{public}u] write int32 failed.", pid);
+        return false;
+    }
+
     if (!parcel.WriteInt32(tid)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Tid [%{public}u] write int32 failed.", tid);
         return false;
@@ -247,6 +289,9 @@ bool AppFaultDataBySA::ReadFromParcel(Parcel &parcel)
     needKillProcess = parcel.ReadBool();
     state = parcel.ReadUint32();
     eventId = parcel.ReadInt32();
+    schedTime = parcel.ReadUint64();
+    detectTime = parcel.ReadUint64();
+    appStatus = parcel.ReadInt32();
     if (parcel.ReadBool()) {
         token = (static_cast<MessageParcel*>(&parcel))->ReadRemoteObject();
     }
@@ -366,6 +411,21 @@ bool AppFaultDataBySA::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteInt32(eventId)) {
         TAG_LOGE(AAFwkTag::APPMGR, "EventId [%{public}u] write int32 failed.", eventId);
+        return false;
+    }
+
+    if (!parcel.WriteUint64(schedTime)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SchedTime [%{public}" PRIu64 "] write uint64 failed.", schedTime);
+        return false;
+    }
+
+    if (!parcel.WriteUint64(detectTime)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "DetectTime [%{public}" PRIu64 "] write uint64 failed.", detectTime);
+        return false;
+    }
+
+    if (!parcel.WriteInt32(appStatus)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppStatus [%{public}d] write int32 failed.", appStatus);
         return false;
     }
 

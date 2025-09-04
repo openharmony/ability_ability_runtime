@@ -240,12 +240,20 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
         faultData.appfreezeInfo = it->appfreezeInfo;
         faultData.appRunningUniqueId = it->appRunningUniqueId;
         faultData.procStatm = it->procStatm;
+        faultData.schedTime = it->schedTime;
+        faultData.detectTime = it->detectTime;
+        faultData.appStatus = it->appStatus;
+        faultData.samplerStartTime = it->samplerStartTime;
+        faultData.samplerFinishTime = it->samplerFinishTime;
+        faultData.samplerCount = it->samplerCount;
+        faultData.pid = it->pid;
         ChangeFaultDateInfo(faultData, msgContent);
     }
     return 0;
 }
 
-void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent)
+void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent, uint64_t schedTime,
+    uint64_t now, bool isInBackground)
 {
     FaultData faultData;
     faultData.errorObject.message =
@@ -254,10 +262,16 @@ void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent)
     faultData.faultType = FaultDataType::APP_FREEZE;
     bool onlyMainThread = false;
     int32_t pid = static_cast<int32_t>(getpid());
+    faultData.pid = pid;
+    faultData.schedTime = schedTime;
+    faultData.detectTime = now;
+    faultData.appStatus = isInBackground ? AppStatus::APP_STATUS_BACKGROUND : AppStatus::APP_STATUS_FOREGROUND;
 
     if (isSixSecondEvent) {
         faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
         onlyMainThread = true;
+        OHOS::HiviewDFX::Watchdog::GetInstance().GetSamplerResult(faultData.samplerStartTime,
+            faultData.samplerFinishTime, faultData.samplerCount);
 #ifdef APP_NO_RESPONSE_DIALOG
         isSixSecondEvent.store(false);
 #endif
