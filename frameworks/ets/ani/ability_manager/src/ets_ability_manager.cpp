@@ -113,7 +113,7 @@ public:
     static void QueryAtomicServiceStartupRule(ani_env *env, ani_object contextObj,
         ani_string aniAppId, ani_object callbackObj);
     static void QueryAtomicServiceStartupRuleCheck(ani_env *env, ani_object contextObj);
-
+    static void GetExtensionRunningInfos(ani_env *env, ani_int upperLimit, ani_object callback);
 private:
     static sptr<AppExecFwk::IAbilityManager> GetAbilityManagerInstance();
     static sptr<AppExecFwk::IAppMgr> GetAppManagerInstance();
@@ -651,6 +651,33 @@ void EtsAbilityManager::NativeUpdateConfiguration(ani_env *env, ani_object confi
         EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
 }
 
+void EtsAbilityManager::GetExtensionRunningInfos(ani_env *env, ani_int upperLimit, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call GetExtensionRunningInfos");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return;
+    }
+    std::vector<AAFwk::ExtensionRunningInfo> infos;
+    auto errcode = AAFwk::AbilityManagerClient::GetInstance()->GetExtensionRunningInfos(upperLimit, infos);
+    if (errcode != ERR_OK) {
+        AppExecFwk::AsyncCallback(env, callback,
+            EtsErrorUtil::CreateErrorByNativeErr(env, errcode), nullptr);
+        return;
+    }
+
+    ani_object extensionArray = nullptr;
+    AbilityManagerEts::WrapExtensionRunningInfoArray(env, extensionArray, infos);
+    if (extensionArray == nullptr) {
+        AppExecFwk::AsyncCallback(env, callback,
+            EtsErrorUtil::CreateErrorByNativeErr(env,
+                static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_INNER)), nullptr);
+        return;
+    }
+    AppExecFwk::AsyncCallback(env, callback,
+        EtsErrorUtil::CreateErrorByNativeErr(env, errcode), extensionArray);
+}
+
 void EtsAbilityManagerRegistryInit(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call EtsAbilityManagerRegistryInit");
@@ -681,6 +708,8 @@ void EtsAbilityManagerRegistryInit(ani_env *env)
             reinterpret_cast<void *>(EtsAbilityManager::GetTopAbility)},
         ani_native_function { "nativeGetAbilityRunningInfos", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsAbilityManager::GetAbilityRunningInfos) },
+        ani_native_function {"nativeGetExtensionRunningInfos", "ILutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsAbilityManager::GetExtensionRunningInfos)},
         ani_native_function { "nativeIsEmbeddedOpenAllowed",
             "Lapplication/Context/Context;Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsAbilityManager::IsEmbeddedOpenAllowed) },
