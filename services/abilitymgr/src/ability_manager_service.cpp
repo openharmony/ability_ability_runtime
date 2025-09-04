@@ -11396,8 +11396,11 @@ int AbilityManagerService::CheckCallAbilityPermission(const AbilityRequest &abil
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallAbilityPermission(
         verificationInfo, isCallByShortcut);
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "without start pageAbility(FA) or ability(Stage) permission, caller:%{public}s",
-            callerAbilityRecord ? callerAbilityRecord->GetAbilityInfo().name.c_str() : "null record");
+        auto sessionInfo = callerAbilityRecord ? callerAbilityRecord->GetSessionInfo() : nullptr;
+        int32_t persistentId = (sessionInfo == nullptr) ? -1 : sessionInfo->persistentId;
+        TAG_LOGE(AAFwkTag::ABILITYMGR,
+            "without start pageAbility(FA) or ability(Stage) permission, caller:%{public}s %{public}d",
+            callerAbilityRecord ? callerAbilityRecord->GetAbilityInfo().name.c_str() : "null record", persistentId);
     }
     return result;
 }
