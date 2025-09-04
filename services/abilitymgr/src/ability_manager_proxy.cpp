@@ -50,6 +50,7 @@ constexpr int32_t MAX_AUTO_STARTUP_COUNT = 100;
 constexpr int32_t MAX_UPDATE_CONFIG_SIZE = 100;
 constexpr int32_t MAX_WANT_LIST_SIZE = 4;
 constexpr int32_t MAX_IPC_CAPACITY_FOR_WANT_LIST = 4 * 216 * 1024;
+constexpr int32_t MAX_DUMP_STATE_SIZE = 10000;
 bool AbilityManagerProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(AbilityManagerProxy::GetDescriptor())) {
@@ -1805,6 +1806,10 @@ void AbilityManagerProxy::DumpSysState(
         return;
     }
     int32_t stackNum = reply.ReadInt32();
+    if (stackNum > MAX_DUMP_STATE_SIZE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "config stackNum error");
+        return;
+    }
     for (int i = 0; i < stackNum; i++) {
         std::string stac = Str16ToStr8(reply.ReadString16());
         state.emplace_back(stac);
@@ -1829,6 +1834,10 @@ void AbilityManagerProxy::DumpState(const std::string &args, std::vector<std::st
         return;
     }
     int32_t stackNum = reply.ReadInt32();
+    if (stackNum > MAX_DUMP_STATE_SIZE) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "config stackNum error");
+        return;
+    }
     for (int i = 0; i < stackNum; i++) {
         std::string stac = Str16ToStr8(reply.ReadString16());
         state.emplace_back(stac);

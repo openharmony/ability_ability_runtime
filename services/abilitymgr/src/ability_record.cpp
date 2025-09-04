@@ -615,6 +615,7 @@ std::string AbilityRecord::GetLabel()
 #ifdef SUPPORT_SCREEN
     auto resourceMgr = CreateResourceManager();
     if (!resourceMgr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "CreateResourceManager empty");
         return strLabel;
     }
 

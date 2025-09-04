@@ -65,7 +65,7 @@ public:
     bool IsEmpty() const;
 private:
     void CallJsMethodInnerCommon(
-        const std::string &methodName, const std::set<std::shared_ptr<NativeReference>> callbacks);
+        const std::string &methodName, const std::set<std::shared_ptr<NativeReference>> &callbacks);
     void CallJsMethod(const std::string &methodName);
     void CallApplicationForegroundInner(const std::string &methodName);
     napi_env env_ = nullptr;
