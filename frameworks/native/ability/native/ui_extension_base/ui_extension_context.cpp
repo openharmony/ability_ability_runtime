@@ -547,7 +547,7 @@ ErrCode UIExtensionContext::AddCompletionHandlerForOpenLink(const std::string &r
     std::lock_guard lock(onOpenLinkRequestResultMutex_);
     for (auto iter = onOpenLinkRequestResults_.begin(); iter != onOpenLinkRequestResults_.end(); iter++) {
         if ((*iter)->requestId_ == requestId) {
-            TAG_LOGI(AAFwkTag::UI_EXT, "requestId=%{public}s already exists", requestId.c_str());
+            TAG_LOGW(AAFwkTag::UI_EXT, "requestId=%{public}s already exists", requestId.c_str());
             return ERR_OK;
         }
     }
