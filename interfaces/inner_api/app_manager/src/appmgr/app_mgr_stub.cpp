@@ -1122,7 +1122,8 @@ int32_t AppMgrStub::HandleRegisterConfigurationObserver(MessageParcel &data, Mes
         TAG_LOGE(AAFwkTag::APPMGR, "Observer is null.");
         return ERR_INVALID_VALUE;
     }
-    int32_t result = RegisterConfigurationObserver(observer);
+    int32_t userId = data.ReadInt32();
+    int32_t result = RegisterConfigurationObserver(observer, userId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

@@ -75,7 +75,8 @@ public:
     MOCK_METHOD2(UpdateConfiguration, int32_t(const Configuration& config, const int32_t userId));
     MOCK_METHOD3(UpdateConfigurationByBundleName, int32_t(const Configuration& config, const std::string &name,
         int32_t appIndex));
-    MOCK_METHOD1(RegisterConfigurationObserver, int32_t(const sptr<IConfigurationObserver>& observer));
+    MOCK_METHOD2(RegisterConfigurationObserver,
+        int32_t(const sptr<IConfigurationObserver>& observer, const int32_t userId));
     MOCK_METHOD1(UnregisterConfigurationObserver, int32_t(const sptr<IConfigurationObserver>& observer));
     MOCK_METHOD1(GetAppRunningStateByBundleName, bool(const std::string& bundleName));
     MOCK_METHOD2(NotifyLoadRepairPatch, int32_t(const std::string& bundleName,

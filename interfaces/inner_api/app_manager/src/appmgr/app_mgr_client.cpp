@@ -895,11 +895,12 @@ AppMgrResultCode AppMgrClient::UpdateConfigurationByBundleName(const Configurati
     return AppMgrResultCode::RESULT_OK;
 }
 
-AppMgrResultCode AppMgrClient::RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer)
+AppMgrResultCode AppMgrClient::RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer,
+    const int32_t userId)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
-        int32_t result = service->RegisterConfigurationObserver(observer);
+        int32_t result = service->RegisterConfigurationObserver(observer, userId);
         if (result == ERR_OK) {
             return AppMgrResultCode::RESULT_OK;
         }

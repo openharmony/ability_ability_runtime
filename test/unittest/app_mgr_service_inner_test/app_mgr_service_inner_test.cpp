@@ -2871,11 +2871,11 @@ HWTEST_F(AppMgrServiceInnerTest, RegisterConfigurationObserver_001, TestSize.Lev
 
     appMgrServiceInner->configurationObservers_.clear();
 
-    appMgrServiceInner->RegisterConfigurationObserver(nullptr);
+    appMgrServiceInner->RegisterConfigurationObserver(nullptr, -1);
 
     sptr<MockConfigurationObserver> observer(new (std::nothrow) MockConfigurationObserver());
-    appMgrServiceInner->RegisterConfigurationObserver(observer);
-    appMgrServiceInner->RegisterConfigurationObserver(observer);
+    appMgrServiceInner->RegisterConfigurationObserver(observer, -1);
+    appMgrServiceInner->RegisterConfigurationObserver(observer, -1);
 
     TAG_LOGI(AAFwkTag::TEST, "RegisterConfigurationObserver_001 end");
 }
@@ -2899,7 +2899,7 @@ HWTEST_F(AppMgrServiceInnerTest, UnregisterConfigurationObserver_001, TestSize.L
     sptr<MockConfigurationObserver> observer(new (std::nothrow) MockConfigurationObserver());
     appMgrServiceInner->UnregisterConfigurationObserver(observer);
 
-    appMgrServiceInner->RegisterConfigurationObserver(observer);
+    appMgrServiceInner->RegisterConfigurationObserver(observer, -1);
     appMgrServiceInner->UnregisterConfigurationObserver(observer);
 
     TAG_LOGI(AAFwkTag::TEST, "UnregisterConfigurationObserver_001 end");
