@@ -498,6 +498,239 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_StartUIServiceEx
 }
 
 /**
+ * @tc.number: OnOpenLinkRequestSuccess_0001
+ * @tc.name: OnOpenLinkRequestSuccess
+ * @tc.desc: OpenLinkRequest not exist.
+ */
+HWTEST_F(ServiceExtensionContextTest, OnOpenLinkRequestSuccess_0001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "service_extension_context_OnOpenLinkRequestSuccess_0001 start";
+    ServiceExtensionContext serviceExtensionContextTest;
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
+        requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(serviceExtensionContextTest.onOpenLinkRequestResults_.empty(), false);
+    std::string norequestId = "test";
+    serviceExtensionContextTest.OnOpenLinkRequestSuccess(norequestId, want.GetElement(), message);
+    EXPECT_EQ(serviceExtensionContextTest.onOpenLinkRequestResults_.empty(), false);
+    serviceExtensionContextTest.onOpenLinkRequestResults_.clear();
+    GTEST_LOG_(INFO) << "service_extension_context_OnOpenLinkRequestSuccess_0001 end";
+}
+
+/**
+ * @tc.number: OnOpenLinkRequestSuccess_0002
+ * @tc.name: OnOpenLinkRequestSuccess
+ * @tc.desc: OpenLinkRequest exist.
+ */
+HWTEST_F(ServiceExtensionContextTest, OnOpenLinkRequestSuccess_0002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "service_extension_context_OnOpenLinkRequestSuccess_0002 start";
+    ServiceExtensionContext serviceExtensionContextTest;
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
+        requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(serviceExtensionContextTest.onOpenLinkRequestResults_.empty(), false);
+
+    serviceExtensionContextTest.OnOpenLinkRequestSuccess(requestId, want.GetElement(), message);
+    EXPECT_EQ(serviceExtensionContextTest.onOpenLinkRequestResults_.empty(), true);
+    serviceExtensionContextTest.onOpenLinkRequestResults_.clear();
+    GTEST_LOG_(INFO) << "service_extension_context_OnOpenLinkRequestSuccess_0002 end";
+}
+
+/**
+ * @tc.number: OnOpenLinkRequestFailure_0001
+ * @tc.name: OnOpenLinkRequestFailure
+ * @tc.desc: OpenLinkRequest not exist.
+ */
+HWTEST_F(ServiceExtensionContextTest, OnOpenLinkRequestFailure_0001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "service_extension_context_OnOpenLinkRequestFailure_0001 start";
+    ServiceExtensionContext serviceExtensionContextTest;
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
+        requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(serviceExtensionContextTest.onOpenLinkRequestResults_.empty(), false);
+    std::string norequestId = "test";
+    serviceExtensionContextTest.OnOpenLinkRequestFailure(norequestId, want.GetElement(), message);
+    EXPECT_EQ(serviceExtensionContextTest.onOpenLinkRequestResults_.empty(), false);
+    serviceExtensionContextTest.onOpenLinkRequestResults_.clear();
+    GTEST_LOG_(INFO) << "service_extension_context_OnOpenLinkRequestFailure_0001 end";
+}
+
+/**
+ * @tc.number: OnOpenLinkRequestFailure_0002
+ * @tc.name: OnOpenLinkRequestFailure
+ * @tc.desc: OpenLinkRequest exist.
+ */
+HWTEST_F(ServiceExtensionContextTest, OnOpenLinkRequestFailure_0002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "service_extension_context_OnOpenLinkRequestFailure_0002 start";
+    ServiceExtensionContext serviceExtensionContextTest;
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
+        requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(serviceExtensionContextTest.onOpenLinkRequestResults_.empty(), false);
+
+    serviceExtensionContextTest.OnOpenLinkRequestFailure(requestId, want.GetElement(), message);
+    EXPECT_EQ(serviceExtensionContextTest.onOpenLinkRequestResults_.empty(), true);
+    serviceExtensionContextTest.onOpenLinkRequestResults_.clear();
+    GTEST_LOG_(INFO) << "service_extension_context_OnOpenLinkRequestFailure_0002 end";
+}
+
+/**
+ * @tc.number: OnOpenLinkRequestFailure_0003
+ * @tc.name: OnOpenLinkRequestFailure
+ * @tc.desc: requestId empty.
+ */
+HWTEST_F(ServiceExtensionContextTest, OnOpenLinkRequestFailure_0003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "service_extension_context_OnOpenLinkRequestFailure_0003 start";
+    ServiceExtensionContext serviceExtensionContextTest;
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
+        requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(serviceExtensionContextTest.onOpenLinkRequestResults_.empty(), false);
+    std::string norequestId = "";
+    serviceExtensionContextTest.OnOpenLinkRequestFailure(norequestId, want.GetElement(), message);
+    EXPECT_EQ(serviceExtensionContextTest.onOpenLinkRequestResults_.empty(), false);
+    serviceExtensionContextTest.onOpenLinkRequestResults_.clear();
+    GTEST_LOG_(INFO) << "service_extension_context_OnOpenLinkRequestFailure_0003 end";
+}
+
+/**
+ * @tc.number: AddCompletionHandlerForOpenLink_0001
+ * @tc.name: AddCompletionHandlerForOpenLink
+ * @tc.desc: param onRequestSucc error
+ */
+HWTEST_F(ServiceExtensionContextTest, AddCompletionHandlerForOpenLink_0001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "service_extension_context_AddCompletionHandlerForOpenLink_0001 start";
+    ServiceExtensionContext serviceExtensionContextTest;
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
+        requestId, nullptr, onRequestFail);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    serviceExtensionContextTest.onOpenLinkRequestResults_.clear();
+    GTEST_LOG_(INFO) << "service_extension_context_AddCompletionHandlerForOpenLink_0001 end";
+}
+
+/**
+ * @tc.number: AddCompletionHandlerForOpenLink_0002
+ * @tc.name: AddCompletionHandlerForOpenLink
+ * @tc.desc: param onRequestFail error
+ */
+HWTEST_F(ServiceExtensionContextTest, AddCompletionHandlerForOpenLink_0002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "service_extension_context_AddCompletionHandlerForOpenLink_0002 start";
+    ServiceExtensionContext serviceExtensionContextTest;
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
+        requestId, onRequestSucc, nullptr);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    serviceExtensionContextTest.onOpenLinkRequestResults_.clear();
+    GTEST_LOG_(INFO) << "service_extension_context_AddCompletionHandlerForOpenLink_0002 end";
+}
+
+/**
+ * @tc.number: AddCompletionHandlerForOpenLink_0003
+ * @tc.name: AddCompletionHandlerForOpenLink
+ * @tc.desc: param onRequestSucc onRequestFail error
+ */
+HWTEST_F(ServiceExtensionContextTest, AddCompletionHandlerForOpenLink_0003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "service_extension_context_AddCompletionHandlerForOpenLink_0003 start";
+    ServiceExtensionContext serviceExtensionContextTest;
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
+        requestId, nullptr, nullptr);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    serviceExtensionContextTest.onOpenLinkRequestResults_.clear();
+    GTEST_LOG_(INFO) << "service_extension_context_AddCompletionHandlerForOpenLink_0003 end";
+}
+
+/**
+ * @tc.number: AddCompletionHandlerForOpenLink_0004
+ * @tc.name: AddCompletionHandlerForOpenLink
+ * @tc.desc: insert success.
+ */
+HWTEST_F(ServiceExtensionContextTest, AddCompletionHandlerForOpenLink_0004, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "service_extension_context_AddCompletionHandlerForOpenLink_0004 start";
+    ServiceExtensionContext serviceExtensionContextTest;
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
+        requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    serviceExtensionContextTest.onOpenLinkRequestResults_.clear();
+    GTEST_LOG_(INFO) << "service_extension_context_AddCompletionHandlerForOpenLink_0004 end";
+}
+
+/**
+ * @tc.number: AddCompletionHandlerForOpenLink_0005
+ * @tc.name: AddCompletionHandlerForOpenLink
+ * @tc.desc: already exists.
+ */
+HWTEST_F(ServiceExtensionContextTest, AddCompletionHandlerForOpenLink_0005, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "service_extension_context_AddCompletionHandlerForOpenLink_0005 start";
+    ServiceExtensionContext serviceExtensionContextTest;
+    std::string requestId = "1234567890";
+    AAFwk::Want want;
+    std::string message = "message";
+    AAFwk::OnOpenLinkRequestFunc onRequestSucc = [](const AppExecFwk::ElementName&, const std::string&) {};
+    AAFwk::OnOpenLinkRequestFunc onRequestFail = [](const AppExecFwk::ElementName&, const std::string&) {};
+    auto result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    result = serviceExtensionContextTest.AddCompletionHandlerForOpenLink(
+        requestId, onRequestSucc, onRequestFail);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(serviceExtensionContextTest.onOpenLinkRequestResults_.size(), 1);
+    serviceExtensionContextTest.onOpenLinkRequestResults_.clear();
+    GTEST_LOG_(INFO) << "service_extension_context_AddCompletionHandlerForOpenLink_0005 end";
+}
+
+/**
  * @tc.number: service_extension_context_ReleaseCall_002
  * @tc.name: ReleaseCall
  * @tc.desc: Start ui service extension ability success
