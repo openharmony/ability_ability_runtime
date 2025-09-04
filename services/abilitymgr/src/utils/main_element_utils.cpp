@@ -117,7 +117,7 @@ bool MainElementUtils::CheckMainElement(const AppExecFwk::HapModuleInfo &hapModu
 
         // old application model, use ability 'process'
         bool isAbilityKeepAlive = false;
-        for (auto abilityInfo : hapModuleInfo.abilityInfos) {
+        for (const auto& abilityInfo : hapModuleInfo.abilityInfos) {
             if (abilityInfo.process != processName || abilityInfo.name != mainElement) {
                 continue;
             }

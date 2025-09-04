@@ -27,7 +27,7 @@ JsApplicationStateChangeCallback::JsApplicationStateChangeCallback(napi_env env)
 }
 
 void JsApplicationStateChangeCallback::CallJsMethodInnerCommon(
-    const std::string &methodName, const std::set<std::shared_ptr<NativeReference>> callbacks)
+    const std::string &methodName, const std::set<std::shared_ptr<NativeReference>> &callbacks)
 {
     for (auto &callback : callbacks) {
         if (!callback) {
