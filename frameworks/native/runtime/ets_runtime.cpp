@@ -15,6 +15,7 @@
 
 #include "ets_runtime.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <dlfcn.h>
 #include <filesystem>
@@ -64,6 +65,13 @@ constexpr char MERGE_ABC_PATH[] = "/ets/modules_static.abc";
 
 const char *ETS_ENV_LIBNAME = "libets_environment.z.so";
 const char *ETS_ENV_REGISTER_FUNCS = "OHOS_ETS_ENV_RegisterFuncs";
+
+static void HandleOhmUrlBase(std::string &base)
+{
+    // <dir1>/<dir2>/  =>  <dir1>.<dir2>.
+    std::replace(base.begin(), base.end(), '/', '.');
+}
+
 ETSEnvFuncs *g_etsEnvFuncs = nullptr;
 
 bool RegisterETSEnvFuncs()
@@ -478,6 +486,7 @@ std::string ETSRuntime::HandleOhmUrlSrcEntry(const std::string &srcEntry)
         return fileName;
     }
     std::string base = srcEntry.substr(0, lastSlashPos + 1);
+    HandleOhmUrlBase(base);
     std::string fileName = srcEntry.substr(lastSlashPos + 1);
     HandleOhmUrlFileName(fileName);
     return base + fileName;
@@ -487,11 +496,11 @@ void ETSRuntime::HandleOhmUrlFileName(std::string &fileName)
 {
     size_t colonPos = fileName.rfind(':');
     if (colonPos != std::string::npos) {
-        // <fileName>:<className>  =>  <fileName>/<className>
-        fileName.replace(colonPos, 1, "/");
+        // <fileName>:<className>  =>  <fileName>.<className>
+        fileName.replace(colonPos, 1, ".");
     } else {
-        // <fileName>  =>  <fileName>/<fileName>
-        fileName = fileName + "/" + fileName;
+        // <fileName>  =>  <fileName>.<fileName>
+        fileName = fileName + "." + fileName;
     }
 }
 
