@@ -118,7 +118,7 @@ int32_t AbilityEcologicalRuleMgrServiceClient::EvaluateResolveInfos(const AAFwk:
     const vector<AppExecFwk::ExtensionAbilityInfo> &extInfos)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    RecordCostTimeUtil("EvaluateResolveInfos");
+    RecordCostTimeUtil timeRecord("EvaluateResolveInfos");
     TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "want: %{private}s, callerInfo: %{public}s, type: %{public}d",
         want.ToString().c_str(), callerInfo.ToString().c_str(), type);
     if (!CheckConnectService()) {
@@ -131,7 +131,7 @@ int32_t AbilityEcologicalRuleMgrServiceClient::QueryStartExperience(const OHOS::
     const AbilityCallerInfo &callerInfo, AbilityExperienceRule &rule)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    RecordCostTimeUtil("QueryStartExperience");
+    RecordCostTimeUtil timeRecord("QueryStartExperience");
     TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "callerInfo: %{public}s, want: %{private}s", callerInfo.ToString().c_str(),
         want.ToString().c_str());
 
