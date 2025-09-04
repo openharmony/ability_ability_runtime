@@ -315,7 +315,7 @@ ErrCode ServiceExtensionContext::AddCompletionHandlerForOpenLink(const std::stri
     std::lock_guard lock(onOpenLinkRequestResultMutex_);
     for (auto iter = onOpenLinkRequestResults_.begin(); iter != onOpenLinkRequestResults_.end(); iter++) {
         if ((*iter)->requestId_ == requestId) {
-            TAG_LOGI(AAFwkTag::APPKIT, "requestId=%{public}s already exists", requestId.c_str());
+            TAG_LOGW(AAFwkTag::APPKIT, "requestId=%{public}s already exists", requestId.c_str());
             return ERR_OK;
         }
     }

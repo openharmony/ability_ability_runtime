@@ -103,7 +103,10 @@ private:
         int requestCode, const std::string& startTime, const std::string& url);
     void UnWrapCompletionHandlerForAtomicService(
         napi_env env, napi_value param, AAFwk::StartOptions &options, const std::string &appId);
-    void UnwrapCompletionHandlerForOpenLink(napi_env env, napi_value param, AAFwk::Want& want);
+    bool UnwrapCompletionHandlerForOpenLink(napi_env env, napi_value param, AAFwk::OnOpenLinkRequestFunc& onRequestSucc,
+    AAFwk::OnOpenLinkRequestFunc& onRequestFail);
+    void AddCompletionHandlerForOpenLink(AAFwk::Want& want, AAFwk::OnOpenLinkRequestFunc& onRequestSucc,
+    AAFwk::OnOpenLinkRequestFunc& onRequestFail);
 #ifdef SUPPORT_SCREEN
     void InitDisplayId(AAFwk::Want &want);
     void InitDisplayId(AAFwk::Want &want, AAFwk::StartOptions &startOptions, napi_env &env, NapiCallbackInfo& info);
