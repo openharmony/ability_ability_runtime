@@ -1076,7 +1076,8 @@ int32_t AppMgrProxy::GetConfiguration(Configuration& config)
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::RegisterConfigurationObserver(const sptr<IConfigurationObserver>& observer)
+int32_t AppMgrProxy::RegisterConfigurationObserver(const sptr<IConfigurationObserver>& observer,
+    const int32_t userId)
 {
     if (!observer) {
         TAG_LOGE(AAFwkTag::APPMGR, "observer null");
@@ -1093,6 +1094,11 @@ int32_t AppMgrProxy::RegisterConfigurationObserver(const sptr<IConfigurationObse
     if (!data.WriteRemoteObject(observer->AsObject())) {
         TAG_LOGE(AAFwkTag::APPMGR, "observer write failed.");
         return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid userId");
+        return ERR_INVALID_DATA;
     }
 
     auto error = SendRequest(AppMgrInterfaceCode::REGISTER_CONFIGURATION_OBSERVER, data, reply, option);
