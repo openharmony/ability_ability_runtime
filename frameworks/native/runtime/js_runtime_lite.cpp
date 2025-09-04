@@ -491,6 +491,10 @@ void JsRuntimeLite::ParsePkgContextInfoJson(nlohmann::json &jsonObject,
         std::vector<std::string> items;
         items.emplace_back(jsonIt.key());
         nlohmann::json itemObject = jsonIt.value();
+        if (!itemObject.is_object()) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "itemObject is not object");
+            return;
+        }
         std::string pkgName = "";
         items.emplace_back(PACKAGE_NAME);
         if (itemObject[PACKAGE_NAME].is_null() || !itemObject[PACKAGE_NAME].is_string()) {
