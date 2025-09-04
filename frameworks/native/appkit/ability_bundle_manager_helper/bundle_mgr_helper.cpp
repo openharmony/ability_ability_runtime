@@ -192,7 +192,7 @@ ErrCode BundleMgrHelper::GetSandboxExtAbilityInfos(const Want &want, int32_t app
         return ERR_APPEXECFWK_SANDBOX_INSTALL_INTERNAL_ERROR;
     }
 
-    RecordCostTimeUtil("GetSandboxExtAbilityInfos");
+    RecordCostTimeUtil timeRecord("GetSandboxExtAbilityInfos");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetSandboxExtAbilityInfos(want, appIndex, flags, userId, extensionInfos);
 }
@@ -490,7 +490,7 @@ bool BundleMgrHelper::QueryAbilityInfo(const Want &want, AbilityInfo &abilityInf
 
     AAFwk::Want newWant = want;
     newWant.RemoveAllFd();
-    RecordCostTimeUtil("QueryAbilityInfoWithWant");
+    RecordCostTimeUtil timeRecord("QueryAbilityInfoWithWant");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto ret = bundleMgr->QueryAbilityInfo(newWant, abilityInfo);
     SetAbilityProcessEmpty(abilityInfo);
@@ -508,7 +508,7 @@ bool BundleMgrHelper::QueryAbilityInfo(const Want &want, int32_t flags, int32_t 
 
     AAFwk::Want newWant = want;
     newWant.RemoveAllFd();
-    RecordCostTimeUtil("QueryAbilityInfoWithFlags");
+    RecordCostTimeUtil timeRecord("QueryAbilityInfoWithFlags");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto ret = bundleMgr->QueryAbilityInfo(newWant, flags, userId, abilityInfo);
     SetAbilityProcessEmpty(abilityInfo);
@@ -594,7 +594,7 @@ bool BundleMgrHelper::QueryExtensionAbilityInfos(const Want &want, const int32_t
 
     AAFwk::Want newWant = want;
     newWant.RemoveAllFd();
-    RecordCostTimeUtil("QueryExtensionAbilityInfos");
+    RecordCostTimeUtil timeRecord("QueryExtensionAbilityInfos");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->QueryExtensionAbilityInfos(newWant, flag, userId, extensionInfos);
 }
@@ -623,7 +623,7 @@ bool BundleMgrHelper::GetApplicationInfo(
         return false;
     }
 
-    RecordCostTimeUtil("GetApplicationInfoWithFlag");
+    RecordCostTimeUtil timeRecord("GetApplicationInfoWithFlag");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetApplicationInfo(appName, flag, userId, appInfo);
 }
@@ -638,7 +638,7 @@ bool BundleMgrHelper::GetApplicationInfo(
         return false;
     }
 
-    RecordCostTimeUtil("GetApplicationInfoWithFlags");
+    RecordCostTimeUtil timeRecord("GetApplicationInfoWithFlags");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return bundleMgr->GetApplicationInfo(appName, flags, userId, appInfo);
 }
@@ -657,7 +657,7 @@ bool BundleMgrHelper::GetApplicationInfoWithAppIndex(
         return false;
     }
 
-    RecordCostTimeUtil("GetApplicationInfoWithAppIndex");
+    RecordCostTimeUtil timeRecord("GetApplicationInfoWithAppIndex");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     BundleInfo bundleInfo;
     if (appIndex == 0) {
@@ -757,7 +757,7 @@ bool BundleMgrHelper::QueryAbilityInfo(
 
     AAFwk::Want newWant = want;
     newWant.RemoveAllFd();
-    RecordCostTimeUtil("QueryAbilityInfoWithCallback");
+    RecordCostTimeUtil timeRecord("QueryAbilityInfoWithCallback");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto ret = bundleMgr->QueryAbilityInfo(newWant, flags, userId, abilityInfo, callBack);
     SetAbilityProcessEmpty(abilityInfo);
@@ -791,7 +791,7 @@ bool BundleMgrHelper::ImplicitQueryInfos(const Want &want, int32_t flags, int32_
 
     AAFwk::Want newWant = want;
     newWant.RemoveAllFd();
-    RecordCostTimeUtil("ImplicitQueryInfos");
+    RecordCostTimeUtil timeRecord("ImplicitQueryInfos");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     bool ret = bundleMgr->ImplicitQueryInfos(newWant, flags, userId, withDefault, abilityInfos,
         extensionInfos, findDefaultApp);
@@ -952,7 +952,7 @@ ErrCode BundleMgrHelper::QueryCloneAbilityInfo(const ElementName &element, int32
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
 
-    RecordCostTimeUtil("QueryCloneAbilityInfo");
+    RecordCostTimeUtil timeRecord("QueryCloneAbilityInfo");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto ret = bundleMgr->QueryCloneAbilityInfo(element, flags, appCloneIndex, abilityInfo, userId);
     SetAbilityProcessEmpty(abilityInfo);
