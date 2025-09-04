@@ -469,6 +469,7 @@ group("unittest") {
       "task_handler_wrap_test:unittest",
       "timeout_state_utils_test:unittest",
       "trigger_Info_test:unittest",
+      "udmf_utils_test:unittest",
       "ui_ability_lifecycle_manager_second_test:unittest",
       "ui_ability_lifecycle_manager_third_test:unittest",
       "ui_extension:unittest",
@@ -479,9 +480,9 @@ group("unittest") {
       "ui_extension_record_test:unittest",
       "ui_extension_utils_test:unittest",
       "update_caller_info_util_test:unittest",
-      "udmf_utils_test:unittest",
       "uri_utils_second_test",
       "uri_utils_test:unittest",
+      "vertical_panel_manager_test:unittest",
       "want_agent_helper_test:unittest",
       "want_agent_info_test:unittest",
       "want_agent_test:unittest",
@@ -565,10 +566,10 @@ group("unittest") {
 
     if (ability_runtime_screenlock_enable) {
       deps += [
+        "ability_manager_service_fourteenth_test:unittest",
         "ability_manager_service_second_test:unittest",
         "ability_manager_service_third_test:unittest",
         "ability_manager_service_thirteenth_test:unittest",
-        "ability_manager_service_fourteenth_test:unittest",
         "crowd_test_interceptor_test:unittest",
         "screen_unlock_interceptor_test:unittest",
         "unlock_screen_test:unittest",
