@@ -2182,6 +2182,14 @@ ohos_shared_library("photo_editor_extension_ani") {
   part_name = "ability_runtime"
 }
 
+config("ui_extension_ani_public_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/include",
+    "${ability_runtime_path}/frameworks/ets/ani/ui_extension_base/include",
+  ]
+}
+
 ohos_shared_library("ui_extension_ani") {
   sanitize = {
     cfi = true
@@ -2210,7 +2218,7 @@ ohos_shared_library("ui_extension_ani") {
     "${ability_runtime_path}/frameworks/ets/ani/ui_extension_base/src/ets_ui_extension_base.cpp",
   ]
 
-  public_configs = []
+  public_configs = [":ui_extension_ani_public_config"]
 
   deps = [
     ":abilitykit_native",
