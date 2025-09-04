@@ -93,10 +93,10 @@ public:
         const Want &want));
     MOCK_METHOD2(NotifyLoadAbility, int32_t(const AppExecFwk::AbilityInfo &abilityInfo,
         const sptr<SessionInfo> &sessionInfo));
-    MOCK_METHOD1(NotifyMoveMissionToBackground, int32_t(int32_t missionId));
-    MOCK_METHOD1(NotifyMoveMissionToForeground, int32_t(int32_t missionId));
-    MOCK_METHOD1(NotifyTerminateMission, int32_t(int32_t missionId));
-    MOCK_METHOD1(NotifyClearMission, int32_t(int32_t missionId));
+    MOCK_METHOD2(NotifyMoveMissionToBackground, int32_t(int32_t missionId, int32_t userId));
+    MOCK_METHOD2(NotifyMoveMissionToForeground, int32_t(int32_t missionId, int32_t userId));
+    MOCK_METHOD2(NotifyTerminateMission, int32_t(int32_t missionId, int32_t userId));
+    MOCK_METHOD2(NotifyClearMission, int32_t(int32_t missionId, int32_t userId));
     MOCK_METHOD3(NotifyRemoveShellProcess, int32_t(int32_t pid, int32_t type, const std::string &reason));
     MOCK_METHOD1(UpdateMissionInfo, void(sptr<SessionInfo> &sessionInfo));
     sptr<IRemoteObject> AsObject() override
