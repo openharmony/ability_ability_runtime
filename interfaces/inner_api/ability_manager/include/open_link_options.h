@@ -23,6 +23,18 @@
 #include "want.h"
 namespace OHOS {
 namespace AAFwk {
+using OnOpenLinkRequestFunc = std::function<void(const AppExecFwk::ElementName&, const std::string&)>;
+
+struct OnOpenLinkRequestResult {
+    std::string requestId_;
+    OnOpenLinkRequestFunc onRequestSuccess_;
+    OnOpenLinkRequestFunc onRequestFailure_;
+
+    OnOpenLinkRequestResult(const std::string &requestId, OnOpenLinkRequestFunc onRequestSucc,
+        OnOpenLinkRequestFunc onRequestFail) : requestId_(requestId), onRequestSuccess_(onRequestSucc),
+        onRequestFailure_(onRequestFail)
+    {}
+};
 class OpenLinkOptions final : public Parcelable {
 public:
     OpenLinkOptions() = default;
