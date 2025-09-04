@@ -57,6 +57,7 @@ constexpr char BINDER_INFO[] = "BINDER_INFO";
 constexpr char APP_RUNNING_UNIQUE_ID[] = "APP_RUNNING_UNIQUE_ID";
 constexpr char FREEZE_MEMORY[] = "FREEZE_MEMORY";
 constexpr char FREEZE_INFO_PATH[] = "FREEZE_INFO_PATH";
+constexpr char KILL_EVENT_NAME[] = "APP_KILL";
 #ifdef ABILITY_RUNTIME_HITRACE_ENABLE
 constexpr char EVENT_TRACE_ID[] = "HITRACE_ID";
 constexpr char EVENT_SPAN_ID[] = "SPAN_ID";
@@ -70,6 +71,7 @@ constexpr int32_t CHARACTER_WIDTH = 2;
 constexpr int MAX_LAYER = 8;
 constexpr int FREEZEMAP_SIZE_MAX = 20;
 constexpr int FREEZE_TIME_LIMIT = 60000;
+constexpr int FREEZE_EVENT_MAX_SIZE = 200;
 static constexpr uint8_t ARR_SIZE = 7;
 static constexpr uint8_t DECIMAL = 10;
 static constexpr uint8_t FREE_ASYNC_INDEX = 6;
@@ -183,13 +185,18 @@ int AppfreezeManager::MergeNotifyInfo(FaultData& faultNotifyData, const Appfreez
     std::string catcherStack;
     faultNotifyData.errorObject.message += "\nCatche stack trace start time: " +
         AbilityRuntime::TimeUtil::DefaultCurrentTimeStr() + "\n";
+    uint64_t dumpStartTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
+    std::string resultMsg;
     if (faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT ||
         faultNotifyData.errorObject.name == AppFreezeType::LIFECYCLE_HALF_TIMEOUT_WARNING) {
         catcherStack += CatcherStacktrace(appInfo.pid, faultNotifyData.errorObject.stack);
     } else {
-        catcherStack += CatchJsonStacktrace(appInfo.pid, faultNotifyData.errorObject.name,
-            faultNotifyData.errorObject.stack);
+        std::pair<std::string, std::string> catchResult =
+            CatchJsonStacktrace(appInfo.pid, faultNotifyData.errorObject.name, faultNotifyData.errorObject.stack);
+        catcherStack += catchResult.first;
+        resultMsg += catchResult.second;
     }
+    uint64_t dumpFinishTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
     std::string timeStamp = "Catche stack trace end time: " + AbilityRuntime::TimeUtil::DefaultCurrentTimeStr();
     faultNotifyData.errorObject.stack = WriteToFile(fileName, catcherStack);
     if (appInfo.isOccurException) {
@@ -207,6 +214,26 @@ int AppfreezeManager::MergeNotifyInfo(FaultData& faultNotifyData, const Appfreez
     return 0;
 }
 
+void AppfreezeManager::RecordAppFreezeBehavior(FaultData& faultData)
+{
+    std::string eventName = faultData.errorObject.name;
+    if (freezeEventMap_.size() > FREEZE_EVENT_MAX_SIZE) {
+        freezeEventMap_.clear();
+    }
+    auto it = std::find(APP_FREEZE_EVENT_NAME.begin(), APP_FREEZE_EVENT_NAME.end(), eventName);
+    if (it != APP_FREEZE_EVENT_NAME.end()) {
+        freezeEventMap_[faultData.pid][eventName].schedTime = faultData.schedTime;
+        freezeEventMap_[faultData.pid][eventName].detectTime = faultData.detectTime;
+        freezeEventMap_[faultData.pid][eventName].dumpStartTime = dumpStartTime;
+        freezeEventMap_[faultData.pid][eventName].dumpFinishTime = dumpFinishTime;
+        freezeEventMap_[faultData.pid][eventName].dumpResult = resultMsg;
+        freezeEventMap_[faultData.pid][eventName].appStatus = faultData.appStatus;
+        freezeEventMap_[faultData.pid][KILL_EVENT_NAME].dumpStartTime = faultData.samplerStartTime;
+        freezeEventMap_[faultData.pid][KILL_EVENT_NAME].dumpFinishTime = faultData.samplerFinishTime;
+        freezeEventMap_[faultData.pid][KILL_EVENT_NAME].dumpResult = std::to_string(faultData.samplerCount);
+    }
+}
+
 int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo)
 {
     TAG_LOGW(AAFwkTag::APPDFR, "NotifyAppFaultTask called, eventName:%{public}s, bundleName:%{public}s, "
@@ -221,6 +248,13 @@ int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const
     faultNotifyData.errorObject.stack = faultData.errorObject.stack;
     faultNotifyData.faultType = FaultDataType::APP_FREEZE;
     faultNotifyData.eventId = faultData.eventId;
+    faultNotifyData.schedTime = faultData.schedTime;
+    faultNotifyData.detectTime = faultData.detectTime;
+    faultNotifyData.appStatus = faultData.appStatus;
+    faultNotifyData.samplerStartTime = faultData.samplerStartTime;
+    faultNotifyData.samplerFinishTime = faultData.samplerFinishTime;
+    faultNotifyData.samplerCount = faultData.samplerCount;
+    faultNotifyData.pid = faultData.pid;
     faultNotifyData.tid = faultData.tid;
     faultNotifyData.appfreezeInfo = faultData.appfreezeInfo;
     faultNotifyData.appRunningUniqueId = faultData.appRunningUniqueId;
@@ -309,6 +343,7 @@ int AppfreezeManager::LifecycleTimeoutHandle(const ParamInfo& info, FreezeUtil::
         faultDataSA.token = flow.token;
         faultDataSA.state = static_cast<uint32_t>(flow.state);
     }
+    faultDataSA.detectTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultDataSA);
     return 0;
 }
@@ -656,7 +691,7 @@ void AppfreezeManager::FindStackByPid(std::string& msg, int pid) const
     }
 }
 
-std::string AppfreezeManager::CatchJsonStacktrace(int pid, const std::string& faultType,
+std::pair<std::string, std::string> AppfreezeManager::CatchJsonStacktrace(int pid, const std::string& faultType,
     const std::string& stack) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_APP, "CatchJsonStacktrace pid:%{public}d", pid);
@@ -682,7 +717,7 @@ std::string AppfreezeManager::CatchJsonStacktrace(int pid, const std::string& fa
             catchStackMap_[pid] = msg;
         }
     }
-    return msg;
+    return std::make_pair(msg, dumpResult.second);
 }
 
 std::string AppfreezeManager::CatcherStacktrace(int pid, const std::string& stack) const
@@ -869,6 +904,62 @@ bool AppfreezeManager::IsValidFreezeFilter(int32_t pid, const std::string& bundl
         "pid:%{public}d", ret, bundleName.c_str(), pid);
     return ret;
 }
+
+void AppfreezeManager::ReportAppFreezeSysEvents(int32_t pid)
+{
+    if (freezeEventMap_.find(pid) == freezeEventMap_.end()) {
+        return;
+    }
+
+    uint64_t now = AbilityRuntime::TimeUtil::CurrentTimeMillis();
+    int ret = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::RELIABILITY, "APP_FREEZE_BEHAVIOR",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "THREAD_HALF_SCHED", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[0]].schedTime,
+        "THREAD_HALF_DETECT", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[0]].detectTime,
+        "THREAD_HALF_DUMP_START", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[0]].dumpStartTime,
+        "THREAD_HALF_DUMP_FINISH", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[0]].dumpFinishTime,
+        "THREAD_HALF_DUMP_RESULT", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[0]].dumpResult,
+        "THREAD_HALF_APP_STATUS", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[0]].appStatus,
+        "THREAD_TIMEOUT_SCHED", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[1]].schedTime,
+        "THREAD_TIMEOUT_DETECT", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[1]].detectTime,
+        "THREAD_TIMEOUT_DUMP_START", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[1]].dumpStartTime,
+        "THREAD_TIMEOUT_DUMP_FINISH", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[1]].dumpFinishTime,
+        "THREAD_TIMEOUT_DUMP_RESULT", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[1]].dumpResult,
+        "THREAD_TIMEOUT_APP_STATUS", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[1]].appStatus,
+        "INPUT_SCHED", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[2]].schedTime,
+        "INPUT_DETECT", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[2]].detectTime,
+        "INPUT_DUMP_START", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[2]].dumpStartTime,
+        "INPUT_DUMP_FINISH", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[2]].dumpFinishTime,
+        "INPUT_DUMP_RESULT", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[2]].dumpResult,
+        "INPUT_APP_STATUS", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[2]].appStatus,
+        "LIFECYCLE_HALF_SCHED", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[3]].schedTime,
+        "LIFECYCLE_HALF_DETECT", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[3]].detectTime,
+        "LIFECYCLE_HALF_DUMP_START", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[3]].dumpStartTime,
+        "LIFECYCLE_HALF_DUMP_FINISH", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[3]].dumpFinishTime,
+        "LIFECYCLE_HALF_DUMP_RESULT", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[3]].dumpResult,
+        "LIFECYCLE_HALF_APP_STATUS", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[3]].appStatus,
+        "LIFECYCLE_TIMEOUT_SCHED", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[4]].schedTime,
+        "LIFECYCLE_TIMEOUT_DETECT", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[4]].detectTime,
+        "LIFECYCLE_TIMEOUT_DUMP_START", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[4]].dumpStartTime,
+        "LIFECYCLE_TIMEOUT_DUMP_FINISH", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[4]].dumpFinishTime,
+        "LIFECYCLE_TIMEOUT_DUMP_RESULT", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[4]].dumpResult,
+        "LIFECYCLE_TIMEOUT_APP_STATUS", freezeEventMap_[pid][APP_FREEZE_EVENT_NAME[4]].appStatus,
+        "APP_KILL_TIME", freezeEventMap_[pid][KILL_EVENT_NAME].schedTime,
+        "APP_TERMINATED_TIME", now,
+        "SAMPLER_START", freezeEventMap_[pid][KILL_EVENT_NAME].dumpStartTime,
+        "SAMPLER_FINISH", freezeEventMap_[pid][KILL_EVENT_NAME].dumpFinishTime,
+        "SAMPLER_COUNT", freezeEventMap_[pid][KILL_EVENT_NAME].dumpResult);
+    freezeEventMap_.erase(pid);
+}
+
+void AppfreezeManager::RegisterAppKillTime(int32_t pid, uint64_t time)
+{
+    if (freezeEventMap_.find(pid) == freezeEventMap_.end()) {
+        return;
+    }
+    freezeEventMap_[pid][KILL_EVENT_NAME].schedTime = time;
+}
+
 void AppfreezeManager::PerfStart(std::string eventName)
 {
     if (OHOS::system::GetParameter("const.dfx.sub_health_recovery.enable", "") != "true") {

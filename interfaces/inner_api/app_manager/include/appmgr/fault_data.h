@@ -40,6 +40,12 @@ enum class FaultDataType {
     RESOURCE_CONTROL
 };
 
+enum AppStatus {
+    APP_STATUS_UNKNOW = -1,
+    APP_STATUS_FOREGROUND = 0,
+    APP_STATUS_BACKGROUND = 1
+};
+
 class AppFreezeType {
 public:
     static constexpr char LIFECYCLE_HALF_TIMEOUT[] = "LIFECYCLE_HALF_TIMEOUT";
@@ -73,8 +79,15 @@ struct FaultData : public Parcelable {
     bool needKillProcess = true;
     uint32_t state = 0;
     int32_t eventId = -1;
+    uint64_t schedTime = 0;
+    uint64_t detectTime = 0;
+    int32_t pid = -1;
     int32_t tid = -1;
     uint32_t stuckTimeout = 0;
+    int32_t appStatus = -1;
+    uint64_t samplerStartTime = 0;
+    uint64_t samplerFinishTime = 0;
+    int32_t samplerCount = -1;
     sptr<IRemoteObject> token = nullptr;
     std::string appfreezeInfo;
     std::string appRunningUniqueId;
@@ -102,6 +115,9 @@ struct AppFaultDataBySA : public Parcelable {
     int32_t pid = -1;
     uint32_t state = 0;
     int32_t eventId = -1;
+    uint64_t schedTime = 0;
+    uint64_t detectTime = 0;
+    int32_t appStatus = -1;
     sptr<IRemoteObject> token = nullptr;
     std::string timeoutMarkers;
     std::string appfreezeInfo;
