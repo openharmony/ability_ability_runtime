@@ -12,32 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_ABILITY_RUNTIME_APPFREEZE_DATA_H
-#define OHOS_ABILITY_RUNTIME_APPFREEZE_DATA_H
+#ifndef OHOS_ABILITY_RUNTIME_CPU_SYS_CONFIG_H
+#define OHOS_ABILITY_RUNTIME_CPU_SYS_CONFIG_H
 
-#include <map>
+#include <string>
 
 namespace OHOS {
 namespace AppExecFwk {
-struct CpuFreqData {
-    uint64_t frequency;
-    uint64_t runningTime;
-};
+class CpuSysConfig {
+public:
+    CpuSysConfig();
+    ~CpuSysConfig();
 
-struct FrequencyPair {
-    uint64_t frequency;
-    float percentage;
-};
-
-struct TotalTime {
-    uint64_t totalRunningTime;
-    uint64_t totalCpuTime;
-};
-
-struct CpuStartTime {
-    uint64_t halfStartTime;
-    uint64_t optimalCpuStartTime;
+    static std::string GetFreqTimePath(int32_t cpu);
+    static std::string GetMainThreadRunningTimePath(int32_t pid);
+    static std::string GetProcRunningTimePath(int32_t pid);
+    static std::string GetMaxCoreDimpsPath(int32_t maxCpuCount);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_APPFREEZE_DATA_H
+#endif // OHOS_ABILITY_RUNTIME_CPU_SYS_CONFIG_H

@@ -83,7 +83,17 @@ HWTEST_F(FaultDataTest, ReadFromParcel_001, TestSize.Level1)
     messageFifth.WriteInt32(12);
     bool retFifth = faultData->ReadFromParcel(messageFifth);
     EXPECT_EQ(false, retFifth);
+}
 
+/**
+ * @tc.name: FaultDataTest_ReadFromParcel_002
+ * @tc.desc: Verify that the ReadFromParcel interface calls normally
+ * @tc.type: FUNC
+ */
+HWTEST_F(FaultDataTest, FaultDataTest_ReadFromParcel_002, TestSize.Level1)
+{
+    auto faultData = std::make_shared<FaultData>();
+    std::string helloWord = "HelloWord";
     MessageParcel messageSixth;
     messageSixth.WriteString(helloWord);
     messageSixth.WriteString(helloWord);
@@ -102,6 +112,8 @@ HWTEST_F(FaultDataTest, ReadFromParcel_001, TestSize.Level1)
     messageSixth.WriteString(helloWord);
     messageSixth.WriteString(helloWord);
     messageSixth.WriteString(helloWord);
+    messageSixth.WriteBool(true);
+    messageSixth.WriteBool(true);
     bool retSixth = faultData->ReadFromParcel(messageSixth);
     EXPECT_EQ(true, retSixth);
 }
@@ -136,6 +148,8 @@ HWTEST_F(FaultDataTest, Unmarshalling_001, TestSize.Level1)
     message.WriteString(helloWord);
     message.WriteString(helloWord);
     message.WriteString(helloWord);
+    message.WriteBool(true);
+    message.WriteBool(true);
     auto retSecond = faultData->Unmarshalling(message);
     EXPECT_NE(nullptr, retSecond);
 }
@@ -195,7 +209,17 @@ HWTEST_F(FaultDataTest, ReadFromParcel_002, TestSize.Level1)
     messageFifth.WriteInt32(12);
     bool retFifth = appFaultDataBySA->ReadFromParcel(messageFifth);
     EXPECT_EQ(false, retFifth);
+}
 
+/**
+ * @tc.name: ReadFromParcel_003
+ * @tc.desc: Verify that the ReadFromParcel interface calls normally
+ * @tc.type: FUNC
+ */
+HWTEST_F(FaultDataTest, ReadFromParcel_003, TestSize.Level1)
+{
+    auto appFaultDataBySA = std::make_shared<AppFaultDataBySA>();
+    std::string helloWord = "HelloWord";
     MessageParcel messageSixth;
     messageSixth.WriteString(helloWord);
     messageSixth.WriteString(helloWord);
@@ -213,6 +237,8 @@ HWTEST_F(FaultDataTest, ReadFromParcel_002, TestSize.Level1)
     messageSixth.WriteString(helloWord);
     messageSixth.WriteString(helloWord);
     messageSixth.WriteString(helloWord);
+    messageSixth.WriteBool(true);
+    messageSixth.WriteBool(true);
     bool retSixth = appFaultDataBySA->ReadFromParcel(messageSixth);
     EXPECT_EQ(true, retSixth);
 }
@@ -246,6 +272,8 @@ HWTEST_F(FaultDataTest, Unmarshalling_002, TestSize.Level1)
     message.WriteString(helloWord);
     message.WriteString(helloWord);
     message.WriteString(helloWord);
+    message.WriteBool(true);
+    message.WriteBool(true);
     auto retSecond = appFaultDataBySA->Unmarshalling(message);
     EXPECT_NE(nullptr, retSecond);
 }

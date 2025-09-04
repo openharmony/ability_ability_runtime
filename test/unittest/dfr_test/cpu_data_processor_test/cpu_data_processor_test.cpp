@@ -19,7 +19,6 @@
 #include "cpu_data_processor.h"
 #undef private
 
-#include "appfreeze_data.h"
 #include "appfreeze_util.h"
 
 using namespace testing;
@@ -54,19 +53,18 @@ void CpuDataProcessorTest::TearDown(void)
 {}
 
 /**
- * @tc.number: GetHandlingHalfCpuData_Test_001
+ * @tc.number: GetCpuDetailData_Test_001
  * @tc.desc: add testcase
  * @tc.type: FUNC
  */
-HWTEST_F(CpuDataProcessorTest, GetHandlingHalfCpuData_Test_001, TestSize.Level1)
+HWTEST_F(CpuDataProcessorTest, GetCpuDetailData_Test_001, TestSize.Level1)
 {
     std::vector<std::vector<CpuFreqData>> cpuData;
     std::vector<TotalTime> totalTimeList;
-    CpuStartTime cpuStartTime;
-    std::string stackPath = "GetHandlingHalfCpuData_Test_001";
+    CpuConsumeTime cpuStartTime;
     int pid = getpid();
-    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath, pid);
-    EXPECT_TRUE(data.GetHandlingHalfCpuData().size() == 0);
+    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, pid);
+    EXPECT_TRUE(data.GetCpuDetailData().size() == 0);
 }
 
 /**
@@ -78,50 +76,29 @@ HWTEST_F(CpuDataProcessorTest, GetTotalTimeList_Test_001, TestSize.Level1)
 {
     std::vector<std::vector<CpuFreqData>> cpuData;
     std::vector<TotalTime> totalTimeList;
-    CpuStartTime cpuStartTime;
-    std::string stackPath = "GetTotalTimeList_Test_001";
+    CpuConsumeTime cpuStartTime;
     int pid = getpid();
-    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath, pid);
+    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, pid);
     EXPECT_TRUE(data.GetTotalTimeList().size() == 0);
 }
 
 /**
- * @tc.number: GetCpuStartTime_Test_001
+ * @tc.number: GetCpuConsumeTime_Test_001
  * @tc.desc: add testcase
  * @tc.type: FUNC
  */
-HWTEST_F(CpuDataProcessorTest, GetCpuStartTime_Test_001, TestSize.Level1)
+HWTEST_F(CpuDataProcessorTest, GetCpuConsumeTime_Test_001, TestSize.Level1)
 {
     std::vector<std::vector<CpuFreqData>> cpuData;
     std::vector<TotalTime> totalTimeList;
-    CpuStartTime cpuStartTime = {
-        .halfStartTime = 1234,
-        .optimalCpuStartTime = 1234,
+    CpuConsumeTime cpuStartTime = {
+        .cpuFaultTime = 1234,
+        .optimalCpuTime = 1234,
     };
-    std::string stackPath = "GetCpuStartTime_Test_001";
     int pid = getpid();
-    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath, pid);
-    EXPECT_EQ(data.GetCpuStartTime().halfStartTime, 1234);
-    EXPECT_EQ(data.GetCpuStartTime().optimalCpuStartTime, 1234);
-}
-
-/**
- * @tc.number: GetStackPath_Test_001
- * @tc.desc: add testcase
- * @tc.type: FUNC
- */
-HWTEST_F(CpuDataProcessorTest, GetStackPath_Test_001, TestSize.Level1)
-{
-    std::vector<std::vector<CpuFreqData>> cpuData;
-    std::vector<TotalTime> totalTimeList;
-    CpuStartTime cpuStartTime = {
-        .halfStartTime = 1234,
-        .optimalCpuStartTime = 1234,
-    };
-    std::string stackPath = "GetStackPath_Test_001";
-    int pid = getpid();
-    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, stackPath, pid);
-    EXPECT_EQ(data.GetStackPath(), stackPath);
+    CpuDataProcessor data(cpuData, totalTimeList, cpuStartTime, pid);
+    EXPECT_EQ(data.GetCpuConsumeTime().cpuFaultTime, 1234);
+    EXPECT_EQ(data.GetCpuConsumeTime().optimalCpuTime, 1234);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

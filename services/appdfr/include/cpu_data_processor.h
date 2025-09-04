@@ -18,29 +18,48 @@
 #include <vector>
 #include <string>
 
-#include "appfreeze_data.h"
-
 namespace OHOS {
 namespace AppExecFwk {
+struct CpuFreqData {
+    uint64_t frequency;
+    uint64_t runningTime;
+};
+
+struct FrequencyPair {
+    uint64_t frequency;
+    float percentage;
+};
+
+struct TotalTime {
+    uint64_t totalRunningTime;
+    uint64_t totalCpuTime;
+};
+
+struct CpuConsumeTime {
+    double optimalCpuTime;
+    uint64_t cpuFaultTime;
+    uint64_t processCpuTime;
+    uint64_t deviceRunTime;
+    uint64_t cpuTime;
+};
+
 class CpuDataProcessor {
 public:
     CpuDataProcessor() {};
     CpuDataProcessor(const std::vector<std::vector<CpuFreqData>> &cpuData,
-        const std::vector<TotalTime> &totalTimeList, CpuStartTime cpuStartTime,
-        const std::string &stackPath, int32_t pid);
+        const std::vector<TotalTime> &totalTimeList, CpuConsumeTime cpuStartTime,
+        int32_t pid);
     ~CpuDataProcessor() = default;
 
-    std::vector<std::vector<CpuFreqData>> GetHandlingHalfCpuData() const;
+    std::vector<std::vector<CpuFreqData>> GetCpuDetailData() const;
     std::vector<TotalTime> GetTotalTimeList() const;
-    CpuStartTime GetCpuStartTime() const;
-    std::string GetStackPath() const;
+    CpuConsumeTime GetCpuConsumeTime() const;
     int32_t GetPid() const;
 
 private:
     std::vector<std::vector<CpuFreqData>> handlingHalfCpuData_;
     std::vector<TotalTime> totalTimeList_;
-    CpuStartTime cpuStartTime_ {};
-    std::string stackPath_;
+    CpuConsumeTime cpuConsumeTime_ {};
     int32_t pid_ = 0;
 };
 }  // namespace AppExecFwk
