@@ -5830,6 +5830,22 @@ int AbilityManagerService::UnRegisterMissionListener(const std::string &deviceId
     return dmsClient.UnRegisterMissionListener(Str8ToStr16(deviceId), listener->AsObject());
 }
 
+int32_t AbilityManagerService::GetUidByCloneBundleInfo(std::string &bundleName, int32_t callerUid, int32_t userId) const
+{
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bms, -1);
+    AppExecFwk::BundleInfo bundleInfo;
+    int32_t appIndex = 0;
+    MultiAppUtils::GetRunningMultiAppIndex(bundleName, callerUid, appIndex);
+    if (IN_PROCESS_CALL(bms->GetCloneBundleInfo(
+        bundleName, static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
+        appIndex, bundleInfo, userId)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed get bundle info for %{public}s", bundleName.c_str());
+        return -1;
+    }
+    return bundleInfo.uid;
+}
+
 sptr<IWantSender> AbilityManagerService::GetWantSender(
     const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken,
     int32_t uid)
