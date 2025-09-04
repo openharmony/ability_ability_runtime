@@ -32,7 +32,7 @@ AbilityWindow::~AbilityWindow()
  *
  * @param handler The EventHandler of the Ability the AbilityWindow belong.
  */
-void AbilityWindow::Init(std::shared_ptr<AbilityHandler>& handler, std::shared_ptr<Ability> ability)
+void AbilityWindow::Init(const std::shared_ptr<AbilityHandler> &handler, const std::shared_ptr<Ability> &ability)
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
     handler_ = handler;
@@ -40,8 +40,8 @@ void AbilityWindow::Init(std::shared_ptr<AbilityHandler>& handler, std::shared_p
     windowScene_ = std::make_shared<Rosen::WindowScene>();
 }
 
-bool AbilityWindow::InitWindow(std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
-    sptr<Rosen::IWindowLifeCycle> &listener, int32_t displayId, sptr<Rosen::WindowOption> option, bool isPrivacy)
+bool AbilityWindow::InitWindow(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
+    sptr<Rosen::IWindowLifeCycle> &listener, int32_t displayId, const sptr<Rosen::WindowOption> &option, bool isPrivacy)
 {
     TAG_LOGD(AAFwkTag::ABILITY, "called");
     if (windowScene_ == nullptr) {

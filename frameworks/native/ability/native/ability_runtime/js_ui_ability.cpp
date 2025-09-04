@@ -633,7 +633,7 @@ void JsUIAbility::OnSceneCreated()
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
     if (delegator && CreateProperty(abilityContext_, property)) {
-        TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformScenceCreated");
+        TAG_LOGD(AAFwkTag::UIABILITY, "call PostPerformSceneCreated");
         property->object_ = jsAbilityObj_;
         delegator->PostPerformScenceCreated(property);
     }
