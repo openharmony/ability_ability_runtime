@@ -1982,7 +1982,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     }
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
     SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
-
 #ifdef WITH_DLP
     if (!DlpUtils::OtherAppsAccessDlpCheck(callerToken, want) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
@@ -1991,6 +1990,13 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         eventHelper_.SendStartAbilityErrorEvent(eventInfo, CHECK_PERMISSION_FAILED,
             "permission verify failed");
         return CHECK_PERMISSION_FAILED;
+    }
+
+    if (AbilityUtil::HandleDlpApp(const_cast<Want &>(want))) {
+        auto result = StartExtensionAbilityInner(want, callerToken, userId,
+            AppExecFwk::ExtensionAbilityType::SERVICE, false, false, true, isStartAsCaller);
+        eventHelper_.SendStartAbilityErrorEvent(eventInfo, result, "StartExtensionAbilityInner failed");
+        return result;
     }
 #endif // WITH_DLP
     if (auto pluginRet = CheckStartPlugin(want, callerToken); pluginRet != ERR_OK) {
