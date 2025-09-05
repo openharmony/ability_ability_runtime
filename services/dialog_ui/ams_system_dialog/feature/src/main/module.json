@@ -22,6 +22,9 @@
       },
       {
         "name" : "ohos.permission.REQUIRE_FORM"
+      },
+      {
+        "name": "ohos.permission.MANAGE_SECURE_SETTINGS"
       }
     ],
     "deviceTypes": [

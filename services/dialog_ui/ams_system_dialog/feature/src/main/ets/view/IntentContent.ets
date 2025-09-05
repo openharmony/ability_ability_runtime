@@ -76,28 +76,27 @@ export struct IntentContent {
             acc[bundleName].push(item);
             return acc;
           }, {} as Record<string, IntentInfo[]>)
-
-          Object.keys(this.intermediateGroupMaterial).forEach((bundleName: string, index: number) => {
-
-            bundle.getApplicationInfo(bundleName, 0).then((result) => {
+          const bundleNames = Object.keys(this.intermediateGroupMaterial);
+          const promises = bundleNames.map(async (bundleName) => {
+            try {
+              const result = await bundle.getApplicationInfo(
+                bundleName, bundle.ApplicationFlag.GET_APPLICATION_INFO_WITH_PERMISSION);
               if (result.debug) {
-                Object.keys(this.intermediateGroupMaterial[bundleName]).forEach((key: string, index: number) => {
-                  this.getAllIntentIcon(this.intermediateGroupMaterial[bundleName][key]['icon'], bundleName).then((value) => {
-                    this.intermediateGroupMaterial[bundleName][key]['iconImg'] = value;
-                    this.setAppName(this.intermediateGroupMaterial[bundleName][0]).then((value) => {
-                      this.groupMaterial[value] = this.intermediateGroupMaterial[bundleName];
-                    })
-                  })
-                })
+                const materialItems = this.intermediateGroupMaterial[bundleName];
+                for (const key of Object.keys(materialItems)) {
+                  const iconImg = await this.getAllIntentIcon(materialItems[key].icon, bundleName);
+                  materialItems[key].iconImg = iconImg;
+                  const appName = await this.setAppName(materialItems[0]);
+                  this.groupMaterial[appName] = materialItems;
+                }
               }
-            }).catch((err: BusinessError) => {
+            } catch (err) {
               hilog.error(DOMAIN, TAG, 'getApplicationInfo failed. Cause: %{public}s', JSON.stringify(err));
-            });
-
-            if (index === Object.keys(this.intermediateGroupMaterial).length - 1) {
-              this.groupMaterial = jsClone(this.groupMaterial);
             }
-          })
+          });
+          Promise.all(promises).then(() => {
+            this.groupMaterial = jsClone(this.groupMaterial);
+          });
         }).catch((err: BusinessError) => {
           hilog.error(DOMAIN, TAG, 'getAllInsightIntentInfo errCode: %{public}d', err.code);
           hilog.error(DOMAIN, TAG, 'getAllInsightIntentInfo errMessage: %{public}s', err.message);
@@ -167,14 +166,14 @@ export struct IntentContent {
   async getAllIntentIcon(icon: string,
     bundleName: string): Promise<PixelMap | ResourceStr | DrawableDescriptor | undefined> {
     let pixelMap: image.PixelMap | ResourceStr | DrawableDescriptor | undefined = undefined;
-    if (icon.startsWith('$r')) {
+    if (icon?.startsWith('$r')) {
       try {
         let resourceStr: string | undefined = icon.match(/['"](.+)['"]/)?.[1];
         if (!resourceStr) {
           return icon;
         }
         let resourceName: string | undefined = resourceStr.split('.').pop();
-        if (!resourceStr) {
+        if (!resourceName) {
           return icon;
         }
         let context = this.getUIContext().getHostContext();
@@ -203,13 +202,20 @@ export struct IntentContent {
 
   async uint8ArrayToImage(buffer: Uint8Array): Promise<PixelMap | null> {
     let imgIcon: image.PixelMap | null = null;
+    let imageSource: image.ImageSource | null = null;
     try {
-      const imageSource = image.createImageSource(buffer.buffer);
+      imageSource = image.createImageSource(buffer.buffer);
+      if (!imageSource) {
+        throw new Error('Failed to create ImageSource from buffer.');
+      }
       imgIcon = await this.getUint8Array(imageSource);
-      imageSource.release();
       return imgIcon;
     } catch (error) {
       hilog.error(DOMAIN, TAG, 'Error in uint8ArrayToImage', JSON.stringify(error));
+    } finally {
+      if (imageSource) {
+        imageSource.release();
+      }
     }
     return imgIcon;
   }
