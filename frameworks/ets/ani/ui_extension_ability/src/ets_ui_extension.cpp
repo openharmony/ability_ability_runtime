@@ -87,6 +87,7 @@ EtsUIExtension *EtsUIExtension::Create(const std::unique_ptr<Runtime> &runtime)
 
 EtsUIExtension::EtsUIExtension(ETSRuntime &eTSRuntime) : etsRuntime_(eTSRuntime)
 {
+    abilityResultListeners_ = std::make_shared<EtsAbilityResultListeners>();
 }
 
 EtsUIExtension::~EtsUIExtension()
