@@ -383,7 +383,7 @@ void EtsUIExtensionContentSession::LoadContent(ani_env *env, ani_object object, 
         isFirstTriggerBindModal_ = false;
     }
     sptr<IRemoteObject> parentToken = sessionInfo_->parentToken;
-    Rosen::WMError ret = uiWindow_->NapiSetUIContent(contextPath, env, storage,
+    Rosen::WMError ret = uiWindow_->AniSetUIContent(contextPath, env, storage,
         Rosen::BackupAndRestoreType::NONE, parentToken);
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "AniSetUIContent failed, ret=%{public}d", ret);
