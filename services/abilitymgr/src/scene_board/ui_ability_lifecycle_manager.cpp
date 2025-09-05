@@ -1545,9 +1545,9 @@ sptr<SessionInfo> UIAbilityLifecycleManager::CreateSessionInfo(const AbilityRequ
 int UIAbilityLifecycleManager::NotifySCBPendingActivationInSplitMode(sptr<SessionInfo> &sessionInfo,
     const AbilityRequest &abilityRequest)
 {
-    auto result = CreateSessionConfigurations(abilityRequest.primaryWindowId, sessionInfo);
-    auto& sessionInfoList = result.first;
-    auto& configs = result.second;
+    std::vector<sptr<SessionInfo>> sessionInfoList;
+    std::vector<Rosen::PendingSessionActivationConfig> configList;
+    CreateSessionConfigurations(sessionInfoList, abilityRequest.primaryWindowId, configList, sessionInfo);
     bool hasStartWindowOption = (sessionInfo->startWindowOption != nullptr);
     bool hasStartWindow = hasStartWindowOption ? sessionInfo->startWindowOption->hasStartWindow : false;
     std::string backgroundColor =
@@ -1561,10 +1561,10 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivationInSplitMode(sptr<Sessio
         return ERR_INVALID_VALUE;
     }
 
-    for (auto sessionInfo : sessionInfoList) {
+    for (auto &sessionInfo : sessionInfoList) {
         sessionInfo->canStartAbilityFromBackground = true;
     }
-    return static_cast<int>(tmpSceneSession->BatchPendingSessionsActivation(sessionInfoList, configs));
+    return static_cast<int>(tmpSceneSession->BatchPendingSessionsActivation(sessionInfoList, configList));
 }
 
 int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo,
@@ -2570,7 +2570,11 @@ int32_t UIAbilityLifecycleManager::MoveAbilityToFront(const SpecifiedRequest &sp
         HandleAbilitiesRequestDone(requestId, requestListId, sessionInfo);
         return ERR_OK;
     }
-    SendSessionInfoToSCB(callerAbility, sessionInfo);
+    if (specifiedRequest.abilityRequest.isStartInSplitMode) {
+        SendSessionInfoToSCBInSplitMode(specifiedRequest.abilityRequest.primaryWindowId, callerAbility, sessionInfo);
+    } else {
+        SendSessionInfoToSCB(callerAbility, sessionInfo);
+    }
     abilityRecord->RemoveWindowMode();
     return ERR_OK;
 }
@@ -2626,54 +2630,34 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(std::shared_ptr<AbilityRecor
     return ERR_OK;
 }
 
-std::pair<std::vector<sptr<SessionInfo>>, std::vector<Rosen::PendingSessionActivationConfig>> UIAbilityLifecycleManager
-    ::CreateSessionConfigurations(int primaryWindowId, sptr<SessionInfo> sessionInfo)
+void UIAbilityLifecycleManager::CreateSessionConfigurations(std::vector<sptr<SessionInfo>> &sessionInfoList,
+    int primaryWindowId, std::vector<Rosen::PendingSessionActivationConfig> &configList, sptr<SessionInfo> sessionInfo)
 {
-    std::vector<sptr<SessionInfo>> sessionInfoList;
     sptr<SessionInfo> sourceSessionInfo = new SessionInfo();
     sourceSessionInfo->persistentId = primaryWindowId;
     sessionInfoList.push_back(sourceSessionInfo);
     sessionInfoList.push_back(sessionInfo);
-
-    std::vector<Rosen::PendingSessionActivationConfig> configs;
     Rosen::PendingSessionActivationConfig sourceConfig = {false, false};
     Rosen::PendingSessionActivationConfig targetConfig = {true, true};
-    configs.push_back(sourceConfig);
-    configs.push_back(targetConfig);
-
-    return {sessionInfoList, configs};
+    configList.push_back(sourceConfig);
+    configList.push_back(targetConfig);
 }
 
 int UIAbilityLifecycleManager::SendSessionInfoToSCBInSplitMode(int primaryWindowId,
     std::shared_ptr<AbilityRecord> callerAbility, sptr<SessionInfo> sessionInfo)
 {
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
-    auto result = CreateSessionConfigurations(primaryWindowId, sessionInfo);
-    auto& sessionInfoList = result.first;
-    auto& configs = result.second;
+    std::vector<sptr<SessionInfo>> sessionInfoList;
+    std::vector<Rosen::PendingSessionActivationConfig> configList;
+    CreateSessionConfigurations(sessionInfoList, primaryWindowId, configList, sessionInfo);
     auto tmpSceneSession = iface_cast<Rosen::ISession>(rootSceneSession_);
-    sptr<SessionInfo> callerSessionInfo = nullptr;
-    if (callerAbility != nullptr && (callerSessionInfo = callerAbility->GetSessionInfo()) != nullptr &&
-        callerSessionInfo->sessionToken != nullptr) {
-        auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
-        CHECK_POINTER_AND_RETURN(callerSession, ERR_INVALID_VALUE);
-        CheckCallerFromBackground(callerAbility, sessionInfo);
-        auto requestId = sessionInfo->want.GetStringParam(KEY_REQUEST_ID);
-        if (!requestId.empty()) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "notify request success, requestId:%{public}s", requestId.c_str());
-            callerAbility->NotifyAbilityRequestSuccess(requestId, sessionInfo->want.GetElement());
-        }
-        sessionInfo->want.RemoveParam(KEY_REQUEST_ID);
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for callerSession, target: %{public}s",
-            sessionInfo->want.GetElement().GetAbilityName().c_str());
-        callerSession->BatchPendingSessionsActivation(sessionInfoList, configs);
-        return ERR_OK;
-    }
     CHECK_POINTER_AND_RETURN(tmpSceneSession, ERR_INVALID_VALUE);
-    sessionInfo->canStartAbilityFromBackground = true;
+    for (auto &sessionInfo : sessionInfoList) {
+        sessionInfo->canStartAbilityFromBackground = true;
+    }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, NotifySCBPendingActivation for rootSceneSession, target: %{public}s",
         sessionInfo->want.GetElement().GetAbilityName().c_str());
-    tmpSceneSession->BatchPendingSessionsActivation(sessionInfoList, configs);
+    tmpSceneSession->BatchPendingSessionsActivation(sessionInfoList, configList);
     return ERR_OK;
 }
 

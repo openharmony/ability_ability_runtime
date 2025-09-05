@@ -54,6 +54,7 @@ public:
     std::shared_ptr<AbilityRecord> acmGetUIExtensionBySessionFromServiceMap_ = nullptr;
     bool isSupportStartAbilities_ = true;
     bool isSupportMultiInstance_ = true;
+    bool isSystemAppCall_ = true;
 };
 } // namespace AAFwk
 } // namespace OHOS

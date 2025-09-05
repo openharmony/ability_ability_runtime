@@ -3751,6 +3751,96 @@ HWTEST_F(AbilityManagerStubTest, ChangeUIAbilityVisibilityBySCB_0100, TestSize.L
 
 /*
  * Feature: AbilityManagerService
+ * Function: StartUIAbilitiesInSplitWindowModeInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowModeInner
+ * EnvConditions: NA
+ * CaseDescription: want is nullptr
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIAbilitiesInSplitWindowModeInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t primaryWindowId = 1;
+    data.WriteInt32(primaryWindowId);
+
+    data.WriteParcelable(nullptr);
+
+    sptr<IRemoteObject> token =
+        sptr<AppExecFwk::MockAbilityToken>(new (std::nothrow) AppExecFwk::MockAbilityToken());
+    data.WriteRemoteObject(token);
+
+    int res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES_IN_SPLIT_WINDOW_MODE), data, reply,
+        option);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilitiesInSplitWindowModeInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowModeInner
+ * EnvConditions: NA
+ * CaseDescription: callToken is nullptr
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIAbilitiesInSplitWindowModeInner_002, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t primaryWindowId = 1;
+    data.WriteInt32(primaryWindowId);
+
+    Want want;
+    data.WriteParcelable(&want);
+
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+
+    int res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES_IN_SPLIT_WINDOW_MODE), data, reply,
+        option);
+    EXPECT_EQ(res, INVALID_CALLER_TOKEN);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilitiesInSplitWindowModeInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowModeInner
+ * EnvConditions: NA
+ * CaseDescription: NO_ERROR
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUIAbilitiesInSplitWindowModeInner_003, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t primaryWindowId = 1;
+    data.WriteInt32(primaryWindowId);
+
+    Want want;
+    data.WriteParcelable(&want);
+
+    sptr<IRemoteObject> token =
+        sptr<AppExecFwk::MockAbilityToken>(new (std::nothrow) AppExecFwk::MockAbilityToken());
+    data.WriteRemoteObject(token);
+
+    int res = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES_IN_SPLIT_WINDOW_MODE), data, reply,
+        option);
+    EXPECT_EQ(res, NO_ERROR);
+}
+/*
+ * Feature: AbilityManagerService
  * Function: StartUIAbilitiesInner
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartUIAbilitiesInner
