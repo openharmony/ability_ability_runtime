@@ -2346,6 +2346,7 @@ private:
     void PauseOldMissionListManager(int32_t userId);
     void PauseOldConnectManager(int32_t userId);
     bool IsSystemUI(const std::string &bundleName) const;
+    int32_t GetUidByCloneBundleInfo(std::string &bundleName, int32_t callerUid, int32_t userId) const;
 
     bool VerificationAllToken(const sptr<IRemoteObject> &token);
     std::shared_ptr<DataAbilityManager> GetCurrentDataAbilityManager();
@@ -2836,6 +2837,8 @@ private:
 
     int32_t ProcessUdmfKey(
         const Want &want, uint32_t targetTokenId, AppExecFwk::ExtensionAbilityType extensionType);
+
+    bool IsAllowAttachOrDetachAppDebug(AppExecFwk::ApplicationInfo &appInfo);
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif

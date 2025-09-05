@@ -25,10 +25,10 @@
 #include "ability_scheduler.h"
 #include "ability_start_setting.h"
 #include "recovery_param.h"
+#include "app_utils.h"
 #undef private
 #undef protected
 #include "ability_manager_errors.h"
-#include "app_utils.h"
 #include "connection_observer_errors.h"
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_execute_manager.h"
@@ -1512,6 +1512,28 @@ HWTEST_F(AbilityManagerServiceFirstTest, AttachAppDebug_001, TestSize.Level1)
     std::string bundleName;
     abilityMs_->AttachAppDebug(bundleName, false);
     EXPECT_NE(abilityMs_, nullptr);
+}
+
+/**
+ * @tc.name: IsAllowAttachOrDetachAppDebug
+ * @tc.desc: Test the state of IsAllowAttachOrDetachAppDebug
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, IsAllowAttachOrDetachAppDebug, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    std::string bundleName = "testName";
+    AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.bundleName = bundleName;
+    applicationInfo.appProvisionType = AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG;
+    EXPECT_TRUE(abilityMs_->IsAllowAttachOrDetachAppDebug(applicationInfo));
+    applicationInfo.appProvisionType = AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE;
+    EXPECT_FALSE(abilityMs_->IsAllowAttachOrDetachAppDebug(applicationInfo));
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportAllowDebugPermission_.isLoaded = true;
+    appUtils.isSupportAllowDebugPermission_.value = true;
+    EXPECT_FALSE(abilityMs_->IsAllowAttachOrDetachAppDebug(applicationInfo));
 }
 
 /**

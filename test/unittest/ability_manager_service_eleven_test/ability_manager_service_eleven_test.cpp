@@ -27,6 +27,7 @@
 #include "mock_ability_controller.h"
 #include "mock_ability_manager_collaborator.h"
 #include "mock_ability_token.h"
+#include "mock_app_mgr_service.h"
 #include "mock_mission_list_manager_interface.h"
 #include "mock_my_flag.h"
 #include "mock_permission_verification.h"
@@ -928,6 +929,35 @@ HWTEST_F(AbilityManagerServiceElevenTest, SetResidentProcessEnabled_001, TestSiz
     int result = abilityMs->SetResidentProcessEnabled(bundleName, enable);
     EXPECT_EQ(result, INNER_ERR);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceElevenTest SetResidentProcessEnabled_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: GetUidByCloneBundleInfo_001
+ * Function: GetUidByCloneBundleInfo
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetUidByCloneBundleInfo
+ */
+HWTEST_F(AbilityManagerServiceElevenTest, GetUidByCloneBundleInfo_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetUidByCloneBundleInfo_001 start";
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(abilityMs->subManagersHelper_, nullptr);
+
+    std::string bundleName = "com.ohos.settings";
+    int uid = -1;
+    int userId = 100;
+    AppExecFwk::MockAppMgrService::retCode_ = uid;
+    abilityMs->GetUidByCloneBundleInfo(bundleName, uid, userId);
+
+    bundleName = "com.applicaion.test";
+    userId = 101;
+    auto result = abilityMs->GetUidByCloneBundleInfo(bundleName, uid, userId);
+    EXPECT_EQ(result, uid);
+
+    GTEST_LOG_(INFO) << "GetUidByCloneBundleInfo_001 end";
 }
 
 /*

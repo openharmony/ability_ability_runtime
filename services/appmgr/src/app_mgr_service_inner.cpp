@@ -4825,7 +4825,8 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
         TAG_LOGI(AAFwkTag::APPMGR, "null appRecord");
         return;
     }
-    AppExecFwk::AppfreezeManager::GetInstance()->ReportAppFreezeSysEvents(appRecord->GetPid());
+    AppExecFwk::AppfreezeManager::GetInstance()->ReportAppFreezeSysEvents(appRecord->GetPid(),
+        appRecord->GetBundleName());
     AppExecFwk::AppfreezeManager::GetInstance()->RemoveDeathProcess(appRecord->GetBundleName());
     std::vector<sptr<IRemoteObject>> abilityTokens;
     for (const auto &token : appRecord->GetAbilities()) {
@@ -6029,7 +6030,8 @@ void AppMgrServiceInner::HandleConfigurationChange(const Configuration& config, 
     }
 }
 
-int32_t AppMgrServiceInner::RegisterConfigurationObserver(const sptr<IConfigurationObserver>& observer)
+int32_t AppMgrServiceInner::RegisterConfigurationObserver(const sptr<IConfigurationObserver>& observer,
+    const int32_t userId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
@@ -6050,8 +6052,12 @@ int32_t AppMgrServiceInner::RegisterConfigurationObserver(const sptr<IConfigurat
         TAG_LOGE(AAFwkTag::APPMGR, "observer exist");
         return ERR_INVALID_VALUE;
     }
-    configurationObservers_.push_back(
-        ConfigurationObserverWithUserId { observer, GetUserIdByUid(IPCSkeleton::GetCallingUid()) });
+    if (userId >= 0) {
+        configurationObservers_.push_back(ConfigurationObserverWithUserId { observer, userId });
+    } else {
+        configurationObservers_.push_back(
+            ConfigurationObserverWithUserId { observer, GetUserIdByUid(IPCSkeleton::GetCallingUid()) });
+    }
     return NO_ERROR;
 }
 
@@ -7265,6 +7271,16 @@ int32_t AppMgrServiceInner::SubmitDfxFaultTask(const FaultData &faultData, const
         return ERR_INVALID_VALUE;
     }
     int64_t startTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
+    TAG_LOGI(AAFwkTag::APPDFR, "init cpuInfo, eventName:%{public}s, bundleName:%{public}s, "
+        "pid:%{public}d", faultData.errorObject.name.c_str(), bundleName.c_str(), pid);
+    AppfreezeManager::AppInfo info = {
+        .pid = pid,
+        .uid = callerUid,
+        .bundleName = bundleName,
+        .processName = processName,
+    };
+    AppExecFwk::AppfreezeManager::GetInstance()->InitWarningCpuInfo(faultData, info);
+    dfxTaskHandler_->SubmitTask(notifyAppTask, "NotifyAppFaultTask");
     dfxTaskHandler_->SubmitTask(notifyAppTask, "NotifyAppFaultTask");
     TAG_LOGW(AAFwkTag::APPDFR, "submit NotifyAppFaultTask, eventName:%{public}s, bundleName:%{public}s, "
         "endTime:%{public}s, interval:%{public}" PRId64 " ms", faultData.errorObject.name.c_str(),
@@ -7536,6 +7552,8 @@ FaultData AppMgrServiceInner::ConvertDataTypes(const AppFaultDataBySA &faultData
     newfaultData.needKillProcess = faultData.needKillProcess;
     newfaultData.appfreezeInfo = faultData.appfreezeInfo;
     newfaultData.procStatm = faultData.procStatm;
+    newfaultData.isInForeground = faultData.isInForeground;
+    newfaultData.isEnableMainThreadSample = faultData.isEnableMainThreadSample;
     if (appRunningManager_) {
         std::string appRunningUniqueId;
         int32_t ret = appRunningManager_->GetAppRunningUniqueIdByPid(faultData.pid, appRunningUniqueId);

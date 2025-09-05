@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#include "ability_util.h"
+#ifdef SUPPORT_GRAPHICS
+#include "implicit_start_processor.h"
+#endif
 #include "interceptor/kiosk_interceptor.h"
 #include "kiosk_manager.h"
 
@@ -20,11 +24,18 @@ namespace OHOS {
 namespace AAFwk {
 int KioskInterceptor::DoProcess(AbilityInterceptorParam param)
 {
-    auto bundleName = param.want.GetElement().GetBundleName();
+#ifdef SUPPORT_SCREEN
+    if (ImplicitStartProcessor::IsImplicitStartAction(param.want)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "is implicit start action");
+        return ERR_OK;
+    }
+#endif
+
     auto& kioskManager = KioskManager::GetInstance();
     if (!kioskManager.IsInKioskMode()) {
         return ERR_OK;
     }
+    auto bundleName = param.want.GetElement().GetBundleName();
     if (!kioskManager.IsInWhiteList(bundleName)) {
         return ERR_KIOSK_MODE_NOT_IN_WHITELIST;
     }

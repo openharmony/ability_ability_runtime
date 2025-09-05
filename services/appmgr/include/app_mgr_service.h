@@ -465,11 +465,11 @@ public:
     /**
      * @brief register a configuration observer which will receive notifies when updated.
      * @param observer the configuration observer to receive notify.
-     *
+     * @param userId The userId provided by caller.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
-
+    virtual int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer,
+        const int32_t userId = -1) override;
     /**
      * @brief unregister a configuration observer registered before.
      * @param observer the configuration observer registered before.

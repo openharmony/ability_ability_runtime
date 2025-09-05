@@ -27,6 +27,7 @@
 #include "mission_info.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
+#include "open_link_options.h"
 #include "start_options.h"
 #include "want.h"
 #include <functional>
@@ -499,8 +500,15 @@ public:
     virtual void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message, int32_t resultCode = 0) = 0;
 
+    virtual void OnOpenLinkRequestSuccess(const std::string &requestId,
+        const AppExecFwk::ElementName &element, const std::string &message) = 0;
+    virtual void OnOpenLinkRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message) = 0;
+
     virtual ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId,
         OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId) = 0;
+    virtual ErrCode AddCompletionHandlerForOpenLink(const std::string &requestId,
+        AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail) = 0;
 
 protected:
     bool IsContext(size_t contextTypeId) override

@@ -110,11 +110,19 @@ int ImplicitStartProcessor::CheckImplicitCallPermission(const AbilityRequest& ab
         return ERR_OK;
     }
     auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyBackgroundCallPermission(isBackgroundCall);
-    if (!ret) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckImplicitCallPermission failed");
+    if (ret) {
+        return ERR_OK;
+    }
+    std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (callerAbility == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "permission failed");
         return CHECK_PERMISSION_FAILED;
     }
-    return ERR_OK;
+    auto sessionInfo = callerAbility->GetSessionInfo();
+    int32_t persistentId = (sessionInfo == nullptr) ? -1 : sessionInfo->persistentId;
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "permission failed %{public}s,%{public}d",
+        callerAbility->GetAbilityInfo().name.c_str(), persistentId);
+    return CHECK_PERMISSION_FAILED;
 }
 
 int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_t userId, int32_t windowMode,
@@ -499,6 +507,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId, Abili
         "ImplicitQueryInfos, abilityInfo size : %{public}zu, extensionInfos size: %{public}zu", abilityInfos.size(),
         extensionInfos.size());
 
+    KioskManager::GetInstance().FilterAbilityInfos(abilityInfos);
     if (appLinkingOnly && abilityInfos.size() == 0) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not match app");
         return ERR_IMPLICIT_START_ABILITY_FAIL;
@@ -607,6 +616,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId, Abili
         dialogAppInfo.multiAppMode = info.applicationInfo.multiAppMode;
         dialogAppInfos.emplace_back(dialogAppInfo);
     }
+    KioskManager::GetInstance().FilterDialogAppInfos(dialogAppInfos);
 
     return ERR_OK;
 }

@@ -110,6 +110,7 @@ public:
 private:
     void Timer();
     void ReportEvent();
+    void SetMainThreadSample();
 #ifdef ABILITY_RUNTIME_HITRACE_ENABLE
     void SetHiTraceChainId();
 

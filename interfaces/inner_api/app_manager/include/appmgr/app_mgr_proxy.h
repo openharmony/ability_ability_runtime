@@ -446,7 +446,8 @@ public:
     virtual int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name,
         int32_t appIndex = 0) override;
 
-    virtual int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
+    virtual int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer,
+        const int32_t userId = -1) override;
 
     virtual int32_t UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
 

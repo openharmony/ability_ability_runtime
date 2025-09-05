@@ -31,6 +31,9 @@ class Configuration;
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr int32_t CURRENT_USER_ID = -1;
+}
 class SessionInfo;
 
 class IAbilityManagerCollaborator : public IRemoteBroker {
@@ -95,30 +98,34 @@ public:
     /**
      * @brief Notify when notify app to background.
      * @param missionId missionId.
+     * @param userId, the user id.
      * @return 0 when notify move mission to background success or else failed.
      */
-    virtual int32_t NotifyMoveMissionToBackground(int32_t missionId) = 0;
+    virtual int32_t NotifyMoveMissionToBackground(int32_t missionId, int32_t userId = CURRENT_USER_ID) = 0;
 
     /**
      * @brief Notify when notify app to foreground.
      * @param missionId missionId.
+     * @param userId, the user id.
      * @return 0 when notify move mission to foreground success or else failed.
      */
-    virtual int32_t NotifyMoveMissionToForeground(int32_t missionId) = 0;
+    virtual int32_t NotifyMoveMissionToForeground(int32_t missionId, int32_t userId = CURRENT_USER_ID) = 0;
 
     /**
      * @brief Notify when notify ability is terminated, but mission is not cleared.
      * @param missionId missionId.
+     * @param userId, the user id.
      * @return 0 when notify terminate mission success or else failed.
      */
-    virtual int32_t NotifyTerminateMission(int32_t missionId) = 0;
+    virtual int32_t NotifyTerminateMission(int32_t missionId, int32_t userId = CURRENT_USER_ID) = 0;
 
     /**
      * @brief Notify to broker when clear mission.
      * @param missionId missionId.
+     * @param userId, the user id.
      * @return 0 when notify clear mission success or else failed.
      */
-    virtual int32_t NotifyClearMission(int32_t missionId) = 0;
+    virtual int32_t NotifyClearMission(int32_t missionId, int32_t userId = CURRENT_USER_ID) = 0;
 
     /**
      * @brief Notify to broker when clear mission.
@@ -190,7 +197,7 @@ public:
         return -1;
     }
 
-    virtual void NotifyMissionBindPid(int32_t missionId, int32_t pid)
+    virtual void NotifyMissionBindPid(int32_t missionId, int32_t pid, int32_t userId = CURRENT_USER_ID)
     {
         return;
     }

@@ -92,6 +92,8 @@ struct FaultData : public Parcelable {
     std::string appfreezeInfo;
     std::string appRunningUniqueId;
     std::string procStatm;
+    bool isInForeground;
+    bool isEnableMainThreadSample;
 };
 
 /**
@@ -123,6 +125,8 @@ struct AppFaultDataBySA : public Parcelable {
     std::string appfreezeInfo;
     std::string appRunningUniqueId;
     std::string procStatm;
+    bool isInForeground;
+    bool isEnableMainThreadSample;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -19,6 +19,7 @@
 #include "ability_info.h"
 #include "context_impl.h"
 #include "start_options.h"
+#include "open_link_options.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -56,6 +57,9 @@ public:
     virtual ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId,
         OnAtomicRequestSuccess onRequestSucc, OnAtomicRequestFailure onRequestFail, const std::string &appId);
 
+    virtual ErrCode AddCompletionHandlerForOpenLink(const std::string &requestId,
+        AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail);
+
     /**
      * @brief Callback on request success.
      *
@@ -75,6 +79,11 @@ public:
      */
     virtual void OnRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
         const std::string &message, int32_t resultCode = 0);
+
+    virtual void OnOpenLinkRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message);
+    virtual void OnOpenLinkRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+        const std::string &message);
 
     using SelfType = ExtensionContext;
     static const size_t CONTEXT_TYPE_ID;

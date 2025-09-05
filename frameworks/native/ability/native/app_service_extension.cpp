@@ -61,7 +61,7 @@ std::shared_ptr<AppServiceExtensionContext> AppServiceExtension::CreateAndInitCo
         ExtensionBase<AppServiceExtensionContext>::CreateAndInitContext(record, application, handler, token);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APP_SERVICE_EXT, "null context");
-        return context;
+        return nullptr;
     }
     return context;
 }

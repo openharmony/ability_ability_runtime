@@ -45,10 +45,11 @@ public:
      *
      * @param handler The EventHandler of the Ability the AbilityWindow belong.
      */
-    void Init(std::shared_ptr<AbilityHandler> &handler, std::shared_ptr<Ability> ability);
+    void Init(const std::shared_ptr<AbilityHandler> &handler, const std::shared_ptr<Ability> &ability);
 
-    bool InitWindow(std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
-        sptr<Rosen::IWindowLifeCycle> &listener, int32_t displayId, sptr<Rosen::WindowOption> option, bool isPrivacy);
+    bool InitWindow(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
+         sptr<Rosen::IWindowLifeCycle> &listener, int32_t displayId,
+         const sptr<Rosen::WindowOption> &option, bool isPrivacy);
 
     /**
      * @brief Called when this ability is background.
