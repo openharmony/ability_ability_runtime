@@ -861,6 +861,18 @@ bool SetKeepAliveInfo(ani_env *env, ani_object object, const AbilityRuntime::Kee
         TAG_LOGE(AAFwkTag::APPMGR, "state failed status:%{public}d", status);
         return false;
     }
+    if ((status = env->Object_SetPropertyByName_Ref(object, "setterUserId",
+        AppExecFwk::CreateInt(env, keepInfo.setterId))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "setterUserId failed status:%{public}d", status);
+        return false;
+    }
+    if (keepInfo.policy != AbilityRuntime::KeepAlivePolicy::UNSPECIFIED) {
+        if ((status = env->Object_SetPropertyByName_Boolean(object, "allowUserToCancel",
+            keepInfo.policy == AbilityRuntime::KeepAlivePolicy::ALLOW_CANCEL)) != ANI_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "allowUserToCancel failed status:%{public}d", status);
+            return false;
+        }
+    }
     return true;
 }
 
