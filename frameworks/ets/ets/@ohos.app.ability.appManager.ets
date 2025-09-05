@@ -73,12 +73,16 @@ export interface KeepAliveBundleInfo {
     bundleName: string;
     type: KeepAliveAppType;
     setter: KeepAliveSetter;
+    setterUserId?: int;
+    allowUserToCancel?: boolean;
 }
 
 export class KeepAliveBundleInfoInner implements KeepAliveBundleInfo {
     bundleName: string = '';
     type: KeepAliveAppType = KeepAliveAppType.ALL;
     setter: KeepAliveSetter = KeepAliveSetter.SYSTEM;
+    setterUserId?: int;
+    allowUserToCancel?: boolean;
 }
 
 export native function nativePreloadApplication(callback: AsyncCallbackWrapper<void>, bundleName: string, userId: int,
@@ -574,4 +578,127 @@ export function getKeepAliveBundles(type: KeepAliveAppType, userId?: int): Promi
   return p;
 }
 
+export native function nativeClearUpApplicationDataCheck(bundleName: string) : void;
+export native function nativeClearUpApplicationData(bundleName: string, callback: AsyncCallbackWrapper<void>) : void;
+export function clearUpApplicationData(bundleName: string, callback: AsyncCallback<void>): void {
+  let myCall = new AsyncCallbackWrapper<void>(callback);
+  appManager.nativeClearUpApplicationDataCheck(bundleName);
+  taskpool.execute((): void => {
+    appManager.nativeClearUpApplicationData(bundleName, myCall);
+  });
+}
+
+function clearUpApplicationData(bundleName: string): Promise<void> {
+  appManager.nativeClearUpApplicationDataCheck(bundleName);
+  let p = new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+    let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+      if (err == null || err.code == 0) {
+        resolve(undefined);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeClearUpApplicationData(bundleName, myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeGetKeepAliveAppServiceExtensions(callback: AsyncCallbackWrapper<Array<KeepAliveBundleInfo>>) : void;
+export function getKeepAliveAppServiceExtensions(): Promise<Array<KeepAliveBundleInfo>> {
+  let p = new Promise<Array<KeepAliveBundleInfo>>((resolve: (data: Array<KeepAliveBundleInfo>) => void, reject: (err: BusinessError) => void): void => {
+    let myCall = new AsyncCallbackWrapper<Array<KeepAliveBundleInfo>>((err: BusinessError | null, data: Array<KeepAliveBundleInfo> | undefined) => {
+      if (err == null || err.code == 0) {
+        resolve(data as Array<KeepAliveBundleInfo>);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeGetKeepAliveAppServiceExtensions(myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeSetKeepAliveForAppServiceExtension(bundleName: string, enabled: boolean,
+  callback: AsyncCallbackWrapper<void>) : void;
+export function setKeepAliveForAppServiceExtension(bundleName: string, enabled: boolean): Promise<void> {
+  let p = new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+    let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+      if (err == null || err.code == 0) {
+        resolve(undefined);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeSetKeepAliveForAppServiceExtension(bundleName, enabled, myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeClearUpAppDataCheck(bundleName: string) : void;
+export native function nativeClearUpAppData(callback: AsyncCallbackWrapper<void>, bundleName: string,
+  appCloneIndex?: int) : void;
+export function clearUpAppData(bundleName: string, appCloneIndex?: int): Promise<void> {
+  appManager.nativeClearUpAppDataCheck(bundleName);
+  let p = new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+    let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+      if (err == null || err.code == 0) {
+        resolve(undefined);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeClearUpAppData(myCall, bundleName, appCloneIndex);
+    });
+  });
+  return p;
+}
+
+export native function nativeTerminateMission(missionId: int, callback: AsyncCallbackWrapper<void>) : void;
+export function terminateMission(missionId: int): Promise<void> {
+  let p = new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+    let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+      if (err == null || err.code == 0) {
+        resolve(undefined);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeTerminateMission(missionId, myCall);
+    });
+  });
+  return p;
+}
+
+export native function nativeIsApplicationRunning(bundleName: string, callback: AsyncCallbackWrapper<boolean>) : void;
+export function isApplicationRunning(bundleName: string): Promise<boolean>
+{
+  let p = new Promise<boolean>((resolve: (data: boolean) => void, reject: (err: BusinessError) => void): void => {
+    let myCall = new AsyncCallbackWrapper<boolean>((err: BusinessError | null, data: boolean | undefined) => {
+      if (err == null || err.code == 0) {
+        resolve(data as boolean);
+      } else {
+        reject(err);
+      }
+    });
+    taskpool.execute((): void => {
+      appManager.nativeIsApplicationRunning(bundleName, myCall);
+    });
+  });
+  return p;
+}
+
+export function isApplicationRunning(bundleName: string, callback: AsyncCallback<boolean>): void {
+  let myCall = new AsyncCallbackWrapper<boolean>(callback);
+  taskpool.execute((): void => {
+    appManager.nativeIsApplicationRunning(bundleName, myCall);
+  });
+}
 } // namespace appManager
