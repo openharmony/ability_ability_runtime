@@ -47,7 +47,7 @@ export interface SaveRequestCallback {
 class FillRequestInner implements FillRequest {
   public type: AutoFillType = AutoFillType.UNSPECIFIED;
   public viewData!: ViewData;
-  public customData!: CustomData;
+  public customData: CustomData = {data: {}};
   public isPopup: boolean;
 }
 class SaveRequestInner implements SaveRequest {
