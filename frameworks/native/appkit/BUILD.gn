@@ -358,6 +358,7 @@ ohos_shared_library("ability_stage_ani") {
     "${ability_runtime_services_path}/abilitymgr/include/utils",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_utils_path}/global/constant",
+    "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
   ]
 
   configs = []
