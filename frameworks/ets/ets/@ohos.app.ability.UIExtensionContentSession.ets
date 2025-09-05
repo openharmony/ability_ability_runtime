@@ -53,6 +53,7 @@ export default class UIExtensionContentSession {
   }
   native nativeSendData(data: Record<string, RecordData>): void;
   native loadContent(path: string, storage?: LocalStorage): void;
+  native loadContentByName(path: string, storage?: LocalStorage): void;
   native setWindowBackgroundColor(color: string): void;
   native getUIExtensionHostWindowProxy(): uiExtensionHost.UIExtensionHostWindowProxy;
   native getUIExtensionWindowProxy(): uiExtension.WindowProxy;
