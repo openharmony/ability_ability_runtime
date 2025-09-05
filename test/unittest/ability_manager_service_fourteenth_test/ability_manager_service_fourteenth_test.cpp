@@ -1006,7 +1006,7 @@ HWTEST_F(AbilityManagerServiceFourteenthTest, TerminateUIExtensionAbility_002, T
     abilityMs_->subManagersHelper_->currentConnectManager_ = mockCurrentConnectManager;
 
     int retCode = abilityMs_->TerminateUIExtensionAbility(MockSessionInfo(0), 0, nullptr);
-    EXPECT_EQ(retCode, CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(retCode, ABILITY_VISIBLE_FALSE_DENY_REQUEST);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourteenthTest TerminateUIExtensionAbility_002 end");
 }
 
