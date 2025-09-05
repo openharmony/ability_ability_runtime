@@ -559,7 +559,8 @@ HWTEST_F(AbilityManagerStubSecondTest, OnRemoteRequestInnerFourteenth_0100, Test
         static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_UI_EXTENSION_ROOT_HOST_INFO),
         static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_UI_EXTENSION_SESSION_INFO),
         static_cast<uint32_t>(AbilityManagerInterfaceCode::PRELOAD_UIEXTENSION_ABILITY),
-        static_cast<uint32_t>(AbilityManagerInterfaceCode::TERMINATE_UI_SERVICE_EXTENSION_ABILITY)
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::TERMINATE_UI_SERVICE_EXTENSION_ABILITY),
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITIES_IN_SPLIT_WINDOW_MODE)
     };
 
     int i = 0;
