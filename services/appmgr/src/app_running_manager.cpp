@@ -1865,12 +1865,12 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByChildR
 }
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::GetMasterProcess(
-    const std::string &bundleName, int32_t appIndex, const std::string &instanceKey)
+    const std::string &bundleName, int32_t uid, const std::string &instanceKey)
 {
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &[key, appRecord]: appRunningRecordMap_) {
         if (appRecord && appRecord->GetBundleName() == bundleName && appRecord->IsMasterProcess() &&
-            appRecord->GetAppIndex() == appIndex && appRecord->GetInstanceKey() == instanceKey) {
+            appRecord->GetUid() == uid && appRecord->GetInstanceKey() == instanceKey) {
             return appRecord;
         }
     }

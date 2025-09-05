@@ -10184,7 +10184,7 @@ bool AppMgrServiceInner::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const 
     (void)AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
     auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
     if (isSpecifiedProcess) {
-        auto appRecord = appRunningManager_->GetMasterProcess(abilityInfo.bundleName, appIndex, instanceKey);
+        auto appRecord = appRunningManager_->GetMasterProcess(abilityInfo.bundleName, abilityInfo.uid, instanceKey);
         if (appRecord != nullptr) {
             isDebug = appRecord->IsDebug();
             return true;
