@@ -465,6 +465,7 @@ private:
     std::mutex updateConfigurationDelayedLock_;
     std::map<const int32_t, bool> updateConfigurationDelayedMap_;
 
+    std::mutex appInfosLock_;
     std::vector<BackgroundAppInfo> appInfos_;
     std::mutex uiExtensionBindMapLock_;
     std::map<int32_t, UIExtensionProcessBindInfo> uiExtensionBindMap_;
