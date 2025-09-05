@@ -8749,10 +8749,13 @@ int32_t AppMgrServiceInner::GetChildProcessInfo(const std::shared_ptr<ChildProce
         return ERR_INVALID_VALUE;
     }
 
-    if (IN_PROCESS_CALL(bundleMgrHelper->GetBaseSharedBundleInfos(appRecord->GetBundleName(), info.hspList,
-        AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO))) {
-            TAG_LOGE(AAFwkTag::APPMGR, "GetBaseSharedBundleInfos fail");
-        return ERR_INVALID_VALUE;
+    if (childProcessRecord->GetChildProcessType() != CHILD_PROCESS_TYPE_NATIVE &&
+        childProcessRecord->GetChildProcessType() != CHILD_PROCESS_TYPE_NATIVE_ARGS) {
+        if (IN_PROCESS_CALL(bundleMgrHelper->GetBaseSharedBundleInfos(appRecord->GetBundleName(), info.hspList,
+            AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO))) {
+                TAG_LOGE(AAFwkTag::APPMGR, "GetBaseSharedBundleInfos fail");
+            return ERR_INVALID_VALUE;
+        }
     }
     
     if (!isCallFromGetChildrenProcesses) {
