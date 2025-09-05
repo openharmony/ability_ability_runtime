@@ -27,7 +27,7 @@ constexpr const char *CLASSNAME_ABILITY_RRUNNINGINFO = "Lapplication/AbilityRunn
 constexpr const char *ABILITY_STATE_ENUM_NAME = "L@ohos/app/ability/abilityManager/abilityManager/AbilityState;";
 constexpr const char *CLASSNAME_EXTENSION_RUNNINGINFO = "Lapplication/ExtensionRunningInfo/ExtensionRunningInfoInner;";
 constexpr const char *EXTENSION_ABILITY_TYPE_ENUM_NAME
-    = "L@ohos/app/ability/abilityManager/abilityManager/ExtensionAbilityType;";
+    = "L@ohos/bundle/bundleManager/bundleManager/ExtensionAbilityType;";
 
 bool WrapAbilityRunningInfoArray(
     ani_env *env, ani_object &arrayObj, const std::vector<AAFwk::AbilityRunningInfo> &infos)
@@ -205,6 +205,44 @@ bool WrapArrayString(ani_env *env, ani_object &arrayObj, const std::vector<std::
     return true;
 }
 
+bool WrapExtensionRunningInfoArray(
+    ani_env *env, ani_object &arrayObj, const std::vector<AAFwk::ExtensionRunningInfo> &infos)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "WrapExtensionRunningInfoArray");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return false;
+    }
+    ani_class arrayCls = nullptr;
+    ani_method arrayCtor = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass(CLASSNAME_ARRAY, &arrayCls)) != ANI_OK || arrayCls == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "FindClass failed, status : %{public}d", status);
+        return false;
+    }
+    if ((status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor)) != ANI_OK || arrayCtor == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Class_FindMethod failed, status : %{public}d", status);
+        return false;
+    }
+    if ((status = env->Object_New(arrayCls, arrayCtor, &arrayObj, infos.size())) != ANI_OK || arrayObj == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Object_New failed, status : %{public}d", status);
+        return false;
+    }
+    for (size_t i = 0; i < infos.size(); i++) {
+        ani_object infoObj = nullptr;
+        if (!WrapExtensionRunningInfo(env, infoObj, infos[i])) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "WrapExtensionRunningInfo failed");
+            return false;
+        }
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", SET_OBJECT_VOID_SIGNATURE, i, infoObj);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Object_CallMethodByName_Void failed, status : %{public}d", status);
+            return false;
+        }
+    }
+    return true;
+}
+
 bool WrapExtensionRunningInfo(ani_env *env, ani_object &infoObj, const AAFwk::ExtensionRunningInfo &info)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "WrapExtensionRunningInfo");
@@ -271,8 +309,10 @@ bool WrapExtensionRunningInfoInner(
         TAG_LOGE(AAFwkTag::ABILITYMGR, "set startTimee failed, status: %{public}d", status);
         return false;
     }
-    bool result = WrapArrayString(env, infoObj, info.clientPackage);
-    if (((status = env->Object_SetFieldByName_Boolean(infoObj, "clientPackage", result)) != ANI_OK)) {
+    ani_object stringArray = nullptr;
+    WrapArrayString(env, stringArray, info.clientPackage);
+    if (((status = env->Object_SetPropertyByName_Ref(
+        infoObj, "clientPackage", reinterpret_cast<ani_ref>(stringArray))) != ANI_OK)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "set clientPackage failed, status: %{public}d", status);
         return false;
     }
