@@ -23,6 +23,7 @@
 namespace OHOS {
 namespace {
 constexpr size_t U32_AT_SIZE = 4;
+constexpr size_t STRING_MAX_LENGTH = 128;
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
@@ -36,10 +37,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     FuzzedDataProvider fdp(data, size);
     value = fdp.ConsumeIntegralInRange<int32_t>(0, U32_AT_SIZE);
     Parcel parcel;
-    parcel.WriteString(fdp.ConsumeRandomLengthString());
+    parcel.WriteString(fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
     processOption->ReadFromParcel(parcel);
     processOption->Marshalling(parcel);
-    AAFwk::ProcessOptions::Unmarshalling(parcel);
+    processOption.reset(AAFwk::ProcessOptions::Unmarshalling(parcel));
     AAFwk::ProcessOptions::ConvertInt32ToProcessMode(value);
     AAFwk::ProcessOptions::ConvertInt32ToStartupVisibility(value);
     processOption->IsNewProcessMode(processMode);
