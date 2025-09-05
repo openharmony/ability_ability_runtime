@@ -165,7 +165,8 @@ private:
     void ClearOldInfo();
     void CollectFreezeSysMemory(std::string& memoryContent);
     int MergeNotifyInfo(FaultData& faultNotifyData, const AppfreezeManager::AppInfo& appInfo);
-    void RecordAppFreezeBehavior(FaultData& faultData);
+    void RecordAppFreezeBehavior(FaultData& faultData, uint64_t dumpStartTime,
+        uint64_t dumpFinishTime, const std::string& dumpResult);
     std::string ParseDecToHex(uint64_t id);
     bool GetHitraceId(HitraceInfo& info);
     void PerfStart(std::string eventName);

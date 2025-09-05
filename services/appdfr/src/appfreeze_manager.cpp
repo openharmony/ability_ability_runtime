@@ -211,10 +211,12 @@ int AppfreezeManager::MergeNotifyInfo(FaultData& faultNotifyData, const Appfreez
     } else {
         NotifyANR(faultNotifyData, appInfo, "", memoryContent);
     }
+    RecordAppFreezeBehavior(faultNotifyData, dumpStartTime, dumpFinishTime, resultMsg);
     return 0;
 }
 
-void AppfreezeManager::RecordAppFreezeBehavior(FaultData& faultData)
+void AppfreezeManager::RecordAppFreezeBehavior(FaultData& faultData, uint64_t dumpStartTime,
+    uint64_t dumpFinishTime, const std::string& resultMsg)
 {
     std::string eventName = faultData.errorObject.name;
     if (freezeEventMap_.size() > FREEZE_EVENT_MAX_SIZE) {
