@@ -1121,10 +1121,14 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration& config, cons
     TAG_LOGD(AAFwkTag::APPMGR, "current app size %{public}zu", appRunningMap.size());
     int32_t result = ERR_OK;
 
-    for (auto &info : appInfos_) {
-        AAFwk::TaskHandlerWrap::GetFfrtHandler()->CancelTask(info.bandleName.c_str() + std::to_string(info.appIndex));
+    {
+        std::lock_guard guard(appInfosLock_);
+        for (auto &info : appInfos_) {
+            AAFwk::TaskHandlerWrap::GetFfrtHandler()->CancelTask(
+                info.bandleName.c_str() + std::to_string(info.appIndex));
+        }
+        appInfos_.clear();
     }
-    appInfos_.clear();
 
     for (const auto& item : appRunningMap) {
         const auto& appRecord = item.second;
@@ -1234,13 +1238,15 @@ int32_t AppRunningManager::UpdateConfigurationForBackgroundApp(const std::vector
         return ERR_INVALID_VALUE;
     }
 
-
-    for (auto &info : appInfos_) {
-        AAFwk::TaskHandlerWrap::GetFfrtHandler()->CancelTask(info.bandleName.c_str() + std::to_string(info.appIndex));
+    {
+        std::lock_guard guard(appInfosLock_);
+        for (auto &info : appInfos_) {
+            AAFwk::TaskHandlerWrap::GetFfrtHandler()->CancelTask(
+                info.bandleName.c_str() + std::to_string(info.appIndex));
+        }
+        appInfos_ = appInfos;
     }
-    appInfos_.clear();
 
-    appInfos_ = appInfos;
     int32_t taskCount = 0;
     int32_t batchCount = 0;
     for (auto &info : appInfos) {
