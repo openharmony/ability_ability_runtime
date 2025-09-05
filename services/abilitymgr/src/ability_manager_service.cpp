@@ -4617,7 +4617,7 @@ int AbilityManagerService::TerminateUIExtensionAbility(const sptr<SessionInfo> &
     SendAbilityEvent(EventName::TERMINATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
 
     // self terminate or caller terminate is allowed.
-    if (!(JudgeSelfCalled(targetRecord) || (abilityRecord != nullptr && JudgeSelfCalled(abilityRecord)))) {
+    if (!JudgeSelfCalled(targetRecord) && abilityRecord != nullptr && !JudgeSelfCalled(abilityRecord)) {
         return CHECK_PERMISSION_FAILED;
     }
 
