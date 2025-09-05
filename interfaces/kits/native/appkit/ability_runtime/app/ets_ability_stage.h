@@ -24,7 +24,6 @@
 #include "configuration.h"
 #include "ets_native_reference.h"
 #include "ets_runtime.h"
-#include "native_engine/native_value.h"
 #include "resource_manager.h"
 
 namespace OHOS {
@@ -44,10 +43,6 @@ public:
 
     void OnDestroy() const override;
 
-    std::string OnAcceptWant(const AAFwk::Want &want) override;
-
-    std::string OnNewProcessRequest(const AAFwk::Want &want) override;
-
     std::string OnAcceptWant(const AAFwk::Want &want,
         AppExecFwk::AbilityTransactionCallbackInfo<std::string> *callbackInfo, bool &isAsync) override;
 
@@ -61,6 +56,10 @@ public:
     void OnConfigurationUpdated(const AppExecFwk::Configuration &configuration) override;
 
     void OnMemoryLevel(int32_t level) override;
+
+    bool OnPrepareTerminate(
+        AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult> *callbackInfo,
+        bool &isAsync) const override;
 private:
     bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...) const;
 
@@ -75,9 +74,15 @@ private:
 
     bool CallAcceptOrRequestAsync(ani_env *env, const AAFwk::Want &want, std::string &methodName, bool &isAsync) const;
 
-    bool BindNativeMethods();
-
     void SetEtsAbilityStage(const std::shared_ptr<Context> &context);
+
+    bool CallOnPrepareTerminate(AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult>
+         *callbackInfo) const;
+
+    bool CallOnPrepareTerminateAsync(AppExecFwk::AbilityTransactionCallbackInfo<AppExecFwk::OnPrepareTerminationResult>
+        *callbackInfo, bool &isAsync) const;
+
+    bool BindNativeMethods();
 
     ETSRuntime& etsRuntime_;
     std::unique_ptr<AppExecFwk::ETSNativeReference> etsAbilityStageObj_;
