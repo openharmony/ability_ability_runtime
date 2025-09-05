@@ -870,8 +870,8 @@ public:
 
     virtual void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey) override;
 
-    int32_t IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &result,
-        bool &isDebug) override;
+    int32_t IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo,
+        bool isSpecifiedProcess, bool &result, bool &isDebug) override;
 
     /**
      * update process rss and pss value.

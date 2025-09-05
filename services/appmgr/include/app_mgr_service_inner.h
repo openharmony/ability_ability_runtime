@@ -1574,7 +1574,8 @@ public:
 
     void UpdateInstanceKeyBySpecifiedId(int32_t specifiedId, std::string &instanceKey);
 
-    bool IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo, bool &isDebug);
+    bool IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo,
+        bool isSpecifiedProcess, bool &isDebug);
 
     std::shared_ptr<AAFwk::TaskHandlerWrap> GetTaskHandler() const
     {

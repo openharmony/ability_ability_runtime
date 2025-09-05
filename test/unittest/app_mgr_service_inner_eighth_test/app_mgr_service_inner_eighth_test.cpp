@@ -2752,9 +2752,40 @@ HWTEST_F(AppMgrServiceInnerEighthTest, IsSpecifiedModuleLoaded_001, TestSize.Lev
     AAFwk::Want want;
     AbilityInfo abilityInfo;
     bool isDebug = false;
-    auto ret = appMgrServiceInner->IsSpecifiedModuleLoaded(want, abilityInfo, isDebug);
+    auto ret = appMgrServiceInner->IsSpecifiedModuleLoaded(want, abilityInfo, false, isDebug);
     EXPECT_EQ(ret, false);
     TAG_LOGI(AAFwkTag::TEST, "IsSpecifiedModuleLoaded_001 end");
+}
+
+/**
+ * @tc.name: IsSpecifiedModuleLoaded_002
+ * @tc.desc: test IsSpecifiedModuleLoaded_002
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerEighthTest, IsSpecifiedModuleLoaded_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsSpecifiedModuleLoaded_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    AAFwk::MyStatus::GetInstance().getSpawnClient_ = std::make_shared<AppSpawnClient>();
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
+
+    AAFwk::Want want;
+    AbilityInfo abilityInfo;
+    bool isDebug = false;
+    auto ret = appMgrServiceInner->IsSpecifiedModuleLoaded(want, abilityInfo, false, isDebug);
+    EXPECT_FALSE(ret);
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_.reset();
+    ret = appMgrServiceInner->IsSpecifiedModuleLoaded(want, abilityInfo, true, isDebug);
+    EXPECT_FALSE(ret);
+
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_ = std::make_shared<AppRunningRecord>(nullptr, 0, "");
+    ret = appMgrServiceInner->IsSpecifiedModuleLoaded(want, abilityInfo, true, isDebug);
+    EXPECT_TRUE(ret);
+
+    AAFwk::MyStatus::GetInstance().getAppRunningRecordByPid_.reset();
+    AAFwk::MyStatus::GetInstance().getSpawnClient_.reset();
+    AAFwk::MyStatus::GetInstance().getBundleManagerHelper_.reset();
+    TAG_LOGI(AAFwkTag::TEST, "IsSpecifiedModuleLoaded_002 end");
 }
 
 /**
