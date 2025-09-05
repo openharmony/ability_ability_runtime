@@ -51,7 +51,7 @@ void KioskManager::OnAppStop(const AppInfo &info)
         info.bundleName.c_str(), static_cast<int32_t>(info.state));
     std::lock_guard<std::mutex> lock(kioskManagermutex_);
     if (IsInKioskModeInner() && (info.bundleName == kioskStatus_.kioskBundleName_)) {
-        ExitKioskModeInner(info.bundleName, kioskStatus_.kioskToken_);
+        ExitKioskModeInner(info.bundleName, kioskStatus_.kioskToken_, true);
     }
 }
 
@@ -76,7 +76,7 @@ int32_t KioskManager::UpdateKioskApplicationList(const std::vector<std::string> 
     if (IsInKioskModeInner()) {
         auto it = std::find(appList.begin(), appList.end(), kioskStatus_.kioskBundleName_);
         if (it == appList.end()) {
-            auto ret = ExitKioskModeInner(kioskStatus_.kioskBundleName_, kioskStatus_.kioskToken_);
+            auto ret = ExitKioskModeInner(kioskStatus_.kioskBundleName_, kioskStatus_.kioskToken_, true);
             if (ret != ERR_OK) {
                 return ret;
             }
@@ -129,7 +129,7 @@ int32_t KioskManager::EnterKioskMode(sptr<IRemoteObject> callerToken)
     return ERR_OK;
 }
 
-int32_t KioskManager::ExitKioskMode(sptr<IRemoteObject> callerToken)
+int32_t KioskManager::ExitKioskMode(sptr<IRemoteObject> callerToken, bool isFoundation)
 {
     if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Disabled config");
@@ -141,10 +141,11 @@ int32_t KioskManager::ExitKioskMode(sptr<IRemoteObject> callerToken)
         return INVALID_PARAMETERS_ERR;
     }
     std::lock_guard<std::mutex> lock(kioskManagermutex_);
-    return ExitKioskModeInner(record->GetAbilityInfo().bundleName, callerToken);
+    return ExitKioskModeInner(record->GetAbilityInfo().bundleName, callerToken, isFoundation);
 }
 
-int32_t KioskManager::ExitKioskModeInner(const std::string &bundleName, sptr<IRemoteObject> callerToken)
+int32_t KioskManager::ExitKioskModeInner(const std::string &bundleName, sptr<IRemoteObject> callerToken,
+    bool isFoundation)
 {
     if (!IsInWhiteListInner(bundleName)) {
         return ERR_KIOSK_MODE_NOT_IN_WHITELIST;
@@ -154,10 +155,11 @@ int32_t KioskManager::ExitKioskModeInner(const std::string &bundleName, sptr<IRe
         return ERR_NOT_IN_KIOSK_MODE;
     }
 
-    if (kioskStatus_.kioskBundleUid_ != IPCSkeleton::GetCallingUid()) {
+    if (!isFoundation && kioskStatus_.kioskBundleUid_ != IPCSkeleton::GetCallingUid()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "bundleName %{public}s is not the currently kiosk app", bundleName.c_str());
         return ERR_NOT_IN_KIOSK_MODE;
     }
+
     GetExitKioskModeCallback()();
     NotifyKioskModeChanged(false);
     kioskStatus_.Clear();
@@ -183,6 +185,32 @@ int32_t KioskManager::GetKioskStatus(KioskStatus &kioskStatus)
     std::lock_guard<std::mutex> lock(kioskManagermutex_);
     kioskStatus = kioskStatus_;
     return ERR_OK;
+}
+
+void KioskManager::FilterDialogAppInfos(std::vector<DialogAppInfo> &dialogAppInfos)
+{
+    if (!IsInKioskModeInner()) {
+        return;
+    }
+
+    auto newEnd = std::remove_if(dialogAppInfos.begin(), dialogAppInfos.end(),
+        [this](const DialogAppInfo &appInfo) {
+            return !IsInWhiteListInner(appInfo.bundleName);
+        });
+    dialogAppInfos.erase(newEnd, dialogAppInfos.end());
+}
+
+void KioskManager::FilterAbilityInfos(std::vector<AppExecFwk::AbilityInfo> &abilityInfos)
+{
+    if (!IsInKioskModeInner()) {
+        return;
+    }
+
+    auto newEnd = std::remove_if(abilityInfos.begin(), abilityInfos.end(),
+        [this](const AppExecFwk::AbilityInfo &abilityInfo) {
+            return !IsInWhiteListInner(abilityInfo.bundleName);
+        });
+    abilityInfos.erase(newEnd, abilityInfos.end());
 }
 
 bool KioskManager::IsInKioskMode()

@@ -17,14 +17,12 @@
 namespace OHOS {
 namespace AppExecFwk {
 CpuDataProcessor::CpuDataProcessor(const std::vector<std::vector<CpuFreqData>> &cpuData,
-    const std::vector<TotalTime> &totalTimeList, CpuStartTime cpuStartTime,
-    const std::string &stackPath, int32_t pid)
-    : handlingHalfCpuData_(cpuData), totalTimeList_(totalTimeList), cpuStartTime_(cpuStartTime), stackPath_(stackPath),
-    pid_(pid)
+    const std::vector<TotalTime> &totalTimeList, CpuConsumeTime cpuConsumeTime, int32_t pid)
+    : handlingHalfCpuData_(cpuData), totalTimeList_(totalTimeList), cpuConsumeTime_(cpuConsumeTime), pid_(pid)
 {
 }
 
-std::vector<std::vector<CpuFreqData>> CpuDataProcessor::GetHandlingHalfCpuData() const
+std::vector<std::vector<CpuFreqData>> CpuDataProcessor::GetCpuDetailData() const
 {
     return handlingHalfCpuData_;
 }
@@ -34,14 +32,9 @@ std::vector<TotalTime> CpuDataProcessor::GetTotalTimeList() const
     return totalTimeList_;
 }
 
-CpuStartTime CpuDataProcessor::GetCpuStartTime() const
+CpuConsumeTime CpuDataProcessor::GetCpuConsumeTime() const
 {
-    return cpuStartTime_;
-}
-
-std::string CpuDataProcessor::GetStackPath() const
-{
-    return stackPath_;
+    return cpuConsumeTime_;
 }
 
 int32_t CpuDataProcessor::GetPid() const

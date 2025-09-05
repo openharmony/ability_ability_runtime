@@ -362,7 +362,6 @@ bool AbilityPermissionUtil::IsStartSelfUIAbility()
     auto callerPid = IPCSkeleton::GetCallingPid();
     auto tokenId = GetTokenIdByPid(callerPid);
     if (tokenId < 0) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid tokenId");
         return false;
     }
     return PermissionVerification::GetInstance()->VerifyStartSelfUIAbility(tokenId);

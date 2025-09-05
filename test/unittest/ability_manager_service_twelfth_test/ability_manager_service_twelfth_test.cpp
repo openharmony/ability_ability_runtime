@@ -1185,7 +1185,7 @@ HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_EnterKioskMode_Fail_01, 
  */
 HWTEST_F(AbilityManagerServiceTwelfthTest, KioskManager_ExitKioskMode_Fail_01, TestSize.Level1) {
     auto callerToken = MockToken(AbilityType::PAGE);
-    auto result = KioskManager::GetInstance().ExitKioskMode(callerToken);
+    auto result = KioskManager::GetInstance().ExitKioskMode(callerToken, false);
     if (!system::GetBoolParameter(KIOSK_MODE_ENABLED, false)) {
         ASSERT_EQ(result, ERR_CAPABILITY_NOT_SUPPORT);
     } else {

@@ -3270,19 +3270,13 @@ int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityReq
         abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE ||
         abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         result = CheckCallServiceExtensionPermission(abilityRequest);
-        if (result != ERR_OK) {
-            return result;
-        }
     } else if (abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
         result = CheckCallAppServiceExtensionPermission(abilityRequest, nullptr, false);
-        if (result != ERR_OK) {
-            return result;
-        }
     } else {
         result = CheckCallOtherExtensionPermission(abilityRequest);
-        if (result != ERR_OK) {
-            return result;
-        }
+    }
+    if (result != ERR_OK) {
+        return result;
     }
     if (!isStartAsCaller) {
         UpdateCallerInfoUtil::GetInstance().UpdateCallerInfo(abilityRequest.want, abilityRequest.callerToken);
@@ -5836,6 +5830,22 @@ int AbilityManagerService::UnRegisterMissionListener(const std::string &deviceId
     return dmsClient.UnRegisterMissionListener(Str8ToStr16(deviceId), listener->AsObject());
 }
 
+int32_t AbilityManagerService::GetUidByCloneBundleInfo(std::string &bundleName, int32_t callerUid, int32_t userId) const
+{
+    auto bms = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bms, -1);
+    AppExecFwk::BundleInfo bundleInfo;
+    int32_t appIndex = 0;
+    MultiAppUtils::GetRunningMultiAppIndex(bundleName, callerUid, appIndex);
+    if (IN_PROCESS_CALL(bms->GetCloneBundleInfo(
+        bundleName, static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
+        appIndex, bundleInfo, userId)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed get bundle info for %{public}s", bundleName.c_str());
+        return -1;
+    }
+    return bundleInfo.uid;
+}
+
 sptr<IWantSender> AbilityManagerService::GetWantSender(
     const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken,
     int32_t uid)
@@ -7712,7 +7722,7 @@ void AbilityManagerService::OnAbilityDied(std::shared_ptr<AbilityRecord> ability
         FreezeUtil::GetInstance().DeleteLifecycleEvent(abilityRecord->GetToken()->AsObject());
         if (KioskManager::GetInstance().IsInKioskMode() &&
             KioskManager::GetInstance().IsInWhiteList(abilityRecord->GetAbilityInfo().bundleName)) {
-            KioskManager::GetInstance().ExitKioskMode(abilityRecord->GetToken()->AsObject());
+            KioskManager::GetInstance().ExitKioskMode(abilityRecord->GetToken()->AsObject(), true);
         }
     }
     FreezeUtil::GetInstance().DeleteAppLifecycleEvent(abilityRecord->GetPid());
@@ -11009,12 +11019,12 @@ int32_t AbilityManagerService::CheckCallAppServiceExtensionPermission(const Abil
     if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         return ERR_OK;
     }
+    if (!AppUtils::GetInstance().IsSupportAppServiceExtension()) {
+        return ERR_CAPABILITY_NOT_SUPPORT;
+    }
     bool isVerifyAppIdentifierAllowList = true;
     if (targetService != nullptr && targetService->IsAbilityState(AbilityState::ACTIVE)) {
         isVerifyAppIdentifierAllowList = false;
-    }
-    if (!AppUtils::GetInstance().IsSupportAppServiceExtension()) {
-        return ERR_CAPABILITY_NOT_SUPPORT;
     }
     if (isVerifyAppIdentifierAllowList && !VerifySameAppOrAppIdentifierAllowListPermission(abilityRequest)) {
         if (isFromConnect) {
@@ -11402,8 +11412,11 @@ int AbilityManagerService::CheckCallAbilityPermission(const AbilityRequest &abil
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallAbilityPermission(
         verificationInfo, isCallByShortcut);
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "without start pageAbility(FA) or ability(Stage) permission, caller:%{public}s",
-            callerAbilityRecord ? callerAbilityRecord->GetAbilityInfo().name.c_str() : "null record");
+        auto sessionInfo = callerAbilityRecord ? callerAbilityRecord->GetSessionInfo() : nullptr;
+        int32_t persistentId = (sessionInfo == nullptr) ? -1 : sessionInfo->persistentId;
+        TAG_LOGE(AAFwkTag::ABILITYMGR,
+            "without start pageAbility(FA) or ability(Stage) permission, caller:%{public}s %{public}d",
+            callerAbilityRecord ? callerAbilityRecord->GetAbilityInfo().name.c_str() : "null record", persistentId);
     }
     return result;
 }
@@ -12372,9 +12385,15 @@ int32_t AbilityManagerService::AttachAppDebug(const std::string &bundleName, boo
 
     int32_t err = ERR_OK;
     int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
-    if ((err = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId)) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckAppProvisionMode returns errcode=%{public}d", err);
-        return err;
+    AppExecFwk::ApplicationInfo appInfo;
+    if (!StartAbilityUtils::GetApplicationInfo(bundleName, userId, appInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get application info failed: %{public}s", bundleName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!IsAllowAttachOrDetachAppDebug(appInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "release application or check permission error");
+        return ERR_NOT_IN_APP_PROVISION_MODE;
     }
 
     ConnectInitAbilityDebugDeal();
@@ -12401,12 +12420,31 @@ int32_t AbilityManagerService::DetachAppDebug(const std::string &bundleName, boo
 
     int32_t err = ERR_OK;
     int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
-    if ((err = StartAbilityUtils::CheckAppProvisionMode(bundleName, userId)) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckAppProvisionMode returns errcode=%{public}d", err);
-        return err;
+    AppExecFwk::ApplicationInfo appInfo;
+    if (!StartAbilityUtils::GetApplicationInfo(bundleName, userId, appInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get application info failed: %{public}s", bundleName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!IsAllowAttachOrDetachAppDebug(appInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "release application or check permission error");
+        return ERR_NOT_IN_APP_PROVISION_MODE;
     }
 
     return IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->DetachAppDebug(bundleName));
+}
+
+bool AbilityManagerService::IsAllowAttachOrDetachAppDebug(AppExecFwk::ApplicationInfo &appInfo)
+{
+    if (appInfo.appProvisionType == AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG) {
+        return true;
+    }
+    bool isDebugEnabled = AppUtils::GetInstance().IsSupportAllowDebugPermission();
+    if (isDebugEnabled && AccessTokenKit::VerifyAccessToken(appInfo.accessTokenId,
+        PermissionConstants::PERMISSION_ALL_DEBUG , false) == AppExecFwk::Constants::PERMISSION_GRANTED) {
+        return true;
+    }
+    return false;
 }
 
 std::string AbilityManagerService::InsightIntentGetcallerBundleName()
@@ -15205,7 +15243,7 @@ int32_t AbilityManagerService::ExitKioskMode(sptr<IRemoteObject> callerToken)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not self call");
         return CHECK_PERMISSION_FAILED;
     }
-    return KioskManager::GetInstance().ExitKioskMode(callerToken);
+    return KioskManager::GetInstance().ExitKioskMode(callerToken, false);
 }
 
 int32_t AbilityManagerService::GetKioskStatus(KioskStatus &kioskStatus)
@@ -15221,7 +15259,7 @@ std::shared_ptr<AbilityInterceptorExecuter> AbilityManagerService::GetAbilityInt
 
 int32_t AbilityManagerService::RegisterSAInterceptor(sptr<AbilityRuntime::ISAInterceptor> interceptor)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call RegisterSaInterceptor");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call RegisterSaInterceptor, callingPid:%{public}d", IPCSkeleton::GetCallingPid());
     if (IPCSkeleton::GetCallingUid() != PENG_LAI_UID) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no permission call");
         return CHECK_PERMISSION_FAILED;

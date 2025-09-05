@@ -385,7 +385,7 @@ int32_t KeepAliveProcessManager::QueryKeepAliveApplications(int32_t appType, int
 }
 
 int32_t KeepAliveProcessManager::SetAppServiceExtensionKeepAlive(const std::string &bundleName, bool updateEnable,
-    bool isByEDM, bool isallowUserToCancel)
+    bool isByEDM, bool isAllowUserToCancel)
 {
     auto result = isByEDM ? CheckPermissionForEDM() : CheckPermission();
     CHECK_RET_RETURN_RET(result, "permission denied");
@@ -414,7 +414,7 @@ int32_t KeepAliveProcessManager::SetAppServiceExtensionKeepAlive(const std::stri
     info.setterId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
     info.appType = bundleInfo.applicationInfo.isSystemApp ? KeepAliveAppType::SYSTEM : KeepAliveAppType::THIRD_PARTY;
     info.setter = isByEDM ? KeepAliveSetter::SYSTEM : KeepAliveSetter::USER;
-    info.policy = isByEDM ? (isallowUserToCancel ? KeepAlivePolicy::ALLOW_CANCEL : KeepAlivePolicy::NOT_ALLOW_CANCEL) :
+    info.policy = isByEDM ? (isAllowUserToCancel ? KeepAlivePolicy::ALLOW_CANCEL : KeepAlivePolicy::NOT_ALLOW_CANCEL) :
         KeepAlivePolicy::UNSPECIFIED;
     result = AbilityKeepAliveService::GetInstance().SetAppServiceExtensionKeepAlive(info, updateEnable);
     CHECK_RET_RETURN_RET(result, "set keep-alive failed");

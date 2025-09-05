@@ -421,6 +421,7 @@ void AppExitReasonDataManager::InnerDeleteAppExitReason(const std::string &keyNa
 int32_t AppExitReasonDataManager::AddAbilityRecoverInfo(uint32_t accessTokenId,
     const std::string &moduleName, const std::string &abilityName, const int &sessionId)
 {
+    AAFwk::RecordCostTimeUtil timeRecord("AddAbilityRecoverInfo");
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "AddAbilityRecoverInfo tokenId %{private}u module %{public}s ability %{public}s id %{public}d ",
         accessTokenId, moduleName.c_str(), abilityName.c_str(), sessionId);
@@ -471,13 +472,12 @@ int32_t AppExitReasonDataManager::AddAbilityRecoverInfo(uint32_t accessTokenId,
         return ERR_INVALID_OPERATION;
     }
     InnerAddSessionId(sessionId, accessTokenId);
-
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "AddAbilityRecoverInfo finish");
     return ERR_OK;
 }
 
 int32_t AppExitReasonDataManager::DeleteAllRecoverInfoByTokenId(uint32_t tokenId)
 {
+    AAFwk::RecordCostTimeUtil timeRecord("DeleteAllRecoverInfoByTokenId");
     TAG_LOGI(AAFwkTag::ABILITYMGR, "tokenId: %{private}u", tokenId);
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
@@ -514,6 +514,7 @@ int32_t AppExitReasonDataManager::DeleteAllRecoverInfoByTokenId(uint32_t tokenId
 
 int32_t AppExitReasonDataManager::DeleteAbilityRecoverInfoBySessionId(const int32_t sessionId)
 {
+    AAFwk::RecordCostTimeUtil timeRecord("DeleteAbilityRecoverInfoBySessionId");
     TAG_LOGI(AAFwkTag::ABILITYMGR, "sessionId %{public}d", sessionId);
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
@@ -561,6 +562,7 @@ int32_t AppExitReasonDataManager::DeleteAbilityRecoverInfoBySessionId(const int3
 int32_t AppExitReasonDataManager::DeleteAbilityRecoverInfo(
     uint32_t accessTokenId, const std::string &moduleName, const std::string &abilityName)
 {
+    AAFwk::RecordCostTimeUtil timeRecord("DeleteAbilityRecoverInfo");
     TAG_LOGI(AAFwkTag::ABILITYMGR, "tokenId %{private}u module %{public}s ability %{public}s ",
         accessTokenId, moduleName.c_str(), abilityName.c_str());
     {
@@ -610,6 +612,7 @@ int32_t AppExitReasonDataManager::DeleteAbilityRecoverInfo(
 int32_t AppExitReasonDataManager::GetAbilityRecoverInfo(
     uint32_t accessTokenId, const std::string &moduleName, const std::string &abilityName, bool &hasRecoverInfo)
 {
+    AAFwk::RecordCostTimeUtil timeRecord("GetAbilityRecoverInfo");
     TAG_LOGI(AAFwkTag::ABILITYMGR, "tokenId %{private}u module %{public}s abillity %{public}s",
         accessTokenId, moduleName.c_str(), abilityName.c_str());
     hasRecoverInfo = false;
@@ -651,6 +654,7 @@ int32_t AppExitReasonDataManager::GetAbilityRecoverInfo(
 
 uint32_t AppExitReasonDataManager::GetTokenIdBySessionID(const int32_t sessionId)
 {
+    AAFwk::RecordCostTimeUtil timeRecord("GetTokenIdBySessionID");
     if (kvStorePtr_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null kvStorePtr_");
         return ERR_NO_INIT;
@@ -706,6 +710,7 @@ bool AppExitReasonDataManager::GetUIExtensionAbilityExitReason(const std::string
     AAFwk::ExitReason &exitReason, AppExecFwk::RunningProcessInfo &processInfo, int64_t &time_stamp,
     bool &withKillMsg)
 {
+    AAFwk::RecordCostTimeUtil timeRecord("GetUIExtensionAbilityExitReason");
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
@@ -739,6 +744,7 @@ bool AppExitReasonDataManager::GetUIExtensionAbilityExitReason(const std::string
 void AppExitReasonDataManager::UpdateAbilityRecoverInfo(uint32_t accessTokenId,
     const std::vector<std::string> &recoverInfoList, const std::vector<int> &sessionIdList)
 {
+    AAFwk::RecordCostTimeUtil timeRecord("UpdateAbilityRecoverInfo");
     if (kvStorePtr_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null kvStorePtr_");
         return;
@@ -822,6 +828,7 @@ void AppExitReasonDataManager::ConvertAccessTokenIdFromValue(const DistributedKv
 
 void AppExitReasonDataManager::InnerDeleteAbilityRecoverInfo(uint32_t accessTokenId)
 {
+    AAFwk::RecordCostTimeUtil timeRecord("InnerDeleteAbilityRecoverInfo");
     if (kvStorePtr_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null kvStorePtr_");
         return;
@@ -841,6 +848,8 @@ void AppExitReasonDataManager::InnerDeleteAbilityRecoverInfo(uint32_t accessToke
 
 void AppExitReasonDataManager::InnerAddSessionId(const int sessionId, uint32_t accessTokenId)
 {
+    AAFwk::RecordCostTimeUtil timeRecord("InnerAddSessionId");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "InnerAddSessionId begin");
     if (kvStorePtr_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null kvStorePtr_");
         return;
@@ -861,6 +870,7 @@ void AppExitReasonDataManager::InnerAddSessionId(const int sessionId, uint32_t a
  
 void AppExitReasonDataManager::InnerDeleteSessionId(const int sessionId)
 {
+    AAFwk::RecordCostTimeUtil timeRecord("InnerDeleteSessionId");
     if (kvStorePtr_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null kvStorePtr_");
         return;

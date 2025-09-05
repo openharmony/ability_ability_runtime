@@ -59,22 +59,22 @@ public:
         return 0;
     }
 
-    int32_t NotifyMoveMissionToBackground(int32_t missionId)
+    int32_t NotifyMoveMissionToBackground(int32_t missionId, int32_t userId)
     {
         return 0;
     }
 
-    int32_t NotifyMoveMissionToForeground(int32_t missionId)
+    int32_t NotifyMoveMissionToForeground(int32_t missionId, int32_t userId)
     {
         return 0;
     }
 
-    int32_t NotifyTerminateMission(int32_t missionId)
+    int32_t NotifyTerminateMission(int32_t missionId, int32_t userId)
     {
         return 0;
     }
 
-    int32_t NotifyClearMission(int32_t missionId)
+    int32_t NotifyClearMission(int32_t missionId, int32_t userId)
     {
         return 0;
     }
@@ -88,7 +88,7 @@ public:
     {}
     MOCK_METHOD4(SendRequest, int(uint32_t, MessageParcel&, MessageParcel&, MessageOption&));
     MOCK_METHOD3(OpenFile, int(const Uri& uri, uint32_t flag, uint32_t tokenId));
-    MOCK_METHOD2(NotifyMissionBindPid, void(int32_t missionId, int32_t pid));
+    MOCK_METHOD3(NotifyMissionBindPid, void(int32_t missionId, int32_t pid, int32_t userId));
     MOCK_METHOD2(CheckStaticCfgPermission, int32_t(const Want &want, bool isImplicit));
     MOCK_METHOD2(NotifyKillProcesses, int32_t(const std::string &, int32_t));
 

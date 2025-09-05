@@ -120,7 +120,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterConfigurationObserver_0100, Test
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
 
     sptr<MockConfigurationObserver> observer(new (std::nothrow) MockConfigurationObserver());
-    result = appMgrClient->RegisterConfigurationObserver(observer);
+    result = appMgrClient->RegisterConfigurationObserver(observer, -1);
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
 
     sleep(1);
@@ -152,11 +152,11 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterConfigurationObserver_0200, Test
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
 
     sptr<MockConfigurationObserver> observer(new (std::nothrow) MockConfigurationObserver());
-    result = appMgrClient->RegisterConfigurationObserver(observer);
+    result = appMgrClient->RegisterConfigurationObserver(observer, -1);
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
 
     sptr<MockConfigurationObserver> observerOther(new (std::nothrow) MockConfigurationObserver());
-    result = appMgrClient->RegisterConfigurationObserver(observerOther);
+    result = appMgrClient->RegisterConfigurationObserver(observerOther, -1);
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
 
     sleep(1);

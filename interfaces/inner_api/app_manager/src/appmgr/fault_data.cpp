@@ -88,6 +88,9 @@ bool FaultData::ReadContent(Parcel &parcel)
 
     RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "ProcStatm read string failed.");
     procStatm = strValue;
+
+    isInForeground = parcel.ReadBool();
+    isEnableMainThreadSample = parcel.ReadBool();
     return true;
 }
 
@@ -104,7 +107,8 @@ FaultData *FaultData::Unmarshalling(Parcel &parcel)
 bool FaultData::WriteContent(Parcel &parcel) const
 {
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint32(stuckTimeout),
-        "stuckTimeout [%{public}u] write uint32 failed.", stuckTimeout);
+        "stuckTimeout [%{public}u] write uint32 failed.", stuckTimeout
+    );
 
     if (token == nullptr) {
         RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.WriteBool(false), "Token falge [false] write bool failed.");
@@ -116,75 +120,104 @@ bool FaultData::WriteContent(Parcel &parcel) const
     }
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(appfreezeInfo),
-        "AppfreezeInfo [%{public}s] write string failed.", appfreezeInfo.c_str());
+        "AppfreezeInfo [%{public}s] write string failed.", appfreezeInfo.c_str()
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(appRunningUniqueId),
-        "AppRunningUniqueId [%{public}s] write string failed.", appRunningUniqueId.c_str());
+        "AppRunningUniqueId [%{public}s] write string failed.", appRunningUniqueId.c_str()
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(procStatm),
-        "ProcStatm [%{public}s] write string failed.", procStatm.c_str());
+        "ProcStatm [%{public}s] write string failed.", procStatm.c_str()
+    );
 
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(isInForeground),
+        "InForeground [%{public}d] write bool failed.", isInForeground
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(isEnableMainThreadSample),
+        "isEnableMainThreadSample [%{public}d] write bool failed.", isEnableMainThreadSample
+    );
     return true;
 }
 
 bool FaultData::Marshalling(Parcel &parcel) const
 {
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.name),
-        "Name [%{public}s] write string failed.", errorObject.name.c_str());
+        "Name [%{public}s] write string failed.", errorObject.name.c_str()
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.message),
-        "Message [%{public}s] write string failed.", errorObject.message.c_str());
+        "Message [%{public}s] write string failed.", errorObject.message.c_str()
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.stack),
-        "Stack [%{public}s] write string failed.", errorObject.stack.c_str());
+        "Stack [%{public}s] write string failed.", errorObject.stack.c_str()
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(static_cast<int32_t>(faultType)),
-        "FaultType [%{public}d] write int32 failed.", static_cast<int32_t>(faultType));
+        "FaultType [%{public}d] write int32 failed.", static_cast<int32_t>(faultType)
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(timeoutMarkers),
-        "TimeoutMarkers [%{public}s] write string failed.", timeoutMarkers.c_str());
+        "TimeoutMarkers [%{public}s] write string failed.", timeoutMarkers.c_str()
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(waitSaveState),
-        "WaitSaveState [%{public}s] write bool failed.", waitSaveState ? "true" : "false");
+        "WaitSaveState [%{public}s] write bool failed.", waitSaveState ? "true" : "false"
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(notifyApp),
-        "NotifyApp [%{public}s] write bool failed.", notifyApp ? "true" : "false");
+        "NotifyApp [%{public}s] write bool failed.", notifyApp ? "true" : "false"
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(forceExit),
-        "ForceExit [%{public}s] write bool failed.", forceExit ? "true" : "false");
+        "ForceExit [%{public}s] write bool failed.", forceExit ? "true" : "false"
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(needKillProcess),
-        "needKillProcess [%{public}s] write bool failed.", needKillProcess ? "true" : "false");
+        "needKillProcess [%{public}s] write bool failed.", needKillProcess ? "true" : "false"
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint32(state),
-        "State [%{public}u] write uint32 failed.", state);
+        "State [%{public}u] write uint32 failed.", state
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(eventId),
-        "EventId [%{public}u] write int32 failed.", eventId);
+        "EventId [%{public}u] write int32 failed.", eventId
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(schedTime),
-        "SchedTime [%{public}" PRIu64 "] write uint64 failed.", schedTime);
+        "SchedTime [%{public}" PRIu64 "] write uint64 failed.", schedTime
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(detectTime),
-        "DetectTime [%{public}" PRIu64 "] write uint64 failed.", detectTime);
+        "DetectTime [%{public}" PRIu64 "] write uint64 failed.", detectTime
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(appStatus),
-        "AppStatus [%{public}d] write int32 failed.", appStatus);
+        "AppStatus [%{public}d] write int32 failed.", appStatus
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(samplerStartTime),
-        "SamplerStartTime [%{public}" PRIu64 "] write uint64 failed.", samplerStartTime);
+        "SamplerStartTime [%{public}" PRIu64 "] write uint64 failed.", samplerStartTime
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(samplerFinishTime),
-        "SamplerFinishTime [%{public}" PRIu64"] write uint64 failed.", samplerFinishTime);
+        "SamplerFinishTime [%{public}" PRIu64"] write uint64 failed.", samplerFinishTime
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(samplerCount),
-        "SamplerCount [%{public}d] write int32 failed.", samplerCount);
+        "SamplerCount [%{public}d] write int32 failed.", samplerCount
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(pid),
-        "Pid [%{public}u] write int32 failed.", pid);
+        "Pid [%{public}u] write int32 failed.", pid
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(tid),
-        "Tid [%{public}u] write int32 failed.", tid);
+        "Tid [%{public}u] write int32 failed.", tid
+    );
 
     return WriteContent(parcel);
 }
@@ -236,6 +269,8 @@ bool AppFaultDataBySA::ReadContent(Parcel &parcel)
 
     RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "ProcStatm read string failed.");
     procStatm = strValue;
+    isInForeground = parcel.ReadBool();
+    isEnableMainThreadSample = parcel.ReadBool();
     return true;
 }
 
@@ -261,13 +296,24 @@ bool AppFaultDataBySA::WriteContent(Parcel &parcel) const
     }
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(appfreezeInfo),
-        "AppfreezeInfo [%{public}s] write string failed.", appfreezeInfo.c_str());
+        "AppfreezeInfo [%{public}s] write string failed.", appfreezeInfo.c_str()
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(appRunningUniqueId),
-        "AppRunningUniqueId [%{public}s] write string failed.", appRunningUniqueId.c_str());
+        "AppRunningUniqueId [%{public}s] write string failed.", appRunningUniqueId.c_str()
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(procStatm),
-        "ProcStatm [%{public}s] write string failed.", procStatm.c_str());
+        "ProcStatm [%{public}s] write string failed.", procStatm.c_str()
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(isInForeground),
+        "InForeground [%{public}d] write bool failed.", isInForeground
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(isEnableMainThreadSample),
+        "isEnableMainThreadSample [%{public}d] write bool failed.", isEnableMainThreadSample
+    );
     return true;
 }
 
@@ -278,40 +324,52 @@ bool AppFaultDataBySA::Marshalling(Parcel &parcel) const
     }
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(static_cast<int32_t>(faultType)),
-        "FaultType [%{public}d] write int32 failed.", static_cast<int32_t>(faultType));
+        "FaultType [%{public}d] write int32 failed.", static_cast<int32_t>(faultType)
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(pid),
-        "Pid [%{public}d] write int32 failed.", static_cast<int32_t>(pid));
+        "Pid [%{public}d] write int32 failed.", static_cast<int32_t>(pid)
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(timeoutMarkers),
-        "TimeoutMarkers [%{public}s] write string failed.", timeoutMarkers.c_str());
+        "TimeoutMarkers [%{public}s] write string failed.", timeoutMarkers.c_str()
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(waitSaveState),
-        "WaitSaveState [%{public}s] write bool failed.", waitSaveState ? "true" : "false");
+        "WaitSaveState [%{public}s] write bool failed.", waitSaveState ? "true" : "false"
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(notifyApp),
-        "NotifyApp [%{public}s] write bool failed.", notifyApp ? "true" : "false");
+        "NotifyApp [%{public}s] write bool failed.", notifyApp ? "true" : "false"
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(forceExit),
-        "ForceExit [%{public}s] write bool failed.", forceExit ? "true" : "false");
+        "ForceExit [%{public}s] write bool failed.", forceExit ? "true" : "false"
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(needKillProcess),
-        "needKillProcess [%{public}s] write bool failed.", needKillProcess ? "true" : "false");
+        "needKillProcess [%{public}s] write bool failed.", needKillProcess ? "true" : "false"
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint32(state),
-        "State [%{public}u] write uint32 failed.", state);
+        "State [%{public}u] write uint32 failed.", state
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(eventId),
-        "EventId [%{public}u] write int32 failed.", eventId);
+        "EventId [%{public}u] write int32 failed.", eventId
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(schedTime),
-        "SchedTime [%{public}" PRIu64 "] write uint64 failed.", schedTime);
+        "SchedTime [%{public}" PRIu64 "] write uint64 failed.", schedTime
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(detectTime),
-        "DetectTime [%{public}" PRIu64 "] write uint64 failed.", detectTime);
+        "DetectTime [%{public}" PRIu64 "] write uint64 failed.", detectTime
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(appStatus),
-        "AppStatus [%{public}d] write int32 failed.", appStatus);
+        "AppStatus [%{public}d] write int32 failed.", appStatus
+    );
 
     return WriteContent(parcel);
 }
@@ -319,13 +377,16 @@ bool AppFaultDataBySA::Marshalling(Parcel &parcel) const
 bool AppFaultDataBySA::WriteErrorObject(Parcel &parcel) const
 {
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.name),
-        "Name [%{public}s] write string failed.", errorObject.name.c_str());
+        "Name [%{public}s] write string failed.", errorObject.name.c_str()
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.message),
-        "Message [%{public}s] write string failed.", errorObject.message.c_str());
+        "Message [%{public}s] write string failed.", errorObject.message.c_str()
+    );
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.stack),
-        "Stack [%{public}s] write string failed.", errorObject.stack.c_str());
+        "Stack [%{public}s] write string failed.", errorObject.stack.c_str()
+    );
     return true;
 }
 }  // namespace AppExecFwk

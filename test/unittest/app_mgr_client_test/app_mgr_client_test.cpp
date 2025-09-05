@@ -1242,7 +1242,7 @@ HWTEST_F(AppMgrClientTest, RegisterConfigurationObserver_001, TestSize.Level1)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     sptr<IConfigurationObserver> observer;
-    appMgrClient->RegisterConfigurationObserver(observer);
+    appMgrClient->RegisterConfigurationObserver(observer, -1);
     EXPECT_NE(appMgrClient, nullptr);
 }
 

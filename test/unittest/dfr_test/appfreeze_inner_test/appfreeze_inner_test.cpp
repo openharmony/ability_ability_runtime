@@ -271,5 +271,43 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_GetProcStatm_001, TestSize.Level1)
     procStatm = appfreezeInner->GetProcStatm(pid);
     EXPECT_TRUE(procStatm.empty());
 }
+
+/**
+ * @tc.number: AppfreezeInner_EnableFreezeSample_001
+ * @tc.name: EnableFreezeSample
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_EnableFreezeSample_001, TestSize.Level1)
+{
+    FaultData faultData;
+    faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
+    appfreezeInner->EnableFreezeSample(faultData);
+    faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
+    appfreezeInner->EnableFreezeSample(faultData);
+    EXPECT_TRUE(appfreezeInner != nullptr);
+}
+
+/**
+ * @tc.number: AppfreezeInner_AppInForeground_001
+ * @tc.name: SetAppInForeground and GetAppInForeground
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_AppInForeground_001, TestSize.Level1)
+{
+    appfreezeInner->SetAppInForeground(true);
+    EXPECT_TRUE(appfreezeInner->GetAppInForeground());
+    appfreezeInner->SetAppInForeground(false);
+    EXPECT_TRUE(!appfreezeInner->GetAppInForeground());
+}
+
+/**
+ * @tc.number: AppfreezeInner_MainThreadSample_001
+ * @tc.name: SetMainThreadSample and GetMainThreadSample
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_MainThreadSample_001, TestSize.Level1)
+{
+    appfreezeInner->SetMainThreadSample(true);
+    EXPECT_TRUE(appfreezeInner->GetMainThreadSample());
+    appfreezeInner->SetMainThreadSample(false);
+    EXPECT_TRUE(!appfreezeInner->GetMainThreadSample());
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

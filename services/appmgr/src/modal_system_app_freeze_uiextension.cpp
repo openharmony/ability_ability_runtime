@@ -147,8 +147,8 @@ bool ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(
 
     int32_t posX = 0;
     int32_t posY = 0;
-    int32_t width = 10;
-    int32_t height  = 10;
+    uint32_t width = 10;
+    uint32_t height  = 10;
     int32_t focusPid = -1;
     for (const auto &info : infos) {
         if (info != nullptr) {

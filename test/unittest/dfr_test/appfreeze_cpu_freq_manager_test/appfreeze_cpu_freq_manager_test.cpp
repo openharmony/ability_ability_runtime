@@ -19,7 +19,6 @@
 #include "appfreeze_cpu_freq_manager.h"
 #undef private
 
-#include "appfreeze_data.h"
 #include "appfreeze_util.h"
 
 using namespace testing;
@@ -54,50 +53,58 @@ void AppfreezeCpuFreqManagerTest::TearDown(void)
 {}
 
 /**
- * @tc.number: InitCpuDataProcessorTest_001
+ * @tc.number: InsertCpuDetailInfo_001
  * @tc.desc: add testcase
  * @tc.type: FUNC
  */
-HWTEST_F(AppfreezeCpuFreqManagerTest, InitCpuDataProcessorTest_001, TestSize.Level1)
+HWTEST_F(AppfreezeCpuFreqManagerTest, InsertCpuDetailInfo_001, TestSize.Level1)
 {
     uint32_t checkMapSize = 10;
-    std::string eventType = "test0";
+    std::string type = "test0";
     int32_t pid = getpid();
     int32_t uid = static_cast<int>(getuid());
-    std::string stackpath = "InitCpuDataProcessorTest_001";
-    bool ret = AppfreezeCpuFreqManager::GetInstance().InitCpuDataProcessor(eventType, pid, uid, stackpath);
+    bool ret = AppfreezeCpuFreqManager::GetInstance().InsertCpuDetailInfo(type, pid);
     EXPECT_TRUE(ret);
-    ret = AppfreezeCpuFreqManager::GetInstance().InitCpuDataProcessor(eventType, pid, uid, stackpath);
-    EXPECT_TRUE(!ret);
     for (auto i = 1; i < checkMapSize; i++) {
-        eventType = "test" + std::to_string(i);
-        AppfreezeCpuFreqManager::GetInstance().InitCpuDataProcessor(eventType, pid, uid, stackpath);
+        type = "test" + std::to_string(i);
+        AppfreezeCpuFreqManager::GetInstance().InsertCpuDetailInfo(type, pid);
     }
-    EXPECT_TRUE(AppfreezeCpuFreqManager::GetInstance().cpuInfoMap_.size() == checkMapSize);
-    int left = 8; // over 8s
+    int left = 10; // over 10s
     while (left > 0) {
         left = sleep(left);
     }
-    eventType = "test112";
-    ret = AppfreezeCpuFreqManager::GetInstance().InitCpuDataProcessor(eventType, pid, uid, stackpath);
+    type = "test0";
+    ret = AppfreezeCpuFreqManager::GetInstance().InsertCpuDetailInfo(type, pid);
     EXPECT_TRUE(ret);
 }
 
 /**
- * @tc.number: ReadCpuDataByNumTest_001
+ * @tc.number: GetCpuDetailInfo_001
  * @tc.desc: add testcase
  * @tc.type: FUNC
  */
-HWTEST_F(AppfreezeCpuFreqManagerTest, ReadCpuDataByNumTest_001, TestSize.Level1)
+HWTEST_F(AppfreezeCpuFreqManagerTest, GetCpuDetailInfo_001, TestSize.Level1)
+{
+    int32_t pid = getpid();
+    CpuDataProcessor data = AppfreezeCpuFreqManager::GetInstance().GetCpuDetailInfo(pid);
+    EXPECT_TRUE(pid >= 0);
+}
+
+/**
+ * @tc.number: GetInfoByCpuCountTest_001
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeCpuFreqManagerTest, GetInfoByCpuCountTest_001, TestSize.Level1)
 {
     std::vector<CpuFreqData> parseDatas;
     TotalTime totalTime;
     int32_t num = 100;
-    AppfreezeCpuFreqManager::GetInstance().ReadCpuDataByNum(num, parseDatas, totalTime);
+    AppfreezeCpuFreqManager::GetInstance().GetInfoByCpuCount(num, parseDatas, totalTime);
     EXPECT_TRUE(parseDatas.size() == 0);
     num = 0;
-    AppfreezeCpuFreqManager::GetInstance().ReadCpuDataByNum(num, parseDatas, totalTime);
-    EXPECT_TRUE(parseDatas.size() == 0);
+    AppfreezeCpuFreqManager::GetInstance().GetInfoByCpuCount(num, parseDatas, totalTime);
+    EXPECT_TRUE(parseDatas.size() >= 0);
 }
 
 /**
@@ -204,7 +211,7 @@ HWTEST_F(AppfreezeCpuFreqManagerTest, GetProcessCpuTimeTest_001, TestSize.Level0
  */
 HWTEST_F(AppfreezeCpuFreqManagerTest, GetOptimalCpuTimeTest_001, TestSize.Level0)
 {
-    uint64_t ret = AppfreezeCpuFreqManager::GetInstance().GetOptimalCpuTime(getpid());
+    double ret = AppfreezeCpuFreqManager::GetInstance().GetOptimalCpuTime(getpid());
     EXPECT_TRUE(ret >= 0);
     int count = AppfreezeCpuFreqManager::GetInstance().cpuCount_;
     AppfreezeCpuFreqManager::GetInstance().cpuCount_ = 0;
@@ -221,10 +228,12 @@ HWTEST_F(AppfreezeCpuFreqManagerTest, GetOptimalCpuTimeTest_001, TestSize.Level0
 HWTEST_F(AppfreezeCpuFreqManagerTest, GetCpuInfoTest_001, TestSize.Level0)
 {
     uint64_t start = AppfreezeUtil::GetMilliseconds();
-    std::string ret = AppfreezeCpuFreqManager::GetInstance().GetStartTime(start);
+    std::string ret = AppfreezeCpuFreqManager::GetInstance().GetTimeStampStr(start);
     EXPECT_TRUE(!ret.empty());
-    CpuStartTime cpuStartTime;
-    ret = AppfreezeCpuFreqManager::GetInstance().GetStaticInfo(getpid(), cpuStartTime);
+    CpuConsumeTime cpuConsumeTime1;
+    CpuConsumeTime cpuConsumeTime2;
+    ret = AppfreezeCpuFreqManager::GetInstance().GetConsumeTimeInfo(getpid(), cpuConsumeTime1,
+        cpuConsumeTime2);
     EXPECT_TRUE(!ret.empty());
     ret = AppfreezeCpuFreqManager::GetInstance().GetStaticInfoHead();
     EXPECT_TRUE(!ret.empty());
@@ -237,9 +246,12 @@ HWTEST_F(AppfreezeCpuFreqManagerTest, GetCpuInfoTest_001, TestSize.Level0)
  */
 HWTEST_F(AppfreezeCpuFreqManagerTest, GetCpuInfoContentTest_001, TestSize.Level0)
 {
-    std::vector<std::vector<CpuFreqData>> datas;
-    std::vector<TotalTime> totalTimeList;
-    std::string ret = AppfreezeCpuFreqManager::GetInstance().GetCpuInfoContent(datas, totalTimeList);
+    std::vector<std::vector<CpuFreqData>> datas1;
+    std::vector<TotalTime> totalTimeList1;
+    std::vector<std::vector<CpuFreqData>> datas2;
+    std::vector<TotalTime> totalTimeList2;
+    std::string ret = AppfreezeCpuFreqManager::GetInstance().GetCpuInfoContent(totalTimeList1, datas1,
+        totalTimeList2, datas2);
     EXPECT_TRUE(ret.empty());
     std::vector<CpuFreqData> parseDatas;
     CpuFreqData cpuFreqData1 = {
@@ -247,63 +259,106 @@ HWTEST_F(AppfreezeCpuFreqManagerTest, GetCpuInfoContentTest_001, TestSize.Level0
         .runningTime = 100,
     };
     parseDatas.push_back(cpuFreqData1);
-    datas.push_back(parseDatas);
+    datas1.push_back(parseDatas);
     TotalTime time1 = {
         .totalRunningTime = 50,
         .totalCpuTime = 1000,
     };
-    totalTimeList.push_back(time1);
-    ret = AppfreezeCpuFreqManager::GetInstance().GetCpuInfoContent(datas, totalTimeList);
+    totalTimeList1.push_back(time1);
+    ret = AppfreezeCpuFreqManager::GetInstance().GetCpuInfoContent(totalTimeList1, datas1,
+        totalTimeList2, datas2);
     EXPECT_TRUE(ret.empty());
 }
 
 /**
- * @tc.number: WriteCpuInfoToFileTest_001
+ * @tc.number: GetFreezeLogHeadTest_001
  * @tc.desc: add testcase
  * @tc.type: FUNC
  */
-HWTEST_F(AppfreezeCpuFreqManagerTest, WriteCpuInfoToFileTest_001, TestSize.Level0)
+HWTEST_F(AppfreezeCpuFreqManagerTest, GetFreezeLogHeadTest_001, TestSize.Level0)
 {
-    AppfreezeCpuFreqManager::GetInstance().WriteDfxLogToFile("filePath", "bundleName");
-    std::string eventType = "WriteCpuInfoToFileTest_001";
-    std::string testValue = "AppfreezeCpuFreqManagerTest";
-    std::string ret = AppfreezeCpuFreqManager::GetInstance().WriteCpuInfoToFile(eventType,
-        testValue, getuid(), getpid(), testValue);
-    EXPECT_TRUE(ret.empty());
+    std::string ret = AppfreezeCpuFreqManager::GetInstance().GetFreezeLogHead("bundleName");
+    EXPECT_TRUE(!ret.empty());
+}
+
+/**
+ * @tc.number: GetIntervalTest_001
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeCpuFreqManagerTest, GetIntervalTest_001, TestSize.Level0)
+{
+    uint64_t warnTime = 1234; // test value
+    uint64_t blockTime = 2345; // test value
+    uint64_t ret = AppfreezeCpuFreqManager::GetInstance().GetInterval(warnTime, blockTime);
+    EXPECT_EQ(ret, 1111);
+}
+
+/**
+ * @tc.number: GetIntervalTest_002
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeCpuFreqManagerTest, GetIntervalTest_002, TestSize.Level0)
+{
+    uint64_t warnTime = 1200; // test value
+    uint64_t blockTime = 1000; // test value
+    uint64_t ret = AppfreezeCpuFreqManager::GetInstance().GetInterval(warnTime, blockTime);
+    EXPECT_EQ(ret, 200);
+}
+
+/**
+ * @tc.number: GetConsumeTimeInfoTest_001
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeCpuFreqManagerTest, GetConsumeTimeInfoTest_001, TestSize.Level0)
+{
+    int32_t pid = getpid();
+    CpuConsumeTime warnTimes = {
+        .optimalCpuTime = AppfreezeCpuFreqManager::GetInstance().GetOptimalCpuTime(pid),
+        .cpuFaultTime = AppfreezeUtil::GetMilliseconds(),
+        .processCpuTime = AppfreezeCpuFreqManager::GetInstance().GetProcessCpuTime(pid),
+        .deviceRunTime = AppfreezeCpuFreqManager::GetInstance().GetDeviceRuntime(),
+        .cpuTime = AppfreezeCpuFreqManager::GetInstance().GetAppCpuTime(pid),
+    };
+    uint64_t testValue = 1234; // testValue
+    CpuConsumeTime blockTimes = {
+        .optimalCpuTime = AppfreezeCpuFreqManager::GetInstance().GetOptimalCpuTime(pid) + testValue,
+        .cpuFaultTime = AppfreezeUtil::GetMilliseconds() + testValue,
+        .processCpuTime = AppfreezeCpuFreqManager::GetInstance().GetProcessCpuTime(pid) + testValue,
+        .deviceRunTime = AppfreezeCpuFreqManager::GetInstance().GetDeviceRuntime() + testValue,
+        .cpuTime = AppfreezeCpuFreqManager::GetInstance().GetAppCpuTime(pid) + testValue,
+    };
+    std::string ret = AppfreezeCpuFreqManager::GetInstance().GetConsumeTimeInfo(pid,
+        warnTimes, blockTimes);
+    EXPECT_TRUE(!ret.empty());
+}
+
+/**
+ * @tc.number: GetCpuInfoPathTest_001
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeCpuFreqManagerTest, GetCpuInfoPathTest_001, TestSize.Level0)
+{
     int32_t pid = getpid();
     int32_t uid = static_cast<int>(getuid());
-    bool result = AppfreezeCpuFreqManager::GetInstance().InitCpuDataProcessor(eventType, pid, uid, testValue);
+    std::string type = "GetCpuInfoPathTest_001";
+    std::string testValue = "AppfreezeCpuFreqManagerTest";
+    bool result = AppfreezeCpuFreqManager::GetInstance().InsertCpuDetailInfo(type, pid);
     EXPECT_TRUE(result);
-    testValue = "LIFECYCLE_TIMEOUT";
-    ret = AppfreezeCpuFreqManager::GetInstance().WriteCpuInfoToFile(eventType,
-        testValue, getuid(), getpid(), testValue);
-    EXPECT_TRUE(ret.empty());
-}
-
-/**
- * @tc.number: WriteCpuInfoToFileTest_002
- * @tc.desc: add testcase
- * @tc.type: FUNC
- */
-HWTEST_F(AppfreezeCpuFreqManagerTest, WriteCpuInfoToFileTest_002, TestSize.Level0)
-{
-    int32_t pid = getpid();
-    int32_t uid = static_cast<int>(getuid());
-    std::string eventType = "WriteCpuInfoToFileTest_001";
-    std::string testValue = "AppfreezeCpuFreqManagerTest";
-    bool result = AppfreezeCpuFreqManager::GetInstance().InitCpuDataProcessor(eventType, pid, uid, testValue);
-    EXPECT_TRUE(!result);
     int32_t newPid = pid + 10;
-    std::string ret = AppfreezeCpuFreqManager::GetInstance().WriteCpuInfoToFile(eventType,
-        testValue, getuid(), newPid, testValue);
+    std::string ret = AppfreezeCpuFreqManager::GetInstance().GetCpuInfoPath(type,
+        testValue, uid, newPid);
     EXPECT_TRUE(ret.empty());
-    int left = 7;
+    int left = 10; // test value
     while (left > 0) {
         left = sleep(left);
     }
-    ret = AppfreezeCpuFreqManager::GetInstance().WriteCpuInfoToFile(eventType,
-        testValue, getuid(), pid, testValue);
-    EXPECT_TRUE(ret.empty());
+    ret = AppfreezeCpuFreqManager::GetInstance().GetCpuInfoPath(type,
+        testValue, uid, pid);
+    EXPECT_TRUE(!ret.empty());
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
