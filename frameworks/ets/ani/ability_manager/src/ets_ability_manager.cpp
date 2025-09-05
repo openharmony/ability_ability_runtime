@@ -30,6 +30,7 @@
 #include "ets_ability_foreground_state_observer.h"
 #include "ets_ability_manager_utils.h"
 #include "ets_error_utils.h"
+#include "ets_query_erms_observer.h"
 #include "hilog_tag_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
@@ -109,14 +110,23 @@ public:
     static void NativeSetResidentProcessEnabledCheck(ani_env *env, ani_string aniBundleName);
     static void NativeAcquireShareData(ani_env *env, ani_int aniMissionId, ani_object callbackObj);
     static void NativeUpdateConfiguration(ani_env *env, ani_object configObj, ani_object callbackObj);
+    static void QueryAtomicServiceStartupRule(ani_env *env, ani_object contextObj,
+        ani_string aniAppId, ani_object callbackObj);
+    static void QueryAtomicServiceStartupRuleCheck(ani_env *env, ani_object contextObj);
 
 private:
     static sptr<AppExecFwk::IAbilityManager> GetAbilityManagerInstance();
     static sptr<AppExecFwk::IAppMgr> GetAppManagerInstance();
+    static int AddQueryERMSObserver(ani_vm *vm, sptr<IRemoteObject> token, const std::string &appId,
+        const std::string &startTime, ani_object callbackObj);
+    static void QueryAtomicServiceStartupRuleInner(std::string appId, std::string startTime,
+        sptr<IRemoteObject> token);
     static sptr<AbilityRuntime::ETSAbilityForegroundStateObserver> observerForeground_;
+    static sptr<AbilityRuntime::EtsQueryERMSObserver> queryERMSObserver_;
 };
 
 sptr<AbilityRuntime::ETSAbilityForegroundStateObserver> EtsAbilityManager::observerForeground_ = nullptr;
+sptr<AbilityRuntime::EtsQueryERMSObserver> EtsAbilityManager::queryERMSObserver_ = nullptr;
 
 sptr<AppExecFwk::IAbilityManager> EtsAbilityManager::GetAbilityManagerInstance()
 {
@@ -269,6 +279,97 @@ void EtsAbilityManager::IsEmbeddedOpenAllowed(ani_env *env, ani_object contextOb
     ani_boolean ret = AAFwk::AbilityManagerClient::GetInstance()->IsEmbeddedOpenAllowed(token, appId);
     AppExecFwk::AsyncCallback(env, callbackObj,
         EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK),  AppExecFwk::CreateBoolean(env, ret));
+}
+
+int EtsAbilityManager::AddQueryERMSObserver(ani_vm *vm, sptr<IRemoteObject> token, const std::string &appId,
+    const std::string &startTime, ani_object callbackObj)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "AddQueryERMSObserver");
+    if (queryERMSObserver_ == nullptr) {
+        queryERMSObserver_ = sptr<EtsQueryERMSObserver>::MakeSptr(vm);
+    }
+    queryERMSObserver_->AddEtsObserverObject(appId, startTime, callbackObj);
+    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->AddQueryERMSObserver(token, queryERMSObserver_);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "addQueryERMSObserver error");
+        AtomicServiceStartupRule rule;
+        queryERMSObserver_->OnQueryFinished(appId, startTime, rule, AAFwk::INNER_ERR);
+        return ret;
+    }
+    return ERR_OK;
+}
+
+void EtsAbilityManager::QueryAtomicServiceStartupRuleCheck(ani_env *env, ani_object contextObj)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "QueryAtomicServiceStartupRule");
+    auto context = OHOS::AbilityRuntime::GetStageModeContext(env, contextObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null context");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param context failed, must not be nullptr.");
+        return;
+    }
+    auto uiAbilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
+    if (uiAbilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null UIAbilityContext");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param context failed, must be UIAbilityContext.");
+        return;
+    }
+}
+
+void EtsAbilityManager::QueryAtomicServiceStartupRule(ani_env *env, ani_object contextObj,
+    ani_string aniAppId, ani_object callbackObj)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "QueryAtomicServiceStartupRule");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null env");
+        return;
+    }
+    auto context = OHOS::AbilityRuntime::GetStageModeContext(env, contextObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null context");
+        return;
+    }
+    auto uiAbilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
+    if (uiAbilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null UIAbilityContext");
+        return;
+    }
+    std::string appId;
+    if (!AppExecFwk::GetStdString(env, aniAppId, appId)) {
+        return;
+    }
+    ani_vm *aniVM = nullptr;
+    if (env->GetVM(&aniVM) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get aniVM failed");
+        return;
+    }
+    auto token = uiAbilityContext->GetToken();
+    std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count());
+    auto ret = AddQueryERMSObserver(aniVM, token, appId, startTime, callbackObj);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "AddQueryERMSObserver failed, ret=%{public}d", ret);
+        return;
+    }
+    QueryAtomicServiceStartupRuleInner(appId, startTime, token);
+}
+
+void EtsAbilityManager::QueryAtomicServiceStartupRuleInner(std::string appId, std::string startTime,
+    sptr<IRemoteObject> token)
+{
+    auto rule = std::make_shared<AtomicServiceStartupRule>();
+    auto ret = AAFwk::AbilityManagerClient::GetInstance()->QueryAtomicServiceStartupRule(token,
+        appId, startTime, *rule);
+    if (ret== AAFwk::ERR_ECOLOGICAL_CONTROL_STATUS) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "openning dialog to confirm");
+        return;
+    }
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "query failed: %{public}d", ret);
+        queryERMSObserver_->OnQueryFinished(appId, startTime, *rule, ret);
+        return;
+    }
+    queryERMSObserver_->OnQueryFinished(appId, startTime, *rule, ERR_OK);
 }
 
 void EtsAbilityManager::NativeOn(ani_env *env, ani_string aniType, ani_object aniObserver)
@@ -583,6 +684,11 @@ void EtsAbilityManagerRegistryInit(ani_env *env)
         ani_native_function { "nativeIsEmbeddedOpenAllowed",
             "Lapplication/Context/Context;Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsAbilityManager::IsEmbeddedOpenAllowed) },
+        ani_native_function { "nativeQueryAtomicServiceStartupRule",
+            "Lapplication/Context/Context;Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsAbilityManager::QueryAtomicServiceStartupRule) },
+        ani_native_function { "nativeQueryAtomicServiceStartupRuleCheck", "Lapplication/Context/Context:V",
+            reinterpret_cast<void *>(EtsAbilityManager::QueryAtomicServiceStartupRuleCheck) },
         ani_native_function { "nativeOn", nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeOn) },
         ani_native_function { "nativeOff", nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeOff) },
         ani_native_function { "nativeNotifyDebugAssertResult",

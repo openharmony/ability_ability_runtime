@@ -41,7 +41,8 @@ export default namespace abilityManager {
   export native function nativeSetResidentProcessEnabledCheck(bundleName: string): void;
   export native function nativeAcquireShareData(missionId: int, callback: AsyncCallbackWrapper<Record<string, Object>>): void;
   export native function nativeUpdateConfiguration(config: Configuration, callback: AsyncCallbackWrapper<void>): void;
-
+  export native function nativeQueryAtomicServiceStartupRule(context: Context, appId: string, callback:AsyncCallbackWrapper<AtomicServiceStartupRule>) : void;
+  export native function nativeQueryAtomicServiceStartupRuleCheck(context: Context): void;
   export function getForegroundUIAbilities():Promise<Array<AbilityStateData>> {
     let p = new Promise<Array<AbilityStateData>>((resolve: (data: Array<AbilityStateData>) => void, reject: (error: Error) => void): void => {
       let executeFunc = (): Array<AbilityStateData> => {
@@ -210,6 +211,22 @@ export default namespace abilityManager {
     abilityManager.nativeOff('abilityForegroundState', observer);
   }
 
+  function queryAtomicServiceStartupRule(context: Context, appId: string): Promise<AtomicServiceStartupRule> {
+    abilityManager.nativeQueryAtomicServiceStartupRuleCheck(context);
+    return new Promise<AtomicServiceStartupRule>((resolve:(data:AtomicServiceStartupRule)=>void, reject:(err: BusinessError | null)=>void):void => {
+      let asyncCall = new AsyncCallbackWrapper<AtomicServiceStartupRule>((err: BusinessError | null, data: AtomicServiceStartupRule | undefined)=>{
+        if (err == null || err.code == 0) {
+          resolve(data as AtomicServiceStartupRule);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        abilityManager.nativeQueryAtomicServiceStartupRule(context, appId, asyncCall);
+      })
+    });
+  }
+
   export enum AbilityState {
     INITIAL = 0,
     FOCUS = 2,
@@ -223,6 +240,16 @@ export default namespace abilityManager {
     ASSERT_TERMINATE = 0,
     ASSERT_CONTINUE = 1,
     ASSERT_RETRY = 2
+  }
+
+  export interface AtomicServiceStartupRule {
+    isOpenAllowed: boolean;
+    isEmbeddedAllowed: boolean;
+  }
+
+  class AtomicServiceStartupRuleImpl implements AtomicServiceStartupRule {
+    isOpenAllowed: boolean;
+    isEmbeddedAllowed: boolean;
   }
 
   export type AbilityRunningInfo = _AbilityRunningInfo;
