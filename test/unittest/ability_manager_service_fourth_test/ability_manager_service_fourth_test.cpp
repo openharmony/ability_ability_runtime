@@ -447,7 +447,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartAbilityForOptionInner_001, TestSi
     abilityMs->interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     result = abilityMs->StartAbilityForOptionInner(want, startOptions, callerToken, false, userId, requestCode,
         isStartAsCaller, specifyTokenId, isImplicit);
-    EXPECT_NE(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, ERR_IMPLICIT_START_ABILITY_FAIL);
 
     abilityMs-> implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     result = abilityMs->StartAbilityForOptionInner(want, startOptions, callerToken, false, userId, requestCode,
