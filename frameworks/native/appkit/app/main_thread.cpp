@@ -194,6 +194,7 @@ const char* PC_FUNC_INFO = "DetermineResourceType";
 const char* PRELOAD_APP_STARTUP = "PreloadAppStartup";
 const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
+constexpr int32_t FOUNDATION_UID = 5523;
 
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
 const std::string NWEB_SURFACE_NODE_NAME = "nwebPreloadSurface";
@@ -1242,6 +1243,7 @@ void MainThread::SubscribeOverlayChange(const std::string &bundleName, const std
     matchingSkills.AddEvent(OVERLAY_STATE_CHANGED);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
+    subscribeInfo.SetPublisherUid(FOUNDATION_UID);
     wptr<MainThread> weak = this;
     auto callback = [weak, resourceManager, bundleName, moduleName = entryHapModuleInfo.moduleName,
         loadPath](const EventFwk::CommonEventData &data) {
