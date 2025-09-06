@@ -126,6 +126,10 @@ public:
     static void NativeOnSetRestoreEnabled(ani_env *env, ani_object aniObj, ani_boolean aniEnabled);
     static void NativeChangeAbilityVisibility(ani_env *env, ani_object aniObj, ani_boolean isShow,
         ani_object callbackObj);
+    static void StartAbilityAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_object callbackObj, ani_object startOptionsObj);
+    static void StartRecentAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+        ani_object callbackObj, ani_object startOptionsObj);
 
 #ifdef SUPPORT_GRAPHICS
 public:
@@ -139,7 +143,8 @@ private:
 #endif
 private:
     void InheritWindowMode(AAFwk::Want &want);
-    void OnStartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call);
+    void OnStartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call,
+        bool isStartRecent = false);
     void OnStartAbilityForResult(
         ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj, ani_object callback);
     void OnTerminateSelf(ani_env *env, ani_object aniObj, ani_object callback);
@@ -191,6 +196,8 @@ private:
         AAFwk::StartOptions &options, std::string appId, ani_object callbackObj);
     void OnStartAbilityWithAccount(
         ani_env *env, ani_object aniObj, ani_object aniWant, ani_int aniAccountId, ani_object aniOpt, ani_object call);
+    void OnStartAbilityAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj,
+        ani_object callbackObj);
 
     ani_env *env_ = nullptr;
     std::weak_ptr<AbilityContext> context_;
