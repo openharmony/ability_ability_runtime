@@ -1322,6 +1322,11 @@ enum NativeFreeInstallError {
      */
     ERR_ATTACH_ABILITY_THREAD_FAILED = 29360222,
 
+    /*
+     * Result(29360223) sa interceptor OnCheckStarting failed.
+     */
+    ERROR_SA_INTERCEPTOR_START_FAILED = 29360223,
+
     /**
      * Undefine error code.
      */
