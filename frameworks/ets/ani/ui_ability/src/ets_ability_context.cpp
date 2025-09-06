@@ -36,6 +36,7 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "ipc_skeleton.h"
+#include "json_utils.h"
 #include "tokenid_kit.h"
 #include "want.h"
 #ifdef SUPPORT_GRAPHICS
@@ -58,6 +59,7 @@ static std::map<EtsConnectionKey, sptr<ETSAbilityConnection>, EtsKeyCompare> g_c
 constexpr const char* UI_ABILITY_CONTEXT_CLASS_NAME = "Lapplication/UIAbilityContext/UIAbilityContext;";
 constexpr const char* CLEANER_CLASS = "Lapplication/UIAbilityContext/Cleaner;";
 const std::string APP_LINKING_ONLY = "appLinkingOnly";
+const std::string JSON_KEY_ERR_MSG = "errMsg";
 constexpr const char* SIGNATURE_OPEN_LINK = "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;"
     "L@ohos/app/ability/OpenLinkOptions/OpenLinkOptions;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
@@ -74,6 +76,10 @@ constexpr const char *SIGNATURE_START_ABILITY_WITH_ACCOUNT =
 constexpr const char *SIGNATURE_START_ABILITY_WITH_ACCOUNT_OPTIONS =
     "L@ohos/app/ability/Want/Want;IL@ohos/app/ability/StartOptions/StartOptions;"
     "Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char *SIGNATURE_START_ABILITY_AS_CALLER = "L@ohos/app/ability/Want/Want;"
+    "Lutils/AbilityUtils/AsyncCallbackWrapper;L@ohos/app/ability/StartOptions/StartOptions;:V";
+constexpr const char *SIGNATURE_START_RECENT_ABILITY = "L@ohos/app/ability/Want/Want;"
+    "Lutils/AbilityUtils/AsyncCallbackWrapper;L@ohos/app/ability/StartOptions/StartOptions;:V";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
 constexpr const char* SIGNATURE_RESTORE_WINDOW_STAGE = "Larkui/stateManagement/storage/localStorage/LocalStorage;:V";
@@ -642,6 +648,39 @@ void EtsAbilityContext::RestoreWindowStage(
     etsContext->OnRestoreWindowStage(env, aniObj, localStorageObj);
 }
 
+void EtsAbilityContext::StartAbilityAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_object callbackObj, ani_object startOptionsObj)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "StartAbilityAsCaller called");
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
+        return;
+    }
+    etsContext->OnStartAbilityAsCaller(env, aniObj, wantObj, callbackObj, startOptionsObj);
+}
+
+void EtsAbilityContext::StartRecentAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_object callbackObj, ani_object startOptionsObj)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "StartRecentAbility called");
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_boolean isOptionsUndefined = ANI_FALSE;
+    if ((status = env->Reference_IsUndefined(startOptionsObj, &isOptionsUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+        return;
+    }
+    if (isOptionsUndefined) {
+        startOptionsObj = nullptr;
+    }
+    etsContext->OnStartAbility(env, aniObj, wantObj, startOptionsObj, callbackObj, true);
+}
+
 int32_t EtsAbilityContext::GenerateRequestCode()
 {
     static int32_t curRequestCode_ = 0;
@@ -671,7 +710,7 @@ void EtsAbilityContext::InheritWindowMode(AAFwk::Want &want)
 }
 
 void EtsAbilityContext::OnStartAbility(
-    ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call)
+    ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call, bool isStartRecent)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     AAFwk::Want want;
@@ -680,6 +719,10 @@ void EtsAbilityContext::OnStartAbility(
         return;
     }
     InheritWindowMode(want);
+    if (isStartRecent) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "startRecentAbility");
+        want.SetParam(AAFwk::Want::PARAM_RESV_START_RECENT, true);
+    }
     auto context = context_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
@@ -1859,6 +1902,45 @@ void EtsAbilityContext::OnSetMissionIcon(ani_env *env, ani_object aniObj, ani_ob
 }
 #endif
 
+void EtsAbilityContext::OnStartAbilityAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_object callbackObj, ani_object startOptionsObj)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "StartAbilityAsCaller called");
+    AAFwk::Want want;
+    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, must be a Want");
+        return;
+    }
+    InheritWindowMode(want);
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        EtsErrorUtil::ThrowInvalidParamError(env, "null context");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_boolean isOptionsUndefined = true;
+    if ((status = env->Reference_IsUndefined(startOptionsObj, &isOptionsUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
+        return;
+    }
+    ErrCode innerErrCode = ERR_OK;
+    AAFwk::StartOptions startOptions;
+    if (!isOptionsUndefined) {
+        if (!AppExecFwk::UnwrapStartOptionsWithProcessOption(env, startOptionsObj, startOptions)) {
+            EtsErrorUtil::ThrowInvalidParamError(env,
+                "Parse param startOptions failed, startOptions must be StartOptions.");
+            TAG_LOGE(AAFwkTag::CONTEXT, "invalid options");
+            return;
+        }
+        innerErrCode = context->StartAbilityAsCaller(want, startOptions, -1);
+    } else {
+        innerErrCode = context->StartAbilityAsCaller(want, -1);
+    }
+    ani_object aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, innerErrCode);
+    AppExecFwk::AsyncCallback(env, callbackObj, aniObject, nullptr);
+}
+
 void EtsAbilityContext::RevokeDelegator(ani_env *env, ani_object aniObj, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "RevokeDelegator called");
@@ -2065,6 +2147,10 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void*>(EtsAbilityContext::StartAbilityForResultWithAccountResult) },
             ani_native_function { "nativeRestoreWindowStage", SIGNATURE_RESTORE_WINDOW_STAGE,
                 reinterpret_cast<void *>(EtsAbilityContext::RestoreWindowStage) },
+            ani_native_function { "nativeStartAbilityAsCaller", SIGNATURE_START_ABILITY_AS_CALLER,
+                reinterpret_cast<void *>(EtsAbilityContext::StartAbilityAsCaller) },
+            ani_native_function { "nativeStartRecentAbility", SIGNATURE_START_RECENT_ABILITY,
+                reinterpret_cast<void *>(EtsAbilityContext::StartRecentAbility) },
         };
         if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
             TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);

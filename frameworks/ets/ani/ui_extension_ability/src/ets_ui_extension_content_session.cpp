@@ -18,6 +18,7 @@
 
 #include "ability_manager_client.h"
 #include "accesstoken_kit.h"
+#include "ani_common_start_options.h"
 #include "ani_common_util.h"
 #include "ani_common_want.h"
 #include "ani_common_start_options.h"
@@ -57,6 +58,8 @@ constexpr const char *SIGNATURE_GET_UI_EXTENSION_WINDOW_PROXY =
     ":L@ohos/arkui/uiExtension/uiExtension/WindowProxy;";
 constexpr const char *SIGNATURE_SET_WINDOW_PRIVACY_MODE = "ZLutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char* PERMISSION_PRIVACY_WINDOW = "ohos.permission.PRIVACY_WINDOW";
+constexpr const char *SIGNATURE_START_ABILITY_AS_CALLER = "L@ohos/app/ability/Want/Want;"
+    "Lutils/AbilityUtils/AsyncCallbackWrapper;L@ohos/app/ability/StartOptions/StartOptions;:V";
 } // namespace
 
 void EtsAbilityResultListeners::AddListener(const uint64_t &uiExtensionComponentId,
@@ -294,6 +297,15 @@ void EtsUIExtensionContentSession::NativeLoadContentByName(ani_env *env, ani_obj
     }
 }
 
+void EtsUIExtensionContentSession::NativeStartAbilityAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_object callbackObj, ani_object startOptionsObj)
+{
+    auto etsContentSession = EtsUIExtensionContentSession::GetEtsContentSession(env, aniObj);
+    if (etsContentSession != nullptr) {
+        etsContentSession->OnStartAbilityAsCaller(env, aniObj, wantObj, callbackObj, startOptionsObj);
+    }
+}
+
 EtsUIExtensionContentSession::EtsUIExtensionContentSession(
     sptr<AAFwk::SessionInfo> sessionInfo, sptr<Rosen::Window> uiWindow,
     std::weak_ptr<AbilityRuntime::Context> &context,
@@ -391,6 +403,8 @@ ani_status EtsUIExtensionContentSession::BindNativeMethod(ani_env *env, ani_clas
             "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/"
             "AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(EtsUIExtensionContentSession::NativeStartAbilityForResultWithStartOptions) },
+        ani_native_function {"nativeStartAbilityAsCaller", SIGNATURE_START_ABILITY_AS_CALLER,
+            reinterpret_cast<void *>(EtsUIExtensionContentSession::NativeStartAbilityAsCaller)}
     };
     ani_status status = ANI_ERROR;
     if ((status = env->Class_BindNativeMethods(cls, methods.data(), methods.size())) != ANI_OK
@@ -1179,6 +1193,56 @@ void EtsUIExtensionContentSession::StartAbilityForResultDoTask(ani_vm *etsVm,
         listener_->OnAbilityResultInner(requestCode, err, want);
     }
     return;
+}
+
+void EtsUIExtensionContentSession::OnStartAbilityAsCaller(ani_env *env, ani_object aniObj, ani_object wantObj,
+    ani_object callbackObj, ani_object startOptionsObj)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "StartAbilityAsCaller called");
+    AAFwk::Want want;
+    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, must be a Want");
+        return;
+    }
+    auto etsContentSession = EtsUIExtensionContentSession::GetEtsContentSession(env, aniObj);
+    if (etsContentSession == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsContentSession");
+        EtsErrorUtil::ThrowInvalidParamError(env, "null etsContentSession");
+        return;
+    }
+    auto context = etsContentSession->GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null context");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
+    }
+    if (etsContentSession->sessionInfo_ == nullptr) {
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_boolean isOptionsUndefined = true;
+    if ((status = env->Reference_IsUndefined(startOptionsObj, &isOptionsUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
+        return;
+    }
+    ErrCode innerErrCode = ERR_OK;
+    AAFwk::StartOptions startOptions;
+    if (!isOptionsUndefined) {
+        if (!AppExecFwk::UnwrapStartOptionsWithProcessOption(env, startOptionsObj, startOptions)) {
+            EtsErrorUtil::ThrowInvalidParamError(env,
+                "Parse param startOptions failed, startOptions must be StartOptions.");
+            TAG_LOGE(AAFwkTag::UI_EXT, "invalid options");
+            return;
+        }
+        innerErrCode = AAFwk::AbilityManagerClient::GetInstance()->
+            StartAbilityAsCaller(want, context->GetToken(), etsContentSession->sessionInfo_->callerToken);
+    } else {
+        innerErrCode = AAFwk::AbilityManagerClient::GetInstance()->
+            StartAbilityAsCaller(want, startOptions, context->GetToken(), etsContentSession->sessionInfo_->callerToken);
+    }
+    ani_object aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, innerErrCode);
+    AppExecFwk::AsyncCallback(env, callbackObj, aniObject, nullptr);
 }
 
 bool EtsUIExtensionContentSession::CheckStartAbilityByTypeParam(
