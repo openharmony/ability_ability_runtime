@@ -7709,6 +7709,19 @@ bool AppMgrServiceInner::CreateAbilityInfo(const AAFwk::Want &want, AbilityInfo 
     return true;
 }
 
+bool AppMgrServiceInner::AllowDebugCheck(const ApplicationInfo &appInfo)
+{
+    if (appInfo.appProvisionType == Constants::APP_PROVISION_TYPE_DEBUG) {
+        TAG_LOGI(AAFwkTag::APPMGR, "debug type ok");
+        return true;
+    }
+    if (!AAFwk::AppUtils::GetInstance().IsSupportAllowDebugPermission()) {
+        return false;
+    }
+    return AccessToken::AccessTokenKit::VerifyAccessToken(appInfo.accessTokenId,
+        AAFwk::PermissionConstants::PERMISSION_ALL_DEBUG, false) == AccessToken::PermissionState::PERMISSION_GRANTED;
+}
+
 int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &want)
 {
     CHECK_POINTER_AND_RETURN_VALUE(appRunningManager_, ERR_INVALID_OPERATION);
