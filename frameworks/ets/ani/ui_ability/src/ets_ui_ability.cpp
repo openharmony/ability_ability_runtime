@@ -1181,6 +1181,32 @@ int32_t EtsUIAbility::OnCollaborate(WantParams &wantParam)
 }
 #endif
 
+void EtsUIAbility::OnAbilityRequestFailure(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnAbilityRequestFailure called");
+    UIAbility::OnAbilityRequestFailure(requestId, element, message);
+    auto abilityContext = GetAbilityContext();
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+        return;
+    }
+    abilityContext->OnRequestFailure(requestId, element, message);
+}
+
+void EtsUIAbility::OnAbilityRequestSuccess(const std::string &requestId, const AppExecFwk::ElementName &element,
+    const std::string &message)
+{
+    TAG_LOGD(AAFwkTag::UIABILITY, "OnAbilityRequestSuccess called");
+    UIAbility::OnAbilityRequestSuccess(requestId, element, message);
+    auto abilityContext = GetAbilityContext();
+    if (abilityContext == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext");
+        return;
+    }
+    abilityContext->OnRequestSuccess(requestId, element, message);
+}
+
 void EtsUIAbility::OnConfigurationUpdated(const Configuration &configuration)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
