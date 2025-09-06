@@ -91,6 +91,7 @@ const int32_t ERR_ABILITY_RUNTIME_EXTERNAL_NOT_SYSTEM_HSP = 16400001;
 const int AREA2 = 2;
 const int AREA3 = 3;
 const int AREA4 = 4;
+constexpr int32_t FOUNDATION_UID = 5523;
 
 ContextImpl::ContextImpl()
 {
@@ -1150,6 +1151,7 @@ void ContextImpl::SubscribeToOverlayEvents(std::shared_ptr<Global::Resource::Res
     matchingSkills.AddEvent(OVERLAY_STATE_CHANGED);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
+    subscribeInfo.SetPublisherUid(FOUNDATION_UID);
     auto callback = [this, resourceManager, bundleName = name, moduleName =
     hapModuleName, loadPath](const EventFwk::CommonEventData &data) {
         TAG_LOGI(AAFwkTag::APPKIT, "on overlay changed");
