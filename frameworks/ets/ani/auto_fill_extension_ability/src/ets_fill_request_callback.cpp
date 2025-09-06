@@ -37,8 +37,6 @@ constexpr const char *CONFIG_POPUP_SIZE = "popupSize";
 constexpr const char *CONFIG_POPUP_PLACEMENT = "placement";
 constexpr const char *WANT_PARAMS_FILL_CONTENT = "ohos.ability.params.fillContent";
 constexpr const char *ERROR_MSG_INVALID_EMPTY = "JsonString is empty.";
-constexpr const char *ERROR_MSG_PARAMETER_INVALID =
-    "The storeld can consist of only letters, digits, and underscores(_), and cannot exceed 128 characters.";
 constexpr const char *FILL_REQUEST_CALL_BACK_CLASS_NAME = "Lapplication/AutoFillRequest/FillRequestCallbackInner;";
 constexpr const char *CLEANER_CLASS = "Lapplication/AutoFillRequest/Cleaner;";
 }
@@ -207,8 +205,6 @@ void EtsFillRequestCallback::OnFillRequestCanceled(ani_env *env, ani_object obje
     }
     if (isFillContentUndefined) {
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "parse fillContent failed");
-        EtsErrorUtil::ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-            ERROR_MSG_PARAMETER_INVALID);
         SendResultCodeAndViewData(EtsAutoFillExtensionUtil::AutoFillResultCode::CALLBACK_FAILED_INVALID_PARAM, "");
         return;
     }
