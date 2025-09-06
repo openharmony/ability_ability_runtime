@@ -572,5 +572,27 @@ HWTEST_F(AppMgrServiceInnerSixthTest, UpdateConfigurationForBackgroundApp_001, T
 
     TAG_LOGI(AAFwkTag::TEST, "UpdateConfiguration_001 end");
 }
+
+/**
+ * @tc.name: AllowDebugCheck
+ * @tc.desc: Test the state of AllowDebugCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerSixthTest, AllowDebugCheck_001, TestSize.Level1)
+{
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ApplicationInfo applicationInfo;
+    applicationInfo.bundleName = "testName";
+    applicationInfo.appProvisionType = AppExecFwk::Constants::APP_PROVISION_TYPE_DEBUG;
+    EXPECT_TRUE(appMgrServiceInner->AllowDebugCheck(applicationInfo));
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isSupportAllowDebugPermission_.isLoaded = true;
+    appUtils.isSupportAllowDebugPermission_.value = false;
+    applicationInfo.appProvisionType = AppExecFwk::Constants::APP_PROVISION_TYPE_RELEASE;
+    EXPECT_FALSE(appMgrServiceInner->AllowDebugCheck(applicationInfo));
+
+    appUtils.isSupportAllowDebugPermission_.value = true;
+    EXPECT_FALSE(appMgrServiceInner->AllowDebugCheck(applicationInfo));
+}
 } // namespace AppExecFwk
 } // namespace OHOS
