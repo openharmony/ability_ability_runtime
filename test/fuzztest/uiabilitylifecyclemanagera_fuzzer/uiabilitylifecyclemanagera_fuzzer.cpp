@@ -75,7 +75,6 @@ void DoSomethingInterestingWithMyAPI1(const char *data, size_t size)
     uIAbilityLifecycleManager->OnStartSpecifiedProcessResponse(strParam, requestId);
     uIAbilityLifecycleManager->OnStartSpecifiedAbilityTimeoutResponse(requestId);
     uIAbilityLifecycleManager->OnStartSpecifiedProcessTimeoutResponse(requestId);
-    uIAbilityLifecycleManager->StartSpecifiedAbilityBySCB(abilityRequest);
     sptr<IRemoteObject> callStub;
     std::shared_ptr<AbilityRecord> abilityRecord4;
     uIAbilityLifecycleManager->CallRequestDone(abilityRecord4, callStub);

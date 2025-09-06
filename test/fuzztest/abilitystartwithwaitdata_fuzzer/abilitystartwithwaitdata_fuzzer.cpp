@@ -34,6 +34,9 @@ using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
+namespace {
+constexpr size_t STRING_MAX_LENGTH = 128;
+}
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
 {
     std::shared_ptr<AbilityStartWithWaitObserverData> infos = std::make_shared<AbilityStartWithWaitObserverData>();
@@ -41,10 +44,11 @@ bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
         return false;
     }
     Parcel parcel;
-    parcel.WriteString(fdp->ConsumeRandomLengthString());
+    infos->bundleName = fdp->ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    infos->abilityName = fdp->ConsumeRandomLengthString(STRING_MAX_LENGTH);
     infos->Marshalling(parcel);
     infos->ReadFromParcel(parcel);
-    AbilityStartWithWaitObserverData::Unmarshalling(parcel);
+    infos.reset(AbilityStartWithWaitObserverData::Unmarshalling(parcel));
     return true;
 }
 }
