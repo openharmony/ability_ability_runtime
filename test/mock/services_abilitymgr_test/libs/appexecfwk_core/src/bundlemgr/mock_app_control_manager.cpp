@@ -66,7 +66,7 @@ ErrCode AppControlProxy::DeleteAppRunningControlRule(int32_t userId)
     return ERR_OK;
 }
 
-ErrCode AppControlProxy::GetAppRunningControlRule(int32_t userId, std::vector<std::string>& appIds)
+ErrCode AppControlProxy::GetAppRunningControlRule(int32_t userId, std::vector<std::string>& appIds, bool &allowRunning)
 {
     return ERR_OK;
 }
