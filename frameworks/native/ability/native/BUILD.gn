@@ -2397,9 +2397,14 @@ config("share_extension_config") {
 ohos_shared_library("share_extension") {
   configs = [ ":share_extension_config" ]
 
+  include_dirs = [
+    "${ability_runtime_path}/frameworks/ets/ani/share_extension_ability/include",
+  ]
+
   sources = [
     "${ability_runtime_native_path}/ability/native/share_extension_ability/js_share_extension.cpp",
     "${ability_runtime_native_path}/ability/native/share_extension_ability/share_extension.cpp",
+    "${ability_runtime_path}/frameworks/ets/ani/share_extension_ability/src/ets_share_extension_instance.cpp",
   ]
 
   deps = [
@@ -2500,9 +2505,14 @@ config("action_extension_config") {
 ohos_shared_library("action_extension") {
   configs = [ ":action_extension_config" ]
 
+  include_dirs = [
+    "${ability_runtime_path}/frameworks/ets/ani/action_extension_ability/include",
+  ]
+
   sources = [
     "${ability_runtime_native_path}/ability/native/action_extension_ability/action_extension.cpp",
     "${ability_runtime_native_path}/ability/native/action_extension_ability/js_action_extension.cpp",
+    "${ability_runtime_path}/frameworks/ets/ani/action_extension_ability/src/ets_action_extension_instance.cpp",
   ]
 
   deps = [
