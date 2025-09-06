@@ -15288,7 +15288,7 @@ bool AbilityManagerService::HandleExecuteSAInterceptor(const Want &want, sptr<IR
 
     if (ret != ERR_OK || rule.type == RuleType::NOT_ALLOW) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sa interceptor OnCheckStarting failed");
-        result = static_cast<int32_t>(AbilityRuntime::AbilityErrorCode::ERROR_CODE_CONTROLLED);
+        result = static_cast<int32_t>(ERROR_SA_INTERCEPTOR_START_FAILED);
         return false;
     }
 
