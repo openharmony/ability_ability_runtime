@@ -675,8 +675,10 @@ HWTEST_F(AbilityManagerServiceThirdTest, GetValidUserId_001, TestSize.Level1)
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest GetValidUserId_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     MissionSnapshot missionSnapshot;
-    EXPECT_EQ(abilityMs_->GetValidUserId(100), 100);
-    EXPECT_EQ(abilityMs_->GetValidUserId(0), 0);
+    int32_t userId = 100;
+    EXPECT_EQ(abilityMs_->GetValidUserId(userId), userId);
+    int32_t invalidUserId = -1;
+    EXPECT_EQ(abilityMs_->GetValidUserId(invalidUserId), 0);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest GetValidUserId_001 end");
 }
 
