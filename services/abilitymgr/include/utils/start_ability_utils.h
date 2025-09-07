@@ -92,6 +92,7 @@ struct StartAbilityWrapParam {
     bool isForegroundToRestartApp = false;
     bool isImplicit = false;
     bool isUIAbilityOnly = false;
+    bool isAppCloneSelector = false;
     bool hideFailureTipDialog = false;
 };
 }
