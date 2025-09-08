@@ -1236,10 +1236,10 @@ void EtsUIExtensionContentSession::OnStartAbilityAsCaller(ani_env *env, ani_obje
             return;
         }
         innerErrCode = AAFwk::AbilityManagerClient::GetInstance()->
-            StartAbilityAsCaller(want, context->GetToken(), etsContentSession->sessionInfo_->callerToken);
+            StartAbilityAsCaller(want, startOptions, context->GetToken(), etsContentSession->sessionInfo_->callerToken);
     } else {
         innerErrCode = AAFwk::AbilityManagerClient::GetInstance()->
-            StartAbilityAsCaller(want, startOptions, context->GetToken(), etsContentSession->sessionInfo_->callerToken);
+            StartAbilityAsCaller(want, context->GetToken(), etsContentSession->sessionInfo_->callerToken);
     }
     ani_object aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, innerErrCode);
     AppExecFwk::AsyncCallback(env, callbackObj, aniObject, nullptr);
