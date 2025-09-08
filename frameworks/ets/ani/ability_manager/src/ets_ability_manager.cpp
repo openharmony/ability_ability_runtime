@@ -716,7 +716,7 @@ void EtsAbilityManagerRegistryInit(ani_env *env)
         ani_native_function { "nativeQueryAtomicServiceStartupRule",
             "Lapplication/Context/Context;Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsAbilityManager::QueryAtomicServiceStartupRule) },
-        ani_native_function { "nativeQueryAtomicServiceStartupRuleCheck", "Lapplication/Context/Context:V",
+        ani_native_function { "nativeQueryAtomicServiceStartupRuleCheck", "Lapplication/Context/Context;:V",
             reinterpret_cast<void *>(EtsAbilityManager::QueryAtomicServiceStartupRuleCheck) },
         ani_native_function { "nativeOn", nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeOn) },
         ani_native_function { "nativeOff", nullptr, reinterpret_cast<void *>(EtsAbilityManager::NativeOff) },
