@@ -4998,7 +4998,6 @@ void AppMgrServiceInner::TerminateApplication(const std::shared_ptr<AppRunningRe
             CHECK_POINTER_AND_RETURN_LOG(innerService, "get appMgrServiceInner fail");
             TAG_LOGI(AAFwkTag::APPMGR, "killProcessByPid %{public}d, uid: %{public}d", pid, uid);
             int32_t result = innerService->KillProcessByPid(pid, "TerminateApplication");
-            innerService->SendProcessKillEvent(appRecord, "TerminateApplication");
             innerService->SendProcessExitEvent(appRecord);
             if (result < 0) {
                 TAG_LOGE(AAFwkTag::APPMGR, "killProcessByPid kill process fail");

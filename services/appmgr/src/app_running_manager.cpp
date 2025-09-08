@@ -716,8 +716,10 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
             TAG_LOGI(AAFwkTag::APPMGR, "pname: %{public}s, pid: %{public}d", appRecord->GetProcessName().c_str(),
                 priorityObject->GetPid());
             if (appMgrServiceInner != nullptr) {
-                appMgrServiceInner->SendProcessKillEvent(appRecord, "OnRemoteDied");
                 appMgrServiceInner->KillProcessByPid(priorityObject->GetPid(), "OnRemoteDied");
+            }
+            if (appMgrServiceInner != nullptr && !appRecord->GetKillReason().empty()) {
+                appMgrServiceInner->SendProcessKillEvent(appRecord, "OnRemoteDied");
             }
             AbilityRuntime::FreezeUtil::GetInstance().DeleteAppLifecycleEvent(priorityObject->GetPid());
         }

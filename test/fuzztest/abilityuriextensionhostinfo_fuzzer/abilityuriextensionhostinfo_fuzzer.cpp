@@ -23,6 +23,7 @@
 namespace OHOS {
 using namespace OHOS::AbilityRuntime;
 
+constexpr size_t STRING_MAX_LENGTH = 128;
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     FuzzedDataProvider fdp(data, size);
@@ -31,10 +32,10 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
         return false;
     }
     Parcel parcel;
-    parcel.WriteString(fdp.ConsumeRandomLengthString());
+    parcel.WriteString(fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH));
     extensionHostInfo->ReadFromParcel(parcel);
     extensionHostInfo->Marshalling(parcel);
-    extensionHostInfo->Unmarshalling(parcel);
+    extensionHostInfo.reset(extensionHostInfo->Unmarshalling(parcel));
     return true;
 }
 }

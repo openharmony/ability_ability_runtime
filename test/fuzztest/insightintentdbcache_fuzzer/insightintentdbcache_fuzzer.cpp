@@ -47,7 +47,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     moduleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
     intentName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
-    AbilityFuzzUtil::GetRandomExtractInsightIntentProfileInfo(fdp, info);
     profileInfos.insightIntents.push_back(info);
     AbilityFuzzUtil::GetRandomExtractInsightIntentGenericInfo(fdp, genericInfo);
     AbilityFuzzUtil::GetRandomExtractInsightIntentInfo(fdp, intentInfo);
