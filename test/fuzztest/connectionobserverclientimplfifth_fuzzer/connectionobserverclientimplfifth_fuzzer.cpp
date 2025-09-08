@@ -38,12 +38,44 @@ using namespace OHOS::AbilityRuntime;
 namespace OHOS {
 namespace {
 constexpr size_t STRING_MAX_LENGTH = 128;
+class MyConnectionObserver : public ConnectionObserver {
+public:
+    MyConnectionObserver() = default;
+    virtual ~MyConnectionObserver() = default;
+    void OnExtensionConnected(const ConnectionData& data) override
+    {}
+    void OnExtensionDisconnected(const ConnectionData& data) override
+    {}
+    void OnDlpAbilityOpened(const DlpStateData& data) override
+    {}
+    void OnDlpAbilityClosed(const DlpStateData& data) override
+    {}
+    void OnServiceDied() override
+    {}
+};
+
+class ConnectionObserverClientSingleton {
+public:
+    static std::shared_ptr<ConnectionObserverClientImpl> GetInstance()
+    {
+        if (!instance) {
+            instance = std::make_shared<ConnectionObserverClientImpl>();
+        }
+        return instance;
+    }
+
+private:
+    ConnectionObserverClientSingleton() = default;
+    ~ConnectionObserverClientSingleton() = default;
+    static std::shared_ptr<ConnectionObserverClientImpl> instance;
+};
+std::shared_ptr<ConnectionObserverClientImpl> ConnectionObserverClientSingleton::instance = nullptr;
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
-    auto connectionObserverClientImpl = std::make_shared<ConnectionObserverClientImpl>();
-    std::shared_ptr<ConnectionObserver> observer;
+    auto connectionObserverClientImpl = ConnectionObserverClientSingleton::GetInstance();
+    std::shared_ptr<ConnectionObserver> observer = std::make_shared<MyConnectionObserver>();
     wptr<IRemoteObject> remote;
     FuzzedDataProvider fdp(data, size);
     connectionObserverClientImpl->RemoveObserversLocked(observer);
@@ -54,8 +86,11 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     connectionObserverClientImpl->ResetStatus();
     connectionObserverClientImpl->NotifyServiceDiedToObservers();
     connectionObserverClientImpl->GetObservers();
-    auto deathRecipient = new (std::nothrow) AbilityRuntime::ConnectionObserverClientImpl::ServiceDeathRecipient(
+    auto deathRecipient = std::make_shared<AbilityRuntime::ConnectionObserverClientImpl::ServiceDeathRecipient>(
         connectionObserverClientImpl);
+    if (!deathRecipient) {
+        return false;
+    }
     deathRecipient->OnRemoteDied(remote);
     return true;
 }
