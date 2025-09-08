@@ -16,7 +16,6 @@
 #include "ability_impl_factory.h"
 #include "data_ability_impl.h"
 #include "hilog_tag_wrapper.h"
-#include "new_ability_impl.h"
 #ifdef SUPPORT_GRAPHICS
 #include "page_ability_impl.h"
 #endif
@@ -42,11 +41,7 @@ std::shared_ptr<AbilityImpl> AbilityImplFactory::MakeAbilityImplObject(const std
     switch (info->type) {
 #ifdef SUPPORT_GRAPHICS
         case AppExecFwk::AbilityType::PAGE:
-            if (info->isStageBasedModel) {
-                abilityImpl = std::make_shared<NewAbilityImpl>();
-            } else {
-                abilityImpl = std::make_shared<PageAbilityImpl>();
-            }
+            abilityImpl = std::make_shared<PageAbilityImpl>();
             break;
 #endif
         case AppExecFwk::AbilityType::SERVICE:
