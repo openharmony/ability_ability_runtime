@@ -146,11 +146,10 @@ public:
      *
      * @param want, the want of the ability to start.
      * @param options, the startOptions of the ability to start.
-     * @param callback, the callback to get target process id.
+     * @param callbackId, the id of the callback to get target process id.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options,
-        sptr<AppExecFwk::ILoadAbilityCallback> callback) override;
+    virtual int StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options, uint64_t callbackId) override;
 
     /**
      * StartAbility with want, send want to ability manager service.

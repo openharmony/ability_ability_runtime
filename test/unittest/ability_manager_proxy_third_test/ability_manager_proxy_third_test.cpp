@@ -27,7 +27,6 @@
 #include "mission_snapshot.h"
 #include "mock_ability_connect_callback.h"
 #include "mock_ability_token.h"
-#include "mock_load_ability_callback.h"
 #include "want_sender_info.h"
 
 using namespace testing::ext;
@@ -230,8 +229,7 @@ HWTEST_F(AbilityManagerProxyTest, StartSelfUIAbilityWithPidResult_0100, TestSize
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeErrorSendRequest));
     Want want;
     StartOptions options;
-    sptr<AppExecFwk::ILoadAbilityCallback> callback = sptr<AbilityRuntime::MockLoadAbilityCallback>::MakeSptr();
-    int32_t result = proxy_->StartSelfUIAbilityWithPidResult(want, options, callback);
+    int32_t result = proxy_->StartSelfUIAbilityWithPidResult(want, options, 123456);
     EXPECT_EQ(
         static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_PID_RESULT), mock_->code_);
     EXPECT_NE(result, NO_ERROR);
@@ -239,7 +237,7 @@ HWTEST_F(AbilityManagerProxyTest, StartSelfUIAbilityWithPidResult_0100, TestSize
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
-    result = proxy_->StartSelfUIAbilityWithPidResult(want, options, callback);
+    result = proxy_->StartSelfUIAbilityWithPidResult(want, options, 123456);
     EXPECT_EQ(
         static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_PID_RESULT), mock_->code_);
     EXPECT_EQ(result, NO_ERROR);

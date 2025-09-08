@@ -6495,16 +6495,11 @@ int32_t AbilityManagerProxy::StartSelfUIAbilityWithStartOptions(const Want &want
 }
 
 int32_t AbilityManagerProxy::StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options,
-    sptr<AppExecFwk::ILoadAbilityCallback> callback)
+    uint64_t callbackId)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-
-    if (callback == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null callback");
-        return INVALID_REMOTE_PARAMETERS_ERR;
-    }
 
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write token fail");
@@ -6521,9 +6516,9 @@ int32_t AbilityManagerProxy::StartSelfUIAbilityWithPidResult(const Want &want, S
         return ERR_WRITE_START_OPTIONS;
     }
 
-    if (!data.WriteRemoteObject(callback->AsObject())) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callback fail");
-        return INVALID_REMOTE_PARAMETERS_ERR;
+    if (!data.WriteUint64(callbackId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write callbackId fail");
+        return ERR_WRITE_INT_FAILED;
     }
 
     auto error = SendRequest(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_PID_RESULT,

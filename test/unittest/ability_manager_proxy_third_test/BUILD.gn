@@ -30,7 +30,6 @@ ohos_unittest("ability_manager_proxy_third_test") {
 
   sources = [
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
-    "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit/src/mock_load_ability_callback.cpp",
     "ability_manager_proxy_third_test.cpp",
   ]
 

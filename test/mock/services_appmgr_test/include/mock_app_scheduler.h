@@ -72,6 +72,7 @@ public:
     MOCK_METHOD0(ScheduleClearPageStack, void());
     MOCK_METHOD0(IsMemorySizeSufficent, bool());
     MOCK_METHOD0(ScheduleCacheProcess, void());
+    MOCK_METHOD2(OnLoadAbilityFinished, void(uint64_t, int32_t));
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

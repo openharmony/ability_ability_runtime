@@ -27,7 +27,8 @@ bool ProcessOptions::ReadFromParcel(Parcel &parcel)
     isRestartKeepAlive = parcel.ReadBool();
     isStartFromNDK = parcel.ReadBool();
     isPreloadStart = parcel.ReadBool();
-    shouldReturnPid = parcel.ReadBool();
+    loadAbilityCallbackId = parcel.ReadUint64();
+    callingPid = parcel.ReadInt32();
     return true;
 }
 
@@ -72,8 +73,12 @@ bool ProcessOptions::Marshalling(Parcel &parcel) const
         TAG_LOGE(AAFwkTag::ABILITYMGR, "isPreloadStart write failed");
         return false;
     }
-    if (!parcel.WriteBool(shouldReturnPid)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "shouldReturnPid write failed");
+    if (!parcel.WriteUint64(loadAbilityCallbackId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "loadAbilityCallbackId write failed");
+        return false;
+    }
+    if (!parcel.WriteInt32(callingPid)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callingPid write failed");
         return false;
     }
     return true;

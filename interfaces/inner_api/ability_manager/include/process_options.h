@@ -58,10 +58,11 @@ public:
     bool isRestartKeepAlive = false;
     bool isStartFromNDK = false;
     bool isPreloadStart = false;
-    bool shouldReturnPid = false;
     ProcessMode processMode = ProcessMode::UNSPECIFIED;
     StartupVisibility startupVisibility = StartupVisibility::UNSPECIFIED;
     std::string processName;
+    uint64_t loadAbilityCallbackId = 0;
+    pid_t callingPid = -1;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

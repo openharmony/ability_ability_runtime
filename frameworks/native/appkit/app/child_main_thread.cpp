@@ -24,6 +24,7 @@
 #endif // SUPPORT_CHILD_PROCESS
 #include "constants.h"
 #include "hilog_tag_wrapper.h"
+#include "load_ability_callback_manager.h"
 #include "js_runtime.h"
 #include "native_lib_util.h"
 #include "sys_mgr_client.h"
@@ -443,6 +444,11 @@ void ChildMainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspLi
             hspInfo.moduleName.c_str(), hspInfo.nativeLibraryPath.c_str());
         GetHspNativeLibPath(hspInfo, appLibPaths, hspInfo.hapPath.find(ABS_CODE_PATH) != 0u);
     }
+}
+
+void ChildMainThread::OnLoadAbilityFinished(uint64_t callbackId, int32_t pid)
+{
+    LoadAbilityCallbackManager::GetInstance().OnLoadAbilityFinished(callbackId, pid);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

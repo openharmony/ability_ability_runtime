@@ -117,5 +117,34 @@ bool ChildSchedulerProxy::ScheduleRunNativeProc(const sptr<IRemoteObject> &mainP
     return true;
 }
 
+void ChildSchedulerProxy::OnLoadAbilityFinished(uint64_t callbackId, int32_t pid)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return;
+    }
+    if (!data.WriteUint64(callbackId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write callbackId failed.");
+        return;
+    }
+    if (!data.WriteInt32(pid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write pid failed.");
+        return;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Remote() is null.");
+        return;
+    }
+    int32_t ret = remote->SendRequest(
+        static_cast<uint32_t>(IChildScheduler::Message::ON_LOAD_ABILITY_FINISHED), data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d.", ret);
+    }
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -144,6 +144,9 @@ public:
 
     void ScheduleClearPageStack() override
     {}
+
+    void OnLoadAbilityFinished(uint64_t callbackId, int32_t pid) override
+    {}
 };
 class AppMgrServiceModuleTest : public testing::Test {
 public:

@@ -14,6 +14,7 @@
  */
 
 #include <atomic>
+#include <chrono>
 #include <memory>
 #include <mutex>
 #include <unistd.h>
@@ -29,6 +30,7 @@
 #include "ffrt.h"
 #include "hilog_tag_wrapper.h"
 #include "load_ability_callback_impl.h"
+#include "load_ability_callback_manager.h"
 #include "start_options_impl.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
@@ -37,6 +39,7 @@
 
 using namespace OHOS::AbilityRuntime;
 using namespace OHOS::AAFwk;
+using namespace OHOS::AppExecFwk;
 using namespace OHOS;
 
 namespace {
@@ -104,6 +107,12 @@ AbilityRuntime_ErrorCode CheckAppMainThread()
         return ABILITY_RUNTIME_ERROR_CODE_MAIN_THREAD_NOT_SUPPORTED;
     }
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+}
+
+uint64_t GenerateCallbackId()
+{
+    return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::high_resolution_clock::now().time_since_epoch()).count());
 }
 }
 
@@ -451,10 +460,9 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetVersionCode(int6
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
 
-AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(AbilityBase_Want *want,
+AbilityRuntime_ErrorCode StartSelfUIAbilityWithPidResultPrecheck(AbilityBase_Want *want,
     AbilityRuntime_StartOptions *options, int32_t *targetPid)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "StartSelfUIAbilityWithPidResult called");
     auto ret = CheckAppMainThread();
     if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AAFwkTag::APPKIT, "CheckAppMainThread failed, ret=%{public}d", ret);
@@ -468,6 +476,16 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(Abili
     if (options == nullptr || targetPid == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null options or targetPid");
         return ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID;
+    }
+    return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
+}
+
+AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(AbilityBase_Want *want,
+    AbilityRuntime_StartOptions *options, int32_t *targetPid)
+{
+    auto ret = StartSelfUIAbilityWithPidResultPrecheck(want, options, targetPid);
+    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
+        return ret;
     }
     Want abilityWant;
     AbilityBase_ErrorCode errCode = CWantManager::TransformToWant(*want, false, abilityWant);
@@ -484,20 +502,30 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(Abili
         callbackDoneCv.notify_all();
     };
     sptr<LoadAbilityCallbackImpl> callback = sptr<LoadAbilityCallbackImpl>::MakeSptr(std::move(task));
-    auto result = AbilityManagerClient::GetInstance()->StartSelfUIAbilityWithPidResult(
-        abilityWant, startOptions, callback);
+    uint64_t callbackId = GenerateCallbackId();
+    auto result = LoadAbilityCallbackManager::GetInstance().AddLoadAbilityCallback(callbackId, callback);
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "add callback error:%{public}d", result);
+        return ABILITY_RUNTIME_ERROR_CODE_INTERNAL;
+    }
+    result = AbilityManagerClient::GetInstance()->StartSelfUIAbilityWithPidResult(
+        abilityWant, startOptions, callbackId);
     if (result != ERR_OK) {
         callback->Cancel();
+        LoadAbilityCallbackManager::GetInstance().RemoveCallback(callback);
         return ConvertToAPI21BusinessErrorCode(result);
     }
-    auto condition = [&done] {
-        return done.load();
-    };
     ffrt::mutex callbackDoneMutex;
     std::unique_lock<ffrt::mutex> lock(callbackDoneMutex);
-    if (!callbackDoneCv.wait_for(lock, std::chrono::milliseconds(ATTACH_ABILITY_THREAD_TIMEOUT_TIME), condition) ||
-        *targetPid < 0) {
+    if (!callbackDoneCv.wait_for(lock, std::chrono::milliseconds(ATTACH_ABILITY_THREAD_TIMEOUT_TIME),
+        [&done] { return done.load(); })) {
+        TAG_LOGE(AAFwkTag::APPKIT, "wait for loadability callback timeout");
         callback->Cancel();
+        LoadAbilityCallbackManager::GetInstance().RemoveCallback(callback);
+        return ABILITY_RUNTIME_ERROR_CODE_START_TIMEOUT;
+    }
+    if (*targetPid < 0) {
+        TAG_LOGE(AAFwkTag::APPKIT, "loadability failed");
         return ABILITY_RUNTIME_ERROR_CODE_START_TIMEOUT;
     }
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;

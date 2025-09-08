@@ -44,6 +44,7 @@ public:
 private:
     void CreateMemberFuncMap();
     int32_t HandleLoadAbility(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleNotifyLoadAbilityFinished(MessageParcel &data, MessageParcel &reply);
     int32_t HandleTerminateAbility(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateAbilityState(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateExtensionState(MessageParcel &data, MessageParcel &reply);

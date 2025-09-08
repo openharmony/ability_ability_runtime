@@ -45,6 +45,7 @@ public:
     bool ScheduleLoadChild() override;
     bool ScheduleExitProcessSafely() override;
     bool ScheduleRunNativeProc(const sptr<IRemoteObject> &mainProcessCb) override;
+    void OnLoadAbilityFinished(uint64_t callbackId, int32_t pid) override;
 
 private:
     static int32_t GetChildProcessInfo(ChildProcessInfo &info);

@@ -54,6 +54,8 @@ struct LoadParam : public Parcelable {
     uint32_t extensionProcessMode = 0;
     ExtensionLoadParam extensionLoadParam;
     bool isStartupHide = false;
+    pid_t callingPid = -1;
+    uint64_t loadAbilityCallbackId = 0;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

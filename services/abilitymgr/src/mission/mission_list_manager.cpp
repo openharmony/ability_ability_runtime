@@ -4138,7 +4138,9 @@ int MissionListManager::DoAbilityForeground(std::shared_ptr<AbilityRecord> &abil
         TAG_LOGD(AAFwkTag::ABILITYMGR, "pending state is not FOREGROUND.");
         abilityRecord->SetPendingState(AbilityState::FOREGROUND);
     }
-    abilityRecord->ProcessForegroundAbility(0, flag);
+    ForegroundOptions options;
+    options.sceneFlag = flag;
+    abilityRecord->ProcessForegroundAbility(0, options);
     return ERR_OK;
 }
 

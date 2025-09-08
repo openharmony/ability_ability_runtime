@@ -368,7 +368,7 @@ HWTEST_F(AbilityManagerClientTest, StartSelfUIAbilityWithPidResult_0100, TestSiz
     TAG_LOGI(AAFwkTag::TEST, "StartSelfUIAbilityWithPidResult_0100 start");
     AAFwk::Want want;
     AAFwk::StartOptions options;
-    auto result = AbilityManagerClient::GetInstance()->StartSelfUIAbilityWithPidResult(want, options, nullptr);
+    auto result = AbilityManagerClient::GetInstance()->StartSelfUIAbilityWithPidResult(want, options, 12345);
     sptr<IRemoteObject> token_(new IPCObjectStub());
     AbilityManagerClient::GetInstance()->SubmitSaveRecoveryInfo(token_);
     EXPECT_EQ(result, ERR_OK);
