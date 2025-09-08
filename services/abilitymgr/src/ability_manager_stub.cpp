@@ -4631,8 +4631,8 @@ int32_t AbilityManagerStub::StartSelfUIAbilityWithPidResultInner(MessageParcel &
         TAG_LOGE(AAFwkTag::ABILITYMGR, "startOptions null");
         return ERR_READ_START_OPTIONS;
     }
-    auto callback = iface_cast<AppExecFwk::ILoadAbilityCallback>(data.ReadRemoteObject());
-    int32_t result = StartSelfUIAbilityWithPidResult(*want, *options, callback);
+    auto callbackId = data.ReadUint64();
+    int32_t result = StartSelfUIAbilityWithPidResult(*want, *options, callbackId);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write StartSelfUIAbilityWithPidResult result fail");
         return ERR_WRITE_START_SELF_UI_ABILITY_RESULT;

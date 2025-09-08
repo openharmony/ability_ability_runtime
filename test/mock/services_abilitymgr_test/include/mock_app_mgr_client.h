@@ -30,7 +30,7 @@ public:
     virtual ~MockAppMgrClient() {};
 
     virtual AppMgrResultCode LoadAbility(const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo,
-        const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam, sptr<AppExecFwk::ILoadAbilityCallback> callback)
+        const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam)
     {
         TAG_LOGI(AAFwkTag::TEST, "MockAppMgrClient LoadAbility enter.");
         token_ = loadParam.token;

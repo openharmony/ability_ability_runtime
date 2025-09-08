@@ -307,7 +307,7 @@ void AbilityRecord::LoadUIAbility()
     g_addLifecycleEventTask(token_, methodName);
 }
 
-int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, sptr<AppExecFwk::ILoadAbilityCallback> callback)
+int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, pid_t callingPid, uint64_t callbackId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "LoadLifecycle: abilityName:%{public}s", abilityInfo_.name.c_str());
@@ -378,9 +378,7 @@ void AbilityRecord::ForegroundUIExtensionAbility(uint32_t sceneFlag)
 {
 }
 
-void AbilityRecord::ProcessForegroundAbility(
-    uint32_t tokenId, uint32_t sceneFlag, bool isShellCall, bool isStartupHide,
-    sptr<AppExecFwk::ILoadAbilityCallback> callback)
+void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, const ForegroundOptions &options)
 {
 }
 

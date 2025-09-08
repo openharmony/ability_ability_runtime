@@ -320,6 +320,13 @@ public:
      */
     virtual void SetWatchdogBackgroundStatus(bool status) override;
 
+    /**
+     * Call the callback to send the pid of the started ability.
+     * @param callbackId The id of the callback to send the pid.
+     * @param pid The resultant process id of the started ability.
+     */
+    virtual void OnLoadAbilityFinished(uint64_t callbackId, int32_t pid) override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     void ScheduleMemoryCommon(const int32_t level, const uint32_t operation);

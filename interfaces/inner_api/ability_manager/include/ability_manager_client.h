@@ -30,12 +30,8 @@
 #include "want.h"
 #include "intent_exemption_info.h"
 #include "ihidden_start_observer.h"
-#include "iload_ability_callback.h"
 
 namespace OHOS {
-namespace AppExecFwk {
-class ILoadAbilityCallback;
-}
 namespace AAFwk {
 class Snapshot;
 class ISnapshotHandler;
@@ -72,11 +68,10 @@ public:
      *
      * @param want, the want of the ability to start.
      * @param options, the startOptions of the ability to start.
-     * @param callback, the callback to get target process id.
+     * @param callbackId, the id of the callback to get target process id.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options,
-        sptr<AppExecFwk::ILoadAbilityCallback> callback);
+    ErrCode StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options, uint64_t callbackId);
 
     /**
      * AttachAbilityThread, ability call this interface after loaded.

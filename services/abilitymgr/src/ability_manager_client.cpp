@@ -20,7 +20,6 @@
 #endif // WITH_DLP
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "iload_ability_callback.h"
 #include "iservice_registry.h"
 #ifdef SUPPORT_SCREEN
 #include "scene_board_judgement.h"
@@ -2209,12 +2208,12 @@ ErrCode AbilityManagerClient::StartSelfUIAbilityWithStartOptions(const Want &wan
 }
 
 ErrCode AbilityManagerClient::StartSelfUIAbilityWithPidResult(const Want &want,
-    StartOptions &options, sptr<AppExecFwk::ILoadAbilityCallback> callback)
+    StartOptions &options, uint64_t callbackId)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call StartSelfUIAbilityWithPidResult");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->StartSelfUIAbilityWithPidResult(want, options, callback);
+    return abms->StartSelfUIAbilityWithPidResult(want, options, callbackId);
 }
 
 void AbilityManagerClient::PrepareTerminateAbilityDone(sptr<IRemoteObject> token, bool isTerminate)

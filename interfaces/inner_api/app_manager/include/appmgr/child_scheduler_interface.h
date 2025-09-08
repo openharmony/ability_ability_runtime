@@ -40,10 +40,18 @@ public:
      */
     virtual bool ScheduleRunNativeProc(const sptr<IRemoteObject> &mainProcessCb) = 0;
 
+    /**
+     * Call the callback to send the pid of the started ability.
+     * @param callbackId The id of the callback to send the pid.
+     * @param pid The resultant process id of the started ability.
+     */
+    virtual void OnLoadAbilityFinished(uint64_t callbackId, int32_t pid) = 0;
+
     enum class Message {
         SCHEDULE_LOAD_JS = 0,
         SCHEDULE_EXIT_PROCESS_SAFELY = 1,
         SCHEDULE_RUN_NATIVE_PROC = 2,
+        ON_LOAD_ABILITY_FINISHED = 3,
     };
 };
 }  // namespace AppExecFwk

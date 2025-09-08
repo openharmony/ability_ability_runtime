@@ -114,7 +114,7 @@ HWTEST_F(AmsMgrSchedulerTest, AmsMgrScheduler_001, TestSize.Level1)
     std::shared_ptr<ApplicationInfo> applicationInfo = std::make_shared<ApplicationInfo>();
     applicationInfo->name = GetTestAppName();
 
-    EXPECT_CALL(*mockAppMgrServiceInner, LoadAbility(_, _, _, _, _))
+    EXPECT_CALL(*mockAppMgrServiceInner, LoadAbility(_, _, _, _))
         .WillOnce(InvokeWithoutArgs(mockAppMgrServiceInner.get(), &MockAppMgrServiceInner::Post));
     AbilityRuntime::LoadParam loadParam;
     loadParam.token = new MockAbilityToken();
@@ -150,7 +150,7 @@ HWTEST_F(AmsMgrSchedulerTest, AmsMgrScheduler_002, TestSize.Level1)
     applicationInfo->name = GetTestAppName();
 
     // check token parameter
-    EXPECT_CALL(*mockAppMgrServiceInner, LoadAbility(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(*mockAppMgrServiceInner, LoadAbility(_, _, _, _)).Times(0);
     AbilityRuntime::LoadParam loadParam;
     loadParam.token = new MockAbilityToken();
     loadParam.preToken = new MockAbilityToken();
@@ -158,7 +158,7 @@ HWTEST_F(AmsMgrSchedulerTest, AmsMgrScheduler_002, TestSize.Level1)
     amsMgrScheduler->LoadAbility(nullptr, applicationInfo, nullptr, loadParamPtr);
 
     // check pretoken parameter
-    EXPECT_CALL(*mockAppMgrServiceInner, LoadAbility(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(*mockAppMgrServiceInner, LoadAbility(_, _, _, _)).Times(0);
     amsMgrScheduler->LoadAbility(abilityInfo, nullptr, nullptr, loadParamPtr);
 
     TAG_LOGD(AAFwkTag::TEST, "AmsMgrScheduler_002 end.");

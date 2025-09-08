@@ -223,6 +223,9 @@ public:
     void ScheduleClearPageStack() override
     {}
 
+    void OnLoadAbilityFinished(uint64_t callbackId, int32_t pid) override
+    {}
+
 private:
     int abilityLaunchTime = 0;
     int appLaunchTime = 0;

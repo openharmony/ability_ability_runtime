@@ -160,7 +160,7 @@ AppMgrClient::~AppMgrClient()
 {}
 
 AppMgrResultCode AppMgrClient::LoadAbility(const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo,
-    const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam, sptr<ILoadAbilityCallback> callback)
+    const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
@@ -171,11 +171,22 @@ AppMgrResultCode AppMgrClient::LoadAbility(const AbilityInfo &abilityInfo, const
             std::shared_ptr<ApplicationInfo> appInfoPtr = std::make_shared<ApplicationInfo>(appInfo);
             std::shared_ptr<AAFwk::Want> wantPtr = std::make_shared<AAFwk::Want>(want);
             auto loadParamPtr = std::make_shared<AbilityRuntime::LoadParam>(loadParam);
-            amsService->LoadAbility(abilityInfoPtr, appInfoPtr, wantPtr, loadParamPtr, callback);
+            amsService->LoadAbility(abilityInfoPtr, appInfoPtr, wantPtr, loadParamPtr);
             return AppMgrResultCode::RESULT_OK;
         }
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
+void AppMgrClient::NotifyLoadAbilityFinished(pid_t callingPid, pid_t targetPid, uint64_t callbackId)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        sptr<IAmsMgr> amsService = service->GetAmsMgr();
+        if (amsService != nullptr) {
+            amsService->NotifyLoadAbilityFinished(callingPid, targetPid, callbackId);
+        }
+    }
 }
 
 AppMgrResultCode AppMgrClient::TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag)
