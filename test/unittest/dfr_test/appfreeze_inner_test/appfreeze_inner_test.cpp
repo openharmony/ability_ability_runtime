@@ -156,10 +156,12 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner__AppfreezeHandle_001, TestSize.Level
     appfreezeInner->SetApplicationInfo(applicationInfo);
     int ret = appfreezeInner->AppfreezeHandle(faultData, onlyMainThread);
     EXPECT_EQ(ret, 0);
+    appfreezeInner->ReportAppfreezeTask(faultData, onlyMainThread);
     ret = appfreezeInner->AcquireStack(faultData, onlyMainThread);
     EXPECT_EQ(ret, 0);
     appfreezeInner->SetAppDebug(true);
     ret = appfreezeInner->AppfreezeHandle(faultData, onlyMainThread);
+    appfreezeInner->ReportAppfreezeTask(faultData, onlyMainThread);
     EXPECT_EQ(ret, -1);
     GTEST_LOG_(INFO) << "AppfreezeInner__AppfreezeHandle_001 end";
 }
