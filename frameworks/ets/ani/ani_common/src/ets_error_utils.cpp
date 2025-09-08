@@ -25,8 +25,8 @@ constexpr const char *ERR_MSG_TOO_FEW_PARAM = "Parameter error. Too few paramete
 constexpr const char *ERR_MSG_NOT_MAINTHREAD = "Caller error. Caller from non-main thread.";
 constexpr const char *ERR_MSG_INVALID_NUM_PARAMS = "Parameter error. The number of parameters is invalid.";
 constexpr const char *NOT_SYSTEM_APP = "The application is not system-app, can not use system-api.";
-constexpr const char *BUSINESS_ERROR_CLASS = "L@ohos/base/BusinessError;";
-constexpr const char *ERROR_CLASS_NAME = "Lescompat/Error;";
+constexpr const char *BUSINESS_ERROR_CLASS = "@ohos.base.BusinessError";
+constexpr const char *ERROR_CLASS_NAME = "escompat.Error";
 constexpr const char* ERROR_MSG_TRANSFER_CLASS_NOT_FOUND = "Unable to find the class for transferring.";
 constexpr int32_t ERROR_CODE_TRANSFER_CLASS_NOT_FOUND = 10200067;
 } // namespace
@@ -210,7 +210,7 @@ ani_object EtsErrorUtil::WrapError(ani_env *env, const std::string &msg)
         return nullptr;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &method)) !=
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
         ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod failed %{public}d", status);
         return nullptr;
@@ -236,7 +236,7 @@ ani_object EtsErrorUtil::CreateError(ani_env *env, ani_int code, const std::stri
         return nullptr;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "ILescompat/Error;:V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "iC{escompat.Error}:", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod failed %{public}d", status);
         return nullptr;
     }

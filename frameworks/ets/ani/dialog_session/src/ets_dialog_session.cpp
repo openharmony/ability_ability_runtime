@@ -28,7 +28,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char* ETS_DIALOG_SESSION_NAMESPACE = "L@ohos/app/ability/dialogSession/dialogSession;";
+constexpr const char* ETS_DIALOG_SESSION_NAMESPACE = "@ohos.app.ability.dialogSession.dialogSession";
 }
 
 static void SendDialogResult(

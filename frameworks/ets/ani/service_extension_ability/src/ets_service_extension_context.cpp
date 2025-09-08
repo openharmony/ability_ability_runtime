@@ -31,16 +31,16 @@ uint32_t g_serialNumber = 0;
 static std::mutex g_connectsMutex;
 static std::map<EtsConnectionKey, sptr<ETSServiceExtensionConnection>, EtsKeyCompare> g_connects;
 constexpr const char *SERVICE_EXTENSION_CONTEXT_CLASS_NAME =
-    "Lapplication/ServiceExtensionContext/ServiceExtensionContext;";
+    "application.ServiceExtensionContext.ServiceExtensionContext";
 constexpr const char *CLEANER_CLASS_NAME =
-    "Lapplication/ServiceExtensionContext/Cleaner;";
+    "application.ServiceExtensionContext.Cleaner";
 constexpr const int ANI_ALREADY_BINDED = 8;
 constexpr const int FAILED_CODE = -1;
 constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
-    "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
-constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
-constexpr const char* SIGNATURE_OPEN_ATOMIC_SERVICE = "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;"
-    "L@ohos/app/ability/AtomicServiceOptions/AtomicServiceOptions;:V";
+    "C{@ohos.app.ability.Want.Want}C{ability.connectOptions.ConnectOptions}:l";
+constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "lC{utils.AbilityUtils.AsyncCallbackWrapper}:";
+constexpr const char* SIGNATURE_OPEN_ATOMIC_SERVICE = "C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}"
+    "C{@ohos.app.ability.AtomicServiceOptions.AtomicServiceOptions}:";
 const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 constexpr int32_t ARGC_ONE = 1;
 constexpr int32_t ARGC_TWO = 2;
@@ -50,19 +50,19 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
     ani_status status = ANI_ERROR;
     std::array functions = {
-        ani_native_function { "nativeTerminateSelf", "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+        ani_native_function { "nativeTerminateSelf", "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsServiceExtensionContext::TerminateSelf) },
         ani_native_function { "nativeStartAbility",
-            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsServiceExtensionContext::StartAbility) },
-        ani_native_function { "nativeStartAbility", "L@ohos/app/ability/Want/Want;"
-            "L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+        ani_native_function { "nativeStartAbility", "C{@ohos.app.ability.Want.Want}"
+            "C{@ohos.app.ability.StartOptions.StartOptions}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsServiceExtensionContext::StartAbilityWithOption) },
         ani_native_function { "nativeStartServiceExtensionAbility",
-            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsServiceExtensionContext::StartServiceExtensionAbility) },
         ani_native_function { "nativeStopServiceExtensionAbility",
-            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsServiceExtensionContext::StopServiceExtensionAbility) },
         ani_native_function { "nativeConnectServiceExtensionAbility", SIGNATURE_CONNECT_SERVICE_EXTENSION,
             reinterpret_cast<void *>(EtsServiceExtensionContext::ConnectServiceExtensionAbility) },
@@ -628,7 +628,7 @@ ani_object CreateEtsServiceExtensionContext(ani_env *env, std::shared_ptr<Servic
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to BindNativeMethods");
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to find constructor, status : %{public}d", status);
         return nullptr;
     }

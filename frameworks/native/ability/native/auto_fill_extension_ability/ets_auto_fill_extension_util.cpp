@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
-constexpr const char* CUSTOM_DATA_INNER_CLASS_NAME = "Lapplication/CustomData/CustomDataInner;";
+constexpr const char* CUSTOM_DATA_INNER_CLASS_NAME = "application.CustomData.CustomDataInner";
 
 ani_object EtsAutoFillExtensionUtil::WrapCustomData(ani_env *env, const CustomData &customdata)
 {
@@ -46,7 +46,7 @@ ani_object EtsAutoFillExtensionUtil::WrapCustomData(ani_env *env, const CustomDa
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null cls");
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) != ANI_OK || ctor == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) != ANI_OK || ctor == nullptr) {
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Class_FindMethod status: %{public}d or null ctor", status);
         return nullptr;
     }

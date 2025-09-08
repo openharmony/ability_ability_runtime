@@ -22,10 +22,10 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-constexpr const char* CLASSNAME_DOUBLE = "Lstd/core/Double;";
-constexpr const char* CLASSNAME_BOOL = "Lstd/core/Boolean;";
-constexpr const char* CLASSNAME_STRING = "Lstd/core/String;";
-constexpr const char* CLASSNAME_ARRAY = "Lescompat/Array;";
+constexpr const char* CLASSNAME_DOUBLE = "std.core.Double";
+constexpr const char* CLASSNAME_BOOL = "std.core.Boolean";
+constexpr const char* CLASSNAME_STRING = "std.core.String";
+constexpr const char* CLASSNAME_ARRAY = "escompat.Array";
 }
 
 bool IsInstanceOf(ani_env* env, const char* name, ani_object aniValue)

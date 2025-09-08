@@ -45,16 +45,16 @@ constexpr static char WANT_PARAMS_AUTO_FILL_EVENT_KEY[] = "ability.want.params.A
 constexpr const char *WANT_PARAMS_CUSTOM_DATA = "ohos.ability.params.customData";
 constexpr const char *WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY = "ohos.ability.params.popupWindow";
 constexpr const char *AUTO_FILL_EXTENSION_CLASS_NAME =
-    "L@ohos/app/ability/AutoFillExtensionAbility/AutoFillExtensionAbility;";
-constexpr const char *ON_REQUEST_METHOD_NAME = "L@ohos/app/ability/Want/Want;I:V";
+    "@ohos.app.ability.AutoFillExtensionAbility.AutoFillExtensionAbility";
+constexpr const char *ON_REQUEST_METHOD_NAME = "C{@ohos.app.ability.Want.Want}i:";
 constexpr const char *ON_SESSION_DESTROY_METHOD_NAME =
-    "L@ohos/app/ability/UIExtensionContentSession/UIExtensionContentSession;:V";
+    "C{@ohos.app.ability.UIExtensionContentSession.UIExtensionContentSession}:";
 constexpr const char *ON_SAVE_REQUEST_METHOD_NAME =
-    "L@ohos/app/ability/UIExtensionContentSession/UIExtensionContentSession;"
-    "Lapplication/AutoFillRequest/SaveRequest;Lapplication/AutoFillRequest/SaveRequestCallback;:V";
+    "C{@ohos.app.ability.UIExtensionContentSession.UIExtensionContentSession}"
+    "C{application.AutoFillRequest.SaveRequest;Lapplication.AutoFillRequest.SaveRequestCallback}:";
 constexpr const char *ON_FILL_REQUEST_METHOD_NAME =
-    "L@ohos/app/ability/UIExtensionContentSession/UIExtensionContentSession;"
-    "Lapplication/AutoFillRequest/FillRequest;Lapplication/AutoFillRequest/FillRequestCallback;:V";
+    "C{@ohos.app.ability.UIExtensionContentSession.UIExtensionContentSession}"
+    "C{application.AutoFillRequest.FillRequest}C{application.AutoFillRequest.FillRequestCallback}:";
 }
 
 EtsAutoFillExtension *EtsAutoFillExtension::Create(const std::unique_ptr<Runtime> &runtime)
@@ -126,7 +126,7 @@ bool EtsAutoFillExtension::BindNativeMethods()
         return false;
     }
     std::array functions = {
-        ani_native_function { "nativeOnDestroyCallback", ":V",
+        ani_native_function { "nativeOnDestroyCallback", ":",
             reinterpret_cast<void*>(EtsAutoFillExtension::OnDestroyCallback) },
     };
     ani_class cls = nullptr;
@@ -201,13 +201,13 @@ void EtsAutoFillExtension::BindContext()
 void EtsAutoFillExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     Extension::OnStart(want);
-    CallObjectMethod(false, "onCreate", ":V");
+    CallObjectMethod(false, "onCreate", ":");
 }
 
 void EtsAutoFillExtension::OnStop()
 {
     AutoFillExtension::OnStop();
-    CallObjectMethod(false, "onDestroy", ":V");
+    CallObjectMethod(false, "onDestroy", ":");
     OnStopCallBack();
 }
 
@@ -241,7 +241,7 @@ void EtsAutoFillExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Object_SetFieldByName_Long failed, status: %{public}d", status);
         return;
     }
-    isAsyncCallback = CallObjectMethod(true, "callOnDestroy", ":Z");
+    isAsyncCallback = CallObjectMethod(true, "callOnDestroy", ":z");
     if (!isAsyncCallback) {
         OnStopCallBack();
     }
@@ -336,12 +336,12 @@ void EtsAutoFillExtension::OnForeground(const Want &want, sptr<AAFwk::SessionInf
 {
     Extension::OnForeground(want, sessionInfo);
     ForegroundWindow(want, sessionInfo);
-    CallObjectMethod(false, "onForeground", ":V");
+    CallObjectMethod(false, "onForeground", ":");
 }
 
 void EtsAutoFillExtension::OnBackground()
 {
-    CallObjectMethod(false, "onBackground", ":V");
+    CallObjectMethod(false, "onBackground", ":");
     Extension::OnBackground();
 }
 
@@ -357,7 +357,7 @@ void EtsAutoFillExtension::UpdateRequest(const AAFwk::WantParams &wantParams)
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null request");
         return;
     }
-    CallObjectMethod(false, "onUpdateRequest", ":V", request);
+    CallObjectMethod(false, "onUpdateRequest", ":", request);
 }
 
 int32_t EtsAutoFillExtension::OnReloadInModal(const sptr<AAFwk::SessionInfo> &sessionInfo,

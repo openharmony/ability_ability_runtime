@@ -44,22 +44,22 @@ namespace AbilityRuntime {
 namespace {
 constexpr int32_t ERR_FAILURE = -1;
 const char* UI_EXTENSION_CONTENT_SESSION_CLASS_NAME =
-    "L@ohos/app/ability/UIExtensionContentSession/UIExtensionContentSession;";
+    "@ohos.app.ability.UIExtensionContentSession.UIExtensionContentSession";
 const char* UI_EXTENSION_CONTENT_SESSION_CLEANER_CLASS_NAME =
-    "L@ohos/app/ability/UIExtensionContentSession/Cleaner;";
+    "@ohos.app.ability.UIExtensionContentSession.Cleaner";
 const std::string UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
 const std::string FLAG_AUTH_READ_URI_PERMISSION = "ability.want.params.uriPermissionFlag";
 constexpr const char *SIGNATURE_START_ABILITY_BY_TYPE =
-    "Lstd/core/String;Lescompat/Record;Lapplication/AbilityStartCallback/AbilityStartCallback;:L@ohos/base/"
-    "BusinessError;";
+    "C{std.core.String}C{escompat.Record}C{application.AbilityStartCallback.AbilityStartCallback}:C{@ohos.base."
+    "BusinessError}";
 constexpr const char *SIGNATURE_GET_UI_EXTENSION_HOST_WINDOW_PROXY =
-    ":L@ohos/uiExtensionHost/uiExtensionHost/UIExtensionHostWindowProxy;";
+    ":C{@ohos.uiExtensionHost.uiExtensionHost.UIExtensionHostWindowProxy}";
 constexpr const char *SIGNATURE_GET_UI_EXTENSION_WINDOW_PROXY =
-    ":L@ohos/arkui/uiExtension/uiExtension/WindowProxy;";
-constexpr const char *SIGNATURE_SET_WINDOW_PRIVACY_MODE = "ZLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    ":C{@ohos.arkui.uiExtension.uiExtension.WindowProxy}";
+constexpr const char *SIGNATURE_SET_WINDOW_PRIVACY_MODE = "zC{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char* PERMISSION_PRIVACY_WINDOW = "ohos.permission.PRIVACY_WINDOW";
-constexpr const char *SIGNATURE_START_ABILITY_AS_CALLER = "L@ohos/app/ability/Want/Want;"
-    "Lutils/AbilityUtils/AsyncCallbackWrapper;L@ohos/app/ability/StartOptions/StartOptions;:V";
+constexpr const char *SIGNATURE_START_ABILITY_AS_CALLER = "C{@ohos.app.ability.Want.Want}"
+    "C{utils.AbilityUtils.AsyncCallbackWrapper}C{@ohos.app.ability.StartOptions.StartOptions}:";
 } // namespace
 
 void EtsAbilityResultListeners::AddListener(const uint64_t &uiExtensionComponentId,
@@ -387,21 +387,21 @@ ani_status EtsUIExtensionContentSession::BindNativeMethod(ani_env *env, ani_clas
         ani_native_function {"nativeSetWindowPrivacyMode", SIGNATURE_SET_WINDOW_PRIVACY_MODE,
             reinterpret_cast<void *>(EtsUIExtensionContentSession::NativeSetWindowPrivacyMode)},
         ani_native_function {"loadContentByName",
-            "Lstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
+            "C{std.core.String}C{arkui.stateManagement.storage.localStorage.LocalStorage}:",
             reinterpret_cast<void *>(EtsUIExtensionContentSession::NativeLoadContentByName)},
         ani_native_function { "nativeStartAbilitySync",
-            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void*>(EtsUIExtensionContentSession::NativeStartAbility) },
         ani_native_function { "nativeStartAbilitySync",
-            "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/"
-            "AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}C{@ohos.app.ability.StartOptions.StartOptions}C{utils.AbilityUtils."
+            "AsyncCallbackWrapper}:",
             reinterpret_cast<void*>(EtsUIExtensionContentSession::NativeStartAbilityWithStartOptions) },
         ani_native_function { "nativeStartAbilityForResult",
-            "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void*>(EtsUIExtensionContentSession::NativeStartAbilityForResult) },
         ani_native_function { "nativeStartAbilityForResult",
-            "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/"
-            "AsyncCallbackWrapper;:V",
+            "C{@ohos.app.ability.Want.Want}C{@ohos.app.ability.StartOptions.StartOptions}C{utils.AbilityUtils."
+            "AsyncCallbackWrapper}:",
             reinterpret_cast<void*>(EtsUIExtensionContentSession::NativeStartAbilityForResultWithStartOptions) },
         ani_native_function {"nativeStartAbilityAsCaller", SIGNATURE_START_ABILITY_AS_CALLER,
             reinterpret_cast<void *>(EtsUIExtensionContentSession::NativeStartAbilityAsCaller)}
@@ -431,7 +431,7 @@ ani_object EtsUIExtensionContentSession::CreateEtsUIExtensionContentSession(ani_
         return nullptr;
     }
     ani_long nativeContextSession = reinterpret_cast<ani_long>(contentSessionPtr.get());
-    status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method);
+    status = env->Class_FindMethod(cls, "<ctor>", "l:", &method);
     if (status != ANI_OK) {
         return nullptr;
     }
