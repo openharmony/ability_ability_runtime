@@ -166,13 +166,13 @@ void AppfreezeInner::AppfreezeHandleOverReportCount(bool isSixSecondEvent)
                 " ret:%{public}d", pid, ret);
         }
         faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
-        EnableFreezeSample(faultData);
     }
     if (!IsHandleAppfreeze()) {
         NotifyANR(faultData);
         return;
     }
     std::string msgContent;
+    EnableFreezeSample(faultData);
     GetMainHandlerDump(msgContent);
     ChangeFaultDateInfo(faultData, msgContent);
     return;
@@ -183,8 +183,7 @@ void AppfreezeInner::EnableFreezeSample(FaultData& newFaultData)
     std::string eventName = newFaultData.errorObject.name;
     if (eventName == AppFreezeType::THREAD_BLOCK_3S || eventName == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
         OHOS::HiviewDFX::Watchdog::GetInstance().StartSample(HALF_DURATION, HALF_INTERVAL);
-        TAG_LOGI(AAFwkTag::APPDFR, "start to sample freeze stack, eventName:%{public}s",
-            eventName.c_str());
+        TAG_LOGI(AAFwkTag::APPDFR, "start to sample freeze stack, eventName:%{public}s", eventName.c_str());
         return;
     }
     if (eventName == AppFreezeType::THREAD_BLOCK_6S || eventName == AppFreezeType::LIFECYCLE_TIMEOUT ||
@@ -199,12 +198,8 @@ void AppfreezeInner::EnableFreezeSample(FaultData& newFaultData)
     }
 }
 
-int AppfreezeInner::AppfreezeHandle(const FaultData& faultData, bool onlyMainThread)
+void AppfreezeInner::ReportAppfreezeTask(const FaultData& faultData, bool onlyMainThread)
 {
-    if (!IsHandleAppfreeze()) {
-        NotifyANR(faultData);
-        return -1;
-    }
     FaultData newFaultData = faultData;
     EnableFreezeSample(newFaultData);
     auto reportFreeze = [newFaultData, onlyMainThread]() {
@@ -225,6 +220,16 @@ int AppfreezeInner::AppfreezeHandle(const FaultData& faultData, bool onlyMainThr
             appfreezeInnerTaskHandler_->SubmitTask(reportFreeze, "reportFreeze");
         }
     }
+}
+
+int AppfreezeInner::AppfreezeHandle(const FaultData& faultData, bool onlyMainThread)
+{
+    if (!IsHandleAppfreeze()) {
+        NotifyANR(faultData);
+        return -1;
+    }
+    auto watchdogTask = [faultData, onlyMainThread, this] { this->ReportAppfreezeTask(faultData, onlyMainThread); };
+    OHOS::HiviewDFX::Watchdog::GetInstance().RunOneShotTask("ReportAppfreezeInnerTask", watchdogTask);
     return 0;
 }
 
