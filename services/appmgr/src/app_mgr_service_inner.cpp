@@ -2978,7 +2978,7 @@ void AppMgrServiceInner::GetChildrenProcesses(const std::shared_ptr<AppRunningRe
         auto childProcessRecord = iter.second;
         if (childProcessRecord != nullptr) {
             ChildProcessInfo childProcessInfo;
-            retCode = GetChildProcessInfo(childProcessRecord, appRecord, childProcessInfo, true);
+            retCode = GetChildProcessInfo(childProcessRecord, appRecord, childProcessInfo);
             if (retCode != ERR_OK) {
                 TAG_LOGW(
                     AAFwkTag::APPMGR, "GetChildProcessInfo failed. host pid=%{public}d, child pid=%{public}d",
@@ -8711,13 +8711,71 @@ int32_t AppMgrServiceInner::GetChildProcessInfoForSelf(ChildProcessInfo &info)
     auto iter = childRecordMap.find(callingPid);
     if (iter != childRecordMap.end()) {
         auto childProcessRecord = iter->second;
-        return GetChildProcessInfo(childProcessRecord, appRecord, info);
+        return GetChildProcessInfoEx(childProcessRecord, appRecord, info);
     }
     return ERR_NAME_NOT_FOUND;
 }
 
+int32_t AppMgrServiceInner::GetChildProcessInfoEx(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
+    const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    int32_t errCode = GetChildProcessInfo(childProcessRecord, appRecord, info);
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetChildProcessInfo failed, error: %{public}d", errCode);
+        return errCode;
+    }
+    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper null");
+        return ERR_NO_INIT;
+    }
+    auto osAccountMgr = DelayedSingleton<OsAccountManagerWrapper>::GetInstance();
+    if (osAccountMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "osAccountMgr is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t userId = -1;
+    errCode = osAccountMgr->GetOsAccountLocalIdFromUid(appRecord->GetUid(), userId);
+    if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetOsAccountLocalIdFromUid failed,errcode=%{public}d", errCode);
+        return errCode;
+    }
+    auto bundleFlag = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA);
+    BundleInfo bundleInfo;
+    if (IN_PROCESS_CALL(bundleMgrHelper->GetCloneBundleInfo(appRecord->GetBundleName(),
+        bundleFlag, appRecord->GetAppIndex(), bundleInfo, userId) != ERR_OK)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetCloneBundleInfo fail");
+        return ERR_INVALID_VALUE;
+    }
+    info.bundleInfo = std::make_shared<BundleInfo>(bundleInfo);
+    if (childProcessRecord->GetChildProcessType() != CHILD_PROCESS_TYPE_NATIVE &&
+        childProcessRecord->GetChildProcessType() != CHILD_PROCESS_TYPE_NATIVE_ARGS) {
+        if (IN_PROCESS_CALL(bundleMgrHelper->GetBaseSharedBundleInfos(appRecord->GetBundleName(), info.hspList,
+            AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO) != ERR_OK)) {
+                TAG_LOGE(AAFwkTag::APPMGR, "GetBaseSharedBundleInfos fail");
+            return ERR_INVALID_VALUE;
+        }
+    }
+    info.childProcessType = childProcessRecord->GetChildProcessType();
+    info.srcEntry = childProcessRecord->GetSrcEntry();
+    info.entryFunc = childProcessRecord->GetEntryFunc();
+    info.entryParams = childProcessRecord->GetEntryParams();
+    info.jitEnabled = appRecord->IsJITEnabled();
+    info.isStartWithDebug = childProcessRecord->isStartWithDebug();
+    auto applicationInfo = appRecord->GetApplicationInfo();
+    if (applicationInfo) {
+        TAG_LOGD(AAFwkTag::APPMGR, "applicationInfo is exist, debug:%{public}d", applicationInfo->debug);
+        info.isDebugApp = applicationInfo->debug;
+    }
+    info.isStartWithNative = appRecord->isNativeStart();
+    return ERR_OK;
+}
+
 int32_t AppMgrServiceInner::GetChildProcessInfo(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
-    const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info, bool isCallFromGetChildrenProcesses)
+    const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!childProcessRecord) {
@@ -8747,44 +8805,6 @@ int32_t AppMgrServiceInner::GetChildProcessInfo(const std::shared_ptr<ChildProce
     info.hostUid = appRecord->GetUid();
     info.bundleName = appRecord->GetBundleName();
     info.processName = childProcessRecord->GetProcessName();
-
-    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
-    if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "bundleMgrHelper null");
-        return ERR_NO_INIT;
-    }
-    auto bundleFlag = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
-        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
-        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA);
-    if (IN_PROCESS_CALL(bundleMgrHelper->GetCloneBundleInfo(appRecord->GetBundleName(),
-        bundleFlag, appRecord->GetAppIndex(), info.bundleInfo, userId))) {
-        TAG_LOGE(AAFwkTag::APPMGR, "GetCloneBundleInfo fail");
-        return ERR_INVALID_VALUE;
-    }
-
-    if (childProcessRecord->GetChildProcessType() != CHILD_PROCESS_TYPE_NATIVE &&
-        childProcessRecord->GetChildProcessType() != CHILD_PROCESS_TYPE_NATIVE_ARGS) {
-        if (IN_PROCESS_CALL(bundleMgrHelper->GetBaseSharedBundleInfos(appRecord->GetBundleName(), info.hspList,
-            AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO))) {
-                TAG_LOGE(AAFwkTag::APPMGR, "GetBaseSharedBundleInfos fail");
-            return ERR_INVALID_VALUE;
-        }
-    }
-    
-    if (!isCallFromGetChildrenProcesses) {
-        info.childProcessType = childProcessRecord->GetChildProcessType();
-        info.srcEntry = childProcessRecord->GetSrcEntry();
-        info.entryFunc = childProcessRecord->GetEntryFunc();
-        info.entryParams = childProcessRecord->GetEntryParams();
-        info.jitEnabled = appRecord->IsJITEnabled();
-        info.isStartWithDebug = childProcessRecord->isStartWithDebug();
-        auto applicationInfo = appRecord->GetApplicationInfo();
-        if (applicationInfo) {
-            TAG_LOGD(AAFwkTag::APPMGR, "applicationInfo is exist, debug:%{public}d", applicationInfo->debug);
-            info.isDebugApp = applicationInfo->debug;
-        }
-        info.isStartWithNative = appRecord->isNativeStart();
-    }
     return ERR_OK;
 }
 

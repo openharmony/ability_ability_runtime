@@ -47,7 +47,7 @@ struct ChildProcessInfo : public Parcelable {
     std::string srcEntry;
     std::string entryFunc;
     std::string entryParams;
-    BundleInfo bundleInfo;
+    std::shared_ptr<BundleInfo> bundleInfo = nullptr;
     std::vector<BaseSharedBundleInfo> hspList;
 
     bool ReadFromParcel(Parcel &parcel);

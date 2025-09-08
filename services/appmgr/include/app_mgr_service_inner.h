@@ -1833,8 +1833,10 @@ private:
         const ChildProcessOptions &options);
 
     int32_t GetChildProcessInfo(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
-        const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info,
-        bool isCallFromGetChildrenProcesses = false);
+        const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info);
+
+    int32_t GetChildProcessInfoEx(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
+        const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info);
 
     void OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote);
 
