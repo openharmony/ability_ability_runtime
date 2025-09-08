@@ -62,6 +62,7 @@ private:
     bool GetAppInForeground();
     bool GetMainThreadSample();
     void EnableFreezeSample(FaultData& newFaultData);
+    void ReportAppfreezeTask(const FaultData& faultData, bool onlyMainThread);
 
     static std::mutex singletonMutex_;
     static std::shared_ptr<AppfreezeInner> instance_;
