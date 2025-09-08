@@ -493,7 +493,7 @@ HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_009, TestSize.Level1)
         system_clock::now().time_since_epoch()).count() - TEST_INTERVAL_TIME;
     watchdog_->isInBackground_ = true;
     watchdog_->ReportEvent();
-    watchdog_->SetBundleInfo("test", "1.1.0");
+    watchdog_->SetBundleInfo("test", "1.1.0", true);
     watchdog_->SetBgWorkingThreadStatus(false);
 }
 
