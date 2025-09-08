@@ -15,6 +15,7 @@
 
 #include "action_extension.h"
 
+#include "ets_action_extension_instance.h"
 #include "hilog_tag_wrapper.h"
 #include "js_action_extension.h"
 #include "cj_action_extension_instance.h"
@@ -34,6 +35,8 @@ ActionExtension *ActionExtension::Create(const std::unique_ptr<Runtime> &runtime
             return JsActionExtension::Create(runtime);
         case Runtime::Language::CJ:
             return CreateCJActionExtension(runtime);
+        case Runtime::Language::ETS:
+            return CreateETSActionExtension(runtime);
         default:
             return new ActionExtension();
     }
