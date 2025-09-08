@@ -212,16 +212,10 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
             TAG_LOGE(AAFwkTag::JSRUNTIME, "not support release app");
             return;
         }
-        auto callback = [weak, isDebugApp, isStartWithDebug](int32_t tid, const DebuggerPostTask& task) {
-            panda::JSNApi::DebugOption debugOption = {ARK_DEBUGGER_LIB_PATH, isDebugApp ? isStartWithDebug : false};
-            if (weak != nullptr) {
-                panda::JSNApi::StoreDebugInfo(tid, weak->GetVM(), debugOption, task, isDebugApp);
-            }
-        };
         if (option.find(DEBUGGER) == std::string::npos) {
             // if has old connect server, stop it
             ConnectServerManager::Get().StopConnectServer(false);
-            ConnectServerManager::Get().SendInstanceMessageAll(callback);
+            ConnectServerManager::Get().SendDebuggerInfo(isStartWithDebug, isDebugApp);
             ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
         } else {
             // if has old debugger server, stop it
