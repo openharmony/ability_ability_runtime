@@ -25,7 +25,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char *ATOMIC_SERVICE_STARTUP_RULE_IMPL_CLASS_NAME =
-    "L@ohos/app/ability/abilityManager/AtomicServiceStartupRuleImpl;";
+    "L@ohos/app/ability/abilityManager/abilityManager/AtomicServiceStartupRuleImpl;";
 }
 EtsQueryERMSObserver::EtsQueryERMSObserver(ani_vm *etsVm) : etsVm_(etsVm) {}
 

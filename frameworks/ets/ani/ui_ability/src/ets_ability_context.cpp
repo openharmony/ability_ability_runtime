@@ -729,10 +729,6 @@ void EtsAbilityContext::OnStartAbility(
         EtsErrorUtil::ThrowInvalidParamError(env, "null context");
         return;
     }
-    if (isStartRecent) {
-        TAG_LOGD(AAFwkTag::CONTEXT, "startRecentAbility");
-        want.SetParam(AAFwk::Want::PARAM_RESV_START_RECENT, true);
-    }
     if ((want.GetFlags() & AAFwk::Want::FLAG_INSTALL_ON_DEMAND) == AAFwk::Want::FLAG_INSTALL_ON_DEMAND) {
         std::string startTime = std::to_string(
             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
