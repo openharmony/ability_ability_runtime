@@ -123,8 +123,12 @@ bool ChildMainThread::Init(const std::shared_ptr<EventRunner> &runner, const Chi
     processInfo_ = std::make_shared<ChildProcessInfo>(processInfo);
     processArgs_->entryParams = processInfo.entryParams;
     mainHandler_ = std::make_shared<EventHandler>(runner);
-    bundleInfo_ = std::make_shared<BundleInfo>(processInfo.bundleInfo);
-    InitNativeLib(processInfo.bundleInfo, processInfo.hspList);
+    bundleInfo_ = processInfo.bundleInfo;
+    if (bundleInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null bundleInfo");
+        return false;
+    }
+    InitNativeLib(*bundleInfo_, processInfo.hspList);
     return true;
 }
 
