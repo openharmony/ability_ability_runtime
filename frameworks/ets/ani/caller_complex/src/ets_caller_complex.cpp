@@ -29,7 +29,7 @@
 namespace { // nameless
 using namespace OHOS;
 using namespace OHOS::AbilityRuntime;
-constexpr const char* CALLER_CLASS_NAME = "Lapplication/Caller/CallerImpl;";
+constexpr const char* CALLER_CLASS_NAME = "application.Caller.CallerImpl";
 
 void ReleaseNativeRemote(ani_env *env, ani_ref aniObj)
 {
@@ -131,7 +131,7 @@ ani_object EtsCallerComplex::CreateEtsCaller(ani_env *env, ReleaseCallFunc relea
         TAG_LOGE(AAFwkTag::UIABILITY, "status : %{public}d", status);
         return nullptr;
     }
-    if ((status = env->FindClass("L@ohos/rpc/rpc/RemoteProxy;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("@ohos.rpc.rpc.RemoteProxy", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "FindClass RemoteProxy: %{public}d", status);
         return nullptr;
     }
@@ -358,7 +358,7 @@ void CallbackWrap::Invoke(const std::string &msg) const
         return;
     }
     status = aniEnv->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(objectRef), name.c_str(),
-        "Lstd/core/String;:V", aniMsg);
+        "C{std.core.String}:", aniMsg);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "%{public}s failed %{public}d", name.c_str(), status);
     }
@@ -384,17 +384,24 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         TAG_LOGE(AAFwkTag::UIABILITY, "find class status : %{public}d", status);
         return ANI_NOT_FOUND;
     }
-    std::array functions = {
+    std::array instanceMethods = {
         ani_native_function { "nativeReleaseSync", nullptr,
             reinterpret_cast<void*>(EtsCallerComplex::ReleaseCall) },
-        ani_native_function { "nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
-            reinterpret_cast<void*>(EtsCallerComplex::NativeTransferStatic) },
-        ani_native_function { "nativeTransferDynamic", "Lstd/core/Object;:Lstd/interop/ESValue;",
-            reinterpret_cast<void*>(EtsCallerComplex::NativeTransferDynamic) },
     };
-    status = env->Class_BindNativeMethods(cls, functions.data(), functions.size());
+    status = env->Class_BindNativeMethods(cls, instanceMethods.data(), instanceMethods.size());
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::UIABILITY, "bind methods status: %{public}d", status);
+        return status;
+    }
+    std::array staticMethods = {
+        ani_native_function { "nativeTransferStatic", "C{std.interop.ESValue}:C{std.core.Object}",
+            reinterpret_cast<void*>(EtsCallerComplex::NativeTransferStatic) },
+        ani_native_function { "nativeTransferDynamic", "C{std.core.Object}:C{std.interop.ESValue}",
+            reinterpret_cast<void*>(EtsCallerComplex::NativeTransferDynamic) },
+    };
+    status = env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size());
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "bind static methods status: %{public}d", status);
         return status;
     }
 

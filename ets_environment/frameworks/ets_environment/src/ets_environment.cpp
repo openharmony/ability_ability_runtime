@@ -67,7 +67,7 @@ using DebuggerPostTask = std::function<void(std::function<void()> &&)>;
 const char ETS_SDK_NSNAME[] = "ets_sdk";
 const char ETS_SYS_NSNAME[] = "ets_system";
 
-constexpr const char* CLASSNAME_LINKER = "Lstd/core/AbcRuntimeLinker;";
+constexpr const char* CLASSNAME_LINKER = "std.core.AbcRuntimeLinker";
 } // namespace
 
 using namespace arkts::ani_signature;
@@ -498,7 +498,7 @@ bool ETSEnvironment::LoadModule(const std::string &modulePath, const std::string
     }
     clsAni = static_cast<ani_class>(clsRef);
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(clsAni, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(clsAni, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod failed, status: %{public}d", status);
         return false;
     }
@@ -794,7 +794,7 @@ bool ETSEnvironment::GetHspAbcRuntimeLinker(ani_array &refHspLinkerArray, ani_cl
     }
     ani_status status = ANI_ERROR;
     ani_method method = nullptr;
-    if ((status = aniEnv->Class_FindMethod(cls, "<ctor>", "Lstd/core/RuntimeLinker;Lescompat/Array;:V",
+    if ((status = aniEnv->Class_FindMethod(cls, "<ctor>", "C{std.core.RuntimeLinker}C{escompat.Array}:",
         &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod ctor failed, status: %{public}d", status);
         return false;
@@ -840,7 +840,7 @@ ani_object ETSEnvironment::CreateRuntimeLinker(
     if (refHspLinkerArray == nullptr) {
         ani_method runtimeLinkerCtorMethod = nullptr;
         if ((status = aniEnv->Class_FindMethod(
-            cls, "<ctor>", "Lstd/core/RuntimeLinker;Lescompat/Array;:V", &runtimeLinkerCtorMethod)) != ANI_OK) {
+            cls, "<ctor>", "C{std.core.RuntimeLinker}C{escompat.Array}:", &runtimeLinkerCtorMethod)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod ctor failed, status: %{public}d", status);
             return nullptr;
         }
@@ -853,7 +853,7 @@ ani_object ETSEnvironment::CreateRuntimeLinker(
         ani_method runtimeLinkerCtorMethodEx = nullptr;
         if ((status = aniEnv->Class_FindMethod(cls,
             "<ctor>",
-            "Lstd/core/RuntimeLinker;Lescompat/Array;[Lstd/core/RuntimeLinker;:V",
+            "C{std.core.RuntimeLinker}C{escompat.Array}C{escompat.Array}:",
             &runtimeLinkerCtorMethodEx)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::ETSRUNTIME, "Class_FindMethod ctor failed, status: %{public}d", status);
             return nullptr;

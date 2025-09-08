@@ -26,7 +26,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 
 namespace {
-constexpr const char* ETS_MISSION_INFO_NAME = "Lapplication/MissionInfo/MissionInfoInner;";
+constexpr const char* ETS_MISSION_INFO_NAME = "application.MissionInfo.MissionInfoInner";
 constexpr const char* KEY_MISSION_ID = "missionId";
 constexpr const char* KEY_RUNNING_STATE = "runningState";
 constexpr const char* KEY_LOCKED_STATE = "lockedState";
@@ -37,7 +37,7 @@ constexpr const char* KEY_CONTINUABLE = "continuable";
 constexpr const char* KEY_ABILITY_STATE = "abilityState";
 constexpr const char* KEY_UNCLEARABLE = "unclearable";
 constexpr const char* KEY_WANT = "want";
-constexpr const char *SET_OBJECT_VOID_SIGNATURE = "ILstd/core/Object;:V";
+constexpr const char *SET_OBJECT_VOID_SIGNATURE = "iC{std.core.Object}:";
 }
 
 bool WrapWantInner(ani_env *env, ani_class cls, ani_object object, const AAFwk::Want &want)
@@ -106,7 +106,7 @@ ani_object CreateEtsMissionInfo(ani_env *env, const AAFwk::MissionInfo &missionI
         return nullptr;
     }
     ani_method method = nullptr;
-    status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+    status = env->Class_FindMethod(cls, "<ctor>", ":", &method);
     if (status != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::MISSION, "Class_FindMethod ctor failed status: %{public}d, method cls is nullptr", status);
         return nullptr;
@@ -133,14 +133,14 @@ ani_object CreateEtsMissionInfos(ani_env *env, const std::vector<AAFwk::MissionI
     }
     ani_class arrayCls = nullptr;
     ani_status status = ANI_ERROR;
-    status = env->FindClass("Lescompat/Array;", &arrayCls);
+    status = env->FindClass("escompat.Array", &arrayCls);
     if (status != ANI_OK || arrayCls == nullptr) {
         TAG_LOGE(AAFwkTag::MISSION, "FindClass failed, status : %{public}d", status);
         return nullptr;
     }
 
     ani_method arrayCtor = nullptr;
-    status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
+    status = env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor);
     if (status != ANI_OK || arrayCtor == nullptr) {
         TAG_LOGE(AAFwkTag::MISSION, "Class_FindMethod failed, status : %{public}d", status);
         return nullptr;

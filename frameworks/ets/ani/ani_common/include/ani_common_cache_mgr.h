@@ -23,14 +23,14 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-constexpr const char *CLASSNAME_BOOLEAN = "Lstd/core/Boolean;";
-constexpr const char *CLASSNAME_SHORT = "Lstd/core/Short;";
-constexpr const char *CLASSNAME_INT = "Lstd/core/Int;";
-constexpr const char *CLASSNAME_LONG = "Lstd/core/Long;";
-constexpr const char *CLASSNAME_FLOAT = "Lstd/core/Float;";
-constexpr const char *CLASSNAME_DOUBLE = "Lstd/core/Double;";
-constexpr const char *CLASSNAME_STRING = "Lstd/core/String;";
-constexpr const char *CLASSNAME_RECORD = "Lescompat/Record;";
+constexpr const char *CLASSNAME_BOOLEAN = "std.core.Boolean";
+constexpr const char *CLASSNAME_SHORT = "std.core.Short";
+constexpr const char *CLASSNAME_INT = "std.core.Int";
+constexpr const char *CLASSNAME_LONG = "std.core.Long";
+constexpr const char *CLASSNAME_FLOAT = "std.core.Float";
+constexpr const char *CLASSNAME_DOUBLE = "std.core.Double";
+constexpr const char *CLASSNAME_STRING = "std.core.String";
+constexpr const char *CLASSNAME_RECORD = "escompat.Record";
 
 using AniCommonMethodCacheKey = std::pair<const char *, const char *>;
 

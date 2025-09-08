@@ -21,7 +21,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char* APPLICATION_STATE_CHANGE_CALLBACK =
-    "L@ohos/app/ability/ApplicationStateChangeCallback/ApplicationStateChangeCallbackInner;";
+    "@ohos.app.ability.ApplicationStateChangeCallback.ApplicationStateChangeCallbackInner";
 }
 
 EtsApplicationStateChangeCallback::EtsApplicationStateChangeCallback(ani_vm *etsVm) : etsVm_(etsVm) {}

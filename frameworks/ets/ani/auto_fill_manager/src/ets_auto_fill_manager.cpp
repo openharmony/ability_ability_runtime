@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace AutoFillManagerEts {
 namespace {
-constexpr const char* AUTO_FILL_MANAGER_NAMESPACE = "L@ohos/app/ability/autoFillManager/autoFillManager;";
+constexpr const char* AUTO_FILL_MANAGER_NAMESPACE = "@ohos.app.ability.autoFillManager.autoFillManager";
 } // namespace
 
 EtsAutoFillManager &EtsAutoFillManager::GetInstance()
@@ -147,7 +147,7 @@ void EtsAutoFillManagerInit(ani_env *env)
     }
     std::array kitFunctions = {ani_native_function{
         "requestAutoSaveWithScope",
-        "L@ohos/app/ability/autoFillManager/autoFillManager/AutoSaveCallback;:V",
+        "C{@ohos.app.ability.autoFillManager.autoFillManager.AutoSaveCallback}:",
         reinterpret_cast<void *>(EtsAutoFillManager::RequestAutoSave)}};
     status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());
     if (status != ANI_OK) {

@@ -112,7 +112,7 @@ ani_object WrapExecuteResult(ani_env *env, const AppExecFwk::InsightIntentExecut
     ani_method ctor = nullptr;
     ani_object objValue = {};
 
-    if ((status = env->FindClass("L@ohos/app/ability/insightIntent/insightIntent/ExecuteResultInner;",
+    if ((status = env->FindClass("@ohos.app.ability.insightIntent.insightIntent.ExecuteResultInner",
         &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "status: %{public}d", status);
         return nullptr;
@@ -155,7 +155,7 @@ ani_object CreateNullExecuteResult(ani_env *env)
     ani_method ctor = nullptr;
     ani_object objValue = {};
 
-    if ((status = env->FindClass("L@ohos/app/ability/insightIntent/insightIntent/ExecuteResultInner;",
+    if ((status = env->FindClass("@ohos.app.ability.insightIntent.insightIntent.ExecuteResultInner",
         &cls))
         != ANI_OK) {
         TAG_LOGE(AAFwkTag::INTENT, "status: %{public}d", status);

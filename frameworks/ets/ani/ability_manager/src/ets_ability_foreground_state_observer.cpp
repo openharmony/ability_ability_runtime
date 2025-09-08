@@ -23,8 +23,8 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char* ABILITY_FOREGROUND_STATE_OBSERVER_CLASS_NAME =
-    "Lapplication/AbilityForegroundStateObserver/AbilityForegroundStateObserver;";
-constexpr const char *SIGNATURE_ABILITY_STATE_DATA = "Lapplication/AbilityStateData/AbilityStateData;:V";
+    "application.AbilityForegroundStateObserver.AbilityForegroundStateObserver";
+constexpr const char *SIGNATURE_ABILITY_STATE_DATA = "C{application.AbilityStateData.AbilityStateData}:";
 }
 
 ETSAbilityForegroundStateObserver::ETSAbilityForegroundStateObserver(ani_vm *etsVm) : etsVm_(etsVm) {}

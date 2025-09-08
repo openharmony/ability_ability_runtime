@@ -27,12 +27,12 @@ constexpr double FONT_SIZE_MAX_SCALE = 3.2;
 constexpr double FONT_WEIGHT_MIN_SCALE = 0.0;
 constexpr double FONT_WEIGHT_MAX_SCALE = 1.25;
 constexpr const char* COLOR_MODE_ENUM_NAME =
-    "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ColorMode;";
+    "@ohos.app.ability.ConfigurationConstant.ConfigurationConstant.ColorMode";
 constexpr const char* DIRECTION_ENUM_NAME =
-    "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/Direction;";
+    "@ohos.app.ability.ConfigurationConstant.ConfigurationConstant.Direction";
 constexpr const char* DENSITY_ENUM_NAME =
-    "L@ohos/app/ability/ConfigurationConstant/ConfigurationConstant/ScreenDensity;";
-constexpr const char* CONFIGURATION_IMPL_CLASS_NAME = "L@ohos/app/ability/Configuration/ConfigurationImpl;";
+    "@ohos.app.ability.ConfigurationConstant.ConfigurationConstant.ScreenDensity";
+constexpr const char* CONFIGURATION_IMPL_CLASS_NAME = "@ohos.app.ability.Configuration.ConfigurationImpl";
 
 void SetBasicConfiguration(ani_env *env, ani_object object, const AppExecFwk::Configuration &configuration)
 {
@@ -111,7 +111,7 @@ ani_object WrapConfiguration(ani_env *env, const AppExecFwk::Configuration &conf
         return nullptr;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod status: %{public}d", status);
         return nullptr;
     }

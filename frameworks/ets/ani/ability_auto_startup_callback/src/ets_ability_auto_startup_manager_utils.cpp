@@ -22,8 +22,8 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char *CLASSNAME_ARRAY = "Lescompat/Array;";
-constexpr const char *SIGNATURE_AUTO_STARTUP_INFO = "Lapplication/AutoStartupInfo/AutoStartupInfoInner;";
+constexpr const char *CLASSNAME_ARRAY = "escompat.Array";
+constexpr const char *SIGNATURE_AUTO_STARTUP_INFO = "application.AutoStartupInfo.AutoStartupInfoInner";
 }
 bool UnwrapAutoStartupInfo(ani_env *env, ani_object param, AutoStartupInfo &info)
 {
@@ -114,7 +114,7 @@ ani_object ConvertAutoStartupInfos(ani_env *env, const std::vector<AutoStartupIn
         return nullptr;
     }
     ani_method arrayCtor = nullptr;
-    status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor);
+    status = env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor);
     if (status != ANI_OK || arrayCtor == nullptr) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "find ctor failed status : %{public}d or null arrayCtor", status);
         return nullptr;
@@ -132,7 +132,7 @@ ani_object ConvertAutoStartupInfos(ani_env *env, const std::vector<AutoStartupIn
             TAG_LOGW(AAFwkTag::AUTO_STARTUP, "null ani_info");
             break;
         }
-        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, ani_info);
+        status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, ani_info);
         if (status != ANI_OK) {
             TAG_LOGW(AAFwkTag::AUTO_STARTUP, "Object_CallMethodByName_Void failed status : %{public}d", status);
             break;
@@ -156,7 +156,7 @@ ani_object CreateAniAutoStartupInfo(ani_env *env, const AutoStartupInfo &info)
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "find class failed status : %{public}d or null cls", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "find ctor failed status : %{public}d or null method", status);
         return nullptr;
     }

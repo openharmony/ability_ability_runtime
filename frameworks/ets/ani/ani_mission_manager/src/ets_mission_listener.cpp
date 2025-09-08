@@ -133,7 +133,7 @@ void EtsMissionListener::CallEtsMethod(const std::string &methodName, int32_t mi
     for (const auto &item : tmpMap) {
         ani_object etsListenerObj = reinterpret_cast<ani_object>(item.second);
         ani_status status = ANI_ERROR;
-        status = env->Object_CallMethodByName_Void(etsListenerObj, methodName.c_str(), "I:V", missionId);
+        status = env->Object_CallMethodByName_Void(etsListenerObj, methodName.c_str(), "i:", missionId);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::MISSION, "Object_CallMethodByName_Void failed, status: %{public}d", status);
         }
@@ -141,7 +141,7 @@ void EtsMissionListener::CallEtsMethod(const std::string &methodName, int32_t mi
     for (const auto &item : tmpMapSync) {
         ani_object etsListenerObj = reinterpret_cast<ani_object>(item.second);
         ani_status status = ANI_ERROR;
-        status = env->Object_CallMethodByName_Void(etsListenerObj, methodName.c_str(), "I:V", missionId);
+        status = env->Object_CallMethodByName_Void(etsListenerObj, methodName.c_str(), "i:", missionId);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::MISSION, "Object_CallMethodByName_Void failed, status: %{public}d", status);
         }
@@ -207,7 +207,7 @@ void EtsMissionListener::OnMissionIconUpdated(int32_t missionId, const std::shar
         ani_object etsListenerObj = reinterpret_cast<ani_object>(item.second);
         ani_status status = ANI_ERROR;
         status = env->Object_CallMethodByName_Void(
-            etsListenerObj, "onMissionIconUpdated", "IL@ohos/multimedia/image/image/PixelMap;:V", missionId, iconObj);
+            etsListenerObj, "onMissionIconUpdated", "iC{@ohos.multimedia.image.image.PixelMap}:", missionId, iconObj);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::MISSION, "Object_CallMethodByName_Void failed, status: %{public}d", status);
         }

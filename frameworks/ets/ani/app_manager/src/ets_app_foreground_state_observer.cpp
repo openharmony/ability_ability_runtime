@@ -21,7 +21,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char* APP_FOREGROUND_STATE_OBSERVER_CLASS_NAME =
-    "Lapplication/AppForegroundStateObserver/AppForegroundStateObserver;";
+    "application.AppForegroundStateObserver.AppForegroundStateObserver";
 }
 ETSAppForegroundStateObserver::ETSAppForegroundStateObserver(ani_vm *etsVm) : etsVm_(etsVm) {}
 

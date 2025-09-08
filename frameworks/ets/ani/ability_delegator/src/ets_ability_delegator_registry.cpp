@@ -30,10 +30,10 @@ std::mutex etsReferenceMutex;
 
 namespace {
 constexpr const char* ETS_DELEGATOR_REGISTRY_NAMESPACE =
-    "L@ohos/app/ability/abilityDelegatorRegistry/abilityDelegatorRegistry;";
-constexpr const char* ETS_DELEGATOR_REGISTRY_SIGNATURE_DELEAGTOR = ":Lapplication/AbilityDelegator/AbilityDelegator;";
+    "@ohos.app.ability.abilityDelegatorRegistry.abilityDelegatorRegistry";
+constexpr const char* ETS_DELEGATOR_REGISTRY_SIGNATURE_DELEAGTOR = ":C{application.AbilityDelegator.AbilityDelegator}";
 constexpr const char* ETS_DELEGATOR_REGISTRY_SIGNATURE_ATGS =
-    ":Lapplication/abilityDelegatorArgs/AbilityDelegatorArgs;";;
+    ":C{application.abilityDelegatorArgs.AbilityDelegatorArgs}";;
 }
 static ani_object GetAbilityDelegator(ani_env *env)
 {

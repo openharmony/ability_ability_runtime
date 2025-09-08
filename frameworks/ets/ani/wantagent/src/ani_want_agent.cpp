@@ -32,9 +32,9 @@ namespace {
 constexpr int32_t ERR_NOT_OK = -1;
 constexpr int32_t BUSINESS_ERROR_CODE_OK = 0;
 constexpr int32_t PARAMETER_ERROR = -1;
-constexpr const char* COMPLETE_DATA_IMPL_CLASS_NAME = "L@ohos/app/ability/wantAgent/wantAgent/CompleteDataImpl;";
-constexpr const char* WANT_AGENT_NAMESPACE = "L@ohos/app/ability/wantAgent/wantAgent;";
-constexpr const char* CLEANER_CLASS = "L@ohos/app/ability/wantAgent/wantAgent/Cleaner;";
+constexpr const char* COMPLETE_DATA_IMPL_CLASS_NAME = "@ohos.app.ability.wantAgent.wantAgent.CompleteDataImpl";
+constexpr const char* WANT_AGENT_NAMESPACE = "@ohos.app.ability.wantAgent.wantAgent";
+constexpr const char* CLEANER_CLASS = "@ohos.app.ability.wantAgent.wantAgent.Cleaner";
 } // namespace
 
 TriggerCompleteCallBack::TriggerCompleteCallBack()
@@ -81,7 +81,7 @@ bool OnSendFinishedCallback(TriggerReceiveDataWorker *dataWorker)
         return false;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK || method == nullptr) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK || method == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Class_FindMethod failed status: %{public}d, or null method", status);
         return false;
     }
