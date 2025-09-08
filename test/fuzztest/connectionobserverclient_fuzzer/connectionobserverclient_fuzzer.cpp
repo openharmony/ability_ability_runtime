@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 
 #define private public
 #define protected public
@@ -77,23 +78,17 @@ public:
 };
 }
 
-uint32_t GetU32Data(const char* ptr)
+bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
-    // convert fuzz input data to an integer
-    return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
-}
-
-bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
-{
-    (void)data;
     std::shared_ptr<ConnectionObserver> observer = std::make_shared<MyConnectionObserver>();
     // fuzz for connectionObserverClient
-    auto connectionObserverClient = std::make_shared<ConnectionObserverClient>();
-    connectionObserverClient->UnregisterObserver(observer);
+    FuzzedDataProvider fdp(data, size);
+    ConnectionObserverClient::GetInstance().UnregisterObserver(observer);
     sptr<IRemoteObject> remoteObj;
     auto serviceProxyAdapter = std::make_shared<ServiceProxyAdapter>(remoteObj);
-    sptr<AbilityRuntime::IConnectionObserver> cobserver = new MyAbilityConnectionObserver();
-    serviceProxyAdapter->UnregisterObserver(cobserver);
+    std::shared_ptr<AbilityRuntime::IConnectionObserver> cobserver = std::make_shared<MyAbilityConnectionObserver>();
+    sptr<OHOS::AbilityRuntime::IConnectionObserver> cobserverSp = cobserver.get();
+    serviceProxyAdapter->UnregisterObserver(cobserverSp);
     serviceProxyAdapter->GetProxyObject();
     return true;
 }
@@ -103,32 +98,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    if (data == nullptr) {
-        return 0;
-    }
-
-    /* Validate the length of size */
-    if (size < OHOS::U32_AT_SIZE) {
-        return 0;
-    }
-
-    char* ch = static_cast<char*>(malloc(size + 1));
-    if (ch == nullptr) {
-        std::cout << "malloc failed." << std::endl;
-        return 0;
-    }
-
-    (void)memset_s(ch, size + 1, 0x00, size + 1);
-    if (memcpy_s(ch, size, data, size) != EOK) {
-        std::cout << "copy failed." << std::endl;
-        free(ch);
-        ch = nullptr;
-        return 0;
-    }
-
-    OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-    free(ch);
-    ch = nullptr;
+    OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
 
