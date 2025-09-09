@@ -119,7 +119,7 @@ void AppRunningRecord::SetSpecifiedProcessFlag(const std::string &flag)
 
 const std::string &AppRunningRecord::GetSpecifiedProcessFlag() const
 {
-    return specifiedProcessFlag_;
+    return AAFwk::MyStatus::GetInstance().specifiedProcessFlag_;
 }
 void AppRunningRecord::SetCustomProcessFlag(const std::string &flag)
 {

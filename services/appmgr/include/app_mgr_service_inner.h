@@ -1593,6 +1593,8 @@ public:
 
     void SendProcessKillEvent(std::shared_ptr<AppRunningRecord> appRecord, const std::string &defaultReason);
 
+    void SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId);
+
 private:
     int32_t ForceKillApplicationInner(const std::string &bundleName, const int userId = -1,
         const int appIndex = 0);

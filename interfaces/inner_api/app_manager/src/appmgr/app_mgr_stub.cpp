@@ -408,6 +408,8 @@ int32_t AppMgrStub::OnRemoteRequestInnerEighth(uint32_t code, MessageParcel &dat
             return HandleExitMasterProcessRole(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::QUERY_RUNNING_SHARED_BUNDLES):
             return HandleQueryRunningSharedBundles(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::SET_SPECIFIED_PROCESS_REQUEST_ID):
+            return HandleSetSpecifiedProcessRequestId(data, reply);
     }
     return INVALID_FD;
 }
@@ -2055,6 +2057,14 @@ int32_t AppMgrStub::HandleExitMasterProcessRole(MessageParcel &data, MessageParc
         return IPC_STUB_ERR;
     }
 
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleSetSpecifiedProcessRequestId(MessageParcel &data, MessageParcel &reply)
+{
+    auto recordId = data.ReadInt32();
+    auto requestId = data.ReadInt32();
+    SetSpecifiedProcessRequestId(recordId, requestId);
     return NO_ERROR;
 }
 

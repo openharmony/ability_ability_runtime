@@ -1943,6 +1943,22 @@ int32_t AppMgrService::ExitMasterProcessRole()
     return appMgrServiceInner_->ExitMasterProcessRole();
 }
 
+void AppMgrService::SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service not ready");
+        return;
+    }
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t pid = getprocpid();
+    if (callingPid != pid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not process call");
+        return;
+    }
+    appMgrServiceInner_->SetSpecifiedProcessRequestId(recordId, requestId);
+}
+
 int32_t AppMgrService::QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);

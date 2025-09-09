@@ -1019,6 +1019,8 @@ public:
 
     int32_t VerifyKillProcessPermission(const std::string &bundleName) const;
 
+    void SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId);
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

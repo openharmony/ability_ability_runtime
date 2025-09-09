@@ -1193,7 +1193,7 @@ public:
     void OnStartSpecifiedAbilityTimeoutResponse(int32_t requestId);
 
     void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId = 0,
-        const std::string &callerProcessName = "");
+        const std::string &callerProcessName = "", int32_t recordId = 0);
     void OnStartSpecifiedProcessTimeoutResponse(int32_t requestId);
     void OnStartSpecifiedFailed(int32_t requestId);
 
