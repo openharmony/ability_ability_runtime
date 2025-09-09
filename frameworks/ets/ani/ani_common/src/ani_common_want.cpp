@@ -45,6 +45,7 @@ constexpr const char *ELEMENTNAME_CLASS_NAME = "LbundleManager/ElementNameInner/
 constexpr const char *RECORD_CLASS_NAME = "Lescompat/Record;";
 constexpr const char *RECORD_SET_NAME =
     "X{C{std.core.Numeric}C{std.core.String}C{std.core.BaseEnum}}C{std.core.Object}:";
+const int PROPERTIES_SIZE = 2;
 
 bool InnerWrapWantParams(ani_env *env, ani_class wantCls, ani_object wantObject, const AAFwk::WantParams &wantParams)
 {
@@ -54,6 +55,16 @@ bool InnerWrapWantParams(ani_env *env, ani_class wantCls, ani_object wantObject,
         return false;
     }
     return SetFieldRefByName(env, wantCls, wantObject, "parameters", wantParamRef);
+}
+
+bool InnerWrapWantParamsFD(ani_env *env, ani_class wantCls, ani_object wantObject, const AAFwk::WantParams &wantParams)
+{
+    ani_ref wantParamFDRef = WrapWantParamsFD(env, wantParams);
+    if (wantParamFDRef == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "failed to WrapWantParamsFD");
+        return false;
+    }
+    return SetFieldRefByName(env, wantCls, wantObject, "fds", wantParamFDRef);
 }
 
 bool InnerUnwrapWantParams(ani_env *env, ani_object wantObject, AAFwk::WantParams &wantParams)
@@ -1049,9 +1060,56 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
     SetFieldIntByName(env, cls, object, "flags", want.GetFlags());
     SetFieldStringByName(env, cls, object, "action", want.GetAction());
     InnerWrapWantParams(env, cls, object, want.GetParams());
+    InnerWrapWantParamsFD(env, cls, object, want.GetParams());
     SetFieldArrayStringByName(env, cls, object, "entities", want.GetEntities());
 
     return object;
+}
+
+ani_ref WrapWantParamsFD(ani_env *env, const AAFwk::WantParams &wantParams)
+{
+    auto paramList = wantParams.GetParams();
+    AAFwk::WantParams fds;
+    for (auto it = paramList.begin(); it != paramList.end(); it++) {
+        if (AAFwk::IWantParams::Query(it->second) == nullptr) {
+            TAG_LOGW(AAFwkTag::ANI, "not wantParam");
+            continue;
+        }
+        auto value = wantParams.GetParam(it->first);
+        AAFwk::IWantParams *o = AAFwk::IWantParams::Query(value);
+        if (o == nullptr) {
+            return nullptr;
+        }
+        AAFwk::WantParams wp = AAFwk::WantParamWrapper::Unbox(o);
+        auto valueMap = wp.GetParams();
+        if (valueMap.size() != PROPERTIES_SIZE) {
+            TAG_LOGD(AAFwkTag::ANI, "not fd");
+            return nullptr;
+        }
+        auto typeIt = valueMap.find(AAFwk::TYPE_PROPERTY);
+        if (typeIt == valueMap.end()) {
+            return nullptr;
+        }
+        AAFwk::IString *strValue = AAFwk::IString::Query(typeIt->second);
+        if (strValue == nullptr) {
+            return nullptr;
+        }
+        std::string typeString = AAFwk::String::Unbox(strValue);
+        if (typeString != AAFwk::FD) {
+            TAG_LOGD(AAFwkTag::ANI, "not fd");
+            return nullptr;
+        }
+        auto valueIt = valueMap.find(AAFwk::VALUE_PROPERTY);
+        if (valueIt == valueMap.end()) {
+            return nullptr;
+        }
+        AAFwk::IInteger *intValue = AAFwk::IInteger::Query(valueIt->second);
+        if (intValue == nullptr) {
+            return nullptr;
+        }
+        fds.SetParam(it->first, intValue);
+    }
+    return WrapWantParams(env, fds);
 }
 
 ani_ref WrapWantParams(ani_env *env, const AAFwk::WantParams &wantParams)
