@@ -158,6 +158,8 @@ private:
     void ResetService();
     void OnRemoteDied();
     void ReRegister();
+    int32_t TryRegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> key, int userId,
+        bool isExtension, DataObsOption opt = {});
 
     class ServiceDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
@@ -165,16 +167,17 @@ private:
         void OnRemoteDied(const wptr<IRemoteObject> &object) override
         {
             auto serviceClient = owner_.lock();
-            if (serviceClient != nullptr) {
+            if (serviceClient != nullptr && isFirst) {
+                isFirst = false;
                 serviceClient->OnRemoteDied();
             }
         }
 
     private:
+        bool isFirst = true;
         std::weak_ptr<DataObsMgrClient> owner_;
     };
 
-    static constexpr int RESUB_INTERVAL = 2;
     static std::mutex mutex_;
     sptr<IDataObsMgr> dataObsManger_;
 
