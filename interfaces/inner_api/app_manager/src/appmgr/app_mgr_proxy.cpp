@@ -2470,6 +2470,21 @@ int32_t AppMgrProxy::ExitMasterProcessRole()
     return reply.ReadInt32();
 }
 
+void AppMgrProxy::SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return;
+    }
+    PARCEL_UTIL_WRITE_NORET(data, Int32, recordId);
+    PARCEL_UTIL_WRITE_NORET(data, Int32, requestId);
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    PARCEL_UTIL_SENDREQ_NORET(AppMgrInterfaceCode::SET_SPECIFIED_PROCESS_REQUEST_ID, data, reply, option);
+}
+
 int32_t AppMgrProxy::QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles)
 {
     MessageParcel data;

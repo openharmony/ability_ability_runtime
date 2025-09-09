@@ -46,7 +46,8 @@ int32_t StartSpecifiedAbilityResponseStub::HandleOnNewProcessRequestResponse(Mes
     auto flag = Str16ToStr8(data.ReadString16());
     auto requestId = data.ReadInt32();
     auto callerProcessName = Str16ToStr8(data.ReadString16());
-    OnNewProcessRequestResponse(flag, requestId, callerProcessName);
+    auto recordId = data.ReadInt32();
+    OnNewProcessRequestResponse(flag, requestId, callerProcessName, recordId);
     return NO_ERROR;
 }
 

@@ -1591,6 +1591,7 @@ void AppRunningRecord::SetScheduleNewProcessRequestState(int32_t requestId,
     specifiedProcessRequest_->requestId = requestId;
     specifiedProcessRequest_->want = want;
     moduleName_ = moduleName;
+    specifiedProcessRequestId_ = requestId;
 }
 
 bool AppRunningRecord::IsNewProcessRequest() const

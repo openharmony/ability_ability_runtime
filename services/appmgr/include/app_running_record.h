@@ -1141,6 +1141,26 @@ public:
         return timeStamp_;
     }
 
+    inline void SetSpecifiedProcessRequestId(int32_t requestId)
+    {
+        specifiedProcessRequestId_.store(requestId);
+    }
+
+    inline int32_t GetSpecifiedProcessRequestId() const
+    {
+        return specifiedProcessRequestId_.load();
+    }
+
+    inline void SetHasBeenExistedMasterProcessRole(bool flag)
+    {
+        hasBeenExistedMasterProcessRole_.store(flag);
+    }
+
+    inline bool HasBeenExistedMasterProcessRole() const
+    {
+        return hasBeenExistedMasterProcessRole_.load();
+    }
+
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -1328,6 +1348,8 @@ private:
 
     bool isMasterProcess_ = false; // Only MasterProcess can be keepalive
     int64_t timeStamp_ = 0; // the flag of BackUpMainControlProcess
+    std::atomic<int32_t> specifiedProcessRequestId_ = -1;
+    std::atomic<bool> hasBeenExistedMasterProcessRole_ = false;
 };
 
 }  // namespace AppExecFwk

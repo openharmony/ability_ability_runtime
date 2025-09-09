@@ -1715,6 +1715,21 @@ int32_t AppMgrClient::ExitMasterProcessRole()
     return service->ExitMasterProcessRole();
 }
 
+void AppMgrClient::SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called");
+    if (mgrHolder_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "mgrHolder is nullptr.");
+        return;
+    }
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return;
+    }
+    service->SetSpecifiedProcessRequestId(recordId, requestId);
+}
+
 int32_t AppMgrClient::QueryRunningSharedBundles(pid_t pid, std::map<std::string, uint32_t> &sharedBundles)
 {
     if (mgrHolder_ == nullptr) {
