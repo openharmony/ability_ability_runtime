@@ -347,7 +347,6 @@ void JsUIAbility::CreateAndBindContext(const std::shared_ptr<AbilityRuntime::Abi
 void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
     std::shared_ptr<AAFwk::Want> want, const std::string &moduleName, const std::string &srcPath)
 {
-    TAG_LOGI(AAFwkTag::UIABILITY, "called");
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     UpdateAbilityObj(abilityInfo, moduleName, srcPath);
@@ -392,7 +391,6 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
         delete workContext;
         return;
     }
-    TAG_LOGI(AAFwkTag::UIABILITY, "End");
 }
 
 void JsUIAbility::CreateJSContext(napi_env env, napi_value &contextObj, int32_t screenMode)
