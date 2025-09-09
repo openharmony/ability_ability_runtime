@@ -2120,6 +2120,8 @@ bool AppMgrServiceInner::IsUninstallingOrUpgrading(int32_t uid)
 
 int32_t AppMgrServiceInner::NotifyUninstallOrUpgradeApp(const std::string &bundleName, int32_t uid, bool isUpgrade)
 {
+    TAG_LOGD(AAFwkTag::APPMGR, 
+        "bundleName: %{public}s, uid: %{public}d", bundleName.c_str(), uid);
     std::unique_lock lock(startProcessLock_);
     std::string killReason = isUpgrade ? "UpgradeApp" : "UninstallApp";
     InsertUninstallOrUpgradeUidSet(uid);
@@ -2128,6 +2130,7 @@ int32_t AppMgrServiceInner::NotifyUninstallOrUpgradeApp(const std::string &bundl
 
 void AppMgrServiceInner::NotifyUninstallOrUpgradeAppEnd(int32_t uid)
 {
+    TAG_LOGD(AAFwkTag::APPMGR, "uid: %{public}d", uid);
     RemoveUninstallOrUpgradeUidSet(uid);
 }
 
@@ -10562,17 +10565,19 @@ bool AppMgrServiceInner::IsBlockedByDisposeRules(const std::string &bundleName, 
     int32_t appIndex)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::APPMGR, 
+        "bundleName: %{public}s, userId: %{public}d", bundleName.c_str(), userId);
     // get bms
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null bundleMgrHelper");
+        TAG_LOGE(AAFwkTag::APPMGR, "null bundleMgrHelper");
         return false;
     }
 
     // get disposed status
     auto appControlMgr = bundleMgrHelper->GetAppControlProxy();
     if (appControlMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "null appControlMgr");
+        TAG_LOGE(AAFwkTag::APPMGR, "null appControlMgr");
         return false;
     }
     std::vector<AppExecFwk::DisposedRule> disposedRuleList;
@@ -10587,7 +10592,7 @@ bool AppMgrServiceInner::IsBlockedByDisposeRules(const std::string &bundleName, 
                 userId, disposedRuleList, 0));
         }
         if (ret != ERR_OK || disposedRuleList.empty()) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "Get No DisposedRule");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Get No DisposedRule");
             return false;
         }
     }
@@ -10606,6 +10611,8 @@ int32_t AppMgrServiceInner:: PreCheckStartProcess(const std::string &bundleName,
     std::shared_ptr<AAFwk::Want> &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::APPMGR, 
+        "bundleName: %{public}s, uid: %{public}d", bundleName.c_str(), uid);
     if (!IsUninstallingOrUpgrading(uid)) {
         return ERR_OK;
     }
