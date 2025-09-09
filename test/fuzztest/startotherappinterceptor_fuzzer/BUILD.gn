@@ -75,7 +75,6 @@ ohos_fuzztest("StartOtherappinterceptorFuzzTest") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
@@ -87,6 +86,10 @@ ohos_fuzztest("StartOtherappinterceptorFuzzTest") {
     "napi:ace_napi",
     "safwk:api_cache_manager",
   ]
+
+  if (ability_runtime_dsoftbus_enable) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]
