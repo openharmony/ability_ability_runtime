@@ -10692,6 +10692,10 @@ int AbilityManagerService::RegisterWindowManagerServiceHandler(const sptr<IWindo
         TAG_LOGE(AAFwkTag::ABILITYMGR, "register wms handler permission fail:%{public}d", IPCSkeleton::GetCallingUid());
         return CHECK_PERMISSION_FAILED;
     }
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "only support null scb device");
+        return CHECK_PERMISSION_FAILED;
+    }
     wmsHandler_ = handler;
     isAnimationEnabled_ = animationEnabled;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "WMS handler registered successfully.");
