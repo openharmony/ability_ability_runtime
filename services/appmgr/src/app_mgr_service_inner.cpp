@@ -10448,7 +10448,7 @@ bool AppMgrServiceInner::IsBlockedByDisposeRules(const std::string &bundleName, 
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::APPMGR, 
-        "bundleName: %{public}s, uid: %{public}d", bundleName.c_str(), userId);
+        "bundleName: %{public}s, userId: %{public}d", bundleName.c_str(), userId);
     // get bms
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
