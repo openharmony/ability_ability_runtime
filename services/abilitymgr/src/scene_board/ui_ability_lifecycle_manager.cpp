@@ -3955,7 +3955,7 @@ bool UIAbilityLifecycleManager::IsSpecifiedModuleLoaded(const AbilityRequest &ab
     }
     bool isLoaded = false;
     auto ret = IN_PROCESS_CALL(appMgr->IsSpecifiedModuleLoaded(abilityRequest.want,
-        abilityRequest.abilityInfo, isSpecifiedProcess, isLoaded, isDebug));
+        abilityRequest.abilityInfo, isLoaded, isDebug));
     return ret == ERR_OK && isLoaded;
 }
 

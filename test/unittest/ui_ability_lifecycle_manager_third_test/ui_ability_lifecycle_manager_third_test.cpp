@@ -400,7 +400,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_003, TestSize
     SpecifiedRequest specifiedRequest(0, AbilityRequest());
     specifiedRequest.specifiedProcessState = SpecifiedProcessState::STATE_ABILITY;
     mgr->StartSpecifiedRequest(specifiedRequest);
-    EXPECT_FALSE(specifiedRequest.isCold);
+    EXPECT_TRUE(specifiedRequest.isCold);
 }
 
 /**
