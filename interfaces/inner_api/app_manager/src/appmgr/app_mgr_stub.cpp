@@ -1976,7 +1976,7 @@ int32_t AppMgrStub::HandleIsSpecifiedModuleLoaded(MessageParcel &data, MessagePa
 
     bool exist = false;
     bool isDebug = false;
-    auto ret = IsSpecifiedModuleLoaded(*want, *abilityInfo, data.ReadBool(), exist, isDebug);
+    auto ret = IsSpecifiedModuleLoaded(*want, *abilityInfo, exist, isDebug);
     if (ret == ERR_OK) {
         reply.WriteBool(exist);
         reply.WriteBool(isDebug);
