@@ -34,6 +34,9 @@ bool ExtensionPermissionsUtil::CheckSAPermission(const AppExecFwk::ExtensionAbil
     } else if (extensionType == AppExecFwk::ExtensionAbilityType::SELECTION) {
         return PermissionVerification::GetInstance()->VerifyCallingPermission(
             "ohos.permission.CONNECT_SELECTION_EXTENSION");
+    } else if (extensionType == AppExecFwk::ExtensionAbilityType::FAULT_LOG) {
+        return PermissionVerification::GetInstance()->VerifyCallingPermission(
+            "ohos.permission.CONNECT_FAULT_LOG_EXTENSION");
     }
     if (PermissionVerification::GetInstance()->IsShellCall()) {
         return true;
