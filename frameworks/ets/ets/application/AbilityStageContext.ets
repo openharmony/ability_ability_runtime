@@ -19,7 +19,7 @@ import { HapModuleInfo } from 'bundleManager.HapModuleInfo'
 
 export default class AbilityStageContext extends Context {
   static {
-    loadLibrary("context_ani");
+    loadLibraryWithPermissionCheck("context_ani", "application.AbilityStageContext");
   }
   config?: Configuration;
   currentHapModuleInfo: HapModuleInfo;

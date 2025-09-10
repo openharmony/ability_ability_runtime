@@ -34,7 +34,7 @@ let unregisterToken = new object();
 
 export class Context extends BaseContext {
   static {
-    loadLibrary("context_ani");
+    loadLibraryWithPermissionCheck("context_ani", "application.Context");
   }
   etsContextPtr: long = 0;
   private cleaner: Cleaner | null = null;
