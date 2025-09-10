@@ -313,7 +313,7 @@ void Watchdog::ReportEvent()
         SetHiTraceChainId();
     }
 #endif
-    AppExecFwk::AppfreezeInner::GetInstance()->ThreadBlock(isSixSecondEvent_);
+    AppExecFwk::AppfreezeInner::GetInstance()->ThreadBlock(isSixSecondEvent_, 0, now, isInBackground_);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

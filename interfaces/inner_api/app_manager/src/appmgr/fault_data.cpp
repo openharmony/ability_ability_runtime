@@ -21,38 +21,39 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+#define RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(expr, log) \
+    do { \
+        if ((expr)) { \
+            TAG_LOGE(AAFwkTag::APPMGR, log); \
+            return false; \
+        } \
+    } while (0)
+
+#define RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(expr, log, arg) \
+    do { \
+        if ((expr)) { \
+            TAG_LOGE(AAFwkTag::APPMGR, log, arg); \
+            return false; \
+        } \
+    } while (0)
+
 bool FaultData::ReadFromParcel(Parcel &parcel)
 {
     std::string strValue;
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Name read string failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "Name read string failed.");
     errorObject.name = strValue;
 
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Message read string failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "Message read string failed.");
     errorObject.message = strValue;
 
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Stack read string failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "Stack read string failed.");
     errorObject.stack = strValue;
 
     int type = 0;
-    if (!parcel.ReadInt32(type)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "FaultType read int32 failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadInt32(type), "FaultType read int32 failed.");
     faultType = static_cast<FaultDataType>(type);
 
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "TimeoutMarkers read string failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "TimeoutMarkers read string failed.");
     timeoutMarkers = strValue;
 
     waitSaveState = parcel.ReadBool();
@@ -61,15 +62,20 @@ bool FaultData::ReadFromParcel(Parcel &parcel)
     needKillProcess = parcel.ReadBool();
     state = parcel.ReadUint32();
     eventId = parcel.ReadInt32();
+    schedTime = parcel.ReadUint64();
+    detectTime = parcel.ReadUint64();
+    appStatus = parcel.ReadInt32();
+    samplerStartTime = parcel.ReadUint64();
+    samplerFinishTime = parcel.ReadUint64();
+    samplerCount = parcel.ReadInt32();
+    pid = parcel.ReadInt32();
     tid = parcel.ReadInt32();
     stuckTimeout = parcel.ReadUint32();
     if (parcel.ReadBool()) {
         token = (static_cast<MessageParcel*>(&parcel))->ReadRemoteObject();
     }
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AppfreezeInfo read string failed.");
-        return false;
-    }
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "AppfreezeInfo read string failed.");
     appfreezeInfo = strValue;
     return ReadContent(parcel);
 }
@@ -77,15 +83,10 @@ bool FaultData::ReadFromParcel(Parcel &parcel)
 bool FaultData::ReadContent(Parcel &parcel)
 {
     std::string strValue;
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AppRunningUniqueId read string failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "AppRunningUniqueId read string failed.");
     appRunningUniqueId = strValue;
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ProcStatm read string failed.");
-        return false;
-    }
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "ProcStatm read string failed.");
     procStatm = strValue;
 
     isInForeground = parcel.ReadBool();
@@ -105,16 +106,12 @@ FaultData *FaultData::Unmarshalling(Parcel &parcel)
 
 bool FaultData::WriteContent(Parcel &parcel) const
 {
-    if (!parcel.WriteUint32(stuckTimeout)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "stuckTimeout [%{public}u] write uint32 failed.", stuckTimeout);
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint32(stuckTimeout),
+        "stuckTimeout [%{public}u] write uint32 failed.", stuckTimeout
+    );
 
     if (token == nullptr) {
-        if (!parcel.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Token falge [false] write bool failed.");
-            return false;
-        }
+        RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.WriteBool(false), "Token falge [false] write bool failed.");
     } else {
         if (!parcel.WriteBool(true) || !(static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(token)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Token falge [true] write bool failed.");
@@ -122,97 +119,105 @@ bool FaultData::WriteContent(Parcel &parcel) const
         }
     }
 
-    if (!parcel.WriteString(appfreezeInfo)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AppfreezeInfo [%{public}s] write string failed.", appfreezeInfo.c_str());
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(appfreezeInfo),
+        "AppfreezeInfo [%{public}s] write string failed.", appfreezeInfo.c_str()
+    );
 
-    if (!parcel.WriteString(appRunningUniqueId)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AppRunningUniqueId [%{public}s] write string failed.", appRunningUniqueId.c_str());
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(appRunningUniqueId),
+        "AppRunningUniqueId [%{public}s] write string failed.", appRunningUniqueId.c_str()
+    );
 
-    if (!parcel.WriteString(procStatm)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ProcStatm [%{public}s] write string failed.", procStatm.c_str());
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(procStatm),
+        "ProcStatm [%{public}s] write string failed.", procStatm.c_str()
+    );
 
-    if (!parcel.WriteBool(isInForeground)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "InForeground [%{public}d] write bool failed.", isInForeground);
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(isInForeground),
+        "InForeground [%{public}d] write bool failed.", isInForeground
+    );
 
-    if (!parcel.WriteBool(isEnableMainThreadSample)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "isEnableMainThreadSample [%{public}d] write bool failed.",
-            isEnableMainThreadSample);
-        return false;
-    }
-
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(isEnableMainThreadSample),
+        "isEnableMainThreadSample [%{public}d] write bool failed.", isEnableMainThreadSample
+    );
     return true;
 }
 
 bool FaultData::Marshalling(Parcel &parcel) const
 {
-    if (!parcel.WriteString(errorObject.name)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Name [%{public}s] write string failed.", errorObject.name.c_str());
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.name),
+        "Name [%{public}s] write string failed.", errorObject.name.c_str()
+    );
 
-    if (!parcel.WriteString(errorObject.message)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Message [%{public}s] write string failed.", errorObject.message.c_str());
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.message),
+        "Message [%{public}s] write string failed.", errorObject.message.c_str()
+    );
 
-    if (!parcel.WriteString(errorObject.stack)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Stack [%{public}s] write string failed.", errorObject.stack.c_str());
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.stack),
+        "Stack [%{public}s] write string failed.", errorObject.stack.c_str()
+    );
 
-    if (!parcel.WriteInt32(static_cast<int32_t>(faultType))) {
-        TAG_LOGE(AAFwkTag::APPMGR, "FaultType [%{public}d] write int32 failed.", static_cast<int32_t>(faultType));
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(static_cast<int32_t>(faultType)),
+        "FaultType [%{public}d] write int32 failed.", static_cast<int32_t>(faultType)
+    );
 
-    if (!parcel.WriteString(timeoutMarkers)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "TimeoutMarkers [%{public}s] write string failed.", timeoutMarkers.c_str());
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(timeoutMarkers),
+        "TimeoutMarkers [%{public}s] write string failed.", timeoutMarkers.c_str()
+    );
 
-    if (!parcel.WriteBool(waitSaveState)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "WaitSaveState [%{public}s] write bool failed.", waitSaveState ? "true" : "false");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(waitSaveState),
+        "WaitSaveState [%{public}s] write bool failed.", waitSaveState ? "true" : "false"
+    );
 
-    if (!parcel.WriteBool(notifyApp)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "NotifyApp [%{public}s] write bool failed.", notifyApp ? "true" : "false");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(notifyApp),
+        "NotifyApp [%{public}s] write bool failed.", notifyApp ? "true" : "false"
+    );
 
-    if (!parcel.WriteBool(forceExit)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ForceExit [%{public}s] write bool failed.", forceExit ? "true" : "false");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(forceExit),
+        "ForceExit [%{public}s] write bool failed.", forceExit ? "true" : "false"
+    );
 
-    if (!parcel.WriteBool(needKillProcess)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "needKillProcess [%{public}s] write bool failed.",
-            needKillProcess ? "true" : "false");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(needKillProcess),
+        "needKillProcess [%{public}s] write bool failed.", needKillProcess ? "true" : "false"
+    );
 
-    if (!parcel.WriteUint32(state)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "State [%{public}u] write uint32 failed.", state);
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint32(state),
+        "State [%{public}u] write uint32 failed.", state
+    );
 
-    if (!parcel.WriteInt32(eventId)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "EventId [%{public}u] write int32 failed.", eventId);
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(eventId),
+        "EventId [%{public}u] write int32 failed.", eventId
+    );
 
-    if (!parcel.WriteInt32(tid)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Tid [%{public}u] write int32 failed.", tid);
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(schedTime),
+        "SchedTime [%{public}" PRIu64 "] write uint64 failed.", schedTime
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(detectTime),
+        "DetectTime [%{public}" PRIu64 "] write uint64 failed.", detectTime
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(appStatus),
+        "AppStatus [%{public}d] write int32 failed.", appStatus
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(samplerStartTime),
+        "SamplerStartTime [%{public}" PRIu64 "] write uint64 failed.", samplerStartTime
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(samplerFinishTime),
+        "SamplerFinishTime [%{public}" PRIu64"] write uint64 failed.", samplerFinishTime
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(samplerCount),
+        "SamplerCount [%{public}d] write int32 failed.", samplerCount
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(pid),
+        "Pid [%{public}u] write int32 failed.", pid
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(tid),
+        "Tid [%{public}u] write int32 failed.", tid
+    );
 
     return WriteContent(parcel);
 }
@@ -220,40 +225,22 @@ bool FaultData::Marshalling(Parcel &parcel) const
 bool AppFaultDataBySA::ReadFromParcel(Parcel &parcel)
 {
     std::string strValue;
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Name read string failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "Name read string failed.");
     errorObject.name = strValue;
 
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Message read string failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "Message read string failed.");
     errorObject.message = strValue;
 
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Stack read string failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "Stack read string failed.");
     errorObject.stack = strValue;
 
     int type = 0;
-    if (!parcel.ReadInt32(type)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Type read int32 failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadInt32(type), "Type read int32 failed.");
     faultType = static_cast<FaultDataType>(type);
 
-    if (!parcel.ReadInt32(pid)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Pid read int32 failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadInt32(pid), "Pid read int32 failed.");
 
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "TimeoutMarkers read string failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "TimeoutMarkers read string failed.");
     timeoutMarkers = strValue;
 
     waitSaveState = parcel.ReadBool();
@@ -262,14 +249,14 @@ bool AppFaultDataBySA::ReadFromParcel(Parcel &parcel)
     needKillProcess = parcel.ReadBool();
     state = parcel.ReadUint32();
     eventId = parcel.ReadInt32();
+    schedTime = parcel.ReadUint64();
+    detectTime = parcel.ReadUint64();
+    appStatus = parcel.ReadInt32();
     if (parcel.ReadBool()) {
         token = (static_cast<MessageParcel*>(&parcel))->ReadRemoteObject();
     }
 
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AppfreezeInfo read string failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "AppfreezeInfo read string failed.");
     appfreezeInfo = strValue;
     return ReadContent(parcel);
 }
@@ -277,16 +264,10 @@ bool AppFaultDataBySA::ReadFromParcel(Parcel &parcel)
 bool AppFaultDataBySA::ReadContent(Parcel &parcel)
 {
     std::string strValue;
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AppRunningUniqueId read string failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "AppRunningUniqueId read string failed.");
     appRunningUniqueId = strValue;
 
-    if (!parcel.ReadString(strValue)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ProcStatm read string failed.");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "ProcStatm read string failed.");
     procStatm = strValue;
     isInForeground = parcel.ReadBool();
     isEnableMainThreadSample = parcel.ReadBool();
@@ -306,10 +287,7 @@ AppFaultDataBySA *AppFaultDataBySA::Unmarshalling(Parcel &parcel)
 bool AppFaultDataBySA::WriteContent(Parcel &parcel) const
 {
     if (token == nullptr) {
-        if (!parcel.WriteBool(false)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "Token falge [false] write bool failed.");
-            return false;
-        }
+        RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.WriteBool(false), "Token falge [false] write bool failed.");
     } else {
         if (!parcel.WriteBool(true) || !(static_cast<MessageParcel*>(&parcel))->WriteRemoteObject(token)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Token falge [true] write bool failed.");
@@ -317,32 +295,25 @@ bool AppFaultDataBySA::WriteContent(Parcel &parcel) const
         }
     }
 
-    if (!parcel.WriteString(appfreezeInfo)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AppfreezeInfo [%{public}s] write string failed.", appfreezeInfo.c_str());
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(appfreezeInfo),
+        "AppfreezeInfo [%{public}s] write string failed.", appfreezeInfo.c_str()
+    );
 
-    if (!parcel.WriteString(appRunningUniqueId)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "AppRunningUniqueId [%{public}s] write string failed.", appRunningUniqueId.c_str());
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(appRunningUniqueId),
+        "AppRunningUniqueId [%{public}s] write string failed.", appRunningUniqueId.c_str()
+    );
 
-    if (!parcel.WriteString(procStatm)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ProcStatm [%{public}s] write string failed.", procStatm.c_str());
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(procStatm),
+        "ProcStatm [%{public}s] write string failed.", procStatm.c_str()
+    );
 
-    if (!parcel.WriteBool(isInForeground)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "InForeground [%{public}d] write bool failed.", isInForeground);
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(isInForeground),
+        "InForeground [%{public}d] write bool failed.", isInForeground
+    );
 
-    if (!parcel.WriteBool(isEnableMainThreadSample)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "isEnableMainThreadSample [%{public}d] write bool failed.",
-            isEnableMainThreadSample);
-        return false;
-    }
-
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(isEnableMainThreadSample),
+        "isEnableMainThreadSample [%{public}d] write bool failed.", isEnableMainThreadSample
+    );
     return true;
 }
 
@@ -352,71 +323,70 @@ bool AppFaultDataBySA::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    if (!parcel.WriteInt32(static_cast<int32_t>(faultType))) {
-        TAG_LOGE(AAFwkTag::APPMGR, "FaultType [%{public}d] write int32 failed.", static_cast<int32_t>(faultType));
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(static_cast<int32_t>(faultType)),
+        "FaultType [%{public}d] write int32 failed.", static_cast<int32_t>(faultType)
+    );
 
-    if (!parcel.WriteInt32(pid)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Pid [%{public}d] write int32 failed.", static_cast<int32_t>(pid));
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(pid),
+        "Pid [%{public}d] write int32 failed.", static_cast<int32_t>(pid)
+    );
 
-    if (!parcel.WriteString(timeoutMarkers)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "TimeoutMarkers [%{public}s] write string failed.", timeoutMarkers.c_str());
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(timeoutMarkers),
+        "TimeoutMarkers [%{public}s] write string failed.", timeoutMarkers.c_str()
+    );
 
-    if (!parcel.WriteBool(waitSaveState)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "WaitSaveState [%{public}s] write bool failed.", waitSaveState ? "true" : "false");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(waitSaveState),
+        "WaitSaveState [%{public}s] write bool failed.", waitSaveState ? "true" : "false"
+    );
 
-    if (!parcel.WriteBool(notifyApp)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "NotifyApp [%{public}s] write bool failed.", notifyApp ? "true" : "false");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(notifyApp),
+        "NotifyApp [%{public}s] write bool failed.", notifyApp ? "true" : "false"
+    );
 
-    if (!parcel.WriteBool(forceExit)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "ForceExit [%{public}s] write bool failed.", forceExit ? "true" : "false");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(forceExit),
+        "ForceExit [%{public}s] write bool failed.", forceExit ? "true" : "false"
+    );
 
-    if (!parcel.WriteBool(needKillProcess)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "needKillProcess [%{public}s] write bool failed.",
-            needKillProcess ? "true" : "false");
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(needKillProcess),
+        "needKillProcess [%{public}s] write bool failed.", needKillProcess ? "true" : "false"
+    );
 
-    if (!parcel.WriteUint32(state)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "State [%{public}u] write uint32 failed.", state);
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint32(state),
+        "State [%{public}u] write uint32 failed.", state
+    );
 
-    if (!parcel.WriteInt32(eventId)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "EventId [%{public}u] write int32 failed.", eventId);
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(eventId),
+        "EventId [%{public}u] write int32 failed.", eventId
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(schedTime),
+        "SchedTime [%{public}" PRIu64 "] write uint64 failed.", schedTime
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteUint64(detectTime),
+        "DetectTime [%{public}" PRIu64 "] write uint64 failed.", detectTime
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteInt32(appStatus),
+        "AppStatus [%{public}d] write int32 failed.", appStatus
+    );
 
     return WriteContent(parcel);
 }
 
 bool AppFaultDataBySA::WriteErrorObject(Parcel &parcel) const
 {
-    if (!parcel.WriteString(errorObject.name)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Name [%{public}s] write string failed.", errorObject.name.c_str());
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.name),
+        "Name [%{public}s] write string failed.", errorObject.name.c_str()
+    );
 
-    if (!parcel.WriteString(errorObject.message)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Message [%{public}s] write string failed.", errorObject.message.c_str());
-        return false;
-    }
-    
-    if (!parcel.WriteString(errorObject.stack)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Stack [%{public}s] write string failed.", errorObject.stack.c_str());
-        return false;
-    }
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.message),
+        "Message [%{public}s] write string failed.", errorObject.message.c_str()
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(errorObject.stack),
+        "Stack [%{public}s] write string failed.", errorObject.stack.c_str()
+    );
     return true;
 }
 }  // namespace AppExecFwk
