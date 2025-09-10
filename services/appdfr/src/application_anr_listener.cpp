@@ -69,7 +69,8 @@ void ApplicationAnrListener::OnAnr(int32_t pid, int32_t eventId) const
     faultData.forceExit = false;
     faultData.eventId = eventId;
     faultData.schedTime = 0;
-    faultData.detectTime = AbilityRuntime::TimeUtil::CurrentTimeMillis();
+    faultData.detectTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData);
 }
 }  // namespace AAFwk

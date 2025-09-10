@@ -181,6 +181,7 @@ void AppfreezeInner::AppfreezeHandleOverReportCount(bool isSixSecondEvent)
 void AppfreezeInner::EnableFreezeSample(FaultData& newFaultData)
 {
     std::string eventName = newFaultData.errorObject.name;
+    newFaultData.isInForeground = GetAppInForeground();
     if (eventName == AppFreezeType::THREAD_BLOCK_3S || eventName == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
         OHOS::HiviewDFX::Watchdog::GetInstance().StartSample(HALF_DURATION, HALF_INTERVAL);
         TAG_LOGI(AAFwkTag::APPDFR, "start to sample freeze stack, eventName:%{public}s",
@@ -190,7 +191,6 @@ void AppfreezeInner::EnableFreezeSample(FaultData& newFaultData)
     if (eventName == AppFreezeType::THREAD_BLOCK_6S || eventName == AppFreezeType::LIFECYCLE_TIMEOUT ||
         eventName == AppFreezeType::APP_INPUT_BLOCK) {
         newFaultData.appfreezeInfo = OHOS::HiviewDFX::Watchdog::GetInstance().StopSample(HALF_DURATION / HALF_INTERVAL);
-        newFaultData.isInForeground = GetAppInForeground();
         newFaultData.isEnableMainThreadSample = GetMainThreadSample();
         OHOS::HiviewDFX::Watchdog::GetInstance().GetSamplerResult(newFaultData.samplerStartTime,
             newFaultData.samplerFinishTime, newFaultData.samplerCount);
