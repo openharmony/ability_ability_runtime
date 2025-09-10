@@ -18,7 +18,7 @@ import { BusinessError, AsyncCallback } from '@ohos.base';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
 
 export default namespace uriPermissionManager {
-    loadLibrary("uri_permission_manager_ani_kit.z");
+    loadLibraryWithPermissionCheck("uri_permission_manager_ani_kit.z", "@ohos.application.uriPermissionManager");
 
     export native function grantUriPermissionCallbackSync(uri: string, flag: wantConstant.Flags, targetBundleName: string,
         appCloneIndex: number, callback: AsyncCallbackWrapper<number>): void;

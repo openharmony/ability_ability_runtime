@@ -20,7 +20,7 @@ import { HapModuleInfo } from 'bundleManager.HapModuleInfo'
 
 export default class ExtensionContext extends Context {
     static {
-        loadLibrary("context_ani");
+        loadLibraryWithPermissionCheck("context_ani", "application.ExtensionContext");
     }
     extensionAbilityInfo: ExtensionAbilityInfo;
     config: Configuration;

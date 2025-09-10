@@ -18,7 +18,7 @@ import { BusinessError, AsyncCallback } from '@ohos.base';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
 
 export default namespace application {
-  loadLibrary("application_ani.z")
+  loadLibraryWithPermissionCheck("application_ani.z", "@ohos.app.ability.application")
   export native function nativeCreateModuleContext(context: Context, bundleName: string, moduleName: string,
     callback: AsyncCallbackWrapper<Context>): void;
 
