@@ -272,6 +272,36 @@ HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAbility_008, TestSize.Level1)
 
 /*
  * Feature: ImplicitStartProcessor
+ * Function: ImplicitStartAbility
+ * SubFunction: NA
+ * FunctionPoints: ImplicitStartProcessor ImplicitStartAbility
+ * EnvConditions: NA
+ * CaseDescription: dialogAppInfos.size() == 0 and !IsSelectorDialogDefaultPossion()
+ */
+HWTEST_F(ImplicitStartProcessorTest, ImplicitStartAbility_009, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_009 start");
+    auto processor = std::make_shared<ImplicitStartProcessor>();
+    AbilityRequest request;
+    int32_t userId = 0;
+    std::string mockAction = "action.system.home";
+    request.want.SetAction(mockAction);
+    request.want.SetParam("isCreateAppGallerySelector", true);
+    request.hideFailureTipDialog = false;
+
+    int32_t res = processor->ImplicitStartAbility(request, userId,
+        AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED, "", false);
+    EXPECT_EQ(res, ERR_IMPLICIT_START_ABILITY_FAIL);
+
+    request.hideFailureTipDialog = true;
+    res = processor->ImplicitStartAbility(request, userId,
+        AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED, "", false);
+    EXPECT_EQ(res, ERR_IMPLICIT_START_ABILITY_FAIL);
+    TAG_LOGI(AAFwkTag::TEST, "ImplicitStartAbility_009 end");
+}
+
+/*
+ * Feature: ImplicitStartProcessor
  * Function: TrustlistIntersectionProcess
  * SubFunction: NA
  * FunctionPoints:ImplicitStartProcessor TrustlistIntersectionProcess
