@@ -672,7 +672,7 @@ int32_t AbilityManagerService::StartAbilityByFreeInstall(const Want &want, sptr<
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Start ability come, ability is %{public}s, userId is %{public}d",
         want.GetElement().GetAbilityName().c_str(), userId);
     StartAbilityWrapParam startAbilityWrapParam = {
-        want, callerToken, requestCode, false, userId, false, 0, false, false, false, hideFailureTipDialog };
+        want, callerToken, requestCode, false, userId, false, 0, false, false, false, false, hideFailureTipDialog };
     int32_t ret = StartAbilityWrap(startAbilityWrapParam);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbilityByFreeInstall error:%{public}d", ret);
