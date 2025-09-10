@@ -36,7 +36,7 @@ namespace AppExecFwk {
 static const std::vector<std::string> APP_FREEZE_EVENT_NAME = {
     "THREAD_BLOCK_3S",
     "THREAD_BLOCK_6S",
-    "APP_INPUUT_BLOCK",
+    "APP_INPUT_BLOCK",
     "LIFECYCLE_HALF_TIMEOUT",
     "LIFECYCLE_TIMEOUT",
 };
@@ -179,6 +179,7 @@ private:
     int64_t perfTime = 0;
     static ffrt::mutex freezeInfoMutex_;
     static std::string appfreezeInfoPath_;
+    std::mutex freezeMapMutex_;
     std::map<int32_t, std::map<std::string, AppfreezeEventRecord>> freezeEventMap_;
 };
 }  // namespace AppExecFwk

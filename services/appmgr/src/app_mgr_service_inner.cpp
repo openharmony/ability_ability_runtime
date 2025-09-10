@@ -7394,8 +7394,8 @@ int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleN
             TAG_LOGW(AAFwkTag::APPMGR, "faultData: %{public}s,pid: %{public}d will exit because %{public}s",
                 bundleName.c_str(), pid, innerService->FaultTypeToString(faultData.faultType).c_str());
             uint64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::steady_clock::now().time_since_epoch()).count();
-            AppExecFwk::AppfreezeManager::GetInstance()->RegisterAppKillTime(now, pid);
+                std::chrono::system_clock::now().time_since_epoch()).count();
+            AppExecFwk::AppfreezeManager::GetInstance()->RegisterAppKillTime(pid, now);
             innerService->KillProcessByPid(pid, faultData.errorObject.name);
             return;
         };
