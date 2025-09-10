@@ -8367,7 +8367,6 @@ void AbilityManagerService::StartAutoStartupApps(int32_t userId)
         return;
     }
     std::vector<AutoStartupInfo> infoList;
-    userId = AbilityRuntime::UserController::GetInstance().GetForegroundUserId(DisplayUtil::ObtainDefaultDisplayId());
     int32_t result = abilityAutoStartupService_->QueryAllAutoStartupApplicationsWithoutPermission(infoList, userId);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed query data");
@@ -8383,10 +8382,10 @@ void AbilityManagerService::StartAutoStartupApps(int32_t userId)
         info.retryCount = START_AUTO_START_APP_RETRY_MAX_TIMES;
         infoQueue.push(info);
     }
-    StartAutoStartupApps(infoQueue);
+    StartAutoStartupApps(infoQueue, userId);
 }
 
-void AbilityManagerService::StartAutoStartupApps(std::queue<AutoStartupInfo> infoQueue)
+void AbilityManagerService::StartAutoStartupApps(std::queue<AutoStartupInfo> infoQueue, int32_t userId)
 {
     if (infoQueue.empty()) {
         return;
@@ -8410,21 +8409,21 @@ void AbilityManagerService::StartAutoStartupApps(std::queue<AutoStartupInfo> inf
     int32_t result = ERR_OK;
     if (info.abilityTypeName == AbilityRuntime::EXTENSION_TYPE_APP_SERVICE) {
         result = StartExtensionAbility(
-            want, nullptr, info.userId, AppExecFwk::ExtensionAbilityType::APP_SERVICE);
+            want, nullptr, userId, AppExecFwk::ExtensionAbilityType::APP_SERVICE);
     } else {
-        result = StartAbility(want, info.userId);
+        result = StartAbility(want, userId);
     }
     if ((result != ERR_OK) && (info.retryCount > 0)) {
         info.retryCount--;
         infoQueue.push(info);
     }
-    auto nextStartAutoStartupAppsTask = [aams = weak_from_this(), infoQueue]() {
+    auto nextStartAutoStartupAppsTask = [aams = weak_from_this(), infoQueue, userId]() {
         auto obj = aams.lock();
         if (obj == nullptr) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "start auto startup app error, obj null");
             return;
         }
-        obj->StartAutoStartupApps(infoQueue);
+        obj->StartAutoStartupApps(infoQueue, userId);
     };
     taskHandler_->SubmitTask(nextStartAutoStartupAppsTask, "StartAutoStartupApps", START_AUTO_START_APP_DELAY_TIME);
 }

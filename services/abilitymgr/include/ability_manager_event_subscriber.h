@@ -39,7 +39,7 @@ public:
 private:
     std::function<void(int32_t)> screenUnlockCallback_;
     std::function<void()> userScreenUnlockCallback_;
-    std::unordered_set<std::string> eventSet_;
+    std::unordered_map<int32_t, std::string> eventMap_;
     std::mutex mutex_;
 };
 } // namespace AbilityRuntime

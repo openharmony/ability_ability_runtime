@@ -430,11 +430,11 @@ HWTEST_F(AbilityManagerServiceTenhtTest, SubscribeScreenUnlockedEvent_001, TestS
     int32_t userId = 100;
     abilityMs_->StartResidentApps(userId);
     std::queue<AutoStartupInfo> infoQueue;
-    abilityMs_->StartAutoStartupApps(infoQueue);
+    abilityMs_->StartAutoStartupApps(infoQueue, userId);
     AutoStartupInfo autoStartupInfo;
     autoStartupInfo.userId = userId;
     infoQueue.push(autoStartupInfo);
-    abilityMs_->StartAutoStartupApps(infoQueue);
+    abilityMs_->StartAutoStartupApps(infoQueue, userId);
     abilityMs_->SubscribeScreenUnlockedEvent();
     EXPECT_NE(abilityMs_->screenSubscriber_, nullptr);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest SubscribeScreenUnlockedEvent_001 end");
@@ -724,7 +724,8 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_001, TestSize.Leve
     autoStartupInfo.abilityTypeName = AbilityRuntime::EXTENSION_TYPE_APP_SERVICE;
     std::queue<AutoStartupInfo> infoQueue;
     infoQueue.push(autoStartupInfo);
-    abilityMs->StartAutoStartupApps(infoQueue);
+    int32_t userId = 100;
+    abilityMs->StartAutoStartupApps(infoQueue, userId);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_001 end");
 }
 
@@ -746,7 +747,8 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_002, TestSize.Leve
     autoStartupInfo.appCloneIndex = MAX_APP_CLONE_INDEX_NUM;
     std::queue<AutoStartupInfo> infoQueue;
     infoQueue.push(autoStartupInfo);
-    abilityMs->StartAutoStartupApps(infoQueue);
+    int32_t userId = 100;
+    abilityMs->StartAutoStartupApps(infoQueue, userId);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_002 end");
 }
 
@@ -765,7 +767,8 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_003, TestSize.Leve
     abilityMs->taskHandler_ = taskHandler;
     EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(0);
     std::queue<AutoStartupInfo> infoQueue;
-    abilityMs->StartAutoStartupApps(infoQueue);
+    int32_t userId = 100;
+    abilityMs->StartAutoStartupApps(infoQueue, userId);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_003 end");
 }
 
@@ -786,7 +789,8 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_004, TestSize.Leve
     AutoStartupInfo autoStartupInfo;
     std::queue<AutoStartupInfo> infoQueue;
     infoQueue.push(autoStartupInfo);
-    abilityMs->StartAutoStartupApps(infoQueue);
+    int32_t userId = 100;
+    abilityMs->StartAutoStartupApps(infoQueue, userId);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_004 end");
 }
 }  // namespace AAFwk
