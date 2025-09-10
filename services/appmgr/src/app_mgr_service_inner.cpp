@@ -4828,6 +4828,8 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
         TAG_LOGI(AAFwkTag::APPMGR, "null appRecord");
         return;
     }
+    AppExecFwk::AppfreezeManager::GetInstance()->ReportAppFreezeSysEvents(appRecord->GetPid(),
+        appRecord->GetBundleName());
     AppExecFwk::AppfreezeManager::GetInstance()->RemoveDeathProcess(appRecord->GetBundleName());
     std::vector<sptr<IRemoteObject>> abilityTokens;
     for (const auto &token : appRecord->GetAbilities()) {
@@ -7281,6 +7283,7 @@ int32_t AppMgrServiceInner::SubmitDfxFaultTask(const FaultData &faultData, const
     };
     AppExecFwk::AppfreezeManager::GetInstance()->InitWarningCpuInfo(faultData, info);
     dfxTaskHandler_->SubmitTask(notifyAppTask, "NotifyAppFaultTask");
+    dfxTaskHandler_->SubmitTask(notifyAppTask, "NotifyAppFaultTask");
     TAG_LOGW(AAFwkTag::APPDFR, "submit NotifyAppFaultTask, eventName:%{public}s, bundleName:%{public}s, "
         "endTime:%{public}s, interval:%{public}" PRId64 " ms", faultData.errorObject.name.c_str(),
         bundleName.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
@@ -7386,20 +7389,24 @@ bool AppMgrServiceInner::CheckAppFault(const std::shared_ptr<AppRunningRecord> &
 int32_t AppMgrServiceInner::KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData,
     bool isNeedExit)
 {
-    auto killAppTask = [pid, bundleName, faultData, isNeedExit, innerServiceWeak = weak_from_this()]() {
-        auto innerService = innerServiceWeak.lock();
-        CHECK_POINTER_AND_RETURN_LOG(innerService, "get appMgrServiceInner fail");
-        if (isNeedExit || (faultData.forceExit && !faultData.waitSaveState)) {
+    if (isNeedExit || (faultData.forceExit && !faultData.waitSaveState)) {
+        auto killAppTask = [pid, bundleName, faultData, isNeedExit, innerServiceWeak = weak_from_this()]() {
+            auto innerService = innerServiceWeak.lock();
+            CHECK_POINTER_AND_RETURN_LOG(innerService, "get appMgrServiceInner fail");
             TAG_LOGW(AAFwkTag::APPMGR, "faultData: %{public}s,pid: %{public}d will exit because %{public}s",
                 bundleName.c_str(), pid, innerService->FaultTypeToString(faultData.faultType).c_str());
+            uint64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count();
+            AppExecFwk::AppfreezeManager::GetInstance()->RegisterAppKillTime(pid, now);
             innerService->KillProcessByPid(pid, faultData.errorObject.name);
             return;
-        }
-    };
-    constexpr int32_t waitTime = 3500;
-    // wait 3.5s before kill application
-    CHECK_POINTER_AND_RETURN_VALUE(taskHandler_, ERR_NO_INIT);
-    taskHandler_->SubmitTaskJust(killAppTask, "killAppTask", waitTime);
+        };
+        constexpr int32_t waitTime = 3500;
+        // wait 3.5s before kill application
+        CHECK_POINTER_AND_RETURN_VALUE(taskHandler_, ERR_NO_INIT);
+        taskHandler_->SubmitTaskJust(killAppTask, "killAppTask", waitTime);
+    }
+
     return ERR_OK;
 }
 
@@ -7541,6 +7548,9 @@ FaultData AppMgrServiceInner::ConvertDataTypes(const AppFaultDataBySA &faultData
     newfaultData.token = faultData.token;
     newfaultData.state = faultData.state;
     newfaultData.eventId = faultData.eventId;
+    newfaultData.pid = faultData.pid;
+    newfaultData.schedTime = faultData.schedTime;
+    newfaultData.detectTime = faultData.detectTime;
     newfaultData.needKillProcess = faultData.needKillProcess;
     newfaultData.appfreezeInfo = faultData.appfreezeInfo;
     newfaultData.procStatm = faultData.procStatm;

@@ -33,6 +33,14 @@
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
 namespace AppExecFwk {
+static const std::vector<std::string> APP_FREEZE_EVENT_NAME = {
+    "THREAD_BLOCK_3S",
+    "THREAD_BLOCK_6S",
+    "APP_INPUT_BLOCK",
+    "LIFECYCLE_HALF_TIMEOUT",
+    "LIFECYCLE_TIMEOUT",
+};
+
 class AppfreezeManager : public std::enable_shared_from_this<AppfreezeManager> {
 public:
     struct AppInfo {
@@ -71,6 +79,15 @@ public:
         std::string msg;
     };
 
+    struct AppfreezeEventRecord {
+        uint64_t schedTime = 0;
+        uint64_t detectTime = 0;
+        uint64_t dumpStartTime = 0;
+        uint64_t dumpFinishTime = 0;
+        std::string dumpResult;
+        int32_t appStatus = -1;
+    };
+
     AppfreezeManager();
     ~AppfreezeManager();
 
@@ -88,6 +105,8 @@ public:
     void RemoveDeathProcess(std::string bundleName);
     void ResetAppfreezeState(int32_t pid, const std::string& bundleName);
     bool IsValidFreezeFilter(int32_t pid, const std::string& bundleName);
+    void ReportAppFreezeSysEvents(int32_t pid, const std::string& bundleName);
+    void RegisterAppKillTime(int32_t pid, uint64_t killTime);
     void InitWarningCpuInfo(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
 
 private:
@@ -125,7 +144,8 @@ private:
     std::set<int> GetBinderPeerPids(std::string& stack, AppfreezeManager::ParseBinderParam params,
         std::set<int>& asyncPids, AppfreezeManager::TerminalBinder& terminalBinder) const;
     void FindStackByPid(std::string& msg, int pid) const;
-    std::string CatchJsonStacktrace(int pid, const std::string& faultType, const std::string& stack) const;
+    std::pair<std::string, std::string> CatchJsonStacktrace(
+        int pid, const std::string& faultType, const std::string& stack) const;
     std::string CatcherStacktrace(int pid, const std::string& stack) const;
     FaultData GetFaultNotifyData(const FaultData& faultData, int pid);
     int AcquireStack(const FaultData& faultData, const AppInfo& appInfo, const std::string& memoryContent);
@@ -139,6 +159,8 @@ private:
     void ClearOldInfo();
     void CollectFreezeSysMemory(std::string& memoryContent);
     int MergeNotifyInfo(FaultData& faultNotifyData, const AppfreezeManager::AppInfo& appInfo);
+    void RecordAppFreezeBehavior(FaultData& faultData, uint64_t dumpStartTime,
+        uint64_t dumpFinishTime, const std::string& dumpResult);
     std::string ParseDecToHex(uint64_t id);
     std::string GetHitraceInfo();
     void PerfStart(std::string eventName);
@@ -157,6 +179,8 @@ private:
     int64_t perfTime = 0;
     static ffrt::mutex freezeInfoMutex_;
     static std::string appfreezeInfoPath_;
+    std::mutex freezeMapMutex_;
+    std::map<int32_t, std::map<std::string, AppfreezeEventRecord>> freezeEventMap_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

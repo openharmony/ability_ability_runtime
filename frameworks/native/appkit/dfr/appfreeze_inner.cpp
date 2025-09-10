@@ -181,6 +181,7 @@ void AppfreezeInner::AppfreezeHandleOverReportCount(bool isSixSecondEvent)
 void AppfreezeInner::EnableFreezeSample(FaultData& newFaultData)
 {
     std::string eventName = newFaultData.errorObject.name;
+    newFaultData.isInForeground = GetAppInForeground();
     if (eventName == AppFreezeType::THREAD_BLOCK_3S || eventName == AppFreezeType::LIFECYCLE_HALF_TIMEOUT) {
         OHOS::HiviewDFX::Watchdog::GetInstance().StartSample(HALF_DURATION, HALF_INTERVAL);
         TAG_LOGI(AAFwkTag::APPDFR, "start to sample freeze stack, eventName:%{public}s", eventName.c_str());
@@ -189,8 +190,9 @@ void AppfreezeInner::EnableFreezeSample(FaultData& newFaultData)
     if (eventName == AppFreezeType::THREAD_BLOCK_6S || eventName == AppFreezeType::LIFECYCLE_TIMEOUT ||
         eventName == AppFreezeType::APP_INPUT_BLOCK) {
         newFaultData.appfreezeInfo = OHOS::HiviewDFX::Watchdog::GetInstance().StopSample(HALF_DURATION / HALF_INTERVAL);
-        newFaultData.isInForeground = GetAppInForeground();
         newFaultData.isEnableMainThreadSample = GetMainThreadSample();
+        OHOS::HiviewDFX::Watchdog::GetInstance().GetSamplerResult(newFaultData.samplerStartTime,
+            newFaultData.samplerFinishTime, newFaultData.samplerCount);
         TAG_LOGI(AAFwkTag::APPDFR, "stop to sample freeze stack, eventName:%{public}s freezeFile:%{public}s "
             "foreGround:%{public}d enbleMainThreadSample:%{public}d.",
             eventName.c_str(), newFaultData.appfreezeInfo.c_str(), newFaultData.isInForeground,
@@ -278,12 +280,20 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
         faultData.procStatm = it->procStatm;
         faultData.isInForeground = it->isInForeground;
         faultData.isEnableMainThreadSample = it->isEnableMainThreadSample;
+        faultData.schedTime = it->schedTime;
+        faultData.detectTime = it->detectTime;
+        faultData.appStatus = it->appStatus;
+        faultData.samplerStartTime = it->samplerStartTime;
+        faultData.samplerFinishTime = it->samplerFinishTime;
+        faultData.samplerCount = it->samplerCount;
+        faultData.pid = it->pid;
         ChangeFaultDateInfo(faultData, msgContent);
     }
     return 0;
 }
 
-void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent)
+void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent, uint64_t schedTime,
+    uint64_t now, bool isInBackground)
 {
     FaultData faultData;
     faultData.errorObject.message =
@@ -292,6 +302,10 @@ void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent)
     faultData.faultType = FaultDataType::APP_FREEZE;
     bool onlyMainThread = false;
     int32_t pid = static_cast<int32_t>(getpid());
+    faultData.pid = pid;
+    faultData.schedTime = schedTime;
+    faultData.detectTime = now;
+    faultData.appStatus = isInBackground ? AppStatus::APP_STATUS_BACKGROUND : AppStatus::APP_STATUS_FOREGROUND;
 
     if (isSixSecondEvent) {
         faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
