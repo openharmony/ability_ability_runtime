@@ -57,12 +57,7 @@ bool ChildProcessInfo::ReadFromParcel(Parcel &parcel)
     isStartWithNative = parcel.ReadBool();
     bool hasBundleInfo = parcel.ReadBool();
     if (hasBundleInfo) {
-        std::unique_ptr<BundleInfo> info(parcel.ReadParcelable<BundleInfo>());
-        if (!info) {
-            TAG_LOGE(AAFwkTag::APPMGR, "read bundle info failed");
-            return false;
-        }
-        bundleInfo = std::make_shared<BundleInfo>(*info);
+        bundleInfo.reset(parcel.ReadParcelable<BundleInfo>());
     }
 
     int32_t hspListSize = 0;
