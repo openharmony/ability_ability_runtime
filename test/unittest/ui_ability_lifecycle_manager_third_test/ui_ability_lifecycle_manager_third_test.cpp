@@ -430,7 +430,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_005, TestSize
     auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
     AppMgrUtil::appMgr_ = appmgr;
     EXPECT_CALL(*appmgr, IsSpecifiedModuleLoaded)
-        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool, bool &result, bool &) {
+        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result, bool &) {
             result = true;
             return 0;
         });
@@ -497,7 +497,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_009, TestSize
     auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
     AppMgrUtil::appMgr_ = appmgr;
     EXPECT_CALL(*appmgr, IsSpecifiedModuleLoaded)
-        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool, bool &result, bool &isDebug) {
+        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result, bool &isDebug) {
             result = false;
             isDebug = true;
             return 0;

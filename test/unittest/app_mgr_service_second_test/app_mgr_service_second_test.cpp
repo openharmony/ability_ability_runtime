@@ -387,7 +387,7 @@ HWTEST_F(AppMgrServiceSecondTest, IsSpecifiedModuleLoaded_0100, TestSize.Level1)
     AbilityInfo abilityInfo;
     bool result;
     bool isDebug = false;
-    auto ret = appMgrService->IsSpecifiedModuleLoaded(want, abilityInfo, false, result, isDebug);
+    auto ret = appMgrService->IsSpecifiedModuleLoaded(want, abilityInfo, result, isDebug);
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
 
     appMgrService->taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler(Constants::APP_MGR_SERVICE_NAME);
@@ -395,11 +395,11 @@ HWTEST_F(AppMgrServiceSecondTest, IsSpecifiedModuleLoaded_0100, TestSize.Level1)
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(appMgrService->taskHandler_,
         appMgrService->appMgrServiceInner_);
     IPCSkeleton::pid_ = 0;
-    ret = appMgrService->IsSpecifiedModuleLoaded(want, abilityInfo, false, result, isDebug);
+    ret = appMgrService->IsSpecifiedModuleLoaded(want, abilityInfo, result, isDebug);
     EXPECT_EQ(ret, ERR_INVALID_OPERATION);
 
     IPCSkeleton::pid_ = getprocpid();
-    ret = appMgrService->IsSpecifiedModuleLoaded(want, abilityInfo, false, result, isDebug);
+    ret = appMgrService->IsSpecifiedModuleLoaded(want, abilityInfo, result, isDebug);
     EXPECT_EQ(ret, ERR_OK);
 }
 
