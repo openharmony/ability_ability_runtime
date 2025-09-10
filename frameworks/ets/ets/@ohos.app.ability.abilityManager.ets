@@ -52,7 +52,7 @@ export default namespace abilityManager {
         return nativeGetForegroundUIAbilities();
       };
       let p1 = taskpool.execute(executeFunc);
-      p1.then((e :NullishType)=>{
+      p1.then((e :Any)=>{
         let abilities: Array<AbilityStateData> = e as Array<AbilityStateData>;
         resolve(abilities);
       }, (err: Error): void => {
