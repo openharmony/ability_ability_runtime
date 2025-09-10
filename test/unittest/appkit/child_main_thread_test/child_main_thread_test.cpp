@@ -76,8 +76,7 @@ HWTEST_F(ChildMainThreadTest, Init_0100, TestSize.Level0)
 
     std::shared_ptr<EventRunner> runner = EventRunner::GetMainEventRunner();
     ChildProcessInfo info;
-    BundleInfo bundleInfo;
-    info.bundleInfo = std::make_shared<BundleInfo>(bundleInfo);
+    info.bundleInfo = std::make_shared<BundleInfo>();
     auto ret = thread->Init(runner, info);
     EXPECT_TRUE(ret);
 }
