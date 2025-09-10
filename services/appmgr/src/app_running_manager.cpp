@@ -285,6 +285,9 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::FindMasterProcessAppRunning
         if (!(appRecord && appRecord->GetUid() == uid)) {
             continue;
         }
+        if (!IsAppRunningRecordValid(appRecord)) {
+            continue;
+        }
         if (appRecord->IsMasterProcess() && IsSameAbilityType(appRecord, abilityInfo)) {
             resMasterRecord = appRecord;
             break;
@@ -302,13 +305,12 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::FindMasterProcessAppRunning
     }
     resMasterRecord = (resMasterRecord == nullptr && maxAppRecord != nullptr) ? maxAppRecord : resMasterRecord;
     resMasterRecord = (resMasterRecord == nullptr) ? minAppRecord : resMasterRecord;
-    if (IsAppRunningRecordValid(resMasterRecord)) {
+    if (resMasterRecord) {
         resMasterRecord->SetMasterProcess(true);
         resMasterRecord->SetTimeStamp(0);
         DelayedSingleton<CacheProcessManager>::GetInstance()->ReuseCachedProcess(resMasterRecord);
-        return resMasterRecord;
     }
-    return nullptr;
+    return resMasterRecord;
 }
 
 bool AppRunningManager::CheckMasterProcessAppRunningRecordIsExist(
