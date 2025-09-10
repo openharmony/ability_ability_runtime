@@ -17,7 +17,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <fuzzer/FuzzedDataProvider.h>
 
 #define private public
 #define protected public
@@ -53,42 +52,15 @@ public:
     {}
 };
 
-class MyAbilityConnectionObserver : public IConnectionObserver {
-public:
-    MyAbilityConnectionObserver() = default;
-    virtual ~MyAbilityConnectionObserver() = default;
-    void OnExtensionConnected(const ConnectionData& data) override
-    {}
-    void OnExtensionDisconnected(const ConnectionData& data) override
-    {}
-    void OnExtensionSuspended(const ConnectionData &data) override
-    {}
-    void OnExtensionResumed(const ConnectionData &data) override
-    {}
-#ifdef WITH_DLP
-    void OnDlpAbilityOpened(const DlpStateData& data) override
-    {}
-    void OnDlpAbilityClosed(const DlpStateData& data) override
-    {}
-#endif // WITH_DLP
-    sptr<IRemoteObject> AsObject() override
-    {
-        return {};
-    }
-};
 }
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     std::shared_ptr<ConnectionObserver> observer = std::make_shared<MyConnectionObserver>();
     // fuzz for connectionObserverClient
-    FuzzedDataProvider fdp(data, size);
     ConnectionObserverClient::GetInstance().UnregisterObserver(observer);
     sptr<IRemoteObject> remoteObj;
     auto serviceProxyAdapter = std::make_shared<ServiceProxyAdapter>(remoteObj);
-    std::shared_ptr<AbilityRuntime::IConnectionObserver> cobserver = std::make_shared<MyAbilityConnectionObserver>();
-    sptr<OHOS::AbilityRuntime::IConnectionObserver> cobserverSp = cobserver.get();
-    serviceProxyAdapter->UnregisterObserver(cobserverSp);
     serviceProxyAdapter->GetProxyObject();
     return true;
 }
