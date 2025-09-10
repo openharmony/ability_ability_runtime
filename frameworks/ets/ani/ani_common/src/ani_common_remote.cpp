@@ -28,7 +28,7 @@ ani_object AniRemote::CreateAniRemoteObject(ani_env *env, const sptr<IRemoteObje
         TAG_LOGE(AAFwkTag::ABILITY, "FindClass RemoteProxy: %{public}d", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "RemoteProxy ctor: %{public}d", status);
         return nullptr;
     }
