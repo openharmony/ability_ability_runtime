@@ -469,7 +469,7 @@ export default class UIAbilityContext extends Context {
     let p1 = taskpool.execute((): BusinessError => {
       return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
     });
-    p1.then((e: NullishType) => {
+    p1.then((e: Any) => {
       let retError = e as BusinessError;
       if (retError.code === 0) {
         callback(null, undefined);
@@ -521,7 +521,7 @@ hideAbility(): Promise<void> {
       let p1 = taskpool.execute((): BusinessError => {
         return this.nativeStartAbilityByTypeSync(type, wantParam, startCallback);
       });
-      p1.then((e: NullishType) => {
+      p1.then((e: Any) => {
         let retError = e as BusinessError;
         if (retError.code === 0) {
           resolve(undefined);
