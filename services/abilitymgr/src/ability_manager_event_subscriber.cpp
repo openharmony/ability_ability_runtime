@@ -36,22 +36,27 @@ void AbilityManagerEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventDa
         TAG_LOGE(AAFwkTag::ABILITYMGR, "nullptr callback");
         return;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto handleEvent = [&](const std::string &event) {
-        if (eventSet_.find(event) != eventSet_.end()) {
-            int32_t userId = want.GetIntParam("userId", -1);
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "The userId: %{public}d.", userId);
-            screenUnlockCallback_(userId);
-            eventSet_.clear();
-        } else {
-            eventSet_.insert(action);
+    auto handleEvent = [&](const std::string &event, int32_t userId) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto iter = eventMap_.find(userId);
+        if (iter != eventMap_.end()) {
+            if (iter->second == event) {
+                screenUnlockCallback_(userId);
+                eventMap_.erase(iter);
+            }
+            return;
         }
+        eventMap_.emplace(userId, action);
     };
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
-        handleEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
+        int32_t userId = data.GetCode();
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "The userId: %{public}d.", userId);
+        handleEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED, userId);
         userScreenUnlockCallback_();
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
-        handleEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
+        int32_t userId = want.GetIntParam("userId", -1);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "The userId: %{public}d.", userId);
+        handleEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED, userId);
     }
 }
 } // namespace AbilityRuntime
