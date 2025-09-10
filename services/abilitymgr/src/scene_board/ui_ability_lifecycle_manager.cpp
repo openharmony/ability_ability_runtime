@@ -3934,6 +3934,20 @@ std::shared_ptr<SpecifiedRequest> UIAbilityLifecycleManager::PopAndGetNextSpecif
 bool UIAbilityLifecycleManager::IsSpecifiedModuleLoaded(const AbilityRequest &abilityRequest,
     bool isSpecifiedProcess, bool &isDebug)
 {
+    if (isSpecifiedProcess) {
+        auto instanceKey = abilityRequest.want.GetStringParam(Want::APP_INSTANCE_KEY);
+        for (const auto &[persistentId, abilityRecord] : sessionAbilityMap_) {
+            if (abilityRecord == nullptr) {
+                continue;
+            }
+            if (abilityRecord->GetAbilityInfo().uid == abilityRequest.abilityInfo.uid &&
+                abilityRecord->GetInstanceKey() == instanceKey) {
+                isDebug = abilityRecord->IsDebug();
+                return true;
+            }
+        }
+        return false;
+    }
     auto appMgr = AppMgrUtil::GetAppMgr();
     if (appMgr == nullptr) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
@@ -3941,7 +3955,7 @@ bool UIAbilityLifecycleManager::IsSpecifiedModuleLoaded(const AbilityRequest &ab
     }
     bool isLoaded = false;
     auto ret = IN_PROCESS_CALL(appMgr->IsSpecifiedModuleLoaded(abilityRequest.want,
-        abilityRequest.abilityInfo, isSpecifiedProcess, isLoaded, isDebug));
+        abilityRequest.abilityInfo, isLoaded, isDebug));
     return ret == ERR_OK && isLoaded;
 }
 

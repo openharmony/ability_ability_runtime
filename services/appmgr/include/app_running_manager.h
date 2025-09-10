@@ -437,8 +437,6 @@ public:
     int32_t RemoveUIExtensionBindItemById(int32_t uiExtensionBindAbilityId);
 
     std::shared_ptr<AppRunningRecord> GetAppRunningRecordByChildRecordPid(const pid_t pid);
-    std::shared_ptr<AppRunningRecord> GetMasterProcess(const std::string &bundleName, int32_t uid,
-        const std::string &instanceKey);
     
     int32_t AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;

@@ -10192,25 +10192,14 @@ void AppMgrServiceInner::SendAppSpawnUninstallDebugHapMsg(int32_t userId)
 }
 
 bool AppMgrServiceInner::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const AbilityInfo &abilityInfo,
-    bool isSpecifiedProcess, bool &isDebug)
+    bool &isDebug)
 {
     if (!CheckRemoteClient() || !appRunningManager_) {
         return false;
     }
-
+    auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo.applicationInfo);
     int32_t appIndex = 0;
     (void)AbilityRuntime::StartupUtil::GetAppIndex(want, appIndex);
-    auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
-    if (isSpecifiedProcess) {
-        auto appRecord = appRunningManager_->GetMasterProcess(abilityInfo.bundleName, abilityInfo.uid, instanceKey);
-        if (appRecord != nullptr) {
-            isDebug = appRecord->IsDebug();
-            return true;
-        }
-        return false;
-    }
-
-    auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo.applicationInfo);
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     if (!GetBundleAndHapInfo(abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
@@ -10220,6 +10209,7 @@ bool AppMgrServiceInner::IsSpecifiedModuleLoaded(const AAFwk::Want &want, const 
     auto abilityInfoPtr = std::make_shared<AbilityInfo>(abilityInfo);
     std::string processName;
     MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, "", processName, false);
+    auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
     auto customProcessFlag = abilityInfo.process;
     auto appRecord = appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name,
         processName, appInfo->uid, bundleInfo, "", nullptr, instanceKey, customProcessFlag);
