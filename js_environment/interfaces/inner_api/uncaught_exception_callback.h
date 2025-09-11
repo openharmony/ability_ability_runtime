@@ -52,6 +52,8 @@ public:
 
     void CallbackTask(napi_value& obj);
 
+    void HandleAndLogIfNotJsError(napi_value obj);
+
     std::string GetNativeStrFromJsTaggedObj(napi_value obj, const char* key);
 
     static std::string GetFuncNameAndBuildId(std::string nativeStack);

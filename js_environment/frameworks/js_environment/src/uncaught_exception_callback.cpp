@@ -81,6 +81,7 @@ void NapiUncaughtExceptionCallback::operator()(panda::TryCatch& trycatch)
 
 void NapiUncaughtExceptionCallback::CallbackTask(napi_value& obj)
 {
+    HandleAndLogIfNotJsError(obj);
     std::string errorMsg = GetNativeStrFromJsTaggedObj(obj, "message");
     std::string errorName = GetNativeStrFromJsTaggedObj(obj, "name");
     std::string errorStack = GetNativeStrFromJsTaggedObj(obj, "stack");
@@ -120,6 +121,43 @@ void NapiUncaughtExceptionCallback::CallbackTask(napi_value& obj)
     if (uncaughtTask_) {
         uncaughtTask_(summary, errorObj);
     }
+}
+
+void NapiUncaughtExceptionCallback::HandleAndLogIfNotJsError(napi_value obj)
+{
+    bool isJsError = false;
+    napi_status napiRet = napi_is_error(env_, obj, &isJsError);
+    if (napiRet != napi_ok) {
+        TAG_LOGE(AAFwkTag::JSENV, "napi_is_error failed");
+        return;
+    }
+    if (isJsError) {
+        TAG_LOGD(AAFwkTag::JSENV, "obj is JS Error");
+        return;
+    }
+    panda::Local<panda::JSValueRef> localVal = NapiValueToLocalValue(obj);
+    auto engine = reinterpret_cast<NativeEngine *>(env_);
+    if (engine == nullptr) {
+        TAG_LOGE(AAFwkTag::JSENV, "null engine");
+        return;
+    }
+    EcmaVM *vm = const_cast<EcmaVM *>(reinterpret_cast<NativeEngine *>(env_)->GetEcmaVm());
+    if (vm == nullptr) {
+        TAG_LOGE(AAFwkTag::JSENV, "null vm");
+        return;
+    }
+    panda::Local<panda::JSValueRef> jsonVal = panda::JSON::Stringify(vm, localVal);
+    if (jsonVal.IsEmpty() || jsonVal->IsUndefined() || jsonVal->IsNull()) {
+        panda::JSNApi::GetAndClearUncaughtException(vm);
+        TAG_LOGE(AAFwkTag::JSENV, "null jsonVal");
+        return;
+    }
+    panda::StringRef *strPtr = panda::StringRef::Cast(*jsonVal);
+    if (strPtr == nullptr) {
+        TAG_LOGE(AAFwkTag::JSENV, "null strPtr");
+        return;
+    }
+    TAG_LOGE(AAFwkTag::JSENV, "Uncaught exception: %{public}s", strPtr->ToString(vm).c_str());
 }
 
 std::string NapiUncaughtExceptionCallback::GetFuncNameAndBuildId(std::string nativeStack)
