@@ -1421,13 +1421,13 @@ HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfoForSelf_005, TestSize.
 }
 
 /**
- * @tc.name: GetChildProcessInfo_001
- * @tc.desc: test GetChildProcessInfo_001
+ * @tc.name: GetChildProcessInfoEx_001
+ * @tc.desc: test GetChildProcessInfoEx_001
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_001, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfoEx_001, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_001 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     
     ChildProcessRequest request;
@@ -1435,20 +1435,19 @@ HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_001, TestSize.Level1)
         std::make_shared<ChildProcessRecord>(0, request, nullptr);
     std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     ChildProcessInfo info;
-    bool isCallFromGetChildren = false;
-    auto ret = appMgrServiceInner->GetChildProcessInfo(childProcessRecord, appRecord, info, isCallFromGetChildren);
+    auto ret = appMgrServiceInner->GetChildProcessInfoEx(childProcessRecord, appRecord, info);
     EXPECT_EQ(ret, ERR_NAME_NOT_FOUND);
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_001 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_001 end");
 }
 
 /**
- * @tc.name: GetChildProcessInfo_002
- * @tc.desc: test GetChildProcessInfo_002
+ * @tc.name: GetChildProcessInfoEx_002
+ * @tc.desc: test GetChildProcessInfoEx_002
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_002, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfoEx_002, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_002 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_002 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getOsAccountLocalIdFromUid_ = ERR_NAME_NOT_FOUND;
     
@@ -1457,20 +1456,19 @@ HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_002, TestSize.Level1)
         std::make_shared<ChildProcessRecord>(0, request, nullptr);
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     ChildProcessInfo info;
-    bool isCallFromGetChildren = false;
-    auto ret = appMgrServiceInner->GetChildProcessInfo(childProcessRecord, appRecord, info, isCallFromGetChildren);
+    auto ret = appMgrServiceInner->GetChildProcessInfoEx(childProcessRecord, appRecord, info);
     EXPECT_EQ(ret, ERR_NAME_NOT_FOUND);
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_002 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_002 end");
 }
 
 /**
- * @tc.name: GetChildProcessInfo_003
- * @tc.desc: test GetChildProcessInfo_003
+ * @tc.name: GetChildProcessInfoEx_003
+ * @tc.desc: test GetChildProcessInfoEx_003
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_003, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfoEx_003, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_003 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_003 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getOsAccountLocalIdFromUid_ = ERR_OK;
     
@@ -1479,20 +1477,19 @@ HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_003, TestSize.Level1)
         std::make_shared<ChildProcessRecord>(0, request, nullptr);
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     ChildProcessInfo info;
-    bool isCallFromGetChildren = false;
-    auto ret = appMgrServiceInner->GetChildProcessInfo(childProcessRecord, appRecord, info, isCallFromGetChildren);
+    auto ret = appMgrServiceInner->GetChildProcessInfoEx(childProcessRecord, appRecord, info);
     EXPECT_EQ(ret, ERR_OK);
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_003 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_003 end");
 }
 
 /**
- * @tc.name: GetChildProcessInfo_004
- * @tc.desc: test GetChildProcessInfo_004
+ * @tc.name: GetChildProcessInfoEx_004
+ * @tc.desc: test GetChildProcessInfoEx_004
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_004, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfoEx_004, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_004 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_004 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getOsAccountLocalIdFromUid_ = ERR_OK;
     
@@ -1501,21 +1498,20 @@ HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_004, TestSize.Level1)
         std::make_shared<ChildProcessRecord>(0, request, nullptr);
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     ChildProcessInfo info;
-    bool isCallFromGetChildren = false;
     AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = nullptr;
-    auto ret = appMgrServiceInner->GetChildProcessInfo(childProcessRecord, appRecord, info, isCallFromGetChildren);
+    auto ret = appMgrServiceInner->GetChildProcessInfoEx(childProcessRecord, appRecord, info);
     EXPECT_EQ(ret, ERR_NO_INIT);
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_004 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_004 end");
 }
 
 /**
- * @tc.name: GetChildProcessInfo_005
- * @tc.desc: test GetChildProcessInfo_005
+ * @tc.name: GetChildProcessInfoEx_005
+ * @tc.desc: test GetChildProcessInfoEx_005
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_005, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfoEx_005, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_005 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_005 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getOsAccountLocalIdFromUid_ = ERR_OK;
     
@@ -1524,23 +1520,22 @@ HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_005, TestSize.Level1)
         std::make_shared<ChildProcessRecord>(0, request, nullptr);
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     ChildProcessInfo info;
-    bool isCallFromGetChildren = false;
     AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
     AAFwk::MyStatus::GetInstance().getCloneBundleInfo_ = ERR_INVALID_VALUE;
-    auto ret = appMgrServiceInner->GetChildProcessInfo(childProcessRecord, appRecord, info, isCallFromGetChildren);
+    auto ret = appMgrServiceInner->GetChildProcessInfoEx(childProcessRecord, appRecord, info);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_005 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_005 end");
 }
 
 
 /**
- * @tc.name: GetChildProcessInfo_006
- * @tc.desc: test GetChildProcessInfo_006
+ * @tc.name: GetChildProcessInfoEx_006
+ * @tc.desc: test GetChildProcessInfoEx_006
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_006, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfoEx_006, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_006 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_006 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getOsAccountLocalIdFromUid_ = ERR_OK;
     
@@ -1550,24 +1545,23 @@ HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_006, TestSize.Level1)
         std::make_shared<ChildProcessRecord>(0, request, nullptr);
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     ChildProcessInfo info;
-    bool isCallFromGetChildren = false;
     AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
     AAFwk::MyStatus::GetInstance().getCloneBundleInfo_ = ERR_OK;
     AAFwk::MyStatus::GetInstance().getBaseSharedBundleInfos_ = ERR_INVALID_VALUE;
-    auto ret = appMgrServiceInner->GetChildProcessInfo(childProcessRecord, appRecord, info, isCallFromGetChildren);
+    auto ret = appMgrServiceInner->GetChildProcessInfoEx(childProcessRecord, appRecord, info);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_006 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_006 end");
 }
 
 
 /**
- * @tc.name: GetChildProcessInfo_007
+ * @tc.name: GetChildProcessInfoEx_007
  * @tc.desc: test GetChildProcessInfo
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_007, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfoEx_007, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_007 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_007 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getOsAccountLocalIdFromUid_ = ERR_OK;
     
@@ -1577,23 +1571,22 @@ HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_007, TestSize.Level1)
         std::make_shared<ChildProcessRecord>(0, request, nullptr);
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     ChildProcessInfo info;
-    bool isCallFromGetChildren = false;
     AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
     AAFwk::MyStatus::GetInstance().getCloneBundleInfo_ = ERR_OK;
     AAFwk::MyStatus::GetInstance().getBaseSharedBundleInfos_ = ERR_INVALID_VALUE;
-    auto ret = appMgrServiceInner->GetChildProcessInfo(childProcessRecord, appRecord, info, isCallFromGetChildren);
+    auto ret = appMgrServiceInner->GetChildProcessInfoEx(childProcessRecord, appRecord, info);
     EXPECT_EQ(ret, ERR_OK);
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_007 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_007 end");
 }
 
 /**
- * @tc.name: GetChildProcessInfo_008
+ * @tc.name: GetChildProcessInfoEx_008
  * @tc.desc: test GetChildProcessInfo
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_008, TestSize.Level1)
+HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfoEx_008, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_008 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_008 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     AAFwk::MyStatus::GetInstance().getOsAccountLocalIdFromUid_ = ERR_OK;
     
@@ -1603,13 +1596,12 @@ HWTEST_F(AppMgrServiceInnerEighthTest, GetChildProcessInfo_008, TestSize.Level1)
         std::make_shared<ChildProcessRecord>(0, request, nullptr);
     std::shared_ptr<AppRunningRecord> appRecord = std::make_shared<AppRunningRecord>(nullptr, 0, "");
     ChildProcessInfo info;
-    bool isCallFromGetChildren = false;
     AAFwk::MyStatus::GetInstance().getBundleManagerHelper_ = std::make_shared<BundleMgrHelper>();
     AAFwk::MyStatus::GetInstance().getCloneBundleInfo_ = ERR_OK;
     AAFwk::MyStatus::GetInstance().getBaseSharedBundleInfos_ = ERR_INVALID_VALUE;
-    auto ret = appMgrServiceInner->GetChildProcessInfo(childProcessRecord, appRecord, info, isCallFromGetChildren);
+    auto ret = appMgrServiceInner->GetChildProcessInfoEx(childProcessRecord, appRecord, info);
     EXPECT_EQ(ret, ERR_OK);
-    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfo_008 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetChildProcessInfoEx_008 end");
 }
 
 /**

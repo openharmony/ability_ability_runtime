@@ -55,12 +55,10 @@ bool ChildProcessInfo::ReadFromParcel(Parcel &parcel)
     isDebugApp = parcel.ReadBool();
     isStartWithDebug = parcel.ReadBool();
     isStartWithNative = parcel.ReadBool();
-    std::unique_ptr<BundleInfo> info(parcel.ReadParcelable<BundleInfo>());
-    if (!info) {
-        TAG_LOGE(AAFwkTag::APPMGR, "read bundle info failed");
-        return false;
+    bool hasBundleInfo = parcel.ReadBool();
+    if (hasBundleInfo) {
+        bundleInfo.reset(parcel.ReadParcelable<BundleInfo>());
     }
-    bundleInfo = *info;
 
     int32_t hspListSize = 0;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, hspListSize);
@@ -105,7 +103,11 @@ bool ChildProcessInfo::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isDebugApp);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isStartWithDebug);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, isStartWithNative);
-    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Parcelable, parcel, &bundleInfo);
+    bool hasBundleInfo = bundleInfo != nullptr;
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Bool, parcel, hasBundleInfo);
+    if (hasBundleInfo) {
+        WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Parcelable, parcel, bundleInfo.get());
+    }
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, hspList.size());
     for (auto &baseSharedBundleInfo : hspList) {
         WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Parcelable, parcel, &baseSharedBundleInfo);
