@@ -330,19 +330,17 @@ void UnWrapOpenLinkOptions(
 {
     TAG_LOGD(AAFwkTag::ANI, "UnWrapOpenLinkOptions");
     ani_status status = ANI_ERROR;
-    ani_ref ParamRef = nullptr;
-    if ((status = env->Object_GetPropertyByName_Ref(optionsObj, "parameters", &ParamRef))  == ANI_OK) {
+    ani_ref paramRef = nullptr;
+    if ((status = env->Object_GetPropertyByName_Ref(optionsObj, "parameters", &paramRef)) == ANI_OK) {
         AAFwk::WantParams wantParam;
-        if (AppExecFwk::UnwrapWantParams(env, ParamRef, wantParam)) {
+        if (AppExecFwk::UnwrapWantParams(env, paramRef, wantParam)) {
             want.SetParams(wantParam);
         } else {
             TAG_LOGE(AAFwkTag::ANI, "UnwrapWantParams failed");
         }
     }
-    ani_boolean aniAppLinkingOnly = ANI_FALSE;
-    if ((status = env->Object_GetPropertyByName_Boolean(optionsObj, APP_LINKING_ONLY.c_str(),
-        &aniAppLinkingOnly)) == ANI_OK) {
-        bool appLinkingOnly = aniAppLinkingOnly;
+    if ((status = env->Object_GetPropertyByName_Ref(optionsObj, APP_LINKING_ONLY.c_str(), &paramRef)) == ANI_OK) {
+        bool appLinkingOnly = false;
         AppExecFwk::GetBooleanPropertyObject(env, optionsObj, "appLinkingOnly", appLinkingOnly);
         openLinkOptions.SetAppLinkingOnly(appLinkingOnly);
         want.SetParam(APP_LINKING_ONLY, appLinkingOnly);
