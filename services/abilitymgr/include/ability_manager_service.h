@@ -1103,7 +1103,8 @@ public:
         bool isImplicit = false,
         bool isUIAbilityOnly = false,
         bool isAppCloneSelector = false,
-        bool hideFailureTipDialog = false);
+        bool hideFailureTipDialog = false,
+        bool isBySCB = false);
 
     int32_t StartExtensionAbilityInner(
         const Want &want,
