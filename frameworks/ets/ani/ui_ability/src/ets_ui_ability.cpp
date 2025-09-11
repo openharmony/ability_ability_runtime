@@ -515,7 +515,7 @@ void EtsUIAbility::OnSceneCreated()
     }
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
-    if (applicationContext != nullptr) {
+    if (applicationContext != nullptr && etsAbilityObj_ != nullptr && etsWindowStageObj_ != nullptr) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnWindowStageCreate");
         applicationContext->DispatchOnWindowStageCreate(etsAbilityObj_, etsWindowStageObj_);
         std::shared_ptr<InteropObject> interopAbility = std::make_shared<InteropObject>(
