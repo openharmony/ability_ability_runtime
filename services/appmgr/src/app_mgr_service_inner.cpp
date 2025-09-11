@@ -304,6 +304,7 @@ constexpr int32_t PROCESS_START_FAILED_SUB_REASON_UNKNOWN = 0;
 constexpr int32_t MAX_SPECIFIED_PROCESS_NAME_LENGTH = 255;
 
 constexpr int32_t NWEB_PRELOAD_DELAY = 3000000;
+constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
 
 constexpr const char* APP_INSTANCE_KEY_0 = "app_instance_0";
 
@@ -583,7 +584,7 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
     if (userId == DEFAULT_INVAL_VALUE) {
         userId = GetUserIdByUid(IPCSkeleton::GetCallingUid());
         if (userId == U0_USER_ID || userId == U1_USER_ID) {
-            userId = UserController::GetInstance().GetForegroundUserId(AAFwk::DisplayUtil::ObtainDefaultDisplayId());
+            userId = UserController::GetInstance().GetForegroundUserId(DEFAULT_DISPLAY_ID);
         }
     }
     if (UserRecordManager::GetInstance().IsLogoutUser(userId)) {
@@ -2324,7 +2325,7 @@ int32_t AppMgrServiceInner::ClearUpApplicationData(const std::string &bundleName
     if (userId == DEFAULT_INVAL_VALUE) {
         newUserId = GetUserIdByUid(callerUid);
         if (newUserId == U0_USER_ID || newUserId == U1_USER_ID) {
-            newUserId = UserController::GetInstance().GetForegroundUserId(AAFwk::DisplayUtil::ObtainDefaultDisplayId());
+            newUserId = UserController::GetInstance().GetForegroundUserId(DEFAULT_DISPLAY_ID);
         }
     }
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName: %{public}s, uId: %{public}d, appIndex: %{public}d", bundleName.c_str(),
@@ -2346,7 +2347,7 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataBySelf(int32_t callerUid, pid_
     if (userId == DEFAULT_INVAL_VALUE) {
         newUserId = GetUserIdByUid(callerUid);
         if (newUserId == U0_USER_ID) {
-            newUserId = UserController::GetInstance().GetForegroundUserId(AAFwk::DisplayUtil::ObtainDefaultDisplayId());
+            newUserId = UserController::GetInstance().GetForegroundUserId(DEFAULT_DISPLAY_ID);
         }
     }
     auto appCloneIndex = appRecord->GetAppIndex();
@@ -6027,7 +6028,7 @@ void AppMgrServiceInner::HandleConfigurationChange(const Configuration& config, 
     for (const auto &item : appStateCallbacks_) {
         if (item.callback != nullptr && (userId == -1 || item.userId == 0 || item.userId == userId)) {
             item.callback->NotifyConfigurationChange(config,
-                UserController::GetInstance().GetForegroundUserId(AAFwk::DisplayUtil::ObtainDefaultDisplayId()));
+                UserController::GetInstance().GetForegroundUserId(DEFAULT_DISPLAY_ID));
         }
     }
 }

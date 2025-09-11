@@ -26,6 +26,7 @@ constexpr uint32_t SCENARIO_BACK_TO_CALLER_ABILITY_WITH_RESULT = 0x00000004;
 // skip onNewWant in these scenerios
 constexpr uint32_t SKIP_ON_NEW_WANT_SCENARIOS = SCENARIO_MOVE_MISSION_TO_FRONT |
     SCENARIO_SHOW_ABILITY | SCENARIO_BACK_TO_CALLER_ABILITY_WITH_RESULT;
+constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
 }  // namespace ServerConstant
 }  // namespace OHOS::AbilityRuntime
 #endif  // OHOS_ABILITY_RUNTIME_SERVER_CONSTANT_H
