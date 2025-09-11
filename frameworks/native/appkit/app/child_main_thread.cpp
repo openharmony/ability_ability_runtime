@@ -281,10 +281,13 @@ void ChildMainThread::HandleLoadNative()
 void ChildMainThread::InitNativeLib(const BundleInfo &bundleInfo)
 {
     HspList hspList;
-    ErrCode ret = DelayedSingleton<BundleMgrHelper>::GetInstance()->GetBaseSharedBundleInfos(bundleInfo.name, hspList,
-        AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Get base shared bundle infos failed: %{public}d", ret);
+    if (processInfo_->childProcessType != CHILD_PROCESS_TYPE_NATIVE &&
+        processInfo_->childProcessType != CHILD_PROCESS_TYPE_NATIVE_ARGS) {
+        ErrCode ret = DelayedSingleton<BundleMgrHelper>::GetInstance()->GetBaseSharedBundleInfos(bundleInfo.name,
+            hspList, AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO);
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::APPKIT, "Get base shared bundle infos failed: %{public}d", ret);
+        }
     }
 
     AppLibPathMap appLibPaths {};
