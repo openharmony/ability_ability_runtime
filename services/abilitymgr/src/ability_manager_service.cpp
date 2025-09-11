@@ -12780,7 +12780,7 @@ void AbilityManagerService::NotifyConfigurationChange(const AppExecFwk::Configur
 void AbilityManagerService::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
 {
     int32_t callerUser =
-        AbilityRuntime::UserController::GetInstance().GetForegroundUserId(DisplayUtil::ObtainDefaultDisplayId());
+        AbilityRuntime::UserController::GetInstance().GetForegroundUserId(ServerConstant::DEFAULT_DISPLAY_ID);
     std::vector<AppExecFwk::BundleInfo> bundleInfosForU0;
     std::map<int32_t, std::vector<AppExecFwk::BundleInfo>> bundleInfosMap;
     for (const auto &item: bundleInfos) {
@@ -12823,7 +12823,7 @@ void AbilityManagerService::NotifyStartKeepAliveProcess(std::vector<AppExecFwk::
     }
 
     auto userId =
-        AbilityRuntime::UserController::GetInstance().GetForegroundUserId(DisplayUtil::ObtainDefaultDisplayId());
+        AbilityRuntime::UserController::GetInstance().GetForegroundUserId(ServerConstant::DEFAULT_DISPLAY_ID);
     std::map<int32_t, std::vector<AppExecFwk::BundleInfo>> bundleInfosMap;
     std::vector<AppExecFwk::BundleInfo> bundleInfosForU1;
     for (const auto &item: bundleInfos) {

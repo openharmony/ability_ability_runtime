@@ -31,6 +31,7 @@ constexpr int32_t U0_USER_ID = 0;
 constexpr int32_t U1_USER_ID = 1;
 constexpr int32_t USER_ID_DEFAULT = 100;
 constexpr int32_t ACCOUNT_MGR_SERVICE_UID = 3058;
+constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
 }
 UserController& UserController::GetInstance()
 {
@@ -112,7 +113,7 @@ int32_t UserController::GetCallerUserId()
     int32_t callerUser = callerUid / BASE_USER_RANGE;
     TAG_LOGD(AAFwkTag::USER_CONTROLLER, "callerUser = %{public}d, CallingUid = %{public}d.", callerUser, callerUid);
     if (callerUser == U0_USER_ID || callerUser == U1_USER_ID) {
-        callerUser = GetForegroundUserId(AAFwk::DisplayUtil::ObtainDefaultDisplayId());
+        callerUser = GetForegroundUserId(DEFAULT_DISPLAY_ID);
     }
     return callerUser;
 }
