@@ -107,6 +107,7 @@ ohos_shared_library("ani_common") {
     "resource_management:resmgr_napi_core",
     "resource_management:resourceManager_ani",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
 
   innerapi_tags = [ "platformsdk" ]

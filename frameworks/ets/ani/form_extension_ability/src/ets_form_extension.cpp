@@ -23,6 +23,7 @@
 #include "ani_common_util.h"
 #include "ani_common_want.h"
 #include "ani_enum_convert.h"
+#include <ani_signature_builder.h>
 #include "ets_runtime.h"
 #include "form_provider_data.h"
 #include "form_runtime/form_extension_provider_client.h"
@@ -40,6 +41,8 @@ constexpr const char *FORM_LOCATION_STATE_ENUM_NAME = "L@ohos/app/form/formInfo/
 constexpr const char *FORM_LOCATION_CHANGED_STATE_NAME =
     "Lstd/core/String;L@ohos/app/form/formInfo/formInfo/FormLocation;:V";
 }
+
+using namespace arkts::ani_signature;
 
 extern "C" __attribute__((visibility("default"))) FormExtension *OHOS_ABILITY_ETSFormExtension(
     const std::unique_ptr<Runtime> &runtime)
@@ -366,7 +369,7 @@ bool ETSFormExtension::ExtractFormData(ani_env *env, ani_ref nativeResult, AppEx
     }
 
     ani_method data{};
-    status = env->Class_FindMethod(cls, "<get>data", nullptr, &data);
+    status = env->Class_FindMethod(cls, Builder::BuildGetterName("data").c_str(), nullptr, &data);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod data status: %{public}d", status);
         return false;
@@ -383,7 +386,7 @@ bool ETSFormExtension::ExtractFormData(ani_env *env, ani_ref nativeResult, AppEx
     formData = AppExecFwk::FormProviderData(dataStr);
 
     ani_method proxies;
-    status = env->Class_FindMethod(cls, "<get>proxies", nullptr, &proxies);
+    status = env->Class_FindMethod(cls, Builder::BuildGetterName("proxies").c_str(), nullptr, &proxies);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod proxies status: %{public}d", status);
         return true;

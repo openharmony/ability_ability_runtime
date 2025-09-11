@@ -44,6 +44,8 @@
 #include "hilog_tag_wrapper.h"
 #include "unwinder.h"
 
+#include <ani_signature_builder.h>
+
 #ifdef SUPPORT_GRAPHICS
 #include "ui_content.h"
 #endif // SUPPORT_GRAPHICS
@@ -68,6 +70,8 @@ const char ETS_SYS_NSNAME[] = "ets_system";
 constexpr const char* CLASSNAME_STRING = "Lstd/core/String;";
 constexpr const char* CLASSNAME_LINKER = "Lstd/core/AbcRuntimeLinker;";
 } // namespace
+
+using namespace arkts::ani_signature;
 
 ETSRuntimeAPI ETSEnvironment::lazyApis_ {};
 std::unique_ptr<ETSEnvironment> instance_ = nullptr;
@@ -338,9 +342,9 @@ EtsEnv::ETSErrorObject ETSEnvironment::GetETSErrorObject()
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "ResetError failed, status : %{public}d", status);
         return EtsEnv::ETSErrorObject();
     }
-    std::string errorMsg = GetErrorProperty(aniError, "<get>message");
-    std::string errorName = GetErrorProperty(aniError, "<get>name");
-    std::string errorStack = GetErrorProperty(aniError, "<get>stack");
+    std::string errorMsg = GetErrorProperty(aniError, Builder::BuildGetterName("message").c_str());
+    std::string errorName = GetErrorProperty(aniError, Builder::BuildGetterName("name").c_str());
+    std::string errorStack = GetErrorProperty(aniError, Builder::BuildGetterName("stack").c_str());
     const EtsEnv::ETSErrorObject errorObj = {
         .name = errorName,
         .message = errorMsg,
