@@ -24,7 +24,7 @@
 #include "ani_common_configuration.h"
 #include "ani_common_util.h"
 #include "ani_common_want.h"
-#include "ani_remote_object.h"
+#include "remote_object_taihe_ani.h"
 #include "application_configuration_manager.h"
 #include "array_wrapper.h"
 #include "configuration_utils.h"
