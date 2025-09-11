@@ -51,6 +51,7 @@ static constexpr const char *DIALOG_APP = "com.ohos.pasteboarddialog";
 static constexpr const char *PROGRESS_ABILITY = "PasteboardProgressAbility";
 static constexpr const char *PROMPT_TEXT = "PromptText_PasteBoard_Local";
 static constexpr const char *NO_PERMISSION = "noPermission";
+static const int32_t DATA_MANAGER_SERVICE_UID = 3012;
 
 const bool REGISTER_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<DataObsMgrService>::GetInstance().get());
@@ -150,27 +151,6 @@ int32_t DataObsMgrService::GetCallingUserId(uint32_t tokenId)
     }
 }
 
-int32_t DataObsMgrService::GetDataMgrServiceUid()
-{
-    static std::atomic_int32_t ddmsUid = 0;
-    if (ddmsUid != 0) {
-        return ddmsUid;
-    }
-    auto manager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (manager == nullptr) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "get system ability manager failed");
-        return 0;
-    }
-    SystemProcessInfo systemProcessInfo;
-    auto ret = manager->GetSystemProcessInfo(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID, systemProcessInfo);
-    if (ret != 0) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "GetSystemProcessInfo failed, err %{public}d", ret);
-        return 0;
-    }
-    ddmsUid = systemProcessInfo.uid;
-    return ddmsUid;
-}
-
 bool DataObsMgrService::IsSystemApp(uint32_t tokenId, uint64_t fullTokenId)
 {
     Security::AccessToken::ATokenTypeEnum tokenType =
@@ -193,9 +173,9 @@ bool DataObsMgrService::IsDataMgrService(uint32_t tokenId, int32_t uid)
     if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
         return false;
     }
-    int32_t ddmsUid = GetDataMgrServiceUid();
-    if (uid != ddmsUid) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "request not from DataMgr, uid %{public}d, DataMgr %{public}d", uid, ddmsUid);
+    if (uid != DATA_MANAGER_SERVICE_UID) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "request not from DataMgr, uid %{public}d, DataMgr %{public}d",
+            uid, DATA_MANAGER_SERVICE_UID);
         return false;
     }
     return true;
@@ -462,7 +442,7 @@ int32_t DataObsMgrService::NotifyChangeInner(Uri &uri, int32_t userId, DataObsOp
     if (userId == -1) {
         userId = callingUserId;
     }
-    if (uid != GetDataMgrServiceUid()) {
+    if (uid != DATA_MANAGER_SERVICE_UID) {
         ObserverInfo info(tokenId, fullTokenId, opt.FirstCallerTokenID(), userId, isExtension);
         info.callingUserId = callingUserId;
         info.errMsg = __FUNCTION__;
