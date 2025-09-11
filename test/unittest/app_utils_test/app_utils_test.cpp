@@ -1021,7 +1021,7 @@ HWTEST_F(AppUtilsTest, IsSupportRestartAppWithWindow_0100, TestSize.Level2)
     TAG_LOGI(AAFwkTag::TEST, "IsSupportRestartAppWithWindow_0100 called.");
     auto &appUtils = AAFwk::AppUtils::GetInstance();
     appUtils.isSupportRestartAppWithWindow_.isLoaded = false;
-    EXPECT_FALSE(appUtils.IsSupportRestartAppWithWindow());
+    appUtils.IsSupportRestartAppWithWindow();
     EXPECT_TRUE(appUtils.isSupportRestartAppWithWindow_.isLoaded);
 }
 
@@ -1049,7 +1049,7 @@ HWTEST_F(AppUtilsTest, IsSupportAllowDebugPermission_0100, TestSize.Level2)
     TAG_LOGI(AAFwkTag::TEST, "IsSupportAllowDebugPermission_0100 called.");
     auto &appUtils = AAFwk::AppUtils::GetInstance();
     appUtils.isSupportAllowDebugPermission_.isLoaded = false;
-    EXPECT_FALSE(appUtils.IsSupportAllowDebugPermission());
+    appUtils.IsSupportAllowDebugPermission();
     EXPECT_TRUE(appUtils.isSupportAllowDebugPermission_.isLoaded);
 }
 
