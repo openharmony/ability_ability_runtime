@@ -96,7 +96,6 @@ private:
     static bool IsSystemApp(uint32_t tokenId, uint64_t fullTokenId);
     static bool IsCallingPermissionValid(DataObsOption &opt, int32_t userId, int32_t callingUserId);
     static bool IsCallingPermissionValid(DataObsOption &opt);
-    static int32_t GetDataMgrServiceUid();
     static bool IsDataMgrService(uint32_t tokenId, int32_t uid);
     int32_t RegisterObserverInner(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId,
         DataObsOption opt, bool isExtension);
