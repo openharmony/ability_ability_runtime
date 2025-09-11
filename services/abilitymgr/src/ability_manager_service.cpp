@@ -14470,10 +14470,19 @@ int AbilityManagerService::StartSelfUIAbilityInner(StartSelfUIAbilityParam param
 {
     CHECK_TRUE_RETURN_RET(!AppUtils::GetInstance().IsStartOptionsWithAnimation(),
         ERR_CAPABILITY_NOT_SUPPORT, "not supported");
+    auto targetBundleName = param.want.GetBundle();
+    CHECK_TRUE_RETURN_RET(targetBundleName.empty(), ERR_NOT_ALLOW_IMPLICIT_START, "implicit start not allowed");
+
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    AppExecFwk::RunningProcessInfo processInfo;
+    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByChildProcessPid(callingPid, processInfo);
+    CHECK_TRUE_RETURN_RET(processInfo.bundleNames.empty(), INNER_ERR, "failed to get by child process pid");
+    auto iter = std::find_if(processInfo.bundleNames.begin(), processInfo.bundleNames.end(),
+        [targetBundleName](const std::string &bundleName) { return bundleName == targetBundleName; });
+    CHECK_TRUE_RETURN_RET(iter == processInfo.bundleNames.end(), ERR_START_OTHER_APP_FAILED, "cannot start other app");
 
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bundleMgrHelper, INNER_ERR);
-
     AppExecFwk::AbilityInfo abilityInfo;
     CHECK_TRUE_RETURN_RET(!IN_PROCESS_CALL(bundleMgrHelper->QueryAbilityInfo(param.want,
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, GetUserId(), abilityInfo)),
@@ -14481,17 +14490,6 @@ int AbilityManagerService::StartSelfUIAbilityInner(StartSelfUIAbilityParam param
 
     CHECK_TRUE_RETURN_RET(abilityInfo.type != AppExecFwk::AbilityType::PAGE,
         RESOLVE_CALL_ABILITY_TYPE_ERR, "not UIAbility");
-
-    auto callingPid = IPCSkeleton::GetCallingPid();
-    AppExecFwk::RunningProcessInfo processInfo;
-    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByChildProcessPid(callingPid, processInfo);
-    CHECK_TRUE_RETURN_RET(processInfo.bundleNames.empty(), INNER_ERR, "failed to get by child process pid");
-
-    auto iter = std::find_if(processInfo.bundleNames.begin(), processInfo.bundleNames.end(),
-        [targetBundleName = param.want.GetBundle()](const std::string &bundleName) {
-            return bundleName == targetBundleName;
-        });
-    CHECK_TRUE_RETURN_RET(iter == processInfo.bundleNames.end(), ERR_START_OTHER_APP_FAILED, "cannot start other app");
 
     param.want.RemoveParam(Want::PARAM_APP_CLONE_INDEX_KEY);
     if (processInfo.appMode == AppExecFwk::MultiAppModeType::APP_CLONE) {
