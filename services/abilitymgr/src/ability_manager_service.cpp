@@ -14042,7 +14042,7 @@ int32_t AbilityManagerService::PreStartInner(const FreeInstallInfo& taskInfo)
 int32_t AbilityManagerService::StartUIAbilityByPreInstall(const FreeInstallInfo &taskInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call StartUIAbilityByPreInstall");
     if (!taskInfo.isFreeInstallFinished || !taskInfo.isInstalled) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "free install not finished or failed");
         return ERR_INVALID_VALUE;
@@ -14097,7 +14097,7 @@ int32_t AbilityManagerService::StartUIAbilityByPreInstall(const FreeInstallInfo 
 int AbilityManagerService::StartUIAbilityByPreInstallInner(sptr<SessionInfo> sessionInfo, uint32_t specifyTokenId,
     uint32_t sceneFlag, bool &isColdStart)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call StartUIAbilityByPreInstallInner");
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
     auto callerToken = sessionInfo->callerToken;
     const auto& want = sessionInfo->want;
@@ -14232,7 +14232,7 @@ int AbilityManagerService::StartUIAbilityByPreInstallInner(sptr<SessionInfo> ses
 void AbilityManagerService::NotifySCBToHandleAtomicServiceException(const std::string& sessionId, int32_t errCode,
     const std::string& reason)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "call NotifySCBToHandleAtomicServiceException");
     sptr<SessionInfo> sessionInfo = nullptr;
     {
         std::lock_guard<ffrt::mutex> guard(preStartSessionMapLock_);

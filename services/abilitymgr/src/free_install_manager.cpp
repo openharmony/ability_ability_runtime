@@ -593,33 +593,42 @@ void FreeInstallManager::OnInstallFinished(int32_t recordId, int resultCode, con
 
 void FreeInstallManager::PostUpgradeAtomicServiceTask(int resultCode, const Want &want, int32_t userId)
 {
-    TAG_LOGI(AAFwkTag::FREE_INSTALL, "called");
-    if (resultCode == ERR_OK) {
-        auto updateAtmoicServiceTask = [want, userId, weak = weak_from_this()]() {
-            auto freeInstallManager = weak.lock();
-            if (freeInstallManager == nullptr) {
-                TAG_LOGE(AAFwkTag::FREE_INSTALL, "null manager");
-                return;
-            }
-            TAG_LOGD(AAFwkTag::FREE_INSTALL,
-                "bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, userId: %{public}d",
-                want.GetElement().GetBundleName().c_str(), want.GetElement().GetModuleName().c_str(),
-                want.GetElement().GetAbilityName().c_str(), userId);
-            std::string nameKey = want.GetElement().GetBundleName() + want.GetElement().GetModuleName();
-            auto iter = freeInstallManager->timeStampMap_.find(nameKey);
-            if (iter == freeInstallManager->timeStampMap_.end() ||
-                AbilityUtil::GetTimeStamp() - iter->second > UPDATE_ATOMOIC_SERVICE_TASK_TIMER) {
-                auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
-                CHECK_POINTER(bundleMgrHelper);
-                bundleMgrHelper->UpgradeAtomicService(want, userId);
-                freeInstallManager->timeStampMap_.emplace(nameKey, AbilityUtil::GetTimeStamp());
-            }
-        };
-
-        auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
-        CHECK_POINTER_LOG(handler, "Fail to get Ability task handler.");
-        handler->SubmitTask(updateAtmoicServiceTask, "UpdateAtmoicServiceTask");
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "PostUpgradeAtomicServiceTask called");
+    if (resultCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "not ok, not upgrading");
+        return;
     }
+    auto updateAtmoicServiceTask = [want, userId, weak = weak_from_this()]() {
+        auto freeInstallManager = weak.lock();
+        if (freeInstallManager == nullptr) {
+            TAG_LOGE(AAFwkTag::FREE_INSTALL, "null manager");
+            return;
+        }
+        TAG_LOGD(AAFwkTag::FREE_INSTALL,
+            "bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, userId: %{public}d",
+            want.GetElement().GetBundleName().c_str(), want.GetElement().GetModuleName().c_str(),
+            want.GetElement().GetAbilityName().c_str(), userId);
+        std::string nameKey = want.GetElement().GetBundleName() + want.GetElement().GetModuleName();
+        bool needUpgrade = false;
+        {
+            std::lock_guard<ffrt::mutex> lock(freeInstallManager->timestampMapLock_);
+            auto iter = freeInstallManager->timestampMap_.find(nameKey);
+            if (iter == freeInstallManager->timestampMap_.end() ||
+                AbilityUtil::GetTimeStamp() - iter->second > UPDATE_ATOMOIC_SERVICE_TASK_TIMER) {
+                needUpgrade = true;
+                freeInstallManager->timestampMap_[nameKey] = AbilityUtil::GetTimeStamp();
+            }
+        }
+        if (needUpgrade) {
+            auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+            CHECK_POINTER(bundleMgrHelper);
+            bundleMgrHelper->UpgradeAtomicService(want, userId);
+        }
+    };
+
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
+    CHECK_POINTER_LOG(handler, "Fail to get Ability task handler.");
+    handler->SubmitTask(updateAtmoicServiceTask, "UpdateAtmoicServiceTask");
 }
 
 void FreeInstallManager::OnRemoteInstallFinished(int32_t recordId, int resultCode, const Want &want, int32_t userId)
@@ -631,7 +640,7 @@ void FreeInstallManager::OnRemoteInstallFinished(int32_t recordId, int resultCod
 int FreeInstallManager::AddFreeInstallObserver(sptr<IRemoteObject> callerToken,
     sptr<AbilityRuntime::IFreeInstallObserver> observer)
 {
-    TAG_LOGI(AAFwkTag::FREE_INSTALL, "called");
+    TAG_LOGD(AAFwkTag::FREE_INSTALL, "AddFreeInstallObserver called");
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (abilityRecord != nullptr) {
         return DelayedSingleton<FreeInstallObserverManager>::GetInstance()->AddObserver(abilityRecord->GetRecordId(),
