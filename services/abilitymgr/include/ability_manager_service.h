@@ -1078,7 +1078,8 @@ public:
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
         bool isImplicit = false,
-        bool isUIAbilityOnly = false);
+        bool isUIAbilityOnly = false,
+        bool isAppCloneSelector = false);
 
     int StartAbilityInner(
         const Want &want,
@@ -1090,7 +1091,8 @@ public:
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
         bool isImplicit = false,
-        bool isUIAbilityOnly = false);
+        bool isUIAbilityOnly = false,
+        bool isAppCloneSelector = false);
 
     int32_t StartExtensionAbilityInner(
         const Want &want,
@@ -1165,7 +1167,9 @@ public:
         sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE,
-        bool isImplicit = false);
+        bool isImplicit = false,
+        bool isAppCloneSelector = false,
+        uint32_t callerAccessTokenId = 0);
 
     int ImplicitStartAbilityAsCaller(
         const Want &want,
@@ -1890,7 +1894,8 @@ public:
      *                          FALSE: The Caller-Application is in focus or in foreground state.
      * @return Returns ERR_OK on check success, others on check failure.
      */
-    int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall, bool isData = false);
+    int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall,
+        uint32_t callerAccessTokenId = 0, bool isData = false);
 
     void EnableListForSCBRecovery(int32_t userId) const;
 

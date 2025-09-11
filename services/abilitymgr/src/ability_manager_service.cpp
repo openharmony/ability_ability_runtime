@@ -909,7 +909,8 @@ int AbilityManagerService::ImplicitStartAbilityAsCaller(const Want &want, const 
 }
 
 int AbilityManagerService::StartAbilityAsCallerDetails(const Want &want, const sptr<IRemoteObject> &callerToken,
-    sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode, bool isImplicit)
+    sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode, bool isImplicit, bool isAppCloneSelector,
+    uint32_t callerAccessTokenId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_CALLER_IS_SYSTEM_APP;
@@ -938,7 +939,7 @@ int AbilityManagerService::StartAbilityAsCallerDetails(const Want &want, const s
         AbilityUtil::AddAbilityJumpRuleToBms(callerPkg, targetPkg, GetUserId());
     }
     int32_t ret = StartAbilityWrap(newWant, callerToken, requestCode, false, userId, true,
-        0, false, isImplicit, false);
+        callerAccessTokenId, false, isImplicit, false, isAppCloneSelector);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "start ability as caller failed:%{public}d", ret);
     }
@@ -1013,7 +1014,7 @@ bool AbilityManagerService::StartAbilityInChain(StartAbilityParams &params, int 
 
 int AbilityManagerService::StartAbilityWrap(const Want &want, const sptr<IRemoteObject> &callerToken,
     int requestCode, bool isPendingWantCaller, int32_t userId, bool isStartAsCaller, uint32_t specifyToken,
-    bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly)
+    bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly, bool isAppCloneSelector)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     StartAbilityParams startParams(const_cast<Want &>(want));
@@ -1029,7 +1030,7 @@ int AbilityManagerService::StartAbilityWrap(const Want &want, const sptr<IRemote
     }
 
     return StartAbilityInner(want, callerToken, requestCode, isPendingWantCaller, userId, isStartAsCaller, specifyToken,
-        isForegroundToRestartApp, isImplicit, isUIAbilityOnly);
+        isForegroundToRestartApp, isImplicit, isUIAbilityOnly, isAppCloneSelector);
 }
 
 void AbilityManagerService::SetReserveInfo(const std::string &linkString, AbilityRequest& abilityRequest)
@@ -1170,7 +1171,7 @@ void AbilityManagerService::CheckExtensionRateLimit()
 
 int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemoteObject> &callerToken,
     int requestCode, bool isPendingWantCaller, int32_t userId, bool isStartAsCaller, uint32_t specifyTokenId,
-    bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly)
+    bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly, bool isAppCloneSelector)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!isStartAsCaller || isImplicit) {
@@ -1410,7 +1411,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         return ERR_STATIC_CFG_PERMISSION;
     }
 
-    if (!isSendDialogResult || !want.GetBoolParam("isSelector", false)) {
+    if (!isAppCloneSelector) {
         result = CheckCallPermission(want, abilityInfo, abilityRequest, isForegroundToRestartApp,
             isSendDialogResult, specifyTokenId, callerBundleName);
         if (result != ERR_OK) {
@@ -1423,33 +1424,33 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
             eventHelper_.SendStartAbilityErrorEvent(eventInfo, result, "HandleExecuteSAInterceptor failed");
             return result;
         }
-    }
-    Want newWant = abilityRequest.want;
-    AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(newWant, requestCode, GetUserId(),
-        true, callerToken, std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo), isStartAsCaller, appIndex);
-    result = afterCheckExecuter_ == nullptr ? ERR_NULL_AFTER_CHECK_EXECUTER :
-        afterCheckExecuter_->DoProcess(afterCheckParam);
-    bool isReplaceWantExist = newWant.GetBoolParam("queryWantFromErms", false);
-    newWant.RemoveParam("queryWantFromErms");
-    if (result != ERR_OK && isReplaceWantExist == false) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "doProcess failed or replaceWant absent");
-        eventHelper_.SendStartAbilityErrorEvent(eventInfo, result, "doProcess failed or replaceWant absent");
-        return result;
-    }
+        Want newWant = abilityRequest.want;
+        AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(newWant, requestCode, GetUserId(),
+            true, callerToken, std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo), isStartAsCaller, appIndex);
+        result = afterCheckExecuter_ == nullptr ? ERR_NULL_AFTER_CHECK_EXECUTER :
+            afterCheckExecuter_->DoProcess(afterCheckParam);
+        bool isReplaceWantExist = newWant.GetBoolParam("queryWantFromErms", false);
+        newWant.RemoveParam("queryWantFromErms");
+        if (result != ERR_OK && isReplaceWantExist == false) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "doProcess failed or replaceWant absent");
+            eventHelper_.SendStartAbilityErrorEvent(eventInfo, result, "doProcess failed or replaceWant absent");
+            return result;
+        }
 #ifdef SUPPORT_SCREEN
-    if (result != ERR_OK && isReplaceWantExist && callerBundleName != BUNDLE_NAME_DIALOG) {
-        result = DialogSessionManager::GetInstance().HandleErmsResult(abilityRequest, GetUserId(), newWant);
-        eventHelper_.SendStartAbilityErrorEvent(eventInfo, result, "HandleErmsResult failed");
-        return result;
-    }
-    if (result == ERR_OK &&
-        DialogSessionManager::GetInstance().IsCreateCloneSelectorDialog(abilityInfo.bundleName, GetUserId())) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "create clone selector dialog");
-        result = CreateCloneSelectorDialog(abilityRequest, GetUserId());
-        eventHelper_.SendStartAbilityErrorEvent(eventInfo, result, "CreateCloneSelectorDialog failed");
-        return result;
-    }
+        if (result != ERR_OK && isReplaceWantExist && callerBundleName != BUNDLE_NAME_DIALOG) {
+            result = DialogSessionManager::GetInstance().HandleErmsResult(abilityRequest, GetUserId(), newWant);
+            eventHelper_.SendStartAbilityErrorEvent(eventInfo, result, "HandleErmsResult failed");
+            return result;
+        }
+        if (result == ERR_OK &&
+            DialogSessionManager::GetInstance().IsCreateCloneSelectorDialog(abilityInfo.bundleName, GetUserId())) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "create clone selector dialog");
+            result = CreateCloneSelectorDialog(abilityRequest, GetUserId());
+            eventHelper_.SendStartAbilityErrorEvent(eventInfo, result, "CreateCloneSelectorDialog failed");
+            return result;
+        }
 #endif // SUPPORT_SCREEN
+    }
 
     if (!AbilityUtil::IsSystemDialogAbility(abilityInfo.bundleName, abilityInfo.name)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "PreLoadAppDataAbilities:%{public}s.", abilityInfo.bundleName.c_str());
@@ -11210,7 +11211,7 @@ int AbilityManagerService::CheckCallAbilityPermission(const AbilityRequest &abil
     if (callerAbilityRecord != nullptr && 
         callerAbilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::APP_SERVICE) {
         verificationInfo.isBackgroundCall = false;
-    } else if (IsCallFromBackground(abilityRequest, verificationInfo.isBackgroundCall) != ERR_OK) {
+    } else if (IsCallFromBackground(abilityRequest, verificationInfo.isBackgroundCall, specifyTokenId) != ERR_OK) {
         return ERR_CHECK_CALL_FROM_BACKGROUND_FAILED;
     }
 
@@ -11253,7 +11254,7 @@ int AbilityManagerService::CheckStartByCallPermission(const AbilityRequest &abil
 }
 
 int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall,
-    bool isData)
+    uint32_t specifyTokenId, bool isData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!isData && AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
@@ -11312,7 +11313,7 @@ int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityReq
         if (processInfo.processName_.empty()) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Can not find caller application by callerPid: %{private}d.", callerPid);
             if (AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
-                PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND)) {
+                PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND, specifyTokenId)) {
                 TAG_LOGD(AAFwkTag::ABILITYMGR, "Caller has PERMISSION_START_ABILITIES_FROM_BACKGROUND, PASS.");
                 isBackgroundCall = false;
                 return ERR_OK;
