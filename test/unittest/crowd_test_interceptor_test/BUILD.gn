@@ -49,7 +49,6 @@ ohos_unittest("crowd_test_interceptor_test") {
     "ability_runtime:ability_deps_wrapper",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gmock_main",
@@ -63,6 +62,10 @@ ohos_unittest("crowd_test_interceptor_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (ability_runtime_dsoftbus_enable) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   if (background_task_mgr_continuous_task_enable) {
     external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]

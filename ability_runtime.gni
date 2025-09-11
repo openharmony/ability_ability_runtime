@@ -126,6 +126,12 @@ declare_args() {
   ability_runtime_hiperf_enable = true
   ability_runtime_screenlock_enable = true
   ability_runtime_udmf_enable = true
+  ability_runtime_dsoftbus_enable = false
+
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.communication_dsoftbus)) {
+    ability_runtime_dsoftbus_enable = false
+  }
 
   if (!defined(global_parts_info) ||
       defined(global_parts_info.account_os_account)) {

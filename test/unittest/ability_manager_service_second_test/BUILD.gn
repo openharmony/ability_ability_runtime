@@ -287,7 +287,6 @@ ohos_unittest("ability_manager_service_second_test") {
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "faultloggerd:libbacktrace_local",
     "ffrt:libffrt",
@@ -319,6 +318,10 @@ ohos_unittest("ability_manager_service_second_test") {
     "window_manager:sms",
     "window_manager:window_animation_utils",
   ]
+
+  if (ability_runtime_dsoftbus_enable) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   if (memmgr_override_enable) {
     external_deps += [ "memmgr:memmgrclient" ]

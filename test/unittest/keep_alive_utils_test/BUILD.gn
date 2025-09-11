@@ -64,7 +64,6 @@ ohos_unittest("keep_alive_utils_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "dsoftbus:softbus_client",
     "ffrt:libffrt",
     "googletest:gtest_main",
     "hicollie:libhicollie",
@@ -81,6 +80,9 @@ ohos_unittest("keep_alive_utils_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+  if (ability_runtime_dsoftbus_enable) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 }
 
 group("unittest") {

@@ -90,7 +90,9 @@
 #include "sa_interceptor_manager.h"
 #include "scene_board_judgement.h"
 #include "server_constant.h"
+#ifdef SUPPORT_RECORDER_DSOFTBUS
 #include "softbus_bus_center.h"
+#endif
 #include "start_ability_handler/start_ability_sandbox_savefile.h"
 #include "start_ability_utils.h"
 #include "start_options_utils.h"
@@ -4860,6 +4862,7 @@ bool AbilityManagerService::CheckIfOperateRemote(const Want &want)
 
 bool AbilityManagerService::GetLocalDeviceId(std::string& localDeviceId)
 {
+#ifdef SUPPORT_RECORDER_DSOFTBUS
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto localNode = std::make_unique<NodeBasicInfo>();
     int32_t errCode = GetLocalNodeDeviceInfo(DM_PKG_NAME, localNode.get());
@@ -4873,6 +4876,7 @@ bool AbilityManagerService::GetLocalDeviceId(std::string& localDeviceId)
             AnonymizeDeviceId(localDeviceId).c_str());
         return true;
     }
+#endif
     TAG_LOGE(AAFwkTag::ABILITYMGR, "localDeviceId null");
     return false;
 }
