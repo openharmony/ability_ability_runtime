@@ -24,6 +24,7 @@
 #include "hilog_tag_wrapper.h"
 #include "in_process_call_wrapper.h"
 #include "permission_constants.h"
+#include "server_constant.h"
 #include "user_controller/user_controller.h"
 
 namespace OHOS {
@@ -429,7 +430,7 @@ int32_t AbilityAutoStartupService::GetValidUserId(int32_t userId)
         validUserId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
     }
     if (validUserId == U0_USER_ID || validUserId == U1_USER_ID) {
-        validUserId = UserController::GetInstance().GetForegroundUserId(AAFwk::DisplayUtil::ObtainDefaultDisplayId());
+        validUserId = UserController::GetInstance().GetForegroundUserId(ServerConstant::DEFAULT_DISPLAY_ID);
     }
     return validUserId;
 }
