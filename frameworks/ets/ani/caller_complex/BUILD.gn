@@ -49,7 +49,7 @@ ohos_shared_library("caller_complex_ani") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_single",
-    "ipc:rpc_ani",
+    "ipc:rpc_taihe",
     "napi:ace_napi",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
