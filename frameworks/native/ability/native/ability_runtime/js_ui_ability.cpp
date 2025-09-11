@@ -634,7 +634,7 @@ void JsUIAbility::OnSceneCreated()
     }
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
-    if (applicationContext != nullptr) {
+    if (applicationContext != nullptr && jsAbilityObj_ != nullptr && jsWindowStageObj_ != nullptr) {
         applicationContext->DispatchOnWindowStageCreate(jsAbilityObj_, jsWindowStageObj_);
         std::shared_ptr<InteropObject> interopAbility = std::make_shared<InteropObject>(
             jsRuntime_.GetNapiEnv(), jsAbilityObj_->GetNapiValue());
