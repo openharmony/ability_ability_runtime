@@ -79,7 +79,6 @@ ohos_fuzztest("ScreenUnlockInterceptorFuzzTest") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
@@ -92,6 +91,10 @@ ohos_fuzztest("ScreenUnlockInterceptorFuzzTest") {
     "safwk:api_cache_manager",
     "samgr:samgr_proxy",
   ]
+
+  if (ability_runtime_dsoftbus_enable) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   if (os_dlp_part_enabled) {
     cflags_cc += [ "-DWITH_DLP" ]

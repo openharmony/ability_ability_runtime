@@ -76,7 +76,6 @@ ohos_fuzztest("AbilityAppMgrAppRunningManagerFuzzTest") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "dsoftbus:softbus_client",
     "ffrt:libffrt",
     "graphic_2d:librender_service_base",
     "hicollie:libhicollie",
@@ -94,6 +93,10 @@ ohos_fuzztest("AbilityAppMgrAppRunningManagerFuzzTest") {
     "window_manager:libwmutil_base",
     "window_manager:libwmutil_static",
   ]
+
+  if (ability_runtime_dsoftbus_enable) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   defines = []
 
