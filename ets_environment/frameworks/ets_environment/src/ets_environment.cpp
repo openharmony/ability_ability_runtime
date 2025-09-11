@@ -67,7 +67,6 @@ using DebuggerPostTask = std::function<void(std::function<void()> &&)>;
 const char ETS_SDK_NSNAME[] = "ets_sdk";
 const char ETS_SYS_NSNAME[] = "ets_system";
 
-constexpr const char* CLASSNAME_STRING = "Lstd/core/String;";
 constexpr const char* CLASSNAME_LINKER = "Lstd/core/AbcRuntimeLinker;";
 } // namespace
 
@@ -420,11 +419,7 @@ bool ETSEnvironment::LoadAbcLinker(ani_env *env, const std::string &modulePath, 
         return false;
     }
     ani_status status = ANI_ERROR;
-    ani_class stringCls = nullptr;
-    if ((status = env->FindClass(CLASSNAME_STRING, &stringCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "FindClass failed, status: %{public}d", status);
-        return false;
-    }
+
     ani_string modulePathAni = nullptr;
     if ((status = env->String_NewUTF8(modulePath.c_str(), modulePath.size(), &modulePathAni)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "String_NewUTF8 failed, status: %{public}d", status);
@@ -435,12 +430,12 @@ bool ETSEnvironment::LoadAbcLinker(ani_env *env, const std::string &modulePath, 
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "GetUndefined failed, status: %{public}d", status);
         return false;
     }
-    ani_array_ref refArray = nullptr;
-    if ((status = env->Array_New_Ref(stringCls, 1, undefinedRef, &refArray)) != ANI_OK) {
+    ani_array refArray = nullptr;
+    if ((status = env->Array_New(1, undefinedRef, &refArray)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_New_Ref failed, status: %{public}d", status);
         return false;
     }
-    if ((status = env->Array_Set_Ref(refArray, 0, modulePathAni)) != ANI_OK) {
+    if ((status = env->Array_Set(refArray, 0, modulePathAni)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_Set_Ref failed, status: %{public}d", status);
         return false;
     }
@@ -722,18 +717,13 @@ void ETSEnvironment::BroadcastAndConnect(const std::string& bundleName, int sock
 }
 
 bool ETSEnvironment::ConvertHspPathToAniArray(ani_env *aniEnv, const std::vector<std::string> &hapPathInfos,
-    ani_array_ref &refArray)
+    ani_array &refArray)
 {
     if (aniEnv == nullptr) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "GetAniEnv failed");
         return false;
     }
     ani_status status = ANI_ERROR;
-    ani_class stringCls = nullptr;
-    if ((status = aniEnv->FindClass(CLASSNAME_STRING, &stringCls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "FindClass Lstd/core/String Failed, status: %{public}d", status);
-        return false;
-    }
 
     ani_ref undefined_ref;
     if ((status = aniEnv->GetUndefined(&undefined_ref)) != ANI_OK) {
@@ -741,7 +731,7 @@ bool ETSEnvironment::ConvertHspPathToAniArray(ani_env *aniEnv, const std::vector
         return false;
     }
 
-    if ((status = aniEnv->Array_New_Ref(stringCls, hapPathInfos.size(), undefined_ref, &refArray)) != ANI_OK) {
+    if ((status = aniEnv->Array_New(hapPathInfos.size(), undefined_ref, &refArray)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_New_Ref Failed, status: %{public}d", status);
         return false;
     }
@@ -753,7 +743,7 @@ bool ETSEnvironment::ConvertHspPathToAniArray(ani_env *aniEnv, const std::vector
             TAG_LOGE(AAFwkTag::ETSRUNTIME, "String_NewUTF8 modulePath Failed, status: %{public}d", status);
             return false;
         }
-        if ((status = aniEnv->Array_Set_Ref(refArray, index, ani_str)) != ANI_OK) {
+        if ((status = aniEnv->Array_Set(refArray, index, ani_str)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_Set_Ref Failed, status: %{public}d", status);
             return false;
         }
@@ -790,7 +780,7 @@ std::vector<std::string> ETSEnvironment::GetHspPathList()
     return hspPathList;
 }
 
-bool ETSEnvironment::GetHspAbcRuntimeLinker(ani_array_ref &refHspLinkerArray, ani_class cls)
+bool ETSEnvironment::GetHspAbcRuntimeLinker(ani_array &refHspLinkerArray, ani_class cls)
 {
     const auto &hspPathList = GetHspPathList();
     if (hspPathList.empty()) {
@@ -815,7 +805,7 @@ bool ETSEnvironment::GetHspAbcRuntimeLinker(ani_array_ref &refHspLinkerArray, an
         return false;
     }
 
-    ani_array_ref str_refArray;
+    ani_array str_refArray;
     if (ConvertHspPathToAniArray(aniEnv, hspPathList, str_refArray) == false) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "ConvertHspPathToAniArray failed");
         return false;
@@ -827,11 +817,11 @@ bool ETSEnvironment::GetHspAbcRuntimeLinker(ani_array_ref &refHspLinkerArray, an
         return false;
     }
 
-    if ((status = aniEnv->Array_New_Ref(cls, 1, undefined_ref, &refHspLinkerArray)) != ANI_OK) {
+    if ((status = aniEnv->Array_New(1, undefined_ref, &refHspLinkerArray)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_New_Ref Failed, status: %{public}d", status);
         return false;
     }
-    if ((status = aniEnv->Array_Set_Ref(refHspLinkerArray, 0, object)) != ANI_OK) {
+    if ((status = aniEnv->Array_Set(refHspLinkerArray, 0, object)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Array_Set_Ref Failed, status: %{public}d", status);
         return false;
     }
@@ -839,10 +829,10 @@ bool ETSEnvironment::GetHspAbcRuntimeLinker(ani_array_ref &refHspLinkerArray, an
 }
 
 ani_object ETSEnvironment::CreateRuntimeLinker(
-    ani_env *aniEnv, ani_class cls, ani_ref undefined_ref, ani_array_ref& refArray)
+    ani_env *aniEnv, ani_class cls, ani_ref undefined_ref, ani_array& refArray)
 {
     ani_object object = nullptr;
-    ani_array_ref refHspLinkerArray = nullptr;
+    ani_array refHspLinkerArray = nullptr;
     GetHspAbcRuntimeLinker(refHspLinkerArray, cls);
     ani_status status = ANI_ERROR;
 

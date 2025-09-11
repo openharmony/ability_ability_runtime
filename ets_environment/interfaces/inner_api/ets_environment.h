@@ -85,10 +85,10 @@ public:
 
 private:
     bool ConvertHspPathToAniArray(ani_env *aniEnv, const std::vector<std::string> &hapPathInfos,
-        ani_array_ref &refArray);
+        ani_array &refArray);
     std::vector<std::string> GetHspPathList();
-    bool GetHspAbcRuntimeLinker(ani_array_ref &refHspLinkerArray, ani_class cls);
-    ani_object CreateRuntimeLinker(ani_env *aniEnv, ani_class cls, ani_ref undefined_ref, ani_array_ref &refArray);
+    bool GetHspAbcRuntimeLinker(ani_array &refHspLinkerArray, ani_class cls);
+    ani_object CreateRuntimeLinker(ani_env *aniEnv, ani_class cls, ani_ref undefined_ref, ani_array &refArray);
     bool LoadRuntimeApis();
     bool LoadSymbolCreateVM(void *handle, ETSRuntimeAPI &apis);
     bool LoadSymbolANIGetCreatedVMs(void *handle, ETSRuntimeAPI &apis);

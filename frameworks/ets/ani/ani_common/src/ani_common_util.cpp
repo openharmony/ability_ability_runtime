@@ -808,7 +808,7 @@ bool UnwrapArrayString(ani_env *env, const ani_object &arrayObj, std::vector<std
     ani_ref ref;
     ani_size idx;
     for (idx = 0; idx < size; idx++) {
-        if ((status = env->Array_Get_Ref(reinterpret_cast<ani_array_ref>(arrayObj), idx, &ref)) != ANI_OK) {
+        if ((status = env->Array_Get(reinterpret_cast<ani_array>(arrayObj), idx, &ref)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::ANI, "status: %{public}d, index: %{public}zu", status, idx);
             return false;
         }

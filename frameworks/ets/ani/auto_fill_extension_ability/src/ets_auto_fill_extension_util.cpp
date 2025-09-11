@@ -188,7 +188,7 @@ void EtsAutoFillExtensionUtil::UnwrapViewData(ani_env *env, const ani_object obj
         }
         for (ani_size index = 0; index < length && index < PAGE_NODE_COUNT_MAX; index++) {
             ani_ref etsNode = nullptr;
-            if ((status = env->Array_Get_Ref(reinterpret_cast<ani_array_ref>(pageNode), index, &etsNode)) != ANI_OK) {
+            if ((status = env->Array_Get(reinterpret_cast<ani_array>(pageNode), index, &etsNode)) != ANI_OK) {
                 TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Array_Get_Ref failed, status: %{public}d", status);
                 return;
             }

@@ -177,6 +177,28 @@ bool InnerWrapWantParamsBool(
     return InnerSetRecord(env, recordObject, aniKey, aniValue);
 }
 
+bool InnerCreateByteObject(ani_env *env, ani_byte value, ani_object &object)
+{
+    ani_class cls = nullptr;
+    ani_method ctorMethod = nullptr;
+    ani_status status = env->FindClass("std.core.Byte", &cls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "FindClass failed status: %{public}d", status);
+        return false;
+    }
+    status = env->Class_FindMethod(cls, "<ctor>", "b:", &ctorMethod);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod constructor failed: %{public}d", status);
+        return false;
+    }
+    status = env->Object_New(cls, ctorMethod, &object, value);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "Object_New failed: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 bool InnerCreateShortObject(ani_env *env, ani_short value, ani_object &object)
 {
     ani_class cls = nullptr;
@@ -472,19 +494,14 @@ bool InnerWrapWantParamsRemoteObject(
 bool InnerSetArrayString(ani_env *env, ani_object recordObject, ani_string aniKey,
     const std::vector<std::string> &natArray)
 {
-    ani_class stringCls = nullptr;
-    bool res = AniCommonCacheMgr::GetCachedClass(env, CLASSNAME_STRING, stringCls);
-    if (!res) {
-        return false;
-    }
     ani_ref undefinedRef = nullptr;
-    ani_status status = env->GetUndefined(&undefinedRef);
+    auto status = env->GetUndefined(&undefinedRef);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "GetUndefined failed, status: %{public}d", status);
         return false;
     }
-    ani_array_ref refArray = nullptr;
-    status = env->Array_New_Ref(stringCls, natArray.size(), undefinedRef, &refArray);
+    ani_array refArray = nullptr;
+    status = env->Array_New(natArray.size(), undefinedRef, &refArray);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Array_New failed, status: %{public}d", status);
         return false;
@@ -496,7 +513,7 @@ bool InnerSetArrayString(ani_env *env, ani_object recordObject, ani_string aniKe
             TAG_LOGE(AAFwkTag::ANI, "value GetAniString failed");
             continue;
         }
-        status = env->Array_Set_Ref(refArray, i, aniValue);
+        status = env->Array_Set(refArray, i, aniValue);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::ANI, "Array_Set_Ref failed, status: %{public}d", status);
         }
@@ -559,19 +576,30 @@ bool InnerWrapWantParamsArrayBool(ani_env *env, ani_object recordObject, const s
             }
         }
     }
-
-    ani_array_boolean aniArray = nullptr;
-    ani_status status = env->Array_New_Boolean(natArray.size(), &aniArray);
+    ani_ref undefinedRef = nullptr;
+    auto status = env->GetUndefined(&undefinedRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "GetUndefined failed, status: %{public}d", status);
+        return false;
+    }
+    ani_array aniArray = nullptr;
+    status = env->Array_New(natArray.size(), undefinedRef, &aniArray);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Array_New failed, status: %{public}d", status);
         return false;
     }
-
     auto *aniArrayBuf = reinterpret_cast<ani_boolean *>(natArray.data());
-    status = env->Array_SetRegion_Boolean(aniArray, 0, natArray.size(), aniArrayBuf);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Array_SetRegion_Boolean failed, status: %{public}d", status);
-        return false;
+
+    for (size_t i = 0; i < natArray.size(); ++i) {
+        ani_object booleanObj {};
+        if (!InnerCreateBooleanObject(env, aniArrayBuf[i], booleanObj)) {
+            return false;
+        }
+        status = env->Array_Set(aniArray, i, booleanObj);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Array_Set failed, status: %{public}d", status);
+            return false;
+        }
     }
 
     return InnerSetRecord(env, recordObject, aniKey, aniArray);
@@ -604,18 +632,31 @@ bool InnerWrapWantParamsArrayShort(ani_env *env, ani_object recordObject, const 
         }
     }
 
-    ani_array_short aniArray = nullptr;
-    ani_status status = env->Array_New_Short(natArray.size(), &aniArray);
+    ani_array aniArray = nullptr;
+    ani_ref undefinedRef = nullptr;
+    auto status = env->GetUndefined(&undefinedRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "GetUndefined failed, status: %{public}d", status);
+        return false;
+    }
+    status = env->Array_New(natArray.size(), undefinedRef, &aniArray);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Array_New failed, status: %{public}d", status);
         return false;
     }
 
     auto *aniArrayBuf = reinterpret_cast<ani_short *>(natArray.data());
-    status = env->Array_SetRegion_Short(aniArray, 0, natArray.size(), aniArrayBuf);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Array_SetRegion failed, status: %{public}d", status);
-        return false;
+
+    for (size_t i = 0; i < natArray.size(); ++i) {
+        ani_object shortObj {};
+        if (!InnerCreateShortObject(env, aniArrayBuf[i], shortObj)) {
+            return false;
+        }
+        status = env->Array_Set(aniArray, i, shortObj);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Array_Set failed, status: %{public}d", status);
+            return false;
+        }
     }
 
     return InnerSetRecord(env, recordObject, aniKey, aniArray);
@@ -648,18 +689,31 @@ bool InnerWrapWantParamsArrayInt32(ani_env *env, ani_object recordObject, const 
         }
     }
 
-    ani_array_int aniArray = nullptr;
-    ani_status status = env->Array_New_Int(natArray.size(), &aniArray);
+    ani_array aniArray = nullptr;
+    ani_ref undefinedRef = nullptr;
+    auto status = env->GetUndefined(&undefinedRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "GetUndefined failed, status: %{public}d", status);
+        return false;
+    }
+    status = env->Array_New(natArray.size(), undefinedRef, &aniArray);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Array_New failed, status: %{public}d", status);
         return false;
     }
 
     auto *aniArrayBuf = reinterpret_cast<ani_int *>(natArray.data());
-    status = env->Array_SetRegion_Int(aniArray, 0, natArray.size(), aniArrayBuf);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Array_SetRegion failed, status: %{public}d", status);
-        return false;
+
+    for (size_t i = 0; i < natArray.size(); ++i) {
+        ani_object intObj {};
+        if (!InnerCreateIntObject(env, aniArrayBuf[i], intObj)) {
+            return false;
+        }
+        status = env->Array_Set(aniArray, i, intObj);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Array_Set failed, status: %{public}d", status);
+            return false;
+        }
     }
 
     return InnerSetRecord(env, recordObject, aniKey, aniArray);
@@ -692,18 +746,31 @@ bool InnerWrapWantParamsArrayInt64(ani_env *env, ani_object recordObject, const 
         }
     }
 
-    ani_array_long aniArray = nullptr;
-    ani_status status = env->Array_New_Long(natArray.size(), &aniArray);
+    ani_array aniArray = nullptr;
+    ani_ref undefinedRef = nullptr;
+    auto status = env->GetUndefined(&undefinedRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "GetUndefined failed, status: %{public}d", status);
+        return false;
+    }
+    status = env->Array_New(natArray.size(), undefinedRef, &aniArray);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Array_New failed, status: %{public}d", status);
         return false;
     }
 
     auto *aniArrayBuf = reinterpret_cast<ani_long *>(natArray.data());
-    status = env->Array_SetRegion_Long(aniArray, 0, natArray.size(), aniArrayBuf);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Array_SetRegion failed, status: %{public}d", status);
-        return false;
+
+    for (size_t i = 0; i < natArray.size(); ++i) {
+        ani_object longObj {};
+        if (!InnerCreateLongObject(env, aniArrayBuf[i], longObj)) {
+            return false;
+        }
+        status = env->Array_Set(aniArray, i, longObj);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Array_Set failed, status: %{public}d", status);
+            return false;
+        }
     }
 
     return InnerSetRecord(env, recordObject, aniKey, aniArray);
@@ -736,18 +803,31 @@ bool InnerWrapWantParamsArrayFloat(ani_env *env, ani_object recordObject, const 
         }
     }
 
-    ani_array_float aniArray = nullptr;
-    ani_status status = env->Array_New_Float(natArray.size(), &aniArray);
+    ani_array aniArray = nullptr;
+    ani_ref undefinedRef = nullptr;
+    auto status = env->GetUndefined(&undefinedRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "GetUndefined failed, status: %{public}d", status);
+        return false;
+    }
+    status = env->Array_New(natArray.size(), undefinedRef, &aniArray);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Array_New failed, status: %{public}d", status);
         return false;
     }
 
     auto *aniArrayBuf = reinterpret_cast<ani_float *>(natArray.data());
-    status = env->Array_SetRegion_Float(aniArray, 0, natArray.size(), aniArrayBuf);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Array_SetRegion failed, status: %{public}d", status);
-        return false;
+
+    for (size_t i = 0; i < natArray.size(); ++i) {
+        ani_object floatObj {};
+        if (!InnerCreateFloatObject(env, aniArrayBuf[i], floatObj)) {
+            return false;
+        }
+        status = env->Array_Set(aniArray, i, floatObj);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Array_Set failed, status: %{public}d", status);
+            return false;
+        }
     }
 
     return InnerSetRecord(env, recordObject, aniKey, aniArray);
@@ -780,18 +860,31 @@ bool InnerWrapWantParamsArrayByte(ani_env *env, ani_object recordObject, const s
         }
     }
 
-    ani_array_byte aniArray = nullptr;
-    ani_status status = env->Array_New_Byte(natArray.size(), &aniArray);
+    ani_array aniArray = nullptr;
+    ani_ref undefinedRef = nullptr;
+    auto status = env->GetUndefined(&undefinedRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "GetUndefined failed, status: %{public}d", status);
+        return false;
+    }
+    status = env->Array_New(natArray.size(), undefinedRef, &aniArray);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Array_New failed, status: %{public}d", status);
         return false;
     }
 
     auto *aniArrayBuf = reinterpret_cast<ani_byte *>(natArray.data());
-    status = env->Array_SetRegion_Byte(aniArray, 0, natArray.size(), aniArrayBuf);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Array_SetRegion failed, status: %{public}d", status);
-        return false;
+
+    for (size_t i = 0; i < natArray.size(); ++i) {
+        ani_object byteObj {};
+        if (InnerCreateByteObject(env, aniArrayBuf[i], byteObj)) {
+            return false;
+        }
+        status = env->Array_Set(aniArray, i, byteObj);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Array_Set failed, status: %{public}d", status);
+            return false;
+        }
     }
 
     return InnerSetRecord(env, recordObject, aniKey, aniArray);
@@ -855,18 +948,31 @@ bool InnerWrapWantParamsArrayDouble(ani_env *env, ani_object recordObject, const
         }
     }
 
-    ani_array_double aniArray = nullptr;
-    ani_status status = env->Array_New_Double(natArray.size(), &aniArray);
+    ani_array aniArray = nullptr;
+    ani_ref undefinedRef = nullptr;
+    auto status = env->GetUndefined(&undefinedRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "GetUndefined failed, status: %{public}d", status);
+        return false;
+    }
+    status = env->Array_New(natArray.size(), undefinedRef, &aniArray);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Array_New failed, status: %{public}d", status);
         return false;
     }
 
     auto *aniArrayBuf = reinterpret_cast<ani_double *>(natArray.data());
-    status = env->Array_SetRegion_Double(aniArray, 0, natArray.size(), aniArrayBuf);
-    if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ANI, "Array_SetRegion failed, status: %{public}d", status);
-        return false;
+
+    for (size_t i = 0; i < natArray.size(); ++i) {
+        ani_object doubleObj {};
+        if (!InnerCreateDoubleObject(env, aniArrayBuf[i], doubleObj)) {
+            return false;
+        }
+        status = env->Array_Set(aniArray, i, doubleObj);
+        if (status != ANI_OK) {
+            TAG_LOGE(AAFwkTag::ANI, "Array_Set failed, status: %{public}d", status);
+            return false;
+        }
     }
 
     return InnerSetRecord(env, recordObject, aniKey, aniArray);
@@ -875,19 +981,14 @@ bool InnerWrapWantParamsArrayDouble(ani_env *env, ani_object recordObject, const
 bool InnerSetArrayObject(ani_env *env, ani_object recordObject, ani_string aniKey,
     const std::vector<AAFwk::WantParams> &natArray)
 {
-    ani_class recordCls = nullptr;
-    bool res = AniCommonCacheMgr::GetCachedClass(env, CLASSNAME_RECORD, recordCls);
-    if (!res) {
-        return false;
-    }
     ani_ref undefinedRef = nullptr;
-    ani_status status = env->GetUndefined(&undefinedRef);
+    auto status = env->GetUndefined(&undefinedRef);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "GetUndefined failed, status: %{public}d", status);
         return false;
     }
-    ani_array_ref refArray = nullptr;
-    status = env->Array_New_Ref(recordCls, natArray.size(), undefinedRef, &refArray);
+    ani_array refArray = nullptr;
+    status = env->Array_New(natArray.size(), undefinedRef, &refArray);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Array_New failed, status: %{public}d", status);
         return false;
@@ -899,7 +1000,7 @@ bool InnerSetArrayObject(ani_env *env, ani_object recordObject, ani_string aniKe
             TAG_LOGE(AAFwkTag::ANI, "value GetAniString failed");
             continue;
         }
-        status = env->Array_Set_Ref(refArray, i, aniValue);
+        status = env->Array_Set(refArray, i, aniValue);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::ANI, "Array_Set_Ref failed, status: %{public}d", status);
         }
