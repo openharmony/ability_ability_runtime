@@ -191,7 +191,7 @@ void SourceMap::SplitSourceMap(const std::string& sourceMapData)
             }
         }
         if (StringStartWith(tmp.c_str(), FLAG_MAPPINGS)) { // mapping
-            ExtractSourceMapData(tmp.substr(FLAG_MAPPINGS_LEN, tmp.size() - FLAG_MAPPINGS_LEN - 1), mapData);
+            ExtractSourceMapData(tmp.substr(FLAG_MAPPINGS_LEN, tmp.size() - FLAG_MAPPINGS_LEN - INDEX_TWO), mapData);
             continue;
         }
         if (StringStartWith(tmp.c_str(), FLAG_ENTRY_PACKAGE_INFO)) { // entryPackageInfo
@@ -304,6 +304,11 @@ MappingInfo SourceMap::Find(int32_t row, int32_t col, const SourceMapData& targe
             left = mid + 1;
         }
     }
+
+    if (targetMap.afterPos_[res].afterRow != row && targetMap.afterPos_[res + 1].afterRow == row) {
+        res++;
+    }
+
     auto pos = sources.find(WEBPACK);
     if (pos != std::string::npos) {
         sources.replace(pos, sizeof(WEBPACK) - 1, "");
