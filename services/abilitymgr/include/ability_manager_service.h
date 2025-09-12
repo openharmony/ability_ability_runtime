@@ -2253,7 +2253,7 @@ private:
     void InitGlobalConfiguration();
 
     int StartRemoteAbility(const Want &want, int requestCode, int32_t validUserId,
-        const sptr<IRemoteObject> &callerToken);
+        const sptr<IRemoteObject> &callerToken, uint32_t specifyTokenId = 0);
     int StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionInfo, uint32_t sceneFlag, bool &isColdStart);
     int StartUIAbilityByPreInstallInner(sptr<SessionInfo> sessionInfo, uint32_t specifyTokenId,
         uint32_t sceneFlag, bool &isColdStart);
