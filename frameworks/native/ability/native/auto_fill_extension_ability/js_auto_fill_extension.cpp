@@ -81,7 +81,7 @@ napi_value AttachAutoFillExtensionContext(napi_env env, void *value, void *)
     auto coerceStatus = napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachAutoFillExtensionContext, value, nullptr);
     if (coerceStatus != napi_ok) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "coerceStatus Failed: %{public}d", coerceStatus);
         return nullptr;
     }
 
@@ -209,7 +209,7 @@ void JsAutoFillExtension::BindContext(napi_env env, napi_value obj)
     auto coerceStatus = napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachAutoFillExtensionContext, workContext, nullptr);
     if (coerceStatus != napi_ok) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "coerceStatus Failed: %{public}d", coerceStatus);
         delete workContext;
         return nullptr;
     }

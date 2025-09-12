@@ -102,7 +102,7 @@ napi_value AttachJsAbilityContext(napi_env env, void *value, void *)
     auto coerceStatus = napi_coerce_to_native_binding_object(
         env, contextObj, DetachNewJsAbilityContext, AttachJsAbilityContext, workContext, nullptr);
     if (coerceStatus != napi_ok) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
+        TAG_LOGE(AAFwkTag::ABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
         delete workContext;
         return nullptr;
     }
@@ -230,7 +230,7 @@ void JsAbility::BindContext()
     auto coerceStatus = napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, workContext, nullptr);
     if (coerceStatus != napi_ok) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
+        TAG_LOGE(AAFwkTag::ABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
         delete workContext;
         return nullptr;
     }
