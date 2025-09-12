@@ -218,7 +218,8 @@ void BindContext(napi_env env, std::unique_ptr<NativeReference> contextRef, JsRu
         env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, workContext, nullptr);
     if (coerceStatus != napi_ok) {
         TAG_LOGE(AAFwkTag::UIABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
-        return nullptr;
+        delete workContext;
+        return;
     }
     abilityContext->Bind(jsRuntime, contextRef.release());
     napi_wrap(
