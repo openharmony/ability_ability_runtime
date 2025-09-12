@@ -60,7 +60,6 @@ ohos_shared_library("ani_common") {
     "src/ets_error_utils.cpp",
     "src/ets_extension_context.cpp",
     "src/ets_free_install_observer.cpp",
-    "src/ani_common_remote.cpp",
   ]
 
   cflags = []
@@ -96,10 +95,9 @@ ohos_shared_library("ani_common") {
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image_ani",
-    "ipc:rpc_ani",
+    "ipc:rpc_taihe",
     "ipc:ipc_core",
     "ipc:ipc_napi",
-    "ipc:rpc_ani",
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",
