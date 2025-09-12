@@ -773,9 +773,10 @@ void AppRunningRecord::StateChangedNotifyObserver(const std::shared_ptr<AbilityR
         }
     }
     abilityStateData.processType = static_cast<int32_t>(processType_);
+    BundleType bundleType = applicationInfo ? applicationInfo->bundleType : AppExecFwk::BundleType::APP;
     auto serviceInner = appMgrServiceInner_.lock();
     if (serviceInner) {
-        serviceInner->StateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged);
+        serviceInner->StateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged, bundleType);
     }
 }
 

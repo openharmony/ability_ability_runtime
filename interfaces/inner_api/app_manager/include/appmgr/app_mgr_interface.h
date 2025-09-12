@@ -24,6 +24,7 @@
 #include "app_mgr_ipc_interface_code.h"
 #include "app_record_id.h"
 #include "application_info.h"
+#include "application_state_filter.h"
 #include "background_app_info.h"
 #include "bundle_info.h"
 #include "child_process_info.h"
@@ -330,6 +331,18 @@ public:
      */
     virtual int32_t RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer,
         const std::vector<std::string> &bundleNameList = {}) = 0;
+
+    /**
+     * Register application/process/ability state observer.
+     * @param observer, bundleNameList, AppStateFilter.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterApplicationStateObserverWithFilter(sptr<IApplicationStateObserver> observer,
+        const std::vector<std::string> &bundleNameList = {}, const AppStateFilter &appStateFilter = AppStateFilter(),
+        bool isUsingFilter = false)
+    {
+        return 0;
+    }
 
     /**
      * Unregister application or process state observer.

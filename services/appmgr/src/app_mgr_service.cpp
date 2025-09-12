@@ -25,6 +25,7 @@
 #include "ability_manager_xcollie.h"
 #include "app_death_recipient.h"
 #include "app_mgr_constants.h"
+#include "application_state_filter.h"
 #include "datetime_ex.h"
 #include "fd_guard.h"
 #include "freeze_util.h"
@@ -59,6 +60,11 @@ constexpr const int BASE_TEN = 10;
 constexpr const char SIGN_TERMINAL = '\0';
 constexpr int32_t DEFAULT_CONCURRENT_NUMBER = 1;
 namespace {
+#define CHECK_CALLER_IS_SYSTEM_APP                                                             \
+    if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) { \
+        TAG_LOGE(AAFwkTag::APPMGR, "can't use SA");    \
+        return AAFwk::ERR_NOT_SYSTEM_APP;                                                      \
+    }
 using namespace std::chrono_literals;
 constexpr const char* TASK_INIT_APPMGRSERVICEINNER = "InitAppMgrServiceInnerTask";
 constexpr const char* TASK_ATTACH_APPLICATION = "AttachApplicationTask";
@@ -1955,6 +1961,36 @@ int32_t AppMgrService::QueryRunningSharedBundles(pid_t pid, std::map<std::string
         return ERR_PERMISSION_DENIED;
     }
     return appMgrServiceInner_->QueryRunningSharedBundles(pid, sharedBundles);
+}
+
+int32_t AppMgrService::RegisterApplicationStateObserverWithFilter(sptr<IApplicationStateObserver> observer,
+    const std::vector<std::string> &bundleNameList, const AppStateFilter &appStateFilter, bool isUsingFilter)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "begin");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "not ready");
+        return ERR_INVALID_OPERATION;
+    }
+    int32_t ret = 0;
+    if (isUsingFilter) {
+        CHECK_CALLER_IS_SYSTEM_APP;
+        ret = appMgrServiceInner_->RegisterApplicationStateObserver(observer, bundleNameList, appStateFilter);
+    } else {
+        FilterCallback callbacks = static_cast<FilterCallback>(
+            static_cast<uint32_t>(FilterCallback::ON_FOREGROUND_APPLICATION_CHANGED) |
+            static_cast<uint32_t>(FilterCallback::ON_ABILITY_STATE_CHANGED) |
+            static_cast<uint32_t>(FilterCallback::ON_PROCESS_CREATED) |
+            static_cast<uint32_t>(FilterCallback::ON_PROCESS_DIED) |
+            static_cast<uint32_t>(FilterCallback::ON_PROCESS_STATE_CHANGED) |
+            static_cast<uint32_t>(FilterCallback::ON_APP_STARTED) |
+            static_cast<uint32_t>(FilterCallback::ON_APP_STOPPED) |
+            static_cast<uint32_t>(FilterCallback::ON_EXTENSION_STATE_CHANGED)
+        );
+        AppStateFilter defaultAppStateFilter {callbacks, FilterBundleType::ALL, FilterAppStateType::ALL,
+            FilterProcessStateType::ALL, FilterAbilityStateType::ALL};
+        ret = appMgrServiceInner_->RegisterApplicationStateObserver(observer, bundleNameList, defaultAppStateFilter);
+    }
+    return ret;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

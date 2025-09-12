@@ -91,6 +91,7 @@ ohos_shared_library("app_manager") {
     "src/appmgr/app_state_callback_host.cpp",
     "src/appmgr/app_state_callback_proxy.cpp",
     "src/appmgr/app_state_data.cpp",
+    "src/appmgr/application_state_filter.cpp",
     "src/appmgr/application_state_observer_proxy.cpp",
     "src/appmgr/application_state_observer_stub.cpp",
     "src/appmgr/background_app_info.cpp",

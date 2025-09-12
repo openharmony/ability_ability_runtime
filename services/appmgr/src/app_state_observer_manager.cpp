@@ -53,8 +53,8 @@ void AppStateObserverManager::Init()
     }
 }
 
-int32_t AppStateObserverManager::RegisterApplicationStateObserver(
-    const sptr<IApplicationStateObserver> &observer, const std::vector<std::string> &bundleNameList)
+int32_t AppStateObserverManager::RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer,
+    const std::vector<std::string> &bundleNameList, const AppStateFilter &appStateFilter)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (bundleNameList.size() > BUNDLE_NAME_LIST_MAX_SIZE) {
@@ -74,7 +74,8 @@ int32_t AppStateObserverManager::RegisterApplicationStateObserver(
         return ERR_INVALID_VALUE;
     }
     std::lock_guard lockRegister(observerLock_);
-    appStateObserverMap_.emplace(observer, AppStateObserverInfo{IPCSkeleton::GetCallingUid(), bundleNameList});
+    appStateObserverMap_.emplace(observer, AppStateObserverInfo{IPCSkeleton::GetCallingUid(),
+        bundleNameList, appStateFilter});
     if (appStateObserverMap_.size() >= OBSERVER_SINGLE_COUNT_LOG &&
         appStateObserverMap_.size() % OBSERVER_SINGLE_STEP_LOG == 0) {
         TAG_LOGW(AAFwkTag::APPMGR, "appStateObserverMap_ size:%{public}zu", appStateObserverMap_.size());
@@ -474,21 +475,21 @@ void AppStateObserverManager::OnChildProcessCreated(std::shared_ptr<ChildProcess
 #endif // SUPPORT_CHILD_PROCESS
 
 void AppStateObserverManager::StateChangedNotifyObserver(
-    const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged)
+    const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged, BundleType bundleType)
 {
     if (handler_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "null handler");
         return;
     }
 
-    auto task = [weak = weak_from_this(), abilityStateData, isAbility, isFromWindowFocusChanged]() {
+    auto task = [weak = weak_from_this(), abilityStateData, isAbility, isFromWindowFocusChanged, bundleType]() {
         auto self = weak.lock();
         if (self == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "null self");
             return;
         }
         TAG_LOGD(AAFwkTag::APPMGR, "StateChangedNotifyObserver come.");
-        self->HandleStateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged);
+        self->HandleStateChangedNotifyObserver(abilityStateData, isAbility, isFromWindowFocusChanged, bundleType);
     };
     handler_->SubmitTask(task);
 }
@@ -509,7 +510,14 @@ void AppStateObserverManager::HandleOnAppStarted(const std::shared_ptr<AppRunnin
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
+            appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
+        AppStateFilter appStateFilter {FilterCallback::ON_APP_STARTED,
+            GetFilterTypeFromBundleType(bundleType),
+            GetFilterTypeFromApplicationState(static_cast<ApplicationState>(data.state)),
+            FilterProcessStateType::NONE, FilterAbilityStateType::NONE};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnAppStarted(data);
         }
     }
@@ -530,7 +538,14 @@ void AppStateObserverManager::HandleOnAppStopped(const std::shared_ptr<AppRunnin
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
+            appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
+        AppStateFilter appStateFilter {FilterCallback::ON_APP_STOPPED,
+            GetFilterTypeFromBundleType(bundleType),
+            GetFilterTypeFromApplicationState(static_cast<ApplicationState>(data.state)),
+            FilterProcessStateType::NONE, FilterAbilityStateType::NONE};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnAppStopped(data);
         }
     }
@@ -543,6 +558,8 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
     if (appRecord == nullptr) {
         return;
     }
+    BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
+        appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
     if (state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_BACKGROUND) {
         if (needNotifyApp && !isFromWindowFocusChanged) {
             AppStateData data = WrapAppStateData(appRecord, state, isFromWindowFocusChanged);
@@ -565,10 +582,22 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
                 auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
                 bool valid = (bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr;
                 if (valid) {
-                    it->first->OnForegroundApplicationChanged(data);
+                    AppStateFilter appStateFilter {FilterCallback::ON_FOREGROUND_APPLICATION_CHANGED,
+                        GetFilterTypeFromBundleType(bundleType),
+                        GetFilterTypeFromApplicationState(static_cast<ApplicationState>(data.state)),
+                        FilterProcessStateType::NONE, FilterAbilityStateType::NONE};
+                    if (it->second.appStateFilter.Match(appStateFilter)) {
+                        it->first->OnForegroundApplicationChanged(data);
+                    }
                 }
                 if (valid && needNotifyApp) {
-                    it->first->OnAppStateChanged(data);
+                    AppStateFilter appStateFilter {FilterCallback::ON_APP_STATE_CHANGED,
+                        GetFilterTypeFromBundleType(bundleType),
+                        GetFilterTypeFromApplicationState(static_cast<ApplicationState>(data.state)),
+                        FilterProcessStateType::NONE, FilterAbilityStateType::NONE};
+                    if (it->second.appStateFilter.Match(appStateFilter)) {
+                        it->first->OnAppStateChanged(data);
+                    }
                 }
             }
         }
@@ -581,7 +610,12 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
         for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
             const auto &bundleNames = it->second.bundleNames;
             auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
-            if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+            AppStateFilter appStateFilter {FilterCallback::ON_APPLICATION_STATE_CHANGED,
+                GetFilterTypeFromBundleType(bundleType),
+                GetFilterTypeFromApplicationState(static_cast<ApplicationState>(data.state)),
+                FilterProcessStateType::NONE, FilterAbilityStateType::NONE};
+            if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+                it->second.appStateFilter.Match(appStateFilter)) {
                 it->first->OnApplicationStateChanged(data);
             }
         }
@@ -589,7 +623,7 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
 }
 
 void AppStateObserverManager::HandleStateChangedNotifyObserver(
-    const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged)
+    const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged, BundleType bundleType)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR,
@@ -605,10 +639,23 @@ void AppStateObserverManager::HandleStateChangedNotifyObserver(
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), abilityStateData.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
-            if (isAbility) {
+        if ((!bundleNames.empty() && iter == bundleNames.end()) || it->first == nullptr) {
+            continue;
+        }
+        if (isAbility) {
+            AppStateFilter appStateFilter {FilterCallback::ON_ABILITY_STATE_CHANGED,
+                GetFilterTypeFromBundleType(bundleType),
+                FilterAppStateType::NONE, FilterProcessStateType::NONE,
+                GetFilterTypeFromAbilityState(static_cast<AbilityState>(abilityStateData.abilityState))};
+            if (it->second.appStateFilter.Match(appStateFilter)) {
                 it->first->OnAbilityStateChanged(abilityStateData);
-            } else {
+            }
+        } else {
+            AppStateFilter appStateFilter {FilterCallback::ON_EXTENSION_STATE_CHANGED,
+                GetFilterTypeFromBundleType(bundleType),
+                FilterAppStateType::NONE, FilterProcessStateType::NONE,
+                GetFilterTypeFromAbilityState(static_cast<AbilityState>(abilityStateData.abilityState))};
+            if (it->second.appStateFilter.Match(appStateFilter)) {
                 it->first->OnExtensionStateChanged(abilityStateData);
             }
         }
@@ -647,7 +694,9 @@ void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<Ap
         "callerPid:%{public}d, callerUid:%{public}d",
         data.bundleName.c_str(), data.pid, data.uid, data.processType, data.extensionType, data.processName.c_str(),
         data.renderUid, data.isTestMode, data.callerPid, data.callerUid);
-    HandleOnProcessCreated(data);
+    BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
+            appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
+    HandleOnProcessCreated(data, bundleType);
 }
 
 void AppStateObserverManager::HandleOnProcessResued(const std::shared_ptr<AppRunningRecord> &appRecord)
@@ -665,7 +714,14 @@ void AppStateObserverManager::HandleOnProcessResued(const std::shared_ptr<AppRun
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
+            appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
+        AppStateFilter appStateFilter {FilterCallback::ON_PROCESS_REUSED,
+            GetFilterTypeFromBundleType(bundleType), FilterAppStateType::NONE,
+            GetFilterTypeFromAppProcessState(static_cast<AppProcessState>(data.state)),
+            FilterAbilityStateType::NONE};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnProcessReused(data);
         }
     }
@@ -685,7 +741,12 @@ void AppStateObserverManager::HandleOnRenderProcessCreated(const std::shared_ptr
         "RenderProcess Create, bundle:%{public}s, pid:%{public}d, uid:%{public}d, processType:%{public}d, "
         "processName:%{public}s, renderUid:%{public}d",
         data.bundleName.c_str(), data.pid, data.uid, data.processType, data.processName.c_str(), data.renderUid);
-    HandleOnProcessCreated(data);
+    BundleType bundleType = BundleType::APP;
+    if (renderRecord->GetHostRecord() != nullptr) {
+        bundleType = renderRecord->GetHostRecord()->GetApplicationInfo() != nullptr ?
+            renderRecord->GetHostRecord()->GetApplicationInfo()->bundleType : BundleType::APP;
+    }
+    HandleOnProcessCreated(data, bundleType);
 }
 
 #ifdef SUPPORT_CHILD_PROCESS
@@ -705,17 +766,27 @@ void AppStateObserverManager::HandleOnChildProcessCreated(std::shared_ptr<ChildP
         "ChildProcess Create, bundleName:%{public}s, pid:%{public}d, uid:%{public}d, "
         "processType:%{public}d, processName:%{public}s",
         data.bundleName.c_str(), data.pid, data.uid, data.processType, data.processName.c_str());
-    HandleOnProcessCreated(data);
+    BundleType bundleType = BundleType::APP;
+    if (childRecord->GetHostRecord() != nullptr) {
+        bundleType = childRecord->GetHostRecord()->GetApplicationInfo() != nullptr ?
+            childRecord->GetHostRecord()->GetApplicationInfo()->bundleType : BundleType::APP;
+    }
+    HandleOnProcessCreated(data, bundleType);
 }
 #endif // SUPPORT_CHILD_PROCESS
 
-void AppStateObserverManager::HandleOnProcessCreated(const ProcessData &data)
+void AppStateObserverManager::HandleOnProcessCreated(const ProcessData &data, BundleType bundleType)
 {
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        AppStateFilter appStateFilter {FilterCallback::ON_PROCESS_CREATED,
+            GetFilterTypeFromBundleType(bundleType), FilterAppStateType::NONE,
+            GetFilterTypeFromAppProcessState(static_cast<AppProcessState>(data.state)),
+            FilterAbilityStateType::NONE};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnProcessCreated(data);
         }
     }
@@ -742,7 +813,14 @@ void AppStateObserverManager::HandleOnProcessStateChanged(
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
+            appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
+        AppStateFilter appStateFilter {FilterCallback::ON_PROCESS_STATE_CHANGED,
+            GetFilterTypeFromBundleType(bundleType), FilterAppStateType::NONE,
+            GetFilterTypeFromAppProcessState(static_cast<AppProcessState>(data.state)),
+            FilterAbilityStateType::NONE};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnProcessStateChanged(data);
         }
     }
@@ -764,7 +842,14 @@ void AppStateObserverManager::HandleOnWindowShow(const std::shared_ptr<AppRunnin
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
+            appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
+        AppStateFilter appStateFilter {FilterCallback::ON_WINDOW_SHOW,
+            GetFilterTypeFromBundleType(bundleType), FilterAppStateType::NONE,
+            GetFilterTypeFromAppProcessState(static_cast<AppProcessState>(data.state)),
+            FilterAbilityStateType::NONE};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnWindowShow(data);
         }
     }
@@ -786,7 +871,14 @@ void AppStateObserverManager::HandleOnWindowHidden(const std::shared_ptr<AppRunn
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
+            appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
+        AppStateFilter appStateFilter {FilterCallback::ON_WINDOW_HIDDEN,
+            GetFilterTypeFromBundleType(bundleType), FilterAppStateType::NONE,
+            GetFilterTypeFromAppProcessState(static_cast<AppProcessState>(data.state)),
+            FilterAbilityStateType::NONE};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnWindowHidden(data);
         }
     }
@@ -803,7 +895,9 @@ void AppStateObserverManager::HandleOnAppProcessDied(const std::shared_ptr<AppRu
     TAG_LOGD(AAFwkTag::APPMGR, "Process died, bundle:%{public}s, pid:%{public}d, uid:%{public}d, renderUid:%{public}d,"
         " exitReason:%{public}d, exitMsg:%{public}s",
         data.bundleName.c_str(), data.pid, data.uid, data.renderUid, data.exitReason, data.exitMsg.c_str());
-    HandleOnProcessDied(data);
+    BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
+            appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
+    HandleOnProcessDied(data, bundleType);
 }
 
 void AppStateObserverManager::HandleOnRenderProcessDied(const std::shared_ptr<RenderRecord> &renderRecord)
@@ -817,7 +911,12 @@ void AppStateObserverManager::HandleOnRenderProcessDied(const std::shared_ptr<Re
     TAG_LOGD(AAFwkTag::APPMGR,
         "Render Process died, bundle:%{public}s, pid:%{public}d, uid:%{public}d, renderUid:%{public}d",
         data.bundleName.c_str(), data.pid, data.uid, data.renderUid);
-    HandleOnProcessDied(data);
+    BundleType bundleType = BundleType::APP;
+    if (renderRecord->GetHostRecord() != nullptr) {
+        bundleType = renderRecord->GetHostRecord()->GetApplicationInfo() != nullptr ?
+            renderRecord->GetHostRecord()->GetApplicationInfo()->bundleType : BundleType::APP;
+    }
+    HandleOnProcessDied(data, bundleType);
 }
 
 #ifdef SUPPORT_CHILD_PROCESS
@@ -837,17 +936,27 @@ void AppStateObserverManager::HandleOnChildProcessDied(std::shared_ptr<ChildProc
         "ChildProcess died, bundleName:%{public}s, pid:%{public}d, uid:%{public}d, "
         "processType:%{public}d, processName:%{public}s",
         data.bundleName.c_str(), data.pid, data.uid, data.processType, data.processName.c_str());
-    HandleOnProcessDied(data);
+    BundleType bundleType = BundleType::APP;
+    if (childRecord->GetHostRecord() != nullptr) {
+        bundleType = childRecord->GetHostRecord()->GetApplicationInfo() != nullptr ?
+            childRecord->GetHostRecord()->GetApplicationInfo()->bundleType : BundleType::APP;
+    }
+    HandleOnProcessDied(data, bundleType);
 }
 #endif // SUPPORT_CHILD_PROCESS
 
-void AppStateObserverManager::HandleOnProcessDied(const ProcessData &data)
+void AppStateObserverManager::HandleOnProcessDied(const ProcessData &data, BundleType bundleType)
 {
     auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        AppStateFilter appStateFilter {FilterCallback::ON_PROCESS_DIED,
+            GetFilterTypeFromBundleType(bundleType), FilterAppStateType::NONE,
+            GetFilterTypeFromAppProcessState(static_cast<AppProcessState>(data.state)),
+            FilterAbilityStateType::NONE};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnProcessDied(data);
         }
     }
@@ -1194,7 +1303,10 @@ void AppStateObserverManager::HandleOnPageShow(const PageStateData pageStateData
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), pageStateData.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        AppStateFilter appStateFilter {FilterCallback::ON_PAGE_SHOW, FilterBundleType::ALL,
+            FilterAppStateType::ALL, FilterProcessStateType::ALL, FilterAbilityStateType::ALL};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnPageShow(pageStateData);
         }
     }
@@ -1207,7 +1319,10 @@ void AppStateObserverManager::HandleOnPageHide(const PageStateData pageStateData
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), pageStateData.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        AppStateFilter appStateFilter {FilterCallback::ON_PAGE_HIDE, FilterBundleType::ALL,
+            FilterAppStateType::ALL, FilterProcessStateType::ALL, FilterAbilityStateType::ALL};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnPageHide(pageStateData);
         }
     }
@@ -1250,7 +1365,14 @@ void AppStateObserverManager::HandleOnAppCacheStateChanged(const std::shared_ptr
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
+            appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
+        AppStateFilter appStateFilter {FilterCallback::ON_APP_CACHE_STATE_CHANGED,
+            GetFilterTypeFromBundleType(bundleType),
+            GetFilterTypeFromApplicationState(static_cast<ApplicationState>(data.state)),
+            FilterProcessStateType::NONE, FilterAbilityStateType::NONE};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnAppCacheStateChanged(data);
         }
     }
@@ -1319,7 +1441,10 @@ void AppStateObserverManager::HandleOnProcessBindingRelationChanged(
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        AppStateFilter appStateFilter {FilterCallback::ON_PROCESS_BINDING_RELATION_CHANGED,
+            FilterBundleType::ALL, FilterAppStateType::ALL, FilterProcessStateType::ALL, FilterAbilityStateType::ALL};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnProcessBindingRelationChanged(data);
         }
     }
@@ -1363,7 +1488,14 @@ void AppStateObserverManager::HandleOnKeepAliveStateChanged(const std::shared_pt
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), data.bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
+            appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
+        AppStateFilter appStateFilter {FilterCallback::ON_KEEPALIVE_STATE_CHANGED,
+            GetFilterTypeFromBundleType(bundleType), FilterAppStateType::NONE,
+            GetFilterTypeFromAppProcessState(static_cast<AppProcessState>(data.state)),
+            FilterAbilityStateType::NONE};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnKeepAliveStateChanged(data);
         }
     }
@@ -1416,7 +1548,13 @@ void AppStateObserverManager::HandleOnProcessPreForegroundChanged(std::shared_pt
     for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
         const auto &bundleNames = it->second.bundleNames;
         auto iter = std::find(bundleNames.begin(), bundleNames.end(), bundleName);
-        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr) {
+        BundleType bundleType = appRecord->GetApplicationInfo() != nullptr ?
+            appRecord->GetApplicationInfo()->bundleType : BundleType::APP;
+        AppStateFilter appStateFilter {FilterCallback::ON_PROCESS_PREFOREGROUND_CHANGED,
+            GetFilterTypeFromBundleType(bundleType), FilterAppStateType::ALL,
+            FilterProcessStateType::ALL, FilterAbilityStateType::ALL};
+        if ((bundleNames.empty() || iter != bundleNames.end()) && it->first != nullptr &&
+            it->second.appStateFilter.Match(appStateFilter)) {
             it->first->OnProcessPreForegroundChanged(preloadProcessData);
         }
     }
