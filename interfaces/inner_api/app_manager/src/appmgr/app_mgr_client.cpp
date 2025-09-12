@@ -1747,5 +1747,16 @@ int32_t AppMgrClient::VerifyKillProcessPermission(const std::string &bundleName)
     }
     return amsService->VerifyKillProcessPermission(bundleName);
 }
+
+int32_t AppMgrClient::RegisterApplicationStateObserverWithFilter(sptr<IApplicationStateObserver> observer,
+    const std::vector<std::string> &bundleNameList, const AppStateFilter &appStateFilter, bool isUsingFilter)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->RegisterApplicationStateObserverWithFilter(observer,
+        bundleNameList, appStateFilter, isUsingFilter);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

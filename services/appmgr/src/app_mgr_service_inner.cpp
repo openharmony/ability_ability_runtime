@@ -38,6 +38,7 @@
 #include "app_state_observer_manager.h"
 #include "app_utils.h"
 #include "appfreeze_manager.h"
+#include "application_state_filter.h"
 #include "application_state_observer_stub.h"
 #include "appspawn_util.h"
 #include "bundle_constants.h"
@@ -3890,11 +3891,11 @@ void AppMgrServiceInner::OnAbilityStateChanged(
     }
 }
 
-void AppMgrServiceInner::StateChangedNotifyObserver(
-    const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged)
+void AppMgrServiceInner::StateChangedNotifyObserver(const AbilityStateData abilityStateData, bool isAbility,
+    bool isFromWindowFocusChanged, BundleType bundleType)
 {
     DelayedSingleton<AppStateObserverManager>::GetInstance()->StateChangedNotifyObserver(
-        abilityStateData, isAbility, isFromWindowFocusChanged);
+        abilityStateData, isAbility, isFromWindowFocusChanged, bundleType);
 }
 
 int32_t AppMgrServiceInner::StartPerfProcessByStartMsg(AppSpawnStartMsg &startMsg,
@@ -5372,11 +5373,11 @@ void AppMgrServiceInner::NotifyAppStatusByCallerUid(const std::string &bundleNam
     NotifyAppStatusByCommonEventName(bundleName, eventData, want);
 }
 
-int32_t AppMgrServiceInner::RegisterApplicationStateObserver(
-    const sptr<IApplicationStateObserver> &observer, const std::vector<std::string> &bundleNameList)
+int32_t AppMgrServiceInner::RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer,
+    const std::vector<std::string> &bundleNameList, const AppStateFilter &appStateFilter)
 {
     return DelayedSingleton<AppStateObserverManager>::GetInstance()->RegisterApplicationStateObserver(
-        observer, bundleNameList);
+        observer, bundleNameList, appStateFilter);
 }
 
 int32_t AppMgrServiceInner::UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer)

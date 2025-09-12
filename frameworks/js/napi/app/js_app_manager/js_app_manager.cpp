@@ -42,6 +42,7 @@
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "napi/native_api.h"
+#include "napi_common_app_state_filter.h"
 #include "napi_common_util.h"
 #include "system_ability_definition.h"
 
@@ -305,16 +306,37 @@ private:
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
             return CreateJsUndefined(env);
         }
-
         std::vector<std::string> bundleNameList;
         // unwarp observer
         if (observer_ == nullptr) {
             observer_ = new JSAppStateObserver(env);
         }
+        OHOS::AppExecFwk::AppStateFilter appStateFilter = OHOS::AppExecFwk::AppStateFilter();
+        bool isUsingFilter = false;
         if (argc > ARGC_TWO) {
-            AppExecFwk::UnwrapArrayStringFromJS(env, argv[INDEX_TWO], bundleNameList);
+            bool isArray = true;
+            if (napi_is_array(env, argv[INDEX_TWO], &isArray) != napi_ok) {
+                TAG_LOGE(AAFwkTag::APPMGR, "judge array failed");
+                ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+                return CreateJsUndefined(env);
+            }
+            if (isArray) {
+                if (!AppExecFwk::UnwrapArrayStringFromJS(env, argv[INDEX_TWO], bundleNameList)) {
+                    ThrowInvalidParamError(env, "Parse bundleNameList failed, must be a string array.");
+                    return CreateJsUndefined(env);
+                }
+            } else {
+                if (!AppExecFwk::UnwrapAppStateFilterFromJS(env, argv[INDEX_TWO], appStateFilter)) {
+                    ThrowInvalidParamError(env, "Parse appStateFilter failed, value must be a combination of "
+                    "values selected from enum FilterBundleType, FilterAppStateType, FilterProcessStateType "
+                    "FilterAbilityStateType and FilterCallback.");
+                    return CreateJsUndefined(env);
+                }
+                isUsingFilter = true;
+            }
         }
-        int32_t ret = appManager_->RegisterApplicationStateObserver(observer_, bundleNameList);
+        int32_t ret = appManager_->RegisterApplicationStateObserverWithFilter(observer_,
+            bundleNameList, appStateFilter, isUsingFilter);
         if (ret == 0) {
             TAG_LOGD(AAFwkTag::APPMGR, "success");
             int64_t observerId = serialNumber_;
@@ -1875,6 +1897,11 @@ void JsAppManagerInitProperty(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "PreloadMode", PreloadModeInit(env));
     napi_set_named_property(env, exportObj, "KeepAliveAppType", KeepAliveAppTypeInit(env));
     napi_set_named_property(env, exportObj, "KeepAliveSetter", KeepAliveSetterInit(env));
+    napi_set_named_property(env, exportObj, "FilterBundleType", FilterBundleTypeInit(env));
+    napi_set_named_property(env, exportObj, "FilterAppStateType", FilterAppStateTypeInit(env));
+    napi_set_named_property(env, exportObj, "FilterProcessStateType", FilterProcessStateTypeInit(env));
+    napi_set_named_property(env, exportObj, "FilterAbilityStateType", FilterAbilityStateTypeInit(env));
+    napi_set_named_property(env, exportObj, "FilterCallback", FilterCallbackInit(env));
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

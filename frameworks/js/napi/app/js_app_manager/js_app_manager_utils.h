@@ -68,6 +68,11 @@ napi_value CreateJsRunningMultiInstanceInfosArray(napi_env env, const std::vecto
 napi_value CreateJsRunningMultiInstanceInfo(napi_env env, const RunningMultiInstanceInfo &info);
 napi_value CreateJsKeepAliveBundleInfo(napi_env env, const KeepAliveInfo &info);
 napi_value CreateJsKeepAliveBundleInfoArray(napi_env env, const std::vector<KeepAliveInfo>& data);
+napi_value FilterBundleTypeInit(napi_env env);
+napi_value FilterAppStateTypeInit(napi_env env);
+napi_value FilterProcessStateTypeInit(napi_env env);
+napi_value FilterAbilityStateTypeInit(napi_env env);
+napi_value FilterCallbackInit(napi_env env);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_JS_APP_MANAGER_UTILS_H
