@@ -2178,6 +2178,7 @@ private:
 
     std::mutex loadTaskListMutex_;
     std::vector<LoadAbilityTaskFunc> loadAbilityTaskFuncList_;
+    std::mutex kiaInterceptorMutex_;
     sptr<IKiaInterceptor> kiaInterceptor_;
     std::shared_ptr<MultiUserConfigurationMgr> multiUserConfigurationMgr_;
     std::unordered_set<std::string> nwebPreloadSet_ {};
