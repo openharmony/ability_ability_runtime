@@ -1569,8 +1569,8 @@ void UvWorkOnAbilityConnectDone(uv_work_t *work, int status)
     }
     CallbackInfo &cbInfo = connectAbilityCB->cbBase.cbInfo;
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(cbInfo.env, &scope);
-    if (scope == nullptr) {
+    napi_status scopeStatus = napi_open_handle_scope(cbInfo.env, &scope);
+    if (scopeStatus != napi_ok || scope == nullptr) {
         TAG_LOGE(AAFwkTag::JSNAPI, "napi_open_handle_scope failed");
         return;
     }
