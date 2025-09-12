@@ -86,7 +86,11 @@ struct OnRequestPermissionsData {
         std::unique_ptr<OnRequestPermissionsData> data{static_cast<OnRequestPermissionsData *>(work->data)};
         auto env = data->env;
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        napi_status scopeStatus = napi_open_handle_scope(env, &scope);
+        if (scopeStatus != napi_ok || scope == nullptr) {
+            TAG_LOGE(AAFwkTag::JSNAPI, "napi_open_handle_scope failed");
+            return;
+        }
         napi_value object = nullptr;
         napi_create_object(env, &object);
         napi_set_named_property(env, object, "requestCode", CreateJsValue(env, data->requestCode));
