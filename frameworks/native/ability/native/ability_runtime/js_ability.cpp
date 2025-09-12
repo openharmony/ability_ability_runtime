@@ -99,8 +99,13 @@ napi_value AttachJsAbilityContext(napi_env env, void *value, void *)
     }
     auto contextObj = systemModule->GetNapiValue();
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(ptr);
-    napi_coerce_to_native_binding_object(
+    auto coerceStatus = napi_coerce_to_native_binding_object(
         env, contextObj, DetachNewJsAbilityContext, AttachJsAbilityContext, workContext, nullptr);
+    if (coerceStatus != napi_ok) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
+        delete workContext;
+        return nullptr;
+    }
     napi_add_detached_finalizer(env, contextObj, DetachFinalizeJsAbilityContext, nullptr);
     napi_status status = napi_wrap(env, contextObj, workContext,
         [](napi_env, void* data, void*) {
@@ -222,8 +227,13 @@ void JsAbility::BindContext()
         return;
     }
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(context);
-    napi_coerce_to_native_binding_object(
+    auto coerceStatus = napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, workContext, nullptr);
+    if (coerceStatus != napi_ok) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
+        delete workContext;
+        return nullptr;
+    }
     context->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
     TAG_LOGD(AAFwkTag::ABILITY, "set ability context");
