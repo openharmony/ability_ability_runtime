@@ -232,7 +232,7 @@ void JsAbility::BindContext()
     if (coerceStatus != napi_ok) {
         TAG_LOGE(AAFwkTag::ABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
         delete workContext;
-        return nullptr;
+        return;
     }
     context->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
