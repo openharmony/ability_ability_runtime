@@ -180,7 +180,12 @@ napi_value AttachJsAbilityContext(napi_env env, void *value, void *)
     }
     CHECK_POINTER_AND_RETURN(systemModule, nullptr);
     auto contextObj = systemModule->GetNapiValue();
-    napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, value, nullptr);
+    auto coerceStatus = napi_coerce_to_native_binding_object(env,
+        contextObj, DetachCallbackFunc, AttachJsAbilityContext, value, nullptr);
+    if (coerceStatus != napi_ok) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
+        return nullptr;
+    }
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(ptr);
     if (workContext != nullptr) {
         napi_status status = napi_wrap(env, contextObj, workContext,
