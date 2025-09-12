@@ -20,7 +20,7 @@
 #include "ability_manager_client.h"
 #include "ani_common_configuration.h"
 #include "ani_common_want.h"
-#include "ani_remote_object.h"
+#include "remote_object_taihe_ani.h"
 #include "configuration_utils.h"
 #include "ets_service_extension_context.h"
 #include "hilog_tag_wrapper.h"

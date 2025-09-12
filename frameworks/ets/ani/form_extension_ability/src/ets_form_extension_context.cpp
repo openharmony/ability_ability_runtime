@@ -19,13 +19,13 @@
 #include <iterator>
 
 #include "ani_common_configuration.h"
-#include "ani_common_remote.h"
 #include "ani_common_want.h"
 #include "ets_context_utils.h"
 #include "ets_error_utils.h"
 #include "ets_extension_context.h"
 #include "form_extension_context.h"
 #include "hilog_tag_wrapper.h"
+#include "remote_object_taihe_ani.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -524,7 +524,7 @@ void ETSFormExtensionConnection::OnAbilityConnectDone(
         DetachCurrentThread();
         return;
     }
-    ani_object refRemoteObject = AniRemote::CreateAniRemoteObject(env, remoteObject);
+    ani_object refRemoteObject = ANI_ohos_rpc_CreateJsRemoteObject(env, remoteObject);
     if (refRemoteObject == nullptr) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "null refRemoteObject");
         DetachCurrentThread();

@@ -16,7 +16,7 @@
 #include "ani_want_module.h"
 
 #include "ani_common_util.h"
-#include "ani_remote_object.h"
+#include "remote_object_taihe_ani.h"
 #include "array_wrapper.h"
 #include "bool_wrapper.h"
 #include "double_wrapper.h"
