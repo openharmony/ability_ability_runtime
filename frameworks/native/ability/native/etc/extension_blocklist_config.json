@@ -1,7 +1,36 @@
 {
     "blocklist": {
         "ServiceExtension": [],
-	    "VpnExtension":[
+        "FaultLogExtension": [
+            "backgroundTaskManager",
+            "resourceschedule.backgroundTaskManager",
+            "multimedia.audio",
+            "multimedia.avsession",
+            "multimedia.camera",
+            "multimedia.cameraPicker",
+            "multimedia.mediaLibrary",
+            "multimedia.movingphotoview",
+            "telephony.call",
+            "telephony.sim",
+            "telephony.sms",
+            "power",
+            "window",
+            "reminderAgent",
+            "reminderAgentManager",
+            "notification",
+            "notificationManager",
+            "notificationSubscribe",
+            "wifiext",
+            "wifiManager",
+            "wifiManagerExt",
+            "inputMethod",
+            "UIAbilityContext",
+            "userIAM.faceAuth",
+            "userIAM.faceAuth",
+            "vibrator",
+            "wallpaper"
+        ],
+        "VpnExtension":[
             "contact",
             "geolocation",
             "geoLocationManager",
