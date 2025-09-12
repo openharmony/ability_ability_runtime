@@ -1265,7 +1265,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 
     if (callerToken != nullptr && CheckIfOperateRemote(want)) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "try to StartRemoteAbility");
-        result = StartRemoteAbility(want, requestCode, validUserId, callerToken);
+        result = StartRemoteAbility(want, requestCode, validUserId, callerToken, specifyTokenId);
         eventHelper_.SendStartAbilityErrorEvent(eventInfo, result, "StartRemoteAbility failed");
         return AbilityErrorUtil::ConvertToOriginErrorCode(result);
     }
@@ -4784,7 +4784,7 @@ int AbilityManagerService::SendResultToAbility(int32_t requestCode, int32_t resu
 }
 
 int AbilityManagerService::StartRemoteAbility(const Want &want, int requestCode, int32_t validUserId,
-    const sptr<IRemoteObject> &callerToken)
+    const sptr<IRemoteObject> &callerToken, uint32_t specifyTokenId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
@@ -4822,7 +4822,7 @@ int AbilityManagerService::StartRemoteAbility(const Want &want, int requestCode,
     UriUtils::GetInstance().CheckUriPermission(accessToken, remoteWant);
 #endif // SUPPORT_UPMS
     DistributedClient dmsClient;
-    int result = dmsClient.StartRemoteAbility(remoteWant, callerUid, requestCode, accessToken);
+    int result = dmsClient.StartRemoteAbility(remoteWant, callerUid, requestCode, accessToken, specifyTokenId);
     if (result != ERR_NONE) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityManagerService::startRemoteAbility failed, result=%{public}d", result);
     }

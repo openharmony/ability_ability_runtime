@@ -124,6 +124,22 @@ HWTEST_F(AbilityManagerServiceDistributedTest, StartRemoteAbility_0004, TestSize
 }
 
 /**
+ * @tc.name: StartRemoteAbility_0005
+ * @tc.desc: StartRemoteAbility Test
+ * @tc.type: FUNC
+ * @tc.require: issueI5T6HF
+ */
+HWTEST_F(AbilityManagerServiceDistributedTest, StartRemoteAbility_0005, TestSize.Level3)
+{
+    Want want;
+    want.AddFlags(want.FLAG_ABILITY_CONTINUATION);
+    want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
+    uint32_t specifyTokenId = 0;
+    int result = abilityMs_->StartRemoteAbility(want, 0, USER_ID_U100, abilityRecord_->GetToken(), specifyTokenId);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: ConnectRemoteAbility_0001
  * @tc.desc: ConnectRemoteAbility Test
  * @tc.type: FUNC
