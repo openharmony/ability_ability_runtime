@@ -211,7 +211,7 @@ void JsAutoFillExtension::BindContext(napi_env env, napi_value obj)
     if (coerceStatus != napi_ok) {
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "coerceStatus Failed: %{public}d", coerceStatus);
         delete workContext;
-        return nullptr;
+        return;
     }
     context->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);

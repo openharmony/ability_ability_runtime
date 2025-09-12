@@ -1267,7 +1267,7 @@ public:
 
     virtual void CompleteFirstFrameDrawing(int32_t sessionId) override;
 
-    sptr<IWindowManagerServiceHandler> GetWMSHandler() const;
+    sptr<IWindowManagerServiceHandler> GetWMSHandler();
 
     virtual int PrepareTerminateAbility(const sptr<IRemoteObject> &token,
         sptr<IPrepareTerminateCallback> &callback) override;
@@ -2856,6 +2856,7 @@ private:
     void InitFocusListener();
     void RegisterFocusListener();
     std::shared_ptr<ImplicitStartProcessor> implicitStartProcessor_;
+    ffrt::mutex wmsHandlerLock_;
     sptr<IWindowManagerServiceHandler> wmsHandler_;
 #endif
     std::shared_ptr<AbilityInterceptorExecuter> interceptorExecuter_;
