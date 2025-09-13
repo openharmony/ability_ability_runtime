@@ -1053,7 +1053,7 @@ std::shared_ptr<Global::Resource::ResourceManager> ContextImpl::InitResourceMana
                     continue;
                 }
                 if (deduplicate != nullptr) {
-                    *deduplicate = hapModuleInfo.deduplicateHar;
+                    *deduplicate |= hapModuleInfo.deduplicateHar;
                 }
                 if (currentBundle) {
                     loadPath = std::regex_replace(loadPath, inner_pattern, LOCAL_CODE_PATH);
