@@ -23,6 +23,8 @@
 #undef protected
 #undef private
 #include "ability_record.h"
+#include "session_info.h"
+#include "multi_instance_utils.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
@@ -38,6 +40,7 @@ constexpr size_t OFFSET_ZERO = 24;
 constexpr size_t OFFSET_ONE = 16;
 constexpr size_t OFFSET_TWO = 8;
 constexpr uint8_t ENABLE = 2;
+const std::string UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbilityId";
 } // namespace
 
 uint32_t GetU32Data(const char* ptr)
@@ -60,6 +63,15 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     std::shared_ptr<AAFwk::AbilityRecord> abilityRecord;
     factory->CreateDebugRecord(abilityRequest, abilityRecord);
 
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.appInfo.multiAppMode.multiAppModeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.extensionType = AppExecFwk::ExtensionAbilityType::EMBEDDED_UI;
+    sptr<AAFwk::SessionInfo> sessionInfo(new SessionInfo());
+    abilityRequest.sessionInfo = sessionInfo;
+    abilityRequest.sessionInfo->want.SetParam(UIEXTENSION_ABILITY_ID, 0);
+    factory->NeedReuse(abilityRequest, int32Param);
+    factory->CreateRecord(abilityRequest, extensionRecord);
     return true;
 }
 } // namespace OHOS
