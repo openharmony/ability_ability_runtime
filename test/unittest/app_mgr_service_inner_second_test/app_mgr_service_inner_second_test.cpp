@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2561,7 +2561,9 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_SetKeepAlive
 
     // case 5, set success.
     appRecord->extensionType_ = AppExecFwk::ExtensionAbilityType::APP_SERVICE;
-    appMgrServiceInner->SetKeepAliveAppService(TEST_BUNDLE_NAME, true, 0);
+    int32_t uid = 0;
+    appRecord->SetUid(uid);
+    appMgrServiceInner->SetKeepAliveAppService(TEST_BUNDLE_NAME, true, uid);
     EXPECT_TRUE(appRecord->isKeepAliveAppService_);
 
     IPCSkeleton::SetCallingUid(0);
