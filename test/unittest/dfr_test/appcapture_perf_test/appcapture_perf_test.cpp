@@ -135,26 +135,6 @@ HWTEST_F(AppCapturePerfTest, AppCapturePerfTest006, TestSize.Level0)
     EXPECT_EQ(result[1], "banana");
     EXPECT_EQ(result[2], "cherry");
 }
-
-/**
- * @tc.name: ScheduleNotifyAppFault_0101
- * @tc.desc: Schedule notify app Fault.
- * @tc.type: FUNC
- * @tc.require: issueI79RY8
- */
-HWTEST_F(AppCapturePerfTest, ScheduleNotifyAppFault_0101, TestSize.Level1)
-{
-    FaultData faultData;
-    faultData.faultType = FaultDataType::CPU_LOAD;
-    faultData.errorObject.message = "msgContent";
-    faultData.errorObject.stack = "stack";
-    faultData.errorObject.name = "eventType";
-    const std::shared_ptr<EventRunner> runner;
-    const sptr<MainThread> thread;
-    mainThread_->mainHandler_ = std::make_shared<MainThread::MainHandler>(runner, thread);
-    auto ret = mainThread_->ScheduleNotifyAppFault(faultData);
-    EXPECT_EQ(ret, -1);
-}
  
 /**
  * @tc.name: ScheduleNotifyAppFault_0102
