@@ -1038,6 +1038,8 @@ public:
     {
         return 0;
     }
+
+    virtual void SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId) {}
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

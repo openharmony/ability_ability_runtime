@@ -9102,13 +9102,14 @@ void AbilityManagerService::OnStartSpecifiedAbilityTimeoutResponse(int32_t reque
 }
 
 void AbilityManagerService::OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId,
-    const std::string &callerProcessName)
+    const std::string &callerProcessName, int32_t recordId)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "flag = %{public}s", flag.c_str());
     auto connectManager = GetCurrentConnectManager();
     CHECK_POINTER(connectManager);
     if (connectManager->HasRequestIdInLoadAbilityQueue(requestId)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "uiextension StartSpecifiedProcessResponse, requestId = %{public}d", requestId);
+        DelayedSingleton<AppScheduler>::GetInstance()->SetSpecifiedProcessRequestId(recordId, -1);
         connectManager->OnStartSpecifiedProcessResponse(flag, requestId);
         return;
     }
@@ -9116,7 +9117,7 @@ void AbilityManagerService::OnStartSpecifiedProcessResponse(const std::string &f
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = GetCurrentUIAbilityManager();
         CHECK_POINTER(uiAbilityManager);
-        uiAbilityManager->OnStartSpecifiedProcessResponse(flag, requestId, callerProcessName);
+        uiAbilityManager->OnStartSpecifiedProcessResponse(flag, requestId, callerProcessName, recordId);
         return;
     }
 }

@@ -90,7 +90,7 @@ public:
     void OnTimeoutResponse(int32_t requestId) override
     {}
     void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId,
-        const std::string &callerProcessName) override
+        const std::string &callerProcessName, int32_t recordId) override
     {}
     void OnNewProcessRequestTimeoutResponse(int32_t requestId) override
     {}
@@ -2097,7 +2097,8 @@ HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedProcess_0600, TestSize.Level
     appMgrServiceInner->startSpecifiedAbilityResponse_ = response;
     bool isOnNewProcessRequestResponseCalled = false;
     EXPECT_CALL(*response, OnNewProcessRequestResponse)
-        .WillOnce([&isOnNewProcessRequestResponseCalled](const std::string&, int32_t, const std::string&) {
+        .WillOnce([&isOnNewProcessRequestResponseCalled](const std::string&, int32_t,
+            const std::string&, const int32_t &) {
             isOnNewProcessRequestResponseCalled = true;
         });
     ASSERT_NE(appMgrServiceInner->startSpecifiedAbilityResponse_, nullptr);

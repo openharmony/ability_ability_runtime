@@ -1036,6 +1036,8 @@ public:
         const std::vector<std::string> &bundleNameList = {}, const AppStateFilter &appStateFilter = AppStateFilter(),
         bool isUsingFilter = false);
 
+    void SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId);
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

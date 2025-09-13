@@ -2424,7 +2424,7 @@ void UIAbilityLifecycleManager::OnStartSpecifiedFailed(int32_t requestId)
 }
 
 void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId,
-    const std::string &callerProcessName)
+    const std::string &callerProcessName, int32_t recordId)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessResponse, %{public}d", requestId);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -2445,6 +2445,7 @@ void UIAbilityLifecycleManager::OnStartSpecifiedProcessResponse(const std::strin
         abilityRequest.want.RemoveParam(SPECIFED_PROCESS_CALLER_PROCESS);
         return;
     }
+    DelayedSingleton<AppScheduler>::GetInstance()->SetSpecifiedProcessRequestId(recordId, -1);
     auto nextRequest = PopAndGetNextSpecified(requestId);
     if (nextRequest) {
         ffrt::submit([nextRequest, pThis = shared_from_this()]() {

@@ -812,6 +812,8 @@ public:
      */
     int32_t ExitMasterProcessRole() override;
 
+    void SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId) override;
+
     /**
      * set browser channel for caller
      */
