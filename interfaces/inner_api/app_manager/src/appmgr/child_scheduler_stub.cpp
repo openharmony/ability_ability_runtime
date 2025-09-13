@@ -43,6 +43,8 @@ int32_t ChildSchedulerStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
             return HandleScheduleExitProcessSafely(data, reply);
         case static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_RUN_NATIVE_PROC):
             return HandleScheduleRunNativeProc(data, reply);
+        case static_cast<uint32_t>(IChildScheduler::Message::ON_LOAD_ABILITY_FINISHED):
+            return HandleOnLoadAbilityFinished(data, reply);
     }
     TAG_LOGI(AAFwkTag::APPMGR, "ChildSchedulerStub::OnRemoteRequest end");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -67,5 +69,12 @@ int32_t ChildSchedulerStub::HandleScheduleRunNativeProc(MessageParcel &data, Mes
     return ERR_NONE;
 }
 
+int32_t ChildSchedulerStub::HandleOnLoadAbilityFinished(MessageParcel &data, MessageParcel &reply)
+{
+    uint64_t callbackId = data.ReadUint64();
+    int32_t pid = data.ReadInt32();
+    OnLoadAbilityFinished(callbackId, pid);
+    return ERR_NONE;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

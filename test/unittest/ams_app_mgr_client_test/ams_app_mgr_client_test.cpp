@@ -122,7 +122,7 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_001, TestSize.Level1)
     sptr<IAmsMgr> amsMgrScheduler(new MockAmsMgrScheduler());
 
     EXPECT_CALL(*(static_cast<MockAmsMgrScheduler*>(amsMgrScheduler.GetRefPtr())),
-        LoadAbility(_, _, _, _, _)).Times(1);
+        LoadAbility(_, _, _, _)).Times(1);
 
     EXPECT_CALL(*(static_cast<MockAppMgrService*>((iface_cast<IAppMgr>(client_->GetRemoteObject())).GetRefPtr())),
         GetAmsMgr())

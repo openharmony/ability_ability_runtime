@@ -41,8 +41,7 @@ bool AppScheduler::Init(const std::weak_ptr<AppStateCallback>& callback)
 }
 
 int AppScheduler::LoadAbility(const AbilityRuntime::LoadParam& loadParam, const AppExecFwk::AbilityInfo& abilityInfo,
-    const AppExecFwk::ApplicationInfo& applicationInfo, const AAFwk::Want& want,
-    sptr<AppExecFwk::ILoadAbilityCallback> callback)
+    const AppExecFwk::ApplicationInfo& applicationInfo, const AAFwk::Want& want)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::LoadAbility()");
     if (applicationInfo.bundleName.find("com.ix.First.Test") != std::string::npos) {

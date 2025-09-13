@@ -68,25 +68,32 @@ bool AppScheduler::Init(const std::weak_ptr<AppStateCallback> &callback)
 }
 
 int AppScheduler::LoadAbility(const AbilityRuntime::LoadParam &loadParam, const AppExecFwk::AbilityInfo &abilityInfo,
-    const AppExecFwk::ApplicationInfo &applicationInfo, const Want &want,
-    sptr<AppExecFwk::ILoadAbilityCallback> callback)
+    const AppExecFwk::ApplicationInfo &applicationInfo, const Want &want)
 {
     if (AppUtils::GetInstance().IsForbidStart()) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "forbid start: %{public}s", abilityInfo.bundleName.c_str());
         return INNER_ERR;
     }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::SERVICE_EXT, "called");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     /* because the errcode type of AppMgr Client API will be changed to int,
      * so must to covert the return result  */
     int ret = static_cast<int>(IN_PROCESS_CALL(
-        appMgrClient_->LoadAbility(abilityInfo, applicationInfo, want, loadParam, callback)));
+        appMgrClient_->LoadAbility(abilityInfo, applicationInfo, want, loadParam)));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::SERVICE_EXT, "AppScheduler fail to LoadAbility. ret %{public}d", ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "AppScheduler fail to LoadAbility. ret %{public}d", ret);
         return INNER_ERR;
     }
     return ERR_OK;
+}
+
+void AppScheduler::NotifyLoadAbilityFinished(pid_t callingPid, pid_t targetPid, uint64_t callbackId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "NotifyLoadAbilityFinished called");
+    CHECK_POINTER(appMgrClient_);
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->NotifyLoadAbilityFinished(callingPid, targetPid, callbackId));
 }
 
 int AppScheduler::TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag)

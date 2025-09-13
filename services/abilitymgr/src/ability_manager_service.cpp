@@ -14829,17 +14829,16 @@ int AbilityManagerService::StartSelfUIAbilityWithStartOptions(const Want &want, 
 }
 
 int AbilityManagerService::StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options,
-    sptr<AppExecFwk::ILoadAbilityCallback> callback)
+    uint64_t callbackId)
 {
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSelfUIAbilityWithPidResult");
-    CHECK_POINTER_AND_RETURN(callback, ERR_INVALID_VALUE);
 
     if (options.processOptions == nullptr) {
         options.processOptions = std::make_shared<ProcessOptions>();
     }
-    options.processOptions->shouldReturnPid = true;
-    options.loadAbilityCallback_ = callback->AsObject();
+    options.processOptions->loadAbilityCallbackId = callbackId;
+    options.processOptions->callingPid = IPCSkeleton::GetCallingPid();
     auto ret = StartSelfUIAbilityWithStartOptions(want, options);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartSelfUIAbilityWithStartOptions failed:%{public}d", ret);

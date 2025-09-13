@@ -46,6 +46,7 @@ public:
     bool ScheduleLoadChild() override{ return true; };
     bool ScheduleExitProcessSafely() override{ return true; };
     bool ScheduleRunNativeProc(const sptr<IRemoteObject> &mainProcessCb) override{ return true; };
+    void OnLoadAbilityFinished(uint64_t callbackId, int32_t pid) override {};
 };
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)

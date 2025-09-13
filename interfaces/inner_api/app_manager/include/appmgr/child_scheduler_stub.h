@@ -37,6 +37,7 @@ private:
     int32_t HandleScheduleLoadChild(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleExitProcessSafely(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleRunNativeProc(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnLoadAbilityFinished(MessageParcel &data, MessageParcel &reply);
 
     DISALLOW_COPY_AND_MOVE(ChildSchedulerStub);
 };

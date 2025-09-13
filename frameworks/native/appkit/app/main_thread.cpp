@@ -65,6 +65,7 @@
 #include "file_path_utils.h"
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
+#include "load_ability_callback_manager.h"
 #include "resource_config_helper.h"
 #ifdef SUPPORT_SCREEN
 #include "locale_config_ext.h"
@@ -4155,6 +4156,11 @@ bool MainThread::GetTestRunnerTypeAndPath(const std::string bundleName, const st
         return false;
     }
     return true;
+}
+
+void MainThread::OnLoadAbilityFinished(uint64_t callbackId, int32_t pid)
+{
+    LoadAbilityCallbackManager::GetInstance().OnLoadAbilityFinished(callbackId, pid);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

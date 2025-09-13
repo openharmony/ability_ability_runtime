@@ -902,5 +902,28 @@ void AppSchedulerProxy::ScheduleCacheProcess()
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
     }
 }
+
+void AppSchedulerProxy::OnLoadAbilityFinished(uint64_t callbackId, int32_t pid)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        return;
+    }
+    if (!data.WriteUint64(callbackId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write callbackId failed.");
+        return;
+    }
+    if (!data.WriteInt32(pid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write pid failed.");
+        return;
+    }
+    int32_t ret = SendTransactCmd(static_cast<uint32_t>(IAppScheduler::Message::ON_LOAD_ABILITY_FINISHED),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is wrong, error code: %{public}d", ret);
+    }
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

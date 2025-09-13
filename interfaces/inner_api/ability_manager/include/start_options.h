@@ -81,7 +81,6 @@ public:
     std::vector<AppExecFwk::SupportWindowMode> supportWindowModes_;
     std::string requestId_;
     std::shared_ptr<Rosen::WindowCreateParams> windowCreateParams_ = nullptr;
-    sptr<IRemoteObject> loadAbilityCallback_ = nullptr;
 
     StartOptions() = default;
     ~StartOptions() = default;
