@@ -78,8 +78,12 @@ napi_value AttachAutoFillExtensionContext(napi_env env, void *value, void *)
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null contextObj");
         return nullptr;
     }
-    napi_coerce_to_native_binding_object(
+    auto coerceStatus = napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachAutoFillExtensionContext, value, nullptr);
+    if (coerceStatus != napi_ok) {
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "coerceStatus Failed: %{public}d", coerceStatus);
+        return nullptr;
+    }
 
     auto workContext = new (std::nothrow) std::weak_ptr<AutoFillExtensionContext>(ptr);
     if (workContext != nullptr) {
@@ -202,8 +206,13 @@ void JsAutoFillExtension::BindContext(napi_env env, napi_value obj)
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "null workContext");
         return;
     }
-    napi_coerce_to_native_binding_object(
+    auto coerceStatus = napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachAutoFillExtensionContext, workContext, nullptr);
+    if (coerceStatus != napi_ok) {
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "coerceStatus Failed: %{public}d", coerceStatus);
+        delete workContext;
+        return;
+    }
     context->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
     auto status = napi_wrap(env, contextObj, workContext,

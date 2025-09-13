@@ -180,7 +180,12 @@ napi_value AttachJsAbilityContext(napi_env env, void *value, void *)
     }
     CHECK_POINTER_AND_RETURN(systemModule, nullptr);
     auto contextObj = systemModule->GetNapiValue();
-    napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, value, nullptr);
+    auto coerceStatus = napi_coerce_to_native_binding_object(env,
+        contextObj, DetachCallbackFunc, AttachJsAbilityContext, value, nullptr);
+    if (coerceStatus != napi_ok) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
+        return nullptr;
+    }
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(ptr);
     if (workContext != nullptr) {
         napi_status status = napi_wrap(env, contextObj, workContext,
@@ -209,8 +214,13 @@ void BindContext(napi_env env, std::unique_ptr<NativeReference> contextRef, JsRu
     }
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(abilityContext);
     CHECK_POINTER(workContext);
-    napi_coerce_to_native_binding_object(
+    auto coerceStatus = napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, workContext, nullptr);
+    if (coerceStatus != napi_ok) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
+        delete workContext;
+        return;
+    }
     abilityContext->Bind(jsRuntime, contextRef.release());
     napi_wrap(
         env, contextObj, workContext,
@@ -373,8 +383,13 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(abilityContext_);
     CHECK_POINTER(workContext);
 
-    napi_coerce_to_native_binding_object(
+    auto coerceStatus = napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, workContext, nullptr);
+    if (coerceStatus != napi_ok) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "coerceStatus Failed: %{public}d", coerceStatus);
+        delete workContext;
+        return;
+    }
     abilityContext_->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
     TAG_LOGD(AAFwkTag::UIABILITY, "set ability context");
