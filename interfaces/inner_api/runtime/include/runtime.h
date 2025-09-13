@@ -27,6 +27,12 @@ namespace AppExecFwk {
 class EventRunner;
 } // namespace AppExecFwk
 namespace AbilityRuntime {
+struct CommonHspBundleInfo {
+    std::string bundleName;
+    std::string moduleName;
+    std::string hapPath;
+    std::string moduleArkTSMode;
+};
 namespace {
 const std::string CODE_LANGUAGE_ARKTS_1_0 = "dynamic";
 const std::string CODE_LANGUAGE_ARKTS_1_2 = "static";
@@ -55,6 +61,8 @@ public:
         std::vector<std::string> assetBasePathStr;
         std::shared_ptr<AppExecFwk::EventRunner> eventRunner = nullptr;
         std::map<std::string, std::string> hapModulePath;
+        std::vector<std::string> appInnerHspPathList;
+        std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> commonHspBundleInfos;
         bool loadAce = true;
         bool preload = false;
         bool isBundle = true;
