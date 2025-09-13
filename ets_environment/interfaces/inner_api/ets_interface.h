@@ -27,6 +27,9 @@ namespace OHOS {
 namespace AppExecFwk {
     class EventRunner;
 }
+namespace AbilityRuntime {
+    struct CommonHspBundleInfo;
+}
 }
 
 extern "C" {
@@ -45,7 +48,9 @@ struct ETSEnvFuncs {
     void (*SetAppLibPath)(const std::map<std::string, std::string> &abcPathsToBundleModuleNameMap,
         std::function<bool(const std::string &bundleModuleName, std::string &namespaceName)> &cb) = nullptr;
     void (*FinishPreload)() = nullptr;
-    void (*PostFork)(void *napiEnv, const std::string &aotPath) = nullptr;
+    void (*PostFork)(void *napiEnv, const std::string &aotPath,
+        const std::vector<std::string> &appInnerHspPathList,
+        const std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> &commonHspBundleInfos) = nullptr;
     void (*PreloadSystemClass)(const char *className) = nullptr;
     void (*SetExtensionApiCheckCallback)(
         std::function<bool(const std::string &className, const std::string &fileName)> &cb) = nullptr;
