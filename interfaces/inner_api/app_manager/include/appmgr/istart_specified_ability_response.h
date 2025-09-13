@@ -41,7 +41,7 @@ public:
     virtual void OnTimeoutResponse(int32_t requestId) = 0;
 
     virtual void OnNewProcessRequestResponse(const std::string &flag,
-        int32_t requestId, const std::string &callerProcessName = "") = 0;
+        int32_t requestId, const std::string &callerProcessName = "", int32_t recordId = 0) = 0;
 
     virtual void OnNewProcessRequestTimeoutResponse(int32_t requestId) = 0;
 

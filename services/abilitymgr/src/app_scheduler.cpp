@@ -442,10 +442,10 @@ void AppScheduler::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecF
 }
 
 void StartSpecifiedAbilityResponse::OnNewProcessRequestResponse(const std::string &flag, int32_t requestId,
-    const std::string &callerProcessName)
+    const std::string &callerProcessName, int32_t recordId)
 {
     DelayedSingleton<AbilityManagerService>::GetInstance()->OnStartSpecifiedProcessResponse(flag, requestId,
-        callerProcessName);
+        callerProcessName, recordId);
 }
 
 void StartSpecifiedAbilityResponse::OnNewProcessRequestTimeoutResponse(int32_t requestId)
@@ -789,6 +789,12 @@ int32_t AppScheduler::VerifyKillProcessPermission(const std::string &bundleName)
         return INNER_ERR;
     }
     return appMgrClient_->VerifyKillProcessPermission(bundleName);
+}
+
+void AppScheduler::SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId)
+{
+    CHECK_POINTER(appMgrClient_);
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->SetSpecifiedProcessRequestId(recordId, requestId));
 }
 } // namespace AAFwk
 }  // namespace OHOS

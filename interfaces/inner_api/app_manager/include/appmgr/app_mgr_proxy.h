@@ -863,6 +863,8 @@ public:
      */
     int32_t DemoteCurrentFromCandidateMasterProcess() override;
 
+    void SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId) override;
+
     /**
      * Exit from the master process role of the current process.
      *

@@ -132,7 +132,7 @@ public:
     virtual void OnTimeoutResponse(int32_t requestId) override;
 
     virtual void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId,
-        const std::string &callerProcessName = "") override;
+        const std::string &callerProcessName = "", int32_t recordId = 0) override;
     virtual void OnNewProcessRequestTimeoutResponse(int32_t requestId) override;
 
     virtual void OnStartSpecifiedFailed(int32_t requestId) override;
@@ -620,6 +620,8 @@ public:
     int32_t CheckPreloadAppRecordExist(const std::string &bundleName, int32_t userId, int32_t appIndex, bool &isExist);
 
     int32_t VerifyKillProcessPermission(const std::string &bundleName) const;
+    
+    void SetSpecifiedProcessRequestId(int32_t recordId, int32_t requestId);
 protected:
     /**
      * OnAbilityRequestDone, app manager service call this interface after ability request done.
