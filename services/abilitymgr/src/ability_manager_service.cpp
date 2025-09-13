@@ -11616,16 +11616,16 @@ bool AbilityManagerService::GetStartUpNewRuleFlag() const
 
 void AbilityManagerService::CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub)
 {
-    {
-        std::lock_guard<ffrt::mutex> autoLock(abilityTokenLock_);
-        callStubTokenMap_[callStub] = token;
-    }
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER(abilityRecord);
     if (!JudgeSelfCalled(abilityRecord)) {
         return;
     }
 
+    {
+        std::lock_guard<ffrt::mutex> autoLock(abilityTokenLock_);
+        callStubTokenMap_[callStub] = token;
+    }
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = GetCurrentUIAbilityManager();
         CHECK_POINTER(uiAbilityManager);
