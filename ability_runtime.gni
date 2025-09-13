@@ -130,7 +130,7 @@ declare_args() {
 
   if (!defined(global_parts_info) ||
       defined(global_parts_info.communication_dsoftbus)) {
-    ability_runtime_dsoftbus_enable = false
+    ability_runtime_dsoftbus_enable = true
   }
 
   if (!defined(global_parts_info) ||
