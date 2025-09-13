@@ -177,6 +177,7 @@ ohos_shared_library("abilityms") {
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
+    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "faultloggerd:libbacktrace_local",
     "ffrt:libffrt",
@@ -227,11 +228,6 @@ ohos_shared_library("abilityms") {
   }
 
   defines = []
-
-  if (ability_runtime_dsoftbus_enable) {
-    external_deps += [ "dsoftbus:softbus_client" ]
-    defines += [ "SUPPORT_RECORDER_DSOFTBUS" ]
-  }
 
   if (ability_runtime_auto_fill) {
     defines += [ "SUPPORT_AUTO_FILL" ]
@@ -481,6 +477,7 @@ ohos_shared_library("mission_list") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
+    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "graphic_2d:color_manager",
@@ -501,11 +498,6 @@ ohos_shared_library("mission_list") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
-
-  if (ability_runtime_dsoftbus_enable) {
-    external_deps += [ "dsoftbus:softbus_client" ]
-    defines += [ "SUPPORT_RECORDER_DSOFTBUS" ]
-  }
 
   if (ability_runtime_child_process) {
     defines += [ "SUPPORT_CHILD_PROCESS" ]

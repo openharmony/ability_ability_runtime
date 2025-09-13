@@ -63,6 +63,7 @@ ohos_unittest("modal_system_app_freeze_uiextension_test") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gmock_main",
@@ -79,10 +80,6 @@ ohos_unittest("modal_system_app_freeze_uiextension_test") {
     "window_manager:scene_session",
     "window_manager:session_manager_lite",
   ]
-
-  if (ability_runtime_dsoftbus_enable) {
-    external_deps += [ "dsoftbus:softbus_client" ]
-  }
 
   if (ability_command_for_test) {
     defines += [ "ABILITY_COMMAND_FOR_TEST" ]

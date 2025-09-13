@@ -71,6 +71,7 @@ ohos_fuzztest("AbilityMgrInsightIntentExecuteResultFuzzTest") {
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "dsoftbus:softbus_client",
     "ffrt:libffrt",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -80,10 +81,6 @@ ohos_fuzztest("AbilityMgrInsightIntentExecuteResultFuzzTest") {
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
-
-  if (ability_runtime_dsoftbus_enable) {
-    external_deps += [ "dsoftbus:softbus_client" ]
-  }
 
   if (background_task_mgr_continuous_task_enable) {
     external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]

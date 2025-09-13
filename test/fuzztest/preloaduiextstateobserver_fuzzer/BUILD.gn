@@ -82,6 +82,7 @@ ohos_fuzztest("PreLoadUIExtStateObserverFuzzTest") {
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "config_policy:configpolicy_util",
+    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "faultloggerd:libbacktrace_local",
     "ffrt:libffrt",
@@ -108,9 +109,6 @@ ohos_fuzztest("PreLoadUIExtStateObserverFuzzTest") {
     "window_manager:sms",
     "ability_runtime:runtime",
   ]
-  if (ability_runtime_dsoftbus_enable) {
-    external_deps += [ "dsoftbus:softbus_client" ]
-  }
 }
 
 ###############################################################################
