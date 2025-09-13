@@ -259,7 +259,7 @@ struct AbilityRequest {
     int32_t collaboratorType = CollaboratorType::DEFAULT_TYPE;
     int32_t callerTokenRecordId = -1;
     int32_t userId = -1;
-    uint32_t callerAccessTokenId = -1;
+    uint32_t callerAccessTokenId = 0;
     uint32_t specifyTokenId = 0;
     int callerUid = -1;         // call ability
     int requestCode = -1;
