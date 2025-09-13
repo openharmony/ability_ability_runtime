@@ -1164,7 +1164,7 @@ void AbilityManagerService::CheckExtensionRateLimit()
 int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemoteObject> &callerToken,
     int requestCode, bool isPendingWantCaller, int32_t userId, bool isStartAsCaller, uint32_t specifyTokenId,
     bool isForegroundToRestartApp, bool isImplicit, bool isUIAbilityOnly, bool isAppCloneSelector,
-    bool hideFailureTipDialog)
+    bool hideFailureTipDialog, bool isBySCB)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!isStartAsCaller || isImplicit) {
@@ -1237,7 +1237,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     }
     if (!isForegroundToRestartApp) {
         auto checkRet = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
-            validUserId, appIndex, callerToken, false);
+            validUserId, appIndex, callerToken, isBySCB);
         if (checkRet != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "CheckMultiInstanceAndAppClone failed: %{public}d", checkRet);
             eventHelper_.SendStartAbilityErrorEvent(eventInfo, checkRet, "CheckMultiInstanceAndAppClone failed");
@@ -1278,6 +1278,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 
     AbilityRequest abilityRequest;
     abilityRequest.hideFailureTipDialog = hideFailureTipDialog;
+    abilityRequest.isFromIcon = isBySCB;
 #ifdef SUPPORT_SCREEN
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "is implicit start action");
@@ -11992,40 +11993,13 @@ int32_t AbilityManagerService::SetSessionManagerService(const sptr<IRemoteObject
 
 int32_t AbilityManagerService::StartSpecifiedAbilityBySCB(const Want &want)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartSpecifiedAbilityBySCB");
     if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "no sceneboard called, no allowed");
         return ERR_PERMISSION_DENIED;
     }
-
-    int32_t appIndex = 0;
-    if (!StartAbilityUtils::GetAppIndex(want, nullptr, appIndex)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "invalid app clone index");
-        return ERR_APP_CLONE_INDEX_INVALID;
-    }
-    int32_t callerUserId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
-    auto result = AbilityPermissionUtil::GetInstance().CheckMultiInstanceAndAppClone(const_cast<Want &>(want),
-        callerUserId, appIndex, nullptr, true);
-    if (result != ERR_OK) {
-        return result;
-    }
-
-    AbilityRequest abilityRequest;
-    result = GenerateAbilityRequest(want, -1, abilityRequest, want.GetRemoteObject(TOKEN_KEY), callerUserId);
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "generate ability request error");
-        return result;
-    }
-    abilityRequest.userId = callerUserId;
-    if (!HandleExecuteSAInterceptor(want, want.GetRemoteObject(TOKEN_KEY), abilityRequest, result)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "interceptor prevented");
-        return result;
-    }
-
-    auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
-    CHECK_POINTER_AND_RETURN_LOG(uiAbilityManager, INNER_ERR, "uiAbilityManager is nullptr.");
-    return uiAbilityManager->StartSpecifiedAbilityBySCB(abilityRequest);
+    return StartAbilityInner(want, nullptr, DEFAULT_INVAL_VALUE, false, DEFAULT_INVAL_VALUE, false, 0, false,
+        false, false, false, false, true);
 }
 
 int32_t AbilityManagerService::RegisterIAbilityManagerCollaborator(

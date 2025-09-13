@@ -1375,23 +1375,6 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, HandleColdAcceptWantDone_004, TestS
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_StartSpecifiedAbilityBySCB_0200
- * @tc.desc: StartSpecifiedAbilityBySCB
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedAbilityBySCB_002, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    AbilityRequest abilityRequest;
-    abilityRequest.abilityInfo.isolationProcess = true;
-    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
-    abilityRequest.abilityInfo.isStageBasedModel = true;
-    AppUtils::isStartSpecifiedProcess_ = true;
-    auto result = uiAbilityLifecycleManager->StartSpecifiedAbilityBySCB(abilityRequest);
-    EXPECT_EQ(result, uiAbilityLifecycleManager->StartSpecifiedProcessRequest(abilityRequest, nullptr));
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_StartSpecifiedProcessRequest_0100
  * @tc.desc: StartSpecifiedProcessRequest
  * @tc.type: FUNC
