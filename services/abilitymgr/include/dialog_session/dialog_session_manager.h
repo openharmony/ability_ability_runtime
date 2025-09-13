@@ -45,6 +45,7 @@ struct DialogCallerInfo {
     SelectorType type = SelectorType::WITHOUT_SELECTOR;
     // for app gallery selector
     bool needGrantUriPermission = false;
+    uint32_t callerAccessTokenId = 0;
 };
 
 struct StartupSessionInfo {

@@ -152,6 +152,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         return ret;
     }
     AbilityUtil::WantSetParameterWindowMode(request.want, windowMode);
+    request.callerAccessTokenId = IPCSkeleton::GetCallingTokenID();
 
     auto identity = IPCSkeleton::ResetCallingIdentity();
     auto startAbilityTask = [imp = shared_from_this(), request, userId, identity]
