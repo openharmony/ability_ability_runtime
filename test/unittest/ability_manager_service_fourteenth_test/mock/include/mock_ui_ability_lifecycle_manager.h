@@ -240,8 +240,6 @@ public:
      */
     void OnStartSpecifiedFailed(int32_t requestId);
 
-    int32_t StartSpecifiedAbilityBySCB(AbilityRequest &abilityRequest);
-
     /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
      *

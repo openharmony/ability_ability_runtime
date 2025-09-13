@@ -2440,19 +2440,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnAcceptWantResponse_002, TestSize.Level
 #endif // WITH_DLP
 
 /**
- * @tc.name: UIAbilityLifecycleManager_StartSpecifiedAbilityBySCB_0100
- * @tc.desc: StartSpecifiedAbilityBySCB
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerTest, StartSpecifiedAbilityBySCB_001, TestSize.Level1)
-{
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
-    AbilityRequest abilityRequest;
-    auto result = uiAbilityLifecycleManager->StartSpecifiedAbilityBySCB(abilityRequest);
-    EXPECT_EQ(result, ERR_OK);
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_IsStartSpecifiedProcessRequest_001
  * @tc.desc: IsStartSpecifiedProcessRequest, test isolationProcess mode
  * @tc.type: FUNC
