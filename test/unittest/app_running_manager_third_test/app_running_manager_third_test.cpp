@@ -109,6 +109,8 @@ public:
     {
         return nullptr;
     }
+    void OnLoadAbilityFinished(uint64_t callbackId, int32_t pid) override
+    {}
 };
 
 /**

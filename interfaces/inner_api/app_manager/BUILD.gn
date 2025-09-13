@@ -49,6 +49,7 @@ ohos_shared_library("app_manager") {
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_services_path}/appmgr/include",
     "${ability_runtime_services_path}/common/include",
+    "${ability_runtime_utils_path}/global/constant",
   ]
 
   sources = [
@@ -104,6 +105,7 @@ ohos_shared_library("app_manager") {
     "src/appmgr/fault_data.cpp",
     "src/appmgr/kia_interceptor_proxy.cpp",
     "src/appmgr/kia_interceptor_stub.cpp",
+    "src/appmgr/load_ability_callback_manager.cpp",
     "src/appmgr/load_ability_callback_proxy.cpp",
     "src/appmgr/load_ability_callback_stub.cpp",
     "src/appmgr/memory_level_info.cpp",

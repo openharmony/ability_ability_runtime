@@ -63,12 +63,19 @@ public:
      * @param appInfo Application information.
      * @param want Want.
      * @param loadParam load ability param.
-     * @param callback, the callback to get process id.
      * @return Returns RESULT_OK on success, others on failure.
      */
     virtual AppMgrResultCode LoadAbility(const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo,
-        const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam,
-        sptr<AppExecFwk::ILoadAbilityCallback> callback = nullptr);
+        const AAFwk::Want &want, AbilityRuntime::LoadParam loadParam);
+
+    /**
+     * notify load ability finished.
+     *
+     * @param callingPid, the pid of the caller.
+     * @param targetPid, the pid of the target ability.
+     * @param callbackId, the id of the callback.
+     */
+    virtual void NotifyLoadAbilityFinished(pid_t callingPid, pid_t targetPid, uint64_t callbackId);
 
     /**
      * Terminate ability.

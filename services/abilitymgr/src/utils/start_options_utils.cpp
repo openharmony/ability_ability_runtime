@@ -113,7 +113,7 @@ int32_t StartOptionsUtils::CheckStartSelfUIAbilityStartOptions(const Want &want,
         ERR_CAPABILITY_NOT_SUPPORT, "not support process options");
 
     if (options.processOptions->startupVisibility == StartupVisibility::UNSPECIFIED &&
-        options.processOptions->shouldReturnPid) {
+        options.processOptions->loadAbilityCallbackId > 0) {
         return ERR_OK;
     }
 

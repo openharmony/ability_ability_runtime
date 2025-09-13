@@ -329,6 +329,13 @@ public:
      */
     virtual void SetWatchdogBackgroundStatus(bool status) = 0;
 
+    /**
+     * Call the callback to send the pid of the started ability.
+     * @param callbackId The id of the callback to send the pid.
+     * @param pid The resultant process id of the started ability.
+     */
+    virtual void OnLoadAbilityFinished(uint64_t callbackId, int32_t pid) = 0;
+
     enum class Message {
         SCHEDULE_FOREGROUND_APPLICATION_TRANSACTION = 0,
         SCHEDULE_BACKGROUND_APPLICATION_TRANSACTION,
@@ -364,6 +371,7 @@ public:
         SCHEDULE_PREPARE_TERMINATE,
         WATCHDOG_BACKGROUND_STATUS_TRANSACTION,
         SCHEDULE_CJHEAP_MEMORY_APPLICATION_TRANSACTION,
+        ON_LOAD_ABILITY_FINISHED,
     };
 };
 }  // namespace AppExecFwk

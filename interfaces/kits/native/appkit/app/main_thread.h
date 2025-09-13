@@ -393,6 +393,8 @@ public:
      */
     void SetWatchdogBackgroundStatus(bool status) override;
 
+    void OnLoadAbilityFinished(uint64_t callbackId, int32_t pid) override;
+
 private:
     /**
      *

@@ -54,6 +54,7 @@ public:
     MOCK_METHOD1(ScheduleJsHeapMemory, void(OHOS::AppExecFwk::JsHeapDumpInfo &info));
     MOCK_METHOD1(ScheduleCjHeapMemory, void(OHOS::AppExecFwk::CjHeapDumpInfo &info));
     MOCK_METHOD1(SetWatchdogBackgroundStatus, void(bool status));
+    MOCK_METHOD2(OnLoadAbilityFinished, void(uint64_t, int32_t));
 };
 }  // namespace AAFwk
 }  // namespace OHOS

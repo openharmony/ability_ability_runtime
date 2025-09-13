@@ -1044,7 +1044,7 @@ ErrCode AbilityManagerClient::StartSelfUIAbilityWithStartOptions(const Want &wan
 }
 
 int AbilityManagerClient::StartSelfUIAbilityWithPidResult(const Want &want, StartOptions &options,
-    sptr<AppExecFwk::ILoadAbilityCallback> callback)
+    uint64_t callbackId)
 {
     return ERR_OK;
 }

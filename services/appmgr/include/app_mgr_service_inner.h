@@ -62,7 +62,6 @@
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
-#include "iload_ability_callback.h"
 #include "iremote_object.h"
 #include "irender_state_observer.h"
 #include "istart_specified_ability_response.h"
@@ -103,16 +102,19 @@ class WindowPidVisibilityChangedListener;
 using LoadAbilityTaskFunc = std::function<void()>;
 constexpr int32_t BASE_USER_RANGE = 200000;
 
-struct LoadAbilityCallbackGuard {
-    sptr<ILoadAbilityCallback> callback_ = nullptr;
-    std::shared_ptr<AppRunningRecord> appRecord_ = nullptr;
-
-    LoadAbilityCallbackGuard(sptr<ILoadAbilityCallback> callback) : callback_(callback) {}
-    ~LoadAbilityCallbackGuard();
-};
-
 class AppMgrServiceInner : public std::enable_shared_from_this<AppMgrServiceInner> {
 public:
+    struct LoadAbilityCallbackGuard {
+        uint64_t callbackId_ = 0;
+        pid_t callingPid_ = -1;
+        pid_t targetPid_ = -1;
+        std::shared_ptr<AppRunningRecord> appRecord_ = nullptr;
+        std::weak_ptr<AppMgrServiceInner> serviceInner_;
+
+        LoadAbilityCallbackGuard(uint64_t callbackId, pid_t callingPid, std::weak_ptr<AppMgrServiceInner> serviceInner)
+            : callbackId_(callbackId), callingPid_(callingPid), serviceInner_(serviceInner) {}
+        ~LoadAbilityCallbackGuard();
+    };
     struct ConfigurationObserverWithUserId {
         sptr<IConfigurationObserver> observer;
         int32_t userId = -1;
@@ -137,13 +139,20 @@ public:
      * @param abilityInfo, the ability information.
      * @param appInfo, the app information.
      * @param want the ability want.
-     * @param callback, the callback to get process id.
      *
      * @return
      */
     virtual void LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
-        std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
-        sptr<ILoadAbilityCallback> callback = nullptr);
+        std::shared_ptr<AAFwk::Want> want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam);
+
+    /**
+     * notify load ability finished.
+     *
+     * @param callingPid, the pid of the caller.
+     * @param targetPid, the pid of the target ability.
+     * @param callbackId, the id of the callback.
+     */
+    virtual void NotifyLoadAbilityFinished(pid_t callingPid, pid_t targetPid, uint64_t callbackId);
 
     /**
      * TerminateAbility, terminate the token ability.

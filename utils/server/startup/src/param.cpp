@@ -74,6 +74,12 @@ bool LoadParam::MarshallingTwo(Parcel &parcel) const
     if (!parcel.WriteBool(isMainElementRunning)) {
         return false;
     }
+    if (!parcel.WriteInt32(callingPid)) {
+        return false;
+    }
+    if (!parcel.WriteUint64(loadAbilityCallbackId)) {
+        return false;
+    }
     return true;
 }
 
@@ -104,6 +110,8 @@ bool LoadParam::ReadFromParcel(Parcel &parcel)
     extensionLoadParam = *extensionParamRead;
     isStartupHide = parcel.ReadBool();
     isMainElementRunning = parcel.ReadBool();
+    callingPid = parcel.ReadInt32();
+    loadAbilityCallbackId = parcel.ReadUint64();
     return true;
 }
 

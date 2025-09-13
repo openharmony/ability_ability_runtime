@@ -235,6 +235,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &dat
             return HandleCheckPreloadAppRecordExist(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::VERIFY_KILL_PROCESS_PERMISSION):
             return HandleVerifyKillProcessPermission(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_LOAD_ABILITY_FINISHED):
+            return HandleNotifyLoadAbilityFinished(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -264,13 +266,17 @@ ErrCode AmsMgrStub::HandleLoadAbility(MessageParcel &data, MessageParcel &reply)
         TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable loadParam failed");
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
-    sptr<ILoadAbilityCallback> callback = nullptr;
-    if (data.ReadBool()) {
-        sptr<IRemoteObject> obj = data.ReadRemoteObject();
-        callback = iface_cast<ILoadAbilityCallback>(obj);
-    }
+    LoadAbility(abilityInfo, appInfo, want, loadParam);
+    return NO_ERROR;
+}
 
-    LoadAbility(abilityInfo, appInfo, want, loadParam, callback);
+ErrCode AmsMgrStub::HandleNotifyLoadAbilityFinished(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    int32_t callingPid = data.ReadInt32();
+    int32_t targetPid = data.ReadInt32();
+    uint64_t callbackId = data.ReadUint64();
+    NotifyLoadAbilityFinished(callingPid, targetPid, callbackId);
     return NO_ERROR;
 }
 

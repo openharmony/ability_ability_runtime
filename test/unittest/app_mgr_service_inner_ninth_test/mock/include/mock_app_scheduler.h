@@ -73,6 +73,7 @@ public:
     MOCK_METHOD1(VerifyKillProcessPermission, int32_t(const std::string &bundleName));
     MOCK_METHOD0(ScheduleCacheProcess, void());
     MOCK_METHOD1(ScheduleCjHeapMemory, void(OHOS::AppExecFwk::CjHeapDumpInfo &info));
+    MOCK_METHOD2(OnLoadAbilityFinished, void(uint64_t, int32_t));
 
     bool AddDeathRecipient(const sptr<DeathRecipient> &recipient) override
     {

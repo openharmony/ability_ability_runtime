@@ -261,7 +261,7 @@ HWTEST_F(StartOptionsUtilsTest, CheckStartSelfUIAbilityStartOptions_007, TestSiz
     StartOptions startOptions;
     startOptions.processOptions = std::make_shared<ProcessOptions>();
     startOptions.processOptions->startupVisibility = StartupVisibility::UNSPECIFIED;
-    startOptions.processOptions->shouldReturnPid = true;
+    startOptions.processOptions->loadAbilityCallbackId = 12345;
     auto ret = StartOptionsUtils::CheckStartSelfUIAbilityStartOptions(want, startOptions);
     EXPECT_EQ(ret, ERR_OK);
 

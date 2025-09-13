@@ -157,6 +157,8 @@ int32_t AppSchedulerHost::OnRemoteRequestInnerThird(uint32_t code, MessageParcel
             return HandleScheduleCacheProcess(data, reply);
         case static_cast<uint32_t>(IAppScheduler::Message::WATCHDOG_BACKGROUND_STATUS_TRANSACTION):
             return HandleSetWatchdogBackgroundStatus(data, reply);
+        case static_cast<uint32_t>(IAppScheduler::Message::ON_LOAD_ABILITY_FINISHED):
+            return HandleOnLoadAbilityFinished(data, reply);
     }
     return INVALID_FD;
 }
@@ -531,6 +533,15 @@ int32_t AppSchedulerHost::HandleSetWatchdogBackgroundStatus(MessageParcel &data,
     HITRACE_METER(HITRACE_TAG_APP);
     bool status = data.ReadBool();
     SetWatchdogBackgroundStatus(status);
+    return NO_ERROR;
+}
+
+int32_t AppSchedulerHost::HandleOnLoadAbilityFinished(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    uint64_t callbackId = data.ReadUint64();
+    int32_t pid = data.ReadInt32();
+    OnLoadAbilityFinished(callbackId, pid);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

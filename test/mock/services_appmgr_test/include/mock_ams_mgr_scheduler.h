@@ -26,10 +26,9 @@ struct LoadParam;
 namespace AppExecFwk {
 class MockAmsMgrScheduler : public AmsMgrStub {
 public:
-    MOCK_METHOD5(LoadAbility,
+    MOCK_METHOD4(LoadAbility,
         void(const std::shared_ptr<AbilityInfo>& abilityInfo, const std::shared_ptr<ApplicationInfo>& appInfo,
-            const std::shared_ptr<AAFwk::Want>& want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam,
-            sptr<ILoadAbilityCallback> callback));
+            const std::shared_ptr<AAFwk::Want>& want, std::shared_ptr<AbilityRuntime::LoadParam> loadParam));
     MOCK_METHOD2(TerminateAbility, void(const sptr<IRemoteObject>& token, bool clearMissionFlag));
     MOCK_METHOD2(UpdateAbilityState, void(const sptr<IRemoteObject>& token, const AbilityState state));
     MOCK_METHOD0(Reset, void());

@@ -52,9 +52,6 @@
 #endif
 
 namespace OHOS {
-namespace AppExecFwk {
-class ILoadAbilityCallback;
-}
 namespace AAFwk {
 using Closure = std::function<void()>;
 
@@ -377,6 +374,16 @@ public:
     std::string perfCmd;
 };
 
+struct ForegroundOptions {
+    uint32_t sceneFlag = 0;
+    bool isShellCall = false;
+    bool isStartupHide = false;
+    pid_t callingPid = -1;
+    uint64_t loadAbilityCallbackId = 0;
+};
+
+static ForegroundOptions DEFAULT_FOREGROUND_OPTIONS;
+
 /**
  * @class AbilityRecord
  * AbilityRecord records ability info and states and used to schedule ability life.
@@ -414,8 +421,8 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    int LoadAbility(bool isShellCall = false, bool isStartupHide = false,
-        sptr<AppExecFwk::ILoadAbilityCallback> callback = nullptr);
+    int LoadAbility(bool isShellCall = false, bool isStartupHide = false, pid_t callingPid = -1,
+        uint64_t loadAbilityCallbackId = 0);
 
     /**
      * foreground the ability.
@@ -428,9 +435,7 @@ public:
      * process request of foregrounding the ability.
      *
      */
-    void ProcessForegroundAbility(
-        uint32_t tokenId, uint32_t sceneFlag = 0, bool isShellCall = false, bool isStartupHide = false,
-        sptr<AppExecFwk::ILoadAbilityCallback> callback = nullptr);
+    void ProcessForegroundAbility(uint32_t tokenId, const ForegroundOptions &options = DEFAULT_FOREGROUND_OPTIONS);
 
      /**
      * post foreground timeout task for ui ability.
@@ -1275,16 +1280,6 @@ public:
         return isPreloadStart_.load();
     }
 
-    inline void SetShouldReturnPid(bool shouldReturnPid)
-    {
-        shouldReturnPid_.store(shouldReturnPid);
-    }
-
-    inline bool ShouldReturnPid() const
-    {
-        return shouldReturnPid_.load();
-    }
-
     inline void SetPreloaded()
     {
         isPreloaded_.store(true);
@@ -1410,7 +1405,6 @@ private:
 #endif
     void SendAppStartupTypeEvent(const AppExecFwk::AppStartType startType);
     std::atomic<bool> isPreloadStart_ = false;           // is ability started via preload
-    std::atomic<bool> shouldReturnPid_ = false;
 
     static std::atomic<int64_t> abilityRecordId;
     bool isReady_ = false;                            // is ability thread attached?
