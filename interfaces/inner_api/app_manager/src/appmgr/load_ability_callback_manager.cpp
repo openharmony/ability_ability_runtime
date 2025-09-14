@@ -16,7 +16,6 @@
 #include "load_ability_callback_manager.h"
 
 #include "ffrt.h"
-#include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
