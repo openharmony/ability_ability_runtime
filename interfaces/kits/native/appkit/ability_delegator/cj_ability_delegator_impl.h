@@ -363,6 +363,7 @@ private:
     std::mutex mutexMonitor_;
     std::mutex mutexAbilityProperties_;
     std::mutex mutexStageMonitor_;
+    std::mutex mutexClearMonitor_;
 };
 } // namespace AppExecFwk
 } // namespace OHOS
