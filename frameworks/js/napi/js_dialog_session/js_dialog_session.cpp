@@ -74,6 +74,7 @@ private:
         auto errcode = AbilityManagerClient::GetInstance()->GetDialogSessionInfo(dialogSessionId, dialogSessionInfo);
         if (errcode || dialogSessionInfo == nullptr) {
             TAG_LOGE(AAFwkTag::DIALOG, "GetDialogSessionInfo error");
+            ThrowErrorByNativeErr(env, errcode);
             return CreateJsUndefined(env);
         }
 #endif // SUPPORT_SCREEN

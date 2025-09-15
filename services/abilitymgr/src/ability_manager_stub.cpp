@@ -3367,7 +3367,7 @@ int AbilityManagerStub::GetDialogSessionInfoInner(MessageParcel &data, MessagePa
     int result = GetDialogSessionInfo(dialogSessionId, info);
     if (result != ERR_OK || info == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not find dialogSessionInfo");
-        return ERR_INVALID_VALUE;
+        return result;
     }
     if (!reply.WriteParcelable(info)) {
         return ERR_INVALID_VALUE;
