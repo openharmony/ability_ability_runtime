@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,17 +15,22 @@
 
 #include "utils/app_mgr_util.h"
 
+#include <mutex>
+
+#include "ffrt.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
 namespace AAFwk {
-sptr<OHOS::AppExecFwk::IAppMgr> AppMgrUtil::appMgr_ = nullptr;
+ffrt::mutex g_appMgrMutex;
+sptr<OHOS::AppExecFwk::IAppMgr> g_appMgr = nullptr;
 
 OHOS::sptr<OHOS::AppExecFwk::IAppMgr> AppMgrUtil::GetAppMgr()
 {
-    if (appMgr_) {
-        return appMgr_;
+    std::lock_guard<ffrt::mutex> guard(g_appMgrMutex);
+    if (g_appMgr) {
+        return g_appMgr;
     }
 
     auto sysMgrClient = DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance();
@@ -36,8 +41,8 @@ OHOS::sptr<OHOS::AppExecFwk::IAppMgr> AppMgrUtil::GetAppMgr()
     if (object == nullptr) {
         return nullptr;
     }
-    appMgr_ = OHOS::iface_cast<OHOS::AppExecFwk::IAppMgr>(object);
-    return appMgr_;
+    g_appMgr = OHOS::iface_cast<OHOS::AppExecFwk::IAppMgr>(object);
+    return g_appMgr;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
