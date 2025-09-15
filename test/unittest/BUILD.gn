@@ -343,6 +343,7 @@ group("unittest") {
       "dfr_test:unittest",
       "dialog_session_info_test:unittest",
       "dialog_session_manager_test:unittest",
+      "disposed_rule_interceptor_test:unittest",
       "dlp_state_item_test:unittest",
       "dlp_utils_test:unittest",
       "dummy_values_bucket_test:unittest",

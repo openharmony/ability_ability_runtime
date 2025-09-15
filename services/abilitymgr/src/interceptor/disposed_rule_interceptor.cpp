@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,13 @@
 
 #include "interceptor/disposed_rule_interceptor.h"
 
-#include "ability_manager_service.h"
+#include "ability_manager_client.h"
+#include "ability_record.h"
+#include "ability_util.h"
+#include "app_mgr_util.h"
 #include "global_constant.h"
 #include "hitrace_meter.h"
-#include "iservice_registry.h"
+#include "in_process_call_wrapper.h"
 #include "modal_system_ui_extension.h"
 
 namespace OHOS {
@@ -118,45 +121,54 @@ bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
         }
     }
 
-    for (auto &rule:disposedRuleList) {
-        if (CheckDisposedRule(want, rule)) {
+    if (FindBlockDisposedRule(want, disposedRuleList, disposedRule)) {
+        return true;
+    }
+    FindNonBlockDisposedRule(disposedRuleList, disposedRule);
+    return false;
+}
+
+bool DisposedRuleInterceptor::FindBlockDisposedRule(const Want &want,
+    const std::vector<AppExecFwk::DisposedRule> &disposedRuleList, AppExecFwk::DisposedRule &disposedRule)
+{
+    int priority = -1;
+    for (const auto &rule : disposedRuleList) {
+        if (rule.disposedType == AppExecFwk::DisposedType::NON_BLOCK || rule.priority <= priority) {
+            continue;
+        }
+        if (rule.disposedType == AppExecFwk::DisposedType::BLOCK_APPLICATION) {
             disposedRule = rule;
-            return true;
+            priority = rule.priority;
+            continue;
+        }
+        std::string moduleName = want.GetElement().GetModuleName();
+        std::string abilityName = want.GetElement().GetAbilityName();
+        auto iter = std::find_if(rule.elementList.begin(), rule.elementList.end(),
+            [moduleName, abilityName](const AppExecFwk::ElementName &elementName) {
+                return moduleName == elementName.GetModuleName() && abilityName == elementName.GetAbilityName();
+            });
+        if ((rule.controlType == AppExecFwk::ControlType::ALLOWED_LIST && iter == rule.elementList.end()) ||
+            (rule.controlType == AppExecFwk::ControlType::DISALLOWED_LIST && iter != rule.elementList.end())) {
+            disposedRule = rule;
+            priority = rule.priority;
         }
     }
+    return priority >= 0;
+}
+
+void DisposedRuleInterceptor::FindNonBlockDisposedRule(const std::vector<AppExecFwk::DisposedRule> &disposedRuleList,
+    AppExecFwk::DisposedRule &disposedRule)
+{
     int priority = -1;
-    for (auto &rule : disposedRuleList) {
+    for (const auto &rule : disposedRuleList) {
         if (rule.disposedType != AppExecFwk::DisposedType::NON_BLOCK) {
-            return false;
+            continue;
         }
         if (rule.priority > priority) {
             priority = rule.priority;
             disposedRule = rule;
         }
     }
-    return false;
-}
-
-bool DisposedRuleInterceptor::CheckDisposedRule(const Want &want, AppExecFwk::DisposedRule &disposedRule)
-{
-    if (disposedRule.disposedType == AppExecFwk::DisposedType::NON_BLOCK) {
-        return false;
-    }
-    bool isAllowed = disposedRule.controlType == AppExecFwk::ControlType::ALLOWED_LIST;
-    if (disposedRule.disposedType == AppExecFwk::DisposedType::BLOCK_APPLICATION) {
-        return !isAllowed;
-    }
-
-    std::string moduleName = want.GetElement().GetModuleName();
-    std::string abilityName = want.GetElement().GetAbilityName();
-
-    for (auto elementName : disposedRule.elementList) {
-        if (moduleName == elementName.GetModuleName()
-            && abilityName == elementName.GetAbilityName()) {
-            return !isAllowed;
-        }
-    }
-    return isAllowed;
 }
 
 ErrCode DisposedRuleInterceptor::StartNonBlockRule(const Want &want, AppExecFwk::DisposedRule &disposedRule,
@@ -174,7 +186,7 @@ ErrCode DisposedRuleInterceptor::StartNonBlockRule(const Want &want, AppExecFwk:
     }
     SetInterceptInfo(want, disposedRule);
     std::string bundleName = want.GetBundle();
-    sptr<OHOS::AppExecFwk::IAppMgr> appManager = GetAppMgr();
+    sptr<OHOS::AppExecFwk::IAppMgr> appManager = AppMgrUtil::GetAppMgr();
     CHECK_POINTER_AND_RETURN(appManager, ERR_INVALID_VALUE);
     {
         std::lock_guard<ffrt::mutex> guard(observerLock_);
@@ -208,26 +220,6 @@ ErrCode DisposedRuleInterceptor::StartNonBlockRule(const Want &want, AppExecFwk:
     return ERR_OK;
 }
 
-sptr<OHOS::AppExecFwk::IAppMgr> DisposedRuleInterceptor::GetAppMgr()
-{
-    OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
-        OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (!systemAbilityManager) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "get systemAbilityManager failed");
-        return nullptr;
-    }
-    OHOS::sptr<OHOS::IRemoteObject> object = systemAbilityManager->GetSystemAbility(OHOS::APP_MGR_SERVICE_ID);
-    if (!object) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "get systemAbilityManager failed");
-        return nullptr;
-    }
-    sptr<OHOS::AppExecFwk::IAppMgr> appMgr = iface_cast<AppExecFwk::IAppMgr>(object);
-    if (!appMgr || !appMgr->AsObject()) {
-        return nullptr;
-    }
-    return appMgr;
-}
-
 void DisposedRuleInterceptor::UnregisterObserver(int32_t uid)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Call");
@@ -241,7 +233,7 @@ void DisposedRuleInterceptor::UnregisterObserver(int32_t uid)
         } else {
             auto disposedObserver = iter->second;
             CHECK_POINTER(disposedObserver);
-            sptr<OHOS::AppExecFwk::IAppMgr> appManager = interceptor->GetAppMgr();
+            sptr<OHOS::AppExecFwk::IAppMgr> appManager = AppMgrUtil::GetAppMgr();
             CHECK_POINTER(appManager);
             IN_PROCESS_CALL(appManager->UnregisterApplicationStateObserver(disposedObserver));
             interceptor->disposedObserverMap_.erase(iter);
