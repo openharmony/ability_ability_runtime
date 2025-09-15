@@ -976,5 +976,68 @@ HWTEST_F(AppMgrStubTest, HandleQueryRunningSharedBundles_0200, TestSize.Level1)
     EXPECT_EQ(replyResult, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "HandleQueryRunningSharedBundles_0200 end.");
 }
+
+/**
+ * @tc.name: HandleGetConfigurationByUserId_0100
+ * @tc.desc: Test HandleGetConfigurationByUserId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleGetConfigurationByUserId_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleGetConfigurationByUserId_0100 start.");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    Configuration config;
+    int32_t userId = USER_ID;
+    data.WriteParcelable(&config);
+    data.WriteInt32(userId);
+
+    EXPECT_CALL(*mockAppMgrService_, GetConfiguration(_, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    auto ret = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::GET_CONFIGURATION_BY_USERID), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+
+    std::unique_ptr<Configuration> replyConfig(reply.ReadParcelable<Configuration>());
+    auto replyResult = reply.ReadInt32();
+    EXPECT_EQ(replyResult, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "HandleGetConfigurationByUserId_0100 end.");
+}
+
+/**
+ * @tc.name: HandleUpdateConfigurationMultiUser_0100
+ * @tc.desc: Test HandleUpdateConfigurationMultiUser.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleUpdateConfigurationMultiUser_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "HandleUpdateConfigurationMultiUser_0100 start.");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    Configuration config;
+    std::vector<int32_t> userIds;
+    data.WriteParcelable(&config);
+    data.WriteInt32Vector(userIds);
+
+    EXPECT_CALL(*mockAppMgrService_, UpdateConfigurationByUserIds(_, _))
+        .Times(1)
+        .WillOnce(Return(ERR_OK));
+
+    auto ret = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_CONFIGURATION_MULTI_USER), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+
+    auto replyResult = reply.ReadInt32();
+    EXPECT_EQ(replyResult, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "HandleUpdateConfigurationMultiUser_0100 end.");
+}
 } // namespace AppExecFwk
 } // namespace OHOS

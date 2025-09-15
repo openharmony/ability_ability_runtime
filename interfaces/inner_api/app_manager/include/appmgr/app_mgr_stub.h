@@ -103,7 +103,9 @@ private:
     int32_t HandleAttachRenderProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetRenderProcessTerminationStatus(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetConfiguration(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetConfigurationByUserId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateConfiguration(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleUpdateConfigurationMultiUser(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateConfigurationForBackgroundApp(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUpdateConfigurationByBundleName(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterConfigurationObserver(MessageParcel &data, MessageParcel &reply);

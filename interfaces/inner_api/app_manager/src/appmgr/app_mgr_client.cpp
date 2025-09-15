@@ -649,6 +649,19 @@ AppMgrResultCode AppMgrClient::GetConfiguration(Configuration& config)
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
+AppMgrResultCode AppMgrClient::GetConfiguration(Configuration& config, int32_t userId)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        int32_t result = service->GetConfiguration(config, userId);
+        if (result == ERR_OK) {
+            return AppMgrResultCode::RESULT_OK;
+        }
+        return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+    }
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
 AppMgrResultCode AppMgrClient::ConnectAppMgrService()
 {
     if (mgrHolder_) {
@@ -889,6 +902,17 @@ AppMgrResultCode AppMgrClient::UpdateConfiguration(const Configuration &config, 
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
     service->UpdateConfiguration(config, userId);
+    return AppMgrResultCode::RESULT_OK;
+}
+
+AppMgrResultCode AppMgrClient::UpdateConfigurationByUserIds(
+    const Configuration &config, const std::vector<int32_t> userIds)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    service->UpdateConfigurationByUserIds(config, userIds);
     return AppMgrResultCode::RESULT_OK;
 }
 

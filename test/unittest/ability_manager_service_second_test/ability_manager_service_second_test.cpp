@@ -22,6 +22,7 @@
 #include "ability_connection.h"
 #include "ability_start_setting.h"
 #include "recovery_param.h"
+#include "app_mgr_util.h"
 #undef private
 #undef protected
 
@@ -1930,5 +1931,19 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallAutoFillExtensionPermission_0
     TAG_LOGI(AAFwkTag::TEST, "testcase end.");
 }
 #endif // SUPPORT_AUTO_FILL
+
+/*
+ * Feature: AbilityManagerService
+ * Function: GetConfiguration
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetConfiguration
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, GetConfiguration_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    AppExecFwk::Configuration config;
+    auto ret = abilityMs_->GetConfiguration(config, USER_ID_U100);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

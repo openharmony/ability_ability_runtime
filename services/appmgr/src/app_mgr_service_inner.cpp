@@ -5928,7 +5928,6 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
     if (ret != ERR_OK) {
         return ret;
     }
-
     // all app
     int32_t result = appRunningManager_->UpdateConfiguration(config, notifyUserId);
     HandleConfigurationChange(config, notifyUserId);
@@ -5944,6 +5943,66 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
         }
     }
 
+    return result;
+}
+
+int32_t AppMgrServiceInner::UpdateConfigurationByUserIds(
+    const Configuration &config, const std::vector<int32_t> userIds)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
+        return ERR_INVALID_VALUE;
+    }
+    CHECK_CALLER_IS_SYSTEM_APP;
+    auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyUpdateConfigurationPerm();
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
+    std::vector<int32_t> effectiveUserIds = userIds;
+    if (effectiveUserIds.empty()) {
+        std::vector<AccountSA::ForegroundOsAccount> accounts;
+        auto errCode = AccountSA::OsAccountManager::GetForegroundOsAccounts(accounts);
+        if (errCode != ERR_OK) {
+            return errCode;
+        }
+        for (const auto &account : accounts) {
+            effectiveUserIds.push_back(account.localId);
+        }
+    }
+
+    int32_t result = ERR_OK;
+    bool isUpdateU0 = true;
+    for (const auto& userId : effectiveUserIds) {
+        int32_t notifyUserId = -1;
+        ret = DealWithUserConfiguration(config, userId, notifyUserId);
+        if (ret != ERR_OK) {
+            TAG_LOGW(AAFwkTag::APPMGR, "DealWithUserConfiguration failed for userId: %{public}d", userId);
+            continue;
+        }
+
+        int32_t updateResult = appRunningManager_->UpdateConfiguration(config, notifyUserId);
+        HandleConfigurationChange(config, notifyUserId);
+        if (updateResult != ERR_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "UpdateConfiguration failed for notifyUserId: %{public}d", notifyUserId);
+            result = updateResult;
+        }
+
+        std::lock_guard<ffrt::mutex> notifyLock(configurationObserverLock_);
+        for (auto &item : configurationObservers_) {
+            if (!isUpdateU0 && item.userId == 0) {
+                continue;
+            }
+            if (item.observer != nullptr &&
+                (notifyUserId == -1 || item.userId == 0 || item.userId == notifyUserId)) {
+                item.observer->OnConfigurationUpdated(config);
+            }
+            if (item.userId == 0) {
+                isUpdateU0 = false;
+            }
+        }
+    }
     return result;
 }
 
@@ -6172,6 +6231,28 @@ std::shared_ptr<AppExecFwk::Configuration> AppMgrServiceInner::GetConfiguration(
     }
     TAG_LOGD(AAFwkTag::APPMGR, "GetForegroundOsAccountLocalId userId: %{public}d", userId);
     return multiUserConfigurationMgr_->GetConfigurationByUserId(userId);
+}
+
+std::shared_ptr<AppExecFwk::Configuration> AppMgrServiceInner::GetConfiguration(int32_t userId)
+{
+    if (multiUserConfigurationMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "multiUserConfigurationMgr_ null");
+        return nullptr;
+    }
+
+    if (userId == -1) {
+        int32_t currentUserId = 0;
+        auto errNo = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(currentUserId);
+        if (errNo != 0) {
+            TAG_LOGE(AAFwkTag::APPMGR, "GetForegroundOsAccountLocalId failed: %{public}d", errNo);
+            currentUserId = USER100;
+        }
+        TAG_LOGD(AAFwkTag::APPMGR, "GetForegroundOsAccountLocalId userId: %{public}d", userId);
+        return multiUserConfigurationMgr_->GetConfigurationByUserId(currentUserId);
+    } else {
+        TAG_LOGD(AAFwkTag::APPMGR, "Using specified user ID: %{public}d", userId);
+        return multiUserConfigurationMgr_->GetConfigurationByUserId(userId);
+    }
 }
 
 void AppMgrServiceInner::KillApplicationByRecord(const std::shared_ptr<AppRunningRecord> &appRecord)

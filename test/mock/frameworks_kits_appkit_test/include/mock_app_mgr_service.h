@@ -59,7 +59,10 @@ public:
     MOCK_METHOD1(SaveBrowserChannel, void(sptr<IRemoteObject> browser));
     MOCK_METHOD2(GetRenderProcessTerminationStatus, int(pid_t renderPid, int& status));
     MOCK_METHOD1(GetConfiguration, int32_t(Configuration& config));
+    MOCK_METHOD2(GetConfiguration, int32_t(Configuration& config, int32_t userid));
     MOCK_METHOD2(UpdateConfiguration, int32_t(const Configuration& config, const int32_t userId));
+    MOCK_METHOD2(UpdateConfigurationByUserIds, int32_t(const Configuration& config,
+        const std::vector<int32_t> userIds));
     MOCK_METHOD2(RegisterConfigurationObserver,
         int32_t(const sptr<IConfigurationObserver>& observer, const int32_t userId));
     MOCK_METHOD1(UnregisterConfigurationObserver, int32_t(const sptr<IConfigurationObserver>& observer));

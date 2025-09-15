@@ -981,6 +981,32 @@ int32_t AppMgrProxy::UpdateConfiguration(const Configuration &config, const int3
     return reply.ReadInt32();
 }
 
+int32_t AppMgrProxy::UpdateConfigurationByUserIds(
+    const Configuration &config, const std::vector<int32_t> userIds)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "AppMgrProxy UpdateConfiguration");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteParcelable(&config)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel config failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteInt32Vector(userIds)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel userIds failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t ret = SendRequest(AppMgrInterfaceCode::UPDATE_CONFIGURATION_MULTI_USER, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+        return ret;
+    }
+    return reply.ReadInt32();
+}
+
 int32_t AppMgrProxy::UpdateConfigurationForBackgroundApp(const std::vector<BackgroundAppInfo>& appInfos,
     const AppExecFwk::ConfigurationPolicy& policy, const int32_t userId)
 {
@@ -1070,6 +1096,36 @@ int32_t AppMgrProxy::GetConfiguration(Configuration& config)
     std::unique_ptr<Configuration> info(reply.ReadParcelable<Configuration>());
     if (!info) {
         TAG_LOGE(AAFwkTag::APPMGR, "read configuration failed.");
+        return ERR_UNKNOWN_OBJECT;
+    }
+    config = *info;
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::GetConfiguration(Configuration& config, int32_t userId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "parcel data failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "failed to write userId to parcel");
+        return ERR_INVALID_DATA;
+    }
+
+    int32_t ret = SendRequest(AppMgrInterfaceCode::GET_CONFIGURATION, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest failed, error code: %{public}d", ret);
+        return ret;
+    }
+
+    std::unique_ptr<Configuration> info(reply.ReadParcelable<Configuration>());
+    if (!info) {
+        TAG_LOGE(AAFwkTag::APPMGR, "read configuration failed");
         return ERR_UNKNOWN_OBJECT;
     }
     config = *info;

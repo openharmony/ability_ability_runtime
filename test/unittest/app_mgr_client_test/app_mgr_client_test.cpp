@@ -1593,20 +1593,31 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_SetProcessCacheEnable_001, TestSize.Leve
 }
 
 /**
- * @tc.name: AppMgrClient_SetProcessCacheEnable_002
+ * @tc.name: AppMgrClient_GetConfiguration_001
  * @tc.desc: SetProcessCacheEnable.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrClientTest, AppMgrClient_SetProcessCacheEnable_002, TestSize.Level2)
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetConfiguration_001, TestSize.Level2)
 {
     auto appMgrClient = std::make_unique<AppMgrClient>();
     ASSERT_NE(appMgrClient, nullptr);
-    auto ret = appMgrClient->ConnectAppMgrService();
-    EXPECT_EQ(ret, AppMgrResultCode::RESULT_OK);
-    int32_t pid = 1;
-    bool enable = false;
-    auto result = appMgrClient->SetProcessCacheEnable(pid, enable);
-    EXPECT_NE(result, AppMgrResultCode::ERROR_SERVICE_NOT_READY);
+    Configuration config;
+    auto result = appMgrClient->GetConfiguration(config, INIT_VALUE);
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+}
+
+/**
+ * @tc.name: AppMgrClient_UpdateConfigurationByUserIds_002
+ * @tc.desc: UpdateConfigurationByUserIds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateConfigurationByUserIds_002, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    Configuration config;
+    std::vector<int32_t> userids;
+    auto result = appMgrClient->UpdateConfigurationByUserIds(config, userids);
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

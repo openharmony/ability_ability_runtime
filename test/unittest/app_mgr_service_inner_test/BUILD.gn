@@ -36,12 +36,15 @@ ohos_unittest("AppMgrServiceInnerTest") {
     "${ability_runtime_services_path}/abilitymgr/include",
 
     "${ability_runtime_test_path}/moduletest/mock/include",
+    "mock/include",
   ]
 
   sources = [
     "${ability_runtime_test_path}/mock/common/src/mock_native_token.cpp",
     "${ability_runtime_test_path}/mock/task_handler_wrap_mock/src/mock_task_handler_wrap.cpp",
     "app_mgr_service_inner_test.cpp",
+    "mock/src/mock_my_flag.cpp",
+    "mock/src/mock_permission_verification.cpp",
   ]
 
   configs = [ "${ability_runtime_services_path}/appmgr:appmgr_config" ]

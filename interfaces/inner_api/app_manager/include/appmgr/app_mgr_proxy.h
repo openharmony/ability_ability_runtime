@@ -431,7 +431,12 @@ public:
 
     virtual int32_t GetConfiguration(Configuration& config) override;
 
+    virtual int32_t GetConfiguration(Configuration& config, int32_t userid) override;
+
     virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) override;
+
+    virtual int32_t UpdateConfigurationByUserIds(
+        const Configuration &config, const std::vector<int32_t> userIds = {}) override;
 
     /**
      * UpdateConfigurationForBackgroundApp

@@ -819,6 +819,8 @@ public:
      */
     int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
 
+    int32_t UpdateConfigurationByUserIds(const Configuration &config, const std::vector<int32_t> userIds);
+
     /**
      * UpdateConfigurationForBackgroundApp
      * @param appInfos Background application information.
@@ -832,6 +834,8 @@ public:
     int32_t UpdateConfigurationByBundleName(const Configuration &config, const std::string &name, int32_t appIndex);
 
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration();
+
+    std::shared_ptr<AppExecFwk::Configuration> GetConfiguration(int32_t userId);
 
     int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver>& observer,
         const int32_t userId = -1);
