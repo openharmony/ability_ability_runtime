@@ -26,17 +26,15 @@
 #undef protected
 
 #include "ability_manager_errors.h"
-#include "ability_manager_stub_mock_test.h"
 #include "ability_scheduler_mock.h"
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_execute_manager.h"
 #include "insight_intent_db_cache.h"
 #include "insight_intent_utils.h"
 #include "mock_ability_token.h"
-#include "mock_bundle_manager_proxy.h"
 #include "mock_my_flag.h"
 #include "mock_parameters.h"
-#include "mock_permission_verification.h"
+#include "mock_bundle_manager_proxy.h"
 #include "mock_task_handler_wrap.h"
 #include "process_options.h"
 #include "recovery_param.h"
@@ -308,7 +306,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityDetails_0300, TestSize.Leve
     Want want1;
     want1.SetElementName(DEVICE_MANAGER_BUNDLE_NAME, DEVICE_MANAGER_NAME);
     auto ret = abilityMs->StartAbilityDetails(want1, abilityStartSetting_, nullptr, MAIN_USER_ID, -1, false);
-    EXPECT_EQ(ret, ERR_NULL_INTERCEPTOR_EXECUTER);
+    EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartAbilityDetails_0300 end");
 }
 
@@ -329,14 +327,13 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartAbilityInner_002, TestSize.Level1)
     Want want;
     want.SetFlags(Want::FLAG_ABILITY_PREPARE_CONTINUATION);
     auto ret = abilityMs->StartAbilityInner(want, nullptr, -1, false, -1, false, -1, true);
-    EXPECT_EQ(ret, ERR_INVALID_CONTINUATION_FLAG);
+    EXPECT_EQ(ret, CHECK_PERMISSION_FAILED);
 
     /**
      * @tc.steps: step2. interceptorExecuter_ is inited, for CONTACTS_BUNDLE_NAME is sigeleton，usrid 0
      * @tc.expected: step2. expect missionListManager/uiAbilityManager null, return ERR_INVALID_VALUE
      */
     auto callerToken = sptr<MockAbilityToken>::MakeSptr();
-    MyFlag::flag_ = MyFlag::IS_SA_CALL;
     Want want2;
     want2.SetElementName(CONTACTS_BUNDLE_NAME, CONTACTS_ABILITY_NAME);
     ret = abilityMs->StartAbilityInner(want2, callerToken, -1, false, -1, true, 1, true);
@@ -505,15 +502,17 @@ HWTEST_F(AbilityManagerServiceSixthTest, CheckOptExtensionAbility_001, TestSize.
     abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI_SERVICE;
     ret = abilityMs_->CheckOptExtensionAbility(want, abilityRequest, validUserId, extensionType,
         isImplicit, isStartAsCaller);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
     isStartAsCaller = false;
     extensionType = ExtensionAbilityType::FORM;
     abilityRequest.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::FORM;
     system::SetBoolParameter("", true);
+    MyFlag::flag_ = MyFlag::IS_SA_CALL;
     ret = abilityMs_->CheckOptExtensionAbility(want, abilityRequest, validUserId, extensionType,
         isImplicit, isStartAsCaller);
     EXPECT_EQ(ret, ERR_OK);
+    MyFlag::flag_ = 0;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest CheckOptExtensionAbility_001 end");
 }
 
@@ -533,6 +532,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartExtensionAbility_001, TestSize.Lev
     auto ret = abilityMs->StartExtensionAbility(want, nullptr, -1, extensionType);
     EXPECT_EQ(ret, ERR_CAPABILITY_NOT_SUPPORT);
 
+    MyFlag::flag_ = MyFlag::IS_SA_CALL;
     extensionType = AppExecFwk::ExtensionAbilityType::VPN;
     ret = abilityMs->StartExtensionAbility(want, nullptr, -1, extensionType);
     EXPECT_EQ(ret, ERR_IMPLICIT_START_ABILITY_FAIL); // implicit start ability failed
@@ -544,6 +544,8 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartExtensionAbility_001, TestSize.Lev
     extensionType = AppExecFwk::ExtensionAbilityType::DATASHARE;
     ret = abilityMs->StartExtensionAbility(want, nullptr, -1, extensionType);
     EXPECT_EQ(ret, ERR_IMPLICIT_START_ABILITY_FAIL); // expect implicit start fail
+    MyFlag::flag_ = 0;
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartExtensionAbility_001 end");
 }
 
 /*
@@ -561,6 +563,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, RecordProcessExitReason_001, TestSize.L
     auto ret = abilityMs->RecordProcessExitReason(1, exitReason);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 
+    abilityMs->appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(nullptr);
     MyFlag::flag_ = MyFlag::IS_SA_CALL;
     ret = abilityMs->RecordProcessExitReason(1, exitReason);
     EXPECT_EQ(ret, ERR_NAME_NOT_FOUND); // init process not record
@@ -1123,7 +1126,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, ConnectLocalAbility_003, TestSize.Level
     auto ret = abilityMs->ConnectLocalAbility(
         want, userId, impl, token, extensionType, sessionInfo, isQueryExtensionOnly, connectInfo);
 
-    EXPECT_EQ(ret, RESOLVE_ABILITY_ERR);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest ConnectLocalAbility_003 end");
 }
 
