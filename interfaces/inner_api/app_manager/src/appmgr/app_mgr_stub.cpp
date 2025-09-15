@@ -216,6 +216,10 @@ int32_t AppMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
             return HandleGetAllRunningInstanceKeysByBundleName(data, reply);
         case static_cast<uint32_t>(AppMgrInterfaceCode::GET_All_RUNNING_INSTANCE_KEYS_BY_SELF):
             return HandleGetAllRunningInstanceKeysBySelf(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_CONFIGURATION_MULTI_USER):
+            return HandleUpdateConfigurationMultiUser(data, reply);
+        case static_cast<uint32_t>(AppMgrInterfaceCode::GET_CONFIGURATION_BY_USERID):
+            return HandleGetConfigurationByUserId(data, reply);
     }
     return INVALID_FD;
 }
@@ -1052,6 +1056,30 @@ int32_t AppMgrStub::HandleGetConfiguration(MessageParcel &data, MessageParcel &r
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleGetConfigurationByUserId(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t userId = -1;
+    if (!data.ReadInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to read userId from parcel");
+        return ERR_INVALID_DATA;
+    }
+
+    Configuration config;
+    int32_t ret = GetConfiguration(config, userId);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrStub GetConfiguration error");
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteParcelable(&config)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrStub GetConfiguration error");
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteInt32(ret)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
 int32_t AppMgrStub::HandleUpdateConfiguration(MessageParcel &data, MessageParcel &reply)
 {
     std::unique_ptr<Configuration> config(data.ReadParcelable<Configuration>());
@@ -1061,6 +1089,26 @@ int32_t AppMgrStub::HandleUpdateConfiguration(MessageParcel &data, MessageParcel
     }
     int32_t userId = data.ReadInt32();
     int32_t ret = UpdateConfiguration(*config, userId);
+    if (!reply.WriteInt32(ret)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUpdateConfigurationMultiUser(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<Configuration> config(data.ReadParcelable<Configuration>());
+    if (!config) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrStub read configuration error");
+        return ERR_INVALID_VALUE;
+    }
+
+    std::vector<int32_t> userIds;
+    if (!data.ReadInt32Vector(&userIds)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrStub read userIds error");
+        return ERR_INVALID_DATA;
+    }
+    int32_t ret = UpdateConfigurationByUserIds(*config, userIds);
     if (!reply.WriteInt32(ret)) {
         return ERR_INVALID_VALUE;
     }

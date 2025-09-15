@@ -371,6 +371,7 @@ public:
      * @return ERR_OK ,return back success，others fail.
      */
     virtual AppMgrResultCode GetConfiguration(Configuration& config);
+    virtual AppMgrResultCode GetConfiguration(Configuration& config, int32_t userId);
 
     /**
      * Ability attach timeout. If start ability encounter failure, attach timeout to terminate.
@@ -432,6 +433,9 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual AppMgrResultCode UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
+    
+    virtual AppMgrResultCode UpdateConfigurationByUserIds(
+        const Configuration &config, const std::vector<int32_t> userIds = {});
 
     /**
      *  Update config by bundle name.

@@ -425,6 +425,7 @@ public:
      * @return ERR_OK ,return back success，others fail.
      */
     virtual int32_t GetConfiguration(Configuration& config) override;
+    virtual int32_t GetConfiguration(Configuration& config, int32_t userId) override;
 
     /**
      * UpdateConfiguration, ANotify application update system environment changes.
@@ -434,6 +435,9 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) override;
+    
+    virtual int32_t UpdateConfigurationByUserIds(
+        const Configuration &config, const std::vector<int32_t> userIds = {}) override;
 
     /**
      * Internally, an asynchronous task will be initiated and tasks in the task list will be scheduled according to
