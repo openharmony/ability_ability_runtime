@@ -282,6 +282,7 @@ private:
 #endif
 
 private:
+    void OnStartInner(ani_env *env, const Want &want);
     bool CallObjectMethod(bool withResult, const char *name, const char *signature, ...);
     ani_object CreateAppWindowStage();
     void SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<Want> want,
