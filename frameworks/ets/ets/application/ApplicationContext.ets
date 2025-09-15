@@ -14,6 +14,7 @@
  */
 
 import AbilityLifecycleCallback from '@ohos.app.ability.AbilityLifecycleCallback';
+import InteropAbilityLifecycleCallback from '../@ohos.app.ability.InteropAbilityLifecycleCallback';
 import Context from 'application.Context'
 import { BusinessError, AsyncCallback } from '@ohos.base'
 import AsyncCallbackWrapper from '../utils/AbilityUtils';
@@ -329,5 +330,14 @@ export default class ApplicationContext extends Context {
 
   onAbilityLifecycle(callback: AbilityLifecycleCallback): int {
     return this.nativeOnLifecycleCallbackSync('abilityLifecycle', callback);
+  }
+
+  public native nativeOnInteropLifecycleCallbackSync(callback: InteropAbilityLifecycleCallback): void;
+  public native nativeOffInteropLifecycleCallbackSync(callback?: InteropAbilityLifecycleCallback): void;
+  onInteropAbilityLifecycle(callback: InteropAbilityLifecycleCallback): void {
+    this.nativeOnInteropLifecycleCallbackSync(callback);
+  }
+  offInteropAbilityLifecycle(callback?: InteropAbilityLifecycleCallback): void {
+    this.nativeOffInteropLifecycleCallbackSync(callback);
   }
 }
