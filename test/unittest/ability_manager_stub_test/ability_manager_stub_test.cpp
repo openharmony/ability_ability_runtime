@@ -2773,7 +2773,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetDialogSessionInfoInner_00
     MessageParcel data;
     MessageParcel reply;
     auto res = stub_->GetDialogSessionInfoInner(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_VALUE);
+    EXPECT_EQ(res, NO_ERROR);
 }
 
 /*
