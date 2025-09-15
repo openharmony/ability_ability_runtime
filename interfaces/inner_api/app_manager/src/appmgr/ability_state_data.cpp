@@ -89,6 +89,9 @@ bool AbilityStateData::MarshallingOne(Parcel &parcel) const
     if (!parcel.WriteBool(isInnerNotify)) {
         return false;
     }
+    if (!parcel.WriteInt32(callerPid)) {
+        return false;
+    }
     return true;
 }
 
@@ -124,6 +127,7 @@ bool AbilityStateData::ReadFromParcel(Parcel &parcel)
     processType = parcel.ReadInt32();
     callerUid = parcel.ReadInt32();
     isInnerNotify = parcel.ReadBool();
+    callerPid = parcel.ReadInt32();
     return true;
 }
 
