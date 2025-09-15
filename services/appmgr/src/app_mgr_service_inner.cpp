@@ -5973,7 +5973,7 @@ int32_t AppMgrServiceInner::UpdateConfigurationByUserIds(
     }
 
     int32_t result = ERR_OK;
-    std::set<notifyUserId> notifiedUserIds;
+    std::set<int32_t> notifiedUserIds;
     for (const auto& userId : effectiveUserIds) {
         int32_t notifyUserId = -1;
         ret = DealWithUserConfiguration(config, userId, notifyUserId);
@@ -5989,12 +5989,14 @@ int32_t AppMgrServiceInner::UpdateConfigurationByUserIds(
         }
         notifiedUserIds.emplace(notifyUserId);
     }
-    HandleConfigurationChange(config, notifiedUserIds);
-    std::lock_guard<ffrt::mutex> notifyLock(configurationObserverLock_);
-    for (auto &item : configurationObservers_) {
-        if (item.observer != nullptr &&
-            (item.userId == 0 || notifiedUserIds.find(item.userId) != notifiedUserIds.end()) {
-            item.observer->OnConfigurationUpdated(config);
+    if (!notifiedUserIds.empty()) {
+        HandleConfigurationChange(config, notifiedUserIds);
+        std::lock_guard<ffrt::mutex> notifyLock(configurationObserverLock_);
+        for (auto &item : configurationObservers_) {
+            if (item.observer != nullptr &&
+                (item.userId == 0 || notifiedUserIds.find(item.userId) != notifiedUserIds.end())) {
+                item.observer->OnConfigurationUpdated(config);
+            }
         }
     }
     return result;
@@ -6121,7 +6123,7 @@ void AppMgrServiceInner::HandleConfigurationChange(const Configuration& config, 
                 UserController::GetInstance().GetForegroundUserId(DEFAULT_DISPLAY_ID));
         }
         if (item.callback != nullptr && userIds.find(item.userId) != userIds.end()) {
-            item.callback->NotifyConfigurationChange(config, item.userId));
+            item.callback->NotifyConfigurationChange(config, item.userId);
         }
     }
 }
