@@ -112,11 +112,12 @@ ErrCode WantAgentHelper::GetWantAgent(
     std::shared_ptr<WantParams> extraInfo = paramsInfo.GetExtraInfo();
     std::shared_ptr<PendingWant> pendingWant = nullptr;
     int requestCode = paramsInfo.GetRequestCode();
+    int userId = paramsInfo.GetUserId();
     WantAgentConstant::OperationType operationType = paramsInfo.GetOperationType();
     ErrCode result;
     switch (operationType) {
         case WantAgentConstant::OperationType::START_ABILITY:
-            result = PendingWant::GetAbility(context, requestCode, wants[0], flags, extraInfo, pendingWant);
+            result = PendingWant::GetAbility(context, requestCode, wants[0], flags, extraInfo, pendingWant, userId);
             break;
         case WantAgentConstant::OperationType::START_ABILITIES:
             result = PendingWant::GetAbilities(context, requestCode, wants, flags, extraInfo, pendingWant);
@@ -468,6 +469,7 @@ std::string WantAgentHelper::ToString(const std::shared_ptr<WantAgent> &agent)
     jsonObject["requestCode"] = (*info.get()).requestCode;
     jsonObject["operationType"] = (*info.get()).type;
     jsonObject["flags"] = (*info.get()).flags;
+    jsonObject["userId"] = (*info.get()).userId;
 
     nlohmann::json wants = nlohmann::json::array();
     for (auto &wantInfo : (*info.get()).allWants) {
@@ -500,6 +502,11 @@ std::shared_ptr<WantAgent> WantAgentHelper::FromString(const std::string &jsonSt
         requestCode = jsonObject.at("requestCode").get<int>();
     }
 
+    int userId = -1;
+    if (jsonObject.contains("userId") && jsonObject["userId"].is_number_integer()) {
+        userId = jsonObject.at("userId").get<int>();
+    }
+
     WantAgentConstant::OperationType operationType = WantAgentConstant::OperationType::UNKNOWN_TYPE;
     if (jsonObject.contains("operationType") && jsonObject["operationType"].is_number_integer()) {
         operationType = static_cast<WantAgentConstant::OperationType>(jsonObject.at("operationType").get<int>());
@@ -530,7 +537,7 @@ std::shared_ptr<WantAgent> WantAgentHelper::FromString(const std::string &jsonSt
     }
     WantAgentInfo info(requestCode, operationType, flagsVec, wants, extraInfo);
 
-    return GetWantAgent(info, INVLID_WANT_AGENT_USER_ID, uid);
+    return GetWantAgent(info, userId, uid);
 }
 
 std::vector<WantAgentConstant::Flags> WantAgentHelper::ParseFlags(nlohmann::json jsonObject)
