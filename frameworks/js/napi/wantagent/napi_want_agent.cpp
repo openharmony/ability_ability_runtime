@@ -970,6 +970,16 @@ int32_t JsWantAgent::GetWantAgentParam(napi_env env, napi_callback_info info, Wa
         return PARAMETER_ERROR;
     }
 
+    bool hasUserId = false;
+    napi_has_named_property(env, argv[0], "userId", &hasUserId);
+    if (hasUserId) {
+        napi_value jsUserId = nullptr;
+        napi_get_named_property(env, argv[0], "userId", &jsUserId);
+        if (!ConvertFromJsValue(env, jsUserId, paras.userId)) {
+            TAG_LOGE(AAFwkTag::WANTAGENT, "Convert userId failed");
+            return PARAMETER_ERROR;
+        }
+    }
     bool hasActionFlags = false;
     napi_has_named_property(env, argv[0], "actionFlags", &hasActionFlags);
     if (hasActionFlags) {
@@ -1341,7 +1351,8 @@ void JsWantAgent::SetOnNapiGetWantAgentCallback(std::shared_ptr<WantAgentWantsPa
                                     static_cast<WantAgentConstant::OperationType>(parasobj->operationType),
                                     parasobj->wantAgentFlags,
                                     parasobj->wants,
-                                    extraInfo);
+                                    extraInfo,
+                                    parasobj->userId);
 
         auto context = OHOS::AbilityRuntime::Context::GetApplicationContext();
         std::shared_ptr<WantAgent> wantAgent = nullptr;
