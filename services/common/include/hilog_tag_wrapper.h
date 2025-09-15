@@ -190,7 +190,7 @@ inline const char* GetDomainName6(AAFwkLogTag tag)
 
 inline std::string GetAbbreviatedFileName(const std::string& fileName)
 {
-    std::map<std::string, std::string> abbreviatedFileNameMap {
+    static std::map<std::string, std::string> abbreviatedFileNameMap {
         { "ability_manager_client", "AMC" },
         { "app_running_manager", "ARM" },
         { "ability_connect_manager", "ACM" },
