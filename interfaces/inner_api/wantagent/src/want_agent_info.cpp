@@ -44,10 +44,11 @@ WantAgentInfo::WantAgentInfo(int requestCode, const WantAgentConstant::Operation
 
 WantAgentInfo::WantAgentInfo(int requestCode, const WantAgentConstant::OperationType &operationType,
     const std::vector<WantAgentConstant::Flags> &flags, std::vector<std::shared_ptr<Want>> &wants,
-    const std::shared_ptr<WantParams> &extraInfo)
+    const std::shared_ptr<WantParams> &extraInfo, int userId)
 {
     requestCode_ = requestCode;
     operationType_ = operationType;
+    userId_ = userId;
     if (!flags.empty()) {
         flags_.insert(flags_.end(), flags.begin(), flags.end());
     }
@@ -104,5 +105,10 @@ std::vector<std::shared_ptr<Want>> WantAgentInfo::GetWants() const
 std::shared_ptr<WantParams> WantAgentInfo::GetExtraInfo() const
 {
     return extraInfo_;
+}
+
+int WantAgentInfo::GetUserId() const
+{
+    return userId_;
 }
 }  // namespace OHOS::AbilityRuntime::WantAgent
