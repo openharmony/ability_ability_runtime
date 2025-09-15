@@ -360,5 +360,18 @@ HWTEST_F(AppfreezeCpuFreqManagerTest, GetCpuInfoPathTest_001, TestSize.Level0)
         testValue, uid, pid);
     EXPECT_TRUE(!ret.empty());
 }
+
+/**
+ * @tc.number: FreezePathToRealPathTest_001
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeCpuFreqManagerTest, FreezePathToRealPathTest_001, TestSize.Level0)
+{
+    std::string logFile = AppfreezeUtil::FreezePathToRealPath("../FreezePathToRealPathTest_001");
+    EXPECT_EQ(logFile, "");
+    logFile = AppfreezeUtil::FreezePathToRealPath("/data/log/faultlog");
+    EXPECT_TRUE(!logFile.empty());
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
