@@ -589,7 +589,7 @@ void JsUIAbility::OnStopCallback()
     }
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
-    if (applicationContext != nullptr) {
+    if (applicationContext != nullptr && jsAbilityObj_ != nullptr) {
         applicationContext->DispatchOnAbilityDestroy(jsAbilityObj_);
         std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(
             jsRuntime_.GetNapiEnv(), jsAbilityObj_->GetNapiValue());
@@ -724,11 +724,7 @@ void JsUIAbility::onSceneDestroyed()
     }
 
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
-    if (applicationContext != nullptr) {
-        if (jsAbilityObj_ == nullptr || jsWindowStageObj_ == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null ability or window stage");
-            return;
-        }
+    if (applicationContext != nullptr && jsAbilityObj_ != nullptr && jsWindowStageObj_ != nullptr) {
         applicationContext->DispatchOnWindowStageDestroy(jsAbilityObj_, jsWindowStageObj_);
         std::shared_ptr<InteropObject> interopAbility = std::make_shared<InteropObject>(
             jsRuntime_.GetNapiEnv(), jsAbilityObj_->GetNapiValue());
