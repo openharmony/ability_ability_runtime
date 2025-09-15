@@ -475,7 +475,7 @@ void EtsUIAbility::OnStopCallback()
     }
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
-    if (applicationContext != nullptr) {
+    if (applicationContext != nullptr && etsAbilityObj_ != nullptr) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnAbilityDestroy");
         applicationContext->DispatchOnAbilityDestroy(etsAbilityObj_);
         std::shared_ptr<InteropObject> interopObject = std::make_shared<InteropObject>(
@@ -586,12 +586,8 @@ void EtsUIAbility::onSceneDestroyed()
     }
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
-    if (applicationContext != nullptr) {
+    if (applicationContext != nullptr && etsAbilityObj_ != nullptr && etsWindowStageObj_ != nullptr) {
         TAG_LOGD(AAFwkTag::UIABILITY, "call DispatchOnWindowStageDestroy");
-        if (etsAbilityObj_ == nullptr || etsWindowStageObj_ == nullptr) {
-            TAG_LOGE(AAFwkTag::UIABILITY, "null ability or window stage");
-            return;
-        }
         applicationContext->DispatchOnWindowStageDestroy(etsAbilityObj_, etsWindowStageObj_);
         std::shared_ptr<InteropObject> interopAbility = std::make_shared<InteropObject>(
             etsRuntime_.GetAniEnv(), etsAbilityObj_->aniRef);
