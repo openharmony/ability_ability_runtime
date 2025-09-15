@@ -80,10 +80,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 
     executer-> DoProcess(param);
     executer-> CheckControl(want, userId, disposedRule, 0);
-    executer-> CheckDisposedRule(want, disposedRule);
     int32_t uid = static_cast<int32_t>(GetU32Data(data));
     executer-> StartNonBlockRule(want, disposedRule, uid);
-    executer-> GetAppMgr();
     executer-> UnregisterObserver(uid);
     executer-> CreateModalUIExtension(want, token);
     executer-> SetInterceptInfo(want, disposedRule);
