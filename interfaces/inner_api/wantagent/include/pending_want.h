@@ -74,7 +74,7 @@ public:
         const std::shared_ptr<OHOS::AbilityRuntime::ApplicationContext> &context, int requestCode,
         const std::shared_ptr<AAFwk::Want> &want, unsigned int flags,
         const std::shared_ptr<AAFwk::WantParams> &options,
-        std::shared_ptr<PendingWant> &pendingWant);
+        std::shared_ptr<PendingWant> &pendingWant, int userId = -1);
 
     /**
      * Like GetAbility(Context, int, Want, int)}, but allows an

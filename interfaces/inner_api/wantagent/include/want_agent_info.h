@@ -69,7 +69,7 @@ public:
      */
     WantAgentInfo(int requestCode, const WantAgentConstant::OperationType &operationType,
         const std::vector<WantAgentConstant::Flags> &flags, std::vector<std::shared_ptr<AAFwk::Want>> &Wants,
-        const std::shared_ptr<AAFwk::WantParams> &extraInfo);
+        const std::shared_ptr<AAFwk::WantParams> &extraInfo, int userId = -1);
 
     /**
      * A constructor used to create an WantAgentInfo instance by copying parameters from an existing one.
@@ -113,8 +113,16 @@ public:
      */
     std::shared_ptr<AAFwk::WantParams> GetExtraInfo() const;
 
+    /**
+     * Obtains the userId of the WantAgent object.
+     *
+     * @return Returns the userId of the WantAgent object.
+     */
+    int GetUserId() const;
+
 private:
     int requestCode_ = 0;
+    int userId_ = -1;
     WantAgentConstant::OperationType operationType_ = WantAgentConstant::OperationType::UNKNOWN_TYPE;
     std::vector<WantAgentConstant::Flags> flags_ = std::vector<WantAgentConstant::Flags>();
     std::vector<std::shared_ptr<AAFwk::Want>> wants_ = std::vector<std::shared_ptr<AAFwk::Want>>();

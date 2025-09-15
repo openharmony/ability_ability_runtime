@@ -76,6 +76,7 @@ struct WantAgentWantsParas {
     std::vector<std::shared_ptr<AAFwk::Want>> wants = {};
     int32_t operationType = -1;
     int32_t requestCode = -1;
+    int32_t userId = -1;
     std::vector<WantAgentConstant::Flags> wantAgentFlags = {};
     AAFwk::WantParams extraInfo = {};
 };

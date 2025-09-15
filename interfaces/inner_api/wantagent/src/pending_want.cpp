@@ -57,13 +57,17 @@ ErrCode PendingWant::GetAbility(
     const std::shared_ptr<OHOS::AbilityRuntime::ApplicationContext> &context, int requestCode,
     const std::shared_ptr<AAFwk::Want> &want, unsigned int flags,
     const std::shared_ptr<AAFwk::WantParams> &options,
-    std::shared_ptr<PendingWant> &pendingWant)
+    std::shared_ptr<PendingWant> &pendingWant, int userId)
 {
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "invalid input param");
         return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     }
 
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "input param want is nullptr");
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
     WantsInfo wantsInfo;
     wantsInfo.want = *want;
     wantsInfo.resolvedTypes = want != nullptr ? want->GetType() : "";
@@ -74,9 +78,13 @@ ErrCode PendingWant::GetAbility(
     WantSenderInfo wantSenderInfo;
     wantSenderInfo.type = static_cast<int32_t>(WantAgentConstant::OperationType::START_ABILITY);
     wantSenderInfo.allWants.push_back(wantsInfo);
-    wantSenderInfo.bundleName = context->GetBundleName();
+    if (userId >= 0) {
+        wantSenderInfo.bundleName = want->GetOperation().GetBundleName();
+    } else {
+        wantSenderInfo.bundleName = context->GetBundleName();
+    }
     wantSenderInfo.flags = flags;
-    wantSenderInfo.userId = -1; // -1 : invalid user id
+    wantSenderInfo.userId = userId;
     wantSenderInfo.requestCode = requestCode;
     sptr<IWantSender> target = nullptr;
     ErrCode result = WantAgentClient::GetInstance().GetWantSender(wantSenderInfo, nullptr, target);
