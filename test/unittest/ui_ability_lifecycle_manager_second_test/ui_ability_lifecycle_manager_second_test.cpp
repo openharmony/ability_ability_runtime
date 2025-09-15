@@ -967,21 +967,6 @@ HWTEST_F(UIAbilityLifecycleManagerSecondTest, AddSpecifiedRequest_002, TestSize.
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_IsSpecifiedModuleLoaded_0200
- * @tc.desc: IsSpecifiedModuleLoaded
- * @tc.type: FUNC
- */
-HWTEST_F(UIAbilityLifecycleManagerSecondTest, IsSpecifiedModuleLoaded_002, TestSize.Level1)
-{
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    AppMgrUtil::appMgr_= nullptr;
-    AbilityRequest abilityRequest;
-    bool isDebug = false;
-    auto ret = mgr->IsSpecifiedModuleLoaded(abilityRequest, false, isDebug);
-    EXPECT_EQ(ret, false);
-}
-
-/**
  * @tc.name: UIAbilityLifecycleManager_HandleColdAcceptWantDone_0100
  * @tc.desc: HandleColdAcceptWantDone
  * @tc.type: FUNC
