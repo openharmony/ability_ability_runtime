@@ -371,6 +371,14 @@ public:
      * @return ERR_OK ,return back success，others fail.
      */
     virtual AppMgrResultCode GetConfiguration(Configuration& config);
+
+    /**
+     * GetConfiguration
+     *
+     * @param config to retrieve configuration data.
+     * @param userId valid user id.
+     * @return ERR_OK ,return back success, others fail.
+     */
     virtual AppMgrResultCode GetConfiguration(Configuration& config, int32_t userId);
 
     /**

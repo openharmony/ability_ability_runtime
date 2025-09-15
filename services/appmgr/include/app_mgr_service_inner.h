@@ -2072,6 +2072,7 @@ private:
     void InitAppWaitingDebugList();
     bool IsWaitingDebugAppInner(const std::string &bundleName);
     void HandleConfigurationChange(const Configuration &config, const int32_t userId = -1);
+    void HandleConfigurationChange(const Configuration &config, const std::set<int32_t> &userIds);
     bool CheckIsThreadInFoundation(pid_t pid);
     bool CheckAppFault(const std::shared_ptr<AppRunningRecord> &appRecord, const FaultData &faultData);
     int32_t KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData,

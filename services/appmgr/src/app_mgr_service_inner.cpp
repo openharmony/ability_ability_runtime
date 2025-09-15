@@ -5973,7 +5973,7 @@ int32_t AppMgrServiceInner::UpdateConfigurationByUserIds(
     }
 
     int32_t result = ERR_OK;
-    bool isUpdateU0 = true;
+    std::set<notifyUserId> notifiedUserIds;
     for (const auto& userId : effectiveUserIds) {
         int32_t notifyUserId = -1;
         ret = DealWithUserConfiguration(config, userId, notifyUserId);
@@ -5983,24 +5983,18 @@ int32_t AppMgrServiceInner::UpdateConfigurationByUserIds(
         }
 
         int32_t updateResult = appRunningManager_->UpdateConfiguration(config, notifyUserId);
-        HandleConfigurationChange(config, notifyUserId);
         if (updateResult != ERR_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "UpdateConfiguration failed for notifyUserId: %{public}d", notifyUserId);
             result = updateResult;
         }
-
-        std::lock_guard<ffrt::mutex> notifyLock(configurationObserverLock_);
-        for (auto &item : configurationObservers_) {
-            if (!isUpdateU0 && item.userId == 0) {
-                continue;
-            }
-            if (item.observer != nullptr &&
-                (notifyUserId == -1 || item.userId == 0 || item.userId == notifyUserId)) {
-                item.observer->OnConfigurationUpdated(config);
-            }
-            if (item.userId == 0) {
-                isUpdateU0 = false;
-            }
+        notifiedUserIds.emplace(notifyUserId);
+    }
+    HandleConfigurationChange(config, notifiedUserIds);
+    std::lock_guard<ffrt::mutex> notifyLock(configurationObserverLock_);
+    for (auto &item : configurationObservers_) {
+        if (item.observer != nullptr &&
+            (item.userId == 0 || notifiedUserIds.find(item.userId) != notifiedUserIds.end()) {
+            item.observer->OnConfigurationUpdated(config);
         }
     }
     return result;
@@ -6112,6 +6106,22 @@ void AppMgrServiceInner::HandleConfigurationChange(const Configuration& config, 
         if (item.callback != nullptr && (userId == -1 || item.userId == 0 || item.userId == userId)) {
             item.callback->NotifyConfigurationChange(config,
                 UserController::GetInstance().GetForegroundUserId(DEFAULT_DISPLAY_ID));
+        }
+    }
+}
+
+void AppMgrServiceInner::HandleConfigurationChange(const Configuration& config, const std::set<int32_t>& userIds)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::lock_guard lock(appStateCallbacksLock_);
+
+    for (const auto &item : appStateCallbacks_) {
+        if (item.userId == 0) {
+            item.callback->NotifyConfigurationChange(config,
+                UserController::GetInstance().GetForegroundUserId(DEFAULT_DISPLAY_ID));
+        }
+        if (item.callback != nullptr && userIds.find(item.userId) != userIds.end()) {
+            item.callback->NotifyConfigurationChange(config, item.userId));
         }
     }
 }
@@ -6240,19 +6250,8 @@ std::shared_ptr<AppExecFwk::Configuration> AppMgrServiceInner::GetConfiguration(
         return nullptr;
     }
 
-    if (userId == -1) {
-        int32_t currentUserId = 0;
-        auto errNo = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(currentUserId);
-        if (errNo != 0) {
-            TAG_LOGE(AAFwkTag::APPMGR, "GetForegroundOsAccountLocalId failed: %{public}d", errNo);
-            currentUserId = USER100;
-        }
-        TAG_LOGD(AAFwkTag::APPMGR, "GetForegroundOsAccountLocalId userId: %{public}d", userId);
-        return multiUserConfigurationMgr_->GetConfigurationByUserId(currentUserId);
-    } else {
-        TAG_LOGD(AAFwkTag::APPMGR, "Using specified user ID: %{public}d", userId);
-        return multiUserConfigurationMgr_->GetConfigurationByUserId(userId);
-    }
+    TAG_LOGD(AAFwkTag::APPMGR, "Using specified user ID: %{public}d", userId);
+    return multiUserConfigurationMgr_->GetConfigurationByUserId(userId);
 }
 
 void AppMgrServiceInner::KillApplicationByRecord(const std::shared_ptr<AppRunningRecord> &appRecord)
