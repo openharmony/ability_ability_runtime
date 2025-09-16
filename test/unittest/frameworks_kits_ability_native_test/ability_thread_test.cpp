@@ -133,7 +133,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_ScheduleSaveAbilityState_0100, F
 
             abilitythread->ScheduleSaveAbilityState();
 
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_ScheduleSaveAbilityState_0100 end";
@@ -182,7 +182,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_ScheduleRestoreAbilityState_0100
 
             abilitythread->ScheduleRestoreAbilityState(state);
 
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_ScheduleRestoreAbilityState_0100 end";
@@ -226,7 +226,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_Attach_3_Param_0100, Function | 
             auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             abilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_Attach_3_Param_0100 end";
@@ -254,7 +254,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_Attach_3_Param_0200, Function | 
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             abilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
 
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_Attach_3_Param_0200 end";
@@ -281,7 +281,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_Attach_2_Param_0100, Function | 
             auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             abilitythread->Attach(application, abilityRecord, nullptr);
 
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_Attach_2_Param_0100 end";
@@ -310,7 +310,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_Attach_2_Param_0200, Function | 
 
             abilitythread->Attach(application, abilityRecord, nullptr);
 
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_Attach_2_Param_0200 end";
@@ -343,7 +343,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_ScheduleAbilityTransaction_0100,
             LifeCycleStateInfo lifeCycleStateInfo;
             abilitythread->ScheduleAbilityTransaction(want, lifeCycleStateInfo);
 
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_ScheduleAbilityTransaction_0100 end";
@@ -404,7 +404,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_ScheduleConnectAbility_0100, Fun
             Want want;
             abilitythread->ScheduleConnectAbility(want);
 
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_ScheduleConnectAbility_0100 end";
@@ -463,7 +463,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_ScheduleDisconnectAbility_0100, 
             Want want;
             abilitythread->ScheduleDisconnectAbility(want);
 
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_ScheduleDisconnectAbility_0100 end";
@@ -526,7 +526,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_ScheduleCommandAbility_0100, Fun
 
             abilitythread->ScheduleCommandAbility(want, restart, startId);
 
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_ScheduleCommandAbility_0100 end";
@@ -588,7 +588,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_ScheduleCommandAbilityWindow_010
             sptr<AAFwk::SessionInfo> session = new (std::nothrow) AAFwk::SessionInfo();
             abilitythread->ScheduleCommandAbilityWindow(want, session, AAFwk::WIN_CMD_FOREGROUND);
 
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_ScheduleCommandAbilityWindow_0100 end";
@@ -623,7 +623,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_SendResult_0100, Function | Medi
             Want want;
             abilitythread->SendResult(requestCode, resultCode, want);
 
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_SendResult_0100 end";
@@ -2034,7 +2034,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_HandleRegisterObserver_0100, Fun
     EXPECT_TRUE(abilitythread->HandleRegisterObserver(uri, dataObserver));
     delete dataObserver;
     dataObserver = nullptr;
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_HandleRegisterObserver_0100 end";
 }
 
@@ -2052,7 +2052,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_HandleUnregisterObserver_0100, F
     Uri uri(TEST);
     sptr<AAFwk::IDataAbilityObserver> dataObserver(new (std::nothrow) MockDataAbilityObserverStub());
     EXPECT_FALSE(abilitythread->HandleUnregisterObserver(uri, dataObserver));
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_HandleUnregisterObserver_0100 end";
 }
 
@@ -2072,7 +2072,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_ScheduleRegisterObserver_0100, F
     EXPECT_FALSE(abilitythread->ScheduleRegisterObserver(uri, dataObserver));
     delete dataObserver;
     dataObserver = nullptr;
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_ScheduleRegisterObserver_0100 end";
 }
 
@@ -2094,7 +2094,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_ScheduleRegisterObserver_0200, F
     EXPECT_FALSE(abilitythread->ScheduleRegisterObserver(uri, dataObserver));
     delete dataObserver;
     dataObserver = nullptr;
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_ScheduleRegisterObserver_0200 end";
 }
 
@@ -2114,7 +2114,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_ScheduleUnregisterObserver_0100,
     EXPECT_FALSE(abilitythread->ScheduleUnregisterObserver(uri, dataObserver));
     delete dataObserver;
     dataObserver = nullptr;
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_ScheduleUnregisterObserver_0100 end";
 }
 
@@ -2136,7 +2136,7 @@ HWTEST_F(AbilityThreadTest, AaFwk_AbilityThread_ScheduleUnregisterObserver_0200,
     EXPECT_FALSE(abilitythread->ScheduleUnregisterObserver(uri, dataObserver));
     delete dataObserver;
     dataObserver = nullptr;
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_AbilityThread_ScheduleUnregisterObserver_0200 end";
 }
 
