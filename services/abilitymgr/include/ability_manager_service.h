@@ -357,7 +357,7 @@ public:
      * @param callerToken current caller ability token.
      * @return Returns ERR_OK if success.
      */
-    ErrCode StartUIAbilitiesInSplitWindowMode(int32_t primaryWindowId, const AAFwk::Want &secondaryWant,
+    int32_t StartUIAbilitiesInSplitWindowMode(int32_t primaryWindowId, const AAFwk::Want &secondaryWant,
         sptr<IRemoteObject> callerToken) override;
     /**
      * Start UI abilities simultaneously.

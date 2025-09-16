@@ -1265,6 +1265,443 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, KillProcessWithReason_003, TestSiz
 
 /*
  * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesInSplitWindowMode_001
+ * Function: StartUIAbilitiesInSplitWindowMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowMode SCB false
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesInSplitWindowMode_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowMode_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+
+    int32_t windowId = 1;
+    sptr<IRemoteObject> callerToken = nullptr;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = false;
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesInSplitWindowMode(windowId, want, callerToken),
+        ERR_CAPABILITY_NOT_SUPPORT);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowMode_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesInSplitWindowMode_002
+ * Function: StartUIAbilitiesInSplitWindowMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowMode SUPPORT_LINKAGE_SCENE false
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesInSplitWindowMode_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowMode_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+
+    int32_t windowId = 1;
+    sptr<IRemoteObject> callerToken = nullptr;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().paramGetBoolParameter_ = false;
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesInSplitWindowMode(windowId, want, callerToken),
+        ERR_CAPABILITY_NOT_SUPPORT);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowMode_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesInSplitWindowMode_003
+ * Function: StartUIAbilitiesInSplitWindowMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowMode SUPPORT_LINKAGE_SCENE false
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesInSplitWindowMode_003, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowMode_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    Want want;
+    int32_t windowId = 1;
+    sptr<IRemoteObject> callerToken = nullptr;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().paramGetBoolParameter_ = true;
+    MyStatus::GetInstance().isSystemAppCall_ = false;
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesInSplitWindowMode(windowId, want, callerToken),
+        ERR_NOT_SYSTEM_APP);
+    MyStatus::GetInstance().isSystemAppCall_ = true;
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowMode_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesInSplitWindowMode_004
+ * Function: StartUIAbilitiesInSplitWindowMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowMode callerToken is null
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesInSplitWindowMode_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowMode_004 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+
+    int32_t windowId = 1;
+    sptr<IRemoteObject> callerToken = nullptr;
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().paramGetBoolParameter_ = true;
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesInSplitWindowMode(windowId, want, callerToken),
+        ERR_INVALID_CALLER);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowMode_004 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesInSplitWindowMode_005
+ * Function: StartUIAbilitiesInSplitWindowMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowMode verifyToken failed
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesInSplitWindowMode_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowMode_005 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(mockSubManagersHelper, nullptr);
+    auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
+    EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
+    abilityMs_->subManagersHelper_ = mockSubManagersHelper;
+    abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
+
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+
+    int32_t windowId = 1;
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::EXTENSION);
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().paramGetBoolParameter_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = false;
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesInSplitWindowMode(windowId, want, callerToken),
+        ERR_INVALID_CALLER);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowMode_005 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesInSplitWindowMode_006
+ * Function: StartUIAbilitiesInSplitWindowMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowModeHandleWant failed
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesInSplitWindowMode_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowMode_006 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(mockSubManagersHelper, nullptr);
+    auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
+    EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
+    abilityMs_->subManagersHelper_ = mockSubManagersHelper;
+    abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
+
+    Want want;
+    int32_t windowId = 1;
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::EXTENSION);
+    MyStatus::GetInstance().sbjIsSceneBoardEnabled_ = true;
+    MyStatus::GetInstance().paramGetBoolParameter_ = true;
+    MyStatus::GetInstance().smhVerificationAllToken_ = true;
+    EXPECT_NE(abilityMs_->StartUIAbilitiesInSplitWindowMode(windowId, want, callerToken),
+        ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowMode_006 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesInSplitWindowModeHandleWant_001
+ * Function: StartUIAbilitiesInSplitWindowModeHandleWant
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowModeHandleWant failed
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesInSplitWindowModeHandleWant_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST,
+        "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowModeHandleWant_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    Want want;
+    AbilityRequest abilityRequest;
+    int32_t windowId = 1;
+    int32_t validUserId = abilityMs_->GetValidUserId(DEFAULT_INVAL_VALUE);
+    int32_t appIndex = 0;
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::EXTENSION);
+
+    EXPECT_NE(abilityMs_->StartUIAbilitiesInSplitWindowModeHandleWant(want, callerToken, abilityRequest),
+        ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST,
+        "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowModeHandleWant_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartUIAbilitiesInSplitWindowModeHandleWant_002
+ * Function: StartUIAbilitiesInSplitWindowModeHandleWant
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowModeHandleWant generateRequest
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, StartUIAbilitiesInSplitWindowModeHandleWant_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST,
+        "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowModeHandleWant_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    AbilityRequest abilityRequest;
+    int32_t windowId = 1;
+    int32_t validUserId = abilityMs_->GetValidUserId(DEFAULT_INVAL_VALUE);
+    int32_t appIndex = 0;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+
+    EXPECT_EQ(abilityMs_->StartUIAbilitiesInSplitWindowModeHandleWant(want, callerToken, abilityRequest),
+        RESOLVE_ABILITY_ERR);
+
+    TAG_LOGI(AAFwkTag::TEST,
+        "AbilityManagerServiceThirteenthTest StartUIAbilitiesInSplitWindowModeHandleWant_002 end");
+}
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckWantForSplitMode_001
+ * Function: CheckWantForSplitMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckWantForSplitMode verifyToken failed
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, CheckWantForSplitMode_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckWantForSplitMode_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(mockSubManagersHelper, nullptr);
+    auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
+    EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
+    abilityMs_->subManagersHelper_ = mockSubManagersHelper;
+    abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
+
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    want.SetParam(AAFwk::Want::DESTINATION_PLUGIN_ABILITY, true);
+
+    int32_t windowId = 1;
+    int32_t validUserId = abilityMs_->GetValidUserId(DEFAULT_INVAL_VALUE);
+    int32_t appIndex = 0;
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::EXTENSION);
+
+    EXPECT_EQ(abilityMs_->CheckWantForSplitMode(want, callerToken, validUserId, appIndex),
+        START_UI_ABILITIES_NOT_SUPPORT_START_PLUGIN);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckWantForSplitMode_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckWantForSplitMode_003
+ * Function: CheckWantForSplitMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckWantForSplitMode dlp failed with dlp
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, CheckWantForSplitMode_002, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    auto mockSubManagersHelper = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_NE(mockSubManagersHelper, nullptr);
+    auto mockCurrentUIAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
+    EXPECT_NE(mockCurrentUIAbilityManager, nullptr);
+    abilityMs_->subManagersHelper_ = mockSubManagersHelper;
+    abilityMs_->subManagersHelper_->currentUIAbilityManager_ = mockCurrentUIAbilityManager;
+
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    want.SetParam(DLP_PARAMS_SANDBOX, true);
+    int32_t windowId = 1;
+    int32_t validUserId = abilityMs_->GetValidUserId(DEFAULT_INVAL_VALUE);
+    int32_t appIndex = 0;
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::EXTENSION);
+
+    EXPECT_EQ(abilityMs_->CheckWantForSplitMode(want, callerToken, validUserId, appIndex),
+        START_UI_ABILITIES_NOT_SUPPORT_DLP);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckWantForSplitMode_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckWantForSplitMode_003
+ * Function: CheckWantForSplitMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckWantForSplitMode appCloneIndexError
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, CheckWantForSplitMode_003, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    Want want;
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t windowId = 1;
+    int32_t validUserId = abilityMs_->GetValidUserId(DEFAULT_INVAL_VALUE);
+    int32_t appIndex = 0;
+
+    want.SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, -5);
+
+    EXPECT_EQ(abilityMs_->CheckWantForSplitMode(want, callerToken, validUserId, appIndex),
+        ERR_APP_CLONE_INDEX_INVALID);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckWantForSplitMode_003 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckWantForSplitMode_004
+ * Function: CheckWantForSplitMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckWantForSplitMode ImplicitStartError
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, CheckWantForSplitMode_004, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckWantForSplitMode_004 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    Want want;
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t windowId = 1;
+    int32_t validUserId = abilityMs_->GetValidUserId(DEFAULT_INVAL_VALUE);
+    int32_t appIndex = 0;
+
+    EXPECT_EQ(abilityMs_->CheckWantForSplitMode(want, callerToken, validUserId, appIndex),
+        START_UI_ABILITIES_NOT_SUPPORT_IMPLICIT_START);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckWantForSplitMode_004 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckWantForSplitMode_005
+ * Function: CheckWantForSplitMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckWantForSplitMode createInstance
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, CheckWantForSplitMode_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckWantForSplitMode_005 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    Want want;
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t windowId = 1;
+    int32_t validUserId = abilityMs_->GetValidUserId(DEFAULT_INVAL_VALUE);
+    int32_t appIndex = 0;
+
+    want.SetParam(AAFwk::Want::CREATE_APP_INSTANCE_KEY, true);
+    EXPECT_EQ(abilityMs_->CheckWantForSplitMode(want, callerToken, validUserId, appIndex),
+        START_UI_ABILITIES_NOT_SUPPORT_CREATE_APP_INSTANCE_KEY);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckWantForSplitMode_005 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckWantForSplitMode_006
+ * Function: CheckWantForSplitMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckWantForSplitMode multiInstanceError
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, CheckWantForSplitMode_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckWantForSplitMode_006 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    MyStatus::GetInstance().isSupportMultiInstance_ = false;
+    std::string instanceKey = "MainAbility";
+    want.SetParam(AAFwk::Want::APP_INSTANCE_KEY, instanceKey);
+    int32_t windowId = 1;
+    int32_t validUserId = abilityMs_->GetValidUserId(DEFAULT_INVAL_VALUE);
+    int32_t appIndex = 0;
+    EXPECT_NE(abilityMs_->CheckWantForSplitMode(want, callerToken, validUserId, appIndex),
+        ERR_OK);
+    MyStatus::GetInstance().isSupportMultiInstance_ = true;
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckWantForSplitMode_006 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: CheckWantForSplitMode_007
+ * Function: CheckWantForSplitMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckWantForSplitMode return ok
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, CheckWantForSplitMode_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckWantForSplitMode_007 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+
+    Want want;
+    want.SetElementName("com.ohos.test", "MainAbility");
+    AbilityRequest abilityRequest;
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    EXPECT_NE(abilityRecord, nullptr);
+    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
+    int32_t windowId = 1;
+    int32_t validUserId = abilityMs_->GetValidUserId(DEFAULT_INVAL_VALUE);
+    int32_t appIndex = 0;
+
+    EXPECT_EQ(abilityMs_->CheckWantForSplitMode(want, callerToken, validUserId, appIndex),
+        ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest CheckWantForSplitMode_007 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Name: StartUIAbilities_001
  * Function: StartUIAbilities
  * SubFunction: NA
