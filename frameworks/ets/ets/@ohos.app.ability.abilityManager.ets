@@ -206,11 +206,11 @@ export default namespace abilityManager {
     });
   }
 
-  export function on(type: 'abilityForegroundState', observer: AbilityForegroundStateObserver): void {
+  export function onAbilityForegroundState(observer: AbilityForegroundStateObserver): void {
     abilityManager.nativeOn('abilityForegroundState', observer);
   }
 
-  export function off(type: 'abilityForegroundState', observer?: AbilityForegroundStateObserver): void {
+  export function offAbilityForegroundState(observer?: AbilityForegroundStateObserver): void {
     abilityManager.nativeOff('abilityForegroundState', observer);
   }
 
