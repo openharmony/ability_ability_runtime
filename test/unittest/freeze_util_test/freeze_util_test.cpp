@@ -51,15 +51,17 @@ void FreezeUtilTest::TearDown()
  */
 HWTEST_F(FreezeUtilTest, FreezeUtilTest_001, TestSize.Level1)
 {
-    sptr<IPCObjectStub> token(new IPCObjectStub(u"testStub"));
+    sptr<IPCObjectStub> token = new IPCObjectStub(u"testStub");
     EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(token), "");
+    auto timeStr1 = TimeUtil::DefaultCurrentTimeStr();
     FreezeUtil::GetInstance().AddLifecycleEvent(token, "firstEntry");
-    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(token),
-        TimeUtil::DefaultCurrentTimeStr() + "; " + "firstEntry");
+    std::string expected1 = timeStr1 + "; firstEntry";
+    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(token), expected1);
 
+    auto timeStr2 = TimeUtil::DefaultCurrentTimeStr(); 
     FreezeUtil::GetInstance().AddLifecycleEvent(token, "secondEntry");
-    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(token), TimeUtil::DefaultCurrentTimeStr() + "; " +
-        "firstEntry\n" + TimeUtil::DefaultCurrentTimeStr() + "; " + "secondEntry");
+    std::string expected2 = expected1 + "\n" + timeStr2 + "; secondEntry";
+    EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(token), expected2);
     TAG_LOGI(AAFwkTag::TEST, "FreezeUtilTest_001 is end");
 }
 
