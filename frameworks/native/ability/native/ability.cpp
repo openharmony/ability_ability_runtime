@@ -1743,7 +1743,8 @@ void Ability::DoOnForeground(const Want& want)
 
     TAG_LOGD(AAFwkTag::ABILITY, "sceneFlag:%{public}d", sceneFlag_);
     auto window = abilityWindow_->GetWindow();
-    if (window != nullptr && want.HasParameter(Want::PARAM_RESV_WINDOW_MODE)) {
+    if (window != nullptr && want.HasParameter(Want::PARAM_RESV_WINDOW_MODE) &&
+        !Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto windowMode = want.GetIntParam(Want::PARAM_RESV_WINDOW_MODE,
             AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED);
         window->SetWindowMode(static_cast<Rosen::WindowMode>(windowMode));
