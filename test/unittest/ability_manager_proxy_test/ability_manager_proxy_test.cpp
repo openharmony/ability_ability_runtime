@@ -2868,6 +2868,44 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RestartApp_0100, TestSize.
 
 /*
  * Feature: AbilityManagerService
+ * Function: StartUIAbilitiesInSplitWindowMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowMode
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartUIAbilitiesInSplitWindowMode callerToken nullptr
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUIAbilitiesInSplitWindowMode_001, TestSize.Level1)
+{
+    sptr<IRemoteObject> callerToken = nullptr;
+    int32_t primaryWindowId = 1;
+    AAFwk::Want want;
+    auto res = proxy_->StartUIAbilitiesInSplitWindowMode(primaryWindowId, want, callerToken);
+    EXPECT_EQ(res, INVALID_CALLER_TOKEN);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartUIAbilitiesInSplitWindowMode
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartUIAbilitiesInSplitWindowMode
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartUIAbilities
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUIAbilitiesInSplitWindowMode_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    
+    OHOS::sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    int32_t primaryWindowId = 1;
+    AAFwk::Want want;
+    auto res = proxy_->StartUIAbilitiesInSplitWindowMode(primaryWindowId, want, callerToken);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: StartUIAbilities
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartUIAbilities

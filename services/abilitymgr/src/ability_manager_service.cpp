@@ -2340,13 +2340,11 @@ int32_t AbilityManagerService::CheckWantForSplitMode(const AAFwk::Want &secondar
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUIAbilitiesInSplitWindowMode multi-user non-concurrent unsatisfied");
         return ERR_CROSS_USER;
     }
-#ifdef SUPPORT_SCREEN
     auto element = secondaryWant.GetElement();
     if (element.GetBundleName().empty() || element.GetAbilityName().empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUIAbilitiesInSplitWindowMode not support implicit start");
         return START_UI_ABILITIES_NOT_SUPPORT_IMPLICIT_START;
     }
-#endif
     return ERR_OK;
 }
 
@@ -2423,7 +2421,7 @@ int32_t AbilityManagerService::GenerateAbilityForSplitMode(const AAFwk::Want &se
     return ERR_OK;
 }
 
-ErrCode AbilityManagerService::StartUIAbilitiesInSplitWindowMode(int32_t primaryWindowId,
+int32_t AbilityManagerService::StartUIAbilitiesInSplitWindowMode(int32_t primaryWindowId,
     const AAFwk::Want &secondaryWant, sptr<IRemoteObject> callerToken)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);

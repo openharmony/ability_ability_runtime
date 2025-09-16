@@ -318,14 +318,14 @@ public:
     }
 
     /**
-     * Start ui session ability with sourceWindowId and want.
+     * Start ui session ability with windowId and want.
      *
-     * @param primaryWindowId the id of sourceWindow.
+     * @param primaryWindowId the id of window.
      * @param secondaryWant the want of the ability to start.
      * @param callerToken current caller ability token.
      * @return Returns ERR_OK if success.
      */
-    virtual ErrCode StartUIAbilitiesInSplitWindowMode(int32_t primaryWindowId, const AAFwk::Want &secondaryWant,
+    virtual int32_t StartUIAbilitiesInSplitWindowMode(int32_t primaryWindowId, const AAFwk::Want &secondaryWant,
         sptr<IRemoteObject> callerToken)
     {
         return 0;

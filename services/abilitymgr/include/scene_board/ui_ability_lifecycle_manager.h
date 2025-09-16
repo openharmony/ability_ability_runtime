@@ -443,8 +443,8 @@ private:
     sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest, int32_t requestId);
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo,
         const AbilityRequest &abilityRequest, std::string &errMsg);
-    std::pair<std::vector<sptr<SessionInfo>>, std::vector<Rosen::PendingSessionActivationConfig>>
-        CreateSessionConfigurations(int primaryWindowId, sptr<SessionInfo> sessionInfo);
+    void CreateSessionConfigurations(std::vector<sptr<SessionInfo>> &sessionInfoList, int primaryWindowId,
+        std::vector<Rosen::PendingSessionActivationConfig> &configList, sptr<SessionInfo> sessionInfo);
     int NotifySCBPendingActivationInSplitMode(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest);
     int32_t BatchNotifySCBPendingActivations(const AbilitiesRequest &abilitiesRequest);
     void HandleAbilitiesRequestDone(int32_t requestId, int32_t requestListId, sptr<SessionInfo> sessionInfo);

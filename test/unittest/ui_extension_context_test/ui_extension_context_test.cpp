@@ -184,6 +184,24 @@ HWTEST_F(UIExtensionContextTest, StartAbilityForResult_0200, TestSize.Level1)
 }
 
 /**
+ * @tc.number: StartUIAbilitiesInSplitWindowMode_0100
+ * @tc.name: StartUIAbilitiesInSplitWindowMode
+ * @tc.desc: StartUIAbilitiesInSplitWindowMode.
+ */
+HWTEST_F(UIExtensionContextTest, StartUIAbilitiesInSplitWindowMode_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartUIAbilitiesInSplitWindowMode_0100 start");
+
+    auto context = std::make_shared<UIExtensionContext>();
+    int32_t primaryWindowId = 1;
+    AAFwk::Want want;
+    auto ret = context->StartUIAbilitiesInSplitWindowMode(primaryWindowId, want);
+    EXPECT_NE(ret, ERR_OK);
+
+    TAG_LOGI(AAFwkTag::TEST, "StartUIAbilitiesInSplitWindowMode_0100 end");
+}
+
+/**
  * @tc.number: StartUIAbilities_0100
  * @tc.name: StartUIAbilities
  * @tc.desc: StartUIAbilities.

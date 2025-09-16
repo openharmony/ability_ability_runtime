@@ -505,6 +505,22 @@ HWTEST_F(AbilityManagerClientTest, StartAbilityByCallWithErrMsg_0100, TestSize.L
 }
 
 /**
+ * @tc.name: AbilityManagerClient_StartUIAbilitiesInSplitWindowMode_0100
+ * @tc.desc: StartUIAbilitiesInSplitWindowMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, StartUIAbilitiesInSplitWindowMode_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartUIAbilitiesInSplitWindowMode_0100 start");
+    Want want;
+    int32_t windowID = 1;
+    sptr<IRemoteObject> callToken = sptr<AbilityRuntime::MockIRemoteObject>::MakeSptr();
+    auto result = AbilityManagerClient::GetInstance()->StartUIAbilitiesInSplitWindowMode(windowID, want, callToken);
+    EXPECT_EQ(result, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "startMultiUIAbilities_0100 end");
+}
+
+/**
  * @tc.name: AbilityManagerClient_StartUIAbilities_0100
  * @tc.desc: StartUIAbilities
  * @tc.type: FUNC
