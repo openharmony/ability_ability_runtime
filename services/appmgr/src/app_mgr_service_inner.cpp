@@ -9423,7 +9423,7 @@ int32_t AppMgrServiceInner::RestartExitKeepAliveProcess(const std::vector<ExitRe
         innerService->NotifyStartKeepAliveProcess(exitBundleInfos);
     };
     CHECK_POINTER_AND_RETURN_VALUE(taskHandler_, ERR_NO_INIT);
-    taskHandler_->SubmitTask(StartExitKeepAliveProcessTask, "startexitkeepaliveprocess");
+    AAFwk::TaskHandlerWrap::GetFfrtHandler()->SubmitTask(StartExitKeepAliveProcessTask, "startexitkeepaliveprocess");
     return ERR_OK;
 }
 
