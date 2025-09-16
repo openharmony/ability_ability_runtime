@@ -1059,7 +1059,9 @@ void JsUIAbility::DoOnForeground(const Want &want)
         if (window != nullptr && want.HasParameter(Want::PARAM_RESV_WINDOW_MODE)) {
             auto windowMode = want.GetIntParam(
                 Want::PARAM_RESV_WINDOW_MODE, AAFwk::AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED);
-            window->SetWindowMode(static_cast<Rosen::WindowMode>(windowMode));
+            if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+                window->SetWindowMode(static_cast<Rosen::WindowMode>(windowMode));
+            }
             windowMode_ = windowMode;
             TAG_LOGD(AAFwkTag::UIABILITY, "set window mode: %{public}d", windowMode);
         }
@@ -1155,7 +1157,8 @@ void JsUIAbility::RequestFocus(const Want &want)
         return;
     }
     auto window = scene_->GetMainWindow();
-    if (window != nullptr && want.HasParameter(Want::PARAM_RESV_WINDOW_MODE)) {
+    if (window != nullptr && want.HasParameter(Want::PARAM_RESV_WINDOW_MODE) &&
+        !Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto windowMode = want.GetIntParam(
             Want::PARAM_RESV_WINDOW_MODE, AAFwk::AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_UNDEFINED);
         window->SetWindowMode(static_cast<Rosen::WindowMode>(windowMode));
