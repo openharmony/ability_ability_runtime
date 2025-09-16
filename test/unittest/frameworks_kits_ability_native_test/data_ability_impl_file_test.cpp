@@ -79,7 +79,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetType_001, Function | 
     std::string resStr = dataabilityimpl->GetType(uri);
 
     EXPECT_STREQ("Type1", resStr.c_str());
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_GetType_001 end";
 }
 
@@ -105,7 +105,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetType_002, Function | 
 
     Uri uri("\nullptr");
     EXPECT_STREQ("", dataabilityimpl->GetType(uri).c_str());
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_GetType_002 end";
 }
 
@@ -138,7 +138,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetFileTypes_001, Functi
     if (types.size() != 0) {
         EXPECT_STREQ(mimeTypeFilter.c_str(), types.at(0).c_str());
     }
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_GetFileTypes_001 end";
 }
 
@@ -160,7 +160,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetFileTypes_002, Functi
     types = dataabilityimpl->GetFileTypes(uri, mimeTypeFilter);
     typesSize = types.size();
     EXPECT_EQ(number, typesSize);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_GetFileTypes_002 end";
 }
 
@@ -191,7 +191,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_OpenFile_001, Function |
     value = dataabilityimpl->OpenFile(uri, mode);
 
     EXPECT_EQ(fd, value);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_OpenFile_001 end";
 }
 
@@ -211,7 +211,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_OpenFile_002, Function |
     value = dataabilityimpl->OpenFile(uri, mode);
 
     EXPECT_EQ(fd, value);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_OpenFile_002 end";
 }
 
@@ -242,7 +242,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_OpenRawFile_001, Functio
     value = dataabilityimpl->OpenRawFile(uri, mode);
 
     EXPECT_EQ(fd, value);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_OpenRawFile_001 end";
 }
 
@@ -262,7 +262,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_OpenRawFile_002, Functio
     value = dataabilityimpl->OpenRawFile(uri, mode);
 
     EXPECT_EQ(fd, value);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_OpenRawFile_002 end";
 }
 
@@ -291,7 +291,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Reload_001, Function | M
     bool ret = dataabilityimpl->Reload(uri, extras);
 
     EXPECT_EQ(true, ret);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Reload_001 end";
 }
 
@@ -310,7 +310,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Reload_002, Function | M
     bool ret = dataabilityimpl->Reload(uri, extras);
 
     EXPECT_EQ(false, ret);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Reload_002 end";
 }
 }  // namespace AppExecFwk
