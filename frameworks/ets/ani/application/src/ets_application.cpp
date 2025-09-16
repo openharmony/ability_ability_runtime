@@ -43,7 +43,7 @@ ani_object CreateEmptyContextObject(ani_env *env)
         return nullptr;
     }
     ani_method method = nullptr;
-    status = env->Class_FindMethod(cls, "<ctor>", ":V", &method);
+    status = env->Class_FindMethod(cls, "<ctor>", ":", &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "Class_FindMethod ctor failed status: %{public}d", status);
         return nullptr;
@@ -350,8 +350,8 @@ void ApplicationInit(ani_env *env)
         },
         ani_native_function {
             "nativeCreatePluginModuleContext",
-            "Lapplication/Context/Context;Lstd/core/String;Lstd/core/String;"
-            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{application.Context.Context}C{std.core.String}C{std.core.String}"
+            "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsApplication::CreatePluginModuleContext)
         },
         ani_native_function {

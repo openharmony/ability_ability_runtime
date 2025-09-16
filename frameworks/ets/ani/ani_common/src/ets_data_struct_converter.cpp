@@ -21,11 +21,11 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr const char *CLASSNAME_LAUNCHPARAM = "L@ohos/app/ability/AbilityConstant/LaunchParamImpl;";
-constexpr const char *CLASSNAME_LAUNCHREASON = "L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchReason;";
-constexpr const char *CLASSNAME_LAST_EXITREASION = "L@ohos/app/ability/AbilityConstant/AbilityConstant/LastExitReason;";
+constexpr const char *CLASSNAME_LAUNCHPARAM = "@ohos.app.ability.AbilityConstant.LaunchParamImpl";
+constexpr const char *CLASSNAME_LAUNCHREASON = "@ohos.app.ability.AbilityConstant.AbilityConstant.LaunchReason";
+constexpr const char *CLASSNAME_LAST_EXITREASION = "@ohos.app.ability.AbilityConstant.AbilityConstant.LastExitReason";
 constexpr const char* LAST_EXIT_DETAIL_INFO_IMPL_CLASS_NAME =
-    "L@ohos/app/ability/AbilityConstant/LastExitDetailInfoImpl;";
+    "@ohos.app.ability.AbilityConstant.LastExitDetailInfoImpl";
 ani_string GetAniString(ani_env *env, const std::string &str)
 {
     if (env == nullptr) {
@@ -54,7 +54,7 @@ ani_object CreateEtsLastExitDetailInfo(ani_env* env, const AAFwk::LastExitDetail
         return nullptr;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "status: %{public}d", status);
         return nullptr;
     }
@@ -127,7 +127,7 @@ bool WrapLaunchParam(ani_env *env, const AAFwk::LaunchParam &launchParam, ani_ob
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "null cls");
         return false;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "Failed to find method, status: %{public}d", status);
         return false;
     }

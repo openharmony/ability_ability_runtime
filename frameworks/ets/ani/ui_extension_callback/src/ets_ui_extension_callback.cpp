@@ -31,7 +31,7 @@ constexpr const char* ERROR_MSG_INNER = "Inner error.";
 #endif // SUPPORT_SCREEN
 
 namespace {
-constexpr const char *ABILITY_START_CLASS_NAME = "Lapplication/AbilityStartCallback/AbilityStartCallback;";
+constexpr const char *ABILITY_START_CLASS_NAME = "application.AbilityStartCallback.AbilityStartCallback";
 }
 
 EtsUIExtensionCallback::~EtsUIExtensionCallback()

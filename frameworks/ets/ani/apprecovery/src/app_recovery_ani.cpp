@@ -174,7 +174,7 @@ static void EtsAppRecoveryInit(ani_env *env)
     }
 
     ani_namespace ns;
-    status = env->FindNamespace("L@ohos/app/ability/appRecovery/appRecovery;", &ns);
+    status = env->FindNamespace("@ohos.app.ability.appRecovery.appRecovery", &ns);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::RECOVERY, "FindNamespace appRecovery failed status: %{public}d", status);
         return;
@@ -183,8 +183,8 @@ static void EtsAppRecoveryInit(ani_env *env)
     std::array kitFunctions = {
         ani_native_function {"enableAppRecovery", nullptr, reinterpret_cast<void *>(EnableAppRecovery)},
         ani_native_function {"restartApp", nullptr, reinterpret_cast<void *>(RestartApp)},
-        ani_native_function {"saveAppState", ":Z", reinterpret_cast<void *>(SaveAppState)},
-        ani_native_function {"saveAppState", "Lapplication/UIAbilityContext/UIAbilityContext;:Z",
+        ani_native_function {"saveAppState", ":z", reinterpret_cast<void *>(SaveAppState)},
+        ani_native_function {"saveAppState", "C{application.UIAbilityContext.UIAbilityContext}:z",
             reinterpret_cast<void *>(SaveAppStateWithParam)},
         ani_native_function {"setRestartWant", nullptr, reinterpret_cast<void *>(SetRestartWant)},
     };
