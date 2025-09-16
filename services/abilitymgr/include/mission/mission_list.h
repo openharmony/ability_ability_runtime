@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -212,20 +212,72 @@ public:
      */
     void DumpList(std::vector<std::string> &info, bool isClient);
 
+    /**
+     * @brief Dump mission state by ability record ID
+     * @param info Output vector to store dump results
+     * @param isClient Whether the dump request is from client
+     * @param abilityRecordId The ID of target ability record
+     * @param params Additional parameters for dump
+     */
     void DumpStateByRecordId(
         std::vector<std::string> &info, bool isClient, int32_t abilityRecordId, const std::vector<std::string> &params);
 
+    /**
+     * @brief Get mission by specified flag
+     * @param want The want object containing search conditions
+     * @param flag The flag to identify mission
+     * @return The matched mission, nullptr if not found
+     */
     std::shared_ptr<Mission> GetMissionBySpecifiedFlag(const AAFwk::Want &want, const std::string &flag) const;
 
+    /**
+     * @brief Get mission count by user ID
+     * @param targetUid The user ID to query
+     * @return Number of missions belong to the user
+     */
     int32_t GetMissionCountByUid(int32_t targetUid) const;
+
+    /**
+     * @brief Find the earliest created mission in the list
+     * @param targetMission Output parameter to store the found mission
+     */
     void FindEarliestMission(std::shared_ptr<Mission>& targetMission) const;
+
+    /**
+     * @brief Get total mission count in the list
+     * @return Number of missions in current list
+     */
     int32_t GetMissionCount() const;
+
+    /**
+     * @brief Get active ability list for specific user
+     * @param uid The user ID to query
+     * @param abilityList Output vector to store ability names
+     * @param pid Optional process ID filter, default is NO_PID
+     */
     void GetActiveAbilityList(int32_t uid, std::vector<std::string> &abilityList, int32_t pid = NO_PID);
     
+    /**
+     * @brief Sign restart flag for application
+     * @param uid The user ID of target application
+     * @param instanceKey The instance key to identify application
+     */
     void SignRestartAppFlag(int32_t uid, const std::string &instanceKey);
 
 private:
+    /**
+     * @brief Get the name of mission list type
+     * @return String representation of the mission list type
+     */
     std::string GetTypeName();
+
+    /**
+     * @brief Check if mission matches initial conditions
+     * @param mission The mission to check
+     * @param bundleName Target bundle name to match
+     * @param uid Target user ID to match
+     * @return true if mission matches the conditions, false otherwise
+     */
     bool MatchedInitialMission(const std::shared_ptr<Mission>& mission, const std::string &bundleName, int32_t uid);
 
     MissionListType type_;
