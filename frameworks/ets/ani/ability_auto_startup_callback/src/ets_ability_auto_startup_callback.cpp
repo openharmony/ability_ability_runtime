@@ -24,7 +24,7 @@ namespace AbilityRuntime {
 namespace {
 constexpr const char *METHOD_ON = "onAutoStartupOn";
 constexpr const char *METHOD_OFF = "onAutoStartupOff";
-constexpr const char *SIGNATURE_AUTO_STARTUP_INFO = "Lapplication/AutoStartupInfo/AutoStartupInfo;:V";
+constexpr const char *SIGNATURE_AUTO_STARTUP_INFO = "C{application.AutoStartupInfo.AutoStartupInfo}:";
 } // namespace
 EtsAbilityAutoStartupCallback::EtsAbilityAutoStartupCallback(ani_vm *etsVm) : etsVm_(etsVm) {}
 

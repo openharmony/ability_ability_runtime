@@ -38,9 +38,9 @@ constexpr const char *ERR_MSG_PARAMS_ERROR = "Params error";
 constexpr const char *ERR_MSG_INTERNAL_ERROR = "Internal error";
 
 constexpr const char* PHOTO_EDITOR_EXTENSION_CONTEXT_CLASS_NAME =
-    "Lapplication/PhotoEditorExtensionContext/PhotoEditorExtensionContext;";
+    "application.PhotoEditorExtensionContext.PhotoEditorExtensionContext";
 
-constexpr const char* CLEANER_CLASS_NAME =  "Lapplication/PhotoEditorExtensionContext/Cleaner;";
+constexpr const char* CLEANER_CLASS_NAME =  "application.PhotoEditorExtensionContext.Cleaner";
 
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
@@ -120,7 +120,7 @@ ani_object CreateEtsPhotoEditorExtensionContext(
         return nullptr;
     }
 
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "J:V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Failed to find constructor status: %{public}d", status);
         return nullptr;
     }

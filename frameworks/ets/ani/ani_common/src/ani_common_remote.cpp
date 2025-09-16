@@ -24,7 +24,7 @@ ani_object AniRemote::CreateAniRemoteObject(ani_env *env, const sptr<IRemoteObje
     ani_status status = ANI_ERROR;
     ani_class cls {};
     ani_method method = nullptr;
-    if ((status = env->FindClass("L@ohos/rpc/rpc/RemoteProxy;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("@ohos.rpc.rpc.RemoteProxy", &cls)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ABILITY, "FindClass RemoteProxy: %{public}d", status);
         return nullptr;
     }

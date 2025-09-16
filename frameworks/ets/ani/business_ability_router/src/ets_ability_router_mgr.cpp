@@ -35,7 +35,7 @@ namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 namespace {
 constexpr const char* ETS_DELEGATOR_REGISTRY_NAMESPACE =
-    "L@ohos/app/businessAbilityRouter/businessAbilityRouter;";
+    "@ohos.app.businessAbilityRouter.businessAbilityRouter";
 const std::string TYPE_BUSINESS_AIBILITY_FILTER = "businessAbilityFilter";
 const std::string QUERY_BUSINESS_ABILITY_INFO = "queryBusinessAbilityInfo";
 }
@@ -111,8 +111,8 @@ void EtsBusinessAbilityRouterInit(ani_env *env)
 
     std::array kitFunctions = {
         ani_native_function {"nativeQueryBusinessAbilityInfos",
-            "L@ohos/app/businessAbilityRouter/businessAbilityRouter/BusinessAbilityFilter;"
-            "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            "C{@ohos.app.businessAbilityRouter.businessAbilityRouter.BusinessAbilityFilter}"
+            "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAbilityRouterMgr::QueryBusinessAbilityInfos)},
     };
 

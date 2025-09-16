@@ -37,9 +37,9 @@ namespace {
 constexpr const char* FORM_BINDING_DATA_CLASS_NAME =
     "@ohos.app.form.formBindingData.formBindingData.FormBindingDataInner";
 constexpr const char* RECORD_CLASS_NAME = "escompat.Record";
-constexpr const char *FORM_LOCATION_STATE_ENUM_NAME = "L@ohos/app/form/formInfo/formInfo/FormLocation;";
+constexpr const char *FORM_LOCATION_STATE_ENUM_NAME = "@ohos.app.form.formInfo.formInfo.FormLocation";
 constexpr const char *FORM_LOCATION_CHANGED_STATE_NAME =
-    "Lstd/core/String;L@ohos/app/form/formInfo/formInfo/FormLocation;:V";
+    "C{std.core.String}C{@ohos.app.form.formInfo.formInfo.FormLocation}:";
 }
 
 using namespace arkts::ani_signature;
@@ -605,7 +605,7 @@ bool ETSFormExtension::CreateAndFillRecordObject(ani_env *env, const std::map<in
         return false;
     }
     ani_method recordSetMethod;
-    status = env->Class_FindMethod(recordCls, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", &recordSetMethod);
+    status = env->Class_FindMethod(recordCls, "$_set", "C{std.core.Object}C{std.core.Object}:", &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod set failed: %{public}d", status);
         return false;
@@ -694,7 +694,7 @@ void ETSFormExtension::OnConfigurationUpdated(const AppExecFwk::Configuration &c
     ani_object aniConfiguration = OHOS::AppExecFwk::WrapConfiguration(env, *fullConfig);
     ani_method method = nullptr;
     ani_status status = env->Class_FindMethod(etsAbilityObj_->aniCls,
-        "onConfigurationUpdate", "L@ohos/app/ability/Configuration/Configuration;:V", &method);
+        "onConfigurationUpdate", "C{@ohos.app.ability.Configuration.Configuration}:", &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::FORM_EXT, "Class_FindMethod failed, status: %{public}d", status);
         return;

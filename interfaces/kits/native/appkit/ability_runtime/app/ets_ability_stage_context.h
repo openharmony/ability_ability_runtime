@@ -25,9 +25,9 @@ namespace AppExecFwk {
 class OHOSApplication;
 }
 namespace AbilityRuntime {
-constexpr const char* ETS_ABILITY_STAGE_CONTEXT_CLASS_NAME = "Lapplication/AbilityStageContext/AbilityStageContext;";
-constexpr const char* ETS_ABILITY_STAGE_CLASS_NAME = "L@ohos/app/ability/AbilityStage/AbilityStage;";
-constexpr const char* ETS_HAPMODULEINFO_CLASS_NAME = "LbundleManager/HapModuleInfoInner/HapModuleInfoInner;";
+constexpr const char* ETS_ABILITY_STAGE_CONTEXT_CLASS_NAME = "application.AbilityStageContext.AbilityStageContext";
+constexpr const char* ETS_ABILITY_STAGE_CLASS_NAME = "@ohos.app.ability.AbilityStage.AbilityStage";
+constexpr const char* ETS_HAPMODULEINFO_CLASS_NAME = "bundleManager.HapModuleInfoInner.HapModuleInfoInner";
 
 class Context;
 class ETSAbilityStageContext final {

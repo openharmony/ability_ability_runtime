@@ -30,8 +30,8 @@
 
 namespace OHOS::AppExecFwk {
 namespace {
-constexpr const char *ETS_NATIVE_WANT_PARAMS_CLASS_NAME = "L@ohos/app/ability/Want/NativeWantParams;";
-constexpr const char *ETS_NATIVE_WANT_PARAMS_CLEANER_CLASS_NAME = "L@ohos/app/ability/Want/NativeWantParamsCleaner;";
+constexpr const char *ETS_NATIVE_WANT_PARAMS_CLASS_NAME = "@ohos.app.ability.Want.NativeWantParams";
+constexpr const char *ETS_NATIVE_WANT_PARAMS_CLEANER_CLASS_NAME = "@ohos.app.ability.Want.NativeWantParamsCleaner";
 } // namespace
 
 ani_ref g_booleanCls {};
@@ -352,7 +352,7 @@ bool EtsWantParams::SetArrayString(ani_env *env, const std::string &key, ani_obj
 
     for (int i = 0; i < length; i++) {
         ani_ref itemRef;
-        status = env->Object_CallMethodByName_Ref(value, "$_get", "I:Lstd/core/Object;", &itemRef, i);
+        status = env->Object_CallMethodByName_Ref(value, "$_get", "i:C{std.core.Object}", &itemRef, i);
         if (status != ANI_OK) {
             TAG_LOGE(AAFwkTag::WANT, "status: %{public}d, index: %{public}d", status, i);
             return false;
@@ -810,63 +810,63 @@ ani_status BindNativeFunctions(ani_env *aniEnv)
 
     std::array nativeFuncs = {
         ani_native_function{
-            "nativeCreate", ":J",
+            "nativeCreate", ":l",
             reinterpret_cast<void *>(EtsWantParams::NativeCreate)
         },
         ani_native_function{
-            "nativeSetStringParam", "JLstd/core/String;Lstd/core/String;:Z",
+            "nativeSetStringParam", "lC{std.core.String}C{std.core.String}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetStringParam)
         },
         ani_native_function{
-            "nativeSetDoubleParam", "JLstd/core/String;D:Z",
+            "nativeSetDoubleParam", "lC{std.core.String}d:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetDoubleParam)
         },
         ani_native_function{
-            "nativeSetIntParam", "JLstd/core/String;I:Z",
+            "nativeSetIntParam", "lC{std.core.String}i:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetIntParam)
         },
         ani_native_function{
-            "nativeSetLongParam", "JLstd/core/String;J:Z",
+            "nativeSetLongParam", "lC{std.core.String}l:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetLongParam)
         },
         ani_native_function{
-            "nativeSetBooleanParam", "JLstd/core/String;Z:Z",
+            "nativeSetBooleanParam", "lC{std.core.String}z:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetBooleanParam)
         },
         ani_native_function{
-            "nativeSetWantParams", "JLstd/core/String;J:Z",
+            "nativeSetWantParams", "lC{std.core.String}l:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetWantParams)
         },
         ani_native_function{
-            "nativeSetArrayStringParam", "JLstd/core/String;Lescompat/Array;:Z",
+            "nativeSetArrayStringParam", "lC{std.core.String}C{escompat.Array}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayStringParam)
         },
         ani_native_function{
-            "nativeSetArrayDoubleParam", "JLstd/core/String;Lescompat/Array;:Z",
+            "nativeSetArrayDoubleParam", "lC{std.core.String}C{escompat.Array}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayDoubleParam)
         },
         ani_native_function{
-            "nativeSetArrayIntParam", "JLstd/core/String;Lescompat/Array;:Z",
+            "nativeSetArrayIntParam", "lC{std.core.String}C{escompat.Array}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayIntParam)
         },
         ani_native_function{
-            "nativeSetArrayLongParam", "JLstd/core/String;Lescompat/Array;:Z",
+            "nativeSetArrayLongParam", "lC{std.core.String}C{escompat.Array}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayLongParam)
         },
         ani_native_function{
-            "nativeSetArrayBooleanParam", "JLstd/core/String;Lescompat/Array;:Z",
+            "nativeSetArrayBooleanParam", "lC{std.core.String}C{escompat.Array}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayBooleanParam)
         },
         ani_native_function{
-            "nativeSetArrayWantParams", "JLstd/core/String;Lescompat/Array;:Z",
+            "nativeSetArrayWantParams", "lC{std.core.String}C{escompat.Array}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetArrayWantParams)
         },
         ani_native_function{
-            "nativeSetRemoteObjectParam", "JLstd/core/String;L@ohos/rpc/rpc/RemoteObject;:Z",
+            "nativeSetRemoteObjectParam", "lC{std.core.String}C{@ohos.rpc.rpc.RemoteObject}:z",
             reinterpret_cast<void *>(EtsWantParams::NativeSetRemoteObjectParam)
         },
     };
-    status = aniEnv->Class_BindNativeMethods(nativeWantParamsCls, nativeFuncs.data(), nativeFuncs.size());
+    status = aniEnv->Class_BindStaticNativeMethods(nativeWantParamsCls, nativeFuncs.data(), nativeFuncs.size());
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::WANT, "Class_BindNativeMethods failed status: %{public}d", status);
         return status;
@@ -880,7 +880,7 @@ ani_status BindNativeFunctions(ani_env *aniEnv)
     }
     std::array cleanerNativeFuncs = {
         ani_native_function{
-            "nativeDestroy", "J:V",
+            "nativeDestroy", "l:",
             reinterpret_cast<void *>(EtsWantParams::NativeDestroy)
         },
     };
