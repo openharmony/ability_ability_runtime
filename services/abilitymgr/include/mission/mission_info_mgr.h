@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -194,8 +194,18 @@ public:
      */
     void RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler);
 
+    /**
+     * @brief Handle application uninstallation event
+     * @param bundleName The bundle name of the application being uninstalled
+     * @param uid The user ID associated with the application
+     * @param missions Output list to store affected mission IDs
+     */
     void HandleUnInstallApp(const std::string &bundleName, int32_t uid, std::list<int32_t> &missions);
 
+    /**
+     * @brief Complete the snapshot saving process for a mission
+     * @param missionId The ID of the mission whose snapshot is being saved
+     */
     void CompleteSaveSnapshot(int32_t missionId);
 private:
     /**
@@ -203,9 +213,29 @@ private:
      * @return Returns true if this function is successfully called; returns false otherwise.
      */
     bool LoadAllMissionInfo();
+
+    /**
+     * @brief Internal implementation of adding mission info
+     * @param missionInfo The mission info to be added
+     * @return true if mission info was successfully added, false otherwise
+     * @note This is an internal helper function without thread safety checks
+     */
     bool AddMissionInfoInner(const InnerMissionInfo &missionInfo);
+
+    /**
+     * @brief Find missions matching bundle name and user ID
+     * @param bundleName The target bundle name to match
+     * @param uid The target user ID to match
+     * @param missions Output list to store matched mission IDs
+     * @note This is an internal helper function without thread safety checks
+     */
     void GetMatchedMission(const std::string &bundleName, int32_t uid, std::list<int32_t> &missions);
 #ifdef SUPPORT_SCREEN
+    /**
+     * @brief Create a white pixel map for snapshot
+     * @param snapshot The snapshot object to be initialized with white pixel map
+     * @note This is an internal helper function for screen support scenarios
+     */
     void CreateWhitePixelMap(Snapshot &snapshot) const;
 #endif
 
