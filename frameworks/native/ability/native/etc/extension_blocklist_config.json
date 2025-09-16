@@ -671,6 +671,9 @@
             "core.account.accountPicker",
             "collaboration.devicePicker",
             "collaboration.CollaborationDevicePicker"
+        ],
+        "WebNativeMessagingExtension": [
+            "window"
         ]
     }
 }
