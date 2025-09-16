@@ -105,6 +105,34 @@ HWTEST_F(ApplicationStateFilterTest, ApplicationStateFilter_GetFilterTypeFromApp
 }
 
 /**
+ * @tc.name: ApplicationStateFilter_GetFilterTypeFromExtensionState_001
+ * @tc.desc: GetFilterTypeFromExtensionState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ApplicationStateFilterTest, ApplicationStateFilter_GetFilterTypeFromExtensionState_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ApplicationStateFilter_GetFilterTypeFromExtensionState_001 start";
+    auto result = GetFilterTypeFromExtensionState(ExtensionState::EXTENSION_STATE_CREATE);
+    EXPECT_EQ(result, FilterAbilityStateType::CREATE);
+    GTEST_LOG_(INFO) << "ApplicationStateFilter_GetFilterTypeFromExtensionState_001 end";
+}
+
+/**
+ * @tc.name: ApplicationStateFilter_GetFilterTypeFromExtensionState_002
+ * @tc.desc: GetFilterTypeFromExtensionState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ApplicationStateFilterTest, ApplicationStateFilter_GetFilterTypeFromExtensionState_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "ApplicationStateFilter_GetFilterTypeFromExtensionState_002 start";
+    auto result = GetFilterTypeFromExtensionState(static_cast<ExtensionState>(INVAID_ID));
+    EXPECT_EQ(result, FilterAbilityStateType::NONE);
+    GTEST_LOG_(INFO) << "ApplicationStateFilter_GetFilterTypeFromExtensionState_002 end";
+}
+
+/**
  * @tc.name: ApplicationStateFilter_GetFilterTypeFromAbilityState_001
  * @tc.desc: GetFilterTypeFromAbilityState
  * @tc.type: FUNC
