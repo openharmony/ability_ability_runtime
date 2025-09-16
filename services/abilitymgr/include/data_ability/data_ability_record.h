@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,20 +35,104 @@ public:
     virtual ~DataAbilityRecord();
 
 public:
+    /**
+     * @brief Start loading the data ability
+     * @return ERR_OK if successful, error code otherwise
+     */
     int StartLoading();
+
+    /**
+     * @brief Wait for data ability to finish loading
+     * @param mutex The mutex to lock while waiting
+     * @param timeout Maximum duration to wait
+     * @return ERR_OK if loaded successfully, error code otherwise
+     */
     int WaitForLoaded(ffrt::mutex &mutex, const std::chrono::system_clock::duration &timeout);
+
+    /**
+     * @brief Get the ability scheduler
+     * @return Pointer to the ability scheduler interface
+     */
     sptr<IAbilityScheduler> GetScheduler();
+
+    /**
+     * @brief Attach ability scheduler
+     * @param scheduler The scheduler to attach
+     * @return ERR_OK if successful, error code otherwise
+     */
     int Attach(const sptr<IAbilityScheduler> &scheduler);
+
+    /**
+     * @brief Handle state transition completion
+     * @param state The new state after transition
+     * @return ERR_OK if successful, error code otherwise
+     */
     int OnTransitionDone(int state);
+
+    /**
+     * @brief Add a client to this data ability
+     * @param client The client remote object to add
+     * @param tryBind Whether to try binding to the client
+     * @param isNotHap Whether the client is not a HAP application
+     * @return ERR_OK if successful, error code otherwise
+     */
     int AddClient(const sptr<IRemoteObject> &client, bool tryBind, bool isNotHap);
+
+    /**
+     * @brief Remove a client from this data ability
+     * @param client The client remote object to remove
+     * @param isNotHap Whether the client is not a HAP application
+     * @return ERR_OK if successful, error code otherwise
+     */
     int RemoveClient(const sptr<IRemoteObject> &client, bool isNotHap);
+
+    /**
+     * @brief Remove multiple clients associated with an ability record
+     * @param client The ability record whose clients should be removed (nullptr for all)
+     * @return ERR_OK if successful, error code otherwise
+     */
     int RemoveClients(const std::shared_ptr<AbilityRecord> &client = nullptr);
+
+    /**
+     * @brief Get the count of connected clients
+     * @param client Specific client to count (nullptr for all clients)
+     * @return Number of connected clients
+     */
     size_t GetClientCount(const sptr<IRemoteObject> &client = nullptr) const;
+
+    /**
+     * @brief Kill all bound client processes
+     * @return ERR_OK if successful, error code otherwise
+     */
     int KillBoundClientProcesses();
+
+    /**
+     * @brief Get the ability request that created this record
+     * @return Reference to the ability request
+     */
     const AbilityRequest &GetRequest() const;
+
+    /**
+     * @brief Get the associated ability record
+     * @return Shared pointer to the ability record
+     */
     std::shared_ptr<AbilityRecord> GetAbilityRecord();
+
+    /**
+     * @brief Get the token of this data ability
+     * @return Remote object token
+     */
     sptr<IRemoteObject> GetToken();
+
+    /**
+     * @brief Dump data ability record information to log
+     */
     void Dump() const;
+
+    /**
+     * @brief Dump data ability record information to vector
+     * @param info Output vector to store dump information
+     */
     void Dump(std::vector<std::string> &info) const;
 
 private:
@@ -61,7 +145,18 @@ private:
         bool isNotHap;
         int32_t clientPid = 0;
     };
+    /**
+     * @brief Handle scheduler death event
+     * @param remote Weak pointer to the dead remote object
+     * @note This is called when the ability scheduler dies unexpectedly
+     */
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
+
+    /**
+     * @brief Get the process ID of a dead caller
+     * @param remote Pointer to the dead remote object
+     * @return Process ID of the dead caller
+     */
     int32_t GetDiedCallerPid(const sptr<IRemoteObject> &remote);
 
 private:
