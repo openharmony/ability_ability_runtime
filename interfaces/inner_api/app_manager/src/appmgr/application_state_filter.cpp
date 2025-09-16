@@ -133,6 +133,16 @@ std::unordered_map<AbilityState, FilterAbilityStateType> ABILITY_STATE_TO_FILTER
     {AbilityState::ABILITY_STATE_DISCONNECTED, FilterAbilityStateType::DISCONNECTED},
 };
 
+std::unordered_map<ExtensionState, FilterAbilityStateType> EXTENSION_STATE_TO_FILTER_MAP = {
+    {ExtensionState::EXTENSION_STATE_CREATE, FilterAbilityStateType::CREATE},
+    {ExtensionState::EXTENSION_STATE_READY, FilterAbilityStateType::READY},
+    {ExtensionState::EXTENSION_STATE_CONNECTED, FilterAbilityStateType::CONNECTED},
+    {ExtensionState::EXTENSION_STATE_DISCONNECTED, FilterAbilityStateType::DISCONNECTED},
+    {ExtensionState::EXTENSION_STATE_TERMINATED, FilterAbilityStateType::DESTROY},
+    {ExtensionState::EXTENSION_STATE_FOREGROUND, FilterAbilityStateType::FOREGROUND},
+    {ExtensionState::EXTENSION_STATE_BACKGROUND, FilterAbilityStateType::BACKGROUND},
+};
+
 std::unordered_map<BundleType, FilterBundleType> BUNDLE_TYPE_TO_FILTER_MAP = {
     {BundleType::APP, FilterBundleType::APP},
     {BundleType::ATOMIC_SERVICE, FilterBundleType::ATOMIC_SERVICE},
@@ -160,6 +170,7 @@ FilterProcessStateType GetFilterTypeFromAppProcessState(AppProcessState state)
     TAG_LOGE(AAFwkTag::APPMGR, "get FilterType from AppProcessState failed");
     return FilterProcessStateType::NONE;
 }
+
 FilterAbilityStateType GetFilterTypeFromAbilityState(AbilityState state)
 {
     auto it = ABILITY_STATE_TO_FILTER_MAP.find(state);
@@ -169,6 +180,17 @@ FilterAbilityStateType GetFilterTypeFromAbilityState(AbilityState state)
     TAG_LOGE(AAFwkTag::APPMGR, "get FilterType from AbilityState failed");
     return FilterAbilityStateType::NONE;
 }
+
+FilterAbilityStateType GetFilterTypeFromExtensionState(ExtensionState state)
+{
+    auto it = EXTENSION_STATE_TO_FILTER_MAP.find(state);
+    if (it != EXTENSION_STATE_TO_FILTER_MAP.end()) {
+        return it->second;
+    }
+    TAG_LOGE(AAFwkTag::APPMGR, "get FilterType from AbilityState failed");
+    return FilterAbilityStateType::NONE;
+}
+
 FilterBundleType GetFilterTypeFromBundleType(BundleType state)
 {
     auto it = BUNDLE_TYPE_TO_FILTER_MAP.find(state);
