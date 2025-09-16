@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,17 +99,52 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetSnapshot(int missionId, bool isLowResolution = false) const;
 
+    /**
+     * @brief Get pixel map for specified mission
+     * @param missionId The ID of target mission
+     * @param isLowResolution Whether to get low resolution version
+     * @return Unique pointer to PixelMap object, nullptr if failed
+     * @note This is an internal helper function for screen support scenarios
+     */
     std::unique_ptr<Media::PixelMap> GetPixelMap(int missionId, bool isLowResolution) const;
+
+    /**
+     * @brief Read file content into memory buffer
+     * @param filePath Path to the file to be read
+     * @param bufferSize Output parameter for buffer size
+     * @return Unique pointer to buffer containing file data, nullptr if failed
+     * @note Caller is responsible for managing the returned buffer memory
+     */
     std::unique_ptr<uint8_t[]> ReadFileToBuffer(const std::string &filePath, size_t &bufferSize) const;
 #endif
 
 private:
+    /**
+     * @brief Get the base directory path for mission data storage
+     * @return Full path to the mission data directory
+     */
     std::string GetMissionDataDirPath() const;
 
+    /**
+     * @brief Get the file path for storing mission data
+     * @param missionId The ID of the mission
+     * @return Full path to the mission data file
+     */
     std::string GetMissionDataFilePath(int missionId);
 
+    /**
+     * @brief Get the path for storing mission snapshot
+     * @param missionId The ID of the mission
+     * @param isLowResolution Whether to get path for low resolution snapshot
+     * @return Full path to the snapshot file
+     */
     std::string GetMissionSnapshotPath(int32_t missionId, bool isLowResolution) const;
 
+    /**
+     * @brief Validate the given file name
+     * @param fileName The file name to validate
+     * @return true if the file name is valid, false otherwise
+     */
     bool CheckFileNameValid(const std::string &fileName);
 
 #ifdef SUPPORT_SCREEN

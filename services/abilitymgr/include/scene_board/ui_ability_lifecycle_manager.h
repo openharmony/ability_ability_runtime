@@ -350,119 +350,535 @@ public:
      */
     int32_t UpdateSessionInfoBySCB(std::list<SessionInfo> &sessionInfos, std::vector<int32_t> &sessionIds);
 
+    /**
+     * @brief Register status bar delegate
+     * @param delegate The status bar delegate to register
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate);
 
+    /**
+     * @brief Check if caller is in status bar
+     * @param instanceKey The instance key to check
+     * @return true if caller is in status bar, false otherwise
+     */
     bool IsCallerInStatusBar(const std::string &instanceKey);
 
+    /**
+     * @brief Check if access token is for status bar
+     * @param accessTokenId The access token ID to check
+     * @param isMultiInstance Whether it's a multi-instance scenario
+     * @return true if access token is for status bar, false otherwise
+     */
     bool IsInStatusBar(uint32_t accessTokenId, bool isMultiInstance);
 
+    /**
+     * @brief Check if status bar is supported
+     * @return true if status bar is supported, false otherwise
+     */
     bool IsSupportStatusBar();
 
+    /**
+     * @brief Try to prepare terminate abilities by process IDs
+     * @param pids List of process IDs to terminate
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t TryPrepareTerminateByPids(const std::vector<int32_t>& pids);
 
+    /**
+     * @brief Change ability visibility
+     * @param token Ability token
+     * @param isShow Whether to show the ability
+     * @return ERR_OK if successful, error code otherwise
+     */
     int ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow);
 
+    /**
+     * @brief Change UI ability visibility through SCB
+     * @param sessionInfo Session information
+     * @param isShow Whether to show the ability
+     * @return ERR_OK if successful, error code otherwise
+     */
     int ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessionInfo, bool isShow);
 
+    /**
+     * @brief Get ability records by element name
+     * @param element The element name to search for
+     * @return Vector of matching ability records
+     */
     std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element);
 
+    /**
+     * @brief Get ability record by token
+     * @param token The ability token
+     * @return Shared pointer to the ability record, nullptr if not found
+     */
     std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
 
 #ifdef SUPPORT_GRAPHICS
+    /**
+     * @brief Complete first frame drawing notification
+     * @param token The ability token
+     */
     void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &token);
 #endif
+    /**
+     * @brief Complete first frame drawing notification by session ID
+     * @param sessionId The session ID
+     */
     void CompleteFirstFrameDrawing(int32_t sessionId) const;
 
+    /**
+     * @brief Get ability state by persistent ID
+     * @param persistentId The persistent ID to check
+     * @param state Output parameter for the state
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t GetAbilityStateByPersistentId(int32_t persistentId, bool &state);
 
+    /**
+     * @brief Notify SCB to handle atomic service exception
+     * @param sessionInfo The session information
+     * @param errorCode The error code
+     * @param errorReason The error reason description
+     */
     void NotifySCBToHandleAtomicServiceException(sptr<SessionInfo> sessionInfo, int32_t errorCode,
         const std::string& errorReason);
 
+    /**
+     * @brief Clean up UI ability resources
+     * @param abilityRecord The ability record to clean up
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t CleanUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
+    /**
+     * @brief Enable list for SCB recovery
+     */
     void EnableListForSCBRecovery();
 
+    /**
+     * @brief Set kill flag for permission update
+     * @param accessTokenId The access token ID
+     */
     void SetKillForPermissionUpdateFlag(uint32_t accessTokenId);
 
+    /**
+     * @brief Handle prepare terminate ability completion
+     * @param abilityRecord The ability record
+     * @param isTerminate Whether termination was completed
+     */
     void PrepareTerminateAbilityDone(std::shared_ptr<AbilityRecord> abilityRecord, bool isTerminate);
 
+    /**
+     * @brief Handle try prepare terminate by PIDs completion
+     * @param moduleName The module name
+     * @param prepareTermination The termination state
+     * @param isExist Whether the module exists
+     */
     void TryPrepareTerminateByPidsDone(const std::string &moduleName, int32_t prepareTermination, bool isExist);
     
+    /**
+     * @brief Revoke delegator
+     * @param token The token to revoke
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t RevokeDelegator(sptr<IRemoteObject> token);
 
+    /**
+     * @brief Check if bundle is starting
+     * @param pid The process ID to check
+     * @return true if bundle is starting, false otherwise
+     */
     bool IsBundleStarting(pid_t pid);
 
+    /**
+     * @brief Record PID killing information
+     * @param pid The process ID
+     * @param reason The reason for killing
+     * @param isKillPrecedeStart Whether kill precedes start
+     */
     void RecordPidKilling(pid_t pid, const std::string &reason, bool isKillPrecedeStart);
 
+    /**
+     * @brief Notify SCB about startup exception
+     * @param requestId The request ID
+     * @param reason The exception reason
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t NotifyStartupExceptionBySCB(int32_t requestId, const std::string &reason);
 
 private:
+    /**
+     * @brief Add starting process ID to tracking list
+     * @param pid The process ID to add
+     */
     void AddStartingPid(pid_t pid);
+
+    /**
+     * @brief Remove starting process ID from tracking list
+     * @param pid The process ID to remove
+     */
     void RemoveStartingPid(pid_t pid);
+
+    /**
+     * @brief Mark starting flag in ability request
+     * @param abilityRequest The ability request to modify
+     */
     void MarkStartingFlag(const AbilityRequest &abilityRequest);
+
+    /**
+     * @brief Get persistent ID from ability request
+     * @param abilityRequest The ability request to check
+     * @param reuse Output parameter indicating if ID should be reused
+     * @return The persistent ID
+     */
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse) const;
+
+    /**
+     * @brief Get reused specified persistent ID
+     * @param abilityRequest The ability request to check
+     * @param reuse Output parameter indicating if ID should be reused
+     * @return The persistent ID
+     */
     int32_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
+
+    /**
+     * @brief Get reused standard persistent ID
+     * @param abilityRequest The ability request to check
+     * @param reuse Output parameter indicating if ID should be reused
+     * @return The persistent ID
+     */
     int32_t GetReusedStandardPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
+
+    /**
+     * @brief Get reused collaborator persistent ID
+     * @param abilityRequest The ability request to check
+     * @param reuse Output parameter indicating if ID should be reused
+     * @return The persistent ID
+     */
     int32_t GetReusedCollaboratorPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
+
+    /**
+     * @brief Generate process name for new process mode
+     * @param abilityInfo The ability info to generate name for
+     * @return The generated process name
+     */
     std::string GenerateProcessNameForNewProcessMode(const AppExecFwk::AbilityInfo& abilityInfo);
+
+    /**
+     * @brief Pre-create process name in ability request
+     * @param abilityRequest The ability request to modify
+     */
     void PreCreateProcessName(AbilityRequest &abilityRequest);
+
+    /**
+     * @brief Update process name in ability record
+     * @param abilityRequest The ability request containing new name
+     * @param abilityRecord The ability record to update
+     */
     void UpdateProcessName(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
+     * @brief Update ability record launch reason
+     * @param abilityRequest The ability request containing launch info
+     * @param abilityRecord The ability record to update
+     */
     void UpdateAbilityRecordLaunchReason(const AbilityRequest &abilityRequest,
         std::shared_ptr<AbilityRecord> &abilityRecord) const;
+
+    /**
+     * @brief Erase ability record from internal storage
+     * @param abilityRecord The ability record to erase
+     */
     void EraseAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
+     * @brief Dispatch state change to ability
+     * @param abilityRecord The ability record to update
+     * @param state The new state to set
+     * @return ERR_OK if successful, error code otherwise
+     */
     int DispatchState(const std::shared_ptr<AbilityRecord> &abilityRecord, int state);
+
+    /**
+     * @brief Dispatch terminate command to ability
+     * @param abilityRecord The ability record to terminate
+     * @return ERR_OK if successful, error code otherwise
+     */
     int DispatchTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
+     * @brief Dispatch background command to ability
+     * @param abilityRecord The ability record to background
+     * @return ERR_OK if successful, error code otherwise
+     */
     int DispatchBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
+     * @brief Dispatch foreground command to ability
+     * @param abilityRecord The ability record to foreground
+     * @param success Whether foreground operation succeeded
+     * @param state The ability state to set
+     * @return ERR_OK if successful, error code otherwise
+     */
     int DispatchForeground(const std::shared_ptr<AbilityRecord> &abilityRecord, bool success,
         AbilityState state = AbilityState::INITIAL);
+
+    /**
+     * @brief Complete foreground success operation
+     * @param abilityRecord The ability record that completed foreground
+     */
     void CompleteForegroundSuccess(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
+     * @brief Handle load timeout for ability
+     * @param ability The ability that timed out
+     */
     void HandleLoadTimeout(const std::shared_ptr<AbilityRecord> &ability);
+
+    /**
+     * @brief Handle foreground failed for ability
+     * @param ability The ability that failed foreground
+     * @param state The ability state to set
+     */
     void HandleForegroundFailed(const std::shared_ptr<AbilityRecord> &ability,
         AbilityState state = AbilityState::INITIAL);
+
+    /**
+     * @brief Handle foreground timeout for ability
+     * @param ability The ability that timed out
+     */
     void HandleForegroundTimeout(const std::shared_ptr<AbilityRecord> &ability);
+
+    /**
+     * @brief Notify SCB to handle ability exception
+     * @param ability The ability with exception
+     * @param errorCode The error code
+     * @param errorReason The error reason
+     * @param needClearCallerLink Whether to clear caller link
+     */
     void NotifySCBToHandleException(const std::shared_ptr<AbilityRecord> &ability, int32_t errorCode,
         const std::string& errorReason, bool needClearCallerLink = true);
+
+    /**
+     * @brief Move ability to background state
+     * @param abilityRecord The ability record to move
+     */
     void MoveToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
+     * @brief Complete background operation for ability
+     * @param abilityRecord The ability that completed background
+     */
     void CompleteBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
+     * @brief Print timeout log message
+     * @param ability The ability that timed out
+     * @param msgId The message ID
+     * @param isHalf Whether it's a half timeout
+     */
     void PrintTimeOutLog(std::shared_ptr<AbilityRecord> ability, uint32_t msgId, bool isHalf = false);
+
+    /**
+     * @brief Delay complete terminate operation
+     * @param abilityRecord The ability record to terminate
+     */
     void DelayCompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
+     * @brief Complete terminate operation
+     * @param abilityRecord The ability record to terminate
+     */
     void CompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
+     * @brief Complete terminate operation with lock
+     * @param abilityRecord The ability record to terminate
+     */
     void CompleteTerminateLocked(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
+     * @brief Check if token is contained in internal storage
+     * @param token The token to check
+     * @return true if contained, false otherwise
+     */
     bool IsContainsAbilityInner(const sptr<IRemoteObject> &token) const;
+
+    /**
+     * @brief Check ability properties against request
+     * @param abilityRecord The ability record to check
+     * @param abilityRequest The ability request to compare
+     * @param launchMode The launch mode to verify
+     * @return true if properties match, false otherwise
+     */
     bool CheckProperties(const std::shared_ptr<AbilityRecord> &abilityRecord, const AbilityRequest &abilityRequest,
         AppExecFwk::LaunchMode launchMode) const;
+
+    /**
+     * @brief Notify ability token change
+     * @param token The new token
+     * @param abilityRequest The ability request containing change
+     */
     void NotifyAbilityToken(const sptr<IRemoteObject> &token, const AbilityRequest &abilityRequest) const;
+
+    /**
+     * @brief Prepare to close UI ability
+     * @param abilityRecord The ability to close
+     * @param resultCode The result code
+     * @param resultWant The result want
+     * @param isClearSession Whether to clear session
+     */
     void PrepareCloseUIAbility(std::shared_ptr<AbilityRecord> abilityRecord,
         int resultCode, const Want *resultWant, bool isClearSession);
+
+    /**
+     * @brief Close UI ability internal implementation
+     * @param abilityRecord The ability to close
+     * @return ERR_OK if successful, error code otherwise
+     */
     int CloseUIAbilityInner(std::shared_ptr<AbilityRecord> abilityRecord);
+
+    /**
+     * @brief Return to caller ability with result (locked)
+     * @param currentSessionInfo Current session info
+     * @param callerAbilityRecord The caller ability record
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t BackToCallerAbilityWithResultLocked(sptr<SessionInfo> currentSessionInfo,
         std::shared_ptr<AbilityRecord> callerAbilityRecord);
 
     // byCall
+    /**
+     * @brief Call ability with lock held
+     * @param abilityRequest The ability request
+     * @param errMsg Output parameter for error message
+     * @return ERR_OK if successful, error code otherwise
+     */
     int CallAbilityLocked(const AbilityRequest &abilityRequest, std::string &errMsg);
+
+    /**
+     * @brief Create session info for ability
+     * @param abilityRequest The ability request
+     * @param requestId The request ID
+     * @return Newly created session info
+     */
     sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest, int32_t requestId);
+
+    /**
+     * @brief Notify SCB about pending activation
+     * @param sessionInfo The session info
+     * @param abilityRequest The ability request
+     * @param errMsg Output parameter for error message
+     * @return ERR_OK if successful, error code otherwise
+     */
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo,
         const AbilityRequest &abilityRequest, std::string &errMsg);
     void CreateSessionConfigurations(std::vector<sptr<SessionInfo>> &sessionInfoList, int primaryWindowId,
         std::vector<Rosen::PendingSessionActivationConfig> &configList, sptr<SessionInfo> sessionInfo);
+
+    /**
+     * @brief Notify SCB about pending activation in split mode
+     * @param sessionInfo The session info
+     * @param abilityRequest The ability request
+     * @return ERR_OK if successful, error code otherwise
+     */
     int NotifySCBPendingActivationInSplitMode(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest);
+
+    /**
+     * @brief Batch notify SCB about pending activations
+     * @param abilitiesRequest The abilities request
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t BatchNotifySCBPendingActivations(const AbilitiesRequest &abilitiesRequest);
+
+    /**
+     * @brief Handle abilities request completion
+     * @param requestId The request ID
+     * @param requestListId The request list ID
+     * @param sessionInfo The session info
+     */
     void HandleAbilitiesRequestDone(int32_t requestId, int32_t requestListId, sptr<SessionInfo> sessionInfo);
+
+    /**
+     * @brief Check if ability is hook module
+     * @param abilityRequest The ability request
+     * @return true if hook module, false otherwise
+     */
     bool IsHookModule(const AbilityRequest &abilityRequest) const;
+
+    /**
+     * @brief Resolve ability request
+     * @param targetAbility The target ability
+     * @param abilityRequest The ability request
+     * @return ERR_OK if successful, error code otherwise
+     */
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
+
+    /**
+     * @brief Get ability records by name (internal)
+     * @param element The element name
+     * @return Vector of matching ability records
+     */
     std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element);
+
+    /**
+     * @brief Handle foreground collaboration
+     * @param abilityRequest The ability request
+     * @param abilityRecord The ability record
+     */
     void HandleForegroundCollaborate(const AbilityRequest &abilityRequest,
         std::shared_ptr<AbilityRecord> abilityRecord);
 
+    /**
+     * @brief Move ability to front
+     * @param specifiedRequest The specified request
+     * @param abilityRecord The ability record
+     * @param callerAbility The caller ability
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t MoveAbilityToFront(const SpecifiedRequest &specifiedRequest,
         const std::shared_ptr<AbilityRecord> abilityRecord, std::shared_ptr<AbilityRecord> callerAbility);
+
+    /**
+     * @brief Send session info to SCB in split mode
+     * @param primaryWindowId The primary window ID
+     * @param callerAbility The caller ability
+     * @param sessionInfo The session info
+     * @return ERR_OK if successful, error code otherwise
+     */
     int SendSessionInfoToSCBInSplitMode(int primaryWindowId, std::shared_ptr<AbilityRecord> callerAbility,
         sptr<SessionInfo> sessionInfo);
+
+    /**
+     * @brief Send session info to SCB
+     * @param callerAbility The caller ability
+     * @param sessionInfo The session info
+     * @return ERR_OK if successful, error code otherwise
+     */
     int SendSessionInfoToSCB(std::shared_ptr<AbilityRecord> &callerAbility, sptr<SessionInfo> &sessionInfo);
+
+    /**
+     * @brief Start ability by specified request
+     * @param specifiedRequest The specified request
+     * @param callerAbility The caller ability
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t StartAbilityBySpecifed(const SpecifiedRequest &specifiedRequest,
         std::shared_ptr<AbilityRecord> callerAbility);
 
+    /**
+     * @brief Set last exit reason for ability
+     * @param abilityRecord The ability record
+     */
     void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord) const;
+
+    /**
+     * @brief Set receiver info for ability
+     * @param abilityRequest The ability request
+     * @param abilityRecord The ability record
+     */
     void SetReceiverInfo(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord) const;
 
     /**
@@ -475,57 +891,313 @@ private:
     std::vector<sptr<IRemoteObject>> PrepareTerminateAppAndGetRemaining(
         int32_t pid, const std::vector<sptr<IRemoteObject>> &tokens);
 
+    /**
+     * @brief Get content and type ID for message
+     * @param msgId The message ID
+     * @param msgContent Output parameter for message content
+     * @param typeId Output parameter for type ID
+     * @return true if successful, false otherwise
+     */
     bool GetContentAndTypeId(uint32_t msgId, std::string &msgContent, int &typeId) const;
+
+    /**
+     * @brief Send ability event
+     * @param abilityInfo The ability info
+     * @param reason The event reason
+     */
     void SendAbilityEvent(const AppExecFwk::AbilityInfo &abilityInfo, const std::string &reason) const;
 
+    /**
+     * @brief Check session info validity
+     * @param sessionInfo The session info to check
+     * @return true if valid, false otherwise
+     */
     bool CheckSessionInfo(sptr<SessionInfo> sessionInfo) const;
+
+    /**
+     * @brief Create ability record
+     * @param abilityRequest The ability request
+     * @param sessionInfo The session info
+     * @return Newly created ability record
+     */
     std::shared_ptr<AbilityRecord> CreateAbilityRecord(AbilityRequest &abilityRequest,
         sptr<SessionInfo> sessionInfo) const;
+
+    /**
+     * @brief Add caller record to ability
+     * @param abilityRequest The ability request
+     * @param sessionInfo The session info
+     * @param uiAbilityRecord The UI ability record
+     */
     void AddCallerRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         std::shared_ptr<AbilityRecord> uiAbilityRecord) const;
+
+    /**
+     * @brief Send key event for ability
+     * @param abilityRequest The ability request
+     */
     void SendKeyEvent(const AbilityRequest &abilityRequest) const;
+
+    /**
+     * @brief Check PID validity
+     * @param abilityRecord The ability record
+     * @param pid The PID to check
+     * @return true if valid, false otherwise
+     */
     bool CheckPid(const std::shared_ptr<AbilityRecord> abilityRecord, const int32_t pid) const;
+
+    /**
+     * @brief Get status bar delegate manager
+     * @return Shared pointer to status bar delegate manager
+     */
     std::shared_ptr<StatusBarDelegateManager> GetStatusBarDelegateManager();
+
+    /**
+     * @brief Process ability attachment
+     * @param abilityRecord The ability record
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t DoProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord);
+
+    /**
+     * @brief Batch close UI abilities
+     * @param abilitySet The set of abilities to close
+     */
     void BatchCloseUIAbility(const std::unordered_set<std::shared_ptr<AbilityRecord>>& abilitySet);
+
+    /**
+     * @brief Terminate session for ability
+     * @param abilityRecord The ability record
+     */
     void TerminateSession(std::shared_ptr<AbilityRecord> abilityRecord);
+
+    /**
+     * @brief Start ability with persistent ID (distributed)
+     * @param abilityRequest The ability request
+     * @param persistentId The persistent ID
+     * @return ERR_OK if successful, error code otherwise
+     */
     int StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest, int32_t persistentId);
+
+    /**
+     * @brief Check if caller is from background
+     * @param callerAbility The caller ability
+     * @param sessionInfo The session info
+     */
     void CheckCallerFromBackground(std::shared_ptr<AbilityRecord> callerAbility, sptr<SessionInfo> &sessionInfo);
+
+    /**
+     * @brief Process caller attachment
+     * @param abilityRecord The ability record
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t DoCallerProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord);
+
+    /**
+     * @brief Process caller detachment
+     * @param abilityRecord The ability record
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t DoCallerProcessDetachment(std::shared_ptr<AbilityRecord> abilityRecord);
+
+    /**
+     * @brief Generate ability record from request
+     * @param abilityRequest The ability request
+     * @param sessionInfo The session info
+     * @param isColdStart Output parameter indicating cold start
+     * @return Newly created ability record
+     */
     std::shared_ptr<AbilityRecord> GenerateAbilityRecord(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         bool &isColdStart);
+
+    /**
+     * @brief Find ability record from temporary map
+     * @param abilityRequest The ability request
+     * @return Found ability record or nullptr
+     */
     std::shared_ptr<AbilityRecord> FindRecordFromTmpMap(const AbilityRequest &abilityRequest);
+
+    /**
+     * @brief Post call timeout task
+     * @param requestId The request ID to timeout
+     */
     void PostCallTimeoutTask(int32_t requestId);
+
+    /**
+     * @brief Add caller timestamp
+     * @param callerUid The caller UID
+     * @return true if added, false if rate limited
+     */
     bool AddStartCallerTimestamp(int32_t callerUid);
+
+    /**
+     * @brief Find ability record from session map
+     * @param abilityRequest The ability request
+     * @return Found ability record or nullptr
+     */
     std::shared_ptr<AbilityRecord> FindRecordFromSessionMap(const AbilityRequest &abilityRequest);
+
+    /**
+     * @brief Add specified request to queue
+     * @param request The specified request
+     */
     void AddSpecifiedRequest(std::shared_ptr<SpecifiedRequest> request);
+
+    /**
+     * @brief Start processing specified request
+     * @param specifiedRequest The request to process
+     */
     void StartSpecifiedRequest(SpecifiedRequest &specifiedRequest);
+
+    /**
+     * @brief Pop next specified request by ID
+     * @param requestId The request ID
+     * @return The specified request or nullptr
+     */
     std::shared_ptr<SpecifiedRequest> PopAndGetNextSpecified(int32_t requestId);
+
+    /**
+     * @brief Check if specified module is loaded
+     * @param abilityRequest The ability request
+     * @param isSpecifiedProcess Whether it's specified process
+     * @param isDebug Output parameter for debug state
+     * @return true if module loaded, false otherwise
+     */
     bool IsSpecifiedModuleLoaded(const AbilityRequest &abilityRequest, bool isSpecifiedProcess, bool &isDebug);
+
+    /**
+     * @brief Handle cold start for specified ability
+     * @param abilityRequest The ability request
+     * @param sessionInfo The session info
+     * @param sceneFlag The scene flag
+     * @return true if handled, false otherwise
+     */
     bool HandleStartSpecifiedCold(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag);
+
+    /**
+     * @brief Handle cold accept want completion
+     * @param want The accepted want
+     * @param flag The completion flag
+     * @param specifiedRequest The specified request
+     * @return true if handled, false otherwise
+     */
     bool HandleColdAcceptWantDone(const AAFwk::Want &want, const std::string &flag,
         const SpecifiedRequest &specifiedRequest);
+
+    /**
+     * @brief Handle legacy accept want completion
+     * @param specifiedRequest The specified request
+     * @param flag The completion flag
+     * @param want The accepted want
+     */
     void HandleLegacyAcceptWantDone(SpecifiedRequest &specifiedRequest,
         const std::string &flag, const AAFwk::Want &want);
+
+    /**
+     * @brief Get specified request by ID
+     * @param requestId The request ID
+     * @return The specified request or nullptr
+     */
     std::shared_ptr<SpecifiedRequest> GetSpecifiedRequest(int32_t requestId);
+
+    /**
+     * @brief Check prepare terminate tokens
+     * @param tokens The tokens to check
+     * @param tokenId Output parameter for token ID
+     * @param tokensPerModuleName Output parameter for grouped tokens
+     * @return true if valid, false otherwise
+     */
     bool CheckPrepareTerminateTokens(const std::vector<sptr<IRemoteObject>> &tokens,
         uint32_t &tokenId, std::map<std::string, std::vector<sptr<IRemoteObject>>> &tokensPerModuleName);
+
+    /**
+     * @brief Handle ability stage prepare termination timeout
+     * @param pid The process ID
+     * @param moduleName The module name
+     * @param tokens The ability tokens
+     */
     void HandleAbilityStageOnPrepareTerminationTimeout(int32_t pid, const std::string &moduleName,
         const std::vector<sptr<IRemoteObject>> &tokens);
+
+    /**
+     * @brief Prepare terminate app and get remaining tokens (internal)
+     * @param pid The process ID
+     * @param moduleName The module name
+     * @param tokens The ability tokens
+     * @return Vector of remaining tokens
+     */
     std::vector<sptr<IRemoteObject>> PrepareTerminateAppAndGetRemainingInner(int32_t pid, const std::string &moduleName,
         const std::vector<sptr<IRemoteObject>> &tokens);
+
+    /**
+     * @brief Cancel prepare terminate operation
+     * @param abilityRecord The ability record
+     */
     void CancelPrepareTerminate(std::shared_ptr<AbilityRecord> abilityRecord);
+
+    /**
+     * @brief Update specified flag for ability
+     * @param abilityRequest The ability record
+     * @param flag The flag to set
+     * @return true if updated, false otherwise
+     */
     bool UpdateSpecifiedFlag(std::shared_ptr<AbilityRecord> abilityRequest, const std::string &flag);
+
+    /**
+     * @brief Process cold start branch
+     * @param abilityRequest The ability request
+     * @param sessionInfo The session info
+     * @param uiAbilityRecord The UI ability record
+     * @param isColdStart Whether it's cold start
+     * @return true if processed, false otherwise
+     */
     bool ProcessColdStartBranch(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo,
         std::shared_ptr<AbilityRecord> uiAbilityRecord, bool isColdStart);
+
+    /**
+     * @brief Try process hook module
+     * @param specifiedRequest The specified request
+     * @param isHookModule Whether it's hook module
+     * @return true if processed, false otherwise
+     */
     bool TryProcessHookModule(SpecifiedRequest &specifiedRequest, bool isHookModule);
+
+    /**
+     * @brief Check if request is for specified process
+     * @param abilityRequest The ability request
+     * @return true if specified process request, false otherwise
+     */
     bool IsStartSpecifiedProcessRequest(const AbilityRequest &abilityRequest);
+
+    /**
+     * @brief Start specified process request
+     * @param abilityRequest The ability request
+     * @param abilitiesRequest The abilities request
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t StartSpecifiedProcessRequest(const AbilityRequest &abilityRequest,
         std::shared_ptr<AbilitiesRequest> abilitiesRequest);
+
+    /**
+     * @brief Handle UI ability request list
+     * @param abilityRequestList The ability request list
+     * @return ERR_OK if successful, error code otherwise
+     */
     int32_t HandleUIAbilityRequestList(std::vector<AbilityRequest> &abilityRequestList);
+
+    /**
+     * @brief Handle abilities normal session info
+     * @param abilityRequest The ability request
+     * @param abilitiesRequest The abilities request
+     * @param requestId The request ID
+     */
     void HandleAbilitiesNormalSessionInfo(AbilityRequest &abilityRequest,
         std::shared_ptr<AbilitiesRequest> abilitiesRequest, int32_t requestId);
+
+    /**
+     * @brief Remove instance key from ability request
+     * @param abilityRequest The ability request
+     */
     void RemoveInstanceKey(const AbilityRequest &abilityRequest) const;
 
     int32_t userId_ = -1;
