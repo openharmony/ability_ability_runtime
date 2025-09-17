@@ -375,6 +375,7 @@ void AppScheduler::OnAppStateChanged(const AppExecFwk::AppProcessData &appData)
     info.appIndex = appData.appIndex;
     info.instanceKey = appData.instanceKey;
     info.bundleName = appData.bundleName;
+    info.userId = appData.uid / BASE_USER_RANGE;
     callback->OnAppStateChanged(info);
 }
 

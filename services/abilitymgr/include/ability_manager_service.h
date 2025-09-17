@@ -1072,8 +1072,6 @@ public:
     virtual int ReleaseCall(
         const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element) override;
 
-    std::list<std::shared_ptr<ConnectionRecord>> GetConnectRecordListByCallback(sptr<IAbilityConnection> callback);
-
     void OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRecord);
     void OnCallConnectDied(std::shared_ptr<CallRecord> callRecord);
     void HandleLoadTimeOut(int64_t abilityRecordId, bool isHalf = false, bool isExtension = false);
@@ -2283,7 +2281,6 @@ private:
 
     bool CheckIfOperateRemote(const Want &want);
     std::string AnonymizeDeviceId(const std::string& deviceId);
-    bool VerificationToken(const sptr<IRemoteObject> &token);
     void RequestPermission(const Want *resultWant);
 
     bool CheckIsRemote(const std::string& deviceId);
@@ -2489,9 +2486,10 @@ private:
      * Check if Caller is allowed to start other Extension(Stage).
      *
      * @param abilityRequest, abilityRequest.
+     * @param validUserId, Valid user id.
      * @return Returns whether the caller is allowed to start OtherExtension.
      */
-    int CheckCallOtherExtensionPermission(const AbilityRequest &abilityRequest);
+    int CheckCallOtherExtensionPermission(const AbilityRequest &abilityRequest, int32_t validUserId = INVALID_USER_ID);
 
     /**
      * Check if Caller is allowed to start ServiceAbility(FA).
@@ -2523,9 +2521,10 @@ private:
      * Consider expanding it to table-driven in the future.
      *
      * @param abilityRequest The ability request.
+     * @param validUserId, Valid user id.
      * @return Returns ERR_OK when allowed, others when check failed.
      */
-    int CheckUIExtensionPermission(const AbilityRequest &abilityRequest);
+    int CheckUIExtensionPermission(const AbilityRequest &abilityRequest, int32_t validUserId);
 
     /**
      * @brief Check CallerInfoQueryExtension permission
@@ -2679,7 +2678,7 @@ private:
     bool CheckUIExtensionCallerIsUIAbility(const AbilityRequest &abilityRequest);
     std::shared_ptr<AbilityRecord> GetUIExtensionRootCaller(const sptr<IRemoteObject> token, int32_t userId);
 
-    bool CheckUIExtensionCallerPidByHostWindowId(const AbilityRequest &abilityRequest);
+    bool CheckUIExtensionCallerPidByHostWindowId(const AbilityRequest &abilityRequest, int32_t validUserId);
 
     int CheckExtensionCallPermission(const Want& want, const AbilityRequest& abilityRequest, uint32_t specifyTokenId);
 

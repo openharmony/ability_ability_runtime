@@ -2388,7 +2388,7 @@ void AbilityConnectManager::OnLoadAbilityFailed(std::shared_ptr<AbilityRecord> a
     HandleStartTimeoutTask(abilityRecord);
 }
 
-void AbilityConnectManager::OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId)
+void AbilityConnectManager::OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     CHECK_POINTER(abilityRecord);
     TAG_LOGI(AAFwkTag::EXT, "on ability died: %{public}s", abilityRecord->GetURI().c_str());
@@ -2410,10 +2410,10 @@ void AbilityConnectManager::OnAbilityDied(const std::shared_ptr<AbilityRecord> &
         taskHandler_->CancelTask("terminate_" + std::to_string(abilityRecord->GetAbilityRecordId()));
     }
     if (taskHandler_) {
-        auto task = [abilityRecord, connectManagerWeak = weak_from_this(), currentUserId]() {
+        auto task = [abilityRecord, connectManagerWeak = weak_from_this()]() {
             auto connectManager = connectManagerWeak.lock();
             CHECK_POINTER(connectManager);
-            connectManager->HandleAbilityDiedTask(abilityRecord, currentUserId);
+            connectManager->HandleAbilityDiedTask(abilityRecord);
         };
         taskHandler_->SubmitTask(task, TASK_ON_ABILITY_DIED);
     }
@@ -2521,7 +2521,7 @@ void AbilityConnectManager::ClearPreloadUIExtensionRecord(const std::shared_ptr<
     uiExtensionAbilityRecordMgr_->RemovePreloadUIExtensionRecordById(extensionRecordMapKey, extensionRecordId);
 }
 
-void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId)
+void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     CHECK_POINTER(abilityRecord);
     auto abilityInfo = abilityRecord->GetAbilityInfo();
@@ -2567,7 +2567,7 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
         return;
     }
     if (IsNeedToRestart(abilityRecord, abilityInfo.bundleName, abilityInfo.name)) {
-        RestartAbility(abilityRecord, currentUserId);
+        RestartAbility(abilityRecord, userId_);
     }
 }
 
@@ -2623,8 +2623,7 @@ void AbilityConnectManager::DisconnectBeforeCleanup()
     TAG_LOGI(AAFwkTag::EXT, "cleanup end");
 }
 
-void AbilityConnectManager::HandleAbilityDiedTask(
-    const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId)
+void AbilityConnectManager::HandleAbilityDiedTask(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     TAG_LOGD(AAFwkTag::EXT, "called");
     std::lock_guard guard(serialMutex_);
@@ -2668,7 +2667,7 @@ void AbilityConnectManager::HandleAbilityDiedTask(
     }
 
     if (IsAbilityNeedKeepAlive(abilityRecord)) {
-        KeepAbilityAlive(abilityRecord, currentUserId);
+        KeepAbilityAlive(abilityRecord);
     } else {
         HandleNotifyAssertFaultDialogDied(abilityRecord);
     }
