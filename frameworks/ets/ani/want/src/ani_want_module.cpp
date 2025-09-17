@@ -22,9 +22,11 @@
 #include "double_wrapper.h"
 #include "hilog_tag_wrapper.h"
 #include "int_wrapper.h"
+#include "ipc_skeleton.h"
 #include "long_wrapper.h"
 #include "remote_object_wrapper.h"
 #include "string_wrapper.h"
+#include "tokenid_kit.h"
 #include "want_params.h"
 #include "want_params_wrapper.h"
 
@@ -614,6 +616,12 @@ ani_boolean EtsWantParams::NativeSetRemoteObjectParam(ani_env *env, ani_object, 
     TAG_LOGD(AAFwkTag::WANT, "call");
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::WANT, "null env");
+        return false;
+    }
+
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGW(AAFwkTag::WANT, "not system app");
         return false;
     }
 
