@@ -92,7 +92,8 @@ HWTEST_F(AbilityInterceptorSecondTest, DisposedRuleInterceptor_001, TestSize.Lev
     want.SetElement(element);
     AppExecFwk::DisposedRule disposedRule;
     disposedRule.disposedType = AppExecFwk::DisposedType::BLOCK_ABILITY;
-    bool result = executer->CheckDisposedRule(want, disposedRule);
+    std::vector<AppExecFwk::DisposedRule> rules = { disposedRule };
+    bool result = executer->FindBlockDisposedRule(want, rules, disposedRule);
     EXPECT_EQ(result, true);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
@@ -113,7 +114,8 @@ HWTEST_F(AbilityInterceptorSecondTest, DisposedRuleInterceptor_002, TestSize.Lev
     AppExecFwk::DisposedRule disposedRule;
     disposedRule.disposedType = AppExecFwk::DisposedType::BLOCK_ABILITY;
     disposedRule.controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
-    bool result = executer->CheckDisposedRule(want, disposedRule);
+    std::vector<AppExecFwk::DisposedRule> rules = { disposedRule };
+    bool result = executer->FindBlockDisposedRule(want, rules, disposedRule);
     EXPECT_EQ(result, false);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
@@ -243,56 +245,12 @@ HWTEST_F(AbilityInterceptorSecondTest, DisposedRuleInterceptor_008, TestSize.Lev
     DisposedRule disposedRule;
     disposedRule.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
     disposedRule.controlType == AppExecFwk::ControlType::DISALLOWED_LIST;
-    executer->CheckDisposedRule(want, disposedRule);
-    bool result = executer->CheckControl(want, userId, disposedRule, appIndex);
-    EXPECT_EQ(result, false);
+    std::vector<AppExecFwk::DisposedRule> rules = { disposedRule };
+    bool result = executer->FindBlockDisposedRule(want, rules, disposedRule);
+    EXPECT_TRUE(result);
+    result = executer->CheckControl(want, userId, disposedRule, appIndex);
+    EXPECT_FALSE(result);
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
-}
-
-/**
- * @tc.name: AbilityInterceptorSecondTest_DisposedRuleInterceptor_009
- * @tc.desc: DisposedRuleInterceptor
- * @tc.type: FUNC
- * @tc.require: No
- */
-HWTEST_F(AbilityInterceptorSecondTest, DisposedRuleInterceptor_009, TestSize.Level1)
-{
-    std::shared_ptr<DisposedRuleInterceptor> executer = std::make_shared<DisposedRuleInterceptor>();
-    ASSERT_NE(executer, nullptr);
-    std::string bundleName = "interceptor_callerBundleName";
-    Want want;
-    want.SetBundle(bundleName);
-    int32_t userId = 10;
-    int32_t appIndex = 10000;
-    DisposedRule disposedRule;
-    disposedRule.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
-    disposedRule.controlType == AppExecFwk::ControlType::DISALLOWED_LIST;
-    executer->CheckDisposedRule(want, disposedRule);
-    bool result = executer->CheckControl(want, userId, disposedRule, appIndex);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: AbilityInterceptorSecondTest_DisposedRuleInterceptor_010
- * @tc.desc: DisposedRuleInterceptor
- * @tc.type: FUNC
- * @tc.require: No
- */
-HWTEST_F(AbilityInterceptorSecondTest, DisposedRuleInterceptor_010, TestSize.Level1)
-{
-    std::shared_ptr<DisposedRuleInterceptor> executer = std::make_shared<DisposedRuleInterceptor>();
-    ASSERT_NE(executer, nullptr);
-    std::string bundleName = "interceptor_callerBundleName";
-    Want want;
-    want.SetBundle(bundleName);
-    int32_t userId = 10;
-    int32_t appIndex = 1;
-    DisposedRule disposedRule;
-    disposedRule.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
-    disposedRule.controlType == AppExecFwk::ControlType::DISALLOWED_LIST;
-    executer->CheckDisposedRule(want, disposedRule);
-    bool result = executer->CheckControl(want, userId, disposedRule, appIndex);
-    EXPECT_EQ(result, false);
 }
 
 /**

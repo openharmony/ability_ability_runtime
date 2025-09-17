@@ -41,6 +41,7 @@ const std::string ATOMIC_SERVICE_BUNDLE_NAME = "com.test.atomicservice";
 const std::string PASS_ABILITY_NAME = "com.test.pass";
 const std::string DENY_ABILITY_NAME = "com.test.deny";
 const std::string JUMP_ABILITY_NAME = "com.test.jump";
+const std::string UIEXTENSION_MODAL_TYPE = "ability.want.params.modalType";
 }
 
 namespace OHOS {
@@ -379,8 +380,9 @@ HWTEST_F(AbilityInterceptorTest, DisposedRuleInterceptor_007, TestSize.Level1)
     ElementName element("", "com.test.disposedrule", "MainAbility6", "entry");
     want.SetElement(element);
     AppExecFwk::DisposedRule disposedRule;
-    bool result = executer->CheckDisposedRule(want, disposedRule);
-    EXPECT_EQ(result, false);
+    std::vector<AppExecFwk::DisposedRule> rules = { disposedRule };
+    bool result = executer->FindBlockDisposedRule(want, rules, disposedRule);
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -397,8 +399,9 @@ HWTEST_F(AbilityInterceptorTest, DisposedRuleInterceptor_008, TestSize.Level1)
     want.SetElement(element);
     AppExecFwk::DisposedRule disposedRule;
     disposedRule.disposedType = AppExecFwk::DisposedType::NON_BLOCK;
-    bool result = executer->CheckDisposedRule(want, disposedRule);
-    EXPECT_EQ(result, false);
+    std::vector<AppExecFwk::DisposedRule> rules = { disposedRule };
+    bool result = executer->FindBlockDisposedRule(want, rules, disposedRule);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -415,8 +418,9 @@ HWTEST_F(AbilityInterceptorTest, DisposedRuleInterceptor_009, TestSize.Level1)
     want.SetElement(element);
     AppExecFwk::DisposedRule disposedRule;
     disposedRule.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
-    bool result = executer->CheckDisposedRule(want, disposedRule);
-    EXPECT_EQ(result, false);
+    std::vector<AppExecFwk::DisposedRule> rules = { disposedRule };
+    bool result = executer->FindBlockDisposedRule(want, rules, disposedRule);
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -434,8 +438,9 @@ HWTEST_F(AbilityInterceptorTest, DisposedRuleInterceptor_010, TestSize.Level1)
     AppExecFwk::DisposedRule disposedRule;
     disposedRule.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
     disposedRule.controlType = AppExecFwk::ControlType::ALLOWED_LIST;
-    bool result = executer->CheckDisposedRule(want, disposedRule);
-    EXPECT_EQ(result, false);
+    std::vector<AppExecFwk::DisposedRule> rules = { disposedRule };
+    bool result = executer->FindBlockDisposedRule(want, rules, disposedRule);
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -453,8 +458,9 @@ HWTEST_F(AbilityInterceptorTest, DisposedRuleInterceptor_011, TestSize.Level1)
     AppExecFwk::DisposedRule disposedRule;
     disposedRule.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
     disposedRule.controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
-    bool result = executer->CheckDisposedRule(want, disposedRule);
-    EXPECT_EQ(result, true);
+    std::vector<AppExecFwk::DisposedRule> rules = { disposedRule };
+    bool result = executer->FindBlockDisposedRule(want, rules, disposedRule);
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -490,27 +496,6 @@ HWTEST_F(AbilityInterceptorTest, DisposedRuleInterceptor_013, TestSize.Level1)
 }
 
 /**
- * @tc.name: AbilityInterceptorTest_DisposedRuleInterceptor_014
- * @tc.desc: DisposedRuleInterceptor
- * @tc.type: FUNC
- * @tc.require: No
- */
-HWTEST_F(AbilityInterceptorTest, DisposedRuleInterceptor_014, TestSize.Level1)
-{
-    std::shared_ptr<DisposedRuleInterceptor> executer = std::make_shared<DisposedRuleInterceptor>();
-    Want want;
-    ElementName element("", "com.acts.disposedrulehap", "MainAbility", "entry");
-    want.SetElement(element);
-    int requestCode = 0;
-    int userId = 100;
-    auto shouldBlockFunc = []() { return false; };
-    AbilityInterceptorParam param = AbilityInterceptorParam(want, requestCode, userId, true, nullptr,
-        shouldBlockFunc);
-    executer->DoProcess(param);
-    EXPECT_NE(executer->GetAppMgr(), nullptr);
-}
-
-/**
  * @tc.name: AbilityInterceptorTest_DisposedRuleInterceptor_015
  * @tc.desc: DisposedRuleInterceptor
  * @tc.type: FUNC
@@ -524,7 +509,7 @@ HWTEST_F(AbilityInterceptorTest, DisposedRuleInterceptor_015, TestSize.Level1)
     want.SetBundle(bundleName);
     sptr<IRemoteObject> callerToken;
     ErrCode result = executer->CreateModalUIExtension(want, callerToken);
-    EXPECT_EQ(result, INNER_ERR);
+    EXPECT_EQ(want.GetIntParam(UIEXTENSION_MODAL_TYPE, 0), 1);
 }
 
 /**

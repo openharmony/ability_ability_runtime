@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,6 @@
 
 #include "ability_interceptor_interface.h"
 
-#include "ability_record.h"
-#include "app_mgr_interface.h"
 #include "disposed_observer.h"
 #include "task_utils_wrap.h"
 
@@ -41,9 +39,11 @@ public:
     void UnregisterObserver(int32_t uid);
 private:
     bool CheckControl(const Want &want, int32_t userId, AppExecFwk::DisposedRule &disposedRule, int32_t appIndex);
-    bool CheckDisposedRule(const Want &want, AppExecFwk::DisposedRule &disposedRule);
+    bool FindBlockDisposedRule(const Want &want, const std::vector<AppExecFwk::DisposedRule> &disposedRuleList,
+        AppExecFwk::DisposedRule &disposedRule);
+    void FindNonBlockDisposedRule(const std::vector<AppExecFwk::DisposedRule> &disposedRuleList,
+        AppExecFwk::DisposedRule &disposedRule);
     ErrCode StartNonBlockRule(const Want &want, AppExecFwk::DisposedRule &disposedRule, int32_t uid);
-    sptr<AppExecFwk::IAppMgr> GetAppMgr();
     ErrCode CreateModalUIExtension(const Want &want, const sptr<IRemoteObject> &callerToken);
     void SetInterceptInfo(const Want &want, AppExecFwk::DisposedRule &disposedRule);
 private:
