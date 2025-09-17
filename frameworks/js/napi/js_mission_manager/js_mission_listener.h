@@ -56,6 +56,7 @@ private:
     void CallJsFunction(napi_value value, const char* methodName, napi_value *argv, size_t argc);
 
     napi_env env_ = nullptr;
+    std::mutex jsListenerObjectMapLock_;
     std::map<int32_t, std::shared_ptr<NativeReference>> jsListenerObjectMap_;
     std::map<int32_t, std::shared_ptr<NativeReference>> jsListenerObjectMapSync_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> mainHandler_;
