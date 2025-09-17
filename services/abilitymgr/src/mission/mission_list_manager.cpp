@@ -2518,6 +2518,10 @@ void MissionListManager::BackToCaller(const std::shared_ptr<AbilityRecord> &call
 
     // caller is already the top ability and foregroundnew.
     auto topAbility = GetCurrentTopAbilityLocked();
+    if (topAbility == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "topAbility null");
+        return;
+    }
     if (callerAbility == topAbility && topAbility->IsAbilityState(AbilityState::FOREGROUND)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "caller is already the top ability and foregroundnew.");
         return;
@@ -4258,12 +4262,13 @@ int MissionListManager::PrepareClearMissionLocked(int missionId, const std::shar
     }
 
     bool res = abilityRecord->PrepareTerminateAbility(false);
-    if (res) {
+    if (handler) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "stop terminating");
         handler->CancelTask("PrepareTerminate_" + std::to_string(abilityRecord->GetAbilityRecordId()));
+    }
+    if (res) {
         return ERR_OK;
     }
-    handler->CancelTask("PrepareTerminate_" + std::to_string(abilityRecord->GetAbilityRecordId()));
     return ClearMissionLocked(missionId, mission);
 }
 

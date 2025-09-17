@@ -1518,6 +1518,7 @@ int ContextImpl::GetOverlayModuleInfos(const std::string &bundleName, const std:
     }
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "overlayMgrProxy_->GetTargetOverlayModuleInfo");
+        std::lock_guard<std::mutex> lock(overlayMgrProxyMutex_);
         auto ret = overlayMgrProxy_->GetTargetOverlayModuleInfo(moduleName, overlayModuleInfos);
         if (ret != ERR_OK) {
             TAG_LOGD(AAFwkTag::APPKIT, "GetOverlayModuleInfo form bms failed");
