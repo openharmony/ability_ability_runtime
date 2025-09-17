@@ -15,11 +15,15 @@
 
 #ifndef MOCK_MY_FLAG_H
 #define MOCK_MY_FLAG_H
+
+#include "mock_app_mgr_service.h"
+
 namespace OHOS {
 namespace AAFwk {
 class MyFlag {
 public:
     static int flag_;
+    static sptr<AppExecFwk::MockAppMgrService> mockAppMgr_;
 };
 } // namespace AAFwk
 } // namespace OHOS

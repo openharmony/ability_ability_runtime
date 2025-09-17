@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_APP_MGR_UTIL_H
-#define OHOS_ABILITY_RUNTIME_APP_MGR_UTIL_H
+#include "app_mgr_util.h"
 
-#include "app_mgr_interface.h"
+#include "mock_my_flag.h"
 
 namespace OHOS {
 namespace AAFwk {
-/**
- * @class AppMgrUtil
- * provides appmgr utilities.
- */
-class AppMgrUtil final {
-public:
-    /**
-     * GetAppMgr, get app mgr.
-     *
-     * @return AppMgr.
-     */
-    static sptr<OHOS::AppExecFwk::IAppMgr> GetAppMgr();
-};
+OHOS::sptr<AppExecFwk::IAppMgr> AppMgrUtil::GetAppMgr()
+{
+    return MyFlag::mockAppMgr_;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_APP_MGR_UTIL_H

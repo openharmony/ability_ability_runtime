@@ -51,6 +51,7 @@ ohos_unittest("ui_ability_lifecycle_manager_third_test") {
     "${ability_runtime_services_path}/abilitymgr/src/utils/request_id_util.cpp",
     "${ability_runtime_services_path}/common/src/event_report.cpp",
     "mock/src/app_utils.cpp",
+    "mock/src/mock_app_mgr_utils.cpp",
     "mock/src/mock_my_flag.cpp",
     "mock/src/mock_permission_verification.cpp",
     "mock/src/session_manager_lite.cpp",

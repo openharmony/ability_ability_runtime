@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,17 +19,17 @@
 
 namespace OHOS {
 namespace AAFwk {
-sptr<OHOS::AppExecFwk::IAppMgr> AppMgrUtil::appMgr_ = nullptr;
+sptr<OHOS::AppExecFwk::IAppMgr> g_appMgr = nullptr;
 
 OHOS::sptr<AppExecFwk::IAppMgr> AppMgrUtil::GetAppMgr()
 {
-    if (appMgr_) {
-        return appMgr_;
+    if (g_appMgr) {
+        return g_appMgr;
     }
 
     sptr<AppExecFwk::MockAppMgrService> mockAppMgr(new AppExecFwk::MockAppMgrService());
-    appMgr_ = iface_cast<AppExecFwk::IAppMgr>(mockAppMgr);
-    return appMgr_;
+    g_appMgr = iface_cast<AppExecFwk::IAppMgr>(mockAppMgr);
+    return g_appMgr;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
