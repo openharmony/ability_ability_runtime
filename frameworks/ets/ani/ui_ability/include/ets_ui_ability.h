@@ -123,6 +123,8 @@ public:
      */
     void OnAbilityResult(int requestCode, int resultCode, const Want &resultData) override;
 
+    sptr<IRemoteObject> CallRequest() override;
+
     static void CreateAndBindContext(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
         const std::unique_ptr<Runtime>& runtime);
 
