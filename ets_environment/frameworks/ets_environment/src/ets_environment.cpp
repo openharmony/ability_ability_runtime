@@ -355,6 +355,10 @@ std::string ETSEnvironment::GetErrorProperty(ani_error aniError, const char *pro
 {
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "GetErrorProperty called");
     auto aniEnv = GetAniEnv();
+    if (aniEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "null env");
+        return "";
+    }
     std::string propertyValue;
     ani_status status = ANI_ERROR;
     ani_type errorType = nullptr;

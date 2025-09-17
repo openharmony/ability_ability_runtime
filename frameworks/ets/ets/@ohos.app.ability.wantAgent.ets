@@ -61,8 +61,8 @@ namespace wantAgent {
   }
 
   native function nativeGetBundleName(agent: WantAgent, callback: AsyncCallbackWrapper<string>): void;
-  native function nativeGetUid(agent: WantAgent, callback: AsyncCallbackWrapper<number>): void;
-  native function nativeGetOperationType(agent: WantAgent, callback: AsyncCallbackWrapper<number>): void;
+  native function nativeGetUid(agent: WantAgent, callback: AsyncCallbackWrapper<int>): void;
+  native function nativeGetOperationType(agent: WantAgent, callback: AsyncCallbackWrapper<int>): void;
   native function nativeCancel(agent: WantAgent, callback: AsyncCallbackWrapper<void>): void;
   native function nativeEqual(agent: WantAgent, otherAgent: WantAgent, callback: AsyncCallbackWrapper<boolean>): void;
   native function nativeTrigger(agent: WantAgent, triggerInfo: TriggerInfo, callback?: AsyncCallbackWrapper<CompleteData>): void;
@@ -99,8 +99,8 @@ namespace wantAgent {
     });
   }
 
-  export function getUid(agent: WantAgent, callback: AsyncCallback<number>): void {
-    let call = new AsyncCallbackWrapper<number>(callback);
+  export function getUid(agent: WantAgent, callback: AsyncCallback<int>): void {
+    let call = new AsyncCallbackWrapper<int>(callback);
     taskpool.execute((): void => {
       try {
         nativeGetUid(agent, call);
@@ -110,11 +110,11 @@ namespace wantAgent {
     });
   }
 
-  export function getUid(agent: WantAgent): Promise<number> {
-    return new Promise<number>((resolve: (data: number) => void, reject: (err: BusinessError) => void): void => {
-      let call = new AsyncCallbackWrapper<number>((err: BusinessError | null, data: number | undefined) => {
+  export function getUid(agent: WantAgent): Promise<int> {
+    return new Promise<int>((resolve: (data: int) => void, reject: (err: BusinessError) => void): void => {
+      let call = new AsyncCallbackWrapper<int>((err: BusinessError | null, data: int | undefined) => {
         if (err == null || err.code == 0) {
-          resolve(data as number);
+          resolve(data as int);
         } else {
           reject(err);
         }
@@ -266,8 +266,8 @@ namespace wantAgent {
     });
   }
 
-  export function getOperationType(agent: WantAgent, callback: AsyncCallback<number>): void {
-    let call = new AsyncCallbackWrapper<number>(callback);
+  export function getOperationType(agent: WantAgent, callback: AsyncCallback<int>): void {
+    let call = new AsyncCallbackWrapper<int>(callback);
     taskpool.execute((): void => {
       try {
         nativeGetOperationType(agent, call);
@@ -277,11 +277,11 @@ namespace wantAgent {
     });
   }
 
-  export function getOperationType(agent: WantAgent): Promise<number> {
-    return new Promise<number>((resolve: (data: number) => void, reject: (err: BusinessError) => void): void => {
-      let call = new AsyncCallbackWrapper<number>((err: BusinessError | null, data: number | undefined) => {
+  export function getOperationType(agent: WantAgent): Promise<int> {
+    return new Promise<int>((resolve: (data: int) => void, reject: (err: BusinessError) => void): void => {
+      let call = new AsyncCallbackWrapper<int>((err: BusinessError | null, data: int | undefined) => {
         if (err == null || err.code == 0) {
-          resolve(data as number);
+          resolve(data as int);
         } else {
           reject(err);
         }
@@ -321,7 +321,7 @@ namespace wantAgent {
   export interface CompleteData {
     info: WantAgent;
     want: Want;
-    finalCode: number;
+    finalCode: int;
     finalData: string;
     extraInfo?: Record<string, Object>;
   }
@@ -329,7 +329,7 @@ namespace wantAgent {
   class CompleteDataImpl implements CompleteData {
     public info: WantAgent;
     public want: Want;
-    public finalCode: number;
+    public finalCode: int;
     public finalData: string;
     public extraInfo?: Record<string, Object>;
   }

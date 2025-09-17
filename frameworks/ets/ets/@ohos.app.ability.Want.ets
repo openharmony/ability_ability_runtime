@@ -154,7 +154,7 @@ class RecordWriter {
 export class RecordSerializeTool {
   public static stringifyNoThrow(obj: Record<string, Object>): String {
     try {
-      return RecordSerializeTool.stringify(obj as Object as Record<string, NullishType>);
+      return JSON.stringify(obj as Object as Record<string, NullishType>);
     } catch (err) {
       hilog.error(DOMAIN_ID, TAG, `RecordSerializeTool.stringify error: ${err}`);
       return '';
@@ -224,9 +224,10 @@ export default class Want {
   deviceId?: string;
   uri?: string;
   type?: string;
-  flags?: number;
+  flags?: int;
   action?: string;
   parameters?: Record<string, Object>;
   entities?: Array<string>;
   moduleName?: string;
+  readonly fds?: Record<string, int>;
 }

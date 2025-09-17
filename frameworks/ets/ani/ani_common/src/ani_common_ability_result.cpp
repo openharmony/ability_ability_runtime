@@ -55,8 +55,7 @@ ani_object WrapAbilityResult(ani_env *env, int32_t resultCode, const AAFwk::Want
         return nullptr;
     }
 
-    ani_double dResultCode {resultCode};
-    if ((status = env->Object_CallMethod_Void(resultObj, resultCodeSetter, dResultCode)) != ANI_OK) {
+    if ((status = env->Object_CallMethod_Void(resultObj, resultCodeSetter, resultCode)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Object_CallMethod_Void status: %{public}d", status);
         return nullptr;
     }
