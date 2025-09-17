@@ -1538,5 +1538,70 @@ HWTEST_F(StartupManagerTest, SetSchedulerPhase_0400, Function | MediumTest | Lev
     EXPECT_EQ(startupManager->EnableLazyLoadingAppStartupTasks(), true);
     GTEST_LOG_(INFO) << "SetSchedulerPhase_0400 end";
 }
+
+/**
+ * @tc.name: GetBundleName_001
+ * @tc.desc: test GetBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupManagerTest, GetBundleName_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetBundleName_001 start";
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    ASSERT_NE(startupManager, nullptr);
+    startupManager->bundleName_ = "testBundleName";
+    EXPECT_EQ(startupManager->GetBundleName(), startupManager->bundleName_);
+    GTEST_LOG_(INFO) << "GetBundleName_001 end";
+}
+
+/**
+ * @tc.name: GetAppIndex_001
+ * @tc.desc: test GetAppIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupManagerTest, GetAppIndex_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetAppIndex_001 start";
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    ASSERT_NE(startupManager, nullptr);
+    startupManager->appIndex_ = 1;
+    EXPECT_EQ(startupManager->GetAppIndex(), startupManager->appIndex_);
+    GTEST_LOG_(INFO) << "GetAppIndex_001 end";
+}
+
+/**
+ * @tc.name: GetUid_001
+ * @tc.desc: test GetUid
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupManagerTest, GetUid_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "GetUid_001 start";
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    ASSERT_NE(startupManager, nullptr);
+    startupManager->uid_ = 20010000;
+    EXPECT_EQ(startupManager->GetUid(), startupManager->uid_);
+    GTEST_LOG_(INFO) << "GetUid_001 end";
+}
+
+/**
+ * @tc.name: OnTimeout_001
+ * @tc.desc: test OnTimeout
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupManagerTest, OnTimeout, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "OnTimeout_001 start";
+    std::map<std::string, std::shared_ptr<StartupTask>> tasks;
+    std::shared_ptr<StartupTaskManager> startupTaskManager = std::make_shared<StartupTaskManager>(1, tasks);
+    bool called = false;
+    const auto timeoutCallback = [&called]() {
+        called = true;
+    };
+    startupTaskManager->SetTimeoutCallback(timeoutCallback);
+    startupTaskManager->OnTimeout();
+    EXPECT_EQ(called, true);
+    GTEST_LOG_(INFO) << "OnTimeout_001 end";
+}
 }
 }
