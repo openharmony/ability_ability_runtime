@@ -54,12 +54,12 @@ HWTEST_F(FreezeUtilTest, FreezeUtilTest_001, TestSize.Level1)
     sptr<IPCObjectStub> token(new IPCObjectStub(u"testStub"));
     EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(token), "");
     FreezeUtil::GetInstance().AddLifecycleEvent(token, "firstEntry");
-    EXPECT_TRUE(FreezeUtil::GetInstance().GetLifecycleEvent(token).find("; firstEntry") 
+    EXPECT_TRUE(FreezeUtil::GetInstance().GetLifecycleEvent(token).find("; firstEntry")
         != std::string::npos);
 
     FreezeUtil::GetInstance().AddLifecycleEvent(token, "secondEntry");
     std::string result = FreezeUtil::GetInstance().GetLifecycleEvent(token);
-    EXPECT_TRUE(result.find("firstEntry") != std::string::npos && 
+    EXPECT_TRUE(result.find("firstEntry") != std::string::npos &&
         result.find("secondEntry") != std::string::npos);
     TAG_LOGI(AAFwkTag::TEST, "FreezeUtilTest_001 is end");
 }
@@ -73,7 +73,7 @@ HWTEST_F(FreezeUtilTest, FreezeUtilTest_002, TestSize.Level1)
 {
     sptr<IPCObjectStub> token(new IPCObjectStub(u"testStub"));
     FreezeUtil::GetInstance().AddLifecycleEvent(token, "testDeleteEntry");
-    EXPECT_TRUE(FreezeUtil::GetInstance().GetLifecycleEvent(token).find("; testDeleteEntry") 
+    EXPECT_TRUE(FreezeUtil::GetInstance().GetLifecycleEvent(token).find("; testDeleteEntry")
         != std::string::npos);
     FreezeUtil::GetInstance().DeleteLifecycleEvent(token);
     EXPECT_EQ(FreezeUtil::GetInstance().GetLifecycleEvent(token), "");
