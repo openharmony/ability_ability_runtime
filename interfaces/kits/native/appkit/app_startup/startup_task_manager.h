@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,12 +52,15 @@ public:
 
     void UpdateStartupTaskContextRef(std::shared_ptr<NativeReference> &contextJsRef, bool updateAll = false);
 
+    void SetTimeoutCallback(const std::function<void()>& callback);
+
 private:
     uint32_t startupTaskManagerId_ = 0;
     std::shared_ptr<StartupConfig> config_;
     std::shared_ptr<StartupTaskDispatcher> dispatcher_;
     std::map<std::string, std::shared_ptr<StartupTask>> tasks_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
+    std::function<void()> timeoutCallback_ = nullptr;
 
     void CallListenerOnCompleted(int32_t result, const std::string &resultMessage = "");
     void AddAsyncTimeoutTimer();
