@@ -38,6 +38,7 @@ ohos_shared_library("want_ani_kit") {
   external_deps = [
     "ability_base:base",
     "ability_base:want",
+    "access_token:libtokenid_sdk",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:rpc_ani",
