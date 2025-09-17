@@ -171,7 +171,11 @@ napi_value CreateJsAutoFillType(napi_env env)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
+    napi_status createStatus = napi_create_object(env, &objValue);
+    if (createStatus != napi_ok || objValue == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "napi_create_reference failed, %{public}d", createStatus);
+        return nullptr;
+    }
 
     napi_set_named_property(env, objValue, "UNSPECIFIED", CreateJsValue(env, AbilityBase::AutoFillType::UNSPECIFIED));
     napi_set_named_property(env, objValue, "PASSWORD", CreateJsValue(env, AbilityBase::AutoFillType::PASSWORD));
@@ -223,7 +227,11 @@ napi_value CreateJsPopupPlacement(napi_env env)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
+    napi_status createStatus = napi_create_object(env, &objValue);
+    if (createStatus != napi_ok || objValue == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "napi_create_reference failed, %{public}d", createStatus);
+        return nullptr;
+    }
 
     napi_set_named_property(env, objValue, "LEFT", CreateJsValue(env, AbilityBase::PopupPlacement::LEFT));
     napi_set_named_property(env, objValue, "RIGHT", CreateJsValue(env, AbilityBase::PopupPlacement::RIGHT));
