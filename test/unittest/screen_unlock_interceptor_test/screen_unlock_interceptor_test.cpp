@@ -26,6 +26,7 @@
 #include "parameters.h"
 #include "scene_board_judgement.h"
 #include "start_ability_utils.h"
+#include "screenlock_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -76,7 +77,7 @@ HWTEST_F(ScreenUnlockInterceptorTest, DoProcess_001, TestSize.Level1)
     AbilityInterceptorParam param(want, requestCode, userId, isWithUI, callerToken, shouldBlockAllAppStartFunc);
     auto ret = screenUnlockInterceptor.DoProcess(param);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-       bool isLocked = OHOS::ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
+        bool isLocked = OHOS::ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
         if (isLocked) {
             EXPECT_EQ(ret, ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK);
         } else {
