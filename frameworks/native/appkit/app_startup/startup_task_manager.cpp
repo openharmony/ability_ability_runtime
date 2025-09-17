@@ -180,6 +180,9 @@ void StartupTaskManager::CancelAsyncTimeoutTimer()
 void StartupTaskManager::OnTimeout()
 {
     CallListenerOnCompleted(ERR_STARTUP_TIMEOUT, StartupUtils::GetErrorMessage(ERR_STARTUP_TIMEOUT));
+    if (timeoutCallback_ != nullptr) {
+        timeoutCallback_();
+    }
     DelayedSingleton<StartupManager>::GetInstance()->OnStartupTaskManagerComplete(startupTaskManagerId_);
 }
 
@@ -201,6 +204,11 @@ void StartupTaskManager::UpdateStartupTaskContextRef(std::shared_ptr<NativeRefer
             jsStartupTask->UpdateContextRef(contextJsRef);
         }
     }
+}
+
+void StartupTaskManager::SetTimeoutCallback(const std::function<void()>& callback)
+{
+    timeoutCallback_ = callback;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

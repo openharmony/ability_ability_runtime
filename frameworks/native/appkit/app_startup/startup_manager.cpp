@@ -97,6 +97,8 @@ int32_t StartupManager::PreloadAppHintStartup(const AppExecFwk::BundleInfo& bund
         return ERR_OK;
     }
     bundleName_ = bundleInfo.name;
+    appIndex_ = bundleInfo.applicationInfo.appIndex;
+    uid_ = bundleInfo.applicationInfo.uid;
     moduleStartupConfigInfos_.emplace_back(preloadHapModuleInfo.name, preloadHapModuleInfo.appStartup,
         preloadHapModuleInfo.hapPath, preloadHapModuleInfo.moduleType,
         preloadHapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE);
@@ -1337,6 +1339,21 @@ bool StartupManager::ParseJsonStringArray(const nlohmann::json &json, const std:
         }
     }
     return true;
+}
+
+const std::string &StartupManager::GetBundleName() const
+{
+    return bundleName_;
+}
+
+int32_t StartupManager::GetAppIndex() const
+{
+    return appIndex_;
+}
+
+int32_t StartupManager::GetUid() const
+{
+    return uid_;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
