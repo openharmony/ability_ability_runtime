@@ -19,16 +19,10 @@ import { HapModuleInfo } from 'bundleManager.HapModuleInfo'
 
 export default class AbilityStageContext extends Context {
   static {
-    loadLibraryWithPermissionCheck("context_ani", "application.AbilityStageContext");
     loadLibraryWithPermissionCheck("ability_stage_context_ani_kit.z", "application.AbilityStageContext");
   }
   config?: Configuration;
-  currentHapModuleInfo: HapModuleInfo;
-  native constructor();
-  constructor(currentHapModuleInfo: HapModuleInfo) {
-    super();
-    this.currentHapModuleInfo = currentHapModuleInfo;
-  }
+  currentHapModuleInfo!: HapModuleInfo;
 
   private static native nativeTransferStatic(input: ESValue, type: string): Object;
   private static native nativeTransferDynamic(input: Object): ESValue;
