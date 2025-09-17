@@ -703,6 +703,102 @@ HWTEST_F(AppSpawnClientTest, VerifyMsg_005, TestSize.Level2)
 }
 
 /**
+ * @tc.name: VerifyMsg_006
+ * @tc.desc: appspawn VerifyMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSpawnClientTest, VerifyMsg_006, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_006 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = 1001;
+    startMsg.gid = 2001;
+    startMsg.gids = {1001, 1002};
+    std::string procName("");
+    startMsg.procName = procName;
+    std::string permission1("permission_for_test_1");
+    startMsg.permissions.insert(permission1);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    startMsg.maxChildProcess = 1;
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    bool result = false;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, false);
+
+    startMsg.code = MSG_APP_SPAWN;
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, false);
+    startMsg.code = MSG_SPAWN_NATIVE_PROCESS;
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, false);
+
+    startMsg.code = MSG_GET_RENDER_TERMINATION_STATUS;
+    startMsg.pid = -1;
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, false);
+    startMsg.pid = 1;
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, true);
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_006 end");
+}
+
+
+/**
+ * @tc.name: VerifyMsg_007
+ * @tc.desc: appspawn VerifyMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppSpawnClientTest, VerifyMsg_007, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_007 start");
+    AppSpawnStartMsg startMsg = {0};
+    startMsg.uid = 1001;
+    startMsg.gid = 2001;
+    startMsg.gids = {1001, 1002};
+    std::string procName("");
+    startMsg.procName = procName;
+    std::string permission1("permission_for_test_1");
+    startMsg.permissions.insert(permission1);
+    startMsg.flags = 0x1000;
+    startMsg.atomicServiceFlag = false;
+    startMsg.strictMode = false;
+    startMsg.isolatedExtension = false;
+    startMsg.childProcessType = 1;
+    startMsg.isolationMode = false;
+    startMsg.maxChildProcess = 1;
+    auto asc = std::make_shared<AppSpawnClient>(false);
+    int32_t ret = 0;
+    bool result = false;
+    ret = asc->OpenConnection();
+    EXPECT_EQ(ret, ERR_OK);
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, false);
+
+    startMsg.code = MSG_APP_SPAWN;
+    startMsg.uid = -1;
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, false);
+
+    startMsg.gid = -1;
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, false);
+
+    startMsg.gids = {1001, -1};
+    result = asc->VerifyMsg(startMsg);
+    EXPECT_EQ(result, false);
+
+    TAG_LOGI(AAFwkTag::TEST, "VerifyMsg_007 end");
+}
+
+/**
  * @tc.name: SetChildProcessTypeStartFlag_001
  * @tc.desc: appspawn SetChildProcessTypeStartFlag
  * @tc.type: FUNC
