@@ -1009,7 +1009,7 @@ bool OHOSApplication::NotifyUnLoadRepairPatch(const std::string &hqfFile)
 void OHOSApplication::CleanAppTempData(bool isLastProcess)
 {
     if (!isLastProcess) {
-        TAG_LOGE(AAFwkTag::APPKIT, "failed");
+        TAG_LOGW(AAFwkTag::APPKIT, "failed");
         return;
     }
     if (abilityRuntimeContext_ == nullptr) {

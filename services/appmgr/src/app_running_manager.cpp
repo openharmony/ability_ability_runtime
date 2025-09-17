@@ -777,7 +777,7 @@ void AppRunningManager::HandleTerminateTimeOut(int64_t eventId)
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto abilityRecord = GetAbilityRunningRecord(eventId);
     if (!abilityRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "null abilityRecord");
+        TAG_LOGW(AAFwkTag::APPMGR, "null abilityRecord");
         return;
     }
     auto abilityToken = abilityRecord->GetToken();

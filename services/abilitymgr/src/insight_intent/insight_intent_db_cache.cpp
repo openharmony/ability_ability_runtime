@@ -181,7 +181,7 @@ void InsightIntentDbCache::GetInsightIntentInfo(const std::string &bundleName, c
     }
     if (DelayedSingleton<InsightRdbStorageMgr>::GetInstance()->
         LoadInsightIntentInfo(bundleName, moduleName, intentName, userId, info) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::INTENT, "GetInsightIntentInfo failed");
+        TAG_LOGW(AAFwkTag::INTENT, "GetInsightIntentInfo failed");
         return;
     }
 }

@@ -228,7 +228,7 @@ bool InsightIntentRdbDataMgr::QueryData(const std::string &key, std::string &val
     ScopeGuard stateGuard([&] { absSharedResultSet->Close(); });
     auto ret = absSharedResultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
-        TAG_LOGE(AAFwkTag::INTENT, "GoToFirstRow failed, ret: %{public}d", ret);
+        TAG_LOGW(AAFwkTag::INTENT, "GoToFirstRow failed, ret: %{public}d", ret);
         return false;
     }
 

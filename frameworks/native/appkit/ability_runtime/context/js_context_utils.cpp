@@ -236,7 +236,6 @@ napi_value JsBaseContext::OnCreateModuleContext(napi_env env, NapiCallbackInfo& 
     }
 
     if (!moduleContext) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null moduleContext");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
