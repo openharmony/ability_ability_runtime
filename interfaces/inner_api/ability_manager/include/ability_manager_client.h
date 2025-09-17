@@ -399,8 +399,22 @@ public:
     ErrCode PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
         int32_t userId = DEFAULT_INVAL_VALUE, int32_t hostPid = DEFAULT_INVAL_VALUE);
 
+    /**
+     * Change the visibility state of an UIAbility.
+     *
+     * @param token The destination UIAbility.
+     * @param isShow The wanted state, show or hide.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     ErrCode ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow);
 
+    /**
+     * Change the visibility state of an UIAbility by SCB.
+     *
+     * @param sessionInfo The destination UIAbility.
+     * @param isShow The wanted state, show or hide.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     ErrCode ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessionInfo, bool isShow);
 
     /**
@@ -957,6 +971,7 @@ public:
      *
      * @param want, Special want for service type's ability.
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param callerToken Indicates the caller's identity
      * @param accountId Indicates the account to start.
      * @param isSilent, whether show window when start fail.
      * @return Returns ERR_OK on success, others on failure.
@@ -964,6 +979,17 @@ public:
     ErrCode StartAbilityByCall(const Want &want, sptr<IAbilityConnection> connect,
         sptr<IRemoteObject> callToken, int32_t accountId = DEFAULT_INVAL_VALUE, bool isSilent = false);
 
+    /**
+     * Start Ability, connect session with common ability.
+     *
+     * @param want, Special want for service type's ability.
+     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param callerToken Indicates the caller's identity
+     * @param accountId Indicates the account to start.
+     * @param errMsg Out parameter, indicates the failed reason.
+     * @param isSilent, whether show window when start fail.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t StartAbilityByCallWithErrMsg(const Want &want, sptr<IAbilityConnection> connect,
         sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent = false);
 
