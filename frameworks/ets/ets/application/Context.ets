@@ -56,7 +56,6 @@ export class Context extends BaseContext {
   resourceManager!: resmgr.ResourceManager;
   eventHub: EventHub = new EventHub();
   processName: string = "";
-  native constructor();
   constructor() {
     if (this.eventHub == null) {
       this.eventHub = new EventHub();
