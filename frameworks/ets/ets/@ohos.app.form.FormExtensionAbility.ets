@@ -42,7 +42,7 @@ export default class FormExtensionAbility {
         wantPara: ${wantParams?.['ohos.extra.param.key.host_bg_inverse_color']}`);
   }
 
-  onChangeFormVisibility(newStatus: Record<string, number>): void {
+  onChangeFormVisibility(newStatus: Record<string, int>): void {
     console.log(`FormExtensionAbility onChangeFormVisibility, newStatus: ${newStatus}`);
   }
 
