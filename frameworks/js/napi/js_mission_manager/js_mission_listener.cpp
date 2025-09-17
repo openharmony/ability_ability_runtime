@@ -62,10 +62,12 @@ void JsMissionListener::AddJsListenerObject(int32_t listenerId, napi_value jsLis
 {
     napi_ref ref = nullptr;
     if (isSync) {
+        std::lock_guard<std::mutex> lock(jsListenerObjectMapLock_);
         napi_create_reference(env_, jsListenerObject, 1, &ref);
         jsListenerObjectMapSync_.emplace(
             listenerId, std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref)));
     } else {
+        std::lock_guard<std::mutex> lock(jsListenerObjectMapLock_);
         napi_create_reference(env_, jsListenerObject, 1, &ref);
         jsListenerObjectMap_.emplace(
             listenerId, std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(ref)));
@@ -76,8 +78,10 @@ bool JsMissionListener::RemoveJsListenerObject(int32_t listenerId, bool isSync)
 {
     bool result = false;
     if (isSync) {
+        std::lock_guard<std::mutex> lock(jsListenerObjectMapLock_);
         result = (jsListenerObjectMapSync_.erase(listenerId) == 1);
     } else {
+        std::lock_guard<std::mutex> lock(jsListenerObjectMapLock_);
         result = (jsListenerObjectMap_.erase(listenerId) == 1);
     }
     return result;
@@ -85,6 +89,7 @@ bool JsMissionListener::RemoveJsListenerObject(int32_t listenerId, bool isSync)
 
 bool JsMissionListener::IsEmpty()
 {
+    std::lock_guard<std::mutex> lock(jsListenerObjectMapLock_);
     return jsListenerObjectMap_.empty() && jsListenerObjectMapSync_.empty();
 }
 
