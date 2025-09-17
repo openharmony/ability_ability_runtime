@@ -26,7 +26,7 @@
             "inputMethod",
             "UIAbilityContext",
             "userIAM.faceAuth",
-            "userIAM.faceAuth",
+            "userIAM.userAuth",
             "vibrator",
             "wallpaper"
         ],
