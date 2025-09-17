@@ -517,7 +517,7 @@ sptr<IRemoteObject> ExtensionRecordManager::GetRootCallerTokenLocked(
         GetCallerTokenList(abilityRecord, callerList);
 
         if (callerList.empty()) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "callerList empty");
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "callerList empty");
             return nullptr;
         }
 
@@ -608,7 +608,7 @@ std::shared_ptr<AAFwk::AbilityRecord> ExtensionRecordManager::GetUIExtensionRoot
     }
 
     if (rootCallerToken == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "get record failed");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "get record failed");
         return nullptr;
     }
 
@@ -727,7 +727,7 @@ void ExtensionRecordManager::GetCallerTokenList(
     auto extensionRecordId = abilityRecord->GetUIExtensionAbilityId();
     auto sessionInfo = abilityRecord->GetSessionInfo();
     if (!sessionInfo) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo null, id: %{public}d", extensionRecordId);
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "sessionInfo null, id: %{public}d", extensionRecordId);
         callerList.clear();
         return;
     }

@@ -66,7 +66,7 @@ int32_t InsightRdbStorageMgr::LoadInsightIntentInfo(const std::string &bundleNam
         .append(moduleName).append("/").append(intentName);
     bool result = DelayedSingleton<InsightIntentRdbDataMgr>::GetInstance()->QueryData(key, value);
     if (!result) {
-        TAG_LOGE(AAFwkTag::INTENT, "get entries error");
+        TAG_LOGW(AAFwkTag::INTENT, "get entries error");
         return ERR_INVALID_VALUE;
     }
     ExtractInsightIntentProfileInfoVec profileInfos;

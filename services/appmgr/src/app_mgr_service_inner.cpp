@@ -2515,7 +2515,7 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
         return AAFwk::ERR_BUNDLE_NOT_EXIST;
     }
     if (appInfo.multiAppMode.multiAppModeType == MultiAppModeType::UNSPECIFIED) {
-        TAG_LOGE(AAFwkTag::APPMGR, "bundle unsupport multi-app");
+        TAG_LOGW(AAFwkTag::APPMGR, "bundle unsupport multi-app");
         return AAFwk::ERR_MULTI_APP_NOT_SUPPORTED;
     }
     info.bundleName = bundleName;
@@ -6777,7 +6777,7 @@ void AppMgrServiceInner::RemoveRenderRecordNoAttach(const std::shared_ptr<AppRun
 
 void AppMgrServiceInner::OnRenderRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    TAG_LOGE(AAFwkTag::APPMGR, "on render remote died");
+    TAG_LOGD(AAFwkTag::APPMGR, "on render remote died");
     if (appRunningManager_) {
         auto renderRecord = appRunningManager_->OnRemoteRenderDied(remote);
         if (renderRecord) {
@@ -7534,7 +7534,7 @@ bool AppMgrServiceInner::SetAppFreezeFilter(int32_t pid)
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     auto callerRecord = GetAppRunningRecordByPid(pid);
     if (callerRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "callerRecord null");
+        TAG_LOGW(AAFwkTag::APPMGR, "callerRecord null");
         return false;
     }
     std::string bundleName = callerRecord->GetBundleName();
@@ -7840,7 +7840,7 @@ int32_t AppMgrServiceInner::GetBundleNameByPid(const int32_t pid, std::string &b
     }
     auto callerRecord = GetAppRunningRecordByPid(pid);
     if (callerRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "callerRecord null");
+        TAG_LOGW(AAFwkTag::APPMGR, "callerRecord null");
         return ERR_INVALID_OPERATION;
     }
     bundleName = callerRecord->GetBundleName();
@@ -7933,7 +7933,7 @@ int32_t AppMgrServiceInner::ChangeAppGcState(pid_t pid, int32_t state, uint64_t 
     }
     auto appRecord = GetAppRunningRecordByPid(pid);
     if (!appRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "no appRecord");
+        TAG_LOGW(AAFwkTag::APPMGR, "no appRecord");
         return ERR_INVALID_VALUE;
     }
     return appRecord->ChangeAppGcState(state, tid);
@@ -10351,7 +10351,7 @@ void AppMgrServiceInner::AddUIExtensionBindItem(
 
     auto notifyProcessBind = want->GetIntParam(UIEXTENSION_NOTIFY_BIND, -1);
     if (notifyProcessBind != 1) {
-        TAG_LOGE(AAFwkTag::APPMGR, "no bind permission");
+        TAG_LOGW(AAFwkTag::APPMGR, "no bind permission");
         return;
     }
 
@@ -10398,7 +10398,7 @@ void AppMgrServiceInner::RemoveUIExtensionBindItem(
     UIExtensionProcessBindInfo bindInfo;
     auto result = appRunningManager_->QueryUIExtensionBindItemById(uiExtensionBindAbilityId, bindInfo);
     if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "bindInfo not exist");
+        TAG_LOGW(AAFwkTag::APPMGR, "bindInfo not exist");
         return;
     }
     if (bindInfo.notifyProcessBind != 1) {

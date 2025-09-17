@@ -410,7 +410,7 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, uint8_t** buff, 
     std::string loadPath = ExtractorUtil::GetLoadFilePath(newHapPath);
     std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
     if (extractor == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "LoadPath %{private}s GetExtractor failed", loadPath.c_str());
+        TAG_LOGW(AAFwkTag::JSRUNTIME, "LoadPath %{private}s GetExtractor failed", loadPath.c_str());
         return false;
     }
     std::unique_ptr<uint8_t[]> dataPtr = nullptr;
@@ -441,7 +441,7 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, uint8_t** buff, 
             if (apiTargetVersion >= API12) {
                 useSecureMem = true;
                 if (safeData == nullptr) {
-                    TAG_LOGE(AAFwkTag::JSRUNTIME, "null safeData file %{private}s", filePath.c_str());
+                    TAG_LOGW(AAFwkTag::JSRUNTIME, "null safeData file %{private}s", filePath.c_str());
                     return false;
                 }
                 *buff = safeData->GetDataPtr();
