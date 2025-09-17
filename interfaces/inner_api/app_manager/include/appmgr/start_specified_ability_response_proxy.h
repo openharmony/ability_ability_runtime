@@ -40,11 +40,24 @@ public:
      */
     virtual void OnTimeoutResponse(int32_t requestId) override;
 
+    /**
+     * @brief called when the module's onNewProcessRequest returns a flag
+     * @param flag process flag
+     * @param requestId a number represents a request
+     */
     virtual void OnNewProcessRequestResponse(const std::string &flag,
         int32_t requestId = 0, const std::string &callerProcessName = "", int32_t recordId = 0) override;
 
+    /**
+     * @brief called when the module's onNewProcessRequest happens time out
+     * @param requestId a number represents a request
+     */
     virtual void OnNewProcessRequestTimeoutResponse(int32_t requestId) override;
 
+    /**
+     * @brief called when the specified request fail fast
+     * @param requestId a number represents a request
+     */
     virtual void OnStartSpecifiedFailed(int32_t requestId) override;
 
 private:
