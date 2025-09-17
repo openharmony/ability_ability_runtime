@@ -20,20 +20,22 @@
 #include "ability_info.h"
 #include "ability_manager_client.h"
 #include "ability_start_setting.h"
+#include "ani_common_configuration.h"
 #include "ani_common_want.h"
 #include "configuration_utils.h"
 #include "connection_manager.h"
 #include "context.h"
 #include "ets_data_struct_converter.h"
+#include "ets_extension_common.h"
+#include "ets_extension_context.h"
 #include "ets_native_reference.h"
 #include "ets_runtime.h"
 #include "ets_ui_extension_context.h"
-#include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
+#include "hitrace_meter.h"
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
-#include "ani_common_want.h"
 #include "ui_extension_window_command.h"
 #include "want_params_wrapper.h"
 
@@ -46,6 +48,37 @@
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
+namespace {
+constexpr const char* UIEXTENSION_CLASS_NAME = "L@ohos/app/ability/UIExtensionAbility/UIExtensionAbility;";
+
+void OnDestroyPromiseCallback(ani_env* env, ani_object aniObj)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnDestroyPromiseCallback called");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env or null aniObj");
+        return;
+    }
+    ani_long destroyCallbackPoint = 0;
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_GetFieldByName_Long(aniObj, "destroyCallbackPoint", &destroyCallbackPoint)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "destroyCallbackPoint GetField status: %{public}d", status);
+        return;
+    }
+    auto *callbackInfo = reinterpret_cast<AppExecFwk::AbilityTransactionCallbackInfo<> *>(destroyCallbackPoint);
+    if (callbackInfo == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null callbackInfo");
+        return;
+    }
+    callbackInfo->Call();
+    AppExecFwk::AbilityTransactionCallbackInfo<>::Destroy(callbackInfo);
+
+    if ((status = env->Object_SetFieldByName_Long(aniObj, "destroyCallbackPoint",
+        static_cast<ani_long>(0))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "destroyCallbackPoint SetField status: %{public}d", status);
+        return;
+    }
+}
+} // namespace
 
 EtsUIExtension *EtsUIExtension::Create(const std::unique_ptr<Runtime> &runtime)
 {
@@ -65,33 +98,6 @@ EtsUIExtension::~EtsUIExtension()
     contentSessions_.clear();
 }
 
-void EtsUIExtension::PromiseCallback(ani_env *env, ani_object aniObj)
-{
-    if (env == nullptr || aniObj == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null env or null aniObj");
-        return;
-    }
-    ani_long destroyCallbackPoint = 0;
-    ani_status status = ANI_ERROR;
-    if ((status = env->Object_GetFieldByName_Long(aniObj, "destroyCallbackPoint", &destroyCallbackPoint)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
-        return;
-    }
-    auto *callbackInfo = reinterpret_cast<AppExecFwk::AbilityTransactionCallbackInfo<> *>(destroyCallbackPoint);
-    if (callbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "null callbackInfo");
-        return;
-    }
-    callbackInfo->Call();
-    AppExecFwk::AbilityTransactionCallbackInfo<>::Destroy(callbackInfo);
-
-    if ((status = env->Object_SetFieldByName_Long(aniObj, "destroyCallbackPoint",
-        static_cast<ani_long>(0))) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "status : %{public}d", status);
-        return;
-    }
-}
-
 void EtsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     const std::shared_ptr<OHOSApplication> &application, std::shared_ptr<AbilityHandler> &handler,
     const sptr<IRemoteObject> &token)
@@ -107,6 +113,7 @@ void EtsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
         return;
     }
 
+    RegisterAbilityConfigUpdateCallback();
     if (record != nullptr) {
         token_ = record->GetToken();
     }
@@ -128,21 +135,37 @@ void EtsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
         TAG_LOGE(AAFwkTag::UI_EXT, "etsObj_ null");
         return;
     }
+    if (!BindNativeMethods()) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "BindNativeMethods failed");
+        return;
+    }
+    BindContext(etsRuntime_.GetAniEnv(), record->GetWant());
+    RegisterDisplayInfoChangedListener();
+}
 
+bool EtsUIExtension::BindNativeMethods()
+{
     auto env = etsRuntime_.GetAniEnv();
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "null env");
-        return;
+        return false;
     }
     std::array functions = {
-        ani_native_function { "nativeOnDestroyCallback", ":V", reinterpret_cast<void*>(EtsUIExtension::PromiseCallback) },
+        ani_native_function { "nativeOnDestroyCallback", ":V", reinterpret_cast<void*>(OnDestroyPromiseCallback) },
     };
-    ani_status status = ANI_ERROR;
-    if ((status = env->Class_BindNativeMethods(etsObj_->aniCls, functions.data(), functions.size())) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
+    ani_class cls {};
+    ani_status status = env->FindClass(UIEXTENSION_CLASS_NAME, &cls);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "FindClass failed status: %{public}d", status);
+        return false;
     }
-    BindContext(env, record->GetWant());
-    RegisterDisplayInfoChangedListener();
+    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "Class_BindNativeMethods status: %{public}d", status);
+        return false;
+    }
+    SetExtensionCommon(
+        EtsExtensionCommon::Create(etsRuntime_, static_cast<ETSNativeReference &>(*etsObj_), shellContextRef_));
+    return true;
 }
 
 ani_object EtsUIExtension::CreateETSContext(
@@ -175,18 +198,18 @@ void EtsUIExtension::BindContext(ani_env *env, std::shared_ptr<AAFwk::Want> want
     ani_field contextField = nullptr;
     auto status = env->Class_FindField(etsObj_->aniCls, "context", &contextField);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return;
     }
 
     ani_ref contextRef = nullptr;
     if ((status = env->GlobalReference_Create(contextObj, &contextRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
         return;
     }
 
     if ((status = env->Object_SetField_Ref(etsObj_->aniObj, contextField, contextRef)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::ETSRUNTIME, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
     }
     shellContextRef_ = std::make_shared<AppExecFwk::ETSNativeReference>();
     shellContextRef_->aniObj = contextObj;
@@ -209,6 +232,9 @@ void EtsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> s
     if (!env) {
         TAG_LOGE(AAFwkTag::UI_EXT, "env not found Ability.ets");
         return;
+    }
+    if (context != nullptr) {
+        EtsExtensionContext::ConfigurationUpdated(env, shellContextRef_, context->GetConfiguration());
     }
     const char *signature =
         "L@ohos/app/ability/AbilityConstant/AbilityConstant/LaunchParam;:V";
@@ -605,18 +631,11 @@ bool EtsUIExtension::CallObjectMethod(bool withResult, const char *name, const c
     return false;
 }
 
-void EtsUIExtension::OnConfigurationUpdated(const AppExecFwk::Configuration &configuration)
+void EtsUIExtension::OnAbilityConfigurationUpdated(const AppExecFwk::Configuration &configuration)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    Extension::OnConfigurationUpdated(configuration);
-    auto context = GetContext();
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "context null");
-        return;
-    }
-
-    auto configUtils = std::make_shared<ConfigurationUtils>();
-    configUtils->UpdateGlobalConfig(configuration, context->GetConfiguration(), context->GetResourceManager());
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnAbilityConfigurationUpdated called");
+    UIExtension::OnAbilityConfigurationUpdated(configuration);
     ConfigurationUpdated();
 }
 
@@ -644,7 +663,7 @@ void EtsUIExtension::OnAbilityResult(int requestCode, int resultCode, const Want
 
 void EtsUIExtension::ConfigurationUpdated()
 {
-    ani_env* env = etsRuntime_.GetAniEnv();
+    auto env = etsRuntime_.GetAniEnv();
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "env null");
         return;
@@ -654,12 +673,24 @@ void EtsUIExtension::ConfigurationUpdated()
         TAG_LOGE(AAFwkTag::UI_EXT, "context null");
         return;
     }
-
+    auto abilityConfig = context->GetAbilityConfiguration();
     auto fullConfig = context->GetConfiguration();
     if (fullConfig == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "fullConfig null");
         return;
     }
+    auto realConfig = AppExecFwk::Configuration(*fullConfig);
+    if (abilityConfig != nullptr) {
+        std::vector<std::string> changeKeyV;
+        realConfig.CompareDifferent(changeKeyV, *abilityConfig);
+        if (!changeKeyV.empty()) {
+            realConfig.Merge(changeKeyV, *abilityConfig);
+        }
+    }
+    auto realConfigPtr = std::make_shared<Configuration>(realConfig);
+    EtsExtensionContext::ConfigurationUpdated(env, shellContextRef_, realConfigPtr);
+    ani_object aniConfiguration = AppExecFwk::WrapConfiguration(env, realConfig);
+    CallObjectMethod(false, "onConfigurationUpdate", nullptr, aniConfiguration);
 }
 
 #ifdef SUPPORT_GRAPHICS

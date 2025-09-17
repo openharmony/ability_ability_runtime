@@ -34,6 +34,7 @@
 #include "js_error_utils.h"
 #include "js_runtime_utils.h"
 #include "js_uiservice_ability_connection.h"
+#include "js_ui_extension_callback.h"
 #include "js_ui_service_proxy.h"
 #include "json_utils.h"
 #include "mission_info.h"

@@ -230,8 +230,8 @@ public:
      */
     ErrCode SetMissionContinueState(const AAFwk::ContinueState &state) override;
 #ifdef SUPPORT_SCREEN
-    ErrCode StartAbilityByType(const std::string &type,
-        AAFwk::WantParams &wantParam, const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks) override;
+    ErrCode StartAbilityByType(const std::string &type, AAFwk::WantParams &wantParam,
+        std::shared_ptr<UIExtensionCallback> uiExtensionCallback) override;
 #endif
     ErrCode RequestModalUIExtension(const Want &want) override;
 

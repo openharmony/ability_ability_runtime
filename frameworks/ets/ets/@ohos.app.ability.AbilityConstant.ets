@@ -23,14 +23,14 @@ namespace AbilityConstant {
   }
 
   export interface LastExitDetailInfo {
-    pid: number;
+    pid: int;
     processName: string;
-    uid: number;
-    exitSubReason: number;
+    uid: int;
+    exitSubReason: int;
     exitMsg: string;
-    rss: number;
-    pss: number;
-    timestamp: number;
+    rss: int;
+    pss: int;
+    timestamp: long;
   }
 
   export enum LaunchReason {
@@ -118,14 +118,14 @@ class LaunchParamImpl implements AbilityConstant.LaunchParam {
 }
 
 class LastExitDetailInfoImpl implements AbilityConstant.LastExitDetailInfo {
-  pid: number = 0;
+  pid: int = 0;
   processName: string = '';
-  uid: number = 0;
-  exitSubReason: number = 0;
+  uid: int = 0;
+  exitSubReason: int = 0;
   exitMsg: string = '';
-  rss: number = 0;
-  pss: number = 0;
-  timestamp: number = 0;
+  rss: int = 0;
+  pss: int = 0;
+  timestamp: long = 0;
 }
 
 export default AbilityConstant;

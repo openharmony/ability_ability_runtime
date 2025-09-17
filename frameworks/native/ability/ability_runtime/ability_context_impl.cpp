@@ -1061,8 +1061,8 @@ Ace::UIContent* AbilityContextImpl::GetUIContent()
     return abilityCallback->GetUIContent();
 }
 
-ErrCode AbilityContextImpl::StartAbilityByType(const std::string &type,
-    AAFwk::WantParams &wantParams, const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks)
+ErrCode AbilityContextImpl::StartAbilityByType(
+    const std::string &type, AAFwk::WantParams &wantParams, std::shared_ptr<UIExtensionCallback> uiExtensionCallback)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "call");
     auto uiContent = GetUIContent();
@@ -1079,20 +1079,24 @@ ErrCode AbilityContextImpl::StartAbilityByType(const std::string &type,
         wantParams.Remove(FLAG_AUTH_READ_URI_PERMISSION);
     }
     Ace::ModalUIExtensionCallbacks callback;
-    callback.onError = [uiExtensionCallbacks](int32_t arg, const std::string &str1, const std::string &str2) {
-        uiExtensionCallbacks->OnError(arg);
+    if (uiExtensionCallback == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null uiExtensionCallback");
+        return ERR_INVALID_VALUE;
+    }
+    callback.onError = [uiExtensionCallback](int32_t arg, const std::string &str1, const std::string &str2) {
+        uiExtensionCallback->OnError(arg);
     };
-    callback.onRelease = [uiExtensionCallbacks](int32_t arg) {
-        uiExtensionCallbacks->OnRelease(arg);
+    callback.onRelease = [uiExtensionCallback](int32_t arg) {
+        uiExtensionCallback->OnRelease(arg);
     };
-    callback.onResult = [uiExtensionCallbacks](int32_t arg1, const OHOS::AAFwk::Want arg2) {
-        uiExtensionCallbacks->OnResult(arg1, arg2);
+    callback.onResult = [uiExtensionCallback](int32_t arg1, const OHOS::AAFwk::Want arg2) {
+        uiExtensionCallback->OnResult(arg1, arg2);
     };
-    callback.onReceive = [uiExtensionCallbacks](const AAFwk::WantParams& data) {
+    callback.onReceive = [uiExtensionCallback](const AAFwk::WantParams& data) {
         if (data.HasParam("onRequestSuccess")) {
             auto successParam = data.GetWantParams("onRequestSuccess");
             auto elementName = successParam.GetStringParam("name");
-            uiExtensionCallbacks->OnRequestSuccess(elementName);
+            uiExtensionCallback->OnRequestSuccess(elementName);
         } else if (data.HasParam("onRequestFailure")) {
             auto failureParam = data.GetWantParams("onRequestFailure");
             auto elementName = failureParam.GetStringParam("name");
@@ -1102,7 +1106,7 @@ ErrCode AbilityContextImpl::StartAbilityByType(const std::string &type,
                 return;
             }
             std::string failureMsg = failureParam.GetStringParam("failureMessage");
-            uiExtensionCallbacks->OnRequestFailure(elementName, failureCode, failureMsg);
+            uiExtensionCallback->OnRequestFailure(elementName, failureCode, failureMsg);
         }
     };
     Ace::ModalUIExtensionConfig config;
@@ -1111,8 +1115,8 @@ ErrCode AbilityContextImpl::StartAbilityByType(const std::string &type,
         TAG_LOGE(AAFwkTag::CONTEXT, "createModalUIExtension failed");
         return ERR_INVALID_VALUE;
     }
-    uiExtensionCallbacks->SetUIContent(uiContent);
-    uiExtensionCallbacks->SetSessionId(sessionId);
+    uiExtensionCallback->SetUIContent(uiContent);
+    uiExtensionCallback->SetSessionId(sessionId);
     return ERR_OK;
 }
 

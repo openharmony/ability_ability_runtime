@@ -26,6 +26,7 @@ constexpr const char* ABILITY_DELEGATOR_CLASS_NAME = "Lapplication/AbilityDelega
 constexpr const char* RECORD_CLASS_NAME = "Lescompat/Record;";
 constexpr const char* VOID_CONTEXT = ":Lapplication/Context/Context;";
 constexpr const char* STRING_NUMBER_ASYNCCALLBACK = "Lstd/core/String;DLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr const char* STRING_LONG_ASYNCCALLBACK = "Lstd/core/String;JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char* STRING_VOID = "Lstd/core/String;:V";
 constexpr const char* MONITOR_ASYNCCALLBACK_VOID =
     "Lapplication/AbilityMonitor/AbilityMonitor;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
@@ -34,19 +35,23 @@ constexpr const char* ARGS_ABILITY_DELEGATOR_CLASS_NAME =
     "Lapplication/abilityDelegatorArgs/AbilityDelegatorArgsInner;";
 constexpr const char* SIGNATURE_MONITOR_VOID = "Lapplication/AbilityMonitor/AbilityMonitor;:V";
 constexpr const char* SIGNATURE_MONITOR_NUMBER_ASYNCCALLBACK =
-    "Lapplication/AbilityMonitor/AbilityMonitor;DLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "Lapplication/AbilityMonitor/AbilityMonitor;JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char* STAGEMONITOR_ASYNCCALLBACK_VOID =
     "Lapplication/AbilityStageMonitor/AbilityStageMonitor;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char* STAGEMONITOR_VOID =
     "Lapplication/AbilityStageMonitor/AbilityStageMonitor;:V";
 constexpr const char* SIGNATURE_STAGEMONITOR_NUMBER_ASYNCCALLBACK =
-    "Lapplication/AbilityStageMonitor/AbilityStageMonitor;DLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+    "Lapplication/AbilityStageMonitor/AbilityStageMonitor;JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char* STAGEMONITOR_UIABILITY_ASYNCCALLBACK =
     "L@ohos/app/ability/UIAbility/UIAbility;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
 constexpr const char* STRING_ASYNCCALLBACK_VOID = "Lstd/core/String;Lutils/AbilityUtils/AsyncCallbackWrapper;:V";
-constexpr const char* STRING_UIABILITY_NUMBER = "L@ohos/app/ability/UIAbility/UIAbility;:D";
+constexpr const char* STRING_UIABILITY_NUMBER = "L@ohos/app/ability/UIAbility/UIAbility;:I";
 constexpr const char* STRING_CALLBACK_UIABILITY =
     "Lutils/AbilityUtils/AsyncCallbackWrapper;:L@ohos/app/ability/UIAbility/UIAbility;";
+constexpr const char* RECORD_GET_NAME =
+    "X{C{std.core.BaseEnum}C{std.core.Numeric}C{std.core.String}}:C{std.core.Object}";
+constexpr const char* RECORD_SET_NAME =
+    "X{C{std.core.BaseEnum}C{std.core.Numeric}C{std.core.String}}C{std.core.Object}:";
 }
 
 bool BindFunctions(ani_env *aniEnv, ani_class abilityDelegator)
@@ -59,7 +64,7 @@ bool BindFunctions(ani_env *aniEnv, ani_class abilityDelegator)
             reinterpret_cast<void *>(EtsAbilityDelegator::GetAppContext)},
         ani_native_function {"nativeExecuteShellCommand", STRING_NUMBER_ASYNCCALLBACK,
             reinterpret_cast<void *>(EtsAbilityDelegator::ExecuteShellCommand)},
-        ani_native_function {"nativeFinishTest", STRING_NUMBER_ASYNCCALLBACK,
+        ani_native_function {"nativeFinishTest", STRING_LONG_ASYNCCALLBACK,
             reinterpret_cast<void *>(EtsAbilityDelegator::FinishTest)},
         ani_native_function {"printSync", STRING_VOID, reinterpret_cast<void *>(EtsAbilityDelegator::PrintSync)},
         ani_native_function {"nativeAddAbilityMonitor", MONITOR_ASYNCCALLBACK_VOID,
@@ -108,34 +113,34 @@ ani_object CreateEtsAbilityDelegator(ani_env *aniEnv)
     TAG_LOGD(AAFwkTag::DELEGATOR, "CreateEtsAbilityDelegator");
     if (aniEnv == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null aniEnv");
-        return {};
+        return nullptr;
     }
     ani_class abilityDelegator = nullptr;
     ani_status status = ANI_ERROR;
     status = aniEnv->FindClass(ABILITY_DELEGATOR_CLASS_NAME, &abilityDelegator);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "find AbilityDelegatorInner failed status: %{public}d", status);
-        return {};
+        return nullptr;
     }
     TAG_LOGD(AAFwkTag::DELEGATOR, "find AbilityDelegator success");
 
     if (!BindFunctions(aniEnv, abilityDelegator)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "BindFunctions failed");
-        return {};
+        return nullptr;
     }
 
     ani_method method = nullptr;
     status = aniEnv->Class_FindMethod(abilityDelegator, "<ctor>", ":V", &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status: %{public}d", status);
-        return {};
+        return nullptr;
     }
     TAG_LOGD(AAFwkTag::DELEGATOR, "Class_FindMethod ctor success");
 
     ani_object object = nullptr;
     if (aniEnv->Object_New(abilityDelegator, method, &object) != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_New failed status: %{public}d", status);
-        return {};
+        return nullptr;
     }
 
     TAG_LOGD(AAFwkTag::DELEGATOR, "CreateEtsAbilityDelegator success");
@@ -192,13 +197,13 @@ void SetParameters(ani_env *aniEnv, ani_class arguments, ani_object argumentObje
         return;
     }
     ani_method recordGetMethod = nullptr;
-    status = aniEnv->Class_FindMethod(recordCls, "$_get", "Lstd/core/Object;:Lstd/core/Object;", &recordGetMethod);
+    status = aniEnv->Class_FindMethod(recordCls, "$_get", RECORD_GET_NAME, &recordGetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
     }
     ani_method recordSetMethod = nullptr;
-    status = aniEnv->Class_FindMethod(recordCls, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", &recordSetMethod);
+    status = aniEnv->Class_FindMethod(recordCls, "$_set", RECORD_SET_NAME, &recordSetMethod);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod failed status: %{public}d", status);
         return;
@@ -308,14 +313,14 @@ ani_object CreateEtsAbilityDelegatorArguments(
     TAG_LOGD(AAFwkTag::DELEGATOR, "CreateEtsAbilityDelegatorArguments");
     if (aniEnv == nullptr || abilityDelegatorArgs == nullptr) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "null aniEnv or abilityDelegatorArgs");
-        return {};
+        return nullptr;
     }
     ani_class arguments = nullptr;
     ani_status status = ANI_ERROR;
     status = aniEnv->FindClass(ARGS_ABILITY_DELEGATOR_CLASS_NAME, &arguments);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "find abilityDelegatorArgs failed status: %{public}d", status);
-        return {};
+        return nullptr;
     }
     TAG_LOGD(AAFwkTag::DELEGATOR, "find AbilityDelegatorArgs success");
 
@@ -323,7 +328,7 @@ ani_object CreateEtsAbilityDelegatorArguments(
     status = aniEnv->Class_FindMethod(arguments, "<ctor>", ":V", &method);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Class_FindMethod ctor failed status: %{public}d", status);
-        return {};
+        return nullptr;
     }
     TAG_LOGD(AAFwkTag::DELEGATOR, "Class_FindMethod ctor success");
 
@@ -331,7 +336,7 @@ ani_object CreateEtsAbilityDelegatorArguments(
     status = aniEnv->Object_New(arguments, method, &argumentObject);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Object_New failed status: %{public}d", status);
-        return {};
+        return nullptr;
     }
     TAG_LOGD(AAFwkTag::DELEGATOR, "Object_New success");
 

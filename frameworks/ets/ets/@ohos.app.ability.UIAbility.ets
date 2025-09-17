@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
+import Ability from '@ohos.app.ability.Ability';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import UIAbilityContext from 'application.UIAbilityContext';
 import Want from '@ohos.app.ability.Want';
 import window from '@ohos.window';
 import { AbilityUtils } from './utils/AbilityUtils';
 
-export default class UIAbility {
+export default class UIAbility extends Ability {
   private destroyCallbackPoint: long;
 
   private native nativeOnDestroyCallback(): void;
@@ -35,8 +36,7 @@ export default class UIAbility {
       this.onDestroy();
       return false;
     }
-    const isOverride = AbilityUtils.isOverride(derivedClassType, "onDestroyAsync", uiAbilityClassType);
-    if (isOverride) {
+    if (AbilityUtils.isOverride(derivedClassType, "onDestroyAsync", uiAbilityClassType)) {
       this.onDestroyAsync().then(() => this.nativeOnDestroyCallback());
       return true;
     }
@@ -74,8 +74,21 @@ export default class UIAbility {
   onForeground(): void {
   }
 
+  onWillForeground(): void {
+  }
+
+  onDidForeground(): void {
+  }
+
   onBackground(): void {
   }
+
+  onWillBackground(): void {
+  }
+
+  onDidBackground(): void {
+  }
+
 
   onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
   }
