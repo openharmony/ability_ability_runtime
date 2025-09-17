@@ -92,8 +92,20 @@ public:
     virtual ~AppStateCallback()
     {}
 
+    /**
+     * AbilityMgr's request is done.
+     *
+     * @param token Ability token.
+     * @param state Application state.
+     */
     virtual void OnAbilityRequestDone(const sptr<IRemoteObject> &token, const int32_t state) = 0;
 
+    /**
+     * Application state changed callback.
+     * Only observe APP_STATE_FOREGROUND and APP_STATE_BACKGROUND
+     *
+     * @param info Application state data.
+     */
     virtual void OnAppStateChanged(const AppInfo &info) = 0;
 
     virtual void NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) {}
@@ -115,8 +127,20 @@ public:
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 
+    /**
+     * @brief Notify abilityms start process failed when load ability
+     * @param abilityTokens abilities in died process.
+     */
     virtual void OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 
+    /**
+     * @brief Notify abilityms process info when an app dies
+     * @param accessTokenId app accessTokenId.
+     * @param exitInfo process running info.
+     * @param bundleName app bundleName.
+     * @param abilityNames started abilities.
+     * @param uiExtensionNames started ui extensions.
+     */
     virtual void OnCacheExitInfo(uint32_t accessTokenId, const AppExecFwk::RunningProcessInfo &exitInfo,
         const std::string &bundleName, const std::vector<std::string> &abilityNames,
         const std::vector<std::string> &uiExtensionNames) {}
@@ -127,14 +151,39 @@ public:
     StartSpecifiedAbilityResponse() = default;
     virtual ~StartSpecifiedAbilityResponse() = default;
 
+    /**
+     * @brief called when the module's onAcceptWant done to notify ability mgr to continue
+     * @param want request param being accepted
+     * @param flag specified flag return by application
+     * @param requestId a number represents a request
+     */
     virtual void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag,
         int32_t requestId) override;
+    
+    /**
+     * @brief called when the module's onAcceptWant happens time out
+     * @param requestId a number represents a request
+     */
     virtual void OnTimeoutResponse(int32_t requestId) override;
 
+    /**
+     * @brief called when the module's onNewProcessRequest returns a flag
+     * @param flag process flag
+     * @param requestId a number represents a request
+     */
     virtual void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId,
         const std::string &callerProcessName = "", int32_t recordId = 0) override;
+    
+    /**
+     * @brief called when the module's onNewProcessRequest happens time out
+     * @param requestId a number represents a request
+     */
     virtual void OnNewProcessRequestTimeoutResponse(int32_t requestId) override;
 
+    /**
+     * @brief called when the specified request fail fast
+     * @param requestId a number represents a request
+     */
     virtual void OnStartSpecifiedFailed(int32_t requestId) override;
 };
 
@@ -663,7 +712,12 @@ protected:
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
+    /**
+     * @brief Notify abilityms start process failed when load ability
+     * @param abilityTokens abilities in died process.
+     */
     virtual void OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
+
     /**
      * @brief Notify abilityms app process pre cache
      * @param pid process pid.
