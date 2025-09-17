@@ -1046,8 +1046,9 @@ void UvWorkNotifyMissionChanged(uv_work_t *work, int status)
         return;
     }
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(registerMissionCB->cbBase.cbInfo.env, &scope);
-    if (scope == nullptr) {
+    napi_status scopeStatus = napi_open_handle_scope(registerMissionCB->cbBase.cbInfo.env, &scope);
+    if (scopeStatus != napi_ok || scope == nullptr) {
+        TAG_LOGE(AAFwkTag::MISSION, "napi_open_handle_scope failed");
         delete registerMissionCB;
         registerMissionCB = nullptr;
         delete work;
@@ -1214,8 +1215,9 @@ void UvWorkNotifySnapshot(uv_work_t *work, int status)
         return;
     }
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(registerMissionCB->cbBase.cbInfo.env, &scope);
-    if (scope == nullptr) {
+    napi_status scopeStatus = napi_open_handle_scope(registerMissionCB->cbBase.cbInfo.env, &scope);
+    if (scopeStatus != napi_ok || scope == nullptr) {
+        TAG_LOGE(AAFwkTag::MISSION, "napi_open_handle_scope failed");
         delete registerMissionCB;
         registerMissionCB = nullptr;
         delete work;
@@ -1296,8 +1298,9 @@ void UvWorkNotifyNetDisconnect(uv_work_t *work, int status)
         return;
     }
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(registerMissionCB->cbBase.cbInfo.env, &scope);
-    if (scope == nullptr) {
+    napi_status scopeStatus = napi_open_handle_scope(registerMissionCB->cbBase.cbInfo.env, &scope);
+    if (scopeStatus != napi_ok || scope == nullptr) {
+        TAG_LOGE(AAFwkTag::MISSION, "napi_open_handle_scope failed");
         delete registerMissionCB;
         registerMissionCB = nullptr;
         delete work;
@@ -2031,8 +2034,9 @@ ContinueAbilityCB *CheckAndGetParameters(uv_work_t *work, napi_handle_scope *sco
         delete work;
         return nullptr;
     }
-    napi_open_handle_scope(continueAbilityCB->cbBase.cbInfo.env, scope);
-    if (scope == nullptr) {
+    napi_status scopeStatus = napi_open_handle_scope(continueAbilityCB->cbBase.cbInfo.env, scope);
+    if (scopeStatus != napi_ok || scope == nullptr) {
+        TAG_LOGE(AAFwkTag::MISSION, "napi_open_handle_scope failed");
         delete continueAbilityCB;
         continueAbilityCB = nullptr;
         delete work;
