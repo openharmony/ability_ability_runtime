@@ -296,6 +296,9 @@ public:
 
     virtual void OnExecuteIntent(const Want &want) = 0;
 
+    /**
+     * @brief Called when the UIAbility has been started by call.
+     */
     virtual void CallRequest() = 0;
 
     /**

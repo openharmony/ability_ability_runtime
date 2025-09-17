@@ -69,6 +69,10 @@ public:
      */
     virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
+    /**
+     * @brief Notify abilityms start process failed when load ability
+     * @param abilityTokens abilities in died process.
+     */
     virtual void OnStartProcessFailed(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
     /**
@@ -78,6 +82,14 @@ public:
      */
     virtual void NotifyAppPreCache(int32_t pid, int32_t userId) override;
 
+    /**
+     * @brief Notify abilityms process info when an app dies
+     * @param accessTokenId app accessTokenId.
+     * @param exitInfo process running info.
+     * @param bundleName app bundleName.
+     * @param abilityNames started abilities.
+     * @param uiExtensionNames started ui extensions.
+     */
     virtual void OnCacheExitInfo(uint32_t accessTokenId, const RunningProcessInfo &exitInfo,
         const std::string &bundleName, const std::vector<std::string> &abilityNames,
         const std::vector<std::string> &uiExtensionNames) override;
