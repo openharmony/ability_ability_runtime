@@ -16,6 +16,7 @@
 #include "js_ability_stage.h"
 
 #include "ability_delegator_registry.h"
+#include "event_report.h"
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "js_ability_stage_context.h"
@@ -720,6 +721,23 @@ int32_t JsAbilityStage::RunAutoStartupTaskInner(const std::function<void()> &cal
             TAG_LOGI(AAFwkTag::APPKIT, "OnCompletedCallback");
             callback();
         });
+    const auto timeoutCallback = [moduleName]() {
+        auto startupManager = DelayedSingleton<StartupManager>::GetInstance();
+        if (startupManager == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "null startupManager");
+            return;
+        }
+        AAFwk::EventInfo eventInfo;
+        eventInfo.errCode = ERR_STARTUP_TIMEOUT;
+        eventInfo.errMsg = "Auto task timeout.";
+        eventInfo.bundleName = startupManager->GetBundleName();
+        eventInfo.appIndex = startupManager->GetAppIndex();
+        eventInfo.moduleName = moduleName;
+        eventInfo.userId = startupManager->GetUid() / AppExecFwk::Constants::BASE_USER_RANGE;
+        AAFwk::EventReport::SendAppStartupErrorEvent(
+            AAFwk::EventName::APP_STARTUP_ERROR, HiSysEventType::FAULT, eventInfo);
+    };
+    startupTaskManager->SetTimeoutCallback(timeoutCallback);
     result = startupTaskManager->Run(runAutoStartupCallback);
     if (result != ERR_OK) {
         isAsyncCallback = runAutoStartupCallback->IsCalled();
