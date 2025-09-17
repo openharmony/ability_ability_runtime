@@ -110,6 +110,18 @@ HWTEST_F(StartupUtilTest, IsSupportAppClone_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsSupportAppClone_003
+ * @tc.desc: test FAULT_LOG support app clone
+ * @tc.type: FUNC
+ */
+HWTEST_F(StartupUtilTest, IsSupportAppClone_003, TestSize.Level1)
+{
+    AppExecFwk::ExtensionAbilityType type = AppExecFwk::ExtensionAbilityType::FAULT_LOG;
+    auto queryRet = StartupUtil::IsSupportAppClone(type);
+    EXPECT_TRUE(queryRet);
+}
+
+/**
  * @tc.name: GenerateFullRequestCode_001
  * @tc.desc: test class StartupUtil number function GenerateFullRequestCode
  * @tc.type: FUNC
