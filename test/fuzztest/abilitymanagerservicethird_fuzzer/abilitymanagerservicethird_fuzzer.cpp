@@ -76,7 +76,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityms->HandleActiveTimeOut(int64Param);
     abilityms->HandleInactiveTimeOut(int64Param);
     abilityms->HandleForegroundTimeOut(int64Param);
-    abilityms->VerificationToken(token);
     abilityms->VerificationAllToken(token);
     sptr<IAbilityScheduler> scheduler;
     abilityms->GetDataAbilityManager(scheduler);

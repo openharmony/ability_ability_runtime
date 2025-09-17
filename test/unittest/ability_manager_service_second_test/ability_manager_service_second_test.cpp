@@ -1387,25 +1387,6 @@ HWTEST_F(AbilityManagerServiceSecondTest, IsAbilityControllerStartById_001, Test
 
 /*
  * Feature: AbilityManagerService
- * Function: GetConnectRecordListByCallback
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService GetConnectRecordListByCallback
- */
-HWTEST_F(AbilityManagerServiceSecondTest, GetConnectRecordListByCallback_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GetConnectRecordListByCallback_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    auto temp = abilityMs_->subManagersHelper_->currentConnectManager_;
-    abilityMs_->subManagersHelper_->currentConnectManager_.reset();
-    std::list<std::shared_ptr<ConnectionRecord>> connectList;
-    EXPECT_EQ(abilityMs_->GetConnectRecordListByCallback(nullptr), connectList);
-    abilityMs_->subManagersHelper_->currentConnectManager_ = temp;
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest GetConnectRecordListByCallback_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: AcquireDataAbility
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService AcquireDataAbility
