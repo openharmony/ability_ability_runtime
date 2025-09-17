@@ -356,8 +356,12 @@ bool JsAutoFillExtension::CallPromise(napi_value result, AppExecFwk::AbilityTran
     }
     HandleScope handleScope(jsRuntime_);
     napi_value promiseCallback = nullptr;
-    napi_create_function(env, "promiseCallback", strlen("promiseCallback"), PromiseCallback,
+    napi_status createStatus = napi_create_function(env, "promiseCallback", strlen("promiseCallback"), PromiseCallback,
         callbackInfo, &promiseCallback);
+    if (createStatus != napi_ok || promiseCallback == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "napi_create_reference failed, %{public}d", createStatus);
+        return false;
+    }
     napi_value argv[1] = { promiseCallback };
     napi_call_function(env, result, then, 1, argv, nullptr);
     return true;

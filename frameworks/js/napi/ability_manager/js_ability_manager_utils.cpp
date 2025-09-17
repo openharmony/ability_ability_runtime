@@ -46,7 +46,11 @@ napi_value CreateJSToken(napi_env env, const sptr<IRemoteObject> target)
 napi_value CreateJsAbilityRunningInfoArray(napi_env env, const std::vector<AAFwk::AbilityRunningInfo> &infos)
 {
     napi_value arrayValue = nullptr;
-    napi_create_array_with_length(env, infos.size(), &arrayValue);
+    napi_status createStatus = napi_create_array_with_length(env, infos.size(), &arrayValue);
+    if (createStatus != napi_ok || arrayValue == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "napi_create_reference failed, %{public}d", createStatus);
+        return nullptr;
+    }
     uint32_t index = 0;
     for (const auto &runningInfo : infos) {
         napi_set_element(env, arrayValue, index++, CreateJsAbilityRunningInfo(env, runningInfo));
@@ -62,7 +66,11 @@ napi_value CreateJsElementName(napi_env env, const AppExecFwk::ElementName &elem
 napi_value CreateJsExtensionRunningInfoArray(napi_env env, const std::vector<AAFwk::ExtensionRunningInfo> &infos)
 {
     napi_value arrayValue = nullptr;
-    napi_create_array_with_length(env, infos.size(), &arrayValue);
+    napi_status createStatus = napi_create_array_with_length(env, infos.size(), &arrayValue);
+    if (createStatus != napi_ok || arrayValue == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null arrayValue");
+        return nullptr;
+    }
     uint32_t index = 0;
     for (const auto &runningInfo : infos) {
         napi_set_element(env, arrayValue, index++, CreateJsExtensionRunningInfo(env, runningInfo));
@@ -73,7 +81,11 @@ napi_value CreateJsExtensionRunningInfoArray(napi_env env, const std::vector<AAF
 napi_value CreateJsAbilityRunningInfo(napi_env env, const AAFwk::AbilityRunningInfo &info)
 {
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
+    napi_status createStatus = napi_create_object(env, &objValue);
+    if (createStatus != napi_ok || objValue == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null ObjValue");
+        return nullptr;
+    }
 
     napi_value napiElementName = OHOS::AppExecFwk::WrapElementName(env, info.ability);
     napi_set_named_property(env, objValue, "ability", napiElementName);
@@ -88,7 +100,11 @@ napi_value CreateJsAbilityRunningInfo(napi_env env, const AAFwk::AbilityRunningI
 napi_value CreateJsExtensionRunningInfo(napi_env env, const AAFwk::ExtensionRunningInfo &info)
 {
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
+    napi_status createStatus = napi_create_object(env, &objValue);
+    if (createStatus != napi_ok || objValue == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null ObjValue");
+        return nullptr;
+    }
 
     napi_value napiElementName = OHOS::AppExecFwk::WrapElementName(env, info.extension);
     napi_set_named_property(env, objValue, "extension", napiElementName);
@@ -105,7 +121,11 @@ napi_value AbilityStateInit(napi_env env)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
+    napi_status createStatus = napi_create_object(env, &objValue);
+    if (createStatus != napi_ok || objValue == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null ObjValue");
+        return nullptr;
+    }
 
     napi_set_named_property(env, objValue, "INITIAL", CreateJsValue(env, AAFwk::AbilityState::INITIAL));
     napi_set_named_property(env, objValue, "FOCUS", CreateJsValue(env, AAFwk::AbilityState::ACTIVE));
@@ -120,7 +140,11 @@ napi_value UserStatusInit(napi_env env)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     napi_value objValue = nullptr;
-    napi_create_object(env, &objValue);
+    napi_status createStatus = napi_create_object(env, &objValue);
+    if (createStatus != napi_ok || objValue == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null ObjValue");
+        return nullptr;
+    }
 
     napi_set_named_property(
         env, objValue, "ASSERT_TERMINATE", CreateJsValue(env, AAFwk::UserStatus::ASSERT_TERMINATE));
@@ -133,8 +157,8 @@ napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilit
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     napi_value object = nullptr;
-    napi_create_object(env, &object);
-    if (object == nullptr) {
+    napi_status createStatus = napi_create_object(env, &object);
+    if (createStatus != napi_ok || object == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null ObjValue");
         return nullptr;
     }
@@ -156,7 +180,11 @@ napi_value CreateJsAbilityStateDataArray(
     napi_env env, const std::vector<AppExecFwk::AbilityStateData> &abilityStateDatas)
 {
     napi_value arrayValue = nullptr;
-    napi_create_array_with_length(env, abilityStateDatas.size(), &arrayValue);
+    napi_status createStatus = napi_create_array_with_length(env, abilityStateDatas.size(), &arrayValue);
+    if (createStatus != napi_ok || arrayValue == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "napi_create_reference failed, %{public}d", createStatus);
+        return nullptr;
+    }
     uint32_t index = 0;
     for (const auto &abilityStateData : abilityStateDatas) {
         napi_set_element(env, arrayValue, index++, CreateJsAbilityStateData(env, abilityStateData));

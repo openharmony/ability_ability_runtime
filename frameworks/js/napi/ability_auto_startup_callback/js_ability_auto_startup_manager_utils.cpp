@@ -71,7 +71,11 @@ bool IsNormalObject(napi_env env, napi_value value)
 napi_value CreateJsAutoStartupInfoArray(napi_env env, const std::vector<AutoStartupInfo> &infoList)
 {
     napi_value arrayObj = nullptr;
-    napi_create_array(env, &arrayObj);
+    napi_status createStatus = napi_create_array(env, &arrayObj);
+    if (createStatus != napi_ok || arrayObj == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "napi_create_reference failed, %{public}d", createStatus);
+        return nullptr;
+    }
     for (size_t i = 0; i < infoList.size(); ++i) {
         auto object = CreateJsAutoStartupInfo(env, infoList.at(i));
         if (object == nullptr) {

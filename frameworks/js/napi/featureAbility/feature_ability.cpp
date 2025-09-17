@@ -119,9 +119,11 @@ napi_value JsFeatureAbilityInit(napi_env env, napi_value exports)
     napi_value contextValue = CreateNapiJSContext(env);
     if (contextValue != nullptr) {
         napi_ref contextRef = nullptr;
-        napi_create_reference(env, contextValue, 1, &contextRef);
-        jsFeatureAbility->SetFAContext(
-            std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(contextRef)));
+        napi_status createStatus = napi_create_reference(env, contextValue, 1, &contextRef);
+        if (createStatus == napi_ok && contextRef != nullptr) {
+            jsFeatureAbility->SetFAContext(
+                std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference*>(contextRef)));
+        }
     }
     napi_wrap(env, exports, jsFeatureAbility.release(), JsFeatureAbility::Finalizer, nullptr, nullptr);
 
