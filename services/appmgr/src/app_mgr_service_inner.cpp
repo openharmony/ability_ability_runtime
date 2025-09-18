@@ -5928,7 +5928,6 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
     if (ret != ERR_OK) {
         return ret;
     }
-
     // all app
     int32_t result = appRunningManager_->UpdateConfiguration(config, notifyUserId);
     HandleConfigurationChange(config, notifyUserId);
@@ -5944,6 +5943,62 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config, con
         }
     }
 
+    return result;
+}
+
+int32_t AppMgrServiceInner::UpdateConfigurationByUserIds(
+    const Configuration &config, const std::vector<int32_t> userIds)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
+        return ERR_INVALID_VALUE;
+    }
+    CHECK_CALLER_IS_SYSTEM_APP;
+    auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyUpdateConfigurationPerm();
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
+    std::vector<int32_t> effectiveUserIds = userIds;
+    if (effectiveUserIds.empty()) {
+        std::vector<AccountSA::ForegroundOsAccount> accounts;
+        auto errCode = AccountSA::OsAccountManager::GetForegroundOsAccounts(accounts);
+        if (errCode != ERR_OK) {
+            return errCode;
+        }
+        for (const auto &account : accounts) {
+            effectiveUserIds.push_back(account.localId);
+        }
+    }
+
+    int32_t result = ERR_OK;
+    std::set<int32_t> notifiedUserIds;
+    for (const auto& userId : effectiveUserIds) {
+        int32_t notifyUserId = -1;
+        ret = DealWithUserConfiguration(config, userId, notifyUserId);
+        if (ret != ERR_OK) {
+            TAG_LOGW(AAFwkTag::APPMGR, "DealWithUserConfiguration failed for userId: %{public}d", userId);
+            continue;
+        }
+
+        int32_t updateResult = appRunningManager_->UpdateConfiguration(config, notifyUserId);
+        if (updateResult != ERR_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "UpdateConfiguration failed for notifyUserId: %{public}d", notifyUserId);
+            result = updateResult;
+        }
+        notifiedUserIds.emplace(notifyUserId);
+    }
+    if (!notifiedUserIds.empty()) {
+        HandleConfigurationChange(config, notifiedUserIds);
+        std::lock_guard<ffrt::mutex> notifyLock(configurationObserverLock_);
+        for (auto &item : configurationObservers_) {
+            if (item.observer != nullptr &&
+                (item.userId == 0 || notifiedUserIds.find(item.userId) != notifiedUserIds.end())) {
+                item.observer->OnConfigurationUpdated(config);
+            }
+        }
+    }
     return result;
 }
 
@@ -6053,6 +6108,22 @@ void AppMgrServiceInner::HandleConfigurationChange(const Configuration& config, 
         if (item.callback != nullptr && (userId == -1 || item.userId == 0 || item.userId == userId)) {
             item.callback->NotifyConfigurationChange(config,
                 UserController::GetInstance().GetForegroundUserId(DEFAULT_DISPLAY_ID));
+        }
+    }
+}
+
+void AppMgrServiceInner::HandleConfigurationChange(const Configuration& config, const std::set<int32_t>& userIds)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::lock_guard lock(appStateCallbacksLock_);
+
+    for (const auto &item : appStateCallbacks_) {
+        if (item.userId == 0) {
+            item.callback->NotifyConfigurationChange(config,
+                UserController::GetInstance().GetForegroundUserId(DEFAULT_DISPLAY_ID));
+        }
+        if (item.callback != nullptr && userIds.find(item.userId) != userIds.end()) {
+            item.callback->NotifyConfigurationChange(config, item.userId);
         }
     }
 }
@@ -6171,6 +6242,17 @@ std::shared_ptr<AppExecFwk::Configuration> AppMgrServiceInner::GetConfiguration(
         userId = USER100;
     }
     TAG_LOGD(AAFwkTag::APPMGR, "GetForegroundOsAccountLocalId userId: %{public}d", userId);
+    return multiUserConfigurationMgr_->GetConfigurationByUserId(userId);
+}
+
+std::shared_ptr<AppExecFwk::Configuration> AppMgrServiceInner::GetConfiguration(int32_t userId)
+{
+    if (multiUserConfigurationMgr_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "multiUserConfigurationMgr_ null");
+        return nullptr;
+    }
+
+    TAG_LOGD(AAFwkTag::APPMGR, "Using specified user ID: %{public}d", userId);
     return multiUserConfigurationMgr_->GetConfigurationByUserId(userId);
 }
 

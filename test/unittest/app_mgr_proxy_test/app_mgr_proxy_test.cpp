@@ -1120,5 +1120,59 @@ HWTEST_F(AppMgrProxyTest, QueryRunningSharedBundles_0400, TestSize.Level1)
     EXPECT_FALSE(sharedBundles.empty());
     TAG_LOGI(AAFwkTag::TEST, "QueryRunningSharedBundles_0300 end.");
 }
+
+/**
+ * @tc.name: UpdateConfigurationByUserIds_001
+ * @tc.desc: UpdateConfigurationByUserIds.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppMgrProxyTest, UpdateConfigurationByUserIds_001, TestSize.Level2)
+{
+    Configuration config;
+    std::vector<int32_t> userIds;
+    auto ret = appMgrProxy_->UpdateConfigurationByUserIds(config, userIds);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: GetConfiguration_001
+ * @tc.desc: GetConfiguration.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppMgrProxyTest, GetConfiguration_001, TestSize.Level2)
+{
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .WillOnce(Invoke([](uint32_t, MessageParcel&, MessageParcel& reply, MessageOption&) {
+            reply.WriteInt32(ERR_OK);
+            return NO_ERROR;
+        }));
+    Configuration config;
+    int32_t result = appMgrProxy_->GetConfiguration(config, USER_ID);
+    EXPECT_EQ(result, ERR_UNKNOWN_OBJECT);
+}
+
+/**
+ * @tc.name: GetConfiguration_002
+ * @tc.desc: GetConfiguration.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AppMgrProxyTest, GetConfiguration_002, TestSize.Level2)
+{
+    Configuration expectedConfig;
+    expectedConfig.AddItem("key", "test");
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .WillOnce(Invoke([&expectedConfig](uint32_t, MessageParcel &, MessageParcel &reply, MessageOption &) {
+            reply.WriteParcelable(&expectedConfig);
+            reply.WriteInt32(ERR_OK);
+            return NO_ERROR;
+        }));
+    Configuration config;
+    std::string key = "key";
+    int32_t result = appMgrProxy_->GetConfiguration(config, USER_ID);
+    EXPECT_EQ(result, ERR_OK);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

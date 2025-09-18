@@ -467,6 +467,8 @@ public:
      */
     virtual int32_t GetConfiguration(Configuration& config) = 0;
 
+    virtual int32_t GetConfiguration(Configuration& config, int32_t userid) = 0;
+
     /**
      * UpdateConfiguration, ANotify application update system environment changes.
      *
@@ -475,6 +477,9 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t UpdateConfiguration(const Configuration &config, const int32_t userId = -1) = 0;
+
+    virtual int32_t UpdateConfigurationByUserIds(
+        const Configuration &config, const std::vector<int32_t> userIds) = 0;
 
     /**
      * UpdateConfigurationForBackgroundApp
