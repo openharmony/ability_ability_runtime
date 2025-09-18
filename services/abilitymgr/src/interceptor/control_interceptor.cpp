@@ -15,9 +15,13 @@
 
 #include "interceptor/control_interceptor.h"
 
+#include "ability_manager_client.h"
 #include "ability_util.h"
 #include "appexecfwk_errors.h"
 #include "hitrace_meter.h"
+#include "in_process_call_wrapper.h"
+#include "ipc_skeleton.h"
+#include "want_params_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
