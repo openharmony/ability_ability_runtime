@@ -30,38 +30,47 @@ int32_t StartSpecifiedAbilityResponseStub::HandleOnAcceptWantResponse(MessagePar
     }
 
     auto flag = Str16ToStr8(data.ReadString16());
-    OnAcceptWantResponse(*want, flag, data.ReadInt32());
+    auto requestId = data.ReadInt32();
+    auto userId = data.ReadInt32();
+    OnAcceptWantResponse(*want, flag, requestId, userId);
     delete want;
     return NO_ERROR;
 }
 
 int32_t StartSpecifiedAbilityResponseStub::HandleOnTimeoutResponse(MessageParcel &data, MessageParcel &reply)
 {
-    OnTimeoutResponse(data.ReadInt32());
+    auto requestId = data.ReadInt32();
+    auto userId = data.ReadInt32();
+    OnTimeoutResponse(requestId, userId);
     return NO_ERROR;
 }
 
 int32_t StartSpecifiedAbilityResponseStub::HandleOnNewProcessRequestResponse(MessageParcel &data, MessageParcel &reply)
 {
     auto flag = Str16ToStr8(data.ReadString16());
+    auto userId = data.ReadInt32();
     auto requestId = data.ReadInt32();
     auto callerProcessName = Str16ToStr8(data.ReadString16());
     auto recordId = data.ReadInt32();
-    OnNewProcessRequestResponse(flag, requestId, callerProcessName, recordId);
+    OnNewProcessRequestResponse(flag, userId, requestId, callerProcessName, recordId);
     return NO_ERROR;
 }
 
 int32_t StartSpecifiedAbilityResponseStub::HandleOnNewProcessRequestTimeoutResponse(MessageParcel &data,
     MessageParcel &reply)
 {
-    OnNewProcessRequestTimeoutResponse(data.ReadInt32());
+    auto requestId = data.ReadInt32();
+    auto userId = data.ReadInt32();
+    OnNewProcessRequestTimeoutResponse(requestId, userId);
     return NO_ERROR;
 }
 
 int32_t StartSpecifiedAbilityResponseStub::HandleOnStartSpecifiedFailed(MessageParcel &data,
     MessageParcel &reply)
 {
-    OnStartSpecifiedFailed(data.ReadInt32());
+    auto requestId = data.ReadInt32();
+    auto userId = data.ReadInt32();
+    OnStartSpecifiedFailed(requestId, userId);
     return NO_ERROR;
 }
 

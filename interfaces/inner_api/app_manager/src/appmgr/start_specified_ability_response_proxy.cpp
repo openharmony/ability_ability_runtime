@@ -33,7 +33,7 @@ bool StartSpecifiedAbilityResponseProxy::WriteInterfaceToken(MessageParcel &data
 }
 
 void StartSpecifiedAbilityResponseProxy::OnAcceptWantResponse(
-    const AAFwk::Want &want, const std::string &flag, int32_t requestId)
+    const AAFwk::Want &want, const std::string &flag, int32_t requestId, int32_t userId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "On accept want by proxy.");
     MessageParcel data;
@@ -47,6 +47,10 @@ void StartSpecifiedAbilityResponseProxy::OnAcceptWantResponse(
         TAG_LOGE(AAFwkTag::APPMGR, "Write data failed.");
         return;
     }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write userId failed.");
+        return;
+    }
 
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IStartSpecifiedAbilityResponse::Message::ON_ACCEPT_WANT_RESPONSE), data, reply, option);
@@ -55,7 +59,7 @@ void StartSpecifiedAbilityResponseProxy::OnAcceptWantResponse(
     }
 }
 
-void StartSpecifiedAbilityResponseProxy::OnTimeoutResponse(int32_t requestId)
+void StartSpecifiedAbilityResponseProxy::OnTimeoutResponse(int32_t requestId, int32_t userId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "On timeout response by proxy.");
     MessageParcel data;
@@ -66,6 +70,10 @@ void StartSpecifiedAbilityResponseProxy::OnTimeoutResponse(int32_t requestId)
     }
     if (!data.WriteInt32(requestId)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write data failed.");
+        return;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write userId failed.");
         return;
     }
 
@@ -89,7 +97,7 @@ int32_t StartSpecifiedAbilityResponseProxy::SendTransactCmd(uint32_t code, Messa
 }
 
 void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestResponse(const std::string &flag,
-    int32_t requestId, const std::string &callerProcessName, int32_t recordId)
+    int32_t userId, int32_t requestId, const std::string &callerProcessName, int32_t recordId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "On satrt specified process response by proxy.");
     MessageParcel data;
@@ -98,7 +106,7 @@ void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestResponse(const std::
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    if (!data.WriteString(flag) || !data.WriteInt32(requestId) ||
+    if (!data.WriteString(flag) || !data.WriteInt32(userId) || !data.WriteInt32(requestId) ||
         !data.WriteString(callerProcessName) || !data.WriteInt32(recordId)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write data failed.");
         return;
@@ -117,7 +125,7 @@ void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestResponse(const std::
     }
 }
 
-void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestTimeoutResponse(int32_t requestId)
+void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestTimeoutResponse(int32_t requestId, int32_t userId)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "On start specified process timeout response by proxy.");
     MessageParcel data;
@@ -128,6 +136,10 @@ void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestTimeoutResponse(int3
     }
     if (data.WriteInt32(requestId)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write data failed.");
+        return;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write userId failed.");
         return;
     }
 
@@ -144,7 +156,7 @@ void StartSpecifiedAbilityResponseProxy::OnNewProcessRequestTimeoutResponse(int3
     }
 }
 
-void StartSpecifiedAbilityResponseProxy::OnStartSpecifiedFailed(int32_t requestId)
+void StartSpecifiedAbilityResponseProxy::OnStartSpecifiedFailed(int32_t requestId, int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -154,6 +166,10 @@ void StartSpecifiedAbilityResponseProxy::OnStartSpecifiedFailed(int32_t requestI
     }
     if (!data.WriteInt32(requestId)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write data failed.");
+        return;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write userId failed.");
         return;
     }
 

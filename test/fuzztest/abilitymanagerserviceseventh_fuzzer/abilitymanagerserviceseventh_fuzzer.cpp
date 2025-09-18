@@ -101,7 +101,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityms->IsRamConstrainedDevice();
     AmsConfigurationParameter::GetInstance().GetMissionSaveTime();
     abilityms->GetMissionIdByAbilityToken(token);
-    abilityms->GetAbilityTokenByMissionId(int32Param);
     abilityms->StartRemoteAbilityByCall(*want, token, token);
     AppExecFwk::ElementName element;
     abilityms->ReleaseRemoteAbility(token, element);

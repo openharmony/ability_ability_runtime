@@ -31,34 +31,40 @@ public:
      * @param want request param being accepted
      * @param flag specified flag return by application
      * @param requestId a number represents a request
+     * @param userId The user id
      */
-    virtual void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId) = 0;
+    virtual void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId,
+        int32_t userId) = 0;
 
     /**
      * @brief called when the module's onAcceptWant happens time out
      * @param requestId a number represents a request
+     * @param userId The user id
      */
-    virtual void OnTimeoutResponse(int32_t requestId) = 0;
+    virtual void OnTimeoutResponse(int32_t requestId, int32_t userId) = 0;
 
     /**
      * @brief called when the module's onNewProcessRequest returns a flag
      * @param flag process flag
+     * @param userId The user id
      * @param requestId a number represents a request
      */
-    virtual void OnNewProcessRequestResponse(const std::string &flag,
+    virtual void OnNewProcessRequestResponse(const std::string &flag, int32_t userId,
         int32_t requestId, const std::string &callerProcessName = "", int32_t recordId = 0) = 0;
 
     /**
      * @brief called when the module's onNewProcessRequest happens time out
      * @param requestId a number represents a request
+     * @param userId The user id
      */
-    virtual void OnNewProcessRequestTimeoutResponse(int32_t requestId) = 0;
+    virtual void OnNewProcessRequestTimeoutResponse(int32_t requestId, int32_t userId) = 0;
 
     /**
      * @brief called when the specified request fail fast
      * @param requestId a number represents a request
+     * @param userId The user id
      */
-    virtual void OnStartSpecifiedFailed(int32_t requestId) {};
+    virtual void OnStartSpecifiedFailed(int32_t requestId, int32_t userId) {};
 
     enum Message {
         ON_ACCEPT_WANT_RESPONSE = 0,

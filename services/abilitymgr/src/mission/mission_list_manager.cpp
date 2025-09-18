@@ -3797,11 +3797,11 @@ void MissionListManager::RegisterSnapshotHandler(const sptr<ISnapshotHandler>& h
     DelayedSingleton<MissionInfoMgr>::GetInstance()->RegisterSnapshotHandler(handler);
 }
 
-bool MissionListManager::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
-    MissionSnapshot& missionSnapshot, bool isLowResolution)
+bool MissionListManager::GetMissionSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot, bool isLowResolution)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "snapshot: Start get mission snapshot.");
+    auto abilityToken = GetAbilityTokenByMissionId(missionId);
     bool forceSnapshot = false;
     {
         std::lock_guard guard(managerLock_);
