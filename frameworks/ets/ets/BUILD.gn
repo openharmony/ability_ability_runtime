@@ -1151,6 +1151,21 @@ ohos_prebuilt_etc("ability_runtime_running_multi_instance_info_abc_etc") {
   deps = [ ":ability_runtime_running_multi_instance_info_abc" ]
 }
 
+generate_static_abc("appRecovery_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.appRecovery.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/appRecovery_abc.abc"
+}
+
+ohos_prebuilt_etc("appRecovery_abc_etc") {
+  source = "$target_out_dir/appRecovery_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":appRecovery_abc" ]
+}
+
 group("ets_packages") {
   deps = [
     ":ability_application_abc_etc",
@@ -1214,6 +1229,7 @@ group("ets_packages") {
     ":ability_runtime_want_agent_abc_etc",
     ":ability_runtime_want_agent_info_abc_etc",
     ":ability_runtime_want_constant_abc_etc",
+    ":appRecovery_abc_etc",
     ":app_foreground_state_observer_abc_etc",
     ":application_state_observer_abc_etc",
     ":atomic_service_options_abc_etc",
