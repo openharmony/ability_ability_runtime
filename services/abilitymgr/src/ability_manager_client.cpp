@@ -1322,7 +1322,7 @@ ErrCode AbilityManagerClient::GetTopAbility(sptr<IRemoteObject> &token)
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "scb call, GetTopAbility");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, GetTopAbility");
         auto ret = static_cast<int>(sceneSessionManager->GetFocusSessionToken(token));
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "scb call, GetTopAbility err: %{public}d", ret);
@@ -1611,7 +1611,7 @@ AppExecFwk::ElementName AbilityManagerClient::GetTopAbility(bool isNeedLocalDevi
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "get sceneSessionManager failed");
                 return elementName;
             }
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "GetTopAbility");
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "GetTopAbility");
             (void)sceneSessionManager->GetFocusSessionElement(elementName);
             return elementName;
         }
