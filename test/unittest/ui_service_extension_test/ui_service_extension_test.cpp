@@ -21,6 +21,7 @@
 #include "ui_service_extension_module_loader.h"
 #include "ui_service_extension_context.h"
 #include "ability_manager_client.h"
+#include "js_ui_extension_callback.h"
 #undef private
 #undef protected
 

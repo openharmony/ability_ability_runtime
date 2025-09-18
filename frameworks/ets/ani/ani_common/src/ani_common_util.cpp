@@ -194,15 +194,30 @@ bool SetFieldStringByName(ani_env *env, ani_class cls, ani_object object, const 
     return true;
 }
 
-bool GetFieldIntByName(ani_env *env, ani_object object, const char *name, int &value)
+bool GetFieldIntByName(ani_env *env, ani_object object, const char *name, int32_t &value)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
         return false;
     }
     ani_status status = ANI_ERROR;
+    ani_ref field = nullptr;
+    if ((status = env->Object_GetFieldByName_Ref(object, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isUndefined = ANI_TRUE;
+    if ((status = env->Reference_IsUndefined(field, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::ANI, "%{public}s: undefined", name);
+        return false;
+    }
     ani_int aniInt = 0;
-    if ((status = env->Object_GetFieldByName_Int(object, name, &aniInt)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Int(
+        reinterpret_cast<ani_object>(field), "intValue", nullptr, &aniInt)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
@@ -210,7 +225,7 @@ bool GetFieldIntByName(ani_env *env, ani_object object, const char *name, int &v
     return true;
 }
 
-bool SetFieldIntByName(ani_env *env, ani_class cls, ani_object object, const char *name, int value)
+bool SetFieldIntByName(ani_env *env, ani_class cls, ani_object object, const char *name, int32_t value)
 {
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::ANI, "null env");
@@ -222,7 +237,67 @@ bool SetFieldIntByName(ani_env *env, ani_class cls, ani_object object, const cha
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
-    if ((status = env->Object_SetField_Int(object, field, value)) != ANI_OK) {
+    ani_object obj = CreateInt(env, value);
+    if (obj == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "CreateInt failed");
+        return false;
+    }
+    if ((status = env->Object_SetField_Ref(object, field, reinterpret_cast<ani_ref>(obj))) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool GetFieldLongByName(ani_env *env, ani_object object, const char *name, int64_t &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_ref field = nullptr;
+    if ((status = env->Object_GetFieldByName_Ref(object, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_boolean isUndefined = ANI_TRUE;
+    if ((status = env->Reference_IsUndefined(field, &isUndefined)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        TAG_LOGE(AAFwkTag::ANI, "%{public}s: undefined", name);
+        return false;
+    }
+    ani_long aniLong = 0;
+    if ((status = env->Object_CallMethodByName_Long(
+        reinterpret_cast<ani_object>(field), "longValue", nullptr, &aniLong)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    value = static_cast<int64_t>(aniLong);
+    return true;
+}
+
+bool SetFieldLongByName(ani_env *env, ani_class cls, ani_object object, const char *name, int64_t value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+    ani_status status = ANI_ERROR;
+    ani_field field = nullptr;
+    if ((status = env->Class_FindField(cls, name, &field)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    ani_object obj = CreateLong(env, value);
+    if (obj == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "CreateLong failed");
+        return false;
+    }
+    if ((status = env->Object_SetField_Ref(object, field, reinterpret_cast<ani_ref>(obj))) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
@@ -745,11 +820,11 @@ bool SetProcessInformation(ani_env *env, ani_object object, const AppExecFwk::Ru
         return false;
     }
     ani_status status = ANI_OK;
-    if ((status = env->Object_SetPropertyByName_Double(object, "pid", processInfo.pid_)) != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Int(object, "pid", processInfo.pid_)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "pid failed status:%{public}d", status);
         return false;
     }
-    if ((status = env->Object_SetPropertyByName_Double(object, "uid", processInfo.uid_)) != ANI_OK) {
+    if ((status = env->Object_SetPropertyByName_Int(object, "uid", processInfo.uid_)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "uid failed status:%{public}d", status);
         return false;
     }
@@ -781,9 +856,9 @@ bool SetProcessInformation(ani_env *env, ani_object object, const AppExecFwk::Ru
         TAG_LOGE(AAFwkTag::ANI, "bundleType failed status:%{public}d", status);
         return false;
     }
-    status = env->Object_SetPropertyByName_Ref(object, "appCloneIndex",
-        CreateDouble(env, processInfo.appCloneIndex));
-    if (status != ANI_OK) {
+    if (processInfo.appCloneIndex != -1 &&
+        (status = env->Object_SetPropertyByName_Ref(
+            object, "appCloneIndex", CreateInt(env, processInfo.appCloneIndex))) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "appCloneIndex failed status:%{public}d", status);
         return false;
     }
@@ -1027,6 +1102,49 @@ bool GetDoublePropertyObject(ani_env *env, ani_object param, const char *name, d
     }
     return true;
 }
+
+bool GetLongPropertyObject(ani_env *env, ani_object param, const char *name, ani_long &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+
+    ani_ref obj = nullptr;
+    ani_status status = ANI_ERROR;
+    if (!GetRefProperty(env, param, name, obj)) {
+        TAG_LOGW(AAFwkTag::ANI, "%{public}s : undefined", name);
+        return false;
+    }
+    if ((status = env->Object_CallMethodByName_Long(
+        reinterpret_cast<ani_object>(obj), "longValue", nullptr, &value)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool GetIntPropertyObject(ani_env *env, ani_object param, const char *name, ani_int &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+
+    ani_ref obj = nullptr;
+    ani_status status = ANI_ERROR;
+    if (!GetRefProperty(env, param, name, obj)) {
+        TAG_LOGW(AAFwkTag::ANI, "%{public}s : undefined", name);
+        return false;
+    }
+    if ((status = env->Object_CallMethodByName_Int(
+        reinterpret_cast<ani_object>(obj), "intValue", nullptr, &value)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 bool GetDoublePropertyValue(ani_env *env, ani_object param, const char *name, double &value)
 {
     if (env == nullptr) {
@@ -1041,6 +1159,23 @@ bool GetDoublePropertyValue(ani_env *env, ani_object param, const char *name, do
         return false;
     }
     value = static_cast<double>(res);
+    return true;
+}
+
+bool GetIntPropertyValue(ani_env *env, ani_object param, const char *name, int32_t &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+
+    ani_status status = ANI_ERROR;
+    ani_int res = 0;
+    if ((status = env->Object_GetPropertyByName_Int(param, name, &res)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    value = res;
     return true;
 }
 
@@ -1063,6 +1198,29 @@ bool GetRefProperty(ani_env *env, ani_object param, const char *name, ani_ref &v
         return false;
     }
     return !isUndefined;
+}
+
+bool GetBooleanPropertyObject(ani_env *env, ani_object param, const char *name, bool &value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+
+    ani_ref obj = nullptr;
+    ani_status status = ANI_ERROR;
+    if (!GetRefProperty(env, param, name, obj)) {
+        TAG_LOGW(AAFwkTag::ANI, "%{public}s : undefined", name);
+        return false;
+    }
+    ani_boolean aniValue = ANI_FALSE;
+    if ((status = env->Object_CallMethodByName_Boolean(
+        reinterpret_cast<ani_object>(obj), "unboxed", nullptr, &aniValue)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    value = aniValue;
+    return true;
 }
 
 bool SetDoublePropertyObject(ani_env *env, ani_object param, const char *name, double value)
@@ -1095,6 +1253,42 @@ bool SetDoublePropertyValue(ani_env *env, ani_object param, const char *name, do
 
     ani_status status = ANI_ERROR;
     if ((status = env->Object_SetPropertyByName_Double(param, name, value)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool SetIntPropertyObject(ani_env *env, ani_object param, const char *name, int32_t value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+
+    ani_object obj = CreateInt(env, value);
+    if (obj == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null obj");
+        return false;
+    }
+
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_SetPropertyByName_Ref(param, name, obj)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool SetIntPropertyValue(ani_env *env, ani_object param, const char *name, int32_t value)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return false;
+    }
+
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_SetPropertyByName_Int(param, name, value)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
@@ -1204,6 +1398,39 @@ bool GetStaticFieldString(ani_env *env, ani_class classObj, const char *fieldNam
         return false;
     }
     return true;
+}
+
+ani_env *AttachAniEnv(ani_vm * etsVm, bool &isAttachThread)
+{
+    ani_env *env = nullptr;
+    ani_status status = ANI_ERROR;
+    if (etsVm == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "etsVm is null");
+        return nullptr;
+    }
+    if ((status = etsVm->GetEnv(ANI_VERSION_1, &env)) == ANI_OK) {
+        return env;
+    }
+    ani_option interopEnabled { "--interop=disable", nullptr };
+    ani_options aniArgs { 1, &interopEnabled };
+    if ((status = etsVm->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
+        return nullptr;
+    }
+    isAttachThread = true;
+    return env;
+}
+
+void DetachAniEnv(ani_vm * etsVm, bool &isAttachThread)
+{
+    if (isAttachThread) {
+        if (etsVm == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "etsVm is null");
+            return;
+        }
+        etsVm->DetachCurrentThread();
+        isAttachThread = false;
+    }
 }
 
 bool IsValidProperty(ani_env *env, ani_ref param)

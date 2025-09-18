@@ -42,23 +42,22 @@ ani_object WrapAbilityStateDataInner(ani_env *env, ani_class cls, ani_object obj
         return nullptr;
     }
 
-    if (!SetFieldIntByName(env, cls, object, "pid", data.pid)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "set pid failed");
+    ani_status status = ANI_ERROR;
+    if ((status = env->Object_SetFieldByName_Int(object, "pid", data.pid))
+        != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "pid failed status:%{public}d", status);
         return nullptr;
     }
-
-    if (!SetFieldIntByName(env, cls, object, "uid", data.uid)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "set uid failed");
+    if ((status = env->Object_SetFieldByName_Int(object, "uid", data.uid)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "uid failed status:%{public}d", status);
         return nullptr;
     }
-
-    if (!SetFieldIntByName(env, cls, object, "state", data.abilityState)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "set state failed");
+    if ((status = env->Object_SetFieldByName_Int(object, "state", data.abilityState)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "state failed status:%{public}d", status);
         return nullptr;
     }
-
-    if (!SetFieldIntByName(env, cls, object, "abilityType", data.abilityType)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "set type failed");
+    if ((status = env->Object_SetFieldByName_Int(object, "abilityType", data.abilityType)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "abilityType failed status:%{public}d", status);
         return nullptr;
     }
 

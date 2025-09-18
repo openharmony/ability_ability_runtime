@@ -125,8 +125,8 @@ ohos_unittest("ability_test") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -674,8 +674,8 @@ ohos_unittest("ability_impl_test") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -746,8 +746,8 @@ ohos_unittest("ui_ability_impl_test") {
       "form_fwk:fmskit_native",
       "i18n:intl_util",
       "input:libmmi-client",
-      "window_manager:libwm",
       "runtime_core:ani",
+      "window_manager:libwm",
     ]
   }
 }
@@ -824,8 +824,8 @@ ohos_unittest("ability_thread_test") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -911,8 +911,8 @@ ohos_unittest("fa_ability_thread_test") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -1033,8 +1033,8 @@ ohos_unittest("ui_ability_thread_test") {
     "ipc:ipc_napi",
     "napi:ace_napi",
     "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -1218,13 +1218,13 @@ ohos_unittest("extension_second_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
+    "${ability_runtime_native_path}/ability/native:extensionkit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "${ability_runtime_native_path}/ability/native:abilitykit_utils",
-    "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
-    "${ability_runtime_native_path}/ability/native:extensionkit_native",
   ]
 
   external_deps = [
@@ -1480,8 +1480,8 @@ ohos_unittest("data_ability_impl_test") {
     "relational_store:rdb_data_ability_adapter",
     "relational_store:rdb_data_share_adapter",
     "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -1548,8 +1548,8 @@ ohos_unittest("data_ability_impl_file_secondpart_test") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -1616,8 +1616,8 @@ ohos_unittest("data_ability_impl_file_test") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -1686,8 +1686,8 @@ ohos_unittest("ability_thread_dataability_test") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -1730,8 +1730,8 @@ ohos_unittest("data_uri_utils_test") {
     "ability_base:extractortool",
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
-    "c_utils:utils",
     "cJSON:cjson",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "googletest:gtest_main",
     "hilog:libhilog",
@@ -1926,8 +1926,8 @@ ohos_unittest("ui_ability_test") {
     "ipc:ipc_napi",
     "napi:ace_napi",
     "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -2021,9 +2021,9 @@ ohos_unittest("form_host_client_test") {
       "ipc:ipc_core",
       "napi:ace_napi",
       "resource_management:global_resmgr",
+      "runtime_core:ani",
       "samgr:samgr_proxy",
       "window_manager:libwm",
-      "runtime_core:ani",
     ]
   }
 }
@@ -2049,8 +2049,8 @@ ohos_unittest("continuation_test") {
     "${ability_runtime_native_path}/ability/native:ability_thread",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:abilitykit_utils",
-    "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/ability/native:configuration_helper",
+    "${ability_runtime_native_path}/ability/native:uiabilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_native_path}/appkit:appkit_native",
@@ -2379,8 +2379,8 @@ ohos_unittest("ability_handler_test") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {
@@ -3212,6 +3212,7 @@ ohos_unittest("js_ui_extension_Callback_test") {
 
   sources = [
     "${ability_runtime_native_path}/ability/native/js_ui_extension_callback.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_extension_callback.cpp",
     "js_ui_extension_Callback_test.cpp",
   ]
 
@@ -3362,8 +3363,8 @@ ohos_unittest("ability_second_test") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
-    "samgr:samgr_proxy",
     "runtime_core:ani",
+    "samgr:samgr_proxy",
   ]
 
   if (ability_runtime_graphics) {

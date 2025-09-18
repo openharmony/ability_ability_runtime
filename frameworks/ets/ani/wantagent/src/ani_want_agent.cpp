@@ -107,7 +107,7 @@ bool OnSendFinishedCallback(TriggerReceiveDataWorker *dataWorker)
     }
     env->Object_SetPropertyByName_Ref(object, "info", retObj);
     env->Object_SetPropertyByName_Ref(object, "want", WrapWant(env, dataWorker->want));
-    env->Object_SetPropertyByName_Double(object, "finalCode", static_cast<ani_double>(dataWorker->resultCode));
+    env->Object_SetPropertyByName_Int(object, "finalCode", static_cast<ani_int>(dataWorker->resultCode));
     env->Object_SetPropertyByName_Ref(object, "finalData", GetAniString(env, dataWorker->resultData));
     env->Object_SetPropertyByName_Ref(object, "extraInfo", WrapWantParams(env, dataWorker->resultExtras));
 
@@ -273,7 +273,7 @@ void EtsWantAgent::OnGetUid(ani_env *env, ani_object agent, ani_object call)
     if (resultCode != ERR_OK) {
         error = EtsErrorUtil::CreateError(env, resultCode, AbilityRuntimeErrorUtil::GetErrMessage(resultCode));
     }
-    AsyncCallback(env, call, error, CreateDouble(env, static_cast<ani_double>(uid)));
+    AsyncCallback(env, call, error, CreateInt(env, uid));
 }
 
 void EtsWantAgent::OnCancel(ani_env *env, ani_object agent, ani_object call)
@@ -382,7 +382,7 @@ void EtsWantAgent::OnGetOperationType(ani_env *env, ani_object agent, ani_object
     if (retCode != NO_ERROR) {
         error = EtsErrorUtil::CreateError(env, retCode, AbilityRuntimeErrorUtil::GetErrMessage(retCode));
     }
-    AsyncCallback(env, call, error, CreateDouble(env, static_cast<ani_double>(operType)));
+    AsyncCallback(env, call, error, CreateInt(env, operType));
 }
 
 int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgentParams &params)

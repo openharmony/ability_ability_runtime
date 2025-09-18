@@ -16,6 +16,7 @@
 import Context from 'application.Context';
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import AsyncCallbackWrapper from './utils/AbilityUtils';
+import ApplicationContext from 'application.ApplicationContext';
 
 export default namespace application {
   loadLibraryWithPermissionCheck("application_ani.z", "@ohos.app.ability.application")
@@ -24,6 +25,8 @@ export default namespace application {
 
   export native function nativeCreateBundleContext(context: Context, bundleName: string,
     callback: AsyncCallbackWrapper<Context>): void;
+
+  export native function nativeGetApplicationContext(): ApplicationContext;
 
   export function createModuleContext(context: Context, moduleName: string): Promise<Context> {
     let p =
@@ -74,5 +77,9 @@ export default namespace application {
         });
       });
     return p;
+  }
+
+  export function getApplicationContext(): ApplicationContext {
+    return nativeGetApplicationContext();
   }
 }

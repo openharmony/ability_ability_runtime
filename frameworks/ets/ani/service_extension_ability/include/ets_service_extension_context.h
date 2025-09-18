@@ -29,6 +29,24 @@
 namespace OHOS {
 namespace AbilityRuntime {
 
+class ETSServiceExtensionConnection : public AbilityConnectCallback {
+public:
+    explicit ETSServiceExtensionConnection(ani_vm *etsVm);
+    ~ETSServiceExtensionConnection();
+    void OnAbilityConnectDone(
+        const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int32_t resultCode) override;
+    void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t resultCode) override;
+    void CallEtsFailed(int32_t errorCode);
+    void SetConnectionId(int32_t id);
+    int32_t GetConnectionId() { return connectionId_; }
+    void SetConnectionRef(ani_object connectOptionsObj);
+    void RemoveConnectionObject();
+protected:
+    ani_vm *etsVm_ = nullptr;
+    int32_t connectionId_ = -1;
+    ani_ref stsConnectionRef_ = nullptr;
+};
+
 class EtsServiceExtensionContext final {
 public:
     explicit EtsServiceExtensionContext(std::shared_ptr<ServiceExtensionContext> context)
@@ -39,6 +57,10 @@ public:
     static EtsServiceExtensionContext *GetEtsAbilityContext(ani_env *env, ani_object obj);
     static void TerminateSelf(ani_env *env, ani_object obj, ani_object callback);
     static void StartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object call);
+    static ani_long ConnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
+        ani_object wantObj, ani_object connectOptionsObj);
+    static void DisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
+        ani_object callback);
     static void StartAbilityWithOption(
         ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call);
     static void StartServiceExtensionAbility(ani_env *env, ani_object obj, ani_object wantObj, ani_object callbackobj);
@@ -54,11 +76,28 @@ private:
     void OnStartServiceExtensionAbility(ani_env *env, ani_object obj, ani_object wantObj, ani_object callbackobj);
     void OnStopServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callbackobj);
     void OnStartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call);
+    ani_long OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
+        ani_object wantObj, ani_object connectOptionsObj);
+    void OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj, ani_long connectId,
+        ani_object callback);
     void AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want,
         ani_object callbackObj, std::shared_ptr<ServiceExtensionContext> context);
 
     std::weak_ptr<ServiceExtensionContext> context_;
     sptr<EtsFreeInstallObserver> freeInstallObserver_ = nullptr;
+};
+
+struct EtsConnectionKey {
+    AAFwk::Want want;
+    int32_t id = 0;
+    int32_t accountId = 0;
+};
+
+struct EtsKeyCompare {
+    bool operator()(const EtsConnectionKey &key1, const EtsConnectionKey &key2) const
+    {
+        return key1.id < key2.id;
+    }
 };
 
 ani_object CreateEtsServiceExtensionContext(ani_env *env, std::shared_ptr<ServiceExtensionContext> context);

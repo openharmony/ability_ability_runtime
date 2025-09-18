@@ -65,6 +65,7 @@ ohos_shared_library("ability_context_native") {
     "ability_runtime/start_vertical_panel.cpp",
     "native/js_ui_extension_callback.cpp",
     "native/panel_start_callback.cpp",
+    "native/ui_extension_callback.cpp",
   ]
 
   deps = [

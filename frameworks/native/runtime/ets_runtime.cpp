@@ -164,7 +164,7 @@ bool ETSRuntime::PostFork(const Options &options, std::unique_ptr<JsRuntime> &js
         options.commonHspBundleInfos);
     return true;
 }
- 
+
 std::unique_ptr<ETSRuntime> ETSRuntime::Create(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime)
 {
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "Create called");
