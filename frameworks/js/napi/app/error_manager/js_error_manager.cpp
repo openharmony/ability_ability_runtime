@@ -17,7 +17,7 @@
 
 #include <cstdint>
 #include <unistd.h>
-
+#include <memory>
 #include "ability_business_error.h"
 #include "application_data_manager.h"
 #include "event_runner.h"
@@ -55,6 +55,12 @@ struct GlobalObserverItem {
         return ref < other.ref;
     }
 };
+struct GlobalUnhandledRejection {
+    napi_ref promiseRef;
+    napi_ref reasonRef;
+    std::string instanceName;
+    uint32_t instanceType;
+};
 static std::set<GlobalObserverItem> globalObserverList;
 static std::set<GlobalObserverItem> globalPromiseList;
 static std::map<napi_env, std::vector<std::pair<int32_t, std::shared_ptr<NativeReference>>>> observerList;
@@ -86,7 +92,12 @@ constexpr const char* ON_OFF_TYPE_SYNC_LOOP = "loopObserver";
 constexpr uint32_t INITITAL_REFCOUNT_ONE = 1;
 
 thread_local std::set<napi_ref> unhandledRejectionObservers;
+thread_local std::set<std::shared_ptr<GlobalUnhandledRejection>> globalUnhandledRejections;
 thread_local std::map<napi_ref, napi_ref> pendingUnHandledRejections;
+
+static bool GlobalPromiseManagerCallback(
+    napi_env env, napi_value promise, napi_value reason, std::string instanceName, uint32_t instanceType);
+static std::string GetContent(napi_env env, napi_value exception, const std::string name);
 
 napi_value AddRejection(napi_env env, napi_value promise, napi_value reason)
 {
@@ -165,6 +176,41 @@ static napi_value NotifyUnhandledRejectionHandler(napi_env env, napi_callback_in
             NAPI_CALL(env, napi_delete_reference(env, iter->first));
             NAPI_CALL(env, napi_delete_reference(env, iter->second));
             iter = pendingUnHandledRejections.erase(iter);
+        }
+    }
+    if (reinterpret_cast<NativeEngine*>(env)->IsMainThread()) {
+        if (!globalUnhandledRejections.empty()) {
+            auto iter = globalUnhandledRejections.begin();
+            while (iter != globalUnhandledRejections.end()) {
+                std::shared_ptr<GlobalUnhandledRejection> rejection = *iter;
+                napi_value promise = nullptr;
+                NAPI_CALL(env, napi_get_reference_value(env, rejection->promiseRef, &promise));
+                napi_value reason = nullptr;
+                NAPI_CALL(env, napi_get_reference_value(env, rejection->reasonRef, &reason));
+                GlobalPromiseManagerCallback(env, promise, reason, rejection->instanceName, rejection->instanceType);
+                NAPI_CALL(env, napi_delete_reference(env, rejection->promiseRef));
+                NAPI_CALL(env, napi_delete_reference(env, rejection->reasonRef));
+                iter = globalUnhandledRejections.erase(iter);
+            }
+        }
+    }
+    return CreateJsUndefined(env);
+}
+
+static napi_value NotifyGlobalUnhandledRejectionHandler(napi_env env, napi_callback_info info)
+{
+    if (!globalUnhandledRejections.empty()) {
+        auto iter = globalUnhandledRejections.begin();
+        while (iter != globalUnhandledRejections.end()) {
+            std::shared_ptr<GlobalUnhandledRejection> rejection = *iter;
+            napi_value promise = nullptr;
+            NAPI_CALL(env, napi_get_reference_value(env, rejection->promiseRef, &promise));
+            napi_value reason = nullptr;
+            NAPI_CALL(env, napi_get_reference_value(env, rejection->reasonRef, &reason));
+            GlobalPromiseManagerCallback(env, promise, reason, rejection->instanceName, rejection->instanceType);
+            NAPI_CALL(env, napi_delete_reference(env, rejection->promiseRef));
+            NAPI_CALL(env, napi_delete_reference(env, rejection->reasonRef));
+            iter = globalUnhandledRejections.erase(iter);
         }
     }
     return CreateJsUndefined(env);
@@ -531,24 +577,71 @@ static bool ErrorManagerMainWorkerCallback(
     return true;
 }
 
-static bool PromiseManagerCallback(napi_env env, napi_value *args, std::string instanceName, uint32_t type)
+static void AddGlobalRejection(
+    napi_env env, napi_value promise, napi_value reason, std::string instanceName, uint32_t type)
 {
+    napi_ref promiseRef = nullptr;
+    napi_create_reference(env, promise, INITITAL_REFCOUNT_ONE, &promiseRef);
+    napi_ref reasonRef = nullptr;
+    napi_create_reference(env, reason, INITITAL_REFCOUNT_ONE, &reasonRef);
+    std::shared_ptr<GlobalUnhandledRejection>rejection = std::make_shared<GlobalUnhandledRejection>();
+    rejection->promiseRef = promiseRef;
+    rejection->reasonRef = reasonRef;
+    rejection->instanceName = instanceName;
+    rejection->instanceType = type;
+    globalUnhandledRejections.insert(rejection);
+}
+
+static void RemoveGlobalRejection(napi_env env, napi_value promise, std::string instanceName, uint32_t type)
+{
+    auto iter = globalUnhandledRejections.begin();
+    while (iter != globalUnhandledRejections.end()) {
+        napi_value prom = nullptr;
+        if (napi_get_reference_value(env, (*iter)->promiseRef, &prom) != napi_ok) {
+            TAG_LOGI(AAFwkTag::JSNAPI, "Get Promise Failed");
+            continue;
+        }
+        bool isEqual = false;
+        if (napi_strict_equals(env, promise, prom, &isEqual) != napi_ok) {
+            TAG_LOGI(AAFwkTag::JSNAPI, "Strict Equals Failed");
+            continue;
+        }
+        if (isEqual) {
+            napi_delete_reference(env, (*iter)->promiseRef);
+            napi_delete_reference(env, (*iter)->reasonRef);
+            globalUnhandledRejections.erase(iter);
+            return;
+        }
+        iter++;
+    }
+}
+
+static bool PromiseManagerCallback(napi_env env, napi_value *args, std::string instanceName, uint32_t instanceType)
+{
+    int event = -1;
+    if (napi_get_value_int32(env, args[INDEX_ZERO], &event) != napi_ok) {
+        TAG_LOGI(AAFwkTag::JSNAPI, "Get Event Failed");
+        return false;
+    }
+    if (event == static_cast<int32_t>(UnhandledRejectionEvent::REJECT)) {
+        AddGlobalRejection(env, args[INDEX_ONE], args[INDEX_TWO], instanceName, instanceType);
+    }
+    if (event == static_cast<int32_t>(UnhandledRejectionEvent::HANDLE)) {
+        RemoveGlobalRejection(env, args[INDEX_ONE], instanceName, instanceType);
+    }
+    return true;
+}
+
+static bool GlobalPromiseManagerCallback(
+    napi_env env, napi_value promise, napi_value reason, std::string instanceName, uint32_t instanceType)
+{
+    std::string name = GetContent(env, reason, "name");
+    std::string stack = GetContent(env, reason, "stack");
+    std::string message = GetContent(env, reason, "message");
     std::lock_guard<std::mutex> lock(globalPromiseMtx);
     if (globalPromiseList.empty()) {
         return false;
     }
-    int32_t event = -1;
-    napi_value reason = args[INDEX_TWO];
-    napi_get_value_int32(env, args[INDEX_ZERO], &event);
-
-    if (event != static_cast<int32_t>(UnhandledRejectionEvent::REJECT)) {
-        return false;
-    }
-
-    std::string name = GetContent(env, reason, "name");
-    std::string stack = GetContent(env, reason, "stack");
-    std::string message = GetContent(env, reason, "message");
-
     for (auto iter : globalPromiseList) {
         uv_loop_t *loop = nullptr;
         if (napi_get_uv_event_loop(iter.env, &loop) != napi_ok) {
@@ -563,7 +656,7 @@ static bool PromiseManagerCallback(napi_env env, napi_value *args, std::string i
         item->env = iter.env;
         item->ref = iter.ref;
         item->instanceName = instanceName;
-        item->instanceType = type;
+        item->instanceType = instanceType;
         item->work.data = item;
         item->name = name;
         item->stack = stack;
@@ -650,6 +743,14 @@ public:
             ++iter;
         }
         pendingUnHandledRejections.clear();
+
+        auto globalIter = globalUnhandledRejections.begin();
+        while (globalIter != globalUnhandledRejections.end()) {
+            napi_delete_reference(env, (*globalIter)->promiseRef);
+            napi_delete_reference(env, (*globalIter)->reasonRef);
+            ++globalIter;
+        }
+        globalUnhandledRejections.clear();
     }
 
 private:
@@ -1330,6 +1431,8 @@ napi_value JsErrorManagerInit(napi_env env, napi_value exportObj)
         NapiErrorManager::GetInstance()->RegisterOnErrorCallback(
             ErrorManagerWorkerCallback, ErrorManagerMainWorkerCallback);
         NapiErrorManager::GetInstance()->RegisterAllUnhandledRejectionCallback(PromiseManagerCallback);
+        NapiErrorManager::GetInstance()->RegisterGlobalUnhandledRejectionCheckCallback(
+            NotifyGlobalUnhandledRejectionHandler);
     });
 
     TAG_LOGD(AAFwkTag::JSNAPI, "bind func ready");
