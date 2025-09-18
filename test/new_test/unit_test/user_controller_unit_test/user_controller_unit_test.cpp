@@ -169,8 +169,9 @@ HWTEST_F(UserControllerTest, GetFreezingNewUserId_001, TestSize.Level1)
 HWTEST_F(UserControllerTest, SetFreezingNewUserId_001, TestSize.Level1)
 {
     std::shared_ptr<UserController> controller = std::make_shared<UserController>();
-    controller->SetFreezingNewUserId(101);
-    EXPECT_EQ(controller->freezingNewUserId_, 101);
+    int32_t userId = 101;
+    controller->SetFreezingNewUserId(userId);
+    EXPECT_EQ(controller->freezingNewUserId_, userId);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
