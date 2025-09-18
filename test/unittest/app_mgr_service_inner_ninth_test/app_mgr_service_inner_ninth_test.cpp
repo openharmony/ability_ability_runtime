@@ -34,6 +34,7 @@
 #include "mock_start_specified_ability_response.h"
 #include "overlay_manager_proxy.h"
 #include "parameters.h"
+#include "start_specified_ability_response_proxy.h"
 #include "user_record_manager.h"
 #include "want.h"
 using namespace testing;
@@ -85,16 +86,17 @@ public:
 
 class MyStartSpecifiedAbilityResponse : public IStartSpecifiedAbilityResponse {
 public:
-    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId) override
+    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId,
+        int32_t userId) override
     {}
-    void OnTimeoutResponse(int32_t requestId) override
+    void OnTimeoutResponse(int32_t requestId, int32_t userId) override
     {}
-    void OnNewProcessRequestResponse(const std::string &flag, int32_t requestId,
+    void OnNewProcessRequestResponse(const std::string &flag, int32_t userId, int32_t requestId,
         const std::string &callerProcessName, int32_t recordId) override
     {}
-    void OnNewProcessRequestTimeoutResponse(int32_t requestId) override
+    void OnNewProcessRequestTimeoutResponse(int32_t requestId, int32_t userId) override
     {}
-    void OnStartSpecifiedFailed(int32_t requestId) override
+    void OnStartSpecifiedFailed(int32_t requestId, int32_t userId) override
     {}
     sptr<IRemoteObject> AsObject() override
     {
@@ -2097,7 +2099,7 @@ HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedProcess_0600, TestSize.Level
     appMgrServiceInner->startSpecifiedAbilityResponse_ = response;
     bool isOnNewProcessRequestResponseCalled = false;
     EXPECT_CALL(*response, OnNewProcessRequestResponse)
-        .WillOnce([&isOnNewProcessRequestResponseCalled](const std::string&, int32_t,
+        .WillOnce([&isOnNewProcessRequestResponseCalled](const std::string&, int32_t, int32_t,
             const std::string&, const int32_t &) {
             isOnNewProcessRequestResponseCalled = true;
         });
@@ -2120,6 +2122,96 @@ HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedProcess_0600, TestSize.Level
     appMgrServiceInner->StartSpecifiedProcess(want, abilityInfo, requestId, customProcess);
     EXPECT_TRUE(isOnNewProcessRequestResponseCalled);
     TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedProcess_0600 end");
+}
+
+/**
+ * @tc.name: StartSpecifiedAbility_0100
+ * @tc.desc: Test StartSpecifiedAbilityResponseProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedAbility_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedAbility_0100 start");
+    auto response = sptr<MockStartSpecifiedAbilityResponse>::MakeSptr();
+    auto proxy = std::make_shared<StartSpecifiedAbilityResponseProxy>(response);
+    AAFwk::Want want;
+    std::string flag = "";
+    int32_t requestId = 0;
+    int32_t userId = 100;
+    proxy->OnAcceptWantResponse(want, flag, requestId, userId);
+    EXPECT_EQ(userId, 100);
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedAbility_0100 end");
+}
+
+/**
+ * @tc.name: StartSpecifiedAbility_0200
+ * @tc.desc: Test StartSpecifiedAbilityResponseProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedAbility_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedAbility_0200 start");
+    auto response = sptr<MockStartSpecifiedAbilityResponse>::MakeSptr();
+    auto proxy = std::make_shared<StartSpecifiedAbilityResponseProxy>(response);
+    int32_t requestId = 0;
+    int32_t userId = 100;
+    proxy->OnTimeoutResponse(requestId, userId);
+    EXPECT_EQ(userId, 100);
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedAbility_0200 end");
+}
+
+/**
+ * @tc.name: StartSpecifiedAbility_0300
+ * @tc.desc: Test StartSpecifiedAbilityResponseProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedAbility_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedAbility_0300 start");
+    auto response = sptr<MockStartSpecifiedAbilityResponse>::MakeSptr();
+    auto proxy = std::make_shared<StartSpecifiedAbilityResponseProxy>(response);
+    std::string flag = "";
+    int32_t userId = 100;
+    int32_t requestId = 0;
+    std::string callerProcessName = "";
+    int32_t recordId = 0;
+    proxy->OnNewProcessRequestResponse(flag, userId, requestId, callerProcessName, recordId);
+    EXPECT_EQ(userId, 100);
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedAbility_0300 end");
+}
+
+/**
+ * @tc.name: StartSpecifiedAbility_0400
+ * @tc.desc: Test StartSpecifiedAbilityResponseProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedAbility_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedAbility_0400 start");
+    auto response = sptr<MockStartSpecifiedAbilityResponse>::MakeSptr();
+    auto proxy = std::make_shared<StartSpecifiedAbilityResponseProxy>(response);
+    int32_t requestId = 0;
+    int32_t userId = 100;
+    proxy->OnNewProcessRequestTimeoutResponse(requestId, userId);
+    EXPECT_EQ(userId, 100);
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedAbility_0400 end");
+}
+
+/**
+ * @tc.name: StartSpecifiedAbility_0500
+ * @tc.desc: Test StartSpecifiedAbilityResponseProxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerNinthTest, StartSpecifiedAbility_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedAbility_0500 start");
+    auto response = sptr<MockStartSpecifiedAbilityResponse>::MakeSptr();
+    auto proxy = std::make_shared<StartSpecifiedAbilityResponseProxy>(response);
+    int32_t requestId = 0;
+    int32_t userId = 100;
+    proxy->OnStartSpecifiedFailed(requestId, userId);
+    EXPECT_EQ(userId, 100);
+    TAG_LOGI(AAFwkTag::TEST, "StartSpecifiedAbility_0500 end");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

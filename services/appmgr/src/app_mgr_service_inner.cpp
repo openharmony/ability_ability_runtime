@@ -539,7 +539,7 @@ void AppMgrServiceInner::StartSpecifiedProcess(const AAFwk::Want &want, const Ap
         return;
     }
     if (startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnNewProcessRequestResponse("", requestId);
+        startSpecifiedAbilityResponse_->OnNewProcessRequestResponse("", GetUserIdByUid(appInfo->uid), requestId);
     }
 }
 
@@ -4869,11 +4869,13 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
     ClearData(appRecord);
 
     if (appRecord->IsStartSpecifiedAbility() && startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnStartSpecifiedFailed(appRecord->GetSpecifiedRequestId());
+        startSpecifiedAbilityResponse_->OnStartSpecifiedFailed(appRecord->GetSpecifiedRequestId(),
+            appRecord->GetUserId());
     }
     appRecord->ResetSpecifiedRequest();
     if (appRecord->IsNewProcessRequest() && startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnStartSpecifiedFailed(appRecord->GetNewProcessRequestId());
+        startSpecifiedAbilityResponse_->OnStartSpecifiedFailed(appRecord->GetNewProcessRequestId(),
+            appRecord->GetUserId());
     }
     appRecord->ResetNewProcessRequest();
 }
@@ -5066,12 +5068,13 @@ void AppMgrServiceInner::HandleAddAbilityStageTimeOut(std::shared_ptr<AppRunning
     }
 
     if (appRecord->IsStartSpecifiedAbility() && startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnTimeoutResponse(appRecord->GetSpecifiedRequestId());
+        startSpecifiedAbilityResponse_->OnTimeoutResponse(appRecord->GetSpecifiedRequestId(), appRecord->GetUserId());
     }
     appRecord->ResetSpecifiedRequest();
 
     if (appRecord->IsNewProcessRequest() && startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnNewProcessRequestTimeoutResponse(appRecord->GetNewProcessRequestId());
+        startSpecifiedAbilityResponse_->OnNewProcessRequestTimeoutResponse(appRecord->GetNewProcessRequestId(),
+            appRecord->GetUserId());
     }
     appRecord->ResetNewProcessRequest();
 
@@ -5815,7 +5818,7 @@ void AppMgrServiceInner::ScheduleAcceptWantDone(
     }
 
     if (startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnAcceptWantResponse(want, flag, requestId);
+        startSpecifiedAbilityResponse_->OnAcceptWantResponse(want, flag, requestId, appRecord->GetUserId());
     }
 }
 
@@ -5843,7 +5846,7 @@ void AppMgrServiceInner::HandleStartSpecifiedAbilityTimeOut(std::shared_ptr<AppR
     }
 
     if (appRecord->IsStartSpecifiedAbility() && startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnTimeoutResponse(appRecord->GetSpecifiedRequestId());
+        startSpecifiedAbilityResponse_->OnTimeoutResponse(appRecord->GetSpecifiedRequestId(), appRecord->GetUserId());
     }
     appRecord->ResetSpecifiedRequest();
 
@@ -5866,7 +5869,9 @@ void AppMgrServiceInner::ScheduleNewProcessRequestDone(
 
     const std::string callerProcessName = appRecord->GetProcessName();
     if (startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnNewProcessRequestResponse(flag, requestId, callerProcessName, recordId);
+        auto userId = appRecord->GetUserId();
+        startSpecifiedAbilityResponse_->OnNewProcessRequestResponse(flag, userId, requestId, callerProcessName,
+            recordId);
     }
     appRecord->ResetNewProcessRequest();
 }
@@ -5880,7 +5885,8 @@ void AppMgrServiceInner::HandleStartSpecifiedProcessTimeout(std::shared_ptr<AppR
     }
 
     if (startSpecifiedAbilityResponse_) {
-        startSpecifiedAbilityResponse_->OnNewProcessRequestTimeoutResponse(appRecord->GetNewProcessRequestId());
+        startSpecifiedAbilityResponse_->OnNewProcessRequestTimeoutResponse(appRecord->GetNewProcessRequestId(),
+            appRecord->GetUserId());
     }
     appRecord->ResetNewProcessRequest();
 }

@@ -180,6 +180,16 @@ void CallRecord::OnCallStubDied(const wptr<IRemoteObject> &remote)
     TAG_LOGD(AAFwkTag::ABILITYMGR, "callstub is died. id:%{public}d, end", recordId_);
 }
 
+int32_t CallRecord::GetUserId() const
+{
+    std::shared_ptr<AbilityRecord> tmpService = service_.lock();
+    if (tmpService == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "AbilityRecord is invalid");
+        return -1;
+    }
+    return tmpService->GetOwnerMissionUserId();
+}
+
 void CallRecord::Dump(std::vector<std::string> &info) const
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "CallRecord::Dump is called");
