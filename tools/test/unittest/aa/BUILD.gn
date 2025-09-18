@@ -301,8 +301,10 @@ ohos_unittest("aa_command_attach_test") {
 ohos_unittest("aa_command_send_memory_level_test") {
   module_out_path = module_output_path
 
-  sources = [ "aa_command_send_memory_level_test.cpp" ]
-  sources += tools_aa_mock_sources
+  sources = [ 
+    "aa_command_send_memory_level_test.cpp",
+    "${ability_runtime_path}/tools/test/mock/mock_app_running_manager.cpp",
+   ]
 
   configs = [ ":tools_aa_config_mock" ]
 
@@ -314,15 +316,44 @@ ohos_unittest("aa_command_send_memory_level_test") {
   deps = [
     "${ability_runtime_path}/tools/aa:tools_aa_source_set",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
+    "${ability_runtime_path}/utils/global/freeze:freeze_util",
+    "${ability_runtime_path}/utils/server/startup:startup_util",
+    "${ability_runtime_services_path}/common:app_util",
+    "${ability_runtime_services_path}/common:event_report",
+    "${ability_runtime_services_path}/common:record_cost_time_util",
+    "${ability_runtime_services_path}/common:perm_verification",
+    "${ability_runtime_services_path}/common:res_sched_util",
+    "${ability_runtime_services_path}/common:task_handler_wrap",
+    "${ability_runtime_test_path}/unittest:appmgr_test_source",
   ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:configuration",
+    "ability_base:want",
+    "access_token:libaccesstoken_sdk",
+    "appspawn:appspawn_client",
     "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "ffrt:libffrt",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "hicollie:libhicollie",
     "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "init:libbeget_proxy",
+    "init:libbegetutil",
     "ipc:ipc_core",
+    "kv_store:distributeddata_mgr",
+    "memory_utils:libmeminfo",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "window_manager:libwmutil",
   ]
 }
 
