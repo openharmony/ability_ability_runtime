@@ -468,12 +468,6 @@ ani_object WrapElementNameInner(ani_env *env, ani_class elementNameObj, ani_obje
     if (!SetFieldStringByName(env, elementNameObj, object, "moduleName", elementNameParam.GetModuleName())) {
         TAG_LOGE(AAFwkTag::ANI, "set moduleName failed");
     }
-    if (!SetFieldStringByName(env, elementNameObj, object, "uri", elementNameParam.GetURI())) {
-        TAG_LOGE(AAFwkTag::ANI, "set uri failed");
-    }
-    if (!SetFieldStringByName(env, elementNameObj, object, "shortName", elementNameParam.GetURI())) {
-        TAG_LOGE(AAFwkTag::ANI, "set shortName failed");
-    }
     return object;
 }
 
