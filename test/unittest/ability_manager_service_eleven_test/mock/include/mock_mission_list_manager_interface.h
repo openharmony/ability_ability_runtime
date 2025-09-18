@@ -181,8 +181,7 @@ public:
     {
         return;
     }
-    bool GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
-        MissionSnapshot& missionSnapshot, bool isLowResolution) override
+    bool GetMissionSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot, bool isLowResolution) override
     {
         return false;
     }

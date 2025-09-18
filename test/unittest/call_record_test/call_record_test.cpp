@@ -87,5 +87,48 @@ HWTEST_F(CallRecordTest, CallRecord_SchedulerConnectDone_001, Function | MediumT
 
     GTEST_LOG_(INFO) << "CallRecord_SchedulerConnectDone_001 end";
 }
+
+/**
+ * @tc.number: CallRecord_GetUserId_001
+ * @tc.name: GetUserId
+ * @tc.desc: CallRecord to process GetUserId success.
+ */
+HWTEST_F(CallRecordTest, CallRecord_GetUserId_001, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "CallRecord_GetUserId_001 begin";
+    AbilityRequest abilityRequest;
+    abilityRequest.callerUid = 1;
+    abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
+    abilityRequest.connect = new MyAbilityConnection();
+    auto callRecord = CallRecord::CreateCallRecord(abilityRequest.callerUid, nullptr,
+        abilityRequest.connect, abilityRequest.callerToken);
+    auto userId = callRecord->GetUserId();
+    EXPECT_EQ(userId, -1);
+    GTEST_LOG_(INFO) << "CallRecord_GetUserId_001 end";
+}
+
+/**
+ * @tc.number: CallRecord_GetUserId_002
+ * @tc.name: GetUserId
+ * @tc.desc: CallRecord to process GetUserId success.
+ */
+HWTEST_F(CallRecordTest, CallRecord_GetUserId_002, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "CallRecord_GetUserId_002 begin";
+    AbilityRequest abilityRequest;
+    abilityRequest.callerUid = 1;
+    abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
+    abilityRequest.connect = new MyAbilityConnection();
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
+    Want want;
+    auto abilityRecord = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord->SetOwnerMissionUserId(100);
+    auto callRecord = CallRecord::CreateCallRecord(abilityRequest.callerUid, abilityRecord,
+        abilityRequest.connect, abilityRequest.callerToken);
+    auto userId = callRecord->GetUserId();
+    EXPECT_EQ(userId, 100);
+    GTEST_LOG_(INFO) << "CallRecord_GetUserId_002 end";
+}
 }  // namespace AAFwk
 }  // namespace OHOS

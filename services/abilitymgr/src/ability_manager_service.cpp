@@ -4776,13 +4776,16 @@ int AbilityManagerService::SendResultToAbility(int32_t requestCode, int32_t resu
         TAG_LOGE(AAFwkTag::ABILITYMGR, "missionId empty");
         return ERR_INVALID_VALUE;
     }
+    auto userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
     std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         abilityRecord = uiAbilityManager->GetAbilityRecordsById(missionId);
     } else {
-        sptr<IRemoteObject> abilityToken = GetAbilityTokenByMissionId(missionId);
+        auto missionListManager = GetMissionListManagerByUserId(userId);
+        CHECK_POINTER_AND_RETURN(missionListManager, ERR_INVALID_VALUE);
+        sptr<IRemoteObject> abilityToken = missionListManager->GetAbilityTokenByMissionId(missionId);
         CHECK_POINTER_AND_RETURN(abilityToken, ERR_INVALID_VALUE);
         abilityRecord = Token::GetAbilityRecordByToken(abilityToken);
     }
@@ -5609,13 +5612,16 @@ int AbilityManagerService::ContinueAbility(const std::string &deviceId, int32_t 
         return ERR_INVALID_VALUE;
     }
 
+    auto userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
     std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         abilityRecord = uiAbilityManager->GetAbilityRecordsById(missionId);
     } else {
-        sptr<IRemoteObject> abilityToken = GetAbilityTokenByMissionId(missionId);
+        auto missionListManager = GetMissionListManagerByUserId(userId);
+        CHECK_POINTER_AND_RETURN(missionListManager, ERR_INVALID_VALUE);
+        sptr<IRemoteObject> abilityToken = missionListManager->GetAbilityTokenByMissionId(missionId);
         CHECK_POINTER_AND_RETURN(abilityToken, ERR_INVALID_VALUE);
         abilityRecord = Token::GetAbilityRecordByToken(abilityToken);
     }
@@ -5699,14 +5705,16 @@ void AbilityManagerService::NotifyCompleteContinuation(const std::string &device
 int AbilityManagerService::NotifyContinuationResult(int32_t missionId, int32_t result)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "result : %{public}d", result);
-
+    auto userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
     std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         abilityRecord = uiAbilityManager->GetAbilityRecordsById(missionId);
     } else {
-        sptr<IRemoteObject> abilityToken = GetAbilityTokenByMissionId(missionId);
+        auto missionListManager = GetMissionListManagerByUserId(userId);
+        CHECK_POINTER_AND_RETURN(missionListManager, ERR_INVALID_VALUE);
+        sptr<IRemoteObject> abilityToken = missionListManager->GetAbilityTokenByMissionId(missionId);
         CHECK_POINTER_AND_RETURN(abilityToken, ERR_INVALID_VALUE);
         abilityRecord = Token::GetAbilityRecordByToken(abilityToken);
     }
@@ -7092,14 +7100,15 @@ void AbilityManagerService::DataDumpSysStateInner(
 
 void AbilityManagerService::DumpInner(const std::string &args, std::vector<std::string> &info)
 {
+    auto userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER(uiAbilityManager);
         uiAbilityManager->Dump(info);
         return;
     }
 
-    auto missionListManager = GetCurrentMissionListManager();
+    auto missionListManager = GetMissionListManagerByUserId(userId);
     if (missionListManager) {
         missionListManager->Dump(info);
     }
@@ -7107,13 +7116,14 @@ void AbilityManagerService::DumpInner(const std::string &args, std::vector<std::
 
 void AbilityManagerService::DumpMissionListInner(const std::string &args, std::vector<std::string> &info)
 {
+    auto userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER(uiAbilityManager);
         uiAbilityManager->DumpMissionList(info, false, " ");
         return;
     }
-    auto missionListManager = GetCurrentMissionListManager();
+    auto missionListManager = GetMissionListManagerByUserId(userId);
     if (missionListManager) {
         missionListManager->DumpMissionList(info, false, "");
     }
@@ -7940,13 +7950,14 @@ void AbilityManagerService::OnAbilityDied(std::shared_ptr<AbilityRecord> ability
 void AbilityManagerService::OnCallConnectDied(std::shared_ptr<CallRecord> callRecord)
 {
     CHECK_POINTER(callRecord);
+    auto userId = callRecord->GetUserId();
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER(uiAbilityManager);
         uiAbilityManager->OnCallConnectDied(callRecord);
         return;
     }
-    auto missionListManager = GetCurrentMissionListManager();
+    auto missionListManager = GetMissionListManagerByUserId(userId);
     if (missionListManager) {
         missionListManager->OnCallConnectDied(callRecord);
     }
@@ -8836,16 +8847,6 @@ int32_t AbilityManagerService::GetMissionIdByAbilityTokenInner(const sptr<IRemot
     return missionListManager->GetMissionIdByAbilityToken(token);
 }
 
-sptr<IRemoteObject> AbilityManagerService::GetAbilityTokenByMissionId(int32_t missionId)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    auto missionListManager = GetCurrentMissionListManager();
-    if (!missionListManager) {
-        return nullptr;
-    }
-    return missionListManager->GetAbilityTokenByMissionId(missionId);
-}
-
 int AbilityManagerService::StartRemoteAbilityByCall(const Want &want, const sptr<IRemoteObject> &callerToken,
     const sptr<IRemoteObject> &connect)
 {
@@ -9062,12 +9063,13 @@ int AbilityManagerService::ReleaseCall(
         return ReleaseRemoteAbility(connect->AsObject(), element);
     }
 
+    int32_t userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         return uiAbilityManager->ReleaseCallLocked(connect, element);
     }
-    auto missionListManager = GetCurrentMissionListManager();
+    auto missionListManager = GetMissionListManagerByUserId(userId);
     CHECK_POINTER_AND_RETURN(missionListManager, ERR_NO_INIT);
     return missionListManager->ReleaseCallLocked(connect, element);
 }
@@ -9236,43 +9238,44 @@ int AbilityManagerService::LogoutUser(int32_t userId, sptr<IUserCallback> callba
 }
 
 void AbilityManagerService::OnAcceptWantResponse(
-    const AAFwk::Want &want, const std::string &flag, int32_t requestId)
+    const AAFwk::Want &want, const std::string &flag, int32_t requestId, int32_t userId)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "On accept want response");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "OnAcceptWantResponse userId:%{public}d", userId);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER(uiAbilityManager);
         uiAbilityManager->OnAcceptWantResponse(want, flag, requestId);
         return;
     }
-    auto missionListManager = GetCurrentMissionListManager();
+    auto missionListManager = GetMissionListManagerByUserId(userId);
     if (!missionListManager) {
         return;
     }
     missionListManager->OnAcceptWantResponse(want, flag);
 }
 
-void AbilityManagerService::OnStartSpecifiedAbilityTimeoutResponse(int32_t requestId)
+void AbilityManagerService::OnStartSpecifiedAbilityTimeoutResponse(int32_t requestId, int32_t userId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedAbilityTimeoutResponse %{public}d", requestId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedAbilityTimeoutResponse %{public}d, userId:%{public}d",
+        requestId, userId);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER(uiAbilityManager);
         uiAbilityManager->OnStartSpecifiedAbilityTimeoutResponse(requestId);
         return;
     }
-    auto missionListManager = GetCurrentMissionListManager();
+    auto missionListManager = GetMissionListManagerByUserId(userId);
     if (!missionListManager) {
         return;
     }
     missionListManager->OnStartSpecifiedAbilityTimeoutResponse();
 }
 
-void AbilityManagerService::OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId,
+void AbilityManagerService::OnStartSpecifiedProcessResponse(const std::string &flag, int32_t userId, int32_t requestId,
     const std::string &callerProcessName, int32_t recordId)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "flag = %{public}s", flag.c_str());
-    auto connectManager = GetCurrentConnectManager();
+    auto connectManager = GetConnectManagerByUserId(userId);
     CHECK_POINTER(connectManager);
     if (connectManager->HasRequestIdInLoadAbilityQueue(requestId)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "uiextension StartSpecifiedProcessResponse, requestId = %{public}d", requestId);
@@ -9282,17 +9285,17 @@ void AbilityManagerService::OnStartSpecifiedProcessResponse(const std::string &f
     }
 
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER(uiAbilityManager);
         uiAbilityManager->OnStartSpecifiedProcessResponse(flag, requestId, callerProcessName, recordId);
         return;
     }
 }
 
-void AbilityManagerService::OnStartSpecifiedProcessTimeoutResponse(int32_t requestId)
+void AbilityManagerService::OnStartSpecifiedProcessTimeoutResponse(int32_t requestId, int32_t userId)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedProcessTimeoutResponse %{public}d", requestId);
-    auto connectManager = GetCurrentConnectManager();
+    auto connectManager = GetConnectManagerByUserId(userId);
     CHECK_POINTER(connectManager);
     if (connectManager->HasRequestIdInLoadAbilityQueue(requestId)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "uiextension StartSpecifiedProcessTimeoutResponse");
@@ -9300,21 +9303,20 @@ void AbilityManagerService::OnStartSpecifiedProcessTimeoutResponse(int32_t reque
         return;
     }
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER(uiAbilityManager);
         uiAbilityManager->OnStartSpecifiedProcessTimeoutResponse(requestId);
         return;
     }
 }
 
-void AbilityManagerService::OnStartSpecifiedFailed(int32_t requestId)
+void AbilityManagerService::OnStartSpecifiedFailed(int32_t requestId, int32_t userId)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "On accept want response");
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER(uiAbilityManager);
         uiAbilityManager->OnStartSpecifiedFailed(requestId);
-        return;
     }
 }
 
@@ -9459,8 +9461,7 @@ int32_t AbilityManagerService::GetMissionSnapshot(const std::string& deviceId, i
     TAG_LOGI(AAFwkTag::ABILITYMGR, "get local mission snapshot");
     auto missionListManager = GetCurrentMissionListManager();
     CHECK_POINTER_AND_RETURN(missionListManager, INNER_ERR);
-    auto token = GetAbilityTokenByMissionId(missionId);
-    bool result = missionListManager->GetMissionSnapshot(missionId, token, missionSnapshot, isLowResolution);
+    bool result = missionListManager->GetMissionSnapshot(missionId, missionSnapshot, isLowResolution);
     if (!result) {
         return INNER_ERR;
     }
@@ -11799,13 +11800,13 @@ void AbilityManagerService::CallRequestDone(const sptr<IRemoteObject> &token, co
         callStubTokenMap_[callStub] = token;
     }
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(abilityRecord->GetOwnerMissionUserId());
         CHECK_POINTER(uiAbilityManager);
         uiAbilityManager->CallRequestDone(abilityRecord, callStub);
         return;
     }
 
-    auto missionListManager = GetCurrentMissionListManager();
+    auto missionListManager = GetMissionListManagerByUserId(abilityRecord->GetOwnerMissionUserId());
     CHECK_POINTER(missionListManager);
     missionListManager->CallRequestDone(abilityRecord, callStub);
 }
@@ -12058,13 +12059,14 @@ int32_t AbilityManagerService::AcquireShareData(
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "missionId is %{public}d.", missionId);
     CHECK_CALLER_IS_SYSTEM_APP;
+    int32_t userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
     std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetCurrentUIAbilityManager();
+        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         abilityRecord = uiAbilityManager->GetAbilityRecordsById(missionId);
     } else {
-        auto missionListManager = GetCurrentMissionListManager();
+        auto missionListManager = GetMissionListManagerByUserId(userId);
         CHECK_POINTER_AND_RETURN(missionListManager, ERR_INVALID_VALUE);
         abilityRecord = missionListManager->GetAbilityRecordByMissionId(missionId);
     }
@@ -14368,14 +14370,14 @@ int AbilityManagerService::StartUIAbilityByPreInstallInner(sptr<SessionInfo> ses
     }
     abilityRequest.want.RemoveParam(PARAM_SPECIFIED_PROCESS_FLAG);
 
-    auto uiAbilityManager = GetCurrentUIAbilityManager();
+    auto uiAbilityManager = GetUIAbilityManagerByUserId(validUserId);
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
 
     return uiAbilityManager->StartUIAbility(abilityRequest, sessionInfo, sceneFlag, isColdStart);
 }
 
 void AbilityManagerService::NotifySCBToHandleAtomicServiceException(const std::string& sessionId, int32_t errCode,
-    const std::string& reason)
+    const std::string& reason, int32_t userId)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call NotifySCBToHandleAtomicServiceException");
     sptr<SessionInfo> sessionInfo = nullptr;
@@ -14394,7 +14396,7 @@ void AbilityManagerService::NotifySCBToHandleAtomicServiceException(const std::s
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sessionInfo null");
         return;
     }
-    auto uiAbilityManager = GetCurrentUIAbilityManager();
+    auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
     CHECK_POINTER(uiAbilityManager);
     return uiAbilityManager->NotifySCBToHandleAtomicServiceException(sessionInfo, errCode, reason);
 }

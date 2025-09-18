@@ -87,8 +87,7 @@ public:
     virtual int ReleaseCallLocked(const sptr<IAbilityConnection> &connect,
         const AppExecFwk::ElementName &element) = 0;
     virtual void RegisterSnapshotHandler(const sptr<ISnapshotHandler> &handler) = 0;
-    virtual bool GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObject> &abilityToken,
-        MissionSnapshot &missionSnapshot, bool isLowResolution) = 0;
+    virtual bool GetMissionSnapshot(int32_t missionId, MissionSnapshot &missionSnapshot, bool isLowResolution) = 0;
     virtual void GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info, bool isPerm) = 0;
 
 #ifdef SUPPORT_SCREEN
