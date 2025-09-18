@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,9 +107,322 @@ HWTEST_F(AaCommandSendMemoryLevelTest, ParsePidMemoryLevel_0200, TestSize.Level1
     AbilityManagerShellCommand cmd(argc, argv);
     std::string pid = STRING_VALID_PID;
     std::string level = STRING_VALID_LEVEL;
-    cmd.ParsePidMemoryLevel(pid, level); // 解析后pid的值：STRING_VALID_PID ——> STRING_INVALID_PID
+    cmd.ParsePidMemoryLevel(pid, level);
     EXPECT_EQ(pid, STRING_INVALID_PID);
     EXPECT_EQ(level, STRING_INVALID_LEVEL);
+}
+
+/**
+ * @tc.number: Aa_Command_ParsePidMemoryLevel_0300
+ * @tc.name: Parse Pid and Level from argv[]
+ * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, ParsePidMemoryLevel_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_ParsePidMemoryLevel_0300";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"-p",
+        (char*)STRING_VALID_PID.c_str(),
+        (char*)"-l",
+        (char*)STRING_INVALID_LEVEL.c_str(),
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string pid = "";
+    std::string level = "";
+    cmd.ParsePidMemoryLevel(pid, level);
+    EXPECT_EQ(pid, STRING_VALID_PID);
+    EXPECT_EQ(level, STRING_INVALID_LEVEL);
+}
+
+/**
+ * @tc.number: Aa_Command_ParsePidMemoryLevel_0400
+ * @tc.name: Parse Pid and Level from argv[]
+ * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, ParsePidMemoryLevel_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_ParsePidMemoryLevel_0400";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"-p",
+        (char*)STRING_INVALID_PID.c_str(),
+        (char*)"-l",
+        (char*)STRING_VALID_LEVEL.c_str(),
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string pid = "";
+    std::string level = "";
+    cmd.ParsePidMemoryLevel(pid, level);
+    EXPECT_EQ(pid, STRING_INVALID_PID);
+    EXPECT_EQ(level, STRING_VALID_LEVEL);
+}
+
+/**
+ * @tc.number: Aa_Command_ParsePidMemoryLevel_0500
+ * @tc.name: Parse Pid and Level from argv[]
+ * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, ParsePidMemoryLevel_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_ParsePidMemoryLevel_0500";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"-h",
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string pid = "";
+    std::string level = "";
+    auto ret = cmd.ParsePidMemoryLevel(pid, level);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.number: Aa_Command_ParsePidMemoryLevel_0600
+ * @tc.name: Parse Pid and Level from argv[]
+ * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, ParsePidMemoryLevel_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_ParsePidMemoryLevel_0600";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"-x",
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string pid = "";
+    std::string level = "";
+    auto ret = cmd.ParsePidMemoryLevel(pid, level);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.number: Aa_Command_ParsePidMemoryLevel_0700
+ * @tc.name: Parse Pid and Level from argv[]
+ * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, ParsePidMemoryLevel_0700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_ParsePidMemoryLevel_0700";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"xxx",
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string pid = "";
+    std::string level = "";
+    auto ret = cmd.ParsePidMemoryLevel(pid, level);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.number: Aa_Command_ParsePidMemoryLevel_0800
+ * @tc.name: Parse Pid and Level from argv[]
+ * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, ParsePidMemoryLevel_0800, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_ParsePidMemoryLevel_0800";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string pid = "";
+    std::string level = "";
+    auto ret = cmd.ParsePidMemoryLevel(pid, level);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.number: Aa_Command_RunAsSendMemoryLevelCommand_0100
+ * @tc.name: Parse Pid and Level from argv[]
+ * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, RunAsSendMemoryLevelCommand_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_RunAsSendMemoryLevelCommand_0100";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"-p",
+        (char*)"",
+        (char*)"-l",
+        (char*)"",
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string pid = "";
+    std::string level = "";
+    auto ret = cmd.RunAsSendMemoryLevelCommand();
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: Aa_Command_RunAsSendMemoryLevelCommand_0200
+ * @tc.name: Parse Pid and Level from argv[]
+ * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, RunAsSendMemoryLevelCommand_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_RunAsSendMemoryLevelCommand_0200";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"-p",
+        (char*)STRING_VALID_PID.c_str(),
+        (char*)"-l",
+        (char*)"",
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string pid = "";
+    std::string level = "";
+    auto ret = cmd.RunAsSendMemoryLevelCommand();
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: Aa_Command_RunAsSendMemoryLevelCommand_0300
+ * @tc.name: Parse Pid and Level from argv[]
+ * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, RunAsSendMemoryLevelCommand_0300, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_RunAsSendMemoryLevelCommand_0300";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"-p",
+        (char*)"",
+        (char*)"-l",
+        (char*)STRING_VALID_LEVEL.c_str(),
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string pid = "";
+    std::string level = "";
+    auto ret = cmd.RunAsSendMemoryLevelCommand();
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: Aa_Command_RunAsSendMemoryLevelCommand_0400
+ * @tc.name: Parse Pid and Level from argv[]
+ * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, RunAsSendMemoryLevelCommand_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_RunAsSendMemoryLevelCommand_0400";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"-p",
+        (char*)STRING_INVALID_PID.c_str(),
+        (char*)"-l",
+        (char*)STRING_VALID_LEVEL.c_str(),
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string pid = "";
+    std::string level = "";
+    auto ret = cmd.RunAsSendMemoryLevelCommand();
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: Aa_Command_RunAsSendMemoryLevelCommand_0500
+ * @tc.name: Parse Pid and Level from argv[]
+ * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, RunAsSendMemoryLevelCommand_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_RunAsSendMemoryLevelCommand_0500";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"-p",
+        (char*)STRING_VALID_PID.c_str(),
+        (char*)"-l",
+        (char*)STRING_INVALID_LEVEL.c_str(),
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string pid = "";
+    std::string level = "";
+    auto ret = cmd.RunAsSendMemoryLevelCommand();
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: Aa_Command_RunAsSendMemoryLevelCommand_0600
+ * @tc.name: Parse Pid and Level from argv[]
+ * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, RunAsSendMemoryLevelCommand_0600, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_RunAsSendMemoryLevelCommand_0600";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"-p",
+        (char*)STRING_VALID_PID.c_str(),
+        (char*)"-l",
+        (char*)STRING_VALID_LEVEL.c_str(),
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string pid = "";
+    std::string level = "";
+    auto ret = cmd.RunAsSendMemoryLevelCommand();
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
