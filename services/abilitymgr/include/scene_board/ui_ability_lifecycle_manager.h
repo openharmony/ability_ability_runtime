@@ -318,6 +318,14 @@ public:
      */
     void OnAppStateChanged(const AppInfo &info);
 
+    void HandleTerminatedOrEndState(const AppInfo &info);
+
+    void HandleColdStartState(const AppInfo &info);
+
+    void HandleOtherAppState(const AppInfo &info);
+
+    bool IsMatchingAppInfo(const AppInfo &info, const std::shared_ptr<AbilityRecord> &abilityRecord);
+
     /**
      * Triggered when app uninstall.
      *
