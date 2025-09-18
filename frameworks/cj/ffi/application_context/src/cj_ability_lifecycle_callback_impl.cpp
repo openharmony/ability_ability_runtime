@@ -35,7 +35,7 @@ void EmplaceAbilityWindowStageFunc(int32_t callbackId, int64_t cFuncId,
     cFuncMap.emplace(callbackId, callback);
 }
 
-int32_t CjAbilityLifecycleCallbackImpl::Register(CArrI64 cFuncIds, bool isSync)
+int32_t CjAbilityLifecycleCallbackImpl::Register(std::vector<int64_t> &cFuncIds, bool isSync)
 {
     int32_t callbackId = serialNumber_;
     if (serialNumber_ < INT32_MAX) {
@@ -46,30 +46,30 @@ int32_t CjAbilityLifecycleCallbackImpl::Register(CArrI64 cFuncIds, bool isSync)
     if (isSync) {
         return -1;
     } else {
-        int64_t i = 0;
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityCreatecallbacks_);
-        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageCreatecallbacks_);
-        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageActivecallbacks_);
-        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageInactivecallbacks_);
-        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageDestroycallbacks_);
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityDestroycallbacks_);
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityForegroundcallbacks_);
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityBackgroundcallbacks_);
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityContinuecallbacks_);
+        size_t i = 0;
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onAbilityCreatecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds[i++], onWindowStageCreatecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds[i++], onWindowStageActivecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds[i++], onWindowStageInactivecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds[i++], onWindowStageDestroycallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onAbilityDestroycallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onAbilityForegroundcallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onAbilityBackgroundcallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onAbilityContinuecallbacks_);
         // optional callbacks
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityWillCreatecallbacks_);
-        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageWillCreatecallbacks_);
-        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageWillDestroycallbacks_);
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityWillForegroundcallbacks_);
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityWillDestroycallbacks_);
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityWillBackgroundcallbacks_);
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onWillNewWantcallbacks_);
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onNewWantcallbacks_);
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityWillContinuecallbacks_);
-        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageWillRestorecallbacks_);
-        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds.head[i++], onWindowStageRestorecallbacks_);
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilityWillSaveStatecallbacks_);
-        EmplaceAbilityFunc(callbackId, cFuncIds.head[i++], onAbilitySaveStatecallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onAbilityWillCreatecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds[i++], onWindowStageWillCreatecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds[i++], onWindowStageWillDestroycallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onAbilityWillForegroundcallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onAbilityWillDestroycallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onAbilityWillBackgroundcallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onWillNewWantcallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onNewWantcallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onAbilityWillContinuecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds[i++], onWindowStageWillRestorecallbacks_);
+        EmplaceAbilityWindowStageFunc(callbackId, cFuncIds[i++], onWindowStageRestorecallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onAbilityWillSaveStatecallbacks_);
+        EmplaceAbilityFunc(callbackId, cFuncIds[i++], onAbilitySaveStatecallbacks_);
     }
     return callbackId;
 }
