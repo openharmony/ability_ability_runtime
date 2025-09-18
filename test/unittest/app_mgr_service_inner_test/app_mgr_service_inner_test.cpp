@@ -34,7 +34,9 @@
 #include "mock_configuration_observer.h"
 #include "mock_iapp_state_callback.h"
 #include "mock_kia_interceptor.h"
+#include "mock_my_flag.h"
 #include "mock_native_token.h"
+#include "mock_permission_verification.h"
 #include "mock_render_scheduler.h"
 #include "mock_sa_call.h"
 #include "mock_task_handler_wrap.h"
@@ -6053,6 +6055,42 @@ HWTEST_F(AppMgrServiceInnerTest, AfterLoadAbility_0001, TestSize.Level1)
     appMgrServiceInner->taskHandler_ = nullptr;
     appMgrServiceInner->AfterLoadAbility(appRecord, abilityInfoSptr, loadParam);
     ASSERT_NE(appRecord, nullptr);
+}
+
+/**
+ * @tc.name: UpdateConfigurationByUserIds_0001
+ * @tc.desc: UpdateConfigurationByUserIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, UpdateConfigurationByUserIds_0001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UpdateConfigurationByUserIds_0001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    MyFlag::flag_ = 0;
+    Configuration changeConfig;
+    std::vector<int32_t> userIds = {0, 1};
+    auto res = appMgrServiceInner->UpdateConfigurationByUserIds(changeConfig, userIds);
+    EXPECT_EQ(res, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "UpdateConfigurationByUserIds_0001 end");
+}
+
+/**
+ * @tc.name: UpdateConfigurationByUserIds_0002
+ * @tc.desc: UpdateConfigurationByUserIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, UpdateConfigurationByUserIds_0002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "UpdateConfigurationByUserIds_0002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    MyFlag::flag_ = 0;
+    Configuration changeConfig;
+    std::vector<int32_t> userIds;
+    auto res = appMgrServiceInner->UpdateConfigurationByUserIds(changeConfig, userIds);
+    EXPECT_EQ(res, ERR_OK);
+    TAG_LOGI(AAFwkTag::TEST, "UpdateConfigurationByUserIds_0002 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

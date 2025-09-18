@@ -373,6 +373,15 @@ public:
     virtual AppMgrResultCode GetConfiguration(Configuration& config);
 
     /**
+     * GetConfiguration
+     *
+     * @param config to retrieve configuration data.
+     * @param userId valid user id.
+     * @return ERR_OK ,return back success, others fail.
+     */
+    virtual AppMgrResultCode GetConfiguration(Configuration& config, int32_t userId);
+
+    /**
      * Ability attach timeout. If start ability encounter failure, attach timeout to terminate.
      *
      * @param token Ability identify.
@@ -432,6 +441,9 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual AppMgrResultCode UpdateConfiguration(const Configuration &config, const int32_t userId = -1);
+    
+    virtual AppMgrResultCode UpdateConfigurationByUserIds(
+        const Configuration &config, const std::vector<int32_t> userIds = {});
 
     /**
      *  Update config by bundle name.

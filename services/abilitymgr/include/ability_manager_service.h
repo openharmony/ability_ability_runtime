@@ -1602,6 +1602,7 @@ public:
 
     int32_t GetConfiguration(AppExecFwk::Configuration& config);
 
+    int32_t GetConfiguration(AppExecFwk::Configuration& config, int32_t userId);
     /**
      * Set rootSceneSession by SCB.
      *

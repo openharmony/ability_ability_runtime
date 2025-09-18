@@ -3254,6 +3254,17 @@ int32_t AbilityManagerService::GetConfiguration(AppExecFwk::Configuration& confi
     return appMgr->GetConfiguration(config);
 }
 
+int32_t AbilityManagerService::GetConfiguration(AppExecFwk::Configuration& config, int32_t userId)
+{
+    auto appMgr = AppMgrUtil::GetAppMgr();
+    if (appMgr == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "AppMgrUtil::GetAppMgr failed");
+        return -1;
+    }
+
+    return appMgr->GetConfiguration(config, userId);
+}
+
 int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityRequest &abilityRequest,
     int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType, bool isImplicit, bool isStartAsCaller)
 {
