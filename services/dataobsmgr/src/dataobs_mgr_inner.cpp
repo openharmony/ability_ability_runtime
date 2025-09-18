@@ -104,8 +104,8 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri, int32_t userId)
 {
     std::string uriStr = uri.ToString();
     std::list<struct ObserverNode> obsList;
-    std::lock_guard<ffrt::mutex> lock(innerMutex_);
     {
+        std::lock_guard<ffrt::mutex> lock(innerMutex_);
         auto obsPair = observers_.find(uriStr);
         if (obsPair == observers_.end()) {
             TAG_LOGD(AAFwkTag::DBOBSMGR, "uri no obs:%{public}s",
