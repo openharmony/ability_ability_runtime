@@ -35,6 +35,7 @@ public:
     static void ThrowErrorByNativeErr(ani_env *env, int32_t err);
     static void ThrowNotSystemAppError(ani_env *env);
     static void ThrowEtsTransferClassError(ani_env *env);
+    static void ThrowRuntimeError(ani_env *env, int32_t errCode, const std::string &errMessage = "");
 
     static ani_object CreateError(ani_env *env, const AbilityErrorCode &err);
     static ani_object CreateError(ani_env *env, ani_int code, const std::string &msg);

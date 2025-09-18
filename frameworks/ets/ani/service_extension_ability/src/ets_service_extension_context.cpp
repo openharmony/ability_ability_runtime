@@ -17,6 +17,7 @@
 #include "ability_manager_client.h"
 #include "ani_common_start_options.h"
 #include "ani_common_want.h"
+#include "ani_remote_object.h"
 #include "common_fun_ani.h"
 #include "ets_context_utils.h"
 #include "ets_error_utils.h"
@@ -25,11 +26,21 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
+std::recursive_mutex g_connectsLock;
+uint32_t g_serialNumber = 0;
+static std::mutex g_connectsMutex;
+static std::map<EtsConnectionKey, sptr<ETSServiceExtensionConnection>, EtsKeyCompare> g_connects;
 constexpr const char *SERVICE_EXTENSION_CONTEXT_CLASS_NAME =
     "Lapplication/ServiceExtensionContext/ServiceExtensionContext;";
 constexpr const char *CLEANER_CLASS_NAME =
     "Lapplication/ServiceExtensionContext/Cleaner;";
 constexpr const int ANI_ALREADY_BINDED = 8;
+constexpr const int FAILED_CODE = -1;
+constexpr const char *SIGNATURE_CONNECT_SERVICE_EXTENSION =
+    "L@ohos/app/ability/Want/Want;Lability/connectOptions/ConnectOptions;:J";
+constexpr const char *SIGNATURE_DISCONNECT_SERVICE_EXTENSION = "JLutils/AbilityUtils/AsyncCallbackWrapper;:V";
+constexpr int32_t ARGC_ONE = 1;
+constexpr int32_t ARGC_TWO = 2;
 
 bool BindNativeMethods(ani_env *env, ani_class &cls)
 {
@@ -49,6 +60,10 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
         ani_native_function { "nativeStopServiceExtensionAbility",
             "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void *>(EtsServiceExtensionContext::StopServiceExtensionAbility) },
+        ani_native_function { "nativeConnectServiceExtensionAbility", SIGNATURE_CONNECT_SERVICE_EXTENSION,
+            reinterpret_cast<void *>(EtsServiceExtensionContext::ConnectServiceExtensionAbility) },
+        ani_native_function { "nativeDisconnectServiceExtensionAbility", SIGNATURE_DISCONNECT_SERVICE_EXTENSION,
+            reinterpret_cast<void *>(EtsServiceExtensionContext::DisconnectServiceExtensionAbility) },
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK
         && status != ANI_ALREADY_BINDED) {
@@ -70,6 +85,43 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
         return false;
     }
     return true;
+}
+
+int32_t InsertConnection(sptr<ETSServiceExtensionConnection> connection,
+    const AAFwk::Want &want, int32_t accountId = -1)
+{
+    std::lock_guard<std::recursive_mutex> lock(g_connectsLock);
+    if (connection == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null connection");
+        return -1;
+    }
+    int32_t connectId = static_cast<int32_t>(g_serialNumber);
+    EtsConnectionKey key;
+    key.id = g_serialNumber;
+    key.want = want;
+    key.accountId = accountId;
+    connection->SetConnectionId(key.id);
+    g_connects.emplace(key, connection);
+    g_serialNumber++;
+    return connectId;
+}
+
+void RemoveConnection(int32_t connectId)
+{
+    std::lock_guard<std::recursive_mutex> lock(g_connectsLock);
+    auto item = std::find_if(g_connects.begin(), g_connects.end(),
+    [&connectId](const auto &obj) {
+        return connectId == obj.first.id;
+    });
+    if (item != g_connects.end()) {
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "remove connection ability exist");
+        if (item->second) {
+            item->second->RemoveConnectionObject();
+        }
+        g_connects.erase(item);
+    } else {
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "remove connection ability not exist");
+    }
 }
 } // namespace
 
@@ -166,6 +218,40 @@ void EtsServiceExtensionContext::StopServiceExtensionAbility(
         return;
     }
     etsServiceExtensionContext->OnStopServiceExtensionAbility(env, aniObj, wantObj, callbackobj);
+}
+
+ani_long EtsServiceExtensionContext::ConnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
+    ani_object wantObj, ani_object connectOptionsObj)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "ConnectServiceExtensionAbility");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return FAILED_CODE;
+    }
+    auto etsServiceExtensionContext = EtsServiceExtensionContext::GetEtsAbilityContext(env, aniObj);
+    if (etsServiceExtensionContext == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null etsServiceExtensionContext");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return FAILED_CODE;
+    }
+    return etsServiceExtensionContext->OnConnectServiceExtensionAbility(env, aniObj, wantObj, connectOptionsObj);
+}
+
+void EtsServiceExtensionContext::DisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
+    ani_long connectId, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "DisconnectServiceExtensionAbility");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
+        return;
+    }
+    auto etsServiceExtensionContext = EtsServiceExtensionContext::GetEtsAbilityContext(env, aniObj);
+    if (etsServiceExtensionContext == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null etsServiceExtensionContext");
+        return;
+    }
+    etsServiceExtensionContext->OnDisconnectServiceExtensionAbility(env, aniObj, connectId, callback);
 }
 
 EtsServiceExtensionContext *EtsServiceExtensionContext::GetEtsAbilityContext(
@@ -317,6 +403,90 @@ void EtsServiceExtensionContext::OnStartAbility(
     }
 }
 
+ani_long EtsServiceExtensionContext::OnConnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
+    ani_object wantObj, ani_object connectOptionsObj)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "OnConnectServiceExtensionAbility call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return FAILED_CODE;
+    }
+    AAFwk::Want want;
+    if (!OHOS::AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to UnwrapWant");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Failed to UnwrapWant");
+        return FAILED_CODE;
+    }
+    ani_vm *etsVm = nullptr;
+    if (env->GetVM(&etsVm) != ANI_OK || etsVm == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to getVM");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return FAILED_CODE;
+    }
+    sptr<ETSServiceExtensionConnection> connection = sptr<ETSServiceExtensionConnection>::MakeSptr(etsVm);
+    connection->SetConnectionRef(connectOptionsObj);
+    int32_t connectId = InsertConnection(connection, want);
+    auto context = context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
+        RemoveConnection(connectId);
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return FAILED_CODE;
+    }
+    auto innerErrCode = context->ConnectAbility(want, connection);
+    int32_t errcode = static_cast<int32_t>(GetJsErrorCodeByNativeError(innerErrCode));
+    if (errcode) {
+        connection->CallEtsFailed(errcode);
+        RemoveConnection(connectId);
+        return FAILED_CODE;
+    }
+    return connectId;
+}
+
+void EtsServiceExtensionContext::OnDisconnectServiceExtensionAbility(ani_env *env, ani_object aniObj,
+    ani_long connectId, ani_object callback)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "OnDisconnectServiceExtensionAbility call");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null env");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return;
+    }
+    auto context = context_.lock();
+    ani_object errorObject = nullptr;
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
+        errorObject = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        AppExecFwk::AsyncCallback(env, callback, errorObject, nullptr);
+        return;
+    }
+    sptr<ETSServiceExtensionConnection> connection = nullptr;
+    AAFwk::Want want;
+    int32_t accountId = -1;
+    {
+        std::lock_guard<std::mutex> lock(g_connectsMutex);
+        auto iter = std::find_if(
+            g_connects.begin(), g_connects.end(), [&connectId](const auto &obj) { return connectId == obj.first.id; });
+        if (iter != g_connects.end()) {
+            want = iter->first.want;
+            connection = iter->second;
+            accountId = iter->first.accountId;
+            g_connects.erase(iter);
+        } else {
+            TAG_LOGI(AAFwkTag::SERVICE_EXT, "Failed to found connection");
+        }
+    }
+    if (!connection) {
+        errorObject = EtsErrorUtil::CreateErrorByNativeErr(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+        AppExecFwk::AsyncCallback(env, callback, errorObject, nullptr);
+        return;
+    }
+    context->DisconnectAbility(want, connection, accountId);
+    AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), nullptr);
+}
+
 void EtsServiceExtensionContext::AddFreeInstallObserver(
     ani_env *env, const AAFwk::Want &want, ani_object callbackObj, std::shared_ptr<ServiceExtensionContext> context)
 {
@@ -390,6 +560,176 @@ ani_object CreateEtsServiceExtensionContext(ani_env *env, std::shared_ptr<Servic
     ContextUtil::CreateEtsBaseContext(env, cls, contextObj, context);
     CreateEtsExtensionContext(env, cls, contextObj, context, context->GetAbilityInfo());
     return contextObj;
+}
+
+ETSServiceExtensionConnection::ETSServiceExtensionConnection(ani_vm *etsVm) : etsVm_(etsVm) {}
+
+ETSServiceExtensionConnection::~ETSServiceExtensionConnection()
+{
+    RemoveConnectionObject();
+}
+
+void ETSServiceExtensionConnection::SetConnectionId(int32_t id)
+{
+    connectionId_ = id;
+}
+
+void ETSServiceExtensionConnection::RemoveConnectionObject()
+{
+    if (etsVm_ != nullptr && stsConnectionRef_ != nullptr) {
+        ani_env *env = nullptr;
+        if (etsVm_->GetEnv(ANI_VERSION_1, &env) == ANI_OK && env != nullptr) {
+            env->GlobalReference_Delete(stsConnectionRef_);
+            stsConnectionRef_ = nullptr;
+        }
+    }
+}
+
+void ETSServiceExtensionConnection::CallEtsFailed(int32_t errorCode)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "CallEtsFailed");
+    if (etsVm_ == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null etsVm");
+        return;
+    }
+    if (stsConnectionRef_ == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null stsConnectionRef_");
+        return;
+    }
+    ani_env *env = nullptr;
+    ani_status status = ANI_OK;
+    if ((status = etsVm_->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to get env, status: %{public}d", status);
+        return;
+    }
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onFailed", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "get onFailed failed status : %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "invalid onFailed property");
+        return;
+    }
+    ani_object errorCodeObj = AppExecFwk::CreateInt(env, errorCode);
+    if (errorCodeObj == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null errorCodeObj");
+        return;
+    }
+    ani_ref result;
+    std::vector<ani_ref> argv = { errorCodeObj };
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ONE, argv.data(),
+        &result)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to call onFailed, status: %{public}d", status);
+    }
+}
+
+void ETSServiceExtensionConnection::SetConnectionRef(ani_object connectOptionsObj)
+{
+    if (etsVm_ == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "etsVm_ is nullptr");
+        return;
+    }
+    ani_env *env = nullptr;
+    ani_status status = ANI_ERROR;
+    if ((status = etsVm_->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || env == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "status: %{public}d", status);
+        return;
+    }
+    if ((status = env->GlobalReference_Create(connectOptionsObj, &stsConnectionRef_)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "status: %{public}d", status);
+    }
+}
+
+void ETSServiceExtensionConnection::OnAbilityConnectDone(
+    const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int32_t resultCode)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "OnAbilityConnectDone");
+    if (etsVm_ == nullptr || stsConnectionRef_ == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null stsConnectionRef or etsVm");
+        return;
+    }
+    bool isAttachThread = false;
+    ani_env *env = AppExecFwk::AttachAniEnv(etsVm_, isAttachThread);
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "GetEnv failed");
+        return;
+    }
+    ani_ref refElement = AppExecFwk::WrapElementName(env, element);
+    if (refElement == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null refElement");
+        AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
+        return;
+    }
+    if (remoteObject == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null remoteObject");
+        AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
+        return;
+    }
+    ani_object refRemoteObject = ANI_ohos_rpc_CreateJsRemoteObject(env, remoteObject);
+    if (refRemoteObject == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null refRemoteObject");
+        AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onConnect", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "get onConnect failed status : %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "invalid onConnect property");
+        return;
+    }
+    ani_ref result;
+    std::vector<ani_ref> argv = { refElement, refRemoteObject};
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_TWO, argv.data(),
+        &result)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to call onConnect, status: %{public}d", status);
+    }
+    AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
+}
+
+void ETSServiceExtensionConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t resultCode)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "OnAbilityDisconnectDone");
+    if (etsVm_ == nullptr || stsConnectionRef_ == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null stsConnectionRef or etsVm");
+        return;
+    }
+    bool isAttachThread = false;
+    ani_env *env = AppExecFwk::AttachAniEnv(etsVm_, isAttachThread);
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "GetEnv failed");
+        return;
+    }
+    ani_ref refElement = AppExecFwk::WrapElementName(env, element);
+    if (refElement == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null refElement");
+        AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_ref funRef;
+    if ((status = env->Object_GetPropertyByName_Ref(reinterpret_cast<ani_object>(stsConnectionRef_),
+        "onDisconnect", &funRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "get onDisconnect failed status : %{public}d", status);
+        return;
+    }
+    if (!AppExecFwk::IsValidProperty(env, funRef)) {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "invalid onDisconnect property");
+        return;
+    }
+    ani_ref result;
+    std::vector<ani_ref> argv = { refElement };
+    if ((status = env->FunctionalObject_Call(reinterpret_cast<ani_fn_object>(funRef), ARGC_ONE, argv.data(),
+        &result)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to call onDisconnect, status: %{public}d", status);
+    }
+    AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -41,6 +41,7 @@ constexpr const char* ABILITY_WANT_CLASS_NAME = "L@ohos/app/ability/Want/Want;";
 constexpr const char* TOOL_CLASS_NAME = "L@ohos/app/ability/Want/RecordSerializeTool;";
 constexpr const char* INNER_CLASS_NAME = "Lability/abilityResult/AbilityResultInner;";
 constexpr const char* ELEMENTNAME_CLASS_NAME = "LbundleManager/ElementNameInner/ElementNameInner;";
+const int PROPERTIES_SIZE = 2;
 
 bool InnerWrapWantParams(ani_env* env, ani_class wantCls, ani_object wantObject, const AAFwk::WantParams& wantParams)
 {
@@ -50,6 +51,16 @@ bool InnerWrapWantParams(ani_env* env, ani_class wantCls, ani_object wantObject,
         return false;
     }
     return SetFieldRefByName(env, wantCls, wantObject, "parameters", wantParamRef);
+}
+
+bool InnerWrapWantParamsFD(ani_env *env, ani_class wantCls, ani_object wantObject, const AAFwk::WantParams &wantParams)
+{
+    ani_ref wantParamFDRef = WrapWantParamsFD(env, wantParams);
+    if (wantParamFDRef == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "failed to WrapWantParamsFD");
+        return false;
+    }
+    return SetFieldRefByName(env, wantCls, wantObject, "fds", wantParamFDRef);
 }
 
 bool InnerUnwrapWantParams(ani_env* env, ani_object wantObject, AAFwk::WantParams& wantParams)
@@ -102,12 +113,59 @@ ani_object WrapWant(ani_env *env, const AAFwk::Want &want)
     SetFieldStringByName(env, cls, object, "moduleName", elementName.GetModuleName());
     SetFieldStringByName(env, cls, object, "uri", want.GetUriString());
     SetFieldStringByName(env, cls, object, "type", want.GetType());
-    SetFieldDoubleByName(env, cls, object, "flags", want.GetFlags());
+    SetFieldIntByName(env, cls, object, "flags", want.GetFlags());
     SetFieldStringByName(env, cls, object, "action", want.GetAction());
     InnerWrapWantParams(env, cls, object, want.GetParams());
+    InnerWrapWantParamsFD(env, cls, object, want.GetParams());
     SetFieldArrayStringByName(env, cls, object, "entities", want.GetEntities());
 
     return object;
+}
+
+ani_ref WrapWantParamsFD(ani_env *env, const AAFwk::WantParams &wantParams)
+{
+    auto paramList = wantParams.GetParams();
+    AAFwk::WantParams fds;
+    for (auto it = paramList.begin(); it != paramList.end(); it++) {
+        if (AAFwk::IWantParams::Query(it->second) == nullptr) {
+            TAG_LOGW(AAFwkTag::ANI, "not wantParam");
+            continue;
+        }
+        auto value = wantParams.GetParam(it->first);
+        AAFwk::IWantParams *o = AAFwk::IWantParams::Query(value);
+        if (o == nullptr) {
+            return nullptr;
+        }
+        AAFwk::WantParams wp = AAFwk::WantParamWrapper::Unbox(o);
+        auto valueMap = wp.GetParams();
+        if (valueMap.size() != PROPERTIES_SIZE) {
+            TAG_LOGD(AAFwkTag::ANI, "not fd");
+            return nullptr;
+        }
+        auto typeIt = valueMap.find(AAFwk::TYPE_PROPERTY);
+        if (typeIt == valueMap.end()) {
+            return nullptr;
+        }
+        AAFwk::IString *strValue = AAFwk::IString::Query(typeIt->second);
+        if (strValue == nullptr) {
+            return nullptr;
+        }
+        std::string typeString = AAFwk::String::Unbox(strValue);
+        if (typeString != AAFwk::FD) {
+            TAG_LOGD(AAFwkTag::ANI, "not fd");
+            return nullptr;
+        }
+        auto valueIt = valueMap.find(AAFwk::VALUE_PROPERTY);
+        if (valueIt == valueMap.end()) {
+            return nullptr;
+        }
+        AAFwk::IInteger *intValue = AAFwk::IInteger::Query(valueIt->second);
+        if (intValue == nullptr) {
+            return nullptr;
+        }
+        fds.SetParam(it->first, intValue);
+    }
+    return WrapWantParams(env, fds);
 }
 
 ani_ref WrapWantParams(ani_env *env, const AAFwk::WantParams &wantParams)
@@ -210,10 +268,10 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
         want.SetUri(uri);
     }
 
-    double flags = 0.0;
-    if (GetFieldDoubleByName(env, param, "flags", flags)) {
-        TAG_LOGD(AAFwkTag::ANI, "flags %{public}f", flags);
-        want.SetFlags(static_cast<int>(flags));
+    int32_t flags = 0;
+    if (GetFieldIntByName(env, param, "flags", flags)) {
+        TAG_LOGD(AAFwkTag::ANI, "flags %{public}d", flags);
+        want.SetFlags(flags);
     }
 
     std::string type = "";
@@ -309,13 +367,13 @@ bool GetResultCode(ani_env *env, ani_object param, ani_class cls, int &resultCod
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
-    ani_double dResultCode = 0.0;
-    status = env->Object_CallMethod_Double(param, method, &dResultCode);
+    ani_int iResultCode = 0;
+    status = env->Object_CallMethod_Int(param, method, &iResultCode);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
-    resultCode = static_cast<int>(dResultCode);
+    resultCode = static_cast<int>(iResultCode);
     return true;
 }
 

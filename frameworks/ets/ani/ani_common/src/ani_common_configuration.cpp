@@ -50,7 +50,7 @@ void SetBasicConfiguration(ani_env *env, ani_object object, const AppExecFwk::Co
     env->Object_SetPropertyByName_Ref(object, "colorMode", colorModeItem);
 
     int32_t displayId = ConvertDisplayId(configuration.GetItem(ConfigurationInner::APPLICATION_DISPLAYID));
-    env->Object_SetPropertyByName_Ref(object, "displayId", CreateDouble(env, static_cast<ani_double>(displayId)));
+    env->Object_SetPropertyByName_Ref(object, "displayId", CreateLong(env, static_cast<int64_t>(displayId)));
 
     std::string direction = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
     ani_enum_item directionItem = nullptr;
