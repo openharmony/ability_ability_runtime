@@ -1214,8 +1214,6 @@ HWTEST_F(AbilityManagerServiceElevenTest, ReleaseCall_002, TestSize.Level1)
 
     abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     abilityMs->subManagersHelper_->missionListManagers_.clear();
-    std::shared_ptr<UIAbilityLifecycleManager> uiAbilityManager = std::make_shared<UIAbilityLifecycleManager>(0);
-    abilityMs->subManagersHelper_->uiAbilityManagers_.emplace(0, uiAbilityManager);
 
     sptr<IAbilityConnection> connect = new AbilityConnectCallback();
     AppExecFwk::ElementName emptyElement;
@@ -1242,9 +1240,6 @@ HWTEST_F(AbilityManagerServiceElevenTest, ReleaseCall_003, TestSize.Level1)
 
     abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     abilityMs->subManagersHelper_->missionListManagers_.clear();
-    std::shared_ptr<MockMissionListManagerInterface> missionListManager =
-        std::make_shared<MockMissionListManagerInterface>();
-    abilityMs->subManagersHelper_->missionListManagers_.emplace(0, missionListManager);
 
     sptr<IAbilityConnection> connect = new AbilityConnectCallback();
     AppExecFwk::ElementName emptyElement;

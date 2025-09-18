@@ -354,26 +354,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, GetMissionSaveTime_001, TestSize.Level1
 
 /*
  * Feature: AbilityManagerService
- * Function: GetAbilityTokenByMissionId
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService GetAbilityTokenByMissionId
- */
-HWTEST_F(AbilityManagerServiceThirdTest, GetAbilityTokenByMissionId_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest GetAbilityTokenByMissionId_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    EXPECT_EQ(abilityMs_->GetAbilityTokenByMissionId(100), nullptr);
-
-    auto temp = abilityMs_->subManagersHelper_->currentMissionListManager_;
-    abilityMs_->subManagersHelper_->currentMissionListManager_.reset();
-    EXPECT_EQ(abilityMs_->GetAbilityTokenByMissionId(100), nullptr);
-    abilityMs_->subManagersHelper_->currentMissionListManager_ = temp;
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest GetAbilityTokenByMissionId_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: StartRemoteAbilityByCall
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartRemoteAbilityByCall
@@ -441,11 +421,12 @@ HWTEST_F(AbilityManagerServiceThirdTest, OnAcceptWantResponse_001, TestSize.Leve
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = std::make_shared<UIAbilityLifecycleManager>();
     AAFwk::Want want;
     ASSERT_NE(abilityMs_, nullptr);
-    abilityMs_->OnAcceptWantResponse(want, "test", 0);
+    int32_t userId = 100;
+    abilityMs_->OnAcceptWantResponse(want, "test", 0, userId);
 
     auto temp = abilityMs_->subManagersHelper_->currentMissionListManager_;
     abilityMs_->subManagersHelper_->currentMissionListManager_.reset();
-    abilityMs_->OnAcceptWantResponse(want, "test", 0);
+    abilityMs_->OnAcceptWantResponse(want, "test", 0, userId);
     abilityMs_->subManagersHelper_->currentMissionListManager_ = temp;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest OnAcceptWantResponse_001 end");
 }
@@ -462,11 +443,12 @@ HWTEST_F(AbilityManagerServiceThirdTest, OnStartSpecifiedAbilityTimeoutResponse_
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     ASSERT_NE(abilityMs_, nullptr);
-    abilityMs_->OnStartSpecifiedAbilityTimeoutResponse(0);
+    int32_t userId = 100;
+    abilityMs_->OnStartSpecifiedAbilityTimeoutResponse(0, userId);
 
     auto temp = abilityMs_->subManagersHelper_->currentMissionListManager_;
     abilityMs_->subManagersHelper_->currentMissionListManager_.reset();
-    abilityMs_->OnStartSpecifiedAbilityTimeoutResponse(0);
+    abilityMs_->OnStartSpecifiedAbilityTimeoutResponse(0, userId);
     abilityMs_->subManagersHelper_->currentMissionListManager_ = temp;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest OnStartSpecifiedAbilityTimeoutResponse_001 end");
 }
@@ -483,7 +465,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, OnStartSpecifiedFailed_001, TestSize.Le
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     ASSERT_NE(abilityMs_, nullptr);
-    abilityMs_->OnStartSpecifiedFailed(1);
+    int32_t userId = 100;
+    abilityMs_->OnStartSpecifiedFailed(1, userId);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest OnStartSpecifiedFailed_001 end");
 }
 
@@ -2515,7 +2498,8 @@ HWTEST_F(AbilityManagerServiceThirdTest, NotifySCBToHandleAtomicServiceException
 
     int32_t  errCode = 0;
     std::string  reason;
-    abilityMs_->NotifySCBToHandleAtomicServiceException(SESSIONID, errCode, reason);
+    int32_t userId = 100;
+    abilityMs_->NotifySCBToHandleAtomicServiceException(SESSIONID, errCode, reason, userId);
 }
 
 /*

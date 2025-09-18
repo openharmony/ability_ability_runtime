@@ -1229,33 +1229,38 @@ public:
      * @param want request param being accepted
      * @param flag specified flag return by application
      * @param requestId a number represents a request
+     * @param userId The user id
      */
-    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId);
+    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId, int32_t userId);
 
     /**
      * @brief called when the module's onAcceptWant happens time out
      * @param requestId a number represents a request
+     * @param userId The user id
      */
-    void OnStartSpecifiedAbilityTimeoutResponse(int32_t requestId);
+    void OnStartSpecifiedAbilityTimeoutResponse(int32_t requestId, int32_t userId);
 
     /**
      * @brief called when the module's onNewProcessRequest returns a flag
      * @param flag process flag
+     * @param userId The user id
      * @param requestId a number represents a request
      */
-    void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t requestId = 0,
+    void OnStartSpecifiedProcessResponse(const std::string &flag, int32_t userId, int32_t requestId = 0,
         const std::string &callerProcessName = "", int32_t recordId = 0);
 
     /**
      * @brief called when the module's onNewProcessRequest happens time out
      * @param requestId a number represents a request
+     * @param userId The user id
      */
-    void OnStartSpecifiedProcessTimeoutResponse(int32_t requestId);
+    void OnStartSpecifiedProcessTimeoutResponse(int32_t requestId, int32_t userId);
     /**
      * @brief called when the specified request fail fast
      * @param requestId a number represents a request
+     * @param userId The user id
      */
-    void OnStartSpecifiedFailed(int32_t requestId);
+    void OnStartSpecifiedFailed(int32_t requestId, int32_t userId);
 
     virtual int GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info) override;
     virtual int GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info) override;
@@ -1286,14 +1291,6 @@ public:
      * @return the missionId of target mission.
      */
     int32_t GetMissionIdByAbilityToken(const sptr<IRemoteObject> &token);
-
-    /**
-     * Get ability token by target mission id.
-     *
-     * @param missionId target missionId.
-     * @return the ability token of target mission.
-     */
-    sptr<IRemoteObject> GetAbilityTokenByMissionId(int32_t missionId);
 
     virtual int StartUser(int userId, uint64_t displayId, sptr<IUserCallback> callback,
         bool isAppRecovery = false) override;
@@ -1954,7 +1951,7 @@ public:
     int32_t StartUIAbilityByPreInstall(const FreeInstallInfo &taskInfo);
 
     void NotifySCBToHandleAtomicServiceException(const std::string& sessionId, int errCode,
-        const std::string& reason);
+        const std::string& reason, int32_t userId);
 
     void HandleRestartResidentProcessDependedOnWeb();
 

@@ -25,11 +25,11 @@ class MockStartSpecifiedAbilityResponse : public StartSpecifiedAbilityResponseSt
 public:
     MockStartSpecifiedAbilityResponse() = default;
     virtual ~MockStartSpecifiedAbilityResponse() = default;
-    MOCK_METHOD3(OnAcceptWantResponse, void(const AAFwk::Want &, const std::string &, int32_t));
-    MOCK_METHOD1(OnTimeoutResponse, void(int32_t));
-    MOCK_METHOD4(OnNewProcessRequestResponse, void(const std::string&, int32_t, const std::string&, int32_t));
-    MOCK_METHOD1(OnNewProcessRequestTimeoutResponse, void(int32_t));
-    MOCK_METHOD1(OnStartSpecifiedFailed, void(int32_t));
+    MOCK_METHOD4(OnAcceptWantResponse, void(const AAFwk::Want &, const std::string &, int32_t, int32_t));
+    MOCK_METHOD2(OnTimeoutResponse, void(int32_t, int32_t));
+    MOCK_METHOD5(OnNewProcessRequestResponse, void(const std::string&, int32_t, int32_t, const std::string&, int32_t));
+    MOCK_METHOD2(OnNewProcessRequestTimeoutResponse, void(int32_t, int32_t));
+    MOCK_METHOD2(OnStartSpecifiedFailed, void(int32_t, int32_t));
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -163,7 +163,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     sptr<ISnapshotHandler> snapshotHandler;
     missionListManager->RegisterSnapshotHandler(snapshotHandler);
     MissionSnapshot missionSnapshot;
-    missionListManager->GetMissionSnapshot(int32Param, token, missionSnapshot, boolParam);
+    missionListManager->GetMissionSnapshot(int32Param, missionSnapshot, boolParam);
     std::vector<AbilityRunningInfo> abilityRunningInfo;
     missionListManager->GetAbilityRunningInfos(abilityRunningInfo, boolParam);
     missionListManager->UninstallApp(stringParam, int32Param);
