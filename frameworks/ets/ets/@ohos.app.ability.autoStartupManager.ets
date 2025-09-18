@@ -27,11 +27,11 @@ export default namespace autoStartupManager {
   export native function nativeCancelApplicationAutoStartup(info: AutoStartupInfo, callback: AsyncCallbackWrapper<void>): void;
   export native function nativeQueryAllAutoStartupApplications(callback: AsyncCallbackWrapper<Array<AutoStartupInfo>>): void;
 
-  export function on(type: 'systemAutoStartup', callback: AutoStartupCallback): void {
+  export function onSystemAutoStartup(callback: AutoStartupCallback): void {
     autoStartupManager.nativeOnApplicationAutoStartupStateChangeSync('systemAutoStartup', callback);
   }
 
-  export function off(type: 'systemAutoStartup', callback?: AutoStartupCallback): void {
+  export function offSystemAutoStartup(callback?: AutoStartupCallback): void {
     autoStartupManager.nativeOffApplicationAutoStartupStateChangeSync('systemAutoStartup', callback);
   }
 
