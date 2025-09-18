@@ -106,6 +106,150 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndGetTest_001, TestSize
 }
 
 /**
+ * @tc.name: AbilityCacheManagerPutAndGetTest_002
+ * @tc.desc: Put a single ability record into cache and get it back with default ability name in want
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndGetTest_002, TestSize.Level2)
+{
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = "TestModuleName2";
+    abilityInfo.bundleName = "TestBundleName2";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.accessTokenId = 1;
+    Want want;
+    ElementName element("", "", "ability", "");
+    want.SetElement(element);
+    auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord_->Init();
+    std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
+    EXPECT_EQ(rec, nullptr);
+    int recId = abilityRecord_->GetRecordId();
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo = abilityInfo;
+    abilityRequest.appInfo = applicationInfo;
+    ElementName elementGet("", "", "AnotherAbility", "");
+    abilityRequest.want.SetElement(elementGet);
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr); // incorrect ability name
+    abilityRequest.want.SetElement(element);
+    abilityRequest.abilityInfo.moduleName = "wrongModuleName";
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr); // incorrect module name
+    abilityRequest.abilityInfo.moduleName = "TestModuleName2";
+    abilityRequest.appInfo.accessTokenId = 0;
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr); // incorrect access token Id
+    abilityRequest.appInfo.accessTokenId = 1;
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo.accessTokenId);
+    EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo.moduleName);
+    EXPECT_EQ(rec->GetAbilityInfo().bundleName, abilityInfo.bundleName);
+    EXPECT_EQ(rec->GetWant().GetElement().GetAbilityName(), "ability");
+    EXPECT_EQ(rec->GetRecordId(), recId);
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerPutAndGetTest_003
+ * @tc.desc: Put a single ability record into cache and get it back with default ability name in want
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndGetTest_003, TestSize.Level2)
+{
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = "TestModuleName3";
+    abilityInfo.bundleName = "TestBundleName3";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.accessTokenId = 1;
+    Want want;
+    ElementName element("", "", "ability", "");
+    want.SetElement(element);
+    auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord_->Init();
+    std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
+    EXPECT_EQ(rec, nullptr);
+    int recId = abilityRecord_->GetRecordId();
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo = abilityInfo;
+    abilityRequest.appInfo = applicationInfo;
+    ElementName elementGet("", "", "AnotherAbility", "");
+    abilityRequest.want.SetElement(elementGet);
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr); // incorrect ability name
+    abilityRequest.want.SetElement(element);
+    abilityRequest.abilityInfo.moduleName = "wrongModuleName";
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr); // incorrect module name
+    abilityRequest.abilityInfo.moduleName = "TestModuleName3";
+    abilityRequest.appInfo.accessTokenId = 0;
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr); // incorrect access token Id
+    abilityRequest.appInfo.accessTokenId = 1;
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo.accessTokenId);
+    EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo.moduleName);
+    EXPECT_EQ(rec->GetAbilityInfo().bundleName, abilityInfo.bundleName);
+    EXPECT_EQ(rec->GetWant().GetElement().GetAbilityName(), "ability");
+    EXPECT_EQ(rec->GetRecordId(), recId);
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerPutAndGetTest_004
+ * @tc.desc: Put a single ability record into cache and get it back with default ability name in want
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutAndGetTest_004, TestSize.Level2)
+{
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = "TestModuleName4";
+    abilityInfo.bundleName = "TestBundleName4";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.accessTokenId = 1;
+    Want want;
+    ElementName element("", "", "ability", "");
+    want.SetElement(element);
+    auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord_->Init();
+    std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
+    EXPECT_EQ(rec, nullptr);
+    int recId = abilityRecord_->GetRecordId();
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo = abilityInfo;
+    abilityRequest.appInfo = applicationInfo;
+    ElementName elementGet("", "", "AnotherAbility", "");
+    abilityRequest.want.SetElement(elementGet);
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr); // incorrect ability name
+    abilityRequest.want.SetElement(element);
+    abilityRequest.abilityInfo.moduleName = "wrongModuleName";
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr); // incorrect module name
+    abilityRequest.abilityInfo.moduleName = "TestModuleName4";
+    abilityRequest.appInfo.accessTokenId = 0;
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr); // incorrect access token Id
+    abilityRequest.appInfo.accessTokenId = 1;
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo.accessTokenId);
+    EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo.moduleName);
+    EXPECT_EQ(rec->GetAbilityInfo().bundleName, abilityInfo.bundleName);
+    EXPECT_EQ(rec->GetWant().GetElement().GetAbilityName(), "ability");
+    EXPECT_EQ(rec->GetRecordId(), recId);
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr);
+}
+
+/**
  * @tc.name: AbilityCacheManagerRemoveTest_001
  * @tc.desc: Put a single ability record into cache and remove with wrong accessTokenId
  * @tc.type: FUNC
@@ -197,6 +341,87 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_003, TestSize.Le
     OHOS::AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.moduleName = "TestModuleName";
     abilityInfo.bundleName = "TestBundleName";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.accessTokenId = 1;
+    Want want;
+    ElementName element("", "", "ability", "");
+    want.SetElement(element);
+    auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord_->Init();
+    std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
+    int recId = abilityRecord_->GetRecordId();
+    EXPECT_EQ(rec, nullptr);
+    ElementName wrongeElement("", "", "wrongAbility", "");
+    want.SetElement(wrongeElement);
+    auto removeRec = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(removeRec);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo = abilityInfo;
+    abilityRequest.appInfo = applicationInfo;
+    abilityRequest.want.SetElement(element);
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo.accessTokenId);
+    EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo.moduleName);
+    EXPECT_EQ(rec->GetAbilityInfo().bundleName, abilityInfo.bundleName);
+    EXPECT_EQ(rec->GetWant().GetElement().GetAbilityName(), "ability");
+    EXPECT_EQ(rec->GetRecordId(), recId);
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerRemoveTest_004
+ * @tc.desc: Put a single ability record into cache and remove with wrong ability name
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_004, TestSize.Level2)
+{
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = "TestModuleName4";
+    abilityInfo.bundleName = "TestBundleName4";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo;
+    applicationInfo.accessTokenId = 1;
+    Want want;
+    ElementName element("", "", "ability", "");
+    want.SetElement(element);
+    auto abilityRecord_ = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    abilityRecord_->Init();
+    std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord_);
+    int recId = abilityRecord_->GetRecordId();
+    EXPECT_EQ(rec, nullptr);
+    ElementName wrongeElement("", "", "wrongAbility", "");
+    want.SetElement(wrongeElement);
+    auto removeRec = std::make_shared<AbilityRecord>(want, abilityInfo, applicationInfo);
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(removeRec);
+    AbilityRequest abilityRequest;
+    abilityRequest.abilityInfo = abilityInfo;
+    abilityRequest.appInfo = applicationInfo;
+    abilityRequest.want.SetElement(element);
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo.accessTokenId);
+    EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo.moduleName);
+    EXPECT_EQ(rec->GetAbilityInfo().bundleName, abilityInfo.bundleName);
+    EXPECT_EQ(rec->GetWant().GetElement().GetAbilityName(), "ability");
+    EXPECT_EQ(rec->GetRecordId(), recId);
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Get(abilityRequest);
+    EXPECT_EQ(rec, nullptr);
+}
+
+
+/**
+ * @tc.name: AbilityCacheManagerRemoveTest_005
+ * @tc.desc: Put a single ability record into cache and remove with wrong ability name
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerRemoveTest_005, TestSize.Level2)
+{
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(10, 5);
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.moduleName = "TestModuleName5";
+    abilityInfo.bundleName = "TestBundleName5";
     OHOS::AppExecFwk::ApplicationInfo applicationInfo;
     applicationInfo.accessTokenId = 1;
     Want want;
@@ -428,6 +653,254 @@ HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_004, TestSize.Level
 
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord2);
     OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord3);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerPutTest_005
+ * @tc.desc: Put multi ability records so that proc cache are full at the same time
+ *           and eliminate the first ability record in proc cache
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_005, TestSize.Level2)
+{
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(3, 1);
+    OHOS::AppExecFwk::AbilityInfo abilityInfo1;
+    abilityInfo1.moduleName = "TestModuleName5";
+    abilityInfo1.bundleName = "TestBundleName5";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo1;
+    applicationInfo1.accessTokenId = 1;
+    Want want;
+    auto abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo1, applicationInfo1);
+    abilityRecord1->Init();
+    std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord1);
+    EXPECT_EQ(rec, nullptr);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo2;
+    abilityInfo2.moduleName = "TestModuleName2";
+    abilityInfo2.bundleName = "TestBundleName2";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo2;
+    applicationInfo2.accessTokenId = 2;
+
+    auto abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo2, applicationInfo2);
+    abilityRecord2->Init();
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord2);
+    EXPECT_EQ(rec, nullptr);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo3;
+    abilityInfo3.moduleName = "TestModuleName3";
+    abilityInfo3.bundleName = "TestBundleName3";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo3;
+    applicationInfo3.accessTokenId = 3;
+    auto abilityRecord3 = std::make_shared<AbilityRecord>(want, abilityInfo3, applicationInfo3);
+    abilityRecord3->Init();
+    int recId3 = abilityRecord3->GetRecordId();
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord3);
+    EXPECT_EQ(rec, nullptr);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo4;
+    abilityInfo4.moduleName = "TestModuleName4";
+    abilityInfo4.bundleName = "TestBundleName4";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo4;
+    applicationInfo4.accessTokenId = 3;
+
+    auto abilityRecord4 = std::make_shared<AbilityRecord>(want, abilityInfo4, applicationInfo4);
+    abilityRecord4->Init();
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord4);
+    EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo3.accessTokenId);
+    EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo3.moduleName);
+    EXPECT_EQ(rec->GetAbilityInfo().bundleName, abilityInfo3.bundleName);
+    EXPECT_EQ(rec->GetRecordId(), recId3);
+
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord1);
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord2);
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord4);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerPutTest_006
+ * @tc.desc: Put multi ability records so that proc cache are full at the same time
+ *           and eliminate the first ability record in proc cache
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_006, TestSize.Level2)
+{
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(3, 1);
+    OHOS::AppExecFwk::AbilityInfo abilityInfo1;
+    abilityInfo1.moduleName = "TestModuleName5";
+    abilityInfo1.bundleName = "TestBundleName5";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo1;
+    applicationInfo1.accessTokenId = 1;
+    Want want;
+    auto abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo1, applicationInfo1);
+    abilityRecord1->Init();
+    std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord1);
+    EXPECT_EQ(rec, nullptr);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo2;
+    abilityInfo2.moduleName = "TestModuleName6";
+    abilityInfo2.bundleName = "TestBundleName6";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo2;
+    applicationInfo2.accessTokenId = 2;
+
+    auto abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo2, applicationInfo2);
+    abilityRecord2->Init();
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord2);
+    EXPECT_EQ(rec, nullptr);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo3;
+    abilityInfo3.moduleName = "TestModuleName3";
+    abilityInfo3.bundleName = "TestBundleName3";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo3;
+    applicationInfo3.accessTokenId = 3;
+    auto abilityRecord3 = std::make_shared<AbilityRecord>(want, abilityInfo3, applicationInfo3);
+    abilityRecord3->Init();
+    int recId3 = abilityRecord3->GetRecordId();
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord3);
+    EXPECT_EQ(rec, nullptr);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo4;
+    abilityInfo4.moduleName = "TestModuleName4";
+    abilityInfo4.bundleName = "TestBundleName4";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo4;
+    applicationInfo4.accessTokenId = 3;
+
+    auto abilityRecord4 = std::make_shared<AbilityRecord>(want, abilityInfo4, applicationInfo4);
+    abilityRecord4->Init();
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord4);
+    EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo3.accessTokenId);
+    EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo3.moduleName);
+    EXPECT_EQ(rec->GetAbilityInfo().bundleName, abilityInfo3.bundleName);
+    EXPECT_EQ(rec->GetRecordId(), recId3);
+
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord1);
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord2);
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord4);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerPutTest_007
+ * @tc.desc: Put multi ability records so that proc cache are full at the same time
+ *           and eliminate the first ability record in proc cache
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_007, TestSize.Level2)
+{
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(3, 1);
+    OHOS::AppExecFwk::AbilityInfo abilityInfo1;
+    abilityInfo1.moduleName = "TestModuleName5";
+    abilityInfo1.bundleName = "TestBundleName5";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo1;
+    applicationInfo1.accessTokenId = 1;
+    Want want;
+    auto abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo1, applicationInfo1);
+    abilityRecord1->Init();
+    std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord1);
+    EXPECT_EQ(rec, nullptr);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo2;
+    abilityInfo2.moduleName = "TestModuleName6";
+    abilityInfo2.bundleName = "TestBundleName6";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo2;
+    applicationInfo2.accessTokenId = 2;
+
+    auto abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo2, applicationInfo2);
+    abilityRecord2->Init();
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord2);
+    EXPECT_EQ(rec, nullptr);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo3;
+    abilityInfo3.moduleName = "TestModuleName7";
+    abilityInfo3.bundleName = "TestBundleName7";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo3;
+    applicationInfo3.accessTokenId = 3;
+    auto abilityRecord3 = std::make_shared<AbilityRecord>(want, abilityInfo3, applicationInfo3);
+    abilityRecord3->Init();
+    int recId3 = abilityRecord3->GetRecordId();
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord3);
+    EXPECT_EQ(rec, nullptr);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo4;
+    abilityInfo4.moduleName = "TestModuleName4";
+    abilityInfo4.bundleName = "TestBundleName4";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo4;
+    applicationInfo4.accessTokenId = 3;
+
+    auto abilityRecord4 = std::make_shared<AbilityRecord>(want, abilityInfo4, applicationInfo4);
+    abilityRecord4->Init();
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord4);
+    EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo3.accessTokenId);
+    EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo3.moduleName);
+    EXPECT_EQ(rec->GetAbilityInfo().bundleName, abilityInfo3.bundleName);
+    EXPECT_EQ(rec->GetRecordId(), recId3);
+
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord1);
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord2);
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord4);
+}
+
+/**
+ * @tc.name: AbilityCacheManagerPutTest_008
+ * @tc.desc: Put multi ability records so that proc cache are full at the same time
+ *           and eliminate the first ability record in proc cache
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AbilityCacheManagerTest, AbilityCacheManagerPutTest_008, TestSize.Level2)
+{
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Init(3, 1);
+    OHOS::AppExecFwk::AbilityInfo abilityInfo1;
+    abilityInfo1.moduleName = "TestModuleName8";
+    abilityInfo1.bundleName = "TestBundleName8";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo1;
+    applicationInfo1.accessTokenId = 1;
+    Want want;
+    auto abilityRecord1 = std::make_shared<AbilityRecord>(want, abilityInfo1, applicationInfo1);
+    abilityRecord1->Init();
+    std::shared_ptr<AbilityRecord> rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord1);
+    EXPECT_EQ(rec, nullptr);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo2;
+    abilityInfo2.moduleName = "TestModuleName6";
+    abilityInfo2.bundleName = "TestBundleName6";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo2;
+    applicationInfo2.accessTokenId = 2;
+
+    auto abilityRecord2 = std::make_shared<AbilityRecord>(want, abilityInfo2, applicationInfo2);
+    abilityRecord2->Init();
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord2);
+    EXPECT_EQ(rec, nullptr);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo3;
+    abilityInfo3.moduleName = "TestModuleName7";
+    abilityInfo3.bundleName = "TestBundleName7";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo3;
+    applicationInfo3.accessTokenId = 3;
+    auto abilityRecord3 = std::make_shared<AbilityRecord>(want, abilityInfo3, applicationInfo3);
+    abilityRecord3->Init();
+    int recId3 = abilityRecord3->GetRecordId();
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord3);
+    EXPECT_EQ(rec, nullptr);
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo4;
+    abilityInfo4.moduleName = "TestModuleName4";
+    abilityInfo4.bundleName = "TestBundleName4";
+    OHOS::AppExecFwk::ApplicationInfo applicationInfo4;
+    applicationInfo4.accessTokenId = 3;
+
+    auto abilityRecord4 = std::make_shared<AbilityRecord>(want, abilityInfo4, applicationInfo4);
+    abilityRecord4->Init();
+    rec = OHOS::AAFwk::AbilityCacheManager::GetInstance().Put(abilityRecord4);
+    EXPECT_EQ(rec->GetApplicationInfo().accessTokenId, applicationInfo3.accessTokenId);
+    EXPECT_EQ(rec->GetAbilityInfo().moduleName, abilityInfo3.moduleName);
+    EXPECT_EQ(rec->GetAbilityInfo().bundleName, abilityInfo3.bundleName);
+    EXPECT_EQ(rec->GetRecordId(), recId3);
+
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord1);
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord2);
+    OHOS::AAFwk::AbilityCacheManager::GetInstance().Remove(abilityRecord4);
 }
 
 /**

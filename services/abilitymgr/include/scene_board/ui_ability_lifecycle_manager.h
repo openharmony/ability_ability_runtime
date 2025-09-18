@@ -311,8 +311,19 @@ public:
     void MoreAbilityNumbersSendEventInfo(
         int32_t userId, const std::string &bundleName, const std::string &abilityName, const std::string &moduleName);
 
+    /**
+     * Triggered when app state changed.
+     *
+     * @param info appInfo on changed.
+     */
     void OnAppStateChanged(const AppInfo &info);
 
+    /**
+     * Triggered when app uninstall.
+     *
+     * @param bundleName application bundle name.
+     * @param uid application uid.
+     */
     void UninstallApp(const std::string &bundleName, int32_t uid);
 
     void GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info, bool isPerm) const;
