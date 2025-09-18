@@ -944,7 +944,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckAbilityCallPermission_001, TestSi
     AppExecFwk::AbilityInfo abilityInfo;
     uint32_t specifyTokenId{0};
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    auto ret = abilityMs_->CheckAbilityCallPermission(abilityRequest, abilityInfo, specifyTokenId);
+    auto ret = abilityMs_->CheckAbilityCallPermission(abilityRequest, abilityInfo, specifyTokenId, false);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest CheckAbilityCallPermission_001 end");
 }
@@ -969,19 +969,19 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckCallPermission_001, TestSize.Leve
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     auto ret = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, isForegroundToRestartApp, isSendDialogResult, specifyTokenId,
-        callerBundleName);
+        callerBundleName, false);
     EXPECT_EQ(ret, ERR_WRONG_INTERFACE_CALL);
 
     abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
     auto ret1 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, isForegroundToRestartApp, isSendDialogResult, specifyTokenId,
-        callerBundleName);
+        callerBundleName, false);
     EXPECT_EQ(ret1, ERR_WRONG_INTERFACE_CALL);
 
     abilityInfo.type = AppExecFwk::AbilityType::SERVICE;
     auto ret2 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, isForegroundToRestartApp, isSendDialogResult, specifyTokenId,
-        callerBundleName);
+        callerBundleName, false);
     EXPECT_EQ(ret2, ERR_INVALID_VALUE);
 
     abilityInfo.type = AppExecFwk::AbilityType::UNKNOWN;
@@ -989,18 +989,18 @@ HWTEST_F(AbilityManagerServiceFourthTest, CheckCallPermission_001, TestSize.Leve
     IPCSkeleton::SetCallingUid(BROKER_UID);
     auto ret3 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, isForegroundToRestartApp, isSendDialogResult, specifyTokenId,
-        callerBundleName);
+        callerBundleName, false);
     EXPECT_EQ(ret3, CHECK_PERMISSION_FAILED);
 
     abilityInfo.type = AppExecFwk::AbilityType::UNKNOWN;
     IPCSkeleton::SetCallingUid(0);
     auto ret4 = abilityMs_->CheckCallPermission(
         want, abilityInfo, abilityRequest, isForegroundToRestartApp, isSendDialogResult, specifyTokenId,
-        callerBundleName);
+        callerBundleName, false);
     EXPECT_EQ(ret4, CHECK_PERMISSION_FAILED);
 
     auto ret5 = abilityMs_->CheckCallPermission(
-        want, abilityInfo, abilityRequest, false, false, specifyTokenId, callerBundleName);
+        want, abilityInfo, abilityRequest, false, false, specifyTokenId, callerBundleName, false);
     EXPECT_NE(ret5, ERR_OK);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest CheckCallPermission_001 end");
 }
