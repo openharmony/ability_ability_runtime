@@ -336,18 +336,18 @@ export function getMissionInfos(deviceId: string, numMax: int, callback: AsyncCa
     return p;
   }
 
-  export function on(type: 'mission', listener: MissionListener): long {
+  export function onMission(listener: MissionListener): long {
     return missionManager.nativeOn('mission', listener);
   }
 
-  export function off(type: 'mission', listenerId: long, callback: AsyncCallback<void>): void {
+  export function offMission(listenerId: long, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
-      missionManager.nativeOff(type, listenerId, myCall);
+      missionManager.nativeOff('mission', listenerId, myCall);
     });
   }
 
-  export function off(type: 'mission', listenerId: long): Promise<void> {
+  export function offMission(listenerId: long): Promise<void> {
     let p: Promise<void> =
       new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
@@ -358,7 +358,7 @@ export function getMissionInfos(deviceId: string, numMax: int, callback: AsyncCa
           }
         });
         taskpool.execute((): void => {
-          missionManager.nativeOff(type, listenerId, myCall);
+          missionManager.nativeOff('mission', listenerId, myCall);
         });
       });
     return p;

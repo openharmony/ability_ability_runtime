@@ -220,25 +220,25 @@ export function getRunningProcessInfoByBundleName(bundleName: string, userId: in
 export native function nativeOn(type: string, observer: ApplicationStateObserver, bundleNameList?: Array<string>) : int;
 export native function nativeOn(type: string, observer: ApplicationStateObserver) : int;
 
-export function on(type: 'applicationState', observer: ApplicationStateObserver): int {
+export function onApplicationStateChange(observer: ApplicationStateObserver): int {
   return appManager.nativeOn('applicationState', observer);
 }
 
-export function on(type: 'applicationState', observer: ApplicationStateObserver, bundleNameList: Array<string>): int {
+export function onApplicationStateChange(observer: ApplicationStateObserver, bundleNameList: Array<string>): int {
   return appManager.nativeOn('applicationState', observer, bundleNameList);
 }
 
 export native function nativeOff(type:string, observerId: int, callback: AsyncCallbackWrapper<void>) : void;
 export native function nativeOffApplicationStateCheck(observerId: int): void;
-export function off(type: 'applicationState', observerId: int, callback: AsyncCallback<void>): void {
+export function offApplicationStateChange(observerId: int, callback: AsyncCallback<void>): void {
     nativeOffApplicationStateCheck(observerId);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
-      appManager.nativeOff(type, observerId, myCall);
+      appManager.nativeOff('applicationState', observerId, myCall);
     });
 }
 
-export function off(type: 'applicationState', observerId: int): Promise<void> {
+export function offApplicationStateChange(observerId: int): Promise<void> {
     nativeOffApplicationStateCheck(observerId);
     let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError | null)=>void):void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
@@ -249,7 +249,7 @@ export function off(type: 'applicationState', observerId: int): Promise<void> {
         }
       });
       taskpool.execute((): void => {
-        appManager.nativeOff(type, observerId, myCall);
+        appManager.nativeOff('applicationState', observerId, myCall);
       });
     });
     return p;
@@ -365,22 +365,22 @@ export function killProcessesByBundleName(bundleName: string, clearPageStack: bo
 }
 
 export native function nativeOnAbilityFirstFrameState(type: string, observer: AbilityFirstFrameStateObserver, bundleName?: string) : void;
-export function on(type: 'abilityFirstFrameState', observer: AbilityFirstFrameStateObserver, bundleName?: string) : void {
+export function onAbilityFirstFrameStateChange(observer: AbilityFirstFrameStateObserver, bundleName?: string) : void {
   appManager.nativeOnAbilityFirstFrameState('abilityFirstFrameState', observer, bundleName);
 }
 
 export native function nativeOffAbilityFirstFrameState(type: string, observer?: AbilityFirstFrameStateObserver) : void;
-export function off(type: 'abilityFirstFrameState', observer?: AbilityFirstFrameStateObserver) : void {
+export function offAbilityFirstFrameStateChange(observer?: AbilityFirstFrameStateObserver) : void {
   appManager.nativeOffAbilityFirstFrameState('abilityFirstFrameState', observer);
 }
 
 export native function nativeOnAppForeGroundState(type: string, observer: AppForegroundStateObserver) : void;
-export function on(type: 'appForegroundState', observer: AppForegroundStateObserver) : void {
+export function onAppForegroundStateChange(observer: AppForegroundStateObserver) : void {
   appManager.nativeOnAppForeGroundState('appForegroundState', observer);
 }
 
 export native function nativeOffAppForeGroundState(type: string, observer?: AppForegroundStateObserver) : void;
-export function off(type: 'appForegroundState', observer?: AppForegroundStateObserver) : void {
+export function offAppForegroundStateChange(observer?: AppForegroundStateObserver) : void {
   appManager.nativeOffAppForeGroundState('appForegroundState', observer);
 }
 
