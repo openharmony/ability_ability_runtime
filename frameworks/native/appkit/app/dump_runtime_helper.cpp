@@ -306,7 +306,11 @@ napi_value DumpRuntimeHelper::GetJsLeakModule(napi_env env, napi_value global)
         return nullptr;
     }
     napi_value moduleName = nullptr;
-    napi_create_string_utf8(env, MODULE_NAME, strlen(MODULE_NAME), &moduleName);
+    status = napi_create_string_utf8(env, MODULE_NAME, strlen(MODULE_NAME), &moduleName);
+    if (status != napi_ok) {
+        TAG_LOGE(AAFwkTag::APPKIT, "fail, %{public}d", status);
+        return nullptr;
+    }
     napi_value param[1] = {moduleName};
     napi_value requireValue = nullptr;
     status = napi_call_function(env, global, napiFunc, 1, &param[0], &requireValue);

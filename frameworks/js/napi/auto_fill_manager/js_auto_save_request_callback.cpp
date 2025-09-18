@@ -59,7 +59,11 @@ void JsAutoSaveRequestCallback::Register(napi_value value)
     }
 
     napi_ref ref = nullptr;
-    napi_create_reference(env_, value, 1, &ref);
+    napi_status createStatus = napi_create_reference(env_, value, 1, &ref);
+    if (createStatus != napi_ok || ref == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "napi_create_reference failed, %{public}d", createStatus);
+        return;
+    }
     callback_ = std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference *>(ref));
 }
 

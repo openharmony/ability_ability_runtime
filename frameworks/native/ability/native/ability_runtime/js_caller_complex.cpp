@@ -267,7 +267,11 @@ public:
             return;
         }
         napi_ref ref = nullptr;
-        napi_create_reference(env, value, 1, &ref);
+        napi_status createStatus = napi_create_reference(env, value, 1, &ref);
+        if (createStatus != napi_ok || ref == nullptr) {
+            TAG_LOGE(AAFwkTag::DEFAULT, "napi_create_reference failed, %{public}d", createStatus);
+            return;
+        }
         jsRemoteObj_.reset(reinterpret_cast<NativeReference*>(ref));
         jsRemoteObjEnv_ = env;
     }
