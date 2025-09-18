@@ -222,13 +222,17 @@ void BindContext(napi_env env, std::unique_ptr<NativeReference> contextRef, JsRu
         return;
     }
     abilityContext->Bind(jsRuntime, contextRef.release());
-    napi_wrap(
+    napi_status wrapStatus = napi_wrap(
         env, contextObj, workContext,
         [](napi_env, void* data, void* hint) {
             TAG_LOGD(AAFwkTag::UIABILITY, "finalizer for weak_ptr ability context is called");
             delete static_cast<std::weak_ptr<AbilityRuntime::AbilityContext>*>(data);
         },
         nullptr, nullptr);
+    if (wrapStatus != napi_ok) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "napi_wrap failed");
+        delete workContext;
+    }
 }
 } // namespace
 
@@ -1518,7 +1522,11 @@ int32_t JsUIAbility::OnContinue(WantParams &wantParams, bool &isAsyncOnContinue,
     }
     std::weak_ptr<UIAbility> weakPtr = shared_from_this();
     napi_ref jsWantParamsRef;
-    napi_create_reference(env, jsWantParams, 1, &jsWantParamsRef);
+    napi_status createStatus = napi_create_reference(env, jsWantParams, 1, &jsWantParamsRef);
+    if (createStatus != napi_ok) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "napi_create_reference failed, %{public}d", createStatus);
+        return AppExecFwk::ContinuationManagerStage::OnContinueResult::ON_CONTINUE_ERR;
+    }
     ReleaseOnContinueAsset(env, result, jsWantParamsRef, callbackInfo);
     auto asyncCallback = [jsWantParamsRef, abilityWeakPtr = weakPtr, abilityInfo](int32_t status) {
         auto ability = abilityWeakPtr.lock();

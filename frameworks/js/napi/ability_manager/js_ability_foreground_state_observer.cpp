@@ -126,7 +126,11 @@ void JSAbilityForegroundStateObserver::AddJsObserverObject(const napi_value &jsO
         return;
     }
     napi_ref ref = nullptr;
-    napi_create_reference(env_, jsObserverObject, 1, &ref);
+    napi_status createStatus = napi_create_reference(env_, jsObserverObject, 1, &ref);
+    if (createStatus != napi_ok || ref == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "napi_create_reference failed, %{public}d", createStatus);
+        return;
+    }
     jsObserverObjectSet_.emplace(std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference *>(ref)));
 }
 

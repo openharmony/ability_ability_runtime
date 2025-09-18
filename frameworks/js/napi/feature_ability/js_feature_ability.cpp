@@ -446,14 +446,20 @@ bool JsFeatureAbility::UnWrapRequestParams(napi_env env, napi_value param, Distr
 napi_value JsFeatureAbility::CreateJsResult(napi_env env, int32_t errCode, const std::string &message)
 {
     napi_value jsResult = nullptr;
-    napi_create_object(env, &jsResult);
+    napi_status createStatus = napi_create_object(env, &jsResult);
+    if (createStatus != napi_ok || jsResult == nullptr) {
+        TAG_LOGE(AAFwkTag::FA, "napi_create_reference failed, %{public}d", createStatus);
+        return nullptr;
+    }
     napi_set_named_property(env, jsResult, "code", CreateJsNumber(env, errCode));
     if (errCode == 0) {
         napi_set_named_property(env, jsResult, "data", CreateJsUndefined(env));
     } else {
         napi_value dataVal = nullptr;
-        napi_create_string_utf8(env, message.c_str(), message.length(), &dataVal);
-        napi_set_named_property(env, jsResult, "data", dataVal);
+        napi_status createStatus = napi_create_string_utf8(env, message.c_str(), message.length(), &dataVal);
+        if (createStatus == napi_ok) {
+            napi_set_named_property(env, jsResult, "data", dataVal);
+        }
     }
 
     return jsResult;
@@ -462,7 +468,11 @@ napi_value JsFeatureAbility::CreateJsResult(napi_env env, int32_t errCode, const
 napi_value JsFeatureAbility::CreateJsFeatureAbility(napi_env env)
 {
     napi_value object = nullptr;
-    napi_create_object(env, &object);
+    napi_status createStatus = napi_create_object(env, &object);
+    if (createStatus != napi_ok || object == nullptr) {
+        TAG_LOGE(AAFwkTag::FA, "napi_create_reference failed, %{public}d", createStatus);
+        return nullptr;
+    }
 
     std::unique_ptr<JsFeatureAbility> jsFeatureAbility = std::make_unique<JsFeatureAbility>();
     napi_wrap(env, object, jsFeatureAbility.release(), JsFeatureAbility::Finalizer, nullptr, nullptr);
