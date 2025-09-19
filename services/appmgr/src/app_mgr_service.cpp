@@ -310,7 +310,7 @@ void AppMgrService::AbilityCleaned(const sptr<IRemoteObject> &token)
     auto callerUid = IPCSkeleton::GetCallingUid();
     auto appRecord = appMgrServiceInner_->GetTerminatingAppRunningRecord(token);
     if (!appRecord || appRecord->GetUid() != callerUid) {
-        TAG_LOGE(AAFwkTag::APPMGR, "verification failed");
+        TAG_LOGW(AAFwkTag::APPMGR, "verification failed");
         return;
     }
 

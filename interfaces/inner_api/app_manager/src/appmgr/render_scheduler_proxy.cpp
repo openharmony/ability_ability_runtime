@@ -53,7 +53,7 @@ void RenderSchedulerProxy::NotifyBrowserFd(int32_t ipcFd, int32_t sharedFd,
     }
 
     if (!data.WriteRemoteObject(browser)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "write browser failed!");
+        TAG_LOGW(AAFwkTag::APPMGR, "write browser failed!");
     }
 
     sptr<IRemoteObject> remote = Remote();
