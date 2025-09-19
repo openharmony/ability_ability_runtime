@@ -46,14 +46,10 @@ void ServiceRouterMgrServiceTest::SetUpTestCase(void)
 {}
 
 void ServiceRouterMgrServiceTest::TearDownTestCase(void)
-{
-    serviceRouterMgrService_->OnStop();
-}
+{}
 
 void ServiceRouterMgrServiceTest::SetUp()
-{
-    serviceRouterMgrService_->OnStart();
-}
+{}
 
 void ServiceRouterMgrServiceTest::TearDown()
 {}
