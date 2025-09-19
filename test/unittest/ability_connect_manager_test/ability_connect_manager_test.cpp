@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1332,13 +1332,12 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Connect_Service_024, TestSize.Level1)
     auto abilityRecord = serviceMap.at(elementNameUri);
     auto token = abilityRecord->GetToken();
 
-    int userId = 0;
-    auto task = [abilityRecord, connectManager = ConnectManager(), userId]() {
-        connectManager->HandleAbilityDiedTask(abilityRecord, userId);
+    auto task = [abilityRecord, connectManager = ConnectManager()]() {
+        connectManager->HandleAbilityDiedTask(abilityRecord);
     };
     EXPECT_CALL(*taskHandler_, SubmitTaskInner(_, _)).WillRepeatedly(DoAll(SetArgReferee<0>(task),
         testing::Invoke(taskHandler_.get(), &MockTaskHandlerWrap::MockTaskHandler)));
-    ConnectManager()->OnAbilityDied(abilityRecord, 0);
+    ConnectManager()->OnAbilityDied(abilityRecord);
     auto list = abilityRecord->GetConnectRecordList();
     EXPECT_EQ(static_cast<int>(list.size()), 0);
 
@@ -1347,12 +1346,12 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Connect_Service_024, TestSize.Level1)
     serviceMap = ConnectManager()->GetServiceMap();
     auto abilityRecord1 = serviceMap.at(elementNameUri1);
     auto token1 = abilityRecord1->GetToken();
-    auto task1 = [abilityRecord1, connectManager = ConnectManager(), userId]() {
-        connectManager->HandleAbilityDiedTask(abilityRecord1, userId);
+    auto task1 = [abilityRecord1, connectManager = ConnectManager()]() {
+        connectManager->HandleAbilityDiedTask(abilityRecord1);
     };
     EXPECT_CALL(*taskHandler_, SubmitTaskInner(_, _)).WillRepeatedly(DoAll(SetArgReferee<0>(task1),
         testing::Invoke(taskHandler_.get(), &MockTaskHandlerWrap::MockTaskHandler)));
-    ConnectManager()->OnAbilityDied(abilityRecord1, 0);
+    ConnectManager()->OnAbilityDied(abilityRecord1);
     auto list1 = abilityRecord1->GetConnectRecordList();
     EXPECT_EQ(static_cast<int>(list1.size()), 0);
 }
@@ -2182,12 +2181,11 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_OnAbilityDied_001, TestSize.
     std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
     ASSERT_NE(connectManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = serviceRecord_;
-    int32_t currentUserId = 0;
     abilityRecord->abilityInfo_.type = AbilityType::PAGE;
     connectManager->SetEventHandler(nullptr);
-    connectManager->OnAbilityDied(abilityRecord, currentUserId);
+    connectManager->OnAbilityDied(abilityRecord);
     abilityRecord->abilityInfo_.type = AbilityType::EXTENSION;
-    connectManager->OnAbilityDied(abilityRecord, currentUserId);
+    connectManager->OnAbilityDied(abilityRecord);
 }
 
 /*
@@ -2243,9 +2241,8 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_HandleAbilityDiedTask_001, T
     std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
     ASSERT_NE(connectManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = serviceRecord_;
-    int32_t currentUserId = 0;
     connectManager->serviceMap_.clear();
-    connectManager->HandleAbilityDiedTask(abilityRecord, currentUserId);
+    connectManager->HandleAbilityDiedTask(abilityRecord);
 }
 
 /*
@@ -2338,11 +2335,10 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_RestartAbility_003, TestSize
     std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
     ASSERT_NE(connectManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = serviceRecord_;
-    int32_t currentUserId = 0;
     connectManager->userId_ = 1;
     abilityRecord->abilityInfo_.bundleName = AbilityConfig::SCENEBOARD_BUNDLE_NAME;
     abilityRecord->abilityInfo_.name = AbilityConfig::SCENEBOARD_ABILITY_NAME;
-    connectManager->HandleAbilityDiedTask(abilityRecord, currentUserId);
+    connectManager->HandleAbilityDiedTask(abilityRecord);
     EXPECT_EQ(static_cast<int>(ConnectManager()->GetServiceMap().size()), 0);
 }
 
@@ -2477,8 +2473,6 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_RestartAbility_001, TestSize.Level1)
     ConnectManager()->SetTaskHandler(TaskHandler());
     ConnectManager()->SetEventHandler(EventHandler());
 
-    int userId = 0;
-
     auto result = ConnectManager()->StartAbility(abilityRequest_);
     EXPECT_EQ(OHOS::ERR_OK, result);
 
@@ -2488,12 +2482,12 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_RestartAbility_001, TestSize.Level1)
     EXPECT_EQ(static_cast<int>(ConnectManager()->GetServiceMap().size()), 1);
 
     // HandleTerminate
-    auto task = [service, connectManager = ConnectManager(), userId]() {
-        connectManager->HandleAbilityDiedTask(service, userId);
+    auto task = [service, connectManager = ConnectManager()]() {
+        connectManager->HandleAbilityDiedTask(service);
     };
     EXPECT_CALL(*taskHandler_, SubmitTaskInner(_, _)).WillRepeatedly(DoAll(SetArgReferee<0>(task),
         testing::Invoke(taskHandler_.get(), &MockTaskHandlerWrap::MockTaskHandler)));
-    ConnectManager()->OnAbilityDied(service, userId);
+    ConnectManager()->OnAbilityDied(service);
     EXPECT_EQ(static_cast<int>(ConnectManager()->GetServiceMap().size()), 0);
 }
 
@@ -2511,8 +2505,6 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_RestartAbility_002, TestSize.Level1)
     ConnectManager()->SetTaskHandler(TaskHandler());
     ConnectManager()->SetEventHandler(EventHandler());
 
-    int userId = 0;
-
     auto result = ConnectManager()->StartAbility(abilityRequest2_);
     EXPECT_EQ(OHOS::ERR_OK, result);
     WaitUntilTaskDone(TaskHandler());
@@ -2523,7 +2515,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_RestartAbility_002, TestSize.Level1)
     EXPECT_EQ(static_cast<int>(ConnectManager()->GetServiceMap().size()), 1);
 
     // HandleTerminate
-    ConnectManager()->HandleAbilityDiedTask(service, userId);
+    ConnectManager()->HandleAbilityDiedTask(service);
     EXPECT_EQ(static_cast<int>(ConnectManager()->GetServiceMap().size()), 0);
 }
 
@@ -2541,8 +2533,6 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_RestartAbility_003, TestSize.Level1)
     ConnectManager()->SetTaskHandler(TaskHandler());
     ConnectManager()->SetEventHandler(EventHandler());
 
-    int userId = 0;
-
     auto result = ConnectManager()->StartAbility(abilityRequest2_);
     EXPECT_EQ(OHOS::ERR_OK, result);
     WaitUntilTaskDone(TaskHandler());
@@ -2556,7 +2546,7 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_RestartAbility_003, TestSize.Level1)
     service->SetRestartTime(AbilityUtil::SystemTimeMillis() + 1000);
 
     // HandleTerminate
-    ConnectManager()->HandleAbilityDiedTask(service, userId);
+    ConnectManager()->HandleAbilityDiedTask(service);
     EXPECT_EQ(static_cast<int>(ConnectManager()->GetServiceMap().size()), 0);
 }
 

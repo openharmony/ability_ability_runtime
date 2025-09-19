@@ -311,13 +311,6 @@ std::shared_ptr<AbilityRecord> AbilityConnectManager::GetExtensionByTokenFromTer
     return nullptr;
 }
 
-std::list<std::shared_ptr<ConnectionRecord>> AbilityConnectManager::GetConnectRecordListByCallback(
-    sptr<IAbilityConnection> callback)
-{
-    std::list<std::shared_ptr<ConnectionRecord>> connectList;
-    return connectList;
-}
-
 void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
     std::function<void(const std::shared_ptr<AbilityRecord>&)> updateRecordCallback)
 {
@@ -481,7 +474,7 @@ void AbilityConnectManager::OnLoadAbilityFailed(std::shared_ptr<AbilityRecord> a
 {
 }
 
-void AbilityConnectManager::OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId)
+void AbilityConnectManager::OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
 }
 
@@ -506,7 +499,7 @@ void AbilityConnectManager::ClearPreloadUIExtensionRecord(const std::shared_ptr<
 {
 }
 
-void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId)
+void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
 }
 
@@ -521,7 +514,7 @@ void AbilityConnectManager::DisconnectBeforeCleanup()
 }
 
 void AbilityConnectManager::HandleAbilityDiedTask(
-    const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId)
+    const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
 }
 

@@ -108,7 +108,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityms->GetMissionIdByToken(token);
     abilityms->IsAbilityControllerStartById(int32Param);
     sptr<IAbilityConnection> callback;
-    abilityms->GetConnectRecordListByCallback(callback);
     Uri uri("myFuzzTest");
     abilityms->AcquireDataAbility(uri, boolParam, token);
     sptr<IAbilityScheduler> dataAbilityScheduler;
