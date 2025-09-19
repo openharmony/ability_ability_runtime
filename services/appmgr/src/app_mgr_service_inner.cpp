@@ -6872,7 +6872,7 @@ void AppMgrServiceInner::RemoveRenderRecordNoAttach(const std::shared_ptr<AppRun
 
 void AppMgrServiceInner::OnRenderRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "on render remote died");
+    TAG_LOGW(AAFwkTag::APPMGR, "on render remote died");
     if (appRunningManager_) {
         auto renderRecord = appRunningManager_->OnRemoteRenderDied(remote);
         if (renderRecord) {
