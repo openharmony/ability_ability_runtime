@@ -48,25 +48,15 @@ let unregisterToken = new object();
 
 export default class UIAbilityContext extends Context {
   static {
-    loadLibraryWithPermissionCheck("context_ani", "application.UIAbilityContext");
+    loadLibraryWithPermissionCheck("ability_context_ani_kit.z", "application.UIAbilityContext");
   }
 
   private cleaner: Cleaner | null = null;
   etsAbilityContextPtr: long = 0;
-  config: Configuration;
-  abilityInfo: AbilityInfo;
-  windowStage: window.WindowStage;
-  currentHapModuleInfo: HapModuleInfo;
-
-  native constructor();
-
-  constructor(config: Configuration, abilityInfo: AbilityInfo, windowStage: window.WindowStage, currentHapModuleInfo: HapModuleInfo) {
-    super();
-    this.config = config;
-    this.abilityInfo = abilityInfo;
-    this.windowStage = windowStage;
-    this.currentHapModuleInfo = currentHapModuleInfo;
-  }
+  config!: Configuration;
+  abilityInfo!: AbilityInfo;
+  windowStage!: window.WindowStage;
+  currentHapModuleInfo!: HapModuleInfo;
 
   private setEtsAbilityContextPtr(ptr: long) {
     if (this.etsAbilityContextPtr == 0) {
@@ -82,6 +72,24 @@ export default class UIAbilityContext extends Context {
 
   unregisterCleaner(): void {
     destroyRegister.unregister(unregisterToken);
+  }
+
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
+  private static native nativeTransferDynamic(input: Object): ESValue;
+  private static contextType: string = 'UIAbilityContext';
+
+  static transferStatic(input: Any): Object {
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    console.log('transferStatic type: ' + type);
+    return UIAbilityContext.nativeTransferStatic(ESValue.wrap(input), type);
+  }
+  static transferDynamic(input: Object): Any {
+    return UIAbilityContext.nativeTransferDynamic(input).unwrap();
   }
 
   private native nativeStartAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;

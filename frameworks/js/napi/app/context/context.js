@@ -89,9 +89,30 @@ class EventHub {
     if (this.eventMap[event].indexOf(callback) === -1) {
       this.eventMap[event].push(callback);
     }
+    
     if (this.emitMultiThreadingEnabled === true && this.emitter !== undefined) {
       if (this.emitter.getListenerCount(this.getEmitterEventName(event)) === 0) {
         this.emitter.on(this.getEmitterEventName(event), (eventData) => this.onEmitterFunction(eventData));
+      }
+    }
+  }
+
+  offByNativeContext(event, callback) {
+    if (typeof (event) !== 'string') {
+      return;
+    }
+    if (this.eventMap[event]) {
+      if (callback) {
+        let cbArray = this.eventMap[event];
+        let index = cbArray.indexOf(callback);
+        if (index > -1) {
+          for (; index + 1 < cbArray.length; index++) {
+            cbArray[index] = cbArray[index + 1];
+          }
+          cbArray.pop();
+        }
+      } else {
+        delete this.eventMap[event];
       }
     }
   }
@@ -162,6 +183,22 @@ class EventHub {
   }
 
   emitInner(event, ...args) {
+    if (typeof (event) !== 'string') {
+      return;
+    }
+    if (this.eventMap[event]) {
+      const cloneArray = [...this.eventMap[event]];
+      const len = cloneArray.length;
+      for (let i = 0; i < len; ++i) {
+        cloneArray[i].apply(this, args);
+      }
+    }
+    if (this.nativeEventHubRef != null) {
+      this.nativeEventHubRef.emitByDynamicContext(event, ...args);
+    }
+  }
+
+  emitByNativeContext(event, ...args) {
     if (typeof (event) !== 'string') {
       return;
     }

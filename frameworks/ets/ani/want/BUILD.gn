@@ -14,28 +14,43 @@
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-ohos_shared_library("context_ani") {
-  branch_protector_ret = "pac_ret"
+ohos_shared_library("want_ani_kit") {
   sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
   }
-
-  sources = [
-    "context_native_constructor.cpp",
-  ]
+  branch_protector_ret = "pac_ret"
 
   include_dirs = [
+    "./include",
     "${ability_runtime_services_path}/common/include",
   ]
 
+  sources = [ "src/ani_want_module.cpp" ]
+
+  deps = [ "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common" ]
+
   external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "access_token:libtokenid_sdk",
+    "c_utils:utils",
     "hilog:libhilog",
+    "ipc:rpc_ani",
     "runtime_core:ani",
   ]
+
+  cflags_cc = []
+  if (os_dlp_part_enabled) {
+    cflags_cc += [ "-DWITH_DLP" ]
+  }
+
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
-  output_extension = "so"
 }
