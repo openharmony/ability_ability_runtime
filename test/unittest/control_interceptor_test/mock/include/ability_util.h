@@ -16,8 +16,12 @@
 #ifndef OHOS_ABILITY_RUNTIME_ABILITY_UTIL_H
 #define OHOS_ABILITY_RUNTIME_ABILITY_UTIL_H
 
+#include "ability_manager_client.h"
 #include "hilog_tag_wrapper.h"
+#include "in_process_call_wrapper.h"
+#include "ipc_skeleton.h"
 #include "mock_my_flag.h"
+#include "want_params_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
