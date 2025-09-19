@@ -34,17 +34,18 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     std::shared_ptr<UIExtensionSessionInfo> uiExtensionSessionInfo = std::make_shared<UIExtensionSessionInfo>();
     Parcel parcel;
     FuzzedDataProvider fdp(data, size);
+    AppExecFwk::ElementName element;
+    AppExecFwk::ElementName hostElement;
+    // persistentId(int32), hostWindowId(uint32), uiExtensionUsageType(uint32)
+    // element, extensionAbilityType(int32), hostElement
     parcel.WriteInt32(fdp.ConsumeIntegral<int32_t>());
-    parcel.WriteInt32(uiExtensionSessionInfo->persistentId);
-    uiExtensionSessionInfo->Marshalling(parcel);
     parcel.WriteUint32(fdp.ConsumeIntegral<uint32_t>());
-    parcel.WriteUint32(uiExtensionSessionInfo->hostWindowId);
+    parcel.WriteUint32(fdp.ConsumeIntegral<uint32_t>());
+    parcel.WriteParcelable(&element);
+    parcel.WriteInt32(fdp.ConsumeIntegral<int32_t>());
+    parcel.WriteParcelable(&hostElement);
+    uiExtensionSessionInfo.reset(uiExtensionSessionInfo->Unmarshalling(parcel));
     uiExtensionSessionInfo->Marshalling(parcel);
-    parcel.WriteUint32(static_cast<uint32_t>(uiExtensionSessionInfo->uiExtensionUsage));
-    uiExtensionSessionInfo->Marshalling(parcel);
-    parcel.WriteInt32(static_cast<int32_t>(uiExtensionSessionInfo->extensionAbilityType));
-    uiExtensionSessionInfo->Marshalling(parcel);
-    uiExtensionSessionInfo->Unmarshalling(parcel);
     return true;
 }
 }

@@ -20,6 +20,10 @@
 
 #include <fuzzer/FuzzedDataProvider.h>
 #include <iostream>
+#include "ability_record.h"
+
+using namespace OHOS::AAFwk;
+using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
@@ -31,6 +35,11 @@ constexpr size_t STRING_MAX_LENGTH = 128;
 bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 {
     FuzzedDataProvider fdp(data, size);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityRequest.abilityInfo.name = fdp.ConsumeRandomLengthString(STRING_MAX_LENGTH);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     std::shared_ptr<AbilityRuntime::ExtensionRecord> extRecord;
     std::weak_ptr<AbilityRuntime::ExtensionRecord> weakExtRecord = extRecord;
     std::shared_ptr<AAFwk::PreLoadUIExtStateObserver> preLoad =
