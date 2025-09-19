@@ -33,6 +33,7 @@ constexpr const char* DEBUG_APP = "debugApp";
 constexpr const char* DLP_PARAMS_SANDBOX = "ohos.dlp.params.sandbox";
 constexpr const char* DLP_INDEX = "ohos.dlp.params.index";
 constexpr const char* START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
+constexpr const char* AUTO_STARTUP_READY = "persist.sys.abilityms.if_startup_ready";
 constexpr int32_t ONE = 1;
 constexpr int32_t TWO = 2;
 constexpr int32_t FOUNDATION_UID = 5523;
@@ -2121,6 +2122,24 @@ HWTEST_F(AbilityManagerServiceThirteenthTest, DelegatorDoAbilityForeground_006, 
     EXPECT_EQ(abilityMs_->DelegatorDoAbilityForeground(token), ERR_INVALID_VALUE);
 
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest DelegatorDoAbilityForeground_006 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: AddWatchParameters_001
+ * Function: AddWatchParameters
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService AddWatchParameters
+ */
+HWTEST_F(AbilityManagerServiceThirteenthTest, AddWatchParameters_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest AddWatchParameters_001 start");
+
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    abilityMs_->AddWatchParameters();
+
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirteenthTest AddWatchParameters_001 end");
 }
 
 /*
