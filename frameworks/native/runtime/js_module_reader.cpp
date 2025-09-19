@@ -212,7 +212,7 @@ std::string JsModuleReader::GetOtherHspPath(const std::string& bundleName, const
     int32_t ret = bundleMgrHelper->GetDependentBundleInfo(sharedBundleName, bundleInfo,
         AppExecFwk::GetDependentBundleInfoFlag::GET_APP_SERVICE_HSP_BUNDLE_INFO);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "GetDependentBundleInfo failed");
+        TAG_LOGW(AAFwkTag::JSRUNTIME, "GetDependentBundleInfo failed");
         return presetAppHapPath;
     }
     for (const auto &info : bundleInfo.hapModuleInfos) {

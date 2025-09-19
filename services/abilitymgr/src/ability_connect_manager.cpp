@@ -802,7 +802,7 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
     ConnectListType connectRecordList;
     GetConnectRecordListFromMap(connect, connectRecordList);
     if (connectRecordList.empty()) {
-        TAG_LOGE(AAFwkTag::EXT, "recordList empty");
+        TAG_LOGW(AAFwkTag::EXT, "recordList empty");
         return CONNECTION_NOT_EXIST;
     }
 
@@ -1558,7 +1558,7 @@ std::shared_ptr<AbilityRecord> AbilityConnectManager::GetUIExtensionBySessionInf
         }
         return abilityRecord;
     } else {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "UIExtension not found");
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "UIExtension not found");
     }
     return nullptr;
 }
@@ -2220,7 +2220,7 @@ void AbilityConnectManager::TerminateAbilityWindowLocked(const std::shared_ptr<A
     std::lock_guard guard(serialMutex_);
     eventInfo.errCode = TerminateAbilityInner(abilityRecord->GetToken());
     if (eventInfo.errCode != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "terminate ability window locked failed: %{public}d", eventInfo.errCode);
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "terminate ability window locked failed: %{public}d", eventInfo.errCode);
         EventReport::SendAbilityEvent(EventName::TERMINATE_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
     }
 }
@@ -3826,7 +3826,7 @@ void AbilityConnectManager::UpdateUIExtensionBindInfo(
     auto sessionInfo = abilityRecord->GetSessionInfo();
     if (sessionInfo == nullptr) {
         if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
-            TAG_LOGE(AAFwkTag::UI_EXT, "sa preload not allow bind process");
+            TAG_LOGW(AAFwkTag::UI_EXT, "sa preload not allow bind process");
             return;
         }
     } else {
