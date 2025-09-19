@@ -41,6 +41,12 @@ enum class ArrayType {
     NOT_ARRAY,
 };
 
+class JsonUtil {
+public:
+    static bool CheckArrayValueType(const nlohmann::json &value, ArrayType arrayType);
+    static bool CheckMapValueType(const nlohmann::json &value, JsonType valueType, ArrayType arrayType);
+};
+
 template<typename T, typename dataType>
 void CheckArrayType(
     const nlohmann::json &jsonObject, const std::string &key, dataType &data, ArrayType arrayType, int32_t &parseResult)
@@ -188,6 +194,43 @@ bool ParseInfoFromJsonStr(const char *data, T &t)
 
     t = jsonObject.get<T>();
     return true;
+}
+
+/**
+ * @brief Retrieves a map value from a JSON object if the specified key exists, with type validation.
+ * @param valueType The expected type of map values.
+ *                  Supported types: [BOOLEAN, NUMBER, STRING, ARRAY]. Returns an error if the type is not supported.
+ * @param arrayType If valueType is ARRAY, specifies the expected type of array items.
+ *                  Supported types: [NUMBER, STRING]. Returns an error if the type is not supported.
+ */
+template<typename T, typename dataType>
+void GetMapValueIfFindKey(const nlohmann::json &jsonObject,
+    const nlohmann::detail::iter_impl<const nlohmann::json> &end, const std::string &key, dataType &data,
+    bool isNecessary, int32_t &parseResult, JsonType valueType, ArrayType arrayType)
+{
+    if (parseResult != ERR_OK) {
+        return;
+    }
+    if (jsonObject.find(key) != end) {
+        if (!jsonObject.at(key).is_object()) {
+            TAG_LOGE(AAFwkTag::ABILITY_SIM, "type error %{public}s not map object", key.c_str());
+            parseResult = ERR_APPEXECFWK_PARSE_PROFILE_PROP_TYPE_ERROR;
+            return;
+        }
+        for (const auto& [mapKey, mapValue] : jsonObject.at(key).items()) {
+            if (!JsonUtil::CheckMapValueType(mapValue, valueType, arrayType)) {
+                TAG_LOGE(AAFwkTag::ABILITY_SIM, "type error key:%{public}s", mapKey.c_str());
+                parseResult = ERR_APPEXECFWK_PARSE_PROFILE_PROP_TYPE_ERROR;
+                return;
+            }
+        }
+        data = jsonObject.at(key).get<T>();
+        return;
+    }
+    if (isNecessary) {
+        TAG_LOGE(AAFwkTag::ABILITY_SIM, "profile prop %{public}s missing", key.c_str());
+        parseResult = ERR_APPEXECFWK_PARSE_PROFILE_MISSING_PROP;
+    }
 }
 } // namespace AppExecFwk
 } // namespace OHOS

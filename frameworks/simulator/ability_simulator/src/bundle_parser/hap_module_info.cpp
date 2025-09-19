@@ -319,13 +319,13 @@ void from_json(const nlohmann::json &jsonObject, RouterItem &routerItem)
         false,
         parseResult,
         ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::map<std::string, std::string>>(jsonObject,
+    GetMapValueIfFindKey<std::map<std::string, std::string>>(jsonObject,
         jsonObjectEnd,
         ROUTER_ITEM_KEY_DATA,
         routerItem.data,
-        JsonType::OBJECT,
         false,
         parseResult,
+        JsonType::STRING,
         ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITY_SIM, "read RouterItem jsonObject error : %{public}d", parseResult);
@@ -682,13 +682,13 @@ void from_json(const nlohmann::json &jsonObject, HapModuleInfo &hapModuleInfo)
         false,
         parseResult,
         ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::map<std::string, bool>>(jsonObject,
+    GetMapValueIfFindKey<std::map<std::string, bool>>(jsonObject,
         jsonObjectEnd,
         HAP_MODULE_INFO_IS_REMOVABLE,
         hapModuleInfo.isRemovable,
-        JsonType::OBJECT,
         false,
         parseResult,
+        JsonType::BOOLEAN,
         ArrayType::NOT_ARRAY);
     GetValueIfFindKey<int32_t>(jsonObject,
         jsonObjectEnd,

@@ -455,13 +455,13 @@ void from_json(const nlohmann::json &jsonObject, InnerModuleInfo &info)
         false,
         parseResult,
         ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::map<std::string, bool>>(jsonObject,
+    GetMapValueIfFindKey<std::map<std::string, bool>>(jsonObject,
         jsonObjectEnd,
         MODULE_IS_REMOVABLE,
         info.isRemovable,
-        JsonType::OBJECT,
         false,
         parseResult,
+        JsonType::BOOLEAN,
         ArrayType::NOT_ARRAY);
     GetValueIfFindKey<int32_t>(jsonObject,
         jsonObjectEnd,
