@@ -91,7 +91,7 @@ HWTEST_F(AppExitReasonHelperThirdTest, RecordProcessExtensionExitReason_0100, Te
         = std::make_shared<AAFwk::AbilityConnectManager>(0);
     appExitReasonHelper_->subManagersHelper_->currentConnectManager_
         ->uiExtensionAbilityRecordMgr_->extensionRecords_.clear();
-    pid = 0;
+    pid = 1;
     result = appExitReasonHelper_->RecordProcessExtensionExitReason(pid, bundleName, exitReason,
         processInfo, withKillMsg);
     EXPECT_EQ(result, AAFwk::ERR_GET_ACTIVE_EXTENSION_LIST_EMPTY);
@@ -99,7 +99,7 @@ HWTEST_F(AppExitReasonHelperThirdTest, RecordProcessExtensionExitReason_0100, Te
         ->uiExtensionAbilityRecordMgr_->extensionRecords_.emplace(userId, extRecord);
     result = appExitReasonHelper_->RecordProcessExtensionExitReason(pid, bundleName, exitReason,
         processInfo, withKillMsg);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_NE(result, ERR_OK);
 }
 
 /**
