@@ -3888,6 +3888,7 @@ AppProcessData AppMgrServiceInner::WrapAppProcessData(const std::shared_ptr<AppR
     processData.instanceKey = appRecord->GetInstanceKey();
     processData.bundleName = appRecord->GetBundleName();
     processData.isFromWindowFocusChanged = isFromWindowFocusChanged;
+    processData.uid = appRecord->GetUid();
     auto renderRecordMap = appRecord->GetRenderRecordMap();
     if (!renderRecordMap.empty()) {
         for (auto iter : renderRecordMap) {

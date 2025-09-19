@@ -313,7 +313,7 @@ public:
      *
      * @param abilityRecord, service ability record.
      */
-    void OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
+    void OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     /**
      * DisconnectBeforeCleanup.
@@ -604,7 +604,7 @@ private:
      *
      * @param abilityRecord, died ability.
      */
-    void HandleAbilityDiedTask(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
+    void HandleAbilityDiedTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     void HandleUIExtensionDied(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
@@ -697,7 +697,7 @@ private:
     void AddConnectObjectToMap(sptr<IRemoteObject> connectObject, const ConnectListType &connectRecordList,
         bool updateOnly);
 
-    void KeepAbilityAlive(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
+    void KeepAbilityAlive(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void ProcessEliminateAbilityRecord(std::shared_ptr<AbilityRecord> eliminateRecord);
     std::string GetServiceKey(const std::shared_ptr<AbilityRecord> &service);
 
