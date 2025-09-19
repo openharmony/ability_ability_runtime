@@ -222,10 +222,8 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         uiAbilityRecord->lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
         return ERR_OK;
     }
-    bool isNewWant = (static_cast<uint32_t>(sessionInfo->scenarios) &
-        ServerConstant::SKIP_ON_NEW_WANT_SCENARIOS) == 0 ? sessionInfo->isNewWant : false;
     auto want = uiAbilityRecord->GetWant();
-    if (want.GetBoolParam(IS_CALLING_FROM_DMS, false) && !isNewWant) {
+    if (want.GetBoolParam(IS_CALLING_FROM_DMS, false) && !(sessionInfo->isNewWant)) {
         want.RemoveParam(IS_CALLING_FROM_DMS);
         uiAbilityRecord->SetWant(want);
     }
@@ -237,19 +235,22 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         ProcessColdStartBranch(abilityRequest, sessionInfo, uiAbilityRecord, isColdStart)) {
         return ERR_OK;
     }
+    auto scenarios = static_cast<uint32_t>(uiAbilityRecord->GetOnNewWantSkipScenarios()) &
+        static_cast<uint32_t>(sessionInfo->scenarios);
     if (uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped");
         uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
-        if (isNewWant) {
+        if (scenarios == 0 && sessionInfo->isNewWant) {
             uiAbilityRecord->SetLastWant(std::make_shared<Want>(abilityRequest.want));
         }
         return ERR_OK;
+    } else {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "pending state is not FOREGROUND or BACKGROUND.");
+        uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "pending state is not FOREGROUND or BACKGROUND.");
-    uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
-    if (!isColdStart) {
-        uiAbilityRecord->SetIsNewWant(isNewWant);
-        if (isNewWant) {
+    if (!isColdStart && scenarios == 0) {
+        uiAbilityRecord->SetIsNewWant(sessionInfo->isNewWant);
+        if (sessionInfo->isNewWant) {
             uiAbilityRecord->SetWant(abilityRequest.want);
             uiAbilityRecord->GetSessionInfo()->want.RemoveAllFd();
         } else {
@@ -257,7 +258,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         }
     }
 
-    if (!uiAbilityRecord->IsReady() || isNewWant) {
+    if (!uiAbilityRecord->IsReady() || sessionInfo->isNewWant) {
         AddCallerRecord(abilityRequest, sessionInfo, uiAbilityRecord);
     }
     auto isShellCall = abilityRequest.want.GetBoolParam(IS_SHELL_CALL, false);
