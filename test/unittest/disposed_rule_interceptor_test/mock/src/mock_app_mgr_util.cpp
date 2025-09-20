@@ -19,9 +19,12 @@
 
 namespace OHOS {
 namespace AAFwk {
+sptr<OHOS::AppExecFwk::IAppMgr> AppMgrUtil::appMgr_ = nullptr;
+
 OHOS::sptr<AppExecFwk::IAppMgr> AppMgrUtil::GetAppMgr()
 {
-    return MyFlag::mockAppMgr_;
+    appMgr_ = MyFlag::mockAppMgr_;
+    return appMgr_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

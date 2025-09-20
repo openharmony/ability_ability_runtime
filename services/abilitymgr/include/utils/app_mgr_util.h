@@ -32,6 +32,9 @@ public:
      * @return AppMgr.
      */
     static sptr<OHOS::AppExecFwk::IAppMgr> GetAppMgr();
+
+private:
+    static sptr<OHOS::AppExecFwk::IAppMgr> appMgr_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
