@@ -2326,6 +2326,9 @@ protected:
      */
     int32_t CheckCallAppServiceExtensionPermission(const AbilityRequest &abilityRequest,
         std::shared_ptr<AbilityRecord> targetService, bool isFromConnect);
+
+    static void HandleAutoStartupReadyCallback(const char *key, const char *value, void *context);
+
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr, bool flag = true);
@@ -2506,6 +2509,9 @@ private:
     void UnSubscribeScreenUnlockedEvent();
     void RetrySubscribeScreenUnlockedEvent(int32_t retryCount);
     void RemoveScreenUnlockInterceptor();
+    bool HasScreenUnlockInterceptor();
+    void AddWatchParameters();
+
     void RemoveUnauthorizedLaunchReasonMessage(const Want &want, AbilityRequest &abilityRequest,
         uint32_t callerTokenId);
 
