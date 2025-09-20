@@ -22,6 +22,7 @@
 #include "ani_common_configuration.h"
 #include "ani_common_want.h"
 #include "ani_enum_convert.h"
+#include "ani_remote_object.h"
 #ifdef SUPPORT_SCREEN
 #include "ani_window_stage.h"
 #endif
@@ -1128,6 +1129,39 @@ void EtsUIAbility::Dump(const std::vector<std::string> &params, std::vector<std:
         info.push_back(dumpInfoStr);
     }
     TAG_LOGD(AAFwkTag::UIABILITY, "dump info size: %{public}zu", info.size());
+}
+
+sptr<IRemoteObject> EtsUIAbility::CallRequest()
+{
+    TAG_LOGI(AAFwkTag::UIABILITY, "CallRequest");
+    if (etsAbilityObj_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null abilityContext_");
+        return nullptr;
+    }
+
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        return nullptr;
+    }
+    auto obj = etsAbilityObj_->aniObj;
+    ani_status status = ANI_ERROR;
+    ani_ref calleeRef = nullptr;
+    status = env->Object_GetFieldByName_Ref(obj, "callee", &calleeRef);
+    if (status != ANI_OK) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "get callee: %{public}d", status);
+        return nullptr;
+    }
+    env->Object_CallMethodByName_Void(reinterpret_cast<ani_object>(calleeRef), "setNewRuleFlag",
+        "z:", ani_boolean(IsUseNewStartUpRule()));
+    ani_long nativePtr = 0;
+    env->Object_CallMethodByName_Long(reinterpret_cast<ani_object>(calleeRef), "getNativePtr",
+        ":l", &nativePtr);
+    sptr<IRemoteObject> remoteObj(reinterpret_cast<IRemoteObject*>(nativePtr));
+    if (remoteObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "AniGetNativeRemoteObject null");
+    }
+    return remoteObj;
 }
 
 bool EtsUIAbility::CallObjectMethod(bool withResult, const char *name, const char *signature, ...)
