@@ -18,6 +18,5 @@
 namespace OHOS {
 namespace AAFwk {
 int MyFlag::flag_ = 0;
-sptr<AppExecFwk::MockAppMgrService> MyFlag::mockAppMgr_ = nullptr;
 } // namespace AAFwk
 } // namespace OHOS
