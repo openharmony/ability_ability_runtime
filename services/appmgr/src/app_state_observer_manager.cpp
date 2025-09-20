@@ -654,7 +654,7 @@ void AppStateObserverManager::HandleStateChangedNotifyObserver(
             AppStateFilter appStateFilter {FilterCallback::ON_EXTENSION_STATE_CHANGED,
                 GetFilterTypeFromBundleType(bundleType),
                 FilterAppStateType::NONE, FilterProcessStateType::NONE,
-                GetFilterTypeFromAbilityState(static_cast<AbilityState>(abilityStateData.abilityState))};
+                GetFilterTypeFromExtensionState(static_cast<ExtensionState>(abilityStateData.abilityState))};
             if (it->second.appStateFilter.Match(appStateFilter)) {
                 it->first->OnExtensionStateChanged(abilityStateData);
             }
