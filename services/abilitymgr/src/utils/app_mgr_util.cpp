@@ -24,13 +24,13 @@
 namespace OHOS {
 namespace AAFwk {
 ffrt::mutex g_appMgrMutex;
-sptr<OHOS::AppExecFwk::IAppMgr> g_appMgr = nullptr;
+sptr<OHOS::AppExecFwk::IAppMgr> AppMgrUtil::appMgr_ = nullptr;
 
 OHOS::sptr<OHOS::AppExecFwk::IAppMgr> AppMgrUtil::GetAppMgr()
 {
     std::lock_guard<ffrt::mutex> guard(g_appMgrMutex);
-    if (g_appMgr) {
-        return g_appMgr;
+    if (appMgr_) {
+        return appMgr_;
     }
 
     auto sysMgrClient = DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance();
@@ -41,8 +41,8 @@ OHOS::sptr<OHOS::AppExecFwk::IAppMgr> AppMgrUtil::GetAppMgr()
     if (object == nullptr) {
         return nullptr;
     }
-    g_appMgr = OHOS::iface_cast<OHOS::AppExecFwk::IAppMgr>(object);
-    return g_appMgr;
+    appMgr_ = OHOS::iface_cast<OHOS::AppExecFwk::IAppMgr>(object);
+    return appMgr_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

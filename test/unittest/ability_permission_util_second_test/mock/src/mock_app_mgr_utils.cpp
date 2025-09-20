@@ -19,17 +19,17 @@
 
 namespace OHOS {
 namespace AAFwk {
-sptr<OHOS::AppExecFwk::IAppMgr> g_appMgr = nullptr;
+sptr<OHOS::AppExecFwk::IAppMgr> AppMgrUtil::appMgr_ = nullptr;
 
 OHOS::sptr<AppExecFwk::IAppMgr> AppMgrUtil::GetAppMgr()
 {
     if (0 == MyFlag::mockFlag_) {
-        return g_appMgr;
+        return appMgr_;
     }
 
     sptr<AppExecFwk::MockAppMgrService> mockAppMgr(new AppExecFwk::MockAppMgrService());
-    g_appMgr = iface_cast<AppExecFwk::IAppMgr>(mockAppMgr);
-    return g_appMgr;
+    appMgr_ = iface_cast<AppExecFwk::IAppMgr>(mockAppMgr);
+    return appMgr_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

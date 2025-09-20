@@ -71,10 +71,7 @@ public:
     std::shared_ptr<AbilityRecord> InitAbilityRecord();
 };
 
-void UIAbilityLifecycleManagerThirdTest::SetUpTestCase()
-{
-    MyFlag::mockAppMgr_ = nullptr;
-}
+void UIAbilityLifecycleManagerThirdTest::SetUpTestCase() {}
 
 void UIAbilityLifecycleManagerThirdTest::TearDownTestCase() {}
 
@@ -427,17 +424,19 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_004, TestSize
  */
 HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_005, TestSize.Level1)
 {
+    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
+    SpecifiedRequest specifiedRequest(0, AbilityRequest());
+    auto originAppMgr = AppMgrUtil::appMgr_;
     auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
-    MyFlag::mockAppMgr_ = appmgr;
     EXPECT_CALL(*appmgr, IsSpecifiedModuleLoaded)
         .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result, bool &) {
             result = true;
             return 0;
         });
-    auto mgr = std::make_shared<UIAbilityLifecycleManager>();
-    SpecifiedRequest specifiedRequest(0, AbilityRequest());
+    AppMgrUtil::appMgr_ = appmgr;
     mgr->StartSpecifiedRequest(specifiedRequest);
     EXPECT_FALSE(specifiedRequest.isCold);
+    AppMgrUtil::appMgr_ = originAppMgr;
 }
 
 /**
@@ -447,13 +446,6 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_005, TestSize
  */
 HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_006, TestSize.Level1)
 {
-    auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
-    MyFlag::mockAppMgr_ = appmgr;
-    EXPECT_CALL(*appmgr, IsSpecifiedModuleLoaded)
-        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result, bool &) {
-            result = false;
-            return 0;
-        });
     auto mgr = std::make_shared<UIAbilityLifecycleManager>();
     SpecifiedRequest specifiedRequest(0, AbilityRequest());
     specifiedRequest.abilityRequest.want.SetParam("debugApp", true);
@@ -469,13 +461,6 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_006, TestSize
  */
 HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_007, TestSize.Level1)
 {
-    auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
-    MyFlag::mockAppMgr_ = appmgr;
-    EXPECT_CALL(*appmgr, IsSpecifiedModuleLoaded)
-        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result, bool &) {
-            result = false;
-            return 0;
-        });
     auto mgr = std::make_shared<UIAbilityLifecycleManager>();
     SpecifiedRequest specifiedRequest(0, AbilityRequest());
     specifiedRequest.abilityRequest.want.SetParam("nativeDebug", true);
@@ -491,13 +476,6 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_007, TestSize
  */
 HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_008, TestSize.Level1)
 {
-    auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
-    MyFlag::mockAppMgr_ = appmgr;
-    EXPECT_CALL(*appmgr, IsSpecifiedModuleLoaded)
-        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result, bool &) {
-            result = false;
-            return 0;
-        });
     auto mgr = std::make_shared<UIAbilityLifecycleManager>();
     SpecifiedRequest specifiedRequest(0, AbilityRequest());
     specifiedRequest.abilityRequest.want.SetParam("perfCmd", std::string("perfCmd"));
@@ -515,8 +493,9 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_009, TestSize
 {
     auto mgr = std::make_shared<UIAbilityLifecycleManager>();
     SpecifiedRequest specifiedRequest(0, AbilityRequest());
+    auto originAppMgr = AppMgrUtil::appMgr_;
     auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
-    MyFlag::mockAppMgr_ = appmgr;
+    AppMgrUtil::appMgr_ = appmgr;
     EXPECT_CALL(*appmgr, IsSpecifiedModuleLoaded)
         .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result, bool &isDebug) {
             result = false;
@@ -526,6 +505,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartSpecifiedRequest_009, TestSize
     mgr->StartSpecifiedRequest(specifiedRequest);
     usleep(TIMEOUT_VALUE);
     EXPECT_TRUE(specifiedRequest.isCold);
+    AppMgrUtil::appMgr_ = originAppMgr;
 }
 
 /**
@@ -679,13 +659,6 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, OnStartSpecifiedFailed_002, TestSiz
  */
 HWTEST_F(UIAbilityLifecycleManagerThirdTest, OnStartSpecifiedFailed_003, TestSize.Level1)
 {
-    auto appmgr = sptr<AppExecFwk::MockAppMgrService>::MakeSptr();
-    MyFlag::mockAppMgr_ = appmgr;
-    EXPECT_CALL(*appmgr, IsSpecifiedModuleLoaded)
-        .WillOnce([](const Want &, const AppExecFwk::AbilityInfo &, bool &result, bool &) {
-            result = true;
-            return 0;
-        });
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     int32_t requestId = 1;
     AbilityRequest abilityRequest;
@@ -1280,7 +1253,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, IsSpecifiedModuleLoaded_001, TestSi
 
     AbilityRequest abilityRequest;
 
-    MyFlag::mockAppMgr_ = nullptr;
+    AppMgrUtil::appMgr_ = nullptr;
     SysMrgClient::instance_ = nullptr;
     bool isDebug = false;
     auto ret = uiAbilityLifecycleManager->IsSpecifiedModuleLoaded(abilityRequest, false, isDebug);
