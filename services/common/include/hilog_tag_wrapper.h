@@ -187,7 +187,7 @@ inline const char* GetDomainName6(AAFwkLogTag tag)
     return tagNames[offset];
 }
 
-inline std::string CovertFileName(const std::string& fileName)
+[[maybe_ununsed]] static std::string CovertFileName(const std::string& fileName)
 {
     std::string fileBaseName = fileName;
     auto pos = fileName.find_last_of(".");
