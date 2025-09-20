@@ -123,6 +123,7 @@ public:
 FilterAppStateType GetFilterTypeFromApplicationState(ApplicationState state);
 FilterProcessStateType GetFilterTypeFromAppProcessState(AppProcessState state);
 FilterAbilityStateType GetFilterTypeFromAbilityState(AbilityState state);
+FilterAbilityStateType GetFilterTypeFromExtensionState(ExtensionState state);
 FilterBundleType GetFilterTypeFromBundleType(BundleType state);
 }  // namespace AppExecFwk
 }  // namespace OHOS
