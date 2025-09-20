@@ -629,10 +629,17 @@ HWTEST_F(AbilityManagerServiceThirdTest, CallRequestDone_001, TestSize.Level1)
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
     abilityMs_->subManagersHelper_->currentUIAbilityManager_ = std::make_shared<UIAbilityLifecycleManager>();
+    abilityMs_->callStubTokenMap_.clear();
     sptr<IRemoteObject> token = nullptr;
     sptr<IRemoteObject> callStub = nullptr;
-    ASSERT_NE(abilityMs_, nullptr);
     abilityMs_->CallRequestDone(token, callStub);
+    EXPECT_TRUE(abilityMs_->callStubTokenMap_.empty());
+
+    auto abilityRecord = MockAbilityRecord(AbilityType::SERVICE);
+    token = abilityRecord->GetToken();
+    abilityMs_->CallRequestDone(token, callStub);
+    EXPECT_NE(abilityMs_->callStubTokenMap_[callStub], nullptr);
+    EXPECT_EQ(abilityMs_->callStubTokenMap_[callStub], token);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest CallRequestDone_001 end");
 }
 
