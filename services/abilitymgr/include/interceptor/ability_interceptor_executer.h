@@ -43,6 +43,11 @@ public:
     void RemoveInterceptor(std::string interceptorName);
 
     /**
+     * @param interceptorName, interceptor name.
+     */
+    bool HasInterceptor(std::string interceptorName);
+
+    /**
      * Excute the DoProcess of the interceptors.
      */
     ErrCode DoProcess(AbilityInterceptorParam param);
