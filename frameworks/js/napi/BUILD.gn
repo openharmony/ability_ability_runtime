@@ -58,6 +58,7 @@ group("napi_packages") {
     "${ability_runtime_napi_path}/callee:callee_napi",
     "${ability_runtime_napi_path}/caller:caller_napi",
     "${ability_runtime_napi_path}/completion_handler_for_atomic_service:completionhandlerforatomicservice",
+    "${ability_runtime_napi_path}/completion_handler_for_abilitystartcallback:completionhandlerforabilitystartcallback",
     "${ability_runtime_napi_path}/configuration_constant:configurationconstant",
     "${ability_runtime_napi_path}/configuration_constant:configurationconstant_napi",
     "${ability_runtime_napi_path}/dataUriUtils:datauriutils_napi",
