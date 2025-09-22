@@ -938,11 +938,6 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
         };
 
-    if (clearMissionFlag && appRecord->IsDebug()) {
-        killProcess();
-        return;
-    }
-
     auto isLastAbility =
         clearMissionFlag ? appRecord->IsLastPageAbilityRecord(token) : appRecord->IsLastAbilityRecord(token);
 #ifdef SUPPORT_SCREEN
