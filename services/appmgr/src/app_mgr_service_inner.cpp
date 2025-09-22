@@ -623,7 +623,7 @@ void AppMgrServiceInner::PreloadModuleFinished(const int32_t pid)
     auto reportLoadTask = [appRecord]() {
         auto priorityObj = appRecord->GetPriorityObject();
         if (priorityObj) {
-            AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::PRELOAD_END, 
+            AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::PRELOAD_END,
                 priorityObj->GetPid(), appRecord->GetUid(), 0, 0);
         }
     };
@@ -2099,7 +2099,7 @@ bool AppMgrServiceInner::IsUninstallingOrUpgrading(int32_t uid)
     std::lock_guard lock(uninstallOrUpgradeUidSetLock_);
     if (uninstallOrUpgradeUidSet_.find(uid) != uninstallOrUpgradeUidSet_.end()) {
         return true;
-    } 
+    }
     return false;
 }
 
@@ -4809,7 +4809,7 @@ void AppMgrServiceInner::OnRemoteDied(const wptr<IRemoteObject> &remote, bool is
         }
     }
     ClearData(appRecord);
-    
+
     if (appRecord->IsStartSpecifiedAbility() && startSpecifiedAbilityResponse_) {
         startSpecifiedAbilityResponse_->OnStartSpecifiedFailed(appRecord->GetSpecifiedRequestId());
     }
@@ -7896,8 +7896,8 @@ int32_t AppMgrServiceInner::UnregisterAppDebugListener(const sptr<IAppDebugListe
 int32_t AppMgrServiceInner::AttachAppDebug(const std::string &bundleName, bool isDebugFromLocal)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
-    if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "developer mode false");
+    if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false) && !isDebugFromLocal) {
+        TAG_LOGE(AAFwkTag::APPMGR, "developer mode false or not debug from local");
         return ERR_INVALID_OPERATION;
     }
 
@@ -10363,7 +10363,7 @@ int32_t AppMgrServiceInner::PromoteCurrentToCandidateMasterProcess(bool isInsert
 {
     TAG_LOGI(AAFwkTag::APPMGR, "call");
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    
+
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ null");
         return AAFwk::ERR_NOT_ISOLATION_PROCESS;
@@ -10378,21 +10378,21 @@ int32_t AppMgrServiceInner::PromoteCurrentToCandidateMasterProcess(bool isInsert
 
     if (!AAFwk::AppUtils::GetInstance().IsStartSpecifiedProcess()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Capability not support");
-        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT; 
+        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }
-    
+
     if (appRecord->GetSpecifiedProcessFlag() == "" &&
         !appRecord->GetIsMasterProcess()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Current process is not running a component "
                                     "configured with \"isolationProcess\".");
-        return AAFwk::ERR_NOT_ISOLATION_PROCESS; 
+        return AAFwk::ERR_NOT_ISOLATION_PROCESS;
     }
 
     auto now = std::chrono::steady_clock::now().time_since_epoch();
     int64_t timeStamp = std::chrono::duration_cast<std::chrono::nanoseconds>(now).count();
     if(!isInsertToHead){
         timeStamp = -timeStamp;
-    } 
+    }
     appRecord->SetTimeStamp(timeStamp);
     return ERR_OK;
 }
@@ -10409,17 +10409,17 @@ int32_t AppMgrServiceInner::DemoteCurrentFromCandidateMasterProcess()
 
     if (!AAFwk::AppUtils::GetInstance().IsStartSpecifiedProcess()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Capability not support");
-        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT; 
+        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
     }
 
     if (appRecord->GetIsMasterProcess()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Current process is already a master process");
         return AAFwk::ERR_ALREADY_MASTER_PROCESS;
     }
-    
+
     if (appRecord->GetTimeStamp() == 0) {
         TAG_LOGE(AAFwkTag::APPMGR, "Current process is not a candidate master process");
-        return AAFwk::ERR_NOT_CANDIDATE_MASTER_PROCESS;    
+        return AAFwk::ERR_NOT_CANDIDATE_MASTER_PROCESS;
     }
 
     appRecord->SetTimeStamp(0);
@@ -10439,7 +10439,7 @@ void AppMgrServiceInner::OnProcessDied(std::shared_ptr<AppRunningRecord> appReco
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
 }
 
-bool AppMgrServiceInner::IsBlockedByDisposeRules(const std::string &bundleName, int32_t userId, 
+bool AppMgrServiceInner::IsBlockedByDisposeRules(const std::string &bundleName, int32_t userId,
     int32_t appIndex)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
