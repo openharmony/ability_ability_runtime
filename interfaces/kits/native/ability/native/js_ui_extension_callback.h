@@ -32,8 +32,8 @@ public:
     void SetJsCallbackObject(napi_value jsCallbackObject);
     void CallJsError(int32_t number);
     void SetCompletionHandler(napi_env env, napi_value completionHandler);
-    void OnRequestSuccess(const std::string& name);
-    void OnRequestFailure(const std::string& name, int32_t failureCode, const std::string& failureMessage);
+    void OnRequestSuccess(const std::string& name) override;
+    void OnRequestFailure(const std::string& name, int32_t failureCode, const std::string& failureMessage) override;
 private:
     napi_env env_ = nullptr;
     std::unique_ptr<NativeReference> jsCallbackObject_ = nullptr;
