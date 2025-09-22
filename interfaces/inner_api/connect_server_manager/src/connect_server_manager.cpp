@@ -467,4 +467,24 @@ void ConnectServerManager::AddInstanceCallback(const int32_t instanceId)
         }
     }
 }
+
+void ConnectServerManager::SendInstanceMessageAll(std::function<void(int32_t, const DebuggerPostTask&)> callback)
+{
+    ConnectServerManager::Get().SetConnectedCallback();
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (const auto& instance : instanceMap_) {
+        auto instanceId = instance.first;
+        auto instanceName = instance.second.first;
+        auto tid = instance.second.second;
+        std::lock_guard<std::mutex> lock(g_debuggerMutex);
+        ConnectServerManager::Get().SendInstanceMessage(tid, instanceId, instanceName);
+        const auto &debuggerPostTask = g_debuggerInfo[tid].second;
+        if (!debuggerPostTask) {
+            continue;
+        }
+        if (callback != nullptr) {
+            callback(tid, debuggerPostTask);
+        }
+    }
+}
 } // namespace OHOS::AbilityRuntime
