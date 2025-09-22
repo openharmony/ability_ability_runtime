@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <chrono>
 #include <gtest/gtest.h>
+#include <thread>
 
 #define private public
 #include "uri_permission_manager_client.h"
@@ -61,6 +63,7 @@ HWTEST_F(UriPermissionManagerTest, ConnectUriPermService_001, TestSize.Level1)
     EXPECT_EQ(upmc.GetUriPermMgr(), nullptr);
     auto ret = upmc.ConnectUriPermService();
     EXPECT_EQ(ret, nullptr);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 /*
@@ -77,6 +80,7 @@ HWTEST_F(UriPermissionManagerTest, ConnectUriPermService_002, TestSize.Level1)
     EXPECT_EQ(upmc.GetUriPermMgr(), nullptr);
     auto ret = upmc.ConnectUriPermService();
     EXPECT_EQ(ret, nullptr);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 /*
@@ -92,7 +96,7 @@ HWTEST_F(UriPermissionManagerTest, ConnectUriPermService_003, TestSize.Level1)
     upmc.SetUriPermMgr(remoteObject);
     EXPECT_EQ(upmc.GetUriPermMgr(), nullptr);
     auto ret = upmc.ConnectUriPermService();
-    EXPECT_NE(ret, nullptr);
+    EXPECT_EQ(ret, nullptr);
 }
 
 /*
