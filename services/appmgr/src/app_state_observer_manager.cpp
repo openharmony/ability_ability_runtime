@@ -276,7 +276,7 @@ void AppStateObserverManager::OnAppStateChanged(
         TAG_LOGD(AAFwkTag::APPMGR, "OnAppStateChanged come.");
         self->HandleAppStateChanged(appRecord, state, needNotifyApp, isFromWindowFocusChanged);
     };
-    AAFwk::TaskAttribute taskAttribute{.taskName_ = "APP_STATE_CHANGED", .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE};
+    AAFwk::TaskAttribute taskAttribute{ .taskName_ = "AppStateChanged", .taskQos_ = AAFwk::TaskQoS::USER_INTERACTIVE };
     handler_->SubmitTask(task, taskAttribute);
 }
 
