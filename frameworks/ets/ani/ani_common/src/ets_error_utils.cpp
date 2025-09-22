@@ -236,7 +236,7 @@ ani_object EtsErrorUtil::CreateError(ani_env *env, ani_int code, const std::stri
         return nullptr;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "DLescompat/Error;:V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "ILescompat/Error;:V", &method)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Class_FindMethod failed %{public}d", status);
         return nullptr;
     }
@@ -246,7 +246,7 @@ ani_object EtsErrorUtil::CreateError(ani_env *env, ani_int code, const std::stri
         return nullptr;
     }
     ani_object obj = nullptr;
-    if ((status = env->Object_New(cls, method, &obj, (ani_double)code, error)) != ANI_OK) {
+    if ((status = env->Object_New(cls, method, &obj, code, error)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "Object_New failed %{public}d", status);
         return nullptr;
     }

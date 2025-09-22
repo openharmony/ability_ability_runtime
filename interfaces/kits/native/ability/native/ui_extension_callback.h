@@ -35,8 +35,8 @@ public:
     void SetSessionId(int32_t sessionId);
     void SetUIContent(Ace::UIContent *uiContent);
     void CloseModalUIExtension();
-    void OnRequestSuccess(const std::string& name);
-    void OnRequestFailure(const std::string& name, int32_t failureCode, const std::string& failureMessage);
+    virtual void OnRequestSuccess(const std::string& name);
+    virtual void OnRequestFailure(const std::string& name, int32_t failureCode, const std::string& failureMessage);
 private:
     int32_t sessionId_ = 0;
     Ace::UIContent *uiContent_ = nullptr;
