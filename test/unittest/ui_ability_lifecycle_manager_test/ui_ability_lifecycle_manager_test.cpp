@@ -3999,6 +3999,196 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnAppStateChanged_008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UIAbilityLifecycleManager_OnAppStateChanged_0900
+ * @tc.desc: OnAppStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, OnAppStateChanged_009, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.process = "AbilityProcess";
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    AppInfo info;
+    info.processName = "AbilityProcess";
+    info.bundleName = "com.example.unittest";
+    info.appIndex = abilityRecord->GetAppIndex();
+    info.instanceKey = abilityRecord->GetInstanceKey();
+    info.pid = abilityRecord->GetPid();
+    info.state = AppState::TERMINATED;
+    uiAbilityLifecycleManager->terminateAbilityList_.emplace_back(abilityRecord);
+    uiAbilityLifecycleManager->OnAppStateChanged(info);
+    uiAbilityLifecycleManager.reset();
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_OnAppStateChanged_1000
+ * @tc.desc: OnAppStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, OnAppStateChanged_010, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.process = "AbilityProcess";
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    AppInfo info;
+    info.processName = "AbilityProcess";
+    info.bundleName = "com.example.unittest1";
+    info.state = AppState::TERMINATED;
+    uiAbilityLifecycleManager->OnAppStateChanged(info);
+    uiAbilityLifecycleManager.reset();
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_OnAppStateChanged_1100
+ * @tc.desc: OnAppStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, OnAppStateChanged_011, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.process = "AbilityProcess";
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    AppInfo info;
+    info.processName = "AbilityProcess";
+    info.bundleName = "com.example.unittest";
+    info.appIndex = abilityRecord->GetAppIndex();
+    info.instanceKey = abilityRecord->GetInstanceKey();
+    info.pid = abilityRecord->GetPid();
+    info.state = AppState::END;
+    uiAbilityLifecycleManager->terminateAbilityList_.emplace_back(abilityRecord);
+    uiAbilityLifecycleManager->OnAppStateChanged(info);
+    uiAbilityLifecycleManager.reset();
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_OnAppStateChanged_1200
+ * @tc.desc: OnAppStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, OnAppStateChanged_012, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.process = "AbilityProcess";
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    AppInfo info;
+    info.processName = "AbilityProcess";
+    info.bundleName = "com.example.unittest1";
+    info.state = AppState::END;
+    uiAbilityLifecycleManager->OnAppStateChanged(info);
+    uiAbilityLifecycleManager.reset();
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_OnAppStateChanged_1300
+ * @tc.desc: OnAppStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, OnAppStateChanged_013, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.process = "AbilityProcess";
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    AppInfo info;
+    info.processName = "AbilityProcess";
+    info.bundleName = "com.example.unittest";
+    info.appIndex = abilityRecord->GetAppIndex();
+    info.instanceKey = abilityRecord->GetInstanceKey();
+    info.pid = abilityRecord->GetPid();
+    info.state = AppState::COLD_START;
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
+    uiAbilityLifecycleManager->OnAppStateChanged(info);
+    uiAbilityLifecycleManager.reset();
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_OnAppStateChanged_1400
+ * @tc.desc: OnAppStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, OnAppStateChanged_014, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.process = "AbilityProcess";
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    AppInfo info;
+    info.processName = "AbilityProcess";
+    info.bundleName = "com.example.unittest1";
+    info.state = AppState::COLD_START;
+    uiAbilityLifecycleManager->OnAppStateChanged(info);
+    uiAbilityLifecycleManager.reset();
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_OnAppStateChanged_1500
+ * @tc.desc: OnAppStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, OnAppStateChanged_015, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.process = "AbilityProcess";
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    AppInfo info;
+    info.processName = "AbilityProcess";
+    info.bundleName = "com.example.unittest";
+    info.appIndex = abilityRecord->GetAppIndex();
+    info.instanceKey = abilityRecord->GetInstanceKey();
+    info.pid = abilityRecord->GetPid();
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(0, abilityRecord);
+    uiAbilityLifecycleManager->OnAppStateChanged(info);
+    uiAbilityLifecycleManager.reset();
+}
+
+/**
+ * @tc.name: UIAbilityLifecycleManager_OnAppStateChanged_1600
+ * @tc.desc: OnAppStateChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerTest, OnAppStateChanged_016, TestSize.Level1)
+{
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
+    ASSERT_NE(uiAbilityLifecycleManager, nullptr);
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.unittest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.process = "AbilityProcess";
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    AppInfo info;
+    info.processName = "AbilityProcess";
+    info.bundleName = "com.example.unittest1";
+    uiAbilityLifecycleManager->OnAppStateChanged(info);
+    uiAbilityLifecycleManager.reset();
+}
+
+/**
  * @tc.name: UIAbilityLifecycleManager_UninstallApp_0100
  * @tc.desc: UninstallApp
  * @tc.type: FUNC
