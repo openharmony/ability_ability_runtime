@@ -85,7 +85,6 @@ constexpr int32_t DEFAULT_INTER_VAL = 500;
 constexpr int32_t API8 = 8;
 const std::string SANDBOX_ARK_CACHE_PATH = "/data/storage/ark-cache/";
 const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
-const std::string DEBUGGER = "@Debugger";
 
 constexpr char MERGE_ABC_PATH[] = "/ets/modules.abc";
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
@@ -164,8 +163,8 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "localDebug %{public}d", dOption.isDebugFromLocal);
-    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "developer Mode false");
+    if (!ShouldSkipDebugMode(dOption)) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "not start debug");
         return;
     }
     CHECK_POINTER(jsEnv_);
@@ -229,6 +228,19 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
     }
 
     DebuggerConnectionHandler(isDebugApp, isStartWithDebug);
+}
+
+bool JsRuntime::ShouldSkipDebugMode(const DebugOption dOption)
+{
+    if (!dOption.isDebugFromLocal && !dOption.isDeveloperMode) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "developer Mode false");
+        return false;
+    }
+    if (!(dOption.arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_1_0)) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "developer register in sts");
+        return false;
+    }
+    return true;
 }
 
 void JsRuntime::DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug)
