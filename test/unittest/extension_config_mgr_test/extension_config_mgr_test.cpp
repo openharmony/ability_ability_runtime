@@ -115,6 +115,23 @@ HWTEST_F(ExtensionConfigMgrTest, Init_0100, TestSize.Level0)
 }
 
 /**
+ * @tc.name: Init_0200
+ * @tc.desc: Init Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionConfigMgrTest, Init_0200, TestSize.Level0)
+{
+    ExtensionConfigMgr mgr;
+    mgr.Init();
+    bool result = false;
+    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_SERVICE_EXTENSION) != mgr.blocklistConfig_.end());
+    EXPECT_TRUE(result);
+    result = (mgr.blocklistConfig_.find(BLOCK_LIST_ITEM_FORM_EXTENSION) != mgr.blocklistConfig_.end());
+    EXPECT_TRUE(result);
+    EXPECT_FALSE(mgr.blocklistConfig_[BLOCK_LIST_ITEM_FORM_EXTENSION].empty());
+}
+
+/**
  * @tc.name: AddBlockListItem_0100
  * @tc.desc: AddBlockListItem Test
  * @tc.type: FUNC
