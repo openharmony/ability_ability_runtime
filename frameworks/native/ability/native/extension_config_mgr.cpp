@@ -63,7 +63,9 @@ void ExtensionConfigMgr::Init()
             continue;
         }
         for (const auto& value : blackList[item.key()]) {
-            currentBlockList.emplace(value.get<std::string>());
+            if (value.is_string()) {
+                currentBlockList.emplace(value.get<std::string>());
+            }
         }
         blocklistConfig_.emplace(item.key(), std::move(currentBlockList));
         currentBlockList.clear();
