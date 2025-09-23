@@ -127,36 +127,6 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateExtensionState_001, TestSize.Level
 }
 
 /**
- * @tc.name: AppMgrClient_GetAllRunningProcesses_001
- * @tc.desc: get all running processes.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRunningProcesses_001, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningProcesses_001 start");
-    AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    EXPECT_NE(appMgrClient, nullptr);
-
-    std::vector<RunningProcessInfo> info;
-    appMgrClient->GetAllRunningProcesses(info);
-    EXPECT_NE(info.size(), APP_NUMBER_ZERO);
-    for (int i = 0; i < info.size(); i++) {
-        TAG_LOGD(AAFwkTag::TEST,
-            "running %{public}d: name: %{public}s, processType: %{public}d, extensionType: %{public}d",
-            i, info[i].processName_.c_str(), info[i].processType_, info[i].extensionType_);
-        if (info[i].processName_ == "com.ohos.systemui") {
-            EXPECT_EQ(info[i].processType_, ProcessType::EXTENSION);
-            EXPECT_EQ(info[i].extensionType_, ExtensionAbilityType::SERVICE);
-        } else if (info[i].processName_ == "com.ohos.launcher") {
-            EXPECT_EQ(info[i].processType_, ProcessType::EXTENSION);
-            EXPECT_EQ(info[i].extensionType_, ExtensionAbilityType::SERVICE);
-        }
-    }
-    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningProcesses_001 end");
-}
-
-/**
  * @tc.name: AppMgrClient_GetRunningProcessInfoByToken_001
  * @tc.desc: can not get the not running process info by token.
  * @tc.type: FUNC

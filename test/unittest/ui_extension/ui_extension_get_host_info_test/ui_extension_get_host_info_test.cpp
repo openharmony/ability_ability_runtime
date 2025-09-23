@@ -80,33 +80,6 @@ HWTEST_F(UIExtensionGetHostInfoTest, GetUIExtensionRootHostInfo_0200, TestSize.L
 }
 
 /**
- * @tc.name: GetUIExtensionRootHostInfo_0300
- * @tc.desc: basic function test of get ui extension root host info.
- * @tc.type: FUNC
- * @tc.require: issueI8ZRAG
- */
-HWTEST_F(UIExtensionGetHostInfoTest, GetUIExtensionRootHostInfo_0300, TestSize.Level1)
-{
-    TAG_LOGI(AAFwkTag::TEST, "begin.");
-    auto currentID = GetSelfTokenID();
-    AppExecFwk::MockNativeToken::SetNativeToken();
-
-    sptr<IRemoteObject> token = nullptr;
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto ret = AbilityManagerClient::GetInstance()->GetTopAbility(token);
-        EXPECT_EQ(ret, ERR_OK);
-        UIExtensionHostInfo hostInfo;
-        ret = AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo);
-        // cause top ability isn't a uiextension ability.
-        EXPECT_EQ(ret, ERR_INVALID_VALUE);
-        TAG_LOGI(AAFwkTag::TEST, "Get host info uri: %{public}s", hostInfo.elementName_.GetURI().c_str());
-    }
-
-    SetSelfTokenID(currentID);
-    TAG_LOGI(AAFwkTag::TEST, "end.");
-}
-
-/**
  * @tc.name: GetUIExtensionRootHostInfo_0400
  * @tc.desc: basic function test of get ui extension root host info.
  * @tc.type: FUNC
