@@ -1928,11 +1928,6 @@ int UIAbilityLifecycleManager::CloseUIAbility(const std::shared_ptr<AbilityRecor
         terminateAbilityList_.remove(abilityRecord);
         return abilityRecord->TerminateAbility();
     }
-    if (abilityRecord->IsDebug() && isClearSession) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "notify AppMS terminate");
-        terminateAbilityList_.remove(abilityRecord);
-        return abilityRecord->TerminateAbility();
-    }
     if (abilityRecord->GetPendingState() != AbilityState::INITIAL) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped. independentRecovery:%{public}d",
             isIndependentRecovery);
