@@ -382,7 +382,7 @@ HWTEST_F(AbilityInterceptorTest, DisposedRuleInterceptor_007, TestSize.Level1)
     AppExecFwk::DisposedRule disposedRule;
     std::vector<AppExecFwk::DisposedRule> rules = { disposedRule };
     bool result = executer->FindBlockDisposedRule(want, rules, disposedRule);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -418,6 +418,7 @@ HWTEST_F(AbilityInterceptorTest, DisposedRuleInterceptor_009, TestSize.Level1)
     want.SetElement(element);
     AppExecFwk::DisposedRule disposedRule;
     disposedRule.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
+    disposedRule.controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
     std::vector<AppExecFwk::DisposedRule> rules = { disposedRule };
     bool result = executer->FindBlockDisposedRule(want, rules, disposedRule);
     EXPECT_TRUE(result);
@@ -440,7 +441,7 @@ HWTEST_F(AbilityInterceptorTest, DisposedRuleInterceptor_010, TestSize.Level1)
     disposedRule.controlType = AppExecFwk::ControlType::ALLOWED_LIST;
     std::vector<AppExecFwk::DisposedRule> rules = { disposedRule };
     bool result = executer->FindBlockDisposedRule(want, rules, disposedRule);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**

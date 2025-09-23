@@ -244,7 +244,7 @@ HWTEST_F(AbilityInterceptorSecondTest, DisposedRuleInterceptor_008, TestSize.Lev
     int32_t appIndex = 0;
     DisposedRule disposedRule;
     disposedRule.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
-    disposedRule.controlType == AppExecFwk::ControlType::DISALLOWED_LIST;
+    disposedRule.controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
     std::vector<AppExecFwk::DisposedRule> rules = { disposedRule };
     bool result = executer->FindBlockDisposedRule(want, rules, disposedRule);
     EXPECT_TRUE(result);
