@@ -163,9 +163,9 @@ void Watchdog::ChangeTimeOut(const std::string& bundleName)
 }
 #endif
 
-void Watchdog::SetBundleInfo(const std::string& bundleName, const std::string& bundleVersion)
+void Watchdog::SetBundleInfo(const std::string& bundleName, const std::string& bundleVersion, bool isSystemApp)
 {
-    OHOS::HiviewDFX::Watchdog::GetInstance().SetBundleInfo(bundleName, bundleVersion);
+    OHOS::HiviewDFX::Watchdog::GetInstance().SetBundleInfo(bundleName, bundleVersion, isSystemApp);
 #ifdef APP_NO_RESPONSE_DIALOG
     if (isDeviceType2in1()) {
         ChangeTimeOut(bundleName);
