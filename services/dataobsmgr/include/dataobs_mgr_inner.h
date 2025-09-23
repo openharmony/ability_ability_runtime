@@ -39,7 +39,7 @@ public:
 
     int HandleRegisterObserver(const Uri &uri, struct ObserverNode observerNode);
     int HandleUnregisterObserver(const Uri &uri, struct ObserverNode observerNode);
-    int HandleNotifyChange(const Uri &uri, int32_t userId);
+    int HandleNotifyChange(const Uri &uri, int32_t userId, std::string readPermission, bool isSilentUri);
     void OnCallBackDied(const wptr<IRemoteObject> &remote);
 
 private:

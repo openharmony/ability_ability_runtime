@@ -55,7 +55,9 @@ enum Status : int32_t {
     DATAOBS_NOT_SYSTEM_APP,
     BMS_NOT_READY,
     COMMON_ERROR,
-    URI_NOT_EXIST
+    URI_NOT_EXIST,
+    DATAOBS_PERMISSION_DENY,
+    DATAOBS_INVALID_URI,
 };
 }  // namespace AAFwk
 }  // namespace OHOS
