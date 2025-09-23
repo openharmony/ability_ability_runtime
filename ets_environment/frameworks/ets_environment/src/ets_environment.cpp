@@ -15,6 +15,7 @@
 
 #include "ets_environment.h"
 
+#include <charconv>
 #include <chrono>
 #include <dlfcn.h>
 #include <fstream>
@@ -27,12 +28,14 @@
 #include "static_core/plugins/ets/runtime/ets_namespace_manager.h"
 
 #include "ets_ani_expo.h"
+#include "static_core/runtime/tooling/inspector/debugger_arkapi.h"
 #ifdef LIKELY
 #undef LIKELY
 #endif
 #ifdef UNLIKELY
 #undef UNLIKELY
 #endif
+#include "connect_server_manager.h"
 #include "dynamic_loader.h"
 #include "elf_factory.h"
 #include "event_handler.h"
@@ -51,9 +54,11 @@ const char ETS_ANI_GET_CREATEDVMS[] = "ANI_GetCreatedVMs";
 const char ETS_LIB_PATH[] = "libets_interop_js_napi.z.so";
 const char BOOT_PATH[] = "/system/framework/bootpath.json";
 const char BACKTRACE[] = "=====================Backtrace========================";
+static const std::string DEBUGGER = "@Debugger";
 
 using CreateVMETSRuntimeType = ani_status (*)(const ani_options *options, uint32_t version, ani_vm **result);
 using ANIGetCreatedVMsType = ani_status (*)(ani_vm **vms_buffer, ani_size vms_buffer_length, ani_size *result);
+using DebuggerPostTask = std::function<void(std::function<void()> &&)>;
 
 const char ETS_SDK_NSNAME[] = "ets_sdk";
 const char ETS_SYS_NSNAME[] = "ets_system";
@@ -215,7 +220,7 @@ void ETSEnvironment::InitETSSysNS(const std::string &path)
     dlns_inherit(&ns, &ndk, "allow_all_shared_libs");
 }
 
-bool ETSEnvironment::Initialize()
+bool ETSEnvironment::Initialize(const std::shared_ptr<AppExecFwk::EventRunner> eventRunner, bool isStartWithDebug)
 {
     TAG_LOGD(AAFwkTag::ETSRUNTIME, "Initialize called");
     if (!LoadRuntimeApis()) {
@@ -228,12 +233,24 @@ bool ETSEnvironment::Initialize()
         return false;
     }
 
+    InitEventHandler(eventRunner);
+
     std::vector<ani_option> options;
     // Create boot-panda-files options
     std::string bootString = "--ext:--boot-panda-files=" + bootfiles;
     options.push_back(ani_option { bootString.data(), nullptr });
     options.push_back(ani_option { "--ext:--compiler-enable-jit=false", nullptr });
     options.push_back(ani_option { "--ext:--log-level=info", nullptr });
+    std::string interpreerMode = "--ext:--interpreter-type=cpp";
+    std::string debugEnalbeMode = "--ext:--debugger-enable=true";
+    std::string debugLibraryPathMode = "--ext:--debugger-library-path=/system/lib64/libarkinspector.so";
+    std::string breadonstartMode = "--ext:--debugger-break-on-start";
+    if (isStartWithDebug) {
+        options.push_back(ani_option { interpreerMode.data(), nullptr });
+        options.push_back(ani_option { debugEnalbeMode.data(), nullptr });
+        options.push_back(ani_option { debugLibraryPathMode.data(), nullptr });
+        options.push_back(ani_option { breadonstartMode.data(), nullptr });
+    }
     ani_options optionsPtr = { options.size(), options.data() };
     ani_status status = ANI_ERROR;
     if ((status = lazyApis_.ANI_CreateVM(&optionsPtr, ANI_VERSION_1, &vmEntry_.aniVm_)) != ANI_OK) {
@@ -544,8 +561,8 @@ ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
         .InitETSSysNS = [](const std::string &path) {
             ETSEnvironment::InitETSSysNS(path);
         },
-        .Initialize = []() {
-            return ETSEnvironment::GetInstance()->Initialize();
+        .Initialize = [](const std::shared_ptr<AppExecFwk::EventRunner> eventRunner, bool isStartWithDebug) {
+            return ETSEnvironment::GetInstance()->Initialize(eventRunner, isStartWithDebug);
         },
         .RegisterUncaughtExceptionHandler = [](const ETSUncaughtExceptionInfo &exceptionInfo) {
             ETSEnvironment::GetInstance()->RegisterUncaughtExceptionHandler(exceptionInfo);
@@ -572,9 +589,118 @@ ETSEnvFuncs *ETSEnvironment::RegisterFuncs()
         },
         .PreloadSystemClass = [](const char *className) {
             ETSEnvironment::GetInstance()->PreloadSystemClass(className);
+        },
+        .RemoveInstance = [](uint32_t instanceId) {
+            return ETSEnvironment::GetInstance()->RemoveInstance(instanceId);
+        },
+        .StopDebugMode = [](void *jsVm) {
+            return ETSEnvironment::GetInstance()->StopDebugMode(jsVm);
+        },
+        .StartDebuggerForSocketPair = [](std::string &option, int32_t socketFd) {
+            return ETSEnvironment::GetInstance()->StartDebuggerForSocketPair(option, socketFd);
+        },
+        .NotifyDebugMode = [](uint32_t tid, uint32_t instanceId, bool isStartWithDebug, void *jsVm) {
+            return ETSEnvironment::GetInstance()->NotifyDebugMode(tid, instanceId, isStartWithDebug, jsVm);
+        },
+        .BroadcastAndConnect = [](const std::string& bundleName, int socketFd) {
+            return ETSEnvironment::GetInstance()->BroadcastAndConnect(bundleName, socketFd);
         }
     };
     return &funcs;
+}
+
+void ETSEnvironment::NotifyDebugMode(uint32_t tid, uint32_t instanceId, bool isStartWithDebug, void *jsVm)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "Start");
+    AbilityRuntime::ConnectServerManager::Get().StoreInstanceMessage(getproctid(), instanceId, "Debugger");
+    auto task = GetDebuggerPostTask();
+    ark::ArkDebugNativeAPI::NotifyDebugMode(tid, instanceId, isStartWithDebug, jsVm, task);
+}
+
+void ETSEnvironment::RemoveInstance(uint32_t instanceId)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "Start");
+    AbilityRuntime::ConnectServerManager::Get().RemoveInstance(instanceId);
+}
+
+void ETSEnvironment::StopDebugMode(void *jsVm)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "Start");
+    if (debugMode_) {
+        ark::ArkDebugNativeAPI::StopDebugger(jsVm);
+    }
+}
+
+void ETSEnvironment::StartDebuggerForSocketPair(std::string &option, int32_t socketFd)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "Start");
+    int32_t identifierId = ParseHdcRegisterOption(option);
+    if (identifierId == -1) {
+        TAG_LOGE(AAFwkTag::ETSRUNTIME, "Abnormal parsing of tid results");
+        return;
+    }
+    debugMode_ = ark::ArkDebugNativeAPI::StartDebuggerForSocketPair(ParseHdcRegisterOption(option), socketFd);
+}
+
+DebuggerPostTask ETSEnvironment::GetDebuggerPostTask()
+{
+    auto debuggerPostTask = [weak = weak_from_this()](std::function<void()>&& task) {
+        auto etsEnv = weak.lock();
+        if (etsEnv == nullptr) {
+            TAG_LOGE(AAFwkTag::ETSRUNTIME, "StsEnv is invalid");
+            return;
+        }
+        etsEnv->PostTask(task, "ETSEnvironment:GetDebuggerPostTask", 0);
+    };
+    return debuggerPostTask;
+}
+
+int32_t ETSEnvironment::ParseHdcRegisterOption(std::string& option)
+{
+    int32_t pid = -1;
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "Start");
+    std::size_t pos = option.find_first_of(":");
+    if (pos == std::string::npos) {
+        return pid;
+    }
+    std::string idStr = option.substr(pos + 1);
+    pos = idStr.find(DEBUGGER);
+    if (pos == std::string::npos) {
+        return pid;
+    }
+    idStr = idStr.substr(0, pos);
+    pos = idStr.find("@");
+    if (pos != std::string::npos) {
+        idStr = idStr.substr(pos + 1);
+    }
+    auto res = std::from_chars(idStr.c_str(), idStr.c_str() + idStr.size(), pid);
+    if (res.ec != std::errc()) {
+        TAG_LOGE(AAFwkTag::AA_TOOL, "pid from_chars (%{public}s) failed", idStr.c_str());
+    }
+    return pid;
+}
+
+void ETSEnvironment::InitEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &eventRunner)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "InitEventHandler called");
+    if (eventRunner != nullptr) {
+        eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(eventRunner);
+    }
+}
+
+void ETSEnvironment::PostTask(const std::function<void()> &task, const std::string &name, int64_t delayTime)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "PostTask called");
+    if (eventHandler_ != nullptr) {
+        eventHandler_->PostTask(task, name, delayTime);
+    }
+}
+
+void ETSEnvironment::BroadcastAndConnect(const std::string& bundleName, int socketFd)
+{
+    TAG_LOGD(AAFwkTag::ETSRUNTIME, "BroadcastAndConnect called");
+    AbilityRuntime::ConnectServerManager::Get().SendInstanceMessageAll(nullptr);
+    AbilityRuntime::ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
 }
 } // namespace EtsEnv
 } // namespace OHOS

@@ -42,12 +42,20 @@ void HdcRegister::StartHdcRegister(const std::string& bundleName, const std::str
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
 
     if (debugMode == BOTH_REG) {
-        registerLocalHandler_ = dlopen("libda_register.z.so", RTLD_LAZY);
-        registerHdcHandler_ = dlopen("libhdc_register.z.so", RTLD_LAZY);
+        if (registerLocalHandler_ == nullptr) {
+            registerLocalHandler_ = dlopen("libda_register.z.so", RTLD_LAZY);
+        }
+        if (registerHdcHandler_ == nullptr) {
+            registerHdcHandler_ = dlopen("libhdc_register.z.so", RTLD_LAZY);
+        }
     } else if (debugMode == LOCAL_DEBUG_REG) {
-        registerLocalHandler_ = dlopen("libda_register.z.so", RTLD_LAZY);
+        if (registerLocalHandler_ == nullptr) {
+            registerLocalHandler_ = dlopen("libda_register.z.so", RTLD_LAZY);
+        }
     } else {
-        registerHdcHandler_ = dlopen("libhdc_register.z.so", RTLD_LAZY);
+        if (registerHdcHandler_ == nullptr) {
+            registerHdcHandler_ = dlopen("libhdc_register.z.so", RTLD_LAZY);
+        }
     }
     if (registerLocalHandler_ != nullptr) {
         auto startRegister = reinterpret_cast<StartRegister>(dlsym(registerLocalHandler_, "StartConnect"));
