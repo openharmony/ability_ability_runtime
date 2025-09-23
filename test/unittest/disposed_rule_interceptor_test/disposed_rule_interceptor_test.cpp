@@ -377,6 +377,7 @@ HWTEST_F(DisposedRuleInterceptorTest, FindBlockDisposedRule_001, TestSize.Level1
     DisposedRuleInterceptor interceptor;
     AppExecFwk::DisposedRule rule1;
     rule1.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
+    rule1.controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
     rule1.priority = 9;
     AppExecFwk::DisposedRule rule2;
     rule2.disposedType = AppExecFwk::DisposedType::NON_BLOCK;
@@ -578,6 +579,7 @@ HWTEST_F(DisposedRuleInterceptorTest, CheckControl_006, TestSize.Level1)
     MyFlag::mockAppControlManager_ = appControlMgr;
     AppExecFwk::DisposedRule rule1;
     rule1.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
+    rule1.controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
     rule1.priority = 8;
     AppExecFwk::DisposedRule rule2;
     rule2.disposedType = AppExecFwk::DisposedType::NON_BLOCK;
@@ -640,6 +642,7 @@ HWTEST_F(DisposedRuleInterceptorTest, DoProcess_001, TestSize.Level1)
     MyFlag::mockAppControlManager_ = appControlMgr;
     AppExecFwk::DisposedRule rule1;
     rule1.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
+    rule1.controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
     rule1.priority = 8;
     AppExecFwk::DisposedRule rule2;
     rule2.disposedType = AppExecFwk::DisposedType::NON_BLOCK;
@@ -676,6 +679,7 @@ HWTEST_F(DisposedRuleInterceptorTest, DoProcess_002, TestSize.Level1)
     MyFlag::mockAppControlManager_ = appControlMgr;
     AppExecFwk::DisposedRule rule1;
     rule1.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
+    rule1.controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
     rule1.priority = 8;
     rule1.want = std::make_shared<Want>();
     rule1.want->SetElementName("", "bundle", "", "");
@@ -715,6 +719,7 @@ HWTEST_F(DisposedRuleInterceptorTest, DoProcess_003, TestSize.Level1)
     MyFlag::mockAppControlManager_ = appControlMgr;
     AppExecFwk::DisposedRule rule1;
     rule1.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
+    rule1.controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
     rule1.priority = 8;
     rule1.want = std::make_shared<Want>();
     rule1.want->SetElementName("", "bundle", "", "");
@@ -754,6 +759,7 @@ HWTEST_F(DisposedRuleInterceptorTest, DoProcess_004, TestSize.Level1)
     MyFlag::mockAppControlManager_ = appControlMgr;
     AppExecFwk::DisposedRule rule1;
     rule1.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
+    rule1.controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
     rule1.priority = 8;
     rule1.want = std::make_shared<Want>();
     rule1.want->SetElementName("", "bundle", "", "");
@@ -794,6 +800,7 @@ HWTEST_F(DisposedRuleInterceptorTest, DoProcess_005, TestSize.Level1)
     MyFlag::mockAppControlManager_ = appControlMgr;
     AppExecFwk::DisposedRule rule1;
     rule1.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
+    rule1.controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
     rule1.priority = 8;
     rule1.want = std::make_shared<Want>();
     rule1.want->SetElementName("", "bundle", "", "");
@@ -834,6 +841,7 @@ HWTEST_F(DisposedRuleInterceptorTest, DoProcess_006, TestSize.Level1)
     MyFlag::mockAppControlManager_ = appControlMgr;
     AppExecFwk::DisposedRule rule1;
     rule1.disposedType = AppExecFwk::DisposedType::BLOCK_APPLICATION;
+    rule1.controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
     rule1.priority = 8;
     rule1.want = std::make_shared<Want>();
     rule1.want->SetElementName("", "bundle", "", "");
