@@ -205,15 +205,6 @@ ErrCode DataObsMgrClient::NotifyChangeFromExtension(const Uri &uri, int userId, 
     return dataObsManger->NotifyChangeFromExtension(uri, userId, opt);
 }
 
-ErrCode DataObsMgrClient::CheckTrusts(uint32_t consumerToken, uint32_t providerToken)
-{
-    auto [errCode, dataObsManger] = GetObsMgr();
-    if (errCode != SUCCESS) {
-        return DATAOBS_SERVICE_NOT_CONNECTED;
-    }
-    return dataObsManger->CheckTrusts(consumerToken, providerToken);
-}
-
 /**
  * Connect dataobs manager service.
  *

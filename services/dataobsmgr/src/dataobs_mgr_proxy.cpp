@@ -61,6 +61,14 @@ bool DataObsManagerProxy::WriteObsOpt(MessageParcel &data, DataObsOption opt)
         TAG_LOGE(AAFwkTag::DBOBSMGR, "write opt error");
         return false;
     }
+    if (!data.WriteInt32(opt.FirstCallerPid())) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "write opt error");
+        return false;
+    }
+    if (!data.WriteBool(opt.IsDataShare())) {
+        TAG_LOGE(AAFwkTag::DBOBSMGR, "write opt error");
+        return false;
+    }
     return true;
 }
 
@@ -215,34 +223,6 @@ int32_t DataObsManagerProxy::NotifyChangeFromExtension(const Uri &uri, int32_t u
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest error:%{public}d, uri:%{public}s", error,
             CommonUtils::Anonymous(uri.ToString()).c_str());
-        return IPC_ERROR;
-    }
-
-    int32_t res = IPC_ERROR;
-    return reply.ReadInt32(res) ? res : IPC_ERROR;
-}
-
-ErrCode DataObsManagerProxy::CheckTrusts(uint32_t consumerToken, uint32_t providerToken)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!WriteInterfaceToken(data)) {
-        return IPC_PARCEL_ERROR;
-    }
-
-    if (!data.WriteUint32(consumerToken)) {
-        return INVALID_PARAM;
-    }
-    if (!data.WriteUint32(providerToken)) {
-        return INVALID_PARAM;
-    }
-
-    auto error = SendTransactCmd(IDataObsMgr::CHECK_TRUSTS, data, reply, option);
-    if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::DBOBSMGR, "sendRequest error:%{public}d, consumer:%{public}d, provider:%{public}d", error,
-            consumerToken, providerToken);
         return IPC_ERROR;
     }
 
