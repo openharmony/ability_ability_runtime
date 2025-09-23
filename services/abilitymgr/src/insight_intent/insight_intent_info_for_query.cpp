@@ -115,7 +115,12 @@ void from_json(const nlohmann::json &jsonObject, EntryInfoForQuery &entryInfo)
     if (jsonObject.find(INSIGHT_INTENT_EXECUTE_MODE) != jsonObjectEnd) {
         const auto &modeArray = jsonObject[INSIGHT_INTENT_EXECUTE_MODE];
         for (const auto &modeStr : modeArray) {
-            auto it = STRING_EXECUTE_MODE_MAP.find(modeStr.get<std::string>());
+            if (!modeStr.is_string()) {
+                TAG_LOGE(AAFwkTag::INTENT, "modestr not string");
+                continue;
+            }
+            std::string modeStrValue = modeStr.get<std::string>();
+            auto it = STRING_EXECUTE_MODE_MAP.find(modeStrValue);
             if (it != STRING_EXECUTE_MODE_MAP.end()) {
                 entryInfo.executeMode.push_back(it->second);
             } else {
