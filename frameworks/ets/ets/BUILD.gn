@@ -1240,6 +1240,7 @@ group("ets_packages") {
     ":ability_runtime_data_uri_utils_abc_etc",
     ":ability_runtime_environment_callback_abc_etc",
     ":ability_runtime_error_code_abc_etc",
+    ":ability_runtime_event_hub_abc_etc",
     ":ability_runtime_extension_ability_abc_etc",
     ":ability_runtime_extension_context_abc_etc",
     ":ability_runtime_extension_running_info_abc_etc",
