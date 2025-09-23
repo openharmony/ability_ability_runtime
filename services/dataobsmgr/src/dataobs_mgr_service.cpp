@@ -176,6 +176,7 @@ bool DataObsMgrService::IsDataMgrService(uint32_t tokenId, int32_t uid)
     if (uid != DATA_MANAGER_SERVICE_UID) {
         TAG_LOGE(AAFwkTag::DBOBSMGR, "request not from DataMgr, uid %{public}d, DataMgr %{public}d",
             uid, DATA_MANAGER_SERVICE_UID);
+        return false;
     }
     return true;
 }
