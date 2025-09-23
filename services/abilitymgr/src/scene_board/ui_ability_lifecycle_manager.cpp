@@ -2398,11 +2398,11 @@ void UIAbilityLifecycleManager::OnStartSpecifiedFailed(int32_t requestId)
         hookSpecifiedMap_.erase(iter);
         return;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnStartSpecifiedFailed %{public}d", requestId);
     auto curRequest = GetSpecifiedRequest(requestId);
     if (curRequest == nullptr) {
         return;
     }
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "OnStartSpecifiedFailed %{public}d", requestId);
     if (curRequest->persistentId != 0) {
         auto iter = sessionAbilityMap_.find(curRequest->persistentId);
         if (iter != sessionAbilityMap_.end() && iter->second != nullptr) {
