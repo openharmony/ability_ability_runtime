@@ -33,7 +33,7 @@ struct RecoveryInfo {
 
 class RecoveryInfoTimer {
     RecoveryInfoTimer() = default;
-    ~RecoveryInfoTimer() = default;
+    virtual ~RecoveryInfoTimer() = default;
 public:
     static RecoveryInfoTimer& GetInstance();
 

@@ -357,11 +357,13 @@ private:
         if (callerCallBackObj_ == nullptr) {
             TAG_LOGE(AAFwkTag::DEFAULT, "null CallBacker");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+            return CreateJsUndefined(env);
         }
 
         if (!releaseCallFunc_) {
             TAG_LOGE(AAFwkTag::DEFAULT, "null releaseFunc");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+            return CreateJsUndefined(env);
         }
         callee_ = nullptr;
         callerCallBackObj_->SetCallBack(nullptr);
@@ -370,6 +372,7 @@ private:
         if (innerErrorCode != ERR_OK) {
             TAG_LOGE(AAFwkTag::DEFAULT, "ReleaseAbility failed %{public}d", static_cast<int>(innerErrorCode));
             ThrowError(env, innerErrorCode);
+            return CreateJsUndefined(env);
         }
 
         return CreateJsUndefined(env);
@@ -382,6 +385,7 @@ private:
         if (info.argc < argcOne) {
             TAG_LOGE(AAFwkTag::DEFAULT, "Invalid argc");
             ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
         }
         bool isCallable = false;
         napi_is_callable(env, info.argv[0], &isCallable);
