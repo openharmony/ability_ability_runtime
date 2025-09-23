@@ -45,6 +45,8 @@ public:
     static bool GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion);
     static bool IsDocsCloudUri(Uri &uri);
     static bool GenerateFUDAppInfo(FUDAppInfo &info);
+    static bool IsUdmfOrPasteboardCall();
+    static bool SendAutoPersistEvent(uint32_t callerTokenId, uint32_t targetTokenId);
 };
 } // OHOS
 } // AAFwk

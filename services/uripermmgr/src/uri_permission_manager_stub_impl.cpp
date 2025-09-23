@@ -221,7 +221,7 @@ ErrCode UriPermissionManagerStubImpl::GrantUriPermission(const std::vector<std::
         return WrapErrorCode(ret, funcResult);
     }
     uint32_t callerTokenId = initiatorTokenId;
-    if (!FUDUtils::IsFoundationCall()) {
+    if (!(FUDUtils::IsFoundationCall() || FUDUtils::IsUdmfOrPasteboardCall())) {
         callerTokenId = IPCSkeleton::GetCallingTokenID();
     }
     funcResult = GrantUriPermissionInner(uriVec, flag, callerTokenId, targetTokenId, targetBundleName);
@@ -259,23 +259,26 @@ int32_t UriPermissionManagerStubImpl::GrantUriPermissionInner(const std::vector<
     }
     std::vector<std::string> permissionedMediaUris;
     std::vector<std::string> permissionedOtherUris;
+    std::vector<std::string> contentUris;
+    bool isUdmfOrPasteboardCall = FUDUtils::IsUdmfOrPasteboardCall();
     size_t permissionedUriCount = 0;
     for (size_t i = 0; i < checkResult.size(); i++) {
+        auto uriInner = Uri(uriVec[i]);
+        if (isUdmfOrPasteboardCall && uriInner.GetScheme() == FUDConstants::CONTENT_SCHEME) {
+            contentUris.emplace_back(uriVec[i]);
+            permissionedUriCount++;
+            continue;
+        }
         if (!checkResult[i]) {
             TAG_LOGW(AAFwkTag::URIPERMMGR, "No permission, uri:%{private}s", uriVec[i].c_str());
             continue;
         }
         permissionedUriCount++;
-        auto uriInner = Uri(uriVec[i]);
         if (uriInner.GetAuthority() == FUDConstants::MEDIA_AUTHORITY) {
             permissionedMediaUris.emplace_back(uriVec[i]);
         } else {
             permissionedOtherUris.emplace_back(uriVec[i]);
         }
-    }
-    // some uri is no permission
-    if (permissionedUriCount != uriVec.size()) {
-        FUDUtils::SendShareUnPrivilegeUriEvent(callerTokenId, targetTokenId);
     }
     if (permissionedUriCount == 0) {
         TAG_LOGE(AAFwkTag::URIPERMMGR, "all uri invalid or no permission");
@@ -287,6 +290,10 @@ int32_t UriPermissionManagerStubImpl::GrantUriPermissionInner(const std::vector<
     }
     // for media uri
     if (GrantBatchMediaUriPermissionImpl(permissionedMediaUris, flag, callerTokenId, targetTokenId, 0) == ERR_OK) {
+        grantRet = ERR_OK;
+    }
+    // for content uri
+    if (GrantBatchContentUriPermissionImpl(contentUris, flag, targetTokenId, targetBundleName) == ERR_OK) {
         grantRet = ERR_OK;
     }
     FUDUtils::SendSystemAppGrantUriPermissionEvent(callerTokenId, targetTokenId, uriVec, checkResult);

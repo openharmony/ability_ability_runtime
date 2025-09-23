@@ -34,6 +34,8 @@ namespace {
 constexpr int32_t DEFAULT_USER_ID = 0;
 constexpr int32_t API_VERSION_MOD = 100;
 constexpr int32_t FOUNDATION_UID = 5523;
+constexpr int32_t UDMF_UID = 3012;
+constexpr int32_t PASTEBOARD_UID = 3816;
 constexpr const char* NET_WORK_ID_MARK = "?networkid=";
 }
 
@@ -73,6 +75,20 @@ bool FUDUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uint
     }
     TAG_LOGD(AAFwkTag::URIPERMMGR, "send grant uri permission event end.");
     return false;
+}
+
+bool FUDUtils::SendAutoPersistEvent(uint32_t callerTokenId, uint32_t targetTokenId)
+{
+    EventInfo eventInfo;
+    std::string callerBundleName;
+    GetBundleNameByTokenId(callerTokenId, callerBundleName);
+    eventInfo.callerBundleName = callerBundleName;
+    std::string targetBundleName;
+    GetBundleNameByTokenId(targetTokenId, targetBundleName);
+    eventInfo.bundleName = targetBundleName;
+    eventInfo.uri = "autoPersist";
+    EventReport::SendGrantUriPermissionEvent(EventName::GRANT_URI_PERMISSION, eventInfo);
+    return true;
 }
 
 bool FUDUtils::CheckAndCreateEventInfo(uint32_t callerTokenId, uint32_t targetTokenId,
@@ -311,6 +327,12 @@ bool FUDUtils::IsDocsCloudUri(Uri &uri)
 {
     return (uri.GetAuthority() == FUDConstants::DOCS_AUTHORITY &&
         uri.ToString().find(NET_WORK_ID_MARK) != std::string::npos);
+}
+
+bool FUDUtils::IsUdmfOrPasteboardCall()
+{
+    auto uid = IPCSkeleton::GetCallingUid();
+    return uid == UDMF_UID || uid == PASTEBOARD_UID;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
