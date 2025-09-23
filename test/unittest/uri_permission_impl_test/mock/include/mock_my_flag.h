@@ -91,6 +91,7 @@ public:
         upmsUtilsIsFoundationCallRet_ = false;
         fudUtilsGenerateFUDAppInfoRet_ = true;
         tokenInfos = {};
+        isUdmfOrPasteboardCallRet_ = false;
     }
 
     static int flag_;
@@ -131,6 +132,7 @@ public:
     static bool fudUtilsGenerateFUDAppInfoRet_;
     static std::string bundleName_;
     static TokenInfoMap tokenInfos;
+    static bool isUdmfOrPasteboardCallRet_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

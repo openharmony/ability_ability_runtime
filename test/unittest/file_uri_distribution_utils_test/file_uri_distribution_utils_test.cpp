@@ -172,5 +172,29 @@ HWTEST_F(FileUriDistributionUtilsTest, GetTokenIdByBundleName_001, TestSize.Leve
     auto testTokenId = FUDUtils::GetTokenIdByBundleName(bundleName, appIndex, tokenId);
     EXPECT_EQ(testTokenId, ERR_GET_TARGET_BUNDLE_INFO_FAILED);
 }
+
+/*
+ * Feature: FUDUtils
+ * Function: IsUdmfOrPasteboardCall
+ * SubFunction: NA
+ * FunctionPoints: FUDUtils IsUdmfOrPasteboardCall
+ */
+HWTEST_F(FileUriDistributionUtilsTest, IsUdmfOrPasteboardCall_001, TestSize.Level1)
+{
+    bool ret = FUDUtils::IsUdmfOrPasteboardCall();
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * Feature: FUDUtils
+ * Function: SendAutoPersistEvent
+ * SubFunction: NA
+ * FunctionPoints: FUDUtils SendAutoPersistEvent
+ */
+HWTEST_F(FileUriDistributionUtilsTest, SendAutoPersistEvent_001, TestSize.Level1)
+{
+    auto ret = FUDUtils::SendAutoPersistEvent(1001, 1002);
+    EXPECT_EQ(ret, true);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

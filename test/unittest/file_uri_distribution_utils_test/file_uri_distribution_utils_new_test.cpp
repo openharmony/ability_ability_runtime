@@ -200,6 +200,18 @@ HWTEST_F(FileUriDistributionUtilsNewTest, IsDocsCloudUri_001, TestSize.Level1)
 
 /*
  * Feature: FUDUtils
+ * Function: IsDocsCloudUri
+ * SubFunction: NA
+ * FunctionPoints: FUDUtils IsDocsCloudUri
+ */
+HWTEST_F(FileUriDistributionUtilsNewTest, IsDocsCloudUri_002, TestSize.Level1)
+{
+    Uri uri("file://docs/temp.txt?networkid=1001");
+    EXPECT_TRUE(FUDUtils::IsDocsCloudUri(uri));
+}
+
+/*
+ * Feature: FUDUtils
  * Function: CheckUriTypeIsValid
  * SubFunction: NA
  * FunctionPoints: FUDUtils CheckUriTypeIsValid
