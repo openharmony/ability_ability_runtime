@@ -703,15 +703,15 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_CheckSystemCallingPe
     DataObsOption opt;
     bool ret = 0;
     opt.isSystem = false;
-    ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, -1);
-    EXPECT_EQ(ret, false);
-    ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, 100);
-    EXPECT_EQ(ret, true);
-    ret = dataObsMgrServer->IsCallingPermissionValid(opt, 100, 101);
-    EXPECT_EQ(ret, false);
+    auto ret1 = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, -1);
+    EXPECT_EQ(ret1, false);
+    auto ret2 = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, 100);
+    EXPECT_EQ(ret2, true);
+    auto ret3 = dataObsMgrServer->IsCallingPermissionValid(opt, 100, 101);
+    EXPECT_EQ(ret3, false);
     opt.isSystem = true;
-    ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, 100);
-    EXPECT_EQ(ret, false);
+    auto ret4 = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, 100);
+    EXPECT_EQ(ret4, false);
 
     SetSelfTokenID(originalToken);
     TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_CheckSystemCallingPermission_0200 end");
