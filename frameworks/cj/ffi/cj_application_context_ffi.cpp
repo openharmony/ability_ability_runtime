@@ -69,7 +69,7 @@ int32_t FfiCJApplicationContextOnOnEnvironment(int64_t id, void (*cfgCallback)(C
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return -1;
     }
-    return context->OnOnEnvironment(cfgCallback, memCallback, false, errCode);
+    return context->OnOnEnvironment(cfgCallback, memCallback, false, *errCode);
 }
 
 int32_t FfiCJApplicationContextOnOnAbilityLifecycle(int64_t id, CArrI64 cFuncIds, int32_t *errCode)
@@ -80,7 +80,12 @@ int32_t FfiCJApplicationContextOnOnAbilityLifecycle(int64_t id, CArrI64 cFuncIds
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return -1;
     }
-    return context->OnOnAbilityLifecycle(cFuncIds, false, errCode);
+    std::vector<int64_t> ids;
+    for (int64_t i = 0; i < cFuncIds.size; i++) {
+        ids.push_back(cFuncIds.head[i]);
+    }
+    
+    return context->OnOnAbilityLifecycle(ids, false, *errCode);
 }
 
 int32_t FfiCJApplicationContextOnOnApplicationStateChange(int64_t id, void (*foregroundCallback)(void),
@@ -92,7 +97,7 @@ int32_t FfiCJApplicationContextOnOnApplicationStateChange(int64_t id, void (*for
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return -1;
     }
-    return context->OnOnApplicationStateChange(foregroundCallback, backgroundCallback, errCode);
+    return context->OnOnApplicationStateChange(foregroundCallback, backgroundCallback, *errCode);
 }
 
 void FfiCJApplicationContextOnOff(int64_t id, const char *type, int32_t callbackId, int32_t *errCode)
@@ -105,13 +110,13 @@ void FfiCJApplicationContextOnOff(int64_t id, const char *type, int32_t callback
     }
     auto typeString = std::string(type);
     if (typeString == "environment") {
-        return context->OnOffEnvironment(callbackId, errCode);
+        return context->OnOffEnvironment(callbackId, *errCode);
     }
     if (typeString == "abilityLifecycle") {
-        return context->OnOffAbilityLifecycle(callbackId, errCode);
+        return context->OnOffAbilityLifecycle(callbackId, *errCode);
     }
     if (typeString == "applicationStateChange") {
-        return context->OnOffApplicationStateChange(callbackId, errCode);
+        return context->OnOffApplicationStateChange(callbackId, *errCode);
     }
     TAG_LOGE(AAFwkTag::CONTEXT, "off function type not match");
     *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
@@ -188,7 +193,7 @@ CArrProcessInformation FfiCJApplicationContextGetRunningProcessInformation(int64
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return cArrProcessInformation;
     }
-    auto processInfo = context->OnGetRunningProcessInformation(errCode);
+    auto processInfo = context->OnGetRunningProcessInformation(*errCode);
     if (*errCode != ERR_OK) {
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
         return cArrProcessInformation;
@@ -220,7 +225,7 @@ void FfiCJApplicationContextKillAllProcesses(int64_t id, bool clearPageStack, in
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
-    context->OnKillProcessBySelf(clearPageStack, errCode);
+    context->OnKillProcessBySelf(clearPageStack, *errCode);
 }
 
 int32_t FfiCJApplicationContextGetCurrentAppCloneIndex(int64_t id, int32_t *errCode)
@@ -231,7 +236,7 @@ int32_t FfiCJApplicationContextGetCurrentAppCloneIndex(int64_t id, int32_t *errC
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return -1;
     }
-    return context->OnGetCurrentAppCloneIndex(errCode);
+    return context->OnGetCurrentAppCloneIndex(*errCode);
 }
 
 void FfiCJApplicationContextRestartApp(int64_t id, WantHandle want, int32_t *errCode)
@@ -248,7 +253,7 @@ void FfiCJApplicationContextRestartApp(int64_t id, WantHandle want, int32_t *err
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
-    return context->OnRestartApp(*actualWant, errCode);
+    return context->OnRestartApp(*actualWant, *errCode);
 }
 
 void FfiCJApplicationContextClearUpApplicationData(int64_t id, int32_t *errCode)
@@ -259,7 +264,7 @@ void FfiCJApplicationContextClearUpApplicationData(int64_t id, int32_t *errCode)
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
-    return context->OnClearUpApplicationData(errCode);
+    return context->OnClearUpApplicationData(*errCode);
 }
 
 void FfiCJApplicationContextSetSupportedProcessCache(int64_t id, bool isSupported, int32_t *errCode)
@@ -270,7 +275,7 @@ void FfiCJApplicationContextSetSupportedProcessCache(int64_t id, bool isSupporte
         *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
-    return context->OnSetSupportedProcessCacheSelf(isSupported, errCode);
+    return context->OnSetSupportedProcessCacheSelf(isSupported, *errCode);
 }
 
 int32_t FfiCJApplicationContextSetFontSizeScale(int64_t id, double fontSizeScale)

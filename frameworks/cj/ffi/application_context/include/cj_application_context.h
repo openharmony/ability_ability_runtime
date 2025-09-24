@@ -106,22 +106,22 @@ public:
     void OnSetFont(std::string font);
     void OnSetLanguage(std::string font);
     void OnSetColorMode(int32_t colorMode);
-    std::shared_ptr<AppExecFwk::RunningProcessInfo> OnGetRunningProcessInformation(int32_t *errCode);
-    void OnKillProcessBySelf(bool clearPageStack, int32_t *errCode);
-    int32_t OnGetCurrentAppCloneIndex(int32_t *errCode);
-    void OnRestartApp(AAFwk::Want want, int32_t *errCode);
-    void OnClearUpApplicationData(int32_t *errCode);
-    void OnSetSupportedProcessCacheSelf(bool isSupported, int32_t *errCode);
+    std::shared_ptr<AppExecFwk::RunningProcessInfo> OnGetRunningProcessInformation(int32_t &errCode);
+    void OnKillProcessBySelf(bool clearPageStack, int32_t &errCode);
+    int32_t OnGetCurrentAppCloneIndex(int32_t &errCode);
+    void OnRestartApp(AAFwk::Want want, int32_t &errCode);
+    void OnClearUpApplicationData(int32_t &errCode);
+    void OnSetSupportedProcessCacheSelf(bool isSupported, int32_t &errCode);
     int32_t OnSetFontSizeScale(double fontSizeScale);
 
     int32_t OnOnEnvironment(void (*cfgCallback)(AbilityRuntime::CConfiguration),
-        void (*memCallback)(int32_t), bool isSync, int32_t *errCode);
-    int32_t OnOnAbilityLifecycle(CArrI64 cFuncIds, bool isSync, int32_t *errCode);
+        void (*memCallback)(int32_t), bool isSync, int32_t &errCode);
+    int32_t OnOnAbilityLifecycle(std::vector<int64_t> &cFuncIds, bool isSync, int32_t &errCode);
     int32_t OnOnApplicationStateChange(void (*foregroundCallback)(void),
-        void (*backgroundCallback)(void), int32_t *errCode);
-    void OnOffEnvironment(int32_t callbackId, int32_t *errCode);
-    void OnOffAbilityLifecycle(int32_t callbackId, int32_t *errCode);
-    void OnOffApplicationStateChange(int32_t callbackId, int32_t *errCode);
+        void (*backgroundCallback)(void), int32_t &errCode);
+    void OnOffEnvironment(int32_t callbackId, int32_t &errCode);
+    void OnOffAbilityLifecycle(int32_t callbackId, int32_t &errCode);
+    void OnOffApplicationStateChange(int32_t callbackId, int32_t &errCode);
     static CJApplicationContext* GetInstance();
     static CJApplicationContext* GetCJApplicationContext(
         std::weak_ptr<AbilityRuntime::ApplicationContext> &&applicationContext);
