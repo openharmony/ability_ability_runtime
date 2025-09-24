@@ -278,7 +278,7 @@ MappingInfo SourceMap::Find(int32_t row, int32_t col, const SourceMapData& targe
     size_t realSourceIndex = std::min(REAL_SOURCE_INDEX, targetMap.sources_.size());
     std::string sources = targetMap.sources_.substr(realSourceIndex,
                                                     targetMap.sources_.size() - realSourceIndex - 1);
-    if (key.rfind(".js") != std::string::npos) {
+    if (key.rfind(".js") == key.size() - INDEX_THREE) {
         return MappingInfo {
             .row = row,
             .col = col,
@@ -305,7 +305,9 @@ MappingInfo SourceMap::Find(int32_t row, int32_t col, const SourceMapData& targe
         }
     }
 
-    if (targetMap.afterPos_[res].afterRow != row && targetMap.afterPos_[res + 1].afterRow == row) {
+    if (res + 1 < static_cast<int32_t>(targetMap.afterPos_.size()) &&
+        targetMap.afterPos_[res].afterRow != row &&
+        targetMap.afterPos_[res + 1].afterRow == row) {
         res++;
     }
 
