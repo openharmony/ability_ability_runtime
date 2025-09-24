@@ -703,14 +703,14 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_CheckSystemCallingPe
     DataObsOption opt;
     bool ret = 0;
     opt.isSystem = false;
-    auto ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, -1);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, -1);
     EXPECT_EQ(ret, false);
-    auto ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, 100);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, 100);
     EXPECT_EQ(ret, true);
-    auto ret = dataObsMgrServer->IsCallingPermissionValid(opt, 100, 101);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, 100, 101);
     EXPECT_EQ(ret, false);
     opt.isSystem = true;
-    auto ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, 100);
+    ret = dataObsMgrServer->IsCallingPermissionValid(opt, IDataObsMgr::DATAOBS_DEFAULT_CURRENT_USER, 100);
     EXPECT_EQ(ret, false);
 
     SetSelfTokenID(originalToken);
