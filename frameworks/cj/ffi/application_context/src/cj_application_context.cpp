@@ -435,12 +435,12 @@ void CJApplicationContext::DispatchOnAbilitySaveState(const int64_t &ability)
 }
 
 int32_t CJApplicationContext::OnOnEnvironment(void (*cfgCallback)(CConfiguration),
-    void (*memCallback)(int32_t), bool isSync, int32_t *errCode)
+    void (*memCallback)(int32_t), bool isSync, int32_t &errCode)
 {
     auto context = applicationContext_.lock();
-    if (context == nullptr) {
+    if (context == nullptr || cfgCallback == nullptr || memCallback == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return -1;
     }
     if (envCallback_ != nullptr) {
@@ -454,12 +454,14 @@ int32_t CJApplicationContext::OnOnEnvironment(void (*cfgCallback)(CConfiguration
     return callbackId;
 }
 
-int32_t CJApplicationContext::OnOnAbilityLifecycle(CArrI64 cFuncIds, bool isSync, int32_t *errCode)
+const size_t FUNC_NUM = 22;
+
+int32_t CJApplicationContext::OnOnAbilityLifecycle(std::vector<int64_t> &cFuncIds, bool isSync, int32_t &errCode)
 {
     auto context = applicationContext_.lock();
-    if (context == nullptr) {
+    if (context == nullptr || cFuncIds.size() != FUNC_NUM) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return -1;
     }
     if (callback_ != nullptr) {
@@ -473,12 +475,12 @@ int32_t CJApplicationContext::OnOnAbilityLifecycle(CArrI64 cFuncIds, bool isSync
 }
 
 int32_t CJApplicationContext::OnOnApplicationStateChange(void (*foregroundCallback)(void),
-    void (*backgroundCallback)(void), int32_t *errCode)
+    void (*backgroundCallback)(void), int32_t &errCode)
 {
     auto context = applicationContext_.lock();
-    if (context == nullptr) {
+    if (context == nullptr || foregroundCallback == nullptr || backgroundCallback == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return -1;
     }
     std::lock_guard<std::mutex> lock(applicationStateCallbackLock_);
@@ -493,70 +495,70 @@ int32_t CJApplicationContext::OnOnApplicationStateChange(void (*foregroundCallba
     return callbackId;
 }
 
-void CJApplicationContext::OnOffEnvironment(int32_t callbackId, int32_t *errCode)
+void CJApplicationContext::OnOffEnvironment(int32_t callbackId, int32_t &errCode)
 {
     auto context = applicationContext_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
     std::weak_ptr<CjEnvironmentCallback> envCallbackWeak(envCallback_);
     auto env_callback = envCallbackWeak.lock();
     if (env_callback == nullptr) {
         TAG_LOGD(AAFwkTag::CONTEXT, "env_callback is not nullptr.");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
     TAG_LOGD(AAFwkTag::CONTEXT, "OnOffEnvironment begin");
     if (!env_callback->UnRegister(callbackId, false)) {
         TAG_LOGE(AAFwkTag::CONTEXT, "call UnRegister failed");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
 }
 
-void CJApplicationContext::OnOffAbilityLifecycle(int32_t callbackId, int32_t *errCode)
+void CJApplicationContext::OnOffAbilityLifecycle(int32_t callbackId, int32_t &errCode)
 {
     auto context = applicationContext_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
     std::weak_ptr<CjAbilityLifecycleCallbackImpl> callbackWeak(callback_);
     auto lifecycle_callback = callbackWeak.lock();
     if (lifecycle_callback == nullptr) {
         TAG_LOGD(AAFwkTag::CONTEXT, "env_callback is not nullptr.");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
     TAG_LOGD(AAFwkTag::CONTEXT, "OnOffAbilityLifecycle begin");
     if (!lifecycle_callback->UnRegister(callbackId, false)) {
         TAG_LOGE(AAFwkTag::CONTEXT, "call UnRegister failed");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
 }
 
-void CJApplicationContext::OnOffApplicationStateChange(int32_t callbackId, int32_t *errCode)
+void CJApplicationContext::OnOffApplicationStateChange(int32_t callbackId, int32_t &errCode)
 {
     auto context = applicationContext_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null context");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
     std::lock_guard<std::mutex> lock(applicationStateCallbackLock_);
     if (applicationStateCallback_ == nullptr) {
         TAG_LOGD(AAFwkTag::CONTEXT, "env_callback is not nullptr.");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
     TAG_LOGD(AAFwkTag::CONTEXT, "OnOffApplicationStateChange begin");
     if (!applicationStateCallback_->UnRegister(callbackId)) {
         TAG_LOGE(AAFwkTag::CONTEXT, "call UnRegister failed");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
         return;
     }
     if (applicationStateCallback_->IsEmpty()) {
@@ -595,51 +597,51 @@ void CJApplicationContext::OnSetColorMode(int32_t colorMode)
 }
 
 std::shared_ptr<AppExecFwk::RunningProcessInfo> CJApplicationContext::OnGetRunningProcessInformation(
-    int32_t *errCode)
+    int32_t &errCode)
 {
     auto context = applicationContext_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "applicationContext is already released");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
         return nullptr;
     }
     auto processInfo = std::make_shared<AppExecFwk::RunningProcessInfo>();
-    *errCode = context->GetProcessRunningInformation(*processInfo);
+    errCode = context->GetProcessRunningInformation(*processInfo);
     return processInfo;
 }
 
-void CJApplicationContext::OnKillProcessBySelf(bool clearPageStack, int32_t *errCode)
+void CJApplicationContext::OnKillProcessBySelf(bool clearPageStack, int32_t &errCode)
 {
     auto context = applicationContext_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "applicationContext is already released");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
         return;
     }
     context->KillProcessBySelf(clearPageStack);
 }
 
-int32_t CJApplicationContext::OnGetCurrentAppCloneIndex(int32_t *errCode)
+int32_t CJApplicationContext::OnGetCurrentAppCloneIndex(int32_t &errCode)
 {
     auto context = applicationContext_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "applicationContext is already released");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
         return -1;
     }
     if (context->GetCurrentAppMode() != static_cast<int32_t>(AppExecFwk::MultiAppModeType::APP_CLONE)) {
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_NOT_APP_CLONE;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_NOT_APP_CLONE;
         return -1;
     }
     return context->GetCurrentAppCloneIndex();
 }
 
-void CJApplicationContext::OnRestartApp(AAFwk::Want want, int32_t *errCode)
+void CJApplicationContext::OnRestartApp(AAFwk::Want want, int32_t &errCode)
 {
     auto context = applicationContext_.lock();
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "applicationContext is already released");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
         return;
     }
     auto code = context->RestartApp(want);
@@ -647,42 +649,42 @@ void CJApplicationContext::OnRestartApp(AAFwk::Want want, int32_t *errCode)
         return;
     }
     if (code == ERR_INVALID_VALUE) {
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
     } else if (code == AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY) {
-        *errCode = ERR_ABILITY_RUNTIME_RESTART_APP_INCORRECT_ABILITY;
+        errCode = ERR_ABILITY_RUNTIME_RESTART_APP_INCORRECT_ABILITY;
     } else if (code == AAFwk::ERR_RESTART_APP_FREQUENT) {
-        *errCode = ERR_ABILITY_RUNTIME_RESTART_APP_FREQUENT;
+        errCode = ERR_ABILITY_RUNTIME_RESTART_APP_FREQUENT;
     } else if (code == AAFwk::NOT_TOP_ABILITY) {
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_NOT_TOP_ABILITY;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_NOT_TOP_ABILITY;
     } else {
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
     }
 }
 
-void CJApplicationContext::OnClearUpApplicationData(int32_t *errCode)
+void CJApplicationContext::OnClearUpApplicationData(int32_t &errCode)
 {
     auto context = applicationContext_.lock();
     if (!context) {
         TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
         return;
     }
     context->ClearUpApplicationData();
 }
 
-void CJApplicationContext::OnSetSupportedProcessCacheSelf(bool isSupported, int32_t *errCode)
+void CJApplicationContext::OnSetSupportedProcessCacheSelf(bool isSupported, int32_t &errCode)
 {
     auto context = applicationContext_.lock();
     if (!context) {
         TAG_LOGE(AAFwkTag::APPKIT, "applicationContext is released");
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST;
         return;
     }
     int32_t code = context->SetSupportedProcessCacheSelf(isSupported);
     if (code == AAFwk::ERR_CAPABILITY_NOT_SUPPORT) {
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_NO_SUCH_SYSCAP;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_NO_SUCH_SYSCAP;
     } else if (code != ERR_OK) {
-        *errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
+        errCode = ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR;
     }
 }
 

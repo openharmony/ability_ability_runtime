@@ -59,7 +59,7 @@ public:
     void OnAbilityWillSaveState(const int64_t &ability) override;
     void OnAbilitySaveState(const int64_t &ability) override;
 
-    int32_t Register(CArrI64 cFuncIds, bool isSync = false);
+    int32_t Register(std::vector<int64_t> &cFuncIds, bool isSync = false);
     bool UnRegister(int32_t callbackId, bool isSync = false);
     bool IsEmpty() const;
     static int32_t serialNumber_;
