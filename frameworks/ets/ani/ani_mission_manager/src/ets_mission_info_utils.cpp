@@ -37,6 +37,64 @@ constexpr const char* KEY_CONTINUABLE = "continuable";
 constexpr const char* KEY_ABILITY_STATE = "abilityState";
 constexpr const char* KEY_UNCLEARABLE = "unclearable";
 constexpr const char* KEY_WANT = "want";
+constexpr const char *WANT_CLASS_NAME = "@ohos.app.ability.Want.Want";
+}
+
+bool InnerCreateEtsWantParams(ani_env *env, ani_class wantCls, ani_object wantObject,
+    const AAFwk::WantParams &wantParams)
+{
+    ani_ref wantParamRef = AppExecFwk::WrapWantParams(env, wantParams);
+    if (wantParamRef == nullptr) {
+        TAG_LOGE(AAFwkTag::MISSION, "failed to WrapWantParams");
+        return false;
+    }
+    return AppExecFwk::SetFieldRefByName(env, wantCls, wantObject, "parameters", wantParamRef);
+}
+
+ani_object CreateEtsWant(ani_env *env, const AAFwk::Want &want)
+{
+    TAG_LOGD(AAFwkTag::MISSION, "WrapWant called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::MISSION, "null env");
+        return nullptr;
+    }
+    ani_class cls = nullptr;
+    ani_status status = ANI_ERROR;
+    ani_method method = nullptr;
+    ani_object object = nullptr;
+    if ((status = env->FindClass(WANT_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::MISSION, "status: %{public}d", status);
+        return nullptr;
+    }
+    if (cls == nullptr) {
+        TAG_LOGE(AAFwkTag::MISSION, "null wantCls");
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::MISSION, "status: %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::MISSION, "status: %{public}d", status);
+        return nullptr;
+    }
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::MISSION, "null object");
+        return nullptr;
+    }
+
+    auto elementName = want.GetElement();
+    AppExecFwk::SetFieldStringByName(env, cls, object, "deviceId", elementName.GetDeviceID());
+    AppExecFwk::SetFieldStringByName(env, cls, object, "bundleName", elementName.GetBundleName());
+    AppExecFwk::SetFieldStringByName(env, cls, object, "abilityName", elementName.GetAbilityName());
+    AppExecFwk::SetFieldStringByName(env, cls, object, "uri", want.GetUriString());
+    AppExecFwk::SetFieldStringByName(env, cls, object, "type", want.GetType());
+    AppExecFwk::SetFieldIntByName(env, cls, object, "flags", want.GetFlags());
+    AppExecFwk::SetFieldStringByName(env, cls, object, "action", want.GetAction());
+    InnerCreateEtsWantParams(env, cls, object, want.GetParams());
+    AppExecFwk::SetFieldArrayStringByName(env, cls, object, "entities", want.GetEntities());
+
+    return object;
 }
 
 bool WrapWantInner(ani_env *env, ani_class cls, ani_object object, const AAFwk::Want &want)
@@ -45,7 +103,7 @@ bool WrapWantInner(ani_env *env, ani_class cls, ani_object object, const AAFwk::
         TAG_LOGE(AAFwkTag::MISSION, "env is null");
         return false;
     }
-    ani_object wantObj = AppExecFwk::WrapWant(env, want);
+    ani_object wantObj = CreateEtsWant(env, want);
     if (wantObj == nullptr) {
         TAG_LOGE(AAFwkTag::MISSION, "wrap want failed");
         return false;
