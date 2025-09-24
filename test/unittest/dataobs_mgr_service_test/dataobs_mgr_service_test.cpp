@@ -795,6 +795,18 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_VerifyDataSharePermi
     TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_VerifyDataSharePermissionInner_0100 end");
 }
 
+HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_VerifyDataSharePermissionInner_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_VerifyDataSharePermissionInner_0200 start");
+    auto dataObsMgrServer = std::make_shared<DataObsMgrService>();
+
+    Uri uri("");
+    ObserverInfo info;
+    int32_t ret = dataObsMgrServer->VerifyDataSharePermissionInner(uri, true, info);
+    EXPECT_EQ(ret, DATAOBS_INVALID_URI);
+    TAG_LOGI(AAFwkTag::DBOBSMGR, "AaFwk_DataObsMgrServiceTest_VerifyDataSharePermissionInner_0200 end");
+}
+
 /*
  * Feature: DataObsMgrService
  * Function: test DATA_MANAGER_SERVICE_UID
