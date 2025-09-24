@@ -318,6 +318,9 @@ const std::string LARGE_SCREEN = "large_screen";
 const std::string CODE_LANGUAGE_ARKTS_1_2 = "static";
 const std::string CODE_LANGUAGE_ARKTS_HYBRID = "hybrid";
 
+constexpr int32_t MAX_EXTENSION_CHILD_PROCESS = 1;
+constexpr int32_t MAX_EXTENSION_CHILD_PROCESS_DEV_MODE = 3;
+
 int32_t GetUserIdByUid(int32_t uid)
 {
     return uid / BASE_USER_RANGE;
@@ -4297,7 +4300,11 @@ void AppMgrServiceInner::PresetMaxChildProcess(std::shared_ptr<AppRunningRecord>
     ExtensionAbilityType extensionType = appRecord->GetExtensionType();
     if (processType == ProcessType::EXTENSION && extensionType != ExtensionAbilityType::DATASHARE &&
         extensionType != ExtensionAbilityType::SERVICE) {
-        maxChildProcess = 1;
+        if (system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+            maxChildProcess = MAX_EXTENSION_CHILD_PROCESS_DEV_MODE;
+        } else {
+            maxChildProcess = MAX_EXTENSION_CHILD_PROCESS;
+        }
     }
 }
 #endif // SUPPORT_CHILD_PROCESS
