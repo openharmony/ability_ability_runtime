@@ -292,5 +292,43 @@ HWTEST_F(ResidentProcessManagerTest, StartFailedResidentAbilities_001, TestSize.
     manager->StartFailedResidentAbilities();
     EXPECT_TRUE(manager->unlockedAfterBoot_);
 }
+
+/*
+ * Feature: ResidentProcessManager
+ * Function: UpdateResidentProcessesStatus
+ * SubFunction: NA
+ * FunctionPoints:ResidentProcessManager UpdateResidentProcessesStatus
+ * EnvConditions: NA
+ * CaseDescription: Verify UpdateResidentProcessesStatus
+ */
+HWTEST_F(ResidentProcessManagerTest, UpdateResidentProcessesStatus_001, TestSize.Level1)
+{
+    auto manager = std::make_shared<ResidentProcessManager>();
+    ASSERT_NE(manager, nullptr);
+    std::string bundleName = "";
+    bool localEnable = false;
+    bool updateEnable = false;
+    manager->UpdateResidentProcessesStatus(bundleName, localEnable, updateEnable);
+    EXPECT_TRUE(bundleName.empty());
+}
+
+/*
+ * Feature: ResidentProcessManager
+ * Function: UpdateResidentProcessesStatus
+ * SubFunction: NA
+ * FunctionPoints:ResidentProcessManager UpdateResidentProcessesStatus
+ * EnvConditions: NA
+ * CaseDescription: Verify UpdateResidentProcessesStatus
+ */
+HWTEST_F(ResidentProcessManagerTest, UpdateResidentProcessesStatus_002, TestSize.Level1)
+{
+    auto manager = std::make_shared<ResidentProcessManager>();
+    ASSERT_NE(manager, nullptr);
+    std::string bundleName = "com.ohos.demo";
+    bool localEnable = false;
+    bool updateEnable = false;
+    manager->UpdateResidentProcessesStatus(bundleName, localEnable, updateEnable);
+    EXPECT_FALSE(bundleName.empty());
+}
 }  // namespace AAFwk
 }  // namespace OHOS
