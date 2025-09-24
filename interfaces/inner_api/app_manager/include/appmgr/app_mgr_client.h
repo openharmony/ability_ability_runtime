@@ -887,7 +887,7 @@ public:
      * whether memory size is sufficient.
      * @return Returns true is sufficient memory size, others return false.
      */
-    bool IsMemorySizeSufficent() const;
+    bool IsMemorySizeSufficient() const;
 
     /**
      * whether or not requier a big memory

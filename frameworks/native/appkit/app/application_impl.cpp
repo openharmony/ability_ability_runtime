@@ -119,7 +119,7 @@ bool ApplicationImpl::PerformTerminate(bool isLastProcess)
     }
 
     application_->CleanAppTempData(isLastProcess);
-    if (curState_ == APP_STATE_BACKGROUND) {
+    if (curState_ == APP_STATE_READY || curState_ == APP_STATE_BACKGROUND) {
         application_->OnTerminate();
         curState_ = APP_STATE_TERMINATED;
         return true;

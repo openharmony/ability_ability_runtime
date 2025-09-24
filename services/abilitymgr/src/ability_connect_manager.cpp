@@ -2578,7 +2578,7 @@ bool AbilityConnectManager::IsNeedToRestart(const std::shared_ptr<AbilityRecord>
         return true;
     }
 
-    if (DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficent()) {
+    if (DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficient()) {
         if (DelayedSingleton<AppScheduler>::GetInstance()->IsNoRequireBigMemory() ||
         !AppUtils::GetInstance().IsBigMemoryUnrelatedKeepAliveProc(bundleName)) {
             TAG_LOGD(AAFwkTag::EXT, "restart keep alive ability");

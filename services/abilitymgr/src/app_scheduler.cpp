@@ -664,13 +664,13 @@ void AppScheduler::ClearProcessByToken(sptr<IRemoteObject> token) const
     appMgrClient_->ClearProcessByToken(token);
 }
 
-bool AppScheduler::IsMemorySizeSufficent() const
+bool AppScheduler::IsMemorySizeSufficient() const
 {
     if (!appMgrClient_) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null appMgrClient");
         return true;
     }
-    return appMgrClient_->IsMemorySizeSufficent();
+    return appMgrClient_->IsMemorySizeSufficient();
 }
 
 bool AppScheduler::IsNoRequireBigMemory() const
