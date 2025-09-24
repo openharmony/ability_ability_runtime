@@ -109,5 +109,15 @@ bool FUDUtils::GenerateFUDAppInfo(FUDAppInfo &info)
     info.bundleName = MyFlag::upmsUtilsBundleName_;
     return MyFlag::fudUtilsGenerateFUDAppInfoRet_;
 }
+
+bool FUDUtils::IsUdmfOrPasteboardCall()
+{
+    return MyFlag::isUdmfOrPasteboardCallRet_;
+}
+
+bool FUDUtils::SendAutoPersistEvent(uint32_t callerTokenId, uint32_t targetTokenId)
+{
+    return true;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

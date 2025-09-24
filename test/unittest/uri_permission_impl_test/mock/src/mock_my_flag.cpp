@@ -55,5 +55,6 @@ uint32_t MyFlag::upmsUtilsTokenId_ = 0;
 bool MyFlag::fudUtilsGenerateFUDAppInfoRet_ = true;
 std::string MyFlag::bundleName_ = "";
 TokenInfoMap MyFlag::tokenInfos = {};
+bool MyFlag::isUdmfOrPasteboardCallRet_ = false;
 } // namespace AAFwk
 } // namespace OHOS
