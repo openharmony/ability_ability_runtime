@@ -3999,7 +3999,13 @@ void MainThread::ParseAppConfigurationParams(const std::string configuration, Co
         TAG_LOGE(AAFwkTag::ABILITYMGR, "app config not exist");
         return;
     }
-    nlohmann::json jsonObject = configurationJson.at(JSON_KEY_APP_CONFIGURATION).get<nlohmann::json>();
+    nlohmann::json jsonObject;
+    auto& configValue = configurationJson.at(JSON_KEY_APP_CONFIGURATION);
+    if (!configValue.is_object()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "config not object");
+        return;
+    }
+    jsonObject = configValue.get<nlohmann::json>();
     if (jsonObject.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null app config");
         return;
