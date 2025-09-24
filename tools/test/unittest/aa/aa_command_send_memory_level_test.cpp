@@ -411,6 +411,33 @@ HWTEST_F(AaCommandSendMemoryLevelTest, RunAsSendMemoryLevelCommand_0600, TestSiz
         (char*)TOOL_NAME.c_str(),
         (char*)sendMemoryLevelCmd_.c_str(),
         (char*)"-p",
+        (char*)STRING_INVALID_PID.c_str(),
+        (char*)"-l",
+        (char*)STRING_INVALID_LEVEL.c_str(),
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+    
+    AbilityManagerShellCommand cmd(argc, argv);
+    std::string pid = "";
+    std::string level = "";
+    auto ret = cmd.RunAsSendMemoryLevelCommand();
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: Aa_Command_RunAsSendMemoryLevelCommand_0700
+ * @tc.name: Parse Pid and Level from argv[]
+ * @tc.desc: Verify that send-memory-level command parse Pid and Level unormally.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, RunAsSendMemoryLevelCommand_0700, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_RunAsSendMemoryLevelCommand_0700";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"-p",
         (char*)STRING_VALID_PID.c_str(),
         (char*)"-l",
         (char*)STRING_VALID_LEVEL.c_str(),
@@ -621,4 +648,28 @@ HWTEST_F(AaCommandSendMemoryLevelTest, Aa_Command_SendMemoryLevel_0900, TestSize
 
     AbilityManagerShellCommand cmd(argc, argv);
     EXPECT_TRUE(cmd.ExecCommand().find(STRING_SEND_MEMORY_LEVEL_NG) != string::npos);
+}
+
+/**
+ * @tc.number: Aa_Command_SendMemoryLevel_1000
+ * @tc.name: ExecCommand
+ * @tc.desc: Verify the "aa send-memory-level -p -1 -l 3" command.
+ */
+HWTEST_F(AaCommandSendMemoryLevelTest, Aa_Command_SendMemoryLevel_1000, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "Aa_Command_SendMemoryLevel_1000";
+
+    char* argv[] = {
+        (char*)TOOL_NAME.c_str(),
+        (char*)sendMemoryLevelCmd_.c_str(),
+        (char*)"-p",
+        (char*)STRING_VALID_PID.c_str(),
+        (char*)"-l",
+        (char*)STRING_VALID_LEVEL.c_str(),
+        (char*)"",
+    };
+    int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    AbilityManagerShellCommand cmd(argc, argv);
+    EXPECT_TRUE(cmd.ExecCommand().find(STRING_SEND_MEMORY_LEVEL_OK) != string::npos);
 }
