@@ -22,7 +22,7 @@
 #include "ani_common_configuration.h"
 #include "ani_common_want.h"
 #include "ani_enum_convert.h"
-#include "ani_remote_object.h"
+#include "remote_object_taihe_ani.h"
 #ifdef SUPPORT_SCREEN
 #include "ani_window_stage.h"
 #endif
