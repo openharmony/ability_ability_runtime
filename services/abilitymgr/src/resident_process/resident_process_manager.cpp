@@ -210,14 +210,9 @@ void ResidentProcessManager::UpdateResidentProcessesStatus(
         return;
     }
 
-    std::vector<int32_t> userIds;
-    AbilityRuntime::UserController::GetInstance().GetAllForegroundUserId(userIds);
-    std::set<int32_t> users{0};
-    auto iter = userIds.begin();
-    while (iter != userIds.end()) {
-        users.emplace(*iter);
-    }
     AppExecFwk::BundleInfo bundleInfo;
+    auto userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
+    std::set<int32_t> users{0, userId};
 
     for (const auto &userId: users) {
         if (!IN_PROCESS_CALL(bms->GetBundleInfo(
