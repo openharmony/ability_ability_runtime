@@ -98,7 +98,7 @@ ohos_shared_library("ani_common") {
     "image_framework:image_ani",
     "ipc:ipc_core",
     "ipc:ipc_napi",
-    "ipc:rpc_ani",
+    "ipc:rpc_taihe",
     "json:nlohmann_json_static",
     "napi:ace_napi",
     "resource_management:global_resmgr",
