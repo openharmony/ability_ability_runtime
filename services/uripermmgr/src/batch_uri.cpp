@@ -34,6 +34,7 @@ int32_t BatchUri::Init(const std::vector<std::string> &uriVec, uint32_t mode,
     validUriCount = 0;
     checkResult = std::vector<bool>(totalUriCount, false);
     isDocsUriVec = std::vector<bool>(totalUriCount, false);
+    isDfsDocsUriVec = std::vector<bool>(totalUriCount, false);
     isTargetBundleUri = std::vector<bool>(totalUriCount, false);
     for (size_t index = 0; index < uriVec.size(); index++) {
         Uri uriInner = Uri(uriVec[index]);
@@ -41,11 +42,16 @@ int32_t BatchUri::Init(const std::vector<std::string> &uriVec, uint32_t mode,
         if (index == 0) {
             TAG_LOGI(AAFwkTag::URIPERMMGR, "uri type: %{public}s.", uriInner.GetAuthority().c_str());
         }
-        if (scheme != FUDConstants::FILE_SCHEME) {
+        if (scheme != FUDConstants::FILE_SCHEME && scheme != FUDConstants::CONTENT_SCHEME) {
             TAG_LOGW(AAFwkTag::URIPERMMGR, "uri is invalid: %{private}s.", uriInner.ToString().c_str());
             continue;
         }
         validUriCount++;
+        // content uri
+        if (scheme == FUDConstants::CONTENT_SCHEME) {
+            contentUris.emplace_back(uriInner.ToString());
+            continue;
+        }
         InitFileUriInfo(uriInner, index, mode, callerAlterBundleName, targetAlterBundleName,
             haveSandboxAccessPermission);
     }
@@ -67,6 +73,11 @@ void BatchUri::InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mod
     }
     // docs uri
     if (authority == FUDConstants::DOCS_AUTHORITY) {
+        // distribute docs uri
+        if (FUDUtils::IsDocsCloudUri(uriInner)) {
+            dfsDocsUris.emplace_back(uriInner.ToString());
+            isDfsDocsUriVec[index] = true;
+        }
         isDocsUriVec[index] = true;
         // need to check uri permission
         otherUris.emplace_back(uriInner);
@@ -123,8 +134,7 @@ int32_t BatchUri::GetMediaUriToGrant(std::vector<std::string> &uriVec)
     return uriVec.size();
 }
 
-void BatchUri::GetNeedCheckProxyPermissionURI(std::vector<PolicyInfo> &proxyUrisByPolicy,
-    std::vector<Uri> &proxyUrisByMap)
+void BatchUri::GetNeedCheckProxyPermissionURI(std::vector<PolicyInfo> &proxyUrisByPolicy)
 {
     // docs uri and bundle uri
     for (size_t i = 0; i < otherIndexes.size(); i++) {
@@ -171,7 +181,7 @@ void BatchUri::SelectPermissionedUri(std::vector<Uri> &uris, std::vector<int32_t
 }
 
 int32_t BatchUri::GetUriToGrantByPolicy(std::vector<PolicyInfo> &docsPolicyInfoVec,
-    std::vector<PolicyInfo> &bundlePolicyInfoVec)
+    std::vector<PolicyInfo> &bundlePolicyInfoVec, bool isRemoveDfsDocsUri)
 {
     // bundleName + docs
     int32_t count = 0;
@@ -190,7 +200,7 @@ int32_t BatchUri::GetUriToGrantByPolicy(std::vector<PolicyInfo> &docsPolicyInfoV
         }
         TAG_LOGD(AAFwkTag::URIPERMMGR, "Add policy: path is %{private}s, mode is %{public}u.",
             otherPolicyInfos[i].path.c_str(), static_cast<uint32_t>(otherPolicyInfos[i].mode));
-        if (isDocsUriVec[index]) {
+        if (isDocsUriVec[index] && (!isRemoveDfsDocsUri || !isDfsDocsUriVec[index])) {
             docsPolicyInfoVec.emplace_back(otherPolicyInfos[i]);
         } else {
             bundlePolicyInfoVec.emplace_back(otherPolicyInfos[i]);
