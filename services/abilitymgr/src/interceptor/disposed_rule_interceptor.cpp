@@ -137,8 +137,10 @@ bool DisposedRuleInterceptor::FindBlockDisposedRule(const Want &want,
             continue;
         }
         if (rule.disposedType == AppExecFwk::DisposedType::BLOCK_APPLICATION) {
-            disposedRule = rule;
-            priority = rule.priority;
+            if (rule.controlType != AppExecFwk::ControlType::ALLOWED_LIST) {
+                disposedRule = rule;
+                priority = rule.priority;
+            }
             continue;
         }
         std::string moduleName = want.GetElement().GetModuleName();
