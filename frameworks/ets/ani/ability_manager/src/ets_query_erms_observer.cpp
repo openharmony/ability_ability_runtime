@@ -32,6 +32,10 @@ EtsQueryERMSObserver::EtsQueryERMSObserver(ani_vm *etsVm) : etsVm_(etsVm) {}
 EtsQueryERMSObserver::~EtsQueryERMSObserver()
 {
     ani_env *env = AttachCurrentThread();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::QUERY_ERMS, "null env");
+        return;
+    }
     for (auto it = etsObserverObjectList_.begin(); it != etsObserverObjectList_.end();) {
         env->GlobalReference_Delete(it->callback);
         it++;

@@ -759,8 +759,7 @@ bool ETSFormExtension::OnShare(int64_t formId, AAFwk::WantParams &wantParams)
     ani_status status = env->Object_GetFieldByName_Ref(
         static_cast<ani_object>(etsAbilityObj_->aniRef), "onShareForm", &nameRef);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d, %{public}p, %{public}p",
-            status, etsAbilityObj_->aniRef, etsAbilityObj_->aniObj);
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d", status);
         return false;
     }
     ani_ref argv[] = { formIdStr };
@@ -790,8 +789,7 @@ bool ETSFormExtension::OnAcquireData(int64_t formId, AAFwk::WantParams &wantPara
     ani_status status = env->Object_GetFieldByName_Ref(
         static_cast<ani_object>(etsAbilityObj_->aniRef), "onAcquireFormData", &nameRef);
     if (status != ANI_OK) {
-        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d, %{public}p, %{public}p",
-            status, etsAbilityObj_->aniRef, etsAbilityObj_->aniObj);
+        TAG_LOGE(AAFwkTag::FORM_EXT, "Object_GetFieldByName status: %{public}d", status);
         return false;
     }
     ani_ref argv[] = { formIdStr };

@@ -52,21 +52,21 @@ constexpr const char *APPLICATION_STATE_ON_SIGNATURE =
     "C{std.core.String}C{application.ApplicationStateObserver.ApplicationStateObserver}:i";
 constexpr const char *APPLICATION_STATE_OFF_SIGNATURE =
     "C{std.core.String}iC{utils.AbilityUtils.AsyncCallbackWrapper}:";
-static const char* ON_SIGNATURE_ABILITY_FIRST_FRAME_STATE =
+static const char *ON_SIGNATURE_ABILITY_FIRST_FRAME_STATE =
     "C{std.core.String}C{application.AbilityFirstFrameStateObserver.AbilityFirstFrameStateObserver}C{std.core.String}:";
-static const char* ON_SIGNATURE_APP_FOREGROUND_STATE
-    = "C{std.core.String}C{application.AppForegroundStateObserver.AppForegroundStateObserver}:";
-static const char *OFF_SIGNATURE_ABILITY_FIRST_FRAME_STATE
-    = "C{std.core.String}C{application.AbilityFirstFrameStateObserver.AbilityFirstFrameStateObserver}:";
-static const char *OFF_SIGNATURE_APP_FOREGROUND_STATE
-    = "C{std.core.String}C{application.AppForegroundStateObserver.AppForegroundStateObserver}:";
+static const char *ON_SIGNATURE_APP_FOREGROUND_STATE =
+    "C{std.core.String}C{application.AppForegroundStateObserver.AppForegroundStateObserver}:";
+static const char *OFF_SIGNATURE_ABILITY_FIRST_FRAME_STATE =
+    "C{std.core.String}C{application.AbilityFirstFrameStateObserver.AbilityFirstFrameStateObserver}:";
+static const char *OFF_SIGNATURE_APP_FOREGROUND_STATE =
+    "C{std.core.String}C{application.AppForegroundStateObserver.AppForegroundStateObserver}:";
 constexpr const char *BUNDLE_NAME_CHECK_SIG = "C{std.core.String}:";
 constexpr const char *CLEAR_UP_APPLICATION_DATA_SIG = "C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char *GET_KEEP_ALIVE_APP_SERVICE_EXTENSION_SIG = "C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char *SET_KEEP_ALIVE_FOR_APP_SERVICE_EXTENSION_SIG =
     "C{std.core.String}zC{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char *CLEAR_UP_APP_DATA_SIG = "C{utils.AbilityUtils.AsyncCallbackWrapper}"
-    "C{std.core.String}C{std.core.Int}:";
+                                              "C{std.core.String}C{std.core.Int}:";
 constexpr const char *TERMINATION_SIG = "iC{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char *IS_APP_RUNNING_SIG = "C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 } // namespace
