@@ -3333,6 +3333,7 @@ void MainThread::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &
     if (mainHandler_ == nullptr || !mainHandler_->PostTask(task, "MainThread:AcceptWant")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
+    TAG_LOGI(AAFwkTag::APPKIT, "ScheduleAcceptWant end");
 }
 
 void MainThread::SchedulePrepareTerminate(const std::string &moduleName)
@@ -3426,6 +3427,7 @@ void MainThread::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::s
     if (!mainHandler_->PostTask(task, "MainThread:ScheduleNewProcessRequest")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
+    TAG_LOGI(AAFwkTag::APPKIT, "ScheduleNewProcessRequest end");
 }
 
 void MainThread::CheckMainThreadIsAlive()
