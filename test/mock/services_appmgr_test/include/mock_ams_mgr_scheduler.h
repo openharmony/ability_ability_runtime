@@ -68,7 +68,7 @@ public:
     MOCK_METHOD1(GetWaitingDebugApp, int32_t(std::vector<std::string> &debugInfoList));
     MOCK_METHOD1(IsWaitingDebugApp, bool(const std::string &bundleName));
     MOCK_METHOD0(ClearNonPersistWaitingDebugFlag, void());
-    MOCK_METHOD0(IsMemorySizeSufficent, bool());
+    MOCK_METHOD0(IsMemorySizeSufficient, bool());
     MOCK_METHOD4(KillProcessesByPids, int32_t(const std::vector<int32_t> &pids, const std::string &reason,
         bool subProcess, bool isKillPrecedeStart));
 

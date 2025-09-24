@@ -190,7 +190,7 @@ void AppScheduler::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk:
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::GetRunningProcessInfoByPid()");
 }
 
-bool AppScheduler::IsMemorySizeSufficent() const
+bool AppScheduler::IsMemorySizeSufficient() const
 {
     return true;
 }

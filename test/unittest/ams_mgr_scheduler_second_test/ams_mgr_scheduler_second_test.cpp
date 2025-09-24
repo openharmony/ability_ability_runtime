@@ -1690,13 +1690,13 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_ClearProcessByToke
 }
 
 /**
- * @tc.name: AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_001
+ * @tc.name: AmsMgrSchedulerSecondTest_IsMemorySizeSufficient_001
  * @tc.desc: Test IsMemorySizeSufficient
  * @tc.type: FUNC
  */
-HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_001, TestSize.Level1)
+HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSufficient_001, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_001 start");
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsMemorySizeSufficient_001 start");
     auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
     std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
         std::make_shared<AmsMgrScheduler>(appMgrServiceInner, nullptr);
@@ -1705,19 +1705,19 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSuffic
      * @tc.steps: step1. amsMgrScheduler isReady false
      * @tc.expected: step1. expect ERR_INVALID_OPERATION
      */
-    auto ret = amsMgrScheduler->IsMemorySizeSufficent();
+    auto ret = amsMgrScheduler->IsMemorySizeSufficient();
     EXPECT_TRUE(ret);
-    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_001 end");
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsMemorySizeSufficient_001 end");
 }
 
 /*
- * @tc.name: AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_002
+ * @tc.name: AmsMgrSchedulerSecondTest_IsMemorySizeSufficient_002
  * @tc.desc: Test IsMemorySizeSufficient
  * @tc.type: FUNC
  */
-HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_002, TestSize.Level1)
+HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSufficient_002, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_002 start");
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsMemorySizeSufficient_002 start");
     auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
     std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
         std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
@@ -1727,19 +1727,19 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSuffic
      * @tc.expected: step1. expect ERR_INVALID_OPERATION
      */
     IPCSkeleton::SetCallingUid(-1);
-    auto ret = amsMgrScheduler->IsMemorySizeSufficent();
+    auto ret = amsMgrScheduler->IsMemorySizeSufficient();
     EXPECT_TRUE(ret);
-    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_002 end");
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsMemorySizeSufficient_002 end");
 }
 
 /*
- * @tc.name: AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_003
+ * @tc.name: AmsMgrSchedulerSecondTest_IsMemorySizeSufficient_003
  * @tc.desc: Test IsMemorySizeSufficient
  * @tc.type: FUNC
  */
-HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_003, TestSize.Level1)
+HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSufficient_003, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_003 start");
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsMemorySizeSufficient_003 start");
     auto appMgrServiceInner = std::make_shared<MockAppMgrServiceInner>();
     std::shared_ptr<AmsMgrScheduler> amsMgrScheduler =
         std::make_shared<AmsMgrScheduler>(appMgrServiceInner, taskHandler_);
@@ -1749,9 +1749,9 @@ HWTEST_F(AmsMgrSchedulerSecondTest, AmsMgrSchedulerSecondTest_IsMemorySizeSuffic
      * @tc.expected: step1. expect ERR_INVALID_OPERATION
      */
     IPCSkeleton::SetCallingUid(Constants::FOUNDATION_UID);
-    auto ret = amsMgrScheduler->IsMemorySizeSufficent();
+    auto ret = amsMgrScheduler->IsMemorySizeSufficient();
     EXPECT_TRUE(ret);
-    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsMemorySizeSufficent_003 end");
+    TAG_LOGI(AAFwkTag::TEST, "AmsMgrSchedulerSecondTest_IsMemorySizeSufficient_003 end");
 }
 
 /**

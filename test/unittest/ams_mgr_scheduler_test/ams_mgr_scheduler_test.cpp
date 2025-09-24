@@ -734,15 +734,15 @@ HWTEST_F(AmsMgrSchedulerTest, GetRunningProcessInfoByToken_001, TestSize.Level2)
  * EnvConditions: NA
  * CaseDescription: Verify IsMemorySizeSufficient
  */
-HWTEST_F(AmsMgrSchedulerTest, IsMemorySizeSufficent_001, TestSize.Level2)
+HWTEST_F(AmsMgrSchedulerTest, IsMemorySizeSufficient_001, TestSize.Level2)
 {
     auto amsMgrScheduler = std::make_unique<AmsMgrScheduler>(nullptr, nullptr);
     ASSERT_NE(amsMgrScheduler, nullptr);
-    bool res = amsMgrScheduler->IsMemorySizeSufficent();
+    bool res = amsMgrScheduler->IsMemorySizeSufficient();
     EXPECT_EQ(res, true);
     amsMgrScheduler->amsMgrServiceInner_ = GetMockAppMgrServiceInner();
     amsMgrScheduler->amsHandler_ = GetAmsTaskHandler();
-    res = amsMgrScheduler->IsMemorySizeSufficent();
+    res = amsMgrScheduler->IsMemorySizeSufficient();
     EXPECT_EQ(res, true);
 }
 
