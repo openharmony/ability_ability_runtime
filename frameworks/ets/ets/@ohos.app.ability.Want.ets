@@ -151,7 +151,7 @@ class RecordWriter {
           let value: string = String(obj as Object);
           let num: number = Number(value);
           if (Number.isInteger(num)) {
-            if (num > int32Min && num < int32Max) {
+            if (num >= int32Min && num <= int32Max) {
               localWantParams?.setParam(key, num as int);
             } else {
               localWantParams?.setParam(key, num as double);
@@ -242,7 +242,7 @@ class RecordWriter {
       // consistent with napi behavior
       if (key === VALUE_PROPERTY) {
         let value: double = obj.unboxed();
-        if (Number.isInteger(value) && value > int32Min && value < int32Max) {
+        if (Number.isInteger(value) && value >= int32Min && value <= int32Max) {
           wantParams?.setParam(key, value as int);
         } else {
           wantParams?.setParam(key, value as double);
@@ -316,7 +316,7 @@ class RecordWriter {
       if (objType instanceof ClassType) {
         let value: string = String(element as Object);
         let enumNum: number = Number(value);
-        if (Number.isInteger(enumNum) && enumNum > int32Min && enumNum < int32Max) {
+        if (Number.isInteger(enumNum) && enumNum >= int32Min && enumNum <= int32Max) {
           hilog.debug(DOMAIN_ID, TAG, `array value type Class Int`);
           if (complexArray.doubleList.length > 0) {
             complexArray.intList.forEach(num => {
