@@ -49,8 +49,9 @@ std::string MyFlag::upmsUtilsBundleName_ = "";
 bool MyFlag::upmsUtilsGetBundleNameByTokenIdRet_ = false;
 std::string MyFlag::upmsUtilsAppId_ = "";
 int32_t MyFlag::upmsUtilsGetAppIdByBundleNameRet_ = 0;
-bool MyFlag::upmsUtilsIsFoundationCallRet_;
+bool MyFlag::upmsUtilsIsFoundationCallRet_ = false;
 uint32_t MyFlag::upmsUtilsTokenId_ = 0;
 TokenInfoMap MyFlag::tokenInfos = {};
+bool MyFlag::isUdmfOrPasteboardCallRet_ = false;
 } // namespace AAFwk
 } // namespace OHOS
