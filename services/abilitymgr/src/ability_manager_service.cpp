@@ -4829,16 +4829,13 @@ int AbilityManagerService::SendResultToAbility(int32_t requestCode, int32_t resu
         TAG_LOGE(AAFwkTag::ABILITYMGR, "missionId empty");
         return ERR_INVALID_VALUE;
     }
-    auto userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
     std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
+        auto uiAbilityManager = GetCurrentUIAbilityManager();
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         abilityRecord = uiAbilityManager->GetAbilityRecordsById(missionId);
     } else {
-        auto missionListManager = GetMissionListManagerByUserId(userId);
-        CHECK_POINTER_AND_RETURN(missionListManager, ERR_INVALID_VALUE);
-        sptr<IRemoteObject> abilityToken = missionListManager->GetAbilityTokenByMissionId(missionId);
+        sptr<IRemoteObject> abilityToken = GetAbilityTokenByMissionId(missionId);
         CHECK_POINTER_AND_RETURN(abilityToken, ERR_INVALID_VALUE);
         abilityRecord = Token::GetAbilityRecordByToken(abilityToken);
     }
@@ -5648,16 +5645,13 @@ int AbilityManagerService::ContinueAbility(const std::string &deviceId, int32_t 
         return ERR_INVALID_VALUE;
     }
 
-    auto userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
     std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
+        auto uiAbilityManager = GetCurrentUIAbilityManager();
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         abilityRecord = uiAbilityManager->GetAbilityRecordsById(missionId);
     } else {
-        auto missionListManager = GetMissionListManagerByUserId(userId);
-        CHECK_POINTER_AND_RETURN(missionListManager, ERR_INVALID_VALUE);
-        sptr<IRemoteObject> abilityToken = missionListManager->GetAbilityTokenByMissionId(missionId);
+        sptr<IRemoteObject> abilityToken = GetAbilityTokenByMissionId(missionId);
         CHECK_POINTER_AND_RETURN(abilityToken, ERR_INVALID_VALUE);
         abilityRecord = Token::GetAbilityRecordByToken(abilityToken);
     }
@@ -5741,16 +5735,13 @@ void AbilityManagerService::NotifyCompleteContinuation(const std::string &device
 int AbilityManagerService::NotifyContinuationResult(int32_t missionId, int32_t result)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "result : %{public}d", result);
-    auto userId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
     std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
+        auto uiAbilityManager = GetCurrentUIAbilityManager();
         CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
         abilityRecord = uiAbilityManager->GetAbilityRecordsById(missionId);
     } else {
-        auto missionListManager = GetMissionListManagerByUserId(userId);
-        CHECK_POINTER_AND_RETURN(missionListManager, ERR_INVALID_VALUE);
-        sptr<IRemoteObject> abilityToken = missionListManager->GetAbilityTokenByMissionId(missionId);
+        sptr<IRemoteObject> abilityToken = GetAbilityTokenByMissionId(missionId);
         CHECK_POINTER_AND_RETURN(abilityToken, ERR_INVALID_VALUE);
         abilityRecord = Token::GetAbilityRecordByToken(abilityToken);
     }
@@ -8856,6 +8847,16 @@ int32_t AbilityManagerService::GetMissionIdByAbilityTokenInner(const sptr<IRemot
         return -1;
     }
     return missionListManager->GetMissionIdByAbilityToken(token);
+}
+
+sptr<IRemoteObject> AbilityManagerService::GetAbilityTokenByMissionId(int32_t missionId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto missionListManager = GetCurrentMissionListManager();
+    if (!missionListManager) {
+        return nullptr;
+    }
+    return missionListManager->GetAbilityTokenByMissionId(missionId);
 }
 
 int AbilityManagerService::StartRemoteAbilityByCall(const Want &want, const sptr<IRemoteObject> &callerToken,
