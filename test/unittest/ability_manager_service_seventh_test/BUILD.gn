@@ -42,7 +42,7 @@ ohos_unittest("ability_manager_service_seventh_test") {
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:process_options",
-    "${ability_runtime_services_path}/common:record_cost_time_util",
+    "${ability_runtime_services_path}/common:app_util",
   ]
 
   external_deps = [
