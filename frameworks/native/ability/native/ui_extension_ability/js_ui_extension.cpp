@@ -611,8 +611,9 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
         return false;
     }
     std::lock_guard<std::mutex> lock(uiWindowMutex_);
-    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ", element: %{public}s",
-        sessionInfo->uiExtensionComponentId, want.GetElement().GetURI().c_str());
+    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ", bundle/ability: %{public}s/%{public}s",
+        sessionInfo->uiExtensionComponentId, want.GetElement().GetBundleName().c_str(),
+        want.GetElement().GetAbilityName().c_str());
     std::shared_ptr<AAFwk::Want> sharedWant = std::make_shared<AAFwk::Want>(want);
     auto compId = sessionInfo->uiExtensionComponentId;
     if (uiWindowMap_.find(compId) == uiWindowMap_.end()) {
