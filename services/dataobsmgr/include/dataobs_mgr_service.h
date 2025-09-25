@@ -52,7 +52,7 @@ public:
     DataObsServiceRunningState QueryServiceState() const;
 
     std::pair<bool, struct ObserverNode> ConstructObserverNode(sptr<IDataAbilityObserver> dataObserver,
-        int32_t userId, uint32_t tokenId, int32_t pid);
+        int32_t userId, uint32_t tokenId);
     virtual int RegisterObserver(const Uri &uri,
         sptr<IDataAbilityObserver> dataObserver, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
         DataObsOption opt = DataObsOption()) override;
@@ -66,6 +66,7 @@ public:
         DataObsOption opt = DataObsOption()) override;
     virtual int NotifyChangeFromExtension(const Uri &uri, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
         DataObsOption opt = DataObsOption()) override;
+    virtual int CheckTrusts(uint32_t consumerToken, uint32_t providerToken) override;
     virtual Status RegisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
         bool isDescendants, DataObsOption opt = DataObsOption()) override;
     virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
@@ -98,18 +99,11 @@ private:
     static bool IsDataMgrService(uint32_t tokenId, int32_t uid);
     int32_t RegisterObserverInner(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, int32_t userId,
         DataObsOption opt, bool isExtension);
-    std::pair<Status, std::string> GetUriPermission(Uri &uri, bool isRead, ObserverInfo &info);
-    int32_t VerifyDataShareExtension(Uri &uri, ObserverInfo &info);
     int32_t VerifyDataSharePermission(Uri &uri, bool isRead, ObserverInfo &info);
-    Status VerifyDataSharePermissionInner(Uri &uri, bool isRead, ObserverInfo &info);
+    int32_t VerifyDataSharePermissionInner(Uri &uri, bool isRead, ObserverInfo &info);
     int32_t NotifyChangeInner(Uri &uri, int32_t userId,
         DataObsOption opt, bool isExtension);
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId) override;
-    bool IsTaskOverLimit();
-    std::pair<Status, std::vector<NotifyInfo>> MakeNotifyInfos(ChangeInfo &changes, DataObsOption opt,
-        uint32_t tokenId, int32_t userId);
-    void SubmitNotifyChangeTask(Uri &uri, int32_t userId, std::string readPermission,
-        ObserverInfo &info);
 private:
     static constexpr std::uint32_t TASK_COUNT_MAX = 50;
     ffrt::mutex taskCountMutex_;

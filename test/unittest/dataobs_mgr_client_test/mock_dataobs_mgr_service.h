@@ -86,6 +86,7 @@ public:
     MOCK_METHOD4(RegisterObserverFromExtension, int(const Uri&, sptr<IDataAbilityObserver>,
         int32_t userId, DataObsOption opt));
     MOCK_METHOD3(NotifyChangeFromExtension, int(const Uri&, int32_t userId, DataObsOption opt));
+    MOCK_METHOD2(CheckTrusts, int(uint32_t consumerToken, uint32_t providerToken));
 
     void OnStart() {}
     void OnStop() {}
