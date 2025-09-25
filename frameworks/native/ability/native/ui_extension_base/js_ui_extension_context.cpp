@@ -64,9 +64,11 @@ const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
 } // namespace
 
 static std::map<UIExtensionConnectionKey, sptr<JSUIExtensionConnection>, key_compare> g_connects;
+std::recursive_mutex gConnectsLock_;
 static int64_t g_serialNumber = 0;
 void RemoveConnection(int64_t connectId)
 {
+    std::lock_guard<std::recursive_mutex> lock(gConnectsLock_);
     auto item = std::find_if(g_connects.begin(), g_connects.end(),
     [&connectId](const auto &obj) {
         return connectId == obj.first.id;
@@ -85,6 +87,7 @@ void RemoveConnection(int64_t connectId)
 void FindConnection(AAFwk::Want& want, sptr<JSUIExtensionConnection>& connection, int64_t& connectId)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "Disconnect ability enter, connection:%{public}" PRId64, connectId);
+    std::lock_guard<std::recursive_mutex> lock(gConnectsLock_);
     auto item = std::find_if(g_connects.begin(),
         g_connects.end(),
         [&connectId](const auto &obj) {
@@ -101,6 +104,7 @@ void FindConnection(AAFwk::Want& want, sptr<JSUIExtensionConnection>& connection
 
 bool CheckConnectionParam(napi_env env, napi_value value, sptr<JSUIExtensionConnection>& connection, AAFwk::Want& want)
 {
+    std::lock_guard<std::recursive_mutex> lock(gConnectsLock_);
     if (!CheckTypeForNapiValue(env, value, napi_object)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "get object failed");
         return false;
