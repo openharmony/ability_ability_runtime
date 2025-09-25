@@ -56,16 +56,6 @@ void DataObsMgrInnerExtTest::TearDownTestCase(void) {}
 void DataObsMgrInnerExtTest::SetUp() {}
 void DataObsMgrInnerExtTest::TearDown() {}
 
-std::vector<NotifyInfo> MakeDefaultNotifyInfo(int count)
-{
-    std::vector<NotifyInfo> infos;
-    for (int i = 0; i < count; i++) {
-        NotifyInfo info("noPermission", false);
-        infos.push_back(info);
-    }
-    return infos;
-}
-
 void DataObsMgrInnerExtTest::RegisterObserverUtil(std::shared_ptr<DataObsMgrInnerExt> &dataObsMgrInnerExt, Uri &uri,
     const sptr<IDataAbilityObserver> &callback, uint32_t times, bool isFuzzy)
 {
@@ -131,19 +121,18 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0100,
     ObserverInfo info(0, 0, 0, USER_TEST, false);
     EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer, info), SUCCESS);
 
-    std::vector<NotifyInfo> infos = MakeDefaultNotifyInfo(1);
     ChangeInfo changeInfo = { ChangeInfo::ChangeType::OTHER, {uri1} };
-    dataObsMgrInnerExt->HandleNotifyChange(changeInfo, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange(changeInfo, USER_TEST);
     EXPECT_TRUE(ChangeInfoEqual(observer->changeInfo_, changeInfo));
 
     changeInfo.uris_ = {uri1};
     observer->ReSet();
-    dataObsMgrInnerExt->HandleNotifyChange(changeInfo, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange(changeInfo, USER_TEST);
     EXPECT_TRUE(ChangeInfoEqual(observer->changeInfo_, changeInfo));
 
     changeInfo.uris_ = {uri2};
     observer->ReSet();
-    dataObsMgrInnerExt->HandleNotifyChange(changeInfo, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange(changeInfo, USER_TEST);
     EXPECT_TRUE(ChangeInfoEqual(observer->changeInfo_, {}));
 }
 
@@ -168,16 +157,15 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0200,
     RegisterObserverUtil(dataObsMgrInnerExt, uri2, observer, DataObsMgrInnerExt::OBS_NUM_MAX - 1, false);
     RegisterObserverUtil(dataObsMgrInnerExt, uri3, observer, DataObsMgrInnerExt::OBS_NUM_MAX, false);
 
-    std::vector<NotifyInfo> infos = MakeDefaultNotifyInfo(1);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer->changeInfo_.uris_, { uri1 }));
 
     observer->ReSet();
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri2 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri2 } }, USER_TEST);
     EXPECT_EQ(observer->onChangeCall_, DataObsMgrInnerExt::OBS_NUM_MAX - 1);
 
     observer->ReSet();
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri3 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri3 } }, USER_TEST);
     EXPECT_EQ(observer->onChangeCall_, DataObsMgrInnerExt::OBS_NUM_MAX);
 }
 
@@ -210,8 +198,7 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0300,
     EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri3, observer3, info), SUCCESS);
     EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri3, observer1, info), SUCCESS);
 
-    std::vector<NotifyInfo> infos = MakeDefaultNotifyInfo(1);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer1->changeInfo_.uris_, { uri1 }));
     EXPECT_TRUE(UrisEqual(observer2->changeInfo_.uris_, { uri1 }));
     EXPECT_TRUE(UrisEqual(observer3->changeInfo_.uris_, {}));
@@ -219,8 +206,7 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0300,
     observer1->ReSet();
     observer2->ReSet();
     observer3->ReSet();
-    std::vector<NotifyInfo> infos2 = MakeDefaultNotifyInfo(2);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri2, uri3 } }, USER_TEST, infos2);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri2, uri3 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer1->changeInfo_.uris_, { uri3 }));
     EXPECT_TRUE(UrisEqual(observer2->changeInfo_.uris_, { uri2 }));
     EXPECT_TRUE(UrisEqual(observer3->changeInfo_.uris_, { uri2, uri3 }));
@@ -251,14 +237,12 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0400,
     sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
     EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer, info, true), SUCCESS);
 
-    std::vector<NotifyInfo> infos = MakeDefaultNotifyInfo(1);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer->changeInfo_.uris_, { uri1 }));
 
     observer->ReSet();
-    std::vector<NotifyInfo> infos4 = MakeDefaultNotifyInfo(4);
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT,
-            { uri12, uri123, uri14, uri2 } }, USER_TEST, infos4);
+            { uri12, uri123, uri14, uri2 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer->changeInfo_.uris_, { uri12, uri123, uri14 }));
 }
 
@@ -289,14 +273,12 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0500,
     RegisterObserverUtil(dataObsMgrInnerExt, uri1, observer, 1, true);
     RegisterObserverUtil(dataObsMgrInnerExt, uri14, observer, 2, true);
 
-    std::vector<NotifyInfo> infos = MakeDefaultNotifyInfo(1);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer->changeInfo_.uris_, { uri1 }));
 
     observer->ReSet();
-    std::vector<NotifyInfo> infos4 = MakeDefaultNotifyInfo(4);
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT,
-        { uri14, uri145, uri12, uri123 } }, USER_TEST, infos4);
+        { uri14, uri145, uri12, uri123 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer->changeInfo_.uris_, { uri14, uri14, uri14, uri145, uri145, uri145, uri12, uri123 }));
 }
 
@@ -329,16 +311,14 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0600,
     sptr<MockDataAbilityObserverStub> observer2(new (std::nothrow) MockDataAbilityObserverStub());
     EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri14, observer2, info, true), SUCCESS);
 
-    std::vector<NotifyInfo> infos = MakeDefaultNotifyInfo(1);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer1->changeInfo_.uris_, { uri1 }));
     EXPECT_TRUE(UrisEqual(observer2->changeInfo_.uris_, {}));
 
     observer1->ReSet();
     observer2->ReSet();
-    std::vector<NotifyInfo> infos4 = MakeDefaultNotifyInfo(4);
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT,
-        { uri14, uri145, uri12, uri123 } }, USER_TEST, infos4);
+        { uri14, uri145, uri12, uri123 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer1->changeInfo_.uris_, { uri14, uri145, uri12, uri123, uri123 }));
     EXPECT_TRUE(UrisEqual(observer2->changeInfo_.uris_, { uri14, uri145 }));
 }
@@ -372,16 +352,14 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0700,
     EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri14, observer2, info, true), SUCCESS);
     EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri14, observer2, info, false), SUCCESS);
 
-    std::vector<NotifyInfo> infos = MakeDefaultNotifyInfo(1);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer1->changeInfo_.uris_, { uri1 }));
     EXPECT_TRUE(UrisEqual(observer2->changeInfo_.uris_, {}));
 
     observer1->ReSet();
     observer2->ReSet();
-    std::vector<NotifyInfo> infos4 = MakeDefaultNotifyInfo(4);
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT,
-            { uri14, uri145, uri12, uri123 } }, USER_TEST, infos4);
+            { uri14, uri145, uri12, uri123 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer1->changeInfo_.uris_, { uri14, uri145, uri12, uri123 }));
     EXPECT_TRUE(UrisEqual(observer2->changeInfo_.uris_, { uri14, uri14, uri145 }));
 }
@@ -479,13 +457,12 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleUnregisterObserver_010
     ObserverInfo info(0, 0, 0, USER_TEST, false);
     sptr<MockDataAbilityObserverStub> observer1(new (std::nothrow) MockDataAbilityObserverStub());
     EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, info, true), SUCCESS);
-    std::vector<NotifyInfo> infos = MakeDefaultNotifyInfo(1);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_TRUE(UrisEqual(observer1->changeInfo_.uris_, { uri1 }));
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 1);
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri1, observer1), SUCCESS);
     observer1->ReSet();
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_EQ(observer1->onChangeCall_, 0);
 }
 
@@ -515,13 +492,13 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleUnregisterObserver_020
     EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer, info, false), SUCCESS);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 1);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.find(observer)->second->ref, 3);
-    std::vector<NotifyInfo> infos = MakeDefaultNotifyInfo(1);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST, infos);
+
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri1, observer), SUCCESS);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 0);
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri1, observer), SUCCESS);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 0);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1 } }, USER_TEST);
     EXPECT_EQ(observer->onChangeCall_, 2);
 }
 
@@ -563,15 +540,14 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleUnregisterObserver_030
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 2);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.find(observer2)->second->ref, 2);
 
-    std::vector<NotifyInfo> infos = MakeDefaultNotifyInfo(1);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri135 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri135 } }, USER_TEST);
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri13, observer2), SUCCESS);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri135 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri135 } }, USER_TEST);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 1);
 
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri13, observer), SUCCESS);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 1);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri13 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri13 } }, USER_TEST);
 
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri134, observer), SUCCESS);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 0);
@@ -609,14 +585,13 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_RegisterAndUnRegister_0100, 
     EXPECT_EQ(obsRecipientRef1->second->ref, 52);
     EXPECT_TRUE(dataObsMgrInnerExt->obsRecipientRefs.find(observer2) == dataObsMgrInnerExt->obsRecipientRefs.end());
 
-    std::vector<NotifyInfo> infos = MakeDefaultNotifyInfo(2);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST);
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri1, observer1), SUCCESS);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST);
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri2, observer1), SUCCESS);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST);
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri2, observer2), SUCCESS);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST, infos);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST);
     EXPECT_TRUE(dataObsMgrInnerExt->obsRecipientRefs.find(observer1) == dataObsMgrInnerExt->obsRecipientRefs.end());
     EXPECT_TRUE(dataObsMgrInnerExt->obsRecipientRefs.find(observer2) == dataObsMgrInnerExt->obsRecipientRefs.end());
     EXPECT_EQ(observer1->onChangeCall_, 51);
@@ -654,14 +629,13 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_RegisterAndUnRegister_0200, 
     EXPECT_EQ(obsRecipientRef1->second->ref, 21);
     EXPECT_EQ(obsRecipientRef2->second->ref, 32);
 
-    std::vector<NotifyInfo> infos2 = MakeDefaultNotifyInfo(2);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST, infos2);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST);
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri1, observer1), SUCCESS);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST, infos2);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST);
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri2, observer1), SUCCESS);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST, infos2);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST);
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri2, observer2), SUCCESS);
-    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST, infos2);
+    dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri1, uri2 } }, USER_TEST);
     EXPECT_TRUE(dataObsMgrInnerExt->obsRecipientRefs.find(observer1) == dataObsMgrInnerExt->obsRecipientRefs.end());
     EXPECT_TRUE(dataObsMgrInnerExt->obsRecipientRefs.find(observer2) == dataObsMgrInnerExt->obsRecipientRefs.end());
     EXPECT_EQ(observer1->onChangeCall_, 40);
@@ -705,16 +679,15 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleUnregisterObserverAll_
     RegisterObserverUtil(dataObsMgrInnerExt, uri134, observer2, 10, false);
     RegisterObserverUtil(dataObsMgrInnerExt, uri135, observer2, 5, false);
 
-    std::vector<NotifyInfo> infos5 = MakeDefaultNotifyInfo(5);
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT,
-        { uri1, uri12, uri13, uri134, uri135 } }, USER_TEST, infos5);
+        { uri1, uri12, uri13, uri134, uri135 } }, USER_TEST);
     EXPECT_EQ(observer1->onChangeCall_, 95);
     EXPECT_EQ(observer2->onChangeCall_, 205);
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(observer1), SUCCESS);
     observer1->ReSet();
     observer2->ReSet();
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT,
-        { uri1, uri12, uri13, uri134, uri135 } }, USER_TEST, infos5);
+        { uri1, uri12, uri13, uri134, uri135 } }, USER_TEST);
     EXPECT_EQ(observer1->onChangeCall_, 0);
     EXPECT_EQ(observer2->onChangeCall_, 205);
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(observer2), SUCCESS);
@@ -754,10 +727,9 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_DeathRecipient_0100, TestSiz
     RegisterObserverUtil(dataObsMgrInnerExt, uri134, observer2, 10, false);
     RegisterObserverUtil(dataObsMgrInnerExt, uri135, observer2, 5, false);
 
-    std::vector<NotifyInfo> infos5 = MakeDefaultNotifyInfo(5);
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientRefs.size(), 2);
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT,
-        { uri1, uri12, uri13, uri134, uri135 } }, USER_TEST, infos5);
+        { uri1, uri12, uri13, uri134, uri135 } }, USER_TEST);
     EXPECT_EQ(observer1->onChangeCall_, 95);
     EXPECT_EQ(observer2->onChangeCall_, 205);
 
@@ -768,7 +740,7 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_DeathRecipient_0100, TestSiz
     observer1->ReSet();
     observer2->ReSet();
     dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT,
-        { uri1, uri12, uri13, uri134, uri135 } }, USER_TEST, infos5);
+        { uri1, uri12, uri13, uri134, uri135 } }, USER_TEST);
     EXPECT_EQ(observer1->onChangeCall_, 0);
     EXPECT_EQ(observer2->onChangeCall_, 205);
     dataObsMgrInnerExt->OnCallBackDied(observer2->AsObject());
@@ -869,9 +841,8 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0800,
     observer1->Wait();
     observer2->Wait();
 
-    std::vector<NotifyInfo> infos2 = MakeDefaultNotifyInfo(2);
     EXPECT_EQ(dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT,
-        { uris[0], uris[1] } }, USER_TEST, infos2), SUCCESS);
+        { uris[0], uris[1] } }, USER_TEST), SUCCESS);
     EXPECT_EQ(observer1->onChangeCall_, 10);
     EXPECT_EQ(observer2->onChangeCall_, 10);
     dataObsMgrInnerExt->HandleUnregisterObserver(observer1);
@@ -879,7 +850,7 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0800,
     observer1->ReSet();
     observer2->ReSet();
     EXPECT_EQ(dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT,
-        { uris[2], uris[3] } }, USER_TEST, infos2), SUCCESS);
+        { uris[2], uris[3] } }, USER_TEST), SUCCESS);
     EXPECT_EQ(observer1->onChangeCall_, 0);
     EXPECT_EQ(observer2->onChangeCall_, 10);
 }
@@ -908,13 +879,10 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleNotifyChange_0100, Tes
         ObserverInfo info(0, 0, 0, USER_TEST, false);
         EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri, observer2, info), SUCCESS);
     };
-    std::vector<NotifyInfo> infos = MakeDefaultNotifyInfo(1);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri } },
-        USER_TEST, infos), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri } }, USER_TEST), SUCCESS);
     EXPECT_EQ(observer1->onChangeCall_, 1);
     observer1->func = nullptr;
-    EXPECT_EQ(dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri } },
-        USER_TEST, infos), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uri } }, USER_TEST), SUCCESS);
     EXPECT_EQ(observer2->onChangeCall_, 1);
 }
 
