@@ -6696,45 +6696,41 @@ void AppMgrServiceInner::SaveBrowserChannel(const pid_t hostPid, sptr<IRemoteObj
 
 int32_t AppMgrServiceInner::GenerateUidByUserId(int32_t userId, int32_t id)
 {
-    return uid = userId * BASE_USER_RANGE + id % BASE_USER_RANGE;
+    return userId * BASE_USER_RANGE + id;
 }
 
-bool AppMgrServiceInner::GenerateChildProcessIsolationId(int32_t &uid)
+bool AppMgrServiceInner::GenerateIsolationId(std::unordered_set<int32_t> set, int32_t beginId, int32_t endId,
+    int32_t &isolationId, int32_t &lastIsolationId)
 {
-    std::lock_guard<ffrt::mutex> lock(childProcessIsolationIdSetLock_);
-    int32_t id = lastChildProcessIsolationId_ + 1;
-    int32_t childProcessIsolationId = Constants::INVALID_UID;
+    int32_t id = lastIsolationId + 1;
     bool needSecondScan = true;
-    if (id > END_ID_FOR_CHILD_PROCESS_ISOLATION) {
-        id = START_ID_FOR_CHILD_PROCESS_ISOLATION;
+    if (id > endId) {
+        id = beginId;
         needSecondScan = false;
     }
 
-    if (childProcessIsolationIdSet_.empty()) {
-        childProcessIsolationId = id;
-        childProcessIsolationIdSet_.insert(childProcessIsolationId);
-        lastChildProcessIsolationId_ = childProcessIsolationId;
-        uid = GenerateUidByUserId(childProcessIsolationId);
+    if (set.empty()) {
+        isolationId = id;
+        set.insert(isolationId);
+        lastIsolationId = isolationId;
         return true;
     }
 
-    for (int32_t i = id; i <= END_UID_FOR_CHILD_PROCESS_ISOLATION; i++) {
-        if (childProcessIsolationIdSet_.find(i) == childProcessIsolationIdSet_.end()) {
-            childProcessIsolationId = i;
-            childProcessIsolationIdSet_.insert(childProcessIsolationId);
-            lastChildProcessIsolationId_ = childProcessIsolationId;
-            uid = GenerateUidByUserId(childProcessIsolationId);
+    for (int32_t i = id; i <= endId; i++) {
+        if (set.find(i) == set.end()) {
+            isolationId = i;
+            set.insert(isolationId);
+            lastIsolationId = isolationId;
             return true;
         }
     }
 
     if (needSecondScan) {
-        for (int32_t i = START_UID_FOR_CHILD_PROCESS_ISOLATION; i <= lastChildProcessIsolationId_; i++) {
-            if (childProcessIsolationIdSet_.find(i) == childProcessIsolationIdSet_.end()) {
-                childProcessIsolationId = i;
-                childProcessIsolationIdSet_.insert(childProcessIsolationId);
-                lastChildProcessIsolationId_ = childProcessIsolationId;
-                uid = GenerateUidByUserId(childProcessIsolationId);
+        for (int32_t i = beginId; i <= lastIsolationId; i++) {
+            if (set.find(i) == set.end()) {
+                isolationId = i;
+                set.insert(isolationId);
+                lastIsolationId = isolationId;
                 return true;
             }
         }
@@ -8841,19 +8837,29 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
     pid_t pid = 0;
     if (options.isolationMode && options.isolationUid) {
         int32_t userId = -1;
-        errCode = osAccountMgr->GetOsAccountLocalIdFromUid(appRecord->GetUid(), userId);
+        auto osAccountMgr = DelayedSingleton<OsAccountManagerWrapper>::GetInstance();
+        if (osAccountMgr == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "osAccountMgr is nullptr");
+            return ERR_INVALID_VALUE;
+        }
+        int32_t errCode = osAccountMgr->GetOsAccountLocalIdFromUid(appRecord->GetUid(), userId);
         if (errCode != ERR_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "GetOsAccountLocalIdFromUid failed,errcode=%{public}d", errCode);
             return errCode;
         }
         int32_t uid = Constants::INVALID_UID;
-        if (!GenerateChildProcessIsolationId(uid)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "generate uid fail");
-            AppMgrEventUtil::SendChildProcessStartFailedEvent(childProcessRecord,
-                ProcessStartFailedReason::GENERATE_RENDER_UID_FAILED, ERR_INVALID_OPERATION);
-            return ERR_INVALID_OPERATION;
+        int32_t isolationId = Constants::INVALID_UID;
+        {
+            std::lock_guard<ffrt::mutex> lock(childProcessIsolationIdSetLock_);
+            if (!GenerateIsolationId(childProcessIsolationIdSet_, START_ID_FOR_CHILD_PROCESS_ISOLATION, 
+                END_ID_FOR_CHILD_PROCESS_ISOLATION, isolationId, lastChildProcessIsolationId_)) {
+                TAG_LOGE(AAFwkTag::APPMGR, "generate uid fail");
+                AppMgrEventUtil::SendChildProcessStartFailedEvent(childProcessRecord,
+                    ProcessStartFailedReason::GENERATE_RENDER_UID_FAILED, ERR_INVALID_OPERATION);
+                return ERR_INVALID_OPERATION;
+            }
+            uid = GenerateUidByUserId(userId, isolationId);
         }
-        
         startMsg.uid = uid;
         startMsg.gid = uid;
         TAG_LOGI(AAFwkTag::APPMGR, "generate uid and gid: %{public}d", uid);

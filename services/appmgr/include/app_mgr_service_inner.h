@@ -1647,7 +1647,8 @@ private:
 
     int32_t GenerateUidByUserId(int32_t userId, int32_t id);
 
-    bool GenerateChildProcessIsolationId(int32_t &userId);
+    bool GenerateIsolationId(std::unordered_set<int32_t> set, int32_t beginId, int32_t endId,
+        int32_t &isolationId, int32_t &lastIsolationId);
 
     bool GenerateRenderUid(int32_t &renderUid);
 
@@ -2188,7 +2189,7 @@ private:
     std::map<std::string, bool> waitingDebugBundleList_;
     ffrt::mutex waitingDebugLock_;
     std::unordered_set<int32_t> renderUidSet_;
-    std::unordered_set<in32_t> childProcessIsolationIdSet_;
+    std::unordered_set<int32_t> childProcessIsolationIdSet_;
     std::string supportIsolationMode_ {"false"};
     std::string supportServiceExtMultiProcess_ {"false"};
     sptr<IAbilityDebugResponse> abilityDebugResponse_;
