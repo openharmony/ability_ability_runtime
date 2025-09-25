@@ -32,7 +32,20 @@ void EtsInsightIntentContext::Finalizer(ani_env *env, void *data, void *hint)
     std::unique_ptr<EtsInsightIntentContext>(static_cast<EtsInsightIntentContext*>(data));
 }
 
-ani_object EtsInsightIntentContext::StartAbiitySync(ani_env *env, ani_object aniObj, ani_object wantObj)
+void EtsInsightIntentContext::StartAbilitySyncCheck(ani_env *env, ani_object aniObj)
+{
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null env");
+        return;
+    }
+    auto context = GetContext(env, aniObj);
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::INTENT, "null context");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+    }
+}
+
+ani_object EtsInsightIntentContext::StartAbilitySync(ani_env *env, ani_object aniObj, ani_object wantObj)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto context = GetContext(env, aniObj);
@@ -130,7 +143,9 @@ std::unique_ptr<AppExecFwk::ETSNativeReference> CreateEtsInsightIntentContext(an
     }
     std::array functions = {
         ani_native_function { "nativeStartAbilitySync", nullptr,
-            reinterpret_cast<void*>(EtsInsightIntentContext::StartAbiitySync) },
+            reinterpret_cast<void*>(EtsInsightIntentContext::StartAbilitySync) },
+        ani_native_function { "nativeStartAbilitySyncCheck", nullptr,
+            reinterpret_cast<void*>(EtsInsightIntentContext::StartAbilitySyncCheck) },
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
         if (status != ANI_ALREADY_BINDED) {

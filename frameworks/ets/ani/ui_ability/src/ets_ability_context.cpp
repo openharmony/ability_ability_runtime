@@ -139,6 +139,18 @@ void RemoveConnection(int32_t connectId)
         TAG_LOGD(AAFwkTag::CONTEXT, "remove connection ability not exist");
     }
 }
+
+bool CheckUrl(std::string &urlValue)
+{
+    if (urlValue.empty()) {
+        return false;
+    }
+    Uri uri = Uri(urlValue);
+    if (uri.GetScheme().empty() || uri.GetHost().empty()) {
+        return false;
+    }
+    return true;
+}
 } // namespace
 
 EtsAbilityContext::~EtsAbilityContext()
@@ -365,6 +377,21 @@ void EtsAbilityContext::OpenLink(ani_env *env, ani_object aniObj, ani_string ani
         !isCallbackUndefined);
 }
 
+void EtsAbilityContext::OpenLinkCheck(ani_env *env, ani_object aniObj, ani_string aniLink)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "OpenLinkCheck called");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env or aniObj");
+        return;
+    }
+    std::string link("");
+    if (!AppExecFwk::GetStdString(env, aniLink, link) || !CheckUrl(link)) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid link params");
+        EtsErrorUtil::ThrowInvalidParamError(
+            env, "Parse param link or openLinkOptions failed, link must be string, openLinkOptions must be options.");
+    }
+}
+
 bool EtsAbilityContext::IsTerminating(ani_env *env, ani_object aniObj)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "IsTerminating called");
@@ -481,6 +508,26 @@ void EtsAbilityContext::OpenAtomicService(
         return;
     }
     etsContext->OnOpenAtomicService(env, aniObj, aniAppId, callbackObj, optionsObj);
+}
+
+void EtsAbilityContext::OpenAtomicServiceCheck(ani_env *env, ani_object aniObj)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "OpenAtomicServiceCheck called");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env or aniObj");
+        return;
+    }
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
+    }
+    auto context = etsContext->context_.lock();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null context");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+    }
 }
 
 ani_long EtsAbilityContext::ConnectServiceExtensionAbilityWithAccount(ani_env *env, ani_object aniObj,
@@ -622,6 +669,21 @@ void EtsAbilityContext::SetAbilityInstanceInfo(ani_env *env, ani_object aniObj, 
     etsContext->OnSetAbilityInstanceInfo(env, aniObj, labelObj, iconObj, callback);
 }
 
+void EtsAbilityContext::SetAbilityInstanceInfoCheck(ani_env *env, ani_object aniObj, ani_object iconObj)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "SetAbilityInstanceInfoCheck called");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env or aniObj");
+        return;
+    }
+    auto icon = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, iconObj);
+    if (icon == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "parse icon failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse icon failed.");
+        return;
+    }
+}
+
 void EtsAbilityContext::SetMissionIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj,
     ani_object callbackObj)
 {
@@ -632,6 +694,22 @@ void EtsAbilityContext::SetMissionIcon(ani_env *env, ani_object aniObj, ani_obje
         return;
     }
     etsContext->OnSetMissionIcon(env, aniObj, pixelMapObj, callbackObj);
+}
+
+void EtsAbilityContext::SetMissionIconCheck(
+    ani_env *env, ani_object aniObj, ani_object pixelMapObj)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "SetMissionIconCheck called");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env or aniObj");
+        return;
+    }
+    auto icon = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapObj);
+    if (icon == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "parse icon failed");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return;
+    }
 }
 #endif
 
@@ -713,7 +791,7 @@ void EtsAbilityContext::OnStartAbility(
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     AAFwk::Want want;
-    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
+    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {	
         EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, must be a Want");
         return;
     }
@@ -797,21 +875,21 @@ void EtsAbilityContext::OnStartAbilityForResult(
 
 ani_object EtsAbilityContext::StartAbilityByCall(ani_env *env, ani_object aniObj, ani_object wantObj)
 {
-    TAG_LOGI(AAFwkTag::UIABILITY, "StartAbilityByCall");
+    TAG_LOGI(AAFwkTag::CONTEXT, "StartAbilityByCall");
     auto etsContext = GetEtsAbilityContext(env, aniObj);
     if (etsContext == nullptr) {
         TAG_LOGE(AAFwkTag::CONTEXT, "null etsContext");
     }
     auto context = etsContext ? etsContext->context_.lock() : nullptr;
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "GetAbilityContext is nullptr");
+        TAG_LOGE(AAFwkTag::CONTEXT, "GetAbilityContext is nullptr");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
         return nullptr;
     }
 
     AAFwk::Want want;
     if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "parse want failed");
+        TAG_LOGE(AAFwkTag::CONTEXT, "parse want failed");
         EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
         return nullptr;
     }
@@ -820,7 +898,7 @@ ani_object EtsAbilityContext::StartAbilityByCall(ani_env *env, ani_object aniObj
     CallUtil::GenerateCallerCallBack(callData, callerCallBack);
     auto ret = context->StartAbilityByCall(want, callerCallBack, -1);
     if (ret != 0) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "startAbility failed");
+        TAG_LOGE(AAFwkTag::CONTEXT, "startAbility failed");
         EtsErrorUtil::ThrowErrorByNativeErr(env, ret);
         return nullptr;
     }
@@ -1037,18 +1115,6 @@ void EtsAbilityContext::OnStopServiceExtensionAbility(ani_env *env, ani_object a
     }
     aniObject = EtsErrorUtil::CreateErrorByNativeErr(env, static_cast<int32_t>(ret));
     AppExecFwk::AsyncCallback(env, callbackobj, aniObject, nullptr);
-}
-
-static bool CheckUrl(std::string &urlValue)
-{
-    if (urlValue.empty()) {
-        return false;
-    }
-    Uri uri = Uri(urlValue);
-    if (uri.GetScheme().empty() || uri.GetHost().empty()) {
-        return false;
-    }
-    return true;
 }
 
 void EtsAbilityContext::OnOpenLink(ani_env *env, ani_object aniObj, ani_string aniLink, ani_object myCallbackobj,
@@ -1732,16 +1798,16 @@ bool EtsAbilityContext::IsInstanceOf(ani_env *env, ani_object aniObj)
     ani_class cls {};
     ani_status status = ANI_ERROR;
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env");
         return false;
     }
     if ((status = env->FindClass(UI_ABILITY_CONTEXT_CLASS_NAME, &cls)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
         return false;
     }
     ani_boolean isInstanceOf = false;
     if ((status = env->Object_InstanceOf(aniObj, cls, &isInstanceOf)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "status: %{public}d", status);
+        TAG_LOGE(AAFwkTag::CONTEXT, "status: %{public}d", status);
         return false;
     }
     return isInstanceOf;
@@ -1749,9 +1815,9 @@ bool EtsAbilityContext::IsInstanceOf(ani_env *env, ani_object aniObj)
 
 void EtsAbilityContext::NativeOnSetRestoreEnabled(ani_env *env, ani_object aniObj, ani_boolean aniEnabled)
 {
-    TAG_LOGD(AAFwkTag::UIABILITY, "NativeOnSetRestoreEnabled");
+    TAG_LOGD(AAFwkTag::CONTEXT, "NativeOnSetRestoreEnabled");
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "null env");
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env");
         return;
     }
 
@@ -1980,6 +2046,20 @@ void EtsAbilityContext::StartAbilityForResultWithAccount(ani_env *env, ani_objec
     etsContext->OnStartAbilityForResultWithAccount(env, aniObj, wantObj, etsAccountId, nullptr, callback);
 }
 
+void EtsAbilityContext::StartAbilityForResultWithAccountCheck(ani_env *env, ani_object aniObj)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "StartAbilityForResultWithAccountCheck called");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null env or aniObj");
+        return;
+    }
+    if (!AppExecFwk::CheckCallerIsSystemApp()) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "non system app forbidden to call");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return;
+    }
+}
+
 void EtsAbilityContext::StartAbilityForResultWithAccountVoid(ani_env *env, ani_object aniObj, ani_object wantObj,
     ani_int etsAccountId, ani_object startOptionsObj, ani_object callback)
 {
@@ -2015,7 +2095,7 @@ void EtsAbilityContext::OnStartAbilityWithAccount(
     ErrCode innerErrCode = ERR_OK;
     auto context = context_.lock();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "context null");
+        TAG_LOGE(AAFwkTag::CONTEXT, "context null");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
         return;
     }
@@ -2090,24 +2170,26 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void *>(EtsAbilityContext::TerminateSelfWithResult) },
             ani_native_function { "nativeStartAbilityByCallSync",
                 "C{@ohos.app.ability.Want.Want}:C{@ohos.app.ability.UIAbility.Caller}",
-                reinterpret_cast<void*>(EtsAbilityContext::StartAbilityByCall) },
+                reinterpret_cast<void *>(EtsAbilityContext::StartAbilityByCall) },
             ani_native_function { "nativeReportDrawnCompletedSync", "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<ani_int *>(EtsAbilityContext::ReportDrawnCompleted) },
             ani_native_function { "nativeStartServiceExtensionAbility",
                 "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
-                reinterpret_cast<void*>(EtsAbilityContext::StartServiceExtensionAbility) },
+                reinterpret_cast<void *>(EtsAbilityContext::StartServiceExtensionAbility) },
             ani_native_function { "nativeOpenLink", SIGNATURE_OPEN_LINK,
-                reinterpret_cast<void*>(EtsAbilityContext::OpenLink) },
+                reinterpret_cast<void *>(EtsAbilityContext::OpenLink) },
+            ani_native_function { "nativeOpenLinkCheck", "C{std.core.String}:",
+                reinterpret_cast<void *>(EtsAbilityContext::OpenLinkCheck) },
             ani_native_function { "nativeIsTerminating", ":z",
-                reinterpret_cast<void*>(EtsAbilityContext::IsTerminating) },
+                reinterpret_cast<void *>(EtsAbilityContext::IsTerminating) },
             ani_native_function { "nativeMoveAbilityToBackground", "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
-                reinterpret_cast<void*>(EtsAbilityContext::MoveAbilityToBackground) },
+                reinterpret_cast<void *>(EtsAbilityContext::MoveAbilityToBackground) },
             ani_native_function { "nativeRequestModalUIExtension",
                 "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
-                reinterpret_cast<void*>(EtsAbilityContext::RequestModalUIExtension) },
+                reinterpret_cast<void *>(EtsAbilityContext::RequestModalUIExtension) },
             ani_native_function { "nativeBackToCallerAbilityWithResult",
                 "C{ability.abilityResult.AbilityResult}C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
-                reinterpret_cast<void*>(EtsAbilityContext::BackToCallerAbilityWithResult) },
+                reinterpret_cast<void *>(EtsAbilityContext::BackToCallerAbilityWithResult) },
             ani_native_function { "nativeSetMissionLabel",
                 "C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void *>(EtsAbilityContext::SetMissionLabel) },
@@ -2117,27 +2199,29 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void *>(EtsAbilityContext::DisconnectServiceExtensionAbility) },
             ani_native_function {"nativeSetColorMode",
                 "C{@ohos.app.ability.ConfigurationConstant.ConfigurationConstant.ColorMode}:",
-                reinterpret_cast<void*>(EtsAbilityContext::SetColorMode)},
+                reinterpret_cast<void *>(EtsAbilityContext::SetColorMode)},
             ani_native_function { "nativeStartAbilityByTypeSync", SIGNATURE_START_ABILITY_BY_TYPE,
-                reinterpret_cast<void*>(EtsAbilityContext::StartAbilityByType) },
+                reinterpret_cast<void *>(EtsAbilityContext::StartAbilityByType) },
             ani_native_function { "nativeOpenAtomicService", SIGNATURE_OPEN_ATOMIC_SERVICE,
                 reinterpret_cast<void *>(EtsAbilityContext::OpenAtomicService) },
+            ani_native_function { "nativeOpenAtomicServiceCheck", ":V",
+                reinterpret_cast<void *>(EtsAbilityContext::OpenAtomicServiceCheck) },
             ani_native_function { "nativeOnSetRestoreEnabled", "z:",
-                reinterpret_cast<void*>(EtsAbilityContext::NativeOnSetRestoreEnabled) },
+                reinterpret_cast<void *>(EtsAbilityContext::NativeOnSetRestoreEnabled) },
             ani_native_function { "nativeConnectServiceExtensionAbilityWithAccount",
                 "C{@ohos.app.ability.Want.Want}iC{ability.connectOptions.ConnectOptions}:l",
-                reinterpret_cast<void*>(EtsAbilityContext::ConnectServiceExtensionAbilityWithAccount) },
+                reinterpret_cast<void *>(EtsAbilityContext::ConnectServiceExtensionAbilityWithAccount) },
             ani_native_function { "nativeStopServiceExtensionAbilityWithAccount",
                 "C{@ohos.app.ability.Want.Want}iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
-                reinterpret_cast<void*>(EtsAbilityContext::StopServiceExtensionAbilityWithAccount) },
+                reinterpret_cast<void *>(EtsAbilityContext::StopServiceExtensionAbilityWithAccount) },
             ani_native_function { "nativeStopServiceExtensionAbility",
                 "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
-                reinterpret_cast<void*>(EtsAbilityContext::StopServiceExtensionAbility) },
+                reinterpret_cast<void *>(EtsAbilityContext::StopServiceExtensionAbility) },
             ani_native_function { "nativeStartServiceExtensionAbilityWithAccount",
                 "C{@ohos.app.ability.Want.Want}iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
-                reinterpret_cast<void*>(EtsAbilityContext::StartServiceExtensionAbilityWithAccount) },
+                reinterpret_cast<void *>(EtsAbilityContext::StartServiceExtensionAbilityWithAccount) },
             ani_native_function { "nativeChangeAbilityVisibility", "zC{utils.AbilityUtils.AsyncCallbackWrapper}:",
-                reinterpret_cast<void*>(EtsAbilityContext::NativeChangeAbilityVisibility) },
+                reinterpret_cast<void *>(EtsAbilityContext::NativeChangeAbilityVisibility) },
             ani_native_function { "nativeConnectAppServiceExtensionAbility", SIGNATURE_CONNECT_SERVICE_EXTENSION,
                 reinterpret_cast<void *>(EtsAbilityContext::ConnectAppServiceExtensionAbility) },
             ani_native_function { "nativeDisconnectAppServiceExtensionAbility", SIGNATURE_DISCONNECT_SERVICE_EXTENSION,
@@ -2149,22 +2233,28 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void *>(EtsAbilityContext::StopAppServiceExtensionAbility) },
             ani_native_function { "nativeStartAbilityWithAccountSync", SIGNATURE_START_ABILITY_WITH_ACCOUNT,
-                reinterpret_cast<void*>(EtsAbilityContext::StartAbilityWithAccount) },
+                reinterpret_cast<void *>(EtsAbilityContext::StartAbilityWithAccount) },
             ani_native_function { "nativeStartAbilityWithAccountSync", SIGNATURE_START_ABILITY_WITH_ACCOUNT_OPTIONS,
-                reinterpret_cast<void*>(EtsAbilityContext::StartAbilityWithAccountAndOptions) },
+                reinterpret_cast<void *>(EtsAbilityContext::StartAbilityWithAccountAndOptions) },
 #ifdef SUPPORT_GRAPHICS
             ani_native_function { "nativeSetAbilityInstanceInfo",
                 "C{std.core.String}C{@ohos.multimedia.image.image.PixelMap}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
-                reinterpret_cast<void*>(EtsAbilityContext::SetAbilityInstanceInfo) },
+                reinterpret_cast<void *>(EtsAbilityContext::SetAbilityInstanceInfo) },
+            ani_native_function { "nativeSetAbilityInstanceInfoCheck", "C{@ohos.multimedia.image.image.PixelMap}:",
+                reinterpret_cast<void *>(EtsAbilityContext::SetAbilityInstanceInfoCheck) },
             ani_native_function { "nativeSetMissionIcon",
                 "C{@ohos.multimedia.image.image.PixelMap}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
-                reinterpret_cast<void*>(EtsAbilityContext::SetMissionIcon) },
+                reinterpret_cast<void *>(EtsAbilityContext::SetMissionIcon) },
+            ani_native_function { "nativeSetMissionIconCheck", "C{@ohos.multimedia.image.image.PixelMap}:",
+                reinterpret_cast<void *>(EtsAbilityContext::SetMissionIconCheck) },
 #endif
             ani_native_function { "nativeRevokeDelegator", "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void *>(EtsAbilityContext::RevokeDelegator) },
             ani_native_function { "nativeStartAbilityForResultWithAccount",
                 "C{@ohos.app.ability.Want.Want}iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void*>(EtsAbilityContext::StartAbilityForResultWithAccount) },
+            ani_native_function { "nativeStartAbilityForResultWithAccountCheck", ":V",
+                reinterpret_cast<void *>(EtsAbilityContext::StartAbilityForResultWithAccountCheck) },
             ani_native_function { "nativeStartAbilityForResultWithAccountVoid",
                 "C{@ohos.app.ability.Want.Want}iC{@ohos.app.ability.StartOptions.StartOptions}"
                 "C{utils.AbilityUtils.AsyncCallbackWrapper}:",

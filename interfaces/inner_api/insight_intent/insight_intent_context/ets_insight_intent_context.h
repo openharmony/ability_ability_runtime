@@ -42,7 +42,8 @@ public:
      *
      * @return result of StartAbility.
      */
-    static ani_object StartAbiitySync(ani_env *env, ani_object aniObj, ani_object wantObj);
+    static ani_object StartAbilitySync(ani_env *env, ani_object aniObj, ani_object wantObj);
+    static void StartAbilitySyncCheck(ani_env *env, ani_object aniObj);
     static EtsInsightIntentContext *GetContext(ani_env *env, ani_object aniObj);
 
 private:

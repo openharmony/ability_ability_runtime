@@ -24,6 +24,9 @@ import bundleManager from '@ohos.bundle.bundleManager';
 import _AppForegroundStateObserver from 'application.AppForegroundStateObserver';
 import { AbilityFirstFrameStateObserver as _AbilityFirstFrameStateObserver } from 'application.AbilityFirstFrameStateObserver';
 import { AbilityFirstFrameStateData as _AbilityFirstFrameStateData } from 'application.AbilityFirstFrameStateData';
+import { AbilityUtils } from './utils/AbilityUtils';
+
+const ERROR_CODE_INVALID_PARAM: int = 401;
 
 export default namespace appManager {
 loadLibrary("app_manager_ani.z")
@@ -88,6 +91,10 @@ export class KeepAliveBundleInfoInner implements KeepAliveBundleInfo {
 export native function nativePreloadApplication(callback: AsyncCallbackWrapper<void>, bundleName: string, userId: int,
     mode: PreloadMode, appIndex?: int): void;
 export function preloadApplication(bundleName: string, userId: int, mode: PreloadMode, appIndex?: int): Promise<void>{
+  if (mode !== PreloadMode.PRESS_DOWN) {
+    throw AbilityUtils.createBusinessError(
+      ERROR_CODE_INVALID_PARAM, 'Unsupported preloadMode, must be PreloadMode.PRESS_DOWN.');
+  }
    let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError | null)=>void):void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
         if (err == null || err.code == 0) {
@@ -151,8 +158,10 @@ export function getForegroundApplications(): Promise<Array<AppStateData>> {
     return p;
 }
 
+export native function nativeGetRunningMultiAppInfoCheck(bundleName: string): void;
 export native function nativeGetRunningMultiAppInfo(bundleName: string, callback: AsyncCallbackWrapper<RunningMultiAppInfo>): void;
 export function getRunningMultiAppInfo(bundleName: string): Promise<RunningMultiAppInfo> {
+    appManager.nativeGetRunningMultiAppInfoCheck(bundleName);
     let p = new Promise<RunningMultiAppInfo>((resolve:(data: RunningMultiAppInfo)=>void, reject:(err: BusinessError)=>void):void => {
       let myCall = new AsyncCallbackWrapper<RunningMultiAppInfo>((err: BusinessError | null, data: RunningMultiAppInfo | undefined)=>{
         if (err == null || err.code == 0) {
@@ -231,7 +240,7 @@ export function onApplicationStateChange(observer: ApplicationStateObserver, bun
 export native function nativeOff(type:string, observerId: int, callback: AsyncCallbackWrapper<void>) : void;
 export native function nativeOffApplicationStateCheck(observerId: int): void;
 export function offApplicationStateChange(observerId: int, callback: AsyncCallback<void>): void {
-    nativeOffApplicationStateCheck(observerId);
+    appManager.nativeOffApplicationStateCheck(observerId);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       appManager.nativeOff('applicationState', observerId, myCall);
@@ -239,7 +248,7 @@ export function offApplicationStateChange(observerId: int, callback: AsyncCallba
 }
 
 export function offApplicationStateChange(observerId: int): Promise<void> {
-    nativeOffApplicationStateCheck(observerId);
+    appManager.nativeOffApplicationStateCheck(observerId);
     let p:Promise<void> = new Promise<void>((resolve: (data:undefined)=>void, reject:(err: BusinessError | null)=>void):void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null)=>{
         if (err == null || err.code == 0) {

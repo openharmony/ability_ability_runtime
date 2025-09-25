@@ -201,6 +201,34 @@ void EtsWantAgent::GetWantAgent(ani_env *env, ani_object info, ani_object call)
     GetInstance().OnGetWantAgent(env, info, call);
 }
 
+void EtsWantAgent::TriggerCheck(ani_env *env, ani_object agent, ani_object triggerInfoObj)
+{
+    TAG_LOGD(AAFwkTag::WANTAGENT, "TriggerCheck called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "null env");
+        return;
+    }
+    WantAgent* pWantAgent = nullptr;
+    UnwrapWantAgent(env, agent, reinterpret_cast<void **>(&pWantAgent));
+    if (pWantAgent == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Parse pWantAgent failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse pWantAgent failed. Agent must be a WantAgent.");
+        return;
+    }
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
+    TriggerInfo triggerInfo;
+    int32_t ret = GetInstance().GetTriggerInfo(env, triggerInfoObj, triggerInfo);
+    if (ret != BUSINESS_ERROR_CODE_OK) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Get trigger info error");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Get trigger info error. TriggerInfo must be a TriggerInfo.");
+        return;
+    }
+    if (wantAgent->IsLocal()) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Trigger does not support localWantAgent");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Agent can not be local.");
+    }
+}
+
 void EtsWantAgent::Clean(ani_env *env, ani_object object)
 {
     TAG_LOGD(AAFwkTag::WANTAGENT, "Clean called");
@@ -656,15 +684,27 @@ ani_status BindNativeFunctions(ani_env *env)
         return status;
     }
     std::array functions = {
-        ani_native_function { "nativeGetBundleName", nullptr, reinterpret_cast<void *>(EtsWantAgent::GetBundleName) },
-        ani_native_function { "nativeGetUid", nullptr, reinterpret_cast<void *>(EtsWantAgent::GetUid) },
-        ani_native_function {
-            "nativeGetOperationType", nullptr, reinterpret_cast<void *>(EtsWantAgent::GetOperationType) },
-        ani_native_function { "nativeCancel", nullptr, reinterpret_cast<void *>(EtsWantAgent::Cancel) },
-        ani_native_function { "nativeEqual", nullptr, reinterpret_cast<void *>(EtsWantAgent::Equal) },
-        ani_native_function { "nativeTrigger", nullptr, reinterpret_cast<void *>(EtsWantAgent::Trigger) },
-        ani_native_function { "nativeGetWant", nullptr, reinterpret_cast<void *>(EtsWantAgent::GetWant) },
-        ani_native_function { "nativeGetWantAgent", nullptr, reinterpret_cast<void *>(EtsWantAgent::GetWantAgent) },
+        ani_native_function { "nativeGetBundleName", "Lstd/core/Object;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsWantAgent::GetBundleName) },
+        ani_native_function { "nativeGetUid", "Lstd/core/Object;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsWantAgent::GetUid) },
+        ani_native_function { "nativeGetOperationType", "Lstd/core/Object;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsWantAgent::GetOperationType) },
+        ani_native_function { "nativeCancel", "Lstd/core/Object;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsWantAgent::Cancel) },
+        ani_native_function { "nativeEqual",
+            "Lstd/core/Object;Lstd/core/Object;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsWantAgent::Equal) },
+        ani_native_function { "nativeTrigger",
+            "Lstd/core/Object;LwantAgent/triggerInfo/TriggerInfo;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsWantAgent::Trigger) },
+        ani_native_function { "nativeGetWant", "Lstd/core/Object;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsWantAgent::GetWant) },
+        ani_native_function { "nativeGetWantAgent",
+            "LwantAgent/wantAgentInfo/WantAgentInfo;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
+            reinterpret_cast<void *>(EtsWantAgent::GetWantAgent) },
+        ani_native_function { "nativeTriggerCheck", "Lstd/core/Object;LwantAgent/triggerInfo/TriggerInfo;:V",
+            reinterpret_cast<void *>(EtsWantAgent::TriggerCheck) },
     };
     if ((status = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "Namespace_BindNativeFunctions failed status: %{public}d", status);

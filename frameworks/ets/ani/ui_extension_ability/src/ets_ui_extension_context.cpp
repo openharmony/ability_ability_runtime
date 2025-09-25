@@ -31,6 +31,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
 static std::mutex g_connectsMutex;
 int32_t g_serialNumber = 0;
 static std::map<EtsUIExtensionConnectionKey, sptr<EtsUIExtensionConnection>, Etskey_compare> g_connects;
@@ -49,6 +50,19 @@ constexpr const char* SIGNATURE_OPEN_LINK = "C{std.core.String}C{utils.AbilityUt
     "C{@ohos.app.ability.OpenLinkOptions.OpenLinkOptions}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 const std::string APP_LINKING_ONLY = "appLinkingOnly";
 const std::string ATOMIC_SERVICE_PREFIX = "com.atomicservice.";
+
+static bool CheckUrl(std::string &urlValue)
+{
+    if (urlValue.empty()) {
+        return false;
+    }
+    Uri uri = Uri(urlValue);
+    if (uri.GetScheme().empty() || uri.GetHost().empty()) {
+        return false;
+    }
+    return true;
+}
+} // namespace
 
 void EtsUIExtensionContext::TerminateSelfSync(ani_env *env, ani_object obj, ani_object callback)
 {
@@ -153,6 +167,21 @@ void EtsUIExtensionContext::StartAbilityForResult(ani_env *env, ani_object aniOb
     etsUiExtensionContext->OnStartAbilityForResult(env, aniObj, wantObj, nullptr, callback);
 }
 
+void EtsUIExtensionContext::OpenLinkCheck(ani_env *env, ani_object aniObj, ani_string aniLink)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "OpenLinkCheck called");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env or aniObj");
+        return;
+    }
+    std::string link("");
+    if (!AppExecFwk::GetStdString(env, aniLink, link) || !CheckUrl(link)) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "invalid link params");
+        EtsErrorUtil::ThrowInvalidParamError(
+            env, "Parse param link or openLinkOptions failed, link must be string, openLinkOptions must be options.");
+    }
+}
+
 void EtsUIExtensionContext::OpenLink(ani_env *env, ani_object aniObj, ani_string aniLink, ani_object myCallbackobj,
     ani_object optionsObj, ani_object callbackobj)
 {
@@ -167,6 +196,25 @@ void EtsUIExtensionContext::OpenLink(ani_env *env, ani_object aniObj, ani_string
         return;
     }
     etsContext->OnOpenLink(env, aniObj, aniLink, myCallbackobj, optionsObj, callbackobj);
+}
+
+void EtsUIExtensionContext::OpenAtomicServiceCheck(ani_env *env, ani_object aniObj)
+{
+    TAG_LOGD(AAFwkTag::UI_EXT, "OpenAtomicServiceCheck");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env or aniObj");
+        return;
+    }
+    auto etsContext = GetEtsUIExtensionContext(env, aniObj);
+    if (etsContext == nullptr || etsContext->context_.lock() == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null etsContext");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
+    }
+    if (etsContext->context_.lock() == nullptr) {
+        TAG_LOGW(AAFwkTag::UI_EXT, "null context");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+    }
 }
 
 void EtsUIExtensionContext::OpenAtomicService(ani_env *env, ani_object aniObj, ani_string aniAppId,
@@ -785,18 +833,6 @@ void EtsUIExtensionContext::OnSetHostPageOverlayForbidden(ani_env *env, ani_obje
     TAG_LOGD(AAFwkTag::UI_EXT, "SetHostPageOverlayForbidden ok, isNotAllow: %{public}d", isNotAllow);
 }
 
-static bool CheckUrl(std::string &urlValue)
-{
-    if (urlValue.empty()) {
-        return false;
-    }
-    Uri uri = Uri(urlValue);
-    if (uri.GetScheme().empty() || uri.GetHost().empty()) {
-        return false;
-    }
-    return true;
-}
-
 void EtsUIExtensionContext::OpenLinkInner(ani_env *env, ani_object aniObj, ani_string aniLink, ani_object myCallbackobj,
     ani_object optionsObj, ani_object callbackobj, bool haveOptionsParm, bool haveCallBackParm)
 {
@@ -1154,8 +1190,12 @@ ani_object CreateEtsUIExtensionContext(ani_env *env, std::shared_ptr<OHOS::Abili
             reinterpret_cast<void*>(EtsUIExtensionContext::ReportDrawnCompleted)},
         ani_native_function { "nativeOpenAtomicService", SIGNATURE_OPEN_ATOMIC_SERVICE,
             reinterpret_cast<void *>(EtsUIExtensionContext::OpenAtomicService) },
+        ani_native_function { "nativeOpenAtomicServiceCheck", ":V",
+            reinterpret_cast<void *>(EtsUIExtensionContext::OpenAtomicServiceCheck) },
         ani_native_function { "nativeOpenLinkSync", SIGNATURE_OPEN_LINK,
             reinterpret_cast<void *>(EtsUIExtensionContext::OpenLink) },
+        ani_native_function { "nativeOpenLinkCheck", "Lstd/core/String;:V",
+            reinterpret_cast<void *>(EtsUIExtensionContext::OpenLinkCheck) },
     };
     if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);

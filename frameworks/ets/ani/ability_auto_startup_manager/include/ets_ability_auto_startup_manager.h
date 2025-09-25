@@ -30,6 +30,8 @@ public:
     static void SetApplicationAutoStartup(ani_env *env, ani_object info, ani_object callback);
     static void CancelApplicationAutoStartup(ani_env *env, ani_object info, ani_object callback);
     static void QueryAllAutoStartupApplications(ani_env *env, ani_object callback);
+    static void AutoStartupInfoCheck(ani_env *env, ani_object info);
+    static void NativeCheckCallerIsSystemApp(ani_env *env);
 
     static sptr<EtsAbilityAutoStartupCallback> etsAutoStartupCallback_;
 };

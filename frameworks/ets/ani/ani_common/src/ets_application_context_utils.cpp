@@ -16,6 +16,7 @@
 
 #include <mutex>
 
+#include "ability_runtime_error_util.h"
 #include "ani_enum_convert.h"
 #include "application_context_manager.h"
 #include "ets_ability_lifecycle_callback.h"
@@ -698,6 +699,25 @@ void EtsApplicationContextUtils::RegisterInteropAbilityLifecycleCallback(ani_env
     applicationContext->RegisterInteropAbilityLifecycleCallback(interopAbilityLifecycleCallback_);
 }
 
+void EtsApplicationContextUtils::NativeOffAbilityLifecycleCheck(ani_env *env, ani_object aniObj)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "NativeOffAbilityLifecycleCheck Call");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env or aniObj");
+        return;
+    }
+    auto etsContext = GeApplicationContext(env, aniObj);
+    if (etsContext == nullptr) {
+        EtsErrorUtil::ThrowRuntimeError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return;
+    }
+    auto applicationContext = etsContext->applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "nativeContext is null");
+        EtsErrorUtil::ThrowRuntimeError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+    }
+}
+
 void EtsApplicationContextUtils::NativeOffLifecycleCallbackSync(ani_env *env,
     ani_object aniObj, ani_string type, ani_int callbackId, ani_object callback)
 {
@@ -866,6 +886,26 @@ ani_int EtsApplicationContextUtils::NativeOnEnvironmentSync(ani_env *env, ani_ob
     return etsContext->OnNativeOnEnvironmentSync(env, aniObj, envCallback);
 }
 
+void EtsApplicationContextUtils::NativeOffEnvironmentCheck(ani_env *env, ani_object aniObj)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "NativeOffEnvironmentCheck Call");
+    if (env == nullptr || aniObj == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env or aniObj");
+        return;
+    }
+    auto etsContext = GeApplicationContext(env, aniObj);
+    if (etsContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null etsContext");
+        EtsErrorUtil::ThrowRuntimeError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return;
+    }
+    auto applicationContext = etsContext->applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "nativeContext is null");
+        EtsErrorUtil::ThrowRuntimeError(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+    }
+}
+
 void EtsApplicationContextUtils::NativeOffEnvironmentSync(ani_env *env, ani_object aniObj,
     ani_int callbackId, ani_object callback)
 {
@@ -1028,6 +1068,8 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env* aniEnv)
             ani_native_function {"nativeOffLifecycleCallbackSync",
                 "C{std.core.String}iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOffLifecycleCallbackSync)},
+            ani_native_function {"nativeOffAbilityLifecycleCheck", ":V",
+                reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOffAbilityLifecycleCheck)},
             ani_native_function {"nativegetRunningProcessInformation",
                 "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::GetRunningProcessInformation)},
@@ -1050,6 +1092,8 @@ void EtsApplicationContextUtils::BindApplicationContextFunc(ani_env* aniEnv)
                 reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOnEnvironmentSync)},
             ani_native_function {"nativeOffEnvironmentSync", "iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOffEnvironmentSync)},
+            ani_native_function {"nativeOffEnvironmentCheck", ":V",
+                reinterpret_cast<void *>(EtsApplicationContextUtils::NativeOffEnvironmentCheck)},
             ani_native_function {"nativeOnApplicationStateChangeSync",
                 "C{@ohos.app.ability.ApplicationStateChangeCallback.ApplicationStateChangeCallback}:",
                 reinterpret_cast<void*>(EtsApplicationContextUtils::NativeOnApplicationStateChangeSync)},

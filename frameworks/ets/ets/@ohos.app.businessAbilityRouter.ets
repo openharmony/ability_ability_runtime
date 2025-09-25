@@ -37,9 +37,11 @@ export default namespace businessAbilityRouter {
 
   export native function nativeQueryBusinessAbilityInfos(filter: BusinessAbilityFilter,
     callback: AsyncCallbackWrapper<Array<BusinessAbilityInfo>>): void;
+  export native function nativeBusinessAbilityFilterCheck(filter: BusinessAbilityFilter): void;
 
   export function queryBusinessAbilityInfo(filter: BusinessAbilityFilter,
     callback: AsyncCallback<Array<BusinessAbilityInfo>, void>): void {
+    businessAbilityRouter.nativeBusinessAbilityFilterCheck(filter);
     let myCall = new AsyncCallbackWrapper<Array<BusinessAbilityInfo>>(callback);
     taskpool.execute((): void => {
       businessAbilityRouter.nativeQueryBusinessAbilityInfos(filter, myCall);
@@ -47,6 +49,7 @@ export default namespace businessAbilityRouter {
   }
 
   export function queryBusinessAbilityInfo(filter: BusinessAbilityFilter): Promise<Array<BusinessAbilityInfo>> {
+    businessAbilityRouter.nativeBusinessAbilityFilterCheck(filter);
     let p = new Promise<Array<BusinessAbilityInfo>>((resolve: (data: Array<BusinessAbilityInfo>) => void,
     reject: (err: BusinessError) => void): void => {
       let myCall = new AsyncCallbackWrapper<Array<BusinessAbilityInfo>>((err: BusinessError | null,
