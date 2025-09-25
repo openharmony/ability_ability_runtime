@@ -851,6 +851,12 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
     if ((isPage || appRecord->IsLastAbilityRecord(token)) && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficient())) {
         appRecord->SetTerminating();
+        auto priopityObject = appRecord->GetPriorityObject();
+        if (priopityObject != nullptr && serviceInner != nullptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "kill process %{public}d", priopityObject->GetPid());
+            serviceInner->KillProcessByPid(priopityObject->GetPid(), "HandleAbilityAttachTimeOut");
+            return;
+        }
     }
 
     std::weak_ptr<AppRunningRecord> appRecordWptr(appRecord);
