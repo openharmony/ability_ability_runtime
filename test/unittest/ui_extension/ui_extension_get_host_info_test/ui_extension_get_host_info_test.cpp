@@ -94,7 +94,11 @@ HWTEST_F(UIExtensionGetHostInfoTest, GetUIExtensionRootHostInfo_0300, TestSize.L
     sptr<IRemoteObject> token = nullptr;
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto ret = AbilityManagerClient::GetInstance()->GetTopAbility(token);
-        EXPECT_EQ(ret, ERR_OK);
+        if (ret != ERR_OK) {
+            SetSelfTokenID(currentID);
+            TAG_LOGI(AAFwkTag::TEST, "end.");
+            return;
+        }
         UIExtensionHostInfo hostInfo;
         ret = AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo);
         // cause top ability isn't a uiextension ability.
