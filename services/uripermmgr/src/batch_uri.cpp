@@ -42,11 +42,15 @@ int32_t BatchUri::Init(const std::vector<std::string> &uriVec, uint32_t mode,
             TAG_LOGI(AAFwkTag::URIPERMMGR, "uri type: %{public}s.", uriInner.GetAuthority().c_str());
             isPrintAuthority = false;
         }
-        if (scheme != "file") {
+        if (scheme != "file" && scheme != "content") {
             TAG_LOGW(AAFwkTag::URIPERMMGR, "uri is invalid: %{private}s.", uriInner.ToString().c_str());
             continue;
         }
         validUriCount++;
+        if (scheme == "content") {
+            contentUris.emplace_back(uriInner.ToString());
+            continue;
+        }
         InitFileUriInfo(uriInner, index, mode, callerAlterBundleName, targetAlterBundleName);
     }
     TAG_LOGI(AAFwkTag::URIPERMMGR, "count of uri is %{public}d, count of valid uri is %{public}d.",
@@ -117,8 +121,7 @@ int32_t BatchUri::GetMediaUriToGrant(std::vector<std::string> &uriVec)
     return uriVec.size();
 }
 
-void BatchUri::GetNeedCheckProxyPermissionURI(std::vector<PolicyInfo> &proxyUrisByPolicy,
-    std::vector<Uri> &proxyUrisByMap)
+void BatchUri::GetNeedCheckProxyPermissionURI(std::vector<PolicyInfo> &proxyUrisByPolicy)
 {
     // docs uri and bundle uri
     for (size_t i = 0; i < otherIndexes.size(); i++) {
