@@ -234,7 +234,8 @@ bool JsNapiCommon::CreateConnectionAndConnectAbilityLocked(
 
 sptr<NAPIAbilityConnection> JsNapiCommon::FindConnectionLocked(const Want &want, int64_t &id)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "uri:%{public}s", want.GetElement().GetURI().c_str());
+    TAG_LOGD(AAFwkTag::JSNAPI, "bundle/ability:%{public}s/%{public}s", want.GetElement().GetBundleName().c_str(),
+        want.GetElement().GetAbilityName().c_str());
     std::string deviceId = want.GetElement().GetDeviceID();
     std::string bundleName = want.GetBundle();
     std::string abilityName = want.GetElement().GetAbilityName();
