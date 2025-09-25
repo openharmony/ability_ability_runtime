@@ -128,8 +128,9 @@ ErrCode ServiceExtensionContext::StartAbilityWithAccount(const AAFwk::Want &want
     if (GetAbilityInfo() != nullptr) {
         callerName = GetAbilityInfo()->name;
     }
-    TAG_LOGI(AAFwkTag::APPKIT, "accountId: %{public}d, ability: %{public}s, caller: %{public}s",
-        accountId, want.GetElement().GetURI().c_str(), callerName.c_str());
+    TAG_LOGI(AAFwkTag::APPKIT, "accountId: %{public}d, ability: %{public}s/%{public}s, caller: %{public}s",
+        accountId, want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(),
+        callerName.c_str());
     (const_cast<Want &>(want)).SetParam(START_ABILITY_TYPE, true);
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(
         want, token_, ILLEGAL_REQUEST_CODE, accountId);

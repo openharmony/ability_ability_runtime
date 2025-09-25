@@ -770,8 +770,9 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
         TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return false;
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ", element: %{public}s",
-        sessionInfo->uiExtensionComponentId, want.GetElement().GetURI().c_str());
+    TAG_LOGD(AAFwkTag::UI_EXT, "UIExtension component id: %{public}" PRId64 ", bundle/ability:%{public}s/%{public}s",
+        sessionInfo->uiExtensionComponentId, want.GetElement().GetBundleName().c_str(),
+        want.GetElement().GetAbilityName().c_str());
     if (sessionInfo == nullptr || sessionInfo->uiExtensionComponentId == 0) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Invalid sessionInfo");
         return false;
