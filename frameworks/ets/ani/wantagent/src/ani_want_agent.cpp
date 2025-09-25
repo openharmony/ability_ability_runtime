@@ -415,12 +415,12 @@ int32_t EtsWantAgent::GetWantAgentParam(ani_env *env, ani_object info, WantAgent
             env, reinterpret_cast<ani_enum_item>(actionTypeRef), params.operationType);
     }
 
-    ani_double dRequestCode = 0.0;
-    if ((status = env->Object_GetPropertyByName_Double(info, "requestCode", &dRequestCode)) != ANI_OK) {
+    ani_int requestCode = 0;
+    if ((status = env->Object_GetPropertyByName_Int(info, "requestCode", &requestCode)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "requestCode GetProperty failed status: %{public}d", status);
         return PARAMETER_ERROR;
     }
-    params.requestCode = dRequestCode;
+    params.requestCode = requestCode;
 
     ani_ref actionFlagsRef = nullptr;
     if (!GetPropertyRef(env, info, "actionFlags", actionFlagsRef, isUndefined)) {
@@ -517,13 +517,13 @@ void EtsWantAgent::OnTrigger(ani_env *env, ani_object agent, ani_object triggerI
 int32_t EtsWantAgent::GetTriggerInfo(ani_env *env, ani_object triggerInfoObj, TriggerInfo &triggerInfo)
 {
     TAG_LOGD(AAFwkTag::WANTAGENT, "GetTriggerInfo called");
-    ani_double dCode = 0.0;
-    ani_status status = env->Object_GetPropertyByName_Double(triggerInfoObj, "code", &dCode);
+    ani_int aniCode = 0;
+    ani_status status = env->Object_GetPropertyByName_Int(triggerInfoObj, "code", &aniCode);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "code GetProperty failed status: %{public}d", status);
         return ERR_NOT_OK;
     }
-    const int32_t code = static_cast<int32_t>(dCode);
+    const int32_t code = static_cast<int32_t>(aniCode);
 
     ani_ref wantRef = nullptr;
     ani_boolean isUndefined = true;
