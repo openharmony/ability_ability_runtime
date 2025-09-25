@@ -340,6 +340,26 @@ HWTEST_F(AbilityManagerServiceThirdTest, GetMissionSaveTime_001, TestSize.Level1
 
 /*
  * Feature: AbilityManagerService
+ * Function: GetAbilityTokenByMissionId
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GetAbilityTokenByMissionId
+ */
+HWTEST_F(AbilityManagerServiceThirdTest, GetAbilityTokenByMissionId_001, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest GetAbilityTokenByMissionId_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
+    EXPECT_EQ(abilityMs_->GetAbilityTokenByMissionId(100), nullptr);
+
+    auto temp = abilityMs_->subManagersHelper_->currentMissionListManager_;
+    abilityMs_->subManagersHelper_->currentMissionListManager_.reset();
+    EXPECT_EQ(abilityMs_->GetAbilityTokenByMissionId(100), nullptr);
+    abilityMs_->subManagersHelper_->currentMissionListManager_ = temp;
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceThirdTest GetAbilityTokenByMissionId_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: StartRemoteAbilityByCall
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartRemoteAbilityByCall

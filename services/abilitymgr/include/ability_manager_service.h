@@ -1291,6 +1291,14 @@ public:
      */
     int32_t GetMissionIdByAbilityToken(const sptr<IRemoteObject> &token);
 
+    /**
+     * Get ability token by target mission id.
+     *
+     * @param missionId target missionId.
+     * @return the ability token of target mission.
+     */
+    sptr<IRemoteObject> GetAbilityTokenByMissionId(int32_t missionId);
+
     virtual int StartUser(int userId, uint64_t displayId, sptr<IUserCallback> callback,
         bool isAppRecovery = false) override;
 
