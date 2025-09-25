@@ -94,6 +94,7 @@ struct StartAbilityWrapParam {
     bool isUIAbilityOnly = false;
     bool isAppCloneSelector = false;
     bool hideFailureTipDialog = false;
+    bool isFreeInstallFromService = false;
 };
 }
 }
