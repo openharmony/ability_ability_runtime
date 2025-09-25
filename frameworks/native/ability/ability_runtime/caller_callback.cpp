@@ -44,6 +44,19 @@ void CallUtil::GenerateCallerCallBack(std::shared_ptr<StartAbilityByCallData> ca
     callerCallBack->SetCallBack(callBackDone);
 }
 
+void CallUtil::SetOnReleaseOfCallerCallBack(std::shared_ptr<CallerCallBack> callerCallBack)
+{
+    if (callerCallBack == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "callerCallBack");
+        return;
+    }
+    auto releaseListen = [](const std::string &str) {
+        TAG_LOGD(AAFwkTag::CONTEXT, "called, %{public}s", str.c_str());
+    };
+
+    callerCallBack->SetOnRelease(releaseListen);
+}
+
 void CallUtil::WaitForCalleeObj(std::shared_ptr<StartAbilityByCallData> callData)
 {
     if (callData == nullptr) {
@@ -55,6 +68,7 @@ void CallUtil::WaitForCalleeObj(std::shared_ptr<StartAbilityByCallData> callData
             return;
         }
         if (callData->condition.wait_for(lock, std::chrono::seconds(CALLER_TIME_OUT)) == std::cv_status::timeout) {
+            callData->err = -1;
             TAG_LOGE(AAFwkTag::CONTEXT, "callExecute waiting callee timeout");
         }
     }
