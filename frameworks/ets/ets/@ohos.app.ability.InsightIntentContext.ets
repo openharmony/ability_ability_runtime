@@ -20,8 +20,10 @@ export default class InsightIntentContext {
   nativeContext: long;
 
   public native nativeStartAbilitySync(want: Want): BusinessError;
+  public native nativeStartAbilitySyncCheck(): void;
 
   startAbility(want: Want, callback: AsyncCallback<void>): void {
+    this.nativeStartAbilitySyncCheck();
     let p1 = taskpool.execute((): BusinessError => {
       return this.nativeStartAbilitySync(want);
     });
@@ -34,6 +36,7 @@ export default class InsightIntentContext {
   }
 
   startAbility(want: Want): Promise<void> {
+    this.nativeStartAbilitySyncCheck();
     let p = new Promise<void>((resolve: (v: undefined) => void, reject: (error: BusinessError) => void): void => {
       let p1 = taskpool.execute((): BusinessError => {
         return this.nativeStartAbilitySync(want);

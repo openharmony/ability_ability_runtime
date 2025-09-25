@@ -120,7 +120,22 @@ void EtsAbilityAutoStartupManager::UnregisterAutoStartupCallback(
         etsAutoStartupCallback_ = nullptr;
     }
 }
+void EtsAbilityAutoStartupManager::AutoStartupInfoCheck(ani_env *env, ani_object info)
+{
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called AutoStartupInfoCheck");
 
+    if (!AppExecFwk::CheckCallerIsSystemApp()) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "not system app");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return;
+    }
+
+    AutoStartupInfo autoStartupInfo;
+    if (!UnwrapAutoStartupInfo(env, info, autoStartupInfo)) {
+        EtsErrorUtil::ThrowInvalidParamError(env, "unwrap AutoStartupInfo failed");
+        return;
+    }
+}
 void EtsAbilityAutoStartupManager::SetApplicationAutoStartup(ani_env *env, ani_object info, ani_object callback)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called SetApplicationAutoStartup");
@@ -188,6 +203,15 @@ void EtsAbilityAutoStartupManager::QueryAllAutoStartupApplications(ani_env *env,
         EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), result);
 }
 
+void EtsAbilityAutoStartupManager::NativeCheckCallerIsSystemApp(ani_env *env)
+{
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called QueryAllAutoStartupApplications");
+    if (!AppExecFwk::CheckCallerIsSystemApp()) {
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+    }
+}
+
+
 void EtsAbilityAutoStartupManagerInit(ani_env *env)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "call EtsAbilityAutoStartupManagerInit");
@@ -216,12 +240,17 @@ void EtsAbilityAutoStartupManagerInit(ani_env *env)
         ani_native_function {"nativeSetApplicationAutoStartup",
             "C{application.AutoStartupInfo.AutoStartupInfo}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAbilityAutoStartupManager::SetApplicationAutoStartup)},
+        ani_native_function {"autoStartupInfoCheck",
+            "C{application.AutoStartupInfo.AutoStartupInfo}:",
+            reinterpret_cast<void *>(EtsAbilityAutoStartupManager::AutoStartupInfoCheck)},
         ani_native_function {"nativeCancelApplicationAutoStartup",
             "C{application.AutoStartupInfo.AutoStartupInfo}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAbilityAutoStartupManager::CancelApplicationAutoStartup)},
         ani_native_function {"nativeQueryAllAutoStartupApplications",
             "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAbilityAutoStartupManager::QueryAllAutoStartupApplications)},
+        ani_native_function {"nativeCheckCallerIsSystemApp", ":",
+            reinterpret_cast<void *>(EtsAbilityAutoStartupManager::NativeCheckCallerIsSystemApp)},
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
     if (status != ANI_OK) {

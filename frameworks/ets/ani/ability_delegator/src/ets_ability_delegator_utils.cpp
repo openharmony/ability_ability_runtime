@@ -44,6 +44,8 @@ constexpr const char* SIGNATURE_STAGEMONITOR_NUMBER_ASYNCCALLBACK =
     "C{application.AbilityStageMonitor.AbilityStageMonitor}lC{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char* STAGEMONITOR_UIABILITY_ASYNCCALLBACK =
     "C{@ohos.app.ability.UIAbility.UIAbility}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
+constexpr const char* STAGEMONITOR_UIABILITY_CHECK =
+    "C{@ohos.app.ability.UIAbility.UIAbility}:";
 constexpr const char* STRING_ASYNCCALLBACK_VOID = "C{std.core.String}C{utils.AbilityUtils.AsyncCallbackWrapper}:";
 constexpr const char* STRING_UIABILITY_NUMBER = "C{@ohos.app.ability.UIAbility.UIAbility}:i";
 constexpr const char* STRING_CALLBACK_UIABILITY =
@@ -71,12 +73,16 @@ bool BindFunctions(ani_env *aniEnv, ani_class abilityDelegator)
         ani_native_function {"printSync", STRING_VOID, reinterpret_cast<void *>(EtsAbilityDelegator::PrintSync)},
         ani_native_function {"nativeAddAbilityMonitor", MONITOR_ASYNCCALLBACK_VOID,
             reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityMonitor)},
+        ani_native_function {"addAbilityMonitorCheck", SIGNATURE_MONITOR_VOID,
+            reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityMonitorCheck)},
         ani_native_function {"nativeStartAbility", WANT_ASYNCCALLBACK,
             reinterpret_cast<void *>(EtsAbilityDelegator::StartAbility)},
         ani_native_function {"addAbilityMonitorSync", SIGNATURE_MONITOR_VOID,
             reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityMonitorSync)},
         ani_native_function {"removeAbilityMonitorAsync", MONITOR_ASYNCCALLBACK_VOID,
             reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityMonitor)},
+        ani_native_function {"removeAbilityMonitorCheck", SIGNATURE_MONITOR_VOID,
+            reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityMonitorCheck)},
         ani_native_function {"removeAbilityMonitorSync", SIGNATURE_MONITOR_VOID,
             reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityMonitorSync)},
         ani_native_function {"waitAbilityMonitorAsync", SIGNATURE_MONITOR_NUMBER_ASYNCCALLBACK,
@@ -85,14 +91,20 @@ bool BindFunctions(ani_env *aniEnv, ani_class abilityDelegator)
             reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityStageMonitor)},
         ani_native_function {"addAbilityStageMonitorSync", STAGEMONITOR_VOID,
             reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityStageMonitorSync)},
+        ani_native_function {"addAbilityStageMonitorCheck", STAGEMONITOR_VOID,
+            reinterpret_cast<void *>(EtsAbilityDelegator::AddAbilityStageMonitorCheck)},
         ani_native_function {"removeAbilityStageMonitorAsync", STAGEMONITOR_ASYNCCALLBACK_VOID,
             reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityStageMonitor)},
         ani_native_function {"removeAbilityStageMonitorSync", STAGEMONITOR_VOID,
             reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityStageMonitorSync)},
+        ani_native_function {"removeAbilityStageMonitorCheck", STAGEMONITOR_VOID,
+            reinterpret_cast<void *>(EtsAbilityDelegator::RemoveAbilityStageMonitorCheck)},
         ani_native_function {"waitAbilityStageMonitorAsync", SIGNATURE_STAGEMONITOR_NUMBER_ASYNCCALLBACK,
             reinterpret_cast<void *>(EtsAbilityDelegator::WaitAbilityStageMonitor)},
         ani_native_function {"doAbilityForegroundAsync", STAGEMONITOR_UIABILITY_ASYNCCALLBACK,
             reinterpret_cast<void *>(EtsAbilityDelegator::DoAbilityForeground)},
+        ani_native_function {"doAbilityForegroundOrBackgroundCheck", STAGEMONITOR_UIABILITY_CHECK,
+            reinterpret_cast<void *>(EtsAbilityDelegator::DoAbilityForegroundOrBackgroundCheck)},
         ani_native_function {"doAbilityBackgroundAsync", STAGEMONITOR_UIABILITY_ASYNCCALLBACK,
             reinterpret_cast<void *>(EtsAbilityDelegator::DoAbilityBackground)},
         ani_native_function {"printAsync", STRING_ASYNCCALLBACK_VOID,

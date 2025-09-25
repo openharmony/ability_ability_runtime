@@ -27,6 +27,7 @@ public:
     EtsAbilityRouterMgr() = default;
     ~EtsAbilityRouterMgr() = default;
     static EtsAbilityRouterMgr &GetInstance();
+    static void BusinessAbilityFilterCheck(ani_env *env, ani_object filterObj);
     static void QueryBusinessAbilityInfos(ani_env *env, ani_object filterObj, ani_object callbackObj);
 private:
     void OnQueryBusinessAbilityInfos(ani_env *env, ani_object filterObj, ani_object callbackObj);

@@ -24,8 +24,10 @@ export default namespace autoStartupManager {
   export native function nativeOnApplicationAutoStartupStateChangeSync(type: string, callback: AutoStartupCallback): void;
   export native function nativeOffApplicationAutoStartupStateChangeSync(type: string, callback?: AutoStartupCallback): void;
   export native function nativeSetApplicationAutoStartup(info: AutoStartupInfo, callback: AsyncCallbackWrapper<void>): void;
+  export native function autoStartupInfoCheck(info: AutoStartupInfo): void;
   export native function nativeCancelApplicationAutoStartup(info: AutoStartupInfo, callback: AsyncCallbackWrapper<void>): void;
   export native function nativeQueryAllAutoStartupApplications(callback: AsyncCallbackWrapper<Array<AutoStartupInfo>>): void;
+  export native function nativeCheckCallerIsSystemApp(): void;
 
   export function onSystemAutoStartup(callback: AutoStartupCallback): void {
     autoStartupManager.nativeOnApplicationAutoStartupStateChangeSync('systemAutoStartup', callback);
@@ -36,6 +38,7 @@ export default namespace autoStartupManager {
   }
 
   export function setApplicationAutoStartup(info: AutoStartupInfo, callback: AsyncCallback<void>): void {
+    autoStartupManager.autoStartupInfoCheck(info);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       autoStartupManager.nativeSetApplicationAutoStartup(info, myCall);
@@ -43,6 +46,7 @@ export default namespace autoStartupManager {
   }
 
   export function setApplicationAutoStartup(info: AutoStartupInfo): Promise<void> {
+    autoStartupManager.autoStartupInfoCheck(info);
     let p = new Promise<void>((resolve: (data: undefined)=>void, reject:(err: BusinessError) => void): void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
         if (err == null || err.code == 0) {
@@ -59,6 +63,7 @@ export default namespace autoStartupManager {
   }
 
   export function cancelApplicationAutoStartup(info: AutoStartupInfo, callback: AsyncCallback<void>): void {
+    autoStartupManager.autoStartupInfoCheck(info);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       autoStartupManager.nativeCancelApplicationAutoStartup(info, myCall);
@@ -66,6 +71,7 @@ export default namespace autoStartupManager {
   }
 
   export function cancelApplicationAutoStartup(info: AutoStartupInfo): Promise<void> {
+    autoStartupManager.autoStartupInfoCheck(info);
     let p = new Promise<void>((resolve: (data: undefined)=>void, reject:(err: BusinessError) => void): void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
         if (err == null || err.code == 0) {
@@ -82,6 +88,7 @@ export default namespace autoStartupManager {
   }
 
   export function queryAllAutoStartupApplications(callback: AsyncCallback<Array<AutoStartupInfo>>): void {
+    autoStartupManager.nativeCheckCallerIsSystemApp();
     let myCall = new AsyncCallbackWrapper<Array<AutoStartupInfo>>(callback);
     taskpool.execute((): void => {
       autoStartupManager.nativeQueryAllAutoStartupApplications(myCall);
@@ -89,6 +96,7 @@ export default namespace autoStartupManager {
   }
 
   export function queryAllAutoStartupApplications(): Promise<Array<AutoStartupInfo>> {
+    autoStartupManager.nativeCheckCallerIsSystemApp();
     let p = new Promise<Array<AutoStartupInfo>>((resolve: (data: Array<AutoStartupInfo>) => void,
       reject: (err: BusinessError) => void): void => {
       let myCall = new AsyncCallbackWrapper<Array<AutoStartupInfo>>((err: BusinessError | null,

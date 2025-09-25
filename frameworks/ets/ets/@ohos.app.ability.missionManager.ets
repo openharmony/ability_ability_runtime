@@ -38,6 +38,7 @@ export default namespace missionManager {
     callback: AsyncCallbackWrapper<MissionSnapshot>): void;
   export native function nativeMoveMissionsToBackground(missionIds: Array<int>,
     callback: AsyncCallbackWrapper<Array<int>>): void;
+  export native function nativeArrayLengthCheck(missionIds: Array<int>): void;
   export native function nativeMoveMissionsToForeground(missionIds: Array<int>, topMission: int,
     callback: AsyncCallbackWrapper<void>): void;
   export native function nativeMoveMissionToFront(missionId: int, options: StartOptions,
@@ -242,6 +243,7 @@ export function getMissionInfos(deviceId: string, numMax: int, callback: AsyncCa
   }
 
   export function moveMissionsToBackground(missionIds: Array<int>, callback: AsyncCallback<Array<int>>): void {
+    missionManager.nativeArrayLengthCheck(missionIds);
     let myCall = new AsyncCallbackWrapper<Array<int>>(callback); 
     taskpool.execute((): void => {
       missionManager.nativeMoveMissionsToBackground(missionIds, myCall);
@@ -249,6 +251,7 @@ export function getMissionInfos(deviceId: string, numMax: int, callback: AsyncCa
   }
 
   export function moveMissionsToBackground(missionIds : Array<int>): Promise<Array<int>> {
+    missionManager.nativeArrayLengthCheck(missionIds);
     let p =
       new Promise<Array<int>>((resolve: (data: Array<int>) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<Array<int>>((err: BusinessError | null, data: Array<int>| undefined) => {
@@ -266,6 +269,7 @@ export function getMissionInfos(deviceId: string, numMax: int, callback: AsyncCa
   }
 
   export function moveMissionsToForeground(missionIds: Array<int>, topMission: int, callback: AsyncCallback<void>): void {
+    missionManager.nativeArrayLengthCheck(missionIds);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       missionManager.nativeMoveMissionsToForeground(missionIds, topMission, myCall);
@@ -273,6 +277,7 @@ export function getMissionInfos(deviceId: string, numMax: int, callback: AsyncCa
   }
 
   export function moveMissionsToForeground(missionIds: Array<int>, callback: AsyncCallback<void>): void {
+    missionManager.nativeArrayLengthCheck(missionIds);
     let topMission: int = -1;
     let myCall = new AsyncCallbackWrapper<void>(callback);                       
     taskpool.execute((): void => {
@@ -281,6 +286,7 @@ export function getMissionInfos(deviceId: string, numMax: int, callback: AsyncCa
   }
 
   export function moveMissionsToForeground(missionIds: Array<int>, topMission?: int): Promise<void> {
+    missionManager.nativeArrayLengthCheck(missionIds);
     let p: Promise<void> =
       new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError | null) => void): void => {
         let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
