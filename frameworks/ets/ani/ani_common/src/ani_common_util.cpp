@@ -116,7 +116,7 @@ bool GetFieldBoolByName(ani_env *env, ani_object object, const char *name, bool 
     }
     ani_boolean aniValue = ANI_FALSE;
     if ((status = env->Object_CallMethodByName_Boolean(
-        reinterpret_cast<ani_object>(field), "unboxed", nullptr, &aniValue)) != ANI_OK) {
+        reinterpret_cast<ani_object>(field), "toBoolean", nullptr, &aniValue)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
@@ -1228,7 +1228,7 @@ bool GetBooleanPropertyObject(ani_env *env, ani_object param, const char *name, 
     }
     ani_boolean aniValue = ANI_FALSE;
     if ((status = env->Object_CallMethodByName_Boolean(
-        reinterpret_cast<ani_object>(obj), "unboxed", nullptr, &aniValue)) != ANI_OK) {
+        reinterpret_cast<ani_object>(obj), "toBoolean", nullptr, &aniValue)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
         return false;
     }
