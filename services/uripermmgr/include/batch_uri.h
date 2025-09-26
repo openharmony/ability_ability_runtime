@@ -62,7 +62,7 @@ public:
     void SelectPermissionedUri(std::vector<Uri> &uris, std::vector<int32_t> &indexs, std::vector<std::string> &uriVec);
 
     int32_t GetUriToGrantByPolicy(std::vector<PolicyInfo> &docsPolicyInfoVec,
-        std::vector<PolicyInfo> &bundlePolicyInfoVec, bool isRemoveDfsDocsUri);
+        std::vector<PolicyInfo> &bundlePolicyInfoVec);
 
     bool GetUriToGrantByPolicy(std::vector<PolicyInfo> &policyVec);
 
@@ -86,9 +86,6 @@ public:
 
     // content uri
     std::vector<std::string> contentUris;
-    // distribute docs uri
-    std::vector<std::string> dfsDocsUris;
-    std::vector<bool> isDfsDocsUriVec;
 
     // caller's uri
     std::vector<PolicyInfo> selfBundlePolicyInfos;
