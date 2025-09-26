@@ -436,5 +436,24 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetFirstLine_001, TestSize.L
     appfreezeManager->GetFirstLine("/data/log/test");
     EXPECT_TRUE(appfreezeManager != nullptr);
 }
+
+/**
+ * @tc.number: AppfreezeManagerTest_CheckAppfreezeHappend_001
+ * @tc.desc: add testcase
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_CheckAppfreezeHappend_001, TestSize.Level1)
+{
+    bool ret = appfreezeManager->CheckAppfreezeHappend(getpid(), "CheckAppfreezeHappend");
+    EXPECT_EQ(ret, false);
+    ret = appfreezeManager->CheckAppfreezeHappend(getpid(), "BUSSINESS_THREAD_BLOCK_3S");
+    EXPECT_EQ(ret, false);
+    ret = appfreezeManager->CheckAppfreezeHappend(getpid(), "BUSSINESS_THREAD_BLOCK_6S");
+    EXPECT_EQ(ret, true);
+    appfreezeManager->CheckAppfreezeHappend(getpid(), "LIFECYCLE_TIMEOUT");
+    appfreezeManager->CheckAppfreezeHappend(getpid(), "THREAD_BLOCK_6S");
+    appfreezeManager->CheckAppfreezeHappend(getpid(), "APP_INPUT_BLOCK");
+    appfreezeManager->CheckAppfreezeHappend(getpid(), "THREAD_BLOCK_3S");
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
