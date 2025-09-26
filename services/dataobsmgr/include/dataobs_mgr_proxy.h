@@ -80,6 +80,8 @@ public:
     virtual int NotifyChangeFromExtension(const Uri &uri, int32_t userId = DATAOBS_DEFAULT_CURRENT_USER,
         DataObsOption opt = DataObsOption()) override;
 
+    virtual int CheckTrusts(uint32_t consumerToken, uint32_t providerToken) override;
+
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.
      *

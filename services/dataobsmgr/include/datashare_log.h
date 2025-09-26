@@ -21,7 +21,7 @@
 namespace OHOS::DataShare {
 static inline OHOS::HiviewDFX::HiLogLabel LogLabel()
 {
-    return { LOG_CORE, 0xD001312, "DbObsMgr" };
+    return { LOG_CORE, 0xD001661, "DataShare" };
 }
 } // namespace OHOS::DataShare
 
@@ -58,7 +58,7 @@ static inline OHOS::HiviewDFX::HiLogLabel LogLabel()
 #define LOG_ERROR(fmt, ...)                                                               \
     do {                                                                                  \
         auto lable = LogLabel();                                                          \
-        if (HiLogIsLoggable(lable.domain, lable.tag, LogLevel::LOG_ERROR)) {               \
+        if (HiLogIsLoggable(lable.domain, lable.tag, LogLevel::LOG_ERROR)) {              \
             ((void)HILOG_IMPL(lable.type, LogLevel::LOG_ERROR, lable.domain, lable.tag,   \
                               "[%{public}s()-%{public}s:%{public}d]: " fmt, __FUNCTION__, \
                               __FILE_NAME__, __LINE__, ##__VA_ARGS__));                   \
