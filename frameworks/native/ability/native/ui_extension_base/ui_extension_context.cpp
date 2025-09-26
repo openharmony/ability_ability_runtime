@@ -126,8 +126,8 @@ ErrCode UIExtensionContext::DisconnectAbility(
 
 ErrCode UIExtensionContext::StartServiceExtensionAbility(const AAFwk::Want& want, int32_t accountId)
 {
-    TAG_LOGI(AAFwkTag::UI_EXT, "Start service extension %{public}s, accountId: %{public}d",
-        want.GetElement().GetURI().c_str(), accountId);
+    TAG_LOGI(AAFwkTag::UI_EXT, "Start service extension %{public}s/%{public}s, accountId: %{public}d",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), accountId);
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(
         want, token_, accountId, AppExecFwk::ExtensionAbilityType::SERVICE);
     if (ret != ERR_OK) {
