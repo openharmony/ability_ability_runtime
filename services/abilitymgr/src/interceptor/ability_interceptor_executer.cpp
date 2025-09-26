@@ -41,10 +41,7 @@ bool AbilityInterceptorExecuter::HasInterceptor(std::string interceptorName)
 {
     std::lock_guard lock(interceptorMapLock_);
     auto iter = interceptorMap_.find(interceptorName);
-    if (iter != interceptorMap_.end()) {
-        return true;
-    }
-    return false;
+    return iter != interceptorMap_.end();
 }
 
 ErrCode AbilityInterceptorExecuter::DoProcess(AbilityInterceptorParam param)
