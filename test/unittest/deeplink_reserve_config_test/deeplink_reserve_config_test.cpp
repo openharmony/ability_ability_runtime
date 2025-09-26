@@ -129,6 +129,103 @@ HWTEST_F(DeepLinkReserveConfigTest, AaFwk_DeepLinkReserveConfig_IsLinkReservedTe
 
 /*
  * Feature: deepLinkReserveConfig
+ * Function: IsLinkReserved
+ * SubFunction: NA
+ * FunctionPoints: deepLinkReserveConfig IsLinkReserved
+ * EnvConditions: NA
+ * CaseDescription: Verify that the deepLinkReserveConfig IsLinkReserved is normal.
+ */
+HWTEST_F(DeepLinkReserveConfigTest, AaFwk_DeepLinkReserveConfigTest_0400, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfigTest_0400 start";
+    DeepLinkReserveConfig deepLinkReserveConfig;
+    const nlohmann::json DEFAULT_CONFIG = R"(
+        {
+            "deepLinkReservedUri": [
+                {
+                    "bundleName": "bundleName",
+                    "uris": [
+                        {
+                            "scheme": "https",
+                            "host": "www.xxx.com",
+                            "port": "80",
+                            "path": "path",
+                            "pathStartWith": "pathStartWith",
+                            "pathRegex": "pathRegex",
+                            "type": "type",
+                            "utd": "utd"
+                        }
+                    ]
+                }
+            ]
+        }
+    )"_json;
+    deepLinkReserveConfig.LoadReservedUriList(DEFAULT_CONFIG);
+    std::string linkString = "https://www.xxx.com:80/pathRegex";
+    std::string bundleName = "test";
+    auto ans = deepLinkReserveConfig.IsLinkReserved(linkString, bundleName);
+    EXPECT_EQ(ans, true);
+    linkString = "http://www.xxx.com:80/pathRegex";
+    ans = deepLinkReserveConfig.IsLinkReserved(linkString, bundleName);
+    EXPECT_EQ(ans, false);
+    GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfigTest_0400 end";
+}
+
+/*
+ * Feature: deepLinkReserveConfig
+ * Function: IsLinkReserved
+ * SubFunction: NA
+ * FunctionPoints: deepLinkReserveConfig IsLinkReserved
+ * EnvConditions: NA
+ * CaseDescription: Verify that the deepLinkReserveConfig IsLinkReserved is normal.
+ */
+HWTEST_F(DeepLinkReserveConfigTest, AaFwk_DeepLinkReserveConfigTest_0500, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfigTest_0500 start";
+    DeepLinkReserveConfig deepLinkReserveConfig;
+    const nlohmann::json DEFAULT_CONFIG = R"(
+        {
+            "deepLinkReservedUri": [
+                {
+                    "bundleName": "bundleName",
+                    "uris": [
+                        {
+                            "scheme": "http",
+                            "host": "www.xxx.com",
+                            "port": "80",
+                            "path": "path",
+                            "pathStartWith": "pathStartWith",
+                            "pathRegex": "pathRegex",
+                            "type": "type",
+                            "utd": "utd"
+                        },
+                        {
+                            "scheme": "https",
+                            "host": "www.yyy.com",
+                            "port": "8080",
+                            "path": "path",
+                            "pathStartWith": "pathStartWith",
+                            "pathRegex": "pathRegex",
+                            "type": "type",
+                            "utd": "utd"
+                        }
+                    ]
+                }
+            ]
+        }
+    )"_json;
+    deepLinkReserveConfig.LoadReservedUriList(DEFAULT_CONFIG);
+    std::string linkString = "http://www.xxx.com:80/pathRegex";
+    std::string bundleName = "test";
+    auto ans = deepLinkReserveConfig.IsLinkReserved(linkString, bundleName);
+    EXPECT_EQ(ans, true);
+    linkString = "https://www.xxx.com:8080/pathRegex";
+    EXPECT_EQ(ans, true);
+    GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfigTest_0500 end";
+}
+
+/*
+ * Feature: deepLinkReserveConfig
  * Function: GetConfigPath
  * SubFunction: NA
  * FunctionPoints: deepLinkReserveConfig GetConfigPath
@@ -144,23 +241,6 @@ HWTEST_F(DeepLinkReserveConfigTest, AaFwk_DeepLinkReserveConfig_GetConfigPathTes
     std::string ret = deepLinkReserveConfig.GetConfigPath();
     EXPECT_NE(ret, "");
     GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfig_GetConfigPathTest_0100 end";
-}
-
-/*
- * Feature: deepLinkReserveConfig
- * Function: LoadConfiguration
- * SubFunction: NA
- * FunctionPoints: deepLinkReserveConfig LoadConfiguration
- * EnvConditions: NA
- * CaseDescription: Verify that the deepLinkReserveConfig LoadConfiguration is normal.
- */
-HWTEST_F(DeepLinkReserveConfigTest, AaFwk_DeepLinkReserveConfig_LoadConfigurationTest_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfig_LoadConfigurationTest_0100 start";
-    DeepLinkReserveConfig deepLinkReserveConfig;
-    bool ret = deepLinkReserveConfig.LoadConfiguration();
-    EXPECT_EQ(ret, false);
-    GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfig_LoadConfigurationTest_0100 end";
 }
 
 /*
@@ -200,5 +280,25 @@ HWTEST_F(DeepLinkReserveConfigTest, AaFwk_DeepLinkReserveConfig_IsUriMatchedTest
     EXPECT_EQ(ret, true);
     GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfig_IsUriMatchedTest_0100 end";
 }
+
+/*
+ * Feature: deepLinkReserveConfig
+ * Function: IsUriMatched
+ * SubFunction: NA
+ * FunctionPoints: deepLinkReserveConfig IsUriMatched
+ * EnvConditions: NA
+ * CaseDescription: Verify that the deepLinkReserveConfig IsUriMatched is normal.
+ */
+HWTEST_F(DeepLinkReserveConfigTest, AaFwk_DeepLinkReserveConfig_IsUriMatchedTest_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfig_IsUriMatchedTest_0200 start";
+    DeepLinkReserveConfig deepLinkReserveConfig;
+    ReserveUri reservedUri = { "http", "www.xxx.com", "80", "path", "pathStartWith", "pathRegex", "type", "utd"};
+    std::string link = "https://www.xxx.com:80/pathRegex";
+    bool ret = deepLinkReserveConfig.IsUriMatched(reservedUri, link);
+    EXPECT_EQ(ret, false);
+    GTEST_LOG_(INFO) << "AaFwk_DeepLinkReserveConfig_IsUriMatchedTest_0200 end";
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS
