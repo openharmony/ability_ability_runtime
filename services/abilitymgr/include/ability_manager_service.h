@@ -2514,7 +2514,6 @@ private:
     void UnSubscribeScreenUnlockedEvent();
     void RetrySubscribeScreenUnlockedEvent(int32_t retryCount);
     void RemoveScreenUnlockInterceptor();
-    bool HasScreenUnlockInterceptor();
     void AddWatchParameters();
 
     void RemoveUnauthorizedLaunchReasonMessage(const Want &want, AbilityRequest &abilityRequest,

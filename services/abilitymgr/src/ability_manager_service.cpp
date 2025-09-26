@@ -571,9 +571,8 @@ void AbilityManagerService::AddWatchParameters()
 void AbilityManagerService::HandleAutoStartupReadyCallback(const char *key, const char *value, void *context)
 {
     bool changed = system::GetBoolParameter(AUTO_STARTUP_READY, true);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleAutoStartupReadyCallback key %{public}s, value %{public}d",
-        key, changed);
-    if (strcmp(key, AUTO_STARTUP_READY) != 0 || changed != true) {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "HandleAutoStartupReadyCallback key %{public}s, value %{public}d", key, changed);
+    if (strcmp(key, AUTO_STARTUP_READY) != 0 || !changed) {
         return;
     }
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
@@ -583,13 +582,6 @@ void AbilityManagerService::HandleAutoStartupReadyCallback(const char *key, cons
     }
     int32_t userId = abilityMgr->GetValidUserId(DEFAULT_INVAL_VALUE);
     abilityMgr->StartAutoStartupApps(userId);
-    int32_t ret = RemoveParameterWatcher(AUTO_STARTUP_READY, nullptr, nullptr);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "RemoveParameterWatcher key %{public}s", key);
-    if (ret != 0) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "RemoveParameterWatcher %{public}s fail with %{public}d",
-            AUTO_STARTUP_READY, ret);
-    }
-    return;
 }
 
 int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int requestCode)
@@ -8539,9 +8531,12 @@ void AbilityManagerService::StartKeepAliveApps(int32_t userId)
 
 void AbilityManagerService::StartAutoStartupApps(int32_t userId)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "StartAutoStartupApps called");
     bool isAutoStartupReady = system::GetBoolParameter(AUTO_STARTUP_READY, true);
-    bool hasScreenUnlockInterceptor = HasScreenUnlockInterceptor();
+    bool hasScreenUnlockInterceptor = false;
+    if (interceptorExecuter_ != nullptr) {
+        hasScreenUnlockInterceptor = interceptorExecuter_->HasInterceptor("ScreenUnlock");
+    }
     if (!isAutoStartupReady || hasScreenUnlockInterceptor) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "isReady %{public}d, hasInterceptor %{public}d",
             isAutoStartupReady, hasScreenUnlockInterceptor);
@@ -8568,6 +8563,13 @@ void AbilityManagerService::StartAutoStartupApps(int32_t userId)
         infoQueue.push(info);
     }
     StartAutoStartupApps(infoQueue, userId);
+    auto removeParameterWatcherTask = []() {
+        int32_t ret = RemoveParameterWatcher(
+            AUTO_STARTUP_READY, AbilityManagerService::HandleAutoStartupReadyCallback, nullptr);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "RemoveParameterWatcher %{public}s with %{public}d",
+                AUTO_STARTUP_READY, ret);
+    };
+    taskHandler_->SubmitTask(removeParameterWatcherTask, "removeParameterWatcherTask");
 }
 
 void AbilityManagerService::StartAutoStartupApps(std::queue<AutoStartupInfo> infoQueue, int32_t userId)
@@ -8716,15 +8718,6 @@ void AbilityManagerService::RemoveScreenUnlockInterceptor()
     if (interceptorExecuter_ != nullptr) {
         interceptorExecuter_->RemoveInterceptor("ScreenUnlock");
     }
-}
-
-bool AbilityManagerService::HasScreenUnlockInterceptor()
-{
-    if (interceptorExecuter_ != nullptr) {
-        return interceptorExecuter_->HasInterceptor("ScreenUnlock");
-    }
-    TAG_LOGW(AAFwkTag::ABILITYMGR, "interceptorExecuter_ nullptr");
-    return false;
 }
 
 void AbilityManagerService::RemoveUnauthorizedLaunchReasonMessage(const Want &want, AbilityRequest &abilityRequest,
