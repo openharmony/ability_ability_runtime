@@ -168,6 +168,7 @@ public:
     void SetPkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName);
     void UpdatePkgContextInfoJson(const std::string& moduleName, const std::string& hapPath,
         const std::string& packageName);
+    bool Init(const Options& options);
 
 private:
     void FinishPreload() override;
