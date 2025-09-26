@@ -45,6 +45,10 @@ public:
     void OnAbilityDestroy(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) override;
     void OnAbilityForeground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) override;
     void OnAbilityBackground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) override;
+    void OnWillForeground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) override;
+    void OnDidForeground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) override;
+    void OnWillBackground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) override;
+    void OnDidBackground(std::shared_ptr<AppExecFwk::ETSNativeReference> ability) override;
 
     int32_t Register(ani_object callback);
     bool Unregister(int32_t callbackId);
