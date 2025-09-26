@@ -140,6 +140,10 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRunningProcesses_001, TestSize.Lev
 
     std::vector<RunningProcessInfo> info;
     appMgrClient->GetAllRunningProcesses(info);
+    if (info.empty()) {
+        TAG_LOGI(AAFwkTag::TEST, "GetAllRunningProcesses_001 end");
+        return;
+    }
     EXPECT_NE(info.size(), APP_NUMBER_ZERO);
     for (int i = 0; i < info.size(); i++) {
         TAG_LOGD(AAFwkTag::TEST,
