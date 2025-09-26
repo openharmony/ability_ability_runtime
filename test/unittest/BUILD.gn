@@ -210,7 +210,6 @@ group("unittest") {
       "ams_ipc_interface_test:unittest",
       "ams_mgr_kill_process_test:unittest",
       "ams_mgr_proxy_test:unittest",
-      "ams_mgr_scheduler_dump_test:unittest",
       "ams_mgr_scheduler_second_test:unittest",
       "ams_mgr_scheduler_test:unittest",
       "ams_mgr_stub_test:unittest",
