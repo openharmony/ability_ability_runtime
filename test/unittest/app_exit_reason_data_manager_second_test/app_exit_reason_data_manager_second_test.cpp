@@ -30,6 +30,7 @@ const std::string MODULE_NAME = "module_name";
 const std::string ABILITY_NAME = "ability_name";
 const std::string BUNDLE_NAME = "bundle_name";
 const int SESSION_ID = 111;
+constexpr int32_t TIME_SLEEP = 2000;
 } // namespace
 
 class AppExitReasonDataManagerSecondTest : public testing::Test {
@@ -152,6 +153,7 @@ HWTEST_F(AppExitReasonDataManagerSecondTest, GetRecordAppAbilityNames_001, TestS
     DelayedSingleton<AppExitReasonDataManager>::GetInstance()->kvStorePtr_ = kvStorePtr;
     result =
         DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetRecordAppAbilityNames(tokenId, abilityLists);
+    usleep(TIME_SLEEP);
     EXPECT_EQ(result, ERR_OK);
 }
 } // namespace AbilityRuntime
