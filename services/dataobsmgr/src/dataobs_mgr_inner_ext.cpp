@@ -52,6 +52,8 @@ Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObs
         RemoveObsDeathRecipient(dataObserver->AsObject());
         return DATAOBS_SERVICE_OBS_LIMMIT;
     }
+    TAG_LOGE(AAFwkTag::DBOBSMGR, "subscribers:%{public}s pid:%{public}d entryId:%{public}d",
+        CommonUtils::Anonymous(uri.ToString()).c_str(), entry.pid, entry.entryId);
     return SUCCESS;
 }
 
@@ -210,6 +212,8 @@ DataObsMgrInnerExt::Node::Node(const std::string &name) : name_(name) {}
 void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint32_t index,
     NotifyInfo &info, int32_t userId, ObsMap &obsRes)
 {
+    std::string obsStr = "";
+    bool logFlag = false;
     if (path.size() == index) {
         for (auto entry : entrys_) {
             if (entry.userId != userId && entry.userId != 0 && userId != 0) {
@@ -221,6 +225,12 @@ void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint
             notifyInfo.uriList.push_back(info);
             notifyInfo.tokenId = entry.tokenId;
             notifyInfo.pid = entry.pid;
+            obsStr += "pid:" + std::to_string(entry.pid) + "entryId:" + std::to_string(entry.entryId) + ",";
+            logFlag = true;
+        }
+        if (logFlag) {
+            TAG_LOGI(AAFwkTag::DBOBSMGR, "notify uri:%{public}s entrys_:%{public}s",
+                CommonUtils::Anonymous(info.uri.ToString()).c_str(), obsStr.c_str());
         }
         return;
     }
@@ -236,7 +246,13 @@ void DataObsMgrInnerExt::Node::GetObs(const std::vector<std::string> &path, uint
             notifyInfo.uriList.push_back(info);
             notifyInfo.tokenId = entry.tokenId;
             notifyInfo.pid = entry.pid;
+            obsStr += "pid: " + std::to_string(entry.pid) + "entryId: " + std::to_string(entry.entryId) + ",";
+            logFlag = true;
         }
+    }
+    if (logFlag) {
+        TAG_LOGI(AAFwkTag::DBOBSMGR, "notify uri:%{public}s entrys_:%{public}s",
+            CommonUtils::Anonymous(info.uri.ToString()).c_str(), obsStr.c_str());
     }
 
     auto it = childrens_.find(path[index]);
@@ -290,6 +306,7 @@ bool DataObsMgrInnerExt::Node::RemoveObserver(const std::vector<std::string> &pa
                 return false;
             }
             entry.deathRecipientRef->ref--;
+            TAG_LOGI(AAFwkTag::DBOBSMGR, "RemoveObserver pid:%{public}d entryId:%{public}d", entry.pid, entry.entryId);
             return true;
         });
         return entrys_.empty() && childrens_.empty();
@@ -316,6 +333,7 @@ bool DataObsMgrInnerExt::Node::RemoveObserver(sptr<IRemoteObject> dataObserver)
             return false;
         }
         entry.deathRecipientRef->ref--;
+        TAG_LOGI(AAFwkTag::DBOBSMGR, "RemoveObserver pid:%{public}d entryId:%{public}d", entry.pid, entry.entryId);
         return true;
     });
     return entrys_.empty() && childrens_.empty();
