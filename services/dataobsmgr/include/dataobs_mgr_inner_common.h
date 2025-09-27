@@ -21,7 +21,7 @@
 
 namespace OHOS {
 namespace AAFwk {
-
+static const int32_t MAX_OBSERVER_NODE_CNT = 100000;
 struct ObserverInfo {
     ObserverInfo() {}
     ObserverInfo(uint32_t tokenId, uint64_t fullTokenId, uint32_t firstCallerTokenId, int32_t userId, bool isExtension)
@@ -46,9 +46,18 @@ struct ObserverNode {
     bool isFromExtension_ = false;
     std::string permission_;
     int32_t pid_ = 0;
+    int32_t nodeId_ = -1;
+    static inline int32_t nextNodeId_ = 1;
 
     ObserverNode(sptr<IDataAbilityObserver> observer, int32_t userId, uint32_t tokenId, int32_t pid)
-        : observer_(observer), userId_(userId), tokenId_(tokenId), pid_(pid) {}
+        : observer_(observer), userId_(userId), tokenId_(tokenId), pid_(pid)
+    {
+        nodeId_ = nextNodeId_++;
+        if (nextNodeId_ > MAX_OBSERVER_NODE_CNT) {
+            // reset nextNodeId_
+            nextNodeId_ = 1;
+        }
+    }
 
     bool operator==(struct ObserverNode other) const
     {
