@@ -42,6 +42,18 @@
             "telephony.sim",
             "telephony.sms"
         ],
+        "PrintExtension":[
+            "contact",
+            "geolocation",
+            "geoLocationManager",
+            "multimedia.camera",
+            "multimedia.audio",
+            "multimedia.media",
+            "multimedia.mediaLibrary",
+            "telephony.call",
+            "telephony.sim",
+            "telephony.sms"
+        ],
         "AdsServiceExtension": [
             "multimedia.camera",
             "multimedia.mediaLibrary",
