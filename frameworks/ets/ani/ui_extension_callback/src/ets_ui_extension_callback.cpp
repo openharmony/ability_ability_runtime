@@ -75,7 +75,7 @@ void EtsUIExtensionCallback::OnError(int32_t number)
         TAG_LOGE(AAFwkTag::UI_EXT, "aniMsg String_NewUTF8 failed, status: %{public}d", status);
         return;
     }
-    CallObjectMethod("onError", nullptr, (ani_double)number, aniName, aniMsg);
+    CallObjectMethod("onError", nullptr, number, aniName, aniMsg);
     CloseModalUIExtension();
 }
 

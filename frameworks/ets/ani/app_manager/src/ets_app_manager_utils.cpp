@@ -92,12 +92,12 @@ bool SetAppStateData(ani_env *env, ani_object object, const AppExecFwk::AppState
         TAG_LOGE(AAFwkTag::APPMGR, "failed status:%{public}d", status);
         return false;
     }
-    status = env->Object_SetFieldByName_Double(object, "uid", static_cast<double>(appStateData.uid));
+    status = env->Object_SetFieldByName_Int(object, "uid", appStateData.uid);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed status:%{public}d", status);
         return false;
     }
-    status = env->Object_SetFieldByName_Double(object, "state", static_cast<double>(appStateData.state));
+    status = env->Object_SetFieldByName_Int(object, "state", appStateData.state);
     if (status != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed status:%{public}d", status);
         return false;
