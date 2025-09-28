@@ -27,6 +27,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 struct JsFreeInstallObserverObject {
+    napi_env env;
     std::string bundleName;
     std::string abilityName;
     std::string startTime;
@@ -34,6 +35,8 @@ struct JsFreeInstallObserverObject {
     napi_deferred deferred;
     napi_ref callback;
     bool isAbilityResult = false;
+
+    ~JsFreeInstallObserverObject();
 };
 
 class JsFreeInstallObserver : public FreeInstallObserverStub {
