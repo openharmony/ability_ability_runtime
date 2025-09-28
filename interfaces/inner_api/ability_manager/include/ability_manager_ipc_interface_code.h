@@ -483,6 +483,8 @@ enum class AbilityManagerInterfaceCode {
     SUSPEND_EXTENSION_ABILITY = 1141,
     // ipc for resume extionsion ability
     RESUME_EXTENSION_ABILITY = 1142,
+    //ipc for prelaunch
+    START_PRELAUNCH_ABILITY = 1143,
 
     // ipc id 2001-3000 for tools
     // ipc id for dumping state (2001)

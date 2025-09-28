@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,6 +62,7 @@ struct AppStateData : public Parcelable {
     bool isFloatingWindowMode = false;
     bool isSpecifyTokenId = false;
     bool isPreloadModule = false;
+    bool isPrelaunch = false;
     int32_t pid = -1;
     int32_t uid = 0;
     int32_t callerUid = -1;
