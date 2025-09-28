@@ -25,6 +25,8 @@
 #include "data_ability_manager.h"
 #include "hilog_tag_wrapper.h"
 #include "mock_task_handler_wrap.h"
+#include "mock_my_status.h"
+#include "mock_parameters.h"
 #include "start_ability_utils.h"
 
 using namespace testing;
@@ -37,6 +39,7 @@ using DataAbilityRecordPtrMap = std::map<std::string, DataAbilityRecordPtr>;
 namespace OHOS {
 namespace AAFwk {
 namespace {
+    constexpr const char* AUTO_STARTUP_READY = "persist.sys.abilityms.if_startup_ready";
     const int32_t USER_ID_U100 = 100;
     const int32_t MIN_DUMP_ARGUMENT_NUM = 2;
     const int32_t MAX_APP_CLONE_INDEX_NUM = 10000;
@@ -723,6 +726,9 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_001, TestSize.Leve
     autoStartupInfo.abilityTypeName = AbilityRuntime::EXTENSION_TYPE_APP_SERVICE;
     std::queue<AutoStartupInfo> infoQueue;
     infoQueue.push(autoStartupInfo);
+
+    system::SetParameter(AUTO_STARTUP_READY, "true");
+    abilityMs->RemoveScreenUnlockInterceptor();
     abilityMs->StartAutoStartupApps(infoQueue);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_001 end");
 }
@@ -738,6 +744,9 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_002, TestSize.Leve
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_002 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs, nullptr);
+    auto interceptorExecuter = std::make_shared<AbilityInterceptorExecuter>();
+    EXPECT_NE(interceptorExecuter, nullptr);
+    abilityMs->interceptorExecuter_ = interceptorExecuter;
     auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceTenhtTest");
     abilityMs->taskHandler_ = taskHandler;
     EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
@@ -745,6 +754,9 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_002, TestSize.Leve
     autoStartupInfo.appCloneIndex = MAX_APP_CLONE_INDEX_NUM;
     std::queue<AutoStartupInfo> infoQueue;
     infoQueue.push(autoStartupInfo);
+
+    system::SetParameter(AUTO_STARTUP_READY, "true");
+    abilityMs->RemoveScreenUnlockInterceptor();
     abilityMs->StartAutoStartupApps(infoQueue);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_002 end");
 }
@@ -760,10 +772,16 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_003, TestSize.Leve
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_003 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs, nullptr);
+    auto interceptorExecuter = std::make_shared<AbilityInterceptorExecuter>();
+    EXPECT_NE(interceptorExecuter, nullptr);
+    abilityMs->interceptorExecuter_ = interceptorExecuter;
     auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceTenhtTest");
     abilityMs->taskHandler_ = taskHandler;
     EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(0);
     std::queue<AutoStartupInfo> infoQueue;
+
+    system::SetParameter(AUTO_STARTUP_READY, "true");
+    abilityMs->RemoveScreenUnlockInterceptor();
     abilityMs->StartAutoStartupApps(infoQueue);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_003 end");
 }
@@ -779,14 +797,164 @@ HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_004, TestSize.Leve
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_004 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs, nullptr);
+    auto interceptorExecuter = std::make_shared<AbilityInterceptorExecuter>();
+    EXPECT_NE(interceptorExecuter, nullptr);
+    abilityMs->interceptorExecuter_ = interceptorExecuter;
     auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceTenhtTest");
     abilityMs->taskHandler_ = taskHandler;
     EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
     AutoStartupInfo autoStartupInfo;
     std::queue<AutoStartupInfo> infoQueue;
     infoQueue.push(autoStartupInfo);
+
+    system::SetParameter(AUTO_STARTUP_READY, "true");
+    abilityMs->RemoveScreenUnlockInterceptor();
     abilityMs->StartAutoStartupApps(infoQueue);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_004 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartAutoStartupApps_005
+ * Function: StartAutoStartupApps
+ * SubFunction: NA
+ * param false; interceptor false
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_005, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_005 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    auto interceptorExecuter = std::make_shared<AbilityInterceptorExecuter>();
+    EXPECT_NE(interceptorExecuter, nullptr);
+    abilityMs->interceptorExecuter_ = interceptorExecuter;
+    auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceTenhtTest");
+    abilityMs->taskHandler_ = taskHandler;
+    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
+    AutoStartupInfo autoStartupInfo;
+    std::queue<AutoStartupInfo> infoQueue;
+    infoQueue.push(autoStartupInfo);
+
+    system::SetParameter(AUTO_STARTUP_READY, "false");
+    abilityMs->RemoveScreenUnlockInterceptor();
+    abilityMs->StartAutoStartupApps(infoQueue);
+    system::SetParameter(AUTO_STARTUP_READY, "true");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_005 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartAutoStartupApps_006
+ * Function: StartAutoStartupApps
+ * SubFunction: NA
+ * param true; interceptor false
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_006, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_006 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    auto interceptorExecuter = std::make_shared<AbilityInterceptorExecuter>();
+    EXPECT_NE(interceptorExecuter, nullptr);
+    abilityMs->interceptorExecuter_ = interceptorExecuter;
+    auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceTenhtTest");
+    abilityMs->taskHandler_ = taskHandler;
+    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
+    AutoStartupInfo autoStartupInfo;
+    std::queue<AutoStartupInfo> infoQueue;
+    infoQueue.push(autoStartupInfo);
+
+    system::SetParameter(AUTO_STARTUP_READY, "true");
+    abilityMs->RemoveScreenUnlockInterceptor();
+    abilityMs->StartAutoStartupApps(infoQueue);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_006 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartAutoStartupApps_007
+ * Function: StartAutoStartupApps
+ * SubFunction: NA
+ * param true; interceptor false
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_007, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_007 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    auto interceptorExecuter = std::make_shared<AbilityInterceptorExecuter>();
+    EXPECT_NE(interceptorExecuter, nullptr);
+    abilityMs->interceptorExecuter_ = interceptorExecuter;
+    auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceTenhtTest");
+    abilityMs->taskHandler_ = taskHandler;
+    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
+    AutoStartupInfo autoStartupInfo;
+    std::queue<AutoStartupInfo> infoQueue;
+    infoQueue.push(autoStartupInfo);
+
+    system::SetParameter(AUTO_STARTUP_READY, "true");
+    abilityMs->RemoveScreenUnlockInterceptor();
+    abilityMs->StartAutoStartupApps(infoQueue);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_007 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartAutoStartupApps_008
+ * Function: StartAutoStartupApps
+ * SubFunction: NA
+ * param false; interceptor true
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_008, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_008 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    auto interceptorExecuter = std::make_shared<AbilityInterceptorExecuter>();
+    EXPECT_NE(interceptorExecuter, nullptr);
+    abilityMs->interceptorExecuter_ = interceptorExecuter;
+    auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceTenhtTest");
+    abilityMs->taskHandler_ = taskHandler;
+    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
+    AutoStartupInfo autoStartupInfo;
+    std::queue<AutoStartupInfo> infoQueue;
+    infoQueue.push(autoStartupInfo);
+
+    system::SetParameter(AUTO_STARTUP_READY, "false");
+    abilityMs->InitInterceptorForScreenUnlock();
+    abilityMs->StartAutoStartupApps(infoQueue);
+    system::SetParameter(AUTO_STARTUP_READY, "true");
+    abilityMs->RemoveScreenUnlockInterceptor();
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_008 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Name: StartAutoStartupApps_009
+ * Function: StartAutoStartupApps
+ * SubFunction: NA
+ * param true; interceptor true
+ */
+HWTEST_F(AbilityManagerServiceTenhtTest, StartAutoStartupApps_009, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_009 start");
+    auto abilityMs = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs, nullptr);
+    auto interceptorExecuter = std::make_shared<AbilityInterceptorExecuter>();
+    EXPECT_NE(interceptorExecuter, nullptr);
+    abilityMs->interceptorExecuter_ = interceptorExecuter;
+    auto taskHandler = MockTaskHandlerWrap::CreateQueueHandler("AbilityManagerServiceTenhtTest");
+    abilityMs->taskHandler_ = taskHandler;
+    EXPECT_CALL(*taskHandler, SubmitTaskInner(_, _)).Times(testing::AtLeast(1));
+    AutoStartupInfo autoStartupInfo;
+    std::queue<AutoStartupInfo> infoQueue;
+    infoQueue.push(autoStartupInfo);
+
+    system::SetParameter(AUTO_STARTUP_READY, "true");
+    abilityMs->InitInterceptorForScreenUnlock();
+    abilityMs->StartAutoStartupApps(infoQueue);
+    abilityMs->RemoveScreenUnlockInterceptor();
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceTenhtTest StartAutoStartupApps_009 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS
