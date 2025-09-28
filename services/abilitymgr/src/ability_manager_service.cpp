@@ -7544,8 +7544,8 @@ void AbilityManagerService::OnAbilityRequestDone(const sptr<IRemoteObject> &toke
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER(abilityRecord);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnAbilityRequestDone, bundleName: %{public}s, abilityName: %{public}s",
-        abilityRecord->GetAbilityInfo().bundleName.c_str(), abilityRecord->GetAbilityInfo().name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnAbilityRequestDone,name:[%{public}s-%{public}s],state:%{public}d",
+        abilityRecord->GetAbilityInfo().bundleName.c_str(), abilityRecord->GetAbilityInfo().name.c_str(), state);
     auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
 
     auto type = abilityRecord->GetAbilityInfo().type;

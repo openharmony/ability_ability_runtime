@@ -241,7 +241,8 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     auto scenarios = static_cast<uint32_t>(uiAbilityRecord->GetOnNewWantSkipScenarios()) &
         static_cast<uint32_t>(sessionInfo->scenarios);
     if (uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state dropped START: %{public}d",
+            static_cast<int32_t>(uiAbilityRecord->GetPendingState()));
         uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
         if (scenarios == 0 && sessionInfo->isNewWant) {
             uiAbilityRecord->SetLastWant(std::make_shared<Want>(abilityRequest.want));
@@ -1290,7 +1291,8 @@ int UIAbilityLifecycleManager::MinimizeUIAbility(const std::shared_ptr<AbilityRe
     abilityRecord->SetMinimizeReason(fromUser);
     abilityRecord->SetSceneFlag(sceneFlag);
     if (abilityRecord->GetPendingState() != AbilityState::INITIAL) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state dropped MINIMIZE: %{public}d",
+            static_cast<int32_t>(abilityRecord->GetPendingState()));
         abilityRecord->SetPendingState(AbilityState::BACKGROUND);
         return ERR_OK;
     }
@@ -1424,7 +1426,8 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
             sessionInfo->isAtomicService =
                 (abilityInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE);
             if (uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
-                TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped");
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state dropped BYCALL: %{public}d",
+                    static_cast<int32_t>(uiAbilityRecord->GetPendingState()));
                 uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
                 return NotifySCBPendingActivation(sessionInfo, abilityRequest, errMsg);
             }
@@ -1453,7 +1456,7 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
         sessionInfo->state = CallToState::BACKGROUND;
         sessionInfo->needClearInNotShowRecent = true;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Notify scb's abilityId is %{public}" PRIu64 ".", sessionInfo->uiAbilityId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ByCall, notify scb abilityId: %{public}" PRIu64 ".", sessionInfo->uiAbilityId);
     tmpAbilityMap_.emplace(sessionInfo->requestId, uiAbilityRecord);
     PostCallTimeoutTask(sessionInfo->requestId);
     return NotifySCBPendingActivation(sessionInfo, abilityRequest, errMsg);
@@ -1477,20 +1480,20 @@ void UIAbilityLifecycleManager::PostCallTimeoutTask(int32_t requestId)
 
 void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CallUIAbilityBySCB");
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    CHECK_POINTER_LOG(sessionInfo, "sessionInfo is invalid.");
-    CHECK_POINTER_LOG(sessionInfo->sessionToken, "sessionToken is nullptr.");
+    CHECK_POINTER_LOG(sessionInfo, "ByCall, null sessionInfo");
+    CHECK_POINTER_LOG(sessionInfo->sessionToken, "bycall, null sessionToken");
     auto sessionToken = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
-    CHECK_POINTER_LOG(sessionToken, "sessionToken is nullptr.");
+    CHECK_POINTER_LOG(sessionToken, "ByCall, sessionToken null");
     auto descriptor = Str16ToStr8(sessionToken->GetDescriptor());
     if (descriptor != "OHOS.ISession") {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "token's Descriptor: %{public}s", descriptor.c_str());
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ByCall, token's Descriptor: %{public}s", descriptor.c_str());
         return;
     }
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "SCB output abilityId is %{public}" PRIu64 ".", sessionInfo->uiAbilityId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "scb call, CallUIAbilityBySCB abilityId:%{public}" PRIu64 ".",
+        sessionInfo->uiAbilityId);
     auto search = tmpAbilityMap_.find(sessionInfo->requestId);
     if (search == tmpAbilityMap_.end()) {
         if (sessionInfo->uiAbilityId == 0 && tmpAbilityMap_.size() == 1) {
@@ -1931,8 +1934,8 @@ int UIAbilityLifecycleManager::CloseUIAbility(const std::shared_ptr<AbilityRecor
         return abilityRecord->TerminateAbility();
     }
     if (abilityRecord->GetPendingState() != AbilityState::INITIAL) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped. independentRecovery:%{public}d",
-            isIndependentRecovery);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state dropped CLOSE: %{public}d, independentRecovery: %{public}d",
+            static_cast<int32_t>(abilityRecord->GetPendingState()), isIndependentRecovery);
         abilityRecord->SetPendingState(AbilityState::BACKGROUND);
         if (!isIndependentRecovery) {
             return ERR_OK;
@@ -3624,7 +3627,8 @@ int UIAbilityLifecycleManager::ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> 
         uiAbilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::FOREGROUND_SHOW);
 #ifdef SUPPORT_SCREEN
         if (uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state: FOREGROUND/ BACKGROUND, dropped");
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state dropped CHANGE: %{public}d",
+                static_cast<int32_t>(uiAbilityRecord->GetPendingState()));
             uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
             return ERR_OK;
         } else {

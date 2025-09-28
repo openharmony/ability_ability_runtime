@@ -1734,11 +1734,12 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     }
     appRecord->PopForegroundingAbilityTokens();
 
-    TAG_LOGI(AAFwkTag::APPMGR, "ApplicationForegrounded, bundle: %{public}s, pendingState: %{public}d",
-        appRecord->GetBundleName().c_str(), appRecord->GetApplicationPendingState());
-    if (appRecord->GetApplicationPendingState() == ApplicationPendingState::BACKGROUNDING) {
+    auto pendingState = appRecord->GetApplicationPendingState();
+    TAG_LOGI(AAFwkTag::APPMGR, "app foregrounded: %{public}s, pState: %{public}d",
+        appRecord->GetBundleName().c_str(), pendingState);
+    if (pendingState == ApplicationPendingState::BACKGROUNDING) {
         appRecord->ScheduleBackgroundRunning();
-    } else if (appRecord->GetApplicationPendingState() == ApplicationPendingState::FOREGROUNDING) {
+    } else if (pendingState == ApplicationPendingState::FOREGROUNDING) {
         appRecord->SetApplicationPendingState(ApplicationPendingState::READY);
     }
     auto eventInfo = BuildEventInfo(appRecord);
