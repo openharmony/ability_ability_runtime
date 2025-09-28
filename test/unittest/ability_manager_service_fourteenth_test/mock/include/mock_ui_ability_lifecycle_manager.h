@@ -192,6 +192,14 @@ public:
      * @param abilityRequest target ability request.
      */
     int ResolveLocked(const AbilityRequest &abilityRequest, std::string &errMsg);
+    
+    /**
+     * resolve the call ipc of ability for prelaunch.
+     *
+     * @param abilityRequest target ability request.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int PrelaunchAbilityLocked(const AbilityRequest &abilityRequest);
 
     /**
      * Call UIAbility by SCB.

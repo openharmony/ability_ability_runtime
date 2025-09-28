@@ -994,6 +994,13 @@ public:
         sptr<IRemoteObject> callToken, int32_t accountId, std::string &errMsg, bool isSilent = false);
 
     /**
+     * Start Ability for prelaunch
+     *
+     * @param want, Special want for service type's ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode StartAbilityForPrelaunch(const Want &want);
+    /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
      *
      * @param token, ability's token.

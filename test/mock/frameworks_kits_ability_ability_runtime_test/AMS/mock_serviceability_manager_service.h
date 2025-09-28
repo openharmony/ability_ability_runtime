@@ -66,7 +66,7 @@ public:
 
     int StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
         const sptr<IRemoteObject>& callerToken, int32_t accountId = DEFAULT_INVAL_VALUE, bool isSilent = false);
-
+    int StartAbilityForPrelaunch(const Want &want);
     int TerminateAbility(
         const sptr<IRemoteObject>& token, int resultCode = -1, const Want* resultWant = nullptr) override;
     int CloseAbility(const sptr<IRemoteObject>& token, int resultCode = DEFAULT_INVAL_VALUE,

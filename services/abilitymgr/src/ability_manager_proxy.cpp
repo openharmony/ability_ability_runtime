@@ -3923,6 +3923,32 @@ int AbilityManagerProxy::StartAbilityByCallWithErrMsg(const Want &want, const sp
     return reply.ReadInt32();
 }
 
+int AbilityManagerProxy::StartAbilityForPrelaunch(const Want &want)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerProxy::StartAbilityForPrelaunch begin.");
+    int error;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "WriteInterfaceToken error");
+        return INNER_ERR;
+    }
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want write fail");
+        return ERR_INVALID_VALUE;
+    }
+
+    error = SendRequest(AbilityManagerInterfaceCode::START_PRELAUNCH_ABILITY, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", error);
+        return error;
+    }
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerProxy::StartAbilityForPrelaunch end.");
+    return reply.ReadInt32();
+}
+
 void AbilityManagerProxy::CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub)
 {
     MessageParcel data;

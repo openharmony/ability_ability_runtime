@@ -912,6 +912,9 @@ int AbilityManagerStub::OnRemoteRequestInnerTwentyFirst(uint32_t code, MessagePa
     if (interfaceCode == AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_WITH_PID_RESULT) {
         return StartSelfUIAbilityWithPidResultInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::START_PRELAUNCH_ABILITY) {
+        return StartAbilityForPrelaunchInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -2503,6 +2506,24 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
     reply.WriteInt32(result);
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerStub::StartAbilityByCallInner end.");
+
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::StartAbilityForPrelaunchInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerStub::StartAbilityForPrelaunchInner begin.");
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = StartAbilityForPrelaunch(*want);
+
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "resolve call ability ret = %{public}d", result);
+    reply.WriteInt32(result);
+
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerStub::StartAbilityForPrelaunchInner end.");
 
     return NO_ERROR;
 }
