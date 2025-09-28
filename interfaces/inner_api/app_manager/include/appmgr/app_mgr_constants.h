@@ -112,6 +112,7 @@ enum class PreloadMode {
     PRE_MAKE = 1,
     PRELOAD_MODULE = 2,
     PRELOAD_BY_PHASE = 3,
+    PRE_LAUNCH = 4,
 };
 
 enum class PreloadPhase {

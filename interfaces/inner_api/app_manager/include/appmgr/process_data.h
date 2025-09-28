@@ -69,10 +69,12 @@ struct ProcessData : public Parcelable {
     int32_t childUid = -1;
     bool isPreload = false;
     bool isPreloadModule = false;
+    bool isPrelaunch = false;
     int32_t callerPid = -1;
     int32_t callerUid = -1;
     std::string killReason;
     bool isFromWindowFocusChanged = false;
+    int32_t preloadMode = -1;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

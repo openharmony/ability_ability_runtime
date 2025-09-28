@@ -56,6 +56,7 @@ struct LoadParam : public Parcelable {
     bool isStartupHide = false;
     pid_t callingPid = -1;
     uint64_t loadAbilityCallbackId = 0;
+    bool isPrelaunch = false;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
