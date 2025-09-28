@@ -63,6 +63,11 @@ int MockServiceAbilityManagerService::StartAbilityByCall(const Want& want, const
     return 0;
 }
 
+int MockServiceAbilityManagerService::StartAbilityForPrelaunch(const Want &want)
+{
+    return 0;
+}
+
 int MockServiceAbilityManagerService::StartAbility(
     const Want& want, const StartOptions& startOptions,
     const sptr<IRemoteObject>& callerToken, int32_t userId, int requestCode)

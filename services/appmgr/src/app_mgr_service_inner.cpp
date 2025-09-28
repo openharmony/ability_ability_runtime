@@ -1043,6 +1043,9 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
 
         if (appRecord != nullptr) {
             appRecord->SetExtensionSandBoxFlag(isExtensionSandBox);
+            if (loadParam->isPrelaunch) {
+                appRecord->SetPreloadMode(PreloadMode::PRE_LAUNCH);
+            }
         }
         LoadAbilityNoAppRecord(appRecord, loadParam->isShellCall, appInfo, abilityInfo, processName,
             specifiedProcessFlag, bundleInfo, hapModuleInfo, want, appExistFlag, false,
@@ -1067,6 +1070,9 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             SendPreloadAppStartupTypeEvent(appRecord, abilityInfo);
         } else {
             SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::WARM, AppStartReason::SUGGEST_CACHE);
+        }
+        if (appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH) {
+            appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
         }
         if (appRecord->IsPreloaded()) {
             appRecord->SetPreloadState(PreloadState::NONE);
@@ -1123,8 +1129,9 @@ void AppMgrServiceInner::AfterLoadAbility(std::shared_ptr<AppRunningRecord> appR
                 timeOut = AbilityRuntime::GlobalConstant::GetLoadAndInactiveTimeout() *
                     AAFwk::AppUtils::GetInstance().GetTimeoutUnitTimeRatio();
             }
-
-            AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(AAFwk::LoadingStage::LOAD_BEGIN,
+            auto stage = appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH ?
+                AAFwk::LoadingStage::PRE_LAUNCH_BEGIN : AAFwk::LoadingStage::LOAD_BEGIN;
+            AAFwk::ResSchedUtil::GetInstance().ReportLoadingEventToRss(stage,
                 priorityObj->GetPid(), appRecord->GetUid(), timeOut, static_cast<int64_t>(abilityRecordId));
         }
     };
@@ -1727,7 +1734,9 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
         appRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
         bool needNotifyApp = appRunningManager_->IsApplicationFirstForeground(*appRecord);
         OnAppStateChanged(appRecord, ApplicationState::APP_STATE_FOREGROUND, needNotifyApp, false);
-        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
+        if (appRecord->GetPreloadMode() != PreloadMode::PRE_LAUNCH) {
+            DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
+        }
     } else {
         TAG_LOGW(AAFwkTag::APPMGR, "app name(%{public}s), app state(%{public}d)",
             appRecord->GetName().c_str(), static_cast<ApplicationState>(appState));
@@ -4552,7 +4561,8 @@ int32_t AppMgrServiceInner::StartProcess(const std::string &appName, const std::
         OnAppStarted(appRecord);
     }
     PerfProfile::GetInstance().SetAppForkEndTime(GetTickCount());
-    SendProcessStartEvent(appRecord, isPreload, preloadMode);
+    SendProcessStartEvent(appRecord, isPreload || appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH,
+        appRecord->GetPreloadMode());
     ProcessAppDebug(appRecord, appRecord->IsDebugApp());
     return ERR_OK;
 }

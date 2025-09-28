@@ -377,6 +377,7 @@ int AbilityRecord::LoadAbility(bool isShellCall, bool isStartupHide, pid_t calli
     loadParam.isStartupHide = isStartupHide;
     loadParam.callingPid = callingPid;
     loadParam.loadAbilityCallbackId = loadAbilityCallbackId;
+    loadParam.isPrelaunch = isPrelaunch_;
     auto userId = abilityInfo_.uid / BASE_USER_RANGE;
     bool isMainUIAbility =
         MainElementUtils::IsMainUIAbility(abilityInfo_.bundleName, abilityInfo_.name, userId);
@@ -1293,6 +1294,16 @@ bool AbilityRecord::GetColdStartFlag()
 void AbilityRecord::SetColdStartFlag(bool isColdStart)
 {
     coldStart_ = isColdStart;
+}
+
+bool AbilityRecord::GetPrelaunchFlag()
+{
+    return isPrelaunch_;
+}
+
+void AbilityRecord::SetPrelaunchFlag(bool isPrelaunch)
+{
+    isPrelaunch_ = isPrelaunch;
 }
 #endif
 

@@ -360,6 +360,11 @@ public:
     {
         return 0;
     }
+    
+    int StartAbilityForPrelaunch(const Want &want) override
+    {
+        return 0;
+    }
 
     void CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub) override
     {

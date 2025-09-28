@@ -231,6 +231,11 @@ int UIAbilityLifecycleManager::ResolveLocked(const AbilityRequest &abilityReques
     return 0;
 }
 
+int UIAbilityLifecycleManager::PrelaunchAbilityLocked(const AbilityRequest &abilityRequest)
+{
+    return 0;
+}
+
 bool UIAbilityLifecycleManager::IsAbilityStarted(AbilityRequest &abilityRequest,
     std::shared_ptr<AbilityRecord> &targetRecord)
 {
