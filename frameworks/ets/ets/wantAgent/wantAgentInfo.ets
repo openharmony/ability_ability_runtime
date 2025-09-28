@@ -21,7 +21,7 @@ import { RecordData } from '@ohos.base';
 export interface WantAgentInfo {
   wants: Array<Want>;
   actionType?: abilityWantAgent.OperationType;
-  requestCode: number;
+  requestCode: int;
   actionFlags?: Array<abilityWantAgent.WantAgentFlags>;
   extraInfo?: Record<string, RecordData>;
   extraInfos?: Record<string, RecordData>;
@@ -30,7 +30,7 @@ export interface WantAgentInfo {
 class WantAgentInfoImpl implements WantAgentInfo {
   public wants: Array<Want>;
   public actionType?: abilityWantAgent.OperationType;
-  public requestCode: number;
+  public requestCode: int;
   public actionFlags?: Array<abilityWantAgent.WantAgentFlags>;
   public extraInfo?: Record<string, RecordData>;
   public extraInfos?: Record<string, RecordData>;

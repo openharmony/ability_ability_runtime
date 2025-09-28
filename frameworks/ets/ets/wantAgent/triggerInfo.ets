@@ -18,7 +18,7 @@ import StartOptions from '@ohos.app.ability.StartOptions';
 import { RecordData } from '@ohos.base';
 
 export interface TriggerInfo {
-  code: number;
+  code: int;
   want?: Want;
   permission?: string;
   extraInfo?: Record<string, RecordData>;
@@ -27,7 +27,7 @@ export interface TriggerInfo {
 }
 
 class TriggerInfoImpl implements TriggerInfo {
-  public code: number;
+  public code: int;
   public want?: Want;
   public permission?: string;
   public extraInfo?: Record<string, RecordData>;
