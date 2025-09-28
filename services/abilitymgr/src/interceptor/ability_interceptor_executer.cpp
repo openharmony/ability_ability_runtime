@@ -37,6 +37,13 @@ void AbilityInterceptorExecuter::RemoveInterceptor(std::string interceptorName)
     }
 }
 
+bool AbilityInterceptorExecuter::HasInterceptor(std::string interceptorName)
+{
+    std::lock_guard lock(interceptorMapLock_);
+    auto iter = interceptorMap_.find(interceptorName);
+    return iter != interceptorMap_.end();
+}
+
 ErrCode AbilityInterceptorExecuter::DoProcess(AbilityInterceptorParam param)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
