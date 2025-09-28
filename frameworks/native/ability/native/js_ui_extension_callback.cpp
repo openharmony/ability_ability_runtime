@@ -31,6 +31,17 @@ constexpr const char* ERROR_MSG_INNER = "Inner error.";
 #endif // SUPPORT_SCREEN
 JsUIExtensionCallback::~JsUIExtensionCallback()
 {
+    if (env_ != nullptr) {
+        if (onRequestSuccess_ != nullptr) {
+            napi_delete_reference(env_, onRequestSuccess_);
+            onRequestSuccess_ = nullptr;
+        }
+        if (onRequestFailure_ != nullptr) {
+            napi_delete_reference(env_, onRequestFailure_);
+            onRequestFailure_ = nullptr;
+        }
+    }
+
     if (jsCallbackObject_  == nullptr) {
         return;
     }
@@ -208,6 +219,14 @@ void JsUIExtensionCallback::SetCompletionHandler(napi_env env, napi_value comple
     if (env == nullptr || completionHandler == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid parameters");
         return;
+    }
+    if (onRequestSuccess_ != nullptr) {
+        napi_delete_reference(env, onRequestSuccess_);
+        onRequestSuccess_ = nullptr;
+    }
+    if (onRequestFailure_ != nullptr) {
+        napi_delete_reference(env, onRequestFailure_);
+        onRequestFailure_ = nullptr;
     }
     napi_value onSuccess = AppExecFwk::GetPropertyValueByPropertyName(
         env, completionHandler, "onRequestSuccess", napi_function);
