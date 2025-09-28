@@ -25,13 +25,6 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-JsFreeInstallObserverObject::~JsFreeInstallObserverObject()
-{
-    if (env != nullptr && callback != nullptr) {
-        napi_delete_reference(env, callback);
-    }
-}
-
 JsFreeInstallObserver::JsFreeInstallObserver(napi_env env) : env_(env) {}
 
 JsFreeInstallObserver::~JsFreeInstallObserver() = default;
@@ -304,7 +297,6 @@ void JsFreeInstallObserver::AddJsObserverCommon(JsFreeInstallObserverObject &obj
     napi_value jsObserverObject, napi_value* result, bool isAbilityResult)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
-    object.env = env_;
     object.isAbilityResult = isAbilityResult;
     napi_valuetype type = napi_undefined;
     napi_typeof(env_, jsObserverObject, &type);
