@@ -25,6 +25,9 @@ import uiExtension from '@ohos.arkui.uiExtension';
 import StartOptions from '@ohos.app.ability.StartOptions';
 import Want from '@ohos.app.ability.Want';
 
+export type OnReceiveDataCallback = (data: Record<string, RecordData>) => void;
+export type OnReceiveDataForResultCallback = (data: Record<string, RecordData>) => Record<string, RecordData>
+
 class Cleaner {
   static callback(cleaner: Cleaner): void {
       cleaner.clean()
@@ -60,8 +63,8 @@ export default class UIExtensionContentSession {
   native setWindowBackgroundColor(color: string): void;
   native getUIExtensionHostWindowProxy(): uiExtensionHost.UIExtensionHostWindowProxy;
   native getUIExtensionWindowProxy(): uiExtension.WindowProxy;
-  native nativeSetReceiveDataCallback(callback: (data: Record<string, Object>) => void): void;
-  native nativeSetReceiveDataForResultCallback(callback: (data: Record<string, Object>) => Record<string, Object>): void;
+  native nativeSetReceiveDataCallback(callback: OnReceiveDataCallback): void;
+  native nativeSetReceiveDataForResultCallback(callback: OnReceiveDataForResultCallback): void;
   native terminateSelfSync(callback:AsyncCallbackWrapper<void>): void;
   native terminateSelfWithResultSync(parameter: AbilityResult, callback:AsyncCallbackWrapper<void>): void;
   private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, RecordData>, startCallback: AbilityStartCallback): BusinessError<void>;
@@ -76,11 +79,11 @@ export default class UIExtensionContentSession {
     this.nativeSendData(data);
   }
 
-  setReceiveDataCallback(callback: (data: Record<string, Object>) => void): void {
+  setReceiveDataCallback(callback: OnReceiveDataCallback): void {
     this.nativeSetReceiveDataCallback(callback);
   }
 
-  setReceiveDataForResultCallback(callback: (data: Record<string, Object>) => Record<string, Object>): void {
+  setReceiveDataForResultCallback(callback: OnReceiveDataForResultCallback): void {
     this.nativeSetReceiveDataForResultCallback(callback);
   }
 
