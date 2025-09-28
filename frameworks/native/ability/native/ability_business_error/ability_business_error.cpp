@@ -126,8 +126,8 @@ constexpr const char* ERROR_MSG_NOT_IN_KIOSK_MODE =
     "The current application is not in the kiosk mode. Exit is not allowed.";
 constexpr const char* ERROR_MSG_APP_NOT_IN_FOCUS = "The current ability is not foreground.";
 
-constexpr const char* ERROR_MSG_NOT_ISOLATION_PROCESS = "The current process is not running a component configured "
-                                        "with \"isolationProcess\" and cannot be set as a candidate master process.";
+constexpr const char* ERROR_MSG_NOT_ISOLATION_PROCESS =
+    "The current process cannot be set as a candidate master process.";
 constexpr const char* ERROR_MSG_ALREADY_MASTER_PROCESS =
     "The current process is already a master process and does not support cancellation.";
 constexpr const char* ERROR_MSG_NOT_CANDIDATE_MASTER_PROCESS =
@@ -150,7 +150,7 @@ constexpr const char* ERROR_MSG_MAIN_WINDOW_NOT_EXIST =
 constexpr const char* ERROR_MSG_NOT_MASTER_PROCESS =
     "Not a master process.";
 constexpr const char* ERROR_MSG_NOT_ON_NEW_PROCESS_REQUEST_DONE =
-    "Cannot exit because there is an unfinished onNewProcessRequest.";
+    "Cannot exit because there is an unfinished request.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
