@@ -1007,6 +1007,10 @@ void AppExitReasonDataManager::PutAsync(const DistributedKv::Key &key, const Dis
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, PUT_TASK_NAME);
         AAFwk::RecordCostTimeUtil timeRecord(PUT_TASK_NAME);
         std::lock_guard lock(pThis->kvStorePtrMutex_);
+        if (!pThis || !pThis->kvStorePtr_) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "null pThis or null kvStorePtr_");
+            return;
+        }
         auto status = pThis->kvStorePtr_->Put(key, value);
         if (status != DistributedKv::Status::SUCCESS) {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "insert error: %{public}d", status);
