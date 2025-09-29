@@ -122,6 +122,27 @@ HWTEST_F(DistributedClientTest, StartRemoteAbility_0200, TestSize.Level3)
 }
 
 /**
+ * @tc.number: StartRemoteAbility_0300
+ * @tc.name: StartRemoteAbility
+ * @tc.desc: StartRemoteAbility Test, return INVALID_PARAMETERS_ERR.
+ */
+HWTEST_F(DistributedClientTest, StartRemoteAbility_0300, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "DistributedClientTest StartRemoteAbility_0300 start";
+    auto client = std::make_shared<OHOS::AAFwk::DistributedClient>();
+    OHOS::AAFwk::Want want;
+    int32_t callerUid = 5;
+    uint32_t accessToken = 0;
+    int32_t requestCode = 0;
+    int32_t specifyTokenId = 0;
+    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = nullptr;
+    int32_t result = client->StartRemoteAbility(want, callerUid, accessToken, requestCode, specifyTokenId);
+    EXPECT_EQ(result, OHOS::AAFwk::INVALID_PARAMETERS_ERR);
+
+    GTEST_LOG_(INFO) << "DistributedClientTest StartRemoteAbility_0300 end";
+}
+
+/**
  * @tc.number: ConnectRemoteAbility_0100
  * @tc.name: ConnectRemoteAbility
  * @tc.desc: ConnectRemoteAbility Test, when connect is nullptr, return ERR_NULL_OBJECT.

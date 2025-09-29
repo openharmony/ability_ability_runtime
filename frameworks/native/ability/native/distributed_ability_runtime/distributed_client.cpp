@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ sptr<IRemoteObject> DistributedClient::GetDmsProxy()
 }
 
 int32_t DistributedClient::StartRemoteAbility(const OHOS::AAFwk::Want& want,
-    int32_t callerUid, int32_t requestCode, uint32_t accessToken)
+    int32_t callerUid, int32_t requestCode, uint32_t accessToken, uint32_t specifyTokenId)
 {
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
@@ -53,6 +53,7 @@ int32_t DistributedClient::StartRemoteAbility(const OHOS::AAFwk::Want& want,
     PARCEL_WRITE_HELPER(data, Int32, callerUid);
     PARCEL_WRITE_HELPER(data, Int32, requestCode);
     PARCEL_WRITE_HELPER(data, Uint32, accessToken);
+    PARCEL_WRITE_HELPER(data, Uint32, specifyTokenId);
     MessageParcel reply;
     PARCEL_TRANSACT_SYNC_RET_INT(remote, START_REMOTE_ABILITY, data, reply);
 }
