@@ -873,7 +873,7 @@ bool AppUtils::IsSupportAllowDebugPermission()
 bool AppUtils::IsPluginNamespaceInherited()
 {
     if (!isPluginNamespaceInherited_.isLoaded) {
-        isPluginNamespaceInherited_.value = system::GetBoolParameter(INHERIT_PLUGIN_NAMESPACE, true);
+        isPluginNamespaceInherited_.value = system::GetBoolParameter(INHERIT_PLUGIN_NAMESPACE, false);
         isPluginNamespaceInherited_.isLoaded = true;
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "pluginNamespaceInherited: %{public}d", isPluginNamespaceInherited_.value);
