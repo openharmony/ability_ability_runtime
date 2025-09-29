@@ -207,6 +207,8 @@ static bool ConvertFileName(const std::string& fileBaseName, std::string& abbrFi
         abbrFileName = "ARR";
     } else if (fileBaseName == "app_spawn_client") {
         abbrFileName = "ASC";
+    } else if (fileBaseName == "app_state_observer_manager") {
+        abbrFileName = "ASOM";
     } else if (fileBaseName == "cache_process_manager") {
         abbrFileName = "CPM";
     } else if (fileBaseName == "connect_server_manager") {
