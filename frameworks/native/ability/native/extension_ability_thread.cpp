@@ -224,7 +224,7 @@ void ExtensionAbilityThread::HandleAttach(const std::shared_ptr<AppExecFwk::OHOS
         return;
     }
 
-    TAG_LOGI(AAFwkTag::EXT, "HandleAttach, extension: %{public}s", abilityName.c_str());
+    TAG_LOGD(AAFwkTag::EXT, "HandleAttach, extension: %{public}s", abilityName.c_str());
     FreezeUtil::GetInstance().AddLifecycleEvent(abilityRecord->GetToken(), "ExtensionAbilityThread::HandleAttach");
     if (mainRunner == nullptr) {
         runner_ = AppExecFwk::EventRunner::Create(abilityName);
