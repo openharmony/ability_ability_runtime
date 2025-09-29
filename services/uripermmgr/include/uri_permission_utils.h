@@ -41,6 +41,8 @@ public:
     static bool CheckUriTypeIsValid(Uri &uri);
     static bool GetBundleApiTargetVersion(const std::string &bundleName, int32_t &targetApiVersion);
     static bool IsDocsCloudUri(Uri &uri);
+    static bool IsUdmfOrPasteboardCall();
+    static bool SendAutoPersistEvent(uint32_t callerTokenId, uint32_t targetTokenId);
 
 private:
     static std::shared_ptr<AppExecFwk::BundleMgrHelper> ConnectManagerHelper();

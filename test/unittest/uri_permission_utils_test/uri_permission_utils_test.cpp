@@ -173,5 +173,28 @@ HWTEST_F(UriPermissionUtilsTest, Upms_GetTokenIdByBundleName_001, TestSize.Level
     EXPECT_EQ(testTokenId, ERR_GET_TARGET_BUNDLE_INFO_FAILED);
 }
 
+/*
+ * Feature: UPMSUtils
+ * Function: IsUdmfOrPasteboardCall
+ * SubFunction: NA
+ * FunctionPoints: UPMSUtils IsUdmfOrPasteboardCall
+ */
+HWTEST_F(UriPermissionUtilsTest, IsUdmfOrPasteboardCall_001, TestSize.Level1)
+{
+    bool ret = UPMSUtils::IsUdmfOrPasteboardCall();
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * Feature: UPMSUtils
+ * Function: SendAutoPersistEvent
+ * SubFunction: NA
+ * FunctionPoints: UPMSUtils SendAutoPersistEvent
+ */
+HWTEST_F(UriPermissionUtilsTest, SendAutoPersistEvent_001, TestSize.Level1)
+{
+    auto ret = UPMSUtils::SendAutoPersistEvent(1001, 1002);
+    EXPECT_EQ(ret, true);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
