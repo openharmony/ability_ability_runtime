@@ -85,7 +85,6 @@ constexpr const char* PRODUCT_PRELOAD_APPLICATION_SETTING_ENABLED = "const.produ
 constexpr const char* FORBID_START = "persist.sys.abilityms.forbid_start";
 constexpr const char* RESTART_APP_WITH_WINDOW = "persist.sys.abilityms.restart_app_with_window";
 constexpr const char* ALLOW_DEBUG_PERMISSION = "persist.sys.abilityms.allow_debug_permission";
-constexpr const char* INHERIT_PLUGIN_NAMESPACE = "persist.sys.abilityms.inherit_plugin_namespace";
 // Support prepare terminate
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
@@ -868,16 +867,6 @@ bool AppUtils::IsSupportAllowDebugPermission()
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "restartApp: %{public}d", isSupportAllowDebugPermission_.value);
     return isSupportAllowDebugPermission_.value;
-}
-
-bool AppUtils::IsPluginNamespaceInherited()
-{
-    if (!isPluginNamespaceInherited_.isLoaded) {
-        isPluginNamespaceInherited_.value = system::GetBoolParameter(INHERIT_PLUGIN_NAMESPACE, false);
-        isPluginNamespaceInherited_.isLoaded = true;
-    }
-    TAG_LOGD(AAFwkTag::DEFAULT, "pluginNamespaceInherited: %{public}d", isPluginNamespaceInherited_.value);
-    return isPluginNamespaceInherited_.value;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
