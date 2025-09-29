@@ -102,7 +102,7 @@ int ImplicitStartProcessor::CheckImplicitCallPermission(const AbilityRequest& ab
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
     CHECK_POINTER_AND_RETURN(abilityMgr, ERR_INVALID_VALUE);
     bool isBackgroundCall = true;
-    if (abilityMgr->IsCallFromBackground(abilityRequest, isBackgroundCall) != ERR_OK) {
+    if (abilityMgr->IsCallFromBackground(abilityRequest, isBackgroundCall, false) != ERR_OK) {
         return ERR_CHECK_CALL_FROM_BACKGROUND_FAILED;
     }
     if (!isBackgroundCall) {

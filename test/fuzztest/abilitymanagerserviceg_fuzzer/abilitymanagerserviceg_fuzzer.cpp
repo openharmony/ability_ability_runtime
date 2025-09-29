@@ -79,9 +79,9 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 
     // fuzz for AbilityManagerService
     auto abilityms = std::make_shared<AbilityManagerService>();
-    abilityms->CheckCallAbilityPermission(abilityRequest);
+    abilityms->CheckCallAbilityPermission(abilityRequest, boolParam);
     abilityms->CheckStartByCallPermission(abilityRequest);
-    abilityms->IsCallFromBackground(abilityRequest, boolParam);
+    abilityms->IsCallFromBackground(abilityRequest, boolParam, boolParam);
     abilityms->CheckNewRuleSwitchState(stringParam);
     abilityms->GetStartUpNewRuleFlag();
     abilityms->AddStartControlParam(*want, token);
