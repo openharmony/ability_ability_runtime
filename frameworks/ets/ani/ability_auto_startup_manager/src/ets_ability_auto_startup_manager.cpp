@@ -205,7 +205,7 @@ void EtsAbilityAutoStartupManager::QueryAllAutoStartupApplications(ani_env *env,
 
 void EtsAbilityAutoStartupManager::NativeCheckCallerIsSystemApp(ani_env *env)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called QueryAllAutoStartupApplications");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called NativeCheckCallerIsSystemApp");
     if (!AppExecFwk::CheckCallerIsSystemApp()) {
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
     }
