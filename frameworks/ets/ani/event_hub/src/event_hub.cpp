@@ -94,12 +94,12 @@ ani_object EventHub::GetDynamicContextEventHub(ani_env *aniEnv, ani_object aniOb
     }
     ani_class contextCls = nullptr;
     auto status = aniEnv->FindClass("application.Context.Context", &contextCls);
-    if (status != ANI_OK || contextCls = nullptr) {
+    if (status != ANI_OK || contextCls == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
         return nullptr;
     }
     auto isApplicationContext = GetIsApplicationContext(aniEnv, aniObj);
-    std::string contextType = isApplicationContext ? "application" : "context";
+    std::string contextType = isApplicationContext ? "ApplicationContext" : "Context";
     ani_object staticResult = nullptr;
     {
         napi_env napiEnv = {};
@@ -107,7 +107,7 @@ ani_object EventHub::GetDynamicContextEventHub(ani_env *aniEnv, ani_object aniOb
             TAG_LOGE(AAFwkTag::APPKIT, "arkts_napi_scope_open failed");
             return nullptr;
         }
-        auto contextObj = ContextTransfer::GetInstance()->GetDynamicContext(contextType, napiEnv, context);
+        auto contextObj = ContextTransfer::GetInstance().GetDynamicObject(contextType, napiEnv, context);
         if (contextObj == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "GetDynamicContext failed");
             arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);

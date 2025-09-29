@@ -1139,10 +1139,10 @@ ani_object EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniE
     return applicationContextObject;
 }
 
-void EtsApplicationContextUtils::SetEventHUbContextIsApplicationContext(ani_env *aniEnv, ani_ref eventHubRef)
+void EtsApplicationContextUtils::SetEventHubContextIsApplicationContext(ani_env *aniEnv, ani_ref eventHubRef)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
-    if (aniEnv == nulltpr) {
+    if (aniEnv == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null env");
         return;
     }
@@ -1153,13 +1153,13 @@ void EtsApplicationContextUtils::SetEventHUbContextIsApplicationContext(ani_env 
         return;
     }
     ani_field contextField;
-    if ((status = aniEnv->Class_FindFiled(contextCls, "isApplicationContext", &contextField)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed status: %{public}d", "status");
+    if ((status = aniEnv->Class_FindField(contextCls, "isApplicationContext", &contextField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed status: %{public}d", status);
         return;
     }
-    if ((status = aniEnv->Object_SetField_Boolean(static_cast<ani_objet>(eventHubRef), contextFiled,
+    if ((status = aniEnv->Object_SetField_Boolean(static_cast<ani_object>(eventHubRef), contextField,
         true)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Boolean failed status: %{public}d", "status");
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Boolean failed status: %{public}d", status);
         return;
     }
 }
