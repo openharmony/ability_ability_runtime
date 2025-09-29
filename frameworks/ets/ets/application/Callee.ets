@@ -59,11 +59,11 @@ class EstParcelable {
     this.etsObj = etsObj;
   }
   marshalling(dataOut: rpc.MessageSequence): boolean {
-    let data = transfer.transferStatic(dataOut, 'rpc.MessageSequence') as rpc.MessageSequence;
+    let data = transfer.transferStatic(dataOut, 'Ipc.MessageSequence') as rpc.MessageSequence;
     return this.etsObj.marshalling(data);
   }
   unmarshalling(dataIn: rpc.MessageSequence): boolean {
-    let data = transfer.transferStatic(dataIn, 'rpc.MessageSequence') as rpc.MessageSequence;
+    let data = transfer.transferStatic(dataIn, 'Ipc.MessageSequence') as rpc.MessageSequence;
     return this.etsObj.unmarshalling(data);
   }
 }
@@ -76,21 +76,27 @@ class CalleeFromJs implements Callee {
   on(method: string, callback: CalleeCallback): void {
     if (CoroutineExtras.isMainWorker()) {
       ESValue.wrap(this.jsObj).invokeMethod('on', method, (seq: Any): EstParcelable => {
-        let data = transfer.transferStatic(seq, 'rpc.MessageSequence') as rpc.MessageSequence;
+        let data = transfer.transferStatic(seq, 'Ipc.MessageSequence') as rpc.MessageSequence;
         return new EstParcelable(callback(data));
       });
       return;
     }
     EAWorker.postToMain<void>((): void => {
       ESValue.wrap(this.jsObj).invokeMethod('on', method, (seq: Any): EstParcelable => {
-        let data = transfer.transferStatic(seq, 'rpc.MessageSequence') as rpc.MessageSequence;
+        let data = transfer.transferStatic(seq, 'Ipc.MessageSequence') as rpc.MessageSequence;
         return new EstParcelable(callback(data));
       });
     });
   }
 
   off(method: string): void {
-    ESValue.wrap(this.jsObj).invokeMethod('off', method);
+    if (CoroutineExtras.isMainWorker()) {
+      ESValue.wrap(this.jsObj).invokeMethod('off', method);
+      return;
+    }
+    EAWorker.postToMain<void>((): void => {
+      ESValue.wrap(this.jsObj).invokeMethod('off', method);
+    });
   }
 }
 
@@ -100,14 +106,30 @@ class JsParcelable implements rpc.Parcelable {
     this.jsObj = jsObj;
   }
   marshalling(dataOut: rpc.MessageSequence): boolean {
-    let ret = ESValue.wrap(this.jsObj).invokeMethod('marshalling',
-      ESValue.wrap(transfer.transferDynamic(dataOut, 'rpc.MessageSequence')));
-    return ret.toBoolean();
+    if (CoroutineExtras.isMainWorker()) {
+      let ret = ESValue.wrap(this.jsObj).invokeMethod('marshalling',
+        ESValue.wrap(transfer.transferDynamic(dataOut, 'Ipc.MessageSequence')));
+      return ret.toBoolean();
+    }
+    let job = EAWorker.postToMain<boolean>((): boolean => {
+      let ret = ESValue.wrap(this.jsObj).invokeMethod('marshalling',
+        ESValue.wrap(transfer.transferDynamic(dataOut, 'Ipc.MessageSequence')));
+      return ret.toBoolean();
+    });
+    return job.Await();
   }
   unmarshalling(dataIn: rpc.MessageSequence): boolean {
-    let ret = ESValue.wrap(this.jsObj).invokeMethod('unmarshalling',
-      ESValue.wrap(transfer.transferDynamic(dataIn, 'rpc.MessageSequence')));
-    return ret.toBoolean();
+    if (CoroutineExtras.isMainWorker()) {
+      let ret = ESValue.wrap(this.jsObj).invokeMethod('unmarshalling',
+        ESValue.wrap(transfer.transferDynamic(dataIn, 'Ipc.MessageSequence')));
+      return ret.toBoolean();
+    }
+    let job = EAWorker.postToMain<boolean>((): boolean => {
+      let ret = ESValue.wrap(this.jsObj).invokeMethod('unmarshalling',
+        ESValue.wrap(transfer.transferDynamic(dataIn, 'Ipc.MessageSequence')));
+      return ret.toBoolean();
+    });
+    return job.Await();
   }
 }
 
@@ -119,21 +141,20 @@ class CalleeFromEts {
   on(method: string, callback: (indata: Any) => Any): void {
     this.callee.on(method, (indata: rpc.MessageSequence): rpc.Parcelable => {
       if (CoroutineExtras.isMainWorker()) {
-        let retData = callback(transfer.transferDynamic(indata, 'rpc.MessageSequence'));
+        let retData = callback(transfer.transferDynamic(indata, 'Ipc.MessageSequence'));
         if (retData instanceof rpc.Parcelable) {
           return retData;
         }
         return new JsParcelable(retData);
       }
-      let job = EAWorker.postToMain<Any>((): Any => {
-        // Expect user to read data as js Parcelable.
-        return callback(transfer.transferDynamic(indata, 'rpc.MessageSequence'));
+      let job = EAWorker.postToMain<rpc.Parcelable>((): rpc.Parcelable => {
+        let retData = callback(transfer.transferDynamic(indata, 'Ipc.MessageSequence'));
+        if (retData instanceof rpc.Parcelable) {
+          return retData;
+        }
+        return new JsParcelable(retData);
       });
-      let retData = job.Await();
-      if (retData instanceof rpc.Parcelable) {
-        return retData;
-      }
-      return new JsParcelable(retData);
+      return job.Await();
     });
   }
 
