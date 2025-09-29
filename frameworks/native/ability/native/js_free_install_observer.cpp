@@ -72,7 +72,7 @@ void JsFreeInstallObserver::OnInstallFinished(const std::string &bundleName, con
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
     std::vector<napi_deferred> promises;
-    std::vector<napi_ref> callbacks;
+    std::vector<std::shared_ptr<NativeReference>> callbacks;
     {
         std::unique_lock<std::mutex> lock(jsObserverObjectListLock_);
         for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end();) {
@@ -103,7 +103,7 @@ void JsFreeInstallObserver::OnInstallFinished(const std::string &bundleName, con
         CallPromise(promise, abilityResult);
         FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
     }
-    for (const napi_ref& callback : callbacks) {
+    for (auto callback : callbacks) {
         CallCallback(callback, abilityResult);
         FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
     }
@@ -114,7 +114,7 @@ void JsFreeInstallObserver::HandleOnInstallFinished(const std::string &bundleNam
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
     std::vector<napi_deferred> promises;
-    std::vector<napi_ref> callbacks;
+    std::vector<std::shared_ptr<NativeReference>> callbacks;
     {
         std::unique_lock<std::mutex> lock(jsObserverObjectListLock_);
         for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end();) {
@@ -143,7 +143,7 @@ void JsFreeInstallObserver::HandleOnInstallFinished(const std::string &bundleNam
         CallPromise(promise, resultCode);
         FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
     }
-    for (const napi_ref& callback : callbacks) {
+    for (auto callback : callbacks) {
         CallCallback(callback, resultCode);
         FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
     }
@@ -154,7 +154,7 @@ void JsFreeInstallObserver::HandleOnInstallFinishedByUrl(const std::string &star
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
     std::vector<napi_deferred> promises;
-    std::vector<napi_ref> callbacks;
+    std::vector<std::shared_ptr<NativeReference>> callbacks;
     {
         std::unique_lock<std::mutex> lock(jsObserverObjectListLock_);
         for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end();) {
@@ -184,13 +184,13 @@ void JsFreeInstallObserver::HandleOnInstallFinishedByUrl(const std::string &star
         CallPromise(promise, resultCode);
         FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
     }
-    for (const napi_ref& callback : callbacks) {
+    for (auto callback : callbacks) {
         CallCallback(callback, resultCode);
         FinishAsyncTrace(HITRACE_TAG_ABILITY_MANAGER, "StartFreeInstall", atoi(startTime.c_str()));
     }
 }
 
-void JsFreeInstallObserver::CallCallback(napi_ref callback, int32_t resultCode)
+void JsFreeInstallObserver::CallCallback(std::shared_ptr<NativeReference> callback, int32_t resultCode)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
     if (callback == nullptr) {
@@ -204,12 +204,11 @@ void JsFreeInstallObserver::CallCallback(napi_ref callback, int32_t resultCode)
         value = CreateJsError(env_, GetJsErrorCodeByNativeError(resultCode));
     }
     napi_value argv[] = { value };
-    napi_value func = nullptr;
-    napi_get_reference_value(env_, callback, &func);
+    napi_value func = callback->GetNapiValue();
     napi_call_function(env_, CreateJsUndefined(env_), func, ArraySize(argv), argv, nullptr);
 }
 
-void JsFreeInstallObserver::CallCallback(napi_ref callback, napi_value abilityResult)
+void JsFreeInstallObserver::CallCallback(std::shared_ptr<NativeReference> callback, napi_value abilityResult)
 {
     TAG_LOGD(AAFwkTag::FREE_INSTALL, "call");
     if (callback == nullptr) {
@@ -220,8 +219,7 @@ void JsFreeInstallObserver::CallCallback(napi_ref callback, napi_value abilityRe
         CreateJsError(env_, 0),
         abilityResult,
     };
-    napi_value func = nullptr;
-    napi_get_reference_value(env_, callback, &func);
+    napi_value func = callback->GetNapiValue();
     napi_call_function(env_, CreateJsUndefined(env_), func, ArraySize(argv), argv, nullptr);
 }
 
@@ -310,7 +308,7 @@ void JsFreeInstallObserver::AddJsObserverCommon(JsFreeInstallObserverObject &obj
         napi_get_undefined(env_, result);
         napi_create_reference(env_, jsObserverObject, 1, &ref);
         object.deferred = nullptr;
-        object.callback = ref;
+        object.callback = std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference *>(ref));
     }
     std::unique_lock<std::mutex> lock(jsObserverObjectListLock_);
     jsObserverObjectList_.emplace_back(object);
