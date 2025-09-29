@@ -178,7 +178,6 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_path}/js_environment/frameworks/js_environment:js_environment",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:app_util",
-    "${ability_runtime_services_path}/common:event_report",
     "${ability_runtime_services_path}/common:task_handler_wrap",
   ]
 
@@ -398,7 +397,6 @@ ohos_shared_library("ability_stage_ani") {
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:app_util",
-    "${ability_runtime_services_path}/common:event_report",
   ]
 
   external_deps = [
@@ -753,8 +751,7 @@ ohos_shared_library("appkit_manager_helper") {
   }
 
   deps = [
-    "${ability_runtime_services_path}/common:app_util",
-    "${ability_runtime_services_path}/common:record_cost_time_util",
+    "${ability_runtime_services_path}/common:app_util"
   ]
 
   external_deps = [

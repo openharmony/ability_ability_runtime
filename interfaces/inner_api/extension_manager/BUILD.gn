@@ -52,7 +52,7 @@ ohos_shared_library("extension_manager") {
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_connect_callback_stub",
-    "${ability_runtime_services_path}/common:hitrace_chain_util",
+    "${ability_runtime_services_path}/common:app_util",
   ]
 
   external_deps = [

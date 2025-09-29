@@ -224,7 +224,7 @@ void ExtensionAbilityThread::HandleAttach(const std::shared_ptr<AppExecFwk::OHOS
         return;
     }
 
-    TAG_LOGI(AAFwkTag::EXT, "HandleAttach, extension: %{public}s", abilityName.c_str());
+    TAG_LOGD(AAFwkTag::EXT, "HandleAttach, extension: %{public}s", abilityName.c_str());
     FreezeUtil::GetInstance().AddLifecycleEvent(abilityRecord->GetToken(), "ExtensionAbilityThread::HandleAttach");
     if (mainRunner == nullptr) {
         runner_ = AppExecFwk::EventRunner::Create(abilityName);
@@ -661,7 +661,6 @@ void ExtensionAbilityThread::ScheduleAbilityRequestFailure(const std::string &re
     bool ret = abilityHandler_->PostTask(task, "ExtensionAbilityThread:ScheduleAbilityRequestFailure");
     if (!ret) {
         TAG_LOGE(AAFwkTag::EXT, "postTask error");
-        return;
     }
 }
 
@@ -682,13 +681,11 @@ void ExtensionAbilityThread::ScheduleAbilityRequestSuccess(const std::string &re
         }
         if (extensionAbilityThread->extensionImpl_ != nullptr) {
             extensionAbilityThread->extensionImpl_->ScheduleAbilityRequestSuccess(requestId, element);
-            return;
         }
     };
     bool ret = abilityHandler_->PostTask(task, "ExtensionAbilityThread:ScheduleAbilityRequestSuccess");
     if (!ret) {
         TAG_LOGE(AAFwkTag::EXT, "postTask error");
-        return;
     }
 }
 
