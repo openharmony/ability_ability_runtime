@@ -31,6 +31,7 @@ namespace {
 static std::once_flag g_bindNativeMethodsFlag;
 constexpr const char* ETS_APPLICATION_CONTEXT_CLASS_NAME = "application.ApplicationContext.ApplicationContext";
 constexpr const char* CLEANER_CLASS = "application.ApplicationContext.Cleaner";
+constexpr const char* ETS_EVENT_HUB_CLASS_NAME = "application.EventHub.EventHub";
 constexpr double FOUNT_SIZE = 0.0;
 constexpr double ERROR_CODE_NULL_ENV = -1;
 constexpr double ERROR_CODE_NULL_CALLBACK = -2;
@@ -1129,7 +1130,38 @@ ani_object EtsApplicationContextUtils::CreateEtsApplicationContext(ani_env* aniE
         return nullptr;
     }
     applicationContext->Bind(contextGlobalRef);
+    ani_ref eventHubRef = nullptr;
+    if ((status = aniEnv->Object_GetFieldByName_Ref(applicationContextObject, "eventHub", &eventHubRef)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_GetFieldByName_Ref failed status: %{public}d", status);
+        return nullptr;
+    }
+    SetEventHubContextIsApplicationContext(aniEnv, eventHubRef);
     return applicationContextObject;
+}
+
+void EtsApplicationContextUtils::SetEventHUbContextIsApplicationContext(ani_env *aniEnv, ani_ref eventHubRef)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    if (aniEnv == nulltpr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_class contextCls = nullptr;
+    if (aniEnv->FindClass(ETS_EVENT_HUB_CLASS_NAME, &contextCls) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass Context failed");
+        return;
+    }
+    ani_field contextField;
+    if ((status = aniEnv->Class_FindFiled(contextCls, "isApplicationContext", &contextField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed status: %{public}d", "status");
+        return;
+    }
+    if ((status = aniEnv->Object_SetField_Boolean(static_cast<ani_objet>(eventHubRef), contextFiled,
+        true)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Boolean failed status: %{public}d", "status");
+        return;
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
