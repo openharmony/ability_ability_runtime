@@ -900,7 +900,7 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
         return;
     }
 
-    TAG_LOGI(AAFwkTag::APPMGR, "appState: %{public}d, pState: %{public}d, bundle: %{public}s, ability: %{public}s",
+    TAG_LOGI(AAFwkTag::APPMGR, "appState: %{public}d, pState: %{public}d, %{public}s/%{public}s",
         curState_, pendingState_, mainBundleName_.c_str(), ability->GetName().c_str());
     // We need schedule application to foregrounded when current application state is ready or background running.
     if (curState_ == ApplicationState::APP_STATE_FOREGROUND
@@ -1085,7 +1085,7 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
 
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
     if (abilityRecord) {
-        TAG_LOGI(AAFwkTag::APPMGR, "TerminateAbility:%{public}s", abilityRecord->GetName().c_str());
+        TAG_LOGI(AAFwkTag::APPMGR, "terminate %{public}s", abilityRecord->GetName().c_str());
     }
     if (!isTimeout) {
         StateChangedNotifyObserver(

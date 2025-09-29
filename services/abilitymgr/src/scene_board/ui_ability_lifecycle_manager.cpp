@@ -3546,8 +3546,7 @@ void UIAbilityLifecycleManager::CancelPrepareTerminate(std::shared_ptr<AbilityRe
 {
     CHECK_POINTER(abilityRecord);
     auto abilityInfo = abilityRecord->GetAbilityInfo();
-    TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "canceling PrepareTerminate,bundle=%{public}s,module=%{public}s,ability=%{public}s",
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "canceling PrepareTerminate %{public}s/%{public}s/%{public}s",
         abilityInfo.bundleName.c_str(), abilityInfo.moduleName.c_str(), abilityInfo.name.c_str());
     std::unique_lock<std::mutex> lock(isTryPrepareTerminateByPidsDoneMutex_);
     auto iter = std::find_if(prepareTerminateByPidRecords_.begin(), prepareTerminateByPidRecords_.end(),

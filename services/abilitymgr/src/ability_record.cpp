@@ -142,8 +142,7 @@ std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemote
 
     std::string descriptor = Str16ToStr8(token->GetObjectDescriptor());
     if (descriptor != "ohos.aafwk.AbilityToken") {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "descriptor:%{public}s",
-            descriptor.c_str());
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "descriptor:%{public}s", descriptor.c_str());
         return nullptr;
     }
 
@@ -430,7 +429,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag, bool hasLastWant)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     isWindowStarted_ = true;
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ForegroundLifecycle: name:%{public}s", abilityInfo_.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ForegroundLifecycle %{public}s", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
 
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
@@ -568,7 +567,7 @@ void AbilityRecord::RemoveLoadTimeoutTask()
 {
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER(handler);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "RemoveLoadTimeoutTask recordId:%{public}" PRId64, GetAbilityRecordId());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "RemoveLoadTimeoutTask:%{public}" PRId64, GetAbilityRecordId());
     handler->RemoveEvent(AbilityManagerService::LOAD_HALF_TIMEOUT_MSG, GetAbilityRecordId());
     handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, GetAbilityRecordId());
 }
@@ -1316,7 +1315,7 @@ void AbilityRecord::SetPrelaunchFlag(bool isPrelaunch)
 void AbilityRecord::BackgroundAbility(const Closure &task)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "BackgroundLifecycle: ability:%{public}s", GetURI().c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "BackgroundLifecycle %{public}s", GetURI().c_str());
     if (lifecycleDeal_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "null lifecycleDeal_");
         return;
