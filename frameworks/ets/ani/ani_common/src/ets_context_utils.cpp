@@ -370,8 +370,8 @@ void SetEventHubContext(ani_env *aniEnv, ani_ref eventHubRef, ani_long nativeCon
     }
     ani_status status = ANI_ERROR;
     ani_class contextCls = nullptr;
-    if (aniEnv->FindClass(ETS_EVENT_HUB_CLASS_NAME, &contextCls) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "FindClass Context failed");
+    if ((status = aniEnv->FindClass(ETS_EVENT_HUB_CLASS_NAME, &contextCls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "FindClass Context failed status: %{public}d", status);
         return;
     }
     ani_field contextField;

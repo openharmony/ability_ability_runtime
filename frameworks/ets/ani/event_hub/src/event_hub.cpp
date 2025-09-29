@@ -116,24 +116,29 @@ ani_object EventHub::GetDynamicContextEventHub(ani_env *aniEnv, ani_object aniOb
         napi_value eventHub = nullptr;
         if (napi_get_named_property(napiEnv, contextObj, "eventHub", &eventHub) != napi_ok) {
             TAG_LOGE(AAFwkTag::APPKIT, "napi_get_named_property failed");
+            arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
             return nullptr;
         }
         if (eventHub == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "napi_get_named_property failed, eventHub nullptr");
+            arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
             return nullptr;
         }
         if (!CallNapiSetNativeEventHubRefFn(aniEnv, aniObj, napiEnv, eventHub)) {
             TAG_LOGE(AAFwkTag::APPKIT, "CallNapiSetNativeEventHubRefFn failed");
+            arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
             return nullptr;
         }
         hybridgref dynamicHybrigRef = nullptr;
         if (!hybridgref_create_from_napi(napiEnv, contextObj, &dynamicHybrigRef)) {
             TAG_LOGE(AAFwkTag::APPKIT, "hybridgref_create_from_napi failed");
+            arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
             return nullptr;
         }
         if (!hybridgref_get_esvalue(aniEnv, dynamicHybrigRef, &staticResult)) {
             TAG_LOGE(AAFwkTag::APPKIT, "hybridgref_get_esvalue failed");
             hybridgref_delete_from_napi(napiEnv, dynamicHybrigRef);
+            arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
             return nullptr;
         }
         hybridgref_delete_from_napi(napiEnv, dynamicHybrigRef);
