@@ -114,7 +114,7 @@ void ServiceExtensionContext::ClearFailedCallConnection(const std::shared_ptr<Ca
 ErrCode ServiceExtensionContext::ConnectAbility(
     const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "ConnectAbility called, caller:%{public}s, target:%{public}s",
+    TAG_LOGI(AAFwkTag::APPKIT, "Connect c:%{public}s, t:%{public}s",
         GetAbilityInfo() == nullptr ? "" : GetAbilityInfo()->name.c_str(), want.GetElement().GetAbilityName().c_str());
     ErrCode ret =
         ConnectionManager::GetInstance().ConnectAbility(token_, want, connectCallback);
@@ -209,7 +209,7 @@ ErrCode ServiceExtensionContext::ConnectAbilityWithAccount(
 ErrCode ServiceExtensionContext::DisconnectAbility(const AAFwk::Want &want,
     const sptr<AbilityConnectCallback> &connectCallback, int32_t accountId) const
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "DisconnectAbility called, caller:%{public}s, target:%{public}s",
+    TAG_LOGI(AAFwkTag::APPKIT, "Disconnect c:%{public}s, t:%{public}s",
         GetAbilityInfo() == nullptr ? "" : GetAbilityInfo()->name.c_str(), want.GetElement().GetAbilityName().c_str());
     ErrCode ret =
         ConnectionManager::GetInstance().DisconnectAbility(token_, want, connectCallback, accountId);

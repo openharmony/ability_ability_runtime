@@ -240,7 +240,7 @@ void MainThread::GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &h
         TAG_LOGD(AAFwkTag::APPKIT, "lib path = %{private}s", libPath.c_str());
         appLibPaths["default"].emplace_back(libPath);
     } else {
-        TAG_LOGI(AAFwkTag::APPKIT, "nativeLibraryPath is empty");
+        TAG_LOGI(AAFwkTag::APPKIT, "NativeLibPath empty");
     }
 
     for (auto &hapInfo : bundleInfo.hapModuleInfos) {
@@ -415,7 +415,7 @@ bool MainThread::ConnectToAppMgr()
         TAG_LOGE(AAFwkTag::APPKIT, "null appMgr_");
         return false;
     }
-    TAG_LOGI(AAFwkTag::APPKIT, "attach to appMGR");
+    TAG_LOGI(AAFwkTag::APPKIT, "attach");
     appMgr_->AttachApplication(this);
     TAG_LOGD(AAFwkTag::APPKIT, "end");
     return true;
@@ -2161,7 +2161,7 @@ void MainThread::CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::st
 
     if (loadSoFromDir) {
         if (nativeLibraryPath.empty()) {
-            TAG_LOGW(AAFwkTag::APPKIT, "nativeLibraryPath empty");
+            TAG_LOGW(AAFwkTag::APPKIT, "nativeLibPath empty");
             return;
         }
 
@@ -3027,7 +3027,7 @@ void MainThread::ForceFullGC()
 
 void MainThread::Start()
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "App main thread create, pid:%{public}d", getprocpid());
+    TAG_LOGI(AAFwkTag::APPKIT, "mainthread start, pid:%{public}d", getprocpid());
 
     std::shared_ptr<EventRunner> runner = EventRunner::GetMainEventRunner();
     if (runner == nullptr) {

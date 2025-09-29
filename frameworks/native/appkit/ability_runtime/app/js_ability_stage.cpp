@@ -187,7 +187,7 @@ void JsAbilityStage::Init(const std::shared_ptr<Context> &context,
 void JsAbilityStage::LoadModule(const AppExecFwk::HapModuleInfo &hapModuleInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::APPKIT, "AbilityStage::LoadModule");
+    TAG_LOGI(AAFwkTag::APPKIT, "LoadModule");
     std::string srcPath(hapModuleInfo.name);
     std::string moduleName(hapModuleInfo.moduleName);
     moduleName.append("::").append("AbilityStage");
