@@ -83,8 +83,10 @@ public:
     static void ReportDrawnCompleted(ani_env *env,  ani_object aniObj, ani_object callback);
     static void OpenLink(ani_env *env, ani_object aniObj, ani_string aniLink, ani_object myCallbackobj,
         ani_object optionsObj, ani_object callbackobj);
+    static void OpenLinkCheck(ani_env *env, ani_object aniObj, ani_string aniLink);
     static void OpenAtomicService(ani_env *env, ani_object aniObj, ani_string aniAppId,
         ani_object callbackobj, ani_object optionsObj);
+    static void OpenAtomicServiceCheck(ani_env *env, ani_object aniObj);
 
     static bool BindNativePtrCleaner(ani_env *env);
     static void Clean(ani_env *env, ani_object object);

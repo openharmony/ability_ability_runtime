@@ -58,6 +58,7 @@ public:
         ani_object callback);
     static void NativeOffLifecycleCallbackSync(ani_env *env, ani_object aniObj, ani_string type,
         ani_int callbackId, ani_object callback);
+    static void NativeOffAbilityLifecycleCheck(ani_env *env, ani_object aniObj);
     static void NativeOnInteropLifecycleCallbackSync(ani_env *env, ani_object aniObj, ani_string type,
         ani_object callback);
     static void NativeOffInteropLifecycleCallbackSync(ani_env *env, ani_object aniObj, ani_string type,
@@ -65,6 +66,7 @@ public:
     static void NativeOffApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
     static void NativeOnApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
     static void NativeOffEnvironmentSync(ani_env *env, ani_object aniObj, ani_int callbackId, ani_object callback);
+    static void NativeOffEnvironmentCheck(ani_env *env, ani_object aniObj);
     static ani_int NativeOnEnvironmentSync(ani_env *env, ani_object aniObj, ani_object envCallback);
 protected:
     std::weak_ptr<ApplicationContext> applicationContext_;

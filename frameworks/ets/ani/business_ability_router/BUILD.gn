@@ -42,6 +42,7 @@ ohos_shared_library("businessabilityrouter_ani") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${srms_inner_api_path}:srms_fwk",
   ]
 

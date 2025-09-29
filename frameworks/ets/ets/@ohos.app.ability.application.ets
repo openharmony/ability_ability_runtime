@@ -31,7 +31,9 @@ export default namespace application {
 
   export native function nativeGetApplicationContext(): ApplicationContext;
 
+  export native function nativeCreateModuleContextCheck(context: Context, moduleName: string, bundleName?: string): void;
   export function createModuleContext(context: Context, moduleName: string): Promise<Context> {
+    application.nativeCreateModuleContextCheck(context, moduleName);
     let p =
       new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError | null, data: Context | undefined) => {
@@ -49,6 +51,7 @@ export default namespace application {
   }
 
   export function createModuleContext(context: Context, bundleName: string, moduleName: string): Promise<Context> {
+    application.nativeCreateModuleContextCheck(context, moduleName, bundleName);
     let p =
       new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError | null, data: Context | undefined) => {
@@ -65,7 +68,9 @@ export default namespace application {
     return p;
   }
 
+  export native function nativeCreateBundleContextCheck(context: Context, bundleName: string): void;
   export function createBundleContext(context: Context, bundleName: string): Promise<Context> {
+    application.nativeCreateBundleContextCheck(context, bundleName);
     let p =
       new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError | null, data: Context | undefined) => {
@@ -82,8 +87,11 @@ export default namespace application {
     return p;
   }
 
-    export function createPluginModuleContext(context: Context, pluginBundleName: string,
+  export native function nativeCreatePluginModuleContextCheck(context: Context, pluginBundleName: string,
+    pluginModuleName: string): void;
+  export function createPluginModuleContext(context: Context, pluginBundleName: string,
     pluginModuleName: string): Promise<Context> {
+    application.nativeCreatePluginModuleContextCheck(context, pluginBundleName, pluginModuleName);
     let p =
       new Promise<Context>((resolve: (data: Context) => void, reject: (err: BusinessError) => void): void => {
         let myCall = new AsyncCallbackWrapper<Context>((err: BusinessError | null, data: Context | undefined) => {

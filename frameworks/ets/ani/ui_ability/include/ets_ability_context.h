@@ -130,12 +130,18 @@ public:
         ani_object callbackObj, ani_object startOptionsObj);
     static void StartRecentAbility(ani_env *env, ani_object aniObj, ani_object wantObj,
         ani_object callbackObj, ani_object startOptionsObj);
+    static void OpenLinkCheck(ani_env *env, ani_object aniObj, ani_string aniLink);
+    static void OpenAtomicServiceCheck(ani_env *env, ani_object aniObj);
+    static void StartAbilityForResultWithAccountCheck(ani_env *env, ani_object aniObj);
 
 #ifdef SUPPORT_GRAPHICS
 public:
     static void SetAbilityInstanceInfo(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object iconObj,
         ani_object callback);
     static void SetMissionIcon(ani_env *env, ani_object aniObj, ani_object pixelMapObj, ani_object callbackObj);
+    static void SetAbilityInstanceInfoCheck(ani_env *env, ani_object aniObj, ani_object iconObj);
+    static void SetMissionIconCheck(ani_env *env, ani_object aniObj, ani_object pixelMapObj);
+
 private:
     void OnSetAbilityInstanceInfo(ani_env *env, ani_object aniObj, ani_string labelObj, ani_object iconObj,
         ani_object callback);

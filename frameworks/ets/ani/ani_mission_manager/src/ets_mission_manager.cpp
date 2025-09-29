@@ -92,6 +92,11 @@ public:
         instance.OnGetMissionSnapShot(env, deviceId, missionId, callback, true);
     }
 
+    static void ArrayLengthCheck(ani_env *env, ani_object missionIds)
+    {
+        instance.OnArrayLengthCheck(env, missionIds);
+    }
+
     static void MoveMissionsToBackground(ani_env *env, ani_object missionIds, ani_object callback)
     {
         instance.OnMoveMissionsToBackground(env, missionIds, callback);
@@ -382,6 +387,21 @@ private:
         return objValue;
     }
 
+    void OnArrayLengthCheck(ani_env *env, ani_object missionIds)
+    {
+        if (env == nullptr) {
+            TAG_LOGE(AAFwkTag::MISSION, "null env");
+            return;
+        }
+        std::vector<int32_t> missionIdList;
+        ani_size arrayLen = 0;
+        ani_status status = env->Array_GetLength(reinterpret_cast<ani_array>(missionIds), &arrayLen);
+        if (status != ANI_OK || arrayLen == 0) {
+            TAG_LOGE(AAFwkTag::MISSION, "missionIds is not a valid array or empty");
+            EtsErrorUtil::ThrowInvalidParamError(env, "Parse param missionIds failed, the size of missionIds must above zero.");
+            return;
+        }
+    }
     void OnMoveMissionsToBackground(ani_env *env, ani_object missionIds, ani_object callback)
     {
         TAG_LOGD(AAFwkTag::MISSION, "OnMoveMissionsToBackground Call");
@@ -733,6 +753,11 @@ void EtsMissionManagerInit(ani_env *env)
             "nativeGetLowResolutionMissionSnapShot",
             "C{std.core.String}iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsMissionManager::GetLowResolutionMissionSnapShot)
+        },
+        ani_native_function {
+            "nativeArrayLengthCheck",
+            "C{escompat.Array}:",
+            reinterpret_cast<void *>(EtsMissionManager::ArrayLengthCheck)
         },
         ani_native_function {
             "nativeMoveMissionsToBackground",
