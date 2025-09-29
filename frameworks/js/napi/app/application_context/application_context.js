@@ -34,7 +34,7 @@ class EventHub {
     this.emitter = undefined;
   }
 
-  setNativeEventHub(ref) {
+  setNativeEventHubRef(ref) {
     this.nativeEventHubRef = ref;
   }
 
@@ -130,7 +130,7 @@ class EventHub {
     }
   }
 
-  off (event, callback) {
+  off(event, callback) {
     if (typeof (event) !== 'string') {
       throw new BusinessError(ERROR_CODE_INVALID_PARAM);
       return;
@@ -149,7 +149,7 @@ class EventHub {
         delete this.eventMap[event];
       }
     }
-    if (this.nativeEventHubRef !== null) {
+    if (this.nativeEventHubRef != null) {
       if (callback) {
         this.nativeEventHubRef.offByDynamicContext(event, callback);
       } else {
@@ -187,7 +187,7 @@ class EventHub {
         cloneArray[i].apply(this, args);
       }
     }
-    if (this.nativeEventHubRef !== null) {
+    if (this.nativeEventHubRef != null) {
       this.nativeEventHubRef.emitByDynamicContext(event, ...args);
     }
   }

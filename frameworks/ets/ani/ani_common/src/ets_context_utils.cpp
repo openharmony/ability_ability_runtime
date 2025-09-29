@@ -652,6 +652,7 @@ ani_object CreateContextObject(ani_env* env, ani_class contextClass, std::shared
     }
     if ((status = env->GlobalReference_Create(contextObj, contextGlobalRef)) != ANI_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "GlobalReference_Create failed status: %{public}d", status);
+        delete contextGlobalRef;
         return nullptr;
     }
     nativeContext->Bind(contextGlobalRef);
