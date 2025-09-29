@@ -6714,7 +6714,6 @@ int AbilityManagerService::AttachAbilityThread(
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     XCOLLIE_TIMER_LESS(__PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "AttachAbilityThread called");
     CHECK_POINTER_AND_RETURN(scheduler, ERR_INVALID_VALUE);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && !VerificationAllToken(token)) {
         return ERR_INVALID_VALUE;
@@ -6728,6 +6727,7 @@ int AbilityManagerService::AttachAbilityThread(
     auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
     auto abilityInfo = abilityRecord->GetAbilityInfo();
     auto type = abilityInfo.type;
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s", abilityRecord->GetURI().c_str());
     // force timeout ability for test
     if (IsNeedTimeoutForTest(abilityInfo.name, AbilityRecord::ConvertAbilityState(AbilityState::INITIAL))) {
         TAG_LOGW(AAFwkTag::ABILITYMGR,
