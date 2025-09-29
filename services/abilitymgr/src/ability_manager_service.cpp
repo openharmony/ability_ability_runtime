@@ -6728,6 +6728,7 @@ int AbilityManagerService::AttachAbilityThread(
     auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
     auto abilityInfo = abilityRecord->GetAbilityInfo();
     auto type = abilityInfo.type;
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "%{public}s", abilityRecord->GetURI().c_str());
     // force timeout ability for test
     if (IsNeedTimeoutForTest(abilityInfo.name, AbilityRecord::ConvertAbilityState(AbilityState::INITIAL))) {
         TAG_LOGW(AAFwkTag::ABILITYMGR,

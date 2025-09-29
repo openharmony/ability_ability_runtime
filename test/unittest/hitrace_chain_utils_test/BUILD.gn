@@ -27,7 +27,7 @@ ohos_unittest("hitrace_chain_utils_test") {
 
   sources = [ "hitrace_chain_utils_test.cpp" ]
 
-  deps = [ "${ability_runtime_services_path}/common:hitrace_chain_util" ]
+  deps = [ "${ability_runtime_services_path}/common:app_util" ]
 
   external_deps = [
     "c_utils:utils",

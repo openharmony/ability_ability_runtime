@@ -48,7 +48,6 @@ ohos_unittest("ets_ui_ability_instance_test") {
     "${ability_runtime_native_path}/insight_intent/insight_intent_context:insightintentcontext",
     "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:app_util",
-    "${ability_runtime_services_path}/common:event_report",
   ]
 
   external_deps = [
