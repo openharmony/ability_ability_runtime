@@ -71,4 +71,12 @@ export class AbilityUtils {
     }
     return false;
   }
+
+  public static createBusinessError(code: int, message: string) {
+    let err = new BusinessError();
+    err.code = code;
+    err.name = 'Error';
+    err.message = message;
+    return err;
+  }
 }

@@ -69,6 +69,7 @@ public:
     static void Trigger(ani_env *env, ani_object agent, ani_object triggerInfoObj, ani_object call);
     static void GetWantAgent(ani_env *env, ani_object info, ani_object call);
     static void Clean(ani_env *env, ani_object object);
+    static void TriggerCheck(ani_env *env, ani_object agent, ani_object triggerInfoObj);
 
 private:
     void OnEqual(ani_env *env, ani_object agent, ani_object otherAgent, ani_object call);

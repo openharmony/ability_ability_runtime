@@ -32,8 +32,10 @@ export default namespace abilityManager {
   export native function nativeGetForegroundUIAbilities(): Array<AbilityStateData>;
   export native function getForegroundUIAbilitiesCallback(callback:AsyncCallbackWrapper<Array<AbilityStateData>>) : void;
   export native function nativeGetTopAbility(callback:AsyncCallbackWrapper<ElementName>) : void;
+  export native function nativeGetTopAbilityCheck() : void;
   export native function nativeGetAbilityRunningInfos(callback:AsyncCallbackWrapper<Array<AbilityRunningInfo>>) : void;
   export native function nativeIsEmbeddedOpenAllowed(context: Context, appId: string, callback:AsyncCallbackWrapper<boolean>) : void;
+  export native function nativeIsEmbeddedOpenAllowedCheck(context: Context): void;
   export native function nativeOn(type:string, observer: AbilityForegroundStateObserver): void;
   export native function nativeOff(type:string, observer?: AbilityForegroundStateObserver): void;
   export native function nativeNotifyDebugAssertResult(sessionId: string, status: UserStatus, callback: AsyncCallbackWrapper<void>): void;
@@ -70,6 +72,7 @@ export default namespace abilityManager {
   }
 
   export function getTopAbility():Promise<ElementName> {
+    abilityManager.nativeGetTopAbilityCheck();
     let p = new Promise<ElementName>((resolve: (data: ElementName)=>void, reject:(err: BusinessError)=>void):void => {
       let myCall = new AsyncCallbackWrapper<ElementName>((err: BusinessError | null, data: ElementName | undefined)=>{
         if (err == null || err.code == 0) {
@@ -86,6 +89,7 @@ export default namespace abilityManager {
   }
 
   export function getTopAbility(callback: AsyncCallback<ElementName, void>): void {
+      abilityManager.nativeGetTopAbilityCheck();
       let myCall = new AsyncCallbackWrapper<ElementName>(callback);
       taskpool.execute( (): void => {
           abilityManager.nativeGetTopAbility(myCall);
@@ -117,6 +121,7 @@ export default namespace abilityManager {
   }
 
   function isEmbeddedOpenAllowed(context: Context, appId: string): Promise<boolean> {
+    abilityManager.nativeIsEmbeddedOpenAllowedCheck(context);
     return new Promise<boolean>((resolve:(data:boolean)=>void, reject:(err: BusinessError | null)=>void):void => {
       let asyncCall = new AsyncCallbackWrapper<boolean>((err: BusinessError | null, data: boolean | undefined)=>{
         if (err == null || err.code == 0) {
