@@ -42,7 +42,6 @@ ohos_unittest("ability_record_first_test") {
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:app_util",
-    "${ability_runtime_services_path}/common:event_report",
   ]
 
   external_deps = [
