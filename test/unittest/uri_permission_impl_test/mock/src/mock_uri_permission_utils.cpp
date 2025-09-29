@@ -102,5 +102,15 @@ bool UPMSUtils::IsDocsCloudUri(Uri &uri)
 {
     return MyFlag::isDocsCloudUri_;
 }
+
+bool UPMSUtils::IsUdmfOrPasteboardCall()
+{
+    return MyFlag::isUdmfOrPasteboardCallRet_;
+}
+
+bool UPMSUtils::SendAutoPersistEvent(uint32_t callerTokenId, uint32_t targetTokenId)
+{
+    return true;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

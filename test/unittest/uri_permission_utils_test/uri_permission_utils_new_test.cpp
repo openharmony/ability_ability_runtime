@@ -158,6 +158,18 @@ HWTEST_F(UriPermissionUtilsNewTest, Upms_IsDocsCloudUri_001, TestSize.Level1)
 
 /*
  * Feature: UPMSUtils
+ * Function: IsDocsCloudUri
+ * SubFunction: NA
+ * FunctionPoints: UPMSUtils IsDocsCloudUri
+ */
+HWTEST_F(UriPermissionUtilsNewTest, IsDocsCloudUri_002, TestSize.Level1)
+{
+    Uri uri("file://docs/temp.txt?networkid=1001");
+    EXPECT_TRUE(UPMSUtils::IsDocsCloudUri(uri));
+}
+
+/*
+ * Feature: UPMSUtils
  * Function: CheckUriTypeIsValid
  * SubFunction: NA
  * FunctionPoints: UPMSUtils CheckUriTypeIsValid

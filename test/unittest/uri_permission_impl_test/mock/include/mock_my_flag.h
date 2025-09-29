@@ -89,6 +89,7 @@ public:
         upmsUtilsTokenId_ = 0;
         upmsUtilsIsFoundationCallRet_ = false;
         tokenInfos = {};
+        isUdmfOrPasteboardCallRet_ = false;
     }
 
     static int flag_;
@@ -126,6 +127,7 @@ public:
     static uint32_t upmsUtilsTokenId_;
     static bool upmsUtilsIsFoundationCallRet_;
     static TokenInfoMap tokenInfos;
+    static bool isUdmfOrPasteboardCallRet_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

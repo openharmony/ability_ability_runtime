@@ -32,6 +32,9 @@ namespace {
 constexpr int32_t DEFAULT_USER_ID = 0;
 constexpr int32_t API_VERSION_MOD = 100;
 constexpr int32_t FOUNDATION_UID = 5523;
+constexpr int32_t UDMF_UID = 3012;
+constexpr int32_t PASTEBOARD_UID = 3816;
+constexpr int32_t BROKER_PASTEBOARD_UID = 5557;
 constexpr const char* NET_WORK_ID_MARK = "?networkid=";
 }
 
@@ -79,6 +82,20 @@ bool UPMSUtils::SendSystemAppGrantUriPermissionEvent(uint32_t callerTokenId, uin
     }
     TAG_LOGD(AAFwkTag::URIPERMMGR, "send grant uri permission event end.");
     return false;
+}
+
+bool UPMSUtils::SendAutoPersistEvent(uint32_t callerTokenId, uint32_t targetTokenId)
+{
+    EventInfo eventInfo;
+    std::string callerBundleName;
+    GetBundleNameByTokenId(callerTokenId, callerBundleName);
+    eventInfo.callerBundleName = callerBundleName;
+    std::string targetBundleName;
+    GetBundleNameByTokenId(targetTokenId, targetBundleName);
+    eventInfo.bundleName = targetBundleName;
+    eventInfo.uri = "autoPersist";
+    EventReport::SendGrantUriPermissionEvent(EventName::GRANT_URI_PERMISSION, eventInfo);
+    return true;
 }
 
 bool UPMSUtils::CheckAndCreateEventInfo(uint32_t callerTokenId, uint32_t targetTokenId,
@@ -297,6 +314,12 @@ bool UPMSUtils::CheckUriTypeIsValid(Uri &uri)
 bool UPMSUtils::IsDocsCloudUri(Uri &uri)
 {
     return (uri.GetAuthority() == "docs" && uri.ToString().find(NET_WORK_ID_MARK) != std::string::npos);
+}
+
+bool UPMSUtils::IsUdmfOrPasteboardCall()
+{
+    auto uid = IPCSkeleton::GetCallingUid();
+    return uid == UDMF_UID || uid == PASTEBOARD_UID || uid == BROKER_PASTEBOARD_UID;
 }
 
 std::shared_ptr<AppExecFwk::BundleMgrHelper> UPMSUtils::bundleMgrHelper_ = nullptr;
