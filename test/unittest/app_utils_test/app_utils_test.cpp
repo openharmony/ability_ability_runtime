@@ -1066,5 +1066,33 @@ HWTEST_F(AppUtilsTest, IsSupportAllowDebugPermission_0200, TestSize.Level2)
     appUtils.isSupportAllowDebugPermission_.value = true;
     EXPECT_TRUE(appUtils.IsSupportAllowDebugPermission());
 }
+
+/**
+ * @tc.number: IsPluginNamespaceInherited_0100
+ * @tc.desc: Test IsPluginNamespaceInherited works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsPluginNamespaceInherited_0100, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsPluginNamespaceInherited_0100 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isPluginNamespaceInherited_.isLoaded = false;
+    appUtils.IsPluginNamespaceInherited();
+    EXPECT_TRUE(appUtils.isPluginNamespaceInherited_.isLoaded);
+}
+
+/**
+ * @tc.number: IsPluginNamespaceInherited_0200
+ * @tc.desc: Test IsPluginNamespaceInherited works
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppUtilsTest, IsPluginNamespaceInherited_0200, TestSize.Level2)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsPluginNamespaceInherited_0200 called.");
+    auto &appUtils = AAFwk::AppUtils::GetInstance();
+    appUtils.isPluginNamespaceInherited_.isLoaded = true;
+    appUtils.isPluginNamespaceInherited_.value = true;
+    EXPECT_TRUE(appUtils.IsPluginNamespaceInherited());
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

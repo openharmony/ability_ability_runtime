@@ -358,6 +358,8 @@ public:
     bool IsSupportRestartAppWithWindow();
 
     bool IsSupportAllowDebugPermission();
+
+    bool IsPluginNamespaceInherited();
 private:
     /**
      * LoadResidentProcessInExtremeMemory, load resident process in extreme low memory.
@@ -445,6 +447,7 @@ private:
     volatile DeviceConfiguration<bool> isForbidStart_ = {true, false};
     volatile DeviceConfiguration<bool> isSupportRestartAppWithWindow_ = {false, false};
     volatile DeviceConfiguration<bool> isSupportAllowDebugPermission_ = {false, false};
+    volatile DeviceConfiguration<bool> isPluginNamespaceInherited_ = {false, true};
     DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
         residentProcessInExtremeMemory_ = {false, {}};
     std::mutex residentProcessInExtremeMemoryMutex_;
