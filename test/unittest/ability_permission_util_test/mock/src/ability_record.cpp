@@ -55,5 +55,10 @@ const AppExecFwk::ApplicationInfo &AbilityRecord::GetApplicationInfo() const
 {
     return appInfo;
 }
+
+int32_t AbilityRecord::GetUid() const
+{
+    return uid_;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
