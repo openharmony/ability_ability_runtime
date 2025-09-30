@@ -38,6 +38,7 @@ const std::string KEY_KEEP_ALIVE_CONFIGURED_LIST = "KEEP_ALIVE_CONFIGURED_LIST";
 
 bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
+    (void)data;
     struct AmsRdbConfig amsRdbConfig;
     amsRdbConfig.tableName = "resident_process_list";
     AmsResidentProcessRdbCallBack amsCallback(amsRdbConfig);
