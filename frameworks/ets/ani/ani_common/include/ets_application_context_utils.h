@@ -92,6 +92,7 @@ private:
     void OnNativeOnApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
     void OnNativeOffEnvironmentSync(ani_env *env, ani_object aniObj, ani_int callbackId, ani_object callback);
     ani_int OnNativeOnEnvironmentSync(ani_env *env, ani_object aniObj, ani_object envCallback);
+    static void SetEventHubContextIsApplicationContext(ani_env *aniEnv, ani_ref eventHubRef);
     std::shared_ptr<EtsEnviromentCallback> etsEnviromentCallback_;
     std::shared_ptr<EtsApplicationStateChangeCallback> applicationStateCallback_;
 };
