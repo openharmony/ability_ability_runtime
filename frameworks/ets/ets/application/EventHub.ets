@@ -18,6 +18,7 @@ export type FixedArgs = Object | null | undefined
 
 export default class EventHub {
   private nativeContext: long = 0;
+  private isApplicationContext: boolean = false;
   private eventMap: Map<string, Function[]> = new Map<string, Function[]>();
   private dynamicContextEventHub?: ESValue;
   private native getDynamicContextEventHub(): ESValue;
