@@ -7861,6 +7861,11 @@ bool AppMgrServiceInner::AllowDebugCheck(const ApplicationInfo &appInfo)
         TAG_LOGI(AAFwkTag::APPMGR, "debug type ok");
         return true;
     }
+    return HasPermissionAllDebug(appInfo);
+}
+
+bool AppMgrServiceInner::HasPermissionAllDebug(const ApplicationInfo &appInfo)
+{
     if (!AAFwk::AppUtils::GetInstance().IsSupportAllowDebugPermission()) {
         return false;
     }
@@ -7909,7 +7914,7 @@ int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &wan
     auto&& pefCmd = want.GetStringParam(PERF_CMD);
     std::string debugCmd = "";
     if (pefCmd.empty()) {
-        if (!appInfo->debug) {
+        if (!appInfo->debug && !HasPermissionAllDebug(*appInfo)) {
             TAG_LOGE(AAFwkTag::APPMGR, "app don't debug mode");
             return ERR_INVALID_OPERATION;
         }
