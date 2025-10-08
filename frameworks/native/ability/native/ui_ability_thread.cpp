@@ -623,7 +623,11 @@ void UIAbilityThread::CallRequest()
 
         retval = currentAbility->CallRequest();
     };
+    std::string entry = "UIAbilityThread::CallRequest Begin";
+    FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
     abilityHandler_->PostSyncTask(syncTask, "UIAbilityThread:CallRequest");
+    std::string end = "UIAbilityThread::CallRequest End";
+    FreezeUtil::GetInstance().AddLifecycleEvent(token_, end);
     AbilityManagerClient::GetInstance()->CallRequestDone(token_, retval);
     TAG_LOGD(AAFwkTag::UIABILITY, "end");
 }
