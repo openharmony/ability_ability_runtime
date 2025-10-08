@@ -43,6 +43,7 @@ ani_object NativeCreateAreaModeContext(ani_env *env, ani_object aniObj, ani_obje
 ani_object NativeCreateSystemHspModuleResourceManager(ani_env *env, ani_object aniObj,
     ani_string bundleNameObj, ani_string moduleNameObj);
 ani_object CreateContextObject(ani_env* env, ani_class contextClass, std::shared_ptr<Context> nativeContext);
+void SetEventHubContext(ani_env *aniEnv, ani_ref eventHubRef, ani_long nativeContextLong);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

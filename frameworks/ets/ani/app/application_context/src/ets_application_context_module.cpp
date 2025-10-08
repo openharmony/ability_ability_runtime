@@ -202,6 +202,14 @@ napi_value EtsApplicationContextModule::GetOrCreateDynamicObject(napi_env napiEn
         return dynamicContext->Get();
     }
 
+    if (!applicationContext->GetApplicationInfoUpdateFlag()) {
+        auto appContextObj = ApplicationContextManager::GetApplicationContextManager().GetGlobalObject(napiEnv);
+        if (appContextObj != nullptr) {
+            TAG_LOGI(AAFwkTag::UIABILITY, "there exist a appContextObj");
+            return appContextObj->GetNapiValue();
+        }
+    }
+
     // if main-thread bindingObj didn't exist, create and bind
     auto nativeRef = CreateNativeReference(napiEnv, applicationContext);
     if (nativeRef == nullptr) {
