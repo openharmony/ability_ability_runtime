@@ -30,10 +30,10 @@ class EventHub {
 public:
     static ani_object GetDynamicContextEventHub(ani_env *env, ani_object aniObj);
     static void InitAniEventHub(ani_env *aniEnv);
-    static void SetEventHubContext(ani_env *aniEnv, ani_ref eventHubRef, ani_long nativeContextLong);
  
 private:
-    static std::shared_ptr<AbilityContext> GetAbilityContext(ani_env *env, ani_object aniObj);
+    static std::shared_ptr<Context> GetContext(ani_env *env, ani_object aniObj);
+    static bool GetIsApplicationContext(ani_env *env, ani_object aniObj);
     static bool CallNapiSetNativeEventHubRefFn(ani_env *aniEnv, ani_object aniObj, napi_env napiEnv,
         napi_value eventHub);
 };
