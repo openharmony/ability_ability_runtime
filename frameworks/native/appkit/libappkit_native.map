@@ -33,6 +33,8 @@
       *StartupUtils*;
       *Watchdog*;
       *ExtNativeStartupTask*;
+      *GetAppPreload*;
+      *ClearAppPreload*;
     };
     extern "C" {
       Ffi*;

@@ -575,6 +575,11 @@ ohos_unittest("context_deal_test") {
 
 ohos_unittest("application_impl_test") {
   module_out_path = module_output_path
+
+  include_dirs = [
+    "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
+  ]
+
   sources = [
     "${ability_runtime_native_path}/appkit/app/app_context.cpp",
     "${ability_runtime_native_path}/appkit/app/app_loader.cpp",
