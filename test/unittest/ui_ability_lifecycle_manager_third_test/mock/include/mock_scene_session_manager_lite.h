@@ -130,6 +130,9 @@ public:
     MOCK_METHOD(WMError, GetRouterStackInfo, (int32_t persistentId,
         const sptr<ISessionRouterStackListener>& listener), (override));
     MOCK_METHOD(WSError, IsFocusWindowParent, (const sptr<IRemoteObject>& token, bool& isParent), (override));
+    MOCK_METHOD(WMError, GetDisplayIdByWindowId,
+        ((const std::vector<uint64_t> &windowIds), (std::unordered_map<uint64_t, DisplayId> & windowDisplayIdMap)),
+        (override));
 };
 } // namespace OHOS::Rosen
 #endif // MOCK_SCENE_SESSION_MANAGER_LITE_H
