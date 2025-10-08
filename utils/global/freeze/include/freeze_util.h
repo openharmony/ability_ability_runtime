@@ -30,7 +30,8 @@ public:
         LOAD,
         FOREGROUND,
         BACKGROUND,
-        CONNECT
+        CONNECT,
+        BY_CALL
     };
 
     struct LifecycleFlow {
