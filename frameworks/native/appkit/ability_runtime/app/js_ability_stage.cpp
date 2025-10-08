@@ -30,6 +30,7 @@
 #include "ohos_application.h"
 #include "startup_manager.h"
 #include "hitrace_meter.h"
+#include "application_env.h"
 #include <algorithm>
 #include <cstring>
 #include <exception>
@@ -231,6 +232,7 @@ void JsAbilityStage::OnCreate(const AAFwk::Want &want) const
 
     if (!jsAbilityStageObj_) {
         TAG_LOGW(AAFwkTag::APPKIT, "Not found AbilityStage.js");
+        ClearAppPreload();
         return;
     }
 
@@ -253,6 +255,7 @@ void JsAbilityStage::OnCreate(const AAFwk::Want &want) const
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     napi_call_function(env, obj, methodOnCreate, 0, nullptr, nullptr);
     FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "JsAbilityStage::OnCreate end");
+    ClearAppPreload();
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     if (delegator) {

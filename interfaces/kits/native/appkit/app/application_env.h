@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_APPLICATION_ENV_H
 #define OHOS_ABILITY_RUNTIME_APPLICATION_ENV_H
 
+#include <cstdint>
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -42,6 +43,18 @@ const char *GetSrcPath();
  * @return Returns the pointer to the data path of this application.
  */
 const char *GetDataPath();
+
+/**
+* @brief Obtains the app preload type of the application
+* @param -
+* @return Returns the application preload type identifier
+*/
+int32_t GetAppPreload();
+
+/**
+* @brief Clears the application preload state
+*/
+void ClearAppPreload();
 
 #ifdef __cplusplus
 #if __cplusplus
