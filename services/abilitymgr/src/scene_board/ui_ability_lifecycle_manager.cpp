@@ -2933,46 +2933,71 @@ void UIAbilityLifecycleManager::OnAppStateChanged(const AppInfo &info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call.");
-    if (info.state == AppState::TERMINATED || info.state == AppState::END) {
-        for (const auto& abilityRecord : terminateAbilityList_) {
-            if (abilityRecord == nullptr) {
-                TAG_LOGW(AAFwkTag::ABILITYMGR, "null abilityRecord");
-                continue;
-            }
-            if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
-                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
-                abilityRecord->SetAppState(info.state);
-            }
-        }
-        return;
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "OnAppStateChanged Call.");
+
+    switch (info.state) {
+        case AppState::TERMINATED:
+        case AppState::END:
+            HandleTerminatedOrEndState(info);
+            break;
+        case AppState::COLD_START:
+            HandleColdStartState(info);
+            break;
+        default:
+            HandleOtherAppState(info);
+            break;
     }
-    if (info.state == AppState::COLD_START) {
-        for (const auto& [sessionId, abilityRecord] : sessionAbilityMap_) {
-            if (abilityRecord == nullptr) {
-                TAG_LOGW(AAFwkTag::ABILITYMGR, "null abilityRecord");
-                continue;
-            }
-            if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
-                info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
-#ifdef SUPPORT_SCREEN
-                abilityRecord->SetColdStartFlag(true);
-#endif // SUPPORT_SCREEN
-                break;
-            }
-        }
-        return;
-    }
-    for (const auto& [sessionId, abilityRecord] : sessionAbilityMap_) {
+}
+
+void UIAbilityLifecycleManager::HandleTerminatedOrEndState(const AppInfo &info)
+{
+    for (const auto &abilityRecord : terminateAbilityList_) {
         if (abilityRecord == nullptr) {
             TAG_LOGW(AAFwkTag::ABILITYMGR, "null abilityRecord");
             continue;
         }
-        if (info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
-            info.appIndex == abilityRecord->GetAppIndex() && info.instanceKey == abilityRecord->GetInstanceKey()) {
+        if (IsMatchingAppInfo(info, abilityRecord)) {
             abilityRecord->SetAppState(info.state);
         }
     }
+}
+
+void UIAbilityLifecycleManager::HandleColdStartState(const AppInfo &info)
+{
+    for (const auto &[sessionId, abilityRecord] : sessionAbilityMap_) {
+        if (abilityRecord == nullptr) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "null abilityRecord");
+            continue;
+        }
+        if (IsMatchingAppInfo(info, abilityRecord)) {
+#ifdef SUPPORT_SCREEN
+            abilityRecord->SetColdStartFlag(true);
+#endif // SUPPORT_SCREEN
+            break;
+        }
+    }
+}
+
+void UIAbilityLifecycleManager::HandleOtherAppState(const AppInfo &info)
+{
+    for (const auto &[sessionId, abilityRecord] : sessionAbilityMap_) {
+        if (abilityRecord == nullptr) {
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "null abilityRecord");
+            continue;
+        }
+        if (IsMatchingAppInfo(info, abilityRecord)) {
+            abilityRecord->SetAppState(info.state);
+        }
+    }
+}
+
+bool UIAbilityLifecycleManager::IsMatchingAppInfo(
+    const AppInfo &info, const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    return info.bundleName == abilityRecord->GetApplicationInfo().bundleName &&
+        info.appIndex == abilityRecord->GetAppIndex() &&
+        info.instanceKey == abilityRecord->GetInstanceKey() &&
+        info.pid == abilityRecord->GetPid();
 }
 
 void UIAbilityLifecycleManager::UninstallApp(const std::string &bundleName, int32_t uid)
