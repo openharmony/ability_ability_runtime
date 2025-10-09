@@ -49,6 +49,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     uint32_t fromTokenId;
     uint32_t flag;
     uint32_t initiatorTokenId;
+    bool isNotiftCollaborator;
+    int32_t userId;
     std::vector<Uri> permissionedUris;
     std::vector<std::string> uriVec;
     // std::vector<bool> checkResults;
@@ -72,6 +74,17 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     fromTokenId = fdp.ConsumeIntegral<uint32_t>();
     flag = fdp.ConsumeIntegral<uint32_t>();
     initiatorTokenId = fdp.ConsumeIntegral<uint32_t>();
+    isNotiftCollaborator = fdp.ConsumeIntegral<bool>();
+    userId = fdp.ConsumeIntegral<int32_t>();
+    GrantUriPermissionInfo grantInfo;
+    grantInfo.callerTokenId = callerTokenId;
+    grantInfo.collaboratorType = collaboratorType;
+    grantInfo.isSandboxApp = isSandboxApp;
+    grantInfo.targetBundleName = targetBundleName;
+    grantInfo.appIndex = appIndex;
+    grantInfo.userId = userId;
+    grantInfo.flag = flag;
+    grantInfo.isNotifyCollaborator = isNotiftCollaborator;
     UriUtils::GetInstance().IsInAncoAppIdentifier(bundleName);
     UriUtils::GetInstance().CheckIsInAncoAppIdentifier(identifier, bundleName);
     identifier = "";
@@ -80,7 +93,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     UriUtils::GetInstance().ProcessWantUri(checkResult, apiVersion, want, permissionedUris);
     UriUtils::GetInstance().GetCallerNameAndApiVersion(tokenId, callerName, apiVersion);
     UriUtils::GetInstance().GetUriListFromWant(want, uriVec);
-    UriUtils::GetInstance().IsGrantUriPermissionFlag(want);
+    UriUtils::GetInstance().IsGrantUriPermissionFlag(flag);
     ExtensionAbilityType extensionAbilityType = ExtensionAbilityType::SERVICE;
     UriUtils::GetInstance().IsServiceExtensionType(extensionAbilityType);
     extensionAbilityType = ExtensionAbilityType::UI_SERVICE;
@@ -91,8 +104,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     UriUtils::GetInstance().CheckUriPermission(callerTokenId, want);
     UriUtils::GetInstance().GrantUriPermission(uriVec, flag, targetBundleName, appIndex, initiatorTokenId);
     UriUtils::GetInstance().IsSandboxApp(tokenId);
-    UriUtils::GetInstance().GrantUriPermission(want, targetBundleName, appIndex, isSandboxApp,
-        callerTokenId, collaboratorType);
+    UriUtils::GetInstance().GrantUriPermission(want, grantInfo);
     UriUtils::GetInstance().ProcessUDMFKey(want);
     UriUtils::GetInstance().PublishFileOpenEvent(want);
     UriUtils::GetInstance().GrantUriPermissionForServiceExtension(abilityRequest);

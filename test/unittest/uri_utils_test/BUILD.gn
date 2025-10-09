@@ -31,18 +31,19 @@ ohos_unittest("uri_utils_test") {
   ]
   defines = [ "SUPPORT_UPMS" ]
   include_dirs = [
-    "${ability_runtime_test_path}/new_test/mock/security"
+    "${ability_runtime_test_path}/new_test/mock/security",
+    "${ability_runtime_test_path}/new_test/mock/ability_manager_service",
   ]
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/utils/uri_utils.cpp",
     "${ability_runtime_test_path}/new_test/mock/security/accesstoken_kit.cpp",
+    "${ability_runtime_test_path}/new_test/mock/ability_manager_service/ability_manager_client.cpp",
     "uri_utils_test.cpp",
   ]
 
   configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
 
   deps = [
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",

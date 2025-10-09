@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "ability_manager_client.h"
 #include "accesstoken_kit.h"
 #include "app_utils.h"
 #include "array_wrapper.h"
@@ -48,6 +49,8 @@ void UriUtilsTest::TearDownTestCase() {}
 void UriUtilsTest::SetUp()
 {
     AccessTokenKit::InitMockResult();
+    AbilityManagerClient::isNullInstance_ = false;
+    AbilityManagerClient::collaborator_ = nullptr;
 }
 
 void UriUtilsTest::TearDown() {}
@@ -657,43 +660,32 @@ HWTEST_F(UriUtilsTest, CheckUriPermission_001, TestSize.Level1)
 HWTEST_F(UriUtilsTest, GrantUriPermission_001, TestSize.Level1)
 {
     Want want;
-    std::string targetBundleName = "";
-    int32_t appIndex = 101;
-    bool isSandboxApp = false;
-    int32_t callerTokenId = 0;
-    int32_t collaboratorType = 2;
-    want.SetFlags(0x00000003);
-    UriUtils::GetInstance().GrantUriPermission(want, targetBundleName, appIndex, isSandboxApp, callerTokenId,
-        collaboratorType);
+    GrantUriPermissionInfo grantInfo;
+    bool ret = UriUtils::GetInstance().GrantUriPermission(want, grantInfo);
+    EXPECT_FALSE(ret);
 
-    want.SetFlags(0x00000001);
-    UriUtils::GetInstance().GrantUriPermission(want, targetBundleName, appIndex, isSandboxApp, callerTokenId,
-        collaboratorType);
+    want.SetFlags(1);
+    grantInfo.flag = want.GetFlags();
+    ret = UriUtils::GetInstance().GrantUriPermission(want, grantInfo);
+    EXPECT_FALSE(ret);
 
-    targetBundleName = "com.example.tsapplication";
-    UriUtils::GetInstance().GrantUriPermission(want, targetBundleName, appIndex, isSandboxApp, callerTokenId,
-        collaboratorType);
+    grantInfo.targetBundleName = "com.example.test";
+    ret = UriUtils::GetInstance().GrantUriPermission(want, grantInfo);
+    EXPECT_FALSE(ret);
 
-    callerTokenId = 1001;
-    UriUtils::GetInstance().GrantUriPermission(want, targetBundleName, appIndex, isSandboxApp, callerTokenId,
-        collaboratorType);
+    grantInfo.callerTokenId = 1001;
+    ret = UriUtils::GetInstance().GrantUriPermission(want, grantInfo);
+    EXPECT_FALSE(ret);
 
-    WantParams params;
-    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(1, AAFwk::g_IID_IString);
-    if (ao != nullptr) {
-        ao->Set(0, String::Box("file"));
-        params.SetParam("ability.params.stream", ao);
-    }
-    want.SetParams(params);
-    UriUtils::GetInstance().GrantUriPermission(want, targetBundleName, appIndex, isSandboxApp, callerTokenId,
-        collaboratorType);
+    grantInfo.isSandboxApp = true;
+    ret = UriUtils::GetInstance().GrantUriPermission(want, grantInfo);
+    EXPECT_FALSE(ret);
 
-    want.SetUri("file://data/storage/el2/distributedfiles/test.txt");
-    UriUtils::GetInstance().GrantUriPermission(want, targetBundleName, appIndex, isSandboxApp, callerTokenId,
-        collaboratorType);
-
-    std::string bundleName = AppUtils::GetInstance().GetBrokerDelegateBundleName();
-    EXPECT_EQ(bundleName.empty(), true);
+    grantInfo.isSandboxApp = false;
+    want.SetUri("file://com.example.test/temp.txt");
+    want.SetParam(Want::PARAM_RESV_CALLER_UID, 2001);
+    ret = UriUtils::GetInstance().GrantUriPermission(want, grantInfo);
+    EXPECT_FALSE(ret);
 }
 
 /*
@@ -705,11 +697,13 @@ HWTEST_F(UriUtilsTest, GrantUriPermission_001, TestSize.Level1)
 HWTEST_F(UriUtilsTest, GrantUriPermissionInner_001, TestSize.Level1)
 {
     std::vector<std::string> uriVec = {"file://data/storage/el2/distributedfiles/test.txt"};
-    uint32_t callerTokenId = 0;
-    std::string targetBundleName = "com.example.tsapplication";
-    int32_t appIndex = 0;
     Want want;
-    bool res = UriUtils::GetInstance().GrantUriPermissionInner(uriVec, callerTokenId, targetBundleName, appIndex, want);
+    GrantUriPermissionInfo grantInfo;
+    grantInfo.callerTokenId = 0;
+    grantInfo.appIndex = 0;
+    grantInfo.targetBundleName = "com.example.tsapplication";
+    grantInfo.isNotifyCollaborator = false;
+    bool res = UriUtils::GetInstance().GrantUriPermissionInner(uriVec, grantInfo, want);
     EXPECT_EQ(res, false);
 }
 #endif // SUPPORT_UPMS
@@ -851,29 +845,7 @@ HWTEST_F(UriUtilsTest, ProcessUDMFKey_002, TestSize.Level1)
  */
 HWTEST_F(UriUtilsTest, IsInAncoAppIdentifier_001, TestSize.Level1)
 {
-    auto &uriUtils = UriUtils::GetInstance();
-    std::string uri = "";
-    Want want;
-    want.SetUri(uri);
-    uriUtils.PublishFileOpenEvent(want);
-    auto result = uriUtils.IsInAncoAppIdentifier("com.example.test");
-    EXPECT_FALSE(result);
-}
-
-/*
- * Feature: UriUtils
- * Function: IsInAncoAppIdentifier
- * SubFunction: NA
- * FunctionPoints: UriUtils IsInAncoAppIdentifier
- */
-HWTEST_F(UriUtilsTest, IsInAncoAppIdentifier_002, TestSize.Level1)
-{
-    auto &uriUtils = UriUtils::GetInstance();
-    std::string uri = "file://com.example.test/test.txt";
-    Want want;
-    want.SetUri(uri);
-    uriUtils.PublishFileOpenEvent(want);
-    auto result = uriUtils.IsInAncoAppIdentifier("com.example.test");
+    auto result = UriUtils::GetInstance().IsInAncoAppIdentifier("com.example.test");
     EXPECT_FALSE(result);
 }
 
@@ -1026,6 +998,96 @@ HWTEST_F(UriUtilsTest, ProcessWantUri_001, TestSize.Level1)
     ret = uriUtils.ProcessWantUri(checkResult, apiVersion, want, permissionedUri);
     EXPECT_EQ(ret, false);
     EXPECT_EQ(want.GetUriString().empty(), false);
+}
+
+/*
+ * Feature: UriUtils
+ * Function: IsGrantUriPermissionFlag
+ * SubFunction: NA
+ * FunctionPoints: IsGrantUriPermissionFlag test.
+ */
+HWTEST_F(UriUtilsTest, IsGrantUriPermissionFlag_001, TestSize.Level1)
+{
+    uint32_t flag = 0;
+    auto ret = UriUtils::GetInstance().IsGrantUriPermissionFlag(flag);
+    EXPECT_EQ(ret, false);
+
+    flag = 1;
+    ret = UriUtils::GetInstance().IsGrantUriPermissionFlag(flag);
+    EXPECT_EQ(ret, true);
+
+    flag = 2;
+    ret = UriUtils::GetInstance().IsGrantUriPermissionFlag(flag);
+    EXPECT_EQ(ret, true);
+
+    flag = 3;
+    ret = UriUtils::GetInstance().IsGrantUriPermissionFlag(flag);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * Feature: UriUtils
+ * Function: NotifyGrantUriPermissionStart
+ * SubFunction: NA
+ * FunctionPoints: NotifyGrantUriPermissionStart test.
+ */
+HWTEST_F(UriUtilsTest, NotifyGrantUriPermissionStart_001, TestSize.Level1)
+{
+    bool isNotifyCollaborator = false;
+    std::vector<std::string> uris = {};
+    uint32_t flag = 1;
+    int32_t userId = -1;
+    auto ret = UriUtils::GetInstance().NotifyGrantUriPermissionStart(isNotifyCollaborator, uris, userId, flag);
+    EXPECT_EQ(ret, true);
+    
+    isNotifyCollaborator = true;
+    AbilityManagerClient::isNullInstance_ = true;
+    ret = UriUtils::GetInstance().NotifyGrantUriPermissionStart(isNotifyCollaborator, uris, userId, flag);
+    EXPECT_EQ(ret, false);
+
+    AbilityManagerClient::isNullInstance_ = false;
+    AbilityManagerClient::collaborator_ = nullptr;
+    ret = UriUtils::GetInstance().NotifyGrantUriPermissionStart(isNotifyCollaborator, uris, userId, flag);
+    EXPECT_EQ(ret, false);
+
+    AbilityManagerClient::collaborator_ = std::make_shared<MockAbilityManagerCollaborator>();
+    ret = UriUtils::GetInstance().NotifyGrantUriPermissionStart(isNotifyCollaborator, uris, userId, flag);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * Feature: UriUtils
+ * Function: NotifyGrantUriPermissionEnd
+ * SubFunction: NA
+ * FunctionPoints: NotifyGrantUriPermissionEnd test.
+ */
+HWTEST_F(UriUtilsTest, NotifyGrantUriPermissionEnd_001, TestSize.Level1)
+{
+    bool isNotifyCollaborator = false;
+    std::vector<std::string> uris = {};
+    std::vector<bool> checkResults = {};
+    uint32_t flag = 1;
+    int32_t userId = -1;
+    auto ret = UriUtils::GetInstance().NotifyGrantUriPermissionEnd(isNotifyCollaborator, uris, userId, flag,
+        checkResults);
+    EXPECT_EQ(ret, true);
+    
+    isNotifyCollaborator = true;
+    AbilityManagerClient::isNullInstance_ = true;
+    ret = UriUtils::GetInstance().NotifyGrantUriPermissionEnd(isNotifyCollaborator, uris, userId, flag,
+        checkResults);
+    EXPECT_EQ(ret, false);
+
+    AbilityManagerClient::isNullInstance_ = false;
+    AbilityManagerClient::collaborator_ = nullptr;
+    ret = UriUtils::GetInstance().NotifyGrantUriPermissionEnd(isNotifyCollaborator, uris, userId, flag,
+        checkResults);
+    EXPECT_EQ(ret, false);
+
+    AbilityManagerClient::collaborator_ = std::make_shared<MockAbilityManagerCollaborator>();
+    ret = UriUtils::GetInstance().NotifyGrantUriPermissionEnd(isNotifyCollaborator, uris, userId, flag,
+        checkResults);
+    EXPECT_EQ(ret, true);
 }
 }
 }

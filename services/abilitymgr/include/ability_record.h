@@ -1323,7 +1323,8 @@ private:
     void GetAbilityTypeString(std::string &typeStr);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
 #ifdef SUPPORT_UPMS
-    void GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId);
+    void GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId,
+        bool isNotifyCollaborator);
 #endif // SUPPORT_UPMS
     int32_t GetCurrentAccountId() const;
 
