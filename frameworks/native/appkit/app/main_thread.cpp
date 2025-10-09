@@ -1944,6 +1944,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
     applicationImpl_->SetRecordId(appLaunchData.GetRecordId());
     applicationImpl_->SetApplication(application_);
+    AppExecFwk::AppfreezeInner::GetInstance()->SetAppfreezeApplication(application_);
     mainThreadState_ = MainThreadState::READY;
     if (!applicationImpl_->PerformAppReady()) {
         TAG_LOGE(AAFwkTag::APPKIT, "applicationImpl_->PerformAppReady failed");
