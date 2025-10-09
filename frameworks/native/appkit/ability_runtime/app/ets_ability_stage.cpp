@@ -31,6 +31,7 @@
 #include "hitrace_meter.h"
 #include "ohos_application.h"
 #include "startup_manager.h"
+#include "application_env.h"
 
 #ifdef WINDOWS_PLATFORM
 #define ETS_EXPORT __declspec(dllexport)
@@ -112,6 +113,7 @@ void ETSAbilityStage::OnCreate(const AAFwk::Want &want) const
     FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "ETSAbilityStage::OnCreate begin");
     CallObjectMethod(false, "onCreate", ":V");
     FreezeUtil::GetInstance().AddAppLifecycleEvent(0, "ETSAbilityStage::OnCreate end");
+    ClearAppPreload();
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator(AbilityRuntime::Runtime::Language::ETS);
     if (delegator) {
@@ -249,6 +251,7 @@ void ETSAbilityStage::SetEtsAbilityStage(const std::shared_ptr<Context> &context
 
     if (!etsAbilityStageObj_) {
         TAG_LOGE(AAFwkTag::APPKIT, "Not found AbilityStage.js");
+        ClearAppPreload();
         return;
     }
 

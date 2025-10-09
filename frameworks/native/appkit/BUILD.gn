@@ -96,6 +96,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_napi_path}/inner/napi_common",
     "${ability_runtime_napi_path}/inner/napi_common/ani_common",
     "${ability_runtime_utils_path}/global/constant",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager",
   ]
 
   configs = [

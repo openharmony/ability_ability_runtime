@@ -39,6 +39,7 @@ public:
     static napi_value DemoteCurrentFromCandidateMasterProcess(napi_env env, napi_callback_info info);
     static napi_value ExitMasterProcessRole(napi_env env, napi_callback_info info);
     static napi_value CreatePluginModuleContextForBundle(napi_env env, napi_callback_info info);
+    static napi_value GetAppPreloadType(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnCreateModuleContext(napi_env env, NapiCallbackInfo &info);
@@ -56,9 +57,11 @@ private:
     napi_value OnExitMasterProcessRole(napi_env env, NapiCallbackInfo& info);
     bool VerifyCreatePluginContextParams(napi_env env, NapiCallbackInfo &info, std::string &moduleName,
         std::string &pluginBundleName, std::string &hostBundleName);
+    napi_value OnGetAppPreloadType(napi_env env, NapiCallbackInfo &info);
 };
 
 napi_value ApplicationInit(napi_env env, napi_value exportObj);
+void JsApplicationInitProperty(napi_env env, napi_value exportObj);
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif //OHOS_ABILITY_RUNTIME_JS_APPLICATION_H
