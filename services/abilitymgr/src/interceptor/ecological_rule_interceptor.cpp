@@ -43,6 +43,10 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
         TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "same bundle");
         return ERR_OK;
     }
+    if (param.isTargetPlugin) {
+        TAG_LOGD(AAFwkTag::ECOLOGICAL_RULE, "start plugin ability");
+        return ERR_OK;
+    }
     ErmsCallerInfo callerInfo;
     ExperienceRule rule;
     AAFwk::Want newWant = param.want;
