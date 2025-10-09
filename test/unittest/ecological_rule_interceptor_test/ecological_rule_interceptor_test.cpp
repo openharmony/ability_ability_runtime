@@ -1341,6 +1341,26 @@ HWTEST_F(EcologicalRuleInterceptorTest, DoProcess_018, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DoProcess_019
+ * @tc.desc: Tests the third branch in DoProcess where isTargetPlugin is true
+ * @tc.type: FUNC
+ * @tc.require: No
+ */
+HWTEST_F(EcologicalRuleInterceptorTest, DoProcess_019, TestSize.Level1)
+{
+    std::shared_ptr<EcologicalRuleInterceptor> interceptor = std::make_shared<EcologicalRuleInterceptor>();
+    Want want;
+    int requestCode = 0;
+    int userId = 100;
+    auto shouldBlockFunc = []() { return false; };
+    AbilityInterceptorParam param = AbilityInterceptorParam(want, requestCode, userId, false, nullptr,
+        shouldBlockFunc);
+    param.isTargetPlugin = true;
+    ErrCode result = interceptor->DoProcess(param);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
  * @tc.name: GetEcologicalTargetInfo_004
  * @tc.desc: Tests GetEcologicalTargetInfo
  * @tc.type: FUNC
