@@ -15,6 +15,8 @@
  
 #include "event_hub.h"
  
+#include "ani_common_util.h"
+#include "context_transfer.h"
 #include "interop_js/arkts_esvalue.h"
 #include "interop_js/arkts_interop_js_api.h"
 #include "interop_js/hybridgref_ani.h"
@@ -27,7 +29,7 @@ namespace {
 constexpr const char* ETS_EVENT_HUB_CLASS_NAME = "Lapplication/EventHub/EventHub;";
 }
  
-std::shared_ptr<AbilityContext> EventHub::GetAbilityContext(ani_env *env, ani_object aniObj)
+std::shared_ptr<Context> EventHub::GetContext(ani_env *env, ani_object aniObj)
 {
     ani_long nativeContextLong = 0;
     ani_class cls {};
@@ -49,8 +51,33 @@ std::shared_ptr<AbilityContext> EventHub::GetAbilityContext(ani_env *env, ani_ob
         TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
         return nullptr;
     }
-    auto weakContext = reinterpret_cast<std::weak_ptr<AbilityContext>*>(nativeContextLong);
+    auto weakContext = reinterpret_cast<std::weak_ptr<Context>*>(nativeContextLong);
     return weakContext != nullptr ? weakContext->lock() : nullptr;
+}
+
+bool EventHub::GetIsApplicationContext(ani_env *env, ani_object aniObj)
+{
+    ani_boolean isApplicationContext = false;
+    ani_class cls {};
+    ani_field contextField = nullptr;
+    ani_status status = ANI_ERROR;
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null env");
+        return false;
+    }
+    if ((status = env->FindClass(ETS_EVENT_HUB_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
+        return false;
+    }
+    if ((status = env->Class_FindField(cls, "isApplicationContext", &contextField)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
+        return false;
+    }
+    if ((status = env->Object_GetField_Boolean(aniObj, contextField, &isApplicationContext)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
+        return false;
+    }
+    return isApplicationContext;
 }
  
 ani_object EventHub::GetDynamicContextEventHub(ani_env *aniEnv, ani_object aniObj)
@@ -60,21 +87,19 @@ ani_object EventHub::GetDynamicContextEventHub(ani_env *aniEnv, ani_object aniOb
         TAG_LOGE(AAFwkTag::APPKIT, "aniEnv or aniObj is null");
         return nullptr;
     }
-    auto context = GetAbilityContext(aniEnv, aniObj);
+    auto context = GetContext(aniEnv, aniObj);
     if (context == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "null context");
         return nullptr;
     }
-    auto &bindingObj = context->GetBindingObject();
-    if (bindingObj == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null bindingObj");
+    ani_class contextCls = nullptr;
+    auto status = aniEnv->FindClass("application.Context.Context", &contextCls);
+    if (status != ANI_OK || contextCls == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "status: %{public}d", status);
         return nullptr;
     }
-    auto dynamicContext = bindingObj->Get<NativeReference>();
-    if (dynamicContext == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null dynamicContext");
-        return nullptr;
-    }
+    auto isApplicationContext = GetIsApplicationContext(aniEnv, aniObj);
+    std::string contextType = isApplicationContext ? "ApplicationContext" : "Context";
     ani_object staticResult = nullptr;
     {
         napi_env napiEnv = {};
@@ -82,27 +107,38 @@ ani_object EventHub::GetDynamicContextEventHub(ani_env *aniEnv, ani_object aniOb
             TAG_LOGE(AAFwkTag::APPKIT, "arkts_napi_scope_open failed");
             return nullptr;
         }
+        auto contextObj = ContextTransfer::GetInstance().GetDynamicObject(contextType, napiEnv, context);
+        if (contextObj == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "GetDynamicContext failed");
+            arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
+            return nullptr;
+        }
         napi_value eventHub = nullptr;
-        if (napi_get_named_property(napiEnv, dynamicContext->Get(), "eventHub", &eventHub) != napi_ok) {
+        if (napi_get_named_property(napiEnv, contextObj, "eventHub", &eventHub) != napi_ok) {
             TAG_LOGE(AAFwkTag::APPKIT, "napi_get_named_property failed");
+            arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
             return nullptr;
         }
         if (eventHub == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "napi_get_named_property failed, eventHub nullptr");
+            arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
             return nullptr;
         }
         if (!CallNapiSetNativeEventHubRefFn(aniEnv, aniObj, napiEnv, eventHub)) {
             TAG_LOGE(AAFwkTag::APPKIT, "CallNapiSetNativeEventHubRefFn failed");
+            arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
             return nullptr;
         }
         hybridgref dynamicHybrigRef = nullptr;
-        if (!hybridgref_create_from_napi(napiEnv, dynamicContext->Get(), &dynamicHybrigRef)) {
+        if (!hybridgref_create_from_napi(napiEnv, contextObj, &dynamicHybrigRef)) {
             TAG_LOGE(AAFwkTag::APPKIT, "hybridgref_create_from_napi failed");
+            arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
             return nullptr;
         }
         if (!hybridgref_get_esvalue(aniEnv, dynamicHybrigRef, &staticResult)) {
             TAG_LOGE(AAFwkTag::APPKIT, "hybridgref_get_esvalue failed");
             hybridgref_delete_from_napi(napiEnv, dynamicHybrigRef);
+            arkts_napi_scope_close_n(napiEnv, 0, nullptr, nullptr);
             return nullptr;
         }
         hybridgref_delete_from_napi(napiEnv, dynamicHybrigRef);
@@ -139,8 +175,9 @@ bool EventHub::CallNapiSetNativeEventHubRefFn(ani_env *aniEnv, ani_object aniObj
     }
     hybridgref_delete_from_ani(aniEnv, nativeHybrigRef);
     napi_value dynamicResult;
-    if (napi_call_function(napiEnv, eventHub, setNativeEventHubRefFn, 1, &nativeEventHubRef,
-        &dynamicResult) != napi_ok) {
+    napi_status status = napi_call_function(napiEnv, eventHub, setNativeEventHubRefFn, 1, &nativeEventHubRef,
+        &dynamicResult);
+    if (status != napi_ok) {
         TAG_LOGE(AAFwkTag::APPKIT, "napi_call_function failed");
         return false;
     }
@@ -165,31 +202,6 @@ void EventHub::InitAniEventHub(ani_env *aniEnv)
     };
     aniEnv->Class_BindNativeMethods(contextCls, contextFunctions.data(),
         contextFunctions.size());
-}
- 
-void EventHub::SetEventHubContext(ani_env *aniEnv, ani_ref eventHubRef, ani_long nativeContextLong)
-{
-    TAG_LOGD(AAFwkTag::APPKIT, "called");
-    if (aniEnv == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "null env");
-        return;
-    }
-    ani_status status = ANI_ERROR;
-    ani_class contextCls = nullptr;
-    if (aniEnv->FindClass(ETS_EVENT_HUB_CLASS_NAME, &contextCls) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "FindClass Context failed");
-        return;
-    }
-    ani_field contextField;
-    if ((status = aniEnv->Class_FindField(contextCls, "nativeContext", &contextField)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Class_FindField failed status: %{public}d", status);
-        return;
-    }
-    if ((status = aniEnv->Object_SetField_Long(static_cast<ani_object>(eventHubRef), contextField,
-        nativeContextLong)) != ANI_OK) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Object_SetField_Long failed status: %{public}d", status);
-        return;
-    }
 }
 }
 }
