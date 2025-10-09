@@ -57,6 +57,8 @@ void CpuSysConfigTest::TearDown(void)
  */
 HWTEST_F(CpuSysConfigTest, GetFreqTimePath_Test_001, TestSize.Level1)
 {
+    std::shared_ptr<CpuSysConfig> cpuSysConfig = std::make_shared<CpuSysConfig>();
+    EXPECT_TRUE(cpuSysConfig);
     int cpu = 0;
     EXPECT_TRUE(!CpuSysConfig::GetFreqTimePath(cpu).empty());
 }
@@ -97,7 +99,10 @@ HWTEST_F(CpuSysConfigTest, GetFreqTimePath_Test_003, TestSize.Level1)
 HWTEST_F(CpuSysConfigTest, GetMainThreadRunningTimePath_Test_001, TestSize.Level1)
 {
     int pid = 0;
-    EXPECT_TRUE(!CpuSysConfig::GetMainThreadRunningTimePath(pid).empty());
+    std::string path = CpuSysConfig::GetMainThreadRunningTimePath(pid);
+    EXPECT_TRUE(!path.empty());
+    std::ifstream fin(path);
+    EXPECT_TRUE(!fin.is_open());
 }
 
 /**
@@ -136,7 +141,10 @@ HWTEST_F(CpuSysConfigTest, GetMainThreadRunningTimePath_Test_003, TestSize.Level
 HWTEST_F(CpuSysConfigTest, GetProcRunningTimePath_Test_001, TestSize.Level1)
 {
     int pid = 0;
-    EXPECT_TRUE(!CpuSysConfig::GetProcRunningTimePath(pid).empty());
+    std::string path = CpuSysConfig::GetProcRunningTimePath(pid);
+    EXPECT_TRUE(!path.empty());
+    std::ifstream fin(path);
+    EXPECT_TRUE(!fin.is_open());
 }
 
 /**
@@ -175,7 +183,10 @@ HWTEST_F(CpuSysConfigTest, GetProcRunningTimePath_Test_003, TestSize.Level1)
 HWTEST_F(CpuSysConfigTest, GetMaxCoreDimpsPath_Test_001, TestSize.Level1)
 {
     int maxCpuCount = 0;
-    EXPECT_TRUE(!CpuSysConfig::GetMaxCoreDimpsPath(maxCpuCount).empty());
+    std::string path = CpuSysConfig::GetMaxCoreDimpsPath(maxCpuCount);
+    EXPECT_TRUE(!path.empty());
+    std::ifstream fin(path);
+    EXPECT_TRUE(fin.is_open());
 }
 
 /**

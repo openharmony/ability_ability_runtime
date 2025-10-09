@@ -46,12 +46,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-constexpr char EVENT_UID[] = "UID";
 constexpr char KILL_EVENT_NAME[] = "APP_KILL";
-#ifdef ABILITY_RUNTIME_HITRACE_ENABLE
-constexpr int32_t CHARACTER_WIDTH = 2;
-#endif
-
 constexpr int MAX_LAYER = 8;
 constexpr int FREEZEMAP_SIZE_MAX = 20;
 constexpr int FREEZE_TIME_LIMIT = 60000;
@@ -354,6 +349,8 @@ FaultData AppfreezeManager::GetFaultNotifyData(const FaultData& faultData, int p
     faultNotifyData.appfreezeInfo = faultData.appfreezeInfo;
     faultNotifyData.appRunningUniqueId = faultData.appRunningUniqueId;
     faultNotifyData.procStatm = faultData.procStatm;
+    faultNotifyData.isInForeground = faultData.isInForeground;
+    faultNotifyData.isEnableMainThreadSample = faultData.isEnableMainThreadSample;
     return faultNotifyData;
 }
 
@@ -410,7 +407,7 @@ int AppfreezeManager::AcquireStack(const FaultData& faultData,
 std::string AppfreezeManager::ParseDecToHex(uint64_t id)
 {
     std::stringstream ss;
-    ss << std::hex << std::setfill('0') << std::setw(CHARACTER_WIDTH) << id;
+    ss << std::hex << id;
     return ss.str();
 }
 
@@ -423,11 +420,12 @@ std::string AppfreezeManager::GetHitraceInfo()
         return "";
     }
     std::ostringstream hitraceIdStr;
-    hitraceIdStr << HITRACE_ID << ParseDecToHex(hitraceId.GetChainId()) <<
-        SPAN_ID << ParseDecToHex(hitraceId.GetSpanId()) <<
-        PARENT_SPAN_ID << ParseDecToHex(hitraceId.GetSpanId()) <<
-        TRACE_FLAG << ParseDecToHex(hitraceId.GetParentSpanId());
-    TAG_LOGW(AAFwkTag::APPDFR, "hitraceIdStr:%{public}s", hitraceIdStr.str().c_str());
+    hitraceIdStr << "hitrace_id: " << ParseDecToHex(hitraceId.GetChainId()) <<
+        "span_id: " << ParseDecToHex(hitraceId.GetSpanId()) <<
+        "parent_span_id: " << ParseDecToHex(hitraceId.GetParentSpanId()) <<
+        "trace_flag: " << ParseDecToHex(hitraceId.GetFlags());
+    std::string hiTraceIdInfo = hitraceIdStr.str();
+    TAG_LOGW(AAFwkTag::APPDFR, "hitraceIdStr:%{public}s", hiTraceIdInfo.c_str());
     return hitraceIdStr.str();
 #endif
     return "";
