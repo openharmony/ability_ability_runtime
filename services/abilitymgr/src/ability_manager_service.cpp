@@ -1243,7 +1243,8 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
 #endif // WITH_DLP
     }
-    if (auto pluginRet = CheckStartPlugin(want, callerToken); pluginRet != ERR_OK) {
+    bool isTargetPlugin = false;
+    if (auto pluginRet = CheckStartPlugin(want, callerToken, isTargetPlugin); pluginRet != ERR_OK) {
         eventHelper_.SendStartAbilityErrorEvent(eventInfo, pluginRet, "CheckStartPlugin failed");
         return AbilityErrorUtil::ConvertToOriginErrorCode(pluginRet);
     }
@@ -1282,6 +1283,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
         true, nullptr, shouldBlockFunc);
+    interceptorParam.isTargetPlugin = isTargetPlugin;
     result = interceptorExecuter_ == nullptr ? ERR_NULL_INTERCEPTOR_EXECUTER :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -1680,7 +1682,8 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
         return CHECK_PERMISSION_FAILED;
     }
 #endif // WITH_DLP
-    if (auto pluginRet = CheckStartPlugin(want, callerToken); pluginRet != ERR_OK) {
+    bool isTargetPlugin = false;
+    if (auto pluginRet = CheckStartPlugin(want, callerToken, isTargetPlugin); pluginRet != ERR_OK) {
         eventHelper_.SendStartAbilityErrorEvent(eventInfo, pluginRet, "CheckStartPlugin failed");
         return AbilityErrorUtil::ConvertToOriginErrorCode(pluginRet);
     }
@@ -1716,6 +1719,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
         true, nullptr, shouldBlockFunc);
+    interceptorParam.isTargetPlugin = isTargetPlugin;
     result = interceptorExecuter_ == nullptr ? ERR_NULL_INTERCEPTOR_EXECUTER :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -2027,7 +2031,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return result;
     }
 #endif // WITH_DLP
-    if (auto pluginRet = CheckStartPlugin(want, callerToken); pluginRet != ERR_OK) {
+    bool isTargetPlugin = false;
+    if (auto pluginRet = CheckStartPlugin(want, callerToken, isTargetPlugin); pluginRet != ERR_OK) {
         eventHelper_.SendStartAbilityErrorEvent(eventInfo, pluginRet, "CheckStartPlugin failed");
         return AbilityErrorUtil::ConvertToOriginErrorCode(pluginRet);
     }
@@ -2064,6 +2069,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
         true, nullptr, shouldBlockFunc);
+    interceptorParam.isTargetPlugin = isTargetPlugin;
     auto result = interceptorExecuter_ == nullptr ? ERR_NULL_INTERCEPTOR_EXECUTER :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -14730,7 +14736,7 @@ int32_t AbilityManagerService::StartAbilityWithWait(Want &want, sptr<IAbilitySta
     return ERR_OK;
 }
 
-int32_t AbilityManagerService::CheckStartPlugin(const Want& want, sptr<IRemoteObject> callerToken)
+int32_t AbilityManagerService::CheckStartPlugin(const Want& want, sptr<IRemoteObject> callerToken, bool &isTargetPlugin)
 {
     if (!AbilityRuntime::StartupUtil::IsStartPlugin(want)) {
         return ERR_OK;
@@ -14756,6 +14762,7 @@ int32_t AbilityManagerService::CheckStartPlugin(const Want& want, sptr<IRemoteOb
         TAG_LOGE(AAFwkTag::ABILITYMGR, "not host ability");
         return ERR_CALLER_IS_PLUGIN_ABILITY;
     }
+    isTargetPlugin = true;
     return ERR_OK;
 }
 
