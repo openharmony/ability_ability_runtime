@@ -110,6 +110,8 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_002, TestSize.Level1)
     eventInfo.hitraceInfo = "hitraceInfo: 1234";
     eventInfo.foregroundState = false;
     eventInfo.enableFreeze = false;
+    eventInfo.applicationHeapInfo = "size:1,";
+    eventInfo.processLifeTime = "2s";
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
@@ -210,6 +212,8 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_005, TestSize.Level1)
     eventInfo.hitraceInfo = "hitraceInfo: 1234";
     eventInfo.foregroundState = false;
     eventInfo.enableFreeze = false;
+    eventInfo.applicationHeapInfo = "size1:1234,size2:1234";
+    eventInfo.processLifeTime = "21s";
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
@@ -308,8 +312,9 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_008, TestSize.Level1)
     eventInfo.errorMessage = "SendAppfreezeEvent_Test_008: error message";
     eventInfo.freezeInfoFile = "SendAppfreezeEvent_Test_008: freezeInfoFile";
     eventInfo.hitraceInfo = "hitraceInfo: 1234";
-    eventInfo.foregroundState = false;
-    eventInfo.enableFreeze = false;
+    eventInfo.foregroundState = true;
+    eventInfo.applicationHeapInfo = "size1:1234,size2:1234";
+    eventInfo.processLifeTime = "21s";
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
     EXPECT_EQ(ret, 0);

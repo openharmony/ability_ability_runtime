@@ -91,6 +91,12 @@ bool FaultData::ReadContent(Parcel &parcel)
 
     isInForeground = parcel.ReadBool();
     isEnableMainThreadSample = parcel.ReadBool();
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "ApplicationHeapInfo read string failed.");
+    applicationHeapInfo = strValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "ProcessLifeTime read string failed.");
+    processLifeTime = strValue;
     return true;
 }
 
@@ -137,6 +143,14 @@ bool FaultData::WriteContent(Parcel &parcel) const
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(isEnableMainThreadSample),
         "isEnableMainThreadSample [%{public}d] write bool failed.", isEnableMainThreadSample
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(applicationHeapInfo),
+        "applicationHeapInfo [%{public}s] write string failed.", applicationHeapInfo.c_str()
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(processLifeTime),
+        "processLifeTime [%{public}s] write string failed.", processLifeTime.c_str()
     );
     return true;
 }
@@ -271,6 +285,12 @@ bool AppFaultDataBySA::ReadContent(Parcel &parcel)
     procStatm = strValue;
     isInForeground = parcel.ReadBool();
     isEnableMainThreadSample = parcel.ReadBool();
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "ApplicationHeapInfo read string failed.");
+    applicationHeapInfo = strValue;
+
+    RETURN_FALSE_AND_WRITE_LOG_IF_TRUE(!parcel.ReadString(strValue), "ProcessLifeTime read string failed.");
+    processLifeTime = strValue;
     return true;
 }
 
@@ -313,6 +333,14 @@ bool AppFaultDataBySA::WriteContent(Parcel &parcel) const
 
     RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteBool(isEnableMainThreadSample),
         "isEnableMainThreadSample [%{public}d] write bool failed.", isEnableMainThreadSample
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(applicationHeapInfo),
+        "applicationHeapInfo [%{public}s] write string failed.", applicationHeapInfo.c_str()
+    );
+
+    RETURN_FALSE_AND_WRITE_LOG_WITH_ONE_ARG_IF_TRUE(!parcel.WriteString(processLifeTime),
+        "processLifeTime [%{public}s] write string failed.", processLifeTime.c_str()
     );
     return true;
 }

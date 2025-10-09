@@ -1317,6 +1317,26 @@ void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC, bool isBinary)
     DFXJSNApi::DumpHeapSnapshot(vm, dumpOption, tid);
 }
 
+size_t JsRuntime::GetHeapTotalSize()
+{
+    auto vm = GetEcmaVm();
+    if (!vm) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null vm");
+        return 0;
+    }
+    return DFXJSNApi::GetHeapTotalSize(vm);
+}
+
+size_t JsRuntime::GetHeapObjectSize()
+{
+    auto vm = GetEcmaVm();
+    if (!vm) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null vm");
+        return 0;
+    }
+    return DFXJSNApi::GetHeapObjectSize(vm);
+}
+
 void JsRuntime::ForceFullGC(uint32_t tid)
 {
     auto vm = GetEcmaVm();

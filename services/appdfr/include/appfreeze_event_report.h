@@ -42,6 +42,8 @@ struct AppfreezeEventInfo {
     std::string hitraceInfo;
     bool foregroundState;
     bool enableFreeze;
+    std::string applicationHeapInfo;
+    std::string processLifeTime;
 };
 
 class AppfreezeEventReport {
@@ -53,6 +55,8 @@ private:
     static int LogAppInputBlockEvent(const std::string &name, HiSysEventType type,
         const AppfreezeEventInfo &eventInfo);
     static int LogThreadBlockEvent(const std::string &name, HiSysEventType type,
+        const AppfreezeEventInfo &eventInfo);
+    static int LogLifeCycleTimeoutEvent(const std::string &name, HiSysEventType type,
         const AppfreezeEventInfo &eventInfo);
     static int LogGeneralEvent(const std::string &name, HiSysEventType type,
         const AppfreezeEventInfo &eventInfo);

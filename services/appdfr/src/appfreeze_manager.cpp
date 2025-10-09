@@ -250,6 +250,8 @@ int AppfreezeManager::AppfreezeHandleWithStack(const FaultData& faultData, const
     faultNotifyData.procStatm = faultData.procStatm;
     faultNotifyData.isInForeground = faultData.isInForeground;
     faultNotifyData.isEnableMainThreadSample = faultData.isEnableMainThreadSample;
+    faultNotifyData.applicationHeapInfo = faultData.applicationHeapInfo;
+    faultNotifyData.processLifeTime = faultData.processLifeTime;
     HITRACE_METER_FMT(HITRACE_TAG_APP, "AppfreezeHandleWithStack pid:%{public}d-name:%{public}s",
         appInfo.pid, faultData.errorObject.name.c_str());
     return MergeNotifyInfo(faultNotifyData, appInfo);
@@ -351,6 +353,8 @@ FaultData AppfreezeManager::GetFaultNotifyData(const FaultData& faultData, int p
     faultNotifyData.procStatm = faultData.procStatm;
     faultNotifyData.isInForeground = faultData.isInForeground;
     faultNotifyData.isEnableMainThreadSample = faultData.isEnableMainThreadSample;
+    faultNotifyData.applicationHeapInfo = faultData.applicationHeapInfo;
+    faultNotifyData.processLifeTime = faultData.processLifeTime;
     return faultNotifyData;
 }
 
@@ -489,17 +493,20 @@ int AppfreezeManager::NotifyANR(const FaultData& faultData, const AppfreezeManag
     eventInfo.hitraceInfo = GetHitraceInfo();
     eventInfo.foregroundState = faultData.isInForeground;
     eventInfo.enableFreeze = faultData.isEnableMainThreadSample;
+    eventInfo.applicationHeapInfo = faultData.applicationHeapInfo;
+    eventInfo.processLifeTime = faultData.processLifeTime;
 
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
     TAG_LOGW(AAFwkTag::APPDFR, "reportEvent:%{public}s, pid:%{public}d, tid:%{public}d, bundleName:%{public}s, "
         "appRunningUniqueId:%{public}s, endTime:%{public}s, interval:%{public}" PRId64 " ms, "
         "eventId:%{public}d freezeInfoFile:%{public}s foreground:%{public}d enableFreeze:%{public}d,"
-        "hisysevent write ret: %{public}d",
+        "applicationHeapInfo:%{public}s processLifeTime:%{public}s hisysevent write ret: %{public}d",
         faultData.errorObject.name.c_str(), appInfo.pid, faultData.tid, appInfo.bundleName.c_str(),
         appRunningUniqueId.c_str(), AbilityRuntime::TimeUtil::DefaultCurrentTimeStr().c_str(),
         AbilityRuntime::TimeUtil::CurrentTimeMillis() - startTime, faultData.eventId,
-        eventInfo.freezeInfoFile.c_str(), eventInfo.foregroundState, eventInfo.enableFreeze, ret);
+        eventInfo.freezeInfoFile.c_str(), eventInfo.foregroundState, eventInfo.enableFreeze,
+        eventInfo.applicationHeapInfo.c_str(), eventInfo.processLifeTime.c_str(), ret);
     OHOS::HiviewDFX::HiTraceChain::ClearId();
     return 0;
 }

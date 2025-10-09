@@ -199,7 +199,7 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_IsExitApp_001, TestSize.Level1)
 /**
  * @tc.number: AppfreezeInner_NotifyANR
  * @tc.name: NotifyANR
- * @tc.desc: Verify that function IsExitApp.
+ * @tc.desc: Verify that function NotifyANR.
  */
 HWTEST_F(AppfreezeInnerTest, AppfreezeInner_NotifyANR, TestSize.Level1)
 {
@@ -310,6 +310,72 @@ HWTEST_F(AppfreezeInnerTest, AppfreezeInner_MainThreadSample_001, TestSize.Level
     EXPECT_TRUE(appfreezeInner->GetMainThreadSample());
     appfreezeInner->SetMainThreadSample(false);
     EXPECT_TRUE(!appfreezeInner->GetMainThreadSample());
+}
+/**
+ * @tc.number: AppfreezeInner_GetApplicationInfo_001
+ * @tc.name: GetApplicationInfo
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_GetApplicationInfo_001, TestSize.Level1)
+{
+    FaultData faultData;
+    faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
+    appfreezeInner->GetApplicationInfo(faultData);
+    appfreezeInner->application_ == nullptr;
+    appfreezeInner->GetApplicationInfo(faultData);
+    EXPECT_TRUE(appfreezeInner != nullptr);
+}
+
+/**
+ * @tc.number: AppfreezeInner_LogFormat_001
+ * @tc.name: LogFormat
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_LogFormat_001, TestSize.Level1)
+{
+    std::string ret = appfreezeInner->LogFormat(0, 0);
+    EXPECT_TRUE(!ret.empty());
+    ret = appfreezeInner->LogFormat(123, 123);
+    EXPECT_TRUE(!ret.empty());
+}
+
+/**
+ * @tc.number: AppfreezeInner_GetProcessLifeCycle_001
+ * @tc.name: GetProcessLifeCycle
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_GetProcessLifeCycle_001, TestSize.Level1)
+{
+    std::string ret = appfreezeInner->GetProcessLifeCycle();
+    printf("%s\n", ret.c_str());
+    ret = appfreezeInner->GetProcessLifeCycle();
+    printf("%s\n", ret.c_str());
+    EXPECT_TRUE(appfreezeInner);
+}
+
+/**
+ * @tc.number: AppfreezeInner_GetProcessStartTime_001
+ * @tc.name: GetProcessStartTime
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_GetProcessStartTime_001, TestSize.Level1)
+{
+    unsigned long long startTime = 0;
+    bool ret = appfreezeInner->GetProcessStartTime(gettid(), startTime);
+    printf("%d\n", ret);
+    startTime = 123456;
+    ret = appfreezeInner->GetProcessStartTime(gettid(), startTime);
+    printf("%d\n", ret);
+    EXPECT_TRUE(appfreezeInner);
+}
+
+/**
+ * @tc.number: AppfreezeInner_IsAppFreeze_001
+ * @tc.name: IsAppFreeze
+ * @tc.desc: Verify that function IsAppFreeze.
+ */
+HWTEST_F(AppfreezeInnerTest, AppfreezeInner_IsAppFreeze_001, TestSize.Level1)
+{
+    bool ret = appfreezeInner->IsAppFreeze(AppFreezeType::THREAD_BLOCK_3S);
+    EXPECT_EQ(ret, false);
+    ret = appfreezeInner->IsAppFreeze(AppFreezeType::THREAD_BLOCK_6S);
+    EXPECT_EQ(ret, true);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
