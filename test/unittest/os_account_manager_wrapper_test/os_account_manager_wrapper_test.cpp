@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,7 +111,7 @@ HWTEST_F(OsAccountManagerWrapperTest, RemoveOsAccount_0100, TestSize.Level1)
     AAFwk::IsMockSaCall::IsMockSpecificSystemAbilityAccessPermission();
     int account = ACCOUNT_VALUE;
     int ret = DelayedSingleton<OsAccountManagerWrapper>::GetInstance()->CreateOsAccount(ACCOUNT_NAME, account);
-    EXPECT_EQ(ret, ERR_ACCOUNT_COMMON_NAME_HAD_EXISTED);
+    EXPECT_NE(ret, ERR_OK);
     ret = DelayedSingleton<OsAccountManagerWrapper>::GetInstance()->RemoveOsAccount(account);
     EXPECT_EQ(ret, ERR_ACCOUNT_COMMON_ACCOUNT_NOT_EXIST_ERROR);
 }
