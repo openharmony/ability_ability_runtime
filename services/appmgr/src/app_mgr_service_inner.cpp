@@ -1046,6 +1046,9 @@ void AppMgrServiceInner::LoadAbility(std::shared_ptr<AbilityInfo> abilityInfo, s
             if (loadParam->isPrelaunch) {
                 appRecord->SetPreloadMode(PreloadMode::PRE_LAUNCH);
             }
+            if (loadParam->isPreloadStart) {
+                appRecord->SetPreloadMode(PreloadMode::PRELOAD_BY_PHASE);
+            }
         }
         LoadAbilityNoAppRecord(appRecord, loadParam->isShellCall, appInfo, abilityInfo, processName,
             specifiedProcessFlag, bundleInfo, hapModuleInfo, want, appExistFlag, false,
