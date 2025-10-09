@@ -2840,7 +2840,7 @@ private:
 
     void CheckExtensionRateLimit();
 
-    int32_t CheckStartPlugin(const Want& want, sptr<IRemoteObject> callerToken);
+    int32_t CheckStartPlugin(const Want& want, sptr<IRemoteObject> callerToken, bool &isTargetPlugin);
 
     int StartAbilityByConnectManager(const Want& want, const AbilityRequest& abilityRequest,
         const AppExecFwk::AbilityInfo& abilityInfo, int validUserId, sptr<IRemoteObject> callerToken);
