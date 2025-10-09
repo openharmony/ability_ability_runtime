@@ -227,7 +227,7 @@ void ETSRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths,
         return;
     }
     g_etsEnvFuncs->InitETSSysNS(ETS_SYSLIB_PATH);
-    
+
     if (g_etsEnvFuncs->SetAppLibPath == nullptr) {
         TAG_LOGE(AAFwkTag::ETSRUNTIME, "null SetAppLibPath");
         return;
@@ -243,6 +243,32 @@ void ETSRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths,
         return appLibNamespaceMgr->CreateNamespace(bundleModuleName, nsName);
     };
     g_etsEnvFuncs->SetAppLibPath(abcPathsToBundleModuleNameMap, cb);
+}
+
+void ETSRuntime::InheritPluginNamespace(const std::vector<std::string> &moduleNames)
+{
+    auto moduleManager = NativeModuleManager::GetInstance();
+    if (moduleManager == nullptr) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "null moduleManager");
+        return;
+    }
+    std::string currentNamespace;
+    if (!moduleManager->GetLdNamespaceName("default", currentNamespace)) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "get current namespace failed");
+        return;
+    }
+
+    for (const auto& item : moduleNames) {
+        if (item.empty()) {
+            continue;
+        }
+        std::string pluginNamespace;
+        if (!moduleManager->GetLdNamespaceName(item, pluginNamespace)) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "get %{public}s pluginNamespace failed", item.c_str());
+            continue;
+        }
+        moduleManager->InheritNamespaceEachOther(currentNamespace, pluginNamespace);
+    }
 }
 
 void ETSRuntime::SetExtensionApiCheckCallback(
