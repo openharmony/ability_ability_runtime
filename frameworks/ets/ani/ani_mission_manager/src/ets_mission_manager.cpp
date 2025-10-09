@@ -398,7 +398,8 @@ private:
         ani_status status = env->Array_GetLength(reinterpret_cast<ani_array>(missionIds), &arrayLen);
         if (status != ANI_OK || arrayLen == 0) {
             TAG_LOGE(AAFwkTag::MISSION, "missionIds is not a valid array or empty");
-            EtsErrorUtil::ThrowInvalidParamError(env, "Parse param missionIds failed, the size of missionIds must above zero.");
+            EtsErrorUtil::ThrowInvalidParamError(
+                env, "Parse param missionIds failed, the size of missionIds must above zero.");
             return;
         }
     }
