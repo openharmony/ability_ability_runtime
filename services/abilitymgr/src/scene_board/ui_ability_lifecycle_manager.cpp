@@ -72,6 +72,7 @@ constexpr int32_t API_VERSION_MOD = 100;
 constexpr int32_t REQUEST_LIST_ID_INIT = -1;
 constexpr const char* IS_CALLING_FROM_DMS = "supportCollaborativeCallingFromDmsInAAFwk";
 constexpr int REMOVE_STARTING_BUNDLE_TIMEOUT_MICRO_SECONDS = 5000000; // 5s
+constexpr int32_t BY_CALL_TIMEOUT = 10 * 1000 * 1000; // 10s
 
 auto g_deleteLifecycleEventTask = [](const sptr<Token> &token) {
     CHECK_POINTER_LOG(token, "token is nullptr.");
@@ -1527,10 +1528,7 @@ void UIAbilityLifecycleManager::PostCallTimeoutTask(int32_t requestId)
             pThis->NotifyStartupExceptionBySCB(requestId, reason);
         }
     };
-
-    int timeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() *
-        GlobalConstant::COLDSTART_TIMEOUT_MULTIPLE * GlobalConstant::TIMEOUT_UNIT_TIME;
-    ffrt::submit(std::move(timeoutTask), ffrt::task_attr().delay(timeout)
+    ffrt::submit(std::move(timeoutTask), ffrt::task_attr().delay(BY_CALL_TIMEOUT)
         .timeout(GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
 }
 
