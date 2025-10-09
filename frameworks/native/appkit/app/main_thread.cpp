@@ -1954,7 +1954,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     ApplicationEnvImpl *pAppEvnIml = ApplicationEnvImpl::GetInstance();
 
     if (pAppEvnIml) {
-        pAppEvnIml->SetAppInfo(*applicationInfo_.get());
+        pAppEvnIml->SetAppInfo(*applicationInfo_.get(), appLaunchData.GetAppPreloadMode());
     } else {
         TAG_LOGE(AAFwkTag::APPKIT, "null pAppEvnIml");
     }

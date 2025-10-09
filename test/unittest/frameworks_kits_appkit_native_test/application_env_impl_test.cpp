@@ -24,6 +24,7 @@
 #include "application_context.h"
 #include "context_impl.h"
 #include "mock_application.h"
+#include "app_mgr_constants.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -67,10 +68,12 @@ HWTEST_F(ApplicationEnvImplTest, AppExecFwk_ApplicationEnvImplTest_SetAppInfo_01
     applicationInfo.bundleName = "bundleName";
     applicationInfo.dataDir = "/dataDir";
     applicationInfo.codePath = "/codePath";
-    ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo);
+    PreloadMode preloadMode = PreloadMode::PRE_MAKE;
+    ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo, preloadMode);
     EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetBundleName(), "bundleName");
     EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetSrcPath(), "/codePath");
     EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetDataPath(), "/dataDir");
+    EXPECT_EQ(ApplicationEnvImpl::GetInstance()->GetAppPreloadType(), 1);
     GTEST_LOG_(INFO) << "AppExecFwk_ApplicationEnvImplTest_SetAppInfo_0100 end";
 }
 
@@ -127,7 +130,8 @@ HWTEST_F(ApplicationEnvImplTest, AppExecFwk_ApplicationEnvTest_SetAppInfo_0200, 
     applicationInfo.bundleName = "bundleName";
     applicationInfo.dataDir = "/dataDir";
     applicationInfo.codePath = "/codePath";
-    ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo);
+    PreloadMode preloadMode = PreloadMode::PRE_MAKE;
+    ApplicationEnvImpl::GetInstance()->SetAppInfo(applicationInfo, preloadMode);
     std::string bundleName(GetBundleName());
     std::string codePath(GetSrcPath());
     std::string dataDir(GetDataPath());
