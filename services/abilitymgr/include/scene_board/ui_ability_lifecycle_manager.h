@@ -312,6 +312,14 @@ public:
 
     void OnAppStateChanged(const AppInfo &info);
 
+    void HandleTerminatedOrEndState(const AppInfo &info);
+
+    void HandleColdStartState(const AppInfo &info);
+
+    void HandleOtherAppState(const AppInfo &info);
+
+    bool IsMatchingAppInfo(const AppInfo &info, const std::shared_ptr<AbilityRecord> &abilityRecord);
+
     void UninstallApp(const std::string &bundleName, int32_t uid);
 
     void GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info, bool isPerm) const;
