@@ -121,7 +121,8 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri, int32_t userId, std::str
         if (obs.observer_ == nullptr) {
             continue;
         }
-        if (obs.userId_ != 0 && userId != 0 && obs.userId_ != userId) {
+        if (!DataShare::DataSharePermission::IsSingletonTrustUri(uri) &&
+            obs.userId_ != 0 && userId != 0 && obs.userId_ != userId) {
             TAG_LOGW(AAFwkTag::DBOBSMGR, "Not allow across user notify, %{public}d to %{public}d, %{public}s",
                 userId, obs.userId_, CommonUtils::Anonymous(uriStr).c_str());
             continue;
