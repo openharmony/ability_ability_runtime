@@ -835,7 +835,8 @@ bool AppfreezeManager::IsNeedIgnoreFreezeEvent(int32_t pid, const std::string& e
         }
         return true;
     } else {
-        if (errorName == "THREAD_BLOCK_3S") {
+        if (errorName == AppFreezeType::THREAD_BLOCK_3S ||
+            errorName == AppFreezeType::BUSSINESS_THREAD_BLOCK_3S) {
             return false;
         }
         SetFreezeState(pid, AppFreezeState::APPFREEZE_STATE_FREEZE, errorName);
@@ -1002,6 +1003,27 @@ std::string AppfreezeManager::GetFirstLine(const std::string &path)
     getline(inFile, firstLine);
     inFile.close();
     return firstLine;
+}
+
+bool AppfreezeManager::CheckInBackGround(const FaultData &faultData)
+{
+    return faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S &&
+        !faultData.isInForeground;
+}
+
+bool AppfreezeManager::CheckAppfreezeHappend(int32_t pid, const std::string& eventName)
+{
+    if (eventName == AppFreezeType::LIFECYCLE_TIMEOUT || eventName == AppFreezeType::APP_INPUT_BLOCK ||
+        eventName == AppFreezeType::THREAD_BLOCK_6S || eventName == AppFreezeType::THREAD_BLOCK_3S ||
+        eventName == AppFreezeType::BUSSINESS_THREAD_BLOCK_3S ||
+        eventName == AppFreezeType::BUSSINESS_THREAD_BLOCK_6S) {
+        if (IsNeedIgnoreFreezeEvent(pid, eventName)) {
+            TAG_LOGE(AAFwkTag::APPDFR, "appFreeze happend, pid:%{public}d, eventName:%{public}s",
+                pid, eventName.c_str());
+            return true;
+        }
+    }
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

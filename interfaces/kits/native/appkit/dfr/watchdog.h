@@ -129,7 +129,6 @@ private:
     std::condition_variable cvWatchdog_;
     static std::shared_ptr<EventHandler> appMainHandler_;
     int64_t lastWatchTime_ = 0;
-    std::string bundleName_;
     bool isSystemApp_ = true;
 };
 }  // namespace AppExecFwk

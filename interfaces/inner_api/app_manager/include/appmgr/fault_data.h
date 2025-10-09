@@ -37,7 +37,8 @@ enum class FaultDataType {
     APP_FREEZE,
     CPU_LOAD,
     PERFORMANCE_CONTROL,
-    RESOURCE_CONTROL
+    RESOURCE_CONTROL,
+    BACKGROUND_WARNING
 };
 
 enum AppStatus {
@@ -58,6 +59,7 @@ public:
     static constexpr char APP_INPUT_BLOCK[] = "APP_INPUT_BLOCK";
     static constexpr char BUSSINESS_THREAD_BLOCK_3S[] = "BUSSINESS_THREAD_BLOCK_3S";
     static constexpr char BUSSINESS_THREAD_BLOCK_6S[] = "BUSSINESS_THREAD_BLOCK_6S";
+    static constexpr char BACKGROUND_WARNING[] = "BACKGROUND_WARNING";
 };
 /**
  * @struct FaultData
