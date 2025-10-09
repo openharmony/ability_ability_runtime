@@ -48,7 +48,6 @@ public:
     static std::unique_ptr<ETSRuntime> Create(const Options &options, std::unique_ptr<JsRuntime> &jsRuntime);
     static void SetAppLibPath(const AppLibPathMap& appLibPaths,
         const std::map<std::string, std::string>& abcPathsToBundleModuleNameMap, bool isSystemApp);
-    static void InheritPluginNamespace(const std::vector<std::string> &moduleNames);
     ~ETSRuntime() override;
     Language GetLanguage() const override
     {

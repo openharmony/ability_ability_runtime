@@ -1662,9 +1662,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             std::map<std::string, std::string> abcPathsToBundleModuleNameMap {};
             GetEtsNativeLibPath(bundleInfo, hspList, etsAppLibPaths, abcPathsToBundleModuleNameMap);
             AbilityRuntime::ETSRuntime::SetAppLibPath(etsAppLibPaths, abcPathsToBundleModuleNameMap, isSystemApp);
-            if (IsPluginNamespaceInherited()) {
-                AbilityRuntime::ETSRuntime::InheritPluginNamespace(pluginModuleNames);
-            }
         } else {
             AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, isSystemApp);
             if (IsPluginNamespaceInherited()) {
