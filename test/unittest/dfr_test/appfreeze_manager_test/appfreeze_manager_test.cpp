@@ -298,17 +298,6 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_CatchStack_001, TestSize.Lev
     EXPECT_TRUE(appfreezeManager->catchStackMap_.empty());
 }
 
-/**
- * @tc.number: AppfreezeManagerTest_ParseDecToHex_001
- * @tc.desc: add testcase codecoverage
- * @tc.type: FUNC
- */
-HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_ParseDecToHex_001, TestSize.Level1)
-{
-    std::string ret = appfreezeManager->ParseDecToHex(1234); // test value
-    EXPECT_EQ(ret, "4d2");
-}
-
 #ifdef ABILITY_RUNTIME_HITRACE_ENABLE
 /**
  * @tc.number: AppfreezeManagerTest_GetHitraceInfo_001
@@ -317,7 +306,10 @@ HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_ParseDecToHex_001, TestSize.
  */
 HWTEST_F(AppfreezeManagerTest, AppfreezeManagerTest_GetHitraceInfo_001, TestSize.Level1)
 {
-    std::string ret = appfreezeManager->GetHitraceInfo();
+    std::string ret = appfreezeManager->ParseDecToHex(1234); // test value
+    EXPECT_EQ(ret, "4d2");
+    ret = appfreezeManager->GetHitraceInfo();
+    ret = appfreezeManager->GetHitraceInfo();
     EXPECT_TRUE(ret.empty());
     OHOS::HiviewDFX::HiTraceChain::Begin("AppfreezeManagerTest_GetHitraceInfo_001", 0);
     appfreezeManager->GetHitraceInfo();

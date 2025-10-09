@@ -117,5 +117,15 @@ int AppfreezeUtil::GetCpuCount()
     TAG_LOGD(AAFwkTag::APPDFR, "read: %{public}s to get cpu count:%{public}d.", procStatPath.c_str(), cpuCount);
     return cpuCount;
 }
+
+std::string AppfreezeUtil::FreezePathToRealPath(const std::string& filePath)
+{
+    std::string realPath;
+    if (!OHOS::PathToRealPath(filePath, realPath)) {
+        TAG_LOGE(AAFwkTag::APPDFR, "pathToRealPath failed:%{public}s", filePath.c_str());
+        return "";
+    }
+    return realPath;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
