@@ -428,7 +428,13 @@
             "application.formHost",
             "application.formInfo",
             "application.formProvider",
-            "telephony.voipCall"
+            "telephony.voipCall",
+            "telephony.numberLookup",
+            "telephony.CallerInfoQueryExtensionAbility",
+            "telephony.CallerInfoQueryExtensionContext",
+            "core.liveview.liveViewManager",
+            "core.liveview.LiveViewLockScreenExtensionContext",
+            "core.liveview.LiveViewLockScreenExtensionAbility"
         ],
         "VoIPExtension": [
             "app.form.formProvider",
