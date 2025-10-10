@@ -332,6 +332,10 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GenerateAbilityRecord(
         }
         MoreAbilityNumbersSendEventInfo(
             abilityRequest.userId, abilityInfo.bundleName, abilityInfo.name, abilityInfo.moduleName);
+        if (!abilityRequest.startOptions.GetCurrentProcessName().empty()) {
+            uiAbilityRecord->SetProcessName(abilityRequest.abilityInfo.process);
+            uiAbilityRecord->SetCallerSetProcess(true);
+        }
         if (isLowMemKill) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "killed by low-mem, created a new record, "
                 "replacing old record id=%{public}s, new record id=%{public}s",
@@ -639,10 +643,13 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(AbilityRequest &ability
     auto isPlugin = StartupUtil::IsStartPlugin(abilityRequest.want);
     auto isSpecified = (abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
     if (isSpecified && !isPlugin) {
-        auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
-        specifiedRequest->preCreateProcessName = true;
-        AddSpecifiedRequest(specifiedRequest);
-        return ERR_OK;
+        if (abilityRequest.startOptions.GetCurrentProcessName().empty()) {
+            auto specifiedRequest = std::make_shared<SpecifiedRequest>(requestId, abilityRequest);
+            specifiedRequest->preCreateProcessName = true;
+            AddSpecifiedRequest(specifiedRequest);
+            return ERR_OK;
+        }
+        return StartAbilityBySpecified(abilityRequest, requestId);
     }
 
     if (IsHookModule(abilityRequest)) {
@@ -2742,6 +2749,17 @@ int32_t UIAbilityLifecycleManager::StartAbilityBySpecifed(const SpecifiedRequest
     return ERR_OK;
 }
 
+int32_t UIAbilityLifecycleManager::StartAbilityBySpecified(const AbilityRequest &abilityRequest, int32_t requestId)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    auto sessionInfo = CreateSessionInfo(abilityRequest, requestId);
+    sessionInfo->requestCode = abilityRequest.requestCode;
+    sessionInfo->isFromIcon = abilityRequest.isFromIcon;
+    sessionInfo->specifiedFlag = abilityRequest.specifiedFlag;
+    auto callerAbility = GetAbilityRecordByToken(abilityRequest.callerToken);
+    return SendSessionInfoToSCB(callerAbility, sessionInfo);
+}
+
 void UIAbilityLifecycleManager::CallRequestDone(const std::shared_ptr<AbilityRecord> &abilityRecord,
     const sptr<IRemoteObject> &callStub)
 {
@@ -4196,6 +4214,32 @@ int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId
             std::lock_guard lock(pThis->sessionLock_);
             pThis->StartSpecifiedRequest(*nextRequest);
             }, ffrt::task_attr().timeout(AbilityRuntime::GlobalConstant::DEFAULT_FFRT_TASK_TIMEOUT));
+    }
+    return ERR_OK;
+}
+
+ErrCode UIAbilityLifecycleManager::IsUIAbilityAlreadyExist(
+    const std::string &bundleName, const std::string &abilityName, const std::string &specifiedFlag, int32_t appIndex)
+{
+    std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> tempSessionAbilityMap;
+    {
+        std::lock_guard<ffrt::mutex> guard(sessionLock_);
+        tempSessionAbilityMap = sessionAbilityMap_;
+    }
+    bool hasSpecifiedFlag = !specifiedFlag.empty();
+    for (auto it = tempSessionAbilityMap.begin(); it != tempSessionAbilityMap.end(); it++) {
+        if (it->second == nullptr) {
+            continue;
+        }
+        if (it->second->GetAbilityInfo().bundleName == bundleName &&
+            it->second->GetAbilityInfo().name == abilityName && it->second->GetAppIndex() == appIndex) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "UIAbility is already exist");
+            return ERROR_UIABILITY_IS_ALREADY_EXIST;
+        }
+        if (hasSpecifiedFlag && it->second->GetSpecifiedFlag() == specifiedFlag) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "specifiedFlag is already exist");
+            return ERROR_UIABILITY_IS_ALREADY_EXIST;
+        }
     }
     return ERR_OK;
 }

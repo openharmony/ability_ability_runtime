@@ -264,6 +264,10 @@ class AbilityContext extends Context {
   setOnNewWantSkipScenarios(scenarios) {
     return this.__context_impl__.setOnNewWantSkipScenarios(scenarios);
   }
+
+  startSelfUIAbilityInCurrentProcess(want, specifiedFlag, options) {
+    return this.__context_impl__.startSelfUIAbilityInCurrentProcess(want, specifiedFlag, options);
+  }
 }
 
 export default AbilityContext;

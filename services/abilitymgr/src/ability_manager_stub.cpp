@@ -334,6 +334,9 @@ int AbilityManagerStub::OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel
     if (interfaceCode == AbilityManagerInterfaceCode::SEND_LOCAL_PENDING_WANT_SENDER) {
         return SendLocalWantSenderInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_IN_CURRENT_PROCESS) {
+        return StartSelfUIAbilityInCurrentProcessInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -5027,6 +5030,31 @@ int AbilityManagerStub::PreloadApplicationInner(MessageParcel &data, MessageParc
         return ERR_WRITE_RESULT_CODE_FAILED;
     }
     return result;
+}
+
+int AbilityManagerStub::StartSelfUIAbilityInCurrentProcessInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want null");
+        return ERR_INVALID_VALUE;
+    }
+    std::string specifiedFlag = data.ReadString();
+    StartOptions *startOptions = data.ReadParcelable<StartOptions>();
+    bool hasOptions = data.ReadBool();
+    if (hasOptions && startOptions == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "startOptions null");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IRemoteObject> callerToken = nullptr;
+    if (data.ReadBool()) {
+        callerToken = data.ReadRemoteObject();
+    }
+    int32_t result = StartSelfUIAbilityInCurrentProcess(
+        *want, specifiedFlag, *startOptions, hasOptions, callerToken);
+    reply.WriteInt32(result);
+    delete startOptions;
+    return NO_ERROR;
 }
 } // namespace AAFwk
 } // namespace OHOS
