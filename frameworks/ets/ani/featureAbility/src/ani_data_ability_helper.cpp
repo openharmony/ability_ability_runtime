@@ -67,7 +67,7 @@ void SetPacMapObject(AppExecFwk::PacMap &pacMap, ani_env* env, std::string keySt
     }
     if (IsInstanceOf(env, CLASSNAME_BOOL, aniValue)) {
         ani_boolean value = ANI_FALSE;
-        if ((status = env->Object_CallMethodByName_Boolean(aniValue, "unboxed", nullptr, &value)) != ANI_OK) {
+        if ((status = env->Object_CallMethodByName_Boolean(aniValue, "toBoolean", nullptr, &value)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::FA, "Object_CallMethodByName_Boolean status: %{public}d", status);
             return;
         }
