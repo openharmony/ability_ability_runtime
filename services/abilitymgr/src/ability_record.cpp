@@ -21,6 +21,7 @@
 #include "ability_resident_process_rdb.h"
 #include "ability_scheduler_stub.h"
 #include "app_exit_reason_data_manager.h"
+#include "appfreeze_manager.h"
 #include "app_utils.h"
 #include "array_wrapper.h"
 #include "accesstoken_kit.h"
@@ -120,6 +121,8 @@ const int RESTART_SCENEBOARD_DELAY = 500;
 constexpr int32_t DMS_UID = 5522;
 constexpr int32_t SCHEDULER_DIED_TIMEOUT = 60000;
 const std::string JSON_KEY_ERR_MSG = "errMsg";
+const int32_t BY_CALL_HALF_TIMEOUT_MS = 2500;
+const int32_t BY_CALL_TIMEOUT_MS = 5000;
 
 auto g_addLifecycleEventTask = [](sptr<Token> token, std::string &methodName) {
     CHECK_POINTER_LOG(token, "token is nullptr");
@@ -3301,16 +3304,78 @@ void AbilityRecord::SetCallerSetProcess(const bool flag)
     isCallerSetProcess_.store(flag);
 }
 
+void AbilityRecord::PostStartAbilityByCallTimeoutTask(bool isHalf)
+{
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
+    CHECK_POINTER(handler);
+
+    auto timeoutTask = [isHalf, ability = shared_from_this()]() {
+        AppExecFwk::RunningProcessInfo processInfo;
+        std::string abilityName = ability->GetAbilityInfo().name;
+        std::string bundleName = ability->GetAbilityInfo().bundleName;
+        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByToken(ability->GetToken(), processInfo);
+        if (processInfo.pid_ == 0) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "ability:%{public}s, app fork fail/not run", abilityName.c_str());
+            return;
+        }
+        int typeId = AppExecFwk::AppfreezeManager::TypeAttribute::CRITICAL_TIMEOUT;
+        std::string msgContent = "ability:" + abilityName + " ";
+        std::string eventName;
+        FreezeUtil::TimeoutState state = FreezeUtil::TimeoutState::BY_CALL;
+        msgContent = isHalf ? msgContent + "call request half timeout." : msgContent + "call request timeout.";
+        eventName = isHalf ? AppExecFwk::AppFreezeType::LIFECYCLE_HALF_TIMEOUT_WARNING
+            : AppExecFwk::AppFreezeType::LIFECYCLE_TIMEOUT_WARNING;
+
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s: uid: %{public}d, pid: %{public}d, bundleName: %{public}s, "
+            "abilityName: %{public}s, msg: %{public}s", eventName.c_str(), processInfo.uid_, processInfo.pid_,
+            bundleName.c_str(), abilityName.c_str(), msgContent.c_str());
+
+        AppExecFwk::AppfreezeManager::ParamInfo info = { false, typeId, processInfo.pid_, eventName, bundleName };
+        FreezeUtil::LifecycleFlow flow;
+        if (ability->GetToken() != nullptr) {
+            flow.token = ability->GetToken()->AsObject();
+            flow.state = state;
+        }
+        info.msg = msgContent + "\nserver actions for ability:\n" +
+            FreezeUtil::GetInstance().GetLifecycleEvent(flow.token)
+            + "\nserver actions for app:\n" + FreezeUtil::GetInstance().GetAppLifecycleEvent(processInfo.pid_);
+        if (!isHalf) {
+            FreezeUtil::GetInstance().DeleteLifecycleEvent(flow.token);
+            FreezeUtil::GetInstance().DeleteAppLifecycleEvent(processInfo.pid_);
+        }
+        AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info, flow);
+    };
+    auto timeoutMs = isHalf ? BY_CALL_HALF_TIMEOUT_MS : BY_CALL_TIMEOUT_MS;
+    std::string taskPrefix = isHalf ? "by_call_half_timeout_" : "by_call_timeout_";
+    handler->SubmitTask(timeoutTask, taskPrefix + std::to_string(recordId_), timeoutMs);
+}
+
 void AbilityRecord::CallRequest()
 {
     CHECK_POINTER(scheduler_);
     // Async call request
+    std::string entry = "AbilityRecord::CallRequest Begin";
+    FreezeUtil::GetInstance().AddLifecycleEvent(token_, entry);
     scheduler_->CallRequest();
+    PostStartAbilityByCallTimeoutTask(true);
+    PostStartAbilityByCallTimeoutTask(false);
+}
+
+void AbilityRecord::CancelStartAbilityByCallTimeoutTask() const
+{
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
+    if (!handler) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "fail get AbilityEventHandler");
+        return;
+    }
+    handler->CancelTask("by_call_timeout_" + std::to_string(recordId_));
+    handler->CancelTask("by_call_half_timeout_" + std::to_string(recordId_));
 }
 
 bool AbilityRecord::CallRequestDone(const sptr<IRemoteObject> &callStub) const
 {
     CHECK_POINTER_RETURN_BOOL(callContainer_);
+    CancelStartAbilityByCallTimeoutTask();
     if (!callContainer_->CallRequestDone(callStub)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "call failed");
         return false;

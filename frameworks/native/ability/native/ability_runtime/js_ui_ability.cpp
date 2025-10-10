@@ -1859,7 +1859,10 @@ sptr<IRemoteObject> JsUIAbility::CallRequest()
     }
 
     napi_value remoteJsObj = nullptr;
+    std::string methodName = "onCallRequest";
+    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::BY_CALL, methodName);
     napi_call_function(env, obj, method, 0, nullptr, &remoteJsObj);
+    AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::BY_CALL, methodName);
     if (remoteJsObj == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "null remoteJsObj");
         return nullptr;
