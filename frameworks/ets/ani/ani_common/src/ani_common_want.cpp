@@ -1199,11 +1199,6 @@ bool UnwrapWant(ani_env *env, ani_object param, AAFwk::Want &want)
             want.AddEntity(valueStringList[i]);
         }
     }
-    TAG_LOGD(AAFwkTag::ANI,
-        "DeviceID %{public}s, BundleName %{public}s, AbilityName %{public}s, ModuleName %{public}s",
-        natElementName.GetDeviceID().c_str(), natElementName.GetBundleName().c_str(),
-        natElementName.GetAbilityName().c_str(), natElementName.GetModuleName().c_str());
-
     AAFwk::WantParams wantParams;
     if (InnerUnwrapWantParams(env, param, wantParams)) {
         want.SetParams(wantParams);
