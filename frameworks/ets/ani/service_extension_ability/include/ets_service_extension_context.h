@@ -66,6 +66,8 @@ public:
     static void StartServiceExtensionAbility(ani_env *env, ani_object obj, ani_object wantObj, ani_object callbackobj);
     static void StopServiceExtensionAbility(
         ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callbackobj);
+    static void StartUIServiceExtension(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callback);
+    static void WantCheck(ani_env *env, ani_object aniObj, ani_object wantObj);
 
     std::weak_ptr<ServiceExtensionContext> GetAbilityContext()
     {
@@ -82,6 +84,7 @@ private:
         ani_object callback);
     void AddFreeInstallObserver(ani_env *env, const AAFwk::Want &want,
         ani_object callbackObj, std::shared_ptr<ServiceExtensionContext> context);
+    void OnStartUIServiceExtension(ani_env *env, ani_object wantObj, ani_object callback);
 
     std::weak_ptr<ServiceExtensionContext> context_;
     sptr<EtsFreeInstallObserver> freeInstallObserver_ = nullptr;

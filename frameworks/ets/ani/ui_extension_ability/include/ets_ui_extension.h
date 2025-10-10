@@ -85,7 +85,10 @@ public:
      */
     void OnStop() override;
     void OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback) override;
-
+    /**
+     * @brief The callback of OnStop.
+     */
+    virtual void OnStopCallBack() override;
     /**
      * @brief Called when this extension enters the <b>STATE_FOREGROUND</b> state.
      *

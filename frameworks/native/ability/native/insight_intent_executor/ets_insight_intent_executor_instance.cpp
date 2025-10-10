@@ -26,7 +26,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 const char *ETS_ANI_LIBNAME = "libinsight_intent_executor_ani.z.so";
-const char *ETS_ANI_Create_FUNC = "OHOS_ETS_Insight_Intent_Executor_Create";
+const char *ETS_ANI_CREATE_FUNC = "OHOS_ETS_Insight_Intent_Executor_Create";
 using CreateETSInsightIntentExecutorFunc = InsightIntentExecutor*(*)(OHOS::AbilityRuntime::Runtime &);
 CreateETSInsightIntentExecutorFunc g_etsCreateFunc = nullptr;
 }
@@ -41,9 +41,9 @@ InsightIntentExecutor *CreateETSInsightIntentExecutor(Runtime &runtime)
         TAG_LOGE(AAFwkTag::UIABILITY, "dlopen failed %{public}s, %{public}s", ETS_ANI_LIBNAME, dlerror());
         return nullptr;
     }
-    auto symbol = dlsym(handle, ETS_ANI_Create_FUNC);
+    auto symbol = dlsym(handle, ETS_ANI_CREATE_FUNC);
     if (symbol == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "dlsym failed %{public}s, %{public}s", ETS_ANI_Create_FUNC, dlerror());
+        TAG_LOGE(AAFwkTag::UIABILITY, "dlsym failed %{public}s, %{public}s", ETS_ANI_CREATE_FUNC, dlerror());
         dlclose(handle);
         return nullptr;
     }

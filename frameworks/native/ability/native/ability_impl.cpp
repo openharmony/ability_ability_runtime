@@ -21,6 +21,7 @@
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
+#include "js_ability_lifecycle_callback.h"
 #include "ohos_application.h"
 #ifdef SUPPORT_SCREEN
 #include "scene_board_judgement.h"
@@ -580,10 +581,12 @@ void AbilityImpl::AfterFocusedCommon(bool isFocused)
                 return;
             }
             auto& jsAbility = static_cast<AbilityRuntime::JsAbility&>(*(impl->ability_));
+            AbilityRuntime::JsAbilityLifecycleCallbackArgs ability(jsAbility.GetJsAbility());
+            AbilityRuntime::JsAbilityLifecycleCallbackArgs stage(jsAbility.GetJsWindowStage());
             if (focuseMode) {
-                applicationContext->DispatchWindowStageFocus(jsAbility.GetJsAbility(),  jsAbility.GetJsWindowStage());
+                applicationContext->DispatchWindowStageFocus(ability, stage);
             } else {
-                applicationContext->DispatchWindowStageUnfocus(jsAbility.GetJsAbility(), jsAbility.GetJsWindowStage());
+                applicationContext->DispatchWindowStageUnfocus(ability, stage);
             }
             return;
         }

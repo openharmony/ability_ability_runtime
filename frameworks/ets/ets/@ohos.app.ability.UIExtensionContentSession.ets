@@ -35,6 +35,9 @@ let destroyRegister = new FinalizationRegistry<Cleaner>(Cleaner.callback)
 let unregisterToken = new object()
 
 export default class UIExtensionContentSession {
+  static {
+    loadLibrary("ui_extension_content_session_ani_kit.z");
+  }
   nativeContextSession:long = 0;
   private cleaner: Cleaner | null = null;
   registerCleaner(ptr: long): void {
@@ -49,6 +52,16 @@ export default class UIExtensionContentSession {
           this.nativeContextSession = contextSession;
     }
     this.registerCleaner(this.nativeContextSession)
+  }
+  private static native nativeTransferStatic(input: ESValue): Object;
+  private static native nativeTransferDynamic(input: Object): ESValue;
+
+  static transferStatic(input: Any): Object {
+    return UIExtensionContentSession.nativeTransferStatic(ESValue.wrap(input));
+  }
+
+  static transferDynamic(input: Object): Any {
+    return UIExtensionContentSession.nativeTransferDynamic(input).unwrap();
   }
   native nativeSendData(data: Record<string, Object>): void;
   native loadContent(path: string, storage?: LocalStorage): void;

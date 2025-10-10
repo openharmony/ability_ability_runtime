@@ -110,10 +110,10 @@ ani_object EtsInsightIntentContext::StartAbilityInner(ani_env *env, AAFwk::Want 
 }
 
 std::unique_ptr<AppExecFwk::ETSNativeReference> CreateEtsInsightIntentContext(ani_env *env,
-    const std::shared_ptr<EtsInsightIntentContext> &context)
+    const EtsInsightIntentContext *context)
 {
     TAG_LOGD(AAFwkTag::INTENT, "CreateEtsInsightIntentContext called");
-    ani_long nativeContextLong = (ani_long)context.get();
+    ani_long nativeContextLong = (ani_long)context;
     ani_class cls {};
     ani_status status = ANI_ERROR;
     ani_object contextObj = nullptr;

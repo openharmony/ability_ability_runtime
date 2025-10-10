@@ -25,6 +25,7 @@
 #include "configuration_utils.h"
 #include "connection_manager.h"
 #include "context.h"
+#include "ets_ability_lifecycle_callback.h"
 #include "ets_data_struct_converter.h"
 #include "ets_extension_common.h"
 #include "ets_extension_context.h"
@@ -96,6 +97,14 @@ EtsUIExtension::~EtsUIExtension()
         context->Unbind();
     }
     contentSessions_.clear();
+    auto env = etsRuntime_.GetAniEnv();
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::UI_EXT, "null env");
+        return;
+    }
+    if (shellContextRef_ && shellContextRef_->aniRef) {
+        env->GlobalReference_Delete(shellContextRef_->aniRef);
+    }
 }
 
 void EtsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
@@ -159,7 +168,8 @@ bool EtsUIExtension::BindNativeMethods()
         TAG_LOGE(AAFwkTag::UI_EXT, "FindClass failed status: %{public}d", status);
         return false;
     }
-    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
+    if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK
+        && status != ANI_ALREADY_BINDED) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Class_BindNativeMethods status: %{public}d", status);
         return false;
     }
@@ -320,6 +330,16 @@ void EtsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callba
     if (!isAsyncCallback) {
         OnStopCallBack();
         return;
+    }
+}
+
+void EtsUIExtension::OnStopCallBack()
+{
+    UIExtension::OnStopCallBack();
+    auto applicationContext = Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        EtsAbilityLifecycleCallbackArgs ability(etsObj_);
+        applicationContext->DispatchOnAbilityDestroy(ability);
     }
 }
 
@@ -491,7 +511,7 @@ bool EtsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAF
         etsUiExtContentSession_ = std::make_shared<EtsUIExtensionContentSession>(sessionInfo, uiWindow,
             wkctx, abilityResultListeners_);
         ani_object sessonObj = EtsUIExtensionContentSession::CreateEtsUIExtensionContentSession(env,
-            sessionInfo, uiWindow, context, abilityResultListeners_, etsUiExtContentSession_);
+            etsUiExtContentSession_.get());
         ani_ref sessonObjRef = nullptr;
         if ((status = env->GlobalReference_Create(sessonObj, &sessonObjRef)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::UI_EXT, "status: %{public}d", status);
