@@ -685,6 +685,8 @@ private:
 
     void HandleUpdatePluginInfoInstalled(const ApplicationInfo &pluginAppInfo, const std::string &moduleName);
 
+    bool IsPluginNamespaceInherited();
+
     /**
      * @brief parse app configuration params
      *
@@ -740,6 +742,7 @@ private:
     std::string abilityLibraryType_ = ".so";
     static std::weak_ptr<OHOSApplication> applicationForDump_;
     bool isDeveloperMode_ = false;
+    bool isPluginNamespaceInherited_ = false;
 #if defined(NWEB) && defined(NWEB_GRAPHIC)
     Rosen::RSSurfaceNode::SharedPtr preloadSurfaceNode_ = nullptr;
     std::shared_ptr<NWeb::NWeb> preloadNWeb_ = nullptr;
