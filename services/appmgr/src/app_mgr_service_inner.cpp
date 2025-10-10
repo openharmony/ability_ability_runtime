@@ -1763,6 +1763,9 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
         TAG_LOGD(AAFwkTag::APPMGR, "callerRecord null");
     }
     AAFwk::EventReport::SendAppForegroundEvent(AAFwk::EventName::APP_FOREGROUND, eventInfo);
+    if (appRecord->GetPreloadMode() == PreloadMode::PRE_LAUNCH) {
+        appRecord->SetPreloadMode(PreloadMode::PRELOAD_NONE);
+    }
 }
 
 void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
