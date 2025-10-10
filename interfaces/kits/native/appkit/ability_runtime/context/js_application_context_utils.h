@@ -19,10 +19,10 @@
 #include <memory>
 #include <mutex>
 
-#include "ability_lifecycle_callback.h"
 #include "application_context.h"
 #include "application_state_change_callback.h"
 #include "js_ability_auto_startup_callback.h"
+#include "js_ability_lifecycle_callback.h"
 #include "native_engine/native_engine.h"
 #include "running_process_info.h"
 

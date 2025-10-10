@@ -476,8 +476,7 @@ generate_static_abc("ability_runtime_caller_callee_abc") {
   ]
 
   is_boot_abc = "True"
-  device_dst_file =
-      "/system/framework/ability_runtime_caller_callee_abc.abc"
+  device_dst_file = "/system/framework/ability_runtime_caller_callee_abc.abc"
 }
 
 ohos_prebuilt_etc("ability_runtime_caller_callee_abc_etc") {
@@ -893,6 +892,23 @@ ohos_prebuilt_etc("ability_runtime_AbilityRunningInfo_abc_etc") {
   deps = [ ":ability_runtime_AbilityRunningInfo_abc" ]
 }
 
+generate_static_abc("ability_runtime_ability_lifecycle_callback_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.AbilityLifecycleCallback.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_runtime_ability_lifecycle_callback_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_ability_lifecycle_callback_abc_etc") {
+  source = "$target_out_dir/ability_runtime_ability_lifecycle_callback_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_ability_lifecycle_callback_abc" ]
+}
+
 generate_static_abc("ability_runtime_connect_options_abc") {
   base_url = "./"
   files = [ "./ability/connectOptions.ets" ]
@@ -1146,6 +1162,25 @@ generate_static_abc("ability_runtime_share_extension_ability_abc") {
       "/system/framework/ability_runtime_share_extension_ability_abc.abc"
 }
 
+generate_static_abc("app_service_extension_ability") {
+  base_url = "./"
+  files = [
+    "./@ohos.app.ability.AppServiceExtensionAbility.ets",
+    "./application/AppServiceExtensionContext.ets",
+  ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/app_service_extension_ability.abc"
+}
+
+ohos_prebuilt_etc("app_service_extension_ability_abc_etc") {
+  source = "$target_out_dir/app_service_extension_ability.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":app_service_extension_ability" ]
+}
+
 ohos_prebuilt_etc("ability_runtime_share_extension_ability_abc_etc") {
   source = "$target_out_dir/ability_runtime_share_extension_ability_abc.abc"
   module_install_dir = "framework"
@@ -1202,6 +1237,126 @@ ohos_prebuilt_etc("ability_runtime_event_hub_abc_etc") {
   deps = [ ":ability_runtime_event_hub_abc" ]
 }
 
+generate_static_abc("ability_runtime_ui_service_extension_ability_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.UIServiceExtensionAbility.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_runtime_ui_service_extension_ability_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_ui_service_extension_ability_abc_etc") {
+  source =
+      "$target_out_dir/ability_runtime_ui_service_extension_ability_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_ui_service_extension_ability_abc" ]
+}
+
+generate_static_abc("ui_service_extension_context_abc") {
+  base_url = "./"
+  files = [ "./application/UIServiceExtensionContext.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ui_service_extension_context_abc.abc"
+}
+
+ohos_prebuilt_etc("ui_service_extension_context_abc_etc") {
+  source = "$target_out_dir/ui_service_extension_context_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ui_service_extension_context_abc" ]
+}
+
+generate_static_abc("ui_service_host_proxy_abc") {
+  base_url = "./"
+  files = [ "./application/UIServiceHostProxy.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ui_service_host_proxy_abc.abc"
+}
+
+ohos_prebuilt_etc("ui_service_host_proxy_abc_etc") {
+  source = "$target_out_dir/ui_service_host_proxy_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ui_service_host_proxy_abc" ]
+}
+
+generate_static_abc("ability_runtime_ability_dialogRequest_abc") {
+  base_url = "./"
+  files = [ "./@ohos.app.ability.dialogRequest.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ability_runtime_ability_dialogRequest_abc.abc"
+}
+
+ohos_prebuilt_etc("ability_runtime_ability_dialogRequest_abc_etc") {
+  source = "$target_out_dir/ability_runtime_ability_dialogRequest_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ability_runtime_ability_dialogRequest_abc" ]
+}
+
+generate_static_abc("ui_service_proxy_abc") {
+  base_url = "./"
+  files = [ "./application/UIServiceProxy.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/ui_service_proxy_abc.abc"
+}
+
+ohos_prebuilt_etc("ui_service_proxy_abc_etc") {
+  source = "$target_out_dir/ui_service_proxy_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ui_service_proxy_abc" ]
+}
+
+generate_static_abc("ui_service_extension_connect_callback_abc") {
+  base_url = "./"
+  files = [ "./application/UIServiceExtensionConnectCallback.ets" ]
+
+  is_boot_abc = "True"
+  device_dst_file =
+      "/system/framework/ui_service_extension_connect_callback_abc.abc"
+}
+
+ohos_prebuilt_etc("ui_service_extension_connect_callback_abc_etc") {
+  source = "$target_out_dir/ui_service_extension_connect_callback_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":ui_service_extension_connect_callback_abc" ]
+}
+
+generate_static_abc("quick_fix_manager_abc") {
+  base_url = "./"
+
+  files = [ "./@ohos.app.ability.quickFixManager.ets" ]
+
+  dst_file = "$target_out_dir/quick_fix_manager.abc"
+  out_puts = [ "$target_out_dir/quick_fix_manager.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/quick_fix_manager.abc"
+}
+
+ohos_prebuilt_etc("quick_fix_manager_abc_etc") {
+  source = "$target_out_dir/quick_fix_manager.abc"
+  module_install_dir = "framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+  deps = [ ":quick_fix_manager_abc" ]
+}
+
 group("ets_packages") {
   deps = [
     ":ability_application_abc_etc",
@@ -1217,6 +1372,8 @@ group("ets_packages") {
     ":ability_runtime_ability_abc_etc",
     ":ability_runtime_ability_constant_abc_etc",
     ":ability_runtime_ability_context_constant_abc_etc",
+    ":ability_runtime_ability_dialogRequest_abc_etc",
+    ":ability_runtime_ability_lifecycle_callback_abc_etc",
     ":ability_runtime_ability_manager_abc_etc",
     ":ability_runtime_ability_mission_manager_abc_etc",
     ":ability_runtime_ability_result_abc_etc",
@@ -1262,6 +1419,7 @@ group("ets_packages") {
     ":ability_runtime_trigger_info_abc_etc",
     ":ability_runtime_ui_ability_abc_etc",
     ":ability_runtime_ui_ability_context_abc_etc",
+    ":ability_runtime_ui_service_extension_ability_abc_etc",
     ":ability_runtime_vertical_panel_manager_abc_etc",
     ":ability_runtime_want_abc_etc",
     ":ability_runtime_want_agent_abc_etc",
@@ -1269,11 +1427,17 @@ group("ets_packages") {
     ":ability_runtime_want_constant_abc_etc",
     ":appRecovery_abc_etc",
     ":app_foreground_state_observer_abc_etc",
+    ":app_service_extension_ability_abc_etc",
     ":application_state_observer_abc_etc",
     ":atomic_service_options_abc_etc",
     ":form_extension_ability_etc",
+    ":quick_fix_manager_abc_etc",
     ":service_extension_ability_abc_etc",
     ":ui_extension_ability_ani_etc",
+    ":ui_service_extension_connect_callback_abc_etc",
+    ":ui_service_extension_context_abc_etc",
+    ":ui_service_host_proxy_abc_etc",
+    ":ui_service_proxy_abc_etc",
     ":uri_permission_manager_abc_etc",
   ]
 }

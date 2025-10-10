@@ -81,6 +81,9 @@ napi_value CreateJsExtensionContext(napi_env env, const std::shared_ptr<Extensio
         }
     }
 
+    std::string type = "ExtensionContext";
+    napi_set_named_property(env, object, "contextType", CreateJsValue(env, type));
+
     return object;
 }
 } // namespace AbilityRuntime

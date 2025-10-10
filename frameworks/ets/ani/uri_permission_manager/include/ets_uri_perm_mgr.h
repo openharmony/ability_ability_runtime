@@ -25,6 +25,10 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     ani_string uri, ani_enum_item flagEnum, ani_string targetName, ani_int appCloneIndex, ani_object callback);
 static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     ani_string uri, ani_string targetName, ani_int appCloneIndex, ani_object callback);
+static void grantUriPermissionByKeyCallbackSync([[maybe_unused]]ani_env *env,
+    ani_string uri, ani_enum_item flag, ani_int targetTokenId, ani_object callback);
+static void grantUriPermissionByKeyAsCallerCallbackSync([[maybe_unused]]ani_env *env,
+    ani_string uri, ani_enum_item flag, ani_int callerTokenId, ani_int targetTokenId, ani_object callback);
 void CreateJsUriPermMgr(ani_env *env);
 bool AsyncCallback(ani_env *env, ani_object call, ani_object error, ani_object result);
 ani_object WrapBusinessError(ani_env *env, ani_int code);

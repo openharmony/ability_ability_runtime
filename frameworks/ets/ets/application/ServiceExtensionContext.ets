@@ -39,6 +39,9 @@ let destroyRegister = new FinalizationRegistry<Cleaner>(callback);
 let unregisterToken = new object();
 
 export default class ServiceExtensionContext extends ExtensionContext {
+  static {
+    loadLibrary("service_extension_context_ani_kit.z");
+  }
   constructor(context: long) {
     if (this.nativeEtsContext == 0) {
       this.nativeEtsContext = context;
@@ -58,6 +61,27 @@ export default class ServiceExtensionContext extends ExtensionContext {
   nativeEtsContext: long = 0;
   private cleaner: Cleaner | null = null;
 
+  private static native nativeTransferStatic(input: ESValue, type: string): Object;
+
+  private static native nativeTransferDynamic(input: Object): ESValue;
+
+  private static contextType: string = 'ServiceExtensionContext';
+
+  static transferStatic(input: Any): Object {
+    let type: string = '';
+    try {
+      type = ESValue.wrap(input).getProperty('__context_impl__').getProperty('contextType').toString();
+    } catch (err) {
+      console.log('transferStatic err: ' + err.toString());
+    }
+    console.log('transferStatic type: ' + type);
+    return ServiceExtensionContext.nativeTransferStatic(ESValue.wrap(input), type);
+  }
+
+  static transferDynamic(input: Object): Any {
+    return ServiceExtensionContext.nativeTransferDynamic(input).unwrap();
+  }
+
   native nativeTerminateSelf(callback: AsyncCallbackWrapper<void>): void;
 
   native nativeStartAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
@@ -71,6 +95,10 @@ export default class ServiceExtensionContext extends ExtensionContext {
   native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): long;
 
   native nativeDisconnectServiceExtensionAbility(connection: long, callback: AsyncCallbackWrapper<void>): void;
+
+  native nativeStartUIServiceExtensionAbility(want: Want, callback: AsyncCallbackWrapper<void>): void;
+
+  native nativeWantCheck(want: Want): void;
 
   terminateSelf(callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
@@ -189,6 +217,22 @@ export default class ServiceExtensionContext extends ExtensionContext {
       taskpool.execute((): void => {
         this.nativeDisconnectServiceExtensionAbility(connection, asyncCall);
       })
+    });
+  }
+
+  startUIServiceExtensionAbility(want: Want): Promise<void> {
+    this.nativeWantCheck(want);
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeStartUIServiceExtensionAbility(want, myCall);
+      });
     });
   }
 }

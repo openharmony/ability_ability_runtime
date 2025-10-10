@@ -26,7 +26,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 const char *ETS_ANI_LIBNAME = "libability_stage_ani.z.so";
-const char *ETS_ANI_Create_FUNC = "OHOS_ETS_Ability_Stage_Create";
+const char *ETS_ANI_CREATE_FUNC = "OHOS_ETS_Ability_Stage_Create";
 using CreateETSAbilityStageFunc = AbilityStage*(*)(const std::unique_ptr<Runtime>&,
     const AppExecFwk::HapModuleInfo&);
 CreateETSAbilityStageFunc g_etsCreateFunc = nullptr;
@@ -43,9 +43,9 @@ AbilityStage *CreateETSAbilityStage(const std::unique_ptr<Runtime> &runtime,
         TAG_LOGE(AAFwkTag::APPKIT, "dlopen failed %{public}s, %{public}s", ETS_ANI_LIBNAME, dlerror());
         return nullptr;
     }
-    auto symbol = dlsym(handle, ETS_ANI_Create_FUNC);
+    auto symbol = dlsym(handle, ETS_ANI_CREATE_FUNC);
     if (symbol == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "dlsym failed %{public}s, %{public}s", ETS_ANI_Create_FUNC, dlerror());
+        TAG_LOGE(AAFwkTag::APPKIT, "dlsym failed %{public}s, %{public}s", ETS_ANI_CREATE_FUNC, dlerror());
         dlclose(handle);
         return nullptr;
     }
