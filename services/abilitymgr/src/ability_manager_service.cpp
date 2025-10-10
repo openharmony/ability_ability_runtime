@@ -161,7 +161,7 @@ constexpr int32_t APP_ALIVE_TIME_MS = 1000;  // Allow background startup within 
 constexpr int32_t REGISTER_FOCUS_DELAY = 5000;
 constexpr size_t OFFSET = 32;
 constexpr int32_t PENG_LAI_UID = 7655;
-constexpr int32_t RSS_UID = 1901;
+constexpr int32_t RSS_UID = 1096;
 constexpr const char* IS_DELEGATOR_CALL = "isDelegatorCall";
 
 // Startup rule switch
