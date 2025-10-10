@@ -21,6 +21,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+const size_t AppServiceExtensionContext::CONTEXT_TYPE_ID(std::hash<const char*> {} ("AppServiceExtensionContext"));
 
 ErrCode AppServiceExtensionContext::ConnectAbility(
     const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const

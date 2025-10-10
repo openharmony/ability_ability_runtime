@@ -45,13 +45,18 @@ public:
     static ani_object StartAbiitySync(ani_env *env, ani_object aniObj, ani_object wantObj);
     static EtsInsightIntentContext *GetContext(ani_env *env, ani_object aniObj);
 
+    std::shared_ptr<InsightIntentContext> GetNativeContext()
+    {
+        return context_.lock();
+    }
+
 private:
     ani_object StartAbilityInner(ani_env *env, AAFwk::Want &want);
     std::weak_ptr<InsightIntentContext> context_;
 };
 
 std::unique_ptr<AppExecFwk::ETSNativeReference> CreateEtsInsightIntentContext(ani_env *env,
-    const std::shared_ptr<EtsInsightIntentContext> &context);
+    const EtsInsightIntentContext *context);
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ETS_INSIGHT_INTENT_CONTEXT_H

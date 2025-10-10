@@ -68,11 +68,7 @@ public:
         sptr<Rosen::Window> uiWindow);
     virtual ~EtsUIExtensionContentSession() = default;
     static EtsUIExtensionContentSession* GetEtsContentSession(ani_env *env, ani_object obj);
-    static ani_object CreateEtsUIExtensionContentSession(ani_env *env,
-        sptr<AAFwk::SessionInfo> sessionInfo, sptr<Rosen::Window> uiWindow,
-        std::weak_ptr<AbilityRuntime::Context> context,
-        std::shared_ptr<EtsAbilityResultListeners> &abilityResultListeners,
-        std::shared_ptr<EtsUIExtensionContentSession> contentSessionPtr);
+    static ani_object CreateEtsUIExtensionContentSession(ani_env *env, EtsUIExtensionContentSession *contentSessionPtr);
 
     static void NativeSendData(ani_env *env, ani_object obj, ani_object data);
     static void NativeLoadContent(ani_env *env, ani_object obj, ani_string path, ani_object storage);
@@ -101,6 +97,12 @@ public:
     sptr<Rosen::Window> GetUIWindow();
     static bool BindNativePtrCleaner(ani_env *env);
     static void Clean(ani_env *env, ani_object object);
+
+    sptr<AAFwk::SessionInfo> GetSessionInfo()
+    {
+        return sessionInfo_;
+    }
+
 private:
     void SetReceiveDataCallbackRegister(ani_env *env, ani_object functionObj);
     void SetReceiveDataForResultCallbackRegister(ani_env *env, ani_object funcObj);

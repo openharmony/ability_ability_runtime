@@ -18,6 +18,7 @@
 #include "ability_business_error.h"
 #include "ability_manager_errors.h"
 #include "ability_runtime_error_util.h"
+#include "ani_common_util.h"
 #include "ani_enum_convert.h"
 #include "hilog_tag_wrapper.h"
 #include "ipc_skeleton.h"
@@ -146,6 +147,70 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     AsyncCallback(env, callback, etsErrCode, CreateDouble(env, result));
 }
 
+static void grantUriPermissionByKeyCallbackSync([[maybe_unused]]ani_env *env,
+    ani_string uri, ani_enum_item flagEnum, ani_int targetTokenId, ani_object callback)
+{
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "grantUriPermissionByKeyCallbackSync start");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "env null");
+        return;
+    }
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    ani_object etsErrCode = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
+        etsErrCode = EtsErrorUtil::CreateError(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), NOT_SYSTEM_APP);
+        AbilityRuntime::EtsErrorUtil::ThrowError(env, AbilityRuntime::AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return;
+    }
+    std::string uriStr = GetStdString(env, uri);
+    ani_int flag = 0;
+    AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, flagEnum, flag);
+    int32_t result = ERR_OK;
+    int32_t errCode =
+        AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermissionByKey(uriStr, flag, targetTokenId);
+    if (errCode != ERR_OK) {
+        result = ERR_FAILURE;
+        TAG_LOGE(AAFwkTag::DELEGATOR, "GrantUriPermissionByKey failed status: %{public}d", errCode);
+        etsErrCode = EtsErrorUtil::CreateErrorByNativeErr(env, errCode);
+        AsyncCallback(env, callback, etsErrCode, CreateDouble(env, result));
+        return;
+    }
+    etsErrCode = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
+    AppExecFwk::AsyncCallback(env, callback, etsErrCode, nullptr);
+}
+
+static void grantUriPermissionByKeyAsCallerCallbackSync([[maybe_unused]]ani_env *env,
+    ani_string uri, ani_enum_item flagEnum, ani_int callerTokenId, ani_int targetTokenId, ani_object callback)
+{
+    TAG_LOGI(AAFwkTag::URIPERMMGR, "grantUriPermissionByKeyAsCallerCallbackSync start");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "env null");
+        return;
+    }
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    ani_object etsErrCode = EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK);
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
+        etsErrCode = EtsErrorUtil::CreateError(env,
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), NOT_SYSTEM_APP);
+        AsyncCallback(env, callback, etsErrCode, CreateDouble(env, ERR_FAILURE));
+        return;
+    }
+    std::string uriStr = GetStdString(env, uri);
+    ani_int flag = 0;
+    AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, flagEnum, flag);
+    int32_t result = ERR_OK;
+    int32_t errCode = AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermissionByKeyAsCaller(
+        uriStr, flag, callerTokenId, targetTokenId);
+    if (errCode != ERR_OK) {
+        result = ERR_FAILURE;
+        etsErrCode = EtsErrorUtil::CreateErrorByNativeErr(env, errCode);
+    }
+    AppExecFwk::AsyncCallback(env, callback, etsErrCode, CreateDouble(env, result));
+}
+
 void EtsUriPermissionManagerInit(ani_env *env)
 {
     TAG_LOGI(AAFwkTag::URIPERMMGR, "EtsUriPermissionManagerInit call");
@@ -175,6 +240,16 @@ void EtsUriPermissionManagerInit(ani_env *env)
             "Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
             reinterpret_cast<void*>(revokeUriPermissionCallbackSync)
         },
+        ani_native_function {
+            "grantUriPermissionByKeyCallbackSync",
+            nullptr,
+            reinterpret_cast<void*>(grantUriPermissionByKeyCallbackSync)
+        },
+        ani_native_function {
+            "grantUriPermissionByKeyAsCallerCallbackSync",
+            nullptr,
+            reinterpret_cast<void*>(grantUriPermissionByKeyAsCallerCallbackSync)
+        }
     };
     TAG_LOGI(AAFwkTag::URIPERMMGR, "EtsUriPermissionManagerInit bind functions");
     if (env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size()) != ANI_OK) {

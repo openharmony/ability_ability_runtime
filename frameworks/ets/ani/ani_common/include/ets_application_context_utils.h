@@ -21,6 +21,7 @@
 #include "ani_common_util.h"
 #include "ani_common_want.h"
 #include "application_context.h"
+#include "ets_ability_lifecycle_callback.h"
 #include "ets_application_state_change_callback.h"
 #include "ets_context_utils.h"
 #include "ets_enviroment_callback.h"
@@ -54,6 +55,10 @@ public:
     static ani_int GetCurrentAppCloneIndex(ani_env *env, ani_object aniObj);
     static ani_string GetCurrentInstanceKey(ani_env *env, ani_object aniObj);
     static void GetAllRunningInstanceKeys(ani_env *env, ani_object aniObj, ani_object callback);
+    static ani_int NativeOnLifecycleCallbackSync(ani_env *env, ani_object aniObj, ani_string type,
+        ani_object callback);
+    static void NativeOffLifecycleCallbackSync(ani_env *env, ani_object aniObj, ani_string type,
+        ani_int callbackId, ani_object callback);
     static void NativeOffApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
     static void NativeOnApplicationStateChangeSync(ani_env *env, ani_object aniObj, ani_object callback);
     static void NativeOffEnvironmentSync(ani_env *env, ani_object aniObj, ani_int callbackId, ani_object callback);
@@ -61,6 +66,8 @@ public:
 protected:
     std::weak_ptr<ApplicationContext> applicationContext_;
 private:
+    ani_int RegisterAbilityLifecycleCallback(ani_env *env, ani_object callback);
+    void UnregisterAbilityLifecycleCallback(ani_env *env, int32_t callbackId, ani_object callback);
     void OnRestartApp(ani_env *env, ani_object aniObj, ani_object wantObj);
     void OnSetFont(ani_env *env, ani_object aniObj, ani_string font);
     void OnSetColorMode(ani_env *env, ani_object aniObj, ani_enum_item colorMode);
@@ -81,6 +88,8 @@ private:
     static void SetEventHubContextIsApplicationContext(ani_env *aniEnv, ani_ref eventHubRef);
     std::shared_ptr<EtsEnviromentCallback> etsEnviromentCallback_;
     std::shared_ptr<EtsApplicationStateChangeCallback> applicationStateCallback_;
+    static std::mutex abilityLifecycleCallbackLock_;
+    static std::shared_ptr<EtsAbilityLifecycleCallback> abilityLifecycleCallback_ ;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

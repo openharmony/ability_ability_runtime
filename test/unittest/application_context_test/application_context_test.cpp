@@ -18,6 +18,7 @@
 #define private public
 #include "application_context.h"
 #undef private
+#include "js_ability_lifecycle_callback.h"
 #include "mock_ability_token.h"
 #include "mock_application_state_change_callback.h"
 #include "mock_context_impl.h"
@@ -846,7 +847,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityCreate_0100, TestSize.Level1)
     GTEST_LOG_(INFO) << "DispatchOnAbilityCreate_0100 start";
     EXPECT_NE(context_, nullptr);
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnAbilityCreate(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnAbilityCreate(abilityArg);
     GTEST_LOG_(INFO) << "DispatchOnAbilityCreate_0100 end";
 }
 
@@ -861,7 +863,9 @@ HWTEST_F(ApplicationContextTest, DispatchOnWindowStageCreate_0100, TestSize.Leve
     EXPECT_NE(context_, nullptr);
     std::shared_ptr<NativeReference> ability = nullptr;
     std::shared_ptr<NativeReference> windowStage = nullptr;
-    context_->DispatchOnWindowStageCreate(ability, windowStage);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    JsAbilityLifecycleCallbackArgs windowStageArg(windowStage);
+    context_->DispatchOnWindowStageCreate(abilityArg, windowStageArg);
     GTEST_LOG_(INFO) << "DispatchOnWindowStageCreate_0100 end";
 }
 
@@ -876,7 +880,9 @@ HWTEST_F(ApplicationContextTest, DispatchOnWindowStageDestroy_0100, TestSize.Lev
     EXPECT_NE(context_, nullptr);
     std::shared_ptr<NativeReference> ability = nullptr;
     std::shared_ptr<NativeReference> windowStage = nullptr;
-    context_->DispatchOnWindowStageDestroy(ability, windowStage);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    JsAbilityLifecycleCallbackArgs windowStageArg(windowStage);
+    context_->DispatchOnWindowStageDestroy(abilityArg, windowStageArg);
     GTEST_LOG_(INFO) << "DispatchOnWindowStageDestroy_0100 end";
 }
 
@@ -891,7 +897,9 @@ HWTEST_F(ApplicationContextTest, DispatchWindowStageFocus_0100, TestSize.Level1)
     EXPECT_NE(context_, nullptr);
     std::shared_ptr<NativeReference> ability = nullptr;
     std::shared_ptr<NativeReference> windowStage = nullptr;
-    context_->DispatchWindowStageFocus(ability, windowStage);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    JsAbilityLifecycleCallbackArgs windowStageArg(windowStage);
+    context_->DispatchWindowStageFocus(abilityArg, windowStageArg);
     GTEST_LOG_(INFO) << "DispatchWindowStageFocus_0100 end";
 }
 
@@ -906,7 +914,9 @@ HWTEST_F(ApplicationContextTest, DispatchWindowStageUnfocus_0100, TestSize.Level
     EXPECT_NE(context_, nullptr);
     std::shared_ptr<NativeReference> ability = nullptr;
     std::shared_ptr<NativeReference> windowStage = nullptr;
-    context_->DispatchWindowStageUnfocus(ability, windowStage);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    JsAbilityLifecycleCallbackArgs windowStageArg(windowStage);
+    context_->DispatchWindowStageUnfocus(abilityArg, windowStageArg);
     GTEST_LOG_(INFO) << "DispatchWindowStageUnfocus_0100 end";
 }
 
@@ -920,7 +930,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityDestroy_0100, TestSize.Level1)
     GTEST_LOG_(INFO) << "DispatchOnAbilityDestroy_0100 start";
     EXPECT_NE(context_, nullptr);
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnAbilityDestroy(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnAbilityDestroy(abilityArg);
     GTEST_LOG_(INFO) << "DispatchOnAbilityDestroy_0100 end";
 }
 
@@ -934,7 +945,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityForeground_0100, TestSize.Leve
     GTEST_LOG_(INFO) << "DispatchOnAbilityForeground_0100 start";
     EXPECT_NE(context_, nullptr);
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnAbilityForeground(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnAbilityForeground(abilityArg);
     GTEST_LOG_(INFO) << "DispatchOnAbilityForeground_0100 end";
 }
 
@@ -948,7 +960,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityBackground_0100, TestSize.Leve
     GTEST_LOG_(INFO) << "DispatchOnAbilityBackground_0100 start";
     EXPECT_NE(context_, nullptr);
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnAbilityBackground(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnAbilityBackground(abilityArg);
     GTEST_LOG_(INFO) << "DispatchOnAbilityBackground_0100 end";
 }
 
@@ -962,7 +975,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityContinue_0100, TestSize.Level1
     GTEST_LOG_(INFO) << "DispatchOnAbilityContinue_0100 start";
     EXPECT_NE(context_, nullptr);
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnAbilityContinue(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnAbilityContinue(abilityArg);
     GTEST_LOG_(INFO) << "DispatchOnAbilityContinue_0100 end";
 }
 
@@ -1335,7 +1349,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityWillContinue_0100, TestSize.Le
 {
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillContinue_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnAbilityWillContinue(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnAbilityWillContinue(abilityArg);
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillContinue_0100 end";
 }
@@ -1350,7 +1365,9 @@ HWTEST_F(ApplicationContextTest, DispatchOnWindowStageWillRestore_0100, TestSize
     GTEST_LOG_(INFO) << "DispatchOnWindowStageWillRestore_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
     std::shared_ptr<NativeReference> winstage = nullptr;
-    context_->DispatchOnWindowStageWillRestore(ability, winstage);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    JsAbilityLifecycleCallbackArgs winstageArg(winstage);
+    context_->DispatchOnWindowStageWillRestore(abilityArg, winstageArg);
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnWindowStageWillRestore_0100 end";
 }
@@ -1365,7 +1382,9 @@ HWTEST_F(ApplicationContextTest, DispatchOnWindowStageRestore_0100, TestSize.Lev
     GTEST_LOG_(INFO) << "DispatchOnWindowStageRestore_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
     std::shared_ptr<NativeReference> winstage = nullptr;
-    context_->DispatchOnWindowStageRestore(ability, winstage);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    JsAbilityLifecycleCallbackArgs winstageArg(winstage);
+    context_->DispatchOnWindowStageRestore(abilityArg, winstageArg);
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnWindowStageRestore_0100 end";
 }
@@ -1379,7 +1398,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityWillSaveState_0100, TestSize.L
 {
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillSaveState_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnAbilityWillSaveState(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnAbilityWillSaveState(abilityArg);
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillSaveState_0100 end";
 }
@@ -1393,7 +1413,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilitySaveState_0100, TestSize.Level
 {
     GTEST_LOG_(INFO) << "DispatchOnAbilitySaveState_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnAbilitySaveState(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnAbilitySaveState(abilityArg);
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilitySaveState_0100 end";
 }
@@ -1407,7 +1428,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnWillNewWant_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DispatchOnWillNewWant_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnWillNewWant(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnWillNewWant(abilityArg);
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnWillNewWant_0100 end";
 }
@@ -1421,7 +1443,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnNewWant_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "DispatchOnNewWant_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnNewWant(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnNewWant(abilityArg);
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnNewWant_0100 end";
 }
@@ -1435,7 +1458,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityWillCreate_0100, TestSize.Leve
 {
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillCreate_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnAbilityWillCreate(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnAbilityWillCreate(abilityArg);
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillCreate_0100 end";
 }
@@ -1450,7 +1474,9 @@ HWTEST_F(ApplicationContextTest, DispatchOnWindowStageWillCreate_0100, TestSize.
     GTEST_LOG_(INFO) << "DispatchOnWindowStageWillCreate_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
     std::shared_ptr<NativeReference> winstage = nullptr;
-    context_->DispatchOnWindowStageWillCreate(ability, winstage);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    JsAbilityLifecycleCallbackArgs winstageArg(winstage);
+    context_->DispatchOnWindowStageWillCreate(abilityArg, winstageArg);
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnWindowStageWillCreate_0100 end";
 }
@@ -1465,7 +1491,9 @@ HWTEST_F(ApplicationContextTest, DispatchOnWindowStageWillDestroy_0100, TestSize
     GTEST_LOG_(INFO) << "DispatchOnWindowStageWillDestroy_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
     std::shared_ptr<NativeReference> winstage = nullptr;
-    context_->DispatchOnWindowStageWillDestroy(ability, winstage);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    JsAbilityLifecycleCallbackArgs winstageArg(winstage);
+    context_->DispatchOnWindowStageWillDestroy(abilityArg, winstageArg);
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnWindowStageWillDestroy_0100 end";
 }
@@ -1479,7 +1507,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityWillDestroy_0100, TestSize.Lev
 {
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillDestroy_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnAbilityWillDestroy(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnAbilityWillDestroy(abilityArg);
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillDestroy_0100 end";
 }
@@ -1493,7 +1522,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityWillForeground_0100, TestSize.
 {
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillForeground_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnAbilityWillForeground(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnAbilityWillForeground(abilityArg);
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillForeground_0100 end";
 }
@@ -1507,7 +1537,8 @@ HWTEST_F(ApplicationContextTest, DispatchOnAbilityWillBackground_0100, TestSize.
 {
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillBackground_0100 start";
     std::shared_ptr<NativeReference> ability = nullptr;
-    context_->DispatchOnAbilityWillBackground(ability);
+    JsAbilityLifecycleCallbackArgs abilityArg(ability);
+    context_->DispatchOnAbilityWillBackground(abilityArg);
     EXPECT_TRUE(context_ != nullptr);
     GTEST_LOG_(INFO) << "DispatchOnAbilityWillBackground_0100 end";
 }

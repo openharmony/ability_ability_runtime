@@ -85,7 +85,7 @@ bool EtsInsightIntentExecutor::Init(const InsightIntentExecutorInfo &insightInte
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
     contextCpp_ = std::make_shared<EtsInsightIntentContext>(context);
-    contextObj_ = CreateEtsInsightIntentContext(env, contextCpp_);
+    contextObj_ = CreateEtsInsightIntentContext(env, contextCpp_.get());
     if (contextObj_ == nullptr) {
         TAG_LOGE(AAFwkTag::INTENT, "null contextObj_");
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);

@@ -21,6 +21,7 @@
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
 #include "ability_delegator_registry.h"
+#include "ets_ui_service_extension_instance.h"
 #include "napi_common_util.h"
 #include "runtime.h"
 #include "js_runtime_utils.h"
@@ -44,6 +45,8 @@ UIServiceExtension* UIServiceExtension::Create(const std::unique_ptr<Runtime>& r
     switch (runtime->GetLanguage()) {
         case Runtime::Language::JS:
             return JsUIServiceExtension::Create(runtime);
+        case Runtime::Language::ETS:
+            return CreateETSUIServiceExtension(runtime);
         default:
             return new (std::nothrow) UIServiceExtension();
     }

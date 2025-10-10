@@ -26,7 +26,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 const char *ETS_ANI_LIBNAME = "libui_ability_ani.z.so";
-const char *ETS_ANI_Create_FUNC = "OHOS_ETS_Ability_Create";
+const char *ETS_ANI_CREATE_FUNC = "OHOS_ETS_Ability_Create";
 using CreateETSUIAbilityFunc = UIAbility*(*)(const std::unique_ptr<Runtime>&);
 CreateETSUIAbilityFunc g_etsCreateFunc = nullptr;
 const char *CREATE_AND_BIND_ETS_UI_ABILITY_CONTEXT_FUNC = "OHOS_CreateAndBindETSUIAbilityContext";
@@ -45,9 +45,9 @@ UIAbility *CreateETSUIAbility(const std::unique_ptr<Runtime> &runtime)
         TAG_LOGE(AAFwkTag::UIABILITY, "dlopen failed %{public}s, %{public}s", ETS_ANI_LIBNAME, dlerror());
         return nullptr;
     }
-    auto symbol = dlsym(handle, ETS_ANI_Create_FUNC);
+    auto symbol = dlsym(handle, ETS_ANI_CREATE_FUNC);
     if (symbol == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "dlsym failed %{public}s, %{public}s", ETS_ANI_Create_FUNC, dlerror());
+        TAG_LOGE(AAFwkTag::UIABILITY, "dlsym failed %{public}s, %{public}s", ETS_ANI_CREATE_FUNC, dlerror());
         dlclose(handle);
         return nullptr;
     }
@@ -68,7 +68,7 @@ void CreateAndBindETSUIAbilityContext(const std::shared_ptr<AbilityContext> &abi
     }
     auto symbol = dlsym(handle, CREATE_AND_BIND_ETS_UI_ABILITY_CONTEXT_FUNC);
     if (symbol == nullptr) {
-        TAG_LOGE(AAFwkTag::UIABILITY, "dlsym failed %{public}s, %{public}s", ETS_ANI_Create_FUNC, dlerror());
+        TAG_LOGE(AAFwkTag::UIABILITY, "dlsym failed %{public}s, %{public}s", ETS_ANI_CREATE_FUNC, dlerror());
         dlclose(handle);
         return;
     }

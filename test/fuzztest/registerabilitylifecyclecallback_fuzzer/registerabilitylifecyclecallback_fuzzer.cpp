@@ -35,27 +35,27 @@ public:
     explicit AbilityLifecycleCallbackFuzz(){};
     virtual ~AbilityLifecycleCallbackFuzz(){};
     void
-    OnAbilityCreate(const std::shared_ptr<NativeReference> &ability) override{};
+    OnAbilityCreate(const AbilityLifecycleCallbackArgs &ability) override{};
     void OnWindowStageCreate(
-        const std::shared_ptr<NativeReference> &ability,
-        const std::shared_ptr<NativeReference> &windowStage) override{};
+        const AbilityLifecycleCallbackArgs &ability,
+        const AbilityLifecycleCallbackArgs &windowStage) override{};
     void OnWindowStageDestroy(
-        const std::shared_ptr<NativeReference> &ability,
-        const std::shared_ptr<NativeReference> &windowStage) override{};
+        const AbilityLifecycleCallbackArgs &ability,
+        const AbilityLifecycleCallbackArgs &windowStage) override{};
     void OnWindowStageActive(
-        const std::shared_ptr<NativeReference> &ability,
-        const std::shared_ptr<NativeReference> &windowStage) override{};
+        const AbilityLifecycleCallbackArgs &ability,
+        const AbilityLifecycleCallbackArgs &windowStage) override{};
     void OnWindowStageInactive(
-        const std::shared_ptr<NativeReference> &ability,
-        const std::shared_ptr<NativeReference> &windowStage) override{};
+        const AbilityLifecycleCallbackArgs &ability,
+        const AbilityLifecycleCallbackArgs &windowStage) override{};
     void
-    OnAbilityDestroy(const std::shared_ptr<NativeReference> &ability) override{};
+    OnAbilityDestroy(const AbilityLifecycleCallbackArgs &ability) override{};
     void OnAbilityForeground(
-        const std::shared_ptr<NativeReference> &ability) override{};
+        const AbilityLifecycleCallbackArgs &ability) override{};
     void OnAbilityBackground(
-        const std::shared_ptr<NativeReference> &ability) override{};
+        const AbilityLifecycleCallbackArgs &ability) override{};
     void
-    OnAbilityContinue(const std::shared_ptr<NativeReference> &ability) override{};
+    OnAbilityContinue(const AbilityLifecycleCallbackArgs &ability) override{};
 };
 bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
 {

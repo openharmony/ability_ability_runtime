@@ -111,6 +111,8 @@ napi_value CreateJsInsightIntentContext(napi_env env, const std::shared_ptr<Insi
     std::unique_ptr<JsInsightIntentContext> jsInsightIntentContext = std::make_unique<JsInsightIntentContext>(context);
     napi_wrap(env, contextObj, jsInsightIntentContext.release(), JsInsightIntentContext::Finalizer, nullptr, nullptr);
 
+    std::string type = "InsightIntentContext";
+    napi_set_named_property(env, contextObj, "contextType", CreateJsValue(env, type));
     BindNativeFunction(env, contextObj, "startAbility", CONTEXT_MODULE_NAME, JsInsightIntentContext::StartAbiity);
     TAG_LOGD(AAFwkTag::INTENT, "end");
     return contextObj;

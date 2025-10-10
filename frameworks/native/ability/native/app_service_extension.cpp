@@ -18,6 +18,7 @@
 #include "app_service_extension_context.h"
 #include "configuration_utils.h"
 #include "connection_manager.h"
+#include "ets_app_service_extension_instance.h"
 #include "hilog_tag_wrapper.h"
 #include "js_app_service_extension.h"
 #include "runtime.h"
@@ -36,7 +37,8 @@ AppServiceExtension* AppServiceExtension::Create(const std::unique_ptr<Runtime>&
     switch (runtime->GetLanguage()) {
         case Runtime::Language::JS:
             return JsAppServiceExtension::Create(runtime);
-
+        case Runtime::Language::ETS:
+            return CreateEtsAppServiceExtension(runtime);
         default:
             return new AppServiceExtension();
     }
