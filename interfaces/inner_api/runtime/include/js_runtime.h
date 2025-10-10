@@ -171,6 +171,9 @@ public:
         const std::string& packageName);
     bool Init(const Options& options);
 
+    size_t GetHeapTotalSize();
+    size_t GetHeapObjectSize();
+
 private:
     void FinishPreload() override;
     bool Initialize(const Options& options);
