@@ -31,6 +31,15 @@
 #include "fault_data.h"
 #include "task_handler_wrap.h"
 
+#define OHOS_TEMP_FAILURE_RETRY(exp)               \
+    ({                                             \
+        long int _rc;                              \
+        do {                                       \
+            _rc = (long int)(exp);                 \
+        } while ((_rc == -1) && (errno == EINTR)); \
+        _rc;                                       \
+    })
+
 namespace OHOS {
 namespace AppExecFwk {
 class AppfreezeInner {
@@ -51,6 +60,8 @@ public:
     void SetAppDebug(bool isAppDebug);
     void SetAppInForeground(bool isInForeground);
     void SetMainThreadSample(bool isEnableMainThreadSample);
+    void SetAppfreezeApplication(const std::shared_ptr<OHOSApplication> &application);
+    std::string GetProcessLifeCycle();
 
 private:
     static std::weak_ptr<EventHandler> appMainHandler_;
@@ -58,12 +69,17 @@ private:
     void AppFreezeRecovery();
     int NotifyANR(const FaultData& faultData);
     bool IsExitApp(const std::string& name);
+    bool IsAppFreeze(const std::string& name);
     bool IsHandleAppfreeze();
     std::string GetProcStatm(int32_t pid);
     bool GetAppInForeground();
     bool GetMainThreadSample();
     void EnableFreezeSample(FaultData& newFaultData);
     void ReportAppfreezeTask(const FaultData& faultData, bool onlyMainThread);
+    std::string LogFormat(size_t totalSize, size_t objectSize);
+    void GetApplicationInfo(FaultData& faultData);
+    bool GetProcessStartTime(pid_t tid, unsigned long long &startTime);
+    bool ReadFdToString(int fd, std::string& content);
 
     static std::mutex singletonMutex_;
     static std::shared_ptr<AppfreezeInner> instance_;
@@ -73,6 +89,7 @@ private:
     std::mutex handlingMutex_;
     std::list<FaultData> handlinglist_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> appfreezeInnerTaskHandler_;
+    std::shared_ptr<OHOSApplication> application_ = nullptr;
 };
 
 class MainHandlerDumper : public Dumper {

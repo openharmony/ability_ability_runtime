@@ -37,6 +37,8 @@ constexpr char EVENT_FREEZE_INFO_PATH[] = "FREEZE_INFO_PATH";
 constexpr char EVENT_TRACE_ID[] = "HITRACE_ID";
 constexpr char EVENT_FOREGROUND[] = "FOREGROUND";
 constexpr char EVENT_ENABLE_MAINTHREAD_SAMPLE[] = "ENABLE_MAINTHREAD_SAMPLE";
+constexpr char EVENT_APPLICATION_HEAP_INFO[] = "APPLICATION_HEAP_INFO";
+constexpr char EVENT_PROCESS_LIFECYCLE_INFO[] = "PROCESS_LIFECYCLE_INFO";
 }
 
 int AppfreezeEventReport::SendAppfreezeEvent(const std::string &eventName, HiSysEventType type,
@@ -49,6 +51,9 @@ int AppfreezeEventReport::SendAppfreezeEvent(const std::string &eventName, HiSys
     }
     if (eventName == AppFreezeType::THREAD_BLOCK_6S) {
         return LogThreadBlockEvent(eventName, type, eventInfo);
+    }
+    if (eventName == AppFreezeType::LIFECYCLE_TIMEOUT) {
+        return LogLifeCycleTimeoutEvent(eventName, type, eventInfo);
     }
     return LogGeneralEvent(eventName, type, eventInfo);
 }
@@ -73,7 +78,9 @@ int AppfreezeEventReport::LogAppInputBlockEvent(const std::string &name, HiSysEv
         EVENT_FREEZE_MEMORY, eventInfo.freezeMemory,
         EVENT_ENABLE_MAINTHREAD_SAMPLE, eventInfo.enableFreeze,
         EVENT_FOREGROUND, eventInfo.foregroundState,
-        EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile);
+        EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile,
+        EVENT_APPLICATION_HEAP_INFO, eventInfo.applicationHeapInfo,
+        EVENT_PROCESS_LIFECYCLE_INFO, eventInfo.processLifeTime);
     return ret;
 }
 
@@ -97,8 +104,35 @@ int AppfreezeEventReport::LogThreadBlockEvent(const std::string &name, HiSysEven
         EVENT_FREEZE_MEMORY, eventInfo.freezeMemory,
         EVENT_TRACE_ID, eventInfo.hitraceInfo,
         EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile,
+        EVENT_FOREGROUND, eventInfo.foregroundState,
+        EVENT_APPLICATION_HEAP_INFO, eventInfo.applicationHeapInfo,
+        EVENT_PROCESS_LIFECYCLE_INFO, eventInfo.processLifeTime);
+    return ret;
+}
+
+int AppfreezeEventReport::LogLifeCycleTimeoutEvent(const std::string &name, HiSysEventType type,
+    const AppfreezeEventInfo &eventInfo)
+{
+    int ret = -1;
+    ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK,
+        name,
+        type,
+        EVENT_UID, eventInfo.uid,
+        EVENT_PID, eventInfo.pid,
+        EVENT_TID, eventInfo.tid,
+        EVENT_PACKAGE_NAME, eventInfo.bundleName,
+        EVENT_PROCESS_NAME, eventInfo.processName,
+        EVENT_MESSAGE, eventInfo.errorMessage,
+        EVENT_STACK, eventInfo.errorStack,
+        EVENT_BINDER_INFO, eventInfo.binderInfo,
+        EVENT_APP_RUNNING_UNIQUE_ID, eventInfo.appRunningUniqueId,
+        EVENT_FREEZE_MEMORY, eventInfo.freezeMemory,
+        EVENT_FREEZE_INFO_PATH, eventInfo.freezeInfoFile,
         EVENT_ENABLE_MAINTHREAD_SAMPLE, eventInfo.enableFreeze,
-        EVENT_FOREGROUND, eventInfo.foregroundState);
+        EVENT_FOREGROUND, eventInfo.foregroundState,
+        EVENT_APPLICATION_HEAP_INFO, eventInfo.applicationHeapInfo,
+        EVENT_PROCESS_LIFECYCLE_INFO, eventInfo.processLifeTime);
     return ret;
 }
 
