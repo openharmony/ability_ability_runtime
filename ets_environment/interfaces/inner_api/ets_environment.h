@@ -61,8 +61,7 @@ public:
         void *&obj, void *&ref);
     void FinishPreload();
     void PostFork(void *napiEnv, const std::string &aotPath, const std::vector<std::string>& appInnerHspPathList,
-        const std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> &commonHspBundleInfos,
-        const std::shared_ptr<OHOS::AppExecFwk::EventRunner> &eventRunner);
+        const std::vector<OHOS::AbilityRuntime::CommonHspBundleInfo> &commonHspBundleInfos);
     void PreloadSystemClass(const char *className);
 
     void RemoveInstance(uint32_t instanceId);
@@ -100,7 +99,6 @@ private:
     bool LoadAbcLinker(ani_env *env, const std::string &modulePath, ani_class &abcCls, ani_object &abcObj);
     void InitEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &eventRunner);
     int32_t ParseHdcRegisterOption(std::string& option);
-    void PostCoroutineScheduleTask();
     static ETSRuntimeAPI lazyApis_;
     VMEntry vmEntry_;
     ETSUncaughtExceptionInfo uncaughtExceptionInfo_;
