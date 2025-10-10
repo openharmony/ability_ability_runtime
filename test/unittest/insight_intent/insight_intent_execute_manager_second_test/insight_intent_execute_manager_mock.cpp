@@ -35,7 +35,7 @@ bool PermissionVerification::JudgeCallerIsAllowedToUseSystemAPI() const
 
 namespace AbilityRuntime {
 uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementName, const std::string &intentName,
-    const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry)
+    const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry, std::string *arkTSMode)
 {
     if (executeMode == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND) {
         if (intentName.empty()) {
