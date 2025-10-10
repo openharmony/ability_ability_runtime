@@ -11,11 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# any change to xxx_ipc_interface_code.h needs to be reviewed by @leonchan5
-interfaces/inner_api/ability_manager/include/ability_manager_ipc_interface_code.h @leonchan5
-interfaces/inner_api/app_manager/include/appmgr/app_mgr_ipc_interface_code.h @leonchan5
-services/common/include/ui_extension_utils.h @li-weifeng2
-services/common/include/ui_extension_utils.h @zhangyafei-echo
+# any change to xxx_ipc_interface_code.h needs to be reviewed by @ccllee1 @li-weifeng2024 @jsjzju
+interfaces/inner_api/ability_manager/include/ability_manager_ipc_interface_code.h @ccllee1 @li-weifeng2024 @jsjzju
+interfaces/inner_api/app_manager/include/appmgr/app_mgr_ipc_interface_code.h @ccllee1 @li-weifeng2024 @jsjzju
+services/common/include/ui_extension_utils.h @li-weifeng2024
 
 [AFWK ABILITY RUNTIME]
 services/uripermmgr/ @afwk_helper
