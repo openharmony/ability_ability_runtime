@@ -412,12 +412,6 @@ std::shared_ptr<Context> GetBaseContext(ani_env *env, ani_object aniObj)
     return weakContext != nullptr ? weakContext->lock() : nullptr;
 }
 
-bool CheckCallerIsSystemApp()
-{
-    auto selfToken = IPCSkeleton::GetSelfTokenID();
-    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken);
-}
-
 ani_object CreateModuleResourceManagerSync(ani_env *env, ani_object aniObj,
     ani_string bundleName, ani_string moduleName)
 {
@@ -435,7 +429,7 @@ ani_object CreateModuleResourceManagerSync(ani_env *env, ani_object aniObj,
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return nullptr;
     }
-    if (!CheckCallerIsSystemApp()) {
+    if (!AppExecFwk::CheckCallerIsSystemApp()) {
         TAG_LOGE(AAFwkTag::APPKIT, "not system-app");
         EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
         return nullptr;
