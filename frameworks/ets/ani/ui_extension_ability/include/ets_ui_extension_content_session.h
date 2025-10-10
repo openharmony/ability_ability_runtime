@@ -83,6 +83,7 @@ public:
     static void NativeSetReceiveDataCallback(ani_env *env, ani_object clsObj, ani_object funcObj);
     static void NativeSetReceiveDataForResultCallback(ani_env *env, ani_object clsObj, ani_object funcObj);
     static ani_object NativeGetUIExtensionHostWindowProxy(ani_env *env, ani_object obj);
+    static ani_object NativeGetUIExtensionWindowProxy(ani_env *env, ani_object obj);
     static ani_object NativeStartAbilityByTypeSync(
         ani_env *env, ani_object obj, ani_string type, ani_ref wantParam, ani_object startCallback);
 
@@ -91,7 +92,6 @@ public:
     void TerminateSelf();
     int32_t TerminateSelfWithResult();
     void SetWindowBackgroundColor(ani_env *env, ani_string color);
-    ani_object GetUIExtensionHostWindowProxy(ani_env *env, ani_object object);
     void SetReceiveDataCallback(ani_env *env, ani_object functionObj);
     static void CallReceiveDataCallback(ani_vm *vm, ani_ref callbackRef, const AAFwk::WantParams &wantParams);
     void SetReceiveDataForResultCallback(ani_env *env, ani_object object);
@@ -107,6 +107,8 @@ private:
     ani_object StartAbilityByTypeSync(ani_env *env, ani_string aniType, ani_ref aniWantParam, ani_object startCallback);
     bool CheckStartAbilityByTypeParam(
         ani_env *env, ani_string aniType, ani_ref aniWantParam, std::string &type, AAFwk::WantParams &wantParam);
+    ani_object GetUIExtensionHostWindowProxy(ani_env *env, ani_object object);
+    ani_object GetUIExtensionWindowProxy(ani_env *env, ani_object object);
 
     sptr<AAFwk::SessionInfo> sessionInfo_;
     sptr<Rosen::Window> uiWindow_;
