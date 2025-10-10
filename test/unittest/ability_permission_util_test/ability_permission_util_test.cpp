@@ -1195,5 +1195,237 @@ HWTEST_F(AbilityPermissionUtilTest, CheckPrepareTerminateEnable_0500, TestSize.L
     auto ret = AbilityPermissionUtil::GetInstance().CheckPrepareTerminateEnable(abilityRecord);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: NeedCheckStatusBar_0100
+ * @tc.desc: UIAbility true; uid true;
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, NeedCheckStatusBar_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0100 start");
+
+    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>();
+    abilityRecord->uid_ = 1000;
+    abilityRecord->instanceKey = "instanceKey";
+
+    AbilityRequest abilityRequest;
+    std::string instanceKey = "instanceKey";
+    abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.uid = 1000;
+    abilityRequest.appInfo.multiAppMode.multiAppModeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+
+    auto ret = AbilityPermissionUtil::GetInstance().NeedCheckStatusBar(abilityRecord, abilityRequest);
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0100 end");
+}
+
+/**
+ * @tc.name: NeedCheckStatusBar_0200
+ * @tc.desc: UIAbility false; uid true;
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, NeedCheckStatusBar_0200, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0200 start");
+
+    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>();
+    abilityRecord->uid_ = 1000;
+    abilityRecord->instanceKey = "instanceKey";
+
+    AbilityRequest abilityRequest;
+    std::string instanceKey = "instanceKey";
+    abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::SERVICE;
+    abilityRequest.abilityInfo.uid = 1000;
+    abilityRequest.appInfo.multiAppMode.multiAppModeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+
+    auto ret = AbilityPermissionUtil::GetInstance().NeedCheckStatusBar(abilityRecord, abilityRequest);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0200 end");
+}
+
+/**
+ * @tc.name: NeedCheckStatusBar_0300
+ * @tc.desc: UIAbility true; uid false;
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, NeedCheckStatusBar_0300, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0300 start");
+
+    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>();
+    abilityRecord->uid_ = 1000;
+    abilityRecord->instanceKey = "instanceKey";
+
+    AbilityRequest abilityRequest;
+    std::string instanceKey = "instanceKey";
+    abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.uid = 1100;
+    abilityRequest.appInfo.multiAppMode.multiAppModeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+
+    auto ret = AbilityPermissionUtil::GetInstance().NeedCheckStatusBar(abilityRecord, abilityRequest);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0300 end");
+}
+
+/**
+ * @tc.name: NeedCheckStatusBar_0400
+ * @tc.desc: UIAbility false; uid false;
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, NeedCheckStatusBar_0400, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0400 start");
+
+    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>();
+    abilityRecord->uid_ = 1000;
+    abilityRecord->instanceKey = "instanceKey";
+
+    AbilityRequest abilityRequest;
+    std::string instanceKey = "instanceKey";
+    abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::SERVICE;
+    abilityRequest.abilityInfo.uid = 1100;
+    abilityRequest.appInfo.multiAppMode.multiAppModeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+
+    auto ret = AbilityPermissionUtil::GetInstance().NeedCheckStatusBar(abilityRecord, abilityRequest);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0400 end");
+}
+
+/**
+ * @tc.name: NeedCheckStatusBar_0500
+ * @tc.desc: UIAbility true; uid true; isMultiInstance true; InstanceKey true;
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, NeedCheckStatusBar_0500, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0500 start");
+
+    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>();
+    abilityRecord->uid_ = 1000;
+    abilityRecord->instanceKey = "instanceKey";
+
+    AbilityRequest abilityRequest;
+    std::string instanceKey = "instanceKey";
+    abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.uid = 1000;
+    abilityRequest.appInfo.multiAppMode.multiAppModeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+
+    auto ret = AbilityPermissionUtil::GetInstance().NeedCheckStatusBar(abilityRecord, abilityRequest);
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0500 end");
+}
+
+/**
+ * @tc.name: NeedCheckStatusBar_0600
+ * @tc.desc: UIAbility true; uid true; isMultiInstance false; InstanceKey true;
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, NeedCheckStatusBar_0600, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0600 start");
+
+    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>();
+    abilityRecord->uid_ = 1000;
+    abilityRecord->instanceKey = "instanceKey";
+
+    AbilityRequest abilityRequest;
+    std::string instanceKey = "instanceKey";
+    abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.uid = 1000;
+    abilityRequest.appInfo.multiAppMode.multiAppModeType = AppExecFwk::MultiAppModeType::APP_CLONE;
+
+    auto ret = AbilityPermissionUtil::GetInstance().NeedCheckStatusBar(abilityRecord, abilityRequest);
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0600 end");
+}
+
+/**
+ * @tc.name: NeedCheckStatusBar_0700
+ * @tc.desc: UIAbility true; uid true; isMultiInstance true; InstanceKey false;
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, NeedCheckStatusBar_0700, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0700 start");
+
+    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>();
+    abilityRecord->uid_ = 1000;
+    abilityRecord->instanceKey = "instanceKey";
+
+    AbilityRequest abilityRequest;
+    std::string instanceKey = "instanceKey123";
+    abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.uid = 1000;
+    abilityRequest.appInfo.multiAppMode.multiAppModeType = AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+
+    auto ret = AbilityPermissionUtil::GetInstance().NeedCheckStatusBar(abilityRecord, abilityRequest);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0700 end");
+}
+
+/**
+ * @tc.name: NeedCheckStatusBar_0800
+ * @tc.desc: UIAbility true; uid true; isMultiInstance false; InstanceKey false;
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, NeedCheckStatusBar_0800, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0800 start");
+
+    std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>();
+    abilityRecord->uid_ = 1000;
+    abilityRecord->instanceKey = "instanceKey";
+
+    AbilityRequest abilityRequest;
+    std::string instanceKey = "instanceKey123";
+    abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.uid = 1000;
+    abilityRequest.appInfo.multiAppMode.multiAppModeType = AppExecFwk::MultiAppModeType::APP_CLONE;
+
+    auto ret = AbilityPermissionUtil::GetInstance().NeedCheckStatusBar(abilityRecord, abilityRequest);
+    EXPECT_EQ(ret, true);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0800 end");
+}
+
+/**
+ * @tc.name: NeedCheckStatusBar_0900
+ * @tc.desc: abilityRecord nullptr
+ * @tc.type: FUNC
+ * @tc.require: NA
+ */
+HWTEST_F(AbilityPermissionUtilTest, NeedCheckStatusBar_0900, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0900 start");
+
+    std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
+
+    AbilityRequest abilityRequest;
+    std::string instanceKey = "instanceKey123";
+    abilityRequest.want.SetParam(Want::APP_INSTANCE_KEY, instanceKey);
+    abilityRequest.abilityInfo.type = AppExecFwk::AbilityType::PAGE;
+    abilityRequest.abilityInfo.uid = 1000;
+    abilityRequest.appInfo.multiAppMode.multiAppModeType = AppExecFwk::MultiAppModeType::APP_CLONE;
+
+    auto ret = AbilityPermissionUtil::GetInstance().NeedCheckStatusBar(abilityRecord, abilityRequest);
+    EXPECT_EQ(ret, false);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityPermissionUtil NeedCheckStatusBar_0900 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

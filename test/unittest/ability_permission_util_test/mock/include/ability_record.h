@@ -65,11 +65,14 @@ public:
 
     const AppExecFwk::ApplicationInfo &GetApplicationInfo() const;
 
+    int32_t GetUid() const;
+
 public:
     AppExecFwk::AbilityInfo abilityInfo;
     AppExecFwk::ApplicationInfo appInfo;
     std::string instanceKey;
     bool isTerminating = false;
+    int32_t uid_ = -1;
 };
 
 struct AbilityRequest {

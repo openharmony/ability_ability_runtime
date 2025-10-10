@@ -11670,7 +11670,7 @@ int AbilityManagerService::CheckCallAbilityPermission(const AbilityRequest &abil
     uint32_t specifyTokenId, bool isCallByShortcut, bool isFreeInstallFromService)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call CheckCallAbilityPermission");
 
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.accessTokenId = abilityRequest.appInfo.accessTokenId;
@@ -11678,6 +11678,14 @@ int AbilityManagerService::CheckCallAbilityPermission(const AbilityRequest &abil
     verificationInfo.withContinuousTask = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     verificationInfo.specifyTokenId = specifyTokenId;
     auto callerAbilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (callerAbilityRecord != nullptr &&
+        AbilityPermissionUtil::GetInstance().NeedCheckStatusBar(callerAbilityRecord, abilityRequest)) {
+        uint32_t accessTokenId = abilityRequest.appInfo.accessTokenId;
+        int32_t callerUid = callerAbilityRecord->GetUid();
+        bool isMultiInstance =
+            abilityRequest.appInfo.multiAppMode.multiAppModeType == AppExecFwk::MultiAppModeType::MULTI_INSTANCE;
+        verificationInfo.isProcessInStatusBar = IsInStatusBar(accessTokenId, callerUid, isMultiInstance);
+    }
     if (isFreeInstallFromService || (callerAbilityRecord != nullptr && 
         callerAbilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::APP_SERVICE)) {
         verificationInfo.isBackgroundCall = false;
