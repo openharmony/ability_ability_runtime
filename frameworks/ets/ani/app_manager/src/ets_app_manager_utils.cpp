@@ -788,7 +788,7 @@ bool UnWrapArrayInt(ani_env *env, ani_object arrayObj, std::vector<int32_t> &lis
         }
         ani_int ival = 0;
         if ((status = env->Object_CallMethodByName_Int(static_cast<ani_object>(ref),
-            "unboxed", nullptr, &ival)) != ANI_OK) {
+            "toInt", nullptr, &ival)) != ANI_OK) {
             TAG_LOGE(AAFwkTag::APPMGR, "Object_CallMethodByName_Int status : %{public}d", status);
             return false;
         }
