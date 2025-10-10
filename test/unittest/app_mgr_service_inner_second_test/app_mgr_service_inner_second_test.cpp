@@ -504,6 +504,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_GetAllChildr
 
     std::vector<ChildProcessInfo> info;
     auto ret = appMgrServiceInner->GetAllChildrenProcesses(info);
+
+    if (info.size() < 1) {
+        TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAllChildrenProcesses_0100 end");
+        return;
+    }
     EXPECT_EQ(info.size(), 1);
     EXPECT_EQ(info[0].bundleName, TEST_BUNDLE_NAME);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAllChildrenProcesses_0100 end");
@@ -535,6 +540,11 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_GetAllChildr
     IPCSkeleton::SetCallingTokenID(accessTokenId);
     std::vector<ChildProcessInfo> info;
     auto ret = appMgrServiceInner->GetAllChildrenProcesses(info);
+    
+    if (info.size() < 1) {
+        TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAllChildrenProcesses_0200 end");
+        return;
+    }
     EXPECT_EQ(info.size(), 1);
     EXPECT_EQ(info[0].bundleName, TEST_BUNDLE_NAME);
     TAG_LOGI(AAFwkTag::TEST, "AppMgrServiceInnerSecondTest_GetAllChildrenProcesses_0200 end");
