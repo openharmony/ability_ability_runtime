@@ -3209,5 +3209,28 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RegisterSAInterceptor_001,
     res = proxy_->RegisterSAInterceptor(interceptor);
     EXPECT_EQ(res, NO_ERROR);
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartSelfUIAbilityInCurrentProcess
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartSelfUIAbilityInCurrentProcess
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartSelfUIAbilityInCurrentProcess
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartSelfUIAbilityInCurrentProcess_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    Want want;
+    std::string specifiedFlag = "testFlag";
+    AAFwk::StartOptions startOptions;
+    OHOS::sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    auto res = proxy_->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, true, callerToken);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SELF_UI_ABILITY_IN_CURRENT_PROCESS),
+        mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
 } // namespace AAFwk
 } // namespace OHOS

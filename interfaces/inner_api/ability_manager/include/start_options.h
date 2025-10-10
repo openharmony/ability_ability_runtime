@@ -130,6 +130,9 @@ public:
 
     void SetMaxWindowHeight(int32_t maxWindowHeight);
     int32_t GetMaxWindowHeight() const;
+
+    void SetCurrentProcessName(const std::string &processName);
+    std::string GetCurrentProcessName() const;
 private:
     bool withAnimation_ = true;
     bool windowFocused_ = true;
@@ -144,6 +147,7 @@ private:
     int32_t minWindowHeight_ = 0;
     int32_t maxWindowWidth_ = 0;
     int32_t maxWindowHeight_ = 0;
+    std::string currentProcessName_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

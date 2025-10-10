@@ -679,6 +679,9 @@ enum class AbilityManagerInterfaceCode {
 
     // start self uiability with startOptions and receives the pid
     START_SELF_UI_ABILITY_WITH_PID_RESULT = 6152,
+
+    // start self uiability in current process
+    START_SELF_UI_ABILITY_IN_CURRENT_PROCESS = 6153,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

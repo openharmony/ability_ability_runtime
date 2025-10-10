@@ -2766,5 +2766,19 @@ HWTEST_F(AbilityContextImplTest, GetFailureInfoByMessage_0100, Function | Medium
     EXPECT_EQ(faileCode, 0);
     EXPECT_EQ(failReason, "A system error occurred");
 }
+
+/**
+ * @tc.number: StartSelfUIAbilityInCurrentProcess_0100
+ * @tc.name: StartSelfUIAbilityInCurrentProcess
+ * @tc.desc: Verify that function StartSelfUIAbilityInCurrentProcess.
+ */
+HWTEST_F(AbilityContextImplTest, StartSelfUIAbilityInCurrentProcess_0100, Function | MediumTest | Level1)
+{
+    AAFwk::Want want;
+    std::string specifiedFlag;
+    AAFwk::StartOptions startOptions;
+    auto ret = context_->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, false);
+    EXPECT_EQ(ret, ERR_OK);
+}
 } // namespace AppExecFwk
 } // namespace OHOS

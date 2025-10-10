@@ -578,6 +578,12 @@ public:
     {
         return 0;
     }
+
+    virtual ErrCode StartSelfUIAbilityInCurrentProcess(const AAFwk::Want &want, const std::string &specifiedFlag,
+        const AAFwk::StartOptions &startOptions, bool isHaveOptions)
+    {
+        return ERR_OK;
+    }
 private:
     std::unique_ptr<NativeReference> mockContentStorage_ = nullptr;
 };

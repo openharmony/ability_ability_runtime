@@ -52,6 +52,7 @@ StartOptions::StartOptions(const StartOptions &other)
     supportWindowModes_ = other.supportWindowModes_;
     requestId_ = other.requestId_;
     windowCreateParams_ = other.windowCreateParams_;
+    currentProcessName_ = other.currentProcessName_;
 }
 
 StartOptions &StartOptions::operator=(const StartOptions &other)
@@ -83,6 +84,7 @@ StartOptions &StartOptions::operator=(const StartOptions &other)
         supportWindowModes_ = other.supportWindowModes_;
         requestId_ = other.requestId_;
         windowCreateParams_ = other.windowCreateParams_;
+        currentProcessName_ = other.currentProcessName_;
     }
     return *this;
 }
@@ -324,5 +326,14 @@ bool StartOptions::GetHideStartWindow() const
     return hideStartWindow_;
 }
 
+void StartOptions::SetCurrentProcessName(const std::string &processName)
+{
+    currentProcessName_ = processName;
+}
+
+std::string StartOptions::GetCurrentProcessName() const
+{
+    return currentProcessName_;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

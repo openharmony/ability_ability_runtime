@@ -80,6 +80,7 @@ public:
     static napi_value StopAppServiceExtensionAbility(napi_env env, napi_callback_info info);
     static napi_value ConnectAppServiceExtensionAbility(napi_env env, napi_callback_info info);
     static napi_value DisconnectAppServiceExtensionAbility(napi_env env, napi_callback_info info);
+    static napi_value StartSelfUIAbilityInCurrentProcess(napi_env env, napi_callback_info info);
 
     static void ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
         const std::shared_ptr<AppExecFwk::Configuration> &config);
@@ -163,6 +164,7 @@ private:
         AppExecFwk::ExtensionAbilityType extensionType);
     napi_value ConnectExtensionAbilityCommon(napi_env env, NapiCallbackInfo& info,
         AppExecFwk::ExtensionAbilityType extensionType);
+    napi_value OnStartSelfUIAbilityInCurrentProcess(napi_env env, NapiCallbackInfo &info);
 
     static bool UnWrapWant(napi_env env, napi_value argv, AAFwk::Want& want);
     static napi_value WrapWant(napi_env env, const AAFwk::Want& want);

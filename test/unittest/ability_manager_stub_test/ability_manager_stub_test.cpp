@@ -4191,5 +4191,31 @@ HWTEST_F(AbilityManagerStubTest, QueryKeepAliveAppServiceExtensions_0100, TestSi
 
     TAG_LOGI(AAFwkTag::TEST, "end");
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: OnRemoteRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerStub StartSelfUIAbilityInCurrentProcessInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal and invalid behavior of StartSelfUIAbilityInCurrentProcessInner
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartSelfUIAbilityInCurrentProcessInner_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInterfaceToken(AbilityManagerStub::GetDescriptor()));
+    Want want;
+    ASSERT_TRUE(data.WriteParcelable(&want));
+    std::string specifiedFlag = "testFlag";
+    ASSERT_TRUE(data.WriteString(specifiedFlag));
+    auto startOptions = new (std::nothrow) StartOptions();
+    ASSERT_NE(startOptions, nullptr);
+    ASSERT_TRUE(data.WriteParcelable(startOptions));
+    ASSERT_TRUE(data.WriteBool(true));
+    ASSERT_TRUE(data.WriteBool(false));
+    auto result = stub_->StartSelfUIAbilityInCurrentProcessInner(data, reply);
+    EXPECT_EQ(result, NO_ERROR);
+}
 } // namespace AAFwk
 } // namespace OHOS
