@@ -485,6 +485,9 @@ napi_value CreateJsUIServiceExtensionContext(napi_env env, std::shared_ptr<UISer
         std::make_unique<JSUIServiceExtensionContext>(context);
     napi_wrap(env, object, jsUIContext.release(), JSUIServiceExtensionContext::Finalizer, nullptr, nullptr);
 
+    std::string type = "UIServiceExtensionContext";
+    napi_set_named_property(env, object, "contextType", CreateJsValue(env, type));
+
     const char *moduleName = "JsUIServiceExtensionContext";
     BindNativeFunction(env, object, "startAbility", moduleName, JSUIServiceExtensionContext::StartAbility);
     BindNativeFunction(env, object, "terminateSelf", moduleName, JSUIServiceExtensionContext::TerminateSelf);

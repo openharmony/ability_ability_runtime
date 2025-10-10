@@ -29,6 +29,9 @@ import { HapModuleInfo } from 'bundleManager.HapModuleInfo';
 import ConfigurationConstant from '@ohos.app.ability.ConfigurationConstant';
 import AbilityStartCallback from 'application.AbilityStartCallback';
 import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
+import UIServiceProxy from 'application.UIServiceProxy';
+import UIServiceExtensionConnectCallback from 'application.UIServiceExtensionConnectCallback';
+import dialogRequest from '@ohos.app.ability.dialogRequest';
 
 class Cleaner {
   public ptr: long = 0;
@@ -132,6 +135,9 @@ export default class UIAbilityContext extends Context {
 
   private native nativeStartAbilityByTypeSync(type: string, wantParam: Record<string, Object>,
     startCallback: AbilityStartCallback): BusinessError;
+ 
+  private native nativeRequestDialogService(want: Want,
+    result: AsyncCallbackWrapper<dialogRequest.RequestResult>): void;
 
   private native nativeOpenAtomicService(appId: string, callback: AsyncCallbackWrapper<AbilityResult>, options?: AtomicServiceOptions): void;
   startAbility(want: Want, callback: AsyncCallback<void>): void {
@@ -140,6 +146,12 @@ export default class UIAbilityContext extends Context {
       this.nativeStartAbilitySync(want, myCall);
     });
   }
+
+  private native nativeWantCheck(want: Want): void;
+  private native nativeDisconnectUIServiceExtensionCheck(proxy: UIServiceProxy) : void;
+  private native nativeConnectUIServiceExtensionAbility(want: Want, uiServiceExtConCallback: UIServiceExtensionConnectCallback, callback:AsyncCallbackWrapper<UIServiceProxy>): void;
+  private native nativeStartUIServiceExtensionAbility(want: Want, callback:AsyncCallbackWrapper<void>): void;
+  private native nativeDisconnectUIServiceExtensionAbility(proxy: UIServiceProxy, callback:AsyncCallbackWrapper<void>): void;
 
   startAbility(want: Want, options: StartOptions, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
@@ -423,7 +435,7 @@ export default class UIAbilityContext extends Context {
         callback(null, undefined);
       } else {
         callback(retError, undefined);
-      }    
+      }
     }, (err: Error): void => {
       callback(err as BusinessError, undefined);
     });
@@ -460,6 +472,83 @@ export default class UIAbilityContext extends Context {
       });
       taskpool.execute(() => {
         this.nativeOpenAtomicService(appId, asyncCall, options);
+      });
+    });
+  }
+
+  connectUIServiceExtensionAbility(want: Want, callback: UIServiceExtensionConnectCallback) : Promise<UIServiceProxy> {
+    this.nativeWantCheck(want);
+    return new Promise<UIServiceProxy>((resolve: (data: UIServiceProxy) => void,
+      reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<UIServiceProxy>((err: BusinessError | null, data: UIServiceProxy | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as UIServiceProxy);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeConnectUIServiceExtensionAbility(want, callback, myCall);
+      });
+    });
+  }
+
+  startUIServiceExtensionAbility(want: Want): Promise<void> {
+    this.nativeWantCheck(want);
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeStartUIServiceExtensionAbility(want, myCall);
+      });
+    });
+  }
+
+  disconnectUIServiceExtensionAbility(proxy: UIServiceProxy): Promise<void> {
+    this.nativeDisconnectUIServiceExtensionCheck(proxy);
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeDisconnectUIServiceExtensionAbility(proxy, myCall);
+      });
+    });
+  }
+
+   requestDialogService(want: Want, result: AsyncCallback<dialogRequest.RequestResult>): void {
+    let syncCall = new AsyncCallbackWrapper<dialogRequest.RequestResult>(result);
+    taskpool.execute((): void => {
+      this.nativeRequestDialogService(want, syncCall);
+    }).catch((err: BusinessError): void => {
+      result(err, undefined);
+    });
+  }
+
+  requestDialogService(want: Want): Promise<dialogRequest.RequestResult> {
+    return new Promise<dialogRequest.RequestResult>((resolve: (data: dialogRequest.RequestResult) => void,
+      reject: (err: BusinessError<void>) => void): void => {
+      let syncCall = new AsyncCallbackWrapper<dialogRequest.RequestResult>((err: BusinessError | null,
+        data: dialogRequest.RequestResult | undefined) => {
+        if (err == null || err.code == 0) {
+          resolve(data as dialogRequest.RequestResult);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeRequestDialogService(want, syncCall);
+      }).catch((err: Error): void => {
+        reject(err as BusinessError);
       });
     });
   }

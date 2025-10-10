@@ -25,6 +25,7 @@
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
 #include "int_wrapper.h"
+#include "js_ability_lifecycle_callback.h"
 #include "js_auto_fill_extension_util.h"
 #include "js_auto_fill_extension_context.h"
 #include "js_fill_request_callback.h"
@@ -299,7 +300,8 @@ void JsAutoFillExtension::OnStopCallBack()
 
     auto applicationContext = Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        applicationContext->DispatchOnAbilityDestroy(jsObj_);
+        JsAbilityLifecycleCallbackArgs ability(jsObj_);
+        applicationContext->DispatchOnAbilityDestroy(ability);
     }
 }
 

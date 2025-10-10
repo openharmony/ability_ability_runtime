@@ -27,6 +27,7 @@
 #include "hilog_tag_wrapper.h"
 #include "insight_intent_executor_mgr.h"
 #include "int_wrapper.h"
+#include "js_ability_lifecycle_callback.h"
 #include "js_data_struct_converter.h"
 #include "js_embeddable_ui_ability_context.h"
 #include "js_embeddable_window_stage.h"
@@ -357,7 +358,8 @@ void JsUIExtension::OnStopCallBack()
 
     auto applicationContext = Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        applicationContext->DispatchOnAbilityDestroy(jsObj_);
+        JsAbilityLifecycleCallbackArgs ability(jsObj_);
+        applicationContext->DispatchOnAbilityDestroy(ability);
     }
 }
 

@@ -125,6 +125,8 @@ public:
 
     sptr<IRemoteObject> CallRequest() override;
 
+    void OnAfterFocusedCommon(bool isFocused) override;
+
     static void CreateAndBindContext(const std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
         const std::unique_ptr<Runtime>& runtime);
 

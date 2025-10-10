@@ -24,7 +24,7 @@ namespace OHOS {
 namespace RunnerRuntime {
 namespace {
 const char *ETS_ANI_LIBNAME = "libtest_runner_ani.z.so";
-const char *ETS_ANI_Create_FUNC = "OHOS_ETS_Test_Runner_Create";
+const char *ETS_ANI_CREATE_FUNC = "OHOS_ETS_Test_Runner_Create";
 using CreateETSTestRunnerFunc = AppExecFwk::TestRunner*(*)(const std::unique_ptr<AbilityRuntime::Runtime>&,
     const std::shared_ptr<AppExecFwk::AbilityDelegatorArgs>&, const AppExecFwk::BundleInfo&);
 CreateETSTestRunnerFunc g_etsCreateFunc = nullptr;
@@ -41,9 +41,9 @@ AppExecFwk::TestRunner *CreateETSTestRunner(const std::unique_ptr<AbilityRuntime
         TAG_LOGE(AAFwkTag::DELEGATOR, "dlopen failed %{public}s, %{public}s", ETS_ANI_LIBNAME, dlerror());
         return nullptr;
     }
-    auto symbol = dlsym(handle, ETS_ANI_Create_FUNC);
+    auto symbol = dlsym(handle, ETS_ANI_CREATE_FUNC);
     if (symbol == nullptr) {
-        TAG_LOGE(AAFwkTag::DELEGATOR, "dlsym failed %{public}s, %{public}s", ETS_ANI_Create_FUNC, dlerror());
+        TAG_LOGE(AAFwkTag::DELEGATOR, "dlsym failed %{public}s, %{public}s", ETS_ANI_CREATE_FUNC, dlerror());
         dlclose(handle);
         return nullptr;
     }
