@@ -765,5 +765,11 @@ int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId
 {
     return ERR_OK;
 }
+
+ErrCode UIAbilityLifecycleManager::IsUIAbilityAlreadyExist(const std::string &bundleName,
+    const std::string &abilityName, const std::string &specifiedFlag, int32_t appIndex)
+{
+    return ERR_OK;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

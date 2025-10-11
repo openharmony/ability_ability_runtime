@@ -535,6 +535,9 @@ public:
      */
     int32_t NotifyStartupExceptionBySCB(int32_t requestId, const std::string &reason);
 
+    ErrCode IsUIAbilityAlreadyExist(const std::string &bundleName, const std::string &abilityName,
+        const std::string &specifiedFlag, int32_t appIndex);
+
 private:
     /**
      * @brief Add starting process ID to tracking list
@@ -894,6 +897,8 @@ private:
      */
     int32_t StartAbilityBySpecifed(const SpecifiedRequest &specifiedRequest,
         std::shared_ptr<AbilityRecord> callerAbility);
+    
+    int32_t StartAbilityBySpecified(const AbilityRequest &abilityRequest, int32_t requestId);
 
     /**
      * @brief Set last exit reason for ability

@@ -510,6 +510,9 @@ public:
     virtual ErrCode AddCompletionHandlerForOpenLink(const std::string &requestId,
         AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail) = 0;
 
+    virtual ErrCode StartSelfUIAbilityInCurrentProcess(const AAFwk::Want &want, const std::string &specifiedFlag,
+        const AAFwk::StartOptions &startOptions, bool hasOptions) = 0;
+
 protected:
     bool IsContext(size_t contextTypeId) override
     {
