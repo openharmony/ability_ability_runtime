@@ -39,6 +39,8 @@ bool UnWrapAbilityResult(ani_env *env, ani_object param, int &resultCode, AAFwk:
 ani_object WrapElementName(ani_env *env, const AppExecFwk::ElementName &elementNameParam);
 ani_object WrapElementNameInner(ani_env *env, ani_class elementNameObj, ani_object object,
     const AppExecFwk::ElementName &elementNameParam);
+
+ani_object CreateAniWant(ani_env *env, const AAFwk::Want &want);
 } // namespace AppExecFwk
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ANI_COMMON_WANT_H
