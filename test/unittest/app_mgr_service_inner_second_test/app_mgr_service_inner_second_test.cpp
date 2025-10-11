@@ -499,7 +499,7 @@ HWTEST_F(AppMgrServiceInnerSecondTest, AppMgrServiceInnerSecondTest_GetAllChildr
         TEST_PROCESS_NAME, bundleInfo, hapModuleInfo, want_, false);
     ChildProcessRequest request;
     auto record1 = std::make_shared<ChildProcessRecord>(IPCSkeleton::GetCallingPid(), request, appRecord);
-    record1.SetUid(0);
+    record1->SetUid(0);
     appRecord->AddChildProcessRecord(1, record1);
     MyFlag::flag_ = MyFlag::IS_SA_CALL;
 
