@@ -6699,7 +6699,7 @@ int32_t AppMgrServiceInner::GenerateUidByUserId(int32_t userId, int32_t id)
     return userId * BASE_USER_RANGE + id;
 }
 
-bool AppMgrServiceInner::GenerateIsolationId(std::unordered_set<int32_t> set, int32_t beginId, int32_t endId,
+bool AppMgrServiceInner::GenerateIsolationId(std::unordered_set<int32_t> &set, int32_t beginId, int32_t endId,
     int32_t &isolationId, int32_t &lastIsolationId)
 {
     int32_t id = lastIsolationId + 1;
@@ -8835,6 +8835,7 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
     startMsg.fds = args.fds;
     startMsg.isolationMode = options.isolationMode;
     pid_t pid = 0;
+    int32_t isolationId = Constants::INVALID_UID;
     if (options.isolationMode && options.isolationUid) {
         int32_t userId = -1;
         auto osAccountMgr = DelayedSingleton<OsAccountManagerWrapper>::GetInstance();
@@ -8848,7 +8849,6 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
             return errCode;
         }
         int32_t uid = Constants::INVALID_UID;
-        int32_t isolationId = Constants::INVALID_UID;
         {
             std::lock_guard<ffrt::mutex> lock(childProcessIsolationIdSetLock_);
             if (!GenerateIsolationId(childProcessIsolationIdSet_, START_ID_FOR_CHILD_PROCESS_ISOLATION, 
@@ -8868,6 +8868,13 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
         std::lock_guard<ffrt::mutex> lock(startChildProcessLock_);
         ErrCode errCode = spawnClient->StartProcess(startMsg, pid);
         if (FAILED(errCode)) {
+            if (options.isolationMode && options.isolationUid) {
+                {
+                    std::lock_guard<ffrt::mutex> lock(childProcessIsolationIdSetLock_);
+                    TAG_LOGD(AAFwkTag::APPMGR, "erase %{public}d", isolationId);
+                    childProcessIsolationIdSet_.erase(isolationId);
+                }
+            }
             TAG_LOGE(AAFwkTag::APPMGR, "spawn new child process fail, errCode %{public}08x", errCode);
             AppMgrEventUtil::SendChildProcessStartFailedEvent(childProcessRecord,
                 ProcessStartFailedReason::APPSPAWN_FAILED, static_cast<int32_t>(errCode));
@@ -9046,13 +9053,21 @@ void AppMgrServiceInner::AttachChildProcess(const pid_t pid, const sptr<IChildSc
     }
 }
 
+void AppMgrServiceInner::WrappedChildProcessDiedWithIsolation(std::shared_ptr<ChildProcessRecord> childProcessRecord)
+{
+    if (childProcessRecord) {
+        std::lock_guard<ffrt::mutex> lock(childProcessIsolationIdSetLock_);
+        TAG_LOGD(AAFwkTag::APPMGR, "erase %{public}d", childProcessRecord->GetUid() % BASE_USER_RANGE);
+        childProcessIsolationIdSet_.erase(childProcessRecord->GetUid() % BASE_USER_RANGE);
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnChildProcessDied(childProcessRecord);
+    }
+}
+
 void AppMgrServiceInner::OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote)
 {
     if (appRunningManager_) {
         auto childRecord = appRunningManager_->OnChildProcessRemoteDied(remote);
-        if (childRecord) {
-            DelayedSingleton<AppStateObserverManager>::GetInstance()->OnChildProcessDied(childRecord);
-        }
+        WrappedChildProcessDiedWithIsolation(childRecord);
     }
 }
 
@@ -9075,7 +9090,7 @@ void AppMgrServiceInner::KillChildProcess(const std::shared_ptr<AppRunningRecord
             TAG_LOGI(AAFwkTag::APPMGR, "kill child process, childPid:%{public}d, childUid:%{public}d",
                 childPid, childRecord->GetUid());
             KillProcessByPid(childPid, "KillChildProcess");
-            DelayedSingleton<AppStateObserverManager>::GetInstance()->OnChildProcessDied(childRecord);
+            WrappedChildProcessDiedWithIsolation(childRecord);
         }
     }
 }
@@ -9105,7 +9120,7 @@ void AppMgrServiceInner::ExitChildProcessSafelyByChildPid(const pid_t pid)
         appRunningManager_->HandleChildRelation(childRecord, appRecord);
         TAG_LOGI(AAFwkTag::APPMGR, "remote child process exited, pid:%{public}d", pid);
         appRecord->RemoveChildProcessRecord(childRecord);
-        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnChildProcessDied(childRecord);
+        WrappedChildProcessDiedWithIsolation(childRecord);
         return;
     }
     childRecord->RegisterDeathRecipient();

@@ -1647,7 +1647,7 @@ private:
 
     int32_t GenerateUidByUserId(int32_t userId, int32_t id);
 
-    bool GenerateIsolationId(std::unordered_set<int32_t> set, int32_t beginId, int32_t endId,
+    bool GenerateIsolationId(std::unordered_set<int32_t> &set, int32_t beginId, int32_t endId,
         int32_t &isolationId, int32_t &lastIsolationId);
 
     bool GenerateRenderUid(int32_t &renderUid);
@@ -1861,6 +1861,8 @@ private:
 
     int32_t GetChildProcessInfoEx(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info);
+
+    void WrappedChildProcessDiedWithIsolation(std::shared_ptr<ChildProcessRecord> childProcessRecord);
 
     void OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote);
 
