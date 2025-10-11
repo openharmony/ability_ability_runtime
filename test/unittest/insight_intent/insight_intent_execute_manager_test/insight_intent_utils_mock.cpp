@@ -18,7 +18,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementName, const std::string &intentName,
-    const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry)
+    const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry, std::string *arkTSMode)
 {
     srcEntry = "test.srcEntry";
     return ERR_OK;
