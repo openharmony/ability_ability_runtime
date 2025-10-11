@@ -503,7 +503,9 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, const ForegroundO
 #ifdef SUPPORT_UPMS
     {
         std::lock_guard guard(wantLock_);
-        GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, tokenId);
+        std::string targetBundleName = abilityInfo_.applicationInfo.bundleName;
+        bool isNotifyCollaborator = (targetBundleName == AppUtils::GetInstance().GetBrokerDelegateBundleName());
+        GrantUriPermission(want_, targetBundleName, false, tokenId, isNotifyCollaborator);
     }
 #endif // SUPPORT_UPMS
     if (!isReady_) {
@@ -784,7 +786,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
 #ifdef SUPPORT_UPMS
     {
         std::lock_guard guard(wantLock_);
-        GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, 0);
+        GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, 0, false);
     }
 #endif // SUPPORT_UPMS
 
@@ -1960,7 +1962,7 @@ void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId)
     auto result = GetResult();
     CHECK_POINTER(result);
 #ifdef SUPPORT_UPMS
-    GrantUriPermission(result->resultWant_, abilityInfo_.applicationInfo.bundleName, isSandboxApp, tokeId);
+    GrantUriPermission(result->resultWant_, abilityInfo_.applicationInfo.bundleName, isSandboxApp, tokeId, false);
 #endif // SUPPORT_UPMS
     scheduler_->SendResult(result->requestCode_, result->resultCode_, result->resultWant_);
     // reset result to avoid send result next time
@@ -3536,7 +3538,8 @@ void AbilityRecord::DumpAbilityInfoDone(std::vector<std::string> &infos)
 }
 
 #ifdef SUPPORT_UPMS
-void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId)
+void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp,
+    uint32_t tokenId, bool isNotifyCollaborator)
 {
     // only for UIAbility and send result
     if (specifyTokenId_ > 0) {
@@ -3553,9 +3556,16 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
     auto callerTokenId = tokenId > 0 ? tokenId :
         static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0));
     TAG_LOGD(AAFwkTag::ABILITYMGR, "callerTokenId:%{public}u, tokenId:%{public}u", callerTokenId, tokenId);
-
-    UriUtils::GetInstance().GrantUriPermission(want, targetBundleName, appIndex_, isSandboxApp,
-        callerTokenId, collaboratorType_);
+    GrantUriPermissionInfo grantInfo;
+    grantInfo.callerTokenId = callerTokenId;
+    grantInfo.collaboratorType = collaboratorType_;
+    grantInfo.isSandboxApp = isSandboxApp;
+    grantInfo.targetBundleName = targetBundleName;
+    grantInfo.appIndex = appIndex_;
+    grantInfo.userId = GetOwnerMissionUserId();
+    grantInfo.flag = want.GetFlags();
+    grantInfo.isNotifyCollaborator = isNotifyCollaborator;
+    UriUtils::GetInstance().GrantUriPermission(want, grantInfo);
 }
 
 void AbilityRecord::GrantUriPermission(const std::vector<std::string> &uriVec, int32_t flag,
@@ -3572,7 +3582,7 @@ void AbilityRecord::GrantUriPermission()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     {
         std::lock_guard guard(wantLock_);
-        GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, 0);
+        GrantUriPermission(want_, abilityInfo_.applicationInfo.bundleName, false, 0, false);
     }
 }
 #endif // SUPPORT_UPMS

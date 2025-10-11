@@ -1860,7 +1860,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_001, TestSize.Level
     EXPECT_NE(abilityRecord, nullptr);
     Want want;
     std::string targetBundleName = "name";
-    abilityRecord->GrantUriPermission(want, targetBundleName, true, 0);
+    abilityRecord->GrantUriPermission(want, targetBundleName, true, 0, false);
 }
 
 /*
@@ -1879,7 +1879,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_002, TestSize.Level
     want.SetFlags(1);
     want.SetUri("datashare://ohos.samples.clock/data/storage/el2/base/haps/entry/files/test_A.txt");
     std::string targetBundleName = "name";
-    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0);
+    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0, false);
 }
 
 /*
@@ -1898,7 +1898,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_003, TestSize.Level
     want.SetFlags(1);
     want.SetUri("file://com.example.mock/data/storage/el2/base/haps/entry/files/test_A.txt");
     std::string targetBundleName = "name";
-    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0);
+    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0, false);
 }
 
 /*
@@ -1917,7 +1917,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_004, TestSize.Level
     want.SetFlags(1);
     want.SetUri("file://ohos.samples.clock/data/storage/el2/base/haps/entry/files/test_A.txt");
     std::string targetBundleName = "name";
-    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0);
+    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0, false);
 }
 
 /*
@@ -1938,7 +1938,7 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_005, TestSize.Level
     want.SetFlags(1);
     want.SetUri("file://ohos.samples.clock/data/storage/el2/base/haps/entry/files/test_A.txt");
     std::string targetBundleName = "name";
-    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0);
+    abilityRecord->GrantUriPermission(want, targetBundleName, false, 0, false);
 }
 
 #ifdef WITH_DLP
