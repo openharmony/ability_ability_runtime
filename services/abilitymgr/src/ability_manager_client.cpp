@@ -2418,5 +2418,14 @@ ErrCode AbilityManagerClient::PreloadApplication(const std::string &bundleName, 
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "PreloadApplication call");
     return abms->PreloadApplication(bundleName, userId, appIndex);
 }
+
+ErrCode AbilityManagerClient::StartSelfUIAbilityInCurrentProcess(const Want &want, const std::string &specifiedFlag,
+    const StartOptions &options, bool hasOptions, sptr<IRemoteObject> callerToken)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, options, hasOptions, callerToken);
+}
 } // namespace AAFwk
 } // namespace OHOS

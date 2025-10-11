@@ -140,6 +140,10 @@ export default class UIAbilityContext extends Context {
     result: AsyncCallbackWrapper<dialogRequest.RequestResult>): void;
 
   private native nativeOpenAtomicService(appId: string, callback: AsyncCallbackWrapper<AbilityResult>, options?: AtomicServiceOptions): void;
+
+  private native nativeStartSelfUIAbilityInCurrentProcessSync(want: Want, specifiedFlag: string, callback: AsyncCallbackWrapper<void>): void;
+
+  private native nativeStartSelfUIAbilityInCurrentProcessSync(want: Want, specifiedFlag: string, options: StartOptions, callback: AsyncCallbackWrapper<void>): void;
   startAbility(want: Want, callback: AsyncCallback<void>): void {
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
@@ -547,6 +551,27 @@ export default class UIAbilityContext extends Context {
       });
       taskpool.execute((): void => {
         this.nativeRequestDialogService(want, syncCall);
+      }).catch((err: Error): void => {
+        reject(err as BusinessError);
+      });
+    });
+  }
+
+  startSelfUIAbilityInCurrentProcess(want: Want, specifiedFlag: string, options?: StartOptions): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        if (options == null) {
+          this.nativeStartSelfUIAbilityInCurrentProcessSync(want, specifiedFlag, myCall);
+        } else {
+          this.nativeStartSelfUIAbilityInCurrentProcessSync(want, specifiedFlag, options, myCall);
+        }
       }).catch((err: Error): void => {
         reject(err as BusinessError);
       });

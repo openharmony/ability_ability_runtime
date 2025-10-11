@@ -1327,6 +1327,16 @@ enum NativeFreeInstallError {
      */
     ERROR_SA_INTERCEPTOR_START_FAILED = 29360223,
 
+    /*
+     * Result(29360224) The UIAbility not belong to caller.
+     */
+    ERROR_UIABILITY_NOT_BELONG_TO_CALLER = 29360224,
+
+    /*
+     * Result(29360225) The UIAbility is already exist, can not start again.
+     */
+    ERROR_UIABILITY_IS_ALREADY_EXIST = 29360225,
+
     /**
      * Undefine error code.
      */

@@ -2746,5 +2746,18 @@ HWTEST_F(AbilityManagerClientBranchTest, RegisterSAInterceptor_0100, TestSize.Le
 {
     EXPECT_EQ(client_->RegisterSAInterceptor(nullptr), ERR_OK);
 }
+
+/**
+ * @tc.name: StartSelfUIAbilityInCurrentProcess_0100
+ * @tc.desc: StartSelfUIAbilityInCurrentProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, StartSelfUIAbilityInCurrentProcess_0100, TestSize.Level1)
+{
+    Want want;
+    std::string specifiedFlag;
+    StartOptions startOptions;
+    EXPECT_EQ(client_->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, false, nullptr), ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
