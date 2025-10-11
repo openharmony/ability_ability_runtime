@@ -3115,6 +3115,7 @@ ohos_shared_library("embedded_ui_extension_module") {
 config("auto_fill_extension_config") {
   visibility = [ ":*" ]
   include_dirs = [
+    "${ability_runtime_path}/frameworks/ets/ani/auto_fill_extension_ability/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/auto_fill_extension_ability",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_extension_base",
@@ -3166,6 +3167,7 @@ ohos_shared_library("auto_fill_extension") {
       "${ability_runtime_native_path}/ability/native/auto_fill_extension_ability/js_auto_fill_extension_util.cpp",
       "${ability_runtime_native_path}/ability/native/auto_fill_extension_ability/js_fill_request_callback.cpp",
       "${ability_runtime_native_path}/ability/native/auto_fill_extension_ability/js_save_request_callback.cpp",
+      "${ability_runtime_path}/frameworks/ets/ani/auto_fill_extension_ability/src/ets_auto_fill_extension_instance.cpp",
     ]
   }
 
@@ -3173,6 +3175,70 @@ ohos_shared_library("auto_fill_extension") {
     external_deps += [ "window_manager:libwm" ]
   }
 
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_shared_library("auto_fill_extension_ani") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  include_dirs = [
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common/include",
+    "${ability_runtime_path}/frameworks/ets/ani/enum_convert",
+    "${ability_runtime_path}/frameworks/ets/ani/ui_extension_ability/include",
+  ]
+
+  public_configs = [ ":auto_fill_extension_config" ]
+
+  sources = []
+
+  deps = [
+    ":abilitykit_native",
+    ":auto_fill_extension",
+    ":ui_extension",
+    ":ui_extension_ani",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/frameworks/ets/ani/ani_common:ani_common",
+  ]
+
+  external_deps = [
+    "ability_base:session_info",
+    "ability_base:view_data",
+    "ability_base:want",
+    "access_token:libtokenid_sdk",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_napi",
+    "runtime_core:ani",
+    "window_manager:embeddablewindowstageani_kit",
+    "window_manager:extensionwindow_napi",
+  ]
+
+  if (ability_runtime_auto_fill) {
+    sources += [
+      "${ability_runtime_path}/frameworks/ets/ani/auto_fill_extension_ability/src/ets_auto_fill_extension.cpp",
+      "${ability_runtime_path}/frameworks/ets/ani/auto_fill_extension_ability/src/ets_auto_fill_extension_context.cpp",
+      "${ability_runtime_path}/frameworks/ets/ani/auto_fill_extension_ability/src/ets_auto_fill_extension_util.cpp",
+      "${ability_runtime_path}/frameworks/ets/ani/auto_fill_extension_ability/src/ets_fill_request_callback.cpp",
+      "${ability_runtime_path}/frameworks/ets/ani/auto_fill_extension_ability/src/ets_save_request_callback.cpp",
+    ]
+  }
+
+  if (ability_runtime_graphics) {
+    external_deps += [ "window_manager:libwm" ]
+  }
+
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
