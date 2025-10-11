@@ -19,11 +19,29 @@
 #include "pending_want_manager.h"
 #include "int_wrapper.h"
 #include "multi_app_utils.h"
+#include "event_report.h"
+#include "permission_verification.h"
 
 namespace OHOS {
 namespace AAFwk {
 std::string APP_MULTI_INSTANCE{ "ohos.extra.param.key.appInstance" };
 constexpr int32_t INVALID_UID = -1;
+
+void SendTriggerFailedEvent(const Want &want, int32_t appIndex, int32_t userId,
+    int32_t errCode, const std::string errMsg)
+{
+    EventInfo eventInfo;
+    eventInfo.bundleName = want.GetElement().GetBundleName();
+    eventInfo.moduleName = want.GetElement().GetModuleName();
+    eventInfo.abilityName = want.GetElement().GetAbilityName();
+    eventInfo.appIndex = appIndex;
+    eventInfo.errCode = errCode;
+    eventInfo.errMsg = errMsg;
+    eventInfo.userId = userId;
+    eventInfo.startType = TRIGGER_FAILED;
+
+    EventReport::SendTriggerEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+}
 
 PendingWantRecord::PendingWantRecord()
 {}
@@ -116,18 +134,27 @@ int32_t PendingWantRecord::ExecuteOperation(
         case static_cast<int32_t>(OperationType::START_ABILITY):
             res = pendingWantManager->PendingWantStartAbility(want, senderInfo.startOptions,
                 senderInfo.callerToken, -1, callerUid_, callerTokenId_);
+            if (res != NO_ERROR) {
+                SendTriggerFailedEvent(want, key_->GetAppIndex(), callerUid_, res, "Trigger Failed");
+            }
             break;
         case static_cast<int32_t>(OperationType::START_ABILITIES): {
             std::vector<WantsInfo> allWantsInfos = key_->GetAllWantsInfos();
             allWantsInfos.back().want = want;
             res = pendingWantManager->PendingWantStartAbilitys(
                 allWantsInfos, senderInfo.startOptions, senderInfo.callerToken, -1, callerUid_, callerTokenId_);
+            if (res != NO_ERROR) {
+                SendTriggerFailedEvent(want, key_->GetAppIndex(), callerUid_, res, "Trigger Failed");
+            }
             break;
         }
         case static_cast<int32_t>(OperationType::START_SERVICE):
         case static_cast<int32_t>(OperationType::START_FOREGROUND_SERVICE):
             res = pendingWantManager->PendingWantStartAbility(want, nullptr, senderInfo.callerToken,
                 -1, callerUid_, callerTokenId_);
+            if (res != NO_ERROR) {
+                SendTriggerFailedEvent(want, key_->GetAppIndex(), callerUid_, res, "Trigger Failed");
+            }
             break;
         case static_cast<int32_t>(OperationType::SEND_COMMON_EVENT):
             res = pendingWantManager->PendingWantPublishCommonEvent(want, senderInfo, callerUid_, callerTokenId_);
