@@ -51,7 +51,7 @@ bool CheckAbilityName(const InsightIntentInfo &info, const std::string &abilityN
 } // namespace
 
 uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementName, const std::string &intentName,
-    const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry)
+    const AppExecFwk::ExecuteMode &executeMode, std::string &srcEntry, std::string *arkTSMode)
 {
     TAG_LOGD(AAFwkTag::INTENT, "get srcEntry, elementName: %{public}s, intentName: %{public}s, mode: %{public}d",
         elementName.GetURI().c_str(), intentName.c_str(), executeMode);
@@ -88,6 +88,9 @@ uint32_t InsightIntentUtils::GetSrcEntry(const AppExecFwk::ElementName &elementN
     for (const auto &info: infos) {
         if (info.intentName == intentName && CheckAbilityName(info, abilityName, executeMode)) {
             srcEntry = info.srcEntry;
+            if (arkTSMode != nullptr) {
+                *arkTSMode = info.arkTSMode;
+            }
             TAG_LOGD(AAFwkTag::INTENT, "srcEntry: %{public}s", srcEntry.c_str());
             return ERR_OK;
         }

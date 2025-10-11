@@ -32,6 +32,7 @@ const std::string INSIGHT_INTENT_NAME = "intentName";
 const std::string INSIGHT_INTENT_DOMAIN = "domain";
 const std::string INSIGHT_INTENT_VERSION = "intentVersion";
 const std::string INSIGHT_INTENT_SRC_ENTRY = "srcEntry";
+const std::string INSIGHT_INTENT_ARKTS_MODE = "arkTSMode";
 const std::string INSIGHT_INTENT_UI_ABILITY = "uiAbility";
 const std::string INSIGHT_INTENT_UI_EXTENSION = "uiExtension";
 const std::string INSIGHT_INTENT_SERVICE_EXTENSION = "serviceExtension";
@@ -68,6 +69,7 @@ struct InsightIntentProfileInfo {
     std::string intentDomain;
     std::string intentVersion;
     std::string srcEntry;
+    std::string arkTSMode;
     UIAbilityProfileInfo uiAbilityProfileInfo;
     UIExtensionProfileInfo uiExtensionProfileInfo;
     ServiceExtensionProfileInfo serviceExtensionProfileInfo;
@@ -163,6 +165,12 @@ void from_json(const nlohmann::json &jsonObject, InsightIntentProfileInfo &insig
         insightIntentInfo.srcEntry,
         true,
         g_parseResult);
+    AppExecFwk::BMSJsonUtil::GetStrValueIfFindKey(jsonObject,
+        jsonObjectEnd,
+        INSIGHT_INTENT_ARKTS_MODE,
+        insightIntentInfo.arkTSMode,
+        false,
+        g_parseResult);
     AppExecFwk::GetValueIfFindKey<UIAbilityProfileInfo>(jsonObject,
         jsonObjectEnd,
         INSIGHT_INTENT_UI_ABILITY,
@@ -221,6 +229,7 @@ bool TransformToInsightIntentInfo(const InsightIntentProfileInfo &insightIntent,
     info.intentDomain = insightIntent.intentDomain;
     info.intentVersion = insightIntent.intentVersion;
     info.srcEntry = insightIntent.srcEntry;
+    info.arkTSMode = insightIntent.arkTSMode;
 
     info.uiAbilityIntentInfo.abilityName = insightIntent.uiAbilityProfileInfo.abilityName;
     for (const auto &executeMode: insightIntent.uiAbilityProfileInfo.supportExecuteMode) {

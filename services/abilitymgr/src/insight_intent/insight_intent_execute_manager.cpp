@@ -112,8 +112,10 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
     }
 
     std::string srcEntry;
+    std::string arkTSMode;
     std::string intentName = want.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME);
-    auto ret = AbilityRuntime::InsightIntentUtils::GetSrcEntry(elementName, intentName, executeMode, srcEntry);
+    auto ret = AbilityRuntime::InsightIntentUtils::GetSrcEntry(
+        elementName, intentName, executeMode, srcEntry, &arkTSMode);
     if (ret != ERR_OK || srcEntry.empty()) {
         TAG_LOGW(AAFwkTag::INTENT, "empty srcEntry");
         if (UpdateEntryDecoratorParams(want, executeMode) != ERR_OK) {
@@ -122,6 +124,7 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
     }
 
     want.SetParam(INSIGHT_INTENT_SRC_ENTRY, srcEntry);
+    want.SetParam(INSIGHT_INTENT_ARKTS_MODE, arkTSMode);
     want.SetParam(INSIGHT_INTENT_EXECUTE_PARAM_ID, std::to_string(intentId));
     want.SetParam(INSIGHT_INTENT_EXECUTE_PARAM_MODE, executeMode);
     TAG_LOGD(AAFwkTag::INTENT, "check done. insightIntentId: %{public}" PRIu64, intentId);
@@ -497,8 +500,12 @@ int32_t InsightIntentExecuteManager::GenerateWant(
     }
 
     std::string srcEntry;
+    std::string arkTSMode;
     auto ret = AbilityRuntime::InsightIntentUtils::GetSrcEntry(want.GetElement(), param->insightIntentName_,
-        static_cast<AppExecFwk::ExecuteMode>(param->executeMode_), srcEntry);
+        static_cast<AppExecFwk::ExecuteMode>(param->executeMode_), srcEntry, &arkTSMode);
+    if (!arkTSMode.empty()) {
+        want.SetParam(INSIGHT_INTENT_ARKTS_MODE, arkTSMode);
+    }
     if (!srcEntry.empty()) {
         want.SetParam(INSIGHT_INTENT_SRC_ENTRY, srcEntry);
     } else if (decoratorInfo.decoratorType == "" && ret == ERR_INSIGHT_INTENT_GET_PROFILE_FAILED &&

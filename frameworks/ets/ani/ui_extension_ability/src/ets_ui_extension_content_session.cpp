@@ -708,6 +708,7 @@ sptr<Rosen::Window> EtsUIExtensionContentSession::GetUIWindow()
 {
     return uiWindow_;
 }
+
 #ifdef SUPPORT_SCREEN
 void EtsUIExtensionContentSession::InitDisplayId(AAFwk::Want &want)
 {
