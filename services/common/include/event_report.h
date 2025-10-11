@@ -33,6 +33,7 @@ struct EventInfo {
     int32_t extensionType = -1;
     int32_t abilityNumber = 0;
     int32_t abilityType = -1;
+    int32_t wantAgentNumber = 0;
     int32_t callerUid = -1;
     int32_t exitResult = -1;
     int32_t bundleType = -1;
@@ -134,14 +135,23 @@ enum class EventName {
     // uri permission
     SHARE_UNPRIVILEGED_FILE_URI,
 
+    // want_agent
+    WANTAGENT_NUMBER,
+
     // report data
     USER_DATA_SIZE
 };
+
+typedef enum {
+    TRIGGER_FAILED = 100
+} StartAbilityErrorType;
 
 class EventReport {
 public:
     static void SendAppEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
     static void SendAbilityEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
+    static void SendWantAgentEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
+    static void SendTriggerEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
     static void SendAtomicServiceEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
     static void SendExtensionEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
     static void SendKeyEvent(const EventName &eventName, HiSysEventType type, const EventInfo &eventInfo);
@@ -168,6 +178,8 @@ private:
     static void LogErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogStartErrorEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogStartAbilityEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
+    static void LogWantAgentNumberEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
+    static void LogTriggerFailedEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogTerminateAbilityEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogAbilityOnForegroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
     static void LogAbilityOnBackgroundEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo);
