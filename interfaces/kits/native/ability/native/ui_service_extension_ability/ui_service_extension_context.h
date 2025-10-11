@@ -24,7 +24,7 @@
 #include "start_options.h"
 #include "iability_callback.h"
 #include "want.h"
-#include "window.h"
+#include "wm/window.h"
 #ifdef SUPPORT_SCREEN
 #include "scene_board_judgement.h"
 #include "ui_content.h"
