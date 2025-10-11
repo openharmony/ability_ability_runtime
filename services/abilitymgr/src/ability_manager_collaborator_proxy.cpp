@@ -21,6 +21,9 @@
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+constexpr int32_t MAX_URI_COUNT = 500;
+}
 int32_t AbilityManagerCollaboratorProxy::NotifyStartAbility(
     const AppExecFwk::AbilityInfo &abilityInfo, int32_t userId, Want &want,
     uint64_t accessTokenIDEx, int32_t windowMode)
@@ -686,6 +689,82 @@ int32_t AbilityManagerCollaboratorProxy::UpdateTargetIfNeed(Want &want)
     }
     want = *wantInfo;
     return NO_ERROR;
+}
+
+int32_t AbilityManagerCollaboratorProxy::NotifyGrantUriPermissionStart(const std::vector<std::string> &uris,
+    uint32_t flag, int32_t userId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token failed");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteStringVector(uris)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write uris failed");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteUint32(flag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag failed");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write userId failed");
+        return ERR_INVALID_OPERATION;
+    }
+
+    auto ret = SendTransactCmd(IAbilityManagerCollaborator::NOTIFY_GRANT_URI_PERMISSION_START, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", ret);
+        return ERR_INVALID_OPERATION;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerCollaboratorProxy::NotifyGrantUriPermissionEnd(const std::vector<std::string> &uris,
+    uint32_t flag, int32_t userId, const std::vector<bool> &checkResults)
+{
+    if (checkResults.size() != uris.size() || checkResults.size() > MAX_URI_COUNT) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid uris or checkResults");
+        return ERR_INVALID_OPERATION;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write token failed");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteStringVector(uris)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write uris failed");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteUint32(flag)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write flag failed");
+        return ERR_INVALID_OPERATION;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write userId failed");
+        return ERR_INVALID_OPERATION;
+    }
+    int32_t uriCount = checkResults.size();
+    if (!data.WriteInt32(uriCount)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "write uriCount failed");
+        return ERR_INVALID_OPERATION;
+    }
+    for (int32_t i = 0; i < uriCount; i++) {
+        if (!data.WriteBool(checkResults[i])) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "write check result failed");
+            return ERR_INVALID_OPERATION;
+        }
+    }
+    int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::NOTIFY_GRANT_URI_PERMISSION_END, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error:%{public}d", ret);
+        return ERR_INVALID_OPERATION;
+    }
+    return reply.ReadInt32();
 }
 
 int32_t AbilityManagerCollaboratorProxy::SendTransactCmd(uint32_t code, MessageParcel &data,

@@ -26,6 +26,17 @@
 
 namespace OHOS {
 namespace AAFwk {
+struct GrantUriPermissionInfo {
+    uint32_t callerTokenId = 0;
+    bool isSandboxApp = false;
+    std::string targetBundleName;
+    int32_t appIndex = 0;
+    int32_t userId = -1;
+    uint32_t flag = 0;
+    int32_t collaboratorType = 0;
+    bool isNotifyCollaborator = false;
+};
+
 class UriUtils {
 public:
     static UriUtils &GetInstance();
@@ -54,10 +65,10 @@ public:
 #ifdef SUPPORT_UPMS
     /**
      * @brief Check if URI permission flag is set in Want
-     * @param want The Want object to check
+     * @param flag The flag for grant uri permission
      * @return true if URI permission flag is set, false otherwise
      */
-    bool IsGrantUriPermissionFlag(const Want &want);
+    bool IsGrantUriPermissionFlag(uint32_t flag);
 #endif // SUPPORT_UPMS
 
     /**
@@ -75,7 +86,7 @@ public:
      * @param targetBundleName Bundle name of the target application
      * @param appIndex Application index
      */
-    void GrantDmsUriPermission(Want &want, uint32_t callerTokenId, std::string targetBundleName, int32_t appIndex);
+    bool GrantDmsUriPermission(Want &want, uint32_t callerTokenId, std::string targetBundleName, int32_t appIndex);
 
     /**
      * @brief Grant URI permission for service extension ability
@@ -94,14 +105,9 @@ public:
     /**
      * @brief Grant URI permission with detailed parameters
      * @param want The Want object containing URI information
-     * @param targetBundleName Bundle name of the target application
-     * @param appIndex Application index
-     * @param isSandboxApp Whether the target is a sandbox application
-     * @param callerTokenId Token ID of the caller
-     * @param collaboratorType Type of collaborator
+     * @param grantInfo The param for grant uri permission
      */
-    void GrantUriPermission(Want &want, std::string targetBundleName, int32_t appIndex,
-        bool isSandboxApp, uint32_t callerTokenId, int32_t collaboratorType);
+    bool GrantUriPermission(Want &want, const GrantUriPermissionInfo &grantInfo);
 
     /**
      * @brief Check URI permission for the caller
@@ -140,14 +146,11 @@ private:
     /**
      * @brief Internal implementation of URI permission granting
      * @param uriVec Vector of URI strings
-     * @param callerTokenId Token ID of the caller
-     * @param targetBundleName Bundle name of the target application
-     * @param appIndex Application index
-     * @param want The Want object containing URI information
+     * @param grantInfo The param for grant uri permission
      * @return true if permission was successfully granted, false otherwise
      */
-    bool GrantUriPermissionInner(std::vector<std::string> uriVec, uint32_t callerTokenId,
-        const std::string &targetBundleName, int32_t appIndex, Want &want);
+    bool GrantUriPermissionInner(const std::vector<std::string> &uriVec, const GrantUriPermissionInfo &grantInfo,
+        Want &want);
 #endif // SUPPORT_UPMS
 
     /**
@@ -228,6 +231,29 @@ private:
      */
     bool SendGrantUriPermissionEvent(const std::string &callerBundleName, const std::string &targetBundleName,
         const std::string &oriUri, int32_t apiVersion, const std::string &eventType);
+
+    /**
+     * @brief Notify collaborator grant uri permission started.
+     * @param isNotifyCollaborator Need notify collaborator.
+     * @param uris The uri list to grant permission.
+     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @param userId The user id of target application.
+     * @return result of notify collaborator.
+     */
+    bool NotifyGrantUriPermissionStart(bool isNotifyCollaborator, const std::vector<std::string> &uris,
+        uint32_t flag, int32_t userId);
+
+    /**
+     * @brief Notify collaborator grant uri Permission finished.
+     * @param isNotifyCollaborator Need notify collaborator.
+     * @param uris The uri list to grant permission.
+     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @param userId The user id of target application.
+     * @param checkResults The result of check uri permission.
+     * @return result of notify collaborator.
+     */
+    bool NotifyGrantUriPermissionEnd(bool isNotifyCollaborator, const std::vector<std::string> &uris,
+        uint32_t flag, int32_t userId, const std::vector<bool> &checkResults);
 
     DISALLOW_COPY_AND_MOVE(UriUtils);
 };
