@@ -128,6 +128,7 @@
           "//foundation/ability/ability_runtime/interfaces/inner_api:innerkits_target",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:ability_thread",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:app_service_extension_ani",
+          "//foundation/ability/ability_runtime/frameworks/native/ability/native:auto_fill_extension_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:extension_module",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:insight_intent_executor_ani",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:service_extension_ani",
