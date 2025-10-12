@@ -114,12 +114,13 @@ void ApplicationContext::DispatchOnAbilityCreate(const AbilityLifecycleCallbackA
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (const auto& callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnAbilityCreate(ability);
-        }
+        callback->OnAbilityCreate(ability);
     }
 }
 
@@ -132,13 +133,14 @@ void ApplicationContext::DispatchOnWindowStageCreate(const AbilityLifecycleCallb
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (const auto& callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_ ||
             windowStage.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnWindowStageCreate(ability, windowStage);
-        }
+        callback->OnWindowStageCreate(ability, windowStage);
     }
 }
 
@@ -151,13 +153,14 @@ void ApplicationContext::DispatchOnWindowStageDestroy(const AbilityLifecycleCall
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_ ||
             windowStage.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnWindowStageDestroy(ability, windowStage);
-        }
+        callback->OnWindowStageDestroy(ability, windowStage);
     }
 }
 
@@ -171,13 +174,14 @@ void ApplicationContext::DispatchWindowStageFocus(const AbilityLifecycleCallback
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_ ||
             windowStage.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnWindowStageActive(ability, windowStage);
-        }
+        callback->OnWindowStageActive(ability, windowStage);
     }
 }
 
@@ -191,13 +195,14 @@ void ApplicationContext::DispatchWindowStageUnfocus(const AbilityLifecycleCallba
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_ ||
             windowStage.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnWindowStageInactive(ability, windowStage);
-        }
+        callback->OnWindowStageInactive(ability, windowStage);
     }
 }
 
@@ -209,12 +214,13 @@ void ApplicationContext::DispatchOnAbilityDestroy(const AbilityLifecycleCallback
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnAbilityDestroy(ability);
-        }
+        callback->OnAbilityDestroy(ability);
     }
 }
 
@@ -226,12 +232,13 @@ void ApplicationContext::DispatchOnAbilityForeground(const AbilityLifecycleCallb
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnAbilityForeground(ability);
-        }
+        callback->OnAbilityForeground(ability);
     }
 }
 
@@ -243,12 +250,13 @@ void ApplicationContext::DispatchOnAbilityBackground(const AbilityLifecycleCallb
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnAbilityBackground(ability);
-        }
+        callback->OnAbilityBackground(ability);
     }
 }
 
@@ -260,12 +268,13 @@ void ApplicationContext::DispatchOnAbilityContinue(const AbilityLifecycleCallbac
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnAbilityContinue(ability);
-        }
+        callback->OnAbilityContinue(ability);
     }
 }
 
@@ -279,12 +288,13 @@ void ApplicationContext::DispatchOnAbilityWillContinue(const AbilityLifecycleCal
 
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnAbilityWillContinue(ability);
-        }
+        callback->OnAbilityWillContinue(ability);
     }
 }
 
@@ -299,13 +309,14 @@ void ApplicationContext::DispatchOnWindowStageWillRestore(const AbilityLifecycle
 
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_ ||
             windowStage.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnWindowStageWillRestore(ability, windowStage);
-        }
+        callback->OnWindowStageWillRestore(ability, windowStage);
     }
 }
 
@@ -320,13 +331,14 @@ void ApplicationContext::DispatchOnWindowStageRestore(const AbilityLifecycleCall
 
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_ ||
             windowStage.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnWindowStageRestore(ability, windowStage);
-        }
+        callback->OnWindowStageRestore(ability, windowStage);
     }
 }
 
@@ -340,12 +352,13 @@ void ApplicationContext::DispatchOnAbilityWillSaveState(const AbilityLifecycleCa
 
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnAbilityWillSaveState(ability);
-        }
+        callback->OnAbilityWillSaveState(ability);
     }
 }
 
@@ -359,12 +372,13 @@ void ApplicationContext::DispatchOnAbilitySaveState(const AbilityLifecycleCallba
 
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnAbilitySaveState(ability);
-        }
+        callback->OnAbilitySaveState(ability);
     }
 }
 
@@ -418,12 +432,13 @@ void ApplicationContext::DispatchOnWillNewWant(const AbilityLifecycleCallbackArg
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnWillNewWant(ability);
-        }
+        callback->OnWillNewWant(ability);
     }
 }
 
@@ -435,12 +450,13 @@ void ApplicationContext::DispatchOnNewWant(const AbilityLifecycleCallbackArgs &a
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnNewWant(ability);
-        }
+        callback->OnNewWant(ability);
     }
 }
 
@@ -453,12 +469,13 @@ void ApplicationContext::DispatchOnAbilityWillCreate(const AbilityLifecycleCallb
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnAbilityWillCreate(ability);
-        }
+        callback->OnAbilityWillCreate(ability);
     }
 }
 
@@ -472,13 +489,14 @@ void ApplicationContext::DispatchOnWindowStageWillCreate(const AbilityLifecycleC
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_ ||
             windowStage.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnWindowStageWillCreate(ability, windowStage);
-        }
+        callback->OnWindowStageWillCreate(ability, windowStage);
     }
 }
 
@@ -492,13 +510,14 @@ void ApplicationContext::DispatchOnWindowStageWillDestroy(const AbilityLifecycle
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_ ||
             windowStage.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnWindowStageWillDestroy(ability, windowStage);
-        }
+        callback->OnWindowStageWillDestroy(ability, windowStage);
     }
 }
 
@@ -511,12 +530,13 @@ void ApplicationContext::DispatchOnAbilityWillDestroy(const AbilityLifecycleCall
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnAbilityWillDestroy(ability);
-        }
+        callback->OnAbilityWillDestroy(ability);
     }
 }
 
@@ -529,12 +549,13 @@ void ApplicationContext::DispatchOnAbilityWillForeground(const AbilityLifecycleC
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnAbilityWillForeground(ability);
-        }
+        callback->OnAbilityWillForeground(ability);
     }
 }
 
@@ -547,12 +568,13 @@ void ApplicationContext::DispatchOnAbilityWillBackground(const AbilityLifecycleC
     }
     std::lock_guard<std::recursive_mutex> lock(callbackLock_);
     for (auto callback : callbacks_) {
+        if (callback == nullptr) {
+            continue;
+        }
         if (ability.type_ != callback->type_) {
             continue;
         }
-        if (callback != nullptr) {
-            callback->OnAbilityWillBackground(ability);
-        }
+        callback->OnAbilityWillBackground(ability);
     }
 }
 
