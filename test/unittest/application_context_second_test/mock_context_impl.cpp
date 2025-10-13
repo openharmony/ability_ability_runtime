@@ -80,6 +80,11 @@ std::string MockContextImpl::GetCloudFileDir()
     return "/cloud";
 }
 
+std::string MockContextImpl::GetLogFileDir()
+{
+    return "/log";
+}
+
 std::string MockContextImpl::GetGroupDir(std::string groupId)
 {
     return "/group";

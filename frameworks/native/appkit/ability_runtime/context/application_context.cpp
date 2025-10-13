@@ -744,6 +744,11 @@ std::string ApplicationContext::GetCloudFileDir()
     return (contextImpl_ != nullptr) ? contextImpl_->GetCloudFileDir() : "";
 }
 
+std::string ApplicationContext::GetLogFileDir()
+{
+    return (contextImpl_ != nullptr) ? contextImpl_->GetLogFileDir() : "";
+}
+
 std::string ApplicationContext::GetLaunchParameter() const
 {
     return (contextImpl_ != nullptr) ? contextImpl_->GetLaunchParameter() : "";

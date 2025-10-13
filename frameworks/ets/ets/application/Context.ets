@@ -61,7 +61,7 @@ export class Context extends BaseContext {
       this.eventHub = new EventHub();
     }
   }
-  
+
   private setEtsContextPtr(ptr: long) {
     if (this.etsContextPtr == 0) {
       this.etsContextPtr = ptr;
@@ -80,6 +80,7 @@ export class Context extends BaseContext {
   public native createModuleResourceManagerSync(bundleName: string, moduleName: string): resmgr.ResourceManager;
   private native switchArea(mode: contextConstant.AreaMode): void;
   private native getArea(): contextConstant.AreaMode;
+  private native getLogFileDir(): string;
   public native nativeGetGroupDir(dataGroupID: string, callback: AsyncCallbackWrapper<string>): void;
   public native nativeCreateDisplayContext(displayId: long): Context;
   public native nativeCreateAreaModeContext(areaMode: contextConstant.AreaMode): Context;
@@ -102,6 +103,10 @@ export class Context extends BaseContext {
 
   get area(): contextConstant.AreaMode {
     return this.getArea();
+  }
+
+  get logFileDir(): string {
+    return this.getLogFileDir();
   }
 
   getGroupDir(dataGroupID: string, callback: AsyncCallback<string>): void {

@@ -499,6 +499,23 @@ HWTEST_F(ContextImplTest, GetCloudFileDir_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetLogFileDir_0100
+ * @tc.desc: Get log directory basic test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContextImplTest, GetLogFileDir_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    EXPECT_NE(contextImpl, nullptr);
+
+    auto logDir = contextImpl->GetLogFileDir();
+    EXPECT_EQ(logDir, "/data/storage/el2/log");
+
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
  * @tc.name: GetBaseDir_0100
  * @tc.desc: Get base directory basic test.
  * @tc.type: FUNC

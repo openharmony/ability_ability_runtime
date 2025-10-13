@@ -69,6 +69,7 @@ public:
     std::string GetDistributedFilesDir() override;
     std::string GetCloudFileDir() override;
     std::string GetBaseDir() const override;
+    std::string GetLogFileDir() override;
     int32_t GetSystemDatabaseDir(const std::string &groupId, bool checkExist, std::string &databaseDir) override;
     int32_t GetSystemPreferencesDir(const std::string &groupId, bool checkExist, std::string &preferencesDir) override;
 

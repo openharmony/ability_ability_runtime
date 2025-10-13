@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +60,7 @@ napi_value JsApplicationContextUtils::OnSwitchArea(napi_env env, NapiCallbackInf
     BindNativeProperty(env, object, "preferencesDir", GetPreferencesDir);
     BindNativeProperty(env, object, "bundleCodeDir", GetBundleCodeDir);
     BindNativeProperty(env, object, "cloudFileDir", GetCloudFileDir);
+    BindNativeProperty(env, object, "logFileDir", GetLogFileDir);
     return CreateJsUndefined(env);
 }
 
@@ -238,6 +239,22 @@ napi_value JsApplicationContextUtils::OnGetCloudFileDir(napi_env env, NapiCallba
     return CreateJsValue(env, path);
 }
 
+napi_value JsApplicationContextUtils::GetLogFileDir(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
+        OnGetLogFileDir, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnGetLogFileDir(napi_env env, NapiCallbackInfo &info)
+{
+    auto context = context_.lock();
+    if (!context) {
+        TAG_LOGW(AAFwkTag::ABILITY_SIM, "context released");
+        return CreateJsUndefined(env);
+    }
+    std::string path = context->GetLogFileDir();
+    return CreateJsValue(env, path);
+}
 napi_value JsApplicationContextUtils::KillProcessBySelf(napi_env env, napi_callback_info info)
 {
     return nullptr;
@@ -337,6 +354,7 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
     BindNativeProperty(env, object, "preferencesDir", JsApplicationContextUtils::GetPreferencesDir);
     BindNativeProperty(env, object, "bundleCodeDir", JsApplicationContextUtils::GetBundleCodeDir);
     BindNativeProperty(env, object, "cloudFileDir", JsApplicationContextUtils::GetCloudFileDir);
+    BindNativeProperty(env, object, "logFileDir", JsApplicationContextUtils::GetLogFileDir);
     BindNativeFunction(env, object, "registerAbilityLifecycleCallback", MD_NAME,
         JsApplicationContextUtils::RegisterAbilityLifecycleCallback);
     BindNativeFunction(env, object, "unregisterAbilityLifecycleCallback", MD_NAME,

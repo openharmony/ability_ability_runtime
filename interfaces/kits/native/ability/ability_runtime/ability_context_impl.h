@@ -47,6 +47,7 @@ public:
     std::string GetPreferencesDir() override;
     std::string GetDistributedFilesDir() override;
     std::string GetCloudFileDir() override;
+    std::string GetLogFileDir() override;
     int32_t GetSystemDatabaseDir(const std::string &groupId, bool checkExist, std::string &databaseDir) override;
     int32_t GetSystemPreferencesDir(const std::string &groupId, bool checkExist, std::string &preferencesDir) override;
     void SwitchArea(int mode) override;
@@ -379,7 +380,7 @@ public:
 
     ErrCode AddCompletionHandlerForAtomicService(const std::string &requestId, OnAtomicRequestSuccess onRequestSucc,
         OnAtomicRequestFailure onRequestFail, const std::string &appId) override;
-    
+
     ErrCode AddCompletionHandlerForOpenLink(const std::string &requestId,
         AAFwk::OnOpenLinkRequestFunc onRequestSucc, AAFwk::OnOpenLinkRequestFunc onRequestFail) override;
 
