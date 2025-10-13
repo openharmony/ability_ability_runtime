@@ -6699,43 +6699,36 @@ int32_t AppMgrServiceInner::GenerateUidByUserId(int32_t userId, int32_t id)
     return userId * BASE_USER_RANGE + id;
 }
 
-bool AppMgrServiceInner::GenerateIsolationId(std::unordered_set<int32_t> &set, int32_t beginId, int32_t endId,
-    int32_t &isolationId, int32_t &lastIsolationId)
+bool AppMgrServiceInner::GenerateUid(std::unordered_set<int32_t> &assignedUids, 
+                                    int32_t beginId, int32_t endId,
+                                    int32_t userId, int32_t &uid, 
+                                    std::unordered_map<int32_t, int32_t> &lastIsolationIdMap)
 {
-    int32_t id = lastIsolationId + 1;
-    bool needSecondScan = true;
-    if (id > endId) {
-        id = beginId;
-        needSecondScan = false;
+    int32_t lastIsolationId = beginId;
+    if (auto it = lastIsolationIdMap.find(userId); it != lastIsolationIdMap.end()) {
+        lastIsolationId = it->second;
     }
 
-    if (set.empty()) {
-        isolationId = id;
-        set.insert(isolationId);
-        lastIsolationId = isolationId;
-        return true;
-    }
-
-    for (int32_t i = id; i <= endId; i++) {
-        if (set.find(i) == set.end()) {
-            isolationId = i;
-            set.insert(isolationId);
-            lastIsolationId = isolationId;
+    auto tryAssignUid = [&](int32_t isolationId) -> bool {
+        int32_t candidateUid = GenerateUidByUserId(userId, isolationId);
+        if (assignedUids.find(candidateUid) == assignedUids.end()) {
+            uid = candidateUid;
+            assignedUids.insert(uid);
+            lastIsolationIdMap[userId] = isolationId;
+            return true;
+        }
+        return false;
+    };
+    for (int32_t i = lastIsolationId + 1; i <= endId; ++i) {
+        if (tryAssignUid(i)) {
             return true;
         }
     }
-
-    if (needSecondScan) {
-        for (int32_t i = beginId; i <= lastIsolationId; i++) {
-            if (set.find(i) == set.end()) {
-                isolationId = i;
-                set.insert(isolationId);
-                lastIsolationId = isolationId;
-                return true;
-            }
+    for (int32_t i = beginId; i <= lastIsolationId; ++i) {
+        if (tryAssignUid(i)) {
+            return true;
         }
     }
-
     return false;
 }
 
@@ -8835,7 +8828,7 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
     startMsg.fds = args.fds;
     startMsg.isolationMode = options.isolationMode;
     pid_t pid = 0;
-    int32_t isolationId = Constants::INVALID_UID;
+    int32_t uid = Constants::INVALID_UID;
     if (options.isolationMode && options.isolationUid) {
         int32_t userId = -1;
         auto osAccountMgr = DelayedSingleton<OsAccountManagerWrapper>::GetInstance();
@@ -8848,17 +8841,15 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
             TAG_LOGE(AAFwkTag::APPMGR, "GetOsAccountLocalIdFromUid failed,errcode=%{public}d", errCode);
             return errCode;
         }
-        int32_t uid = Constants::INVALID_UID;
         {
-            std::lock_guard<ffrt::mutex> lock(childProcessIsolationIdSetLock_);
-            if (!GenerateIsolationId(childProcessIsolationIdSet_, START_ID_FOR_CHILD_PROCESS_ISOLATION, 
-                END_ID_FOR_CHILD_PROCESS_ISOLATION, isolationId, lastChildProcessIsolationId_)) {
+            std::lock_guard<ffrt::mutex> lock(childProcessIsolationUidSetLock_);
+            if (!GenerateUid(childProcessIsolationUidSet_, START_ID_FOR_CHILD_PROCESS_ISOLATION, 
+                END_ID_FOR_CHILD_PROCESS_ISOLATION, userId, uid, lastChildProcessIsolationIdMap_)) {
                 TAG_LOGE(AAFwkTag::APPMGR, "generate uid fail");
                 AppMgrEventUtil::SendChildProcessStartFailedEvent(childProcessRecord,
                     ProcessStartFailedReason::GENERATE_RENDER_UID_FAILED, ERR_INVALID_OPERATION);
                 return ERR_INVALID_OPERATION;
             }
-            uid = GenerateUidByUserId(userId, isolationId);
         }
         startMsg.uid = uid;
         startMsg.gid = uid;
@@ -8869,11 +8860,7 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
         ErrCode errCode = spawnClient->StartProcess(startMsg, pid);
         if (FAILED(errCode)) {
             if (options.isolationMode && options.isolationUid) {
-                {
-                    std::lock_guard<ffrt::mutex> lock(childProcessIsolationIdSetLock_);
-                    TAG_LOGD(AAFwkTag::APPMGR, "erase %{public}d", isolationId);
-                    childProcessIsolationIdSet_.erase(isolationId);
-                }
+                RemoveChildProcessIsolationUid(uid);
             }
             TAG_LOGE(AAFwkTag::APPMGR, "spawn new child process fail, errCode %{public}08x", errCode);
             AppMgrEventUtil::SendChildProcessStartFailedEvent(childProcessRecord,
@@ -9053,12 +9040,17 @@ void AppMgrServiceInner::AttachChildProcess(const pid_t pid, const sptr<IChildSc
     }
 }
 
-void AppMgrServiceInner::WrappedChildProcessDiedWithIsolation(std::shared_ptr<ChildProcessRecord> childProcessRecord)
+void AppMgrServiceInner::RemoveChildProcessIsolationUid(int32_t uid)
+{
+    std::lock_guard<ffrt::mutex> lock(childProcessIsolationUidSetLock_);
+    TAG_LOGD(AAFwkTag::APPMGR, "erase %{public}d", uid);
+    childProcessIsolationUidSet_.erase(uid);
+}
+
+void AppMgrServiceInner::OnChildProcessDied(std::shared_ptr<ChildProcessRecord> childProcessRecord)
 {
     if (childProcessRecord) {
-        std::lock_guard<ffrt::mutex> lock(childProcessIsolationIdSetLock_);
-        TAG_LOGD(AAFwkTag::APPMGR, "erase %{public}d", childProcessRecord->GetUid() % BASE_USER_RANGE);
-        childProcessIsolationIdSet_.erase(childProcessRecord->GetUid() % BASE_USER_RANGE);
+        RemoveChildProcessIsolationUid(childProcessRecord->GetUid());
         DelayedSingleton<AppStateObserverManager>::GetInstance()->OnChildProcessDied(childProcessRecord);
     }
 }
@@ -9067,7 +9059,7 @@ void AppMgrServiceInner::OnChildProcessRemoteDied(const wptr<IRemoteObject> &rem
 {
     if (appRunningManager_) {
         auto childRecord = appRunningManager_->OnChildProcessRemoteDied(remote);
-        WrappedChildProcessDiedWithIsolation(childRecord);
+        OnChildProcessDied(childRecord);
     }
 }
 
@@ -9090,7 +9082,7 @@ void AppMgrServiceInner::KillChildProcess(const std::shared_ptr<AppRunningRecord
             TAG_LOGI(AAFwkTag::APPMGR, "kill child process, childPid:%{public}d, childUid:%{public}d",
                 childPid, childRecord->GetUid());
             KillProcessByPid(childPid, "KillChildProcess");
-            WrappedChildProcessDiedWithIsolation(childRecord);
+            OnChildProcessDied(childRecord);
         }
     }
 }
@@ -9120,7 +9112,7 @@ void AppMgrServiceInner::ExitChildProcessSafelyByChildPid(const pid_t pid)
         appRunningManager_->HandleChildRelation(childRecord, appRecord);
         TAG_LOGI(AAFwkTag::APPMGR, "remote child process exited, pid:%{public}d", pid);
         appRecord->RemoveChildProcessRecord(childRecord);
-        WrappedChildProcessDiedWithIsolation(childRecord);
+        OnChildProcessDied(childRecord);
         return;
     }
     childRecord->RegisterDeathRecipient();
