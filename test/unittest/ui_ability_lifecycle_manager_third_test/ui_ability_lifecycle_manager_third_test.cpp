@@ -1501,5 +1501,55 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, NotifyStartupExceptionBySCB_002, Te
     auto ret = uiAbilityLifecycleManager->NotifyStartupExceptionBySCB(requestId, reason);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: StartUIAbility_1200
+ * @tc.desc: StartUIAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, StartUIAbility_1200, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    AbilityRequest abilityRequest;
+    bool isColdStart = false;
+    EXPECT_EQ(mgr->StartUIAbility(abilityRequest, nullptr, 0, true, isColdStart), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: HandleRestartUIAbility_0100
+ * @tc.desc: HandleRestartUIAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIAbilityLifecycleManagerThirdTest, HandleRestartUIAbility_0100, TestSize.Level1)
+{
+    auto mgr = std::make_unique<UIAbilityLifecycleManager>();
+    EXPECT_FALSE(mgr->HandleRestartUIAbility(nullptr));
+
+    auto sessionInfo = sptr<SessionInfo>::MakeSptr();
+    EXPECT_FALSE(mgr->HandleRestartUIAbility(sessionInfo));
+
+    auto session = sptr<Rosen::Session>::MakeSptr(Rosen::SessionInfo());
+    sessionInfo->sessionToken = session->AsObject();
+    EXPECT_FALSE(mgr->HandleRestartUIAbility(sessionInfo));
+
+    auto session2 = sptr<Rosen::Session>::MakeSptr(Rosen::SessionInfo());
+    sessionInfo->callerSession = session2->AsObject();
+    EXPECT_FALSE(mgr->HandleRestartUIAbility(sessionInfo));
+
+    mgr->sessionAbilityMap_.emplace(0, nullptr);
+    AbilityRequest abilityRequest;
+    auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    mgr->sessionAbilityMap_.emplace(1, abilityRequest);
+    auto sessionInfo2 = sptr<SessionInfo>::MakeSptr();
+    sessionInfo2->sessionToken = session2->AsObject();
+    abilityRequest.sessionInfo = sessionInfo2;
+    auto abilityRecord2 = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    mgr->sessionAbilityMap_.emplace(2, abilityRecord2);
+    EXPECT_FALSE(mgr->HandleRestartUIAbility(sessionInfo));
+
+    sessionInfo->callerSession = sessionInfo->sessionToken;
+    sessionInfo2->sessionToken = sessionInfo->sessionToken;
+    EXPECT_FALSE(mgr->HandleRestartUIAbility(sessionInfo));
+}
 }  // namespace AAFwk
 }  // namespace OHOS

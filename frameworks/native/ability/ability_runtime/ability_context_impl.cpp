@@ -18,6 +18,7 @@
 #include <native_engine/native_engine.h>
 
 #include "ability_manager_client.h"
+#include "app_utils.h"
 #include "application_configuration_manager.h"
 #include "configuration_convertor.h"
 #include "bindable_sub_thread.h"
@@ -1515,6 +1516,58 @@ ErrCode AbilityContextImpl::SetOnNewWantSkipScenarios(int32_t scenarios)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     return AAFwk::AbilityManagerClient::GetInstance()->SetOnNewWantSkipScenarios(token_, scenarios);
+}
+
+#ifdef SUPPORT_SCREEN
+int32_t AbilityContextImpl::TransferRestartWSError(Rosen::WSError srcError)
+{
+    std::map<Rosen::WSError, int32_t> codeMap {
+        {Rosen::WSError::WS_OK, ERR_OK},
+        {Rosen::WSError::WS_ERROR_INVALID_OPERATION, AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY},
+        {Rosen::WSError::WS_ERROR_INVALID_PERMISSION, AAFwk::ERR_ABILITY_NOT_FOREGROUND}
+    };
+    auto it = codeMap.find(srcError);
+    if (it != codeMap.end()) {
+        return it->second;
+    }
+    return ERR_INVALID_VALUE;
+}
+#endif
+
+ErrCode AbilityContextImpl::RestartAppWithWindow(const Want &want)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (abilityInfo_ == nullptr || abilityInfo_->bundleName.empty() || abilityInfo_->name.empty()) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid ability info");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto element = want.GetElement();
+    TAG_LOGI(AAFwkTag::CONTEXT, "RestartAppWithWindow: %{public}s", abilityInfo_->bundleName.c_str());
+    if (element.GetBundleName().empty() || element.GetBundleName() != abilityInfo_->bundleName ||
+        element.GetAbilityName().empty()) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid bundleName or abilityName");
+        return AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY;
+    }
+#ifdef SUPPORT_SCREEN
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() ||
+        !AAFwk::AppUtils::GetInstance().IsSupportRestartAppWithWindow()) {
+        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+    }
+    auto ifaceSessionToken = iface_cast<Rosen::ISession>(GetSessionToken());
+    if (ifaceSessionToken == nullptr) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "null session");
+        return ERR_INVALID_VALUE;
+    }
+    TAG_LOGI(AAFwkTag::CONTEXT, "scb call, restartApp");
+    auto ret = ifaceSessionToken->RestartApp(std::make_shared<Want>(want));
+    if (ret != Rosen::WSError::WS_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "scb call, RestartApp err: %{public}d", ret);
+    }
+    return TransferRestartWSError(ret);
+#else
+    return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+#endif
 }
 
 ErrCode AbilityContextImpl::AddCompletionHandlerForAtomicService(const std::string &requestId,

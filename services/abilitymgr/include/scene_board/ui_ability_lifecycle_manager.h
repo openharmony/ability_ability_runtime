@@ -82,7 +82,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int StartUIAbility(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag,
-        bool &isColdStart);
+        bool isRestart, bool &isColdStart);
 
     /**
      * @brief execute after the ability schedule the lifecycle
@@ -1231,6 +1231,7 @@ private:
      * @param abilityRequest The ability request
      */
     void RemoveInstanceKey(const AbilityRequest &abilityRequest) const;
+    bool HandleRestartUIAbility(sptr<SessionInfo> sessionInfo);
 
     int32_t userId_ = -1;
     mutable ffrt::mutex sessionLock_;
@@ -1239,6 +1240,7 @@ private:
     std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> tmpAbilityMap_;
     std::unordered_map<std::shared_ptr<AbilityRecord>, std::list<AbilityRequest>> callRequestCache_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
+    std::unordered_set<std::shared_ptr<AbilityRecord>> reuseWindowRecords_;
     sptr<IRemoteObject> rootSceneSession_;
     sptr<ISessionHandler> handler_;
     ffrt::mutex statusBarDelegateManagerLock_;

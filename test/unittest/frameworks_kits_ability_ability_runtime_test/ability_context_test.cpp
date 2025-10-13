@@ -584,6 +584,11 @@ public:
     {
         return ERR_OK;
     }
+
+    virtual ErrCode RestartAppWithWindow(const AAFwk::Want &want)
+    {
+        return 0;
+    }
 private:
     std::unique_ptr<NativeReference> mockContentStorage_ = nullptr;
 };

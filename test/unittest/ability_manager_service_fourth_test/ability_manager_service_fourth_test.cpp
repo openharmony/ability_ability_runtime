@@ -392,10 +392,10 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartUIAbilityBySCB_003, TestSize.Leve
     sptr<SessionInfo> sessionInfo(new SessionInfo());
     sessionInfo->sessionToken = new Rosen::Session(info);
     bool isColdStart = true;
-    auto result = abilityMs->StartUIAbilityBySCB(sessionInfo, isColdStart);
+    auto result = abilityMs->StartUIAbilityBySCB(sessionInfo, isColdStart, 0, false);
     EXPECT_EQ(result, ERR_WRONG_INTERFACE_CALL);
     abilityMs->subManagersHelper_ = std::make_shared<SubManagersHelper>(nullptr, nullptr);
-    result = abilityMs->StartUIAbilityBySCB(sessionInfo, isColdStart);
+    result = abilityMs->StartUIAbilityBySCB(sessionInfo, isColdStart, 0, false);
     EXPECT_EQ(result, ERR_WRONG_INTERFACE_CALL);
 }
 
@@ -1237,7 +1237,7 @@ HWTEST_F(AbilityManagerServiceFourthTest, StartUIAbilityBySCB_001, TestSize.Leve
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartUIAbilityBySCB_001 start");
     bool isColdStart;
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    auto ret = abilityMs_->StartUIAbilityBySCB(nullptr, isColdStart);
+    auto ret = abilityMs_->StartUIAbilityBySCB(nullptr, isColdStart, 0, false);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFourthTest StartUIAbilityBySCB_001 end");
 }
