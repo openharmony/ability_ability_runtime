@@ -13651,6 +13651,17 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want, bool isAppRec
     return result;
 }
 
+bool AbilityManagerService::IsRestartAppLimit()
+{
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    AppExecFwk::RunningProcessInfo processInfo;
+    DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    RestartAppKeyType key(processInfo.instanceKey, callerUid);
+    int64_t now = time(nullptr);
+    return RestartAppManager::GetInstance().IsRestartAppFrequent(key, now);
+}
+
 int32_t AbilityManagerService::CheckRestartAppWant(const AAFwk::Want &want, int32_t appIndex, int32_t userId)
 {
     std::string bundleName = want.GetElement().GetBundleName();

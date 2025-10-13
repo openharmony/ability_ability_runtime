@@ -1963,6 +1963,11 @@ public:
     ErrCode StartSelfUIAbilityInCurrentProcess(const Want &want, const std::string &specifiedFlag,
         const AAFwk::StartOptions &startOptions, bool hasOptions, sptr<IRemoteObject> callerToken);
 
+    /**
+     * Check if the app is restart-limited.
+     * @return Returns true on being limited.
+     */
+    bool IsRestartAppLimit();
 private:
     AbilityManagerClient();
     DISALLOW_COPY_AND_MOVE(AbilityManagerClient);

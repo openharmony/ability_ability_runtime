@@ -2249,6 +2249,12 @@ public:
     virtual int32_t NotifyStartupExceptionBySCB(int32_t requestId) override;
 
     /**
+     * Check if the app is restart-limited.
+     * @return Returns true on being limited.
+     */
+    bool IsRestartAppLimit() override;
+
+    /**
      * Preload application.
      * @param bundleName Name of the application.
      * @param userId user id.

@@ -1543,11 +1543,16 @@ ErrCode AbilityContextImpl::RestartAppWithWindow(const Want &want)
     }
 
     auto element = want.GetElement();
-    TAG_LOGI(AAFwkTag::CONTEXT, "RestartAppWithWindow: %{public}s", abilityInfo_->bundleName.c_str());
+    TAG_LOGI(AAFwkTag::CONTEXT, "RestartAppWithWindow: %{public}s, appIndex: %{public}d",
+        abilityInfo_->bundleName.c_str(), abilityInfo_->appIndex);
     if (element.GetBundleName().empty() || element.GetBundleName() != abilityInfo_->bundleName ||
         element.GetAbilityName().empty()) {
         TAG_LOGE(AAFwkTag::CONTEXT, "invalid bundleName or abilityName");
         return AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY;
+    }
+    if (AAFwk::AbilityManagerClient::GetInstance()->IsRestartAppLimit()) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "reach restarting limit");
+        return AAFwk::ERR_RESTART_APP_FREQUENT;
     }
 #ifdef SUPPORT_SCREEN
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() ||
@@ -1559,8 +1564,10 @@ ErrCode AbilityContextImpl::RestartAppWithWindow(const Want &want)
         TAG_LOGE(AAFwkTag::CONTEXT, "null session");
         return ERR_INVALID_VALUE;
     }
+    auto wantCopy = std::make_shared<Want>(want);
+    wantCopy->SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, abilityInfo_->appIndex);
     TAG_LOGI(AAFwkTag::CONTEXT, "scb call, restartApp");
-    auto ret = ifaceSessionToken->RestartApp(std::make_shared<Want>(want));
+    auto ret = ifaceSessionToken->RestartApp();
     if (ret != Rosen::WSError::WS_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "scb call, RestartApp err: %{public}d", ret);
     }

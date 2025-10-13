@@ -2435,6 +2435,15 @@ public:
     {
         return ERR_OK;
     }
+
+    /**
+     * Check if the app is restart-limited.
+     * @return Returns true on being limited.
+     */
+    virtual bool IsRestartAppLimit()
+    {
+        return false;
+    }
 };
 }  // namespace AAFwk
 }  // namespace OHOS

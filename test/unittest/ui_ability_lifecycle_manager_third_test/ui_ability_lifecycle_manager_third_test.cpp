@@ -1539,7 +1539,7 @@ HWTEST_F(UIAbilityLifecycleManagerThirdTest, HandleRestartUIAbility_0100, TestSi
     mgr->sessionAbilityMap_.emplace(0, nullptr);
     AbilityRequest abilityRequest;
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-    mgr->sessionAbilityMap_.emplace(1, abilityRequest);
+    mgr->sessionAbilityMap_.emplace(1, abilityRecord);
     auto sessionInfo2 = sptr<SessionInfo>::MakeSptr();
     sessionInfo2->sessionToken = session2->AsObject();
     abilityRequest.sessionInfo = sessionInfo2;

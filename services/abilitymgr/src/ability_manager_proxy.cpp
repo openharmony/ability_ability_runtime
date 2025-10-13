@@ -7333,5 +7333,22 @@ int32_t AbilityManagerProxy::StartSelfUIAbilityInCurrentProcess(const Want &want
     }
     return reply.ReadInt32();
 }
+
+bool AbilityManagerProxy::IsRestartAppLimit()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return false;
+    }
+    auto ret = SendRequest(AbilityManagerInterfaceCode::IS_RESTART_APP_LIMIT, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "request error: %{public}d", ret);
+        return false;
+    }
+
+    return reply.ReadBool();
+}
 } // namespace AAFwk
 } // namespace OHOS
