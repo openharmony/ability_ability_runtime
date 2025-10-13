@@ -254,6 +254,49 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_1100, Function | MediumTest | Level1)
 }
 
 /**
+ * @tc.number: JsEnv_SourceMap_1200
+ * @tc.name: Find
+ * @tc.desc: Verifying Find succeeded.
+ * @tc.require: #I6T4K1
+ */
+HWTEST_F(SourceMapTest, JsEnv_SourceMap_1200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_1200 start";
+    std::string sourceMaps = "{\n"
+        "  \"entry|entry|1.0.0|src/main/ets/pages/Index.ts\": {\n"
+        "    \"version\": 3,\n"
+        "    \"file\": \"Index.ets\",\n"
+        "    \"sources\": [\n"
+        "      \"entry/src/main/ets/pages/Index.ets\"\n"
+        "    ],\n"
+        "    \"names\": [],\n"
+        "    \"mappings\": \";;;;IAuBW,aAAa,GAAE,SAAS;IACP,aAAa,GAAE,UAAU;;AAxBrD,MAAM,MAAM,UAAU;"
+        "IACpB,KAAK,IAAI;CACV;MAIM,uBAAuB;IAF9B;;6BAIoC,SAAS;uGACF,UAAU,CAAC,KAAK;;KAP1D;;6BAMmC,"
+        "SAAS;wGACF,UAAU,CAAC,KAAK;;IADzD,CAAC,KAAK;IAAC,aAAa,EAAE,SAAS,CAAY;IAC3C,CAAC,IAAI;IAAC,"
+        "CAAC,KAAK;IAAC,aAAa,EAAE,UAAU,CAAmB;IAEzD;;YACE,MAAM;;;;;4CAEJ,oBAAoB,OAAC;wBACnB,aAAa,EAAE,"
+        "IAAI,CAAC,aAAa;qBAClC;;;;4BADC,aAAa,EAAE,IAAI,CAAC,aAAa;;;;;;;;;;QAHrC,MAAM;KAMP;;;;;;;;;;;;;;;;"
+        "AAGH,MAAM,OAAQ,oBAAoB;IADlC;;;;;4DAGsC,SAAS;;sDACpC,eAAe;;;KALzB;;;;;;;;;;;;;;;;;;IAIC,kDAAwB,SAAS,"
+        "EAAY;QAApC,aAAa;;;QAAb,aAAa,WAAE,SAAS;;;IACjC,oDAAyC,UAAU,EAAA;QAAzB,aAAa;;;QAAb,aAAa,WAAE,UAAU;;;"
+        "IAEnD;;YACE,MAAM,QAAC,EAAC,KAAK,EAAE,CAAC,EAAC;;;YACf,IAAI,QAAC,iBAAiB,GAAG,IAAI,CAAC,aAAa;;QAA3C,IAAI;"
+        ";YACJ,IAAI,QAAC,iBAAiB,GAAG,IAAI,CAAC,aAAa;;QAA3C,IAAI;;;;4CACJ,YAAY,OAAC;wBACX,aAAa,EAAE,IAAI,CAAC,aAAa"
+        ";wBACjC,aAAa,EAAE,IAAI,CAAC,aAAa;qBAClC;;;;4BAFC,aAAa,EAAE,IAAI,CAAC,aAAa;4BACjC,aAAa,EAAE,IAAI,CAAC,aAAa"
+        ";;;;;;;wBADjC,aAAa,EAAE,IAAI,CAAC,aAAa;wBACjC,aAAa,EAAE,IAAI,CAAC,aAAa;;;;;QALrC,MAAM;KAQP;;;;;MAII,YAAY;"
+        "IADnB;;uGAEoC,SAAS;uGACR,UAAU,CAAC,KAAK;;KALpD;;wGAImC,SAAS;wGACR,UAAU,CAAC,KAAK;;IADnD,CAAC,KAAK;IAxCR,"
+        "QAAA,CAwCS,aAAa,EAAE,SAAS,CAAY;IAC3C,CAAC,KAAK;IAzCR,QAAA,CAyCS,aAAa,EAAE,UAAU,CAAmB;IAEnD;;YACE,MAAM;;;"
+        "YACJ,IAAI,QAAC,iBAAiB,GAAG,IAAI,CAAC,aAAa;;QAA3C,IAAI;;YACJ,IAAI,QAAC,iBAAiB,GAAG,IAAI,CAAC,aAAa;;QAA3C,"
+        "IAAI;QAFN,MAAM;KAIP\",\n"
+        "    \"entry-package-info\": \"entry|1.0.0\n"
+        "  }\n"
+        "}";
+    auto modSourceMap = std::make_shared<SourceMap>();
+    modSourceMap->SplitSourceMap(sourceMaps);
+    std::string stackStr = "at ChildComponenttest48 (entry|entry|1.0.0|src/main/ets/pages/Index.ts:75:37)";
+    std::string stack = modSourceMap->TranslateBySourceMap(stackStr);
+    EXPECT_STREQ(stack.c_str(), "at ChildComponenttest48 entry (entry/src/main/ets/pages/Index.ets:25:12)\n");
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_1200 end";
+}
+
+/**
  * @tc.number: JsEnv_SourceMap_1300
  * @tc.name: GetPosInfo
  * @tc.desc: Verifying GetPosInfo succeeded.
@@ -272,6 +315,48 @@ HWTEST_F(SourceMapTest, JsEnv_SourceMap_1300, Function | MediumTest | Level1)
     EXPECT_STREQ(line.c_str(), "5779");
     EXPECT_STREQ(column.c_str(), "5");
     GTEST_LOG_(INFO) << "JsEnv_SourceMap_1300 end";
+}
+
+/**
+ * @tc.number: JsEnv_SourceMap_1400
+ * @tc.name: Find
+ * @tc.desc: Verifying Find succeeded.
+ */
+HWTEST_F(SourceMapTest, JsEnv_SourceMap_1400, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_1400 start";
+    std::string sourceMaps = "{\n"
+        "  \"entry|entry|1.0.0|src/main/ets/pages/Index.ts\": {\n"
+        "    \"version\": 3,\n"
+        "    \"file\": \"Index.ets\",\n"
+        "    \"sources\": [\n"
+        "      \"entry/src/main/ets/pages/Index.ets\"\n"
+        "    ],\n"
+        "    \"names\": [],\n"
+        "    \"mappings\": \";;;;IAuBW,aAAa,GAAE,SAAS;IACP,aAAa,GAAE,UAAU;;AAxBrD,MAAM,MAAM,UAAU;"
+        "IACpB,KAAK,IAAI;CACV;MAIM,uBAAuB;IAF9B;;6BAIoC,SAAS;uGACF,UAAU,CAAC,KAAK;;KAP1D;;6BAMmC,"
+        "SAAS;wGACF,UAAU,CAAC,KAAK;;IADzD,CAAC,KAAK;IAAC,aAAa,EAAE,SAAS,CAAY;IAC3C,CAAC,IAAI;IAAC,"
+        "CAAC,KAAK;IAAC,aAAa,EAAE,UAAU,CAAmB;IAEzD;;YACE,MAAM;;;;;4CAEJ,oBAAoB,OAAC;wBACnB,aAAa,EAAE,"
+        "IAAI,CAAC,aAAa;qBAClC;;;;4BADC,aAAa,EAAE,IAAI,CAAC,aAAa;;;;;;;;;;QAHrC,MAAM;KAMP;;;;;;;;;;;;;;;;"
+        "AAGH,MAAM,OAAQ,oBAAoB;IADlC;;;;;4DAGsC,SAAS;;sDACpC,eAAe;;;KALzB;;;;;;;;;;;;;;;;;;IAIC,kDAAwB,SAAS,"
+        "EAAY;QAApC,aAAa;;;QAAb,aAAa,WAAE,SAAS;;;IACjC,oDAAyC,UAAU,EAAA;QAAzB,aAAa;;;QAAb,aAAa,WAAE,UAAU;;;"
+        "IAEnD;;YACE,MAAM,QAAC,EAAC,KAAK,EAAE,CAAC,EAAC;;;YACf,IAAI,QAAC,iBAAiB,GAAG,IAAI,CAAC,aAAa;;QAA3C,IAAI;"
+        ";YACJ,IAAI,QAAC,iBAAiB,GAAG,IAAI,CAAC,aAAa;;QAA3C,IAAI;;;;4CACJ,YAAY,OAAC;wBACX,aAAa,EAAE,IAAI,CAAC,aAAa"
+        ";wBACjC,aAAa,EAAE,IAAI,CAAC,aAAa;qBAClC;;;;4BAFC,aAAa,EAAE,IAAI,CAAC,aAAa;4BACjC,aAAa,EAAE,IAAI,CAAC,aAAa"
+        ";;;;;;;wBADjC,aAAa,EAAE,IAAI,CAAC,aAAa;wBACjC,aAAa,EAAE,IAAI,CAAC,aAAa;;;;;QALrC,MAAM;KAQP;;;;;MAII,YAAY;"
+        "IADnB;;uGAEoC,SAAS;uGACR,UAAU,CAAC,KAAK;;KALpD;;wGAImC,SAAS;wGACR,UAAU,CAAC,KAAK;;IADnD,CAAC,KAAK;IAxCR,"
+        "QAAA,CAwCS,aAAa,EAAE,SAAS,CAAY;IAC3C,CAAC,KAAK;IAzCR,QAAA,CAyCS,aAAa,EAAE,UAAU,CAAmB;IAEnD;;YACE,MAAM;;;"
+        "YACJ,IAAI,QAAC,iBAAiB,GAAG,IAAI,CAAC,aAAa;;QAA3C,IAAI;;YACJ,IAAI,QAAC,iBAAiB,GAAG,IAAI,CAAC,aAAa;;QAA3C,"
+        "IAAI;QAFN,MAAM;KAIP\",\n"
+        "    \"entry-package-info\": \"entry|1.0.0\n"
+        "  }\n"
+        "}";
+    auto modSourceMap = std::make_shared<SourceMap>();
+    modSourceMap->SplitSourceMap(sourceMaps);
+    std::string stackStr = "at ChildComponenttest48 (entry|entry|1.0.0|src/main/ets/pages/Index.ts:179:5)";
+    std::string stack = modSourceMap->TranslateBySourceMap(stackStr);
+    EXPECT_STREQ(stack.c_str(), "at ChildComponenttest48 entry (entry/src/main/ets/pages/Index.ets:45:5)\n");
+    GTEST_LOG_(INFO) << "JsEnv_SourceMap_1400 end";
 }
 
 /**
