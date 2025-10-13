@@ -687,6 +687,35 @@ HWTEST_F(ApplicationContextTest, GetCloudFileDir_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.number: GetLogFileDir_0100
+ * @tc.name: GetLogFileDir
+ * @tc.desc: Get Log File Dir failed
+ */
+HWTEST_F(ApplicationContextTest, GetLogFileDir_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetLogFileDir_0100 start";
+    std::shared_ptr<ContextImpl> contextImpl = nullptr;
+    context_->AttachContextImpl(contextImpl);
+    auto ret = context_->GetLogFileDir();
+    EXPECT_EQ(ret, "");
+    GTEST_LOG_(INFO) << "GetLogFileDir_0100 end";
+}
+
+/**
+ * @tc.number: GetLogFileDir_0200
+ * @tc.name: GetLogFileDir
+ * @tc.desc: Get Log File Dir failed
+ */
+HWTEST_F(ApplicationContextTest, GetLogFileDir_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetLogFileDir_0200 start";
+    context_->AttachContextImpl(mock_);
+    auto ret = context_->GetLogFileDir();
+    EXPECT_EQ(ret, "/log");
+    GTEST_LOG_(INFO) << "GetLogFileDir_0200 end";
+}
+
+/**
  * @tc.number: GetToken_0100
  * @tc.name: GetToken
  * @tc.desc: Get Token failed
