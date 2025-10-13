@@ -152,7 +152,7 @@ HWTEST_F(AbilityContextImplSecondTest, RestartAppWithWindow_0100, Function | Med
     EXPECT_CALL(Rosen::SceneBoardJudgement::GetInstance(), MockIsSceneBoardEnabled).Times(1).WillOnce(Return(true));
     AAFwk::AppUtils::GetInstance().isSupportRestartAppWithWindow_.value = true;
     ret = context_->RestartAppWithWindow(want);
-    EXPECT_EQ(ret, AAFwk::ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 #ifdef SUPPORT_SCREEN
@@ -163,13 +163,13 @@ HWTEST_F(AbilityContextImplSecondTest, RestartAppWithWindow_0100, Function | Med
 HWTEST_F(AbilityContextImplSecondTest, TransferRestartWSError_0100, Function | MediumTest | Level1)
 {
     auto srcCode = Rosen::WSError::WS_OK;
-    EXPECT_EQ(TransferRestartWSError(srcCode), ERR_OK);
+    EXPECT_EQ(AbilityContextImpl::TransferRestartWSError(srcCode), ERR_OK);
 
     srcCode = Rosen::WSError::WS_ERROR_INVALID_OPERATION;
-    EXPECT_EQ(TransferRestartWSError(srcCode), AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY);
+    EXPECT_EQ(AbilityContextImpl::TransferRestartWSError(srcCode), AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY);
 
     srcCode = Rosen::WSError::WS_ERROR_SET_SESSION_LABEL_FAILED;
-    EXPECT_EQ(TransferRestartWSError(srcCode), ERR_INVALID_VALUE);
+    EXPECT_EQ(AbilityContextImpl::TransferRestartWSError(srcCode), ERR_INVALID_VALUE);
 }
 #endif
 } // namespace AppExecFwk

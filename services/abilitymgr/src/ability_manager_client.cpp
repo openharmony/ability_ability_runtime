@@ -2428,5 +2428,16 @@ ErrCode AbilityManagerClient::StartSelfUIAbilityInCurrentProcess(const Want &wan
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, options, hasOptions, callerToken);
 }
+
+bool AbilityManagerClient::IsRestartAppLimit()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    if (abms == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "null abms");
+        return false;
+    }
+    return abms->IsRestartAppLimit();
+}
 } // namespace AAFwk
 } // namespace OHOS

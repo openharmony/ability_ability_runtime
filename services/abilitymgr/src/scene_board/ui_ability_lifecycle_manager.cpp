@@ -32,6 +32,7 @@
 #include "permission_constants.h"
 #include "process_options.h"
 #include "request_id_util.h"
+#include "restart_app_manager.h"
 #include "scene_board/status_bar_delegate_manager.h"
 #include "server_constant.h"
 #include "session_manager_lite.h"
@@ -330,6 +331,8 @@ bool UIAbilityLifecycleManager::HandleRestartUIAbility(sptr<SessionInfo> session
         TAG_LOGE(AAFwkTag::ABILITYMGR, "signRestartAppFlag error: %{public}d", result);
         return false;
     }
+    RestartAppKeyType key(callerRecord->GetInstanceKey(), callerRecord->GetUid());
+    RestartAppManager::GetInstance().AddRestartAppHistory(key, time(nullptr));
     return true;
 }
 

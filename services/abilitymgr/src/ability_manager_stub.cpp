@@ -479,6 +479,9 @@ int AbilityManagerStub::OnRemoteRequestInnerEleventh(uint32_t code, MessageParce
     if (interfaceCode == AbilityManagerInterfaceCode::RECORD_PROCESS_EXIT_REASON_PLUS) {
         return RecordProcessExitReasonPlusInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::IS_RESTART_APP_LIMIT) {
+        return IsRestartAppLimitInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -5054,6 +5057,12 @@ int AbilityManagerStub::StartSelfUIAbilityInCurrentProcessInner(MessageParcel &d
         *want, specifiedFlag, *startOptions, hasOptions, callerToken);
     reply.WriteInt32(result);
     delete startOptions;
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::IsRestartAppLimitInner(MessageParcel &data, MessageParcel &reply)
+{
+    reply.WriteBool(IsRestartAppLimit());
     return NO_ERROR;
 }
 } // namespace AAFwk

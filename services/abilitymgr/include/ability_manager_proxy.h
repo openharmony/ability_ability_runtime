@@ -1896,6 +1896,11 @@ public:
     virtual ErrCode StartSelfUIAbilityInCurrentProcess(const Want &want, const std::string &specifiedFlag,
         const AAFwk::StartOptions &startOptions, bool hasOptions, sptr<IRemoteObject> callerToken) override;
 
+    /**
+     * Check if the app is restart-limited.
+     * @return Returns true on being limited.
+     */
+    virtual bool IsRestartAppLimit() override;
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
