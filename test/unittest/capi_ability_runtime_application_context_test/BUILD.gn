@@ -25,7 +25,10 @@ ohos_unittest("capi_ability_runtime_application_context_test") {
     cflags = [ "-DBINDER_IPC_32BIT" ]
   }
 
-  sources = [ "capi_ability_runtime_application_context_test.cpp" ]
+  sources = [
+    "capi_ability_runtime_application_context_test.cpp",
+    "capi_ability_runtime_application_context_second_test.cpp",
+  ]
 
   include_dirs = [
     "${ability_runtime_ndk_path}/ability_runtime",

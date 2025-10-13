@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,6 +49,7 @@ public:
     static napi_value GetPreferencesDir(napi_env env, napi_callback_info info);
     static napi_value GetBundleCodeDir(napi_env env, napi_callback_info info);
     static napi_value GetCloudFileDir(napi_env env, napi_callback_info info);
+    static napi_value GetLogFileDir(napi_env env, napi_callback_info info);
     static napi_value GetApplicationContext(napi_env env, napi_callback_info info);
     static napi_value KillProcessBySelf(napi_env env, napi_callback_info info);
     static napi_value GetRunningProcessInformation(napi_env env, napi_callback_info info);
@@ -65,6 +66,7 @@ public:
     napi_value OnGetPreferencesDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetBundleCodeDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetCloudFileDir(napi_env env, NapiCallbackInfo& info);
+    napi_value OnGetLogFileDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetArea(napi_env env, NapiCallbackInfo& info);
     napi_value OnSetSupportedProcessCacheSelf(napi_env env, NapiCallbackInfo& info);
 

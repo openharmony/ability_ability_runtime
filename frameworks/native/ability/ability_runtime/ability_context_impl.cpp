@@ -134,6 +134,11 @@ std::string AbilityContextImpl::GetCloudFileDir()
     return stageContext_ ? stageContext_->GetCloudFileDir() : "";
 }
 
+std::string AbilityContextImpl::GetLogFileDir()
+{
+    return stageContext_ ? stageContext_->GetLogFileDir() : "";
+}
+
 bool AbilityContextImpl::IsUpdatingConfigurations()
 {
     return stageContext_ ? stageContext_->IsUpdatingConfigurations() : false;
