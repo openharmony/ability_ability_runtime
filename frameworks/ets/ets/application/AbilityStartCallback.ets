@@ -18,7 +18,7 @@ import { AbilityResult } from 'ability.abilityResult';
 type OnResultFn = (parameter: AbilityResult) => void;
 
 export default interface AbilityStartCallback {
-  onError(code: number, name: string, message: string): void;
+  onError(code: int, name: string, message: string): void;
 
   onResult?: OnResultFn;
 }
