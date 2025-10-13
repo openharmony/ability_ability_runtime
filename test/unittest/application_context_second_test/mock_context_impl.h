@@ -54,6 +54,8 @@ public:
 
     std::string GetCloudFileDir() override;
 
+    std::string GetLogFileDir() override;
+
     std::shared_ptr<Context> CreateModuleContext(const std::string &moduleName) override;
 
     std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName, const std::string &moduleName) override;

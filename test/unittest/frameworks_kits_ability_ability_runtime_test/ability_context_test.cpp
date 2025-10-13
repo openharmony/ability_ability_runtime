@@ -215,6 +215,10 @@ public:
     {
         return "MockAbilityContext for tdd";
     }
+    virtual std::string GetLogFileDir()
+    {
+        return "MockAbilityContext for tdd";
+    }
     virtual sptr<IRemoteObject> GetToken()
     {
         return nullptr;

@@ -140,6 +140,11 @@ std::string AbilityContext::GetCloudFileDir()
     return stageContext_ ? stageContext_->GetCloudFileDir() : "";
 }
 
+std::string AbilityContext::GetLogFileDir()
+{
+    return stageContext_ ? stageContext_->GetLogFileDir() : "";
+}
+
 void AbilityContext::SwitchArea(int mode)
 {
     if (stageContext_) {
