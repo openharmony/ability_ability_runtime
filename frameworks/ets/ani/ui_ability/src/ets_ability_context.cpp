@@ -785,7 +785,16 @@ void EtsAbilityContext::InheritWindowMode(AAFwk::Want &want)
     TAG_LOGD(AAFwkTag::CONTEXT, "window mode is %{public}d", windowMode);
 #endif
 }
-
+void EtsAbilityContext::StartAbilitySyncCheck(ani_env *env, ani_object aniObj, ani_object opt)
+{
+    AAFwk::StartOptions startOptions;
+    if (!AppExecFwk::UnwrapStartOptionsWithProcessOption(env, opt, startOptions)) {
+        EtsErrorUtil::ThrowInvalidParamError(env,
+            "Parse param startOptions failed, startOptions must be StartOptions.");
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid options");
+        return;
+    }
+}
 void EtsAbilityContext::OnStartAbility(
     ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call, bool isStartRecent)
 {
@@ -2156,6 +2165,9 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 "C{@ohos.app.ability.Want.Want}C{@ohos.app.ability.StartOptions.StartOptions}C{utils.AbilityUtils."
                 "AsyncCallbackWrapper}:",
                 reinterpret_cast<void *>(EtsAbilityContext::StartAbilityWithOptions) },
+            ani_native_function { "nativeStartAbilitySyncCheck",
+                "C{@ohos.app.ability.StartOptions.StartOptions}:",
+                reinterpret_cast<void *>(EtsAbilityContext::StartAbilitySyncCheck) },
             ani_native_function { "nativeStartAbilityForResult",
                 "C{@ohos.app.ability.Want.Want}C{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void *>(EtsAbilityContext::StartAbilityForResult) },

@@ -97,6 +97,8 @@ export default class UIAbilityContext extends Context {
 
   private native nativeStartAbilitySync(want: Want, callback: AsyncCallbackWrapper<void>): void;
 
+  private native nativeStartAbilitySyncCheck(options: StartOptions): void;
+
   private native nativeStartAbilitySync(want: Want, options: StartOptions, callback: AsyncCallbackWrapper<void>): void;
 
   private native nativeStartAbilityForResult(want: Want, callback: AsyncCallbackWrapper<AbilityResult>): void;
@@ -204,6 +206,7 @@ export default class UIAbilityContext extends Context {
   }
 
   startAbility(want: Want, options: StartOptions, callback: AsyncCallback<void>): void {
+    this.nativeStartAbilitySyncCheck(options);
     let myCall = new AsyncCallbackWrapper<void>(callback);
     taskpool.execute((): void => {
       this.nativeStartAbilitySync(want, options, myCall);
@@ -211,6 +214,9 @@ export default class UIAbilityContext extends Context {
   }
 
   startAbility(want: Want, options?: StartOptions): Promise<void> {
+    if (options != null) {
+      this.nativeStartAbilitySyncCheck(options);
+    } 
     return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
       let myCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
         if (err == null || err.code == 0) {

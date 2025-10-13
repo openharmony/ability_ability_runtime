@@ -60,6 +60,7 @@ public:
     static void StartAbility(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object call);
     static void StartAbilityWithOptions(
         ani_env *env, ani_object aniObj, ani_object wantObj, ani_object opt, ani_object call);
+    static void StartAbilitySyncCheck(ani_env *env, ani_object aniObj, ani_object opt);
     static void StartAbilityForResult(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callback);
     static void StartAbilityForResultWithOptions(
         ani_env *env, ani_object aniObj, ani_object wantObj, ani_object startOptionsObj, ani_object callback);
