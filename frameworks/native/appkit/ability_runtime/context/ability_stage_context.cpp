@@ -344,6 +344,16 @@ std::string AbilityStageContext::GetCloudFileDir()
     return contextImpl_->GetCloudFileDir();
 }
 
+std::string AbilityStageContext::GetLogFileDir()
+{
+    if (contextImpl_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "null contextImpl");
+        return {};
+    }
+
+    return contextImpl_->GetLogFileDir();
+}
+
 std::string AbilityStageContext::GetBaseDir() const
 {
     if (contextImpl_ == nullptr) {
