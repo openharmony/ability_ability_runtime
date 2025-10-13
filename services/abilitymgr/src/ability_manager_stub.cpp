@@ -2539,7 +2539,7 @@ int AbilityManagerStub::StartUIAbilityBySCBInner(MessageParcel &data, MessagePar
     }
     uint32_t sceneFlag = data.ReadUint32();
     bool isColdStart = false;
-    int32_t result = StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag);
+    int32_t result = StartUIAbilityBySCB(sessionInfo, isColdStart, sceneFlag, data.ReadBool());
     reply.WriteBool(isColdStart);
     reply.WriteInt32(result);
     return NO_ERROR;

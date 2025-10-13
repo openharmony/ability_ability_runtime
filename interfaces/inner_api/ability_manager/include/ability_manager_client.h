@@ -433,9 +433,12 @@ public:
      *
      * @param sessionInfo the session info of the ability to start.
      * @param isColdStart the session info of the ability is or not cold start.
+     * @param sceneFlag scene flag.
+     * @param isRestart whether kill old process and start the ability in new process.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart, uint32_t sceneFlag = 0);
+    ErrCode StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart, uint32_t sceneFlag = 0,
+        bool isRestart = false);
 
     /**
      * Stop extension ability with want, send want to ability manager service.
