@@ -35,34 +35,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const int32_t ERR_OK = 0;
-constexpr const int32_t ERR_FAILURE = -1;
 constexpr const char* NOT_SYSTEM_APP = "The application is not system-app, can not use system-api.";
-
-ani_object CreateDouble(ani_env *env, int32_t res)
-{
-    if (env == nullptr) {
-        return nullptr;
-    }
-    static const char *className = "std.core.Double";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        TAG_LOGE(AAFwkTag::URIPERMMGR, "create double error");
-        return nullptr;
-    }
-
-    if (cls == nullptr) {
-        return nullptr;
-    }
-    ani_method ctor;
-    env->Class_FindMethod(cls, "<ctor>", "d:", &ctor);
-    if (ctor == nullptr) {
-        return nullptr;
-    }
-    ani_object obj;
-    env->Object_New(cls, ctor, &obj, ani_double(res));
-    return obj;
-}
-
 }
 
 static std::string GetStdString(ani_env* env, ani_string str)
@@ -92,7 +65,7 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateError(env,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
             "Param appCloneIndex is invalid, the value less than 0."),
-            CreateDouble(env, ERR_FAILURE));
+            nullptr);
         return;
     }
     auto selfToken = IPCSkeleton::GetSelfTokenID();
@@ -101,7 +74,7 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
         etsErrCode = EtsErrorUtil::CreateError(env,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), NOT_SYSTEM_APP);
-        AppExecFwk::AsyncCallback(env, callback, etsErrCode, CreateDouble(env, ERR_FAILURE));
+        AppExecFwk::AsyncCallback(env, callback, etsErrCode, nullptr);
         return;
     }
     std::string uriStr = GetStdString(env, uri);
@@ -110,15 +83,13 @@ static void grantUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
     AAFwk::AniEnumConvertUtil::EnumConvert_EtsToNative(env, flagEnum, flag);
     int32_t flagId = static_cast<int32_t>(flag);
     std::string targetBundleName = GetStdString(env, targetName);
-    int32_t result = ERR_OK;
     int32_t errCode = AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uriVec, flagId,
         targetBundleName, appCloneIndex);
     if (errCode != ERR_OK) {
-        result = ERR_FAILURE;
         etsErrCode = EtsErrorUtil::CreateErrorByNativeErr(env, errCode);
     }
     
-    AppExecFwk::AsyncCallback(env, callback, etsErrCode, CreateDouble(env, result));
+    AppExecFwk::AsyncCallback(env, callback, etsErrCode, nullptr);
 }
 
 static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
@@ -134,7 +105,7 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateError(env,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
             "Param appCloneIndex is invalid, the value less than 0."),
-            CreateDouble(env, ERR_FAILURE));
+            nullptr);
         return;
     }
     auto selfToken = IPCSkeleton::GetSelfTokenID();
@@ -143,20 +114,18 @@ static void revokeUriPermissionCallbackSync([[maybe_unused]]ani_env *env,
         TAG_LOGE(AAFwkTag::URIPERMMGR, "app not system-app");
         etsErrCode = EtsErrorUtil::CreateError(env,
             static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP), NOT_SYSTEM_APP);
-        AppExecFwk::AsyncCallback(env, callback, etsErrCode, CreateDouble(env, ERR_FAILURE));
+        AppExecFwk::AsyncCallback(env, callback, etsErrCode, nullptr);
         return;
     }
     std::string uriStr = GetStdString(env, uri);
     Uri uriVec(uriStr);
     std::string targetBundleName = GetStdString(env, targetName);
-    int32_t result = ERR_OK;
     int32_t errCode = AAFwk::UriPermissionManagerClient::GetInstance().RevokeUriPermissionManually(uriVec,
         targetBundleName, appCloneIndex);
     if (errCode != ERR_OK) {
-        result = ERR_FAILURE;
         etsErrCode = EtsErrorUtil::CreateErrorByNativeErr(env, errCode);
     }
-    AppExecFwk::AsyncCallback(env, callback, etsErrCode, CreateDouble(env, result));
+    AppExecFwk::AsyncCallback(env, callback, etsErrCode, nullptr);
 }
 
 void EtsUriPermissionManagerInit(ani_env *env)
