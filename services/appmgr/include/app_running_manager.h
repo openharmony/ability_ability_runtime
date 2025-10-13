@@ -155,6 +155,9 @@ public:
      */
     int32_t CheckAppCloneRunningRecordIsExistByBundleName(const std::string &bundleName,
         int32_t appCloneIndex, bool &isRunning);
+    
+    int32_t IsAppRunningByBundleName(const std::string &bundleName, int32_t appCloneIndex,
+        int32_t userId, bool &isRunning);
 
     /**
      * Check whether the process of the application under the specified user exists.

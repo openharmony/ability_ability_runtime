@@ -637,6 +637,9 @@ public:
      */
     int32_t IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId, bool &isRunning) override;
 
+    int32_t IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
+        int32_t userId, bool &isRunning) override;
+
 #ifdef SUPPORT_CHILD_PROCESS
     /**
      * Start child process, called by ChildProcessManager.

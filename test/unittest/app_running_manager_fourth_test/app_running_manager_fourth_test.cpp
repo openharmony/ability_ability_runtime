@@ -421,6 +421,57 @@ HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_IsAppRunningByBundleName
 }
 
 /**
+ * @tc.name: AppRunningManager_IsAppRunningByBundleName_0100
+ * @tc.desc: NA
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerFourthTest, AppRunningManager_IsAppRunningByBundleName_0100, TestSize.Level1)
+{
+    std::string bundleName;
+    int32_t userId = ONE;
+    bool isRunning = false;
+    BundleInfo bundleInfo;
+    std::shared_ptr<AppRunningRecord> record =
+        appRunningManager_->CreateAppRunningRecord(appInfo_, PROCESS_NAME, bundleInfo, "");
+    appRunningManager_->appRunningRecordMap_.clear();
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, nullptr));
+    auto ret = appRunningManager_->IsAppRunningByBundleName(bundleName, 0, userId, isRunning);
+    EXPECT_FALSE(isRunning);
+
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, record));
+    ret = appRunningManager_->IsAppRunningByBundleName(BUNDLE_NAME, 0, userId, isRunning);
+    EXPECT_FALSE(isRunning);
+
+    appRunningManager_->appRunningRecordMap_.clear();
+    record->SetRestartAppFlag(true);
+    record->SetUid(TEST_BASE_USER_RANGE);
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, record));
+    ret = appRunningManager_->IsAppRunningByBundleName(BUNDLE_NAME, 0, userId, isRunning);
+    EXPECT_FALSE(isRunning);
+
+    appRunningManager_->appRunningRecordMap_.clear();
+    record->SetRestartAppFlag(false);
+    record->SetUid(0);
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, record));
+    ret = appRunningManager_->IsAppRunningByBundleName(BUNDLE_NAME, 0, userId, isRunning);
+    EXPECT_FALSE(isRunning);
+
+    appRunningManager_->appRunningRecordMap_.clear();
+    record->SetRestartAppFlag(false);
+    record->SetUid(TEST_BASE_USER_RANGE);
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, record));
+    ret = appRunningManager_->IsAppRunningByBundleName(BUNDLE_NAME, 1, userId, isRunning);
+    EXPECT_FALSE(isRunning);
+
+    appRunningManager_->appRunningRecordMap_.clear();
+    record->SetRestartAppFlag(false);
+    record->SetUid(TEST_BASE_USER_RANGE);
+    appRunningManager_->appRunningRecordMap_.insert(std::make_pair(ONE, record));
+    ret = appRunningManager_->IsAppRunningByBundleName(BUNDLE_NAME, 0, userId, isRunning);
+    EXPECT_TRUE(isRunning);
+}
+
+/**
  * @tc.name: AppRunningManager_ProcessUpdateApplicationInfoInstalled_0100
  * @tc.desc: NA
  * @tc.type: FUNC

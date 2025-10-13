@@ -1055,6 +1055,9 @@ private:
      */
     int32_t IsAppRunningByBundleNameAndUserId(const std::string &bundleName, int32_t userId, bool &isRunning) override;
 
+    int32_t IsAppRunning(const std::string &bundleName, int32_t appCloneIndex,
+        int32_t userId, bool &isRunning) override;
+
     /**
      * Whether the current application process is the last surviving process.
      *
