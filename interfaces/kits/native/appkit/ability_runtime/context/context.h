@@ -193,6 +193,13 @@ public:
 
     virtual std::string GetCloudFileDir() = 0;
 
+    /**
+     * @brief Obtains the log file path of the application
+     *
+     * @return Returns the log file path.
+     */
+    virtual std::string GetLogFileDir() = 0;
+
      /**
      * @brief Obtains token.
      *

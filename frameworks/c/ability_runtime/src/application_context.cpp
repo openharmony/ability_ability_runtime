@@ -530,3 +530,24 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(Abili
     }
     return ABILITY_RUNTIME_ERROR_CODE_NO_ERROR;
 }
+
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetLogFileDir(
+    char* buffer, const int32_t bufferSize, int32_t* writeLength)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "getLogFileDir called");
+    auto ret = CheckParameters(buffer, writeLength);
+    if (ret != ABILITY_RUNTIME_ERROR_CODE_NO_ERROR) {
+        return ret;
+    }
+    const auto appContext = Context::GetApplicationContext();
+    if (appContext == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appContext is null");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    const std::string logFileDir = appContext->GetLogFileDir();
+    if (logFileDir.empty()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "logFileDir is empty");
+        return ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST;
+    }
+    return WriteStringToBuffer(logFileDir, buffer, bufferSize, writeLength);
+}

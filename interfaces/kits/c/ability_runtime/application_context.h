@@ -383,6 +383,23 @@ AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetLatestParameter(
 AbilityRuntime_ErrorCode OH_AbilityRuntime_StartSelfUIAbilityWithPidResult(AbilityBase_Want *want,
     AbilityRuntime_StartOptions *options, int32_t *targetPid);
 
+/**
+ * @brief Obtain the log file directory of the application.
+ *
+ * @param buffer A pointer to a buffer that receives the log file directory of the application.
+ * @param bufferSize The length of the buffer.
+ * @param writeLength The string length actually written to the buffer,
+ *                    when returning {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR}.
+ * @return The error code.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_PARAM_INVALID} if the buffer or writeLength is null,
+ *         or the buffer size is less than the minimum buffer size.
+ *         {@link ABILITY_RUNTIME_ERROR_CODE_CONTEXT_NOT_EXIST} if the application context does not exist.
+ * @since 21
+ */
+AbilityRuntime_ErrorCode OH_AbilityRuntime_ApplicationContextGetLogFileDir(
+    char* buffer, const int32_t bufferSize, int32_t* writeLength);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

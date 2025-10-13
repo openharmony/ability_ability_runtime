@@ -157,6 +157,7 @@ HWTEST_F(AbilityStageContextTest, AbilityStageContextTest_0300, TestSize.Level1)
     EXPECT_EQ(abilityStageContext->GetDistributedFilesDir(), "/data/storage/el2/distributedfiles");
     EXPECT_EQ(abilityStageContext->GetCloudFileDir(), "/data/storage/el2/cloud");
     EXPECT_EQ(abilityStageContext->GetBaseDir(), "/data/storage/el2/base/haps/");
+    EXPECT_EQ(abilityStageContext->GetLogFileDir(), "/data/storage/el2/log");
     TAG_LOGI(AAFwkTag::TEST, "end.");
 }
 
