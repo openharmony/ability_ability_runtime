@@ -32,6 +32,7 @@ ani_object GetApplicationContextSync(ani_env *env, ani_object aniObj);
 std::shared_ptr<Context> GetBaseContext(ani_env *env, ani_object aniObj);
 void SwitchArea(ani_env *env, ani_object obj, ani_enum_item areaModeItem);
 ani_enum_item GetArea(ani_env *env, ani_object obj);
+ani_string GetLogFileDir(ani_env *env, ani_object obj);
 ani_object CreateModuleResourceManagerSync(ani_env *env, ani_object aniObj,
     ani_string bundleName, ani_string moduleName);
 void Clean(ani_env *env, ani_object object);
