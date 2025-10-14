@@ -929,6 +929,7 @@ napi_value JsApplicationContextUtils::OnGetRunningProcessInformation(napi_env en
             napi_set_named_property(env, object, "bundleNames", CreateNativeArray(env, processInfo->bundleNames));
             napi_set_named_property(env, object,
                 "state", CreateJsValue(env, ConvertToJsAppProcessState(processInfo->state_, processInfo->isFocused)));
+            napi_set_named_property(env, object, "bundleType", CreateJsValue(env, processInfo->bundleType));
             if (processInfo->appCloneIndex != -1) {
                 napi_set_named_property(env, object, "appCloneIndex", CreateJsValue(env, processInfo->appCloneIndex));
             }
