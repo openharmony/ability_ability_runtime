@@ -20,8 +20,10 @@
 #include "ability_cache_manager.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
-#include "scene_board_judgement.h"
 #include "os_account_manager_wrapper.h"
+#include "scene_board_judgement.h"
+#include "server_constant.h"
+#include "user_controller/user_controller.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -375,8 +377,8 @@ std::shared_ptr<UIAbilityLifecycleManager> SubManagersHelper::GetUIAbilityManage
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "userId: %{public}d", userId);
     if (userId == U0_USER_ID) {
-        std::lock_guard<ffrt::mutex> lock(managersMutex_);
-        return currentUIAbilityManager_;
+        userId = AbilityRuntime::UserController::GetInstance().GetForegroundUserId(
+            AbilityRuntime::ServerConstant::DEFAULT_DISPLAY_ID);
     }
     return GetUIAbilityManagerByUserId(userId);
 }
