@@ -1567,7 +1567,7 @@ ErrCode AbilityContextImpl::RestartAppWithWindow(const Want &want)
     auto wantCopy = std::make_shared<Want>(want);
     wantCopy->SetParam(Want::PARAM_APP_CLONE_INDEX_KEY, abilityInfo_->appIndex);
     TAG_LOGI(AAFwkTag::CONTEXT, "scb call, restartApp");
-    auto ret = ifaceSessionToken->RestartApp();
+    auto ret = ifaceSessionToken->RestartApp(wantCopy);
     if (ret != Rosen::WSError::WS_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "scb call, RestartApp err: %{public}d", ret);
     }
