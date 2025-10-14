@@ -25,8 +25,10 @@ import resmgr from '@ohos.resourceManager'
 
 class Cleaner {
   public ptr: long = 0;
-  constructor(ptr: long) {
+  public nativePtr: long = 0;
+  constructor(ptr: long, nativePtr: long) {
     this.ptr = ptr;
+    this.nativePtr = nativePtr;
   }
   native clean(): void;
 }
@@ -41,6 +43,7 @@ export class Context extends BaseContext {
     loadLibraryWithPermissionCheck("context_ani_kit.z", "application.Context");
   }
 
+  nativePtr: long = 0;
   etsContextPtr: long = 0;
   private cleaner: Cleaner | null = null;
   filesDir: string = "";
@@ -62,14 +65,21 @@ export class Context extends BaseContext {
     }
   }
 
+  constructor(ptr: long) {
+    if (this.eventHub == null) {
+      this.eventHub = new EventHub();
+    }
+    this.nativePtr = ptr;
+  }
+
   private setEtsContextPtr(ptr: long) {
     if (this.etsContextPtr == 0) {
       this.etsContextPtr = ptr;
     }
-    this.registerCleaner(this.etsContextPtr);
+    this.registerCleaner(this.etsContextPtr, this.nativePtr);
   }
-  registerCleaner(ptr: long): void {
-    this.cleaner = new Cleaner(ptr);
+  registerCleaner(ptr: long, nativePtr: long): void {
+    this.cleaner = new Cleaner(ptr, nativePtr);
     destroyRegister.register(this, this.cleaner!, unregisterToken);
   }
   unregisterCleaner(): void {
