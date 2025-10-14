@@ -2216,7 +2216,7 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 reinterpret_cast<void *>(EtsAbilityContext::StartAbilityByType) },
             ani_native_function { "nativeOpenAtomicService", SIGNATURE_OPEN_ATOMIC_SERVICE,
                 reinterpret_cast<void *>(EtsAbilityContext::OpenAtomicService) },
-            ani_native_function { "nativeOpenAtomicServiceCheck", ":V",
+            ani_native_function { "nativeOpenAtomicServiceCheck", ":",
                 reinterpret_cast<void *>(EtsAbilityContext::OpenAtomicServiceCheck) },
             ani_native_function { "nativeOnSetRestoreEnabled", "z:",
                 reinterpret_cast<void *>(EtsAbilityContext::NativeOnSetRestoreEnabled) },
@@ -2265,7 +2265,7 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
             ani_native_function { "nativeStartAbilityForResultWithAccount",
                 "C{@ohos.app.ability.Want.Want}iC{utils.AbilityUtils.AsyncCallbackWrapper}:",
                 reinterpret_cast<void*>(EtsAbilityContext::StartAbilityForResultWithAccount) },
-            ani_native_function { "nativeStartAbilityForResultWithAccountCheck", ":V",
+            ani_native_function { "nativeStartAbilityForResultWithAccountCheck", ":",
                 reinterpret_cast<void *>(EtsAbilityContext::StartAbilityForResultWithAccountCheck) },
             ani_native_function { "nativeStartAbilityForResultWithAccountVoid",
                 "C{@ohos.app.ability.Want.Want}iC{@ohos.app.ability.StartOptions.StartOptions}"

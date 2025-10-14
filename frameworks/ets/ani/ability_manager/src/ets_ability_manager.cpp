@@ -772,7 +772,7 @@ void EtsAbilityManagerRegistryInit(ani_env *env)
         },
         ani_native_function {"nativeGetTopAbility", ETS_ABILITY_MANAGER_SIGNATURE_CALLBACK,
             reinterpret_cast<void *>(EtsAbilityManager::GetTopAbility)},
-        ani_native_function {"nativeGetTopAbilityCheck", ":V",
+        ani_native_function {"nativeGetTopAbilityCheck", ":",
             reinterpret_cast<void *>(EtsAbilityManager::GetTopAbilityCheck)},
         ani_native_function { "nativeGetAbilityRunningInfos", "C{utils.AbilityUtils.AsyncCallbackWrapper}:",
             reinterpret_cast<void *>(EtsAbilityManager::GetAbilityRunningInfos) },
