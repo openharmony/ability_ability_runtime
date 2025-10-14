@@ -14,8 +14,8 @@
  */
 export default class AppStateData {
     bundleName: string = '';
-    uid: number;
-    state: number;
+    uid: int;
+    state: int;
     isSplitScreenMode: boolean;
     isFloatingWindowMode: boolean;
 }
