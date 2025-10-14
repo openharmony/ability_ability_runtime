@@ -30,6 +30,7 @@ ohos_unittest("uri_permission_impl_test") {
     "${ability_runtime_path}/services/uripermmgr/include",
     "${ability_runtime_test_path}/mock/common/include",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include/",
+    "${ability_runtime_test_path}/new_test/mock/security/sandbox_manager/",
     "mock/include",
   ]
 
@@ -39,6 +40,7 @@ ohos_unittest("uri_permission_impl_test") {
     "${ability_runtime_path}/services/uripermmgr/src/tokenid_permission.cpp",
     "${ability_runtime_path}/services/uripermmgr/src/uri_permission_manager_stub_impl.cpp",
     "${ability_runtime_test_path}/mock/common/src/mock_native_token.cpp",
+    "${ability_runtime_test_path}/new_test/mock/security/sandbox_manager/sandbox_manager_kit.cpp",
     "mock/src/mock_ability_manager_client.cpp",
     "mock/src/mock_accesstoken_kit.cpp",
     "mock/src/mock_app_utils.cpp",
@@ -48,7 +50,6 @@ ohos_unittest("uri_permission_impl_test") {
     "mock/src/mock_ipc_skeleton.cpp",
     "mock/src/mock_my_flag.cpp",
     "mock/src/mock_permission_verification.cpp",
-    "mock/src/mock_sandbox_manager.cpp",
     "mock/src/mock_udmf_utils.cpp",
     "batch_uri_test.cpp",
     "uri_permission_impl_test.cpp",
@@ -90,7 +91,6 @@ ohos_unittest("uri_permission_impl_test") {
     "storage_service:storage_manager_sa_proxy",
   ]
   if (ability_runtime_feature_sandboxmanager) {
-    external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
     defines = [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
   }
   if (ability_runtime_udmf_enable) {
@@ -115,11 +115,13 @@ ohos_unittest("uri_permission_manager_stub_impl_test") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_test_path}/mock/common/include",
     "${ability_runtime_test_path}/mock/services_appmgr_test/include/",
+    "${ability_runtime_test_path}/new_test/mock/security/sandbox_manager/",
     "mock/include",
   ]
 
   sources = [
     "${ability_runtime_test_path}/mock/common/src/mock_native_token.cpp",
+    "${ability_runtime_test_path}/new_test/mock/security/sandbox_manager/sandbox_manager_kit.cpp",
     "mock/src/mock_ability_manager_client.cpp",
     "mock/src/mock_file_uri_distribution_utils.cpp",
     "mock/src/mock_my_flag.cpp",
@@ -177,7 +179,6 @@ ohos_unittest("uri_permission_manager_stub_impl_test") {
     "storage_service:storage_manager_sa_proxy",
   ]
   if (ability_runtime_feature_sandboxmanager) {
-    external_deps += [ "sandbox_manager:libsandbox_manager_sdk" ]
     defines = [ "ABILITY_RUNTIME_FEATURE_SANDBOXMANAGER" ]
   }
   if (ability_runtime_udmf_enable) {

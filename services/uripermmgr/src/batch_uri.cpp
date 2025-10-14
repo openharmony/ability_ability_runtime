@@ -32,7 +32,7 @@ int32_t BatchUri::Init(const std::vector<std::string> &uriVec, uint32_t mode,
     }
     totalUriCount = static_cast<int32_t>(uriVec.size());
     validUriCount = 0;
-    checkResult = std::vector<bool>(totalUriCount, false);
+    checkResult = std::vector<CheckResult>(totalUriCount, CheckResult());
     isDocsUriVec = std::vector<bool>(totalUriCount, false);
     isTargetBundleUri = std::vector<bool>(totalUriCount, false);
     for (size_t index = 0; index < uriVec.size(); index++) {
@@ -81,7 +81,10 @@ void BatchUri::InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mod
     // bundle uri
     isTargetBundleUri[index] = (!targetAlterBundleName.empty() && authority == targetAlterBundleName);
     if (!authority.empty() && (haveSandboxAccessPermission || authority == callerAlterBundleName)) {
-        checkResult[index] = true;
+        checkResult[index].result = true;
+        if (authority == callerAlterBundleName) {
+            checkResult[index].permissionType = PolicyType::SELF_PATH;
+        }
         if (isTargetBundleUri[index]) {
             TAG_LOGI(AAFwkTag::URIPERMMGR, "uri belong to targetBundle.");
             targetBundleUriCount++;
@@ -90,6 +93,7 @@ void BatchUri::InitFileUriInfo(Uri &uriInner, uint32_t index, const uint32_t mod
         if (mode > 0) {
             // need set policy
             auto policyInfo = FilePermissionManager::GetPathPolicyInfoFromUri(uriInner, mode);
+            policyInfo.type = static_cast<PolicyType>(checkResult[index].permissionType);
             selfBundlePolicyInfos.emplace_back(policyInfo);
         }
         return;
@@ -103,7 +107,7 @@ void BatchUri::SetMediaUriCheckResult(const std::vector<bool> &mediaUriResult)
 {
     for (size_t i = 0; i < mediaUriResult.size(); i++) {
         auto index = mediaIndexes[i];
-        checkResult[index] = mediaUriResult[i];
+        checkResult[index].result = mediaUriResult[i];
     }
 }
 
@@ -111,8 +115,8 @@ void BatchUri::SetOtherUriCheckResult(const std::vector<bool> &otherUriResult)
 {
     for (size_t i = 0; i < otherUriResult.size(); i++) {
         auto index = otherIndexes[i];
-        checkResult[index] = otherUriResult[i];
-        if (checkResult[index] && isTargetBundleUri[index]) {
+        checkResult[index].result = otherUriResult[i];
+        if (checkResult[index].result && isTargetBundleUri[index]) {
             targetBundleUriCount++;
         }
     }
@@ -121,7 +125,7 @@ void BatchUri::SetOtherUriCheckResult(const std::vector<bool> &otherUriResult)
 int32_t BatchUri::GetMediaUriToGrant(std::vector<std::string> &uriVec)
 {
     for (size_t i = 0; i < mediaIndexes.size(); i++) {
-        if (checkResult[mediaIndexes[i]]) {
+        if (checkResult[mediaIndexes[i]].result) {
             uriVec.emplace_back(mediaUris[i]);
         }
     }
@@ -133,29 +137,29 @@ void BatchUri::GetNeedCheckProxyPermissionURI(std::vector<PolicyInfo> &proxyUris
     // docs uri and bundle uri
     for (size_t i = 0; i < otherIndexes.size(); i++) {
         auto index = otherIndexes[i];
-        if (!checkResult[index]) {
+        if (!checkResult[index].result) {
             proxyIndexesByPolicy.emplace_back(index);
             proxyUrisByPolicy.emplace_back(otherPolicyInfos[i]);
         }
     }
 }
 
-void BatchUri::SetCheckProxyByMapResult(std::vector<bool> &proxyResultByMap)
+bool BatchUri::SetCheckProxyByPolicyResult(const std::vector<bool> &proxyResultByPolicy)
 {
-    for (size_t i = 0; i < proxyResultByMap.size(); i++) {
-        auto index = proxyIndexesByMap[i];
-        checkResult[index] = proxyResultByMap[i];
+    if (proxyResultByPolicy.size() != proxyIndexesByPolicy.size()) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Invalid proxyResult:%{public}zu, %{public}zu",
+            proxyResultByPolicy.size(), proxyIndexesByPolicy.size());
+        return false;
     }
-    proxyIndexesByMap.clear();
-}
-
-void BatchUri::SetCheckProxyByPolicyResult(std::vector<bool> &proxyResultByPolicy)
-{
     for (size_t i = 0; i < proxyResultByPolicy.size(); i++) {
         auto index = proxyIndexesByPolicy[i];
-        checkResult[index] = proxyResultByPolicy[i];
+        checkResult[index].result = proxyResultByPolicy[i];
+        if (checkResult[index].result) {
+            checkResult[index].permissionType = PolicyType::AUTHORIZATION_PATH;
+        }
     }
     proxyIndexesByPolicy.clear();
+    return true;
 }
 
 int32_t BatchUri::GetUriToGrantByMap(std::vector<std::string> &uriVec)
@@ -167,7 +171,7 @@ void BatchUri::SelectPermissionedUri(std::vector<Uri> &uris, std::vector<int32_t
     std::vector<std::string> &uriVec)
 {
     for (size_t i = 0; i < indexs.size(); i++) {
-        if (checkResult[indexs[i]]) {
+        if (checkResult[indexs[i]].result) {
             auto uriStr = uris[i].ToString();
             uriVec.emplace_back(uriStr);
         }
@@ -185,7 +189,7 @@ int32_t BatchUri::GetUriToGrantByPolicy(std::vector<PolicyInfo> &docsPolicyInfoV
     }
     for (size_t i = 0; i < otherPolicyInfos.size(); i++) {
         auto index = otherIndexes[i];
-        if (!checkResult[index]) {
+        if (!checkResult[index].result) {
             continue;
         }
         // the uri belong to target app.
@@ -194,6 +198,7 @@ int32_t BatchUri::GetUriToGrantByPolicy(std::vector<PolicyInfo> &docsPolicyInfoV
         }
         TAG_LOGD(AAFwkTag::URIPERMMGR, "Add policy: path is %{private}s, mode is %{public}u.",
             otherPolicyInfos[i].path.c_str(), static_cast<uint32_t>(otherPolicyInfos[i].mode));
+        otherPolicyInfos[i].type = static_cast<PolicyType>(checkResult[index].permissionType);
         if (isDocsUriVec[index]) {
             docsPolicyInfoVec.emplace_back(otherPolicyInfos[i]);
         } else {
@@ -212,14 +217,28 @@ bool BatchUri::GetUriToGrantByPolicy(std::vector<PolicyInfo> &policyVec)
     }
     for (size_t i = 0; i < otherPolicyInfos.size(); i++) {
         auto index = otherIndexes[i];
-        if (!checkResult[index]) {
+        if (!checkResult[index].result) {
             return false;
         }
         // the uri belong to target app.
         if (isTargetBundleUri[index]) {
             continue;
         }
+        otherPolicyInfos[i].type = static_cast<PolicyType>(checkResult[index].permissionType);
         policyVec.emplace_back(otherPolicyInfos[i]);
+    }
+    return true;
+}
+
+bool BatchUri::SetCheckUriAuthorizationResult(std::vector<bool> &funcResult)
+{
+    if (checkResult.size() != funcResult.size()) {
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "Invalid funcResult:%{public}zu, %{public}zu",
+            checkResult.size(), funcResult.size());
+        return false;
+    }
+    for (auto i = 0; i < checkResult.size(); i++) {
+        funcResult[i] = checkResult[i].result;
     }
     return true;
 }
@@ -227,8 +246,8 @@ bool BatchUri::GetUriToGrantByPolicy(std::vector<PolicyInfo> &policyVec)
 int32_t BatchUri::GetPermissionedUriCount()
 {
     int32_t permissionedUriCount = 0;
-    for (auto checkRes: checkResult) {
-        if (checkRes) {
+    for (auto &checkRes: checkResult) {
+        if (checkRes.result) {
             permissionedUriCount++;
         }
     }
@@ -242,8 +261,8 @@ bool BatchUri::IsAllUriValid()
 
 bool BatchUri::IsAllUriPermissioned()
 {
-    for (auto checkRes : checkResult) {
-        if (!checkRes) {
+    for (auto &checkRes : checkResult) {
+        if (!checkRes.result) {
             return false;
         }
     }

@@ -93,6 +93,13 @@ public:
     /*
     * only support local file uri, not support distribute docs and content uri.
     */
+    ErrCode GrantUriPermissionWithType(const std::vector<Uri> &uriVec, uint32_t flag,
+        const std::string &targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t hideSensitiveType,
+        const std::vector<int32_t> &permisionTypes, int32_t &funcResult) override;
+
+    /*
+    * only support local file uri, not support distribute docs and content uri.
+    */
     ErrCode GrantUriPermissionPrivileged(const std::vector<std::string>& uriVec, uint32_t flag,
         const std::string& targetBundleName, int32_t appIndex, uint32_t initiatorTokenId, int32_t hideSensitiveType,
         int32_t& funcResult) override;
@@ -109,6 +116,12 @@ public:
 
     ErrCode GrantUriPermissionByKey(const std::string &key, uint32_t flag,
         uint32_t targetTokenId, int32_t &funcResult) override;
+
+    /*
+    * only support local file uri, not support distribute docs and content uri.
+    */
+    ErrCode CheckUriAuthorizationWithType(const std::vector<std::string>& uriVec, uint32_t flag, uint32_t tokenId,
+        std::vector<CheckResult>& funcResult) override;
 
     /*
     * only support local file uri, not support distribute docs and content uri.

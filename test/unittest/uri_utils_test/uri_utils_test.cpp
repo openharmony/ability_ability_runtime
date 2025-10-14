@@ -101,7 +101,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_001, TestSize.Level1)
     AccessTokenKit::getTokenTypeFlagRet = ATokenTypeEnum::TOKEN_HAP;
     AccessTokenKit::getHapTokenInfoRet = 0;
     std::vector<std::string> uriVec;
-    std::vector<bool> checkResults = {true};
+    std::vector<CheckResult> checkResults = { CheckResult(true, 0) };
     Want want;
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 0);
@@ -111,17 +111,17 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_001, TestSize.Level1)
     std::vector<Uri> vec2 = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec2.size(), 1);
 
-    checkResults[0] = false;
+    checkResults[0].result = false;
     std::vector<Uri> vec3 = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec3.size(), 0);
 
-    checkResults[0] = true;
+    checkResults[0].result = true;
     uriVec.push_back("https//test.openharmony.com");
-    checkResults.push_back(true);
+    checkResults.push_back(CheckResult(true, 0));
     std::vector<Uri> vec4 = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec4.size(), 2);
 
-    checkResults[1] = false;
+    checkResults[1].result = false;
     std::vector<Uri> vec5 = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec5.size(), 1);
 }
@@ -141,7 +141,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_002, TestSize.Level1)
     Want want;
     want.SetUri(uri);
     std::vector<std::string> uriVec = { uri };
-    std::vector<bool> checkResults = { true };
+    std::vector<CheckResult> checkResults = { CheckResult(true, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 1);
     EXPECT_EQ(want.GetUriString(), uri);
@@ -162,7 +162,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_003, TestSize.Level1)
     Want want;
     want.SetUri(uri);
     std::vector<std::string> uriVec = { uri };
-    std::vector<bool> checkResults = { false };
+    std::vector<CheckResult> checkResults = { CheckResult(false, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 0);
     EXPECT_EQ(want.GetUriString(), "");
@@ -183,7 +183,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_004, TestSize.Level1)
     Want want;
     want.SetUri(uri);
     std::vector<std::string> uriVec = { uri };
-    std::vector<bool> checkResults = { false };
+    std::vector<CheckResult> checkResults = { CheckResult(false, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 0);
     EXPECT_EQ(want.GetUriString(), uri);
@@ -204,7 +204,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_005, TestSize.Level1)
     Want want;
     want.SetUri(uri);
     std::vector<std::string> uriVec = { uri };
-    std::vector<bool> checkResults = { false };
+    std::vector<CheckResult> checkResults = { CheckResult(false, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 0);
     EXPECT_EQ(want.GetUriString(), "");
@@ -225,7 +225,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_006, TestSize.Level1)
     Want want;
     want.SetUri(uri);
     std::vector<std::string> uriVec = { uri };
-    std::vector<bool> checkResults = { false };
+    std::vector<CheckResult> checkResults = { CheckResult(false, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 0);
     EXPECT_EQ(want.GetUriString(), "");
@@ -248,7 +248,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_007, TestSize.Level1)
     want.SetParam("ability.params.stream", paramStreamUris);
 
     std::vector<std::string> uriVec = { uri };
-    std::vector<bool> checkResults = { true };
+    std::vector<CheckResult> checkResults = { CheckResult(true, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 1);
     
@@ -273,7 +273,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_008, TestSize.Level1)
     want.SetParam("ability.params.stream", paramStreamUris);
 
     std::vector<std::string> uriVec = { uri };
-    std::vector<bool> checkResults = { false };
+    std::vector<CheckResult> checkResults = { CheckResult(false, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 0);
     
@@ -298,7 +298,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_009, TestSize.Level1)
     want.SetParam("ability.params.stream", paramStreamUris);
 
     std::vector<std::string> uriVec = { uri };
-    std::vector<bool> checkResults = { false };
+    std::vector<CheckResult> checkResults = { CheckResult(false, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 0);
     
@@ -323,7 +323,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_010, TestSize.Level1)
     want.SetParam("ability.params.stream", paramStreamUris);
 
     std::vector<std::string> uriVec = { uri };
-    std::vector<bool> checkResults = { false };
+    std::vector<CheckResult> checkResults = { CheckResult(false, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 0);
     
@@ -348,7 +348,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_011, TestSize.Level1)
     want.SetParam("ability.params.stream", paramStreamUris);
 
     std::vector<std::string> uriVec = { uri };
-    std::vector<bool> checkResults = { false };
+    std::vector<CheckResult> checkResults = { CheckResult(false, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 0);
     
@@ -374,7 +374,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_012, TestSize.Level1)
     want.SetParam("ability.params.stream", paramStreamUris);
 
     std::vector<std::string> uriVec = { uri, uri };
-    std::vector<bool> checkResults = { true, true };
+    std::vector<CheckResult> checkResults = { CheckResult(true, 0), CheckResult(true, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 2);
     // param stream
@@ -403,7 +403,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_013, TestSize.Level1)
     want.SetParam("ability.params.stream", paramStreamUris);
 
     std::vector<std::string> uriVec = { uri1, uri2 };
-    std::vector<bool> checkResults = { true, false };
+    std::vector<CheckResult> checkResults = { CheckResult(true, 0), CheckResult(false, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 1);
     // param stream
@@ -432,7 +432,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_014, TestSize.Level1)
     want.SetParam("ability.params.stream", paramStreamUris);
 
     std::vector<std::string> uriVec = { uri2, uri1 };
-    std::vector<bool> checkResults = { false, true };
+    std::vector<CheckResult> checkResults = { CheckResult(false, 0), CheckResult(true, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 1);
     // param stream
@@ -461,7 +461,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_015, TestSize.Level1)
     want.SetParam("ability.params.stream", paramStreamUris);
 
     std::vector<std::string> uriVec = { uri2, uri1 };
-    std::vector<bool> checkResults = { false, true };
+    std::vector<CheckResult> checkResults = { CheckResult(false, 0), CheckResult(true, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 1);
     // param stream
@@ -490,7 +490,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_016, TestSize.Level1)
     want.SetParam("ability.params.stream", paramStreamUris);
 
     std::vector<std::string> uriVec = { uri2, uri1 };
-    std::vector<bool> checkResults = { false, false };
+    std::vector<CheckResult> checkResults = { CheckResult(false, 0), CheckResult(false, 0) };
     std::vector<Uri> vec = UriUtils::GetInstance().GetPermissionedUriList(uriVec, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 0);
     // param stream
@@ -516,7 +516,7 @@ HWTEST_F(UriUtilsTest, GetPermissionedUriList_017, TestSize.Level1)
     std::vector<std::string> paramStreamUris = { uri1, uri2 };
     Want want;
     want.SetParam("ability.params.stream", paramStreamUris);
-    std::vector<bool> checkResults = { false, false };
+    std::vector<CheckResult> checkResults = { CheckResult(false, 0), CheckResult(false, 0) };
     auto vec = UriUtils::GetInstance().GetPermissionedUriList(paramStreamUris, checkResults, 0, "target", want);
     EXPECT_EQ(vec.size(), 0);
     // param stream

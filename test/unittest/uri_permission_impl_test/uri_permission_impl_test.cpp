@@ -988,7 +988,7 @@ HWTEST_F(UriPermissionImplTest, UPMS_Active_002, TestSize.Level1)
     MyFlag::permissionFileAccessPersist_ = true;
     upms->Active(policyRawData, result, funcResult);
     MyFlag::permissionFileAccessPersist_ = false;
-    EXPECT_NE(funcResult, ERR_OK);
+    EXPECT_EQ(funcResult, ERR_OK);
 }
 
 /*
