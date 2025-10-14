@@ -2705,11 +2705,11 @@ private:
     AAFwk::EventInfo BuildEventInfo(const Want &want, int32_t userId);
     AAFwk::EventInfo BuildEventInfoByAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
-    ErrCode IsUIAbilityAlreadyExist(const std::string &bundleName, const std::string &abilityName,
-        const std::string &specifiedFlag, int32_t appIndex);
+    ErrCode IsUIAbilityAlreadyExist(const std::string &abilityName, const std::string &specifiedFlag,
+        int32_t appIndex, const std::string &instanceKey, AppExecFwk::LaunchMode launchMode);
     
-    bool IsAppCloneOrMultiInstance(Want &want, const sptr<IRemoteObject> &callerToken,
-        int32_t appIndex, const std::string &callerInstanceKey);
+    bool IsAppCloneOrMultiInstance(const Want &want, const std::shared_ptr<AbilityRecord> callerRecord,
+        int32_t &appIndex, const std::string &callerInstanceKey);
 
 #ifdef WITH_DLP
     int CheckDlpForExtension(

@@ -1950,7 +1950,7 @@ public:
     ErrCode PreloadApplication(const std::string &bundleName, int32_t userId, int32_t appIndex);
 
     /**
-     * Preload application.
+     * Start self UIAbility in current process.
      * @param want Ability want.
      * @param specifiedFlag specified flag.
      * @param startOptions Indicates the options used to start.
