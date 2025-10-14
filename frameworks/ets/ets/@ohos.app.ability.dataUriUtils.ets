@@ -38,7 +38,7 @@ class DataUriError extends Error {
 }
 
 namespace dataUriUtils {
-  export function getId(uri: string): number {
+  export function getId(uri: string): double {
     hilog.debug(domainID, TAG, 'DataUriUtils getId called.');
     if (typeof uri !== 'string') {
       throw new DataUriError(ERROR_CODE_INVALID_PARAM);
@@ -51,10 +51,10 @@ namespace dataUriUtils {
     if (ret === '' || isNaN(Number(ret))) {
       throw new DataUriError(ERROR_CODE_INVALID_PARAM);
     }
-    return Number(ret);
+    return Number(ret).toDouble();
   }
 
-  export function attachId(uri: string, id: number): string {
+  export function attachId(uri: string, id: double): string {
     hilog.debug(domainID, TAG, 'DataUriUtils attachId called.');
     if (typeof uri !== 'string' || typeof id !== 'number') {
       throw new DataUriError(ERROR_CODE_INVALID_PARAM);
@@ -78,7 +78,7 @@ namespace dataUriUtils {
     return uri.substring(0, index);
   }
 
-  export function updateId(uri: string, id: number): string {
+  export function updateId(uri: string, id: double): string {
     hilog.debug(domainID, TAG, 'DataUriUtils updateId called.');
     if (typeof uri !== 'string' || typeof id !== 'number') {
       throw new DataUriError(ERROR_CODE_INVALID_PARAM);
