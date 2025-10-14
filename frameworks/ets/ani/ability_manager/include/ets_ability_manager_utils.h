@@ -37,6 +37,9 @@ bool WrapExtensionRunningInfoInner(
 bool WrapArrayString(ani_env *env, ani_object &arrayObj, const std::vector<std::string> &values);
 bool WrapExtensionRunningInfoArray(
     ani_env *env, ani_object &arrayObj, const std::vector<AAFwk::ExtensionRunningInfo> &infos);
+ani_object WrapAbilityElementName(ani_env *env, const AppExecFwk::ElementName &elementNameParam);
+ani_object WrapAbilityElementNameInner(ani_env *env, ani_class elementNameObj, ani_object object,
+    const AppExecFwk::ElementName &elementNameParam);
 } // namespace AbilityManagerEts
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ETS_ABILITY_MANAGER_UTILS_H

@@ -1374,5 +1374,52 @@ ani_object WrapElementNameInner(ani_env *env, ani_class elementNameObj, ani_obje
     return object;
 }
 
+ani_object CreateAniWant(ani_env *env, const AAFwk::Want &want)
+{
+    TAG_LOGD(AAFwkTag::ANI, "CreateAniWant called");
+    if (env == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null env");
+        return nullptr;
+    }
+    ani_class cls = nullptr;
+    ani_status status = ANI_ERROR;
+    ani_method method = nullptr;
+    ani_object object = nullptr;
+    if ((status = env->FindClass(ABILITY_WANT_CLASS_NAME, &cls)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return nullptr;
+    }
+    if (cls == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null wantCls");
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &method)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Object_New(cls, method, &object)) != ANI_OK) {
+        TAG_LOGE(AAFwkTag::ANI, "status: %{public}d", status);
+        return nullptr;
+    }
+    if (object == nullptr) {
+        TAG_LOGE(AAFwkTag::ANI, "null object");
+        return nullptr;
+    }
+
+    auto elementName = want.GetElement();
+    SetFieldStringByName(env, cls, object, "deviceId", elementName.GetDeviceID());
+    SetFieldStringByName(env, cls, object, "bundleName", elementName.GetBundleName());
+    SetFieldStringByName(env, cls, object, "abilityName", elementName.GetAbilityName());
+    SetFieldStringByName(env, cls, object, "moduleName", elementName.GetModuleName());
+    SetFieldStringByName(env, cls, object, "uri", want.GetUriString());
+    SetFieldStringByName(env, cls, object, "type", want.GetType());
+    SetFieldIntByName(env, cls, object, "flags", want.GetFlags());
+    SetFieldStringByName(env, cls, object, "action", want.GetAction());
+    InnerWrapWantParams(env, cls, object, want.GetParams());
+    SetFieldArrayStringByName(env, cls, object, "entities", want.GetEntities());
+
+    return object;
+}
+
 } // namespace AppExecFwk
 } // namespace OHOS
