@@ -73,7 +73,7 @@ export default class EventHub {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
     const eventHub = this.dynamicContextEventHub?.getProperty("eventHub");
-    if (eventHub) {
+    if (eventHub && !eventHub.isUndefined()) {
       eventHub.invokeMethod("offByNativeContext", ESValue.wrap(event));
     }
   }
@@ -88,7 +88,7 @@ export default class EventHub {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
     const eventHub = this.dynamicContextEventHub?.getProperty("eventHub");
-    if (eventHub) {
+    if (eventHub && !eventHub.isUndefined()) {
       eventHub.invokeMethod("offByNativeContext", ESValue.wrap(event));
     }
   }
@@ -121,7 +121,7 @@ export default class EventHub {
       this.dynamicContextEventHub = this.getDynamicContextEventHub();
     }
     const eventHub = this.dynamicContextEventHub?.getProperty("eventHub");
-    if (eventHub) {
+    if (eventHub && !eventHub.isUndefined()) {
       let params: FixedArray<ESValueArgs> = new ESValueArgs[args.length + 1];
       params[0] = ESValue.wrap(event);
       for (let i = 0; i < args.length; i++) {
