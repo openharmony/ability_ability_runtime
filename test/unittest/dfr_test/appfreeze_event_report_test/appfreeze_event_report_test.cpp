@@ -109,9 +109,10 @@ HWTEST_F(AppfreezeEventReportTest, SendAppfreezeEvent_Test_002, TestSize.Level1)
     eventInfo.freezeInfoFile = "SendAppfreezeEvent_Test_002: freezeInfoFile";
     eventInfo.hitraceInfo = "hitraceInfo: 1234";
     eventInfo.foregroundState = false;
-    eventInfo.enableFreeze = false;
     eventInfo.applicationHeapInfo = "size:1,";
     eventInfo.processLifeTime = "2s";
+    eventInfo.mainStack = "test";
+    eventInfo.enableFreeze = false;
     int ret = AppfreezeEventReport::SendAppfreezeEvent(eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, eventInfo);
     EXPECT_EQ(ret, 0);
