@@ -44,6 +44,7 @@ struct AppfreezeEventInfo {
     bool enableFreeze;
     std::string applicationHeapInfo;
     std::string processLifeTime;
+    std::string mainStack;
 };
 
 class AppfreezeEventReport {
