@@ -15678,26 +15678,32 @@ int32_t AbilityManagerService::ProcessUdmfKey(
     return ERR_OK;
 }
 
-ErrCode AbilityManagerService::IsUIAbilityAlreadyExist(const std::string &bundleName, const std::string &abilityName,
-    const std::string &specifiedFlag, int32_t appIndex)
+ErrCode AbilityManagerService::IsUIAbilityAlreadyExist(const std::string &abilityName,const std::string &specifiedFlag,
+    int32_t appIndex, const std::string &instanceKey, AppExecFwk::LaunchMode launchMode)
 {
     auto uiAbilityManager = GetUIAbilityManagerByUid(IPCSkeleton::GetCallingUid());
     CHECK_POINTER_AND_RETURN(uiAbilityManager, ERR_INVALID_VALUE);
-    return uiAbilityManager->IsUIAbilityAlreadyExist(bundleName, abilityName, specifiedFlag, appIndex);
+    return uiAbilityManager->IsUIAbilityAlreadyExist(abilityName, specifiedFlag, appIndex, instanceKey, launchMode);
 }
 
-bool AbilityManagerService::IsAppCloneOrMultiInstance(
-    Want &want, const sptr<IRemoteObject> &callerToken, int32_t targetAppIndex, const std::string &callerInstanceKey)
+bool AbilityManagerService::IsAppCloneOrMultiInstance(const Want &want, const std::shared_ptr<AbilityRecord> callerRecord,
+    int32_t &targetAppIndex, const std::string &callerInstanceKey)
 {
-    int32_t appIndex = 0;
-    if (StartAbilityUtils::GetAppIndex(want, callerToken, appIndex) && appIndex != targetAppIndex) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not support APP_CLONE");
+    if (callerRecord == nullptr) {
+        return false;
+    }
+    int32_t callerIndex = callerRecord->GetAppIndex();
+    if (targetAppIndex == -1) {
+        targetAppIndex = callerIndex;
+    }
+    if (callerIndex != targetAppIndex) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "app clone scene");
         return true;
     }
     auto instanceKey = want.GetStringParam(Want::APP_INSTANCE_KEY);
     auto isCreating = want.GetBoolParam(Want::CREATE_APP_INSTANCE_KEY, false);
     if ((!instanceKey.empty() && instanceKey != callerInstanceKey) || isCreating) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "not support multi app mode");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "multi instance scene");
         return true;
     }
     return false;
@@ -15706,6 +15712,16 @@ bool AbilityManagerService::IsAppCloneOrMultiInstance(
 ErrCode AbilityManagerService::StartSelfUIAbilityInCurrentProcess(const Want &want, const std::string &specifiedFlag,
     const AAFwk::StartOptions &startOptions, bool hasOptions, sptr<IRemoteObject> callerToken)
 {
+    if (!AppUtils::GetInstance().IsStartUIAbilityInCurrentProcess()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "device not supported");
+        return ERR_CAPABILITY_NOT_SUPPORT;
+    }
+    auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (callerRecord == nullptr || !JudgeSelfCalled(callerRecord)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not self call");
+        return ERR_INVALID_VALUE;
+    }
+
     std::string targetBundleName = want.GetBundle();
     std::string targetAbilityName = want.GetElement().GetAbilityName();
     if (targetBundleName.empty() || targetAbilityName.empty()) {
@@ -15719,22 +15735,23 @@ ErrCode AbilityManagerService::StartSelfUIAbilityInCurrentProcess(const Want &wa
     auto iter = std::find(processInfo.bundleNames.begin(), processInfo.bundleNames.end(), targetBundleName);
     CHECK_TRUE_RETURN_RET(iter == processInfo.bundleNames.end(), ERROR_UIABILITY_NOT_BELONG_TO_CALLER,
         "The UIAbility not belog to caller");
+    int32_t appIndex = want.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, -1);
+    if (IsAppCloneOrMultiInstance(want, callerRecord, appIndex, processInfo.instanceKey)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "not support app clone and multi instance");
+        return ERROR_UIABILITY_NOT_BELONG_TO_CALLER;
+    }
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bundleMgrHelper, INNER_ERR);
     AppExecFwk::AbilityInfo abilityInfo;
     auto callerUserId = AbilityRuntime::UserController::GetInstance().GetCallerUserId();
-    CHECK_TRUE_RETURN_RET(!IN_PROCESS_CALL(bundleMgrHelper->QueryAbilityInfo(want,
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, callerUserId, abilityInfo)),
+    CHECK_TRUE_RETURN_RET(IN_PROCESS_CALL(bundleMgrHelper->QueryCloneAbilityInfo(want.GetElement(),
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, appIndex, abilityInfo, callerUserId)) != ERR_OK,
         TARGET_BUNDLE_NOT_EXIST, "The specified ability not exist");
 
     CHECK_TRUE_RETURN_RET(abilityInfo.type != AppExecFwk::AbilityType::PAGE,
-        RESOLVE_CALL_ABILITY_TYPE_ERR, "not UIAbility");
-    auto useWant = want;
-    int32_t appIndex = useWant.GetIntParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
-    if (IsAppCloneOrMultiInstance(useWant, callerToken, appIndex, processInfo.instanceKey)) {
-        return ERROR_UIABILITY_NOT_BELONG_TO_CALLER;
-    }
-    auto ret = IsUIAbilityAlreadyExist(targetBundleName, targetAbilityName, specifiedFlag, appIndex);
+        TARGET_BUNDLE_NOT_EXIST, "not UIAbility");
+    auto ret = IsUIAbilityAlreadyExist(targetAbilityName,
+        specifiedFlag, appIndex, processInfo.instanceKey, abilityInfo.launchMode);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "UIAbility already exist");
         return ret;
@@ -15742,12 +15759,10 @@ ErrCode AbilityManagerService::StartSelfUIAbilityInCurrentProcess(const Want &wa
 
     CHECK_TRUE_RETURN_RET(processInfo.state_ != AppExecFwk::AppProcessState::APP_STATE_FOREGROUND,
         NOT_TOP_ABILITY, "caller not foreground");
-    if (!AppUtils::GetInstance().IsStartUIAbilityInCurrentProcess()) {
-        return ERR_CAPABILITY_NOT_SUPPORT;
-    }
 
     auto useStartOptions = startOptions;
     useStartOptions.SetCurrentProcessName(processInfo.processName_);
+    auto useWant = want;
     if (abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
         useWant.SetParam(KEY_SPECIFIED_FLAG, specifiedFlag);
     }

@@ -19,6 +19,7 @@
 #define protected public
 #include "ability_manager_service.h"
 #include "ability_record.h"
+#include "app_utils.h"
 #include "bundle_mgr_helper.h"
 #include "mission_list_manager.h"
 #include "ui_ability_lifecycle_manager.h"
@@ -2060,11 +2061,12 @@ HWTEST_F(AbilityManagerServiceSixthTest, IsUIAbilityAlreadyExist_001, TestSize.L
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest IsUIAbilityAlreadyExist_001 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
-    std::string bundleName ;
     std::string abilityName;
     std::string specifiedFlag;
     int32_t appIndex = 0;
-    auto ret = abilityMs->IsUIAbilityAlreadyExist(bundleName, abilityName, specifiedFlag, appIndex);
+    std::string instanceKey;
+    auto ret = abilityMs->IsUIAbilityAlreadyExist(abilityName, specifiedFlag, appIndex,
+        instanceKey, AppExecFwk::LaunchMode::SPECIFIED);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest IsUIAbilityAlreadyExist_001 end");
 }
@@ -2082,14 +2084,10 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartSelfUIAbilityInCurrentProcess_001,
     Want want;
     std::string specifiedFlag;
     StartOptions startOptions;
-    EventInfo eventInfo;
+    AppUtils::GetInstance().isStartUIAbilityInCurrentProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartUIAbilityInCurrentProcess_.value = false;
     auto ret = abilityMs->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, false, nullptr);
-    EXPECT_EQ(ret, START_UI_ABILITIES_NOT_SUPPORT_IMPLICIT_START);
-    std::string bundleName = "test";
-    std::string abilityName;
-    want.SetElementName(bundleName, abilityName);
-    ret = abilityMs->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, false, nullptr);
-    EXPECT_EQ(ret, START_UI_ABILITIES_NOT_SUPPORT_IMPLICIT_START);
+    EXPECT_EQ(ret, ERR_CAPABILITY_NOT_SUPPORT);
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest SendIntentReport_001 end");
 }
 
@@ -2100,7 +2098,7 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartSelfUIAbilityInCurrentProcess_001,
  */
 HWTEST_F(AbilityManagerServiceSixthTest, StartSelfUIAbilityInCurrentProcess_002, TestSize.Level1)
 {
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartSelfUIAbilityInCurrentProcess_001 start");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartSelfUIAbilityInCurrentProcess_002 start");
     auto abilityMs = std::make_shared<AbilityManagerService>();
     ASSERT_NE(abilityMs, nullptr);
     Want want;
@@ -2109,10 +2107,11 @@ HWTEST_F(AbilityManagerServiceSixthTest, StartSelfUIAbilityInCurrentProcess_002,
     want.SetElementName(bundleName, abilityName);
     std::string specifiedFlag;
     StartOptions startOptions;
-    EventInfo eventInfo;
+    AppUtils::GetInstance().isStartUIAbilityInCurrentProcess_.isLoaded = true;
+    AppUtils::GetInstance().isStartUIAbilityInCurrentProcess_.value = true;
     auto ret = abilityMs->StartSelfUIAbilityInCurrentProcess(want, specifiedFlag, startOptions, false, nullptr);
-    EXPECT_EQ(ret, INNER_ERR);
-    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest SendIntentReport_001 end");
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSixthTest StartSelfUIAbilityInCurrentProcess_002 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS
