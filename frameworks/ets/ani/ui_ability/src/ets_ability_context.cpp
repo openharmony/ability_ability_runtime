@@ -621,6 +621,29 @@ ani_object EtsAbilityContext::StartAbilityByCall(ani_env *env, ani_object aniObj
     return caller;
 }
 
+void EtsAbilityContext::RestartAppWithWindow(ani_env *env, ani_object aniObj, ani_object wantObj)
+{
+    TAG_LOGI(AAFwkTag::UIABILITY, "RestartAppWithWindow");
+    auto etsContext = GetEtsAbilityContext(env, aniObj);
+    auto context = etsContext ? etsContext->context_.lock() : nullptr;
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "GetAbilityContext is nullptr");
+        EtsErrorUtil::ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+        return;
+    }
+
+    AAFwk::Want want;
+    if (!AppExecFwk::UnwrapWant(env, wantObj, want)) {
+        TAG_LOGE(AAFwkTag::UIABILITY, "parse want failed");
+        EtsErrorUtil::ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
+        return;
+    }
+    auto ret = context->RestartAppWithWindow(want);
+    if (ret != ERR_OK) {
+        EtsErrorUtil::ThrowErrorByNativeErr(env, ret);
+    }
+}
+
 void EtsAbilityContext::StartAbilityForResultInner(ani_env *env, const AAFwk::StartOptions &startOptions,
     AAFwk::Want &want, std::shared_ptr<AbilityContext> context, ani_object startOptionsObj, ani_object callback)
 {
@@ -1758,6 +1781,8 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 "L@ohos/app/ability/Want/Want;Lstd/core/String;L@ohos/app/ability/StartOptions/StartOptions;Lutils/"
                 "AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsAbilityContext::StartSelfUIAbilityInCurrentProcessWithOptions) },
+            ani_native_function { "nativeRestartAppSync", "L@ohos/app/ability/Want/Want;:V",
+                reinterpret_cast<void*>(EtsAbilityContext::RestartAppWithWindow) },
         };
         if ((status = env->Class_BindNativeMethods(cls, functions.data(), functions.size())) != ANI_OK) {
             TAG_LOGE(AAFwkTag::CONTEXT, "Class_BindNativeMethods failed status: %{public}d", status);
