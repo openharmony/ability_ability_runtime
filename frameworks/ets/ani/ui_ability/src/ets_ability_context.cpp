@@ -266,6 +266,17 @@ void EtsAbilityContext::StartAbilityWithOptions(
     etsContext->OnStartAbility(env, aniObj, wantObj, opt, call);
 }
 
+void EtsAbilityContext::StartAbilitySyncCheck(ani_env *env, ani_object aniObj, ani_object opt)
+{
+    AAFwk::StartOptions startOptions;
+    if (!AppExecFwk::UnwrapStartOptionsWithProcessOption(env, opt, startOptions)) {
+        EtsErrorUtil::ThrowInvalidParamError(env,
+            "Parse param startOptions failed, startOptions must be StartOptions.");
+        TAG_LOGE(AAFwkTag::CONTEXT, "invalid options");
+        return;
+    }
+}
+
 // to be done: free install
 void EtsAbilityContext::StartAbilityForResult(ani_env *env, ani_object aniObj, ani_object wantObj, ani_object callback)
 {
@@ -1692,6 +1703,9 @@ bool BindNativeMethods(ani_env *env, ani_class &cls)
                 "L@ohos/app/ability/Want/Want;L@ohos/app/ability/StartOptions/StartOptions;Lutils/AbilityUtils/"
                 "AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsAbilityContext::StartAbilityWithOptions) },
+            ani_native_function { "nativeStartAbilitySyncCheck",
+                "L@ohos/app/ability/StartOptions/StartOptions;:V",
+                reinterpret_cast<void *>(EtsAbilityContext::StartAbilitySyncCheck) },
             ani_native_function { "nativeStartAbilityForResult",
                 "L@ohos/app/ability/Want/Want;Lutils/AbilityUtils/AsyncCallbackWrapper;:V",
                 reinterpret_cast<void *>(EtsAbilityContext::StartAbilityForResult) },
