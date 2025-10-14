@@ -35,7 +35,7 @@ public:
         type_ = AbilityLifecycleCallbackType::ETS;
     }
     bool IsValid() const override { return ref_ != nullptr; }
-    std::shared_ptr<AppExecFwk::ETSNativeReference> ref_;
+    const std::shared_ptr<AppExecFwk::ETSNativeReference> &ref_;
 };
 
 class EtsAbilityLifecycleCallback : public AbilityLifecycleCallback,
