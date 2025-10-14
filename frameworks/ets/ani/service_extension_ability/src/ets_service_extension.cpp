@@ -16,12 +16,14 @@
 #include "ets_service_extension.h"
 
 #include "ability_business_error.h"
+#include "ability_handler.h"
 #include "ability_info.h"
 #include "ability_manager_client.h"
 #include "ani_common_configuration.h"
 #include "ani_common_want.h"
 #include "remote_object_taihe_ani.h"
 #include "configuration_utils.h"
+#include "display_util.h"
 #include "ets_service_extension_context.h"
 #include "hilog_tag_wrapper.h"
 #include "hitrace_meter.h"
@@ -30,6 +32,11 @@
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
 #include "js_service_extension_context.h"
+#ifdef SUPPORT_GRAPHICS
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
+#include "window_scene.h"
+#endif
 
 #ifdef WINDOWS_PLATFORM
 #define ETS_EXPORT __declspec(dllexport)
@@ -173,6 +180,82 @@ void EtsServiceExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record
         return;
     }
     BindContext(env, record->GetWant());
+
+    handler_ = handler;
+    auto context = GetContext();
+    auto appContext = Context::GetApplicationContext();
+    if (context != nullptr && appContext != nullptr) {
+        auto appConfig = appContext->GetConfiguration();
+        if (appConfig != nullptr) {
+            TAG_LOGD(AAFwkTag::SERVICE_EXT, "Original config dump: %{public}s", appConfig->GetName().c_str());
+            context->SetConfiguration(std::make_shared<Configuration>(*appConfig));
+        }
+    }
+    ListenWMS();
+}
+
+void EtsServiceExtension::ListenWMS()
+{
+#ifdef SUPPORT_GRAPHICS
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "RegisterDisplayListener");
+    auto abilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (abilityManager == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null SaMgr");
+        return;
+    }
+
+    auto etsServiceExtension = std::static_pointer_cast<EtsServiceExtension>(shared_from_this());
+    displayListener_ = sptr<EtsServiceExtensionDisplayListener>::MakeSptr(etsServiceExtension);
+    if (displayListener_ == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null displayListener");
+        return;
+    }
+
+    auto context = GetContext();
+    if (context == nullptr || context->GetToken() == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
+        return;
+    }
+
+    saStatusChangeListener_ =
+        sptr<SystemAbilityStatusChangeListener>::MakeSptr(displayListener_, context->GetToken());
+    if (saStatusChangeListener_ == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null saStatusChangeListener");
+        return;
+    }
+
+    auto ret = abilityManager->SubscribeSystemAbility(WINDOW_MANAGER_SERVICE_ID, saStatusChangeListener_);
+    if (ret != 0) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "subscribe system ability error:%{public}d.", ret);
+    }
+#endif
+}
+#ifdef SUPPORT_GRAPHICS
+void EtsServiceExtension::SystemAbilityStatusChangeListener::OnAddSystemAbility(int32_t systemAbilityId,
+    const std::string& deviceId)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "systemAbilityId: %{public}d add", systemAbilityId);
+    if (systemAbilityId == WINDOW_MANAGER_SERVICE_ID) {
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "RegisterDisplayInfoChangedListener");
+        Rosen::WindowManager::GetInstance().RegisterDisplayInfoChangedListener(token_, tmpDisplayListener_);
+    }
+}
+#endif //SUPPORT_GRAPHICS
+
+bool EtsServiceExtension::HasScreenDensityBeenSet(std::shared_ptr<Global::Resource::ResourceManager> resourceManager)
+{
+    TAG_LOGD(AAFwkTag::ABILITY, "call HasScreenDensityBeenSet");
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    if (resConfig == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null resConfig");
+        return false;
+    }
+    if (resourceManager == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITY, "null resourceManager");
+        return false;
+    }
+    resourceManager->GetResConfig(*resConfig);
+    return resConfig->GetScreenDensityDpi() != Global::Resource::ScreenDensity::SCREEN_DENSITY_NOT_SET;
 }
 
 void EtsServiceExtension::OnStart(const AAFwk::Want &want)
@@ -183,6 +266,19 @@ void EtsServiceExtension::OnStart(const AAFwk::Want &want)
     if (env == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "env not found Ability.ets");
         return;
+    }
+    auto context = GetContext();
+    if (context != nullptr) {
+#ifdef SUPPORT_GRAPHICS
+        int32_t displayId = AAFwk::DisplayUtil::GetDefaultDisplayId();
+        displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, displayId);
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "displayId %{public}d", displayId);
+        auto configUtils = std::make_shared<ConfigurationUtils>();
+        if (!HasScreenDensityBeenSet(context->GetResourceManager())) {
+            TAG_LOGD(AAFwkTag::ABILITY, "call InitDisplayConfig");
+            configUtils->InitDisplayConfig(displayId, context->GetConfiguration(), context->GetResourceManager());
+        }
+#endif //SUPPORT_GRAPHICS
     }
     ani_ref wantRef = OHOS::AppExecFwk::WrapWant(env, want);
     if (wantRef == nullptr) {
@@ -614,6 +710,90 @@ void EtsServiceExtension::Dump(const std::vector<std::string> &params, std::vect
     }
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "Dump info size: %{public}zu", info.size());
 }
+
+#ifdef SUPPORT_GRAPHICS
+void EtsServiceExtension::OnCreate(Rosen::DisplayId displayId)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "enter");
+}
+
+void EtsServiceExtension::OnDestroy(Rosen::DisplayId displayId)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "exit");
+}
+
+void EtsServiceExtension::OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::DisplayId displayId,
+    float density, Rosen::DisplayOrientation orientation)
+{
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "displayId: %{public}" PRIu64, displayId);
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
+        return;
+    }
+
+    auto contextConfig = context->GetConfiguration();
+    if (contextConfig == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null contextConfig");
+        return;
+    }
+
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "Config dump: %{public}s", contextConfig->GetName().c_str());
+    bool configChanged = false;
+    auto configUtils = std::make_shared<ConfigurationUtils>();
+    configUtils->UpdateDisplayConfig(displayId, contextConfig, context->GetResourceManager(), configChanged);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "Config dump after update: %{public}s", contextConfig->GetName().c_str());
+
+    if (configChanged) {
+        auto etsServiceExtension = std::static_pointer_cast<EtsServiceExtension>(shared_from_this());
+        auto task = [etsServiceExtension]() {
+            if (etsServiceExtension) {
+                etsServiceExtension->ConfigurationUpdated();
+            }
+        };
+        if (handler_ != nullptr) {
+            handler_->PostTask(task, "EtsServiceExtension:OnChange");
+        }
+    }
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "finished");
+}
+
+void EtsServiceExtension::OnChange(Rosen::DisplayId displayId)
+{
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "displayId: %{public}" PRIu64"", displayId);
+    auto context = GetContext();
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null context");
+        return;
+    }
+
+    auto contextConfig = context->GetConfiguration();
+    if (contextConfig == nullptr) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "null contextConfig");
+        return;
+    }
+
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "Config dump: %{public}s", contextConfig->GetName().c_str());
+    bool configChanged = false;
+    auto configUtils = std::make_shared<ConfigurationUtils>();
+    configUtils->UpdateDisplayConfig(displayId, contextConfig, context->GetResourceManager(), configChanged);
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "Config dump after update: %{public}s", contextConfig->GetName().c_str());
+
+    if (configChanged) {
+        auto etsServiceExtension = std::static_pointer_cast<EtsServiceExtension>(shared_from_this());
+        auto task = [etsServiceExtension]() {
+            if (etsServiceExtension) {
+                etsServiceExtension->ConfigurationUpdated();
+            }
+        };
+        if (handler_ != nullptr) {
+            handler_->PostTask(task, "EtsServiceExtension:OnChange");
+        }
+    }
+
+    TAG_LOGD(AAFwkTag::SERVICE_EXT, "finished");
+}
+#endif
 } // namespace AbilityRuntime
 } // namespace OHOS
 
