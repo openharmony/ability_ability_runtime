@@ -1978,8 +1978,9 @@ int UIAbilityLifecycleManager::CloseUIAbility(const std::shared_ptr<AbilityRecor
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_UI_ABILITY_MANAGER_NULL_ABILITY_RECORD);
-    std::string element = abilityRecord->GetElementName().GetURI();
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "CloseUIAbility call: %{public}s", element.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "CloseUIAbility call: %{public}s/%{public}s",
+        abilityRecord->GetElementName().GetBundleName().c_str(),
+        abilityRecord->GetElementName().GetAbilityName().c_str());
     if (abilityRecord->IsTerminating() && !abilityRecord->IsForeground()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "ability on terminating");
         return ERR_OK;
@@ -3818,13 +3819,16 @@ int32_t UIAbilityLifecycleManager::CleanUIAbility(
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_UI_ABILITY_MANAGER_NULL_ABILITY_RECORD);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::string element = abilityRecord->GetElementName().GetURI();
     if (DelayedSingleton<AppScheduler>::GetInstance()->CleanAbilityByUserRequest(abilityRecord->GetToken())) {
-        TAG_LOGI(AAFwkTag::ABILITYMGR, "user clean ability: %{public}s success", element.c_str());
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "user clean ability: %{public}s/%{public}s success",
+            abilityRecord->GetElementName().GetBundleName().c_str(),
+            abilityRecord->GetElementName().GetAbilityName().c_str());
         return ERR_OK;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR,
-        "can not force kill when user request clean ability, schedule lifecycle:%{public}s", element.c_str());
+        "can not force kill when user request clean ability, schedule lifecycle:%{public}s/%{public}s",
+        abilityRecord->GetElementName().GetBundleName().c_str(),
+        abilityRecord->GetElementName().GetAbilityName().c_str());
     return CloseUIAbility(abilityRecord, -1, nullptr, true, false);
 }
 
@@ -4193,7 +4197,9 @@ int32_t UIAbilityLifecycleManager::NotifyStartupExceptionBySCB(int32_t requestId
         if (requestId == it->first) {
             auto abilityRecord = it->second;
             if (abilityRecord != nullptr) {
-                TAG_LOGW(AAFwkTag::ABILITYMGR, "startup exception: %{public}s", abilityRecord->GetURI().c_str());
+                TAG_LOGW(AAFwkTag::ABILITYMGR, "startup exception: %{public}s/%{public}s",
+                    abilityRecord->GetElementName().GetBundleName().c_str(),
+                    abilityRecord->GetElementName().GetAbilityName().c_str());
                 SendAbilityEvent(abilityRecord->GetAbilityInfo(), reason);
             }
             tmpAbilityMap_.erase(it);
