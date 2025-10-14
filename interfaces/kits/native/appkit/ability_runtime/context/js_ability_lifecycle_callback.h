@@ -34,7 +34,7 @@ public:
         type_ = AbilityLifecycleCallbackType::JS;
     }
     bool IsValid() const override { return ref_ != nullptr; }
-    std::shared_ptr<NativeReference> ref_;
+    const std::shared_ptr<NativeReference> &ref_;
 };
 
 class JsAbilityLifecycleCallback : public AbilityLifecycleCallback,
