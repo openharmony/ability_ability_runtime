@@ -224,7 +224,7 @@ void EtsAbilityDelegator::ExecuteShellCommand(ani_env *env, [[maybe_unused]]ani_
             COMMON_FAILED, "executeShellCommand failed."), nullptr);
         return;
     }
-    AppExecFwk::AsyncCallback(env, callback, EtsErrorUtil::CreateError(env, AbilityErrorCode::ERROR_OK), objValue);
+    AppExecFwk::AsyncCallback(env, callback, nullptr, objValue);
     return;
 }
 
