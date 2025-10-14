@@ -14,6 +14,7 @@
  */
 
 sequenceable OHOS.Uri;
+sequenceable OHOS.AAFwk.CheckResult;
 rawdata OHOS.AAFwk.UriPermissionRawData;
 
 interface OHOS.AAFwk.IUriPermissionManager {
@@ -23,6 +24,8 @@ interface OHOS.AAFwk.IUriPermissionManager {
         [in] String targetBundleName, [in] int appIndex, [in] unsigned int initiatorTokenId);
     int GrantUriPermission([in] UriPermissionRawData rawData, [in] unsigned int flag,
         [in] String targetBundleName, [in] int appIndex, [in] unsigned int initiatorTokenId);
+    int GrantUriPermissionWithType([in] Uri[] uriVec, [in] unsigned int flag, [in] String targetBundleName,
+        [in] int appIndex, [in] unsigned int initiatorTokenId, [in] int hideSensitiveType, [in] int[] permissionTypes);
     int GrantUriPermissionPrivileged([in] String[] uriVec, [in] unsigned int flag, [in] String targetBundleName,
         [in] int appIndex, [in] unsigned int initiatorTokenId, [in] int hideSensitiveType);
     int GrantUriPermissionPrivileged([in] UriPermissionRawData rawData, [in] unsigned int flag,
@@ -35,6 +38,8 @@ interface OHOS.AAFwk.IUriPermissionManager {
     int RevokeUriPermissionManually([in] Uri uri, [in] String bundleName, [in] int appIndex);
     boolean VerifyUriPermission([in] Uri uri, [in] unsigned int flag, [in] unsigned int tokenId);
     boolean[] CheckUriAuthorization([in] String[] uriVec, [in] unsigned int flag, [in] unsigned int tokenId);
+    CheckResult[] CheckUriAuthorizationWithType([in] String[] uriVec, [in] unsigned int flag,
+        [in] unsigned int tokenId);
     UriPermissionRawData CheckUriAuthorization([in] UriPermissionRawData rawData, [in] unsigned int flag,
         [in] unsigned int tokenId);
     int ClearPermissionTokenByMap([in] unsigned int tokenId);

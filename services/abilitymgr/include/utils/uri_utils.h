@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "ability_record.h"
+#include "check_result.h"
 #include "nocopyable.h"
 #include "uri.h"
 #include "want.h"
@@ -51,7 +52,7 @@ public:
      * @return Vector of Uri objects with granted permissions
      */
     std::vector<Uri> GetPermissionedUriList(const std::vector<std::string> &uriVec,
-        const std::vector<bool> &checkResults, uint32_t callerTokenId,
+        const std::vector<CheckResult> &checkResults, uint32_t callerTokenId,
         const std::string &targetBundleName, Want &want);
 
     /**

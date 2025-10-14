@@ -180,7 +180,8 @@ bool UriUtils::GetCallerNameAndApiVersion(uint32_t tokenId, std::string &callerN
 }
 
 std::vector<Uri> UriUtils::GetPermissionedUriList(const std::vector<std::string> &uriVec,
-    const std::vector<bool> &checkResults, uint32_t callerTokenId, const std::string &targetBundleName, Want &want)
+    const std::vector<CheckResult> &checkResults, uint32_t callerTokenId,
+    const std::string &targetBundleName, Want &want)
 {
     std::vector<Uri> permissionedUris;
     if (uriVec.size() != checkResults.size()) {
@@ -193,7 +194,7 @@ std::vector<Uri> UriUtils::GetPermissionedUriList(const std::vector<std::string>
     GetCallerNameAndApiVersion(callerTokenId, callerBundleName, apiVersion);
     // process uri
     size_t startIndex = want.GetUriString().empty() ? 0 : 1;
-    if (!ProcessWantUri(checkResults[0], apiVersion, want, permissionedUris)) {
+    if (!ProcessWantUri(checkResults[0].result, apiVersion, want, permissionedUris)) {
         SendGrantUriPermissionEvent(callerBundleName, targetBundleName, uriVec[0], apiVersion, ERASE_URI);
     }
     // process param stream
@@ -202,7 +203,7 @@ std::vector<Uri> UriUtils::GetPermissionedUriList(const std::vector<std::string>
     for (size_t index = startIndex; index < checkResults.size(); index++) {
         // only reserve privileged file uri
         auto uri = Uri(uriVec[index]);
-        if (checkResults[index]) {
+        if (checkResults[index].result) {
             permissionedUris.emplace_back(uri);
             paramStreamUris.emplace_back(uriVec[index]);
             continue;
@@ -338,7 +339,7 @@ void UriUtils::CheckUriPermission(uint32_t callerTokenId, Want &want)
         TAG_LOGD(AAFwkTag::ABILITYMGR, "No file uri neet grant.");
         return;
     }
-    auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
+    auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorizationWithType(
         uriVec, flag, callerTokenId));
     auto permissionUris = GetPermissionedUriList(uriVec, checkResults, callerTokenId, "", want);
     if (permissionUris.empty()) {
@@ -448,21 +449,29 @@ bool UriUtils::GrantUriPermissionInner(const std::vector<std::string> &uriVec,
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     NotifyGrantUriPermissionStart(grantInfo.isNotifyCollaborator, uriVec, grantInfo.flag, grantInfo.userId);
-    auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorization(
+    auto checkResults = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().CheckUriAuthorizationWithType(
         uriVec, grantInfo.flag, grantInfo.callerTokenId));
     auto permissionUris = GetPermissionedUriList(uriVec, checkResults, grantInfo.callerTokenId,
         grantInfo.targetBundleName, want);
+    std::vector<bool> boolResults(checkResults.size(), false);
     if (permissionUris.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "uris not permissioned.");
         NotifyGrantUriPermissionEnd(grantInfo.isNotifyCollaborator, uriVec, grantInfo.flag,
-            grantInfo.userId, checkResults);
+            grantInfo.userId, boolResults);
         return false;
     }
-
+    std::vector<int32_t> permissionTypes;
+    for (auto i = 0; i < checkResults.size(); i++) {
+        boolResults[i] = checkResults[i].result;
+        if (checkResults[i].result) {
+            permissionTypes.emplace_back(checkResults[i].permissionType);
+        }
+    }
     auto hideSensitiveType = want.GetIntParam(HIDE_SENSITIVE_TYPE, 0);
-    auto ret = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().GrantUriPermissionPrivileged(permissionUris,
-        grantInfo.flag, grantInfo.targetBundleName, grantInfo.appIndex, grantInfo.callerTokenId, hideSensitiveType));
-    NotifyGrantUriPermissionEnd(grantInfo.isNotifyCollaborator, uriVec, grantInfo.flag, grantInfo.userId, checkResults);
+    auto ret = IN_PROCESS_CALL(UriPermissionManagerClient::GetInstance().GrantUriPermissionWithType(
+        permissionUris, grantInfo.flag, grantInfo.targetBundleName, grantInfo.appIndex, grantInfo.callerTokenId,
+        hideSensitiveType, permissionTypes));
+    NotifyGrantUriPermissionEnd(grantInfo.isNotifyCollaborator, uriVec, grantInfo.flag, grantInfo.userId, boolResults);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "failed, err:%{public}d", ret);
         return false;
