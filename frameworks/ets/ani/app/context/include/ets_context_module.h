@@ -42,8 +42,12 @@ public:
 private:
     static bool LoadTargetModule(ani_env *aniEnv, const std::string &className);
     static std::unique_ptr<NativeReference> CreateNativeReference(napi_env napiEnv, std::shared_ptr<Context> context);
-    static ani_object CreateStaticObject(ani_env *aniEnv, ani_object type, std::shared_ptr<Context> context);
-    static ani_object CreateDynamicObject(ani_env *aniEnv, ani_class aniCls, std::shared_ptr<Context> context);
+    static ani_object GetOrCreateStaticObject(ani_env *aniEnv, ani_object input, ani_object type,
+        std::shared_ptr<Context> context);
+    static ani_object CreateDynamicObject(ani_env *aniEnv, ani_class aniCls, ani_object input,
+        std::shared_ptr<Context> context);
+    static void SaveDynamicBindingObject(ani_env *aniEnv, ani_object input, std::shared_ptr<Context> context);
+    static void SaveStaticBindingObject(ani_env *aniEnv, ani_object input, std::shared_ptr<Context> context);
 };
 
 void EtsContextModuleInit(ani_env *aniEnv);
