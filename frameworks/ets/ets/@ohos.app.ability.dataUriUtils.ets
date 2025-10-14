@@ -31,7 +31,7 @@ errMap.set(ERROR_CODE_INVALID_PARAM, ERROR_MSG_INVALID_PARAM);
 errMap.set(ERROR_CODE_INNER_ERROR, ERROR_MSG_INNER_ERROR);
 
 class DataUriError extends Error {
-  constructor(code: number) {
+  constructor(code: int) {
     super(errMap.has(code) ? errMap.get(code) : ERROR_MSG_INNER_ERROR);
     this.code = code;
   }
