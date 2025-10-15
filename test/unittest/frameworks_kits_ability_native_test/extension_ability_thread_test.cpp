@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <thread>
 #include <functional>
 #include <gtest/gtest.h>
 #define private public
@@ -147,7 +148,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_Attach_3_Param_0100,
             auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "ExtensionAbilityThread_Attach_3_Param_0100 end";
@@ -175,7 +176,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_Attach_3_Param_0200,
             auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "ExtensionAbilityThread_Attach_3_Param_0200 end";
@@ -202,7 +203,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_Attach_2_Param_0100,
             std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
             auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             extensionabilitythread->Attach(application, abilityRecord, nullptr);
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "ExtensionAbilityThread_Attach_2_Param_0100 end";
@@ -230,7 +231,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_Attach_2_Param_0200,
             auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token, nullptr, 0);
             std::shared_ptr<EventRunner> mainRunner = EventRunner::Create(abilityInfo->name);
             extensionabilitythread->Attach(application, abilityRecord, nullptr);
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "ExtensionAbilityThread_Attach_2_Param_0200 end";
@@ -262,7 +263,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleAbilityTrans
             Want want;
             LifeCycleStateInfo lifeCycleStateInfo;
             extensionabilitythread->ScheduleAbilityTransaction(want, lifeCycleStateInfo);
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "ExtensionAbilityThread_ScheduleAbilityTransaction_0100 end";
@@ -366,7 +367,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleConnectAbili
             extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             Want want;
             extensionabilitythread->ScheduleConnectAbility(want);
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "ExtensionAbilityThread_ScheduleConnectAbility_0100 end";
@@ -424,7 +425,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleDisconnectAb
             extensionabilitythread->Attach(application, abilityRecord, mainRunner, nullptr);
             Want want;
             extensionabilitythread->ScheduleDisconnectAbility(want);
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "ExtensionAbilityThread_ScheduleDisconnectAbility_0100 end";
@@ -485,7 +486,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleCommandAbili
             bool restart = true;
             int startId = 0;
             extensionabilitythread->ScheduleCommandAbility(want, restart, startId);
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "ExtensionAbilityThread_ScheduleCommandAbility_0100 end";
@@ -546,7 +547,7 @@ HWTEST_F(ExtensionAbilityThreadTest, ExtensionAbilityThread_ScheduleCommandAbili
             Want want;
             sptr<AAFwk::SessionInfo> session = new (std::nothrow) AAFwk::SessionInfo();
             extensionabilitythread->ScheduleCommandAbilityWindow(want, session, AAFwk::WIN_CMD_FOREGROUND);
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
     GTEST_LOG_(INFO) << "ExtensionAbilityThread_ScheduleCommandAbilityWindow_0100 end";

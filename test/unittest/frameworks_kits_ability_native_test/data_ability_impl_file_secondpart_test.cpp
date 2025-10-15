@@ -80,7 +80,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_BatchInsert_001, Functio
     ret = dataabilityimpl->BatchInsert(uri, values);
 
     EXPECT_EQ(1, ret);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_BatchInsert_001 end";
 }
 
@@ -99,7 +99,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_BatchInsert_002, Functio
     ret = dataabilityimpl->BatchInsert(uri, values);
 
     EXPECT_EQ(-1, ret);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_BatchInsert_002 end";
 }
 
@@ -126,7 +126,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_HandleAbilityTransaction
     LifeCycleStateInfo targetState;
 
     dataabilityimpl->HandleAbilityTransaction(want, targetState);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_HandleAbilityTransaction_001 end";
 }
 
@@ -153,7 +153,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_HandleAbilityTransaction
     LifeCycleStateInfo targetState;
 
     dataabilityimpl->HandleAbilityTransaction(want, targetState);
-    sleep(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_HandleAbilityTransaction_002 end";
 }
 }  // namespace AppExecFwk

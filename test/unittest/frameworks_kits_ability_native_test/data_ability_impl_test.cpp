@@ -89,7 +89,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Insert_0100, Function | 
     result = dataabilityimpl->Insert(uri, value);
 
     EXPECT_EQ(number, result);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Insert_0100 end";
 }
 
@@ -107,7 +106,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Insert_0200, Function | 
     NativeRdb::ValuesBucket value;
 
     EXPECT_EQ(number, dataabilityimpl->Insert(uri, value));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Insert_0200 end";
 }
 
@@ -144,7 +142,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Insert_0300, Function | 
     auto result = dataabilityimpl->Insert(uri, value);
 
     EXPECT_EQ(number, result);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Insert_0300 end";
 }
 
@@ -174,7 +171,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Update_0100, Function | 
     NativeRdb::DataAbilityPredicates predicates;
 
     EXPECT_EQ(number, dataabilityimpl->Update(uri, value, predicates));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Update_0100 end";
 }
 
@@ -193,7 +189,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Update_0200, Function | 
     NativeRdb::DataAbilityPredicates predicates;
 
     EXPECT_EQ(number, dataabilityimpl->Update(uri, value, predicates));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Update_0200 end";
 }
 
@@ -228,7 +223,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Update_0300, Function | 
     NativeRdb::DataAbilityPredicates predicates;
 
     EXPECT_EQ(number, dataabilityimpl->Update(uri, value, predicates));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Update_0300 end";
 }
 
@@ -258,7 +252,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Delete_0100, Function | 
     NativeRdb::DataAbilityPredicates predicates;
 
     EXPECT_EQ(number, dataabilityimpl->Delete(uri, predicates));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Delete_0100 end";
 }
 
@@ -276,7 +269,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Delete_0200, Function | 
     NativeRdb::DataAbilityPredicates predicates;
 
     EXPECT_EQ(number, dataabilityimpl->Delete(uri, predicates));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Delete_0200 end";
 }
 
@@ -311,7 +303,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Delete_0300, Function | 
     NativeRdb::DataAbilityPredicates predicates;
 
     EXPECT_EQ(number, dataabilityimpl->Delete(uri, predicates));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Delete_0300 end";
 }
 
@@ -342,7 +333,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Query_0100, Function | M
 
     EXPECT_TRUE(set != nullptr);
     dataabilityimpl.reset();
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Query_0100 end";
 }
 
@@ -362,7 +352,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Query_0200, Function | M
 
     std::shared_ptr<NativeRdb::AbsSharedResultSet> set = dataabilityimpl->Query(uri, columns, predicates);
     EXPECT_EQ(nullptr, set);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Query_0200 end";
 }
 
@@ -399,7 +388,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Query_0300, Function | M
 
     EXPECT_TRUE(set == nullptr);
     dataabilityimpl.reset();
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Query_0300 end";
 }
 
@@ -427,7 +415,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_OpenFile_0100, Function 
     const std::string mode = "abc";
 
     EXPECT_EQ(number, dataabilityimpl->OpenFile(uri, mode));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_OpenFile_0100 end";
 }
 
@@ -445,7 +432,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_OpenFile_0200, Function 
     const std::string mode = "abc";
 
     EXPECT_EQ(number, dataabilityimpl->OpenFile(uri, mode));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_OpenFile_0200 end";
 }
 
@@ -478,7 +464,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_OpenFile_0300, Function 
     const std::string mode = "r";
 
     EXPECT_EQ(number, dataabilityimpl->OpenFile(uri, mode));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_OpenFile_0300 end";
 }
 
@@ -506,7 +491,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_OpenRawFile_0100, Functi
     const std::string mode = "abc";
 
     EXPECT_EQ(number, dataabilityimpl->OpenRawFile(uri, mode));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_OpenRawFile_0100 end";
 }
 
@@ -524,7 +508,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_OpenRawFile_0200, Functi
     const std::string mode = "abc";
 
     EXPECT_EQ(number, dataabilityimpl->OpenRawFile(uri, mode));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_OpenRawFile_0200 end";
 }
 
@@ -557,7 +540,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_OpenRawFile_0300, Functi
     const std::string mode = "r";
 
     EXPECT_EQ(number, dataabilityimpl->OpenRawFile(uri, mode));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_OpenRawFile_0300 end";
 }
 
@@ -588,7 +570,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Call_0100, Function | Me
 
     EXPECT_TRUE(set != nullptr);
     dataabilityimpl.reset();
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Call_0100 end";
 }
 
@@ -608,7 +589,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Call_0200, Function | Me
 
     std::shared_ptr<AppExecFwk::PacMap> set = dataabilityimpl->Call(uri, method, arg, pacMap);
     EXPECT_EQ(nullptr, set);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Call_0200 end";
 }
 
@@ -639,7 +619,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetFileTypes_0100, Funct
     value = dataabilityimpl->GetFileTypes(uri, mimeTypeFilter);
     std::string ret = value.back();
     EXPECT_EQ(ret, mimeTypeFilter);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_GetFileTypes_0100 end";
 }
 
@@ -658,7 +637,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetFileTypes_0200, Funct
 
     dataabilityimpl->GetFileTypes(uri, mimeTypeFilter);
     EXPECT_EQ(value, dataabilityimpl->GetFileTypes(uri, mimeTypeFilter));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_GetFileTypes_0200 end";
 }
 
@@ -686,7 +664,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetType_0100, Function |
     const std::string value("Type1");
 
     EXPECT_EQ(value, dataabilityimpl->GetType(uri));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_GetType_0100 end";
 }
 
@@ -703,7 +680,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetType_0200, Function |
     const std::string value;
 
     EXPECT_EQ(value, dataabilityimpl->GetType(uri));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_GetType_0200 end";
 }
 
@@ -731,7 +707,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Reload_0100, Function | 
     PacMap extras;
 
     EXPECT_TRUE(dataabilityimpl->Reload(uri, extras));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Reload_0100 end";
 }
 
@@ -748,7 +723,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_Reload_0200, Function | 
     PacMap extras;
 
     EXPECT_FALSE(dataabilityimpl->Reload(uri, extras));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_Reload_0200 end";
 }
 
@@ -777,7 +751,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_BatchInsert_0100, Functi
     constexpr int32_t number = 1;
 
     EXPECT_EQ(number, dataabilityimpl->BatchInsert(uri, values));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_BatchInsert_0100 end";
 }
 
@@ -795,7 +768,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_BatchInsert_0200, Functi
     constexpr int32_t number = -1;
 
     EXPECT_EQ(number, dataabilityimpl->BatchInsert(uri, values));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_BatchInsert_0200 end";
 }
 
@@ -829,7 +801,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_BatchInsert_0300, Functi
     constexpr int32_t number = -1;
 
     EXPECT_EQ(number, dataabilityimpl->BatchInsert(uri, values));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_BatchInsert_0300 end";
 }
 
@@ -857,7 +828,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_NormalizeUri_0100, Funct
     Uri urivalue("UriTest");
 
     EXPECT_EQ(urivalue, dataabilityimpl->NormalizeUri(uri));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_NormalizeUri_0100 end";
 }
 
@@ -874,7 +844,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_NormalizeUri_0200, Funct
     Uri urivalue("");
 
     EXPECT_EQ(urivalue, dataabilityimpl->NormalizeUri(uri));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_NormalizeUri_0200 end";
 }
 
@@ -907,7 +876,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_NormalizeUri_0300, Funct
     Uri urivalue("");
 
     EXPECT_EQ(urivalue, dataabilityimpl->NormalizeUri(uri));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_NormalizeUri_0300 end";
 }
 
@@ -935,7 +903,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_DenormalizeUri_0100, Fun
     Uri urivalue("UriTest");
 
     EXPECT_EQ(urivalue, dataabilityimpl->DenormalizeUri(uri));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_DenormalizeUri_0100 end";
 }
 
@@ -952,7 +919,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_DenormalizeUri_0200, Fun
     Uri urivalue("");
 
     EXPECT_EQ(urivalue, dataabilityimpl->DenormalizeUri(uri));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_DenormalizeUri_0200 end";
 }
 
@@ -985,7 +951,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_DenormalizeUri_0300, Fun
     Uri urivalue("");
 
     EXPECT_EQ(urivalue, dataabilityimpl->DenormalizeUri(uri));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_DenormalizeUri_0300 end";
 }
 
@@ -1018,7 +983,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetPermissionInfo_0100, 
     const std::string permissionType = "r";
 
     EXPECT_TRUE(abilityInfo->readPermission == dataabilityimpl->GetPermissionInfo(permissionType));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_GetPermissionInfo_0100 end";
 }
 
@@ -1051,7 +1015,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetPermissionInfo_0200, 
     const std::string permissionType = "w";
 
     EXPECT_TRUE(abilityInfo->writePermission == dataabilityimpl->GetPermissionInfo(permissionType));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_GetPermissionInfo_0200 end";
 }
 
@@ -1084,7 +1047,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetPermissionInfo_0300, 
     const std::string permissionType = "a";
 
     EXPECT_TRUE("" == dataabilityimpl->GetPermissionInfo(permissionType));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_GetPermissionInfo_0300 end";
 }
 
@@ -1114,7 +1076,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetPermissionInfo_0400, 
     const std::string permissionType = "r";
 
     EXPECT_TRUE("" == dataabilityimpl->GetPermissionInfo(permissionType));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_GetPermissionInfo_0400 end";
 }
 
@@ -1144,7 +1105,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetPermissionInfo_0500, 
     const std::string permissionType = "w";
 
     EXPECT_TRUE("" == dataabilityimpl->GetPermissionInfo(permissionType));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_GetPermissionInfo_0500 end";
 }
 
@@ -1180,7 +1140,6 @@ HWTEST_F(
     ret = dataabilityimpl->CheckReadAndWritePermission(permissionType);
 
     EXPECT_TRUE(ret);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckReadAndWritePermission_0100 end";
 }
 
@@ -1213,7 +1172,6 @@ HWTEST_F(
     ret = dataabilityimpl->CheckReadAndWritePermission(permissionType);
 
     EXPECT_TRUE(ret);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckReadAndWritePermission_0200 end";
 }
 
@@ -1246,7 +1204,6 @@ HWTEST_F(
     ret = dataabilityimpl->CheckReadAndWritePermission(permissionType);
 
     EXPECT_TRUE(ret);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckReadAndWritePermission_0300 end";
 }
 
@@ -1282,7 +1239,6 @@ HWTEST_F(
     ret = dataabilityimpl->CheckReadAndWritePermission(permissionType);
 
     EXPECT_FALSE(ret);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckReadAndWritePermission_0400 end";
 }
 
@@ -1318,7 +1274,6 @@ HWTEST_F(
     ret = dataabilityimpl->CheckReadAndWritePermission(permissionType);
 
     EXPECT_FALSE(ret);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckReadAndWritePermission_0500 end";
 }
 
@@ -1353,7 +1308,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_CheckOpenFilePermission_
     ret = dataabilityimpl->CheckOpenFilePermission(mode);
 
     EXPECT_FALSE(ret);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckOpenFilePermission_0100 end";
 }
 
@@ -1388,7 +1342,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_CheckOpenFilePermission_
     ret = dataabilityimpl->CheckOpenFilePermission(mode);
 
     EXPECT_FALSE(ret);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckOpenFilePermission_0200 end";
 }
 
@@ -1423,7 +1376,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_CheckOpenFilePermission_
     ret = dataabilityimpl->CheckOpenFilePermission(mode);
 
     EXPECT_FALSE(ret);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckOpenFilePermission_0300 end";
 }
 
@@ -1458,7 +1410,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_CheckOpenFilePermission_
     ret = dataabilityimpl->CheckOpenFilePermission(mode);
 
     EXPECT_FALSE(ret);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckOpenFilePermission_0400 end";
 }
 
@@ -1493,7 +1444,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_CheckOpenFilePermission_
     ret = dataabilityimpl->CheckOpenFilePermission(mode);
 
     EXPECT_TRUE(ret);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckOpenFilePermission_0500 end";
 }
 
@@ -1522,7 +1472,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_ExecuteBatch_0100, Funct
     results.clear();
 
     EXPECT_EQ(results, dataabilityimpl->ExecuteBatch(operations));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_ExecuteBatch_0100 end";
 }
 
@@ -1540,7 +1489,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_ExecuteBatch_0200, Funct
     results.clear();
 
     EXPECT_EQ(results, dataabilityimpl->ExecuteBatch(operations));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_ExecuteBatch_0200 end";
 }
 
@@ -1575,7 +1523,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_ExecuteBatch_0300, Funct
     results.clear();
 
     EXPECT_EQ(results, dataabilityimpl->ExecuteBatch(operations));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_ExecuteBatch_0300 end";
 }
 
@@ -1605,7 +1552,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_ExecuteBatch_0400, Funct
     std::vector<std::shared_ptr<DataAbilityOperation>> operations;
     dataabilityimpl->ExecuteBatch(operations);
     EXPECT_TRUE(true);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_ExecuteBatch_0400 end";
 }
 
@@ -1633,7 +1579,6 @@ HWTEST_F(
     std::vector<std::shared_ptr<DataAbilityOperation>> operations;
 
     EXPECT_TRUE(dataabilityimpl->CheckExecuteBatchPermission(operations));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckExecuteBatchPermission_0100 end";
 }
 
@@ -1663,7 +1608,6 @@ HWTEST_F(
     operations.push_back(operation);
 
     EXPECT_FALSE(dataabilityimpl->CheckExecuteBatchPermission(operations));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckExecuteBatchPermission_0200 end";
 }
 
@@ -1699,7 +1643,6 @@ HWTEST_F(
     operations.push_back(operation);
 
     EXPECT_FALSE(dataabilityimpl->CheckExecuteBatchPermission(operations));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckExecuteBatchPermission_0300 end";
 }
 
@@ -1735,7 +1678,6 @@ HWTEST_F(
     operations.push_back(operation);
 
     EXPECT_FALSE(dataabilityimpl->CheckExecuteBatchPermission(operations));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckExecuteBatchPermission_0400 end";
 }
 
@@ -1771,7 +1713,6 @@ HWTEST_F(
     operations.push_back(operation);
 
     EXPECT_FALSE(dataabilityimpl->CheckExecuteBatchPermission(operations));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckExecuteBatchPermission_0500 end";
 }
 
@@ -1807,7 +1748,6 @@ HWTEST_F(
     operations.push_back(operation);
 
     EXPECT_FALSE(dataabilityimpl->CheckExecuteBatchPermission(operations));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckExecuteBatchPermission_0600 end";
 }
 
@@ -1846,7 +1786,6 @@ HWTEST_F(
     operations.push_back(operation2);
 
     EXPECT_FALSE(dataabilityimpl->CheckExecuteBatchPermission(operations));
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_CheckExecuteBatchPermission_0700 end";
 }
 
@@ -1865,7 +1804,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_HandleAbilityTransaction
     targetState.state = AbilityLifeCycleState::ABILITY_STATE_INITIAL;
     targetState.isNewWant = false;
     dataabilityimpl->HandleAbilityTransaction(want, targetState);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_HandleAbilityTransaction_0100 end";
 }
 
@@ -1884,7 +1822,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_HandleAbilityTransaction
     targetState.state = AAFwk::ABILITY_STATE_ACTIVE;
     targetState.isNewWant = true;
     dataabilityimpl->HandleAbilityTransaction(want, targetState);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_HandleAbilityTransaction_0200 end";
 }
 
@@ -1903,7 +1840,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_HandleAbilityTransaction
     targetState.state = AAFwk::ABILITY_STATE_ACTIVE;
     targetState.isNewWant = true;
     dataabilityimpl->HandleAbilityTransaction(want, targetState);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_HandleAbilityTransaction_0300 end";
 }
 
@@ -1922,7 +1858,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_HandleAbilityTransaction
     targetState.state = AAFwk::ABILITY_STATE_BACKGROUND;
     targetState.isNewWant = true;
     dataabilityimpl->HandleAbilityTransaction(want, targetState);
-    sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_HandleAbilityTransaction_0400 end";
 }
 }  // namespace AppExecFwk
