@@ -670,6 +670,7 @@ bool AppUtils::IsSystemReasonMessage(const std::string &reasonMessage)
         "ReasonMessage_SystemShare",
         "ReasonMessage_DesktopShortcut",
         "ReasonMessage_Notification",
+        "ReasonMessage_DesktopIcon",
     };
     return systemReasonMessagesSet.find(reasonMessage) != systemReasonMessagesSet.end();
 }
