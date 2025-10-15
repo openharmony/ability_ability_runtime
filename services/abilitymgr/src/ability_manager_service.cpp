@@ -1283,7 +1283,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
         true, nullptr, shouldBlockFunc);
-    interceptorParam.isTargetPlugin = isTargetPlugin;
     result = interceptorExecuter_ == nullptr ? ERR_NULL_INTERCEPTOR_EXECUTER :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -1456,6 +1455,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         Want newWant = abilityRequest.want;
         AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(newWant, requestCode, GetUserId(),
             true, callerToken, std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo), isStartAsCaller, appIndex);
+        afterCheckParam.isTargetPlugin = isTargetPlugin;
         result = afterCheckExecuter_ == nullptr ? ERR_NULL_AFTER_CHECK_EXECUTER :
             afterCheckExecuter_->DoProcess(afterCheckParam);
         bool isReplaceWantExist = newWant.GetBoolParam("queryWantFromErms", false);
@@ -1719,7 +1719,6 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
         true, nullptr, shouldBlockFunc);
-    interceptorParam.isTargetPlugin = isTargetPlugin;
     result = interceptorExecuter_ == nullptr ? ERR_NULL_INTERCEPTOR_EXECUTER :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -1816,6 +1815,7 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
 
     AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(abilityRequest.want, requestCode,
         GetUserId(), true, callerToken, std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo), false, appIndex);
+    afterCheckParam.isTargetPlugin = isTargetPlugin;
     result = afterCheckExecuter_ == nullptr ? ERR_NULL_AFTER_CHECK_EXECUTER :
         afterCheckExecuter_->DoProcess(afterCheckParam);
     if (result != ERR_OK) {
@@ -2069,7 +2069,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     auto shouldBlockFunc = [aams = shared_from_this()]() { return aams->ShouldBlockAllAppStart(); };
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
         true, nullptr, shouldBlockFunc);
-    interceptorParam.isTargetPlugin = isTargetPlugin;
     auto result = interceptorExecuter_ == nullptr ? ERR_NULL_INTERCEPTOR_EXECUTER :
         interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
@@ -2265,6 +2264,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     Want newWant = abilityRequest.want;
     AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(newWant, requestCode, GetUserId(),
         true, callerToken, std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo), isStartAsCaller, appIndex);
+    afterCheckParam.isTargetPlugin = isTargetPlugin;
     result = afterCheckExecuter_ == nullptr ? ERR_NULL_AFTER_CHECK_EXECUTER :
         afterCheckExecuter_->DoProcess(afterCheckParam);
     bool isReplaceWantExist = newWant.GetBoolParam("queryWantFromErms", false);
